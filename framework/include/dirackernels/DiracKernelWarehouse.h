@@ -47,7 +47,8 @@ public:
   void addDiracKernel(DiracKernel *DiracKernel);
 
 protected:
-  std::vector<DiracKernel *> _dirac_kernels;            ///< All dirac kernels
+  /// All dirac kernels
+  std::vector<DiracKernel *> _dirac_kernels;
 };
 
 #endif // DIRACKERNELWAREHOUSE_H

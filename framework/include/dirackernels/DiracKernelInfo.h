@@ -46,14 +46,10 @@ public:
    */
   void addPoint(const Elem * elem, Point p);
 
-  /**
-   * The list of elements that need distributions.
-   */
+  /// The list of elements that need distributions.
   std::set<const Elem *> _elements;
 
-  /**
-   * The list of physical xyz Points that need to be evaluated in each element.
-   */
+  /// The list of physical xyz Points that need to be evaluated in each element.
   std::map<const Elem *, std::set<Point> > _points;
 
   /**

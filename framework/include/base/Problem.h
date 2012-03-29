@@ -88,13 +88,19 @@ public:
   virtual const std::vector<Material*> & getMaterials(unsigned int /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
   virtual const std::vector<Material*> & getFaceMaterials(unsigned int /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
 
-  /// Returns true if the Problem has Dirac kernels it needs to compute on elem.
+  /**
+   * Returns true if the Problem has Dirac kernels it needs to compute on elem.
+   */
   virtual bool reinitDirac(const Elem * /*elem*/, THREAD_ID /*tid*/){ mooseError("Cannot reinit this Problem with arbitrary quadrature points!"); return false; };
 
-  /// Fills "elems" with the elements that should be looped over for Dirac Kernels
+  /**
+   * Fills "elems" with the elements that should be looped over for Dirac Kernels
+   */
   virtual void getDiracElements(std::set<const Elem *> & /*elems*/){ mooseError("Cannot retrieve Dirac elements from this problem!"); };
 
-  /// Get's called before Dirac Kernels are asked to add the points they are supposed to be evaluated in
+  /**
+   * Gets called before Dirac Kernels are asked to add the points they are supposed to be evaluated in
+   */
   virtual void clearDiracInfo(){ mooseError("Cannot clear Dirac Info this problem!"); };
 
   // Solve /////
@@ -153,13 +159,16 @@ public:
   MooseArray<MooseArray<RealTensor> > _second_zero;
 
 protected:
-  std::string _name;                                     ///< The name of the problem
-  InputParameters _pars;                                 ///< Generic parameters object used during construction
+  /// The name of the problem
+  std::string _name;
+  /// Generic parameters object used during construction
+  InputParameters _pars;
 
   // functions
   std::vector<std::map<std::string, Function *> > _functions;
 
-  bool _output_initial;                                         ///< output initial condition if true
+  /// output initial condition if true
+  bool _output_initial;
 };
 
 #endif /* PROBLEM_H */

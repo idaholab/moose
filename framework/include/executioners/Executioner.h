@@ -61,9 +61,7 @@ public:
 protected:
   MooseMesh * _mesh;
 
-  /**
-   * Initial Residual Variables
-   */
+  /// Initial Residual Variables
   Real _initial_residual_norm;
   Real _old_initial_residual_norm;
 

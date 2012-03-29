@@ -198,24 +198,16 @@ private:
   std::map<std::string, std::string> _doc_string;
   std::set<std::string> _required_params;
 
-  /**
-   * The set of parameters either seen in the input file or provided a default value when added
-   */
+  /// The set of parameters either seen in the input file or provided a default value when added
   std::set<std::string> _valid_params;
 
-  /**
-   * The set of parameters that will NOT appear in the the dump of the parser tree
-   */
+  /// The set of parameters that will NOT appear in the the dump of the parser tree
   std::set<std::string> _private_params;
 
-  /**
-   * The set of parameters seen in the input file only
-   */
+  /// The set of parameters seen in the input file only
   std::set<std::string> _seen_in_input;
 
-  /**
-   * The coupled variables set
-   */
+  /// The coupled variables set
   std::set<std::string> _coupled_vars;
 };
 

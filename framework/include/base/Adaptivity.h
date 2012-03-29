@@ -124,23 +124,35 @@ protected:
   FEProblem & _subproblem;
   MooseMesh & _mesh;
 
-  bool _mesh_refinement_on;                     ///< on/off flag reporting if the adaptivity is being used
-  MeshRefinement * _mesh_refinement;            ///< A mesh refinement object to be used either with initial refinement or with Adaptivity.
-  ErrorEstimator * _error_estimator;            ///< Error estimator to be used by the apps.
-  ErrorVector * _error;                         ///< Error vector for use with the error estimator.
+  /// on/off flag reporting if the adaptivity is being used
+  bool _mesh_refinement_on;
+  /// A mesh refinement object to be used either with initial refinement or with Adaptivity.
+  MeshRefinement * _mesh_refinement;
+  /// Error estimator to be used by the apps.
+  ErrorEstimator * _error_estimator;
+  /// Error vector for use with the error estimator.
+  ErrorVector * _error;
 
   DisplacedProblem * & _displaced_problem;
-  MeshRefinement * _displaced_mesh_refinement;  ///< A mesh refinement object for displaced mesh
+  /// A mesh refinement object for displaced mesh
+  MeshRefinement * _displaced_mesh_refinement;
 
-  unsigned int _initial_steps;                  ///< the number of adaptivity steps to do at the beginning of simulation
-  unsigned int _steps;                          ///< steps of adaptivity to perform
+  /// the number of adaptivity steps to do at the beginning of simulation
+  unsigned int _initial_steps;
+  /// steps of adaptivity to perform
+  unsigned int _steps;
 
-  bool _print_mesh_changed;                     ///< True if we want to print out info when mesh has changed
+  /// True if we want to print out info when mesh has changed
+  bool _print_mesh_changed;
 
-  Real & _t;                                    ///< Time
-  Real _start_time;                             ///< When adaptivity start
-  Real _stop_time;                              ///< When adaptivity stops
-  unsigned int _cycles_per_step;                ///< The number of adapativity cycles per step
+  /// Time
+  Real & _t;
+  /// When adaptivity start
+  Real _start_time;
+  /// When adaptivity stops
+  Real _stop_time;
+  /// The number of adaptivity cycles per step
+  unsigned int _cycles_per_step;
 };
 
 template<typename T>

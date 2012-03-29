@@ -149,50 +149,83 @@ protected:
   THREAD_ID _tid;
 
   Assembly & _assembly;
-  MooseVariable & _var;                                 ///< Variable this kernel acts on
-  MooseMesh & _mesh;                                    ///< Mesh this kernels acts on
+  /// Variable this kernel acts on
+  MooseVariable & _var;
+  /// Mesh this kernels acts on
+  MooseMesh & _mesh;
 
-  unsigned int _dim;                                    ///< Dimension of the problem
-  Moose::CoordinateSystemType & _coord_sys;             ///< Coordinate system
+  /// Dimension of the problem
+  unsigned int _dim;
+  /// Coordinate system
+  Moose::CoordinateSystemType & _coord_sys;
 
   DiracKernelInfo & _dirac_kernel_info;
 
-  std::set<const Elem *> _elements;                     ///< The list of elements that need distributions
-  std::map<const Elem *, std::set<Point> > _points;     ///< The list of physical xyz Points that need to be evaluated in each element
+  /// The list of elements that need distributions
+  std::set<const Elem *> _elements;
+  /// The list of physical xyz Points that need to be evaluated in each element
+  std::map<const Elem *, std::set<Point> > _points;
 
   //std::vector<Point> & _current_points;               ///< The points on the current element
 
-  Point _current_point;                                 ///< The current point
+  /// The current point
+  Point _current_point;
 
-  const Elem * & _current_elem;                         ///< Current element
+  ///< Current element
+  const Elem * & _current_elem;
 
-  unsigned int _qp;                                     ///< Quadrature point index
-  const std::vector< Point > & _q_point;                ///< Quadrature points
-  const std::vector< Point > & _physical_point;         ///< Physical points
-  QBase * & _qrule;                                     ///< Quadrature rule
-  const std::vector<Real> & _JxW;                       ///< Transformed Jacobian weights
+  /// Quadrature point index
+  unsigned int _qp;
+  /// Quadrature points
+  const std::vector< Point > & _q_point;
+  /// Physical points
+  const std::vector< Point > & _physical_point;
+  /// Quadrature rule
+  QBase * & _qrule;
+  /// Transformed Jacobian weights
+  const std::vector<Real> & _JxW;
 
-   unsigned int _i, _j;                                         ///< i-th, j-th index for enumerating shape and test functions
+  /// i-th, j-th index for enumerating shape and test functions
+  unsigned int _i, _j;
+
   // shape functions
-  const std::vector<std::vector<Real> > & _phi;                 ///< Values of shape functions at QPs
-  const std::vector<std::vector<RealGradient> > & _grad_phi;    ///< Gradients of shape functions at QPs
-  const std::vector<std::vector<RealTensor> > & _second_phi;    ///< Second derivatives of shape functions at QPs
+
+  /// Values of shape functions at QPs
+  const std::vector<std::vector<Real> > & _phi;
+  /// Gradients of shape functions at QPs
+  const std::vector<std::vector<RealGradient> > & _grad_phi;
+  /// Second derivatives of shape functions at QPs
+  const std::vector<std::vector<RealTensor> > & _second_phi;
+
   // test functions
-  const std::vector<std::vector<Real> > & _test;                ///< Values of test functions at QPs
-  const std::vector<std::vector<RealGradient> > & _grad_test;   ///< Gradients of test functions at QPs
-  const std::vector<std::vector<RealTensor> > & _second_test;   ///< Second derivatives of shape functions at QPs
 
-  VariableValue & _u;                                   ///< Holds the solution at current quadrature points
-  VariableGradient & _grad_u;                           ///< Holds the solution gradient at the current quadrature points
+  /// Values of test functions at QPs
+  const std::vector<std::vector<Real> > & _test;
+  /// Gradients of test functions at QPs
+  const std::vector<std::vector<RealGradient> > & _grad_test;
+  /// Second derivatives of shape functions at QPs
+  const std::vector<std::vector<RealTensor> > & _second_test;
 
-  VariableValue & _u_dot;                               ///< Time derivative of the solution
-  VariableValue & _du_dot_du;                           ///< Derivative of u_dot wrt u
+  /// Holds the solution at current quadrature points
+  VariableValue & _u;
+  /// Holds the solution gradient at the current quadrature points
+  VariableGradient & _grad_u;
+
+  /// Time derivative of the solution
+  VariableValue & _u_dot;
+  /// Derivative of u_dot wrt u
+  VariableValue & _du_dot_du;
 
   // Single Instance Variables
-  Real & _real_zero;                                    ///< Scalar zero
-  MooseArray<Real> & _zero;                             ///< Scalar zero at QPs
-  MooseArray<RealGradient> & _grad_zero;                ///< Zero gradient at QPs
-  MooseArray<RealTensor> & _second_zero;                ///< Zero second derivative at QPs
+
+  /// Scalar zero
+  Real & _real_zero;
+  /// Scalar zero at QPs
+  MooseArray<Real> & _zero;
+  /// Zero gradient at QPs
+  MooseArray<RealGradient> & _grad_zero;
+  /// Zero second derivative at QPs
+  MooseArray<RealTensor> & _second_zero;
 };
 
 #endif

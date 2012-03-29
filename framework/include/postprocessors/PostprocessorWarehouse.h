@@ -96,8 +96,10 @@ protected:
   std::vector<Postprocessor *> _generic_postprocessors;
   std::vector<Postprocessor *> _all_postprocessors;
 
-  std::set<subdomain_id_type> _block_ids_with_postprocessors;                ///< All of the block ids that have postprocessors specified to act on them
-  std::set<unsigned int> _boundary_ids_with_postprocessors;             ///< All of the boundary ids that have postprocessors specified to act on them
+  /// All of the block ids that have postprocessors specified to act on them
+  std::set<subdomain_id_type> _block_ids_with_postprocessors;
+  /// All of the boundary ids that have postprocessors specified to act on them
+  std::set<unsigned int> _boundary_ids_with_postprocessors;
 
 };
 

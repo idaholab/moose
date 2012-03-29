@@ -68,24 +68,16 @@ private:
   template<typename map_type>
   class value_iterator;
 
-  /**
-   * This is our main datastructure a multimap that contains any number of dependencies in a key = value format
-   */
+  /// This is our main datastructure a multimap that contains any number of dependencies in a key = value format
   std::multimap<T, T> _depends;
 
-  /**
-   * Extra items that need to come out in the sorted list but contain no dependencies
-   */
+  /// Extra items that need to come out in the sorted list but contain no dependencies
   std::set<T> _independent_items;
 
-  /**
-   * The sorted vector of sets
-   */
+  /// The sorted vector of sets
   std::vector<std::set<T> > _ordered_items;
 
-  /**
-   * The sorted vector (if requested)
-   */
+  /// The sorted vector (if requested)
   std::vector<T> _ordered_items_vector;
 };
 

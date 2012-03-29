@@ -22,7 +22,10 @@
 
 class Material;
 
-/// Proxy for accessing MaterialPropertyStorage
+/**
+ * Proxy for accessing MaterialPropertyStorage.
+ *
+ */
 class MaterialData
 {
 public:
@@ -89,14 +92,16 @@ protected:
 
   bool _sized;
 
-  std::set<unsigned int> _stateful_props;                               ///< list of property ids of stateful material properties
+  /// list of property ids of stateful material properties
+  std::set<unsigned int> _stateful_props;
 
   // holds material properties for currently selected element (and possibly a side), they are being copied from _storage
   MaterialProperties _props;
   MaterialProperties _props_old;
   MaterialProperties _props_older;
 
-  std::map<std::string, unsigned int> _prop_ids;                        ///< mapping from property name to property ID
+  /// mapping from property name to property ID
+  std::map<std::string, unsigned int> _prop_ids;
 
   unsigned int addProperty (const std::string & prop_name);
 };

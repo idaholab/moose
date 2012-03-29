@@ -28,8 +28,10 @@ struct BndNode
   {
   }
 
-  Node * _node;                         // pointer to the node
-  short int _bnd_id;                    // boundary id for the node
+  /// pointer to the node
+  Node * _node;
+  /// boundary id for the node
+  short int _bnd_id;
 };
 
 /**

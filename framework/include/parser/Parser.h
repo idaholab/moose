@@ -157,8 +157,10 @@ public:
   MooseMesh *_displaced_mesh;
   FEProblem *_problem;
 
-  ExodusII_IO *_exreader;                               ///< auxiliary object for restart
-  bool _loose;                                          ///< true if parsing input file with loose syntax
+  /// auxiliary object for restart
+  ExodusII_IO *_exreader;
+  /// true if parsing input file with loose syntax
+  bool _loose;
 
 protected:
   Syntax & _syntax;
@@ -229,21 +231,23 @@ protected:
 
   std::map<std::string, CLIOption> _cli_options;
 
-  // Contains all of the sections that are not active during the parse phase so that blocks
-  // nested more than one level deep can detect that the grandparent is not active
+  /// Contains all of the sections that are not active during the parse phase so that blocks
+  /// nested more than one level deep can detect that the grandparent is not active
   std::set<std::string> _inactive_strings;
   std::set<std::string> _command_line_vars;
   bool _getpot_initialized;
   GetPot _getpot_file;
   std::string _input_filename;
 
-  // The set of all variables extracted from the input file
+  /// The set of all variables extracted from the input file
   std::set<std::string> _extracted_vars;
   enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
   bool _sort_alpha;
 
 public:
-  /// Functor for sorting input file syntax in MOOSE desired order
+  /**
+   * Functor for sorting input file syntax in MOOSE desired order
+   */
   class InputFileSort
   {
   public:

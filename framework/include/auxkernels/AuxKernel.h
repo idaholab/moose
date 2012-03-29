@@ -77,40 +77,63 @@ public:
 protected:
   virtual Real computeValue() = 0;
 
-  Problem & _problem;                                   ///< Problem this kernel is part of
-  SubProblem & _subproblem;                             ///< Subproblem this kernel is part of
-  SystemBase & _sys;                                    ///< System this kernel is part of
+  /// Problem this kernel is part of
+  Problem & _problem;
+  /// Subproblem this kernel is part of
+  SubProblem & _subproblem;
+  /// System this kernel is part of
+  SystemBase & _sys;
   SystemBase & _nl_sys;
   AuxiliarySystem & _aux_sys;
-  THREAD_ID _tid;                                       ///< Thread ID
-  MooseVariable & _var;                                 ///< Variable this kernel is acting on
-  bool _nodal;                                          ///< true if the kernel nodal, false if it is elemental
-  MooseMesh & _mesh;                                    ///< Mesh this kernel is active on
-  unsigned int _dim;                                    ///< Dimension of the problem being solved
+  /// Thread ID
+  THREAD_ID _tid;
+  /// Variable this kernel is acting on
+  MooseVariable & _var;
+  /// true if the kernel nodal, false if it is elemental
+  bool _nodal;
+  /// Mesh this kernel is active on
+  MooseMesh & _mesh;
+  /// Dimension of the problem being solved
+  unsigned int _dim;
 
-  const std::vector< Point > & _q_point;                ///< Active quadrature points
-  QBase * & _qrule;                                     ///< Quadrature rule being used
-  const std::vector<Real> & _JxW;                       ///< Transformed Jacobian weights
+  /// Active quadrature points
+  const std::vector< Point > & _q_point;
+  /// Quadrature rule being used
+  QBase * & _qrule;
+  /// Transformed Jacobian weights
+  const std::vector<Real> & _JxW;
   const std::vector<Real> & _coord;
 
-  VariableValue & _u;                                   ///< Holds the solution at current quadrature points
-  VariableValue & _u_old;                               ///< Holds the previous solution at the current quadrature point.
-  VariableValue & _u_older;                             ///< Holds the t-2 solution at the current quadrature point.
+  /// Holds the solution at current quadrature points
+  VariableValue & _u;
+  /// Holds the previous solution at the current quadrature point.
+  VariableValue & _u_old;
+  /// Holds the t-2 solution at the current quadrature point.
+  VariableValue & _u_older;
 
-  const Elem * & _current_elem;                         ///< Current element (valid only for elemental kernels)
-  const Real & _current_elem_volume;                    ///< Volume of the current element
+  /// Current element (valid only for elemental kernels)
+  const Elem * & _current_elem;
+  /// Volume of the current element
+  const Real & _current_elem_volume;
 
-  const Node * & _current_node;                         ///< Current node (valid only for nodal kernels)
+  /// Current node (valid only for nodal kernels)
+  const Node * & _current_node;
 
-  NumericVector<Number> & _solution;                    ///< reference to the solution vector of auxiliary system
+  /// reference to the solution vector of auxiliary system
+  NumericVector<Number> & _solution;
 
-  unsigned int _qp;                                     ///< Quadrature point index
+  /// Quadrature point index
+  unsigned int _qp;
 
   // Single Instance Variables
-  Real & _real_zero;                                    ///< Scalar zero
-  MooseArray<Real> & _zero;                             ///< Scalar zero in quadrature points
-  MooseArray<RealGradient> & _grad_zero;                ///< Zero gradient in quadrature points
-  MooseArray<RealTensor> & _second_zero;                ///< Zero second derivative in quadrature points
+  /// Scalar zero
+  Real & _real_zero;
+  /// Scalar zero in quadrature points
+  MooseArray<Real> & _zero;
+  /// Zero gradient in quadrature points
+  MooseArray<RealGradient> & _grad_zero;
+  /// Zero second derivative in quadrature points
+  MooseArray<RealTensor> & _second_zero;
 };
 
 #endif //AUXKERNEL_H

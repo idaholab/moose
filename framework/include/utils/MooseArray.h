@@ -132,19 +132,13 @@ public:
 
 private:
 
-  /**
-   * Actual data pointer.
-   */
+  /// Actual data pointer.
   T * _data;
 
-  /**
-   * The current number of elements the array can hold.
-   */
+  /// The current number of elements the array can hold.
   unsigned int _size;
 
-  /**
-   * Number of allocated memory positions for storage.
-   */
+  /// Number of allocated memory positions for storage.
   unsigned int _allocated_size;
 };
 

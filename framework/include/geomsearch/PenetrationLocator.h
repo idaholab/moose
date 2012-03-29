@@ -89,9 +89,7 @@ public:
 
   NearestNodeLocator & _nearest_node;
 
-  /**
-   * Data structure of nodes and their associated penetration information
-   */
+  /// Data structure of nodes and their associated penetration information
   std::map<unsigned int, PenetrationInfo *> _penetration_info;
 
   std::map<unsigned int, bool> _has_penetrated;

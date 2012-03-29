@@ -44,11 +44,12 @@ public:
   MooseVariable & cedVariable() { return _ced_var; }
 
 protected:
-  MooseVariable & _ced_var;                             ///< Constrained variable (i.e. variable which the LM is constraining)
-
-  VariableValue & _u_ced;                               ///< Holds the solution of CED variable
-
-  std::vector<unsigned int> _node_ids;                  ///< List of node IDs
+  /// Constrained variable (i.e. variable which the LM is constraining)
+  MooseVariable & _ced_var;
+  /// Holds the solution of CED variable
+  VariableValue & _u_ced;
+  /// List of node IDs
+  std::vector<unsigned int> _node_ids;
 };
 
 #endif /* NODALSCALARKERNEL_H */

@@ -39,6 +39,9 @@ class AuxScalarKernel;
 template<>
 InputParameters validParams<AuxScalarKernel>();
 
+/**
+ * Base class for making kernels that work on auxiliary scalar variables
+ */
 class AuxScalarKernel :
   public MooseObject,
   public ScalarCoupleable,
@@ -50,6 +53,9 @@ class AuxScalarKernel :
 public:
   AuxScalarKernel(const std::string & name, InputParameters parameters);
 
+  /**
+   * Evaluate the kernel
+   */
   virtual void compute();
 
   /**
@@ -85,6 +91,12 @@ protected:
   // Single Instance Variables
   Real & _real_zero;
 
+  /**
+   * Compute the value of this kernel.
+   *
+   * Each kernel must implement this.
+   * @return The computed value
+   */
   virtual Real computeValue() = 0;
 };
 

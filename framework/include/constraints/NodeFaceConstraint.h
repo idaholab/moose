@@ -121,9 +121,12 @@ public:
   bool overwriteSlaveResidual() { return _overwrite_slave_residual; }
 
   SparseMatrix<Number> * _jacobian;
+
 protected:
-  unsigned int _slave;  /// Boundary ID for the slave surface
-  unsigned int _master; /// Boundary ID for the master surface
+  /// Boundary ID for the slave surface
+  unsigned int _slave;
+  /// Boundary ID for the master surface
+  unsigned int _master;
 
   Problem & _problem;
   SubProblem & _subproblem;
@@ -146,23 +149,34 @@ public:
   PenetrationLocator & _penetration_locator;
 protected:
 
-  const Node * & _current_node;                                       ///< current node being processed
+  /// current node being processed
+  const Node * & _current_node;
   const Elem * & _current_master;
 
-  VariableValue & _u_slave;                                           ///< Value of the unknown variable this BC is action on
-  std::vector<std::vector<Real> > _phi_slave;                   /// Shape function on the slave side.  This will always
-  std::vector<std::vector<Real> > _test_slave;                  /// Shape function on the slave side.  This will always only have one entry and that entry will always be "1"
+  /// Value of the unknown variable this BC is action on
+  VariableValue & _u_slave;
+  /// Shape function on the slave side.  This will always
+  std::vector<std::vector<Real> > _phi_slave;
+  /// Shape function on the slave side.  This will always only have one entry and that entry will always be "1"
+  std::vector<std::vector<Real> > _test_slave;
 
-  const std::vector<std::vector<Real> > & _phi_master;                /// Side shape function.
-  const std::vector<std::vector<RealGradient> > & _grad_phi_master;   /// Gradient of side shape function
+  /// Side shape function.
+  const std::vector<std::vector<Real> > & _phi_master;
+  /// Gradient of side shape function
+  const std::vector<std::vector<RealGradient> > & _grad_phi_master;
 
-  const std::vector<std::vector<Real> > & _test_master;               /// Side test function
-  const std::vector<std::vector<RealGradient> > & _grad_test_master;  /// Gradient of side shape function
+  /// Side test function
+  const std::vector<std::vector<Real> > & _test_master;
+  /// Gradient of side shape function
+  const std::vector<std::vector<RealGradient> > & _grad_test_master;
 
-  VariableValue & _u_master;                                          /// Holds the current solution at the current quadrature point
-  VariableGradient & _grad_u_master;                                  /// Holds the current solution gradient at the current quadrature point
+  /// Holds the current solution at the current quadrature point
+  VariableValue & _u_master;
+  /// Holds the current solution gradient at the current quadrature point
+  VariableGradient & _grad_u_master;
 
-  const DofMap & _dof_map;                                            /// DOF map
+  /// DOF map
+  const DofMap & _dof_map;
 
   std::vector<std::vector<unsigned int> > & _node_to_elem_map;
 

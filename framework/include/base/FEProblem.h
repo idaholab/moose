@@ -281,7 +281,9 @@ public:
 
   // debugging iface /////
 
-  /// Set the number of top residual to be printed out (0 = no output)
+  /**
+   * Set the number of top residual to be printed out (0 = no output)
+   */
   void setDebugTopResiduals(unsigned int n) { _dbg_top_residuals = n; }
 
 
@@ -329,7 +331,8 @@ public:
   bool _postprocessor_gnuplot_output;
   std::string _gnuplot_format;
 
-  ExodusII_IO * _ex_reader; // indirect ptr to ex_reader used for copying nodal values
+  /// indirect ptr to ex_reader used for copying nodal values
+  ExodusII_IO * _ex_reader;
 
 protected:
   void checkPPSs();
@@ -356,27 +359,39 @@ protected:
 
   bool _reinit_displaced_elem;
   bool _reinit_displaced_face;
-  bool _output_displaced;                               ///< true for outputting displaced problem
-  bool _output_solution_history;                        ///< true for outputting solution history
-  bool _input_file_saved;                               ///< whether input file has been written
+  /// true for outputting displaced problem
+  bool _output_displaced;
+  /// true for outputting solution history
+  bool _output_solution_history;
+  /// whether input file has been written
+  bool _input_file_saved;
 
-  bool _has_dampers;                                    ///< Whether or not this system has any Dampers associated with it.
+  /// Whether or not this system has any Dampers associated with it.
+  bool _has_dampers;
 
-  bool _has_constraints;                                /// Whether or not this system has any Constraints.
+  /// Whether or not this system has any Constraints.
+  bool _has_constraints;
 
-  bool _restart;                                        ///< true if restarting from a file, otherwise false
-  std::string _restart_file_name;                       ///< name of the file that we restart from
+  /// true if restarting from a file, otherwise false
+  bool _restart;
+  /// name of the file that we restart from
+  std::string _restart_file_name;
 
-  std::set<unsigned int> _ghosted_elems;                ///< Elements that should have Dofs ghosted to the local processor
+  /// Elements that should have Dofs ghosted to the local processor
+  std::set<unsigned int> _ghosted_elems;
 
 //  PerfLog _solve_only_perf_log;                         ///< Only times the solve
-  bool _output_setup_log_early;                         ///< Determines if the setup log is printed before the first time step
+  /// Determines if the setup log is printed before the first time step
+  bool _output_setup_log_early;
 
   // DEBUGGING capabilities
-  unsigned int _dbg_top_residuals;                      ///< Number of top residual to print out
+
+  /// Number of top residual to print out
+  unsigned int _dbg_top_residuals;
 
 public:
-  static unsigned int _n;                               ///< number of instances of FEProblem (to distinguish Systems when coupling problems together)
+  /// number of instances of FEProblem (to distinguish Systems when coupling problems together)
+  static unsigned int _n;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystem;

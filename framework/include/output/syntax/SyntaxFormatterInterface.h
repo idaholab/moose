@@ -32,7 +32,8 @@ public:
 
 protected:
   std::ostream & _out;
-  bool _dump_mode;               ///< Indicates whether this is a full dump or input file based
+  /// Indicates whether this is a full dump or input file based
+  bool _dump_mode;
 };
 
 #endif /* SYNTAXFORMATTERINTERFACE_H */

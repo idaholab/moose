@@ -31,11 +31,6 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-
-  /**
-   * Coefficients (weights) for the BDF2 time discretization.
-   */
-//  std::vector<Real> & _time_weight;
 };
 
 #endif //TIMEDERIVATIVE_H

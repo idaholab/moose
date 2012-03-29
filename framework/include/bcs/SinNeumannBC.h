@@ -45,9 +45,7 @@ private:
   Real _final;
   Real _duration;
 
-  /**
-   * Value of grad(u) on the boundary.
-   */
+  /// Value of grad(u) on the boundary.
   Real _value;
 };
 

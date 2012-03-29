@@ -106,13 +106,17 @@ public:
   virtual void storeMatPropName(unsigned int block_id, const std::string & name);
   virtual void checkMatProp(unsigned int block_id, const std::string & name);
 
-  /// Will make sure that all dofs connected to elem_id are ghosted to this processor
+  /**
+   * Will make sure that all dofs connected to elem_id are ghosted to this processor
+   */
   virtual void addGhostedElem(unsigned int elem_id) = 0;
 
-  /// Will make sure that all necessary elements from boundary_id are ghosted to this processor
+  /**
+   * Will make sure that all necessary elements from boundary_id are ghosted to this processor
+   */
   virtual void addGhostedBoundary(unsigned int boundary_id) = 0;
 
-  /***
+  /**
    * Get a vector containing the block ids the material property is defined on.
    */
   virtual std::vector<unsigned int> getMaterialPropertyBlocks(const std::string prop_name);
@@ -122,7 +126,8 @@ protected:
   MooseMesh & _mesh;
   EquationSystems & _eq;
 
-  Moose::CoordinateSystemType _coord_sys;                      ///< Type of coordinate system
+  /// Type of coordinate system
+  Moose::CoordinateSystemType _coord_sys;
 
   bool _transient;
   Real & _time;

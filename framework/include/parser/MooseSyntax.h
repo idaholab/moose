@@ -60,9 +60,7 @@ public:
 
 protected:
 
-  /**
-   * Actions/Syntax association
-   */
+  /// Actions/Syntax association
   std::multimap<std::string, ActionInfo> _associated_actions;
 
 };

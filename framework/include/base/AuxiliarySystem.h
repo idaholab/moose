@@ -106,10 +106,13 @@ protected:
 
   FEProblem & _mproblem;
 
-  const NumericVector<Number> * _current_solution;      ///< solution vector from nonlinear solver
-  NumericVector<Number> & _serialized_solution;         ///< Serialized version of the solution vector
+  /// solution vector from nonlinear solver
+  const NumericVector<Number> * _current_solution;
+  /// Serialized version of the solution vector
+  NumericVector<Number> & _serialized_solution;
 
-  bool _need_serialized_solution;                       ///< Whether or not a copy of the residual needs to be made
+  /// Whether or not a copy of the residual needs to be made
+  bool _need_serialized_solution;
 
   // Variables
   std::vector<std::map<std::string, MooseVariable *> > _nodal_vars;

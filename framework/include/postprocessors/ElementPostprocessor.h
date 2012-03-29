@@ -43,9 +43,7 @@ public:
   const std::vector<unsigned int> & blockIDs() { return _block_ids; }
 
 protected:
-  /**
-   * The block ID this postprocessor works on
-   */
+  /// The block ID this postprocessor works on
   std::vector<unsigned int> _block_ids;
 
   MooseVariable & _var;
@@ -59,8 +57,10 @@ protected:
   const Elem * & _current_elem;
   const Real & _current_elem_volume;
 
-  VariableValue & _u;                                   ///< Holds the solution at current quadrature points
-  VariableGradient & _grad_u;                           ///< Holds the solution gradient at the current quadrature points
+  /// Holds the solution at current quadrature points
+  VariableValue & _u;
+  /// Holds the solution gradient at the current quadrature points
+  VariableGradient & _grad_u;
 };
 
 #endif

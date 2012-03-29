@@ -50,7 +50,8 @@ public:
   virtual Point get_corresponding_pos(const Point & pt) const;
 
 protected:
-  unsigned int _dim;                             ///< the dimension of the problem (says which _tr_XYZ member variables are active)
+  /// The dimension of the problem (says which _tr_XYZ member variables are active)
+  unsigned int _dim;
   Real _dir;
 
   Function * _tr_x;

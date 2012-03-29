@@ -28,7 +28,9 @@ public:
 
 protected:
 
-  /// Helper method for printing the parts of the YAML Syntax
+  /**
+   * Helper method for printing the parts of the YAML Syntax
+   */
   void printCloseAndOpen(const std::string & name, const std::string * prev_name) const;
 
 private:

@@ -355,63 +355,96 @@ protected:
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
   void enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian);
 
-  const NumericVector<Number> * _current_solution;      ///< solution vector from nonlinear solver
-  NumericVector<Number> & _older_solution;              ///< solution vector from step prior to previous step
-  NumericVector<Number> & _solution_u_dot;              ///< solution vector for u^dot
-  NumericVector<Number> & _solution_du_dot_du;          ///< solution vector for {du^dot}\over{du}
-  NumericVector<Number> * _residual_old;                ///< residual evaluated at the old time step (need for Crank-Nicolson)
-  NumericVector<Number> & _residual_ghosted;            ///< ghosted form of the residual
+  /// solution vector from nonlinear solver
+  const NumericVector<Number> * _current_solution;
+  /// solution vector from step prior to previous step
+  NumericVector<Number> & _older_solution;
+  /// solution vector for u^dot
+  NumericVector<Number> & _solution_u_dot;
+  /// solution vector for {du^dot}\over{du}
+  NumericVector<Number> & _solution_du_dot_du;
+  /// residual evaluated at the old time step (need for Crank-Nicolson)
+  NumericVector<Number> * _residual_old;
+  /// ghosted form of the residual
+  NumericVector<Number> & _residual_ghosted;
 
-  NumericVector<Number> & _serialized_solution;         ///< Serialized version of the solution vector
+  /// Serialized version of the solution vector
+  NumericVector<Number> & _serialized_solution;
 
-  NumericVector<Number> & _residual_copy;               ///< Copy of the residual vector
+  /// Copy of the residual vector
+  NumericVector<Number> & _residual_copy;
 
-  Real & _t;                                            ///< time
-  Real & _dt;                                           ///< size of the time step
-  Real & _dt_old;                                       ///< previous time step size
-  int & _t_step;                                        ///< time step (number)
-  std::vector<Real> & _time_weight;                     ///< Coefficients (weights) for the time discretization
-  Moose::TimeSteppingScheme _time_stepping_scheme;      ///< Time stepping scheme used for time discretization
-  Real _time_stepping_order;                            ///< The order of the time stepping scheme
+  /// time
+  Real & _t;
+  /// size of the time step
+  Real & _dt;
+  /// previous time step size
+  Real & _dt_old;
+  /// time step (number)
+  int & _t_step;
+  /// Coefficients (weights) for the time discretization
+  std::vector<Real> & _time_weight;
+  /// Time stepping scheme used for time discretization
+  Moose::TimeSteppingScheme _time_stepping_scheme;
+  /// The order of the time stepping scheme
+  Real _time_stepping_order;
 
   // holders
-  std::vector<KernelWarehouse> _kernels;                ///< Kernel storage for each thread
-  std::vector<BCWarehouse> _bcs;                        ///< BC storage for each thread
-  std::vector<DiracKernelWarehouse> _dirac_kernels;     ///< Dirac Kernel storage for each thread
-  std::vector<DGKernelWarehouse> _dg_kernels;           ///< DG Kernel storage for each thread
-  std::vector<DamperWarehouse> _dampers;                ///< Dampers for each thread
+
+  /// Kernel storage for each thread
+  std::vector<KernelWarehouse> _kernels;
+  /// BC storage for each thread
+  std::vector<BCWarehouse> _bcs;
+  /// Dirac Kernel storage for each thread
+  std::vector<DiracKernelWarehouse> _dirac_kernels;
+  /// DG Kernel storage for each thread
+  std::vector<DGKernelWarehouse> _dg_kernels;
+  /// Dampers for each thread
+  std::vector<DamperWarehouse> _dampers;
 
 public:
-  std::vector<ConstraintWarehouse> _constraints;        ///< Constraints for each thread
+  /// Constraints for each thread
+  std::vector<ConstraintWarehouse> _constraints;
 
 protected:
-  NumericVector<Number> * _increment_vec;               ///< increment vector
+  /// increment vector
+  NumericVector<Number> * _increment_vec;
+  /// Preconditioner
+  Preconditioner<Real> * _preconditioner;
 
-  Preconditioner<Real> * _preconditioner;               ///< Preconditioner
-
-  bool _use_finite_differenced_preconditioner;          /// Whether or not to use a finite differenced preconditioner
+  /// Whether or not to use a finite differenced preconditioner
+  bool _use_finite_differenced_preconditioner;
 #ifdef LIBMESH_HAVE_PETSC
   MatFDColoring _fdcoloring;
 #endif
 
-  bool _add_implicit_geometric_coupling_entries_to_jacobian; /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
+  /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
+  bool _add_implicit_geometric_coupling_entries_to_jacobian;
 
-  bool _need_serialized_solution;                       ///< Whether or not a copy of the residual needs to be made
+  /// Whether or not a copy of the residual needs to be made
+  bool _need_serialized_solution;
 
-  bool _need_residual_copy;                             ///< Whether or not a copy of the residual needs to be made
-  bool _need_residual_ghosted;                          ///< Whether or not a ghosted copy of the residual needs to be made
-  bool _debugging_residuals;                            ///< true if debugging residuals
+  /// Whether or not a copy of the residual needs to be made
+  bool _need_residual_copy;
+  /// Whether or not a ghosted copy of the residual needs to be made
+  bool _need_residual_ghosted;
+  /// true if debugging residuals
+  bool _debugging_residuals;
 
-  bool _doing_dg;                                       ///< true if DG is active (optimization reasons)
+  /// true if DG is active (optimization reasons)
+  bool _doing_dg;
 
-  std::vector<NumericVector<Number> *> _vecs_to_zero_for_residual;   ///< NumericVectors that will be zeroed before a residual computation
+  /// NumericVectors that will be zeroed before a residual computation
+  std::vector<NumericVector<Number> *> _vecs_to_zero_for_residual;
 
   unsigned int _n_iters;
   unsigned int _n_linear_iters;
   Real _final_residual;
 
-  bool _use_predictor;                                   ///< true if predictor is active
-  Real _predictor_scale;                                 ///< Scale factor to use with predictor
+  /// true if predictor is active
+  bool _use_predictor;
+  /// Scale factor to use with predictor
+  Real _predictor_scale;
 
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;

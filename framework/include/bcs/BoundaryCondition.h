@@ -79,13 +79,18 @@ protected:
   Problem & _problem;
   SubProblem & _subproblem;
   SystemBase & _sys;
-  THREAD_ID _tid;                                       ///< thread id
+  /// thread id
+  THREAD_ID _tid;
   Assembly & _assembly;
-  MooseVariable & _var;                                 ///< variable this BC works on
-  MooseMesh & _mesh;                                    ///< Mesh this BC is defined on
-  unsigned int _dim;                                    ///< dimension of the mesh
+  /// variable this BC works on
+  MooseVariable & _var;
+  /// Mesh this BC is defined on
+  MooseMesh & _mesh;
+  /// dimension of the mesh
+  unsigned int _dim;
 
-  unsigned int _boundary_id;                            ///< boundary ID this BC is active on
+  /// boundary ID this BC is active on
+  unsigned int _boundary_id;
 
   // Single Instance Variables
   Real & _real_zero;

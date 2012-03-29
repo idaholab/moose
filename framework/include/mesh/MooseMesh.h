@@ -98,11 +98,15 @@ public:
   void prepare();
   void update();
 
-  /// This will add the boundary ids to be ghosted to this processor
+  /**
+   * This will add the boundary ids to be ghosted to this processor
+   */
   void addGhostedBoundary(unsigned int boundary_id) { _ghosted_boundaries.insert(boundary_id); }
 
-  /// This sets the inflation amount for the bounding box for each partition for use in
-  /// ghosting boundaries
+  /**
+   * This sets the inflation amount for the bounding box for each partition for use in
+   * ghosting boundaries
+   */
   void setGhostedBoundaryInflation(const std::vector<Real> & inflation) { _ghosted_boundaries_inflation = inflation; }
 
   std::set<unsigned int> & getGhostedBoundaries() { return _ghosted_boundaries; }
@@ -140,7 +144,8 @@ public:
   libMesh::Mesh _mesh;
 
 protected:
-  bool _is_changed;                   ///< true if mesh is changed (i.e. after adaptivity step)
+  /// true if mesh is changed (i.e. after adaptivity step)
+  bool _is_changed;
 
   // bool _is_parallel;           /// True if using a TRUE parallel mesh (ie Nemesis)
 
@@ -157,9 +162,7 @@ protected:
   ConstNodeRange * _local_node_range;
   ConstBndNodeRange * _bnd_node_range;
 
-  /**
-   * A map of all of the current nodes to the elements that they are connected to.
-   */
+  /// A map of all of the current nodes to the elements that they are connected to.
   std::vector<std::vector<unsigned int> > _node_to_elem_map;
 
   /**
@@ -179,27 +182,27 @@ protected:
 
   std::vector<MeshModifier *> _mesh_modifiers;
 
-  std::vector<BndNode *> _bnd_nodes;                                            ///< array of boundary nodes
+  /// array of boundary nodes
+  std::vector<BndNode *> _bnd_nodes;
   typedef std::vector<BndNode *>::iterator             bnd_node_iterator_imp;
   typedef std::vector<BndNode *>::const_iterator const_bnd_node_iterator_imp;
 
-  std::map<unsigned int, std::set<subdomain_id_type> > _block_node_list;        ///< list of nodes that belongs to a specified block (domain)
+  /// list of nodes that belongs to a specified block (domain)
+  std::map<unsigned int, std::set<subdomain_id_type> > _block_node_list;
 
-  std::map<short int, std::vector<unsigned int> > _node_set_nodes;              ///< list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> <array of node ids>
+  /// list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> <array of node ids>
+  std::map<short int, std::vector<unsigned int> > _node_set_nodes;
 
   std::set<unsigned int> _ghosted_boundaries;
   std::vector<Real> _ghosted_boundaries_inflation;
 
-  /**
-   * The number of nodes to consider in the NearestNode neighborhood.
-   */
+  /// The number of nodes to consider in the NearestNode neighborhood.
   unsigned int _patch_size;
 
-  std::string _file_name;                              ///< file_name iff this mesh was read from a file
+  /// file_name iff this mesh was read from a file
+  std::string _file_name;
 
-  /**
-   * Vector of all the Nodes in the mesh for determining when to add a new point
-   */
+  /// Vector of all the Nodes in the mesh for determining when to add a new point
   std::vector<Node *> _node_map;
 
   void cacheInfo();

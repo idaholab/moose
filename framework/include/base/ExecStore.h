@@ -21,11 +21,16 @@
 
 /// Execution flags - when is the oject executed/evaluated
 enum ExecFlagType {
-  EXEC_INITIAL,                 ///< Object is evaluated only once at the beginning of the simulation
-  EXEC_RESIDUAL,                ///< Object is evaluated in every residual computation
-  EXEC_JACOBIAN,                ///< Object is evaluated in every jacobian computation
-  EXEC_TIMESTEP,                ///< Object is evaluated at the end of every time step
-  EXEC_TIMESTEP_BEGIN           ///< Object is evaluated at the beginning of every time step
+  /// Object is evaluated only once at the beginning of the simulation
+  EXEC_INITIAL,
+  /// Object is evaluated in every residual computation
+  EXEC_RESIDUAL,
+  /// Object is evaluated in every jacobian computation
+  EXEC_JACOBIAN,
+  /// Object is evaluated at the end of every time step
+  EXEC_TIMESTEP,
+  /// Object is evaluated at the beginning of every time step
+  EXEC_TIMESTEP_BEGIN
 };
 
 
@@ -47,7 +52,11 @@ public:
   {
   }
 
-  /// Parenthesis operator for accessing the warehouses for different times
+  /**
+   * Parenthesis operator for accessing the warehouses for different times
+   * @param type
+   * @return
+   */
   std::vector<T> &
   operator()(ExecFlagType type)
   {
@@ -64,11 +73,16 @@ public:
   }
 
 protected:
-  std::vector<T> _obj_init;                     ///< executed once at the beginning of the simulation
-  std::vector<T> _obj_res;                      ///< executed every residual evaluation
-  std::vector<T> _obj_jac;                      ///< executed every jacobian evaluation
-  std::vector<T> _obj_timestep;                 ///< executed at the end of every time step
-  std::vector<T> _obj_ts_begin;                 ///< executed at the beginning of every time step
+  /// executed once at the beginning of the simulation
+  std::vector<T> _obj_init;
+  /// executed every residual evaluation
+  std::vector<T> _obj_res;
+  /// executed every jacobian evaluation
+  std::vector<T> _obj_jac;
+  /// executed at the end of every time step
+  std::vector<T> _obj_timestep;
+  /// executed at the beginning of every time step
+  std::vector<T> _obj_ts_begin;
 };
 
 #endif /* EXECSTORE_H */

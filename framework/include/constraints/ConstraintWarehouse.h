@@ -48,7 +48,8 @@ public:
   std::vector<NodeFaceConstraint *> & getDisplacedNodeFaceConstraints(unsigned int boundary_id);
 
 protected:
-  std::vector<NodalConstraint *> _nodal_constraints;           ///< nodal constraints on a boundary
+  /// nodal constraints on a boundary
+  std::vector<NodalConstraint *> _nodal_constraints;
 
   std::map<unsigned int, std::vector<NodeFaceConstraint *> > _node_face_constraints;
   std::map<unsigned int, std::vector<NodeFaceConstraint *> > _displaced_node_face_constraints;

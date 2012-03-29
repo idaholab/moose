@@ -131,7 +131,8 @@ protected:
 
   MooseMesh & _mesh;
   unsigned int _dim;
-  Moose::CoordinateSystemType & _coord_sys;                 ///< Coordinate system
+  /// Coordinate system
+  Moose::CoordinateSystemType & _coord_sys;
 
   std::set<std::string> _depend_props;
   std::set<std::string> _supplied_props;

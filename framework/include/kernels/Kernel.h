@@ -99,7 +99,8 @@ protected:
   unsigned int _dim;
 
   const Elem * & _current_elem;
-  const Real & _current_elem_volume;                    ///< Volume of the current element
+  /// Volume of the current element
+  const Real & _current_elem_volume;
 
   unsigned int _qp;
   const std::vector< Point > & _q_point;
@@ -117,14 +118,20 @@ protected:
   const std::vector<std::vector<RealGradient> > & _grad_test;
   const std::vector<std::vector<RealTensor> > & _second_test;
 
-  VariableValue & _u;                                   ///< Holds the solution at current quadrature points
-  VariableGradient & _grad_u;                           ///< Holds the solution gradient at the current quadrature points
+  /// Holds the solution at current quadrature points
+  VariableValue & _u;
+  /// Holds the solution gradient at the current quadrature points
+  VariableGradient & _grad_u;
 
-  VariableValue & _u_dot;                               ///< Time derivative of u
-  VariableValue & _du_dot_du;                           ///< Derivative of u_dot wrt u
+  /// Time derivative of u
+  VariableValue & _u_dot;
+  /// Derivative of u_dot wrt u
+  VariableValue & _du_dot_du;
 
-  Real _start_time;                                     ///< The time, after which this kernel will be active.
-  Real _stop_time;                                      ///< The time, after which this kernel will be inactive.
+  /// The time, after which this kernel will be active.
+  Real _start_time;
+  /// The time, after which this kernel will be inactive.
+  Real _stop_time;
 
   // Single Instance Variables
   Real & _real_zero;

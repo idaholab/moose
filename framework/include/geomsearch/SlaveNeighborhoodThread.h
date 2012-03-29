@@ -32,33 +32,33 @@ public:
                           const unsigned int patch_size);
 
 
-  // Splitting Constructor
+  /// Splitting Constructor
   SlaveNeighborhoodThread(SlaveNeighborhoodThread & x, Threads::split split);
 
   void operator() (const NodeIdRange & range);
 
   void join(const SlaveNeighborhoodThread & other);
 
-  // List of the slave nodes we're actually going to keep track of
+  /// List of the slave nodes we're actually going to keep track of
   std::vector<unsigned int> _slave_nodes;
 
-  // The neighborhood nodes associated with each node
+  /// The neighborhood nodes associated with each node
   std::map<unsigned int, std::vector<unsigned int> > _neighbor_nodes;
 
-  // Elements that we need to ghost
+  /// Elements that we need to ghost
   std::set<unsigned int> _ghosted_elems;
 
 protected:
-  // The Mesh
+  /// The Mesh
   const MeshBase & _mesh;
 
-  // Nodes to search against
+  /// Nodes to search against
   const std::vector<unsigned int> & _trial_master_nodes;
 
-  // Node to elem map
+  /// Node to elem map
   const std::vector<std::vector<unsigned int> > & _node_to_elem_map;
 
-  // The number of nodes to keep
+  /// The number of nodes to keep
   unsigned int _patch_size;
 };
 

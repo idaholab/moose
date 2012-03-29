@@ -97,12 +97,16 @@ protected:
   unsigned int _dim;
 
   const Elem * & _current_elem;
-  const Elem * & _neighbor_elem;        ///< The neighboring element
+  /// The neighboring element
+  const Elem * & _neighbor_elem;
 
-  unsigned int & _current_side;         ///< Current side
-  const Elem * & _current_side_elem;    ///< Current side element
+  /// Current side
+  unsigned int & _current_side;
+  /// Current side element
+  const Elem * & _current_side_elem;
 
-  Moose::CoordinateSystemType & _coord_sys;                     ///< Coordinate system
+  /// Coordinate system
+  Moose::CoordinateSystemType & _coord_sys;
   unsigned int _qp;
   const std::vector< Point > & _q_point;
   QBase * & _qrule;
@@ -111,31 +115,46 @@ protected:
 
   unsigned int _i, _j;
 
-  unsigned int _boundary_id;                                    ///<
+  unsigned int _boundary_id;
 
-  VariableValue & _u;                                           ///< Holds the current solution at the current quadrature point on the face.
+  /// Holds the current solution at the current quadrature point on the face.
+  VariableValue & _u;
 
-  VariableGradient & _grad_u;                                   ///< Holds the current solution gradient at the current quadrature point on the face.
+  /// Holds the current solution gradient at the current quadrature point on the face.
+  VariableGradient & _grad_u;
   // shape functions
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;
   const std::vector<std::vector<RealTensor> > & _second_phi;
   // test functions
-  const std::vector<std::vector<Real> > & _test;                        ///< Side shape function.
-  const std::vector<std::vector<RealGradient> > & _grad_test;           ///< Gradient of side shape function
-  const std::vector<std::vector<RealTensor> > & _second_test;           ///< Second derivative of side shape function
-  const std::vector<Point>& _normals;                                   ///< Normal vectors at the quadrature points
 
-  const std::vector<std::vector<Real> > & _phi_neighbor;                ///< Side shape function.
-  const std::vector<std::vector<RealGradient> > & _grad_phi_neighbor;   ///< Gradient of side shape function
-  const std::vector<std::vector<RealTensor> > & _second_phi_neighbor;   ///< Second derivative of side shape function
+  /// Side shape function.
+  const std::vector<std::vector<Real> > & _test;
+  /// Gradient of side shape function
+  const std::vector<std::vector<RealGradient> > & _grad_test;
+  /// Second derivative of side shape function
+  const std::vector<std::vector<RealTensor> > & _second_test;
+  /// Normal vectors at the quadrature points
+  const std::vector<Point>& _normals;
 
-  const std::vector<std::vector<Real> > & _test_neighbor;               ///< Side test function
-  const std::vector<std::vector<RealGradient> > & _grad_test_neighbor;  ///< Gradient of side shape function
-  const std::vector<std::vector<RealTensor> > & _second_test_neighbor;  ///< Second derivative of side shape function
+  /// Side shape function.
+  const std::vector<std::vector<Real> > & _phi_neighbor;
+  /// Gradient of side shape function
+  const std::vector<std::vector<RealGradient> > & _grad_phi_neighbor;
+  /// Second derivative of side shape function
+  const std::vector<std::vector<RealTensor> > & _second_phi_neighbor;
 
-  VariableValue & _u_neighbor;                                          ///< Holds the current solution at the current quadrature point
-  VariableGradient & _grad_u_neighbor;                                  ///< Holds the current solution gradient at the current quadrature point
+  /// Side test function
+  const std::vector<std::vector<Real> > & _test_neighbor;
+  /// Gradient of side shape function
+  const std::vector<std::vector<RealGradient> > & _grad_test_neighbor;
+  /// Second derivative of side shape function
+  const std::vector<std::vector<RealTensor> > & _second_test_neighbor;
+
+  /// Holds the current solution at the current quadrature point
+  VariableValue & _u_neighbor;
+  /// Holds the current solution gradient at the current quadrature point
+  VariableGradient & _grad_u_neighbor;
 
   /**
    * This is the virtual that derived classes should override for computing the residual on neighboring element.
@@ -153,8 +172,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar);
 
 public:
-  // boundary id used for internal edges (all DG kernels lives on this boundary id)
-  static const unsigned int InternalBndId;                              ///< Made-up number for internal edges
+  // boundary id used for internal edges (all DG kernels lives on this boundary id -- a made-up number)
+  static const unsigned int InternalBndId;
 };
 
 #endif //DGKERNEL_H

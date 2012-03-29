@@ -51,31 +51,55 @@ public:
   void computeJacobianBlock(unsigned int jvar);
 
 protected:
-  const Elem * & _current_elem;                                         ///< current element
-  unsigned int & _current_side;                                         ///< current side of the current element
-  const Elem * & _current_side_elem;                                    ///< current side element
+  /// current element
+  const Elem * & _current_elem;
+  /// current side of the current element
+  unsigned int & _current_side;
+  /// current side element
+  const Elem * & _current_side_elem;
 
-  const std::vector<Point> & _normals;                                  ///< normals at quadrature points
+  /// normals at quadrature points
+  const std::vector<Point> & _normals;
 
-  unsigned int _qp;                                                     ///< quadrature point index
-  QBase * & _qrule;                                                     ///< active quadrature rule
-  const std::vector< Point > & _q_point;                                ///< active quadrature points
-  const std::vector<Real> & _JxW;                                       ///< transformed Jacobian weights
-  const std::vector<Real> & _coord;                                     ///< coordinate transformation
-  unsigned int _i, _j;                                                  ///< i-th, j-th index for enumerating test and shape functions
+  /// quadrature point index
+  unsigned int _qp;
+  /// active quadrature rule
+  QBase * & _qrule;
+  /// active quadrature points
+  const std::vector< Point > & _q_point;
+  /// transformed Jacobian weights
+  const std::vector<Real> & _JxW;
+  /// coordinate transformation
+  const std::vector<Real> & _coord;
+  /// i-th, j-th index for enumerating test and shape functions
+  unsigned int _i, _j;
 
   // shape functions
-  const std::vector<std::vector<Real> > & _phi;                         ///< shape function values (in QPs)
-  const std::vector<std::vector<RealGradient> > & _grad_phi;            ///< gradients of shape functions (in QPs)
-  const std::vector<std::vector<RealTensor> > & _second_phi;            ///< second derivatives of shape functions (in QPs)
+
+  /// shape function values (in QPs)
+  const std::vector<std::vector<Real> > & _phi;
+  /// gradients of shape functions (in QPs)
+  const std::vector<std::vector<RealGradient> > & _grad_phi;
+  /// second derivatives of shape functions (in QPs)
+  const std::vector<std::vector<RealTensor> > & _second_phi;
+
   // test functions
-  const std::vector<std::vector<Real> > & _test;                        ///< test function values (in QPs)
-  const std::vector<std::vector<RealGradient> > & _grad_test;           ///< gradients of test functions  (in QPs)
-  const std::vector<std::vector<RealTensor> > & _second_test;           ///< second derivatives of test functions (in QPs)
+
+  /// test function values (in QPs)
+  const std::vector<std::vector<Real> > & _test;
+  /// gradients of test functions  (in QPs)
+  const std::vector<std::vector<RealGradient> > & _grad_test;
+  /// second derivatives of test functions (in QPs)
+  const std::vector<std::vector<RealTensor> > & _second_test;
+
   // unknown
-  const VariableValue & _u;                                             ///< the values of the unknown variable this BC is acting on
-  const VariableGradient & _grad_u;                                     ///< the gradient of the unknown variable this BC is acting on
-  const VariableSecond & _second_u;                                     ///< the second derivative of the unknown variable this BC is acting on
+
+  /// the values of the unknown variable this BC is acting on
+  const VariableValue & _u;
+  /// the gradient of the unknown variable this BC is acting on
+  const VariableGradient & _grad_u;
+  /// the second derivative of the unknown variable this BC is acting on
+  const VariableSecond & _second_u;
 
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();

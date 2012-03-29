@@ -65,22 +65,33 @@ protected:
   SubProblem & _subproblem;
   SystemBase & _sys;
 
-  THREAD_ID _tid;                                       ///< Thread ID
+  /// Thread ID
+  THREAD_ID _tid;
 
-  Moose::CoordinateSystemType & _coord_sys;             ///< Coordinate system
+  /// Coordinate system
+  Moose::CoordinateSystemType & _coord_sys;
 
-  MooseVariable & _var;                                 ///< Non-linear variable this damper works on
+  /// Non-linear variable this damper works on
+  MooseVariable & _var;
 
-  const Elem * & _current_elem;                         ///< Current element
+  /// Current element
+  const Elem * & _current_elem;
 
-  unsigned int _qp;                                     ///< Quadrature point index
-  const std::vector< Point > & _q_point;                ///< Quadrature points
-  QBase * & _qrule;                                     ///< Quadrature rule
-  const std::vector<Real> & _JxW;                       ///< Transformed Jacobina weights
+  /// Quadrature point index
+  unsigned int _qp;
+  /// Quadrature points
+  const std::vector< Point > & _q_point;
+  /// Quadrature rule
+  QBase * & _qrule;
+  /// Transformed Jacobian weights
+  const std::vector<Real> & _JxW;
 
-  VariableValue & _u_increment;                         ///< The current newton increment
-  VariableValue & _u;                                   ///< Holds the current solution at the current quadrature point
-  VariableGradient & _grad_u;                           ///< Holds the current solution gradient at the current quadrature point
+  /// The current Newton increment
+  VariableValue & _u_increment;
+  /// Holds the current solution at the current quadrature point
+  VariableValue & _u;
+  /// Holds the current solution gradient at the current quadrature point
+  VariableGradient & _grad_u;
 };
 
 #endif

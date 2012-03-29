@@ -88,12 +88,17 @@ public:
   std::vector<MooseVariableScalar *> & scalars();
 
 protected:
-  std::vector<MooseVariable *> _vars;                                        ///< list of all variables
-  std::map<std::string, MooseVariable *> _var_name;                          ///< Name to variable mapping
-  std::map<unsigned int, std::set<MooseVariable *> > _boundary_vars;         ///< Map to variables that need to be evaluated on a boundary
+  /// list of all variables
+  std::vector<MooseVariable *> _vars;
+  /// Name to variable mapping
+  std::map<std::string, MooseVariable *> _var_name;
+  /// Map to variables that need to be evaluated on a boundary
+  std::map<unsigned int, std::set<MooseVariable *> > _boundary_vars;
 
-  std::map<std::string, MooseVariableScalar *> _scalar_var_map;             ///< variable number to variable mapping
-  std::vector<MooseVariableScalar *> _scalar_vars;                           ///< list of all variables
+  /// variable number to variable mapping
+  std::map<std::string, MooseVariableScalar *> _scalar_var_map;
+  /// list of all variables
+  std::vector<MooseVariableScalar *> _scalar_vars;
 };
 
 #endif // VARIABLEWAREHOUSE_H

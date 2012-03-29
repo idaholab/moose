@@ -80,18 +80,27 @@ public:
   void addScalarKernel(AuxScalarKernel *kernel);
 
 protected:
-  std::vector<AuxKernel *> _all_aux_kernels;                                                    ///< all aux kernels
-  std::vector<AuxKernel *> _all_element_aux_kernels;                                            ///< all element aux kernels
-  std::vector<AuxKernel *> _all_nodal_aux_kernels;                                              ///< all nodal aux kernels
+  /// all aux kernels
+  std::vector<AuxKernel *> _all_aux_kernels;
+  /// all element aux kernels
+  std::vector<AuxKernel *> _all_element_aux_kernels;
+  /// all nodal aux kernels
+  std::vector<AuxKernel *> _all_nodal_aux_kernels;
 
-  std::vector<AuxKernel *> _active_nodal_aux_kernels;                                           ///< nodal kernels active everywhere
-  std::vector<AuxKernel *> _active_element_aux_kernels;                                         ///< elemental kernels active everywhere
-  std::map<unsigned int, std::vector<AuxKernel *> > _active_block_nodal_aux_kernels;            ///< nodal kernels active on a block
-  std::map<unsigned int, std::vector<AuxKernel *> > _active_block_element_aux_kernels;          ///< elemental kernels active on a block
+  /// nodal kernels active everywhere
+  std::vector<AuxKernel *> _active_nodal_aux_kernels;
+  /// elemental kernels active everywhere
+  std::vector<AuxKernel *> _active_element_aux_kernels;
+  /// nodal kernels active on a block
+  std::map<unsigned int, std::vector<AuxKernel *> > _active_block_nodal_aux_kernels;
+  /// elemental kernels active on a block
+  std::map<unsigned int, std::vector<AuxKernel *> > _active_block_element_aux_kernels;
 
-  std::map<unsigned int, std::vector<AuxKernel *> > _active_bcs;                                ///< aux boundary conditions
+  /// aux boundary conditions
+  std::map<unsigned int, std::vector<AuxKernel *> > _active_bcs;
 
-  std::vector<AuxScalarKernel *> _scalar_kernels;                                                  ///< Scalar kernels
+  /// Scalar kernels
+  std::vector<AuxScalarKernel *> _scalar_kernels;
 };
 
 #endif // AUXWAREHOUSE_H

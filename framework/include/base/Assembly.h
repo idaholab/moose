@@ -201,8 +201,6 @@ public:
    */
   void reinitNodeNeighbor(const Node * node);
 
-  ///
-
   void init();
 
   void prepare();
@@ -296,63 +294,105 @@ protected:
   void addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, const std::vector<unsigned int> & idof_indices, const std::vector<unsigned int> & jdof_indices, Real scaling_factor);
 
   SystemBase & _sys;
-  CouplingMatrix * & _cm;                                        ///< Reference to coupling matrix
-  std::vector<std::pair<unsigned int, unsigned int> > _cm_entry; ///< Entries in the coupling matrix
-  const DofMap & _dof_map;                                       ///< DOF map
-  THREAD_ID _tid;                                                ///< Thread number (id)
+  /// Reference to coupling matrix
+  CouplingMatrix * & _cm;
+  /// Entries in the coupling matrix
+  std::vector<std::pair<unsigned int, unsigned int> > _cm_entry;
+  /// DOF map
+  const DofMap & _dof_map;
+  /// Thread number (id)
+  THREAD_ID _tid;
 
   MooseMesh & _mesh;
 
-  std::map<FEType, FEBase *> _fe;               ///< types of finite elements
-  FEBase * _fe_helper;                          ///< helper object for transforming coordinates
-  QBase * _qrule;                               ///< current quadrature rule being used (could be either volumetric or arbitrary - for dirac kernels)
-  QBase * _qrule_volume;                        ///< volumetric quadrature for the element
-  ArbitraryQuadrature * _qrule_arbitrary;       ///< arbitrary quadrature rule used within the element interior
-  ArbitraryQuadrature * _qface_arbitrary;       ///< arbitrary quadrature rule used on element faces
+  /// types of finite elements
+  std::map<FEType, FEBase *> _fe;
+  /// helper object for transforming coordinates
+  FEBase * _fe_helper;
+  /// current quadrature rule being used (could be either volumetric or arbitrary - for dirac kernels)
+  QBase * _qrule;
+  /// volumetric quadrature for the element
+  QBase * _qrule_volume;
+  /// arbitrary quadrature rule used within the element interior
+  ArbitraryQuadrature * _qrule_arbitrary;
+  /// arbitrary quadrature rule used on element faces
+  ArbitraryQuadrature * _qface_arbitrary;
 
-  const std::vector<Point> & _q_points;         ///< reference to the list of quadrature points
-  const std::vector<Real> & _JxW;               ///< reference to the list of transformed jacobian weights
-  std::vector<Real> _coord;                     ///< reference to the coordinate transformation coefficients
+  /// reference to the list of quadrature points
+  const std::vector<Point> & _q_points;
+  /// reference to the list of transformed jacobian weights
+  const std::vector<Real> & _JxW;
+  /// reference to the coordinate transformation coefficients
+  std::vector<Real> _coord;
 
-  std::map<FEType, FEBase *> _fe_face;          ///< types of finite elements
-  FEBase * _fe_face_helper;                     ///< helper object for transforming coordinates
-  QBase * _qrule_face;                          ///< quadrature rule used on faces
-  const std::vector<Point> & _q_points_face;    ///< reference to the quadrature points on a face
-  const std::vector<Real> & _JxW_face;          ///< reference to the transformed jacobian weights on a face
-  const std::vector<Point> & _normals;          ///< Normal vectors at the quadrature points.
+  /// types of finite elements
+  std::map<FEType, FEBase *> _fe_face;
+  /// helper object for transforming coordinates
+  FEBase * _fe_face_helper;
+  /// quadrature rule used on faces
+  QBase * _qrule_face;
+  /// reference to the quadrature points on a face
+  const std::vector<Point> & _q_points_face;
+  /// reference to the transformed jacobian weights on a face
+  const std::vector<Real> & _JxW_face;
+  /// Normal vectors at the quadrature points.
+  const std::vector<Point> & _normals;
 
-  std::map<FEType, FEBase *> _fe_neighbor;      ///< types of finite elements
-  FEBase * _fe_neighbor_helper;                 ///< helper object for transforming coordinates
+  /// types of finite elements
+  std::map<FEType, FEBase *> _fe_neighbor;
+  /// helper object for transforming coordinates
+  FEBase * _fe_neighbor_helper;
 
-  const Elem * _current_elem;                   ///< The current "element" we are currently on.
-  Real _current_elem_volume;                    ///< Volume of the current element
-  unsigned int _current_side;                   ///< The current side of the selected element (valid only when working with sides)
-  const Elem * _current_side_elem;              ///< The current "element" making up the side we are currently on.
-  Real _current_side_volume;                    ///< Volume of the current side element
-  const Elem * _neighbor_elem;                  ///< The current neighbor "element"
+  /// The current "element" we are currently on.
+  const Elem * _current_elem;
+  /// Volume of the current element
+  Real _current_elem_volume;
+  /// The current side of the selected element (valid only when working with sides)
+  unsigned int _current_side;
+  /// The current "element" making up the side we are currently on.
+  const Elem * _current_side_elem;
+  /// Volume of the current side element
+  Real _current_side_volume;
+  /// The current neighbor "element"
+  const Elem * _neighbor_elem;
 
-  const Node * _current_node;                   ///< The current node we are working with
-  const Node * _current_neighbor_node;          ///< The current neighboring node we are working with
+  /// The current node we are working with
+  const Node * _current_node;
+  /// The current neighboring node we are working with
+  const Node * _current_neighbor_node;
 
-  std::vector<Point> _current_physical_points;  ///< This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
+  /// This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
+  std::vector<Point> _current_physical_points;
 
-  std::vector<DenseVector<Number> > _sub_Re;                     ///< residual contributions for each variable from the element
-  std::vector<DenseVector<Number> > _sub_Rn;                     ///< residual contributions for each variable from the neighbor
-  std::vector<DenseVector<Number> > _scalar_Re;                  ///< residual for scalar variable
-  DenseVector<Number> _tmp_Re;                                   ///< auxiliary vector for scaling residuals (optimization to avoid expensive construction/destruction)
+  /// residual contributions for each variable from the element
+  std::vector<DenseVector<Number> > _sub_Re;
+  /// residual contributions for each variable from the neighbor
+  std::vector<DenseVector<Number> > _sub_Rn;
+  /// residual for scalar variable
+  std::vector<DenseVector<Number> > _scalar_Re;
+  /// auxiliary vector for scaling residuals (optimization to avoid expensive construction/destruction)
+  DenseVector<Number> _tmp_Re;
 
-  std::vector<std::vector<DenseMatrix<Number> > > _sub_Kee;      ///< jacobian contributions
+  /// jacobian contributions
+  std::vector<std::vector<DenseMatrix<Number> > > _sub_Kee;
 
-  std::vector<std::vector<DenseMatrix<Number> > > _sub_Ken;      ///< jacobian contributions from the element and neighbor
-  std::vector<std::vector<DenseMatrix<Number> > > _sub_Kne;      ///< jacobian contributions from the neighbor and element
-  std::vector<std::vector<DenseMatrix<Number> > > _sub_Knn;      ///< jacobian contributions from the neighbor
+  /// jacobian contributions from the element and neighbor
+  std::vector<std::vector<DenseMatrix<Number> > > _sub_Ken;
+  /// jacobian contributions from the neighbor and element
+  std::vector<std::vector<DenseMatrix<Number> > > _sub_Kne;
+  /// jacobian contributions from the neighbor
+  std::vector<std::vector<DenseMatrix<Number> > > _sub_Knn;
 
-  std::vector<std::vector<DenseMatrix<Number> > > _scalar_Kee;   ///< jacobian contributions for scalar variable
-  std::vector<std::vector<DenseMatrix<Number> > > _scalar_Ken;   ///< jacobian contributions
-  std::vector<std::vector<DenseMatrix<Number> > > _scalar_Kne;   ///< jacobian contributions
+  /// jacobian contributions for scalar variable
+  std::vector<std::vector<DenseMatrix<Number> > > _scalar_Kee;
+  /// jacobian contributions
+  std::vector<std::vector<DenseMatrix<Number> > > _scalar_Ken;
+  /// jacobian contributions
+  std::vector<std::vector<DenseMatrix<Number> > > _scalar_Kne;
   bool _scalar_has_off_diag_contributions;
 
-  DenseMatrix<Number> _tmp_Ke;                                   ///< auxiliary matrix for scaling jacobians (optimization to avoid expensive construction/destruction)
+  /// auxiliary matrix for scaling jacobians (optimization to avoid expensive construction/destruction)
+  DenseMatrix<Number> _tmp_Ke;
 
   // Shape function values, gradients. second derivatives
   std::vector<std::vector<Real> > _phi;
@@ -367,14 +407,19 @@ protected:
   std::vector<std::vector<RealGradient> > _grad_phi_face_neighbor;
   std::vector<std::vector<RealTensor> > _second_phi_face_neighbor;
 
-  std::vector<Real> _cached_residual_values;                     /// Values cached by calling cacheResidual()
-  std::vector<unsigned int> _cached_residual_rows;               /// Where the cached values should go
+  /// Values cached by calling cacheResidual()
+  std::vector<Real> _cached_residual_values;
+  /// Where the cached values should go
+  std::vector<unsigned int> _cached_residual_rows;
 
   unsigned int _max_cached_residuals;
 
-  std::vector<Real> _cached_jacobian_values;                     /// Values cached by calling cacheJacobian()
-  std::vector<unsigned int> _cached_jacobian_rows;               /// Row where the corresponding cached value should go
-  std::vector<unsigned int> _cached_jacobian_cols;               /// Column where the corresponding cached value should go
+  /// Values cached by calling cacheJacobian()
+  std::vector<Real> _cached_jacobian_values;
+  /// Row where the corresponding cached value should go
+  std::vector<unsigned int> _cached_jacobian_rows;
+  /// Column where the corresponding cached value should go
+  std::vector<unsigned int> _cached_jacobian_cols;
 
   unsigned int _max_cached_jacobians;
 };

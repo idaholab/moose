@@ -56,14 +56,10 @@ public:
    */
   std::map<unsigned int, std::vector<std::vector<Real> > > _test;
 
-  /**
-   * The qrule that can hold arbitrary points in the reference element.
-   */
+  /// The qrule that can hold arbitrary points in the reference element.
   ArbitraryQuadrature * _arbitrary_qrule;
 
-  /**
-   * The points on the current element.
-   */
+  /// The points on the current element.
   std::vector<Point> _current_points;
 };
 

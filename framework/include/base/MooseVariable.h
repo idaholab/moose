@@ -58,34 +58,55 @@ public:
   void reinit_aux();
   void reinitNodes(const std::vector<unsigned int> & nodes);
 
-  /// Get the variable number
+  /**
+   * Get the variable number
+   * @return The variable name
+   */
   unsigned int number() { return _moose_var_num; }
-//  int dimension() { return _dim; }
 
-  /// Get the variable number
+  /**
+   * Get the variable number
+   * @return The variable number
+   */
   const std::string & name();
 
-  /// Kind of the variable (Nonlinear, Auxiliary, ...)
+  /**
+   * Get the kind of the variable (Nonlinear, Auxiliary, ...)
+   * @return The kind of the variable
+   */
   Moose::VarKindType kind() { return _var_kind; }
 
   const std::set<subdomain_id_type> & activeSubdomains();
 
-  /// Get the type of finite element object
+  /**
+   * Get the type of finite element object
+   */
   const FEType feType() { return _fe->get_fe_type(); }
 
-  /// Get the order of this variable
+  /**
+   * Get the order of this variable
+   */
   Order getOrder() const { return _fe->get_order(); }
 
-  /// is this variable nodal
+  /**
+   * Is this variable nodal
+   * @return true if it nodal, otherwise false
+   */
   bool isNodal();
 
   // Read-only access to FE object used by this variable
   FEBase * const & currentFE() const { return _fe; }
-  /// Current element this variable is evaluated at
+  /**
+   * Current element this variable is evaluated at
+   */
   const Elem * & currentElem() { return _elem; }
-  /// Current side this variable is being evaluated on
+  /**
+   * Current side this variable is being evaluated on
+   */
   unsigned int & currentSide() { return _current_side; }
-  /// Current neighboring element
+  /**
+   * Current neighboring element
+   */
   const Elem * & neighbor() { return _neighbor; }
 
   const std::vector<std::vector<Real> > & phi() { return _phi; }
@@ -144,40 +165,71 @@ public:
   VariableValue & nodalSlnOldNeighbor() { return _nodal_u_old_neighbor; }
   VariableValue & nodalSlnOlderNeighbor() { return _nodal_u_older_neighbor; }
 
-  /// Compute values at interior quadrature points
+  /**
+   * Compute values at interior quadrature points
+   */
   void computeElemValues();
-  /// Compute values at facial quadrature points
+  /**
+   * Compute values at facial quadrature points
+   */
   void computeElemValuesFace();
-  /// Compute values at facial quadrature points for the neighbor
+  /**
+   * Compute values at facial quadrature points for the neighbor
+   */
   void computeNeighborValuesFace();
-  /// Compute values at quadrature points for the neighbor
+  /**
+   * Compute values at quadrature points for the neighbor
+   */
   void computeNeighborValues();
-  /// Compute nodal values of this variable
+  /**
+   * Compute nodal values of this variable
+   */
   void computeNodalValues();
-  /// Compute nodal values of this variable in the neighbor
+  /**
+   * Compute nodal values of this variable in the neighbor
+   */
   void computeNodalNeighborValues();
-  /// Set the nodal value for this variable (to keep everything up to date
+  /**
+   * Set the nodal value for this variable (to keep everything up to date
+   */
   void setNodalValue(Number value);
-  /// Compute damping for this variable based on increment_vec
+  /**
+   * Compute damping for this variable based on increment_vec
+   */
   void computeDamping(const NumericVector<Number> & increment_vec);
 
-  /// get DOF indices for currently selected element
+  /**
+   * Get DOF indices for currently selected element
+   */
   std::vector<unsigned int> & dofIndices() { return _dof_indices; }
-  /// get DOF indices for currently selected element
+  /**
+   * Get DOF indices for currently selected element
+   * @return
+   */
   std::vector<unsigned int> & dofIndicesNeighbor() { return _dof_indices_neighbor; }
 
   void insert(NumericVector<Number> & residual);
 
-  /// Get the value of this variable at given node
+  /**
+   * Get the value of this variable at given node
+   */
   Number getNodalValue(const Node & node);
-  /// Get the old value of this variable at given node
+  /**
+   * Get the old value of this variable at given node
+   */
   Number getNodalValueOld(const Node & node);
-  /// Get the t-2 value of this variable at given node
+  /**
+   * Get the t-2 value of this variable at given node
+   */
   Number getNodalValueOlder(const Node & node);
 
-  /// Set the scaling factor for this variable
+  /**
+   * Set the scaling factor for this variable
+   */
   void scalingFactor(Real factor) { _scaling_factor = factor; }
-  /// Get the scaling factor for this variable
+  /**
+   * Get the scaling factor for this variable
+   */
   Real scalingFactor() { return _scaling_factor; }
 
   /**
@@ -200,32 +252,50 @@ public:
   bool usesSecondPhi() { return _need_second || _need_second_old || _need_second_older; }
 
 protected:
-  THREAD_ID _tid;                                               ///< Thread ID
-  unsigned int _var_num;                                        ///< variable number (from libMesh)
-  unsigned int _moose_var_num;                                  ///< variable number (MOOSE)
+  /// Thread ID
+  THREAD_ID _tid;
+  /// variable number (from libMesh)
+  unsigned int _var_num;
+  /// variable number (MOOSE)
+  unsigned int _moose_var_num;
   Moose::VarKindType _var_kind;
-  SubProblem & _subproblem;                                     ///< Problem this variable is part of
-  SystemBase & _sys;                                            ///< System this variable is part of
+  /// Problem this variable is part of
+  SubProblem & _subproblem;
+  /// System this variable is part of
+  SystemBase & _sys;
 
-  const DofMap & _dof_map;                                      ///< DOF map
-  Assembly & _assembly;                                         ///< Assembly data
+  /// DOF map
+  const DofMap & _dof_map;
+  /// Assembly data
+  Assembly & _assembly;
 
-  QBase * & _qrule;                                             /// Quadrature rule for interior
-  QBase * & _qrule_face;                                        /// Quadrature rule for the face
+  /// Quadrature rule for interior
+  QBase * & _qrule;
+  /// Quadrature rule for the face
+  QBase * & _qrule_face;
 
-  FEBase * & _fe;                                               /// libMesh's FE object for this variable
-  FEBase * & _fe_face;                                          /// libMesh's FE object for this variable on a face
-  FEBase * & _fe_face_neighbor;                                 /// libMesh's FE object for this variable on a face on the neighboring element
+  /// libMesh's FE object for this variable
+  FEBase * & _fe;
+  /// libMesh's FE object for this variable on a face
+  FEBase * & _fe_face;
+  /// libMesh's FE object for this variable on a face on the neighboring element
+  FEBase * & _fe_face_neighbor;
 
-  const Elem * & _elem;                                         /// current element
-  unsigned int & _current_side;                                 /// the side of the current element (valid when doing face assembly)
+  /// current element
+  const Elem * & _elem;
+  /// the side of the current element (valid when doing face assembly)
+  unsigned int & _current_side;
 
-  const Elem * & _neighbor;                                     /// neighboring element
+  /// neighboring element
+  const Elem * & _neighbor;
 
-  std::vector<unsigned int> _dof_indices;                       /// DOF indices
-  std::vector<unsigned int> _dof_indices_neighbor;              /// DOF indices (neighbor)
+  /// DOF indices
+  std::vector<unsigned int> _dof_indices;
+  /// DOF indices (neighbor)
+  std::vector<unsigned int> _dof_indices_neighbor;
 
-  bool _is_nl;                                                  /// true if this varaible is non-linear
+  /// true if this varaible is non-linear
+  bool _is_nl;
 
 
   bool _need_u_old;
@@ -264,7 +334,8 @@ protected:
   const std::vector<std::vector<RealGradient> > & _grad_phi_face_neighbor;
   const std::vector<std::vector<RealTensor> > * _second_phi_face_neighbor;
 
-  const std::vector<Point> & _normals;                                  ///< Normals at QPs on faces
+  /// Normals at QPs on faces
+  const std::vector<Point> & _normals;
 
   VariableValue _u;
   VariableValue _u_old;
@@ -287,21 +358,30 @@ protected:
   VariableSecond _second_u_older_neighbor;
 
   // time derivatives
-  VariableValue _u_dot;                                                 ///< u_dot (time derivative)
-  VariableValue _du_dot_du;                                             ///< derivative of u_dot wrt u
+
+  /// u_dot (time derivative)
+  VariableValue _u_dot;
+  /// derivative of u_dot wrt u
+  VariableValue _du_dot_du;
 
   // nodal stuff
-  bool _is_defined;                                                     ///< If the variable is defined at the node (used in compute nodal values)
-  bool _has_nodal_value;                                                ///< If true, the nodal value gets inserted on calling insert()
+
+  /// If the variable is defined at the node (used in compute nodal values)
+  bool _is_defined;
+  /// If true, the nodal value gets inserted on calling insert()
+  bool _has_nodal_value;
   const Node * & _node;
   unsigned int _nodal_dof_index;
   VariableValue _nodal_u;
   VariableValue _nodal_u_old;
   VariableValue _nodal_u_older;
-  VariableValue _nodal_u_dot;                                           ///< nodal values of u_dot
-  VariableValue _nodal_du_dot_du;                                       ///< nodal values of derivative of u_dot wrt u
+  /// nodal values of u_dot
+  VariableValue _nodal_u_dot;
+  /// nodal values of derivative of u_dot wrt u
+  VariableValue _nodal_du_dot_du;
 
-  bool _is_defined_neighbor;                                            ///< If the variable is defined at the neighbor node (used in compute nodal values)
+  /// If the variable is defined at the neighbor node (used in compute nodal values)
+  bool _is_defined_neighbor;
   const Node * & _node_neighbor;
   unsigned int _nodal_dof_index_neighbor;
   VariableValue _nodal_u_neighbor;
@@ -311,7 +391,8 @@ protected:
   // damping
   VariableValue _increment;
 
-  Real _scaling_factor;                                                 ///< scaling factor for this variable
+  /// scaling factor for this variable
+  Real _scaling_factor;
 };
 
 #endif /* MOOSEVARIABLE_H */

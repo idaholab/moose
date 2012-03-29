@@ -40,7 +40,8 @@ public:
   void addDamper(Damper *damper);
 
 protected:
-  std::vector<Damper *> _dampers;                       ///< The list of all dampers
+  /// The list of all dampers
+  std::vector<Damper *> _dampers;
 };
 
 #endif // DAMPERWAREHOUSE_H

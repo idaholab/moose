@@ -63,8 +63,10 @@ public:
   inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
 
 protected:
-  std::string _name;                            ///< the name of the object
-  InputParameters _pars;                        ///< parameters
+  /// The name of this object
+  std::string _name;
+  /// Parameters of this object
+  InputParameters _pars;
 };
 
 #endif /* MOOSEOBJECT_H*/

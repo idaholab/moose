@@ -77,14 +77,17 @@ protected:
   THREAD_ID _tid;
 
   Assembly & _assembly;
-  MooseVariableScalar & _var;                           ///< Scalar variable
+  /// Scalar variable
+  MooseVariableScalar & _var;
   MooseMesh & _mesh;
   unsigned int _dim;
 
   unsigned int _i, _j;
 
-  VariableValue & _u;                                    ///< Value(s) of the scalar variable
-  VariableValue & _u_old;                                ///< Old value(s) of the scalar varaible
+  /// Value(s) of the scalar variable
+  VariableValue & _u;
+  /// Old value(s) of the scalar varaible
+  VariableValue & _u_old;
   VariableValue & _u_dot;
   VariableValue & _du_dot_du;
 

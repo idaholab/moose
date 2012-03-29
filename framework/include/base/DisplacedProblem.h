@@ -179,9 +179,14 @@ public:
   virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
   virtual void outputPps(const FormattedTable & table);
 
-  /// Will make sure that all dofs connected to elem_id are ghosted to this processor
+  /**
+   * Will make sure that all dofs connected to elem_id are ghosted to this processor
+   */
   virtual void addGhostedElem(unsigned int elem_id);
-  /// Will make sure that all necessary elements from boundary_id are ghosted to this processor
+  /**
+   * Will make sure that all necessary elements from boundary_id are ghosted to this processor
+   * @param boundary_id Boundary ID
+   */
   virtual void addGhostedBoundary(unsigned int boundary_id);
 
 protected:
@@ -189,7 +194,8 @@ protected:
   FEProblem & _mproblem;
   MooseMesh & _mesh;
   EquationSystems _eq;
-  MooseMesh & _ref_mesh;                               ///< reference mesh
+  /// reference mesh
+  MooseMesh & _ref_mesh;
   std::vector<std::string> _displacements;
 
   DisplacedSystem _displaced_nl;

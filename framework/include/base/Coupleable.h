@@ -136,7 +136,8 @@ protected:
   virtual VariableValue & coupledScalarDotDu(const std::string & var_name, unsigned int comp = 0);
 
 protected:
-  std::map<std::string, std::vector<MooseVariableScalar *> > _coupled_scalar_vars;   ///< Coupled vars whose values we provide
+  /// Coupled vars whose values we provide
+  std::map<std::string, std::vector<MooseVariableScalar *> > _coupled_scalar_vars;
 
   MooseVariableScalar *getScalarVar(const std::string & var_name, unsigned int comp);
 };

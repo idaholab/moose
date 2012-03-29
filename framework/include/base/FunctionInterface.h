@@ -54,8 +54,10 @@ public:
 
 private:
   Problem & _fni_problem;
-  THREAD_ID _fni_tid;                               ///< Thread ID
-  InputParameters _fni_params;                      ///< Parameters of the object with this interface
+  /// Thread ID
+  THREAD_ID _fni_tid;
+  /// Parameters of the object with this interface
+  InputParameters _fni_params;
 };
 
 #endif //FUNCTIONINTERFACE_H

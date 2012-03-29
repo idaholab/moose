@@ -26,7 +26,9 @@ class EmptyAction;
 template<>
 InputParameters validParams<EmptyAction>();
 
-
+/**
+ * Do nothing action.
+ */
 class EmptyAction : public Action
 {
 public:

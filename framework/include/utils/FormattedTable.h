@@ -85,25 +85,17 @@ protected:
    */
   std::map<Real, std::map<std::string, Real> > _data;
 
-  /**
-   * The set of column names updated when data is inserted through the setter methods
-   */
+  /// The set of column names updated when data is inserted through the setter methods
   std::set<std::string> _column_names;
 
-  /**
-   * The single cell width used for all columns in the table
-   */
+  /// The single cell width used for all columns in the table
   static const unsigned short _column_width;
 
-  /**
-   * The optional output file stream
-   */
+  /// The optional output file stream
   std::ofstream _output_file;
   bool _stream_open;
 
-  /**
-   * The last key value inserted
-   */
+  /// The last key value inserted
   Real _last_key;
 };
 

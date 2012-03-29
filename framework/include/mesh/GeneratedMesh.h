@@ -37,11 +37,16 @@ public:
   Real dimensionWidth(unsigned int dim) const;
 
 protected:
-  int _dim;                                     ///< The dimension of the mesh
-  int _nx, _ny, _nz;                            ///< Number of elements in x, y, z direction
-  Real _xmin, _xmax;                            ///< Min and max in x direction
-  Real _ymin, _ymax;                            ///< Min and max in y direction
-  Real _zmin, _zmax;                            ///< Min and max in z direction
+  /// The dimension of the mesh
+  int _dim;
+  /// Number of elements in x, y, z direction
+  int _nx, _ny, _nz;
+  /// Min and max in x direction
+  Real _xmin, _xmax;
+  /// Min and max in y direction
+  Real _ymin, _ymax;
+  /// Min and max in z direction
+  Real _zmin, _zmax;
 };
 
 #endif /* GENERATEDMESH_H */

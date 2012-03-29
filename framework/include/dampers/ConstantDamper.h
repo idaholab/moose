@@ -42,9 +42,7 @@ protected:
    */
   virtual Real computeQpDamping();
 
-  /**
-   * The constant amount of the newton update to take.
-   */
+  /// The constant amount of the newton update to take.
   Real _damping;
 };
 

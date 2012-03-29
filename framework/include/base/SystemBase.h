@@ -38,10 +38,14 @@
 
 class MooseVariable;
 
-/// Free function used for a libMesh callback
+/**
+ * ///< Type of coordinate system
+ */
 void extraSendList(std::vector<unsigned int> & send_list, void * context);
 
-/// Free function used for a libMesh callback
+/**
+ * Free function used for a libMesh callback
+ */
 void extraSparsity(SparsityPattern::Graph & sparsity,
                    std::vector<unsigned int> & n_nz,
                    std::vector<unsigned int> & n_oz,
@@ -49,6 +53,7 @@ void extraSparsity(SparsityPattern::Graph & sparsity,
 
 /**
  * Base class for a system (of equations)
+ *
  */
 class SystemBase
 {
@@ -75,7 +80,9 @@ public:
    */
   virtual void init() = 0;
 
-  /// Called only once, just before the solve begins so objects can do some precalculations
+  /**
+   * Called only once, just before the solve begins so objects can do some precalculations
+   */
   virtual void initializeObjects() {};
 
   /**
@@ -104,24 +111,34 @@ public:
   virtual NumericVector<Number> & solutionUDot() = 0;
   virtual NumericVector<Number> & solutionDuDotDu() = 0;
 
-  /// Get a raw NumericVector
+  /**
+   * Get a raw NumericVector
+   */
   virtual NumericVector<Number> & getVector(std::string name) = 0;
 
-  /// Returns a reference to a serialized version of the solution vector for this subproblem
+  /**
+   * Returns a reference to a serialized version of the solution vector for this subproblem
+   */
   virtual NumericVector<Number> & serializedSolution() = 0;
 
   virtual NumericVector<Number> & residualCopy() { mooseError("This system does not support getting a copy of the residual"); }
   virtual NumericVector<Number> & residualGhosted() { mooseError("This system does not support getting a ghosted copy of the residual"); }
 
-  /// Will modify the send_list to add all of the extra ghosted dofs for this system
+  /**
+   * Will modify the send_list to add all of the extra ghosted dofs for this system
+   */
   virtual void augmentSendList(std::vector<unsigned int> & send_list) = 0;
 
-  /// Will modify the sparsity pattern to add logcial geometric connections
+  /**
+   * Will modify the sparsity pattern to add logcial geometric connections
+   */
   virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
                                std::vector<unsigned int> & n_nz,
                                std::vector<unsigned int> & n_oz) = 0;
 
-  /// Returns true if we are currently computing Jacobian
+  /**
+   * Returns true if we are currently computing Jacobian
+   */
   virtual bool currentlyComputingJacobian() { return _currently_computing_jacobian; }
 
   /**
@@ -195,7 +212,10 @@ public:
 
   virtual unsigned int nScalarVariables() = 0;
 
-  /// Get minimal quadrature order needed for integrating variables in this system
+  /**
+   * Get minimal quadrature order needed for integrating variables in this system
+   * @return The minimal order of quadrature
+   */
   virtual Order getMinQuadratureOrder();
 
   /**
@@ -283,12 +303,16 @@ protected:
   Problem & _problem;
   SubProblem & _subproblem;
   MooseMesh & _mesh;
-  std::string _name;                                                    ///< The name of this system
+  /// The name of this system
+  std::string _name;
 
-  bool _currently_computing_jacobian;                                   ///< Whether or not the system is currently computing the Jacobian matrix
+  /// Whether or not the system is currently computing the Jacobian matrix
+  bool _currently_computing_jacobian;
 
-  std::vector<VariableWarehouse> _vars;                                 ///< Variable warehouses (one for each thread)
-  std::map<unsigned int, std::set<subdomain_id_type> > _var_map;        ///< Map of variables (variable id -> array of subdomains where it lives)
+  /// Variable warehouses (one for each thread)
+  std::vector<VariableWarehouse> _vars;
+  /// Map of variables (variable id -> array of subdomains where it lives)
+  std::map<unsigned int, std::set<subdomain_id_type> > _var_map;
 };
 
 /**
@@ -488,7 +512,8 @@ public:
 
 protected:
   T & _sys;
-  Moose::VarKindType _var_kind;                                      ///< default kind of variables in this system
+  /// default kind of variables in this system
+  Moose::VarKindType _var_kind;
   std::vector<std::string> _var_names;
 
   NumericVector<Number> & _solution;

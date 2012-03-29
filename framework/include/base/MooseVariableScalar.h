@@ -40,16 +40,24 @@ public:
 
   void reinit();
 
-  /// Get the variable number
+  /**
+   * Get the variable number
+   */
   unsigned int number() { return _moose_var_num; }
 
-  /// Get the variable number
+  /**
+   * Get the variable number
+   */
   const std::string & name();
 
-  /// Kind of the variable (Nonlinear, Auxiliary, ...)
+  /**
+   * Kind of the variable (Nonlinear, Auxiliary, ...)
+   */
   Moose::VarKindType kind() { return _var_kind; }
 
- /// Get the order of this variable
+  /**
+   * Get the order of this variable
+   */
   unsigned int order() const;
 
   //
@@ -61,37 +69,54 @@ public:
 
   const std::vector<unsigned int> & dofIndices() { return _dof_indices; }
 
-  /// Set the scaling factor for this variable
+  /**
+   * Set the scaling factor for this variable
+   */
   void scalingFactor(Real factor) { _scaling_factor = factor; }
-  /// Get the scaling factor for this variable
+  /**
+   * Get the scaling factor for this variable
+   */
   Real scalingFactor() { return _scaling_factor; }
 
-  /// Set the nodal value for this variable (to keep everything up to date
+  /**
+   * Set the nodal value for this variable (to keep everything up to date
+   */
   void setValue(unsigned int i, Number value);
 
   void insert(NumericVector<Number> & soln);
 
 protected:
-  unsigned int _var_num;                                        ///< variable number (from libMesh)
-  unsigned int _moose_var_num;                                  ///<
+  /// variable number (from libMesh)
+  unsigned int _var_num;
+  /// variable number within MOOSE
+  unsigned int _moose_var_num;
   Moose::VarKindType _var_kind;
-  SubProblem & _subproblem;                                     ///< Problem this variable is part of
-  SystemBase & _sys;                                            ///< System this variable is part of
+  /// Problem this variable is part of
+  SubProblem & _subproblem;
+  /// System this variable is part of
+  SystemBase & _sys;
 
-  Assembly & _assembly;                                         ///< Assembly data
-  const DofMap & _dof_map;                                      ///< DOF map
-  std::vector<unsigned int> _dof_indices;                       ///< DOF indices
+  /// Assembly data
+  Assembly & _assembly;
+  /// DOF map
+  const DofMap & _dof_map;
+  /// DOF indices
+  std::vector<unsigned int> _dof_indices;
 
   bool _has_value;
-  VariableValue _u;                                             ///< The value of scalar variable
-  VariableValue _u_old;                                         ///< The old value of scalar variable
+  /// The value of scalar variable
+  VariableValue _u;
+  /// The old value of scalar variable
+  VariableValue _u_old;
 
   VariableValue _u_dot;
   VariableValue _du_dot_du;
 
-  Real _scaling_factor;                                         ///< scaling factor for this variable
+  /// scaling factor for this variable
+  Real _scaling_factor;
 
-  bool _is_nl;                                                  /// true if this variable is non-linear
+  /// true if this variable is non-linear
+  bool _is_nl;
 };
 
 #endif /* MOOSEVARIABLESCALAR_H */

@@ -58,14 +58,12 @@ protected:
   virtual Real computeDT();
 
   /**
-   * Multiplier specifiying the direction the timestep is currently going.
+   * Multiplier specifying the direction the timestep is currently going.
    * Positive for up.  Negative for down.
    */
   int _direction;
 
-  /**
-   * Percentage to change the timestep by either way.
-   */
+  /// Percentage to change the timestep by either way.
   Real _percent_change;
 
   timeval _solve_start, _solve_end;

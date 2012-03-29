@@ -44,7 +44,8 @@ public:
 protected:
   EquationSystems & _es;
 
-  std::vector<std::string> _output_variables;           /// The variables to be output
+  /// The variables to be output
+  std::vector<std::string> _output_variables;
 };
 
 #endif /* OUTPUTTER_H */

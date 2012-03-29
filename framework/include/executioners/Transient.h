@@ -95,11 +95,15 @@ public:
 protected:
   FEProblem & _problem;
 
-  int & _t_step;                        ///< Current timestep.
-  Real & _time;                         ///< Current time
+  /// Current timestep.
+  int & _t_step;
+  /// Current time
+  Real & _time;
   Real _time_old;
-  Real _input_dt;                       ///< The dt from the input file.
-  Real & _dt;                           ///< Current delta t... or timestep size.
+  /// The dt from the input file.
+  Real _input_dt;
+  /// Current delta t... or timestep size.
+  Real & _dt;
   Real & _dt_old;
 
   Real _prev_dt;
@@ -119,17 +123,17 @@ protected:
   Real _ss_tmin;
   Real _old_time_solution_norm;
 
-  /**
-   * Whether or not the previous solve converged.
-   */
+  /// Whether or not the previous solve converged.
   bool _converged;
 
   std::vector<Real> _sync_times;
   std::vector<Real>::iterator _curr_sync_time_iter;
   bool _remaining_sync_time;
 
-  LinearInterpolation _time_ipol;               ///< Piecewise linear definition of time stepping
-  bool _use_time_ipol;                          ///< true if we want to use piecewise-defined time stepping
+  /// Piecewise linear definition of time stepping
+  LinearInterpolation _time_ipol;
+  /// true if we want to use piecewise-defined time stepping
+  bool _use_time_ipol;
   Real _growth_factor;
   bool _cutback_occurred;
 };

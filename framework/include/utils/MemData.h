@@ -79,14 +79,10 @@ private:
    */
   void get_current_mem_usage(long& mem_in_kB, struct rusage& r_usage);
 
-  /**
-   * Used on both linux and Mac to store the current memory usage in kilobytes.
-   */
+  /// Used on both linux and Mac to store the current memory usage in kilobytes.
   long _mem_in_kB_at_start, _mem_in_kB_at_stop;
 
-  /**
-   * Used only on Mac OS, but rusage struct should be at least defined everywhere...
-   */
+  /// Used only on Mac OS, but rusage struct should be at least defined everywhere...
   struct rusage _r_usage_at_start, _r_usage_at_stop;
 
   /**

@@ -39,8 +39,10 @@ protected:
   Nemesis_IO * _out;
 
   bool _seq;
-  int _file_num;                        ///< number of the file
-  int _num;                             ///< the number of timestep within the file
+  /// number of the file
+  int _file_num;
+  /// the number of timestep within the file
+  int _num;
   std::string getFileName(const std::string & file_base);
 };
 

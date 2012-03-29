@@ -64,20 +64,27 @@ public:
   const std::set<int> & blocks() { return _blocks; }
 
 protected:
-  std::map<int, std::vector<Material *> > _active_materials;            ///< A list of material associated with the block (subdomain)
-  std::map<int, std::vector<Material *> > _active_boundary_materials;   ///< A list of boundary materials associated with the block (subdomain)
-  std::map<int, std::vector<Material *> > _active_neighbor_materials;   ///< A list of neighbor materials associated with the block (subdomain) (for DG)
+  /// A list of material associated with the block (subdomain)
+  std::map<int, std::vector<Material *> > _active_materials;
+  /// A list of boundary materials associated with the block (subdomain)
+  std::map<int, std::vector<Material *> > _active_boundary_materials;
+  /// A list of neighbor materials associated with the block (subdomain) (for DG)
+  std::map<int, std::vector<Material *> > _active_neighbor_materials;
 
-  std::set<int> _blocks;                                                ///< Set of blocks where materials are defined
+  /// Set of blocks where materials are defined
+  std::set<int> _blocks;
 
-  std::vector<std::map<int, std::vector<Material *> > *> _master_list;  ///< A convenience list of all the maps
+  /// A convenience list of all the maps
+  std::vector<std::map<int, std::vector<Material *> > *> _master_list;
 
   /// list of materials by name
   std::map<std::string, std::vector<Material *> > _mat_by_name;
 
 private:
-  // This routine uses the Dependency Resolver to sort Materials based on dependencies they
-  // might have on coupled values
+  /**
+   * This routine uses the Dependency Resolver to sort Materials based on dependencies they
+   * might have on coupled values
+   */
   void sortMaterials(std::map<int, std::vector<Material *> > & materials_map);
 };
 

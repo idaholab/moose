@@ -93,13 +93,19 @@ public:
   bool subdomains_covered(std::set<subdomain_id_type> & return_set) const;
 
 protected:
-  std::vector<Kernel *> _active_kernels;                                ///< Kernels active on a block and in specified time
-  std::map<unsigned int, std::vector<Kernel *> > _active_var_kernels;   ///< Kernels active on a block and in specified time per variable
-  std::vector<Kernel *> _all_kernels;                                   ///< All instances of kernels
-  std::vector<Kernel *> _global_kernels;                                ///< Kernels that live everywhere (on the whole domain)
-  std::map<unsigned int, std::vector<Kernel *> > _block_kernels;        ///< Kernels that live on a specified block
+  /// Kernels active on a block and in specified time
+  std::vector<Kernel *> _active_kernels;
+  /// Kernels active on a block and in specified time per variable
+  std::map<unsigned int, std::vector<Kernel *> > _active_var_kernels;
+  /// All instances of kernels
+  std::vector<Kernel *> _all_kernels;
+  /// Kernels that live everywhere (on the whole domain)
+  std::vector<Kernel *> _global_kernels;
+  /// Kernels that live on a specified block
+  std::map<unsigned int, std::vector<Kernel *> > _block_kernels;
 
-  std::vector<ScalarKernel *> _scalar_kernels;                          ///< Scalar kernels
+  /// Scalar kernels
+  std::vector<ScalarKernel *> _scalar_kernels;
 };
 
 #endif // KERNELWAREHOUSE_H

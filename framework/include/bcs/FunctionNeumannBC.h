@@ -35,7 +35,8 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  Function & _func;                             ///< the function being used for setting the value
+  /// The function being used for setting the value
+  Function & _func;
 };
 
 #endif // FUNCTIONNEUMANNBC_H

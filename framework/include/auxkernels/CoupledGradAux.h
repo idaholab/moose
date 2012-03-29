@@ -42,9 +42,12 @@ public:
 protected:
   virtual Real computeValue();
 
-  RealGradient _grad;                           ///< Gradient being set by this kernel
-  int _coupled;                                 ///< The number of coupled variable
-  VariableGradient & _coupled_grad;             ///< The value of coupled gradient
+  /// Gradient being set by this kernel
+  RealGradient _grad;
+  /// The number of coupled variable
+  int _coupled;
+  /// The value of coupled gradient
+  VariableGradient & _coupled_grad;
 };
 
 #endif //COUPLEDGRADAUX_H

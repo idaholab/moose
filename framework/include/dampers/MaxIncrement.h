@@ -35,9 +35,7 @@ public:
 protected:
   virtual Real computeQpDamping();
 
-  /**
-   * The maximum newton increment for the variable.
-   */
+  ///The maximum Newton increment for the variable.
   Real _max_increment;
 };
 
