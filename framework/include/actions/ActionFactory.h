@@ -105,9 +105,7 @@ public:
     unsigned int _unique_id;
   };
 
-  /**
-   * Typedef for registered Action iterator
-   **/
+  /// Typedef for registered Action iterator
   typedef std::multimap<std::string, BuildInfo>::iterator iterator;
   typedef std::multimap<std::string, BuildInfo>::const_iterator const_iterator;
 

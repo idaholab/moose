@@ -7,6 +7,11 @@
 
 #include <string>
 
+class AddBoundsVectorsAction;
+
+template<>
+InputParameters validParams<AddBoundsVectorsAction>();
+
 class AddBoundsVectorsAction : public Action
 {
 public:
@@ -14,8 +19,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<AddBoundsVectorsAction>();
 
 #endif // ADDBOUNDSVECTORSACTION_H

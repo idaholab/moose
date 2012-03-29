@@ -42,4 +42,5 @@ private:
   unsigned int _v_var;
   VariableValue & _v;
 };
+
 #endif //COUPLEDFORCE_H

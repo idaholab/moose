@@ -37,4 +37,5 @@ protected:
   VariableValue & _u_old;
   VariableValue & _u_older;
 };
+
 #endif //SECONDDERIVATIVEIMPLICITEULER_H

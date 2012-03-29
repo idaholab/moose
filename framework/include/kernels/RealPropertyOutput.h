@@ -40,4 +40,5 @@ protected:
 
   MaterialProperty<Real> & _prop;
 };
+
 #endif //REALPROPERTYOUTPUT_H

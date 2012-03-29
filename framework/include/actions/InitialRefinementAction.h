@@ -22,6 +22,12 @@
 //Forward Declaration
 class MooseMesh;
 
+class InitialRefinementAction;
+
+template<>
+InputParameters validParams<InitialRefinementAction>();
+
+
 class InitialRefinementAction : public Action
 {
 public:
@@ -29,8 +35,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<InitialRefinementAction>();
 
 #endif // INITIALREFINEMENTACTION_H

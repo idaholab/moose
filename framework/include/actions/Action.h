@@ -60,7 +60,9 @@ public:
 
   //void printInputFile(const std::string * prev_name, std::ostream & out);
 
-  /// Helper method for adding Params pointers to be printed out in syntax dumps
+  /**
+   * Helper method for adding Params pointers to be printed out in syntax dumps
+   */
   virtual void addParamsPtrs(std::vector<InputParameters *> & param_ptrs);
 
 protected:
@@ -71,7 +73,8 @@ protected:
   std::string _action;
   Parser & _parser_handle;
 
-  FEProblem * & _problem;                  ///< Convenience reference to a problem this action works on
+  /// Convenience reference to a problem this action works on
+  FEProblem * & _problem;
 
 private:
   /// Helper method for printing the parts of the InputFile Syntax

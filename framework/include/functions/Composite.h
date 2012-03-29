@@ -18,6 +18,11 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
+class Composite;
+
+template<>
+InputParameters validParams<Composite>();
+
 /**
  * Base class for function objects.  Functions override value to supply a
  * value at a point.
@@ -35,8 +40,5 @@ private:
   std::vector<Function *> _f;
 
 };
-
-template<>
-InputParameters validParams<Composite>();
 
 #endif //COMPOSITE_H

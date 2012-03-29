@@ -17,6 +17,11 @@
 
 #include "ElementIntegral.h"
 
+class ElementIntegralMaterialProperty;
+
+template<>
+InputParameters validParams<ElementIntegralMaterialProperty>();
+
 class ElementIntegralMaterialProperty : public ElementIntegral
 {
 public:
@@ -27,8 +32,5 @@ protected:
 
   MaterialProperty<Real> & _scalar;
 };
-
-template<>
-InputParameters validParams<ElementIntegralMaterialProperty>();
 
 #endif
