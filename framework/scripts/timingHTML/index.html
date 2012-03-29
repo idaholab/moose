@@ -22,14 +22,8 @@
     <!-- IMPORTANT: these need to be in the same order as the TAB_NAMES variable -->
     <div id="testTabs">
       <ul>
-        <li><a href="bighorn/bighorn.html"><span>BIGHORN</span></a></li>
-        <li><a href="bison/bison.html"><span>BISON</span></a></li>
-        <li><a href="elk_test/elk_test.html"><span>ELK Test</span></a></li>
-        <li><a href="falcon/falcon.html"><span>FALCON</span></a></li>
-        <li><a href="marmot/marmot.html"><span>MARMOT</span></a></li>
-        <li><a href="moose_test/moose_test.html"><span>MOOSE Test</span></a></li>
-        <li><a href="pronghorn/pronghorn.html"><span>PRONGHORN</span></a></li>
-        <li><a href="rat/rat.html"><span>RAT</span></a></li>
+        <li><a href="elk/elk.html"><span>ELK</span></a></li>
+        <li><a href="moose_test/moose_test.html"><span>MOOSE</span></a></li>
       </ul>
     </div>
     <br clear="all"/>
@@ -58,13 +52,12 @@
       <tr title="Revision that was checked out to run the test"><td><b>Revision:</b></td><td id="tb_rev"></td></tr>
       <tr title="Time it took the test to execute"><td><b>Time:</b></td><td id="tb_timing"></td></tr>
       <tr title="Approx. time the test was run"><td><b>Date:</b></td><td id="tb_date"></td></tr>
-      <tr title="Dofs passed to run_tests script with --dofs"><td><b>Dofs:</b></td><td id="tb_dofs"></td></tr>
       <tr title="Load average of the server when the test was run"><td><b>Load Average:</b></td><td id="tb_load"></td></tr>
       </table>
     </div>
 
 <script id="source">
-var TAB_NAMES = ["bighorn", "bison", "elk_test", "falcon", "marmot", "moose_test", "pronghorn", "rat"];
+var TAB_NAMES = ["elk", "moose_test"];
 
 //holds the data currently to be plotted indexed by url (same info as global_data)
 var global_plots = {};
@@ -315,11 +308,10 @@ $(function () {
       //put that data into the html for the user to see
       $("#tb_app").html(data[0]);
       $("#tb_test").html(data[1]);
-      $("#tb_rev").html("<a href='https://hpcsc/data/trac/FPCP/changeset/" + data[2] + "'>" + data[2] + "</a>");
+      $("#tb_rev").html("<a href='https://hpcsc.inl.gov/moose/changeset/" + data[2] + "'>" + data[2] + "</a>");
       $("#tb_timing").html(data[3]);
       $("#tb_date").html(data[4]);
-      $("#tb_dofs").html(data[5]);
-      $("#tb_load").html(data[6]);
+      $("#tb_load").html(data[5]);
     }
   });
 

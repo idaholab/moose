@@ -6,7 +6,7 @@ from datetime import datetime
 
 # if it doesn't import this is probably icestorm and we won't use it anyway
 try:
-  from pysqlite2 import dbapi2 as sqlite
+  from sqlite3 import dbapi2 as sqlite
 except:
   pass
 
@@ -44,14 +44,14 @@ class HTMLGen:
       json = JSON_TEMPLATE.replace('$LABEL$', self.app_name + '.' + test)
 
       # fill out revision vs timing
-      self.ex('select revision, seconds, dofs, date from timing where app_name = ? and test_name = ? order by revision',
+      self.ex('select revision, seconds, date, load from timing where app_name = ? and test_name = ? order by revision',
                    (self.app_name,test))
       results = self.cr.fetchall()
       data = ['[' + str(r[0]) + ', ' + str(r[1]) + ']' for r in results]
       data = '[ ' + ', '.join(data) + ' ]'
       json = json.replace('$REV_DATA$', data)
 
-      data = [ ( self.app_name, test, str(r[0]), str(r[1]), str(datetime.fromtimestamp(r[3])), str(r[2]) ) for r in results ]
+      data = [ ( self.app_name, test, str(r[0]), str(r[1]), str(datetime.fromtimestamp(r[2])), str(r[3]) ) for r in results ]
       data = [ '["' + '","'.join(d) + '"]' for d in data ]
       data = '[ ' + ', '.join(data) + ' ]'
       json = json.replace( '$INFO$', data )
@@ -126,7 +126,6 @@ CREATE_TABLE = """create table timing
   revision int,
   date int,
   seconds real,
-  dofs int,
   load real
 );"""
 
