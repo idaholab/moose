@@ -53,7 +53,14 @@ public:
    * Perform rotation around one axis (c-axis)
    */
 
-  virtual void rotate(const Real a1);
+  virtual void rotate(const Real a1, const Real a2, const Real a3);
+
+  /**
+   * Set a boolean to true to indicate that this is for a cubic
+   * anisotropic system.  Grr.
+   */
+  void setCubic();
+  
 
 protected:
 
@@ -74,6 +81,8 @@ protected:
 
   Real _c11, _c12, _c44; // Material Constants
 
+  bool _cubic;
+  
   void form_r_matrix();
   void initialize_material_dt_matrix();
   void initialize_anisotropic_material_dt_matrix();
