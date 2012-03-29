@@ -98,8 +98,12 @@ IndirectSort::testDoubleSort()
   std::vector<size_t> b;
   Moose::indirectSortGreater(a.begin(), a.end(), b);
 
-  std::vector<size_t> c;
-  Moose::indirectSortLess(b.begin(), b.end(), c);
+  std::vector<size_t> c(b.size());
+
+  // This operation is equivalent to doing another sort of the indicies
+  for (unsigned int i=0; i<b.size(); ++i)
+    c[b[i]] = i;
+  //Moose::indirectSortLess(b.begin(), b.end(), c);
 
   CPPUNIT_ASSERT( c[0] == 0 );
   CPPUNIT_ASSERT( c[1] == 3 );
