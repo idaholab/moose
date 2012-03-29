@@ -1,10 +1,5 @@
 #include "LinearAnisotropicMaterial.h"
 
-/**
- * N.B.: LinearAnisotropicMaterial is for CUBIC anisotropic materials ONLY!
- * For general anisotropic materials, use LinearGeneralAnisotropicMaterial instead.
- */
-
 // Elk Includes
 #include "SymmAnisotropicElasticityTensor.h"
 
@@ -33,7 +28,6 @@ LinearAnisotropicMaterial::LinearAnisotropicMaterial(const std::string & name,
    _euler_angle_3(getParam<Real>("euler_angle_3"))
 {
   SymmAnisotropicElasticityTensor * aniso_elasticity_tensor = new SymmAnisotropicElasticityTensor;
-  aniso_elasticity_tensor->setCubic();
   aniso_elasticity_tensor->setMaterialConstantc11(_material_constant_c11);
   aniso_elasticity_tensor->setMaterialConstantc12(_material_constant_c12);
   aniso_elasticity_tensor->setMaterialConstantc44(_material_constant_c44);

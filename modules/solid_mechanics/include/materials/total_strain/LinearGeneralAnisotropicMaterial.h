@@ -1,5 +1,4 @@
 // Original class author: A.M. Jokisaari
-// Also developed with ANL folks: O. Heinonen et al.
 
 #ifndef LINEARGENERALANISOTROPICMATERIAL_H
 #define LINEARGENERALANISOTROPICMATERIAL_H
@@ -35,9 +34,6 @@ protected:
 
   virtual void computeQpStress();
   
-  Real _euler_angle_1;
-  Real _euler_angle_2;
-  Real _euler_angle_3;
   
 private:
   // vectors to get the input values
@@ -47,7 +43,8 @@ private:
   bool _all_21;
 
   //Individual material information
-  SymmAnisotropicElasticityTensor _Cijkl_matrix;
+  SymmElasticityTensor _Cijkl_matrix;
+  //MaterialProperty<SymmElasticityTensor > &_Cijkl_matrix_MP;
   
 };
 

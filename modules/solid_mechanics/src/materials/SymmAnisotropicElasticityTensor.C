@@ -18,14 +18,13 @@ SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor()
     //_transpose_trans_d9_to_d6(9,6),
     _c11(0),
     _c12(0),
-    _c44(0),
-    _cubic(false)
+    _c44(0)
 {
   form_transformation_t_matrix();
 }
 
 SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Real> & init_list, bool all_21)
-    : SymmElasticityTensor(false),
+    : SymmElasticityTensor(true),
       _dmat(9,9),
       _qdmat(9,9),
       _dt(6,6),
@@ -40,8 +39,7 @@ SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Rea
       //_transpose_trans_d9_to_d6(9,6),
       _c11(0),
       _c12(0),
-      _c44(0),
-      _cubic(false)
+      _c44(0)
 {
 // test the input vector length to make sure it's correct
   if ((all_21==true && init_list.size()!=21) ||(all_21==false && init_list.size()!=9) )
@@ -69,7 +67,7 @@ SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Rea
 }
 
 SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(const SymmAnisotropicElasticityTensor & a)
-     : SymmElasticityTensor(false)
+     : SymmElasticityTensor(true)
  {
    *this = a;
  }
@@ -92,40 +90,27 @@ void SymmAnisotropicElasticityTensor::setThirdEulerAngle(const Real a3)
 void SymmAnisotropicElasticityTensor::setMaterialConstantc11(const Real c11)
 {
   _c11 = c11;
-  if(_cubic)
-  {
-    _val[0] = _val[6] = _val[11] = _c11;
-  }
-  
 }
 
 void SymmAnisotropicElasticityTensor::setMaterialConstantc12(const Real c12)
 {
   _c12 = c12;
-  if(_cubic)
-  {
-    _val[1] = _val[2] = _val[7] = _c12;
-  }
 }
 
 void SymmAnisotropicElasticityTensor::setMaterialConstantc44(const Real c44)
 {
   _c44 = c44;
-  if(_cubic)
-  {
-    _val[15] = _val[18] = _val[20] = _c44;
-  }
-  
 }
 
 void
-SymmAnisotropicElasticityTensor::rotate(const Real a1, const Real a2, const Real a3)
+SymmAnisotropicElasticityTensor::rotate(const Real a1)
 {
   setFirstEulerAngle(a1);
-  setSecondEulerAngle(a2);
-  setThirdEulerAngle(a3);
+  setSecondEulerAngle(0.0);
+  setThirdEulerAngle(0.0);
 
-// pulled from calculateEntries to sub in the initialize_anisotropic_material_dt_matrix() call
+// pulled from calculateEntries to sub in the
+// initialize_anisotropic_material_dt_matrix() call
   form_r_matrix();
   initialize_anisotropic_material_dt_matrix();
   form_rotational_q_matrix();
@@ -143,12 +128,6 @@ SymmAnisotropicElasticityTensor::rotate(const Real a1, const Real a2, const Real
       _val[count++] = _dt(i,j);
     }
   }
-}
-
-void
-SymmAnisotropicElasticityTensor::setCubic()
-{
-  _cubic = true;
 }
 
 
@@ -177,7 +156,7 @@ void SymmAnisotropicElasticityTensor::form_r_matrix()
   _r(2,2) = cp;
 }
 
-//SMN: this function is obsolete
+
 void
 SymmAnisotropicElasticityTensor::initialize_material_dt_matrix()
 {
@@ -200,12 +179,10 @@ SymmAnisotropicElasticityTensor::initialize_anisotropic_material_dt_matrix()
   {
     for (int j=i; j<6; j++)
     {
-      _dt(i,j) = _dt(j,i) = _val[k++];
+      _dt(i,j) = _dt(j,i) = _val[k];
+      k++;
     }
   }
-  _dt(3,3) *= 2.0;
-  _dt(4,4) *= 2.0;
-  _dt(5,5) *= 2.0;
 }
 
 void
@@ -222,6 +199,9 @@ SymmAnisotropicElasticityTensor::form_rotational_q_matrix()
   /*for(int p = 0; p < 9; ++p)
     for(int q = 0; q < 9; ++q)
     _qt(q,p) = _q(p,q);*/
+  
+  
+
 }
 
 void
@@ -262,6 +242,8 @@ SymmAnisotropicElasticityTensor::form_transformation_t_matrix()
 
 }
 
+
+
 void SymmAnisotropicElasticityTensor::form_transformed_material_dmat_matrix()
 {
 
@@ -287,14 +269,14 @@ void SymmAnisotropicElasticityTensor::form_transformed_material_dt_matrix()
   // The function makes use of TransD6toD9 matrix to transfrom
   // QDmat[9][9] to Dt[6][6]
   // Dt = TT * QDmat * T
-  
+
 //   DenseMatrix<Real> outputMatrix(6,9);
 
 //   outputMatrix = _trans_d9_to_d6;
 //   outputMatrix.right_multiply(_qdmat);
 //   _dt = outputMatrix;
-//   _dt.right_multiply_transpose(_trans_d9_to_d6);
-  
+//   _dt.right_multiply(_transpose_trans_d9_to_d6);
+
   // The transformation below is general and should work whether or not the
   //   incoming tensor has been rotated.
 
@@ -306,7 +288,7 @@ void SymmAnisotropicElasticityTensor::form_transformed_material_dt_matrix()
       tmp(i,j) = _qdmat(i,j);
     }
   }
-  
+
   SymmElasticityTensor fred;
   fred.convertFrom9x9( tmp );
   ColumnMajorMatrix wilma = fred.columnMajorMatrix6x6();
@@ -317,6 +299,7 @@ void SymmAnisotropicElasticityTensor::form_transformed_material_dt_matrix()
       _dt(i,j) = wilma(i,j);
     }
   }
+
 }
 
 
@@ -343,7 +326,7 @@ SymmAnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
 {
 
   form_r_matrix();
-  initialize_anisotropic_material_dt_matrix();
+  initialize_material_dt_matrix();
   form_rotational_q_matrix();
   // form_transformation_t_matrix();
   form_transformed_material_dmat_matrix();
