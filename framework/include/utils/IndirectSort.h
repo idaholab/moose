@@ -24,11 +24,11 @@ namespace Moose
 
 // Indirect Sorting Functor
 template <class T>
-class IndexCompare
+class IndexCompareLess
 {
   T v;
 public:
-  IndexCompare (T v) : v(v) {}
+  IndexCompareLess (T v) : v(v) {}
 
   bool operator() (size_t lhs, size_t rhs) const
   {
@@ -38,12 +38,35 @@ public:
 };
 
 template <class T>
-void indirectSort (T first, T last, std::vector<size_t> &x)
+void indirectSortLess (T first, T last, std::vector<size_t> &x)
 {
   x.resize(std::distance(first, last));
   for (unsigned int i=0; i<x.size(); ++i)
     x[i] = i;
-  std::sort(x.begin(), x.end(), IndexCompare<T>(first));
+  std::sort(x.begin(), x.end(), IndexCompareLess<T>(first));
+}
+
+template <class T>
+class IndexCompareGreater
+{
+  T v;
+public:
+  IndexCompareGreater (T v) : v(v) {}
+
+  bool operator() (size_t lhs, size_t rhs) const
+  {
+    // The part after || stabalizes quicksort omit if unstable is ok
+    return v[lhs] > v[rhs] || lhs > rhs && ! (v[rhs] > v[lhs]);
+  }
+};
+
+template <class T>
+void indirectSortGreater (T first, T last, std::vector<size_t> &x)
+{
+  x.resize(std::distance(first, last));
+  for (unsigned int i=0; i<x.size(); ++i)
+    x[i] = i;
+  std::sort(x.begin(), x.end(), IndexCompareGreater<T>(first));
 }
 
 } // namespace Moose

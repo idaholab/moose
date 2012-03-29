@@ -25,6 +25,7 @@ class IndirectSort : public CppUnit::TestFixture
   CPPUNIT_TEST( realSort );
   CPPUNIT_TEST( intSort );
   CPPUNIT_TEST( testStableSort );
+  CPPUNIT_TEST( testDoubleSort );
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -32,6 +33,7 @@ public:
   void realSort();
   void intSort();
   void testStableSort();
+  void testDoubleSort();
 };
 
 #endif  // LINEARINTERPOLATIONTEST_H
