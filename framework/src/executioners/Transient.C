@@ -318,30 +318,29 @@ Transient::computeDT()
 bool
 Transient::keepGoing()
 {
-  // FIXME:
-//  // Check for stop condition based upon steady-state check flag:
-//  if(_converged && _trans_ss_check == true && _time > _ss_tmin)
-//  {
-//    // Compute new time solution l2_norm
-//    Real new_time_solution_norm = _moose_system.getNonlinearSystem()->current_local_solution->l2_norm();
-//
-//    // Compute l2_norm relative error
-//    Real ss_relerr_norm = fabs(new_time_solution_norm - _old_time_solution_norm)/new_time_solution_norm;
-//
-//    // Check current solution relative error norm against steady-state tolerance
-//    if(ss_relerr_norm < _ss_check_tol)
-//    {
-//      std::cout<<"Steady-State Solution Achieved at time: "<<_time<<std::endl;
-//      return false;
-//    }
-//    else // Keep going
-//    {
-//      // Update solution norm for next time step
-//      _old_time_solution_norm = new_time_solution_norm;
-//      // Print steady-state relative error norm
-//      std::cout<<"Steady-State Relative Differential Norm: "<<ss_relerr_norm<<std::endl;
-//    }
-//  }
+  // Check for stop condition based upon steady-state check flag:
+  if(_converged && _trans_ss_check == true && _time > _ss_tmin)
+  {
+    // Compute new time solution l2_norm
+    Real new_time_solution_norm = _problem.getNonlinearSystem().currentSolution()->l2_norm();
+
+    // Compute l2_norm relative error
+    Real ss_relerr_norm = fabs(new_time_solution_norm - _old_time_solution_norm)/new_time_solution_norm;
+
+    // Check current solution relative error norm against steady-state tolerance
+    if(ss_relerr_norm < _ss_check_tol)
+    {
+      std::cout<<"Steady-State Solution Achieved at time: "<<_time<<std::endl;
+      return false;
+    }
+    else // Keep going
+    {
+      // Update solution norm for next time step
+      _old_time_solution_norm = new_time_solution_norm;
+      // Print steady-state relative error norm
+      std::cout<<"Steady-State Relative Differential Norm: "<<ss_relerr_norm<<std::endl;
+    }
+  }
 
   // Check for stop condition based upon number of simulation steps and/or solution end time:
   if(_t_step>_num_steps)
