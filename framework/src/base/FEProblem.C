@@ -195,6 +195,10 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
     adaptivity().uniformRefine(_uniform_refine_level);
     Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
+
+    // reproject the initial condition but only when we are not "restarting" from an exodus file
+    if (_ex_reader == NULL)
+      projectSolution();
   }
   _eq.print_info();
 
