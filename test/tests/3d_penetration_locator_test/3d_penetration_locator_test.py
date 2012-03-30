@@ -1,5 +1,7 @@
 from options import *
 
 test = { INPUT : '3d_penetration_locator_test.i',
-         EXODIFF : ['out.e'] }
+         EXODIFF : ['out.e'],
+         SCALE_REFINE : 1
+         }
 
