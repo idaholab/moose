@@ -21,6 +21,7 @@ uniform_refine_test_2 = {
 uniform_refine_refine_test_2 = {
   INPUT : 'exodus_refined_refined_restart_2_test.i',
   EXODIFF : ['exodus_refined_refined_restart_2.e'],
-  PREREQ : 'uniform_refine_test_1'
+  PREREQ : 'uniform_refine_test_1',
+  SKIP : 'Temporarily disabled'
 }
 

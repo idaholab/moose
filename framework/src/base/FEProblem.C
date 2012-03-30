@@ -178,7 +178,16 @@ void FEProblem::initialSetup()
 {
   if (_restart)
     restartFromFile();
-  else
+
+  // uniform refine
+  if (_uniform_refine_level > 0)
+  {
+    Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
+    adaptivity().uniformRefine(_uniform_refine_level);
+    Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
+  }
+
+  if (!_restart)
   {
     projectSolution();
 
@@ -189,17 +198,6 @@ void FEProblem::initialSetup()
     }
   }
 
-  // uniform refine
-  if (_uniform_refine_level > 0)
-  {
-    Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
-    adaptivity().uniformRefine(_uniform_refine_level);
-    Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
-
-    // reproject the initial condition but only when we are not "restarting" from an exodus file
-    if (_ex_reader == NULL)
-      projectSolution();
-  }
   _eq.print_info();
 
   unsigned int n_threads = libMesh::n_threads();
