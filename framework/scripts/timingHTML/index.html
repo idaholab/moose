@@ -3,6 +3,7 @@
  <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Moose Test Timing</title>
+    <br><a href="https://hpcsc.inl.gov/moose">Back to MOOSE wiki</a><br>
     <link href="resources/jquery.css" rel="stylesheet" type="text/css">
     <!--[if IE]><script language="javascript" type="text/javascript" src="resources/excanvas.min.js"></script><![endif]-->
     <script language="javascript" type="text/javascript" src="resources/jquery.min.js"></script>
@@ -52,6 +53,7 @@
       <tr title="Revision that was checked out to run the test"><td><b>Revision:</b></td><td id="tb_rev"></td></tr>
       <tr title="Time it took the test to execute"><td><b>Time:</b></td><td id="tb_timing"></td></tr>
       <tr title="Approx. time the test was run"><td><b>Date:</b></td><td id="tb_date"></td></tr>
+      <tr title="Scale Refinement"><td><b>Scale Refinement:</b></td><td id="tb_scale"></td></tr>
       <tr title="Load average of the server when the test was run"><td><b>Load Average:</b></td><td id="tb_load"></td></tr>
       </table>
     </div>
@@ -311,7 +313,8 @@ $(function () {
       $("#tb_rev").html("<a href='https://hpcsc.inl.gov/moose/changeset/" + data[2] + "'>" + data[2] + "</a>");
       $("#tb_timing").html(data[3]);
       $("#tb_date").html(data[4]);
-      $("#tb_load").html(data[5]);
+      $("#tb_scale").html(data[5]);
+      $("#tb_load").html(data[6]);
     }
   });
 

@@ -10,6 +10,7 @@ CREATE_TABLE = """create table timing
   revision int,
   date int,
   seconds real,
+  scale int,
   load real
 );"""
 
@@ -58,7 +59,7 @@ class TestTimer(TestHarness):
     if timing != None and test[SCALE_REFINE] != 0:
       sum_time += float(timing)
       num += 1
-      data.append( (self.app_name, test[TEST_NAME], self.options.revision, timestamp, timing, load) )
+      data.append( (self.app_name, test[TEST_NAME], self.options.revision, timestamp, timing, test[SCALE_REFINE], load) )
     # Insert the data into the database
-    cr.executemany('insert into timing values (?,?,?,?,?,?)', data)
+    cr.executemany('insert into timing values (?,?,?,?,?,?,?)', data)
     con.commit()
