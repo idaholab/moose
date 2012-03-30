@@ -178,17 +178,7 @@ void FEProblem::initialSetup()
 {
   if (_restart)
     restartFromFile();
-
-  // uniform refine
-  if (_uniform_refine_level > 0)
-  {
-    Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
-    adaptivity().uniformRefine(_uniform_refine_level);
-    Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
-  }
-  _eq.print_info();
-
-  if (!_restart)
+  else
   {
     projectSolution();
 
@@ -198,6 +188,15 @@ void FEProblem::initialSetup()
       _aux.copyVars(*_ex_reader);
     }
   }
+
+  // uniform refine
+  if (_uniform_refine_level > 0)
+  {
+    Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
+    adaptivity().uniformRefine(_uniform_refine_level);
+    Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
+  }
+  _eq.print_info();
 
   unsigned int n_threads = libMesh::n_threads();
 
