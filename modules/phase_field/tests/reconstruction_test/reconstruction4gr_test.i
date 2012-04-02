@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 9
-  ny = 11
+  nx = 5
+  ny = 7
   nz = 0
   xmin = 0
   xmax = 18
@@ -89,16 +89,16 @@ active = ' '
 [Executioner]
   type = Transient
   scheme = 'bdf2'
- # petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
+  petsc_options = '-snes_mf_operator'
 
- # petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
- # petsc_options_value = 'hypre boomeramg 101'
-  petsc_options = '-snes_mf_operator -ksp_monitor -ksp_gmres_modifiedgramschmidt -snes_ksp_ew'
-  petsc_options_iname = '-snes_type -snes_ls -ksp_gmres_restart -pc_type  -pc_composite_pcs -sub_0_pc_hypre_type -sub_0_pc_hypre_boomeramg_max_iter -sub_0_pc_hypre_boomeramg_grid_sweeps_all -sub_1_sub_pc_type -pc_composite_type -ksp_type -mat_mffd_type'
-  petsc_options_value = 'ls         basic   201                 composite hypre,asm         boomeramg            2                                  2                                         lu                 multiplicative     fgmres    ds'
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+  petsc_options_value = 'hypre boomeramg 101'
+ # petsc_options = '-snes_mf_operator -ksp_monitor -ksp_gmres_modifiedgramschmidt -snes_ksp_ew'
+ # petsc_options_iname = '-snes_type -snes_ls -ksp_gmres_restart -pc_type  -pc_composite_pcs -sub_0_pc_hypre_type -sub_0_pc_hypre_boomeramg_max_iter -sub_0_pc_hypre_boomeramg_grid_sweeps_all -sub_1_sub_pc_type -pc_composite_type -ksp_type -mat_mffd_type'
+ # petsc_options_value = 'ls         basic   201                 composite hypre,asm         boomeramg            2                                  2                                         lu                 multiplicative     fgmres    ds'
 
   l_tol = 1.0e-4
-  l_max_its = 25
+  l_max_its = 15
 
   nl_rel_tol = 1.0e-9
   nl_abs_tol = 1.0e-12
@@ -109,7 +109,7 @@ active = ' '
   dt = 0.1
 
   [./Adaptivity]
-   initial_adaptivity = 2
+   initial_adaptivity = 1
     refine_fraction = 0.7
     coarsen_fraction = 0.1
     max_h_level = 3
