@@ -340,6 +340,11 @@ class TestHarness:
     ## Save executable-under-test name to self.executable
     self.executable = os.getcwd() + '/' + app_name + '-' + self.options.method
 
+    # Check for built application
+    if not os.path.exists(self.executable):
+      print 'Application not found: ' + str(self.executable)
+      sys.exit(1)
+
     # Emulate the standard Nose RegEx for consistency
     self.test_match = re.compile(r"(?:^|\b|[_-])[Tt]est")
 
