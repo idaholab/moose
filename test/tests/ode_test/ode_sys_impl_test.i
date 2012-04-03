@@ -39,12 +39,12 @@
   [./x]
     family = SCALAR
     order = FIRST
-    initial_condition = 1;
+    initial_condition = 1
   [../]
   [./y]
     family = SCALAR
     order = FIRST
-    initial_condition = 2;
+    initial_condition = 2
   [../]
 []
 

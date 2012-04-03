@@ -12,10 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONSTANTIC_H
-#define CONSTANTIC_H
+#ifndef SCALARCONSTANTIC_H
+#define SCALARCONSTANTIC_H
 
-#include "InitialCondition.h"
+#include "ScalarInitialCondition.h"
 
 // LibMesh includes
 #include <parameters.h>
@@ -26,15 +26,15 @@
 #include <string>
 
 // Forward Declarations
-class ConstantIC;
+class ScalarConstantIC;
 
 template<>
-InputParameters validParams<ConstantIC>();
+InputParameters validParams<ScalarConstantIC>();
 
 /**
- * ConstantIC just returns a constant value.
+ * ScalarConstantIC just returns a constant value.
  */
-class ConstantIC : public InitialCondition
+class ScalarConstantIC : public ScalarInitialCondition
 {
 public:
 
@@ -45,15 +45,12 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
-  ConstantIC(const std::string & name,
-             InputParameters parameters);
+  ScalarConstantIC(const std::string & name, InputParameters parameters);
 
   /**
    * The value of the variable at a point.
-   *
-   * This must be overridden by derived classes.
    */
-  virtual Real value(const Point & p);
+  virtual Real value();
 
 protected:
   Real _value;

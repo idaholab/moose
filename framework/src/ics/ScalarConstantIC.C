@@ -12,31 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AddICAction.h"
-#include "Parser.h"
-#include "FEProblem.h"
+#include "ScalarConstantIC.h"
 
 template<>
-InputParameters validParams<AddICAction>()
+InputParameters validParams<ScalarConstantIC>()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = validParams<ScalarInitialCondition>();
+  params.set<Real>("value") = 0.0;
   return params;
 }
 
-
-AddICAction::AddICAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+ScalarConstantIC::ScalarConstantIC(const std::string & name, InputParameters parameters) :
+    ScalarInitialCondition(name, parameters),
+    _value(getParam<Real>("value"))
 {
 }
 
-void
-AddICAction::act()
+Real
+ScalarConstantIC::value()
 {
-  std::vector<std::string> elements;
-  Parser::tokenize(_name, elements);
-
-  // The variable name will be the second to last element in the path name
-  std::string & var_name = elements[elements.size()-2];
-  _moose_object_pars.set<std::string>("variable") = var_name;
-  _problem->addInitialCondition(_type, getShortName(), _moose_object_pars);
+  return _value;
 }
+

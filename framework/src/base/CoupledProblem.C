@@ -222,18 +222,6 @@ CoupledProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVect
   _map[sys.name()]->computeJacobian(sys, soln, jacobian);
 }
 
-Number
-CoupledProblem::initialValue (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name)
-{
-  return _map[sys_name]->initialValue(p, parameters, sys_name, var_name);
-}
-
-Gradient
-CoupledProblem::initialGradient (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name)
-{
-  return _map[sys_name]->initialValue(p, parameters, sys_name, var_name);
-}
-
 void
 CoupledProblem::computePostprocessors(ExecFlagType /*type = EXEC_TIMESTEP*/)
 {

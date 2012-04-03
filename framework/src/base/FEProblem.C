@@ -29,32 +29,6 @@
 
 unsigned int FEProblem::_n = 0;
 
-namespace Moose
-{
-
-Number initial_value (const Point & p,
-                      const Parameters & parameters,
-                      const std::string & sys_name,
-                      const std::string & var_name)
-{
-  Problem * problem = parameters.get<Problem *>("_problem");
-  mooseAssert(problem != NULL, "Internal pointer to _problem was not set");
-  return problem->initialValue(p, parameters, sys_name, var_name);
-}
-
-Gradient initial_gradient (const Point & p,
-                           const Parameters & parameters,
-                           const std::string & sys_name,
-                           const std::string & var_name)
-{
-  Problem * problem = parameters.get<Problem *>("_problem");
-  mooseAssert(problem != NULL, "Internal pointer to _problem was not set");
-  return problem->initialGradient(p, parameters, sys_name, var_name);
-}
-
-} // namespace Moose
-
-
 static
 std::string name_sys(const std::string & name, unsigned int n)
 {
@@ -108,8 +82,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
   unsigned int n_threads = libMesh::n_threads();
 
-  _ics.resize(n_threads);
-
   _assembly.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
     _assembly[i] = new Assembly(_nl, couplingMatrix(), i);
@@ -155,11 +127,6 @@ FEProblem::~FEProblem()
     _bnd_material_props.releaseProperties();
   }
 
-  // ICS
-  for(unsigned int i=0; i<n_threads; i++)
-    for (std::map<std::string, InitialCondition *>::iterator it = _ics[i].begin(); it != _ics[i].end(); ++it)
-      delete it->second;
-
   delete _displaced_mesh;
   delete _displaced_problem;
 
@@ -178,6 +145,14 @@ void FEProblem::initialSetup()
 {
   if (_restart)
     restartFromFile();
+  else
+  {
+    if (_ex_reader != NULL)
+    {
+      _nl.copyVars(*_ex_reader);
+      _aux.copyVars(*_ex_reader);
+    }
+  }
 
   // uniform refine
   if (_uniform_refine_level > 0)
@@ -188,15 +163,7 @@ void FEProblem::initialSetup()
   }
 
   if (!_restart)
-  {
     projectSolution();
-
-    if (_ex_reader != NULL)
-    {
-      _nl.copyVars(*_ex_reader);
-      _aux.copyVars(*_ex_reader);
-    }
-  }
 
   _eq.print_info();
 
@@ -245,7 +212,8 @@ void FEProblem::initialSetup()
   {
     adaptMesh();
     //reproject the initial condition
-    _nl.sys().project_solution(Moose::initial_value, Moose::initial_gradient, _eq.parameters);
+//    _nl.sys().project_solution(Moose::initial_value, Moose::initial_gradient, _eq.parameters);
+    _nl.projectSolution();
   }
   Moose::setup_perf_log.pop("initial adaptivity","Setup");
 #endif //LIBMESH_ENABLE_AMR
@@ -985,76 +953,26 @@ FEProblem::addDGKernel(const std::string & dg_kernel_name, const std::string & n
   _nl.addDGKernel(dg_kernel_name, name, parameters);
 }
 
-// Initial Conditions /////
 void
-FEProblem::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name)
+FEProblem::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
-  parameters.set<SubProblem *>("_subproblem") = this;
-  parameters.set<std::string>("var_name") = var_name;
+  const std::string & var_name = parameters.get<std::string>("variable");
 
-  for(unsigned int i=0; i < libMesh::n_threads(); i++)
-  {
-    _ics[i][var_name] = static_cast<InitialCondition *>(Factory::instance()->create(ic_name, name, parameters));
-  }
-}
-
-void
-FEProblem::addInitialCondition(const std::string & var_name, Real value)
-{
-  std::ostringstream oss;
-  oss << "initial_" + var_name;
-  std::string name = oss.str();
-
-  InputParameters parameters = validParams<ConstantIC>();
-  parameters.set<Problem *>("_problem") = this;
-  parameters.set<SubProblem *>("_subproblem") = this;
-  parameters.set<std::string>("var_name") = var_name;
-  parameters.set<Real>("value") = value;
-
-  for(unsigned int i=0; i < libMesh::n_threads(); i++)
-  {
-    _ics[i][var_name] = static_cast<InitialCondition *>(Factory::instance()->create("ConstantIC", name, parameters));
-  }
-}
-
-Number
-FEProblem::initialValue (const Point& p,
-                        const Parameters& /*parameters*/,
-                        const std::string& /*sys_name*/,
-                        const std::string& var_name)
-{
-  ParallelUniqueId puid;
-  unsigned int tid = puid.id;
-
-  // Try to grab an InitialCondition object for this variable.
-  if (_ics[tid].find(var_name) != _ics[tid].end())
-    return _ics[tid][var_name]->value(p);
-
-  return 0.;
-}
-
-Gradient
-FEProblem::initialGradient (const Point& p,
-                           const Parameters& /*parameters*/,
-                           const std::string& /*sys_name*/,
-                           const std::string& var_name)
-{
-  ParallelUniqueId puid;
-  unsigned int tid = puid.id;
-
-  // Try to grab an InitialCondition object for this variable.
-  if (_ics[tid].find(var_name) != _ics[tid].end())
-    return _ics[tid][var_name]->gradient(p);
-
-  return RealGradient();
+  if (_nl.hasVariable(var_name))
+    _nl.addInitialCondition(ic_name, name, parameters);
+  else if (_nl.hasScalarVariable(var_name))
+    _nl.addScalarInitialCondition(ic_name, name, parameters);
+  else if (_aux.hasVariable(var_name))
+    _aux.addInitialCondition(ic_name, name, parameters);
+  else if (_aux.hasScalarVariable(var_name))
+    _aux.addScalarInitialCondition(ic_name, name, parameters);
 }
 
 void
 FEProblem::projectSolution()
 {
-  _nl.projectSolution(Moose::initial_value, Moose::initial_gradient, _eq.parameters);
-  _aux.projectSolution(Moose::initial_value, Moose::initial_gradient, _eq.parameters);
+  _aux.projectSolution();
+  _nl.projectSolution();
 }
 
 void

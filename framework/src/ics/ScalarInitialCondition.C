@@ -12,38 +12,37 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "InitialCondition.h"
+#include "ScalarInitialCondition.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
-#include "Assembly.h"
-#include "MooseVariable.h"
 
 template<>
-InputParameters validParams<InitialCondition>()
+InputParameters validParams<ScalarInitialCondition>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<std::string>("variable", "The variable this InitialCondtion is supposed to provide values for.");
-  params.addParam<std::vector<subdomain_id_type> >("block", "The list of ids of the blocks (subdomain) that this initial condition will be applied to");
+  params.addParam<std::string>("variable", "The variable this initial condition is supposed to provide values for.");
 
   params.addPrivateParam<std::string>("built_by_action", "add_ic");
   return params;
 }
 
-InitialCondition::InitialCondition(const std::string & name, InputParameters parameters) :
+ScalarInitialCondition::ScalarInitialCondition(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    FunctionInterface(parameters),
     _subproblem(*getParam<SubProblem *>("_subproblem")),
     _sys(*getParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _coord_sys(_subproblem.coordSystem()),
-    _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
-
-    _current_elem(_var.currentElem())
+    _var(_sys.getScalarVariable(_tid, parameters.get<std::string>("variable")))
 {
 }
 
-InitialCondition::~InitialCondition()
+ScalarInitialCondition::~ScalarInitialCondition()
 {
 }
 
+void
+ScalarInitialCondition::compute(DenseVector<Number> & vals)
+{
+  for (_i = 0; _i < _var.order(); ++_i)
+    vals(_i) = value();
+}

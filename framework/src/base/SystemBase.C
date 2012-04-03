@@ -242,3 +242,42 @@ SystemBase::reinitScalars(THREAD_ID tid)
     var->reinit();
   }
 }
+
+
+void
+SystemBase::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<Problem *>("_problem") = &_problem;
+  parameters.set<SubProblem *>("_subproblem") = &_subproblem;
+  parameters.set<SystemBase *>("_sys") = this;
+
+  const std::string & var_name = parameters.get<std::string>("variable");
+  const std::vector<subdomain_id_type> & blocks = parameters.get<std::vector<subdomain_id_type> >("block");
+
+  for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+    if (blocks.size() > 0)
+      for (unsigned int i = 0; i < blocks.size(); i++)
+        _vars[tid].addInitialCondition(var_name, blocks[i], static_cast<InitialCondition *>(Factory::instance()->create(ic_name, name, parameters)));
+    else
+      _vars[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID, static_cast<InitialCondition *>(Factory::instance()->create(ic_name, name, parameters)));
+  }
+}
+
+void
+SystemBase::addScalarInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<Problem *>("_problem") = &_problem;
+  parameters.set<SubProblem *>("_subproblem") = &_subproblem;
+  parameters.set<SystemBase *>("_sys") = this;
+
+  const std::string & var_name = parameters.get<std::string>("variable");
+
+  for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+    _vars[tid].addScalarInitialCondition(var_name, static_cast<ScalarInitialCondition *>(Factory::instance()->create(ic_name, name, parameters)));
+  }
+}
+

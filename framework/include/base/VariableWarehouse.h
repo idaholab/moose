@@ -21,6 +21,8 @@
 
 #include "MooseVariable.h"
 #include "MooseVariableScalar.h"
+#include "InitialCondition.h"
+#include "ScalarInitialCondition.h"
 
 
 /**
@@ -87,9 +89,40 @@ public:
    */
   std::vector<MooseVariableScalar *> & scalars();
 
+  /**
+   * Add an initial condition for field variable
+   * @param var_name The variable name this initial condition works on
+   * @param ic The initial condition object
+   */
+  void addInitialCondition(const std::string & var_name, subdomain_id_type blockid, InitialCondition * ic);
+
+  /**
+   * Add an initial condition for scalar variable
+   * @param var_name The variable name this initial condition works on
+   * @param ic The initial condition object
+   */
+  void addScalarInitialCondition(const std::string & var_name, ScalarInitialCondition * ic);
+
+  /**
+   * Get an initial condition
+   * @param var_name The name of the variable for which we are retrieving the initial condition
+   * @return The initial condition object if the initial condition exists, NULL otherwise
+   */
+  InitialCondition * getInitialCondition(const std::string & var_name, subdomain_id_type blockid);
+
+  /**
+   * Get a scalar initial condition
+   * @param var_name The name of the variable for which we are retrieving the initial condition
+   * @return The initial condition object if the initial condition exists, NULL otherwise
+   */
+  ScalarInitialCondition * getScalarInitialCondition(const std::string & var_name);
+
+
 protected:
   /// list of all variables
   std::vector<MooseVariable *> _vars;
+  /// Initial conditions: [name] -> [block_id] -> initial condition (only 1 IC per sub-block)
+  std::map<std::string, std::map<subdomain_id_type, InitialCondition *> > _ics;
   /// Name to variable mapping
   std::map<std::string, MooseVariable *> _var_name;
   /// Map to variables that need to be evaluated on a boundary
@@ -99,6 +132,8 @@ protected:
   std::map<std::string, MooseVariableScalar *> _scalar_var_map;
   /// list of all variables
   std::vector<MooseVariableScalar *> _scalar_vars;
+  /// Initial conditions: [name] -> initial condition
+  std::map<std::string, ScalarInitialCondition *> _scalar_ics;
 };
 
 #endif // VARIABLEWAREHOUSE_H

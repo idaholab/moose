@@ -70,10 +70,6 @@ public:
   virtual void computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & /*soln*/, NumericVector<Number> & /*residual*/) {}
   virtual void computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & /*soln*/, SparseMatrix<Number> & /*jacobian*/) {}
 
-  // Initial conditions /////
-  virtual Number initialValue (const Point & /*p*/, const Parameters & /*parameters*/, const std::string & /*sys_name*/, const std::string & /*var_name*/) { return 0; }
-  virtual Gradient initialGradient (const Point & /*p*/, const Parameters & /*parameters*/, const std::string & /*sys_name*/, const std::string & /*var_name*/) { return Gradient(); }
-
   virtual void initialCondition(EquationSystems & /*es*/, const std::string & /*system_name*/) {}
 
   // Postprocessors /////

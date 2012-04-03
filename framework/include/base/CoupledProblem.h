@@ -86,10 +86,6 @@ public:
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual);
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);
 
-  // Initial conditions /////
-  virtual Number initialValue (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name);
-  virtual Gradient initialGradient (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name);
-
   // Postprocessors /////
   virtual void computePostprocessors(ExecFlagType type = EXEC_TIMESTEP);
   virtual void outputPostprocessors(bool force = false);

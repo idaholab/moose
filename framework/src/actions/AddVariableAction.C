@@ -15,6 +15,7 @@
 #include "AddVariableAction.h"
 #include "Parser.h"
 #include "FEProblem.h"
+#include "Factory.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -28,7 +29,7 @@
 #include "string_to_enum.h"
 #include "fe.h"
 
-// class static initializiation
+// class static initialization
 const Real AddVariableAction::_abs_zero_tol = 1e-12;
 
 template<>
@@ -67,12 +68,14 @@ AddVariableAction::act()
     blocks.insert(*it);
 
   Real scale_factor = getParam<Real>("scaling");
+  bool scalar_var = false;                              // tru if adding scalar variable
 
   if (is_variables_block)
   {
     if (fe_type.family == SCALAR)
     {
       _problem->addScalarVariable(var_name, fe_type.order, scale_factor);
+      scalar_var = true;
     }
     else
     {
@@ -88,7 +91,10 @@ AddVariableAction::act()
       mooseWarning("Currently the Auxiliary System ignores scaling factors - please contact the MOOSE team");
 
     if (fe_type.family == SCALAR)
+    {
       _problem->addAuxScalarVariable(var_name, fe_type.order);
+      scalar_var = true;
+    }
     else if (blocks.empty())
       _problem->addAuxVariable(var_name, fe_type);
     else
@@ -98,5 +104,22 @@ AddVariableAction::act()
   // Set initial condition
   Real initial = getParam<Real>("initial_condition");
   if (initial > _abs_zero_tol || initial < -_abs_zero_tol)
-    _problem->addInitialCondition(var_name, initial);
+  {
+    if (scalar_var)
+    {
+      // built a ScalarConstantIC object
+      InputParameters params = Factory::instance()->getValidParams("ScalarConstantIC");
+      params.set<std::string>("variable") = var_name;
+      params.set<Real>("value") = initial;
+      _problem->addInitialCondition("ScalarConstantIC", "ic", params);
+    }
+    else
+    {
+      // built a ConstantIC object
+      InputParameters params = Factory::instance()->getValidParams("ConstantIC");
+      params.set<std::string>("variable") = var_name;
+      params.set<Real>("value") = initial;
+      _problem->addInitialCondition("ConstantIC", "ic", params);
+    }
+  }
 }

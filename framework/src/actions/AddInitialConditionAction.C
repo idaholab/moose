@@ -12,31 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AddICAction.h"
+#include "AddInitialConditionAction.h"
 #include "Parser.h"
 #include "FEProblem.h"
 
 template<>
-InputParameters validParams<AddICAction>()
+InputParameters validParams<AddInitialConditionAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
   return params;
 }
 
 
-AddICAction::AddICAction(const std::string & name, InputParameters params) :
+AddInitialConditionAction::AddInitialConditionAction(const std::string & name, InputParameters params) :
     MooseObjectAction(name, params)
 {
 }
 
 void
-AddICAction::act()
+AddInitialConditionAction::act()
 {
-  std::vector<std::string> elements;
-  Parser::tokenize(_name, elements);
-
-  // The variable name will be the second to last element in the path name
-  std::string & var_name = elements[elements.size()-2];
-  _moose_object_pars.set<std::string>("variable") = var_name;
   _problem->addInitialCondition(_type, getShortName(), _moose_object_pars);
 }

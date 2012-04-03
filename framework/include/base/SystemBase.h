@@ -21,12 +21,15 @@
 #include "NodalBC.h"
 #include "IntegratedBC.h"
 #include "InitialCondition.h"
+#include "ScalarInitialCondition.h"
 
 #include "MooseMesh.h"
 #include "VariableWarehouse.h"
 #include "Assembly.h"
 #include "ParallelUniqueId.h"
 #include "SubProblem.h"
+#include "MooseVariableScalar.h"
+#include "ComputeInitialConditionThread.h"
 
 // libMesh
 #include "equation_systems.h"
@@ -98,6 +101,8 @@ public:
   virtual void copyOldSolutions() = 0;
   virtual void restoreSolutions() = 0;
 
+  virtual void projectSolution() = 0;
+
   /**
    * The solution vector that is currently being operated on.
    * This is typically a ghosted vector that comes in from the Nonlinear solver.
@@ -130,7 +135,7 @@ public:
   virtual void augmentSendList(std::vector<unsigned int> & send_list) = 0;
 
   /**
-   * Will modify the sparsity pattern to add logcial geometric connections
+   * Will modify the sparsity pattern to add logical geometric connections
    */
   virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
                                std::vector<unsigned int> & n_nz,
@@ -151,6 +156,23 @@ public:
    */
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL) = 0;
 
+  // ICs /////
+  /**
+   * Add an initial condition for a field variable.
+   * @param ic_name The initial condition type
+   * @param name The name of the initial condition
+   * @param parameters Input parameters
+   */
+  void addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Add an initial condition for scalar variable
+   * @param ic_name The initial condition type
+   * @param name The name of the initial condition
+   * @param parameters Input parameters
+   */
+  void addScalarInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters);
+
   /**
    * Query a system for a variable
    *
@@ -164,7 +186,7 @@ public:
    * Gets a reference to a variable of with specified name
    *
    * @param tid Thread id
-   * @param var_name varaible name
+   * @param var_name variable name
    * @return reference the variable (class)
    */
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
@@ -173,7 +195,7 @@ public:
    * Gets a reference to a variable with specified number
    *
    * @param tid Thread id
-   * @param var_number varaible number
+   * @param var_number variable number
    * @return reference the variable (class)
    */
   virtual MooseVariable & getVariable(THREAD_ID tid, unsigned int var_number);
@@ -182,7 +204,7 @@ public:
    * Gets a reference to a scalar variable with specified number
    *
    * @param tid Thread id
-   * @param var_number varaible number
+   * @param var_number variable number
    * @return reference the variable (class)
    */
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name);
@@ -191,7 +213,7 @@ public:
    * Gets a reference to a variable with specified number
    *
    * @param tid Thread id
-   * @param var_number varaible number
+   * @param var_number variable number
    * @return reference the variable (class)
    */
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, unsigned int var_number);
@@ -313,6 +335,8 @@ protected:
   std::vector<VariableWarehouse> _vars;
   /// Map of variables (variable id -> array of subdomains where it lives)
   std::map<unsigned int, std::set<subdomain_id_type> > _var_map;
+
+  friend class ComputeInitialConditionThread;
 };
 
 /**
@@ -464,20 +488,7 @@ public:
     _sys.update();
   }
 
-  virtual void projectSolution (Number fptr(const Point& p,
-                                             const Parameters& parameters,
-                                             const std::string& sys_name,
-                                             const std::string& unknown_name),
-                                 Gradient gptr(const Point& p,
-                                               const Parameters& parameters,
-                                               const std::string& sys_name,
-                                               const std::string& unknown_name),
-                                 Parameters& parameters) const
-  {
-    // project the solution only if we have dofs in this system (without this check, libMesh will freak out and crash on us)
-    if (_sys.n_dofs() > 0)
-      _sys.project_solution(fptr, gptr, parameters);
-  }
+  virtual void projectSolution();
 
   /**
    * Get a reference to libMesh system object
@@ -524,6 +535,59 @@ protected:
 
   std::vector<VarCopyInfo> _var_to_copy;
 };
+
+
+template<typename T>
+void
+SystemTempl<T>::projectSolution()
+{
+  if (_sys.n_dofs() <= 0)
+    return;
+
+  START_LOG("projectSolution()", "SystemTempl");
+
+  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  ComputeInitialConditionThread cic(_subproblem, *this, _solution);
+  Threads::parallel_reduce(elem_range, cic);
+
+  // Also, load values into the SCALAR dofs
+  // Note: We assume that all SCALAR dofs are on the
+  // processor with highest ID
+  if(libMesh::processor_id() == (libMesh::n_processors()-1))
+  {
+    THREAD_ID tid = 0;
+    std::vector<MooseVariableScalar *> & scalar_vars = _vars[tid].scalars();
+    for (unsigned int vn = 0; vn < scalar_vars.size(); vn++)
+    {
+      MooseVariableScalar * var = scalar_vars[vn];
+      ScalarInitialCondition * sic = _vars[tid].getScalarInitialCondition(var->name());
+      if (sic != NULL)
+      {
+        var->reinit();
+
+        DenseVector<Number> vals(var->order());
+        sic->compute(vals);
+
+        const unsigned int n_SCALAR_dofs = var->dofIndices().size();
+        for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+        {
+          const unsigned int global_index = var->dofIndices()[i];
+          _solution.set(global_index, vals(i));
+        }
+      }
+    }
+  }
+
+  _solution.close();
+
+#ifdef LIBMESH_ENABLE_CONSTRAINTS
+  dofMap().enforce_constraints_exactly(_sys, &_solution);
+#endif
+
+  STOP_LOG("projectSolution()", "SystemTempl");
+
+  _solution.localize(*_sys.current_local_solution, dofMap().get_send_list());
+}
 
 
 #endif /* SYSTEMBASE_H */

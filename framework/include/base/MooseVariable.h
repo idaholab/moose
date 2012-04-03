@@ -79,9 +79,22 @@ public:
   const std::set<subdomain_id_type> & activeSubdomains();
 
   /**
+   * Is the variable active on the subdomain?
+   * @param Subdomain id
+   * @return true if active on subdomain, false otherwise
+   */
+  bool activeOnSubdomain(subdomain_id_type subdomain) const;
+
+  /**
    * Get the type of finite element object
    */
   const FEType feType() { return _fe->get_fe_type(); }
+
+  /**
+   * Get the continuity type of this variable
+   * @return The continuity type
+   */
+  const FEContinuity getContinuity() { return _fe->get_continuity(); }
 
   /**
    * Get the order of this variable

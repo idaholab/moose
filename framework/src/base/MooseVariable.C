@@ -134,6 +134,12 @@ MooseVariable::activeSubdomains()
 }
 
 bool
+MooseVariable::activeOnSubdomain(subdomain_id_type subdomain) const
+{
+  return _sys.system().variable(_var_num).active_on_subdomain(subdomain);
+}
+
+bool
 MooseVariable::isNodal()
 {
   // FIXME: improve this fix (currently we use only monomials as elemental variables)

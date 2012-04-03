@@ -547,18 +547,6 @@ DisplacedProblem::meshChanged()
   _geometric_search_data.update();
 }
 
-Number
-DisplacedProblem::initialValue (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name)
-{
-  return _mproblem.initialValue(p, parameters, sys_name, var_name);
-}
-
-Gradient
-DisplacedProblem::initialGradient (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name)
-{
-  return _mproblem.initialGradient(p, parameters, sys_name, var_name);
-}
-
 void
 DisplacedProblem::computePostprocessors(ExecFlagType)
 {

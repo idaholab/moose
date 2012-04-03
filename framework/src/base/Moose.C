@@ -76,6 +76,7 @@
 #include "BoundingBoxIC.h"
 #include "FunctionIC.h"
 #include "RandomIC.h"
+#include "ScalarConstantIC.h"
 
 // mesh modifiers
 #include "ElementDeleter.h"
@@ -148,6 +149,7 @@
 #include "AddBCAction.h"
 #include "AddDiracKernelAction.h"
 #include "AddICAction.h"
+#include "AddInitialConditionAction.h"
 #include "AddKernelAction.h"
 #include "AddScalarKernelAction.h"
 #include "AddDGKernelAction.h"
@@ -250,6 +252,7 @@ registerObjects()
   registerInitialCondition(BoundingBoxIC);
   registerInitialCondition(FunctionIC);
   registerInitialCondition(RandomIC);
+  registerInitialCondition(ScalarConstantIC);
   // Mesh Modifiers
   registerMeshModifier(ElementDeleter);
   // executioners
@@ -474,6 +477,7 @@ registerActions()
   registerAction(CopyNodalVarsAction, "copy_nodal_aux_vars");
 
   registerAction(AddICAction, "add_ic");
+  registerAction(AddInitialConditionAction, "add_ic");
   registerAction(AddKernelAction, "add_kernel");
   registerAction(AddKernelAction, "add_aux_kernel");
   registerAction(AddScalarKernelAction, "add_scalar_kernel");

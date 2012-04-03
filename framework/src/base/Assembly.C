@@ -416,7 +416,6 @@ Assembly::prepareScalar()
 {
   _scalar_has_off_diag_contributions = false;
 
-  unsigned int n_vars = _sys.nVariables();
   unsigned int n_scalar_vars = _sys.nScalarVariables();
 
   for (unsigned int vi = 0; vi < n_scalar_vars; vi++)

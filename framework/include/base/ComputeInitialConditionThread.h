@@ -12,31 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AddICAction.h"
-#include "Parser.h"
-#include "FEProblem.h"
+#ifndef COMPUTEREINITIALCONDITIONTHREAD_H
+#define COMPUTEREINITIALCONDITIONTHREAD_H
 
-template<>
-InputParameters validParams<AddICAction>()
+#include "ParallelUniqueId.h"
+#include "elem_range.h"
+#include "numeric_vector.h"
+
+class SubProblem;
+class SystemBase;
+
+class ComputeInitialConditionThread
 {
-  InputParameters params = validParams<MooseObjectAction>();
-  return params;
-}
+public:
+  ComputeInitialConditionThread(SubProblem & problem, SystemBase & sys, NumericVector<Number> & solution);
+  // Splitting Constructor
+  ComputeInitialConditionThread(ComputeInitialConditionThread & x, Threads::split split);
 
+  void operator() (const ConstElemRange & range);
+  void join(const ComputeInitialConditionThread & /*y*/);
 
-AddICAction::AddICAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
-{
-}
+protected:
+  SubProblem & _subproblem;
+  SystemBase & _sys;
+  THREAD_ID _tid;
+  NumericVector<Number> & _solution;
+};
 
-void
-AddICAction::act()
-{
-  std::vector<std::string> elements;
-  Parser::tokenize(_name, elements);
-
-  // The variable name will be the second to last element in the path name
-  std::string & var_name = elements[elements.size()-2];
-  _moose_object_pars.set<std::string>("variable") = var_name;
-  _problem->addInitialCondition(_type, getShortName(), _moose_object_pars);
-}
+#endif //COMPUTEINITIALCONDITIONTHREAD_H

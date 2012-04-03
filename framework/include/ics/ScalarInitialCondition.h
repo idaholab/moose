@@ -12,12 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef INITIALCONDITION_H
-#define INITIALCONDITION_H
+#ifndef SCALARINITIALCONDITION_H
+#define SCALARINITIALCONDITION_H
 
 #include "Moose.h"
 #include "MooseObject.h"
-#include "FunctionInterface.h"
 #include "ParallelUniqueId.h"
 
 // System includes
@@ -26,24 +25,24 @@
 // libMesh
 #include "point.h"
 #include "vector_value.h"
-#include "elem.h"
+#include "dense_vector.h"
 
 //forward declarations
-class InitialCondition;
+class ScalarInitialCondition;
 class SubProblem;
 class SystemBase;
 class Assembly;
-class MooseVariable;
+class MooseVariableScalar;
+
 
 template<>
-InputParameters validParams<InitialCondition>();
+InputParameters validParams<ScalarInitialCondition>();
 
 /**
  * InitialConditions are objects that set the initial value of variables.
  */
-class InitialCondition :
-  public MooseObject,
-  public FunctionInterface
+class ScalarInitialCondition :
+  public MooseObject
 {
 public:
   /**
@@ -52,24 +51,21 @@ public:
    * @param name The name given to the initial condition in the input file.
    * @param parameters The parameters object holding data for the class to use.
    */
-  InitialCondition(const std::string & name, InputParameters parameters);
+  ScalarInitialCondition(const std::string & name, InputParameters parameters);
 
-  virtual ~InitialCondition();
+  virtual ~ScalarInitialCondition();
 
   /**
-   * The value of the variable at a point.
+   * Compute the initial condition
+   */
+  virtual void compute(DenseVector<Number> & vals);
+
+  /**
+   * The value of the variable.
    *
    * This must be overridden by derived classes.
    */
-  virtual Real value(const Point & p) = 0;
-
-  /**
-   * The gradient of the variable at a point.
-   *
-   * This is optional.  Note that if you are using C1 continuous elements you will
-   * want to use an initial condition that defines this!
-   */
-  virtual RealGradient gradient(const Point & /*p*/) { return RealGradient(); };
+  virtual Real value() = 0;
 
 protected:
   SubProblem & _subproblem;
@@ -77,11 +73,10 @@ protected:
   THREAD_ID _tid;
 
   Assembly & _assembly;
+  /// Scalar variable this initial condition works on
+  MooseVariableScalar & _var;
 
-  Moose::CoordinateSystemType _coord_sys;
-  MooseVariable & _var;
-
-  const Elem * & _current_elem;
+  unsigned int _i;
 };
 
-#endif //INITIALCONDITION_H
+#endif //SCALARINITIALCONDITION_H

@@ -24,6 +24,12 @@ VariableWarehouse::~VariableWarehouse()
     delete *it;
   for (std::vector<MooseVariableScalar *>::iterator it = _scalar_vars.begin(); it != _scalar_vars.end(); ++it)
     delete *it;
+
+  for (std::map<std::string, std::map<subdomain_id_type, InitialCondition *> >::iterator it = _ics.begin(); it != _ics.end(); ++it)
+    for (std::map<subdomain_id_type, InitialCondition *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
+      delete jt->second;
+  for (std::map<std::string, ScalarInitialCondition *>::iterator it = _scalar_ics.begin(); it != _scalar_ics.end(); ++it)
+    delete it->second;
 }
 
 void
@@ -84,3 +90,46 @@ VariableWarehouse::boundaryVars(unsigned int bnd)
 {
   return _boundary_vars[bnd];
 }
+
+void
+VariableWarehouse::addInitialCondition(const std::string & var_name, subdomain_id_type blockid, InitialCondition * ic)
+{
+  _ics[var_name][blockid] = ic;
+}
+
+void
+VariableWarehouse::addScalarInitialCondition(const std::string & var_name, ScalarInitialCondition * ic)
+{
+  _scalar_ics[var_name] = ic;
+}
+
+InitialCondition *
+VariableWarehouse::getInitialCondition(const std::string & var_name, subdomain_id_type blockid)
+{
+  std::map<std::string, std::map<subdomain_id_type, InitialCondition *> >::iterator it = _ics.find(var_name);
+  if (it != _ics.end())
+  {
+    std::map<subdomain_id_type, InitialCondition *>::iterator jt = it->second.find(blockid);
+    if (jt != it->second.end())
+      return jt->second;                        // we return the IC that was defined on the specified block (blockid)
+
+    jt = it->second.find(Moose::ANY_BLOCK_ID);
+    if (jt != it->second.end())
+      return jt->second;                        // return the IC that lives everywhere
+    else
+      return NULL;                              // No IC there at all
+  }
+  else
+    return NULL;
+}
+
+ScalarInitialCondition *
+VariableWarehouse::getScalarInitialCondition(const std::string & var_name)
+{
+  std::map<std::string, ScalarInitialCondition *>::iterator it = _scalar_ics.find(var_name);
+  if (it != _scalar_ics.end())
+    return it->second;
+  else
+    return NULL;
+}
+

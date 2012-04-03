@@ -61,7 +61,7 @@
   [./y]
     family = SCALAR
     order = FIRST
-    initial_condition = 1;
+    initial_condition = 1
   [../]
 []
 

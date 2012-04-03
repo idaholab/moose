@@ -186,6 +186,9 @@ void associateSyntax()
   syntax.registerActionSyntax("EmptyAction", "AuxBCs");
   syntax.registerActionSyntax("AddBCAction", "AuxBCs/*", "add_aux_bc");
 
+  syntax.registerActionSyntax("EmptyAction", "ICs");
+  syntax.registerActionSyntax("AddInitialConditionAction", "ICs/*", "add_ic");
+
   syntax.registerActionSyntax("EmptyAction", "Materials");
   syntax.registerActionSyntax("AddMaterialAction", "Materials/*");
 

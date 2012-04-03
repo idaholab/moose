@@ -168,12 +168,8 @@ public:
   // DG /////
   void addDGKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
-  // ICs /////
-  void addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name);
-  void addInitialCondition(const std::string & var_name, Real value);
-
-  Number initialValue (const Point & p, const Parameters & parameters, const std::string & /*sys_name*/, const std::string & var_name);
-  Gradient initialGradient (const Point & p, const Parameters & /*parameters*/, const std::string & /*sys_name*/, const std::string & var_name);
+  // IC /////
+  void addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters);
 
   void projectSolution();
 
@@ -297,9 +293,6 @@ protected:
   // quadrature
   Order _quadrature_order;                              ///< Quadrature order required by all variables to integrated over them.
   std::vector<Assembly *> _assembly;
-
-  // Initial conditions
-  std::vector<std::map<std::string, InitialCondition *> > _ics;
 
   // material properties
   MaterialPropertyStorage _material_props;
