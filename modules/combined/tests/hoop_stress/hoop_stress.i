@@ -1,3 +1,18 @@
+#
+# Hoop stress
+#
+# This test checks that hoop stress is calculated correctly for three orientations.
+# 1. A hoop centered at (20,20,20) with vector (0,0,1)
+# 2. A hoop centered at (-25,20,20) with vector (0,1,0)
+# 3. A hoop centered at (-20,-20,20) with vector (1,0,0)
+# All three have radius = 20, t = 1.
+#
+# Hoop stress should be P*r/t -> 1e3*20/1 = 20e3
+#
+# The output hoop stress is close to this value (nonlinear geometry is on) for all
+# elements.
+#
+
 [GlobalParams]
   disp_x = disp_x
   disp_y = disp_y
