@@ -23,17 +23,6 @@
 
 #include <algorithm>
 
-//Temporary code until get_node_index gets added to libmesh Elem class:
-unsigned int get_node_index (const Elem* el, const Node* nd)
-{
-  for (unsigned int n=0; n != el->n_nodes(); ++n)
-    if (el->get_node(n) == nd)
-      return n;
-
-  return Node::invalid_id;
-}
-
-
 // Mutex to use when accessing _penetration_info;
 Threads::spin_mutex pinfo_mutex;
 
@@ -619,8 +608,7 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
   std::vector<unsigned int> local_node_indices;
   for (unsigned int i(0); i<edge_nodes.size(); ++i)
   {
-    //unsigned int local_index = side->get_node_index(edge_nodes[i]); //TODO: use this version once it makes it in libmesh
-    unsigned int local_index = get_node_index(side,edge_nodes[i]);
+    unsigned int local_index = side->get_node_index(edge_nodes[i]);
     if (local_index == Node::invalid_id)
       mooseError("Side does not contain node");
     local_node_indices.push_back(local_index);
