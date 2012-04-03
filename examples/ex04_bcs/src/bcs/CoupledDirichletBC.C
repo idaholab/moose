@@ -25,18 +25,18 @@ InputParameters validParams<CoupledDirichletBC>()
   return params;
 }
 
-CoupledDirichletBC::CoupledDirichletBC(const std::string & name, InputParameters parameters)
-  :NodalBC(name, parameters),
+CoupledDirichletBC::CoupledDirichletBC(const std::string & name, InputParameters parameters) :
+    NodalBC(name, parameters),
 
-   /**
-    * Grab the parameter for the multiplier.
-    */
-   _alpha(getParam<Real>("alpha")),
+    /**
+     * Grab the parameter for the multiplier.
+     */
+    _alpha(getParam<Real>("alpha")),
 
-   /**
-    * Get a reference to the coupled variable's values.
-    */
-   _some_var_val(coupledValue("some_var"))
+    /**
+     * Get a reference to the coupled variable's values.
+     */
+    _some_var_val(coupledValue("some_var"))
 {}
 
 Real

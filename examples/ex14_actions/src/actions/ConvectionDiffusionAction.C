@@ -26,8 +26,8 @@ InputParameters validParams<ConvectionDiffusionAction>()
   return params;
 }
 
-ConvectionDiffusionAction::ConvectionDiffusionAction(const std::string & name, InputParameters params)
-  :Action(name, params)
+ConvectionDiffusionAction::ConvectionDiffusionAction(const std::string & name, InputParameters params) :
+    Action(name, params)
 {
 }
 

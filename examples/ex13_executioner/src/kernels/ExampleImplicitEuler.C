@@ -24,9 +24,9 @@ InputParameters validParams<ExampleImplicitEuler>()
 }
 
 ExampleImplicitEuler::ExampleImplicitEuler(const std::string & name,
-                                           InputParameters parameters)
-  :ImplicitEuler(name,parameters),
-   _time_coefficient(getMaterialProperty<Real>("time_coefficient"))
+                                           InputParameters parameters) :
+    ImplicitEuler(name,parameters),
+    _time_coefficient(getMaterialProperty<Real>("time_coefficient"))
 {}
 
 Real

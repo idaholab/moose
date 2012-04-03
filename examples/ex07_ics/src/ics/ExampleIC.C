@@ -23,9 +23,9 @@ InputParameters validParams<ExampleIC>()
 }
 
 ExampleIC::ExampleIC(const std::string & name,
-                     InputParameters parameters)
-  :InitialCondition(name, parameters),
-   _value(getParam<Real>("value"))
+                     InputParameters parameters) :
+    InitialCondition(name, parameters),
+    _value(getParam<Real>("value"))
 {}
 
 Real

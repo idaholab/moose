@@ -25,15 +25,15 @@ InputParameters validParams<ExampleMaterial>()
 }
 
 ExampleMaterial::ExampleMaterial(const std::string & name,
-                                 InputParameters parameters)
-  :Material(name, parameters),
+                                 InputParameters parameters) :
+    Material(name, parameters),
 
-   // Get a parameter
-   _diffusivity_baseline(getParam<Real>("diffusivity_baseline")),
+    // Get a parameter
+    _diffusivity_baseline(getParam<Real>("diffusivity_baseline")),
 
-   // Declare that this material is going to have a Real
-   // valued property named "diffusivity" that Kernels can use.
-   _diffusivity(declareProperty<Real>("diffusivity"))
+    // Declare that this material is going to have a Real
+    // valued property named "diffusivity" that Kernels can use.
+    _diffusivity(declareProperty<Real>("diffusivity"))
 {}
 
 void

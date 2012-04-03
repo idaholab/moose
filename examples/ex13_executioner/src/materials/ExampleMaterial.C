@@ -24,22 +24,22 @@ InputParameters validParams<ExampleMaterial>()
 }
 
 ExampleMaterial::ExampleMaterial(const std::string & name,
-                                 InputParameters parameters)
-  :Material(name, parameters),
+                                 InputParameters parameters) :
+    Material(name, parameters),
 
-   // Get a parameter value for the diffusivity
-   _input_diffusivity(getParam<Real>("diffusivity")),
+    // Get a parameter value for the diffusivity
+    _input_diffusivity(getParam<Real>("diffusivity")),
 
-   // Get a parameter value for the time_coefficient
-   _input_time_coefficient(getParam<Real>("time_coefficient")),
+    // Get a parameter value for the time_coefficient
+    _input_time_coefficient(getParam<Real>("time_coefficient")),
 
-   // Declare that this material is going to have a Real
-   // valued property named "diffusivity" that Kernels can use.
-   _diffusivity(declareProperty<Real>("diffusivity")),
+    // Declare that this material is going to have a Real
+    // valued property named "diffusivity" that Kernels can use.
+    _diffusivity(declareProperty<Real>("diffusivity")),
 
-   // Declare that this material is going to have a Real
-   // valued property named "time_coefficient" that Kernels can use.
-   _time_coefficient(declareProperty<Real>("time_coefficient"))
+    // Declare that this material is going to have a Real
+    // valued property named "time_coefficient" that Kernels can use.
+    _time_coefficient(declareProperty<Real>("time_coefficient"))
 {}
 
 void

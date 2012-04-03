@@ -24,8 +24,8 @@ InputParameters validParams<Convection>()
 }
 
 Convection::Convection(const std::string & name,
-                       InputParameters parameters)
-  :Kernel(name, parameters),
+                       InputParameters parameters) :
+    Kernel(name, parameters),
    _some_variable(coupledGradient("some_variable"))
 {}
 

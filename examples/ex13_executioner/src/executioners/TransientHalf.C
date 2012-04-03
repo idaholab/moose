@@ -25,10 +25,10 @@ InputParameters validParams<TransientHalf>()
   return params;
 }
 
-TransientHalf::TransientHalf(const std::string & name, InputParameters parameters)
-  :Transient(name, parameters),
-   _ratio(getParam<Real>("ratio")),
-   _min_dt(getParam<Real>("min_dt"))
+TransientHalf::TransientHalf(const std::string & name, InputParameters parameters) :
+    Transient(name, parameters),
+    _ratio(getParam<Real>("ratio")),
+    _min_dt(getParam<Real>("min_dt"))
 {}
 
 Real

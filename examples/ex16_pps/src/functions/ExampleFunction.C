@@ -22,9 +22,9 @@ InputParameters validParams<ExampleFunction>()
   return params;
 }
 
-ExampleFunction::ExampleFunction(const std::string & name, InputParameters parameters)
-  :Function(name, parameters),
-   _alpha(getParam<Real>("alpha"))
+ExampleFunction::ExampleFunction(const std::string & name, InputParameters parameters) :
+    Function(name, parameters),
+    _alpha(getParam<Real>("alpha"))
 {}
 
 Real

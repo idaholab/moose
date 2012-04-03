@@ -23,20 +23,20 @@ InputParameters validParams<ExampleMaterial>()
 }
 
 ExampleMaterial::ExampleMaterial(const std::string & name,
-                                 InputParameters parameters)
-  :Material(name, parameters),
+                                 InputParameters parameters) :
+    Material(name, parameters),
 
-   // Get a parameter value for the diffusivity
-   _initial_diffusivity(getParam<Real>("initial_diffusivity")),
+    // Get a parameter value for the diffusivity
+    _initial_diffusivity(getParam<Real>("initial_diffusivity")),
 
-   // Declare that this material is going to have a Real
-   // valued property named "diffusivity" that Kernels can use.
-   _diffusivity(declareProperty<Real>("diffusivity")),
+    // Declare that this material is going to have a Real
+    // valued property named "diffusivity" that Kernels can use.
+    _diffusivity(declareProperty<Real>("diffusivity")),
 
-   // Declare that we are going to have an old value of diffusivity
-   // Note: this is _expensive_ and currently means that you can't
-   // use adaptivity!  Only do this if you REALLY need it!
-   _diffusivity_old(declarePropertyOld<Real>("diffusivity"))
+    // Declare that we are going to have an old value of diffusivity
+    // Note: this is _expensive_ and currently means that you can't
+    // use adaptivity!  Only do this if you REALLY need it!
+    _diffusivity_old(declarePropertyOld<Real>("diffusivity"))
 {}
 
 void

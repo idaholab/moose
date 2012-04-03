@@ -24,9 +24,9 @@ InputParameters validParams<Convection>()
 }
 
 Convection::Convection(const std::string & name,
-                       InputParameters parameters)
-  :Kernel(name, parameters),
-   _some_variable(coupledGradient("some_variable"))
+                       InputParameters parameters) :
+    Kernel(name, parameters),
+    _some_variable(coupledGradient("some_variable"))
 {}
 
 Real Convection::computeQpResidual()

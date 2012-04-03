@@ -29,17 +29,17 @@ InputParameters validParams<Convection>()
 }
 
 Convection::Convection(const std::string & name,
-                       InputParameters parameters)
-  // You must call the constructor of the base class first
-  // The "true" here specifies that this Kernel is to be integrated
-  // over the domain.
-  :Kernel(name, parameters),
+                       InputParameters parameters) :
+    // You must call the constructor of the base class first
+    // The "true" here specifies that this Kernel is to be integrated
+    // over the domain.
+    Kernel(name, parameters),
 
-   // This is the "Intialization List" it sets the values of class variables
-   // Here we are grabbing the values of Parameters to use for a velocity vector
-   _x(getParam<Real>("x")),
-   _y(getParam<Real>("y")),
-   _z(getParam<Real>("z"))
+    // This is the "Intialization List" it sets the values of class variables
+    // Here we are grabbing the values of Parameters to use for a velocity vector
+    _x(getParam<Real>("x")),
+    _y(getParam<Real>("y")),
+    _z(getParam<Real>("z"))
 {
   // Build a velocity vector to use in the residual / jacobian computations.
   // We do this here so that it's only done once and then we just reuse it.

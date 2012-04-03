@@ -25,10 +25,10 @@ InputParameters validParams<ExampleTimeDerivative>()
 }
 
 ExampleTimeDerivative::ExampleTimeDerivative(const std::string & name,
-                                             InputParameters parameters)
-  :TimeDerivative(name,parameters),
-   // This kernel expects an input parameter named "time_coefficient"
-   _time_coefficient(getParam<Real>("time_coefficient"))
+                                             InputParameters parameters) :
+    TimeDerivative(name,parameters),
+    // This kernel expects an input parameter named "time_coefficient"
+    _time_coefficient(getParam<Real>("time_coefficient"))
 {}
 
 Real

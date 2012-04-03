@@ -24,10 +24,10 @@ InputParameters validParams<ExampleDiffusion>()
 }
 
 ExampleDiffusion::ExampleDiffusion(const std::string & name,
-                                   InputParameters parameters)
-  :Diffusion(name,parameters),
-   // Initialize our member variable based on a default or input file
-   _diffusivity(getParam<Real>("diffusivity"))
+                                   InputParameters parameters) :
+    Diffusion(name,parameters),
+    // Initialize our member variable based on a default or input file
+    _diffusivity(getParam<Real>("diffusivity"))
 {}
 
 Real
