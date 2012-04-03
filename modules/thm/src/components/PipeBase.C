@@ -75,8 +75,6 @@ PipeBase::getBoundaryId(RELAP7::EEndType id)
 void
 PipeBase::buildMesh()
 {
-  //LZou changed this as PipeBase's protected member variable
-  //std::vector<unsigned int> node_ids;
   // points
   Real delta_t = _length / _n_elems;
   Point p(0, 0, 0);                      // origin
