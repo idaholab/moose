@@ -35,14 +35,12 @@ InputParameters validParams<NodalFloodCount>()
 }
 
 NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters parameters) :
-  ElementPostprocessor(name, parameters),
-  _threshold(getParam<Real>("threshold")),
-  _mesh(_subproblem.mesh()),
-  _moose_var(_subproblem.getVariable(0, getParam<std::string>("variable"))),
-  _var_number(_moose_var.number()),
-  _region_count(0)
-  // DEBUG
-//  _dof_map(static_cast<FEProblem &>(_subproblem).getNonlinearSystem().dofMap())
+    ElementPostprocessor(name, parameters),
+    _threshold(getParam<Real>("threshold")),
+    _mesh(_subproblem.mesh()),
+    _moose_var(_subproblem.getVariable(0, getParam<std::string>("variable"))),
+    _var_number(_moose_var.number()),
+    _region_count(0)
 {}
 
 void
@@ -60,16 +58,6 @@ NodalFloodCount::initialize()
   // Build a new node to element map
   _nodes_to_elem_map.clear();
   MeshTools::build_nodes_to_elem_map(_mesh._mesh, _nodes_to_elem_map);
-
-  //DEBUG
-//   for (unsigned int i=0; i<_nodes_to_elem_map.size(); ++i)
-//   {
-//     std::cout << "node_id: " << i << "\n";
-//     for (unsigned int j=0; j<_nodes_to_elem_map[i].size(); ++j)
-//       std::cout << _nodes_to_elem_map[i][j]->id() << " ";
-//     std::cout << "\n";
-//  }
-  //DEBUG
 }
 
 void
@@ -87,88 +75,14 @@ NodalFloodCount::execute()
 Real
 NodalFloodCount::getValue()
 {
-  //DEBUG
-//  pack(_packed_data);
-//  unpack(_packed_data);
-//  std::cout << "\n\n*********** PROCESSOR " << libMesh::processor_id() << " DATA ************\n";
-// 
-//  for (std::list<std::set<unsigned int> >::iterator li = _bubble_sets.begin(); li != _bubble_sets.end(); ++li)
-//  {
-//    for (std::set<unsigned int>::iterator it = li->begin(); it != li->end(); ++it)
-//    {
-//      std::cout << *it << " ";
-//      //      if (--counter == 0) break;
-//    }
-//    std::cout << "\n";
-//  }
-  //DEBUG
-  
   // Exchange data in parallel
   pack(_packed_data);
   Parallel::allgather(_packed_data, false);
   unpack(_packed_data);
 
-
-  //DEBUG
-//  std::cout << "\n\n************* BEFORE MERGE ********************\n";
-// 
-//  for (std::list<std::set<unsigned int> >::iterator li = _bubble_sets.begin(); li != _bubble_sets.end(); ++li)
-//  {
-//    for (std::set<unsigned int>::iterator it = li->begin(); it != li->end(); ++it)
-//    {
-//      std::cout << *it << " ";
-//      //      if (--counter == 0) break;
-//    }
-//    std::cout << "\n";
-//  }
-  //DEBUG
-
-  
-  // Now we need to merge the sets to remove bubbles that were partially counted by multiple processors
-  // This call consolidates _bubble_sets
   mergeSets();
 
-  //DEBUG
-//  std::cout << "\n\n************* AFTER MERGE ********************\n";
-//  for (std::list<std::set<unsigned int> >::iterator li = _bubble_sets.begin(); li != _bubble_sets.end(); ++li)
-//  {
-//    for (std::set<unsigned int>::iterator it = li->begin(); it != li->end(); ++it)
-//    {
-//      std::cout << *it << " ";
-//      //      if (--counter == 0) break;
-//    }
-//    std::cout << "\n";
-//  }
-
-  
-  //unsigned int ret_value = _bubble_sets.size();
-  //while (!_bubble_sets.empty())
-  //{
-  //  std::list<std::set<unsigned int> >::iterator low;
-  //  unsigned int min = std::numeric_limits<unsigned int>::max();
-  //  for (std::list<std::set<unsigned int> >::iterator li = _bubble_sets.begin(); li != _bubble_sets.end(); ++li)
-  //  {
-  //    if (*(li->begin()) < min)
-  //    {
-  //      min = *(li->begin());
-  //      low = li;
-  //    }
-  //  }
-  //  std::cout << "\nL " << low->size() << "\n";
-  //  unsigned int counter=5;
-  //  for (std::set<unsigned int>::iterator it = low->begin(); it != low->end(); ++it)
-  //  {
-  //    std::cout << *it << " ";
-  //    //      if (--counter == 0) break;
-  //  }
-  //  _bubble_sets.erase(low);
-  //}
-  //DEBUG
-
-  // Finally return the number of bubbles (count of unique sets)
-//  return ret_value;
   return _bubble_sets.size();
-//  return _region_count;
 }
 
 void
@@ -206,17 +120,6 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data) const
     mooseAssert(_region_count+1 == data.size(), "Error in packing data");
   }
 
-  //DEBUG
-//   for (unsigned int j=1; j<data.size(); ++j)
-//   {
-//     std::cout << "\nL " << data[j].size() << "\n";
-//     for (std::set<unsigned int>::iterator it = data[j].begin(); it != data[j].end(); ++it)
-//     {
-//       std::cout << *it << " ";
-//     }
-//   }
-  //DEBUG
-
   {
     /**
      * The size of the packed data structure should be the total number of marked
@@ -252,15 +155,6 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
   unsigned int curr_set_length;
   std::set<unsigned int> curr_set;
 
-  //DEBUG
-//   std::cout << "\npacked data:\n";
-//   for (unsigned int j=0; j<packed_data.size(); ++j)
-//   {
-//     std::cout << packed_data[j] << " ";
-//   }
-//   std::cout << std::endl;
-  //DEBUG
-
   _bubble_sets.clear();
   for (unsigned int i=0; i<packed_data.size(); ++i)
   {
@@ -295,6 +189,11 @@ NodalFloodCount::mergeSets()
   std::set<unsigned int> set_union;
   bool set_merged;
 
+  /**
+   * This loop will continue as long as sets of nodes are merged
+   * creating "new" sets.  There may be other ways to optimize this loop
+   * but it should not be a bottleneck in practice.
+   */
   do
   {
     set_merged = false;
@@ -309,8 +208,6 @@ NodalFloodCount::mergeSets()
         std::set_union(it1->begin(), it1->end(), it2->begin(), it2->end(),
                        std::inserter(set_union, set_union.end()));
 
-        // If the union of these two sets is less than
-//      std::cout << set_union.size() << " < " << it1->size() << " + " <<  it2->size() << std::endl;
         if (set_union.size() < it1->size() + it2->size())
         {
           *it1 = set_union;
@@ -336,12 +233,7 @@ NodalFloodCount::flood(const Node *node, unsigned int region)
   if (_bubble_map.find(node_id) != _bubble_map.end())
     return;
 
-  // Get the value from the serialized solution
-  // zeroeth system (Nonlinear), and zeroeth component (Scalar)
-//  unsigned int dof_number = node->dof_number(0, _var_number, 0);
-
   // This node hasn't been marked - is it in a bubble?
-//  if (_serialized_solution(dof_number) < _threshold)
   if (_moose_var.getNodalValue(*node) < _threshold)
   {
     // No - mark and return
@@ -360,32 +252,15 @@ NodalFloodCount::flood(const Node *node, unsigned int region)
     return;
   }
 
-  //DEBUG
-//  std::cout << "node_id: " << node->id() << "\n";
-//  for (unsigned int i=0; i<neighbors.size(); ++i)
-//  {
-//    std::cout << neighbors[i]->id() << " ";
-//  }
-//  std::cout << "\n";
-  //DEBUG
-  
   // Mark it! (If region is zero that signifies that this is a new bubble)
   _bubble_map[node_id] = region ? region : ++_region_count;
-  
+
   for (unsigned int i=0; i<neighbors.size(); ++i)
   {
-    // Only recurse one nodes this processor owns
+    // Only recurse on nodes this processor owns
     if (!region || isNodeValueValid(neighbors[i]->id()))
     {
-      //DEBUG
-//       std::vector<unsigned int> dof_indices(1);
-//       dof_indices[0] = neighbors[i]->dof_number(0, _var_number, 0);
-//       if (!_dof_map.all_semilocal_indices(dof_indices))
-//         mooseError("Hmm - doesn't look like we can safely access the value at this node\n");
-      //DEBUG
       flood(neighbors[i], _bubble_map[node_id]);
-//    else
-//      std::cout << "Not recursing on Node: " << node_id << " since we do not own it\n";
     }
   }
 }

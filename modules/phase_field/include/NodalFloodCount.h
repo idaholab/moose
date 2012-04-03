@@ -48,14 +48,15 @@ protected:
 
   /**
    * These routines packs/unpack the _bubble_map data into a structure suitable for parallel
-   * communication operations.
+   * communication operations. See the comments in these routines for the exact
+   * data structure layout.
    */
   void pack(std::vector<unsigned int> &) const;
   void unpack(const std::vector<unsigned int> &);
 
   /**
-   * This routine merges the data in _bubble_sets to resolve any
-   * bubbles that were counted as unique by multiple processors
+   * This routine merges the data in _bubble_sets from separate threads/processes to resolve
+   * any bubbles that were counted as unique by multiple processors
    */
   void mergeSets();
 
@@ -74,12 +75,8 @@ protected:
   std::vector<unsigned int> _packed_data;
   std::vector< std::vector< const Elem * > > _nodes_to_elem_map;
   std::list<std::set<unsigned int> > _bubble_sets;
-//  const NumericVector<Number> &_serialized_solution;
 
   unsigned int _region_count;
-  
-  //DEBUG
-//  libMesh::DofMap & _dof_map;
 };
 
 #endif
