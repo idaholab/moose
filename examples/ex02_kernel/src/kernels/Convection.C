@@ -27,9 +27,9 @@ InputParameters validParams<Convection>()
 }
 
 Convection::Convection(const std::string & name,
-                       InputParameters parameters)
+                       InputParameters parameters) :
   // You must call the constructor of the base class first
-  :Kernel(name, parameters),
+  Kernel(name, parameters),
    _velocity(getParam<RealVectorValue>("velocity"))
 {}
 
