@@ -24,7 +24,7 @@ template<>
 InputParameters validParams<CoupledForce>();
 
 /**
- * Simple class to demonstrate off diagonal Jacobian contributijons.
+ * Simple class to demonstrate off diagonal Jacobian contributions.
  */
 class CoupledForce : public Kernel
 {

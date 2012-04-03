@@ -19,7 +19,7 @@ InputParameters validParams<CoupledForce>()
 {
   InputParameters params = validParams<Kernel>();
 
-  params.addRequiredCoupledVar("v", "");
+  params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
 
   return params;
 }
