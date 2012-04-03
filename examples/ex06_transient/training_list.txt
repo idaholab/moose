@@ -1,5 +1,7 @@
 Title: Transient Analysis
 ex06.i
+../../moose/include/kernels/Diffusion.h
+../../moose/src/kernels/Diffusion.C
 include/kernels/ExampleTimeDerivative.h
 src/kernels/ExampleTimeDerivative.C
 src/main.C
