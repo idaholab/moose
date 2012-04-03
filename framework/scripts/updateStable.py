@@ -145,7 +145,8 @@ if __name__ == '__main__':
     runCMD(comment_syntax_cmd)
     runCMD(rsync_comment_syntax_cmd)
     arg_revision = process_args()
-    if buildStatus() and getCoverage():
+    coverage_status = getCoverage()
+    if buildStatus() and coverage_status:
       # Checking out moose-stable
       checkout_moose_stable = ['svn', 'co', '--quiet', moose_stable, 'moose-stable']
       runCMD(checkout_moose_stable)
