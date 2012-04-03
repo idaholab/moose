@@ -37,5 +37,5 @@ ExampleIC::value(const Point & p)
    * coordinates x,y,z can be accessed individually using
    * the parenthesis operator and a numeric index from 0..2
    */
-  return 2.*_value*fabs(p(0));
+  return 2.*_value*std::abs(p(0));
 }

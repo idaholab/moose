@@ -1,3 +1,4 @@
 Title: Automatic Mesh Adaptivity
 ex05.i
-
+include/kernels/ExampleCoefDiffusion.h
+src/kernels/ExampleCoefDiffusion.C

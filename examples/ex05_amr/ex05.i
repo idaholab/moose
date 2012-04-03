@@ -84,11 +84,11 @@
     steps = 2
     refine_fraction = 0.5 # flags by error fraction
     coarsen_fraction = 0
-    max_h_level = 10
+    max_h_level = 3
     error_estimator = KellyErrorEstimator
     print_changed_info = true
     weight_names = 'convected diffused'
-    weight_values = '1.0 0.0'
+    weight_values = '1.0      0.0'
   [../]
 []
 

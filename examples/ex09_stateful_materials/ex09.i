@@ -84,9 +84,9 @@
 []
 
 [Materials]
-  active = empty
+  active = example_material
 
-  [./empty]
+  [./example_material]
     type = ExampleMaterial
     block = 1
     initial_diffusivity = 0.05

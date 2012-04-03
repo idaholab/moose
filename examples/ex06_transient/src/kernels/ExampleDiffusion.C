@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "ExampleDiffusion.h"
-#include "Material.h"
 
 template<>
 InputParameters validParams<ExampleDiffusion>()

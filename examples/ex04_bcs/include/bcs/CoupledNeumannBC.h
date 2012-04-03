@@ -12,10 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "IntegratedBC.h"
-
 #ifndef COUPLEDNEUMANNBC_H
 #define COUPLEDNEUMANNBC_H
+
+#include "IntegratedBC.h"
 
 //Forward Declarations
 class CoupledNeumannBC;
