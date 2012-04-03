@@ -24,6 +24,7 @@ protected:
     MTA_VONMISES,
     MTA_PLASTICSTRAINMAG,
     MTA_HYDROSTATIC,
+    MTA_HOOP,
     MTA_FIRSTINVARIANT,
     MTA_SECONDINVARIANT,
     MTA_THIRDINVARIANT,
@@ -37,6 +38,9 @@ protected:
   const int _index;
   std::string _quantity_string;
   MTA_ENUM _quantity;
+
+  const Point _p1;
+  const Point _p2;
 
 };
 

@@ -260,6 +260,61 @@ public:
     return *rVal;
   }
 
+  Real operator()(const unsigned i, const unsigned j) const
+  {
+    const Real * rVal(NULL);
+    if (0 == i)
+    {
+      if (0 == j)
+      {
+        rVal = &_xx;
+      }
+      else if (1 == j)
+      {
+        rVal = &_xy;
+      }
+      else if (2 == j)
+      {
+        rVal = &_zx;
+      }
+    }
+    else if (1 == i)
+    {
+      if (0 == j)
+      {
+        rVal = &_xy;
+      }
+      else if (1 == j)
+      {
+        rVal = &_yy;
+      }
+      else if (2 == j)
+      {
+        rVal = &_yz;
+      }
+    }
+    else if (2 == i)
+    {
+      if (0 == j)
+      {
+        rVal = &_zx;
+      }
+      else if (1 == j)
+      {
+        rVal = &_yz;
+      }
+      else if (2 == j)
+      {
+        rVal = &_zz;
+      }
+    }
+    if (!rVal)
+    {
+      mooseError( "Index must be 0, 1, or 2" );
+    }
+    return *rVal;
+  }
+
   Real doubleContraction( const SymmTensor & rhs ) const
   {
     return _xx*rhs._xx + _yy*rhs._yy + _zz*rhs._zz +
