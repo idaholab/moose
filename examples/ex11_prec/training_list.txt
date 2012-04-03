@@ -1,6 +1,6 @@
 Title: Preconditioning
-ex11-default.i
-ex11-smp.i
-ex11-fdp.i
+default.i
+smp.i
+fdp.i
 ../../moose/include/kernels/CoupledForce.h
 ../../moose/src/kernels/CoupledForce.C

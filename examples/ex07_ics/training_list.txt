@@ -1,5 +1,5 @@
 Title: Custom Initial Conditions
-ex07-transient.i
+transient.i
 include/ics/ExampleIC.h
 src/ics/ExampleIC.C
 src/main.C
