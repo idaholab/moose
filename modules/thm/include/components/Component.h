@@ -54,14 +54,16 @@ public:
    * Get the ids associated with the component.  These can either be subdomain ids or boundary ids depending
    * on what you are asking for.
    *
-   * @param piece The name of the piece of the component you are intersted in.
+   * @param piece The name of the piece of the component you are interested in.
    */
-  virtual std::vector<unsigned int> getIDs(std::string piece) { return std::vector<unsigned int>(); }
+  virtual std::vector<unsigned int> getIDs(std::string /*piece*/) { return std::vector<unsigned int>(); }
 
   /**
    * Returns the variable associated with that part of the component.
+   *
+   * @param piece The name of the piece of the component you are interested in.
    */
-  virtual std::string variableName(std::string piece) { return std::string(); }
+  virtual std::string variableName(std::string /*piece*/) { return std::string(); }
 
 protected:
   unsigned int _id;                     ///< Unique ID of this component
