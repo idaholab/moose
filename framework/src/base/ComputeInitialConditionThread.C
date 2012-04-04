@@ -120,7 +120,8 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
       const std::vector<Point>& xyz_values = fe->get_xyz();
 
       // Update the DOF indices for this element based on the current mesh
-      dof_map.dof_indices (elem, dof_indices, var.number());
+      var.prepare();
+      dof_indices = var.dofIndices();
 
       // The number of DOFs on the element
       const unsigned int n_dofs = dof_indices.size();
