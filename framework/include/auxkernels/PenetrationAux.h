@@ -41,6 +41,23 @@ public:
   virtual ~PenetrationAux() {}
 
 protected:
+  enum PA_ENUM
+  {
+    PA_DISTANCE,
+    PA_TANG_DISTANCE,
+    PA_NORMAL_X,
+    PA_NORMAL_Y,
+    PA_NORMAL_Z,
+    PA_CLOSEST_POINT_X,
+    PA_CLOSEST_POINT_Y,
+    PA_CLOSEST_POINT_Z,
+    PA_ELEM_ID,
+    PA_SIDE
+  };
+
+  std::string _quantity_string;
+  PA_ENUM _quantity;
+
   virtual Real computeValue();
 
   PenetrationLocator & _penetration_locator;
