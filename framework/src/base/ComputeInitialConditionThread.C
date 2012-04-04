@@ -106,7 +106,7 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
       // The gradients of the shape functions at the quadrature points on the child element.
       const std::vector<std::vector<RealGradient> > * dphi = NULL;
 
-      const FEContinuity cont = var.getContinuity();
+      const FEContinuity cont = fe->get_continuity();
 
       if (cont == C_ONE)
       {

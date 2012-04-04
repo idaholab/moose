@@ -29,130 +29,216 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _dof_map(_sys.dofMap()),
     _tid(tid),
     _mesh(sys.mesh()),
-
-    _fe_helper(getFE(FEType(FIRST, LAGRANGE))),
-    _qrule(NULL),
-    _qrule_volume(NULL),
-    _qrule_arbitrary(NULL),
-    _qface_arbitrary(NULL),
-    _q_points(_fe_helper->get_xyz()),
-    _JxW(_fe_helper->get_JxW()),
-
-    _fe_face_helper(getFEFace(FEType(FIRST, LAGRANGE))),
-    _qrule_face(NULL),
-    _q_points_face(_fe_face_helper->get_xyz()),
-    _JxW_face(_fe_face_helper->get_JxW()),
-    _normals(_fe_face_helper->get_normals()),
+    _mesh_dimension(_mesh.dimension()),
+    _current_qrule(NULL),
+    _current_qrule_volume(NULL),
+    _current_qrule_arbitrary(NULL),
+    _current_qrule_face(NULL),
+    _current_qface_arbitrary(NULL),
 
     _current_elem(NULL),
     _current_side(0),
     _current_side_elem(NULL),
-    _neighbor_elem(NULL),
+    _current_neighbor_elem(NULL),
     _current_node(NULL),
     _current_neighbor_node(NULL),
 
     _max_cached_residuals(0),
     _max_cached_jacobians(0)
 {
+  // Build fe's for the helpers
+  getFE(FEType(FIRST, LAGRANGE));
+  getFEFace(FEType(FIRST, LAGRANGE));
+
+  // Build an FE helper object for this type for each dimension up to the dimension of the current mesh
+  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  {
+    _holder_fe_helper[dim] = &_fe[dim][FEType(FIRST, LAGRANGE)];
+    (*_holder_fe_helper[dim])->get_xyz();
+    (*_holder_fe_helper[dim])->get_JxW();
+
+    _holder_fe_face_helper[dim] = &_fe_face[dim][FEType(FIRST, LAGRANGE)];
+    (*_holder_fe_face_helper[dim])->get_xyz();
+    (*_holder_fe_face_helper[dim])->get_JxW();
+    (*_holder_fe_face_helper[dim])->get_normals();
+  }
 }
 
 Assembly::~Assembly()
 {
-  for (std::map<FEType, FEBase *>::iterator it = _fe.begin(); it != _fe.end(); ++it)
+  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+    for (std::map<FEType, FEBase *>::iterator it = _fe[dim].begin(); it != _fe[dim].end(); ++it)
+      delete it->second;
+  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+    for (std::map<FEType, FEBase *>::iterator it = _fe_face[dim].begin(); it != _fe_face[dim].end(); ++it)
+      delete it->second;
+  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+    for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor[dim].begin(); it != _fe_neighbor[dim].end(); ++it)
+      delete it->second;
+
+  for (std::map<unsigned int, QBase *>::iterator it = _holder_qrule_volume.begin(); it != _holder_qrule_volume.end(); ++it)
     delete it->second;
-  for (std::map<FEType, FEBase *>::iterator it = _fe_face.begin(); it != _fe_face.end(); ++it)
+  for (std::map<unsigned int, ArbitraryQuadrature *>::iterator it = _holder_qrule_arbitrary.begin(); it != _holder_qrule_arbitrary.end(); ++it)
     delete it->second;
-  for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor.begin(); it != _fe_neighbor.end(); ++it)
+  for (std::map<unsigned int, ArbitraryQuadrature *>::iterator it = _holder_qface_arbitrary.begin(); it != _holder_qface_arbitrary.end(); ++it)
     delete it->second;
-  delete _qrule_volume;
-  delete _qrule_arbitrary;
-  delete _qface_arbitrary;
-  delete _qrule_face;
+  for (std::map<unsigned int, QBase *>::iterator it = _holder_qrule_face.begin(); it != _holder_qrule_face.end(); ++it)
+    delete it->second;
+
   delete _current_side_elem;
 }
 
 FEBase * &
 Assembly::getFE(FEType type)
 {
-  if (!_fe[type])
-    _fe[type] = FEBase::build(_mesh.dimension(), type).release();
+  // Build an FE object for this type for each dimension up to the dimension of the current mesh
+  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  {
+    if (!_fe[dim][type])
+      _fe[dim][type] = FEBase::build(dim, type).release();
+  }
 
-  return _fe[type];
+  return _current_fe[type];
 }
 
 FEBase * &
 Assembly::getFEFace(FEType type)
 {
-  if (!_fe_face[type])
-    _fe_face[type] = FEBase::build(_mesh.dimension(), type).release();
+  // Build an FE object for this type for each dimension up to the dimension of the current mesh
+  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  {
+    if (!_fe_face[dim][type])
+      _fe_face[dim][type] = FEBase::build(dim, type).release();
+  }
 
-  return _fe_face[type];
+  return _current_fe_face[type];
 }
 
 FEBase * &
 Assembly::getFEFaceNeighbor(FEType type)
 {
-  if (!_fe_neighbor[type])
-    _fe_neighbor[type] = FEBase::build(_mesh.dimension(), type).release();
+  // Build an FE object for this type for each dimension up to the dimension of the current mesh
+  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  {
+    if (!_fe_neighbor[dim][type])
+      _fe_neighbor[dim][type] = FEBase::build(_mesh_dimension, type).release();
+  }
 
-  return _fe_neighbor[type];
+  return _current_fe_neighbor[type];
 }
 
 void
 Assembly::createQRules(QuadratureType type, Order o)
 {
-  delete _qrule_volume;
-  _qrule_volume = QBase::build(type, _mesh.dimension(), o).release();
-  delete _qrule_face;
-  _qrule_face = QBase::build(type, _mesh.dimension() - 1, o).release();
-  delete _qrule_arbitrary;
-  _qrule_arbitrary = new ArbitraryQuadrature(_mesh.dimension(), o);
+  _holder_qrule_volume.clear();
+  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+    _holder_qrule_volume[dim] = QBase::build(type, dim, o).release();
 
-  setVolumeQRule(_qrule_volume);
-  setFaceQRule(_qrule_face);
+  _holder_qrule_face.clear();
+  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+    _holder_qrule_face[dim] = QBase::build(type, dim - 1, o).release();
+
+  _holder_qrule_arbitrary.clear();
+  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+    _holder_qrule_arbitrary[dim] = new ArbitraryQuadrature(dim, o);
+
+//  setVolumeQRule(_qrule_volume);
+//  setFaceQRule(_qrule_face);
 }
 
 void
-Assembly::setVolumeQRule(QBase * qrule)
+Assembly::setVolumeQRule(QBase * qrule, unsigned int dim)
 {
-  _qrule = qrule;
+  _current_qrule = qrule;
 
-  for (std::map<FEType, FEBase *>::iterator it = _fe.begin(); it != _fe.end(); ++it)
-    it->second->attach_quadrature_rule(_qrule);
+  for (std::map<FEType, FEBase *>::iterator it = _fe[dim].begin(); it != _fe[dim].end(); ++it)
+    it->second->attach_quadrature_rule(_current_qrule);
 }
 
 void
-Assembly::setFaceQRule(QBase * qrule)
+Assembly::setFaceQRule(QBase * qrule, unsigned int dim)
 {
-  _qrule_face = qrule;
+  _current_qrule_face = qrule;
 
-  for (std::map<FEType, FEBase *>::iterator it = _fe_face.begin(); it != _fe_face.end(); ++it)
-    it->second->attach_quadrature_rule(_qrule_face);
+  for (std::map<FEType, FEBase *>::iterator it = _fe_face[dim].begin(); it != _fe_face[dim].end(); ++it)
+    it->second->attach_quadrature_rule(_current_qrule_face);
+}
+
+void
+Assembly::reinitFE(const Elem * elem)
+{
+  unsigned int dim = elem->dim();
+
+  for (std::map<FEType, FEBase *>::iterator it = _fe[dim].begin(); it != _fe[dim].end(); ++it)
+  {
+    FEBase * fe = it->second;
+    const FEType & fe_type = it->first;
+    fe->reinit(elem);
+    _current_fe[fe_type] = fe;
+
+    _fe_phi[fe_type] = fe->get_phi();
+    _fe_grad_phi[fe_type] = fe->get_dphi();
+    if(_need_second_derivative[fe_type])
+      _fe_second_phi[fe_type] = fe->get_d2phi();
+  }
+
+  // During that last loop the helper objects will have been reinitialized as well
+  // We need to dig out the q_points and JxW from it.
+  _current_q_points = (*_holder_fe_helper[dim])->get_xyz();
+  _current_JxW = (*_holder_fe_helper[dim])->get_JxW();
+}
+
+void
+Assembly::reinitFEFace(const Elem * elem, unsigned int side)
+{
+  unsigned int dim = elem->dim();
+
+  for (std::map<FEType, FEBase *>::iterator it = _fe_face[dim].begin(); it != _fe_face[dim].end(); ++it)
+  {
+    FEBase * fe_face = it->second;
+    const FEType & fe_type = it->first;
+    fe_face->reinit(elem, side);
+    _current_fe_face[it->first] = fe_face;
+
+    _fe_phi_face[fe_type] = fe_face->get_phi();
+    _fe_grad_phi_face[fe_type] = fe_face->get_dphi();
+    if(_need_second_derivative[fe_type])
+      _fe_second_phi_face[fe_type] = fe_face->get_d2phi();
+  }
+
+  // During that last loop the helper objects will have been reinitialized as well
+  // We need to dig out the q_points and JxW from it.
+  _current_q_points_face = (*_holder_fe_face_helper[dim])->get_xyz();
+  _current_JxW_face = (*_holder_fe_face_helper[dim])->get_JxW();
+  _current_normals = (*_holder_fe_face_helper[dim])->get_normals();
 }
 
 void
 Assembly::reinit(const Elem * elem)
 {
-  // Make sure the qrule is the right one
-  if(_qrule != _qrule_volume)
-    setVolumeQRule(_qrule_volume);
-
   _current_elem = elem;
-  for (std::map<FEType, FEBase *>::iterator it = _fe.begin(); it != _fe.end(); ++it)
-    it->second->reinit(elem);
+  unsigned int elem_dimension = elem->dim();
+
+  _current_qrule_volume = _holder_qrule_volume[elem_dimension];
+
+  // Make sure the qrule is the right one
+  if(_current_qrule != _current_qrule_volume)
+    setVolumeQRule(_current_qrule_volume, elem_dimension);
+
+  reinitFE(elem);
 
   // set the coord transformation
-  _coord.resize(_qrule->n_points());
+  _coord.resize(_current_qrule->n_points());
   switch (_sys.subproblem().coordSystem())
   {
   case Moose::COORD_XYZ:
-    for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+    for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
       _coord[qp] = 1.;
     break;
 
   case Moose::COORD_RZ:
-    for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
-      _coord[qp] = 2 * M_PI * _q_points[qp](0);
+    for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
+      _coord[qp] = 2 * M_PI * _current_q_points[qp](0);
     break;
 
   default:
@@ -162,8 +248,8 @@ Assembly::reinit(const Elem * elem)
 
   //Compute the area of the element
   _current_elem_volume = 0.;
-  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
-    _current_elem_volume += _JxW[qp] * _coord[qp];
+  for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
+    _current_elem_volume += _current_JxW[qp] * _coord[qp];
 }
 
 void
@@ -171,7 +257,9 @@ Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physica
 {
   std::vector<Point> reference_points;
 
-  FEInterface::inverse_map(_mesh.dimension(), FEType(), elem, physical_points, reference_points);
+  unsigned int elem_dimension = elem->dim();
+
+  FEInterface::inverse_map(elem->dim(), FEType(), elem, physical_points, reference_points);
 
   reinit(elem, reference_points);
 
@@ -182,15 +270,19 @@ Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physica
 void
 Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
 {
-  // Make sure the qrule is the right one
-  if(_qrule != _qrule_arbitrary)
-    setVolumeQRule(_qrule_arbitrary);
-
-  _qrule_arbitrary->setPoints(reference_points);
-
   _current_elem = elem;
-  for (std::map<FEType, FEBase *>::iterator it = _fe.begin(); it != _fe.end(); ++it)
-    it->second->reinit(elem);
+
+  unsigned int elem_dimension = _current_elem->dim();
+
+  _current_qrule_arbitrary = _holder_qrule_arbitrary[elem_dimension];
+
+  // Make sure the qrule is the right one
+  if(_current_qrule != _current_qrule_arbitrary)
+    setVolumeQRule(_current_qrule_arbitrary, elem_dimension);
+
+  _current_qrule_arbitrary->setPoints(reference_points);
+
+  reinitFE(elem);
 }
 
 void
@@ -199,25 +291,32 @@ Assembly::reinit(const Elem * elem, unsigned int side)
   _current_elem = elem;
   _current_side = side;
 
+  unsigned int elem_dimension = _current_elem->dim();
+
+  if(_current_qrule_face != _holder_qrule_face[elem_dimension])
+  {
+    _current_qrule_face = _holder_qrule_face[elem_dimension];
+    setFaceQRule(_current_qrule_face, elem_dimension);
+  }
+
   if (_current_side_elem)
     delete _current_side_elem;
   _current_side_elem = elem->build_side(side).release();
 
-  for (std::map<FEType, FEBase *>::iterator it = _fe_face.begin(); it != _fe_face.end(); ++it)
-    it->second->reinit(elem, side);
+  reinitFEFace(elem, side);
 
   // set the coord transformation
-  _coord.resize(_qrule_face->n_points());
+  _coord.resize(_current_qrule_face->n_points());
   switch (_sys.subproblem().coordSystem())
   {
   case Moose::COORD_XYZ:
-    for (unsigned int qp = 0; qp < _qrule_face->n_points(); qp++)
+    for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
       _coord[qp] = 1.;
     break;
 
   case Moose::COORD_RZ:
-    for (unsigned int qp = 0; qp < _qrule_face->n_points(); qp++)
-      _coord[qp] = 2 * M_PI * _q_points_face[qp](0);
+    for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
+      _coord[qp] = 2 * M_PI * _current_q_points_face[qp](0);
     break;
 
   default:
@@ -227,8 +326,8 @@ Assembly::reinit(const Elem * elem, unsigned int side)
 
   //Compute the area of the element
   _current_side_volume = 0.;
-  for (unsigned int qp = 0; qp < _qrule_face->n_points(); qp++)
-    _current_side_volume += _JxW_face[qp] * _coord[qp];
+  for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
+    _current_side_volume += _current_JxW_face[qp] * _coord[qp];
 }
 
 void
@@ -249,19 +348,29 @@ Assembly::reinit(const Elem * elem, unsigned int side, const Elem * neighbor)
   // reinit this element
   reinit(elem, side);
 
+  unsigned int neighbor_dim = neighbor->dim();
+
   // reinit neighbor element
-  for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor.begin(); it != _fe_neighbor.end(); ++it)
+  for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor[neighbor_dim].begin(); it != _fe_neighbor[neighbor_dim].end(); ++it)
   {
-    FEType fe_type = it->first;
+    FEBase * fe_neighbor = it->second;
+    const FEType & fe_type = it->first;
 
     // Find locations of quadrature points on the neighbor
     std::vector<Point> qface_neighbor_point;
-    libMesh::FEInterface::inverse_map (elem->dim(), fe_type, neighbor, _q_points_face, qface_neighbor_point);
+    libMesh::FEInterface::inverse_map (neighbor_dim, fe_type, neighbor, _current_q_points_face, qface_neighbor_point);
     // Calculate the neighbor element shape functions at those locations
     it->second->reinit(neighbor, &qface_neighbor_point);
+
+    _current_fe_neighbor[fe_type] = fe_neighbor;
+
+    _fe_phi_face_neighbor[fe_type] = fe_neighbor->get_phi();
+    _fe_grad_phi_face_neighbor[fe_type] = fe_neighbor->get_dphi();
+    if(_need_second_derivative[fe_type])
+      _fe_second_phi_face_neighbor[fe_type] = fe_neighbor->get_d2phi();
   }
 
-  _neighbor_elem = neighbor;
+  _current_neighbor_elem = neighbor;
 }
 
 void
@@ -269,25 +378,37 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int /*neighbo
 {
   std::vector<Point> reference_points;
 
+  unsigned int neighbor_dim = neighbor->dim();
+
   // reinit neighbor element
-  for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor.begin(); it != _fe_neighbor.end(); ++it)
+  for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor[neighbor_dim].begin(); it != _fe_neighbor[neighbor_dim].end(); ++it)
   {
+    FEBase * fe_neighbor = it->second;
     FEType fe_type = it->first;
 
-    FEInterface::inverse_map(_mesh.dimension(), fe_type, neighbor, physical_points, reference_points);
+    FEInterface::inverse_map(neighbor_dim, fe_type, neighbor, physical_points, reference_points);
 
     it->second->reinit(neighbor, &reference_points);
+
+    _current_fe_neighbor[it->first] = it->second;
+
+    _fe_phi_face_neighbor[fe_type] = fe_neighbor->get_phi();
+    _fe_grad_phi_face_neighbor[fe_type] = fe_neighbor->get_dphi();
+    if(_need_second_derivative[fe_type])
+      _fe_second_phi_face_neighbor[fe_type] = fe_neighbor->get_d2phi();
   }
 
   // Save off the physical points
   _current_physical_points = physical_points;
 
-  // Make sure the qrule is the right one
-  if(_qrule != _qrule_arbitrary)
-    setVolumeQRule(_qrule_arbitrary);
+  _current_qrule_arbitrary = _holder_qrule_arbitrary[neighbor_dim];
 
-  _qrule_arbitrary->setPoints(reference_points);
-  _neighbor_elem = neighbor;
+  // Make sure the qrule is the right one
+  if(_current_qrule != _current_qrule_arbitrary)
+    setVolumeQRule(_current_qrule_arbitrary, neighbor_dim);
+
+  _current_qrule_arbitrary->setPoints(reference_points);
+  _current_neighbor_elem = neighbor;
 }
 
 DenseMatrix<Number> &

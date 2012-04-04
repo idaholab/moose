@@ -20,7 +20,6 @@
 #include "ParallelUniqueId.h"
 
 // libMesh
-#include "fe.h"
 #include "quadrature.h"
 #include "dense_vector.h"
 #include "dense_matrix.h"
@@ -28,7 +27,9 @@
 #include "sparse_matrix.h"
 #include "elem.h"
 #include "node.h"
-
+#include "variable.h"
+#include "tensor_value.h"
+#include "vector_value.h"
 
 typedef MooseArray<Real>               VariableValue;
 typedef MooseArray<RealGradient>       VariableGradient;
@@ -88,18 +89,12 @@ public:
   /**
    * Get the type of finite element object
    */
-  const FEType feType() { return _fe->get_fe_type(); }
-
-  /**
-   * Get the continuity type of this variable
-   * @return The continuity type
-   */
-  const FEContinuity getContinuity() { return _fe->get_continuity(); }
+  const FEType feType() { return _fe_type; }
 
   /**
    * Get the order of this variable
    */
-  Order getOrder() const { return _fe->get_order(); }
+  Order getOrder() const { return _fe_type.order; }
 
   /**
    * Is this variable nodal
@@ -107,32 +102,32 @@ public:
    */
   bool isNodal();
 
-  // Read-only access to FE object used by this variable
-  FEBase * const & currentFE() const { return _fe; }
   /**
    * Current element this variable is evaluated at
    */
   const Elem * & currentElem() { return _elem; }
+
   /**
    * Current side this variable is being evaluated on
    */
   unsigned int & currentSide() { return _current_side; }
+
   /**
    * Current neighboring element
    */
   const Elem * & neighbor() { return _neighbor; }
 
-  const std::vector<std::vector<Real> > & phi() { return _phi; }
-  const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
-  const std::vector<std::vector<RealTensor> > & secondPhi() { _second_phi = &_fe->get_d2phi(); return *_second_phi; }
+  const std::vector<std::vector<Real> > & phi();
+  const std::vector<std::vector<RealGradient> > & gradPhi();
+  const std::vector<std::vector<RealTensor> > & secondPhi();
 
-  const std::vector<std::vector<Real> > & phiFace() { return _phi_face; }
-  const std::vector<std::vector<RealGradient> > & gradPhiFace() { return _grad_phi_face; }
-  const std::vector<std::vector<RealTensor> > & secondPhiFace() { _second_phi_face = &_fe_face->get_d2phi(); return *_second_phi_face; }
+  const std::vector<std::vector<Real> > & phiFace();
+  const std::vector<std::vector<RealGradient> > & gradPhiFace();
+  const std::vector<std::vector<RealTensor> > & secondPhiFace();
 
-  const std::vector<std::vector<Real> > & phiFaceNeighbor() { return _phi_face_neighbor; }
-  const std::vector<std::vector<RealGradient> > & gradPhiFaceNeighbor() { return _grad_phi_face_neighbor; }
-  const std::vector<std::vector<RealTensor> > & secondPhiFaceNeighbor() { _second_phi_face_neighbor = &_fe_face_neighbor->get_d2phi(); return *_second_phi_face_neighbor; }
+  const std::vector<std::vector<Real> > & phiFaceNeighbor();
+  const std::vector<std::vector<RealGradient> > & gradPhiFaceNeighbor();
+  const std::vector<std::vector<RealTensor> > & secondPhiFaceNeighbor();
 
   const std::vector<Point> & normals() { return _normals; }
 
@@ -269,6 +264,8 @@ protected:
   THREAD_ID _tid;
   /// variable number (from libMesh)
   unsigned int _var_num;
+  /// The FEType associated with this variable
+  FEType _fe_type;
   /// variable number (MOOSE)
   unsigned int _moose_var_num;
   Moose::VarKindType _var_kind;
@@ -276,6 +273,9 @@ protected:
   SubProblem & _subproblem;
   /// System this variable is part of
   SystemBase & _sys;
+
+  /// libMesh variable object for this variable
+  const Variable & _variable;
 
   /// DOF map
   const DofMap & _dof_map;
@@ -286,13 +286,6 @@ protected:
   QBase * & _qrule;
   /// Quadrature rule for the face
   QBase * & _qrule_face;
-
-  /// libMesh's FE object for this variable
-  FEBase * & _fe;
-  /// libMesh's FE object for this variable on a face
-  FEBase * & _fe_face;
-  /// libMesh's FE object for this variable on a face on the neighboring element
-  FEBase * & _fe_face_neighbor;
 
   /// current element
   const Elem * & _elem;

@@ -17,6 +17,7 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "NonlinearSystem.h"
+#include "Assembly.h"
 
 // libMesh
 #include "numeric_vector.h"
@@ -24,17 +25,16 @@
 
 MooseVariable::MooseVariable(unsigned int var_num, unsigned int mvn, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
     _var_num(var_num),
+    _fe_type(fe_type),
     _moose_var_num(mvn),
     _var_kind(var_kind),
     _subproblem(sys.subproblem()),
     _sys(sys),
+    _variable(sys.system().variable(_var_num)),
     _dof_map(sys.dofMap()),
     _assembly(assembly),
     _qrule(_assembly.qRule()),
     _qrule_face(_assembly.qRuleFace()),
-    _fe(_assembly.getFE(fe_type)),
-    _fe_face(_assembly.getFEFace(fe_type)),
-    _fe_face_neighbor(_assembly.getFEFaceNeighbor(fe_type)),
     _elem(_assembly.elem()),
     _current_side(_assembly.side()),
     _neighbor(_assembly.neighbor()),
@@ -62,21 +62,25 @@ MooseVariable::MooseVariable(unsigned int var_num, unsigned int mvn, const FETyp
     _need_second_old_neighbor(false),
     _need_second_older_neighbor(false),
 
-    _phi(_fe->get_phi()),
-    _grad_phi(_fe->get_dphi()),
+    _phi(_assembly.fePhi(_fe_type)),
+    _grad_phi(_assembly.feGradPhi(_fe_type)),
 
-    _phi_face(_fe_face->get_phi()),
-    _grad_phi_face(_fe_face->get_dphi()),
+    _phi_face(_assembly.fePhiFace(_fe_type)),
+    _grad_phi_face(_assembly.feGradPhiFace(_fe_type)),
 
-    _phi_face_neighbor(_fe_face_neighbor->get_phi()),
-    _grad_phi_face_neighbor(_fe_face_neighbor->get_dphi()),
+    _phi_face_neighbor(_assembly.fePhiFaceNeighbor(_fe_type)),
+    _grad_phi_face_neighbor(_assembly.feGradPhiFaceNeighbor(_fe_type)),
 
-    _normals(_fe_face->get_normals()),
+    _normals(_assembly.normals()),
 
     _node(_assembly.node()),
     _node_neighbor(_assembly.nodeNeighbor()),
     _scaling_factor(1.0)
 {
+  // Need to do this to make the assembly aware of what shape functions we're going to use
+  _assembly.getFE(_fe_type);
+  _assembly.getFEFace(_fe_type);
+  _assembly.getFEFaceNeighbor(_fe_type);
 }
 
 MooseVariable::~MooseVariable()
@@ -227,6 +231,63 @@ MooseVariable::insert(NumericVector<Number> & residual)
 {
   if (_has_nodal_value)
     residual.set(_nodal_dof_index, _nodal_u[0]);
+}
+
+const std::vector<std::vector<Real> > &
+MooseVariable::phi()
+{
+  return _phi;
+}
+
+const std::vector<std::vector<RealGradient> > &
+MooseVariable::gradPhi()
+{
+  return _grad_phi;
+}
+
+const std::vector<std::vector<RealTensor> > &
+MooseVariable::secondPhi()
+{
+  _second_phi = &_assembly.feSecondPhi(_fe_type);
+  return *_second_phi;
+}
+
+const std::vector<std::vector<Real> > &
+MooseVariable::phiFace()
+{
+  return _phi_face;
+}
+
+const std::vector<std::vector<RealGradient> > &
+MooseVariable::gradPhiFace()
+{
+  return _grad_phi_face;
+}
+
+const std::vector<std::vector<RealTensor> > &
+MooseVariable::secondPhiFace()
+{
+  _second_phi_face = &_assembly.feSecondPhiFace(_fe_type);
+  return *_second_phi_face;
+}
+
+const std::vector<std::vector<Real> > &
+MooseVariable::phiFaceNeighbor()
+{
+  return _phi_face_neighbor;
+}
+
+const std::vector<std::vector<RealGradient> > &
+MooseVariable::gradPhiFaceNeighbor()
+{
+  return _grad_phi_face_neighbor;
+}
+
+const std::vector<std::vector<RealTensor> > &
+MooseVariable::secondPhiFaceNeighbor()
+{
+  _second_phi_face_neighbor = &_assembly.feSecondPhiFaceNeighbor(_fe_type);
+  return *_second_phi_face_neighbor;
 }
 
 void
