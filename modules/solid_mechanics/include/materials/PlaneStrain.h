@@ -1,20 +1,18 @@
-#ifndef LINEAR_H
-#define LINEAR_H
+#ifndef PLANESTRAIN_H
+#define PLANESTRAIN_H
 
 #include "Element.h"
 
-//Forward Declarations
-class SymmElasticityTensor;
 namespace Elk
 {
 namespace SolidMechanics
 {
 
-class Linear : public Element
+class PlaneStrain : public Element
 {
 public:
-  Linear(const std::string & name, InputParameters parameters);
-  virtual ~Linear();
+  PlaneStrain(const std::string & name, InputParameters parameters);
+  virtual ~PlaneStrain();
 
 protected:
 
@@ -23,15 +21,19 @@ protected:
                               SymmTensor & total_strain_new,
                               SymmTensor & strain_increment );
 
+  virtual unsigned int getNumKnownCrackDirs() const
+  {
+    return 1;
+  }
+
   const bool _large_strain;
 
   VariableGradient & _grad_disp_x;
   VariableGradient & _grad_disp_y;
-  VariableGradient & _grad_disp_z;
 
 };
 
 }
 }
 
-#endif
+#endif //SOLIDMECHANICSMATERIALRZ_H

@@ -1,41 +1,25 @@
 #
-# This problem is adapted from the Abaqus verification manual:
-#   "1.5.4 Patch test for axisymmetric elements"
+# This problem is taken from the Abaqus verification manual:
+#   "1.5.1 Membrane patch test"
+# The stress solution is given as:
+#   xx = yy = 1600
+#   zz = 800
+#   xy = 400
+#   yz = zx = 0
 #
-# For large strain,
-#   e_rr = 1e-3 + (1e-3)^2
-#   e_zz = 1e-3 + 0.5*(1e-3)^2
-#   e_tt = 1e-3 + 0.5*(1e-3)^2
-#   e_rz = 0.5*(1e-3+(1e-3)^2)
-#
-# If you multiply these strains through the elasticity tensor for
-#   axisymmetry, you will obtain the following stresses:
-#   xx = 2001.6
-#   yy = zz = 2001.2
-#   xy = 400.4
-#
-
-[Problem]
-  coord_type = RZ
-[]
 
 [Mesh]#Comment
   file = elastic_patch_rz.e
-  displacements = 'disp_x disp_y'
 [] # Mesh
 
 [Functions]
-  [./ur]
+  [./ux]
     type = ParsedFunction
-    value = '1e-3*x'
+    value = '1e-3*(x+0.5*y)'
   [../]
-  [./uz]
+  [./uy]
     type = ParsedFunction
-    value = '1e-3*(x+y)'
-  [../]
-  [./body]
-    type = ParsedFunction
-    value = '-400/x'
+    value = '1e-3*(y+0.5*x)'
   [../]
 [] # Functions
 
@@ -90,19 +74,12 @@
 
 [SolidMechanics]
   [./solid]
-    disp_r = disp_x
-    disp_z = disp_y
+    disp_x = disp_x
+    disp_y = disp_y
   [../]
 []
 
 [Kernels]
-
-  [./body]
-    type = BodyForce
-    variable = disp_y
-    value = 1
-    function = body
-  [../]
 
   [./heat]
     type = HeatConduction
@@ -158,13 +135,13 @@
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 10
-    function = ur
+    function = ux
   [../]
   [./uz]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 10
-    function = uz
+    function = uy
   [../]
 
   [./temp]
@@ -182,15 +159,16 @@
     type = Elastic
     block = 1
 
-    disp_r = disp_x
-    disp_z = disp_y
+    disp_x = disp_x
+    disp_y = disp_y
 
     youngs_modulus = 1e6
     poissons_ratio = 0.25
 
     temp = temp
 
-    large_strain = true
+    formulation = planestrain
+
   [../]
 
   [./heat]
@@ -226,7 +204,6 @@
 [Output]
   interval = 1
   output_initial = true
-  elemental_as_nodal = true
   exodus = true
   perf_log = true
 [] # Output

@@ -19,7 +19,17 @@ test_rz = { INPUT : 'elastic_patch_rz.i',
             SCALE_REFINE : 1
             }
 
-test_large_strain = { INPUT : 'elastic_patch_rz_large_strain.i',
-                      EXODIFF : ['elastic_patch_rz_large_strain_out.e'],
-                      SCALE_REFINE : 3
-                      }
+test_rz_large_strain = { INPUT : 'elastic_patch_rz_large_strain.i',
+                         EXODIFF : ['elastic_patch_rz_large_strain_out.e'],
+                         SCALE_REFINE : 3
+                       }
+
+test_plane_strain = { INPUT : 'elastic_patch_plane_strain.i',
+                      EXODIFF : ['elastic_patch_plane_strain_out.e'],
+                      SCALE_REFINE : 1
+                    }
+
+test_plane_strain_large_strain = { INPUT : 'elastic_patch_plane_strain_large_strain.i',
+                                   EXODIFF : ['elastic_patch_plane_strain_large_strain_out.e'],
+                                   SCALE_REFINE : 3
+                                 }

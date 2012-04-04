@@ -13,6 +13,7 @@ namespace SolidMechanics
 Linear::Linear(const std::string & name,
                                InputParameters parameters)
   :Element(name, parameters),
+   _large_strain(getParam<bool>("large_strain")),
    _grad_disp_x(coupledGradient("disp_x")),
    _grad_disp_y(coupledGradient("disp_y")),
    _grad_disp_z(_dim == 3 ? coupledGradient("disp_z") : _grad_zero)
@@ -35,6 +36,27 @@ Linear::computeStrain( const unsigned qp,
   strain_increment.xy( 0.5*(_grad_disp_x[qp](1)+_grad_disp_y[qp](0)) );
   strain_increment.yz( 0.5*(_grad_disp_y[qp](2)+_grad_disp_z[qp](1)) );
   strain_increment.zx( 0.5*(_grad_disp_z[qp](0)+_grad_disp_x[qp](2)) );
+  if (_large_strain)
+  {
+    strain_increment.xx() += 0.5*(_grad_disp_x[qp](0)*_grad_disp_x[qp](0) +
+                                  _grad_disp_y[qp](0)*_grad_disp_y[qp](0) +
+                                  _grad_disp_z[qp](0)*_grad_disp_z[qp](0));
+    strain_increment.yy() += 0.5*(_grad_disp_x[qp](1)*_grad_disp_x[qp](1) +
+                                  _grad_disp_y[qp](1)*_grad_disp_y[qp](1) +
+                                  _grad_disp_z[qp](1)*_grad_disp_z[qp](1));
+    strain_increment.zz() += 0.5*(_grad_disp_x[qp](2)*_grad_disp_x[qp](2) +
+                                  _grad_disp_y[qp](2)*_grad_disp_y[qp](2) +
+                                  _grad_disp_z[qp](2)*_grad_disp_z[qp](2));
+    strain_increment.xy() += 0.5*(_grad_disp_x[qp](0)*_grad_disp_x[qp](1) +
+                                  _grad_disp_y[qp](0)*_grad_disp_y[qp](1) +
+                                  _grad_disp_z[qp](0)*_grad_disp_z[qp](1));
+    strain_increment.yz() += 0.5*(_grad_disp_x[qp](1)*_grad_disp_x[qp](2) +
+                                  _grad_disp_y[qp](1)*_grad_disp_y[qp](2) +
+                                  _grad_disp_z[qp](1)*_grad_disp_z[qp](2));
+    strain_increment.zx() += 0.5*(_grad_disp_x[qp](2)*_grad_disp_x[qp](0) +
+                                  _grad_disp_y[qp](2)*_grad_disp_y[qp](0) +
+                                  _grad_disp_z[qp](2)*_grad_disp_z[qp](0));
+  }
 
   total_strain_new = strain_increment;
 

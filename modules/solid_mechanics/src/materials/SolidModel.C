@@ -1,8 +1,9 @@
 #include "SolidModel.h"
 
-#include "Nonlinear3D.h"
-#include "Linear.h"
 #include "AxisymmetricRZ.h"
+#include "Linear.h"
+#include "Nonlinear3D.h"
+#include "PlaneStrain.h"
 
 #include "Problem.h"
 #include "SymmIsotropicElasticityTensor.h"
@@ -25,7 +26,7 @@ InputParameters validParams<SolidModel>()
   params.addParam<unsigned int>("max_cracks", 3, "The maximum number of cracks allowed at a material point.");
   params.addParam<std::string>("formulation", "Element formulation.  Choices are \"Nonlinear3D\", \"AxisymmetricRZ\", and \"Linear\".  (Case insensitive.)");
   params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen). For use with Nonlinear3D formulation.");
-  params.addParam<bool>("large_strain", false, "Whether to include large strain terms in AxisymmetricRZ formulation.");
+  params.addParam<bool>("large_strain", false, "Whether to include large strain terms in AxisymmetricRZ and PlaneStrain formulations.");
   params.addCoupledVar("disp_r", "The r displacement");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
@@ -675,6 +676,15 @@ SolidModel::createElement( const std::string & name,
       mooseError("AxisymmetricRZ must define disp_r and disp_z");
     }
     element = new Elk::SolidMechanics::AxisymmetricRZ(name, parameters);
+  }
+  else if ( formulation == "planestrain" )
+  {
+    if ( !isCoupled("disp_x") ||
+         !isCoupled("disp_y") )
+    {
+      mooseError("PlaneStrain must define disp_x and disp_y");
+    }
+    element = new Elk::SolidMechanics::PlaneStrain(name, parameters);
   }
   else if ( formulation == "linear" )
   {
