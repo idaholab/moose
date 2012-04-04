@@ -17,6 +17,42 @@
     order = FIRST
     family = LAGRANGE
   [../]
+  [./tangential_distance]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./normal_x]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./normal_y]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./normal_z]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./closest_point_x]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./closest_point_y]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./closest_point_z]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./element_id]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./side]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 []
 
 [Kernels]
@@ -29,7 +65,6 @@
 []
 
 [AuxBCs]
-  active = 'penetrate penetrate2'
 
   [./penetrate]
     type = PenetrationAux
@@ -43,6 +78,150 @@
     variable = penetration
     boundary = 3
     paired_boundary = 2
+  [../]
+
+  [./penetrate3]
+    type = PenetrationAux
+    variable = tangential_distance
+    boundary = 2
+    paired_boundary = 3
+    quantity = tangential_distance
+  [../]
+
+  [./penetrate4]
+    type = PenetrationAux
+    variable = tangential_distance
+    boundary = 3
+    paired_boundary = 2
+    quantity = tangential_distance
+  [../]
+
+  [./penetrate5]
+    type = PenetrationAux
+    variable = normal_x
+    boundary = 2
+    paired_boundary = 3
+    quantity = normal_x
+  [../]
+
+  [./penetrate6]
+    type = PenetrationAux
+    variable = normal_x
+    boundary = 3
+    paired_boundary = 2
+    quantity = normal_x
+  [../]
+
+  [./penetrate7]
+    type = PenetrationAux
+    variable = normal_y
+    boundary = 2
+    paired_boundary = 3
+    quantity = normal_y
+  [../]
+
+  [./penetrate8]
+    type = PenetrationAux
+    variable = normal_y
+    boundary = 3
+    paired_boundary = 2
+    quantity = normal_y
+  [../]
+
+  [./penetrate9]
+    type = PenetrationAux
+    variable = normal_z
+    boundary = 2
+    paired_boundary = 3
+    quantity = normal_z
+  [../]
+
+  [./penetrate10]
+    type = PenetrationAux
+    variable = normal_z
+    boundary = 3
+    paired_boundary = 2
+    quantity = normal_z
+  [../]
+
+  [./penetrate11]
+    type = PenetrationAux
+    variable = closest_point_x
+    boundary = 2
+    paired_boundary = 3
+    quantity = closest_point_x
+  [../]
+
+  [./penetrate12]
+    type = PenetrationAux
+    variable = closest_point_x
+    boundary = 3
+    paired_boundary = 2
+    quantity = closest_point_x
+  [../]
+
+  [./penetrate13]
+    type = PenetrationAux
+    variable = closest_point_y
+    boundary = 2
+    paired_boundary = 3
+    quantity = closest_point_y
+  [../]
+
+  [./penetrate14]
+    type = PenetrationAux
+    variable = closest_point_y
+    boundary = 3
+    paired_boundary = 2
+    quantity = closest_point_y
+  [../]
+
+  [./penetrate15]
+    type = PenetrationAux
+    variable = closest_point_z
+    boundary = 2
+    paired_boundary = 3
+    quantity = closest_point_z
+  [../]
+
+  [./penetrate16]
+    type = PenetrationAux
+    variable = closest_point_z
+    boundary = 3
+    paired_boundary = 2
+    quantity = closest_point_z
+  [../]
+
+  [./penetrate17]
+    type = PenetrationAux
+    variable = element_id
+    boundary = 2
+    paired_boundary = 3
+    quantity = element_id
+  [../]
+
+  [./penetrate18]
+    type = PenetrationAux
+    variable = element_id
+    boundary = 3
+    paired_boundary = 2
+    quantity = element_id
+  [../]
+
+  [./penetrate19]
+    type = PenetrationAux
+    variable = side
+    boundary = 2
+    paired_boundary = 3
+    quantity = side
+  [../]
+
+  [./penetrate20]
+    type = PenetrationAux
+    variable = side
+    boundary = 3
+    paired_boundary = 2
+    quantity = side
   [../]
 []
 
