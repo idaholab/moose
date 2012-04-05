@@ -1,7 +1,6 @@
 from TestHarness import TestHarness
 from options import *
-from sqlite3 import dbapi2 as sqlite
-import os, time
+import os, time, sys
 
 CREATE_TABLE = """create table timing
 (
@@ -17,6 +16,11 @@ CREATE_TABLE = """create table timing
 class TestTimer(TestHarness):
   def __init__(self, argv, app_name, moose_dir):
     TestHarness.__init__(self, argv, app_name, moose_dir)
+    try:
+      from sqlite4 import dbapi2 as sqlite
+    except:
+      print 'Error: --store-timing requires the sqlite3 python module.'
+      sys.exit(1)
     self.app_name = app_name
     self.db_file = self.options.dbFile
     if not self.db_file:
@@ -29,6 +33,7 @@ class TestTimer(TestHarness):
         print 'Warning: Assuming database location ' + self.db_file
 
   def createDB(self, fname):
+    from sqlite3 import dbapi2 as sqlite
     print 'Creating empty database at ' + fname
     con = sqlite.connect(fname)
     cr = con.cursor()
@@ -36,6 +41,7 @@ class TestTimer(TestHarness):
     con.commit()
 
   def preRun(self):
+    from sqlite3 import dbapi2 as sqlite
     # Delete previous data if app_name and repo revision are found
     con = sqlite.connect(self.db_file)
     cr = con.cursor()
@@ -44,6 +50,7 @@ class TestTimer(TestHarness):
 
   # After the run store the results in the database
   def postRun(self, test, timing):
+    from sqlite3 import dbapi2 as sqlite
     con = sqlite.connect(self.db_file)
     cr = con.cursor()
 
