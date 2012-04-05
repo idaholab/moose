@@ -31,6 +31,7 @@
 // kernels
 #include "TimeDerivative.h"
 #include "Diffusion.h"
+#include "AnisotropicDiffusion.h"
 #include "CoupledForce.h"
 #include "UserForcingFunction.h"
 #include "BodyForce.h"
@@ -208,6 +209,7 @@ registerObjects()
   // kernels
   registerKernel(TimeDerivative);
   registerKernel(Diffusion);
+  registerKernel(AnisotropicDiffusion);
   registerKernel(CoupledForce);
   registerKernel(UserForcingFunction);
   registerKernel(BodyForce);

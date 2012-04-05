@@ -23,6 +23,7 @@
 #include "getpot.h"
 #include "exodusII_io.h"
 #include "vector_value.h"
+#include "tensor_value.h"
 
 class MooseMesh;
 class FEProblem;
@@ -107,6 +108,18 @@ public:
   static void checkFileWritable(const std::string & filename);
 
   /**
+<<<<<<< Updated upstream
+=======
+   * This class returns true or false if the passed in string can be converted
+   * to a number type.  If it can be converted it will be written to
+   * number
+   */
+  template<class NumType>
+  static bool isNumber(const std::string &input, NumType &number);
+
+
+  /**
+>>>>>>> Stashed changes
    * Return a reference to the getpot object to extract options from the input file
    */
   const GetPot * getPotHandle() const;
@@ -207,15 +220,13 @@ protected:
                           InputParameters::Parameter<RealVectorValue>* param,
                           bool in_global, GlobalParamsAction *global_block);
 
+  void setRealTensorValue(const std::string & full_name, const std::string & short_name,
+                          InputParameters::Parameter<RealTensorValue>* param,
+                          bool in_global, GlobalParamsAction *global_block);
+
   template<typename T>
   void setVectorParameter(const std::string & full_name, const std::string & short_name,
                           InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block);
-
-
-  template<typename T>
-  void setTensorParameter(const std::string & full_name, const std::string & short_name,
-                          InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global,
-                          GlobalParamsAction *global_block);
 
   /************************************
    * Protected Data Members

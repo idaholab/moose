@@ -12,38 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef GLOBALPARAMSACTION_H
-#define GLOBALPARAMSACTION_H
+#ifndef ANISOTROPICDIFFUSION_H
+#define ANISOTROPICDIFFUSION_H
 
-#include "Action.h"
-#include "Moose.h"
+#include "Kernel.h"
 
-class GlobalParamsAction;
+class AnisotropicDiffusion;
 
 template<>
-InputParameters validParams<GlobalParamsAction>();
+InputParameters validParams<AnisotropicDiffusion>();
 
 
-class GlobalParamsAction: public Action
+class AnisotropicDiffusion : public Kernel
 {
 public:
-  GlobalParamsAction(const std::string & name, InputParameters params);
+  AnisotropicDiffusion(const std::string & name, InputParameters parameters);
+  virtual ~AnisotropicDiffusion();
 
-  virtual void act();
+protected:
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
 
-  template <typename T>
-  inline
-  T & setScalarParam(const std::string &name)
-  {
-    return parameters().set<T>(name);
-  }
-
-  template <typename T>
-  inline
-  std::vector<T> & setVectorParam(const std::string &name)
-  {
-    return parameters().set<std::vector<T> >(name);
-  }
+  RealTensorValue _k;
 };
 
-#endif //GLOBALPARAMSACTION_H
+
+#endif /* ANISOTROPICDIFFUSION_H */

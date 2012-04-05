@@ -12,38 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef GLOBALPARAMSACTION_H
-#define GLOBALPARAMSACTION_H
+#include "AnisotropicDiffusion.h"
 
-#include "Action.h"
-#include "Moose.h"
-
-class GlobalParamsAction;
 
 template<>
-InputParameters validParams<GlobalParamsAction>();
-
-
-class GlobalParamsAction: public Action
+InputParameters validParams<AnisotropicDiffusion>()
 {
-public:
-  GlobalParamsAction(const std::string & name, InputParameters params);
+  InputParameters p = validParams<Kernel>();
+  p.addRequiredParam<RealTensorValue>("tensor_coeff", "The Tensor to multiply the Diffusion operator by");
+  return p;
+}
 
-  virtual void act();
 
-  template <typename T>
-  inline
-  T & setScalarParam(const std::string &name)
-  {
-    return parameters().set<T>(name);
-  }
+AnisotropicDiffusion::AnisotropicDiffusion(const std::string & name, InputParameters parameters) :
+    Kernel(name, parameters),
+    _k(getParam<RealTensorValue>("tensor_coeff"))
+{
+}
 
-  template <typename T>
-  inline
-  std::vector<T> & setVectorParam(const std::string &name)
-  {
-    return parameters().set<std::vector<T> >(name);
-  }
-};
+AnisotropicDiffusion::~AnisotropicDiffusion()
+{
+}
 
-#endif //GLOBALPARAMSACTION_H
+Real
+AnisotropicDiffusion::computeQpResidual()
+{
+  return (_k * _grad_u[_qp]) * _grad_test[_i][_qp];
+}
+
+Real
+AnisotropicDiffusion::computeQpJacobian()
+{
+  return (_k * _grad_phi[_j][_qp]) * _grad_test[_i][_qp];
+}

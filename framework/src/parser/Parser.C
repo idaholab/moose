@@ -787,6 +787,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       InputParameters::Parameter<subdomain_id_type>  * subdomain_id_param  = dynamic_cast<InputParameters::Parameter<subdomain_id_type>*>(it->second);
       InputParameters::Parameter<bool> * bool_param = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
       InputParameters::Parameter<RealVectorValue> * real_vec_val_param = dynamic_cast<InputParameters::Parameter<RealVectorValue>*>(it->second);
+      InputParameters::Parameter<RealTensorValue> * real_tensor_val_param = dynamic_cast<InputParameters::Parameter<RealTensorValue>*>(it->second);
       InputParameters::Parameter<std::string> * string_param = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
       InputParameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<InputParameters::Parameter<std::vector<Real> >*>(it->second);
       InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
@@ -794,9 +795,11 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       InputParameters::Parameter<std::vector<subdomain_id_type>  > * vec_subdomain_id_param  = dynamic_cast<InputParameters::Parameter<std::vector<subdomain_id_type> >*>(it->second);
       InputParameters::Parameter<std::vector<bool>  > * vec_bool_param  = dynamic_cast<InputParameters::Parameter<std::vector<bool> >*>(it->second);
       InputParameters::Parameter<std::vector<std::string> > * vec_string_param = dynamic_cast<InputParameters::Parameter<std::vector<std::string> >*>(it->second);
-      InputParameters::Parameter<std::vector<std::vector<Real> > > * tensor_real_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<Real> > >*>(it->second);
-      InputParameters::Parameter<std::vector<std::vector<int> > >  * tensor_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<int> > >*>(it->second);
-      InputParameters::Parameter<std::vector<std::vector<bool> > > * tensor_bool_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<bool> > >*>(it->second);
+
+
+//      InputParameters::Parameter<std::vector<std::vector<Real> > > * tensor_real_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<Real> > >*>(it->second);
+//      InputParameters::Parameter<std::vector<std::vector<int> > >  * tensor_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<int> > >*>(it->second);
+//      InputParameters::Parameter<std::vector<std::vector<bool> > > * tensor_bool_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<bool> > >*>(it->second);
 
       if (real_param)
         setScalarParameter<Real>(full_name, it->first, real_param, in_global, global_params_block);
@@ -811,6 +814,8 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       // Real Vector Param
       else if (real_vec_val_param)
         setRealVectorValue(full_name, it->first, real_vec_val_param, in_global, global_params_block);
+      else if (real_tensor_val_param)
+        setRealTensorValue(full_name, it->first, real_tensor_val_param, in_global, global_params_block);
       else if (string_param)
         setScalarParameter<std::string>(full_name, it->first, string_param, in_global, global_params_block);
       else if (vec_real_param)
@@ -825,12 +830,6 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setVectorParameter<bool>(full_name, it->first, vec_bool_param, in_global, global_params_block);
       else if (vec_string_param)
         setVectorParameter<std::string>(full_name, it->first, vec_string_param, in_global, global_params_block);
-      else if (tensor_real_param)
-        setTensorParameter<Real>(full_name, it->first, tensor_real_param, in_global, global_params_block);
-      else if (tensor_int_param)
-        setTensorParameter<int>(full_name, it->first, tensor_int_param, in_global, global_params_block);
-      else if (tensor_bool_param)
-        setTensorParameter<bool>(full_name, it->first, tensor_bool_param, in_global, global_params_block);
     }
   }
 }
@@ -908,8 +907,7 @@ void Parser::setVectorParameter(const std::string & full_name, const std::string
   }
 }
 
-template<typename T>
-void Parser::setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsAction *global_block)
+void Parser::setRealTensorValue(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<RealTensorValue>* param, bool in_global, GlobalParamsAction *global_block)
 {
   GetPot *gp;
 
@@ -921,26 +919,19 @@ void Parser::setTensorParameter(const std::string & full_name, const std::string
     gp = &_getpot_file;
 
   int vec_size = gp->vector_variable_size(full_name.c_str());
-  int one_dim = pow(vec_size, 0.5);
 
-  param->set().resize(one_dim);
-  for (int i=0; i<one_dim; ++i)
-  {
-    param->set()[i].resize(one_dim);
-    for (int j=0; j<one_dim; ++j)
-      param->set()[i][j] = gp->get_value_no_default(full_name.c_str(), param->get()[i][j], i*one_dim+j);
-  }
+  if (vec_size != LIBMESH_DIM * LIBMESH_DIM)
+    mooseError(std::string("Error in RealTensorValue parmeter ") + full_name + ": size is " << vec_size
+               << ", should be " << LIBMESH_DIM * LIBMESH_DIM);
 
+  RealTensorValue value;
+  for (int i=0; i<LIBMESH_DIM; ++i)
+    for (int j=0; j<LIBMESH_DIM; ++j)
+      value(i, j) = Real(gp->get_value_no_default(full_name.c_str(), (Real)0.0, i*LIBMESH_DIM+j));
+
+  param->set() = value;
   if (in_global)
-  {
-    global_block->setTensorParam<T>(short_name).resize(one_dim);
-    for (int i=0; i<one_dim; ++i)
-    {
-      global_block->setTensorParam<T>(short_name)[i].resize(one_dim);
-      for (int j=0; j<one_dim; ++j)
-        global_block->setTensorParam<T>(short_name)[i][j] = param->get()[i][j];
-    }
-  }
+    global_block->setScalarParam<RealTensorValue>(short_name) = value;
 }
 
 //--------------------------------------------------------------------------
