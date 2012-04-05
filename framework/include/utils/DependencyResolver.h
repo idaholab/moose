@@ -34,7 +34,7 @@ public:
   ~DependencyResolver() {}
 
   /**
-   * Insert a dependecy pair - the first value or the "key" depends on the second value or the "value"
+   * Insert a dependency pair - the first value or the "key" depends on the second value or the "value"
    */
   void insertDependency(const T & key, const T & value);
 
@@ -50,7 +50,7 @@ public:
   const std::vector<std::set<T> > & getSortedValuesSets();
 
   /**
-   * This function also returns dependency resolved values but with a simplier single vector interface.
+   * This function also returns dependency resolved values but with a simpler single vector interface.
    * Some information may be lost as values at the same level that don't depend on one and other can't
    * be represented in a single vector.  This isn't a problem in practice though.
    */
@@ -68,7 +68,7 @@ private:
   template<typename map_type>
   class value_iterator;
 
-  /// This is our main datastructure a multimap that contains any number of dependencies in a key = value format
+  /// This is our main data structure a multimap that contains any number of dependencies in a key = value format
   std::multimap<T, T> _depends;
 
   /// Extra items that need to come out in the sorted list but contain no dependencies
