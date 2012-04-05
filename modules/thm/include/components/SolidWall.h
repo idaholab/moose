@@ -1,7 +1,7 @@
 #ifndef SOLIDWALL_H
 #define SOLIDWALL_H
 
-#include "Component.h"
+#include "BoundaryBase.h"
 
 class SolidWall;
 
@@ -12,7 +12,7 @@ InputParameters validParams<SolidWall>();
  * A simple component for solid wall BC
  *
  */
-class SolidWall : public Component
+class SolidWall : public BoundaryBase
 {
 public:
   SolidWall(const std::string & name, InputParameters params);
@@ -21,11 +21,6 @@ public:
   virtual void buildMesh();
   virtual void addVariables();
   virtual void addMooseObjects();
-
-  // Location
-  virtual Point getPosition() { return Point(0, 0, 0); }
-
-  virtual RealVectorValue getDirection() { return RealVectorValue(0, 0, 0); }
 
 protected:
   std::string _input;                                   ///< Name of the input

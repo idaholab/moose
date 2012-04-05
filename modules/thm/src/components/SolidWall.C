@@ -10,14 +10,14 @@
 template<>
 InputParameters validParams<SolidWall>()
 {
-  InputParameters params = validParams<Component>();
+  InputParameters params = validParams<BoundaryBase>();
   params.addRequiredParam<std::string>("input", "Pipe name");
   return params;
 }
 
 
 SolidWall::SolidWall(const std::string & name, InputParameters params) :
-    Component(name, params),
+    BoundaryBase(name, params),
     _input(getParam<std::string>("input"))
 {
 }
