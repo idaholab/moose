@@ -17,7 +17,7 @@ class TestTimer(TestHarness):
   def __init__(self, argv, app_name, moose_dir):
     TestHarness.__init__(self, argv, app_name, moose_dir)
     try:
-      from sqlite4 import dbapi2 as sqlite
+      from sqlite3 import dbapi2 as sqlite
     except:
       print 'Error: --store-timing requires the sqlite3 python module.'
       sys.exit(1)
