@@ -8,8 +8,7 @@
 #include "Convection.h"
 #include "InternalVolume.h"
 #include "MaterialRealScaledAux.h"
-#include "MixedValueBC.h"
-#include "MixedValue2BC.h"
+#include "RobinBC.h"
 #include "JouleHeating.h"
 
 void
@@ -22,6 +21,5 @@ Elk::Misc::registerObjects()
   registerKernel(JouleHeating);
   registerAux(MaterialRealScaledAux);
   registerPostprocessor(InternalVolume);
-  registerBoundaryCondition(MixedValueBC);
-  registerBoundaryCondition(MixedValue2BC);
+  registerBoundaryCondition(RobinBC);
 }

@@ -12,21 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MIXEDVALUEBC_H
-#define MIXEDVALUEBC_H
+#ifndef ROBINBC_H
+#define ROBINBC_H
 
 #include "IntegratedBC.h"
 
 
-class MixedValueBC;
+class RobinBC;
 
 template<>
-InputParameters validParams<MixedValueBC>();
+InputParameters validParams<RobinBC>();
 
-class MixedValueBC : public IntegratedBC
+class RobinBC : public IntegratedBC
 {
 public:
-  MixedValueBC(const std::string & name, InputParameters parameters);
+  RobinBC(const std::string & name, InputParameters parameters);
 
 
 protected:
@@ -36,4 +36,4 @@ protected:
 };
 
 
-#endif //MIXEDVALUEBC_H
+#endif //ROBINBC_H

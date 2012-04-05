@@ -12,24 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MixedValue2BC.h"
+#include "RobinBC.h"
 
 template<>
-InputParameters validParams<MixedValue2BC>()
+InputParameters validParams<RobinBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
+  params.addParam<Real>("value", 0.0, "The value of the gradient on the boundary.");
   return params;
 }
 
-MixedValue2BC::MixedValue2BC(const std::string & name, InputParameters parameters) :
-  IntegratedBC(name, parameters)
+RobinBC::RobinBC(const std::string & name, InputParameters parameters) :
+  IntegratedBC(name, parameters),
+  _value(parameters.get<Real>("value"))
 {
 }
 
 Real
-MixedValue2BC::computeQpResidual()
+RobinBC::computeQpResidual()
 {
-  return -_test[_i][_qp]*_q_point[_qp](0);
-//  return (_grad_u[_qp])(1)*_test[_i][_qp] - _q_point[_qp](0);
+  return (_grad_u[_qp])(1)*_test[_i][_qp] + _u[_qp] - _value;
 }
 
