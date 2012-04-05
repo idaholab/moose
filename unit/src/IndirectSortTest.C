@@ -26,7 +26,7 @@ IndirectSort::realSort()
   std::vector<double> a(a1, a1+8);
 
   std::vector<size_t> b;
-  Moose::indirectSortLess(a.begin(), a.end(), b);
+  Moose::indirectSort(a.begin(), a.end(), b);
 
   CPPUNIT_ASSERT( b[0] == 0 );
   CPPUNIT_ASSERT( b[1] == 2 );
@@ -48,7 +48,7 @@ IndirectSort::intSort()
     a[i] = length-i-1;
 
   std::vector<size_t> b;
-  Moose::indirectSortLess(a.begin(), a.end(), b);
+  Moose::indirectSort(a.begin(), a.end(), b);
 
   CPPUNIT_ASSERT( b[0] == 7 );
   CPPUNIT_ASSERT( b[1] == 6 );
@@ -74,7 +74,7 @@ IndirectSort::testStableSort()
   a.push_back(std::make_pair(2, 3));
   a.push_back(std::make_pair(1, 4));
 
-  Moose::indirectSortLess(a.begin(), a.end(), b);
+  Moose::indirectSort(a.begin(), a.end(), b);
 
   CPPUNIT_ASSERT( b[0] == 3 );
   CPPUNIT_ASSERT( b[1] == 1 );
@@ -96,14 +96,14 @@ IndirectSort::testDoubleSort()
   a[4] = 81;
 
   std::vector<size_t> b;
-  Moose::indirectSortGreater(a.begin(), a.end(), b);
+  Moose::indirectSort(a.begin(), a.end(), b, std::greater<int>());
 
   std::vector<size_t> c(b.size());
 
   // This operation is equivalent to doing another sort of the indicies
   for (unsigned int i=0; i<b.size(); ++i)
     c[b[i]] = i;
-  //Moose::indirectSortLess(b.begin(), b.end(), c);
+  //Moose::indirectSort(b.begin(), b.end(), c);
 
   CPPUNIT_ASSERT( c[0] == 0 );
   CPPUNIT_ASSERT( c[1] == 3 );
