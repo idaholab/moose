@@ -50,11 +50,17 @@
 #include "dof_map.h"
 
 namespace Moose {
+  void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys);
 
   void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys)
   {
     Problem * p = sys.get_equation_systems().parameters.get<Problem *>("_problem");
     p->computeJacobian(sys, soln, jacobian);
+
+    // This call is here to make sure the residual vector is up to date with any decisions that have been made in
+    // the Jacobian evaluation.  That is important in JFNK becasue that residual is used for finite differencing
+    compute_residual(soln, *sys.rhs, sys);
+    sys.rhs->close();
   }
 
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys)
