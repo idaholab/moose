@@ -29,6 +29,7 @@ public:
 
   virtual void buildMesh();
   virtual void addVariables();
+  virtual const std::string & getType() { return _type; }
 
   virtual Point getPosition() { return _position; }
   virtual RealVectorValue getDirection() { return _dir; }
@@ -62,6 +63,9 @@ protected:
                                                         ///< Local node IDs are used by other components for connecting
 
   std::map<RELAP7::EEndType, unsigned int> _bnd_ids;    ///< Boundary id of this pipe (indexing: local "node id" => boundary_id).
+
+public:
+  static const std::string _type;
 };
 
 #endif /* PIPEBASE_H */

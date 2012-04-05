@@ -11,6 +11,9 @@
 // physics
 #include "Diffusion.h"
 
+const std::string PipeBase::_type("pipe");
+
+
 template<>
 InputParameters validParams<PipeBase>()
 {

@@ -43,6 +43,8 @@ public:
 
   virtual void parseInput();
 
+  virtual const std::string & getType() = 0;
+
   // Location
   virtual Point getPosition() = 0;
 
