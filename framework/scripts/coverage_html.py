@@ -32,7 +32,7 @@ def buildFilter(directory_list):
     coverage_filter_cmd.extend([ '-e', 'raw.info', '/*' + single_filter.lower() + '/src*', '-e', 'raw.info', '/*' + single_filter.lower() + '/include*' ])
   coverage_filter_cmd.extend([ '-o', 'extracted.info' ])
 # build the genhtml command (builds a coverage directory containing the HTML):
-  genhtml_cmd = [ 'genhtml', 'extracted.info', '-t', str(directory_list[0].upper()) + " Test Coverage", '--num-spaces', '2', '--legend', '-o', 'coverage' ]
+  genhtml_cmd = [ 'genhtml', 'extracted.info', '-t', str(directory_list[0].upper()) + " Test Coverage", '--num-spaces', '2', '--legend', '--no-branch-coverage', '-o', 'coverage' ]
 # build the rsync command (moves the coverage directory to HPCSC's ssl web server):
   rsync_cmd = [ 'rsync', '-ro', 'coverage', 'hpcsc:/srv/www/ssl/' + str(directory_list[0].upper()) ]
 
