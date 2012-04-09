@@ -41,6 +41,11 @@
     order = FIRST
     family = LAGRANGE
   [../]
+
+  [./grain_num]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []	     
 
 [Kernels]
@@ -53,6 +58,14 @@
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
+    execute_on = timestep
+  [../]
+
+  [./grain_num]
+    type = GrainOrientation
+    variable = grain_num
+    execute_on = timestep
+    output_angles = false
   [../]
 []
 
@@ -83,6 +96,7 @@ active = ' '
   [./ave_gr_area]
     type = PolycrystalAvGrArea
     variable = gr0
+    execute_on = timestep
   [../]
 []
 
