@@ -2,5 +2,6 @@ from options import *
 
 test = {
   INPUT : 'nodal_constraint_test.i',
-  EXODIFF : ['nodal_constraint_test_out.e']
+  EXODIFF : ['nodal_constraint_test_out.e'],
+  SKIP : 'Waiting for libMesh stable update'
 }
