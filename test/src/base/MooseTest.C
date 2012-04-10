@@ -68,6 +68,8 @@
 #include "ImplicitODEx.h"
 #include "ImplicitODEy.h"
 
+#include "EqualValueNodalConstraint.h"
+
 // meshes
 #include "StripeMesh.h"
 
@@ -150,6 +152,8 @@ void registerObjects()
 
   // meshes
   registerObject(StripeMesh);
+
+  registerConstraint(EqualValueNodalConstraint);
 }
 
 } // namespace
