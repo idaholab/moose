@@ -32,28 +32,50 @@ public:
   void setThirdEulerAngle(const Real a3);
 
   /**
-   * Set the material constant c11
+   * Set the material constant c11; assumes cubic material.
    */
 
   void setMaterialConstantc11(const Real c11);
 
   /**
-   * Set the material constant c22
+   * Set the material constant c22; assumes cubic material.
    */
 
   void setMaterialConstantc12(const Real c12);
 
   /**
-   * Set the material constant c44
+   * Set the material constant c44; assumes cubic material.
    */
 
   void setMaterialConstantc44(const Real c44);
 
   /**
-   * Perform rotation around one axis (c-axis)
+   * Perform rotation around three axes
    */
 
-  virtual void rotate(const Real a1);
+  virtual void rotate(const Real a1, const Real a2, const Real a3);
+
+  /**
+   * @return the first Euler angle
+   */
+  
+  Real firstEulerAngle();
+
+  /**
+   * @return the first Euler angle
+   */
+  
+  Real secondEulerAngle();
+
+  /**
+   * @return the first Euler angle
+   */
+  
+  Real thirdEulerAngle();
+
+  // Debugging functions
+  void show_dt_matrix();
+  void show_r_matrix();
 
 protected:
 

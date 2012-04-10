@@ -1,4 +1,5 @@
 // Original class author: A.M. Jokisaari
+// O. Heinonen, et al. at ANL also have contributed significantly - thanks guys!
 
 #ifndef LINEARGENERALANISOTROPICMATERIAL_H
 #define LINEARGENERALANISOTROPICMATERIAL_H
@@ -36,6 +37,10 @@ protected:
   
   
 private:
+  Real _euler_angle_1;
+  Real _euler_angle_2;
+  Real _euler_angle_3;
+
   // vectors to get the input values
   std::vector<Real> _Cijkl_matrix_vector;
   
@@ -43,9 +48,7 @@ private:
   bool _all_21;
 
   //Individual material information
-  SymmElasticityTensor _Cijkl_matrix;
-  //MaterialProperty<SymmElasticityTensor > &_Cijkl_matrix_MP;
-  
+  SymmAnisotropicElasticityTensor _Cijkl_matrix;
 };
 
 #endif //LINEARGENERALANISOTROPICMATERIAL_H

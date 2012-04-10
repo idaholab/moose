@@ -1,9 +1,9 @@
 // Original class author: A.M. Jokisaari
+// O. Heinonen, et al. at ANL also have contributed significantly - thanks guys!
 
 #include "LinearGeneralAnisotropicMaterial.h"
 #include <ostream>
 
-// may need some more includes here.
 
 /**
  * LinearGeneralAnisotropicMaterial handles a fully anisotropic, single-crystal material's elastic
@@ -17,20 +17,36 @@ InputParameters validParams<LinearGeneralAnisotropicMaterial>()
   InputParameters params = validParams<SolidMechanicsMaterial>();
   params.addRequiredParam<std::vector<Real> >("C_matrix", "Stiffness tensor for matrix");  
   params.addRequiredParam<bool>("all_21","True if all 21 independent values are given; else false indicates only 9 values given (C11, C12, C13, C22, C23, C33, C44, C55, C66.");
-  
+  params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1");
+  params.addParam<Real>("euler_angle_2", 0.0, "Euler angle in direction 2");
+  params.addParam<Real>("euler_angle_3", 0.0, "Euler angle in direction 3");
+
   return params;
 }
 
 LinearGeneralAnisotropicMaterial::LinearGeneralAnisotropicMaterial(const std::string & name, 
                                                                    InputParameters parameters)
     : SolidMechanicsMaterial(name, parameters),
+      _euler_angle_1(getParam<Real>("euler_angle_1")),
+      _euler_angle_2(getParam<Real>("euler_angle_2")),
+      _euler_angle_3(getParam<Real>("euler_angle_3")),
       _Cijkl_matrix_vector(getParam<std::vector<Real> >("C_matrix")),
       _all_21(getParam<bool>("all_21")),
-      _Cijkl_matrix(true)
-      //_Cijkl_matrix_MP(declareProperty<SymmElasticityTensor >("Cijkl_matrix_MP"))
+      _Cijkl_matrix()
 {
   // fill in the local tensors from the input vector information
   _Cijkl_matrix.fillFromInputVector(_Cijkl_matrix_vector, _all_21);
+
+  //rotate the C_ijkl matrix 
+  _Cijkl_matrix.rotate(_euler_angle_1,_euler_angle_2,_euler_angle_3);
+
+  //debugging
+  /*_Cijkl_matrix.show_r_matrix();
+    _Cijkl_matrix.show_dt_matrix();
+    if(libMesh::on_command_line("--debug") || libMesh::on_command_line("--debug-elasticity-Cijkl"))
+    {
+      libMesh::out << "Material " << this->name() << " on mesh block " << this->blockID() << " has _Cijkl_matrix:\n" << _Cijkl_matrix << "\n";
+    }*/
 }
 
 void
