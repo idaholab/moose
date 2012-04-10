@@ -85,12 +85,13 @@ MultiDContactConstraint::updateContactSet()
   for (; it!=end; ++it)
   {
     PenetrationLocator::PenetrationInfo * pinfo = it->second;
-    const Node * node = pinfo->_node;
 
     if (!pinfo)
     {
       continue;
     }
+
+    const Node * node = pinfo->_node;
 
     unsigned int slave_node_num = it->first;
 
