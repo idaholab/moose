@@ -122,8 +122,19 @@ YAMLFormatter::print(const std::string & name, const std::string * prev_name, st
 
       //prints the value, which is the default value when dumping the tree
       //because it hasn't been changed
-      iter->second->print(_out);
 
+      // remove additional '\n' possibly generated in output (breaks YAML parsing)
+      std::ostringstream oss;
+      iter->second->print(oss);
+      std::string tmp_str = oss.str();
+      for(std::string::iterator it=tmp_str.begin(); it!=tmp_str.end(); ++it)
+      {
+        if ( *it == '\n')
+        {
+          *it = ' ';
+        }
+      }
+      _out << tmp_str;
       _out << "\n" << spacing << "    description: |\n      " << spacing
                 << param_ptrs[i]->getDocString(iter->first) << "\n";
     }
