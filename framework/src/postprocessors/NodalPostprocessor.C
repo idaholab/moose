@@ -31,7 +31,7 @@ NodalPostprocessor::NodalPostprocessor(const std::string & name, InputParameters
     MooseVariableInterface(parameters, false),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
-    _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _var(_subproblem.getVariable(_tid, parameters.get<std::string>("variable"))),
 //    _q_point(_subproblem.points(_tid)),
 //    _qrule(_subproblem.qRule(_tid)),
 //    _JxW(_subproblem.JxW(_tid)),
