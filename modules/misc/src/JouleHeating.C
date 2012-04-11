@@ -34,8 +34,8 @@ JouleHeating::JouleHeating(const std::string & name, InputParameters parameters)
 Real
 JouleHeating::computeQpResidual()
 {
-  //std::cout << std::abs(_grad_potential[_qp].size()) << "\n";
   
-  
-  return -_test[_i][_qp] * std::abs(_grad_potential[_qp].size());
+  return -_grad_potential[_qp]*_grad_potential[_qp]*_test[_i][_qp];
+  // return -_test[_i][_qp] * std::abs(_grad_potential[_qp].size());
 }
+
