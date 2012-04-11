@@ -45,7 +45,7 @@ public:
   virtual Real value(const Point & p);
 
 private:
-  Real _value;
+  Real _coefficient;
 };
 
 #endif //EXAMPLEIC_H

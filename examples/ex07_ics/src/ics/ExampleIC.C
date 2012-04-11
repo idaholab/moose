@@ -18,14 +18,14 @@ template<>
 InputParameters validParams<ExampleIC>()
 {
   InputParameters params = validParams<InitialCondition>();
-  params.addRequiredParam<Real>("value", "The value of the initial condition");
+  params.addRequiredParam<Real>("coefficient", "The value of the initial condition");
   return params;
 }
 
 ExampleIC::ExampleIC(const std::string & name,
                      InputParameters parameters) :
     InitialCondition(name, parameters),
-    _value(getParam<Real>("value"))
+    _coefficient(getParam<Real>("coefficient"))
 {}
 
 Real
@@ -37,5 +37,5 @@ ExampleIC::value(const Point & p)
    * coordinates x,y,z can be accessed individually using
    * the parenthesis operator and a numeric index from 0..2
    */
-  return 2.*_value*std::abs(p(0));
+  return 2.*_coefficient*std::abs(p(0));
 }
