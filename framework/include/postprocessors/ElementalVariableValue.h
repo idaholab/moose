@@ -12,28 +12,38 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "FunctionAux.h"
-#include "Function.h"
+#ifndef ELEMENTALVARIABLEVALUE_H
+#define ELEMENTALVARIABLEVALUE_H
+
+#include "GeneralPostprocessor.h"
+// libMesh
+#include "elem.h"
+
+class MooseMesh;
+
+//Forward Declarations
+class ElementalVariableValue;
 
 template<>
-InputParameters validParams<FunctionAux>()
-{
-  InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<std::string>("function", "The function to use as the value");
-  return params;
-}
+InputParameters validParams<ElementalVariableValue>();
 
-FunctionAux::FunctionAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
-    _func(getFunction("function"))
+class ElementalVariableValue : public GeneralPostprocessor
 {
-}
+public:
+  ElementalVariableValue(const std::string & name, InputParameters parameters);
 
-Real
-FunctionAux::computeValue()
-{
-  if (isNodal())
-    return _func.value(_t, *_current_node);
-  else
-    return _func.value(_t, _current_elem->centroid());
-}
+  virtual void initialize() {}
+  virtual void execute() {}
+
+  /**
+   * This will return the degrees of freedom in the system.
+   */
+  virtual Real getValue();
+
+protected:
+  MooseMesh & _mesh;
+  std::string _var_name;
+  Elem * _element;
+};
+
+#endif //ELEMENTALVARIABLEVALUE_H

@@ -129,6 +129,7 @@
 #include "NodalMaxValue.h"
 #include "PlotFunction.h"
 #include "ScalarL2Error.h"
+#include "ElementalVariableValue.h"
 
 // dampers
 #include "ConstantDamper.h"
@@ -301,6 +302,7 @@ registerObjects()
   registerPostprocessor(SideFluxIntegral);
   registerPostprocessor(SideIntegral);
   registerPostprocessor(NodalMaxValue);
+  registerPostprocessor(ElementalVariableValue);
   // dampers
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);
