@@ -24,6 +24,7 @@
 #include "Conversion.h"
 #include "Moose.h"
 #include "ConstantIC.h"
+#include "FP.h"
 
 #include "ElementH1Error.h"
 
@@ -971,8 +972,12 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
 void
 FEProblem::projectSolution()
 {
+  Moose::enableFPE();
+
   _aux.projectSolution();
   _nl.projectSolution();
+
+  Moose::enableFPE(false);
 }
 
 void
