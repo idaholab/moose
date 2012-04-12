@@ -9,24 +9,23 @@
 #   is 7.
 #
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]#Comment
-  file = internal_volume_rz_quad8_test.e
+  file = internal_volume_hex20.e
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
-  [./pressure]
+  [./step]
     type = PiecewiseLinear
-    x = '0. 1.'
-    y = '0. 1.'
-    scale_factor = 1e4
+    x = '0. 1. 2. 3.'
+    y = '0. 0. 1e-2 0.'
+    scale_factor = 0.5
   [../]
 []
 
 [Variables]
+
+#  active = 'disp_x disp_y disp_z'
 
   [./disp_x]
     order = SECOND
@@ -38,39 +37,44 @@
     family = LAGRANGE
   [../]
 
+  [./disp_z]
+    order = SECOND
+    family = LAGRANGE
+  [../]
+
 []
 
 [SolidMechanics]
   [./solid]
-    disp_r = disp_x
-    disp_z = disp_y
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
-
 [BCs]
+
+  active = 'no_x no_y prescribed_z'
 
   [./no_x]
     type = DirichletBC
     variable = disp_x
-    boundary = '1 2'
+    boundary = 100
     value = 0.0
   [../]
 
   [./no_y]
     type = DirichletBC
     variable = disp_y
-    boundary = '1 2'
+    boundary = 100
     value = 0.0
   [../]
 
-  [./Pressure]
-    [./the_pressure]
-      boundary = 3
-      function = pressure
-      disp_x = disp_x
-      disp_y = disp_y
-    [../]
+  [./prescribed_z]
+    type = FunctionPresetBC
+    variable = disp_z
+    boundary = 100
+    function = step
   [../]
 []
 
@@ -78,32 +82,47 @@
   active = 'stiffStuff stiffStuff2'
 
   [./stiffStuff]
-    type = Elastic
+    type = LinearIsotropicMaterial
     block = 1
 
-    disp_r = disp_x
-    disp_z = disp_y
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
 
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+    thermal_expansion = 1e-5
+    t_ref = 400.
   [../]
 
   [./stiffStuff2]
-    type = Elastic
+    type = LinearIsotropicMaterial
     block = 2
 
-    disp_r = disp_x
-    disp_z = disp_y
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
 
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+    thermal_expansion = 1e-5
+    t_ref = 400.
   [../]
+[]
+
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+  []
 []
 
 [Executioner]
 
   type = Transient
-  petsc_options = '-snes_mf -ksp_monitor'
+  petsc_options = '-snes_mf_operator -ksp_monitor'
+  petsc_options_iname = '-pc_type -snes_type -snes_ls -ksp_gmres_restart'
+  petsc_options_value = 'lu       ls         basic    101'
 
   nl_abs_tol = 1e-10
 
@@ -111,7 +130,8 @@
 
   start_time = 0.0
   dt = 1.0
-  end_time = 1.0
+  #num_steps = 3
+  end_time = 3.0
 
   [./Quadrature]
     order = THIRD
@@ -122,13 +142,19 @@
 [Postprocessors]
   [./internalVolume]
     type = InternalVolume
-    boundary = 2
+    boundary = 100
     variable = disp_x
+  [../]
+
+  [./dispZ]
+    type = ElementAverageValue
+    block = '1 2'
+    variable = disp_z
   [../]
 []
 
 [Output]
-  file_base = out_rz
+  file_base = out
   interval = 1
   output_initial = true
   exodus = true

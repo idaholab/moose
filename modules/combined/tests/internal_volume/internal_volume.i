@@ -10,7 +10,7 @@
 #
 
 [Mesh]#Comment
-  file = internal_volume_hex20_test.e
+  file = internal_volume.e
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -28,17 +28,17 @@
 #  active = 'disp_x disp_y disp_z'
 
   [./disp_x]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
   [../]
 
   [./disp_y]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
   [../]
 
   [./disp_z]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
   [../]
 
@@ -71,7 +71,7 @@
   [../]
 
   [./prescribed_z]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = 100
     function = step
@@ -110,19 +110,10 @@
   [../]
 []
 
-[Preconditioning]
-  [./SMP]
-    type = SMP
-    full = true
-  []
-[]
-
 [Executioner]
 
   type = Transient
   petsc_options = '-snes_mf_operator -ksp_monitor'
-  petsc_options_iname = '-pc_type -snes_type -snes_ls -ksp_gmres_restart'
-  petsc_options_value = 'lu       ls         basic    101'
 
   nl_abs_tol = 1e-10
 
@@ -132,11 +123,6 @@
   dt = 1.0
   #num_steps = 3
   end_time = 3.0
-
-  [./Quadrature]
-    order = THIRD
-  [../]
-
 []
 
 [Postprocessors]

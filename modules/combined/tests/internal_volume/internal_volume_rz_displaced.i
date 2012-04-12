@@ -1,12 +1,35 @@
 #
-# Internal Volume Test
+# Volume Test
 #
-# This test is designed to compute the internal volume of a space considering
-#   an embedded volume inside.
+# This test is designed to compute the volume of a space when displacements
+#   are imposed..
 #
-# The mesh is composed of one block (1) with an interior cavity of volume 8.
-#   Block 2 sits in the cavity and has a volume of 1.  Thus, the total volume
-#   is 7.
+# The mesh is composed of one block (1) with two elements.  The mesh is
+#   such that the initial volume is 1.  One element face is displaced to
+#   produce a final volume of 2.
+#
+#     r1
+#   +----+   -
+#   |    |   |
+#   +----+   h    V1 = pi * h * r1^2
+#   |    |   |
+#   +----+   -
+#
+#   becomes
+#
+#   +----+
+#   |     \
+#   +------+      v2 = pi * h/2 * ( r2^2 + 1/3 * ( r2^2 + r2*r1 + r1^2 ) )
+#   |      |
+#   +------+
+#      r2
+#
+#   r1 = 1
+#   r2 = 1.5380168369562588
+#   h  = 1/pi
+#
+#  Note:  Because the InternalVolume PP computes cavity volumes as positive,
+#         the volumes reported are negative.
 #
 
 [Problem]
@@ -14,15 +37,15 @@
 []
 
 [Mesh]#Comment
-  file = internal_volume_rz_test.e
+  file = internal_volume_rz_displaced.e
+  displacements = 'disp_x disp_y'
 []
 
 [Functions]
-  [./pressure]
+  [./disp_x]
     type = PiecewiseLinear
     x = '0. 1.'
-    y = '0. 1.'
-    scale_factor = 1e4
+    y = '0. 0.5380168369562588'
   [../]
 []
 
@@ -53,29 +76,26 @@
   [./no_x]
     type = DirichletBC
     variable = disp_x
-    boundary = '1 2'
+    boundary = 1
     value = 0.0
   [../]
 
   [./no_y]
     type = DirichletBC
     variable = disp_y
-    boundary = '1 2'
+    boundary = 2
     value = 0.0
   [../]
 
-  [./Pressure]
-    [./fred]
-      boundary = 3
-      function = pressure
-      disp_x = disp_x
-      disp_y = disp_y
-    [../]
+  [./x]
+    type = FunctionDirichletBC
+    boundary = 3
+    variable = disp_x
+    function = disp_x
   [../]
 []
 
 [Materials]
-  active = 'stiffStuff stiffStuff2'
 
   [./stiffStuff]
     type = Elastic
@@ -88,16 +108,6 @@
     poissons_ratio = 0.3
   [../]
 
-  [./stiffStuff2]
-    type = Elastic
-    block = 2
-
-    disp_r = disp_x
-    disp_z = disp_y
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.3
-  [../]
 []
 
 [Executioner]
@@ -123,7 +133,6 @@
 []
 
 [Output]
-  file_base = out_rz
   interval = 1
   output_initial = true
   exodus = true
