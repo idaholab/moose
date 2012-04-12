@@ -58,14 +58,14 @@ public:
    *
    * @param piece The name of the piece of the component you are interested in.
    */
-  virtual std::vector<unsigned int> getIDs(std::string /*piece*/) { return std::vector<unsigned int>(); }
+  virtual std::vector<unsigned int> getIDs(std::string piece) = 0;
 
   /**
    * Returns the variable associated with that part of the component.
    *
    * @param piece The name of the piece of the component you are interested in.
    */
-  virtual std::string variableName(std::string /*piece*/) { return std::string(); }
+  virtual std::string variableName(std::string piece) = 0;
 
 protected:
   unsigned int _id;                     ///< Unique ID of this component

@@ -120,3 +120,17 @@ PipeBase::addVariables()
 {
   Model::addVariables(_subdomain_id);
 }
+
+std::vector<unsigned int>
+PipeBase::getIDs(std::string /*piece*/)
+{
+  mooseError("Not implemented yet");
+  return std::vector<unsigned int>();
+}
+
+std::string
+PipeBase::variableName(std::string /*piece*/)
+{
+  mooseError("Not implemented yet");
+  return std::string();
+}
