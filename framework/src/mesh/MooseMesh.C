@@ -92,7 +92,7 @@ MooseMesh::freeBndNodes()
 void
 MooseMesh::read(const std::string file_name)
 {
-  _mesh.read(file_name);
+  _mesh.read(file_name, NULL, true);
 }
 
 void
