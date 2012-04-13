@@ -20,6 +20,9 @@ InputParameters validParams<PipeBase>()
   InputParameters params = validParams<Component>();
   //Input parameters [NO] default values should be given.
   params.addRequiredParam<std::vector<Real> >("position", "Origin (start) of the pipe");
+
+  std::vector<Real> zr(LIBMESH_DIM, 0.);
+  params.addParam<std::vector<Real> >("offset", zr, "Offset of the origin for mesh generation");
   params.addRequiredParam<std::vector<Real> >("orientation", "Orientation vector of the pipe");
   params.addRequiredParam<Real>("length", "Length of the pipe");
   params.addRequiredParam<unsigned int>("n_elems", "number of element in this pipe");
@@ -39,6 +42,7 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
     Component(name, params),
     Model(params),
     _position(toPoint(getParam<std::vector<Real> >("position"))),
+    _offset(toPoint(getParam<std::vector<Real> >("offset"))),
     _length(getParam<Real>("length")),
     _n_elems(getParam<unsigned int>("n_elems")),
     _A(getParam<Real>("A")),
@@ -81,6 +85,7 @@ PipeBase::buildMesh()
   // points
   Real delta_t = _length / _n_elems;
   Point p(0, 0, 0);                      // origin
+  p += _offset;
   for (unsigned int i = 0; i <= _n_elems; i++)
   {
     const Node * nd = _mesh._mesh.add_point(p);

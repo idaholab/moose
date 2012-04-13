@@ -44,6 +44,8 @@ public:
 
 protected:
   Point _position;                              ///< Physical position in the space
+  /// Offset for mesh generation
+  Point _offset;
   RealVectorValue _dir;                         ///< Direction this pipe is going to
   Real _length;                                 ///< Length of the pipe
   unsigned int _n_elems;                        ///< Number of elements this pipe is divided into
