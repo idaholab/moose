@@ -45,9 +45,10 @@ LinearIsotropicMaterial::~LinearIsotropicMaterial()
 
 void
 LinearIsotropicMaterial::computeProperties()
-{
+{  
   for(_qp=0; _qp < _qrule->n_points(); ++_qp)
   {
+      Real alpha = computeAlpha();
 
     /* AMJ: I believe I have identified a logic bug with using inherited classes (e.g.,
        LinearAnisotropicMaterial and non-zero Euler angles in conjunction with/inheriting from
@@ -78,12 +79,12 @@ LinearIsotropicMaterial::computeProperties()
     // Add in Isotropic Thermal Strain
     if(_has_temp)
     {
-      Real isotropic_strain = _alpha * (_temp[_qp] - _t_ref);
+      Real isotropic_strain = alpha * (_temp[_qp] - _t_ref);
 
       strn.addDiag( -isotropic_strain );
 
       _d_strain_dT.zero();
-      _d_strain_dT.addDiag( -_alpha );
+      _d_strain_dT.addDiag( -alpha );
 
     }
 
@@ -164,4 +165,10 @@ LinearIsotropicMaterial::computeStrain(const SymmTensor & total_strain, SymmTens
   _d_stress_dT[_qp] = d_stress_dT;
   
 
+}
+
+Real
+LinearIsotropicMaterial::computeAlpha()
+{
+  return _alpha;
 }

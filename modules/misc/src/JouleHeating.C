@@ -27,15 +27,14 @@ InputParameters validParams<JouleHeating>()
 
 JouleHeating::JouleHeating(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
-    _grad_potential(coupledGradient("potential"))
+    _grad_potential(coupledGradient("potential")),
+    _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity"))
 {
 }
 
 Real
 JouleHeating::computeQpResidual()
 {
-  
-  return -_grad_potential[_qp]*_grad_potential[_qp]*_test[_i][_qp];
-  // return -_test[_i][_qp] * std::abs(_grad_potential[_qp].size());
+  return - _thermal_conductivity[_qp] * _grad_potential[_qp]*_grad_potential[_qp]*_test[_i][_qp];
 }
 

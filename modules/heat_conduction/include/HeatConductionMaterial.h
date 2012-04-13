@@ -21,9 +21,7 @@ public:
 
 protected:
   virtual void computeProperties();
-
-private:
-
+  
   bool _has_temp;
   VariableValue & _temp;
 

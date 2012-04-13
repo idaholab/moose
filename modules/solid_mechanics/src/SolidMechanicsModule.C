@@ -10,6 +10,7 @@
 #include "Gravity.h"
 #include "LinearAnisotropicMaterial.h"
 #include "LinearIsotropicMaterial.h"
+#include "SiLinearIsotropicMaterial.h"
 #include "LinearStrainHardening.h"
 #include "MaterialTensorAux.h"
 #include "MaterialVectorAux.h"
@@ -36,6 +37,7 @@ Elk::SolidMechanics::registerObjects()
   registerKernel(Gravity);
   registerMaterial(LinearAnisotropicMaterial);
   registerMaterial(LinearIsotropicMaterial);
+  registerMaterial(SiLinearIsotropicMaterial);
   registerMaterial(LinearStrainHardening);
   registerAux(MaterialTensorAux);
   registerAux(MaterialVectorAux);

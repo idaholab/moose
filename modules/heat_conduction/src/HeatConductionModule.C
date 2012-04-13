@@ -9,6 +9,7 @@
 #include "HeatConduction.h"
 #include "HeatConductionImplicitEuler.h"
 #include "HeatConductionMaterial.h"
+#include "SiHeatConductionMaterial.h"
 #include "BulkCoolantBC.h"
 #include "ThermalContactAction.h"
 
@@ -21,6 +22,7 @@ Elk::HeatConduction::registerObjects()
   registerBoundaryCondition(GapHeatTransfer);
   registerBoundaryCondition(BulkCoolantBC);
   registerMaterial(HeatConductionMaterial);
+  registerMaterial(SiHeatConductionMaterial);
   registerDiracKernel(GapHeatPointSourceMaster);
    
   // This registers an action to add the "slave_flux" vector to the system at the right time

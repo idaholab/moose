@@ -33,6 +33,8 @@ protected:
    */
   virtual void computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain);
 
+  virtual Real computeAlpha();
+  
   /**
    * The current quadrature point.
    */
