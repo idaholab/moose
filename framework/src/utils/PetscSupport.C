@@ -40,8 +40,20 @@
 #include <petsc.h>
 #include <petscsnes.h>
 #include <petscksp.h>
+/*
+   This is a proxy for "petsc-dev close to the petsc-3.3 release".
+   Once petsc-3.3 is released this should be replaced by
+   !PETSC_VERSION_LESS_THAN(3,3,0)
+*/
+#define PETSC_3_3_DEV (!PETSC_VERSION_LESS_THAN(3,2,0) && !PETSC_VERSION_RELEASE)
+
+#if PETSC_3_3_DEV
+#include <petsc-private/kspimpl.h>
+#include <petsc-private/snesimpl.h>
+#else
 #include <private/kspimpl.h>
 #include <private/snesimpl.h>
+#endif
 
 namespace Moose
 {
@@ -167,11 +179,20 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
       PetscInfo2(snes,"Converged due to function norm %G < %G (relative tolerance)\n",fnorm,snes->ttol);
       *reason = SNES_CONVERGED_FNORM_RELATIVE;
     }
+
+#if PETSC_3_3_DEV
+    else if (pnorm < snes->stol*xnorm)
+    {
+      PetscInfo3(snes,"Converged due to small update length: %G < %G * %G\n",pnorm,snes->stol,xnorm);
+      *reason = SNES_CONVERGED_SNORM_RELATIVE;
+    }
+#else
     else if (pnorm < snes->xtol*xnorm)
     {
       PetscInfo3(snes,"Converged due to small update length: %G < %G * %G\n",pnorm,snes->xtol,xnorm);
       *reason = SNES_CONVERGED_PNORM_RELATIVE;
     }
+#endif
   }
 
   if (it)
@@ -276,15 +297,30 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 //    *reason = SNES_DIVERGED_LS_FAILURE;
 */
 
+#if PETSC_3_3_DEV
+  if(*reason == SNES_CONVERGED_SNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_ABS)
+    system->_current_nl_its = it;
+#else
   if(*reason == SNES_CONVERGED_PNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_ABS)
     system->_current_nl_its = it;
-
+#endif
   return(0);
 }
 
 
+
+#if PETSC_3_3_DEV
+PetscErrorCode dampedCheck(SNESLineSearch /* linesearch */, Vec /*x*/, Vec w, Vec y, PetscBool * /*changed_w*/, PetscBool * changed_y, void *lsctx)
+#else
 PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, PetscBool * changed_y, PetscBool * /*changed_w*/)
+#endif
 {
+//   From SNESLineSearchSetPostCheck docs:
+// +  x - old solution vector
+// .  y - search direction vector
+// .  w - new solution vector
+// .  changed_y - indicates that the line search changed y
+// .  changed_w - indicates that the line search changed w
   //w = updated solution = x- scaling*y
   //x = current solution
   //y = updates.
@@ -460,7 +496,13 @@ void petscSetupDampers(NonlinearImplicitSystem& sys)
   PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
   SNES snes = petsc_solver->snes();
 
+#if PETSC_3_3_DEV
+  SNESLineSearch linesearch;
+  SNESGetSNESLineSearch(snes, &linesearch);
+  SNESLineSearchSetPostCheck(linesearch, dampedCheck, problem);
+#else
   SNESLineSearchSetPostCheck(snes, dampedCheck, problem);
+#endif
 }
 
 void petscSetDefaults(FEProblem & problem)
@@ -511,6 +553,5 @@ void petscSetDefaults(FEProblem & problem)
 }
 } // Namespace PetscSupport
 } // Namespace MOOSE
-
 
 #endif //LIBMESH_HAVE_PETSC
