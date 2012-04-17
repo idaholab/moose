@@ -30,13 +30,12 @@ protected:
   
   MaterialProperty<Real> & _M;
 
+  bool _implicit;
   VariableValue & _u_old;
   VariableGradient & _grad_u_old;
 
 private:
-  
   bool _has_MJac;
   MaterialProperty<Real> * _DM;
-  bool _implicit;
 };
 #endif //CHBulk_H
