@@ -254,6 +254,11 @@ public:
   virtual void output(bool force = false);
   virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
   virtual void outputSolutionHistory(bool state = true) { _output_solution_history = state; }
+  /**
+   * Set which variables will be written in ouput files
+   * @param output_variables The list of variable names to write in the ouput files
+   */
+  virtual void setOutputVariables(std::vector<std::string> output_variables);
   OutputProblem & getOutputProblem(unsigned int refinements);
   void setMaxPPSRowsScreen(unsigned int n) { _pps_output_table_max_rows = n; }
 

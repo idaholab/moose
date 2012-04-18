@@ -104,21 +104,20 @@ SetupOutputAction::act()
   _parser_handle._problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
 
   FEProblem & problem = *_parser_handle._problem;
-  Output & output = problem.out();                       // can't use use this with coupled problems on different meshes
 
   if (_parser_handle._problem != NULL)
   {
     FEProblem & fe_problem = *_parser_handle._problem;
     if(_pars.isParamValid("output_variables"))
     {
-      output.setOutputVariables(getParam<std::vector<std::string> >("output_variables"));
+      fe_problem.setOutputVariables(getParam<std::vector<std::string> >("output_variables"));
     }
     else
     {
       if (getParam<bool>("elemental_as_nodal"))
       {
         // output all variables in the system
-        output.setOutputVariables(fe_problem.getVariableNames());
+        fe_problem.setOutputVariables(fe_problem.getVariableNames());
       }
     }
 
@@ -135,6 +134,7 @@ SetupOutputAction::act()
   else
     _pars.set<std::string>("file_base") = "out";
 
+  Output & output = problem.out();                       // can't use use this with coupled problems on different meshes
   setupOutputObject(output, _pars);
 
   const bool output_initial = getParam<bool>("output_initial");

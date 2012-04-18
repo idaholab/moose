@@ -174,6 +174,11 @@ public:
   virtual void outputPostprocessors(bool force = false);
   virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
   virtual void outputPps(const FormattedTable & table);
+  /**
+   * Set which variables will be written in ouput files
+   * @param output_variables The list of variable names to write in the ouput files
+   */
+  virtual void setOutputVariables(std::vector<std::string> output_variables);
 
   /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor

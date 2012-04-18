@@ -1775,6 +1775,14 @@ FEProblem::output(bool force/*= false*/)
   }
 }
 
+void
+FEProblem::setOutputVariables(std::vector<std::string> output_variables)
+{
+  _out.setOutputVariables(output_variables);
+  if(_displaced_problem)
+    _displaced_problem->setOutputVariables(output_variables);
+}
+
 OutputProblem &
 FEProblem::getOutputProblem(unsigned int refinements)
 {
