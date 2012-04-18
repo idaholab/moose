@@ -49,7 +49,7 @@ public:
    */
   Real sample(Real xcoord, Real ycoord);
 
-  void GetNeigbourIndices(std::vector<Real> inArr, Real x ,int& lowerX ,int& upperX );
+  void getNeighborIndices(std::vector<Real> inArr, Real x ,int& lowerX ,int& upperX );
 
 private:
 
