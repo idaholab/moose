@@ -329,6 +329,11 @@ SymmAnisotropicElasticityTensor::form_rotated_material_qdmat_matrix()
 void
 SymmAnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
 {
+  zero();
+  setMaterialConstantc11(_c11);
+  setMaterialConstantc12(_c12);
+  setMaterialConstantc44(_c44);
+  
   form_r_matrix();
   //initialize_material_anisotropic_dt_matrix();
   form_rotational_q_matrix();
