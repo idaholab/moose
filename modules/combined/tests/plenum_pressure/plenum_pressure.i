@@ -40,7 +40,7 @@
 []
 
 [Mesh]#Comment
-  file = plenum_pressure_test.e
+  file = plenum_pressure.e
   displacements = 'disp_x disp_y disp_z'
 []
 

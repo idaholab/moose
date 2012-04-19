@@ -21,6 +21,8 @@ public:
 
   virtual void residualSetup();
 
+  virtual void timestepSetup();
+
 protected:
 
   virtual Real computeQpResidual();
@@ -31,7 +33,7 @@ protected:
 
   const Real _initial_pressure;
 
-  PostprocessorValue * const _material_input;
+  const Real & _material_input;
 
   const Real _R;
 
@@ -43,6 +45,13 @@ protected:
 
   PostprocessorValue * const _initial_moles;
   PostprocessorValue * const _output;
+
+  bool _refab_needed;
+  Real _refab_gas_released;
+  const Real _refab_time;
+  const Real _refab_pressure;
+  const Real _refab_temperature;
+  const Real _refab_volume;
 
   Real _my_value;
 

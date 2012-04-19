@@ -22,6 +22,11 @@ InputParameters validParams<PlenumPressureAction>()
   params.addParam<std::string>("output_initial_moles", "", "The reporting postprocessor to use for the initial moles of gas.");
   params.addParam<std::string>("output", "", "The reporting postprocessor to use for the plenum pressure value.");
 
+  params.addParam<Real>("refab_time", -1, "The time at which the plenum pressure must be reinitialized due to fuel rod refabrication.");
+  params.addParam<Real>("refab_pressure", -1, "The pressure of fill gas at refabrication.");
+  params.addParam<Real>("refab_temperature", -1, "The temperature at refabrication.");
+  params.addParam<Real>("refab_volume", -1, "The gas volume at refabrication.");
+
   return params;
 }
 
@@ -40,9 +45,21 @@ PlenumPressureAction::PlenumPressureAction(const std::string & name, InputParame
   _output_initial_moles(getParam<std::string>("output_initial_moles")),
   _output(getParam<std::string>("output")),
 
+  _refab_time(getParam<Real>("refab_time")),
+  _refab_pressure(getParam<Real>("refab_pressure")),
+  _refab_temperature(getParam<Real>("refab_temperature")),
+  _refab_volume(getParam<Real>("refab_volume")),
+
   _kernel_name("PlenumPressure"),
   _use_displaced_mesh(true)
 {
+  if (params.wasSeenInInput("refab_time") &&
+      !(params.wasSeenInInput("refab_pressure") &&
+        params.wasSeenInInput("refab_temperature") &&
+        params.wasSeenInInput("refab_volume")))
+  {
+    mooseError("PlenumPressure error: refabrication time given but not complete set of refabrication data");
+  }
 }
 
 void
@@ -87,6 +104,10 @@ PlenumPressureAction::act()
     params.set<Real>("startup_time") = _startup_time;
     params.set<std::string>("output_initial_moles") = _output_initial_moles;
     params.set<std::string>("output") = _output;
+    params.set<Real>("refab_time") = _refab_time;
+    params.set<Real>("refab_pressure") = _refab_pressure;
+    params.set<Real>("refab_temperature") = _refab_temperature;
+    params.set<Real>("refab_volume") = _refab_volume;
 
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 

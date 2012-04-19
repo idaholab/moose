@@ -39,7 +39,7 @@
 []
 
 [Mesh]#Comment
-  file = plenum_pressure_rz_test.e
+  file = plenum_pressure_rz.e
 []
 
 [Functions]
