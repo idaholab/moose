@@ -65,11 +65,9 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
 
     _phi(_assembly.phi()),
     _grad_phi(_assembly.gradPhi()),
-    _second_phi(_assembly.secondPhi()),
 
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
-    _second_test(_var.secondPhi()),
 
     _u(_var.sln()),
     _grad_u(_var.gradSln()),

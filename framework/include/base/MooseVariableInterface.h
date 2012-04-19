@@ -118,8 +118,28 @@ protected:
    */
   virtual VariableSecond & secondOlder();
 
+  /**
+   * The second derivative of the test function.
+   *
+   * @return The reference to be stored off and used later.
+   */
+  virtual VariableTestSecond & secondTest();
+
+  /**
+   * The second derivative of the shape function.
+   *
+   * @return The reference to be stored off and used later.
+   */
+  virtual VariablePhiSecond & secondPhi();
+
+  /// Whether or not this object is acting only at nodes
   bool _nodal;
+
+  /// The variable this object is acting on
   MooseVariable * _variable;
+
+protected:
+  Assembly * _mvi_assembly;
 };
 
 
@@ -202,6 +222,21 @@ protected:
    * @return The reference to be stored off and used later.
    */
   virtual VariableSecond & neighborSecondOlder();
+
+  /**
+   * The second derivative of the neighbor's test function.
+   *
+   * @return The reference to be stored off and used later.
+   */
+  virtual VariableTestSecond & neighborSecondTest();
+
+  /**
+   * The second derivative of the neighbor's shape function.
+   *
+   * @return The reference to be stored off and used later.
+   */
+  virtual VariablePhiSecond & neighborSecondPhi();
+
 };
 
 #endif /* MOOSEVARIABLEINTERFACE_H */

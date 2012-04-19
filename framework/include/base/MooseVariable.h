@@ -35,6 +35,13 @@ typedef MooseArray<Real>               VariableValue;
 typedef MooseArray<RealGradient>       VariableGradient;
 typedef MooseArray<RealTensor>         VariableSecond;
 
+typedef std::vector<std::vector<Real> >         VariableTestValue;
+typedef std::vector<std::vector<RealGradient> > VariableTestGradient;
+typedef std::vector<std::vector<RealTensor> >   VariableTestSecond;
+
+typedef std::vector<std::vector<Real> >         VariablePhiValue;
+typedef std::vector<std::vector<RealGradient> > VariablePhiGradient;
+typedef std::vector<std::vector<RealTensor> >   VariablePhiSecond;
 
 class Assembly;
 class SubProblem;
@@ -116,6 +123,11 @@ public:
    * Current neighboring element
    */
   const Elem * & neighbor() { return _neighbor; }
+
+  /**
+   * Whether or not this variable is computing any second derivatives.
+   */
+  bool computingSecond() { return _need_second || _need_second_old || _need_second_older; }
 
   const std::vector<std::vector<Real> > & phi();
   const std::vector<std::vector<RealGradient> > & gradPhi();

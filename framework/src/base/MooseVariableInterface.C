@@ -21,11 +21,11 @@ MooseVariableInterface::MooseVariableInterface(InputParameters & parameters, boo
     _nodal(nodal)
 {
   SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
-  Problem & topproblem = *problem.parent();
 
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 
-  _variable = &topproblem.getVariable(tid, parameters.get<std::string>("variable"));
+  _variable = &problem.getVariable(tid, parameters.get<std::string>("variable"));
+  _mvi_assembly = &problem.assembly(tid);
 }
 
 MooseVariableInterface::~MooseVariableInterface()
@@ -139,6 +139,24 @@ MooseVariableInterface::secondOlder()
   return _variable->secondSlnOlder();
 }
 
+VariableTestSecond &
+MooseVariableInterface::secondTest()
+{
+  if (_nodal)
+    mooseError("Nodal _variables do not have second derivatives");
+
+  return const_cast<std::vector<std::vector<RealTensor> > &>(_variable->secondPhi());
+}
+
+VariablePhiSecond &
+MooseVariableInterface::secondPhi()
+{
+  if (_nodal)
+    mooseError("Nodal _variables do not have second derivatives");
+
+  return const_cast<VariablePhiSecond &>(_mvi_assembly->secondPhi());
+}
+
 // Neighbor values
 
 NeighborMooseVariableInterface::NeighborMooseVariableInterface(InputParameters & parameters, bool nodal) :
@@ -230,4 +248,22 @@ NeighborMooseVariableInterface::neighborSecondOlder()
     mooseError("Nodal _variables do not have second derivatives");
 
   return _variable->secondSlnOlderNeighbor();
+}
+
+VariableTestSecond &
+NeighborMooseVariableInterface::neighborSecondTest()
+{
+  if (_nodal)
+    mooseError("Nodal _variables do not have second derivatives");
+
+  return const_cast<std::vector<std::vector<RealTensor> > &>(_variable->secondPhiFaceNeighbor());
+}
+
+VariablePhiSecond &
+NeighborMooseVariableInterface::neighborSecondPhi()
+{
+  if (_nodal)
+    mooseError("Nodal _variables do not have second derivatives");
+
+  return const_cast<VariablePhiSecond &>(_mvi_assembly->secondPhiFaceNeighbor());
 }

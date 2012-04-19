@@ -24,7 +24,8 @@ InputParameters validParams<KernelSecond>()
 
 
 KernelSecond::KernelSecond(const std::string & name, InputParameters parameters):
-  Kernel(name, parameters)
+    Kernel(name, parameters),
+    _second_test(_var.secondPhi())
 {
 }
 
@@ -35,8 +36,6 @@ KernelSecond::~KernelSecond()
 void
 KernelSecond::computeResidual()
 {
-//  Moose::perf_log.push("computeResidual()","KernelSecond");
-
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
 
   _value.resize(_qrule->n_points());
@@ -44,8 +43,6 @@ KernelSecond::computeResidual()
   for (_i=0; _i<_test.size(); _i++)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
       re(_i) += _JxW[_qp]*_coord[_qp]*(_value[_qp]*_second_test[_i][_qp].tr());
-
-//  Moose::perf_log.pop("computeResidual()","KernelSecond");
 }
 
 Real

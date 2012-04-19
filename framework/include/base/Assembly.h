@@ -329,17 +329,17 @@ public:
   const std::vector<std::vector<RealTensor> > & secondPhiFaceNeighbor() { return _second_phi_face_neighbor; }
 
 
-  const std::vector<std::vector<Real> > & fePhi(FEType type) { return _fe_phi[type]; }
-  const std::vector<std::vector<RealGradient> > & feGradPhi(FEType type) { return _fe_grad_phi[type]; }
-  const std::vector<std::vector<RealTensor> > & feSecondPhi(FEType type) { _need_second_derivative[type] = true; return _fe_second_phi[type]; }
+  const std::vector<std::vector<Real> > & fePhi(FEType type)             { getFE(type); return _fe_shape_data[type]->_phi; }
+  const std::vector<std::vector<RealGradient> > & feGradPhi(FEType type) { getFE(type); return _fe_shape_data[type]->_grad_phi; }
+  const std::vector<std::vector<RealTensor> > & feSecondPhi(FEType type) { getFE(type); _need_second_derivative[type] = true; return _fe_shape_data[type]->_second_phi; }
 
-  const std::vector<std::vector<Real> > & fePhiFace(FEType type) { return _fe_phi_face[type]; }
-  const std::vector<std::vector<RealGradient> > & feGradPhiFace(FEType type) { return _fe_grad_phi_face[type]; }
-  const std::vector<std::vector<RealTensor> > & feSecondPhiFace(FEType type) { _need_second_derivative[type] = true; return _fe_second_phi_face[type]; }
+  const std::vector<std::vector<Real> > & fePhiFace(FEType type)             { getFEFace(type); return _fe_shape_data_face[type]->_phi; }
+  const std::vector<std::vector<RealGradient> > & feGradPhiFace(FEType type) { getFEFace(type); return _fe_shape_data_face[type]->_grad_phi; }
+  const std::vector<std::vector<RealTensor> > & feSecondPhiFace(FEType type) { getFEFace(type); _need_second_derivative[type] = true; return _fe_shape_data_face[type]->_second_phi; }
 
-  const std::vector<std::vector<Real> > & fePhiFaceNeighbor(FEType type) { return _fe_phi_face_neighbor[type]; }
-  const std::vector<std::vector<RealGradient> > & feGradPhiFaceNeighbor(FEType type) { return _fe_grad_phi_face_neighbor[type]; }
-  const std::vector<std::vector<RealTensor> > & feSecondPhiFaceNeighbor(FEType type) { _need_second_derivative[type] = true; return _fe_second_phi_face_neighbor[type]; }
+  const std::vector<std::vector<Real> > & fePhiFaceNeighbor(FEType type)             { getFEFaceNeighbor(type); return _fe_shape_data_face_neighbor[type]->_phi; }
+  const std::vector<std::vector<RealGradient> > & feGradPhiFaceNeighbor(FEType type) { getFEFaceNeighbor(type); return _fe_shape_data_face_neighbor[type]->_grad_phi; }
+  const std::vector<std::vector<RealTensor> > & feSecondPhiFaceNeighbor(FEType type) { getFEFaceNeighbor(type); _need_second_derivative[type] = true; return _fe_shape_data_face_neighbor[type]->_second_phi; }
 
   std::map<FEType, bool> _need_second_derivative;
 
@@ -514,19 +514,18 @@ protected:
   std::vector<std::vector<RealGradient> > _grad_phi_face_neighbor;
   std::vector<std::vector<RealTensor> > _second_phi_face_neighbor;
 
+  class FEShapeData
+  {
+  public:
+    std::vector<std::vector<Real> > _phi;
+    std::vector<std::vector<RealGradient> > _grad_phi;
+    std::vector<std::vector<RealTensor> > _second_phi;
+  };
+
   // Shape function values, gradients. second derivatives for each FE type
-  std::map<FEType, std::vector<std::vector<Real> > > _fe_phi;
-  std::map<FEType, std::vector<std::vector<RealGradient> > > _fe_grad_phi;
-  std::map<FEType, std::vector<std::vector<RealTensor> > > _fe_second_phi;
-
-  std::map<FEType, std::vector<std::vector<Real> > > _fe_phi_face;
-  std::map<FEType, std::vector<std::vector<RealGradient> > > _fe_grad_phi_face;
-  std::map<FEType, std::vector<std::vector<RealTensor> > > _fe_second_phi_face;
-
-  std::map<FEType, std::vector<std::vector<Real> > > _fe_phi_face_neighbor;
-  std::map<FEType, std::vector<std::vector<RealGradient> > > _fe_grad_phi_face_neighbor;
-  std::map<FEType, std::vector<std::vector<RealTensor> > > _fe_second_phi_face_neighbor;
-
+  std::map<FEType, FEShapeData * > _fe_shape_data;
+  std::map<FEType, FEShapeData * > _fe_shape_data_face;
+  std::map<FEType, FEShapeData * > _fe_shape_data_face_neighbor;
 
   /// Values cached by calling cacheResidual()
   std::vector<Real> _cached_residual_values;

@@ -112,11 +112,11 @@ protected:
   // shape functions
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;
-  const std::vector<std::vector<RealTensor> > & _second_phi;
-  // test functions
+
+// test functions
   const std::vector<std::vector<Real> > & _test;
   const std::vector<std::vector<RealGradient> > & _grad_test;
-  const std::vector<std::vector<RealTensor> > & _second_test;
+//  const std::vector<std::vector<RealTensor> > & _second_test;
 
   /// Holds the solution at current quadrature points
   VariableValue & _u;

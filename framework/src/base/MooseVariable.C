@@ -76,12 +76,7 @@ MooseVariable::MooseVariable(unsigned int var_num, unsigned int mvn, const FETyp
     _node(_assembly.node()),
     _node_neighbor(_assembly.nodeNeighbor()),
     _scaling_factor(1.0)
-{
-  // Need to do this to make the assembly aware of what shape functions we're going to use
-  _assembly.getFE(_fe_type);
-  _assembly.getFEFace(_fe_type);
-  _assembly.getFEFaceNeighbor(_fe_type);
-}
+{}
 
 MooseVariable::~MooseVariable()
 {

@@ -85,12 +85,22 @@ Assembly::~Assembly()
   for (std::map<unsigned int, QBase *>::iterator it = _holder_qrule_face.begin(); it != _holder_qrule_face.end(); ++it)
     delete it->second;
 
+  for (std::map<FEType, FEShapeData * >::iterator it = _fe_shape_data.begin(); it != _fe_shape_data.end(); ++it)
+    delete it->second;
+  for (std::map<FEType, FEShapeData * >::iterator it = _fe_shape_data_face.begin(); it != _fe_shape_data_face.end(); ++it)
+    delete it->second;
+  for (std::map<FEType, FEShapeData * >::iterator it = _fe_shape_data_face_neighbor.begin(); it != _fe_shape_data_face_neighbor.end(); ++it)
+    delete it->second;
+
   delete _current_side_elem;
 }
 
 FEBase * &
 Assembly::getFE(FEType type)
 {
+  if(!_fe_shape_data[type])
+    _fe_shape_data[type] = new FEShapeData;
+
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
   for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
   {
@@ -104,6 +114,9 @@ Assembly::getFE(FEType type)
 FEBase * &
 Assembly::getFEFace(FEType type)
 {
+  if(!_fe_shape_data_face[type])
+    _fe_shape_data_face[type] = new FEShapeData;
+
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
   for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
   {
@@ -117,6 +130,9 @@ Assembly::getFEFace(FEType type)
 FEBase * &
 Assembly::getFEFaceNeighbor(FEType type)
 {
+  if(!_fe_shape_data_face_neighbor[type])
+    _fe_shape_data_face_neighbor[type] = new FEShapeData;
+
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
   for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
   {
@@ -168,18 +184,21 @@ void
 Assembly::reinitFE(const Elem * elem)
 {
   unsigned int dim = elem->dim();
+  std::map<FEType, FEBase *>::iterator it = _fe[dim].begin();
+  std::map<FEType, FEBase *>::iterator end = _fe[dim].end();
 
-  for (std::map<FEType, FEBase *>::iterator it = _fe[dim].begin(); it != _fe[dim].end(); ++it)
+  for (; it != end; ++it)
   {
     FEBase * fe = it->second;
     const FEType & fe_type = it->first;
+    FEShapeData * fesd = _fe_shape_data[fe_type];
     fe->reinit(elem);
     _current_fe[fe_type] = fe;
 
-    _fe_phi[fe_type] = fe->get_phi();
-    _fe_grad_phi[fe_type] = fe->get_dphi();
+    fesd->_phi = fe->get_phi();
+    fesd->_grad_phi = fe->get_dphi();
     if(_need_second_derivative[fe_type])
-      _fe_second_phi[fe_type] = fe->get_d2phi();
+      fesd->_second_phi = fe->get_d2phi();
   }
 
   // During that last loop the helper objects will have been reinitialized as well
@@ -197,13 +216,14 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
   {
     FEBase * fe_face = it->second;
     const FEType & fe_type = it->first;
+    FEShapeData * fesd = _fe_shape_data_face[fe_type];
     fe_face->reinit(elem, side);
     _current_fe_face[it->first] = fe_face;
 
-    _fe_phi_face[fe_type] = fe_face->get_phi();
-    _fe_grad_phi_face[fe_type] = fe_face->get_dphi();
+    fesd->_phi = fe_face->get_phi();
+    fesd->_grad_phi = fe_face->get_dphi();
     if(_need_second_derivative[fe_type])
-      _fe_second_phi_face[fe_type] = fe_face->get_d2phi();
+      fesd->_second_phi = fe_face->get_d2phi();
   }
 
   // During that last loop the helper objects will have been reinitialized as well
@@ -355,6 +375,7 @@ Assembly::reinit(const Elem * elem, unsigned int side, const Elem * neighbor)
   {
     FEBase * fe_neighbor = it->second;
     const FEType & fe_type = it->first;
+    FEShapeData * fesd = _fe_shape_data_face_neighbor[fe_type];
 
     // Find locations of quadrature points on the neighbor
     std::vector<Point> qface_neighbor_point;
@@ -364,10 +385,10 @@ Assembly::reinit(const Elem * elem, unsigned int side, const Elem * neighbor)
 
     _current_fe_neighbor[fe_type] = fe_neighbor;
 
-    _fe_phi_face_neighbor[fe_type] = fe_neighbor->get_phi();
-    _fe_grad_phi_face_neighbor[fe_type] = fe_neighbor->get_dphi();
+    fesd->_phi = fe_neighbor->get_phi();
+    fesd->_grad_phi = fe_neighbor->get_dphi();
     if(_need_second_derivative[fe_type])
-      _fe_second_phi_face_neighbor[fe_type] = fe_neighbor->get_d2phi();
+      fesd->_second_phi = fe_neighbor->get_d2phi();
   }
 
   _current_neighbor_elem = neighbor;
@@ -385,6 +406,7 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int /*neighbo
   {
     FEBase * fe_neighbor = it->second;
     FEType fe_type = it->first;
+    FEShapeData * fesd = _fe_shape_data_face_neighbor[fe_type];
 
     FEInterface::inverse_map(neighbor_dim, fe_type, neighbor, physical_points, reference_points);
 
@@ -392,10 +414,10 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int /*neighbo
 
     _current_fe_neighbor[it->first] = it->second;
 
-    _fe_phi_face_neighbor[fe_type] = fe_neighbor->get_phi();
-    _fe_grad_phi_face_neighbor[fe_type] = fe_neighbor->get_dphi();
+    fesd->_phi = fe_neighbor->get_phi();
+    fesd->_grad_phi = fe_neighbor->get_dphi();
     if(_need_second_derivative[fe_type])
-      _fe_second_phi_face_neighbor[fe_type] = fe_neighbor->get_d2phi();
+      fesd->_second_phi = fe_neighbor->get_d2phi();
   }
 
   // Save off the physical points
@@ -602,7 +624,9 @@ Assembly::copyShapes(unsigned int var)
 
   _phi = v.phi();
   _grad_phi = v.gradPhi();
-  _second_phi = v.secondPhi();
+
+  if(v.computingSecond())
+    _second_phi = v.secondPhi();
 }
 
 void

@@ -21,7 +21,6 @@ Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
     _nodal(nodal)
 {
   SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
-  Problem & topproblem = *problem.parent();
 
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 
@@ -37,9 +36,9 @@ Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
       for (unsigned int i = 0; i < vars.size(); i++)
       {
         std::string coupled_var_name = vars[i];
-        if (topproblem.hasVariable(coupled_var_name))
-          _coupled_vars[name].push_back(&topproblem.getVariable(tid, coupled_var_name));
-        else if (topproblem.hasScalarVariable(coupled_var_name))
+        if (problem.hasVariable(coupled_var_name))
+          _coupled_vars[name].push_back(&problem.getVariable(tid, coupled_var_name));
+        else if (problem.hasScalarVariable(coupled_var_name))
           ; // ignore scalar variables
         else
           mooseError("Coupled variable '" + coupled_var_name + "' was not found\n");
@@ -281,7 +280,6 @@ NeighborCoupleable::coupledNeighborSecond(const std::string & var_name, unsigned
 ScalarCoupleable::ScalarCoupleable(InputParameters & parameters)
 {
   SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
-  Problem & topproblem = *problem.parent();
 
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 
@@ -297,9 +295,9 @@ ScalarCoupleable::ScalarCoupleable(InputParameters & parameters)
       for (unsigned int i = 0; i < vars.size(); i++)
       {
         std::string coupled_var_name = vars[i];
-        if (topproblem.hasScalarVariable(coupled_var_name))
-          _coupled_scalar_vars[name].push_back(&topproblem.getScalarVariable(tid, coupled_var_name));
-        else if (topproblem.hasVariable(coupled_var_name))
+        if (problem.hasScalarVariable(coupled_var_name))
+          _coupled_scalar_vars[name].push_back(&problem.getScalarVariable(tid, coupled_var_name));
+        else if (problem.hasVariable(coupled_var_name))
           ; // ignore normal variables
         else
           mooseError("Coupled variable '" + coupled_var_name + "' was not found\n");
