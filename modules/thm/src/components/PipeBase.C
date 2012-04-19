@@ -127,15 +127,23 @@ PipeBase::addVariables()
 }
 
 std::vector<unsigned int>
-PipeBase::getIDs(std::string /*piece*/)
+PipeBase::getIDs(std::string part)
 {
-  mooseError("Not implemented yet");
-  return std::vector<unsigned int>();
+  std::vector<unsigned int> ids;
+
+  if(part == "PIPE")
+    ids.push_back(_subdomain_id);
+  else
+    mooseError(part + " is not a valid part of PipeBase!");
+
+  return ids;
 }
 
 std::string
-PipeBase::variableName(std::string /*piece*/)
+PipeBase::variableName(std::string part)
 {
-  mooseError("Not implemented yet");
-  return std::string();
+  if(part == "FLUID_TEMP")
+    return Model::TEMPERATURE;
+  else
+    mooseError(part + " is not a valid part of PipeBase!");
 }
