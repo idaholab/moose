@@ -38,5 +38,7 @@ private:
 
   VariableSecond & _second_u;
   VariableSecond & _second_u_old;
+  VariableTestSecond & _second_test;
+  VariablePhiSecond & _second_phi;
 };
 #endif //CHInterface_H

@@ -29,7 +29,9 @@ CHInterface::CHInterface(const std::string & name, InputParameters parameters)
    _Dgrad_Mnp(_has_MJac ? &getMaterialProperty<RealGradient>("Dgrad_Mnp") : NULL),
    _Dgrad_Mngp(_has_MJac ? &getMaterialProperty<Real>("Dgrad_Mngp") : NULL),
    _second_u(second()),
-   _second_u_old(_implicit ? _second_zero : secondOld())
+   _second_u_old(_implicit ? _second_zero : secondOld()),
+   _second_test(secondTest()),
+   _second_phi(secondPhi())
 {
 }
 
