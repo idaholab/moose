@@ -148,6 +148,11 @@ public:
 
   void fillFromInputVector(std::vector<Real> input, bool all);
 
+  /*
+   * @return the value of the tensor given the index supplied.
+   */ 
+  Real valueAtIndex(int i) const;
+
 protected:
 
   /**

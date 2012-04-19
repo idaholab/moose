@@ -391,3 +391,9 @@ SymmElasticityTensor::fillFromInputVector(std::vector<Real> input, bool all)
     _val[20] = input[8];  //C1212
   }
 }
+
+Real
+SymmElasticityTensor::valueAtIndex(int i) const
+{
+  return _val[i];
+}

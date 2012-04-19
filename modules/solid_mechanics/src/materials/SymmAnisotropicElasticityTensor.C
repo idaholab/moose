@@ -131,7 +131,23 @@ SymmAnisotropicElasticityTensor::rotate(const Real a1, const Real a2, const Real
   setThirdEulerAngle(a3);
 
   // pulled from calculateEntries to sub in the initialize_anisotropic_material_dt_matrix() call
-  calculateEntries(0);
+//  calculateEntries(0);
+
+  form_r_matrix();
+  form_rotational_q_matrix();
+  form_transformed_material_dmat_matrix();
+  form_rotated_material_qdmat_matrix();
+  form_transformed_material_dt_matrix();
+
+  unsigned count(0);
+
+  for (int j(0); j < 6; ++j)
+  {
+    for(int i(j); i < 6; ++i)
+    {
+      _val[count++] = _dt(i,j);
+    }
+  }
 }
 
 void SymmAnisotropicElasticityTensor::form_r_matrix()
@@ -329,6 +345,9 @@ SymmAnisotropicElasticityTensor::form_rotated_material_qdmat_matrix()
 void
 SymmAnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
 {
+
+  // The following four lines of code force the calculateEntries function to be useful
+  // only for CUBIC ANISOTROPIC materials.
   zero();
   setMaterialConstantc11(_c11);
   setMaterialConstantc12(_c12);

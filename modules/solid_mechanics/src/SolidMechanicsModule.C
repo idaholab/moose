@@ -27,6 +27,7 @@
 #include "StressDivergenceRZ.h"
 #include "LinearGeneralAnisotropicMaterial.h"
 #include "DashpotBC.h"
+#include "MaterialSymmElasticityTensorAux.h"
 
 void
 Elk::SolidMechanics::registerObjects()
@@ -56,6 +57,7 @@ Elk::SolidMechanics::registerObjects()
   registerKernel(SolidMechImplicitEuler);
 
   registerAux(ElasticEnergyAux);
+  registerAux(MaterialSymmElasticityTensorAux);
 
   registerKernel(StressDivergence);
   registerKernel(StressDivergenceRZ);
