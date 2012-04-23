@@ -44,15 +44,12 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
 
     _phi(_assembly.phiFace()),
     _grad_phi(_assembly.gradPhiFace()),
-    _second_phi(_assembly.secondPhiFace()),
 
     _test(_var.phiFace()),
     _grad_test(_var.gradPhiFace()),
-    _second_test(_var.secondPhiFace()),
 
     _u(_var.sln()),
-    _grad_u(_var.gradSln()),
-    _second_u(_var.secondSln())
+    _grad_u(_var.gradSln())
 {
 }
 

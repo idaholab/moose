@@ -103,19 +103,19 @@ protected:
   const Real & _current_elem_volume;
 
   unsigned int _qp;
-  const std::vector< Point > & _q_point;
+  const MooseArray< Point > & _q_point;
   QBase * & _qrule;
-  const std::vector<Real> & _JxW;
-  const std::vector<Real> & _coord;
+  const MooseArray<Real> & _JxW;
+  const MooseArray<Real> & _coord;
 
   unsigned int _i, _j;
   // shape functions
-  const std::vector<std::vector<Real> > & _phi;
-  const std::vector<std::vector<RealGradient> > & _grad_phi;
+  const VariablePhiValue & _phi;
+  const VariablePhiGradient & _grad_phi;
 
 // test functions
-  const std::vector<std::vector<Real> > & _test;
-  const std::vector<std::vector<RealGradient> > & _grad_test;
+  const VariableTestValue & _test;
+  const VariableTestGradient & _grad_test;
 //  const std::vector<std::vector<RealTensor> > & _second_test;
 
   /// Holds the solution at current quadrature points

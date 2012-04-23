@@ -108,10 +108,10 @@ protected:
   /// Coordinate system
   Moose::CoordinateSystemType & _coord_sys;
   unsigned int _qp;
-  const std::vector< Point > & _q_point;
+  const MooseArray< Point > & _q_point;
   QBase * & _qrule;
-  const std::vector<Real> & _JxW;
-  const std::vector<Real> & _coord;
+  const MooseArray<Real> & _JxW;
+  const MooseArray<Real> & _coord;
 
   unsigned int _i, _j;
 
@@ -123,33 +123,26 @@ protected:
   /// Holds the current solution gradient at the current quadrature point on the face.
   VariableGradient & _grad_u;
   // shape functions
-  const std::vector<std::vector<Real> > & _phi;
-  const std::vector<std::vector<RealGradient> > & _grad_phi;
-  const std::vector<std::vector<RealTensor> > & _second_phi;
+  const VariablePhiValue & _phi;
+  const VariablePhiGradient & _grad_phi;
   // test functions
 
   /// Side shape function.
-  const std::vector<std::vector<Real> > & _test;
+  const VariableTestValue & _test;
   /// Gradient of side shape function
-  const std::vector<std::vector<RealGradient> > & _grad_test;
-  /// Second derivative of side shape function
-  const std::vector<std::vector<RealTensor> > & _second_test;
+  const VariableTestGradient & _grad_test;
   /// Normal vectors at the quadrature points
-  const std::vector<Point>& _normals;
+  const MooseArray<Point>& _normals;
 
   /// Side shape function.
-  const std::vector<std::vector<Real> > & _phi_neighbor;
+  const VariablePhiValue & _phi_neighbor;
   /// Gradient of side shape function
-  const std::vector<std::vector<RealGradient> > & _grad_phi_neighbor;
-  /// Second derivative of side shape function
-  const std::vector<std::vector<RealTensor> > & _second_phi_neighbor;
+  const VariablePhiGradient & _grad_phi_neighbor;
 
   /// Side test function
-  const std::vector<std::vector<Real> > & _test_neighbor;
+  const VariableTestValue & _test_neighbor;
   /// Gradient of side shape function
-  const std::vector<std::vector<RealGradient> > & _grad_test_neighbor;
-  /// Second derivative of side shape function
-  const std::vector<std::vector<RealTensor> > & _second_test_neighbor;
+  const VariableTestGradient & _grad_test_neighbor;
 
   /// Holds the current solution at the current quadrature point
   VariableValue & _u_neighbor;

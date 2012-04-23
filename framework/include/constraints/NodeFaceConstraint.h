@@ -142,7 +142,7 @@ protected:
   unsigned int _i, _j;
   unsigned int _qp;
 
-  const std::vector< Point > & _master_q_point;
+  const MooseArray< Point > & _master_q_point;
   QBase * & _master_qrule;
 
 public:
@@ -156,19 +156,19 @@ protected:
   /// Value of the unknown variable this BC is action on
   VariableValue & _u_slave;
   /// Shape function on the slave side.  This will always
-  std::vector<std::vector<Real> > _phi_slave;
+  VariablePhiValue _phi_slave;
   /// Shape function on the slave side.  This will always only have one entry and that entry will always be "1"
-  std::vector<std::vector<Real> > _test_slave;
+  VariableTestValue _test_slave;
 
   /// Side shape function.
-  const std::vector<std::vector<Real> > & _phi_master;
+  const VariablePhiValue & _phi_master;
   /// Gradient of side shape function
-  const std::vector<std::vector<RealGradient> > & _grad_phi_master;
+  const VariablePhiGradient & _grad_phi_master;
 
   /// Side test function
-  const std::vector<std::vector<Real> > & _test_master;
+  const VariableTestValue & _test_master;
   /// Gradient of side shape function
-  const std::vector<std::vector<RealGradient> > & _grad_test_master;
+  const VariableTestGradient & _grad_test_master;
 
   /// Holds the current solution at the current quadrature point
   VariableValue & _u_master;

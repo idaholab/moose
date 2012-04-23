@@ -191,20 +191,40 @@ Assembly::reinitFE(const Elem * elem)
   {
     FEBase * fe = it->second;
     const FEType & fe_type = it->first;
+
     FEShapeData * fesd = _fe_shape_data[fe_type];
-    fe->reinit(elem);
+    /*
+    FEShapeData *& cached_fesd = _fe_shape_data_cache[std::make_pair(elem->id(), fe_type)];
+
     _current_fe[fe_type] = fe;
 
-    fesd->_phi = fe->get_phi();
-    fesd->_grad_phi = fe->get_dphi();
-    if(_need_second_derivative[fe_type])
-      fesd->_second_phi = fe->get_d2phi();
+    if(!cached_fesd)
+    {*/
+      fe->reinit(elem);
+
+      fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe->get_phi()));
+      fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe->get_dphi()));
+      if(_need_second_derivative[fe_type])
+        fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe->get_d2phi()));
+/*
+      cached_fesd = new FEShapeData;
+
+      *cached_fesd = *fesd;
+    }
+    else
+    {
+      fesd->_phi = cached_fesd->_phi;
+      fesd->_grad_phi = cached_fesd->_grad_phi;
+      if(_need_second_derivative[fe_type])
+        fesd->_second_phi = cached_fesd->_second_phi;
+    }
+*/
   }
 
   // During that last loop the helper objects will have been reinitialized as well
   // We need to dig out the q_points and JxW from it.
-  _current_q_points = (*_holder_fe_helper[dim])->get_xyz();
-  _current_JxW = (*_holder_fe_helper[dim])->get_JxW();
+  _current_q_points.shallowCopy(const_cast<std::vector<Point> &>((*_holder_fe_helper[dim])->get_xyz()));
+  _current_JxW.shallowCopy(const_cast<std::vector<Real> &>((*_holder_fe_helper[dim])->get_JxW()));
 }
 
 void
@@ -220,17 +240,17 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
     fe_face->reinit(elem, side);
     _current_fe_face[it->first] = fe_face;
 
-    fesd->_phi = fe_face->get_phi();
-    fesd->_grad_phi = fe_face->get_dphi();
+    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_face->get_phi()));
+    fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_face->get_dphi()));
     if(_need_second_derivative[fe_type])
-      fesd->_second_phi = fe_face->get_d2phi();
+      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_face->get_d2phi()));
   }
 
   // During that last loop the helper objects will have been reinitialized as well
   // We need to dig out the q_points and JxW from it.
-  _current_q_points_face = (*_holder_fe_face_helper[dim])->get_xyz();
-  _current_JxW_face = (*_holder_fe_face_helper[dim])->get_JxW();
-  _current_normals = (*_holder_fe_face_helper[dim])->get_normals();
+  _current_q_points_face.shallowCopy(const_cast<std::vector<Point> &>((*_holder_fe_face_helper[dim])->get_xyz()));
+  _current_JxW_face.shallowCopy(const_cast<std::vector<Real> &>((*_holder_fe_face_helper[dim])->get_JxW()));
+  _current_normals.shallowCopy(const_cast<std::vector<Point> &>((*_holder_fe_face_helper[dim])->get_normals()));
 }
 
 void
@@ -379,16 +399,16 @@ Assembly::reinit(const Elem * elem, unsigned int side, const Elem * neighbor)
 
     // Find locations of quadrature points on the neighbor
     std::vector<Point> qface_neighbor_point;
-    libMesh::FEInterface::inverse_map (neighbor_dim, fe_type, neighbor, _current_q_points_face, qface_neighbor_point);
+    libMesh::FEInterface::inverse_map (neighbor_dim, fe_type, neighbor, _current_q_points_face.stdVector(), qface_neighbor_point);
     // Calculate the neighbor element shape functions at those locations
     it->second->reinit(neighbor, &qface_neighbor_point);
 
     _current_fe_neighbor[fe_type] = fe_neighbor;
 
-    fesd->_phi = fe_neighbor->get_phi();
-    fesd->_grad_phi = fe_neighbor->get_dphi();
+    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_neighbor->get_phi()));
+    fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_neighbor->get_dphi()));
     if(_need_second_derivative[fe_type])
-      fesd->_second_phi = fe_neighbor->get_d2phi();
+      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_neighbor->get_d2phi()));
   }
 
   _current_neighbor_elem = neighbor;
@@ -414,10 +434,10 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int /*neighbo
 
     _current_fe_neighbor[it->first] = it->second;
 
-    fesd->_phi = fe_neighbor->get_phi();
-    fesd->_grad_phi = fe_neighbor->get_dphi();
+    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_neighbor->get_phi()));
+    fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_neighbor->get_dphi()));
     if(_need_second_derivative[fe_type])
-      fesd->_second_phi = fe_neighbor->get_d2phi();
+      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_neighbor->get_d2phi()));
   }
 
   // Save off the physical points

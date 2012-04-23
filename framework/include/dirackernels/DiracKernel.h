@@ -177,13 +177,13 @@ protected:
   /// Quadrature point index
   unsigned int _qp;
   /// Quadrature points
-  const std::vector< Point > & _q_point;
+  const MooseArray< Point > & _q_point;
   /// Physical points
-  const std::vector< Point > & _physical_point;
+  const MooseArray< Point > & _physical_point;
   /// Quadrature rule
   QBase * & _qrule;
   /// Transformed Jacobian weights
-  const std::vector<Real> & _JxW;
+  const MooseArray<Real> & _JxW;
 
   /// i-th, j-th index for enumerating shape and test functions
   unsigned int _i, _j;
@@ -191,20 +191,16 @@ protected:
   // shape functions
 
   /// Values of shape functions at QPs
-  const std::vector<std::vector<Real> > & _phi;
+  const VariablePhiValue & _phi;
   /// Gradients of shape functions at QPs
-  const std::vector<std::vector<RealGradient> > & _grad_phi;
-  /// Second derivatives of shape functions at QPs
-  const std::vector<std::vector<RealTensor> > & _second_phi;
+  const VariablePhiGradient & _grad_phi;
 
   // test functions
 
   /// Values of test functions at QPs
-  const std::vector<std::vector<Real> > & _test;
+  const VariableTestValue & _test;
   /// Gradients of test functions at QPs
-  const std::vector<std::vector<RealGradient> > & _grad_test;
-  /// Second derivatives of shape functions at QPs
-  const std::vector<std::vector<RealTensor> > & _second_test;
+  const VariableTestGradient & _grad_test;
 
   /// Holds the solution at current quadrature points
   VariableValue & _u;

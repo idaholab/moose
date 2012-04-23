@@ -78,14 +78,14 @@ public:
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
 
   virtual QBase * & qRule(THREAD_ID tid) = 0;
-  virtual const std::vector<Point> & points(THREAD_ID tid) = 0;
-  virtual const std::vector<Point> & physicalPoints(THREAD_ID tid) = 0;
-  virtual const std::vector<Real> & JxW(THREAD_ID tid) = 0;
+  virtual const MooseArray<Point> & points(THREAD_ID tid) = 0;
+  virtual const MooseArray<Point> & physicalPoints(THREAD_ID tid) = 0;
+  virtual const MooseArray<Real> & JxW(THREAD_ID tid) = 0;
   virtual const Real & elemVolume(THREAD_ID tid) = 0;
-  virtual const std::vector<Real> & coords(THREAD_ID tid) = 0;
+  virtual const MooseArray<Real> & coords(THREAD_ID tid) = 0;
   virtual QBase * & qRuleFace(THREAD_ID tid) = 0;
-  virtual const std::vector<Point> & pointsFace(THREAD_ID tid) = 0;
-  virtual const std::vector<Real> & JxWFace(THREAD_ID tid) = 0;
+  virtual const MooseArray<Point> & pointsFace(THREAD_ID tid) = 0;
+  virtual const MooseArray<Real> & JxWFace(THREAD_ID tid) = 0;
   virtual const Real & sideElemVolume(THREAD_ID tid) = 0;
   virtual const Elem * & elem(THREAD_ID tid) = 0;
   virtual unsigned int & side(THREAD_ID tid) = 0;

@@ -202,3 +202,53 @@ MooseArrayTest::shallowCopy()
   CPPUNIT_ASSERT( ma3[0] == 22 );
   CPPUNIT_ASSERT( ma4[0] == 22 );
 }
+
+void
+MooseArrayTest::shallowCopyStdVector()
+{
+  std::vector<Real> avec;
+  avec.push_back(1.2);
+  avec.push_back(3.4);
+  avec.push_back(6.7);
+
+  MooseArray<Real> ma;
+
+  ma.shallowCopy(avec);
+
+  CPPUNIT_ASSERT( ma[0] == 1.2 );
+  CPPUNIT_ASSERT( ma[1] == 3.4 );
+  CPPUNIT_ASSERT( ma[2] == 6.7 );
+}
+
+void
+MooseArrayTest::operatorEqualsStdVector()
+{
+  std::vector<Real> avec;
+  avec.push_back(1.2);
+  avec.push_back(3.4);
+  avec.push_back(6.7);
+
+  MooseArray<Real> ma;
+
+  ma = avec;
+
+  CPPUNIT_ASSERT( ma[0] == 1.2 );
+  CPPUNIT_ASSERT( ma[1] == 3.4 );
+  CPPUNIT_ASSERT( ma[2] == 6.7 );
+}
+
+void
+MooseArrayTest::stdVector()
+{
+  MooseArray<Real> ma( 3 );
+  ma[0] = 1.2;
+  ma[1] = 3.4;
+  ma[2] = 6.7;
+
+  std::vector<Real> avec = ma.stdVector();
+
+  CPPUNIT_ASSERT( avec[0] == 1.2 );
+  CPPUNIT_ASSERT( avec[1] == 3.4 );
+  CPPUNIT_ASSERT( avec[2] == 6.7 );
+}
+

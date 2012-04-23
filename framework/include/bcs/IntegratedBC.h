@@ -59,38 +59,34 @@ protected:
   const Elem * & _current_side_elem;
 
   /// normals at quadrature points
-  const std::vector<Point> & _normals;
+  const MooseArray<Point> & _normals;
 
   /// quadrature point index
   unsigned int _qp;
   /// active quadrature rule
   QBase * & _qrule;
   /// active quadrature points
-  const std::vector< Point > & _q_point;
+  const MooseArray< Point > & _q_point;
   /// transformed Jacobian weights
-  const std::vector<Real> & _JxW;
+  const MooseArray<Real> & _JxW;
   /// coordinate transformation
-  const std::vector<Real> & _coord;
+  const MooseArray<Real> & _coord;
   /// i-th, j-th index for enumerating test and shape functions
   unsigned int _i, _j;
 
   // shape functions
 
   /// shape function values (in QPs)
-  const std::vector<std::vector<Real> > & _phi;
+  const VariablePhiValue & _phi;
   /// gradients of shape functions (in QPs)
-  const std::vector<std::vector<RealGradient> > & _grad_phi;
-  /// second derivatives of shape functions (in QPs)
-  const std::vector<std::vector<RealTensor> > & _second_phi;
+  const VariablePhiGradient & _grad_phi;
 
   // test functions
 
   /// test function values (in QPs)
-  const std::vector<std::vector<Real> > & _test;
+  const VariableTestValue & _test;
   /// gradients of test functions  (in QPs)
-  const std::vector<std::vector<RealGradient> > & _grad_test;
-  /// second derivatives of test functions (in QPs)
-  const std::vector<std::vector<RealTensor> > & _second_test;
+  const VariableTestGradient & _grad_test;
 
   // unknown
 
@@ -98,8 +94,6 @@ protected:
   const VariableValue & _u;
   /// the gradient of the unknown variable this BC is acting on
   const VariableGradient & _grad_u;
-  /// the second derivative of the unknown variable this BC is acting on
-  const VariableSecond & _second_u;
 
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();

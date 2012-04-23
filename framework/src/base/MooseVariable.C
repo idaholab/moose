@@ -228,57 +228,57 @@ MooseVariable::insert(NumericVector<Number> & residual)
     residual.set(_nodal_dof_index, _nodal_u[0]);
 }
 
-const std::vector<std::vector<Real> > &
+const VariablePhiValue &
 MooseVariable::phi()
 {
   return _phi;
 }
 
-const std::vector<std::vector<RealGradient> > &
+const VariablePhiGradient &
 MooseVariable::gradPhi()
 {
   return _grad_phi;
 }
 
-const std::vector<std::vector<RealTensor> > &
+const VariablePhiSecond &
 MooseVariable::secondPhi()
 {
   _second_phi = &_assembly.feSecondPhi(_fe_type);
   return *_second_phi;
 }
 
-const std::vector<std::vector<Real> > &
+const VariablePhiValue &
 MooseVariable::phiFace()
 {
   return _phi_face;
 }
 
-const std::vector<std::vector<RealGradient> > &
+const VariablePhiGradient &
 MooseVariable::gradPhiFace()
 {
   return _grad_phi_face;
 }
 
-const std::vector<std::vector<RealTensor> > &
+const VariablePhiSecond &
 MooseVariable::secondPhiFace()
 {
   _second_phi_face = &_assembly.feSecondPhiFace(_fe_type);
   return *_second_phi_face;
 }
 
-const std::vector<std::vector<Real> > &
+const VariablePhiValue &
 MooseVariable::phiFaceNeighbor()
 {
   return _phi_face_neighbor;
 }
 
-const std::vector<std::vector<RealGradient> > &
+const VariablePhiGradient &
 MooseVariable::gradPhiFaceNeighbor()
 {
   return _grad_phi_face_neighbor;
 }
 
-const std::vector<std::vector<RealTensor> > &
+const VariablePhiSecond &
 MooseVariable::secondPhiFaceNeighbor()
 {
   _second_phi_face_neighbor = &_assembly.feSecondPhiFaceNeighbor(_fe_type);

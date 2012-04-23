@@ -49,10 +49,10 @@ protected:
   MooseVariable & _var;
 
   unsigned int _qp;
-  const std::vector< Point > & _q_point;
+  const MooseArray< Point > & _q_point;
   QBase * & _qrule;
-  const std::vector<Real> & _JxW;
-  const std::vector<Real> & _coord;
+  const MooseArray<Real> & _JxW;
+  const MooseArray<Real> & _coord;
 
   const Elem * & _current_elem;
   const Real & _current_elem_volume;

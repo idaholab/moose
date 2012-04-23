@@ -132,14 +132,14 @@ public:
 
   virtual Assembly & assembly(THREAD_ID tid) { return *_assembly[tid]; }
   virtual QBase * & qRule(THREAD_ID tid) { return _assembly[tid]->qRule(); }
-  virtual const std::vector<Point> & points(THREAD_ID tid) { return _assembly[tid]->qPoints(); }
-  virtual const std::vector<Point> & physicalPoints(THREAD_ID tid) { return _assembly[tid]->physicalPoints(); }
-  virtual const std::vector<Real> & JxW(THREAD_ID tid) { return _assembly[tid]->JxW(); }
+  virtual const MooseArray<Point> & points(THREAD_ID tid) { return _assembly[tid]->qPoints(); }
+  virtual const MooseArray<Point> & physicalPoints(THREAD_ID tid) { return _assembly[tid]->physicalPoints(); }
+  virtual const MooseArray<Real> & JxW(THREAD_ID tid) { return _assembly[tid]->JxW(); }
   virtual const Real & elemVolume(THREAD_ID tid) { return _assembly[tid]->elemVolume(); }
-  virtual const std::vector<Real> & coords(THREAD_ID tid) { return _assembly[tid]->coordTransformation(); } // have to use coord transformation from undisplaced problem
+  virtual const MooseArray<Real> & coords(THREAD_ID tid) { return _assembly[tid]->coordTransformation(); } // have to use coord transformation from undisplaced problem
   virtual QBase * & qRuleFace(THREAD_ID tid) { return _assembly[tid]->qRuleFace(); }
-  virtual const std::vector<Point> & pointsFace(THREAD_ID tid) { return _assembly[tid]->qPointsFace(); }
-  virtual const std::vector<Real> & JxWFace(THREAD_ID tid) { return _assembly[tid]->JxWFace(); }
+  virtual const MooseArray<Point> & pointsFace(THREAD_ID tid) { return _assembly[tid]->qPointsFace(); }
+  virtual const MooseArray<Real> & JxWFace(THREAD_ID tid) { return _assembly[tid]->JxWFace(); }
   virtual const Real & sideElemVolume(THREAD_ID tid) { return _assembly[tid]->sideElemVolume(); }
   virtual const Elem * & elem(THREAD_ID tid) { return _assembly[tid]->elem(); }
   virtual unsigned int & side(THREAD_ID tid) { return _assembly[tid]->side(); }

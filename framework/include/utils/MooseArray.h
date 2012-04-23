@@ -106,7 +106,7 @@ public:
    * The number of elements that can currently
    * be stored in the array.
    */
-  unsigned int size();
+  unsigned int size() const;
 
   /**
    * Get element i out of the array.
@@ -129,6 +129,38 @@ public:
    * here.
    */
   void shallowCopy(const MooseArray & rhs);
+
+  /**
+   * Doesn't actually make a copy of the data.
+   *
+   * Just makes _this_ object operate on the same data.
+   *
+   * Note! You can leak memory with this function if you
+   * don't take care to have a copy of _this_ array somewhere
+   * else.  This is because the data pointer will get overriden
+   * here.
+   *
+   * I repeat!  This is an extremely dangerous function!
+   *
+   * DO NOT USE UNLESS YOU KNOW WHAT YOU ARE DOING!
+   *
+   * YOU HAVE BEEN WARNED!
+   */
+  void shallowCopy(std::vector<T> & rhs);
+
+  /**
+   * Actual operator=... really does make a copy of the data
+   *
+   * If you don't want a copy use shallowCopy()
+   */
+  MooseArray<T> & operator=(const std::vector<T> & rhs);
+
+  /**
+   * Extremely inefficent way to produce a std::vector from a MooseArray!
+   *
+   * @return A _copy_ of the MooseArray contents.
+   */
+  std::vector<T> stdVector();
 
 private:
 
@@ -202,7 +234,7 @@ MooseArray<T>::resize(const unsigned int size, const T & default_value)
 template<typename T>
 inline
 unsigned int
-MooseArray<T>::size()
+MooseArray<T>::size() const
 {
   return _size;
 }
@@ -237,6 +269,38 @@ MooseArray<T>::shallowCopy(const MooseArray & rhs)
   _allocated_size = rhs._allocated_size;
 }
 
+template<typename T>
+inline
+void
+MooseArray<T>::shallowCopy(std::vector<T> & rhs)
+{
+  _data = &rhs[0];
+  _size = rhs.size();
+  _allocated_size = rhs.size();
+}
+
+template<typename T>
+inline
+MooseArray<T> &
+MooseArray<T>::operator=(const std::vector<T> & rhs)
+{
+  unsigned int rhs_size = rhs.size();
+
+  resize(rhs_size);
+
+  for(unsigned int i=0; i<rhs_size; i++)
+    _data[i] = rhs[i];
+
+  return *this;
+}
+
+
+template <class T>
+std::vector<T>
+MooseArray<T>::stdVector()
+{
+  return std::vector<T>(_data, _data+_size);
+}
 
 template <class T>
 void

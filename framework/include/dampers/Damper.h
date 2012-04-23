@@ -80,11 +80,11 @@ protected:
   /// Quadrature point index
   unsigned int _qp;
   /// Quadrature points
-  const std::vector< Point > & _q_point;
+  const MooseArray< Point > & _q_point;
   /// Quadrature rule
   QBase * & _qrule;
   /// Transformed Jacobian weights
-  const std::vector<Real> & _JxW;
+  const MooseArray<Real> & _JxW;
 
   /// The current Newton increment
   VariableValue & _u_increment;

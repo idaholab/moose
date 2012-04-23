@@ -59,7 +59,7 @@ protected:
 
   MooseArray<Real> _value;
 
-  const std::vector<std::vector<RealTensor> > & _second_test;
+  const VariableTestSecond & _second_test;
 };
 
 #endif //KERNELSECOND_H

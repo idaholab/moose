@@ -32,6 +32,9 @@ class MooseArrayTest : public CppUnit::TestFixture
   CPPUNIT_TEST( size );
   CPPUNIT_TEST( access );
   CPPUNIT_TEST( shallowCopy );
+  CPPUNIT_TEST( shallowCopyStdVector );
+  CPPUNIT_TEST( operatorEqualsStdVector );
+  CPPUNIT_TEST( stdVector );
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -49,6 +52,9 @@ public:
   void size();
   void access();
   void shallowCopy();
+  void shallowCopyStdVector();
+  void operatorEqualsStdVector();
+  void stdVector();
 
 private:
 };

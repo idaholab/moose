@@ -80,21 +80,17 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
 
     _phi(_assembly.phiFace()),
     _grad_phi(_assembly.gradPhiFace()),
-    _second_phi(_assembly.secondPhiFace()),
 
     _test(_var.phiFace()),
     _grad_test(_var.gradPhiFace()),
-    _second_test(_var.secondPhiFace()),
 
     _normals(_var.normals()),
 
     _phi_neighbor(_assembly.phiFaceNeighbor()),
     _grad_phi_neighbor(_assembly.gradPhiFaceNeighbor()),
-    _second_phi_neighbor(_assembly.secondPhiFaceNeighbor()),
 
     _test_neighbor(_var.phiFaceNeighbor()),
     _grad_test_neighbor(_var.gradPhiFaceNeighbor()),
-    _second_test_neighbor(_var.secondPhiFaceNeighbor()),
 
     _u_neighbor(_var.slnNeighbor()),
     _grad_u_neighbor(_var.gradSlnNeighbor())

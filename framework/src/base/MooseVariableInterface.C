@@ -145,7 +145,7 @@ MooseVariableInterface::secondTest()
   if (_nodal)
     mooseError("Nodal _variables do not have second derivatives");
 
-  return const_cast<std::vector<std::vector<RealTensor> > &>(_variable->secondPhi());
+  return const_cast<VariableTestSecond &>(_variable->secondPhi());
 }
 
 VariablePhiSecond &
@@ -256,7 +256,7 @@ NeighborMooseVariableInterface::neighborSecondTest()
   if (_nodal)
     mooseError("Nodal _variables do not have second derivatives");
 
-  return const_cast<std::vector<std::vector<RealTensor> > &>(_variable->secondPhiFaceNeighbor());
+  return const_cast<VariableTestSecond &>(_variable->secondPhiFaceNeighbor());
 }
 
 VariablePhiSecond &

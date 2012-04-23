@@ -35,13 +35,13 @@ typedef MooseArray<Real>               VariableValue;
 typedef MooseArray<RealGradient>       VariableGradient;
 typedef MooseArray<RealTensor>         VariableSecond;
 
-typedef std::vector<std::vector<Real> >         VariableTestValue;
-typedef std::vector<std::vector<RealGradient> > VariableTestGradient;
-typedef std::vector<std::vector<RealTensor> >   VariableTestSecond;
+typedef MooseArray<std::vector<Real> >         VariableTestValue;
+typedef MooseArray<std::vector<RealGradient> > VariableTestGradient;
+typedef MooseArray<std::vector<RealTensor> >   VariableTestSecond;
 
-typedef std::vector<std::vector<Real> >         VariablePhiValue;
-typedef std::vector<std::vector<RealGradient> > VariablePhiGradient;
-typedef std::vector<std::vector<RealTensor> >   VariablePhiSecond;
+typedef MooseArray<std::vector<Real> >         VariablePhiValue;
+typedef MooseArray<std::vector<RealGradient> > VariablePhiGradient;
+typedef MooseArray<std::vector<RealTensor> >   VariablePhiSecond;
 
 class Assembly;
 class SubProblem;
@@ -129,19 +129,19 @@ public:
    */
   bool computingSecond() { return _need_second || _need_second_old || _need_second_older; }
 
-  const std::vector<std::vector<Real> > & phi();
-  const std::vector<std::vector<RealGradient> > & gradPhi();
-  const std::vector<std::vector<RealTensor> > & secondPhi();
+  const VariablePhiValue & phi();
+  const VariablePhiGradient & gradPhi();
+  const VariablePhiSecond & secondPhi();
 
-  const std::vector<std::vector<Real> > & phiFace();
-  const std::vector<std::vector<RealGradient> > & gradPhiFace();
-  const std::vector<std::vector<RealTensor> > & secondPhiFace();
+  const VariablePhiValue & phiFace();
+  const VariablePhiGradient & gradPhiFace();
+  const VariablePhiSecond & secondPhiFace();
 
-  const std::vector<std::vector<Real> > & phiFaceNeighbor();
-  const std::vector<std::vector<RealGradient> > & gradPhiFaceNeighbor();
-  const std::vector<std::vector<RealTensor> > & secondPhiFaceNeighbor();
+  const VariablePhiValue & phiFaceNeighbor();
+  const VariablePhiGradient & gradPhiFaceNeighbor();
+  const VariablePhiSecond & secondPhiFaceNeighbor();
 
-  const std::vector<Point> & normals() { return _normals; }
+  const MooseArray<Point> & normals() { return _normals; }
 
   // damping
   VariableValue & increment() { return _increment; }
@@ -338,22 +338,22 @@ protected:
   bool _need_second_older_neighbor;
 
   // Shape function values, gradients. second derivatives
-  const std::vector<std::vector<Real> > & _phi;
-  const std::vector<std::vector<RealGradient> > & _grad_phi;
-  const std::vector<std::vector<RealTensor> > * _second_phi;
+  const VariablePhiValue & _phi;
+  const VariablePhiGradient & _grad_phi;
+  const VariablePhiSecond * _second_phi;
 
   // Values, gradients and second derivatives of shape function on faces
-  const std::vector<std::vector<Real> > & _phi_face;
-  const std::vector<std::vector<RealGradient> > & _grad_phi_face;
-  const std::vector<std::vector<RealTensor> > * _second_phi_face;
+  const VariablePhiValue & _phi_face;
+  const VariablePhiGradient & _grad_phi_face;
+  const VariablePhiSecond * _second_phi_face;
 
   // Values, gradients and second derivatives of shape function on faces
-  const std::vector<std::vector<Real> > & _phi_face_neighbor;
-  const std::vector<std::vector<RealGradient> > & _grad_phi_face_neighbor;
-  const std::vector<std::vector<RealTensor> > * _second_phi_face_neighbor;
+  const VariablePhiValue & _phi_face_neighbor;
+  const VariablePhiGradient & _grad_phi_face_neighbor;
+  const VariablePhiSecond * _second_phi_face_neighbor;
 
   /// Normals at QPs on faces
-  const std::vector<Point> & _normals;
+  const MooseArray<Point> & _normals;
 
   VariableValue _u;
   VariableValue _u_old;

@@ -82,25 +82,25 @@ public:
    * Returns the reference to the quadrature points
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const std::vector<Point> & qPoints() { return _current_q_points; }
+  const MooseArray<Point> & qPoints() { return _current_q_points; }
 
   /**
    * The current points in physical space where we have reinited through reinitAtPhysical()
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const std::vector<Point> & physicalPoints() { return _current_physical_points; }
+  const MooseArray<Point> & physicalPoints() { return _current_physical_points; }
 
   /**
    * Returns the reference to the transformed jacobian weights
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const std::vector<Real> & JxW() { return _current_JxW; }
+  const MooseArray<Real> & JxW() { return _current_JxW; }
 
   /**
    * Returns the reference to the coordinate transformation coefficients
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const std::vector<Real> & coordTransformation() { return _coord; }
+  const MooseArray<Real> & coordTransformation() { return _coord; }
 
   /**
    * Returns the reference to the current quadrature being used on a current face
@@ -112,19 +112,19 @@ public:
    * Returns the reference to the current quadrature being used
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const std::vector<Point> & qPointsFace() { return _current_q_points_face; }
+  const MooseArray<Point> & qPointsFace() { return _current_q_points_face; }
 
   /**
    * Returns the reference to the transformed jacobian weights on a current face
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const std::vector<Real> & JxWFace() { return _current_JxW_face; }
+  const MooseArray<Real> & JxWFace() { return _current_JxW_face; }
 
   /**
    * Returns the array of normals for quadrature points on a current side
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const std::vector<Point> & normals() { return _current_normals; }
+  const MooseArray<Point> & normals() { return _current_normals; }
 
   /**
    * Return the current element
@@ -316,30 +316,30 @@ public:
 
   std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries() { return _cm_entry; }
 
-  const std::vector<std::vector<Real> > & phi() { return _phi; }
-  const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
-  const std::vector<std::vector<RealTensor> > & secondPhi() { return _second_phi; }
+  const VariablePhiValue & phi() { return _phi; }
+  const VariablePhiGradient & gradPhi() { return _grad_phi; }
+  const VariablePhiSecond & secondPhi() { return _second_phi; }
 
-  const std::vector<std::vector<Real> > & phiFace() { return _phi_face; }
-  const std::vector<std::vector<RealGradient> > & gradPhiFace() { return _grad_phi_face; }
-  const std::vector<std::vector<RealTensor> > & secondPhiFace() { return _second_phi_face; }
+  const VariablePhiValue & phiFace() { return _phi_face; }
+  const VariablePhiGradient & gradPhiFace() { return _grad_phi_face; }
+  const VariablePhiSecond & secondPhiFace() { return _second_phi_face; }
 
-  const std::vector<std::vector<Real> > & phiFaceNeighbor() { return _phi_face_neighbor; }
-  const std::vector<std::vector<RealGradient> > & gradPhiFaceNeighbor() { return _grad_phi_face_neighbor; }
-  const std::vector<std::vector<RealTensor> > & secondPhiFaceNeighbor() { return _second_phi_face_neighbor; }
+  const VariablePhiValue & phiFaceNeighbor() { return _phi_face_neighbor; }
+  const VariablePhiGradient & gradPhiFaceNeighbor() { return _grad_phi_face_neighbor; }
+  const VariablePhiSecond & secondPhiFaceNeighbor() { return _second_phi_face_neighbor; }
 
 
-  const std::vector<std::vector<Real> > & fePhi(FEType type)             { getFE(type); return _fe_shape_data[type]->_phi; }
-  const std::vector<std::vector<RealGradient> > & feGradPhi(FEType type) { getFE(type); return _fe_shape_data[type]->_grad_phi; }
-  const std::vector<std::vector<RealTensor> > & feSecondPhi(FEType type) { getFE(type); _need_second_derivative[type] = true; return _fe_shape_data[type]->_second_phi; }
+  const VariablePhiValue & fePhi(FEType type)             { getFE(type); return _fe_shape_data[type]->_phi; }
+  const VariablePhiGradient & feGradPhi(FEType type) { getFE(type); return _fe_shape_data[type]->_grad_phi; }
+  const VariablePhiSecond & feSecondPhi(FEType type) { getFE(type); _need_second_derivative[type] = true; return _fe_shape_data[type]->_second_phi; }
 
-  const std::vector<std::vector<Real> > & fePhiFace(FEType type)             { getFEFace(type); return _fe_shape_data_face[type]->_phi; }
-  const std::vector<std::vector<RealGradient> > & feGradPhiFace(FEType type) { getFEFace(type); return _fe_shape_data_face[type]->_grad_phi; }
-  const std::vector<std::vector<RealTensor> > & feSecondPhiFace(FEType type) { getFEFace(type); _need_second_derivative[type] = true; return _fe_shape_data_face[type]->_second_phi; }
+  const VariablePhiValue & fePhiFace(FEType type)             { getFEFace(type); return _fe_shape_data_face[type]->_phi; }
+  const VariablePhiGradient & feGradPhiFace(FEType type) { getFEFace(type); return _fe_shape_data_face[type]->_grad_phi; }
+  const VariablePhiSecond & feSecondPhiFace(FEType type) { getFEFace(type); _need_second_derivative[type] = true; return _fe_shape_data_face[type]->_second_phi; }
 
-  const std::vector<std::vector<Real> > & fePhiFaceNeighbor(FEType type)             { getFEFaceNeighbor(type); return _fe_shape_data_face_neighbor[type]->_phi; }
-  const std::vector<std::vector<RealGradient> > & feGradPhiFaceNeighbor(FEType type) { getFEFaceNeighbor(type); return _fe_shape_data_face_neighbor[type]->_grad_phi; }
-  const std::vector<std::vector<RealTensor> > & feSecondPhiFaceNeighbor(FEType type) { getFEFaceNeighbor(type); _need_second_derivative[type] = true; return _fe_shape_data_face_neighbor[type]->_second_phi; }
+  const VariablePhiValue & fePhiFaceNeighbor(FEType type)             { getFEFaceNeighbor(type); return _fe_shape_data_face_neighbor[type]->_phi; }
+  const VariablePhiGradient & feGradPhiFaceNeighbor(FEType type) { getFEFaceNeighbor(type); return _fe_shape_data_face_neighbor[type]->_grad_phi; }
+  const VariablePhiSecond & feSecondPhiFaceNeighbor(FEType type) { getFEFaceNeighbor(type); _need_second_derivative[type] = true; return _fe_shape_data_face_neighbor[type]->_second_phi; }
 
   std::map<FEType, bool> _need_second_derivative;
 
@@ -402,11 +402,11 @@ protected:
   /// The current arbitrary quadrature rule used within the element interior
   ArbitraryQuadrature * _current_qrule_arbitrary;
   /// The current list of quadrature points
-  std::vector<Point> _current_q_points;
+  MooseArray<Point> _current_q_points;
   /// The current list of transformed jacobian weights
-  std::vector<Real> _current_JxW;
+  MooseArray<Real> _current_JxW;
   /// The current coordinate transformation coefficients
-  std::vector<Real> _coord;
+  MooseArray<Real> _coord;
   /// Holds volume qrules for each dimension
   std::map<unsigned int, QBase *> _holder_qrule_volume;
   /// Holds arbitrary qrules for each dimension
@@ -429,11 +429,11 @@ protected:
   /// The current arbitrary quadrature rule used on element faces
   ArbitraryQuadrature * _current_qface_arbitrary;
   /// The current quadrature points on a face
-  std::vector<Point> _current_q_points_face;
+  MooseArray<Point> _current_q_points_face;
   /// The current transformed jacobian weights on a face
-  std::vector<Real> _current_JxW_face;
+  MooseArray<Real> _current_JxW_face;
   /// The current Normal vectors at the quadrature points.
-  std::vector<Point> _current_normals;
+  MooseArray<Point> _current_normals;
   /// Holds face qrules for each dimension
   std::map<unsigned int, QBase *> _holder_qrule_face;
   /// Holds arbitrary face qrules for each dimension
@@ -469,7 +469,7 @@ protected:
   const Node * _current_neighbor_node;
 
   /// This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
-  std::vector<Point> _current_physical_points;
+  MooseArray<Point> _current_physical_points;
 
   /// residual contributions for each variable from the element
   std::vector<DenseVector<Number> > _sub_Re;
@@ -502,26 +502,27 @@ protected:
   DenseMatrix<Number> _tmp_Ke;
 
   // Shape function values, gradients. second derivatives
-  std::vector<std::vector<Real> > _phi;
-  std::vector<std::vector<RealGradient> > _grad_phi;
-  std::vector<std::vector<RealTensor> > _second_phi;
+  VariablePhiValue _phi;
+  VariablePhiGradient _grad_phi;
+  VariablePhiSecond _second_phi;
 
-  std::vector<std::vector<Real> > _phi_face;
-  std::vector<std::vector<RealGradient> > _grad_phi_face;
-  std::vector<std::vector<RealTensor> > _second_phi_face;
+  VariablePhiValue _phi_face;
+  VariablePhiGradient _grad_phi_face;
+  VariablePhiSecond _second_phi_face;
 
-  std::vector<std::vector<Real> > _phi_face_neighbor;
-  std::vector<std::vector<RealGradient> > _grad_phi_face_neighbor;
-  std::vector<std::vector<RealTensor> > _second_phi_face_neighbor;
+  VariablePhiValue _phi_face_neighbor;
+  VariablePhiGradient _grad_phi_face_neighbor;
+  VariablePhiSecond _second_phi_face_neighbor;
 
   class FEShapeData
   {
   public:
-    std::vector<std::vector<Real> > _phi;
-    std::vector<std::vector<RealGradient> > _grad_phi;
-    std::vector<std::vector<RealTensor> > _second_phi;
+    MooseArray<std::vector<Real> > _phi;
+    MooseArray<std::vector<RealGradient> > _grad_phi;
+    MooseArray<std::vector<RealTensor> > _second_phi;
   };
 
+  std::map<std::pair<unsigned int, FEType>, FEShapeData * > _fe_shape_data_cache;
   // Shape function values, gradients. second derivatives for each FE type
   std::map<FEType, FEShapeData * > _fe_shape_data;
   std::map<FEType, FEShapeData * > _fe_shape_data_face;

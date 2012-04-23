@@ -97,12 +97,12 @@ protected:
   unsigned int _dim;
 
   /// Active quadrature points
-  const std::vector< Point > & _q_point;
+  const MooseArray< Point > & _q_point;
   /// Quadrature rule being used
   QBase * & _qrule;
   /// Transformed Jacobian weights
-  const std::vector<Real> & _JxW;
-  const std::vector<Real> & _coord;
+  const MooseArray<Real> & _JxW;
+  const MooseArray<Real> & _coord;
 
   /// Holds the solution at current quadrature points
   VariableValue & _u;
