@@ -152,7 +152,7 @@ test_up: all up
 	@for app in $(CURRENT_APP) $(DEP_APPS); \
 	do \
 		echo ====== Testing in $${app} ====== ; \
-		(cd $(ROOT_DIR)/$$app && ./run_tests -j $(JOBS)) ; \
+		(cd $(ROOT_DIR)/$$app && ./run_tests -q -j $(JOBS)) ; \
 	done
 
 clean_up:
