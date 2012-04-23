@@ -36,16 +36,9 @@ LinearGeneralAnisotropicMaterial::LinearGeneralAnisotropicMaterial(const std::st
 {
   // fill in the local tensors from the input vector information
   _Cijkl_matrix.fillFromInputVector(_Cijkl_matrix_vector, _all_21);
-
-  std::cout<<_Cijkl_matrix <<std::endl;
-  
   
   //rotate the C_ijkl matrix 
   _Cijkl_matrix.rotate(_euler_angle_1,_euler_angle_2,_euler_angle_3);
-  std::cout << "rotated";
-  
-  std::cout<<_Cijkl_matrix <<std::endl;
-  
 
   //debugging
   /*_Cijkl_matrix.show_r_matrix();
@@ -69,9 +62,6 @@ void LinearGeneralAnisotropicMaterial::computeQpElasticityTensor()
   // Fill in the matrix stiffness material property
   _elasticity_tensor[_qp] = _Cijkl_matrix;
   _Jacobian_mult[_qp] = _Cijkl_matrix;
-
-  std::cout<<_elasticity_tensor[_qp];
-  
 }
 
 void LinearGeneralAnisotropicMaterial::computeQpStrain()
