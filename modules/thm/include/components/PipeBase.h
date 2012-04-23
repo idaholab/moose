@@ -40,6 +40,7 @@ public:
   // Pipe specific interface ----
   virtual Node * getBoundaryNode(RELAP7::EEndType id);
   virtual unsigned int getBoundaryId(RELAP7::EEndType id);
+  virtual int getBoundaryOutNorm(RELAP7::EEndType id);
   virtual Real getArea() { return _A; }
 
 protected:
@@ -68,6 +69,8 @@ protected:
                                                         ///< Local node IDs are used by other components for connecting
 
   std::map<RELAP7::EEndType, unsigned int> _bnd_ids;    ///< Boundary id of this pipe (indexing: local "node id" => boundary_id).
+
+  std::map<RELAP7::EEndType, int> _bnd_out_norm;	///< Out norm (either 1 or -1) on boundaries
 
 public:
   static const std::string _type;

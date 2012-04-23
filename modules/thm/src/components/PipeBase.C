@@ -79,6 +79,16 @@ PipeBase::getBoundaryId(RELAP7::EEndType id)
     mooseError("PipeBase " << name() << " does not have this type of end defined.");
 }
 
+int
+PipeBase::getBoundaryOutNorm(RELAP7::EEndType id)
+{
+  std::map<RELAP7::EEndType, int>::iterator it = _bnd_out_norm.find(id);
+  if (it != _bnd_out_norm.end())
+    return it->second;
+  else
+    mooseError("PipeBase " << name() << " does not have this type of end defined.");
+}
+
 void
 PipeBase::buildMesh()
 {
@@ -110,12 +120,14 @@ PipeBase::buildMesh()
       _bnd_ids[RELAP7::IN] = bc_id_in;
       _mesh._mesh.boundary_info->add_side(elem, 0, bc_id_in);
       _bnd_nodes[RELAP7::IN] = elem->get_node(0);                // first 0 is local bnd_id that Joints will use for connecting
+      _bnd_out_norm[RELAP7::IN] = -1;
     }
     if (i == (_n_elems - 1))
     {
       _bnd_ids[RELAP7::OUT] = bc_id_out;
       _mesh._mesh.boundary_info->add_side(elem, 1, bc_id_out);
       _bnd_nodes[RELAP7::OUT] = elem->get_node(1);               // first 1 is local bnd_id that Joints will use for connecting
+      _bnd_out_norm[RELAP7::OUT] = 1;
     }
  }
 }
