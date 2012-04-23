@@ -35,6 +35,24 @@ OneDEnergyWallHeating::OneDEnergyWallHeating(const std::string & name, InputPara
 Real
 OneDEnergyWallHeating::computeQpResidual()
 {
+/*
+  //time ramp up
+  Real t1 = 0.55;
+  Real t2 = 1.0;
+  Real _Hw_time = 0.;
+  if(_t < t1)
+  {
+    _Hw_time = 0.;
+  }
+  else if(_t < t2)
+  {
+    _Hw_time = _Hw * (_t - t1) / (t2 - t1);
+  }
+  else
+  {
+    _Hw_time = _Hw;
+  }
+*/
   // heat transfer term: Hw * aw * (T-Tw) * psi
   return _Hw * _aw * (_temperature[_qp]-_Tw) * _test[_i][_qp];
 }
