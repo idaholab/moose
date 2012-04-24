@@ -35,6 +35,7 @@ public:
 
 protected:
   std::string _coord_sys;
+  bool _fe_cache;
 };
 
 

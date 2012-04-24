@@ -156,6 +156,13 @@ public:
   MooseArray<T> & operator=(const std::vector<T> & rhs);
 
   /**
+   * Actual operator=... really does make a copy of the data
+   *
+   * If you don't want a copy use shallowCopy()
+   */
+  MooseArray<T> & operator=(const MooseArray<T> & rhs);
+
+  /**
    * Extremely inefficent way to produce a std::vector from a MooseArray!
    *
    * @return A _copy_ of the MooseArray contents.
@@ -294,6 +301,20 @@ MooseArray<T>::operator=(const std::vector<T> & rhs)
   return *this;
 }
 
+template<typename T>
+inline
+MooseArray<T> &
+MooseArray<T>::operator=(const MooseArray<T> & rhs)
+{
+//  mooseError("Shouldn't be doing this!");
+  resize(rhs._size);
+//  memcpy(_data,rhs._data,sizeof(T)*_size);
+
+  for(unsigned int i=0; i<_size; i++)
+    _data[i] = rhs._data[i];
+
+  return *this;
+}
 
 template <class T>
 std::vector<T>

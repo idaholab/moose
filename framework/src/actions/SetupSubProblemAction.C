@@ -23,12 +23,14 @@ InputParameters validParams<SetupSubProblemAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<std::string>("coord_type", "XYZ", "Type of the coordinate system");
+  params.addParam<bool>("fe_cache", true, "Whether or not to turn on the finite element shape function caching system.  This can increase speed with an associated memory cost.");
   return params;
 }
 
 SetupSubProblemAction::SetupSubProblemAction(const std::string & name, InputParameters parameters) :
     Action(name, parameters),
-    _coord_sys(getParam<std::string>("coord_type"))
+    _coord_sys(getParam<std::string>("coord_type")),
+    _fe_cache(getParam<bool>("fe_cache"))
 {
 }
 
@@ -43,5 +45,6 @@ SetupSubProblemAction::act()
   {
     SubProblem & subproblem = *_parser_handle._problem;
     subproblem.setCoordSystem(Moose::stringToEnum<Moose::CoordinateSystemType>(_coord_sys));
+    subproblem.useFECache(_fe_cache);
   }
 }

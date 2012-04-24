@@ -128,6 +128,13 @@ public:
   virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
   virtual void subdomainSetupSide(unsigned int subdomain, THREAD_ID tid);
 
+  /**
+   * Whether or not this problem should utilize FE shape function caching.
+   *
+   * @param fe_cache True for using the cache false for not.
+   */
+  virtual void useFECache(bool fe_cache);
+
   virtual void init();
   virtual void init2();
   virtual void solve();

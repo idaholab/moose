@@ -246,6 +246,13 @@ public:
 
   void init();
 
+  /**
+   * Whether or not this assembly should utilize FE shape function caching.
+   *
+   * @param fe_cache True for using the cache false for not.
+   */
+  void useFECache(bool fe_cache) { _should_use_fe_cache = fe_cache; }
+
   void prepare();
   void prepareNeighbor();
   void prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices);
@@ -340,6 +347,11 @@ public:
   const VariablePhiValue & fePhiFaceNeighbor(FEType type)             { getFEFaceNeighbor(type); return _fe_shape_data_face_neighbor[type]->_phi; }
   const VariablePhiGradient & feGradPhiFaceNeighbor(FEType type) { getFEFaceNeighbor(type); return _fe_shape_data_face_neighbor[type]->_grad_phi; }
   const VariablePhiSecond & feSecondPhiFaceNeighbor(FEType type) { getFEFaceNeighbor(type); _need_second_derivative[type] = true; return _fe_shape_data_face_neighbor[type]->_second_phi; }
+
+  /**
+   * Invalidate any currently cached data.  In particular this will cause FE data to get recached.
+   */
+  void invalidateCache();
 
   std::map<FEType, bool> _need_second_derivative;
 
@@ -522,7 +534,37 @@ protected:
     MooseArray<std::vector<RealTensor> > _second_phi;
   };
 
-  std::map<std::pair<unsigned int, FEType>, FEShapeData * > _fe_shape_data_cache;
+  /**
+   * Ok - here's the design.  One ElementFEShapeData class will be stored per element in _fe_shape_data_cache.
+   * When reinit() is called on an element we will retrieve the ElementFEShapeData class associated with that
+   * element.  If it's NULL we'll make one.  Then we'll store a copy of the shape functions computed on that
+   * element within shape_data and JxW and q_points within EleementFEShapeData.
+   */
+  class ElementFEShapeData
+  {
+  public:
+    /// This is where the cached shape functions will be held
+    std::map<FEType, FEShapeData *> _shape_data;
+
+    /// Whether or not this data is invalid (needs to be recached) note that there is no constructor so the value is invalid the first time through and must be set.
+    bool _invalidated;
+
+    /// Cached JxW
+    MooseArray<Real> _JxW;
+
+    /// Cached xyz positions of quadrature points
+    MooseArray<Point> _q_points;
+  };
+
+  /// Cached shape function values stored by element
+  std::map<unsigned int, ElementFEShapeData * > _element_fe_shape_data_cache;
+
+  /// Whether or not fe cache should be built at all
+  bool _should_use_fe_cache;
+
+  /// Whether or not fe should currently be cached - This will be false if something funky is going on with the quadrature rules.
+  bool _currently_fe_caching;
+
   // Shape function values, gradients. second derivatives for each FE type
   std::map<FEType, FEShapeData * > _fe_shape_data;
   std::map<FEType, FEShapeData * > _fe_shape_data_face;

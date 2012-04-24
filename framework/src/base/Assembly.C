@@ -43,6 +43,9 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _current_node(NULL),
     _current_neighbor_node(NULL),
 
+    _should_use_fe_cache(false),
+    _currently_fe_caching(true),
+
     _max_cached_residuals(0),
     _max_cached_jacobians(0)
 {
@@ -166,7 +169,6 @@ void
 Assembly::setVolumeQRule(QBase * qrule, unsigned int dim)
 {
   _current_qrule = qrule;
-
   for (std::map<FEType, FEBase *>::iterator it = _fe[dim].begin(); it != _fe[dim].end(); ++it)
     it->second->attach_quadrature_rule(_current_qrule);
 }
@@ -181,50 +183,102 @@ Assembly::setFaceQRule(QBase * qrule, unsigned int dim)
 }
 
 void
+Assembly::invalidateCache()
+{
+  std::map<unsigned int, ElementFEShapeData * >::iterator it = _element_fe_shape_data_cache.begin();
+  std::map<unsigned int, ElementFEShapeData * >::iterator end = _element_fe_shape_data_cache.end();
+
+  for(; it!=end; ++it)
+    it->second->_invalidated = true;
+}
+
+void
 Assembly::reinitFE(const Elem * elem)
 {
   unsigned int dim = elem->dim();
   std::map<FEType, FEBase *>::iterator it = _fe[dim].begin();
   std::map<FEType, FEBase *>::iterator end = _fe[dim].end();
 
+  ElementFEShapeData * efesd = NULL;
+
+  // Whether or not we're going to do FE caching this time through
+  bool do_caching = _should_use_fe_cache && _currently_fe_caching;
+
+  if(do_caching)
+  {
+    efesd = _element_fe_shape_data_cache[elem->id()];
+
+    if(!efesd)
+    {
+      efesd = new ElementFEShapeData;
+      _element_fe_shape_data_cache[elem->id()] = efesd;
+      efesd->_invalidated = true;
+    }
+  }
+
   for (; it != end; ++it)
   {
     FEBase * fe = it->second;
     const FEType & fe_type = it->first;
 
-    FEShapeData * fesd = _fe_shape_data[fe_type];
-    /*
-    FEShapeData *& cached_fesd = _fe_shape_data_cache[std::make_pair(elem->id(), fe_type)];
-
     _current_fe[fe_type] = fe;
 
-    if(!cached_fesd)
-    {*/
+    FEShapeData * fesd = _fe_shape_data[fe_type];
+
+    FEShapeData * cached_fesd = NULL;
+    if(do_caching)
+      cached_fesd = efesd->_shape_data[fe_type];
+
+    if(!cached_fesd || efesd->_invalidated)
+    {
       fe->reinit(elem);
 
       fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe->get_phi()));
       fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe->get_dphi()));
       if(_need_second_derivative[fe_type])
         fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe->get_d2phi()));
-/*
-      cached_fesd = new FEShapeData;
 
-      *cached_fesd = *fesd;
+      if(do_caching)
+      {
+        if(!cached_fesd)
+        {
+          cached_fesd = new FEShapeData;
+          efesd->_shape_data[fe_type] = cached_fesd;
+        }
+
+        *cached_fesd = *fesd;
+      }
     }
-    else
+    else // This means we have valid cached shape function values for this element / fe_type combo
     {
-      fesd->_phi = cached_fesd->_phi;
-      fesd->_grad_phi = cached_fesd->_grad_phi;
+      fesd->_phi.shallowCopy(cached_fesd->_phi);
+      fesd->_grad_phi.shallowCopy(cached_fesd->_grad_phi);
       if(_need_second_derivative[fe_type])
-        fesd->_second_phi = cached_fesd->_second_phi;
+        fesd->_second_phi.shallowCopy(cached_fesd->_second_phi);
     }
-*/
   }
 
   // During that last loop the helper objects will have been reinitialized as well
   // We need to dig out the q_points and JxW from it.
-  _current_q_points.shallowCopy(const_cast<std::vector<Point> &>((*_holder_fe_helper[dim])->get_xyz()));
-  _current_JxW.shallowCopy(const_cast<std::vector<Real> &>((*_holder_fe_helper[dim])->get_JxW()));
+  if(!do_caching || efesd->_invalidated)
+  {
+    _current_q_points.shallowCopy(const_cast<std::vector<Point> &>((*_holder_fe_helper[dim])->get_xyz()));
+    _current_JxW.shallowCopy(const_cast<std::vector<Real> &>((*_holder_fe_helper[dim])->get_JxW()));
+
+    if(do_caching)
+    {
+      efesd->_q_points = _current_q_points;
+      efesd->_JxW = _current_JxW;
+    }
+  }
+  else // Use cached values
+  {
+    _current_q_points.shallowCopy(efesd->_q_points);
+    _current_JxW.shallowCopy(efesd->_JxW);
+  }
+
+  if(do_caching)
+    efesd->_invalidated = false;
 }
 
 void
@@ -265,6 +319,8 @@ Assembly::reinit(const Elem * elem)
   if(_current_qrule != _current_qrule_volume)
     setVolumeQRule(_current_qrule_volume, elem_dimension);
 
+  _currently_fe_caching = true;
+
   reinitFE(elem);
 
   // set the coord transformation
@@ -301,6 +357,8 @@ Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physica
 
   FEInterface::inverse_map(elem->dim(), FEType(), elem, physical_points, reference_points);
 
+  _currently_fe_caching = false;
+
   reinit(elem, reference_points);
 
   // Save off the physical points
@@ -321,6 +379,8 @@ Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
     setVolumeQRule(_current_qrule_arbitrary, elem_dimension);
 
   _current_qrule_arbitrary->setPoints(reference_points);
+
+  _currently_fe_caching = false;
 
   reinitFE(elem);
 }
@@ -642,11 +702,11 @@ Assembly::copyShapes(unsigned int var)
 {
   MooseVariable & v = _sys.getVariable(_tid, var);
 
-  _phi = v.phi();
-  _grad_phi = v.gradPhi();
+  _phi.shallowCopy(v.phi());
+  _grad_phi.shallowCopy(v.gradPhi());
 
   if(v.computingSecond())
-    _second_phi = v.secondPhi();
+    _second_phi.shallowCopy(v.secondPhi());
 }
 
 void
@@ -654,9 +714,11 @@ Assembly::copyFaceShapes(unsigned int var)
 {
   MooseVariable & v = _sys.getVariable(_tid, var);
 
-  _phi_face = v.phiFace();
-  _grad_phi_face = v.gradPhiFace();
-  _second_phi_face = v.secondPhiFace();
+  _phi_face.shallowCopy(v.phiFace());
+  _grad_phi_face.shallowCopy(v.gradPhiFace());
+
+  if(v.computingSecond())
+    _second_phi_face.shallowCopy(v.secondPhiFace());
 }
 
 void
@@ -665,11 +727,11 @@ Assembly::copyNeighborShapes(unsigned int var)
   MooseVariable & v = _sys.getVariable(_tid, var);
 
   if(v.usesPhi())
-    _phi_face_neighbor = v.phiFaceNeighbor();
+    _phi_face_neighbor.shallowCopy(v.phiFaceNeighbor());
   if(v.usesGradPhi())
-    _grad_phi_face_neighbor = v.gradPhiFaceNeighbor();
+    _grad_phi_face_neighbor.shallowCopy(v.gradPhiFaceNeighbor());
   if(v.usesSecondPhi())
-    _second_phi_face_neighbor = v.secondPhiFaceNeighbor();
+    _second_phi_face_neighbor.shallowCopy(v.secondPhiFaceNeighbor());
 }
 
 void

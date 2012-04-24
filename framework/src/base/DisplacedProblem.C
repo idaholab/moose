@@ -140,6 +140,15 @@ DisplacedProblem::createQRules(QuadratureType type, Order order)
 }
 
 void
+DisplacedProblem::useFECache(bool fe_cache)
+{
+  unsigned int n_threads = libMesh::n_threads();
+
+  for (unsigned int i = 0; i < n_threads; ++i)
+    _assembly[i]->useFECache(fe_cache); // fe caching is turned off for now for the displaced system.
+}
+
+void
 DisplacedProblem::init()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
@@ -181,7 +190,12 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
 {
   Moose::perf_log.push("updateDisplacedMesh()","Solve");
 
+  unsigned int n_threads = libMesh::n_threads();
+
   syncSolutions(soln, aux_soln);
+
+  for (unsigned int i = 0; i < n_threads; ++i)
+    _assembly[i]->invalidateCache();
 
   _nl_solution = &soln;
   _aux_solution = &aux_soln;
@@ -544,6 +558,10 @@ DisplacedProblem::meshChanged()
   // mesh changed
   _eq.reinit();
   _mesh.meshChanged();
+  unsigned int n_threads = libMesh::n_threads();
+
+  for (unsigned int i = 0; i < n_threads; ++i)
+    _assembly[i]->invalidateCache();
   _geometric_search_data.update();
 }
 

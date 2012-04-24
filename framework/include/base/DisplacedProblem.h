@@ -52,6 +52,14 @@ public:
   DisplacedSystem & auxSys() { return _displaced_aux; }
 
   virtual void createQRules(QuadratureType type, Order order);
+
+  /**
+   * Whether or not this problem should utilize FE shape function caching.
+   *
+   * @param fe_cache True for using the cache false for not.
+   */
+  virtual void useFECache(bool fe_cache);
+
   virtual void init();
   virtual void solve() {}
   virtual bool converged() { return _mproblem.converged(); }

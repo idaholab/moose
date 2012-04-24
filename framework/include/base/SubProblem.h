@@ -53,6 +53,13 @@ public:
   Moose::CoordinateSystemType & coordSystem() { return _coord_sys; }
   virtual void setCoordSystem(Moose::CoordinateSystemType type) { _coord_sys = type; }
 
+  /**
+   * Whether or not this problem should utilize FE shape function caching.
+   *
+   * @param fe_cache True for using the cache false for not.
+   */
+  virtual void useFECache(bool fe_cache) = 0;
+
   virtual void init();
   virtual void solve() = 0;
   virtual bool converged() = 0;

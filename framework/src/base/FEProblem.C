@@ -1518,6 +1518,17 @@ FEProblem::setCouplingMatrix(CouplingMatrix * cm)
   _cm = cm;
 }
 
+void
+FEProblem::useFECache(bool fe_cache)
+{
+  if(fe_cache)
+    std::cout<<std::endl<<"Utilizing FE Shape Function Caching"<<std::endl<<std::endl;
+
+  unsigned int n_threads = libMesh::n_threads();
+
+  for (unsigned int i = 0; i < n_threads; ++i)
+    _assembly[i]->useFECache(fe_cache); //fe_cache);
+}
 
 void
 FEProblem::init()
@@ -1817,6 +1828,12 @@ FEProblem::meshChanged()
   // mesh changed
   _eq.reinit();
   _mesh.meshChanged();
+
+  unsigned int n_threads = libMesh::n_threads();
+
+  for (unsigned int i = 0; i < n_threads; ++i)
+    _assembly[i]->invalidateCache();
+
   _geometric_search_data.update();
   _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
 
