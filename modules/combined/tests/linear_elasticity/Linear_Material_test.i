@@ -34,6 +34,13 @@
   [../]
 []
 
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+  [../]
+[]
+
 # Materials properties into AuxVariables - these are elemental variables, not nodal variables.
 [AuxVariables]
   [./C11_aux]
@@ -322,7 +329,6 @@
 []
 
 [BCs]
-active = 'bottom top'
   [./bottom]
     type = DirichletBC
     variable = diffused
@@ -335,6 +341,20 @@ active = 'bottom top'
     variable = diffused
     boundary = '2'
     value = 0
+  [../]
+
+  [./disp_x_BC]
+    type = DirichletBC
+    variable = disp_x
+    boundary = '0 1 2 3'
+    value = 0.0
+  [../]
+
+  [./disp_y_BC]
+    type = DirichletBC
+    variable = disp_y
+    boundary = '0 1 2 3'
+    value = 0.0
   [../]
 []
 
