@@ -22,6 +22,7 @@
 #include "Coupleable.h"
 #include "MooseVariableInterface.h"
 #include "FunctionInterface.h"
+#include "UserDataInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
 #include "GeometricSearchInterface.h"
@@ -50,6 +51,7 @@ class NodalConstraint :
   public NeighborCoupleable,
   public NeighborMooseVariableInterface,
   public FunctionInterface,
+  public UserDataInterface,
   public TransientInterface,
   protected GeometricSearchInterface
 {

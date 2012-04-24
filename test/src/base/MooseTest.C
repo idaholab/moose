@@ -29,6 +29,7 @@
 #include "MatConvection.h"
 #include "PPSDiffusion.h"
 #include "DotCouplingKernel.h"
+#include "UserDataKernel.h"
 
 #include "CoupledAux.h"
 #include "PolyConstantAux.h"
@@ -69,6 +70,7 @@
 #include "ImplicitODEy.h"
 
 #include "EqualValueNodalConstraint.h"
+#include "MTUserData.h"
 
 // meshes
 #include "StripeMesh.h"
@@ -105,6 +107,7 @@ void registerObjects()
   registerKernel(MatConvection);
   registerKernel(PPSDiffusion);
   registerKernel(DotCouplingKernel);
+  registerKernel(UserDataKernel);
 
   // Aux kernels
   registerAux(CoupledAux);
@@ -154,6 +157,8 @@ void registerObjects()
   registerObject(StripeMesh);
 
   registerConstraint(EqualValueNodalConstraint);
+
+  registerUserData(MTUserData);
 }
 
 } // namespace

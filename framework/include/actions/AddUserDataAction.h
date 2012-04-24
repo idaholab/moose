@@ -12,19 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "GeneralPostprocessor.h"
+#ifndef ADDUSERDATAACTION_H
+#define ADDUSERDATAACTION_H
+
+#include "InputParameters.h"
+#include "Moose.h"
+#include "MooseObjectAction.h"
+
+#include <string>
+
+class AddUserDataAction;
 
 template<>
-InputParameters validParams<GeneralPostprocessor>()
-{
-  InputParameters params = validParams<Postprocessor>();
-  return params;
-}
+InputParameters validParams<AddUserDataAction>();
 
-GeneralPostprocessor::GeneralPostprocessor(const std::string & name, InputParameters parameters) :
-    Postprocessor(name, parameters),
-    TransientInterface(parameters),
-    FunctionInterface(parameters),
-    UserDataInterface(parameters),
-    PostprocessorInterface(parameters)
-{}
+
+class AddUserDataAction : public MooseObjectAction
+{
+public:
+  AddUserDataAction(const std::string & name, InputParameters params);
+
+  virtual void act();
+};
+
+#endif // ADDUSERDATAACTION_H

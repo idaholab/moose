@@ -12,19 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "GeneralPostprocessor.h"
+#include "UserDataWarehouse.h"
+#include "Moose.h"
 
-template<>
-InputParameters validParams<GeneralPostprocessor>()
+
+UserDataWarehouse::UserDataWarehouse()
 {
-  InputParameters params = validParams<Postprocessor>();
-  return params;
 }
 
-GeneralPostprocessor::GeneralPostprocessor(const std::string & name, InputParameters parameters) :
-    Postprocessor(name, parameters),
-    TransientInterface(parameters),
-    FunctionInterface(parameters),
-    UserDataInterface(parameters),
-    PostprocessorInterface(parameters)
-{}
+UserDataWarehouse::~UserDataWarehouse()
+{
+  for (std::vector<UserData *>::iterator it = _user_data.begin(); it != _user_data.end(); ++it)
+    delete (*it);
+}
+
+void
+UserDataWarehouse::addUserData(const std::string & name, UserData * user_data)
+{
+  _user_data.push_back(user_data);
+  _name_to_user_data[name] = user_data;
+}
+
+UserData *
+UserDataWarehouse::getUserDataByName(const std::string & name)
+{
+  std::map<std::string, UserData *>::iterator it = _name_to_user_data.find(name);
+  if (it == _name_to_user_data.end())
+    mooseError("Could not find user-data object with name '" << name << "'");
+  return it->second;
+}

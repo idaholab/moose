@@ -12,19 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "GeneralPostprocessor.h"
+#include "AddUserDataAction.h"
+#include "Parser.h"
+#include "FEProblem.h"
 
 template<>
-InputParameters validParams<GeneralPostprocessor>()
+InputParameters validParams<AddUserDataAction>()
 {
-  InputParameters params = validParams<Postprocessor>();
-  return params;
+  return validParams<MooseObjectAction>();
 }
 
-GeneralPostprocessor::GeneralPostprocessor(const std::string & name, InputParameters parameters) :
-    Postprocessor(name, parameters),
-    TransientInterface(parameters),
-    FunctionInterface(parameters),
-    UserDataInterface(parameters),
-    PostprocessorInterface(parameters)
-{}
+AddUserDataAction::AddUserDataAction(const std::string & name, InputParameters params) :
+    MooseObjectAction(name, params)
+{
+}
+
+void
+AddUserDataAction::act()
+{
+  _problem->addUserData(_type, getShortName(), _moose_object_pars);
+}

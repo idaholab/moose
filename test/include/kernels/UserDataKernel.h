@@ -12,19 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "GeneralPostprocessor.h"
+#ifndef USERDATAKERNEL_H
+#define USERDATAKERNEL_H
+
+#include "Kernel.h"
+#include "MTUserData.h"
+
+class UserDataKernel;
 
 template<>
-InputParameters validParams<GeneralPostprocessor>()
-{
-  InputParameters params = validParams<Postprocessor>();
-  return params;
-}
+InputParameters validParams<UserDataKernel>();
 
-GeneralPostprocessor::GeneralPostprocessor(const std::string & name, InputParameters parameters) :
-    Postprocessor(name, parameters),
-    TransientInterface(parameters),
-    FunctionInterface(parameters),
-    UserDataInterface(parameters),
-    PostprocessorInterface(parameters)
-{}
+/**
+ * This kernel user user-data object
+ */
+class UserDataKernel : public Kernel
+{
+public:
+  UserDataKernel(const std::string & name, InputParameters params);
+  virtual ~UserDataKernel();
+
+protected:
+  virtual Real computeQpResidual();
+
+  /// Mutley - do a google search on him if you do not know him
+  const MTUserData & _mutley;
+};
+
+#endif /* USERDATAKERNEL_H */

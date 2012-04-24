@@ -12,19 +12,44 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "GeneralPostprocessor.h"
+#ifndef MTUSERDATA_H
+#define MTUSERDATA_H
+
+#include "UserData.h"
+
+class MTUserData;
 
 template<>
-InputParameters validParams<GeneralPostprocessor>()
-{
-  InputParameters params = validParams<Postprocessor>();
-  return params;
-}
+InputParameters validParams<MTUserData>();
 
-GeneralPostprocessor::GeneralPostprocessor(const std::string & name, InputParameters parameters) :
-    Postprocessor(name, parameters),
-    TransientInterface(parameters),
-    FunctionInterface(parameters),
-    UserDataInterface(parameters),
-    PostprocessorInterface(parameters)
-{}
+
+/**
+ * Demonstration of user-data object
+ */
+class MTUserData : public UserData
+{
+public:
+  MTUserData(const std::string & name, InputParameters params);
+  virtual ~MTUserData();
+
+  virtual void destroy();
+
+  /**
+   * A function that does something
+   */
+  Real doSomething() const;
+
+protected:
+  /// A scalar value
+  const Real & _scalar;
+  /// A vector value
+  const std::vector<Real> & _vector;
+  /// Dynamically allocated memory
+  Real * _dyn_memory;
+
+protected:
+  /// Number of elements to allocate (we do not like magic numbers)
+  static const unsigned int NUM = 10;
+};
+
+#endif /* MTUSERDATA_H */

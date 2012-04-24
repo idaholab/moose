@@ -12,19 +12,20 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "GeneralPostprocessor.h"
+#include "UserData.h"
 
 template<>
-InputParameters validParams<GeneralPostprocessor>()
+InputParameters validParams<UserData>()
 {
-  InputParameters params = validParams<Postprocessor>();
+  InputParameters params = validParams<MooseObject>();
   return params;
 }
 
-GeneralPostprocessor::GeneralPostprocessor(const std::string & name, InputParameters parameters) :
-    Postprocessor(name, parameters),
-    TransientInterface(parameters),
-    FunctionInterface(parameters),
-    UserDataInterface(parameters),
-    PostprocessorInterface(parameters)
-{}
+UserData::UserData(const std::string & name, InputParameters params) :
+    MooseObject(name, params)
+{
+}
+
+UserData::~UserData()
+{
+}

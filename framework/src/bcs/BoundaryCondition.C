@@ -36,6 +36,7 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     MooseObject(name, parameters),
     SetupInterface(parameters),
     FunctionInterface(parameters),
+    UserDataInterface(parameters),
     TransientInterface(parameters),
     PostprocessorInterface(parameters),
     GeometricSearchInterface(parameters),

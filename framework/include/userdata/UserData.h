@@ -12,19 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "GeneralPostprocessor.h"
+#ifndef USERDATA_H
+#define USERDATA_H
+
+#include "MooseObject.h"
+
+class UserData;
 
 template<>
-InputParameters validParams<GeneralPostprocessor>()
-{
-  InputParameters params = validParams<Postprocessor>();
-  return params;
-}
+InputParameters validParams<UserData>();
 
-GeneralPostprocessor::GeneralPostprocessor(const std::string & name, InputParameters parameters) :
-    Postprocessor(name, parameters),
-    TransientInterface(parameters),
-    FunctionInterface(parameters),
-    UserDataInterface(parameters),
-    PostprocessorInterface(parameters)
-{}
+
+/**
+ * Base class for user-specific data
+ */
+class UserData : public MooseObject
+{
+public:
+  UserData(const std::string & name, InputParameters params);
+  virtual ~UserData();
+
+  /**
+   * Called before deleting the object. Free memory allocated by your derived classes, etc.
+   */
+  virtual void destroy() = 0;
+};
+
+#endif /* USERDATA_H */

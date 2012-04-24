@@ -186,6 +186,8 @@
 #include "AddConstraintAction.h"
 #include "InitDisplacedProblemAction.h"
 #include "SetupSubProblemAction.h"
+#include "AddUserDataAction.h"
+
 
 namespace Moose {
 
@@ -373,6 +375,7 @@ addActionTypes()
   registerActionName("setup_oversampling", false);
   registerActionName("deprecated_block", false);
   registerActionName("add_constraint", false);
+  registerActionName("add_user_data", false);
   registerActionName("add_bounds_vectors", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
@@ -403,6 +406,7 @@ addActionTypes()
 "(setup_executioner)"
 "(init_displaced_problem)"
 "(setup_subproblem)"
+"(add_user_data)"
 "(add_function)"
 "(setup_function_complete)"
 "(add_aux_variable, add_variable)"
@@ -502,6 +506,7 @@ registerActions()
   registerAction(SetupOverSamplingAction, "setup_oversampling");
   registerAction(DeprecatedBlockAction, "deprecated_block");
   registerAction(AddConstraintAction, "add_constraint");
+  registerAction(AddUserDataAction, "add_user_data");
 
 #ifdef LIBMESH_ENABLE_AMR
   registerAction(AdaptivityAction, "setup_adaptivity");

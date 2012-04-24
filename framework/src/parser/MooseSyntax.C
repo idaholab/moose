@@ -227,6 +227,9 @@ void associateSyntax()
   syntax.registerActionSyntax("EmptyAction", "Constraints");
   syntax.registerActionSyntax("AddConstraintAction", "Constraints/*");
 
+  syntax.registerActionSyntax("EmptyAction", "UserData");
+  syntax.registerActionSyntax("AddUserDataAction", "UserData/*", "add_user_data");
+
   syntax.registerActionSyntax("AddBoundsVectorsAction", "Bounds", "add_bounds_vectors");
 
   // This works because the AddKernelAction will build AuxKernels if the path doesn't contain Kernels!

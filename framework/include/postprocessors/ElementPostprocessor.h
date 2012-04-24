@@ -21,6 +21,7 @@
 #include "MooseVariable.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
+#include "UserDataInterface.h"
 // libMesh
 #include "elem.h"
 
@@ -33,6 +34,7 @@ InputParameters validParams<ElementPostprocessor>();
 class ElementPostprocessor :
   public Postprocessor,
   public Coupleable,
+  public UserDataInterface,
   public MooseVariableInterface,
   public TransientInterface,
   public MaterialPropertyInterface

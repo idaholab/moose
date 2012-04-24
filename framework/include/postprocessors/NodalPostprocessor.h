@@ -17,6 +17,7 @@
 
 #include "Postprocessor.h"
 #include "Coupleable.h"
+#include "UserDataInterface.h"
 #include "MooseVariableInterface.h"
 #include "MooseVariable.h"
 #include "TransientInterface.h"
@@ -35,6 +36,7 @@ InputParameters validParams<NodalPostprocessor>();
 class NodalPostprocessor :
   public Postprocessor,
   public Coupleable,
+  public UserDataInterface,
   public MooseVariableInterface,
   public TransientInterface,
   public MaterialPropertyInterface

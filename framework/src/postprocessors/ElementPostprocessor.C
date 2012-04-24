@@ -31,6 +31,7 @@ InputParameters validParams<ElementPostprocessor>()
 ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParameters parameters) :
     Postprocessor(name, parameters),
     Coupleable(parameters, false),
+    UserDataInterface(parameters),
     MooseVariableInterface(parameters, false),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),

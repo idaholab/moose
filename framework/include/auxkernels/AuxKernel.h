@@ -21,6 +21,7 @@
 #include "MooseVariableInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "FunctionInterface.h"
+#include "UserDataInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
@@ -47,6 +48,7 @@ class AuxKernel :
   public ScalarCoupleable,
   public MooseVariableInterface,
   public FunctionInterface,
+  public UserDataInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
   public PostprocessorInterface,

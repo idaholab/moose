@@ -20,6 +20,7 @@
 #include "Coupleable.h"
 #include "MooseVariableInterface.h"
 #include "FunctionInterface.h"
+#include "UserDataInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
@@ -49,6 +50,7 @@ class Kernel :
   public ScalarCoupleable,
   public MooseVariableInterface,
   public FunctionInterface,
+  public UserDataInterface,
   public TransientInterface,
   public PostprocessorInterface,
   public MaterialPropertyInterface,

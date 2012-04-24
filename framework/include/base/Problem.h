@@ -22,6 +22,7 @@
 #include "MooseMesh.h"
 #include "MooseArray.h"
 #include "Function.h"
+#include "UserDataWarehouse.h"
 
 // libMesh
 #include "libmesh_common.h"
@@ -137,6 +138,22 @@ public:
   virtual void addFunction(std::string type, const std::string & name, InputParameters parameters);
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
 
+  // UserData /////
+  /**
+   * Adds an user-data object to this problem
+   * @param type The type (C++ class name) of the user-data object
+   * @param name The name of the user-data object
+   * @param parameters Parameters of the user-data object
+   */
+  virtual void addUserData(const std::string & type, const std::string & name, InputParameters parameters);
+  /**
+   * Get the user-data object by its name
+   * @param name The name of the user-data object being retrieved
+   * @param tid The thread ID
+   * @return Const reference to the user-data object
+   */
+  virtual const UserData & getUserData(const std::string & name, THREAD_ID tid = 0);
+
   // Transient /////
   virtual void copySolutionsBackwards() = 0;
 
@@ -160,8 +177,10 @@ protected:
   /// Generic parameters object used during construction
   InputParameters _pars;
 
-  // functions
+  /// functions
   std::vector<std::map<std::string, Function *> > _functions;
+  /// User data
+  std::vector<UserDataWarehouse> _user_data;
 
   /// output initial condition if true
   bool _output_initial;

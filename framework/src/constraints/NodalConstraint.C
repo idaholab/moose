@@ -36,6 +36,7 @@ NodalConstraint::NodalConstraint(const std::string & name, InputParameters param
   NeighborCoupleable(parameters, true),
   NeighborMooseVariableInterface(parameters, true),
   FunctionInterface(parameters),
+  UserDataInterface(parameters),
   TransientInterface(parameters),
   GeometricSearchInterface(parameters),
 

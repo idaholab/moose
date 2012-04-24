@@ -12,39 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef GENERALPOSTPROCESSOR_H
-#define GENERALPOSTPROCESSOR_H
-
-#include "Postprocessor.h"
-#include "TransientInterface.h"
-#include "FunctionInterface.h"
 #include "UserDataInterface.h"
-#include "PostprocessorInterface.h"
+#include "UserData.h"
 #include "Problem.h"
 
-
-//Forward Declarations
-class GeneralPostprocessor;
-
-template<>
-InputParameters validParams<GeneralPostprocessor>();
-
-/* This class is here to combine the Postprocessor interface and the
- * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
-class GeneralPostprocessor :
-  public Postprocessor,
-  public TransientInterface,
-  public FunctionInterface,
-  public UserDataInterface,
-  protected PostprocessorInterface
+UserDataInterface::UserDataInterface(InputParameters & params) :
+    _udi_problem(*params.get<Problem *>("_problem")),
+    _udi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
+    _udi_params(params)
 {
-public:
-  GeneralPostprocessor(const std::string & name, InputParameters parameters);
+}
 
-  virtual ~GeneralPostprocessor() {}
+const UserData &
+UserDataInterface::getUserData(const std::string & name)
+{
+  return _udi_problem.getUserData(_udi_params.get<std::string>(name), _udi_tid);
+}
 
-  // General Postprocessors are not threaded
-  virtual void threadJoin(const Postprocessor & /*pps*/) {}
-};
-
-#endif
+const UserData &
+UserDataInterface::getUserDataByName(const std::string & name)
+{
+  return _udi_problem.getUserData(name, _udi_tid);
+}

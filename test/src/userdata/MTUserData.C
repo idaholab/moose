@@ -12,19 +12,42 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "GeneralPostprocessor.h"
+#include "MTUserData.h"
 
 template<>
-InputParameters validParams<GeneralPostprocessor>()
+InputParameters validParams<MTUserData>()
 {
-  InputParameters params = validParams<Postprocessor>();
+  InputParameters params = validParams<UserData>();
+  params.addParam<Real>("scalar", 0, "A scalar value");
+  params.addParam<std::vector<Real> >("vector", std::vector<Real>(), "A vector value");
   return params;
 }
 
-GeneralPostprocessor::GeneralPostprocessor(const std::string & name, InputParameters parameters) :
-    Postprocessor(name, parameters),
-    TransientInterface(parameters),
-    FunctionInterface(parameters),
-    UserDataInterface(parameters),
-    PostprocessorInterface(parameters)
-{}
+
+MTUserData::MTUserData(const std::string & name, InputParameters params) :
+    UserData(name, params),
+    _scalar(getParam<Real>("scalar")),
+    _vector(getParam<std::vector<Real> >("vector")),
+    _dyn_memory(NULL)
+{
+  // allocate some memory
+  _dyn_memory = new Real[NUM];
+}
+
+MTUserData::~MTUserData()
+{
+}
+
+void
+MTUserData::destroy()
+{
+  // release the Kraken (eeee... I mean memory)
+  delete _dyn_memory;
+}
+
+Real
+MTUserData::doSomething() const
+{
+  // let so something here, for example
+  return -2.;
+}
