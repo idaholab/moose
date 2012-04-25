@@ -131,17 +131,14 @@ PenetrationThread::operator() (const NodeIdRange & range)
         if(contact_point_on_side)
         {
           if (info->_tangential_distance <= 0.0) //on the face
+          {
             continue;
+          }
           else if(info->_tangential_distance > 0.0 && old_tangential_distance > 0.0)
           { //off the face but within tolerance, was that way on the last step too
-            Point dummy_closest_point(info->_closest_point_ref);
-            std::vector<Node*>off_edge_nodes;
-            Moose::restrictPointToFace(dummy_closest_point,
-                                       info->_side,
-                                       off_edge_nodes);
-            if (off_edge_nodes.size()<2)
-            { //Closest point is on a node rather than an edge.  It is possible that
-              //another face is a better candidate.
+            if (info->_side->dim()==2 && info->_off_edge_nodes.size()<2)
+            { //Closest point on face is on a node rather than an edge.  Another
+              //face might be a better candidate.
               delete info;
               info = NULL;
             }
@@ -161,6 +158,8 @@ PenetrationThread::operator() (const NodeIdRange & range)
         }
       }
     }
+
+    mooseAssert(info==NULL,"Shouldn't have info at this point");
 
     const Node * closest_node = _nearest_node.nearestNode(node.id());
     std::vector<unsigned int> & closest_elems = _node_to_elem_map[closest_node->id()];
@@ -182,8 +181,9 @@ PenetrationThread::operator() (const NodeIdRange & range)
 
           Elem *side = (elem->build_side(side_num,false)).release();
 
-          Point contact_ref;
           Point contact_phys;
+          Point contact_ref;
+          Point contact_on_face_ref;
           Real distance = 0.;
           Real tangential_distance = 0.;
           RealGradient normal;
@@ -204,6 +204,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
                                                     tangential_distance,
                                                     contact_phys,
                                                     contact_ref,
+                                                    contact_on_face_ref,
                                                     off_edge_nodes,
                                                     side_phi,
                                                     dxyzdxi,
@@ -213,150 +214,200 @@ PenetrationThread::operator() (const NodeIdRange & range)
           Moose::findContactPoint(*pen_info, fe, _fe_type, node,
                                   true, _tangential_tolerance, contact_point_on_side);
 
-          if (contact_point_on_side)
-          {
-            if (!info)
-            {
-              info = pen_info;
-            }
-            else
-            {
-              CompeteInteractionResult CIResult=competeInteractions(pen_info,info);
-              if (CIResult == FIRST_WINS){
-                delete info;
-                info = pen_info;
-              }
-              else if (CIResult == NEITHER_WINS){
-                //Put both into p_info.  It is likely that the interaction will be on this edge.
-                p_info.push_back(pen_info);
-                p_info.push_back(info);
-                info = NULL;
-              }
-            }
-          }
-          else
-          {
-            p_info.push_back( pen_info );
-          }
+          p_info.push_back( pen_info );
+
         }
       }
     }
 
-    // if we didn't find a match and there are two or more candidates...
-    if (!info && p_info.size() > 1)
+    mooseAssert(info==NULL,"Shouldn't have info at this point");
+
+    if (p_info.size() == 1)
     {
-      // The contact point is possibly on a ridge between two faces
-      // or at a peak at the corner of multiple faces
-
-      std::vector<Point>closest_points_ref(p_info.size());
-      // Restrict the parametric coordinates to the domain of the face
-      for ( unsigned int j(0); j < p_info.size(); ++j )
+      if (p_info[0]->_tangential_distance <= _tangential_tolerance)
       {
-        closest_points_ref[j] = p_info[j]->_closest_point_ref;
-        Moose::restrictPointToFace(closest_points_ref[j],
-                                   p_info[j]->_side,
-                                   p_info[j]->_off_edge_nodes);
+        info = p_info[0];
+        p_info[0] = NULL; // Set this to NULL so that we don't delete it (now owned by _penetration_info).
       }
+    }
+    else if (p_info.size() > 1)
+    {
 
-      // Find the face for which the closest point to the projection
-      // of the node on that face is closest to the node.
-      unsigned int closest_index(0);
-      Point closest_coor;
-      Real dist(0);
-      for ( unsigned int j(0); j < p_info.size(); ++j )
+      //Loop through all pairs of faces, and check for contact on ridge betweeen each face pair
+      std::vector<RidgeData> ridgeDataVec;
+      for ( unsigned int i(0); i < p_info.size()-1; ++i )
       {
-        std::vector<Point> points(1);
-        points[0] = closest_points_ref[j];
-        fe->reinit(p_info[j]->_side, &points);
-        const Point coor = fe->get_xyz()[0];
-        Real dist2 = (coor - node).size();
-        if (j==0 || dist2 < dist)
+        for ( unsigned int j(i+1); j < p_info.size(); ++j )
         {
-          dist = dist2;
-          closest_coor = coor;
-          closest_index = j;
+          Point closest_coor;
+          Real tangential_distance(0.0);
+          Node* closest_node(NULL);
+          bool found_ridge_contact_point = findRidgeContactPoint(closest_coor,p_info[i],p_info[j],
+                                                                 tangential_distance, closest_node);
+          if (found_ridge_contact_point)
+          {
+            RidgeData rpd;
+            rpd._index1=i;
+            rpd._index2=j;
+            rpd._closest_coor=closest_coor;
+            rpd._tangential_distance=tangential_distance;
+            rpd._closest_node=closest_node;
+            ridgeDataVec.push_back(rpd);
+          }
         }
       }
-
-      // We now have the index for the closest face.
-      for ( unsigned int j(0); j < p_info.size(); ++j )
+      if (ridgeDataVec.size() > 0) //find the ridge pair that is the best or find a peak
       {
-
-        if ( j != closest_index )
+        //Group together ridges for which we are off the edge of a common node.
+        //Those are peaks.
+        std::vector<RidgeSetData> ridgeSetDataVec;
+        for (unsigned int i(0); i<ridgeDataVec.size(); ++i)
         {
-          CommonEdgeResult offCommonEdge=interactionsOffCommonEdge(p_info[closest_index],p_info[j]);
-
-          if (offCommonEdge != NO_COMMON)
+          bool foundSetWithMatchingNode(false);
+          for (unsigned int j(0); j<ridgeSetDataVec.size(); ++j)
           {
-            bool found_contact_point(true);
-            // The contact point is at the intersection between these two faces
-            if (offCommonEdge == COMMON_EDGE)
+            if (ridgeDataVec[i]._closest_node != NULL &&
+                ridgeDataVec[i]._closest_node == ridgeSetDataVec[j]._closest_node)
             {
-              //Nothing to do here.  closest_coor is the intersection point
-              //TODO: thats's not completely true.  Run ridge routine to smooth between faces
-            }
-            else if (offCommonEdge == COMMON_NODE)
-            {
-              if (p_info[closest_index]->_elem->has_neighbor(p_info[j]->_elem)) //true only if they share a face
-              {
-                int interaction_to_keep(0);
-                found_contact_point = findRidgeContactPoint(closest_coor,p_info[j],p_info[closest_index],interaction_to_keep);
-              }
-              // If false, they share only a node, so the contact point is on that node,
-              // and closest_coor is the location of that point.
-            }
-            else if (offCommonEdge == EDGE_AND_COMMON_NODE)
-            {
-              int interaction_to_keep(0);
-              found_contact_point = findRidgeContactPoint(closest_coor,p_info[j],p_info[closest_index],interaction_to_keep);
-              if (interaction_to_keep==1)
-              {
-                info = p_info[j];
-                p_info[j] = NULL; // Set this to NULL so that we don't delete it (now owned by _penetration_info).
-                break;
-              }
-              else if (interaction_to_keep==2)
-              {
-                info = p_info[closest_index];
-                p_info[closest_index] = NULL; // Set this to NULL so that we don't delete it (now owned by _penetration_info).
-                break;
-              }
-            }
-            if (found_contact_point)
-            {
-              // The contact point is at the intersection between these two faces
-              p_info[closest_index]->_closest_point = closest_coor;
-              p_info[closest_index]->_distance = (p_info[closest_index]->_distance >= 0 ? 1 : -1) * dist;
-              Point normal(closest_coor - node);
-              const Real len(normal.size());
-              if (len > 0)
-              {
-                normal /= len;
-              }
-              const Real dot(normal * p_info[closest_index]->_normal);
-              if (dot < 0)
-              {
-                normal *= -1;
-              }
-              p_info[closest_index]->_normal = normal;
-
-              std::vector<Point> points(1);
-              points[0] = p_info[closest_index]->_closest_point_ref;
-              fe->reinit(p_info[closest_index]->_side, &points);
-              p_info[closest_index]->_side_phi = fe->get_phi();
-              p_info[closest_index]->_dxyzdxi = fe->get_dxyzdxi();
-              p_info[closest_index]->_dxyzdeta = fe->get_dxyzdeta();
-              p_info[closest_index]->_d2xyzdxideta = fe->get_d2xyzdxideta();
-
-              info = p_info[closest_index];
-              p_info[closest_index] = NULL; // Set this to NULL so that we don't delete it (now owned by _penetration_info).
-
+              foundSetWithMatchingNode=true;
+              ridgeSetDataVec[j]._ridge_data_vec.push_back(ridgeDataVec[i]);
               break;
             }
           }
+          if (!foundSetWithMatchingNode)
+          {
+            RidgeSetData rsd;
+            rsd._distance=std::numeric_limits<Real>::max();
+            rsd._ridge_data_vec.push_back(ridgeDataVec[i]);
+            rsd._closest_node=ridgeDataVec[i]._closest_node;
+            ridgeSetDataVec.push_back(rsd);
+          }
+        }
+        //Compute distance to each set of ridges
+        for (unsigned int i(0); i<ridgeSetDataVec.size(); ++i)
+        {
+          if (ridgeSetDataVec[i]._closest_node != NULL) //peak or off edge of single ridge
+          {
+            if (ridgeSetDataVec[i]._ridge_data_vec.size() == 1) //off edge of single ridge
+            {
+              if (ridgeSetDataVec[i]._ridge_data_vec[0]._tangential_distance <= _tangential_tolerance) //off within tolerance
+              {
+                ridgeSetDataVec[i]._closest_coor = ridgeSetDataVec[i]._ridge_data_vec[0]._closest_coor;
+                Point contact_point_vec = node - ridgeSetDataVec[i]._closest_coor;
+                ridgeSetDataVec[i]._distance = contact_point_vec.size();
+              }
+            }
+            else //several ridges join at common node to make peak.  The common node is the contact point
+            {
+              ridgeSetDataVec[i]._closest_coor = *ridgeSetDataVec[i]._closest_node;
+              Point contact_point_vec = node - ridgeSetDataVec[i]._closest_coor;
+              ridgeSetDataVec[i]._distance = contact_point_vec.size();
+            }
+          }
+          else //on a single ridge
+          {
+            ridgeSetDataVec[i]._closest_coor = ridgeSetDataVec[i]._ridge_data_vec[0]._closest_coor;
+            Point contact_point_vec = node - ridgeSetDataVec[i]._closest_coor;
+            ridgeSetDataVec[i]._distance = contact_point_vec.size();
+          }
+        }
+        //Find the set of ridges closest to us.
+        unsigned int closest(0);
+        Real closest_distance(ridgeSetDataVec[0]._distance);
+        Point closest_point(ridgeSetDataVec[0]._closest_coor);
+        for (unsigned int i(1); i<ridgeSetDataVec.size(); ++i)
+        {
+          if (ridgeSetDataVec[i]._distance < closest_distance)
+          {
+            closest = i;
+            closest_distance = ridgeSetDataVec[i]._distance;
+            closest_point = ridgeSetDataVec[i]._closest_coor;
+          }
+        }
+
+        if (closest_distance < std::numeric_limits<Real>::max()) //contact point is on the closest ridge set
+        {
+          //find the face in the ridge set with the smallest index, assign that one to the interaction
+          unsigned int face_index(std::numeric_limits<unsigned int>::max());
+          unsigned int ridge_set_data_index(0);
+          unsigned int ridge_data_index(0);
+          for (unsigned int i(0); i<ridgeSetDataVec.size(); ++i)
+          {
+            for (unsigned int j(0); j<ridgeSetDataVec[i]._ridge_data_vec.size(); ++j)
+            {
+              if (ridgeSetDataVec[i]._ridge_data_vec[j]._index1 < face_index)
+              {
+                face_index = ridgeSetDataVec[i]._ridge_data_vec[j]._index1;
+                ridge_set_data_index=i;
+                ridge_data_index=j;
+              }
+              if (ridgeSetDataVec[i]._ridge_data_vec[j]._index2 < face_index)
+              {
+                face_index = ridgeSetDataVec[i]._ridge_data_vec[j]._index2;
+                ridge_set_data_index=i;
+                ridge_data_index=j;
+              }
+            }
+          }
+
+          mooseAssert(face_index < std::numeric_limits<unsigned int>::max(),"face_index invalid");
+
+          p_info[face_index]->_closest_point = closest_point;
+          p_info[face_index]->_distance = (p_info[face_index]->_distance >= 0.0 ? 1.0 : -1.0) * closest_distance;
+          Point normal(closest_point - node);
+          const Real len(normal.size());
+          if (len > 0)
+          {
+            normal /= len;
+          }
+          const Real dot(normal * p_info[face_index]->_normal);
+          if (dot < 0)
+          {
+            normal *= -1;
+          }
+          p_info[face_index]->_normal = normal;
+          p_info[face_index]->_tangential_distance = 0.0;
+
+          std::vector<Point> points(1);
+          points[0] = p_info[face_index]->_closest_point_ref;
+          fe->reinit(p_info[face_index]->_side, &points);
+          p_info[face_index]->_side_phi = fe->get_phi();
+          p_info[face_index]->_dxyzdxi = fe->get_dxyzdxi();
+          p_info[face_index]->_dxyzdeta = fe->get_dxyzdeta();
+          p_info[face_index]->_d2xyzdxideta = fe->get_d2xyzdxideta();
+
+          info = p_info[face_index];
+          p_info[face_index] = NULL; // Set this to NULL so that we don't delete it (now owned by _penetration_info).
+        }
+        else
+        {//todo:remove invalid ridge cases so they don't mess up individual face competition????
+        }
+      }
+
+      if (!info) //contact wasn't on a ridge -- compete individual interactions
+      {
+        unsigned int best(0),i(1);
+        do{
+          CompeteInteractionResult CIResult=competeInteractions(p_info[best],p_info[i]);
+          if (CIResult == FIRST_WINS){
+            i++;
+          } else if (CIResult == SECOND_WINS){
+            best = i;
+            i++;
+          } else if (CIResult == NEITHER_WINS){
+            best = i+1;
+            i+=2;
+          }
+        }
+        while(i<p_info.size() && best<p_info.size());
+        if (best < p_info.size())
+        {
+          info = p_info[best];
+          p_info[best] = NULL; // Set this to NULL so that we don't delete it (now owned by _penetration_info).
         }
       }
     }
+
     for ( unsigned int j(0); j < p_info.size(); ++j )
     {
       delete p_info[j];
@@ -369,43 +420,130 @@ void
 PenetrationThread::join(const PenetrationThread & /*other*/)
 {}
 
-//Is first interaction (pi1) stronger than second one (pi2)?
+//Determine whether first (pi1) or second (pi2) interaction is stronger
 PenetrationThread::CompeteInteractionResult
 PenetrationThread::competeInteractions(PenetrationLocator::PenetrationInfo * pi1,
                                        PenetrationLocator::PenetrationInfo * pi2)
 {
 
-  CompeteInteractionResult result(SECOND_WINS);
+  CompeteInteractionResult result;
 
-  //actually on face for i1, off face but within tangential tolerance for i2
-  //always favor i1
-  if (pi1->_tangential_distance == 0.0 && pi2->_tangential_distance > 0.0)
-  {
-    result=FIRST_WINS;
-  }
-  else if (pi2->_tangential_distance == 0.0 && pi1->_tangential_distance > 0.0)
-  {
-    result=SECOND_WINS;
-  }
-  else if (pi2->_tangential_distance > 0.0 &&
-           pi1->_tangential_distance > 0.0 &&
-           interactionsOffCommonEdge(pi1,pi2)!=NO_COMMON) //ridge case
+  if (pi1->_tangential_distance > _tangential_tolerance &&
+      pi2->_tangential_distance > _tangential_tolerance) //out of tol on both faces
   {
     result=NEITHER_WINS;
   }
-  else
+  else if (pi1->_tangential_distance == 0.0 &&
+      pi2->_tangential_distance > 0.0)                   //on face 1, off face 2
   {
-    //i1 is closer, favor it no matter what
-    if (std::abs(pi1->_distance) < std::abs(pi2->_distance))
+    result=FIRST_WINS;
+  }
+  else if (pi2->_tangential_distance == 0.0 &&
+           pi1->_tangential_distance > 0.0)              //on face 2, off face 1
+  {
+    result=SECOND_WINS;
+  }
+  else if (pi1->_tangential_distance <= _tangential_tolerance &&
+           pi2->_tangential_distance > _tangential_tolerance) //in face 1 tol, out of face 2 tol
+  {
+    result=FIRST_WINS;
+  }
+  else if (pi2->_tangential_distance <= _tangential_tolerance &&
+           pi1->_tangential_distance > _tangential_tolerance) //in face 2 tol, out of face 1 tol
+  {
+    result=SECOND_WINS;
+  }
+  else if (pi1->_tangential_distance == 0.0 &&
+           pi2->_tangential_distance == 0.0)                  //on both faces
+  {
+    if (pi1->_distance >= 0.0 && pi2->_distance < 0.0)  //favor face with positive distance (penetrated)
     {
       result=FIRST_WINS;
     }
-
-    //positive distance if penetrated, negative if off of face
-    //i1 is penetrated, i2 isn't, so favor i1
-    if (pi1->_distance >= 0.0 && pi2->_distance < 0.0)
+    else if (pi2->_distance >= 0.0 && pi1->_distance < 0.0)
+    {
+      result=SECOND_WINS;
+    }
+    else if (std::abs(pi1->_distance) < std::abs(pi2->_distance)) //otherwise, favor the closer face
     {
       result=FIRST_WINS;
+    }
+    else if (std::abs(pi2->_distance) < std::abs(pi1->_distance)) //otherwise, favor the closer face
+    {
+      result=SECOND_WINS;
+    }
+    else //completely equal.  Favor the one with a smaller element id (for repeatibility)
+    {
+      if (pi1->_elem->id()<pi2->_elem->id())
+      {
+        result=FIRST_WINS;
+      }
+      else
+      {
+        result=SECOND_WINS;
+      }
+    }
+  }
+  else if (pi1->_tangential_distance <= _tangential_tolerance &&
+           pi2->_tangential_distance <= _tangential_tolerance) //off but within tol of both faces
+  {
+    CommonEdgeResult cer=interactionsOffCommonEdge(pi1,pi2);
+    if (cer == COMMON_EDGE || cer == COMMON_NODE) //ridge case.
+    {
+      //We already checked for ridges, and it got rejected, so neither face must be valid
+      result=NEITHER_WINS;
+//      mooseError("Erroneously encountered ridge case");
+    }
+    else if (cer == EDGE_AND_COMMON_NODE) //off side of face, off corner of another face.  Favor the off-side face
+    {
+      if (pi1->_off_edge_nodes.size() == pi2->_off_edge_nodes.size())
+      {
+        result=NEITHER_WINS;
+        mooseError("Invalid off_edge_nodes counts");
+      }
+      else if (pi1->_off_edge_nodes.size()==2)
+      {
+        result=FIRST_WINS;
+      }
+      else if (pi2->_off_edge_nodes.size()==2)
+      {
+        result=FIRST_WINS;
+      }
+      else
+      {
+        result=NEITHER_WINS;
+        mooseError("Invalid off_edge_nodes counts");
+      }
+    }
+    else //Use the same logic as in the on-face condition (above).  A little copy-paste can't hurt...
+    {
+      if (pi1->_distance >= 0.0 && pi2->_distance < 0.0)  //favor face with positive distance (penetrated)
+      {
+        result=FIRST_WINS;
+      }
+      else if (pi2->_distance >= 0.0 && pi1->_distance < 0.0)
+      {
+        result=SECOND_WINS;
+      }
+      else if (std::abs(pi1->_distance) < std::abs(pi2->_distance)) //otherwise, favor the closer face
+      {
+        result=FIRST_WINS;
+      }
+      else if (std::abs(pi2->_distance) < std::abs(pi1->_distance)) //otherwise, favor the closer face
+      {
+        result=SECOND_WINS;
+      }
+      else //completely equal.  Favor the one with a smaller element id (for repeatibility)
+      {
+        if (pi1->_elem->id()<pi2->_elem->id())
+        {
+          result=FIRST_WINS;
+        }
+        else
+        {
+          result=SECOND_WINS;
+        }
+      }
     }
   }
 
@@ -472,9 +610,11 @@ bool
 PenetrationThread::findRidgeContactPoint(Point &contact_point,
                                          PenetrationLocator::PenetrationInfo * pi1,
                                          PenetrationLocator::PenetrationInfo * pi2,
-                                         int & interaction_to_keep)
+                                         Real & tangential_distance,
+                                         Node* &closest_node)
 {
-  interaction_to_keep = 0;
+  tangential_distance = 0.0;
+  closest_node = NULL;
   const unsigned sidedim(pi1->_side->dim());
   mooseAssert(sidedim == pi2->_side->dim(), "Incompatible dimensionalities");
 
@@ -501,37 +641,21 @@ PenetrationThread::findRidgeContactPoint(Point &contact_point,
   Node* closest_node1;
   found_point1 = restrictPointToSpecifiedEdgeOfFace(closest_coor_ref1,closest_node1,pi1->_side,common_nodes);
 
-  if (sidedim == 1)
-  {
-    if (!found_point1)
-      return false;
-  }
-  else if (sidedim == 2)
-  {
-    Point closest_coor_ref2(pi2->_closest_point_ref);
-    Node* closest_node2;
-    found_point2 = restrictPointToSpecifiedEdgeOfFace(closest_coor_ref2,closest_node2,pi2->_side,common_nodes);
-    if (!found_point1 && !found_point2)
-      return false;
-    else if (!found_point1) //interaction 1 isn't a ridge case.  Keep it if within tangential tolerance and don't move it to the ridge.
-    {
-      if (pi1->_tangential_distance <= _tangential_tolerance)
-        interaction_to_keep = 1;
-      return false;
-    }
-    else if (!found_point2) //interaction 2 isn't a ridge case.  Keep it if within tangential tolerance and don't move it to the ridge.
-    {
-      if (pi2->_tangential_distance <= _tangential_tolerance)
-        interaction_to_keep = 2;
-      return false;
-    }
+  Point closest_coor_ref2(pi2->_closest_point_ref);
+  Node* closest_node2;
+  found_point2 = restrictPointToSpecifiedEdgeOfFace(closest_coor_ref2,closest_node2,pi2->_side,common_nodes);
 
+  if (!found_point1 || !found_point2)
+    return false;
+
+//  if (sidedim == 2)
+//  {
     //TODO:
     //We have the parametric coordinates of the closest intersection point for both faces.
     //We need to find a point somewhere in the middle of them so there's not an abrupt jump.
     //Find that point by taking dot products of vector from contact point to slave node point
     //with face normal vectors to see which face we're closer to.
-  }
+//  }
 
   FEBase * fe = _fes[_tid];
   std::vector<Point> points(1);
@@ -539,14 +663,16 @@ PenetrationThread::findRidgeContactPoint(Point &contact_point,
   fe->reinit(pi1->_side, &points);
   contact_point = fe->get_xyz()[0];
 
-  if (closest_node1)
+  if (sidedim == 2)
   {
-    RealGradient off_face = *closest_node1 - contact_point;
-    Real tangential_distance = off_face.size();
-    if (tangential_distance <= _tangential_tolerance)
-      return true;
-    else
-      return false;
+    if (closest_node1) //point is off the ridge between the two elements
+    {
+      mooseAssert(closest_node1 == closest_node2,"If off edge of ridge, closest node must be the same on both elements");
+      closest_node = closest_node1;
+
+      RealGradient off_face = *closest_node1 - contact_point;
+      tangential_distance = off_face.size();
+    }
   }
 
   return true;

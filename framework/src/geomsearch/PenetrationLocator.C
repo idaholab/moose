@@ -121,7 +121,7 @@ PenetrationLocator::setTangentialTolerance(Real tangential_tolerance)
 }
 
 
-PenetrationLocator::PenetrationInfo::PenetrationInfo(const Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, Real tangential_distance, const Point & closest_point, const Point & closest_point_ref, std::vector<Node*> off_edge_nodes, const std::vector<std::vector<Real> > & side_phi, const std::vector<RealGradient> & dxyzdxi, const std::vector<RealGradient> & dxyzdeta, const std::vector<RealGradient> & d2xyzdxideta)
+PenetrationLocator::PenetrationInfo::PenetrationInfo(const Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, Real tangential_distance, const Point & closest_point, const Point & closest_point_ref, const Point & closest_point_on_face_ref, std::vector<Node*> off_edge_nodes, const std::vector<std::vector<Real> > & side_phi, const std::vector<RealGradient> & dxyzdxi, const std::vector<RealGradient> & dxyzdeta, const std::vector<RealGradient> & d2xyzdxideta)
   :_node(node),
    _elem(elem),
    _side(side),
@@ -131,6 +131,7 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const Node * node, Elem * e
    _tangential_distance(tangential_distance),
    _closest_point(closest_point),
    _closest_point_ref(closest_point_ref),
+   _closest_point_on_face_ref(closest_point_on_face_ref),
    _off_edge_nodes(off_edge_nodes),
    _side_phi(side_phi),
    _dxyzdxi(dxyzdxi),
@@ -150,6 +151,7 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p) 
     _tangential_distance(p._tangential_distance),
     _closest_point(p._closest_point),
     _closest_point_ref(p._closest_point_ref),
+    _closest_point_on_face_ref(p._closest_point_on_face_ref),
     _off_edge_nodes(p._off_edge_nodes),
     _side_phi(p._side_phi),
     _dxyzdxi(p._dxyzdxi),

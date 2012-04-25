@@ -176,10 +176,10 @@ findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
 
   if (!contact_point_on_side)
   {
-    Point closest_point_on_face_ref(ref_point);
-    restrictPointToFace(closest_point_on_face_ref,side,p_info._off_edge_nodes);
+    p_info._closest_point_on_face_ref=ref_point;
+    restrictPointToFace(p_info._closest_point_on_face_ref,side,p_info._off_edge_nodes);
 
-    points[0] = closest_point_on_face_ref;
+    points[0] = p_info._closest_point_on_face_ref;
     _fe->reinit(side, &points);
     Point closest_point_on_face(phys_point[0]);
 

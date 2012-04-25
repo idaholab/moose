@@ -98,7 +98,8 @@ protected:
   findRidgeContactPoint(Point &contact_point,
                        PenetrationLocator::PenetrationInfo * pi1,
                        PenetrationLocator::PenetrationInfo * pi2,
-                       int & interaction_to_keep);
+                       Real & tangential_distance,
+                       Node* &closest_node);
 
   void
   getSideCornerNodes(Elem* side,
@@ -109,6 +110,22 @@ protected:
                                      Node* &closest_node,
                                      const Elem* side,
                                      const std::vector<Node*> &edge_nodes);
+  struct RidgeData
+  {
+    unsigned int _index1;
+    unsigned int _index2;
+    Point _closest_coor;
+    Real _tangential_distance;
+    Node* _closest_node;
+  };
+
+  struct RidgeSetData
+  {
+    Real _distance;
+    Point _closest_coor;
+    Node* _closest_node;
+    std::vector<RidgeData> _ridge_data_vec;
+  };
 };
 
 #endif //PENETRATIONTHREAD_H
