@@ -110,8 +110,8 @@ public:
 
   virtual void meshChanged() { mooseError("This system does not support changing the mesh"); }
 
-  virtual void storeMatPropName(unsigned int block_id, const std::string & name);
-  virtual void checkMatProp(unsigned int block_id, const std::string & name);
+  virtual void storeMatPropName(SubdomainID block_id, const std::string & name);
+  virtual void checkMatProp(SubdomainID block_id, const std::string & name);
 
   /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor
@@ -121,12 +121,17 @@ public:
   /**
    * Will make sure that all necessary elements from boundary_id are ghosted to this processor
    */
-  virtual void addGhostedBoundary(unsigned int boundary_id) = 0;
+  virtual void addGhostedBoundary(BoundaryID boundary_id) = 0;
 
   /**
    * Get a vector containing the block ids the material property is defined on.
    */
-  virtual std::vector<unsigned int> getMaterialPropertyBlocks(const std::string prop_name);
+  virtual std::vector<SubdomainID> getMaterialPropertyBlocks(const std::string prop_name);
+
+  /**
+   * Get a vector of block id equivalences that the material property is defined on.
+   */
+  virtual std::vector<SubdomainName> getMaterialPropertyBlockNames(const std::string prop_name);
 
 protected:
   Problem * _parent;

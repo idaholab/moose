@@ -39,43 +39,43 @@ public:
   void residualSetup();
   void jacobianSetup();
 
-  bool hasMaterials(unsigned int block_id);
-  bool hasBoundaryMaterials(unsigned int boundary_id);
-  bool hasNeighborMaterials(unsigned int boundary_id);
+  bool hasMaterials(SubdomainID block_id);
+  bool hasBoundaryMaterials(BoundaryID boundary_id);
+  bool hasNeighborMaterials(BoundaryID boundary_id);
 
   std::vector<Material *> & getMaterialsByName(const std::string & name);
 
-  std::vector<Material *> & getMaterials(unsigned int block_id);
-  std::vector<Material *> & getBoundaryMaterials(unsigned int boundary_id);
-  std::vector<Material *> & getNeighborMaterials(unsigned int boundary_id);
+  std::vector<Material *> & getMaterials(SubdomainID block_id);
+  std::vector<Material *> & getBoundaryMaterials(BoundaryID boundary_id);
+  std::vector<Material *> & getNeighborMaterials(BoundaryID boundary_id);
 
-  const std::vector<Material *> & active(unsigned int block_id) { return _active_materials[block_id]; }
+  const std::vector<Material *> & active(SubdomainID block_id) { return _active_materials[block_id]; }
 
   void updateMaterialDataState();
 
-  void addMaterial(int block_id, Material *material);
-  void addBoundaryMaterial(int block_id, Material *material);
-  void addNeighborMaterial(int block_id, Material *material);
+  void addMaterial(SubdomainID block_id, Material *material);
+  void addBoundaryMaterial(SubdomainID block_id, Material *material);
+  void addNeighborMaterial(SubdomainID block_id, Material *material);
 
   /**
    * Get the list of blocks that materials are defined on
    * @return The list of subdomain IDs
    */
-  const std::set<int> & blocks() { return _blocks; }
+  const std::set<SubdomainID> & blocks() { return _blocks; }
 
 protected:
   /// A list of material associated with the block (subdomain)
-  std::map<int, std::vector<Material *> > _active_materials;
+  std::map<SubdomainID, std::vector<Material *> > _active_materials;
   /// A list of boundary materials associated with the block (subdomain)
-  std::map<int, std::vector<Material *> > _active_boundary_materials;
+  std::map<SubdomainID, std::vector<Material *> > _active_boundary_materials;
   /// A list of neighbor materials associated with the block (subdomain) (for DG)
-  std::map<int, std::vector<Material *> > _active_neighbor_materials;
+  std::map<SubdomainID, std::vector<Material *> > _active_neighbor_materials;
 
   /// Set of blocks where materials are defined
-  std::set<int> _blocks;
+  std::set<SubdomainID> _blocks;
 
   /// A convenience list of all the maps
-  std::vector<std::map<int, std::vector<Material *> > *> _master_list;
+  std::vector<std::map<SubdomainID, std::vector<Material *> > *> _master_list;
 
   /// list of materials by name
   std::map<std::string, std::vector<Material *> > _mat_by_name;
@@ -85,7 +85,7 @@ private:
    * This routine uses the Dependency Resolver to sort Materials based on dependencies they
    * might have on coupled values
    */
-  void sortMaterials(std::map<int, std::vector<Material *> > & materials_map);
+  void sortMaterials(std::map<SubdomainID, std::vector<Material *> > & materials_map);
 };
 
 #endif // MATERIALWAREHOUSE_H

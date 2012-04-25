@@ -21,7 +21,8 @@
 
 // libMesh
 #include "parameters.h"
-#include "id_types.h"
+
+#include "Moose.h"
 
 
 class MooseObject;
@@ -322,7 +323,7 @@ namespace libMesh
 
   template<>
   inline
-  void InputParameters::Parameter<std::vector<subdomain_id_type> >::print (std::ostream& os) const
+  void InputParameters::Parameter<std::vector<SubdomainID> >::print (std::ostream& os) const
   {
     for (unsigned int i=0; i<_value.size(); i++)
       os << _value[i] << " ";

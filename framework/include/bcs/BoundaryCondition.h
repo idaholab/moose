@@ -61,7 +61,7 @@ public:
    * Gets boundary ID this BC is active on
    * @return the boundary ID
    */
-  unsigned int boundaryID() { return _boundary_id; }
+  BoundaryID boundaryID() { return _boundary_id; }
 
   /**
    * Gets the variable this BC is active on
@@ -92,7 +92,7 @@ protected:
   unsigned int _dim;
 
   /// boundary ID this BC is active on
-  unsigned int _boundary_id;
+  BoundaryID _boundary_id;
 
   // Single Instance Variables
   Real & _real_zero;

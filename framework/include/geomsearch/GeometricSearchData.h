@@ -32,9 +32,9 @@ public:
   GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh);
   virtual ~GeometricSearchData();
 
-  PenetrationLocator & getPenetrationLocator(unsigned int master, unsigned int slave, Order order=FIRST);
+  PenetrationLocator & getPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order=FIRST);
 
-  NearestNodeLocator & getNearestNodeLocator(unsigned int master, unsigned int slave);
+  NearestNodeLocator & getNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave);
 
   /**
    * Update all of the search objects.

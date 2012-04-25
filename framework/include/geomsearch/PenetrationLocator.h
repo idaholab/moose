@@ -37,7 +37,7 @@ class GeometricSearchData;
 class PenetrationLocator
 {
 public:
-  PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh, unsigned int master, unsigned int slave, Order order);
+  PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh, const BoundaryName & master, const BoundaryName & slave, Order order);
   ~PenetrationLocator();
   void detectPenetration();
 
@@ -79,8 +79,8 @@ public:
   int inSegment(Point P, Point SP0, Point SP1);
 
   MooseMesh & _mesh;
-  unsigned int _master_boundary;
-  unsigned int _slave_boundary;
+  BoundaryID _master_boundary;
+  BoundaryID _slave_boundary;
 
   FEType _fe_type;
 

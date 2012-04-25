@@ -44,15 +44,15 @@ public:
 
   std::vector<NodalConstraint *> & getNodalConstraints();
 
-  std::vector<NodeFaceConstraint *> & getNodeFaceConstraints(unsigned int boundary_id);
-  std::vector<NodeFaceConstraint *> & getDisplacedNodeFaceConstraints(unsigned int boundary_id);
+  std::vector<NodeFaceConstraint *> & getNodeFaceConstraints(BoundaryID boundary_id);
+  std::vector<NodeFaceConstraint *> & getDisplacedNodeFaceConstraints(BoundaryID boundary_id);
 
 protected:
   /// nodal constraints on a boundary
   std::vector<NodalConstraint *> _nodal_constraints;
 
-  std::map<unsigned int, std::vector<NodeFaceConstraint *> > _node_face_constraints;
-  std::map<unsigned int, std::vector<NodeFaceConstraint *> > _displaced_node_face_constraints;
+  std::map<BoundaryID, std::vector<NodeFaceConstraint *> > _node_face_constraints;
+  std::map<BoundaryID, std::vector<NodeFaceConstraint *> > _displaced_node_face_constraints;
 };
 
 #endif // CONSTRAINTWAREHOUSE_H

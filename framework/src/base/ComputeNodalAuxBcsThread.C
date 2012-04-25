@@ -48,7 +48,7 @@ ComputeNodalAuxBcsThread::operator() (const ConstBndNodeRange & range)
   {
     const BndNode * bnode = *nd;
 
-    short int boundary_id = bnode->_bnd_id;
+    BoundaryID boundary_id = bnode->_bnd_id;
 
     // prepare variables
     for (std::map<std::string, MooseVariable *>::iterator it = _sys._nodal_vars[_tid].begin(); it != _sys._nodal_vars[_tid].end(); ++it)

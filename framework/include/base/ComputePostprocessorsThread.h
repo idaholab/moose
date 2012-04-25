@@ -30,7 +30,7 @@ public:
   ComputePostprocessorsThread(ComputePostprocessorsThread & x, Threads::split);                 // Splitting Constructor
 
   virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id);
+  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
 
   void join(const ComputePostprocessorsThread & /*y*/);
 

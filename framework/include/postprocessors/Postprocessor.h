@@ -90,6 +90,12 @@ public:
    */
   Moose::PPSOutputType getOutput() { return _output; }
 
+  /**
+   * Returns a reference to the subproblem that
+   * this postprocessor is tied to
+   */
+  SubProblem & getSubProblem() const { return _subproblem; }
+
 protected:
   Problem & _problem;
   SubProblem & _subproblem;

@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<NearestNodeValueAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<unsigned int>("paired_boundary", "The boundary to get the value from.");
+  params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to get the value from.");
   params.addRequiredCoupledVar("paired_variable", "The variable to get the value of.");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
@@ -29,11 +29,11 @@ InputParameters validParams<NearestNodeValueAux>()
 
 NearestNodeValueAux::NearestNodeValueAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _nearest_node(getNearestNodeLocator(parameters.get<unsigned int>("paired_boundary"), getParam<std::vector<unsigned int> >("boundary")[0])),
+    _nearest_node(getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0])),
     _serialized_solution(_nl_sys.currentSolution()),
     _paired_variable(coupled("paired_variable"))
 {
-  if(getParam<std::vector<unsigned int> >("boundary").size() > 1)
+  if(getParam<std::vector<BoundaryName> >("boundary").size() > 1)
     mooseError("NearestNodeValueAux can only be used with one boundary at a time!");
 }
 

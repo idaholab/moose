@@ -56,14 +56,14 @@ AuxWarehouse::jacobianSetup()
 }
 
 void
-AuxWarehouse::addActiveBC(unsigned int boundary_id, AuxKernel *aux)
+AuxWarehouse::addActiveBC(BoundaryID boundary_id, AuxKernel *aux)
 {
   _all_aux_kernels.push_back(aux);
   _active_bcs[boundary_id].push_back(aux);
 }
 
 void
-AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids)
+AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<SubdomainID> block_ids)
 {
   _all_aux_kernels.push_back(aux);
   if (block_ids.empty())
@@ -81,9 +81,9 @@ AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids
   }
   else
   {
-    for(std::set<subdomain_id_type>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
+    for(std::set<SubdomainID>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
     {
-      subdomain_id_type id = *it;
+      SubdomainID id = *it;
 
       if(aux->isNodal())
       {

@@ -84,14 +84,14 @@ public:
    */
   Moose::VarKindType kind() { return _var_kind; }
 
-  const std::set<subdomain_id_type> & activeSubdomains();
+  const std::set<SubdomainID> & activeSubdomains();
 
   /**
    * Is the variable active on the subdomain?
    * @param Subdomain id
    * @return true if active on subdomain, false otherwise
    */
-  bool activeOnSubdomain(subdomain_id_type subdomain) const;
+  bool activeOnSubdomain(SubdomainID subdomain) const;
 
   /**
    * Get the type of finite element object

@@ -60,7 +60,7 @@ ComputeResidualThread::onElement(const Elem *elem)
 }
 
 void
-ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
+ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
   std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
   if (bcs.size() > 0)

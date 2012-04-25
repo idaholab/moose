@@ -42,11 +42,11 @@ class ElementPostprocessor :
 public:
   ElementPostprocessor(const std::string & name, InputParameters parameters);
 
-  const std::vector<unsigned int> & blockIDs() { return _block_ids; }
+  const std::vector<SubdomainName> & blocks() { return _blocks; }
 
 protected:
   /// The block ID this postprocessor works on
-  std::vector<unsigned int> _block_ids;
+  std::vector<SubdomainName> _blocks;
 
   MooseVariable & _var;
 

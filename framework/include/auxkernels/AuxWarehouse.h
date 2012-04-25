@@ -48,10 +48,10 @@ public:
   const std::vector<AuxKernel *> & activeNodalKernels() { return _active_nodal_aux_kernels; }
   const std::vector<AuxKernel *> & activeElementKernels() { return _active_element_aux_kernels; }
 
-  const std::vector<AuxKernel *> & activeBlockNodalKernels(unsigned int block) { return _active_block_nodal_aux_kernels[block]; }
-  const std::vector<AuxKernel *> & activeBlockElementKernels(unsigned int block) { return _active_block_element_aux_kernels[block]; }
+  const std::vector<AuxKernel *> & activeBlockNodalKernels(SubdomainID block) { return _active_block_nodal_aux_kernels[block]; }
+  const std::vector<AuxKernel *> & activeBlockElementKernels(SubdomainID block) { return _active_block_element_aux_kernels[block]; }
 
-  const std::vector<AuxKernel *> & activeBCs(unsigned int boundary_id) { return _active_bcs[boundary_id]; }
+  const std::vector<AuxKernel *> & activeBCs(BoundaryID boundary_id) { return _active_bcs[boundary_id]; }
 
   /**
    * Get list of scalar kernels
@@ -64,14 +64,14 @@ public:
    * @param boundary_id Boundary ID this kernel works on
    * @param aux BC kernel being added
    */
-  void addActiveBC(unsigned int boundary_id, AuxKernel *aux);
+  void addActiveBC(BoundaryID boundary_id, AuxKernel *aux);
 
   /**
    * Adds an auxiliary kernel
    * @param aux Kernel being added
    * @param block_ids Set of subdomain this kernel is active on
    */
-  void addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids);
+  void addAuxKernel(AuxKernel *aux, std::set<SubdomainID> block_ids);
 
   /**
    * Add a scalar kernels
@@ -92,12 +92,12 @@ protected:
   /// elemental kernels active everywhere
   std::vector<AuxKernel *> _active_element_aux_kernels;
   /// nodal kernels active on a block
-  std::map<unsigned int, std::vector<AuxKernel *> > _active_block_nodal_aux_kernels;
+  std::map<SubdomainID, std::vector<AuxKernel *> > _active_block_nodal_aux_kernels;
   /// elemental kernels active on a block
-  std::map<unsigned int, std::vector<AuxKernel *> > _active_block_element_aux_kernels;
+  std::map<SubdomainID, std::vector<AuxKernel *> > _active_block_element_aux_kernels;
 
   /// aux boundary conditions
-  std::map<unsigned int, std::vector<AuxKernel *> > _active_bcs;
+  std::map<BoundaryID, std::vector<AuxKernel *> > _active_bcs;
 
   /// Scalar kernels
   std::vector<AuxScalarKernel *> _scalar_kernels;

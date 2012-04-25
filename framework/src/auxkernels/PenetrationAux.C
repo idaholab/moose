@@ -20,7 +20,7 @@ template<>
 InputParameters validParams<PenetrationAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<unsigned int>("paired_boundary", "The boundary to be penetrated");
+  params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<std::string>("order", "FIRST", "The finite element order");
   params.set<bool>("use_displaced_mesh") = true;
@@ -32,7 +32,7 @@ PenetrationAux::PenetrationAux(const std::string & name, InputParameters paramet
     AuxKernel(name, parameters),
     _quantity_string( getParam<std::string>("quantity") ),
     _quantity(PA_DISTANCE),
-    _penetration_locator(getPenetrationLocator(parameters.get<unsigned int>("paired_boundary"), getParam<std::vector<unsigned int> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<std::string>("order"))))
+    _penetration_locator(getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<std::string>("order"))))
 {
   if (parameters.isParamValid("tangential_tolerance"))
   {

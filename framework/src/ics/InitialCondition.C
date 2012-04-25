@@ -23,7 +23,7 @@ InputParameters validParams<InitialCondition>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addParam<std::string>("variable", "The variable this InitialCondtion is supposed to provide values for.");
-  params.addParam<std::vector<subdomain_id_type> >("block", "The list of ids of the blocks (subdomain) that this initial condition will be applied to");
+  params.addParam<std::vector<SubdomainName> >("block", "The list of ids or names of the blocks (subdomain) that this initial condition will be applied to");
 
   params.addPrivateParam<std::string>("built_by_action", "add_ic");
   return params;

@@ -491,7 +491,7 @@ void gatherNearbyElements (MooseMesh & moose_mesh, const std::set<unsigned int> 
 		nodes_sent[n_node_replies_sent].push_back (Node::PackedNode(**node_it));
 
 		// add the node if it has BCs
-                std::vector<short int> bcs = mesh.boundary_info->boundary_ids(*node_it);
+                std::vector<BoundaryID> bcs = mesh.boundary_info->boundary_ids(*node_it);
 
 		if (!bcs.empty())
 		  {
@@ -545,7 +545,7 @@ void gatherNearbyElements (MooseMesh & moose_mesh, const std::set<unsigned int> 
 		  for (unsigned int s=0; s<(*elem_it)->n_sides(); s++)
 		    if ((*elem_it)->neighbor(s) == NULL)
                       {
-                        const std::vector<short int>& bc_ids = mesh.boundary_info->boundary_ids(*elem_it, s);
+                        const std::vector<BoundaryID> & bc_ids = mesh.boundary_info->boundary_ids(*elem_it, s);
                         for (std::vector<short int>::const_iterator id_it=bc_ids.begin(); id_it!=bc_ids.end(); ++id_it)
                           {
                             const short int bc_id = *id_it;

@@ -25,8 +25,8 @@ InputParameters validParams<NodeFaceConstraint>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<SetupInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this constraint is applied to.");
-  params.addRequiredParam<unsigned int>("slave", "The boundary ID associated with the slave side");
-  params.addRequiredParam<unsigned int>("master", "The boundary ID associated with the master side");
+  params.addRequiredParam<BoundaryName>("slave", "The boundary ID associated with the slave side");
+  params.addRequiredParam<BoundaryName>("master", "The boundary ID associated with the master side");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<std::string>("order", "FIRST", "The finite element order used for projections");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
@@ -43,9 +43,6 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   TransientInterface(parameters),
   GeometricSearchInterface(parameters),
 
-  _slave(getParam<unsigned int>("slave")),
-  _master(getParam<unsigned int>("master")),
-
   _problem(*parameters.get<Problem *>("_problem")),
   _subproblem(*parameters.get<SubProblem *>("_subproblem")),
   _sys(*parameters.get<SystemBase *>("_sys")),
@@ -55,10 +52,14 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   _mesh(_subproblem.mesh()),
   _dim(_mesh.dimension()),
 
+  _slave(_mesh.getBoundaryID(getParam<BoundaryName>("slave"))),
+  _master(_mesh.getBoundaryID(getParam<BoundaryName>("master"))),
+
   _master_q_point(_subproblem.pointsFace(_tid)),
   _master_qrule(_subproblem.qRuleFace(_tid)),
 
-  _penetration_locator(getPenetrationLocator(_master, _slave, Utility::string_to_enum<Order>(getParam<std::string>("order")))),
+  _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("master"), getParam<BoundaryName>("slave"),
+                                             Utility::string_to_enum<Order>(getParam<std::string>("order")))),
 
   _current_node(_var.node()),
   _current_master(_var.neighbor()),

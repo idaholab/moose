@@ -59,7 +59,7 @@ ComputeFullJacobianThread::computeJacobian()
 }
 
 void
-ComputeFullJacobianThread::computeFaceJacobian(short int bnd_id)
+ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 {
   std::vector<std::pair<unsigned int, unsigned int> > & ce = _fe_problem.couplingEntries(_tid);
   for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = ce.begin(); it != ce.end(); ++it)

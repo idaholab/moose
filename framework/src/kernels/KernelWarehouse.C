@@ -56,7 +56,7 @@ KernelWarehouse::jacobianSetup()
 }
 
 void
-KernelWarehouse::addKernel(Kernel *kernel, const std::set<subdomain_id_type> & block_ids)
+KernelWarehouse::addKernel(Kernel *kernel, const std::set<SubdomainID> & block_ids)
 {
   _all_kernels.push_back(kernel);
 
@@ -66,9 +66,9 @@ KernelWarehouse::addKernel(Kernel *kernel, const std::set<subdomain_id_type> & b
   }
   else
   {
-    for (std::set<subdomain_id_type>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
+    for (std::set<SubdomainID>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
     {
-      subdomain_id_type blk_id = *it;
+      SubdomainID blk_id = *it;
       _block_kernels[blk_id].push_back(kernel);
     }
   }
@@ -110,7 +110,7 @@ KernelWarehouse::updateActiveKernels(Real t, Real dt, unsigned int subdomain_id)
 }
 
 bool
-KernelWarehouse::subdomains_covered(std::set<subdomain_id_type> & return_set) const
+KernelWarehouse::subdomains_covered(std::set<SubdomainID> & return_set) const
 {
   return_set.clear();
 
@@ -118,7 +118,7 @@ KernelWarehouse::subdomains_covered(std::set<subdomain_id_type> & return_set) co
     return true;
   else
   {
-    for (std::map<unsigned int, std::vector<Kernel *> >::const_iterator it = _block_kernels.begin();
+    for (std::map<SubdomainID, std::vector<Kernel *> >::const_iterator it = _block_kernels.begin();
          it != _block_kernels.end(); ++it)
       return_set.insert(it->first);
     return false;

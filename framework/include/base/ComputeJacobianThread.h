@@ -31,7 +31,7 @@ public:
   ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split);
 
   virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id);
+  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
   virtual void onInternalSide(const Elem *elem, unsigned int side);
   virtual void postElement(const Elem * /*elem*/);
 
@@ -44,7 +44,7 @@ protected:
   NonlinearSystem & _sys;
 
   virtual void computeJacobian();
-  virtual void computeFaceJacobian(short int bnd_id);
+  virtual void computeFaceJacobian(BoundaryID bnd_id);
   virtual void computeInternalFaceJacobian();
 };
 

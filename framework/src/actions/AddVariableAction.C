@@ -40,7 +40,7 @@ InputParameters validParams<AddVariableAction>()
   params.addParam<std::string>("order", "FIRST",  "Specifies the order of the FE shape function to use for this variable");
   params.addParam<Real>("initial_condition", 0.0, "Specifies the initial condition for this variable");
   params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
-  params.addParam<std::vector<unsigned int> >("block", "The block id where this variable lives");
+  params.addParam<std::vector<SubdomainName> >("block", "The block id where this variable lives");
 
   return params;
 }
@@ -62,10 +62,13 @@ AddVariableAction::act()
                  Utility::string_to_enum<FEFamily>(getParam<std::string>("family")));
   bool is_variables_block = Parser::pathContains(_name, "Variables");
 
-  std::set<subdomain_id_type> blocks;
-  std::vector<unsigned int> block_param = getParam<std::vector<unsigned int> >("block");
-  for (std::vector<unsigned int>::iterator it = block_param.begin(); it != block_param.end(); ++it)
-    blocks.insert(*it);
+  std::set<SubdomainID> blocks;
+  std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName> >("block");
+  for (std::vector<SubdomainName>::iterator it = block_param.begin(); it != block_param.end(); ++it)
+  {
+    SubdomainID blk_id = _problem->mesh().getSubdomainID(*it);
+    blocks.insert(blk_id);
+  }
 
   Real scale_factor = getParam<Real>("scaling");
   bool scalar_var = false;                              // tru if adding scalar variable

@@ -66,28 +66,34 @@ GeometricSearchData::update()
 }
 
 PenetrationLocator &
-GeometricSearchData::getPenetrationLocator(unsigned int master, unsigned int slave, Order order)
+GeometricSearchData::getPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order)
 {
-  PenetrationLocator * pl = _penetration_locators[std::pair<unsigned int, unsigned int>(master, slave)];
+  unsigned int master_id = _mesh.getBoundaryID(master);
+  unsigned int slave_id  = _mesh.getBoundaryID(slave);
+
+  PenetrationLocator * pl = _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)];
 
   if(!pl)
   {
     pl = new PenetrationLocator(_subproblem, *this, _mesh, master, slave, order);
-    _penetration_locators[std::pair<unsigned int, unsigned int>(master, slave)] = pl;
+    _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)] = pl;
   }
 
   return *pl;
 }
 
 NearestNodeLocator &
-GeometricSearchData::getNearestNodeLocator(unsigned int master, unsigned int slave)
+GeometricSearchData::getNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave)
 {
-  NearestNodeLocator * nnl = _nearest_node_locators[std::pair<unsigned int, unsigned int>(master, slave)];
+  unsigned int master_id = _mesh.getBoundaryID(master);
+  unsigned int slave_id  = _mesh.getBoundaryID(slave);
+
+  NearestNodeLocator * nnl = _nearest_node_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)];
 
   if(!nnl)
   {
-    nnl = new NearestNodeLocator(_subproblem, _mesh, master, slave);
-    _nearest_node_locators[std::pair<unsigned int, unsigned int>(master, slave)] = nnl;
+    nnl = new NearestNodeLocator(_subproblem, _mesh, master_id, slave_id);
+    _nearest_node_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)] = nnl;
   }
 
   return *nnl;

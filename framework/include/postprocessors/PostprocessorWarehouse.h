@@ -42,14 +42,14 @@ public:
    * @param block_id Block ID
    * @return The list of all elemental postprocessors
    */
-  const std::vector<Postprocessor *> & elementPostprocessors(subdomain_id_type block_id) { return _element_postprocessors[block_id]; }
+  const std::vector<Postprocessor *> & elementPostprocessors(SubdomainID block_id) { return _element_postprocessors[block_id]; }
 
   /**
    * Get the list of side postprocessors
    * @param boundary_id Boundary ID
    * @return The list of side postprocessors
    */
-  const std::vector<Postprocessor *> & sidePostprocessors(unsigned int boundary_id) { return _side_postprocessors[boundary_id]; }
+  const std::vector<Postprocessor *> & sidePostprocessors(BoundaryID boundary_id) { return _side_postprocessors[boundary_id]; }
 
   /**
    * Get the list of nodal postprocessors
@@ -80,26 +80,26 @@ public:
    * Get the list of blocks with postprocessors
    * @return The list of block IDs with postprocessors
    */
-  const std::set<subdomain_id_type> & blocks() { return _block_ids_with_postprocessors; }
+  const std::set<SubdomainID> & blocks() { return _block_ids_with_postprocessors; }
 
   /**
    * Get the list of boundary IDs with postprocessors
    * @return The list of boundary IDs with postprocessors
    */
-  const std::set<unsigned int> & boundaryIds() { return _boundary_ids_with_postprocessors; }
+  const std::set<BoundaryID> & boundaryIds() { return _boundary_ids_with_postprocessors; }
 
 protected:
-  std::map<subdomain_id_type, std::vector<Postprocessor *> > _element_postprocessors;
-  std::map<unsigned int, std::vector<Postprocessor *> > _side_postprocessors;
+  std::map<SubdomainID, std::vector<Postprocessor *> > _element_postprocessors;
+  std::map<BoundaryID, std::vector<Postprocessor *> > _side_postprocessors;
   std::vector<Postprocessor *> _nodal_postprocessors;
 
   std::vector<Postprocessor *> _generic_postprocessors;
   std::vector<Postprocessor *> _all_postprocessors;
 
   /// All of the block ids that have postprocessors specified to act on them
-  std::set<subdomain_id_type> _block_ids_with_postprocessors;
+  std::set<SubdomainID> _block_ids_with_postprocessors;
   /// All of the boundary ids that have postprocessors specified to act on them
-  std::set<unsigned int> _boundary_ids_with_postprocessors;
+  std::set<BoundaryID> _boundary_ids_with_postprocessors;
 
 };
 

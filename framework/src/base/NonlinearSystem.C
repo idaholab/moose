@@ -34,6 +34,8 @@
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
 #include "ScalarKernel.h"
+#include "Parser.h"
+
 
 // libMesh
 #include "nonlinear_solver.h"
@@ -322,16 +324,18 @@ NonlinearSystem::addKernel(const  std::string & kernel_name, const std::string &
     Kernel *kernel = static_cast<Kernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
 
-    std::set<subdomain_id_type> blk_ids;
+    std::set<SubdomainID> blk_ids;
     if (!parameters.isParamValid("block"))
       blk_ids = _var_map[kernel->variable().number()];
     else
     {
-      std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
+      std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
       for (unsigned int i=0; i<blocks.size(); ++i)
       {
-        if (_var_map[kernel->variable().number()].count(blocks[i]) > 0 || _var_map[kernel->variable().number()].size() == 0)
-          blk_ids.insert(blocks[i]);
+        SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
+
+        if (_var_map[kernel->variable().number()].count(blk_id) > 0 || _var_map[kernel->variable().number()].size() == 0)
+          blk_ids.insert(blk_id);
         else
           mooseError("Kernel (" + kernel->name() + "): block outside of the domain of the variable");
       }
@@ -357,11 +361,17 @@ NonlinearSystem::addScalarKernel(const  std::string & kernel_name, const std::st
 void
 NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
-  std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
+  std::vector<BoundaryName> boundaries = parameters.get<std::vector<BoundaryName> >("boundary");
 
+  /**
+   * Since MOOSE supports named boundary conditions we need to see if the vector contains
+   * names (strings) or ids (unsigned ints)
+   */
   for (unsigned int i=0; i<boundaries.size(); ++i)
   {
-    parameters.set<unsigned int>("_boundary_id") = boundaries[i];
+    BoundaryID boundary_id = _mesh.getBoundaryID(boundaries[i]);
+
+    parameters.set<BoundaryID>("_boundary_id") = boundary_id;
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       parameters.set<THREAD_ID>("_tid") = tid;
@@ -373,25 +383,25 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
       if (dynamic_cast<PresetNodalBC*>(bc) != NULL)
       {
         PresetNodalBC * pnbc = dynamic_cast<PresetNodalBC*>(bc);
-        _bcs[tid].addPresetNodalBC(boundaries[i], pnbc);
+        _bcs[tid].addPresetNodalBC(boundary_id, pnbc);
       }
 
       if (dynamic_cast<NodalBC *>(bc) != NULL)
       {
         NodalBC * nbc = dynamic_cast<NodalBC *>(bc);
-        _bcs[tid].addNodalBC(boundaries[i], nbc);
-        _vars[tid].addBoundaryVars(boundaries[i], nbc->getCoupledVars());
+        _bcs[tid].addNodalBC(boundary_id, nbc);
+        _vars[tid].addBoundaryVars(boundary_id, nbc->getCoupledVars());
       }
       else if (dynamic_cast<IntegratedBC *>(bc) != NULL)
       {
         IntegratedBC * ibc = dynamic_cast<IntegratedBC *>(bc);
-        _bcs[tid].addBC(boundaries[i], ibc);
-        _vars[tid].addBoundaryVars(boundaries[i], ibc->getCoupledVars());
+        _bcs[tid].addBC(boundary_id, ibc);
+        _vars[tid].addBoundaryVars(boundary_id, ibc->getCoupledVars());
       }
       else
         mooseError("Unknown type of BoudaryCondition object");
 
-      _vars[tid].addBoundaryVar(boundaries[i], &bc->variable());
+      _vars[tid].addBoundaryVar(boundary_id, &bc->variable());
     }
   }
 }
@@ -407,8 +417,8 @@ NonlinearSystem::addConstraint(const std::string & c_name, const std::string & n
   NodeFaceConstraint * nfc = dynamic_cast<NodeFaceConstraint *>(obj);
   if (nfc != NULL)
   {
-    unsigned int slave = parameters.get<unsigned int>("slave");
-    unsigned int master = parameters.get<unsigned int>("master");
+    unsigned int slave = _mesh.getBoundaryID(parameters.get<BoundaryName>("slave"));
+    unsigned int master = _mesh.getBoundaryID(parameters.get<BoundaryName>("master"));
     _constraints[0].addNodeFaceConstraint(slave, master, nfc);
   }
   else if (nc != NULL)
@@ -582,7 +592,7 @@ NonlinearSystem::setInitialSolution()
   for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
   {
     const BndNode * bnode = *nd;
-    short int boundary_id = bnode->_bnd_id;
+    BoundaryID boundary_id = bnode->_bnd_id;
     Node * node = bnode->_node;
 
     if(node->processor_id() == libMesh::processor_id())
@@ -781,7 +791,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
 
     std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
 
-    unsigned int slave_boundary = pen_loc._slave_boundary;
+    BoundaryID slave_boundary = pen_loc._slave_boundary;
 
     std::vector<NodeFaceConstraint *> constraints;
 
@@ -869,7 +879,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
     std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
 
-    unsigned int slave_boundary = pen_loc._slave_boundary;
+    BoundaryID slave_boundary = pen_loc._slave_boundary;
 
     std::vector<NodeFaceConstraint *> constraints;
 
@@ -1004,7 +1014,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
   {
     const BndNode * bnode = *nd;
-    short int boundary_id = bnode->_bnd_id;
+    BoundaryID boundary_id = bnode->_bnd_id;
     Node * node = bnode->_node;
 
     if(node->processor_id() == libMesh::processor_id())
@@ -1200,7 +1210,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
     std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
 
-    unsigned int slave_boundary = pen_loc._slave_boundary;
+    BoundaryID slave_boundary = pen_loc._slave_boundary;
 
     std::vector<NodeFaceConstraint *> constraints;
 
@@ -1412,7 +1422,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
   {
     const BndNode * bnode = *nd;
-    unsigned int boundary_id = bnode->_bnd_id;
+    BoundaryID boundary_id = bnode->_bnd_id;
     Node * node = bnode->_node;
 
     if(node->processor_id() == libMesh::processor_id())
@@ -1529,13 +1539,13 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
 
         for (unsigned int side=0; side<elem->n_sides(); side++)
         {
-          std::vector<short int> boundary_ids = _mesh.boundary_ids(elem, side);
+          std::vector<BoundaryID> boundary_ids = _mesh.boundary_ids(elem, side);
 
           if (boundary_ids.size() > 0)
           {
-            for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+            for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
             {
-              short int bnd_id = *it;
+              BoundaryID bnd_id = *it;
 
               std::vector<IntegratedBC *> bcs = _bcs[tid].getBCs(bnd_id);
               if (bcs.size() > 0)
@@ -1614,7 +1624,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
   for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
   {
     const BndNode * bnode = *nd;
-    unsigned int boundary_id = bnode->_bnd_id;
+    BoundaryID boundary_id = bnode->_bnd_id;
     Node * node = bnode->_node;
 
     std::vector<NodalBC *> & bcs = _bcs[0].getNodalBCs(boundary_id);
@@ -1873,16 +1883,16 @@ NonlinearSystem::reinitDampers(THREAD_ID tid)
 }
 
 void
-NonlinearSystem::checkKernelCoverage(const std::set<subdomain_id_type> & mesh_subdomains) const
+NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const
 {
   // Check kernel coverage of subdomains (blocks) in your mesh
-  std::set<subdomain_id_type> input_subdomains;
+  std::set<SubdomainID> input_subdomains;
 
   bool global_kernels_exist = _kernels[0].subdomains_covered(input_subdomains);
 
   if (!global_kernels_exist)
   {
-    std::set<subdomain_id_type> difference;
+    std::set<SubdomainID> difference;
     std::set_difference (mesh_subdomains.begin(), mesh_subdomains.end(),
                          input_subdomains.begin(), input_subdomains.end(),
                          std::inserter(difference, difference.end()));

@@ -17,6 +17,7 @@
 #include "SubProblem.h"
 #include "MooseVariable.h"
 #include "Conversion.h"
+#include "Parser.h"
 
 // libMesh
 #include "quadrature_gauss.h"
@@ -85,7 +86,7 @@ SystemBase::getScalarVariable(THREAD_ID tid, unsigned int var_number)
   return *var;
 }
 
-const std::set<subdomain_id_type> *
+const std::set<SubdomainID> *
 SystemBase::getVariableBlocks(unsigned int var_number)
 {
   mooseAssert(_var_map.find(var_number) != _var_map.end(), "Variable does not exist.");
@@ -142,7 +143,7 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 }
 
 void
-SystemBase::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, unsigned int /*bnd_id*/, THREAD_ID tid)
+SystemBase::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
 /*
   for (std::set<MooseVariable *>::iterator it = _vars[tid].boundaryVars(bnd_id).begin();
@@ -157,7 +158,7 @@ SystemBase::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, unsigne
 }
 
 void
-SystemBase::reinitNeighborFace(const Elem * /*elem*/, unsigned int /*side*/, unsigned int /*bnd_id*/, THREAD_ID tid)
+SystemBase::reinitNeighborFace(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
@@ -191,7 +192,7 @@ SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
 }
 
 void
-SystemBase::reinitNodeFace(const Node * /*node*/, unsigned int /*bnd_id*/, THREAD_ID tid)
+SystemBase::reinitNodeFace(const Node * /*node*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
 /*  for (std::set<MooseVariable *>::iterator it = _vars[tid].boundaryVars(bnd_id).begin();
        it != _vars[tid].boundaryVars(bnd_id).end();
@@ -252,14 +253,17 @@ SystemBase::addInitialCondition(const std::string & ic_name, const std::string &
   parameters.set<SystemBase *>("_sys") = this;
 
   const std::string & var_name = parameters.get<std::string>("variable");
-  const std::vector<subdomain_id_type> & blocks = parameters.get<std::vector<subdomain_id_type> >("block");
+  const std::vector<SubdomainName> & blocks = parameters.get<std::vector<SubdomainName> >("block");
 
   for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
     if (blocks.size() > 0)
       for (unsigned int i = 0; i < blocks.size(); i++)
-        _vars[tid].addInitialCondition(var_name, blocks[i], static_cast<InitialCondition *>(Factory::instance()->create(ic_name, name, parameters)));
+      {
+        SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
+        _vars[tid].addInitialCondition(var_name, blk_id, static_cast<InitialCondition *>(Factory::instance()->create(ic_name, name, parameters)));
+      }
     else
       _vars[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID, static_cast<InitialCondition *>(Factory::instance()->create(ic_name, name, parameters)));
   }

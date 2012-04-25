@@ -66,7 +66,7 @@ public:
    *
    * @param bnd_id - ID of the boundary we are at
    */
-  virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id);
+  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
 
   /**
    * Called when doing internal edge assembling
@@ -123,11 +123,11 @@ ThreadedElementLoop<RangeType>::operator () (const RangeType & range)
 
     for (unsigned int side=0; side<elem->n_sides(); side++)
     {
-      std::vector<short int> boundary_ids = _system.mesh().boundary_ids (elem, side);
+      std::vector<BoundaryID> boundary_ids = _system.mesh().boundary_ids (elem, side);
 
       if (boundary_ids.size() > 0)
       {
-        for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+        for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
           onBoundary(elem, side, *it);
       }
 
@@ -170,7 +170,7 @@ ThreadedElementLoop<RangeType>::postElement(const Elem * /*elem*/)
 
 template<typename RangeType>
 void
-ThreadedElementLoop<RangeType>::onBoundary(const Elem * /*elem*/, unsigned int /*side*/, short int /*bnd_id*/)
+ThreadedElementLoop<RangeType>::onBoundary(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/)
 {
 }
 

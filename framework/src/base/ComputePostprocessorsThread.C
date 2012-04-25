@@ -53,7 +53,7 @@ ComputePostprocessorsThread::onElement(const Elem * elem)
 }
 
 void
-ComputePostprocessorsThread::onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
+ComputePostprocessorsThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
   if (_pps[_tid].sidePostprocessors(bnd_id).size() > 0)
   {

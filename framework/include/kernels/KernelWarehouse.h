@@ -68,7 +68,7 @@ public:
    * @param kernel Kernel being added
    * @param block_ids Set of active domain where the kernel is defined
    */
-  void addKernel(Kernel *kernel, const std::set<subdomain_id_type> & block_ids);
+  void addKernel(Kernel *kernel, const std::set<SubdomainID> & block_ids);
 
   /**
    * Add a scalar kernels
@@ -90,19 +90,19 @@ public:
    * with the complete set of subdomains represented which may or may not represent
    * the entire domain.
    */
-  bool subdomains_covered(std::set<subdomain_id_type> & return_set) const;
+  bool subdomains_covered(std::set<SubdomainID> & return_set) const;
 
 protected:
   /// Kernels active on a block and in specified time
   std::vector<Kernel *> _active_kernels;
   /// Kernels active on a block and in specified time per variable
-  std::map<unsigned int, std::vector<Kernel *> > _active_var_kernels;
+  std::map<SubdomainID, std::vector<Kernel *> > _active_var_kernels;
   /// All instances of kernels
   std::vector<Kernel *> _all_kernels;
   /// Kernels that live everywhere (on the whole domain)
   std::vector<Kernel *> _global_kernels;
   /// Kernels that live on a specified block
-  std::map<unsigned int, std::vector<Kernel *> > _block_kernels;
+  std::map<SubdomainID, std::vector<Kernel *> > _block_kernels;
 
   /// Scalar kernels
   std::vector<ScalarKernel *> _scalar_kernels;

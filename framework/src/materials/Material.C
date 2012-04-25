@@ -24,7 +24,7 @@ InputParameters validParams<Material>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<SetupInterface>();
-  params.addRequiredParam<std::vector<unsigned int> >("block", "The id of the block (subdomain) that this material represents.");
+  params.addRequiredParam<std::vector<SubdomainName> >("block", "The id or name of the block (subdomain) that this material represents.");
 
   params.addPrivateParam<std::string>("built_by_action", "add_material");
   return params;
@@ -56,7 +56,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
     _coord_sys(_subproblem.coordSystem()),
-    _block_id(parameters.get<unsigned int>("block_id")),
+    _block_id(parameters.get<SubdomainID>("_block_id")),
     _real_zero(_problem._real_zero[_tid]),
     _zero(_problem._zero[_tid]),
     _grad_zero(_problem._grad_zero[_tid]),
@@ -93,7 +93,7 @@ Material::~Material()
   //std::for_each(_qp_curr.begin(), _qp_curr.end(), DeleteFunctor());
 }
 
-unsigned int
+SubdomainID
 Material::blockID()
 {
   return _block_id;

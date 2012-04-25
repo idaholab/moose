@@ -68,17 +68,17 @@ public:
   virtual void prepareAssembly(THREAD_ID /*tid*/) { mooseError("Not implemented!");};
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
-  virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
+  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid);
   virtual void reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid);
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid);
   virtual void reinitScalars(THREAD_ID tid);
 
-  virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
-  virtual void subdomainSetupSide(unsigned int subdomain, THREAD_ID tid);
+  virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
+  virtual void subdomainSetupSide(SubdomainID subdomain, THREAD_ID tid);
 
   // Solve /////
   virtual void init();
@@ -92,8 +92,8 @@ public:
   virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
 
   // Materials /////
-  virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);
-  virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid);
+  virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid);
+  virtual void reinitMaterialsFace(SubdomainID blk_id, unsigned int side, THREAD_ID tid);
 
   virtual void copySolutionsBackwards();
 

@@ -154,7 +154,7 @@ public:
    * @param scale_factor the scaling factor for the variable
    * @param active_subdomains a list of subdomain ids this variable is active on
    */
-  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL) = 0;
+  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL) = 0;
 
   // ICs /////
   /**
@@ -224,7 +224,7 @@ public:
    * @param var_number The number of the variable
    * @return the set of subdomain ids where the variable is active (defined)
    */
-  virtual const std::set<subdomain_id_type> * getVariableBlocks(unsigned int var_number);
+  virtual const std::set<SubdomainID> * getVariableBlocks(unsigned int var_number);
 
   /**
    * Get the number of variables in this system
@@ -266,12 +266,12 @@ public:
    * @param bnd_id Boundary id on that side
    * @param tid Thread ID
    */
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
 
   /**
    * Compute the values of the variables at all the current points.
    */
-  virtual void reinitNeighborFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
+  virtual void reinitNeighborFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
 
   /**
    * Compute the values of the variables at all the current points.
@@ -291,7 +291,7 @@ public:
    * @param bnd_id Boundary ID
    * @param tid Thread ID
    */
-  virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
+  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid);
 
   /**
    * Reinit nodal assembly info for neighbor node
@@ -334,7 +334,7 @@ protected:
   /// Variable warehouses (one for each thread)
   std::vector<VariableWarehouse> _vars;
   /// Map of variables (variable id -> array of subdomains where it lives)
-  std::map<unsigned int, std::set<subdomain_id_type> > _var_map;
+  std::map<unsigned int, std::set<SubdomainID> > _var_map;
 
   friend class ComputeInitialConditionThread;
 };
@@ -374,7 +374,7 @@ public:
   {
   }
 
-  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL)
+  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL)
   {
     unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
     unsigned int mvn = nVariables();                                      // MOOSE variable number
@@ -385,9 +385,9 @@ public:
       _vars[tid].add(var_name, var);
     }
     if (active_subdomains == NULL)
-      _var_map[mvn] = std::set<subdomain_id_type>();
+      _var_map[mvn] = std::set<SubdomainID>();
     else
-      for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+      for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
         _var_map[mvn].insert(*it);
     _var_names.push_back(var_name);
   }

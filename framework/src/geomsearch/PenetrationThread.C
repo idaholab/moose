@@ -27,8 +27,8 @@
 Threads::spin_mutex pinfo_mutex;
 
 PenetrationThread::PenetrationThread(const MeshBase & mesh,
-                                     unsigned int master_boundary,
-                                     unsigned int slave_boundary,
+                                     BoundaryID master_boundary,
+                                     BoundaryID slave_boundary,
                                      std::map<unsigned int, PenetrationLocator::PenetrationInfo *> & penetration_info,
                                      bool update_location,
                                      Real tangential_tolerance,

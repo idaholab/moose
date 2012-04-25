@@ -126,14 +126,14 @@ MooseVariable::name()
   return _sys.system().variable(_var_num).name();
 }
 
-const std::set<subdomain_id_type> &
+const std::set<SubdomainID> &
 MooseVariable::activeSubdomains()
 {
   return _sys.system().variable(_var_num).active_subdomains();
 }
 
 bool
-MooseVariable::activeOnSubdomain(subdomain_id_type subdomain) const
+MooseVariable::activeOnSubdomain(SubdomainID subdomain) const
 {
   return _sys.system().variable(_var_num).active_on_subdomain(subdomain);
 }

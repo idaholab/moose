@@ -25,7 +25,7 @@ InputParameters validParams<BoundaryCondition>()
   params += validParams<SetupInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
-  params.addRequiredParam<std::vector<unsigned int> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
+  params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
 
   params.addPrivateParam<std::string>("built_by_action", "add_bc");
   return params;
@@ -48,7 +48,7 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
-    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
+    _boundary_id(parameters.get<BoundaryID>("_boundary_id")),
 
     _real_zero(_problem._real_zero[_tid]),
     _zero(_problem._zero[_tid]),

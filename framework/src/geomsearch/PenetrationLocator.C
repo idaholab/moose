@@ -23,11 +23,12 @@
 #include "GeometricSearchData.h"
 #include "PenetrationThread.h"
 
-PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh, unsigned int master, unsigned int slave, Order order) :
+PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh,
+                                       const BoundaryName & master, const BoundaryName & slave, Order order) :
     _subproblem(subproblem),
     _mesh(mesh),
-    _master_boundary(master),
-    _slave_boundary(slave),
+    _master_boundary(_mesh.getBoundaryID(master)),
+    _slave_boundary(_mesh.getBoundaryID(slave)),
     _fe_type(order),
     _nearest_node(geom_search_data.getNearestNodeLocator(master, slave)),
     _update_location(true),

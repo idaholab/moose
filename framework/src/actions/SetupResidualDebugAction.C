@@ -47,7 +47,7 @@ SetupResidualDebugAction::act()
 
     // add aux-variable
     MooseVariable & var = _problem->getVariable(0, var_name);
-    const std::set<subdomain_id_type> & subdomains = var.activeSubdomains();
+    const std::set<SubdomainID> & subdomains = var.activeSubdomains();
 
     std::stringstream aux_var_ss;
     aux_var_ss << "residual_" << var.name();

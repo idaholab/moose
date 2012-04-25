@@ -23,8 +23,8 @@ class PenetrationThread
 {
 public:
   PenetrationThread(const MeshBase & mesh,
-                    unsigned int master_boundary,
-                    unsigned int slave_boundary,
+                    BoundaryID master_boundary,
+                    BoundaryID slave_boundary,
                     std::map<unsigned int, PenetrationLocator::PenetrationInfo *> & penetration_info,
                     bool update_location,
                     Real tangential_tolerance,
@@ -46,8 +46,8 @@ public:
 protected:
   // The Mesh
   const MeshBase & _mesh;
-  unsigned int _master_boundary;
-  unsigned int _slave_boundary;
+  BoundaryID _master_boundary;
+  BoundaryID _slave_boundary;
 
   // This is the info map we're actually filling here
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *> & _penetration_info;

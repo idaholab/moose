@@ -65,17 +65,17 @@ public:
   virtual void initialSetup() {};
   virtual void timestepSetup() {};
 
-  virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid) = 0;
-  virtual void subdomainSetupSide(unsigned int subdomain, THREAD_ID tid) = 0;
+  virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid) = 0;
+  virtual void subdomainSetupSide(SubdomainID subdomain, THREAD_ID tid) = 0;
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
   virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid) = 0;
   virtual void prepareAssembly(THREAD_ID tid) = 0;
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid) = 0;
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
-  virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid) = 0;
+  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid) = 0;
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid) = 0;
@@ -83,11 +83,11 @@ public:
   virtual void reinitScalars(THREAD_ID tid) = 0;
 
   // Materials /////
-  virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid) = 0;
-  virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid) = 0;
-  virtual void reinitMaterialsNeighbor(unsigned int /*blk_id*/, unsigned int /*side*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
-  virtual const std::vector<Material*> & getMaterials(unsigned int /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
-  virtual const std::vector<Material*> & getFaceMaterials(unsigned int /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
+  virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid) = 0;
+  virtual void reinitMaterialsFace(SubdomainID blk_id, unsigned int side, THREAD_ID tid) = 0;
+  virtual void reinitMaterialsNeighbor(SubdomainID /*blk_id*/, unsigned int /*side*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
+  virtual const std::vector<Material*> & getMaterials(SubdomainID /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
+  virtual const std::vector<Material*> & getFaceMaterials(SubdomainID /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
 
   /**
    * Returns true if the Problem has Dirac kernels it needs to compute on elem.

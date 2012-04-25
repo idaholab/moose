@@ -131,7 +131,7 @@ CoupledProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 }
 
 void
-CoupledProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
+CoupledProblem::reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid)
 {
   for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitElemFace(elem, side, bnd_id, tid);
@@ -145,7 +145,7 @@ CoupledProblem::reinitNode(const Node * node, THREAD_ID tid)
 }
 
 void
-CoupledProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
+CoupledProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid)
 {
   for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitNodeFace(node, bnd_id, tid);
@@ -188,12 +188,12 @@ CoupledProblem::reinitScalars(THREAD_ID tid)
 
 
 void
-CoupledProblem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID /*tid*/)
+CoupledProblem::subdomainSetup(SubdomainID /*subdomain*/, THREAD_ID /*tid*/)
 {
 }
 
 void
-CoupledProblem::subdomainSetupSide(unsigned int /*subdomain*/, THREAD_ID /*tid*/)
+CoupledProblem::subdomainSetupSide(SubdomainID /*subdomain*/, THREAD_ID /*tid*/)
 {
 }
 
@@ -240,12 +240,12 @@ CoupledProblem::getPostprocessorValue(const std::string & /*name*/, THREAD_ID /*
 }
 
 void
-CoupledProblem::reinitMaterials(unsigned int /*blk_id*/, THREAD_ID /*tid*/)
+CoupledProblem::reinitMaterials(SubdomainID /*blk_id*/, THREAD_ID /*tid*/)
 {
 }
 
 void
-CoupledProblem::reinitMaterialsFace(unsigned int /*blk_id*/, unsigned int /*side*/, THREAD_ID /*tid*/)
+CoupledProblem::reinitMaterialsFace(SubdomainID /*blk_id*/, unsigned int /*side*/, THREAD_ID /*tid*/)
 {
 }
 

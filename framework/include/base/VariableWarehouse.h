@@ -53,9 +53,9 @@ public:
    * @param bnd The boundary id where this variable is defined
    * @param var The variable
    */
-  void addBoundaryVar(unsigned int bnd, MooseVariable *var);
+  void addBoundaryVar(BoundaryID bnd, MooseVariable *var);
   /// Convenience function for adding coupled vars at once
-  void addBoundaryVars(unsigned int bnd, const std::map<std::string, std::vector<MooseVariable *> > & vars);
+  void addBoundaryVars(BoundaryID bnd, const std::map<std::string, std::vector<MooseVariable *> > & vars);
 
   /**
    * Get a variable from the warehouse
@@ -81,7 +81,7 @@ public:
    * @param bnd The boundary ID
    * @return The list of variables
    */
-  std::set<MooseVariable *> & boundaryVars(unsigned int bnd);
+  std::set<MooseVariable *> & boundaryVars(BoundaryID bnd);
 
   /**
    * Get the list of scalar variables
@@ -94,7 +94,7 @@ public:
    * @param var_name The variable name this initial condition works on
    * @param ic The initial condition object
    */
-  void addInitialCondition(const std::string & var_name, subdomain_id_type blockid, InitialCondition * ic);
+  void addInitialCondition(const std::string & var_name, SubdomainID blockid, InitialCondition * ic);
 
   /**
    * Add an initial condition for scalar variable
@@ -108,7 +108,7 @@ public:
    * @param var_name The name of the variable for which we are retrieving the initial condition
    * @return The initial condition object if the initial condition exists, NULL otherwise
    */
-  InitialCondition * getInitialCondition(const std::string & var_name, subdomain_id_type blockid);
+  InitialCondition * getInitialCondition(const std::string & var_name, SubdomainID blockid);
 
   /**
    * Get a scalar initial condition
@@ -122,11 +122,11 @@ protected:
   /// list of all variables
   std::vector<MooseVariable *> _vars;
   /// Initial conditions: [name] -> [block_id] -> initial condition (only 1 IC per sub-block)
-  std::map<std::string, std::map<subdomain_id_type, InitialCondition *> > _ics;
+  std::map<std::string, std::map<SubdomainID, InitialCondition *> > _ics;
   /// Name to variable mapping
   std::map<std::string, MooseVariable *> _var_name;
   /// Map to variables that need to be evaluated on a boundary
-  std::map<unsigned int, std::set<MooseVariable *> > _boundary_vars;
+  std::map<BoundaryID, std::set<MooseVariable *> > _boundary_vars;
 
   /// variable number to variable mapping
   std::map<std::string, MooseVariableScalar *> _scalar_var_map;

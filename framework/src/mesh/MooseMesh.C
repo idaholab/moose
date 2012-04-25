@@ -130,7 +130,7 @@ MooseMesh::prepare()
     _mesh_subdomains.insert((*el)->subdomain_id());
 
   // Collect (local) boundary IDs
-  const std::set<short>& local_bids = _mesh.boundary_info->get_boundary_ids();
+  const std::set<BoundaryID>& local_bids = _mesh.boundary_info->get_boundary_ids();
   _mesh_boundary_ids.insert(local_bids.begin(), local_bids.end());
 
   // Communicate subdomain and boundary IDs if this is a parallel mesh
@@ -140,7 +140,7 @@ MooseMesh::prepare()
       // std::cout << "(before) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
 
       // Pack our subdomain IDs into a vector
-      std::vector<subdomain_id_type> mesh_subdomains_vector(_mesh_subdomains.begin(),
+      std::vector<SubdomainID> mesh_subdomains_vector(_mesh_subdomains.begin(),
 							    _mesh_subdomains.end());
 
       // Gather them all into an enlarged vector
@@ -160,8 +160,8 @@ MooseMesh::prepare()
       // std::cout << "(before) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
 
       // Pack our boundary IDs into a vector for communication
-      std::vector<short> mesh_boundary_ids_vector(_mesh_boundary_ids.begin(),
-						  _mesh_boundary_ids.end());
+      std::vector<BoundaryID> mesh_boundary_ids_vector(_mesh_boundary_ids.begin(),
+                                                       _mesh_boundary_ids.end());
 
       // Gather them all into an enlarged vector
       Parallel::allgather(mesh_boundary_ids_vector);
@@ -370,7 +370,7 @@ MooseMesh::cacheInfo()
   }
 }
 
-std::set<subdomain_id_type> &
+std::set<SubdomainID> &
 MooseMesh::getNodeBlockIds(const Node & node)
 {
   return _block_node_list[node.id()];
@@ -443,4 +443,30 @@ MooseMesh::addUniqueNode(const Point & p, Real tol)
 
   mooseAssert(node != NULL, "Node is NULL");
   return node;
+}
+
+
+BoundaryID
+MooseMesh::getBoundaryID(const BoundaryName & boundary_name) const
+{
+  BoundaryID id;
+  std::istringstream ss(boundary_name);
+
+  if (!(ss >> id))
+    id = _mesh.boundary_info->get_id_by_name(boundary_name);
+
+  return id;
+}
+
+
+SubdomainID
+MooseMesh::getSubdomainID(const SubdomainName & subdomain_name) const
+{
+  SubdomainID id;
+  std::istringstream ss(subdomain_name);
+
+  if (!(ss >> id))
+    id = _mesh.get_id_by_name(subdomain_name);
+
+  return id;
 }

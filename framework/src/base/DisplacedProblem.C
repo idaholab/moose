@@ -254,13 +254,13 @@ DisplacedProblem::getScalarVariable(THREAD_ID tid, const std::string & var_name)
 }
 
 void
-DisplacedProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains)
+DisplacedProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
 {
   _displaced_nl.addVariable(var_name, type, scale_factor, active_subdomains);
 }
 
 void
-DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains)
+DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains)
 {
   _displaced_aux.addVariable(var_name, type, 1.0, active_subdomains);
 }
@@ -342,7 +342,7 @@ DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 }
 
 void
-DisplacedProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
+DisplacedProblem::reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid)
 {
   _assembly[tid]->reinit(elem, side);
   _displaced_nl.reinitElemFace(elem, side, bnd_id, tid);
@@ -358,7 +358,7 @@ DisplacedProblem::reinitNode(const Node * node, THREAD_ID tid)
 }
 
 void
-DisplacedProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
+DisplacedProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid)
 {
   _assembly[tid]->reinit(node);
   _displaced_nl.reinitNodeFace(node, bnd_id, tid);
@@ -383,7 +383,7 @@ DisplacedProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID
   _displaced_nl.prepareNeighbor(tid);
   _displaced_aux.prepareNeighbor(tid);
 
-  unsigned int bnd_id = 0;              // some dummy number (it is not really used for anything, right now)
+  BoundaryID bnd_id = 0;              // some dummy number (it is not really used for anything, right now)
   _displaced_nl.reinitElemFace(elem, side, bnd_id, tid);
   _displaced_aux.reinitElemFace(elem, side, bnd_id, tid);
 
@@ -600,7 +600,7 @@ DisplacedProblem::addGhostedElem(unsigned int elem_id)
 }
 
 void
-DisplacedProblem::addGhostedBoundary(unsigned int boundary_id)
+DisplacedProblem::addGhostedBoundary(BoundaryID boundary_id)
 {
   _mproblem.addGhostedBoundary(boundary_id);
 }

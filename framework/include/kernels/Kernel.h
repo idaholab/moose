@@ -160,15 +160,15 @@ Kernel::getMaterialProperty(const std::string & name)
   if (parameters().isParamValid("block"))
   {
     // check blocks where the kernel is defined
-    std::vector<unsigned int> blocks = parameters().get<std::vector<unsigned int> >("block");
-    for (std::vector<unsigned int>::iterator it = blocks.begin(); it != blocks.end(); ++it)
-      _subproblem.checkMatProp(*it, name);
+    std::vector<SubdomainName> blocks = parameters().get<std::vector<SubdomainName> >("block");
+    for (std::vector<SubdomainName>::iterator it = blocks.begin(); it != blocks.end(); ++it)
+      _subproblem.checkMatProp(_subproblem.mesh().getSubdomainID(*it), name);
   }
   else
   {
     // no kernel blocks specified, check all blocks that are in the mesh
-    const std::set<subdomain_id_type> & blocks = _mesh.meshSubdomains();
-    for (std::set<subdomain_id_type>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+    const std::set<SubdomainID> & blocks = _mesh.meshSubdomains();
+    for (std::set<SubdomainID>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
       _subproblem.checkMatProp(*it, name);
   }
 

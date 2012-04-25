@@ -23,6 +23,7 @@
 #include "ComputeNodalAuxVarsThread.h"
 #include "ComputeNodalAuxBcsThread.h"
 #include "ComputeElemAuxVarsThread.h"
+#include "Parser.h"
 
 #include "quadrature_gauss.h"
 #include "node_range.h"
@@ -91,7 +92,7 @@ AuxiliarySystem::jacobianSetup()
 }
 
 void
-AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
+AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
   unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
   unsigned int mvn = nVariables();                                      // MOOSE variable number
@@ -106,9 +107,9 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
       _elem_vars[tid][var_name] = var;
   }
   if (active_subdomains == NULL)
-    _var_map[mvn] = std::set<subdomain_id_type>();
+    _var_map[mvn] = std::set<SubdomainID>();
   else
-    for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+    for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
       _var_map[mvn].insert(*it);
   _var_names.push_back(var_name);
 }
@@ -140,16 +141,18 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
     AuxKernel *kernel = static_cast<AuxKernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not an AuxKernel object");
 
-    std::set<subdomain_id_type> blk_ids;
+    std::set<SubdomainID> blk_ids;
     if (!parameters.isParamValid("block"))
       blk_ids = _var_map[kernel->variable().number()];
     else
     {
-      std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
+      std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
       for (unsigned int i=0; i<blocks.size(); ++i)
       {
-        if (_var_map[kernel->variable().number()].count(blocks[i]) > 0 || _var_map[kernel->variable().number()].size() == 0)
-          blk_ids.insert(blocks[i]);
+        SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
+
+        if (_var_map[kernel->variable().number()].count(blk_id) > 0 || _var_map[kernel->variable().number()].size() == 0)
+          blk_ids.insert(blk_id);
         else
           mooseError("AuxKernel (" + kernel->name() + "): block outside of the domain of the variable");
       }
@@ -177,24 +180,24 @@ void
 AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<AuxiliarySystem *>("_aux_sys") = this;
-  std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
+  std::vector<BoundaryName> boundaries = parameters.get<std::vector<BoundaryName> >("boundary");
 
   for (unsigned int i=0; i<boundaries.size(); ++i)
   {
-    parameters.set<unsigned int>("_boundary_id") = boundaries[i];
+    BoundaryID boundary = _mesh.getBoundaryID(boundaries[i]);
+    parameters.set<unsigned int>("_boundary_id") = boundary;
+
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       parameters.set<THREAD_ID>("_tid") = tid;
       parameters.set<MaterialData *>("_material_data") = _mproblem._bnd_material_data[tid];
 
-      std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
-
       AuxKernel * bc = static_cast<AuxKernel *>(Factory::instance()->create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a AuxBoundaryCondition object");
 
-      _auxs(bc->execFlag())[tid].addActiveBC(boundaries[i], bc);
+      _auxs(bc->execFlag())[tid].addActiveBC(boundary, bc);
 
-      _vars[tid].addBoundaryVar(boundaries[i], &bc->variable());
+      _vars[tid].addBoundaryVar(boundary, &bc->variable());
     }
   }
 }
@@ -308,7 +311,7 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
 {
   // Do we have some kernels to evaluate?
   bool have_block_kernels = false;
-  for(std::set<subdomain_id_type>::const_iterator subdomain_it = _mesh.meshSubdomains().begin();
+  for(std::set<SubdomainID>::const_iterator subdomain_it = _mesh.meshSubdomains().begin();
       subdomain_it != _mesh.meshSubdomains().end();
       ++subdomain_it)
   {

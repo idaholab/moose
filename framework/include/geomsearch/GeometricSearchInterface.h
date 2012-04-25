@@ -18,6 +18,7 @@
 #include "InputParameters.h"
 
 #include "enum_order.h"
+#include "Moose.h"
 
 // Forward Declarations
 class GeometricSearchData;
@@ -33,12 +34,12 @@ public:
   /**
    * Retrieve the PentrationLocator associated with the two sides.
    */
-  PenetrationLocator & getPenetrationLocator(unsigned int master, unsigned int slave, Order order);
+  PenetrationLocator & getPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order);
 
   /**
    * Retrieve the PentrationLocator associated with the two sides.
    */
-  NearestNodeLocator & getNearestNodeLocator(unsigned int master, unsigned int slave);
+  NearestNodeLocator & getNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave);
 
 protected:
   GeometricSearchData & _geometric_search_data;

@@ -27,9 +27,9 @@ InputParameters validParams<AddPeriodicBCAction>()
   InputParameters params = validParams<Action>();
   params.addParam<std::vector<std::string> >("auto_direction", "If using a generated mesh, you can specifiy just the dimension(s) you want to mark as periodic");
 
-  params.addParam<unsigned int>("primary", "Boundary ID associated with the primary boundary.");
-  params.addParam<unsigned int>("secondary", "Boundary ID associated with the secondary boundary.");
-  params.addParam<std::vector<Real> >("translation", "Vector that translates coordinates on the primary boundary to coordinates on the secondary boundary.");
+  params.addParam<BoundaryName>("primary", "Boundary ID associated with the primary boundary.");
+  params.addParam<BoundaryName>("secondary", "Boundary ID associated with the secondary boundary.");
+  params.addParam<RealVectorValue>("translation", "Vector that translates coordinates on the primary boundary to coordinates on the secondary boundary.");
   params.addParam<std::vector<std::string> >("transform_func", "Functions that specify the transformation");
   params.addParam<std::vector<std::string> >("inv_transform_func", "Functions that specify the inverse transformation");
 
@@ -106,14 +106,13 @@ AddPeriodicBCAction::act()
   if (autoTranslationBoundaries())
     return;
 
-  if (getParam<std::vector<Real> >("translation") != std::vector<Real>())
+  if (_pars.isParamValid("translation"))
   {
-    std::vector<Real> translation = getParam<std::vector<Real> >("translation");
-    translation.resize(3);
+    RealVectorValue translation = getParam<RealVectorValue>("translation");
 
-    PeriodicBoundary p(RealVectorValue(translation[0], translation[1], translation[2]));
-    p.myboundary = getParam<unsigned int>("primary");
-    p.pairedboundary = getParam<unsigned int>("secondary");
+    PeriodicBoundary p(translation);
+    p.myboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("primary"));
+    p.pairedboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("secondary"));
     setPeriodicVars(p, getParam<std::vector<std::string> >("variable"));
 
     nl.dofMap().add_periodic_boundary(p);
@@ -123,8 +122,8 @@ AddPeriodicBCAction::act()
     std::vector<std::string> fn_names = getParam<std::vector<std::string> >("transform_func");
 
     FunctionPeriodicBoundary *pb = new FunctionPeriodicBoundary(*_problem, fn_names);
-    pb->myboundary = getParam<unsigned int>("primary");
-    pb->pairedboundary = getParam<unsigned int>("secondary");
+    pb->myboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("primary"));
+    pb->pairedboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("secondary"));
     setPeriodicVars(*pb, getParam<std::vector<std::string> >("variable"));
 
     FunctionPeriodicBoundary *ipb = NULL;
@@ -135,8 +134,8 @@ AddPeriodicBCAction::act()
 
       ipb = new FunctionPeriodicBoundary(*_problem, inv_fn_names);
       // these are switched, because we are forming the inverse translation
-      ipb->myboundary = getParam<unsigned int>("secondary");
-      ipb->pairedboundary = getParam<unsigned int>("primary");
+      ipb->myboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("primary"));
+      ipb->pairedboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("secondary"));
       setPeriodicVars(*ipb, getParam<std::vector<std::string> >("variable"));
     }
     else

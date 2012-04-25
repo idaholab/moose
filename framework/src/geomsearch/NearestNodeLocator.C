@@ -26,7 +26,7 @@
 #include "mesh_tools.h"
 
 
-NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh, unsigned int boundary1, unsigned int boundary2) :
+NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh, BoundaryID boundary1, BoundaryID boundary2) :
     _subproblem(subproblem),
     _mesh(mesh),
     _boundary1(boundary1),
@@ -95,7 +95,7 @@ NearestNodeLocator::findNodes()
     for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
     {
       const BndNode * bnode = *nd;
-      unsigned int boundary_id = bnode->_bnd_id;
+      BoundaryID boundary_id = bnode->_bnd_id;
       unsigned int node_id = bnode->_node->id();
 
       // If we have a BB only consider saving this node if it's in our inflated BB

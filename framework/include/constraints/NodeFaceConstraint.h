@@ -123,11 +123,6 @@ public:
   SparseMatrix<Number> * _jacobian;
 
 protected:
-  /// Boundary ID for the slave surface
-  unsigned int _slave;
-  /// Boundary ID for the master surface
-  unsigned int _master;
-
   Problem & _problem;
   SubProblem & _subproblem;
   SystemBase & _sys;
@@ -138,6 +133,11 @@ protected:
   MooseVariable & _var;
   MooseMesh & _mesh;
   unsigned int _dim;
+
+  /// Boundary ID for the slave surface
+  unsigned int _slave;
+  /// Boundary ID for the master surface
+  unsigned int _master;
 
   unsigned int _i, _j;
   unsigned int _qp;

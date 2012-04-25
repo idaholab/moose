@@ -48,7 +48,7 @@ ComputeJacobianThread::computeJacobian()
 }
 
 void
-ComputeJacobianThread::computeFaceJacobian(short int bnd_id)
+ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 {
   for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
   {
@@ -93,7 +93,7 @@ ComputeJacobianThread::onElement(const Elem *elem)
 }
 
 void
-ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
+ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
   std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
   if (bcs.size() > 0)

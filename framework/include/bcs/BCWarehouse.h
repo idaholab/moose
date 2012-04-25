@@ -37,36 +37,36 @@ public:
   void residualSetup();
   void jacobianSetup();
 
-  void addBC(unsigned int boundary_id, IntegratedBC *bc);
-  void addNodalBC(unsigned int boundary_id, NodalBC *bc);
-  void addPresetNodalBC(unsigned int boundary_id, PresetNodalBC *bc);
+  void addBC(BoundaryID boundary_id, IntegratedBC *bc);
+  void addNodalBC(BoundaryID boundary_id, NodalBC *bc);
+  void addPresetNodalBC(BoundaryID boundary_id, PresetNodalBC *bc);
 
   /**
    * Get boundary conditions on a specified boundary id
    */
-  std::vector<IntegratedBC *> & getBCs(unsigned int boundary_id);
+  std::vector<IntegratedBC *> & getBCs(BoundaryID boundary_id);
   /**
    * Get nodal boundary conditions on a specified boundary id
    */
-  std::vector<NodalBC *> & getNodalBCs(unsigned int boundary_id);
+  std::vector<NodalBC *> & getNodalBCs(BoundaryID boundary_id);
   /**
    * Get presetting (;-)) nodal boundary conditions on a specified boundary id
    */
-  std::vector<PresetNodalBC *> & getPresetNodalBCs(unsigned int boundary_id);
+  std::vector<PresetNodalBC *> & getPresetNodalBCs(BoundaryID boundary_id);
 
   /**
    * Get list of active boundaries
    * @param bnds[out] set of boundaries that are active
    */
-  void activeBoundaries(std::set<short> & bnds) const;
+  void activeBoundaries(std::set<BoundaryID> & bnds) const;
 
 protected:
   /// integrated boundary conditions on a boundary
-  std::map<unsigned int, std::vector<IntegratedBC *> > _bcs;
+  std::map<BoundaryID, std::vector<IntegratedBC *> > _bcs;
   /// nodal boundary conditions on a boundary
-  std::map<unsigned int, std::vector<NodalBC *> > _nodal_bcs;
+  std::map<BoundaryID, std::vector<NodalBC *> > _nodal_bcs;
   /// presetting nodal boundary condition on a boundary
-  std::map<unsigned int, std::vector<PresetNodalBC *> > _preset_nodal_bcs;
+  std::map<BoundaryID, std::vector<PresetNodalBC *> > _preset_nodal_bcs;
 };
 
 #endif // BCWAREHOUSE_H

@@ -108,13 +108,13 @@ public:
   virtual void prepareAssembly(THREAD_ID tid);
 
   virtual void addGhostedElem(unsigned int elem_id);
-  virtual void addGhostedBoundary(unsigned int boundary_id);
+  virtual void addGhostedBoundary(BoundaryID boundary_id);
 
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
-  virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
+  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid);
   virtual void reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid);
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
@@ -125,8 +125,8 @@ public:
   virtual void getDiracElements(std::set<const Elem *> & elems);
   virtual void clearDiracInfo();
 
-  virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
-  virtual void subdomainSetupSide(unsigned int subdomain, THREAD_ID tid);
+  virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
+  virtual void subdomainSetupSide(SubdomainID subdomain, THREAD_ID tid);
 
   /**
    * Whether or not this problem should utilize FE shape function caching.
@@ -153,7 +153,7 @@ public:
 
   // NL /////
   NonlinearSystem & getNonlinearSystem() { return _nl; }
-  void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
+  void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
   void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
@@ -161,7 +161,7 @@ public:
   void addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
 
   // Aux /////
-  void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
+  void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains = NULL);
   void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
   void addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addAuxScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
@@ -189,12 +189,12 @@ public:
    * @return The list of materials with the name 'name'
    */
   virtual const std::vector<Material *> & getMaterialsByName(const std::string & name, THREAD_ID tid);
-  virtual const std::vector<Material*> & getMaterials(unsigned int block_id, THREAD_ID tid);
-  virtual const std::vector<Material*> & getFaceMaterials(unsigned int block_id, THREAD_ID tid);
+  virtual const std::vector<Material*> & getMaterials(SubdomainID block_id, THREAD_ID tid);
+  virtual const std::vector<Material*> & getFaceMaterials(SubdomainID block_id, THREAD_ID tid);
   virtual void updateMaterials();
-  virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);
-  virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid);
-  virtual void reinitMaterialsNeighbor(unsigned int blk_id, unsigned int side, THREAD_ID tid);
+  virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid);
+  virtual void reinitMaterialsFace(SubdomainID blk_id, unsigned int side, THREAD_ID tid);
+  virtual void reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int side, THREAD_ID tid);
 
 
   // Postprocessors /////

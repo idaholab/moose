@@ -18,6 +18,7 @@
 #include "InputParameters.h"
 #include "MooseObject.h"
 #include "BndNode.h"
+#include "Moose.h"
 
 // libMesh
 #include "mesh.h"
@@ -46,8 +47,8 @@ public:
 
   virtual unsigned int dimension() { return _mesh.mesh_dimension(); }
 
-  std::vector<short int> boundary_ids (const Elem *const elem, const unsigned short int side) const { return _mesh.boundary_info->boundary_ids(elem, side); }
-  const std::set<short int> & get_boundary_ids () const { return _mesh.boundary_info->get_boundary_ids(); }
+  std::vector<BoundaryID> boundary_ids (const Elem *const elem, const unsigned short int side) const { return _mesh.boundary_info->boundary_ids(elem, side); }
+  const std::set<BoundaryID> & get_boundary_ids () const { return _mesh.boundary_info->get_boundary_ids(); }
 
   void buildNodeList ();
 
@@ -56,7 +57,7 @@ public:
 
   void build_node_list_from_side_list() { _mesh.boundary_info->build_node_list_from_side_list(); }
   void build_side_list(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<short int> & il) { _mesh.boundary_info->build_side_list(el, sl, il); }
-  unsigned int side_with_boundary_id(const Elem * const elem, const unsigned short int boundary_id) const { return _mesh.boundary_info->side_with_boundary_id(elem, boundary_id); }
+  unsigned int side_with_boundary_id(const Elem * const elem, const BoundaryID boundary_id) const { return _mesh.boundary_info->side_with_boundary_id(elem, boundary_id); }
 
   MeshBase::const_node_iterator local_nodes_begin() { return _mesh.local_nodes_begin(); }
   MeshBase::const_node_iterator local_nodes_end() { return _mesh.local_nodes_end(); }
@@ -90,8 +91,8 @@ public:
   ConstNodeRange * getLocalNodeRange();
   ConstBndNodeRange * getBoundaryNodeRange();
 
-  const std::set<subdomain_id_type> & meshSubdomains() { return _mesh_subdomains; }
-  const std::set<short> & meshBoundaryIds() { return _mesh_boundary_ids; }
+  const std::set<SubdomainID> & meshSubdomains() { return _mesh_subdomains; }
+  const std::set<BoundaryID> & meshBoundaryIds() { return _mesh_boundary_ids; }
 
   void read(const std::string file_name);
 
@@ -101,7 +102,7 @@ public:
   /**
    * This will add the boundary ids to be ghosted to this processor
    */
-  void addGhostedBoundary(unsigned int boundary_id) { _ghosted_boundaries.insert(boundary_id); }
+  void addGhostedBoundary(BoundaryID boundary_id) { _ghosted_boundaries.insert(boundary_id); }
 
   /**
    * This sets the inflation amount for the bounding box for each partition for use in
@@ -126,7 +127,7 @@ public:
 
   inline void printInfo(std::ostream &os=libMesh::out) { _mesh.print_info(os); }
 
-  std::set<subdomain_id_type> & getNodeBlockIds(const Node & node);
+  std::set<SubdomainID> & getNodeBlockIds(const Node & node);
 
   std::vector<unsigned int> & getNodeList(short int nodeset_id) { return _node_set_nodes[nodeset_id]; }
 
@@ -140,6 +141,16 @@ public:
    * will be returned
    */
   const Node * addUniqueNode(const Point & p, Real tol=1e-6);
+
+  /**
+   * This class returns the boundary id from the passed boundary name.
+   */
+  BoundaryID getBoundaryID(const BoundaryName & boundary_name) const;
+
+  /**
+   * This class returns the subdomain id from the passed subdomain name.
+   */
+  SubdomainID getSubdomainID(const SubdomainName & subdomain_name) const;
 
   libMesh::Mesh _mesh;
 
@@ -170,7 +181,7 @@ protected:
    * For parallel meshes, includes subdomains defined on other
    * processors as well.
    */
-  std::set<subdomain_id_type> _mesh_subdomains;
+  std::set<SubdomainID> _mesh_subdomains;
 
   /**
    * A set of boundary IDs currently present in the mesh.
@@ -178,7 +189,7 @@ protected:
    * by _mesh.boundary_info->get_boundary_ids().  In parallel,
    * it will contain off-processor boundary IDs as well.
    */
-  std::set<short> _mesh_boundary_ids;
+  std::set<BoundaryID> _mesh_boundary_ids;
 
   std::vector<MeshModifier *> _mesh_modifiers;
 
@@ -188,7 +199,7 @@ protected:
   typedef std::vector<BndNode *>::const_iterator const_bnd_node_iterator_imp;
 
   /// list of nodes that belongs to a specified block (domain)
-  std::map<unsigned int, std::set<subdomain_id_type> > _block_node_list;
+  std::map<unsigned int, std::set<SubdomainID> > _block_node_list;
 
   /// list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> <array of node ids>
   std::map<short int, std::vector<unsigned int> > _node_set_nodes;

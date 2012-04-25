@@ -47,7 +47,7 @@ public:
   virtual void residualSetup();
   virtual void jacobianSetup();
 
-  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
+  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
 
   /**
    * Adds a scalar variable

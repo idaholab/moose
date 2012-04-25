@@ -20,7 +20,7 @@ InputParameters validParams<SidePostprocessor>()
 {
   InputParameters params = validParams<Postprocessor>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
-  params.addRequiredParam<std::vector<unsigned int> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
+  params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs or names from the mesh where this boundary condition applies");
   return params;
 }
 
@@ -28,8 +28,8 @@ SidePostprocessor::SidePostprocessor(const std::string & name, InputParameters p
     Postprocessor(name, parameters),
     UserDataInterface(parameters),
     MaterialPropertyInterface(parameters),
-    _var(_subproblem.getVariable(_tid, parameters.get<std::string>("variable"))),
-    _boundary_ids(parameters.get<std::vector<unsigned int> >("boundary")),
+    _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),
     _q_point(_subproblem.pointsFace(_tid)),
     _qrule(_subproblem.qRuleFace(_tid)),
     _JxW(_subproblem.JxWFace(_tid)),

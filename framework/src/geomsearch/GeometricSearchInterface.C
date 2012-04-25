@@ -24,13 +24,13 @@ GeometricSearchInterface::GeometricSearchInterface(InputParameters & params) :
 }
 
 PenetrationLocator &
-GeometricSearchInterface::getPenetrationLocator(unsigned int master, unsigned int slave, Order order)
+GeometricSearchInterface::getPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order)
 {
   return _geometric_search_data.getPenetrationLocator(master, slave, order);
 }
 
 NearestNodeLocator &
-GeometricSearchInterface::getNearestNodeLocator(unsigned int master, unsigned int slave)
+GeometricSearchInterface::getNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave)
 {
   return _geometric_search_data.getNearestNodeLocator(master, slave);
 }

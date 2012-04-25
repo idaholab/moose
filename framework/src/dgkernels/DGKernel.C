@@ -29,7 +29,7 @@
 #include "dense_subvector.h"
 #include "libmesh_common.h"
 
-const unsigned int DGKernel::InternalBndId = 123456789;
+const BoundaryID DGKernel::InternalBndId = 12345;
 
 template<>
 InputParameters validParams<DGKernel>()
@@ -37,7 +37,7 @@ InputParameters validParams<DGKernel>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<SetupInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
-  params.addPrivateParam<unsigned int>("_boundary_id", DGKernel::InternalBndId);
+  params.addPrivateParam<BoundaryID>("_boundary_id", DGKernel::InternalBndId);
 
   params.addPrivateParam<std::string>("built_by_action", "add_dg_kernel");
   return params;
@@ -74,7 +74,7 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     _JxW(_subproblem.JxWFace(_tid)),
     _coord(_subproblem.coords(_tid)),
 
-    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
+    _boundary_id(parameters.get<BoundaryID>("_boundary_id")),
 
     _u(_var.sln()),
     _grad_u(_var.gradSln()),

@@ -117,7 +117,7 @@ protected:
 
   unsigned int _i, _j;
 
-  unsigned int _boundary_id;
+  BoundaryID _boundary_id;
 
   /// Holds the current solution at the current quadrature point on the face.
   VariableValue & _u;
@@ -168,7 +168,7 @@ protected:
 
 public:
   // boundary id used for internal edges (all DG kernels lives on this boundary id -- a made-up number)
-  static const unsigned int InternalBndId;
+  static const BoundaryID InternalBndId;
 };
 
 #endif //DGKERNEL_H

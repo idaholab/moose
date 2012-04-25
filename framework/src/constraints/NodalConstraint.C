@@ -40,7 +40,6 @@ NodalConstraint::NodalConstraint(const std::string & name, InputParameters param
   TransientInterface(parameters),
   GeometricSearchInterface(parameters),
 
-//  _boundary_id(getParam<unsigned int>("boundary")),
   _problem(*parameters.get<Problem *>("_problem")),
   _subproblem(*parameters.get<SubProblem *>("_subproblem")),
   _sys(*parameters.get<SystemBase *>("_sys")),

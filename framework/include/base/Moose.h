@@ -24,7 +24,16 @@
 #include "id_types.h"
 #include "stored_range.h"
 
+#include <string>
+
+/**
+ * MOOSE typedefs
+ */
 typedef Real                     PostprocessorValue;
+typedef boundary_id_type         BoundaryID;
+typedef std::string              BoundaryName;
+typedef subdomain_id_type        SubdomainID;
+typedef std::string              SubdomainName;
 
 /**
  * MOOSE wrapped versions of useful libMesh macros (see libmesh_common.h)
@@ -156,7 +165,7 @@ enum PPSOutputType
   PPS_OUTPUT_BOTH
 };
 
-const subdomain_id_type ANY_BLOCK_ID = (subdomain_id_type) -1;
+const SubdomainID ANY_BLOCK_ID = (SubdomainID) -1;
 
 /* Wrappers for extern random number generator */
 inline void seed(unsigned int s)

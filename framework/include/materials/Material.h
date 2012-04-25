@@ -75,7 +75,7 @@ public:
    *
    * @return The block ID.
    */
-  unsigned int blockID();
+  SubdomainID blockID();
 
   /**
    * This function is called at the beginning of each timestep
@@ -173,7 +173,7 @@ protected:
   /**
    * Block ID this material is active on.
    */
-  unsigned int _block_id;
+  SubdomainID _block_id;
 
   /**
    * Declare the Real valued property named "name".

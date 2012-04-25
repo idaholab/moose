@@ -22,9 +22,9 @@ InputParameters validParams<ElementPostprocessor>()
 {
   InputParameters params = validParams<Postprocessor>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this postprocessor operates on");
-  std::vector<unsigned int> everywhere(1);
-  everywhere[0] = Moose::ANY_BLOCK_ID;
-  params.addParam<std::vector<unsigned int> >("block", everywhere, "block ID where the postprocessor works");
+  std::vector<std::string> everywhere(1);
+  everywhere[0] = "ANY_BLOCK_ID";
+  params.addParam<std::vector<SubdomainName> >("block", everywhere, "block ID or name where the postprocessor works");
   return params;
 }
 
@@ -35,8 +35,8 @@ ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParame
     MooseVariableInterface(parameters, false),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
-    _block_ids(parameters.get<std::vector<unsigned int> >("block")),
-    _var(_subproblem.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _blocks(parameters.get<std::vector<std::string> >("block")),
+    _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
     _q_point(_subproblem.points(_tid)),
     _qrule(_subproblem.qRule(_tid)),
     _JxW(_subproblem.JxW(_tid)),

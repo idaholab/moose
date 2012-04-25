@@ -25,8 +25,8 @@ VariableWarehouse::~VariableWarehouse()
   for (std::vector<MooseVariableScalar *>::iterator it = _scalar_vars.begin(); it != _scalar_vars.end(); ++it)
     delete *it;
 
-  for (std::map<std::string, std::map<subdomain_id_type, InitialCondition *> >::iterator it = _ics.begin(); it != _ics.end(); ++it)
-    for (std::map<subdomain_id_type, InitialCondition *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
+  for (std::map<std::string, std::map<SubdomainID, InitialCondition *> >::iterator it = _ics.begin(); it != _ics.end(); ++it)
+    for (std::map<SubdomainID, InitialCondition *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
       delete jt->second;
   for (std::map<std::string, ScalarInitialCondition *>::iterator it = _scalar_ics.begin(); it != _scalar_ics.end(); ++it)
     delete it->second;
@@ -48,13 +48,13 @@ VariableWarehouse::add(const std::string & var_name, MooseVariableScalar * var)
 
 
 void
-VariableWarehouse::addBoundaryVar(unsigned int bnd, MooseVariable *var)
+VariableWarehouse::addBoundaryVar(BoundaryID bnd, MooseVariable *var)
 {
   _boundary_vars[bnd].insert(var);
 }
 
 void
-VariableWarehouse::addBoundaryVars(unsigned int bnd, const std::map<std::string, std::vector<MooseVariable *> > & vars)
+VariableWarehouse::addBoundaryVars(BoundaryID bnd, const std::map<std::string, std::vector<MooseVariable *> > & vars)
 {
   for (std::map<std::string, std::vector<MooseVariable *> >::const_iterator it = vars.begin(); it != vars.end(); ++it)
     for (std::vector<MooseVariable *>::const_iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
@@ -86,13 +86,13 @@ VariableWarehouse::scalars()
 }
 
 std::set<MooseVariable *> &
-VariableWarehouse::boundaryVars(unsigned int bnd)
+VariableWarehouse::boundaryVars(BoundaryID bnd)
 {
   return _boundary_vars[bnd];
 }
 
 void
-VariableWarehouse::addInitialCondition(const std::string & var_name, subdomain_id_type blockid, InitialCondition * ic)
+VariableWarehouse::addInitialCondition(const std::string & var_name, SubdomainID blockid, InitialCondition * ic)
 {
   _ics[var_name][blockid] = ic;
 }
@@ -104,12 +104,12 @@ VariableWarehouse::addScalarInitialCondition(const std::string & var_name, Scala
 }
 
 InitialCondition *
-VariableWarehouse::getInitialCondition(const std::string & var_name, subdomain_id_type blockid)
+VariableWarehouse::getInitialCondition(const std::string & var_name, SubdomainID blockid)
 {
-  std::map<std::string, std::map<subdomain_id_type, InitialCondition *> >::iterator it = _ics.find(var_name);
+  std::map<std::string, std::map<SubdomainID, InitialCondition *> >::iterator it = _ics.find(var_name);
   if (it != _ics.end())
   {
-    std::map<subdomain_id_type, InitialCondition *>::iterator jt = it->second.find(blockid);
+    std::map<SubdomainID, InitialCondition *>::iterator jt = it->second.find(blockid);
     if (jt != it->second.end())
       return jt->second;                        // we return the IC that was defined on the specified block (blockid)
 

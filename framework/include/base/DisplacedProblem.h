@@ -72,8 +72,8 @@ public:
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
   virtual bool hasScalarVariable(const std::string & var_name);
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name);
-  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
-  virtual void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
+  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
+  virtual void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains = NULL);
   virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
   virtual void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
 
@@ -84,8 +84,8 @@ public:
   virtual void initAdaptivity();
   virtual void meshChanged();
 
-  virtual void subdomainSetup(unsigned int /*subdomain*/, THREAD_ID /*tid*/) {}
-  virtual void subdomainSetupSide(unsigned int /*subdomain*/, THREAD_ID /*tid*/) {}
+  virtual void subdomainSetup(SubdomainID /*subdomain*/, THREAD_ID /*tid*/) {}
+  virtual void subdomainSetupSide(SubdomainID /*subdomain*/, THREAD_ID /*tid*/) {}
 
   // reinit /////
 
@@ -96,17 +96,17 @@ public:
 
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
-  virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
+  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid);
   virtual void reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid);
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid);
   virtual void reinitScalars(THREAD_ID tid);
 
-  virtual void reinitMaterials(unsigned int /*blk_id*/, THREAD_ID /*tid*/) { }
-  virtual void reinitMaterialsFace(unsigned int /*blk_id*/, unsigned int /*side*/, THREAD_ID /*tid*/) { }
+  virtual void reinitMaterials(SubdomainID /*blk_id*/, THREAD_ID /*tid*/) { }
+  virtual void reinitMaterialsFace(SubdomainID /*blk_id*/, unsigned int /*side*/, THREAD_ID /*tid*/) { }
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & elems);
@@ -196,7 +196,7 @@ public:
    * Will make sure that all necessary elements from boundary_id are ghosted to this processor
    * @param boundary_id Boundary ID
    */
-  virtual void addGhostedBoundary(unsigned int boundary_id);
+  virtual void addGhostedBoundary(BoundaryID boundary_id);
 
 protected:
   Problem & _problem;

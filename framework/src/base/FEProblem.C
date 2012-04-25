@@ -25,7 +25,7 @@
 #include "Moose.h"
 #include "ConstantIC.h"
 #include "FP.h"
-
+#include "Parser.h"
 #include "ElementH1Error.h"
 
 unsigned int FEProblem::_n = 0;
@@ -183,7 +183,7 @@ void FEProblem::initialSetup()
     for (ConstElemRange::const_iterator el = elem_range.begin() ; el != elem_range.end(); ++el)
     {
       const Elem * elem = *el;
-      subdomain_id_type blk_id = elem->subdomain_id();
+      SubdomainID blk_id = elem->subdomain_id();
 
       mooseAssert(_materials[0].hasMaterials(blk_id), "No materials on subdomain block " + elem->id());
       _assembly[0]->reinit(elem);
@@ -489,7 +489,7 @@ FEProblem::addGhostedElem(unsigned int elem_id)
 }
 
 void
-FEProblem::addGhostedBoundary(unsigned int boundary_id)
+FEProblem::addGhostedBoundary(BoundaryID boundary_id)
 {
   _mesh.addGhostedBoundary(boundary_id);
 
@@ -540,7 +540,7 @@ FEProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 }
 
 void
-FEProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
+FEProblem::reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid)
 {
   _assembly[tid]->reinit(elem, side);
 
@@ -574,7 +574,7 @@ FEProblem::reinitNode(const Node * node, THREAD_ID tid)
 }
 
 void
-FEProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
+FEProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid)
 {
   _assembly[tid]->reinit(node);
 
@@ -649,7 +649,7 @@ FEProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 
   _assembly[tid]->prepareNeighbor();
 
-  unsigned int bnd_id = 0;              // some dummy number (it is not really used for anything, right now)
+  BoundaryID bnd_id = 0;              // some dummy number (it is not really used for anything, right now)
   _nl.reinitElemFace(elem, side, bnd_id, tid);
   _aux.reinitElemFace(elem, side, bnd_id, tid);
 
@@ -712,7 +712,7 @@ FEProblem::clearDiracInfo()
 
 
 void
-FEProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
+FEProblem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 {
   if (_materials[tid].hasMaterials(subdomain))
   {
@@ -735,7 +735,7 @@ FEProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
 }
 
 void
-FEProblem::subdomainSetupSide(unsigned int subdomain, THREAD_ID tid)
+FEProblem::subdomainSetupSide(SubdomainID subdomain, THREAD_ID tid)
 {
   if (_materials[tid].hasBoundaryMaterials(subdomain))
   {
@@ -747,7 +747,7 @@ FEProblem::subdomainSetupSide(unsigned int subdomain, THREAD_ID tid)
 }
 
 void
-FEProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
+FEProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
   if (hasVariable(var_name))
     mooseError("Variable with name '" << var_name << "' already exists.");
@@ -843,7 +843,7 @@ FEProblem::addConstraint(const std::string & c_name, const std::string & name, I
 }
 
 void
-FEProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
+FEProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
   _aux.addVariable(var_name, type, 1.0, active_subdomains);
   if (_displaced_problem)
@@ -990,33 +990,34 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
+    std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
     for (unsigned int i=0; i<blocks.size(); ++i)
     {
-      parameters.set<unsigned int>("block_id") = blocks[i];
+      SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
+      parameters.set<SubdomainID>("_block_id") = blk_id;
 
       // volume material
       parameters.set<bool>("_bnd") = false;
       parameters.set<MaterialData *>("_material_data") = _material_data[tid];
       Material *material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
       mooseAssert(material != NULL, "Not a Material object");
-      _materials[tid].addMaterial(blocks[i], material);
+      _materials[tid].addMaterial(blk_id, material);
 
       // boundary material
       parameters.set<bool>("_bnd") = true;
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
       Material *bnd_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
       mooseAssert(bnd_material != NULL, "Not a Material object");
-      _materials[tid].addBoundaryMaterial(blocks[i], bnd_material);
+      _materials[tid].addBoundaryMaterial(blk_id, bnd_material);
 
       // neighbor material
       parameters.set<bool>("_bnd") = true;
       parameters.set<MaterialData *>("_material_data") = _neighbor_material_data[tid];
       Material *neighbor_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
       mooseAssert(neighbor_material != NULL, "Not a Material object");
-      _materials[tid].addNeighborMaterial(blocks[i], neighbor_material);
+      _materials[tid].addNeighborMaterial(blk_id, neighbor_material);
 
-//      _vars[tid].addBoundaryVars(blocks[i], bnd_material->getCoupledVars());
+//      _vars[tid].addBoundaryVars(blk_id, bnd_material->getCoupledVars());
     }
   }
 }
@@ -1028,14 +1029,14 @@ FEProblem::getMaterialsByName(const std::string & name, THREAD_ID tid)
 }
 
 const std::vector<Material*> &
-FEProblem::getMaterials(unsigned int block_id, THREAD_ID tid)
+FEProblem::getMaterials(SubdomainID block_id, THREAD_ID tid)
 {
   mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
   return _materials[tid].getMaterials(block_id);
 }
 
 const std::vector<Material*> &
-FEProblem::getFaceMaterials(unsigned int block_id, THREAD_ID tid)
+FEProblem::getFaceMaterials(SubdomainID block_id, THREAD_ID tid)
 {
   mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
   return _materials[tid].getBoundaryMaterials(block_id);
@@ -1055,7 +1056,7 @@ FEProblem::updateMaterials()
 }
 
 void
-FEProblem::reinitMaterials(unsigned int blk_id, THREAD_ID tid)
+FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid)
 {
   if (_materials[tid].hasMaterials(blk_id))
   {
@@ -1065,7 +1066,7 @@ FEProblem::reinitMaterials(unsigned int blk_id, THREAD_ID tid)
 }
 
 void
-FEProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid)
+FEProblem::reinitMaterialsFace(SubdomainID blk_id, unsigned int side, THREAD_ID tid)
 {
   if (_materials[tid].hasBoundaryMaterials(blk_id))
   {
@@ -1075,7 +1076,7 @@ FEProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID
 }
 
 void
-FEProblem::reinitMaterialsNeighbor(unsigned int blk_id, unsigned int /*side*/, THREAD_ID tid)
+FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int /*side*/, THREAD_ID tid)
 {
   if (_materials[tid].hasNeighborMaterials(blk_id))
   {
@@ -1109,7 +1110,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
     parameters.set<THREAD_ID>("_tid") = tid;
 
     // distinguish between side and the rest of PPs to provide the right material object
-    if(parameters.have_parameter<std::vector<unsigned int> >("boundary"))
+    if(parameters.have_parameter<std::vector<BoundaryName> >("boundary"))
     {
       if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
         _reinit_displaced_face = true;
@@ -1161,11 +1162,11 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
     // init
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      for (std::set<subdomain_id_type>::const_iterator block_it = pps[tid].blocks().begin();
+      for (std::set<SubdomainID>::const_iterator block_it = pps[tid].blocks().begin();
           block_it != pps[tid].blocks().end();
           ++block_it)
       {
-        subdomain_id_type block_id = *block_it;
+        SubdomainID block_id = *block_it;
 
         for (std::vector<Postprocessor *>::const_iterator postprocessor_it = pps[tid].elementPostprocessors(block_id).begin();
             postprocessor_it != pps[tid].elementPostprocessors(block_id).end();
@@ -1173,7 +1174,7 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
           (*postprocessor_it)->initialize();
       }
 
-      for (std::set<unsigned int>::const_iterator boundary_it = pps[tid].boundaryIds().begin();
+      for (std::set<BoundaryID>::const_iterator boundary_it = pps[tid].boundaryIds().begin();
           boundary_it != pps[tid].boundaryIds().end();
           ++boundary_it)
       {
@@ -1192,11 +1193,11 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
 
     // Store element postprocessors values
     std::set<Postprocessor *> already_gathered;
-    for (std::set<subdomain_id_type>::const_iterator block_ids_it = pps[0].blocks().begin();
+    for (std::set<SubdomainID>::const_iterator block_ids_it = pps[0].blocks().begin();
         block_ids_it != pps[0].blocks().end();
         ++block_ids_it)
     {
-      subdomain_id_type block_id = *block_ids_it;
+      SubdomainID block_id = *block_ids_it;
 
       const std::vector<Postprocessor *> & element_postprocessors = pps[0].elementPostprocessors(block_id);
       // Store element postprocessors values
@@ -1224,11 +1225,11 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
 
     // Store side postprocessors values
     already_gathered.clear();
-    for (std::set<unsigned int>::const_iterator boundary_ids_it = pps[0].boundaryIds().begin();
+    for (std::set<BoundaryID>::const_iterator boundary_ids_it = pps[0].boundaryIds().begin();
         boundary_ids_it != pps[0].boundaryIds().end();
         ++boundary_ids_it)
     {
-      unsigned int boundary_id = *boundary_ids_it;
+      BoundaryID boundary_id = *boundary_ids_it;
 
       const std::vector<Postprocessor *> & side_postprocessors = pps[0].sidePostprocessors(boundary_id);
       for (unsigned int i = 0; i < side_postprocessors.size(); ++i)
@@ -1848,7 +1849,7 @@ void
 FEProblem::checkProblemIntegrity()
 {
   // Check for unsatisfied actions
-  const std::set<subdomain_id_type> & mesh_subdomains = _mesh.meshSubdomains();
+  const std::set<SubdomainID> & mesh_subdomains = _mesh.meshSubdomains();
   Moose::action_warehouse.checkUnsatisfiedActions();
 
   // Check kernel coverage of subdomains (blocks) in the mesh
@@ -1861,13 +1862,13 @@ FEProblem::checkProblemIntegrity()
       mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
 #endif
 
-    std::set<subdomain_id_type> local_mesh_subs(mesh_subdomains);
+    std::set<SubdomainID> local_mesh_subs(mesh_subdomains);
     /**
      * If a material is specified for any block in the simulation, then all blocks must
      * have a material specified.
      */
     bool check_material_coverage = false;
-    for (std::set<int>::const_iterator i = _materials[0].blocks().begin(); i != _materials[0].blocks().end(); ++i)
+    for (std::set<SubdomainID>::const_iterator i = _materials[0].blocks().begin(); i != _materials[0].blocks().end(); ++i)
     {
       if (mesh_subdomains.find(*i) == mesh_subdomains.end())
       {
@@ -1884,7 +1885,7 @@ FEProblem::checkProblemIntegrity()
     if (check_material_coverage && !local_mesh_subs.empty())
     {
       std::stringstream extra_subdomain_ids;
-      /// <unsigned int> is necessary to print subdomain_id_types in the statement below
+      /// <unsigned int> is necessary to print SubdomainIDs in the statement below
       std::copy (local_mesh_subs.begin(), local_mesh_subs.end(), std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
 
       mooseError("The following blocks from your input mesh do not contain on active material: " + extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, all blocks must contain a Material object.\n");
@@ -1901,8 +1902,8 @@ void
 FEProblem::checkPPSs()
 {
   // Check pps block coverage
-  std::set<subdomain_id_type> mesh_subdomains = _mesh.meshSubdomains();
-  std::set<subdomain_id_type> pps_blocks;
+  std::set<SubdomainID> mesh_subdomains = _mesh.meshSubdomains();
+  std::set<SubdomainID> pps_blocks;
 
   // gather names of all postprocessors that were defined in the input file
   // and the blocks that they are defined on
@@ -1918,7 +1919,7 @@ FEProblem::checkPPSs()
 
   // See if all referenced blocks are covered
   mesh_subdomains.insert(Moose::ANY_BLOCK_ID);
-  std::set<subdomain_id_type> difference;
+  std::set<SubdomainID> difference;
   std::set_difference(pps_blocks.begin(), pps_blocks.end(), mesh_subdomains.begin(), mesh_subdomains.end(),
                       std::inserter(difference, difference.end()));
 
@@ -1926,7 +1927,7 @@ FEProblem::checkPPSs()
   {
     std::ostringstream oss;
     oss << "One or more Postprocessors is referencing a nonexistent block:\n";
-    for (std::set<subdomain_id_type>::iterator i = difference.begin(); i != difference.end();  ++i)
+    for (std::set<SubdomainID>::iterator i = difference.begin(); i != difference.end();  ++i)
       oss << *i << "\n";
     mooseError(oss.str());
   }

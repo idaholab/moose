@@ -108,18 +108,6 @@ public:
   static void checkFileWritable(const std::string & filename);
 
   /**
-<<<<<<< Updated upstream
-=======
-   * This class returns true or false if the passed in string can be converted
-   * to a number type.  If it can be converted it will be written to
-   * number
-   */
-  template<class NumType>
-  static bool isNumber(const std::string &input, NumType &number);
-
-
-  /**
->>>>>>> Stashed changes
    * Return a reference to the getpot object to extract options from the input file
    */
   const GetPot * getPotHandle() const;

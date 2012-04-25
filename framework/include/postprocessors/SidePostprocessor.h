@@ -34,14 +34,14 @@ class SidePostprocessor :
 public:
   SidePostprocessor(const std::string & name, InputParameters parameters);
 
-  const std::vector<unsigned int> & boundaryIDs() { return _boundary_ids; }
+  const std::vector<std::string> & boundaries() { return _boundaries; }
 
   virtual Real computeIntegral();
 
 protected:
   MooseVariable & _var;
 
-  std::vector<unsigned int> _boundary_ids;
+  std::vector<std::string> _boundaries;
 
   unsigned int _qp;
   const MooseArray< Point > & _q_point;

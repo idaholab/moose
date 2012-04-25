@@ -61,18 +61,18 @@ SubProblem::init()
   _eq.init();
 }
 
-std::vector<unsigned int>
+std::vector<SubdomainID>
 SubProblem::getMaterialPropertyBlocks(const std::string prop_name)
 {
-  std::set<unsigned int> blocks;
-  std::vector<unsigned int> blocks_vec;
+  std::set<SubdomainID> blocks;
+  std::vector<SubdomainID> blocks_vec;
 
   for(std::map<unsigned int, std::set<std::string> >::iterator it = _map_material_props.begin();
       it != _map_material_props.end();
       ++it)
   {
     std::set<std::string> & prop_names = it->second;
-    int block = it->first;
+    SubdomainID block = it->first;
 
     for(std::set<std::string>::iterator name_it = prop_names.begin();
         name_it != prop_names.end();
@@ -86,7 +86,7 @@ SubProblem::getMaterialPropertyBlocks(const std::string prop_name)
   // Copy it out to a vector for convenience
   blocks_vec.reserve(blocks.size());
 
-  for(std::set<unsigned int>::iterator it = blocks.begin();
+  for(std::set<SubdomainID>::iterator it = blocks.begin();
       it != blocks.end();
       ++it)
     blocks_vec.push_back(*it);
@@ -94,14 +94,29 @@ SubProblem::getMaterialPropertyBlocks(const std::string prop_name)
   return blocks_vec;
 }
 
+std::vector<SubdomainName>
+SubProblem::getMaterialPropertyBlockNames(const std::string prop_name)
+{
+  std::vector<SubdomainID> blocks = getMaterialPropertyBlocks(prop_name);
+  std::vector<SubdomainName> block_names(blocks.size());
+
+  for (unsigned int i=0; i<blocks.size(); ++i)
+  {
+    std::stringstream ss;
+    ss << blocks[i];
+    block_names[i] = ss.str();
+  }
+  return block_names;
+}
+
 void
-SubProblem::storeMatPropName(unsigned int block_id, const std::string & name)
+SubProblem::storeMatPropName(SubdomainID block_id, const std::string & name)
 {
   _map_material_props[block_id].insert(name);
 }
 
 void
-SubProblem::checkMatProp(unsigned int block_id, const std::string & name)
+SubProblem::checkMatProp(SubdomainID block_id, const std::string & name)
 {
   std::map<unsigned int, std::set<std::string> >::iterator it;
   if ((it = _map_material_props.find(block_id)) != _map_material_props.end())

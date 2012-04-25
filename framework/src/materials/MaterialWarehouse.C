@@ -42,8 +42,8 @@ MaterialWarehouse::MaterialWarehouse(const MaterialWarehouse &rhs)
 
 MaterialWarehouse::~MaterialWarehouse()
 {
-  for (std::vector<std::map<int, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
-    for (std::map<int, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
+  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+    for (std::map<SubdomainID, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
       for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
         delete (*k);
 }
@@ -52,10 +52,10 @@ MaterialWarehouse::~MaterialWarehouse()
 void
 MaterialWarehouse::initialSetup()
 {
-    for (std::vector<std::map<int, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+    for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
     {
       sortMaterials(**i);
-      for (std::map<int, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
+      for (std::map<SubdomainID, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
         for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
           (*k)->initialSetup();
     }
@@ -64,8 +64,8 @@ MaterialWarehouse::initialSetup()
 void
 MaterialWarehouse::timestepSetup()
 {
-  for (std::vector<std::map<int, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
-    for (std::map<int, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
+  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+    for (std::map<SubdomainID, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
       for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
         (*k)->timestepSetup();
 }
@@ -73,8 +73,8 @@ MaterialWarehouse::timestepSetup()
 void
 MaterialWarehouse::residualSetup()
 {
-  for (std::vector<std::map<int, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
-    for (std::map<int, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
+  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+    for (std::map<SubdomainID, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
       for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
         (*k)->residualSetup();
 }
@@ -82,34 +82,34 @@ MaterialWarehouse::residualSetup()
 void
 MaterialWarehouse::jacobianSetup()
 {
-  for (std::vector<std::map<int, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
-    for (std::map<int, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
+  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+    for (std::map<SubdomainID, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
       for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
         (*k)->jacobianSetup();
 }
 
 bool
-MaterialWarehouse::hasMaterials(unsigned int block_id)
+MaterialWarehouse::hasMaterials(SubdomainID block_id)
 {
   return (_active_materials.find(block_id) != _active_materials.end());
 }
 
 bool
-MaterialWarehouse::hasBoundaryMaterials(unsigned int boundary_id)
+MaterialWarehouse::hasBoundaryMaterials(BoundaryID boundary_id)
 {
   return (_active_boundary_materials.find(boundary_id) != _active_boundary_materials.end());
 }
 
 bool
-MaterialWarehouse::hasNeighborMaterials(unsigned int boundary_id)
+MaterialWarehouse::hasNeighborMaterials(BoundaryID boundary_id)
 {
   return (_active_neighbor_materials.find(boundary_id) != _active_neighbor_materials.end());
 }
 
 std::vector<Material *> &
-MaterialWarehouse::getMaterials(unsigned int block_id)
+MaterialWarehouse::getMaterials(SubdomainID block_id)
 {
-  std::map<int, std::vector<Material *> >::iterator mat_iter = _active_materials.find(block_id);
+  std::map<SubdomainID, std::vector<Material *> >::iterator mat_iter = _active_materials.find(block_id);
   if (unlikely(mat_iter == _active_materials.end()))
   {
     std::stringstream oss;
@@ -120,9 +120,9 @@ MaterialWarehouse::getMaterials(unsigned int block_id)
 }
 
 std::vector<Material *> &
-MaterialWarehouse::getBoundaryMaterials(unsigned int boundary_id)
+MaterialWarehouse::getBoundaryMaterials(BoundaryID boundary_id)
 {
-  std::map<int, std::vector<Material *> >::iterator mat_iter = _active_boundary_materials.find(boundary_id);
+  std::map<SubdomainID, std::vector<Material *> >::iterator mat_iter = _active_boundary_materials.find(boundary_id);
   if (unlikely(mat_iter == _active_boundary_materials.end()))
   {
     std::stringstream oss;
@@ -133,9 +133,9 @@ MaterialWarehouse::getBoundaryMaterials(unsigned int boundary_id)
 }
 
 std::vector<Material *> &
-MaterialWarehouse::getNeighborMaterials(unsigned int boundary_id)
+MaterialWarehouse::getNeighborMaterials(BoundaryID boundary_id)
 {
-  std::map<int, std::vector<Material *> >::iterator mat_iter = _active_neighbor_materials.find(boundary_id);
+  std::map<SubdomainID, std::vector<Material *> >::iterator mat_iter = _active_neighbor_materials.find(boundary_id);
   if (unlikely(mat_iter == _active_neighbor_materials.end()))
   {
     std::stringstream oss;
@@ -147,7 +147,7 @@ MaterialWarehouse::getNeighborMaterials(unsigned int boundary_id)
 
 void MaterialWarehouse::updateMaterialDataState()
 {
-  for (std::map<int, std::vector<Material *> >::iterator it = _active_materials.begin(); it != _active_materials.end(); ++it)
+  for (std::map<SubdomainID, std::vector<Material *> >::iterator it = _active_materials.begin(); it != _active_materials.end(); ++it)
   {
     for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
     {
@@ -155,7 +155,7 @@ void MaterialWarehouse::updateMaterialDataState()
     }
   }
 
-  for (std::map<int, std::vector<Material *> >::iterator it = _active_boundary_materials.begin(); it != _active_boundary_materials.end(); ++it)
+  for (std::map<SubdomainID, std::vector<Material *> >::iterator it = _active_boundary_materials.begin(); it != _active_boundary_materials.end(); ++it)
   {
     for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
     {
@@ -165,21 +165,21 @@ void MaterialWarehouse::updateMaterialDataState()
 }
 
 void
-MaterialWarehouse::addMaterial(int block_id, Material *material)
+MaterialWarehouse::addMaterial(SubdomainID block_id, Material *material)
 {
   _blocks.insert(block_id);
   _active_materials[block_id].push_back(material);
   _mat_by_name[material->name()].push_back(material);
 }
 
-void MaterialWarehouse::addBoundaryMaterial(int block_id, Material *material)
+void MaterialWarehouse::addBoundaryMaterial(SubdomainID block_id, Material *material)
 {
   _blocks.insert(block_id);
   _active_boundary_materials[block_id].push_back(material);
   _mat_by_name[material->name()].push_back(material);
 }
 
-void MaterialWarehouse::addNeighborMaterial(int block_id, Material *material)
+void MaterialWarehouse::addNeighborMaterial(SubdomainID block_id, Material *material)
 {
   _blocks.insert(block_id);
   _active_neighbor_materials[block_id].push_back(material);
@@ -187,9 +187,9 @@ void MaterialWarehouse::addNeighborMaterial(int block_id, Material *material)
 }
 
 void
-MaterialWarehouse::sortMaterials(std::map<int, std::vector<Material *> > & materials_map)
+MaterialWarehouse::sortMaterials(std::map<SubdomainID, std::vector<Material *> > & materials_map)
 {
-  for (std::map<int, std::vector<Material *> >::iterator j = materials_map.begin(); j != materials_map.end(); ++j)
+  for (std::map<SubdomainID, std::vector<Material *> >::iterator j = materials_map.begin(); j != materials_map.end(); ++j)
   {
     DependencyResolver<Material *> resolver;
 

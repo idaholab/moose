@@ -37,7 +37,7 @@ class SubProblem;
 class NearestNodeLocator
 {
 public:
-  NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh, unsigned int boundary1, unsigned int boundary2);
+  NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh, BoundaryID boundary1, BoundaryID boundary2);
 
   ~NearestNodeLocator();
 
@@ -89,8 +89,8 @@ protected:
 public:
   std::map<unsigned int, NearestNodeInfo> _nearest_node_info;
 
-  unsigned int _boundary1;
-  unsigned int _boundary2;
+  BoundaryID _boundary1;
+  BoundaryID _boundary2;
 
   bool _first;
   std::vector<unsigned int> _slave_nodes;

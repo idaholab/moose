@@ -122,7 +122,7 @@ MeshExtruder::extrude(libMesh::MeshBase &dest_mesh)
           // Propogate sides
           for (short int side = 0; side < 4; ++side)
           {
-            std::vector<short int> boundary_ids = _src_mesh.boundary_info->boundary_ids(*el, side);
+            std::vector<BoundaryID> boundary_ids = _src_mesh.boundary_info->boundary_ids(*el, side);
 
             if (!boundary_ids.empty())
               dest_mesh.boundary_info->add_side(elem, Quad4_to_Hex8_side_map[side], boundary_ids);
@@ -149,7 +149,7 @@ MeshExtruder::extrude(libMesh::MeshBase &dest_mesh)
           // Propogate sides
           for (short int side = 0; side < 4; ++side)
           {
-            std::vector<short int> boundary_ids = _src_mesh.boundary_info->boundary_ids(*el, side);
+            std::vector<BoundaryID> boundary_ids = _src_mesh.boundary_info->boundary_ids(*el, side);
 
             if (!boundary_ids.empty())
               dest_mesh.boundary_info->add_side(elem, Tri3_to_Prism6_side_map[side], boundary_ids);
