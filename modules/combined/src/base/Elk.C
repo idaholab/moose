@@ -8,6 +8,7 @@
 #include "HeatConductionModule.h"
 #include "NavierStokesModule.h"
 #include "LinearElasticityModule.h"
+#include "FluidMassEnergyBalanceModule.h"
 #include "MiscModule.h"
 
 void
@@ -19,6 +20,7 @@ Elk::registerObjects()
   HeatConduction::registerObjects();
   NavierStokes::registerObjects();
   LinearElasticity::registerObjects();
+  FluidMassEnergyBalance::registerObjects();
   Misc::registerObjects();
 }
 
