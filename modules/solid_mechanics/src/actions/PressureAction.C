@@ -8,7 +8,7 @@ template<>
 InputParameters validParams<PressureAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<std::vector<unsigned int> >("boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
+  params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
   params.addRequiredParam<std::string>("disp_x", "The x displacement");
   params.addRequiredParam<std::string>("disp_y", "The y displacement");
   params.addParam<std::string>("disp_z", "", "The z displacement");
@@ -19,7 +19,7 @@ InputParameters validParams<PressureAction>()
 
 PressureAction::PressureAction(const std::string & name, InputParameters params) :
   Action(name, params),
-  _boundary(getParam<std::vector<unsigned int> >("boundary")),
+  _boundary(getParam<std::vector<BoundaryName> >("boundary")),
   _disp_x(getParam<std::string>("disp_x")),
   _disp_y(getParam<std::string>("disp_y")),
   _disp_z(getParam<std::string>("disp_z")),
@@ -62,7 +62,7 @@ PressureAction::act()
 
     InputParameters params = Factory::instance()->getValidParams(_kernel_name);
 
-    params.set<std::vector<unsigned int> >("boundary") = _boundary;
+    params.set<std::vector<BoundaryName> >("boundary") = _boundary;
     params.set<Real>("factor") = _factor;
     params.set<std::string>("function") = _function;
 

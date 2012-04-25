@@ -9,8 +9,8 @@ template<>
 InputParameters validParams<ContactAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<unsigned int>("master", "The master surface");
-  params.addRequiredParam<unsigned int>("slave", "The slave surface");
+  params.addRequiredParam<BoundaryName>("master", "The master surface");
+  params.addRequiredParam<BoundaryName>("slave", "The slave surface");
   params.addRequiredParam<std::string>("disp_x", "The x displacement");
   params.addRequiredParam<std::string>("disp_y", "The y displacement");
   params.addParam<std::string>("disp_z", "", "The z displacement");
@@ -24,8 +24,8 @@ InputParameters validParams<ContactAction>()
 
 ContactAction::ContactAction(const std::string & name, InputParameters params) :
   Action(name, params),
-  _master(getParam<unsigned int>("master")),
-  _slave(getParam<unsigned int>("slave")),
+  _master(getParam<BoundaryName>("master")),
+  _slave(getParam<BoundaryName>("slave")),
   _disp_x(getParam<std::string>("disp_x")),
   _disp_y(getParam<std::string>("disp_y")),
   _disp_z(getParam<std::string>("disp_z")),
@@ -75,8 +75,8 @@ ContactAction::act()
 
     params.set<std::string>("model") = _model;
     params.set<std::string>("order") = _order;
-    params.set<unsigned int>("boundary") = _master;
-    params.set<unsigned int>("slave") = _slave;
+    params.set<BoundaryName>("boundary") = _master;
+    params.set<BoundaryName>("slave") = _slave;
     params.set<Real>("penalty") = _penalty;
     params.set<Real>("tension_release") = _tension_release;
     if (isParamValid("tangential_tolerance"))
@@ -120,8 +120,8 @@ ContactAction::act()
 
     params.set<std::string>("model") = _model;
     params.set<std::string>("order") = _order;
-    params.set<unsigned int>("boundary") = _slave;
-    params.set<unsigned int>("master") = _master;
+    params.set<BoundaryName>("boundary") = _slave;
+    params.set<BoundaryName>("master") = _master;
     params.set<Real>("penalty") = _penalty;
     if (isParamValid("tangential_tolerance"))
     {

@@ -16,7 +16,7 @@ public:
   virtual void act();
 
 private:
-  const std::vector<unsigned int> _boundary;
+  const std::vector<std::string> _boundary;
   const std::string _disp_x;
   const std::string _disp_y;
   const std::string _disp_z;

@@ -12,9 +12,9 @@ template<>
 InputParameters validParams<SlaveConstraint>()
 {
   InputParameters params = validParams<DiracKernel>();
-  params.addRequiredParam<unsigned int>("boundary", "The slave boundary");
-  params.addRequiredParam<unsigned int>("master", "The master boundary");
-  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
+  params.addRequiredParam<BoundaryName>("boundary", "The slave boundary");
+  params.addRequiredParam<BoundaryName>("master", "The master boundary");
+  params.addRequiredParam<BoundaryName>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addRequiredCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
@@ -31,7 +31,7 @@ SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters param
   :DiracKernel(name, parameters),
    _component(getParam<unsigned int>("component")),
    _model(contactModel(getParam<std::string>("model"))),
-   _penetration_locator(getPenetrationLocator(getParam<unsigned int>("master"), getParam<unsigned int>("boundary"), Utility::string_to_enum<Order>(getParam<std::string>("order")))),
+   _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("master"), getParam<BoundaryName>("boundary"), Utility::string_to_enum<Order>(getParam<std::string>("order")))),
    _penalty(getParam<Real>("penalty")),
    _residual_copy(_sys.residualGhosted()),
    _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),

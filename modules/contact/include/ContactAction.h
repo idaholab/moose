@@ -16,8 +16,8 @@ public:
   virtual void act();
 
 private:
-  const unsigned int _master;
-  const unsigned int _slave;
+  const std::string _master;
+  const std::string _slave;
   const std::string _disp_x;
   const std::string _disp_y;
   const std::string _disp_z;
