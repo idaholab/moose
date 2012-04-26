@@ -205,6 +205,8 @@ NonlinearSystem::restoreSolutions()
 void
 NonlinearSystem::initialSetup()
 {
+  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+    _constraints[i].initialSetup();
 }
 
 void
@@ -960,6 +962,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
     _bcs[i].residualSetup();
     _dirac_kernels[i].residualSetup();
     if (_doing_dg) _dg_kernels[i].residualSetup();
+    _constraints[i].residualSetup();
   }
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
