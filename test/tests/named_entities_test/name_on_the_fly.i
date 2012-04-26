@@ -2,8 +2,8 @@
   file = three_block.e
 
   # These names will be applied on the fly to the
-  # mesh so they can be used in the input file
-  # In addition they will show up in the input file
+  # mesh so that they can be used in the input file
+  # In addition they will show up in the output file
   block_id = '1 2 3'
   block_name = 'wood steel copper'
 
