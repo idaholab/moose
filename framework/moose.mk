@@ -75,8 +75,12 @@ $(exodiff_APP): $(exodiff_objfiles)
 #
 # Maintenance
 #
-
 clean::
+	@rm -fr $(moose_LIB)
+	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \) -exec rm '{}' \;
+	@rm -fr *.mod
+
+clobber::
 	@rm -fr $(moose_LIB)
 	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
                 -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \) -exec rm '{}' \;

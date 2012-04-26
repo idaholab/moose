@@ -65,6 +65,12 @@ $(target): $(fobjects) $(f90objects) $(objects) $(cobjects) $(mesh_library) $(AD
 clean::
 	@rm -fr $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-* $(exodiff)
 	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
+                -or -name "*.mod" \) -exec rm '{}' \;
+	@rm -fr *.mod
+
+clobber::
+	@rm -fr $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-* $(exodiff)
+	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
                 -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \
                 -or -name "*.mod" \) -exec rm '{}' \;
 	@rm -fr *.mod
