@@ -792,6 +792,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       InputParameters::Parameter<int>  * int_param  = dynamic_cast<InputParameters::Parameter<int>*>(it->second);
       InputParameters::Parameter<unsigned int>  * uint_param  = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it->second);
       InputParameters::Parameter<SubdomainID>  * subdomain_id_param  = dynamic_cast<InputParameters::Parameter<SubdomainID>*>(it->second);
+      InputParameters::Parameter<BoundaryID>  * boundary_id_param  = dynamic_cast<InputParameters::Parameter<BoundaryID>*>(it->second);
       InputParameters::Parameter<bool> * bool_param = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
       InputParameters::Parameter<RealVectorValue> * real_vec_val_param = dynamic_cast<InputParameters::Parameter<RealVectorValue>*>(it->second);
       InputParameters::Parameter<RealTensorValue> * real_tensor_val_param = dynamic_cast<InputParameters::Parameter<RealTensorValue>*>(it->second);
@@ -800,6 +801,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
       InputParameters::Parameter<std::vector<unsigned int>  > * vec_uint_param  = dynamic_cast<InputParameters::Parameter<std::vector<unsigned int> >*>(it->second);
       InputParameters::Parameter<std::vector<SubdomainID>  > * vec_subdomain_id_param  = dynamic_cast<InputParameters::Parameter<std::vector<SubdomainID> >*>(it->second);
+      InputParameters::Parameter<std::vector<BoundaryID>  > * vec_boundary_id_param  = dynamic_cast<InputParameters::Parameter<std::vector<BoundaryID> >*>(it->second);
       InputParameters::Parameter<std::vector<bool>  > * vec_bool_param  = dynamic_cast<InputParameters::Parameter<std::vector<bool> >*>(it->second);
       InputParameters::Parameter<std::vector<std::string> > * vec_string_param = dynamic_cast<InputParameters::Parameter<std::vector<std::string> >*>(it->second);
 
@@ -814,6 +816,8 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setScalarParameter<int>(full_name, it->first, int_param, in_global, global_params_block);
       else if (subdomain_id_param)
         setScalarParameter<SubdomainID>(full_name, it->first, subdomain_id_param, in_global, global_params_block);
+      else if (boundary_id_param)
+        setScalarParameter<BoundaryID>(full_name, it->first, boundary_id_param, in_global, global_params_block);
       else if (uint_param)
         setScalarParameter<unsigned int>(full_name, it->first, uint_param, in_global, global_params_block);
       else if (bool_param)
@@ -833,6 +837,8 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setVectorParameter<unsigned int>(full_name, it->first, vec_uint_param, in_global, global_params_block);
       else if (vec_subdomain_id_param)
         setVectorParameter<SubdomainID>(full_name, it->first, vec_subdomain_id_param, in_global, global_params_block);
+      else if (vec_boundary_id_param)
+        setVectorParameter<BoundaryID>(full_name, it->first, vec_boundary_id_param, in_global, global_params_block);
       else if (vec_bool_param)
         setVectorParameter<bool>(full_name, it->first, vec_bool_param, in_global, global_params_block);
       else if (vec_string_param)

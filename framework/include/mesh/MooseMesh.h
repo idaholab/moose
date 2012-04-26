@@ -143,14 +143,24 @@ public:
   const Node * addUniqueNode(const Point & p, Real tol=1e-6);
 
   /**
-   * This class returns the boundary id from the passed boundary name.
+   * This method returns the boundary id from the passed boundary name.
    */
   BoundaryID getBoundaryID(const BoundaryName & boundary_name) const;
 
   /**
-   * This class returns the subdomain id from the passed subdomain name.
+   * This method returns the subdomain id from the passed subdomain name.
    */
   SubdomainID getSubdomainID(const SubdomainName & subdomain_name) const;
+
+  /**
+   * This method returns a writable reference to a subdomain name based on the id parameter
+   */
+  SubdomainName & subdomainName(SubdomainID subdomain_id) { return _mesh.subdomain_name(subdomain_id); }
+
+  /**
+   * This method returns a writable reference to a boundary name based on the id parameter
+   */
+  BoundaryName & boundaryName(BoundaryID boundary_id);
 
   libMesh::Mesh _mesh;
 

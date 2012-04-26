@@ -445,6 +445,20 @@ MooseMesh::addUniqueNode(const Point & p, Real tol)
   return node;
 }
 
+BoundaryName &
+MooseMesh::boundaryName(BoundaryID boundary_id)
+{
+  std::vector<BoundaryID> side_boundaries;
+  _mesh.boundary_info->build_side_boundary_ids(side_boundaries);
+
+  // We need to figure out if this boundary is a sideset or nodeset
+  if (std::find(side_boundaries.begin(), side_boundaries.end(), boundary_id) != side_boundaries.end())
+    return _mesh.boundary_info->sideset_name(boundary_id);
+  else
+    return _mesh.boundary_info->nodeset_name(boundary_id);
+}
+
+
 
 BoundaryID
 MooseMesh::getBoundaryID(const BoundaryName & boundary_name) const
@@ -470,3 +484,4 @@ MooseMesh::getSubdomainID(const SubdomainName & subdomain_name) const
 
   return id;
 }
+

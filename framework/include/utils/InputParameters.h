@@ -269,6 +269,14 @@ namespace libMesh
 {
   template<>
   inline
+  void InputParameters::Parameter<std::vector<short int> >::print (std::ostream& os) const
+  {
+    for (unsigned int i=0; i<_value.size(); i++)
+      os << _value[i] << " ";
+  }
+
+  template<>
+  inline
   void InputParameters::Parameter<std::vector<int> >::print (std::ostream& os) const
   {
     for (unsigned int i=0; i<_value.size(); i++)

@@ -137,3 +137,15 @@ override_name_variable_test = {
 
 pps_bad_block_test = { INPUT : 'pps_bad_block_test.i',
                        EXPECT_ERR : "One or more Postprocessors is referencing a nonexistent block" }
+
+dyanmic_check_name_block_test = { INPUT : 'check_dynamic_name_block.i',
+                                  EXPECT_ERR : "The following dynamic block name is not unique: \w+" }
+
+dyanmic_check_name_boundary_test = { INPUT : 'check_dynamic_name_boundary.i',
+                                     EXPECT_ERR : "The following dynamic boundary name is not unique: \w+" }
+
+dyanmic_check_name_block_mismatch_test = { INPUT : 'check_dynamic_name_block_mismatch.i',
+                                           EXPECT_ERR : "You must supply the same number of block ids and names parameters" }
+
+dyanmic_check_name_boundary_mismatch_test = { INPUT : 'check_dynamic_name_boundary_mismatch.i',
+                                              EXPECT_ERR : "You must supply the same number of boundary ids and names parameters" }

@@ -32,7 +32,12 @@ InputParameters validParams<SetupMeshAction>()
   params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation. Available options: linear, centroid");
   params.addParam<std::string>("centroid_partitioner_direction", "Specifies the sort direction if using the centroid partitioner. Available options: x, y, z, radial");
   params.addParam<bool>("construct_side_list_from_node_list", false, "If true, construct side lists from the nodesets in the mesh (i.e. if every node on a give side is in a nodeset then add that side to a sideset");
-//  params.addParam<unsigned int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
+
+  params.addParam<std::vector<SubdomainID> >("block_id", "IDs of the block id/name pairs");
+  params.addParam<std::vector<SubdomainName> >("block_name", "Names of the block id/name pairs (must correspond with \"block_id\"");
+
+  params.addParam<std::vector<BoundaryID> >("boundary_id", "IDs of the boundary id/name pairs");
+  params.addParam<std::vector<BoundaryName> >("boundary_name", "Names of the boundary id/name pairs (must correspond with \"boundary_id\"");
   return params;
 }
 
@@ -40,7 +45,6 @@ SetupMeshAction::SetupMeshAction(const std::string & name, InputParameters param
     Action(name, params)
 {
 }
-
 
 void
 SetupMeshAction::setupMesh(MooseMesh *mesh)
@@ -79,27 +83,46 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   if (getParam<bool>("construct_side_list_from_node_list"))
     mesh->_mesh.boundary_info->build_side_list_from_node_list();
 
-// MOVED TO InitialRefinementAction
-//
-// #ifdef LIBMESH_ENABLE_AMR
-//   unsigned int level = getParam<unsigned int>("uniform_refine");
-//   if (level)
-//   {
-//     Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
-//     // uniformly refine mesh
-//     mesh->uniformlyRefine(level);
-//     Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
-//   }
-// #endif //LIBMESH_ENABLE_AMR
-
-  // FIXME: autosize problem
-  //  MeshRefinement mesh_refinement(*mesh);
-  //  if (!autoResizeProblem(mesh, mesh_refinement))
-  //    mesh_refinement.uniformly_refine(getParam<int>("uniform_refine"));
-
   Moose::setup_perf_log.push("Initial meshChanged()","Setup");
   mesh->meshChanged();
   Moose::setup_perf_log.pop("Initial meshChanged()","Setup");
+
+  // Add names to the mesh
+  if (_pars.isParamValid("block_id") && _pars.isParamValid("block_name"))
+  {
+    std::vector<SubdomainID> ids = getParam<std::vector<SubdomainID> >("block_id");
+    std::vector<SubdomainName> names = getParam<std::vector<SubdomainName> >("block_name");
+    std::set<SubdomainName> seen_it;
+
+    if (ids.size() != names.size())
+      mooseError("You must supply the same number of block ids and names parameters");
+
+    for (unsigned int i=0; i<ids.size(); ++i)
+    {
+      if (seen_it.find(names[i]) != seen_it.end())
+        mooseError("The following dynamic block name is not unique: " + names[i]);
+      seen_it.insert(names[i]);
+      mesh->subdomainName(ids[i]) = names[i];
+    }
+
+  }
+  if (_pars.isParamValid("boundary_id") && _pars.isParamValid("boundary_name"))
+  {
+    std::vector<BoundaryID> ids = getParam<std::vector<BoundaryID> >("boundary_id");
+    std::vector<BoundaryName> names = getParam<std::vector<BoundaryName> >("boundary_name");
+    std::set<SubdomainName> seen_it;
+
+    if (ids.size() != names.size())
+      mooseError("You must supply the same number of boundary ids and names parameters");
+
+    for (unsigned int i=0; i<ids.size(); ++i)
+    {
+      if (seen_it.find(names[i]) != seen_it.end())
+        mooseError("The following dynamic boundary name is not unique: " + names[i]);
+      mesh->boundaryName(ids[i]) = names[i];
+      seen_it.insert(names[i]);
+    }
+  }
 
   mesh->printInfo();
 }
@@ -126,4 +149,3 @@ SetupMeshAction::act()
     Moose::setup_perf_log.pop("Create FEProblem","Setup");
   }
 }
-
