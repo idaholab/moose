@@ -27,7 +27,6 @@
 // problems
 #include "FEProblem.h"
 #include "OutputProblem.h"
-#include "CoupledProblem.h"
 // kernels
 #include "TimeDerivative.h"
 #include "Diffusion.h"
@@ -85,7 +84,6 @@
 // executioners
 #include "Steady.h"
 #include "Transient.h"
-#include "LooseCoupling.h"
 #include "SolutionTimeAdaptive.h"
 #include "DT2Transient.h"
 
@@ -208,7 +206,6 @@ registerObjects()
   // problems
   registerProblem(FEProblem);
   registerProblem(OutputProblem);
-  registerProblem(CoupledProblem);
 
   // kernels
   registerKernel(TimeDerivative);
@@ -264,7 +261,6 @@ registerObjects()
   // executioners
   registerExecutioner(Steady);
   registerExecutioner(Transient);
-  registerExecutioner(LooseCoupling);
   registerExecutioner(SolutionTimeAdaptive);
   registerExecutioner(DT2Transient);
   // functions

@@ -20,7 +20,6 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "FEProblem.h"
-#include "CoupledProblem.h"
 #include "ActionWarehouse.h"
 
 template<>
