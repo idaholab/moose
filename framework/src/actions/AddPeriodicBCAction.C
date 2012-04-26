@@ -134,8 +134,8 @@ AddPeriodicBCAction::act()
 
       ipb = new FunctionPeriodicBoundary(*_problem, inv_fn_names);
       // these are switched, because we are forming the inverse translation
-      ipb->myboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("primary"));
-      ipb->pairedboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("secondary"));
+      ipb->myboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("secondary"));
+      ipb->pairedboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("primary"));
       setPeriodicVars(*ipb, getParam<std::vector<std::string> >("variable"));
     }
     else
