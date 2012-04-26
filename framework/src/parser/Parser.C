@@ -51,7 +51,7 @@ Parser::Parser(Syntax & syntax):
   _action_wh(Moose::action_warehouse),
   _syntax_formatter(NULL),
   _getpot_initialized(false),
-  _enable_unused_check(OFF),
+  _enable_unused_check(WARN_UNUSED),
   _sort_alpha(false)
 {
   initOptions();
@@ -72,7 +72,7 @@ Parser::Parser(Syntax & syntax, ActionWarehouse & action_wh) :
     _action_wh(action_wh),
     _syntax_formatter(NULL),
     _getpot_initialized(false),
-    _enable_unused_check(OFF),
+    _enable_unused_check(WARN_UNUSED),
     _sort_alpha(false)
 {
   initOptions();
@@ -699,6 +699,13 @@ Parser::setCheckUnusedFlag(bool warn_is_error)
 {
   _enable_unused_check = warn_is_error ? ERROR_UNUSED : WARN_UNUSED;
 }
+
+void
+Parser::disableCheckUnusedFlag()
+{
+  _enable_unused_check = OFF;
+}
+
 
 void
 Parser::setSortAlpha(bool sort_alpha_flag)

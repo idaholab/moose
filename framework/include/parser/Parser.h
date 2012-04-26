@@ -119,6 +119,11 @@ public:
   void setCheckUnusedFlag(bool warn_is_error=false);
 
   /**
+   * Removes warnings and error checks for unrecognized variables in the input file
+   */
+  void disableCheckUnusedFlag();
+
+  /**
    * Set/Get a flag so that synax dumped from the system is in alphabetical order
    */
   void setSortAlpha(bool sort_alpha_flag);
