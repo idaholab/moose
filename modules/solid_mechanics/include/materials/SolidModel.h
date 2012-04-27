@@ -57,7 +57,7 @@ protected:
   VariableValue & _temperature_old;
   const Real _alpha;
 
-  std::vector<VolumetricModel*> _volumetric_models;
+  std::map<SubdomainID, std::vector<VolumetricModel*> > _volumetric_models;
 
   MaterialProperty<SymmTensor> & _stress;
 private:

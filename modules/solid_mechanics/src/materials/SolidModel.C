@@ -57,7 +57,6 @@ SolidModel::SolidModel( const std::string & name,
    _temperature(_has_temp ? coupledValue("temp") : _zero),
    _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
    _alpha(getParam<Real>("thermal_expansion")),
-   _volumetric_models(0),
    _stress(declareProperty<SymmTensor>("stress")),
    _stress_old_prop(declarePropertyOld<SymmTensor>("stress")),
    _stress_old(0),
@@ -251,6 +250,8 @@ SolidModel::elasticityTensor( SymmElasticityTensor * e )
 void
 SolidModel::modifyStrainIncrement()
 {
+  SubdomainID current_block = _current_elem->subdomain_id();
+  
   if ( _has_temp && _t_step != 0 )
   {
     const Real tStrain( _alpha * (_temperature[_qp] - _temperature_old[_qp]) );
@@ -260,9 +261,9 @@ SolidModel::modifyStrainIncrement()
     _d_strain_dT.addDiag( -_alpha );
   }
 
-  for (unsigned int i(0); i < _volumetric_models.size(); ++i)
+  for (unsigned int i(0); i < _volumetric_models[current_block].size(); ++i)
   {
-    _volumetric_models[i]->modifyStrain(_qp, _strain_increment, _d_strain_dT);
+    _volumetric_models[current_block][i]->modifyStrain(_qp, _strain_increment, _d_strain_dT);
   }
 }
 
@@ -380,23 +381,31 @@ void
 SolidModel::initialSetup()
 {
   // Load in the volumetric models
-   const std::vector<Material*> * mats_p;
-   if(_bnd)
-   {
-     mats_p = &_problem.getFaceMaterials( _block_id, _tid );
-   }
-   else
-   {
-     mats_p = &_problem.getMaterials( _block_id, _tid );
-   }
 
-  const std::vector<Material*> & mats = *mats_p;
-  for (unsigned int i(0); i < mats.size(); ++i)
+  for(unsigned int i=0; i<_block_id.size(); i++)
   {
-    VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));
-    if (vm)
+    std::cout<<"Working on block: "<<_block_id[i]<<std::endl;
+    
+    const std::vector<Material*> * mats_p;
+    if(_bnd)
     {
-      _volumetric_models.push_back( vm );
+      mats_p = &_problem.getFaceMaterials( _block_id[i], _tid );
+    }
+    else
+    {
+      mats_p = &_problem.getMaterials( _block_id[i], _tid );
+    }
+    
+    const std::vector<Material*> & mats = *mats_p;
+    for (unsigned int j=0; j < mats.size(); ++j)
+    {
+      VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[j]));
+      if (vm)
+      {
+        std::cout<<"Adding VM! For block: "<<_block_id[i]<<std::endl;
+        
+        _volumetric_models[_block_id[i]].push_back( vm );
+      }
     }
   }
 }
