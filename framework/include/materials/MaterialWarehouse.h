@@ -53,9 +53,9 @@ public:
 
   void updateMaterialDataState();
 
-  void addMaterial(SubdomainID block_id, Material *material);
-  void addBoundaryMaterial(SubdomainID block_id, Material *material);
-  void addNeighborMaterial(SubdomainID block_id, Material *material);
+  void addMaterial(std::vector<SubdomainID> blocks, Material *material);
+  void addBoundaryMaterial(std::vector<SubdomainID> blocks, Material *material);
+  void addNeighborMaterial(std::vector<SubdomainID> blocks, Material *material);
 
   /**
    * Get the list of blocks that materials are defined on
@@ -79,6 +79,9 @@ protected:
 
   /// list of materials by name
   std::map<std::string, std::vector<Material *> > _mat_by_name;
+
+  /// All of the material objects this warehouse knows about
+  std::vector<Material *> _mats;
 
 private:
   /**

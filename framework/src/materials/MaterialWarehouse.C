@@ -42,50 +42,41 @@ MaterialWarehouse::MaterialWarehouse(const MaterialWarehouse &rhs)
 
 MaterialWarehouse::~MaterialWarehouse()
 {
-  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
-    for (std::map<SubdomainID, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
-      for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-        delete (*k);
+  for(unsigned int i=0; i<_mats.size(); i++)
+    delete _mats[i];
 }
 
 
 void
 MaterialWarehouse::initialSetup()
 {
-    for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
-    {
-      sortMaterials(**i);
-      for (std::map<SubdomainID, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
-        for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-          (*k)->initialSetup();
-    }
+  // Sort the materials in each subdomain to get correct execution order
+  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+    sortMaterials(**i);
+
+  for(unsigned int i=0; i<_mats.size(); i++)
+    _mats[i]->initialSetup();
 }
 
 void
 MaterialWarehouse::timestepSetup()
 {
-  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
-    for (std::map<SubdomainID, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
-      for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-        (*k)->timestepSetup();
+  for(unsigned int i=0; i<_mats.size(); i++)
+    _mats[i]->timestepSetup();
 }
 
 void
 MaterialWarehouse::residualSetup()
 {
-  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
-    for (std::map<SubdomainID, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
-      for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-        (*k)->residualSetup();
+  for(unsigned int i=0; i<_mats.size(); i++)
+    _mats[i]->residualSetup();
 }
 
 void
 MaterialWarehouse::jacobianSetup()
 {
-  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
-    for (std::map<SubdomainID, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
-      for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-        (*k)->jacobianSetup();
+  for(unsigned int i=0; i<_mats.size(); i++)
+    _mats[i]->jacobianSetup();
 }
 
 bool
@@ -165,25 +156,42 @@ void MaterialWarehouse::updateMaterialDataState()
 }
 
 void
-MaterialWarehouse::addMaterial(SubdomainID block_id, Material *material)
+MaterialWarehouse::addMaterial(std::vector<SubdomainID> blocks, Material *material)
 {
-  _blocks.insert(block_id);
-  _active_materials[block_id].push_back(material);
-  _mat_by_name[material->name()].push_back(material);
+  _mats.push_back(material);
+
+  for (unsigned int i=0; i<blocks.size(); ++i)
+  {
+    SubdomainID blk_id = blocks[i];
+    _active_materials[blk_id].push_back(material);
+    _mat_by_name[material->name()].push_back(material);
+  }
 }
 
-void MaterialWarehouse::addBoundaryMaterial(SubdomainID block_id, Material *material)
+void MaterialWarehouse::addBoundaryMaterial(std::vector<SubdomainID> blocks, Material *material)
 {
-  _blocks.insert(block_id);
-  _active_boundary_materials[block_id].push_back(material);
-  _mat_by_name[material->name()].push_back(material);
+  _mats.push_back(material);
+
+  for (unsigned int i=0; i<blocks.size(); ++i)
+  {
+    SubdomainID blk_id = blocks[i];
+    _blocks.insert(blk_id);
+    _active_boundary_materials[blk_id].push_back(material);
+    _mat_by_name[material->name()].push_back(material);
+  }
 }
 
-void MaterialWarehouse::addNeighborMaterial(SubdomainID block_id, Material *material)
+void MaterialWarehouse::addNeighborMaterial(std::vector<SubdomainID> blocks, Material *material)
 {
-  _blocks.insert(block_id);
-  _active_neighbor_materials[block_id].push_back(material);
-  _mat_by_name[material->name()].push_back(material);
+  _mats.push_back(material);
+
+  for (unsigned int i=0; i<blocks.size(); ++i)
+  {
+    SubdomainID blk_id = blocks[i];
+    _blocks.insert(blk_id);
+    _active_neighbor_materials[blk_id].push_back(material);
+    _mat_by_name[material->name()].push_back(material);
+  }
 }
 
 void

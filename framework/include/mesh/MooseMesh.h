@@ -143,14 +143,28 @@ public:
   const Node * addUniqueNode(const Point & p, Real tol=1e-6);
 
   /**
-   * This method returns the boundary id from the passed boundary name.
+   * Get the associated BoundaryID for the boundary name.
+   *
+   * @return param boundary_name The name of the boundary.
+   * @return the boundary id from the passed boundary name.
    */
   BoundaryID getBoundaryID(const BoundaryName & boundary_name) const;
 
   /**
-   * This method returns the subdomain id from the passed subdomain name.
+   * Get the associated subdomain ID for the subdomain name.
+   *
+   * @param subdomain_name The name of the subdomain
+   * @return The subdomain id from the passed subdomain name.
    */
   SubdomainID getSubdomainID(const SubdomainName & subdomain_name) const;
+
+  /**
+   * Get the associated subdomainIDs for the subdomain names that are passed in.
+   *
+   * @param subdomain_name The names of the subdomains
+   * @return The subdomain ids from the passed subdomain name.
+   */
+  std::vector<SubdomainID> getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) const;
 
   /**
    * This method returns a writable reference to a subdomain name based on the id parameter

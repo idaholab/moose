@@ -56,7 +56,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
     _coord_sys(_subproblem.coordSystem()),
-    _block_id(parameters.get<SubdomainID>("_block_id")),
+    _block_id(_mesh.getSubdomainIDs(parameters.get<std::vector<SubdomainName> >("block"))),
     _real_zero(_problem._real_zero[_tid]),
     _zero(_problem._zero[_tid]),
     _grad_zero(_problem._grad_zero[_tid]),
@@ -91,12 +91,6 @@ Material::~Material()
 
   //std::for_each(_qp_prev.begin(), _qp_prev.end(), DeleteFunctor());
   //std::for_each(_qp_curr.begin(), _qp_curr.end(), DeleteFunctor());
-}
-
-SubdomainID
-Material::blockID()
-{
-  return _block_id;
 }
 
 void

@@ -49,7 +49,7 @@
 []
 
 [Materials]
-  # order is switched intentionally, so we won't get luck and dep-resolver has to do its job
+  # order is switched intentionally, so we won't get lucky and dep-resolver has to do its job
   [./mat2]
     type = CoupledMaterial
     block = 0

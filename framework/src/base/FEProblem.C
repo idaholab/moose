@@ -986,39 +986,37 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
   parameters.set<Problem *>("_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<SubProblem *>("_subproblem_displaced") = _displaced_problem;
+
+  std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
+  std::vector<SubdomainID> block_ids(blocks.size());
+
+  for (unsigned int i=0; i<blocks.size(); ++i)
+    block_ids[i] = _mesh.getSubdomainID(blocks[i]);
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
-    for (unsigned int i=0; i<blocks.size(); ++i)
-    {
-      SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
-      parameters.set<SubdomainID>("_block_id") = blk_id;
+    // volume material
+    parameters.set<bool>("_bnd") = false;
+    parameters.set<MaterialData *>("_material_data") = _material_data[tid];
+    Material *volume_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+    mooseAssert(volume_material != NULL, "Not a Material object");
+    _materials[tid].addMaterial(block_ids, volume_material);
 
-      // volume material
-      parameters.set<bool>("_bnd") = false;
-      parameters.set<MaterialData *>("_material_data") = _material_data[tid];
-      Material *material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
-      mooseAssert(material != NULL, "Not a Material object");
-      _materials[tid].addMaterial(blk_id, material);
+    // boundary material
+    parameters.set<bool>("_bnd") = true;
+    parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
+    Material *bnd_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+    mooseAssert(bnd_material != NULL, "Not a Material object");
+    _materials[tid].addBoundaryMaterial(block_ids, bnd_material);
 
-      // boundary material
-      parameters.set<bool>("_bnd") = true;
-      parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-      Material *bnd_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
-      mooseAssert(bnd_material != NULL, "Not a Material object");
-      _materials[tid].addBoundaryMaterial(blk_id, bnd_material);
-
-      // neighbor material
-      parameters.set<bool>("_bnd") = true;
-      parameters.set<MaterialData *>("_material_data") = _neighbor_material_data[tid];
-      Material *neighbor_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
-      mooseAssert(neighbor_material != NULL, "Not a Material object");
-      _materials[tid].addNeighborMaterial(blk_id, neighbor_material);
-
-//      _vars[tid].addBoundaryVars(blk_id, bnd_material->getCoupledVars());
-    }
+    // neighbor material
+    parameters.set<bool>("_bnd") = true;
+    parameters.set<MaterialData *>("_material_data") = _neighbor_material_data[tid];
+    Material *neighbor_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+    mooseAssert(neighbor_material != NULL, "Not a Material object");
+    _materials[tid].addNeighborMaterial(block_ids, neighbor_material);
   }
 }
 

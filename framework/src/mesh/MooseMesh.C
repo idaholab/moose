@@ -485,3 +485,21 @@ MooseMesh::getSubdomainID(const SubdomainName & subdomain_name) const
   return id;
 }
 
+std::vector<SubdomainID>
+MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) const
+{
+  std::vector<SubdomainID> ids(subdomain_name.size());
+
+  for(unsigned int i=0; i<subdomain_name.size(); i++)
+  {
+    SubdomainID id;
+    std::istringstream ss(subdomain_name[i]);
+
+    if (!(ss >> id))
+      id = _mesh.get_id_by_name(subdomain_name[i]);
+
+    ids[i] = id;
+  }
+
+  return ids;
+}

@@ -71,13 +71,6 @@ public:
   virtual ~Material();
 
   /**
-   * Block ID the Material is active on.
-   *
-   * @return The block ID.
-   */
-  SubdomainID blockID();
-
-  /**
    * This function is called at the beginning of each timestep
    * for each active material block
    */
@@ -173,7 +166,9 @@ protected:
   /**
    * Block ID this material is active on.
    */
-  SubdomainID _block_id;
+  std::vector<SubdomainID> _block_id;
+
+
 
   /**
    * Declare the Real valued property named "name".
@@ -183,10 +178,7 @@ protected:
   template<typename T>
   MaterialProperty<T> & declareProperty(const std::string & prop_name)
   {
-    _supplied_props.insert(prop_name);
-    _subproblem.storeMatPropName(_block_id, prop_name);
-    if (_displaced_subproblem != NULL)
-      _displaced_subproblem->storeMatPropName(_block_id, prop_name);
+    registerPropName(prop_name);
     return _material_data.declareProperty<T>(prop_name);
   }
 
@@ -198,10 +190,7 @@ protected:
   template<typename T>
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name)
   {
-    _supplied_props.insert(prop_name);
-    _subproblem.storeMatPropName(_block_id, prop_name);
-    if (_displaced_subproblem != NULL)
-      _displaced_subproblem->storeMatPropName(_block_id, prop_name);
+    registerPropName(prop_name);
     return _material_data.declarePropertyOld<T>(prop_name);
   }
 
@@ -213,10 +202,7 @@ protected:
   template<typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name)
   {
-    _supplied_props.insert(prop_name);
-    _subproblem.storeMatPropName(_block_id, prop_name);
-    if (_displaced_subproblem != NULL)
-      _displaced_subproblem->storeMatPropName(_block_id, prop_name);
+    registerPropName(prop_name);
     return _material_data.declarePropertyOlder<T>(prop_name);
   }
 
@@ -228,6 +214,21 @@ protected:
   MooseArray<Real> & _zero;
   MooseArray<RealGradient> & _grad_zero;
   MooseArray<RealTensor> & _second_zero;
+
+private:
+  /**
+   * Small helper function to call storeMatPropName
+   */
+  void registerPropName(std::string prop_name)
+  {
+    for(unsigned int i=0; i<_block_id.size(); i++)
+    {
+      _supplied_props.insert(prop_name);
+      _subproblem.storeMatPropName(_block_id[i], prop_name);
+      if (_displaced_subproblem != NULL)
+        _displaced_subproblem->storeMatPropName(_block_id[i], prop_name);
+    }
+  }
 };
 
 
