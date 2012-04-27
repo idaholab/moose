@@ -1396,31 +1396,33 @@ FEProblem::outputPostprocessors(bool force/* = false*/)
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
     addPPSValuesToTable(types[i]);
 
-  // short cut if there is nothing to output
-  if (_pps_output_table_file.empty() || _pps_output_table_screen.empty())
-    return;
-
-  if (force || (_postprocessor_screen_output && (_t_step % out().screen_interval() == 0)))
+  if (!_pps_output_table_screen.empty())
   {
-    std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
-    _pps_output_table_screen.printTable(std::cout, _pps_output_table_max_rows);
-    std::cout<<std::endl;
+    if (force || (_postprocessor_screen_output && (_t_step % out().screen_interval() == 0)))
+    {
+      std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
+      _pps_output_table_screen.printTable(std::cout, _pps_output_table_max_rows);
+      std::cout<<std::endl;
+    }
   }
 
-  if (force || (_t_step % out().interval() == 0))
+  if (!_pps_output_table_file.empty())
   {
-    // FIXME: if exodus output is enabled?
-    _out.outputPps(_pps_output_table_file);
-    if (_displaced_problem)
-      _displaced_problem->outputPps(_pps_output_table_file);
-    if (_out_problem)
-      _out_problem->outputPps(_pps_output_table_file);
+    if (force || (_t_step % out().interval() == 0))
+    {
+      // FIXME: if exodus output is enabled?
+      _out.outputPps(_pps_output_table_file);
+      if (_displaced_problem)
+        _displaced_problem->outputPps(_pps_output_table_file);
+      if (_out_problem)
+        _out_problem->outputPps(_pps_output_table_file);
 
-    if (_postprocessor_csv_output)
-      _pps_output_table_file.printCSV(_out.fileBase() + ".csv", out().screen_interval());
+      if (_postprocessor_csv_output)
+        _pps_output_table_file.printCSV(_out.fileBase() + ".csv", out().screen_interval());
 
-    if (_postprocessor_gnuplot_output)
-      _pps_output_table_file.makeGnuplot(_out.fileBase(), _gnuplot_format);
+      if (_postprocessor_gnuplot_output)
+        _pps_output_table_file.makeGnuplot(_out.fileBase(), _gnuplot_format);
+    }
   }
 }
 
