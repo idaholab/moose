@@ -36,7 +36,7 @@ Problem::Problem(const std::string & name, InputParameters parameters):
   _second_zero.resize(n_threads);
 
   _functions.resize(n_threads);
-  _user_data.resize(n_threads);
+  _user_objects.resize(n_threads);
 }
 
 Problem::~Problem()
@@ -82,25 +82,25 @@ Problem::getFunction(const std::string & name, THREAD_ID tid)
 }
 
 void
-Problem::addUserData(const std::string & type, const std::string & name, InputParameters parameters)
+Problem::addUserObject(const std::string & type, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    UserData * ud = static_cast<UserData *>(Factory::instance()->create(type, name, parameters));
-    _user_data[tid].addUserData(name, ud);
+    UserObject * uo = static_cast<UserObject *>(Factory::instance()->create(type, name, parameters));
+    _user_objects[tid].addUserObject(name, uo);
   }
 }
 
-const UserData &
-Problem::getUserData(const std::string & name, THREAD_ID tid)
+const UserObject &
+Problem::getUserObject(const std::string & name, THREAD_ID tid)
 {
-  UserData * user_data = _user_data[tid].getUserDataByName(name);
-  if (user_data == NULL)
+  UserObject * user_object = _user_objects[tid].getUserObjectByName(name);
+  if (user_object == NULL)
   {
-    mooseError("Unable to find user data object with name '" + name + "'");
+    mooseError("Unable to find user object with name '" + name + "'");
   }
-  return *user_data;
+  return *user_object;
 }
 

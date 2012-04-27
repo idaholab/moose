@@ -42,7 +42,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     ScalarCoupleable(parameters),
     MooseVariableInterface(parameters, false),
     FunctionInterface(parameters),
-    UserDataInterface(parameters),
+    UserObjectInterface(parameters),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
     GeometricSearchInterface(parameters),

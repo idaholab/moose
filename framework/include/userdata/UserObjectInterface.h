@@ -12,42 +12,42 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef USERDATAINTERFACE_H
-#define USERDATAINTERFACE_H
+#ifndef USEROBJECTINTERFACE_H
+#define USEROBJECTINTERFACE_H
 
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
 
 class Problem;
-class UserData;
+class UserObject;
 
 /**
- * Interface for objects that need to use user-data objects
+ * Interface for objects that need to use user objects
  */
-class UserDataInterface
+class UserObjectInterface
 {
 public:
   /**
    * @param params The parameters used by the object being instantiated. This
-   *        class needs them so it can get the user data object named in the input file,
-   *        but the object calling getUserData only needs to use the name on the
-   *        left hand side of the statement "user_data = user_data_name"
+   *        class needs them so it can get the user object named in the input file,
+   *        but the object calling getUserObject only needs to use the name on the
+   *        left hand side of the statement "user_object = user_object_name"
    */
-  UserDataInterface(InputParameters & params);
+  UserObjectInterface(InputParameters & params);
 
   /**
-   * Get an user data object with a given name
-   * @param name The name of the parameter key of the user data object to retrieve
-   * @return The user data object with name associated with the parameter 'name'
+   * Get an user object with a given name
+   * @param name The name of the parameter key of the user object to retrieve
+   * @return The user object with name associated with the parameter 'name'
    */
-  const UserData & getUserData(const std::string & name);
+  const UserObject & getUserObject(const std::string & name);
 
   /**
-   * Get a user data object with a given name
-   * @param name The name of the user data object to retrieve
-   * @return The user data object with name 'name'
+   * Get a user object with a given name
+   * @param name The name of the user object to retrieve
+   * @return The user object with name 'name'
    */
-  const UserData & getUserDataByName(const std::string & name);
+  const UserObject & getUserObjectByName(const std::string & name);
 
 private:
   Problem & _udi_problem;
@@ -57,4 +57,4 @@ private:
   InputParameters _udi_params;
 };
 
-#endif //USERDATAFACE_H
+#endif //USEROBJECTFACE_H

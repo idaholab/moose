@@ -12,20 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "UserData.h"
+#ifndef USEROBJECT_H
+#define USEROBJECT_H
+
+#include "MooseObject.h"
+
+class UserObject;
 
 template<>
-InputParameters validParams<UserData>()
-{
-  InputParameters params = validParams<MooseObject>();
-  return params;
-}
+InputParameters validParams<UserObject>();
 
-UserData::UserData(const std::string & name, InputParameters params) :
-    MooseObject(name, params)
-{
-}
 
-UserData::~UserData()
+/**
+ * Base class for user-specific data
+ */
+class UserObject : public MooseObject
 {
-}
+public:
+  UserObject(const std::string & name, InputParameters params);
+  virtual ~UserObject();
+
+  /**
+   * Called before deleting the object. Free memory allocated by your derived classes, etc.
+   */
+  virtual void destroy() = 0;
+};
+
+#endif /* USEROBJECT_H */

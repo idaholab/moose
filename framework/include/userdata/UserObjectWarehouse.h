@@ -12,32 +12,41 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "UserDataWarehouse.h"
-#include "Moose.h"
+#ifndef USEROBJECTWAREHOUSE_H
+#define USEROBJECTWAREHOUSE_H
 
+#include <vector>
+#include <map>
 
-UserDataWarehouse::UserDataWarehouse()
+#include "UserObject.h"
+
+/**
+ * Warehouse for storing user objects.
+ */
+class UserObjectWarehouse
 {
-}
+public:
+  UserObjectWarehouse();
+  virtual ~UserObjectWarehouse();
 
-UserDataWarehouse::~UserDataWarehouse()
-{
-  for (std::vector<UserData *>::iterator it = _user_data.begin(); it != _user_data.end(); ++it)
-    delete (*it);
-}
+  /**
+   * Get user object by its name
+   * @param name Name of the object
+   * @return Pointer to the user object
+   */
+  UserObject * getUserObjectByName(const std::string & name);
+  /**
+   * Add an user object
+   * @param name Name of the object
+   * @param user_data Pointer to the object being added
+   */
+  void addUserObject(const std::string & name, UserObject * user_object);
 
-void
-UserDataWarehouse::addUserData(const std::string & name, UserData * user_data)
-{
-  _user_data.push_back(user_data);
-  _name_to_user_data[name] = user_data;
-}
+protected:
+  /// storage for user objects
+  std::vector<UserObject *> _user_objects;
+  /// Map of names to user objects
+  std::map<std::string, UserObject *> _name_to_user_objects;
+};
 
-UserData *
-UserDataWarehouse::getUserDataByName(const std::string & name)
-{
-  std::map<std::string, UserData *>::iterator it = _name_to_user_data.find(name);
-  if (it == _name_to_user_data.end())
-    mooseError("Could not find user-data object with name '" << name << "'");
-  return it->second;
-}
+#endif // USEROBJECTWAREHOUSE_H

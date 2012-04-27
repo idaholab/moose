@@ -19,7 +19,7 @@
 #include "SetupInterface.h"
 #include "Coupleable.h"
 #include "FunctionInterface.h"
-#include "UserDataInterface.h"
+#include "UserObjectInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "MaterialProperty.h"
@@ -60,7 +60,7 @@ class Material :
   public Coupleable,
   public ScalarCoupleable,
   public FunctionInterface,
-  public UserDataInterface,
+  public UserObjectInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
   public PostprocessorInterface

@@ -12,30 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef USERDATA_H
-#define USERDATA_H
-
-#include "MooseObject.h"
-
-class UserData;
+#include "AddUserObjectAction.h"
+#include "Parser.h"
+#include "FEProblem.h"
 
 template<>
-InputParameters validParams<UserData>();
-
-
-/**
- * Base class for user-specific data
- */
-class UserData : public MooseObject
+InputParameters validParams<AddUserObjectAction>()
 {
-public:
-  UserData(const std::string & name, InputParameters params);
-  virtual ~UserData();
+  return validParams<MooseObjectAction>();
+}
 
-  /**
-   * Called before deleting the object. Free memory allocated by your derived classes, etc.
-   */
-  virtual void destroy() = 0;
-};
+AddUserObjectAction::AddUserObjectAction(const std::string & name, InputParameters params) :
+    MooseObjectAction(name, params)
+{
+}
 
-#endif /* USERDATA_H */
+void
+AddUserObjectAction::act()
+{
+  _problem->addUserObject(_type, getShortName(), _moose_object_pars);
+}

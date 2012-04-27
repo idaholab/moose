@@ -12,23 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AddUserDataAction.h"
-#include "Parser.h"
-#include "FEProblem.h"
+#ifndef ADDUSEROBJECTACTION_H
+#define ADDUSEROBJECTACTION_H
+
+#include "InputParameters.h"
+#include "Moose.h"
+#include "MooseObjectAction.h"
+
+#include <string>
+
+class AddUserObjectAction;
 
 template<>
-InputParameters validParams<AddUserDataAction>()
-{
-  return validParams<MooseObjectAction>();
-}
+InputParameters validParams<AddUserObjectAction>();
 
-AddUserDataAction::AddUserDataAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
-{
-}
 
-void
-AddUserDataAction::act()
+class AddUserObjectAction : public MooseObjectAction
 {
-  _problem->addUserData(_type, getShortName(), _moose_object_pars);
-}
+public:
+  AddUserObjectAction(const std::string & name, InputParameters params);
+
+  virtual void act();
+};
+
+#endif // ADDUSEROBJECTACTION_H

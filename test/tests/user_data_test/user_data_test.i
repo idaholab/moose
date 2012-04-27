@@ -10,7 +10,7 @@
   elem_type = QUAD4
 []
 
-[UserData]
+[UserObjects]
   [./ud]
     type = MTUserData
     scalar = 2

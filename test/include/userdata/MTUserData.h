@@ -15,7 +15,7 @@
 #ifndef MTUSERDATA_H
 #define MTUSERDATA_H
 
-#include "UserData.h"
+#include "UserObject.h"
 
 class MTUserData;
 
@@ -26,7 +26,7 @@ InputParameters validParams<MTUserData>();
 /**
  * Demonstration of user-data object
  */
-class MTUserData : public UserData
+class MTUserData : public UserObject
 {
 public:
   MTUserData(const std::string & name, InputParameters params);

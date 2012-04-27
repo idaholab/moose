@@ -17,7 +17,7 @@
 template<>
 InputParameters validParams<MTUserData>()
 {
-  InputParameters params = validParams<UserData>();
+  InputParameters params = validParams<UserObject>();
   params.addParam<Real>("scalar", 0, "A scalar value");
   params.addParam<std::vector<Real> >("vector", std::vector<Real>(), "A vector value");
   return params;
@@ -25,7 +25,7 @@ InputParameters validParams<MTUserData>()
 
 
 MTUserData::MTUserData(const std::string & name, InputParameters params) :
-    UserData(name, params),
+    UserObject(name, params),
     _scalar(getParam<Real>("scalar")),
     _vector(getParam<std::vector<Real> >("vector")),
     _dyn_memory(NULL)

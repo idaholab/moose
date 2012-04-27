@@ -26,7 +26,7 @@ InputParameters validParams<SidePostprocessor>()
 
 SidePostprocessor::SidePostprocessor(const std::string & name, InputParameters parameters) :
     Postprocessor(name, parameters),
-    UserDataInterface(parameters),
+    UserObjectInterface(parameters),
     MaterialPropertyInterface(parameters),
     _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
     _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),

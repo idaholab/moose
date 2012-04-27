@@ -25,6 +25,6 @@ GeneralPostprocessor::GeneralPostprocessor(const std::string & name, InputParame
     Postprocessor(name, parameters),
     TransientInterface(parameters),
     FunctionInterface(parameters),
-    UserDataInterface(parameters),
+    UserObjectInterface(parameters),
     PostprocessorInterface(parameters)
 {}

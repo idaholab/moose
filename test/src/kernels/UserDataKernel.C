@@ -24,7 +24,7 @@ InputParameters validParams<UserDataKernel>()
 
 UserDataKernel::UserDataKernel(const std::string & name, InputParameters params) :
     Kernel(name, params),
-    _mutley(dynamic_cast<const MTUserData &>(getUserData("user_data")))   // get user-data object and cast it down so we can use it
+    _mutley(dynamic_cast<const MTUserData &>(getUserObject("user_data")))   // get user-data object and cast it down so we can use it
 {
 }
 

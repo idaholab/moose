@@ -28,7 +28,7 @@ InputParameters validParams<NodalPostprocessor>()
 NodalPostprocessor::NodalPostprocessor(const std::string & name, InputParameters parameters) :
     Postprocessor(name, parameters),
     Coupleable(parameters, false),
-    UserDataInterface(parameters),
+    UserObjectInterface(parameters),
     MooseVariableInterface(parameters, false),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),

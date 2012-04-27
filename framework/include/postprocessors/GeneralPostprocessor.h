@@ -18,7 +18,7 @@
 #include "Postprocessor.h"
 #include "TransientInterface.h"
 #include "FunctionInterface.h"
-#include "UserDataInterface.h"
+#include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "Problem.h"
 
@@ -35,7 +35,7 @@ class GeneralPostprocessor :
   public Postprocessor,
   public TransientInterface,
   public FunctionInterface,
-  public UserDataInterface,
+  public UserObjectInterface,
   protected PostprocessorInterface
 {
 public:

@@ -12,25 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "UserDataInterface.h"
-#include "UserData.h"
+#include "UserObjectInterface.h"
+#include "UserObject.h"
 #include "Problem.h"
 
-UserDataInterface::UserDataInterface(InputParameters & params) :
+UserObjectInterface::UserObjectInterface(InputParameters & params) :
     _udi_problem(*params.get<Problem *>("_problem")),
     _udi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
     _udi_params(params)
 {
 }
 
-const UserData &
-UserDataInterface::getUserData(const std::string & name)
+const UserObject &
+UserObjectInterface::getUserObject(const std::string & name)
 {
-  return _udi_problem.getUserData(_udi_params.get<std::string>(name), _udi_tid);
+  return _udi_problem.getUserObject(_udi_params.get<std::string>(name), _udi_tid);
 }
 
-const UserData &
-UserDataInterface::getUserDataByName(const std::string & name)
+const UserObject &
+UserObjectInterface::getUserObjectByName(const std::string & name)
 {
-  return _udi_problem.getUserData(name, _udi_tid);
+  return _udi_problem.getUserObject(name, _udi_tid);
 }

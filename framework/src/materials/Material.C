@@ -37,7 +37,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     Coupleable(parameters, false),
     ScalarCoupleable(parameters),
     FunctionInterface(parameters),
-    UserDataInterface(parameters),
+    UserObjectInterface(parameters),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),

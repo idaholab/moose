@@ -17,7 +17,7 @@
 
 #include "Postprocessor.h"
 #include "MooseVariable.h"
-#include "UserDataInterface.h"
+#include "UserObjectInterface.h"
 #include "MaterialPropertyInterface.h"
 
 //Forward Declarations
@@ -28,7 +28,7 @@ InputParameters validParams<SidePostprocessor>();
 
 class SidePostprocessor :
   public Postprocessor,
-  public UserDataInterface,
+  public UserObjectInterface,
   public MaterialPropertyInterface
 {
 public:

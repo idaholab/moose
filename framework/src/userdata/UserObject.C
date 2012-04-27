@@ -12,41 +12,20 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef USERDATAWAREHOUSE_H
-#define USERDATAWAREHOUSE_H
+#include "UserObject.h"
 
-#include <vector>
-#include <map>
-
-#include "UserData.h"
-
-/**
- * Warehouse for storing user-data objects.
- */
-class UserDataWarehouse
+template<>
+InputParameters validParams<UserObject>()
 {
-public:
-  UserDataWarehouse();
-  virtual ~UserDataWarehouse();
+  InputParameters params = validParams<MooseObject>();
+  return params;
+}
 
-  /**
-   * Get user-data object by its name
-   * @param name Name of the object
-   * @return Pointer to the user data object
-   */
-  UserData * getUserDataByName(const std::string & name);
-  /**
-   * Add an user-data object
-   * @param name Name of the object
-   * @param user_data Pointer to the object being added
-   */
-  void addUserData(const std::string & name, UserData * user_data);
+UserObject::UserObject(const std::string & name, InputParameters params) :
+    MooseObject(name, params)
+{
+}
 
-protected:
-  /// storage for user data
-  std::vector<UserData *> _user_data;
-  /// Map of names to user data
-  std::map<std::string, UserData *> _name_to_user_data;
-};
-
-#endif // USERDATAWAREHOUSE_H
+UserObject::~UserObject()
+{
+}

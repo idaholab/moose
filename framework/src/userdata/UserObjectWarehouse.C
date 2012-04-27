@@ -12,27 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADDUSERDATAACTION_H
-#define ADDUSERDATAACTION_H
-
-#include "InputParameters.h"
+#include "UserObjectWarehouse.h"
 #include "Moose.h"
-#include "MooseObjectAction.h"
-
-#include <string>
-
-class AddUserDataAction;
-
-template<>
-InputParameters validParams<AddUserDataAction>();
 
 
-class AddUserDataAction : public MooseObjectAction
+UserObjectWarehouse::UserObjectWarehouse()
 {
-public:
-  AddUserDataAction(const std::string & name, InputParameters params);
+}
 
-  virtual void act();
-};
+UserObjectWarehouse::~UserObjectWarehouse()
+{
+  for (std::vector<UserObject *>::iterator it = _user_objects.begin(); it != _user_objects.end(); ++it)
+    delete (*it);
+}
 
-#endif // ADDUSERDATAACTION_H
+void
+UserObjectWarehouse::addUserObject(const std::string & name, UserObject * user_object)
+{
+  _user_objects.push_back(user_object);
+  _name_to_user_objects[name] = user_object;
+}
+
+UserObject *
+UserObjectWarehouse::getUserObjectByName(const std::string & name)
+{
+  std::map<std::string, UserObject *>::iterator it = _name_to_user_objects.find(name);
+  if (it == _name_to_user_objects.end())
+    mooseError("Could not find user object with name '" << name << "'");
+  return it->second;
+}
