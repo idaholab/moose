@@ -106,11 +106,10 @@ class UiBox(QtGui.QMainWindow):
   def click_save(self):
     file_name = QtGui.QFileDialog.getSaveFileName(self, "Save Input File", "~/", "Input Files (*.i)")
 
-    file = open(file_name,'w')
-    
-    output_string = self.buildInputString()
-
-    file.write(output_string)
+    if file_name != '':
+      file = open(file_name,'w')
+      output_string = self.buildInputString()
+      file.write(output_string)
 
   def input_selection(self, item, column):
     try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
