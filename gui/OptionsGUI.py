@@ -44,6 +44,8 @@ class OptionsGUI(QtGui.QDialog):
       self.fillTableWithData(self.incoming_data)
       self.table_widget.cellChanged.disconnect(self.cellChanged)
 
+    self.resize(700,500)
+
   ### Takes a dictionary containing name value pairs
   def fillTableWithData(self, the_data):
     for name,value in the_data.items():

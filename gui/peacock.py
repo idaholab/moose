@@ -42,25 +42,32 @@ class UiBox(QtGui.QMainWindow):
   def initUI(self):
     self.main_ui = QtGui.QWidget(self)
     self.main_ui.setObjectName(_fromUtf8("Dialog"))
-    self.main_ui.setGeometry(200, 500, 100, 100)
     self.setCentralWidget(self.main_ui)
     self.layoutV = QtGui.QVBoxLayout()
     self.layoutH = QtGui.QHBoxLayout()
+    self.layout_with_textbox = QtGui.QHBoxLayout()
     self.init_treewidet(self.layoutV)
     self.init_buttons(self.layoutH)
     self.layoutV.addLayout(self.layoutH)
-    self.main_ui.setLayout(self.layoutV)
+    self.layout_with_textbox.addLayout(self.layoutV)
+    self.init_textbox()
+    self.main_ui.setLayout(self.layout_with_textbox)
+    self.resize(700,800)
 
+  def init_textbox(self):
+    self.input_display = QtGui.QTextEdit()
+    self.layout_with_textbox.addWidget(self.input_display)
+  
   def init_treewidet(self, layout):
     iter_dict = []
     i = 0
-    tree_widget = QtGui.QTreeWidget()
+    self.tree_widget = QtGui.QTreeWidget()
     for itm in self.main_data:
-      iter_dict.append(QtGui.QTreeWidgetItem(tree_widget))
+      iter_dict.append(QtGui.QTreeWidgetItem(self.tree_widget))
       iter_dict[i].setText(0, itm['name'])
       i += 1
-    QtCore.QObject.connect(tree_widget, QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem *, int)"), self.input_selection)
-    layout.addWidget(tree_widget)
+    QtCore.QObject.connect(self.tree_widget, QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem *, int)"), self.input_selection)
+    layout.addWidget(self.tree_widget)
 
   def init_buttons(self, layout):
     buttonSave = QtGui.QPushButton("Save")
@@ -73,9 +80,32 @@ class UiBox(QtGui.QMainWindow):
   def click_cancel(self):
     sys.exit(0)
 
+  def buildInputString(self):
+    the_string = ''
+    root = self.tree_widget.invisibleRootItem()
+    child_count = root.childCount()
+    for i in range(child_count):
+      item = root.child(i)
+      subchild_count = item.childCount()
+      if subchild_count:
+        section = item.text(0)
+        the_string += '[' + section + ']\n'
+        
+        for j in range(subchild_count):
+          subitem = item.child(j)
+          table_data = subitem.table_data
+
+          the_string += '  [./' + table_data['Name'] + ']\n'
+          for param,value in table_data.items():
+            if not value == '' and not param == 'Name':
+              the_string += '    ' + param + ' = ' + value + '\n'
+          the_string += '  [../]\n'
+        the_string += '[]\n'
+    return the_string
+
   def click_save(self):
-    print 'saved'
-    
+    print self.buildInputString()
+
   def input_selection(self, item, column):
     try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
       item.table_data
@@ -87,6 +117,7 @@ class UiBox(QtGui.QMainWindow):
           if new_gui.exec_():
             table_data = new_gui.result()
             item.table_data = table_data
+            self.input_display.setText(self.buildInputString())
     except:
       for sgl_item in self.main_data:
         if sgl_item['name'] == item.text(column) and sgl_item['subblocks'] != None:
@@ -97,6 +128,7 @@ class UiBox(QtGui.QMainWindow):
             new_child.setText(0,table_data['Name'])
             new_child.table_data = table_data
             item.addChild(new_child)
+            self.input_display.setText(self.buildInputString())
           break
 
 def printUsage(message):
