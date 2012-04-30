@@ -23,7 +23,7 @@ InputParameters validParams<SetupSubProblemAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<std::string>("coord_type", "XYZ", "Type of the coordinate system");
-  params.addParam<bool>("fe_cache", true, "Whether or not to turn on the finite element shape function caching system.  This can increase speed with an associated memory cost.");
+  params.addParam<bool>("fe_cache", false, "Whether or not to turn on the finite element shape function caching system.  This can increase speed with an associated memory cost.");
   return params;
 }
 
