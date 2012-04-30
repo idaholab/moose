@@ -127,6 +127,10 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
         if (Parser::trim(doc) != "")
         {
           Parser::tokenize(doc, elements, 68, " \t");
+
+          for (unsigned int i=0; i<elements.size(); ++i)
+            Parser::escape(elements[i]);
+
           _out << std::right << std::setw(l_offset) << "# " << elements[0];
           for (unsigned int i=1; i<elements.size(); ++i)
             _out << " ...\n" << "  " << std::setw(63) << "# " << elements[i];

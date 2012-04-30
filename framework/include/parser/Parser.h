@@ -91,6 +91,12 @@ public:
                        const std::string &delims = "/");
 
   /**
+   * This function will escape all of the standard C++ escape character so they can be printed.  The
+   * passed in parameter is modified in place
+   */
+  static void escape(std::string &str);
+
+  /**
    * Standard scripting languague trim function
    */
   static std::string trim(std::string str,

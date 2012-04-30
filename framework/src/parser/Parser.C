@@ -602,6 +602,25 @@ Parser::tokenize(const std::string &str, std::vector<std::string> &elements, uns
   }
 }
 
+void
+Parser::escape(std::string &str)
+{
+  std::map<char, std::string> escapes;
+  escapes['\a'] = "\\a";
+  escapes['\b'] = "\\b";
+  escapes['\f'] = "\\f";
+  escapes['\n'] = "\\n";
+  escapes['\t'] = "\\t";
+  escapes['\v'] = "\\v";
+  escapes['\r'] = "\\r";
+  escapes['\\'] = "\\\\";
+
+  for (std::map<char, std::string>::iterator it = escapes.begin(); it != escapes.end(); ++it)
+    for (size_t pos=0; (pos=str.find(it->first, pos)) != std::string::npos; pos+=it->second.size())
+      str.replace(pos, 1, it->second);
+}
+
+
 std::string
 Parser::trim(std::string str, const std::string &white_space)
 {
