@@ -59,7 +59,10 @@ class OptionsGUI(QtGui.QDialog):
   def tableToDict(self):
     the_data = {}
     for i in xrange(0,self.total_rows):
-      the_data[str(self.table_widget.item(i,0).text())] = str(self.table_widget.item(i,1).text())
+      param_name = str(self.table_widget.item(i,0).text())
+      param_value = str(self.table_widget.item(i,1).text())
+      if not param_name in self.original_table_data or not self.original_table_data[param_name] == param_value:
+        the_data[param_name] = param_value
     return the_data
     
 
@@ -100,12 +103,16 @@ class OptionsGUI(QtGui.QDialog):
     # Build the Table
     the_table_data = []
 
+    # Save off thie original data from the dump so we can compare later
+    self.original_table_data = {}
+
     the_table_data.append({'name':'Name','default':'','description':'Name you want to give to this object','required':True})
     
     for new_text in self.main_data:
       if new_text['name'].split('/').pop() == item:
         the_table_data.append({'name':'type','default':new_text['name'].split('/').pop(),'description':'The object type','required':True})
         for param in new_text['parameters']:
+          self.original_table_data[param['name']] = param['default']
           the_table_data.append(param)
         break
 
