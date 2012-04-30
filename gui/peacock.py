@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file '/Users/milljm/projects/moose_front_end/Peacock.ui'
@@ -6,14 +7,17 @@
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
-import os, sys, PyQt4, commands, yaml, time, getopt, pickle
+import os, sys, PyQt4, getopt
 from PyQt4 import QtCore, QtGui
-from PyQt4.Qt import *
+
+
+from OptionsGUI import OptionsGUI
+from GenSyntax import GenSyntax
+
 try:
   _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
   _fromUtf8 = lambda s: s
-
 
 _USAGE = """
 
@@ -27,54 +31,18 @@ or
      ./peacock.py /home/userid/projects/trunk/bison
 """
 
-class OptionsGUI(QtGui.QMainWindow):
-  def __init__(self, main_data, single_item, win_parent=None):
-    QtGui.QMainWindow.__init__(self, win_parent)
-    self.main_data = main_data
-    self.single_item = single_item
-    self.initUI()
-
-  def initUI(self):
-    self.main_ui = QtGui.QWidget(self)
-    self.main_ui.setObjectName(_fromUtf8("Dialog"))
-    self.setCentralWidget(self.main_ui)
-    self.layoutV = QtGui.QVBoxLayout()
-    self.init_menu(self.layoutV)
-    self.main_ui.setLayout(self.layoutV)
-
-  def init_menu(self, layout):
-    drop_menu = QtGui.QComboBox()
-    for item in self.main_data:
-      drop_menu.addItem(item['name'].split('/').pop())
-    drop_menu.activated[str].connect(self.item_clicked)
-    layout.addWidget(drop_menu)
-
-  def item_clicked(self, item):
-    widget_list = []
-#   edit_box = QtGui.QPlainTextEdit()
-    for new_text in self.main_data:
-      if new_text['name'].split('/').pop() == item:
-        for sub_item in new_text['parameters']:
-          widget_list.append(QtGui.QLabel())
-          widget_list[len(widget_list) - 1].setText(sub_item['name'])
-          self.layoutV.addWidget(widget_list[len(widget_list) - 1])
-#         edit_box.appendPlainText(sub_item['name'])
-#   self.widget_list.append(self.layoutV.addWidget(edit_box))
-    self.main_ui.setLayout(self.layoutV)
-
-
-
 class UiBox(QtGui.QMainWindow):
   def __init__(self, app_path, win_parent = None):
     QtGui.QMainWindow.__init__(self, win_parent)
     self.setWindowTitle('Peacock - MOOSE front end')
-    self.app_path = app_path
-    self.main_data = self.GetSyntax()
+    self.main_data = GenSyntax(app_path).GetSyntax()
+    self.constructed_data = {}
     self.initUI()
 
   def initUI(self):
     self.main_ui = QtGui.QWidget(self)
     self.main_ui.setObjectName(_fromUtf8("Dialog"))
+    self.main_ui.setGeometry(200, 500, 100, 100)
     self.setCentralWidget(self.main_ui)
     self.layoutV = QtGui.QVBoxLayout()
     self.layoutH = QtGui.QHBoxLayout()
@@ -102,58 +70,34 @@ class UiBox(QtGui.QMainWindow):
     layout.addWidget(buttonSave)
     layout.addWidget(buttonCancel)
 
-  def GetSyntax(self):
-    exet = os.path.split(self.app_path)
-    if exet[len(exet) - 1] != '':
-      exet = exet[len(exet) - 1].split('/').pop()
-    else:
-      exet = exet[0].split('/').pop()
-    EXTENSIONS = [ 'opt', 'dbg', 'pro' ]
-    fname = None
-    timestamp = time.time() + 99 #initialize to a big number (in the future)
-    for ext in EXTENSIONS:
-      exe = self.app_path + '/' + exet + '-' + ext
-      print exe
-      if os.path.isfile(exe):
-        if os.path.getmtime(exe) < timestamp:
-          fname = exe
-    if fname == None:
-      print 'ERROR: You must build an ' + \
-            'executable in ' + self.app_path + ' first.'
-      sys.exit(1)
-    data = commands.getoutput( fname + " --yaml" )
-    data = data.split('**START YAML DATA**\n')[1]
-    data = data.split('**END YAML DATA**')[0]
-    if not os.path.exists('yaml_dump'):
-      data = yaml.load(data)
-      pickle.dump(data, open('yaml_dump', 'wb'))
-    else:
-      data = pickle.load(open('yaml_dump', 'rb'))
-    data = self.massage_data(data)
-    return data
-
-  def massage_data(self, data):
-    for block in data:
-      name =  block['name']
-      if name == 'Executioner' or name == 'InitialCondition':
-        curr_type = str(block['type'])
-        if curr_type == 'None':
-          curr_type = 'ALL'
-        block['name'] += ' (' + curr_type + ')'
-    return data
-
   def click_cancel(self):
     sys.exit(0)
 
   def click_save(self):
     print 'saved'
-
+    
   def input_selection(self, item, column):
-    for sgl_item in self.main_data:
-      if sgl_item['name'] == item.text(column) and sgl_item['subblocks'] != None:
-        self.new_gui = OptionsGUI(sgl_item['subblocks'], item.text(column))
-        self.new_gui.show()
-        break
+    try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
+      item.table_data
+      print item.table_data
+      for sgl_item in self.main_data:
+        if sgl_item['name'] == item.parent().text(column) and sgl_item['subblocks'] != None:
+          new_gui = OptionsGUI(sgl_item['subblocks'], item.text(column), item.table_data)
+          new_gui.incoming_data = item.table_data
+          if new_gui.exec_():
+            table_data = new_gui.result()
+            item.table_data = table_data
+    except:
+      for sgl_item in self.main_data:
+        if sgl_item['name'] == item.text(column) and sgl_item['subblocks'] != None:
+          self.new_gui = OptionsGUI(sgl_item['subblocks'], item.text(column), None)
+          if self.new_gui.exec_():
+            table_data = self.new_gui.result()
+            new_child = QtGui.QTreeWidgetItem(item)
+            new_child.setText(0,table_data['Name'])
+            new_child.table_data = table_data
+            item.addChild(new_child)
+          break
 
 def printUsage(message):
   sys.stderr.write(_USAGE)
@@ -187,18 +131,3 @@ if __name__ == '__main__':
   else:
     print 'Path not found:', application
     sys.exit(1)
-
-
-
-
-
-
-
-#       try:
-#         for sgl_child in itm['subblocks']:
-#           if sgl_child['type'] != None:
-#             temp_item = QtGui.QTreeWidgetItem()
-#             iter_dict[i].addChild(temp_item)
-#             temp_item.setText(0, sgl_child['type'])
-#       except:
-#         continue
