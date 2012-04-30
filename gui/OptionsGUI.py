@@ -37,7 +37,7 @@ class OptionsGUI(QtGui.QDialog):
     self.layoutV.addWidget(self.table_widget)
     # self.main_ui.setLayout(self.layoutV)
 
-    print self.incoming_data
+    # print self.incoming_data
     if self.incoming_data:
       self.drop_menu.setCurrentIndex(self.drop_menu.findText(self.incoming_data['type']))
       self.table_widget.cellChanged.connect(self.cellChanged)
@@ -75,7 +75,7 @@ class OptionsGUI(QtGui.QDialog):
     layout.addWidget(self.drop_menu)
 
   def click_add(self):
-    print 'add'
+    #print 'add'
     self.table_data = self.tableToDict()
     self.accept()
     return
@@ -84,11 +84,11 @@ class OptionsGUI(QtGui.QDialog):
     return self.table_data
 
   def click_cancel(self):
-    print 'cancel'
+    #rint 'cancel'
     self.reject()
 
   def item_clicked(self, item):
-    print "item_clicked"
+    #print "item_clicked"
     # Hide previous widgets (you can not delete them apparently)
     # TODO: theres gotta be a way to handle destroying widgets no
     # longer needed.
@@ -164,4 +164,5 @@ class OptionsGUI(QtGui.QDialog):
     self.table_widget.cellChanged.connect(self.cellChanged)
     
   def cellChanged(self, row, col):
-    print "Changed!"
+    pass
+    #print "Changed!"

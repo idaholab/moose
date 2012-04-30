@@ -104,12 +104,17 @@ class UiBox(QtGui.QMainWindow):
     return the_string
 
   def click_save(self):
-    print self.buildInputString()
+    file_name = QtGui.QFileDialog.getSaveFileName(self, "Save Input File", "~/", "Input Files (*.i)")
+
+    file = open(file_name,'w')
+    
+    output_string = self.buildInputString()
+
+    file.write(output_string)
 
   def input_selection(self, item, column):
     try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
       item.table_data
-      print item.table_data
       for sgl_item in self.main_data:
         if sgl_item['name'] == item.parent().text(column) and sgl_item['subblocks'] != None:
           new_gui = OptionsGUI(sgl_item['subblocks'], item.text(column), item.table_data)
