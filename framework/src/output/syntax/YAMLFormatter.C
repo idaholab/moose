@@ -65,7 +65,7 @@ YAMLFormatter::print(const std::string & name, const std::string * prev_name, st
     _out << prev_spacing << "  subblocks: \n";
   }
 */
-  if (prev_name == NULL || *prev_name != name || *prev_name == "Executioner" || prev_name->find("InitialCondition") != std::string::npos)
+  if (prev_name == NULL || *prev_name != name /*|| *prev_name == "Executioner"*/ || prev_name->find("InitialCondition") != std::string::npos)
   {
     if (first)
       first = false;
@@ -110,7 +110,7 @@ YAMLFormatter::print(const std::string & name, const std::string * prev_name, st
     {
       std::string name = iter->first;
       // First make sure we want to see this parameter, also block active and type
-      if (param_ptrs[i]->isPrivate(iter->first) || name == "active" || name == "type")
+      if (param_ptrs[i]->isPrivate(iter->first) || name == "active")
         continue;
 
       // Block params may be required and will have a doc string
@@ -174,8 +174,9 @@ YAMLFormatter::printCloseAndOpen(const std::string & name, const std::string * p
       ++same_elements;
 
   // Executioner syntax is different - we'll hack it here!
-  if ((name == "Executioner" && *prev_name == "Executioner") ||
-      (name.find("InitialCondition") != std::string::npos && prev_name->find("InitialCondition") != std::string::npos) || name == "Executioner/Adaptivity")
+
+  if (/*(name == "Executioner" && *prev_name == "Executioner") ||*/
+    (name.find("InitialCondition") != std::string::npos && prev_name->find("InitialCondition") != std::string::npos)/* || name == "Executioner/Adaptivity"*/)
   {
     num_to_open += 1;
     same_elements -= 1;

@@ -18,6 +18,7 @@
 #include "InputParameters.h"
 #include "Moose.h"
 #include "Action.h"
+#include "MooseObjectAction.h"
 
 //Forward Declaration
 class SetupMeshAction;

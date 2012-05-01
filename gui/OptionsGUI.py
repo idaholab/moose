@@ -13,6 +13,7 @@ class OptionsGUI(QtGui.QDialog):
     QtGui.QDialog.__init__(self, win_parent)
     self.main_data = main_data
     self.single_item = single_item
+    self.original_table_data = {}
 #    self.widget_list = []
     self.button_list =[]
 #    self.layout_group = []
@@ -37,9 +38,17 @@ class OptionsGUI(QtGui.QDialog):
     self.layoutV.addWidget(self.table_widget)
     # self.main_ui.setLayout(self.layoutV)
 
+    self.drop_menu.setCurrentIndex(-1)
     # print self.incoming_data
     if self.incoming_data:
-      self.drop_menu.setCurrentIndex(self.drop_menu.findText(self.incoming_data['type']))
+      if 'type' in self.incoming_data:
+        self.drop_menu.setCurrentIndex(self.drop_menu.findText(self.incoming_data['type']))
+      else:
+        found_index = self.drop_menu.findText(self.incoming_data['Name'])
+        if found_index != -1:
+          self.drop_menu.setCurrentIndex(found_index)
+        else:
+          self.drop_menu.setCurrentIndex(0) #Hack until we figure out something better
       self.table_widget.cellChanged.connect(self.cellChanged)
       self.fillTableWithData(self.incoming_data)
       self.table_widget.cellChanged.disconnect(self.cellChanged)
@@ -56,13 +65,23 @@ class OptionsGUI(QtGui.QDialog):
           item = self.table_widget.item(i,1)
           item.setText(value)
 
-  def tableToDict(self):
+  def tableToDict(self, only_not_in_original = False):
     the_data = {}
+    
     for i in xrange(0,self.total_rows):
       param_name = str(self.table_widget.item(i,0).text())
       param_value = str(self.table_widget.item(i,1).text())
-      if not param_name in self.original_table_data or not self.original_table_data[param_name] == param_value:
-        the_data[param_name] = param_value
+      
+      if not param_name in self.original_table_data or not self.original_table_data[param_name] == param_value: #If we changed it - definitely include it
+          the_data[param_name] = param_value
+      else:
+        if not only_not_in_original: # If we want stuff other than what we changed
+          if param_name == 'parent_params' or param_name == 'type':  #Pass through type and parent_params even if we didn't change them
+             the_data[param_name] = param_value
+          else:
+            if param_name in self.param_is_required and self.param_is_required[param_name]: #Pass through any 'required' parameters
+              the_data[param_name] = param_value
+              
     return the_data
     
 
@@ -100,21 +119,30 @@ class OptionsGUI(QtGui.QDialog):
     except:
       pass
 
+    saved_data = {}
+    # Save off the current contents to try to restore it after swapping out the params
+    if self.original_table_data: #This will only have some length after the first time through
+      saved_data = self.tableToDict(True) # Pass true so we only save off stuff the user has entered
+
     # Build the Table
     the_table_data = []
 
     # Save off thie original data from the dump so we can compare later
     self.original_table_data = {}
+    self.param_is_required = {}
 
     the_table_data.append({'name':'Name','default':'','description':'Name you want to give to this object','required':True})
     
     for new_text in self.main_data:
       if new_text['name'].split('/').pop() == item:
-        the_table_data.append({'name':'type','default':new_text['name'].split('/').pop(),'description':'The object type','required':True})
+        #the_table_data.append({'name':'type','default':new_text['name'].split('/').pop(),'description':'The object type','required':True})
         for param in new_text['parameters']:
           self.original_table_data[param['name']] = param['default']
+          if param['name'] == 'type':
+            param['default'] = new_text['name'].split('/').pop()
           the_table_data.append(param)
-        break
+          self.param_is_required[param['name']] = param['required']
+        break #- can't break here because there might be more
 
     self.total_rows = len(the_table_data)
     self.table_widget.setRowCount(self.total_rows)
@@ -123,6 +151,14 @@ class OptionsGUI(QtGui.QDialog):
     self.table_widget.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem('Value'))
     self.table_widget.setHorizontalHeaderItem(2, QtGui.QTableWidgetItem('Description'))
     self.table_widget.verticalHeader().setVisible(False)
+
+    has_parent_params_set = False
+
+    #Search for 'parent_params' parameter so we know what to do with the Name
+    for param in the_table_data:
+      if param['name'] == 'parent_params':
+        has_parent_params_set = True
+        break
 
     row = 0
     for param in the_table_data:
@@ -133,6 +169,15 @@ class OptionsGUI(QtGui.QDialog):
       
       if not param['required'] or param['name'] == 'type':
         value = param['default']
+
+      if param['required']:
+        color = QtGui.QColor()
+#        color.setNamedColor("red")
+        color.setRgb(255,204,153)
+        name_item.setBackgroundColor(color)
+
+      if has_parent_params_set and param['name'] == 'Name':
+        value = 'ParentParams'
         
       value_item = QtGui.QTableWidgetItem(value)
 
@@ -141,7 +186,7 @@ class OptionsGUI(QtGui.QDialog):
       name_item.setFlags(QtCore.Qt.ItemIsEnabled)
       doc_item.setFlags(QtCore.Qt.ItemIsEnabled)
 
-      if param['name'] == 'type':
+      if param['name'] == 'type' or param['name'] == 'parent_params' or (has_parent_params_set and param['name'] == 'Name'):
         value_item.setFlags(QtCore.Qt.NoItemFlags)
 
       self.table_widget.setItem(row, 0, name_item)
@@ -152,7 +197,11 @@ class OptionsGUI(QtGui.QDialog):
     self.table_widget.resizeColumnsToContents()
 
     # Build the Add and Cancel buttons
-    self.button_list.append(QtGui.QPushButton("Add"))
+    if self.incoming_data and len(self.incoming_data):
+      self.button_list.append(QtGui.QPushButton("Apply"))
+    else:
+      self.button_list.append(QtGui.QPushButton("Add"))
+      
     self.button_list.append(QtGui.QPushButton("Cancel"))
     QtCore.QObject.connect(self.button_list[len(self.button_list) - 2], QtCore.SIGNAL("clicked()"), self.click_add)
     QtCore.QObject.connect(self.button_list[len(self.button_list) - 1], QtCore.SIGNAL("clicked()"), self.click_cancel)
@@ -160,6 +209,10 @@ class OptionsGUI(QtGui.QDialog):
     for button in self.button_list:
       self.layout_buttons[len(self.layout_buttons) - 1].addWidget(button)
     self.layoutV.addLayout(self.layout_buttons[len(self.layout_buttons) - 1])
+
+    # Try to restore saved data
+    if len(saved_data):
+      self.fillTableWithData(saved_data)
     
     self.table_widget.cellChanged.connect(self.cellChanged)
     

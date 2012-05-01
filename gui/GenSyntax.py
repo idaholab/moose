@@ -27,12 +27,12 @@ class GenSyntax():
     data = commands.getoutput( fname + " --yaml" )
     data = data.split('**START YAML DATA**\n')[1]
     data = data.split('**END YAML DATA**')[0]
-    if not os.path.exists('yaml_dump'):
+    if not os.path.exists(exet + '_yaml_dump'):
       data = yaml.load(data)
-      pickle.dump(data, open('yaml_dump', 'wb'))
+      pickle.dump(data, open(exet + '_yaml_dump', 'wb'))
     else:
-      data = pickle.load(open('yaml_dump', 'rb'))
-    data = self.massage_data(data)
+      data = pickle.load(open(exet + '_yaml_dump', 'rb'))
+#    data = self.massage_data(data)
     return data
 
   def massage_data(self, data):
@@ -42,5 +42,5 @@ class GenSyntax():
         curr_type = str(block['type'])
         if curr_type == 'None':
           curr_type = 'ALL'
-        block['name'] += ' (' + curr_type + ')'
+        block['name'] = name + '/' + curr_type
     return data

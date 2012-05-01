@@ -32,6 +32,7 @@ InputParameters validParams<MooseMesh>()
   InputParameters params = validParams<MooseObject>();
 
   params.addParam<int>("_dimension", 1, "Dimension of the mesh");
+  params.addPrivateParam<std::string>("built_by_action", "read_mesh");
 
   return params;
 }

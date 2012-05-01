@@ -528,8 +528,13 @@ Parser::buildFullTree()
             pos = act_name.size();
 
           // Executioner and Initial Condition syntax is non standard - we'll hack it here
-          if (act_name == "Executioner")
-            name = "Executioner";
+          if (act_name == "Executioner" || act_name == "Mesh")
+          {
+            name = act_name.substr(0, pos) + "/" +  moose_obj->first;
+
+            // This indicates that these parameters are to be used in the parent block
+            moose_obj_params.addParam<bool>("parent_params", true, "Indicates that the options for this block should actually be put in its parent");
+          }
           else if (act_name.find("InitialCondition") != std::string::npos)
             name = act_name;
           else
