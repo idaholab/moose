@@ -278,6 +278,25 @@ public:
       r_val._zz = 1./_zz ;
       return r_val;
     }
+
+ DiagTensor  sinvert() const
+    {
+      DiagTensor r_val;
+      r_val._xx=0;
+      r_val._yy=0;
+      r_val._zz=0;
+
+      Real _eps=1e-15;
+      
+      if(_xx!=0)
+        r_val._xx = 1./(_xx+_eps);
+      if(_yy!=0)
+        r_val._yy = 1./(_yy+_eps);
+      if(_zz!=0)
+        r_val._zz = 1./(_zz+_eps);
+
+      return r_val;
+    }
   
   DiagTensor operator*(Real t) const 
     {
