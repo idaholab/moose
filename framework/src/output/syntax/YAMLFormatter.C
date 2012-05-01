@@ -134,9 +134,12 @@ YAMLFormatter::print(const std::string & name, const std::string * prev_name, st
           *it = ' ';
         }
       }
+
+      std::string doc = param_ptrs[i]->getDocString(iter->first);
+      Parser::escape(doc);
       _out << tmp_str;
       _out << "\n" << spacing << "    description: |\n      " << spacing
-                << param_ptrs[i]->getDocString(iter->first) << "\n";
+                << doc << "\n";
     }
   }
 
