@@ -613,7 +613,6 @@ Parser::escape(std::string &str)
   escapes['\t'] = "\\t";
   escapes['\v'] = "\\v";
   escapes['\r'] = "\\r";
-  escapes['\\'] = "\\\\";
 
   for (std::map<char, std::string>::iterator it = escapes.begin(); it != escapes.end(); ++it)
     for (size_t pos=0; (pos=str.find(it->first, pos)) != std::string::npos; pos+=it->second.size())
