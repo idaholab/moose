@@ -78,4 +78,5 @@
   exodus = true
   xda = true
   perf_log = true
+  num_restart_files = 1
 []

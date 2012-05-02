@@ -27,6 +27,7 @@
 #include "PostprocessorData.h"
 #include "Output.h"
 #include "Adaptivity.h"
+#include "Resurrector.h"
 
 class DisplacedProblem;
 class OutputProblem;
@@ -271,8 +272,18 @@ public:
   void setMaxPPSRowsScreen(unsigned int n) { _pps_output_table_max_rows = n; }
 
   // Restart //////
-  virtual void setRestartFile(const std::string & file_name) { _restart = true; _restart_file_name = file_name; }
-  virtual void restartFromFile();
+
+  /**
+   * Set a file we will restart from
+   * @param file_name The file name we will restart from
+   */
+  virtual void setRestartFile(const std::string & file_name);
+
+  /**
+   * Set the number of restart files to save
+   * @param num_files Number of files to keep around
+   */
+  virtual void setNumRestartFiles(unsigned int num_files);
 
 #ifdef LIBMESH_ENABLE_AMR
   // Adaptivity /////
@@ -378,10 +389,8 @@ protected:
   /// Whether or not this system has any Constraints.
   bool _has_constraints;
 
-  /// true if restarting from a file, otherwise false
-  bool _restart;
-  /// name of the file that we restart from
-  std::string _restart_file_name;
+  /// Object responsible for restart (read/write)
+  Resurrector _resurrector;
 
   /// Elements that should have Dofs ghosted to the local processor
   std::set<unsigned int> _ghosted_elems;
@@ -401,6 +410,7 @@ public:
 
   friend class AuxiliarySystem;
   friend class NonlinearSystem;
+  friend class Resurrector;
 };
 
 #endif /* FEPROBLEM_H */

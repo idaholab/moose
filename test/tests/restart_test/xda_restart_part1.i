@@ -76,6 +76,7 @@
   output_initial = true
   interval = 1
   exodus = true
-  xda = true
   perf_log = true
+  # restart
+  num_restart_files = 2
 []

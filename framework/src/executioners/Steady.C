@@ -30,8 +30,8 @@ Steady::Steady(const std::string & name, InputParameters parameters) :
     _time_step(_problem.timeStep()),
     _time(_problem.time())
 {
-  if (!_restart_sln_file_name.empty())
-    _problem.setRestartFile(_restart_sln_file_name);
+  if (!_restart_file_base.empty())
+    _problem.setRestartFile(_restart_file_base);
 }
 
 Steady::~Steady()

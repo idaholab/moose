@@ -73,7 +73,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _input_file_saved(false),
     _has_dampers(false),
     _has_constraints(false),
-    _restart(false),
+    _resurrector(*this),
 //    _solve_only_perf_log("Solve Only"),
     _output_setup_log_early(false),
     // debugging
@@ -144,8 +144,8 @@ void FEProblem::setCoordSystem(Moose::CoordinateSystemType type)
 
 void FEProblem::initialSetup()
 {
-  if (_restart)
-    restartFromFile();
+  if (_resurrector.isOn())
+    _resurrector.restartFromFile();
   else
   {
     if (_ex_reader != NULL)
@@ -163,7 +163,7 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
   }
 
-  if (!_restart)
+  if (!_resurrector.isOn())
     projectSolution();
 
   _eq.print_info();
@@ -174,7 +174,7 @@ void FEProblem::initialSetup()
   copySolutionsBackwards();
   Moose::setup_perf_log.pop("copySolutionsBackwards()","Setup");
 
-  if (!_restart)
+  if (!_resurrector.isOn())
     _aux.compute(EXEC_INITIAL);
 
   if (_material_props.hasStatefulProperties())
@@ -1803,6 +1803,8 @@ FEProblem::output(bool force/*= false*/)
       _input_file_saved = true;
     }
   }
+
+  _resurrector.write();
 }
 
 void
@@ -1966,11 +1968,17 @@ FEProblem::serializeSolution()
 }
 
 void
-FEProblem::restartFromFile()
+FEProblem::setRestartFile(const std::string & file_name)
 {
-  _eq.read(_restart_file_name, libMeshEnums::READ, EquationSystems::READ_DATA);
-  _nl.update();
+  _resurrector.setRestartFile(file_name);
 }
+
+void
+FEProblem::setNumRestartFiles(unsigned int num_files)
+{
+  _resurrector.setNumRestartFiles(num_files);
+}
+
 
 std::vector<std::string>
 FEProblem::getVariableNames()

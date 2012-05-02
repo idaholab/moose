@@ -1,5 +1,5 @@
 [Mesh]
-  file = out_part1_0005_mesh.xda
+  file = out_part1_restart_0005_mesh.xda
 []
 
 [Functions]
@@ -50,8 +50,7 @@
 [Executioner]
   type = Steady
   petsc_options = '-snes_mf_operator'
-
-  restart_soln_file = out_part1_0005.xda
+  restart_file = out_part1_restart_0005
 []
 
 [Output]

@@ -33,11 +33,11 @@ public:
   virtual void meshChanged();
   virtual void sequence(bool state);
 
+  std::string getFileName(const std::string & file_base);
+
 protected:
   /// number of the file
   int _file_num;
-
-  std::string getFileName(const std::string & file_base);
 };
 
 #endif /* XDAOUTPUT_H */

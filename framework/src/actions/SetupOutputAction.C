@@ -58,6 +58,9 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("elemental_as_nodal", false, "Output elemental variables also as nodal");
   params.addParam<bool>("exodus_inputfile_output", true, "Determines whether or not the input file is output to exodus - default (true)");
 
+  // restart options
+  params.addParam<unsigned int>("num_restart_files", 0, "Number of the restart files to save (0 = no restart files)");
+
   return params;
 }
 
@@ -152,6 +155,9 @@ SetupOutputAction::act()
 
     fe_problem.outputDisplaced(getParam<bool>("output_displaced"));
     fe_problem.outputSolutionHistory(getParam<bool>("output_solution_history"));
+
+    fe_problem.setNumRestartFiles(getParam<unsigned int>("num_restart_files"));
+
 
 #ifdef LIBMESH_ENABLE_AMR
     Adaptivity & adapt = fe_problem.adaptivity();

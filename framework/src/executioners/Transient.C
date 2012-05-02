@@ -88,7 +88,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 {
   _t_step = 0;
   _dt = 0;
-  _time = getParam<Real>("start_time");
+  _time = _time_old = getParam<Real>("start_time");
   _problem.transient(true);
   if (parameters.wasSeenInInput("predictor_scale"))
   {
@@ -112,8 +112,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     if (++_curr_sync_time_iter == _sync_times.end())
       _remaining_sync_time = false;
 
-  if (!_restart_sln_file_name.empty())
-    _problem.setRestartFile(_restart_sln_file_name);
+  if (!_restart_file_base.empty())
+    _problem.setRestartFile(_restart_file_base);
 }
 
 Transient::~Transient()

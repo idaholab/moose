@@ -5,18 +5,18 @@
 #
 
 [Mesh]
-  file = out_xda_restart_part1_0005_mesh.xda
+  file = out_xda_restart_part1_restart_0005_mesh.xda
 []
 
 [Functions]
   [./exact_fn]
     type = ParsedFunction
-    value = ((x*x)+(y*y))
+    value = t*((x*x)+(y*y))
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = -4
+    value = -4+(x*x+y*y)
   [../]
 []
 
@@ -35,6 +35,11 @@
 []
 
 [Kernels]
+  [./ie]
+    type = TimeDerivative
+    variable = u
+  [../]
+  
   [./diff]
     type = Diffusion
     variable = u
@@ -84,10 +89,15 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   perf_log = true
 #  petsc_options = '-snes_mf'
-  restart_soln_file = out_xda_restart_part1_0005.xda
+  restart_file = out_xda_restart_part1_restart_0005
+  
+  start_time = 1
+  interval = 1
+  dt = 0.1
+  num_steps = 3
 []
 
 [Output]
