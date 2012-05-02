@@ -19,8 +19,8 @@ template<>
 InputParameters validParams<BoundsAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<Real>("upper", "The upper bound for the variable");
-  params.addRequiredParam<Real>("lower", "The lower bound for the variable");
+  params.addParam<Real>("upper", "The upper bound for the variable");
+  params.addParam<Real>("lower", "The lower bound for the variable");
   params.addRequiredCoupledVar("bounded_variable", "The variable to be bounded");
   return params;
 }
@@ -29,12 +29,14 @@ BoundsAux::BoundsAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
     _upper_vector(_nl_sys.getVector("upper_bound")),
     _lower_vector(_nl_sys.getVector("lower_bound")),
-    _upper(getParam<Real>("upper")),
-    _lower(getParam<Real>("lower")),
     _bounded_variable_id(coupled("bounded_variable"))
 {
   if(!isNodal())
     mooseError("BoundsAux must be used on a nodal auxiliary variable!");
+  _upper_valid = parameters.isParamValid("upper");
+  if(_upper_valid) _upper = getParam<Real>("upper");
+  _lower_valid = parameters.isParamValid("lower");
+  if(_lower_valid) _lower = getParam<Real>("lower");
 }
 
 Real
@@ -42,9 +44,8 @@ BoundsAux::computeValue()
 {
   // The zero is for the component, this will only work for Lagrange variables!
   unsigned int dof = _current_node->dof_number(_nl_sys.number(), _bounded_variable_id, 0);
-
-  _upper_vector.set(dof, _upper);
-  _lower_vector.set(dof, _lower);
+  if(_upper_valid) _upper_vector.set(dof, _upper);
+  if(_lower_valid) _lower_vector.set(dof, _lower);
 
   return 0.0;
 }

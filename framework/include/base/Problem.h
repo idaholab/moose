@@ -109,6 +109,7 @@ public:
 
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual) = 0;
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian) = 0;
+  virtual void computeBounds(NonlinearImplicitSystem & sys, NumericVector<Number> & lower, NumericVector<Number> & upper) = 0;
 
   virtual void addResidual(NumericVector<Number> & /*residual*/, THREAD_ID /*tid*/) { }
   virtual void addResidualNeighbor(NumericVector<Number> & /*residual*/, THREAD_ID /*tid*/) { }

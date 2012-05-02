@@ -1716,6 +1716,24 @@ FEProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System
   _nl.computeJacobianBlock(jacobian, precond_system, ivar, jvar);
 }
 
+void
+FEProblem::computeBounds(NonlinearImplicitSystem & /*sys*/, NumericVector<Number>& lower, NumericVector<Number>& upper)
+{
+  NumericVector<Number>& _lower = _nl.getVector("lower_bound");
+  NumericVector<Number>& _upper = _nl.getVector("upper_bound");
+  _lower.swap(lower);
+  _upper.swap(upper);
+  unsigned int n_threads = libMesh::n_threads();
+  for(unsigned int i=0; i<n_threads; i++)
+  {
+    _materials[i].residualSetup();
+  }
+  _aux.residualSetup();
+  _aux.compute();
+  _lower.swap(lower);
+  _upper.swap(upper);
+}
+
 Real
 FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update)
 {

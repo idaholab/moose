@@ -69,6 +69,7 @@ public:
 
   virtual void computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & /*soln*/, NumericVector<Number> & /*residual*/) {}
   virtual void computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & /*soln*/, SparseMatrix<Number> & /*jacobian*/) {}
+  virtual void computeBounds(NonlinearImplicitSystem & /*sys*/, NumericVector<Number> & /*lower*/, NumericVector<Number> & /*upper*/){}
 
   virtual void initialCondition(EquationSystems & /*es*/, const std::string & /*system_name*/) {}
 

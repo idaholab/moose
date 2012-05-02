@@ -47,11 +47,13 @@ protected:
 
   NumericVector<Number> & _upper_vector;
   NumericVector<Number> & _lower_vector;
-
+  unsigned int _bounded_variable_id;
+  bool _upper_valid;
+  bool _lower_valid;
   Real _upper;
   Real _lower;
 
-  unsigned int _bounded_variable_id;
+
 };
 
 #endif //BOUNDSAUX_H

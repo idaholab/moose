@@ -71,6 +71,12 @@ namespace Moose {
     p->computeResidual(sys, soln, residual);
   }
 
+  void compute_bounds (NumericVector<Number>& lower, NumericVector<Number>& upper, NonlinearImplicitSystem& sys)
+  {
+    Problem * p = sys.get_equation_systems().parameters.get<Problem *>("_problem");
+    p->computeBounds(sys, lower, upper);
+  }
+
 } // namespace Moose
 
 NonlinearSystem::NonlinearSystem(FEProblem & subproblem, const std::string & name) :
@@ -109,6 +115,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & subproblem, const std::string & nam
 {
   _sys.nonlinear_solver->residual = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian = Moose::compute_jacobian;
+  _sys.nonlinear_solver->bounds   = Moose::compute_bounds;
 
   _time_weight.resize(3);
   timeSteppingScheme(Moose::IMPLICIT_EULER);                   // default time stepping scheme
@@ -512,6 +519,7 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual)
 
   Moose::perf_log.pop("compute_residual()","Solve");
 }
+
 
 void
 NonlinearSystem::timeSteppingScheme(Moose::TimeSteppingScheme scheme)
