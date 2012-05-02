@@ -316,9 +316,6 @@ registerObjects()
   // Scalar kernels
   registerScalarKernel(ODETimeDerivative);
 
-  addActionTypes();
-  registerActions();
-
   registered = true;
 }
 

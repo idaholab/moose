@@ -1,7 +1,6 @@
 #include "MooseTest.h"
 #include "Moose.h"
 #include "Factory.h"
-#include "ActionFactory.h"
 #include "Parser.h"
 
 #include "CoupledConvection.h"
@@ -57,8 +56,6 @@
 #include "StatefulSpatialTest.h"
 #include "CoupledMaterial.h"
 #include "LinearInterpolationMaterial.h"
-
-#include "ConvDiffMetaAction.h"
 
 #include "DGMatDiffusion.h"
 #include "EnhancedDGMatDiffusion.h"
@@ -150,8 +147,6 @@ void registerObjects()
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);
   registerScalarKernel(ImplicitODEy);
-
-  registerAction(ConvDiffMetaAction, "meta_action");
 
   // meshes
   registerObject(StripeMesh);

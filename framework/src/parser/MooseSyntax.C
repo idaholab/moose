@@ -14,6 +14,7 @@
 
 #include "MooseSyntax.h"
 #include "Parser.h"
+#include "Moose.h"
 
 
 Syntax::Syntax()
@@ -237,6 +238,9 @@ void associateSyntax()
 
   // Loose Coupling
   syntax.registerActionSyntax("EmptyAction", "SubProblems");
+
+  addActionTypes();
+  registerActions();
 }
 
 
