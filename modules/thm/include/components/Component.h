@@ -4,7 +4,6 @@
 #include "RELAP7.h"
 #include "R7Object.h"
 #include "R7Mesh.h"
-#include "ComponentParser.h"
 #include "ActionWarehouse.h"
 #include "Simulation.h"
 #include "Model.h"
