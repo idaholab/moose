@@ -49,10 +49,8 @@ Elk::SolidMechanics::registerObjects()
 
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PlenumPressure);
-  registerAction(PlenumPressureAction, "add_bc");
 
   registerBoundaryCondition(Pressure);
-  registerAction(PressureAction, "add_bc");
 
   registerKernel(SolidMechImplicitEuler);
 
@@ -61,7 +59,6 @@ Elk::SolidMechanics::registerObjects()
 
   registerKernel(StressDivergence);
   registerKernel(StressDivergenceRZ);
-  registerAction(SolidMechanicsAction, "add_kernel");
 }
 
 void
@@ -74,4 +71,8 @@ Elk::SolidMechanics::associateSyntax()
   Moose::syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
   
   Moose::syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
+
+  registerAction(PlenumPressureAction, "add_bc");
+  registerAction(PressureAction, "add_bc");
+  registerAction(SolidMechanicsAction, "add_kernel");
 }

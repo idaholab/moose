@@ -29,5 +29,6 @@ Elk::associateSyntax()
 {
   SolidMechanics::associateSyntax();
   Contact::associateSyntax();
+  HeatConduction::associateSyntax();
 }
 

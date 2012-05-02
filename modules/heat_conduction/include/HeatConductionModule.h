@@ -6,6 +6,7 @@ namespace Elk
   namespace HeatConduction
   {
   void registerObjects();
+  void associateSyntax();
   }
 }
 

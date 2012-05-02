@@ -1,6 +1,7 @@
 #include "HeatConductionModule.h"
 #include "Factory.h"
 #include "ActionFactory.h"
+#include "Parser.h"
 
 // heat_conduction
 #include "AddSlaveFluxVectorAction.h"
@@ -24,7 +25,11 @@ Elk::HeatConduction::registerObjects()
   registerMaterial(HeatConductionMaterial);
   registerMaterial(SiHeatConductionMaterial);
   registerDiracKernel(GapHeatPointSourceMaster);
-   
+}
+
+void
+Elk::HeatConduction::associateSyntax()
+{
   // This registers an action to add the "slave_flux" vector to the system at the right time
   registerActionName("add_slave_flux_vector", false);
   addActionNameDependency("add_slave_flux_vector", "ready_to_init");
@@ -32,5 +37,6 @@ Elk::HeatConduction::registerObjects()
   registerAction(AddSlaveFluxVectorAction, "add_slave_flux_vector");
 
   // thermal contact
+  Moose::syntax.registerActionSyntax("ThermalContactAction", "ThermalContact/*");
   registerAction(ThermalContactAction, "meta_action");
 }

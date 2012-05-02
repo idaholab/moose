@@ -14,7 +14,6 @@ void
 Elk::Contact::registerObjects()
 {
   // contact
-  registerAction(ContactAction, "meta_action");
   registerDiracKernel(ContactMaster);
   registerDiracKernel(SlaveConstraint);
   registerConstraint(OneDContactConstraint);
@@ -25,5 +24,6 @@ void
 Elk::Contact::associateSyntax()
 {
   Moose::syntax.registerActionSyntax("ContactAction", "Contact/*");
-  Moose::syntax.registerActionSyntax("ThermalContactAction", "ThermalContact/*");
+
+  registerAction(ContactAction, "meta_action");
 }
