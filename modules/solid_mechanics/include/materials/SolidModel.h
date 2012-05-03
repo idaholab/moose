@@ -34,6 +34,13 @@ public:
   static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const SymmTensor & T,
                                      SymmTensor & result );
 
+  enum CRACKING_RELEASE
+  {
+    CR_ABRUPT = 0,
+    CR_EXPONENTIAL,
+    CR_UNKNOWN
+  };
+
 protected:
 
   bool _bulk_modulus_set;
@@ -48,7 +55,10 @@ protected:
   Real _shear_modulus;
   Real _youngs_modulus;
 
+  const CRACKING_RELEASE _cracking_release;
   const Real _cracking_stress;
+  const Real _cracking_residual_stress;
+  Real _cracking_alpha;
   std::vector<unsigned int> _active_crack_planes;
   const unsigned int _max_cracks;
 
@@ -76,6 +86,11 @@ protected:
   RealVectorValue _crack_flags_local;
   MaterialProperty<ColumnMajorMatrix> * _crack_rotation;
   MaterialProperty<ColumnMajorMatrix> * _crack_rotation_old;
+  MaterialProperty<RealVectorValue> * _crack_strain;
+  MaterialProperty<RealVectorValue> * _crack_strain_old;
+  MaterialProperty<RealVectorValue> * _crack_max_strain;
+  MaterialProperty<RealVectorValue> * _crack_max_strain_old;
+  ColumnMajorMatrix _principal_strain;
 
   MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
   MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
@@ -113,13 +128,15 @@ protected:
    */
   virtual void crackingStressRotation();
 
+  virtual Real computeCrackFactor( int i, Real & sigma, Real & flagVal );
+
   /// Rotate stress to current configuration
   virtual void finalizeStress();
 
 
   virtual void computePreconditioning();
 
-  void applyCracksToTensor( SymmTensor & tensor );
+  void applyCracksToTensor( SymmTensor & tensor, const RealVectorValue & sigma );
 
   void
   elasticityTensor( SymmElasticityTensor * e );

@@ -55,6 +55,11 @@ public:
    */
   SymmElasticityTensor(const bool constant = false);
 
+  void constant( bool c )
+  {
+    _constant = c;
+  }
+
   virtual ~SymmElasticityTensor() {}
 
   void copyValues( SymmElasticityTensor & rhs ) const
@@ -131,7 +136,7 @@ public:
 
   void convertFrom9x9( const ColumnMajorMatrix & cmm );
   void convertFrom6x6( const ColumnMajorMatrix & cmm );
-  
+
   ColumnMajorMatrix columnMajorMatrix9x9() const;
   ColumnMajorMatrix columnMajorMatrix6x6() const;
 
@@ -140,7 +145,7 @@ public:
   void rotateFromGlobalToLocal( const ColumnMajorMatrix & R );
   void rotateFromLocalToGlobal( const ColumnMajorMatrix & R );
 
-  void adjustForCracking( const RealVectorValue & crack_flags );
+  virtual void adjustForCracking( const RealVectorValue & crack_flags );
 
   virtual SymmElasticityTensor calculateDerivative(unsigned int qp,unsigned int i);
 

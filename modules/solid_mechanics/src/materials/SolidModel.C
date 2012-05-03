@@ -21,6 +21,7 @@ InputParameters validParams<SolidModel>()
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addCoupledVar("temp", "Coupled Temperature");
+  params.addParam<std::string>("cracking_release", "abrupt", "The cracking release type.  Choices are abrupt (default) and exponential.");
   params.addParam<Real>("cracking_stress", 0.0, "The stress threshold beyond which cracking occurs.  Must be positive.");
   params.addParam<std::vector<unsigned int> >("active_crack_planes", "Planes on which cracks are allowed (0,1,2 -> x,z,theta in RZ)");
   params.addParam<unsigned int>("max_cracks", 3, "The maximum number of cracks allowed at a material point.");
@@ -34,7 +35,29 @@ InputParameters validParams<SolidModel>()
   return params;
 }
 
-
+namespace
+{
+  SolidModel::CRACKING_RELEASE
+  getCrackingModel( const std::string & name )
+  {
+    std::string n(name);
+    std::transform( n.begin(), n.end(), n.begin(), ::tolower);
+    SolidModel::CRACKING_RELEASE cm(SolidModel::CR_UNKNOWN);
+    if (n == "abrupt")
+    {
+      cm = SolidModel::CR_ABRUPT;
+    }
+    else if (n == "exponential")
+    {
+      cm = SolidModel::CR_EXPONENTIAL;
+    }
+    if (cm == SolidModel::CR_UNKNOWN)
+    {
+      mooseError("Unknown cracking model");
+    }
+    return cm;
+  }
+}
 
 SolidModel::SolidModel( const std::string & name,
                         InputParameters parameters )
@@ -49,8 +72,11 @@ SolidModel::SolidModel( const std::string & name,
    _poissons_ratio( _poissons_ratio_set ?  getParam<Real>("poissons_ratio") : -1 ),
    _shear_modulus( _shear_modulus_set ? getParam<Real>("shear_modulus") : -1 ),
    _youngs_modulus( _youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1 ),
+   _cracking_release( getCrackingModel( getParam<std::string>("cracking_release"))),
    _cracking_stress( parameters.isParamValid("cracking_stress") ?
                      (getParam<Real>("cracking_stress") > 0 ? getParam<Real>("cracking_stress") : -1) : -1 ),
+   _cracking_residual_stress( 0 ),
+   _cracking_alpha( 0 ),
    _active_crack_planes(3,1),
    _max_cracks( getParam<unsigned int>("max_cracks") ),
    _has_temp(isCoupled("temp")),
@@ -70,6 +96,11 @@ SolidModel::SolidModel( const std::string & name,
    _crack_flags_local(),
    _crack_rotation(NULL),
    _crack_rotation_old(NULL),
+   _crack_strain( NULL ),
+   _crack_strain_old( NULL ),
+   _crack_max_strain(NULL),
+   _crack_max_strain_old(NULL),
+   _principal_strain(3,1),
    _elasticity_tensor(declareProperty<SymmElasticityTensor>("elasticity_tensor")),
    _Jacobian_mult(declareProperty<SymmElasticityTensor>("Jacobian_mult")),
    _d_strain_dT(),
@@ -176,12 +207,18 @@ SolidModel::SolidModel( const std::string & name,
 
   createElasticityTensor();
 
+  _cracking_alpha = -_youngs_modulus;
+
   if (_cracking_stress > 0)
   {
     _crack_flags = &declareProperty<RealVectorValue>("crack_flags");
     _crack_flags_old = &declarePropertyOld<RealVectorValue>("crack_flags");
     _crack_rotation = &declareProperty<ColumnMajorMatrix>("crack_rotation");
     _crack_rotation_old = &declarePropertyOld<ColumnMajorMatrix>("crack_rotation");
+    _crack_max_strain = &declareProperty<RealVectorValue>("crack_max_strain");
+    _crack_max_strain_old = &declarePropertyOld<RealVectorValue>("crack_max_strain");
+    _crack_strain = &declareProperty<RealVectorValue>("crack_strain");
+    _crack_strain_old = &declarePropertyOld<RealVectorValue>("crack_strain");
 
     if (parameters.isParamValid( "active_crack_planes" ))
     {
@@ -216,10 +253,15 @@ SolidModel::~SolidModel()
 void
 SolidModel::createElasticityTensor()
 {
+  bool constant(true);
+  if ( _cracking_stress > 0 )
+  {
+    constant = false;
+  }
   // The IsoRZ and Iso are actually the same...
   if (_coord_sys == Moose::COORD_RZ)
   {
-    SymmIsotropicElasticityTensorRZ * t = new SymmIsotropicElasticityTensorRZ;
+    SymmIsotropicElasticityTensorRZ * t = new SymmIsotropicElasticityTensorRZ(constant);
     mooseAssert(_lambda_set, "Internal error:  lambda not set");
     t->setLambda(_lambda);
     mooseAssert(_shear_modulus_set, "Internal error:  shear modulus not set");
@@ -229,7 +271,7 @@ SolidModel::createElasticityTensor()
   }
   else
   {
-    SymmIsotropicElasticityTensor * iso = new SymmIsotropicElasticityTensor(true);
+    SymmIsotropicElasticityTensor * iso = new SymmIsotropicElasticityTensor(constant);
     iso->setLambda( _lambda );
     iso->setShearModulus( _shear_modulus );
     iso->calculate(0);
@@ -307,7 +349,9 @@ SolidModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
 void
 SolidModel::computeProperties()
 {
-  if (_t_step == 1 && _cracking_stress > 0)
+  // Something weird in MOOSE causes the first pass here to have _t_step
+  // set to either 0 or 1
+  if ((_t_step == 0 || _t_step == 1) && _cracking_stress > 0)
   {
     // Initialize crack flags, rotation
     for (unsigned int i(0); i < _qrule->n_points(); ++i)
@@ -418,12 +462,19 @@ SolidModel::crackingStrainDirections()
   if (_cracking_stress > 0)
   {
     // Compute whether cracking has occurred
-    ColumnMajorMatrix principal_strain(3,1);
-    computeCrackStrainAndOrientation( principal_strain );
+    computeCrackStrainAndOrientation( _principal_strain );
 
     for (unsigned int i(0); i < 3; ++i)
     {
-      if (principal_strain(i,0) < 0)
+      if (_principal_strain(i,0) > (*_crack_max_strain_old)[_qp](i))
+      {
+        (*_crack_max_strain)[_qp](i) = _principal_strain(i,0);
+      }
+      else
+      {
+        (*_crack_max_strain)[_qp](i) = (*_crack_max_strain_old)[_qp](i);
+      }
+      if (_principal_strain(i,0) < 0)
       {
         _crack_flags_local(i) = 1;
       }
@@ -448,34 +499,51 @@ SolidModel::crackingStrainDirections()
     _elasticity_tensor[_qp].form9x9Rotation( R, R_9x9 );
     _elasticity_tensor[_qp].rotateFromLocalToGlobal( R_9x9 );
 
-    // JDH DEBUG:  Perhaps this isn't needed?
-//     applyCracksToTensor( _stress_old );
-
   }
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void
-SolidModel::applyCracksToTensor( SymmTensor & tensor )
+SolidModel::applyCracksToTensor( SymmTensor & tensor, const RealVectorValue & sigma )
 {
   // Form transformation matrix R*E*R^T
   const ColumnMajorMatrix & R( (*_crack_rotation)[_qp] );
-  ColumnMajorMatrix trans(3,3);
-  for (unsigned int j(0); j < 3; ++j)
-  {
-    for (unsigned int i(0); i < 3; ++i)
-    {
-      for (unsigned int k(0); k < 3; ++k)
-      {
-        trans(i,j) += R(i,k) * _crack_flags_local(k) * R(j,k);
-      }
-    }
-  }
-  // Rotate the old stress to the principal orientation, zero out the stress in
+//  ColumnMajorMatrix trans(3,3);
+//  RealVectorValue cfl(_crack_flags_local);
+//  for (unsigned i(0); i < 3; ++i)
+//  {
+//    cfl(i) = std::sqrt(cfl(i));
+//  }
+//  for (unsigned int j(0); j < 3; ++j)
+//  {
+//    for (unsigned int i(0); i < 3; ++i)
+//    {
+//      for (unsigned int k(0); k < 3; ++k)
+//      {
+//        trans(i,j) += R(i,k) * cfl(k) * R(j,k);
+//      }
+//    }
+//  }
+  // Rotate the old stress to the principal orientation, modify the stress in
   // cracked directions, and rotate back.  This is done in one step since we have
   // the transformation matrix R*E*R^T.
-  rotateSymmetricTensor( trans, tensor, tensor );
+//  rotateSymmetricTensor( trans, tensor, tensor );
+
+  rotateSymmetricTensor( R.transpose(), tensor, tensor );
+  if ((*_crack_flags)[_qp](0) < 1)
+  {
+    tensor(0,0) = sigma(0);
+  }
+  if ((*_crack_flags)[_qp](1) < 1)
+  {
+    tensor(1,1) = sigma(1);
+  }
+  if ((*_crack_flags)[_qp](2) < 1)
+  {
+    tensor(2,2) = sigma(2);
+  }
+  rotateSymmetricTensor( R, tensor, tensor );
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -583,44 +651,67 @@ SolidModel::crackingStressRotation()
     SymmTensor sigmaPrime;
     rotateSymmetricTensor( RT, _stress[_qp], sigmaPrime );
 
-    bool new_crack(false);
-    bool cracked(false);
-    const Real tiny(1e-8);
     unsigned int num_cracks(0);
     for (unsigned i(0); i < 3; ++i)
     {
+      _crack_flags_local(i) = 1;
+      (*_crack_strain)[_qp](i) = (*_crack_strain_old)[_qp](i);
       if ((*_crack_flags_old)[_qp](i) < 1)
       {
         ++num_cracks;
       }
     }
+
+    bool new_crack(false);
+    bool cracked(false);
+    RealVectorValue sigma;
     for (unsigned i(0); i < 3; ++i)
     {
+      sigma(i) = sigmaPrime(i,i);
       (*_crack_flags)[_qp](i) = (*_crack_flags_old)[_qp](i);
-      if (sigmaPrime(i,i) > _cracking_stress &&
+      Real crackFactor(1);
+      if ((*_crack_flags_old)[_qp](i) == 1 &&
+          sigmaPrime(i,i) > _cracking_stress &&
           num_cracks < _max_cracks &&
           _active_crack_planes[i] == 1)
       {
+        cracked = true;
         new_crack = true;
         ++num_cracks;
-        (*_crack_flags)[_qp](i) = tiny;
-        _crack_flags_local(i) = tiny;
+
+        (*_crack_strain)[_qp](i) = _cracking_stress*_principal_strain(i,0)/sigma(i);
+        crackFactor = computeCrackFactor( i, sigma(i), (*_crack_flags)[_qp](i) );
+        (*_crack_flags)[_qp](i) = crackFactor;
+        _crack_flags_local(i) = crackFactor;
 
         // Also set the old value.  This helps tremendously with the nonlinear solve
         // since the stress cannot bounce between just below the critical stress and
         // effectively zero.
-        (*_crack_flags_old)[_qp](i) = tiny;
+//        (*_crack_flags_old)[_qp](i) = crackFactor;
+//        (*_crack_strain_old)[_qp](i) = _principal_strain(i,0);
       }
-      if ((*_crack_flags)[_qp](i) == tiny)
+      else if ((*_crack_flags_old)[_qp](i) < 1)
       {
+        // Previously cracked
         cracked = true;
+        if (_principal_strain(i,0) == (*_crack_max_strain)[_qp](i))
+        {
+          // Crack opening
+          crackFactor = computeCrackFactor( i, sigma(i), (*_crack_flags)[_qp](i) );
+          (*_crack_flags)[_qp](i) = crackFactor;
+          _crack_flags_local(i) = crackFactor;
+        }
+      }
+      if ((*_crack_flags)[_qp](i) < 1)
+      {
+        // cracked = true;
         // If cracked in this direction and the stress is positive (tension), we need
         // to ensure that the stress is removed and not rely on _crack_flags_local
         // having the correct value based on the estimate of the elastic strain.
-        if (sigmaPrime(i,i) > 0)
-        {
-          _crack_flags_local(i) = tiny;
-        }
+        // if (sigmaPrime(i,i) > 0)
+        // {
+        //   _crack_flags_local(i) = (*_crack_flags)[_qp](i);
+        // }
       }
     }
 
@@ -630,9 +721,48 @@ SolidModel::crackingStressRotation()
     }
     if (cracked)
     {
-      applyCracksToTensor( _stress[_qp] );
+      applyCracksToTensor( _stress[_qp], sigma );
     }
   }
+}
+
+Real
+SolidModel::computeCrackFactor( int i, Real & sigma, Real & flagVal )
+{
+  if (_principal_strain(i,0) < 0)
+  {
+    // Nothing needed
+  }
+  else if ((*_crack_max_strain)[_qp](i) < (*_crack_strain)[_qp](i))
+  {
+    // Nothing needed
+  }
+  else if (_cracking_release == CR_EXPONENTIAL)
+  {
+    if ((*_crack_max_strain)[_qp](i) < (*_crack_strain)[_qp](i))
+    {
+      mooseError("Max strain less than current");
+    }
+    const Real crackMaxStrain( (*_crack_max_strain)[_qp](i) );
+    sigma = _cracking_stress*
+           (_cracking_residual_stress + (1-_cracking_residual_stress)*
+            std::exp(_cracking_alpha/_cracking_stress*(crackMaxStrain-(*_crack_strain)[_qp](i))));
+    if ( crackMaxStrain != 0 )
+    {
+      flagVal = sigma*(*_crack_strain)[_qp](i)/(crackMaxStrain * _cracking_stress);
+    }
+    else
+    {
+      flagVal = 1;
+    }
+  }
+  else
+  {
+    const Real tiny(1e-16);
+    flagVal = tiny;
+    sigma = tiny*(*_crack_strain)[_qp](i)*_youngs_modulus;
+  }
+  return flagVal;
 }
 
 unsigned int

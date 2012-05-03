@@ -195,4 +195,3 @@ SymmIsotropicElasticityTensor::multiply( const SymmTensor & x, SymmTensor & b ) 
   b.yz() = 2*_val[18]*yz;
   b.zx() = 2*_val[20]*zx;
 }
-
