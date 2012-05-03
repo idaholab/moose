@@ -18,3 +18,9 @@ test_exponential = { INPUT : 'cracking_exponential.i',
                      SCALE_REFINE : 4
                     }
 
+test_rz_exponential = { INPUT : 'cracking_rz_exponential.i',
+                        EXODIFF : ['cracking_rz_exponential_out.e'],
+                        ABS_ZERO : 1e-4,
+                        SCALE_REFINE : 4
+                       }
+
