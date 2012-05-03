@@ -92,7 +92,7 @@
   type = Transient
   perf_log = true
 #  petsc_options = '-snes_mf'
-  restart_file = out_xda_restart_part1_restart_0005
+  restart_file_base = out_xda_restart_part1_restart_0005
   
   start_time = 1
   interval = 1

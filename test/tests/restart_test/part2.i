@@ -50,7 +50,7 @@
 [Executioner]
   type = Steady
   petsc_options = '-snes_mf_operator'
-  restart_file = out_part1_restart_0005
+  restart_file_base = out_part1_restart_0005
 []
 
 [Output]
