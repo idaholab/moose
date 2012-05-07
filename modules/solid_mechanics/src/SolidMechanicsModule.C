@@ -24,6 +24,7 @@
 #include "SolidMechanicsAction.h"
 #include "SolidMechImplicitEuler.h"
 #include "StressDivergence.h"
+#include "HomogenizationKernel.h"
 #include "StressDivergenceRZ.h"
 #include "LinearGeneralAnisotropicMaterial.h"
 #include "DashpotBC.h"
@@ -59,6 +60,7 @@ Elk::SolidMechanics::registerObjects()
 
   registerKernel(StressDivergence);
   registerKernel(StressDivergenceRZ);
+  registerKernel(HomogenizationKernel);
 }
 
 void
