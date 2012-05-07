@@ -21,6 +21,7 @@
 #include <vector>
 #include <set>
 
+#include "periodic_boundaries.h"
 //Forward Declarations
 class NodalFloodCount;
 class MooseMesh;
@@ -66,6 +67,12 @@ protected:
    */
   bool isNodeValueValid(unsigned int node_id) const;
 
+  /**
+   * This routine adds the periodic node information to our data structure prior to packing the data
+   * this makes those periodic neighbors appear much like ghosted nodes in a multiprocessor setting
+   */
+  unsigned int appendPeriodicNeighborNodes(std::vector<std::set<unsigned int> > & data) const;
+
   Real _threshold;
   MooseMesh & _mesh;
   MooseVariable & _moose_var;
@@ -77,6 +84,9 @@ protected:
   std::list<std::set<unsigned int> > _bubble_sets;
 
   unsigned int _region_count;
+
+  PeriodicBoundaries *_pbs;
+  std::multimap<unsigned int, unsigned int> _periodic_node_map;
 };
 
 #endif

@@ -11,6 +11,7 @@
 #include "RobinBC.h"
 #include "JouleHeating.h"
 #include "CoefTimeDerivative.h"
+#include "GaussContForcing.h"
 
 void
 Elk::Misc::registerObjects()
@@ -21,6 +22,7 @@ Elk::Misc::registerObjects()
   registerKernel(Convection);
   registerKernel(JouleHeating);
   registerKernel(CoefTimeDerivative);
+  registerKernel(GaussContForcing);
   registerAux(MaterialRealScaledAux);
   registerPostprocessor(InternalVolume);
   registerBoundaryCondition(RobinBC);

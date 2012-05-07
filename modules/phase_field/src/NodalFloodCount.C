@@ -17,10 +17,15 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 
-#include "mesh_tools.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
+
+
+//libMesh includes
 #include "dof_map.h"
+#include "mesh_tools.h"
+#include "periodic_boundaries.h"
+#include "point_locator_base.h"
 
 #include <algorithm>
 #include <limits>
@@ -40,12 +45,17 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _mesh(_subproblem.mesh()),
     _moose_var(_subproblem.getVariable(0, getParam<std::string>("variable"))),
     _var_number(_moose_var.number()),
-    _region_count(0)
+    _region_count(0),
+    _pbs(NULL)
 {}
 
 void
 NodalFloodCount::initialize()
 {
+  // Get a pointer to the PeriodicBoundaries buried in libMesh
+  // TODO: Can we do this in the constructor (i.e. are all objects necessary for this call in existance during ctor?)
+  _pbs = dynamic_cast<FEProblem *>(&_subproblem)->getNonlinearSystem().dofMap().get_periodic_boundaries();
+
   // Clear the bubble marking map
   _bubble_map.clear();
 
@@ -58,6 +68,9 @@ NodalFloodCount::initialize()
   // Build a new node to element map
   _nodes_to_elem_map.clear();
   MeshTools::build_nodes_to_elem_map(_mesh._mesh, _nodes_to_elem_map);
+
+  // TODO: We might only need to build this once if adaptivity is turned off
+  _mesh.buildPeriodicNodeMap(_periodic_node_map, _var_number, _pbs);
 }
 
 void
@@ -110,6 +123,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data) const
     return;
 
   std::vector<std::set<unsigned int> > data(_region_count+1);
+  unsigned int n_periodic_nodes = 0;
 
   {
     std::map<unsigned int, int>::const_iterator end = _bubble_map.end();
@@ -117,19 +131,22 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data) const
     for (std::map<unsigned int, int>::const_iterator it = _bubble_map.begin(); it != end; ++it)
       data[(it->second)].insert(it->first);
 
+    // Append our periodic neighbor nodes to the data structure before packing
+    n_periodic_nodes = appendPeriodicNeighborNodes(data);
+
     mooseAssert(_region_count+1 == data.size(), "Error in packing data");
   }
 
   {
     /**
      * The size of the packed data structure should be the total number of marked
-     * nodes plus the number of unique bubbles.
+     * nodes plus inserted periodic neighbor information plus the number of unique bubbles.
      *
      * We will pack the data into a series of groups representing each unique bubble
      * the nodes for each group will be proceeded by the number of nodes in that group
      * [ <n_nodes> <n_0> <n_1> ... <n_n> <m_nodes> <n_0> <n_1> ... <n_m> ]
      */
-    packed_data.resize(_bubble_map.size() + _region_count);
+    packed_data.resize(_bubble_map.size() + n_periodic_nodes + _region_count);
 
     // Now pack it up
     unsigned int current_idx = 0;
@@ -241,7 +258,6 @@ NodalFloodCount::flood(const Node *node, unsigned int region)
     return;
   }
 
-  // Yay! A bubble
   std::vector< const Node * > neighbors;
   MeshTools::find_nodal_neighbors(_mesh._mesh, *node, _nodes_to_elem_map, neighbors);
   // Important!  If this node doesn't have any neighbors (i.e. floating node in the center
@@ -252,8 +268,10 @@ NodalFloodCount::flood(const Node *node, unsigned int region)
     return;
   }
 
-  // Mark it! (If region is zero that signifies that this is a new bubble)
+  // Yay! A bubble -> Mark it! (If region is zero that signifies that this is a new bubble)
   _bubble_map[node_id] = region ? region : ++_region_count;
+  // If this is a periodic boudnary then there may be multiple corresponding nodes that need to
+  // be marked depending on the number of mapped directions and node position - we'll do that now!
 
   for (unsigned int i=0; i<neighbors.size(); ++i)
   {
@@ -273,4 +291,39 @@ NodalFloodCount::isNodeValueValid(unsigned int node_id) const
       return true;
 
   return false;
+}
+
+unsigned int
+NodalFloodCount::appendPeriodicNeighborNodes(std::vector<std::set<unsigned int> > & data) const
+{
+  unsigned int inserted_counts = 0;
+
+  /**
+   * Now we will append our periodic neighbor information.  We treat the periodic neighbor nodes
+   * much like we do ghosted nodes in a multi-processor setting.  If a bubble is sitting on a
+   * periodic boundary we will simply add those periodic neighbors to the appropriate bubble
+   * before packing up the data
+   */
+  for (unsigned int i = 0; i < data.size(); ++i)
+  {
+    std::set<unsigned int> periodic_neighbors;
+    std::set<unsigned int> merged_sets;
+
+    for (std::set<unsigned int>::iterator s_it = data[i].begin(); s_it != data[i].end(); ++s_it)
+    {
+      std::pair<std::multimap<unsigned int, unsigned int>::const_iterator, std::multimap<unsigned int, unsigned int>::const_iterator> iters =
+        _periodic_node_map.equal_range(*s_it);
+      for (std::multimap<unsigned int, unsigned int>::const_iterator it = iters.first; it != iters.second; ++it)
+        periodic_neighbors.insert(it->second);
+    }
+
+    // Now that we have all of the periodic_neighbors in our temporary set we need to union it together with the original set
+    // for the current bubble
+    std::set_union(data[i].begin(), data[i].end(), periodic_neighbors.begin(), periodic_neighbors.end(), std::inserter(merged_sets, merged_sets.end()));
+
+    inserted_counts += merged_sets.size() - data[i].size();
+    // save the updated set back into our datastructure
+    data[i] = merged_sets;
+  }
+  return inserted_counts;
 }
