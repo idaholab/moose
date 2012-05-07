@@ -504,3 +504,61 @@ MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) co
 
   return ids;
 }
+
+void
+MooseMesh::buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & periodic_node_map, unsigned int var_number, PeriodicBoundaries *pbs) const
+{
+  periodic_node_map.clear();
+
+  MeshBase::const_element_iterator it = _mesh.active_local_elements_begin();
+  MeshBase::const_element_iterator it_end = _mesh.active_local_elements_end();
+  const PointLocatorBase &point_locator = _mesh.point_locator();
+
+  for (; it != it_end; ++it)
+  {
+    const Elem *elem = *it;
+    for (unsigned int s=0; s<elem->n_sides(); ++s)
+    {
+      if (elem->neighbor(s))
+        continue;
+
+      const std::vector<boundary_id_type>& bc_ids = _mesh.boundary_info->boundary_ids (elem, s);
+      for (std::vector<boundary_id_type>::const_iterator id_it = bc_ids.begin(); id_it!=bc_ids.end(); ++id_it)
+      {
+        const boundary_id_type boundary_id = *id_it;
+        const PeriodicBoundary *periodic = pbs->boundary(boundary_id);
+        if (periodic && periodic->is_my_variable(var_number))
+        {
+          const Elem* neigh = pbs->neighbor(boundary_id, point_locator, elem, s);
+          unsigned int s_neigh = _mesh.boundary_info->side_with_boundary_id (neigh, periodic->pairedboundary);
+
+          AutoPtr<Elem> elem_side = elem->build_side(s);
+          AutoPtr<Elem> neigh_side = neigh->build_side(s_neigh);
+
+          // At this point we have matching sides - lets find matching nodes
+          for (unsigned int i=0; i<elem_side->n_nodes(); ++i)
+          {
+            Node *master_node = elem->get_node(i);
+            Point master_point = periodic->get_corresponding_pos(*master_node);
+            for (unsigned int j=0; j<neigh_side->n_nodes(); ++j)
+            {
+              Node *slave_node = neigh_side->get_node(j);
+              if (master_point.absolute_fuzzy_equals(*slave_node))
+              {
+                // Avoid inserting any duplicates
+                std::pair<std::multimap<unsigned int, unsigned int>::iterator, std::multimap<unsigned int, unsigned int>::iterator> iters =
+                  periodic_node_map.equal_range(master_node->id());
+                bool found = false;
+                for (std::multimap<unsigned int, unsigned int>::iterator map_it = iters.first; map_it != iters.second; ++map_it)
+                  if (map_it->second == slave_node->id())
+                    found = true;
+                if (!found)
+                  periodic_node_map.insert(std::make_pair(master_node->id(), slave_node->id()));
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

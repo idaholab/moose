@@ -25,6 +25,9 @@
 #include "boundary_info.h"
 #include "elem_range.h"
 #include "node_range.h"
+#include "periodic_boundaries.h"
+
+#include <map>
 
 //forward declaration
 class MeshModifier;
@@ -177,6 +180,13 @@ public:
   BoundaryName & boundaryName(BoundaryID boundary_id);
 
   libMesh::Mesh _mesh;
+
+  /**
+   * This routine builds a multip map of boundary ids to matching boundary ids across all periodic boudnaries
+   * in the system.  It does this only for active local elements so the list will not be globally complete when
+   * run in parallel!
+   */
+  void buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & periodic_node_map, unsigned int var_number, PeriodicBoundaries *pbs) const;
 
 protected:
   /// true if mesh is changed (i.e. after adaptivity step)
