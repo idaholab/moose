@@ -43,7 +43,7 @@ MultiSmoothCircleIC::MultiSmoothCircleIC(const std::string & name,
          _bubradi[i] = 0.0;
 
        //Vary circle positions
-       int num_tries = 0;
+       unsigned int num_tries = 0;
          
        Real rr = 0.0;
        Real xx, yy, zz;

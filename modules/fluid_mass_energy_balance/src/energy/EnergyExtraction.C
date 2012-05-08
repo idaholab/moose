@@ -143,7 +143,7 @@ Real EnergyExtraction::computeQpJacobian()
 
 
 
-Real EnergyExtraction::computeQpOffDiagJacobian(unsigned int jvar)
+Real EnergyExtraction::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
    return 0.0;
     

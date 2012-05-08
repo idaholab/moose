@@ -74,7 +74,7 @@ Real SourceSink::computeQpResidual()
       
 
         Real strength = -_test[_i][_qp]*_value/_range_param[0]/_range_param[1]/_range_param[2];
-         Real strength2 = _value/_range_param[0]/_range_param[1]/_range_param[2];
+     //    Real strength2 = _value/_range_param[0]/_range_param[1]/_range_param[2];
      // if (strength !=0)
      //   std::cout << "_E= " <<_q_point[_qp](0)<<" "<<_q_point[_qp](1)<<" "<<_q_point[_qp](2)<<" "<<_value<< " " <<strength2<<"\n";
 

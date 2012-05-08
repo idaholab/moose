@@ -141,6 +141,8 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data) const
     /**
      * The size of the packed data structure should be the total number of marked
      * nodes plus inserted periodic neighbor information plus the number of unique bubbles.
+     * This first resize will be an overesitmate because we aren't going to store nodes
+     * marked with zeros (outside of bubbles).
      *
      * We will pack the data into a series of groups representing each unique bubble
      * the nodes for each group will be proceeded by the number of nodes in that group
@@ -161,6 +163,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data) const
         packed_data[current_idx++] = *it;
     }
 
+    // Resize the structure to it's actual final size
     packed_data.resize(current_idx);
   }
 }

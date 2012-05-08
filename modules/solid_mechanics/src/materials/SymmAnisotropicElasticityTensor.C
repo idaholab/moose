@@ -225,7 +225,7 @@ SymmAnisotropicElasticityTensor::form_transformation_t_matrix()
   // TransD6toD9 transfroms Dt[6][6] to Dmat[9][9]
   // TransD9toD6 transforms Dmat[9][9] to Dt[6][6]
 
-  Real sqrt2 = std::sqrt(2.0);
+//  Real sqrt2 = std::sqrt(2.0);
 //  Real a = 1/sqrt2;
   Real a = 1.0;
 
