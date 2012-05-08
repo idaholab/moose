@@ -172,7 +172,7 @@ void
 NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
 {
   bool next_set = true;
-  unsigned int curr_set_length;
+  unsigned int curr_set_length=0;
   std::set<unsigned int> curr_set;
 
   _bubble_sets.clear();
