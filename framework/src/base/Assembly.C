@@ -353,8 +353,6 @@ Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physica
 {
   std::vector<Point> reference_points;
 
-  unsigned int elem_dimension = elem->dim();
-
   FEInterface::inverse_map(elem->dim(), FEType(), elem, physical_points, reference_points);
 
   _currently_fe_caching = false;

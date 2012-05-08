@@ -25,7 +25,7 @@ ComputeInitialConditionThread::ComputeInitialConditionThread(SubProblem & subpro
 {
 }
 
-ComputeInitialConditionThread::ComputeInitialConditionThread(ComputeInitialConditionThread & x, Threads::split split) :
+ComputeInitialConditionThread::ComputeInitialConditionThread(ComputeInitialConditionThread & x, Threads::split /*split*/) :
     _subproblem(x._subproblem),
     _sys(x._sys),
     _solution(x._solution)
@@ -47,8 +47,6 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
   const unsigned int n_variables = _sys.nVariables();
   // The dimensionality of the current mesh
   const unsigned int dim = _sys.mesh().dimension();
-  // The DofMap for this system
-  const DofMap & dof_map = _sys.dofMap();
 
   // The element matrix and RHS for projections.
   // Note that Ke is always real-valued, whereas Fe may be complex valued if complex number support is enabled

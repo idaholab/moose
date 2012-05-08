@@ -64,6 +64,6 @@ ScalarKernel::ScalarKernel(const std::string & name, InputParameters parameters)
 }
 
 void
-ScalarKernel::computeOffDiagJacobian(unsigned int jvar)
+ScalarKernel::computeOffDiagJacobian(unsigned int /*jvar*/)
 {
 }

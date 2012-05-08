@@ -40,7 +40,7 @@ public:
   // Variables /////
   virtual bool hasVariable(const std::string & /*var_name*/) { return false; } // TODO
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) { return _mproblem.getVariable(tid, var_name); } // TODO
-  virtual bool hasScalarVariable(const std::string & var_name) { return false; } // TODO
+  virtual bool hasScalarVariable(const std::string & /*var_name*/) { return false; } // TODO
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) { return _mproblem.getScalarVariable(tid, var_name); } // TODO
 
   virtual void subdomainSetup(SubdomainID /*subdomain*/, THREAD_ID /*tid*/) {}
