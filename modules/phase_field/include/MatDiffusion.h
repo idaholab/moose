@@ -1,7 +1,7 @@
 #ifndef MATDIFFUSION_H
 #define MATFDIFFUSION_H
 
-#include "Kernel.h"
+#include "Diffusion.h"
 #include "Material.h"
 
 //Forward Declarations
@@ -10,7 +10,7 @@ class MatDiffusion;
 template<>
 InputParameters validParams<MatDiffusion>();
 
-class MatDiffusion : public Kernel
+class MatDiffusion : public Diffusion
 {
 public:
 
