@@ -30,6 +30,7 @@ public:
   NodalProxyMaxValue(const std::string & name, InputParameters parameters);
 
   virtual void initialize();
+  virtual Real computeValue();
   virtual void execute();
   virtual Real getValue();
 

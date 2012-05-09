@@ -37,12 +37,20 @@ NodalProxyMaxValue::initialize()
   _value = -std::numeric_limits<Real>::max();
 }
 
+Real
+NodalProxyMaxValue::computeValue()
+{
+  return _u[_qp];
+}
+
 void
 NodalProxyMaxValue::execute()
 {
-  if (_u[_qp] > _value)
+  Real val = computeValue();
+
+  if (val > _value)
   {
-    _value = _u[_qp];
+    _value = val;
     _node_id = _current_node->id();
   }
 }
