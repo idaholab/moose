@@ -125,6 +125,7 @@
 #include "SideFluxIntegral.h"
 #include "SideIntegral.h"
 #include "NodalMaxValue.h"
+#include "NodalProxyMaxValue.h"
 #include "PlotFunction.h"
 #include "ScalarL2Error.h"
 #include "ElementalVariableValue.h"
@@ -301,6 +302,7 @@ registerObjects()
   registerPostprocessor(SideFluxIntegral);
   registerPostprocessor(SideIntegral);
   registerPostprocessor(NodalMaxValue);
+  registerPostprocessor(NodalProxyMaxValue);
   registerPostprocessor(ElementalVariableValue);
   registerPostprocessor(ElementL2Norm);
   // dampers

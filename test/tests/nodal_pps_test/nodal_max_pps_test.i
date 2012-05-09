@@ -79,6 +79,11 @@
     type = NodalMaxValue
     variable = u
   [../]
+
+  [./max_node_id]
+    type = NodalProxyMaxValue
+    variable = u
+  [../]
 []
 
 [Executioner]

@@ -1,0 +1,66 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "NodalProxyMaxValue.h"
+#include "MooseMesh.h"
+#include "SubProblem.h"
+// libMesh
+#include "boundary_info.h"
+
+template<>
+InputParameters validParams<NodalProxyMaxValue>()
+{
+  InputParameters params = validParams<NodalPostprocessor>();
+  return params;
+}
+
+NodalProxyMaxValue::NodalProxyMaxValue(const std::string & name, InputParameters parameters) :
+    NodalPostprocessor(name, parameters),
+    _value(-std::numeric_limits<Real>::max())
+{
+}
+
+void
+NodalProxyMaxValue::initialize()
+{
+  _value = -std::numeric_limits<Real>::max();
+}
+
+void
+NodalProxyMaxValue::execute()
+{
+  if (_u[_qp] > _value)
+  {
+    _value = _u[_qp];
+    _node_id = _current_node->id();
+  }
+}
+
+Real
+NodalProxyMaxValue::getValue()
+{
+  gatherProxyValueMax(_value, _node_id);
+  return _node_id;
+}
+
+void
+NodalProxyMaxValue::threadJoin(const Postprocessor & y)
+{
+  const NodalProxyMaxValue & pps = static_cast<const NodalProxyMaxValue &>(y);
+  if (pps._value > _value)
+  {
+    _value = pps._value;
+    _node_id = pps._node_id;
+  }
+}

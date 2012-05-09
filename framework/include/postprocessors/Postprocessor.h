@@ -71,15 +71,21 @@ public:
   template <typename T>
   void gatherSum(T & value)
   {
-    // TODO: Gather threaded values as well
     Parallel::sum(value);
   }
 
   template <typename T>
   void gatherMax(T & value)
   {
-    // TODO: Gather threaded values as well
     Parallel::max(value);
+  }
+
+  template <typename T1, typename T2>
+  void gatherProxyValueMax(T1 & value, T2 & proxy)
+  {
+    unsigned int rank;
+    Parallel::maxloc(value, rank);
+    Parallel::broadcast(proxy, rank);
   }
 
   virtual void threadJoin(const Postprocessor & /*pps*/) = 0;
