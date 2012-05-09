@@ -44,8 +44,12 @@ class NodalPostprocessor :
 public:
   NodalPostprocessor(const std::string & name, InputParameters parameters);
 
+  const std::vector<std::string> & boundaries() { return _boundaries; }
+
 protected:
   MooseVariable & _var;
+
+  std::vector<std::string> _boundaries;
 
   const unsigned int _qp;
 //  const std::vector< Point > & _q_point;

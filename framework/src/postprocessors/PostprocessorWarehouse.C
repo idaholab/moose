@@ -93,8 +93,18 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
   }
   else if(dynamic_cast<NodalPostprocessor*>(postprocessor))
   {
-    // FIXME: nodal pps multithreaded
-    _nodal_postprocessors.push_back(postprocessor);
+    const std::vector<BoundaryName> & bnds = dynamic_cast<NodalPostprocessor*>(postprocessor)->boundaries();
+    for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
+    {
+      BoundaryID boundary_id;
+
+      if (*it == "ANY_BOUNDARY_ID")
+        boundary_id = Moose::ANY_BOUNDARY_ID;
+      else
+        boundary_id = mesh.getBoundaryID(*it);
+      _nodal_postprocessors[boundary_id].push_back(postprocessor);
+      _nodeset_ids_with_postprocessors.insert(boundary_id);
+    }
   }
   else
   {

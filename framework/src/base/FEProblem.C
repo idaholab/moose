@@ -1148,7 +1148,7 @@ FEProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
 void
 FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pps)
 {
-  if (pps[0].blocks().size() > 0 || pps[0].boundaryIds().size() > 0)
+  if (pps[0].blocks().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0)
   {
     serializeSolution();
 
@@ -1158,6 +1158,7 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
     _aux.compute();
 
     // init
+    bool have_nodal_pps = false;
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
       for (std::set<SubdomainID>::const_iterator block_it = pps[tid].blocks().begin();
@@ -1182,6 +1183,19 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
             side_postprocessor_it != pps[tid].sidePostprocessors(*boundary_it).end();
             ++side_postprocessor_it)
           (*side_postprocessor_it)->initialize();
+      }
+
+      for (std::set<BoundaryID>::const_iterator boundary_it = pps[tid].nodesetIds().begin();
+          boundary_it != pps[tid].nodesetIds().end();
+          ++boundary_it)
+      {
+        for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[tid].nodalPostprocessors(*boundary_it).begin();
+             nodal_postprocessor_it != pps[tid].nodalPostprocessors(*boundary_it).end();
+             ++nodal_postprocessor_it)
+        {
+          (*nodal_postprocessor_it)->initialize();
+          have_nodal_pps = true;
+        }
       }
     }
 
@@ -1224,8 +1238,8 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
     // Store side postprocessors values
     already_gathered.clear();
     for (std::set<BoundaryID>::const_iterator boundary_ids_it = pps[0].boundaryIds().begin();
-        boundary_ids_it != pps[0].boundaryIds().end();
-        ++boundary_ids_it)
+         boundary_ids_it != pps[0].boundaryIds().end();
+         ++boundary_ids_it)
     {
       BoundaryID boundary_id = *boundary_ids_it;
 
@@ -1251,52 +1265,42 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
         }
       }
     }
-  }
 
-  // Fixme: Nodal processors need to be threaded
-  // init
-  bool have_nodal_pps = false;
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-  {
-    for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[tid].nodalPostprocessors().begin();
-         nodal_postprocessor_it != pps[tid].nodalPostprocessors().end();
-         ++nodal_postprocessor_it)
+    // Don't waste time looping over nodes if there aren't any nodal postprocessors to calculate
+    if (have_nodal_pps)
     {
-      (*nodal_postprocessor_it)->initialize();
-      have_nodal_pps = true;
-    }
-  }
+      ComputeNodalPPSThread cnppt(*this, pps);
+      Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
 
-  // Don't waste time looping over nodes if there aren't any nodal postprocessors to calculate
-  if (have_nodal_pps)
-  {
-    ComputeNodalPPSThread cnppt(*this, pps);
-    Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
-
-    // Store nodal postprocessors values
-    std::set<Postprocessor *> already_gathered;
-
-    const std::vector<Postprocessor *> & nodal_postprocessors = pps[0].nodalPostprocessors();
-
-    for (unsigned int i = 0; i < nodal_postprocessors.size(); ++i)
-    {
-      Postprocessor *ps = nodal_postprocessors[i];
-      std::string name = ps->name();
-
-      // join across the threads (gather the value in thread #0)
-      if (already_gathered.find(ps) == already_gathered.end())
+      // Store nodal postprocessors values
+      already_gathered.clear();
+      for (std::set<BoundaryID>::const_iterator boundary_ids_it = pps[0].nodesetIds().begin();
+           boundary_ids_it != pps[0].nodesetIds().end();
+           ++boundary_ids_it)
       {
-        for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
-          ps->threadJoin(*pps[tid].nodalPostprocessors()[i]);
+        BoundaryID boundary_id = *boundary_ids_it;
 
-        Real value = ps->getValue();
-        // store the value in each thread
+        const std::vector<Postprocessor *> & nodal_postprocessors = pps[0].nodalPostprocessors(boundary_id);
+        for (unsigned int i = 0; i < nodal_postprocessors.size(); ++i)
+        {
+          Postprocessor *ps = nodal_postprocessors[i];
+          std::string name = ps->name();
 
-        for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-          _pps_data[tid].storeValue(name, value);
+          // join across the threads (gather the value in thread #0)
+          if (already_gathered.find(ps) == already_gathered.end())
+          {
+            for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
+              ps->threadJoin(*pps[tid].nodalPostprocessors(boundary_id)[i]);
 
-        already_gathered.insert(ps);
+            Real value = ps->getValue();
+            // store the value in each thread
+
+            for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+              _pps_data[tid].storeValue(name, value);
+
+            already_gathered.insert(ps);
+          }
+        }
       }
     }
   }
