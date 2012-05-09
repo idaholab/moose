@@ -22,9 +22,6 @@ InputParameters validParams<NodalPostprocessor>()
 {
   InputParameters params = validParams<Postprocessor>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this postprocessor operates on");
-  std::vector<std::string> everywhere(1);
-  everywhere[0] = "ANY_BOUNDARY_ID";
-  params.addParam<std::vector<BoundaryName> >("boundary", everywhere, "boundary ID or name where the postprocessor works");
   return params;
 }
 
@@ -36,7 +33,6 @@ NodalPostprocessor::NodalPostprocessor(const std::string & name, InputParameters
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
     _var(_subproblem.getVariable(_tid, parameters.get<std::string>("variable"))),
-    _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),
 //    _q_point(_subproblem.points(_tid)),
 //    _qrule(_subproblem.qRule(_tid)),
 //    _JxW(_subproblem.JxW(_tid)),

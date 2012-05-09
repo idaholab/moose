@@ -25,7 +25,7 @@ class Problem;
 class ComputeNodalPPSThread
 {
 public:
-  ComputeNodalPPSThread(SubProblem & problem, std::vector<PostprocessorWarehouse> & pps);
+  ComputeNodalPPSThread(Problem & problem, std::vector<PostprocessorWarehouse> & pps);
   // Splitting Constructor
   ComputeNodalPPSThread(ComputeNodalPPSThread & x, Threads::split split);
 
@@ -34,7 +34,7 @@ public:
   void join(const ComputeNodalPPSThread & /*y*/);
 
 protected:
-  SubProblem & _sub_problem;
+  Problem & _problem;
   THREAD_ID _tid;
 
   std::vector<PostprocessorWarehouse> & _pps;
