@@ -144,6 +144,8 @@ public:
   virtual unsigned int nLinearIterations() { return _nl.nLinearIterations(); }
   virtual Real finalNonlinearResidual() { return _nl.finalNonlinearResidual(); }
 
+  virtual bool computingInitialResidual() { return _nl.computingInitialResidual(); }
+
   virtual void onTimestepBegin();
   virtual void onTimestepEnd();
 

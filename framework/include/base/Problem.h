@@ -107,6 +107,12 @@ public:
   // Solve /////
   virtual void init() = 0;
 
+  /**
+   * Returns true if the problem is in the process of computing it's initial residual.
+   * @return Whether or not the problem is currently computing the initial residual.
+   */
+  virtual bool computingInitialResidual() = 0;
+
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual) = 0;
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian) = 0;
   virtual void computeBounds(NonlinearImplicitSystem & sys, NumericVector<Number> & lower, NumericVector<Number> & upper) = 0;

@@ -49,6 +49,12 @@ public:
   virtual void solve();
   virtual void restoreSolutions();
 
+  /**
+   * Returns true if this system is currently computing the initial residual for a solve.
+   * @return Whether or not we are currently computing the initial residual.
+   */
+  virtual bool computingInitialResidual() { return _computing_initial_residual; }
+
   // Setup Functions ////
   virtual void initialSetup();
   virtual void initialSetupBCs();
@@ -445,6 +451,8 @@ protected:
   bool _use_predictor;
   /// Scale factor to use with predictor
   Real _predictor_scale;
+
+  bool _computing_initial_residual;
 
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;

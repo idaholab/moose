@@ -67,6 +67,8 @@ public:
   // Solve /////
   virtual void init();
 
+  virtual bool computingInitialResidual() { return false; }
+
   virtual void computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & /*soln*/, NumericVector<Number> & /*residual*/) {}
   virtual void computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & /*soln*/, SparseMatrix<Number> & /*jacobian*/) {}
   virtual void computeBounds(NonlinearImplicitSystem & /*sys*/, NumericVector<Number> & /*lower*/, NumericVector<Number> & /*upper*/){}

@@ -163,6 +163,8 @@ public:
   // Transient /////
   virtual void copySolutionsBackwards() {}
 
+  virtual bool computingInitialResidual() { return _mproblem.computingInitialResidual(); }
+
   virtual void onTimestepBegin() {}
   virtual void onTimestepEnd() {}
 
