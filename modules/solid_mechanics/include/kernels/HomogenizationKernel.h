@@ -23,11 +23,10 @@ protected:
 
   MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
 
-
 private:
   const unsigned int _component;
   const unsigned int _column;
-  
+
 
 };
 #endif //HOMOGENIZATIONKERNEL_H

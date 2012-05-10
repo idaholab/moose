@@ -43,6 +43,8 @@ public:
 
 protected:
 
+  const std::string _appended_property_name;
+
   bool _bulk_modulus_set;
   bool _lambda_set;
   bool _poissons_ratio_set;
@@ -155,6 +157,20 @@ protected:
   int delta(int i, int j) const
   {
     return i == j;
+  }
+
+  template<typename T>
+  MaterialProperty<T> & createProperty(const std::string & prop_name)
+  {
+    std::string name(prop_name + _appended_property_name);
+    return declareProperty<T>(name);
+  }
+
+  template<typename T>
+  MaterialProperty<T> & createPropertyOld(const std::string & prop_name)
+  {
+    std::string name(prop_name + _appended_property_name);
+    return declarePropertyOld<T>(name);
   }
 
 private:

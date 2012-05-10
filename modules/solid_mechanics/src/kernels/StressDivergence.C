@@ -12,6 +12,7 @@ InputParameters validParams<StressDivergence>()
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature");
+  params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
   params.set<bool>("use_displaced_mesh") = true;
 
@@ -21,9 +22,9 @@ InputParameters validParams<StressDivergence>()
 
 StressDivergence::StressDivergence(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
-   _stress(getMaterialProperty<SymmTensor>("stress")),
-   _Jacobian_mult(getMaterialProperty<SymmElasticityTensor>("Jacobian_mult")),
-   _d_stress_dT(getMaterialProperty<SymmTensor>("d_stress_dT")),
+   _stress(getMaterialProperty<SymmTensor>("stress" + getParam<std::string>("appended_property_name"))),
+   _Jacobian_mult(getMaterialProperty<SymmElasticityTensor>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
+   _d_stress_dT(getMaterialProperty<SymmTensor>("d_stress_dT"+ getParam<std::string>("appended_property_name"))),
    _component(getParam<unsigned int>("component")),
    _xdisp_coupled(isCoupled("disp_x")),
    _ydisp_coupled(isCoupled("disp_y")),

@@ -14,6 +14,7 @@ template<>
 InputParameters validParams<SolidModel>()
 {
   InputParameters params = validParams<Material>();
+  params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
   params.addParam<Real>("lambda", "Lame's first parameter for the material.");
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material");
@@ -62,6 +63,7 @@ namespace
 SolidModel::SolidModel( const std::string & name,
                         InputParameters parameters )
   :Material( name, parameters ),
+   _appended_property_name( getParam<std::string>("appended_property_name") ),
    _bulk_modulus_set( parameters.isParamValid("bulk_modulus") ),
    _lambda_set( parameters.isParamValid("lambda") ),
    _poissons_ratio_set( parameters.isParamValid("poissons_ratio") ),
@@ -84,13 +86,13 @@ SolidModel::SolidModel( const std::string & name,
    _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
    _alpha(getParam<Real>("thermal_expansion")),
    _volumetric_models(),
-   _stress(declareProperty<SymmTensor>("stress")),
-   _stress_old_prop(declarePropertyOld<SymmTensor>("stress")),
+   _stress(createProperty<SymmTensor>("stress")),
+   _stress_old_prop(createPropertyOld<SymmTensor>("stress")),
    _stress_old(0),
-   _total_strain(declareProperty<SymmTensor>("total_strain")),
-   _total_strain_old(declarePropertyOld<SymmTensor>("total_strain")),
-   _elastic_strain(declareProperty<SymmTensor>("elastic_strain")),
-   _elastic_strain_old(declarePropertyOld<SymmTensor>("elastic_strain")),
+   _total_strain(createProperty<SymmTensor>("total_strain")),
+   _total_strain_old(createPropertyOld<SymmTensor>("total_strain")),
+   _elastic_strain(createProperty<SymmTensor>("elastic_strain")),
+   _elastic_strain_old(createPropertyOld<SymmTensor>("elastic_strain")),
    _crack_flags(NULL),
    _crack_flags_old(NULL),
    _crack_flags_local(),
@@ -101,10 +103,10 @@ SolidModel::SolidModel( const std::string & name,
    _crack_max_strain(NULL),
    _crack_max_strain_old(NULL),
    _principal_strain(3,1),
-   _elasticity_tensor(declareProperty<SymmElasticityTensor>("elasticity_tensor")),
-   _Jacobian_mult(declareProperty<SymmElasticityTensor>("Jacobian_mult")),
+   _elasticity_tensor(createProperty<SymmElasticityTensor>("elasticity_tensor")),
+   _Jacobian_mult(createProperty<SymmElasticityTensor>("Jacobian_mult")),
    _d_strain_dT(),
-   _d_stress_dT(declareProperty<SymmTensor>("d_stress_dT")),
+   _d_stress_dT(createProperty<SymmTensor>("d_stress_dT")),
    _total_strain_increment(0),
    _strain_increment(0),
    _element(createElement(name, parameters)),
@@ -211,14 +213,14 @@ SolidModel::SolidModel( const std::string & name,
 
   if (_cracking_stress > 0)
   {
-    _crack_flags = &declareProperty<RealVectorValue>("crack_flags");
-    _crack_flags_old = &declarePropertyOld<RealVectorValue>("crack_flags");
-    _crack_rotation = &declareProperty<ColumnMajorMatrix>("crack_rotation");
-    _crack_rotation_old = &declarePropertyOld<ColumnMajorMatrix>("crack_rotation");
-    _crack_max_strain = &declareProperty<RealVectorValue>("crack_max_strain");
-    _crack_max_strain_old = &declarePropertyOld<RealVectorValue>("crack_max_strain");
-    _crack_strain = &declareProperty<RealVectorValue>("crack_strain");
-    _crack_strain_old = &declarePropertyOld<RealVectorValue>("crack_strain");
+    _crack_flags = &createProperty<RealVectorValue>("crack_flags");
+    _crack_flags_old = &createPropertyOld<RealVectorValue>("crack_flags");
+    _crack_rotation = &createProperty<ColumnMajorMatrix>("crack_rotation");
+    _crack_rotation_old = &createPropertyOld<ColumnMajorMatrix>("crack_rotation");
+    _crack_max_strain = &createProperty<RealVectorValue>("crack_max_strain");
+    _crack_max_strain_old = &createPropertyOld<RealVectorValue>("crack_max_strain");
+    _crack_strain = &createProperty<RealVectorValue>("crack_strain");
+    _crack_strain_old = &createPropertyOld<RealVectorValue>("crack_strain");
 
     if (parameters.isParamValid( "active_crack_planes" ))
     {

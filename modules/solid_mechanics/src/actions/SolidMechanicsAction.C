@@ -13,6 +13,7 @@ InputParameters validParams<SolidMechanicsAction>()
   params.addParam<std::string>("disp_z", "", "The z displacement");
   params.addParam<std::string>("disp_r", "", "The r displacement");
   params.addParam<std::string>("temp", "", "The temperature");
+  params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
@@ -93,6 +94,7 @@ SolidMechanicsAction::act()
   {
     params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
   }
+  params.set<std::string>("appended_property_name") = getParam<std::string>("appended_property_name");
 
   for (unsigned int i(0); i < dim; ++i)
   {
