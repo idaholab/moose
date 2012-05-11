@@ -1,3 +1,8 @@
+[GlobalParams]
+  order = SECOND
+  family = LAGRANGE
+[]
+
 [Mesh]
   file = pl_test5q.e
   displacements = 'disp_x disp_y'
@@ -5,47 +10,27 @@
 
 [Variables]
   [./disp_x]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = SECOND
-    family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
   [./distance]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./tangential_distance]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./normal_x]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./normal_y]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./closest_point_x]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./closest_point_y]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./element_id]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./side]
-    order = SECOND
-    family = LAGRANGE
   [../]
 []
 
