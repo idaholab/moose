@@ -507,7 +507,7 @@ PenetrationThread::competeInteractions(PenetrationLocator::PenetrationInfo * pi1
       }
       else if (pi2->_off_edge_nodes.size()==2)
       {
-        result=FIRST_WINS;
+        result=SECOND_WINS;
       }
       else
       {
