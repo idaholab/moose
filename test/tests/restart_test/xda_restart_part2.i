@@ -21,14 +21,17 @@
 []
 
 [Variables]
-  active = 'u v'
-
   [./u]
     order = FIRST
     family = LAGRANGE
   [../]
 
   [./v]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+
+  [./diffusivity]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -41,8 +44,9 @@
   [../]
   
   [./diff]
-    type = Diffusion
+    type = MatDiffusion
     variable = u
+    prop_name = diffusivity
   [../]
 
   [./ffn]
@@ -54,6 +58,19 @@
   [./diff_v]
     type = Diffusion
     variable = v
+  [../]
+
+  [./out_diffusivity]
+    type = RealPropertyOutput
+    variable = diffusivity
+    prop_name = diffusivity
+  [../]
+[]
+
+[Materials]
+  [./mat]
+    type = StatefulMaterial
+    block = 0
   [../]
 []
 
@@ -83,15 +100,15 @@
 [Preconditioning]
   [./PBP]
     type = PBP
-    solve_order = 'u v'
-    preconditioner = 'amg amg'
+    solve_order = 'u v diffusivity'
+    preconditioner = 'AMG AMG AMG'
   [../]
 []
 
 [Executioner]
   type = Transient
   perf_log = true
-#  petsc_options = '-snes_mf'
+  petsc_options = '-snes_mf'
   restart_file_base = out_xda_restart_part1_restart_0005
   
   start_time = 1

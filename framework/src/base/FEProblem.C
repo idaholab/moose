@@ -144,7 +144,7 @@ void FEProblem::setCoordSystem(Moose::CoordinateSystemType type)
 
 void FEProblem::initialSetup()
 {
-  if (_resurrector.isOn())
+  if (isRestarting())
     _resurrector.restartFromFile();
   else
   {
@@ -163,7 +163,7 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
   }
 
-  if (!_resurrector.isOn())
+  if (!isRestarting())
     projectSolution();
 
   _eq.print_info();
@@ -174,8 +174,7 @@ void FEProblem::initialSetup()
   copySolutionsBackwards();
   Moose::setup_perf_log.pop("copySolutionsBackwards()","Setup");
 
-  if (!_resurrector.isOn())
-    _aux.compute(EXEC_INITIAL);
+  _aux.compute(EXEC_INITIAL);
 
   if (_material_props.hasStatefulProperties())
   {
@@ -199,8 +198,17 @@ void FEProblem::initialSetup()
       }
     }
   }
-  else
+
+  if (isRestarting())
   {
+    // now if restarting and we have stateful material properties, go overwrite the values with the ones
+    // from the restart file.  We need to do it this way, since we have no idea about sizes of user-defined material
+    // properties (i.e. things like std:vector<std::vector<SymmTensor> >)
+    if (_material_props.hasStatefulProperties())
+    {
+      // load the stateful material props from a file
+      _resurrector.restartStatefulMaterialProps();
+    }
   }
 
 //  // RUN initial postprocessors
@@ -1992,6 +2000,11 @@ FEProblem::setNumRestartFiles(unsigned int num_files)
   _resurrector.setNumRestartFiles(num_files);
 }
 
+bool
+FEProblem::isRestarting()
+{
+  return _resurrector.isOn();
+}
 
 std::vector<std::string>
 FEProblem::getVariableNames()

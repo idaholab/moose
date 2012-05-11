@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<StatefulMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addParam<Real>("initial_diffusivity", 1.0, "The Initial Diffusivity");
+  params.addParam<Real>("initial_diffusivity", 0.5, "The Initial Diffusivity");
   return params;
 }
 
@@ -40,13 +40,14 @@ StatefulMaterial::StatefulMaterial(const std::string & name,
 {}
 
 void
+StatefulMaterial::initQpStatefulProperties()
+{
+  _diffusivity[_qp] = _initial_diffusivity;
+  _diffusivity_old[_qp] = _initial_diffusivity;
+}
+
+void
 StatefulMaterial::computeQpProperties()
 {
-  if(_problem.computingInitialResidual())
-  {
-    std::cerr<<"Computing Initial!"<<std::endl;
-    _diffusivity[_qp] = _initial_diffusivity;
-  }
-  else
-    _diffusivity[_qp] = _diffusivity_old[_qp] * 2;
+  _diffusivity[_qp] = _diffusivity_old[_qp] * 2;
 }

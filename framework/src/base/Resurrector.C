@@ -16,11 +16,14 @@
 #include "FEProblem.h"
 #include <stdio.h>
 
+const std::string Resurrector::MAT_PROP_EXT(".msmp");
+
 Resurrector::Resurrector(FEProblem & fe_problem) :
     _fe_problem(fe_problem),
     _restart(false),
     _num_restart_files(0),
-    _xda(_fe_problem.es())
+    _xda(_fe_problem.es()),
+    _mat(_fe_problem._material_props, _fe_problem._bnd_material_props)
 {
 }
 
@@ -44,6 +47,14 @@ Resurrector::restartFromFile()
 }
 
 void
+Resurrector::restartStatefulMaterialProps()
+{
+  // read material properties from a file
+  _mat.read(_restart_file_base + MAT_PROP_EXT);
+}
+
+
+void
 Resurrector::setNumRestartFiles(unsigned int num_files)
 {
   _num_restart_files = num_files;
@@ -55,10 +66,13 @@ Resurrector::write()
   if (_num_restart_files == 0)
     return;
 
-  std::string file_base = _xda.getFileName(_fe_problem.out().fileBase() + "_restart");
+  std::string s = _fe_problem.out().fileBase() + "_restart";
+  std::string file_base = _xda.getFileName(s);
   _restart_file_names.push_back(file_base);
 
-  _xda.output(file_base, _fe_problem.time());                   // time does not have any effect here actually
+  _xda.output(s, _fe_problem.time());                   // time does not have any effect here actually
+  if (_fe_problem._material_props.hasStatefulProperties())
+    _mat.write(file_base + MAT_PROP_EXT);
 
   if (_restart_file_names.size() > _num_restart_files)
   {
@@ -71,5 +85,7 @@ Resurrector::write()
     remove(fn.c_str());           // mesh
     fn = fb + ".xda";
     remove(fn.c_str());           // solution
+    fn = fb + ".msmp";
+    remove(fn.c_str());           // material properties
   }
 }

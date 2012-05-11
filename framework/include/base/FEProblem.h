@@ -287,6 +287,12 @@ public:
    */
   virtual void setNumRestartFiles(unsigned int num_files);
 
+  /**
+   * Was this subproblem initialized from a restart file
+   * @return true if we restarted form a file, otherwise false
+   */
+  virtual bool isRestarting();
+
 #ifdef LIBMESH_ENABLE_AMR
   // Adaptivity /////
   Adaptivity & adaptivity() { return _adaptivity; }

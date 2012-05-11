@@ -154,15 +154,23 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data, const Elem & ele
 }
 
 void
-MaterialPropertyStorage::addPropertyOld (unsigned int prop_id)
+MaterialPropertyStorage::addProperty (unsigned int prop_id, const std::string & prop_name)
 {
+  _prop_names[prop_id] = prop_name;
+}
+
+void
+MaterialPropertyStorage::addPropertyOld (unsigned int prop_id, const std::string & prop_name)
+{
+  addProperty(prop_id, prop_name);
   _has_stateful_props = true;
   _stateful_props.insert(prop_id);
 }
 
 void
-MaterialPropertyStorage::addPropertyOlder (unsigned int prop_id)
+MaterialPropertyStorage::addPropertyOlder (unsigned int prop_id, const std::string & prop_name)
 {
+  addProperty(prop_id, prop_name);
   _has_stateful_props = true;
   _has_older_prop = true;
   _stateful_props.insert(prop_id);

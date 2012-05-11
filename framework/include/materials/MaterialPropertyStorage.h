@@ -78,8 +78,12 @@ public:
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & propsOld() { return *_props_elem_old; }
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & propsOlder() { return *_props_elem_older; }
 
-  void addPropertyOld (unsigned int prop_id);
-  void addPropertyOlder (unsigned int prop_id);
+  void addProperty (unsigned int prop_id, const std::string & prop_name);
+  void addPropertyOld (unsigned int prop_id, const std::string & prop_name);
+  void addPropertyOlder (unsigned int prop_id, const std::string & prop_name);
+
+  std::set<unsigned int> & statefulProps() { return _stateful_props; }
+  std::map<unsigned int, std::string> statefulPropNames() { return _prop_names; }
 
 protected:
   // indexing: [element][side]->material_properties
@@ -99,6 +103,8 @@ protected:
    */
   bool _has_older_prop;
 
+  /// mapping from property ID to property name
+  std::map<unsigned int, std::string> _prop_names;
   /// list of property ids of stateful material properties
   std::set<unsigned int> _stateful_props;
 };

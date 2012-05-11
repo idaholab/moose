@@ -8,8 +8,8 @@
   xmax = 1
   ymin = -1
   ymax = 1
-  nx = 20
-  ny = 20
+  nx = 10
+  ny = 10
 []
 
 [Functions]
@@ -25,31 +25,39 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  
+  [./diffusivity]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  active = 'ie diff ffn'
-
   [./ie]
     type = TimeDerivative
     variable = u
   [../]
 
   [./diff]
-    type = Diffusion
+    type = MatDiffusion
     variable = u
+    prop_name = diffusivity
   [../]
 
   [./ffn]
     type = UserForcingFunction
     variable = u
     function = forcing_fn
+  [../]
+  
+  [./out_diffusivity]
+    type = RealPropertyOutput
+    variable = diffusivity
+    prop_name = diffusivity
   [../]
 []
 
@@ -59,6 +67,14 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
+  [../]
+[]
+
+[Materials]
+  [./mat]
+    type = StatefulMaterial
+    block = 0
+    initial_diffusivity = 0.5
   [../]
 []
 

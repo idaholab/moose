@@ -19,6 +19,7 @@
 
 #include "MooseArray.h"
 #include "ColumnMajorMatrix.h"
+#include "MaterialPropertyIO.h"
 
 #include "libmesh_common.h"
 #include "tensor_value.h"
@@ -57,6 +58,10 @@ public:
   virtual void resize (int n) = 0;
 
   virtual void shallowCopy (PropertyValue *rhs) = 0;
+
+  // save/restore in a file
+  virtual void store(std::ofstream & stream) = 0;
+  virtual void load(std::ifstream & stream) = 0;
 };
 
 /**
@@ -78,7 +83,7 @@ public:
   MooseArray<T> & get () { return _value; }
 
   /**
-   * @returns a writeable reference to the parameter value.
+   * @returns a writable reference to the parameter value.
    */
   MooseArray<T> & set () { return _value; }
 
@@ -113,6 +118,16 @@ public:
    *
    */
   virtual void shallowCopy (PropertyValue *rhs);
+
+  /**
+   * Store the property into a binary stream
+   */
+  virtual void store(std::ofstream & stream);
+
+  /**
+   * Load the property from a binary stream
+   */
+  virtual void load(std::ifstream & stream);
 
 private:
 
@@ -202,6 +217,22 @@ MaterialProperty<T>::shallowCopy (PropertyValue *rhs)
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");
   _value.shallowCopy(libmesh_cast_ptr<const MaterialProperty<T>*>(rhs)->_value);
+}
+
+template<typename T>
+inline void
+MaterialProperty<T>::store(std::ofstream & stream)
+{
+  for (unsigned int i = 0; i < _value.size(); i++)
+    materialPropertyStore<T>(stream, _value[i]);
+}
+
+template<typename T>
+inline void
+MaterialProperty<T>::load(std::ifstream & stream)
+{
+  for (unsigned int i = 0; i < _value.size(); i++)
+    materialPropertyLoad<T>(stream, _value[i]);
 }
 
 

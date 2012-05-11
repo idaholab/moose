@@ -183,6 +183,7 @@ MaterialData::declareProperty(const std::string & prop_name)
     prop_id = addProperty(prop_name);
     _props[prop_id] = new MaterialProperty<T>;
   }
+  _storage.addProperty(prop_id, prop_name);
 
   MaterialProperty<T> *prop = dynamic_cast<MaterialProperty<T>*>(_props[prop_id]);
   mooseAssert(prop != NULL, "Internal error in declaring material property: " + prop_name);
@@ -202,7 +203,7 @@ MaterialData::declarePropertyOld(const std::string & prop_name)
     prop_id = addProperty(prop_name);
     _props_old[prop_id] = new MaterialProperty<T>;
   }
-  _storage.addPropertyOld(prop_id);
+  _storage.addPropertyOld(prop_id, prop_name);
 
   MaterialProperty<T> *prop = dynamic_cast<MaterialProperty<T>*>(_props_old[prop_id]);
   mooseAssert(prop != NULL, "Internal error in declaring material property: " + prop_name);
@@ -222,7 +223,7 @@ MaterialData::declarePropertyOlder(const std::string & prop_name)
     prop_id = addProperty(prop_name);
     _props_older[prop_id] = new MaterialProperty<T>;
   }
-  _storage.addPropertyOlder(prop_id);
+  _storage.addPropertyOlder(prop_id, prop_name);
 
   MaterialProperty<T> *prop = dynamic_cast<MaterialProperty<T>*>(_props_older[prop_id]);
   mooseAssert(prop != NULL, "Internal error in declaring material property: " + prop_name);
