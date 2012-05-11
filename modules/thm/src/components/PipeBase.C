@@ -47,6 +47,7 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
     _n_elems(getParam<unsigned int>("n_elems")),
     _A(getParam<Real>("A")),
     _aw(getParam<Real>("aw")),
+    _has_f(params.wasSeenInInput("f")),
     _f(getParam<Real>("f")),
     _Hw(getParam<Real>("Hw")),
     _Tw(getParam<Real>("Tw"))

@@ -56,6 +56,7 @@ protected:
 						///< Physical meaning:
 						///< _aw = A_heating_surface_per_length / A_pipe_flow_are [1/m]
 
+  bool _has_f;
   Real _f;                                      ///< friction
   Real _Hw;                                     ///< Convective heat transfer coefficient
   Real _Tw;                                     ///< Wall temperature
