@@ -17,18 +17,18 @@ pl_test1q = { INPUT : 'pl_test1q.i',
 pl_test1qtt = { INPUT : 'pl_test1qtt.i',
                 EXODIFF : ['pl_test1qtt_out.e'] }
 
-#pl_test2 = { INPUT : 'pl_test2.i',
-#             EXODIFF : ['pl_test2_out.e'] }
-#
-#pl_test2tt = { INPUT : 'pl_test2tt.i',
-#               EXODIFF : ['pl_test2tt_out.e'] }
-#
-#pl_test2q = { INPUT : 'pl_test2q.i',
-#              EXODIFF : ['pl_test2q_out.e'] }
-#
-#pl_test2qtt = { INPUT : 'pl_test2qtt.i',
-#                EXODIFF : ['pl_test2qtt_out.e'] }
-#
+pl_test2 = { INPUT : 'pl_test2.i',
+             EXODIFF : ['pl_test2_out.e'] }
+
+pl_test2tt = { INPUT : 'pl_test2tt.i',
+               EXODIFF : ['pl_test2tt_out.e'] }
+
+pl_test2q = { INPUT : 'pl_test2q.i',
+              EXODIFF : ['pl_test2q_out.e'] }
+
+pl_test2qtt = { INPUT : 'pl_test2qtt.i',
+                EXODIFF : ['pl_test2qtt_out.e'] }
+
 #pl_test3 = { INPUT : 'pl_test3.i',
 #             EXODIFF : ['pl_test3_out.e'] }
 #
