@@ -21,3 +21,27 @@ MaterialProperty<SymmTensor>::init (int size)
     (*copy)[i].zero();
   return copy;
 }
+
+template<>
+void materialPropertyStore(std::ofstream & stream, const SymmTensor & v)
+{
+  Real r;
+  r = v.xx(); stream.write((const char *) &r, sizeof(r));
+  r = v.yy(); stream.write((const char *) &r, sizeof(r));
+  r = v.zz(); stream.write((const char *) &r, sizeof(r));
+  r = v.xy(); stream.write((const char *) &r, sizeof(r));
+  r = v.yz(); stream.write((const char *) &r, sizeof(r));
+  r = v.zx(); stream.write((const char *) &r, sizeof(r));
+}
+
+template<>
+void materialPropertyLoad(std::ifstream & stream, SymmTensor & v)
+{
+  Real r = 0.;
+  stream.read((char *) &r, sizeof(r)); v.xx(r);
+  stream.read((char *) &r, sizeof(r)); v.yy(r);
+  stream.read((char *) &r, sizeof(r)); v.zz(r);
+  stream.read((char *) &r, sizeof(r)); v.xy(r);
+  stream.read((char *) &r, sizeof(r)); v.yz(r);
+  stream.read((char *) &r, sizeof(r)); v.zx(r);
+}
