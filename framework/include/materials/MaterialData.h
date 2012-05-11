@@ -30,15 +30,12 @@ class MaterialData
 {
 public:
   MaterialData(MaterialPropertyStorage & storage);
-
   virtual ~MaterialData();
 
   /**
    * Size the properties
    */
   void size(unsigned int n_qpoints);
-
-  void initStatefulProps(std::vector<Material *> & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side = 0);
 
   /**
    * Declare the Real valued property named "name".
@@ -79,21 +76,18 @@ public:
   unsigned int getPropertyId (const std::string & prop_name) const;
 
   template <typename T>
-  bool have_property(const std::string & prop_name) const;
+  bool haveProperty(const std::string & prop_name) const;
 
   template <typename T>
-  bool have_property_old(const std::string & prop_name) const;
+  bool havePropertyOld(const std::string & prop_name) const;
 
   template <typename T>
-  bool have_property_older(const std::string & prop_name) const;
+  bool havePropertyOlder(const std::string & prop_name) const;
 
 protected:
   MaterialPropertyStorage & _storage;
 
   bool _sized;
-
-  /// list of property ids of stateful material properties
-  std::set<unsigned int> _stateful_props;
 
   // holds material properties for currently selected element (and possibly a side), they are being copied from _storage
   MaterialProperties _props;
@@ -129,7 +123,6 @@ MaterialData::addProperty (const std::string & prop_name)
     _props.resize(id + 1);
     _props_old.resize(id + 1);
     _props_older.resize(id + 1);
-
     return id;
   }
   else
@@ -138,7 +131,7 @@ MaterialData::addProperty (const std::string & prop_name)
 
 template <typename T>
 inline bool
-MaterialData::have_property (const std::string & prop_name) const
+MaterialData::haveProperty (const std::string & prop_name) const
 {
   std::map<std::string, unsigned int>::const_iterator it = _prop_ids.find(prop_name);
   if (it == _prop_ids.end())
@@ -152,7 +145,7 @@ MaterialData::have_property (const std::string & prop_name) const
 
 template <typename T>
 inline bool
-MaterialData::have_property_old (const std::string & prop_name) const
+MaterialData::havePropertyOld (const std::string & prop_name) const
 {
   std::map<std::string, unsigned int>::const_iterator it = _prop_ids.find(prop_name);
   if (it == _prop_ids.end())
@@ -166,7 +159,7 @@ MaterialData::have_property_old (const std::string & prop_name) const
 
 template <typename T>
 inline bool
-MaterialData::have_property_older (const std::string & prop_name) const
+MaterialData::havePropertyOlder (const std::string & prop_name) const
 {
   std::map<std::string, unsigned int>::const_iterator it = _prop_ids.find(prop_name);
   if (it == _prop_ids.end())
@@ -183,7 +176,7 @@ MaterialProperty<T> &
 MaterialData::declareProperty(const std::string & prop_name)
 {
   unsigned int prop_id;
-  if (this->have_property<T>(prop_name))
+  if (this->haveProperty<T>(prop_name))
     prop_id = _prop_ids[prop_name];
   else
   {
@@ -201,16 +194,15 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOld(const std::string & prop_name)
 {
-  _storage.hasStatefulProperties() = true;
   unsigned int prop_id;
-  if (this->have_property_old<T>(prop_name))
+  if (this->havePropertyOld<T>(prop_name))
     prop_id = _prop_ids[prop_name];
   else
   {
     prop_id = addProperty(prop_name);
     _props_old[prop_id] = new MaterialProperty<T>;
   }
-  _stateful_props.insert(prop_id);
+  _storage.addPropertyOld(prop_id);
 
   MaterialProperty<T> *prop = dynamic_cast<MaterialProperty<T>*>(_props_old[prop_id]);
   mooseAssert(prop != NULL, "Internal error in declaring material property: " + prop_name);
@@ -222,17 +214,15 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOlder(const std::string & prop_name)
 {
-  _storage.hasStatefulProperties() = true;
-  _storage.hasOlderProperties() = true;
   unsigned int prop_id;
-  if (this->have_property_older<T>(prop_name))
+  if (this->havePropertyOlder<T>(prop_name))
     prop_id = _prop_ids[prop_name];
   else
   {
     prop_id = addProperty(prop_name);
     _props_older[prop_id] = new MaterialProperty<T>;
   }
-  _stateful_props.insert(prop_id);
+  _storage.addPropertyOlder(prop_id);
 
   MaterialProperty<T> *prop = dynamic_cast<MaterialProperty<T>*>(_props_older[prop_id]);
   mooseAssert(prop != NULL, "Internal error in declaring material property: " + prop_name);

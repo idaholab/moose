@@ -188,15 +188,14 @@ void FEProblem::initialSetup()
       mooseAssert(_materials[0].hasMaterials(blk_id), "No materials on subdomain block " + elem->id());
       _assembly[0]->reinit(elem);
       unsigned int n_points = _assembly[0]->qRule()->n_points();
-      _material_data[0]->initStatefulProps(_materials[0].getMaterials(blk_id), n_points, *elem);
+      _material_props.initStatefulProps(*_material_data[0], _materials[0].getMaterials(blk_id), n_points, *elem);
 
       for (unsigned int side=0; side<elem->n_sides(); side++)
       {
         mooseAssert(_materials[0].hasBoundaryMaterials(blk_id), "No face materials on subdomain block " + elem->id());
         _assembly[0]->reinit(elem, side);
         unsigned int n_points = _assembly[0]->qRuleFace()->n_points();
-        _bnd_material_data[0]->initStatefulProps(_materials[0].getBoundaryMaterials(blk_id), n_points, *elem, side);
-        // TODO:
+        _bnd_material_props.initStatefulProps(*_bnd_material_data[0], _materials[0].getBoundaryMaterials(blk_id), n_points, *elem, side);
       }
     }
   }

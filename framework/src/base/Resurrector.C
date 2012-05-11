@@ -55,9 +55,8 @@ Resurrector::write()
   if (_num_restart_files == 0)
     return;
 
-  std::string file_base(_fe_problem.out().fileBase() + "_restart");
-  std::string file_name = _xda.getFileName(file_base);
-  _restart_file_names.push_back(file_name);
+  std::string file_base = _xda.getFileName(_fe_problem.out().fileBase() + "_restart");
+  _restart_file_names.push_back(file_base);
 
   _xda.output(file_base, _fe_problem.time());                   // time does not have any effect here actually
 

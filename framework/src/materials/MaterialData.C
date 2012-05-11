@@ -15,21 +15,6 @@
 #include "MaterialData.h"
 #include "Material.h"
 
-void shallowCopyData(const std::set<unsigned int> & prop_ids,
-                     MaterialProperties & data,
-                     MaterialProperties & data_from)
-{
-  for (std::set<unsigned int>::const_iterator it = prop_ids.begin(); it != prop_ids.end(); ++it)
-  {
-    unsigned int id = *it;
-    PropertyValue * prop = data[id];                  // do the look-up just once (OPT)
-    PropertyValue * prop_from = data_from[id];        // do the look-up just once (OPT)
-    if (prop != NULL && prop_from != NULL)
-      prop->shallowCopy(prop_from);
-  }
-}
-
-
 MaterialData::MaterialData(MaterialPropertyStorage & storage) :
     _storage(storage),
     _sized(false)
@@ -55,13 +40,15 @@ MaterialData::size(unsigned int n_qpoints)
       (*it)->resize(n_qpoints);
   }
 
+  // if there are stateful material properties in the system, also resize
+  // storage for old and older material properties
   if (_storage.hasStatefulProperties())
   {
     for (MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
       if (*it != NULL)
         (*it)->resize(n_qpoints);
 
-    if (_storage.hasStatefulProperties())
+    if (_storage.hasOlderProperties())
       for (MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
         if (*it != NULL)
           (*it)->resize(n_qpoints);
@@ -70,73 +57,25 @@ MaterialData::size(unsigned int n_qpoints)
 }
 
 void
-MaterialData::initStatefulProps(std::vector<Material *> & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side/* = 0*/)
-{
-  unsigned int elem_id = elem.id();
-
-  size(n_qpoints);
-
-  if (_storage.props()[elem_id][side].size() == 0) _storage.props()[elem_id][side].resize(_props.size());
-  if (_storage.propsOld()[elem_id][side].size() == 0) _storage.propsOld()[elem_id][side].resize(_props_old.size());
-  if (_storage.propsOlder()[elem_id][side].size() == 0) _storage.propsOlder()[elem_id][side].resize(_props_older.size());
-
-  // init properties (allocate memory. etc)
-  for (std::set<unsigned int>::const_iterator it = _stateful_props.begin(); it != _stateful_props.end(); ++it)
-  {
-    unsigned int prop_id = *it;
-    // duplicate the stateful property in property storage (all three states - we will reuse the allocated memory there)
-    // also allocating the right amount of memory, so we do not have to resize, etc.
-    if (_storage.props()[elem_id][side][prop_id] == NULL) _storage.props()[elem_id][side][prop_id] = _props[prop_id]->init(n_qpoints);
-    if (_storage.propsOld()[elem_id][side][prop_id] == NULL) _storage.propsOld()[elem_id][side][prop_id] = _props_old[prop_id]->init(n_qpoints);
-    if (_storage.hasOlderProperties())
-      if (_storage.propsOlder()[elem_id][side][prop_id] == NULL) _storage.propsOlder()[elem_id][side][prop_id] = _props_old[prop_id]->init(n_qpoints);
-  }
-  // copy from storage to material data
-  shallowCopyData(_stateful_props, _props, _storage.props()[elem_id][side]);
-  shallowCopyData(_stateful_props, _props_old, _storage.propsOld()[elem_id][side]);
-  if (_storage.hasOlderProperties())
-    shallowCopyData(_stateful_props, _props_older, _storage.propsOlder()[elem_id][side]);
-  // run custom init on properties
-  for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
-    (*it)->initStatefulProperties(n_qpoints);
-  // copy from material_data to storage
-  shallowCopyData(_stateful_props, _storage.props()[elem_id][side], _props);
-  shallowCopyData(_stateful_props, _storage.propsOld()[elem_id][side], _props_old);
-  if (_storage.hasOlderProperties())
-    shallowCopyData(_stateful_props, _storage.propsOlder()[elem_id][side], _props_older);
-}
-
-void
 MaterialData::reinit(std::vector<Material *> & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side/* = 0*/)
 {
   unsigned int elem_id = elem.id();
 
+  // FIXME: if there are elements with different number of quadrature points and the one with smaller
+  // number gets hit first, we will fail with out-of-bound error, since we set the resize flag to true,
+  // but we need more space to store the new properties.  Thus, we need to be smarter here with invalidating
+  // the _size flag.
   if (!_sized)
     size(n_qpoints);
 
   if (_storage.hasStatefulProperties())
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-
-    shallowCopyData(_stateful_props, _props, _storage.props()[elem_id][side]);
-    shallowCopyData(_stateful_props, _props_old, _storage.propsOld()[elem_id][side]);
-    if (_storage.hasOlderProperties())
-      shallowCopyData(_stateful_props, _props_older, _storage.propsOlder()[elem_id][side]);
-  }
-
+    _storage.swap(*this, elem, side);
 
   for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
     (*it)->computeProperties();
 
   if (_storage.hasStatefulProperties())
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-
-    shallowCopyData(_stateful_props, _storage.props()[elem_id][side], _props);
-    shallowCopyData(_stateful_props, _storage.propsOld()[elem_id][side], _props_old);
-    if (_storage.hasOlderProperties())
-      shallowCopyData(_stateful_props, _storage.propsOlder()[elem_id][side], _props_older);
-  }
+    _storage.swapBack(*this, elem, side);
 }
 
 bool

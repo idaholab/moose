@@ -101,7 +101,7 @@ template<typename T>
 bool
 MaterialPropertyInterface::hasMaterialProperty(const std::string & name)
 {
-  return _material_data.have_property<T>(name);
+  return _material_data.haveProperty<T>(name);
 }
 
 
