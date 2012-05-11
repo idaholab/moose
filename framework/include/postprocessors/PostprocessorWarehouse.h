@@ -53,10 +53,10 @@ public:
 
   /**
    * Get the list of nodal postprocessors
-   * @param block_id Block ID
+   * @param boundary_id Boundary ID
    * @return The list of all nodal postprocessors
    */
-  const std::vector<Postprocessor *> & nodalPostprocessors() { return _nodal_postprocessors; }
+  const std::vector<Postprocessor *> & nodalPostprocessors(BoundaryID boundary_id) { return _nodal_postprocessors[boundary_id]; }
 
   /**
    * Get the list general postprocessors
@@ -88,10 +88,17 @@ public:
    */
   const std::set<BoundaryID> & boundaryIds() { return _boundary_ids_with_postprocessors; }
 
+  /**
+   * Get the list of nodeset IDs with postprocessors
+   * @return The list of nodeset IDs with postprocessors
+   */
+  const std::set<BoundaryID> & nodesetIds() { return _nodeset_ids_with_postprocessors; }
+
+
 protected:
   std::map<SubdomainID, std::vector<Postprocessor *> > _element_postprocessors;
   std::map<BoundaryID, std::vector<Postprocessor *> > _side_postprocessors;
-  std::vector<Postprocessor *> _nodal_postprocessors;
+  std::map<BoundaryID, std::vector<Postprocessor *> > _nodal_postprocessors;
 
   std::vector<Postprocessor *> _generic_postprocessors;
   std::vector<Postprocessor *> _all_postprocessors;
@@ -100,6 +107,8 @@ protected:
   std::set<SubdomainID> _block_ids_with_postprocessors;
   /// All of the boundary ids that have postprocessors specified to act on them
   std::set<BoundaryID> _boundary_ids_with_postprocessors;
+  /// All of the nodeset ids that have postprocessors specified to act on them
+  std::set<BoundaryID> _nodeset_ids_with_postprocessors;
 
 };
 

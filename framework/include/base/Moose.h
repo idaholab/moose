@@ -167,6 +167,8 @@ enum PPSOutputType
 
 const SubdomainID ANY_BLOCK_ID = (SubdomainID) -1;
 
+const BoundaryID ANY_BOUNDARY_ID = (BoundaryID) -1;
+
 /* Wrappers for extern random number generator */
 inline void seed(unsigned int s)
 {
