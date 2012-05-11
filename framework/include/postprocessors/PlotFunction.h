@@ -38,6 +38,7 @@ public:
 
 protected:
   Function & _func;
+  const Real _scale_factor;
 };
 
 
