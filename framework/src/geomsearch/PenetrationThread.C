@@ -312,14 +312,14 @@ PenetrationThread::operator() (const NodeIdRange & range)
           }
         }
         //Find the set of ridges closest to us.
-        unsigned int closest(0);
+        unsigned int closest_ridge_set_index(0);
         Real closest_distance(ridgeSetDataVec[0]._distance);
         Point closest_point(ridgeSetDataVec[0]._closest_coor);
         for (unsigned int i(1); i<ridgeSetDataVec.size(); ++i)
         {
           if (ridgeSetDataVec[i]._distance < closest_distance)
           {
-            closest = i;
+            closest_ridge_set_index = i;
             closest_distance = ridgeSetDataVec[i]._distance;
             closest_point = ridgeSetDataVec[i]._closest_coor;
           }
@@ -331,22 +331,17 @@ PenetrationThread::operator() (const NodeIdRange & range)
           unsigned int face_index(std::numeric_limits<unsigned int>::max());
           unsigned int ridge_set_data_index(0);
           unsigned int ridge_data_index(0);
-          for (unsigned int i(0); i<ridgeSetDataVec.size(); ++i)
+          for (unsigned int i(0); i<ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size(); ++i)
           {
-            for (unsigned int j(0); j<ridgeSetDataVec[i]._ridge_data_vec.size(); ++j)
+            if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index1 < face_index)
             {
-              if (ridgeSetDataVec[i]._ridge_data_vec[j]._index1 < face_index)
-              {
-                face_index = ridgeSetDataVec[i]._ridge_data_vec[j]._index1;
-                ridge_set_data_index=i;
-                ridge_data_index=j;
-              }
-              if (ridgeSetDataVec[i]._ridge_data_vec[j]._index2 < face_index)
-              {
-                face_index = ridgeSetDataVec[i]._ridge_data_vec[j]._index2;
-                ridge_set_data_index=i;
-                ridge_data_index=j;
-              }
+              face_index = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index1;
+              ridge_data_index=i;
+            }
+            if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index2 < face_index)
+            {
+              face_index = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index2;
+              ridge_data_index=i;
             }
           }
 
@@ -367,6 +362,11 @@ PenetrationThread::operator() (const NodeIdRange & range)
           }
           p_info[face_index]->_normal = normal;
           p_info[face_index]->_tangential_distance = 0.0;
+
+          if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size()==1) //contact with a single ridge rather than a peak
+          {
+            p_info[face_index]->_tangential_distance = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[0]._tangential_distance;
+          }
 
           std::vector<Point> points(1);
           points[0] = p_info[face_index]->_closest_point_ref;
