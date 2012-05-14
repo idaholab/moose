@@ -75,6 +75,9 @@
 #include "StripeMesh.h"
 
 
+#include "ExceptionSteady.h"
+
+
 namespace MooseTest
 {
 
@@ -158,6 +161,8 @@ void registerObjects()
   registerConstraint(EqualValueNodalConstraint);
 
   registerUserData(MTUserData);
+
+  registerExecutioner(ExceptionSteady);
 }
 
 } // namespace

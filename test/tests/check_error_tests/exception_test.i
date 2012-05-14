@@ -38,7 +38,7 @@
 []
 
 [Executioner]
-  type = Steady
+  type = ExceptionSteady
   petsc_options = '-snes_mf_operator'
 []
 

@@ -86,7 +86,7 @@ nan_test = { INPUT : 'nan_test.i',
 
 exception_test = {
   INPUT : 'exception_test.i',
-  EXPECT_ERR : "terminate called throwing an exception"
+  EXPECT_ERR : "Exception caught: MOOSE exception"
 }
 
 multi_precond_test = { INPUT : 'multi_precond_test.i',
