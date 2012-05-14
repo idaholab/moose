@@ -86,6 +86,7 @@ nan_test = { INPUT : 'nan_test.i',
 
 exception_test = {
   INPUT : 'exception_test.i',
+  PETSC_VERSION : ['3.0.0'],
   EXPECT_ERR : "Exception caught: MOOSE exception"
 }
 
