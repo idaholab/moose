@@ -548,8 +548,11 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual)
       _exception = e.clone();
       // tell solver to stop
 #ifdef LIBMESH_HAVE_PETSC
+#if PETSC_VERSION_LESS_THAN(3,0,0)
+#else
       PetscNonlinearSolver<Real> & solver = static_cast<PetscNonlinearSolver<Real> &>(*_sys.nonlinear_solver);
       SNESSetFunctionDomainError(solver.snes());
+#endif
 #endif
     }
   }
@@ -1529,8 +1532,11 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
     _exception = e.clone();
     // tell solver to stop
 #ifdef LIBMESH_HAVE_PETSC
+#if PETSC_VERSION_LESS_THAN(3,0,0)
+#else
     PetscNonlinearSolver<Real> & solver = static_cast<PetscNonlinearSolver<Real> &>(*_sys.nonlinear_solver);
     SNESSetFunctionDomainError(solver.snes());
+#endif
 #endif
   }
 
