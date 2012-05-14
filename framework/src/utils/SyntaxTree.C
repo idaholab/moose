@@ -122,6 +122,8 @@ SyntaxTree::TreeNode::print(short depth) const
     for (std::map<std::string, InputParameters *>::const_iterator ait = _action_params.begin(); ait != _action_params.end(); ++ait)
       _syntax_tree.printParams(*ait->second, depth);
 
+    _syntax_tree.preTraverse(depth);
+
     for (std::map<std::string, TreeNode *>::const_iterator it = _children.begin(); it != _children.end(); ++it)
       it->second->print(depth+1);
 
@@ -137,6 +139,8 @@ SyntaxTree::TreeNode::print(short depth) const
         _syntax_tree.printParams(*ait->second, depth);
 
       _syntax_tree.printParams(*it->second, depth);
+
+      _syntax_tree.preTraverse(depth);
 
       for (std::map<std::string, TreeNode *>::const_iterator it = _children.begin(); it != _children.end(); ++it)
         it->second->print(depth+1);

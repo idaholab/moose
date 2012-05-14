@@ -528,8 +528,8 @@ Parser::buildFullTree()
             name = act_name + "/type/" + moose_obj->first;
           }
 
-          action_obj_params.set<std::string>("type") = moose_obj->first;
-          action_obj_params.seenInInputFile("type");
+          moose_obj_params.set<std::string>("type") = moose_obj->first;
+          moose_obj_params.seenInInputFile("type");
 
           _syntax_formatter->insertNode(name, moose_obj->first, false, &moose_obj_params);
         }

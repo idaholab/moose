@@ -25,6 +25,7 @@ public:
   virtual void preamble();
   virtual void postscript();
 
+  virtual void preTraverse(short depth) const;
   virtual void printBlockOpen(const std::string &name, short depth, const std::string &type) const;
   virtual void printBlockClose(const std::string &name, short depth) const;
   virtual void printParams(InputParameters &params, short depth) const;
@@ -39,7 +40,7 @@ protected:
   /**
    * Helper method for printing the parts of the YAML Syntax
    */
-  void printCloseAndOpen(const std::string & name, const std::string * prev_name) const;
+//  void printCloseAndOpen(const std::string & name, const std::string * prev_name) const;
 
 protected:
   std::ostream &_out;

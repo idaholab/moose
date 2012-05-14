@@ -29,6 +29,7 @@ public:
   virtual void postscript() {}
 
   virtual void print() const = 0;
+  virtual void preTraverse(short depth) const {}
   virtual void printBlockOpen(const std::string &name, short depth, const std::string &type) const = 0;
   virtual void printBlockClose(const std::string &name, short depth) const = 0;
   virtual void printParams(InputParameters &params, short depth) const = 0;
