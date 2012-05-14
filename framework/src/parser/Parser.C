@@ -522,31 +522,37 @@ Parser::buildFullTree()
               moose_obj_params.get<std::string>("built_by_action") == "add_aux_kernel")))
         {
 //          print_once = true;
-//          std::string name;
-//          size_t pos = 0;
-//          if (act_name[act_name.size()-1] == '*')
-//            pos = act_name.size()-1;
-//          else
-//            pos = act_name.size();
+          std::string name;
+          size_t pos = 0;
+          if (act_name[act_name.size()-1] == '*')
+          {
+            pos = act_name.size()-1;
+            name = act_name.substr(0, pos) + moose_obj->first;
+          }
+          else
+          {
+            name = act_name + "/type/" + moose_obj->first;
+          }
+
 
           // Executioner and Initial Condition syntax is non standard - we'll hack it here
-          if (act_name == "Executioner" || act_name == "Mesh")
-          {
-//            name = act_name.substr(0, pos) + "/" +  moose_obj->first;
+//          if (act_name == "Executioner" || act_name == "Mesh")
+//          {
+//          name = act_name.substr(0, pos) + "/" +  moose_obj->first;
 
             // This indicates that these parameters are to be used in the parent block
-            moose_obj_params.addParam<bool>("parent_params", true, "Indicates that the options for this block should actually be put in its parent");
-          }
+//            moose_obj_params.addParam<bool>("parent_params", true, "Indicates that the options for this block should actually be put in its parent");
+//          }
 //          else if (act_name.find("InitialCondition") != std::string::npos)
 //            name = act_name;
 //          else
 //            name = act_name.substr(0, pos) + moose_obj->first;
 
-          moose_obj_params.set<std::string>("type") = moose_obj->first;
-          moose_obj_params.seenInInputFile("type");
+          action_obj_params.set<std::string>("type") = moose_obj->first;
+          action_obj_params.seenInInputFile("type");
 //          params_ptrs[1] = &moose_obj_params;
 
-          _syntax_formatter->insertNode(act_names->first, moose_obj->first, false, &moose_obj_params);
+          _syntax_formatter->insertNode(name, moose_obj->first, false, &moose_obj_params);
 
 //          prev_name = name;
         }

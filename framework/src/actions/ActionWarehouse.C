@@ -16,6 +16,8 @@
 #include "ActionFactory.h"
 #include "Parser.h"
 #include "MooseObjectAction.h"
+#include "InputFileFormatter.h"
+#include "InputParameters.h"
 
 ActionWarehouse::ActionWarehouse() :
   _generator_valid(false),
@@ -119,6 +121,8 @@ ActionWarehouse::actionBlocksWithActionEnd(const std::string & action_name)
 void
 ActionWarehouse::printInputFile(std::ostream & out)
 {
+  InputFileFormatter tree(std::cout, false);
+
   std::map<std::string, std::vector<Action *> >::iterator iter;
 
   std::vector<Action *> ordered_actions;
@@ -131,16 +135,16 @@ ActionWarehouse::printInputFile(std::ostream & out)
 
   // We'll push one more "empty" action onto the end so that when we print the input syntax
   // everything will get closed off without any odd tail calls.  Had to do delayed construction
-  InputParameters pars = ActionFactory::instance()->getValidParams("EmptyAction");
-  Action * empty_action = ActionFactory::instance()->create("EmptyAction", pars);
-  ordered_actions.push_back(empty_action);
+//  InputParameters pars = ActionFactory::instance()->getValidParams("EmptyAction");
+//  Action * empty_action = ActionFactory::instance()->create("EmptyAction", pars);
+//  ordered_actions.push_back(empty_action);
 
-  mooseAssert (_parser_ptr != NULL, "Parser is NULL in ActionWarehouse");
-  _parser_ptr->initSyntaxFormatter(Parser::INPUT_FILE, false, out);
+//  mooseAssert (_parser_ptr != NULL, "Parser is NULL in ActionWarehouse");
+//  _parser_ptr->initSyntaxFormatter(Parser::INPUT_FILE, false, out);
 
   // Print it out!
 
-  std::string prev_name = "";
+//  std::string prev_name = "";
   for (std::vector<Action* >::iterator i = ordered_actions.begin();
        i != ordered_actions.end();
        ++i)
@@ -149,14 +153,19 @@ ActionWarehouse::printInputFile(std::ostream & out)
 
     if (ActionFactory::instance()->isParsed(name))
     {
-      std::vector<InputParameters *> param_ptrs;
-      (*i)->addParamsPtrs(param_ptrs);
-      _parser_ptr->print(name, prev_name == "" ? NULL : &prev_name, param_ptrs);
-      prev_name = name;
+//      std::vector<InputParameters *> param_ptrs;
+      InputParameters params = (*i)->getParams(); //addParamsPtrs(param_ptrs);
+      std::cout << name << "\n";
+
+      tree.insertNode(name, name, true, &params);
+
+
+      //      _parser_ptr->print(name, prev_name == "" ? NULL : &prev_name, param_ptrs);
+//      prev_name = name;
     }
   }
 
-  delete empty_action;
+//  delete empty_action;
 }
 
 void

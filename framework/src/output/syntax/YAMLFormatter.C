@@ -186,7 +186,7 @@ YAMLFormatter::printParams(InputParameters &params, short depth) const
     std::string doc = params.getDocString(iter->first);
     Parser::escape(doc);
     _out << tmp_str;
-    _out << "\n" << indent << "    description: |\n	    " << indent
+    _out << "\n" << indent << "    description: |\n      " << indent
          << doc << "\n";
   }
 }
@@ -204,7 +204,7 @@ YAMLFormatter::printBlockOpen(const std::string &name, short depth, const std::s
 }
 
 void
-YAMLFormatter::printBlockClose(const std::string &name, short depth) const
+YAMLFormatter::printBlockClose(const std::string &/*name*/, short /*depth*/) const
 {
 }
 

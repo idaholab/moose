@@ -131,7 +131,6 @@ SyntaxTree::TreeNode::print(short depth) const
   {
     for (std::map<std::string, InputParameters *>::const_iterator it = _moose_object_params.begin(); it != _moose_object_params.end(); ++it)
     {
-      type = it->second->get<std::string>("type");
       _syntax_tree.printBlockOpen(_name, depth, type);
 
       for (std::map<std::string, InputParameters *>::const_iterator ait = _action_params.begin(); ait != _action_params.end(); ++ait)
