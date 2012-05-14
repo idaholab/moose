@@ -17,7 +17,6 @@
 
 #include "GlobalParamsAction.h"
 #include "MooseSyntax.h"
-#include "SyntaxFormatterInterface.h"
 
 // libMesh
 #include "getpot.h"
@@ -28,6 +27,7 @@
 class MooseMesh;
 class FEProblem;
 class Executioner;
+class SyntaxTree;
 
 class Parser
 {
@@ -160,8 +160,8 @@ public:
   /// Wrapper for syntax formatter print interface
   inline void print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs)
   {
-    mooseAssert(_syntax_formatter != NULL, "Syntax Formatter is NULL in Parser");
-    _syntax_formatter->print(name, prev_name, param_ptrs);
+    //mooseAssert(_syntax_formatter != NULL, "Syntax Formatter is NULL in Parser");
+    //_syntax_formatter->print(name, prev_name, param_ptrs);
   }
 
   // data created while running execute()
@@ -237,7 +237,7 @@ protected:
     bool required;
   };
 
-  SyntaxFormatterInterface * _syntax_formatter;
+  SyntaxTree * _syntax_formatter;
 
   std::map<std::string, CLIOption> _cli_options;
 

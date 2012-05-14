@@ -15,26 +15,20 @@
 #ifndef INPUTFILEFORMATTER_H
 #define INPUTFILEFORMATTER_H
 
-#include "SyntaxFormatterInterface.h"
+#include "SyntaxTree.h"
 
-// This class is a big hack job - and probably should be refacted into a tree data structure so that printing
-// is more consistent and simple
-
-class InputFileFormatter : public SyntaxFormatterInterface
+class InputFileFormatter : public SyntaxTree
 {
 public:
-  InputFileFormatter(std::ostream & out, bool dump_mode);
+  InputFileFormatter(std::ostream &out, bool dump_mode);
 
-  virtual void print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs);
+  virtual void printBlockOpen(const std::string &name, short depth, const std::string &type) const;
+  virtual void printBlockClose(const std::string &name, short depth) const;
+  virtual void printParams(InputParameters &params, short depth) const;
 
 protected:
-  /// Helper method for printing the parts of the InputFile Syntax
-  void printCloseAndOpen(const std::string & name, const std::string * prev_name) const;
-
-private:
-  /// Holds the names of the paramters we've seen for a parsed block so they don't get printed twice
-  std::map<std::string, std::set<std::string> > _seen_it;
-
+  std::ostream &_out;
+  bool _dump_mode;
 };
 
 #endif /* INPUTFILEFORMATTER_H */

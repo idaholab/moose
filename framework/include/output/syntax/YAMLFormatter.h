@@ -15,16 +15,24 @@
 #ifndef YAMLFORMATTER_H
 #define YAMLFORMATTER_H
 
-#include "SyntaxFormatterInterface.h"
+#include "SyntaxTree.h"
 
-class YAMLFormatter : public SyntaxFormatterInterface
+class YAMLFormatter : public SyntaxTree
 {
 public:
-  YAMLFormatter(std::ostream & out, bool dump_mode);
+  YAMLFormatter(std::ostream &out, bool dump_mode);
 
   virtual void preamble();
-  virtual void print(const std::string & name, const std::string * /*prev_name*/, std::vector<InputParameters *> & param_ptrs);
   virtual void postscript();
+
+  virtual void printBlockOpen(const std::string &name, short depth, const std::string &type) const;
+  virtual void printBlockClose(const std::string &name, short depth) const;
+  virtual void printParams(InputParameters &params, short depth) const;
+
+
+
+//  virtual void print() const;
+//  virtual void postscript();
 
 protected:
 
@@ -33,8 +41,10 @@ protected:
    */
   void printCloseAndOpen(const std::string & name, const std::string * prev_name) const;
 
-private:
-  bool first;
+protected:
+  std::ostream &_out;
+  bool _dump_mode;
+  bool _first;
 };
 
 #endif /* YAMLFORMATTER_H */

@@ -35,6 +35,7 @@
 
 #include "GlobalParamsAction.h"
 
+#include "SyntaxTree.h"
 #include "InputFileFormatter.h"
 #include "YAMLFormatter.h"
 
@@ -467,8 +468,8 @@ Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostre
 void
 Parser::buildFullTree()
 {
-  std::string prev_name = "";
-  std::vector<InputParameters *> params_ptrs(2);
+//  std::string prev_name = "";
+//  std::vector<InputParameters *> params_ptrs(2);
   std::vector<std::pair<std::string, Syntax::ActionInfo> > all_names;
 
   _syntax_formatter->preamble();
@@ -492,15 +493,16 @@ Parser::buildFullTree()
   for (std::vector<std::pair<std::string, Syntax::ActionInfo> >::iterator act_names = all_names.begin(); act_names != all_names.end(); ++act_names)
   {
     InputParameters action_obj_params = ActionFactory::instance()->getValidParams(act_names->second._action);
+    _syntax_formatter->insertNode(act_names->first, act_names->second._action, true, &action_obj_params);
 
     // DEBUG
-    std::cout << std::endl;
+//    std::cout << std::endl;
     const std::string & action_name = act_names->second._action_name;
     std::string act_name = act_names->first;
 
-    params_ptrs[0] = &action_obj_params;
+//    params_ptrs[0] = &action_obj_params;
 
-    bool print_once = false;
+//    bool print_once = false;
 
     // We need to see if this action is inherited from MooseObjectAction
     // If it is, then we will loop over all the Objects in MOOSE's Factory object to print them out
@@ -519,46 +521,44 @@ Parser::buildFullTree()
              (action_name == "add_aux_bc" &&
               moose_obj_params.get<std::string>("built_by_action") == "add_aux_kernel")))
         {
-          print_once = true;
-          std::string name;
-          size_t pos = 0;
-          if (act_name[act_name.size()-1] == '*')
-            pos = act_name.size()-1;
-          else
-            pos = act_name.size();
+//          print_once = true;
+//          std::string name;
+//          size_t pos = 0;
+//          if (act_name[act_name.size()-1] == '*')
+//            pos = act_name.size()-1;
+//          else
+//            pos = act_name.size();
 
           // Executioner and Initial Condition syntax is non standard - we'll hack it here
           if (act_name == "Executioner" || act_name == "Mesh")
           {
-            name = act_name.substr(0, pos) + "/" +  moose_obj->first;
+//            name = act_name.substr(0, pos) + "/" +  moose_obj->first;
 
             // This indicates that these parameters are to be used in the parent block
             moose_obj_params.addParam<bool>("parent_params", true, "Indicates that the options for this block should actually be put in its parent");
           }
-          else if (act_name.find("InitialCondition") != std::string::npos)
-            name = act_name;
-          else
-            name = act_name.substr(0, pos) + moose_obj->first;
+//          else if (act_name.find("InitialCondition") != std::string::npos)
+//            name = act_name;
+//          else
+//            name = act_name.substr(0, pos) + moose_obj->first;
 
           moose_obj_params.set<std::string>("type") = moose_obj->first;
           moose_obj_params.seenInInputFile("type");
-          params_ptrs[1] = &moose_obj_params;
+//          params_ptrs[1] = &moose_obj_params;
 
-          _syntax_formatter->print(name, &prev_name, params_ptrs);
+          _syntax_formatter->insertNode(act_names->first, moose_obj->first, false, &moose_obj_params);
 
-          prev_name = name;
+//          prev_name = name;
         }
       }
     }
-    // Not a MOOSE Object Action
-    if (!print_once && ActionFactory::instance()->isParsed(act_name))
-    {
-      params_ptrs[1] = NULL;
+//    // Not a MOOSE Object Action
+//    if (!print_once && ActionFactory::instance()->isParsed(act_name))
+//    {
+//      params_ptrs[1] = NULL;
 
-      _syntax_formatter->print(act_name, prev_name == "" ? NULL : &prev_name, params_ptrs);
-
-      prev_name = act_name;
-    }
+//      prev_name = act_name;
+//    }
 
     // Preconditioner syntax is non standard - we'll hack them in here
     if (action_name == "preconditioning_meta_action")
@@ -573,20 +573,25 @@ Parser::buildFullTree()
 
           precond_params.set<std::string>("type") = block_name;
           precond_params.seenInInputFile("type");
-          params_ptrs[1] = &precond_params;
+//          params_ptrs[1] = &precond_params;
 
           std::string name = act_name.substr(0, act_name.size()-1) + block_name;
+//          std::cout << name << "\n";
 
-          _syntax_formatter->print(name, &act_name, params_ptrs);
+          _syntax_formatter->insertNode(name, block_name, false, &precond_params);
 
-          prev_name = name;
+//          prev_name = name;
         }
     }
 
   }
-  params_ptrs[0] = NULL;
-  params_ptrs[1] = NULL;
-  _syntax_formatter->print("", &prev_name, params_ptrs);
+//  params_ptrs[0] = NULL;
+//  params_ptrs[1] = NULL;
+//  _syntax_formatter->print("", &prev_name, params_ptrs);
+
+//  _syntax_formatter->postscript();
+
+  _syntax_formatter->print();
 
   _syntax_formatter->postscript();
 }
@@ -594,6 +599,8 @@ Parser::buildFullTree()
 void
 Parser::tokenize(const std::string &str, std::vector<std::string> &elements, unsigned int min_len, const std::string &delims)
 {
+  elements.clear();
+
   std::string::size_type last_pos = str.find_first_not_of(delims, 0);
   std::string::size_type pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
 

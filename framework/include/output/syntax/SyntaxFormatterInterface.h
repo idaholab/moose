@@ -23,17 +23,15 @@
 class SyntaxFormatterInterface
 {
 public:
-  SyntaxFormatterInterface(std::ostream & out, bool dump_mode=false);
-  virtual ~SyntaxFormatterInterface();
-
+  SyntaxFormatterInterface() {}
+  virtual ~SyntaxFormatterInterface() {}
   virtual void preamble() {}
-  virtual void print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs) = 0;
   virtual void postscript() {}
 
-protected:
-  std::ostream & _out;
-  /// Indicates whether this is a full dump or input file based
-  bool _dump_mode;
+  virtual void print() const = 0;
+  virtual void printBlockOpen(const std::string &name, short depth, const std::string &type) const = 0;
+  virtual void printBlockClose(const std::string &name, short depth) const = 0;
+  virtual void printParams(InputParameters &params, short depth) const = 0;
 };
 
 #endif /* SYNTAXFORMATTERINTERFACE_H */
