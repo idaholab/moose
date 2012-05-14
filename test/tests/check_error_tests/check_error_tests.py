@@ -84,6 +84,11 @@ windows_line_endings_test = { INPUT : 'windows_line_endings.i',
 nan_test = { INPUT : 'nan_test.i',
              EXPECT_ERR : "Floating point exception" }
 
+exception_test = {
+  INPUT : 'exception_test.i',
+  EXPECT_ERR : "terminate called throwing an exception"
+}
+
 multi_precond_test = { INPUT : 'multi_precond_test.i',
                        EXPECT_ERR : 'More than one active Preconditioner Action detected while building \S+' }
 

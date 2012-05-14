@@ -22,6 +22,7 @@
 #include "DGKernelWarehouse.h"
 #include "DamperWarehouse.h"
 #include "ConstraintWarehouse.h"
+#include "MooseException.h"
 
 // libMesh includes
 #include "transient_system.h"
@@ -453,6 +454,11 @@ protected:
   Real _predictor_scale;
 
   bool _computing_initial_residual;
+
+  /**
+   * If this is non-NULL, it holds an exception that we will re-throw
+   */
+  MooseException * _exception;
 
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;

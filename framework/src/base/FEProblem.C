@@ -1625,6 +1625,7 @@ FEProblem::solve()
   Moose::perf_log.push("solve()","Solve");
 //  _solve_only_perf_log.push("solve");
   _nl.solve();
+
 //  _solve_only_perf_log.pop("solve");
   Moose::perf_log.pop("solve()","Solve");
   _nl.update();
@@ -1707,7 +1708,7 @@ FEProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVecto
 }
 
 void
-FEProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
+FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
 {
   _nl.set_solution(soln);
   computePostprocessors(EXEC_JACOBIAN);
@@ -1725,6 +1726,11 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVecto
   _aux.jacobianSetup();
   _aux.compute();
   _nl.computeJacobian(jacobian);
+
+  // This call is here to make sure the residual vector is up to date with any decisions that have been made in
+  // the Jacobian evaluation.  That is important in JFNK because that residual is used for finite differencing
+  computeResidual(sys, soln, *sys.rhs);
+  sys.rhs->close();
 }
 
 void
@@ -1740,19 +1746,30 @@ FEProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System
 void
 FEProblem::computeBounds(NonlinearImplicitSystem & /*sys*/, NumericVector<Number>& lower, NumericVector<Number>& upper)
 {
-  NumericVector<Number>& _lower = _nl.getVector("lower_bound");
-  NumericVector<Number>& _upper = _nl.getVector("upper_bound");
-  _lower.swap(lower);
-  _upper.swap(upper);
-  unsigned int n_threads = libMesh::n_threads();
-  for(unsigned int i=0; i<n_threads; i++)
+  try
   {
-    _materials[i].residualSetup();
+    NumericVector<Number> & _lower = _nl.getVector("lower_bound");
+    NumericVector<Number> & _upper = _nl.getVector("upper_bound");
+    _lower.swap(lower);
+    _upper.swap(upper);
+    unsigned int n_threads = libMesh::n_threads();
+    for(unsigned int i=0; i<n_threads; i++)
+    {
+      _materials[i].residualSetup();
+    }
+    _aux.residualSetup();
+    _aux.compute();
+    _lower.swap(lower);
+    _upper.swap(upper);
   }
-  _aux.residualSetup();
-  _aux.compute();
-  _lower.swap(lower);
-  _upper.swap(upper);
+  catch (MooseException & e)
+  {
+    // tell solver to stop
+#ifdef LIBMESH_HAVE_PETSC
+    PetscNonlinearSolver<Real> & solver = static_cast<PetscNonlinearSolver<Real> &>(*_nl.sys().nonlinear_solver);
+    SNESSetFunctionDomainError(solver.snes());
+#endif
+  }
 }
 
 Real

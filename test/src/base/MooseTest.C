@@ -25,6 +25,7 @@
 #include "ForcingFunctionXYZ0.h"
 #include "TEJumpFFN.h"
 #include "NanKernel.h"
+#include "ExceptionKernel.h"
 #include "MatConvection.h"
 #include "PPSDiffusion.h"
 #include "DotCouplingKernel.h"
@@ -102,6 +103,7 @@ void registerObjects()
   registerKernel(ForcingFunctionXYZ0);
   registerKernel(TEJumpFFN);
   registerKernel(NanKernel);
+  registerKernel(ExceptionKernel);
   registerKernel(MatConvection);
   registerKernel(PPSDiffusion);
   registerKernel(DotCouplingKernel);

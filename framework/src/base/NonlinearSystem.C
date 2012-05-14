@@ -50,6 +50,10 @@
 #include "dense_subvector.h"
 #include "dense_submatrix.h"
 #include "dof_map.h"
+// PETSc
+#ifdef LIBMESH_HAVE_PETSC
+#include "petscsnes.h"
+#endif
 
 namespace Moose {
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys);
@@ -58,11 +62,6 @@ namespace Moose {
   {
     Problem * p = sys.get_equation_systems().parameters.get<Problem *>("_problem");
     p->computeJacobian(sys, soln, jacobian);
-
-    // This call is here to make sure the residual vector is up to date with any decisions that have been made in
-    // the Jacobian evaluation.  That is important in JFNK becasue that residual is used for finite differencing
-    compute_residual(soln, *sys.rhs, sys);
-    sys.rhs->close();
   }
 
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys)
@@ -111,7 +110,8 @@ NonlinearSystem::NonlinearSystem(FEProblem & subproblem, const std::string & nam
     _n_linear_iters(0),
     _final_residual(0.),
     _use_predictor(false),
-    _predictor_scale(0.0)
+    _predictor_scale(0.0),
+    _exception(NULL)
 {
   _sys.nonlinear_solver->residual = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian = Moose::compute_jacobian;
@@ -163,16 +163,24 @@ NonlinearSystem::init()
 void
 NonlinearSystem::solve()
 {
-  //Calculate the initial residual for use in the convergence criterion.  The initial
-  //residual
-  _computing_initial_residual = true;
-  _mproblem.computeResidual(_sys, *_current_solution, *_sys.rhs);
-  _computing_initial_residual = false;
+  try
+  {
+    //Calculate the initial residual for use in the convergence criterion.  The initial
+    //residual
+    _computing_initial_residual = true;
+    _mproblem.computeResidual(_sys, *_current_solution, *_sys.rhs);
+    _computing_initial_residual = false;
 
-  _sys.rhs->close();
-  _initial_residual = _sys.rhs->l2_norm();
-  std::cout <<std::scientific<<std::setprecision(6);
-  std::cout << "  Initial |residual|_2 = "<<_initial_residual<<"\n";
+    _sys.rhs->close();
+    _initial_residual = _sys.rhs->l2_norm();
+    std::cout <<std::scientific<<std::setprecision(6);
+    std::cout << "  Initial |residual|_2 = "<<_initial_residual<<"\n";
+  }
+  catch (MooseException & e)
+  {
+    // re-throw the exception, we can do this since we did not enter the solve() call yet
+    throw;
+  }
 
   // Clear the iteration counters
   _current_l_its.clear();
@@ -201,6 +209,16 @@ NonlinearSystem::solve()
     MatFDColoringDestroy(&_fdcoloring);
 #endif
 #endif
+
+  // we are back from the libMesh solve, so re-throw the exception if we got one;
+  if (_exception != NULL)
+  {
+    // clone the exception, delete it and re-throw it
+    MooseException * e = _exception->clone();
+    delete _exception;
+    _exception = NULL;
+    throw *e;
+  }
 }
 
 void
@@ -514,9 +532,27 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual)
     (*it)->zero();
   }
 
-  computeTimeDerivatives();
-  computeResidualInternal(residual);
-  finishResidual(residual);
+  try
+  {
+    computeTimeDerivatives();
+    computeResidualInternal(residual);
+    finishResidual(residual);
+  }
+  catch (MooseException & e)
+  {
+    if (_computing_initial_residual)
+      throw;                            // re-throw the exception if we are computing initial residual
+    else
+    {
+      // save the exception so we can re-throw it again
+      _exception = e.clone();
+      // tell solver to stop
+#ifdef LIBMESH_HAVE_PETSC
+      PetscNonlinearSolver<Real> & solver = static_cast<PetscNonlinearSolver<Real> &>(*_sys.nonlinear_solver);
+      SNESSetFunctionDomainError(solver.snes());
+#endif
+    }
+  }
 
   Moose::enableFPE(false);
 
@@ -1369,113 +1405,134 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 
   Moose::enableFPE();
 
-  _currently_computing_jacobian = true;
+  try
+  {
+    _currently_computing_jacobian = true;
 
 #ifdef LIBMESH_HAVE_PETSC
-  //Necessary for speed
+    // put zeroes on the diagonal
+    Vec zero_vec;
+    VecDuplicate(static_cast<PetscVector<Number> &>(*_sys.solution).vec(), &zero_vec);                         // get the same parallel layout
+    VecZeroEntries(zero_vec);
+    MatDiagonalSet(static_cast<PetscMatrix<Number> &>(jacobian).mat(), zero_vec, INSERT_VALUES);
+    LibMeshVecDestroy(&zero_vec);
+    jacobian.close();
+
+    //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
-  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3,1,0)
-  // In Petsc 3.0.0, MatSetOption has three args...the third arg
-  // determines whether the option is set (true) or unset (false)
-  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-   MAT_KEEP_ZEROED_ROWS,
-   PETSC_TRUE);
+    // In Petsc 3.0.0, MatSetOption has three args...the third arg
+    // determines whether the option is set (true) or unset (false)
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+      MAT_KEEP_ZEROED_ROWS,
+      PETSC_TRUE);
 #else
-  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-   MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
-   PETSC_TRUE);
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+      MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
+      PETSC_TRUE);
 #endif
 #endif
 
-  // jacobianSetup /////
-  for(unsigned int i=0; i<libMesh::n_threads(); i++)
-  {
-    _kernels[i].jacobianSetup();
-    _bcs[i].jacobianSetup();
-    _dirac_kernels[i].jacobianSetup();
-    _constraints[i].jacobianSetup();
-    if (_doing_dg) _dg_kernels[i].jacobianSetup();
-  }
-
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  switch (_mproblem.coupling())
-  {
-  case Moose::COUPLING_DIAG:
+    // jacobianSetup /////
+    for(unsigned int i=0; i<libMesh::n_threads(); i++)
     {
-      ComputeJacobianThread cj(_mproblem, *this, jacobian);
-      Threads::parallel_reduce(elem_range, cj);
+      _kernels[i].jacobianSetup();
+      _bcs[i].jacobianSetup();
+      _dirac_kernels[i].jacobianSetup();
+      _constraints[i].jacobianSetup();
+      if (_doing_dg) _dg_kernels[i].jacobianSetup();
     }
-    break;
 
-  default:
-  case Moose::COUPLING_CUSTOM:
+    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    switch (_mproblem.coupling())
     {
-      ComputeFullJacobianThread cj(_mproblem, *this, jacobian);
-      Threads::parallel_reduce(elem_range, cj);
-    }
-    break;
-  }
-
-  computeDiracContributions(NULL, &jacobian);
-  computeScalarKernelsJacobians(jacobian);
-
-  static bool first = true;
-
-  // This adds zeroes into geometric coupling entries to ensure they stay in the matrix
-  if(first && (_add_implicit_geometric_coupling_entries_to_jacobian || _mproblem._has_constraints))
-  {
-    first = false;
-    addImplicitGeometricCouplingEntries(jacobian, _mproblem.geomSearchData());
-
-    if(_mproblem.getDisplacedProblem())
-      addImplicitGeometricCouplingEntries(jacobian, _mproblem.getDisplacedProblem()->geomSearchData());
-  }
-
-  jacobian.close();
-
-  // do nodal BC
-  std::vector<int> zero_rows;
-
-  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-  for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
-  {
-    const BndNode * bnode = *nd;
-    BoundaryID boundary_id = bnode->_bnd_id;
-    Node * node = bnode->_node;
-
-    if(node->processor_id() == libMesh::processor_id())
-    {
-      _problem.reinitNodeFace(node, boundary_id, 0);
-
-      for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
+    case Moose::COUPLING_DIAG:
       {
-        NodalBC * bc = *it;
-        if (bc->shouldApply())
-          zero_rows.push_back(bc->variable().nodalDofIndex());
+        ComputeJacobianThread cj(_mproblem, *this, jacobian);
+        Threads::parallel_reduce(elem_range, cj);
+      }
+      break;
+
+    default:
+    case Moose::COUPLING_CUSTOM:
+      {
+        ComputeFullJacobianThread cj(_mproblem, *this, jacobian);
+        Threads::parallel_reduce(elem_range, cj);
+      }
+      break;
+    }
+
+    computeDiracContributions(NULL, &jacobian);
+    computeScalarKernelsJacobians(jacobian);
+
+    static bool first = true;
+
+    // This adds zeroes into geometric coupling entries to ensure they stay in the matrix
+    if(first && (_add_implicit_geometric_coupling_entries_to_jacobian || _mproblem._has_constraints))
+    {
+      first = false;
+      addImplicitGeometricCouplingEntries(jacobian, _mproblem.geomSearchData());
+
+      if(_mproblem.getDisplacedProblem())
+        addImplicitGeometricCouplingEntries(jacobian, _mproblem.getDisplacedProblem()->geomSearchData());
+    }
+
+    jacobian.close();
+
+    // do nodal BC
+    std::vector<int> zero_rows;
+
+    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
+    {
+      const BndNode * bnode = *nd;
+      BoundaryID boundary_id = bnode->_bnd_id;
+      Node * node = bnode->_node;
+
+      if(node->processor_id() == libMesh::processor_id())
+      {
+        _problem.reinitNodeFace(node, boundary_id, 0);
+
+        for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
+        {
+          NodalBC * bc = *it;
+          if (bc->shouldApply())
+            zero_rows.push_back(bc->variable().nodalDofIndex());
+        }
       }
     }
+
+    jacobian.zero_rows(zero_rows, 1.0);
+
+    jacobian.close();
+
+    // Add in Jacobian contributions from Constraints
+    if(_mproblem._has_constraints)
+    {
+      // Nodal Constraints
+      enforceNodalConstraintsJacobian(jacobian);
+
+      // Undisplaced Constraints
+      constraintJacobians(jacobian, false);
+
+      // Displaced Constraints
+      if(_mproblem.getDisplacedProblem())
+        constraintJacobians(jacobian, true);
+    }
+
+    _currently_computing_jacobian = false;
   }
-
-  jacobian.zero_rows(zero_rows, 1.0);
-
-  jacobian.close();
-
-  // Add in Jacobian contributions from Constraints
-  if(_mproblem._has_constraints)
+  catch (MooseException & e)
   {
-    // Nodal Constraints
-    enforceNodalConstraintsJacobian(jacobian);
-
-    // Undisplaced Constraints
-    constraintJacobians(jacobian, false);
-
-    // Displaced Constraints
-    if(_mproblem.getDisplacedProblem())
-      constraintJacobians(jacobian, true);
+    // save the exception so we can re-throw it again
+    _exception = e.clone();
+    // tell solver to stop
+#ifdef LIBMESH_HAVE_PETSC
+    PetscNonlinearSolver<Real> & solver = static_cast<PetscNonlinearSolver<Real> &>(*_sys.nonlinear_solver);
+    SNESSetFunctionDomainError(solver.snes());
+#endif
   }
-
-  _currently_computing_jacobian = false;
 
   Moose::enableFPE(false);
 
