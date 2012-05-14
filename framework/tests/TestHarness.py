@@ -17,12 +17,15 @@ class TestHarness:
     self.num_skipped = 0
     self.host_name = gethostname()
     self.moose_dir = os.path.abspath(moose_dir) + '/'
-    #Assume libmesh is a peer directory to MOOSE if not defined
+    # Assume libmesh is a peer directory to MOOSE if not defined
     if os.environ.has_key("LIBMESH_DIR"):
       self.libmesh_dir = os.environ['LIBMESH_DIR']
     else:
       self.libmesh_dir = self.moose_dir + '../libmesh'
     self.file = None
+
+    # Parse arguments
+    self.parseCLArgs(argv)
 
     self.checks = {}
     self.checks[PLATFORM] = getPlatforms()
@@ -332,8 +335,6 @@ class TestHarness:
       sys.exit(1)
 
   def initialize(self, argv, app_name):
-    self.parseCLArgs(argv)
-
     # Initialize the parallel runner with how many tests to run in parallel
     self.runner = RunParallel(self, self.options.jobs, self.options.load)
 
@@ -391,6 +392,8 @@ class TestHarness:
                       help="Report Timing information for passing tests")
     parser.add_option('-s', '--scale', action='store_true', dest='scaling', default=False,
                       help="Scale problems that have SCALE_REFINE set")
+    parser.add_option('--libmesh_dir', action="store", type='string', dest="libmesh_dir", default='',
+                      help="Currently only needed for bitten code coverage")
 
     outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show the output of every test that fails')
@@ -431,6 +434,10 @@ class TestHarness:
         self.options.method = os.environ['METHOD']
       else:
         self.options.method = 'opt'
+
+    # Update libmesh_dir to reflect arguments
+    if opts.libmesh_dir != '':
+      self.libmesh_dir = opts.libmesh_dir
 
   def postRun(self, test, timing):
     return
