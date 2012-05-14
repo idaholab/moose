@@ -58,13 +58,6 @@ public:
    */
   std::string getShortName() const;
 
-  //void printInputFile(const std::string * prev_name, std::ostream & out);
-
-  /**
-   * Helper method for adding Params pointers to be printed out in syntax dumps
-   */
-  virtual void addParamsPtrs(std::vector<InputParameters *> & param_ptrs);
-
 protected:
 
   std::string _name;
@@ -75,10 +68,6 @@ protected:
 
   /// Convenience reference to a problem this action works on
   FEProblem * & _problem;
-
-private:
-  /// Helper method for printing the parts of the InputFile Syntax
-  //void printCloseAndOpen(const std::string * prev_name, const std::string & curr_name, std::ostream & out) const;
 };
 
 #endif // ACTION_H

@@ -34,10 +34,3 @@ MooseObjectAction::MooseObjectAction(const std::string & name, InputParameters p
                        ? Factory::instance()->getValidParams(_type) : validParams<MooseObject>())
 {
 }
-
-void
-MooseObjectAction::addParamsPtrs(std::vector<InputParameters *> & param_ptrs)
-{
-  Action::addParamsPtrs(param_ptrs);
-  param_ptrs.push_back(&_moose_object_pars);
-}

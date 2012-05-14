@@ -121,7 +121,7 @@ ActionWarehouse::actionBlocksWithActionEnd(const std::string & action_name)
 void
 ActionWarehouse::printInputFile(std::ostream & out)
 {
-  InputFileFormatter tree(std::cout, false);
+  InputFileFormatter tree(out, false);
 
   std::map<std::string, std::vector<Action *> >::iterator iter;
 
@@ -131,41 +131,20 @@ ActionWarehouse::printInputFile(std::ostream & out)
     for (std::vector<Action *>::iterator j = iter->second.begin(); j != iter->second.end(); ++j)
       ordered_actions.push_back(*j);
 
-  std::sort(ordered_actions.begin(), ordered_actions.end(), Parser::InputFileSort());
-
-  // We'll push one more "empty" action onto the end so that when we print the input syntax
-  // everything will get closed off without any odd tail calls.  Had to do delayed construction
-//  InputParameters pars = ActionFactory::instance()->getValidParams("EmptyAction");
-//  Action * empty_action = ActionFactory::instance()->create("EmptyAction", pars);
-//  ordered_actions.push_back(empty_action);
-
-//  mooseAssert (_parser_ptr != NULL, "Parser is NULL in ActionWarehouse");
-//  _parser_ptr->initSyntaxFormatter(Parser::INPUT_FILE, false, out);
-
-  // Print it out!
-
-//  std::string prev_name = "";
   for (std::vector<Action* >::iterator i = ordered_actions.begin();
        i != ordered_actions.end();
        ++i)
   {
     std::string name ((*i)->name());
 
-    if (ActionFactory::instance()->isParsed(name))
+    if (Moose::syntax.isAssociated(name, false) != "")
     {
-//      std::vector<InputParameters *> param_ptrs;
-      InputParameters params = (*i)->getParams(); //addParamsPtrs(param_ptrs);
-      std::cout << name << "\n";
-
+      InputParameters params = (*i)->getParams();
       tree.insertNode(name, name, true, &params);
-
-
-      //      _parser_ptr->print(name, prev_name == "" ? NULL : &prev_name, param_ptrs);
-//      prev_name = name;
     }
   }
 
-//  delete empty_action;
+  tree.print();
 }
 
 void

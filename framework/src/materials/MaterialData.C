@@ -59,8 +59,6 @@ MaterialData::size(unsigned int n_qpoints)
 void
 MaterialData::reinit(std::vector<Material *> & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side/* = 0*/)
 {
-  unsigned int elem_id = elem.id();
-
   // FIXME: if there are elements with different number of quadrature points and the one with smaller
   // number gets hit first, we will fail with out-of-bound error, since we set the resize flag to true,
   // but we need more space to store the new properties.  Thus, we need to be smarter here with invalidating

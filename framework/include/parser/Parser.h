@@ -157,13 +157,6 @@ public:
    */
   void initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostream & out = std::cout);
 
-  /// Wrapper for syntax formatter print interface
-//  inline void print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs)
-//  {
-    //mooseAssert(_syntax_formatter != NULL, "Syntax Formatter is NULL in Parser");
-    //_syntax_formatter->print(name, prev_name, param_ptrs);
-//  }
-
   // data created while running execute()
   MooseMesh *_mesh;
   MooseMesh *_displaced_mesh;

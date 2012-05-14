@@ -44,9 +44,3 @@ Action::getShortName() const
 {
   return _name.substr(_name.find_last_of('/') != std::string::npos ? _name.find_last_of('/') + 1 : 0);
 }
-
-void
-Action::addParamsPtrs(std::vector<InputParameters *> & param_ptrs)
-{
-  param_ptrs.push_back(&_pars);
-}
