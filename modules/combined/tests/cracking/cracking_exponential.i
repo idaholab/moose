@@ -82,8 +82,8 @@
   [../]
   [./disply]
     type = PiecewiseLinear
-    x = '0 1 2'
-    y = '0 0 .0035'
+    x = '0 5 6'
+    y = '0 0 .00175'
   [../]
   [./displz]
     type = PiecewiseLinear
@@ -168,26 +168,21 @@
     value = 0.0
   [../]
 
-#  [./pully]
-#    type = FunctionPresetBC
-#    variable = disp_y
-#    boundary = 5
-#    function = disply
-#  [../]
-  [./bottom]
+  [./fix_y]
     type = PresetBC
     #type = DirichletBC
     variable = disp_y
-    boundary = '2 5'
+    boundary = 1
     value = 0.0
   [../]
 
-#  [./pullz]
-#    type = FunctionPresetBC
-#    variable = disp_z
-#    boundary = 6
-#    function = displz
-#  [../]
+  [./move_y]
+    type = FunctionPresetBC
+    variable = disp_y
+    boundary = 4
+    function = disply
+  [../]
+
   [./back]
     type = PresetBC
     #type = DirichletBC
