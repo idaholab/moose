@@ -524,7 +524,7 @@ Parser::buildFullTree()
           }
           else
           {
-            name = act_name + "/type/" + moose_obj->first;
+            name = act_name + "/<type>/" + moose_obj->first;
           }
 
           moose_obj_params.set<std::string>("type") = moose_obj->first;

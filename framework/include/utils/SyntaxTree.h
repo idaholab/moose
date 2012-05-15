@@ -58,8 +58,8 @@ protected:
     void insertParams(const std::string &action, bool is_action_params, InputParameters *params=NULL);
 
     std::map<std::string, TreeNode *> _children;
-    std::map<std::string, InputParameters *> _action_params;
-    std::map<std::string, InputParameters *> _moose_object_params;
+    std::multimap<std::string, InputParameters *> _action_params;
+    std::multimap<std::string, InputParameters *> _moose_object_params;
     std::string _name;
     TreeNode *_parent;
     const SyntaxTree &_syntax_tree;

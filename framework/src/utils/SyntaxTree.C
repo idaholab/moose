@@ -51,16 +51,16 @@ SyntaxTree::TreeNode::TreeNode(const std::string &name, const SyntaxTree &syntax
     _syntax_tree(syntax_tree)
 {
   if (action)
-    _action_params[*action] = new InputParameters(*params);
+    _action_params.insert(std::make_pair(*action, new InputParameters(*params)));
 }
 
 SyntaxTree::TreeNode::~TreeNode()
 {
-  for (std::map<std::string, InputParameters *>::iterator it = _action_params.begin();
+  for (std::multimap<std::string, InputParameters *>::iterator it = _action_params.begin();
        it != _action_params.end(); ++it)
     delete it->second;
 
-  for (std::map<std::string, InputParameters *>::iterator it = _moose_object_params.begin();
+  for (std::multimap<std::string, InputParameters *>::iterator it = _moose_object_params.begin();
        it != _moose_object_params.end(); ++it)
     delete it->second;
 
@@ -102,17 +102,9 @@ void
 SyntaxTree::TreeNode::insertParams(const std::string &action, bool is_action_params, InputParameters *params)
 {
   if (is_action_params)
-  {
-    mooseAssert(_action_params.find(action) == _action_params.end(),
-                "Trying to insert a dupliate action parameter node in the SyntaxTree, this probably isn't correct");
-    _action_params[action] = new InputParameters(*params);
-  }
+    _action_params.insert(std::make_pair(action, new InputParameters(*params)));
   else
-  {
-    mooseAssert(_moose_object_params.find(action) == _moose_object_params.end(),
-                "Trying to insert a dupliate moose object parameter node in the SyntaxTree, this probably isn't correct");
-    _moose_object_params[action] = new InputParameters(*params);
-  }
+    _moose_object_params.insert(std::make_pair(action, new InputParameters(*params)));
 }
 
 void
@@ -130,11 +122,12 @@ SyntaxTree::TreeNode::print(short depth) const
 
   std::string indent((depth+1)*2, ' ');
 
+
   if (_moose_object_params.begin() == _moose_object_params.end())
   {
     _syntax_tree.printBlockOpen(name, depth, type);
 
-    for (std::map<std::string, InputParameters *>::const_iterator ait = _action_params.begin(); ait != _action_params.end(); ++ait)
+    for (std::multimap<std::string, InputParameters *>::const_iterator ait = _action_params.begin(); ait != _action_params.end(); ++ait)
       _syntax_tree.printParams(*ait->second, depth);
 //      std::cout << "\n" << indent << "(" << ait->first << ")";
 
@@ -147,11 +140,11 @@ SyntaxTree::TreeNode::print(short depth) const
   }
   else
   {
-    for (std::map<std::string, InputParameters *>::const_iterator it = _moose_object_params.begin(); it != _moose_object_params.end(); ++it)
+    for (std::multimap<std::string, InputParameters *>::const_iterator it = _moose_object_params.begin(); it != _moose_object_params.end(); ++it)
     {
       _syntax_tree.printBlockOpen(name, depth, type);
 
-      for (std::map<std::string, InputParameters *>::const_iterator ait = _action_params.begin(); ait != _action_params.end(); ++ait)
+      for (std::multimap<std::string, InputParameters *>::const_iterator ait = _action_params.begin(); ait != _action_params.end(); ++ait)
         _syntax_tree.printParams(*ait->second, depth);
 //        std::cout << "\n" << indent << "(" << ait->first << ")";
 
