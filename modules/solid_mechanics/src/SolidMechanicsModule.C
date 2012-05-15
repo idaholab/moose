@@ -29,6 +29,7 @@
 #include "LinearGeneralAnisotropicMaterial.h"
 #include "DashpotBC.h"
 #include "MaterialSymmElasticityTensorAux.h"
+#include "HomogenizedElasticConstants.h"
 
 void
 Elk::SolidMechanics::registerObjects()
@@ -61,6 +62,7 @@ Elk::SolidMechanics::registerObjects()
   registerKernel(StressDivergence);
   registerKernel(StressDivergenceRZ);
   registerKernel(HomogenizationKernel);
+  registerPostprocessor(HomogenizedElasticConstants);
 }
 
 void
