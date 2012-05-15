@@ -50,7 +50,7 @@ HomogenizedElasticConstants::HomogenizedElasticConstants(const std::string & nam
    _integral_value(0)
 {
 
-  
+
   if(_column == 0)
   {
     _k = 0;
@@ -93,8 +93,8 @@ HomogenizedElasticConstants::HomogenizedElasticConstants(const std::string & nam
 
 
 
-  
-  
+
+
   if(_row == 0)
   {
     _i = 0;
@@ -135,11 +135,11 @@ HomogenizedElasticConstants::HomogenizedElasticConstants(const std::string & nam
     _j = 0;
   }
 
-  
+
 
   _J = (3 * _l + _k);
   _I = (3 * _j + _i);
-  
+
 }
 
 void
@@ -159,7 +159,7 @@ HomogenizedElasticConstants::getValue()
 {
 
   gatherSum(_integral_value);
-  
+
   return _integral_value;
 }
 
@@ -181,14 +181,39 @@ HomogenizedElasticConstants::computeQpIntegral()
 
     value = 0.0;
 
+    VariableGradient * grad[6][3];
+    grad[0][0] = &_grad_disp_x_xx;
+    grad[0][1] = &_grad_disp_y_xx;
+    grad[0][2] = &_grad_disp_z_xx;
+
+    grad[1][0] = &_grad_disp_x_yy;
+    grad[1][1] = &_grad_disp_y_yy;
+    grad[1][2] = &_grad_disp_z_yy;
+
+    grad[2][0] = &_grad_disp_x_zz;
+    grad[2][1] = &_grad_disp_y_zz;
+    grad[2][2] = &_grad_disp_z_zz;
+
+    grad[3][0] = &_grad_disp_x_xy;
+    grad[3][1] = &_grad_disp_y_xy;
+    grad[3][2] = &_grad_disp_z_xy;
+
+    grad[4][0] = &_grad_disp_x_yz;
+    grad[4][1] = &_grad_disp_y_yz;
+    grad[4][2] = &_grad_disp_z_yz;
+
+    grad[5][0] = &_grad_disp_x_zx;
+    grad[5][1] = &_grad_disp_y_zx;
+    grad[5][2] = &_grad_disp_z_zx;
+
 
     for(int p = 0; p < 3; p++)
+    {
       for(int q = 0; q < 3; q++)
       {
-        value = value + E(_I,3 * q + p);
+        value = value + E(_I,3 * q + p) * (*grad[_column][p])[_qp](q);
       }
-    
+    }
 
-        
     return (E(_I,_J) - value);
 }
