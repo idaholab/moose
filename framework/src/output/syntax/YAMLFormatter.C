@@ -19,7 +19,7 @@
 #include <vector>
 
 YAMLFormatter::YAMLFormatter(std::ostream &out, bool dump_mode)
-  :SyntaxTree(),
+  :SyntaxTree(true),
    _out(out),
    _dump_mode(dump_mode),
    _first(true)

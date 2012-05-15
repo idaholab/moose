@@ -329,7 +329,6 @@ PenetrationThread::operator() (const NodeIdRange & range)
         {
           //find the face in the ridge set with the smallest index, assign that one to the interaction
           unsigned int face_index(std::numeric_limits<unsigned int>::max());
-          unsigned int ridge_set_data_index(0);
           unsigned int ridge_data_index(0);
           for (unsigned int i(0); i<ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size(); ++i)
           {

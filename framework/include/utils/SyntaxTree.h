@@ -29,7 +29,7 @@ class SyntaxTree;
 class SyntaxTree: public SyntaxFormatterInterface
 {
 public:
-  SyntaxTree();
+  SyntaxTree(bool use_long_names=false);
 
   virtual ~SyntaxTree();
 
@@ -45,12 +45,14 @@ protected:
   class TreeNode
   {
   public:
-    TreeNode(const std::string &name, const SyntaxTree &syntax_tree, const std::string *action=NULL, InputParameters *params=NULL);
+    TreeNode(const std::string &name, const SyntaxTree &syntax_tree, const std::string *action=NULL, InputParameters *params=NULL, TreeNode *parent=NULL);
     virtual ~TreeNode();
 
     void insertNode(std::string &syntax, const std::string &action, bool is_action_params=true,
                     InputParameters *params=NULL);
     void print(short depth) const;
+
+    std::string getLongName(const std::string &delim="/") const;
 
   protected:
     void insertParams(const std::string &action, bool is_action_params, InputParameters *params=NULL);
@@ -59,10 +61,14 @@ protected:
     std::map<std::string, InputParameters *> _action_params;
     std::map<std::string, InputParameters *> _moose_object_params;
     std::string _name;
+    TreeNode *_parent;
     const SyntaxTree &_syntax_tree;
   };
 
+  bool isLongNames() const { return _use_long_names; }
+
   TreeNode *_root;
+  bool _use_long_names;
 };
 
 

@@ -17,9 +17,10 @@
 #include "InputParameters.h"
 #include "Parser.h"
 
-SyntaxTree::SyntaxTree() :
+SyntaxTree::SyntaxTree(bool use_long_names) :
     SyntaxFormatterInterface(),
-    _root(NULL)
+    _root(NULL),
+    _use_long_names(use_long_names)
 {
 }
 
@@ -32,7 +33,7 @@ void
 SyntaxTree::insertNode(std::string syntax, const std::string &action, bool is_action_params, InputParameters *params)
 {
   if (_root == NULL)
-    _root = new TreeNode("/", *this);
+    _root = new TreeNode("", *this);
 
   _root->insertNode(syntax, action, is_action_params, params);
 }
@@ -44,8 +45,9 @@ SyntaxTree::print() const
     _root->print(-1);
 }
 
-SyntaxTree::TreeNode::TreeNode(const std::string &name, const SyntaxTree &syntax_tree, const std::string *action, InputParameters *params) :
+SyntaxTree::TreeNode::TreeNode(const std::string &name, const SyntaxTree &syntax_tree, const std::string *action, InputParameters *params, TreeNode *parent) :
     _name(name),
+    _parent(parent),
     _syntax_tree(syntax_tree)
 {
   if (action)
@@ -84,7 +86,9 @@ SyntaxTree::TreeNode::insertNode(std::string &syntax, const std::string &action,
   bool node_created = false;
   if (_children.find(item) == _children.end())
   {
-    _children[item] = new TreeNode(item, _syntax_tree, is_leaf ? &action : NULL, params);
+    _children[item] = new TreeNode(item, _syntax_tree, is_leaf && is_action_params ? &action : NULL, params, this);
+    if (is_leaf && !is_action_params)
+      _children[item]->insertParams(action, is_action_params, params);
     node_created = true;
   }
 
@@ -98,15 +102,24 @@ void
 SyntaxTree::TreeNode::insertParams(const std::string &action, bool is_action_params, InputParameters *params)
 {
   if (is_action_params)
+  {
+    mooseAssert(_action_params.find(action) == _action_params.end(),
+                "Trying to insert a dupliate action parameter node in the SyntaxTree, this probably isn't correct");
     _action_params[action] = new InputParameters(*params);
+  }
   else
+  {
+    mooseAssert(_moose_object_params.find(action) == _moose_object_params.end(),
+                "Trying to insert a dupliate moose object parameter node in the SyntaxTree, this probably isn't correct");
     _moose_object_params[action] = new InputParameters(*params);
+  }
 }
 
 void
 SyntaxTree::TreeNode::print(short depth) const
 {
   std::string type;
+  std::string name(_syntax_tree.isLongNames() ? getLongName() : _name);
 
   if (depth < 0)
   {
@@ -115,37 +128,51 @@ SyntaxTree::TreeNode::print(short depth) const
     return;
   }
 
+  std::string indent((depth+1)*2, ' ');
+
   if (_moose_object_params.begin() == _moose_object_params.end())
   {
-    _syntax_tree.printBlockOpen(_name, depth, type);
+    _syntax_tree.printBlockOpen(name, depth, type);
 
     for (std::map<std::string, InputParameters *>::const_iterator ait = _action_params.begin(); ait != _action_params.end(); ++ait)
       _syntax_tree.printParams(*ait->second, depth);
+//      std::cout << "\n" << indent << "(" << ait->first << ")";
 
     _syntax_tree.preTraverse(depth);
 
     for (std::map<std::string, TreeNode *>::const_iterator it = _children.begin(); it != _children.end(); ++it)
       it->second->print(depth+1);
 
-    _syntax_tree.printBlockClose(_name, depth);
+    _syntax_tree.printBlockClose(name, depth);
   }
   else
   {
     for (std::map<std::string, InputParameters *>::const_iterator it = _moose_object_params.begin(); it != _moose_object_params.end(); ++it)
     {
-      _syntax_tree.printBlockOpen(_name, depth, type);
+      _syntax_tree.printBlockOpen(name, depth, type);
 
       for (std::map<std::string, InputParameters *>::const_iterator ait = _action_params.begin(); ait != _action_params.end(); ++ait)
         _syntax_tree.printParams(*ait->second, depth);
+//        std::cout << "\n" << indent << "(" << ait->first << ")";
 
       _syntax_tree.printParams(*it->second, depth);
+//      std::cout << "\n" << indent << "{" << it->first << "}";
 
       _syntax_tree.preTraverse(depth);
 
       for (std::map<std::string, TreeNode *>::const_iterator it = _children.begin(); it != _children.end(); ++it)
         it->second->print(depth+1);
 
-      _syntax_tree.printBlockClose(_name, depth);
+      _syntax_tree.printBlockClose(name, depth);
     }
   }
+}
+
+std::string
+SyntaxTree::TreeNode::getLongName(const std::string &delim) const
+{
+  if (_parent)
+    return _parent->getLongName(delim) + delim + _name;
+  else
+    return _name;
 }

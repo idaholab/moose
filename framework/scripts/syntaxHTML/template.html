@@ -2,8 +2,8 @@
   <%doc>Only display Child from a node named /ParentBlock/Child </%doc>
   <li><a><b>${block['name'].split('/')[-1]}</b></a>
     <ul>
-      % if block['desc'] != '':
-        <li><div><a><b>Description: ${block['desc']}</b></a></div></li>
+      % if block['description'] != '':
+        <li><div><a><b>Description: ${block['description']}</b></a></div></li>
       % endif
       % if block['type'] != None:
         <li><div class="required"><a>type = ${block['type']}</a></div></li>

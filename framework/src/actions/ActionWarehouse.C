@@ -138,7 +138,8 @@ ActionWarehouse::printInputFile(std::ostream & out)
     std::string name ((*i)->name());
     std::string action ((*i)->getAction());
 
-    if (Moose::syntax.isAssociated(name, false) != "")
+    bool is_parent;
+    if (Moose::syntax.isAssociated(name, &is_parent) != "")
     {
       InputParameters params = (*i)->getParams();
       tree.insertNode(name, action, true, &params);
