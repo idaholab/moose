@@ -33,6 +33,11 @@ class TestHarness:
     self.checks[PETSC_VERSION] = getPetscVersion(self.libmesh_dir)
     self.checks[MESH_MODE] = getParmeshOption(self.libmesh_dir)
 
+    method = set()
+    method.add('ALL')
+    method.add(self.options.method.upper())
+    self.checks[METHOD] = method
+
     self.initialize(argv, app_name)
 
   def findAndRunTests(self):
@@ -137,7 +142,7 @@ class TestHarness:
     elif self.options.store_time and test[SCALE_REFINE] == 0:
       return False
 
-    checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE]
+    checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE, METHOD]
     for check in checks:
       test_platforms = set()
       for x in test[check]:
@@ -234,6 +239,8 @@ class TestHarness:
         caveats.append(', '.join(test[PETSC_VERSION]))
       if not 'ALL' in test[MESH_MODE]:
         caveats.append(', '.join(test[MESH_MODE]))
+      if not 'ALL' in test[METHOD]:
+        caveats.append(', '.join(test[METHOD]))
       if len(caveats):
         result = '[' + ', '.join(caveats) + '] OK'
       else:
