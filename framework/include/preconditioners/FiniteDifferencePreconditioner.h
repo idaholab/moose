@@ -12,26 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SETUPFINITEDIFFERENCEPRECONDITIONERACTION_H
-#define SETUPFINITEDIFFERENCEPRECONDITIONERACTION_H
+#ifndef FINITEDIFFERENCEPRECONDITIONER_H
+#define FINITEDIFFERENCEPRECONDITIONER_H
 
-#include "SetupPreconditionerAction.h"
+#include "MoosePreconditioner.h"
 
-class SetupFiniteDifferencePreconditionerAction;
+class FiniteDifferencePreconditioner;
 
 template<>
-InputParameters validParams<SetupFiniteDifferencePreconditionerAction>();
+InputParameters validParams<FiniteDifferencePreconditioner>();
 
 /**
- * Action to setup single matrix Jacobian (or Jacobian approximate)
- *
+ * Finite difference preconditioner.
  */
-class SetupFiniteDifferencePreconditionerAction: public SetupPreconditionerAction
+class FiniteDifferencePreconditioner : public MoosePreconditioner
 {
 public:
-  SetupFiniteDifferencePreconditionerAction(const std::string & name, InputParameters params);
-
-  virtual void act();
+  FiniteDifferencePreconditioner(const std::string & name, InputParameters params);
+  virtual ~FiniteDifferencePreconditioner();
 };
 
-#endif //SETUPFINITEDIFFERENCEPRECONDITIONERACTION_H
+#endif /* FINITEDIFFERENCEPRECONDITIONER_H */

@@ -15,10 +15,11 @@
 #ifndef PHYSICSBASEDPRECONDITIONER_H
 #define PHYSICSBASEDPRECONDITIONER_H
 
-//Global includes:
-#include<vector>
-
-//libMesh includes:
+//Global includes
+#include <vector>
+// MOOSE includes
+#include "MoosePreconditioner.h"
+//libMesh includes
 #include "preconditioner.h"
 #include "system.h"
 #include "linear_implicit_system.h"
@@ -33,17 +34,23 @@ namespace libMesh
 
 class FEProblem;
 class NonlinearSystem;
+class PhysicsBasedPreconditioner;
+
+template<>
+InputParameters validParams<PhysicsBasedPreconditioner>();
 
 /**
  * Implements a segregated solve preconditioner.
  */
-class PhysicsBasedPreconditioner : public Preconditioner<Number>
+class PhysicsBasedPreconditioner :
+    public MoosePreconditioner,
+    public Preconditioner<Number>
 {
 public:
   /**
    *  Constructor. Initializes PhysicsBasedPreconditioner data structures
    */
-  PhysicsBasedPreconditioner (FEProblem & mproblem);
+  PhysicsBasedPreconditioner (const std::string & name, InputParameters params);
 
   /**
    * Destructor.
@@ -73,12 +80,6 @@ public:
   virtual void init ();
 
   /**
-   * Set the order the block rows are solved for.  If not set then the solve happens in the order
-   * the variables were added to the NonlinearSystem.
-   */
-  void setSolveOrder(std::vector<unsigned int> solve_order);
-
-  /**
    * Helper function for copying values associated with variables in vectors from two different systems.
    */
   static void copyVarValues(MeshBase & mesh,
@@ -86,8 +87,6 @@ public:
                      const unsigned int to_system, const unsigned int to_var, NumericVector<Number> & to_vector);
 
 protected:
-  /// Subproblem this preconditioner is part of
-  FEProblem & _mproblem;
   /// The nonlinear system this PBP is associated with (convenience reference)
   NonlinearSystem & _nl;
   /// List of linear system that build up the preconditioner

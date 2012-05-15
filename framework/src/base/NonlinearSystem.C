@@ -1933,13 +1933,9 @@ NonlinearSystem::printVarNorms()
 }
 
 void
-NonlinearSystem::setPreconditioner(Preconditioner<Real> *pc)
+NonlinearSystem::setPreconditioner(MoosePreconditioner *pc)
 {
   _preconditioner = pc;
-
-  // We don't want to be computing the big Jacobian!
-  _sys.nonlinear_solver->jacobian = NULL;
-  _sys.nonlinear_solver->attach_preconditioner(pc);
 }
 
 void

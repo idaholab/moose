@@ -12,32 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SETUPPRECONDITIONERACTION_H
-#define SETUPPRECONDITIONERACTION_H
+#ifndef SINGLEMATRIXPRECONDITIONER_H
+#define SINGLEMATRIXPRECONDITIONER_H
 
-#include "InputParameters.h"
-#include "Moose.h"
-#include "MooseObjectAction.h"
+#include "MoosePreconditioner.h"
 
-#include <string>
-
-class SetupPreconditionerAction;
+class SingleMatrixPreconditioner;
 
 template<>
-InputParameters validParams<SetupPreconditionerAction>();
+InputParameters validParams<SingleMatrixPreconditioner>();
 
 /**
- * Set the preconditioner up.
+ * Single matrix preconditioner.
  */
-class SetupPreconditionerAction : public MooseObjectAction
+class SingleMatrixPreconditioner : public MoosePreconditioner
 {
 public:
-  SetupPreconditionerAction(const std::string & name, InputParameters params);
-
-  virtual void act();
-
-protected:
-  static unsigned int _count;
+  SingleMatrixPreconditioner(const std::string & name, InputParameters params);
+  virtual ~SingleMatrixPreconditioner();
 };
 
-#endif // SETUPPRECONDITIONERACTION_H
+#endif /* SINGLEMATRIXPRECONDITIONER_H_ */

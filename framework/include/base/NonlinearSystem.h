@@ -23,6 +23,7 @@
 #include "DamperWarehouse.h"
 #include "ConstraintWarehouse.h"
 #include "MooseException.h"
+#include "MoosePreconditioner.h"
 
 // libMesh includes
 #include "transient_system.h"
@@ -30,7 +31,6 @@
 #include "numeric_vector.h"
 #include "sparse_matrix.h"
 #include "petsc_matrix.h"
-#include "preconditioner.h"
 #include "coupling_matrix.h"
 
 class FEProblem;
@@ -257,7 +257,7 @@ public:
    * Sets a preconditioner
    * @param pc The preconditioner to be set
    */
-  void setPreconditioner(Preconditioner<Real> *pc);
+  void setPreconditioner(MoosePreconditioner *pc);
 
   /**
    * If called with true this system will use a finite differenced form of
@@ -417,7 +417,7 @@ protected:
   /// increment vector
   NumericVector<Number> * _increment_vec;
   /// Preconditioner
-  Preconditioner<Real> * _preconditioner;
+  MoosePreconditioner * _preconditioner;
 
   /// Whether or not to use a finite differenced preconditioner
   bool _use_finite_differenced_preconditioner;

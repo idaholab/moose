@@ -131,6 +131,11 @@
 #include "ElementalVariableValue.h"
 #include "ElementL2Norm.h"
 
+// preconditioners
+#include "PhysicsBasedPreconditioner.h"
+#include "FiniteDifferencePreconditioner.h"
+#include "SingleMatrixPreconditioner.h"
+
 // dampers
 #include "ConstantDamper.h"
 #include "MaxIncrement.h"
@@ -175,9 +180,6 @@
 #include "CheckIntegrityAction.h"
 #include "SetupQuadratureAction.h"
 #include "SetupPreconditionerAction.h"
-#include "SetupPBPAction.h"
-#include "SetupSMPAction.h"
-#include "SetupFiniteDifferencePreconditionerAction.h"
 #include "SetupDebugAction.h"
 #include "SetupResidualDebugAction.h"
 #include "InitialRefinementAction.h"
@@ -305,6 +307,10 @@ registerObjects()
   registerPostprocessor(NodalProxyMaxValue);
   registerPostprocessor(ElementalVariableValue);
   registerPostprocessor(ElementL2Norm);
+  // preconditioners
+  registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");
+  registerNamedPreconditioner(FiniteDifferencePreconditioner, "FDP");
+  registerNamedPreconditioner(SingleMatrixPreconditioner, "SMP");
   // dampers
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);
@@ -362,7 +368,6 @@ addActionTypes()
   registerActionName("add_postprocessor", false);
   registerActionName("add_damper", false);
   registerActionName("add_periodic_bc", false);
-  registerActionName("preconditioning_meta_action", false);
   registerActionName("add_preconditioning", false);
   registerActionName("setup_adaptivity", false);
   registerActionName("meta_action", false);
@@ -410,7 +415,6 @@ addActionTypes()
 "(setup_variable_complete)"
 "(setup_adaptivity)"
 "(add_ic, add_periodic_bc)"
-"(preconditioning_meta_action)"
 "(add_preconditioning, add_constraint)"
 "(ready_to_init)"
 "(setup_quadrature)"
@@ -495,10 +499,7 @@ registerActions()
   registerAction(AddMaterialAction, "add_material");
   registerAction(AddPostprocessorAction, "add_postprocessor");
   registerAction(AddDamperAction, "add_damper");
-  registerAction(SetupPreconditionerAction, "preconditioning_meta_action");
-  registerAction(SetupPBPAction, "add_preconditioning");
-  registerAction(SetupSMPAction, "add_preconditioning");
-  registerAction(SetupFiniteDifferencePreconditionerAction, "add_preconditioning");
+  registerAction(SetupPreconditionerAction, "add_preconditioning");
   registerAction(SetupQuadratureAction, "setup_quadrature");
   registerAction(SetupOverSamplingAction, "setup_oversampling");
   registerAction(DeprecatedBlockAction, "deprecated_block");

@@ -12,41 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SetupSMPAction.h"
-#include "Moose.h"
-#include "Parser.h"
-#include "FEProblem.h"
+#include "SingleMatrixPreconditioner.h"
 #include "NonlinearSystem.h"
-
-#include "string_to_enum.h"
+#include "FEProblem.h"
 
 template<>
-InputParameters validParams<SetupSMPAction>()
+InputParameters validParams<SingleMatrixPreconditioner>()
 {
-  InputParameters params = validParams<SetupPreconditionerAction>();
-  params.addParam<std::vector<std::string> >("off_diag_row", "The off diagonal row you want to add into the matrix, it will be associated with an off diagonal column from the same possition in off_diag_colum.");
-  params.addParam<std::vector<std::string> >("off_diag_column", "The off diagonal column you want to add into the matrix, it will be associated with an off diagonal row from the same possition in off_diag_row.");
+  InputParameters params = validParams<MoosePreconditioner>();
+
+  params.addParam<std::vector<std::string> >("off_diag_row", "The off diagonal row you want to add into the matrix, it will be associated with an off diagonal column from the same position in off_diag_colum.");
+  params.addParam<std::vector<std::string> >("off_diag_column", "The off diagonal column you want to add into the matrix, it will be associated with an off diagonal row from the same position in off_diag_row.");
   params.addParam<bool>("full", false, "Set to true if you want the full set of couplings.  Simply for convenience so you don't have to set every off_diag_row and off_diag_column combination.");
 
-return params;
+  return params;
 }
 
-SetupSMPAction::SetupSMPAction(const std::string & name, InputParameters params) :
-    SetupPreconditionerAction(name, params)
+SingleMatrixPreconditioner::SingleMatrixPreconditioner(const std::string & name, InputParameters params) :
+    MoosePreconditioner(name, params)
 {
-}
-
-void
-SetupSMPAction::act()
-{
-  NonlinearSystem & nl = _problem->getNonlinearSystem();
+  NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
   unsigned int n_vars = nl.nVariables();
   unsigned int n_scalar_vars = nl.nScalarVariables();
 
   CouplingMatrix * cm = new CouplingMatrix(n_vars + n_scalar_vars);
   bool full = getParam<bool>("full");
 
-  if(!full)
+  if (!full)
   {
     // put 1s on diagonal
     for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
@@ -63,10 +55,15 @@ SetupSMPAction::act()
   }
   else
   {
-    for(unsigned int i=0; i<n_vars + n_scalar_vars; i++)
-      for(unsigned int j=0; j<n_vars + n_scalar_vars; j++)
+    for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
+      for (unsigned int j = 0; j < n_vars + n_scalar_vars; j++)
         (*cm)(i,j) = 1;
   }
 
-  _problem->setCouplingMatrix(cm);
+  _fe_problem.setCouplingMatrix(cm);
 }
+
+SingleMatrixPreconditioner::~SingleMatrixPreconditioner()
+{
+}
+

@@ -43,7 +43,8 @@
 #define registerMeshModifier(name)                  registerObject(name)
 #define registerConstraint(name)                    registerObject(name)
 #define registerScalarKernel(name)                  registerObject(name)
-#define registerUserData(name)                     registerObject(name)
+#define registerUserData(name)                      registerObject(name)
+#define registerPreconditioner(name)                registerObject(name)
 
 #define registerNamedKernel(obj, name)              registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)   registerNamedObject(obj, name)
@@ -58,7 +59,8 @@
 #define registerNamedFunction(obj, name)            registerNamedObject(obj, name)
 #define registerNamedMeshModifier(obj, name)        registerNamedObject(obj, name)
 #define registerNamedConstraint(obj, name)          registerNamedObject(obj, name)
-#define registerNamedUserData(name)                 registerNamedObject(obj, name)
+#define registerNamedUserData(obj, name)            registerNamedObject(obj, name)
+#define registerNamedPreconditioner(obj, name)      registerNamedObject(obj, name)
 
 
 /**

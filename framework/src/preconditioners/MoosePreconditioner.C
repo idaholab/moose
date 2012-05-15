@@ -12,23 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SETUPPBPACTION_H
-#define SETUPPBPACTION_H
-
-#include "SetupPreconditionerAction.h"
-
-class SetupPBPAction;
+#include "MoosePreconditioner.h"
+#include "FEProblem.h"
 
 template<>
-InputParameters validParams<SetupPBPAction>();
-
-
-class SetupPBPAction: public SetupPreconditionerAction
+InputParameters validParams<MoosePreconditioner>()
 {
-public:
-  SetupPBPAction(const std::string & name, InputParameters params);
+  InputParameters params = validParams<MooseObject>();
+  params.addPrivateParam<FEProblem *>("_fe_problem");
+  return params;
+}
 
-  virtual void act();
-};
 
-#endif //SETUPPBPACTION_H
+MoosePreconditioner::MoosePreconditioner(const std::string & name, InputParameters params) :
+    MooseObject(name, params),
+    _fe_problem(*getParam<FEProblem *>("_fe_problem"))
+{
+}
+
+MoosePreconditioner::~MoosePreconditioner()
+{
+}
+

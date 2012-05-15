@@ -12,26 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SETUPSMPACTION_H
-#define SETUPSMPACTION_H
+#ifndef MOOSEPRECONDITIONER_H
+#define MOOSEPRECONDITIONER_H
 
-#include "SetupPreconditionerAction.h"
+#include "MooseObject.h"
 
-class SetupSMPAction;
+class FEProblem;
+class MoosePreconditioner;
 
 template<>
-InputParameters validParams<SetupSMPAction>();
+InputParameters validParams<MoosePreconditioner>();
 
 /**
- * Action to setup single matrix Jacobian (or Jacobian approximate)
- *
+ * Base class for MOOSE preconditioners
  */
-class SetupSMPAction: public SetupPreconditionerAction
+class MoosePreconditioner : public MooseObject
 {
 public:
-  SetupSMPAction(const std::string & name, InputParameters params);
+  MoosePreconditioner(const std::string & name, InputParameters params);
+  virtual ~MoosePreconditioner();
 
-  virtual void act();
+protected:
+  /// Subproblem this preconditioner is part of
+  FEProblem & _fe_problem;
 };
 
-#endif //SETUPSINGLEMATRIXACTION_H
+#endif /* MOOSEPRECONDITIONER_H */

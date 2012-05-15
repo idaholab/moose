@@ -26,7 +26,6 @@
 #include "Factory.h"
 #include "MooseObjectAction.h"
 #include "ActionWarehouse.h"
-#include "SetupPreconditionerAction.h"
 
 #include "FEProblem.h"
 #include "MooseMesh.h"
@@ -535,27 +534,6 @@ Parser::buildFullTree()
         }
       }
     }
-
-    // Preconditioner syntax is non standard - we'll hack them in here
-    if (action_name == "preconditioning_meta_action")
-    {
-      for (ActionFactory::iterator act_obj = ActionFactory::instance()->begin();
-           act_obj != ActionFactory::instance()->end();
-           ++act_obj)
-        if (act_obj->second._action_name == "add_preconditioning")
-        {
-          InputParameters precond_params = ActionFactory::instance()->getValidParams(act_obj->first);
-          std::string block_name = SetupPreconditionerAction::getTypeString(act_obj->first);
-
-          precond_params.set<std::string>("type") = block_name;
-          precond_params.seenInInputFile("type");
-
-          std::string name = act_name.substr(0, act_name.size()-1) + block_name;
-
-          _syntax_formatter->insertNode(name, block_name, false, &precond_params);
-        }
-    }
-
   }
   _syntax_formatter->print();
 

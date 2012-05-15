@@ -16,7 +16,7 @@
 #include "Moose.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
-
+#include "PetscSupport.h"
 //libMesh Includes
 #include "libmesh_common.h"
 #include "equation_systems.h"
@@ -25,28 +25,78 @@
 #include "transient_system.h"
 #include "numeric_vector.h"
 #include "sparse_matrix.h"
+#include "string_to_enum.h"
+
+template<>
+InputParameters validParams<PhysicsBasedPreconditioner>()
+{
+  InputParameters params = validParams<MoosePreconditioner>();
+
+  params.addRequiredParam<std::vector<std::string> >("solve_order", "TODO: docstring");
+  params.addRequiredParam<std::vector<std::string> >("preconditioner", "TODO: docstring");
+
+  params.addParam<std::vector<std::string> >("off_diag_row", "TODO: docstring");
+  params.addParam<std::vector<std::string> >("off_diag_column", "TODO: docstring");
 
 
-PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (FEProblem & mproblem) :
+  return params;
+}
+
+PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const std::string & name, InputParameters params) :
+    MoosePreconditioner(name, params),
     Preconditioner<Number>(),
-    _mproblem(mproblem),
-    _nl(mproblem.getNonlinearSystem())
+    _nl(_fe_problem.getNonlinearSystem())
 {
   unsigned int num_systems = _nl.sys().n_vars();
   _systems.resize(num_systems);
   _preconditioners.resize(num_systems);
   _off_diag.resize(num_systems);
   _off_diag_mats.resize(num_systems);
-
   _pre_type.resize(num_systems);
-  //Default to using AMG
-  for(unsigned int i=0;i<num_systems;i++)
-    _pre_type[i]=AMG_PRECOND;
+
+  // PC types
+  const std::vector<std::string> & pc_types = getParam<std::vector<std::string> >("preconditioner");
+  for (unsigned int i = 0; i < num_systems; i++)
+    _pre_type[i] = Utility::string_to_enum<PreconditionerType>(pc_types[i]);
+
+  // solve order
+  const std::vector<std::string> & solve_order = getParam<std::vector<std::string> >("solve_order");
+  _solve_order.resize(solve_order.size());
+  for (unsigned int i = 0; i < solve_order.size(); i++)
+    _solve_order[i] = _nl.sys().variable_number(solve_order[i]);
+
+  // diag and off-diag systems
+  unsigned int n_vars = _nl.sys().n_vars();
+
+  // off-diagonal entries
+  const std::vector<std::string> & odr = getParam<std::vector<std::string> >("off_diag_row");
+  const std::vector<std::string> & odc = getParam<std::vector<std::string> >("off_diag_column");
+  std::vector<std::vector<unsigned int> > off_diag(n_vars);
+  for (unsigned int i = 0; i < odr.size(); i++)
+  {
+    unsigned int row = _nl.sys().variable_number(odr[i]);
+    unsigned int column = _nl.sys().variable_number(odc[i]);
+    off_diag[row].push_back(column);
+  }
+  // Add all of the preconditioning systems
+  for (unsigned int var = 0; var < n_vars; var++)
+    addSystem(var, off_diag[var], _pre_type[var]);
+
+  // We don't want to be computing the big Jacobian!
+  _nl.sys().nonlinear_solver->jacobian = NULL;
+  _nl.sys().nonlinear_solver->attach_preconditioner(this);
+
+  // If using PETSc, use the right PETSc option
+#ifdef LIBMESH_HAVE_PETSC
+  std::vector<std::string> petsc_options(1), petsc_inames, petsc_values;
+  petsc_options[0] = "-snes_mf";  // SNES Matrix Free
+  Moose::PetscSupport::petscSetOptions(petsc_options, petsc_inames, petsc_values);
+#endif
 }
 
 PhysicsBasedPreconditioner::~PhysicsBasedPreconditioner ()
 {
-  this->clear ();
+  this->clear();
 
   std::vector<Preconditioner<Number> *>::iterator it;
   for (it = _preconditioners.begin(); it != _preconditioners.end(); ++it)
@@ -58,7 +108,7 @@ PhysicsBasedPreconditioner::addSystem(unsigned int var, std::vector<unsigned int
 {
   std::string var_name = _nl.sys().variable_name(var);
 
-  LinearImplicitSystem & precond_system = _mproblem.es().add_system<LinearImplicitSystem>(var_name+"_system");
+  LinearImplicitSystem & precond_system = _fe_problem.es().add_system<LinearImplicitSystem>(var_name+"_system");
   precond_system.assemble_before_solve = false;
 
   const std::set<SubdomainID> * active_subdomains = _nl.getVariableBlocks(var);
@@ -108,13 +158,13 @@ PhysicsBasedPreconditioner::init ()
     preconditioner->init();
 
     //Compute the diagonal block... storing the result in the system matrix
-    _mproblem.computeJacobianBlock(*u_system.matrix, u_system, system_var, system_var);
+    _fe_problem.computeJacobianBlock(*u_system.matrix, u_system, system_var, system_var);
 
     for(unsigned int diag=0;diag<_off_diag[system_var].size();diag++)
     {
       unsigned int coupled_var = _off_diag[system_var][diag];
       std::string coupled_name = _nl.sys().variable_name(coupled_var);
-      _mproblem.computeJacobianBlock(*_off_diag_mats[system_var][diag], u_system, system_var, coupled_var);
+      _fe_problem.computeJacobianBlock(*_off_diag_mats[system_var][diag], u_system, system_var, coupled_var);
     }
   }
 
@@ -128,7 +178,7 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
 
   const unsigned int num_systems = _systems.size();
 
-  MooseMesh & mesh = _mproblem.mesh();
+  MooseMesh & mesh = _fe_problem.mesh();
 
   //Zero out the solution vectors
   for(unsigned int sys=0; sys<num_systems; sys++)
@@ -191,12 +241,6 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
 void
 PhysicsBasedPreconditioner::clear ()
 {
-}
-
-void
-PhysicsBasedPreconditioner::setSolveOrder(std::vector<unsigned int> solve_order)
-{
-  _solve_order = solve_order;
 }
 
 void
