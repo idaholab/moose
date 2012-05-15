@@ -52,8 +52,6 @@ InputFileFormatter::printBlockClose(const std::string & /*name*/, short depth) c
 void
 InputFileFormatter::printParams(InputParameters &params, short depth) const
 {
-  bool _dump_mode = true;
-
   std::stringstream ss;
   std::set<std::string> seen_it;
 
@@ -69,11 +67,10 @@ InputFileFormatter::printParams(InputParameters &params, short depth) const
     offset -= 2;
   }
 
-
   for (InputParameters::iterator iter = params.begin(); iter != params.end(); ++iter)
   {
-    // We only want non-private params unless we are in dump mode
-    if ((_dump_mode && params.isPrivate(iter->first)) || ((!_dump_mode && !params.isParamValid(iter->first))))
+    // We only want non-private params
+    if (params.isPrivate(iter->first))
       continue;
 
     // Don't print active if it is the default all, that means it's not in the input file - unless of course we are in dump mode

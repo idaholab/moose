@@ -136,11 +136,19 @@ ActionWarehouse::printInputFile(std::ostream & out)
        ++i)
   {
     std::string name ((*i)->name());
+    std::string action ((*i)->getAction());
 
     if (Moose::syntax.isAssociated(name, false) != "")
     {
       InputParameters params = (*i)->getParams();
-      tree.insertNode(name, name, true, &params);
+      tree.insertNode(name, action, true, &params);
+
+      MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(*i);
+      if (moose_object_action)
+      {
+        InputParameters obj_params = moose_object_action->getObjectParams();
+        tree.insertNode(name, action, false, &obj_params);
+      }
     }
   }
 
