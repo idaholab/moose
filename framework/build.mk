@@ -175,4 +175,4 @@ syntax:
 	python scripts/generate_input_syntax.py
 
 doc:
-	doxygen doc/Doxyfile
+	doxygen doc/doxygen/Doxyfile
