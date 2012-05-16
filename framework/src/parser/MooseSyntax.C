@@ -144,7 +144,7 @@ void associateSyntax()
   syntax.registerActionSyntax("SetupMeshAction", "Mesh");
   syntax.registerActionSyntax("InitialRefinementAction", "Mesh");
   syntax.registerActionSyntax("InitDisplacedProblemAction", "Mesh");
-  syntax.registerActionSyntax("DeprecatedBlockAction", "Mesh/Generation");
+//  syntax.registerActionSyntax("DeprecatedBlockAction", "Mesh/Generation");
   syntax.registerActionSyntax("AddExtraNodesetAction", "Mesh/ExtraNodesets/*");
   syntax.registerActionSyntax("AddMeshModifierAction", "Mesh/Modifier/*");
 
@@ -196,12 +196,12 @@ void associateSyntax()
   syntax.registerActionSyntax("EmptyAction", "Postprocessors");
   syntax.registerActionSyntax("AddPostprocessorAction", "Postprocessors/*");
 
-  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Residual");
-  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Jacobian");
-  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/NewtonIter");
-  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Residual/*");
-  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Jacobian/*");
-  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/NewtonIter/*");
+//  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Residual");
+//  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Jacobian");
+//  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/NewtonIter");
+//  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Residual/*");
+//  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Jacobian/*");
+//  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/NewtonIter/*");
 
   syntax.registerActionSyntax("EmptyAction", "Dampers");
   syntax.registerActionSyntax("AddDamperAction", "Dampers/*");

@@ -110,10 +110,10 @@ subdomain_restricted_auxkernel_test = { INPUT : 'subdomain_restricted_auxkernel_
 subdomain_restricted_kernel_test = { INPUT : 'subdomain_restricted_kernel_mismatch.i',
                                      EXPECT_ERR : "Kernel \(\w+\): block outside of the domain of the variable" }
 
-deprecated_block_test = {
-  INPUT : 'deprecated_block_test.i',
-  EXPECT_ERR : "Input file block '\S+' has been deprecated."
-}
+#deprecated_block_test = {
+#  INPUT : 'deprecated_block_test.i',
+#  EXPECT_ERR : "Input file block '\S+' has been deprecated."
+#}
 
 unused_param_test = {
  INPUT : 'unused_param_test.i',
