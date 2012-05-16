@@ -115,6 +115,15 @@ Parser::parseCommandLine()
       buildFullTree( /*&Parser::printYAMLParameterData*/ );
       exit(0);
     }
+    if (searchCommandLine("Syntax"))
+    {
+      std::multimap<std::string, Syntax::ActionInfo> syntax = Moose::syntax.getAssociatedActions();
+      for (std::multimap<std::string, Syntax::ActionInfo>::iterator it = syntax.begin(); it != syntax.end(); ++it)
+      {
+        std::cout << it->first << "\n";
+      }
+      exit(0);
+    }
     if (Moose::command_line->search("-i"))
       input_filename = Moose::command_line->next(input_filename);
     else
@@ -162,6 +171,13 @@ Parser::initOptions()
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
   _cli_options["YAML"] = cli_opt;
+
+  syntax.clear();
+  cli_opt.desc = "Dumps the associated Action syntax paths ONLY";
+  syntax.push_back("--syntax");
+  cli_opt.cli_syntax = syntax;
+  cli_opt.required = false;
+  _cli_options["Syntax"] = cli_opt;
 
   syntax.clear();
   cli_opt.desc = "Runs the specified number of threads (Intel TBB) per process";
