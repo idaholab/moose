@@ -98,10 +98,18 @@ class TestHarness:
   def createCommand(self, test):
     command = ''
 
-    if test[PARALLEL] > 1:
+    if self.options.parallel > 1:
+      if test[MAXPARALLEL]:
+        command = 'mpiexec -n ' + test[MAXPARALLEL] + ' -host ' + self.host_name + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+      elif test[NOPARALLEL]:
+        command = 'mpiexec -n 1' + ' -host ' + self.host_name + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+      else:
+        command = 'mpiexec -n ' + str(self.options.parallel) + ' -host ' + self.host_name + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+    elif test[PARALLEL] > 1:
       command = 'mpiexec -n ' + test[PARALLEL] + ' -host ' + self.host_name + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
     else:
       command = self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
+
     if self.options.scaling and test[SCALE_REFINE] > 0:
       command += ' -r ' + str(test[SCALE_REFINE])
     return command
@@ -401,6 +409,8 @@ class TestHarness:
                       help="Scale problems that have SCALE_REFINE set")
     parser.add_option('--libmesh_dir', action="store", type='string', dest="libmesh_dir", default='',
                       help="Currently only needed for bitten code coverage")
+    parser.add_option('--parallel', '-p', action="store", type='int', dest="parallel", default='1',
+                      help="Number of processors to use when running mpiexec")
 
     outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show the output of every test that fails')
