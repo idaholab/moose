@@ -1413,14 +1413,6 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
     _currently_computing_jacobian = true;
 
 #ifdef LIBMESH_HAVE_PETSC
-    // put zeroes on the diagonal
-    Vec zero_vec;
-    VecDuplicate(static_cast<PetscVector<Number> &>(*_sys.solution).vec(), &zero_vec);                         // get the same parallel layout
-    VecZeroEntries(zero_vec);
-    MatDiagonalSet(static_cast<PetscMatrix<Number> &>(jacobian).mat(), zero_vec, INSERT_VALUES);
-    LibMeshVecDestroy(&zero_vec);
-    jacobian.close();
-
     //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
     MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
@@ -1528,6 +1520,12 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   }
   catch (MooseException & e)
   {
+    // The matrix is in a wrong state (since there was an exception), so we need to force it into a proper state. We can
+    // do it by putting zeroes on the diagonal
+    for (unsigned int i = jacobian.row_start(); i < jacobian.row_stop(); i++)
+      jacobian.set(i, i, 0.);
+    jacobian.close();
+
     // save the exception so we can re-throw it again
     _exception = e.clone();
     // tell solver to stop
