@@ -63,6 +63,12 @@ protected:
   VariableValue & _u;
   /// Holds the solution gradient at the current quadrature points
   VariableGradient & _grad_u;
+
+  // Single Instance Variables
+  Real & _real_zero;
+  MooseArray<Real> & _zero;
+  MooseArray<RealGradient> & _grad_zero;
+  MooseArray<RealTensor> & _second_zero;
 };
 
 #endif

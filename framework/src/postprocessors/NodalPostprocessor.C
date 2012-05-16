@@ -42,10 +42,13 @@ NodalPostprocessor::NodalPostprocessor(const std::string & name, InputParameters
 //    _JxW(_subproblem.JxW(_tid)),
     _qp(0),
     _current_node(_var.node()),
-    _u(_var.nodalSln())
+    _u(_var.nodalSln()),
 //    _u_old(_var.slnOld()),
 //    _u_older(_var.slnOlder()),
 //    _grad_u(_var.gradSln()),
+
+    _real_zero(_problem._real_zero[_tid]),
+    _zero(_problem._zero[_tid])
 {
 }
 

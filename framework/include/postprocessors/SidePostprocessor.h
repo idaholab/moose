@@ -58,6 +58,12 @@ protected:
   const VariableValue & _u;
   const VariableGradient & _grad_u;
 
+  // Single Instance Variables
+  Real & _real_zero;
+  MooseArray<Real> & _zero;
+  MooseArray<RealGradient> & _grad_zero;
+  MooseArray<RealTensor> & _second_zero;
+
   virtual Real computeQpIntegral() = 0;
 };
 

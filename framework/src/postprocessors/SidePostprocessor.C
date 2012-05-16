@@ -39,7 +39,12 @@ SidePostprocessor::SidePostprocessor(const std::string & name, InputParameters p
     _current_side_elem(_subproblem.sideElem(_tid)),
     _current_side_volume(_subproblem.sideElemVolume(_tid)),
     _u(_var.sln()),
-    _grad_u(_var.gradSln())
+    _grad_u(_var.gradSln()),
+    //
+    _real_zero(_problem._real_zero[_tid]),
+    _zero(_problem._zero[_tid]),
+    _grad_zero(_problem._grad_zero[_tid]),
+    _second_zero(_problem._second_zero[_tid])
 {}
 
 Real
