@@ -9,13 +9,18 @@ class GPNode:
     self.name = name
     self.parent = parent
     self.params = {}
+    self.params_list = [] #This is here to capture the ordering
     self.children = {}
+    self.children_list = []  #This is here to capture the ordering
   """ Print this node and it's children """
   def Print(self, prefix=''):
     print prefix + self.name
-    print self.params
-    for child,child_node in self.children.items():
-      child_node.Print(prefix + self.name + '/')
+    
+    for param in self.params_list:
+      print prefix + param + ": " + str(self.params[param])
+      
+    for child in self.children_list:
+      self.children[child].Print(prefix + self.name + '/')
 
 """ Add all of the sections to the tree """
 def buildSectionTree(ifpot, root_node):
@@ -28,6 +33,7 @@ def buildSectionTree(ifpot, root_node):
           if not subsection in current_node.children: # New section node
             new_node = GPNode(subsection, current_node)
             current_node.children[subsection] = new_node
+            current_node.children_list.append(subsection)
             current_node = new_node
           else:
             current_node = current_node.children[subsection]
@@ -42,6 +48,7 @@ def populateParams(ifpot, root_node):
         if subsection != '':
           if not subsection in current_node.children: # Must be a parameter
               current_node.params[subsection] = ifpot(param,'')
+              current_node.params_list.append(subsection)
           else:
             current_node = current_node.children[subsection]
 
@@ -52,7 +59,7 @@ def readInputFile(file_name):
   buildSectionTree(ifpot, root_node)
   populateParams(ifpot, root_node)
 #  root_node.Print()
-  return root_node.children
+  return root_node
 
 if __name__ == '__main__':
   readInputFile()

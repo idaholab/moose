@@ -128,7 +128,8 @@ SyntaxTree::TreeNode::print(short depth) const
     _syntax_tree.printBlockOpen(name, depth, type);
 
     for (std::multimap<std::string, InputParameters *>::const_iterator ait = _action_params.begin(); ait != _action_params.end(); ++ait)
-      _syntax_tree.printParams(*ait->second, depth);
+      if(ait->first != "EmptyAction")
+        _syntax_tree.printParams(*ait->second, depth);
 //      std::cout << "\n" << indent << "(" << ait->first << ")";
 
     _syntax_tree.preTraverse(depth);
@@ -145,7 +146,8 @@ SyntaxTree::TreeNode::print(short depth) const
       _syntax_tree.printBlockOpen(name, depth, type);
 
       for (std::multimap<std::string, InputParameters *>::const_iterator ait = _action_params.begin(); ait != _action_params.end(); ++ait)
-        _syntax_tree.printParams(*ait->second, depth);
+        if(ait->first != "EmptyAction")
+          _syntax_tree.printParams(*ait->second, depth);
 //        std::cout << "\n" << indent << "(" << ait->first << ")";
 
       _syntax_tree.printParams(*it->second, depth);

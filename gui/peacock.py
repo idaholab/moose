@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 
 
 from OptionsGUI import OptionsGUI
-from GenSyntax import GenSyntax
+from GenSyntax import *
 
 from readInputFile import readInputFile, GPNode
 
@@ -40,6 +40,7 @@ class UiBox(QtGui.QMainWindow):
     self.main_data = GenSyntax(app_path).GetSyntax()
     self.constructed_data = {}
     self.initUI()
+    self.input_file_root_node = None  #This will only not be None if you open an input file
 
   def initUI(self):
     self.main_ui = QtGui.QWidget(self)
@@ -62,17 +63,18 @@ class UiBox(QtGui.QMainWindow):
     self.layout_with_textbox.addWidget(self.input_display)
   
   def init_treewidet(self, layout):
-    iter_dict = []
     i = 0
     self.tree_widget = QtGui.QTreeWidget()
-    for itm in self.main_data: #Make sure we only add each one once
-      if not len(self.tree_widget.findItems(itm['name'], QtCore.Qt.MatchExactly)):
-        new_child = QtGui.QTreeWidgetItem(self.tree_widget)
-        new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
-        new_child.setCheckState(0, QtCore.Qt.Checked)
-        iter_dict.append(new_child)
-        iter_dict[i].setText(0, itm['name'])
-        i += 1
+    #Go over each top level section and add it to the tree
+    for itm in self.main_data:
+      new_child = QtGui.QTreeWidgetItem(self.tree_widget)
+      new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
+      new_child.setCheckState(0, QtCore.Qt.Unchecked)
+      name = itm['name'].split('/')[1]
+#      if 'subblocks' in itm and itm['subblocks'] != None and len(itm['subblocks']) > 0:
+#        name += '+'
+      new_child.setText(0, name)
+      
     self.tree_widget.header().close()
     QtCore.QObject.connect(self.tree_widget, QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem *, int)"), self.input_selection)
     QtCore.QObject.connect(self.tree_widget, QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self.item_changed)
@@ -93,6 +95,7 @@ class UiBox(QtGui.QMainWindow):
   def addDataRecursively(self, parent_item, node):
     table_data = node.params
     table_data['Name'] = node.name
+    parent_item.setCheckState(0, QtCore.Qt.Checked)
     new_child = QtGui.QTreeWidgetItem(parent_item)
     new_child.setText(0,table_data['Name'])
     new_child.table_data = table_data
@@ -107,18 +110,21 @@ class UiBox(QtGui.QMainWindow):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Input File", "~/", "Input Files (*.i)")
 
     if file_name != '':
-      main_sections = readInputFile(file_name)
+      self.input_file_root_node = readInputFile(file_name)
+      main_sections = self.input_file_root_node.children
       for section_name, section_node in main_sections.items():
+        # Find out if this section has it's own parameters.  If so we need to add a ParentParams node
+
+        num_params = 0
+        for param in section_node.params:
+          if param != 'active':
+            num_params += 1
         
-        if section_name == 'Executioner' or section_name == 'Mesh' or section_name == 'Output': # Handle Weird Cases
-          new_name = ''
-          if 'type' in section_node.params:
-            new_name = section_node.params['type']
-          else:
-            new_name = 'ParentParams'
+        if num_params > 0:
+          new_name = 'ParentParams'
           new_node = GPNode(new_name, section_node)
           new_node.params = section_node.params
-          new_node.params['parent_params'] = '1'
+          new_node.params['parent_params'] = True
           if section_name == 'Mesh' and not 'type' in new_node.params:
             new_node.params['type'] = 'MooseMesh'
           
@@ -131,49 +137,79 @@ class UiBox(QtGui.QMainWindow):
   def click_cancel(self):
     sys.exit(0)
 
+  def inputStringRecurse(self, item, level):
+    indent_string = ''
+    for i in xrange(0,level):
+      indent_string += '  '
+
+    if item.checkState(0) != QtCore.Qt.Checked:
+      return
+    else:
+      section = str(item.text(0)).rstrip('+')
+      subchild_count = item.childCount()
+
+      if level == 0:
+        self.the_string += '[' + section + ']\n'
+      else:
+        self.the_string += indent_string + '[./' + section + ']\n'
+
+#       active = []
+#       has_inactive_children = True # Whether or not it has inactive children
+      
+#       # Print the active line if necessary
+#       for j in range(subchild_count):
+#         subitem = item.child(j)
+#         if subitem.checkState(0) == QtCore.Qt.Checked:
+        
+
+      # Print out the params for this item
+      try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
+        for param,value in item.table_data.items():
+          if param != 'Name' and param != 'parent_params':
+            self.the_string += indent_string + '  ' + param + ' = ' + value + '\n'
+      except:
+        pass
+
+      # Grab all the subblocks with "parent_params" and print them out
+      for j in range(subchild_count):
+        subitem = item.child(j)
+        if subitem.checkState(0) != QtCore.Qt.Checked:
+          continue
+
+        table_data = subitem.table_data
+
+        if 'parent_params' in table_data:
+          for param,value in table_data.items():
+            if param != 'Name' and param != 'parent_params':
+              self.the_string += indent_string + '  ' + param + ' = ' + value + '\n'
+          break
+
+      # Now recurse over the children that _don't_ have parent_params
+      for j in range(subchild_count):
+        subitem = item.child(j)
+        if subitem.checkState(0) != QtCore.Qt.Checked:
+          continue
+        table_data = subitem.table_data
+
+        if 'parent_params' in table_data:
+          continue
+
+        self.inputStringRecurse(subitem, level+1)
+
+      if level == 0:
+        self.the_string += '[]\n'
+      else:
+        self.the_string += indent_string + '[../]\n'
+
+    
   def buildInputString(self):
-    the_string = ''
+    self.the_string = ''
     root = self.tree_widget.invisibleRootItem()
     child_count = root.childCount()
     for i in range(child_count):
       item = root.child(i)
-      if item.checkState(0) != QtCore.Qt.Checked:
-        continue
-      subchild_count = item.childCount()
-      if subchild_count:
-        section = item.text(0)
-        the_string += '[' + section + ']\n'
-
-        for j in range(subchild_count):
-          subitem = item.child(j)
-          if subitem.checkState(0) != QtCore.Qt.Checked:
-            continue
-
-          table_data = subitem.table_data
-          
-          if 'parent_params' in table_data:
-            for param,value in table_data.items():
-              if param != 'Name' and param != 'parent_params':
-                the_string += '    ' + param + ' = ' + value + '\n'
-            break
-            
-        
-        for j in range(subchild_count):
-          subitem = item.child(j)
-          if subitem.checkState(0) != QtCore.Qt.Checked:
-            continue
-          table_data = subitem.table_data
-
-          if 'parent_params' in table_data:
-            continue
-
-          the_string += '  [./' + table_data['Name'] + ']\n'
-          for param,value in table_data.items():
-            if param != 'Name':
-              the_string += '    ' + param + ' = ' + value + '\n'
-          the_string += '  [../]\n'
-        the_string += '[]\n'
-    return the_string
+      self.inputStringRecurse(item, 0)
+    return self.the_string
 
   def click_save(self):
     file_name = QtGui.QFileDialog.getSaveFileName(self, "Save Input File", "~/", "Input Files (*.i)")
@@ -185,10 +221,13 @@ class UiBox(QtGui.QMainWindow):
 
   def input_selection(self, item, column):
     try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
+      print 'Here 3'
       item.table_data
+      print 'Here 4'
       for sgl_item in self.main_data:
-        if sgl_item['name'] == item.parent().text(column) and sgl_item['subblocks'] != None:
-          new_gui = OptionsGUI(sgl_item['subblocks'], item.text(column), item.table_data)
+        if sgl_item['name'].find('/'+str(item.parent().text(column)).rstrip('+')) != -1:
+          print 'Here 5'
+          new_gui = OptionsGUI(sgl_item, str(item.text(column)).rstrip('+'), item.table_data)
           new_gui.incoming_data = item.table_data
           if new_gui.exec_():
             table_data = new_gui.result()
@@ -197,8 +236,8 @@ class UiBox(QtGui.QMainWindow):
             self.input_display.setText(self.buildInputString())
     except:
       for sgl_item in self.main_data:
-        if sgl_item['name'] == item.text(column) and sgl_item['subblocks'] != None:
-          self.new_gui = OptionsGUI(sgl_item['subblocks'], item.text(column), None)
+        if sgl_item['name'].find('/'+str(item.text(column)).rstrip('+')) != -1:
+          self.new_gui = OptionsGUI(sgl_item, str(item.text(column)).rstrip('+'), None)
           if self.new_gui.exec_():
             table_data = self.new_gui.result()
             new_child = QtGui.QTreeWidgetItem(item)
@@ -207,6 +246,7 @@ class UiBox(QtGui.QMainWindow):
             new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
             new_child.setCheckState(0, QtCore.Qt.Checked)
             item.addChild(new_child)
+            item.setCheckState(0, QtCore.Qt.Checked)
             self.input_display.setText(self.buildInputString())
           break
         
