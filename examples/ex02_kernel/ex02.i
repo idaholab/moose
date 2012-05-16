@@ -32,14 +32,14 @@
   [./bottom]
     type = DirichletBC
     variable = convected
-    boundary = '1'
+    boundary = 'bottom'
     value = 1
   [../]
 
   [./top]
     type = DirichletBC
     variable = convected
-    boundary = '2'
+    boundary = 'top'
     value = 0
   [../]
 []

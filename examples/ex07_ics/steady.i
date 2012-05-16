@@ -15,7 +15,7 @@
     # for which we want to apply this initial condition
     [./InitialCondition]
       type = ExampleIC
-      value = 2.0;
+      coefficient = 2.0;
     [../]
   [../]
 []
@@ -35,14 +35,14 @@
   [./left]
     type = DirichletBC
     variable = diffused
-    boundary = '1'
+    boundary = 'top'
     value = 2
   [../]
 
   [./right]
     type = DirichletBC
     variable = diffused
-    boundary = '2'
+    boundary = 'bottom'
     value = 10
   [../]
 []

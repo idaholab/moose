@@ -58,19 +58,19 @@
 []
 
 [BCs]
-  active = 'left right'
+  active = 'bottom top'
 
-  [./left]
+  [./bottom]
     type = DirichletBC
     variable = diffused
-    boundary = '1'
+    boundary = 'bottom'
     value = 0
   [../]
 
-  [./right]
+  [./top]
     type = DirichletBC
     variable = diffused
-    boundary = '2'
+    boundary = 'top'
     value = 1
   [../]
 []

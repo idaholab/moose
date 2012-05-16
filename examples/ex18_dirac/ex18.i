@@ -33,17 +33,17 @@
 [BCs]
   active = 'left right'
 
-  [./left]
-    type = DirichletBC
-    variable = diffused
-    boundary = '1'
-    value = 0
-  [../]
-
   [./right]
     type = DirichletBC
     variable = diffused
-    boundary = '2'
+    boundary = 'right'
+    value = 0
+  [../]
+
+  [./left]
+    type = DirichletBC
+    variable = diffused
+    boundary = 'left'
     value = 1
   [../]
 []

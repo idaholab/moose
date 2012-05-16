@@ -44,28 +44,28 @@
   [./bottom_convected]
     type = DirichletBC
     variable = convected
-    boundary = '1'
+    boundary = 'bottom'
     value = 1
   [../]
 
   [./top_convected]
     type = DirichletBC
     variable = convected
-    boundary = '2'
+    boundary = 'top'
     value = 0
   [../]
 
   [./bottom_diffused]
     type = DirichletBC
     variable = diffused
-    boundary = '1'
+    boundary = 'bottom'
     value = 2
   [../]
 
   [./top_diffused]
     type = DirichletBC
     variable = diffused
-    boundary = '2'
+    boundary = 'top'
     value = 0
   [../]
 []

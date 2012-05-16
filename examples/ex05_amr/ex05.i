@@ -43,7 +43,7 @@
   [./cylinder_convected]
     type = DirichletBC
     variable = convected
-    boundary = '4'
+    boundary = 'inside'
     value = 1
   [../]
 
@@ -51,21 +51,21 @@
   [./exterior_convected]
     type = DirichletBC
     variable = convected
-    boundary = '5 6 8'
+    boundary = 'left top bottom'
     value = 0
   [../]
 
   [./left_diffused]
     type = DirichletBC
     variable = diffused
-    boundary = '5'
+    boundary = 'left'
     value = 0
   [../]
 
   [./right_diffused]
     type = DirichletBC
     variable = diffused
-    boundary = '7'
+    boundary = 'right'
     value = 10
   [../]
 

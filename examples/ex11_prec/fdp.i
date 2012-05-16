@@ -79,28 +79,28 @@
   [./left_diffused]
     type = DirichletBC
     variable = diffused
-    boundary = 1
+    boundary = 'left'
     value = 0
   [../]
 
   [./right_diffused]
     type = DirichletBC
     variable = diffused
-    boundary = 2
+    boundary = 'right'
     value = 100
   [../]
 
   [./left_forced]
     type = DirichletBC
     variable = forced
-    boundary = 1
+    boundary = 'left'
     value = 0
   [../]
 
   [./right_forced]
     type = DirichletBC
     variable = forced
-    boundary = 2
+    boundary = 'right'
     value = 0
   [../]
 []

@@ -27,19 +27,19 @@
 []
 
 [BCs]
-  active = 'left_diffused right_diffused'
+  active = 'bottom_diffused top_diffused'
 
-  [./left_diffused]
+  [./bottom_diffused]
     type = DirichletBC
     variable = diffused
-    boundary = '1'
+    boundary = 'bottom'
     value = 0
   [../]
 
-  [./right_diffused]
+  [./top_diffused]
     type = DirichletBC
     variable = diffused
-    boundary = '2'
+    boundary = 'top'
     value = 1
   [../]
 

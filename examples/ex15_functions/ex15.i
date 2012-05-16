@@ -64,7 +64,7 @@
   [./all]
     type = FunctionDirichletBC
     variable = forced
-    boundary = '0 1 2 3'
+    boundary = 'bottom right top left'
     function = bc_func
   [../]
 []

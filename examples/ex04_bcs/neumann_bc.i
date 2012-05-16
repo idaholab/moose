@@ -43,7 +43,7 @@
   [./left_convected]
     type = DirichletBC
     variable = convected
-    boundary = '1'
+    boundary = 'left'
     value = 0
   [../]
 
@@ -51,7 +51,7 @@
   [./right_convected_dirichlet]
     type = CoupledDirichletBC
     variable = convected
-    boundary = '2'
+    boundary = 'right'
     alpha = 2
 
     some_var = diffused
@@ -60,7 +60,7 @@
   [./right_convected_neumann]
     type = CoupledNeumannBC
     variable = convected
-    boundary = '2'
+    boundary = 'right'
     alpha = 2
 
     some_var = diffused
@@ -69,14 +69,14 @@
   [./left_diffused]
     type = DirichletBC
     variable = diffused
-    boundary = '1'
+    boundary = 'left'
     value = 0
   [../]
 
   [./right_diffused]
     type = DirichletBC
     variable = diffused
-    boundary = '2'
+    boundary = 'right'
     value = 1
   [../]
 
