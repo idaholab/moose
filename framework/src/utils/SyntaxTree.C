@@ -38,11 +38,19 @@ SyntaxTree::insertNode(std::string syntax, const std::string &action, bool is_ac
   _root->insertNode(syntax, action, is_action_params, params);
 }
 
-void
-SyntaxTree::print() const
+std::string
+SyntaxTree::print(const std::string &search_string) const
 {
+  bool found=false;
+  std::string output;
+
   if (_root)
-    _root->print(-1);
+    output = _root->print(-1, search_string, found);
+
+  if (found)
+    return preamble() + output + postscript();
+  else
+    return "";
 }
 
 SyntaxTree::TreeNode::TreeNode(const std::string &name, const SyntaxTree &syntax_tree, const std::string *action, InputParameters *params, TreeNode *parent) :
@@ -107,60 +115,87 @@ SyntaxTree::TreeNode::insertParams(const std::string &action, bool is_action_par
     _moose_object_params.insert(std::make_pair(action, new InputParameters(*params)));
 }
 
-void
-SyntaxTree::TreeNode::print(short depth) const
+std::string
+SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool &found) const
 {
   std::string type;
-  std::string name(_syntax_tree.isLongNames() ? getLongName() : _name);
+  std::string long_name(getLongName());
+  std::string name(_syntax_tree.isLongNames() ? long_name : _name);
+  std::string out;
 
   if (depth < 0)
   {
-    for (std::map<std::string, TreeNode *>::const_iterator it = _children.begin(); it != _children.end(); ++it)
-      it->second->print(depth+1);
-    return;
+    for (std::map<std::string, TreeNode *>::const_iterator c_it = _children.begin(); c_it != _children.end(); ++c_it)
+    {
+      bool local_found = false;
+      std::string local_out (c_it->second->print(depth+1, search_string, local_found));
+      found |= local_found;  // Update the current frame's found variable
+      if (local_found)
+        out += local_out;
+    }
+    return out;
   }
 
   std::string indent((depth+1)*2, ' ');
 
-
-  if (_moose_object_params.begin() == _moose_object_params.end())
+  std::multimap<std::string, InputParameters *>::const_iterator it = _moose_object_params.begin();
+  do
   {
-    _syntax_tree.printBlockOpen(name, depth, type);
+    bool local_found = false;
+    std::string local_out;
 
-    for (std::multimap<std::string, InputParameters *>::const_iterator ait = _action_params.begin(); ait != _action_params.end(); ++ait)
-      if(ait->first != "EmptyAction")
-        _syntax_tree.printParams(*ait->second, depth);
-//      std::cout << "\n" << indent << "(" << ait->first << ")";
+    // Compare the block name, if it's matched we are going to pass an empty search string
+    // which means match ALL parameters
+    std::string local_search_string;
+    if (name == search_string)
+      found = true;
+    else
+      local_search_string = search_string;
 
-    _syntax_tree.preTraverse(depth);
+    local_out += _syntax_tree.printBlockOpen(name, depth, type);
 
-    for (std::map<std::string, TreeNode *>::const_iterator it = _children.begin(); it != _children.end(); ++it)
-      it->second->print(depth+1);
+    for (std::multimap<std::string, InputParameters *>::const_iterator a_it = _action_params.begin(); a_it != _action_params.end(); ++a_it)
+      if(a_it->first != "EmptyAction")
+      {
+        local_out += _syntax_tree.printParams(*a_it->second, depth, local_search_string, local_found);
+        found |= local_found;   // Update the current frame's found variable
+        //DEBUG
+        // std::cout << "\n" << indent << "(" << ait->first << ")";
+        //DEBUG
+      }
 
-    _syntax_tree.printBlockClose(name, depth);
-  }
-  else
-  {
-    for (std::multimap<std::string, InputParameters *>::const_iterator it = _moose_object_params.begin(); it != _moose_object_params.end(); ++it)
+    if (it != _moose_object_params.end())
     {
-      _syntax_tree.printBlockOpen(name, depth, type);
-
-      for (std::multimap<std::string, InputParameters *>::const_iterator ait = _action_params.begin(); ait != _action_params.end(); ++ait)
-        if(ait->first != "EmptyAction")
-          _syntax_tree.printParams(*ait->second, depth);
-//        std::cout << "\n" << indent << "(" << ait->first << ")";
-
-      _syntax_tree.printParams(*it->second, depth);
-//      std::cout << "\n" << indent << "{" << it->first << "}";
-
-      _syntax_tree.preTraverse(depth);
-
-      for (std::map<std::string, TreeNode *>::const_iterator it = _children.begin(); it != _children.end(); ++it)
-        it->second->print(depth+1);
-
-      _syntax_tree.printBlockClose(name, depth);
+      local_out += _syntax_tree.printParams(*it->second, depth, local_search_string, local_found);
+      found |= local_found;
+      //DEBUG
+      // std::cout << "\n" << indent << "{" << it->first << "}";
+      //DEBUG
     }
-  }
+
+    local_out += _syntax_tree.preTraverse(depth);
+
+    for (std::map<std::string, TreeNode *>::const_iterator c_it = _children.begin(); c_it != _children.end(); ++c_it)
+    {
+      bool child_found = false;
+      std::string child_out (c_it->second->print(depth+1, local_search_string, child_found));
+      found |= child_found;   // Update the current frame's found variable
+
+      if (child_found)
+        local_out += child_out;
+    }
+
+    local_out += _syntax_tree.printBlockClose(name, depth);
+
+    if (found)
+      out += local_out;
+
+    // If there are no moose object params then we have to be careful about how we
+    // increment the iterator.  We only want to increment if we aren't already
+    // at the end.
+  } while (it != _moose_object_params.end() && ++it != _moose_object_params.end());
+
+  return out;
 }
 
 std::string

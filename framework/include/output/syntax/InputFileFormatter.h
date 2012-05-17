@@ -20,14 +20,13 @@
 class InputFileFormatter : public SyntaxTree
 {
 public:
-  InputFileFormatter(std::ostream &out, bool dump_mode);
+  InputFileFormatter(bool dump_mode);
 
-  virtual void printBlockOpen(const std::string &name, short depth, const std::string &type) const;
-  virtual void printBlockClose(const std::string &name, short depth) const;
-  virtual void printParams(InputParameters &params, short depth) const;
+  virtual std::string printBlockOpen(const std::string &name, short depth, const std::string &type) const;
+  virtual std::string printBlockClose(const std::string &name, short depth) const;
+  virtual std::string printParams(InputParameters &params, short depth, const std::string &search_string, bool &found) const;
 
 protected:
-  std::ostream &_out;
   bool _dump_mode;
 };
 

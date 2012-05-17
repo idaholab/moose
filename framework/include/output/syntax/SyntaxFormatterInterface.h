@@ -25,14 +25,13 @@ class SyntaxFormatterInterface
 public:
   SyntaxFormatterInterface() {}
   virtual ~SyntaxFormatterInterface() {}
-  virtual void preamble() {}
-  virtual void postscript() {}
+  virtual std::string preamble() const { return std::string(); }
+  virtual std::string postscript() const { return std::string(); }
 
-  virtual void print() const = 0;
-  virtual void preTraverse(short /*depth*/) const {}
-  virtual void printBlockOpen(const std::string &name, short depth, const std::string &type) const = 0;
-  virtual void printBlockClose(const std::string &name, short depth) const = 0;
-  virtual void printParams(InputParameters &params, short depth) const = 0;
+  virtual std::string preTraverse(short /*depth*/) const { return std::string(); }
+  virtual std::string printBlockOpen(const std::string &name, short depth, const std::string &type) const = 0;
+  virtual std::string printBlockClose(const std::string &name, short depth) const = 0;
+  virtual std::string printParams(InputParameters &params, short depth, const std::string &search_string, bool &found) const = 0;
 };
 
 #endif /* SYNTAXFORMATTERINTERFACE_H */

@@ -20,32 +20,18 @@
 class YAMLFormatter : public SyntaxTree
 {
 public:
-  YAMLFormatter(std::ostream &out, bool dump_mode);
+  YAMLFormatter(bool dump_mode);
 
-  virtual void preamble();
-  virtual void postscript();
+  virtual std::string preamble() const;
+  virtual std::string postscript() const;
 
-  virtual void preTraverse(short depth) const;
-  virtual void printBlockOpen(const std::string &name, short depth, const std::string &type) const;
-  virtual void printBlockClose(const std::string &name, short depth) const;
-  virtual void printParams(InputParameters &params, short depth) const;
-
-
-
-//  virtual void print() const;
-//  virtual void postscript();
+  virtual std::string preTraverse(short depth) const;
+  virtual std::string printBlockOpen(const std::string &name, short depth, const std::string &type) const;
+  virtual std::string printBlockClose(const std::string &name, short depth) const;
+  virtual std::string printParams(InputParameters &params, short depth, const std::string &search_string, bool &found) const;
 
 protected:
-
-  /**
-   * Helper method for printing the parts of the YAML Syntax
-   */
-//  void printCloseAndOpen(const std::string & name, const std::string * prev_name) const;
-
-protected:
-  std::ostream &_out;
   bool _dump_mode;
-  bool _first;
 };
 
 #endif /* YAMLFORMATTER_H */

@@ -21,6 +21,7 @@
 #include <vector>
 #include <map>
 #include <cstddef>
+#include <sstream>
 
 // Forward declarations
 class InputParameters;
@@ -36,7 +37,7 @@ public:
   void insertNode(std::string syntax, const std::string &action, bool is_action_params=true,
                   InputParameters *params=NULL);
 
-  virtual void print() const;
+  std::string print(const std::string &search_string) const;
 
 protected:
   /**
@@ -50,7 +51,7 @@ protected:
 
     void insertNode(std::string &syntax, const std::string &action, bool is_action_params=true,
                     InputParameters *params=NULL);
-    void print(short depth) const;
+    std::string print(short depth, const std::string &search_string, bool &found) const;
 
     std::string getLongName(const std::string &delim="/") const;
 

@@ -50,12 +50,11 @@ Parser::Parser(Syntax & syntax):
   _syntax(syntax),
   _action_wh(Moose::action_warehouse),
   _syntax_formatter(NULL),
+  _command_line(*this),
   _getpot_initialized(false),
   _enable_unused_check(WARN_UNUSED),
   _sort_alpha(false)
 {
-  initOptions();
-
   // Need to make sure that the parser pointer is set in the warehouse for various functions
   // TODO: Rip the Parser Pointer out of the warehouse
   _action_wh.setParserPointer(this);
@@ -71,12 +70,11 @@ Parser::Parser(Syntax & syntax, ActionWarehouse & action_wh) :
     _syntax(syntax),
     _action_wh(action_wh),
     _syntax_formatter(NULL),
+    _command_line(*this),
     _getpot_initialized(false),
     _enable_unused_check(WARN_UNUSED),
     _sort_alpha(false)
 {
-  initOptions();
-
   // Need to make sure that the parser pointer is set in the warehouse for various functions
   // TODO: Rip the Parser Pointer out of the warehouse
   _action_wh.setParserPointer(this);
@@ -87,128 +85,6 @@ Parser::~Parser()
 {
   delete _exreader;
   delete _syntax_formatter;
-}
-
-std::string
-Parser::parseCommandLine()
-{
-  std::string input_filename;
-
-  if (Moose::command_line != NULL)
-  {
-    if (searchCommandLine("Help"))
-    {
-      printUsage();
-      exit(0);
-    }
-    if (searchCommandLine("Dump"))
-    {
-      initSyntaxFormatter(INPUT_FILE, true);
-
-      buildFullTree( /*&Parser::printInputParameterData*/ );
-      exit(0);
-    }
-    if (searchCommandLine("YAML"))
-    {
-      initSyntaxFormatter(YAML, true);
-
-      buildFullTree( /*&Parser::printYAMLParameterData*/ );
-      exit(0);
-    }
-    if (searchCommandLine("Syntax"))
-    {
-      std::multimap<std::string, Syntax::ActionInfo> syntax = Moose::syntax.getAssociatedActions();
-      for (std::multimap<std::string, Syntax::ActionInfo>::iterator it = syntax.begin(); it != syntax.end(); ++it)
-      {
-        std::cout << it->first << "\n";
-      }
-      exit(0);
-    }
-    if (Moose::command_line->search("-i"))
-      input_filename = Moose::command_line->next(input_filename);
-    else
-      printUsage();
-  }
-  else
-    mooseError("Command Line object is NULL! Did you create a MooseInit object?");
-
-  return input_filename;
-}
-
-
-void
-Parser::initOptions()
-{
-  // Static Data Initialization
-  CLIOption cli_opt;
-  std::vector<std::string> syntax;
-
-  syntax.clear();
-  cli_opt.desc = "Shows the parsed input file before running the simulation";
-  syntax.push_back("--show-input");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  _cli_options["ShowTree"] = cli_opt;
-
-  syntax.clear();
-  cli_opt.desc = "Displays CLI usage statement";
-  syntax.push_back("-h");
-  syntax.push_back("--help");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  _cli_options["Help"] = cli_opt;
-
-  syntax.clear();
-  cli_opt.desc = "Shows a full dump of available input file syntax";
-  syntax.push_back("--dump");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  _cli_options["Dump"] = cli_opt;
-
-  syntax.clear();
-  cli_opt.desc = "Dumps input file syntax in YAML format";
-  syntax.push_back("--yaml");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  _cli_options["YAML"] = cli_opt;
-
-  syntax.clear();
-  cli_opt.desc = "Dumps the associated Action syntax paths ONLY";
-  syntax.push_back("--syntax");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  _cli_options["Syntax"] = cli_opt;
-
-  syntax.clear();
-  cli_opt.desc = "Runs the specified number of threads (Intel TBB) per process";
-  syntax.push_back("--n-threads");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  _cli_options["Threads"] = cli_opt;
-
-  syntax.clear();
-  cli_opt.desc = "Warn about unused input file options";
-  syntax.push_back("-w");
-  syntax.push_back("--warn-unused");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  _cli_options["WarnUnused"] = cli_opt;
-
-  syntax.clear();
-  cli_opt.desc = "Error when encounting unused input file options";
-  syntax.push_back("-e");
-  syntax.push_back("--error-unused");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  _cli_options["ErrorUnused"] = cli_opt;
-
-  /* This option is used in InitialRefinementAction directly - Do we need a better API? */
-  syntax.clear();
-  cli_opt.desc = "Specify additional initial uniform refinements for automatic scaling";
-  syntax.push_back("-r <refinements>");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  _cli_options["REFINE"] = cli_opt;
 }
 
 bool
@@ -251,20 +127,6 @@ Parser::isSectionActive(const std::string & s,
   return retValue;
 }
 
-bool
-Parser::searchCommandLine(const std::string &option_name)
-{
-  std::map<std::string, CLIOption>::iterator pos;
-
-  pos = _cli_options.find(option_name);
-  if (pos != _cli_options.end())
-    for (unsigned int i=0; i<pos->second.cli_syntax.size(); ++i)
-      if (Moose::command_line->search(pos->second.cli_syntax[i]))
-        return true;
-
-  return false;
-}
-
 void
 Parser::parse(const std::string &input_filename)
 {
@@ -278,7 +140,7 @@ Parser::parse(const std::string &input_filename)
   _input_filename = input_filename;
 
   // Build Command Line Vars Vector
-  buildCommandLineVarsVector();
+  _command_line.buildCommandLineVarsSet();
 
   // vector for initializing active blocks
   std::vector<std::string> all(1);
@@ -369,7 +231,7 @@ Parser::parse(const std::string &input_filename)
   checkActiveUsed(section_names, active_lists);
 
   // Print the input file syntax if requested
-  if (Moose::command_line && searchCommandLine("ShowTree"))
+  if (_command_line.searchCommandLine("ShowTree"))
   {
     _action_wh.printInputFile(std::cout);
     std::cout << std::endl << std::endl;
@@ -461,7 +323,7 @@ Parser::getFileName(bool stripLeadingPath) const
 
 
 void
-Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostream & out)
+Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode)
 {
   if (_syntax_formatter)
     delete _syntax_formatter;
@@ -469,10 +331,10 @@ Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostre
   switch (type)
   {
   case INPUT_FILE:
-    _syntax_formatter = new InputFileFormatter(out, dump_mode);
+    _syntax_formatter = new InputFileFormatter(dump_mode);
     break;
   case YAML:
-    _syntax_formatter = new YAMLFormatter(out, dump_mode);
+    _syntax_formatter = new YAMLFormatter(dump_mode);
     break;
   default:
     mooseError("Unrecognized Syntax Formatter requested");
@@ -481,13 +343,11 @@ Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostre
 }
 
 void
-Parser::buildFullTree()
+Parser::buildFullTree(const std::string &search_string)
 {
 //  std::string prev_name = "";
 //  std::vector<InputParameters *> params_ptrs(2);
   std::vector<std::pair<std::string, Syntax::ActionInfo> > all_names;
-
-  _syntax_formatter->preamble();
 
   for (std::multimap<std::string, Syntax::ActionInfo>::const_iterator iter = _syntax.getAssociatedActions().begin();
        iter != _syntax.getAssociatedActions().end(); ++iter)
@@ -551,9 +411,8 @@ Parser::buildFullTree()
       }
     }
   }
-  _syntax_formatter->print();
 
-  _syntax_formatter->postscript();
+  std::cout << _syntax_formatter->print(search_string);
 }
 
 void
@@ -626,12 +485,12 @@ Parser::execute()
   _action_wh.executeAllActions();
 
   // If requested, see if there are unidentified name/value pairs in the input file
-  if ((Moose::command_line && searchCommandLine("ErrorUnused")) || _enable_unused_check == ERROR_UNUSED)
+  if (_command_line.searchCommandLine("ErrorUnused") || _enable_unused_check == ERROR_UNUSED)
   {
     std::vector<std::string> all_vars = _getpot_file.get_variable_names();
     checkUnidentifiedParams(all_vars, true);
   }
-  else if ((Moose::command_line && searchCommandLine("WarnUnused")) || _enable_unused_check == WARN_UNUSED)
+  else if (_command_line.searchCommandLine("WarnUnused") || _enable_unused_check == WARN_UNUSED)
   {
     std::vector<std::string> all_vars = _getpot_file.get_variable_names();
     checkUnidentifiedParams(all_vars, false);
@@ -671,20 +530,6 @@ Parser::checkFileWritable(const std::string & filename)
 }
 
 void
-Parser::buildCommandLineVarsVector()
-{
-  if (Moose::command_line == NULL)
-    return;
-
-  for(const char* var; (var = Moose::command_line->next_nominus()) != NULL; )
-  {
-    std::vector<std::string> name_value_pairs;
-    tokenize(var, name_value_pairs, 0, "=");
-    _command_line_vars.insert(name_value_pairs[0]);
-  }
-}
-
-void
 Parser::setCheckUnusedFlag(bool warn_is_error)
 {
   _enable_unused_check = warn_is_error ? ERROR_UNUSED : WARN_UNUSED;
@@ -707,32 +552,6 @@ bool
 Parser::getSortFlag() const
 {
   return _sort_alpha;
-}
-
-void
-Parser::printUsage() const
-{
-  // Grab the first item out of argv
-  std::string command((*Moose::command_line)[0]);
-  command.substr(command.find_last_of("/\\")+1);
-
-  std::cout << "\nUsage: " << command << " [-i <input file> --show-input | <Option>]\n\n"
-            << "Options:\n" << std::left;
-
-  for (std::map<std::string, CLIOption>::const_iterator i=_cli_options.begin(); i != _cli_options.end(); ++i)
-  {
-    std::stringstream oss;
-    for (unsigned int j=0; j<i->second.cli_syntax.size(); ++j)
-    {
-      if (j) oss << " | ";
-      oss << i->second.cli_syntax[j];
-    }
-    std::cout << "  " << std::setw(50) << oss.str() << i->second.desc << "\n";
-  }
-
-  std::cout << "\nSolver Options:\n"
-            << "  See solver manual for details (Petsc or Trilinos)\n";
-  exit(0);
 }
 
 void
@@ -837,9 +656,9 @@ void Parser::setRealVectorValue(const std::string & full_name, const std::string
 {
   GetPot *gp;
 
-  // See if this variable was passed on the command line (and previously stored in the CLI vars vector)
+  // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_command_line_vars.find(full_name) != _command_line_vars.end())
+  if (_command_line.isVariableOnCommandLine(full_name))
     gp = Moose::command_line;
   else
     gp = &_getpot_file;
@@ -864,9 +683,9 @@ void Parser::setScalarParameter(const std::string & full_name, const std::string
 {
   GetPot *gp;
 
-  // See if this variable was passed on the command line (and previously stored in the CLI vars vector)
+  // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_command_line_vars.find(full_name) != _command_line_vars.end())
+  if (_command_line.isVariableOnCommandLine(full_name))
     gp = Moose::command_line;
   else
     gp = &_getpot_file;
@@ -883,9 +702,9 @@ void Parser::setVectorParameter(const std::string & full_name, const std::string
 {
   GetPot *gp;
 
-  // See if this variable was passed on the command line (and previously stored in the CLI vars vector)
+  // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_command_line_vars.find(full_name) != _command_line_vars.end())
+  if (_command_line.isVariableOnCommandLine(full_name))
     gp = Moose::command_line;
   else
     gp = &_getpot_file;
@@ -910,9 +729,9 @@ void Parser::setRealTensorValue(const std::string & full_name, const std::string
 {
   GetPot *gp;
 
-  // See if this variable was passed on the command line (and previously stored in the CLI vars vector)
+  // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_command_line_vars.find(full_name) != _command_line_vars.end())
+  if (_command_line.isVariableOnCommandLine(full_name))
     gp = Moose::command_line;
   else
     gp = &_getpot_file;

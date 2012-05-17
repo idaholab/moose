@@ -18,14 +18,13 @@
 #include <sstream>
 #include <vector>
 
-InputFileFormatter::InputFileFormatter(std::ostream &out, bool dump_mode) :
+InputFileFormatter::InputFileFormatter(bool dump_mode) :
     SyntaxTree(),
-    _out(out),
     _dump_mode(dump_mode)
 {
 }
 
-void
+std::string
 InputFileFormatter::printBlockOpen(const std::string &name, short depth, const std::string & /*type*/) const
 {
   std::string indent(depth*2, ' ');
@@ -34,10 +33,10 @@ InputFileFormatter::printBlockOpen(const std::string &name, short depth, const s
   if (depth)
     opening_string = "./";
 
-  _out << "\n" << indent << "[" << opening_string <<  name << "]";
+  return std::string("\n") + indent + "[" + opening_string + name + "]\n";
 }
 
-void
+std::string
 InputFileFormatter::printBlockClose(const std::string & /*name*/, short depth) const
 {
   std::string indent(depth*2, ' ');
@@ -46,13 +45,13 @@ InputFileFormatter::printBlockClose(const std::string & /*name*/, short depth) c
   if (depth)
     closing_string = "../";
 
-  _out << "\n" << indent << "[" << closing_string << "]\n";
+  return std::string("") + indent + "[" + closing_string + "]\n";
 }
 
-void
-InputFileFormatter::printParams(InputParameters &params, short depth) const
+std::string
+InputFileFormatter::printParams(InputParameters &params, short depth, const std::string &search_string, bool &found) const
 {
-  std::stringstream ss;
+  std::stringstream oss;
   std::set<std::string> seen_it;
 
   std::string quotes   = "";
@@ -70,7 +69,7 @@ InputFileFormatter::printParams(InputParameters &params, short depth) const
   for (InputParameters::iterator iter = params.begin(); iter != params.end(); ++iter)
   {
     // We only want non-private params
-    if (params.isPrivate(iter->first))
+    if (params.isPrivate(iter->first) || (search_string != "" && search_string != iter->first))
       continue;
 
     // Don't print active if it is the default all, that means it's not in the input file - unless of course we are in dump mode
@@ -91,15 +90,16 @@ InputFileFormatter::printParams(InputParameters &params, short depth) const
         continue;
     }
 
-    _out << "\n" << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
+    found = true;
+    oss << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
     size_t l_offset = 30;
     if (!_dump_mode || params.isParamValid(iter->first))
     {
       // Print the parameter's value to a stringstream.
-      ss.str("");
-      iter->second->print(ss);
+      std::ostringstream toss;
+      iter->second->print(toss);
       // If the value has spaces, surround it with quotes, otherwise no quotes
-      std::string value = Parser::trim(ss.str());
+      std::string value = Parser::trim(toss.str());
       if (value.find(' ') != std::string::npos)
       {
         quotes = "'";
@@ -107,12 +107,12 @@ InputFileFormatter::printParams(InputParameters &params, short depth) const
       }
       else
         quotes = "";
-      _out << quotes << value << quotes;
+      oss << quotes << value << quotes;
       l_offset -= value.size();
     }
     else if (_dump_mode && params.isParamRequired(iter->first))
     {
-      _out << "(required)";
+      oss << "(required)";
       l_offset -= 10;
     }
 
@@ -128,10 +128,13 @@ InputFileFormatter::printParams(InputParameters &params, short depth) const
         for (unsigned int i=0; i<elements.size(); ++i)
           Parser::escape(elements[i]);
 
-        _out << std::right << std::setw(l_offset) << "# " << elements[0];
+        oss << std::right << std::setw(l_offset) << "# " << elements[0];
         for (unsigned int i=1; i<elements.size(); ++i)
-          _out << " ...\n" << "  " << std::setw(63) << "# " << elements[i];
+          oss << " ...\n" << "  " << std::setw(63) << "# " << elements[i];
       }
     }
+    oss << "\n";
   }
+
+  return oss.str();
 }

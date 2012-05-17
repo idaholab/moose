@@ -17,6 +17,7 @@
 
 #include "GlobalParamsAction.h"
 #include "MooseSyntax.h"
+#include "CommandLine.h"
 
 // libMesh
 #include "getpot.h"
@@ -52,14 +53,6 @@ public:
    */
   bool isSectionActive(const std::string & section_name,
                        const std::map<std::string, std::vector<std::string> > & active_lists);
-
-  /**
-   * Parse the command line running any dump, usage, or other commands as encountered.
-   * If this is a normal run we'll return the input filename back.  This function takes
-   * no arguments but assumes that Moose::command_line exists from a previous creation
-   * of MooseInit
-   */
-  std::string parseCommandLine();
 
   /**
    * Parse an input file consisting of getpot syntax and setup objects
@@ -155,7 +148,14 @@ public:
   /**
    * Creates a syntax formatter for printing
    */
-  void initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostream & out = std::cout);
+  void initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode);
+
+  /**
+   * Use MOOSE Factories to construct a full parse tree for documentation or echoing input.
+   */
+  void buildFullTree(const std::string &search_string);
+
+  std::string parseCommandLine() { return _command_line.parseCommandLine(); }
 
   // data created while running execute()
   MooseMesh *_mesh;
@@ -172,21 +172,6 @@ protected:
   ActionWarehouse & _action_wh;
 
   /**
-   * This function initializes the command line options recognized by MOOSE based applications
-   */
-  void initOptions();
-
-  /**
-   * Searches the command line for the given option name (multiple syntaxes supported)
-   */
-  bool searchCommandLine(const std::string &option_name);
-
-  /**
-   * Use MOOSE Factories to construct a full parse tree for documentation or echoing input.
-   */
-  void buildFullTree();
-
-  /**
    * This function checks to see if there are unindentified variables in the input file (i.e. unused)
    * If the warn_is_error is set, then the program will abort if unidentified parameters are found
    */
@@ -196,12 +181,6 @@ protected:
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
    * since they are colled only from this Object
    */
-
-  /**
-   * This function extracts parameters from the command line in name=value format.  Note
-   * that the name should be fully qualified (i.e. BCs/left/value=10)
-   */
-  void buildCommandLineVarsVector();
 
   template<typename T>
   void setScalarParameter(const std::string & full_name, const std::string & short_name,
@@ -223,21 +202,23 @@ protected:
   /************************************
    * Protected Data Members
    ************************************/
-  struct CLIOption
-  {
-    std::string desc;
-    std::vector<std::string> cli_syntax;
-    bool required;
-  };
+//  struct CLIOption
+//  {
+//    std::string desc;
+//    std::vector<std::string> cli_syntax;
+//    bool required;
+//  };
 
   SyntaxTree * _syntax_formatter;
 
-  std::map<std::string, CLIOption> _cli_options;
+  CommandLine _command_line;
+
+//  std::map<std::string, CLIOption> _cli_options;
 
   /// Contains all of the sections that are not active during the parse phase so that blocks
   /// nested more than one level deep can detect that the grandparent is not active
   std::set<std::string> _inactive_strings;
-  std::set<std::string> _command_line_vars;
+
   bool _getpot_initialized;
   GetPot _getpot_file;
   std::string _input_filename;

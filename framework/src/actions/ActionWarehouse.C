@@ -121,7 +121,7 @@ ActionWarehouse::actionBlocksWithActionEnd(const std::string & action_name)
 void
 ActionWarehouse::printInputFile(std::ostream & out)
 {
-  InputFileFormatter tree(out, false);
+  InputFileFormatter tree(false);
 
   std::map<std::string, std::vector<Action *> >::iterator iter;
 
@@ -153,7 +153,7 @@ ActionWarehouse::printInputFile(std::ostream & out)
     }
   }
 
-  tree.print();
+  out << tree.print("");
 }
 
 void
