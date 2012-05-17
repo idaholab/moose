@@ -384,12 +384,14 @@ class UiBox(QtGui.QMainWindow):
   
   def input_selection(self, item, column):
     this_path = self.generatePathFromItem(item)
+    
     try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
       print 'Here 3'
       item.table_data # If this fails we will jump to "except"...
       print "Old", this_path
       print 'Here 4'
       parent_path = self.generatePathFromItem(item.parent())
+      parent_path = '/' + self.action_syntax.getPath(parent_path) # Get the real action path associated with this item
       yaml_entry = self.findYamlEntry(parent_path)
       print 'Here 5'
       new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data)
@@ -400,6 +402,7 @@ class UiBox(QtGui.QMainWindow):
         self.input_display.setText(self.buildInputString())
     except AttributeError:
       print "New", this_path
+      this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
       yaml_entry = self.findYamlEntry(this_path)
       self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), None)
       if self.new_gui.exec_():
