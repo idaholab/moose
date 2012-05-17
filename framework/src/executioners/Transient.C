@@ -82,7 +82,6 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _ss_tmin(getParam<Real>("ss_tmin")),
     _converged(true),
     _sync_times(getParam<std::vector<Real> >("sync_times")),
-    _curr_sync_time_iter(_sync_times.begin()),
     _remaining_sync_time(true),
     _time_ipol(getParam<std::vector<Real> >("time_t"),
                getParam<std::vector<Real> >("time_dt")),
@@ -126,15 +125,13 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 
   const std::vector<Real> & time = getParam<std::vector<Real> >("time_t");
   if (_use_time_ipol)
-  {
     _sync_times.insert(_sync_times.end(), time.begin()+1, time.end());          // insert times as sync points except the very first one
-    _curr_sync_time_iter = _sync_times.begin();
-  }
   sort(_sync_times.begin(), _sync_times.end());
   _sync_times.erase(std::unique(_sync_times.begin(), _sync_times.end()), _sync_times.end());    // remove duplicates (needs sorted array)
 
   // Advance to the first sync time if one is provided in sim time range
-  while (_remaining_sync_time && *_curr_sync_time_iter < _time)
+  _curr_sync_time_iter = _sync_times.begin();
+  while (_remaining_sync_time && *_curr_sync_time_iter <= _time)
     if (++_curr_sync_time_iter == _sync_times.end())
       _remaining_sync_time = false;
 
