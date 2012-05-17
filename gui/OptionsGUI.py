@@ -10,10 +10,11 @@ except AttributeError:
 
 
 class OptionsGUI(QtGui.QDialog):
-  def __init__(self, main_data, single_item, incoming_data, win_parent=None):
+  def __init__(self, main_data, action_syntax, single_item, incoming_data, win_parent=None):
     QtGui.QDialog.__init__(self, win_parent)
     print 'Here 9'
     self.main_data = main_data
+    self.action_syntax = action_syntax
 
     if 'subblocks' in main_data:
       self.subblocks = main_data['subblocks']
@@ -120,7 +121,8 @@ class OptionsGUI(QtGui.QDialog):
               sb_name = sb['name'].split('/').pop()
               self.drop_menu.addItem(sb_name)
         else:
-          self.drop_menu.addItem(name)
+          if not self.action_syntax.isPath(item['name']):
+            self.drop_menu.addItem(name)
 
     if self.main_data['parameters'] and len(self.main_data['parameters']):
       self.drop_menu.addItem('ParentParams')

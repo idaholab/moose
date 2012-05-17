@@ -13,6 +13,7 @@ from PyQt4 import QtCore, QtGui
 
 from OptionsGUI import OptionsGUI
 from GenSyntax import *
+from ActionSyntax import *
 
 from readInputFile import readInputFile, GPNode
 
@@ -38,6 +39,9 @@ class UiBox(QtGui.QMainWindow):
     QtGui.QMainWindow.__init__(self, win_parent)
     self.setWindowTitle('Peacock - MOOSE front end')
     self.main_data = GenSyntax(app_path).GetSyntax()
+    self.action_syntax = ActionSyntax(app_path)
+    self.input_file_root_node = None
+
     self.constructed_data = {}
     self.initUI()
     self.input_file_root_node = None  #This will only not be None if you open an input file
@@ -61,24 +65,42 @@ class UiBox(QtGui.QMainWindow):
     self.input_display = QtGui.QTextEdit()
     self.input_display.setReadOnly(True)
     self.layout_with_textbox.addWidget(self.input_display)
+
+  def recursivelyAddTreeItems(self, split_path, parent):
+    this_piece = split_path[0]
+
+    #FIXME: Deal with this!
+    if this_piece == '*':
+      return
+
+    this_item = None
+    search = self.tree_widget.findItems(this_piece, QtCore.Qt.MatchExactly)
+
+    if len(search) > 0:
+      # Already have this in the tree
+      this_item = search[0]
+    else:    
+      # Add it
+      this_item = QtGui.QTreeWidgetItem(parent)
+      this_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
+      this_item.setCheckState(0, QtCore.Qt.Unchecked)
+      this_item.setText(0, this_piece)
+
+    if len(split_path) > 1:
+      self.recursivelyAddTreeItems(split_path[1:], this_item)
   
   def init_treewidet(self, layout):
     i = 0
     self.tree_widget = QtGui.QTreeWidget()
-    #Go over each top level section and add it to the tree
-    for itm in self.main_data:
-      new_child = QtGui.QTreeWidgetItem(self.tree_widget)
-      new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
-      new_child.setCheckState(0, QtCore.Qt.Unchecked)
-      name = itm['name'].split('/')[1]
-#      if 'subblocks' in itm and itm['subblocks'] != None and len(itm['subblocks']) > 0:
-#        name += '+'
-      new_child.setText(0, name)
+    self.tree_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+    self.connect(self.tree_widget,QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.newContext)
+    # Add every hard path
+    for path in self.action_syntax.hard_paths:
+      self.recursivelyAddTreeItems(path.split('/'), self.tree_widget)
       
     self.tree_widget.header().close()
     QtCore.QObject.connect(self.tree_widget, QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem *, int)"), self.input_selection)
     QtCore.QObject.connect(self.tree_widget, QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self.item_changed)
-    self.tree_widget.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
     layout.addWidget(self.tree_widget)
 
   def init_buttons(self, layout):
@@ -93,6 +115,7 @@ class UiBox(QtGui.QMainWindow):
     layout.addWidget(buttonCancel)
 
   def addDataRecursively(self, parent_item, node):
+    is_active = 'active' not in node.parent.params or node.parent.params['active'].find(node.name) != -1
     table_data = node.params
     table_data['Name'] = node.name
     parent_item.setCheckState(0, QtCore.Qt.Checked)
@@ -100,7 +123,11 @@ class UiBox(QtGui.QMainWindow):
     new_child.setText(0,table_data['Name'])
     new_child.table_data = table_data
     new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
-    new_child.setCheckState(0, QtCore.Qt.Checked)
+
+    if is_active:
+      new_child.setCheckState(0, QtCore.Qt.Checked)
+    else:
+      new_child.setCheckState(0, QtCore.Qt.Unchecked)
     parent_item.addChild(new_child)
 
     for child, child_node in node.children.items():
@@ -137,35 +164,76 @@ class UiBox(QtGui.QMainWindow):
   def click_cancel(self):
     sys.exit(0)
 
-  def inputStringRecurse(self, item, level):
+  def recursiveGetGPNode(self, current_node, pieces):
+    if len(pieces) == 1 and pieces[0] == current_node.name:
+      return current_node
+
+    if pieces[1] in current_node.children:
+      return self.recursiveGetGPNode(current_node.children[pieces[1]], pieces[1:])
+
+    return None
+
+  """ Returns the GetPot Node associated with the item... or None if there wasn't one """
+  def getGPNode(self, item):
+    if not self.input_file_root_node:
+      return None
+    else:
+      path = self.generatePathFromItem(item)
+      pieces = path.split('/')
+      return self.recursiveGetGPNode(self.input_file_root_node, pieces)
+
+  def inputStringRecurse(self, item, level):    
     indent_string = ''
     for i in xrange(0,level):
       indent_string += '  '
+      
+    this_path = self.generatePathFromItem(item)
 
-    if item.checkState(0) != QtCore.Qt.Checked:
+    # Don't print hard paths that aren't checked
+    if self.action_syntax.isPath(this_path) and item.checkState(0) != QtCore.Qt.Checked:
       return
+    
     else:
       section = str(item.text(0)).rstrip('+')
       subchild_count = item.childCount()
+      gp_node = None
+
+      if self.input_file_root_node:
+        gp_node = self.getGPNode(item)
 
       if level == 0:
         self.the_string += '[' + section + ']\n'
       else:
         self.the_string += indent_string + '[./' + section + ']\n'
 
-#       active = []
-#       has_inactive_children = True # Whether or not it has inactive children
+      active = []
+      has_inactive_children = False # Whether or not it has inactive children
       
-#       # Print the active line if necessary
-#       for j in range(subchild_count):
-#         subitem = item.child(j)
-#         if subitem.checkState(0) == QtCore.Qt.Checked:
-        
+      # Print the active line if necessary
+      for j in range(subchild_count):
+        subitem = item.child(j)
+        if subitem.checkState(0) == QtCore.Qt.Checked:
+          active.append(str(subitem.text(0)))
+        else:
+          if not self.action_syntax.isPath(self.generatePathFromItem(subitem)) and str(subitem.text(0)) != 'ParentParams':
+            has_inactive_children = True
+
+      if has_inactive_children:
+          self.the_string += indent_string + '  ' + "active = '" + ' '.join(active) + "'\n"
 
       # Print out the params for this item
       try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
+        printed_params = []
+
+        # Print out the ones that we know from the read in input file in the right order
+        if gp_node:
+          for param in gp_node.params_list:
+            if param in item.table_data and param != 'Name' and param != 'parent_params':
+              self.the_string += indent_string + '  ' + param + ' = ' + item.table_data[param] + '\n'
+              printed_params.append(param)
+        
         for param,value in item.table_data.items():
-          if param != 'Name' and param != 'parent_params':
+          if param not in printed_params and param != 'Name' and param != 'parent_params':
             self.the_string += indent_string + '  ' + param + ' = ' + value + '\n'
       except:
         pass
@@ -175,40 +243,86 @@ class UiBox(QtGui.QMainWindow):
         subitem = item.child(j)
         if subitem.checkState(0) != QtCore.Qt.Checked:
           continue
+        try:
+          table_data = subitem.table_data
 
-        table_data = subitem.table_data
+          printed_params = []
 
-        if 'parent_params' in table_data:
-          for param,value in table_data.items():
-            if param != 'Name' and param != 'parent_params':
-              self.the_string += indent_string + '  ' + param + ' = ' + value + '\n'
-          break
+          # Print out the ones that we know from the read in input file in the right order
+          if gp_node:
+            for param in gp_node.params_list:
+              if param in table_data and param != 'Name' and param != 'parent_params':
+                self.the_string += indent_string + '  ' + param + ' = ' + table_data[param] + '\n'
+                printed_params.append(param)
+
+
+          if 'parent_params' in table_data:
+            for param,value in table_data.items():
+              if param not in printed_params and param != 'Name' and param != 'parent_params':
+                self.the_string += indent_string + '  ' + param + ' = ' + value + '\n'
+            break
+        except:
+          pass
 
       # Now recurse over the children that _don't_ have parent_params
+      printed_children = []
+      if gp_node:  # Print the children we knew about from the input file in the right order
+        for child in gp_node.children_list:
+          for j in range(subchild_count):
+            subitem = item.child(j)
+            if subitem.text(0) != child:
+              continue
+
+            try:
+              table_data = subitem.table_data
+
+              if 'parent_params' in table_data:
+                continue
+            except:
+              pass
+
+            self.inputStringRecurse(subitem, level+1)
+            printed_children.append(child)
+
+      
       for j in range(subchild_count):
         subitem = item.child(j)
-        if subitem.checkState(0) != QtCore.Qt.Checked:
+        if subitem.text(0) in printed_children:
           continue
-        table_data = subitem.table_data
+        
+        try:
+          table_data = subitem.table_data
 
-        if 'parent_params' in table_data:
-          continue
+          if 'parent_params' in table_data:
+            continue
+        except:
+          pass
 
         self.inputStringRecurse(subitem, level+1)
 
-      if level == 0:
-        self.the_string += '[]\n'
-      else:
-        self.the_string += indent_string + '[../]\n'
+    if level == 0:
+      self.the_string += '[]\n\n'
+    else:
+      self.the_string += indent_string + '[../]\n'
 
     
   def buildInputString(self):
     self.the_string = ''
     root = self.tree_widget.invisibleRootItem()
     child_count = root.childCount()
-    for i in range(child_count):
+    printed_sections = []
+    
+    if self.input_file_root_node: # Print any sections we knew about from the input file first (and in the right order)
+      for section_name in self.input_file_root_node.children_list:
+        item = self.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)[0]
+        self.inputStringRecurse(item, 0)
+        printed_sections.append(section_name)  
+        
+    for i in range(child_count): # Print out all the other sections
       item = root.child(i)
-      self.inputStringRecurse(item, 0)
+      if item.text(0) not in printed_sections:
+        self.inputStringRecurse(item, 0)
+        
     return self.the_string
 
   def click_save(self):
@@ -219,36 +333,85 @@ class UiBox(QtGui.QMainWindow):
       output_string = self.buildInputString()
       file.write(output_string)
 
+  def generatePathFromItem(self, item):
+    from_parent = ''
+    if item.parent():
+      from_parent = self.generatePathFromItem(item.parent())
+      
+    return from_parent + '/' + str(item.text(0))
+
+  def recursiveYamlDataSearch(self, path, current_yaml):
+    if current_yaml['name'] == path:
+      return current_yaml
+    else:
+      if current_yaml['subblocks']:
+        for child in current_yaml['subblocks']:
+          yaml_data = self.recursiveYamlDataSearch(path, child)
+          
+          if yaml_data:  # Found it in a child!
+            return yaml_data
+      else: # No children.. stop recursion
+        return None
+
+  def findYamlEntry(self, path):
+    for yaml_it in self.main_data:
+      yaml_data = self.recursiveYamlDataSearch(path, yaml_it)
+
+      if yaml_data:
+        return yaml_data
+      
+    # This means it wasn't found  
+    return None
+
+  def deleteCurrentItem(self):
+    item = self.tree_widget.currentItem()
+    parent = item.parent()
+    parent.removeChild(item)
+    self.input_display.setText(self.buildInputString())
+    
+  def newContext(self, pos):
+    global_pos = self.tree_widget.mapToGlobal(pos)
+    item = self.tree_widget.itemAt(pos)
+    this_path = self.generatePathFromItem(item)
+
+    # Don't allow deletion of hard paths
+    if not self.action_syntax.isPath(this_path):
+      menu = QtGui.QMenu(self)
+      delete_action = QtGui.QAction("Delete", self)
+      delete_action.triggered.connect(self.deleteCurrentItem)
+      menu.addAction(delete_action)
+      menu.popup(global_pos)
+  
   def input_selection(self, item, column):
+    this_path = self.generatePathFromItem(item)
     try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
       print 'Here 3'
-      item.table_data
+      item.table_data # If this fails we will jump to "except"...
+      print "Old", this_path
       print 'Here 4'
-      for sgl_item in self.main_data:
-        if sgl_item['name'].find('/'+str(item.parent().text(column)).rstrip('+')) != -1:
-          print 'Here 5'
-          new_gui = OptionsGUI(sgl_item, str(item.text(column)).rstrip('+'), item.table_data)
-          new_gui.incoming_data = item.table_data
-          if new_gui.exec_():
-            table_data = new_gui.result()
-            item.table_data = table_data
-            item.setText(0,table_data['Name'])
-            self.input_display.setText(self.buildInputString())
-    except:
-      for sgl_item in self.main_data:
-        if sgl_item['name'].find('/'+str(item.text(column)).rstrip('+')) != -1:
-          self.new_gui = OptionsGUI(sgl_item, str(item.text(column)).rstrip('+'), None)
-          if self.new_gui.exec_():
-            table_data = self.new_gui.result()
-            new_child = QtGui.QTreeWidgetItem(item)
-            new_child.setText(0,table_data['Name'])
-            new_child.table_data = table_data
-            new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
-            new_child.setCheckState(0, QtCore.Qt.Checked)
-            item.addChild(new_child)
-            item.setCheckState(0, QtCore.Qt.Checked)
-            self.input_display.setText(self.buildInputString())
-          break
+      parent_path = self.generatePathFromItem(item.parent())
+      yaml_entry = self.findYamlEntry(parent_path)
+      print 'Here 5'
+      new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data)
+      new_gui.incoming_data = item.table_data
+      if new_gui.exec_():
+        item.table_data = new_gui.result()
+        item.setText(0,item.table_data['Name'])
+        self.input_display.setText(self.buildInputString())
+    except AttributeError:
+      print "New", this_path
+      yaml_entry = self.findYamlEntry(this_path)
+      self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), None)
+      if self.new_gui.exec_():
+        table_data = self.new_gui.result()
+        new_child = QtGui.QTreeWidgetItem(item)
+        new_child.setText(0,table_data['Name'])
+        new_child.table_data = table_data
+        new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
+        new_child.setCheckState(0, QtCore.Qt.Checked)
+        item.addChild(new_child)
+        item.setCheckState(0, QtCore.Qt.Checked)
+        self.input_display.setText(self.buildInputString())
         
   def item_changed(self, item, column):
     self.input_display.setText(self.buildInputString())
