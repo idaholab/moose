@@ -23,6 +23,7 @@ InputParameters validParams<BoundaryCondition>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<SetupInterface>();
+  params += validParams<TransientInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");

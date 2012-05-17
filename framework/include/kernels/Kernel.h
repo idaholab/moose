@@ -71,16 +71,6 @@ public:
    */
   MooseVariable & variable() { return _var; }
 
-  /**
-   * The time, after which this kernel will be active.
-   */
-  Real startTime();
-
-  /**
-   * The time, after which this kernel will be inactive.
-   */
-  Real stopTime();
-
   SubProblem & subProblem() { return _subproblem; }
 
   // materials
@@ -129,11 +119,6 @@ protected:
   VariableValue & _u_dot;
   /// Derivative of u_dot wrt u
   VariableValue & _du_dot_du;
-
-  /// The time, after which this kernel will be active.
-  Real _start_time;
-  /// The time, after which this kernel will be inactive.
-  Real _stop_time;
 
   // Single Instance Variables
   Real & _real_zero;

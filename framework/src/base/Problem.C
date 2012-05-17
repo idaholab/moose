@@ -104,3 +104,21 @@ Problem::getUserObject(const std::string & name, THREAD_ID tid)
   return *user_object;
 }
 
+void
+Problem::addTimePeriod(const std::string & name, Real start_time, Real end_time)
+{
+  TimePeriod * tp = new TimePeriod;
+  tp->_start = start_time;
+  tp->_end = end_time;
+  _time_periods[name] = tp;
+}
+
+TimePeriod *
+Problem::getTimePeriodByName(const std::string & name)
+{
+  std::map<std::string, TimePeriod *>::iterator it = _time_periods.find(name);
+  if (it == _time_periods.end())
+    return NULL;
+  else
+    return it->second;
+}

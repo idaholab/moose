@@ -54,6 +54,10 @@ InputParameters validParams<Transient>()
   params.addParam<Real>("growth_factor", 2, "Maximum ratio of new to previous timestep sizes following a step that required the time step to be cut due to a failed solve.  For use with 'time_t' and 'time_dt'.");
   params.addParam<Real>("predictor_scale",      0.0,    "The scale factor for the predictor (can range from 0 to 1)");
 
+  params.addParam<std::vector<std::string> >("time_periods", "The names of periods");
+  params.addParam<std::vector<Real> >("time_period_starts", "The start times of time periods");
+  params.addParam<std::vector<Real> >("time_period_ends", "The end times of time periods");
+
   return params;
 }
 
@@ -99,6 +103,27 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
       mooseError("Input value for predictor_scale = "<< predscale << ", outside of permissible range (0 to 1)");
   }
 
+  // process time periods
+  const std::vector<std::string> & time_period_names = getParam<std::vector<std::string> >("time_periods");
+  const std::vector<Real> & time_start = getParam<std::vector<Real> >("time_period_starts");
+  const std::vector<Real> & time_end = getParam<std::vector<Real> >("time_period_ends");
+  for (unsigned int i = 0; i < time_period_names.size(); ++i)
+  {
+    Real t_start = time_start[i];
+    Real t_end = 0;
+    if (time_end.size() > 0)
+      t_end = time_end[i];                              // use the time end specified in the input file
+    else
+    {
+      if (i < time_period_names.size() - 1)
+        t_end = time_start[i + 1];                      // use the next start time as an end time of this period
+      else
+        t_end = std::numeric_limits<Real>::max();       // use the max as the end
+    }
+    _problem.addTimePeriod(time_period_names[i], t_start, t_end);
+    _sync_times.push_back(t_start);
+  }
+
   const std::vector<Real> & time = getParam<std::vector<Real> >("time_t");
   if (_use_time_ipol)
   {
@@ -106,6 +131,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _curr_sync_time_iter = _sync_times.begin();
   }
   sort(_sync_times.begin(), _sync_times.end());
+  _sync_times.erase(std::unique(_sync_times.begin(), _sync_times.end()), _sync_times.end());    // remove duplicates (needs sorted array)
 
   // Advance to the first sync time if one is provided in sim time range
   while (_remaining_sync_time && *_curr_sync_time_iter < _time)

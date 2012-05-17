@@ -82,7 +82,7 @@ public:
    * @param dt Time step size
    * @param subdomain_id Domain ID
    */
-  void updateActiveKernels(Real t, Real dt, unsigned int subdomain_id);
+  void updateActiveKernels(unsigned int subdomain_id);
 
   /**
    * This returns a boolean to indicate whether this warehouse contains kernels

@@ -60,6 +60,27 @@ public:
    */
   void activeBoundaries(std::set<BoundaryID> & bnds) const;
 
+  /**
+   * Get active integrated boundary conditions
+   * @param boundary_id Boundary ID
+   * @return Set of active integrated BCs
+   */
+  std::vector<IntegratedBC *> activeIntegrated(BoundaryID boundary_id);
+
+  /**
+   * Get active nodal boundary conditions
+   * @param boundary_id Boundary ID
+   * @return Set of active nodal BCs
+   */
+  std::vector<NodalBC *> activeNodal(BoundaryID boundary_id);
+
+  /**
+   * Get active preset nodal boundary conditions
+   * @param boundary_id Boundary ID
+   * @return Set of active preset nodal BCs
+   */
+  std::vector<PresetNodalBC *> activePresetNodal(BoundaryID boundary_id);
+
 protected:
   /// integrated boundary conditions on a boundary
   std::map<BoundaryID, std::vector<IntegratedBC *> > _bcs;

@@ -1080,7 +1080,8 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
       // reinit variables in nodes
       _problem.reinitNodeFace(node, boundary_id, 0);
 
-      for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
+      std::vector<NodalBC *> bcs = _bcs[0].activeNodal(boundary_id);
+      for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
       {
         NodalBC * bc = *it;
         if (bc->shouldApply())
@@ -1600,17 +1601,17 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
         {
           subdomain = cur_subdomain;
           _problem.subdomainSetup(subdomain, tid);
-          _kernels[tid].updateActiveKernels(_t, _dt, cur_subdomain);
+          _kernels[tid].updateActiveKernels(cur_subdomain);
         }
 
         _problem.parent()->reinitMaterials(cur_subdomain, tid);
 
         //Kernels
-        for(std::vector<Kernel *>::const_iterator kernel_it=_kernels[tid].active().begin(); kernel_it != _kernels[tid].active().end(); kernel_it++)
+        std::vector<Kernel *> kernels = _kernels[tid].active();
+        for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); it++)
         {
-          Kernel * kernel = *kernel_it;
-
-          if(kernel->variable().number() == ivar)
+          Kernel * kernel = *it;
+          if (kernel->variable().number() == ivar)
           {
             kernel->subProblem().prepareShapes(jvar, tid);
             kernel->computeOffDiagJacobian(jvar);
@@ -1627,7 +1628,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
             {
               BoundaryID bnd_id = *it;
 
-              std::vector<IntegratedBC *> bcs = _bcs[tid].getBCs(bnd_id);
+              std::vector<IntegratedBC *> bcs = _bcs[tid].activeIntegrated(bnd_id);
               if (bcs.size() > 0)
               {
                 _problem.reinitElemFace(elem, side, bnd_id, tid);
@@ -1707,10 +1708,10 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
     BoundaryID boundary_id = bnode->_bnd_id;
     Node * node = bnode->_node;
 
-    std::vector<NodalBC *> & bcs = _bcs[0].getNodalBCs(boundary_id);
-    if(bcs.size() > 0)
+    std::vector<NodalBC *> bcs = _bcs[0].activeNodal(boundary_id);
+    if (bcs.size() > 0)
     {
-      if(node->processor_id() == libMesh::processor_id())
+      if (node->processor_id() == libMesh::processor_id())
       {
         _problem.parent()->reinitNodeFace(node, boundary_id, 0);
 

@@ -39,9 +39,10 @@ ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads:
 void
 ComputeJacobianThread::computeJacobian()
 {
-  for (std::vector<Kernel *>::const_iterator kernel_it = _sys._kernels[_tid].active().begin(); kernel_it != _sys._kernels[_tid].active().end(); ++kernel_it)
+  const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
+  for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
   {
-    Kernel * kernel = *kernel_it;
+    Kernel * kernel = *it;
     kernel->subProblem().prepareShapes(kernel->variable().number(), _tid);
     kernel->computeJacobian();
   }
@@ -50,7 +51,8 @@ ComputeJacobianThread::computeJacobian()
 void
 ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 {
-  for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
+  std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
+  for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
   {
     IntegratedBC * bc = *it;
     if (bc->shouldApply())
@@ -80,11 +82,11 @@ ComputeJacobianThread::onElement(const Elem *elem)
   _problem.prepare(elem, _tid);
   _problem.reinitElem(elem, _tid);
 
-  unsigned int subdomain = elem->subdomain_id();
+  SubdomainID subdomain = elem->subdomain_id();
   if (subdomain != _subdomain)
   {
     _problem.subdomainSetup(subdomain, _tid);
-    _sys._kernels[_tid].updateActiveKernels(_fe_problem.time(), _fe_problem.dt(), subdomain);
+    _sys._kernels[_tid].updateActiveKernels(subdomain);
   }
 
   _problem.reinitMaterials(subdomain, _tid);
@@ -95,7 +97,7 @@ ComputeJacobianThread::onElement(const Elem *elem)
 void
 ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
-  std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
+  std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {
     _problem.reinitElemFace(elem, side, bnd_id, _tid);

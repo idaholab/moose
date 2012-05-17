@@ -19,6 +19,11 @@
 
 
 class SubProblem;
+class TimePeriod;
+class TransientInterface;
+
+template<>
+InputParameters validParams<TransientInterface>();
 
 /**
  * Interface for objects that needs transient capabilities
@@ -29,6 +34,12 @@ class TransientInterface
 public:
   TransientInterface(InputParameters & parameters);
   virtual ~TransientInterface();
+
+  /**
+   * Is the object active at the given time?
+   * @return true is it is active, otherwise false
+   */
+  virtual bool isActive();
 
 private:
   SubProblem & _ti_subproblem;
@@ -47,6 +58,9 @@ protected:
 
   // NOTE: dunno if it is set properly in time of instantiation (might be a source of bugs)
   bool _is_transient;
+
+  /// Time periods this object is active in (sorted in ascending order)
+  std::vector<TimePeriod *> _time_periods;
 };
 
 #endif /* TRANSIENTINTERFACE_H */

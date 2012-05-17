@@ -42,6 +42,20 @@ class Problem;
 template<>
 InputParameters validParams<Problem>();
 
+/**
+ * Data structure to keep info about the time period
+ */
+struct TimePeriod
+{
+  /// Time when this period starts (included)
+  Real _start;
+  /// Time when this period ends (excluded)
+  Real _end;
+};
+
+/**
+ * Class that hold the whole problem being solved.
+ */
 class Problem
 {
 public:
@@ -169,6 +183,24 @@ public:
   virtual void output(bool force = false) = 0;
   void outputInitial(bool out_init) { _output_initial = out_init; }
 
+  // time periods
+
+  /**
+   * Add a time period
+   * @param name Name of the time period
+   * @param start_time Start time of the time period
+   * @param end_time End time of the time period
+   */
+  void addTimePeriod(const std::string & name, Real start_time, Real end_time);
+
+  /**
+   * Get time period by name
+   * @param name Name of the time period to get
+   * @return Pointer to the time period struct if found, otherwise NULL
+   */
+  virtual TimePeriod * getTimePeriodByName(const std::string & name);
+
+
 public:
   /**
    * Convenience zeros
@@ -191,6 +223,9 @@ protected:
 
   /// output initial condition if true
   bool _output_initial;
+
+  /// Time periods by name
+  std::map<std::string, TimePeriod *> _time_periods;
 };
 
 #endif /* PROBLEM_H */

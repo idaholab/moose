@@ -125,3 +125,33 @@ BCWarehouse::activeBoundaries(std::set<BoundaryID> & bnds) const
   for (std::map<BoundaryID, std::vector<PresetNodalBC *> >::const_iterator curr = _preset_nodal_bcs.begin(); curr != _preset_nodal_bcs.end(); ++curr)
     bnds.insert(curr->first);
 }
+
+std::vector<IntegratedBC *>
+BCWarehouse::activeIntegrated(BoundaryID boundary_id)
+{
+  std::vector<IntegratedBC *> active;
+  for (std::vector<IntegratedBC *>::iterator it = _bcs[boundary_id].begin(); it != _bcs[boundary_id].end(); ++it)
+    if ((*it)->isActive())
+      active.push_back(*it);
+  return active;
+}
+
+std::vector<NodalBC *>
+BCWarehouse::activeNodal(BoundaryID boundary_id)
+{
+  std::vector<NodalBC *> active;
+  for (std::vector<NodalBC *>::iterator it = _nodal_bcs[boundary_id].begin(); it != _nodal_bcs[boundary_id].end(); ++it)
+    if ((*it)->isActive())
+      active.push_back(*it);
+  return active;
+}
+
+std::vector<PresetNodalBC *>
+BCWarehouse::activePresetNodal(BoundaryID boundary_id)
+{
+  std::vector<PresetNodalBC *> active;
+  for (std::vector<PresetNodalBC *>::iterator it = _preset_nodal_bcs[boundary_id].begin(); it != _preset_nodal_bcs[boundary_id].end(); ++it)
+    if ((*it)->isActive())
+      active.push_back(*it);
+  return active;
+}

@@ -49,20 +49,21 @@ ComputeResidualThread::onElement(const Elem *elem)
   if (subdomain != _subdomain)
   {
     _problem.subdomainSetup(subdomain, _tid);
-    _sys._kernels[_tid].updateActiveKernels(_fe_problem.time(), _fe_problem.dt(), subdomain);
+    _sys._kernels[_tid].updateActiveKernels(subdomain);
     if (_sys._doing_dg) _sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
   }
 
   _problem.reinitMaterials(subdomain, _tid);
 
-  for (std::vector<Kernel *>::const_iterator kernel_it = _sys._kernels[_tid].active().begin(); kernel_it != _sys._kernels[_tid].active().end(); ++kernel_it)
-    (*kernel_it)->computeResidual();
+  const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
+  for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+    (*it)->computeResidual();
 }
 
 void
 ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
-  std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
+  std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {
     _problem.reinitElemFace(elem, side, bnd_id, _tid);

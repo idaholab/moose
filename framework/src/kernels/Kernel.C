@@ -24,10 +24,9 @@ InputParameters validParams<Kernel>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<SetupInterface>();
+  params += validParams<TransientInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that this kernel will be applied to");
-  params.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that this kernel will be active after.");
-  params.addParam<Real>("stop_time", std::numeric_limits<Real>::max(), "The time after which this kernel will no longer be active.");
 
   // testing, dude
   params.addPrivateParam<bool>("use_displaced_mesh", false);
@@ -75,26 +74,11 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu()),
 
-    _start_time(parameters.get<Real>("start_time")),
-    _stop_time(parameters.get<Real>("stop_time")),
-
     _real_zero(_problem._real_zero[_tid]),
     _zero(_problem._zero[_tid]),
     _grad_zero(_problem._grad_zero[_tid]),
     _second_zero(_problem._second_zero[_tid])
 {
-}
-
-Real
-Kernel::startTime()
-{
-  return _start_time;
-}
-
-Real
-Kernel::stopTime()
-{
-  return _stop_time;
 }
 
 void
