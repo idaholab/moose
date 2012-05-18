@@ -69,17 +69,33 @@ class UiBox(QtGui.QMainWindow):
   def recursivelyAddTreeItems(self, split_path, parent):
     this_piece = split_path[0]
 
-    #FIXME: Deal with this!
-    if this_piece == '*':
-      return
-
     this_item = None
-    search = self.tree_widget.findItems(this_piece, QtCore.Qt.MatchExactly)
+    found_it = False
+    is_star = False
 
-    if len(search) > 0:
-      # Already have this in the tree
-      this_item = search[0]
-    else:    
+    if this_piece == '*':
+      found_it = True
+      is_star = True
+
+    num_children = 0
+
+    try: # This will fail when we're dealing with the QTreeWidget itself
+      num_children = parent.childCount()
+    except:
+      num_children = parent.topLevelItemCount()
+
+    for i in range(num_children):
+      child = None
+      try: # This will fail when we're dealing with the QTreeWidget itself
+        child = parent.child(i)
+      except:
+        child = parent.topLevelItem(i)
+        
+      if child.text(0) == this_piece:
+        this_item = child
+        found_it = True
+
+    if not found_it:
       # Add it
       this_item = QtGui.QTreeWidgetItem(parent)
       this_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
@@ -87,16 +103,28 @@ class UiBox(QtGui.QMainWindow):
       this_item.setText(0, this_piece)
 
     if len(split_path) > 1:
-      self.recursivelyAddTreeItems(split_path[1:], this_item)
-  
+      if not is_star:
+        self.recursivelyAddTreeItems(split_path[1:], this_item)
+      else: # If it is a star and there are children - then add it to all of the children
+        for i in range(num_children):
+          child = None
+          try: # This will fail when we're dealing with the QTreeWidget itself
+            child = parent.child(i)
+          except:
+            child = parent.topLevelItem(i)
+          self.recursivelyAddTreeItems(split_path[1:], child)
+
+  def addHardPathsToTree(self):
+    # Add every hard path
+    for path in self.action_syntax.hard_paths:
+      self.recursivelyAddTreeItems(path.split('/'), self.tree_widget)
+    
   def init_treewidet(self, layout):
     i = 0
     self.tree_widget = QtGui.QTreeWidget()
     self.tree_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.connect(self.tree_widget,QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.newContext)
-    # Add every hard path
-    for path in self.action_syntax.hard_paths:
-      self.recursivelyAddTreeItems(path.split('/'), self.tree_widget)
+    self.addHardPathsToTree()
       
     self.tree_widget.header().close()
     QtCore.QObject.connect(self.tree_widget, QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem *, int)"), self.input_selection)
@@ -437,6 +465,7 @@ class UiBox(QtGui.QMainWindow):
         item.addChild(new_child)
         item.setCheckState(0, QtCore.Qt.Checked)
         self.input_display.setText(self.buildInputString())
+        self.addHardPathsToTree()
         
   def item_changed(self, item, column):
     self.input_display.setText(self.buildInputString())
