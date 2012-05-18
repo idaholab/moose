@@ -1,12 +1,4 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file '/Users/milljm/projects/moose_front_end/Peacock.ui'
-#
-# Created: Wed Apr 18 13:54:16 2012
-#      by: PyQt4 UI code generator 4.9.1
-#
-# WARNING! All changes made in this file will be lost!
 import os, sys, PyQt4, getopt
 from PyQt4 import QtCore, QtGui
 
@@ -388,8 +380,6 @@ class UiBox(QtGui.QMainWindow):
     return from_parent + '/' + str(item.text(0))
 
   def recursiveYamlDataSearch(self, path, current_yaml):
-    if current_yaml['name'].find('Variables') != -1:
-      print 'Current Yaml', current_yaml['name']
     if current_yaml['name'] == path:
       return current_yaml
     else:
@@ -441,7 +431,6 @@ class UiBox(QtGui.QMainWindow):
       print 'Here 4'
       parent_path = self.generatePathFromItem(item.parent())
       parent_path = '/' + self.action_syntax.getPath(parent_path) # Get the real action path associated with this item
-      print parent_path
       yaml_entry = self.findYamlEntry(parent_path)
       print 'Here 5'
       new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data)
@@ -465,7 +454,7 @@ class UiBox(QtGui.QMainWindow):
         item.addChild(new_child)
         item.setCheckState(0, QtCore.Qt.Checked)
         self.input_display.setText(self.buildInputString())
-        self.addHardPathsToTree()
+        self.addHardPathsToTree() # We do this here because * paths might add more paths underneath the item we just added
         
   def item_changed(self, item, column):
     self.input_display.setText(self.buildInputString())
