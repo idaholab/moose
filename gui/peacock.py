@@ -118,11 +118,25 @@ class UiBox(QtGui.QMainWindow):
     is_active = 'active' not in node.parent.params or node.parent.params['active'].find(node.name) != -1
     table_data = node.params
     table_data['Name'] = node.name
-    parent_item.setCheckState(0, QtCore.Qt.Checked)
     new_child = QtGui.QTreeWidgetItem(parent_item)
     new_child.setText(0,table_data['Name'])
-    new_child.table_data = table_data
-    new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
+
+    # If this is a hard path then we need to add ParentParams for it
+    if self.action_syntax.isPath(self.generatePathFromItem(new_child)):
+      num_params = 0
+      for param in node.params:
+        if param != 'active':
+          num_params += 1
+
+      if num_params > 0:
+        new_name = 'ParentParams'
+        new_node = GPNode(new_name, node)
+        new_node.params = node.params
+        new_node.params['parent_params'] = True
+        self.addDataRecursively(new_child, new_node)
+    else: # Otherwise this is just a normal node
+      new_child.table_data = table_data
+      new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
 
     if is_active:
       new_child.setCheckState(0, QtCore.Qt.Checked)
@@ -142,10 +156,15 @@ class UiBox(QtGui.QMainWindow):
       for section_name, section_node in main_sections.items():
         # Find out if this section has it's own parameters.  If so we need to add a ParentParams node
 
+        section_item = self.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)[0]
+
         num_params = 0
         for param in section_node.params:
           if param != 'active':
             num_params += 1
+
+        if num_params > 1 or len(section_node.children):
+          section_item.setCheckState(0, QtCore.Qt.Checked)
         
         if num_params > 0:
           new_name = 'ParentParams'
@@ -154,8 +173,8 @@ class UiBox(QtGui.QMainWindow):
           new_node.params['parent_params'] = True
           if section_name == 'Mesh' and not 'type' in new_node.params:
             new_node.params['type'] = 'MooseMesh'
-          
-          self.addDataRecursively(self.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)[0], new_node)
+
+          self.addDataRecursively(section_item, new_node)
           
         for child, child_node in section_node.children.items():
           self.addDataRecursively(self.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)[0], child_node)
@@ -341,6 +360,8 @@ class UiBox(QtGui.QMainWindow):
     return from_parent + '/' + str(item.text(0))
 
   def recursiveYamlDataSearch(self, path, current_yaml):
+    if current_yaml['name'].find('Variables') != -1:
+      print 'Current Yaml', current_yaml['name']
     if current_yaml['name'] == path:
       return current_yaml
     else:
@@ -392,6 +413,7 @@ class UiBox(QtGui.QMainWindow):
       print 'Here 4'
       parent_path = self.generatePathFromItem(item.parent())
       parent_path = '/' + self.action_syntax.getPath(parent_path) # Get the real action path associated with this item
+      print parent_path
       yaml_entry = self.findYamlEntry(parent_path)
       print 'Here 5'
       new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data)
