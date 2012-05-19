@@ -28,33 +28,18 @@ class GenSyntax():
     self.app_path = app_path
 
   def GetSyntax(self):
-    exet = os.path.split(self.app_path)
-    if exet[len(exet) - 1] != '':
-      exet = exet[len(exet) - 1].split('/').pop()
-    else:
-      exet = exet[0].split('/').pop()
-    EXTENSIONS = [ 'opt', 'dbg', 'pro' ]
-    fname = None
-    timestamp = time.time() + 99 #initialize to a big number (in the future)
-    for ext in EXTENSIONS:
-      exe = self.app_path + '/' + exet + '-' + ext
-      print exe
-      if os.path.isfile(exe):
-        if os.path.getmtime(exe) < timestamp:
-          fname = exe
-          break
-    if fname == None:
-      print 'ERROR: You must build an ' + \
-            'executable in ' + self.app_path + ' first.'
+    if not os.path.isfile(self.app_path):
+      print 'ERROR: Executable ' + self.app_path + ' not found!'
       sys.exit(1)
-    data = commands.getoutput( fname + " --yaml" )
+    executable = os.path.basename(self.app_path)
+    data = commands.getoutput( self.app_path + " --yaml" )
     data = data.split('**START YAML DATA**\n')[1]
     data = data.split('**END YAML DATA**')[0]
-    if not os.path.exists(exet + '_yaml_dump'):
+    if not os.path.exists(executable + '_yaml_dump'):
       data = yaml.load(data)
-      pickle.dump(data, open(exet + '_yaml_dump', 'wb'))
+      pickle.dump(data, open(executable + '_yaml_dump', 'wb'))
     else:
-      data = pickle.load(open(exet + '_yaml_dump', 'rb'))
+      data = pickle.load(open(executable + '_yaml_dump', 'rb'))
 #    data = self.massage_data(data)
 #    for i in data:
 #      printYaml(i, 0)
