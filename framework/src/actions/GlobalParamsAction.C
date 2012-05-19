@@ -24,6 +24,7 @@ InputParameters validParams<GlobalParamsAction>()
   /* GlobalParams should not have children or other standard public Action attributes */
   params.addPrivateParam<std::vector<std::string> >("active", blocks);
   params.addPrivateParam<Parser *>("parser_handle");
+  params.addParam<std::string>("add_parameters","add_values","Add your own parameters to this block!");
   return params;
 }
 

@@ -16,7 +16,7 @@ class OptionsGUI(QtGui.QDialog):
     self.main_data = main_data
     self.action_syntax = action_syntax
 
-    if 'subblocks' in main_data:
+    if main_data and 'subblocks' in main_data:
       self.subblocks = main_data['subblocks']
 #      for i in self.subblocks
 #        print i
@@ -57,6 +57,13 @@ class OptionsGUI(QtGui.QDialog):
     print 'Here 70'
     
     self.drop_menu.setCurrentIndex(-1)
+    found_index = self.drop_menu.findText('*')
+
+    if found_index == -1:
+      found_index = self.drop_menu.findText('ParentParams')
+      
+    self.drop_menu.setCurrentIndex(found_index)
+
     # print self.incoming_data
     if self.incoming_data:
       if 'type' in self.incoming_data:
@@ -65,36 +72,79 @@ class OptionsGUI(QtGui.QDialog):
         found_index = self.drop_menu.findText(self.incoming_data['Name'])
         if found_index != -1:
           self.drop_menu.setCurrentIndex(found_index)
-        else:
-          found_index = self.drop_menu.findText('*')
-          if found_index != -1:
-            self.drop_menu.setCurrentIndex(found_index)
-          else:
-            self.drop_menu.setCurrentIndex(-1)
+              
       self.table_widget.cellChanged.connect(self.cellChanged)
       print 'Here 71'
       self.fillTableWithData(self.incoming_data)
       self.table_widget.cellChanged.disconnect(self.cellChanged)
     print 'Here 75'
 
+    apply_button = None
+        # Build the Add and Cancel buttons
+    if self.incoming_data and len(self.incoming_data):
+      apply_button = QtGui.QPushButton("Apply")
+    else:
+      apply_button = QtGui.QPushButton("Add")
+
+    new_row_button = QtGui.QPushButton("New Parameter")
+    cancel_button = QtGui.QPushButton("Cancel")
+    
+    QtCore.QObject.connect(apply_button, QtCore.SIGNAL("clicked()"), self.click_add)
+    QtCore.QObject.connect(new_row_button, QtCore.SIGNAL("clicked()"), self.click_new_row)
+    QtCore.QObject.connect(cancel_button, QtCore.SIGNAL("clicked()"), self.click_cancel)
+    
+    button_layout = QtGui.QHBoxLayout()
+
+    button_layout.addWidget(apply_button)
+    button_layout.addWidget(new_row_button)
+    button_layout.addWidget(cancel_button)
+    
+    self.layoutV.addLayout(button_layout)
+
     self.resize(700,500)
 
   ### Takes a dictionary containing name value pairs
   def fillTableWithData(self, the_data):
-    for name,value in the_data.items():
-      for i in xrange(0,self.total_rows):
-        row_name = str(self.table_widget.item(i,0).text())
+#     for name,value in the_data.items():
+#       for i in xrange(0,self.table_widget.rowCount()):
+#         row_name = str(self.table_widget.item(i,0).text())
 
-        if row_name == name:
-          item = self.table_widget.item(i,1)
-          item.setText(str(value))
+#         if row_name == name:
+#           item = self.table_widget.item(i,1)
+#           item.setText(str(value))
+    used_params = []
+    print 'Here 74'
+    # First, loop through and add all data that corresponds to YAML
+    for i in xrange(0,self.table_widget.rowCount()):
+      row_name = str(self.table_widget.item(i,0).text())
+
+      if row_name in the_data:
+        item = self.table_widget.item(i,1)
+        item.setText(str(the_data[row_name]))
+        used_params.append(row_name)
+    print 'Here 75'
+    # Now look to see if we have more data that wasn't in YAML and add additional rows for that
+    for name,value in the_data.items():
+      print 'Here 76',name,value
+      if name not in used_params:
+        self.table_widget.insertRow(self.table_widget.rowCount())
+        print 'Here 77'
+        name_item = QtGui.QTableWidgetItem(name)
+        value_item = QtGui.QTableWidgetItem(value)
+        self.table_widget.setItem(self.table_widget.rowCount()-1,0,name_item)
+        self.table_widget.setItem(self.table_widget.rowCount()-1,1,value_item)
+        print 'Here 79'
+        print 'Here 80'
+    print 'Here 81'
+
 
   def tableToDict(self, only_not_in_original = False):
     the_data = {}
-    
-    for i in xrange(0,self.total_rows):
+    print 'in ttd'
+    for i in xrange(0,self.table_widget.rowCount()):
       param_name = str(self.table_widget.item(i,0).text())
       param_value = str(self.table_widget.item(i,1).text())
+      print 'Parm name', param_name
       
       if not param_name in self.original_table_data or not self.original_table_data[param_name] == param_value: #If we changed it - definitely include it
           the_data[param_name] = param_value
@@ -102,20 +152,22 @@ class OptionsGUI(QtGui.QDialog):
         if not only_not_in_original: # If we want stuff other than what we changed
           if param_name == 'parent_params' or param_name == 'type':  #Pass through type and parent_params even if we didn't change them
              the_data[param_name] = param_value
-          else:
-            if param_name in self.param_is_required and self.param_is_required[param_name]: #Pass through any 'required' parameters
-              the_data[param_name] = param_value
-              
+#          else:
+#            if param_name in self.param_is_required and self.param_is_required[param_name]: #Pass through any 'required' parameters
+#              the_data[param_name] = param_value
+    print 'the_data', the_data
     return the_data
     
 
   def init_menu(self, layout):
     self.drop_menu = QtGui.QComboBox()
     print 'Here 60'
+    self.has_type = False
     if self.subblocks:
       for item in self.subblocks:
         name = item['name'].split('/').pop()
         if name == '<type>':  #If this is the "type" node then put all of it's subblocks into the menu
+          self.has_type = True
           if item['subblocks'] and len(item['subblocks']):
             for sb in item['subblocks']:
               sb_name = sb['name'].split('/').pop()
@@ -123,8 +175,9 @@ class OptionsGUI(QtGui.QDialog):
         else:
           if not self.action_syntax.isPath(item['name']):
             self.drop_menu.addItem(name)
+    
 
-    if self.main_data['parameters'] and len(self.main_data['parameters']):
+    if self.main_data and self.main_data['parameters'] and len(self.main_data['parameters']) and ('subblocks' not in self.main_data or not self.main_data['subblocks'] or not self.has_type):
       self.drop_menu.addItem('ParentParams')
 #    self.drop_menu.activated[str].connect(self.item_clicked)
     self.drop_menu.currentIndexChanged[str].connect(self.item_clicked)
@@ -134,8 +187,12 @@ class OptionsGUI(QtGui.QDialog):
   def click_add(self):
     #print 'add'
     self.table_data = self.tableToDict()
+    print self.table_data
     self.accept()
     return
+
+  def click_new_row(self):
+    self.table_widget.insertRow(self.table_widget.rowCount())
 
   def result(self):
     return self.table_data
@@ -145,13 +202,6 @@ class OptionsGUI(QtGui.QDialog):
     self.reject()
 
   def item_clicked(self, item):
-    #print "item_clicked"
-    # Hide previous widgets (you can not delete them apparently)
-    # TODO: theres gotta be a way to handle destroying widgets no
-    # longer needed.
-    for button in self.button_list:
-      button.hide()
-
     try:
       self.table_widget.cellChanged.disconnect(self.cellChanged)
     except:
@@ -222,8 +272,9 @@ class OptionsGUI(QtGui.QDialog):
         the_table_data.append(param)
         self.param_is_required[param['name']] = param['required']
 
-    self.total_rows = len(the_table_data)
-    self.table_widget.setRowCount(self.total_rows)
+    print 'the_tab_dat', the_table_data
+    total_rows = len(the_table_data)
+    self.table_widget.setRowCount(total_rows)
     self.table_widget.setColumnCount(3)
     self.table_widget.setHorizontalHeaderItem(0, QtGui.QTableWidgetItem('Name'))
     self.table_widget.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem('Value'))
@@ -265,20 +316,6 @@ class OptionsGUI(QtGui.QDialog):
       row += 1
 
     self.table_widget.resizeColumnsToContents()
-
-    # Build the Add and Cancel buttons
-    if self.incoming_data and len(self.incoming_data):
-      self.button_list.append(QtGui.QPushButton("Apply"))
-    else:
-      self.button_list.append(QtGui.QPushButton("Add"))
-      
-    self.button_list.append(QtGui.QPushButton("Cancel"))
-    QtCore.QObject.connect(self.button_list[len(self.button_list) - 2], QtCore.SIGNAL("clicked()"), self.click_add)
-    QtCore.QObject.connect(self.button_list[len(self.button_list) - 1], QtCore.SIGNAL("clicked()"), self.click_cancel)
-    self.layout_buttons.append(QtGui.QHBoxLayout())
-    for button in self.button_list:
-      self.layout_buttons[len(self.layout_buttons) - 1].addWidget(button)
-    self.layoutV.addLayout(self.layout_buttons[len(self.layout_buttons) - 1])
 
     # Try to restore saved data
     if len(saved_data):

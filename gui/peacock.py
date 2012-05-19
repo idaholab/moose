@@ -446,6 +446,7 @@ class UiBox(QtGui.QMainWindow):
       self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), None)
       if self.new_gui.exec_():
         table_data = self.new_gui.result()
+        print 'peacock td', table_data
         new_child = QtGui.QTreeWidgetItem(item)
         new_child.setText(0,table_data['Name'])
         new_child.table_data = table_data
