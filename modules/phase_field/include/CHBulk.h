@@ -5,14 +5,14 @@
 
 //Forward Declarations
 class CHBulk;
-/** This is the Cahn-Hilliard equation base class that implements the bulk energy term of the equation.
+
+template<>
+InputParameters validParams<CHBulk>();
+/** This is the Cahn-Hilliard equation base class that implements the bulk or local energy term of the equation.
  *  See M.R. Tonks et al. / Computational Materials Science 51 (2012) 20–29 for more information.
  *  Note that the function computeGradDFDCons MUST be overridden in any kernel that inherits from
  *  CHBulk.  Use CHMath as an example of how this works.
  **/
-
-template<>
-InputParameters validParams<CHBulk>();
 
 class CHBulk : public KernelGrad
 {
