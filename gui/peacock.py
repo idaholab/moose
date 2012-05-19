@@ -6,6 +6,7 @@ from PyQt4 import QtCore, QtGui
 from OptionsGUI import OptionsGUI
 from GenSyntax import *
 from ActionSyntax import *
+from ParamTable import *
 
 from readInputFile import readInputFile, GPNode
 
@@ -37,11 +38,27 @@ class UiBox(QtGui.QMainWindow):
     self.constructed_data = {}
     self.initUI()
     self.input_file_root_node = None  #This will only not be None if you open an input file
-
+    
+  def newEditParamWidget(self):
+    try:
+      self.edit_param_widget.hide()
+      self.edit_param_layout_spot.removeWidget(self.edit_param_widget)
+    except:
+      pass
+    
+    self.edit_param_widget = QtGui.QWidget(self)
+    self.edit_param_widget.hide()
+    self.edit_param_layout = QtGui.QVBoxLayout(self.edit_param_widget)
+    self.edit_param_layout_spot.addWidget(self.edit_param_widget)
+    
   def initUI(self):
     self.main_ui = QtGui.QWidget(self)
     self.main_ui.setObjectName(_fromUtf8("Dialog"))
     self.setCentralWidget(self.main_ui)
+
+    # Just a holder so the edit param_widget can go in where we want
+    self.edit_param_layout_spot = QtGui.QVBoxLayout()
+    
     self.layoutV = QtGui.QVBoxLayout()
     self.layoutH = QtGui.QHBoxLayout()
     self.layout_with_textbox = QtGui.QHBoxLayout()
@@ -49,14 +66,19 @@ class UiBox(QtGui.QMainWindow):
     self.init_buttons(self.layoutH)
     self.layoutV.addLayout(self.layoutH)
     self.layout_with_textbox.addLayout(self.layoutV)
+    self.layout_with_textbox.addLayout(self.edit_param_layout_spot)
     self.init_textbox()
     self.main_ui.setLayout(self.layout_with_textbox)
     self.resize(700,800)
 
   def init_textbox(self):
     self.input_display = QtGui.QTextEdit()
+    self.input_display.setMinimumWidth(300)
     self.input_display.setReadOnly(True)
-    self.layout_with_textbox.addWidget(self.input_display)
+    self.textbox_layout = QtGui.QVBoxLayout()
+    self.textbox_layout.addWidget(self.input_display)
+    self.textbox_layout.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
+    self.layout_with_textbox.addLayout(self.textbox_layout)
 
   def recursivelyAddTreeItems(self, split_path, parent):
     this_piece = split_path[0]
@@ -433,6 +455,11 @@ class UiBox(QtGui.QMainWindow):
       parent_path = '/' + self.action_syntax.getPath(parent_path) # Get the real action path associated with this item
       yaml_entry = self.findYamlEntry(parent_path)
       print 'Here 5'
+      # This stuff will edit the parameters _in_ the window!
+#      self.newEditParamWidget()
+#      self.param_table = ParamTable(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data, self.edit_param_layout, self)
+#      self.edit_param_widget.show()
+      
       new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data)
       new_gui.incoming_data = item.table_data
       if new_gui.exec_():
@@ -459,6 +486,13 @@ class UiBox(QtGui.QMainWindow):
         
   def item_changed(self, item, column):
     self.input_display.setText(self.buildInputString())
+
+  def accept_params(self):
+    self.edit_param_widget.hide()
+    
+  def reject_params(self):
+    self.edit_param_widget.hide()
+
     
 def printUsage(message):
   sys.stderr.write(_USAGE)

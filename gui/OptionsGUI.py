@@ -15,8 +15,16 @@ class OptionsGUI(QtGui.QDialog):
     QtGui.QDialog.__init__(self, win_parent)
 #    self.main_ui = QtGui.QWidget(self)
 #    self.main_ui.setObjectName(_fromUtf8("Add Subblock"))
-    self.param_table = ParamTable(main_data, action_syntax, single_item, incoming_data, self)
+    self.layout = QtGui.QVBoxLayout()
+    self.setLayout(self.layout)
+    self.param_table = ParamTable(main_data, action_syntax, single_item, incoming_data, self.layout, self)
     self.resize(700,500)
 
   def result(self):
-    return self.param_table.table_data
+    return self.param_table.result()
+
+  def accept_params(self):
+    self.accept()
+    
+  def reject_params(self):
+    self.reject()

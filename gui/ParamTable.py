@@ -10,7 +10,7 @@ except AttributeError:
 
 
 class ParamTable:
-  def __init__(self, main_data, action_syntax, single_item, incoming_data, main_layout):
+  def __init__(self, main_data, action_syntax, single_item, incoming_data, main_layout, parent_class):
     self.main_data = main_data
     self.action_syntax = action_syntax
 
@@ -23,10 +23,12 @@ class ParamTable:
     self.original_table_data = {}
     self.incoming_data = incoming_data
     self.main_layout = main_layout
+    self.parent_class = parent_class
     self.initUI()
 
   def initUI(self):
-    self.layoutV = QtGui.QVBoxLayout(self.main_layout)
+#    self.layoutV = QtGui.QVBoxLayout(self.main_layout)
+    self.layoutV = QtGui.QVBoxLayout()
     
     self.init_menu(self.layoutV)
     self.table_widget = QtGui.QTableWidget()
@@ -53,6 +55,7 @@ class ParamTable:
       print 'Here 71'
       self.fillTableWithData(self.incoming_data)
       self.table_widget.cellChanged.disconnect(self.cellChanged)
+    self.main_layout.addLayout(self.layoutV)
     print 'Here 75'
 
     apply_button = None
@@ -93,7 +96,7 @@ class ParamTable:
     for i in xrange(0,self.table_widget.rowCount()):
       row_name = str(self.table_widget.item(i,0).text())
 
-      if row_name in the_data:
+      if row_name in the_data and row_name != 'type':
         item = self.table_widget.item(i,1)
         item.setText(str(the_data[row_name]))
         used_params.append(row_name)
@@ -101,7 +104,7 @@ class ParamTable:
     # Now look to see if we have more data that wasn't in YAML and add additional rows for that
     for name,value in the_data.items():
       print 'Here 76',name,value
-      if name not in used_params:
+      if name not in used_params and name != 'type':
         self.table_widget.insertRow(self.table_widget.rowCount())
         print 'Here 77'
         name_item = QtGui.QTableWidgetItem(name)
@@ -160,9 +163,8 @@ class ParamTable:
     layout.addWidget(self.drop_menu)
 
   def click_add(self):
-    #print 'add'
     self.table_data = self.tableToDict()
-    self.main_layout.accept()
+    self.parent_class.accept_params()
     return
 
   def click_new_row(self):
@@ -172,19 +174,15 @@ class ParamTable:
     return self.table_data
 
   def click_cancel(self):
-    #rint 'cancel'
-    self.main_layout.reject()
+    self.parent_class.reject_params()
 
   def item_clicked(self, item):
-    try:
-      self.table_widget.cellChanged.disconnect(self.cellChanged)
-    except:
-      pass
-
     saved_data = {}
     # Save off the current contents to try to restore it after swapping out the params
     if self.original_table_data: #This will only have some length after the first time through
       saved_data = self.tableToDict(True) # Pass true so we only save off stuff the user has entered
+
+    print "saved data", saved_data
 
     # Build the Table
     the_table_data = []
