@@ -26,10 +26,11 @@ or
 """
 
 class UiBox(QtGui.QMainWindow):
-  def __init__(self, app_path, win_parent = None):
+  def __init__(self, app_path, qt_app, win_parent = None):
     QtGui.QMainWindow.__init__(self, win_parent)
     self.setWindowTitle('Peacock - MOOSE front end')
     self.app_path = os.path.abspath(app_path)
+    self.qt_app = qt_app
 
     self.initUI()
     
@@ -40,7 +41,7 @@ class UiBox(QtGui.QMainWindow):
     self.setCentralWidget(self.main_ui)
 
     self.input_file_widget = InputFileWidget(self.app_path)
-    self.execute_widget = ExecuteWidget(self.app_path, self.input_file_widget)
+    self.execute_widget = ExecuteWidget(self.app_path, self.input_file_widget, self.qt_app)
 
     self.tab_widget = QtGui.QTabWidget()
 
@@ -78,7 +79,7 @@ if __name__ == '__main__':
   application = process_args()
   if os.path.exists(application):
     app = QtGui.QApplication(sys.argv)
-    main_window = UiBox(application)
+    main_window = UiBox(application,app)
     main_window.show()
     app.exec_()
   else:

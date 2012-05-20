@@ -22,10 +22,11 @@ class EmittingStream(QtCore.QObject):
     self.textWritten.emit(str(text))
 
 class ExecuteWidget(QtGui.QWidget):
-  def __init__(self, app_path, input_file_widget, win_parent=None):
+  def __init__(self, app_path, input_file_widget, qt_app, win_parent=None):
     QtGui.QWidget.__init__(self, win_parent)
     self.app_path = app_path
     self.input_file_widget = input_file_widget
+    self.qt_app = qt_app
     self.main_layout = QtGui.QVBoxLayout()
     self.setLayout(self.main_layout)
 
@@ -84,8 +85,10 @@ class ExecuteWidget(QtGui.QWidget):
     self.connect(self.proc,QtCore.SIGNAL("readyReadStandardOutput()"),self.output)
     self.proc.setProcessChannelMode(QtCore.QProcess.MergedChannels)
     self.proc.start(command)
-    self.proc.waitForFinished()
-    self.execution_text.append(str(self.proc.readAllStandardOutput()))
+    while proc.state() != QtCore.QProcess.ProcessState.NotRunning:
+      self.qt_app.processEvents()
+#    self.proc.waitForFinished()
 
   def output(self):
     self.execution_text.append(str(self.proc.readAllStandardOutput()))
+    print 'Got stdout!'
