@@ -133,15 +133,15 @@ class InputFileWidget(QtGui.QWidget):
     layout.addWidget(self.tree_widget)
 
   def init_buttons(self, layout):
-    buttonOpen = QtGui.QPushButton("Open")
-    buttonSave = QtGui.QPushButton("Save")
-    buttonCancel = QtGui.QPushButton("Cancel")
-    QtCore.QObject.connect(buttonOpen, QtCore.SIGNAL("clicked()"), self.click_open)
-    QtCore.QObject.connect(buttonSave, QtCore.SIGNAL("clicked()"), self.click_save)
-    QtCore.QObject.connect(buttonCancel, QtCore.SIGNAL("clicked()"), self.click_cancel)
-    layout.addWidget(buttonOpen)
-    layout.addWidget(buttonSave)
-    layout.addWidget(buttonCancel)
+    self.buttonOpen = QtGui.QPushButton("Open")
+    self.buttonSave = QtGui.QPushButton("Save")
+    self.buttonClear = QtGui.QPushButton("Clear")
+    QtCore.QObject.connect(self.buttonOpen, QtCore.SIGNAL("clicked()"), self.click_open)
+    QtCore.QObject.connect(self.buttonSave, QtCore.SIGNAL("clicked()"), self.click_save)
+    QtCore.QObject.connect(self.buttonClear, QtCore.SIGNAL("clicked()"), self.click_clear)
+    layout.addWidget(self.buttonOpen)
+    layout.addWidget(self.buttonSave)
+    layout.addWidget(self.buttonClear)
 
   def addDataRecursively(self, parent_item, node):
     is_active = 'active' not in node.parent.params or node.parent.params['active'].find(node.name) != -1
@@ -213,8 +213,15 @@ class InputFileWidget(QtGui.QWidget):
       self.input_display.setText(self.buildInputString())
       self.addHardPathsToTree() # We do this here because * paths might add more paths underneath some of the paths
     
-  def click_cancel(self):
-    sys.exit(0)
+  def click_clear(self):
+    msgBox = QMessageBox();
+    msgBox.setText("Clear Tree?");
+    msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No);
+    msgBox.setDefaultButton(QMessageBox.No);
+    ret = msgBox.exec_();
+    if ret == QMessageBox.Yes:
+      self.tree_widget.clear()
+      self.addHardPathsToTree()
 
   def recursiveGetGPNode(self, current_node, pieces):
 #    print 'in rggpn',current_node.name, pieces
@@ -441,6 +448,7 @@ class InputFileWidget(QtGui.QWidget):
       file = open(file_name,'w')
       output_string = self.buildInputString()
       file.write(output_string)
+      os.chdir(os.path.dirname(str(file_name)))
 
   def generatePathFromItem(self, item):
     from_parent = ''

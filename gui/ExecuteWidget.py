@@ -15,12 +15,6 @@ try:
 except AttributeError:
   _fromUtf8 = lambda s: s
 
-class EmittingStream(QtCore.QObject):
-  textWritten = QtCore.pyqtSignal(str)
-
-  def write(self, text):
-    self.textWritten.emit(str(text))
-
 class ExecuteWidget(QtGui.QWidget):
   def __init__(self, app_path, input_file_widget, qt_app, win_parent=None):
     QtGui.QWidget.__init__(self, win_parent)
@@ -31,6 +25,7 @@ class ExecuteWidget(QtGui.QWidget):
     self.setLayout(self.main_layout)
 
     self.command_layout = QtGui.QHBoxLayout()
+    self.cwd_layout = QtGui.QHBoxLayout()
     self.button_layout = QtGui.QHBoxLayout()
 
     self.mpi_layout = QtGui.QVBoxLayout()
@@ -60,6 +55,15 @@ class ExecuteWidget(QtGui.QWidget):
     self.run_button = QtGui.QPushButton("Run")
     QtCore.QObject.connect(self.run_button, QtCore.SIGNAL("clicked()"), self.clickedRun)
     self.command_layout.addWidget(self.run_button, alignment=Qt.AlignHCenter)
+
+    self.cwd_layout.addWidget(QtGui.QLabel("Current Working Directory:"))
+    self.cwd_text = QtGui.QLineEdit()
+    self.cwd_text.setReadOnly(True)
+    self.cwd_text.setText(os.getcwd())
+    self.cwd_button = QtGui.QPushButton("Choose")
+    QtCore.QObject.connect(self.cwd_button, QtCore.SIGNAL("clicked()"), self.clickedCwd)
+    self.cwd_layout.addWidget(self.cwd_text)
+    self.cwd_layout.addWidget(self.cwd_button)
     
     self.execution_text = QtGui.QTextEdit()
     self.execution_text.setMinimumHeight(400)
@@ -84,8 +88,13 @@ class ExecuteWidget(QtGui.QWidget):
     self.button_layout.addWidget(self.save_log_button, alignment=Qt.AlignHCenter)
 
     self.main_layout.addLayout(self.command_layout)
+    self.main_layout.addLayout(self.cwd_layout)
     self.main_layout.addWidget(self.execution_text)
     self.main_layout.addLayout(self.button_layout)
+
+    # These change the CWD... so let's connect to them
+    QtCore.QObject.connect(self.input_file_widget.buttonOpen, QtCore.SIGNAL("clicked()"), self.click_open)
+    QtCore.QObject.connect(self.input_file_widget.buttonSave, QtCore.SIGNAL("clicked()"), self.click_save)
     
   def clickedRun(self):
     tmp_file_name = 'peacock_run_tmp.i'
@@ -146,3 +155,16 @@ class ExecuteWidget(QtGui.QWidget):
       file = open(file_name,'w')
       file.write(self.execution_text.toPlainText())
       file.close()
+
+  def clickedCwd(self):
+    dir_name = QtGui.QFileDialog.getExistingDirectory(self, "Choose CWD")
+
+    if dir_name != '':
+      self.cwd_text.setText(dir_name)
+      os.chdir(dir_name)
+
+  def click_open(self):
+    self.cwd_text.setText(os.getcwd())
+
+  def click_save(self):
+    self.cwd_text.setText(os.getcwd())
