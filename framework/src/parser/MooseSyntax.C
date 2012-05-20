@@ -145,6 +145,7 @@ void associateSyntax()
   syntax.registerActionSyntax("InitialRefinementAction", "Mesh");
   syntax.registerActionSyntax("InitDisplacedProblemAction", "Mesh");
 //  syntax.registerActionSyntax("DeprecatedBlockAction", "Mesh/Generation");
+  syntax.registerActionSyntax("EmptyAction", "Mesh/ExtraNodesets");
   syntax.registerActionSyntax("AddExtraNodesetAction", "Mesh/ExtraNodesets/*");
   syntax.registerActionSyntax("AddMeshModifierAction", "Mesh/Modifier/*");
 

@@ -10,7 +10,7 @@ except AttributeError:
 
 
 class ParamTable:
-  def __init__(self, main_data, action_syntax, single_item, incoming_data, main_layout, parent_class):
+  def __init__(self, main_data, action_syntax, single_item, incoming_data, main_layout, parent_class, already_has_parent_params):
     self.main_data = main_data
     self.action_syntax = action_syntax
 
@@ -24,6 +24,7 @@ class ParamTable:
     self.incoming_data = incoming_data
     self.main_layout = main_layout
     self.parent_class = parent_class
+    self.already_has_parent_params = already_has_parent_params
     self.initUI()
 
   def initUI(self):
@@ -132,6 +133,8 @@ class ParamTable:
       for item in self.subblocks:
         name = item['name'].split('/').pop()
         if name == '<type>':  #If this is the "type" node then put all of it's subblocks into the menu
+          if self.already_has_parent_params:
+            continue
           self.has_type = True
           if item['subblocks'] and len(item['subblocks']):
             for sb in item['subblocks']:
@@ -142,7 +145,7 @@ class ParamTable:
             self.drop_menu.addItem(name)
     
 
-    if self.main_data and self.main_data['parameters'] and len(self.main_data['parameters']) and ('subblocks' not in self.main_data or not self.main_data['subblocks'] or not self.has_type):
+    if not self.already_has_parent_params and self.main_data and self.main_data['parameters'] and len(self.main_data['parameters']) and ('subblocks' not in self.main_data or not self.main_data['subblocks'] or not self.has_type):
       self.drop_menu.addItem('ParentParams')
 #    self.drop_menu.activated[str].connect(self.item_clicked)
     self.drop_menu.currentIndexChanged[str].connect(self.item_clicked)
@@ -196,7 +199,7 @@ class ParamTable:
           break #- can't break here because there might be more
 
 
-      if not found_it: # If we still haven't found it... look under "item"
+      if not found_it and not self.already_has_parent_params: # If we still haven't found it... look under "item"
         for data in self.subblocks:
           name = data['name'].split('/').pop()
           if name == '<type>':

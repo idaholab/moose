@@ -11,13 +11,13 @@ except AttributeError:
 
 
 class OptionsGUI(QtGui.QDialog):
-  def __init__(self, main_data, action_syntax, single_item, incoming_data, win_parent=None):
+  def __init__(self, main_data, action_syntax, single_item, incoming_data, already_has_parent_params, win_parent=None):
     QtGui.QDialog.__init__(self, win_parent)
 #    self.main_ui = QtGui.QWidget(self)
 #    self.main_ui.setObjectName(_fromUtf8("Add Subblock"))
     self.layout = QtGui.QVBoxLayout()
     self.setLayout(self.layout)
-    self.param_table = ParamTable(main_data, action_syntax, single_item, incoming_data, self.layout, self)
+    self.param_table = ParamTable(main_data, action_syntax, single_item, incoming_data, self.layout, self, already_has_parent_params)
     self.resize(700,500)
 
   def result(self):

@@ -1,0 +1,112 @@
+#!/usr/bin/python
+import os, sys, PyQt4, re
+from PyQt4 import QtCore, QtGui
+
+from optparse import OptionParser
+
+from InputFileWidget import *
+from ExecuteWidget import *
+
+
+from readInputFile import readInputFile, GPNode
+
+try:
+  _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+  _fromUtf8 = lambda s: s
+
+class UiBox(QtGui.QMainWindow):
+  def __init__(self, options, args, app_path, qt_app, win_parent = None):
+    QtGui.QMainWindow.__init__(self, win_parent)
+    self.setWindowTitle('Peacock - MOOSE front end')
+    self.app_path = os.path.abspath(app_path)
+    self.qt_app = qt_app
+
+    self.initUI()
+    
+  def initUI(self):
+    self.main_ui = QtGui.QWidget(self)
+    self.main_ui.setObjectName(_fromUtf8("Dialog"))
+    self.main_layout = QtGui.QVBoxLayout()
+    self.setCentralWidget(self.main_ui)
+
+    self.input_file_widget = InputFileWidget(self.app_path, options)
+    self.execute_widget = ExecuteWidget(self.app_path, self.input_file_widget, self.qt_app)
+
+    self.tab_widget = QtGui.QTabWidget()
+
+    self.tab_widget.addTab(self.input_file_widget, "Input File")
+    self.tab_widget.addTab(self.execute_widget, "Execute")
+    
+    self.main_layout.addWidget(self.tab_widget)
+    
+    self.main_ui.setLayout(self.main_layout)
+    self.resize(700,800)
+
+def recursiveFindExecutable(current_path, p):
+  files = os.listdir(current_path)
+
+  split = current_path.split('/')
+
+  # if we're in the "problems" directory... hop over to this application's directory instead
+  if len(split) > 2 and split[len(split)-2] == 'problems':
+    return recursiveFindExecutable('/'.join(split[:len(split)-2]) + '/' + split[len(split)-1], p)
+  
+  for afile in files:
+    if p.match(afile):
+      return current_path + '/' + afile
+
+  up_one = os.path.dirname(current_path)
+
+  if current_path != '/':
+    return recursiveFindExecutable(up_one, p)
+
+  return None  
+
+def findExecutable(executable_option, method_option):
+  if executable_option and os.path.exists(executable_option):
+    return executable_option
+  else:
+    # search up directories until we find an executable, starting with the current directory
+
+    method = 'opt' # Find the optimized binary by default
+
+    if 'METHOD' in os.environ:
+      method = os.environ['METHOD']
+
+    if method_option:
+      method = method_option
+      
+    p = re.compile('.+-'+method+'$')
+
+    executable = recursiveFindExecutable(os.getcwd(), p)
+
+    if not executable:
+      print 'Executable not found!  Try specifing it using -e'
+      sys.exit(1)
+
+    return executable
+  
+if __name__ == '__main__':
+  parser = OptionParser()
+  parser.add_option("-e", "--executable", dest="executable",
+                    help="The executable you would liek to build an input file for. \n If not supplied an executable will be searched for.  The searched for executable will default to the optimized version of the executable (if available).")
+
+  parser.add_option("-i", "--input-file", dest="input_file",
+                    help="An input file you would optionally like to open.")
+
+  parser.add_option("-m", "--method", dest="method",
+                    help="Pass either opt, dbg or devel.  Works the same as setting the $METHOD environment variable.")
+
+  parser.add_option("-r", "--recache-syntax", action="store_true", dest="recache", help="Force a recache of the syntax for this executable. Use if you add new syntax or objects.")
+  
+  (options, args) = parser.parse_args()
+
+  executable = findExecutable(options.executable, options.method)
+
+  print 'Using Executable: ' + executable
+
+  app = QtGui.QApplication(sys.argv)
+  main_window = UiBox(options,args,executable,app)
+  main_window.show()
+  app.exec_()

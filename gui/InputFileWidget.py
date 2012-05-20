@@ -16,13 +16,14 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class InputFileWidget(QtGui.QWidget):
-  def __init__(self, app_path, win_parent=None):
+  def __init__(self, app_path, options, win_parent=None):
     QtGui.QWidget.__init__(self, win_parent)
-    self.main_data = GenSyntax(app_path).GetSyntax()
+    self.main_data = GenSyntax(app_path, options.recache).GetSyntax()
     self.action_syntax = ActionSyntax(app_path)
 
     # Start with an input file template if this application has one
     input_file_template_name = os.path.dirname(app_path) + '/input_template'
+    self.input_file_template_root_node = None
     if os.path.isfile(input_file_template_name):
       self.input_file_template_root_node = readInputFile(input_file_template_name)
       
@@ -30,6 +31,16 @@ class InputFileWidget(QtGui.QWidget):
 
     self.constructed_data = {}
     self.initUI()
+    if options.input_file:
+      abs_input_file = os.path.abspath(options.input_file)
+      if os.path.isfile(abs_input_file):
+        self.openInputFile(abs_input_file)
+      else:
+        msgBox = QMessageBox()
+        msgBox.setText("Warning: Input file, " + options.input_file + ", not found!")
+        msgBox.setStandardButtons(QMessageBox.Ok)
+        msgBox.setDefaultButton(QMessageBox.Ok)
+        msgBox.exec_()
     
   def newEditParamWidget(self):
     try:
@@ -123,6 +134,7 @@ class InputFileWidget(QtGui.QWidget):
   def init_treewidet(self, layout):
     i = 0
     self.tree_widget = QtGui.QTreeWidget()
+    self.tree_widget.setMaximumWidth(300)
     self.tree_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.connect(self.tree_widget,QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.newContext)
     self.addHardPathsToTree()
@@ -176,11 +188,9 @@ class InputFileWidget(QtGui.QWidget):
 
     for child, child_node in node.children.items():
       self.addDataRecursively(new_child, child_node)
-    
-  def click_open(self):
-    file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Input File", "~/", "Input Files (*.i)")
 
-    if file_name != '':
+  def openInputFile(self, file_name):
+    if file_name and file_name != '':
       os.chdir(os.path.dirname(str(file_name)))
       self.input_file_root_node = readInputFile(file_name)
       main_sections = self.input_file_root_node.children
@@ -212,13 +222,17 @@ class InputFileWidget(QtGui.QWidget):
           self.addDataRecursively(self.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)[0], child_node)
       self.input_display.setText(self.buildInputString())
       self.addHardPathsToTree() # We do this here because * paths might add more paths underneath some of the paths
+
+  def click_open(self):
+    file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Input File", "~/", "Input Files (*.i)")
+    self.openInputFile(file_name)
     
   def click_clear(self):
-    msgBox = QMessageBox();
-    msgBox.setText("Clear Tree?");
-    msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No);
-    msgBox.setDefaultButton(QMessageBox.No);
-    ret = msgBox.exec_();
+    msgBox = QMessageBox()
+    msgBox.setText("Clear Tree?")
+    msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+    msgBox.setDefaultButton(QMessageBox.No)
+    ret = msgBox.exec_()
     if ret == QMessageBox.Yes:
       self.tree_widget.clear()
       self.addHardPathsToTree()
@@ -512,7 +526,7 @@ class InputFileWidget(QtGui.QWidget):
 #      self.param_table = ParamTable(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data, self.edit_param_layout, self)
 #      self.edit_param_widget.show()
       
-      new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data)
+      new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data, False)
       new_gui.incoming_data = item.table_data
       if new_gui.exec_():
         item.table_data = new_gui.result()
@@ -521,7 +535,12 @@ class InputFileWidget(QtGui.QWidget):
     except AttributeError:
       this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
       yaml_entry = self.findYamlEntry(this_path)
-      self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), None)
+      already_has_parent_params = False
+      for i in range(item.childCount()):
+        if item.child(i).text(0) == 'ParentParams':
+          already_has_parent_params = True
+        
+      self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), None, already_has_parent_params)
       if self.new_gui.exec_():
         table_data = self.new_gui.result()
         new_child = QtGui.QTreeWidgetItem(item)

@@ -6,6 +6,7 @@ class ActionSyntax():
     self.app_path = app_path
     self.paths = []
     self.hard_paths = []
+    self.hard_path_patterns = {}
 
     if not os.path.isfile(self.app_path):
       print 'ERROR: Executable ' + self.app_path + ' not found!'
@@ -15,13 +16,25 @@ class ActionSyntax():
 
     data = commands.getoutput( self.app_path + " --syntax" )
 
-    # The 1 is so we skip the first line
-    self.paths = list(set(data.split('\n')[1:]))
+    data = data.split('**START SYNTAX DATA**\n')[1]
+    data = data.split('**END SYNTAX DATA**')[0]
+
+    self.paths = list(set(data.split('\n')))
     self.paths.sort()
 
     for path in self.paths:
-      if path[len(path)-1] != '*':
+      if path != '' and path[len(path)-1] != '*':
         self.hard_paths.append(path)
+
+    # Compile regex patterns once here so we can search them quickly later
+    for hard_path in self.hard_paths:
+      modified = hard_path.replace('*','[^/]*')
+      modified += '$'
+
+      p = re.compile(modified)
+
+      self.hard_path_patterns[hard_path] = p
+
 
   """ Whether or not this is a hard path """
   def isPath(self, inpath):
@@ -45,12 +58,7 @@ class ActionSyntax():
     path = inpath
     path = path.lstrip('/')
     for hard_path in self.hard_paths:
-      modified = hard_path.replace('*','[^/]*')
-      modified += '$'
-
-      p = re.compile(modified)
-    
-      if p.match(path):
+      if self.hard_path_patterns[hard_path].match(path):
         return hard_path
     return None
 

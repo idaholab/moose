@@ -125,10 +125,12 @@ CommandLine::parseCommandLine()
   if (searchCommandLine("Syntax"))
   {
     std::multimap<std::string, Syntax::ActionInfo> syntax = Moose::syntax.getAssociatedActions();
+    std::cout << "**START SYNTAX DATA**\n";
     for (std::multimap<std::string, Syntax::ActionInfo>::iterator it = syntax.begin(); it != syntax.end(); ++it)
     {
       std::cout << it->first << "\n";
     }
+    std::cout << "**END SYNTAX DATA**\n" << std::endl;
     exit(0);
   }
 

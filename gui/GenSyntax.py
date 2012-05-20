@@ -24,8 +24,9 @@ def printYaml(data, level):
       printYaml(d, level+1)    
 
 class GenSyntax():
-  def __init__(self, app_path):
+  def __init__(self, app_path, recache):
     self.app_path = app_path
+    self.recache = recache #Whether or not to force a yaml recache
 
   def GetSyntax(self):
     if not os.path.isfile(self.app_path):
@@ -36,11 +37,16 @@ class GenSyntax():
     data = commands.getoutput( self.app_path + " --yaml" )
     data = data.split('**START YAML DATA**\n')[1]
     data = data.split('**END YAML DATA**')[0]
-    if not os.path.exists(executable_path + '/yaml_dump'):
+    yaml_dump_file_name = executable_path + '/yaml_dump_' + executable
+    if self.recache or not os.path.exists(yaml_dump_file_name):
+      print "\nCaching syntax. Subsequent startup times will be greatly reduced."
+      if not self.recache:
+        print "In the future, you can use '-r' to force a syntax recache."
+      
       data = yaml.load(data)
-      pickle.dump(data, open(executable_path + '/yaml_dump', 'wb'))
+      pickle.dump(data, open(yaml_dump_file_name, 'wb'))
     else:
-      data = pickle.load(open(executable_path + '/yaml_dump', 'rb'))
+      data = pickle.load(open(yaml_dump_file_name, 'rb'))
 #    data = self.massage_data(data)
 #    for i in data:
 #      printYaml(i, 0)
