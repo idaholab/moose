@@ -20,11 +20,16 @@ class InputFileWidget(QtGui.QWidget):
     QtGui.QWidget.__init__(self, win_parent)
     self.main_data = GenSyntax(app_path).GetSyntax()
     self.action_syntax = ActionSyntax(app_path)
+
+    # Start with an input file template if this application has one
+    input_file_template_name = os.path.dirname(app_path) + '/input_template'
+    if os.path.isfile(input_file_template_name):
+      self.input_file_template_root_node = readInputFile(input_file_template_name)
+      
     self.input_file_root_node = None
 
     self.constructed_data = {}
     self.initUI()
-    self.input_file_root_node = None  #This will only not be None if you open an input file
     
   def newEditParamWidget(self):
     try:
@@ -212,22 +217,27 @@ class InputFileWidget(QtGui.QWidget):
     sys.exit(0)
 
   def recursiveGetGPNode(self, current_node, pieces):
+#    print 'in rggpn',current_node.name, pieces
     if len(pieces) == 1 and pieces[0] == current_node.name:
       return current_node
 
     if pieces[1] in current_node.children:
       return self.recursiveGetGPNode(current_node.children[pieces[1]], pieces[1:])
 
+    # See if there is a * here (this would be from an input template)
+    if len(pieces) == 2 and '*' in current_node.children:
+      return current_node.children['*']
+
     return None
 
   """ Returns the GetPot Node associated with the item... or None if there wasn't one """
-  def getGPNode(self, item):
-    if not self.input_file_root_node:
+  def getGPNode(self, root_gp_node, item):
+    if not self.input_file_root_node and not self.input_file_template_root_node:
       return None
     else:
       path = self.generatePathFromItem(item)
       pieces = path.split('/')
-      return self.recursiveGetGPNode(self.input_file_root_node, pieces)
+      return self.recursiveGetGPNode(root_gp_node, pieces)
 
   def inputStringRecurse(self, item, level):    
     indent_string = ''
@@ -244,9 +254,14 @@ class InputFileWidget(QtGui.QWidget):
       section = str(item.text(0)).rstrip('+')
       subchild_count = item.childCount()
       gp_node = None
+      template_gp_node = None
 
       if self.input_file_root_node:
-        gp_node = self.getGPNode(item)
+        gp_node = self.getGPNode(self.input_file_root_node, item)
+
+      if self.input_file_template_root_node:
+        template_gp_node = self.getGPNode(self.input_file_template_root_node, item)
+#        template_gp_node.Print()
 
       if level == 0:
         self.the_string += '[' + section + ']\n'
@@ -278,6 +293,12 @@ class InputFileWidget(QtGui.QWidget):
             if param in item.table_data and param != 'Name' and param != 'parent_params':
               self.the_string += indent_string + '  ' + param + ' = ' + item.table_data[param] + '\n'
               printed_params.append(param)
+
+        if template_gp_node:
+          for param in template_gp_node.params_list:
+            if param in item.table_data and param != 'Name' and param != 'parent_params' and param not in printed_params:
+              self.the_string += indent_string + '  ' + param + ' = ' + item.table_data[param] + '\n'
+              printed_params.append(param)
         
         for param,value in item.table_data.items():
           if param not in printed_params and param != 'Name' and param != 'parent_params':
@@ -302,6 +323,12 @@ class InputFileWidget(QtGui.QWidget):
                 self.the_string += indent_string + '  ' + param + ' = ' + table_data[param] + '\n'
                 printed_params.append(param)
 
+          if template_gp_node:
+            for param in template_gp_node.params_list:
+              if param in table_data and param != 'Name' and param != 'parent_params' and param not in printed_params:
+                self.the_string += indent_string + '  ' + param + ' = ' + table_data[param] + '\n'
+                printed_params.append(param)
+
 
           if 'parent_params' in table_data:
             for param,value in table_data.items():
@@ -320,6 +347,27 @@ class InputFileWidget(QtGui.QWidget):
             if subitem.text(0) != child:
               continue
 
+            try:
+              table_data = subitem.table_data
+
+              if 'parent_params' in table_data:
+                continue
+            except:
+              pass
+
+            self.inputStringRecurse(subitem, level+1)
+            printed_children.append(child)
+
+      if template_gp_node:  # Print the children we knew about from the input file in the right order
+        for child in template_gp_node.children_list:
+          for j in range(subchild_count):
+            subitem = item.child(j)
+            if subitem.text(0) != child:
+              continue
+
+            if subitem.text(0) in printed_children:
+              continue
+            
             try:
               table_data = subitem.table_data
 
@@ -361,10 +409,24 @@ class InputFileWidget(QtGui.QWidget):
     
     if self.input_file_root_node: # Print any sections we knew about from the input file first (and in the right order)
       for section_name in self.input_file_root_node.children_list:
-        item = self.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)[0]
-        self.inputStringRecurse(item, 0)
-        printed_sections.append(section_name)  
+        search = self.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)
+
+        if search and len(search):
+          item = search[0]
+          self.inputStringRecurse(item, 0)
+          printed_sections.append(section_name)  
         
+    if self.input_file_template_root_node: # Print any sections we knew about from the template input file first (and in the right order)
+      for section_name in self.input_file_template_root_node.children_list:
+        if section_name in printed_sections:
+          continue
+        search = self.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)
+
+        if search and len(search):
+          item = search[0]
+          self.inputStringRecurse(item, 0)
+          printed_sections.append(section_name)  
+
     for i in range(child_count): # Print out all the other sections
       item = root.child(i)
       if item.text(0) not in printed_sections:
