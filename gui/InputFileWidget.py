@@ -206,6 +206,7 @@ class InputFileWidget(QtGui.QWidget):
         for child, child_node in section_node.children.items():
           self.addDataRecursively(self.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)[0], child_node)
       self.input_display.setText(self.buildInputString())
+      self.addHardPathsToTree() # We do this here because * paths might add more paths underneath some of the paths
     
   def click_cancel(self):
     sys.exit(0)
@@ -432,14 +433,10 @@ class InputFileWidget(QtGui.QWidget):
     this_path = self.generatePathFromItem(item)
     
     try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
-      print 'Here 3'
       item.table_data # If this fails we will jump to "except"...
-      print "Old", this_path
-      print 'Here 4'
       parent_path = self.generatePathFromItem(item.parent())
       parent_path = '/' + self.action_syntax.getPath(parent_path) # Get the real action path associated with this item
       yaml_entry = self.findYamlEntry(parent_path)
-      print 'Here 5'
       # This stuff will edit the parameters _in_ the window!
 #      self.newEditParamWidget()
 #      self.param_table = ParamTable(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data, self.edit_param_layout, self)
@@ -452,13 +449,11 @@ class InputFileWidget(QtGui.QWidget):
         item.setText(0,item.table_data['Name'])
         self.input_display.setText(self.buildInputString())
     except AttributeError:
-      print "New", this_path
       this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
       yaml_entry = self.findYamlEntry(this_path)
       self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), None)
       if self.new_gui.exec_():
         table_data = self.new_gui.result()
-        print 'peacock td', table_data
         new_child = QtGui.QTreeWidgetItem(item)
         new_child.setText(0,table_data['Name'])
         new_child.table_data = table_data

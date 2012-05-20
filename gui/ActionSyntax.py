@@ -44,7 +44,6 @@ class ActionSyntax():
   def getPath(self, inpath):
     path = inpath
     path = path.lstrip('/')
-    print path
     for hard_path in self.hard_paths:
       modified = hard_path.replace('*','[^/]*')
       modified += '$'

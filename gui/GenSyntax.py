@@ -32,14 +32,15 @@ class GenSyntax():
       print 'ERROR: Executable ' + self.app_path + ' not found!'
       sys.exit(1)
     executable = os.path.basename(self.app_path)
+    executable_path = os.path.dirname(self.app_path)
     data = commands.getoutput( self.app_path + " --yaml" )
     data = data.split('**START YAML DATA**\n')[1]
     data = data.split('**END YAML DATA**')[0]
-    if not os.path.exists(executable + '_yaml_dump'):
+    if not os.path.exists(executable_path + '/yaml_dump'):
       data = yaml.load(data)
-      pickle.dump(data, open(executable + '_yaml_dump', 'wb'))
+      pickle.dump(data, open(executable_path + '/yaml_dump', 'wb'))
     else:
-      data = pickle.load(open(executable + '_yaml_dump', 'rb'))
+      data = pickle.load(open(executable_path + '/yaml_dump', 'rb'))
 #    data = self.massage_data(data)
 #    for i in data:
 #      printYaml(i, 0)

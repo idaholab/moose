@@ -52,11 +52,9 @@ class ParamTable:
           self.drop_menu.setCurrentIndex(found_index)
               
       self.table_widget.cellChanged.connect(self.cellChanged)
-      print 'Here 71'
       self.fillTableWithData(self.incoming_data)
       self.table_widget.cellChanged.disconnect(self.cellChanged)
     self.main_layout.addLayout(self.layoutV)
-    print 'Here 75'
 
     apply_button = None
         # Build the Add and Cancel buttons
@@ -91,7 +89,6 @@ class ParamTable:
 #           item = self.table_widget.item(i,1)
 #           item.setText(str(value))
     used_params = []
-    print 'Here 74'
     # First, loop through and add all data that corresponds to YAML
     for i in xrange(0,self.table_widget.rowCount()):
       row_name = str(self.table_widget.item(i,0).text())
@@ -100,29 +97,21 @@ class ParamTable:
         item = self.table_widget.item(i,1)
         item.setText(str(the_data[row_name]))
         used_params.append(row_name)
-    print 'Here 75'
     # Now look to see if we have more data that wasn't in YAML and add additional rows for that
     for name,value in the_data.items():
-      print 'Here 76',name,value
       if name not in used_params and name != 'type':
         self.table_widget.insertRow(self.table_widget.rowCount())
-        print 'Here 77'
         name_item = QtGui.QTableWidgetItem(name)
         value_item = QtGui.QTableWidgetItem(value)
         self.table_widget.setItem(self.table_widget.rowCount()-1,0,name_item)
         self.table_widget.setItem(self.table_widget.rowCount()-1,1,value_item)
-        print 'Here 79'
-        print 'Here 80'
-    print 'Here 81'
 
 
   def tableToDict(self, only_not_in_original = False):
     the_data = {}
-    print 'in ttd'
     for i in xrange(0,self.table_widget.rowCount()):
       param_name = str(self.table_widget.item(i,0).text())
       param_value = str(self.table_widget.item(i,1).text())
-      print 'Parm name', param_name
       
       if not param_name in self.original_table_data or not self.original_table_data[param_name] == param_value: #If we changed it - definitely include it
           the_data[param_name] = param_value
@@ -133,13 +122,11 @@ class ParamTable:
 #          else:
 #            if param_name in self.param_is_required and self.param_is_required[param_name]: #Pass through any 'required' parameters
 #              the_data[param_name] = param_value
-    print 'the_data', the_data
     return the_data
     
 
   def init_menu(self, layout):
     self.drop_menu = QtGui.QComboBox()
-    print 'Here 60'
     self.has_type = False
     if self.subblocks:
       for item in self.subblocks:
@@ -159,7 +146,6 @@ class ParamTable:
       self.drop_menu.addItem('ParentParams')
 #    self.drop_menu.activated[str].connect(self.item_clicked)
     self.drop_menu.currentIndexChanged[str].connect(self.item_clicked)
-    print 'Here 61'
     layout.addWidget(self.drop_menu)
 
   def click_add(self):
@@ -181,8 +167,6 @@ class ParamTable:
     # Save off the current contents to try to restore it after swapping out the params
     if self.original_table_data: #This will only have some length after the first time through
       saved_data = self.tableToDict(True) # Pass true so we only save off stuff the user has entered
-
-    print "saved data", saved_data
 
     # Build the Table
     the_table_data = []
@@ -223,7 +207,6 @@ class ParamTable:
                   found_it = True
                   has_parent_params_set = True
                   for param in sb['parameters']:
-                    # print param
                     self.original_table_data[param['name']] = param['default']
                     the_table_data.append(param)
                     self.param_is_required[param['name']] = param['required']
@@ -244,7 +227,6 @@ class ParamTable:
         the_table_data.append(param)
         self.param_is_required[param['name']] = param['required']
 
-    print 'the_tab_dat', the_table_data
     total_rows = len(the_table_data)
     self.table_widget.setRowCount(total_rows)
     self.table_widget.setColumnCount(3)
@@ -297,4 +279,3 @@ class ParamTable:
     
   def cellChanged(self, row, col):
     pass
-    #print "Changed!"
