@@ -124,14 +124,14 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
   if (!file.good())
     mooseError("Error opening file '" + _file_name + "' from PiecewiseBilinear function.");
    std::string line;
-   unsigned int linenum = 0;
+   unsigned int linenum= 0;
    unsigned int itemnum = 0;
+   unsigned int num_cols = 0;
    std::vector<Real> data;
 
    while (getline (file, line))
    {
      linenum++;
-//     std::cout << "\nLine #" << linenum << ":" << std::endl;
      std::istringstream linestream(line);
      std::string item;
      itemnum = 0;
@@ -142,16 +142,23 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
        Real d;
        i >> d;
        data.push_back( d );
-//       std::cout << "Item #" << itemnum << ": " << item << std::endl;
-
+     }
+     if (linenum == 1)
+     {
+       num_cols = itemnum;
+     }
+     else
+     {
+       if (num_cols+1 != itemnum)
+       {
+         mooseError("ERROR! Read "<<itemnum<<" columns of data but expected "<<num_cols+1<<
+                    " columns while reading line "<<linenum<<" of '"+ _file_name + "' for PiecewiseBilinear function.");
+       }
      }
    }
-//   std::cout << " linenum " << linenum << std::endl;
-//   std::cout << " itemnum " << itemnum << std::endl;
 
    x.resize(itemnum-1);
    y.resize(linenum-1);
-//   z.reshape(itemnum-1, linenum-1);
    z.reshape(linenum-1,itemnum-1);
    unsigned int offset(0);
    // Extract the first line's data (the x axis data)
@@ -175,6 +182,6 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
    }
    if (data.size() != offset)
    {
-     std::cerr << "ERROR! Data mismatch!" << std::endl;
+     mooseError("ERROR! Inconsistency in data read from '" + _file_name + "' for PiecewiseBilinear function.");
    }
 }
