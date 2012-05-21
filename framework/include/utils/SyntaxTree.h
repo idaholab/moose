@@ -68,6 +68,8 @@ protected:
 
   bool isLongNames() const { return _use_long_names; }
 
+  static bool wildCardMatch(std::string name, std::string search_string);
+
   TreeNode *_root;
   bool _use_long_names;
 };

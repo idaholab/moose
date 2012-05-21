@@ -145,11 +145,11 @@ void associateSyntax()
   syntax.registerActionSyntax("InitialRefinementAction", "Mesh");
   syntax.registerActionSyntax("InitDisplacedProblemAction", "Mesh");
 //  syntax.registerActionSyntax("DeprecatedBlockAction", "Mesh/Generation");
-  syntax.registerActionSyntax("EmptyAction", "Mesh/ExtraNodesets");
+//  syntax.registerActionSyntax("EmptyAction", "Mesh/ExtraNodesets");
   syntax.registerActionSyntax("AddExtraNodesetAction", "Mesh/ExtraNodesets/*");
   syntax.registerActionSyntax("AddMeshModifierAction", "Mesh/Modifier/*");
 
-  syntax.registerActionSyntax("EmptyAction", "Functions");
+//  syntax.registerActionSyntax("EmptyAction", "Functions");
   syntax.registerActionSyntax("AddFunctionAction", "Functions/*");
 
   syntax.registerActionSyntax("GlobalParamsAction", "GlobalParams");
@@ -158,43 +158,43 @@ void associateSyntax()
   syntax.registerActionSyntax("SetupResidualDebugAction", "Debug");
 
   /// Variable/AuxVariable Actions
-  syntax.registerActionSyntax("EmptyAction", "Variables");
+//  syntax.registerActionSyntax("EmptyAction", "Variables");
   syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_variable");
   syntax.registerActionSyntax("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
   syntax.registerActionSyntax("AddICAction", "Variables/*/InitialCondition");
 
-  syntax.registerActionSyntax("EmptyAction", "AuxVariables");
+//  syntax.registerActionSyntax("EmptyAction", "AuxVariables");
   syntax.registerActionSyntax("AddVariableAction", "AuxVariables/*", "add_aux_variable");
   syntax.registerActionSyntax("CopyNodalVarsAction", "AuxVariables/*", "copy_nodal_aux_vars");
   syntax.registerActionSyntax("AddICAction", "AuxVariables/*/InitialCondition");
 
-  syntax.registerActionSyntax("EmptyAction", "Kernels");
+//  syntax.registerActionSyntax("EmptyAction", "Kernels");
   syntax.registerActionSyntax("AddKernelAction", "Kernels/*", "add_kernel");
 
-  syntax.registerActionSyntax("EmptyAction", "AuxKernels");
+//  syntax.registerActionSyntax("EmptyAction", "AuxKernels");
   syntax.registerActionSyntax("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
 
-  syntax.registerActionSyntax("EmptyAction", "ScalarKernels");
+//  syntax.registerActionSyntax("EmptyAction", "ScalarKernels");
   syntax.registerActionSyntax("AddScalarKernelAction", "ScalarKernels/*", "add_scalar_kernel");
 
-  syntax.registerActionSyntax("EmptyAction", "AuxScalarKernels");
+//  syntax.registerActionSyntax("EmptyAction", "AuxScalarKernels");
   syntax.registerActionSyntax("AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");
 
-  syntax.registerActionSyntax("EmptyAction", "BCs");
+//  syntax.registerActionSyntax("EmptyAction", "BCs");
   syntax.registerActionSyntax("AddBCAction", "BCs/*", "add_bc");
   syntax.registerActionSyntax("EmptyAction", "BCs/Periodic");  // placeholder
   syntax.registerActionSyntax("AddPeriodicBCAction", "BCs/Periodic/*");
 
-  syntax.registerActionSyntax("EmptyAction", "AuxBCs");
+//  syntax.registerActionSyntax("EmptyAction", "AuxBCs");
   syntax.registerActionSyntax("AddBCAction", "AuxBCs/*", "add_aux_bc");
 
-  syntax.registerActionSyntax("EmptyAction", "ICs");
+//  syntax.registerActionSyntax("EmptyAction", "ICs");
   syntax.registerActionSyntax("AddInitialConditionAction", "ICs/*", "add_ic");
 
-  syntax.registerActionSyntax("EmptyAction", "Materials");
+//  syntax.registerActionSyntax("EmptyAction", "Materials");
   syntax.registerActionSyntax("AddMaterialAction", "Materials/*");
 
-  syntax.registerActionSyntax("EmptyAction", "Postprocessors");
+//  syntax.registerActionSyntax("EmptyAction", "Postprocessors");
   syntax.registerActionSyntax("AddPostprocessorAction", "Postprocessors/*");
 
 //  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Residual");
@@ -204,14 +204,14 @@ void associateSyntax()
 //  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Jacobian/*");
 //  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/NewtonIter/*");
 
-  syntax.registerActionSyntax("EmptyAction", "Dampers");
+//  syntax.registerActionSyntax("EmptyAction", "Dampers");
   syntax.registerActionSyntax("AddDamperAction", "Dampers/*");
 
   syntax.registerActionSyntax("SetupOutputAction", "Output");
   syntax.registerActionSyntax("SetupOverSamplingAction", "Output/OverSampling");
 
   // Note: Preconditioner Actions will be built by this setup action
-  syntax.registerActionSyntax("EmptyAction", "Preconditioning");
+//  syntax.registerActionSyntax("EmptyAction", "Preconditioning");
   syntax.registerActionSyntax("SetupPreconditionerAction", "Preconditioning/*");
 
   syntax.registerActionSyntax("CreateExecutionerAction", "Executioner");
@@ -220,16 +220,16 @@ void associateSyntax()
   syntax.registerActionSyntax("AdaptivityAction", "Executioner/Adaptivity");
 #endif
 
-  syntax.registerActionSyntax("EmptyAction", "DiracKernels");
+//  syntax.registerActionSyntax("EmptyAction", "DiracKernels");
   syntax.registerActionSyntax("AddDiracKernelAction", "DiracKernels/*");
 
-  syntax.registerActionSyntax("EmptyAction", "DGKernels");
+//  syntax.registerActionSyntax("EmptyAction", "DGKernels");
   syntax.registerActionSyntax("AddDGKernelAction", "DGKernels/*");
 
-  syntax.registerActionSyntax("EmptyAction", "Constraints");
+//  syntax.registerActionSyntax("EmptyAction", "Constraints");
   syntax.registerActionSyntax("AddConstraintAction", "Constraints/*");
 
-  syntax.registerActionSyntax("EmptyAction", "UserObjects");
+//  syntax.registerActionSyntax("EmptyAction", "UserObjects");
   syntax.registerActionSyntax("AddUserObjectAction", "UserObjects/*", "add_user_object");
 
   syntax.registerActionSyntax("AddBoundsVectorsAction", "Bounds", "add_bounds_vectors");
