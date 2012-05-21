@@ -6,4 +6,5 @@ neumann_bc.i
 include/bcs/CoupledNeumannBC.h
 src/bcs/CoupledNeumannBC.C
 src/main.C
-
+periodic_bc.i
+trapezoid.i

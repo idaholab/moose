@@ -30,6 +30,7 @@
 
 // Example 4 Includes
 #include "Convection.h"
+#include "GaussContForcing.h"
 #include "CoupledDirichletBC.h"
 #include "CoupledNeumannBC.h"
 
@@ -47,6 +48,7 @@ int main (int argc, char** argv)
   Moose::registerObjects();
 
   registerKernel(Convection);
+  registerKernel(GaussContForcing);                 // Extra forcing term
   registerBoundaryCondition(CoupledDirichletBC);    // Register our Boundary Conditions
   registerBoundaryCondition(CoupledNeumannBC);
   // Associate Parser Syntax with specific MOOSE Actions
