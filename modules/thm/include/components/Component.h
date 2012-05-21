@@ -52,6 +52,15 @@ public:
   virtual const std::vector<unsigned int> & getSubdomainIds() { return _subdomains; }
 
   /**
+   * Coupling between components
+   */
+/*  virtual void RequestCoupling(std::string sender_name, std::string receiver_name, std::string ) 
+	{ _sim.echoCouplingRequest(sender_name, receiver_name); }
+
+  virtual void echoCouplingRequest(std::string sender_name) { }
+*/   
+
+  /**
    * Get the ids associated with the component.  These can either be subdomain ids or boundary ids depending
    * on what you are asking for.
    *

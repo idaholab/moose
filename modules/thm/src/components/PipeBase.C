@@ -114,6 +114,7 @@ PipeBase::buildMesh()
     elem->subdomain_id() = _subdomain_id;
     elem->set_node(0) = _mesh._mesh.node_ptr(node_ids[i]);
     elem->set_node(1) = _mesh._mesh.node_ptr(node_ids[i+1]);
+    elem_ids.push_back(elem->id());
 
     // BCs
     if (i == 0)

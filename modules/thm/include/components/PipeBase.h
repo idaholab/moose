@@ -64,7 +64,8 @@ protected:
 
   unsigned int _subdomain_id;                   ///< Subdomain id this pipe defined
 
-  std::vector<unsigned int> node_ids;		
+  std::vector<unsigned int> node_ids;		///< Nodes ids of this pipe component
+  std::vector<unsigned int> elem_ids;		///< Elements ids of this pipe component
 
   std::map<RELAP7::EEndType, Node *> _bnd_nodes;        ///< Boundary nodes of this pipe (indexing: local "node id" => Node).
                                                         ///< Local node IDs are used by other components for connecting
