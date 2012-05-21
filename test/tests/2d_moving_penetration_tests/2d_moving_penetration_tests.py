@@ -1,6 +1,6 @@
 from options import *
 
-#This is a set of 5 basic tests of the penetration locator with a moving
+#This is a set of basic tests of the penetration locator with a moving
 #mesh.  The baseline cases are with linear quad4 elements.  The 'q' postfix
 #on the case names indicates variants with quadratic quad8 elements.  The
 #'tt' postfix indicates variants with a nonzero tangential tolerance.
@@ -52,15 +52,3 @@ pl_test4q = { INPUT : 'pl_test4q.i',
 
 pl_test4qtt = { INPUT : 'pl_test4qtt.i',
                 EXODIFF : ['pl_test4qtt_out.e'] }
-
-pl_test5 = { INPUT : 'pl_test5.i',
-             EXODIFF : ['pl_test5_out.e'] }
-
-pl_test5tt = { INPUT : 'pl_test5tt.i',
-               EXODIFF : ['pl_test5tt_out.e'] }
-
-pl_test5q = { INPUT : 'pl_test5q.i',
-              EXODIFF : ['pl_test5q_out.e'] }
-
-pl_test5qtt = { INPUT : 'pl_test5qtt.i',
-                EXODIFF : ['pl_test5qtt_out.e'] }
