@@ -38,4 +38,7 @@ include ../test.mk
 test: $(APPLICATION_NAME)-$(METHOD)
 	$(call TEST_exodiff,dirichlet_bc.i,out_coupled_dirichlet.e)
 	$(call TEST_exodiff,neumann_bc.i,out_coupled_neumann.e)
+	$(call TEST_exodiff,periodic_bc.i,out_pbc.e)
+	$(call TEST_exodiff,trapezoid.i,out_trapezoid.e)
+
 
