@@ -23,7 +23,6 @@ template<>
 InputParameters validParams<Kernel>()
 {
   InputParameters params = validParams<MooseObject>();
-  params += validParams<SetupInterface>();
   params += validParams<TransientInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that this kernel will be applied to");

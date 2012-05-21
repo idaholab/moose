@@ -23,9 +23,17 @@ InputParameters validParams<SetupInterface>()
   return params;
 }
 
-SetupInterface::SetupInterface(InputParameters & params) :
-    _exec_flags(Moose::stringToEnum<ExecFlagType>(params.get<std::string>("execute_on")))
+SetupInterface::SetupInterface(InputParameters & params)
 {
+  /**
+   * While many of the MOOSE systems inherit from this interface, it doesn't make sense for them all to adjust their execution flags.
+   * Our way of dealing with this is by not having those particular classes add the this classes valid params to their own.  In
+   * thoses cases it won't exist so we just set it to a default and ignore it.
+   */
+  if (params.have_parameter<std::string>("execute_on"))
+    _exec_flags = Moose::stringToEnum<ExecFlagType>(params.get<std::string>("execute_on"));
+  else
+    _exec_flags = EXEC_RESIDUAL;   // ignored
 }
 
 SetupInterface::~SetupInterface()

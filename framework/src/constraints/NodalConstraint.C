@@ -22,7 +22,6 @@ template<>
 InputParameters validParams<NodalConstraint>()
 {
   InputParameters params = validParams<MooseObject>();
-  params += validParams<SetupInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this constraint is applied to.");
   params.addRequiredParam<unsigned int>("master", "The ID of the master node");
   params.addPrivateParam<bool>("use_displaced_mesh", false);

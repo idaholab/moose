@@ -23,7 +23,6 @@ template<>
 InputParameters validParams<AuxScalarKernel>()
 {
   InputParameters params = validParams<MooseObject>();
-  params += validParams<SetupInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_aux_scalar_kernel");
