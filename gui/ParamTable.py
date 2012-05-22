@@ -45,7 +45,7 @@ class ParamTable:
 
     # print self.incoming_data
     if self.incoming_data:
-      if 'type' in self.incoming_data:
+      if 'type' in self.incoming_data and self.drop_menu.findText(self.incoming_data['type']) != -1:
         self.drop_menu.setCurrentIndex(self.drop_menu.findText(self.incoming_data['type']))
       else:
         found_index = self.drop_menu.findText(self.incoming_data['Name'])
@@ -94,7 +94,7 @@ class ParamTable:
     for i in xrange(0,self.table_widget.rowCount()):
       row_name = str(self.table_widget.item(i,0).text())
 
-      if row_name in the_data and row_name != 'type':
+      if row_name in the_data:# and row_name != 'type':
         item = self.table_widget.item(i,1)
         item.setText(str(the_data[row_name]))
         used_params.append(row_name)
@@ -239,6 +239,7 @@ class ParamTable:
     self.table_widget.verticalHeader().setVisible(False)
 
     row = 0
+
     for param in the_table_data:
       # Populate table with data:
       name_item = QtGui.QTableWidgetItem(param['name'])
@@ -264,7 +265,7 @@ class ParamTable:
       name_item.setFlags(QtCore.Qt.ItemIsEnabled)
       doc_item.setFlags(QtCore.Qt.ItemIsEnabled)
 
-      if param['name'] == 'type' or param['name'] == 'parent_params' or (has_parent_params_set and param['name'] == 'Name'):
+      if (param['name'] == 'type' and str(item) != '*') or param['name'] == 'parent_params' or (has_parent_params_set and param['name'] == 'Name'):
         value_item.setFlags(QtCore.Qt.NoItemFlags)
 
       self.table_widget.setItem(row, 0, name_item)

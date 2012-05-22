@@ -64,6 +64,9 @@ class ExecuteWidget(QtGui.QWidget):
     QtCore.QObject.connect(self.cwd_button, QtCore.SIGNAL("clicked()"), self.clickedCwd)
     self.cwd_layout.addWidget(self.cwd_text)
     self.cwd_layout.addWidget(self.cwd_button)
+
+    self.pb = QtGui.QProgressBar(self)
+    self.pb.hide()
     
     self.execution_text = QtGui.QTextEdit()
     self.execution_text.setMinimumHeight(400)
@@ -89,14 +92,47 @@ class ExecuteWidget(QtGui.QWidget):
 
     self.main_layout.addLayout(self.command_layout)
     self.main_layout.addLayout(self.cwd_layout)
+    self.main_layout.addWidget(self.pb)
     self.main_layout.addWidget(self.execution_text)
     self.main_layout.addLayout(self.button_layout)
 
     # These change the CWD... so let's connect to them
     QtCore.QObject.connect(self.input_file_widget.buttonOpen, QtCore.SIGNAL("clicked()"), self.click_open)
     QtCore.QObject.connect(self.input_file_widget.buttonSave, QtCore.SIGNAL("clicked()"), self.click_save)
+
+  def getNumSteps(self):
+    executioner_item = self.input_file_widget.tree_widget.findItems("Executioner", QtCore.Qt.MatchExactly)[0]
+    if executioner_item:
+      for i in range(executioner_item.childCount()):
+        child = executioner_item.child(i)
+        if child.text(0) == 'ParentParams':
+          table_data = child.table_data
+
+          cur_steps = -1
+          
+          if 'num_steps' in table_data:
+            cur_steps = float(table_data['num_steps'])
+
+          if 'end_time' in table_data and 'dt' in table_data:
+            steps = float(table_data['end_time']) / float(table_data['dt'])
+
+            if steps < cur_steps:
+              cur_steps = steps
+              
+          if cur_steps > 0:
+            return cur_steps
+          
+    # If we can't figure it out...          
+    return None                                                     
     
   def clickedRun(self):
+    num_steps = self.getNumSteps()
+    if num_steps:
+      self.pb.reset()
+      self.pb.setMaximum(num_steps)
+      self.pb.show()
+      self.pb.setValue(0)
+      
     tmp_file_name = 'peacock_run_tmp.i'
     file = open(tmp_file_name,'w')
     file.write(self.input_file_widget.buildInputString())
@@ -114,17 +150,26 @@ class ExecuteWidget(QtGui.QWidget):
     self.execution_text.append('-----\n' + command + '\n')
     self.proc = QtCore.QProcess()
     self.connect(self.proc,QtCore.SIGNAL("readyReadStandardOutput()"),self.output)
+    self.connect(self.proc,QtCore.SIGNAL("finished(int)"),self.processFinished)
     self.proc.setProcessChannelMode(QtCore.QProcess.MergedChannels)
     self.proc.start(command)
     self.kill_button.setDisabled(False)
     self.clear_button.setDisabled(False)
     self.save_log_button.setDisabled(False)
-    while self.proc.state() != QtCore.QProcess.NotRunning:
-      self.qt_app.processEvents()
-    self.kill_button.setDisabled(True)
 
   def output(self):
-    self.execution_text.append(str(self.proc.readAllStandardOutput()).rstrip('\n'))
+    current_output = str(self.proc.readAllStandardOutput())
+    self.execution_text.append(current_output.rstrip('\n'))
+
+    split = current_output.split('\n')
+
+    for line in split:
+      if 'Solving time step' in line:
+        self.pb.setValue(self.pb.value()+1)
+
+  def processFinished(self):
+    self.kill_button.setDisabled(True)
+    self.pb.hide()
 
   def clickedKill(self):
     msgBox = QMessageBox();

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import sys, os, commands, time, re
+import sys, os, commands, time, re, copy
 
 class ActionSyntax():
   def __init__(self, app_path):
@@ -19,7 +19,14 @@ class ActionSyntax():
     data = data.split('**START SYNTAX DATA**\n')[1]
     data = data.split('**END SYNTAX DATA**')[0]
 
-    self.paths = list(set(data.split('\n')))
+    data_set = set(data.split('\n'))
+
+    set_copy = copy.deepcopy(data_set)
+
+    for item in set_copy:
+      self.recursiveAddAllParents(data_set, item)
+
+    self.paths = list(data_set)
     self.paths.sort()
 
     for path in self.paths:
@@ -34,19 +41,21 @@ class ActionSyntax():
       p = re.compile(modified)
 
       self.hard_path_patterns[hard_path] = p
-
+      
+  def recursiveAddAllParents(self, the_set, path):
+    if path != '':
+      if '*' not in path:
+        the_set.add(path)
+      self.recursiveAddAllParents(the_set, os.path.dirname(path))
+    
+    
 
   """ Whether or not this is a hard path """
   def isPath(self, inpath):
     path = inpath
     path = path.lstrip('/')
     for hard_path in self.hard_paths:
-      modified = hard_path.replace('*','[^/]*')
-      modified += '$'
-
-      p = re.compile(modified)
-    
-      if p.match(path):
+      if self.hard_path_patterns[hard_path].match(path):
         return True
     return False
 

@@ -23,6 +23,9 @@ class UiBox(QtGui.QMainWindow):
     self.qt_app = qt_app
 
     self.initUI()
+
+    # Pull this window to the foreground
+    self.raise_()
     
   def initUI(self):
     self.main_ui = QtGui.QWidget(self)

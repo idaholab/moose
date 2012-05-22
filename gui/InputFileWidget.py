@@ -191,12 +191,48 @@ class InputFileWidget(QtGui.QWidget):
 
   def openInputFile(self, file_name):
     if file_name and file_name != '':
-      os.chdir(os.path.dirname(str(file_name)))
-      self.input_file_root_node = readInputFile(file_name)
-      main_sections = self.input_file_root_node.children
-      for section_name, section_node in main_sections.items():
-        # Find out if this section has it's own parameters.  If so we need to add a ParentParams node
+      progress = QtGui.QProgressDialog("Reading Input File...", "Abort", 0, 100, self)
+      progress.setWindowModality(Qt.WindowModal)
+      counter = 0
 
+      counter+=1
+      progress.setValue(counter)
+
+      # Clear the tree
+      self.tree_widget.clear()
+
+      counter+=1
+      progress.setValue(counter)
+
+      self.addHardPathsToTree()
+
+      counter+=1
+      progress.setValue(counter)
+
+      os.chdir(os.path.dirname(str(file_name)))
+
+      counter+=1
+      progress.setValue(counter)
+
+      self.input_file_root_node = readInputFile(file_name)
+
+      counter+=1
+      progress.setValue(counter)
+      
+      main_sections = self.input_file_root_node.children
+
+      counter+=1
+      progress.setValue(counter)
+
+      QtCore.QObject.disconnect(self.tree_widget, QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self.item_changed)
+
+      progress.setMaximum(counter+len(main_sections))
+
+      for section_name, section_node in main_sections.items():
+        counter+=1
+        progress.setValue(counter)
+        
+        # Find out if this section has it's own parameters.  If so we need to add a ParentParams node
         section_item = self.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)[0]
 
         num_params = 0
@@ -220,8 +256,9 @@ class InputFileWidget(QtGui.QWidget):
           
         for child, child_node in section_node.children.items():
           self.addDataRecursively(self.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)[0], child_node)
-      self.input_display.setText(self.buildInputString())
       self.addHardPathsToTree() # We do this here because * paths might add more paths underneath some of the paths
+      self.input_display.setText(self.buildInputString())
+      QtCore.QObject.connect(self.tree_widget, QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self.item_changed)
 
   def click_open(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Input File", "~/", "Input Files (*.i)")
