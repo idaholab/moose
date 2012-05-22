@@ -3,25 +3,30 @@
   uniform_refine = 1
 []
 
+# Polar to Cartesian
+# R = sqrt(x^2 + y^2)
+# x = R * cos(theta)
+# y = R * sin(theta)
 [Functions]
   [./tr_x]
     type = ParsedFunction
-    value = -x*cos(pi/3)
+    value = sqrt(x^2+y^2)*cos(2*pi/3)
   [../]
 
   [./tr_y]
     type = ParsedFunction
-    value = x*sin(pi/3)
+    value = sqrt(x^2+y^2)*sin(2*pi/3)
   [../]
 
   [./itr_x]
     type = ParsedFunction
     value = -x/cos(pi/3)
+    value = sqrt(x^2+y^2)*cos(0)
   [../]
 
   [./itr_y]
     type = ParsedFunction
-    value = 0
+    value = sqrt(x^2+y^2)*sin(0)  # Always Zero!
   [../]
 []
 
