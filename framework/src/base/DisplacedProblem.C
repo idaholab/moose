@@ -65,7 +65,7 @@ public:
          aux_var_nums_directions.push_back(i);
       }
       else
-        mooseError("Undefined variable used for displacements!");
+        mooseError("Undefined variable '"<<displacement_name<<"' used for displacements!");
     }
 
     unsigned int num_var_nums = var_nums.size();
