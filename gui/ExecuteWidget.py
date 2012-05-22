@@ -105,28 +105,32 @@ class ExecuteWidget(QtGui.QWidget):
 
   def getNumSteps(self):
     executioner_item = self.input_file_widget.tree_widget.findItems("Executioner", QtCore.Qt.MatchExactly)[0]
+    cur_steps = 0
     if executioner_item:
       for i in range(executioner_item.childCount()):
         child = executioner_item.child(i)
         if child.text(0) == 'ParentParams':
           table_data = child.table_data
 
-          cur_steps = -1
-          
           if 'num_steps' in table_data:
             cur_steps = float(table_data['num_steps'])
-
+            
           if 'end_time' in table_data and 'dt' in table_data:
             steps = float(table_data['end_time']) / float(table_data['dt'])
 
             if steps < cur_steps:
               cur_steps = steps
               
-          if cur_steps > 0:
-            return cur_steps
-          
-    # If we can't figure it out...          
-    return None                                                     
+        if child.text(0) == 'Adaptivity':
+          try:
+            table_data = child.table_data
+            if 'steps' in table_data:
+              cur_steps += table_data['steps']
+            
+          except:
+            pass
+
+    return cur_steps + 2 + 1 # The +2 is for setup steps the +1 is so there is always a bit left...      
     
   def clickedRun(self):
     num_steps = self.getNumSteps()
@@ -150,6 +154,8 @@ class ExecuteWidget(QtGui.QWidget):
       
     command += ' ' + self.other_options_text.text()
 
+    self.execution_text.verticalScrollBar().setValue(self.execution_text.verticalScrollBar().maximum())
+
     self.execution_text.append('-----\n' + command + '\n')
     self.proc = QtCore.QProcess()
     self.connect(self.proc,QtCore.SIGNAL("readyReadStandardOutput()"),self.output)
@@ -160,15 +166,21 @@ class ExecuteWidget(QtGui.QWidget):
     self.clear_button.setDisabled(False)
     self.save_log_button.setDisabled(False)
 
+  def incrementPB(self, text):
+    split = text.split('\n')
+
+    # List of keywords to increment the PB on
+    increment_on = ['Mesh Information','EquationSystems','NL step  0']
+
+    for line in split:
+      for keyword in increment_on:
+        if keyword in line:  
+          self.pb.setValue(self.pb.value()+1)
+    
   def output(self):
     current_output = str(self.proc.readAllStandardOutput())
     self.execution_text.append(current_output.rstrip('\n'))
-
-    split = current_output.split('\n')
-
-    for line in split:
-      if 'Solving time step' in line:
-        self.pb.setValue(self.pb.value()+1)
+    self.incrementPB(current_output)
 
   def processFinished(self):
     self.kill_button.setDisabled(True)
