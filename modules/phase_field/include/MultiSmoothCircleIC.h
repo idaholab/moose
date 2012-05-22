@@ -19,8 +19,9 @@ template<>
 InputParameters validParams<MultiSmoothCircleIC>();
 
 /**
- * SmoothcircleIC just returns a constant value.
- */
+ * MultismoothCircleIC creates multiple SmoothCircles (number = numbub) that are randomly
+ * positioned around the domain, with a minimum spacing equal to bubspac
+ **/
 class MultiSmoothCircleIC : public SmoothCircleIC
 {
 public:

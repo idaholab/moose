@@ -40,9 +40,7 @@ InputParameters validParams<CrossIC>();
 /**
  * CrossIC creates a C1 continuous initial condition that looks like a cross in
  * the middle of the domain.
- *
- * Note that the domain should be on the unit square 0,1 x 0,1.
- */
+ **/
 class CrossIC : public C1ICBase
 {
 public:

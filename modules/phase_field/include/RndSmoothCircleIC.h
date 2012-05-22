@@ -19,8 +19,9 @@ template<>
 InputParameters validParams<RndSmoothCircleIC>();
 
 /**
- * SmoothcircleIC just returns a constant value.
- */
+ * RndSmoothcircleIC creates a smooth circle with a random distribution
+ * of values inside and outside of the circle.
+ **/
 class RndSmoothCircleIC : public InitialCondition
 {
 public:

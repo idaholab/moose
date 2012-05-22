@@ -8,7 +8,9 @@ class CoupledImplicitEuler;
 
 template<>
 InputParameters validParams<CoupledImplicitEuler>();
-
+/**
+ * This calculates the time derivative for a coupled variable
+ **/
 class CoupledImplicitEuler : public Kernel
 {
 public:

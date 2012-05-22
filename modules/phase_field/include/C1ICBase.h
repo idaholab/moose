@@ -37,7 +37,7 @@ template<>
 InputParameters validParams<C1ICBase>();
 
 /**
- * C1ICBase just returns a constant value.
+ * C1ICBase is used by the CrossIC.
  */
 class C1ICBase : public InitialCondition
 {

@@ -4,7 +4,6 @@
 
 // phase_field
 #include "MatDiffusion.h"
-#include "AC.h"
 #include "ACInterface.h"
 #include "CHMath.h"
 #include "CHInterface.h"
@@ -25,7 +24,6 @@ Elk::PhaseField::registerObjects()
 {
   // phase_field
   registerKernel(MatDiffusion);
-  registerKernel(AC);
   registerKernel(ACInterface);
   registerKernel(CHMath);
   registerKernel(CHInterface);

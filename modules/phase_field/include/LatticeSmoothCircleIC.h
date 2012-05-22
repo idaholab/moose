@@ -19,8 +19,9 @@ template<>
 InputParameters validParams<LatticeSmoothCircleIC>();
 
 /**
- * SmoothcircleIC just returns a constant value.
- */
+ * LatticeSmoothcircleIC creates a lattice of smoothcircles as an initial condition.
+ * They are either directly on the lattice or randomly perturbed from the lattice.
+ **/
 class LatticeSmoothCircleIC : public MultiSmoothCircleIC
 {
 public:

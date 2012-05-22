@@ -26,7 +26,7 @@ InputParameters validParams<RndBoundingBoxIC>();
  *
  * When setting the initial condition if bottom_left <= Point <= top_right then the "inside" value is used.
  * Otherwise the "outside" value is used.
- */
+ **/
 class RndBoundingBoxIC : public InitialCondition
 {
 public:
