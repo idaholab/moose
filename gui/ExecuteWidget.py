@@ -26,6 +26,7 @@ class ExecuteWidget(QtGui.QWidget):
 
     self.command_layout = QtGui.QHBoxLayout()
     self.cwd_layout = QtGui.QHBoxLayout()
+    self.pb_layout = QtGui.QHBoxLayout()
     self.button_layout = QtGui.QHBoxLayout()
 
     self.mpi_layout = QtGui.QVBoxLayout()
@@ -65,8 +66,10 @@ class ExecuteWidget(QtGui.QWidget):
     self.cwd_layout.addWidget(self.cwd_text)
     self.cwd_layout.addWidget(self.cwd_button)
 
+    self.pb_layout.addWidget(QtGui.QLabel("Progress:"), alignment=Qt.AlignLeft)
     self.pb = QtGui.QProgressBar(self)
     self.pb.hide()
+    self.pb_layout.addWidget(self.pb)
     
     self.execution_text = QtGui.QTextEdit()
     self.execution_text.setMinimumHeight(400)
@@ -92,7 +95,7 @@ class ExecuteWidget(QtGui.QWidget):
 
     self.main_layout.addLayout(self.command_layout)
     self.main_layout.addLayout(self.cwd_layout)
-    self.main_layout.addWidget(self.pb)
+    self.main_layout.addLayout(self.pb_layout)
     self.main_layout.addWidget(self.execution_text)
     self.main_layout.addLayout(self.button_layout)
 
