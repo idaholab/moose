@@ -23,6 +23,7 @@
 #include "mtwist.h"
 #include "id_types.h"
 #include "stored_range.h"
+#include "parallel.h"
 
 #include <string>
 
@@ -55,6 +56,16 @@ typedef std::string              SubdomainName;
 #define mooseDoOnce(do_this) do { static bool did_this_already = false; if (!did_this_already) { did_this_already = true; do_this; } } while (0)
 
 #define mooseDeprecated() mooseDoOnce(std::cout << "*** Warning, This code is deprecated, and likely to be removed in future library versions! " << __FILE__ << ", line " << __LINE__ << ", compiled " << __DATE__ << " at " << __TIME__ << " ***" << std::endl;)
+
+/**
+ * Testing a condition on a local CPU that need to be propagated across all processes.
+ *
+ * If the condition 'cond' is satisfied, it gets propagated across all processes, so the parallel code take the same path (if that is requires).
+ */
+#define parallel_if(cond)                       \
+    bool __local_bool__ = (cond);               \
+    Parallel::max<bool>(__local_bool__);        \
+    if (__local_bool__)
 
 
 class FEProblem;

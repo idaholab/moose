@@ -23,6 +23,9 @@ ExceptionKernel::computeQpResidual()
 Real
 ExceptionKernel::computeQpJacobian()
 {
-  throw MooseException();
+  // if the exception occurs only on one processor, we need to propagate it on the other ones as well
+  parallel_if(libMesh::processor_id() == 0)
+    throw MooseException();
+
   return 0.;
 }
