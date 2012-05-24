@@ -13,6 +13,7 @@
 #include "SiHeatConductionMaterial.h"
 #include "BulkCoolantBC.h"
 #include "ThermalContactAction.h"
+#include "HeatSource.h"
 
 void
 Elk::HeatConduction::registerObjects()
@@ -20,6 +21,7 @@ Elk::HeatConduction::registerObjects()
   // heat_conduction
   registerNamedKernel(HeatConductionKernel, "HeatConduction");
   registerKernel(HeatConductionImplicitEuler);
+  registerKernel(HeatSource);
   registerBoundaryCondition(GapHeatTransfer);
   registerBoundaryCondition(BulkCoolantBC);
   registerMaterial(HeatConductionMaterial);
