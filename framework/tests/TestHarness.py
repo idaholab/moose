@@ -103,6 +103,12 @@ class TestHarness:
     # Lower the ceiling
     ncpus = min(ncpus, int(test[MAXPARALLEL]))
 
+    # TODO: Refactor this caveats business
+    if ncpus > self.options.parallel:
+      test['CAVEATS'] = ['MIN_CPUS=' + str(ncpus)]
+    elif ncpus < self.options.parallel:
+      test['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
+
     if ncpus > 1:
       command = 'mpiexec -n ' + str(ncpus) + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
     else:
@@ -169,6 +175,8 @@ class TestHarness:
   def testOutputAndFinish(self, test, retcode, output):
     reason = ''
     caveats = []
+    if 'CAVEATS' in test:
+      caveats = test['CAVEATS']
 
     # Expected errors and assertions might do a lot of things including crash so we
     # will handle them seperately
