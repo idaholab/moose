@@ -20,7 +20,7 @@ public:
   SolidMechanicsMaterial(const std::string & name, InputParameters parameters);
 
 protected:
-
+  const std::string _appended_property_name;
   VariableGradient & _grad_disp_x;
   VariableGradient & _grad_disp_y;
   VariableGradient & _grad_disp_z;
@@ -45,6 +45,22 @@ protected:
 
   MaterialProperty<SymmTensor> & _elastic_strain;
 
+  
+  template<typename T>
+  MaterialProperty<T> & createProperty(const std::string & prop_name)
+    {
+      std::string name(prop_name + _appended_property_name);
+      return declareProperty<T>(name);
+    }
+  
+  template<typename T>
+  MaterialProperty<T> & createPropertyOld(const std::string & prop_name)
+    {
+      std::string name(prop_name + _appended_property_name);
+      return declarePropertyOld<T>(name);
+    }
+  
+  
 };
 
 #endif //SOLIDMECHANICSMATERIAL_H

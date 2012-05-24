@@ -231,6 +231,7 @@ HomogenizedElasticConstants::computeQpIntegral()
     //  grad[5][2] = &_grad_disp_z_zx;
 
 
+    
     for(int p = 0; p < 2; p++)
     {
       for(int q = 0; q < 2; q++)
@@ -238,6 +239,30 @@ HomogenizedElasticConstants::computeQpIntegral()
         value = value + E(_I,3 * q + p) * (*grad[_column][p])[_qp](q);
       }
     }
-
+    
     return (E(_I,_J) - value);
+
+    /*
+    value = 0;
+    
+    if(_I == 0 && _J == 0)
+      value = E(0,0) - E(0,0) * (*grad[0][0])[_qp](0) - E(0,4) * (*grad[0][1])[_qp](1); //E1111
+    
+    if(_I == 4 && _J == 4)
+      value = E(4,4) - E(4,0) * (*grad[1][0])[_qp](0) - E(4,4) * (*grad[1][1])[_qp](1);  //E2222
+    
+    if(_I == 3 && _J == 3)
+      value = E(1,1) - E(1,1) * (*grad[3][0])[_qp](1) - E(1,1) * (*grad[3][1])[_qp](0); //E1212
+    
+    if(_I == 4 && _J == 0)
+      value = E(4,0) - E(4,0) * (*grad[0][0])[_qp](0) - E(4,4) * (*grad[0][1])[_qp](1); //E2211
+    
+    if(_I == 0 && _J == 4)
+      value = E(0,4) - E(0,4) * (*grad[1][1])[_qp](1) - E(0,0) * (*grad[1][0])[_qp](0); //E1122
+    
+    return value;
+    */
+
+      
+  
 }
