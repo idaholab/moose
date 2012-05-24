@@ -98,21 +98,13 @@ class TestHarness:
   def createCommand(self, test):
     command = ''
 
-    if self.options.parallel > 1:
-      if test[NOPARALLEL]:
-        command = 'mpiexec -n 1' + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
-      elif test[MINPARALLEL]:
-        if int(test[MINPARALLEL]) >= self.options.parallel:
-          command = 'mpiexec -n ' + test[MINPARALLEL] + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
-        else:
-          command = 'mpiexec -n ' + str(self.options.parallel) + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
-      elif test[MAXPARALLEL]:
-        if int(test[MAXPARALLEL]) <= self.options.parallel:
-          command = 'mpiexec -n ' + test[MAXPARALLEL] + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
-        else:
-          command = 'mpiexec -n ' + str(self.options.parallel) + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
-      else:
-        command = 'mpiexec -n ' + str(self.options.parallel) + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+    # Raise the floor
+    ncpus = max(self.options.parallel, int(test[MINPARALLEL]))
+    # Lower the ceiling
+    ncpus = min(ncpus, int(test[MAXPARALLEL]))
+
+    if ncpus > 1:
+      command = 'mpiexec -n ' + str(ncpus) + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
     else:
       command = self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
 
@@ -415,7 +407,7 @@ class TestHarness:
                       help="Scale problems that have SCALE_REFINE set")
     parser.add_option('--libmesh_dir', action="store", type='string', dest="libmesh_dir", default='',
                       help="Currently only needed for bitten code coverage")
-    parser.add_option('--parallel', '-p', action="store", type='int', dest="parallel", default='1',
+    parser.add_option('--parallel', '-p', action="store", type='int', dest="parallel", default=1,
                       help="Number of processors to use when running mpiexec")
 
     outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
