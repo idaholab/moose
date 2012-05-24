@@ -99,14 +99,20 @@ class TestHarness:
     command = ''
 
     if self.options.parallel > 1:
-      if test[MAXPARALLEL]:
-        command = 'mpiexec -n ' + test[MAXPARALLEL] + ' -host ' + self.host_name + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
-      elif test[NOPARALLEL]:
-        command = 'mpiexec -n 1' + ' -host ' + self.host_name + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+      if test[NOPARALLEL]:
+        command = 'mpiexec -n 1' + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+      elif test[MINPARALLEL]:
+        if int(test[MINPARALLEL]) >= self.options.parallel:
+          command = 'mpiexec -n ' + test[MINPARALLEL] + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+        else:
+          command = 'mpiexec -n ' + str(self.options.parallel) + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+      elif test[MAXPARALLEL]:
+        if int(test[MAXPARALLEL]) <= self.options.parallel:
+          command = 'mpiexec -n ' + test[MAXPARALLEL] + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+        else:
+          command = 'mpiexec -n ' + str(self.options.parallel) + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
       else:
-        command = 'mpiexec -n ' + str(self.options.parallel) + ' -host ' + self.host_name + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
-    elif test[PARALLEL] > 1:
-      command = 'mpiexec -n ' + test[PARALLEL] + ' -host ' + self.host_name + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+        command = 'mpiexec -n ' + str(self.options.parallel) + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
     else:
       command = self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
 

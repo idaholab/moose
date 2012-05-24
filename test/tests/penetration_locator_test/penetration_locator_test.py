@@ -5,6 +5,6 @@ test = { INPUT : 'penetration_locator_test.i',
 
 parallel_test = { INPUT : 'penetration_locator_test.i',
                   EXODIFF : ['out.e'],
-                  PARALLEL : '4',
+                  MAXPARALLEL : '3',
                   PREREQ : 'test' }
 
