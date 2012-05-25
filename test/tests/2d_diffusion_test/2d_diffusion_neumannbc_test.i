@@ -28,7 +28,6 @@
     variable = u
     boundary = 1
     value = 0
-    foo = '1 2 3'
   [../]
 
   [./right]
