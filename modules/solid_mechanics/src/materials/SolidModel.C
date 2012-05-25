@@ -102,6 +102,8 @@ SolidModel::SolidModel( const std::string & name,
    _crack_strain_old( NULL ),
    _crack_max_strain(NULL),
    _crack_max_strain_old(NULL),
+   _crack_strain_zero_stress(NULL),
+   _crack_strain_zero_stress_old(NULL),
    _principal_strain(3,1),
    _elasticity_tensor(createProperty<SymmElasticityTensor>("elasticity_tensor")),
    _Jacobian_mult(createProperty<SymmElasticityTensor>("Jacobian_mult")),
@@ -221,6 +223,8 @@ SolidModel::SolidModel( const std::string & name,
     _crack_max_strain_old = &createPropertyOld<RealVectorValue>("crack_max_strain");
     _crack_strain = &createProperty<RealVectorValue>("crack_strain");
     _crack_strain_old = &createPropertyOld<RealVectorValue>("crack_strain");
+    _crack_strain_zero_stress = &createProperty<RealVectorValue>("crack_strain_zero_stress");
+    _crack_strain_zero_stress_old = &createPropertyOld<RealVectorValue>("crack_strain_zero_stress");
 
     if (parameters.isParamValid( "active_crack_planes" ))
     {
@@ -459,7 +463,6 @@ void
 SolidModel::crackingStrainDirections()
 {
   _stress_old = _stress_old_prop[_qp];
-
   bool cracking_locally_active( false );
   if (_cracking_stress > 0)
   {
@@ -468,6 +471,8 @@ SolidModel::crackingStrainDirections()
 
     for (unsigned int i(0); i < 3; ++i)
     {
+      (*_crack_strain_zero_stress)[_qp](i) = (*_crack_strain_zero_stress_old)[_qp](i);
+
       if (_principal_strain(i,0) > (*_crack_max_strain_old)[_qp](i))
       {
         (*_crack_max_strain)[_qp](i) = _principal_strain(i,0);
@@ -476,7 +481,7 @@ SolidModel::crackingStrainDirections()
       {
         (*_crack_max_strain)[_qp](i) = (*_crack_max_strain_old)[_qp](i);
       }
-      if (_principal_strain(i,0) < 0)
+      if (_principal_strain(i,0)-(*_crack_strain_zero_stress)[_qp](i) < 0)
       {
         _crack_flags_local(i) = 1;
       }
@@ -652,6 +657,8 @@ SolidModel::crackingStressRotation()
     ColumnMajorMatrix RT( (*_crack_rotation)[_qp].transpose() );
     SymmTensor sigmaPrime;
     rotateSymmetricTensor( RT, _stress[_qp], sigmaPrime );
+    SymmTensor sigmaOldPrime;
+    rotateSymmetricTensor( RT, _stress_old_prop[_qp], sigmaOldPrime );
 
     unsigned int num_cracks(0);
     for (unsigned i(0); i < 3; ++i)
@@ -671,6 +678,17 @@ SolidModel::crackingStressRotation()
     {
       sigma(i) = sigmaPrime(i,i);
       (*_crack_flags)[_qp](i) = (*_crack_flags_old)[_qp](i);
+      if (sigma(i) <= 1e-4)
+      {
+        if (sigmaOldPrime(i,i) >= -1e-4)
+        {
+          (*_crack_strain_zero_stress)[_qp](i) = _principal_strain(i,0);
+        }
+        if ((*_crack_flags)[_qp](i) == 1)
+        {
+          (*_crack_max_strain)[_qp](i) = _principal_strain(i,0);
+        }
+      }
       Real crackFactor(1);
       if ((*_crack_flags_old)[_qp](i) == 1 &&
           sigmaPrime(i,i) > _cracking_stress &&
@@ -681,7 +699,8 @@ SolidModel::crackingStressRotation()
         new_crack = true;
         ++num_cracks;
 
-        (*_crack_strain)[_qp](i) = _cracking_stress*_principal_strain(i,0)/sigma(i);
+        (*_crack_strain)[_qp](i) = _cracking_stress*(_principal_strain(i,0)-(*_crack_strain_zero_stress)[_qp](i))/sigma(i) +
+                                   (*_crack_strain_zero_stress)[_qp](i);
         crackFactor = computeCrackFactor( i, sigma(i), (*_crack_flags)[_qp](i) );
         (*_crack_flags)[_qp](i) = crackFactor;
         _crack_flags_local(i) = crackFactor;
@@ -696,7 +715,7 @@ SolidModel::crackingStressRotation()
       {
         // Previously cracked
         cracked = true;
-        if (_principal_strain(i,0) == (*_crack_max_strain)[_qp](i))
+        if (std::abs(_principal_strain(i,0) - (*_crack_max_strain)[_qp](i)) < 1e-10)
         {
           // Crack opening
           crackFactor = computeCrackFactor( i, sigma(i), (*_crack_flags)[_qp](i) );
@@ -731,38 +750,38 @@ SolidModel::crackingStressRotation()
 Real
 SolidModel::computeCrackFactor( int i, Real & sigma, Real & flagVal )
 {
-  if (_principal_strain(i,0) < 0)
-  {
-    // Nothing needed
-  }
-  else if ((*_crack_max_strain)[_qp](i) < (*_crack_strain)[_qp](i))
-  {
-    // Nothing needed
-  }
-  else if (_cracking_release == CR_EXPONENTIAL)
+  if (_cracking_release == CR_EXPONENTIAL)
   {
     if ((*_crack_max_strain)[_qp](i) < (*_crack_strain)[_qp](i))
     {
-      mooseError("Max strain less than current");
+      std::stringstream err;
+      err << "Max strain less than current: " << i << " "
+          << (*_crack_max_strain)[_qp](i) << ",  " << (*_crack_strain)[_qp](i) << " "
+          << _principal_strain(i,0) << " "
+          << (*_crack_strain_zero_stress)[_qp](i) << std::endl;
+      mooseError( err.str() );
     }
     const Real crackMaxStrain( (*_crack_max_strain)[_qp](i) );
     sigma = _cracking_stress*
            (_cracking_residual_stress + (1-_cracking_residual_stress)*
             std::exp(_cracking_alpha/_cracking_stress*(crackMaxStrain-(*_crack_strain)[_qp](i))));
-    if ( crackMaxStrain != 0 )
-    {
-      flagVal = sigma*(*_crack_strain)[_qp](i)/(crackMaxStrain * _cracking_stress);
-    }
-    else
-    {
-      flagVal = 1;
-    }
+    flagVal = sigma * ((*_crack_strain)[_qp](i)-(*_crack_strain_zero_stress)[_qp](i)) /
+        ((crackMaxStrain-(*_crack_strain_zero_stress)[_qp](i)) * _cracking_stress);
   }
   else
   {
     const Real tiny(1e-16);
     flagVal = tiny;
-    sigma = tiny*(*_crack_strain)[_qp](i)*_youngs_modulus;
+    sigma = tiny*((*_crack_strain)[_qp](i)-(*_crack_strain_zero_stress)[_qp](i))*_youngs_modulus;
+  }
+  if (flagVal < 0)
+  {
+    std::stringstream err;
+    err << "Negative crack flag found: " << i << " "
+        << flagVal << " "
+        << (*_crack_max_strain)[_qp](i) << " "
+        << (*_crack_strain_zero_stress)[_qp](i) << std::endl;
+    mooseError( err.str() );
   }
   return flagVal;
 }
