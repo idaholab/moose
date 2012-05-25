@@ -105,8 +105,6 @@ void ReadMeshAction::readMesh(const std::string & mesh_file)
   _parser_handle._mesh->setFileName(mesh_file);
   _parser_handle._mesh->setPatchSize(getParam<unsigned int>("patch_size"));
 
-  Parser::checkFileReadable(mesh_file);
-
   Moose::setup_perf_log.push("Read Mesh","Setup");
   if (getParam<bool>("nemesis"))
   {
@@ -117,6 +115,8 @@ void ReadMeshAction::readMesh(const std::string & mesh_file)
   }
   else // not reading Nemesis files
   {
+    Parser::checkFileReadable(mesh_file);
+
     // if reading ExodusII, read it through a reader and save it off, since it will be used in possible "copy nodal vars" action
     // NOTE: the other reader that can do copy nodal values is GMVIO, but GMV is _pretty_ old right now (May 2011)
     if (mesh_file.rfind(".exd") < mesh_file.size() ||
