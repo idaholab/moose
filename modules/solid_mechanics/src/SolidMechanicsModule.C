@@ -18,6 +18,7 @@
 #include "PowerLawCreep.h"
 #include "PlenumPressure.h"
 #include "PlenumPressureAction.h"
+#include "PresetVelocity.h"
 #include "Pressure.h"
 #include "PressureAction.h"
 #include "PLSHPlasticMaterial.h"
@@ -30,6 +31,7 @@
 #include "DashpotBC.h"
 #include "MaterialSymmElasticityTensorAux.h"
 #include "HomogenizedElasticConstants.h"
+
 
 void
 Elk::SolidMechanics::registerObjects()
@@ -52,6 +54,7 @@ Elk::SolidMechanics::registerObjects()
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PlenumPressure);
 
+  registerBoundaryCondition(PresetVelocity);
   registerBoundaryCondition(Pressure);
 
   registerKernel(SolidMechImplicitEuler);
@@ -63,6 +66,7 @@ Elk::SolidMechanics::registerObjects()
   registerKernel(StressDivergenceRZ);
   registerKernel(HomogenizationKernel);
   registerPostprocessor(HomogenizedElasticConstants);
+
 }
 
 void
@@ -73,7 +77,7 @@ Elk::SolidMechanics::associateSyntax()
 
   Moose::syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   Moose::syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
-  
+
   Moose::syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
 
   registerAction(PlenumPressureAction, "add_bc");
