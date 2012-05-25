@@ -33,6 +33,11 @@ class ParamTable:
     
     self.init_menu(self.layoutV)
     self.table_widget = QtGui.QTableWidget()
+    self.table_widget.setColumnCount(3)
+    self.table_widget.setHorizontalHeaderItem(0, QtGui.QTableWidgetItem('Name'))
+    self.table_widget.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem('Value'))
+    self.table_widget.setHorizontalHeaderItem(2, QtGui.QTableWidgetItem('Description'))
+    self.table_widget.verticalHeader().setVisible(False)
     self.layoutV.addWidget(self.table_widget)
 
     self.drop_menu.setCurrentIndex(-1)
@@ -101,6 +106,7 @@ class ParamTable:
     # Now look to see if we have more data that wasn't in YAML and add additional rows for that
     for name,value in the_data.items():
       if name not in used_params and name != 'type':
+        print "adding",name, value
         self.table_widget.insertRow(self.table_widget.rowCount())
         name_item = QtGui.QTableWidgetItem(name)
         value_item = QtGui.QTableWidgetItem(value)
@@ -232,11 +238,6 @@ class ParamTable:
 
     total_rows = len(the_table_data)
     self.table_widget.setRowCount(total_rows)
-    self.table_widget.setColumnCount(3)
-    self.table_widget.setHorizontalHeaderItem(0, QtGui.QTableWidgetItem('Name'))
-    self.table_widget.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem('Value'))
-    self.table_widget.setHorizontalHeaderItem(2, QtGui.QTableWidgetItem('Description'))
-    self.table_widget.verticalHeader().setVisible(False)
 
     row = 0
 
