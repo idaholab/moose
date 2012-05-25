@@ -652,7 +652,8 @@ NonlinearSystem::setInitialSolution()
       // reinit variables in nodes
       _problem.reinitNodeFace(node, boundary_id, 0);
 
-      for (std::vector<PresetNodalBC *>::iterator it = _bcs[0].getPresetNodalBCs(boundary_id).begin(); it != _bcs[0].getPresetNodalBCs(boundary_id).end(); ++it)
+      std::vector<PresetNodalBC*> p( _bcs[0].activePresetNodal(boundary_id) );
+      for (std::vector<PresetNodalBC *>::iterator it = p.begin(); it != p.end(); ++it)
         (*it)->computeValue(initial_solution);
     }
   }
