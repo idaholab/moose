@@ -25,6 +25,11 @@ adv_mat_couple_test = { INPUT : 'adv_mat_couple_test.i',
                         SCALE_REFINE : 4
                         }
 
+adv_mat_couple_test2 = { INPUT : 'adv_mat_couple_test2.i',
+                         EXODIFF : ['out_adv_coupled2.e'],
+                         SCALE_REFINE : 4
+                         }
+
 mat_cyclic_dep_error_test = { INPUT : 'mat_cyclic_coupling.i',
                               EXPECT_ERR : 'Cyclic dependency detected' }
 

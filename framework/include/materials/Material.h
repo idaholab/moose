@@ -176,9 +176,9 @@ protected:
    * to be retrieved using get().
    */
   template<typename T>
-  MaterialProperty<T> & declareProperty(const std::string & prop_name)
+  MaterialProperty<T> & declareProperty(const std::string & prop_name, bool is_get=false)
   {
-    registerPropName(prop_name);
+    registerPropName(prop_name, is_get);
     return _material_data.declareProperty<T>(prop_name);
   }
 
@@ -188,9 +188,9 @@ protected:
    * to be retrieved using getOld().
    */
   template<typename T>
-  MaterialProperty<T> & declarePropertyOld(const std::string & prop_name)
+  MaterialProperty<T> & declarePropertyOld(const std::string & prop_name, bool is_get=false)
   {
-    registerPropName(prop_name);
+    registerPropName(prop_name, is_get);
     return _material_data.declarePropertyOld<T>(prop_name);
   }
 
@@ -200,9 +200,9 @@ protected:
    * to be retrieved using getOlder().
    */
   template<typename T>
-  MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name)
+  MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name, bool is_get=false)
   {
-    registerPropName(prop_name);
+    registerPropName(prop_name, is_get);
     return _material_data.declarePropertyOlder<T>(prop_name);
   }
 
@@ -219,11 +219,13 @@ private:
   /**
    * Small helper function to call storeMatPropName
    */
-  void registerPropName(std::string prop_name)
+  void registerPropName(std::string prop_name, bool is_get)
   {
     for(unsigned int i=0; i<_block_id.size(); i++)
     {
-      _supplied_props.insert(prop_name);
+      // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
+      if (!is_get)
+        _supplied_props.insert(prop_name);
       _subproblem.storeMatPropName(_block_id[i], prop_name);
       if (_displaced_subproblem != NULL)
         _displaced_subproblem->storeMatPropName(_block_id[i], prop_name);
@@ -237,7 +239,7 @@ MaterialProperty<T> &
 Material::getMaterialProperty(const std::string & name)
 {
   _depend_props.insert(name);
-  return declareProperty<T>(name);      ///< the property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
+  return declareProperty<T>(name, true);      ///< the property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
 }
 
 template<typename T>
@@ -245,7 +247,7 @@ MaterialProperty<T> &
 Material::getMaterialPropertyOld(const std::string & name)
 {
   _depend_props.insert(name);
-  return declarePropertyOld<T>(name);
+  return declarePropertyOld<T>(name, true);
 }
 
 template<typename T>
@@ -253,7 +255,7 @@ MaterialProperty<T> &
 Material::getMaterialPropertyOlder(const std::string & name)
 {
   _depend_props.insert(name);
-  return declarePropertyOlder<T>(name);
+  return declarePropertyOlder<T>(name, true);
 }
 
 #endif //MATERIAL_H

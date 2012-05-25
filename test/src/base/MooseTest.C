@@ -57,6 +57,7 @@
 #include "StatefulTest.h"
 #include "StatefulSpatialTest.h"
 #include "CoupledMaterial.h"
+#include "CoupledMaterial2.h"
 #include "LinearInterpolationMaterial.h"
 
 #include "DGMatDiffusion.h"
@@ -149,6 +150,7 @@ void registerObjects()
   registerMaterial(StatefulTest);
   registerMaterial(StatefulSpatialTest);
   registerMaterial(CoupledMaterial);
+  registerMaterial(CoupledMaterial2);
   registerMaterial(LinearInterpolationMaterial);
 
   registerScalarKernel(ExplicitODE);
