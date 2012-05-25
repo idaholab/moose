@@ -58,7 +58,7 @@ class ParamTable:
           self.drop_menu.setCurrentIndex(found_index)
               
       self.table_widget.cellChanged.connect(self.cellChanged)
-      self.fillTableWithData(self.incoming_data)
+      self.fillTableWithData(self.incoming_data, True)
       self.table_widget.cellChanged.disconnect(self.cellChanged)
     self.main_layout.addLayout(self.layoutV)
 
@@ -86,7 +86,7 @@ class ParamTable:
 
 
   ### Takes a dictionary containing name value pairs
-  def fillTableWithData(self, the_data):
+  def fillTableWithData(self, the_data, overwrite_type=False):
 #     for name,value in the_data.items():
 #       for i in xrange(0,self.table_widget.rowCount()):
 #         row_name = str(self.table_widget.item(i,0).text())
@@ -99,14 +99,13 @@ class ParamTable:
     for i in xrange(0,self.table_widget.rowCount()):
       row_name = str(self.table_widget.item(i,0).text())
 
-      if row_name in the_data:# and row_name != 'type':
+      if row_name in the_data and (overwrite_type == True or row_name != 'type'):
         item = self.table_widget.item(i,1)
         item.setText(str(the_data[row_name]))
         used_params.append(row_name)
     # Now look to see if we have more data that wasn't in YAML and add additional rows for that
     for name,value in the_data.items():
       if name not in used_params and name != 'type':
-        print "adding",name, value
         self.table_widget.insertRow(self.table_widget.rowCount())
         name_item = QtGui.QTableWidgetItem(name)
         value_item = QtGui.QTableWidgetItem(value)
