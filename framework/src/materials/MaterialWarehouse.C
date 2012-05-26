@@ -228,8 +228,21 @@ MaterialWarehouse::sortMaterials(std::map<SubdomainID, std::vector<Material *> >
       }
     }
 
-    // Sort based on dependencies
-    std::sort(j->second.begin(), j->second.end(), resolver);
+    try
+    {
+      // Sort based on dependencies
+      std::sort(j->second.begin(), j->second.end(), resolver);
+    }
+    catch(CyclicDependencyException<Material *> & e)
+    {
+      std::ostringstream oss;
+
+      oss << "Cyclic dependency detected in material property couplings:\n";
+      const std::multimap<Material *, Material *> & depends = e.getCyclicDependencies();
+      for (std::multimap<Material *, Material *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
+        oss << it->first->name() << " -> " << it->second->name() << "\n";
+      mooseError(oss.str());
+    }
   }
 }
 

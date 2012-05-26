@@ -21,6 +21,7 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
+#include <exception>
 
 #include "Moose.h"
 
@@ -81,6 +82,34 @@ private:
   std::vector<T> _ordered_items_vector;
 };
 
+template<typename T>
+class CyclicDependencyException : public std::runtime_error
+{
+public:
+  CyclicDependencyException(const std::string &error, const std::multimap<T, T> & cyclic_items) throw() :
+      runtime_error(error),
+      _cyclic_items(cyclic_items)
+    {
+    }
+
+  CyclicDependencyException(const CyclicDependencyException & e) throw() :
+      runtime_error(e),
+      _cyclic_items(e._cyclic_items)
+    {
+    }
+
+  ~CyclicDependencyException() throw()
+    {
+    }
+
+  const std::multimap<T, T> & getCyclicDependencies() const
+    {
+      return _cyclic_items;
+    }
+
+private:
+  std::multimap<T, T> _cyclic_items;
+};
 
 /**
  * Helper class definitions
@@ -240,7 +269,7 @@ DependencyResolver<T>::getSortedValuesSets()
         oss << "Cyclic dependency detected in the Dependency Resolver.  Remaining items are:\n";
         for (typename std::multimap<T, T>::iterator j = depends.begin(); j != depends.end(); ++j)
           oss << j->first << " -> " << j->second << "\n";
-        mooseError(oss.str());
+        throw CyclicDependencyException<T>(oss.str(), depends);
       }
     }
   }
