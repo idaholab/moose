@@ -26,6 +26,7 @@ public:
 
   unsigned int id() { return _id; }
 
+
   /**
    * Initialize the component
    */

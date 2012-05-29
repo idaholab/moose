@@ -28,6 +28,8 @@ InputParameters validParams<PipeBase>()
   params.addRequiredParam<unsigned int>("n_elems", "number of element in this pipe");
   params.addRequiredParam<Real>("A", "Area of the pipe");
 
+  params.addRequiredParam<std::string>("eos_function", "The EOS function object");
+
   //Input parameters default values could be given.
   params.addParam<Real>("aw", 0.0, "Heating surface density");
   params.addParam<Real>("f", 0.0, "friction");
