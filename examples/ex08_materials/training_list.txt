@@ -4,4 +4,6 @@ include/materials/ExampleMaterial.h
 src/materials/ExampleMaterial.C
 include/kernels/ExampleDiffusion.h
 src/kernels/ExampleDiffusion.C
+include/kernels/Convection.h
+src/kernels/Convection.C
 src/main.C

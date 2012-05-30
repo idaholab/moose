@@ -18,23 +18,24 @@ template<>
 InputParameters validParams<Convection>()
 {
   InputParameters params = validParams<Kernel>();
-
-  params.addRequiredCoupledVar("some_variable", "The gradient of this variable will be used as the velocity vector.");
   return params;
 }
 
 Convection::Convection(const std::string & name,
                        InputParameters parameters) :
     Kernel(name, parameters),
-    _some_variable(coupledGradient("some_variable"))
+
+    // Retrieve a gradient material property to use for the convection
+    // velocity
+    _velocity(getMaterialProperty<RealGradient>("convection_velocity"))
 {}
 
 Real Convection::computeQpResidual()
 {
-  return _test[_i][_qp]*(_some_variable[_qp]*_grad_u[_qp]);
+  return _test[_i][_qp]*(_velocity[_qp]*_grad_u[_qp]);
 }
 
 Real Convection::computeQpJacobian()
 {
-  return _test[_i][_qp]*(_some_variable[_qp]*_grad_phi[_j][_qp]);
+  return _test[_i][_qp]*(_velocity[_qp]*_grad_phi[_j][_qp]);
 }

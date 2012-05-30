@@ -19,7 +19,11 @@ InputParameters validParams<ExampleMaterial>()
 {
   InputParameters params = validParams<Material>();
 
-  params.addParam<Real>("diffusivity_baseline", 1.0, "This number will be added to the value of some_variable");
+  // Vectors for Linear Interpolation
+  params.addRequiredParam<std::vector<Real> >("independent_vals", "The vector of indepedent values for building the piecewise function");
+  params.addRequiredParam<std::vector<Real> >("dependent_vals", "The vector of depedent values for building the piecewise function");
+
+  params.addCoupledVar("diffusion_gradient", "The gradient of this variable will be used to compute a velocity vector property.");
 
   return params;
 }
@@ -27,17 +31,26 @@ InputParameters validParams<ExampleMaterial>()
 ExampleMaterial::ExampleMaterial(const std::string & name,
                                  InputParameters parameters) :
     Material(name, parameters),
-
-    // Get a parameter
-    _diffusivity_baseline(getParam<Real>("diffusivity_baseline")),
-
-    // Declare that this material is going to have a Real
+    // Declare that this material is going to provide a Real
     // valued property named "diffusivity" that Kernels can use.
-    _diffusivity(declareProperty<Real>("diffusivity"))
+    _diffusivity(declareProperty<Real>("diffusivity")),
+
+    // Declare that this material is going to provide a RealGradient
+    // valued property named "convection_velocity" that Kernels can use.
+    _convection_velocity(declareProperty<RealGradient>("convection_velocity")),
+
+    // Get the reference to the variable coupled into this Material
+    _diffusion_gradient(isCoupled("diffusion_gradient") ? coupledGradient("diffusion_gradient") : _grad_zero),
+
+    _piecewise_func(getParam<std::vector<Real> >("independent_vals"),
+                    getParam<std::vector<Real> >("dependent_vals"))
 {}
 
 void
 ExampleMaterial::computeQpProperties()
 {
-  _diffusivity[_qp] = _diffusivity_baseline;
+  // We will compute the diffusivity based on the Linear Interpolation of the provided vectors in the z-direction
+  _diffusivity[_qp] = _piecewise_func.sample(_coord[2]);
+
+  _convection_velocity[_qp] = _diffusion_gradient[_qp];
 }
