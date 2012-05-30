@@ -33,10 +33,10 @@ GROUP         = 'group'          # Specify a single group or a list of groups th
 HEAVY         = 'heavy'          # Set to true if this test should only be run when the --heavy option is used
 
 # Scaling options
-#PARALLEL      = 'parallel'       # String: Number of processes to use
-NOPARALLEL    = 'noparallel'     # Boolean: When operating in parallel, do not run in parallel for this test
-MAXPARALLEL   = 'maxparallel'    # String: When running in parallel, regardles of processes to use, use this number instead
-MINPARALLEL   = 'minparallel'    # String: When running in parallel, regardles of processes to use, use this number instead
+#PARALLEL      = 'parallel'      # String: Number of processes to use
+NO_PARALLEL    = 'no_parallel'   # Boolean: When operating in parallel, do not run in parallel for this test
+MAX_PARALLEL   = 'max_parallel'  # String: When running in parallel, regardles of processes to use, use this number instead
+MIN_PARALLEL   = 'min_parallel'  # String: When running in parallel, regardles of processes to use, use this number instead
 SCALE_REFINE  = '<n>'            # The number of refinements to do when scaling
 
 # These options are not currently implemented.  Please contact the MOOSE Team if you are ready to use them.
@@ -77,9 +77,9 @@ DEFAULTS = { EXODIFF : [],
              HEAVY : False,
              SCALE_REFINE : 0,
 #             DOFS : 0,
-             MINPARALLEL : 1,
-             NOPARALLEL : False,
-             MAXPARALLEL : 1000,
+             MIN_PARALLEL : 1,
+             NO_PARALLEL : False,
+             MAX_PARALLEL : 1000,
 #             THREADS : 0,
              MAX_TIME : 300,
              SKIP : '',

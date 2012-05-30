@@ -99,9 +99,9 @@ class TestHarness:
     command = ''
 
     # Raise the floor
-    ncpus = max(self.options.parallel, int(test[MINPARALLEL]))
+    ncpus = max(self.options.parallel, int(test[MIN_PARALLEL]))
     # Lower the ceiling
-    ncpus = min(ncpus, int(test[MAXPARALLEL]))
+    ncpus = min(ncpus, int(test[MAX_PARALLEL]))
 
     # TODO: Refactor this caveats business
     if ncpus > self.options.parallel:
@@ -110,7 +110,7 @@ class TestHarness:
       test['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
 
     if ncpus > 1:
-      command = 'mpiexec -n ' + str(ncpus) + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+      command = 'mpiexec -host ' + self.host_name + ' -n ' + str(ncpus) + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
     else:
       command = self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
 
