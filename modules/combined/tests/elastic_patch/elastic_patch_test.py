@@ -6,7 +6,7 @@ test = { INPUT : 'elastic_patch.i',
 
 test2Procs = { INPUT : 'elastic_patch.i',
                EXODIFF : ['elastic_patch_out.e'],
-               MINPARALLEL : '2',
+               MIN_PARALLEL : '2',
                PREREQ : 'test',
                PLATFORM : ['DARWIN'] }
 
