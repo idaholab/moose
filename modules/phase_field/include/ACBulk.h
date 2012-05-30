@@ -25,11 +25,11 @@ protected:
   virtual Real precomputeQpJacobian();
   virtual Real computeDFDOP(PFFunctionType type) = 0;
   std::string _mob_name;
+  MaterialProperty<Real> & _L;
 
 
 private:
 
-  MaterialProperty<Real> & _L;
 
 };
 #endif //ACBulk_H
