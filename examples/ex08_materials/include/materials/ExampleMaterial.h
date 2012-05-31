@@ -49,8 +49,7 @@ private:
   MaterialProperty<Real> & _diffusivity;
 
   /**
-   * This is the member reference that will hold the computed values
-   * for the Gradient value property in this class.
+   * Computed values for the Gradient value property in this class.
    */
   MaterialProperty<RealGradient> & _convection_velocity;
 
@@ -61,9 +60,8 @@ private:
   VariableGradient & _diffusion_gradient;
 
   /**
-   * This object returns a piecewise linear
-   * function based an a series of points
-   * and their corresponding values
+   * This object returns a piecewise linear function based an a series
+   * of points and their corresponding values
    */
   LinearInterpolation _piecewise_func;
 };
