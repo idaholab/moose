@@ -22,7 +22,7 @@ template<>
 InputParameters validParams<Postprocessor>()
 {
   InputParameters params = validParams<MooseObject>();
-  params += validParams<SetupInterface>();
+  params.addParam<std::string>("execute_on", "timestep", "Set to (residual|timestep|timestep_begin) to execute only at that moment");
 
   params.addParam<std::string>("output", "both", "The values are: none, screen, file, both (no output, output to screen only, output to files only, output both to screen and files)");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
@@ -39,7 +39,4 @@ Postprocessor::Postprocessor(const std::string & name, InputParameters parameter
     _coord_sys(_subproblem.coordSystem()),
     _output(Moose::stringToEnum<Moose::PPSOutputType>(parameters.get<std::string>("output")))
 {
-  // Initialize the postprocessor data for this PP
-  // FIXME: PPS::init()
-//  parameters.get<MooseSystem *>("_moose_system")->_postprocessor_data[_local_tid].init(name);
 }

@@ -27,16 +27,10 @@ InputParameters validParams<AddPostprocessorAction>()
 AddPostprocessorAction::AddPostprocessorAction(const std::string & name, InputParameters params) :
     MooseObjectAction(name, params)
 {
-  if (_parser_handle.pathContains(_name, "Residual"))
-    _pps_type = EXEC_RESIDUAL;
-  else if (_parser_handle.pathContains(_name, "Jacobian"))
-    _pps_type = EXEC_JACOBIAN;
-  else
-    _pps_type = EXEC_TIMESTEP;
 }
 
 void
 AddPostprocessorAction::act()
 {
-  _problem->addPostprocessor(_type, getShortName(), _moose_object_pars, _pps_type);
+  _problem->addPostprocessor(_type, getShortName(), _moose_object_pars);
 }

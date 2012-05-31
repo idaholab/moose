@@ -201,7 +201,7 @@ public:
 
 
   // Postprocessors /////
-  virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, ExecFlagType type = EXEC_TIMESTEP);
+  virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
 
   /**
    * Get a reference to the value associated with the postprocessor.

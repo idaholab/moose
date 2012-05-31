@@ -1093,7 +1093,7 @@ FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int /*side*/, TH
 }
 
 void
-FEProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, ExecFlagType type/* = EXEC_TIMESTEP*/)
+FEProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
@@ -1105,11 +1105,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
     parameters.set<SubProblem *>("_subproblem") = this;
   }
 
-  // Parameter 'execute_on' needs to override the 'type' arg
-  // TODO: remove this when we get rid of residual/jacobian sub-block in the input file
-  if (parameters.wasSeenInInput("execute_on"))
-    type = Moose::stringToEnum<ExecFlagType>(parameters.get<std::string>("execute_on"));
-
+  ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<std::string>("execute_on"));
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;

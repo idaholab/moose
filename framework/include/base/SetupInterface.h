@@ -18,10 +18,6 @@
 #include "InputParameters.h"
 #include "ExecStore.h"
 
-class SetupInterface;
-
-template<>
-InputParameters validParams<SetupInterface>();
 
 class SetupInterface
 {

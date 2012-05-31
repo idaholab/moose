@@ -30,9 +30,6 @@ public:
   AddPostprocessorAction(const std::string & name, InputParameters params);
 
   virtual void act();
-
-protected:
-  ExecFlagType _pps_type;
 };
 
 #endif //ADDPOSTPROCESSORACTION_H

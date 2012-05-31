@@ -23,7 +23,7 @@ template<>
 InputParameters validParams<Material>()
 {
   InputParameters params = validParams<MooseObject>();
-  params += validParams<SetupInterface>();
+  params.addParam<std::string>("execute_on", "residual", "Set to (residual|timestep|timestep_begin) to execute only at that moment");
   params.addRequiredParam<std::vector<SubdomainName> >("block", "The id or name of the block (subdomain) that this material represents.");
 
   params.addPrivateParam<std::string>("built_by_action", "add_material");

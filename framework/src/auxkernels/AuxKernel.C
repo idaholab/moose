@@ -27,7 +27,8 @@ template<>
 InputParameters validParams<AuxKernel>()
 {
   InputParameters params = validParams<MooseObject>();
-  params += validParams<SetupInterface>();
+  params.addParam<std::string>("execute_on", "residual", "Set to (residual|timestep|timestep_begin) to execute only at that moment");
+
   params.addRequiredParam<std::string>("variable", "The name of the variable that this object applies to");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   // For use on the boundary only
