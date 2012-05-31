@@ -23,7 +23,7 @@
  * at the bottom of the file.
  */
 
-//Forward Declarations
+// Forward Declarations
 class ImplicitODEy;
 
 /**
@@ -42,17 +42,13 @@ class ImplicitODEy : public ODEKernel
 {
 public:
   /**
-   * This is the Constructor declaration AND definition.
-   * It is ok to have the definition in the .h if the function body
-   * is really small.  Otherwise it should be in the .C
+   * Constructor
    */
   ImplicitODEy(const std::string & name, InputParameters parameters);
 
 protected:
   /**
    * Responsible for computing the residual
-   *
-   * This should always be defined in the .C
    */
   virtual Real computeQpResidual();
 
@@ -63,8 +59,6 @@ protected:
    *
    * Note that this can be an approximation or linearization.  In this case it's
    * not because the Jacobian of this operator is easy to calculate.
-   *
-   * This should always be defined in the .C
    */
   virtual Real computeQpJacobian();
 
@@ -72,18 +66,17 @@ protected:
    * Responsible for computing the off-diagonal block of the preconditioning matrix.
    * This is essentially the partial derivative of the residual with respect to
    * the variable that is coupled into this kernel.
-   *
-   * Note that this can be an approximation or linearization.  In this case it's
-   * not because the Jacobian of this operator is easy to calculate.
-   *
-   * This should always be defined in the .C
    */
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// The number of coupled scalar variable
-  /// Needed for computing off-diagonal terms in Jacobian
+  /**
+   * Needed for computing off-diagonal terms in Jacobian
+   */
   unsigned int _x_var;
-  /// Coupled scalar variable values
+  
+  /**
+   * Coupled scalar variable values
+   */
   VariableValue & _x;
 };
 

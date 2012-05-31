@@ -24,7 +24,7 @@
  * at the bottom of the file.
  */
 
-//Forward Declarations
+// Forward Declarations
 class ImplicitODEx;
 
 /**
@@ -36,23 +36,18 @@ InputParameters validParams<ImplicitODEx>();
 
 /**
  * ODE: x' = 3 * x + 2 * y
- *
  */
 class ImplicitODEx : public ODEKernel
 {
 public:
   /**
-   * This is the Constructor declaration AND definition.
-   * It is ok to have the definition in the .h if the function body
-   * is really small.  Otherwise it should be in the .C
+   * Constructor
    */
   ImplicitODEx(const std::string & name, InputParameters parameters);
 
 protected:
   /**
    * Responsible for computing the residual
-   *
-   * This should always be defined in the .C
    */
   virtual Real computeQpResidual();
 
@@ -63,8 +58,6 @@ protected:
    *
    * Note that this can be an approximation or linearization.  In this case it's
    * not because the Jacobian of this operator is easy to calculate.
-   *
-   * This should always be defined in the .C
    */
   virtual Real computeQpJacobian();
 
@@ -75,15 +68,17 @@ protected:
    *
    * Note that this can be an approximation or linearization.  In this case it's
    * not because the Jacobian of this operator is easy to calculate.
-   *
-   * This should always be defined in the .C
    */
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// The number of coupled scalar variable
-  /// Needed for computing off-diagonal terms in Jacobian
+  /**
+   * Needed for computing off-diagonal terms in Jacobian
+   */
   unsigned int _y_var;
-  /// Coupled scalar variable values
+
+  /**
+   * Coupled scalar variable values
+   */
   VariableValue & _y;
 };
 
