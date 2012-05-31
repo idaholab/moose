@@ -60,6 +60,7 @@ KernelValue::computeJacobian()
   {
     for (_j = 0; _j < _phi.size(); _j++)
     {
+      // NOTE: is it possible to move this out of the for-loop and multiply the _value by _phi[_j][_qp]
       _value = precomputeQpJacobian();
       for (_i = 0; _i < _test.size(); _i++)
         ke(_i, _j) += _JxW[_qp]*_coord[_qp]*_value*_test[_i][_qp];
@@ -80,16 +81,18 @@ KernelValue::computeOffDiagJacobian(unsigned int jvar)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
     {
       if(jvar == _var.number())
-        _value = _coord[_qp]*precomputeQpJacobian();
-      else
-        _value = _coord[_qp]*computeQpOffDiagJacobian(jvar);
-
-      for (_i=0; _i<_test.size(); _i++)
       {
-        if(jvar == _var.number())
+        _value = _coord[_qp]*precomputeQpJacobian();
+        for (_i=0; _i<_test.size(); _i++)
           Ke(_i,_j) += _JxW[_qp]*_coord[_qp]*_value*_test[_i][_qp];
-        else
+      }
+      else
+      {
+        for (_i=0; _i<_test.size(); _i++)
+        {
+          _value = _coord[_qp]*computeQpOffDiagJacobian(jvar);
           Ke(_i,_j) += _JxW[_qp]*_coord[_qp]*_value;
+        }
       }
     }
 

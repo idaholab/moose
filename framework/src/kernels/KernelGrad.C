@@ -106,17 +106,20 @@ KernelGrad::computeOffDiagJacobian(unsigned int jvar)
       Real coord = _coord[_qp];
 
       if(jvar == var_num)
-        _value = precomputeQpJacobian();
-      else
-        off_diag_value = computeQpOffDiagJacobian(jvar);
-
-      for (_i=0; _i<n_test; _i++)
       {
-        if(jvar == var_num)
+        _value = precomputeQpJacobian();
+        for (_i=0; _i<n_test; _i++)
           Ke(_i,_j) += jxw*coord*_value*_grad_test[_i][_qp];
-        else
-          Ke(_i,_j) += jxw*coord*off_diag_value;
       }
+      else
+      {
+        for (_i=0; _i<n_test; _i++)
+        {
+          off_diag_value = computeQpOffDiagJacobian(jvar);
+          Ke(_i,_j) += jxw*coord*off_diag_value;
+        }
+      }
+
     }
 
 //  Moose::perf_log.pop("computeOffDiagJacobian()",_name);
