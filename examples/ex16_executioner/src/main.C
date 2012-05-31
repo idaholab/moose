@@ -46,14 +46,12 @@ int main (int argc, char** argv)
   MooseInit init (argc, argv);
 
   Moose::registerObjects();
-
   // Register our new executioner
   registerExecutioner(TransientHalf);
   registerKernel(ExampleDiffusion);
   registerKernel(Convection);
   registerKernel(ExampleImplicitEuler);
   registerMaterial(ExampleMaterial);
-
   // Associate Parser Syntax with specific MOOSE Actions
   Moose::associateSyntax();
   Parser p(Moose::syntax);
