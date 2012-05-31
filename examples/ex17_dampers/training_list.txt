@@ -1,3 +1,0 @@
-Title: Newton Damping
-ex17.i
-

@@ -1,5 +1,0 @@
-Title: Custom Executioner
-ex13.i
-include/executioners/TransientHalf.h
-src/executioners/TransientHalf.C
-src/main.C
