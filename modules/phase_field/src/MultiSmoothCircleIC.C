@@ -95,7 +95,8 @@ MultiSmoothCircleIC::MultiSmoothCircleIC(const std::string & name,
      }
 }
 
-Real MultiSmoothCircleIC::value(const Point & p)
+Real
+MultiSmoothCircleIC::value(const Point & p)
 {
   Real val = _outvalue; 
   Real val2 = 0.0;
@@ -112,4 +113,23 @@ Real MultiSmoothCircleIC::value(const Point & p)
       }
     }
   return val;
+}
+
+RealGradient
+MultiSmoothCircleIC::gradient(const Point & p)
+{
+  RealGradient grad = Gradient(0.0,0.0,0.0);
+  RealGradient grad2;
+  
+  for(unsigned int i=0; i<_numbub; i++)
+    {
+      _radius = _bubradi[i];
+      _center = _bubcent[i];
+      grad2 = SmoothCircleIC::gradient(p)/_numbub;
+      if (grad.size() < grad2.size())
+        grad = grad2;
+      
+    }
+  
+  return grad;
 }

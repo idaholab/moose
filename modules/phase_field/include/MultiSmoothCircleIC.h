@@ -37,6 +37,7 @@ public:
                          InputParameters parameters);
   
   virtual Real value(const Point & p);
+  virtual RealGradient gradient(const Point & p);
 
 protected:
   unsigned int _numbub;

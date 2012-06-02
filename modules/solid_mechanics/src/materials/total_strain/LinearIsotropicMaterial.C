@@ -50,20 +50,6 @@ LinearIsotropicMaterial::computeProperties()
   {
       Real alpha = computeAlpha();
 
-    /* AMJ: I believe I have identified a logic bug with using inherited classes (e.g.,
-       LinearAnisotropicMaterial and non-zero Euler angles in conjunction with/inheriting from
-       LinearIsotropicMaterial.  When using Euler angles = 0.0, no problem occurs.  However,
-       using Euler angles != zero causes the _elasticity_tensor[_qp]=*_local_elasticity_tensor
-       to rotate with every single quadrature point, every time the Material class is
-       computed.  This is due to the _local_elasticity_tensor->calculate(_qp) call.  Because
-       we are dereferencing the _local_elasticity_tensor, we are actually changing the
-       original elasticity tensor that is supplied (from the input or material class
-       construction, etc).  I've attempted to fix this by moving the relevant information
-       into a local copy_local_tensor variable, but (perhaps because I don't know enough
-       C++) I cannot get this to work in LinearIsotropicMaterial for an arbitrary derived class that
-       may use different derived kinds of Symm***ElasticityTensors.  So... good luck, Chuck.
-       I might not be able to fix the problem, but I think I've identified it correctly. */
-
     _local_elasticity_tensor->calculate(_qp);
 
     _elasticity_tensor[_qp] = *_local_elasticity_tensor;
