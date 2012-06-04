@@ -5,10 +5,9 @@
 #include "R7Object.h"
 #include "R7Mesh.h"
 #include "ActionWarehouse.h"
-#include "Simulation.h"
 #include "Model.h"
 
-
+class Simulation;
 class Component;
 class FEProblem;
 
