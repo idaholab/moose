@@ -38,8 +38,6 @@ public:
    */
   ProcessorIDAux(const std::string & name, InputParameters parameters);
 
-  virtual ~ProcessorIDAux() {}
-
 protected:
   virtual Real computeValue();
 };

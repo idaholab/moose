@@ -69,7 +69,7 @@ public:
    * Use this to enable/disable the constraint
    * @return true if the constrain is active
    */
-  virtual bool isActive() { return true; }
+  virtual bool isActive();
 
 protected:
   Problem & _problem;

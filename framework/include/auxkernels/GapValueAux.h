@@ -30,8 +30,6 @@ class GapValueAux : public AuxKernel
 public:
   GapValueAux(const std::string & name, InputParameters parameters);
 
-  virtual ~GapValueAux() {}
-
 protected:
   virtual Real computeValue();
 

@@ -37,8 +37,6 @@ public:
    */
   SelfAux(const std::string & name, InputParameters parameters);
 
-  virtual ~SelfAux() {}
-
 protected:
   virtual Real computeValue();
 };

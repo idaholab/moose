@@ -36,6 +36,12 @@ NemesisOutput::~NemesisOutput()
   delete _out;
 }
 
+void
+NemesisOutput::sequence(bool state)
+{
+  _seq = state;
+}
+
 std::string
 NemesisOutput::getFileName(const std::string & file_base)
 {

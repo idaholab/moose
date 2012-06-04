@@ -33,7 +33,7 @@ public:
   virtual void outputInput();
 
   virtual void meshChanged();
-  virtual void sequence(bool state) { _seq = state; }
+  virtual void sequence(bool state);
 
 protected:
   Nemesis_IO * _out;

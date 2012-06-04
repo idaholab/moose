@@ -32,3 +32,30 @@ SetupInterface::SetupInterface(InputParameters & params)
 SetupInterface::~SetupInterface()
 {
 }
+
+void
+SetupInterface::initialSetup() {}
+
+void
+SetupInterface::timestepSetup() {}
+
+void
+SetupInterface::jacobianSetup() {}
+
+void
+SetupInterface::residualSetup() {}
+
+void
+SetupInterface::subdomainSetup() {}
+
+ExecFlagType
+SetupInterface::execFlag()
+{
+  return _exec_flags;
+}
+
+void
+SetupInterface::execFlag(ExecFlagType type)
+{
+  _exec_flags = type;
+}

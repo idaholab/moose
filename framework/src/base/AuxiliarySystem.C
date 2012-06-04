@@ -354,3 +354,11 @@ AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
 
   Moose::perf_log.pop("update_aux_vars_elemental()","Solve");
 }
+
+void
+AuxiliarySystem::augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
+                                 std::vector<unsigned int> & /*n_nz*/,
+                                 std::vector<unsigned int> & /*n_oz*/)
+{
+}
+

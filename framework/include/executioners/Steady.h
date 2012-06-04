@@ -55,7 +55,7 @@ public:
    */
   virtual void execute();
 
-  virtual Problem & problem() { return _problem; }
+  virtual Problem & problem();
 
   virtual void checkIntegrity();
 

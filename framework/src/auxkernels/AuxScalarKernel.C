@@ -64,3 +64,9 @@ AuxScalarKernel::compute()
     _var.setValue(_i, value);                  // update variable data, which is referenced by other kernels, so the value is up-to-date
   }
 }
+
+bool
+AuxScalarKernel::isActive()
+{
+  return true;
+}

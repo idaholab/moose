@@ -40,6 +40,12 @@ Steady::~Steady()
   delete &_problem;
 }
 
+Problem &
+Steady::problem()
+{
+  return _problem;
+}
+
 void
 Steady::execute()
 {
