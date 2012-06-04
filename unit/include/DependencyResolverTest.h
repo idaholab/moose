@@ -28,6 +28,8 @@ class DependencyResolverTest : public CppUnit::TestFixture
 
   CPPUNIT_TEST( operatorParensTest );
   CPPUNIT_TEST( resolverSets );
+  CPPUNIT_TEST( ptrTest );
+  CPPUNIT_TEST( simpleTest );
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -36,6 +38,8 @@ public:
 
   void operatorParensTest();
   void resolverSets();
+  void ptrTest();
+  void simpleTest();
 
 private:
   DependencyResolver<std::string> _resolver;

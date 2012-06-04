@@ -52,6 +52,64 @@ DependencyResolverTest::operatorParensTest()
 }
 
 void
+DependencyResolverTest::ptrTest()
+{
+  DependencyResolver<int *> resolver;
+
+  int *mat3 = new int;
+  int *mat1 = new int;
+  int *mat2 = new int;
+
+  resolver.insertDependency(mat2, mat1);
+  resolver.insertDependency(mat3, mat1);
+  resolver.insertDependency(mat3, mat2);
+
+  std::vector<int *> sorted(3);
+  sorted[0] = mat1;
+  sorted[1] = mat2;
+  sorted[2] = mat3;
+
+
+  const std::vector<std::set<int *> > & sets = resolver.getSortedValuesSets();
+
+  std::sort(sorted.begin(), sorted.end(), resolver);
+  CPPUNIT_ASSERT( sorted[0] == mat1);
+  CPPUNIT_ASSERT( sorted[1] == mat2);
+  CPPUNIT_ASSERT( sorted[2] == mat3);
+
+  delete mat1;
+  delete mat2;
+  delete mat3;
+}
+
+void
+DependencyResolverTest::simpleTest()
+{
+  DependencyResolver<int> resolver;
+
+  int mat3 = 3;
+  int mat1 = 1;
+  int mat2 = 2;
+
+  resolver.insertDependency(mat2, mat1);
+  resolver.insertDependency(mat3, mat1);
+  resolver.insertDependency(mat3, mat2);
+
+  std::vector<int> sorted(3);
+  sorted[0] = mat1;
+  sorted[1] = mat2;
+  sorted[2] = mat3;
+
+
+  const std::vector<std::set<int> > & sets = resolver.getSortedValuesSets();
+
+  std::sort(sorted.begin(), sorted.end(), resolver);
+  CPPUNIT_ASSERT( sorted[0] == mat1);
+  CPPUNIT_ASSERT( sorted[1] == mat2);
+  CPPUNIT_ASSERT( sorted[2] == mat3);
+}
+
+void
 DependencyResolverTest::resolverSets()
 {
   // First throw in an extra independent item

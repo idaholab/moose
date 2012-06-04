@@ -246,9 +246,14 @@ DependencyResolver<T>::getSortedValuesSets()
       {
         if (difference.find(iter->second) != difference.end())
         {
-          if (nodepends.find(iter->first) != nodepends.end()) //Item is at end of dependency chain
-            next_set.insert(iter->first);
+          T key = iter->first;
           depends.erase(iter++);   // post increment to maintain a valid iterator
+
+          // If the item is at the end of a dependency chain (by being in nodepends) AND
+          // is not still in the depends map because it still has another unresolved link
+          // insert it into the next_set
+          if (nodepends.find(key) != nodepends.end() && depends.find(key) == depends.end())
+            next_set.insert(key);
         }
         else
           ++iter;
