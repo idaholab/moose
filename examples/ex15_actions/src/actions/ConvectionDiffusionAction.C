@@ -49,17 +49,17 @@ ConvectionDiffusionAction::act()
   // Setup our Diffusion Kernel on the "u" variable
   InputParameters conv_diff_params = Factory::instance()->getValidParams("Diffusion");
   conv_diff_params.set<std::string>("variable") = variables[0];
-  _parser_handle._problem->addKernel("Diffusion", "diff_u", conv_diff_params);
+  _problem->addKernel("Diffusion", "diff_u", conv_diff_params);
 
   // Setup our Convection Kernel on the "u" variable coupled to the diffusion variable "v"
   conv_diff_params.addCoupledVar("some_variable", "The gradient of this var");
   vel_vec_variable.push_back(variables[1]);
   conv_diff_params.set<std::vector<std::string> >("some_variable") = vel_vec_variable;
-  _parser_handle._problem->addKernel("Convection", "conv", conv_diff_params);
+  _problem->addKernel("Convection", "conv", conv_diff_params);
 
   // Setup out Diffusion Kernel on the "v" variable
   InputParameters conv_params = Factory::instance()->getValidParams("Convection");
   conv_params.set<std::string>("variable") = variables[1];
-  _parser_handle._problem->addKernel("Diffusion", "diff_v", conv_params);
+  _problem->addKernel("Diffusion", "diff_v", conv_params);
 }
 

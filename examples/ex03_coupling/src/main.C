@@ -22,11 +22,7 @@
 
 // Moose Includes
 #include "MooseInit.h"
-#include "Executioner.h"
-
-// Parser
-#include "Parser.h"
-#include "MooseSyntax.h"
+#include "MooseApp.h"
 
 // Example 3 Includes
 #include "Factory.h"
@@ -42,20 +38,11 @@ PerfLog Moose::perf_log("Example 3: Coupling");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-
-  Moose::registerObjects();
+  MooseApp app(argc, argv);
 
   registerKernel(Convection);
-  Moose::associateSyntax();
-  Parser p(Moose::syntax);
 
-  // Parse commandline and return inputfile filename if appropriate
-  std::string input_filename = p.parseCommandLine();
-
-  p.parse(input_filename);
-  p.execute();
-
-  Moose::executioner->execute();
+  app.run();
 
   return 0;
 }

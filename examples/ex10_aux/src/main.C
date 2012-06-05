@@ -20,12 +20,8 @@
 
 // Moose Includes
 #include "MooseInit.h"
-#include "Executioner.h"
+#include "MooseApp.h"
 #include "Factory.h"
-
-// Parser
-#include "Parser.h"
-#include "MooseSyntax.h"
 
 // Example 10 Includes
 #include "ExampleAux.h"
@@ -38,23 +34,12 @@ PerfLog Moose::perf_log("Example 10: Auxiliary Calculations");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-
-  Moose::registerObjects();
+  MooseApp app(argc, argv);
 
   // Register our Example AuxKernel with the AuxFactory
   registerAux(ExampleAux);
 
-  // Associate Parser Syntax with specific MOOSE Actions
-  Moose::associateSyntax();
-  Parser p(Moose::syntax);
-
-  // Parse commandline and return inputfile filename if appropriate
-  std::string input_filename = p.parseCommandLine();
-
-  p.parse(input_filename);
-  p.execute();
-
-  Moose::executioner->execute();
+  app.run();
 
   return 0;
 }

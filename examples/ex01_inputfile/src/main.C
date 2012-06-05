@@ -20,11 +20,7 @@
 
 //Moose Includes
 #include "MooseInit.h"
-#include "Executioner.h"
-
-// Parser
-#include "Parser.h"
-#include "MooseSyntax.h"
+#include "MooseApp.h"
 
 // libMesh includes
 #include "perf_log.h"
@@ -37,26 +33,10 @@ int main (int argc, char** argv)
 {
   // Create a MooseInit Object
   MooseInit init (argc, argv);
+  // Create MOOSE app that will take care of registering object, syntax, etc.
+  MooseApp app(argc, argv);
 
-  // Register a bunch of common objects that exist inside of Moose.  You will
-  // generally create a registerObjects method of your own to register modules
-  // that you create in your own application.
-  Moose::registerObjects();
-
-  // Associate Parser Syntax with specific MOOSE Actions
-  Moose::associateSyntax();
-
-  // Create a parser object
-  Parser p(Moose::syntax);
-
-  // Parse commandline and return inputfile filename if appropriate
-  std::string input_filename = p.parseCommandLine();
-
-  // Tell the parser to parse the given file to setup the simulation and execute
-  p.parse(input_filename);
-  p.execute();
-
-  Moose::executioner->execute();
+  app.run();
 
   return 0;
 }

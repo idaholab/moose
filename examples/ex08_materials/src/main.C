@@ -20,12 +20,8 @@
 
 //Moose Includes
 #include "MooseInit.h"
-#include "Executioner.h"
+#include "MooseApp.h"
 #include "Factory.h"
-
-// Parser
-#include "Parser.h"
-#include "MooseSyntax.h"
 
 // Example 8 Includes
 #include "ExampleDiffusion.h"
@@ -42,25 +38,15 @@ PerfLog Moose::perf_log("Example 8: Material Properties");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
+  MooseApp app(argc, argv);
 
-  Moose::registerObjects();
   registerKernel(Convection);
   // Our new Diffusion Kernel that accepts a material property
   registerKernel(ExampleDiffusion);
   // Register our new material class so we can use it.
   registerMaterial(ExampleMaterial);
 
-  // Associate Parser Syntax with specific MOOSE Actions
-  Moose::associateSyntax();
-  Parser p(Moose::syntax);
-
-  // Parse commandline and return inputfile filename if appropriate
-  std::string input_filename = p.parseCommandLine();
-
-  p.parse(input_filename);
-  p.execute();
-
-  Moose::executioner->execute();
+  app.run();
 
   return 0;
 }

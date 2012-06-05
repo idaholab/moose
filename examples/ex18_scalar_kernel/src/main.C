@@ -18,12 +18,8 @@
 
 //Moose Includes
 #include "MooseInit.h"
-#include "Executioner.h"
+#include "MooseApp.h"
 #include "Factory.h"
-
-// Parser
-#include "Parser.h"
-#include "MooseSyntax.h"
 
 // Example 18 Includes
 #include "ScalarDirichletBC.h"
@@ -40,25 +36,14 @@ PerfLog Moose::perf_log("Example 18: ScalarKernel");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-
-  Moose::registerObjects();
+  MooseApp app(argc, argv);
 
   // Register any custom objects you have built on the MOOSE Framework
   registerBoundaryCondition(ScalarDirichletBC);
   registerScalarKernel(ImplicitODEx);
   registerScalarKernel(ImplicitODEy);
 
-  // Associate Parser Syntax with specific MOOSE Actions
-  Moose::associateSyntax();
-  Parser p(Moose::syntax);
-
-  // Parse commandline and return inputfile filename if appropriate
-  std::string input_filename = p.parseCommandLine();
-
-  p.parse(input_filename);
-  p.execute();
-
-  Moose::executioner->execute();
+  app.run();
 
   return 0;
 }

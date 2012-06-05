@@ -18,12 +18,7 @@
 
 // Moose Includes
 #include "MooseInit.h"
-#include "Parser.h"
-#include "Executioner.h"
-
-// Parser
-#include "Parser.h"
-#include "MooseSyntax.h"
+#include "MooseApp.h"
 
 // libMesh includes
 #include "perf_log.h"
@@ -35,20 +30,9 @@ PerfLog Moose::perf_log("Example 19 Dampers");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
+  MooseApp app(argc, argv);
 
-  Moose::registerObjects();
-
-  // Associate Parser Syntax with specific MOOSE Actions
-  Moose::associateSyntax();
-  Parser p(Moose::syntax);
-
-  // Parse commandline and return inputfile filename if appropriate
-  std::string input_filename = p.parseCommandLine();
-
-  p.parse(input_filename);
-  p.execute();
-
-  Moose::executioner->execute();
+  app.run();
 
   return 0;
 }
