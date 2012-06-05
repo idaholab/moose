@@ -62,4 +62,5 @@ def readInputFile(file_name):
   return root_node
 
 if __name__ == '__main__':
-  readInputFile()
+  readInputFile('new_test.i').Print()
+  

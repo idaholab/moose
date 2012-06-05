@@ -172,6 +172,12 @@ class GetPot:
         token = ''; tmp = 0; last_letter = 0
         while 1+1 == 2:
             last_letter = tmp; tmp = FH.read(1);
+            if tmp == '#': #If we run into a comment symbol keep reading until the end of the line
+                while tmp != '\n':
+                    tmp = FH.read(1)
+                    if tmp == '': return token # end of file ?
+                return token
+
             if tmp == '' or \
                ((tmp == ' ' or tmp == '\t' or tmp == '\n') and last_letter != '\\'):
                 return token
