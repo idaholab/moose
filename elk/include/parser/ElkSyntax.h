@@ -6,7 +6,7 @@ class Parser;
 
 namespace Elk
 {
-void associateSyntax();
+void associateSyntax(Syntax & syntax);
 }
 
 #endif // ELKSYNTAX_H

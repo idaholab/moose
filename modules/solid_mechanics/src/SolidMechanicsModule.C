@@ -70,15 +70,15 @@ Elk::SolidMechanics::registerObjects()
 }
 
 void
-Elk::SolidMechanics::associateSyntax()
+Elk::SolidMechanics::associateSyntax(Syntax & syntax)
 {
-  Moose::syntax.registerActionSyntax("EmptyAction", "BCs/PlenumPressure");
-  Moose::syntax.registerActionSyntax("PlenumPressureAction", "BCs/PlenumPressure/*");
+  syntax.registerActionSyntax("EmptyAction", "BCs/PlenumPressure");
+  syntax.registerActionSyntax("PlenumPressureAction", "BCs/PlenumPressure/*");
 
-  Moose::syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
-  Moose::syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
+  syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
+  syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
-  Moose::syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
+  syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
 
   registerAction(PlenumPressureAction, "add_bc");
   registerAction(PressureAction, "add_bc");

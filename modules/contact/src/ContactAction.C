@@ -47,7 +47,7 @@ ContactAction::act()
   }
 
   InputParameters action_params = ActionFactory::instance()->getValidParams("AddDiracKernelAction");
-  action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+  action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
 
   // Create master objects
   action_params.set<std::string>("type") = "ContactMaster";
@@ -98,7 +98,7 @@ ContactAction::act()
     params.set<std::string>("variable") = vars[i];
 
     // add it to the warehouse
-    Moose::action_warehouse.addActionBlock(action);
+    _awh.addActionBlock(action);
   }
 
   // Create slave objects
@@ -142,7 +142,7 @@ ContactAction::act()
     params.set<std::string>("variable") = vars[i];
 
     // add it to the warehouse
-    Moose::action_warehouse.addActionBlock(action);
+    _awh.addActionBlock(action);
   }
 
 }

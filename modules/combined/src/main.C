@@ -3,16 +3,9 @@
  */
 
 #include "Elk.h"
-
 //Moose Includes
 #include "MooseInit.h"
-#include "Executioner.h"
-#include "Moose.h"
-
-// Parser
-#include "Parser.h"
-#include "MooseSyntax.h"
-#include "ElkSyntax.h"
+#include "ElkTestApp.h"
 
 // libMesh includes
 #include "perf_log.h"
@@ -24,23 +17,11 @@ PerfLog Moose::perf_log("Elk");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
+  ElkTestApp app(argc, argv);
 
-  Elk::registerObjects();
-
-  // Associate Parser Syntax
-  Moose::associateSyntax();
-  Elk::associateSyntax();
-  Parser p(Moose::syntax);
-  p.setCheckUnusedFlag( true );
-  p.setSortAlpha( true );
-
-  // Parse commandline and return inputfile filename if appropriate
-  std::string input_filename = p.parseCommandLine();
-
-  p.parse(input_filename);
-  p.execute();
-
-  Moose::executioner->execute();
+  app.setCheckUnusedFlag( true );
+  app.setSortAlpha( true );
+  app.run();
 
   return 0;
 }

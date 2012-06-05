@@ -71,7 +71,7 @@ PressureAction::act()
     params.set<int>("component") = i;
     params.set<std::string>("variable") = vars[i];
 
-    _parser_handle._problem->addBoundaryCondition(_kernel_name, name.str(), params);
+    _problem->addBoundaryCondition(_kernel_name, name.str(), params);
   }
 
 }

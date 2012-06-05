@@ -1,10 +1,10 @@
 #include "ThermalContactAction.h"
-#include "Parser.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "ActionFactory.h"
 #include "AddSlaveFluxVectorAction.h"
 #include "Conversion.h"
+#include "MooseApp.h"
 
 static unsigned int n = 0;                                  // numbering for gap heat transfer objects (we can have them on multiple interfaces)
 static const std::string GAP_VALUE_VAR_NAME = "gap_value";
@@ -51,7 +51,7 @@ ThermalContactAction::addBcs()
    */
 
   InputParameters action_params = ActionFactory::instance()->getValidParams("AddBCAction");
-  action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+  action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
   action_params.set<std::string>("type") = getParam<std::string>("type");
   action_params.set<std::string>("name") = "BCs/gap_bc_" + Moose::stringify(n);
   Action *action = ActionFactory::instance()->create("AddBCAction", action_params);
@@ -62,7 +62,7 @@ ThermalContactAction::addBcs()
 
   // get valid params for the BC specified in 'type' field
   InputParameters bc_params = Factory::instance()->getValidParams(getParam<std::string>("type"));
-  _parser_handle.extractParams(_name, bc_params);
+  _parser->extractParams(_name, bc_params);
   params += bc_params;
 
   params.set<std::string>("variable") = getParam<std::string>("variable");
@@ -94,7 +94,7 @@ ThermalContactAction::addBcs()
   }
 
   // add it to the warehouse
-  Moose::action_warehouse.addActionBlock(action);
+  _awh.addActionBlock(action);
 }
 
 void
@@ -117,30 +117,30 @@ ThermalContactAction::addAuxVariables()
       InputParameters action_params = ActionFactory::instance()->getValidParams("AddVariableAction");
 //    for (unsigned int i=0; i<action_params.size(); ++i)
 //    {
-      action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+      action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
       action_params.set<std::string>("action") = "add_aux_variable";
       action_params.set<std::string>("name") = "AuxVariables/" + GAP_VALUE_VAR_NAME;
       action_params.set<std::string>("order") = getParam<std::string>("order");
       // gap_value
       Action *action = ActionFactory::instance()->create("AddVariableAction", action_params);
-      Moose::action_warehouse.addActionBlock(action);
+      _awh.addActionBlock(action);
       // penetration
       action_params.set<std::string>("name") = "AuxVariables/" + PENETRATION_VAR_NAME;
       action = ActionFactory::instance()->create("AddVariableAction", action_params);
-      Moose::action_warehouse.addActionBlock(action);
+      _awh.addActionBlock(action);
 //    }
 
       action_params = ActionFactory::instance()->getValidParams("CopyNodalVarsAction");
-      action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+      action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
       action_params.set<std::string>("action") = "copy_nodal_aux_vars";
       action_params.set<std::string>("name") = "AuxVariables/" + GAP_VALUE_VAR_NAME;
       // gap_value
       action = ActionFactory::instance()->create("CopyNodalVarsAction", action_params);
-      Moose::action_warehouse.addActionBlock(action);
+      _awh.addActionBlock(action);
       // penetration
       action_params.set<std::string>("name") = "AuxVariables/" + PENETRATION_VAR_NAME;
       action = ActionFactory::instance()->create("CopyNodalVarsAction", action_params);
-      Moose::action_warehouse.addActionBlock(action);
+      _awh.addActionBlock(action);
   }
 }
 
@@ -164,7 +164,7 @@ ThermalContactAction::addAuxBcs()
   */
 
   InputParameters action_params = ActionFactory::instance()->getValidParams("AddBCAction");
-  action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+  action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
   action_params.set<std::string>("action") = "add_aux_bc";
 
   {
@@ -188,7 +188,7 @@ ThermalContactAction::addAuxBcs()
     }
     params.set<bool>("warnings") = getParam<bool>("warnings");
     // add it to the warehouse
-    Moose::action_warehouse.addActionBlock(action);
+    _awh.addActionBlock(action);
   }
 
   {
@@ -208,7 +208,7 @@ ThermalContactAction::addAuxBcs()
       params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
     }
     // add it to the warehouse
-    Moose::action_warehouse.addActionBlock(action);
+    _awh.addActionBlock(action);
   }
 }
 
@@ -225,7 +225,7 @@ ThermalContactAction::addDiracKernels()
   */
 
   InputParameters action_params = ActionFactory::instance()->getValidParams("AddDiracKernelAction");
-  action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+  action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
   action_params.set<std::string>("type") = "GapHeatPointSourceMaster";
   action_params.set<std::string>("name") = "DiracKernels/thermal_master_" + Moose::stringify(n);
   Action *action = ActionFactory::instance()->create("AddDiracKernelAction", action_params);
@@ -243,7 +243,7 @@ ThermalContactAction::addDiracKernels()
 
 
   // add it to the warehouse
-  Moose::action_warehouse.addActionBlock(action);
+  _awh.addActionBlock(action);
 }
 
 void
@@ -253,11 +253,11 @@ ThermalContactAction::addVectors()
   if (n == 0)
   {
     InputParameters action_params = validParams<AddSlaveFluxVectorAction>();
-    action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+    action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
     action_params.set<std::string>("name") = "add_slave_flux_vector";
     Action *action = ActionFactory::instance()->create("AddSlaveFluxVectorAction", action_params);
     // add it to the warehouse
-    Moose::action_warehouse.addActionBlock(action);
+    _awh.addActionBlock(action);
   }
 }
 

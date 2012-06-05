@@ -1,13 +1,15 @@
 #ifndef CONTACTMODULE_H
 #define CONTACTMODULE_H
 
+#include "Syntax.h"
+
 namespace Elk
 {
   namespace Contact
   {
   void registerObjects();
 
-  void associateSyntax();
+  void associateSyntax(Syntax & syntax);
   }
 }
 

@@ -21,9 +21,9 @@ Elk::Contact::registerObjects()
 }
 
 void
-Elk::Contact::associateSyntax()
+Elk::Contact::associateSyntax(Syntax & syntax)
 {
-  Moose::syntax.registerActionSyntax("ContactAction", "Contact/*");
+  syntax.registerActionSyntax("ContactAction", "Contact/*");
 
   registerAction(ContactAction, "meta_action");
 }

@@ -25,10 +25,10 @@ Elk::registerObjects()
 }
 
 void
-Elk::associateSyntax()
+Elk::associateSyntax(Syntax & syntax)
 {
-  SolidMechanics::associateSyntax();
-  Contact::associateSyntax();
-  HeatConduction::associateSyntax();
+  SolidMechanics::associateSyntax(syntax);
+  Contact::associateSyntax(syntax);
+  HeatConduction::associateSyntax(syntax);
 }
 

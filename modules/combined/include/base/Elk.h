@@ -1,6 +1,8 @@
 #ifndef ELK_H
 #define ELK_H
 
+#include "Syntax.h"
+
 namespace Elk
 {
   /**
@@ -8,7 +10,7 @@ namespace Elk
    */
   void registerObjects();
 
-  void associateSyntax();
+  void associateSyntax(Syntax & syntax);
 }
 
 #endif //ELK_H

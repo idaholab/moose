@@ -30,7 +30,7 @@ Elk::HeatConduction::registerObjects()
 }
 
 void
-Elk::HeatConduction::associateSyntax()
+Elk::HeatConduction::associateSyntax(Syntax & syntax)
 {
   // This registers an action to add the "slave_flux" vector to the system at the right time
   registerActionName("add_slave_flux_vector", false);
@@ -39,6 +39,6 @@ Elk::HeatConduction::associateSyntax()
   registerAction(AddSlaveFluxVectorAction, "add_slave_flux_vector");
 
   // thermal contact
-  Moose::syntax.registerActionSyntax("ThermalContactAction", "ThermalContact/*");
+  syntax.registerActionSyntax("ThermalContactAction", "ThermalContact/*");
   registerAction(ThermalContactAction, "meta_action");
 }

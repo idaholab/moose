@@ -1,12 +1,14 @@
 #ifndef HEATCONDUCTIONMODULE_H
 #define HEATCONDUCTIONMODULE_H
 
+#include "Syntax.h"
+
 namespace Elk
 {
   namespace HeatConduction
   {
   void registerObjects();
-  void associateSyntax();
+  void associateSyntax(Syntax & syntax);
   }
 }
 

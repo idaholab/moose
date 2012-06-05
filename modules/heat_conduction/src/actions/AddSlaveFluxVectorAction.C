@@ -16,5 +16,5 @@ AddSlaveFluxVectorAction::AddSlaveFluxVectorAction(const std::string & name, Inp
 void
 AddSlaveFluxVectorAction::act()
 {
-  _parser_handle._problem->getNonlinearSystem().addVector("slave_flux", false, GHOSTED, true);
+  _problem->getNonlinearSystem().addVector("slave_flux", false, GHOSTED, true);
 }

@@ -106,7 +106,7 @@ SolidMechanicsAction::act()
     params.set<unsigned int>("component") = i;
     params.set<std::string>("variable") = vars[i];
 
-    _parser_handle._problem->addKernel(type, name.str(), params);
+    _problem->addKernel(type, name.str(), params);
   }
 
 }
