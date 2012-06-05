@@ -67,19 +67,14 @@ typedef std::string              SubdomainName;
     Parallel::max<bool>(__local_bool__);        \
     if (__local_bool__)
 
-
+// forward declarations
+class Syntax;
 class FEProblem;
-class ActionWarehouse;
-class Executioner;
 
 typedef StoredRange<std::vector<unsigned int>::iterator, unsigned int> NodeIdRange;
 
 namespace Moose
 {
-
-extern ActionWarehouse action_warehouse;
-
-extern Executioner *executioner;
 
 /**
  * Perflog to be used by applications.
@@ -96,8 +91,8 @@ extern PerfLog setup_perf_log;
  * Register objects that are in MOOSE
  */
 void registerObjects();
-void addActionTypes();
-void registerActions();
+void addActionTypes(Syntax & syntax);
+void registerActions(Syntax & syntax);
 
 void setSolverDefaults(FEProblem & problem);
 

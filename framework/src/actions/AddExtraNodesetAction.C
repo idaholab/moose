@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddExtraNodesetAction.h"
-#include "Parser.h"
+#include "MooseApp.h"
 #include "MooseMesh.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
@@ -28,7 +28,6 @@ InputParameters validParams<AddExtraNodesetAction>()
   params.addParam<std::vector<Real> >("coord","The nodes with coordinates you want to be in the nodeset (Either this parameter or \"nodes\" must be supplied).");
   params.addParam<Real>("tolerance", TOLERANCE, "The tolerance in which two nodes are considered identical");
 
-
   return params;
 }
 
@@ -40,9 +39,6 @@ AddExtraNodesetAction::AddExtraNodesetAction(const std::string & name, InputPara
 void
 AddExtraNodesetAction::act()
 {
-  MooseMesh * mesh = _parser_handle._mesh;
-  MooseMesh * displaced_mesh = _parser_handle._displaced_mesh;
-
   // make sure the input is not empty
   bool data_valid = false;
   if (_pars.isParamValid("nodes"))
@@ -51,7 +47,7 @@ AddExtraNodesetAction::act()
   if (_pars.isParamValid("coord"))
   {
     unsigned int n_coord = getParam<std::vector<Real> >("coord").size();
-    if (n_coord % _parser_handle._mesh->dimension() != 0)
+    if (n_coord % _mesh->dimension() != 0)
       mooseError("Size of node coordinates does not match the mesh dimension");
     if (n_coord !=0)
       data_valid = true;
@@ -65,15 +61,15 @@ AddExtraNodesetAction::act()
   const std::vector<unsigned int> & nodes = getParam<std::vector<unsigned int> >("nodes");
   for(unsigned int i=0; i<nodes.size(); i++)
   {
-    if(mesh)
-      mesh->getMesh().boundary_info->add_node(nodes[i], id);
-    if(displaced_mesh)
-      displaced_mesh->getMesh().boundary_info->add_node(nodes[i], id);
+    if(_mesh)
+      _mesh->getMesh().boundary_info->add_node(nodes[i], id);
+    if(_displaced_mesh)
+      _displaced_mesh->getMesh().boundary_info->add_node(nodes[i], id);
   }
 
   // add nodes with their coordinates
   const std::vector<Real> & coord = getParam<std::vector<Real> >("coord");
-  unsigned int dim = mesh->dimension();
+  unsigned int dim = _mesh->dimension();
   unsigned int n_nodes = coord.size() / dim;
 
   for (unsigned int i=0; i<n_nodes; i++)
@@ -82,7 +78,7 @@ AddExtraNodesetAction::act()
     for (unsigned int j=0; j<dim; j++)
       p(j) = coord[i*dim+j];
 
-    const Elem* elem = mesh->getMesh().point_locator() (p);
+    const Elem* elem = _mesh->getMesh().point_locator() (p);
 
     bool on_node = false;
     for (unsigned int j=0; j<elem->n_nodes(); j++)
@@ -94,7 +90,7 @@ AddExtraNodesetAction::act()
         q(k) = (*node)(k);
 
       if (p.absolute_fuzzy_equals(q, getParam<Real>("tolerance"))) {
-        mesh->getMesh().boundary_info->add_node(node, id);
+        _mesh->getMesh().boundary_info->add_node(node, id);
         on_node = true;
         break;
       }

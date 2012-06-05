@@ -112,7 +112,8 @@ subdomain_restricted_kernel_test = { INPUT : 'subdomain_restricted_kernel_mismat
 
 deprecated_block_test = {
   INPUT : 'deprecated_block_test.i',
-  EXPECT_ERR : "Input file block '\S+' has been deprecated."
+  EXPECT_ERR : "Input file block '\S+' has been deprecated.",
+  SKIP : 'out-dated test'
 }
 
 unused_param_test = {

@@ -24,15 +24,14 @@
 #include "InputParameters.h"
 #include "ActionWarehouse.h"
 
+
 /**
  * Macros
  */
 #define stringifyName(name) #name
-#define registerActionName(name, is_required)   Moose::action_warehouse.registerName(name, is_required)
-#define registerAction(tplt, action)      ActionFactory::instance()->reg<tplt>(stringifyName(tplt), action)
-
-// TODO: This will change when action_warehouse is moved inside of some system
-#define addActionNameDependency(action, depends_on)       Moose::action_warehouse.addDependency(action, depends_on)
+#define registerAction(tplt, action)                  ActionFactory::instance()->reg<tplt>(stringifyName(tplt), action)
+#define registerActionName(name, is_required)         syntax.registerName(name, is_required)
+#define addActionNameDependency(action, depends_on)   syntax.addDependency(action, depends_on)
 
 // Forward Declaration
 class ActionFactory;
@@ -88,14 +87,6 @@ public:
 
   InputParameters getValidParams(const std::string & name);
 
-  /**
-   * This method will build all Actions associated with the passed action_name
-   * if the parameters object doesn't contain any missing required parameters.
-   * It returns true if at least one Action was built, therefore satisfying
-   * the passed action_name
-   */
-  bool buildAllBuildableActions(const std::string & action_name, Parser * p_ptr);
-
   class BuildInfo
   {
   public:
@@ -115,17 +106,16 @@ public:
   iterator end();
   const_iterator end() const;
 
-  bool isParsed(const std::string & name) const;
+  std::pair<std::multimap<std::string, std::string>::iterator, std::multimap<std::string, std::string>::iterator> getA(const std::string & action_name);
 
   std::multimap<std::string, BuildInfo> _name_to_build_info;
 
-  std::set<std::string> _non_parsed;
   std::multimap<std::string, std::string> _action_to_name_map;
 
   std::vector<std::string> _registered_parser_block_names;
 
   // TODO: I don't think we need this anymore
-  static unsigned int _unique_id;        ///< Unique ID for identifing multiple registrations
+  static unsigned int _unique_id;        ///< Unique ID for identifying multiple registrations
 
   static ActionFactory *_instance;       ///< Pointer to the singleton instance
 
@@ -161,9 +151,10 @@ ActionFactory::const_iterator ActionFactory::end() const
 }
 
 inline
-bool ActionFactory::isParsed(const std::string & name) const
+std::pair<std::multimap<std::string, std::string>::iterator, std::multimap<std::string, std::string>::iterator>
+ActionFactory::getA(const std::string & action_name)
 {
-  return _non_parsed.find(name) == _non_parsed.end();
+  return _action_to_name_map.equal_range(action_name);
 }
 
 #endif /* ACTIONFACTORY_H */

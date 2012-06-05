@@ -15,10 +15,13 @@
 #ifndef SYNTAXFORMATTERINTERFACE_H
 #define SYNTAXFORMATTERINTERFACE_H
 
-#include "InputParameters.h"
-
 #include <string>
 #include <ostream>
+
+#include "InputParameters.h"
+#include "ActionWarehouse.h"
+#include "MooseSyntax.h"
+
 
 class SyntaxFormatterInterface
 {

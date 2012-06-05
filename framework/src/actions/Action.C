@@ -13,8 +13,9 @@
 /****************************************************************/
 
 #include "Action.h"
-
-#include "Parser.h"
+#include "ActionWarehouse.h"
+#include "MooseMesh.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<Action>()
@@ -26,7 +27,8 @@ InputParameters validParams<Action>()
   // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
   params.addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active");
   params.addPrivateParam<std::string>("action");
-  params.addPrivateParam<Parser *>("parser_handle");
+  params.addPrivateParam<Parser *>("parser", NULL);
+  params.addPrivateParam<ActionWarehouse *>("awh", NULL);
   return params;
 }
 
@@ -34,8 +36,11 @@ Action::Action(const std::string & name, InputParameters params) :
     _name(name),
     _pars(params),
     _action(getParam<std::string>("action")),
-    _parser_handle(*getParam<Parser *>("parser_handle")),
-    _problem(_parser_handle._problem)
+    _parser(getParam<Parser *>("parser")),
+    _awh(*getParam<ActionWarehouse *>("awh")),
+    _mesh(_awh.mesh()),
+    _displaced_mesh(_awh.displacedMesh()),
+    _problem(_awh.problem())
 {
 }
 

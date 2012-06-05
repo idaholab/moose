@@ -13,10 +13,10 @@
 /****************************************************************/
 
 #include "InitialRefinementAction.h"
-#include "Parser.h"
+#include "MooseApp.h"
 #include "MooseMesh.h"
 #include "FEProblem.h"
-#include "MooseInit.h"
+#include "CommandLine.h"
 
 template<>
 InputParameters validParams<InitialRefinementAction>()
@@ -37,17 +37,19 @@ void
 InitialRefinementAction::act()
 {
 #ifdef LIBMESH_ENABLE_AMR
-  mooseAssert(_parser_handle._mesh != NULL, "Mesh not setup");
+  mooseAssert(_mesh != NULL, "Mesh not setup");
 
   unsigned int level = getParam<unsigned int>("uniform_refine");
 
-  if (Moose::command_line->search("-r"))
+  std::string arg;
+  if (Moose::app->commandLine().search("REFINE", &arg))
   {
     unsigned int auto_refine_levels = 0;
-    auto_refine_levels = Moose::command_line->next(auto_refine_levels);
+    std::stringstream ss(arg);
+    ss >> auto_refine_levels;
     level += auto_refine_levels;
   }
 
-  _parser_handle._problem->setUniformRefineLevel(level);
+  _problem->setUniformRefineLevel(level);
 #endif //LIBMESH_ENABLE_AMR
 }

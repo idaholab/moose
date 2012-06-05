@@ -19,6 +19,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include "getpot.h"
 
 // Forward Declaration
 class Parser;
@@ -26,34 +27,7 @@ class Parser;
 class CommandLine
 {
 public:
-  CommandLine(Parser &parser);
-
-  /**
-   * This routine parses the command line looking for and handling various options.
-   *
-   * @return The inputfile file name is returned.
-   */
-  std::string parseCommandLine();
-
-  /**
-   * This function extracts parameters from the command line in name=value format.  Note
-   * that the name should be fully qualified (i.e. BCs/left/value=10)
-   */
-  void buildCommandLineVarsSet();
-
-  /**
-   * This routine searches the command line for the given option "handle"
-   * and returns a boolean indicating whether it was found.  If the given
-   * option has an argument it is also filled in.
-   */
-  bool searchCommandLine(const std::string &option_name, std::string *argument=NULL);
-
-  bool isVariableOnCommandLine(const std::string &name) const;
-
-  void printUsage() const;
-
-protected:
-  struct CLIOption
+  struct Option
   {
     std::string description;
     std::vector<std::string> cli_syntax;
@@ -61,9 +35,50 @@ protected:
     bool optional_argument;
   };
 
-  Parser &_parser;
-  std::map<std::string, CLIOption> _cli_options;
 
+  CommandLine(int argc, char * argv[]);
+  virtual ~CommandLine();
+
+  void addOption(const std::string & name, Option cli_opt);
+
+  /**
+   * This function extracts parameters from the command line in name=value format.  Note
+   * that the name should be fully qualified (i.e. BCs/left/value=10)
+   */
+  void buildVarsSet();
+
+  /**
+   * This routine searches the command line for the given option "handle"
+   * and returns a boolean indicating whether it was found.  If the given
+   * option has an argument it is also filled in.
+   */
+  bool search(const std::string & option_name, std::string * argument = NULL);
+
+  bool isVariableOnCommandLine(const std::string & name) const;
+
+  /**
+   * Print the usage info for this command line
+   */
+  void printUsage() const;
+
+  /**
+   * Get the GetPot object
+   * @return Pointer to the GetPot object
+   */
+  GetPot * getPot() { return _get_pot; }
+
+  /**
+   * Check if we have a variable on the command line
+   * @param name The name of the variable
+   * @return True if the variable was defined on the command line
+   */
+  bool haveVariable(const std::string & name);
+
+protected:
+  /// Pointer to GetPot object that represents the command line arguments
+  GetPot * _get_pot;
+  /// Command line options
+  std::map<std::string, Option> _cli_options;
   /// This is a set of all "extra" options on the command line
   std::set<std::string> _command_line_vars;
 };

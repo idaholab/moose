@@ -30,17 +30,17 @@ InputParameters validParams<CopyNodalVarsAction>()
 }
 
 CopyNodalVarsAction::CopyNodalVarsAction(const std::string & name, InputParameters params) :
-  Action(name, params)
+    Action(name, params)
 {
 }
 
 void
 CopyNodalVarsAction::act()
 {
-  SystemBase * system;
 
   if (isParamValid("initial_from_file_var"))
   {
+    SystemBase * system;
     // Is this a NonlinearSystem variable or an AuxiliarySystem variable?
     if (getAction() == "copy_nodal_vars")
       system = &_problem->getNonlinearSystem();

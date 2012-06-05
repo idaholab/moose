@@ -19,15 +19,30 @@
 #include "InputFileFormatter.h"
 #include "InputParameters.h"
 
-ActionWarehouse::ActionWarehouse() :
-  _generator_valid(false),
-  _parser_ptr(NULL),
-  _show_actions(false)
+
+ActionWarehouse::ActionWarehouse(Syntax & syntax) :
+    _syntax(syntax),
+    _generator_valid(false),
+    _show_actions(false),
+    _mesh(NULL),
+    _displaced_mesh(NULL),
+    _problem(NULL),
+    _exreader(NULL),
+    _executioner(NULL)
 {
 }
 
 ActionWarehouse::~ActionWarehouse()
 {
+  delete _exreader;
+}
+
+void
+ActionWarehouse::build()
+{
+  _ordered_names = _syntax.getSortedActionName();
+  for (std::vector<std::string>::iterator it = _ordered_names.begin(); it != _ordered_names.end(); ++it)
+    buildBuildableActions(*it);
 }
 
 void
@@ -43,49 +58,12 @@ ActionWarehouse::clear()
 }
 
 void
-ActionWarehouse::registerName(std::string action, bool is_required)
-{
-  _actions.addItem(action);
-  _registered_actions[action] = is_required;
-}
-
-void
-ActionWarehouse::addDependency(std::string action, std::string pre_req)
-{
-  if (_registered_actions.find(action) == _registered_actions.end())
-    mooseError("A " << action << " is not a registered action name");
-
-  _actions.insertDependency(action, pre_req);
-}
-
-void
-ActionWarehouse::addDependencySets(const std::string & action_sets)
-{
-  std::vector<std::string> sets, prev_names, action_names;
-  Parser::tokenize(action_sets, sets, 1, "()");
-
-  for (unsigned int i=0; i<sets.size(); ++i)
-  {
-    action_names.clear();
-    Parser::tokenize(sets[i], action_names, 0, ", ");
-    for (unsigned int j=0; j<action_names.size(); ++j)
-    {
-      // Each line should depend on each item in the previous line
-      for (unsigned int k=0; k<prev_names.size(); ++k)
-        addDependency(action_names[j], prev_names[k]);
-    }
-    // Copy the the current items to the previous items for the next iteration
-    std::swap(action_names, prev_names);
-  }
-}
-
-void
 ActionWarehouse::addActionBlock(Action * blk)
 {
   std::string action_name = blk->getAction();
 
   // Some error checking
-  if (_registered_actions.find(action_name) == _registered_actions.end())
+  if (!_syntax.hasActionName(action_name))
     mooseError("A(n) " << action_name << " is not a registered action name");
 
   // Make sure that the ObjectAction action_name and Action action_name are consistent
@@ -119,51 +97,28 @@ ActionWarehouse::actionBlocksWithActionEnd(const std::string & action_name)
 }
 
 void
-ActionWarehouse::printInputFile(std::ostream & out)
-{
-  InputFileFormatter tree(false);
-
-  std::map<std::string, std::vector<Action *> >::iterator iter;
-
-  std::vector<Action *> ordered_actions;
-  ordered_actions.clear();
-  for (iter = _action_blocks.begin(); iter != _action_blocks.end(); ++iter)
-    for (std::vector<Action *>::iterator j = iter->second.begin(); j != iter->second.end(); ++j)
-      ordered_actions.push_back(*j);
-
-  for (std::vector<Action* >::iterator i = ordered_actions.begin();
-       i != ordered_actions.end();
-       ++i)
-  {
-    std::string name ((*i)->name());
-    std::string action ((*i)->getAction());
-
-    bool is_parent;
-    if (Moose::syntax.isAssociated(name, &is_parent) != "")
-    {
-      InputParameters params = (*i)->getParams();
-      tree.insertNode(name, action, true, &params);
-
-      MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(*i);
-      if (moose_object_action)
-      {
-        InputParameters obj_params = moose_object_action->getObjectParams();
-        tree.insertNode(name, action, false, &obj_params);
-      }
-    }
-  }
-
-  out << tree.print("");
-}
-
-void
 ActionWarehouse::buildBuildableActions(const std::string &action_name)
 {
-  mooseAssert(_parser_ptr != NULL, "Parser Pointer NULL in ActionWarehouse");
+  if (_syntax.isActionRequired(action_name) && _action_blocks[action_name].empty())
+  {
+    bool ret_value = false;
+    std::pair<std::multimap<std::string, std::string>::iterator,
+              std::multimap<std::string, std::string>::iterator> range = ActionFactory::instance()->getA(action_name);
+    for (std::multimap<std::string, std::string>::iterator it = range.first; it != range.second; ++it)
+    {
+      InputParameters params = ActionFactory::instance()->getValidParams(it->second);
+      params.set<ActionWarehouse *>("awh") = this;
 
-  if (_registered_actions[action_name] && _action_blocks[action_name].empty())
-    if (!ActionFactory::instance()->buildAllBuildableActions(action_name, _parser_ptr))
+      if (params.areAllRequiredParamsValid())
+      {
+        addActionBlock(ActionFactory::instance()->create(it->second, params));
+        ret_value = true;
+      }
+    }
+
+    if (!ret_value)
       _unsatisfied_dependencies.insert(action_name);
+  }
 }
 
 void
@@ -194,8 +149,8 @@ ActionWarehouse::printActionDependencySets()
 {
   std::cerr << "[DBG][ACT] Ordered Actions:\n";
 
-  std::vector<std::set<std::string> > _ordered_names = _actions.getSortedValuesSets();
-  for (std::vector<std::set<std::string> >::const_iterator i = _ordered_names.begin(); i != _ordered_names.end(); ++i)
+  const std::vector<std::set<std::string> > & ordered_names = _syntax.getSortedActionNameSet();
+  for (std::vector<std::set<std::string> >::const_iterator i = ordered_names.begin(); i != ordered_names.end(); ++i)
   {
     std::cerr << "[DBG][ACT] (";
     unsigned int jj = 0;
@@ -224,19 +179,11 @@ ActionWarehouse::executeAllActions()
     std::cerr << "[DBG][ACT] Executing actions:" << std::endl;
   }
 
-  for (iterator act_iter = begin(); act_iter != end(); ++act_iter)
+  for (std::vector<std::string>::iterator it = _ordered_names.begin(); it != _ordered_names.end(); ++it)
   {
-     // Delay the InputParameters check of MOOSE based objects until just before "acting"
-     // so that Meta-Actions can complete the build of parameters as necessary
-     ObjectAction * obj_action = dynamic_cast<ObjectAction *>(*act_iter);
-     if (obj_action != NULL)
-       obj_action->getObjectParams().checkParams(obj_action->name());
-
-     if (_show_actions)
-       std::cerr << "[DBG][ACT] - " << (*act_iter)->name() << std::endl;
-     // Act!
-     (*act_iter)->act();
-   }
+    std::string action_name = *it;
+    executeActionsWithAction(action_name);
+  }
 }
 
 void
@@ -252,90 +199,8 @@ ActionWarehouse::executeActionsWithAction(const std::string & name)
     if (obj_action != NULL)
       obj_action->getObjectParams().checkParams(obj_action->name());
 
+    if (_show_actions)
+      std::cerr << "[DBG][ACT] - " << (*act_iter)->name() << std::endl;
     (*act_iter)->act();
   }
-}
-
-ActionWarehouse::iterator
-ActionWarehouse::begin()
-{
-  if (_generator_valid)
-    mooseError("Cannot create two active iterators on ActionWarehouse at the same time");
-
-  return iterator (*this);
-}
-
-ActionWarehouse::iterator
-ActionWarehouse::end()
-{
-  return iterator (*this, true);
-}
-
-//--------------------------------------------------------------------------
-// Iterator methods
-ActionWarehouse::iterator::iterator(ActionWarehouse & act_wh, bool end)
-  :_act_wh(act_wh),
-   _first(true),
-   _end(end)
-{
-  if (end) return;
-
-  _act_wh._ordered_names = _act_wh._actions.getSortedValues();
-
-  // current action name
-  _i = _act_wh._ordered_names.begin();
-
-  _act_wh.buildBuildableActions(*_i);
-
-  _j = _act_wh._action_blocks[*_i].begin();
-
-  _act_wh._generator_valid = true;
-
-  // Advanced to the first item
-  this->operator++();
-}
-
-bool
-ActionWarehouse::iterator::operator==(const ActionWarehouse::iterator &rhs) const
-{
-  return !operator!=(rhs);
-}
-
-bool
-ActionWarehouse::iterator::operator!=(const ActionWarehouse::iterator &rhs) const
-{
-  return _end != rhs._end;
-}
-
-ActionWarehouse::iterator &
-ActionWarehouse::iterator::operator++()
-{
-  mooseAssert(_act_wh._generator_valid, "Action iterator invalid in ActionWarehouse\n");
-
-  if (_first)
-    _first = false;
-  else
-    ++_j;
-  while (_j == _act_wh._action_blocks[*_i].end())
-    if (++_i == _act_wh._ordered_names.end())
-    {
-      _act_wh._generator_valid = false;
-      _end = true;
-      break;
-    }
-    else
-    {
-      _act_wh.buildBuildableActions(*_i);
-      _j = _act_wh._action_blocks[*_i].begin();
-    }
-
-  return *this;
-}
-
-Action *
-ActionWarehouse::iterator::operator*()
-{
-  mooseAssert(_act_wh._generator_valid, "Action iterator invalid in ActionWarehouse\n");
-
-  return *_j;
 }

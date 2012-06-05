@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "InitDisplacedProblemAction.h"
-#include "Parser.h"
+#include "MooseApp.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 
@@ -42,6 +42,6 @@ InitDisplacedProblemAction::act()
   {
     InputParameters params = validParams<DisplacedProblem>();
     params.set<std::vector<std::string> >("displacements") = getParam<std::vector<std::string> >("displacements");
-    _parser_handle._problem->initDisplacedProblem(_parser_handle._displaced_mesh, params);
+    _problem->initDisplacedProblem(_displaced_mesh, params);
   }
 }

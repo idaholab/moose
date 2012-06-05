@@ -31,7 +31,7 @@ SetupDebugAction::SetupDebugAction(const std::string & name, InputParameters par
     _top_residuals(getParam<unsigned int>("show_top_residuals")),
     _show_actions(getParam<bool>("show_actions"))
 {
-  Moose::action_warehouse.showActions(_show_actions);
+  _awh.showActions(_show_actions);
 }
 
 SetupDebugAction::~SetupDebugAction()

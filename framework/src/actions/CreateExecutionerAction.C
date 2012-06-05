@@ -17,7 +17,7 @@
 #include "PetscSupport.h"
 #include "Conversion.h"
 #include "Moose.h"
-#include "Parser.h"
+#include "MooseApp.h"
 #include "Executioner.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
@@ -63,7 +63,7 @@ CreateExecutionerAction::act()
 {
   //InputParameters class_params = getClassParams();
 
-  // Steady and derived Executioners need to know the number of adaptivity steps to take.  This paramter
+  // Steady and derived Executioners need to know the number of adaptivity steps to take.  This parameter
   // is held in the child block Adaptivity and needs to be pulled early
 
 #ifdef LIBMESH_HAVE_PETSC
@@ -75,18 +75,18 @@ CreateExecutionerAction::act()
   Moose::PetscSupport::petscSetOptions(petsc_options, petsc_inames, petsc_values);
 #endif //LIBMESH_HAVE_PETSC
 
-  _moose_object_pars.set<MooseMesh *>("_mesh") = _parser_handle._mesh;
+  _moose_object_pars.set<MooseMesh *>("_mesh") = _mesh;
   Moose::setup_perf_log.push("Create Executioner","Setup");
-  Moose::executioner = static_cast<Executioner *>(Factory::instance()->create(_type, "Executioner", _moose_object_pars));
+  Executioner * executioner = static_cast<Executioner *>(Factory::instance()->create(_type, "Executioner", _moose_object_pars));
+
   Moose::setup_perf_log.pop("Create Executioner","Setup");
-  if (dynamic_cast<FEProblem *>(&Moose::executioner->problem()) != NULL)
+  FEProblem *mproblem = dynamic_cast<FEProblem *>(&executioner->problem());
+  if (mproblem != NULL)
   {
-    FEProblem *mproblem = dynamic_cast<FEProblem *>(&Moose::executioner->problem());
-    _parser_handle._problem = mproblem;
-    _parser_handle._problem->_ex_reader = _parser_handle._exreader;               // FIXME: do not access members directly
+    mproblem->_ex_reader = _awh.exReader();               // FIXME: do not access members directly
 
     // solver params
-    EquationSystems & es = _parser_handle._problem->es();
+    EquationSystems & es = mproblem->es();
     es.parameters.set<Real> ("linear solver tolerance")
       = getParam<Real>("l_tol");
 
@@ -119,7 +119,10 @@ CreateExecutionerAction::act()
 #endif
 //    _moose_system._no_fe_reinit = getParam<bool>("no_fe_reinit");
 
-    NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
+    NonlinearSystem & nl = mproblem->getNonlinearSystem();
     nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<std::string>("scheme")));
+
+    _problem = mproblem;
   }
+  _awh.executioner() = executioner;
 }

@@ -1,11 +1,5 @@
 #include "MooseInit.h"
-#include "Executioner.h"
 #include "MooseTest.h"
-
-// Parser
-#include "Parser.h"
-#include "MooseSyntax.h"
-#include "MooseTestSyntax.h"
 
 // libMesh includes
 #include "perf_log.h"
@@ -17,22 +11,8 @@ int main(int argc, char *argv[])
 {
   MooseInit init(argc, argv);
 
-  MooseTest::registerObjects();
-
-  // Associate Parser Syntax
-  Moose::associateSyntax();
-  MooseTest::associateSyntax();
-
-  Parser p(Moose::syntax);
-
-  // Parse commandline and return inputfile filename if appropriate
-  std::string input_filename = p.parseCommandLine();
-
-  // Parse the input file
-  p.parse(input_filename);
-  p.execute();
-
-  Moose::executioner->execute();
+  MooseTestApp app(argc, argv);
+  app.run();
 
   return 0;
 }

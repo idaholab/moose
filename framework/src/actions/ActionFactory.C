@@ -80,7 +80,7 @@ ActionFactory::getValidParams(const std::string & name)
 {
   /**
    * If an Action is registered more than once, it'll appear in the _name_to_build_info data
-   * structure multiple times.  The actual paramters function remains the same however
+   * structure multiple times.  The actual parameters function remains the same however
    * so we can safely use the first instance
    */
   ActionFactory::iterator iter = _name_to_build_info.find(name);
@@ -92,37 +92,10 @@ ActionFactory::getValidParams(const std::string & name)
 
   params.addPrivateParam<unsigned int>("unique_id", iter->second._unique_id);
 
-  // Add a default name which can be overriden by the parser or whatever other future driver
+  // Add a default name which can be overridden by the parser or whatever other future driver
   params.addPrivateParam<std::string>("name", iter->second._action_name);
 
   return params;
-}
-
-bool
-ActionFactory::buildAllBuildableActions(const std::string & action, Parser * p_ptr)
-{
-  bool ret_value = false;
-  std::multimap<std::string, std::string>::iterator it;
-  std::pair<std::multimap<std::string, std::string>::iterator, std::multimap<std::string, std::string>::iterator> iters;
-
-  // First get the names of all the Actions for the given action_name so we can index into the other Factory maps
-  iters = _action_to_name_map.equal_range(action);
-
-  for (it = iters.first; it != iters.second; ++it)
-  {
-    InputParameters params = getValidParams(it->second);
-
-    // FIXME: HACK
-    params.set<Parser *>("parser_handle") = p_ptr;
-
-    if (params.areAllRequiredParamsValid())
-    {
-      Moose::action_warehouse.addActionBlock(create(it->second, params));
-      ret_value = true;
-    }
-  }
-
-  return ret_value;
 }
 
 std::string

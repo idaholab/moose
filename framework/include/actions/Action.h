@@ -17,21 +17,25 @@
 
 #include "InputParameters.h"
 #include "Moose.h"
-#include "MooseObject.h"
 
 #include <string>
 #include <ostream>
 
 class Action;
+class ActionWarehouse;
+class MooseMesh;
+class FEProblem;
 
 template<>
 InputParameters validParams<Action>();
 
+/**
+ * Base class for actions.
+ */
 class Action
 {
 public:
   Action(const std::string & name, InputParameters params);
-
   virtual ~Action() {}                  // empty virtual destructor for proper memory release
 
   virtual void act() = 0;
@@ -59,13 +63,17 @@ public:
   std::string getShortName() const;
 
 protected:
-
+  /// The name of the action
   std::string _name;
+  /// Input parameters for the action
   InputParameters _pars;
 
   std::string _action;
-  Parser & _parser_handle;
-
+  Parser * _parser;
+  /// Reference to ActionWarehouse where we store object build by actions
+  ActionWarehouse & _awh;
+  MooseMesh * & _mesh;
+  MooseMesh * & _displaced_mesh;
   /// Convenience reference to a problem this action works on
   FEProblem * & _problem;
 };

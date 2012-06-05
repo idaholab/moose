@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "SetupMeshAction.h"
-#include "Parser.h"
+#include "MooseApp.h"
 #include "MooseMesh.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
@@ -130,22 +130,21 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
 void
 SetupMeshAction::act()
 {
-  if (_parser_handle._mesh)
-    setupMesh(_parser_handle._mesh);
+  if (_mesh)
+    setupMesh(_mesh);
   else
     mooseError("No mesh file was supplied and no generation block was provided");
 
-  if (_parser_handle._displaced_mesh)
-    setupMesh(_parser_handle._displaced_mesh);
+  if (_displaced_mesh)
+    setupMesh(_displaced_mesh);
 
   // There is no setup execution action satisfied, create the MProblem class by ourselves
-  if (Moose::action_warehouse.actionBlocksWithActionBegin("setup_executioner") ==
-      Moose::action_warehouse.actionBlocksWithActionEnd("setup_executioner"))
+  if (_awh.actionBlocksWithActionBegin("setup_executioner") ==
+      _awh.actionBlocksWithActionEnd("setup_executioner"))
   {
     Moose::setup_perf_log.push("Create FEProblem","Setup");
-
     // Use the Factory to build a normal MOOSE problem
-    _parser_handle._problem = ProblemFactory::instance()->createFEProblem(_parser_handle._mesh);
+    _problem = ProblemFactory::instance()->createFEProblem(_mesh);
     Moose::setup_perf_log.pop("Create FEProblem","Setup");
   }
 }

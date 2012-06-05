@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "ReadMeshAction.h"
-#include "Parser.h"
+#include "MooseApp.h"
 #include "Factory.h"
 #include "MooseMesh.h"
 #include "FEProblem.h"
@@ -62,56 +62,54 @@ ReadMeshAction::act()
     std::string mesh_file = getParam<std::string>("file");
     if (mesh_file != no_file_supplied)
       readMesh(mesh_file);
-
-    std::vector<unsigned int> ghosted_boundaries = getParam<std::vector<unsigned int > >("ghosted_boundaries");
-
-    for(unsigned int i=0; i<ghosted_boundaries.size(); i++)
-    {
-      _parser_handle._mesh->addGhostedBoundary(ghosted_boundaries[i]);
-      if (isParamValid("displacements"))
-        _parser_handle._displaced_mesh->addGhostedBoundary(ghosted_boundaries[i]);
-    }
-
-    if(isParamValid("ghosted_boundaries_inflation"))
-    {
-      std::vector<Real> ghosted_boundaries_inflation = getParam<std::vector<Real> >("ghosted_boundaries_inflation");
-      _parser_handle._mesh->setGhostedBoundaryInflation(ghosted_boundaries_inflation);
-      if (isParamValid("displacements"))
-        _parser_handle._displaced_mesh->setGhostedBoundaryInflation(ghosted_boundaries_inflation);
-    }
   }
   else
   {
     InputParameters pars = Factory::instance()->getValidParams(mesh_type);
-    _parser_handle.extractParams("Mesh", pars);
-
-    MooseMesh * mesh = dynamic_cast<MooseMesh *>(Factory::instance()->create(mesh_type, "mesh", pars));
-    _parser_handle._mesh = mesh;
+    _parser->extractParams("Mesh", pars);
+    _mesh = dynamic_cast<MooseMesh *>(Factory::instance()->create(mesh_type, "mesh", pars));
   }
 
-  mooseAssert(_parser_handle._mesh != NULL, "Mesh hasn't been created");
+  mooseAssert(_mesh != NULL, "Mesh hasn't been created");
+
+  // use displacements
+  std::vector<unsigned int> ghosted_boundaries = getParam<std::vector<unsigned int > >("ghosted_boundaries");
+  for(unsigned int i=0; i<ghosted_boundaries.size(); i++)
+  {
+    _mesh->addGhostedBoundary(ghosted_boundaries[i]);
+    if (isParamValid("displacements"))
+      _displaced_mesh->addGhostedBoundary(ghosted_boundaries[i]);
+  }
+
+  if(isParamValid("ghosted_boundaries_inflation"))
+  {
+    std::vector<Real> ghosted_boundaries_inflation = getParam<std::vector<Real> >("ghosted_boundaries_inflation");
+    _mesh->setGhostedBoundaryInflation(ghosted_boundaries_inflation);
+    if (isParamValid("displacements"))
+      _displaced_mesh->setGhostedBoundaryInflation(ghosted_boundaries_inflation);
+  }
 }
 
 
 void ReadMeshAction::readMesh(const std::string & mesh_file)
 {
-  mooseAssert(_parser_handle._mesh == NULL, "Mesh already exists, and you are trying to read another");
+  mooseAssert(_mesh == NULL, "Mesh already exists, and you are trying to read another");
 
   // Create the mesh and save it off
   InputParameters params = emptyInputParameters();
   params.set<int>("_dimension") = 1;
-  _parser_handle._mesh = new MooseMesh("mesh", params);
+  MooseMesh * mesh = new MooseMesh("mesh", params);
 
-  _parser_handle._mesh->setFileName(mesh_file);
-  _parser_handle._mesh->setPatchSize(getParam<unsigned int>("patch_size"));
+  mesh->setFileName(mesh_file);
+  mesh->setPatchSize(getParam<unsigned int>("patch_size"));
 
   Moose::setup_perf_log.push("Read Mesh","Setup");
   if (getParam<bool>("nemesis"))
   {
     // Nemesis_IO only takes a reference to ParallelMesh, so we can't be quite so short here.
-    ParallelMesh& pmesh = libmesh_cast_ref<ParallelMesh&>(_parser_handle._mesh->getMesh());
+    ParallelMesh& pmesh = libmesh_cast_ref<ParallelMesh&>(mesh->getMesh());
     Nemesis_IO(pmesh).read(mesh_file);
-    //_parser_handle._mesh->parallel(true); // This is redundant because we have Mesh::is_serial()
+    //mesh->parallel(true); // This is redundant because we have Mesh::is_serial()
   }
   else // not reading Nemesis files
   {
@@ -122,42 +120,46 @@ void ReadMeshAction::readMesh(const std::string & mesh_file)
     if (mesh_file.rfind(".exd") < mesh_file.size() ||
         mesh_file.rfind(".e") < mesh_file.size())
     {
-      _parser_handle._exreader = new ExodusII_IO(*_parser_handle._mesh);
-      _parser_handle._exreader->read(mesh_file);
+      _awh.exReader() = new ExodusII_IO(*mesh);
+      _awh.exReader()->read(mesh_file);
     }
     else
-      _parser_handle._mesh->read(mesh_file);
+      mesh->read(mesh_file);
   }
   Moose::setup_perf_log.pop("Read Mesh","Setup");
 
-  _parser_handle._mesh->_mesh.skip_partitioning(getParam<bool>("skip_partitioning"));
+  mesh->_mesh.skip_partitioning(getParam<bool>("skip_partitioning"));
 
   if (isParamValid("displacements"))
   {
     // Create the displaced mesh
-    _parser_handle._displaced_mesh = new MooseMesh("displaced_mesh", params);
-    _parser_handle._displaced_mesh->setPatchSize(getParam<unsigned int>("patch_size"));
+    MooseMesh * displaced_mesh = new MooseMesh("displaced_mesh", params);
+    displaced_mesh->setPatchSize(getParam<unsigned int>("patch_size"));
 
     Moose::setup_perf_log.push("Read Displaced Mesh","Setup");
 
     if (getParam<bool>("nemesis"))
     {
       // Nemesis_IO only takes a reference to ParallelMesh
-      ParallelMesh& pmesh = libmesh_cast_ref<ParallelMesh&>(_parser_handle._displaced_mesh->getMesh());
+      ParallelMesh & pmesh = libmesh_cast_ref<ParallelMesh&>(displaced_mesh->getMesh());
       Nemesis_IO(pmesh).read(mesh_file);
     }
     else // not reading Nemesis files
     {
       // Here we are fine with read, since we are not doing "copy_nodal_vars" on displaced mesh (yet ;-))
-      _parser_handle._displaced_mesh->read(mesh_file);
+      displaced_mesh->read(mesh_file);
     }
 
     Moose::setup_perf_log.pop("Read Displaced Mesh","Setup");
 
     std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
-    if (displacements.size() != _parser_handle._mesh->dimension())
+    if (displacements.size() != mesh->dimension())
       mooseError("Number of displacements and dimension of mesh MUST be the same!");
 
-    _parser_handle._displaced_mesh->_mesh.skip_partitioning(getParam<bool>("skip_partitioning"));
+    displaced_mesh->_mesh.skip_partitioning(getParam<bool>("skip_partitioning"));
+
+    _displaced_mesh = displaced_mesh;
   }
+
+  _mesh = mesh;
 }

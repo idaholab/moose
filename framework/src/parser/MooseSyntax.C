@@ -13,126 +13,13 @@
 /****************************************************************/
 
 #include "MooseSyntax.h"
-#include "Parser.h"
 #include "Moose.h"
 
-
-Syntax::Syntax()
-{
-}
-
-void
-Syntax::registerActionSyntax(const std::string & action, const std::string & syntax, const std::string & action_name)
-{
-  ActionInfo action_info;
-  action_info._action = action;
-  action_info._action_name = action_name;
-
-  _associated_actions.insert(std::make_pair(syntax, action_info));
-}
-
-void
-Syntax::replaceActionSyntax(const std::string & action, const std::string & syntax, const std::string & action_name)
-{
-  _associated_actions.erase(syntax);
-  registerActionSyntax(action, syntax, action_name);
-}
-
-std::string
-Syntax::getSyntaxByAction(const std::string & action, const std::string & action_name)
-{
-  std::string syntax;
-  /**
-   * For now we don't have a data structure that maps Actions to Syntax but this routine
-   * is only used by the build full tree routine so it doesn't need to be fast.  We
-   * will do a linear search for each call to this routine
-   */
-  for (std::multimap<std::string, ActionInfo>::const_iterator iter = _associated_actions.begin();
-       iter != _associated_actions.end(); ++iter)
-  {
-    if (iter->second._action == action &&
-        (iter->second._action_name == action_name || iter->second._action_name == ""))
-      syntax = iter->first;
-  }
-
-  return syntax;
-}
-
-std::string
-Syntax::isAssociated(const std::string & real_id, bool * is_parent)
-{
-  /**
-   * This implementation assumes that wildcards can occur in the place of an entire token but not as part
-   * of a token (i.e.  'Variables/ * /InitialConditions' is valid but not 'Variables/Partial* /InitialConditions'.
-   * Since maps are ordered, a reverse traversal through the registered list will always select a more
-   * specific match before a wildcard match ('*' == char(42))
-   */
-  bool local_is_parent;
-  if (is_parent == NULL)
-   is_parent = &local_is_parent;  // Just so we don't have to keep checking below when we want to set the value
-  std::multimap<std::string, ActionInfo>::reverse_iterator it;
-  std::vector<std::string> real_elements, reg_elements;
-  std::string return_value;
-
-  Parser::tokenize(real_id, real_elements);
-
-  *is_parent = false;
-  for (it=_associated_actions.rbegin(); it != _associated_actions.rend(); ++it)
-  {
-    std::string reg_id = it->first;
-    if (reg_id == real_id)
-    {
-      *is_parent = false;
-      return reg_id;
-    }
-    reg_elements.clear();
-    Parser::tokenize(reg_id, reg_elements);
-    if (real_elements.size() <= reg_elements.size())
-    {
-      bool keep_going = true;
-      for (unsigned int j=0; keep_going && j<real_elements.size(); ++j)
-      {
-        if (real_elements[j] != reg_elements[j] && reg_elements[j] != std::string("*"))
-          keep_going = false;
-      }
-      if (keep_going)
-      {
-        if (real_elements.size() < reg_elements.size() && !*is_parent)
-        {
-          // We found a parent, the longest parent in fact but we need to keep
-          // looking to make sure that the real thing isn't registered
-          *is_parent = true;
-          return_value = reg_id;
-        }
-        else if (real_elements.size() == reg_elements.size())
-        {
-          *is_parent = false;
-          return reg_id;
-        }
-      }
-    }
-  }
-
-  if (*is_parent)
-    return return_value;
-  else
-    return std::string("");
-}
-
-std::pair<std::multimap<std::string, Syntax::ActionInfo>::iterator, std::multimap<std::string, Syntax::ActionInfo>::iterator>
-Syntax::getActions(const std::string & name)
-{
-  return _associated_actions.equal_range(name);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
 
 namespace Moose
 {
 
-Syntax syntax;
-
-void associateSyntax()
+void associateSyntax(Syntax & syntax)
 {
   /**
    * Note: the optional third parameter is used to differentiate which action_name is
@@ -240,8 +127,8 @@ void associateSyntax()
   // Loose Coupling
   syntax.registerActionSyntax("EmptyAction", "SubProblems");
 
-  addActionTypes();
-  registerActions();
+  addActionTypes(syntax);
+  registerActions(syntax);
 }
 
 

@@ -1,7 +1,7 @@
 #include "MooseTest.h"
 #include "Moose.h"
 #include "Factory.h"
-#include "Parser.h"
+#include "ActionFactory.h"
 
 #include "CoupledConvection.h"
 #include "ForcingFn.h"
@@ -79,11 +79,22 @@
 #include "ExceptionSteady.h"
 
 
-namespace MooseTest
-{
+#include "ConvDiffMetaAction.h"
 
-void registerObjects()
+
+
+MooseTestApp::MooseTestApp(int argc, char *argv[]) :
+    MooseApp(argc, argv)
 {
+  registerObjects();
+  associateSyntax();
+}
+
+void
+MooseTestApp::registerObjects()
+{
+  Moose::registerObjects();
+
   // Kernels
   registerKernel(CoupledConvection);
   registerKernel(ForcingFn);
@@ -167,4 +178,13 @@ void registerObjects()
   registerExecutioner(ExceptionSteady);
 }
 
-} // namespace
+void
+MooseTestApp::associateSyntax()
+{
+  // add MOOSE basic syntax
+  Moose::associateSyntax(_syntax);
+
+  // and add more
+  registerAction(ConvDiffMetaAction, "meta_action");
+  _syntax.registerActionSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
+}

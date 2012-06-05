@@ -35,8 +35,8 @@ void
 SetupDampersAction::act()
 {
   // if we have add_damper action, we will setup dampers ;-)
-  ActionIterator it_beg = Moose::action_warehouse.actionBlocksWithActionBegin("add_damper");
-  ActionIterator it_end = Moose::action_warehouse.actionBlocksWithActionEnd("add_damper");
+  ActionIterator it_beg = _awh.actionBlocksWithActionBegin("add_damper");
+  ActionIterator it_end = _awh.actionBlocksWithActionEnd("add_damper");
   if (it_beg != it_end)
     _problem->setupDampers();
 }

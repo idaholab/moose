@@ -19,6 +19,7 @@
 #include "PetscSupport.h"
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
+#include "Syntax.h"
 
 // objects that can be created by MOOSE
 #include "MooseMesh.h"
@@ -328,19 +329,19 @@ registerObjects()
 }
 
 void
-addActionTypes()
+addActionTypes(Syntax & syntax)
 {
   /**************************/
   /**** Register Actions ****/
   /**************************/
   /// Minimal Problem
-  registerActionName("setup_mesh", true);
-  registerActionName("add_variable", true);
-  registerActionName("add_kernel", true);
+  registerActionName("setup_mesh", false);
+  registerActionName("add_variable", false);
+  registerActionName("add_kernel", false);
   registerActionName("setup_executioner", true);
   registerActionName("init_displaced_problem", false);
-  registerActionName("setup_subproblem", true);
-  registerActionName("setup_output", true);
+  registerActionName("setup_subproblem", false);
+  registerActionName("setup_output", false);
   registerActionName("init_problem", true);
   registerActionName("copy_nodal_vars", true);
   registerActionName("copy_nodal_aux_vars", true);
@@ -398,7 +399,7 @@ addActionTypes()
    * Additional dependencies can be inserted later inside of user applications with calls to
    * ActionWarehouse::addDependency("action_name", "pre_req")
    */
-  action_warehouse.addDependencySets(
+  syntax.addDependencySets(
 "(meta_action)"
 "(set_global_params)"
 "(read_mesh)"
@@ -437,7 +438,7 @@ addActionTypes()
 
 /**
  * Multiple Action class can be associated with a single input file section, in which case all associated Actions
- * will be created and "acted" on when the associated inputfile section is seen.
+ * will be created and "acted" on when the associated input file section is seen.
  *
  * Example:
  * "setup_mesh" <---> SetupMeshAction <-
@@ -463,7 +464,7 @@ addActionTypes()
  *       prematurely)
  */
 void
-registerActions()
+registerActions(Syntax & syntax)
 {
   registerAction(ReadMeshAction, "read_mesh");
   registerAction(SetupMeshAction, "setup_mesh");
@@ -536,12 +537,7 @@ setSolverDefaults(FEProblem & problem)
 #endif //LIBMESH_HAVE_PETSC
 }
 
-// TODO: Move this (perhaps into the problem_warehouse?)
-ActionWarehouse action_warehouse;
-
 
 PerfLog setup_perf_log("Setup");
-
-Executioner *executioner = NULL;
 
 } // namespace Moose

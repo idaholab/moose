@@ -15,7 +15,7 @@
 #include "SetupSubProblemAction.h"
 #include "Moose.h"
 #include "FEProblem.h"
-#include "Parser.h"
+#include "MooseApp.h"
 #include "Conversion.h"
 
 template<>
@@ -41,10 +41,9 @@ SetupSubProblemAction::~SetupSubProblemAction()
 void
 SetupSubProblemAction::act()
 {
-  if (_parser_handle._problem != NULL)
+  if (_problem != NULL)
   {
-    SubProblem & subproblem = *_parser_handle._problem;
-    subproblem.setCoordSystem(Moose::stringToEnum<Moose::CoordinateSystemType>(_coord_sys));
-    subproblem.useFECache(_fe_cache);
+    _problem->setCoordSystem(Moose::stringToEnum<Moose::CoordinateSystemType>(_coord_sys));
+    _problem->useFECache(_fe_cache);
   }
 }

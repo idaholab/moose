@@ -15,7 +15,7 @@
 #include "SetupOutputAction.h"
 
 #include "Moose.h"
-#include "Parser.h"
+#include "MooseApp.h"
 #include "Output.h"
 #include "FEProblem.h"
 #include "Conversion.h"
@@ -39,7 +39,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("xda", false, "Specifies that you would like xda output solution files(s)");
   params.addParam<bool>("postprocessor_screen", true, "Specifies that you would like PostProcessor output to the screen (stdout)");
   params.addParam<unsigned int>("max_pps_rows_screen", 0, "The maximum number of postprocessor values displayed on screen during a timestep");
-  params.addParam<bool>("postprocessor_csv", false, "Specifies that you would like a PostProcessor comma seperated values file");
+  params.addParam<bool>("postprocessor_csv", false, "Specifies that you would like a PostProcessor comma separated values file");
   params.addParam<bool>("postprocessor_gnuplot", false, "Specifies that you would like plots of the postprocessor output");
   params.addParam<std::string>("gnuplot_format", "ps", "Specifies which output format gnuplot will produce. Currently supported: ps, gif, and png");
   params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file");
@@ -101,33 +101,28 @@ SetupOutputAction::act()
     Moose::setup_perf_log.disable_logging();
   }
 
-  // FIXME: _parser_handle._problem can be NULL !!!
-
-  /// Determines whether we see the perf log early in a run or not
-  _parser_handle._problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
-
-  FEProblem & problem = *_parser_handle._problem;
-
-  if (_parser_handle._problem != NULL)
+  if (_problem != NULL)
   {
-    FEProblem & fe_problem = *_parser_handle._problem;
+    /// Determines whether we see the perf log early in a run or not
+    _problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
+
     if(_pars.isParamValid("output_variables"))
     {
-      fe_problem.setOutputVariables(getParam<std::vector<std::string> >("output_variables"));
+      _problem->setOutputVariables(getParam<std::vector<std::string> >("output_variables"));
     }
     else
     {
       if (getParam<bool>("elemental_as_nodal"))
       {
         // output all variables in the system
-        fe_problem.setOutputVariables(fe_problem.getVariableNames());
+        _problem->setOutputVariables(_problem->getVariableNames());
       }
     }
 
     // If the user didn't provide a filename - see if the parser has a filename that we can use as a base
     if (!_pars.isParamValid("file_base"))
     {
-      std::string input_file_name = _parser_handle.getFileName();
+      std::string input_file_name = Moose::app->getFileName();
       mooseAssert(input_file_name != "", "Input Filename is NULL");
       size_t pos = input_file_name.find_last_of('.');
       mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
@@ -137,30 +132,29 @@ SetupOutputAction::act()
   else
     _pars.set<std::string>("file_base") = "out";
 
-  Output & output = problem.out();                       // can't use use this with coupled problems on different meshes
+  Output & output = _problem->out();                       // can't use use this with coupled problems on different meshes
   setupOutputObject(output, _pars);
 
   const bool output_initial = getParam<bool>("output_initial");
-  problem.outputInitial(output_initial);
+  _problem->outputInitial(output_initial);
 
-  if (_parser_handle._problem != NULL)
+  if (_problem != NULL)
   {
     // TODO: handle this thru Problem interface
-    FEProblem & fe_problem = *_parser_handle._problem;
-    fe_problem._postprocessor_screen_output = getParam<bool>("postprocessor_screen");
-    fe_problem._postprocessor_csv_output = getParam<bool>("postprocessor_csv");
-    fe_problem._postprocessor_gnuplot_output = getParam<bool>("postprocessor_gnuplot");
-    fe_problem._gnuplot_format = getParam<std::string>("gnuplot_format");
-    fe_problem.setMaxPPSRowsScreen(getParam<unsigned int>("max_pps_rows_screen"));
+    _problem->_postprocessor_screen_output = getParam<bool>("postprocessor_screen");
+    _problem->_postprocessor_csv_output = getParam<bool>("postprocessor_csv");
+    _problem->_postprocessor_gnuplot_output = getParam<bool>("postprocessor_gnuplot");
+    _problem->_gnuplot_format = getParam<std::string>("gnuplot_format");
+    _problem->setMaxPPSRowsScreen(getParam<unsigned int>("max_pps_rows_screen"));
 
-    fe_problem.outputDisplaced(getParam<bool>("output_displaced"));
-    fe_problem.outputSolutionHistory(getParam<bool>("output_solution_history"));
+    _problem->outputDisplaced(getParam<bool>("output_displaced"));
+    _problem->outputSolutionHistory(getParam<bool>("output_solution_history"));
 
-    fe_problem.setNumRestartFiles(getParam<unsigned int>("num_restart_files"));
+    _problem->setNumRestartFiles(getParam<unsigned int>("num_restart_files"));
 
 
 #ifdef LIBMESH_ENABLE_AMR
-    Adaptivity & adapt = fe_problem.adaptivity();
+    Adaptivity & adapt = _problem->adaptivity();
     if (adapt.isOn())
       output.sequence(true);
 #endif //LIBMESH_ENABLE_AMR

@@ -36,7 +36,7 @@ InputParameters validParams<AdaptivityAction>()
   params.addParam<Real> ("coarsen_fraction",                   0.0, "The fraction of elements or error to coarsen. Should be between 0 and 1.");
   params.addParam<unsigned int> ("max_h_level",                0, "Maximum number of times a single element can be refined. If 0 then infinite.");
   params.addParam<std::string> ("error_estimator",             "KellyErrorEstimator", "The class name of the error estimator you want to use.");
-  params.addParam<bool> ("print_changed_info",                 false, "Determines whether information about the mesh is printed when adapativity occurs");
+  params.addParam<bool> ("print_changed_info",                 false, "Determines whether information about the mesh is printed when adaptivity occurs");
   params.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that adaptivity will be active after.");
   params.addParam<Real>("stop_time", std::numeric_limits<Real>::max(), "The time after which adaptivity will no longer be active.");
   params.addParam<std::vector<std::string> > ("weight_names", "List of names of variables that will be associated with weight_values");

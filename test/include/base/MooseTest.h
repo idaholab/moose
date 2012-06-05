@@ -1,14 +1,18 @@
 #ifndef MOOSETEST_H
 #define MOOSETEST_H
 
-//Forward Declaration
-class Parser;
+#include "MooseApp.h"
 
-namespace MooseTest
+class MooseTestApp : public MooseApp
 {
-void registerObjects();
+public:
+  MooseTestApp(int argc, char *argv[]);
 
-void associateSyntax(Parser & p);
-}
+protected:
+  void associateSyntax();
+
+public:
+  static void registerObjects();
+};
 
 #endif /* MOOSETEST_H */

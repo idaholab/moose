@@ -96,6 +96,8 @@ Assembly::~Assembly()
     delete it->second;
 
   delete _current_side_elem;
+
+  _coord.release();
 }
 
 FEBase * &

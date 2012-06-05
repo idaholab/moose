@@ -26,11 +26,13 @@
 #include "Factory.h"
 #include "MooseObjectAction.h"
 #include "ActionWarehouse.h"
+#include "EmptyAction.h"
 
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "Executioner.h"
 #include "Moose.h"
+#include "MooseApp.h"
 
 #include "GlobalParamsAction.h"
 
@@ -41,49 +43,19 @@
 // libMesh
 #include "getpot.h"
 
-Parser::Parser(Syntax & syntax):
-  _mesh(NULL),
-  _displaced_mesh(NULL),
-  _problem(NULL),
-  _exreader(NULL),
-  _loose(false),
-  _syntax(syntax),
-  _action_wh(Moose::action_warehouse),
-  _syntax_formatter(NULL),
-  _command_line(*this),
-  _getpot_initialized(false),
-  _enable_unused_check(WARN_UNUSED),
-  _sort_alpha(false)
-{
-  // Need to make sure that the parser pointer is set in the warehouse for various functions
-  // TODO: Rip the Parser Pointer out of the warehouse
-  _action_wh.setParserPointer(this);
-  _action_wh.clear();                      // new parser run, get rid of old actions
-}
 
-Parser::Parser(Syntax & syntax, ActionWarehouse & action_wh) :
-    _mesh(NULL),
-    _displaced_mesh(NULL),
-    _problem(NULL),
-    _exreader(NULL),
-    _loose(false),
-    _syntax(syntax),
+Parser::Parser(ActionWarehouse & action_wh) :
     _action_wh(action_wh),
+    _syntax(_action_wh.syntax()),
     _syntax_formatter(NULL),
-    _command_line(*this),
     _getpot_initialized(false),
-    _enable_unused_check(WARN_UNUSED),
     _sort_alpha(false)
 {
-  // Need to make sure that the parser pointer is set in the warehouse for various functions
-  // TODO: Rip the Parser Pointer out of the warehouse
-  _action_wh.setParserPointer(this);
 }
 
 
 Parser::~Parser()
 {
-  delete _exreader;
   delete _syntax_formatter;
 }
 
@@ -115,7 +87,7 @@ Parser::isSectionActive(const std::string & s,
       retValue = std::find(active.begin(), active.end(), short_name) != active.end();
   }
 
-  // Finally see if any of the deactive strings are partially contained in this path (matching from the beginning)
+  // Finally see if any of the inactive strings are partially contained in this path (matching from the beginning)
   for (std::set<std::string>::iterator i = _inactive_strings.begin(); i != _inactive_strings.end(); ++i)
     if (s.find(*i) == 0)
       retValue = false;
@@ -136,11 +108,8 @@ Parser::parse(const std::string &input_filename)
   InputParameters active_list_params = validParams<Action>();
   InputParameters params = validParams<EmptyAction>();
 
-  // Save off the input filename for future use
-  _input_filename = input_filename;
-
   // Build Command Line Vars Vector
-  _command_line.buildCommandLineVarsSet();
+//  _command_line.buildVarsSet();
 
   // vector for initializing active blocks
   std::vector<std::string> all(1);
@@ -195,7 +164,8 @@ Parser::parse(const std::string &input_filename)
         // Before we build any objects we need to make sure that the section they are in is active
         if (isSectionActive(curr_identifier, active_lists))
         {
-          params.set<Parser *>("parser_handle") = this;
+          params.set<ActionWarehouse *>("awh") = &_action_wh;
+          params.set<Parser *>("parser") = this;
 
           extractParams(curr_identifier, params);
 
@@ -221,7 +191,7 @@ Parser::parse(const std::string &input_filename)
       }
     }
 
-    // Extract and save the current "active" list in the datastructure
+    // Extract and save the current "active" list in the data structure
     active_list_params.set<std::vector<std::string> >("active") = all;
     extractParams(curr_identifier, active_list_params);
     active_lists[curr_identifier] = active_list_params.get<std::vector<std::string> >("active");
@@ -229,13 +199,6 @@ Parser::parse(const std::string &input_filename)
 
   // Check to make sure that all sections in the input file that are explicitly listed are actually present
   checkActiveUsed(section_names, active_lists);
-
-  // Print the input file syntax if requested
-  if (_command_line.searchCommandLine("ShowTree"))
-  {
-    _action_wh.printInputFile(std::cout);
-    std::cout << std::endl << std::endl;
-  }
 }
 
 void
@@ -304,23 +267,6 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_
       std::cout << oss.str();
   }
 }
-
-std::string
-Parser::getFileName(bool stripLeadingPath) const
-{
-  if (!stripLeadingPath)
-    return _input_filename;
-
-  std::string filename;
-  size_t pos = _input_filename.find_last_of('/');
-  if (pos != std::string::npos)
-    filename = _input_filename.substr(pos+1);
-  else
-    filename = _input_filename;
-
-  return filename;
-}
-
 
 void
 Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode)
@@ -480,24 +426,6 @@ Parser::getPotHandle() const
 }
 
 void
-Parser::execute()
-{
-  _action_wh.executeAllActions();
-
-  // If requested, see if there are unidentified name/value pairs in the input file
-  if (_command_line.searchCommandLine("ErrorUnused") || _enable_unused_check == ERROR_UNUSED)
-  {
-    std::vector<std::string> all_vars = _getpot_file.get_variable_names();
-    checkUnidentifiedParams(all_vars, true);
-  }
-  else if (_command_line.searchCommandLine("WarnUnused") || _enable_unused_check == WARN_UNUSED)
-  {
-    std::vector<std::string> all_vars = _getpot_file.get_variable_names();
-    checkUnidentifiedParams(all_vars, false);
-  }
-}
-
-void
 Parser::checkFileReadable(const std::string & filename, bool check_line_endings)
 {
   std::ifstream in(filename.c_str(), std::ifstream::in);
@@ -527,18 +455,6 @@ Parser::checkFileWritable(const std::string & filename)
                 + std::string("\". Check to make sure that it exists and that you have write permission.")).c_str());
 
   out.close();
-}
-
-void
-Parser::setCheckUnusedFlag(bool warn_is_error)
-{
-  _enable_unused_check = warn_is_error ? ERROR_UNUSED : WARN_UNUSED;
-}
-
-void
-Parser::disableCheckUnusedFlag()
-{
-  _enable_unused_check = OFF;
 }
 
 
@@ -575,8 +491,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
     std::string full_name = orig_name;
 
     // Mark parameters appearing in the input file or command line
-    if (_getpot_file.have_variable(full_name.c_str())
-      || (Moose::command_line && Moose::command_line->have_variable(full_name.c_str())))
+    if (_getpot_file.have_variable(full_name.c_str()) || Moose::app->commandLine().haveVariable(full_name.c_str()))
     {
       p.seenInInputFile(it->first);
       _extracted_vars.insert(full_name);  // Keep track of all variables extracted from the input file
@@ -652,26 +567,26 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
   }
 }
 
-void Parser::setRealVectorValue(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<RealVectorValue>* param, bool in_global, GlobalParamsAction *global_block)
+void Parser::setRealVectorValue(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<RealVectorValue> * param, bool in_global, GlobalParamsAction * global_block)
 {
   GetPot *gp;
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_command_line.isVariableOnCommandLine(full_name))
-    gp = Moose::command_line;
+  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
+    gp = Moose::app->commandLine().getPot();
   else
     gp = &_getpot_file;
 
   int vec_size = gp->vector_variable_size(full_name.c_str());
 
   if (vec_size != LIBMESH_DIM)
-    mooseError(std::string("Error in RealVectorValue parmeter ") + full_name + ": size is " << vec_size
+    mooseError(std::string("Error in RealVectorValue parameter ") + full_name + ": size is " << vec_size
                << ", should be " << LIBMESH_DIM);
 
   RealVectorValue value;
-  for (int i=0; i<vec_size; ++i)
-    value(i) = Real(gp->get_value_no_default(full_name.c_str(), (Real)0.0, i));
+  for (int i = 0; i < vec_size; ++i)
+    value(i) = Real(gp->get_value_no_default(full_name.c_str(), (Real) 0.0, i));
 
   param->set() = value;
   if (in_global)
@@ -679,73 +594,70 @@ void Parser::setRealVectorValue(const std::string & full_name, const std::string
 }
 
 template<typename T>
-void Parser::setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block)
+void Parser::setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T> * param, bool in_global, GlobalParamsAction * global_block)
 {
   GetPot *gp;
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_command_line.isVariableOnCommandLine(full_name))
-    gp = Moose::command_line;
+  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
+    gp = Moose::app->commandLine().getPot();
   else
     gp = &_getpot_file;
 
   T value = gp->get_value_no_default(full_name.c_str(), param->get());
-
   param->set() = value;
   if (in_global)
     global_block->setScalarParam<T>(short_name) = value;
 }
 
 template<typename T>
-void Parser::setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block)
+void Parser::setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction * global_block)
 {
   GetPot *gp;
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_command_line.isVariableOnCommandLine(full_name))
-    gp = Moose::command_line;
+  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
+    gp = Moose::app->commandLine().getPot();
   else
     gp = &_getpot_file;
 
   int vec_size = gp->vector_variable_size(full_name.c_str());
-
   if (gp->have_variable(full_name.c_str()))
     param->set().resize(vec_size);
 
-  for (int i=0; i<vec_size; ++i)
+  for (int i = 0; i < vec_size; ++i)
     param->set()[i] = gp->get_value_no_default(full_name.c_str(), param->get()[i], i);
 
   if (in_global)
   {
     global_block->setVectorParam<T>(short_name).resize(vec_size);
-    for (int i=0; i<vec_size; ++i)
+    for (int i = 0; i < vec_size; ++i)
       global_block->setVectorParam<T>(short_name)[i] = param->get()[i];
   }
 }
 
-void Parser::setRealTensorValue(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<RealTensorValue>* param, bool in_global, GlobalParamsAction *global_block)
+void Parser::setRealTensorValue(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<RealTensorValue> * param, bool in_global, GlobalParamsAction * global_block)
 {
   GetPot *gp;
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_command_line.isVariableOnCommandLine(full_name))
-    gp = Moose::command_line;
+  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
+    gp = Moose::app->commandLine().getPot();
   else
     gp = &_getpot_file;
 
   int vec_size = gp->vector_variable_size(full_name.c_str());
-
   if (vec_size != LIBMESH_DIM * LIBMESH_DIM)
-    mooseError(std::string("Error in RealTensorValue parmeter ") + full_name + ": size is " << vec_size
+    mooseError(std::string("Error in RealTensorValue parameter ") + full_name + ": size is " << vec_size
                << ", should be " << LIBMESH_DIM * LIBMESH_DIM);
 
   RealTensorValue value;
-  for (int i=0; i<LIBMESH_DIM; ++i)
-    for (int j=0; j<LIBMESH_DIM; ++j)
-      value(i, j) = Real(gp->get_value_no_default(full_name.c_str(), (Real)0.0, i*LIBMESH_DIM+j));
+  for (int i = 0; i < LIBMESH_DIM; ++i)
+    for (int j = 0; j < LIBMESH_DIM; ++j)
+      value(i, j) = Real(gp->get_value_no_default(full_name.c_str(), (Real) 0.0, i * LIBMESH_DIM + j));
 
   param->set() = value;
   if (in_global)

@@ -12,25 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AddMaterialAction.h"
-#include "Parser.h"
-#include "FEProblem.h"
+#ifndef EXODUSFORMATTER_H
+#define EXODUSFORMATTER_H
 
-template<>
-InputParameters validParams<AddMaterialAction>()
+#include "InputFileFormatter.h"
+
+class ExodusFormatter : public InputFileFormatter
 {
-  return validParams<MooseObjectAction>();
-}
+public:
+  ExodusFormatter();
 
-AddMaterialAction::AddMaterialAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
-{
-}
+  virtual void printInputFile(ActionWarehouse & wh);
 
-void
-AddMaterialAction::act()
-{
-  std::vector<std::string> blocks = _moose_object_pars.get<std::vector<std::string> >("block");
+  virtual void format();
 
-  _problem->addMaterial(_type, getShortName(), _moose_object_pars);
-}
+  std::vector<std::string> & getInputFileRecord() { return _input_file_record; }
+
+protected:
+  std::stringstream _ss;
+  std::vector<std::string> _input_file_record;
+};
+
+#endif /* EXODUSFORMATTER_H */

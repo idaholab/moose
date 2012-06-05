@@ -12,25 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AddMaterialAction.h"
-#include "Parser.h"
-#include "FEProblem.h"
+#ifndef MOOSETESTAPP_H
+#define MOOSETESTAPP_H
 
-template<>
-InputParameters validParams<AddMaterialAction>()
-{
-  return validParams<MooseObjectAction>();
-}
 
-AddMaterialAction::AddMaterialAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
-{
-}
-
-void
-AddMaterialAction::act()
-{
-  std::vector<std::string> blocks = _moose_object_pars.get<std::vector<std::string> >("block");
-
-  _problem->addMaterial(_type, getShortName(), _moose_object_pars);
-}
+#endif /* MOOSETESTAPP_H */

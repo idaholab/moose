@@ -46,26 +46,15 @@ MooseInit::MooseInit(int argc, char *argv[]) :
 
 //  std::cout << "Using " << libMesh::n_threads() << " thread(s)" << std::endl;
 
-  Moose::command_line = new GetPot(argc, argv);
-  Moose::executioner = NULL;
 
-  Moose::registerObjects();
+//  Moose::registerObjects();
 }
 
 MooseInit::~MooseInit()
 {
-  Moose::action_warehouse.clear();
+//  Moose::action_warehouse.clear();
 
-  delete Moose::command_line;
-  delete Moose::executioner;
   Factory::release();
   ActionFactory::release();
   ProblemFactory::release();
-}
-
-namespace Moose
-{
-
-GetPot *command_line = NULL;
-
 }

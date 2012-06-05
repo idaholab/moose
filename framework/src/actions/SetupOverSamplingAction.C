@@ -15,7 +15,7 @@
 #include "SetupOverSamplingAction.h"
 
 #include "Moose.h"
-#include "Parser.h"
+#include "MooseApp.h"
 #include "Output.h"
 #include "FEProblem.h"
 #include "OutputProblem.h"
@@ -59,44 +59,35 @@ SetupOverSamplingAction::SetupOverSamplingAction(const std::string & name, Input
 void
 SetupOverSamplingAction::act()
 {
-  FEProblem * problem = dynamic_cast<FEProblem *>(_parser_handle._problem);
-  if (!problem)
-    mooseError("Can't get a handle to FEproblem");
+  if (_problem == NULL)
+    return;
 
-  OutputProblem & out_problem = problem->getOutputProblem(getParam<unsigned int>("refinements"));
+  OutputProblem & out_problem = _problem->getOutputProblem(getParam<unsigned int>("refinements"));
 
   Output & output = out_problem.out();  // can't use use this with coupled problems on different meshes
 
-  if(!_pars.isParamValid("output_variables") && _parser_handle._problem != NULL)
+  if(!_pars.isParamValid("output_variables"))
   {
-    FEProblem & fe_problem = *_parser_handle._problem;
-    _pars.set<std::vector<std::string> >("output_variables") = fe_problem.getVariableNames();
+    _pars.set<std::vector<std::string> >("output_variables") = _problem->getVariableNames();
   }
 
   // If no filebase was supplied in the parameters object - borrow the main problem's filebase
   if (!_pars.isParamValid("file_base"))
-    _pars.set<std::string>("file_base") = problem->out().fileBase() + "_oversample";
+    _pars.set<std::string>("file_base") = _problem->out().fileBase() + "_oversample";
 
   setupOutputObject(output, _pars);
 
   out_problem.outputInitial(getParam<bool>("output_initial"));
 
-  if (_parser_handle._problem != NULL)
-  {
-    // TODO: handle this thru Problem interface
-    FEProblem & fe_problem = *_parser_handle._problem;
-
 #ifdef LIBMESH_ENABLE_AMR
-    Adaptivity & adapt = fe_problem.adaptivity();
-    if (adapt.isOn())
-      output.sequence(true);
+  Adaptivity & adapt = _problem->adaptivity();
+  if (adapt.isOn())
+    output.sequence(true);
 #endif //LIBMESH_ENABLE_AMR
 
-    // TODO: Need to set these values on the OutputProblem
-    output.interval(getParam<int>("interval"));
-    output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
-
-  }
+  // TODO: Need to set these values on the OutputProblem
+  output.interval(getParam<int>("interval"));
+  output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
 
 // Test to make sure that the user can write to the directory specified in file_base
   std::string base = "./" + getParam<std::string>("file_base");

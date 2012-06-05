@@ -1907,8 +1907,6 @@ FEProblem::checkProblemIntegrity()
 {
   // Check for unsatisfied actions
   const std::set<SubdomainID> & mesh_subdomains = _mesh.meshSubdomains();
-  Moose::action_warehouse.checkUnsatisfiedActions();
-
   // Check kernel coverage of subdomains (blocks) in the mesh
   _nl.checkKernelCoverage(mesh_subdomains);
 

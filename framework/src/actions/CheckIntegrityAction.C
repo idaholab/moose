@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "CheckIntegrityAction.h"
+#include "ActionWarehouse.h"
 #include "FEProblem.h"
 #include "Parser.h"
 
@@ -32,5 +33,6 @@ CheckIntegrityAction::CheckIntegrityAction(const std::string & name, InputParame
 void
 CheckIntegrityAction::act()
 {
+  _awh.checkUnsatisfiedActions();
   _problem->checkProblemIntegrity();
 }

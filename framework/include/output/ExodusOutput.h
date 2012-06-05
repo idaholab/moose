@@ -48,4 +48,4 @@ protected:
   std::string getFileName(const std::string & file_base);
 };
 
-#endif /* OUTPUTTER_H */
+#endif /* EXODUSOUTPUTTER_H */

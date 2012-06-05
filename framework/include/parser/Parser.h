@@ -25,11 +25,12 @@
 #include "vector_value.h"
 #include "tensor_value.h"
 
-class MooseMesh;
-class FEProblem;
-class Executioner;
+class ActionWarehouse;
 class SyntaxTree;
 
+/**
+ * Class for parsing input files.
+ */
 class Parser
 {
 public:
@@ -39,12 +40,11 @@ public:
     YAML
   };
 
-  Parser(Syntax & syntax);
-  Parser(Syntax & syntax, ActionWarehouse & action_wh);
+  Parser(ActionWarehouse & action_wh);
 
   virtual ~Parser();
 
-  // Retrieve the Syntax associated with the passed Action and action_name
+  /// Retrieve the Syntax associated with the passed Action and action_name
   std::string getSyntaxByAction(const std::string & action, const std::string & action_name) { return _syntax.getSyntaxByAction(action, action_name); }
 
   /**
@@ -68,12 +68,6 @@ public:
                        const std::map<std::string, std::vector<std::string> > & active_lists);
 
   /**
-   * This function initiates the traversal of the parse block tree which is each block is resposible
-   * for creating and filling in various MOOSE based objects.
-   */
-  void execute();
-
-  /**
    * This function will split the passed in string on a set of delimiters appending the substrings
    * to the passed in vector.  The delimiters default to "/" but may be supplied as well.  In addition
    * if min_len is supplied, the minimum token length will be greater than the supplied value.
@@ -90,7 +84,7 @@ public:
   static void escape(std::string &str);
 
   /**
-   * Standard scripting languague trim function
+   * Standard scripting language trim function
    */
   static std::string trim(std::string str,
                           const std::string &white_space = " \t\n\v\f\r");
@@ -112,26 +106,10 @@ public:
   const GetPot * getPotHandle() const;
 
   /**
-   * Set a flag so that the parser will either warn or error when unused variables are seen after
-   * parsing is complete.
-   */
-  void setCheckUnusedFlag(bool warn_is_error=false);
-
-  /**
-   * Removes warnings and error checks for unrecognized variables in the input file
-   */
-  void disableCheckUnusedFlag();
-
-  /**
-   * Set/Get a flag so that synax dumped from the system is in alphabetical order
+   * Set/Get a flag so that syntax dumped from the system is in alphabetical order
    */
   void setSortAlpha(bool sort_alpha_flag);
   bool getSortFlag() const;
-
-  /**
-   * Return the filename that was parsed
-   */
-  std::string getFileName(bool stripLeadingPath=true) const;
 
   /**
    * This function attempts to extract values from the input file based on the contents of
@@ -139,11 +117,6 @@ public:
    * including vector types
    */
   void extractParams(const std::string & prefix, InputParameters &p);
-
-  /**
-   * prints a standard cli usage message
-   */
-  void printUsage() const;
 
   /**
    * Creates a syntax formatter for printing
@@ -155,31 +128,21 @@ public:
    */
   void buildFullTree(const std::string &search_string);
 
-  std::string parseCommandLine() { return _command_line.parseCommandLine(); }
-
-  // data created while running execute()
-  MooseMesh *_mesh;
-  MooseMesh *_displaced_mesh;
-  FEProblem *_problem;
-
-  /// auxiliary object for restart
-  ExodusII_IO *_exreader;
-  /// true if parsing input file with loose syntax
-  bool _loose;
-
-protected:
-  Syntax & _syntax;
-  ActionWarehouse & _action_wh;
-
   /**
-   * This function checks to see if there are unindentified variables in the input file (i.e. unused)
+   * This function checks to see if there are unidentified variables in the input file (i.e. unused)
    * If the warn_is_error is set, then the program will abort if unidentified parameters are found
    */
   void checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn);
 
+protected:
+  /// Action warehouse that will be filled by actions
+  ActionWarehouse & _action_wh;
+  /// Reference to an object that defines input file syntax
+  Syntax & _syntax;
+
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
-   * since they are colled only from this Object
+   * since they are called only from this Object
    */
 
   template<typename T>
@@ -188,32 +151,21 @@ protected:
 
 
   void setRealVectorValue(const std::string & full_name, const std::string & short_name,
-                          InputParameters::Parameter<RealVectorValue>* param,
-                          bool in_global, GlobalParamsAction *global_block);
+                          InputParameters::Parameter<RealVectorValue>* param, bool in_global, GlobalParamsAction *global_block);
 
   void setRealTensorValue(const std::string & full_name, const std::string & short_name,
-                          InputParameters::Parameter<RealTensorValue>* param,
-                          bool in_global, GlobalParamsAction *global_block);
+                          InputParameters::Parameter<RealTensorValue>* param, bool in_global, GlobalParamsAction *global_block);
 
   template<typename T>
   void setVectorParameter(const std::string & full_name, const std::string & short_name,
                           InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block);
 
-  /************************************
-   * Protected Data Members
-   ************************************/
-//  struct CLIOption
-//  {
-//    std::string desc;
-//    std::vector<std::string> cli_syntax;
-//    bool required;
-//  };
+  template<typename T>
+  void setTensorParameter(const std::string & full_name, const std::string & short_name,
+                          InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsAction *global_block);
+
 
   SyntaxTree * _syntax_formatter;
-
-  CommandLine _command_line;
-
-//  std::map<std::string, CLIOption> _cli_options;
 
   /// Contains all of the sections that are not active during the parse phase so that blocks
   /// nested more than one level deep can detect that the grandparent is not active
@@ -225,7 +177,6 @@ protected:
 
   /// The set of all variables extracted from the input file
   std::set<std::string> _extracted_vars;
-  enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
   bool _sort_alpha;
 
 public:

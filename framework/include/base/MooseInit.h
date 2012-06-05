@@ -16,7 +16,6 @@
 #define MOOSEINIT_H
 
 #include "libmesh.h"
-#include "getpot.h"
 
 /**
  * Initialization object for any MOOSE-based application
@@ -29,15 +28,6 @@ class MooseInit : public LibMeshInit
 public:
   MooseInit(int argc, char *argv[]);
   virtual ~MooseInit();
-
-protected:
 };
-
-namespace Moose
-{
-
-extern GetPot *command_line;
-
-} // namespace Moose
 
 #endif /* MOOSEINIT_H */

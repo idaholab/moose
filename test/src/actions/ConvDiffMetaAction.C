@@ -16,7 +16,7 @@
 #include "Factory.h"
 #include "ActionFactory.h"
 #include "MooseObjectAction.h"
-#include "Parser.h"
+#include "MooseApp.h"
 #include "FEProblem.h"
 
 #include "vector_value.h"
@@ -30,8 +30,8 @@ InputParameters validParams<ConvDiffMetaAction>()
   return params;
 }
 
-ConvDiffMetaAction::ConvDiffMetaAction(const std::string & name, InputParameters params)
-  :Action(name, params)
+ConvDiffMetaAction::ConvDiffMetaAction(const std::string & name, InputParameters params) :
+    Action(name, params)
 {
 }
 
@@ -58,20 +58,20 @@ ConvDiffMetaAction::act()
   //**************** Variables ****************//
   //*******************************************//
   InputParameters variable_params = ActionFactory::instance()->getValidParams("AddVariableAction");
+  variable_params.set<ActionWarehouse *>("awh") = &_awh;
 
 //  for (unsigned int i=0; i<variable_params.size(); ++i)
 //  {
-  variable_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
 
-  // Creat and Add First Variable Action
+  // Create and Add First Variable Action
   variable_params.set<std::string>("name") = "Variables/" + variables[0];
   action = ActionFactory::instance()->create("AddVariableAction", variable_params);
-  Moose::action_warehouse.addActionBlock(action);
+  _awh.addActionBlock(action);
 
-    // Create and Add Second Variable Action
+  // Create and Add Second Variable Action
   variable_params.set<std::string>("name") = "Variables/" + variables[1];
   action = ActionFactory::instance()->create("AddVariableAction", variable_params);
-  Moose::action_warehouse.addActionBlock(action);
+  _awh.addActionBlock(action);
 //  }
 
 
@@ -79,7 +79,7 @@ ConvDiffMetaAction::act()
   //**************** Kernels ******************//
   //*******************************************//
   InputParameters action_params = ActionFactory::instance()->getValidParams("AddKernelAction");
-  action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+  action_params.set<ActionWarehouse *>("awh") = &_awh;
 
   // Setup our Diffusion Kernel on the "u" variable
   action_params.set<std::string>("type") = "Diffusion";
@@ -90,8 +90,8 @@ ConvDiffMetaAction::act()
   {
     InputParameters & params = moose_object_action->getObjectParams();
     params.set<std::string>("variable") = variables[0];
-  // add it to the warehouse
-  Moose::action_warehouse.addActionBlock(action);
+    // add it to the warehouse
+    _awh.addActionBlock(action);
   }
 
   // Setup our Diffusion Kernel on the "v" variable
@@ -105,7 +105,7 @@ ConvDiffMetaAction::act()
     params.set<std::string>("variable") = variables[1];
   }
   // add it to the warehouse
-  Moose::action_warehouse.addActionBlock(action);
+  _awh.addActionBlock(action);
 
   // Setup our Convection Kernel on the "u" variable coupled to the diffusion variable "v"
   action_params.set<std::string>("type") = "Convection";
@@ -123,6 +123,5 @@ ConvDiffMetaAction::act()
     params.set<RealVectorValue>("velocity") = RealVectorValue(0, 0, 0);
   }
   // add it to the warehouse
-  Moose::action_warehouse.addActionBlock(action);
-
+  _awh.addActionBlock(action);
 }

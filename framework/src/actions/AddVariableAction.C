@@ -50,7 +50,6 @@ AddVariableAction::AddVariableAction(const std::string & name, InputParameters p
     Action(name, params),
     _variable_to_read(""),
     _timestep_to_read(2)
-
 {
 }
 
@@ -71,7 +70,7 @@ AddVariableAction::act()
   }
 
   Real scale_factor = getParam<Real>("scaling");
-  bool scalar_var = false;                              // tru if adding scalar variable
+  bool scalar_var = false;                              // true if adding scalar variable
 
   if (is_variables_block)
   {

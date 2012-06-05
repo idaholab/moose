@@ -20,27 +20,29 @@
 #include <map>
 #include <ostream>
 
-#include "DependencyResolver.h"
 #include "Action.h"
-#include "EmptyAction.h"
+#include "exodusII_io.h"
 
 /// Typedef to hide implementation details
 typedef std::vector<Action *>::iterator ActionIterator;
 
+class MooseMesh;
+class Executioner;
+
+/**
+ * Storage for action instances.
+ */
 class ActionWarehouse
 {
 public:
-  ActionWarehouse();
+  ActionWarehouse(Syntax & syntax);
   ~ActionWarehouse();
 
+  void build();
   void clear();
 
   bool empty() { return _action_blocks.empty(); }
 
-  void setParserPointer(Parser * p_ptr) { _parser_ptr = p_ptr; }
-  void registerName(std::string action, bool is_required);
-  void addDependency(std::string action, std::string pre_req);
-  void addDependencySets(const std::string & action_sets);
   void addActionBlock(Action * blk);
 
   /**
@@ -55,6 +57,8 @@ public:
   ActionIterator actionBlocksWithActionBegin(const std::string & action_name);
   ActionIterator actionBlocksWithActionEnd(const std::string & action_name);
 
+  std::map<std::string, std::vector<Action *> > & actionBlocks() { return _action_blocks; }
+
   /**
    * This method loops over all actions in the warehouse and executes them.  Meta-actions
    * may add new actions to the warehouse on the fly and they will still be executed in order
@@ -67,52 +71,26 @@ public:
    */
   void executeActionsWithAction(const std::string & name);
 
-  /**
-   * Iterator class for returning the Actions stored in this warehouse in order.
-   * This class is necessary to support the Meta-action capability supported by the
-   * ActionWarehouse.  Meta-Actions can add new Actions to the warehouse while
-   * maintaining proper order and a valid iterator.
-   */
-  class iterator
-  {
-  public:
-    iterator(ActionWarehouse & act_wh, bool end=false);
-    bool operator==(const iterator &rhs) const;
-    bool operator!=(const iterator &rhs) const;
-    iterator & operator++();
-    Action * operator*();
-
-  private:
-    ActionWarehouse & _act_wh;
-    bool _first;
-    bool _end;
-    std::vector<std::string>::iterator _i;
-    std::vector<Action *>::iterator _j;
-  };
-  friend class iterator;
-
-  iterator begin();
-  iterator end();
-
-  void printInputFile(std::ostream & stream);
-
   void showActions(bool state = true) { _show_actions = state; }
 
-private:
+  //// Getters
+  Syntax & syntax() { return _syntax; }
+
+  MooseMesh * & mesh() { return _mesh; }
+  MooseMesh * & displacedMesh() { return _displaced_mesh; }
+  FEProblem * & problem() { return _problem; }
+  ExodusII_IO * & exReader() { return _exreader; }
+  Executioner * & executioner() { return _executioner; }
+
+protected:
   void buildBuildableActions(const std::string &action_name);
 
-  /// The list of registered actions and a flag indicating whether or not they are required
-  std::map<std::string, bool> _registered_actions;
-
+  /// Reference to a "syntax" of actions
+  Syntax & _syntax;
   /// Pointers to the actual parsed input file blocks
   std::map<std::string, std::vector<Action *> > _action_blocks;
-
-  /// The dependency resolver
-  DependencyResolver<std::string> _actions;
-
   /// The container that holds the sorted action names from the DependencyResolver
   std::vector<std::string> _ordered_names;
-
   /// Use to store the current list of unsatisfied dependencies
   std::set<std::string> _unsatisfied_dependencies;
 
@@ -123,11 +101,25 @@ private:
    */
   bool _generator_valid;
 
-  /// Pointer to the active parser for this Warehouse instance
-  Parser * _parser_ptr;
-
   // DEBUGGING
   bool _show_actions;
+
+
+  //
+  // data created by actions
+  //
+
+  /// Mesh class
+  MooseMesh * _mesh;
+  /// Possible mesh for displaced problem
+  MooseMesh * _displaced_mesh;
+  /// Problem class
+  FEProblem * _problem;
+  /// Auxiliary object for restart
+  ExodusII_IO * _exreader;
+  /// Executioner for the simulation (top-level class, is stored in MooseApp, where it is freed)
+  Executioner * _executioner;
+
 };
 
 #endif // ACTIONWAREHOUSE_H
