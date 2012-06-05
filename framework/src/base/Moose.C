@@ -102,6 +102,7 @@
 
 // PPS
 #include "AverageElementSize.h"
+#include "AverageNodalVariableValue.h"
 #include "ElementAverageValue.h"
 #include "ElementH1Error.h"
 #include "ElementH1SemiError.h"
@@ -278,6 +279,7 @@ registerObjects()
   registerMaterial(GenericConstantMaterial);
   // PPS
   registerPostprocessor(AverageElementSize);
+  registerPostprocessor(AverageNodalVariableValue);
   registerPostprocessor(ElementAverageValue);
   registerPostprocessor(ElementH1Error);
   registerPostprocessor(ElementH1SemiError);
