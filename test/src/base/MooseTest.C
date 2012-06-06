@@ -30,6 +30,8 @@
 #include "PPSDiffusion.h"
 #include "DotCouplingKernel.h"
 #include "UserDataKernel.h"
+#include "DiffusionPrecompute.h"
+#include "ConvectionPrecompute.h"
 
 #include "CoupledAux.h"
 #include "PolyConstantAux.h"
@@ -123,6 +125,8 @@ MooseTestApp::registerObjects()
   registerKernel(PPSDiffusion);
   registerKernel(DotCouplingKernel);
   registerKernel(UserDataKernel);
+  registerKernel(DiffusionPrecompute);
+  registerKernel(ConvectionPrecompute);
 
   // Aux kernels
   registerAux(CoupledAux);
