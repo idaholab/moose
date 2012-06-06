@@ -99,11 +99,11 @@
     function = u_func
   [../]
 
-#  [./h1_semi]
-#    type = ElementH1SemiError
-#    variable = u
-#    function = u_func
-#  [../]
+  [./h1_semi]
+    type = ElementH1SemiError
+    variable = u
+    function = u_func
+  [../]
 
   [./l2_error]
     type = ElementL2Error
