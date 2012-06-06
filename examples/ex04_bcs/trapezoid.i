@@ -20,7 +20,6 @@
 
   [./itr_x]
     type = ParsedFunction
-    value = -x/cos(pi/3)
     value = sqrt(x^2+y^2)*cos(0)
   [../]
 
