@@ -35,6 +35,7 @@ int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
   MooseApp app(argc, argv);
+  app.init();
 
   // Register our Example AuxKernel with the AuxFactory
   registerAux(ExampleAux);

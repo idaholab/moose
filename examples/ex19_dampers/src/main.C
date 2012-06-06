@@ -31,7 +31,7 @@ int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
   MooseApp app(argc, argv);
-
+  app.init();
   app.run();
 
   return 0;

@@ -40,6 +40,7 @@ int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
   MooseApp app(argc, argv);
+  app.init();
 
   registerKernel(Convection);
   registerKernel(ExampleDiffusion);

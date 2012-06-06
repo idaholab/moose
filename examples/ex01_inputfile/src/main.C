@@ -35,7 +35,7 @@ int main (int argc, char** argv)
   MooseInit init (argc, argv);
   // Create MOOSE app that will take care of registering object, syntax, etc.
   MooseApp app(argc, argv);
-
+  app.init();
   app.run();
 
   return 0;

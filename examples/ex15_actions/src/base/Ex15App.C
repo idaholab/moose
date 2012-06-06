@@ -9,6 +9,8 @@
 Ex15App::Ex15App(int argc, char *argv[]) :
     MooseApp(argc, argv)
 {
+  init();
+
   Ex15App::registerObjects();
   Ex15App::associateSyntax(_syntax);
 }

@@ -36,6 +36,7 @@ int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
   MooseApp app(argc, argv);
+  app.init();
 
   // Register our custom Initial Condition with the Factory
   registerInitialCondition(ExampleIC);

@@ -37,6 +37,7 @@ int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
   MooseApp app(argc, argv);
+  app.init();
 
   // Register any custom objects you have built on the MOOSE Framework
   registerBoundaryCondition(ScalarDirichletBC);
