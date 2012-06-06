@@ -11,6 +11,9 @@
 // physics
 #include "Diffusion.h"
 
+#include "Function.h"
+#include "EquationOfState.h"
+
 const std::string PipeBase::_type("pipe");
 
 
@@ -36,6 +39,11 @@ InputParameters validParams<PipeBase>()
   params.addParam<Real>("Hw", 0.0, "Convective heat transfer coefficient");
   params.addParam<Real>("Tw", 400, "Wall temperature");
 
+
+  params.addParam<Real>("initial_P", 0., "Initial pressure in the pipe");
+  params.addParam<Real>("initial_V", 0., "Initial velocity in the pipe");
+  params.addParam<Real>("initial_T", 300., "Initial temperature in the pipe");
+
   return params;
 }
 
@@ -52,10 +60,22 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
     _has_f(params.wasSeenInInput("f")),
     _f(getParam<Real>("f")),
     _Hw(getParam<Real>("Hw")),
-    _Tw(getParam<Real>("Tw"))
+    _Tw(getParam<Real>("Tw")),
+    //_func(_sim.feproblem().getFunction(getParam<std::string>("eos_function"))),
+    //_eos(dynamic_cast<EquationOfState&>(_func))
+	_has_initial_P(params.wasSeenInInput("initial_P")),
+	_has_initial_V(params.wasSeenInInput("initial_V")),
+	_has_initial_T(params.wasSeenInInput("initial_T")),
+	_initial_P(_has_initial_P ? getParam<Real>("initial_P") : 0.),
+	_initial_V(_has_initial_V ? getParam<Real>("initial_V") : 0.),
+	_initial_T(_has_initial_T ? getParam<Real>("initial_T") : 300.)
 {
   const std::vector<Real> & dir = getParam<std::vector<Real> >("orientation");
   _dir = VectorValue<Real>(dir[0], dir[1], dir[2]);
+
+  //FEProblem & feproblem = _sim.feproblem();
+  //Function & func = feproblem.getFunction(getParam<std::string>("eos_function"));
+  //_eos = dynamic_cast<EquationOfState&>(func);
 }
 
 PipeBase::~PipeBase()
@@ -140,6 +160,55 @@ void
 PipeBase::addVariables()
 {
   Model::addVariables(_subdomain_id);
+
+  FEProblem & feproblem = _sim.feproblem();
+  Function & func = feproblem.getFunction(getParam<std::string>("eos_function"));
+  EquationOfState& _eos = dynamic_cast<EquationOfState&>(func);
+
+  Real initial_P = _sim.getParam<Real>("global_init_P");
+  Real initial_V = _sim.getParam<Real>("global_init_V");
+  Real initial_T = _sim.getParam<Real>("global_init_T");
+  if(_has_initial_P)
+	  initial_P = _initial_P;			//replace by local initial conditions
+  if(_has_initial_V)
+	  initial_V = _initial_V;
+  if(_has_initial_T)
+	  initial_T = _initial_T;
+
+  //Model::addInitialConditions(_subdomain_id, initial_P, initial_V, initial_T);
+
+
+  Real initial_rho = 0.;
+  Real initial_rhou = 0.;
+  Real initial_e = 0.;
+  Real initial_rhoE = 0.;
+  Real initial_enthalpy = 0.;
+  if(_model_type == EQ_MODEL_2)
+  {
+	  initial_rho = _eos.invert_eos_rho(initial_P);
+	  initial_rhou = initial_rho * initial_V;
+  }
+  else if(_model_type == EQ_MODEL_3)
+  {
+	  initial_e = _eos.invert_eos_internal_energy(initial_T);
+	  initial_rho = _eos.invert_eos_rho(initial_P, initial_e);
+	  initial_rhou = initial_rho * initial_V;
+	  initial_rhoE = initial_rho * initial_e + initial_rho * 0.5 * initial_V * initial_V;
+	  initial_enthalpy = (initial_rhoE + initial_P) / initial_rho;
+  }
+  else
+	  mooseError("wrong model type");
+
+  std::cout << std::endl
+  	  	  << initial_P << std::endl
+		  << initial_V << std::endl
+		  << initial_rho << std::endl
+		  << initial_rhou << std::endl
+		  << initial_T << std::endl
+		  << initial_rhoE << std::endl
+		  << initial_enthalpy << std::endl << std::endl;
+
+  Model::addInitialConditions(_subdomain_id, initial_P, initial_V, initial_rho, initial_rhou, initial_T, initial_rhoE, initial_enthalpy);
 }
 
 std::vector<unsigned int>
