@@ -38,11 +38,6 @@ protected:
 
 private:
   /**
-   * Holds a value from the input file.
-   */
-  Real _diffusivity_baseline;
-
-  /**
    * This is the member reference that will hold the computed values
    * for the Real value property in this class.
    */
