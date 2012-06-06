@@ -33,6 +33,8 @@ public:
     std::vector<std::string> cli_syntax;
     bool required;
     bool optional_argument;
+    /// This gets filled in automagicaly when calling addOption()
+    std::vector<std::string> cli_switch;
   };
 
 

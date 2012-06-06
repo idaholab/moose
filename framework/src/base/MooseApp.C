@@ -55,7 +55,7 @@ MooseApp::initCommandLineOptions()
 
   syntax.clear();
   cli_opt.description = "Specify an input file";
-  syntax.push_back("-i");
+  syntax.push_back("-i <input file>");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
   cli_opt.optional_argument = true;

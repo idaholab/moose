@@ -29,6 +29,12 @@ CommandLine::~CommandLine()
 void
 CommandLine::addOption(const std::string & name, Option cli_opt)
 {
+  for (unsigned int i = 0; i < cli_opt.cli_syntax.size(); i++)
+  {
+    std::string stx = cli_opt.cli_syntax[i];
+    cli_opt.cli_switch.push_back(stx.substr(0, stx.find_first_of(" ")));
+  }
+
   _cli_options[name] = cli_opt;
 }
 
@@ -37,9 +43,9 @@ CommandLine::search(const std::string &option_name, std::string *argument)
 {
   std::map<std::string, Option>::iterator pos = _cli_options.find(option_name);
   if (pos != _cli_options.end())
-    for (unsigned int i=0; i<pos->second.cli_syntax.size(); ++i)
+    for (unsigned int i=0; i<pos->second.cli_switch.size(); ++i)
     {
-      if (_get_pot->search(pos->second.cli_syntax[i]))
+      if (_get_pot->search(pos->second.cli_switch[i]))
       {
         if (pos->second.optional_argument && argument)
           *argument = _get_pot->next(*argument);

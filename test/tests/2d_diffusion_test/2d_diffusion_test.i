@@ -17,7 +17,6 @@
   [./diff]
     type = Diffusion
     variable = u
-    asdf = 1
   [../]
 []
 
