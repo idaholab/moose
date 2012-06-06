@@ -187,9 +187,7 @@ MooseApp::parseCommandLine()
   // Print the input file syntax if requested
   if (_command_line.search("ShowTree"))
   {
-    _parser.initSyntaxFormatter(Parser::INPUT_FILE, false);
-    // FIXME: MAPP
-//    _syntax_formatter->printInputFile(Moose::action_warehouse);
+    _action_warehouse.printInputFile(std::cout);
   }
 }
 

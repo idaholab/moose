@@ -204,3 +204,41 @@ ActionWarehouse::executeActionsWithAction(const std::string & name)
     (*act_iter)->act();
   }
 }
+
+void
+ActionWarehouse::printInputFile(std::ostream & out)
+{
+  InputFileFormatter tree(false);
+
+  std::map<std::string, std::vector<Action *> >::iterator iter;
+
+  std::vector<Action *> ordered_actions;
+  ordered_actions.clear();
+  for (iter = _action_blocks.begin(); iter != _action_blocks.end(); ++iter)
+    for (std::vector<Action *>::iterator j = iter->second.begin(); j != iter->second.end(); ++j)
+      ordered_actions.push_back(*j);
+
+  for (std::vector<Action* >::iterator i = ordered_actions.begin();
+       i != ordered_actions.end();
+       ++i)
+   {
+    std::string name ((*i)->name());
+    std::string action ((*i)->getAction());
+
+    bool is_parent;
+    if (_syntax.isAssociated(name, &is_parent) != "")
+     {
+      InputParameters params = (*i)->getParams();
+      tree.insertNode(name, action, true, &params);
+
+      MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(*i);
+      if (moose_object_action)
+       {
+        InputParameters obj_params = moose_object_action->getObjectParams();
+        tree.insertNode(name, action, false, &obj_params);
+       }
+     }
+  }
+
+  out << tree.print("");
+}

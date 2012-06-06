@@ -17,6 +17,7 @@
   [./diff]
     type = Diffusion
     variable = u
+    asdf = 1
   [../]
 []
 
@@ -59,8 +60,4 @@
   exodus = true
   print_linear_residuals = true
   perf_log = true
-[]
-
-[Debug]
-  show_actions = true
 []

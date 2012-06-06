@@ -53,6 +53,7 @@ public:
   void checkUnsatisfiedActions() const;
 
   void printActionDependencySets();
+  void printInputFile(std::ostream & out);
 
   ActionIterator actionBlocksWithActionBegin(const std::string & action_name);
   ActionIterator actionBlocksWithActionEnd(const std::string & action_name);
