@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 2
+  ny = 2
 
   xmin = 0
   xmax = 2
@@ -68,13 +68,20 @@
   [./right]
     type = DirichletBC
     variable = u
-    boundary = '2'
+    boundary = '3'
     value = 0
   [../]
 []
 
 [Executioner]
   type = Steady
+
+  [./Adaptivity]
+    refine_fraction = 1.0
+    coarsen_fraction = 0.0
+    max_h_level = 10
+    steps = 4
+  [../]
 []
 
 [Postprocessors]
