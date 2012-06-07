@@ -14,7 +14,7 @@
 
 #include "ExodusFormatter.h"
 #include "Parser.h"
-#include "MooseInit.h"
+#include "MooseApp.h"
 // libMesh
 #include "exodusII.h"
 //
@@ -34,20 +34,12 @@ ExodusFormatter::printInputFile(ActionWarehouse & wh)
   _ss << "# Created by MOOSE #" << std::endl;
   _ss << "####################" << std::endl;
 
-  std::stringstream ss;
   // Grab the command line arguments first
-  // FIXME: MAPP
-//  Moose::command_line->print("", ss, 1);
-  std::string s;
-  std::getline(ss, s);
-
   _ss << "### Command Line Arguments ###" << std::endl;
-  _ss << s << std::endl;
+  Moose::app->commandLine().print("", _ss, 1);
 
   _ss << "### Input File ###" << std::endl;
-
-  // FIXME: MAPP
-//  InputFileFormatter::printInputFile(wh);
+  wh.printInputFile(_ss);
 }
 
 void

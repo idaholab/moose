@@ -76,6 +76,8 @@ public:
    */
   bool haveVariable(const std::string & name);
 
+  void print(const char * prefix, std::ostream & out_stream, unsigned int skip_count);
+
 protected:
   /// Pointer to GetPot object that represents the command line arguments
   GetPot * _get_pot;

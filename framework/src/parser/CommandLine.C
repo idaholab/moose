@@ -104,3 +104,9 @@ CommandLine::haveVariable(const std::string & name)
 {
   return _get_pot->have_variable(name);
 }
+
+void
+CommandLine::print(const char * prefix, std::ostream & out_stream, unsigned int skip_count)
+{
+  _get_pot->print(prefix, out_stream, skip_count);
+}
