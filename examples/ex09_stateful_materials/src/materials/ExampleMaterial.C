@@ -42,7 +42,8 @@ ExampleMaterial::ExampleMaterial(const std::string & name,
 void
 ExampleMaterial::initQpStatefulProperties()
 {
-  // init the diffusivity property (this will become _diffusivity_old in the first call of computeProperties)
+  // init the diffusivity property (this will become
+  // _diffusivity_old in the first call of computeProperties)
   _diffusivity[_qp] = _initial_diffusivity;
 }
 
