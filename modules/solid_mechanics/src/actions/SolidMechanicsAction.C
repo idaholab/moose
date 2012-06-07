@@ -90,10 +90,8 @@ SolidMechanicsAction::act()
     params.addCoupledVar(keys[j], "");
     params.set<std::vector<std::string> >(keys[j]) = std::vector<std::string>(1, vars[j]);
   }
-  if (!rz)
-  {
-    params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-  }
+
+  params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
   params.set<std::string>("appended_property_name") = getParam<std::string>("appended_property_name");
 
   for (unsigned int i(0); i < dim; ++i)

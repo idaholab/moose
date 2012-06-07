@@ -12,12 +12,7 @@ InputParameters validParams<StressDivergenceRZ>()
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature");
 
-  // The material portion of the RZ formulation is based on original geometry.
-  // Nonlinear effects are included through additional terms in the strain
-  // calculation.
-  // The pressure uses original geometry in RZ as well.
-  // Hence, we do not set the following to true.
-//   params.set<bool>("use_displaced_mesh") = true;
+  params.set<bool>("use_displaced_mesh") = true;
 
   return params;
 }

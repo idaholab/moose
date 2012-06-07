@@ -19,6 +19,7 @@ InputParameters validParams<PlenumPressure>()
   params.addParam<Real>("refab_temperature", -1, "The temperature at refabrication.");
   params.addParam<Real>("refab_volume", -1, "The gas volume at refabrication.");
 
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
