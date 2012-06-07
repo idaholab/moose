@@ -183,12 +183,6 @@ MooseApp::parseCommandLine()
   }
   else
     _command_line.printUsage();
-
-  // Print the input file syntax if requested
-  if (_command_line.search("ShowTree"))
-  {
-    _action_warehouse.printInputFile(std::cout);
-  }
 }
 
 void
@@ -197,6 +191,12 @@ MooseApp::runInputFile()
   _parser.parse(_input_filename);
 
   _action_warehouse.build();
+  // Print the input file syntax if requested
+  if (_command_line.search("ShowTree"))
+  {
+    _action_warehouse.printInputFile(std::cout);
+  }
+
   _action_warehouse.executeAllActions();
   _executioner = _action_warehouse.executioner();
 
