@@ -71,9 +71,10 @@
 [Executioner]
   type = Steady
 
+#  petsc_options = '-snes_mf'
   petsc_options = '-snes_mf_operator -ksp_monitor'
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+#  petsc_options_iname = '-pc_type'
+#  petsc_options_value = 'lu'
 []
 
 [Output]
