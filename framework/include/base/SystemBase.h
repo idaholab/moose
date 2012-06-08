@@ -117,6 +117,11 @@ public:
   virtual NumericVector<Number> & solutionDuDotDu() = 0;
 
   /**
+   * Check if the named vector exists in the system.
+   */
+  virtual bool hasVector(std::string name) = 0;
+
+  /**
    * Get a raw NumericVector
    */
   virtual NumericVector<Number> & getVector(std::string name) = 0;
@@ -443,6 +448,7 @@ public:
   virtual NumericVector<Number> & solutionUDot() { return *_dummy_sln; }
   virtual NumericVector<Number> & solutionDuDotDu() { return *_dummy_sln; }
 
+  virtual bool hasVector(std::string name) { return _sys.have_vector(name); }
   virtual NumericVector<Number> & getVector(std::string name) { return _sys.get_vector(name); }
 
   virtual void init()

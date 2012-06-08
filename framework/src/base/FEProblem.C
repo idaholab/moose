@@ -1742,6 +1742,7 @@ FEProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System
 void
 FEProblem::computeBounds(NonlinearImplicitSystem & /*sys*/, NumericVector<Number>& lower, NumericVector<Number>& upper)
 {
+  if(!_nl.hasVector("lower_bound") || !_nl.hasVector("upper_bound")) return;
   try
   {
     NumericVector<Number> & _lower = _nl.getVector("lower_bound");
