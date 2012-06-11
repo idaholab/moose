@@ -36,7 +36,7 @@ ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParame
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
     _blocks(parameters.get<std::vector<std::string> >("block")),
-    _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _var(_subproblem.getVariable(_tid, parameters.get<std::string>("variable"))),
     _q_point(_subproblem.points(_tid)),
     _qrule(_subproblem.qRule(_tid)),
     _JxW(_subproblem.JxW(_tid)),
