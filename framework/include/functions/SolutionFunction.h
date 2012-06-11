@@ -16,6 +16,7 @@
 #define SOLUTIONFUNCTION_H
 
 #include "Function.h"
+#include "exodusII_io.h"
 
 // Forward Declarations
 namespace libMesh
@@ -46,16 +47,24 @@ public:
 
 protected:
   std::string _mesh_file;
+  std::string _file_type;
   std::string _es_file;
   std::string _system_name;
   std::string _var_name;
+  int _local_timestep;
 
   Mesh * _mesh;
   EquationSystems * _es;
   System * _system;
   MeshFunction * _mesh_function;
+  ExodusII_IO *_exodusII_io;
 
   NumericVector<Number> * _serialized_solution;
+
+ // The map is an internal container for the file type
+ // strings to match an internal numeric id
+  std::map<std::string,int> _internal_file_type_list;
+
 };
 
 #endif //SOLUTIONFUNCTION_H
