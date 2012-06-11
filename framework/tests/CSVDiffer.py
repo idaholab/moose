@@ -80,7 +80,7 @@ class CSVDiffer:
           if max( val1, val2 ) == 0:
             continue
 
-          rel_diff = abs( val1 - val2 ) / max( val1, val2 )
+          rel_diff = abs( ( val1 - val2 ) / max( abs(val1), abs(val2) ) )
           if rel_diff > rel_tol:
             self.addError(fname, "The values in column " + key + " don't match")
             # assume all other vals in this column are wrong too, so don't report them
