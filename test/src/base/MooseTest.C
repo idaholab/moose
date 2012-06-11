@@ -74,6 +74,8 @@
 #include "EqualValueNodalConstraint.h"
 #include "MTUserData.h"
 
+#include "TimestepSetupFunction.h"
+
 // meshes
 #include "StripeMesh.h"
 
@@ -171,6 +173,9 @@ MooseTestApp::registerObjects()
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);
   registerScalarKernel(ImplicitODEy);
+
+  // Functions
+  registerFunction(TimestepSetupFunction);
 
   // meshes
   registerObject(StripeMesh);

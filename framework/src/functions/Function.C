@@ -25,7 +25,8 @@ InputParameters validParams<Function>()
 }
 
 Function::Function(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters)
+    MooseObject(name, parameters),
+    SetupInterface(parameters)
 {
 }
 

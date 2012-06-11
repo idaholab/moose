@@ -27,6 +27,7 @@
 #include "FP.h"
 #include "Parser.h"
 #include "ElementH1Error.h"
+#include "Function.h"
 
 unsigned int FEProblem::_n = 0;
 
@@ -265,6 +266,11 @@ void FEProblem::initialSetup()
     _pps(EXEC_JACOBIAN)[i].initialSetup();
     _pps(EXEC_TIMESTEP)[i].initialSetup();
     _pps(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
+
+    for(std::map<std::string, Function *>::iterator vit = _functions[i].begin();
+        vit != _functions[i].end();
+        ++vit)
+      vit->second->initialSetup();
   }
 
   _aux.initialSetup();
@@ -302,6 +308,11 @@ void FEProblem::timestepSetup()
   for(unsigned int i=0; i<n_threads; i++)
   {
     _materials[i].timestepSetup();
+
+    for(std::map<std::string, Function *>::iterator vit = _functions[i].begin();
+        vit != _functions[i].end();
+        ++vit)
+      vit->second->timestepSetup();
   }
 
   _aux.timestepSetup();
@@ -1693,6 +1704,11 @@ FEProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVecto
   for(unsigned int i=0; i<n_threads; i++)
   {
     _materials[i].residualSetup();
+
+    for(std::map<std::string, Function *>::iterator vit = _functions[i].begin();
+        vit != _functions[i].end();
+        ++vit)
+      vit->second->initialSetup();
   }
   _aux.residualSetup();
 
@@ -1717,6 +1733,11 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
   for(unsigned int i=0; i<n_threads; i++)
   {
     _materials[i].jacobianSetup();
+
+    for(std::map<std::string, Function *>::iterator vit = _functions[i].begin();
+        vit != _functions[i].end();
+        ++vit)
+      vit->second->jacobianSetup();
   }
 
   _aux.jacobianSetup();
