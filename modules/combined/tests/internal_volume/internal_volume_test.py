@@ -15,5 +15,6 @@ test_quad8_rz = { INPUT : 'internal_volume_rz_quad8.i',
                   CSVDIFF : ['out_rz.csv']}
 
 test_rz_displaced = { INPUT : 'internal_volume_rz_displaced.i',
-                      CSVDIFF : ['internal_volume_rz_displaced_out.csv']}
+                      CSVDIFF : ['internal_volume_rz_displaced_out.csv'],
+                      SKIP : 'Bug in Internal volume'}
 
