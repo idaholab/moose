@@ -26,6 +26,9 @@ class InputFileWidget(QtGui.QWidget):
     self.input_file_template_root_node = None
     if os.path.isfile(input_file_template_name):
       self.input_file_template_root_node = readInputFile(input_file_template_name)
+    else: # If they haven't specified their own template... let's use a default one:
+      input_file_template_name = os.path.dirname(sys.argv[0]) + '/input_template'
+      self.input_file_template_root_node = readInputFile(input_file_template_name)
       
     self.input_file_root_node = None
 
