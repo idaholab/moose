@@ -17,3 +17,6 @@ test_quad8_rz = { INPUT : 'internal_volume_rz_quad8.i',
 test_rz_displaced = { INPUT : 'internal_volume_rz_displaced.i',
                       CSVDIFF : ['internal_volume_rz_displaced_out.csv']}
 
+test_rz_cone = { INPUT : 'internal_volume_rz_cone.i',
+                      CSVDIFF : ['internal_volume_rz_cone_out.csv']}
+
