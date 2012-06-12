@@ -66,6 +66,11 @@ public:
   virtual Problem * parent() = 0;
 
   /**
+   * Get the name of this problem
+   * @return The name of this problem
+   */
+  virtual const std::string & name() { return _name; }
+  /**
    * Get reference to all-purpose parameters
    */
   InputParameters & parameters() { return _pars; }

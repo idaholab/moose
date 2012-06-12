@@ -105,15 +105,15 @@ protected:
 
 
 DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, InputParameters params) :
-    SubProblem("disp", params),
+    SubProblem(mproblem.name() + "_disp", params),
     _problem(*mproblem.parent()),
     _mproblem(mproblem),
     _mesh(displaced_mesh),
     _eq(displaced_mesh),
     _ref_mesh(_mproblem.mesh()),
     _displacements(params.get<std::vector<std::string> >("displacements")),
-    _displaced_nl(*this, _mproblem.getNonlinearSystem(), "DisplacedSystem", Moose::VAR_NONLINEAR),
-    _displaced_aux(*this, _mproblem.getAuxiliarySystem(), "DisplacedAuxSystem", Moose::VAR_AUXILIARY),
+    _displaced_nl(*this, _mproblem.getNonlinearSystem(), _mproblem.getNonlinearSystem().name() + "_displaced", Moose::VAR_NONLINEAR),
+    _displaced_aux(*this, _mproblem.getAuxiliarySystem(), _mproblem.getAuxiliarySystem().name() + "_displaced", Moose::VAR_AUXILIARY),
     _geometric_search_data(_mproblem, _mesh),
     _ex(_eq),
     _seq(params.get<bool>("sequence"))

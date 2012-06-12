@@ -65,6 +65,7 @@ public:
   virtual ~SystemBase() {}
 
   virtual unsigned int number() = 0;
+  virtual const std::string & name() = 0;
   virtual MooseMesh & mesh() { return _mesh; }
   virtual SubProblem & subproblem() { return _subproblem; }
 
@@ -377,6 +378,11 @@ public:
 
   virtual ~SystemTempl()
   {
+  }
+
+  virtual const std::string & name()
+  {
+    return _sys.name();
   }
 
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL)
