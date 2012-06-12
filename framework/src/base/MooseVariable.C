@@ -39,7 +39,7 @@ MooseVariable::MooseVariable(unsigned int var_num, unsigned int mvn, const FETyp
     _current_side(_assembly.side()),
     _neighbor(_assembly.neighbor()),
 
-    _is_nl(dynamic_cast<NonlinearSystem *>(&sys) != NULL),
+    _is_nl(var_kind == Moose::VAR_NONLINEAR),
 
     _need_u_old(false),
     _need_u_older(false),

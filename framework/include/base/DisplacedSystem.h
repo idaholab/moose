@@ -38,6 +38,9 @@ public:
 
   virtual const NumericVector<Number> * & currentSolution() { return _undisplaced_system.currentSolution(); }
 
+  virtual NumericVector<Number> & solutionUDot() { return _undisplaced_system.solutionUDot(); }
+  virtual NumericVector<Number> & solutionDuDotDu() { return _undisplaced_system.solutionDuDotDu(); }
+
   /**
    * Return the residual copy from the NonlinearSystem
    * @return Residual copy
