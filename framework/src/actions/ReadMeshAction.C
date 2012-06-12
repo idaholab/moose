@@ -68,11 +68,24 @@ ReadMeshAction::act()
     InputParameters pars = Factory::instance()->getValidParams(mesh_type);
     _parser->extractParams("Mesh", pars);
     _mesh = dynamic_cast<MooseMesh *>(Factory::instance()->create(mesh_type, "mesh", pars));
+
+    if (isParamValid("displacements"))
+    {
+      // Create the displaced mesh
+      Moose::setup_perf_log.push("Create Displaced Mesh","Setup");
+      MooseMesh * displaced_mesh = dynamic_cast<MooseMesh *>(Factory::instance()->create(mesh_type, "displaced_mesh", pars));
+      Moose::setup_perf_log.pop("Create Displaced Mesh","Setup");
+
+      std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
+      if (displacements.size() != displaced_mesh->dimension())
+        mooseError("Number of displacements and dimension of mesh MUST be the same!");
+
+      _displaced_mesh = displaced_mesh;
+    }
   }
 
   mooseAssert(_mesh != NULL, "Mesh hasn't been created");
 
-  // use displacements
   std::vector<unsigned int> ghosted_boundaries = getParam<std::vector<unsigned int > >("ghosted_boundaries");
   for(unsigned int i=0; i<ghosted_boundaries.size(); i++)
   {

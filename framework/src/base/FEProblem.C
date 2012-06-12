@@ -1816,6 +1816,8 @@ FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector
 void
 FEProblem::initDisplacedProblem(MooseMesh * displaced_mesh, InputParameters params)
 {
+  if (displaced_mesh == NULL)
+    mooseError("Trying to set displaced mesh to NULL");
   _displaced_mesh = displaced_mesh;
 
   Moose::setup_perf_log.push("Create DisplacedProblem","Setup");
