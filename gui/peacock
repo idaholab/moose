@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import os, sys, PyQt4, re
+import os, sys, PyQt4, re, inspect
 from PyQt4 import QtCore, QtGui
 
 from optparse import OptionParser
@@ -9,6 +9,8 @@ from ExecuteWidget import *
 
 
 from readInputFile import readInputFile, GPNode
+
+from PeacockTab import PeacockTab
 
 try:
   _fromUtf8 = QtCore.QString.fromUtf8
@@ -20,6 +22,7 @@ class UiBox(QtGui.QMainWindow):
     QtGui.QMainWindow.__init__(self, win_parent)
     self.setWindowTitle('Peacock - MOOSE front end')
     self.app_path = os.path.abspath(app_path)
+    self.plugin_classes = findPlugins(os.path.dirname(self.app_path))
     self.qt_app = qt_app
 
     self.initUI()
@@ -40,6 +43,10 @@ class UiBox(QtGui.QMainWindow):
 
     self.tab_widget.addTab(self.input_file_widget, "Input File")
     self.tab_widget.addTab(self.execute_widget, "Execute")
+
+    for plugin_class in self.plugin_classes:
+      instance = plugin_class(self)
+      self.tab_widget.addTab(instance, instance.name())
     
     self.main_layout.addWidget(self.tab_widget)
     
@@ -89,6 +96,19 @@ def findExecutable(executable_option, method_option):
       sys.exit(1)
 
     return executable
+  
+def findPlugins(executable_path):
+  
+  for dirpath, dirnames, filenames in os.walk(executable_path+'/gui'):
+    for file in filenames:
+      if file[-2:] == 'py':
+        module_name = file[:-3]
+        sys.path.append(os.path.abspath(dirpath))
+
+        # dynamically load the module
+        __import__(module_name)
+
+  return PeacockTab.__subclasses__()
   
 if __name__ == '__main__':
   parser = OptionParser()
