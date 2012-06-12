@@ -181,11 +181,13 @@
     bulk_modulus = 0.333333333333333e6
   [../]
 
-  [./for_density]
-    type = HeatConductionMaterial
+  [./density]
+    type = Density
     block = 1
-
     density = 2
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 
 [] # Materials

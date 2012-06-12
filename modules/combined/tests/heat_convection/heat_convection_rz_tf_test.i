@@ -103,11 +103,14 @@
   [./thermal]
     type = HeatConductionMaterial
     block = 1
-    density = 2405.28
     specific_heat = 826.4
     thermal_conductivity = 1.937	# this makes alpha 9.74e-7 m^2/s
   [../]
-
+  [./density]
+    type = Density
+    block = 1
+    density = 2405.28
+  [../]
 []			# Materials END
 
 [Executioner]		# Executioner Start

@@ -6,7 +6,7 @@ InputParameters validParams<SolidMechImplicitEuler>()
 {
   InputParameters params = validParams<SecondDerivativeImplicitEuler>();
   params.addParam<Real>("artificial_scaling", "Factor to replace rho/dt^2");
-  params.set<Real>("artificial_scaling") = 1;
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 

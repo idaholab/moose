@@ -187,9 +187,16 @@
     type = HeatConductionMaterial
     block = 1
 
-    density = 0.283
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
+  [../]
+
+  [./density]
+    type = Density
+    block = 1
+    density = 0.283
+    disp_r = disp_x
+    disp_z = disp_y
   [../]
 
 [] # Materials

@@ -1,6 +1,6 @@
 #This is a simple 1D test of the volumetric heat source with material properties
 #that are somewhat similar to UO2.  A bar is uniformly heated, and a temperature
-#boundary condition is applied to the left side of the bar.  
+#boundary condition is applied to the left side of the bar.
 
 #Important properties of problem:
 #Length: 0.01 m
@@ -73,6 +73,10 @@
     block = 1
     thermal_conductivity = 3.0
     specific_heat = 300.0
+  [../]
+  [./density]
+    type = Density
+    block = 1
     density = 10431.0
   [../]
 []

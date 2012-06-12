@@ -12,7 +12,7 @@
 #	where
 #		q - heat transfer rate (w)
 #		h - heat transfer coefficient (w/m^2-K)
-		A - surface area (m^2)
+#		A - surface area (m^2)
 #		Tw - surface temperature (K)
 #		Tf - fluid temperature adjacent to the surface (K)
 # The heat transfer coefficient (h) is input as a variable called 'rate'
@@ -102,7 +102,6 @@
   [./thermal]
     type = HeatConductionMaterial
     block = 1
-    density = 2405.28
     specific_heat = 826.4
 #    thermal_conductivity = 1.937	# this makes alpha 9.74e-7 m^2/s
 #    thermal_conductivity = 19.37	# this makes alpha 9.74e-6 m^2/s
@@ -114,6 +113,11 @@
 					#    make the cylinder thermally soak faster (only for the purposes
 					#    of this test problem
 
+  [../]
+  [./density]
+    type = Density
+    block = 1
+    density = 2405.28
   [../]
 
 []			# Materials END

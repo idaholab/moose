@@ -77,10 +77,6 @@ protected:
                                           SymmTensor & strain_increment );
 
 
-  void fillMatrix( const VariableGradient & grad_x,
-                   const VariableGradient & grad_y,
-                   const VariableGradient & grad_z,
-                   ColumnMajorMatrix & A );
 
 };
 

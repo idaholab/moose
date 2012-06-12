@@ -1,4 +1,4 @@
-# Test cases for convective boundary conditions. 
+# Test cases for convective boundary conditions.
 # Input file for htc_3dtest0
 
 # TKLarson
@@ -29,9 +29,9 @@
 # The model is 3-d xyz coordinates.
 #
 # Brazillian Parallelpiped sample dimensions:
-#       z = 10.3 cm, 0.103 m, (4 in) 
-#       y = 5.08 cm, 0.0508 m, (2 in) 
-#       x = 5.08 cm, 0.0508 m, (2 in) 
+#       z = 10.3 cm, 0.103 m, (4 in)
+#       y = 5.08 cm, 0.0508 m, (2 in)
+#       x = 5.08 cm, 0.0508 m, (2 in)
 
 # Material properties are:
 # 	density = 2405.28 km/m^3
@@ -100,9 +100,9 @@
 #				 #  the above h is ~ infinity for present purposes
          initial = 294.26         # initial ambient (lab or oven) temperature (K)
          final = 477.6            # final ambient (lab or oven) temperature (K)
-	 duration = 600.	 # length of time in seconds that it takes the ambient 
+	 duration = 600.	 # length of time in seconds that it takes the ambient
 				 #     temperature to ramp from initial to final
-  [../]					# Convective End 
+  [../]					# Convective End
 
 []		# BCs END
 
@@ -110,11 +110,14 @@
   [./thermal]
     type = HeatConductionMaterial
     block = 1
-    density = 2405.28 
     specific_heat = 826.4
     thermal_conductivity = 1.937	# this makes alpha 9.74e-7 m^2/s
   [../]
-
+  [./density]
+    type = Density
+    block = 1
+    density = 2405.28
+  [../]
 []			# Materials END
 
 [Executioner]		# Executioner Start

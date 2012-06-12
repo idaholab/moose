@@ -36,6 +36,7 @@
 
 [Mesh]#Comment
   file = gravity_rz_quad8_test.e
+  displacements = 'disp_x disp_y'
 [] # Mesh
 
 [Variables]
@@ -163,11 +164,12 @@
     lambda = 0.0
   [../]
 
-  [./for_density]
-    type = HeatConductionMaterial
+  [./density]
+    type = Density
     block = 1
-
     density = 2
+    disp_r = disp_x
+    disp_z = disp_y
   [../]
 
 [] # Materials

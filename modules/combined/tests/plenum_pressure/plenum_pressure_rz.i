@@ -154,9 +154,15 @@
     type = HeatConductionMaterial
     block = '1 2'
     thermal_conductivity = 1.0
-    density = 1.0
   [../]
 
+  [./density]
+    type = Density
+    block = '1 2'
+    density = 1.0
+    disp_r = disp_x
+    disp_z = disp_y
+  [../]
 []
 
 [Executioner]

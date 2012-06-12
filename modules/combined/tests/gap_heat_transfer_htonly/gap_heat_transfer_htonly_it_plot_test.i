@@ -93,9 +93,14 @@
   [./heat1]
     type = HeatConductionMaterial
     block = '1 2'
-    density = 1.0
     specific_heat = 1.0
     thermal_conductivity = 100000000.0
+  [../]
+
+  [./density]
+    type = Density
+    block = '1 2'
+    density = 1.0
   [../]
 []
 

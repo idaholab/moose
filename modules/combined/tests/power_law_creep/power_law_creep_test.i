@@ -199,7 +199,6 @@
 []
 
 [Materials]
-  active = 'creep thermal'
 
   [./creep]
     type = PowerLawCreep
@@ -218,12 +217,20 @@
     output_iteration_info = false
   [../]
 
- [./thermal]
+  [./thermal]
     type = HeatConductionMaterial
     block = 1
-    density = 1.0
     specific_heat = 1.0
     thermal_conductivity = 100.
+  [../]
+
+  [./density]
+    type = Density
+    block = 1
+    density = 1.0
+    disp_x = x_disp
+    disp_y = y_disp
+    disp_z = z_disp
   [../]
 
 []

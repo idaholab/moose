@@ -379,6 +379,7 @@ SolidModel::computeProperties()
 
   for ( _qp = 0; _qp < _qrule->n_points(); ++_qp )
   {
+
     _local_elasticity_tensor->calculate(_qp);
 
     _elasticity_tensor[_qp] = *_local_elasticity_tensor;

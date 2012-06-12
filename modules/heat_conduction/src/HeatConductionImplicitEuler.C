@@ -4,6 +4,8 @@ template<>
 InputParameters validParams<HeatConductionImplicitEuler>()
 {
   InputParameters params = validParams<ImplicitEuler>();
+  // Density may be changing with deformation, so we must integrate over current volume
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 

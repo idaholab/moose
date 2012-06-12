@@ -1,4 +1,4 @@
-# Test cases for convective boundary conditions. 
+# Test cases for convective boundary conditions.
 # Input file for htc_3dtest1
 
 # TKLarson
@@ -29,9 +29,9 @@
 # The model is 3-d xyz coordinates.
 #
 # Brazillian Parallelpiped sample dimensions:
-#       z = 10.3 cm, 0.103 m, (4 in) 
-#       y = 5.08 cm, 0.0508 m, (2 in) 
-#       x = 5.08 cm, 0.0508 m, (2 in) 
+#       z = 10.3 cm, 0.103 m, (4 in)
+#       y = 5.08 cm, 0.0508 m, (2 in)
+#       x = 5.08 cm, 0.0508 m, (2 in)
 
 # Material properties are:
 # 	density = 2405.28 km/m^3
@@ -42,7 +42,7 @@
 # Initial parallelpiped temperature is room temperature 294.26 K (70 F)
 # The initial fluid temperature is room temperature. We will ramp it to 477.6 K (400 F) in 10 minutes.
 # We will use an h representative of natural convection conditions as the boundary condition for all sides
-# on the parallelpiped.  Akin to putting the object in an oven and turning the oven on. 
+# on the parallelpiped.  Akin to putting the object in an oven and turning the oven on.
 #  This is essentially a thermal soak.
 #
 # What we expect for this problem:
@@ -100,9 +100,9 @@
 	 rate = 284.			# convective heat transfer coefficient (w/m^2-K)[50 BTU/hr-ft^2-F]
          initial = 294.26		# initial ambient (lab or oven) temperature (K)
          final = 477.6			# final ambient (lab or oven) temperature (K)
-	 duration = 600.		# length of time in seconds that it takes the ambient 
+	 duration = 600.		# length of time in seconds that it takes the ambient
 				 	#     temperature to ramp from initial to final
-  [../]					# Convective End 
+  [../]					# Convective End
 
 []		# BCs END
 
@@ -110,7 +110,6 @@
   [./thermal]
     type = HeatConductionMaterial
     block = 1
-    density = 2405.28 
     specific_heat = 826.4
     thermal_conductivity = 1.937	# this makes alpha 9.74e-7 m^2/s
     thermal_conductivity = 193.7	# this makes alpha 9.74e-5 m^2/s
@@ -119,6 +118,11 @@
 
   [../]
 
+  [./density]
+    type = Density
+    block = 1
+    density = 2405.28
+  [../]
 []			# Materials END
 
 [Executioner]		# Executioner Start

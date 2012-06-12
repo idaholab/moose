@@ -4,7 +4,8 @@ template<>
 InputParameters validParams<HeatConductionKernel>()
 {
   InputParameters params = validParams<Diffusion>();
-  params.addClassDescription("TODO"); // Add a description of what this kernel does
+  params.addClassDescription("Compute thermal conductivity "); // Add a description of what this kernel does
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 

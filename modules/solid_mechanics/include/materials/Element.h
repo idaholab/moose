@@ -63,6 +63,12 @@ public:
   {
     return 0;
   }
+
+  void fillMatrix( const VariableGradient & grad_x,
+                   const VariableGradient & grad_y,
+                   const VariableGradient & grad_z,
+                   ColumnMajorMatrix & A );
+
 };
 
 } // namespace solid_mechanics
