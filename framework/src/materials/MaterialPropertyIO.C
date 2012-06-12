@@ -77,20 +77,21 @@ MaterialPropertyIO::write(const std::string & file_name)
   unsigned int n_props = prop_ids.size();        // number of properties in this block
   out.write((const char *) &n_props, sizeof(n_props));
   // property names
-  for (unsigned int i = 0; i < n_props; ++i)
+  for (unsigned int i = 0; i < n_props; i++)
   {
-    std::string prop_name = _material_props.statefulPropNames()[i];
+    unsigned int pid = prop_ids[i];
+    std::string prop_name = _material_props.statefulPropNames()[pid];
     out.write(prop_name.c_str(), prop_name.length() + 1);                 // do not forget the trailing zero ;-)
   }
 
   // save current material properties
-  for (unsigned int e = 0; e < n_elems; ++e)
+  for (unsigned int e = 0; e < n_elems; e++)
   {
     unsigned int elem_id = e;
     out.write((const char *) &elem_id, sizeof(elem_id));
 
     // write out the properties themselves
-    for (unsigned int i = 0; i < n_props; ++i)
+    for (unsigned int i = 0; i < n_props; i++)
     {
       unsigned int pid = prop_ids[i];
       props[e][0][pid]->store(out);
@@ -105,15 +106,15 @@ MaterialPropertyIO::write(const std::string & file_name)
   out.write((const char *) &n_sides, sizeof(n_sides));
 
   // save current material properties
-  for (unsigned int e = 0; e < n_elems; ++e)
+  for (unsigned int e = 0; e < n_elems; e++)
   {
     unsigned int elem_id = e;
     out.write((const char *) &elem_id, sizeof(elem_id));
 
-    for (unsigned int s = 0; s < n_sides; ++s)
+    for (unsigned int s = 0; s < n_sides; s++)
     {
       // write out the properties themselves
-      for (unsigned int i = 0; i < n_props; ++i)
+      for (unsigned int i = 0; i < n_props; i++)
       {
         unsigned int pid = prop_ids[i];
         bnd_props[e][s][pid]->store(out);
@@ -178,7 +179,7 @@ MaterialPropertyIO::read(const std::string & file_name)
     // property names
     std::vector<std::string> prop_names;
 
-    for (unsigned int i = 0; i < n_props; ++i)
+    for (unsigned int i = 0; i < n_props; i++)
     {
       std::string prop_name;
       char ch = 0;
@@ -190,13 +191,13 @@ MaterialPropertyIO::read(const std::string & file_name)
       prop_names.push_back(prop_name);
     }
 
-    for (unsigned int e = 0; e < n_elems; ++e)
+    for (unsigned int e = 0; e < n_elems; e++)
     {
       unsigned int elem_id = 0;
       in.read((char *) &elem_id, sizeof(elem_id));
 
       // read in the properties themselves
-      for (unsigned int i = 0; i < n_props; ++i)
+      for (unsigned int i = 0; i < n_props; i++)
       {
         unsigned int pid = stateful_prop_ids[prop_names[i]];
 
@@ -211,15 +212,15 @@ MaterialPropertyIO::read(const std::string & file_name)
     unsigned int n_sides = 0;
     in.read((char *) &n_sides, sizeof(n_sides));
 
-    for (unsigned int e = 0; e < n_elems; ++e)
+    for (unsigned int e = 0; e < n_elems; e++)
     {
       unsigned int elem_id = 0;
       in.read((char *) &elem_id, sizeof(elem_id));
 
-      for (unsigned int s = 0; s < n_sides; ++s)
+      for (unsigned int s = 0; s < n_sides; s++)
       {
         // read in the properties themselves
-        for (unsigned int i = 0; i < n_props; ++i)
+        for (unsigned int i = 0; i < n_props; i++)
         {
           unsigned int pid = stateful_prop_ids[prop_names[i]];
 
