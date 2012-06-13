@@ -40,19 +40,15 @@
 #include <petsc.h>
 #include <petscsnes.h>
 #include <petscksp.h>
-/*
-   This is a proxy for "petsc-dev close to the petsc-3.3 release".
-   Once petsc-3.3 is released this should be replaced by
-   !PETSC_VERSION_LESS_THAN(3,3,0)
-*/
-#define PETSC_3_3_DEV (!PETSC_VERSION_LESS_THAN(3,2,0) && !PETSC_VERSION_RELEASE)
 
-#if PETSC_3_3_DEV
-#include <petsc-private/kspimpl.h>
-#include <petsc-private/snesimpl.h>
-#else
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+// PETSc 3.2.x and lower
 #include <private/kspimpl.h>
 #include <private/snesimpl.h>
+#else
+// PETSc 3.3.0+
+#include <petsc-private/kspimpl.h>
+#include <petsc-private/snesimpl.h>
 #endif
 
 namespace Moose
@@ -168,6 +164,7 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 #if PETSC_VERSION_LESS_THAN(3,2,0)
     *reason = SNES_DIVERGED_LS_FAILURE;
 #else
+    // PETSc 3.2.0 +
     *reason = SNES_DIVERGED_LINE_SEARCH;
 #endif
   }
@@ -179,18 +176,19 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
       PetscInfo2(snes,"Converged due to function norm %G < %G (relative tolerance)\n",fnorm,snes->ttol);
       *reason = SNES_CONVERGED_FNORM_RELATIVE;
     }
-
-#if PETSC_3_3_DEV
-    else if (pnorm < snes->stol*xnorm)
-    {
-      PetscInfo3(snes,"Converged due to small update length: %G < %G * %G\n",pnorm,snes->stol,xnorm);
-      *reason = SNES_CONVERGED_SNORM_RELATIVE;
-    }
-#else
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+    // PETSc 3.2.x-
     else if (pnorm < snes->xtol*xnorm)
     {
       PetscInfo3(snes,"Converged due to small update length: %G < %G * %G\n",pnorm,snes->xtol,xnorm);
       *reason = SNES_CONVERGED_PNORM_RELATIVE;
+    }
+#else
+    // PETSc 3.3.0+
+    else if (pnorm < snes->stol*xnorm)
+    {
+      PetscInfo3(snes,"Converged due to small update length: %G < %G * %G\n",pnorm,snes->stol,xnorm);
+      *reason = SNES_CONVERGED_SNORM_RELATIVE;
     }
 #endif
   }
@@ -297,11 +295,13 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 //    *reason = SNES_DIVERGED_LS_FAILURE;
 */
 
-#if PETSC_3_3_DEV
-  if(*reason == SNES_CONVERGED_SNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_ABS)
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+  // PETSc 3.2.x
+  if(*reason == SNES_CONVERGED_PNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_ABS)
     system->_current_nl_its = it;
 #else
-  if(*reason == SNES_CONVERGED_PNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_ABS)
+  // PETSc 3.3.0+
+  if(*reason == SNES_CONVERGED_SNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_ABS)
     system->_current_nl_its = it;
 #endif
   return(0);
@@ -309,10 +309,12 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 
 
 
-#if PETSC_3_3_DEV
-PetscErrorCode dampedCheck(SNESLineSearch /* linesearch */, Vec /*x*/, Vec w, Vec y, PetscBool * /*changed_w*/, PetscBool * changed_y, void *lsctx)
-#else
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+// PETSc 3.2.x-
 PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, PetscBool * changed_y, PetscBool * /*changed_w*/)
+#else
+// PETSc 3.3.0+
+PetscErrorCode dampedCheck(SNESLineSearch /* linesearch */, Vec /*x*/, Vec w, Vec y, PetscBool * /*changed_w*/, PetscBool * changed_y, void *lsctx)
 #endif
 {
 //   From SNESLineSearchSetPostCheck docs:
@@ -496,12 +498,14 @@ void petscSetupDampers(NonlinearImplicitSystem& sys)
   PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
   SNES snes = petsc_solver->snes();
 
-#if PETSC_3_3_DEV
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+  // PETSc 3.2.x-
+  SNESLineSearchSetPostCheck(snes, dampedCheck, problem);
+#else
+  // PETSc 3.3.0+
   SNESLineSearch linesearch;
   SNESGetSNESLineSearch(snes, &linesearch);
   SNESLineSearchSetPostCheck(linesearch, dampedCheck, problem);
-#else
-  SNESLineSearchSetPostCheck(snes, dampedCheck, problem);
 #endif
 }
 
@@ -514,8 +518,10 @@ void petscSetDefaults(FEProblem & problem)
   KSP ksp;
   SNESGetKSP(snes, &ksp);
 #if PETSC_VERSION_LESS_THAN(3,2,0)
+  // PETSc 3.1.x-
   KSPSetPreconditionerSide(ksp, PC_RIGHT);
 #else
+  // PETSc 3.2.x+
   KSPSetPCSide(ksp, PC_RIGHT);
 #endif
   SNESSetMaxLinearSolveFailures(snes, 1000000);
@@ -524,9 +530,11 @@ void petscSetDefaults(FEProblem & problem)
 //    SNESLineSearchSetPostCheck(snes, dampedCheck, &problem);
 
 #if PETSC_VERSION_LESS_THAN(3,0,0)
+  // PETSc 2.3.3-
   KSPSetConvergenceTest(ksp, petscConverged, &nl);
   SNESSetConvergenceTest(snes, petscNonlinearConverged, &nl);
 #else
+  // PETSc 3.0.0+
 
   // In 3.0.0, the context pointer must actually be used, and the
   // final argument to KSPSetConvergenceTest() is a pointer to a
