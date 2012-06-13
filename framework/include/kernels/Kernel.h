@@ -126,6 +126,14 @@ protected:
   MooseArray<RealGradient> & _grad_zero;
   MooseArray<RealTensor> & _second_zero;
 
+  /// Holds residual entries as their accumulated by this Kernel
+  DenseVector<Number> _local_re;
+
+  /// The aux variables to save the residual contributions to
+  bool _has_save_in;
+  std::vector<MooseVariable*> _save_in;
+  std::vector<std::string> _save_in_strings;
+
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();
 

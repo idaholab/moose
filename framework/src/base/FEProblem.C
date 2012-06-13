@@ -1694,6 +1694,10 @@ void
 FEProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, NumericVector<Number>& residual)
 {
   _nl.set_solution(soln);
+
+  _nl.zeroVariables();
+  _aux.zeroVariables();
+
   computePostprocessors(EXEC_RESIDUAL);
 
   if (_displaced_problem != NULL)

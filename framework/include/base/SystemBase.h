@@ -241,6 +241,17 @@ public:
   virtual unsigned int nScalarVariables() = 0;
 
   /**
+   * Adds this variable to the list of variables to be zeroed during each residual evaluation.
+   * @param var_name The name of the variable to be zeroed.
+   */
+  virtual void addVariableToZeroOnResidual(std::string var_name);
+
+  /**
+   * Zero out the variables that have been specified to be zeroed during each residual evaluation.
+   */
+  virtual void zeroVariables();
+
+  /**
    * Get minimal quadrature order needed for integrating variables in this system
    * @return The minimal order of quadrature
    */
@@ -341,6 +352,8 @@ protected:
   std::vector<VariableWarehouse> _vars;
   /// Map of variables (variable id -> array of subdomains where it lives)
   std::map<unsigned int, std::set<SubdomainID> > _var_map;
+
+  std::vector<std::string> _vars_to_be_zeroed_on_residual;
 
   friend class ComputeInitialConditionThread;
 };

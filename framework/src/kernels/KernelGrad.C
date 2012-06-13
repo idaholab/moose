@@ -15,6 +15,7 @@
 #include "KernelGrad.h"
 #include "SubProblem.h"
 #include "Moose.h"
+#include "SystemBase.h"
 
 template<>
 InputParameters validParams<KernelGrad>()
@@ -39,6 +40,8 @@ KernelGrad::computeResidual()
 //  Moose::perf_log.push("computeResidual()","KernelGrad");
 
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+  _local_re.resize(re.size());
+  _local_re.zero();
 
   unsigned int n_qp = _qrule->n_points();
   unsigned int n_test = _test.size();
@@ -51,9 +54,17 @@ KernelGrad::computeResidual()
     Real coord = _coord[_qp];
 
     for (_i=0; _i<n_test; _i++)
-      re(_i) += jxw*coord*_value*_grad_test[_i][_qp];
+      _local_re(_i) += jxw*coord*_value*_grad_test[_i][_qp];
   }
 
+  re += _local_re;
+
+  if(_has_save_in)
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for(unsigned int i=0; i<_save_in.size(); i++)
+      _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
+  }
 //  Moose::perf_log.pop("computeResidual()","KernelGrad");
 }
 

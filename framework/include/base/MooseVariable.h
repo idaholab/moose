@@ -73,6 +73,11 @@ public:
   unsigned int number() { return _moose_var_num; }
 
   /**
+   * Get the system this variable is part of.
+   */
+  SystemBase & sys() { return _sys; }
+
+  /**
    * Get the variable number
    * @return The variable number
    */

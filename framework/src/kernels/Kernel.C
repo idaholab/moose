@@ -19,6 +19,9 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 
+// libmesh includes
+#include "threads.h"
+
 template<>
 InputParameters validParams<Kernel>()
 {
@@ -26,6 +29,7 @@ InputParameters validParams<Kernel>()
   params += validParams<TransientInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that this kernel will be applied to");
+  params.addParam<std::vector<std::string> >("save_in", "The name of auxiliary variables to save this Kernel's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
 
   // testing, dude
   params.addPrivateParam<bool>("use_displaced_mesh", false);
@@ -76,21 +80,46 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _real_zero(_problem._real_zero[_tid]),
     _zero(_problem._zero[_tid]),
     _grad_zero(_problem._grad_zero[_tid]),
-    _second_zero(_problem._second_zero[_tid])
+    _second_zero(_problem._second_zero[_tid]),
+
+    _save_in_strings(parameters.get<std::vector<std::string> >("save_in"))
 {
+  _save_in.resize(_save_in_strings.size());
+
+  for(unsigned int i=0; i<_save_in_strings.size(); i++)
+  {
+    MooseVariable * var = &_problem.getVariable(_tid, _save_in_strings[i]);
+
+    if(var->feType() != _var.feType())
+      mooseError("Error in " + _name + ". When saving residual values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
+
+    _save_in[i] = var;
+    var->sys().addVariableToZeroOnResidual(_save_in_strings[i]);
+  }
+
+  _has_save_in = _save_in.size() > 0;
 }
 
 void
 Kernel::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+  _local_re.resize(re.size());
+  _local_re.zero();
 
   precalculateResidual();
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    {
-      re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
-    }
+      _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
+
+  re += _local_re;
+
+  if(_has_save_in)
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for(unsigned int i=0; i<_save_in.size(); i++)
+      _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
+  }
 }
 
 void

@@ -95,6 +95,14 @@ protected:
   /// the gradient of the unknown variable this BC is acting on
   const VariableGradient & _grad_u;
 
+  /// Holds residual entries as their accumulated by this Kernel
+  DenseVector<Number> _local_re;
+
+  /// The aux variables to save the residual contributions to
+  bool _has_save_in;
+  std::vector<MooseVariable*> _save_in;
+  std::vector<std::string> _save_in_strings;
+
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();
   /**

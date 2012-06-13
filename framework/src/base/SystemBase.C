@@ -18,6 +18,7 @@
 #include "MooseVariable.h"
 #include "Conversion.h"
 #include "Parser.h"
+#include "AllLocalDofIndicesThread.h"
 
 // libMesh
 #include "quadrature_gauss.h"
@@ -94,6 +95,39 @@ SystemBase::getVariableBlocks(unsigned int var_number)
     return NULL;
   else
     return & _var_map[var_number];
+}
+
+void
+SystemBase::addVariableToZeroOnResidual(std::string var_name)
+{
+  _vars_to_be_zeroed_on_residual.push_back(var_name);
+}
+
+void
+SystemBase::zeroVariables()
+{
+  if(_vars_to_be_zeroed_on_residual.size() > 0)
+  {
+    AllLocalDofIndicesThread aldit(system(), _vars_to_be_zeroed_on_residual);
+    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    Threads::parallel_reduce(elem_range, aldit);
+
+    std::set<unsigned int> dof_indices_to_zero = aldit._all_dof_indices;
+
+    NumericVector<Number> & solution = this->solution();
+
+    solution.close();
+
+    for(std::set<unsigned int>::iterator it = dof_indices_to_zero.begin();
+        it != dof_indices_to_zero.end();
+        ++it)
+      solution.set(*it, 0);
+
+    solution.close();
+
+    // Call update to update the current_local_solution for this system
+    system().update();
+  }
 }
 
 Order

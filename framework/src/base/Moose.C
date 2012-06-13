@@ -104,6 +104,7 @@
 // PPS
 #include "AverageElementSize.h"
 #include "AverageNodalVariableValue.h"
+#include "NodalSum.h"
 #include "ElementAverageValue.h"
 #include "ElementH1Error.h"
 #include "ElementH1SemiError.h"
@@ -281,6 +282,7 @@ registerObjects()
   // PPS
   registerPostprocessor(AverageElementSize);
   registerPostprocessor(AverageNodalVariableValue);
+  registerPostprocessor(NodalSum);
   registerPostprocessor(ElementAverageValue);
   registerPostprocessor(ElementH1Error);
   registerPostprocessor(ElementH1SemiError);
