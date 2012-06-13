@@ -31,6 +31,7 @@
 #include "DashpotBC.h"
 #include "MaterialSymmElasticityTensorAux.h"
 #include "HomogenizedElasticConstants.h"
+#include "Mass.h"
 
 
 void
@@ -66,6 +67,7 @@ Elk::SolidMechanics::registerObjects()
   registerKernel(StressDivergenceRZ);
   registerKernel(HomogenizationKernel);
   registerPostprocessor(HomogenizedElasticConstants);
+  registerPostprocessor(Mass);
 
 }
 
