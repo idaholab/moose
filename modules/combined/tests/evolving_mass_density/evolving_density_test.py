@@ -28,3 +28,7 @@ test_uniform = { INPUT : 'uniform_expand_compress_test.i',
          EXODIFF : ['uniform_expand_compress_test_out.e']
          }
 
+test_rz = { INPUT : 'rz.i',
+         EXODIFF : ['rz_out.e']
+         }
+
