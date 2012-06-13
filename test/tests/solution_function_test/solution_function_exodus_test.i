@@ -3,63 +3,107 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 0.0
   [../]
+[]
+
+[AuxVariables]
+  [./nn]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+#  [./ne]
+#    order = FIRST
+#    family = LAGRANGE
+#  [../]
+  [./en]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+#  [./ee]
+#    order = CONSTANT
+#    family = MONOMIAL
+#  [../]
 []
 
 [Functions]
-  active = 'source'
-  [./source]
+  [./sourcen]
     type = SolutionFunction
     file_type = exodusII 
     mesh = cubesource.e 
-    variable = Source 
-    system = AuxSystem
+    variable = source_nodal
+    timestep = 2
+#    system = AuxSystem
   [../]
+#  [./sourcee]
+#    type = SolutionFunction
+#    file_type = exodusII 
+#    mesh = cubesource.e 
+#    variable = source_element
+#  [../]
 []
 
 [Kernels]
-  active = 'diff fvol'
-
   [./diff]
     type = Diffusion
     variable = u
   [../]
-  [./fvol]
-     type = UserForcingFunction
-     variable = u
-     function = source
+[]
+
+[AuxKernels]
+  [./nn]
+     type = FunctionAux
+     variable = nn
+     function = sourcen
   [../]
+#  [./ne]
+#     type = FunctionAux
+#     variable = ne
+#     function = sourcee
+#  [../]
+  [./en]
+     type = FunctionAux
+     variable = en
+     function = sourcen
+  [../]
+#  [./ee]
+#     type = FunctionAux
+#     variable = ee
+#     function = sourcee
+#  [../]
 []
 
 [BCs]
-  active = 'stuff'
-
   [./stuff]
     type = DirichletBC
     variable = u
-    boundary = '1'
-    value = 0
+    boundary = '1 2'
+    value = 0.0
   [../]
 
 []
 
+#[Executioner]
+#  type = Steady
+#  petsc_options = '-snes'
+#  l_max_its = 800
+#  nl_rel_tol = 1e-10
+#[]
+
 [Executioner]
-  type = Steady
- petsc_options = '-snes'
+  type = Transient
+  petsc_options = '-snes'
   l_max_its = 800
   nl_rel_tol = 1e-10
-#   petsc_options = '-snes_mf_operator'
-#  nl_rel_tol = 1e-10
+  num_steps = 50
+  end_time = 5
+  dt = 0.5
 []
 
 [Output]
   exodus = true
   perf_log = true
 []
-
-
