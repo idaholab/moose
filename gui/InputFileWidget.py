@@ -159,7 +159,7 @@ class InputFileWidget(QtGui.QWidget):
     layout.addWidget(self.buttonClear)
 
   def addDataRecursively(self, parent_item, node):
-    is_active = 'active' not in node.parent.params or node.parent.params['active'].find(node.name) != -1
+    is_active = 'active' not in node.parent.params or node.parent.params['active'].find(node.name) != -1 or node.name == 'ParentParams'
     table_data = node.params
     table_data['Name'] = node.name
     new_child = QtGui.QTreeWidgetItem(parent_item)
