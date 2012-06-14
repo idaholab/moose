@@ -33,9 +33,6 @@ class SolutionFunction;
 template<>
 InputParameters validParams<SolutionFunction>();
 
-/**
- * Do nothing function
- */
 class SolutionFunction : public Function
 {
 public:
@@ -54,6 +51,8 @@ protected:
     EXODUSII
   };
   static SolutionFileType getSolutionFileType(const std::string filetype);
+  void updateExodusTimeInterpolation(Real time);
+  bool updateExodusBracketingTimeIndices(Real time);
 
   std::string _mesh_file;
   SolutionFileType _file_type;
@@ -61,14 +60,28 @@ protected:
   std::string _system_name;
   std::string _var_name;
   int _exodus_time_index;
+  bool _interpolate_times;
 
   Mesh * _mesh;
   EquationSystems * _es;
   System * _system;
   MeshFunction * _mesh_function;
+
+
   ExodusII_IO *_exodusII_io;
 
   NumericVector<Number> * _serialized_solution;
+
+  //These are only used for interpolation between two exodusII times
+  EquationSystems * _es2;
+  System * _system2;
+  MeshFunction * _mesh_function2;
+  NumericVector<Number> * _serialized_solution2;
+  Real _old_time;
+  Real _interpolation_factor;
+  const std::vector<Real> * _exodus_times;
+  int _exodus_index1;
+  int _exodus_index2;
 
 };
 

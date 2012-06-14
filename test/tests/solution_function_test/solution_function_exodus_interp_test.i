@@ -35,7 +35,6 @@
     file_type = exodusII 
     mesh = cubesource.e 
     variable = source_nodal
-    timestep = 2
   [../]
 #  [./sourcee]
 #    type = SolutionFunction
