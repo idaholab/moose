@@ -217,7 +217,7 @@
 [] # Output
 
 [Postprocessors]
-  [./Mass_Density]
+  [./Mass]
     type = Mass
     variable = disp_x
   [../]
