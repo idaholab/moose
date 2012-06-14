@@ -12,30 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "UserObject.h"
+#ifndef USERDATAIO_H
+#define USERDATAIO_H
 
-template<>
-InputParameters validParams<UserObject>()
-{
-  InputParameters params = validParams<MooseObject>();
-  return params;
-}
+#include "UserObjectWarehouse.h"
 
-UserObject::UserObject(const std::string & name, InputParameters params) :
-    MooseObject(name, params)
+class UserDataIO
 {
-}
+public:
+  UserDataIO(UserObjectWarehouse & ud_wh);
+  virtual ~UserDataIO();
 
-UserObject::~UserObject()
-{
-}
+  virtual void write(const std::string & file_name);
+  virtual void read(const std::string & file_name);
 
-void
-UserObject::load(std::ifstream & stream)
-{
-}
+protected:
+  UserObjectWarehouse & _userobject_wh;
 
-void
-UserObject::store(std::ofstream & stream)
-{
-}
+  static const unsigned int file_version;
+};
+
+#endif /* USERDATAIO_H */

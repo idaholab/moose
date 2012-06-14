@@ -19,6 +19,7 @@
 #include <list>
 #include "XDAOutput.h"
 #include "MaterialPropertyIO.h"
+#include "UserDataIO.h"
 
 class FEProblem;
 
@@ -50,6 +51,8 @@ public:
 
   void restartStatefulMaterialProps();
 
+  void restartUserData();
+
   /**
    * Set the number of restart file to store
    * @param num_files Number of files to keep around
@@ -75,10 +78,13 @@ protected:
   XDAOutput _xda;
   /// Stateful material property output
   MaterialPropertyIO _mat;
+  /// User Data IO
+  UserDataIO _user_data;
   /// list of file names we keep around
   std::list<std::string> _restart_file_names;
 
   static const std::string MAT_PROP_EXT;
+  static const std::string USER_DATA_EXT;
 };
 
 #endif /* RESURRECTOR_H */

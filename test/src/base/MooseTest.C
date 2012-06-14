@@ -79,6 +79,8 @@
 // meshes
 #include "StripeMesh.h"
 
+// postprocessors
+#include "UserDataPPS.h"
 
 #include "ExceptionSteady.h"
 
@@ -181,6 +183,8 @@ MooseTestApp::registerObjects()
   registerObject(StripeMesh);
 
   registerConstraint(EqualValueNodalConstraint);
+
+  registerPostprocessor(UserDataPPS);
 
   registerUserData(MTUserData);
 

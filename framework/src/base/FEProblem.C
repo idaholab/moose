@@ -210,6 +210,9 @@ void FEProblem::initialSetup()
       // load the stateful material props from a file
       _resurrector.restartStatefulMaterialProps();
     }
+
+    if (_user_objects[0].size() > 0)
+      _resurrector.restartUserData();
   }
 
 //  // RUN initial postprocessors

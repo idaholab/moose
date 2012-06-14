@@ -39,9 +39,23 @@ public:
    */
   Real doSomething() const;
 
+  /**
+   * Get scalar value
+   */
+  Real getScalar() const { return _scalar; }
+
+  /**
+   * Set the scalar value
+   * @param scalar
+   */
+  void setScalar(Real scalar) { _scalar = scalar; }
+
+  virtual void load(std::ifstream & stream);
+  virtual void store(std::ofstream & stream);
+
 protected:
   /// A scalar value
-  const Real & _scalar;
+  Real _scalar;
   /// A vector value
   const std::vector<Real> & _vector;
   /// Dynamically allocated memory
@@ -51,5 +65,6 @@ protected:
   /// Number of elements to allocate (we do not like magic numbers)
   static const unsigned int NUM = 10;
 };
+
 
 #endif /* MTUSERDATA_H */

@@ -26,6 +26,13 @@ UserObjectWarehouse::~UserObjectWarehouse()
     delete (*it);
 }
 
+bool
+UserObjectWarehouse::hasUserObject(const std::string & name)
+{
+  std::map<std::string, UserObject *>::iterator it = _name_to_user_objects.find(name);
+  return (it != _name_to_user_objects.end());
+}
+
 void
 UserObjectWarehouse::addUserObject(const std::string & name, UserObject * user_object)
 {

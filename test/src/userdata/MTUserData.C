@@ -48,6 +48,19 @@ MTUserData::destroy()
 Real
 MTUserData::doSomething() const
 {
-  // let so something here, for example
+  // let's so something here, for example
   return -2.;
+}
+
+
+void
+MTUserData::load(std::ifstream & stream)
+{
+  stream.read((char *) & _scalar, sizeof(_scalar));
+}
+
+void
+MTUserData::store(std::ofstream & stream)
+{
+  stream.write((const char *) & _scalar, sizeof(_scalar));
 }

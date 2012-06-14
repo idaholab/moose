@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MATERIALOUTPUT_H
-#define MATERIALOUTPUT_H
+#ifndef MATERIALPROPERTYIO_H
+#define MATERIALPROPERTYIO_H
 
 #include <string>
 #include <vector>
@@ -175,4 +175,4 @@ materialPropertyLoad(std::ifstream & stream, RealVectorValue & v)
   }
 }
 
-#endif /* MATERIALOUTPUT_H */
+#endif /* MATERIALPROPERTYIO_H */

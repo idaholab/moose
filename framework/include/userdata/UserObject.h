@@ -36,6 +36,20 @@ public:
    * Called before deleting the object. Free memory allocated by your derived classes, etc.
    */
   virtual void destroy() = 0;
+
+
+  /**
+   * Load user data object from a stream
+   * @param stream Stream to load from
+   */
+  virtual void load(std::ifstream & stream);
+
+  /**
+   * Store user data object to a stream
+   * @param stream Stream to store to
+   */
+  virtual void store(std::ofstream & stream);
+
 };
 
 #endif /* USEROBJECT_H */

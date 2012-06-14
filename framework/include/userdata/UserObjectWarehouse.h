@@ -30,6 +30,13 @@ public:
   virtual ~UserObjectWarehouse();
 
   /**
+   *
+   * @param name
+   * @return
+   */
+  bool hasUserObject(const std::string & name);
+
+  /**
    * Get user object by its name
    * @param name Name of the object
    * @return Pointer to the user object
@@ -41,6 +48,18 @@ public:
    * @param user_data Pointer to the object being added
    */
   void addUserObject(const std::string & name, UserObject * user_object);
+
+  /**
+   * Get the number of user data objects stored in this warehouse
+   * @return The number of objects stored in this warehouse
+   */
+  unsigned int size() { return _user_objects.size(); }
+
+  /**
+   * Get the reference to the list of objects in this warehouse
+   * @return The reference to the list of objects in this warehouse
+   */
+  std::vector<UserObject *> & getObjects() { return _user_objects; }
 
 protected:
   /// storage for user objects
