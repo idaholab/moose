@@ -24,7 +24,6 @@ copyright_header = \
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
 """
 
 global_options = {}
