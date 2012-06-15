@@ -16,7 +16,6 @@
 #define SYSTEMINFO_H
 
 #include <string>
-#include <ctime>
 
 class SystemInfo
 {

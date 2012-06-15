@@ -16,11 +16,15 @@
 #include "ExecutablePath.h"
 #include "HerdRevision.h"  ///< This file is auto-generated and contains the revisions
 
+#include "libmesh_config.h"
+
+#include <ctime>
 #include <sstream>
 #include <sys/stat.h>
 #include <iomanip>
-
-#include "libmesh_config.h"
+#ifdef LIBMESH_HAVE_LOCALE
+#include <locale>
+#endif
 
 SystemInfo::SystemInfo(int argc, char *argv[]) :
     _argc(argc),
