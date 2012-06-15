@@ -19,6 +19,7 @@
 #include "ActionFactory.h"
 #include "ProblemFactory.h"
 #include "Executioner.h"
+#include "SystemInfo.h"
 
 // PETSc
 #ifdef LIBMESH_HAVE_PETSC
@@ -44,16 +45,13 @@ MooseInit::MooseInit(int argc, char *argv[]) :
 
   ParallelUniqueId::initialize();
 
-//  std::cout << "Using " << libMesh::n_threads() << " thread(s)" << std::endl;
+  SystemInfo sys_info(argc, argv);
 
-
-//  Moose::registerObjects();
+  std::cout << sys_info.getInfo();
 }
 
 MooseInit::~MooseInit()
 {
-//  Moose::action_warehouse.clear();
-
   Factory::release();
   ActionFactory::release();
   ProblemFactory::release();

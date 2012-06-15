@@ -24,9 +24,15 @@ moose_objects	+= $(patsubst %.c, %.$(obj-suffix), $(moose_csrcfiles))
 moose_objects += $(patsubst %.f, %.$(obj-suffix), $(moose_fsrcfiles))
 moose_objects += $(patsubst %.f90, %.$(obj-suffix), $(moose_f90srcfiles))
 
-all:: moose
+# revision header
+revision_header = $(MOOSE_DIR)/include/base/HerdRevision.h
 
-moose: $(moose_LIB)
+all:: herd_revision moose
+
+herd_revision:
+	$(shell $(MOOSE_DIR)/scripts/get_repo_revision.py $(MOOSE_DIR))
+
+moose: $(moose_LIB) 
 
 # build rule for MOOSE
 ifeq ($(enable-shared),yes)
