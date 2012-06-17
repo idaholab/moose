@@ -240,10 +240,8 @@ SolutionFunction::updateExodusBracketingTimeIndices(Real time)
 void
 SolutionFunction::timestepSetup()
 {
-//  if (_file_type==EXODUSII && _interpolate_times)
-//  {
-//    updateExodusTimeInterpolation(_t);
-//  }
+  if (_file_type==EXODUSII && _interpolate_times)
+    updateExodusTimeInterpolation(_t);
 }
 
 Real
@@ -252,7 +250,6 @@ SolutionFunction::value(Real t, const Point & p)
   Real val = (*_mesh_function)(p);
   if (_file_type==EXODUSII && _interpolate_times)
   {
-    updateExodusTimeInterpolation(t); //TODO: move this to timestepSetup() once we are able to access the time there
     Real val2 = (*_mesh_function2)(p);
     val = val + (val2 - val)*_interpolation_factor;
   }

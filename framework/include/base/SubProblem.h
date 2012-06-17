@@ -133,6 +133,10 @@ public:
    */
   virtual std::vector<SubdomainName> getMaterialPropertyBlockNames(const std::string prop_name);
 
+  // Function /////
+  virtual void addFunction(std::string type, const std::string & name, InputParameters parameters);
+  virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
+
 protected:
   Problem * _parent;
   MooseMesh & _mesh;
@@ -153,6 +157,9 @@ protected:
 
   /// the map of material properties (block_id -> list of properties)
   std::map<unsigned int, std::set<std::string> > _map_material_props;
+
+  /// functions
+  std::vector<std::map<std::string, Function *> > _functions;
 };
 
 

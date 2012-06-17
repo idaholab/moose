@@ -47,12 +47,20 @@ SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
     _dt_old = _dt;
     _eq.parameters.set<Problem *>("_problem") = this;
   }
+
+  unsigned int n_threads = libMesh::n_threads();
+  _functions.resize(n_threads);
 }
 
 SubProblem::~SubProblem()
 {
   if (_parent == this)
     delete &_eq;
+
+  unsigned int n_threads = libMesh::n_threads();
+  for (unsigned int i = 0; i < n_threads; i++)
+    for (std::map<std::string, Function *>::iterator it = _functions[i].begin(); it != _functions[i].end(); ++it)
+      delete it->second;
 }
 
 void
@@ -129,4 +137,29 @@ SubProblem::checkMatProp(SubdomainID block_id, const std::string & name)
   {
     mooseError("No material defined on block " + Moose::stringify(block_id));
   }
+}
+
+void
+SubProblem::addFunction(std::string type, const std::string & name, InputParameters parameters)
+{
+  parameters.set<Problem *>("_problem") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+    Function * func = static_cast<Function *>(Factory::instance()->create(type, name, parameters));
+    _functions[tid][name] = func;
+  }
+}
+
+Function &
+SubProblem::getFunction(const std::string & name, THREAD_ID tid)
+{
+  Function * function = _functions[tid][name];
+  if (!function)
+  {
+    mooseError("Unable to find function " + name);
+  }
+  return *function;
 }

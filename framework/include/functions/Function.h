@@ -17,6 +17,8 @@
 
 #include "MooseObject.h"
 #include "SetupInterface.h"
+#include "TransientInterface.h"
+#include "UserObjectInterface.h"
 
 // libMesh
 #include "vector_value.h"
@@ -31,7 +33,11 @@ InputParameters validParams<Function>();
  * Base class for function objects.  Functions override value to supply a
  * value at a point.
  */
-class Function : public MooseObject, public SetupInterface
+class Function :
+  public MooseObject,
+  public SetupInterface,
+  public TransientInterface,
+  public UserObjectInterface
 {
 public:
   Function(const std::string & name, InputParameters parameters);
