@@ -9,6 +9,9 @@ bad_bc_test = { INPUT : 'bad_bc_test.i',
 bad_material_test = { INPUT : 'bad_material_test.i',
                       EXPECT_ERR : "A '\w+' is not a registered object" }
 
+nodal_material_test = { INPUT : 'nodal_material_test.i',
+                        EXPECT_ERR : "Nodal AuxKernel '\w+' attempted to reference material property '\w+'" }
+
 bad_executioner_test = { INPUT : 'bad_executioner_test.i',
                          EXPECT_ERR : "A '\w+' is not a registered object" }
 

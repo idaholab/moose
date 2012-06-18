@@ -76,6 +76,16 @@ public:
    */
   bool isNodal();
 
+  /**
+   * Override functions from MaterialPropertyInterface for error checking
+   */
+  template<typename T>
+  MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  template<typename T>
+  MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
+  template<typename T>
+  MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+
 protected:
   virtual Real computeValue() = 0;
 
@@ -137,5 +147,32 @@ protected:
   /// Zero second derivative in quadrature points
   MooseArray<RealTensor> & _second_zero;
 };
+
+template<typename T>
+MaterialProperty<T> &
+AuxKernel::getMaterialProperty(const std::string & name)
+{
+  if (isNodal())
+    mooseError(std::string("Nodal AuxKernel '") + _name + "' attempted to reference material property '" + name + "'");
+  return MaterialPropertyInterface::getMaterialProperty<T>(name);
+}
+
+template<typename T>
+MaterialProperty<T> &
+AuxKernel::getMaterialPropertyOld(const std::string & name)
+{
+  if (isNodal())
+    mooseError(std::string("Nodal AuxKernel '") + _name + "' attempted to reference material property '" + name + "'");
+  return MaterialPropertyInterface::getMaterialPropertyOld<T>(name);
+}
+
+template<typename T>
+MaterialProperty<T> &
+AuxKernel::getMaterialPropertyOlder(const std::string & name)
+{
+  if (isNodal())
+    mooseError(std::string("Nodal AuxKernel '") + _name + "' attempted to reference material property '" + name + "'");
+  return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
+}
 
 #endif //AUXKERNEL_H
