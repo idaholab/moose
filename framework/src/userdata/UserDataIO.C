@@ -15,6 +15,7 @@
 #include "UserDataIO.h"
 #include "UserObject.h"
 #include <vector>
+#include <cstring>
 
 const unsigned int UserDataIO::file_version = 1;
 
@@ -41,7 +42,7 @@ UserDataIO::write(const std::string & file_name)
 
   // header
   MUDSHeader head;
-  memcpy(head._id, "MUDS", 4);
+  std::memcpy(head._id, "MUDS", 4);
   head._file_version = file_version;
   out.write((const char *) & head, sizeof(head));
 
