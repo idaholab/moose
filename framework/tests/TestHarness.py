@@ -108,9 +108,9 @@ class TestHarness:
     #Set number of threads to be used upper bound
     nthreads = min(nthreads, int(test[MAX_THREADS]))
 
-    if nthreads > self.options.nthread:
+    if nthreads > self.options.nthreads:
       test['CAVEATS'] = ['MIN_THREADS=' + str(nthreads)]
-    elif nthreads < self.options.nthread:
+    elif nthreads < self.options.nthreads:
       test['CAVEATS'] = ['MAX_THREADS=' + str(nthreads)]
     # TODO: Refactor this caveats business
     if ncpus > self.options.parallel:
