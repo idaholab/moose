@@ -51,4 +51,9 @@ test_skip_depend_test = { INPUT : '2d_diffusion_test.i',
                           PREREQ : 'test_always_skipped'
 }
 
-
+# This test is to test to see if the threads option is working.
+test_threads_test = { INPUT : '2d_diffusion_test2.i',
+                       EXODIFF : ['out2.e'],
+                       MIN_THREADS : 4,
+                       MAX_THREADS : 4
+}

@@ -103,14 +103,22 @@ class TestHarness:
     # Lower the ceiling
     ncpus = min(ncpus, int(test[MAX_PARALLEL]))
 
+    #Set number of threads to be used lower bound
+    nthreads = max(self.options.nthreads, int(test[MIN_THREADS]))
+    #Set number of threads to be used upper bound
+    nthreads = min(nthreads, int(test[MAX_THREADS]))
+
+    if nthreads > self.options.nthread:
+      test['CAVEATS'] = ['MIN_THREADS=' + str(nthreads)]
+    elif nthreads < self.options.nthread:
+      test['CAVEATS'] = ['MAX_THREADS=' + str(nthreads)]
     # TODO: Refactor this caveats business
     if ncpus > self.options.parallel:
       test['CAVEATS'] = ['MIN_CPUS=' + str(ncpus)]
     elif ncpus < self.options.parallel:
       test['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
-
-    if ncpus > 1:
-      command = 'mpiexec -host ' + self.host_name + ' -n ' + str(ncpus) + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+    if ncpus > 1 or nthreads > 1:
+      command = 'mpiexec -host ' + self.host_name + ' -n ' + str(ncpus) + ' ' + self.executable + ' --n-threads=' + str(nthreads) + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
     else:
       command = self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
 
@@ -417,6 +425,8 @@ class TestHarness:
                       help="Currently only needed for bitten code coverage")
     parser.add_option('--parallel', '-p', action="store", type='int', dest="parallel", default=1,
                       help="Number of processors to use when running mpiexec")
+    parser.add_option('--threads', action="store", type='int', dest="nthreads",default=1,
+                      help="Number of threads to use when running mpiexec")
 
     outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show the output of every test that fails')

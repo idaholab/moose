@@ -39,6 +39,10 @@ MAX_PARALLEL   = 'max_parallel'  # String: When running in parallel, regardles o
 MIN_PARALLEL   = 'min_parallel'  # String: When running in parallel, regardles of processes to use, use this number instead
 SCALE_REFINE  = '<n>'            # The number of refinements to do when scaling
 
+MAX_THREADS     = 'max_thread'    # String: Max number of threads 16
+MIN_THREADS     = 'min_thread'    # String: Min number of threads 1
+#SCALE_REFINE   = '<n>'           # The number of refinements to do when scaling
+
 # These options are not currently implemented.  Please contact the MOOSE Team if you are ready to use them.
 #SCALE    = 'scale'              # Set to True to scale?
 #DOFS     = 'dofs'               # Default number of DOFS to use when --scale is specified
@@ -80,7 +84,8 @@ DEFAULTS = { EXODIFF : [],
              MIN_PARALLEL : 1,
              NO_PARALLEL : False,
              MAX_PARALLEL : 1000,
-#             THREADS : 0,
+             MIN_THREADS: 1,
+             MAX_THREADS: 16,
              MAX_TIME : 300,
              SKIP : '',
 #             TIME : False,
