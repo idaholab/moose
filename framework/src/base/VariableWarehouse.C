@@ -94,6 +94,19 @@ VariableWarehouse::boundaryVars(BoundaryID bnd)
 void
 VariableWarehouse::addInitialCondition(const std::string & var_name, SubdomainID blockid, InitialCondition * ic)
 {
+  std::string name;
+
+  if (_ics[var_name].find(blockid) != _ics[var_name].end())                     // Two ics on the same block
+    name = _ics[var_name][blockid]->name();
+  else if (_ics[var_name].find(Moose::ANY_BLOCK_ID) != _ics[var_name].end())    // Two ics, first global
+    name = _ics[var_name][Moose::ANY_BLOCK_ID]->name();
+  else if (blockid == Moose::ANY_BLOCK_ID && _ics[var_name].size())             // Two ics, second global
+    name = _ics[var_name].begin()->second->name();
+
+  if (name != "")
+    mooseError(std::string("Initial Conditions '") + name + "' and '" + ic->name()
+               + "' are both defined on the same block.");
+
   _ics[var_name][blockid] = ic;
 }
 
