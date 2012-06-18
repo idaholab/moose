@@ -8,6 +8,7 @@ import subprocess, os, sys, re
 def findRepoRevision(moose_dir):
   apps_file = '.build_apps'
   revision = ""
+  vcs = 'SVN'
 
   # Locate the .build_apps file
   found_it = False
@@ -26,8 +27,23 @@ def findRepoRevision(moose_dir):
   # See if this is an SVN checkout
   regex = ''
   if os.path.exists(apps_dir + '.git'):
-    command = 'git svn log --limit 1'
-    regex = re.compile(r'r(\d+)')
+    # See if this git project has a SVN remote
+    saved_dir = os.getcwd()
+    os.chdir(apps_dir)
+    srre=re.compile('svn-remote')
+    p = subprocess.Popen('git config -l', stdout=subprocess.PIPE, shell=True, stderr=None)
+    buffer = p.communicate()[0]
+    os.chdir(saved_dir)
+    m = srre.search(buffer)
+    if m != None:
+      # It has a SVN remote -- get the ID from the svn commit
+      command = 'git svn log --limit 1'
+      regex = re.compile(r'r(\d+)')
+    else:
+      # It doesn't have a SVN remote -- get the git commit id
+      command = 'git log -n 1'
+      regex = re.compile(r'commit (\S+)')
+      vcs = 'GIT'
   elif os.path.exists(apps_dir + '.svn'):
     command = 'svnversion .'
     regex = re.compile(r'(\d+)\w*$')
@@ -47,6 +63,8 @@ def findRepoRevision(moose_dir):
   m = regex.search(buffer)
   if m != None:
     revision = m.group(1)
+  if vcs == 'GIT':
+    revision = '"'+revision+'"'
   return revision
 
 
@@ -59,7 +77,7 @@ def writeRevision(moose_dir, revision):
     f = open(revision_file, "r")
     buffer = f.read()
 
-    m = re.search(r'(\d+)', buffer)
+    m = re.search(r'HERD_REVISION (\S+)', buffer)
     existing_revision = ""
     if m != None:
       existing_revision = m.group(1)
