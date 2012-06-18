@@ -29,6 +29,7 @@ MooseApp::MooseApp(int argc, char *argv[]) :
     _action_warehouse(_syntax),
     _parser(_action_warehouse),
     _executioner(NULL),
+    _sys_info(argc, argv),
     _enable_unused_check(WARN_UNUSED)
 {
   Moose::app = this;
@@ -230,6 +231,8 @@ MooseApp::disableCheckUnusedFlag()
 void
 MooseApp::run()
 {
+  std::cout << _sys_info.getInfo();
+
   initCommandLineOptions();
   _command_line.buildVarsSet();
   parseCommandLine();

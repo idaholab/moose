@@ -24,6 +24,7 @@
 #include "MooseSyntax.h"
 #include "ActionWarehouse.h"
 #include "Executioner.h"
+#include "SystemInfo.h"
 
 /**
  * Base class for MOOSE-based applications
@@ -95,6 +96,8 @@ public:
    */
   void disableCheckUnusedFlag();
 
+  std::string getSysInfo() { return _sys_info.getInfo(); }
+
 protected:
   virtual void runInputFile();
 
@@ -110,6 +113,8 @@ protected:
   Parser _parser;
   /// Pointer to the executioner of this run (typically build by actions)
   Executioner * _executioner;
+  /// System Information
+  SystemInfo _sys_info;
 
   enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
 };

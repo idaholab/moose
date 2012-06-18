@@ -30,13 +30,16 @@ ExodusFormatter::ExodusFormatter() :
 void
 ExodusFormatter::printInputFile(ActionWarehouse & wh)
 {
-  _ss << "####################" << std::endl;
-  _ss << "# Created by MOOSE #" << std::endl;
-  _ss << "####################" << std::endl;
+  _ss << "####################\n"
+      << "# Created by MOOSE #\n"
+      << "####################\n";
 
   // Grab the command line arguments first
-  _ss << "### Command Line Arguments ###" << std::endl;
+  _ss << "### Command Line Arguments ###\n";
   Moose::app->commandLine().print("", _ss, 1);
+
+  _ss << "### Version Info ###\n"
+      << Moose::app->getSysInfo() << "\n";
 
   _ss << "### Input File ###" << std::endl;
   wh.printInputFile(_ss);
@@ -46,6 +49,7 @@ void
 ExodusFormatter::format()
 {
   std::string s;
+  _input_file_record.clear();
 
   while (std::getline(_ss, s))
   {
