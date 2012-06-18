@@ -12,6 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#if 0
+
 #ifndef USERFUNCTIONTEST_H
 #define USERFUNCTIONTEST_H
 
@@ -44,3 +46,5 @@ private:
 };
 
 #endif  // USERFUNCTIONTEST_H
+
+#endif
