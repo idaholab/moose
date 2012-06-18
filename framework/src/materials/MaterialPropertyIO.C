@@ -14,6 +14,7 @@
 
 #include "MaterialPropertyIO.h"
 #include "MaterialPropertyStorage.h"
+#include <cstring>
 
 
 const unsigned int MaterialPropertyIO::file_version = 1;
@@ -42,7 +43,7 @@ MaterialPropertyIO::write(const std::string & file_name)
 
   // header
   MSMPHeader head;
-  memcpy(head._id, "MSMP", 4);
+  std::memcpy(head._id, "MSMP", 4);
   head._file_version = file_version;
   out.write((const char *) &head, sizeof(head));
 
