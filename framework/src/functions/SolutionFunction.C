@@ -55,7 +55,7 @@ SolutionFunction::SolutionFunction(const std::string & name, InputParameters par
     _system2(NULL),
     _mesh_function2(NULL),
     _serialized_solution2(NULL),
-    _old_time(0.0),
+    _interpolation_time(0.0),
     _interpolation_factor(0.0),
     _exodus_times(NULL),
     _exodus_index1(-1),
@@ -174,7 +174,7 @@ SolutionFunction::getSolutionFileType(const std::string filetype)
 void
 SolutionFunction::updateExodusTimeInterpolation(Real time)
 {
-  if (time != _old_time)
+  if (time != _interpolation_time)
   {
     if (updateExodusBracketingTimeIndices(time))
     {
@@ -188,6 +188,7 @@ SolutionFunction::updateExodusTimeInterpolation(Real time)
       _es2->update();
       _system2->solution->localize(*_serialized_solution2);
     }
+    _interpolation_time = time;
   }
 }
 
@@ -250,6 +251,7 @@ SolutionFunction::value(Real t, const Point & p)
   Real val = (*_mesh_function)(p);
   if (_file_type==EXODUSII && _interpolate_times)
   {
+    mooseAssert(t == _interpolation_time,"Time passed into value() must match time at last call to timestepSetup()");
     Real val2 = (*_mesh_function2)(p);
     val = val + (val2 - val)*_interpolation_factor;
   }

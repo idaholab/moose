@@ -77,7 +77,7 @@ protected:
   System * _system2;
   MeshFunction * _mesh_function2;
   NumericVector<Number> * _serialized_solution2;
-  Real _old_time;
+  Real _interpolation_time;
   Real _interpolation_factor;
   const std::vector<Real> * _exodus_times;
   int _exodus_index1;
