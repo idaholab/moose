@@ -10,6 +10,7 @@
 class Simulation;
 class Component;
 class FEProblem;
+//class ComponentPostProcessor;
 
 template<>
 InputParameters validParams<Component>();
@@ -74,6 +75,12 @@ public:
    * @param piece The name of the piece of the component you are interested in.
    */
   virtual std::string variableName(std::string piece) = 0;
+
+  //LZou test
+  //virtual void update();
+  virtual void onResidual() {}
+  virtual void onTimestepBegin() {}
+  virtual void onTimestepEnd() {}
 
 protected:
   unsigned int _id;                     ///< Unique ID of this component
