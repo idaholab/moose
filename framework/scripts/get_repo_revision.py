@@ -38,7 +38,7 @@ def findRepoRevision(moose_dir):
   # Change current working directory (this is necessary for braindead SVN)
   os.chdir(apps_dir)
   # Get the revision from the log
-  p = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True, stderr=None)
+  p = subprocess.Popen([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   buffer = p.communicate()[0]
   # Restore current working directory
   os.chdir(saved_dir)
