@@ -20,6 +20,7 @@
 
 //Moose includes
 #include "Moose.h"
+#include "MooseInit.h"
 
 //libMesh includes
 #include "perf_log.h"
@@ -31,6 +32,7 @@ PerfLog Moose::perf_log("CppUnit");
 
 int main(int argc, char **argv)
 {
+  MooseInit init(argc, argv);
   CppUnit::Test *suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
 
   CppUnit::TextTestRunner runner;

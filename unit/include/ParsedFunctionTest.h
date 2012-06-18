@@ -12,8 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#if 0
-
 #ifndef USERFUNCTIONTEST_H
 #define USERFUNCTIONTEST_H
 
@@ -21,7 +19,8 @@
 #include "cppunit/extensions/HelperMacros.h"
 
 // Forward declarations
-class MooseInit;
+class MooseMesh;
+class SubProblem;
 
 class ParsedFunctionTest : public CppUnit::TestFixture
 {
@@ -41,10 +40,11 @@ public:
   void testVariables();
   void testConstants();
 
-private:
-  MooseInit *init;
+  void init();
+
+protected:
+  MooseMesh * _mesh;
+  SubProblem * _subproblem;
 };
 
 #endif  // USERFUNCTIONTEST_H
-
-#endif

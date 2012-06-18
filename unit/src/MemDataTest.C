@@ -50,7 +50,7 @@ void MemDataTest::test()
   Real megs_used = static_cast<Real>(mem_used)/static_cast<Real>(1024);
 
   // Assert that the memory counter counted *at least* 4 Megabytes
-  CPPUNIT_ASSERT(megs_used > 4.);
+  CPPUNIT_ASSERT(megs_used >= 4.);
 
   Real rel_diff = std::abs(megs_used-4.)/4.;
   //std::cout << "rel_diff=" << rel_diff << std::endl;
