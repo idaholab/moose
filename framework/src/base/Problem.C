@@ -14,6 +14,7 @@
 
 #include "Problem.h"
 #include "Factory.h"
+#include "Function.h"
 
 template<>
 InputParameters validParams<Problem>()
@@ -63,17 +64,6 @@ Problem::addUserObject(const std::string & type, const std::string & name, Input
     UserObject * uo = static_cast<UserObject *>(Factory::instance()->create(type, name, parameters));
     _user_objects[tid].addUserObject(name, uo);
   }
-}
-
-const UserObject &
-Problem::getUserObject(const std::string & name, THREAD_ID tid)
-{
-  UserObject * user_object = _user_objects[tid].getUserObjectByName(name);
-  if (user_object == NULL)
-  {
-    mooseError("Unable to find user object with name '" + name + "'");
-  }
-  return *user_object;
 }
 
 void

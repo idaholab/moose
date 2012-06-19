@@ -12,31 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef USERDATAKERNEL_H
-#define USERDATAKERNEL_H
-
-#include "Kernel.h"
-#include "MTUserData.h"
-
-class UserDataKernel;
+#include "UserObjectKernel.h"
 
 template<>
-InputParameters validParams<UserDataKernel>();
-
-/**
- * This kernel user user-data object
- */
-class UserDataKernel : public Kernel
+InputParameters validParams<UserObjectKernel>()
 {
-public:
-  UserDataKernel(const std::string & name, InputParameters params);
-  virtual ~UserDataKernel();
+  InputParameters params = validParams<Kernel>();
+  params.addRequiredParam<std::string>("user_data", "The name of user data object to use.");
+  return params;
+}
 
-protected:
-  virtual Real computeQpResidual();
+UserObjectKernel::UserObjectKernel(const std::string & name, InputParameters params) :
+    Kernel(name, params),
+    _mutley(getUserObject<MTUserObject>("user_data"))   // get user-data object and cast it down so we can use it
+{
+}
 
-  /// Mutley - do a google search on him if you do not know him
-  const MTUserData & _mutley;
-};
+UserObjectKernel::~UserObjectKernel()
+{
+}
 
-#endif /* USERDATAKERNEL_H */
+Real
+UserObjectKernel::computeQpResidual()
+{
+  Real val = _mutley.doSomething();     // let Mutley do something
+  return -_test[_i][_qp] * val;
+}

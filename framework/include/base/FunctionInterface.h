@@ -17,9 +17,9 @@
 
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
+#include "Function.h"
 
 class Problem;
-class Function;
 
 /**
  * Interface for objects that need to use functions

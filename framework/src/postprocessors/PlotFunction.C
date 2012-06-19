@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "PlotFunction.h"
+#include "Function.h"
 #include "SubProblem.h"
 
 template<>

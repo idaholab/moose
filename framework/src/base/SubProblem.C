@@ -16,6 +16,7 @@
 #include "Factory.h"
 #include "MooseMesh.h"
 #include "Conversion.h"
+#include "Function.h"
 
 template<>
 InputParameters validParams<SubProblem>()

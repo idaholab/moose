@@ -29,7 +29,7 @@
 #include "MatConvection.h"
 #include "PPSDiffusion.h"
 #include "DotCouplingKernel.h"
-#include "UserDataKernel.h"
+#include "UserObjectKernel.h"
 #include "DiffusionPrecompute.h"
 #include "ConvectionPrecompute.h"
 
@@ -72,7 +72,7 @@
 #include "ImplicitODEy.h"
 
 #include "EqualValueNodalConstraint.h"
-#include "MTUserData.h"
+#include "MTUserObject.h"
 
 #include "TimestepSetupFunction.h"
 
@@ -80,7 +80,7 @@
 #include "StripeMesh.h"
 
 // postprocessors
-#include "UserDataPPS.h"
+#include "UserObjectPPS.h"
 
 #include "ExceptionSteady.h"
 
@@ -128,7 +128,7 @@ MooseTestApp::registerObjects()
   registerKernel(MatConvection);
   registerKernel(PPSDiffusion);
   registerKernel(DotCouplingKernel);
-  registerKernel(UserDataKernel);
+  registerKernel(UserObjectKernel);
   registerKernel(DiffusionPrecompute);
   registerKernel(ConvectionPrecompute);
 
@@ -184,9 +184,9 @@ MooseTestApp::registerObjects()
 
   registerConstraint(EqualValueNodalConstraint);
 
-  registerPostprocessor(UserDataPPS);
+  registerPostprocessor(UserObjectPPS);
 
-  registerUserData(MTUserData);
+  registerUserData(MTUserObject);
 
   registerExecutioner(ExceptionSteady);
 }

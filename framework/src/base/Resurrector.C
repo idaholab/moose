@@ -26,7 +26,7 @@ Resurrector::Resurrector(FEProblem & fe_problem) :
     _num_restart_files(0),
     _xda(_fe_problem.es()),
     _mat(_fe_problem._material_props, _fe_problem._bnd_material_props),
-    _user_data(_fe_problem._user_objects[0])
+    _user_object(_fe_problem._user_objects[0])
 {
 }
 
@@ -65,7 +65,7 @@ Resurrector::restartUserData()
   // read material properties from a file
   std::string file_name(_restart_file_base + USER_DATA_EXT);
   Parser::checkFileReadable(file_name);
-  _user_data.read(file_name);
+  _user_object.read(file_name);
 }
 
 
@@ -90,7 +90,7 @@ Resurrector::write()
     _mat.write(file_base + MAT_PROP_EXT);
   THREAD_ID tid = 0;
   if (_fe_problem._user_objects[tid].size() > 0)
-    _user_data.write(file_base + USER_DATA_EXT);
+    _user_object.write(file_base + USER_DATA_EXT);
 
   if (_restart_file_names.size() > _num_restart_files)
   {

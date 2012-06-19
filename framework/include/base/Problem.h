@@ -21,7 +21,6 @@
 #include "ExecStore.h"
 #include "MooseMesh.h"
 #include "MooseArray.h"
-#include "Function.h"
 #include "UserObjectWarehouse.h"
 
 // libMesh
@@ -36,6 +35,7 @@ class MooseVariable;
 class MooseVariableScalar;
 class Output;
 class Material;
+class Function;
 
 class Problem;
 
@@ -178,7 +178,18 @@ public:
    * @param tid The thread ID
    * @return Const reference to the user object
    */
-  virtual const UserObject & getUserObject(const std::string & name, THREAD_ID tid = 0);
+  template <class T>
+  const T & getUserObject(const std::string & name, THREAD_ID tid = 0)
+  {
+    UserObject * user_object = _user_objects[tid].getUserObjectByName(name);
+    if (user_object == NULL)
+    {
+      mooseError("Unable to find user object with name '" + name + "'");
+    }
+    return dynamic_cast<const T &>(*user_object);
+  }
+
+
 
   // Transient /////
   virtual void copySolutionsBackwards() = 0;

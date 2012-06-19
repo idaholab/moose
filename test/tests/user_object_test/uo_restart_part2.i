@@ -12,21 +12,19 @@
 
 [UserObjects]
   [./ud]
-    type = MTUserData
-    scalar = 2
-    vector = '9 7 5'
+    type = MTUserObject
   [../]
 []
 
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
-    value = -2
+    value = 2
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = x*x
+    value = -x*x
   [../]
 []
 
@@ -45,10 +43,10 @@
 
   # this kernel will user user data object from above
   [./ffn]
-    type = UserDataKernel
+    type = UserForcingFunction
     variable = u
-    user_data = ud 
-  []
+    function = forcing_fn
+  [../]
 []
 
 [BCs]
@@ -62,12 +60,21 @@
   [../]
 []
 
+[Postprocessors]
+  [./ud_pps]
+    type = UserObjectPPS
+    user_data = ud
+  [../]
+[]
+
 [Executioner]
   type = Steady
   petsc_options = '-snes_mf_operator'
+
+  restart_file_base = ud_restart_part1_out_restart_0001
 []
 
 [Output]
-  file_base = out
+  output_initial = true
   exodus = true
 []

@@ -12,12 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "UserDataIO.h"
+#include "UserObjectIO.h"
 #include "UserObject.h"
 #include <vector>
 #include <cstring>
 
-const unsigned int UserDataIO::file_version = 1;
+const unsigned int UserObjectIO::file_version = 1;
 
 struct MUDSHeader               // MOOSE User Data Storage
 {
@@ -26,17 +26,17 @@ struct MUDSHeader               // MOOSE User Data Storage
 };
 
 
-UserDataIO::UserDataIO(UserObjectWarehouse & ud_wh) :
+UserObjectIO::UserObjectIO(UserObjectWarehouse & ud_wh) :
     _userobject_wh(ud_wh)
 {
 }
 
-UserDataIO::~UserDataIO()
+UserObjectIO::~UserObjectIO()
 {
 }
 
 void
-UserDataIO::write(const std::string & file_name)
+UserObjectIO::write(const std::string & file_name)
 {
   std::ofstream out(file_name.c_str(), std::ios::out | std::ios::binary);
 
@@ -77,7 +77,7 @@ UserDataIO::write(const std::string & file_name)
 }
 
 void
-UserDataIO::read(const std::string & file_name)
+UserObjectIO::read(const std::string & file_name)
 {
   std::ifstream in(file_name.c_str(), std::ios::in | std::ios::binary);
 

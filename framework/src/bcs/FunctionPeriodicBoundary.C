@@ -14,6 +14,7 @@
 
 #include "FunctionPeriodicBoundary.h"
 #include "SubProblem.h"
+#include "Function.h"
 
 /**
  */

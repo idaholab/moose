@@ -30,7 +30,6 @@
 #include "sparse_matrix.h"
 
 class MooseMesh;
-
 class SubProblem;
 
 template<>

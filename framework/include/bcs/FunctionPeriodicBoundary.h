@@ -15,12 +15,12 @@
 #ifndef FUNCTIONPERIODICBOUNDARY_H
 #define FUNCTIONPERIODICBOUNDARY_H
 
-#include "Function.h"
 
 #include "point.h"
 #include "periodic_boundaries.h"
 
 class SubProblem;
+class Function;
 
 /**
  * Periodic boundary for calculation periodic BC on domains where the translation is given by functions

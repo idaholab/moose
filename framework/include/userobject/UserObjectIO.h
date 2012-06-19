@@ -12,29 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "UserDataKernel.h"
+#ifndef USEROBJECTIO_H
+#define USEROBJECTIO_H
 
-template<>
-InputParameters validParams<UserDataKernel>()
-{
-  InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<std::string>("user_data", "The name of user data object to use.");
-  return params;
-}
+#include "UserObjectWarehouse.h"
 
-UserDataKernel::UserDataKernel(const std::string & name, InputParameters params) :
-    Kernel(name, params),
-    _mutley(dynamic_cast<const MTUserData &>(getUserObject("user_data")))   // get user-data object and cast it down so we can use it
+class UserObjectIO
 {
-}
+public:
+  UserObjectIO(UserObjectWarehouse & ud_wh);
+  virtual ~UserObjectIO();
 
-UserDataKernel::~UserDataKernel()
-{
-}
+  virtual void write(const std::string & file_name);
+  virtual void read(const std::string & file_name);
 
-Real
-UserDataKernel::computeQpResidual()
-{
-  Real val = _mutley.doSomething();     // let Mutley do something
-  return -_test[_i][_qp] * val;
-}
+protected:
+  UserObjectWarehouse & _userobject_wh;
+
+  static const unsigned int file_version;
+};
+
+#endif /* USEROBJECTIO_H */

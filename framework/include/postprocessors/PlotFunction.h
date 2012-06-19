@@ -19,6 +19,7 @@
 
 //Forward Declarations
 class PlotFunction;
+class Function;
 
 template<>
 InputParameters validParams<PlotFunction>();

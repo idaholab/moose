@@ -19,7 +19,7 @@
 #include <list>
 #include "XDAOutput.h"
 #include "MaterialPropertyIO.h"
-#include "UserDataIO.h"
+#include "UserObjectIO.h"
 
 class FEProblem;
 
@@ -79,7 +79,7 @@ protected:
   /// Stateful material property output
   MaterialPropertyIO _mat;
   /// User Data IO
-  UserDataIO _user_data;
+  UserObjectIO _user_object;
   /// list of file names we keep around
   std::list<std::string> _restart_file_names;
 

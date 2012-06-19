@@ -12,10 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MTUserData.h"
+#include "MTUserObject.h"
 
 template<>
-InputParameters validParams<MTUserData>()
+InputParameters validParams<MTUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params.addParam<Real>("scalar", 0, "A scalar value");
@@ -24,7 +24,7 @@ InputParameters validParams<MTUserData>()
 }
 
 
-MTUserData::MTUserData(const std::string & name, InputParameters params) :
+MTUserObject::MTUserObject(const std::string & name, InputParameters params) :
     UserObject(name, params),
     _scalar(getParam<Real>("scalar")),
     _vector(getParam<std::vector<Real> >("vector")),
@@ -34,19 +34,19 @@ MTUserData::MTUserData(const std::string & name, InputParameters params) :
   _dyn_memory = new Real[NUM];
 }
 
-MTUserData::~MTUserData()
+MTUserObject::~MTUserObject()
 {
 }
 
 void
-MTUserData::destroy()
+MTUserObject::destroy()
 {
   // release the Kraken (eeee... I mean memory)
   delete _dyn_memory;
 }
 
 Real
-MTUserData::doSomething() const
+MTUserObject::doSomething() const
 {
   // let's so something here, for example
   return -2.;
@@ -54,13 +54,13 @@ MTUserData::doSomething() const
 
 
 void
-MTUserData::load(std::ifstream & stream)
+MTUserObject::load(std::ifstream & stream)
 {
   stream.read((char *) & _scalar, sizeof(_scalar));
 }
 
 void
-MTUserData::store(std::ofstream & stream)
+MTUserObject::store(std::ofstream & stream)
 {
   stream.write((const char *) & _scalar, sizeof(_scalar));
 }

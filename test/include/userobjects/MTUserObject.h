@@ -12,25 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MTUSERDATA_H
-#define MTUSERDATA_H
+#ifndef MTUSEROBJECT_H
+#define MTUSEROBJECT_H
 
 #include "UserObject.h"
 
-class MTUserData;
+class MTUserObject;
 
 template<>
-InputParameters validParams<MTUserData>();
+InputParameters validParams<MTUserObject>();
 
 
 /**
  * Demonstration of user-data object
  */
-class MTUserData : public UserObject
+class MTUserObject : public UserObject
 {
 public:
-  MTUserData(const std::string & name, InputParameters params);
-  virtual ~MTUserData();
+  MTUserObject(const std::string & name, InputParameters params);
+  virtual ~MTUserObject();
 
   virtual void destroy();
 
@@ -67,4 +67,4 @@ protected:
 };
 
 
-#endif /* MTUSERDATA_H */
+#endif /* MTUSEROBJECT_H */

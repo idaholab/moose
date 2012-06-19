@@ -12,24 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef USERDATAIO_H
-#define USERDATAIO_H
+#include "UserObjectInterface.h"
+#include "UserObject.h"
 
-#include "UserObjectWarehouse.h"
-
-class UserDataIO
+UserObjectInterface::UserObjectInterface(InputParameters & params) :
+    _uoi_problem(*params.get<Problem *>("_problem")),
+    _uoi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
+    _uoi_params(params)
 {
-public:
-  UserDataIO(UserObjectWarehouse & ud_wh);
-  virtual ~UserDataIO();
-
-  virtual void write(const std::string & file_name);
-  virtual void read(const std::string & file_name);
-
-protected:
-  UserObjectWarehouse & _userobject_wh;
-
-  static const unsigned int file_version;
-};
-
-#endif /* USERDATAIO_H */
+}

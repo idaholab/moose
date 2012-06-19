@@ -12,25 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "UserObjectInterface.h"
-#include "UserObject.h"
-#include "Problem.h"
+#ifndef USEROBJECTKERNEL_H
+#define USEROBJECTKERNEL_H
 
-UserObjectInterface::UserObjectInterface(InputParameters & params) :
-    _udi_problem(*params.get<Problem *>("_problem")),
-    _udi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
-    _udi_params(params)
-{
-}
+#include "Kernel.h"
+#include "MTUserObject.h"
 
-const UserObject &
-UserObjectInterface::getUserObject(const std::string & name)
-{
-  return _udi_problem.getUserObject(_udi_params.get<std::string>(name), _udi_tid);
-}
+class UserObjectKernel;
 
-const UserObject &
-UserObjectInterface::getUserObjectByName(const std::string & name)
+template<>
+InputParameters validParams<UserObjectKernel>();
+
+/**
+ * This kernel user user-data object
+ */
+class UserObjectKernel : public Kernel
 {
-  return _udi_problem.getUserObject(name, _udi_tid);
-}
+public:
+  UserObjectKernel(const std::string & name, InputParameters params);
+  virtual ~UserObjectKernel();
+
+protected:
+  virtual Real computeQpResidual();
+
+  /// Mutley - do a google search on him if you do not know him
+  const MTUserObject & _mutley;
+};
+
+#endif /* USEROBJECTKERNEL_H */

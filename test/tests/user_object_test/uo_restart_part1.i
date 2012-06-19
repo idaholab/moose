@@ -12,7 +12,7 @@
 
 [UserObjects]
   [./ud]
-    type = MTUserData
+    type = MTUserObject
     scalar = 2
     vector = '9 7 5'
   [../]
@@ -45,7 +45,7 @@
 
   # this kernel will user user data object from above
   [./ffn]
-    type = UserDataKernel
+    type = UserObjectKernel
     variable = u
     user_data = ud 
   [../]

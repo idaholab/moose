@@ -24,7 +24,6 @@
 
 #include "Moose.h"
 
-
 class MooseObject;
 class GlobalParamsAction;
 class Action;

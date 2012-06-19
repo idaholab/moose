@@ -17,8 +17,8 @@
 
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
+#include "Problem.h"
 
-class Problem;
 class UserObject;
 
 /**
@@ -40,21 +40,37 @@ public:
    * @param name The name of the parameter key of the user object to retrieve
    * @return The user object with name associated with the parameter 'name'
    */
-  const UserObject & getUserObject(const std::string & name);
+  template<class T>
+  const T & getUserObject(const std::string & name);
 
   /**
    * Get a user object with a given name
    * @param name The name of the user object to retrieve
    * @return The user object with name 'name'
    */
-  const UserObject & getUserObjectByName(const std::string & name);
+  template<class T>
+  const T & getUserObjectByName(const std::string & name);
 
 private:
-  Problem & _udi_problem;
+  Problem & _uoi_problem;
   /// Thread ID
-  THREAD_ID _udi_tid;
+  THREAD_ID _uoi_tid;
   /// Parameters of the object with this interface
-  InputParameters _udi_params;
+  InputParameters _uoi_params;
 };
+
+template<class T>
+const T &
+UserObjectInterface::getUserObject(const std::string & name)
+{
+  return _uoi_problem.getUserObject<T>(_uoi_params.get<std::string>(name), _uoi_tid);
+}
+
+template<class T>
+const T &
+UserObjectInterface::getUserObjectByName(const std::string & name)
+{
+  return _uoi_problem.getUserObject<T>(name, _uoi_tid);
+}
 
 #endif //USEROBJECTFACE_H
