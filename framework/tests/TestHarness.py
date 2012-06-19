@@ -118,7 +118,7 @@ class TestHarness:
     elif ncpus < self.options.parallel:
       test['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
     if ncpus > 1 or nthreads > 1:
-      command = 'mpiexec -host ' + self.host_name + ' -n ' + str(ncpus) + ' ' + self.executable + ' --n-threads=' + str(nthreads) + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+      command = 'mpiexec -host ' + self.host_name + ' -n ' + str(ncpus) + ' ' + self.executable + ' --n-threads=' + str(nthreads) + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
     else:
       command = self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
 
