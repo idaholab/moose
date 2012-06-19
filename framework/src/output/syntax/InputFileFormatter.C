@@ -15,6 +15,8 @@
 #include "InputFileFormatter.h"
 #include "Parser.h"
 
+#include "o_string_stream.h"
+
 #include <sstream>
 #include <vector>
 

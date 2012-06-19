@@ -12,6 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include <iomanip>
+
 #include "CommandLine.h"
 #include "MooseInit.h"
 #include "Parser.h"

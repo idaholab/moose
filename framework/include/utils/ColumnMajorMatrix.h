@@ -23,6 +23,7 @@
 #include "dense_vector.h"
 // system includes
 #include <vector>
+#include <iomanip>
 
 /**
  * This class defines a Tensor that can change it's shape.

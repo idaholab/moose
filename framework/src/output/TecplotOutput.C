@@ -16,6 +16,7 @@
 #include "Problem.h"
 // libMesh
 #include "tecplot_io.h"
+#include "o_string_stream.h"
 
 TecplotOutput::TecplotOutput(EquationSystems & es, bool binary) :
     Outputter(es),

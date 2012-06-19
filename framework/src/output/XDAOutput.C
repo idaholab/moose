@@ -15,6 +15,9 @@
 #include "XDAOutput.h"
 #include "Problem.h"
 
+// Libmesh headers
+#include "o_string_stream.h"
+
 XDAOutput::XDAOutput(EquationSystems & es) :
     Outputter(es),
     _file_num(0)

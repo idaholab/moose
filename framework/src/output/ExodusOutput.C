@@ -25,6 +25,8 @@
 // libMesh
 #include "exodusII.h"
 #include "exodusII_io.h"
+#include "o_string_stream.h"
+
 
 ExodusOutput::ExodusOutput(EquationSystems & es, bool output_input) :
     Outputter(es),

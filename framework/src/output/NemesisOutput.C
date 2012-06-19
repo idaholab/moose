@@ -21,6 +21,7 @@
 
 // libMesh
 #include "nemesis_io.h"
+#include "o_string_stream.h"
 
 NemesisOutput::NemesisOutput(EquationSystems & es) :
     Outputter(es),

@@ -25,6 +25,7 @@
 #include "nonlinear_implicit_system.h"
 #include "transient_system.h"
 #include "numeric_vector.h"
+#include "o_string_stream.h"
 
 // C++ Includes
 #include <iomanip>

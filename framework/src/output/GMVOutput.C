@@ -17,6 +17,7 @@
 
 // libMesh
 #include "gmv_io.h"
+#include "o_string_stream.h"
 
 GMVOutput::GMVOutput(EquationSystems & es) :
     Outputter(es),
