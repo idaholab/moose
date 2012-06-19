@@ -3,6 +3,7 @@
 
 #include "IntegratedBC.h"
 #include "HeatConductionMaterial.h"
+#include "Function.h"
 
 //Forward Declarations
 class BulkCoolantBC;
