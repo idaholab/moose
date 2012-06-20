@@ -33,6 +33,7 @@ InputParameters validParams<SolutionFunction>()
   params.addParam<std::string>("system", "NonlinearSystem", "The name of the system to pull values out of (xda only).");
   params.addRequiredParam<std::string>("variable", "The name of the variable you want to use for values.");
   params.addParam<int>("timestep", -1, "Index of the single timestep used (exodusII only).  If not supplied, time interpolation will occur.");
+  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the values");
   return params;
 }
 
@@ -59,7 +60,8 @@ SolutionFunction::SolutionFunction(const std::string & name, InputParameters par
     _interpolation_factor(0.0),
     _exodus_times(NULL),
     _exodus_index1(-1),
-    _exodus_index2(-1)
+    _exodus_index2(-1),
+    _scale_factor( getParam<Real>("scale_factor") )
 {
   _mesh = new Mesh;
 
@@ -255,5 +257,5 @@ SolutionFunction::value(Real t, const Point & p)
     Real val2 = (*_mesh_function2)(p);
     val = val + (val2 - val)*_interpolation_factor;
   }
-  return val;
+  return val*_scale_factor;
 }

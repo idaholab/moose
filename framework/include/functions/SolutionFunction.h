@@ -82,6 +82,7 @@ protected:
   const std::vector<Real> * _exodus_times;
   int _exodus_index1;
   int _exodus_index2;
+  const Real _scale_factor;
 
 };
 

@@ -36,6 +36,7 @@
     mesh = cubesource.e 
     variable = source_nodal
     timestep = 2
+    scale_factor = 2.0
   [../]
 #  [./sourcee]
 #    type = SolutionFunction
