@@ -71,7 +71,7 @@
   type = Steady
   petsc_options = '-snes_mf_operator'
 
-  restart_file_base = ud_restart_part1_out_restart_0001
+  restart_file_base = uo_restart_part1_out_restart_0001
 []
 
 [Output]
