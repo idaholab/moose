@@ -1429,6 +1429,12 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
       MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
       PETSC_TRUE);
 #endif
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+#else
+    // PETSc 3.3.0
+    MatSetOption(static_cast<PetscMatrix<Number> &>(*sys().matrix).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+#endif
+
 #endif
 
     // jacobianSetup /////
