@@ -303,16 +303,12 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
 #if PETSC_VERSION_LESS_THAN(3,2,0)
   ierr = MatGetColoring(petsc_mat->mat(), MATCOLORING_LF, &iscoloring);
 #else
+  // PETSc 3.3.0
   ierr = MatGetColoring(petsc_mat->mat(), MATCOLORINGLF, &iscoloring);
 #endif
   CHKERRABORT(libMesh::COMM_WORLD,ierr);
 
   MatFDColoringCreate(petsc_mat->mat(),iscoloring, &_fdcoloring);
-#if PETSC_VERSION_LESS_THAN(3,2,0)
-  ISColoringDestroy(iscoloring);
-#else
-  ISColoringDestroy(&iscoloring);
-#endif
   MatFDColoringSetFromOptions(_fdcoloring);
   MatFDColoringSetFunction(_fdcoloring,
                            (PetscErrorCode (*)(void))&libMesh::__libmesh_petsc_snes_residual,
@@ -326,11 +322,20 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
   Mat my_mat = petsc_mat->mat();
   MatStructure my_struct;
 
+#if PETSC_VERSION_LESS_THAN(3,2,0)
   SNESComputeJacobian(petsc_nonlinear_solver.snes(),
                       petsc_vec->vec(),
                       &my_mat,
                       &my_mat,
                       &my_struct);
+#endif
+
+#if PETSC_VERSION_LESS_THAN(3,2,0)
+  ISColoringDestroy(iscoloring);
+#else
+  // PETSc 3.3.0
+  ISColoringDestroy(&iscoloring);
+#endif
 
 //  std::cout<<*_sys.matrix<<std::endl;
 #endif
