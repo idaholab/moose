@@ -168,7 +168,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
     for(unsigned int j=0; j<closest_elems.size(); j++)
     {
       unsigned int elem_id = closest_elems[j];
-      Elem * elem = _mesh.elem(elem_id);
+      const Elem * elem = _mesh.elem(elem_id);
 
       // TODO: This is a horribly inefficient way to do this!  We need to cache information
       //       about which boundary ids elements are connected to and which sides are on those

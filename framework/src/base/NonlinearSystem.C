@@ -876,7 +876,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
           {
             PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
-            Elem * master_elem = info._elem;
+            const Elem * master_elem = info._elem;
             unsigned int master_side = info._side_num;
 
             // reinit variables at the node
@@ -964,7 +964,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
           {
             PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
-            Elem * master_elem = info._elem;
+            const Elem * master_elem = info._elem;
             unsigned int master_side = info._side_num;
 
             // reinit variables at the node
@@ -1297,7 +1297,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
           {
             PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
-            Elem * master_elem = info._elem;
+            const Elem * master_elem = info._elem;
             unsigned int master_side = info._side_num;
 
             // reinit variables at the node

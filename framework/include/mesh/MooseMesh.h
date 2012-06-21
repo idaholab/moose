@@ -76,7 +76,7 @@ public:
   virtual const Node & node (const unsigned int i) const { return _mesh.node(i); }
   virtual Node & node (const unsigned int i) { return _mesh.node(i); }
 
-  virtual Elem * elem(const unsigned int i) const { return _mesh.elem(i); }
+  virtual Elem * elem(const unsigned int i) { return _mesh.elem(i); }
 
   bool changed() { return _is_changed; }
   void changed(bool state) { _is_changed = state; }
