@@ -168,6 +168,10 @@ protected:
    */
   std::vector<SubdomainID> _block_id;
 
+  /**
+   * Boundary ID this material is active on.
+   */
+  std::vector<BoundaryID> _boundary_id;
 
 
   /**

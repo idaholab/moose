@@ -191,13 +191,15 @@ public:
    * @param tid Thread ID
    * @return The list of materials with the name 'name'
    */
-  virtual const std::vector<Material *> & getMaterialsByName(const std::string & name, THREAD_ID tid);
+  virtual const std::vector<Material*> & getMaterialsByName(const std::string & name, THREAD_ID tid);
   virtual const std::vector<Material*> & getMaterials(SubdomainID block_id, THREAD_ID tid);
   virtual const std::vector<Material*> & getFaceMaterials(SubdomainID block_id, THREAD_ID tid);
+  virtual const std::vector<Material*> & getBndMaterials(BoundaryID block_id, THREAD_ID tid);
   virtual void updateMaterials();
   virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid);
   virtual void reinitMaterialsFace(SubdomainID blk_id, unsigned int side, THREAD_ID tid);
   virtual void reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int side, THREAD_ID tid);
+  virtual void reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid);
 
 
   // Postprocessors /////

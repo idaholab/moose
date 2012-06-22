@@ -73,6 +73,7 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
       _problem.subdomainSetupSide(subdomain, _tid);
 
     _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
+    _problem.reinitMaterialsBoundary(bnd_id, _tid);
 
     for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
     {

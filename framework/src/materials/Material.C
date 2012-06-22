@@ -23,7 +23,8 @@ template<>
 InputParameters validParams<Material>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<std::vector<SubdomainName> >("block", "The id or name of the block (subdomain) that this material represents.");
+  params.addParam<std::vector<SubdomainName> >("block", "The id or name of the block (subdomain) that this material represents.");
+  params.addParam<std::vector<BoundaryName> >("boundary", "The id or name of the boundary that this material represents.");
 
   params.addPrivateParam<std::string>("built_by_action", "add_material");
   return params;

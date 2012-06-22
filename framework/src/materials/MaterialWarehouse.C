@@ -22,20 +22,22 @@ MaterialWarehouse::MaterialWarehouse()
 {
   _master_list.reserve(3);
   _master_list.push_back(&_active_materials);
-  _master_list.push_back(&_active_boundary_materials);
+  _master_list.push_back(&_active_face_materials);
   _master_list.push_back(&_active_neighbor_materials);
 }
 
 MaterialWarehouse::MaterialWarehouse(const MaterialWarehouse &rhs)
 {
   _active_materials = rhs._active_materials;
-  _active_boundary_materials = rhs._active_boundary_materials;
+  _active_face_materials = rhs._active_face_materials;
   _active_neighbor_materials = rhs._active_neighbor_materials;
+  _active_boundary_materials = rhs._active_boundary_materials;
   _blocks = rhs._blocks;
+  _boundaries = rhs._boundaries;
 
   _master_list.reserve(3);
   _master_list.push_back(&_active_materials);
-  _master_list.push_back(&_active_boundary_materials);
+  _master_list.push_back(&_active_face_materials);
   _master_list.push_back(&_active_neighbor_materials);
 }
 
@@ -53,6 +55,7 @@ MaterialWarehouse::initialSetup()
   // Sort the materials in each subdomain to get correct execution order
   for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
     sortMaterials(**i);
+  sortBndMaterials(_active_boundary_materials);
 
   for(unsigned int i=0; i<_mats.size(); i++)
     _mats[i]->initialSetup();
@@ -86,15 +89,21 @@ MaterialWarehouse::hasMaterials(SubdomainID block_id)
 }
 
 bool
-MaterialWarehouse::hasBoundaryMaterials(BoundaryID boundary_id)
+MaterialWarehouse::hasFaceMaterials(SubdomainID block_id)
 {
-  return (_active_boundary_materials.find(boundary_id) != _active_boundary_materials.end());
+  return (_active_face_materials.find(block_id) != _active_face_materials.end());
 }
 
 bool
-MaterialWarehouse::hasNeighborMaterials(BoundaryID boundary_id)
+MaterialWarehouse::hasNeighborMaterials(SubdomainID block_id)
 {
-  return (_active_neighbor_materials.find(boundary_id) != _active_neighbor_materials.end());
+  return (_active_neighbor_materials.find(block_id) != _active_neighbor_materials.end());
+}
+
+bool
+MaterialWarehouse::hasBoundaryMaterials(BoundaryID boundary_id)
+{
+  return (_active_boundary_materials.find(boundary_id) != _active_boundary_materials.end());
 }
 
 std::vector<Material *> &
@@ -111,26 +120,39 @@ MaterialWarehouse::getMaterials(SubdomainID block_id)
 }
 
 std::vector<Material *> &
-MaterialWarehouse::getBoundaryMaterials(BoundaryID boundary_id)
+MaterialWarehouse::getFaceMaterials(SubdomainID block_id)
 {
-  std::map<SubdomainID, std::vector<Material *> >::iterator mat_iter = _active_boundary_materials.find(boundary_id);
-  if (unlikely(mat_iter == _active_boundary_materials.end()))
+  std::map<SubdomainID, std::vector<Material *> >::iterator mat_iter = _active_face_materials.find(block_id);
+  if (unlikely(mat_iter == _active_face_materials.end()))
   {
     std::stringstream oss;
-    oss << "Active Boundary Material Missing for boundary: " << boundary_id << "\n";
+    oss << "Active Face Material Missing for block: " << block_id << "\n";
     mooseError(oss.str());
   }
   return mat_iter->second;
 }
 
 std::vector<Material *> &
-MaterialWarehouse::getNeighborMaterials(BoundaryID boundary_id)
+MaterialWarehouse::getNeighborMaterials(SubdomainID block_id)
 {
-  std::map<SubdomainID, std::vector<Material *> >::iterator mat_iter = _active_neighbor_materials.find(boundary_id);
+  std::map<SubdomainID, std::vector<Material *> >::iterator mat_iter = _active_neighbor_materials.find(block_id);
   if (unlikely(mat_iter == _active_neighbor_materials.end()))
   {
     std::stringstream oss;
-    oss << "Active Neighbor Material Missing for boundary: " << boundary_id << "\n";
+    oss << "Active Neighbor Material Missing for block: " << block_id << "\n";
+    mooseError(oss.str());
+  }
+  return mat_iter->second;
+}
+
+std::vector<Material *> &
+MaterialWarehouse::getBoundaryMaterials(BoundaryID boundary_id)
+{
+  std::map<BoundaryID, std::vector<Material *> >::iterator mat_iter = _active_boundary_materials.find(boundary_id);
+  if (unlikely(mat_iter == _active_boundary_materials.end()))
+  {
+    std::stringstream oss;
+    oss << "Active Boundary Material Missing for boundary: " << boundary_id << "\n";
     mooseError(oss.str());
   }
   return mat_iter->second;
@@ -146,7 +168,7 @@ void MaterialWarehouse::updateMaterialDataState()
     }
   }
 
-  for (std::map<SubdomainID, std::vector<Material *> >::iterator it = _active_boundary_materials.begin(); it != _active_boundary_materials.end(); ++it)
+  for (std::map<SubdomainID, std::vector<Material *> >::iterator it = _active_face_materials.begin(); it != _active_face_materials.end(); ++it)
   {
     for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
     {
@@ -168,7 +190,7 @@ MaterialWarehouse::addMaterial(std::vector<SubdomainID> blocks, Material *materi
   }
 }
 
-void MaterialWarehouse::addBoundaryMaterial(std::vector<SubdomainID> blocks, Material *material)
+void MaterialWarehouse::addFaceMaterial(std::vector<SubdomainID> blocks, Material *material)
 {
   _mats.push_back(material);
 
@@ -176,7 +198,7 @@ void MaterialWarehouse::addBoundaryMaterial(std::vector<SubdomainID> blocks, Mat
   {
     SubdomainID blk_id = blocks[i];
     _blocks.insert(blk_id);
-    _active_boundary_materials[blk_id].push_back(material);
+    _active_face_materials[blk_id].push_back(material);
     _mat_by_name[material->name()].push_back(material);
   }
 }
@@ -194,10 +216,79 @@ void MaterialWarehouse::addNeighborMaterial(std::vector<SubdomainID> blocks, Mat
   }
 }
 
+void MaterialWarehouse::addBoundaryMaterial(std::vector<BoundaryID> boundaries, Material *material)
+{
+  _mats.push_back(material);
+
+  for (unsigned int i = 0; i < boundaries.size(); ++i)
+  {
+    SubdomainID bnd_id = boundaries[i];
+    _boundaries.insert(bnd_id);
+    _active_boundary_materials[bnd_id].push_back(material);
+    _mat_by_name[material->name()].push_back(material);
+  }
+}
+
 void
 MaterialWarehouse::sortMaterials(std::map<SubdomainID, std::vector<Material *> > & materials_map)
 {
   for (std::map<SubdomainID, std::vector<Material *> >::iterator j = materials_map.begin(); j != materials_map.end(); ++j)
+  {
+    DependencyResolver<Material *> resolver;
+
+    /**
+     * For each block we have to run through the dependency list since
+     * the property provided by a material can change from block to block
+     * which can change the dependencies
+     */
+    for (std::vector<Material *>::const_iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
+    {
+      const std::set<std::string> & depend_props = (*mat_iter)->getPropertyDependencies();
+
+      // See if any of the active materials supply this property
+      for (std::vector<Material *>::const_iterator mat_iter2=j->second.begin(); mat_iter2 != j->second.end(); ++mat_iter2)
+      {
+        // Don't check THIS material for a coupled property
+        if (mat_iter == mat_iter2) continue;
+
+        const std::set<std::string> & supplied_props = (*mat_iter2)->getSuppliedPropertiesList();
+
+        std::set<std::string> intersect;
+        std::set_intersection(depend_props.begin(), depend_props.end(), supplied_props.begin(),
+                              supplied_props.end(), std::inserter(intersect, intersect.end()));
+
+        // If the intersection isn't empty then there is a dependency here
+        if (!intersect.empty())
+          resolver.insertDependency(*mat_iter, *mat_iter2);
+      }
+    }
+
+    try
+    {
+      // Sort based on dependencies
+      std::sort(j->second.begin(), j->second.end(), resolver);
+    }
+    catch(CyclicDependencyException<Material *> & e)
+    {
+      std::ostringstream oss;
+
+      oss << "Cyclic dependency detected in material property couplings:\n";
+      const std::multimap<Material *, Material *> & depends = e.getCyclicDependencies();
+      for (std::multimap<Material *, Material *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
+        oss << it->first->name() << " -> " << it->second->name() << "\n";
+      mooseError(oss.str());
+    }
+  }
+}
+
+void
+MaterialWarehouse::sortBndMaterials(std::map<BoundaryID, std::vector<Material *> > & materials_map)
+{
+  // NOTE: I was really lazy here (it was Friday afternoon), so I just copy and pasted sortMaterials and made it to work with
+  // Boundary materials.  I realize that it is poor CS practice, but hell it is Friday afternoon... If someone makes this
+  // nicer without code duplication, I'll buy him/her a beer.
+
+  for (std::map<BoundaryID, std::vector<Material *> >::iterator j = materials_map.begin(); j != materials_map.end(); ++j)
   {
     DependencyResolver<Material *> resolver;
 

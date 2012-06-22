@@ -107,6 +107,7 @@ public:
 
   virtual void reinitMaterials(SubdomainID /*blk_id*/, THREAD_ID /*tid*/) { }
   virtual void reinitMaterialsFace(SubdomainID /*blk_id*/, unsigned int /*side*/, THREAD_ID /*tid*/) { }
+  virtual void reinitMaterialsBoundary(BoundaryID /*bnd_id*/, THREAD_ID /*tid*/) { }
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & elems);

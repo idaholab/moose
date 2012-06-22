@@ -192,10 +192,10 @@ void FEProblem::initialSetup()
 
       for (unsigned int side=0; side<elem->n_sides(); side++)
       {
-        mooseAssert(_materials[0].hasBoundaryMaterials(blk_id), "No face materials on subdomain block " + elem->id());
+        mooseAssert(_materials[0].hasFaceMaterials(blk_id), "No face materials on subdomain block " + elem->id());
         _assembly[0]->reinit(elem, side);
         unsigned int n_points = _assembly[0]->qRuleFace()->n_points();
-        _bnd_material_props.initStatefulProps(*_bnd_material_data[0], _materials[0].getBoundaryMaterials(blk_id), n_points, *elem, side);
+        _bnd_material_props.initStatefulProps(*_bnd_material_data[0], _materials[0].getFaceMaterials(blk_id), n_points, *elem, side);
       }
     }
   }
@@ -1011,33 +1011,52 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
   std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
   std::vector<SubdomainID> block_ids(blocks.size());
 
+  std::vector<BoundaryName> boundaries = parameters.get<std::vector<BoundaryName> >("boundary");
+  std::vector<BoundaryID> boundary_ids(boundaries.size());
+
   for (unsigned int i=0; i<blocks.size(); ++i)
     block_ids[i] = _mesh.getSubdomainID(blocks[i]);
+  for (unsigned int i=0; i < boundaries.size(); ++i)
+    boundary_ids[i] = _mesh.getBoundaryID(boundaries[i]);
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    // volume material
-    parameters.set<bool>("_bnd") = false;
-    parameters.set<MaterialData *>("_material_data") = _material_data[tid];
-    Material *volume_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
-    mooseAssert(volume_material != NULL, "Not a Material object");
-    _materials[tid].addMaterial(block_ids, volume_material);
+    if (blocks.size() > 0)
+    {
+      // volume material
+      parameters.set<bool>("_bnd") = false;
+      parameters.set<MaterialData *>("_material_data") = _material_data[tid];
+      Material *volume_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+      mooseAssert(volume_material != NULL, "Not a Material object");
+      _materials[tid].addMaterial(block_ids, volume_material);
 
-    // boundary material
-    parameters.set<bool>("_bnd") = true;
-    parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-    Material *bnd_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
-    mooseAssert(bnd_material != NULL, "Not a Material object");
-    _materials[tid].addBoundaryMaterial(block_ids, bnd_material);
+      // face material
+      parameters.set<bool>("_bnd") = true;
+      parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
+      Material *face_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+      mooseAssert(face_material != NULL, "Not a Material object");
+      _materials[tid].addFaceMaterial(block_ids, face_material);
 
-    // neighbor material
-    parameters.set<bool>("_bnd") = true;
-    parameters.set<MaterialData *>("_material_data") = _neighbor_material_data[tid];
-    Material *neighbor_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
-    mooseAssert(neighbor_material != NULL, "Not a Material object");
-    _materials[tid].addNeighborMaterial(block_ids, neighbor_material);
+      // neighbor material
+      parameters.set<bool>("_bnd") = true;
+      parameters.set<MaterialData *>("_material_data") = _neighbor_material_data[tid];
+      Material *neighbor_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+      mooseAssert(neighbor_material != NULL, "Not a Material object");
+      _materials[tid].addNeighborMaterial(block_ids, neighbor_material);
+    }
+    else if (boundaries.size() > 0)
+    {
+      parameters.set<bool>("_bnd") = true;
+      parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
+      Material *bnd_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+      mooseAssert(bnd_material != NULL, "Not a Material object");
+      _materials[tid].addBoundaryMaterial(boundary_ids, bnd_material);
+    }
+    else
+      mooseError("Material '" + name + "' did not specify either block or boundary parameter");
+
   }
 }
 
@@ -1058,7 +1077,14 @@ const std::vector<Material*> &
 FEProblem::getFaceMaterials(SubdomainID block_id, THREAD_ID tid)
 {
   mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
-  return _materials[tid].getBoundaryMaterials(block_id);
+  return _materials[tid].getFaceMaterials(block_id);
+}
+
+const std::vector<Material*> &
+FEProblem::getBndMaterials(BoundaryID boundary_id, THREAD_ID tid)
+{
+  mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
+  return _materials[tid].getBoundaryMaterials(boundary_id);
 }
 
 void
@@ -1087,10 +1113,10 @@ FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid)
 void
 FEProblem::reinitMaterialsFace(SubdomainID blk_id, unsigned int side, THREAD_ID tid)
 {
-  if (_materials[tid].hasBoundaryMaterials(blk_id))
+  if (_materials[tid].hasFaceMaterials(blk_id))
   {
     const Elem * & elem = _assembly[tid]->elem();
-    _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(blk_id), _assembly[tid]->qRuleFace()->n_points(), *elem, side);
+    _bnd_material_data[tid]->reinit(_materials[tid].getFaceMaterials(blk_id), _assembly[tid]->qRuleFace()->n_points(), *elem, side);
   }
 }
 
@@ -1105,6 +1131,19 @@ FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int /*side*/, TH
     _neighbor_material_data[tid]->reinit(_materials[tid].getNeighborMaterials(blk_id), _assembly[tid]->qRuleFace()->n_points(), *neighbor, neighbor_side);
   }
 }
+
+void
+FEProblem::reinitMaterialsBoundary(BoundaryID bnd_id, THREAD_ID tid)
+{
+  if (_materials[tid].hasBoundaryMaterials(bnd_id))
+  {
+    // this works b/c we called reinitElemFace before, so assembly has the right values
+    const Elem * & elem = _assembly[tid]->elem();
+    unsigned int side = _assembly[tid]->side();
+    _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(bnd_id), _assembly[tid]->qRuleFace()->n_points(), *elem, side);
+  }
+}
+
 
 void
 FEProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters)

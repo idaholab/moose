@@ -104,9 +104,11 @@ public:
   // Materials /////
   virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid) = 0;
   virtual void reinitMaterialsFace(SubdomainID blk_id, unsigned int side, THREAD_ID tid) = 0;
+  virtual void reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid) = 0;
   virtual void reinitMaterialsNeighbor(SubdomainID /*blk_id*/, unsigned int /*side*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
   virtual const std::vector<Material*> & getMaterials(SubdomainID /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
   virtual const std::vector<Material*> & getFaceMaterials(SubdomainID /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
+  virtual const std::vector<Material*> & getBndMaterials(BoundaryID /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
 
   /**
    * Returns true if the Problem has Dirac kernels it needs to compute on elem.
