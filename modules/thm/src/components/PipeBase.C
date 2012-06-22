@@ -198,16 +198,6 @@ PipeBase::addVariables()
   }
   else
 	  mooseError("wrong model type");
-/*
-  std::cout << std::endl
-  	  	  << initial_P << std::endl
-		  << initial_V << std::endl
-		  << initial_rho << std::endl
-		  << initial_rhou << std::endl
-		  << initial_T << std::endl
-		  << initial_rhoE << std::endl
-		  << initial_enthalpy << std::endl << std::endl;
-*/
 
   Model::addInitialConditions(_subdomain_id, initial_P, initial_V, initial_rho, initial_rhou, initial_T, initial_rhoE, initial_enthalpy);
 }

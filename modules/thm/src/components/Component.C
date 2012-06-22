@@ -54,6 +54,7 @@ Component::~Component()
 void
 Component::init()
 {
+	/*
 	{
 		InputParameters params = validParams<ComponentPostProcessor>();
 		params.set<Component*>("Component") = this;
@@ -75,6 +76,7 @@ Component::init()
 		params.set<std::string>("execute_on") = "timestep";
 		_sim.addPostprocessor("ComponentPostProcessor", genName("ComponentPPS_", _id, "_onTimestepEnd"), params);
 	}
+	*/
 }
 
 void
