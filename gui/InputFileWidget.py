@@ -158,12 +158,35 @@ class InputFileWidget(QtGui.QWidget):
     layout.addWidget(self.buttonSave)
     layout.addWidget(self.buttonClear)
 
+  ''' Looks for a child item of parent named "name"... with return None if there is no child named that '''
+  def findChildItemWithName(self, parent, name):
+    try: # This will fail when we're dealing with the QTreeWidget itself
+      num_children = parent.childCount()
+    except:
+      num_children = parent.topLevelItemCount()
+
+    for i in range(num_children):
+      child = None
+      try: # This will fail when we're dealing with the QTreeWidget itself
+        child = parent.child(i)
+      except:
+        child = parent.topLevelItem(i)
+        
+      if child.text(0) == name:
+        return child
+      
+    return None
+
   def addDataRecursively(self, parent_item, node):
     is_active = 'active' not in node.parent.params or node.parent.params['active'].find(node.name) != -1 or node.name == 'ParentParams'
     table_data = node.params
     table_data['Name'] = node.name
-    new_child = QtGui.QTreeWidgetItem(parent_item)
-    new_child.setText(0,table_data['Name'])
+
+    new_child = self.findChildItemWithName(parent_item, table_data['Name'])
+
+    if not new_child:  # If we didn't find a child that already matched then create a new child
+      new_child = QtGui.QTreeWidgetItem(parent_item)
+      new_child.setText(0,table_data['Name'])
 
     # If this is a hard path then we need to add ParentParams for it
     if self.action_syntax.isPath(self.generatePathFromItem(new_child)):
