@@ -536,13 +536,13 @@ class InputFileWidget(QtGui.QWidget):
 
   def input_selection(self, item, column):
     this_path = self.generatePathFromItem(item)
-    this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
     
     try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
       item.table_data # If this fails we will jump to "except"...
       parent_path = ''
 
       if self.action_syntax.isPath(this_path):
+        this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
         parent_path = this_path
       else:
         parent_path = self.generatePathFromItem(item.parent())
