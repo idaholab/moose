@@ -16,7 +16,10 @@
 #define SIDEPOSTPROCESSOR_H
 
 #include "Postprocessor.h"
+#include "Coupleable.h"
+#include "MooseVariableInterface.h"
 #include "MooseVariable.h"
+#include "TransientInterface.h"
 #include "UserObjectInterface.h"
 #include "MaterialPropertyInterface.h"
 
@@ -28,7 +31,10 @@ InputParameters validParams<SidePostprocessor>();
 
 class SidePostprocessor :
   public Postprocessor,
+  public Coupleable,
   public UserObjectInterface,
+  public MooseVariableInterface,
+  public TransientInterface,
   public MaterialPropertyInterface
 {
 public:
