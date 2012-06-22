@@ -365,39 +365,7 @@ class InputFileWidget(QtGui.QWidget):
       except:
         pass
 
-      # Grab all the subblocks with "parent_params" and print them out
-      for j in range(subchild_count):
-        subitem = item.child(j)
-        if subitem.checkState(0) != QtCore.Qt.Checked:
-          continue
-        try:
-          table_data = subitem.table_data
-
-          printed_params = []
-
-          # Print out the ones that we know from the read in input file in the right order
-          if gp_node:
-            for param in gp_node.params_list:
-              if param in table_data and param != 'Name' and param != 'parent_params':
-                self.the_string += indent_string + '  ' + param + ' = ' + table_data[param] + '\n'
-                printed_params.append(param)
-
-          if template_gp_node:
-            for param in template_gp_node.params_list:
-              if param in table_data and param != 'Name' and param != 'parent_params' and param not in printed_params:
-                self.the_string += indent_string + '  ' + param + ' = ' + table_data[param] + '\n'
-                printed_params.append(param)
-
-
-          if 'parent_params' in table_data:
-            for param,value in table_data.items():
-              if param not in printed_params and param != 'Name' and param != 'parent_params':
-                self.the_string += indent_string + '  ' + param + ' = ' + value + '\n'
-            break
-        except:
-          pass
-
-      # Now recurse over the children that _don't_ have parent_params
+      # Now recurse over the children
       printed_children = []
       if gp_node:  # Print the children we knew about from the input file in the right order
         for child in gp_node.children_list:
@@ -405,14 +373,6 @@ class InputFileWidget(QtGui.QWidget):
             subitem = item.child(j)
             if subitem.text(0) != child:
               continue
-
-            try:
-              table_data = subitem.table_data
-
-              if 'parent_params' in table_data:
-                continue
-            except:
-              pass
 
             self.inputStringRecurse(subitem, level+1)
             printed_children.append(child)
@@ -425,15 +385,7 @@ class InputFileWidget(QtGui.QWidget):
               continue
 
             if subitem.text(0) in printed_children:
-              continue
-            
-            try:
-              table_data = subitem.table_data
-
-              if 'parent_params' in table_data:
-                continue
-            except:
-              pass
+              continue            
 
             self.inputStringRecurse(subitem, level+1)
             printed_children.append(child)
@@ -442,15 +394,7 @@ class InputFileWidget(QtGui.QWidget):
       for j in range(subchild_count):
         subitem = item.child(j)
         if subitem.text(0) in printed_children:
-          continue
-        
-        try:
-          table_data = subitem.table_data
-
-          if 'parent_params' in table_data:
-            continue
-        except:
-          pass
+          continue        
 
         self.inputStringRecurse(subitem, level+1)
 
