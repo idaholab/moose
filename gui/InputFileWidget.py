@@ -261,7 +261,10 @@ class InputFileWidget(QtGui.QWidget):
 
   def click_open(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Input File", "~/", "Input Files (*.i)")
-    self.openInputFile(file_name)
+    if file_name:
+      self.tree_widget.clear()
+      self.addHardPathsToTree()
+      self.openInputFile(file_name)
     
   def click_clear(self):
     msgBox = QMessageBox()
@@ -274,7 +277,6 @@ class InputFileWidget(QtGui.QWidget):
       self.addHardPathsToTree()
 
   def recursiveGetGPNode(self, current_node, pieces):
-#    print 'in rggpn',current_node.name, pieces
     if len(pieces) == 1 and pieces[0] == current_node.name:
       return current_node
 
@@ -590,6 +592,7 @@ class InputFileWidget(QtGui.QWidget):
 
   def input_selection(self, item, column):
     this_path = self.generatePathFromItem(item)
+    this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
     
     try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
       item.table_data # If this fails we will jump to "except"...
@@ -600,7 +603,7 @@ class InputFileWidget(QtGui.QWidget):
       else:
         parent_path = self.generatePathFromItem(item.parent())
         parent_path = '/' + self.action_syntax.getPath(parent_path)
-      yaml_entry = self.findYamlEntry(parent_path)      
+      yaml_entry = self.findYamlEntry(parent_path)
       new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data, False)
       new_gui.incoming_data = item.table_data
       if new_gui.exec_():
@@ -610,7 +613,6 @@ class InputFileWidget(QtGui.QWidget):
         self.updateTextBox()
     except AttributeError:
       if self.action_syntax.isPath(this_path):
-        this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
         yaml_entry = self.findYamlEntry(this_path)
               
         if self.itemHasEditableParameters(item):
