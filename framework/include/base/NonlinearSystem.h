@@ -218,6 +218,12 @@ public:
   void timeSteppingScheme(Moose::TimeSteppingScheme scheme);
 
   /**
+   * Gets the time-stepping scheme
+   * @return Time-stepping scheme being used
+   */
+  Moose::TimeSteppingScheme timeSteppingScheme() { return _time_stepping_scheme; }
+
+  /**
    * Get the order of used time integration scheme
    */
   Real getTimeSteppingOrder() { return _time_stepping_order; }
@@ -463,6 +469,7 @@ protected:
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;
   friend class ComputeFullJacobianThread;
+  friend class ComputeExplicitJacobianThread;
   friend class ComputeDiracThread;
   friend class ComputeDampingThread;
 };

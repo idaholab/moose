@@ -37,12 +37,14 @@ SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
     _coord_sys(Moose::COORD_XYZ),
     _transient(false),
     _time(_eq.parameters.set<Real>("time")),
+    _time_old(_eq.parameters.set<Real>("time_old")),
     _t_step(_eq.parameters.set<int>("t_step")),
     _dt(_eq.parameters.set<Real>("dt"))
 {
   if (_parent == this)
   {
     _time = 0.0;
+    _time_old = 0.0;
     _t_step = 0;
     _dt = 0;
     _dt_old = _dt;

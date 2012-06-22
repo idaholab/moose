@@ -15,6 +15,7 @@
 #include "ComputeJacobianThread.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
+#include "TimeDerivative.h"
 
 // libmesh includes
 #include "threads.h"

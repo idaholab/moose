@@ -67,6 +67,7 @@ public:
   virtual void onTimestepEnd() = 0;
 
   virtual Real & time() { return _time; }
+  virtual Real & timeOld() { return _time_old; }
   virtual int & timeStep() { return _t_step; }
   virtual Real & dt() { return _dt; }
   virtual Real & dtOld() { return _dt_old; }
@@ -146,6 +147,7 @@ protected:
 
   bool _transient;
   Real & _time;
+  Real & _time_old;
   int & _t_step;
   Real & _dt;
   Real _dt_old;

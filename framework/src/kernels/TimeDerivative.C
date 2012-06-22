@@ -18,11 +18,13 @@ template<>
 InputParameters validParams<TimeDerivative>()
 {
   InputParameters params = validParams<TimeKernel>();
+  params.addParam<bool>("lumping", false, "True for mass matrix lumping, false otherwise");
   return params;
 }
 
 TimeDerivative::TimeDerivative(const std::string & name, InputParameters parameters) :
-    TimeKernel(name, parameters)
+    TimeKernel(name, parameters),
+    _lumping(getParam<bool>("lumping"))
 {
 }
 
@@ -36,4 +38,22 @@ Real
 TimeDerivative::computeQpJacobian()
 {
   return _test[_i][_qp]*_phi[_j][_qp]*_du_dot_du[_qp];
+}
+
+void
+TimeDerivative::computeJacobian()
+{
+  if (_lumping)
+  {
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_j = 0; _j < _phi.size(); _j++)
+        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        {
+          ke(_i, _i) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+        }
+  }
+  else
+    TimeKernel::computeJacobian();
 }

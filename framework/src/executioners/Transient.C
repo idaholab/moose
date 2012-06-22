@@ -67,7 +67,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _problem(*ProblemFactory::instance()->createFEProblem(_mesh)),
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
-    _time_old(_time),
+    _time_old(_problem.timeOld()),
     _input_dt(getParam<Real>("dt")),
     _dt(_problem.dt()),
     _dt_old(_problem.dtOld()),
@@ -201,7 +201,7 @@ Transient::takeStep(Real input_dt)
 
     OSSInt(out,2,_t_step);
     out << ", time=";
-    OSSRealzeroleft(out,9,6,_time);
+    OSSRealzeroleft(out, 9, 6, _time);
     out <<  "...";
     std::cout << out.str() << std::endl;
   }
@@ -222,7 +222,9 @@ Transient::takeStep(Real input_dt)
 
   // If _reset_dt is true, the time step was synced to the user defined value and we dump the solution in an output file
   if (last_solve_converged)
+  {
     _problem.computePostprocessors();
+  }
 }
 
 void
@@ -240,8 +242,8 @@ Transient::endStep()
   }
 #endif
 
-  _t_step++;
   _time_old = _time;
+  _t_step++;
 }
 
 Real

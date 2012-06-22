@@ -99,7 +99,8 @@ protected:
   int & _t_step;
   /// Current time
   Real & _time;
-  Real _time_old;
+  /// Previous time
+  Real & _time_old;
   /// The dt from the input file.
   Real _input_dt;
   /// Current delta t... or timestep size.

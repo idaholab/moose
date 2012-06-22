@@ -109,6 +109,7 @@ enum VarKindType
 enum TimeSteppingScheme
 {
   IMPLICIT_EULER,
+  EXPLICIT_EULER,
   BDF2,
   CRANK_NICOLSON
 };

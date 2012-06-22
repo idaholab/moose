@@ -50,8 +50,8 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
     _test(_var.phiFace()),
     _grad_test(_var.gradPhiFace()),
 
-    _u(_var.sln()),
-    _grad_u(_var.gradSln()),
+    _u(_is_implicit ? _var.sln() : _var.slnOld()),
+    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
 
     _save_in_strings(parameters.get<std::vector<std::string> >("save_in"))
 {

@@ -31,6 +31,7 @@ namespace Moose {
     {
       timesteppingscheme_type_to_enum["BACKWARD-EULER"] = IMPLICIT_EULER;
       timesteppingscheme_type_to_enum["IMPLICIT-EULER"] = IMPLICIT_EULER;
+      timesteppingscheme_type_to_enum["EXPLICIT-EULER"] = EXPLICIT_EULER;
       timesteppingscheme_type_to_enum["CRANK-NICOLSON"] = CRANK_NICOLSON;
       timesteppingscheme_type_to_enum["BDF2"]           = BDF2;
     }

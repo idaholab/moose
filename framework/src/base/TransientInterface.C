@@ -20,13 +20,15 @@ InputParameters validParams<TransientInterface>()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<std::string> >("time_periods", "Names of time periods this object will be active in, empty means all the time");
+  params.addPrivateParam<bool>("implicit", true);
   return params;
 }
 
 
 TransientInterface::TransientInterface(InputParameters & parameters) :
     _ti_subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _t(_ti_subproblem.time()),
+    _is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true),
+    _t(_is_implicit ? _ti_subproblem.time() : _ti_subproblem.timeOld()),
     _t_step(_ti_subproblem.timeStep()),
     _dt(_ti_subproblem.dt()),
     _dt_old(_ti_subproblem.dtOld()),

@@ -12,29 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef TIMEDERIVATIVE_H
-#define TIMEDERIVATIVE_H
+#ifndef COMPUTEEXPLICITJACOBIANTHREAD_H
+#define COMPUTEEXPLICITJACOBIANTHREAD_H
 
-#include "TimeKernel.h"
+#include "ComputeJacobianThread.h"
 
-// Forward Declaration
-class TimeDerivative;
+// libMesh includes
+#include "elem_range.h"
 
-template<>
-InputParameters validParams<TimeDerivative>();
+class NonlinearSystem;
 
-class TimeDerivative : public TimeKernel
+class ComputeExplicitJacobianThread : public ComputeJacobianThread
 {
 public:
-  TimeDerivative(const std::string & name, InputParameters parameters);
+  ComputeExplicitJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian);
 
-  virtual void computeJacobian();
+  // Splitting Constructor
+  ComputeExplicitJacobianThread(ComputeExplicitJacobianThread & x, Threads::split split);
+
+  void join(const ComputeJacobianThread & /*y*/)
+  {}
+
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-
-  bool _lumping;
+  virtual void computeJacobian();
 };
 
-#endif //TIMEDERIVATIVE_H
+#endif //COMPUTEEXPLICITJACOBIANTHREAD_H

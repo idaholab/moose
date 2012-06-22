@@ -72,8 +72,8 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
 
-    _u(_var.sln()),
-    _grad_u(_var.gradSln()),
+    _u(_is_implicit ? _var.sln() : _var.slnOld()),
+    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu()),
 

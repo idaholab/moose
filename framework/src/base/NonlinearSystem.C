@@ -24,6 +24,7 @@
 #include "ComputeResidualThread.h"
 #include "ComputeJacobianThread.h"
 #include "ComputeFullJacobianThread.h"
+#include "ComputeExplicitJacobianThread.h"
 #include "ComputeDiracThread.h"
 #include "ComputeDampingThread.h"
 #include "TimeKernel.h"
@@ -193,6 +194,7 @@ NonlinearSystem::solve()
     setupFiniteDifferencedPreconditioner();
 
   _sys.solve();
+
   // store info about the solve
   _n_iters = _sys.n_nonlinear_iterations();
   _final_residual = _sys.final_nonlinear_residual();
@@ -349,7 +351,7 @@ NonlinearSystem::converged()
 }
 
 void
-NonlinearSystem::addKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
+NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -574,6 +576,7 @@ NonlinearSystem::timeSteppingScheme(Moose::TimeSteppingScheme scheme)
   _time_stepping_scheme = scheme;
   switch (_time_stepping_scheme)
   {
+  case Moose::EXPLICIT_EULER:
   case Moose::IMPLICIT_EULER:
     _time_weight[0] = 1;
     _time_weight[1] = 0;
@@ -731,6 +734,7 @@ NonlinearSystem::computeTimeDerivatives()
   switch (_time_stepping_scheme)
   {
   case Moose::IMPLICIT_EULER:
+  case Moose::EXPLICIT_EULER:
     _solution_u_dot = *currentSolution();
     _solution_u_dot -= solutionOld();
     _solution_u_dot /= _dt;
@@ -765,6 +769,9 @@ NonlinearSystem::computeTimeDerivatives()
 
       _solution_du_dot_du = _time_weight[0]/_dt;
     }
+    break;
+
+  default:
     break;
   }
 
@@ -1453,22 +1460,30 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
     }
 
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    switch (_mproblem.coupling())
+    if (_time_stepping_scheme != Moose::EXPLICIT_EULER)
     {
-    case Moose::COUPLING_DIAG:
+      switch (_mproblem.coupling())
       {
-        ComputeJacobianThread cj(_mproblem, *this, jacobian);
-        Threads::parallel_reduce(elem_range, cj);
-      }
-      break;
+      case Moose::COUPLING_DIAG:
+        {
+          ComputeJacobianThread cj(_mproblem, *this, jacobian);
+          Threads::parallel_reduce(elem_range, cj);
+        }
+        break;
 
-    default:
-    case Moose::COUPLING_CUSTOM:
-      {
-        ComputeFullJacobianThread cj(_mproblem, *this, jacobian);
-        Threads::parallel_reduce(elem_range, cj);
+      default:
+      case Moose::COUPLING_CUSTOM:
+        {
+          ComputeFullJacobianThread cj(_mproblem, *this, jacobian);
+          Threads::parallel_reduce(elem_range, cj);
+        }
+        break;
       }
-      break;
+    }
+    else
+    {
+      ComputeExplicitJacobianThread cj(_mproblem, *this, jacobian);
+      Threads::parallel_reduce(elem_range, cj);
     }
 
     computeDiracContributions(NULL, &jacobian);
