@@ -253,7 +253,7 @@ class InputFileWidget(QtGui.QWidget):
         self.addDataRecursively(self.tree_widget, section_node)
         
       self.addHardPathsToTree() # We do this here because * paths might add more paths underneath some of the paths
-      self.input_display.setText(self.buildInputString())
+      self.updateTextBox()
       QtCore.QObject.connect(self.tree_widget, QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self.item_changed)
 
   def click_open(self):
@@ -531,7 +531,7 @@ class InputFileWidget(QtGui.QWidget):
     item = self.tree_widget.currentItem()
     parent = item.parent()
     parent.removeChild(item)
-    self.input_display.setText(self.buildInputString())
+    self.updateTextBox()
 
   def addItem(self):
     item = self.tree_widget.currentItem()
@@ -549,7 +549,7 @@ class InputFileWidget(QtGui.QWidget):
       new_child.setCheckState(0, QtCore.Qt.Checked)
       item.addChild(new_child)
       item.setCheckState(0, QtCore.Qt.Checked)
-      self.input_display.setText(self.buildInputString())
+      self.updateTextBox()
       self.addHardPathsToTree() # We do this here because * paths might add more paths underneath the item we just added
     
   def newContext(self, pos):
@@ -590,7 +590,7 @@ class InputFileWidget(QtGui.QWidget):
         item.table_data = new_gui.result()
         if not self.action_syntax.isPath(this_path):  # Don't change the name of hard paths
           item.setText(0,item.table_data['Name'])
-        self.input_display.setText(self.buildInputString())
+        self.updateTextBox()
     except AttributeError:
       if self.action_syntax.isPath(this_path):
         this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
@@ -602,11 +602,21 @@ class InputFileWidget(QtGui.QWidget):
           item.table_data = table_data
           item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
           item.setCheckState(0, QtCore.Qt.Checked)
-          self.input_display.setText(self.buildInputString())
+          self.updateTextBox()
           self.addHardPathsToTree() # We do this here because * paths might add more paths underneath the item we just added
-        
-  def item_changed(self, item, column):
+          
+  def updateTextBox(self):
+    # Save off the current position
+    position = self.input_display.verticalScrollBar().sliderPosition()
+
+    # Reset the text
     self.input_display.setText(self.buildInputString())
+
+    # Scroll back to where we were
+    self.input_display.verticalScrollBar().setValue(position)
+    
+  def item_changed(self, item, column):
+    self.updateTextBox()
 
   def accept_params(self):
     self.edit_param_widget.hide()
