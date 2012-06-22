@@ -556,6 +556,9 @@ class InputFileWidget(QtGui.QWidget):
           item.setText(0,item.table_data['Name'])
         self.updateTextBox()
     except AttributeError:
+      if self.action_syntax.getPath(this_path):
+        this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
+        
       if self.action_syntax.isPath(this_path):
         yaml_entry = self.findYamlEntry(this_path)
               

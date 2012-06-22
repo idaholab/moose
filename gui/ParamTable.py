@@ -241,7 +241,15 @@ class ParamTable:
 
     row = 0
 
+    param_names = []
+    name_to_param = {}
+
     for param in the_table_data:
+      param_names.append(param['name'])
+      name_to_param[param['name']] = param
+
+    for param_name in sorted(param_names):
+      param = name_to_param[param_name]
       # Populate table with data:
       name_item = QtGui.QTableWidgetItem(param['name'])
 
