@@ -137,6 +137,7 @@ class InputFileWidget(QtGui.QWidget):
   def init_treewidet(self, layout):
     i = 0
     self.tree_widget = QtGui.QTreeWidget()
+    self.tree_widget.setExpandsOnDoubleClick(False)
     self.tree_widget.setMaximumWidth(300)
     self.tree_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.connect(self.tree_widget,QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.newContext)
@@ -178,7 +179,7 @@ class InputFileWidget(QtGui.QWidget):
     return None
 
   def addDataRecursively(self, parent_item, node):
-    is_active = 'active' not in node.parent.params or node.parent.params['active'].find(node.name) != -1 or node.name == 'ParentParams'
+    is_active = 'active' not in node.parent.params or node.parent.params['active'].find(node.name) != -1
     table_data = node.params
     table_data['Name'] = node.name
 
@@ -187,30 +188,22 @@ class InputFileWidget(QtGui.QWidget):
     if not new_child:  # If we didn't find a child that already matched then create a new child
       new_child = QtGui.QTreeWidgetItem(parent_item)
       new_child.setText(0,table_data['Name'])
+      parent_item.addChild(new_child)
 
-    # If this is a hard path then we need to add ParentParams for it
-    if self.action_syntax.isPath(self.generatePathFromItem(new_child)):
-      num_params = 0
-      for param in node.params:
-        if param != 'active':
-          num_params += 1
+    has_params = False
+    # See if there are any actual parameters for this item
+    for name,value in node.params.items():
+      if name != 'active' and name != 'Name':
+        has_params = True
 
-      if num_params > 0:
-        new_name = 'ParentParams'
-        new_node = GPNode(new_name, node)
-        new_node.params = node.params
-        new_node.params['parent_params'] = True
-        parent_item.setCheckState(0, QtCore.Qt.Checked)
-        self.addDataRecursively(new_child, new_node)
-    else: # Otherwise this is just a normal node
+    if has_params:
       new_child.table_data = table_data
-      new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
+    new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
 
     if is_active:
       new_child.setCheckState(0, QtCore.Qt.Checked)
     else:
       new_child.setCheckState(0, QtCore.Qt.Unchecked)
-    parent_item.addChild(new_child)
 
     for child, child_node in node.children.items():
       self.addDataRecursively(new_child, child_node)
@@ -257,31 +250,8 @@ class InputFileWidget(QtGui.QWidget):
       for section_name, section_node in main_sections.items():
         counter+=1
         progress.setValue(counter)
+        self.addDataRecursively(self.tree_widget, section_node)
         
-        # Find out if this section has it's own parameters.  If so we need to add a ParentParams node
-        section_item = self.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)[0]
-
-        num_params = 0
-        for param in section_node.params:
-          if param != 'active':
-            num_params += 1
-
-        if num_params > 1 or len(section_node.children):
-          section_item.setCheckState(0, QtCore.Qt.Checked)
-        
-        if num_params > 0:
-          new_name = 'ParentParams'
-          new_node = GPNode(new_name, section_node)
-          new_node.params = section_node.params
-          new_node.params['parent_params'] = True
-          if section_name == 'Mesh' and not 'type' in new_node.params:
-            new_node.params['type'] = 'MooseMesh'
-
-          section_item.setCheckState(0, QtCore.Qt.Checked)
-          self.addDataRecursively(section_item, new_node)
-          
-        for child, child_node in section_node.children.items():
-          self.addDataRecursively(self.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)[0], child_node)
       self.addHardPathsToTree() # We do this here because * paths might add more paths underneath some of the paths
       self.input_display.setText(self.buildInputString())
       QtCore.QObject.connect(self.tree_widget, QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self.item_changed)
@@ -562,6 +532,25 @@ class InputFileWidget(QtGui.QWidget):
     parent = item.parent()
     parent.removeChild(item)
     self.input_display.setText(self.buildInputString())
+
+  def addItem(self):
+    item = self.tree_widget.currentItem()
+    this_path = self.generatePathFromItem(item)
+    this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
+    yaml_entry = self.findYamlEntry(this_path)
+
+    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(0)).rstrip('+'), None, False)
+    if self.new_gui.exec_():
+      table_data = self.new_gui.result()
+      new_child = QtGui.QTreeWidgetItem(item)
+      new_child.setText(0,table_data['Name'])
+      new_child.table_data = table_data
+      new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
+      new_child.setCheckState(0, QtCore.Qt.Checked)
+      item.addChild(new_child)
+      item.setCheckState(0, QtCore.Qt.Checked)
+      self.input_display.setText(self.buildInputString())
+      self.addHardPathsToTree() # We do this here because * paths might add more paths underneath the item we just added
     
   def newContext(self, pos):
     global_pos = self.tree_widget.mapToGlobal(pos)
@@ -575,46 +564,46 @@ class InputFileWidget(QtGui.QWidget):
       delete_action.triggered.connect(self.deleteCurrentItem)
       menu.addAction(delete_action)
       menu.popup(global_pos)
+    elif self.action_syntax.hasStar(this_path): # If it is a hard path allow them to add a child
+      menu = QtGui.QMenu(self)
+      add_action = QtGui.QAction("Add...", self)
+      add_action.triggered.connect(self.addItem)
+      menu.addAction(add_action)
+      menu.popup(global_pos)
   
   def input_selection(self, item, column):
     this_path = self.generatePathFromItem(item)
     
     try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
       item.table_data # If this fails we will jump to "except"...
-      parent_path = self.generatePathFromItem(item.parent())
-      parent_path = '/' + self.action_syntax.getPath(parent_path) # Get the real action path associated with this item
-      yaml_entry = self.findYamlEntry(parent_path)
-      # This stuff will edit the parameters _in_ the window!
-#      self.newEditParamWidget()
-#      self.param_table = ParamTable(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data, self.edit_param_layout, self)
-#      self.edit_param_widget.show()
-      
+      parent_path = ''
+
+      if self.action_syntax.isPath(this_path):
+        parent_path = this_path
+      else:
+        parent_path = self.generatePathFromItem(item.parent())
+        parent_path = '/' + self.action_syntax.getPath(parent_path)
+      yaml_entry = self.findYamlEntry(parent_path)      
       new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data, False)
       new_gui.incoming_data = item.table_data
       if new_gui.exec_():
         item.table_data = new_gui.result()
-        item.setText(0,item.table_data['Name'])
+        if not self.action_syntax.isPath(this_path):  # Don't change the name of hard paths
+          item.setText(0,item.table_data['Name'])
         self.input_display.setText(self.buildInputString())
     except AttributeError:
-      this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
-      yaml_entry = self.findYamlEntry(this_path)
-      already_has_parent_params = False
-      for i in range(item.childCount()):
-        if item.child(i).text(0) == 'ParentParams':
-          already_has_parent_params = True
-        
-      self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), None, already_has_parent_params)
-      if self.new_gui.exec_():
-        table_data = self.new_gui.result()
-        new_child = QtGui.QTreeWidgetItem(item)
-        new_child.setText(0,table_data['Name'])
-        new_child.table_data = table_data
-        new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
-        new_child.setCheckState(0, QtCore.Qt.Checked)
-        item.addChild(new_child)
-        item.setCheckState(0, QtCore.Qt.Checked)
-        self.input_display.setText(self.buildInputString())
-        self.addHardPathsToTree() # We do this here because * paths might add more paths underneath the item we just added
+      if self.action_syntax.isPath(this_path):
+        this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
+        yaml_entry = self.findYamlEntry(this_path)
+
+        self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(0)).rstrip('+'), None, False)
+        if self.new_gui.exec_():
+          table_data = self.new_gui.result()
+          item.table_data = table_data
+          item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
+          item.setCheckState(0, QtCore.Qt.Checked)
+          self.input_display.setText(self.buildInputString())
+          self.addHardPathsToTree() # We do this here because * paths might add more paths underneath the item we just added
         
   def item_changed(self, item, column):
     self.input_display.setText(self.buildInputString())

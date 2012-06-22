@@ -74,9 +74,11 @@ class ActionSyntax():
     
 
   """ Whether or not this path has a star after it """
-  def hasStar(self, the_path):
-    for path in self.paths:
-      if path.find(the_path+'/*') != -1:
+  def hasStar(self, inpath):
+    the_path = inpath
+    the_path = the_path.lstrip('/')
+    for apath in self.paths:
+      if apath.find(the_path+'/*') != -1:
         return True
     return False
 
