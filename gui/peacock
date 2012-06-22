@@ -132,4 +132,6 @@ if __name__ == '__main__':
   app = QtGui.QApplication(sys.argv)
   main_window = UiBox(options,args,executable,app)
   main_window.show()
+  main_window.raise_()
+
   app.exec_()

@@ -53,9 +53,10 @@ class ParamTable:
       if 'type' in self.incoming_data and self.drop_menu.findText(self.incoming_data['type']) != -1:
         self.drop_menu.setCurrentIndex(self.drop_menu.findText(self.incoming_data['type']))
       else:
-        found_index = self.drop_menu.findText(self.incoming_data['Name'])
-        if found_index != -1:
-          self.drop_menu.setCurrentIndex(found_index)
+        if 'Name' in self.incoming_data:
+          found_index = self.drop_menu.findText(self.incoming_data['Name'])
+          if found_index != -1:
+            self.drop_menu.setCurrentIndex(found_index)
               
       self.table_widget.cellChanged.connect(self.cellChanged)
       self.fillTableWithData(self.incoming_data, True)

@@ -595,15 +595,21 @@ class InputFileWidget(QtGui.QWidget):
       if self.action_syntax.isPath(this_path):
         this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
         yaml_entry = self.findYamlEntry(this_path)
-
-        self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(0)).rstrip('+'), None, False)
-        if self.new_gui.exec_():
-          table_data = self.new_gui.result()
-          item.table_data = table_data
-          item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
-          item.setCheckState(0, QtCore.Qt.Checked)
-          self.updateTextBox()
-          self.addHardPathsToTree() # We do this here because * paths might add more paths underneath the item we just added
+        has_type_subblock = False
+        if 'subblocks' in yaml_entry and yaml_entry['subblocks']:
+          for sb in yaml_entry['subblocks']:
+            if '<type>' in sb['name']:
+              has_type_subblock = True
+              
+        if ('parameters' in yaml_entry and yaml_entry['parameters'] != None) or has_type_subblock or this_path == '/GlobalParams':
+          self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(0)).rstrip('+'), None, False)
+          if self.new_gui.exec_():
+            table_data = self.new_gui.result()
+            item.table_data = table_data
+            item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
+            item.setCheckState(0, QtCore.Qt.Checked)
+            self.updateTextBox()
+            self.addHardPathsToTree() # We do this here because * paths might add more paths underneath the item we just added
           
   def updateTextBox(self):
     # Save off the current position
