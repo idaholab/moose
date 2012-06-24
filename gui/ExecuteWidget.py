@@ -107,19 +107,19 @@ class ExecuteWidget(QtGui.QWidget):
     executioner_item = self.input_file_widget.tree_widget.findItems("Executioner", QtCore.Qt.MatchExactly)[0]
     cur_steps = 0
     if executioner_item:
+      table_data = executioner_item.table_data
+
+      if 'num_steps' in table_data:
+        cur_steps = float(table_data['num_steps'])
+            
+      if 'end_time' in table_data and 'dt' in table_data:
+        steps = float(table_data['end_time']) / float(table_data['dt'])
+
+        if steps < cur_steps:
+          cur_steps = steps
+
       for i in range(executioner_item.childCount()):
         child = executioner_item.child(i)
-        if child.text(0) == 'ParentParams':
-          table_data = child.table_data
-
-          if 'num_steps' in table_data:
-            cur_steps = float(table_data['num_steps'])
-            
-          if 'end_time' in table_data and 'dt' in table_data:
-            steps = float(table_data['end_time']) / float(table_data['dt'])
-
-            if steps < cur_steps:
-              cur_steps = steps
               
         if child.text(0) == 'Adaptivity':
           try:
@@ -134,6 +134,7 @@ class ExecuteWidget(QtGui.QWidget):
     
   def clickedRun(self):
     num_steps = self.getNumSteps()
+    print num_steps
     if num_steps:
       self.pb.reset()
       self.pb.setMaximum(num_steps)
