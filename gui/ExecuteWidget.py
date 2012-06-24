@@ -142,7 +142,7 @@ class ExecuteWidget(QtGui.QWidget):
       
     tmp_file_name = 'peacock_run_tmp.i'
     file = open(tmp_file_name,'w')
-    file.write(self.input_file_widget.buildInputString())
+    file.write(self.input_file_widget.input_file_textbox.buildInputString())
     file.close()
     command = self.app_path + ' -i ' + tmp_file_name
 
