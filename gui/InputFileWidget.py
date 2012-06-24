@@ -115,9 +115,6 @@ class InputFileWidget(QtGui.QWidget):
 
       self.tree_widget.loadData(counter, progress, main_sections)
 
-      counter+=1
-      progress.setValue(counter)
-
   def click_open(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Input File", "~/", "Input Files (*.i)")
     if file_name:
