@@ -19,10 +19,15 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class InputFileWidget(QtGui.QWidget):
-  def __init__(self, app_path, options, win_parent=None):
+  def __init__(self, app_path, options, peacock_ui, win_parent=None):
     QtGui.QWidget.__init__(self, win_parent)
-    self.yaml_data = YamlData(app_path, options)
+    self.app_path = app_path
+    self.options = options
+
+    self._recache(False)
+    
     self.action_syntax = ActionSyntax(app_path)
+    self.peacock_ui = peacock_ui
 
     # Start with an input file template if this application has one
     input_file_template_name = os.path.dirname(app_path) + '/input_template'
@@ -68,6 +73,12 @@ class InputFileWidget(QtGui.QWidget):
     self.layout_with_textbox.addLayout(self.edit_param_layout_spot)
     self.layout_with_textbox.addLayout(self.input_file_textbox.getLayout())
     self.setLayout(self.layout_with_textbox)
+
+    self.menubar = self.peacock_ui.menuBar()
+    self.advanced_menu = self.menubar.addMenu('&Advanced')
+    recache_action = QtGui.QAction("Recache Syntax", self)
+    recache_action.triggered.connect(self._recache)
+    self.advanced_menu.addAction(recache_action)
 
   def init_buttons(self, layout):
     self.buttonOpen = QtGui.QPushButton("Open")
@@ -141,3 +152,13 @@ class InputFileWidget(QtGui.QWidget):
       output_string = self.buildInputString()
       file.write(output_string)
       os.chdir(os.path.dirname(str(file_name)))    
+
+  def _recache(self, force_recache = True):
+    progress = QtGui.QProgressDialog("Caching Syntax...", "Abort", 0, 4, self)
+    progress.setWindowModality(Qt.WindowModal)
+    progress.setValue(2)
+
+    self.yaml_data = YamlData(self.app_path, force_recache or self.options.recache)
+
+    progress.setValue(3)
+    progress.setValue(4)

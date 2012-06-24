@@ -36,7 +36,7 @@ class UiBox(QtGui.QMainWindow):
     self.main_layout = QtGui.QVBoxLayout()
     self.setCentralWidget(self.main_ui)
 
-    self.input_file_widget = InputFileWidget(self.app_path, options)
+    self.input_file_widget = InputFileWidget(self.app_path, options, self)
     self.execute_widget = ExecuteWidget(self.app_path, self.input_file_widget, self.qt_app)
 
     self.tab_widget = QtGui.QTabWidget()
@@ -52,7 +52,7 @@ class UiBox(QtGui.QMainWindow):
     
     self.main_ui.setLayout(self.main_layout)
     self.resize(700,800)
-
+    
 def recursiveFindExecutable(current_path, p):
   files = os.listdir(current_path)
 

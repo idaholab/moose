@@ -1,12 +1,18 @@
 #!/usr/bin/python
-import sys, os, commands, time, re, copy
+import sys, os, commands, time, re, copy, PyQt4
+from PyQt4 import QtCore, QtGui
 
 from GenSyntax import *
 
+try:
+  _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+  _fromUtf8 = lambda s: s
+
 class YamlData():
-  def __init__(self, app_path, options):
+  def __init__(self, app_path, recache):
     self.app_path = app_path
-    self.yaml_data = GenSyntax(app_path, options.recache).GetSyntax()
+    self.yaml_data = GenSyntax(app_path, recache).GetSyntax()    
     
   def recursiveYamlDataSearch(self, path, current_yaml):
     if current_yaml['name'] == path:
