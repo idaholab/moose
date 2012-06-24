@@ -115,7 +115,7 @@ class ExecuteWidget(QtGui.QWidget):
       if 'end_time' in table_data and 'dt' in table_data:
         steps = float(table_data['end_time']) / float(table_data['dt'])
 
-        if steps < cur_steps:
+        if cur_steps == 0 or steps < cur_steps:
           cur_steps = steps
 
       for i in range(executioner_item.childCount()):
