@@ -310,7 +310,7 @@ class InputFileWidget(QtGui.QWidget):
       return
     
     else:
-      section = str(item.text(0)).rstrip('+')
+      section = item.text(0)
       subchild_count = item.childCount()
       gp_node = None
       template_gp_node = None
@@ -488,7 +488,7 @@ class InputFileWidget(QtGui.QWidget):
     this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
     yaml_entry = self.findYamlEntry(this_path)
 
-    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(0)).rstrip('+'), None, False)
+    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, False)
     if self.new_gui.exec_():
       table_data = self.new_gui.result()
       new_child = QtGui.QTreeWidgetItem(item)
@@ -548,7 +548,7 @@ class InputFileWidget(QtGui.QWidget):
         parent_path = self.generatePathFromItem(item.parent())
         parent_path = '/' + self.action_syntax.getPath(parent_path)
       yaml_entry = self.findYamlEntry(parent_path)
-      new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(column)).rstrip('+'), item.table_data, False)
+      new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, False)
       new_gui.incoming_data = item.table_data
       if new_gui.exec_():
         item.table_data = new_gui.result()
@@ -563,7 +563,7 @@ class InputFileWidget(QtGui.QWidget):
         yaml_entry = self.findYamlEntry(this_path)
               
         if self.itemHasEditableParameters(item):
-          self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, str(item.text(0)).rstrip('+'), None, False)
+          self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, False)
           if self.new_gui.exec_():
             table_data = self.new_gui.result()
             item.table_data = table_data
