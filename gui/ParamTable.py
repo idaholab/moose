@@ -158,6 +158,8 @@ class ParamTable:
     layout.addWidget(self.drop_menu)
 
   def click_add(self):
+#    self.table_widget.clearFocus()
+    self.table_widget.setCurrentCell(0,0)
     self.table_data = self.tableToDict()
     self.parent_class.accept_params()
     return
