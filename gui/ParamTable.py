@@ -101,8 +101,19 @@ class ParamTable:
       row_name = str(self.table_widget.item(i,0).text())
 
       if row_name in the_data and (overwrite_type == True or row_name != 'type'):
-        item = self.table_widget.item(i,1)
-        item.setText(str(the_data[row_name]))
+        if type(self.table_widget.cellWidget(i,1)) is QtGui.QComboBox:
+          incoming_value = None
+          if the_data[row_name] == '1' or the_data[row_name] == 'true':
+            incoming_value = 'true'
+          else:
+            incoming_value = 'false'
+            
+          cb = self.table_widget.cellWidget(i,1)
+          found_index = cb.findText(incoming_value)
+          cb.setCurrentIndex(found_index)
+        else:
+          item = self.table_widget.item(i,1)
+          item.setText(str(the_data[row_name]))
         used_params.append(row_name)
     # Now look to see if we have more data that wasn't in YAML and add additional rows for that
     for name,value in the_data.items():
@@ -113,14 +124,17 @@ class ParamTable:
         self.table_widget.setItem(self.table_widget.rowCount()-1,0,name_item)
         self.table_widget.setItem(self.table_widget.rowCount()-1,1,value_item)
 
-
   def tableToDict(self, only_not_in_original = False):
     the_data = {}
     for i in xrange(0,self.table_widget.rowCount()):
       param_name = str(self.table_widget.item(i,0).text())
-      param_value = str(self.table_widget.item(i,1).text())
+      param_value = None
+      if type(self.table_widget.cellWidget(i,1)) is QtGui.QComboBox:
+        param_value = self.table_widget.cellWidget(i,1).currentText()
+      else:
+        param_value = str(self.table_widget.item(i,1).text())
       
-      if not param_name in self.original_table_data or not self.original_table_data[param_name] == param_value: #If we changed it - definitely include it
+      if not param_name in self.original_table_data or self.original_table_data[param_name] != param_value: #If we changed it - definitely include it
           the_data[param_name] = param_value
       else:
         if not only_not_in_original: # If we want stuff other than what we changed
@@ -199,7 +213,13 @@ class ParamTable:
           found_it = True
           #the_table_data.append({'name':'type','default':new_text['name'].split('/').pop(),'description':'The object type','required':True})
           for param in new_text['parameters']:
-            self.original_table_data[param['name']] = param['default']
+            if 'cpp_type' in param and param['cpp_type'] == 'bool':
+              if param['default'] == '1':
+                self.original_table_data[param['name']] = 'true'
+              else:
+                self.original_table_data[param['name']] = 'false'
+            else:
+              self.original_table_data[param['name']] = param['default']
             if param['name'] == 'type':
               param['default'] = new_text['name'].split('/').pop()
             the_table_data.append(param)
@@ -218,7 +238,13 @@ class ParamTable:
                   found_it = True
                   has_parent_params_set = True
                   for param in sb['parameters']:
-                    self.original_table_data[param['name']] = param['default']
+                    if 'cpp_type' in param and param['cpp_type'] == 'bool':
+                      if param['default'] == '1':
+                        self.original_table_data[param['name']] = 'true'
+                      else:
+                        self.original_table_data[param['name']] = 'false'
+                    else:
+                      self.original_table_data[param['name']] = param['default']
                     the_table_data.append(param)
                     self.param_is_required[param['name']] = param['required']
           if found_it:
@@ -234,7 +260,15 @@ class ParamTable:
       for param in self.main_data['parameters']:
         if param['name'] == 'type':
           continue
-        self.original_table_data[param['name']] = param['default']
+
+        if 'cpp_type' in param and param['cpp_type'] == 'bool':
+          if param['default'] == '1':
+            self.original_table_data[param['name']] = 'true'
+          else:
+            self.original_table_data[param['name']] = 'false'
+        else:
+          self.original_table_data[param['name']] = param['default']
+
         the_table_data.append(param)
         self.param_is_required[param['name']] = param['required']
 
@@ -256,7 +290,6 @@ class ParamTable:
       name_item = QtGui.QTableWidgetItem(param['name'])
 
       value = ''
-      
       if not param['required'] or param['name'] == 'type':
         value = param['default']
 
@@ -268,8 +301,23 @@ class ParamTable:
 
       if has_parent_params_set and param['name'] == 'Name':
         value = 'ParentParams'
-        
-      value_item = QtGui.QTableWidgetItem(value)
+
+      value_item = None
+
+      if 'cpp_type' in param and param['cpp_type'] == 'bool':
+        value_item = QtGui.QComboBox()
+        value_item.addItem('true')
+        value_item.addItem('false')
+
+        if value == '1':
+          value_item.setCurrentIndex(0)
+        else:
+          value_item.setCurrentIndex(1)
+          
+        self.table_widget.setCellWidget(row, 1, value_item)
+      else:
+        value_item = QtGui.QTableWidgetItem(value)
+        self.table_widget.setItem(row, 1, value_item)
 
       doc_item = QtGui.QTableWidgetItem(param['description'])
       
@@ -280,7 +328,6 @@ class ParamTable:
         value_item.setFlags(QtCore.Qt.NoItemFlags)
 
       self.table_widget.setItem(row, 0, name_item)
-      self.table_widget.setItem(row, 1, value_item)
       self.table_widget.setItem(row, 2, doc_item)
       row += 1
 
