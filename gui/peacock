@@ -63,7 +63,7 @@ def recursiveFindExecutable(current_path, p):
     return recursiveFindExecutable('/'.join(split[:len(split)-2]) + '/' + split[len(split)-1], p)
   
   for afile in files:
-    if p.match(afile):
+    if p.match(afile) and os.access(current_path+'/'+afile, os.X_OK):
       return current_path + '/' + afile
 
   up_one = os.path.dirname(current_path)
