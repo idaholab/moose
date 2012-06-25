@@ -20,6 +20,7 @@ InputParameters validParams<MoosePreconditioner>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addPrivateParam<FEProblem *>("_fe_problem");
+  params.addPrivateParam<std::string>("built_by_action", "add_preconditioning");
   return params;
 }
 
