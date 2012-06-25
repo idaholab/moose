@@ -10,32 +10,24 @@ def mergeLists(master, slave):
     else:
       slave_before_slice = slave[0:slave_value_position]
       slave_after_slice = slave[slave_value_position+1:]
-      print value
-      print slave_before_slice
-      print slave_after_slice
 
       best_score = 0
       best_position = 0
 
-      for master_position in xrange(0,len(master)):
+      for master_position in xrange(0,len(master)+1):
         current_score = 0
         master_before_slice = master[0:master_position]
         master_after_slice = master[master_position:]
-        print 'master_position',master_position
-        print 'master_before',master_before_slice
-        print 'master_after',master_after_slice
 
         for slave_slice_position in xrange(len(slave_before_slice)):
           slave_value = slave_before_slice[slave_slice_position]
           if slave_value in master_before_slice:
             current_score += 1.0/float(len(slave_before_slice)-slave_slice_position+1)
-            print master_position, current_score
 
         for slave_slice_position in xrange(len(slave_after_slice)):
           slave_value = slave_after_slice[slave_slice_position]
           if slave_value in master_after_slice:
             current_score += 1.0/float(slave_slice_position+1)
-            print master_position, current_score
 
         if current_score > best_score:
           best_position = master_position
@@ -44,9 +36,10 @@ def mergeLists(master, slave):
 
 
 if __name__ == '__main__':
-#  input = ['Variables','Functions','Kernels','BCs','Executioner','Output']
-  input = []
-#  template = ['Variables','AuxVariables','Kernels','AuxKernels','BCs','AuxBCs','Postprocessors','Executioner','Output']
-  template = ['Variables','AuxVariables']
+  input = ['Variables','Functions','Kernels','BCs','Executioner','Output']
+#  input = []
+  template = ['Variables','AuxVariables','Kernels','AuxKernels','BCs','AuxBCs','Postprocessors','Executioner','Output']
+#  template = ['Variables','AuxVariables']
+#  template = []
   mergeLists(input, template)
   print input

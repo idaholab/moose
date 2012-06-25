@@ -9,6 +9,7 @@ from ActionSyntax import *
 from ParamTable import *
 
 from readInputFile import readInputFile, GPNode
+from mergeLists import mergeLists
 
 try:
   _fromUtf8 = QtCore.QString.fromUtf8
@@ -33,26 +34,28 @@ class InputFileTextbox(QtGui.QTextEdit):
     root = self.input_file_widget.tree_widget.invisibleRootItem()
     child_count = root.childCount()
     printed_sections = []
+
+    ordered_sections = []
+    template_sections = []
     
     if self.input_file_widget.input_file_root_node: # Print any sections we knew about from the input file first (and in the right order)
       for section_name in self.input_file_widget.input_file_root_node.children_list:
-        search = self.input_file_widget.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)
+        ordered_sections.append(section_name)
 
-        if search and len(search):
-          item = search[0]
-          self._inputStringRecurse(item, 0)
-          printed_sections.append(section_name)  
-        
     if self.input_file_widget.input_file_template_root_node: # Print any sections we knew about from the template input file first (and in the right order)
       for section_name in self.input_file_widget.input_file_template_root_node.children_list:
-        if section_name in printed_sections:
-          continue
-        search = self.input_file_widget.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)
+        template_sections.append(section_name)
 
-        if search and len(search):
-          item = search[0]
-          self._inputStringRecurse(item, 0)
-          printed_sections.append(section_name)  
+    #Merge the sections
+    mergeLists(ordered_sections, template_sections)
+
+    for section_name in ordered_sections:
+      search = self.input_file_widget.tree_widget.findItems(section_name, QtCore.Qt.MatchExactly)
+
+      if search and len(search):
+        item = search[0]
+        self._inputStringRecurse(item, 0)
+        printed_sections.append(section_name)          
 
     for i in range(child_count): # Print out all the other sections
       item = root.child(i)
@@ -119,18 +122,27 @@ class InputFileTextbox(QtGui.QTextEdit):
       try: # Need to see if this item has data on it.  If it doesn't then we're creating a new item.
         printed_params = []
 
+        ordered_params = []
+        template_params = []
+
         # Print out the ones that we know from the read in input file in the right order
         if gp_node:
           for param in gp_node.params_list:
             if param in item.table_data and param != 'Name' and param != 'parent_params':
-              self.the_string += indent_string + '  ' + param + ' = ' + item.table_data[param] + '\n'
-              printed_params.append(param)
-
+              ordered_params.append(param)
+              
         if template_gp_node:
           for param in template_gp_node.params_list:
-            if param in item.table_data and param != 'Name' and param != 'parent_params' and param not in printed_params:
-              self.the_string += indent_string + '  ' + param + ' = ' + item.table_data[param] + '\n'
-              printed_params.append(param)
+            if param in item.table_data and param != 'Name' and param != 'parent_params':
+              template_params.append(param)
+
+        # Merge Lists
+        mergeLists(ordered_params, template_params)
+
+        # Print out the merged lists
+        for param in ordered_params:
+          self.the_string += indent_string + '  ' + param + ' = ' + item.table_data[param] + '\n'
+          printed_params.append(param)
         
         for param,value in item.table_data.items():
           if param not in printed_params and param != 'Name' and param != 'parent_params':
@@ -140,29 +152,29 @@ class InputFileTextbox(QtGui.QTextEdit):
 
       # Now recurse over the children
       printed_children = []
-      if gp_node:  # Print the children we knew about from the input file in the right order
+
+      ordered_children = []
+      template_children = []
+
+      if gp_node:
         for child in gp_node.children_list:
-          for j in range(subchild_count):
-            subitem = item.child(j)
-            if subitem.text(0) != child:
-              continue
+          ordered_children.append(child)
 
-            self._inputStringRecurse(subitem, level+1)
-            printed_children.append(child)
-
-      if template_gp_node:  # Print the children we knew about from the input file in the right order
+      if template_gp_node:
         for child in template_gp_node.children_list:
-          for j in range(subchild_count):
-            subitem = item.child(j)
-            if subitem.text(0) != child:
-              continue
+          template_children.append(child)
 
-            if subitem.text(0) in printed_children:
-              continue            
+      mergeLists(ordered_children, template_children)
+      
+      for child in ordered_children:
+        for j in range(subchild_count):
+          subitem = item.child(j)
 
-            self._inputStringRecurse(subitem, level+1)
-            printed_children.append(child)
+          if subitem.text(0) != child:
+            continue
 
+          self._inputStringRecurse(subitem, level+1)
+          printed_children.append(child)
       
       for j in range(subchild_count):
         subitem = item.child(j)
