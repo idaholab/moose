@@ -30,39 +30,18 @@ InputParameters validParams<NodalPostprocessor>()
 
 NodalPostprocessor::NodalPostprocessor(const std::string & name, InputParameters parameters) :
     Postprocessor(name, parameters),
-    Coupleable(parameters, false),
+    Coupleable(parameters, true),
     UserObjectInterface(parameters),
-    MooseVariableInterface(parameters, false),
+    MooseVariableInterface(parameters, true),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
     _var(_subproblem.getVariable(_tid, parameters.get<std::string>("variable"))),
     _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),
-//    _q_point(_subproblem.points(_tid)),
-//    _qrule(_subproblem.qRule(_tid)),
-//    _JxW(_subproblem.JxW(_tid)),
     _qp(0),
     _current_node(_var.node()),
     _u(_var.nodalSln()),
-//    _u_old(_var.slnOld()),
-//    _u_older(_var.slnOlder()),
-//    _grad_u(_var.gradSln()),
 
     _real_zero(_problem._real_zero[_tid]),
     _zero(_problem._zero[_tid])
 {
 }
-
-/*
-Real
-NodalPostprocessor::doSomething()
-{
-
- *  Real sum = 0;
-
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      sum += _JxW[_qp]*computeQpIntegral();
-  return sum;
-
-  return 0;
-}
-*/
