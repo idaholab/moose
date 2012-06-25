@@ -18,6 +18,7 @@ template<>
 InputParameters validParams<UserObject>()
 {
   InputParameters params = validParams<MooseObject>();
+  params.addPrivateParam<std::string>("built_by_action", "add_user_object");
   return params;
 }
 
