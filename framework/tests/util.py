@@ -56,6 +56,8 @@ def colorify(str, options, html=False):
       str = str.replace('skipped', BOLD+'skipped'+RESET)
       if str.find('FAILED (EXODIFF)') != -1:
         str = str.replace('FAILED (EXODIFF)', BOLD+YELLOW+'FAILED (EXODIFF)'+RESET)
+      elif str.find('FAILED (CSVDIFF') != -1:
+        str = str.replace('FAILED (CSVDIFF)', BOLD+YELLOW+'FAILED (CSVDIFF)'+RESET)
       else:
         str = re.sub(r'(FAILED \([A-Za-z ]*\))', BOLD+RED+'\\1'+RESET, str)
   elif html:
