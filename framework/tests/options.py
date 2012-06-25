@@ -17,7 +17,7 @@ CLI_ARGS      = '[]'             # Additional argument vector to pass to test
 
 # Types of tests
 EXODIFF       = '[exodiff]'      # A list of files to exodiff
-EXODIFF_OPTIONS = '[exodiff_options]'  # A place where the user can put in whatever else needs to be sent out.
+EXODIFF_OPTS  = '[extra_options]'# A place where the user can put in what ever else needs to be sent out.
 CSVDIFF       = '[csvdiff]'      # A list of files to CSV diff
 CHECK_FILES   = '[testfiles]'    # A list of files to check for existence
 GOLD_DIR      = 'gold_dir'       # The directory where the "golden standard" files resides relative to TEST_DIR
@@ -65,6 +65,7 @@ PREREQ        = '[prereq]'
 
 # Default test options: these are use if an option is not specified
 DEFAULTS = { EXODIFF : [],
+             EXODIFF_OPTS : [],
              CSVDIFF : [],
              CHECK_FILES : [],
              CLI_ARGS : [],
