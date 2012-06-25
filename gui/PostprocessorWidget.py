@@ -131,7 +131,6 @@ class PostprocessorWidget(QtGui.QWidget):
             self.postData.append(line[indexCol])
     
     def runClicked(self):
-        self.timer.stop()
         QtCore.QObject.connect(self.execute_widget.proc,QtCore.SIGNAL("finished(int)"),self.stopPlotting)
         self.clearClick()
 
@@ -148,5 +147,8 @@ class PostprocessorWidget(QtGui.QWidget):
 
     def stopPlotting(self):
         
+        self.comboWidget.clear()
+        self.getFileName()
+        self.fillComboWidget()
         self.updatePlots()
         self.timer.stop()

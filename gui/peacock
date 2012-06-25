@@ -45,7 +45,7 @@ class UiBox(QtGui.QMainWindow):
 
     self.tab_widget.addTab(self.input_file_widget, "Input File")
     self.tab_widget.addTab(self.execute_widget, "Execute")
-    self.tab_widget.addTab(self.postprocessor_widget, "Postprocessor")
+    self.tab_widget.addTab(self.postprocessor_widget, "Postprocess")
 
     for plugin_class in self.plugin_classes:
       instance = plugin_class(self)
