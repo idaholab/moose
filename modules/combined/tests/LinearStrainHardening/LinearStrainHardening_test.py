@@ -7,17 +7,16 @@ test = { INPUT : 'LinearStrainHardening_test.i',
          }
 
 testRestart1 = { INPUT : 'LinearStrainHardeningRestart1.i',
-                 EXODIFF : ['LinearStrainHardeningRestart1_out.e'],
+#                 EXODIFF : ['LinearStrainHardeningRestart1_out.e'],
                  ABS_ZERO : 1e-9,
                  PREREQ : 'test',
-                 SKIP : 'Need exodiff option'
+#                 SKIP : 'Need exodiff option'
                }
 
 testRestart2 = { INPUT : 'LinearStrainHardeningRestart2.i',
                  EXODIFF : ['out.e'],
-#                 EXODIFF_OPTIONS : ['-TM'],
+                 EXODIFF_OPTS : ['-TM'],
                  ABS_ZERO : 1e-9,
                  PREREQ : 'testRestart1',
-                 SKIP : 'Need exodiff option'
+#                 SKIP : 'Need exodiff option'
                }
-
