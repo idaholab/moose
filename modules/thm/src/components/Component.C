@@ -13,6 +13,7 @@ InputParameters validParams<Component>()
   params.addPrivateParam<Simulation *>("_sim");
 
   params.addParam<std::string>("physics_input_file", "Input file with physics");
+  params.addPrivateParam<std::string>("built_by_action", "add_component");
 
   return params;
 }
