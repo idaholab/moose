@@ -130,7 +130,7 @@ class InputFileWidget(QtGui.QWidget):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Input File", "~/", "Input Files (*.i)")
     if file_name:
       self.tree_widget.clear()
-      self.addHardPathsToTree()
+      self.tree_widget.addHardPathsToTree()
       self.openInputFile(file_name)
     
   def click_clear(self):
@@ -141,7 +141,7 @@ class InputFileWidget(QtGui.QWidget):
     ret = msgBox.exec_()
     if ret == QMessageBox.Yes:
       self.tree_widget.clear()
-      self.addHardPathsToTree()
+      self.tree_widget.addHardPathsToTree()
 
 
   def click_save(self):
@@ -149,7 +149,7 @@ class InputFileWidget(QtGui.QWidget):
 
     if file_name != '':
       file = open(file_name,'w')
-      output_string = self.buildInputString()
+      output_string = self.input_file_textbox.buildInputString()
       file.write(output_string)
       os.chdir(os.path.dirname(str(file_name)))    
 
