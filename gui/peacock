@@ -36,7 +36,8 @@ class UiBox(QtGui.QMainWindow):
     self.main_layout = QtGui.QVBoxLayout()
     self.setCentralWidget(self.main_ui)
 
-    self.input_file_widget = InputFileWidget(self.app_path, options, self)
+    print 'junk',self.qt_app
+    self.input_file_widget = InputFileWidget(self.app_path, options, self, self.qt_app)
     self.execute_widget = ExecuteWidget(self.app_path, self.input_file_widget, self.qt_app)
 
     self.tab_widget = QtGui.QTabWidget()

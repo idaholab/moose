@@ -19,15 +19,17 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class InputFileWidget(QtGui.QWidget):
-  def __init__(self, app_path, options, peacock_ui, win_parent=None):
+  def __init__(self, app_path, options, peacock_ui, qt_app, win_parent=None):
     QtGui.QWidget.__init__(self, win_parent)
     self.app_path = app_path
     self.options = options
+    self.peacock_ui = peacock_ui
+    self.qt_app = qt_app
+    print qt_app
 
     self._recache()
     
     self.action_syntax = ActionSyntax(app_path)
-    self.peacock_ui = peacock_ui
 
     # Start with an input file template if this application has one
     input_file_template_name = os.path.dirname(app_path) + '/input_template'
@@ -157,11 +159,17 @@ class InputFileWidget(QtGui.QWidget):
     self._recache(True)
 
   def _recache(self, force_recache = False):
-    progress = QtGui.QProgressDialog("Caching Syntax...", "Abort", 0, 4, self)
+    progress = QtGui.QProgressDialog("Caching Syntax...", "Abort", 0, 10, self)
     progress.setWindowModality(Qt.WindowModal)
-    progress.setValue(2)
+    progress.show()
+
+    for i in xrange(0,7):
+      progress.setValue(i)
+      self.qt_app.processEvents()
+      self.qt_app.flush()
 
     self.yaml_data = YamlData(self.app_path, force_recache or self.options.recache)
 
-    progress.setValue(3)
-    progress.setValue(4)
+    progress.setValue(8)
+    progress.setValue(9)
+    progress.setValue(10)
