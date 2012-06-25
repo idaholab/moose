@@ -134,7 +134,6 @@ class ExecuteWidget(QtGui.QWidget):
     
   def clickedRun(self):
     num_steps = self.getNumSteps()
-    print num_steps
     if num_steps:
       self.pb.reset()
       self.pb.setMaximum(num_steps)

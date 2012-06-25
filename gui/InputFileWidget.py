@@ -25,7 +25,6 @@ class InputFileWidget(QtGui.QWidget):
     self.options = options
     self.peacock_ui = peacock_ui
     self.qt_app = qt_app
-    print qt_app
 
     self._recache()
     
