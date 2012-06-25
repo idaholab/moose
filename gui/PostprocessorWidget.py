@@ -14,7 +14,7 @@ class PostprocessorWidget(QtGui.QWidget):
         self.input_file_widget = input_file_widget
         self.execute_widget = execute_widget
         
-        self.getFileName()
+        self.currentFile = None
         
         # uses the postprocessor selected by the user to pass the information required for plotting
         self.comboWidget = QtGui.QComboBox(self)
@@ -69,7 +69,7 @@ class PostprocessorWidget(QtGui.QWidget):
     
     def fillComboWidget(self):
         
-        if os.path.exists(self.currentFile):
+        if self.currentFile and os.path.exists(self.currentFile):
         
             self.names = open(self.currentFile,'rb').readline()
             self.names = self.names.strip()
@@ -105,7 +105,7 @@ class PostprocessorWidget(QtGui.QWidget):
         # and for each plot calls the getPlotData function to update every plot that has been selected
         
         
-        if os.path.exists(self.currentFile):
+        if self.currentFile and os.path.exists(self.currentFile):
             self.data = numpy.genfromtxt(self.currentFile,
                                 delimiter = ',' , names = True)
             self.time = []
