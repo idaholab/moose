@@ -24,7 +24,7 @@ class InputFileWidget(QtGui.QWidget):
     self.app_path = app_path
     self.options = options
 
-    self._recache(False)
+    self._recache()
     
     self.action_syntax = ActionSyntax(app_path)
     self.peacock_ui = peacock_ui
@@ -77,7 +77,7 @@ class InputFileWidget(QtGui.QWidget):
     self.menubar = self.peacock_ui.menuBar()
     self.advanced_menu = self.menubar.addMenu('&Advanced')
     recache_action = QtGui.QAction("Recache Syntax", self)
-    recache_action.triggered.connect(self._recache)
+    recache_action.triggered.connect(self._selected_recache)
     self.advanced_menu.addAction(recache_action)
 
   def init_buttons(self, layout):
@@ -153,7 +153,10 @@ class InputFileWidget(QtGui.QWidget):
       file.write(output_string)
       os.chdir(os.path.dirname(str(file_name)))    
 
-  def _recache(self, force_recache = True):
+  def _selected_recache(self):
+    self._recache(True)
+
+  def _recache(self, force_recache = False):
     progress = QtGui.QProgressDialog("Caching Syntax...", "Abort", 0, 4, self)
     progress.setWindowModality(Qt.WindowModal)
     progress.setValue(2)

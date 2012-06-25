@@ -34,11 +34,11 @@ class GenSyntax():
       sys.exit(1)
     executable = os.path.basename(self.app_path)
     executable_path = os.path.dirname(self.app_path)
-    data = commands.getoutput( self.app_path + " --yaml" )
-    data = data.split('**START YAML DATA**\n')[1]
-    data = data.split('**END YAML DATA**')[0]
     yaml_dump_file_name = executable_path + '/yaml_dump_' + executable
     if self.recache or not os.path.exists(yaml_dump_file_name):
+      data = commands.getoutput( self.app_path + " --yaml" )
+      data = data.split('**START YAML DATA**\n')[1]
+      data = data.split('**END YAML DATA**')[0]
       print "\nCaching syntax. Subsequent startup times will be greatly reduced."
       if not self.recache:
         print "In the future, you can use '-r' to force a syntax recache."
