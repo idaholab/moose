@@ -37,6 +37,12 @@ all::
 	@echo "Compiling Fortran (in "$(mode)" mode) "$<"..."
 	@$(libmesh_F77) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< -o $@
 
+# preprocessed Fortran
+PreProcessed_FFLAGS := $(libmesh_FFLAGS)
+%.$(obj-suffix) : %.F
+	@echo "Compiling Fortran (in "$(mode)" mode) "$<"..."
+	@$(libmesh_F90) $(PreProcessed_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
+
 #
 # Fortran90 rules
 #
