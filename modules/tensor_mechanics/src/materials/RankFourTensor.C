@@ -244,8 +244,11 @@ RankFourTensor::selfRotate(const Real a1, const Real a2, const Real a3)
 }
 
 RankFourTensor
-RankFourTensor::rotate(const Real a1, const Real a2, const Real a3)
+RankFourTensor::rotate(const Real a1, const Real a2, const Real a3) const
 {
+  RankFourTensor a;
+
+  return a;
 }
 
 
@@ -268,19 +271,19 @@ RankFourTensor::setThirdEulerAngle(const Real a3)
 }
 
 Real
-RankFourTensor::firstEulerAngle()
+RankFourTensor::firstEulerAngle() const
 {
   return _euler_angle[0];
 }
 
 Real
-RankFourTensor::secondEulerAngle()
+RankFourTensor::secondEulerAngle() const
 {
   return _euler_angle[1];
 }
 
 Real
-RankFourTensor::thirdEulerAngle()
+RankFourTensor::thirdEulerAngle() const
 {
   return _euler_angle[2];
 }

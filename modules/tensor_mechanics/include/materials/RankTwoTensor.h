@@ -74,6 +74,8 @@ private:
   std::vector<std::vector<Real> > _vals;
 
   std::vector<Real> _euler_angle;
+
+  std::vector<std::vector<Real> > _rotation_matrix;
 };
 
 #endif //RANKTWOTENSOR_H

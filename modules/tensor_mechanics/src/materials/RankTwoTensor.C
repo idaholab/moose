@@ -7,7 +7,8 @@
 
 RankTwoTensor::RankTwoTensor() :
     _vals(),
-    _euler_angle(3)
+    _euler_angle(3),
+    _rotation_matrix()
 {
   _vals.resize(3);
   for (unsigned int i(0); i<3; i++)
@@ -20,8 +21,19 @@ RankTwoTensor::RankTwoTensor() :
     }
   }
   
-  for(unsigned int i(0); i<3, i++)
+  for(unsigned int i(0); i<3; i++)
     _euler_angle[i] = 0.0;
+
+  _rotation_matrix.resize(3);
+  for(unsigned int i(0); i<3; i++)
+  {
+    _rotation_matrix[i].resize(3);
+    for(unsigned int(j); j<3; j++)
+    {
+      _rotation_matrix[i][j] = 0.0;
+    }
+  }
+
 }
 
 RankTwoTensor::RankTwoTensor(const RankTwoTensor &a)
@@ -88,8 +100,11 @@ RankTwoTensor::selfRotate(const Real a1, const Real a2, const Real a3)
 }
 
 RankTwoTensor
-RankTwoTensor::rotate(const Real a1, const Real a2, const Real a3)
+RankTwoTensor::rotate(const Real a1, const Real a2, const Real a3) const
 {
+  RankTwoTensor a;
+
+  return a;
 }
 
 
@@ -112,19 +127,19 @@ RankTwoTensor::setThirdEulerAngle(const Real a3)
 }
 
 Real
-RankTwoTensor::firstEulerAngle()
+RankTwoTensor::firstEulerAngle() const
 {
   return _euler_angle[0];
 }
 
 Real
-RankTwoTensor::secondEulerAngle()
+RankTwoTensor::secondEulerAngle() const
 {
   return _euler_angle[1];
 }
 
 Real
-RankTwoTensor::thirdEulerAngle()
+RankTwoTensor::thirdEulerAngle() const
 {
   return _euler_angle[2];
 }
