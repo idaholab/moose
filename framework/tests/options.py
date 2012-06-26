@@ -35,7 +35,6 @@ HEAVY         = 'heavy'          # Set to true if this test should only be run w
 
 # Scaling options
 #PARALLEL      = 'parallel'      # String: Number of processes to use
-NO_PARALLEL    = 'no_parallel'   # Boolean: When operating in parallel, do not run in parallel for this test
 MAX_PARALLEL   = 'max_parallel'  # String: When running in parallel, regardles of processes to use, use this number instead
 MIN_PARALLEL   = 'min_parallel'  # String: When running in parallel, regardles of processes to use, use this number instead
 SCALE_REFINE  = '<n>'            # The number of refinements to do when scaling
@@ -84,7 +83,6 @@ DEFAULTS = { EXODIFF : [],
              SCALE_REFINE : 0,
 #             DOFS : 0,
              MIN_PARALLEL : 1,
-             NO_PARALLEL : False,
              MAX_PARALLEL : 1000,
              MIN_THREADS: 1,
              MAX_THREADS: 16,
