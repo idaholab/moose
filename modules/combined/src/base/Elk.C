@@ -3,6 +3,7 @@
 #include "ActionFactory.h"
 
 #include "SolidMechanicsModule.h"
+#include "TensorMechanicsModule.h"
 #include "PhaseFieldModule.h"
 #include "ContactModule.h"
 #include "HeatConductionModule.h"
@@ -15,6 +16,7 @@ void
 Elk::registerObjects()
 {
   SolidMechanics::registerObjects();
+  TensorMechanics::registerObjects();
   PhaseField::registerObjects();
   Contact::registerObjects();
   HeatConduction::registerObjects();
@@ -28,6 +30,7 @@ void
 Elk::associateSyntax(Syntax & syntax)
 {
   SolidMechanics::associateSyntax(syntax);
+  TensorMechanics::associateSyntax(syntax);
   Contact::associateSyntax(syntax);
   HeatConduction::associateSyntax(syntax);
 }
