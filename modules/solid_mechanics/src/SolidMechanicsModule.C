@@ -33,7 +33,6 @@
 #include "HomogenizedElasticConstants.h"
 #include "Mass.h"
 
-
 void
 Elk::SolidMechanics::registerObjects()
 {
@@ -59,7 +58,6 @@ Elk::SolidMechanics::registerObjects()
   registerBoundaryCondition(Pressure);
 
   registerKernel(SolidMechImplicitEuler);
-
   registerAux(ElasticEnergyAux);
   registerAux(MaterialSymmElasticityTensorAux);
 
@@ -68,7 +66,6 @@ Elk::SolidMechanics::registerObjects()
   registerKernel(HomogenizationKernel);
   registerPostprocessor(HomogenizedElasticConstants);
   registerPostprocessor(Mass);
-
 }
 
 void
