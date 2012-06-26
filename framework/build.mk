@@ -30,15 +30,7 @@ all::
 	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
 
 #
-# Fortran77 rules
-#
-
-%.$(obj-suffix) : %.f
-	@echo "Compiling Fortran (in "$(mode)" mode) "$<"..."
-	@$(libmesh_F77) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< -o $@
-
-#
-# Fortran90 rules
+# Fortran rules
 #
 
 mpif90_command := $(libmesh_F90)
@@ -62,10 +54,6 @@ ifneq (,$(findstring gfortran,$(mpif90_command)))
 	module_dir_flag = -J${@D}
 endif
 
-%.$(obj-suffix) : %.f90
-	@echo "Compiling Fortran90 (in "$(mode)" mode) "$<"..."
-	@$(libmesh_F90) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
-
 
 # treat these warnings as errors (This doesn't seem to be necessary for Intel)
 ifneq (,$(findstring gcc,$(GXX-VERSION)))
@@ -76,7 +64,7 @@ endif
 # Fortran baggage
 #
 mpif77_command := $(libmesh_F77)
-
+PreProcessed_FFLAGS := $(libmesh_FFLAGS)
 # If $(libmesh_f77) is an mpiXXX compiler script, use -show
 # to determine the base compiler
 ifneq (,$(findstring mpi,$(mpif77_command)))
@@ -107,6 +95,20 @@ ifeq ($(coverage),true)
 		libmesh_LDFLAGS += --coverage
 	endif
 endif
+
+%.$(obj-suffix) : %.f
+	@echo "Compiling Fortran (in "$(mode)" mode) "$<"..."
+	@$(libmesh_F77) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< -o $@
+
+# preprocessed Fortran
+%.$(obj-suffix) : %.F
+	@echo "Compiling Fortran (in "$(mode)" mode) "$<"..."
+	@$(libmesh_F90) $(PreProcessed_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
+
+%.$(obj-suffix) : %.f90
+	@echo "Compiling Fortran90 (in "$(mode)" mode) "$<"..."
+	@$(libmesh_F90) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
+
 
 # link with gcov support, but do now generate data for this build
 # if you wanted code coverage data for moose, but you wanted to run
