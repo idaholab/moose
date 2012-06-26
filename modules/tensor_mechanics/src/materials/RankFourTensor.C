@@ -1,0 +1,286 @@
+#include "RankFourTensor.h"
+
+// Any other includes here
+#include <vector>
+#include "MaterialProperty.h"
+#include "libmesh.h"
+#include <ostream>
+
+
+RankFourTensor::RankFourTensor() :
+    _vals(),
+    _euler_angle(),
+    _rotation_matrix()
+{
+  _vals.resize(3);
+  for (unsigned int i(0); i<3; i++)
+  {
+    _vals[i].resize(3);
+    for(unsigned int j(0); j<3; j++)
+    {
+      _vals[i][j].resize(3);
+      for(unsigned int k(0); k<3; k++)
+      {
+        _vals[i][j][k].resize(3);
+        for(unsigned int l(0); l<3; l++)
+        {
+          _vals[i][j][k][l] = 0.0;
+        }
+      }
+    }
+  }
+
+  _euler_angle.resize(3);
+  for(unsigned int i(0); i< 3; i++)
+    _euler_angle[i] = 0.0;
+
+  _rotation_matrix.resize(3);
+  for(unsigned int i(0); i<3; i++)
+  {
+    _rotation_matrix[i].resize(3);
+    for(unsigned int(j); j<3; j++)
+    {
+      _rotation_matrix[i][j] = 0.0;
+    }
+  }
+  
+}
+
+RankFourTensor::RankFourTensor(const RankFourTensor &a)
+{
+  *this = a;
+}
+
+void
+RankFourTensor::fillFromInputVector(const std::vector<Real> input, bool all)
+{
+  if((all == true && input.size() != 21) || (all == false && input.size() != 9 ))
+    mooseError("Please check the number of entries in the stiffness input vector.");
+  
+  zero();
+  
+  if(all == true)
+  {
+    _vals[0][0][0][0] = input[0]; //C1111
+    _vals[0][0][1][1] = input[1]; //C1122
+    _vals[0][0][2][2] = input[2]; //C1133
+    _vals[0][0][1][2] = input[3]; //C1123
+    _vals[0][0][0][2] = input[4]; //C1113
+    _vals[0][0][0][1] = input[5]; //C1112
+
+    _vals[1][1][1][1] = input[6]; //C2222
+    _vals[1][1][2][2] = input[7]; //C2233
+    _vals[1][1][1][2] = input[8]; //C2223
+    _vals[1][1][0][2] = input[9]; //C2213
+    _vals[1][1][0][1] = input[10]; //C2212
+
+    _vals[2][2][2][2] = input[11]; //C3333
+    _vals[2][2][1][2] = input[12]; //C3323
+    _vals[2][2][0][2] = input[13]; //C3313
+    _vals[2][2][0][1] = input[14]; //C3312
+    
+    _vals[1][2][1][2] = input[15]; //C2323
+    _vals[1][2][0][2] = input[16]; //C2313
+    _vals[1][2][0][1] = input[17]; //C2312
+    
+    _vals[0][2][0][2] = input[18]; //C1313
+    _vals[0][2][0][1] = input[19]; //C1312
+    
+    _vals[0][1][0][1] = input[20]; //C1212
+  }
+  else
+  {
+    _vals[0][0][0][0] = input[0];   //C1111
+    _vals[0][0][1][1] = input[1];   //C1122
+    _vals[0][0][2][2] = input[2];   //C1133
+    _vals[1][1][1][1] = input[3];   //C2222
+    _vals[1][1][2][2] = input[4];   //C2233
+    _vals[2][2][2][2] = input[5];  //C3333
+    _vals[1][2][1][2] = input[6];  //C2323
+    _vals[0][2][0][2] = input[7];  //C1313
+    _vals[0][1][0][1] = input[8];  //C1212
+  }
+  
+  //fill in from symmetry relations
+  for(unsigned int i(0); i<3; i++)
+  {
+    for(unsigned int j(0); j<3; j++)
+    {
+      for(unsigned int k(0); k<3; k++)
+      {
+        for(unsigned int l(0); l<3; l++)
+        {
+          _vals[i][j][l][k] =
+            _vals[j][i][k][l] = 
+            _vals[j][i][l][k] =
+            _vals[k][l][i][j] =
+            _vals[l][k][j][i] = 
+            _vals[k][l][j][i] =
+            _vals[l][k][i][j] = _vals[i][j][k][l];
+        }
+      }
+    }
+  }
+}
+
+void
+RankFourTensor::setValue(Real val, int i, int j, int k, int l)
+{
+  _vals[i-1][j-1][k-1][l-1] = val;
+}
+
+Real
+RankFourTensor::getValue(int i, int j, int k, int l) const
+{
+  return _vals[i-1][j-1][k-1][l-1];
+}
+
+void
+RankFourTensor::zero()
+{
+  for(unsigned int i(0); i<3; i++)
+  {
+    for(unsigned int j(0); j<3; j++)
+    {
+      for(unsigned int k(0); k<3; k++)
+      {
+        for(unsigned int l(0); l<3; l++)
+        {
+          _vals[i][j][k][l] = 0.0;
+        }
+      }
+    }
+  }
+}
+
+
+RankTwoTensor
+RankFourTensor::operator*(const RankTwoTensor &a)
+{
+  RankTwoTensor result;
+
+  Real t(0.0);
+  
+  for(unsigned int i(0); i<3; i++)
+  {
+    for(unsigned int j(0); j<3; j++)
+    {
+      t = 0.0;
+      for(unsigned int k(0); k<3; k++)
+      {
+        for(unsigned int l(0); l<3; l++)
+        {
+          t += (_vals[i][j][k][l])*(a.getValue(k+1, l+1));
+        }
+      }
+      //result[i][j] = t;
+      result.setValue(t, i+1, j+1);
+    }
+  }
+  return result;
+}
+Real
+RankFourTensor::stiffness( const int i, const int j,
+                           const RealGradient & test,
+                           const RealGradient & phi)
+{
+  RealGradient b(0);
+  
+  int A[3], B[3], C[3], D[3];
+
+  //these are actual crystal indices
+  if (i == 0)
+  {
+    A[0] = 1; A[1] = 2; A[2] = 1;
+    B[0] = 1; B[1] = 3; B[2] = 2;
+  }
+  if (i == 1)
+  {
+    A[0] = 1; A[1] = 2; A[2] = 1;
+    B[0] = 1; B[1] = 3; B[2] = 2;
+  }
+  if (i == 2)
+  {
+    A[0] = 1; A[1] = 2; A[2] = 1;
+    B[0] = 1; B[1] = 3; B[2] = 2;
+  }
+  if (j == 0)
+  {
+    C[0] = 1; C[1] = 2; C[2] = 1;
+    D[0] = 1; D[1] = 3; D[2] = 2;
+  }
+  if (j == 1)
+  {
+    C[0] = 1; C[1] = 2; C[2] = 1;
+    D[0] = 1; D[1] = 3; D[2] = 2;
+  }
+  if (j == 2)
+  {
+    C[0] = 1; C[1] = 2; C[2] = 1;
+    D[0] = 1; D[1] = 3; D[2] = 2;
+  }
+
+  for(int k(0); k<3; k++)
+  {
+    for(int l(0); l<3; l++)
+    {
+      // array indices - thus subtracting 1
+      int m, n, o, p;
+      m = A[k] - 1;
+      n = B[k] - 1;
+      o = C[l] - 1;
+      p = D[l] - 1;
+      
+      b(k) = b(k) + _vals[m][n][o][p]*phi(l);
+    }
+  }
+  return test*b;
+}
+
+void
+RankFourTensor::selfRotate(const Real a1, const Real a2, const Real a3)
+{
+  
+}
+
+RankFourTensor
+RankFourTensor::rotate(const Real a1, const Real a2, const Real a3)
+{
+}
+
+
+void
+RankFourTensor::setFirstEulerAngle(const Real a1)
+{
+  _euler_angle[0] = a1;
+}
+
+void
+RankFourTensor::setSecondEulerAngle(const Real a2)
+{
+  _euler_angle[1] = a2;
+}
+
+void
+RankFourTensor::setThirdEulerAngle(const Real a3)
+{
+  _euler_angle[2] = a3;
+}
+
+Real
+RankFourTensor::firstEulerAngle()
+{
+  return _euler_angle[0];
+}
+
+Real
+RankFourTensor::secondEulerAngle()
+{
+  return _euler_angle[1];
+}
+
+Real
+RankFourTensor::thirdEulerAngle()
+{
+  return _euler_angle[2];
+}
