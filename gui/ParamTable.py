@@ -216,8 +216,10 @@ class ParamTable:
             if 'cpp_type' in param and param['cpp_type'] == 'bool':
               if param['default'] == '1':
                 self.original_table_data[param['name']] = 'true'
-              else:
+              elif param['default'] == '0':
                 self.original_table_data[param['name']] = 'false'
+              else:
+                self.original_table_data[param['name']] = ''
             else:
               self.original_table_data[param['name']] = param['default']
             if param['name'] == 'type':
@@ -241,8 +243,10 @@ class ParamTable:
                     if 'cpp_type' in param and param['cpp_type'] == 'bool':
                       if param['default'] == '1':
                         self.original_table_data[param['name']] = 'true'
-                      else:
+                      elif param['default'] == '0':
                         self.original_table_data[param['name']] = 'false'
+                      else:
+                        self.original_table_data[param['name']] = ''
                     else:
                       self.original_table_data[param['name']] = param['default']
                     the_table_data.append(param)
@@ -264,8 +268,10 @@ class ParamTable:
         if 'cpp_type' in param and param['cpp_type'] == 'bool':
           if param['default'] == '1':
             self.original_table_data[param['name']] = 'true'
-          else:
+          elif param['default'] == '0':
             self.original_table_data[param['name']] = 'false'
+          else:
+            self.original_table_data[param['name']] = ''
         else:
           self.original_table_data[param['name']] = param['default']
 
@@ -306,13 +312,16 @@ class ParamTable:
 
       if 'cpp_type' in param and param['cpp_type'] == 'bool':
         value_item = QtGui.QComboBox()
+        value_item.addItem('')
         value_item.addItem('true')
         value_item.addItem('false')
 
         if value == '1':
-          value_item.setCurrentIndex(0)
-        else:
           value_item.setCurrentIndex(1)
+        elif value == '0':
+          value_item.setCurrentIndex(2)
+        else:
+          value_item.setCurrentIndex(0)
           
         self.table_widget.setCellWidget(row, 1, value_item)
       else:
