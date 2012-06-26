@@ -225,8 +225,8 @@ class TestHarness:
                custom_cmp = ' -f ' + os.path.join(test[TEST_DIR], test[CUSTOM_CMP])
             if test[USE_OLD_FLOOR]:
                old_floor = ' -use_old_floor'
-            command = self.moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F' + ' ' + ' '.join(test[EXODIFF_OPTS]) + str(test[ABS_ZERO]) + old_floor +  ' -t ' + str(test[REL_ERR]) \
-                      + ' ' + os.path.join(test[GOLD_DIR], test[TEST_DIR], file) + ' ' + os.path.join(test[TEST_DIR], file)
+            command = self.moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F' + ' ' + str(test[ABS_ZERO]) + old_floor + ' -t ' + str(test[REL_ERR]) \
+                      + ' ' + ' '.join(test[EXODIFF_OPTS]) + ' ' + os.path.join(test[GOLD_DIR], test[TEST_DIR], file) + ' ' + os.path.join(test[TEST_DIR], file)
             exo_output = runCommand(command)
 
             output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(test[EXODIFF_OPTS])
