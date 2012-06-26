@@ -57,6 +57,8 @@ class ExecuteWidget(QtGui.QWidget):
     QtCore.QObject.connect(self.run_button, QtCore.SIGNAL("clicked()"), self.clickedRun)
     self.command_layout.addWidget(self.run_button, alignment=Qt.AlignHCenter)
 
+    self.postprocessor_csv = QtGui.QCheckBox("Enable Postprocessor CSV Output")
+
     self.cwd_layout.addWidget(QtGui.QLabel("Current Working Directory:"))
     self.cwd_text = QtGui.QLineEdit()
     self.cwd_text.setReadOnly(True)
@@ -95,6 +97,7 @@ class ExecuteWidget(QtGui.QWidget):
 
     self.main_layout.addLayout(self.command_layout)
     self.main_layout.addLayout(self.cwd_layout)
+    self.main_layout.addWidget(self.postprocessor_csv, alignment=Qt.AlignHCenter)
     self.main_layout.addLayout(self.pb_layout)
     self.main_layout.addWidget(self.execution_text)
     self.main_layout.addLayout(self.button_layout)
@@ -153,6 +156,9 @@ class ExecuteWidget(QtGui.QWidget):
       command = command + ' --n-threads=' + self.threads_text.text()
       
     command += ' ' + self.other_options_text.text()
+
+    if self.postprocessor_csv.checkState() == Qt.Checked:
+      command += ' Output/postprocessor_csv=true '
 
     self.execution_text.verticalScrollBar().setValue(self.execution_text.verticalScrollBar().maximum())
 
