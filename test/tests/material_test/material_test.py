@@ -34,3 +34,7 @@ mat_cyclic_dep_error_test = { INPUT : 'mat_cyclic_coupling.i',
                               EXPECT_ERR : 'Cyclic dependency detected' }
 
 
+bnd_material_test = {
+  INPUT : 'bnd_material_test.i',
+  EXODIFF : ['bnd_material_test_out.e'],
+}
