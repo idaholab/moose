@@ -44,15 +44,25 @@ public:
   void setValue(Real val, int i, int j);
 
   /**
-   * Gets the value for the index specified.  Takes index = 1,2,3
+   *@return A Real value for the index specified.
+   *@param i is index of 1, 2, 3
+   *@param j is index of 1, 2, 3
    */
   Real getValue(int i, int j) const;
 
   Real rowDot(const unsigned int r, const libMesh::TypeVector<Real> & v) const;
 
+  /**
+   *rotates the tensor data given three Euler angles
+   */
   virtual void selfRotate(const Real a1, const Real a2, const Real a3);
 
-  virtual RankTwoTensor rotate(const Real a1, const Real a2, const Real a3) const;
+  /**
+   *@return A RankTwoTensor of the rotated data.
+   */ 
+  virtual RankTwoTensor rotate(const Real a1, const Real a2, const Real a3);
+
+  virtual void setRotationMatrix();
 
   void setFirstEulerAngle(const Real a1);
 
@@ -65,6 +75,8 @@ public:
   Real secondEulerAngle() const;
 
   Real thirdEulerAngle() const;
+
+  RankTwoTensor & operator= (const RankTwoTensor &a);
   
 
 protected:

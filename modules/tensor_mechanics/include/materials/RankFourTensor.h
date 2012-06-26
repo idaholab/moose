@@ -63,7 +63,9 @@ public:
 
   virtual void selfRotate(const Real a1, const Real a2, const Real a3);
 
-  virtual RankFourTensor rotate(const Real a1, const Real a2, const Real a3) const;
+  virtual RankFourTensor rotate(const Real a1, const Real a2, const Real a3);
+
+  virtual void setRotationMatrix();
 
   void setFirstEulerAngle(const Real a1);
 
@@ -76,6 +78,8 @@ public:
   Real secondEulerAngle() const;
 
   Real thirdEulerAngle() const;
+
+  RankFourTensor & operator= (const RankFourTensor &a);
   
   
 protected:

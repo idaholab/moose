@@ -47,16 +47,10 @@ LinearElasticMaterial::LinearElasticMaterial(const std::string & name,
   // fill in the local tensors from the input vector information
   _Cijkl.fillFromInputVector(_Cijkl_vector, _all_21);
   
-  //rotate the C_ijkl matrix 
-  // _Cijkl_matrix.rotate(_euler_angle_1,_euler_angle_2,_euler_angle_3);
+  //rotate the C_ijkl matrix original data
+  // to leave the original data, use the x = a.rotate() method instead
+  _Cijkl.selfRotate(_euler_angle_1,_euler_angle_2,_euler_angle_3);
   
-  //debugging
-  /*_Cijkl_matrix.show_r_matrix();
-    _Cijkl_matrix.show_dt_matrix();
-    if(libMesh::on_command_line("--debug") || libMesh::on_command_line("--debug-elasticity-Cijkl"))
-    {
-    libMesh::out << "Material " << this->name() << " on mesh block " << this->blockID() << " has _Cijkl_matrix:\n" << _Cijkl_matrix << "\n";
-    }*/
 }
 
 void
@@ -76,6 +70,7 @@ void LinearElasticMaterial::computeQpElasticityTensor()
 
 void LinearElasticMaterial::computeQpStrain()
 {
+  // ugly, could be cleaned up, but works
   _elastic_strain[_qp].setValue(_grad_disp_x[_qp](0), 1, 1);
   _elastic_strain[_qp].setValue(_grad_disp_y[_qp](1), 2, 2);
   _elastic_strain[_qp].setValue(_grad_disp_z[_qp](2), 3, 3);

@@ -97,16 +97,94 @@ RankTwoTensor::rowDot(const unsigned int r, const libMesh::TypeVector<Real> & v)
 void
 RankTwoTensor::selfRotate(const Real a1, const Real a2, const Real a3)
 {
+  setFirstEulerAngle(a1);
+  setSecondEulerAngle(a2);
+  setThirdEulerAngle(a3);
+  
+  setRotationMatrix();
+  
+  Real temp;
+
+  //slide down the endless for loop rainbow!
+  for(int i(0); i<3; i++)
+  {
+    for(int j(0); j<3; j++)
+    {
+      temp = 0.0;
+      for(int k(0); k<3; k++)
+      {
+        for(int l(0); l<3; l++)
+        {
+          temp += _rotation_matrix[i][k]*_rotation_matrix[j][l]*_vals[i][j];
+        }
+      }
+      _vals[i][j] = temp;
+    }
+  }
+
 }
 
 RankTwoTensor
-RankTwoTensor::rotate(const Real a1, const Real a2, const Real a3) const
+RankTwoTensor::rotate(const Real a1, const Real a2, const Real a3)
 {
   RankTwoTensor a;
+
+  setFirstEulerAngle(a1);
+  setSecondEulerAngle(a2);
+  setThirdEulerAngle(a3);
+
+  setRotationMatrix();
+
+  Real temp;
+  
+  for(int i(0); i<3; i++)
+  {
+    for(int j(0); j<3; j++)
+    {
+      temp = 0.0;
+      for(int k(0); k<3; k++)
+      {
+        for(int l(0); l<3; l++)
+        {
+          temp += _rotation_matrix[i][k]*_rotation_matrix[j][l]*_vals[i][j];
+        }
+      }
+      a.setValue(temp, i+1, j+1);
+    }
+  }
 
   return a;
 }
 
+void
+RankTwoTensor::setRotationMatrix()
+{
+  Real phi_1 = _euler_angle[0]*(libMesh::pi/180.0);
+  Real phi_2 = _euler_angle[1]*(libMesh::pi/180.0);
+  Real phi_3 = _euler_angle[2]*(libMesh::pi/180.0);
+
+  Real c1 = std::cos(phi_1);
+  Real c2 = std::cos(phi_2);
+  Real c3 = std::cos(phi_3);
+
+  Real s1 = std::sin(phi_1);
+  Real s2 = std::sin(phi_2);
+  Real s3 = std::sin(phi_3);
+
+//doing a Z1, X2, Z3 rotation
+  
+  _rotation_matrix[0][0] = c1*c3 - c2*s1*s3;
+  _rotation_matrix[0][1] = -c1*s3 - c2*c3*s1;
+  _rotation_matrix[0][2] = s1*s2;
+
+  _rotation_matrix[1][0] = c3*s1 + c1*c2*s3;
+  _rotation_matrix[1][1] = c1*c2*c3 - s1*s3;
+  _rotation_matrix[1][2] = -c1*s2;
+  
+  _rotation_matrix[2][0] = s2*s3;
+  _rotation_matrix[2][1] = c3*s2;
+  _rotation_matrix[2][2] = c2;
+}
 
 void
 RankTwoTensor::setFirstEulerAngle(const Real a1)
@@ -142,4 +220,13 @@ Real
 RankTwoTensor::thirdEulerAngle() const
 {
   return _euler_angle[2];
+}
+
+RankTwoTensor &
+RankTwoTensor::operator= (const RankTwoTensor &a)
+{
+ _vals = a._vals;
+ _euler_angle = a._euler_angle;
+ _rotation_matrix = a._rotation_matrix;
+ return *this;
 }

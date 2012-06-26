@@ -240,15 +240,121 @@ RankFourTensor::stiffness( const int i, const int j,
 void
 RankFourTensor::selfRotate(const Real a1, const Real a2, const Real a3)
 {
+  setFirstEulerAngle(a1);
+  setSecondEulerAngle(a2);
+  setThirdEulerAngle(a3);
   
+  setRotationMatrix();
+
+  Real temp;
+  
+  for(int i(0); i<3; i++)
+  {
+    for(int j(0); j<3; j++)
+    {
+      for(int k(0); k<3; k++)
+      {
+        for(int l(0); l<3; l++)
+        {
+          temp = 0.0;
+          for(int m(0); m<3; m++)
+          {
+            for(int n(0); n<3; n++)
+            {
+              for(int o(0); o<3; o++)
+              {
+                for(int p(0); p<3; p++)
+                {
+                  temp += _rotation_matrix[i][m]*_rotation_matrix[j][n]
+                    *_rotation_matrix[k][o]*_rotation_matrix[l][p]*_vals[m][n][o][p];
+                }
+              }
+            }
+          }
+          _vals[i][j][k][l] = temp;
+        }
+      }
+    }
+  }
+  //congratulations! you've reached the end of this endless loop.
+  //have some glitter!
 }
 
 RankFourTensor
-RankFourTensor::rotate(const Real a1, const Real a2, const Real a3) const
+RankFourTensor::rotate(const Real a1, const Real a2, const Real a3)
 {
   RankFourTensor a;
 
+  setFirstEulerAngle(a1);
+  setSecondEulerAngle(a2);
+  setThirdEulerAngle(a3);
+  
+  setRotationMatrix();
+
+  Real temp;
+  
+  for(int i(0); i<3; i++)
+  {
+    for(int j(0); j<3; j++)
+    {
+      for(int k(0); k<3; k++)
+      {
+        for(int l(0); l<3; l++)
+        {
+          temp = 0.0;
+          for(int m(0); m<3; m++)
+          {
+            for(int n(0); n<3; n++)
+            {
+              for(int o(0); o<3; o++)
+              {
+                for(int p(0); p<3; p++)
+                {
+                  temp += _rotation_matrix[i][m]*_rotation_matrix[j][n]
+                    *_rotation_matrix[k][o]*_rotation_matrix[l][p]*_vals[m][n][o][p];
+                }
+              }
+            }
+          }
+          a.setValue(temp, i+1, j+1, k+1, l+1);
+        }
+      }
+    }
+  }
+  //congratulations! you've reached the end of this endless loop.
+  //have some more glitter!
+  
   return a;
+}
+
+void
+RankFourTensor::setRotationMatrix()
+{
+  Real phi_1 = _euler_angle[0]*(libMesh::pi/180.0);
+  Real phi_2 = _euler_angle[1]*(libMesh::pi/180.0);
+  Real phi_3 = _euler_angle[2]*(libMesh::pi/180.0);
+
+  Real c1 = std::cos(phi_1);
+  Real c2 = std::cos(phi_2);
+  Real c3 = std::cos(phi_3);
+
+  Real s1 = std::sin(phi_1);
+  Real s2 = std::sin(phi_2);
+  Real s3 = std::sin(phi_3);
+
+//doing a Z1, X2, Z3 rotation
+  
+  _rotation_matrix[0][0] = c1*c3 - c2*s1*s3;
+  _rotation_matrix[0][1] = -c1*s3 - c2*c3*s1;
+  _rotation_matrix[0][2] = s1*s2;
+
+  _rotation_matrix[1][0] = c3*s1 + c1*c2*s3;
+  _rotation_matrix[1][1] = c1*c2*c3 - s1*s3;
+  _rotation_matrix[1][2] = -c1*s2;
+  
+  _rotation_matrix[2][0] = s2*s3;
+  _rotation_matrix[2][1] = c3*s2;
+  _rotation_matrix[2][2] = c2;
 }
 
 
@@ -286,4 +392,13 @@ Real
 RankFourTensor::thirdEulerAngle() const
 {
   return _euler_angle[2];
+}
+
+RankFourTensor &
+RankFourTensor::operator= (const RankFourTensor &a)
+{
+ _vals = a._vals;
+ _euler_angle = a._euler_angle;
+ _rotation_matrix = a._rotation_matrix;
+ return *this; 
 }
