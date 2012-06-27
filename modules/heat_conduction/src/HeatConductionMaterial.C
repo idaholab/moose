@@ -7,8 +7,8 @@ InputParameters validParams<HeatConductionMaterial>()
 
   params.addCoupledVar("temp", "Coupled Temperature");
 
-  params.set<Real>("thermal_conductivity")=1.0;
-  params.set<Real>("specific_heat")=1.0;
+  params.addRequiredParam<Real>("thermal_conductivity", "The thermal conductivity value");
+  params.addRequiredParam<Real>("specific_heat", "The specific heat value");
 
   return params;
 }

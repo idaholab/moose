@@ -337,6 +337,7 @@
     type = HeatConductionMaterial
     block = '1 2'
     thermal_conductivity = 1.0
+    specific_heat = 1.0
   [../]
 
   [./density]
