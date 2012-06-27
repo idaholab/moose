@@ -8,23 +8,29 @@ try:
 except AttributeError:
   _fromUtf8 = lambda s: s
 
-class selctionWidget(QtGui.QWidget):
-  def __init__(self):
-    QtGui.QWidget.__init__(self)
-    self.main_layout = QtGui.QHBoxLayout()
-    self.setLayout(self.main_layout)
-
-    self.line_edit = QtGui.QLineEdit()
-    self.combo_box = QtGui.QComboBox()
-
-    self.main_layout.addWidget(self.line_edit)
-    self.main_layout.addWidget(self.combo_box)
-
-  def setOptions(options):
-    self.combo_box.addItem('')
+class OptionsWidget(QtGui.QComboBox):
+  def __init__(self, table_widget, row, options):
+    QtGui.QComboBox.__init__(self)
+    self.table_widget = table_widget
+    self.row = row
 
     for option in options:
-      self.combo_box.addItem(option)
+      self.addItem(option)
+
+    self.setCurrentIndex(-1)  
+    self.currentIndexChanged[str].connect(self.itemClicked)
+
+  def itemClicked(self, item):
+    table_value_item = self.table_widget.item(self.row,1)
+
+    if table_value_item.text() == '':
+      table_value_item.setText(item)
+    else:
+      table_value_item.setText(str(table_value_item.text()).strip("'") + ' ' + item)
+  
+    self.currentIndexChanged[str].disconnect(self.itemClicked)
+    self.setCurrentIndex(-1)
+    self.currentIndexChanged[str].connect(self.itemClicked)
 
 class ParamTable:
   def __init__(self, main_data, action_syntax, type_options, incoming_data, main_layout, parent_class, already_has_parent_params):
@@ -51,10 +57,11 @@ class ParamTable:
     
     self.init_menu(self.layoutV)
     self.table_widget = QtGui.QTableWidget()
-    self.table_widget.setColumnCount(3)
+    self.table_widget.setColumnCount(4)
     self.table_widget.setHorizontalHeaderItem(0, QtGui.QTableWidgetItem('Name'))
     self.table_widget.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem('Value'))
-    self.table_widget.setHorizontalHeaderItem(2, QtGui.QTableWidgetItem('Description'))
+    self.table_widget.setHorizontalHeaderItem(2, QtGui.QTableWidgetItem('Options'))
+    self.table_widget.setHorizontalHeaderItem(3, QtGui.QTableWidgetItem('Description'))
     self.table_widget.verticalHeader().setVisible(False)
     self.layoutV.addWidget(self.table_widget)
 
@@ -154,7 +161,10 @@ class ParamTable:
         
       if param_value == '':
         continue
-      
+
+      if ' ' in param_value:
+        param_value = "'"+param_value.strip("'")+"'"
+        
       if not param_name in self.original_table_data or self.original_table_data[param_name] != param_value: #If we changed it - definitely include it
           the_data[param_name] = param_value
       else:
@@ -356,6 +366,10 @@ class ParamTable:
         value_item = QtGui.QTableWidgetItem(value)
         self.table_widget.setItem(row, 1, value_item)
 
+      if 'cpp_type' in param and param['cpp_type'] == 'CoupledVarsType':
+        options_item = OptionsWidget(self.table_widget,row,['stuff','junk'])
+        self.table_widget.setCellWidget(row, 2, options_item)
+
       doc_item = QtGui.QTableWidgetItem(param['description'])
       
       name_item.setFlags(QtCore.Qt.ItemIsEnabled)
@@ -365,7 +379,7 @@ class ParamTable:
         value_item.setFlags(QtCore.Qt.NoItemFlags)
 
       self.table_widget.setItem(row, 0, name_item)
-      self.table_widget.setItem(row, 2, doc_item)
+      self.table_widget.setItem(row, 3, doc_item)
       row += 1
 
     self.table_widget.resizeColumnsToContents()
