@@ -19,6 +19,7 @@ class ParamTable:
     else:
       self.subblocks = None
       
+    self.param_names = {}      
     self.single_item = single_item
     self.original_table_data = {}
     self.incoming_data = incoming_data
@@ -87,7 +88,7 @@ class ParamTable:
 
 
   ### Takes a dictionary containing name value pairs
-  def fillTableWithData(self, the_data, overwrite_type=False):
+  def fillTableWithData(self, the_data, overwrite_type=False, old_params={}):
 #     for name,value in the_data.items():
 #       for i in xrange(0,self.table_widget.rowCount()):
 #         row_name = str(self.table_widget.item(i,0).text())
@@ -117,7 +118,7 @@ class ParamTable:
         used_params.append(row_name)
     # Now look to see if we have more data that wasn't in YAML and add additional rows for that
     for name,value in the_data.items():
-      if name not in used_params and name != 'type':
+      if name not in used_params and name != 'type' and name not in old_params:
         self.table_widget.insertRow(self.table_widget.rowCount())
         name_item = QtGui.QTableWidgetItem(name)
         value_item = QtGui.QTableWidgetItem(value)
@@ -133,6 +134,9 @@ class ParamTable:
         param_value = self.table_widget.cellWidget(i,1).currentText()
       else:
         param_value = str(self.table_widget.item(i,1).text())
+        
+      if param_value == '':
+        continue
       
       if not param_name in self.original_table_data or self.original_table_data[param_name] != param_value: #If we changed it - definitely include it
           the_data[param_name] = param_value
@@ -189,9 +193,13 @@ class ParamTable:
 
   def item_clicked(self, item):
     saved_data = {}
+    saved_params = {}
     # Save off the current contents to try to restore it after swapping out the params
-    if self.original_table_data: #This will only have some length after the first time through
-      saved_data = self.tableToDict(True) # Pass true so we only save off stuff the user has entered
+#    if self.original_table_data: #This will only have some length after the first time through
+    saved_params = self.param_names #Save off the params from the previous YAML
+    saved_data = self.tableToDict(True) # Pass true so we only save off stuff the user has entered
+
+    self.table_widget.clearContents()
 
     # Build the Table
     the_table_data = []
@@ -274,7 +282,7 @@ class ParamTable:
             self.original_table_data[param['name']] = ''
         else:
           self.original_table_data[param['name']] = param['default']
-
+          
         the_table_data.append(param)
         self.param_is_required[param['name']] = param['required']
 
@@ -283,14 +291,14 @@ class ParamTable:
 
     row = 0
 
-    param_names = []
+    self.param_names = []
     name_to_param = {}
 
     for param in the_table_data:
-      param_names.append(param['name'])
+      self.param_names.append(param['name'])
       name_to_param[param['name']] = param
 
-    for param_name in sorted(param_names):
+    for param_name in sorted(self.param_names):
       param = name_to_param[param_name]
       # Populate table with data:
       name_item = QtGui.QTableWidgetItem(param['name'])
@@ -344,7 +352,7 @@ class ParamTable:
 
     # Try to restore saved data
     if len(saved_data):
-      self.fillTableWithData(saved_data)
+      self.fillTableWithData(saved_data, old_params=saved_params)
     
     self.table_widget.cellChanged.connect(self.cellChanged)
     
