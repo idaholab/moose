@@ -88,7 +88,7 @@ class PostprocessorWidget(QtGui.QWidget):
         
                 self.comboWidget.setCurrentIndex(-1)
             else:
-                self.clearClick()
+                self.timer2.start(1000)
         
     
     
