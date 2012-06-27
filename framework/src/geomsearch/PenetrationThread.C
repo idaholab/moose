@@ -425,7 +425,7 @@ PenetrationThread::competeInteractions(PenetrationLocator::PenetrationInfo * pi1
                                        PenetrationLocator::PenetrationInfo * pi2)
 {
 
-  CompeteInteractionResult result;
+  CompeteInteractionResult result = NEITHER_WINS;
 
   if (pi1->_tangential_distance > _tangential_tolerance &&
       pi2->_tangential_distance > _tangential_tolerance) //out of tol on both faces

@@ -32,11 +32,11 @@ UserObject::~UserObject()
 }
 
 void
-UserObject::load(std::ifstream & stream)
+UserObject::load(std::ifstream & /*stream*/)
 {
 }
 
 void
-UserObject::store(std::ofstream & stream)
+UserObject::store(std::ofstream & /*stream*/)
 {
 }

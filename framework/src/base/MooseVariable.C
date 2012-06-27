@@ -378,7 +378,7 @@ MooseVariable::computeElemValues()
 
   Real phi_local = 0;
   const RealGradient * dphi_qp = NULL;
-  const RealTensor * d2phi_local;
+  const RealTensor * d2phi_local = NULL;
 
   RealGradient * grad_u_qp = NULL;
 
@@ -564,8 +564,8 @@ MooseVariable::computeElemValuesFace()
 
   int idx;
   Real soln_local;
-  Real soln_old_local;
-  Real soln_older_local;
+  Real soln_old_local=0;
+  Real soln_older_local=0;
 //  Real u_dot_local;
 //  Real du_dot_du_local;
 
@@ -702,8 +702,8 @@ MooseVariable::computeNeighborValuesFace()
 
   int idx;
   Real soln_local;
-  Real soln_old_local;
-  Real soln_older_local;
+  Real soln_old_local=0;
+  Real soln_older_local=0;
 
   Real phi_local;
   RealGradient dphi_local;
@@ -829,8 +829,8 @@ MooseVariable::computeNeighborValues()
 
   int idx;
   Real soln_local;
-  Real soln_old_local;
-  Real soln_older_local;
+  Real soln_old_local=0;
+  Real soln_older_local=0;
 
   Real phi_local;
   RealGradient dphi_local;

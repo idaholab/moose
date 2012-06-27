@@ -73,11 +73,11 @@ void BilinearInterpolation::getNeighborIndices(std::vector<Real> inArr, Real x ,
 Real BilinearInterpolation::sample(Real xcoord, Real ycoord)
 {
 	//first find 4 neighboring points
-	int lx; //index of x coordinate of adjacent grid point to left of P
-	int ux; //index of x coordinate of adjacent grid point to right of P
+	int lx=0; //index of x coordinate of adjacent grid point to left of P
+	int ux=0; //index of x coordinate of adjacent grid point to right of P
 	getNeighborIndices( _xAxis, xcoord, lx, ux);
-	int ly; //index of y coordinate of adjacent grid point below P
-	int uy; //index of y coordinate of adjacent grid point above P
+	int ly=0; //index of y coordinate of adjacent grid point below P
+	int uy=0; //index of y coordinate of adjacent grid point above P
 	getNeighborIndices( _yAxis, ycoord, ly, uy);
 	Real fQ11 = _zSurface(ly, lx);
 	Real fQ21 = _zSurface(ly, ux);

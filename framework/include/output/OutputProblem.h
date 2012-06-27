@@ -82,8 +82,8 @@ public:
   virtual Real & getPostprocessorValue(const std::string & /*name*/, THREAD_ID /*tid*/ = 0) { return _dummy; } // TODO
 
   // Function /////
-  virtual void addFunction(std::string type, const std::string & name, InputParameters parameters) { mooseError("Can't add Functions to the output problem"); }
-  virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0) { mooseError("Can't get Functions from the OutputProblem!"); }
+  virtual void addFunction(std::string /*type*/, const std::string & /*name*/, InputParameters /*parameters*/) { mooseError("Can't add Functions to the output problem"); }
+  virtual Function & getFunction(const std::string & /*name*/, THREAD_ID /*tid*/ = 0) { mooseError("Can't get Functions from the OutputProblem!"); }
 
   // Transient /////
   virtual void transient(bool /*trans*/) {}

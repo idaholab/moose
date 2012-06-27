@@ -143,24 +143,26 @@ MooseApp::parseCommandLine()
   std::string input_filename;
   std::string argument;
 
+  if (_command_line.search("ErrorUnused"))
+    setCheckUnusedFlag(true);
+  else if (_command_line.search("WarnUnused"))
+    setCheckUnusedFlag(false);
+
   if (_command_line.search("Help"))
   {
     _command_line.printUsage();
-    exit(0);
   }
-  if (_command_line.search("Dump", &argument))
+  else if (_command_line.search("Dump", &argument))
   {
     _parser.initSyntaxFormatter(Parser::INPUT_FILE, true);
     _parser.buildFullTree(argument);
-    exit(0);
   }
-  if (_command_line.search("YAML", &argument))
+  else if (_command_line.search("YAML", &argument))
   {
     _parser.initSyntaxFormatter(Parser::YAML, true);
     _parser.buildFullTree(argument);
-    exit(0);
   }
-  if (_command_line.search("Syntax"))
+  else if (_command_line.search("Syntax"))
   {
     std::multimap<std::string, Syntax::ActionInfo> syntax = _syntax.getAssociatedActions();
     std::cout << "**START SYNTAX DATA**\n";
@@ -169,15 +171,8 @@ MooseApp::parseCommandLine()
       std::cout << it->first << "\n";
     }
     std::cout << "**END SYNTAX DATA**\n" << std::endl;
-    exit(0);
   }
-
-  if (_command_line.search("ErrorUnused"))
-    setCheckUnusedFlag(true);
-  else if (_command_line.search("WarnUnused"))
-    setCheckUnusedFlag(false);
-
-  if (_command_line.search("InputFile", &input_filename))
+  else if (_command_line.search("InputFile", &input_filename))
   {
     _input_filename = input_filename;
     runInputFile();

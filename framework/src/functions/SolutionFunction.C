@@ -213,7 +213,7 @@ SolutionFunction::updateExodusBracketingTimeIndices(Real time)
   }
   else
   {
-    for (unsigned i=0; i<num_exo_times-1; ++i)
+    for (int i=0; i<num_exo_times-1; ++i)
     {
       if (time  <= (*_exodus_times)[i+1])
       {

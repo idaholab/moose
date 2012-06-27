@@ -55,5 +55,6 @@ test_skip_depend_test = { INPUT : '2d_diffusion_test.i',
 test_threads_test = { INPUT : '2d_diffusion_test2.i',
                        EXODIFF : ['out2.e'],
                        MIN_THREADS : 4,
-                       MAX_THREADS : 4
+                       MAX_THREADS : 4,
+                      PREREQ : 'test_method_check'
 }
