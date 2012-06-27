@@ -18,10 +18,15 @@ class PostprocessorWidget(QtGui.QWidget):
         
         # uses the postprocessor selected by the user to pass the information required for plotting
         self.comboWidget = QtGui.QComboBox(self)
+        self.getFileName()
         self.fillComboWidget()
         self.comboWidget.activated[str].connect(self.createPlot)
         self.plotObjectDict = {}
         self.plotDataDict = {}
+        self.counter = 0
+        self.plotIndex = 0
+        
+        
         
         # adds a button to the widget that will be used to clear plot selectons
         self.clearButton = QtGui.QPushButton("Clear")
@@ -41,10 +46,10 @@ class PostprocessorWidget(QtGui.QWidget):
         
         # timer feature that updates all of the plots
         self.timer = QtCore.QTimer(self)
+        self.timer.stop()
+        self.timer2 = QtCore.QTimer(self)
         QtCore.QObject.connect(self.execute_widget.run_button, QtCore.SIGNAL("clicked()"), self.runClicked)
-        QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.updatePlots)
-        self.timer.start(500)
-        
+        QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.updatePlots)        
         
         # sets the layout for the widget
         self.Layout = QtGui.QVBoxLayout(self)
@@ -70,34 +75,47 @@ class PostprocessorWidget(QtGui.QWidget):
     def fillComboWidget(self):
         
         if self.currentFile and os.path.exists(self.currentFile):
+            if os.path.getsize(self.currentFile) > 0:
         
-            self.names = open(self.currentFile,'rb').readline()
-            self.names = self.names.strip()
-            self.names = self.names.split(',')
+                self.names = open(self.currentFile,'rb').readline()
+                self.names = self.names.strip()
+                self.names = self.names.split(',')
+            
+                    # the PP names are used to populate a dropdown menu 
+                    # the user uses  this menu to select specific graphs to be monitored
+                for index in range(len(self.names)-1):
+                    self.comboWidget.addItem(self.names[index+1])
         
-        # the PP names are used to populate a dropdown menu 
-        # the user uses  this menu to select specific graphs to be monitored
-            for index in range(len(self.names)-1):
-                self.comboWidget.addItem(self.names[index+1])
+                self.comboWidget.setCurrentIndex(-1)
+            else:
+                self.clearClick()
         
-            self.comboWidget.setCurrentIndex(-1)
-      
     
     
     def createPlot(self, plotName):
         
         # when this method is called a new item is added to the plots dictionary
         # then the getPlotData function is called to begin the first plot
-       
+        self.timer.start(500)
         time = [0]
         postData = [0]
         plotData = [time, postData]
         self.plotObjectDict[plotName] = MPLPlotter(plotData,plotName)
         self.plotDataDict[plotName] = [plotData]
+        self.hbox = QtGui.QHBoxLayout()
+
         
-        
-        # adds a layout to the PPD plot
-        self.scrollLayout.addRow(self.plotObjectDict[plotName])
+        if (self.counter == 0):
+            self.hbox.addWidget(self.plotObjectDict[plotName])
+            # adds a layout to the PPD plot
+            self.scrollLayout.addRow(self.hbox)
+            self.counter = 1
+        else:
+            self.scrollLayout.itemAt(self.plotIndex).addWidget(self.plotObjectDict[plotName])
+            self.plotIndex += 1
+            self.counter = 0
+
+
         self.updatePlots()
     
     def updatePlots(self):
@@ -106,21 +124,25 @@ class PostprocessorWidget(QtGui.QWidget):
         
         
         if self.currentFile and os.path.exists(self.currentFile):
-            self.data = numpy.genfromtxt(self.currentFile,
+            if os.path.getsize(self.currentFile) > 0:
+                self.data = numpy.genfromtxt(self.currentFile,
                                 delimiter = ',' , names = True)
-            self.time = []
+                self.time = []
         
-            for line in self.data:
-                self.time.append(line[0])
+                for line in self.data:
+
+                    self.time.append(line[0])
             
-            for key in self.plotObjectDict.keys():
-                self.postData = []
-                self.getPlotData(key)
-                plotData = [self.time, self.postData]
-                self.plotDataDict[key] = plotData
+                for key in self.plotObjectDict.keys():
+                    self.postData = []
+                    self.getPlotData(key)
+                    plotData = [self.time, self.postData]
+                    self.plotDataDict[key] = plotData
     
-            for key in self.plotDataDict:
-                self.plotObjectDict[key].setPlotData(self.plotDataDict[key],key)
+                for key in self.plotDataDict:
+                        self.plotObjectDict[key].setPlotData(self.plotDataDict[key],key)
+                    
+
 
     
     def getPlotData(self, plotName):
@@ -132,12 +154,18 @@ class PostprocessorWidget(QtGui.QWidget):
     
     def runClicked(self):
         QtCore.QObject.connect(self.execute_widget.proc,QtCore.SIGNAL("finished(int)"),self.stopPlotting)
-        self.clearClick()
+        
+        QtCore.QObject.connect(self.timer2, QtCore.SIGNAL("timeout()"), self.clearClick)
+        self.timer2.start(1000)
 
     def clearClick(self):
+        self.timer2.stop()
         for i in range(self.scrollLayout.count()):
-            self.scrollLayout.itemAt(i).widget().close()
+            for j in range(self.scrollLayout.itemAt(i).count()):
+                self.scrollLayout.itemAt(i).itemAt(j).widget().close()
+            self.scrollLayout.itemAt(i).removeItem(self.hbox)
         self.plotObjectDict = {}
+        self.counter = 0
         self.plotDataDict = {}
         self.comboWidget.clear()
         self.getFileName()
