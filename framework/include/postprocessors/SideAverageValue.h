@@ -33,6 +33,7 @@ class SideAverageValue : public SideIntegral
 {
 public:
   SideAverageValue(const std::string & name, InputParameters parameters);
+  virtual ~SideAverageValue(){}
 
   virtual void initialize();
   virtual void execute();
