@@ -32,7 +32,7 @@ AxisymmetricRZ::computeStrain( const unsigned qp,
 {
   strain_increment.xx() = _grad_disp_r[qp](0);
   strain_increment.yy() = _grad_disp_z[qp](1);
-  strain_increment.zz() = (_q_point[qp](0) != 0.0 ? _disp_r[qp]/_q_point[qp](0) : 0.0);
+  strain_increment.zz() = _disp_r[qp]/_q_point[qp](0);
   strain_increment.xy() = 0.5*(_grad_disp_r[qp](1) + _grad_disp_z[qp](0));
   if (_large_strain)
   {
