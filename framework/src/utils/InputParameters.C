@@ -202,3 +202,12 @@ InputParameters::checkParams(const std::string &prefix) const
   }
 }
 
+std::string
+InputParameters::type(const std::string &name)
+{
+  if (_coupled_vars.find(name) != _coupled_vars.end())
+    return "CoupledVarsType";
+  else
+    return _values[name]->type();
+}
+

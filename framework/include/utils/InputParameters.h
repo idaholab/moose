@@ -146,6 +146,11 @@ public:
   bool areAllRequiredParamsValid() const;
 
   /**
+   * Prints the type of the requested parameter by name
+   */
+  std::string type(const std::string &name);
+
+  /**
    * Returns a boolean indicating whether the specified parameter is private or not
    */
   bool isPrivate(const std::string &name) const;

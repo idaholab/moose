@@ -77,7 +77,7 @@ YAMLFormatter::printParams(InputParameters &params, short depth, const std::stri
     Parser::escape(doc);
     oss << tmp_str;
     // Print the type
-    oss << "\n" << indent << "    cpp_type: " << iter->second->type() << "\n";
+    oss << "\n" << indent << "    cpp_type: " << params.type(iter->first) << "\n";
     oss << "\n" << indent << "    description: |\n      " << indent
          << doc << "\n";
   }
