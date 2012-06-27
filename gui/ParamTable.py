@@ -8,11 +8,29 @@ try:
 except AttributeError:
   _fromUtf8 = lambda s: s
 
+class selctionWidget(QtGui.QWidget):
+  def __init__(self):
+    QtGui.QWidget.__init__(self)
+    self.main_layout = QtGui.QHBoxLayout()
+    self.setLayout(self.main_layout)
+
+    self.line_edit = QtGui.QLineEdit()
+    self.combo_box = QtGui.QComboBox()
+
+    self.main_layout.addWidget(self.line_edit)
+    self.main_layout.addWidget(self.combo_box)
+
+  def setOptions(options):
+    self.combo_box.addItem('')
+
+    for option in options:
+      self.combo_box.addItem(option)
 
 class ParamTable:
-  def __init__(self, main_data, action_syntax, single_item, incoming_data, main_layout, parent_class, already_has_parent_params):
+  def __init__(self, main_data, action_syntax, type_options, incoming_data, main_layout, parent_class, already_has_parent_params):
     self.main_data = main_data
     self.action_syntax = action_syntax
+    self.type_options = type_options
 
     if main_data and 'subblocks' in main_data:
       self.subblocks = main_data['subblocks']
@@ -20,7 +38,6 @@ class ParamTable:
       self.subblocks = None
       
     self.param_names = {}      
-    self.single_item = single_item
     self.original_table_data = {}
     self.incoming_data = incoming_data
     self.main_layout = main_layout
@@ -318,6 +335,9 @@ class ParamTable:
 
       value_item = None
 
+      if 'cpp_type' in param:
+        print param['cpp_type']
+        
       if 'cpp_type' in param and param['cpp_type'] == 'bool':
         value_item = QtGui.QComboBox()
         value_item.addItem('')
