@@ -23,7 +23,11 @@ UserObjectWarehouse::UserObjectWarehouse()
 UserObjectWarehouse::~UserObjectWarehouse()
 {
   for (std::vector<UserObject *>::iterator it = _user_objects.begin(); it != _user_objects.end(); ++it)
-    delete (*it);
+  {
+    UserObject * uo = *it;
+    uo->destroy();
+    delete uo;
+  }
 }
 
 bool
