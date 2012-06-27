@@ -17,6 +17,8 @@ class PostprocessorWidget(QtGui.QWidget):
         self.currentFile = None
         
         # uses the postprocessor selected by the user to pass the information required for plotting
+        
+        self.cwd = os.getcwd()
         self.comboWidget = QtGui.QComboBox(self)
         self.getFileName()
         self.fillComboWidget()
@@ -32,6 +34,14 @@ class PostprocessorWidget(QtGui.QWidget):
         self.clearButton = QtGui.QPushButton("Clear")
         self.clearButton.resize(self.clearButton.sizeHint())
         self.clearButton.clicked.connect(self.clearClick)
+        # adds an open box to the widget
+        self.openButton = QtGui.QPushButton("Open")
+        self.openButton.resize(self.clearButton.sizeHint())
+        self.openButton.clicked.connect(self.openClick)
+            
+        self.mainHBox = QtGui.QHBoxLayout()
+        self.mainHBox.addWidget(self.openButton)
+        self.mainHBox.addWidget(self.clearButton)
 
         # adds a scroll layout to the main widget so all of the plots don't take up too much space
         # scroll area widget contents - layout
@@ -55,14 +65,14 @@ class PostprocessorWidget(QtGui.QWidget):
         self.Layout = QtGui.QVBoxLayout(self)
         self.Layout.addWidget(self.comboWidget)
         self.Layout.addWidget(self.scrollArea)
-        self.Layout.addWidget(self.clearButton)
+        self.Layout.addLayout(self.mainHBox)
 
    
     
     def getFileName(self):
         
         output_item = self.input_file_widget.tree_widget.findItems("Output", QtCore.Qt.MatchExactly)[0]
-        self.cwd = os.getcwd()
+
         self.currentFile = self.cwd +'/peacock_run_tmp_out.csv'
     
         if output_item:
@@ -125,8 +135,7 @@ class PostprocessorWidget(QtGui.QWidget):
         
         if self.currentFile and os.path.exists(self.currentFile):
             if os.path.getsize(self.currentFile) > 0:
-                self.data = numpy.genfromtxt(self.currentFile,
-                                delimiter = ',' , names = True)
+                self.data = numpy.genfromtxt(self.currentFile,delimiter = ',' , names = True)
                 self.time = []
         
                 for line in self.data:
@@ -157,7 +166,26 @@ class PostprocessorWidget(QtGui.QWidget):
         
         QtCore.QObject.connect(self.timer2, QtCore.SIGNAL("timeout()"), self.clearClick)
         self.timer2.start(1000)
-
+    
+    
+    def openClick(self):
+        
+        file_name = QtGui.QFileDialog.getOpenFileName(self, "Open CSV File", "~/", "CSV Files (*.csv)")
+        if file_name:
+            self.currentFile = str(file_name)
+            self.timer2.stop()
+            self.timer.stop()
+            for i in range(self.scrollLayout.count()):
+                for j in range(self.scrollLayout.itemAt(i).count()):
+                    self.scrollLayout.itemAt(i).itemAt(j).widget().close()
+                self.scrollLayout.itemAt(i).removeItem(self.hbox)
+            self.plotObjectDict = {}
+            self.counter = 0
+            self.plotDataDict = {}
+            self.comboWidget.clear()
+            self.fillComboWidget()
+            self.comboWidget.setCurrentIndex(-1)
+    
     def clearClick(self):
         self.timer2.stop()
         for i in range(self.scrollLayout.count()):
