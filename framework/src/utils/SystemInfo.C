@@ -40,7 +40,7 @@ SystemInfo::getInfo()
 
   // Repository Revision
   oss << "Framework Information:\n";
-  oss << std::setw(25) << "SVN Revion: " << HERD_REVISION << "\n";
+  oss << std::setw(25) << "SVN Revision: " << HERD_REVISION << "\n";
 #ifdef LIBMESH_DETECTED_PETSC_VERSION_MAJOR
   oss << std::setw(25) << "PETSc Version: "
       << LIBMESH_DETECTED_PETSC_VERSION_MAJOR << '.'
