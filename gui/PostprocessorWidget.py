@@ -20,7 +20,6 @@ class PostprocessorWidget(QtGui.QWidget):
         
         self.cwd = os.getcwd()
         self.comboWidget = QtGui.QComboBox(self)
-        self.getFileName()
         self.fillComboWidget()
         self.comboWidget.activated[str].connect(self.createPlot)
         self.plotObjectDict = {}
