@@ -206,7 +206,7 @@ std::string
 InputParameters::type(const std::string &name)
 {
   if (_coupled_vars.find(name) != _coupled_vars.end())
-    return "CoupledVarsType";
+    return "std::vector<VariableName>";
   else
     return _values[name]->type();
 }
