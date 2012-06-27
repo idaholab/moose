@@ -33,7 +33,7 @@ class OptionsWidget(QtGui.QComboBox):
     self.currentIndexChanged[str].connect(self.itemClicked)
 
 class ParamTable:
-  def __init__(self, main_data, action_syntax, type_options, incoming_data, main_layout, parent_class, already_has_parent_params):
+  def __init__(self, main_data, action_syntax, single_options, incoming_data, main_layout, parent_class, already_has_parent_params, type_options):
     self.main_data = main_data
     self.action_syntax = action_syntax
     self.type_options = type_options
@@ -257,8 +257,13 @@ class ParamTable:
                 self.original_table_data[param['name']] = ''
             else:
               self.original_table_data[param['name']] = param['default']
+              
             if param['name'] == 'type':
               param['default'] = new_text['name'].split('/').pop()
+
+            if param['name'] == 'variable':
+              param['cpp_type'] = 'VariableName'
+              
             the_table_data.append(param)
             self.param_is_required[param['name']] = param['required']
           break #- can't break here because there might be more
@@ -284,6 +289,10 @@ class ParamTable:
                         self.original_table_data[param['name']] = ''
                     else:
                       self.original_table_data[param['name']] = param['default']
+
+                    if param['name'] == 'variable':
+                      param['cpp_type'] = 'VariableName'
+
                     the_table_data.append(param)
                     self.param_is_required[param['name']] = param['required']
           if found_it:
@@ -309,6 +318,9 @@ class ParamTable:
             self.original_table_data[param['name']] = ''
         else:
           self.original_table_data[param['name']] = param['default']
+
+        if param['name'] == 'variable':
+          param['cpp_type'] = 'VariableName'
           
         the_table_data.append(param)
         self.param_is_required[param['name']] = param['required']
@@ -345,9 +357,6 @@ class ParamTable:
 
       value_item = None
 
-      if 'cpp_type' in param:
-        print param['cpp_type']
-        
       if 'cpp_type' in param and param['cpp_type'] == 'bool':
         value_item = QtGui.QComboBox()
         value_item.addItem('')
@@ -366,8 +375,8 @@ class ParamTable:
         value_item = QtGui.QTableWidgetItem(value)
         self.table_widget.setItem(row, 1, value_item)
 
-      if 'cpp_type' in param and param['cpp_type'] == 'CoupledVarsType':
-        options_item = OptionsWidget(self.table_widget,row,['stuff','junk'])
+      if 'cpp_type' in param and param['cpp_type'] in self.type_options:
+        options_item = OptionsWidget(self.table_widget,row,self.type_options[param['cpp_type']])
         self.table_widget.setCellWidget(row, 2, options_item)
 
       doc_item = QtGui.QTableWidgetItem(param['description'])

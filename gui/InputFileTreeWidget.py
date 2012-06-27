@@ -178,6 +178,37 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
             child = parent.topLevelItem(i)
           self._recursivelyAddTreeItems(split_path[1:], child)
 
+  def _getChildNames(self, parent):
+    try: # This will fail when we're dealing with the QTreeWidget itself
+      num_children = parent.childCount()
+    except:
+      num_children = parent.topLevelItemCount()
+
+    children_names = []
+
+    for i in range(num_children):
+      child = None
+      try: # This will fail when we're dealing with the QTreeWidget itself
+        child = parent.child(i)
+      except:
+        child = parent.topLevelItem(i)
+        
+      children_names.append(child.text(0))
+      
+    return children_names
+  
+  def _typeOptions(self):
+    type_options = {}
+    variables_item = self.input_file_widget.tree_widget.findItems("Variables", QtCore.Qt.MatchExactly)[0]
+
+    variable_names = self._getChildNames(variables_item)
+
+    if len(variable_names):
+      type_options['std::vector<VariableName>'] = variable_names
+      type_options['VariableName'] = variable_names
+      
+    return type_options
+    
   def _doubleClickedItem(self, item, column):
     this_path = self.generatePathFromItem(item)
 
@@ -199,7 +230,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         parent_path = '/' + self.action_syntax.getPath(parent_path)
       yaml_entry = self.input_file_widget.yaml_data.findYamlEntry(parent_path)
 
-      new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, False)
+      new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, False, self._typeOptions())
 
       if item.table_data:
         new_gui.incoming_data = item.table_data
@@ -231,7 +262,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
     yaml_entry = self.input_file_widget.yaml_data.findYamlEntry(this_path)
 
-    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, False)
+    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, False, self._typeOptions())
     if self.new_gui.exec_():
       table_data = self.new_gui.result()
       new_child = QtGui.QTreeWidgetItem(item)
