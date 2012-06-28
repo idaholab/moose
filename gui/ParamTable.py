@@ -9,13 +9,14 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class OptionsWidget(QtGui.QComboBox):
-  def __init__(self, table_widget, row, options):
+  def __init__(self, table_widget, row, options, is_vector_type):
     QtGui.QComboBox.__init__(self)
     self.table_widget = table_widget
     self.row = row
+    self.is_vector_type = is_vector_type
 
     for option in options:
-      self.addItem(option)
+      self.addItem(str(option))
 
     self.setCurrentIndex(-1)  
     self.currentIndexChanged[str].connect(self.itemClicked)
@@ -23,7 +24,7 @@ class OptionsWidget(QtGui.QComboBox):
   def itemClicked(self, item):
     table_value_item = self.table_widget.item(self.row,1)
 
-    if table_value_item.text() == '':
+    if not self.is_vector_type or table_value_item.text() == '':
       table_value_item.setText(item)
     else:
       table_value_item.setText(str(table_value_item.text()).strip("'") + ' ' + item)
@@ -218,6 +219,41 @@ class ParamTable:
   def click_cancel(self):
     self.parent_class.reject_params()
 
+  def modifyCppType(self, param, new_text):
+    if 'cpp_type' in param and param['cpp_type'] == 'bool':
+      if param['default'] == '1':
+        self.original_table_data[param['name']] = 'true'
+      elif param['default'] == '0':
+        self.original_table_data[param['name']] = 'false'
+      else:
+        self.original_table_data[param['name']] = ''
+    else:
+      self.original_table_data[param['name']] = param['default']
+
+    if param['name'] == 'type':
+      param['default'] = new_text['name'].split('/').pop()
+
+    if param['name'] == 'variable':
+      param['cpp_type'] = 'VariableName'
+
+    if param['name'] == 'block':
+      param['cpp_type'] = 'std::vector<BlockName>'
+
+    if param['name'] == 'boundary':
+      param['cpp_type'] = 'std::vector<BoundaryName>'
+
+    if param['name'] == 'function':
+      param['cpp_type'] = 'FunctionName'
+
+  def isVectorType(self, cpp_type):
+    if 'vector' in cpp_type:
+      return True
+
+    if 'Vector' in cpp_type:
+      return True
+
+    return False
+  
   def item_clicked(self, item):
     saved_data = {}
     saved_params = {}
@@ -248,22 +284,7 @@ class ParamTable:
           found_it = True
           #the_table_data.append({'name':'type','default':new_text['name'].split('/').pop(),'description':'The object type','required':True})
           for param in new_text['parameters']:
-            if 'cpp_type' in param and param['cpp_type'] == 'bool':
-              if param['default'] == '1':
-                self.original_table_data[param['name']] = 'true'
-              elif param['default'] == '0':
-                self.original_table_data[param['name']] = 'false'
-              else:
-                self.original_table_data[param['name']] = ''
-            else:
-              self.original_table_data[param['name']] = param['default']
-              
-            if param['name'] == 'type':
-              param['default'] = new_text['name'].split('/').pop()
-
-            if param['name'] == 'variable':
-              param['cpp_type'] = 'VariableName'
-              
+            self.modifyCppType(param, new_text)
             the_table_data.append(param)
             self.param_is_required[param['name']] = param['required']
           break #- can't break here because there might be more
@@ -280,18 +301,7 @@ class ParamTable:
                   found_it = True
                   has_parent_params_set = True
                   for param in sb['parameters']:
-                    if 'cpp_type' in param and param['cpp_type'] == 'bool':
-                      if param['default'] == '1':
-                        self.original_table_data[param['name']] = 'true'
-                      elif param['default'] == '0':
-                        self.original_table_data[param['name']] = 'false'
-                      else:
-                        self.original_table_data[param['name']] = ''
-                    else:
-                      self.original_table_data[param['name']] = param['default']
-
-                    if param['name'] == 'variable':
-                      param['cpp_type'] = 'VariableName'
+                    self.modifyCppType(param, new_text)
 
                     the_table_data.append(param)
                     self.param_is_required[param['name']] = param['required']
@@ -309,18 +319,7 @@ class ParamTable:
         if param['name'] == 'type':
           continue
 
-        if 'cpp_type' in param and param['cpp_type'] == 'bool':
-          if param['default'] == '1':
-            self.original_table_data[param['name']] = 'true'
-          elif param['default'] == '0':
-            self.original_table_data[param['name']] = 'false'
-          else:
-            self.original_table_data[param['name']] = ''
-        else:
-          self.original_table_data[param['name']] = param['default']
-
-        if param['name'] == 'variable':
-          param['cpp_type'] = 'VariableName'
+        self.modifyCppType(param, new_text)
           
         the_table_data.append(param)
         self.param_is_required[param['name']] = param['required']
@@ -376,7 +375,7 @@ class ParamTable:
         self.table_widget.setItem(row, 1, value_item)
 
       if 'cpp_type' in param and param['cpp_type'] in self.type_options:
-        options_item = OptionsWidget(self.table_widget,row,self.type_options[param['cpp_type']])
+        options_item = OptionsWidget(self.table_widget,row,self.type_options[param['cpp_type']], self.isVectorType(param['cpp_type']))
         self.table_widget.setCellWidget(row, 2, options_item)
 
       doc_item = QtGui.QTableWidgetItem(param['description'])

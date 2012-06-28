@@ -1,3 +1,11 @@
+import sys
+
+def getMeshInfo(file_name):
+  if '.e' in file_name:
+    return ExodusIIMeshInfo(file_name)
+  else:
+    return None
+
 class MeshInfo:
   def __init__(self, file_name):
     self.file_name = file_name
@@ -36,3 +44,4 @@ class ExodusIIMeshInfo(MeshInfo):
 
   def sidesetNames(self):
     return self.sidesets
+

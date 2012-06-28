@@ -8,6 +8,8 @@ from GenSyntax import *
 from ActionSyntax import *
 from ParamTable import *
 
+import MeshInfo
+
 from readInputFile import readInputFile, GPNode
 
 try:
@@ -83,6 +85,17 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       
     return None
 
+  def getMeshFileName(self):
+    mesh_item = self.findChildItemWithName(self, 'Mesh')
+    data = None
+    try:
+      data = mesh_item.table_data
+      if 'file' in data:
+        return data['file']
+    except:
+      pass
+    return None
+    
   def _itemHasEditableParameters(self, item):
     this_path = self.generatePathFromItem(item)
     this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
@@ -196,16 +209,39 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       children_names.append(child.text(0))
       
     return children_names
-  
+
   def _typeOptions(self):
     type_options = {}
+
+    # Variables
     variables_item = self.input_file_widget.tree_widget.findItems("Variables", QtCore.Qt.MatchExactly)[0]
-
     variable_names = self._getChildNames(variables_item)
-
     if len(variable_names):
       type_options['std::vector<VariableName>'] = variable_names
       type_options['VariableName'] = variable_names
+
+    aux_variables_item = self.input_file_widget.tree_widget.findItems("AuxVariables", QtCore.Qt.MatchExactly)[0]
+    aux_variable_names = self._getChildNames(aux_variables_item)
+    if len(aux_variable_names):
+      type_options['std::vector<VariableName>'] += aux_variable_names
+      type_options['VariableName'] += aux_variable_names
+
+    functions_item = self.input_file_widget.tree_widget.findItems("Functions", QtCore.Qt.MatchExactly)[0]
+    function_names = self._getChildNames(functions_item)
+    if len(function_names):
+      type_options['std::vector<FunctionName>'] = function_names
+      type_options['FunctionName'] = function_names
+
+    # Mesh stuff
+    mesh_file_name = self.getMeshFileName()
+    if mesh_file_name:
+      mesh_info = MeshInfo.getMeshInfo(mesh_file_name)
+
+      if mesh_info:
+        type_options['BlockName'] = mesh_info.blockNames()
+        type_options['std::vector<BlockName>'] = mesh_info.blockNames()
+        type_options['BoundaryName'] = mesh_info.sidesetNames()
+        type_options['std::vector<BoundaryName>'] = mesh_info.sidesetNames()
       
     return type_options
     

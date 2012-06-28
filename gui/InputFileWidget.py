@@ -10,7 +10,6 @@ from YamlData import *
 from GetPotData import *
 from InputFileTreeWidget import *
 from InputFileTextbox import *
-from MeshInfo import *
 
 from readInputFile import readInputFile, GPNode
 
@@ -30,10 +29,6 @@ class InputFileWidget(QtGui.QWidget):
     self._recache()
     
     self.action_syntax = ActionSyntax(app_path)
-
-    mesh_info = ExodusIIMeshInfo("square.e")
-
-    print mesh_info.blockNames()
 
     # Start with an input file template if this application has one
     input_file_template_name = os.path.dirname(app_path) + '/input_template'
