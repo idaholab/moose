@@ -230,7 +230,7 @@ class ParamTable:
     else:
       self.original_table_data[param['name']] = param['default']
 
-    if param['name'] == 'type':
+    if new_text != '' and param['name'] == 'type':
       param['default'] = new_text['name'].split('/').pop()
 
     if param['name'] == 'variable':
@@ -319,7 +319,7 @@ class ParamTable:
         if param['name'] == 'type':
           continue
 
-        self.modifyCppType(param, new_text)
+        self.modifyCppType(param, '')
           
         the_table_data.append(param)
         self.param_is_required[param['name']] = param['required']
@@ -378,6 +378,10 @@ class ParamTable:
         options_item = OptionsWidget(self.table_widget,row,self.type_options[param['cpp_type']], self.isVectorType(param['cpp_type']))
         self.table_widget.setCellWidget(row, 2, options_item)
 
+      if 'cpp_type' in param and param['cpp_type'] == 'MooseEnum':
+        options_item = OptionsWidget(self.table_widget,row,param['options'].split(' '), self.isVectorType(param['cpp_type']))
+        self.table_widget.setCellWidget(row, 2, options_item)
+      
       doc_item = QtGui.QTableWidgetItem(param['description'])
       
       name_item.setFlags(QtCore.Qt.ItemIsEnabled)
