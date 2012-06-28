@@ -14,6 +14,7 @@
 
 #include "YAMLFormatter.h"
 #include "Parser.h"
+#include "MooseEnum.h"
 
 #include <sstream>
 #include <vector>
@@ -77,7 +78,12 @@ YAMLFormatter::printParams(InputParameters &params, short depth, const std::stri
     Parser::escape(doc);
     oss << tmp_str;
     // Print the type
-    oss << "\n" << indent << "    cpp_type: " << params.type(iter->first) << "\n";
+    oss << "\n" << indent << "    cpp_type: " << params.type(iter->first);
+
+    InputParameters::Parameter<MooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(iter->second);
+    if (enum_type)
+      oss << "\n" << indent << "    options: " << enum_type->get().getRawNames();
+
     oss << "\n" << indent << "    description: |\n      " << indent
          << doc << "\n";
   }

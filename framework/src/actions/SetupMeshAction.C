@@ -22,6 +22,7 @@
 // libmesh includes
 #include "linear_partitioner.h"
 #include "centroid_partitioner.h"
+#include "MooseEnum.h"
 
 template<>
 InputParameters validParams<SetupMeshAction>()

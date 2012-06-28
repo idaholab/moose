@@ -113,6 +113,9 @@ subdomain_restricted_auxkernel_test = { INPUT : 'subdomain_restricted_auxkernel_
 subdomain_restricted_kernel_test = { INPUT : 'subdomain_restricted_kernel_mismatch.i',
                                      EXPECT_ERR : "Kernel \(\w+\): block outside of the domain of the variable" }
 
+bad_enum_test = { INPUT : 'bad_enum_test.i',
+                  EXPECT_ERR : "Invalid option \"\w+\" in MooseEnum." }
+
 deprecated_block_test = {
   INPUT : 'deprecated_block_test.i',
   EXPECT_ERR : "Input file block '\S+' has been deprecated.",
@@ -159,3 +162,4 @@ dyanmic_check_name_block_mismatch_test = { INPUT : 'check_dynamic_name_block_mis
 
 dyanmic_check_name_boundary_mismatch_test = { INPUT : 'check_dynamic_name_boundary_mismatch.i',
                                               EXPECT_ERR : "You must supply the same number of boundary ids and names parameters" }
+

@@ -18,6 +18,7 @@
 #include "GlobalParamsAction.h"
 #include "MooseSyntax.h"
 #include "CommandLine.h"
+#include "MooseEnum.h"
 
 // libMesh
 #include "getpot.h"
@@ -149,6 +150,10 @@ protected:
   void setScalarParameter(const std::string & full_name, const std::string & short_name,
                           InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
 
+//  template<>
+//  void setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name,
+//                                     InputParameters::Parameter<MooseEnum>* param, bool in_global, GlobalParamsAction *global_block);
+
 
   void setRealVectorValue(const std::string & full_name, const std::string & short_name,
                           InputParameters::Parameter<RealVectorValue>* param, bool in_global, GlobalParamsAction *global_block);
@@ -159,11 +164,6 @@ protected:
   template<typename T>
   void setVectorParameter(const std::string & full_name, const std::string & short_name,
                           InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block);
-
-  template<typename T>
-  void setTensorParameter(const std::string & full_name, const std::string & short_name,
-                          InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsAction *global_block);
-
 
   SyntaxTree * _syntax_formatter;
 
@@ -196,5 +196,7 @@ public:
     bool _sort_alpha;
   };
 };
+
+
 
 #endif //PARSER_H

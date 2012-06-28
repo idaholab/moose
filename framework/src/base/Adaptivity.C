@@ -86,7 +86,7 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
 }
 
 void
-Adaptivity::setErrorEstimator(const std::string &error_estimator_name)
+Adaptivity::setErrorEstimator(const MooseEnum & error_estimator_name)
 {
   if (error_estimator_name == "KellyErrorEstimator")
     _error_estimator = new KellyErrorEstimator;

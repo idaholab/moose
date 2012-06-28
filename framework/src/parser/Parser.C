@@ -44,6 +44,11 @@
 #include "getpot.h"
 
 
+template<>
+void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name,
+                                           InputParameters::Parameter<MooseEnum>* param, bool in_global, GlobalParamsAction *global_block);
+
+
 Parser::Parser(ActionWarehouse & action_wh) :
     _action_wh(action_wh),
     _syntax(_action_wh.syntax()),
@@ -521,6 +526,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       InputParameters::Parameter<RealVectorValue> * real_vec_val_param = dynamic_cast<InputParameters::Parameter<RealVectorValue>*>(it->second);
       InputParameters::Parameter<RealTensorValue> * real_tensor_val_param = dynamic_cast<InputParameters::Parameter<RealTensorValue>*>(it->second);
       InputParameters::Parameter<std::string> * string_param = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
+      InputParameters::Parameter<MooseEnum> * enum_param = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(it->second);
       InputParameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<InputParameters::Parameter<std::vector<Real> >*>(it->second);
       InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
       InputParameters::Parameter<std::vector<unsigned int>  > * vec_uint_param  = dynamic_cast<InputParameters::Parameter<std::vector<unsigned int> >*>(it->second);
@@ -549,6 +555,8 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setRealTensorValue(full_name, it->first, real_tensor_val_param, in_global, global_params_block);
       else if (string_param)
         setScalarParameter<std::string>(full_name, it->first, string_param, in_global, global_params_block);
+      else if (enum_param)
+        setScalarParameter<MooseEnum>(full_name, it->first, enum_param, in_global, global_params_block);
       else if (vec_real_param)
         setVectorParameter<Real>(full_name, it->first, vec_real_param, in_global, global_params_block);
       else if (vec_int_param)
@@ -662,6 +670,26 @@ void Parser::setRealTensorValue(const std::string & full_name, const std::string
   param->set() = value;
   if (in_global)
     global_block->setScalarParam<RealTensorValue>(short_name) = value;
+}
+
+template<>
+void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<MooseEnum> * param, bool in_global, GlobalParamsAction * global_block)
+{
+  GetPot *gp;
+
+  // See if this variable was passed on the command line
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
+    gp = Moose::app->commandLine().getPot();
+  else
+    gp = &_getpot_file;
+
+  std::string current_name = param->get();
+
+  std::string value = gp->get_value_no_default(full_name.c_str(), current_name);
+  param->set() = value;
+  if (in_global)
+    global_block->setScalarParam<MooseEnum>(short_name) = value;
 }
 
 //--------------------------------------------------------------------------

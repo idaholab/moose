@@ -16,6 +16,7 @@
 #define ADAPTIVITY_H
 
 #include "Moose.h"
+#include "MooseEnum.h"
 
 #ifdef LIBMESH_ENABLE_AMR
 
@@ -63,7 +64,7 @@ public:
    *
    * @param error_estimator_name the name of the error estimator (currently: Laplacian, Kelly, and PatchRecovery)
    */
-  void setErrorEstimator(const std::string & error_estimator_name);
+  void setErrorEstimator(const MooseEnum & error_estimator_name);
 
   /**
    * Set the error norm (FIXME: improve description)
