@@ -15,7 +15,7 @@ class OptionsWidget(QtGui.QComboBox):
     self.row = row
     self.is_vector_type = is_vector_type
 
-    for option in options:
+    for option in sorted(options):
       self.addItem(str(option))
 
     self.setCurrentIndex(-1)  

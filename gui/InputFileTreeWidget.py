@@ -85,16 +85,23 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       
     return None
 
-  def getMeshFileName(self):
+  def getMeshItemData(self):
     mesh_item = self.findChildItemWithName(self, 'Mesh')
     data = None
     try:
-      data = mesh_item.table_data
-      if 'file' in data:
-        return data['file']
+      return mesh_item.table_data
     except:
       pass
+    
     return None
+
+  def getMeshFileName(self):
+    mesh_data = self.getMeshItemData()
+    if mesh_data:
+      if 'file' in mesh_data:
+        return data['file']
+    else:
+      return None
     
   def _itemHasEditableParameters(self, item):
     this_path = self.generatePathFromItem(item)
@@ -233,9 +240,9 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       type_options['FunctionName'] = function_names
 
     # Mesh stuff
-    mesh_file_name = self.getMeshFileName()
-    if mesh_file_name:
-      mesh_info = MeshInfo.getMeshInfo(mesh_file_name)
+    mesh_data = self.getMeshItemData()
+    if mesh_data:
+      mesh_info = MeshInfo.getMeshInfo(mesh_data)
 
       if mesh_info:
         type_options['BlockName'] = mesh_info.blockNames()
