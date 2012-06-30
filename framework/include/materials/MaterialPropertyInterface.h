@@ -31,7 +31,13 @@ class SubProblem;
 class MaterialPropertyInterface
 {
 public:
-  MaterialPropertyInterface(InputParameters & parameters);
+  MaterialPropertyInterface(InputParameters & parameters) :
+      _material_data(*parameters.get<MaterialData *>("_material_data")),
+      _material_props(_material_data.props()),
+      _material_props_old(_material_data.propsOld()),
+      _material_props_older(_material_data.propsOlder())
+    {
+    }
 
   /**
    * Retrieve the property named "name"
