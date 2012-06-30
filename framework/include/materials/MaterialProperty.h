@@ -25,19 +25,6 @@
 #include "tensor_value.h"
 #include "vector_value.h"
 
-class PropertyValue;
-
-/**
- * Scalar Init helper routine so that specialization isn't needed for basic scalar MaterialProperty types
- */
-template<typename P>
-PropertyValue *_init_helper(int size, PropertyValue *prop, const P* the_type);
-
-/**
- * Vector Init helper routine so that specialization isn't needed for basic vector MaterialProperty types
- */
-template<typename P>
-PropertyValue *_init_helper(int size, PropertyValue *prop, const std::vector<P>* the_type);
 
 /**
  * Abstract definition of a property value.
@@ -142,25 +129,6 @@ public:
    */
   virtual void load(std::ifstream & stream);
 
-  /**
-   * Friend helper function to handle scalar material property initializations
-   * @param size - the size corresponding to the quadrature rule
-   * @param prop - The Material property that we will resize since this is not a member
-   * @param the_type - This is just a template paramter used to identify the
-   *                   difference between the scalar and vector template functions
-   */
-  template<typename P>
-  friend
-  PropertyValue *_init_helper(int size, PropertyValue *prop, const P* the_type);
-
-  /**
-   * Friend helper function to handle vector material property initializations
-   * This function is an overload for the vector version
-   */
-  template<typename P>
-  friend
-  PropertyValue *_init_helper(int size, PropertyValue *prop, const std::vector<P>* the_type);
-
 private:
 
   /// Stored parameter value.
@@ -181,8 +149,60 @@ template <typename T>
 inline PropertyValue *
 MaterialProperty<T>::init (int size)
 {
-  return _init_helper(size, this, static_cast<T *>(0));
+  MaterialProperty<T> *copy = new MaterialProperty<T>;
+  copy->_value.resize(size, 0);
+  return copy;
 }
+
+/**
+ * Specialization of init function for std::vector<Real>
+ * See MaterialPropertyInterface.C for implementation.
+ */
+template <>
+PropertyValue *
+MaterialProperty<std::vector<Real> >::init (int size);
+
+/**
+ * Specialization of init function for ColumnMajorMatrix
+ * See MaterialPropertyInterface.C for implementation.
+ */
+template <>
+PropertyValue *
+MaterialProperty<ColumnMajorMatrix>::init (int size);
+
+/**
+ * Specialization of init function for std::vector<ColumnMajorMatrix>
+ * See MaterialPropertyInterface.C for implementation.
+ */
+template <>
+PropertyValue *
+MaterialProperty<std::vector<ColumnMajorMatrix> >::init (int size);
+
+/**
+ * Specialization of init function for std::vector<RealTensorValue>
+ * See MaterialPropertyInterface.C for implementation.
+ */
+template <>
+PropertyValue *
+MaterialProperty<std::vector<RealTensorValue> >::init (int size);
+
+/**
+ * Specialization of init function for std::vector<std::vector<RealTensorValue> >
+ * See MaterialPropertyInterface.C for implementation.
+ */
+template <>
+PropertyValue *
+MaterialProperty<std::vector<std::vector<RealTensorValue> > >::init (int size);
+
+/**
+ * Specialization of init function for std::vector<RealVectorValue>
+ * See MaterialPropertyInterface.C for implementation.
+ */
+template <>
+PropertyValue *
+MaterialProperty<std::vector<RealVectorValue> >::init (int size);
+
+
 
 template <typename T>
 inline void
@@ -243,31 +263,5 @@ public:
       delete *k;
   }
 };
-
-// Scalar Init Helper Function
-template<typename P>
-PropertyValue *_init_helper(int size, PropertyValue *prop, const P*)
-{
-  MaterialProperty<P> *copy = new MaterialProperty<P>;
-  copy->_value.resize(size);
-  return copy;
-}
-
-// Vector Init Helper Function
-template<typename P>
-PropertyValue *_init_helper(int size, PropertyValue *prop, const std::vector<P>*)
-{
-  typedef MaterialProperty<std::vector<P> > PropType;
-  PropType *copy = new PropType;
-  copy->_value.resize(size);
-
-  // We don't know the size of the underlying vector at each
-  // quadrature point, the user will be responsible for resizing it
-  // and filling in the entries...
-
-  // Return the copy we allocated
-  return copy;
-}
-
 
 #endif
