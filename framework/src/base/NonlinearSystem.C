@@ -641,7 +641,6 @@ NonlinearSystem::onTimestepBegin()
 void
 NonlinearSystem::setInitialSolution()
 {
-
   NumericVector<Number> & initial_solution( solution() );
 
   if (_use_predictor)
@@ -1080,7 +1079,33 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   }
   residual.close();
 
-  // do nodal BC
+  // Add in Residual contributions from Constraints
+  if(_mproblem._has_constraints)
+  {
+    // Undisplaced Constraints
+    constraintResiduals(residual, false);
+
+    // Displaced Constraints
+    if(_mproblem.getDisplacedProblem())
+      constraintResiduals(residual, true);
+  }
+}
+
+void
+NonlinearSystem::finishResidual(NumericVector<Number> & residual)
+{
+  switch (_time_stepping_scheme)
+  {
+  case Moose::CRANK_NICOLSON:
+    residual.add(*_residual_old);
+    residual.close();
+    break;
+
+  default:
+    break;
+  }
+
+  // last thing to do are nodal BCs
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
   for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
   {
@@ -1107,21 +1132,6 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   residual.close();
   Moose::perf_log.pop("residual.close4()","Solve");
 
-  // Add in Residual contributions from Constraints
-  if(_mproblem._has_constraints)
-  {
-    // Undisplaced Constraints
-    constraintResiduals(residual, false);
-
-    // Displaced Constraints
-    if(_mproblem.getDisplacedProblem())
-      constraintResiduals(residual, true);
-  }
-
-
-  //std::cerr << "--" << std::endl;
-  //residual.print(std::cerr);
-
 
   // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
   if(_need_residual_ghosted && _debugging_residuals)
@@ -1131,21 +1141,6 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
     Moose::perf_log.pop("residual.close5()","Solve");
     _residual_ghosted = residual;
     _residual_ghosted.close();
-  }
-}
-
-void
-NonlinearSystem::finishResidual(NumericVector<Number> & residual)
-{
-  switch (_time_stepping_scheme)
-  {
-  case Moose::CRANK_NICOLSON:
-    residual.add(*_residual_old);
-    residual.close();
-    break;
-
-  default:
-    break;
   }
 }
 

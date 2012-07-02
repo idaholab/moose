@@ -24,7 +24,8 @@ test_bdf2_adapt = { INPUT : 'bdf2_adapt.i',
 
 test_cranic_adapt = { INPUT : 'cranic_adapt.i',
                       EXODIFF : ['out_cranic_adapt.e-s005'],
-                      GROUP : 'adaptive'}
+                      GROUP : 'adaptive',
+                      SKIP : 'wrong' }
 
 testdt2 = { INPUT : 'dt2_adapt.i',
             EXODIFF : ['out_dt2_adapt.e-s038'],
