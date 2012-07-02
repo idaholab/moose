@@ -74,7 +74,6 @@ class ParamTable:
       
     self.drop_menu.setCurrentIndex(found_index)
 
-    # print self.incoming_data
     if self.incoming_data:
       if 'type' in self.incoming_data and self.drop_menu.findText(self.incoming_data['type']) != -1:
         self.drop_menu.setCurrentIndex(self.drop_menu.findText(self.incoming_data['type']))
@@ -289,7 +288,6 @@ class ParamTable:
             self.param_is_required[param['name']] = param['required']
           break #- can't break here because there might be more
 
-
       if not found_it and not self.already_has_parent_params: # If we still haven't found it... look under "item"
         for data in self.subblocks:
           name = data['name'].split('/').pop()
@@ -301,7 +299,7 @@ class ParamTable:
                   found_it = True
                   has_parent_params_set = True
                   for param in sb['parameters']:
-                    self.modifyCppType(param, new_text)
+                    self.modifyCppType(param, sb)
 
                     the_table_data.append(param)
                     self.param_is_required[param['name']] = param['required']
