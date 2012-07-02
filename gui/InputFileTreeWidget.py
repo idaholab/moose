@@ -126,7 +126,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     if not new_child:  # If we didn't find a child that already matched then create a new child
       new_child = QtGui.QTreeWidgetItem(parent_item)
       new_child.setText(0,table_data['Name'])
-      parent_item.addChild(new_child)
+#      parent_item.addChild(new_child)
       new_child.table_data = {}
 
     has_params = False
