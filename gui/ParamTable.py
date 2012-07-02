@@ -33,6 +33,26 @@ class OptionsWidget(QtGui.QComboBox):
     self.setCurrentIndex(-1)
     self.currentIndexChanged[str].connect(self.itemClicked)
 
+class FileOpenWidget(QtGui.QPushButton):
+  def __init__(self, table_widget, row, is_vector_type):
+    self.table_widget = table_widget
+    self.row = row
+    self.is_vector_type = is_vector_type
+    QtGui.QPushButton.__init__(self,'Find File')
+    QtCore.QObject.connect(self, QtCore.SIGNAL("clicked()"), self.clicked)
+    
+  def clicked(self):
+    file_name = QtGui.QFileDialog.getOpenFileName(self, "Find Mesh File", os.getcwd(), "File (*)")
+    
+    if file_name:
+      table_value_item = self.table_widget.item(self.row,1)
+
+      if not self.is_vector_type or table_value_item.text() == '':
+        table_value_item.setText(file_name)
+      else:
+        table_value_item.setText(str(table_value_item.text()).strip("'") + ' ' + file_name)
+
+
 class ParamTable:
   def __init__(self, main_data, action_syntax, single_options, incoming_data, main_layout, parent_class, already_has_parent_params, type_options):
     self.main_data = main_data
@@ -244,6 +264,9 @@ class ParamTable:
     if param['name'] == 'function':
       param['cpp_type'] = 'FunctionName'
 
+    if param['name'] == 'file':
+      param['cpp_type'] = 'FileType'
+
   def isVectorType(self, cpp_type):
     if 'vector' in cpp_type:
       return True
@@ -371,6 +394,10 @@ class ParamTable:
       else:
         value_item = QtGui.QTableWidgetItem(value)
         self.table_widget.setItem(row, 1, value_item)
+        
+      if 'cpp_type' in param and param['cpp_type'] == 'FileType':
+        options_item = FileOpenWidget(self.table_widget,row,self.isVectorType(param['cpp_type']))
+        self.table_widget.setCellWidget(row, 2, options_item)
 
       if 'cpp_type' in param and param['cpp_type'] in self.type_options:
         options_item = OptionsWidget(self.table_widget,row,self.type_options[param['cpp_type']], self.isVectorType(param['cpp_type']))
