@@ -102,6 +102,37 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         return mesh_data['file']
     else:
       return None
+
+  def getOutputItemData(self):
+    output_item = self.findChildItemWithName(self, 'Output')
+    data = None
+    try:
+      return output_item.table_data
+    except:
+      pass
+    
+    return None
+
+  def getOutputFileNames(self):
+    output_data = self.getOutputItemData()
+
+    file_names = []
+
+    file_base = ''
+
+    if output_data:
+      if 'file_base' in output_data:
+        file_base = output_data['file_base']
+      else:
+        file_base = 'peacock_run_tmp'
+
+    type_to_extension = {'exodus':'.e', 'tecplot':'.plt'}
+
+    for atype,extension in type_to_extension.items():
+      if atype in output_data and (output_data[atype] == 'true' or output_data[atype] == '1'):
+        file_names.append(file_base + extension)
+
+    return file_names
     
   def _itemHasEditableParameters(self, item):
     this_path = self.generatePathFromItem(item)

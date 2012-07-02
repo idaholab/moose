@@ -96,6 +96,9 @@ class InputFileWidget(QtGui.QWidget):
     layout.addWidget(self.buttonOpen)
     layout.addWidget(self.buttonSave)
     layout.addWidget(self.buttonClear)
+
+  def getOutputFileNames(self):
+    return self.tree_widget.getOutputFileNames()
     
   def openInputFile(self, file_name):
     if file_name and file_name != '':

@@ -16,6 +16,11 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class ExecuteWidget(QtGui.QWidget):
+  # These are the signals this object can emit:
+  run_started = QtCore.pyqtSignal()
+  run_stopped = QtCore.pyqtSignal()
+  timestep_begin = QtCore.pyqtSignal()
+  timestep_end = QtCore.pyqtSignal()
   def __init__(self, app_path, input_file_widget, qt_app, win_parent=None):
     QtGui.QWidget.__init__(self, win_parent)
     self.app_path = app_path
@@ -106,6 +111,7 @@ class ExecuteWidget(QtGui.QWidget):
     QtCore.QObject.connect(self.input_file_widget.buttonOpen, QtCore.SIGNAL("clicked()"), self.click_open)
     QtCore.QObject.connect(self.input_file_widget.buttonSave, QtCore.SIGNAL("clicked()"), self.click_save)
 
+    
   def getNumSteps(self):
     executioner_item = self.input_file_widget.tree_widget.findItems("Executioner", QtCore.Qt.MatchExactly)[0]
     cur_steps = 0
@@ -167,10 +173,12 @@ class ExecuteWidget(QtGui.QWidget):
     self.connect(self.proc,QtCore.SIGNAL("readyReadStandardOutput()"),self.output)
     self.connect(self.proc,QtCore.SIGNAL("finished(int)"),self.processFinished)
     self.proc.setProcessChannelMode(QtCore.QProcess.MergedChannels)
+    self.run_started.emit()
     self.proc.start(command)
     self.kill_button.setDisabled(False)
     self.clear_button.setDisabled(False)
     self.save_log_button.setDisabled(False)
+
 
   def incrementPB(self, text):
     split = text.split('\n')
@@ -179,6 +187,12 @@ class ExecuteWidget(QtGui.QWidget):
     increment_on = ['Mesh Information','EquationSystems','NL step  0']
 
     for line in split:
+      if 'NL step  0' in line:
+        self.timestep_begin.emit()
+        
+      if 'Norm of each nonlinear' in line:
+        self.timestep_end.emit()
+      
       for keyword in increment_on:
         if keyword in line:  
           self.pb.setValue(self.pb.value()+1)
@@ -191,6 +205,7 @@ class ExecuteWidget(QtGui.QWidget):
   def processFinished(self):
     self.kill_button.setDisabled(True)
     self.pb.hide()
+    self.run_stopped.emit()
 
   def clickedKill(self):
     msgBox = QMessageBox();
