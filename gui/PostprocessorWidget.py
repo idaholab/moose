@@ -144,18 +144,19 @@ class PostprocessorWidget(QtGui.QWidget):
             if os.path.getsize(self.currentFile) > 0:
                 self.data = numpy.genfromtxt(self.currentFile,delimiter = ',' , names = True)
                 self.time = []
-        
-                for line in self.data:
 
-                    self.time.append(line[0])
-            
-                for key in self.plotObjectDict.keys():
-                    self.postData = []
-                    self.getPlotData(key)
-                    plotData = [self.time, self.postData]
-                    self.plotDataDict[key] = plotData
-    
-                for key in self.plotDataDict:
+                if self.data != None and len(self.data):        
+                    for line in self.data:
+
+                        self.time.append(line[0])
+
+                    for key in self.plotObjectDict.keys():
+                        self.postData = []
+                        self.getPlotData(key)
+                        plotData = [self.time, self.postData]
+                        self.plotDataDict[key] = plotData
+
+                    for key in self.plotDataDict:
                         self.plotObjectDict[key].setPlotData(self.plotDataDict[key],key)
                     
 

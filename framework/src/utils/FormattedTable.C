@@ -205,6 +205,7 @@ FormattedTable::printCSV(const std::string & file_name, int interval)
     }
   }
   _output_file << "\n";
+  _output_file.flush();
 }
 
 // const strings that the gnuplot generator needs
