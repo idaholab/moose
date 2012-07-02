@@ -54,11 +54,17 @@ class PostprocessorWidget(QtGui.QWidget):
         
         
         # timer feature that updates all of the plots
-        self.timer = QtCore.QTimer(self)
-        self.timer.stop()
-        self.timer2 = QtCore.QTimer(self)
-        QtCore.QObject.connect(self.execute_widget.run_button, QtCore.SIGNAL("clicked()"), self.runClicked)
-        QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.updatePlots)        
+#        self.timer = QtCore.QTimer(self)
+#        self.timer.stop()
+#        self.timer2 = QtCore.QTimer(self)
+#        QtCore.QObject.connect(self.execute_widget.run_button, QtCore.SIGNAL("clicked()"), self.runClicked)
+#        QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.updatePlots)
+
+        self.execute_widget.run_started.connect(self.clearClick)
+        self.execute_widget.timestep_begin.connect(self.updatePlots)
+        self.execute_widget.run_stopped.connect(self.updatePlots)
+
+
         
         # sets the layout for the widget
         self.Layout = QtGui.QVBoxLayout(self)
@@ -96,8 +102,6 @@ class PostprocessorWidget(QtGui.QWidget):
                     self.comboWidget.addItem(self.names[index+1])
         
                 self.comboWidget.setCurrentIndex(-1)
-            else:
-                self.timer2.start(1000)
         
     
     
@@ -105,7 +109,6 @@ class PostprocessorWidget(QtGui.QWidget):
         
         # when this method is called a new item is added to the plots dictionary
         # then the getPlotData function is called to begin the first plot
-        self.timer.start(500)
         time = [0]
         postData = [0]
         plotData = [time, postData]
@@ -130,7 +133,12 @@ class PostprocessorWidget(QtGui.QWidget):
     def updatePlots(self):
         # this method loops through all of the plot objects in the plot dictionary
         # and for each plot calls the getPlotData function to update every plot that has been selected
-        
+
+        if self.first:
+            self.first = False
+            self.getFileName()
+            self.fillComboWidget()
+            self.comboWidget.setCurrentIndex(-1)
         
         if self.currentFile and os.path.exists(self.currentFile):
             if os.path.getsize(self.currentFile) > 0:
@@ -160,11 +168,11 @@ class PostprocessorWidget(QtGui.QWidget):
         for line in self.data:
             self.postData.append(line[indexCol])
     
-    def runClicked(self):
-        QtCore.QObject.connect(self.execute_widget.proc,QtCore.SIGNAL("finished(int)"),self.stopPlotting)
+#    def runClicked(self):
+#        QtCore.QObject.connect(self.execute_widget.proc,QtCore.SIGNAL("finished(int)"),self.stopPlotting)
         
-        QtCore.QObject.connect(self.timer2, QtCore.SIGNAL("timeout()"), self.clearClick)
-        self.timer2.start(1000)
+#        QtCore.QObject.connect(self.timer2, QtCore.SIGNAL("timeout()"), self.clearClick)
+#        self.timer2.start(1000)
     
     
     def openClick(self):
@@ -172,8 +180,6 @@ class PostprocessorWidget(QtGui.QWidget):
         file_name = QtGui.QFileDialog.getOpenFileName(self, "Open CSV File", "~/", "CSV Files (*.csv)")
         if file_name:
             self.currentFile = str(file_name)
-            self.timer2.stop()
-            self.timer.stop()
             for i in range(self.scrollLayout.count()):
                 for j in range(self.scrollLayout.itemAt(i).count()):
                     self.scrollLayout.itemAt(i).itemAt(j).widget().close()
@@ -186,7 +192,7 @@ class PostprocessorWidget(QtGui.QWidget):
             self.comboWidget.setCurrentIndex(-1)
     
     def clearClick(self):
-        self.timer2.stop()
+        self.first = True
         for i in range(self.scrollLayout.count()):
             for j in range(self.scrollLayout.itemAt(i).count()):
                 self.scrollLayout.itemAt(i).itemAt(j).widget().close()
@@ -195,15 +201,5 @@ class PostprocessorWidget(QtGui.QWidget):
         self.counter = 0
         self.plotDataDict = {}
         self.comboWidget.clear()
-        self.getFileName()
-        self.fillComboWidget()
-        self.comboWidget.setCurrentIndex(-1)
         
 
-    def stopPlotting(self):
-        
-        self.comboWidget.clear()
-        self.getFileName()
-        self.fillComboWidget()
-        self.updatePlots()
-        self.timer.stop()
