@@ -10,6 +10,7 @@ from YamlData import *
 from GetPotData import *
 from InputFileTreeWidget import *
 from InputFileTextbox import *
+from ExodusRenderWidget import *
 
 from readInputFile import readInputFile, GPNode
 
@@ -73,6 +74,10 @@ class InputFileWidget(QtGui.QWidget):
     self.layout_with_textbox.addLayout(self.tree_widget_layout)
     self.layout_with_textbox.addLayout(self.edit_param_layout_spot)
     self.layout_with_textbox.addLayout(self.input_file_textbox.getLayout())
+
+    self.exodus_render_widget = ExodusRenderWidget()
+    self.layout_with_textbox.addWidget(self.exodus_render_widget)
+    
     self.setLayout(self.layout_with_textbox)
 
     self.menubar = self.peacock_ui.menuBar()

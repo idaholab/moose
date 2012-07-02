@@ -56,7 +56,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       self._addDataRecursively(self, section_node)
 
     self.addHardPathsToTree() # We do this here because * paths might add more paths underneath some of the paths
-    self.input_file_widget.input_file_textbox.updateTextBox()
+    self._updateOtherGUIElements()
     QtCore.QObject.connect(self, QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self._itemChanged)
 
   def generatePathFromItem(self, item):
@@ -99,7 +99,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     mesh_data = self.getMeshItemData()
     if mesh_data:
       if 'file' in mesh_data:
-        return data['file']
+        return mesh_data['file']
     else:
       return None
     
@@ -284,10 +284,10 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
           item.setText(0,item.table_data['Name'])
         if not already_had_data:
           item.setCheckState(0, QtCore.Qt.Checked)
-        self.input_file_widget.input_file_textbox.updateTextBox()
+        self._updateOtherGUIElements()
 
   def _itemChanged(self, item, column):
-    self.input_file_widget.input_file_textbox.updateTextBox()
+    self._updateOtherGUIElements()
 
   def _deleteCurrentItem(self):
     item = self.currentItem()
@@ -297,7 +297,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     else: #Must be a top level item
       self.removeItemWidget(item, 0)
     self.addHardPathsToTree() # We do this here because they might have removed a hard path... but there is no way to get them back
-    self.input_file_widget.input_file_textbox.updateTextBox()
+    self._updateOtherGUIElements()
 
   def _addItem(self):
     item = self.currentItem()
@@ -316,7 +316,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       item.addChild(new_child)
       item.setCheckState(0, QtCore.Qt.Checked)
       item.setExpanded(True)
-      self.input_file_widget.updateTextBox()
+      self._updateOtherGUIElements()
       self.addHardPathsToTree() # We do this here because * paths might add more paths underneath the item we just added
 
   def _newContext(self, pos):
@@ -338,3 +338,9 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       
     menu.popup(global_pos)
 
+  def _updateOtherGUIElements(self):
+    self.input_file_widget.input_file_textbox.updateTextBox()
+    
+    mesh_file_name = self.getMeshFileName()
+    if mesh_file_name:
+      self.input_file_widget.exodus_render_widget.setFileName(mesh_file_name)
