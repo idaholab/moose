@@ -32,6 +32,8 @@ class ExodusRenderWidget(QtGui.QWidget):
   def setFileName(self, file_name):
     for actor in self.current_actors:
       self.renderer.RemoveActor(actor)
+
+    del self.current_actors[:]
       
     self.currently_has_actor = True
     
@@ -43,38 +45,6 @@ class ExodusRenderWidget(QtGui.QWidget):
     reader.SetAllArrayStatus(vtk.vtkExodusIIReader.NODAL_TEMPORAL, 1)
     reader.SetTimeStep(1)
     reader.Update()
-
-#     out = reader.GetOutput()
-#     vtk_mesh = []
-#     for i in xrange( out.GetNumberOfBlocks() ):
-#         blk = out.GetBlock( i )
-#         for j in xrange( blk.GetNumberOfBlocks() ):
-#             sub_block = blk.GetBlock( j )
-#             print sub_block
-#             if sub_block and sub_block.IsA( 'vtkUnstructuredGrid' ):
-#                 vtk_mesh.append( sub_block )    
-
-#     for mesh in vtk_mesh:
-#       grid_mapper = vtk.vtkDataSetMapper()
-#       grid_mapper.SetInput(mesh)
-#       grid_actor = vtk.vtkActor()
-#       grid_actor.SetMapper(grid_mapper)
-
-#       self.current_actors.append(grid_actor)
-#       self.renderer.AddActor(grid_actor)
-
-#       edges = vtk.vtkExtractEdges()
-#       edges.SetInput(mesh)
-#       edge_mapper = vtk.vtkPolyDataMapper()
-#       edge_mapper.SetInput(edges.GetOutput())
-
-#       edge_actor = vtk.vtkActor()
-#       edge_actor.SetMapper(edge_mapper)
-#       edge_actor.GetProperty().SetColor(0,0,0)
-
-#       self.current_actors.append(edge_actor)
-#       self.renderer.AddActor(edge_actor)
-
 
 
     cdp = vtk.vtkCompositeDataPipeline()
@@ -94,7 +64,23 @@ class ExodusRenderWidget(QtGui.QWidget):
 
     actor = vtk.vtkActor()
     actor.SetMapper(mapper)
+    self.current_actors.append(actor)
     self.renderer.AddActor(actor)
+
+    edge_geom = vtk.vtkCompositeDataGeometryFilter()
+    edge_geom.SetInputConnection(0,reader.GetOutputPort(0));
+    edge_geom.Update()
+
+    edges = vtk.vtkExtractEdges()
+    edges.SetInput(edge_geom.GetOutput())
+    edge_mapper = vtk.vtkPolyDataMapper()
+    edge_mapper.SetInput(edges.GetOutput())
+
+    edge_actor = vtk.vtkActor()
+    self.current_actors.append(edge_actor)
+    edge_actor.SetMapper(edge_mapper)
+    edge_actor.GetProperty().SetColor(0,0,0)
+    self.renderer.AddActor(edge_actor)
 
     # Avoid z-buffer fighting
     vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()

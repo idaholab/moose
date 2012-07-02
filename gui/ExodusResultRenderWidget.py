@@ -99,12 +99,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_slider.setMaximum(self.max_timestep)
     self.time_slider.setSliderPosition(self.max_timestep)
     
-  def setFileName(self, file_name):
-    for actor in self.current_actors:
-      self.renderer.RemoveActor(actor)
-
-    del self.current_actors[:]
-      
+  def setFileName(self, file_name):      
     self.currently_has_actor = True
     
     self.file_name = file_name
@@ -112,17 +107,18 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.reader.SetFileName(self.file_name)
     self.reader.UpdateInformation()
 
-    self.reader.SetAllArrayStatus(vtk.vtkExodusIIReader.NODAL, 1)
-    self.reader.SetAllArrayStatus(vtk.vtkExodusIIReader.NODAL_TEMPORAL, 1)
-    self.reader.SetTimeStep(1)
-    self.reader.Update()
-    self.current_variable_point_data = {}
-    self.current_variables = []
     self.min_timestep = 0
     self.max_timestep = 0
     range = self.reader.GetTimeStepRange()
     self.min_timestep = range[0]
     self.max_timestep = range[1]
+
+    self.reader.SetAllArrayStatus(vtk.vtkExodusIIReader.NODAL, 1)
+    self.reader.SetAllArrayStatus(vtk.vtkExodusIIReader.NODAL_TEMPORAL, 1)
+    self.reader.SetTimeStep(self.max_timestep)
+    self.reader.Update()
+    self.current_variable_point_data = {}
+    self.current_variables = []
 
     num_variables = self.reader.GetNumberOfObjectArrays(vtk.vtkExodusIIReader.NODAL)
     for var_num in xrange(num_variables):
@@ -213,7 +209,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_slider_textbox.setText(str(self.time_slider.sliderPosition()))
 
   def _timeSliderReleased(self):
-    self.reader.SetTimeStep(int(self.time_slider_textbox.text()))
+    textbox_string = self.time_slider_textbox.text()
+    if textbox_string == '':
+      textbox_string = str(self.min_timestep)
+      
+    self.reader.SetTimeStep(int(textbox_string))
     self.reader.Update()
     self.geom.Update()
     self.edge_geom.Update()
@@ -249,6 +249,12 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   def _runStarted(self):
     self.file_name = None
     
+    for actor in self.current_actors:
+      self.renderer.RemoveActor(actor)
+
+    del self.current_actors[:]
+    
   def _runStopped(self):
-    self._timestepEnd()
+    self._timestepBegin()
+    
 
