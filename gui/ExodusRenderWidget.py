@@ -39,37 +39,62 @@ class ExodusRenderWidget(QtGui.QWidget):
     reader = vtk.vtkExodusIIReader()
     reader.SetFileName(self.file_name)
     reader.UpdateInformation()
+    reader.SetAllArrayStatus(vtk.vtkExodusIIReader.NODAL, 1)
+    reader.SetAllArrayStatus(vtk.vtkExodusIIReader.NODAL_TEMPORAL, 1)
+    reader.SetTimeStep(1)
     reader.Update()
 
-    out = reader.GetOutput()
-    vtk_mesh = []
-    for i in xrange( out.GetNumberOfBlocks() ):
-        blk = out.GetBlock( i )
-        for j in xrange( blk.GetNumberOfBlocks() ):
-            sub_block = blk.GetBlock( j )
-            if sub_block and sub_block.IsA( 'vtkUnstructuredGrid' ):
-                vtk_mesh.append( sub_block )    
+#     out = reader.GetOutput()
+#     vtk_mesh = []
+#     for i in xrange( out.GetNumberOfBlocks() ):
+#         blk = out.GetBlock( i )
+#         for j in xrange( blk.GetNumberOfBlocks() ):
+#             sub_block = blk.GetBlock( j )
+#             print sub_block
+#             if sub_block and sub_block.IsA( 'vtkUnstructuredGrid' ):
+#                 vtk_mesh.append( sub_block )    
 
-    for mesh in vtk_mesh:
-      grid_mapper = vtk.vtkDataSetMapper()
-      grid_mapper.SetInput(mesh)
-      grid_actor = vtk.vtkActor()
-      grid_actor.SetMapper(grid_mapper)
+#     for mesh in vtk_mesh:
+#       grid_mapper = vtk.vtkDataSetMapper()
+#       grid_mapper.SetInput(mesh)
+#       grid_actor = vtk.vtkActor()
+#       grid_actor.SetMapper(grid_mapper)
 
-      self.current_actors.append(grid_actor)
-      self.renderer.AddActor(grid_actor)
+#       self.current_actors.append(grid_actor)
+#       self.renderer.AddActor(grid_actor)
 
-      edges = vtk.vtkExtractEdges()
-      edges.SetInput(mesh)
-      edge_mapper = vtk.vtkPolyDataMapper()
-      edge_mapper.SetInput(edges.GetOutput())
+#       edges = vtk.vtkExtractEdges()
+#       edges.SetInput(mesh)
+#       edge_mapper = vtk.vtkPolyDataMapper()
+#       edge_mapper.SetInput(edges.GetOutput())
 
-      edge_actor = vtk.vtkActor()
-      edge_actor.SetMapper(edge_mapper)
-      edge_actor.GetProperty().SetColor(0,0,0)
+#       edge_actor = vtk.vtkActor()
+#       edge_actor.SetMapper(edge_mapper)
+#       edge_actor.GetProperty().SetColor(0,0,0)
 
-      self.current_actors.append(edge_actor)
-      self.renderer.AddActor(edge_actor)
+#       self.current_actors.append(edge_actor)
+#       self.renderer.AddActor(edge_actor)
+
+
+
+    cdp = vtk.vtkCompositeDataPipeline()
+    vtk.vtkAlgorithm.SetDefaultExecutivePrototype(cdp)
+
+    geom = vtk.vtkCompositeDataGeometryFilter()
+    geom.SetInputConnection(0,reader.GetOutputPort(0));
+    geom.Update()
+
+    data = geom.GetOutput()
+    data.GetPointData().SetScalars(data.GetPointData().GetArray("u"))
+    mapper = vtk.vtkPolyDataMapper()
+    mapper.SetInput(data)
+    mapper.ScalarVisibilityOn()
+    mapper.SetColorModeToMapScalars()
+    mapper.SetScalarRange(0,1.0)
+
+    actor = vtk.vtkActor()
+    actor.SetMapper(mapper)
+    self.renderer.AddActor(actor)
 
     # Avoid z-buffer fighting
     vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
@@ -77,3 +102,8 @@ class ExodusRenderWidget(QtGui.QWidget):
 
     self.renderer.ResetCamera()
     self.vtkwidget.updateGL()
+
+class ExodusResultRenderWidget(ExodusRenderWidget):
+  def __init__(self):
+    ExodusRenderWidget.__init__(self)
+    self.setFileName('out.e')

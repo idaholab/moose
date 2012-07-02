@@ -7,7 +7,7 @@ from optparse import OptionParser
 from InputFileWidget import *
 from ExecuteWidget import *
 from PostprocessorWidget import *
-
+from ExodusResultRenderWidget import *
 
 from readInputFile import readInputFile, GPNode
 
@@ -40,11 +40,14 @@ class UiBox(QtGui.QMainWindow):
     self.input_file_widget = InputFileWidget(self.app_path, options, self, self.qt_app)
     self.execute_widget = ExecuteWidget(self.app_path, self.input_file_widget, self.qt_app)
     self.postprocessor_widget = PostprocessorWidget(self.input_file_widget, self.execute_widget)
+    self.visualize_widget = ExodusResultRenderWidget()
+    
     self.tab_widget = QtGui.QTabWidget()
 
     self.tab_widget.addTab(self.input_file_widget, "Input File")
     self.tab_widget.addTab(self.execute_widget, "Execute")
     self.tab_widget.addTab(self.postprocessor_widget, "Postprocess")
+    self.tab_widget.addTab(self.visualize_widget, "Visualize")
 
     for plugin_class in self.plugin_classes:
       instance = plugin_class(self)
