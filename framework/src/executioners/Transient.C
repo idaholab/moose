@@ -187,12 +187,6 @@ Transient::takeStep(Real input_dt)
   // Increment time
   _time = _time_old + _dt;
 
-  // Compute TimestepBegin AuxKernels
-  _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_BEGIN);
-
-  // Compute TimestepBegin Postprocessors
-  _problem.computePostprocessors(EXEC_TIMESTEP_BEGIN);
-
   std::cout<<"DT: "<<_dt<<std::endl;
 
   std::cout << " Solving time step ";
@@ -209,6 +203,13 @@ Transient::takeStep(Real input_dt)
   preSolve();
 
   _problem.timestepSetup();
+
+  // Compute TimestepBegin AuxKernels
+  _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_BEGIN);
+
+  // Compute TimestepBegin Postprocessors
+  _problem.computePostprocessors(EXEC_TIMESTEP_BEGIN);
+
   _problem.solve();
 
   _converged = _problem.converged();
