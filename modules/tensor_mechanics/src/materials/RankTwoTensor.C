@@ -28,7 +28,7 @@ RankTwoTensor::RankTwoTensor() :
   for(unsigned int i(0); i<3; i++)
   {
     _rotation_matrix[i].resize(3);
-    for(unsigned int(j); j<3; j++)
+    for(unsigned int j(0); j<3; j++)
     {
       _rotation_matrix[i][j] = 0.0;
     }
