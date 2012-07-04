@@ -103,6 +103,15 @@ class InputFileTextbox(QtGui.QTextEdit):
       else:
         self.the_string += indent_string + '[./' + section + ']\n'
 
+      try:
+        # Print out comments for this block
+        if item.comment != '':
+          split_comment = item.comment.split('\n')
+          for line in split_comment:
+            self.the_string += indent_string + '  # ' + line + '\n'
+      except:
+        pass
+
       active = []
       has_inactive_children = False # Whether or not it has inactive children
       

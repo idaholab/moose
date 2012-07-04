@@ -54,14 +54,18 @@ class FileOpenWidget(QtGui.QPushButton):
 
 
 class ParamTable:
-  def __init__(self, main_data, action_syntax, single_options, incoming_data, incoming_param_comments, main_layout, parent_class, already_has_parent_params, type_options):
+  def __init__(self, main_data, action_syntax, single_options, incoming_data, incoming_param_comments, incoming_comment, main_layout, parent_class, already_has_parent_params, type_options):
     self.main_data = main_data
     self.action_syntax = action_syntax
     self.type_options = type_options
     self.param_comments = {}
+    self.comment = ''
 
     if incoming_param_comments:
       self.param_comments = incoming_param_comments
+
+    if incoming_comment:
+      self.comment = incoming_comment
 
     if main_data and 'subblocks' in main_data:
       self.subblocks = main_data['subblocks']
@@ -80,6 +84,7 @@ class ParamTable:
   def initUI(self):
 #    self.layoutV = QtGui.QVBoxLayout(self.main_layout)
     self.layoutV = QtGui.QVBoxLayout()
+
     
     self.init_menu(self.layoutV)
     self.table_widget = QtGui.QTableWidget()
@@ -90,7 +95,17 @@ class ParamTable:
     self.table_widget.setHorizontalHeaderItem(3, QtGui.QTableWidgetItem('Description'))
     self.table_widget.setHorizontalHeaderItem(4, QtGui.QTableWidgetItem('Comment'))
     self.table_widget.verticalHeader().setVisible(False)
+    self.table_widget.setMinimumHeight(300)
     self.layoutV.addWidget(self.table_widget)
+
+
+    self.comment_label = QtGui.QLabel('Comment:')
+    self.comment_box = QtGui.QTextEdit()
+    self.comment_box.insertPlainText(self.comment)
+
+    self.layoutV.addWidget(self.comment_label)
+    self.layoutV.addWidget(self.comment_box)
+    
 
     self.drop_menu.setCurrentIndex(-1)
     found_index = self.drop_menu.findText('*')

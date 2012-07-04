@@ -154,6 +154,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     param_comments = node.param_comments
 
+    comment = '\n'.join(node.comments)
+
     new_child = self.findChildItemWithName(parent_item, table_data['Name'])
 
     if not new_child:  # If we didn't find a child that already matched then create a new child
@@ -162,6 +164,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 #      parent_item.addChild(new_child)
       new_child.table_data = {}
       new_child.param_comments = []
+      new_child.comment = ''
+      
 
     has_params = False
     # See if there are any actual parameters for this item
@@ -172,6 +176,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     if has_params:
       new_child.table_data = table_data
       new_child.param_comments = param_comments
+      
+    new_child.comment = comment
     
     new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
 
@@ -309,7 +315,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         parent_path = '/' + self.action_syntax.getPath(parent_path)
       yaml_entry = self.input_file_widget.yaml_data.findYamlEntry(parent_path)
 
-      new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, item.param_comments, False, self._typeOptions())
+      new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, item.param_comments, item.comment, False, self._typeOptions())
 
       if item.table_data:
         new_gui.incoming_data = item.table_data
@@ -317,6 +323,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       if new_gui.exec_():
         item.table_data = new_gui.result()
         item.param_comments = new_gui.param_table.param_comments
+        item.comment = new_gui.param_table.comment
         if not self.action_syntax.isPath(this_path):  # Don't change the name of hard paths
           item.setText(0,item.table_data['Name'])
         if not already_had_data:
@@ -342,14 +349,16 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
     yaml_entry = self.input_file_widget.yaml_data.findYamlEntry(this_path)
 
-    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, None, False, self._typeOptions())
+    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, None, None, False, self._typeOptions())
     if self.new_gui.exec_():
       table_data = self.new_gui.result()
       param_comments = self.new_gui.param_table.param_comments
+      comment = self.new_gui.param_table.comment
       new_child = QtGui.QTreeWidgetItem(item)
       new_child.setText(0,table_data['Name'])
       new_child.table_data = table_data
       new_child.param_comments = param_comments
+      new_child.comment = comment
       new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
       new_child.setCheckState(0, QtCore.Qt.Checked)
       item.addChild(new_child)
