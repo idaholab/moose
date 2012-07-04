@@ -38,10 +38,10 @@ class ParseGetPot:
 
     self.root_node = GPNode('root', None)
 
-    self.section_begin_re = re.compile(r"\s*\[(\./)?(\w+)]")
-    self.section_end_re = re.compile(r"\s*\[(\.\./)?\]")
+    self.section_begin_re = re.compile(r"\s*\[\s*(\./)?(\w+)\s*]")
+    self.section_end_re = re.compile(r"\s*\[\s*(\.\./)?\s*\]")
 
-    self.parameter_re = re.compile(r"\s*(\w+)\s*=\s*([^#\n]+?)\s*\n")
+    self.parameter_re = re.compile(r"\s*(\w+)\s*=\s*([^#\n]+?)\s*(#.*)?\n")
 
     self.comment_re = re.compile(r"[^#]*#\s*(.*)")
 
@@ -132,13 +132,12 @@ class ParseGetPot:
     self._recursiveParseFile(self.root_node, lines, 0)
 
 def readInputFile(file_name):
-  print 'parsing!'
   pgp = ParseGetPot(file_name)
   return pgp.root_node
 
  
 if __name__ == '__main__':
 #  ParseGetPot('2d_diffusion_test.i')
-  pgp = ParseGetPot('2d_diffusion_test.i')
+  pgp = ParseGetPot('input.i')
   print 'Printing tree'
   pgp.root_node.Print()
