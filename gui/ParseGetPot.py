@@ -24,7 +24,7 @@ class GPNode:
       comment = ''
       if param in self.param_comments:
         comment = '# ' + self.param_comments[param]
-      print prefix + param + ": " + str(self.params[param]) + comment
+      print prefix + self.name + '/' + param + ": " + str(self.params[param]) + '|' + comment
 
       
     for child in self.children_list:
@@ -41,7 +41,7 @@ class ParseGetPot:
     self.section_begin_re = re.compile(r"\s*\[(\./)?(\w+)]")
     self.section_end_re = re.compile(r"\s*\[(\.\./)?\]")
 
-    self.parameter_re = re.compile(r"\s*(\w+)\s*=\s*([^#\n]+)")
+    self.parameter_re = re.compile(r"\s*(\w+)\s*=\s*([^#\n]+?)\s*\n")
 
     self.comment_re = re.compile(r"[^#]*#\s*(.*)")
 
@@ -139,6 +139,6 @@ def readInputFile(file_name):
  
 if __name__ == '__main__':
 #  ParseGetPot('2d_diffusion_test.i')
-  pgp = ParseGetPot('input.i')
+  pgp = ParseGetPot('2d_diffusion_test.i')
   print 'Printing tree'
   pgp.root_node.Print()
