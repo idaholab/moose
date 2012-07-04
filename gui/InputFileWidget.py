@@ -12,7 +12,7 @@ from InputFileTreeWidget import *
 from InputFileTextbox import *
 from ExodusRenderWidget import *
 
-from readInputFile import readInputFile, GPNode
+from ParseGetPot import readInputFile, GPNode
 
 try:
   _fromUtf8 = QtCore.QString.fromUtf8

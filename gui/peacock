@@ -9,7 +9,7 @@ from ExecuteWidget import *
 from PostprocessorWidget import *
 from ExodusResultRenderWidget import *
 
-from readInputFile import readInputFile, GPNode
+from ParseGetPot import readInputFile, GPNode
 
 from PeacockTab import PeacockTab
 

@@ -55,6 +55,7 @@ def populateParams(ifpot, root_node):
 """Reads file_name and returns a dictionary of GPNodes that are the 'main blocks'"""
 def readInputFile(file_name):
   ifpot = GetPot(Filename=file_name)
+  print ifpot.comments
   root_node = GPNode('root', None)
   buildSectionTree(ifpot, root_node)
   populateParams(ifpot, root_node)

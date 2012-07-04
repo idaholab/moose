@@ -52,6 +52,8 @@ class GetPot:
         self.variables = [ ]
 
         self.section_list = []
+
+        self.comments = {}
         
         # cursor oriented functions (nect(), follow(), etc.): 
         # pointer to actual position to be parsed.
@@ -117,9 +119,12 @@ class GetPot:
         brute_tokens = []
         token = 0
         while token != '':
+            self.current_comment = ''
             self.__skip_whitespace(fh)
             token = self.__get_next_token(fh)
             brute_tokens.append(token)
+            if self.current_comment != '':
+                self.comments[token] = self.current_comment
 
         # -- reduce expressions of token1'='token2 to a single 
         #    string 'token1=token2'
@@ -164,6 +169,7 @@ class GetPot:
             # '#' - comment => skip until end of line
             while tmp != '\n':
                 tmp = FH.read(1)
+                self.current_comment += tmp
                 if tmp == '': return # end of file ?
 
     def __get_next_token(self, FH):
@@ -175,6 +181,7 @@ class GetPot:
             if tmp == '#': #If we run into a comment symbol keep reading until the end of the line
                 while tmp != '\n':
                     tmp = FH.read(1)
+                    self.current_comment += tmp
                     if tmp == '': return token # end of file ?
                 return token
 
