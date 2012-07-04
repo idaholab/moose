@@ -10,7 +10,7 @@ except AttributeError:
 class ExodusRenderWidget(QtGui.QWidget):
   def __init__(self):
     QtGui.QWidget.__init__(self)
-    self.this_layout = QtGui.QHBoxLayout()
+    self.this_layout = QtGui.QVBoxLayout()
     self.setMinimumWidth(700)
     self.setLayout(self.this_layout)
 

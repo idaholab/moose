@@ -65,6 +65,7 @@ class InputFileWidget(QtGui.QWidget):
     self.layout_with_textbox = QtGui.QHBoxLayout()
 
     self.input_file_textbox = InputFileTextbox(self)
+    self.input_file_textbox.hide()
     self.tree_widget = InputFileTreeWidget(self)
     
     self.tree_widget_layout.addWidget(self.tree_widget)
@@ -75,6 +76,7 @@ class InputFileWidget(QtGui.QWidget):
     self.layout_with_textbox.addLayout(self.input_file_textbox.getLayout())
 
     self.exodus_render_widget = ExodusRenderWidget()
+    self.exodus_render_widget.hide()
     self.layout_with_textbox.addWidget(self.exodus_render_widget)
     
     self.setLayout(self.layout_with_textbox)
@@ -85,6 +87,14 @@ class InputFileWidget(QtGui.QWidget):
     main_comment_action = QtGui.QAction("Main Comment", self)
     main_comment_action.triggered.connect(self._edit_main_comment)
     self.edit_menu.addAction(main_comment_action)    
+
+    self.view_menu = self.menubar.addMenu('&View')
+    input_file_action = QtGui.QAction("Input File", self)
+    input_file_action.triggered.connect(self._view_input_file)
+    self.view_menu.addAction(input_file_action)    
+    mesh_view_action = QtGui.QAction("Mesh View", self)
+    mesh_view_action.triggered.connect(self._view_mesh_view)
+    self.view_menu.addAction(mesh_view_action)    
 
     self.advanced_menu = self.menubar.addMenu('&Advanced')
     recache_action = QtGui.QAction("Recache Syntax", self)
@@ -172,13 +182,25 @@ class InputFileWidget(QtGui.QWidget):
       file.write(output_string)
       os.chdir(os.path.dirname(str(file_name)))    
 
-  def _selected_recache(self):
-    self._recache(True)
-
   def _edit_main_comment(self):
     ce = CommentEditor(self.tree_widget)
     if ce.exec_():
       self.tree_widget._itemChanged(self.tree_widget, 0)
+
+  def _view_input_file(self):
+    if self.input_file_textbox.isVisible():
+      self.input_file_textbox.hide()
+    else:
+      self.input_file_textbox.show()
+    
+  def _view_mesh_view(self):
+    if self.exodus_render_widget.isVisible():
+      self.exodus_render_widget.hide()
+    else:
+      self.exodus_render_widget.show()
+    
+  def _selected_recache(self):
+    self._recache(True)
 
   def _recache(self, force_recache = False):
     progress = QtGui.QProgressDialog("Caching Syntax...", "Abort", 0, 10, self)

@@ -23,12 +23,14 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     QtGui.QTreeWidget.__init__(self, win_parent)
 
     self.comment = ''
+    self.mesh_file_name = ''
 
     self.input_file_widget = input_file_widget
     self.action_syntax = self.input_file_widget.action_syntax
 
     self.setExpandsOnDoubleClick(False)
-    self.setMaximumWidth(300)
+    self.setMaximumWidth(400)
+    self.setMinimumWidth(250)
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.connect(self,QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self._newContext)
     self.addHardPathsToTree()
@@ -403,5 +405,11 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     self.input_file_widget.input_file_textbox.updateTextBox()
     
     mesh_file_name = self.getMeshFileName()
-    if mesh_file_name:
-      self.input_file_widget.exodus_render_widget.setFileName(mesh_file_name)
+    if mesh_file_name and '.e' in mesh_file_name:
+      if self.mesh_file_name != mesh_file_name: # Did the file name change?
+        self.mesh_file_name = mesh_file_name
+        self.input_file_widget.exodus_render_widget.setFileName(self.mesh_file_name)
+        self.input_file_widget.exodus_render_widget.show()
+    else:
+      self.input_file_widget.exodus_render_widget.hide()
+      
