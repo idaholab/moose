@@ -137,7 +137,7 @@ def readInputFile(file_name):
 
  
 if __name__ == '__main__':
-#  ParseGetPot('2d_diffusion_test.i')
-  pgp = ParseGetPot('input.i')
+  pgp = ParseGetPot('2d_diffusion_test.i')
+#  pgp = ParseGetPot('input.i')
   print 'Printing tree'
   pgp.root_node.Print()

@@ -38,11 +38,11 @@ class InputFileTextbox(QtGui.QTextEdit):
     ordered_sections = []
     template_sections = []
     
-    if self.input_file_widget.input_file_root_node: # Print any sections we knew about from the input file first (and in the right order)
+    if self.input_file_widget.input_file_root_node:
       for section_name in self.input_file_widget.input_file_root_node.children_list:
         ordered_sections.append(section_name)
 
-    if self.input_file_widget.input_file_template_root_node: # Print any sections we knew about from the template input file first (and in the right order)
+    if self.input_file_widget.input_file_template_root_node:
       for section_name in self.input_file_widget.input_file_template_root_node.children_list:
         template_sections.append(section_name)
 
@@ -125,7 +125,6 @@ class InputFileTextbox(QtGui.QTextEdit):
         ordered_params = []
         template_params = []
 
-        # Print out the ones that we know from the read in input file in the right order
         if gp_node:
           for param in gp_node.params_list:
             if param in item.table_data and param != 'Name' and param != 'parent_params':
@@ -141,12 +140,18 @@ class InputFileTextbox(QtGui.QTextEdit):
 
         # Print out the merged lists
         for param in ordered_params:
-          self.the_string += indent_string + '  ' + param + ' = ' + item.table_data[param] + '\n'
+          comment = ''
+          if param in item.param_comments:
+            comment = ' # ' + item.param_comments[param]
+          self.the_string += indent_string + '  ' + param + ' = ' + item.table_data[param] + comment + '\n'
           printed_params.append(param)
         
         for param,value in item.table_data.items():
           if param not in printed_params and param != 'Name' and param != 'parent_params':
-            self.the_string += indent_string + '  ' + param + ' = ' + value + '\n'
+            comment = ''
+            if param in item.param_comments:
+              comment = ' # ' + item.param_comments[param]
+            self.the_string += indent_string + '  ' + param + ' = ' + value + comment + '\n'
       except:
         pass
 

@@ -54,10 +54,14 @@ class FileOpenWidget(QtGui.QPushButton):
 
 
 class ParamTable:
-  def __init__(self, main_data, action_syntax, single_options, incoming_data, main_layout, parent_class, already_has_parent_params, type_options):
+  def __init__(self, main_data, action_syntax, single_options, incoming_data, incoming_param_comments, main_layout, parent_class, already_has_parent_params, type_options):
     self.main_data = main_data
     self.action_syntax = action_syntax
     self.type_options = type_options
+    self.param_comments = {}
+
+    if incoming_param_comments:
+      self.param_comments = incoming_param_comments
 
     if main_data and 'subblocks' in main_data:
       self.subblocks = main_data['subblocks']
@@ -67,6 +71,7 @@ class ParamTable:
     self.param_names = {}      
     self.original_table_data = {}
     self.incoming_data = incoming_data
+    self.incoming_param_comments = incoming_param_comments
     self.main_layout = main_layout
     self.parent_class = parent_class
     self.already_has_parent_params = already_has_parent_params
@@ -78,11 +83,12 @@ class ParamTable:
     
     self.init_menu(self.layoutV)
     self.table_widget = QtGui.QTableWidget()
-    self.table_widget.setColumnCount(4)
+    self.table_widget.setColumnCount(5)
     self.table_widget.setHorizontalHeaderItem(0, QtGui.QTableWidgetItem('Name'))
     self.table_widget.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem('Value'))
     self.table_widget.setHorizontalHeaderItem(2, QtGui.QTableWidgetItem('Options'))
     self.table_widget.setHorizontalHeaderItem(3, QtGui.QTableWidgetItem('Description'))
+    self.table_widget.setHorizontalHeaderItem(4, QtGui.QTableWidgetItem('Comment'))
     self.table_widget.verticalHeader().setVisible(False)
     self.layoutV.addWidget(self.table_widget)
 
@@ -139,7 +145,7 @@ class ParamTable:
 
 #         if row_name == name:
 #           item = self.table_widget.item(i,1)
-#           item.setText(str(value))
+#           item.setText(str(value))      
     used_params = []
     # First, loop through and add all data that corresponds to YAML
     for i in xrange(0,self.table_widget.rowCount()):
@@ -159,15 +165,28 @@ class ParamTable:
         else:
           item = self.table_widget.item(i,1)
           item.setText(str(the_data[row_name]))
+
+        if row_name in self.param_comments:
+          item = self.table_widget.item(i,4)
+          item.setText(self.param_comments[row_name])
+          
         used_params.append(row_name)
+
     # Now look to see if we have more data that wasn't in YAML and add additional rows for that
     for name,value in the_data.items():
       if name not in used_params and name != 'type' and name not in old_params:
         self.table_widget.insertRow(self.table_widget.rowCount())
         name_item = QtGui.QTableWidgetItem(name)
         value_item = QtGui.QTableWidgetItem(value)
+        comment_item = QtGui.QTableWidgetItem()
         self.table_widget.setItem(self.table_widget.rowCount()-1,0,name_item)
         self.table_widget.setItem(self.table_widget.rowCount()-1,1,value_item)
+        self.table_widget.setItem(self.table_widget.rowCount()-1,4,comment_item)
+
+        
+
+      
+        
 
   def tableToDict(self, only_not_in_original = False):
     the_data = {}
@@ -191,10 +210,15 @@ class ParamTable:
         if not only_not_in_original: # If we want stuff other than what we changed
           if param_name == 'parent_params' or param_name == 'type':  #Pass through type and parent_params even if we didn't change them
              the_data[param_name] = param_value
+
+      comment = str(self.table_widget.item(i,4).text())
+
+      if comment != '':
+        self.param_comments[param_name] = comment
 #          else:
 #            if param_name in self.param_is_required and self.param_is_required[param_name]: #Pass through any 'required' parameters
 #              the_data[param_name] = param_value
-    return the_data
+    return the_data 
     
 
   def init_menu(self, layout):
@@ -408,7 +432,7 @@ class ParamTable:
         self.table_widget.setCellWidget(row, 2, options_item)
       
       doc_item = QtGui.QTableWidgetItem(param['description'])
-      
+
       name_item.setFlags(QtCore.Qt.ItemIsEnabled)
       doc_item.setFlags(QtCore.Qt.ItemIsEnabled)
 
@@ -417,13 +441,18 @@ class ParamTable:
 
       self.table_widget.setItem(row, 0, name_item)
       self.table_widget.setItem(row, 3, doc_item)
+      
+      comment_item = QtGui.QTableWidgetItem()
+      self.table_widget.setItem(row, 4, comment_item)
+      
       row += 1
 
-    self.table_widget.resizeColumnsToContents()
 
     # Try to restore saved data
     if len(saved_data):
       self.fillTableWithData(saved_data, old_params=saved_params)
+
+    self.table_widget.resizeColumnsToContents()
     
     self.table_widget.cellChanged.connect(self.cellChanged)
     
