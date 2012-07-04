@@ -7,6 +7,7 @@ from OptionsGUI import OptionsGUI
 from GenSyntax import *
 from ActionSyntax import *
 from ParamTable import *
+from CommentEditor import *
 
 import MeshInfo
 
@@ -345,6 +346,12 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     self.addHardPathsToTree() # We do this here because they might have removed a hard path... but there is no way to get them back
     self._updateOtherGUIElements()
 
+  def _editComment(self):
+    item = self.currentItem()
+    ce = CommentEditor(item)
+    if ce.exec_():
+      self._itemChanged(item, 0)
+
   def _addItem(self):
     item = self.currentItem()
     this_path = self.generatePathFromItem(item)
@@ -385,6 +392,10 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       delete_action = QtGui.QAction("Delete", self)
       delete_action.triggered.connect(self._deleteCurrentItem)
       menu.addAction(delete_action)
+
+    comment_action = QtGui.QAction("Edit Comment...", self)
+    comment_action.triggered.connect(self._editComment)
+    menu.addAction(comment_action)
       
     menu.popup(global_pos)
 

@@ -3,7 +3,6 @@ import os, sys, PyQt4, getopt
 from PyQt4 import QtCore, QtGui
 
 
-from OptionsGUI import OptionsGUI
 from GenSyntax import *
 from ActionSyntax import *
 from YamlData import *
@@ -55,7 +54,7 @@ class InputFileWidget(QtGui.QWidget):
         msgBox.setText("Warning: Input file, " + options.input_file + ", not found!")
         msgBox.setStandardButtons(QMessageBox.Ok)
         msgBox.setDefaultButton(QMessageBox.Ok)
-        msgBox.exec_()    
+        msgBox.exec_()
     
   def initUI(self):
     # Just a holder so the edit param_widget can go in where we want
@@ -81,6 +80,12 @@ class InputFileWidget(QtGui.QWidget):
     self.setLayout(self.layout_with_textbox)
 
     self.menubar = self.peacock_ui.menuBar()
+
+    self.edit_menu = self.menubar.addMenu('&Edit')
+    main_comment_action = QtGui.QAction("Main Comment", self)
+    main_comment_action.triggered.connect(self._edit_main_comment)
+    self.edit_menu.addAction(main_comment_action)    
+
     self.advanced_menu = self.menubar.addMenu('&Advanced')
     recache_action = QtGui.QAction("Recache Syntax", self)
     recache_action.triggered.connect(self._selected_recache)
@@ -169,6 +174,11 @@ class InputFileWidget(QtGui.QWidget):
 
   def _selected_recache(self):
     self._recache(True)
+
+  def _edit_main_comment(self):
+    ce = CommentEditor(self.tree_widget)
+    if ce.exec_():
+      self.tree_widget._itemChanged(self.tree_widget, 0)
 
   def _recache(self, force_recache = False):
     progress = QtGui.QProgressDialog("Caching Syntax...", "Abort", 0, 10, self)
