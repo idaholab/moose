@@ -130,10 +130,15 @@ class InputFileWidget(QtGui.QWidget):
 
       counter+=1
       progress.setValue(counter)
+
+      main_comment = '\n'.join(self.input_file_root_node.comments)
+      
+      self.tree_widget.comment = main_comment
       
       main_sections = self.input_file_root_node.children
 
       self.tree_widget.loadData(counter, progress, main_sections)
+
 
   def click_open(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Input File", "~/", "Input Files (*.i)")

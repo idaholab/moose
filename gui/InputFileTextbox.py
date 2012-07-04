@@ -37,6 +37,14 @@ class InputFileTextbox(QtGui.QTextEdit):
 
     ordered_sections = []
     template_sections = []
+
+    # Print out comments in the main section
+    if self.input_file_widget.tree_widget.comment != '':
+      split_comment = self.input_file_widget.tree_widget.comment.split('\n')
+      for line in split_comment:
+        self.the_string += '# ' + line + '\n'
+
+      self.the_string += '\n'
     
     if self.input_file_widget.input_file_root_node:
       for section_name in self.input_file_widget.input_file_root_node.children_list:

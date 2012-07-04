@@ -21,6 +21,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
   def __init__(self, input_file_widget, win_parent=None):
     QtGui.QTreeWidget.__init__(self, win_parent)
 
+    self.comment = ''
+
     self.input_file_widget = input_file_widget
     self.action_syntax = self.input_file_widget.action_syntax
 
