@@ -40,6 +40,8 @@
 #include "InputFileFormatter.h"
 #include "YAMLFormatter.h"
 
+#include "FileName.h"
+
 // libMesh
 #include "getpot.h"
 
@@ -526,6 +528,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       InputParameters::Parameter<RealVectorValue> * real_vec_val_param = dynamic_cast<InputParameters::Parameter<RealVectorValue>*>(it->second);
       InputParameters::Parameter<RealTensorValue> * real_tensor_val_param = dynamic_cast<InputParameters::Parameter<RealTensorValue>*>(it->second);
       InputParameters::Parameter<std::string> * string_param = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
+      InputParameters::Parameter<FileName> * file_name_param = dynamic_cast<InputParameters::Parameter<FileName>*>(it->second);
       InputParameters::Parameter<MooseEnum> * enum_param = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(it->second);
       InputParameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<InputParameters::Parameter<std::vector<Real> >*>(it->second);
       InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
@@ -555,6 +558,8 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setRealTensorValue(full_name, it->first, real_tensor_val_param, in_global, global_params_block);
       else if (string_param)
         setScalarParameter<std::string>(full_name, it->first, string_param, in_global, global_params_block);
+      else if (file_name_param)
+        setScalarParameter<FileName>(full_name, it->first, file_name_param, in_global, global_params_block);
       else if (enum_param)
         setScalarParameter<MooseEnum>(full_name, it->first, enum_param, in_global, global_params_block);
       else if (vec_real_param)
