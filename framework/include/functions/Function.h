@@ -19,6 +19,7 @@
 #include "SetupInterface.h"
 #include "TransientInterface.h"
 #include "UserObjectInterface.h"
+#include "PostprocessorInterface.h"
 
 // libMesh
 #include "vector_value.h"
@@ -37,6 +38,7 @@ class Function :
   public MooseObject,
   public SetupInterface,
   public TransientInterface,
+  public PostprocessorInterface,
   public UserObjectInterface
 {
 public:

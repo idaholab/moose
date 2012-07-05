@@ -28,6 +28,7 @@ Function::Function(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
     TransientInterface(parameters),
+    PostprocessorInterface(parameters),
     UserObjectInterface(parameters)
 {
 }

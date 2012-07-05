@@ -75,6 +75,7 @@
 #include "MTUserObject.h"
 
 #include "TimestepSetupFunction.h"
+#include "PostprocessorFunction.h"
 
 // meshes
 #include "StripeMesh.h"
@@ -178,6 +179,7 @@ MooseTestApp::registerObjects()
 
   // Functions
   registerFunction(TimestepSetupFunction);
+  registerFunction(PostprocessorFunction);
 
   // meshes
   registerObject(StripeMesh);
