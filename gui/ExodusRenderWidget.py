@@ -26,7 +26,8 @@ class ExodusActor:
     
     self.mesh = data.GetBlock(type).GetBlock(index)
     
-    self.geom = vtk.vtkGeometryFilter()
+#    self.geom = vtk.vtkGeometryFilter()
+    self.geom = vtk.vtkDataSetSurfaceFilter()
     self.geom.SetInput(self.mesh)
     self.geom.Update()
     
@@ -37,7 +38,7 @@ class ExodusActor:
     self.actor.SetMapper(self.mapper)
 
     self.edges = vtk.vtkExtractEdges()
-    self.edges.SetInput(self.mesh)
+    self.edges.SetInput(self.geom.GetOutput())
     self.edge_mapper = vtk.vtkPolyDataMapper()
     self.edge_mapper.SetInput(self.edges.GetOutput())
 
