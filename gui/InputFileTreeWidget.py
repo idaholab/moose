@@ -32,7 +32,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     self.setMaximumWidth(400)
     self.setMinimumWidth(250)
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    self.connect(self,QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self._newContext)
+    self.connect(self,QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self._newContext)    
     self.addHardPathsToTree()
       
     self.header().close()
@@ -44,6 +44,11 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     QtCore.QObject.connect(self,
                            QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"),
                            self._itemChanged)
+
+    QtCore.QObject.connect(self,
+                           QtCore.SIGNAL("currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)"),
+                           self._currentItemChanged)
+
     
   def addHardPathsToTree(self):
     # Add every hard path
@@ -229,6 +234,10 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       this_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
       this_item.setCheckState(0, QtCore.Qt.Unchecked)
       this_item.setText(0, this_piece)
+      this_item.table_data = {}
+      this_item.param_comments = []
+      this_item.comment = ''
+
       this_path = self.generatePathFromItem(this_item)
       if self.action_syntax.hasStar(this_path):
         this_item.setForeground(0, Qt.blue)
@@ -375,6 +384,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       item.addChild(new_child)
       item.setCheckState(0, QtCore.Qt.Checked)
       item.setExpanded(True)
+      self.setCurrentItem(new_child)
       self._updateOtherGUIElements()
       self.addHardPathsToTree() # We do this here because * paths might add more paths underneath the item we just added
 
@@ -412,4 +422,18 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         self.input_file_widget.exodus_render_widget.show()
     else:
       self.input_file_widget.exodus_render_widget.hide()
+      
+  def _currentItemChanged(self, current, previous):
+#    try:
+    if 'boundary' in current.table_data:
+      self.input_file_widget.exodus_render_widget.highlightBoundary(current.table_data['boundary'])
+    elif 'master' in current.table_data:
+      if 'slave' in current.table_data:
+        self.input_file_widget.exodus_render_widget.highlightBoundary(current.table_data['master']+' '+current.table_data['slave'])
+    elif 'block' in current.table_data:
+      self.input_file_widget.exodus_render_widget.highlightBlock(current.table_data['block'])
+    elif previous and ('boundary' in previous.table_data or 'block' in previous.table_data or ('master' in previous.table_data and 'slave' in previous.table_data)):
+      self.input_file_widget.exodus_render_widget.clearHighlight()
+#    except:
+#      pass
       
