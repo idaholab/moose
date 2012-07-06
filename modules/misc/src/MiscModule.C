@@ -8,7 +8,6 @@
 #include "Convection.h"
 #include "Density.h"
 #include "InternalVolume.h"
-#include "MaterialRealScaledAux.h"
 #include "RobinBC.h"
 #include "JouleHeating.h"
 #include "CoefTimeDerivative.h"
@@ -18,14 +17,16 @@ void
 Elk::Misc::registerObjects()
 {
   // Misc
+  registerBoundaryCondition(RobinBC);
+
   registerKernel(BodyForceVoid);
   registerKernel(CoefDiffusion);
   registerKernel(Convection);
-  registerMaterial(Density);
   registerKernel(JouleHeating);
   registerKernel(CoefTimeDerivative);
   registerKernel(GaussContForcing);
-  registerAux(MaterialRealScaledAux);
+
+  registerMaterial(Density);
+
   registerPostprocessor(InternalVolume);
-  registerBoundaryCondition(RobinBC);
 }

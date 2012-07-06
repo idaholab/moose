@@ -92,7 +92,7 @@
 [AuxBCs]
   [./conductance]
     type = MaterialRealAux
-    matpro = gap_conductance
+    property = gap_conductance
     variable = gap_cond
     boundary = 2
   [../]
