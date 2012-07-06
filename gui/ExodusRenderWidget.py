@@ -14,9 +14,90 @@ class ExodusMap:
   sideset_vtk_block = 4
   nodeset_vtk_block = 7
 
-class ExodusActor:
-  def __init__(self, renderer, data, type, index):
+class PeacockActor:
+  def __init__(self, renderer):
     self.renderer = renderer
+    
+    self.visible = False
+    self.edges_visible = False
+    self.solid = True
+    self.color = white
+    
+  ''' Sync view options.  The view options for self will match the passed in object '''
+  def sync(self, other_actor):
+    if other_actor.visible:
+      self.show()
+    else:
+      self.hide()
+
+    if other_actor.edges_visible:
+      self.showEdges()
+    else:
+      self.hideEdges()
+
+    if other_actor.solid:
+      self.goSolid()
+    else:
+      self.goWireframe()
+
+    self.setColor(other_actor.color)
+    
+  def getBounds(self):
+    raise NotImplementedError    
+
+  def show(self):
+    self.visible = True
+    self._show()
+
+  def hide(self):
+    self.visible = False
+    self._hide()
+
+  def showEdges(self):
+    self.edges_visible = True
+    self._showEdges()
+    
+  def hideEdges(self):
+    self.edges_visible = False
+    self._hideEdges()
+
+  def goSolid(self):
+    self.solid = True
+    self._goSolid()
+    
+  def goWireframe(self):
+    self.solid = False
+    self._goWireframe()
+
+  def setColor(self, color):
+    self.color = color
+    self._setColor(color)
+
+  def _show(self):
+    raise NotImplementedError
+  
+  def _hide(self):
+    raise NotImplementedError
+
+  def _showEdges(self):
+    raise NotImplementedError
+    
+  def _hideEdges(self):
+    raise NotImplementedError
+
+  def _goSolid(self):
+    raise NotImplementedError
+    
+  def _goWireframe(self):
+    raise NotImplementedError
+
+  def _setColor(self, color):
+    raise NotImplementedError
+
+
+class ExodusActor(PeacockActor):
+  def __init__(self, renderer, data, type, index):
+    PeacockActor.__init__(self, renderer)
     self.data = data
     self.type = type
     self.index = index
@@ -26,66 +107,46 @@ class ExodusActor:
     
     self.mesh = data.GetBlock(type).GetBlock(index)
     
-#    self.geom = vtk.vtkGeometryFilter()
     self.geom = vtk.vtkDataSetSurfaceFilter()
-#    self.geom = vtk.vtkMaskPoints()
-#    self.geom.GenerateVerticesOn()
-#    self.geom.SetGenerateVertices(1)
     self.geom.SetInput(self.mesh)
     self.geom.Update()
     
     self.mapper = vtk.vtkDataSetMapper()
     self.mapper.SetInput(self.mesh)
-#    self.mapper = vtk.vtkPolyDataMapper()
-#    self.mapper.SetInput(self.geom.GetOutput())
     
     self.actor = vtk.vtkActor()
     self.actor.SetMapper(self.mapper)
     self.actor.GetProperty().SetPointSize(4)
     self.actor.GetProperty().SetEdgeColor(0,0,0)
-
     self.actor.GetProperty().SetAmbient(0.3);
-#    self.actor.GetProperty().SetDiffuse(0.0);
-#    self.actor.GetProperty().SetSpecular(0.0);
 
-#     self.edges = vtk.vtkExtractEdges()
-#     self.edges.SetInput(self.geom.GetOutput())
-#     self.edge_mapper = vtk.vtkPolyDataMapper()
-#     self.edge_mapper.SetInput(self.edges.GetOutput())
+  def getBounds(self):
+    return self.actor.GetBounds()
 
-#     self.edge_actor = vtk.vtkActor()
-#     self.edge_actor.SetMapper(self.edge_mapper)
-#     self.edge_actor.GetProperty().SetColor(0,0,0)
-
-  def show(self):
-    self.visible = True
+  def _show(self):
     self.renderer.AddActor(self.actor)
 
-  def hide(self):
-    self.visible = False
+  def _hide(self):
     self.renderer.RemoveActor(self.actor)
 
-  def showEdges(self):
-    self.edges_visible = True
+  def _showEdges(self):
     self.actor.GetProperty().EdgeVisibilityOn()
-#    self.renderer.AddActor(self.edge_actor)
     
-  def hideEdges(self):
-    self.edges_visible = False
+  def _hideEdges(self):
     self.actor.GetProperty().EdgeVisibilityOff()
-#    self.renderer.RemoveActor(self.edge_actor)
 
-  def goSolid(self):
+  def _goSolid(self):
     self.actor.GetProperty().SetRepresentationToSurface()
     
-  def goWireframe(self):
+  def _goWireframe(self):
     self.actor.GetProperty().SetRepresentationToWireframe()
 
-  def setSolidColor(self, color):
+  def _setColor(self, color):
     self.actor.GetProperty().SetColor(color)
 
-class ClippedActor:
+class ClippedActor(PeacockActor):
   def __init__(self, original_actor, plane):
+    PeacockActor.__init__(self, original_actor.renderer)
     self.original_actor = original_actor
     self.plane = plane
 
@@ -122,38 +183,8 @@ class ClippedActor:
     self.cut_actor = vtk.vtkActor()
     self.cut_actor.SetMapper(self.cut_mapper)
 
-    self.edge_clipper = vtk.vtkClipPolyData()
-    self.edge_clipper.SetInput(self.original_actor.edges.GetOutput())
-    self.edge_clipper.SetClipFunction(self.plane)
-    self.edge_clipper.GenerateClipScalarsOn()
-
-    self.edge_clip_mapper = vtk.vtkPolyDataMapper()
-    self.edge_clip_mapper.SetInputConnection(self.edge_clipper.GetOutputPort())
-    self.edge_clip_mapper.ScalarVisibilityOff()
-
-    self.edge_clip_actor = vtk.vtkActor()
-    self.edge_clip_actor.SetMapper(self.edge_clip_mapper)
-
-    self.edge_cutter = vtk.vtkCutter()
-    self.edge_cutter.SetInput(self.original_actor.edges.GetOutput())
-    self.edge_cutter.SetCutFunction(self.plane)
-    self.edge_cutter.GenerateCutScalarsOn()
-    
-    self.edge_stripper = vtk.vtkStripper()
-    self.edge_stripper.SetInputConnection(self.edge_cutter.GetOutputPort())
-    self.edge_stripper.Update()
-    
-    self.edge_cut_poly = vtk.vtkPolyData()
-    self.edge_cut_poly.SetPoints(self.edge_stripper.GetOutput().GetPoints())
-    self.edge_cut_poly.SetPolys(self.edge_stripper.GetOutput().GetLines())
-
-    self.edge_cut_triangles = vtk.vtkTriangleFilter()
-    self.edge_cut_triangles.SetInput(self.edge_cut_poly)
-    self.edge_cut_mapper = vtk.vtkPolyDataMapper()
-    self.edge_cut_mapper.SetInput(self.edge_cut_poly)
-    self.edge_cut_mapper.SetInputConnection(self.edge_cut_triangles.GetOutputPort())
-    self.edge_cut_actor = vtk.vtkActor()
-    self.edge_cut_actor.SetMapper(self.edge_cut_mapper)
+  def getBounds(self):
+    return self.original_actor.getBounds()
 
   def movePlane(self, distance):
     self.clipper.SetValue(distance)
@@ -163,21 +194,36 @@ class ClippedActor:
     self.cut_poly.SetPolys(self.stripper.GetOutput().GetLines())
     self.cut_mapper.Update()
   
-  def show(self):
+  def _show(self):
     self.original_actor.renderer.AddActor(self.clip_actor)
     self.original_actor.renderer.AddActor(self.cut_actor)
 
-  def hideSolid(self):
+  def _hide(self):
     self.original_actor.renderer.RemoveActor(self.clip_actor)
     self.original_actor.renderer.RemoveActor(self.cut_actor)
 
-  def showEdges(self):
-    self.original_actor.renderer.AddActor(self.edge_clip_actor)
-    self.original_actor.renderer.AddActor(self.edge_cut_actor)
+  def _showEdges(self):
+    self.clip_actor.GetProperty().EdgeVisibilityOn()
+#    self.cut_actor.GetProperty().EdgeVisibilityOn()
+    
+  def _hideEdges(self):
+    self.clip_actor.GetProperty().EdgeVisibilityOff()
+#    self.cut_actor.GetProperty().EdgeVisibilityOff()
 
-  def hideEdges(self):
-    self.original_actor.renderer.RemoveActor(self.edge_clip_actor)
-    self.original_actor.renderer.RemoveActor(self.edge_cut_actor)
+  def _goSolid(self):
+    self.clip_actor.GetProperty().SetRepresentationToSurface()
+    self.original_actor.renderer.AddActor(self.cut_actor)
+    
+#    self.cut_actor.GetProperty().SetRepresentationToSurface()
+    
+  def _goWireframe(self):
+    self.clip_actor.GetProperty().SetRepresentationToWireframe()
+    self.original_actor.renderer.RemoveActor(self.cut_actor)
+#    self.cut_actor.GetProperty().SetRepresentationToWireframe()
+
+  def _setColor(self, color):
+    self.clip_actor.GetProperty().SetColor(color)
+    self.cut_actor.GetProperty().SetColor(color)
 
 class ExodusRenderWidget(QtGui.QWidget):
   def __init__(self):
@@ -200,7 +246,44 @@ class ExodusRenderWidget(QtGui.QWidget):
     self.current_actors = []
 
     self.vtkwidget.GetRenderWindow().AddRenderer(self.renderer)
+
+    self.plane = vtk.vtkPlane()
+    self.plane.SetOrigin(0, 0, 0)
+    self.plane.SetNormal(1, 0, 0)
+
+    self.clip_groupbox = QtGui.QGroupBox("Clip")
+    self.clip_groupbox.setCheckable(True)
+    self.clip_groupbox.setChecked(False)
+    self.clip_groupbox.setMaximumHeight(70)
+    self.clip_groupbox.toggled[bool].connect(self._clippingToggled)
+    clip_layout = QtGui.QHBoxLayout()
     
+    self.clip_plane_combobox = QtGui.QComboBox()
+    self.clip_plane_combobox.addItem('x')
+    self.clip_plane_combobox.addItem('y')
+    self.clip_plane_combobox.addItem('z')
+    self.clip_plane_combobox.currentIndexChanged[str].connect(self._clipNormalChanged)
+
+    clip_layout.addWidget(self.clip_plane_combobox)
+    
+    self.clip_plane_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+    self.clip_plane_slider.setRange(0, 100)
+    self.clip_plane_slider.setSliderPosition(50)
+    self.clip_plane_slider.sliderMoved[int].connect(self._clipSliderMoved)
+    clip_layout.addWidget(self.clip_plane_slider)
+#     vbox->addStretch(1);
+    self.clip_groupbox.setLayout(clip_layout)
+
+    self.this_layout.addWidget(self.clip_groupbox)
+
+    self.bounds = {}
+    self.bounds['x'] = [0.0, 0.0]
+    self.bounds['y'] = [0.0, 0.0]
+    self.bounds['z'] = [0.0, 0.0]
+
+#    self.draw_edges_checkbox = QtGui.QCheckBox("View Mesh")
+
+#    self.left_controls_layout.addWidget(self.draw_edges_checkbox)
 
   def setFileName(self, file_name):
     for actor in self.current_actors:
@@ -253,112 +336,197 @@ class ExodusRenderWidget(QtGui.QWidget):
 
     self.data = reader.GetOutput()
 
+    self.all_actors = []
+
     self.sideset_actors = {}
+    self.clipped_sideset_actors = {}
+    
+    self.current_sideset_actors = self.sideset_actors
     for i in xrange(num_sidesets):
       actor = ExodusActor(self.renderer, self.data, ExodusMap.sideset_vtk_block, i)
-      actor.setSolidColor(red)
+      actor.setColor(red)
       self.sideset_actors[str(self.sidesets[i])] = actor
+      self.all_actors.append(actor)
+
+      clipped_actor = ClippedActor(actor, self.plane)
+      self.clipped_sideset_actors[str(self.sidesets[i])] = clipped_actor
+      self.all_actors.append(clipped_actor)
+      
       name = reader.GetObjectName(vtk.vtkExodusIIReader.SIDE_SET,i).split(' ')
       if 'Unnamed' not in name:
         self.sideset_actors[name[0]] = actor
+        self.clipped_sideset_actors[name[0]] = clipped_actor
 
     self.nodeset_actors = {}
+    self.clipped_nodeset_actors = {}
+
+    self.current_nodeset_actors = self.nodeset_actors
     for i in xrange(num_nodesets):
       actor = ExodusActor(self.renderer, self.data, ExodusMap.nodeset_vtk_block, i)
-      actor.setSolidColor(red)
+      actor.setColor(red)
       self.nodeset_actors[str(self.nodesets[i])] = actor
+      self.all_actors.append(actor)
+
+      clipped_actor = ClippedActor(actor, self.plane)
+      self.clipped_nodeset_actors[str(self.nodesets[i])] = clipped_actor
+      self.all_actors.append(clipped_actor)
+
       name = reader.GetObjectName(vtk.vtkExodusIIReader.NODE_SET,i).split(' ')
       if 'Unnamed' not in name:
         self.nodeset_actors[name[0]] = actor
-
+        self.clipped_nodeset_actors[name[0]] = clipped_actor
 
     self.block_actors = {}
+    self.clipped_block_actors = {}
+
+    self.current_block_actors = self.block_actors
     for i in xrange(num_blocks):
       actor = ExodusActor(self.renderer, self.data, ExodusMap.element_vtk_block, i)
       self.block_actors[str(self.blocks[i])] = actor
+      self.all_actors.append(actor)
+
       actor.show()
       actor.showEdges()
+
+      clipped_actor = ClippedActor(actor, self.plane)
+      self.clipped_block_actors[str(self.blocks[i])] = clipped_actor
+      self.all_actors.append(clipped_actor)
       
       name = reader.GetObjectName(vtk.vtkExodusIIReader.ELEM_BLOCK,i).split(' ')
       if 'Unnamed' not in name:
         self.block_actors[name[0]] = actor
+        self.clipped_block_actors[name[0]] = clipped_actor
 
-
-    plane = vtk.vtkPlane()
-    plane.SetOrigin(0, 0, 0)
-    plane.SetNormal(1, 0, 0)
+    self.setBounds()
     
-#    self.ca = ClippedActor(self.block_actors[2], plane)
-#    self.ca.showEdges()
-#    self.sideset_actors[1].show()
-
     # Avoid z-buffer fighting
     vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
 
     self.renderer.ResetCamera()
     self.vtkwidget.updateGL()
 
+  def setBounds(self):
+    for actor in self.all_actors:
+      current_bounds = actor.getBounds()
+      self.bounds['x'][0] = min(self.bounds['x'][0], current_bounds[0])
+      self.bounds['x'][1] = max(self.bounds['x'][1], current_bounds[1])
+
+      self.bounds['y'][0] = min(self.bounds['y'][0], current_bounds[2])
+      self.bounds['y'][1] = max(self.bounds['y'][1], current_bounds[3])
+
+      self.bounds['z'][0] = min(self.bounds['z'][0], current_bounds[4])
+      self.bounds['z'][1] = max(self.bounds['z'][1], current_bounds[5])
+
+  def swapActors(self, current, new):
+    for old_name, old_actor in current.items():
+      new[old_name].sync(old_actor)
+      old_actor.hide()
+
+  def _clippingToggled(self, value):
+    if value:
+      self.swapActors(self.current_block_actors, self.clipped_block_actors)
+      self.current_block_actors = self.clipped_block_actors
+      self.swapActors(self.current_sideset_actors, self.clipped_sideset_actors)
+      self.current_sideset_actors = self.clipped_sideset_actors
+      self.swapActors(self.current_nodeset_actors, self.clipped_nodeset_actors)
+      self.current_nodeset_actors = self.clipped_nodeset_actors
+    else:
+      self.swapActors(self.current_block_actors, self.block_actors)
+      self.current_block_actors = self.block_actors
+      self.swapActors(self.current_sideset_actors, self.sideset_actors)
+      self.current_sideset_actors = self.sideset_actors
+      self.swapActors(self.current_nodeset_actors, self.nodeset_actors)
+      self.current_nodeset_actors = self.nodeset_actors
+
+    self.vtkwidget.updateGL()
+    
+  def _clipNormalChanged(self, value):
+    if value == 'x':
+      self.plane.SetNormal(1, 0, 0)
+    elif value == 'y':
+      self.plane.SetNormal(0, 1, 0)
+    else:
+      self.plane.SetNormal(0, 0, 1)
+
+    self.clip_plane_slider.setSliderPosition(50)
+    self._clipSliderMoved(50)
+  
+  def _clipSliderMoved(self, value):
+    direction = str(self.clip_plane_combobox.currentText())
+    step_size = (self.bounds[direction][1] - self.bounds[direction][0])/100.0
+    steps = value-50
+    distance = float(steps)*step_size
+    
+    for actor_name, actor in self.current_sideset_actors.items():
+      actor.movePlane(distance)
+
+    for actor_name, actor in self.current_nodeset_actors.items():
+      actor.movePlane(distance)
+
+    for actor_name, actor in self.current_block_actors.items():
+      actor.movePlane(distance)
+
+    self.vtkwidget.updateGL()    
+    
+    
   def highlightBoundary(self, boundary):
     # Turn off all sidesets
-    for actor_name, actor in self.sideset_actors.items():
+    for actor_name, actor in self.current_sideset_actors.items():
       actor.hide()
 
     # Turn off all nodesets
-    for actor_name, actor in self.nodeset_actors.items():
+    for actor_name, actor in self.current_nodeset_actors.items():
       actor.hide()
 
     # Turn solids to only edges... but only if they are visible
-    for actor_name, actor in self.block_actors.items():
-      actor.setSolidColor(black)
+    for actor_name, actor in self.current_block_actors.items():
+      actor.setColor(black)
       actor.goWireframe()
 
     boundaries = boundary.strip("'").split(' ')
     for the_boundary in boundaries:
-      if the_boundary in self.sideset_actors:
-        self.sideset_actors[the_boundary].show()
-      elif the_boundary in self.nodeset_actors:
-        self.nodeset_actors[the_boundary].show()
+      if the_boundary in self.current_sideset_actors:
+        self.current_sideset_actors[the_boundary].show()
+      elif the_boundary in self.current_nodeset_actors:
+        self.current_nodeset_actors[the_boundary].show()
     
-    self.renderer.ResetCamera()
     self.vtkwidget.updateGL()
 
   def highlightBlock(self, block):
     # Turn off all sidesets
-    for actor_name, actor in self.sideset_actors.items():
+    for actor_name, actor in self.current_sideset_actors.items():
       actor.hide()
 
     # Turn off all nodesets
-    for actor_name, actor in self.nodeset_actors.items():
+    for actor_name, actor in self.current_nodeset_actors.items():
       actor.hide()
 
     # Turn solids to only edges...
-    for actor_name, actor in self.block_actors.items():
-      actor.setSolidColor(black)
+    for actor_name, actor in self.current_block_actors.items():
+      actor.setColor(black)
       actor.goWireframe()
 
     blocks = block.strip("'").split(' ')
     for the_block in blocks:
-      if the_block in self.block_actors:
-        self.block_actors[the_block].setSolidColor(red)
-        self.block_actors[the_block].goSolid()
+      if the_block in self.current_block_actors:
+        self.current_block_actors[the_block].setColor(red)
+        self.current_block_actors[the_block].goSolid()
     
-    self.renderer.ResetCamera()
     self.vtkwidget.updateGL()
 
   def clearHighlight(self):
     # Turn off all sidesets
-    for actor_name, actor in self.sideset_actors.items():
+    for actor_name, actor in self.current_sideset_actors.items():
       actor.hide()
 
     # Turn off all nodesets
-    for actor_name, actor in self.nodeset_actors.items():
+    for actor_name, actor in self.current_nodeset_actors.items():
       actor.hide()
 
     # Show solids and edges - but only if something is visible
-    for actor_name, actor in self.block_actors.items():
-      actor.setSolidColor(white)
+    for actor_name, actor in self.current_block_actors.items():
+      actor.setColor(white)
       actor.goSolid()
         
-    self.renderer.ResetCamera()
     self.vtkwidget.updateGL()
     
