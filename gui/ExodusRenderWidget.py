@@ -217,7 +217,7 @@ class ExodusRenderWidget(QtGui.QWidget):
     self.nodesets = []
     self.nodeset_id_to_exodus_block = {}
     for i in xrange(num_nodesets):
-      nodeset_id = reader.GetObjectId(vtk.vtkExodusIIReader.SIDE_SET,i)
+      nodeset_id = reader.GetObjectId(vtk.vtkExodusIIReader.NODE_SET,i)
       self.nodesets.append(nodeset_id)
       self.nodeset_id_to_exodus_block[nodeset_id] = i
       reader.SetObjectStatus(vtk.vtkExodusIIReader.NODE_SET, i, 1)
@@ -288,6 +288,8 @@ class ExodusRenderWidget(QtGui.QWidget):
     for the_boundary in boundaries:
       if the_boundary in self.sideset_actors:
         self.sideset_actors[the_boundary].showSolid()
+      elif the_boundary in self.nodeset_actors:
+        self.nodeset_actors[the_boundary].showSolid()
     
     self.renderer.ResetCamera()
     self.vtkwidget.updateGL()

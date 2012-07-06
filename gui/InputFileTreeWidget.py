@@ -307,6 +307,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         type_options['std::vector<BlockName>'] = mesh_info.blockNames()
         type_options['BoundaryName'] = mesh_info.sidesetNames()
         type_options['std::vector<BoundaryName>'] = mesh_info.sidesetNames()
+        type_options['BoundaryName'].update(mesh_info.nodesetNames())
+        type_options['std::vector<BoundaryName>'].update(mesh_info.sidesetNames())
       
     return type_options
     
