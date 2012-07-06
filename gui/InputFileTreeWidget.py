@@ -185,6 +185,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     if has_params:
       new_child.table_data = table_data
+      if 'active' in new_child.table_data:
+        del new_child.table_data['active']
       new_child.param_comments = param_comments
       
     new_child.comment = comment
@@ -415,7 +417,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     self.input_file_widget.input_file_textbox.updateTextBox()
     
     mesh_file_name = self.getMeshFileName()
-    if mesh_file_name and '.e' in mesh_file_name:
+    if mesh_file_name and os.path.exists(mesh_file_name) and '.e' in mesh_file_name:
       if self.mesh_file_name != mesh_file_name: # Did the file name change?
         self.mesh_file_name = mesh_file_name
         self.input_file_widget.exodus_render_widget.setFileName(self.mesh_file_name)
