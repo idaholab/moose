@@ -1,4 +1,5 @@
 #include "GapHeatTransfer.h"
+#include "GapConductance.h"
 
 #include "SystemBase.h"
 
@@ -10,7 +11,8 @@ InputParameters validParams<GapHeatTransfer>()
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredCoupledVar("gap_distance", "Distance across the gap");
   params.addRequiredCoupledVar("gap_temp", "Temperature on the other side of the gap");
-  params.addParam<Real>("gap_conductivity", 1.0, "The thermal conductivity of the gap material");
+  params.addRequiredCoupledVar("gap_conductance", "Variable to hold the gap conductance");
+  params.addRequiredCoupledVar("gap_conductance_dT", "Variable to hold the derivative of gap conductance wrt temperature");
   params.addParam<Real>("min_gap", 1.0e-6, "A minimum gap size");
   params.addParam<Real>("max_gap", 1.0e6, "A maximum gap size");
   return params;
@@ -21,7 +23,8 @@ GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters param
    _slave_flux(_sys.getVector("slave_flux")),
    _gap_distance(coupledValue("gap_distance")),
    _gap_temp(coupledValue("gap_temp")),
-   _gap_conductivity(getParam<Real>("gap_conductivity")),
+   _gap_conductance(getMaterialProperty<Real>("gap_conductance")),
+   _gap_conductance_dT(getMaterialProperty<Real>("gap_conductance_dT")),
    _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap")),
    _xdisp_coupled(isCoupled("disp_x")),
@@ -37,11 +40,7 @@ GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters param
 Real
 GapHeatTransfer::computeQpResidual()
 {
-  Real h_gap = 0.0;
-  Real grad_t = 0.0;
-
-  h_gap = h_conduction() + h_contact() + h_radiation();
-  grad_t = (_u[_qp] - _gap_temp[_qp]) * h_gap;
+  Real grad_t = (_u[_qp] - _gap_temp[_qp]) * _gap_conductance[_qp];
 
   // This is keeping track of this residual contribution so it can be used as the flux on the other side of the gap.
   {
@@ -67,7 +66,6 @@ GapHeatTransfer::computeQpResidual()
 //               << std::endl;
 //   }
 
-
   return _test[_i][_qp]*grad_t;
 }
 
@@ -80,10 +78,7 @@ GapHeatTransfer::computeSlaveFluxContribution( Real grad_t )
 Real
 GapHeatTransfer::computeQpJacobian()
 {
-  Real h_gap = h_conduction() + h_contact() + h_radiation();
-  Real dh_gap = dh_conduction() + dh_contact() + dh_radiation();
-
-  return _test[_i][_qp] * ((_u[_qp] - _gap_temp[_qp]) * dh_gap + h_gap) * _phi[_j][_qp];
+  return _test[_i][_qp] * ((_u[_qp] - _gap_temp[_qp]) * _gap_conductance_dT[_qp] + _gap_conductance[_qp]) * _phi[_j][_qp];
 }
 
 Real
@@ -128,7 +123,6 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
     //                       = (u_[xyz]-m_[xyz])/gapLength
     // This is the normal vector.
 
-
     const Real gapL = gapLength();
 
     // THIS IS NOT THE NORMAL WE NEED.
@@ -144,69 +138,16 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
     const Point & normal( _normals[_qp] );
 
     const Real dgap = dgapLength( -normal(coupled_component) );
-    dRdx = -(_u[_qp]-_gap_temp[_qp])*gapK()/(gapL*gapL) * dgap;
+    dRdx = -(_u[_qp]-_gap_temp[_qp])*_gap_conductance[_qp]/gapL * dgap;
   }
   return _test[_i][_qp] * dRdx * _phi[_j][_qp];
 }
 
 
 Real
-GapHeatTransfer::h_conduction()
-{
-  Real gap_L = gapLength();
-
-  return gapK()/gap_L;
-}
-
-
-Real
-GapHeatTransfer::h_contact()
-{
-  return 0.0;
-}
-
-
-Real
-GapHeatTransfer::h_radiation()
-{
-  return 0.0;
-}
-
-
-Real
-GapHeatTransfer::dh_conduction()
-{
-  return 0;
-}
-
-
-Real
-GapHeatTransfer::dh_contact()
-{
-  return 0.0;
-}
-
-
-Real
-GapHeatTransfer::dh_radiation()
-{
-  return 0.0;
-}
-
-
-Real
 GapHeatTransfer::gapLength() const
 {
-  Real gap_L = -(_gap_distance[_qp]);
-
-  if(gap_L > _max_gap)
-  {
-    gap_L = _max_gap;
-  }
-
-  gap_L = std::max(_min_gap, gap_L);
-
-  return gap_L;
+  return GapConductance::gapLength( -(_gap_distance[_qp]), _min_gap, _max_gap );
 }
 
 Real
@@ -222,12 +163,5 @@ GapHeatTransfer::dgapLength( Real normalComponent ) const
   }
 
   return dgap;
-}
-
-
-Real
-GapHeatTransfer::gapK()
-{
-  return _gap_conductivity;
 }
 

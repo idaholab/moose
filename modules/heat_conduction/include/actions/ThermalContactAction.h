@@ -23,6 +23,7 @@ protected:
   void addBcs();
   void addAuxVariables();
   void addAuxBcs();
+  void addMaterials();
   void addDiracKernels();
   void addVectors();
 };

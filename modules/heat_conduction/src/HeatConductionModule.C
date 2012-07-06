@@ -5,6 +5,7 @@
 
 // heat_conduction
 #include "AddSlaveFluxVectorAction.h"
+#include "GapConductance.h"
 #include "GapHeatPointSourceMaster.h"
 #include "GapHeatTransfer.h"
 #include "HeatConduction.h"
@@ -24,6 +25,7 @@ Elk::HeatConduction::registerObjects()
   registerKernel(HeatSource);
   registerBoundaryCondition(GapHeatTransfer);
   registerBoundaryCondition(BulkCoolantBC);
+  registerMaterial(GapConductance);
   registerMaterial(HeatConductionMaterial);
   registerMaterial(SiHeatConductionMaterial);
   registerDiracKernel(GapHeatPointSourceMaster);

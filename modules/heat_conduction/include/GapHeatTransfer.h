@@ -25,13 +25,6 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
-  virtual Real h_conduction();
-  virtual Real h_contact();
-  virtual Real h_radiation();
-  virtual Real dh_conduction();
-  virtual Real dh_contact();
-  virtual Real dh_radiation();
-  virtual Real gapK();
   virtual Real gapLength() const;
   virtual Real dgapLength(Real normalComponent) const;
 
@@ -39,13 +32,14 @@ protected:
 
   NumericVector<Number> & _slave_flux;
 
-  VariableValue & _gap_distance;
-  VariableValue & _gap_temp;
+  const VariableValue & _gap_distance;
+  const VariableValue & _gap_temp;
 
-  const Real _gap_conductivity;
+  const MaterialProperty<Real> & _gap_conductance;
+  const MaterialProperty<Real> & _gap_conductance_dT;
 
-  Real _min_gap;
-  Real _max_gap;
+  const Real _min_gap;
+  const Real _max_gap;
 
 private:
   const bool _xdisp_coupled;

@@ -15,7 +15,8 @@ InputParameters validParams<ThermalContactAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::string>("type", "A string representing the Moose object that will be used for heat conduction over the gap");
-  params.addParam<std::string>("gap_type", "GapValueAux", "A string representing the Moose object that will be used for computing the gap size");
+  params.addParam<std::string>("gap_type", "GapValueAux", "A string representing the Moose object that will be used for computing the gap siz\
+e");
   params.addRequiredParam<std::string>("variable", "The variable for thermal contact");
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
@@ -95,6 +96,7 @@ ThermalContactAction::addBcs()
 
   // add it to the warehouse
   _awh.addActionBlock(action);
+
 }
 
 void
@@ -115,8 +117,7 @@ ThermalContactAction::addAuxVariables()
   if (n == 0)
   {
       InputParameters action_params = ActionFactory::instance()->getValidParams("AddVariableAction");
-//    for (unsigned int i=0; i<action_params.size(); ++i)
-//    {
+
       action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
       action_params.set<std::string>("action") = "add_aux_variable";
       action_params.set<std::string>("name") = "AuxVariables/" + GAP_VALUE_VAR_NAME;
@@ -128,13 +129,12 @@ ThermalContactAction::addAuxVariables()
       action_params.set<std::string>("name") = "AuxVariables/" + PENETRATION_VAR_NAME;
       action = ActionFactory::instance()->create("AddVariableAction", action_params);
       _awh.addActionBlock(action);
-//    }
 
       action_params = ActionFactory::instance()->getValidParams("CopyNodalVarsAction");
       action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
       action_params.set<std::string>("action") = "copy_nodal_aux_vars";
-      action_params.set<std::string>("name") = "AuxVariables/" + GAP_VALUE_VAR_NAME;
       // gap_value
+      action_params.set<std::string>("name") = "AuxVariables/" + GAP_VALUE_VAR_NAME;
       action = ActionFactory::instance()->create("CopyNodalVarsAction", action_params);
       _awh.addActionBlock(action);
       // penetration
@@ -191,6 +191,7 @@ ThermalContactAction::addAuxBcs()
     _awh.addActionBlock(action);
   }
 
+  std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
   {
     action_params.set<std::string>("type") = "PenetrationAux";
     action_params.set<std::string>("name") = "AuxBCs/penetration_" + Moose::stringify(n);
@@ -200,7 +201,6 @@ ThermalContactAction::addAuxBcs()
 
     InputParameters & params = moose_object_action->getObjectParams();
     params.set<std::string>("variable") = PENETRATION_VAR_NAME;
-    std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
     params.set<std::vector<BoundaryName> >("boundary") = bnds;
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
     if (isParamValid("tangential_tolerance"))
@@ -210,8 +210,49 @@ ThermalContactAction::addAuxBcs()
     // add it to the warehouse
     _awh.addActionBlock(action);
   }
+
 }
 
+void
+ThermalContactAction::addMaterials()
+{
+  InputParameters action_params = ActionFactory::instance()->getValidParams("AddMaterialAction");
+  action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
+  action_params.set<std::string>("action") = "add_material";
+
+  {
+    std::string type("GapConductance");
+    if (getParam<std::string>("type") == "GapHeatTransferLWR")
+    {
+      type += "LWR";
+    }
+    action_params.set<std::string>("type") = type;
+    action_params.set<std::string>("name") = "Materials/gap_value_" + Moose::stringify(n);
+    Action *action = ActionFactory::instance()->create("AddMaterialAction", action_params);
+    MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+    mooseAssert (moose_object_action, "Dynamic Cast failed");
+
+    InputParameters & params = moose_object_action->getObjectParams();
+
+    // get valid params for the Material
+    InputParameters material_params = Factory::instance()->getValidParams(type);
+    _parser->extractParams(_name, material_params);
+    params += material_params;
+
+    params.set<std::vector<std::string> >("variable") = std::vector<std::string>(1, getParam<std::string>("variable"));
+    params.set<std::vector<std::string> >("gap_temp") = std::vector<std::string>(1, GAP_VALUE_VAR_NAME);
+    std::vector<std::string> vars(1);
+    vars[0] = PENETRATION_VAR_NAME;
+    params.set<std::vector<std::string> >("gap_distance") = vars;
+
+    std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
+    params.set<std::vector<BoundaryName> >("boundary") = bnds;
+
+    // add it to the warehouse
+    _awh.addActionBlock(action);
+  }
+
+}
 void
 ThermalContactAction::addDiracKernels()
 {
@@ -267,9 +308,11 @@ ThermalContactAction::act()
   addBcs();
   addAuxVariables();
   addAuxBcs();
-  // if using NearestNodeValueAux, we do not need the dirac kernel
+  addMaterials();
   if (getParam<std::string>("gap_type") != "NearestNodeValueAux")
+  {
     addDiracKernels();
+  }
   addVectors();
   n++;
 }
