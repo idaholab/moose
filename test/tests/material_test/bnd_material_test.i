@@ -47,6 +47,24 @@
   [../]
 []
 
+# auxiliary system
+
+[AuxVariables]
+	[./matp]
+		order = CONSTANT
+		family = MONOMIAL
+	[../]
+[]
+
+[AuxBCs]
+  [./prop]
+    type = MaterialRealAux
+    matpro = matp
+    variable = matp
+    boundary = 'left right'
+  [../]
+[]
+
 [Materials]
   [./mat_left]
     type = MTMaterial

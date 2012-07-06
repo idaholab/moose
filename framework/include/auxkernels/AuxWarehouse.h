@@ -51,7 +51,9 @@ public:
   const std::vector<AuxKernel *> & activeBlockNodalKernels(SubdomainID block) { return _active_block_nodal_aux_kernels[block]; }
   const std::vector<AuxKernel *> & activeBlockElementKernels(SubdomainID block) { return _active_block_element_aux_kernels[block]; }
 
-  const std::vector<AuxKernel *> & activeBCs(BoundaryID boundary_id) { return _active_bcs[boundary_id]; }
+  const std::vector<AuxKernel *> & activeBCs(BoundaryID boundary_id) { return _active_nodal_bcs[boundary_id]; }
+  const std::vector<AuxKernel *> & allElementalBCs() { return _all_elem_bcs; }
+  const std::vector<AuxKernel *> & elementalBCs(BoundaryID boundary_id) { return _elem_bcs[boundary_id]; }
 
   /**
    * Get list of scalar kernels
@@ -96,8 +98,12 @@ protected:
   /// elemental kernels active on a block
   std::map<SubdomainID, std::vector<AuxKernel *> > _active_block_element_aux_kernels;
 
-  /// aux boundary conditions
-  std::map<BoundaryID, std::vector<AuxKernel *> > _active_bcs;
+  /// nodal aux boundary conditions
+  std::map<BoundaryID, std::vector<AuxKernel *> > _active_nodal_bcs;
+  /// All elemental BCs
+  std::vector<AuxKernel *> _all_elem_bcs;
+  /// Elemental auxs at boundaries
+  std::map<BoundaryID, std::vector<AuxKernel *> > _elem_bcs;
 
   /// Scalar kernels
   std::vector<AuxScalarKernel *> _scalar_kernels;

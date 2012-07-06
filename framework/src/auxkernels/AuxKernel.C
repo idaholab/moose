@@ -60,13 +60,14 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
 
     _var(_aux_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _nodal(_var.feType().family == LAGRANGE),
+    _bnd(parameters.have_parameter<unsigned int>("_boundary_id")),
 
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
 
-    _q_point(_subproblem.points(_tid)),
-    _qrule(_subproblem.qRule(_tid)),
-    _JxW(_subproblem.JxW(_tid)),
+    _q_point(_bnd ? _subproblem.pointsFace(_tid) : _subproblem.points(_tid)),
+    _qrule(_bnd ? _subproblem.qRuleFace(_tid) : _subproblem.qRule(_tid)),
+    _JxW(_bnd ? _subproblem.JxWFace(_tid) : _subproblem.JxW(_tid)),
     _coord(_subproblem.coords(_tid)),
 
     _u(_nodal ? _var.nodalSln() : _var.sln()),

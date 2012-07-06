@@ -79,6 +79,7 @@ public:
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
 
   virtual const NumericVector<Number> * & currentSolution() { _current_solution = _sys.current_local_solution.get(); return _current_solution; }
 
@@ -124,6 +125,7 @@ protected:
   friend class ComputeNodalAuxVarsThread;
   friend class ComputeNodalAuxBcsThread;
   friend class ComputeElemAuxVarsThread;
+  friend class ComputeElemAuxBcsThread;
 };
 
 #endif /* EXPLICITSYSTEM_H */

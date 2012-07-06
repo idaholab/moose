@@ -48,6 +48,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     _active_node_range(NULL),
     _local_node_range(NULL),
     _bnd_node_range(NULL),
+    _bnd_elem_range(NULL),
     _patch_size(40)
 {
 }
@@ -62,6 +63,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _active_node_range(NULL),
     _local_node_range(NULL),
     _bnd_node_range(NULL),
+    _bnd_elem_range(NULL),
     _patch_size(40)
 {
   (*_mesh.boundary_info) = (*other_mesh._mesh.boundary_info);
@@ -70,12 +72,14 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
 MooseMesh::~MooseMesh()
 {
   freeBndNodes();
+  freeBndElems();
 
   delete _active_local_elem_range;
   delete _active_node_range;
   delete _active_semilocal_node_range;
   delete _local_node_range;
   delete _bnd_node_range;
+  delete _bnd_elem_range;
 }
 
 void
@@ -88,6 +92,14 @@ MooseMesh::freeBndNodes()
   for (std::map<short int, std::vector<unsigned int> >::iterator it = _node_set_nodes.begin(); it != _node_set_nodes.end(); ++it)
     it->second.clear();
   _node_set_nodes.clear();
+}
+
+void
+MooseMesh::freeBndElems()
+{
+  // free memory
+  for (std::vector<BndElement *>::iterator it = _bnd_elems.begin(); it != _bnd_elems.end(); ++it)
+    delete (*it);
 }
 
 void
@@ -142,14 +154,14 @@ MooseMesh::prepare()
 
       // Pack our subdomain IDs into a vector
       std::vector<SubdomainID> mesh_subdomains_vector(_mesh_subdomains.begin(),
-							    _mesh_subdomains.end());
+                                                      _mesh_subdomains.end());
 
       // Gather them all into an enlarged vector
       Parallel::allgather(mesh_subdomains_vector);
 
       // Attempt to insert any new IDs into the set (any existing ones will be skipped)
       _mesh_subdomains.insert(mesh_subdomains_vector.begin(),
-			      mesh_subdomains_vector.end());
+                              mesh_subdomains_vector.end());
 
       // Subdomain size after
       // std::cout << "(after) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
@@ -187,6 +199,7 @@ MooseMesh::update()
   _node_to_elem_map.clear();
   MeshTools::build_nodes_to_elem_map(_mesh, _node_to_elem_map);
   buildNodeList();
+  buildBndElemList();
   cacheInfo();
 }
 
@@ -280,6 +293,25 @@ MooseMesh::buildNodeList()
   }
 }
 
+void
+MooseMesh::buildBndElemList()
+{
+  freeBndElems();
+
+  /// Boundary node list (node ids and corresponding side-set ids, arrays always have the same length)
+  std::vector<unsigned int> elems;
+  std::vector<unsigned short int> sides;
+  std::vector<boundary_id_type> ids;
+  _mesh.boundary_info->build_side_list(elems, sides, ids);
+
+  int n = elems.size();
+  _bnd_elems.resize(n);
+  for (int i = 0; i < n; i++)
+  {
+    _bnd_elems[i] = new BndElement(_mesh.elem(elems[i]), sides[i], ids[i]);
+  }
+}
+
 ConstElemRange *
 MooseMesh::getActiveLocalElementRange()
 {
@@ -343,6 +375,18 @@ MooseMesh::getBoundaryNodeRange()
   return _bnd_node_range;
 }
 
+ConstBndElemRange *
+MooseMesh::getBoundaryElementRange()
+{
+  if (!_bnd_elem_range)
+  {
+    _bnd_elem_range = new ConstBndElemRange(bnd_elems_begin(),
+                                            bnd_elems_end(), GRAIN_SIZE);
+  }
+
+  return _bnd_elem_range;
+}
+
 // MooseMesh Modifiers /////
 void
 MooseMesh::addMeshModifer(const std::string & mod_name, const std::string & name, InputParameters parameters)
@@ -392,6 +436,22 @@ MooseMesh::bnd_nodes_end ()
 {
   Predicates::NotNull<bnd_node_iterator_imp> p;
   return bnd_node_iterator(_bnd_nodes.end(), _bnd_nodes.end(), p);
+}
+
+// default begin() accessor
+bnd_elem_iterator
+MooseMesh::bnd_elems_begin ()
+{
+  Predicates::NotNull<bnd_elem_iterator_imp> p;
+  return bnd_elem_iterator(_bnd_elems.begin(), _bnd_elems.end(), p);
+}
+
+// default end() accessor
+bnd_elem_iterator
+MooseMesh::bnd_elems_end ()
+{
+  Predicates::NotNull<bnd_elem_iterator_imp> p;
+  return bnd_elem_iterator(_bnd_elems.end(), _bnd_elems.end(), p);
 }
 
 const Node *

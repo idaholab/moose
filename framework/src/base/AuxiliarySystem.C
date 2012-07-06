@@ -23,6 +23,7 @@
 #include "ComputeNodalAuxVarsThread.h"
 #include "ComputeNodalAuxBcsThread.h"
 #include "ComputeElemAuxVarsThread.h"
+#include "ComputeElemAuxBcsThread.h"
 #include "Parser.h"
 
 #include "quadrature_gauss.h"
@@ -219,6 +220,23 @@ AuxiliarySystem::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
   }
 }
 
+void
+AuxiliarySystem::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
+{
+  for (std::map<std::string, MooseVariable *>::iterator it = _nodal_vars[tid].begin(); it != _nodal_vars[tid].end(); ++it)
+  {
+    MooseVariable *var = it->second;
+    var->computeElemValuesFace();
+  }
+
+  for (std::map<std::string, MooseVariable *>::iterator it = _elem_vars[tid].begin(); it != _elem_vars[tid].end(); ++it)
+  {
+    MooseVariable *var = it->second;
+    var->reinit_aux();
+    var->computeElemValuesFace();
+  }
+}
+
 NumericVector<Number> &
 AuxiliarySystem::serializedSolution()
 {
@@ -350,6 +368,16 @@ AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
     ConstElemRange & range = *_mesh.getActiveLocalElementRange();
     ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs);
     Threads::parallel_reduce(range, eavt);
+  }
+
+  bool bnd_auxs_to_compute = false;
+  for(unsigned int i=0; i<auxs.size(); i++)
+    bnd_auxs_to_compute |= auxs[i].allElementalBCs().size();
+  if(bnd_auxs_to_compute)
+  {
+    ConstBndElemRange & bnd_elems = *_mesh.getBoundaryElementRange();
+    ComputeElemAuxBcsThread eabt(_mproblem, *this, auxs);
+    Threads::parallel_reduce(bnd_elems, eabt);
   }
 
   Moose::perf_log.pop("update_aux_vars_elemental()","Solve");

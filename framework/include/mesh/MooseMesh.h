@@ -18,6 +18,7 @@
 #include "InputParameters.h"
 #include "MooseObject.h"
 #include "BndNode.h"
+#include "BndElement.h"
 #include "Moose.h"
 
 // libMesh
@@ -54,9 +55,13 @@ public:
   const std::set<BoundaryID> & get_boundary_ids () const { return _mesh.boundary_info->get_boundary_ids(); }
 
   void buildNodeList ();
+  void buildBndElemList();
 
   virtual bnd_node_iterator bnd_nodes_begin ();
   virtual bnd_node_iterator bnd_nodes_end ();
+
+  virtual bnd_elem_iterator bnd_elems_begin ();
+  virtual bnd_elem_iterator bnd_elems_end ();
 
   void build_node_list_from_side_list() { _mesh.boundary_info->build_node_list_from_side_list(); }
   void build_side_list(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<short int> & il) { _mesh.boundary_info->build_side_list(el, sl, il); }
@@ -93,6 +98,7 @@ public:
   SemiLocalNodeRange * getActiveSemiLocalNodeRange();
   ConstNodeRange * getLocalNodeRange();
   ConstBndNodeRange * getBoundaryNodeRange();
+  ConstBndElemRange * getBoundaryElementRange();
 
   const std::set<SubdomainID> & meshSubdomains() { return _mesh_subdomains; }
   const std::set<BoundaryID> & meshBoundaryIds() { return _mesh_boundary_ids; }
@@ -206,6 +212,7 @@ protected:
   NodeRange * _active_node_range;
   ConstNodeRange * _local_node_range;
   ConstBndNodeRange * _bnd_node_range;
+  ConstBndElemRange * _bnd_elem_range;
 
   /// A map of all of the current nodes to the elements that they are connected to.
   std::vector<std::vector<unsigned int> > _node_to_elem_map;
@@ -232,6 +239,11 @@ protected:
   typedef std::vector<BndNode *>::iterator             bnd_node_iterator_imp;
   typedef std::vector<BndNode *>::const_iterator const_bnd_node_iterator_imp;
 
+  /// array of boundary elems
+  std::vector<BndElement *> _bnd_elems;
+  typedef std::vector<BndElement *>::iterator             bnd_elem_iterator_imp;
+  typedef std::vector<BndElement *>::const_iterator const_bnd_elem_iterator_imp;
+
   /// list of nodes that belongs to a specified block (domain)
   std::map<unsigned int, std::set<SubdomainID> > _block_node_list;
 
@@ -252,6 +264,7 @@ protected:
 
   void cacheInfo();
   void freeBndNodes();
+  void freeBndElems();
 };
 
 #endif /* MOOSEMESH_H */

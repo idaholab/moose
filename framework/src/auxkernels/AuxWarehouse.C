@@ -59,7 +59,15 @@ void
 AuxWarehouse::addActiveBC(BoundaryID boundary_id, AuxKernel *aux)
 {
   _all_aux_kernels.push_back(aux);
-  _active_bcs[boundary_id].push_back(aux);
+  if (aux->isNodal())
+  {
+    _active_nodal_bcs[boundary_id].push_back(aux);
+  }
+  else
+  {
+    _all_elem_bcs.push_back(aux);
+    _elem_bcs[boundary_id].push_back(aux);
+  }
 }
 
 void

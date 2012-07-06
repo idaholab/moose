@@ -12,25 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MaterialRealAux.h"
+#ifndef COMPUTEELEMAUXBCSTHREAD_H
+#define COMPUTEELEMAUXBCSTHREAD_H
 
-template<>
-InputParameters validParams<MaterialRealAux>()
+#include "ParallelUniqueId.h"
+#include "AuxWarehouse.h"
+// libMesh includes
+#include "node_range.h"
+
+class FEProblem;
+class AuxiliarySystem;
+
+
+class ComputeElemAuxBcsThread
 {
-  InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<std::string>("matpro", "The material parameter name.");
-  return params;
-}
+public:
+  ComputeElemAuxBcsThread(FEProblem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs);
+  // Splitting Constructor
+  ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split split);
 
-MaterialRealAux::MaterialRealAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters),
-  _matpro(getParam<std::string>("matpro")),
-  _prop(getMaterialProperty<Real>(_matpro))
-{}
+  void operator() (const ConstBndElemRange & range);
 
+  void join(const ComputeElemAuxBcsThread & /*y*/);
 
-Real
-MaterialRealAux::computeValue()
-{
-  return _prop[_qp];
-}
+protected:
+  FEProblem & _problem;
+  AuxiliarySystem & _sys;
+  THREAD_ID _tid;
+
+  std::vector<AuxWarehouse> & _auxs;
+};
+
+#endif //COMPUTEELEMAUXBCSTHREAD_H

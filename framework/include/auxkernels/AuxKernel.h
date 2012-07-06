@@ -101,8 +101,10 @@ protected:
   THREAD_ID _tid;
   /// Variable this kernel is acting on
   MooseVariable & _var;
-  /// true if the kernel nodal, false if it is elemental
+  /// true if the kernel is nodal, false if it is elemental
   bool _nodal;
+  /// true if the kernel is boundary kernel, false if it is interior kernels
+  bool _bnd;
   /// Mesh this kernel is active on
   MooseMesh & _mesh;
   /// Dimension of the problem being solved
