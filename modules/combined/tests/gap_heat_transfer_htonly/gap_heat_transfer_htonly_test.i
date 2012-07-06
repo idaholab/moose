@@ -58,6 +58,13 @@
   [../]
 []
 
+[AuxVariables]
+  [./gap_cond]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
 [Kernels]
   [./heat]
     type = HeatConduction
@@ -79,6 +86,15 @@
     boundary = 4
     variable = temp
     value = 100
+  [../]
+[]
+
+[AuxBCs]
+  [./conductance]
+    type = MaterialRealAux
+    matpro = gap_conductance
+    variable = gap_cond
+    boundary = 2
   [../]
 []
 
