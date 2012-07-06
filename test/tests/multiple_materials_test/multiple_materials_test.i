@@ -57,13 +57,13 @@ active = 'diff1 diff2'
   [./diff1]
     type = MaterialRealAux
     variable = diff1
-    matpro = diff1
+    property = diff1
   [../]
 
   [./diff2]
     type = MaterialRealAux
     variable = diff2
-    matpro = diff2
+    property = diff2
   [../]
 []
 

@@ -59,7 +59,7 @@
 [AuxBCs]
   [./prop]
     type = MaterialRealAux
-    matpro = matp
+    property = matp
     variable = matp
     boundary = 'left right'
   [../]

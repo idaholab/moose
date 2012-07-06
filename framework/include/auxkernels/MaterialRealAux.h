@@ -32,11 +32,10 @@ public:
 protected:
 
   virtual Real computeValue();
-  std::string _matpro;
-
-private:
 
   MaterialProperty<Real> & _prop;
+  const Real _factor;
+  const Real _offset;
 
 };
 

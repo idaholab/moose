@@ -49,7 +49,7 @@
   [./hardness]
     type = MaterialRealAux
     variable = reporter
-    matpro = 'hardness'
+    property = 'hardness'
     block = 'left_block 3'
   [../]
 []

@@ -42,7 +42,7 @@ active = 'mat'
   [./mat]
     type = MaterialRealAux
     variable = mat
-    matpro = matp
+    property = matp
   [../]
 []
 
