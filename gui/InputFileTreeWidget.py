@@ -19,6 +19,7 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class InputFileTreeWidget(QtGui.QTreeWidget):
+  tree_changed = QtCore.pyqtSignal()
   def __init__(self, input_file_widget, win_parent=None):
     QtGui.QTreeWidget.__init__(self, win_parent)
 
@@ -277,6 +278,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
   def _typeOptions(self):
     type_options = {}
+    return type_options
 
     # Variables
     variables_item = self.input_file_widget.tree_widget.findItems("Variables", QtCore.Qt.MatchExactly)[0]
@@ -416,6 +418,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     menu.popup(global_pos)
 
   def _updateOtherGUIElements(self):
+    self.tree_changed.emit()
     self.input_file_widget.input_file_textbox.updateTextBox()
     
     mesh_file_name = self.getMeshFileName()
