@@ -38,7 +38,8 @@ class ParseGetPot:
 
     self.root_node = GPNode('root', None)
 
-    self.section_begin_re = re.compile(r"\s*\[\s*(\./)?(\w+)\s*]")
+    self.section_begin_re = re.compile(r"\s*\[\s*(\./)?([^(?:\.\./)]+?)\s*]")
+    
     self.section_end_re = re.compile(r"\s*\[\s*(\.\./)?\s*\]")
 
     self.parameter_re = re.compile(r"\s*(\w+)\s*=\s*([^#\n]+?)\s*(#.*)?\n")
