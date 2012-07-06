@@ -20,7 +20,7 @@ class InputFileTextbox(QtGui.QTextEdit):
   def __init__(self, input_file_widget, win_parent=None):
     QtGui.QTextEdit.__init__(self, win_parent)
     self.input_file_widget = input_file_widget
-    self.setMinimumWidth(300)
+#    self.setMinimumWidth(300)
     self.setReadOnly(True)
     self.textbox_layout = QtGui.QVBoxLayout()
     self.textbox_layout.addWidget(self)

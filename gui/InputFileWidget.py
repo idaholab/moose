@@ -59,27 +59,42 @@ class InputFileWidget(QtGui.QWidget):
   def initUI(self):
     # Just a holder so the edit param_widget can go in where we want
     self.edit_param_layout_spot = QtGui.QVBoxLayout()
-    
+
+    self.tree_widget_layout_widget = QtGui.QWidget()
     self.tree_widget_layout = QtGui.QVBoxLayout()
+    self.tree_widget_layout_widget.setLayout(self.tree_widget_layout)
     self.layoutH = QtGui.QHBoxLayout()
-    self.layout_with_textbox = QtGui.QHBoxLayout()
+    self.layout_with_textbox = QtGui.QSplitter()
+#    self.layout_with_textbox.setChildrenCollapsible(False)
 
     self.input_file_textbox = InputFileTextbox(self)
-    self.input_file_textbox.hide()
+#    self.input_file_textbox.hide()
     self.tree_widget = InputFileTreeWidget(self)
     
     self.tree_widget_layout.addWidget(self.tree_widget)
     self.init_buttons(self.layoutH)
     self.tree_widget_layout.addLayout(self.layoutH)
-    self.layout_with_textbox.addLayout(self.tree_widget_layout)
-    self.layout_with_textbox.addLayout(self.edit_param_layout_spot)
-    self.layout_with_textbox.addLayout(self.input_file_textbox.getLayout())
+    self.layout_with_textbox.addWidget(self.tree_widget_layout_widget)
+#    self.layout_with_textbox.addLayout(self.edit_param_layout_spot)
 
     self.exodus_render_widget = ExodusRenderWidget()
     self.exodus_render_widget.hide()
     self.layout_with_textbox.addWidget(self.exodus_render_widget)
-    
-    self.setLayout(self.layout_with_textbox)
+
+    self.input_file_textbox_layout_widget = QtGui.QWidget()
+    self.input_file_textbox_layout_widget.setLayout(self.input_file_textbox.getLayout())
+    self.layout_with_textbox.addWidget(self.input_file_textbox_layout_widget)
+
+
+    self.layout_with_textbox.setStretchFactor(0,0.1)
+    self.layout_with_textbox.setStretchFactor(1,0.9)
+    self.layout_with_textbox.setStretchFactor(1,0.2)
+
+    self.layout_with_textbox.setSizes([30,600,0])
+
+    self.main_layout = QtGui.QHBoxLayout()
+    self.main_layout.addWidget(self.layout_with_textbox)
+    self.setLayout(self.main_layout)
 
     self.menubar = self.peacock_ui.menuBar()
 
@@ -190,14 +205,26 @@ class InputFileWidget(QtGui.QWidget):
   def _view_input_file(self):
     if self.input_file_textbox.isVisible():
       self.input_file_textbox.hide()
+      sizes = self.layout_with_textbox.sizes()
+      sizes[2] = 0
+      self.layout_with_textbox.setSizes(sizes)
     else:
       self.input_file_textbox.show()
+      sizes = self.layout_with_textbox.sizes()
+      sizes[2] = 50
+      self.layout_with_textbox.setSizes(sizes)
     
   def _view_mesh_view(self):
     if self.exodus_render_widget.isVisible():
       self.exodus_render_widget.hide()
+      sizes = self.layout_with_textbox.sizes()
+      sizes[1] = 0
+      self.layout_with_textbox.setSizes(sizes)
     else:
       self.exodus_render_widget.show()
+      sizes = self.layout_with_textbox.sizes()
+      sizes[1] = 600
+      self.layout_with_textbox.setSizes(sizes)
     
   def _selected_recache(self):
     self._recache(True)
