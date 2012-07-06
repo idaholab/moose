@@ -1,7 +1,7 @@
 import os, sys, PyQt4, getopt
 from PyQt4 import QtCore, QtGui
 import vtk
-from vtk.util.colors import peacock, tomato, red, white
+from vtk.util.colors import peacock, tomato, red, white, black
 
 try:
   _fromUtf8 = QtCore.QString.fromUtf8
@@ -28,39 +28,58 @@ class ExodusActor:
     
 #    self.geom = vtk.vtkGeometryFilter()
     self.geom = vtk.vtkDataSetSurfaceFilter()
+#    self.geom = vtk.vtkMaskPoints()
+#    self.geom.GenerateVerticesOn()
+#    self.geom.SetGenerateVertices(1)
     self.geom.SetInput(self.mesh)
     self.geom.Update()
     
     self.mapper = vtk.vtkDataSetMapper()
     self.mapper.SetInput(self.mesh)
+#    self.mapper = vtk.vtkPolyDataMapper()
+#    self.mapper.SetInput(self.geom.GetOutput())
     
     self.actor = vtk.vtkActor()
     self.actor.SetMapper(self.mapper)
+    self.actor.GetProperty().SetPointSize(4)
+    self.actor.GetProperty().SetEdgeColor(0,0,0)
 
-    self.edges = vtk.vtkExtractEdges()
-    self.edges.SetInput(self.geom.GetOutput())
-    self.edge_mapper = vtk.vtkPolyDataMapper()
-    self.edge_mapper.SetInput(self.edges.GetOutput())
+    self.actor.GetProperty().SetAmbient(0.3);
+#    self.actor.GetProperty().SetDiffuse(0.0);
+#    self.actor.GetProperty().SetSpecular(0.0);
 
-    self.edge_actor = vtk.vtkActor()
-    self.edge_actor.SetMapper(self.edge_mapper)
-    self.edge_actor.GetProperty().SetColor(0,0,0)
+#     self.edges = vtk.vtkExtractEdges()
+#     self.edges.SetInput(self.geom.GetOutput())
+#     self.edge_mapper = vtk.vtkPolyDataMapper()
+#     self.edge_mapper.SetInput(self.edges.GetOutput())
 
-  def showSolid(self):
-    self.solid_visible = True
+#     self.edge_actor = vtk.vtkActor()
+#     self.edge_actor.SetMapper(self.edge_mapper)
+#     self.edge_actor.GetProperty().SetColor(0,0,0)
+
+  def show(self):
+    self.visible = True
     self.renderer.AddActor(self.actor)
 
-  def hideSolid(self):
-    self.solid_visible = False
+  def hide(self):
+    self.visible = False
     self.renderer.RemoveActor(self.actor)
 
   def showEdges(self):
     self.edges_visible = True
-    self.renderer.AddActor(self.edge_actor)
+    self.actor.GetProperty().EdgeVisibilityOn()
+#    self.renderer.AddActor(self.edge_actor)
     
   def hideEdges(self):
     self.edges_visible = False
-    self.renderer.RemoveActor(self.edge_actor)
+    self.actor.GetProperty().EdgeVisibilityOff()
+#    self.renderer.RemoveActor(self.edge_actor)
+
+  def goSolid(self):
+    self.actor.GetProperty().SetRepresentationToSurface()
+    
+  def goWireframe(self):
+    self.actor.GetProperty().SetRepresentationToWireframe()
 
   def setSolidColor(self, color):
     self.actor.GetProperty().SetColor(color)
@@ -144,7 +163,7 @@ class ClippedActor:
     self.cut_poly.SetPolys(self.stripper.GetOutput().GetLines())
     self.cut_mapper.Update()
   
-  def showSolid(self):
+  def show(self):
     self.original_actor.renderer.AddActor(self.clip_actor)
     self.original_actor.renderer.AddActor(self.cut_actor)
 
@@ -170,7 +189,7 @@ class ExodusRenderWidget(QtGui.QWidget):
     self.vtkwidget = vtk.QVTKWidget2()
 
     self.renderer = vtk.vtkRenderer()
-    self.renderer.SetBackground(0,0,0)
+    self.renderer.SetBackground(0.2,0.2,0.2)
     self.renderer.SetBackground2(1,1,1)
     self.renderer.SetGradientBackground(1)
     self.renderer.ResetCamera()
@@ -239,19 +258,31 @@ class ExodusRenderWidget(QtGui.QWidget):
       actor = ExodusActor(self.renderer, self.data, ExodusMap.sideset_vtk_block, i)
       actor.setSolidColor(red)
       self.sideset_actors[str(self.sidesets[i])] = actor
+      name = reader.GetObjectName(vtk.vtkExodusIIReader.SIDE_SET,i).split(' ')
+      if 'Unnamed' not in name:
+        self.sideset_actors[name[0]] = actor
 
     self.nodeset_actors = {}
     for i in xrange(num_nodesets):
       actor = ExodusActor(self.renderer, self.data, ExodusMap.nodeset_vtk_block, i)
       actor.setSolidColor(red)
       self.nodeset_actors[str(self.nodesets[i])] = actor
+      name = reader.GetObjectName(vtk.vtkExodusIIReader.NODE_SET,i).split(' ')
+      if 'Unnamed' not in name:
+        self.nodeset_actors[name[0]] = actor
+
 
     self.block_actors = {}
     for i in xrange(num_blocks):
       actor = ExodusActor(self.renderer, self.data, ExodusMap.element_vtk_block, i)
       self.block_actors[str(self.blocks[i])] = actor
-      actor.showSolid()
+      actor.show()
       actor.showEdges()
+      
+      name = reader.GetObjectName(vtk.vtkExodusIIReader.ELEM_BLOCK,i).split(' ')
+      if 'Unnamed' not in name:
+        self.block_actors[name[0]] = actor
+
 
     plane = vtk.vtkPlane()
     plane.SetOrigin(0, 0, 0)
@@ -259,7 +290,7 @@ class ExodusRenderWidget(QtGui.QWidget):
     
 #    self.ca = ClippedActor(self.block_actors[2], plane)
 #    self.ca.showEdges()
-#    self.sideset_actors[1].showSolid()
+#    self.sideset_actors[1].show()
 
     # Avoid z-buffer fighting
     vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
@@ -270,26 +301,23 @@ class ExodusRenderWidget(QtGui.QWidget):
   def highlightBoundary(self, boundary):
     # Turn off all sidesets
     for actor_name, actor in self.sideset_actors.items():
-      actor.hideSolid()
-      actor.hideEdges()
+      actor.hide()
 
     # Turn off all nodesets
     for actor_name, actor in self.nodeset_actors.items():
-      actor.hideSolid()
-      actor.hideEdges()
+      actor.hide()
 
     # Turn solids to only edges... but only if they are visible
     for actor_name, actor in self.block_actors.items():
-      if actor.solid_visible:
-        actor.hideSolid()
-        actor.showEdges()
+      actor.setSolidColor(black)
+      actor.goWireframe()
 
     boundaries = boundary.strip("'").split(' ')
     for the_boundary in boundaries:
       if the_boundary in self.sideset_actors:
-        self.sideset_actors[the_boundary].showSolid()
+        self.sideset_actors[the_boundary].show()
       elif the_boundary in self.nodeset_actors:
-        self.nodeset_actors[the_boundary].showSolid()
+        self.nodeset_actors[the_boundary].show()
     
     self.renderer.ResetCamera()
     self.vtkwidget.updateGL()
@@ -297,25 +325,22 @@ class ExodusRenderWidget(QtGui.QWidget):
   def highlightBlock(self, block):
     # Turn off all sidesets
     for actor_name, actor in self.sideset_actors.items():
-      actor.hideSolid()
-      actor.hideEdges()
+      actor.hide()
 
     # Turn off all nodesets
     for actor_name, actor in self.nodeset_actors.items():
-      actor.hideSolid()
-      actor.hideEdges()
+      actor.hide()
 
-    # Turn solids to only edges... but only if they are visible
+    # Turn solids to only edges...
     for actor_name, actor in self.block_actors.items():
-      if actor.solid_visible:
-        actor.hideSolid()
-        actor.showEdges()
+      actor.setSolidColor(black)
+      actor.goWireframe()
 
     blocks = block.strip("'").split(' ')
     for the_block in blocks:
       if the_block in self.block_actors:
         self.block_actors[the_block].setSolidColor(red)
-        self.block_actors[the_block].showSolid()
+        self.block_actors[the_block].goSolid()
     
     self.renderer.ResetCamera()
     self.vtkwidget.updateGL()
@@ -323,20 +348,16 @@ class ExodusRenderWidget(QtGui.QWidget):
   def clearHighlight(self):
     # Turn off all sidesets
     for actor_name, actor in self.sideset_actors.items():
-      actor.hideSolid()
-      actor.hideEdges()
+      actor.hide()
 
     # Turn off all nodesets
     for actor_name, actor in self.nodeset_actors.items():
-      actor.hideSolid()
-      actor.hideEdges()
+      actor.hide()
 
     # Show solids and edges - but only if something is visible
     for actor_name, actor in self.block_actors.items():
       actor.setSolidColor(white)
-      if actor.solid_visible or actor.edges_visible:
-        actor.showSolid()
-        actor.showEdges()
+      actor.goSolid()
         
     self.renderer.ResetCamera()
     self.vtkwidget.updateGL()
