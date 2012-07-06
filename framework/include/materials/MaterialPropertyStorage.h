@@ -71,8 +71,15 @@ public:
    */
   void swapBack(MaterialData & material_data, const Elem & elem, unsigned int side);
 
-  bool & hasStatefulProperties() { return _has_stateful_props; }
-  bool & hasOlderProperties() { return _has_older_prop; }
+  /**
+   * @return a Boolean indicating whether stateful properties exist on this material
+   */
+  bool hasStatefulProperties() const { return _has_stateful_props; }
+
+  /**
+   * @return a Boolean indicating whether or not this material has older properties declared
+   */
+  bool hasOlderProperties() const { return _has_older_prop; }
 
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & props() { return *_props_elem; }
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & propsOld() { return *_props_elem_old; }

@@ -14,7 +14,7 @@ ComputingInitialTest::ComputingInitialTest(const std::string & name, InputParame
 {}
 
 void
-ComputingInitialTest::initQpComputingInitialProperties()
+ComputingInitialTest::initQpStatefulProperties()
 {
   _thermal_conductivity[_qp] = 0.;
 }

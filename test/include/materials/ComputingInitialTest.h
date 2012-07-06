@@ -20,7 +20,7 @@ public:
                 InputParameters parameters);
 
 protected:
-  virtual void initQpComputingInitialProperties();
+  virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 
   MaterialProperty<Real> & _thermal_conductivity;

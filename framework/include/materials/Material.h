@@ -194,6 +194,7 @@ protected:
   template<typename T>
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name, bool is_get=false)
   {
+    _has_stateful_property = true;
     registerPropName(prop_name, is_get);
     return _material_data.declarePropertyOld<T>(prop_name);
   }
@@ -206,6 +207,7 @@ protected:
   template<typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name, bool is_get=false)
   {
+    _has_stateful_property = true;
     registerPropName(prop_name, is_get);
     return _material_data.declarePropertyOlder<T>(prop_name);
   }
@@ -235,6 +237,8 @@ private:
         _displaced_subproblem->storeMatPropName(_block_id[i], prop_name);
     }
   }
+
+  bool _has_stateful_property;
 };
 
 

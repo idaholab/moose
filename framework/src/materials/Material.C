@@ -60,7 +60,8 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _real_zero(_problem._real_zero[_tid]),
     _zero(_problem._zero[_tid]),
     _grad_zero(_problem._grad_zero[_tid]),
-    _second_zero(_problem._second_zero[_tid])
+    _second_zero(_problem._second_zero[_tid]),
+    _has_stateful_property(false)
 {
 /*
   for (unsigned int i = 0; i < _coupled_to.size(); i++)
@@ -103,13 +104,15 @@ Material::computeProperties()
 void
 Material::initStatefulProperties(unsigned int n_points)
 {
-  for (_qp = 0; _qp < n_points; ++_qp)
-    initQpStatefulProperties();
+  if (_has_stateful_property)
+    for (_qp = 0; _qp < n_points; ++_qp)
+      initQpStatefulProperties();
 }
 
 void
 Material::initQpStatefulProperties()
 {
+  mooseWarning(std::string("Material \"") + _name + "\" declares one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class.");
 }
 
 void

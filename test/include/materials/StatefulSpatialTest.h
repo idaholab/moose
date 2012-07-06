@@ -21,6 +21,7 @@ public:
 
 protected:
   virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() {}
 
   MaterialProperty<Real> & _thermal_conductivity;
   MaterialProperty<Real> & _thermal_conductivity_old;
