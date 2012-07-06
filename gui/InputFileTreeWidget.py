@@ -30,8 +30,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     self.action_syntax = self.input_file_widget.action_syntax
 
     self.setExpandsOnDoubleClick(False)
-    self.setMaximumWidth(400)
-    self.setMinimumWidth(250)
+#    self.setMaximumWidth(400)
+#    self.setMinimumWidth(250)
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.connect(self,QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self._newContext)    
     self.addHardPathsToTree()
@@ -278,26 +278,31 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
   def _typeOptions(self):
     type_options = {}
-    return type_options
 
     # Variables
-    variables_item = self.input_file_widget.tree_widget.findItems("Variables", QtCore.Qt.MatchExactly)[0]
-    variable_names = self._getChildNames(variables_item)
-    if len(variable_names):
-      type_options['std::vector<VariableName>'] = variable_names
-      type_options['VariableName'] = variable_names
+    variables_items = self.input_file_widget.tree_widget.findItems("Variables", QtCore.Qt.MatchExactly)
+    if variables_items:
+      variables_item = variables_items[0]
+      variable_names = self._getChildNames(variables_item)
+      if len(variable_names):
+        type_options['std::vector<VariableName>'] = variable_names
+        type_options['VariableName'] = variable_names
 
-    aux_variables_item = self.input_file_widget.tree_widget.findItems("AuxVariables", QtCore.Qt.MatchExactly)[0]
-    aux_variable_names = self._getChildNames(aux_variables_item)
-    if len(aux_variable_names):
-      type_options['std::vector<VariableName>'] += aux_variable_names
-      type_options['VariableName'] += aux_variable_names
+    aux_variables_items = self.input_file_widget.tree_widget.findItems("AuxVariables", QtCore.Qt.MatchExactly)
+    if aux_variables_items:
+      aux_variables_item = aux_variables_items[0]
+      aux_variable_names = self._getChildNames(aux_variables_item)
+      if len(aux_variable_names):
+        type_options['std::vector<VariableName>'] += aux_variable_names
+        type_options['VariableName'] += aux_variable_names
 
-    functions_item = self.input_file_widget.tree_widget.findItems("Functions", QtCore.Qt.MatchExactly)[0]
-    function_names = self._getChildNames(functions_item)
-    if len(function_names):
-      type_options['std::vector<FunctionName>'] = function_names
-      type_options['FunctionName'] = function_names
+    functions_items = self.input_file_widget.tree_widget.findItems("Functions", QtCore.Qt.MatchExactly)
+    if functions_items:
+      functions_item = functions_items[0]
+      function_names = self._getChildNames(functions_item)
+      if len(function_names):
+        type_options['std::vector<FunctionName>'] = function_names
+        type_options['FunctionName'] = function_names
 
     # Mesh stuff
     mesh_data = self.getMeshItemData()
