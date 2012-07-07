@@ -24,7 +24,7 @@ class ExodusActor(PeacockActor):
     
     self.actor = vtk.vtkActor()
     self.actor.SetMapper(self.mapper)
-    self.actor.GetProperty().SetPointSize(4)
+    self.actor.GetProperty().SetPointSize(5)
     self.actor.GetProperty().SetEdgeColor(0,0,0)
     self.actor.GetProperty().SetAmbient(0.3);
 

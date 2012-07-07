@@ -38,7 +38,7 @@ class ParseGetPot:
 
     self.root_node = GPNode('root', None)
 
-    self.section_begin_re = re.compile(r"\s*\[\s*(\./)?([^(?:\.\./)]+?)\s*]")
+    self.section_begin_re = re.compile(r"\s*\[\s*(\./)?([^(\.\./) \t\n\r\f\v]+)\s*]")
     
     self.section_end_re = re.compile(r"\s*\[\s*(\.\./)?\s*\]")
 
@@ -68,7 +68,7 @@ class ParseGetPot:
 
         current_node.children[child_name] = child
         current_node.children_list.append(child_name)
-        
+
         current_position += 1        
         current_position = self._recursiveParseFile(child, lines, current_position)
 

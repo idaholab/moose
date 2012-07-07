@@ -39,6 +39,8 @@ class MeshRenderWidget(QtGui.QWidget):
     self.highlight_layout = QtGui.QHBoxLayout()
 
     self.view_mesh_checkbox = QtGui.QCheckBox('View Mesh')
+    self.view_mesh_checkbox.setCheckState(QtCore.Qt.Checked)
+    self.view_mesh_checkbox.stateChanged.connect(self.viewMeshCheckboxChanged)
     self.highlight_layout.addWidget(self.view_mesh_checkbox)
 
     self.highlight_block_label = QtGui.QLabel('Block:')
@@ -260,6 +262,23 @@ class MeshRenderWidget(QtGui.QWidget):
 
     self.vtkwidget.updateGL()    
 
+  def viewMeshCheckboxChanged(self, value):
+    if value == QtCore.Qt.Checked:
+      for actor_name, actor in self.current_sideset_actors.items():
+        actor.showEdges()
+      for actor_name, actor in self.current_nodeset_actors.items():
+        actor.showEdges()
+      for actor_name, actor in self.current_block_actors.items():
+        actor.showEdges()
+    else:
+      for actor_name, actor in self.current_sideset_actors.items():
+        actor.hideEdges()
+      for actor_name, actor in self.current_nodeset_actors.items():
+        actor.hideEdges()
+      for actor_name, actor in self.current_block_actors.items():
+        actor.hideEdges()
+    self.vtkwidget.updateGL()
+    
   def showBlockSelected(self, block_name):
     self.highlight_sideset_combo.setCurrentIndex(0)
     self.highlight_nodeset_combo.setCurrentIndex(0)

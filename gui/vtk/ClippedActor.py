@@ -21,43 +21,44 @@ class ClippedActor(PeacockActor):
     self.clip_actor = vtk.vtkActor()
     self.clip_actor.SetMapper(self.clip_mapper)
 
-    self.cutter = vtk.vtkCutter()
-    self.cutter.SetInput(self.original_actor.geom.GetOutput())
-    self.cutter.SetCutFunction(self.plane)
-    self.cutter.GenerateCutScalarsOn()
+#     self.cutter = vtk.vtkCutter()
+#     self.cutter.SetInput(self.original_actor.geom.GetOutput())
+#     self.cutter.SetCutFunction(self.plane)
+#     self.cutter.GenerateCutScalarsOn()
     
-    self.stripper = vtk.vtkStripper()
-    self.stripper.SetInputConnection(self.cutter.GetOutputPort())
-    self.stripper.Update()
+#     self.stripper = vtk.vtkStripper()
+#     self.stripper.SetInputConnection(self.cutter.GetOutputPort())
+#     self.stripper.Update()
     
-    self.cut_poly = vtk.vtkPolyData()
-    self.cut_poly.SetPoints(self.stripper.GetOutput().GetPoints())
-    self.cut_poly.SetPolys(self.stripper.GetOutput().GetLines())
+#     self.cut_poly = vtk.vtkPolyData()
+#     self.cut_poly.SetPoints(self.stripper.GetOutput().GetPoints())
+#     self.cut_poly.SetPolys(self.stripper.GetOutput().GetLines())
 
-    self.cut_triangles = vtk.vtkTriangleFilter()
-    self.cut_triangles.SetInput(self.cut_poly)
-    self.cut_mapper = vtk.vtkPolyDataMapper()
-    self.cut_mapper.SetInput(self.cut_poly)
-    self.cut_mapper.SetInputConnection(self.cut_triangles.GetOutputPort())
-    self.cut_actor = vtk.vtkActor()
-    self.cut_actor.SetMapper(self.cut_mapper)
+#     self.cut_triangles = vtk.vtkTriangleFilter()
+#     self.cut_triangles.SetInput(self.cut_poly)
+#     self.cut_mapper = vtk.vtkPolyDataMapper()
+#     self.cut_mapper.SetInput(self.cut_poly)
+#     self.cut_mapper.SetInputConnection(self.cut_triangles.GetOutputPort())
+#     self.cut_actor = vtk.vtkActor()
+#     self.cut_actor.SetMapper(self.cut_mapper)
 
   def getBounds(self):
     return self.original_actor.getBounds()
 
   def movePlane(self):
-    self.stripper.Update()
-    self.cut_poly.SetPoints(self.stripper.GetOutput().GetPoints())
-    self.cut_poly.SetPolys(self.stripper.GetOutput().GetLines())
-    self.cut_mapper.Update()
+    pass
+#    self.stripper.Update()
+#    self.cut_poly.SetPoints(self.stripper.GetOutput().GetPoints())
+#    self.cut_poly.SetPolys(self.stripper.GetOutput().GetLines())
+#    self.cut_mapper.Update()
   
   def _show(self):
     self.original_actor.renderer.AddActor(self.clip_actor)
-    self.original_actor.renderer.AddActor(self.cut_actor)
+#    self.original_actor.renderer.AddActor(self.cut_actor)
 
   def _hide(self):
     self.original_actor.renderer.RemoveActor(self.clip_actor)
-    self.original_actor.renderer.RemoveActor(self.cut_actor)
+#    self.original_actor.renderer.RemoveActor(self.cut_actor)
 
   def _showEdges(self):
     self.clip_actor.GetProperty().EdgeVisibilityOn()
@@ -69,15 +70,15 @@ class ClippedActor(PeacockActor):
 
   def _goSolid(self):
     self.clip_actor.GetProperty().SetRepresentationToSurface()
-    self.original_actor.renderer.AddActor(self.cut_actor)
+#    self.original_actor.renderer.AddActor(self.cut_actor)
     
 #    self.cut_actor.GetProperty().SetRepresentationToSurface()
     
   def _goWireframe(self):
     self.clip_actor.GetProperty().SetRepresentationToWireframe()
-    self.original_actor.renderer.RemoveActor(self.cut_actor)
+#    self.original_actor.renderer.RemoveActor(self.cut_actor)
 #    self.cut_actor.GetProperty().SetRepresentationToWireframe()
 
   def _setColor(self, color):
     self.clip_actor.GetProperty().SetColor(color)
-    self.cut_actor.GetProperty().SetColor(color)
+#    self.cut_actor.GetProperty().SetColor(color)
