@@ -2,6 +2,15 @@
 import os, sys, PyQt4, re, inspect
 from PyQt4 import QtCore, QtGui
 
+# Get the real path of peacock
+pathname = os.path.dirname(sys.argv[0])        
+pathname = os.path.abspath(pathname)
+
+subdirs = ['gui','utils','vtk','mesh_info','plug_ins']
+
+for subdir in subdirs:
+  sys.path.append(pathname + '/' + subdir)
+
 from optparse import OptionParser
 
 from InputFileWidget import *
