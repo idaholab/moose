@@ -20,11 +20,12 @@ except AttributeError:
 
 class InputFileTreeWidget(QtGui.QTreeWidget):
   tree_changed = QtCore.pyqtSignal()
+  mesh_item_changed = QtCore.pyqtSignal(QtGui.QTreeWidgetItem)
+  
   def __init__(self, input_file_widget, win_parent=None):
     QtGui.QTreeWidget.__init__(self, win_parent)
 
     self.comment = ''
-    self.mesh_file_name = ''
 
     self.input_file_widget = input_file_widget
     self.action_syntax = self.input_file_widget.action_syntax
@@ -199,6 +200,9 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     else:
       new_child.setCheckState(0, QtCore.Qt.Unchecked)
 
+    if new_child.text(0) == 'Mesh':
+      self.mesh_item_changed.emit(new_child)
+
     for child, child_node in node.children.items():
       self._addDataRecursively(new_child, child_node)      
 
@@ -353,6 +357,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
           item.setText(0,item.table_data['Name'])
         if not already_had_data:
           item.setCheckState(0, QtCore.Qt.Checked)
+        if item.text(0) == 'Mesh':
+          self.mesh_item_changed.emit(item)
         self._updateOtherGUIElements()
 
   def _itemChanged(self, item, column):
@@ -396,6 +402,10 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       item.setCheckState(0, QtCore.Qt.Checked)
       item.setExpanded(True)
       self.setCurrentItem(new_child)
+      
+      if item.text(0) == 'Mesh':
+        self.mesh_item_changed.emit(item)
+        
       self._updateOtherGUIElements()
       self.addHardPathsToTree() # We do this here because * paths might add more paths underneath the item we just added
 
@@ -424,28 +434,19 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
   def _updateOtherGUIElements(self):
     self.tree_changed.emit()
-    self.input_file_widget.input_file_textbox.updateTextBox()
-    
-    mesh_file_name = self.getMeshFileName()
-    if mesh_file_name and os.path.exists(mesh_file_name) and '.e' in mesh_file_name:
-      if self.mesh_file_name != mesh_file_name: # Did the file name change?
-        self.mesh_file_name = mesh_file_name
-        self.input_file_widget.exodus_render_widget.setFileName(self.mesh_file_name)
-        self.input_file_widget.exodus_render_widget.show()
-    else:
-      self.input_file_widget.exodus_render_widget.hide()
+    self.input_file_widget.input_file_textbox.updateTextBox()    
       
   def _currentItemChanged(self, current, previous):
 #    try:
     if 'boundary' in current.table_data:
-      self.input_file_widget.exodus_render_widget.highlightBoundary(current.table_data['boundary'])
+      self.input_file_widget.mesh_render_widget.highlightBoundary(current.table_data['boundary'])
     elif 'master' in current.table_data:
       if 'slave' in current.table_data:
-        self.input_file_widget.exodus_render_widget.highlightBoundary(current.table_data['master']+' '+current.table_data['slave'])
+        self.input_file_widget.mesh_render_widget.highlightBoundary(current.table_data['master']+' '+current.table_data['slave'])
     elif 'block' in current.table_data:
-      self.input_file_widget.exodus_render_widget.highlightBlock(current.table_data['block'])
+      self.input_file_widget.mesh_render_widget.highlightBlock(current.table_data['block'])
     elif previous and ('boundary' in previous.table_data or 'block' in previous.table_data or ('master' in previous.table_data and 'slave' in previous.table_data)):
-      self.input_file_widget.exodus_render_widget.clearHighlight()
+      self.input_file_widget.mesh_render_widget.clearHighlight()
 #    except:
 #      pass
       

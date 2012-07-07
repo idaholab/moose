@@ -9,7 +9,7 @@ from YamlData import *
 from GetPotData import *
 from InputFileTreeWidget import *
 from InputFileTextbox import *
-from ExodusRenderWidget import *
+from MeshRenderWidget import *
 
 from ParseGetPot import readInputFile, GPNode
 
@@ -77,9 +77,9 @@ class InputFileWidget(QtGui.QWidget):
     self.layout_with_textbox.addWidget(self.tree_widget_layout_widget)
 #    self.layout_with_textbox.addLayout(self.edit_param_layout_spot)
 
-    self.exodus_render_widget = ExodusRenderWidget()
-    self.exodus_render_widget.hide()
-    self.layout_with_textbox.addWidget(self.exodus_render_widget)
+    self.mesh_render_widget = MeshRenderWidget(self.tree_widget)
+    self.mesh_render_widget.hide()
+    self.layout_with_textbox.addWidget(self.mesh_render_widget)
 
     self.input_file_textbox_layout_widget = QtGui.QWidget()
     self.input_file_textbox_layout_widget.setLayout(self.input_file_textbox.getLayout())
@@ -215,13 +215,13 @@ class InputFileWidget(QtGui.QWidget):
       self.layout_with_textbox.setSizes(sizes)
     
   def _view_mesh_view(self):
-    if self.exodus_render_widget.isVisible():
-      self.exodus_render_widget.hide()
+    if self.mesh_render_widget.isVisible():
+      self.mesh_render_widget.hide()
       sizes = self.layout_with_textbox.sizes()
       sizes[1] = 0
       self.layout_with_textbox.setSizes(sizes)
     else:
-      self.exodus_render_widget.show()
+      self.mesh_render_widget.show()
       sizes = self.layout_with_textbox.sizes()
       sizes[1] = 600
       self.layout_with_textbox.setSizes(sizes)
