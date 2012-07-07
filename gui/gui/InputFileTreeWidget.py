@@ -437,7 +437,9 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     self.input_file_widget.input_file_textbox.updateTextBox()    
       
   def _currentItemChanged(self, current, previous):
-#    try:
+    if not current:
+      return
+    
     if 'boundary' in current.table_data:
       self.input_file_widget.mesh_render_widget.highlightBoundary(current.table_data['boundary'])
     elif 'master' in current.table_data:
