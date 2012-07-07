@@ -9,7 +9,7 @@ from ActionSyntax import *
 from ParamTable import *
 from CommentEditor import *
 
-import MeshInfo
+import MeshInfoFactory
 
 from readInputFile import readInputFile, GPNode
 
@@ -307,7 +307,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     # Mesh stuff
     mesh_data = self.getMeshItemData()
     if mesh_data:
-      mesh_info = MeshInfo.getMeshInfo(mesh_data)
+      mesh_info = MeshInfoFactory.getMeshInfo(mesh_data)
 
       if mesh_info:
         type_options['BlockName'] = mesh_info.blockNames()
