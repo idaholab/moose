@@ -151,21 +151,21 @@ class MeshRenderWidget(QtGui.QWidget):
       
     sorted_block_names = set()
     for block_actor_name, block_actor in self.current_block_actors.items():
-      sorted_block_names.add(int(block_actor_name))
+      sorted_block_names.add(block_actor_name.strip(' '))
     self.highlight_block_combo.addItem('')
     for block_actor_name in sorted_block_names:
       self.highlight_block_combo.addItem(str(block_actor_name))
 
     sorted_sideset_names = set()
     for sideset_actor_name, sideset_actor in self.current_sideset_actors.items():
-      sorted_sideset_names.add(sideset_actor_name)
+      sorted_sideset_names.add(sideset_actor_name.strip(' '))
     self.highlight_sideset_combo.addItem('')
     for sideset_actor_name in sorted_sideset_names:
       self.highlight_sideset_combo.addItem(sideset_actor_name)
 
     sorted_nodeset_names = set()
     for nodeset_actor_name, nodeset_actor in self.current_nodeset_actors.items():
-      sorted_nodeset_names.add(nodeset_actor_name)
+      sorted_nodeset_names.add(nodeset_actor_name.strip(' '))
     self.highlight_nodeset_combo.addItem('')
     for nodeset_actor_name in sorted_nodeset_names:
       self.highlight_nodeset_combo.addItem(nodeset_actor_name)
