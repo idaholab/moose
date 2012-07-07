@@ -112,7 +112,7 @@ Material::initStatefulProperties(unsigned int n_points)
 void
 Material::initQpStatefulProperties()
 {
-  mooseWarning(std::string("Material \"") + _name + "\" declares one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class.");
+  libmesh_do_once(mooseWarning(std::string("Material \"") + _name + "\" declares one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class."));
 }
 
 void
