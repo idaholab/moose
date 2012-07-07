@@ -210,7 +210,9 @@ class MeshRenderWidget(QtGui.QWidget):
       self.swapActors(self.current_sideset_actors, self.mesh_renderer.clipped_sideset_actors)
       self.current_sideset_actors = self.mesh_renderer.clipped_sideset_actors
       self.swapActors(self.current_nodeset_actors, self.mesh_renderer.clipped_nodeset_actors)
-      self.current_nodeset_actors = self.mesh_renderer.clipped_nodeset_actors
+      self.current_nodeset_actors = self.mesh_renderer.clipped_nodeset_actors      
+
+      self._clipNormalChanged(self.clip_plane_combobox.currentText())
     else:
       self.swapActors(self.current_block_actors, self.mesh_renderer.block_actors)
       self.current_block_actors = self.mesh_renderer.block_actors
@@ -218,10 +220,13 @@ class MeshRenderWidget(QtGui.QWidget):
       self.current_sideset_actors = self.mesh_renderer.sideset_actors
       self.swapActors(self.current_nodeset_actors, self.mesh_renderer.nodeset_actors)
       self.current_nodeset_actors = self.mesh_renderer.nodeset_actors
-
+    
     self.vtkwidget.updateGL()
     
   def _clipNormalChanged(self, value):
+    self.plane.SetOrigin(self.bounds['x'][0],
+                         self.bounds['y'][0],
+                         self.bounds['z'][0])
     if value == 'x':
       self.plane.SetNormal(1, 0, 0)
     elif value == 'y':
@@ -235,17 +240,23 @@ class MeshRenderWidget(QtGui.QWidget):
   def _clipSliderMoved(self, value):
     direction = str(self.clip_plane_combobox.currentText())
     step_size = (self.bounds[direction][1] - self.bounds[direction][0])/100.0
-    steps = value-50
+    steps = value
     distance = float(steps)*step_size
-    
+    position = self.bounds[direction][0] + distance
+
+    old = self.plane.GetOrigin()
+    self.plane.SetOrigin(position if direction == 'x' else old[0],
+                         position if direction == 'y' else old[1],
+                         position if direction == 'z' else old[2])
+      
     for actor_name, actor in self.current_sideset_actors.items():
-      actor.movePlane(distance)
+      actor.movePlane()
 
     for actor_name, actor in self.current_nodeset_actors.items():
-      actor.movePlane(distance)
+      actor.movePlane()
 
     for actor_name, actor in self.current_block_actors.items():
-      actor.movePlane(distance)
+      actor.movePlane()
 
     self.vtkwidget.updateGL()    
 

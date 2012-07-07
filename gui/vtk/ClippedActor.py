@@ -45,9 +45,7 @@ class ClippedActor(PeacockActor):
   def getBounds(self):
     return self.original_actor.getBounds()
 
-  def movePlane(self, distance):
-    self.clipper.SetValue(distance)
-    self.cutter.SetValue(0, distance)
+  def movePlane(self):
     self.stripper.Update()
     self.cut_poly.SetPoints(self.stripper.GetOutput().GetPoints())
     self.cut_poly.SetPolys(self.stripper.GetOutput().GetLines())
