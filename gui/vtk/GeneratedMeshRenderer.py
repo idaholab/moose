@@ -89,25 +89,46 @@ class GeneratedMeshRenderer(MeshRenderer):
 
     if self.dim == 3:
       self.sideset_actors['front'] = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,self.zmax,True,True,False))
+      self.sideset_actors['5']     = self.sideset_actors['front']
       self.sideset_actors['back']  = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,self.zmin,True,True,False))
+      self.sideset_actors['0']     = self.sideset_actors['back']
 
       self.sideset_actors['left']  = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmin,self.ymin,self.zmin,False,True,True))
+      self.sideset_actors['4']     = self.sideset_actors['left']
       self.sideset_actors['right'] = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymin,self.zmin,False,True,True))
+      self.sideset_actors['2']     = self.sideset_actors['right']
 
       self.sideset_actors['top']   = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,self.zmin,True,False,True))
+      self.sideset_actors['3']     = self.sideset_actors['top']
       self.sideset_actors['bottom']= GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymin,self.zmin,True,False,True))
+      self.sideset_actors['1']     = self.sideset_actors['bottom']
 
     if self.dim == 2:
       self.sideset_actors['left']   = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmin,self.ymax,0.0,False,True,False))
+      self.sideset_actors['3']      = self.sideset_actors['left']
       self.sideset_actors['right']  = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,0.0,False,True,False))
+      self.sideset_actors['1']      = self.sideset_actors['right']
 
       self.sideset_actors['top']    = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,0.0,True,False,False))
+      self.sideset_actors['2']      = self.sideset_actors['top']
       self.sideset_actors['bottom'] = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymin,0.0,True,False,False))
+      self.sideset_actors['0']      = self.sideset_actors['bottom']
 
     if self.dim == 1:
       self.sideset_actors['left']   = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmin,self.ymax,0.0,False,False,False))
+      self.sideset_actors['0']      = self.sideset_actors['left']
       self.sideset_actors['right']  = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,0.0,False,False,False))
+      self.sideset_actors['1']      = self.sideset_actors['right']
+
+    for actor_name, actor in self.block_actors.items():
+      self.clipped_block_actors[actor_name] = ClippedActor(actor, self.plane)
+
+    for actor_name, actor in self.sideset_actors.items():
+      self.clipped_sideset_actors[actor_name] = ClippedActor(actor, self.plane)
       
+    for actor_name, actor in self.nodeset_actors.items():
+      self.clipped_nodeset_actors[actor_name] = ClippedActor(actor, self.plane)
+
   def generateMesh(self, x, y, z, in_x, in_y, in_z):
     x_coord = vtk.vtkFloatArray()
     x_coord.InsertNextValue(x)

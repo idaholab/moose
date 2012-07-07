@@ -71,7 +71,6 @@ class ExodusRenderer(MeshRenderer):
     
     for i in xrange(num_sidesets):
       actor = ExodusActor(self.renderer, self.data, ExodusMap.sideset_vtk_block, i)
-      actor.setColor(red)
       self.sideset_actors[str(self.sidesets[i])] = actor
       self.all_actors.append(actor)
 
@@ -86,7 +85,6 @@ class ExodusRenderer(MeshRenderer):
 
     for i in xrange(num_nodesets):
       actor = ExodusActor(self.renderer, self.data, ExodusMap.nodeset_vtk_block, i)
-      actor.setColor(red)
       self.nodeset_actors[str(self.nodesets[i])] = actor
       self.all_actors.append(actor)
 

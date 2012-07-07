@@ -41,28 +41,28 @@ class MeshRenderWidget(QtGui.QWidget):
     self.view_mesh_checkbox = QtGui.QCheckBox('View Mesh')
     self.highlight_layout.addWidget(self.view_mesh_checkbox)
 
-    self.highlight_block_label = QtGui.QLabel('Highlight Block:')
+    self.highlight_block_label = QtGui.QLabel('Block:')
     self.highlight_block_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
     self.highlight_block_combo = QtGui.QComboBox()
     self.highlight_block_combo.currentIndexChanged[str].connect(self.showBlockSelected)
     self.highlight_layout.addWidget(self.highlight_block_label)
     self.highlight_layout.addWidget(self.highlight_block_combo)
 
-    self.highlight_sideset_label = QtGui.QLabel('Highlight Sideset:')
+    self.highlight_sideset_label = QtGui.QLabel('Sideset:')
     self.highlight_sideset_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
     self.highlight_sideset_combo = QtGui.QComboBox()
     self.highlight_sideset_combo.currentIndexChanged[str].connect(self.showSidesetSelected)
     self.highlight_layout.addWidget(self.highlight_sideset_label)
     self.highlight_layout.addWidget(self.highlight_sideset_combo)
 
-    self.highlight_nodeset_label = QtGui.QLabel('Highlight Nodeset:')
+    self.highlight_nodeset_label = QtGui.QLabel('Nodeset:')
     self.highlight_nodeset_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
     self.highlight_nodeset_combo = QtGui.QComboBox()
     self.highlight_nodeset_combo.currentIndexChanged[str].connect(self.showNodesetSelected)
     self.highlight_layout.addWidget(self.highlight_nodeset_label)
     self.highlight_layout.addWidget(self.highlight_nodeset_combo)
 
-    self.highlight_clear = QtGui.QPushButton('Clear Highlight')
+    self.highlight_clear = QtGui.QPushButton('Clear')
     self.highlight_clear.setDisabled(True)
     self.highlight_clear.clicked.connect(self.clearHighlight)
     self.highlight_layout.addWidget(self.highlight_clear)
@@ -158,6 +158,7 @@ class MeshRenderWidget(QtGui.QWidget):
 
     sorted_sideset_names = set()
     for sideset_actor_name, sideset_actor in self.current_sideset_actors.items():
+      sideset_actor.setColor(red)
       sorted_sideset_names.add(sideset_actor_name.strip(' '))
     self.highlight_sideset_combo.addItem('')
     for sideset_actor_name in sorted_sideset_names:
@@ -165,6 +166,7 @@ class MeshRenderWidget(QtGui.QWidget):
 
     sorted_nodeset_names = set()
     for nodeset_actor_name, nodeset_actor in self.current_nodeset_actors.items():
+      nodeset_actor.setColor(red)
       sorted_nodeset_names.add(nodeset_actor_name.strip(' '))
     self.highlight_nodeset_combo.addItem('')
     for nodeset_actor_name in sorted_nodeset_names:
