@@ -2,6 +2,9 @@ import os, sys, PyQt4, getopt
 from PyQt4 import QtCore, QtGui
 import vtk
 
+pathname = os.path.dirname(sys.argv[0])        
+pathname = os.path.abspath(pathname)
+
 try:
   _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -44,9 +47,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   def setupControls(self):
     self.controls_widget = QtGui.QWidget()
     self.controls_layout = QtGui.QHBoxLayout()
-#    self.controls_widget.setLayout(self.controls_layout)
-#    self.controls_widget.setMinimumHeight(100)
-#    self.main_layout.addWidget(self.controls_widget)
     self.main_layout.addLayout(self.controls_layout)
 
     self.left_controls_layout = QtGui.QVBoxLayout()
@@ -67,13 +67,34 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     
     self.contour_layout = QtGui.QHBoxLayout()
-    self.contour_label = QtGui.QLabel("Variable Contour:")
+    self.contour_label = QtGui.QLabel("Contour:")
     self.variable_contour = QtGui.QComboBox()
     self.variable_contour.currentIndexChanged[str].connect(self._contourVariableSelected)
     self.contour_layout.addWidget(self.contour_label, alignment=QtCore.Qt.AlignRight)
     self.contour_layout.addWidget(self.variable_contour, alignment=QtCore.Qt.AlignLeft)
-    self.right_controls_layout.addLayout(self.contour_layout)
-    
+    self.left_controls_layout.addLayout(self.contour_layout)
+
+    self.beginning_button = QtGui.QToolButton()
+    self.beginning_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrFirst32.png'))
+
+    self.back_button = QtGui.QToolButton()
+    self.back_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrBack32.png'))
+
+    self.play_button = QtGui.QToolButton()
+    self.play_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrPlay32.png'))
+
+    self.pause_button = QtGui.QToolButton()
+    self.pause_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrPause32.png'))
+
+    self.forward_button = QtGui.QToolButton()
+    self.forward_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrForward32.png'))
+
+    self.last_button = QtGui.QToolButton()
+    self.last_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrLast32.png'))
+
+    self.loop_button = QtGui.QToolButton()
+    self.loop_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrLoop24.png'))
+
     self.time_slider_label = QtGui.QLabel("Timestep:")
     self.time_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
     self.time_slider.setMaximumWidth(600)
@@ -84,12 +105,54 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_slider_textbox = QtGui.QLineEdit()
     self.time_slider_textbox.setMaximumWidth(30)
     self.time_slider_textbox.returnPressed.connect(self._sliderTextboxReturn)
+
+    self.time_groupbox = QtGui.QGroupBox("Time")
+    self.time_groupbox.setMaximumHeight(70)
     
-    self.slider_layout = QtGui.QHBoxLayout()
-    self.slider_layout.addWidget(self.time_slider_label, alignment=QtCore.Qt.AlignRight)
-    self.slider_layout.addWidget(self.time_slider)
-    self.slider_layout.addWidget(self.time_slider_textbox, alignment=QtCore.Qt.AlignLeft)
-    self.right_controls_layout.addLayout(self.slider_layout)
+    self.time_layout = QtGui.QHBoxLayout()
+    self.time_layout.addWidget(self.beginning_button)
+    self.time_layout.addWidget(self.back_button)
+    self.time_layout.addWidget(self.play_button)
+    self.time_layout.addWidget(self.pause_button)
+    self.time_layout.addWidget(self.forward_button)
+    self.time_layout.addWidget(self.last_button)
+    self.time_layout.addWidget(self.loop_button)
+    self.time_layout.addWidget(self.time_slider_label, alignment=QtCore.Qt.AlignRight)
+    self.time_layout.addWidget(self.time_slider)
+    self.time_layout.addWidget(self.time_slider_textbox, alignment=QtCore.Qt.AlignLeft)
+
+    self.time_groupbox.setLayout(self.time_layout)
+
+    self.right_controls_layout.addWidget(self.time_groupbox)
+
+    self.plane = vtk.vtkPlane()
+    self.plane.SetOrigin(0, 0, 0)
+    self.plane.SetNormal(1, 0, 0)
+
+    self.clip_groupbox = QtGui.QGroupBox("Clip")
+    self.clip_groupbox.setCheckable(True)
+    self.clip_groupbox.setChecked(False)
+    self.clip_groupbox.setMaximumHeight(70)
+    self.clip_groupbox.toggled[bool].connect(self._clippingToggled)
+    clip_layout = QtGui.QHBoxLayout()
+    
+    self.clip_plane_combobox = QtGui.QComboBox()
+    self.clip_plane_combobox.addItem('x')
+    self.clip_plane_combobox.addItem('y')
+    self.clip_plane_combobox.addItem('z')
+    self.clip_plane_combobox.currentIndexChanged[str].connect(self._clipNormalChanged)
+
+    clip_layout.addWidget(self.clip_plane_combobox)
+    
+    self.clip_plane_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+    self.clip_plane_slider.setRange(0, 100)
+    self.clip_plane_slider.setSliderPosition(50)
+    self.clip_plane_slider.sliderMoved[int].connect(self._clipSliderMoved)
+    clip_layout.addWidget(self.clip_plane_slider)
+#     vbox->addStretch(1);
+    self.clip_groupbox.setLayout(clip_layout)
+
+    self.right_controls_layout.addWidget(self.clip_groupbox)
 
   def _updateControls(self):
     self.variable_contour.clear()
@@ -154,6 +217,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.current_actors.append(self.scalar_bar)
     self.scalar_bar.SetLookupTable(self.mapper.GetLookupTable())
     self.scalar_bar.SetNumberOfLabels(4)
+    
+    self.current_bounds = self.actor.GetBounds()
 
     # Avoid z-buffer fighting
     vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
@@ -228,9 +293,14 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.min_timestep = range[0]
       self.max_timestep = range[1]
       self.time_slider.setMinimum(self.min_timestep)
-      self.time_slider.setMaximum(self.max_timestep)
-      self.time_slider.setSliderPosition(self.max_timestep)
-      self._timeSliderReleased()
+
+      # Only automatically move forward if they're on the current step
+      if self.time_slider.sliderPosition() == self.time_slider.maximum():
+        self.time_slider.setMaximum(self.max_timestep)
+        self.time_slider.setSliderPosition(self.max_timestep)
+        self._timeSliderReleased()
+      else:
+        self.time_slider.setMaximum(self.max_timestep)
 
   def _timestepEnd(self):
     pass
@@ -247,3 +317,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self._timestepBegin()
     
 
+  def _clippingToggled(self, value):
+    pass
+    
+  def _clipNormalChanged(self, value):
+    pass
+  
+  def _clipSliderMoved(self, value):
+    pass
