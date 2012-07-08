@@ -17,6 +17,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.input_file_widget = input_file_widget
     self.qt_app = qt_app
 
+    self.plane = vtk.vtkPlane()
+    self.plane.SetOrigin(0, 0, 0)
+    self.plane.SetNormal(1, 0, 0)
+
     self.reader = None
     
     self.execution_widget = execution_widget
@@ -140,10 +144,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.right_controls_layout.addWidget(self.time_groupbox)
 
-    self.plane = vtk.vtkPlane()
-    self.plane.SetOrigin(0, 0, 0)
-    self.plane.SetNormal(1, 0, 0)
-
     self.clip_groupbox = QtGui.QGroupBox("Clip")
     self.clip_groupbox.setCheckable(True)
     self.clip_groupbox.setChecked(False)
@@ -191,6 +191,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.min_timestep = range[0]
     self.max_timestep = range[1]
 
+    self.reader.SetAllArrayStatus(vtk.vtkExodusIIReader.ELEM_BLOCK, 1)
     self.reader.SetAllArrayStatus(vtk.vtkExodusIIReader.NODAL, 1)
     self.reader.SetAllArrayStatus(vtk.vtkExodusIIReader.NODAL_TEMPORAL, 1)
     self.reader.SetTimeStep(self.max_timestep)
@@ -205,26 +206,90 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     cdp = vtk.vtkCompositeDataPipeline()
     vtk.vtkAlgorithm.SetDefaultExecutivePrototype(cdp)
 
-    self.geom = vtk.vtkCompositeDataGeometryFilter()
-    self.geom.SetInputConnection(0,self.reader.GetOutputPort(0));
-    self.geom.Update()
+    self.output = self.reader.GetOutput()
+#    self.geom = vtk.vtkCompositeDataGeometryFilter()
+#    self.geom.SetInputConnection(0,self.reader.GetOutputPort(0));
+#    self.geom.Update()
 
     lut = vtk.vtkLookupTable()
     lut.SetHueRange(0.667, 0.0)
     lut.SetNumberOfColors(256)
     lut.Build()
 
-    self.data = self.geom.GetOutput()
-    self.mapper = vtk.vtkPolyDataMapper()
-    self.mapper.SetInput(self.data)
-    self.mapper.ScalarVisibilityOn()
-    self.mapper.SetColorModeToMapScalars()
-    self.mapper.SetLookupTable(lut)
+#    self.data = self.geom.GetOutput()
+
+    
+#    self.mapper = vtk.vtkPolyDataMapper()
+#    self.mapper.SetInput(self.data)
+#    self.mapper.ScalarVisibilityOn()
+#    self.mapper.SetColorModeToMapScalars()
+#    self.mapper.SetLookupTable(lut)
+
+
+    self.mesh = self.output.GetBlock(0).GetBlock(0)
+    
+    self.geom = vtk.vtkGeometryFilter()
+    self.geom.SetInput(self.mesh)
+    self.geom.Update()
+    
+    self.mapper = vtk.vtkDataSetMapper()
+    self.mapper.SetInput(self.mesh)
+
     
     self.actor = vtk.vtkActor()
     self.current_actors.append(self.actor)
     self.actor.SetMapper(self.mapper)
     self.renderer.AddActor(self.actor)
+    self.current_actor = self.actor
+
+#     self.clipper = vtk.vtkClipPolyData()
+#     self.clipper.SetInput(self.data)
+#     self.clipper.SetClipFunction(self.plane)
+#     self.clipper.GenerateClipScalarsOff()
+
+#     self.clip_mapper = vtk.vtkPolyDataMapper()
+#     self.clip_mapper.SetInputConnection(self.clipper.GetOutputPort())
+#     self.clip_mapper.ScalarVisibilityOn()
+#     self.clip_mapper.SetColorModeToMapScalars()
+#     self.clip_mapper.SetLookupTable(lut)
+
+#     self.clip_actor = vtk.vtkActor()
+#     self.clip_actor.SetMapper(self.clip_mapper)
+
+    self.actor.GetProperty().SetRepresentationToWireframe()
+
+
+
+
+
+#     self.cutter = vtk.vtkCutter()
+#     self.cutter.SetInput(self.data)
+#     self.cutter.SetCutFunction(self.plane)
+#     self.cutter.GenerateCutScalarsOff()
+    
+#     self.cut_mapper = vtk.vtkPolyDataMapper()
+#     self.cut_mapper.SetInputConnection(self.cutter.GetOutputPort())
+# #    self.cut_mapper.SetScalarRange(pl3d.GetOutput().GetPointData().GetScalars().GetRange())
+#     self.cut_actor = vtk.vtkActor()
+#     self.cut_actor.SetMapper(self.cut_mapper)
+
+#    extract = vtk.vtkExtractGeometry()
+#    extract.SetInput(self.data)
+#    extract.SetImplicitFunction(self.plane)
+#    dataMapper = vtk.vtkDataSetMapper()
+#    dataMapper.SetInputConnection(extract.GetOutputPort())
+#    self.cut_actor = vtk.vtkActor()
+#    self.cut_actor.SetMapper(dataMapper)
+
+
+
+
+
+
+
+
+
+    
 
     self._drawEdgesChanged(self.draw_edges_checkbox.checkState())
 
@@ -265,6 +330,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     point_data = self.current_variable_point_data[value_string]
     self.data.GetPointData().SetScalars(point_data)
     self.mapper.SetScalarRange(point_data.GetRange()[0],point_data.GetRange()[1])
+    self.clip_mapper.SetScalarRange(point_data.GetRange()[0],point_data.GetRange()[1])
     self.scalar_bar.SetTitle(value_string)
     self.renderer.AddActor2D(self.scalar_bar)
     self.vtkwidget.updateGL()
@@ -340,6 +406,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.reader.Update()
       self.geom.Update()
       self._contourVariableSelected(self.variable_contour.currentText(), True)
+      self.current_bounds = self.actor.GetBounds()
 
   def _sliderTextboxReturn(self):
     self.time_slider.setSliderPosition(int(self.time_slider_textbox.text()))
@@ -386,10 +453,61 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     
 
   def _clippingToggled(self, value):
-    pass
+    if value:
+      self.renderer.RemoveActor(self.current_actor)
+#      self.renderer.AddActor(self.clip_actor)
+#      self.current_actor = self.clip_actor
+
+      self.renderer.AddActor(self.cut_actor)
+      self.current_actor = self.cut_actor
+
+    else:
+      self.renderer.RemoveActor(self.current_actor)
+      self.renderer.AddActor(self.actor)
+      self.current_actor = self.actor
+      
+    self.vtkwidget.updateGL()    
     
   def _clipNormalChanged(self, value):
-    pass
+    self.plane.SetOrigin(self.current_bounds[0],
+                         self.current_bounds[2],
+                         self.current_bounds[4])
+    if value == 'x':
+      self.plane.SetNormal(1, 0, 0)
+    elif value == 'y':
+      self.plane.SetNormal(0, 1, 0)
+    else:
+      self.plane.SetNormal(0, 0, 1)
+
+    self.clip_plane_slider.setSliderPosition(50)
+    self._clipSliderMoved(50)
+
+    self.vtkwidget.updateGL()    
   
   def _clipSliderMoved(self, value):
-    pass
+    direction = str(self.clip_plane_combobox.currentText())
+
+    min = 0
+    max = 0
+
+    if direction == 'x':
+      min = self.current_bounds[0]
+      max = self.current_bounds[1]
+    elif direction == 'y':
+      min = self.current_bounds[2]
+      max = self.current_bounds[3]
+    elif direction == 'z':
+      min = self.current_bounds[4]
+      max = self.current_bounds[5]
+    
+    step_size = (max - min)/100.0
+    steps = value
+    distance = float(steps)*step_size
+    position = min + distance
+
+    old = self.plane.GetOrigin()
+    self.plane.SetOrigin(position if direction == 'x' else old[0],
+                         position if direction == 'y' else old[1],
+                         position if direction == 'z' else old[2])
+
+    self.vtkwidget.updateGL()    
