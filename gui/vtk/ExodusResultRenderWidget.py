@@ -148,20 +148,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.actor.SetMapper(self.mapper)
     self.renderer.AddActor(self.actor)
 
-    self.edge_geom = vtk.vtkCompositeDataGeometryFilter()
-    self.edge_geom.SetInputConnection(0,self.reader.GetOutputPort(0));
-    self.edge_geom.Update()
-
-    self.edges = vtk.vtkExtractEdges()
-    self.edges.SetInput(self.edge_geom.GetOutput())
-    self.edge_mapper = vtk.vtkPolyDataMapper()
-    self.edge_mapper.SetInput(self.edges.GetOutput())
-
-    self.edge_actor = vtk.vtkActor()
-    self.current_actors.append(self.edge_actor)
-    self.edge_actor.SetMapper(self.edge_mapper)
-    self.edge_actor.GetProperty().SetColor(0,0,0)
-
     self._drawEdgesChanged(self.draw_edges_checkbox.checkState())
 
     self.scalar_bar = vtk.vtkScalarBarActor()
@@ -182,9 +168,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
   def _drawEdgesChanged(self, value):
     if value == QtCore.Qt.Checked:
-      self.renderer.AddActor(self.edge_actor)
+      self.actor.GetProperty().EdgeVisibilityOn()
     else:
-      self.renderer.RemoveActor(self.edge_actor)
+      self.actor.GetProperty().EdgeVisibilityOff()
     self.vtkwidget.updateGL()
 
   def _contourVariableSelected(self, value, force_update=False):
@@ -220,7 +206,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.reader.SetTimeStep(int(textbox_string))
     self.reader.Update()
     self.geom.Update()
-    self.edge_geom.Update()
     self._contourVariableSelected(self.variable_contour.currentText(), True)
 
   def _sliderTextboxReturn(self):
