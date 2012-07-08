@@ -131,13 +131,17 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.geom.SetInputConnection(0,self.reader.GetOutputPort(0));
     self.geom.Update()
 
+    lut = vtk.vtkLookupTable()
+    lut.SetHueRange(0.667, 0.0)
+    lut.SetNumberOfColors(256)
+    lut.Build()
+
     self.data = self.geom.GetOutput()
     self.mapper = vtk.vtkPolyDataMapper()
     self.mapper.SetInput(self.data)
     self.mapper.ScalarVisibilityOn()
     self.mapper.SetColorModeToMapScalars()
-    self.mapper.SetColorMode(2)
-#    self.mapper.SetScalarRange(0,2.0)
+    self.mapper.SetLookupTable(lut)
     
     self.actor = vtk.vtkActor()
     self.current_actors.append(self.actor)
