@@ -18,7 +18,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.qt_app = qt_app
 
     self.plane = vtk.vtkPlane()
-    self.plane.SetOrigin(0, 0, 0)
+    self.plane.SetOrigin(-1000, 0, 0)
     self.plane.SetNormal(1, 0, 0)
 
     self.reader = None
@@ -36,7 +36,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.vtkwidget = vtk.QVTKWidget2()
 
     self.renderer = vtk.vtkRenderer()
-    self.renderer.SetBackground(0,0,0)
+    self.renderer.SetBackground(0.2,0.2,0.2)
     self.renderer.SetBackground2(1,1,1)
     self.renderer.SetGradientBackground(1)
     self.renderer.ResetCamera()
@@ -162,6 +162,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_plane_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
     self.clip_plane_slider.setRange(0, 100)
     self.clip_plane_slider.setSliderPosition(50)
+    self.clip_plane_slider.sliderReleased.connect(self._clipSliderReleased)
     self.clip_plane_slider.sliderMoved[int].connect(self._clipSliderMoved)
     clip_layout.addWidget(self.clip_plane_slider)
 #     vbox->addStretch(1);
@@ -207,34 +208,22 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     vtk.vtkAlgorithm.SetDefaultExecutivePrototype(cdp)
 
     self.output = self.reader.GetOutput()
-#    self.geom = vtk.vtkCompositeDataGeometryFilter()
-#    self.geom.SetInputConnection(0,self.reader.GetOutputPort(0));
-#    self.geom.Update()
+    self.geom = vtk.vtkCompositeDataGeometryFilter()
+    self.geom.SetInputConnection(0,self.reader.GetOutputPort(0))
+    self.geom.Update()
 
     lut = vtk.vtkLookupTable()
     lut.SetHueRange(0.667, 0.0)
     lut.SetNumberOfColors(256)
     lut.Build()
 
-#    self.data = self.geom.GetOutput()
-
+    self.data = self.geom.GetOutput()
     
-#    self.mapper = vtk.vtkPolyDataMapper()
-#    self.mapper.SetInput(self.data)
-#    self.mapper.ScalarVisibilityOn()
-#    self.mapper.SetColorModeToMapScalars()
-#    self.mapper.SetLookupTable(lut)
-
-
-    self.mesh = self.output.GetBlock(0).GetBlock(0)
-    
-    self.geom = vtk.vtkGeometryFilter()
-    self.geom.SetInput(self.mesh)
-    self.geom.Update()
-    
-    self.mapper = vtk.vtkDataSetMapper()
-    self.mapper.SetInput(self.mesh)
-
+    self.mapper = vtk.vtkPolyDataMapper()
+    self.mapper.SetInput(self.data)
+    self.mapper.ScalarVisibilityOn()
+    self.mapper.SetColorModeToMapScalars()
+    self.mapper.SetLookupTable(lut)
     
     self.actor = vtk.vtkActor()
     self.current_actors.append(self.actor)
@@ -242,54 +231,26 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.renderer.AddActor(self.actor)
     self.current_actor = self.actor
 
-#     self.clipper = vtk.vtkClipPolyData()
-#     self.clipper.SetInput(self.data)
-#     self.clipper.SetClipFunction(self.plane)
-#     self.clipper.GenerateClipScalarsOff()
+    self.clipper = vtk.vtkTableBasedClipDataSet()
+    self.clipper.SetInput(self.output)
+    self.clipper.SetClipFunction(self.plane)
+    self.clipper.Update()
 
-#     self.clip_mapper = vtk.vtkPolyDataMapper()
-#     self.clip_mapper.SetInputConnection(self.clipper.GetOutputPort())
-#     self.clip_mapper.ScalarVisibilityOn()
-#     self.clip_mapper.SetColorModeToMapScalars()
-#     self.clip_mapper.SetLookupTable(lut)
-
-#     self.clip_actor = vtk.vtkActor()
-#     self.clip_actor.SetMapper(self.clip_mapper)
-
-    self.actor.GetProperty().SetRepresentationToWireframe()
-
-
-
-
-
-#     self.cutter = vtk.vtkCutter()
-#     self.cutter.SetInput(self.data)
-#     self.cutter.SetCutFunction(self.plane)
-#     self.cutter.GenerateCutScalarsOff()
+    self.clip_geom = vtk.vtkCompositeDataGeometryFilter()
+    self.clip_geom.SetInputConnection(0,self.clipper.GetOutputPort(0))
+    self.clip_geom.Update()
     
-#     self.cut_mapper = vtk.vtkPolyDataMapper()
-#     self.cut_mapper.SetInputConnection(self.cutter.GetOutputPort())
-# #    self.cut_mapper.SetScalarRange(pl3d.GetOutput().GetPointData().GetScalars().GetRange())
-#     self.cut_actor = vtk.vtkActor()
-#     self.cut_actor.SetMapper(self.cut_mapper)
+    self.clip_data = self.clip_geom.GetOutput()
 
-#    extract = vtk.vtkExtractGeometry()
-#    extract.SetInput(self.data)
-#    extract.SetImplicitFunction(self.plane)
-#    dataMapper = vtk.vtkDataSetMapper()
-#    dataMapper.SetInputConnection(extract.GetOutputPort())
-#    self.cut_actor = vtk.vtkActor()
-#    self.cut_actor.SetMapper(dataMapper)
+    self.clip_mapper = vtk.vtkPolyDataMapper()
+    self.clip_mapper.SetInput(self.clip_data)
+    self.clip_mapper.ScalarVisibilityOn()
+    self.clip_mapper.SetColorModeToMapScalars()
+    self.clip_mapper.SetLookupTable(lut)
 
-
-
-
-
-
-
-
-
-    
+    self.clip_actor = vtk.vtkActor()
+    self.clip_actor.SetMapper(self.clip_mapper)
+    self.current_actors.append(self.clip_actor)
 
     self._drawEdgesChanged(self.draw_edges_checkbox.checkState())
 
@@ -306,6 +267,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     if self.first:
       self.first = False
       self.renderer.ResetCamera()
+
+    if self.clip_groupbox.isChecked():
+      _clippingToggled(True)
       
     self.vtkwidget.updateGL()
 
@@ -314,23 +278,24 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   def _drawEdgesChanged(self, value):
     if value == QtCore.Qt.Checked:
       self.actor.GetProperty().EdgeVisibilityOn()
+      self.clip_actor.GetProperty().EdgeVisibilityOn()
     else:
       self.actor.GetProperty().EdgeVisibilityOff()
+      self.clip_actor.GetProperty().EdgeVisibilityOff()
     self.vtkwidget.updateGL()
 
   def _contourVariableSelected(self, value, force_update=False):
     value_string = str(value)
 
-    if force_update:
-      del self.current_variable_point_data[value_string]
-
-    if value_string not in self.current_variable_point_data:
-      self.current_variable_point_data[value_string] = self.data.GetPointData().GetArray(value_string)
-
-    point_data = self.current_variable_point_data[value_string]
+    point_data = self.data.GetPointData().GetArray(value_string)
+    clip_point_data = self.clip_data.GetPointData().GetArray(value_string)
+    
     self.data.GetPointData().SetScalars(point_data)
+    self.clip_data.GetPointData().SetScalars(clip_point_data)
+
     self.mapper.SetScalarRange(point_data.GetRange()[0],point_data.GetRange()[1])
-    self.clip_mapper.SetScalarRange(point_data.GetRange()[0],point_data.GetRange()[1])
+    self.clip_mapper.SetScalarRange(clip_point_data.GetRange()[0],clip_point_data.GetRange()[1])
+    
     self.scalar_bar.SetTitle(value_string)
     self.renderer.AddActor2D(self.scalar_bar)
     self.vtkwidget.updateGL()
@@ -366,6 +331,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.time_slider.setSliderPosition(self.time_slider.sliderPosition()+1)
         self.qt_app.processEvents()
         self._timeSliderReleased()
+        self._clipSliderReleased()
         time.sleep(0.02)
         self.qt_app.processEvents()
         if not self.currently_playing:
@@ -405,8 +371,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.reader.SetTimeStep(int(textbox_string))
       self.reader.Update()
       self.geom.Update()
-      self._contourVariableSelected(self.variable_contour.currentText(), True)
       self.current_bounds = self.actor.GetBounds()
+      self._contourVariableSelected(self.variable_contour.currentText(), True)
 
   def _sliderTextboxReturn(self):
     self.time_slider.setSliderPosition(int(self.time_slider_textbox.text()))
@@ -434,6 +400,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.time_slider.setMaximum(self.max_timestep)
         self.time_slider.setSliderPosition(self.max_timestep)
         self._timeSliderReleased()
+        self._clipSliderReleased()
+        self.vtkwidget.updateGL()
       else:
         self.time_slider.setMaximum(self.max_timestep)
 
@@ -455,12 +423,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   def _clippingToggled(self, value):
     if value:
       self.renderer.RemoveActor(self.current_actor)
-#      self.renderer.AddActor(self.clip_actor)
-#      self.current_actor = self.clip_actor
-
-      self.renderer.AddActor(self.cut_actor)
-      self.current_actor = self.cut_actor
-
+      self.renderer.AddActor(self.clip_actor)
+      self.current_actor = self.clip_actor
+      self.clip_plane_slider.setSliderPosition(50)
+      self._clipSliderMoved(50)
+      self._clipSliderReleased()
     else:
       self.renderer.RemoveActor(self.current_actor)
       self.renderer.AddActor(self.actor)
@@ -482,6 +449,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_plane_slider.setSliderPosition(50)
     self._clipSliderMoved(50)
 
+    self.vtkwidget.updateGL()
+
+  def _clipSliderReleased(self):
+    self._contourVariableSelected(self.variable_contour.currentText(), True)
     self.vtkwidget.updateGL()    
   
   def _clipSliderMoved(self, value):
@@ -508,6 +479,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     old = self.plane.GetOrigin()
     self.plane.SetOrigin(position if direction == 'x' else old[0],
                          position if direction == 'y' else old[1],
-                         position if direction == 'z' else old[2])
+                         position if direction == 'z' else old[2])    
 
     self.vtkwidget.updateGL()    
