@@ -1,6 +1,7 @@
 import os, sys, PyQt4, getopt
 from PyQt4 import QtCore, QtGui
 import vtk
+import time
 
 pathname = os.path.dirname(sys.argv[0])        
 pathname = os.path.abspath(pathname)
@@ -11,9 +12,12 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class ExodusResultRenderWidget(QtGui.QWidget):
-  def __init__(self, input_file_widget, execution_widget):
+  def __init__(self, input_file_widget, execution_widget, qt_app):
     QtGui.QWidget.__init__(self)
     self.input_file_widget = input_file_widget
+    self.qt_app = qt_app
+
+    self.reader = None
     
     self.execution_widget = execution_widget
     self.execution_widget.run_started.connect(self._runStarted)
@@ -76,24 +80,35 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.beginning_button = QtGui.QToolButton()
     self.beginning_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrFirst32.png'))
+    self.beginning_button.clicked.connect(self._beginningClicked)
 
     self.back_button = QtGui.QToolButton()
     self.back_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrBack32.png'))
+    self.back_button.clicked.connect(self._backClicked)
 
     self.play_button = QtGui.QToolButton()
     self.play_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrPlay32.png'))
+    self.play_button.clicked.connect(self._playClicked)
 
     self.pause_button = QtGui.QToolButton()
+    self.pause_button.setDisabled(True)
     self.pause_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrPause32.png'))
+    self.pause_button.clicked.connect(self._pauseClicked)
 
     self.forward_button = QtGui.QToolButton()
     self.forward_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrForward32.png'))
+    self.forward_button.clicked.connect(self._forwardClicked)
 
     self.last_button = QtGui.QToolButton()
     self.last_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrLast32.png'))
+    self.last_button.clicked.connect(self._lastClicked)
 
     self.loop_button = QtGui.QToolButton()
+    self.loop_button.setCheckable(True)
     self.loop_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrLoop24.png'))
+    self.loop_button.toggled.connect(self._loopClicked)
+
+    self.currently_looping = False
 
     self.time_slider_label = QtGui.QLabel("Timestep:")
     self.time_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
@@ -259,6 +274,58 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.automatically_update = True
     else:
       self.automatically_update = False
+
+  def _beginningClicked(self):
+    self.time_slider.setSliderPosition(0)
+    self._timeSliderReleased()
+
+  def _backClicked(self):
+    self.time_slider.setSliderPosition(self.time_slider.sliderPosition()-1)
+    self._timeSliderReleased()
+        
+  def _playClicked(self):
+    self.play_button.setDisabled(True)
+    self.pause_button.setDisabled(False)
+    self.currently_playing = True
+
+    first = True
+    while((first or self.currently_looping) and self.currently_playing):
+      first = False
+
+      # If the slider is at the end then start over
+      if self.time_slider.sliderPosition() == self.time_slider.maximum():
+        self.time_slider.setSliderPosition(0)
+        
+      while self.time_slider.sliderPosition() < self.time_slider.maximum():
+        self.time_slider.setSliderPosition(self.time_slider.sliderPosition()+1)
+        self.qt_app.processEvents()
+        self._timeSliderReleased()
+        time.sleep(0.02)
+        self.qt_app.processEvents()
+        if not self.currently_playing:
+          break
+
+    self.play_button.setDisabled(False)
+    self.pause_button.setDisabled(True)
+    
+  def _pauseClicked(self):
+    self.play_button.setDisabled(False)
+    self.pause_button.setDisabled(True)
+    self.currently_playing = False
+
+  def _forwardClicked(self):
+    self.time_slider.setSliderPosition(self.time_slider.sliderPosition()+1)
+    self._timeSliderReleased()
+
+  def _lastClicked(self):
+    self.time_slider.setSliderPosition(self.time_slider.maximum())
+    self._timeSliderReleased()
+
+  def _loopClicked(self, state):
+    if state:
+      self.currently_looping = True
+    else:
+      self.currently_looping = False
     
   def _timeSliderChanged(self):
     self.time_slider_textbox.setText(str(self.time_slider.sliderPosition()))
@@ -267,11 +334,12 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     textbox_string = self.time_slider_textbox.text()
     if textbox_string == '':
       textbox_string = str(self.min_timestep)
-      
-    self.reader.SetTimeStep(int(textbox_string))
-    self.reader.Update()
-    self.geom.Update()
-    self._contourVariableSelected(self.variable_contour.currentText(), True)
+
+    if self.reader:
+      self.reader.SetTimeStep(int(textbox_string))
+      self.reader.Update()
+      self.geom.Update()
+      self._contourVariableSelected(self.variable_contour.currentText(), True)
 
   def _sliderTextboxReturn(self):
     self.time_slider.setSliderPosition(int(self.time_slider_textbox.text()))
