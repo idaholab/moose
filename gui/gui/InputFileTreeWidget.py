@@ -330,7 +330,6 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       already_had_data = False
       try:
         item.table_data # If this fails we will jump to "except"...
-        already_had_data = True
       except:
         item.table_data = None
 
@@ -355,8 +354,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         item.comment = new_gui.param_table.comment
         if not self.action_syntax.isPath(this_path):  # Don't change the name of hard paths
           item.setText(0,item.table_data['Name'])
-        if not already_had_data:
-          item.setCheckState(0, QtCore.Qt.Checked)
+        item.setCheckState(0, QtCore.Qt.Checked)
         if item.text(0) == 'Mesh':
           self.mesh_item_changed.emit(item)
         self._updateOtherGUIElements()
