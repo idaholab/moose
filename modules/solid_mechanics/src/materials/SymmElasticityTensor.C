@@ -306,13 +306,13 @@ void
 SymmElasticityTensor::form9x9Rotation( const ColumnMajorMatrix & R_3x3,
                                        ColumnMajorMatrix & R_9x9 ) const
 {
-  for(int i = 0; i < 3; ++i)
+  for (int i = 0; i < 3; ++i)
   {
-    for(int j = 0; j < 3; ++j)
+    for (int j = 0; j < 3; ++j)
     {
       for (int k = 0; k < 3; ++k)
       {
-        for(int l = 0; l < 3; ++l)
+        for (int l = 0; l < 3; ++l)
         {
           R_9x9(((i*3)+k),((j*3)+l)) = R_3x3(i,j) * R_3x3(k,l);
         }
@@ -324,15 +324,13 @@ SymmElasticityTensor::form9x9Rotation( const ColumnMajorMatrix & R_3x3,
 void
 SymmElasticityTensor::rotateFromLocalToGlobal( const ColumnMajorMatrix & R )
 {
-  ColumnMajorMatrix this_9x9( columnMajorMatrix9x9() );
-  convertFrom9x9( ( R * this_9x9 ) * R.transpose() );
+  convertFrom9x9( ( R * columnMajorMatrix9x9() ) * R.transpose() );
 }
 
 void
 SymmElasticityTensor::rotateFromGlobalToLocal( const ColumnMajorMatrix & R )
 {
-  ColumnMajorMatrix this_9x9( columnMajorMatrix9x9() );
-  convertFrom9x9( R.transpose() * ( this_9x9 * R ) );
+  convertFrom9x9( R.transpose() * ( columnMajorMatrix9x9() * R ) );
 }
 
 void
