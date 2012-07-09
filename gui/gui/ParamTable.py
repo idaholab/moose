@@ -154,13 +154,7 @@ class ParamTable:
 
   ### Takes a dictionary containing name value pairs
   def fillTableWithData(self, the_data, overwrite_type=False, old_params={}):
-#     for name,value in the_data.items():
-#       for i in xrange(0,self.table_widget.rowCount()):
-#         row_name = str(self.table_widget.item(i,0).text())
 
-#         if row_name == name:
-#           item = self.table_widget.item(i,1)
-#           item.setText(str(value))      
     used_params = []
     # First, loop through and add all data that corresponds to YAML
     for i in xrange(0,self.table_widget.rowCount()):
@@ -338,6 +332,7 @@ class ParamTable:
     found_it = False
     
     has_parent_params_set = False
+    has_type_subblock = False
 
     if self.subblocks:
       for new_text in self.subblocks:
@@ -350,10 +345,11 @@ class ParamTable:
             self.param_is_required[param['name']] = param['required']
           break #- can't break here because there might be more
 
-      if not found_it and not self.already_has_parent_params: # If we still haven't found it... look under "item"
+      if not found_it and not self.already_has_parent_params: # If we still haven't found it... look under "<type>"
         for data in self.subblocks:
           name = data['name'].split('/').pop()
           if name == '<type>':
+            has_type_subblock = True
             if data['subblocks'] and len(data['subblocks']):
               for sb in data['subblocks']:
                 sb_name = sb['name'].split('/').pop()
@@ -376,7 +372,7 @@ class ParamTable:
     if has_parent_params_set: # Need to add in the parent's params
       the_table_data.append({'name':'parent_params','default':'true','description':'These options will go into the parent','required':False})
       for param in self.main_data['parameters']:
-        if param['name'] == 'type':
+        if has_type_subblock and param['name'] == 'type':
           continue
 
         self.modifyCppType(param, '')
@@ -451,7 +447,7 @@ class ParamTable:
       name_item.setFlags(QtCore.Qt.ItemIsEnabled)
       doc_item.setFlags(QtCore.Qt.ItemIsEnabled)
 
-      if (param['name'] == 'type' and str(item) != '*') or param['name'] == 'parent_params' or (has_parent_params_set and param['name'] == 'Name'):
+      if ((has_type_subblock or not has_parent_params_set) and param['name'] == 'type' and str(item) != '*') or param['name'] == 'parent_params' or (has_parent_params_set and param['name'] == 'Name'):
         value_item.setFlags(QtCore.Qt.NoItemFlags)
 
       self.table_widget.setItem(row, 0, name_item)
