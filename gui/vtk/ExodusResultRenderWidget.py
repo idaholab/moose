@@ -215,6 +215,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     lut = vtk.vtkLookupTable()
     lut.SetHueRange(0.667, 0.0)
     lut.SetNumberOfColors(256)
+    lut.SetVectorModeToMagnitude()
     lut.Build()
 
     self.data = self.geom.GetOutput()
@@ -222,7 +223,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.mapper = vtk.vtkPolyDataMapper()
     self.mapper.SetInput(self.data)
     self.mapper.ScalarVisibilityOn()
-    self.mapper.SetColorModeToMapScalars()
+    self.mapper.SetScalarModeToUsePointFieldData()
     self.mapper.SetLookupTable(lut)
     
     self.actor = vtk.vtkActor()
@@ -245,7 +246,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_mapper = vtk.vtkPolyDataMapper()
     self.clip_mapper.SetInput(self.clip_data)
     self.clip_mapper.ScalarVisibilityOn()
-    self.clip_mapper.SetColorModeToMapScalars()
+    self.clip_mapper.SetScalarModeToUsePointFieldData()
     self.clip_mapper.SetLookupTable(lut)
 
     self.clip_actor = vtk.vtkActor()
@@ -293,15 +294,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.clip_geom.Update()
       self.clip_mapper.Update()
 
-    point_data = self.data.GetPointData().GetArray(value_string)
-    clip_point_data = self.clip_data.GetPointData().GetArray(value_string)
-    
-    self.data.GetPointData().SetScalars(point_data)
-    self.clip_data.GetPointData().SetScalars(clip_point_data)
-
-    self.mapper.SetScalarRange(point_data.GetRange()[0],point_data.GetRange()[1])
-#    self.clip_mapper.SetScalarRange(clip_point_data.GetRange()[0],clip_point_data.GetRange()[1])
-    self.clip_mapper.SetScalarRange(point_data.GetRange()[0],point_data.GetRange()[1])
+    self.mapper.SetScalarRange(self.data.GetPointData().GetVectors(value_string).GetRange(-1))
+    self.mapper.SelectColorArray(value_string)
+    self.clip_mapper.SetScalarRange(self.data.GetPointData().GetVectors(value_string).GetRange(-1))
+    self.clip_mapper.SelectColorArray(value_string)
     
     self.scalar_bar.SetTitle(value_string)
     self.renderer.AddActor2D(self.scalar_bar)
