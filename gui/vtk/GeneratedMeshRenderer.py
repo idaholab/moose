@@ -12,6 +12,7 @@ class GeneratedMeshRenderer(MeshRenderer):
   def __init__(self, render_widget, mesh_item_data):
     MeshRenderer.__init__(self, render_widget, mesh_item_data)
 
+    print 'Here 1'
     self.dim = int(mesh_item_data['dim'])
 
     self.xmin = 0.0
@@ -36,6 +37,7 @@ class GeneratedMeshRenderer(MeshRenderer):
     if 'zmax' in mesh_item_data:
       self.zmax = float(mesh_item_data['zmax'])
 
+    print 'Here 2'
     # This is actually going to be the number of nodes in each direction
     # The default is one element in each direction... meaning 2 nodes
     # But if we are in a lower dimension then there is just one node...
@@ -66,6 +68,7 @@ class GeneratedMeshRenderer(MeshRenderer):
 
     if self.dim >= 2 and self.ny:
       self.dy = (self.ymax - self.ymin)/float(self.ny-1)
+    print 'Here 3'
 
     if self.dim == 3 and self.nz:
       self.dz = (self.zmax - self.zmin)/float(self.nz-1)
@@ -82,6 +85,7 @@ class GeneratedMeshRenderer(MeshRenderer):
 
     for k in xrange(self.nz):
       self.z_coords.InsertNextValue(float(k)*self.dz)
+    print 'Here 4'
 
     self.main_block = self.generateMesh(self.xmin,self.ymin,self.zmin,True,True,True)
     
@@ -102,6 +106,7 @@ class GeneratedMeshRenderer(MeshRenderer):
       self.sideset_actors['3']     = self.sideset_actors['top']
       self.sideset_actors['bottom']= GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymin,self.zmin,True,False,True))
       self.sideset_actors['1']     = self.sideset_actors['bottom']
+    print 'Here 5'
 
     if self.dim == 2:
       self.sideset_actors['left']   = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmin,self.ymax,0.0,False,True,False))
@@ -123,11 +128,12 @@ class GeneratedMeshRenderer(MeshRenderer):
     for actor_name, actor in self.block_actors.items():
       self.clipped_block_actors[actor_name] = ClippedActor(actor, self.plane)
 
-    for actor_name, actor in self.sideset_actors.items():
-      self.clipped_sideset_actors[actor_name] = ClippedActor(actor, self.plane)
+#    for actor_name, actor in self.sideset_actors.items():
+#      self.clipped_sideset_actors[actor_name] = ClippedActor(actor, self.plane)
       
-    for actor_name, actor in self.nodeset_actors.items():
-      self.clipped_nodeset_actors[actor_name] = ClippedActor(actor, self.plane)
+#     for actor_name, actor in self.nodeset_actors.items():
+#       self.clipped_nodeset_actors[actor_name] = ClippedActor(actor, self.plane)
+    print 'Here 6'
 
   def generateMesh(self, x, y, z, in_x, in_y, in_z):
     x_coord = vtk.vtkFloatArray()
