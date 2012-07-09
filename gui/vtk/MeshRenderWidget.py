@@ -151,27 +151,27 @@ class MeshRenderWidget(QtGui.QWidget):
       block_actor.show()  
       block_actor.showEdges()
       
-    sorted_block_names = set()
+    block_names = []
     for block_actor_name, block_actor in self.current_block_actors.items():
-      sorted_block_names.add(block_actor_name.strip(' '))
+      block_names.append(block_actor_name.strip(' '))
     self.highlight_block_combo.addItem('')
-    for block_actor_name in sorted_block_names:
+    for block_actor_name in sorted(block_names):
       self.highlight_block_combo.addItem(str(block_actor_name))
 
-    sorted_sideset_names = set()
+    sideset_names = []
     for sideset_actor_name, sideset_actor in self.current_sideset_actors.items():
       sideset_actor.setColor(red)
-      sorted_sideset_names.add(sideset_actor_name.strip(' '))
+      sideset_names.append(sideset_actor_name.strip(' '))
     self.highlight_sideset_combo.addItem('')
-    for sideset_actor_name in sorted_sideset_names:
+    for sideset_actor_name in sorted(sideset_names):
       self.highlight_sideset_combo.addItem(sideset_actor_name)
 
-    sorted_nodeset_names = set()
+    nodeset_names = []
     for nodeset_actor_name, nodeset_actor in self.current_nodeset_actors.items():
       nodeset_actor.setColor(red)
-      sorted_nodeset_names.add(nodeset_actor_name.strip(' '))
+      nodeset_names.append(nodeset_actor_name.strip(' '))
     self.highlight_nodeset_combo.addItem('')
-    for nodeset_actor_name in sorted_nodeset_names:
+    for nodeset_actor_name in sorted(nodeset_names):
       self.highlight_nodeset_combo.addItem(nodeset_actor_name)
 
 
