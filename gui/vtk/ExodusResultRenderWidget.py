@@ -287,6 +287,12 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   def _contourVariableSelected(self, value, force_update=False):
     value_string = str(value)
 
+    if self.clip_groupbox.isChecked():
+      self.clipper.Modified()
+      self.clipper.Update()
+      self.clip_geom.Update()
+      self.clip_mapper.Update()
+
     point_data = self.data.GetPointData().GetArray(value_string)
     clip_point_data = self.clip_data.GetPointData().GetArray(value_string)
     
@@ -294,7 +300,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_data.GetPointData().SetScalars(clip_point_data)
 
     self.mapper.SetScalarRange(point_data.GetRange()[0],point_data.GetRange()[1])
-    self.clip_mapper.SetScalarRange(clip_point_data.GetRange()[0],clip_point_data.GetRange()[1])
+#    self.clip_mapper.SetScalarRange(clip_point_data.GetRange()[0],clip_point_data.GetRange()[1])
+    self.clip_mapper.SetScalarRange(point_data.GetRange()[0],point_data.GetRange()[1])
     
     self.scalar_bar.SetTitle(value_string)
     self.renderer.AddActor2D(self.scalar_bar)
@@ -331,7 +338,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.time_slider.setSliderPosition(self.time_slider.sliderPosition()+1)
         self.qt_app.processEvents()
         self._timeSliderReleased()
-        self._clipSliderReleased()
         time.sleep(0.02)
         self.qt_app.processEvents()
         if not self.currently_playing:
@@ -400,7 +406,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.time_slider.setMaximum(self.max_timestep)
         self.time_slider.setSliderPosition(self.max_timestep)
         self._timeSliderReleased()
-        self._clipSliderReleased()
+        if self.clip_groupbox.isChecked():
+          self._clipSliderReleased()
         self.vtkwidget.updateGL()
       else:
         self.time_slider.setMaximum(self.max_timestep)
@@ -481,4 +488,5 @@ class ExodusResultRenderWidget(QtGui.QWidget):
                          position if direction == 'y' else old[1],
                          position if direction == 'z' else old[2])    
 
+    self._contourVariableSelected(self.variable_contour.currentText(), True)
     self.vtkwidget.updateGL()    
