@@ -121,10 +121,10 @@ protected:
   /// System Information
   SystemInfo _sys_info;
 
-private:
   /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
   enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
 
+private:
   /// Inidicates whether warnings or errors are displayed when overrridden parameters are detected
   bool _error_overridden;
 };
