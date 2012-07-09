@@ -136,7 +136,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       if 'file_base' in output_data:
         file_base = output_data['file_base']
       else:
-        file_base = 'peacock_run_tmp'
+        file_base = 'peacock_run_tmp_out'
 
     type_to_extension = {'exodus':'.e', 'tecplot':'.plt'}
 
