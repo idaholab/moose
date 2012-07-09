@@ -107,6 +107,9 @@ Material::initStatefulProperties(unsigned int n_points)
   if (_has_stateful_property)
     for (_qp = 0; _qp < n_points; ++_qp)
       initQpStatefulProperties();
+  else
+    for (_qp = 0; _qp < n_points; ++_qp)
+      computeQpProperties();
 }
 
 void
