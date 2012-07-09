@@ -175,6 +175,9 @@ void FEProblem::initialSetup()
   copySolutionsBackwards();
   Moose::setup_perf_log.pop("copySolutionsBackwards()","Setup");
 
+  for(unsigned int i=0; i<n_threads; i++)
+    _materials[i].initialSetup();
+
   _aux.compute(EXEC_INITIAL);
 
   if (_material_props.hasStatefulProperties())
@@ -264,7 +267,6 @@ void FEProblem::initialSetup()
 
   for(unsigned int i=0; i<n_threads; i++)
   {
-    _materials[i].initialSetup();
     _pps(EXEC_RESIDUAL)[i].initialSetup();
     _pps(EXEC_JACOBIAN)[i].initialSetup();
     _pps(EXEC_TIMESTEP)[i].initialSetup();

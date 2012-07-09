@@ -246,7 +246,7 @@ public:
 
 // Scalar Init Helper Function
 template<typename P>
-PropertyValue *_init_helper(int size, PropertyValue *prop, const P*)
+PropertyValue *_init_helper(int size, PropertyValue * /*prop*/, const P*)
 {
   MaterialProperty<P> *copy = new MaterialProperty<P>;
   copy->_value.resize(size);
@@ -255,7 +255,7 @@ PropertyValue *_init_helper(int size, PropertyValue *prop, const P*)
 
 // Vector Init Helper Function
 template<typename P>
-PropertyValue *_init_helper(int size, PropertyValue *prop, const std::vector<P>*)
+PropertyValue *_init_helper(int size, PropertyValue * /*prop*/, const std::vector<P>*)
 {
   typedef MaterialProperty<std::vector<P> > PropType;
   PropType *copy = new PropType;
@@ -268,54 +268,5 @@ PropertyValue *_init_helper(int size, PropertyValue *prop, const std::vector<P>*
   // Return the copy we allocated
   return copy;
 }
-
-/**
- * Specialization of init function for std::vector<Real>
- * See MaterialPropertyInterface.C for implementation.
- */
-// template <>
-// PropertyValue *
-// MaterialProperty<std::vector<Real> >::init (int size);
-
-/**
- * Specialization of init function for ColumnMajorMatrix
- * See MaterialPropertyInterface.C for implementation.
- */
-
-//template <>
-// PropertyValue *
-// MaterialProperty<Real>::init (int size);
-
-/**
- * Specialization of init function for std::vector<ColumnMajorMatrix>
- * See MaterialPropertyInterface.C for implementation.
- */
-// template <>
-// PropertyValue *
-// MaterialProperty<std::vector<ColumnMajorMatrix> >::init (int size);
-
-/**
- * Specialization of init function for std::vector<RealTensorValue>
- * See MaterialPropertyInterface.C for implementation.
- */
-// template <>
-// PropertyValue *
-// MaterialProperty<std::vector<RealTensorValue> >::init (int size);
-
-/**
- * Specialization of init function for std::vector<std::vector<RealTensorValue> >
- * See MaterialPropertyInterface.C for implementation.
- */
-// template <>
-// PropertyValue *
-// MaterialProperty<std::vector<std::vector<RealTensorValue> > >::init (int size);
-
-/**
- * Specialization of init function for std::vector<RealVectorValue>
- * See MaterialPropertyInterface.C for implementation.
- */
-// template <>
-// PropertyValue *
-// MaterialProperty<std::vector<RealVectorValue> >::init (int size);
 
 #endif
