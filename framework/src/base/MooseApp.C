@@ -30,7 +30,8 @@ MooseApp::MooseApp(int argc, char *argv[]) :
     _parser(_action_warehouse),
     _executioner(NULL),
     _sys_info(argc, argv),
-    _enable_unused_check(WARN_UNUSED)
+    _enable_unused_check(WARN_UNUSED),
+    _error_overridden(false)
 {
   Moose::app = this;
 }
@@ -127,6 +128,14 @@ MooseApp::initCommandLineOptions()
   cli_opt.required = false;
   _command_line.addOption("ErrorUnused", cli_opt);
 
+  syntax.clear();
+  cli_opt.description = "Error when encountering overriden or parameters supplied multipled times";
+  syntax.push_back("-o");
+  syntax.push_back("--error-override");
+  cli_opt.cli_syntax = syntax;
+  cli_opt.required = false;
+  _command_line.addOption("ErrorOverride", cli_opt);
+
   /* This option is used in InitialRefinementAction directly - Do we need a better API? */
   syntax.clear();
   cli_opt.description = "Specify additional initial uniform refinements for automatic scaling";
@@ -147,6 +156,9 @@ MooseApp::parseCommandLine()
     setCheckUnusedFlag(true);
   else if (_command_line.search("WarnUnused"))
     setCheckUnusedFlag(false);
+
+  if (_command_line.search("ErrorOverride"))
+    setErrorOverridden();
 
   if (_command_line.search("Help"))
   {
@@ -207,6 +219,12 @@ MooseApp::runInputFile()
     std::vector<std::string> all_vars = _parser.getPotHandle()->get_variable_names();
     _parser.checkUnidentifiedParams(all_vars, _enable_unused_check == ERROR_UNUSED);
   }
+
+  if (_command_line.search("ErrorOverride") || _error_overridden)
+    _parser.checkOverriddenParams(true);
+  else
+    _parser.checkOverriddenParams(false);
+
   // run the simulation
   _executioner->execute();
 }
@@ -221,6 +239,12 @@ void
 MooseApp::disableCheckUnusedFlag()
 {
   _enable_unused_check = OFF;
+}
+
+void
+MooseApp::setErrorOverridden()
+{
+  _error_overridden = true;
 }
 
 void

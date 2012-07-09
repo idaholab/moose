@@ -135,6 +135,13 @@ public:
    */
   void checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn);
 
+  /**
+   * This function checks to see if there were any overridden parameters in the input file.
+   * (i.e. suplied more than once)
+   * @param error_on_warn a Boolean that will trigger an error if this case is detected
+   */
+  void checkOverriddenParams(bool error_on_warn);
+
 protected:
   /// Action warehouse that will be filled by actions
   ActionWarehouse & _action_wh;
@@ -178,6 +185,9 @@ protected:
   /// The set of all variables extracted from the input file
   std::set<std::string> _extracted_vars;
   bool _sort_alpha;
+
+  ///
+  bool _sections_read;
 
 public:
   /**

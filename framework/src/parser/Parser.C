@@ -56,7 +56,8 @@ Parser::Parser(ActionWarehouse & action_wh) :
     _syntax(_action_wh.syntax()),
     _syntax_formatter(NULL),
     _getpot_initialized(false),
-    _sort_alpha(false)
+    _sort_alpha(false),
+    _sections_read(false)
 {
 }
 
@@ -115,9 +116,6 @@ Parser::parse(const std::string &input_filename)
   InputParameters active_list_params = validParams<Action>();
   InputParameters params = validParams<EmptyAction>();
 
-  // Build Command Line Vars Vector
-//  _command_line.buildVarsSet();
-
   // vector for initializing active blocks
   std::vector<std::string> all(1);
   all[0] = "__all__";
@@ -130,20 +128,8 @@ Parser::parse(const std::string &input_filename)
   _inactive_strings.clear();
 
   section_names = _getpot_file.get_section_names();
-
-  std::set<std::string> overridden_vars = _getpot_file.get_overridden_variables();
-
-  if (!overridden_vars.empty())
-  {
-    std::ostringstream oss;
-
-    for (std::set<std::string>::const_iterator i=overridden_vars.begin();
-         i != overridden_vars.end(); ++i)
-      oss << *i << "\n";
-
-    mooseWarning(std::string("The following variables were overridden or supplied multiple times:\n"
-                             + oss.str()));
-  }
+  // Set the class variable to indicate that sections names have been read, this is used later by the checkOverriddenParams function
+  _sections_read = true;
 
   for (std::vector<std::string>::iterator i=section_names.begin(); i != section_names.end(); ++i)
   {
@@ -265,6 +251,33 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_
 
     oss << message_indicator << ": The following parameters were unused in your input file:\n";
     for (std::set<std::string>::iterator i=difference.begin(); i != difference.end(); ++i)
+      oss << *i << "\n";
+    oss << message_indicator << "\n\n";
+
+    if (error_on_warn)
+      mooseError(oss.str());
+    else
+      std::cout << oss.str();
+  }
+}
+
+void
+Parser::checkOverriddenParams(bool error_on_warn)
+{
+  if (!_sections_read && error_on_warn)
+    // The user has requested errors but we haven't done any parsing yet so throw an error
+    mooseError("No parsing has been done, so checking for overridden parameters is not possible");
+
+  std::set<std::string> overridden_vars = _getpot_file.get_overridden_variables();
+  std::string message_indicator(error_on_warn ? "*** ERROR" : "*** WARNING");
+
+  if (!overridden_vars.empty())
+  {
+    std::ostringstream oss;
+
+    oss << message_indicator << ": The following variables were overridden or supplied multiple times:\n";
+    for (std::set<std::string>::const_iterator i=overridden_vars.begin();
+         i != overridden_vars.end(); ++i)
       oss << *i << "\n";
     oss << message_indicator << "\n\n";
 

@@ -86,6 +86,11 @@ public:
   void setCheckUnusedFlag(bool warn_is_error = false);
 
   /**
+   * Set a flag so that the parser will throw an error if overriden parameters are detected
+   */
+  void setErrorOverridden();
+
+  /**
    * Set/Get a flag so that syntax dumped from the system is in alphabetical order
    */
   void setSortAlpha(bool sort_alpha_flag) { _parser.setSortAlpha(sort_alpha_flag); }
@@ -116,7 +121,12 @@ protected:
   /// System Information
   SystemInfo _sys_info;
 
+private:
+  /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
   enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
+
+  /// Inidicates whether warnings or errors are displayed when overrridden parameters are detected
+  bool _error_overridden;
 };
 
 
