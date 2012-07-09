@@ -143,9 +143,6 @@ ColumnMajorMatrix::eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) con
   char jobz = 'V';
   char uplo = 'U';
   int n = _n_rows;
-  int buffer_size = -1;
-//   Real opt_buffer_size;
-//   Real *buffer;
   int return_value = 0;
 
   eval._n_rows = _n_rows;
@@ -158,63 +155,37 @@ ColumnMajorMatrix::eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) con
   Real * eval_data = eval.rawData();
   Real * evec_data = evec.rawData();
 
+  int buffer_size = n * 64;
+  std::vector<Real> buffer(buffer_size);
 
-/*
-  dsyev_(&jobz, &uplo, &n, a_data, &n, w_data, &opt_buffer_size, &buffer_size, &return_value);
-
-  if (return_value)
-    mooseError("");
-
-  buffer_size = (int) opt_buffer_size;
-
-  buffer = new Real[buffer_size];
-
-  dsyev_(&jobz, &uplo, &n, a_data, &n, w_data, buffer, &buffer_size, &return_value);
-  delete [] buffer;
-
-  if (return_value)
-  mooseError("");*/
-
-
-  buffer_size = n * 64;
-  ColumnMajorMatrix buffer(buffer_size,1);
-  Real * b_data = buffer.rawData();
-
-  dsyev_(&jobz, &uplo, &n, evec_data, &n, eval_data, b_data, &buffer_size, &return_value);
+  dsyev_(&jobz, &uplo, &n, evec_data, &n, eval_data, &buffer[0], &buffer_size, &return_value);
 
   if (return_value)
     mooseError("error in lapack eigen solve");
 
-
 }
-
-
-
 
 void
 ColumnMajorMatrix::inverse(ColumnMajorMatrix & invA) const
 {
   mooseAssert(_n_rows == _n_cols, "Cannot solve for inverse of a non-square matrix!");
-  mooseAssert(_n_rows == invA._n_cols && _n_cols == invA._n_rows, "Matrices must be the same shape for matrix inverse!");
+  mooseAssert(_n_rows == invA._n_cols && _n_cols == invA._n_rows, "Matrices must be the same size for matrix inverse!");
 
   int n = _n_rows;
-  int buffer_size = -1;
   int return_value = 0;
 
   invA = *this;
 
   std::vector<int> ipiv(n);
 
-
   Real * invA_data = invA.rawData();
 
-  buffer_size = n * 64;
-  ColumnMajorMatrix buffer(buffer_size,1);
-  Real * b_data = buffer.rawData();
+  int buffer_size = n * 64;
+  std::vector<Real> buffer(buffer_size);
 
   dgetrf_(&n, &n, invA_data, &n, &ipiv[0], &return_value);
 
-  dgetri_(&n, invA_data, &n, &ipiv[0], b_data, &buffer_size, &return_value);
+  dgetri_(&n, invA_data, &n, &ipiv[0], &buffer[0], &buffer_size, &return_value);
 
   if (return_value)
     mooseError("error in lapack inverse solve");
