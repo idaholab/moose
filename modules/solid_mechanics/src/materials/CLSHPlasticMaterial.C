@@ -41,6 +41,12 @@ CLSHPlasticMaterial::CLSHPlasticMaterial(std::string name,
 }
 
 void
+CLSHPlasticMaterial::initQpStatefulProperties()
+{
+  _hardening_variable[_qp] = _hardening_variable_old[_qp] = 0;
+}
+
+void
 CLSHPlasticMaterial::computeStress()
 {
 // trial stress

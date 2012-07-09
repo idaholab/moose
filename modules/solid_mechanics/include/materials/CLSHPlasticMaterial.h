@@ -19,6 +19,9 @@ public:
                       InputParameters parameters);
 
 protected:
+
+  virtual void initQpStatefulProperties();
+
   virtual void computeStress();
 
   Real _yield_stress;

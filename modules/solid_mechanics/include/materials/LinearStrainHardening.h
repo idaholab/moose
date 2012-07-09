@@ -22,6 +22,7 @@ public:
 
 protected:
 
+  virtual void initQpStatefulProperties();
 
   const Real _tolerance;
   const unsigned int _max_its;

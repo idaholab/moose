@@ -68,6 +68,12 @@ PLC_LSH::PLC_LSH( const std::string & name,
 }
 
 void
+PLC_LSH::initQpStatefulProperties()
+{
+  _hardening_variable[_qp] = _hardening_variable_old[_qp] = 0;
+}
+
+void
 PLC_LSH::computeStress()
 {
   // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain

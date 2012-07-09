@@ -23,6 +23,8 @@ public:
 
 protected:
 
+  virtual void initQpStatefulProperties();
+
   Real _coefficient;
   Real _n_exponent;
   Real _m_exponent;
