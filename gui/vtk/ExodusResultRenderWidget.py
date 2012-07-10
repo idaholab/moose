@@ -229,6 +229,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     lut = vtk.vtkLookupTable()
     lut.SetHueRange(0.667, 0.0)
     lut.SetNumberOfColors(256)
+    lut.SetVectorModeToMagnitude()
     lut.Build()
 
     self.data = self.geom.GetOutput()
