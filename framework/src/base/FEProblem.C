@@ -20,6 +20,7 @@
 #include "MaterialData.h"
 #include "ComputePostprocessorsThread.h"
 #include "ComputeNodalPPSThread.h"
+#include "ComputeMaterialsObjectThread.h"
 #include "ActionWarehouse.h"
 #include "Conversion.h"
 #include "Moose.h"
@@ -184,24 +185,28 @@ void FEProblem::initialSetup()
   if (_material_props.hasStatefulProperties())
   {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    for (ConstElemRange::const_iterator el = elem_range.begin() ; el != elem_range.end(); ++el)
-    {
-      const Elem * elem = *el;
-      SubdomainID blk_id = elem->subdomain_id();
+    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _material_props, _bnd_material_props, _materials, _assembly);
+    Threads::parallel_reduce(elem_range, cmt);
 
-      mooseAssert(_materials[0].hasMaterials(blk_id), "No materials on subdomain block " + elem->id());
-      _assembly[0]->reinit(elem);
-      unsigned int n_points = _assembly[0]->qRule()->n_points();
-      _material_props.initStatefulProps(*_material_data[0], _materials[0].getMaterials(blk_id), n_points, *elem);
-
-      for (unsigned int side=0; side<elem->n_sides(); side++)
-      {
-        mooseAssert(_materials[0].hasFaceMaterials(blk_id), "No face materials on subdomain block " + elem->id());
-        _assembly[0]->reinit(elem, side);
-        unsigned int n_points = _assembly[0]->qRuleFace()->n_points();
-        _bnd_material_props.initStatefulProps(*_bnd_material_data[0], _materials[0].getFaceMaterials(blk_id), n_points, *elem, side);
-      }
-    }
+//    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+//    for (ConstElemRange::const_iterator el = elem_range.begin() ; el != elem_range.end(); ++el)
+//    {
+//      const Elem * elem = *el;
+//      SubdomainID blk_id = elem->subdomain_id();
+//
+//      mooseAssert(_materials[0].hasMaterials(blk_id), "No materials on subdomain block " + elem->id());
+//      _assembly[0]->reinit(elem);
+//      unsigned int n_points = _assembly[0]->qRule()->n_points();
+//      _material_props.initStatefulProps(*_material_data[0], _materials[0].getMaterials(blk_id), n_points, *elem);
+//
+//      for (unsigned int side=0; side<elem->n_sides(); side++)
+//      {
+//        mooseAssert(_materials[0].hasFaceMaterials(blk_id), "No face materials on subdomain block " + elem->id());
+//        _assembly[0]->reinit(elem, side);
+//        unsigned int n_points = _assembly[0]->qRuleFace()->n_points();
+//        _bnd_material_props.initStatefulProps(*_bnd_material_data[0], _materials[0].getFaceMaterials(blk_id), n_points, *elem, side);
+//      }
+//    }
   }
 
   if (isRestarting())
