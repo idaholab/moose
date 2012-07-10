@@ -31,7 +31,7 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankFourTensor> & _Jacobian_mult;
-  MaterialProperty<RankTwoTensor> & _d_stress_dT;
+  // MaterialProperty<RankTwoTensor> & _d_stress_dT;
 
 private:
   const unsigned int _component;

@@ -52,14 +52,10 @@ protected:
   MaterialProperty<RankFourTensor> & _Jacobian_mult;
   MaterialProperty<RankTwoTensor> & _elastic_strain;
 
-
-  MaterialProperty<RankTwoTensor> & _d_stress_dT;
-  
-private:
   Real _euler_angle_1;
   Real _euler_angle_2;
   Real _euler_angle_3;
-
+  
   // vectors to get the input values
   std::vector<Real> _Cijkl_vector;
   
@@ -70,6 +66,10 @@ private:
   // SymmAnisotropicElasticityTensor _Cijkl_matrix;
   RankFourTensor _Cijkl;
   
+//  MaterialProperty<RankTwoTensor> & _d_stress_dT;
+  
+private:
+
 };
 
 #endif //LINEARGENERALANISOTROPICMATERIAL_H

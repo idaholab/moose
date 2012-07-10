@@ -76,8 +76,15 @@ public:
 
   Real thirdEulerAngle() const;
 
+  void zero();
+
   RankTwoTensor & operator= (const RankTwoTensor &a);
-  
+
+  RankTwoTensor & operator+= (const RankTwoTensor &a);
+
+  RankTwoTensor operator- (const RankTwoTensor &a) const;
+
+  RankTwoTensor operator* (const Real &a);
 
 protected:
   

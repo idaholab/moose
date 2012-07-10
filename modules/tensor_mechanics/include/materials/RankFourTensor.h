@@ -57,6 +57,12 @@ public:
 
   RankTwoTensor operator*(const RankTwoTensor &a);
 
+  RankFourTensor operator*(const Real &a);
+
+  RankFourTensor & operator+=(const RankFourTensor &a);
+  
+  RankFourTensor operator+(const RankFourTensor &a) const;
+
   virtual Real stiffness( const int i, const int j,
                           const RealGradient & t,
                           const RealGradient & p);

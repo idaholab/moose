@@ -36,7 +36,7 @@ LinearElasticMaterial::LinearElasticMaterial(const std::string & name,
       _elasticity_tensor(declareProperty<RankFourTensor>("elasticity_tensor")),
       _Jacobian_mult(declareProperty<RankFourTensor>("Jacobian_mult")),
       _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
-      _d_stress_dT(declareProperty<RankTwoTensor>("d_stress_dT")),
+      //_d_stress_dT(declareProperty<RankTwoTensor>("d_stress_dT")),
       _euler_angle_1(getParam<Real>("euler_angle_1")),
       _euler_angle_2(getParam<Real>("euler_angle_2")),
       _euler_angle_3(getParam<Real>("euler_angle_3")),
@@ -50,7 +50,6 @@ LinearElasticMaterial::LinearElasticMaterial(const std::string & name,
   //rotate the C_ijkl matrix original data
   // to leave the original data, use the x = a.rotate() method instead
   _Cijkl.selfRotate(_euler_angle_1,_euler_angle_2,_euler_angle_3);
-  
 }
 
 void
@@ -71,9 +70,9 @@ void LinearElasticMaterial::computeQpElasticityTensor()
 void LinearElasticMaterial::computeQpStrain()
 {
   // ugly, could be cleaned up, but works
-  _elastic_strain[_qp].setValue(_grad_disp_x[_qp](0), 1, 1);
-  _elastic_strain[_qp].setValue(_grad_disp_y[_qp](1), 2, 2);
-  _elastic_strain[_qp].setValue(_grad_disp_z[_qp](2), 3, 3);
+  _elastic_strain[_qp].setValue(0.5*(_grad_disp_x[_qp](0)+_grad_disp_x[_qp](0)), 1, 1);
+  _elastic_strain[_qp].setValue(0.5*(_grad_disp_y[_qp](1)+_grad_disp_y[_qp](1)), 2, 2);
+  _elastic_strain[_qp].setValue(0.5*(_grad_disp_z[_qp](2)+_grad_disp_z[_qp](2)), 3, 3);
   _elastic_strain[_qp].setValue(0.5*(_grad_disp_x[_qp](1)+_grad_disp_y[_qp](0)), 1, 2);
   _elastic_strain[_qp].setValue(0.5*(_grad_disp_x[_qp](1)+_grad_disp_y[_qp](0)), 2, 1);
   _elastic_strain[_qp].setValue(0.5*(_grad_disp_x[_qp](2)+_grad_disp_z[_qp](0)), 1, 3);

@@ -27,7 +27,7 @@ StressDivergenceTensors::StressDivergenceTensors(const std::string & name, Input
   :Kernel(name, parameters),
    _stress(getMaterialProperty<RankTwoTensor>("stress" + getParam<std::string>("appended_property_name"))),
    _Jacobian_mult(getMaterialProperty<RankFourTensor>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
-   _d_stress_dT(getMaterialProperty<RankTwoTensor>("d_stress_dT"+ getParam<std::string>("appended_property_name"))),
+   // _d_stress_dT(getMaterialProperty<RankTwoTensor>("d_stress_dT"+ getParam<std::string>("appended_property_name"))),
    _component(getParam<unsigned int>("component")),
    _xdisp_coupled(isCoupled("disp_x")),
    _ydisp_coupled(isCoupled("disp_y")),
@@ -84,8 +84,8 @@ StressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 
   if ( _temp_coupled && jvar == _temp_var )
   {
-    return _d_stress_dT[_qp].rowDot(_component, _grad_test[_i][_qp]) * _phi[_j][_qp];
-    //return 0.0;
+    //return _d_stress_dT[_qp].rowDot(_component, _grad_test[_i][_qp]) * _phi[_j][_qp];
+    return 0.0;
   }
 
   return 0;

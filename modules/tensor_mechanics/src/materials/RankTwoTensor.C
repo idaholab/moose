@@ -4,6 +4,7 @@
 #include <vector>
 #include "libmesh.h"
 #include "MaterialProperty.h"
+#include <ostream>
 
 RankTwoTensor::RankTwoTensor() :
     _vals(),
@@ -33,7 +34,7 @@ RankTwoTensor::RankTwoTensor() :
       _rotation_matrix[i][j] = 0.0;
     }
   }
-
+  
 }
 
 RankTwoTensor::RankTwoTensor(const RankTwoTensor &a)
@@ -222,6 +223,14 @@ RankTwoTensor::thirdEulerAngle() const
   return _euler_angle[2];
 }
 
+void
+RankTwoTensor::zero()
+{
+    for(unsigned int i(0); i<3; i++)
+      for(unsigned int j(0); j<3; j++)
+        _vals[i][j] = 0.0;
+}
+
 RankTwoTensor &
 RankTwoTensor::operator= (const RankTwoTensor &a)
 {
@@ -229,4 +238,37 @@ RankTwoTensor::operator= (const RankTwoTensor &a)
  _euler_angle = a._euler_angle;
  _rotation_matrix = a._rotation_matrix;
  return *this;
+}
+
+RankTwoTensor &
+RankTwoTensor::operator+=(const RankTwoTensor &a)
+{
+   for(unsigned int i(0); i<3; i++)
+    for(unsigned int j(0); j<3; j++)
+      _vals[i][j] = _vals[i][j] + a.getValue(i+1, j+1);
+  return *this;
+}
+
+RankTwoTensor
+RankTwoTensor::operator- (const RankTwoTensor &a) const
+{
+  RankTwoTensor result;
+  
+   for(unsigned int i(0); i<3; i++)
+    for(unsigned int j(0); j<3; j++)
+      result.setValue(_vals[i][j]+a.getValue(i+1,j+1), i+1, j+1);
+
+   return result;
+}
+
+RankTwoTensor
+RankTwoTensor::operator*(const Real &a)
+{
+  RankTwoTensor result;
+
+  for(unsigned int i(0); i<3; i++)
+    for(unsigned int j(0); j<3; j++)
+      result.setValue(_vals[i][j]*a, i+1, j+1);
+
+  return result;
 }

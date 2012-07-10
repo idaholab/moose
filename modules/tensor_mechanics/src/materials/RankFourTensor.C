@@ -25,7 +25,7 @@ RankFourTensor::RankFourTensor() :
         for(unsigned int l(0); l<3; l++)
         {
           _vals[i][j][k][l] = 0.0;
-        }
+       }
       }
     }
   }
@@ -43,7 +43,6 @@ RankFourTensor::RankFourTensor() :
       _rotation_matrix[i][j] = 0.0;
     }
   }
-  
 }
 
 RankFourTensor::RankFourTensor(const RankFourTensor &a)
@@ -179,6 +178,46 @@ RankFourTensor::operator*(const RankTwoTensor &a)
   }
   return result;
 }
+
+RankFourTensor
+RankFourTensor::operator*(const Real &a)
+{
+  RankFourTensor result;
+  
+  for(unsigned int i(0); i<3; i++)
+    for(unsigned int j(0); j<3; j++)
+      for(unsigned int k(0); k<3; k++)
+        for(unsigned int l(0); l<3; l++)
+          result.setValue(_vals[i][j][k][l]*a, i+1, j+1, k+1, l+1);
+
+return result;
+}
+
+RankFourTensor &
+RankFourTensor::operator+=(const RankFourTensor &a)
+{
+  for(unsigned int i(0); i<3; i++)
+    for(unsigned int j(0); j<3; j++)
+      for(unsigned int k(0); k<3; k++)
+        for(unsigned int l(0); l<3; l++)
+          _vals[i][j][k][l] = _vals[i][j][k][l] + a.getValue(i+1, j+1, k+1, l+1);
+  return *this;
+}
+
+RankFourTensor
+RankFourTensor::operator+(const RankFourTensor &a) const
+{
+  RankFourTensor result;
+  
+  for(unsigned int i(0); i<3; i++)
+    for(unsigned int j(0); j<3; j++)
+      for(unsigned int k(0); k<3; k++)
+        for(unsigned int l(0); l<3; l++)
+          result.setValue(_vals[i][j][k][l]+a.getValue(i+1, j+1, k+1, l+1), i+1, j+1, k+1, l+1);
+
+  return result;
+}
+
 Real
 RankFourTensor::stiffness( const int i, const int j,
                            const RealGradient & test,
