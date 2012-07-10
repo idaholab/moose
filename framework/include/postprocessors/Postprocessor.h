@@ -108,7 +108,7 @@ protected:
   /// Thread ID of this postprocessor
   THREAD_ID _tid;
   /// Coordinate system
-  Moose::CoordinateSystemType & _coord_sys;
+  const Moose::CoordinateSystemType & _coord_sys;
   /// If and where is the postprocessor output
   Moose::PPSOutputType _output;
 };

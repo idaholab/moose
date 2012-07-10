@@ -34,7 +34,6 @@ SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
     _parent(parameters.get<Problem *>("parent") == NULL ? this : parameters.get<Problem *>("parent")),
     _mesh(*parameters.get<MooseMesh *>("mesh")),
     _eq(_parent == this ? *new EquationSystems(_mesh) : _parent->es()),
-    _coord_sys(Moose::COORD_XYZ),
     _transient(false),
     _time(_eq.parameters.set<Real>("time")),
     _time_old(_eq.parameters.set<Real>("time_old")),
@@ -64,6 +63,55 @@ SubProblem::~SubProblem()
   for (unsigned int i = 0; i < n_threads; i++)
     for (std::map<std::string, Function *>::iterator it = _functions[i].begin(); it != _functions[i].end(); ++it)
       delete it->second;
+}
+
+Moose::CoordinateSystemType
+SubProblem::getCoordSystem(SubdomainID sid)
+{
+  std::map<SubdomainID, Moose::CoordinateSystemType>::iterator it = _coord_sys.find(sid);
+  if (it != _coord_sys.end())
+    return (*it).second;
+  else
+    mooseError("Requested subdomain does not exist.");
+}
+
+void
+SubProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const std::vector<std::string> & coord_sys)
+{
+  const std::set<SubdomainID> & subdomains = _mesh.meshSubdomains();
+  if (blocks.size() == 0)
+  {
+    // no blocks specified -> assume the whole domain
+    Moose::CoordinateSystemType coord_type = Moose::COORD_XYZ;                          // all is going to be XYZ by default
+    if (coord_sys.size() == 0)
+      ; // relax, do nothing
+    else if (coord_sys.size() == 1)
+      coord_type = Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[0]);      // one system specified, the whole domain is going to have that system
+    else
+      mooseError("Multiple coordinate systems specified, but no blocks given.");
+
+    for (std::set<SubdomainID>::const_iterator it = subdomains.begin(); it != subdomains.end(); ++it)
+      _coord_sys[*it] = coord_type;
+  }
+  else
+  {
+    if (blocks.size() != coord_sys.size())
+      mooseError("Number of blocks and coordinate systems does not match.");
+
+    for (unsigned int i = 0; i < blocks.size(); i++)
+    {
+      SubdomainID sid = _mesh.getSubdomainID(blocks[i]);
+      Moose::CoordinateSystemType coord_type = Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[i]);
+      _coord_sys[sid] = coord_type;
+    }
+
+    for (std::set<SubdomainID>::const_iterator it = subdomains.begin(); it != subdomains.end(); ++it)
+    {
+      SubdomainID sid = *it;
+      if (_coord_sys.find(sid) == _coord_sys.end())
+        mooseError("Subdomain '" + Moose::stringify(sid) + "' does not have a coordinate system specified.");
+    }
+  }
 }
 
 void

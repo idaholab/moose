@@ -36,7 +36,7 @@ Postprocessor::Postprocessor(const std::string & name, InputParameters parameter
     _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _coord_sys(_subproblem.coordSystem()),
+    _coord_sys(_subproblem.coordSystem(_tid)),
     _output(Moose::stringToEnum<Moose::PPSOutputType>(parameters.get<std::string>("output")))
 {
 }

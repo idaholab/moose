@@ -103,6 +103,12 @@ public:
   const MooseArray<Real> & coordTransformation() { return _coord; }
 
   /**
+   * Get the coordinate system type
+   * @return A reference to the coordinate system type
+   */
+  const Moose::CoordinateSystemType & coordSystem() { return _coord_type; }
+
+  /**
    * Returns the reference to the current quadrature being used on a current face
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -417,6 +423,8 @@ protected:
   MooseArray<Point> _current_q_points;
   /// The current list of transformed jacobian weights
   MooseArray<Real> _current_JxW;
+  /// The coordinate system
+  Moose::CoordinateSystemType _coord_type;
   /// The current coordinate transformation coefficients
   MooseArray<Real> _coord;
   /// Holds volume qrules for each dimension

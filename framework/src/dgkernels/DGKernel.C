@@ -67,7 +67,7 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     _current_side(_assembly.side()),
     _current_side_elem(_assembly.sideElem()),
 
-    _coord_sys(_subproblem.coordSystem()),
+    _coord_sys(_subproblem.coordSystem(_tid)),
     _q_point(_subproblem.pointsFace(_tid)),
     _qrule(_subproblem.qRuleFace(_tid)),
     _JxW(_subproblem.JxWFace(_tid)),

@@ -36,7 +36,7 @@ InitialCondition::InitialCondition(const std::string & name, InputParameters par
     _sys(*getParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _coord_sys(_subproblem.coordSystem()),
+    _coord_sys(_subproblem.coordSystem(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
 
     _current_elem(_var.currentElem())

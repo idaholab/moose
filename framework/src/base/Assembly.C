@@ -327,7 +327,8 @@ Assembly::reinit(const Elem * elem)
 
   // set the coord transformation
   _coord.resize(_current_qrule->n_points());
-  switch (_sys.subproblem().coordSystem())
+  _coord_type = _sys.subproblem().getCoordSystem(elem->subdomain_id());
+  switch (_coord_type)
   {
   case Moose::COORD_XYZ:
     for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
@@ -407,7 +408,8 @@ Assembly::reinit(const Elem * elem, unsigned int side)
 
   // set the coord transformation
   _coord.resize(_current_qrule_face->n_points());
-  switch (_sys.subproblem().coordSystem())
+  _coord_type = _sys.subproblem().getCoordSystem(elem->subdomain_id());
+  switch (_coord_type)
   {
   case Moose::COORD_XYZ:
     for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)

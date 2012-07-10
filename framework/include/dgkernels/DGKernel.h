@@ -108,7 +108,7 @@ protected:
   const Elem * & _current_side_elem;
 
   /// Coordinate system
-  Moose::CoordinateSystemType & _coord_sys;
+  const Moose::CoordinateSystemType & _coord_sys;
   unsigned int _qp;
   const MooseArray< Point > & _q_point;
   QBase * & _qrule;

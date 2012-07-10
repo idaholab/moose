@@ -49,8 +49,8 @@ public:
   virtual EquationSystems & es() { return _eq; }
   virtual MooseMesh & mesh() { return _mesh; }
 
-  Moose::CoordinateSystemType & coordSystem() { return _coord_sys; }
-  virtual void setCoordSystem(Moose::CoordinateSystemType type) { _coord_sys = type; }
+  Moose::CoordinateSystemType getCoordSystem(SubdomainID sid);
+  virtual void setCoordSystem(const std::vector<SubdomainName> & blocks, const std::vector<std::string> & coord_sys);
 
   /**
    * Whether or not this problem should utilize FE shape function caching.
@@ -84,6 +84,7 @@ public:
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
 
+  virtual const Moose::CoordinateSystemType & coordSystem(THREAD_ID tid) = 0;
   virtual QBase * & qRule(THREAD_ID tid) = 0;
   virtual const MooseArray<Point> & points(THREAD_ID tid) = 0;
   virtual const MooseArray<Point> & physicalPoints(THREAD_ID tid) = 0;
@@ -142,8 +143,8 @@ protected:
   MooseMesh & _mesh;
   EquationSystems & _eq;
 
-  /// Type of coordinate system
-  Moose::CoordinateSystemType _coord_sys;
+  /// Type of coordinate system per subdomain
+  std::map<SubdomainID, Moose::CoordinateSystemType> _coord_sys;
 
   bool _transient;
   Real & _time;

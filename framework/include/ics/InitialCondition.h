@@ -78,7 +78,7 @@ protected:
 
   Assembly & _assembly;
 
-  Moose::CoordinateSystemType _coord_sys;
+  const Moose::CoordinateSystemType & _coord_sys;
   MooseVariable & _var;
 
   const Elem * & _current_elem;

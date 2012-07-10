@@ -34,7 +34,9 @@ public:
   virtual void act();
 
 protected:
-  std::string _coord_sys;
+  std::vector<SubdomainName> _blocks;
+  std::vector<std::string> _coord_sys;
+
   bool _fe_cache;
 };
 

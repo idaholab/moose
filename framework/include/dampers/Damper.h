@@ -69,7 +69,7 @@ protected:
   THREAD_ID _tid;
 
   /// Coordinate system
-  Moose::CoordinateSystemType & _coord_sys;
+  const Moose::CoordinateSystemType & _coord_sys;
 
   /// Non-linear variable this damper works on
   MooseVariable & _var;

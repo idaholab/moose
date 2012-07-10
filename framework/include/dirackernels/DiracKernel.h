@@ -159,7 +159,7 @@ protected:
   /// Dimension of the problem
   unsigned int _dim;
   /// Coordinate system
-  Moose::CoordinateSystemType & _coord_sys;
+  const Moose::CoordinateSystemType & _coord_sys;
 
   DiracKernelInfo & _dirac_kernel_info;
 

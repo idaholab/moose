@@ -342,7 +342,7 @@ addActionTypes(Syntax & syntax)
   registerActionName("add_kernel", false);
   registerActionName("setup_executioner", true);
   registerActionName("init_displaced_problem", false);
-  registerActionName("setup_subproblem", false);
+  registerActionName("setup_subproblem", true);
   registerActionName("setup_output", false);
   registerActionName("init_problem", true);
   registerActionName("copy_nodal_vars", true);

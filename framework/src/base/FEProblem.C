@@ -136,11 +136,12 @@ FEProblem::~FEProblem()
     delete _out_problem;
 }
 
-void FEProblem::setCoordSystem(Moose::CoordinateSystemType type)
+void
+FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const std::vector<std::string> & coord_sys)
 {
-  SubProblem::setCoordSystem(type);
+  SubProblem::setCoordSystem(blocks, coord_sys);
   if (_displaced_problem)
-    _displaced_problem->setCoordSystem(type);
+    _displaced_problem->setCoordSystem(blocks, coord_sys);
 }
 
 void FEProblem::initialSetup()

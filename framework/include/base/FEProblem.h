@@ -48,7 +48,7 @@ public:
   FEProblem(const std::string & name, InputParameters parameters);
   virtual ~FEProblem();
 
-  virtual void setCoordSystem(Moose::CoordinateSystemType type);
+  virtual void setCoordSystem(const std::vector<SubdomainName> & blocks, const std::vector<std::string> & coord_sys);
 
   /**
    * Set the coupling between variables
@@ -77,6 +77,7 @@ public:
   virtual void createQRules(QuadratureType type, Order order);
   virtual Order getQuadratureOrder() { return _quadrature_order; }
   virtual Assembly & assembly(THREAD_ID tid) { return *_assembly[tid]; }
+  virtual const Moose::CoordinateSystemType & coordSystem(THREAD_ID tid) { return _assembly[tid]->coordSystem(); }
   virtual QBase * & qRule(THREAD_ID tid) { return _assembly[tid]->qRule(); }
   virtual const MooseArray<Point> & points(THREAD_ID tid) { return _assembly[tid]->qPoints(); }
   virtual const MooseArray<Point> & physicalPoints(THREAD_ID tid) { return _assembly[tid]->physicalPoints(); }

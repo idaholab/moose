@@ -141,6 +141,7 @@ public:
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid);
 
   virtual Assembly & assembly(THREAD_ID tid) { return *_assembly[tid]; }
+  virtual const Moose::CoordinateSystemType & coordSystem(THREAD_ID tid) { return _assembly[tid]->coordSystem(); }
   virtual QBase * & qRule(THREAD_ID tid) { return _assembly[tid]->qRule(); }
   virtual const MooseArray<Point> & points(THREAD_ID tid) { return _assembly[tid]->qPoints(); }
   virtual const MooseArray<Point> & physicalPoints(THREAD_ID tid) { return _assembly[tid]->physicalPoints(); }
