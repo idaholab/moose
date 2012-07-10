@@ -106,7 +106,7 @@ def findExecutable(executable_option, method_option):
     executable = recursiveFindExecutable(os.getcwd(), p)
 
     if not executable:
-      print 'Executable not found!  Try specifing it using -e'
+      print 'Executable not found!  Try specifying it using -e'
       sys.exit(1)
 
     return executable
@@ -127,7 +127,7 @@ def findPlugins(executable_path):
 if __name__ == '__main__':
   parser = OptionParser()
   parser.add_option("-e", "--executable", dest="executable",
-                    help="The executable you would liek to build an input file for. \n If not supplied an executable will be searched for.  The searched for executable will default to the optimized version of the executable (if available).")
+                    help="The executable you would like to build an input file for.  If not supplied an executable will be searched for.  The searched for executable will default to the optimized version of the executable (if available).")
 
   parser.add_option("-i", "--input-file", dest="input_file",
                     help="An input file you would optionally like to open.")
