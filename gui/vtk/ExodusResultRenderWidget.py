@@ -2,6 +2,7 @@ import os, sys, PyQt4, getopt
 from PyQt4 import QtCore, QtGui
 import vtk
 import time
+from ExodusResult import ExodusResult
 
 pathname = os.path.dirname(sys.argv[0])        
 pathname = os.path.abspath(pathname)
@@ -21,7 +22,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.plane.SetOrigin(-1000, 0, 0)
     self.plane.SetNormal(1, 0, 0)
 
-    self.reader = None
+    self.exodus_result = None
     
     self.execution_widget = execution_widget
     self.execution_widget.run_started.connect(self._runStarted)
@@ -44,11 +45,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.main_layout.addWidget(self.vtkwidget)
     self.vtkwidget.show()
 
-    self.current_actors = []
-
     self.vtkwidget.GetRenderWindow().AddRenderer(self.renderer)
 
     self.first = True
+
+    self.exodus_result = None
 
     self.setupControls()
 
@@ -185,10 +186,14 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.right_controls_layout.addWidget(self.clip_groupbox)
 
+
+
+
+
   def _updateControls(self):
     self.old_contour = self.variable_contour.currentText()
     self.variable_contour.clear()
-    for variable in self.current_variables:
+    for variable in self.exodus_result.current_variables:
       self.variable_contour.addItem(variable)
 
     # Try to restore back to the view of the variable we were looking at
@@ -199,143 +204,32 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self._resetView()
       
       
-    self.time_slider.setMinimum(self.min_timestep)
-    self.time_slider.setMaximum(self.max_timestep)
-    self.time_slider.setSliderPosition(self.max_timestep)
+    self.time_slider.setMinimum(self.exodus_result.min_timestep)
+    self.time_slider.setMaximum(self.exodus_result.max_timestep)
+    self.time_slider.setSliderPosition(self.exodus_result.max_timestep)
     
-  def setFileName(self, file_name):      
-    self.currently_has_actor = True
-    
-    self.file_name = file_name
-    self.reader = vtk.vtkExodusIIReader()
-    self.reader.SetFileName(self.file_name)
-    self.reader.UpdateInformation()
-
-    self.current_dim = self.reader.GetDimensionality()
-
-    self.min_timestep = 0
-    self.max_timestep = 0
-    range = self.reader.GetTimeStepRange()
-    self.min_timestep = range[0]
-    self.max_timestep = range[1]
-
-    self.reader.SetAllArrayStatus(vtk.vtkExodusIIReader.ELEM_BLOCK, 1)
-    self.reader.SetAllArrayStatus(vtk.vtkExodusIIReader.NODAL, 1)
-    self.reader.SetAllArrayStatus(vtk.vtkExodusIIReader.NODAL_TEMPORAL, 1)
-    self.reader.SetTimeStep(self.max_timestep)
-    self.reader.Update()
-    self.current_variable_point_data = {}
-    self.current_variables = []
-    self.current_nodal_components = {}
-    self.current_elemental_components = {}
-    self.component_index = -1
-
-
-    cdp = vtk.vtkCompositeDataPipeline()
-    vtk.vtkAlgorithm.SetDefaultExecutivePrototype(cdp)
-
-    self.output = self.reader.GetOutput()
-    self.geom = vtk.vtkCompositeDataGeometryFilter()
-    self.geom.SetInputConnection(0,self.reader.GetOutputPort(0))
-    self.geom.Update()
-
-    self.lut = vtk.vtkLookupTable()
-    self.lut.SetHueRange(0.667, 0.0)
-    self.lut.SetNumberOfColors(256)
-    self.lut.Build()
-
-    self.data = self.geom.GetOutput()
-
-    num_nodal_variables = self.data.GetPointData().GetNumberOfArrays()
-    for var_num in xrange(num_nodal_variables):
-      var_name = self.data.GetPointData().GetArrayName(var_num)
-      self.current_variables.append(var_name)
-      components = self.data.GetPointData().GetVectors(var_name).GetNumberOfComponents()
-      self.current_nodal_components[var_name] = components
-      # self.data.GetPointData().GetVectors(value_string).GetComponentName(0)
-
-    num_elemental_variables = self.data.GetCellData().GetNumberOfArrays()
-    for var_num in xrange(num_elemental_variables):
-      var_name = self.data.GetCellData().GetArrayName(var_num)
-      self.current_variables.append(var_name)
-      components = self.data.GetCellData().GetVectors(var_name).GetNumberOfComponents()
-      self.current_elemental_components[var_name] = components      
-    
-    self.mapper = vtk.vtkPolyDataMapper()
-    self.mapper.SetInput(self.data)
-    self.mapper.ScalarVisibilityOn()
-    self.mapper.SetLookupTable(self.lut)
-    
-    self.actor = vtk.vtkActor()
-    self.current_actors.append(self.actor)
-    self.actor.SetMapper(self.mapper)
-    self.renderer.AddActor(self.actor)
-    self.current_actor = self.actor
-
-    self.clipper = vtk.vtkTableBasedClipDataSet()
-    self.clipper.SetInput(self.output)
-    self.clipper.SetClipFunction(self.plane)
-    self.clipper.Update()
-
-    self.clip_geom = vtk.vtkCompositeDataGeometryFilter()
-    self.clip_geom.SetInputConnection(0,self.clipper.GetOutputPort(0))
-    self.clip_geom.Update()
-    
-    self.clip_data = self.clip_geom.GetOutput()
-
-    self.clip_mapper = vtk.vtkPolyDataMapper()
-    self.clip_mapper.SetInput(self.clip_data)
-    self.clip_mapper.ScalarVisibilityOn()
-    self.clip_mapper.SetLookupTable(self.lut)
-
-    self.clip_actor = vtk.vtkActor()
-    self.clip_actor.SetMapper(self.clip_mapper)
-    self.current_actors.append(self.clip_actor)
-
-    self._drawEdgesChanged(self.draw_edges_checkbox.checkState())
-
-    self.scalar_bar = vtk.vtkScalarBarActor()
-    self.current_actors.append(self.scalar_bar)
-    self.scalar_bar.SetLookupTable(self.mapper.GetLookupTable())
-    self.scalar_bar.SetNumberOfLabels(4)
-    
-    self.current_bounds = self.actor.GetBounds()
-
-    # Avoid z-buffer fighting
-    vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
-
-    if self.first:
-      self.first = False
-      self.renderer.ResetCamera()
-
-    if self.clip_groupbox.isChecked():
-      _clippingToggled(True)
-      
-    self.vtkwidget.updateGL()
-
-    self._updateControls()
 
   def _drawEdgesChanged(self, value):
     if value == QtCore.Qt.Checked:
-      self.actor.GetProperty().EdgeVisibilityOn()
-      self.clip_actor.GetProperty().EdgeVisibilityOn()
+      self.exodus_result.actor.GetProperty().EdgeVisibilityOn()
+      self.exodus_result.clip_actor.GetProperty().EdgeVisibilityOn()
     else:
-      self.actor.GetProperty().EdgeVisibilityOff()
-      self.clip_actor.GetProperty().EdgeVisibilityOff()
+      self.exodus_result.actor.GetProperty().EdgeVisibilityOff()
+      self.exodus_result.clip_actor.GetProperty().EdgeVisibilityOff()
     self.vtkwidget.updateGL()
 
   def _fillComponentCombo(self, variable_name, components):
     self.variable_component.clear()
     self.variable_component.addItem('Magnitude')
     num_components = components[variable_name]
-    if num_components > 1 and self.current_dim >= 2:
+    if num_components > 1 and self.exodus_result.current_dim >= 2:
       self.variable_component.setDisabled(False)
       self.variable_component.addItem('X')
       self.variable_component.addItem('Y')
     else:
       self.variable_component.setDisabled(True)
       
-    if num_components > 1 and  self.current_dim == 3:
+    if num_components > 1 and  self.exodus_result.current_dim == 3:
       self.variable_component.addItem('Z')
 
     self._variableComponentSelected('Magnitude')
@@ -345,57 +239,57 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.current_variable = value_string
 
     # Maybe results haven't been written yet...
-    if not self.data.GetPointData().GetVectors(value_string) and not self.data.GetCellData().GetVectors(value_string):
+    if not self.exodus_result.data.GetPointData().GetVectors(value_string) and not self.exodus_result.data.GetCellData().GetVectors(value_string):
       return
 
-    if value_string in self.current_nodal_components:
-      self._fillComponentCombo(value_string, self.current_nodal_components)
+    if value_string in self.exodus_result.current_nodal_components:
+      self._fillComponentCombo(value_string, self.exodus_result.current_nodal_components)
     elif value_string in self.current_elemental_components:
       self._fillComponentCombo(value_string, self.current_elemental_components)
     
   def _variableComponentSelected(self, value):
     value_string = str(value)
     if value_string == 'Magnitude':
-      self.lut.SetVectorModeToMagnitude()
+      self.exodus_result.lut.SetVectorModeToMagnitude()
       self.component_index = -1
     elif value_string == 'X':
-      self.lut.SetVectorModeToComponent()
-      self.lut.SetVectorComponent(0)
+      self.exodus_result.lut.SetVectorModeToComponent()
+      self.exodus_result.lut.SetVectorComponent(0)
       self.component_index = 0
     elif value_string == 'Y':
-      self.lut.SetVectorModeToComponent()
-      self.lut.SetVectorComponent(1)
+      self.exodus_result.lut.SetVectorModeToComponent()
+      self.exodus_result.lut.SetVectorComponent(1)
       self.component_index = 1
     elif value_string == 'Z':
-      self.lut.SetVectorModeToComponent()
-      self.lut.SetVectorComponent(2)
+      self.exodus_result.lut.SetVectorModeToComponent()
+      self.exodus_result.lut.SetVectorComponent(2)
       self.component_index = 2
 
     self._updateContours()
 
   def _updateContours(self):
     if self.clip_groupbox.isChecked():
-      self.clipper.Modified()
-      self.clipper.Update()
-      self.clip_geom.Update()
-      self.clip_mapper.Update()
+      self.exodus_result.clipper.Modified()
+      self.exodus_result.clipper.Update()
+      self.exodus_result.clip_geom.Update()
+      self.exodus_result.clip_mapper.Update()
 
-    if self.current_variable in self.current_nodal_components:
-      self.mapper.SetScalarModeToUsePointFieldData()
-      self.mapper.SetScalarRange(self.data.GetPointData().GetVectors(self.current_variable).GetRange(self.component_index))
-      self.clip_mapper.SetScalarModeToUsePointFieldData()
-      self.clip_mapper.SetScalarRange(self.data.GetPointData().GetVectors(self.current_variable).GetRange(self.component_index))
+    if self.current_variable in self.exodus_result.current_nodal_components:
+      self.exodus_result.mapper.SetScalarModeToUsePointFieldData()
+      self.exodus_result.mapper.SetScalarRange(self.exodus_result.data.GetPointData().GetVectors(self.current_variable).GetRange(self.component_index))
+      self.exodus_result.clip_mapper.SetScalarModeToUsePointFieldData()
+      self.exodus_result.clip_mapper.SetScalarRange(self.exodus_result.data.GetPointData().GetVectors(self.current_variable).GetRange(self.component_index))
     elif self.current_variable in self.current_elemental_components:
-      self.mapper.SetScalarModeToUseCellFieldData()
-      self.mapper.SetScalarRange(self.data.GetCellData().GetVectors(self.current_variable).GetRange(self.component_index))
-      self.clip_mapper.SetScalarModeToUseCellFieldData()
-      self.clip_mapper.SetScalarRange(self.data.GetCellData().GetVectors(self.current_variable).GetRange(self.component_index))
+      self.exodus_result.mapper.SetScalarModeToUseCellFieldData()
+      self.exodus_result.mapper.SetScalarRange(self.exodus_result.data.GetCellData().GetVectors(self.current_variable).GetRange(self.component_index))
+      self.exodus_result.clip_mapper.SetScalarModeToUseCellFieldData()
+      self.exodus_result.clip_mapper.SetScalarRange(self.exodus_result.data.GetCellData().GetVectors(self.current_variable).GetRange(self.component_index))
 
-    self.mapper.SelectColorArray(self.current_variable)
-    self.clip_mapper.SelectColorArray(self.current_variable)
+    self.exodus_result.mapper.SelectColorArray(self.current_variable)
+    self.exodus_result.clip_mapper.SelectColorArray(self.current_variable)
     
-    self.scalar_bar.SetTitle(self.current_variable)
-    self.renderer.AddActor2D(self.scalar_bar)
+    self.exodus_result.scalar_bar.SetTitle(self.current_variable)
+    self.renderer.AddActor2D(self.exodus_result.scalar_bar)
     self.vtkwidget.updateGL()
 
     
@@ -467,13 +361,13 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   def _timeSliderReleased(self):
     textbox_string = self.time_slider_textbox.text()
     if textbox_string == '':
-      textbox_string = str(self.min_timestep)
+      textbox_string = str(self.exodus_result.min_timestep)
 
-    if self.reader:
-      self.reader.SetTimeStep(int(textbox_string))
-      self.reader.Update()
-      self.geom.Update()
-      self.current_bounds = self.actor.GetBounds()
+    if self.exodus_result.reader:
+      self.exodus_result.reader.SetTimeStep(int(textbox_string))
+      self.exodus_result.reader.Update()
+      self.exodus_result.geom.Update()
+      self.current_bounds = self.exodus_result.actor.GetBounds()
       self._updateContours()
       
   def _sliderTextboxReturn(self):
@@ -481,43 +375,62 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self._timeSliderReleased()
 
   def _timestepBegin(self):
-    if not self.file_name:
+    if not self.exodus_result:
       output_file_names = self.input_file_widget.getOutputFileNames()
 
       output_file = ''
 
       for file_name in output_file_names:
         if '.e' in file_name and os.path.exists(file_name):
-          self.setFileName(file_name)
+          self.exodus_result = ExodusResult(self, self.renderer, self.plane)
+          self.exodus_result.setFileName(file_name)
+          self._drawEdgesChanged(self.draw_edges_checkbox.checkState())
+
+          if self.first:
+            self.first = False
+            self.renderer.ResetCamera()
+
+          # Avoid z-buffer fighting
+          vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
+
+          if self.clip_groupbox.isChecked():
+            _clippingToggled(True)
+      
+          self.vtkwidget.updateGL()
+          self._updateControls()
+
 
     if self.automatically_update:
-      self.reader.UpdateTimeInformation()
-      range = self.reader.GetTimeStepRange()
-      self.min_timestep = range[0]
-      self.max_timestep = range[1]
-      self.time_slider.setMinimum(self.min_timestep)
+      self.exodus_result.reader.UpdateTimeInformation()
+      range = self.exodus_result.reader.GetTimeStepRange()
+      self.exodus_result.min_timestep = range[0]
+      self.exodus_result.max_timestep = range[1]
+      self.time_slider.setMinimum(self.exodus_result.min_timestep)
 
       # Only automatically move forward if they're on the current step
       if self.time_slider.sliderPosition() == self.time_slider.maximum():
-        self.time_slider.setMaximum(self.max_timestep)
-        self.time_slider.setSliderPosition(self.max_timestep)
+        self.time_slider.setMaximum(self.exodus_result.max_timestep)
+        self.time_slider.setSliderPosition(self.exodus_result.max_timestep)
         self._timeSliderReleased()
         if self.clip_groupbox.isChecked():
           self._clipSliderReleased()
         self.vtkwidget.updateGL()
       else:
-        self.time_slider.setMaximum(self.max_timestep)
+        self.time_slider.setMaximum(self.exodus_result.max_timestep)
 
   def _timestepEnd(self):
     pass
     
   def _runStarted(self):
     self.file_name = None
+
+    if not self.exodus_result:
+      return
     
-    for actor in self.current_actors:
+    for actor in self.exodus_result.current_actors:
       self.renderer.RemoveActor(actor)
 
-    del self.current_actors[:]
+    del self.exodus_result.current_actors[:]
     
   def _runStopped(self):
     self._timestepBegin()
@@ -525,16 +438,16 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
   def _clippingToggled(self, value):
     if value:
-      self.renderer.RemoveActor(self.current_actor)
-      self.renderer.AddActor(self.clip_actor)
-      self.current_actor = self.clip_actor
+      self.renderer.RemoveActor(self.exodus_result.current_actor)
+      self.renderer.AddActor(self.exodus_result.clip_actor)
+      self.exodus_result.current_actor = self.exodus_result.clip_actor
       self.clip_plane_slider.setSliderPosition(50)
       self._clipSliderMoved(50)
       self._clipSliderReleased()
     else:
-      self.renderer.RemoveActor(self.current_actor)
-      self.renderer.AddActor(self.actor)
-      self.current_actor = self.actor
+      self.renderer.RemoveActor(self.exodus_result.current_actor)
+      self.renderer.AddActor(self.exodus_result.actor)
+      self.exodus_result.current_actor = self.exodus_result.actor
       
     self.vtkwidget.updateGL()    
     
