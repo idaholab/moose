@@ -42,6 +42,7 @@ public:
   };
 
 protected:
+  Moose::CoordinateSystemType _coord_type;
 
   const std::string _appended_property_name;
 

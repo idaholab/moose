@@ -111,9 +111,18 @@ SolidModel::SolidModel( const std::string & name,
    _d_stress_dT(createProperty<SymmTensor>("d_stress_dT")),
    _total_strain_increment(0),
    _strain_increment(0),
-   _element(createElement(name, parameters)),
+   _element(NULL),
    _local_elasticity_tensor(NULL)
 {
+  bool same_coord_type = true;
+  for (unsigned int i = 1; i < _block_id.size(); i++)
+    same_coord_type &= (_subproblem.getCoordSystem(_block_id[0]) == _subproblem.getCoordSystem(_block_id[i]));
+  if (!same_coord_type)
+    mooseError("Material '" << name << "' was specified on multiple blocks that do not have the same coordinate system");
+  // Use the first block to figure out the coordinate system (the above check ensures that they are the same)
+  _coord_type = _subproblem.getCoordSystem(_block_id[0]);
+  _element = createElement(name, parameters);
+
   int num_elastic_constants =
     _bulk_modulus_set + _lambda_set + _poissons_ratio_set + _shear_modulus_set + _youngs_modulus_set;
 
@@ -265,7 +274,7 @@ SolidModel::createElasticityTensor()
     constant = false;
   }
   // The IsoRZ and Iso are actually the same...
-  if (_coord_sys == Moose::COORD_RZ)
+  if (_coord_type == Moose::COORD_RZ)
   {
     SymmIsotropicElasticityTensorRZ * t = new SymmIsotropicElasticityTensorRZ(constant);
     mooseAssert(_lambda_set, "Internal error:  lambda not set");
@@ -820,7 +829,7 @@ SolidModel::createElement( const std::string & name,
     {
       mooseError("Linear must not define disp_r");
     }
-    if ( _coord_sys == Moose::COORD_RZ )
+    if ( _coord_type == Moose::COORD_RZ )
     {
       mooseError("Nonlinear3D formulation requested for coord_type = RZ problem");
     }
@@ -850,7 +859,7 @@ SolidModel::createElement( const std::string & name,
     {
       mooseError("Linear must not define disp_r");
     }
-    if ( _coord_sys == Moose::COORD_RZ )
+    if ( _coord_type == Moose::COORD_RZ )
     {
       mooseError("Linear formulation requested for coord_type = RZ problem");
     }
@@ -861,7 +870,7 @@ SolidModel::createElement( const std::string & name,
     mooseError("Unknown formulation: " + formulation);
   }
 
-  if ( !element && _coord_sys == Moose::COORD_RZ )
+  if ( !element && _coord_type == Moose::COORD_RZ )
   {
     if ( !isCoupled("disp_r") ||
          !isCoupled("disp_z") )
@@ -886,7 +895,7 @@ SolidModel::createElement( const std::string & name,
     else if (isCoupled("disp_r") &&
              isCoupled("disp_z"))
     {
-      if ( _coord_sys != Moose::COORD_RZ )
+      if ( _coord_type != Moose::COORD_RZ )
       {
         mooseError("RZ coord system not specified, but disp_r and disp_z are");
       }
