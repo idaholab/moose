@@ -246,7 +246,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       var_name = self.data.GetCellData().GetArrayName(var_num)
       self.current_variables.append(var_name)
       components = self.data.GetCellData().GetVectors(var_name).GetNumberOfComponents()
-      print 'Elemental:',var_name
       self.current_elemental_components[var_name] = components      
     
     self.mapper = vtk.vtkPolyDataMapper()
@@ -325,15 +324,12 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     if not self.data.GetPointData().GetVectors(value_string) and not self.data.GetCellData().GetVectors(value_string):
       return
 
-    print 'value:',value_string
-    print self.current_elemental_components
     if value_string in self.current_nodal_components:
       self.mapper.SetScalarModeToUsePointFieldData()
       self.mapper.SetScalarRange(self.data.GetPointData().GetVectors(value_string).GetRange(-1))
       self.clip_mapper.SetScalarModeToUsePointFieldData()
       self.clip_mapper.SetScalarRange(self.data.GetPointData().GetVectors(value_string).GetRange(-1))
     elif value_string in self.current_elemental_components:
-      print 'setting element value'
       self.mapper.SetScalarModeToUseCellFieldData()
       self.mapper.SetScalarRange(self.data.GetCellData().GetVectors(value_string).GetRange(-1))
       self.clip_mapper.SetScalarModeToUseCellFieldData()

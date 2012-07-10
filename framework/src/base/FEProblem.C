@@ -874,6 +874,9 @@ FEProblem::addConstraint(const std::string & c_name, const std::string & name, I
 void
 FEProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
+  if (_aux.hasVariable(var_name))
+    mooseError("Variable with name '" << var_name << "' already exists.");
+
   _aux.addVariable(var_name, type, 1.0, active_subdomains);
   if (_displaced_problem)
     _displaced_problem->addAuxVariable(var_name, type, active_subdomains);
