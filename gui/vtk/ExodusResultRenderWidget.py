@@ -294,6 +294,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.clip_geom.Update()
       self.clip_mapper.Update()
 
+    # Maybe results haven't been written yet...
+    if not self.data.GetPointData().GetVectors(value_string):
+      return
+
     self.mapper.SetScalarRange(self.data.GetPointData().GetVectors(value_string).GetRange(-1))
     self.mapper.SelectColorArray(value_string)
     self.clip_mapper.SetScalarRange(self.data.GetPointData().GetVectors(value_string).GetRange(-1))

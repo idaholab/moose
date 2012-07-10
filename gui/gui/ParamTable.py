@@ -151,6 +151,8 @@ class ParamTable:
     
     self.layoutV.addLayout(button_layout)
 
+    self.table_widget.resizeColumnsToContents()
+
 
   ### Takes a dictionary containing name value pairs
   def fillTableWithData(self, the_data, overwrite_type=False, old_params={}):

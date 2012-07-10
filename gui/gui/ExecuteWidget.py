@@ -63,7 +63,8 @@ class ExecuteWidget(QtGui.QWidget):
     self.command_layout.addWidget(self.run_button, alignment=Qt.AlignHCenter)
 
     self.postprocessor_csv = QtGui.QCheckBox("Enable Postprocessor CSV Output")
-
+    self.postprocessor_csv.setCheckState(QtCore.Qt.Checked)
+    
     self.cwd_layout.addWidget(QtGui.QLabel("Current Working Directory:"))
     self.cwd_text = QtGui.QLineEdit()
     self.cwd_text.setReadOnly(True)

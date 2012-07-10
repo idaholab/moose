@@ -140,6 +140,10 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     type_to_extension = {'exodus':'.e', 'tecplot':'.plt'}
 
+    # FIXME: Hack to make raven and r7 work for now
+    if 'raven' in self.input_file_widget.app_path or 'r7' in self.input_file_widget.app_path:
+      file_base += '_displaced'
+
     for atype,extension in type_to_extension.items():
       if atype in output_data and (output_data[atype] == 'true' or output_data[atype] == '1'):
         file_names.append(file_base + extension)
