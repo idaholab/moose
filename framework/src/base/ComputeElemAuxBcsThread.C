@@ -51,35 +51,37 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
     unsigned short int side = belem->_side;
     BoundaryID boundary_id = belem->_bnd_id;
 
-    // prepare variables
-    for (std::map<std::string, MooseVariable *>::iterator it = _sys._elem_vars[_tid].begin(); it != _sys._elem_vars[_tid].end(); ++it)
+    if (elem->processor_id() == libMesh::processor_id())
     {
-      MooseVariable * var = it->second;
-      var->prepare_aux();
-    }
-
-    if (_auxs[_tid].elementalBCs(boundary_id).size() > 0)
-    {
-      _problem.prepare(elem, _tid);
-      _problem.reinitElemFace(elem, side, boundary_id, _tid);
-      _problem.reinitMaterialsBoundary(boundary_id, _tid);
-
-      const std::vector<AuxKernel*> & bcs = _auxs[_tid].elementalBCs(boundary_id);
-      for (std::vector<AuxKernel*>::const_iterator element_bc_it = bcs.begin();
-          element_bc_it != bcs.end(); ++element_bc_it)
-        (*element_bc_it)->compute();
-    }
-
-    // update the solution vector
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      // prepare variables
       for (std::map<std::string, MooseVariable *>::iterator it = _sys._elem_vars[_tid].begin(); it != _sys._elem_vars[_tid].end(); ++it)
       {
         MooseVariable * var = it->second;
-        var->insert(_sys.solution());
+        var->prepare_aux();
+      }
+
+      if (_auxs[_tid].elementalBCs(boundary_id).size() > 0)
+      {
+        _problem.prepare(elem, _tid);
+        _problem.reinitElemFace(elem, side, boundary_id, _tid);
+        _problem.reinitMaterialsBoundary(boundary_id, _tid);
+
+        const std::vector<AuxKernel*> & bcs = _auxs[_tid].elementalBCs(boundary_id);
+        for (std::vector<AuxKernel*>::const_iterator element_bc_it = bcs.begin();
+            element_bc_it != bcs.end(); ++element_bc_it)
+          (*element_bc_it)->compute();
+      }
+
+      // update the solution vector
+      {
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        for (std::map<std::string, MooseVariable *>::iterator it = _sys._elem_vars[_tid].begin(); it != _sys._elem_vars[_tid].end(); ++it)
+        {
+          MooseVariable * var = it->second;
+          var->insert(_sys.solution());
+        }
       }
     }
-
   }
 }
 
