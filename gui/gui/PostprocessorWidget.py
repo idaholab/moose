@@ -4,6 +4,7 @@ import sys, os, random
 from PyQt4 import QtGui, QtCore
 import numpy, csv
 from Plotter import *
+from FlowLayout import *
 
 
 
@@ -24,11 +25,7 @@ class PostprocessorWidget(QtGui.QWidget):
         self.comboWidget.activated[str].connect(self.createPlot)
         self.plotObjectDict = {}
         self.plotDataDict = {}
-        self.counter = 0
-        self.plotIndex = 0
-        
-        
-        
+
         # adds a button to the widget that will be used to clear plot selectons
         self.clearButton = QtGui.QPushButton("Clear")
         self.clearButton.resize(self.clearButton.sizeHint())
@@ -38,19 +35,23 @@ class PostprocessorWidget(QtGui.QWidget):
         self.openButton.resize(self.clearButton.sizeHint())
         self.openButton.clicked.connect(self.openClick)
             
-        self.mainHBox = QtGui.QHBoxLayout()
-        self.mainHBox.addWidget(self.openButton)
-        self.mainHBox.addWidget(self.clearButton)
+        self.buttonHBox = QtGui.QHBoxLayout()
+        self.buttonHBox.addWidget(self.openButton)
+        self.buttonHBox.addWidget(self.clearButton)
 
         # adds a scroll layout to the main widget so all of the plots don't take up too much space
         # scroll area widget contents - layout
-        self.scrollLayout = QtGui.QFormLayout()
-        self.scrollWidget = QtGui.QWidget()
-        self.scrollWidget.setLayout(self.scrollLayout)
-        self.scrollArea = QtGui.QScrollArea()
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setHorizontalScrollBarPolicy(1)
-        self.scrollArea.setWidget(self.scrollWidget)
+        self.plotHBox = QtGui.QHBoxLayout()
+        scroll = ResizeScrollArea()
+        wrapper = QtGui.QWidget()
+        self.flowLayout = FlowLayout()
+        wrapper.setLayout(self.flowLayout)
+        scroll.setWidget(wrapper)
+        scroll.setWidgetResizable(True)
+        self.plotHBox.addWidget(scroll)
+        pal = QtGui.QPalette(scroll.palette())
+        pal.setColor(QtGui.QPalette.Window, QtGui.QColor('lightgray'))
+        scroll.setPalette(pal)
         
         
         # timer feature that updates all of the plots
@@ -64,15 +65,12 @@ class PostprocessorWidget(QtGui.QWidget):
         self.execute_widget.timestep_begin.connect(self.updatePlots)
         self.execute_widget.run_stopped.connect(self.updatePlots)
 
-
         
         # sets the layout for the widget
         self.Layout = QtGui.QVBoxLayout(self)
         self.Layout.addWidget(self.comboWidget)
-        self.Layout.addWidget(self.scrollArea)
-        self.Layout.addLayout(self.mainHBox)
-
-   
+        self.Layout.addLayout(self.plotHBox)
+        self.Layout.addLayout(self.buttonHBox)
     
     def getFileName(self):
         
@@ -91,6 +89,8 @@ class PostprocessorWidget(QtGui.QWidget):
         
         if self.currentFile and os.path.exists(self.currentFile):
             if os.path.getsize(self.currentFile) > 0:
+                
+                self.comboWidget.clear()
         
                 self.names = open(self.currentFile,'rb').readline()
                 self.names = self.names.strip()
@@ -104,9 +104,7 @@ class PostprocessorWidget(QtGui.QWidget):
                 self.comboWidget.setCurrentIndex(-1)
         
     
-    
     def createPlot(self, plotName):
-        
         # when this method is called a new item is added to the plots dictionary
         # then the getPlotData function is called to begin the first plot
         time = [0]
@@ -114,26 +112,14 @@ class PostprocessorWidget(QtGui.QWidget):
         plotData = [time, postData]
         self.plotObjectDict[plotName] = MPLPlotter(plotData,plotName)
         self.plotDataDict[plotName] = [plotData]
-        self.hbox = QtGui.QHBoxLayout()
-
-        
-        if (self.counter == 0):
-            self.hbox.addWidget(self.plotObjectDict[plotName])
-            # adds a layout to the PPD plot
-            self.scrollLayout.addRow(self.hbox)
-            self.counter = 1
-        else:
-            self.scrollLayout.itemAt(self.plotIndex).addWidget(self.plotObjectDict[plotName])
-            self.plotIndex += 1
-            self.counter = 0
-
+        self.flowLayout.addWidget(self.plotObjectDict[plotName])
 
         self.updatePlots()
+    
     
     def updatePlots(self):
         # this method loops through all of the plot objects in the plot dictionary
         # and for each plot calls the getPlotData function to update every plot that has been selected
-
         if self.first:
             self.first = False
             self.getFileName()
@@ -160,11 +146,8 @@ class PostprocessorWidget(QtGui.QWidget):
                         self.plotObjectDict[key].setPlotData(self.plotDataDict[key],key)
                     
 
-
     
     def getPlotData(self, plotName):
-        
-       
         indexCol = self.names.index(plotName)
         for line in self.data:
             self.postData.append(line[indexCol])
@@ -181,10 +164,8 @@ class PostprocessorWidget(QtGui.QWidget):
         file_name = QtGui.QFileDialog.getOpenFileName(self, "Open CSV File", "~/", "CSV Files (*.csv)")
         if file_name:
             self.currentFile = str(file_name)
-            for i in range(self.scrollLayout.count()):
-                for j in range(self.scrollLayout.itemAt(i).count()):
-                    self.scrollLayout.itemAt(i).itemAt(j).widget().close()
-                self.scrollLayout.itemAt(i).removeItem(self.hbox)
+            for i in range(self.flowLayout.count()):
+                self.flowLayout.itemAt(i).widget().close()
             self.plotObjectDict = {}
             self.counter = 0
             self.plotDataDict = {}
@@ -193,14 +174,32 @@ class PostprocessorWidget(QtGui.QWidget):
             self.comboWidget.setCurrentIndex(-1)
     
     def clearClick(self):
+        
         self.first = True
-        for i in range(self.scrollLayout.count()):
-            for j in range(self.scrollLayout.itemAt(i).count()):
-                self.scrollLayout.itemAt(i).itemAt(j).widget().close()
-            self.scrollLayout.itemAt(i).removeItem(self.hbox)
+        for i in range(self.flowLayout.count()):
+            self.flowLayout.itemAt(i).widget().close()
         self.plotObjectDict = {}
         self.counter = 0
         self.plotDataDict = {}
         self.comboWidget.clear()
-        
+        self.fillComboWidget()
 
+        
+class ResizeScrollArea(QtGui.QScrollArea):
+    
+    def __init(self, parent=None):  
+        QtGui.QScrollArea.__init__(self, parent)
+    
+    def resizeEvent(self, event):
+        wrapper = self.findChild(QtGui.QWidget)
+        flow = wrapper.findChild(FlowLayout)
+        
+        width = self.viewport().width()
+        height = flow.heightForWidth(width)
+        size = QtCore.QSize(width, height)
+        point = self.viewport().rect().topLeft()
+        
+        flow.setGeometry(QtCore.QRect(point, size))
+        
+        self.viewport().update()  
+        QtGui.QScrollArea.resizeEvent(self, event)
