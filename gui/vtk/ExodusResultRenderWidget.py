@@ -82,6 +82,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.contour_layout.addWidget(self.variable_contour, alignment=QtCore.Qt.AlignLeft)
     self.left_controls_layout.addLayout(self.contour_layout)
 
+    self.reset_button = QtGui.QPushButton('Reset View')
+    self.reset_button.clicked.connect(self._resetView)
+    self.left_controls_layout.addWidget(self.reset_button)
+    
+
     self.beginning_button = QtGui.QToolButton()
     self.beginning_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrFirst32.png'))
     self.beginning_button.clicked.connect(self._beginningClicked)
@@ -171,9 +176,19 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.right_controls_layout.addWidget(self.clip_groupbox)
 
   def _updateControls(self):
+    self.old_contour = self.variable_contour.currentText()
     self.variable_contour.clear()
     for variable in self.current_variables:
       self.variable_contour.addItem(variable)
+
+    # Try to restore back to the view of the variable we were looking at
+    found_index = self.variable_contour.findText(self.old_contour)
+    if found_index != -1:
+      self.variable_contour.setCurrentIndex(found_index)
+    else: # If this variable doesn't exist then we are probably running a new simulation... try to reset the camera
+      self._resetView()
+      
+      
     self.time_slider.setMinimum(self.min_timestep)
     self.time_slider.setMaximum(self.max_timestep)
     self.time_slider.setSliderPosition(self.max_timestep)
@@ -307,6 +322,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.renderer.AddActor2D(self.scalar_bar)
     self.vtkwidget.updateGL()
 
+  def _resetView(self):
+    self.renderer.ResetCamera()
+    self.vtkwidget.updateGL()
+    
   def _automaticUpdateChanged(self, value):
     if value == QtCore.Qt.Checked:
       self.automatically_update = True
