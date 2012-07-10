@@ -10,7 +10,7 @@ from matplotlib.figure import Figure
 class PlotWidget(FigureCanvas):
     """This is the canvas Widget. It allows for MPL plot embedding """
     
-    def __init__(self, parent=None, width=7.75, height=4 , dpi=50):
+    def __init__(self, parent=None, width=10.5, height=5 , dpi=50):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
         # We want the axes cleared every time plot() is called
