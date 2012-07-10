@@ -73,14 +73,24 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.automatic_update_checkbox.stateChanged[int].connect(self._automaticUpdateChanged)
     self.left_controls_layout.addWidget(self.automatic_update_checkbox)
 
-    
+    self.contour_groupbox = QtGui.QGroupBox("Contour")
     self.contour_layout = QtGui.QHBoxLayout()
+    self.contour_groupbox.setLayout(self.contour_layout)
     self.contour_label = QtGui.QLabel("Contour:")
     self.variable_contour = QtGui.QComboBox()
     self.variable_contour.currentIndexChanged[str].connect(self._contourVariableSelected)
-    self.contour_layout.addWidget(self.contour_label, alignment=QtCore.Qt.AlignRight)
+#    self.contour_layout.addWidget(self.contour_label, alignment=QtCore.Qt.AlignRight)
     self.contour_layout.addWidget(self.variable_contour, alignment=QtCore.Qt.AlignLeft)
-    self.left_controls_layout.addLayout(self.contour_layout)
+
+    self.component_layout = QtGui.QHBoxLayout()
+    self.component_label = QtGui.QLabel("Component:")
+    self.variable_component = QtGui.QComboBox()
+    self.variable_component.currentIndexChanged[str].connect(self._variableComponentSelected)
+#    self.component_layout.addWidget(self.component_label, alignment=QtCore.Qt.AlignRight)
+    self.component_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignLeft)
+    self.contour_layout.addLayout(self.component_layout)
+
+    self.left_controls_layout.addWidget(self.contour_groupbox)
 
     self.reset_button = QtGui.QPushButton('Reset View')
     self.reset_button.clicked.connect(self._resetView)
@@ -201,6 +211,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.reader.SetFileName(self.file_name)
     self.reader.UpdateInformation()
 
+    self.current_dim = self.reader.GetDimensionality()
+
     self.min_timestep = 0
     self.max_timestep = 0
     range = self.reader.GetTimeStepRange()
@@ -216,6 +228,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.current_variables = []
     self.current_nodal_components = {}
     self.current_elemental_components = {}
+    self.component_index = -1
 
 
     cdp = vtk.vtkCompositeDataPipeline()
@@ -226,11 +239,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.geom.SetInputConnection(0,self.reader.GetOutputPort(0))
     self.geom.Update()
 
-    lut = vtk.vtkLookupTable()
-    lut.SetHueRange(0.667, 0.0)
-    lut.SetNumberOfColors(256)
-    lut.SetVectorModeToMagnitude()
-    lut.Build()
+    self.lut = vtk.vtkLookupTable()
+    self.lut.SetHueRange(0.667, 0.0)
+    self.lut.SetNumberOfColors(256)
+    self.lut.Build()
 
     self.data = self.geom.GetOutput()
 
@@ -252,7 +264,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.mapper = vtk.vtkPolyDataMapper()
     self.mapper.SetInput(self.data)
     self.mapper.ScalarVisibilityOn()
-    self.mapper.SetLookupTable(lut)
+    self.mapper.SetLookupTable(self.lut)
     
     self.actor = vtk.vtkActor()
     self.current_actors.append(self.actor)
@@ -274,7 +286,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_mapper = vtk.vtkPolyDataMapper()
     self.clip_mapper.SetInput(self.clip_data)
     self.clip_mapper.ScalarVisibilityOn()
-    self.clip_mapper.SetLookupTable(lut)
+    self.clip_mapper.SetLookupTable(self.lut)
 
     self.clip_actor = vtk.vtkActor()
     self.clip_actor.SetMapper(self.clip_mapper)
@@ -312,37 +324,81 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.clip_actor.GetProperty().EdgeVisibilityOff()
     self.vtkwidget.updateGL()
 
-  def _contourVariableSelected(self, value, force_update=False):
-    value_string = str(value)
+  def _fillComponentCombo(self, variable_name, components):
+    self.variable_component.clear()
+    self.variable_component.addItem('Magnitude')
+    num_components = components[variable_name]
+    if num_components > 1 and self.current_dim >= 2:
+      self.variable_component.setDisabled(False)
+      self.variable_component.addItem('X')
+      self.variable_component.addItem('Y')
+    else:
+      self.variable_component.setDisabled(True)
+      
+    if num_components > 1 and  self.current_dim == 3:
+      self.variable_component.addItem('Z')
 
-    if self.clip_groupbox.isChecked():
-      self.clipper.Modified()
-      self.clipper.Update()
-      self.clip_geom.Update()
-      self.clip_mapper.Update()
+    self._variableComponentSelected('Magnitude')
+    
+  def _contourVariableSelected(self, value):
+    value_string = str(value)
+    self.current_variable = value_string
 
     # Maybe results haven't been written yet...
     if not self.data.GetPointData().GetVectors(value_string) and not self.data.GetCellData().GetVectors(value_string):
       return
 
     if value_string in self.current_nodal_components:
-      self.mapper.SetScalarModeToUsePointFieldData()
-      self.mapper.SetScalarRange(self.data.GetPointData().GetVectors(value_string).GetRange(-1))
-      self.clip_mapper.SetScalarModeToUsePointFieldData()
-      self.clip_mapper.SetScalarRange(self.data.GetPointData().GetVectors(value_string).GetRange(-1))
+      self._fillComponentCombo(value_string, self.current_nodal_components)
     elif value_string in self.current_elemental_components:
-      self.mapper.SetScalarModeToUseCellFieldData()
-      self.mapper.SetScalarRange(self.data.GetCellData().GetVectors(value_string).GetRange(-1))
-      self.clip_mapper.SetScalarModeToUseCellFieldData()
-      self.clip_mapper.SetScalarRange(self.data.GetCellData().GetVectors(value_string).GetRange(-1))
-
-    self.mapper.SelectColorArray(value_string)
-    self.clip_mapper.SelectColorArray(value_string)
+      self._fillComponentCombo(value_string, self.current_elemental_components)
     
-    self.scalar_bar.SetTitle(value_string)
+  def _variableComponentSelected(self, value):
+    value_string = str(value)
+    if value_string == 'Magnitude':
+      self.lut.SetVectorModeToMagnitude()
+      self.component_index = -1
+    elif value_string == 'X':
+      self.lut.SetVectorModeToComponent()
+      self.lut.SetVectorComponent(0)
+      self.component_index = 0
+    elif value_string == 'Y':
+      self.lut.SetVectorModeToComponent()
+      self.lut.SetVectorComponent(1)
+      self.component_index = 1
+    elif value_string == 'Z':
+      self.lut.SetVectorModeToComponent()
+      self.lut.SetVectorComponent(2)
+      self.component_index = 2
+
+    self._updateContours()
+
+  def _updateContours(self):
+    if self.clip_groupbox.isChecked():
+      self.clipper.Modified()
+      self.clipper.Update()
+      self.clip_geom.Update()
+      self.clip_mapper.Update()
+
+    if self.current_variable in self.current_nodal_components:
+      self.mapper.SetScalarModeToUsePointFieldData()
+      self.mapper.SetScalarRange(self.data.GetPointData().GetVectors(self.current_variable).GetRange(self.component_index))
+      self.clip_mapper.SetScalarModeToUsePointFieldData()
+      self.clip_mapper.SetScalarRange(self.data.GetPointData().GetVectors(self.current_variable).GetRange(self.component_index))
+    elif self.current_variable in self.current_elemental_components:
+      self.mapper.SetScalarModeToUseCellFieldData()
+      self.mapper.SetScalarRange(self.data.GetCellData().GetVectors(self.current_variable).GetRange(self.component_index))
+      self.clip_mapper.SetScalarModeToUseCellFieldData()
+      self.clip_mapper.SetScalarRange(self.data.GetCellData().GetVectors(self.current_variable).GetRange(self.component_index))
+
+    self.mapper.SelectColorArray(self.current_variable)
+    self.clip_mapper.SelectColorArray(self.current_variable)
+    
+    self.scalar_bar.SetTitle(self.current_variable)
     self.renderer.AddActor2D(self.scalar_bar)
     self.vtkwidget.updateGL()
 
+    
   def _resetView(self):
     self.renderer.ResetCamera()
     self.vtkwidget.updateGL()
@@ -418,8 +474,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.reader.Update()
       self.geom.Update()
       self.current_bounds = self.actor.GetBounds()
-      self._contourVariableSelected(self.variable_contour.currentText(), True)
-
+      self._updateContours()
+      
   def _sliderTextboxReturn(self):
     self.time_slider.setSliderPosition(int(self.time_slider_textbox.text()))
     self._timeSliderReleased()
@@ -499,7 +555,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.vtkwidget.updateGL()
 
   def _clipSliderReleased(self):
-    self._contourVariableSelected(self.variable_contour.currentText(), True)
+    self._updateContours()
     self.vtkwidget.updateGL()    
   
   def _clipSliderMoved(self, value):
@@ -528,5 +584,5 @@ class ExodusResultRenderWidget(QtGui.QWidget):
                          position if direction == 'y' else old[1],
                          position if direction == 'z' else old[2])    
 
-    self._contourVariableSelected(self.variable_contour.currentText(), True)
+    self._updateContours()
     self.vtkwidget.updateGL()    
