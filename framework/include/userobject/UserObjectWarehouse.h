@@ -30,9 +30,9 @@ public:
   virtual ~UserObjectWarehouse();
 
   /**
-   *
-   * @param name
-   * @return
+   * Check if there is a user object with given name
+   * @param name The name of the object being checked for
+   * @return true if the object exists, false otherwise
    */
   bool hasUserObject(const std::string & name);
 

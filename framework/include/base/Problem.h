@@ -191,7 +191,16 @@ public:
     return dynamic_cast<const T &>(*user_object);
   }
 
-
+  /**
+   * Check if there if a user object of given name
+   * @param name The name of the user object being checked for
+   * @param tid  The thread ID
+   * @return true if the user object exists, false otherwise
+   */
+  bool hasUserObject(const std::string & name, THREAD_ID tid = 0)
+  {
+    return _user_objects[tid].hasUserObject(name);
+  }
 
   // Transient /////
   virtual void copySolutionsBackwards() = 0;
