@@ -278,24 +278,45 @@ class MeshRenderWidget(QtGui.QWidget):
       for actor_name, actor in self.current_block_actors.items():
         actor.hideEdges()
     self.vtkwidget.updateGL()
-    
-  def showBlockSelected(self, block_name):
+
+  def clearBlockComboBox(self):
+      self.highlight_block_combo.currentIndexChanged[str].disconnect(self.showBlockSelected)
+      self.highlight_block_combo.setCurrentIndex(0)
+      self.highlight_block_combo.currentIndexChanged[str].connect(self.showBlockSelected)
+
+  def clearSidesetComboBox(self):
+    self.highlight_sideset_combo.currentIndexChanged[str].disconnect(self.showSidesetSelected)
     self.highlight_sideset_combo.setCurrentIndex(0)
+    self.highlight_sideset_combo.currentIndexChanged[str].connect(self.showSidesetSelected)
+
+  def clearNodesetComboBox(self):
+    self.highlight_nodeset_combo.currentIndexChanged[str].disconnect(self.showNodesetSelected)
     self.highlight_nodeset_combo.setCurrentIndex(0)
+    self.highlight_nodeset_combo.currentIndexChanged[str].connect(self.showNodesetSelected)
+
+  def showBlockSelected(self, block_name):
     if block_name != '':
+      self.clearSidesetComboBox()
+      self.clearNodesetComboBox()
       self.highlightBlock(str(block_name))
+    else:
+      self.clearActors()
 
   def showSidesetSelected(self, sideset_name):
-    self.highlight_block_combo.setCurrentIndex(0)
-    self.highlight_nodeset_combo.setCurrentIndex(0)
     if sideset_name != '':
+      self.clearBlockComboBox()
+      self.clearNodesetComboBox()
       self.highlightBoundary(str(sideset_name))
+    else:
+      self.clearActors()
 
   def showNodesetSelected(self, nodeset_name):
-    self.highlight_block_combo.setCurrentIndex(0)
-    self.highlight_sideset_combo.setCurrentIndex(0)
     if nodeset_name != '':
+      self.clearBlockComboBox()
+      self.clearSidesetComboBox()
       self.highlightNodeset(str(nodeset_name))
+    else:
+      self.clearActors()
 
   def highlightBoundary(self, boundary):
     self.highlight_clear.setDisabled(False)
@@ -366,12 +387,7 @@ class MeshRenderWidget(QtGui.QWidget):
     
     self.vtkwidget.updateGL()
 
-  def clearHighlight(self):
-    self.highlight_block_combo.setCurrentIndex(0)
-    self.highlight_sideset_combo.setCurrentIndex(0)
-    self.highlight_nodeset_combo.setCurrentIndex(0)
-    self.highlight_clear.setDisabled(True)
-    
+  def clearActors(self):
     # Turn off all sidesets
     for actor_name, actor in self.current_sideset_actors.items():
       actor.hide()
@@ -386,3 +402,10 @@ class MeshRenderWidget(QtGui.QWidget):
       actor.goSolid()
         
     self.vtkwidget.updateGL()
+
+  def clearHighlight(self):
+    self.highlight_block_combo.setCurrentIndex(0)
+    self.highlight_sideset_combo.setCurrentIndex(0)
+    self.highlight_nodeset_combo.setCurrentIndex(0)
+    self.highlight_clear.setDisabled(True)
+    self.clearActors()
