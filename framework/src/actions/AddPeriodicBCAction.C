@@ -86,7 +86,7 @@ AddPeriodicBCAction::autoTranslationBoundaries()
       {
         if (dim_offset == 0)
           mooseError("Cannot wrap 'Z' direction when using a 2D mesh");
-        PeriodicBoundary p(RealVectorValue(0, 0, gen_mesh->dimensionWidth(2)));
+        PeriodicBoundary p(RealVectorValue(0., 0., gen_mesh->dimensionWidth(2)));
         p.myboundary = _paired_boundary_map[2][dim_offset][0];
         p.pairedboundary = _paired_boundary_map[2][dim_offset][1];
         setPeriodicVars(p, getParam<std::vector<std::string> >("variable"));
