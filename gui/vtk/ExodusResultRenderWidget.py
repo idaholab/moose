@@ -214,10 +214,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.reader.Update()
     self.current_variable_point_data = {}
     self.current_variables = []
+    self.current_nodal_components = {}
+    self.current_elemental_components = {}
 
-    num_variables = self.reader.GetNumberOfObjectArrays(vtk.vtkExodusIIReader.NODAL)
-    for var_num in xrange(num_variables):
-      self.current_variables.append(self.reader.GetObjectArrayName(vtk.vtkExodusIIReader.NODAL,var_num))
 
     cdp = vtk.vtkCompositeDataPipeline()
     vtk.vtkAlgorithm.SetDefaultExecutivePrototype(cdp)
@@ -230,15 +229,29 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     lut = vtk.vtkLookupTable()
     lut.SetHueRange(0.667, 0.0)
     lut.SetNumberOfColors(256)
-    lut.SetVectorModeToMagnitude()
     lut.Build()
 
     self.data = self.geom.GetOutput()
+
+    num_nodal_variables = self.data.GetPointData().GetNumberOfArrays()
+    for var_num in xrange(num_nodal_variables):
+      var_name = self.data.GetPointData().GetArrayName(var_num)
+      self.current_variables.append(var_name)
+      components = self.data.GetPointData().GetVectors(var_name).GetNumberOfComponents()
+      self.current_nodal_components[var_name] = components
+      # self.data.GetPointData().GetVectors(value_string).GetComponentName(0)
+
+    num_elemental_variables = self.data.GetCellData().GetNumberOfArrays()
+    for var_num in xrange(num_elemental_variables):
+      var_name = self.data.GetCellData().GetArrayName(var_num)
+      self.current_variables.append(var_name)
+      components = self.data.GetCellData().GetVectors(var_name).GetNumberOfComponents()
+      print 'Elemental:',var_name
+      self.current_elemental_components[var_name] = components      
     
     self.mapper = vtk.vtkPolyDataMapper()
     self.mapper.SetInput(self.data)
     self.mapper.ScalarVisibilityOn()
-    self.mapper.SetScalarModeToUsePointFieldData()
     self.mapper.SetLookupTable(lut)
     
     self.actor = vtk.vtkActor()
@@ -261,7 +274,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_mapper = vtk.vtkPolyDataMapper()
     self.clip_mapper.SetInput(self.clip_data)
     self.clip_mapper.ScalarVisibilityOn()
-    self.clip_mapper.SetScalarModeToUsePointFieldData()
     self.clip_mapper.SetLookupTable(lut)
 
     self.clip_actor = vtk.vtkActor()
@@ -310,12 +322,24 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.clip_mapper.Update()
 
     # Maybe results haven't been written yet...
-    if not self.data.GetPointData().GetVectors(value_string):
+    if not self.data.GetPointData().GetVectors(value_string) and not self.data.GetCellData().GetVectors(value_string):
       return
 
-    self.mapper.SetScalarRange(self.data.GetPointData().GetVectors(value_string).GetRange(-1))
+    print 'value:',value_string
+    print self.current_elemental_components
+    if value_string in self.current_nodal_components:
+      self.mapper.SetScalarModeToUsePointFieldData()
+      self.mapper.SetScalarRange(self.data.GetPointData().GetVectors(value_string).GetRange(-1))
+      self.clip_mapper.SetScalarModeToUsePointFieldData()
+      self.clip_mapper.SetScalarRange(self.data.GetPointData().GetVectors(value_string).GetRange(-1))
+    elif value_string in self.current_elemental_components:
+      print 'setting element value'
+      self.mapper.SetScalarModeToUseCellFieldData()
+      self.mapper.SetScalarRange(self.data.GetCellData().GetVectors(value_string).GetRange(-1))
+      self.clip_mapper.SetScalarModeToUseCellFieldData()
+      self.clip_mapper.SetScalarRange(self.data.GetCellData().GetVectors(value_string).GetRange(-1))
+
     self.mapper.SelectColorArray(value_string)
-    self.clip_mapper.SetScalarRange(self.data.GetPointData().GetVectors(value_string).GetRange(-1))
     self.clip_mapper.SelectColorArray(value_string)
     
     self.scalar_bar.SetTitle(value_string)
