@@ -244,8 +244,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     if value_string in self.exodus_result.current_nodal_components:
       self._fillComponentCombo(value_string, self.exodus_result.current_nodal_components)
-    elif value_string in self.current_elemental_components:
-      self._fillComponentCombo(value_string, self.current_elemental_components)
+    elif value_string in self.exodus_result.current_elemental_components:
+      self._fillComponentCombo(value_string, self.exodus_result.current_elemental_components)
     
   def _variableComponentSelected(self, value):
     value_string = str(value)
@@ -279,7 +279,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.exodus_result.mapper.SetScalarRange(self.exodus_result.data.GetPointData().GetVectors(self.current_variable).GetRange(self.component_index))
       self.exodus_result.clip_mapper.SetScalarModeToUsePointFieldData()
       self.exodus_result.clip_mapper.SetScalarRange(self.exodus_result.data.GetPointData().GetVectors(self.current_variable).GetRange(self.component_index))
-    elif self.current_variable in self.current_elemental_components:
+    elif self.current_variable in self.exodus_result.current_elemental_components:
       self.exodus_result.mapper.SetScalarModeToUseCellFieldData()
       self.exodus_result.mapper.SetScalarRange(self.exodus_result.data.GetCellData().GetVectors(self.current_variable).GetRange(self.component_index))
       self.exodus_result.clip_mapper.SetScalarModeToUseCellFieldData()
