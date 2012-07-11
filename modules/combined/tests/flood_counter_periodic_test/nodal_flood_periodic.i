@@ -75,6 +75,7 @@
     [./x]
       variable = u
       auto_direction = 'x y'
+    [../]
   [../]
 []
 
