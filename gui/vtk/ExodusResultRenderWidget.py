@@ -3,6 +3,7 @@ from PyQt4 import QtCore, QtGui
 import vtk
 import time
 from ExodusResult import ExodusResult
+import glob
 
 pathname = os.path.dirname(sys.argv[0])        
 pathname = os.path.abspath(pathname)
@@ -23,6 +24,16 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.plane.SetNormal(1, 0, 0)
 
     self.exodus_result = None
+    
+    # The multiple (from adaptivity)
+    self.exodus_results = []
+
+    self.timestep_to_exodus_result = {}
+    
+    self.file_name = None
+
+    # The multiple (from adaptivity) file names we know of
+    self.file_names = []
     
     self.execution_widget = execution_widget
     self.execution_widget.run_started.connect(self._runStarted)
@@ -375,6 +386,22 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self._timeSliderReleased()
 
   def _timestepBegin(self):
+    # Check to see if there are new exodus files with adapted timesteps in them.
+    if self.file_name:
+      base_stamp = os.path.getmtime(self.file_name)
+      for file_name in sorted(glob.glob(self.file_name + '-s*')):
+        file_stamp = os.path.getmtime(file_name)
+        if file_stamp >= base_stamp and file_name not in self.file_names:
+          self.file_names.append(file_name)
+          exodus_result = ExodusResult(self, self.plane)
+          exodus_result.setFileName(file_name)
+          self.exodus_results.append(exodus_result)
+          print exodus_result.min_timestep
+          print exodus_result.max_timestep
+          for timestep in xrange(exodus_result.min_timestep, exodus_result.max_timestep+1):
+            print timestep
+            self.timestep_to_exodus_result[timestep] = exodus_result
+      
     if not self.exodus_result:
       output_file_names = self.input_file_widget.getOutputFileNames()
 
@@ -382,8 +409,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
       for file_name in output_file_names:
         if '.e' in file_name and os.path.exists(file_name):
-          self.exodus_result = ExodusResult(self, self.renderer, self.plane)
+          self.file_name = file_name
+          self.exodus_result = ExodusResult(self, self.plane)
           self.exodus_result.setFileName(file_name)
+          self.renderer.AddActor(self.exodus_result.actor)
           self._drawEdgesChanged(self.draw_edges_checkbox.checkState())
 
           if self.first:
@@ -423,14 +452,19 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     
   def _runStarted(self):
     self.file_name = None
+    self.file_names = []
 
     if not self.exodus_result:
       return
-    
+
     for actor in self.exodus_result.current_actors:
       self.renderer.RemoveActor(actor)
 
     del self.exodus_result.current_actors[:]
+
+    self.exodus_result = None
+    self.exodus_results = []
+    self.timestep_to_exodus_result = {}
     
   def _runStopped(self):
     self._timestepBegin()

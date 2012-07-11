@@ -5,9 +5,8 @@ import time
 
 
 class ExodusResult:
-  def __init__(self, render_widget, renderer, plane):
+  def __init__(self, render_widget, plane):
     self.render_widget = render_widget
-    self.renderer = renderer
     self.plane = plane
 
     self.current_actors = []
@@ -78,7 +77,6 @@ class ExodusResult:
     self.actor = vtk.vtkActor()
     self.current_actors.append(self.actor)
     self.actor.SetMapper(self.mapper)
-    self.renderer.AddActor(self.actor)
     self.current_actor = self.actor
 
     self.clipper = vtk.vtkTableBasedClipDataSet()
