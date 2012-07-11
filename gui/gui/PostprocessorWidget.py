@@ -19,7 +19,6 @@ class PostprocessorWidget(QtGui.QWidget):
         
         # uses the postprocessor selected by the user to pass the information required for plotting
         
-        self.cwd = os.getcwd()
         self.comboWidget = QtGui.QComboBox(self)
         self.fillComboWidget()
         self.comboWidget.activated[str].connect(self.createPlot)
@@ -76,14 +75,14 @@ class PostprocessorWidget(QtGui.QWidget):
     def getFileName(self):
         
         output_item = self.input_file_widget.tree_widget.findItems("Output", QtCore.Qt.MatchExactly)[0]
-
-        self.currentFile = self.cwd +'/peacock_run_tmp_out.csv'
+        cwd = str(self.execute_widget.cwd_text.text())
+        self.currentFile = cwd +'/peacock_run_tmp_out.csv'
     
         if output_item:
             outputTable_data = output_item.table_data
             
             if 'file_base' in outputTable_data:
-                self.currentFile = self.cwd +'/'+ outputTable_data['file_base'] + '.csv'
+                self.currentFile = cwd +'/'+ outputTable_data['file_base'] + '.csv'
             
     
     def fillComboWidget(self):
