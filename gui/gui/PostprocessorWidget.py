@@ -58,11 +58,12 @@ class PostprocessorWidget(QtGui.QWidget):
 #        self.timer = QtCore.QTimer(self)
 #        self.timer.stop()
 #        self.timer2 = QtCore.QTimer(self)
+#        QtCore.QObject.connect(self.timer2, QtCore.SIGNAL("timeout()"), self.fillComboWidget)
 #        QtCore.QObject.connect(self.execute_widget.run_button, QtCore.SIGNAL("clicked()"), self.runClicked)
 #        QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.updatePlots)
 
         self.execute_widget.run_started.connect(self.clearClick)
-        self.execute_widget.timestep_begin.connect(self.updatePlots)
+        self.execute_widget.timestep_end.connect(self.updatePlots)
         self.execute_widget.run_stopped.connect(self.updatePlots)
 
         
@@ -128,7 +129,7 @@ class PostprocessorWidget(QtGui.QWidget):
         
         if self.currentFile and os.path.exists(self.currentFile):
             if os.path.getsize(self.currentFile) > 0:
-                self.data = numpy.genfromtxt(self.currentFile,delimiter = ',' , names = True)
+                self.data = numpy.genfromtxt(self.currentFile,delimiter = ',' , names = True , invalid_raise = False)
                 self.time = []
 
                 if self.data != None and len(self.data):        
@@ -160,7 +161,7 @@ class PostprocessorWidget(QtGui.QWidget):
     
     
     def openClick(self):
-        
+        self.first = True
         file_name = QtGui.QFileDialog.getOpenFileName(self, "Open CSV File", "~/", "CSV Files (*.csv)")
         if file_name:
             self.currentFile = str(file_name)
@@ -171,7 +172,7 @@ class PostprocessorWidget(QtGui.QWidget):
             self.plotDataDict = {}
             self.comboWidget.clear()
             self.fillComboWidget()
-            self.comboWidget.setCurrentIndex(-1)
+
     
     def clearClick(self):
         
