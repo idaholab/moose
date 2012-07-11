@@ -207,7 +207,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.old_contour = self.variable_contour.currentText()
     self.variable_contour.clear()
     for variable in self.exodus_result.current_variables:
-      self.variable_contour.addItem(variable)
+      if 'ObjectId' not in variable:
+        self.variable_contour.addItem(variable)
 
     # Try to restore back to the view of the variable we were looking at
     found_index = self.variable_contour.findText(self.old_contour)
