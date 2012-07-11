@@ -460,7 +460,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           self._updateControls()
 
 
-    if self.automatically_update:
+    if self.exodus_result and self.automatically_update:
       self._associateResultsWithTimesteps()
 #      self.exodus_result.reader.UpdateTimeInformation()
 #      range = self.exodus_result.reader.GetTimeStepRange()
