@@ -34,6 +34,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     # The multiple (from adaptivity) file names we know of
     self.file_names = []
+
+    self.current_max_timestep = 0
     
     self.execution_widget = execution_widget
     self.execution_widget.run_started.connect(self._runStarted)
@@ -374,8 +376,26 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     if textbox_string == '':
       textbox_string = str(self.exodus_result.min_timestep)
 
+    if int(textbox_string) in self.timestep_to_exodus_result:
+      for actor in self.exodus_result.current_actors:
+        self.renderer.RemoveActor(actor)
+      self.exodus_result = self.timestep_to_exodus_result[int(textbox_string)]
+      
+      if self.clip_groupbox.isChecked():
+        self.renderer.AddActor(self.exodus_result.clip_actor)
+        if self.draw_edges_checkbox.checkState() == QtCore.Qt.Checked:
+          self.exodus_result.clip_actor.GetProperty().EdgeVisibilityOn()
+        else:
+          self.exodus_result.clip_actor.GetProperty().EdgeVisibilityOff()
+      else:
+        self.renderer.AddActor(self.exodus_result.actor)
+        if self.draw_edges_checkbox.checkState() == QtCore.Qt.Checked:
+          self.exodus_result.actor.GetProperty().EdgeVisibilityOn()
+        else:
+          self.exodus_result.actor.GetProperty().EdgeVisibilityOff()
+
     if self.exodus_result.reader:
-      self.exodus_result.reader.SetTimeStep(int(textbox_string))
+      self.exodus_result.reader.SetTimeStep(self.timestep_to_timestep[int(textbox_string)])
       self.exodus_result.reader.Update()
       self.exodus_result.geom.Update()
       self.current_bounds = self.exodus_result.actor.GetBounds()
@@ -385,6 +405,19 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_slider.setSliderPosition(int(self.time_slider_textbox.text()))
     self._timeSliderReleased()
 
+  def _associateResultsWithTimesteps(self):
+    self.timestep_to_exodus_result = {}
+    self.timestep_to_timestep = {}
+    self.current_max_timestep = -1
+    for result in self.exodus_results:
+      result.reader.UpdateTimeInformation()
+      min = result.reader.GetTimeStepRange()[0]
+      max = result.reader.GetTimeStepRange()[1]
+      for timestep in xrange(min, max+1):
+        self.current_max_timestep += 1
+        self.timestep_to_exodus_result[self.current_max_timestep] = result
+        self.timestep_to_timestep[self.current_max_timestep] = timestep
+    
   def _timestepBegin(self):
     # Check to see if there are new exodus files with adapted timesteps in them.
     if self.file_name:
@@ -396,11 +429,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           exodus_result = ExodusResult(self, self.plane)
           exodus_result.setFileName(file_name)
           self.exodus_results.append(exodus_result)
-          print exodus_result.min_timestep
-          print exodus_result.max_timestep
-          for timestep in xrange(exodus_result.min_timestep, exodus_result.max_timestep+1):
-            print timestep
-            self.timestep_to_exodus_result[timestep] = exodus_result
       
     if not self.exodus_result:
       output_file_names = self.input_file_widget.getOutputFileNames()
@@ -412,6 +440,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           self.file_name = file_name
           self.exodus_result = ExodusResult(self, self.plane)
           self.exodus_result.setFileName(file_name)
+          self.exodus_results.append(self.exodus_result)
+          self.current_max_timestep = self.exodus_result.max_timestep
           self.renderer.AddActor(self.exodus_result.actor)
           self._drawEdgesChanged(self.draw_edges_checkbox.checkState())
 
@@ -430,16 +460,17 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
 
     if self.automatically_update:
-      self.exodus_result.reader.UpdateTimeInformation()
-      range = self.exodus_result.reader.GetTimeStepRange()
-      self.exodus_result.min_timestep = range[0]
-      self.exodus_result.max_timestep = range[1]
-      self.time_slider.setMinimum(self.exodus_result.min_timestep)
+      self._associateResultsWithTimesteps()
+#      self.exodus_result.reader.UpdateTimeInformation()
+#      range = self.exodus_result.reader.GetTimeStepRange()
+#      self.exodus_result.min_timestep = range[0]
+#      self.exodus_result.max_timestep = range[1]
+      self.time_slider.setMinimum(0)
 
       # Only automatically move forward if they're on the current step
       if self.time_slider.sliderPosition() == self.time_slider.maximum():
-        self.time_slider.setMaximum(self.exodus_result.max_timestep)
-        self.time_slider.setSliderPosition(self.exodus_result.max_timestep)
+        self.time_slider.setMaximum(self.current_max_timestep)
+        self.time_slider.setSliderPosition(self.current_max_timestep)
         self._timeSliderReleased()
         if self.clip_groupbox.isChecked():
           self._clipSliderReleased()
