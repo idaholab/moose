@@ -132,7 +132,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     file_names = []     
     file_base = ''
 
-    if oversampling_item:
+    if oversampling_item.checkState(0) == QtCore.Qt.Checked:
       output_data =  output_item.table_data
 
       if output_data:
@@ -141,7 +141,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         else:
           file_base = 'peacock_run_tmp_out_oversample'
       
-    elif output_item:
+    elif output_item.checkState(0) == QtCore.Qt.Checked:
       output_data =  output_item.table_data
 
       if output_data:
