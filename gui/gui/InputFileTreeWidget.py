@@ -126,17 +126,29 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     return None
 
   def getOutputFileNames(self):
-    output_data = self.getOutputItemData()
+    output_item = self.findChildItemWithName(self, 'Output')
+    oversampling_item = self.findChildItemWithName(output_item, 'OverSampling')
 
-    file_names = []
-
+    file_names = []     
     file_base = ''
 
-    if output_data:
-      if 'file_base' in output_data:
-        file_base = output_data['file_base']
-      else:
-        file_base = 'peacock_run_tmp_out'
+    if oversampling_item:
+      output_data =  output_item.table_data
+
+      if output_data:
+        if 'file_base' in output_data:
+          file_base = output_data['file_base'] + '_oversample'
+        else:
+          file_base = 'peacock_run_tmp_out_oversample'
+      
+    elif output_item:
+      output_data =  output_item.table_data
+
+      if output_data:
+        if 'file_base' in output_data:
+          file_base = output_data['file_base']
+        else:
+          file_base = 'peacock_run_tmp_out'
 
     type_to_extension = {'exodus':'.e', 'tecplot':'.plt'}
 
