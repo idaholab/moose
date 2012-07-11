@@ -49,15 +49,15 @@ class MPLPlotter(QtGui.QWidget):
         saveAction.triggered.connect(self.savePlot)
         #zoomAction = QtGui.QAction('Zoom', self)
         #panAction = QtGui.QAction('Pan', self)
-        #closeAction = QtGui.QAction('Close', self)
-        #closeAction.triggered.connect(self.closePlot)
+        closeAction = QtGui.QAction('Close', self)
+        closeAction.triggered.connect(self.closePlot)
         self.popMenu = QtGui.QMenu(self)
         self.popMenu.addAction(saveAction)
         #self.popMenu.addSeparator()
         #self.popMenu.addAction(zoomAction)
         #self.popMenu.addAction(panAction)
-        #self.popMenu.addSeparator()
-        #self.popMenu.addAction(closeAction)
+        self.popMenu.addSeparator()
+        self.popMenu.addAction(closeAction)
 
     
     def setPlotData(self, plotData, plotName):
@@ -83,4 +83,6 @@ class MPLPlotter(QtGui.QWidget):
         path = unicode(QtGui.QFileDialog.getSaveFileName(self, 'Save file', self.plotTitle,"Images (*.pdf)" ))
         if path:
             self.canvas.print_figure(path, dpi = 100)
+    def closePlot(self):
+        self.close()
         
