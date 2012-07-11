@@ -22,9 +22,6 @@ public:
 protected:
   virtual void computeProperties();
 
-  bool _has_temp;
-  VariableValue & _temp;
-
   const Real & _my_thermal_conductivity;
   Real _my_specific_heat;
 

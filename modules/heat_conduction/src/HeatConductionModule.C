@@ -11,7 +11,6 @@
 #include "HeatConduction.h"
 #include "HeatConductionImplicitEuler.h"
 #include "HeatConductionMaterial.h"
-#include "SiHeatConductionMaterial.h"
 #include "BulkCoolantBC.h"
 #include "ThermalContactAction.h"
 #include "HeatSource.h"
@@ -27,7 +26,6 @@ Elk::HeatConduction::registerObjects()
   registerBoundaryCondition(BulkCoolantBC);
   registerMaterial(GapConductance);
   registerMaterial(HeatConductionMaterial);
-  registerMaterial(SiHeatConductionMaterial);
   registerDiracKernel(GapHeatPointSourceMaster);
 }
 
