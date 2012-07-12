@@ -129,6 +129,8 @@ protected:
   const Elem * & _current_elem;
   /// Volume of the current element
   const Real & _current_elem_volume;
+  /// Volume of the current side
+  const Real & _current_side_volume;
 
   /// Current node (valid only for nodal kernels)
   const Node * & _current_node;
