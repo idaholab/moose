@@ -98,6 +98,17 @@ class InputFileWidget(QtGui.QWidget):
 
     self.menubar = self.peacock_ui.menuBar()
 
+    # build menu
+    self.file_menu = self.menubar.addMenu('&File')
+    open_file_action = QtGui.QAction("Open...", self)
+    open_file_action.setShortcut('Ctrl+O')
+    open_file_action.triggered.connect(self.click_open)
+    self.file_menu.addAction(open_file_action)
+    save_file_action = QtGui.QAction("Save...", self)
+    save_file_action.setShortcut('Ctrl+S')
+    save_file_action.triggered.connect(self.click_save)
+    self.file_menu.addAction(save_file_action)
+
     self.edit_menu = self.menubar.addMenu('&Edit')
     main_comment_action = QtGui.QAction("Main Comment", self)
     main_comment_action.triggered.connect(self._edit_main_comment)
