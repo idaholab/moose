@@ -66,13 +66,13 @@ SolidWall::addMooseObjects()
   std::vector<unsigned int> bnd_id(1, _boundary_id);
   {
     InputParameters params = validParams<OneDMassSolidWallBC>();
-    params.set<std::string>("variable") = Model::RHO;
+    params.set<NonlinearVariableName>("variable") = Model::RHO;
     params.set<std::vector<unsigned int> >("boundary") = bnd_id;
     _sim.addBoundaryCondition("OneDMassSolidWallBC", genName("bc", _id, "rho"), params);
   }
   {
     InputParameters params = validParams<OneDMomentumSolidWallBC>();
-    params.set<std::string>("variable") = Model::RHOU;
+    params.set<NonlinearVariableName>("variable") = Model::RHOU;
     params.set<std::vector<unsigned int> >("boundary") = bnd_id;
     //params.set<std::string>("eos_function") = Model::EOS_FUNCTION;
     params.set<std::string>("eos_function") = getParam<std::string>("eos_function");
@@ -88,7 +88,7 @@ SolidWall::addMooseObjects()
   if (_model_type == Model::EQ_MODEL_3)
   {
     InputParameters params = validParams<OneDEnergySolidWallBC>();
-    params.set<std::string>("variable") = Model::RHOE;
+    params.set<NonlinearVariableName>("variable") = Model::RHOE;
     params.set<std::vector<unsigned int> >("boundary") = bnd_id;
     //params.set<std::string>("eos_function") = Model::EOS_FUNCTION;
     params.set<std::string>("eos_function") = getParam<std::string>("eos_function");
