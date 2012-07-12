@@ -23,6 +23,7 @@
 #include "parameters.h"
 
 #include "Moose.h"
+#include "MooseTypes.h"
 
 class MooseObject;
 class GlobalParamsAction;
@@ -301,6 +302,31 @@ namespace libMesh
     for (unsigned int i=0; i<_value.size(); i++)
       os << _value[i] << " ";
   }
+
+  template<>
+  inline
+  void InputParameters::Parameter<std::vector<VariableName> >::print (std::ostream& os) const
+  {
+    for (unsigned int i=0; i<_value.size(); i++)
+      os << _value[i] << " ";
+  }
+
+  template<>
+  inline
+  void InputParameters::Parameter<std::vector<NonlinearVariableName> >::print (std::ostream& os) const
+  {
+    for (unsigned int i=0; i<_value.size(); i++)
+      os << _value[i] << " ";
+  }
+
+  template<>
+  inline
+  void InputParameters::Parameter<std::vector<AuxVariableName> >::print (std::ostream& os) const
+  {
+    for (unsigned int i=0; i<_value.size(); i++)
+      os << _value[i] << " ";
+  }
+
 
   template<>
   inline
