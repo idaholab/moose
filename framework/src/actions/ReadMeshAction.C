@@ -38,7 +38,7 @@ InputParameters validParams<ReadMeshAction>()
    */
   params.set<std::string>("type") = "MooseMesh";
 
-  params.addParam<FileName>("file", ReadMeshAction::no_file_supplied, "The name of the mesh file to read (required unless using dynamic generation)");
+  params.addParam<MeshFileName>("file", ReadMeshAction::no_file_supplied, "The name of the mesh file to read (required unless using dynamic generation)");
   params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
   params.addParam<bool>("nemesis", false, "If nemesis=true and file=foo.e, actually reads foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, where N = # CPUs, with NemesisIO.");
   params.addParam<std::vector<unsigned int> >("ghosted_boundaries", "Boundaries to be ghosted if using Nemesis");
@@ -60,7 +60,7 @@ ReadMeshAction::act()
   std::string mesh_type = getParam<std::string>("type");
   if (mesh_type == std::string("MooseMesh"))
   {
-    std::string mesh_file = getParam<FileName>("file");
+    std::string mesh_file = getParam<MeshFileName>("file");
     if (mesh_file != no_file_supplied)
       readMesh(mesh_file);
   }

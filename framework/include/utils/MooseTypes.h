@@ -32,6 +32,7 @@
 
 // Create Classes
 DerivativeStringClass(FileName);
+DerivativeStringClass(MeshFileName);
 DerivativeStringClass(VariableName);
 DerivativeStringClass(NonlinearVariableName);
 DerivativeStringClass(AuxVariableName);

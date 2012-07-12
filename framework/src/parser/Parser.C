@@ -543,6 +543,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
 
       InputParameters::Parameter<std::string> * string_param = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
       InputParameters::Parameter<FileName> * file_name_param = dynamic_cast<InputParameters::Parameter<FileName>*>(it->second);
+      InputParameters::Parameter<MeshFileName> * mesh_file_name_param = dynamic_cast<InputParameters::Parameter<MeshFileName>*>(it->second);
       InputParameters::Parameter<VariableName> * var_name_param = dynamic_cast<InputParameters::Parameter<VariableName>*>(it->second);
       InputParameters::Parameter<NonlinearVariableName> * nl_var_name_param = dynamic_cast<InputParameters::Parameter<NonlinearVariableName>*>(it->second);
       InputParameters::Parameter<AuxVariableName> * aux_var_name_param = dynamic_cast<InputParameters::Parameter<AuxVariableName>*>(it->second);
@@ -582,6 +583,8 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setScalarParameter<std::string>(full_name, it->first, string_param, in_global, global_params_block);
       else if (file_name_param)
         setScalarParameter<FileName>(full_name, it->first, file_name_param, in_global, global_params_block);
+      else if (mesh_file_name_param)
+        setScalarParameter<MeshFileName>(full_name, it->first, mesh_file_name_param, in_global, global_params_block);
       else if (var_name_param)
         setScalarParameter<VariableName>(full_name, it->first, var_name_param, in_global, global_params_block);
       else if (nl_var_name_param)
