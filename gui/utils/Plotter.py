@@ -33,9 +33,12 @@ class MPLPlotter(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)  
         
         
-            
+        self.plotData = plotData
+        self.plotName = plotName
         self.canvas = PlotWidget()
-        self.setPlotData(plotData,plotName)
+        self.plotTitle = plotName + ' Postprocessor'
+        self.getPlotColor()
+        self.setPlotData(self.plotData, self.plotName)
         self.vbox = QtGui.QVBoxLayout()
         self.vbox.addWidget(self.canvas)
         self.setLayout(self.vbox)
@@ -43,19 +46,42 @@ class MPLPlotter(QtGui.QWidget):
         # set button context menu policy
         self.canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(self.canvas, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_context_menu)
+        
+        # create color menu
+        self.colorMenu = QtGui.QMenu('Plot Color', self)
+        royalBlueLine = QtGui.QAction('Blue',self)
+        royalBlueLine.triggered.connect(self.changeRoyalBlue)
+        orchidLine = QtGui.QAction('Magenta',self)
+        orchidLine.triggered.connect(self.changeOrchid)
+        tomatoLine = QtGui.QAction('Red',self)
+        tomatoLine.triggered.connect(self.changeTomato)
+        goldLine = QtGui.QAction('Yellow',self)
+        goldLine.triggered.connect(self.changeGold)
+        limeGreenLine = QtGui.QAction('Green',self)
+        limeGreenLine.triggered.connect(self.changeLimeGreen)
+        turquoiseLine = QtGui.QAction('Cyan',self)
+        turquoiseLine.triggered.connect(self.changeTurquoise)
+        blackLine = QtGui.QAction('Black',self)
+        blackLine.triggered.connect(self.changeBlack)
+        self.colorMenu.addAction(royalBlueLine)
+        self.colorMenu.addAction(orchidLine)
+        self.colorMenu.addAction(tomatoLine)
+        self.colorMenu.addAction(goldLine)
+        self.colorMenu.addAction(limeGreenLine)
+        self.colorMenu.addAction(turquoiseLine)
+        self.colorMenu.addAction(blackLine)
+
+
 
         # create context menu
-        saveAction = QtGui.QAction('Save', self)
+        saveAction = QtGui.QAction('Save Plot', self)
         saveAction.triggered.connect(self.savePlot)
-        #zoomAction = QtGui.QAction('Zoom', self)
-        #panAction = QtGui.QAction('Pan', self)
-        closeAction = QtGui.QAction('Close', self)
+        closeAction = QtGui.QAction('Close Plot', self)
         closeAction.triggered.connect(self.closePlot)
         self.popMenu = QtGui.QMenu(self)
         self.popMenu.addAction(saveAction)
-        #self.popMenu.addSeparator()
-        #self.popMenu.addAction(zoomAction)
-        #self.popMenu.addAction(panAction)
+        self.popMenu.addSeparator()
+        self.popMenu.addMenu(self.colorMenu)
         self.popMenu.addSeparator()
         self.popMenu.addAction(closeAction)
 
@@ -65,11 +91,9 @@ class MPLPlotter(QtGui.QWidget):
         self.plotName = plotName
         self.xData = self.plotData[0]
         self.yData = self.plotData[1]
-        self.plotTitle = plotName + ' Postprocessor'
-        
         
         # MPL plots
-        self.canvas.axes.plot(self.xData, self.yData, 'r')
+        self.canvas.axes.plot(self.xData, self.yData, self.plotColor)
         self.canvas.axes.set_xlabel('time')
         self.canvas.axes.set_ylabel(self.plotName)
         self.canvas.axes.set_title(self.plotTitle)
@@ -85,4 +109,41 @@ class MPLPlotter(QtGui.QWidget):
             self.canvas.print_figure(path, dpi = 100)
     def closePlot(self):
         self.close()
+    
+    def changeRoyalBlue(self):
+        self.plotColor = "RoyalBlue"
+        self.setPlotData(self.plotData,self.plotName)
+    def changeOrchid(self):
+        self.plotColor = "Magenta"
+        self.setPlotData(self.plotData,self.plotName)
+    def changeTomato(self):
+        self.plotColor = "Tomato"
+        self.setPlotData(self.plotData,self.plotName)
+    def changeGold(self):
+        self.plotColor = "Gold"
+        self.setPlotData(self.plotData,self.plotName)
+    def changeLimeGreen(self):
+        self.plotColor = "LimeGreen"
+        self.setPlotData(self.plotData,self.plotName)
+    def changeTurquoise(self):
+        self.plotColor = "DarkTurquoise"
+        self.setPlotData(self.plotData,self.plotName)
+    def changeBlack(self):
+        self.plotColor = "Black"
+        self.setPlotData(self.plotData,self.plotName)
+
+
+    def getPlotColor(self):
+        if (self.plotName[0] in ('a','A','f','F','k','K','p','P','u','U','z','Z')):
+            self.plotColor = "LimeGreen"
+        elif (self.plotName[0] in ('b','B','g','G','l','L','q','Q','v','V')):
+            self.plotColor = "DarkTurquoise"
+        elif (self.plotName[0] in ('c','C','h','H','m','M','r','R','w','W')):
+            self.plotColor = "RoyalBlue"
+        elif (self.plotName[0] in ('d','D','i','I','n','N','s','S','x','X')):
+            self.plotColor = "Magenta"
+        elif (self.plotName[0] in ('e','E','j','J','o','O','t','T','y','Y')):
+            self.plotColor = "Tomato"
+        else:
+            self.plotColor = "Gold"
         
