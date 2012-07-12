@@ -2,6 +2,7 @@
 #define CONTACTACTION_H
 
 #include "Action.h"
+#include "MooseTypes.h"
 
 class ContactAction;
 
@@ -18,9 +19,9 @@ public:
 private:
   const std::string _master;
   const std::string _slave;
-  const std::string _disp_x;
-  const std::string _disp_y;
-  const std::string _disp_z;
+  const NonlinearVariableName _disp_x;
+  const NonlinearVariableName _disp_y;
+  const NonlinearVariableName _disp_z;
   const Real _penalty;
   const Real _tension_release;
   const std::string _model;

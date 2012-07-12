@@ -17,12 +17,12 @@ InputParameters validParams<ThermalContactAction>()
   params.addRequiredParam<std::string>("type", "A string representing the Moose object that will be used for heat conduction over the gap");
   params.addParam<std::string>("gap_type", "GapValueAux", "A string representing the Moose object that will be used for computing the gap siz\
 e");
-  params.addRequiredParam<std::string>("variable", "The variable for thermal contact");
+  params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
-  params.addParam<std::string>("disp_x", "The x displacement");
-  params.addParam<std::string>("disp_y", "The y displacement");
-  params.addParam<std::string>("disp_z", "The z displacement");
+  params.addParam<NonlinearVariableName>("disp_x", "The x displacement");
+  params.addParam<NonlinearVariableName>("disp_y", "The y displacement");
+  params.addParam<NonlinearVariableName>("disp_z", "The z displacement");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<std::string>("order", "FIRST", "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
@@ -66,32 +66,32 @@ ThermalContactAction::addBcs()
   _parser->extractParams(_name, bc_params);
   params += bc_params;
 
-  params.set<std::string>("variable") = getParam<std::string>("variable");
-  std::vector<std::string> vars(1);
+  params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("variable");
+  std::vector<AuxVariableName> vars(1);
   vars[0] = PENETRATION_VAR_NAME;
-  params.set<std::vector<std::string> >("gap_distance") = vars;
+  params.set<std::vector<AuxVariableName> >("gap_distance") = vars;
   vars[0] = GAP_VALUE_VAR_NAME;
-  params.set<std::vector<std::string> >("gap_temp") = vars;
+  params.set<std::vector<AuxVariableName> >("gap_temp") = vars;
   std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
   params.set<std::vector<BoundaryName> >("boundary") = bnds;
 
   if (isParamValid("disp_x"))
   {
     params.addCoupledVar("disp_x", "The x displacement");
-    std::vector<std::string> disp_x(1, getParam<std::string>("disp_x"));
-    params.set< std::vector<std::string> >("disp_x") = disp_x;
+    std::vector<NonlinearVariableName> disp_x(1, getParam<NonlinearVariableName>("disp_x"));
+    params.set< std::vector<NonlinearVariableName> >("disp_x") = disp_x;
   }
   if (isParamValid("disp_y"))
   {
     params.addCoupledVar("disp_y", "The y displacement");
-    std::vector<std::string> disp_y(1, getParam<std::string>("disp_y"));
-    params.set< std::vector<std::string> >("disp_y") = disp_y;
+    std::vector<NonlinearVariableName> disp_y(1, getParam<NonlinearVariableName>("disp_y"));
+    params.set< std::vector<NonlinearVariableName> >("disp_y") = disp_y;
   }
   if (isParamValid("disp_z"))
   {
     params.addCoupledVar("disp_z", "The z displacement");
-    std::vector<std::string> disp_z(1, getParam<std::string>("disp_z"));
-    params.set< std::vector<std::string> >("disp_z") = disp_z;
+    std::vector<NonlinearVariableName> disp_z(1, getParam<NonlinearVariableName>("disp_z"));
+    params.set< std::vector<NonlinearVariableName> >("disp_z") = disp_z;
   }
 
   // add it to the warehouse
@@ -175,12 +175,14 @@ ThermalContactAction::addAuxBcs()
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
     InputParameters & params = moose_object_action->getObjectParams();
-    params.set<std::string>("variable") = GAP_VALUE_VAR_NAME;
+    params.set<AuxVariableName>("variable") = GAP_VALUE_VAR_NAME;
     std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
     params.set<std::vector<BoundaryName> >("boundary") = bnds;
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
-    std::vector<std::string> vars(1, getParam<std::string>("variable"));
-    params.set<std::vector<BoundaryName> >("paired_variable") = vars;
+
+    std::vector<VariableName> vars(1, getParam<NonlinearVariableName>("variable"));
+    params.set<std::vector<VariableName> >("paired_variable") = vars;
+    
     params.set<std::string>("order") = getParam<std::string>("order");
     if (isParamValid("tangential_tolerance"))
     {
@@ -200,7 +202,7 @@ ThermalContactAction::addAuxBcs()
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
     InputParameters & params = moose_object_action->getObjectParams();
-    params.set<std::string>("variable") = PENETRATION_VAR_NAME;
+    params.set<AuxVariableName>("variable") = PENETRATION_VAR_NAME;
     params.set<std::vector<BoundaryName> >("boundary") = bnds;
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
     if (isParamValid("tangential_tolerance"))
@@ -239,11 +241,11 @@ ThermalContactAction::addMaterials()
     _parser->extractParams(_name, material_params);
     params += material_params;
 
-    params.set<std::vector<std::string> >("variable") = std::vector<std::string>(1, getParam<std::string>("variable"));
-    params.set<std::vector<std::string> >("gap_temp") = std::vector<std::string>(1, GAP_VALUE_VAR_NAME);
-    std::vector<std::string> vars(1);
+    params.set<std::vector<VariableName> >("variable") = std::vector<VariableName>(1, getParam<NonlinearVariableName>("variable"));
+    params.set<std::vector<AuxVariableName> >("gap_temp") = std::vector<AuxVariableName>(1, GAP_VALUE_VAR_NAME);
+    std::vector<AuxVariableName> vars(1);
     vars[0] = PENETRATION_VAR_NAME;
-    params.set<std::vector<std::string> >("gap_distance") = vars;
+    params.set<std::vector<AuxVariableName> >("gap_distance") = vars;
 
     std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
     params.set<std::vector<BoundaryName> >("boundary") = bnds;
@@ -274,7 +276,7 @@ ThermalContactAction::addDiracKernels()
   mooseAssert (moose_object_action, "Dynamic Cast failed");
 
   InputParameters & params = moose_object_action->getObjectParams();
-  params.set<std::string>("variable") = getParam<std::string>("variable");
+  params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("variable");
   params.set<BoundaryName>("boundary") = getParam<BoundaryName>("master");
   params.set<BoundaryName>("slave") = getParam<BoundaryName>("slave");
   if (isParamValid("tangential_tolerance"))

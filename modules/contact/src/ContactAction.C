@@ -11,9 +11,9 @@ InputParameters validParams<ContactAction>()
   InputParameters params = validParams<Action>();
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
-  params.addRequiredParam<std::string>("disp_x", "The x displacement");
-  params.addRequiredParam<std::string>("disp_y", "The y displacement");
-  params.addParam<std::string>("disp_z", "", "The z displacement");
+  params.addRequiredParam<NonlinearVariableName>("disp_x", "The x displacement");
+  params.addRequiredParam<NonlinearVariableName>("disp_y", "The y displacement");
+  params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  Must be positive.");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
@@ -26,9 +26,9 @@ ContactAction::ContactAction(const std::string & name, InputParameters params) :
   Action(name, params),
   _master(getParam<BoundaryName>("master")),
   _slave(getParam<BoundaryName>("slave")),
-  _disp_x(getParam<std::string>("disp_x")),
-  _disp_y(getParam<std::string>("disp_y")),
-  _disp_z(getParam<std::string>("disp_z")),
+  _disp_x(getParam<NonlinearVariableName>("disp_x")),
+  _disp_y(getParam<NonlinearVariableName>("disp_y")),
+  _disp_z(getParam<NonlinearVariableName>("disp_z")),
   _penalty(getParam<Real>("penalty")),
   _tension_release(getParam<Real>("tension_release")),
   _model(getParam<std::string>("model")),
@@ -51,7 +51,7 @@ ContactAction::act()
 
   // Create master objects
   action_params.set<std::string>("type") = "ContactMaster";
-  std::vector<std::string> vars;
+  std::vector<NonlinearVariableName> vars;
   vars.push_back(_disp_x);
   vars.push_back(_disp_y);
   vars.push_back(_disp_z);
@@ -95,7 +95,7 @@ ContactAction::act()
 
     params.set<bool>("use_displaced_mesh") = true;
     params.set<unsigned int>("component") = i;
-    params.set<std::string>("variable") = vars[i];
+    params.set<NonlinearVariableName>("variable") = vars[i];
 
     // add it to the warehouse
     _awh.addActionBlock(action);
@@ -139,7 +139,7 @@ ContactAction::act()
 
     params.set<bool>("use_displaced_mesh") = true;
     params.set<unsigned int>("component") = i;
-    params.set<std::string>("variable") = vars[i];
+    params.set<NonlinearVariableName>("variable") = vars[i];
 
     // add it to the warehouse
     _awh.addActionBlock(action);

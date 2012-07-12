@@ -8,11 +8,11 @@ template<>
 InputParameters validParams<TensorMechanicsAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::string>("disp_x", "", "The x displacement");
-  params.addParam<std::string>("disp_y", "", "The y displacement");
-  params.addParam<std::string>("disp_z", "", "The z displacement");
-  params.addParam<std::string>("disp_r", "", "The r displacement");
-  params.addParam<std::string>("temp", "", "The te mperature");
+  params.addParam<NonlinearVariableName>("disp_x", "", "The x displacement");
+  params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");
+  params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
+  params.addParam<NonlinearVariableName>("disp_r", "", "The r displacement");
+  params.addParam<NonlinearVariableName>("temp", "", "The te mperature");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
   // changed this from true to false
@@ -22,11 +22,11 @@ InputParameters validParams<TensorMechanicsAction>()
 
 TensorMechanicsAction::TensorMechanicsAction(const std::string & name, InputParameters params) :
   Action(name, params),
-  _disp_x(getParam<std::string>("disp_x")),
-  _disp_y(getParam<std::string>("disp_y")),
-  _disp_z(getParam<std::string>("disp_z")),
-  _disp_r(getParam<std::string>("disp_r")),
-  _temp(getParam<std::string>("temp"))
+  _disp_x(getParam<NonlinearVariableName>("disp_x")),
+  _disp_y(getParam<NonlinearVariableName>("disp_y")),
+  _disp_z(getParam<NonlinearVariableName>("disp_z")),
+  _disp_r(getParam<NonlinearVariableName>("disp_r")),
+  _temp(getParam<NonlinearVariableName>("temp"))
 {
 }
 
@@ -104,7 +104,7 @@ TensorMechanicsAction::act()
     name << i;
 
     params.set<unsigned int>("component") = i;
-    params.set<std::string>("variable") = vars[i];
+    params.set<NonlinearVariableName>("variable") = vars[i];
 
     _problem->addKernel(type, name.str(), params);
   }

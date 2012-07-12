@@ -2,6 +2,7 @@
 #define PLENUMPRESSUREACTION_H
 
 #include "Action.h"
+#include "MooseTypes.h"
 
 class PlenumPressureAction;
 
@@ -17,9 +18,9 @@ public:
 
 private:
   const std::vector<std::string> _boundary;
-  const std::string _disp_x;
-  const std::string _disp_y;
-  const std::string _disp_z;
+  const NonlinearVariableName _disp_x;
+  const NonlinearVariableName _disp_y;
+  const NonlinearVariableName _disp_z;
   const Real _initial_pressure;
   const std::string _material_input;
   const Real _R;

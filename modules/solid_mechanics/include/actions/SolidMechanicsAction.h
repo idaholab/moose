@@ -2,6 +2,7 @@
 #define SOLIDMECHANICSACTION_H
 
 #include "Action.h"
+#include "MooseTypes.h"
 
 class SolidMechanicsAction;
 
@@ -16,11 +17,11 @@ public:
   virtual void act();
 
 private:
-  const std::string _disp_x;
-  const std::string _disp_y;
-  const std::string _disp_z;
-  const std::string _disp_r;
-  const std::string _temp;
+  const NonlinearVariableName _disp_x;
+  const NonlinearVariableName _disp_y;
+  const NonlinearVariableName _disp_z;
+  const NonlinearVariableName _disp_r;
+  const NonlinearVariableName _temp;
 };
 
 

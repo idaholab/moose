@@ -9,9 +9,9 @@ InputParameters validParams<PlenumPressureAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
-  params.addRequiredParam<std::string>("disp_x", "The x displacement");
-  params.addRequiredParam<std::string>("disp_y", "The y displacement");
-  params.addParam<std::string>("disp_z", "", "The z displacement");
+  params.addRequiredParam<NonlinearVariableName>("disp_x", "The x displacement");
+  params.addRequiredParam<NonlinearVariableName>("disp_y", "The y displacement");
+  params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
 
   params.addParam<Real>("initial_pressure", 0, "The initial pressure in the plenum.  If not given, a zero initial pressure will be used.");
   params.addParam<std::string>("material_input", "", "The name of the postprocessor value that holds the amount of material injected into the plenum.");
@@ -33,9 +33,9 @@ InputParameters validParams<PlenumPressureAction>()
 PlenumPressureAction::PlenumPressureAction(const std::string & name, InputParameters params) :
   Action(name, params),
   _boundary(getParam<std::vector<BoundaryName> >("boundary")),
-  _disp_x(getParam<std::string>("disp_x")),
-  _disp_y(getParam<std::string>("disp_y")),
-  _disp_z(getParam<std::string>("disp_z")),
+  _disp_x(getParam<NonlinearVariableName>("disp_x")),
+  _disp_y(getParam<NonlinearVariableName>("disp_y")),
+  _disp_z(getParam<NonlinearVariableName>("disp_z")),
   _initial_pressure(getParam<Real>("initial_pressure")),
   _material_input(getParam<std::string>("material_input")),
   _R(getParam<Real>("R")),
@@ -72,7 +72,7 @@ PlenumPressureAction::act()
     ++dim;
   }
 
-  std::vector<std::string> vars;
+  std::vector<NonlinearVariableName> vars;
   vars.push_back(_disp_x);
   vars.push_back(_disp_y);
   vars.push_back(_disp_z);
@@ -107,7 +107,7 @@ PlenumPressureAction::act()
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
     params.set<int>("component") = i;
-    params.set<std::string>("variable") = vars[i];
+    params.set<NonlinearVariableName>("variable") = vars[i];
 
     _problem->addBoundaryCondition(_kernel_name, name.str(), params);
   }

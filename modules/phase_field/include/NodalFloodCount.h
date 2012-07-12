@@ -75,7 +75,6 @@ protected:
 
   Real _threshold;
   MooseMesh & _mesh;
-  MooseVariable & _moose_var;
   unsigned int _var_number;
 
   std::map<unsigned int, int> _bubble_map;

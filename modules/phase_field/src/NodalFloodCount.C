@@ -34,7 +34,6 @@ template<>
 InputParameters validParams<NodalFloodCount>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
-  params.addRequiredParam<std::string>("variable", "The variable to be monitored");
   params.addParam<Real>("threshold", 0.5, "The threshold value of the bubble boundary");
   return params;
 }
@@ -43,8 +42,7 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     ElementPostprocessor(name, parameters),
     _threshold(getParam<Real>("threshold")),
     _mesh(_subproblem.mesh()),
-    _moose_var(_subproblem.getVariable(0, getParam<std::string>("variable"))),
-    _var_number(_moose_var.number()),
+    _var_number(_var.number()),
     _region_count(0),
     _pbs(NULL)
 {}
@@ -254,7 +252,7 @@ NodalFloodCount::flood(const Node *node, unsigned int region)
     return;
 
   // This node hasn't been marked - is it in a bubble?
-  if (_moose_var.getNodalValue(*node) < _threshold)
+  if (_var.getNodalValue(*node) < _threshold)
   {
     // No - mark and return
     _bubble_map[node_id] = 0;

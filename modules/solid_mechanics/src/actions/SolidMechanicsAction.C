@@ -123,7 +123,7 @@ SolidMechanicsAction::act()
       name << i;
 
       params.set<unsigned int>("component") = i;
-      params.set<std::string>("variable") = vars[i];
+      params.set<NonlinearVariableName>("variable") = vars[i];
       params.set<std::vector<SubdomainName> >("block") = blocks;
 
       _problem->addKernel(type, name.str(), params);
