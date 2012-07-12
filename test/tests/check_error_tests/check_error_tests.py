@@ -140,7 +140,7 @@ invalid_elemental_to_nodal_couple_test = {
 
 same_name_variable_test = {
   INPUT : 'same_name_variable_test.i',
-  EXPECT_ERR : "Variable with name '\S+' already exist."
+  EXPECT_ERR : "Cannot have an auxiliary variable and a nonlinear variable with the same name!"
 }
 
 override_name_variable_test = {
@@ -162,4 +162,5 @@ dyanmic_check_name_block_mismatch_test = { INPUT : 'check_dynamic_name_block_mis
 
 dyanmic_check_name_boundary_mismatch_test = { INPUT : 'check_dynamic_name_boundary_mismatch.i',
                                               EXPECT_ERR : "You must supply the same number of boundary ids and names parameters" }
-
+add_aux_variable_multiple_test = { INPUT : 'add_aux_variable_multiple_test.i',
+                                   EXPECT_ERR : "AuxVariable with name 'q' already exists but is of a differing type!" }

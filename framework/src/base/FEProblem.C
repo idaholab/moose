@@ -778,8 +778,17 @@ FEProblem::subdomainSetupSide(SubdomainID subdomain, THREAD_ID tid)
 void
 FEProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
-  if (hasVariable(var_name))
-    mooseError("Variable with name '" << var_name << "' already exists.");
+  if (_aux.hasVariable(var_name))
+    mooseError("Cannot have an auxiliary variable and a nonlinear variable with the same name!");
+
+  if (_nl.hasVariable(var_name))
+  {
+    const Variable & var = _nl.sys().variable(_nl.sys().variable_number(var_name));
+    if(var.type() != type)
+      mooseError("Variable with name '" << var_name << "' already exists but is of a differing type!");
+
+    return;
+  }
 
   _nl.addVariable(var_name, type, scale_factor, active_subdomains);
   if (_displaced_problem)
@@ -874,8 +883,18 @@ FEProblem::addConstraint(const std::string & c_name, const std::string & name, I
 void
 FEProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
+  if (_nl.hasVariable(var_name))
+    mooseError("Cannot have an auxiliary variable and a nonlinear variable with the same name!");
+
   if (_aux.hasVariable(var_name))
-    mooseError("Variable with name '" << var_name << "' already exists.");
+  {
+    const Variable & var = _aux.sys().variable(_aux.sys().variable_number(var_name));
+    if(var.type() != type)
+      mooseError("AuxVariable with name '" << var_name << "' already exists but is of a differing type!");
+
+    return;
+  }
+
 
   _aux.addVariable(var_name, type, 1.0, active_subdomains);
   if (_displaced_problem)

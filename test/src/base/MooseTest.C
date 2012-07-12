@@ -88,6 +88,9 @@
 
 #include "ConvDiffMetaAction.h"
 
+// From MOOSE
+#include "AddVariableAction.h"
+
 
 
 MooseTestApp::MooseTestApp(int argc, char *argv[]) :
@@ -202,4 +205,5 @@ MooseTestApp::associateSyntax()
   // and add more
   registerAction(ConvDiffMetaAction, "meta_action");
   _syntax.registerActionSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
+  _syntax.registerActionSyntax("AddVariableAction", "MoreAuxVariables/*", "add_variable");
 }
