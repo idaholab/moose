@@ -25,5 +25,5 @@ Elk::Contact::associateSyntax(Syntax & syntax)
 {
   syntax.registerActionSyntax("ContactAction", "Contact/*");
 
-  registerAction(ContactAction, "meta_action");
+  registerAction(ContactAction, "add_dg_kernel");
 }

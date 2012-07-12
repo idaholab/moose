@@ -21,4 +21,7 @@ increment_options_test = { INPUT : 'increment_options_test.i',
 pressure_component_test = { INPUT : 'pressure_component.i',
                             EXPECT_ERR : "Invalid component given for fred: 123456789."}
 
+contact_displacements_test = { INPUT : 'contact_displacements.i',
+                               EXPECT_ERR : "Contact requires updated coordinates.  Use the 'displacements"}
+
 

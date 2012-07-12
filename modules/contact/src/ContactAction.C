@@ -1,7 +1,6 @@
 #include "ContactAction.h"
 
-#include "ActionFactory.h"
-#include "MooseObjectAction.h"
+#include "Factory.h"
 #include "FEProblem.h"
 #include "Parser.h"
 
@@ -39,6 +38,11 @@ ContactAction::ContactAction(const std::string & name, InputParameters params) :
 void
 ContactAction::act()
 {
+  if (!_problem->getDisplacedProblem())
+  {
+    mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the Mesh block.");
+  }
+
   // Determine number of dimensions
   unsigned int dim(2);
   if (_disp_z != "")
@@ -46,33 +50,23 @@ ContactAction::act()
     ++dim;
   }
 
-  InputParameters action_params = ActionFactory::instance()->getValidParams("AddDiracKernelAction");
-  action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
+  std::string short_name(_name);
+  // Chop off "Contact/"
+  short_name.erase(0, 8);
 
-  // Create master objects
-  action_params.set<std::string>("type") = "ContactMaster";
   std::vector<NonlinearVariableName> vars;
   vars.push_back(_disp_x);
   vars.push_back(_disp_y);
   vars.push_back(_disp_z);
-  std::string short_name(_name);
-  // Chop off "Contact/"
-  short_name.erase(0, 8);
-  for (unsigned int i(0); i < dim; ++i)
+
   {
-    std::stringstream name;
-    name << "DiracKernels/";
-    name << short_name;
-    name << "_master_";
-    name << i;
-    action_params.set<std::string>("name") = name.str();
-    Action *action = ActionFactory::instance()->create("AddDiracKernelAction", action_params);
+    InputParameters params = Factory::instance()->getValidParams("ContactMaster");
 
-    MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
-    mooseAssert (moose_object_action, "Dynamic Cast failed");
+    // Extract global params
+    const std::string syntax = _parser->getSyntaxByAction("ContactMaster", "");
+    _parser->extractParams(syntax, params);
 
-    InputParameters & params = moose_object_action->getObjectParams();
-
+    // Create master objects
     params.set<std::string>("model") = _model;
     params.set<std::string>("order") = _order;
     params.set<BoundaryName>("boundary") = _master;
@@ -94,30 +88,31 @@ ContactAction::act()
     }
 
     params.set<bool>("use_displaced_mesh") = true;
-    params.set<unsigned int>("component") = i;
-    params.set<NonlinearVariableName>("variable") = vars[i];
 
-    // add it to the warehouse
-    _awh.addActionBlock(action);
+    for (unsigned int i(0); i < dim; ++i)
+    {
+      std::stringstream name;
+      name << short_name;
+      name << "_master_";
+      name << i;
+
+      params.set<unsigned int>("component") = i;
+      params.set<NonlinearVariableName>("variable") = vars[i];
+
+      _problem->addDiracKernel("ContactMaster",
+                               name.str(),
+                               params);
+    }
   }
 
-  // Create slave objects
-  action_params.set<std::string>("type") = "SlaveConstraint";
-  for (unsigned int i(0); i < dim; ++i)
   {
-    std::stringstream name;
-    name << "DiracKernels/";
-    name << short_name;
-    name << "_slave_";
-    name << i;
-    action_params.set<std::string>("name") = name.str();
-    Action *action = ActionFactory::instance()->create("AddDiracKernelAction", action_params);
+    InputParameters params = Factory::instance()->getValidParams("SlaveConstraint");
 
-    MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
-    mooseAssert (moose_object_action, "Dynamic Cast failed");
+    // Extract global params
+    const std::string syntax = _parser->getSyntaxByAction("SlaveConstraint", "");
+    _parser->extractParams(syntax, params);
 
-    InputParameters & params = moose_object_action->getObjectParams();
-
+    // Create slave objects
     params.set<std::string>("model") = _model;
     params.set<std::string>("order") = _order;
     params.set<BoundaryName>("boundary") = _slave;
@@ -138,11 +133,21 @@ ContactAction::act()
     }
 
     params.set<bool>("use_displaced_mesh") = true;
-    params.set<unsigned int>("component") = i;
-    params.set<NonlinearVariableName>("variable") = vars[i];
 
-    // add it to the warehouse
-    _awh.addActionBlock(action);
+    for (unsigned int i(0); i < dim; ++i)
+    {
+      std::stringstream name;
+      name << short_name;
+      name << "_slave_";
+      name << i;
+
+      params.set<unsigned int>("component") = i;
+      params.set<NonlinearVariableName>("variable") = vars[i];
+
+      _problem->addDiracKernel("SlaveConstraint",
+                               name.str(),
+                               params);
+    }
   }
 
 }

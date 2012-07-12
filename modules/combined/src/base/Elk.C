@@ -34,4 +34,3 @@ Elk::associateSyntax(Syntax & syntax)
   Contact::associateSyntax(syntax);
   HeatConduction::associateSyntax(syntax);
 }
-
