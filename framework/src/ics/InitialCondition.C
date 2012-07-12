@@ -22,7 +22,7 @@ template<>
 InputParameters validParams<InitialCondition>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<std::string>("variable", "The variable this InitialCondtion is supposed to provide values for.");
+  params.addParam<VariableName>("variable", "The variable this InitialCondtion is supposed to provide values for.");
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids or names of the blocks (subdomain) that this initial condition will be applied to");
 
   params.addPrivateParam<std::string>("built_by_action", "add_ic");
@@ -37,7 +37,7 @@ InitialCondition::InitialCondition(const std::string & name, InputParameters par
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
     _coord_sys(_subproblem.coordSystem(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _var(_sys.getVariable(_tid, parameters.get<VariableName>("variable"))),
 
     _current_elem(_var.currentElem())
 {

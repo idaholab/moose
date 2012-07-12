@@ -40,7 +40,7 @@
 #include "InputFileFormatter.h"
 #include "YAMLFormatter.h"
 
-#include "FileName.h"
+#include "MooseTypes.h"
 
 // libMesh
 #include "getpot.h"
@@ -540,8 +540,13 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       InputParameters::Parameter<bool> * bool_param = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
       InputParameters::Parameter<RealVectorValue> * real_vec_val_param = dynamic_cast<InputParameters::Parameter<RealVectorValue>*>(it->second);
       InputParameters::Parameter<RealTensorValue> * real_tensor_val_param = dynamic_cast<InputParameters::Parameter<RealTensorValue>*>(it->second);
+
       InputParameters::Parameter<std::string> * string_param = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
       InputParameters::Parameter<FileName> * file_name_param = dynamic_cast<InputParameters::Parameter<FileName>*>(it->second);
+      InputParameters::Parameter<VariableName> * var_name_param = dynamic_cast<InputParameters::Parameter<VariableName>*>(it->second);
+      InputParameters::Parameter<NonlinearVariableName> * nl_var_name_param = dynamic_cast<InputParameters::Parameter<NonlinearVariableName>*>(it->second);
+      InputParameters::Parameter<AuxVariableName> * aux_var_name_param = dynamic_cast<InputParameters::Parameter<AuxVariableName>*>(it->second);
+
       InputParameters::Parameter<MooseEnum> * enum_param = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(it->second);
       InputParameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<InputParameters::Parameter<std::vector<Real> >*>(it->second);
       InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
@@ -549,7 +554,11 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       InputParameters::Parameter<std::vector<SubdomainID>  > * vec_subdomain_id_param  = dynamic_cast<InputParameters::Parameter<std::vector<SubdomainID> >*>(it->second);
       InputParameters::Parameter<std::vector<BoundaryID>  > * vec_boundary_id_param  = dynamic_cast<InputParameters::Parameter<std::vector<BoundaryID> >*>(it->second);
       InputParameters::Parameter<std::vector<bool>  > * vec_bool_param  = dynamic_cast<InputParameters::Parameter<std::vector<bool> >*>(it->second);
+
       InputParameters::Parameter<std::vector<std::string> > * vec_string_param = dynamic_cast<InputParameters::Parameter<std::vector<std::string> >*>(it->second);
+      InputParameters::Parameter<std::vector<VariableName> > * vec_var_name_param = dynamic_cast<InputParameters::Parameter<std::vector<VariableName> >*>(it->second);
+      InputParameters::Parameter<std::vector<NonlinearVariableName> > * vec_nl_var_name_param = dynamic_cast<InputParameters::Parameter<std::vector<NonlinearVariableName> >*>(it->second);
+      InputParameters::Parameter<std::vector<AuxVariableName> > * vec_aux_var_name_param = dynamic_cast<InputParameters::Parameter<std::vector<AuxVariableName> >*>(it->second);
 
 
       if (real_param)
@@ -573,6 +582,12 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setScalarParameter<std::string>(full_name, it->first, string_param, in_global, global_params_block);
       else if (file_name_param)
         setScalarParameter<FileName>(full_name, it->first, file_name_param, in_global, global_params_block);
+      else if (var_name_param)
+        setScalarParameter<VariableName>(full_name, it->first, var_name_param, in_global, global_params_block);
+      else if (nl_var_name_param)
+        setScalarParameter<NonlinearVariableName>(full_name, it->first, nl_var_name_param, in_global, global_params_block);
+      else if (aux_var_name_param)
+        setScalarParameter<AuxVariableName>(full_name, it->first, aux_var_name_param, in_global, global_params_block);
       else if (enum_param)
         setScalarParameter<MooseEnum>(full_name, it->first, enum_param, in_global, global_params_block);
       else if (vec_real_param)
@@ -589,6 +604,12 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setVectorParameter<bool>(full_name, it->first, vec_bool_param, in_global, global_params_block);
       else if (vec_string_param)
         setVectorParameter<std::string>(full_name, it->first, vec_string_param, in_global, global_params_block);
+      else if (vec_var_name_param)
+        setVectorParameter<VariableName>(full_name, it->first, vec_var_name_param, in_global, global_params_block);
+      else if (vec_nl_var_name_param)
+        setVectorParameter<NonlinearVariableName>(full_name, it->first, vec_nl_var_name_param, in_global, global_params_block);
+      else if (vec_aux_var_name_param)
+        setVectorParameter<AuxVariableName>(full_name, it->first, vec_aux_var_name_param, in_global, global_params_block);
     }
   }
 }

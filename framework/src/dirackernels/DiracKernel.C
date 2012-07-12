@@ -27,7 +27,7 @@ template<>
 InputParameters validParams<DiracKernel>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
+  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this kernel operates on");
 
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_dirac_kernel");
@@ -50,7 +50,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
     _coord_sys(_subproblem.coordSystem(_tid)),

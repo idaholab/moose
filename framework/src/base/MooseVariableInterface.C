@@ -16,6 +16,7 @@
 #include "Moose.h"
 #include "Problem.h"
 #include "SubProblem.h"
+#include "MooseTypes.h"
 
 MooseVariableInterface::MooseVariableInterface(InputParameters & parameters, bool nodal) :
     _nodal(nodal)
@@ -24,7 +25,8 @@ MooseVariableInterface::MooseVariableInterface(InputParameters & parameters, boo
 
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 
-  _variable = &problem.getVariable(tid, parameters.get<std::string>("variable"));
+  _variable = &problem.getVariable(tid, parameters.getMooseType("variable"));
+
   _mvi_assembly = &problem.assembly(tid);
 }
 

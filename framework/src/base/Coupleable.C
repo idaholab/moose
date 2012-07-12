@@ -30,9 +30,9 @@ Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
        ++iter)
   {
     std::string name = *iter;
-    if (parameters.get<std::vector<std::string> >(*iter) != std::vector<std::string>())
+    if (parameters.getVecMooseType(*iter) != std::vector<std::string>())
     {
-      std::vector<std::string> vars = parameters.get<std::vector<std::string> >(*iter);
+      std::vector<std::string> vars = parameters.getVecMooseType(*iter);
       for (unsigned int i = 0; i < vars.size(); i++)
       {
         std::string coupled_var_name = vars[i];
@@ -289,9 +289,9 @@ ScalarCoupleable::ScalarCoupleable(InputParameters & parameters)
        ++iter)
   {
     std::string name = *iter;
-    if (parameters.get<std::vector<std::string> >(*iter) != std::vector<std::string>())
+    if (parameters.getVecMooseType(*iter) != std::vector<std::string>())
     {
-      std::vector<std::string> vars = parameters.get<std::vector<std::string> >(*iter);
+      std::vector<std::string> vars = parameters.getVecMooseType(*iter);
       for (unsigned int i = 0; i < vars.size(); i++)
       {
         std::string coupled_var_name = vars[i];

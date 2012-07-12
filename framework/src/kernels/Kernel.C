@@ -27,9 +27,9 @@ InputParameters validParams<Kernel>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
-  params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
+  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this kernel operates on");
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that this kernel will be applied to");
-  params.addParam<std::vector<std::string> >("save_in", "The name of auxiliary variables to save this Kernel's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
+  params.addParam<std::vector<AuxVariableName> >("save_in", "The name of auxiliary variables to save this Kernel's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
 
   // testing, dude
   params.addPrivateParam<bool>("use_displaced_mesh", false);
@@ -55,7 +55,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
 
@@ -82,7 +82,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _grad_zero(_problem._grad_zero[_tid]),
     _second_zero(_problem._second_zero[_tid]),
 
-    _save_in_strings(parameters.get<std::vector<std::string> >("save_in"))
+    _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in"))
 {
   _save_in.resize(_save_in_strings.size());
 

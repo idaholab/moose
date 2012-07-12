@@ -16,6 +16,7 @@
 #define SETUPRESIDUALDEBUGACTION_H
 
 #include "Action.h"
+#include "MooseTypes.h"
 
 class SetupResidualDebugAction;
 
@@ -34,7 +35,7 @@ public:
   virtual void act();
 
 protected:
-  std::vector<std::string> _show_var_residual;
+  std::vector<NonlinearVariableName> _show_var_residual;
 };
 
 

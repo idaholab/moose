@@ -28,6 +28,7 @@
 #include "Assembly.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"
+#include "MooseTypes.h"
 
 // libMesh
 #include "fe.h"
@@ -36,8 +37,6 @@
 class MooseMesh;
 class Problem;
 class SubProblem;
-
-
 class Kernel;
 
 template<>
@@ -132,7 +131,7 @@ protected:
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
   std::vector<MooseVariable*> _save_in;
-  std::vector<std::string> _save_in_strings;
+  std::vector<AuxVariableName> _save_in_strings;
 
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();

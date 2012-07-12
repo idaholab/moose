@@ -16,12 +16,13 @@
 #include "ElementPostprocessor.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"
+#include "MooseTypes.h"
 
 template<>
 InputParameters validParams<ElementPostprocessor>()
 {
   InputParameters params = validParams<Postprocessor>();
-  params.addRequiredParam<std::string>("variable", "The name of the variable that this postprocessor operates on");
+  params.addRequiredParam<VariableName>("variable", "The name of the variable that this postprocessor operates on");
   std::vector<std::string> everywhere(1);
   everywhere[0] = "ANY_BLOCK_ID";
   params.addParam<std::vector<SubdomainName> >("block", everywhere, "block ID or name where the postprocessor works");
@@ -36,7 +37,7 @@ ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParame
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
     _blocks(parameters.get<std::vector<std::string> >("block")),
-    _var(_subproblem.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _q_point(_subproblem.points(_tid)),
     _qrule(_subproblem.qRule(_tid)),
     _JxW(_subproblem.JxW(_tid)),

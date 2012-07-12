@@ -21,13 +21,13 @@ template<>
 InputParameters validParams<SetupResidualDebugAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::vector<std::string> >("show_var_residual", "Variables we will display the residual for");
+  params.addParam<std::vector<NonlinearVariableName> >("show_var_residual", "Variables we will display the residual for");
   return params;
 }
 
 SetupResidualDebugAction::SetupResidualDebugAction(const std::string & name, InputParameters parameters) :
     Action(name, parameters),
-    _show_var_residual(getParam<std::vector<std::string> >("show_var_residual"))
+    _show_var_residual(getParam<std::vector<NonlinearVariableName> >("show_var_residual"))
 {
 }
 
@@ -41,9 +41,9 @@ SetupResidualDebugAction::act()
   _problem->getNonlinearSystem().debuggingResiduals(true);
 
   // debug variable residuals
-  for (std::vector<std::string>::const_iterator it = _show_var_residual.begin(); it != _show_var_residual.end(); ++it)
+  for (std::vector<NonlinearVariableName>::const_iterator it = _show_var_residual.begin(); it != _show_var_residual.end(); ++it)
   {
-    std::string var_name = *it;
+    NonlinearVariableName var_name = *it;
 
     // add aux-variable
     MooseVariable & var = _problem->getVariable(0, var_name);
@@ -64,7 +64,7 @@ SetupResidualDebugAction::act()
     std::string kern_name = kern_ss.str();
 
     InputParameters params = Factory::instance()->getValidParams("DebugResidualAux");
-    params.set<std::string>("variable") = aux_var_name;
+    params.set<AuxVariableName>("variable") = aux_var_name;
     params.set<std::string>("debug_variable") = var.name();
     params.set<std::string>("execute_on") = "residual";
     _problem->addAuxKernel("DebugResidualAux", kern_name, params);

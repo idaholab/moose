@@ -15,6 +15,7 @@
 #include "AddICAction.h"
 #include "Parser.h"
 #include "FEProblem.h"
+#include "MooseTypes.h"
 
 template<>
 InputParameters validParams<AddICAction>()
@@ -37,6 +38,6 @@ AddICAction::act()
 
   // The variable name will be the second to last element in the path name
   std::string & var_name = elements[elements.size()-2];
-  _moose_object_pars.set<std::string>("variable") = var_name;
+  _moose_object_pars.set<VariableName>("variable") = var_name;
   _problem->addInitialCondition(_type, getShortName(), _moose_object_pars);
 }

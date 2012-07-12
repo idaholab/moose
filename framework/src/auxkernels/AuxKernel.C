@@ -18,6 +18,7 @@
 #include "Moose.h"
 #include "SubProblem.h"
 #include "AuxiliarySystem.h"
+#include "MooseTypes.h"
 
 //libmesh includes
 #include "numeric_vector.h"
@@ -29,7 +30,7 @@ InputParameters validParams<AuxKernel>()
   InputParameters params = validParams<MooseObject>();
   params.addParam<std::string>("execute_on", "residual", "Set to (residual|timestep|timestep_begin) to execute only at that moment");
 
-  params.addRequiredParam<std::string>("variable", "The name of the variable that this object applies to");
+  params.addRequiredParam<AuxVariableName>("variable", "The name of the variable that this object applies to");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   // For use on the boundary only
   params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this AuxBC applies");
@@ -42,9 +43,9 @@ InputParameters validParams<AuxKernel>()
 AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
-    Coupleable(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<std::string>("variable")).feType().family == LAGRANGE), // horrible
+    Coupleable(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).feType().family == LAGRANGE), // horrible
     ScalarCoupleable(parameters),
-    MooseVariableInterface(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<std::string>("variable")).feType().family == LAGRANGE), // horrible
+    MooseVariableInterface(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).feType().family == LAGRANGE), // horrible
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     TransientInterface(parameters),
@@ -58,7 +59,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _aux_sys(*parameters.get<AuxiliarySystem *>("_aux_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
 
-    _var(_aux_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _var(_aux_sys.getVariable(_tid, parameters.get<AuxVariableName>("variable"))),
     _nodal(_var.feType().family == LAGRANGE),
     _bnd(parameters.have_parameter<unsigned int>("_boundary_id")),
 

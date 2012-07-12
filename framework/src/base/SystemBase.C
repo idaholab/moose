@@ -19,6 +19,7 @@
 #include "Conversion.h"
 #include "Parser.h"
 #include "AllLocalDofIndicesThread.h"
+#include "MooseTypes.h"
 
 // libMesh
 #include "quadrature_gauss.h"
@@ -286,7 +287,7 @@ SystemBase::addInitialCondition(const std::string & ic_name, const std::string &
   parameters.set<SubProblem *>("_subproblem") = &_subproblem;
   parameters.set<SystemBase *>("_sys") = this;
 
-  const std::string & var_name = parameters.get<std::string>("variable");
+  const std::string & var_name = parameters.get<VariableName>("variable");
   const std::vector<SubdomainName> & blocks = parameters.get<std::vector<SubdomainName> >("block");
 
   for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
@@ -310,7 +311,7 @@ SystemBase::addScalarInitialCondition(const std::string & ic_name, const std::st
   parameters.set<SubProblem *>("_subproblem") = &_subproblem;
   parameters.set<SystemBase *>("_sys") = this;
 
-  const std::string & var_name = parameters.get<std::string>("variable");
+  const std::string & var_name = parameters.get<VariableName>("variable");
 
   for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
   {

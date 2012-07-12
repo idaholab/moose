@@ -14,6 +14,7 @@
 
 #include "InputParameters.h"
 #include "Moose.h"
+#include "MooseTypes.h"
 
 InputParameters emptyInputParameters()
 {
@@ -211,3 +212,48 @@ InputParameters::type(const std::string &name)
     return _values[name]->type();
 }
 
+std::string
+InputParameters::getMooseType(const std::string &name) const
+{
+  std::string var;
+
+  if (have_parameter<VariableName>(name))
+    var = get<VariableName>(name);
+  else if (have_parameter<NonlinearVariableName>(name))
+    var = get<NonlinearVariableName>(name);
+  else if (have_parameter<AuxVariableName>(name))
+    var = get<AuxVariableName>(name);
+  else if (have_parameter<std::string>(name))
+    var = get<std::string>(name);
+
+  return var;
+}
+
+std::vector<std::string>
+InputParameters::getVecMooseType(const std::string &name) const
+{
+  std::vector<std::string> svars;
+
+  if (have_parameter<std::vector<VariableName> >(name))
+  {
+    std::vector<VariableName> vars = get<std::vector<VariableName> >(name);
+    std::copy(vars.begin(), vars.end(), std::back_inserter(svars));
+  }
+  else if (have_parameter<std::vector<NonlinearVariableName> >(name))
+  {
+    std::vector<NonlinearVariableName> vars = get<std::vector<NonlinearVariableName> >(name);
+    std::copy(vars.begin(), vars.end(), std::back_inserter(svars));
+  }
+  else if (have_parameter<std::vector<AuxVariableName> >(name))
+  {
+    std::vector<AuxVariableName> vars = get<std::vector<AuxVariableName> >(name);
+    std::copy(vars.begin(), vars.end(), std::back_inserter(svars));
+  }
+  else if (have_parameter<std::vector<std::string> >(name))
+  {
+    std::vector<std::string> vars = get<std::vector<std::string> >(name);
+    std::copy(vars.begin(), vars.end(), std::back_inserter(svars));
+  }
+
+  return svars;
+}

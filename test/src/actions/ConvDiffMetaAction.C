@@ -25,7 +25,7 @@ template<>
 InputParameters validParams<ConvDiffMetaAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<std::vector<std::string> >("variables", "The names of the convection and diffusion variables in the simulation");
+  params.addRequiredParam<std::vector<NonlinearVariableName> >("variables", "The names of the convection and diffusion variables in the simulation");
 
   return params;
 }
@@ -41,7 +41,7 @@ ConvDiffMetaAction::act()
   Action *action;
   MooseObjectAction *moose_object_action;
 
-  std::vector<std::string> variables = getParam<std::vector<std::string> > ("variables");
+  std::vector<NonlinearVariableName> variables = getParam<std::vector<NonlinearVariableName> > ("variables");
 
 //  std::cerr << "Acting on " << getParam<std::string>("built_by_action") << "\n\n";
 
@@ -89,7 +89,7 @@ ConvDiffMetaAction::act()
   mooseAssert (moose_object_action, "Dynamic Cast failed");
   {
     InputParameters & params = moose_object_action->getObjectParams();
-    params.set<std::string>("variable") = variables[0];
+    params.set<NonlinearVariableName>("variable") = variables[0];
     // add it to the warehouse
     _awh.addActionBlock(action);
   }
@@ -102,7 +102,7 @@ ConvDiffMetaAction::act()
   mooseAssert (moose_object_action, "Dynamic Cast failed");
   {
     InputParameters & params = moose_object_action->getObjectParams();
-    params.set<std::string>("variable") = variables[1];
+    params.set<NonlinearVariableName>("variable") = variables[1];
   }
   // add it to the warehouse
   _awh.addActionBlock(action);
@@ -116,7 +116,7 @@ ConvDiffMetaAction::act()
   {
     std::vector<std::string> vel_vec_variable;
     InputParameters & params = moose_object_action->getObjectParams();
-    params.set<std::string>("variable") = variables[0];
+    params.set<NonlinearVariableName>("variable") = variables[0];
     vel_vec_variable.push_back(variables[1]);
     params.set<std::vector<std::string> >("some_variable") = vel_vec_variable;
 

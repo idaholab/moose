@@ -109,6 +109,13 @@ public:
   void addCoupledVar(const std::string &name, const std::string &doc_string);
 
   /**
+   * Utility functions for retrieving on of the MooseTypes variables into the common "string" base class.
+   * Scalar and Vector versions are supplied
+   */
+  std::string getMooseType(const std::string &name) const;
+  std::vector<std::string> getVecMooseType(const std::string &name) const;
+
+  /**
    * This method adds a coupled variable name pair.  The parser will look for variable
    * name pair in the input file and can return a reference to the storage location
    * for the coupled variable.  If the coupled variable is not supplied in the input

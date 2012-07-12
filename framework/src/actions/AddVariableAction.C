@@ -111,7 +111,7 @@ AddVariableAction::act()
     {
       // built a ScalarConstantIC object
       InputParameters params = Factory::instance()->getValidParams("ScalarConstantIC");
-      params.set<std::string>("variable") = var_name;
+      params.set<VariableName>("variable") = var_name;
       params.set<Real>("value") = initial;
       _problem->addInitialCondition("ScalarConstantIC", "ic", params);
     }
@@ -119,7 +119,7 @@ AddVariableAction::act()
     {
       // built a ConstantIC object
       InputParameters params = Factory::instance()->getValidParams("ConstantIC");
-      params.set<std::string>("variable") = var_name;
+      params.set<VariableName>("variable") = var_name;
       params.set<Real>("value") = initial;
       _problem->addInitialCondition("ConstantIC", "ic", params);
     }

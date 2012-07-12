@@ -18,7 +18,7 @@
 #include "MooseMesh.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
-#include "FileName.h"
+#include "MooseTypes.h"
 
 // libMesh includes
 #include "exodusII_io.h"

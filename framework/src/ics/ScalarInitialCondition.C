@@ -20,7 +20,7 @@ template<>
 InputParameters validParams<ScalarInitialCondition>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<std::string>("variable", "The variable this initial condition is supposed to provide values for.");
+  params.addParam<VariableName>("variable", "The variable this initial condition is supposed to provide values for.");
 
   params.addPrivateParam<std::string>("built_by_action", "add_ic");
   return params;
@@ -32,7 +32,7 @@ ScalarInitialCondition::ScalarInitialCondition(const std::string & name, InputPa
     _sys(*getParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getScalarVariable(_tid, parameters.get<std::string>("variable")))
+    _var(_sys.getScalarVariable(_tid, parameters.get<VariableName>("variable")))
 {
 }
 

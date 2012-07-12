@@ -23,7 +23,7 @@ InputParameters validParams<BoundaryCondition>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
-  params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
+  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this boundary condition applies to");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
 
@@ -45,7 +45,7 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
     _boundary_id(parameters.get<BoundaryID>("_boundary_id")),
