@@ -291,19 +291,15 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       item.setCheckState(QtCore.Qt.Checked)
       self.block_view_model.appendRow(item)
 
-    print self.exodus_result.reader.GetApplyDisplacements()
-
     # Try to restore back to the view of the variable we were looking at
     found_index = self.variable_contour.findText(self.old_contour)
     if found_index != -1:
       self.variable_contour.setCurrentIndex(found_index)
     else: # If this variable doesn't exist then we are probably running a new simulation... try to reset the camera
-      self._resetView()
+      self._resetView()      
       
-      
-    self.time_slider.setMinimum(self.exodus_result.min_timestep)
-    self.time_slider.setMaximum(self.exodus_result.max_timestep)
-    self.time_slider.setSliderPosition(self.exodus_result.max_timestep)
+    self.time_slider.setMinimum(0)
+    self.time_slider.setMaximum(self.current_max_timestep)
     
   def _blockViewItemChanged(self, item):
     if item.checkState() == QtCore.Qt.Checked:
@@ -443,9 +439,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
       # If the slider is at the end then start over
       self.qt_app.processEvents()
-      time.sleep(0.01)
+      time.sleep(0.02)
       self.qt_app.processEvents()
-      print self.time_slider.sliderPosition(), self.time_slider.maximum()
       if self.time_slider.sliderPosition() == self.time_slider.maximum():
         self.time_slider.setSliderPosition(0)
         
@@ -602,7 +597,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           self._clipSliderReleased()
         self.vtkwidget.updateGL()
       else:
-        self.time_slider.setMaximum(self.exodus_result.max_timestep)
+        self.time_slider.setMaximum(self.current_max_timestep)
 
   def _timestepEnd(self):
     pass
