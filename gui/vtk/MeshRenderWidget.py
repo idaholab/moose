@@ -42,8 +42,8 @@ class MeshRenderWidget(QtGui.QWidget):
     self.left_controls_layout = QtGui.QVBoxLayout()
 
     self.block_view_group_box = QtGui.QGroupBox('Show Blocks')
-    self.block_view_group_box.setMaximumWidth(200)
-    self.block_view_group_box.setMaximumHeight(200)
+    self.block_view_group_box.setMaximumWidth(150)
+#    self.block_view_group_box.setMaximumHeight(200)
     
     self.block_view_layout = QtGui.QVBoxLayout()
     self.block_view_list = QtGui.QListView()
@@ -59,13 +59,18 @@ class MeshRenderWidget(QtGui.QWidget):
 
     self.right_controls_layout = QtGui.QVBoxLayout()
     self.controls_layout.addLayout(self.right_controls_layout)
-    self.highlight_layout = QtGui.QHBoxLayout()
 
     self.view_mesh_checkbox = QtGui.QCheckBox('View Mesh')
     self.view_mesh_checkbox.setToolTip('Toggle viewing of mesh elements')
     self.view_mesh_checkbox.setCheckState(QtCore.Qt.Checked)
     self.view_mesh_checkbox.stateChanged.connect(self.viewMeshCheckboxChanged)
-    self.highlight_layout.addWidget(self.view_mesh_checkbox)
+    self.right_controls_layout.addWidget(self.view_mesh_checkbox)
+
+    self.highlight_group_box = QtGui.QGroupBox('Highlight')
+    self.highlight_group_box.setMaximumHeight(70)
+    self.highlight_layout = QtGui.QHBoxLayout()
+    self.highlight_group_box.setLayout(self.highlight_layout)
+    self.right_controls_layout.addWidget(self.highlight_group_box)
 
     self.highlight_block_label = QtGui.QLabel('Block:')
     self.highlight_block_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
@@ -97,8 +102,6 @@ class MeshRenderWidget(QtGui.QWidget):
     self.highlight_clear.clicked.connect(self.clearHighlight)
     self.highlight_layout.addWidget(self.highlight_clear)
     
-    self.right_controls_layout.addLayout(self.highlight_layout)
-
     self.plane = vtk.vtkPlane()
     self.plane.SetOrigin(0, 0, 0)
     self.plane.SetNormal(1, 0, 0)

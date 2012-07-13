@@ -65,6 +65,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.exodus_result = None
 
+    self.has_displacements = False
+    self.current_displacement_magnitude = 1.0
+
     self.setupControls()
 
   def setupControls(self):
@@ -78,7 +81,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.block_view_group_box = QtGui.QGroupBox('Show Blocks')
     self.block_view_group_box.setMaximumWidth(200)
-    self.block_view_group_box.setMaximumHeight(200)
+#    self.block_view_group_box.setMaximumHeight(200)
     
     self.block_view_layout = QtGui.QVBoxLayout()
     self.block_view_list = QtGui.QListView()
@@ -94,20 +97,20 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.controls_layout.addLayout(self.leftest_controls_layout)
     self.controls_layout.addLayout(self.left_controls_layout)
     self.controls_layout.addLayout(self.right_controls_layout)
-    
-    self.draw_edges_checkbox = QtGui.QCheckBox("View Mesh")
-    self.draw_edges_checkbox.setToolTip('Show mesh elements')
-    self.draw_edges_checkbox.stateChanged[int].connect(self._drawEdgesChanged)
-    self.left_controls_layout.addWidget(self.draw_edges_checkbox)
+
+    self.controls_layout.setStretchFactor(self.leftest_controls_layout,1.0)
+    self.controls_layout.setStretchFactor(self.left_controls_layout,2.0)
+    self.controls_layout.setStretchFactor(self.right_controls_layout,4.0)    
 
     self.automatic_update_checkbox = QtGui.QCheckBox("Automatically Update")
     self.automatic_update_checkbox.setToolTip('Toggle automattically reading new timesteps as they finish computing')
     self.automatic_update_checkbox.setCheckState(QtCore.Qt.Checked)
     self.automatically_update = True
     self.automatic_update_checkbox.stateChanged[int].connect(self._automaticUpdateChanged)
-    self.left_controls_layout.addWidget(self.automatic_update_checkbox)
+#    self.left_controls_layout.addWidget(self.automatic_update_checkbox)
 
     self.contour_groupbox = QtGui.QGroupBox("Contour")
+    self.contour_groupbox.setMaximumHeight(70)
     self.contour_layout = QtGui.QHBoxLayout()
     self.contour_groupbox.setLayout(self.contour_layout)
     self.contour_label = QtGui.QLabel("Contour:")
@@ -128,11 +131,39 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.left_controls_layout.addWidget(self.contour_groupbox)
 
+    self.displace_groupbox = QtGui.QGroupBox("Displace")
+    self.displace_groupbox.setCheckable(True)
+    self.displace_groupbox.setChecked(True)
+    self.displace_groupbox.setDisabled(True)
+    self.displace_groupbox.setMaximumHeight(70)
+    self.displace_groupbox.toggled[bool].connect(self._displaceToggled)
+    self.displace_layout = QtGui.QHBoxLayout()
+    self.displace_layout.setSpacing(0)
+    self.displace_groupbox.setLayout(self.displace_layout)
+
+    self.displace_magnitude_label = QtGui.QLabel("Multiplier: ")
+    self.displace_magnitude_text = QtGui.QLineEdit("1.0")
+    self.displace_magnitude_text.setMaximumWidth(50)
+    self.displace_magnitude_text.returnPressed.connect(self._displaceMagnitudeTextReturn)
+
+    self.displace_layout.addWidget(self.displace_magnitude_label, alignment=QtCore.Qt.AlignRight)
+    self.displace_layout.addWidget(self.displace_magnitude_text, alignment=QtCore.Qt.AlignLeft)
+
+    self.left_controls_layout.addWidget(self.displace_groupbox)
+
+    self.reset_layout = QtGui.QHBoxLayout()
+    self.draw_edges_checkbox = QtGui.QCheckBox("View Mesh")
+    self.draw_edges_checkbox.setToolTip('Show mesh elements')
+    self.draw_edges_checkbox.stateChanged[int].connect(self._drawEdgesChanged)
+    self.reset_layout.addWidget(self.draw_edges_checkbox, alignment=QtCore.Qt.AlignHCenter)
+
     self.reset_button = QtGui.QPushButton('Reset View')
+    self.reset_button.setMaximumWidth(100)
     self.reset_button.setToolTip('Recenter the camera on the current result')
     self.reset_button.clicked.connect(self._resetView)
-    self.left_controls_layout.addWidget(self.reset_button)
-    
+    self.reset_layout.addWidget(self.reset_button, alignment=QtCore.Qt.AlignHCenter)
+
+    self.left_controls_layout.addLayout(self.reset_layout)
 
     self.beginning_button = QtGui.QToolButton()
     self.beginning_button.setToolTip('Go to first timestep')
@@ -238,9 +269,15 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   def _updateControls(self):
     self.old_contour = self.variable_contour.currentText()
     self.variable_contour.clear()
+    self.has_displacements = False
     for variable in self.exodus_result.current_variables:
       if 'ObjectId' not in variable:
         self.variable_contour.addItem(variable)
+        if 'disp' in variable:
+          self.has_displacements = True
+
+    if self.has_displacements:
+      self.displace_groupbox.setDisabled(False)
 
     self.block_view_model.clear()
     for block in self.exodus_result.blocks:
@@ -253,6 +290,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
       item.setCheckState(QtCore.Qt.Checked)
       self.block_view_model.appendRow(item)
+
+    print self.exodus_result.reader.GetApplyDisplacements()
 
     # Try to restore back to the view of the variable we were looking at
     found_index = self.variable_contour.findText(self.old_contour)
@@ -279,6 +318,13 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.exodus_result.geom.Update()
       self.current_bounds = self.exodus_result.actor.GetBounds()
       self._updateContours()
+
+  def _displaceToggled(self, value):
+    self._timeSliderReleased()
+
+  def _displaceMagnitudeTextReturn(self):
+    self.current_displacement_magnitude = float(self.displace_magnitude_text.text())
+    self._timeSliderReleased()    
     
   def _drawEdgesChanged(self, value):
     if value == QtCore.Qt.Checked:
@@ -396,6 +442,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       first = False
 
       # If the slider is at the end then start over
+      self.qt_app.processEvents()
+      time.sleep(0.01)
+      self.qt_app.processEvents()
+      print self.time_slider.sliderPosition(), self.time_slider.maximum()
       if self.time_slider.sliderPosition() == self.time_slider.maximum():
         self.time_slider.setSliderPosition(0)
         
@@ -463,6 +513,12 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           self.exodus_result.showBlock(item.exodus_block)
         else:
           self.exodus_result.hideBlock(item.exodus_block)
+
+      if self.has_displacements and self.displace_groupbox.isChecked():
+        self.exodus_result.reader.SetApplyDisplacements(1)
+        self.exodus_result.reader.SetDisplacementMagnitude(float(self.current_displacement_magnitude))
+      else:
+        self.exodus_result.reader.SetApplyDisplacements(0)
 
     if self.exodus_result.reader:
       self.exodus_result.reader.SetTimeStep(self.timestep_to_timestep[int(textbox_string)])
