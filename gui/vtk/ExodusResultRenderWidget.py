@@ -109,6 +109,21 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.automatic_update_checkbox.stateChanged[int].connect(self._automaticUpdateChanged)
 #    self.left_controls_layout.addWidget(self.automatic_update_checkbox)
 
+    self.reset_layout = QtGui.QHBoxLayout()
+    self.draw_edges_checkbox = QtGui.QCheckBox("View Mesh")
+    self.draw_edges_checkbox.setToolTip('Show mesh elements')
+    self.draw_edges_checkbox.stateChanged[int].connect(self._drawEdgesChanged)
+    self.reset_layout.addWidget(self.draw_edges_checkbox, alignment=QtCore.Qt.AlignHCenter)
+
+    self.reset_button = QtGui.QPushButton('Reset View')
+    self.reset_button.setMaximumWidth(100)
+    self.reset_button.setToolTip('Recenter the camera on the current result')
+    self.reset_button.clicked.connect(self._resetView)
+    self.reset_layout.addWidget(self.reset_button, alignment=QtCore.Qt.AlignHCenter)
+
+    self.left_controls_layout.addLayout(self.reset_layout)
+
+
     self.contour_groupbox = QtGui.QGroupBox("Contour")
     self.contour_groupbox.setMaximumHeight(70)
     self.contour_layout = QtGui.QHBoxLayout()
@@ -118,16 +133,17 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.variable_contour.setToolTip('Which variable to color by')
     self.variable_contour.currentIndexChanged[str].connect(self._contourVariableSelected)
 #    self.contour_layout.addWidget(self.contour_label, alignment=QtCore.Qt.AlignRight)
-    self.contour_layout.addWidget(self.variable_contour, alignment=QtCore.Qt.AlignLeft)
+    self.contour_layout.addWidget(self.variable_contour, alignment=QtCore.Qt.AlignHCenter)
 
-    self.component_layout = QtGui.QHBoxLayout()
+#    self.component_layout = QtGui.QHBoxLayout()
     self.component_label = QtGui.QLabel("Component:")
     self.variable_component = QtGui.QComboBox()
     self.variable_component.setToolTip('If the variable is a vector this selects what component of that vector (or the Magnitude) to color by') 
     self.variable_component.currentIndexChanged[str].connect(self._variableComponentSelected)
 #    self.component_layout.addWidget(self.component_label, alignment=QtCore.Qt.AlignRight)
-    self.component_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignLeft)
-    self.contour_layout.addLayout(self.component_layout)
+#    self.component_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignLeft)
+#    self.contour_layout.addLayout(self.component_layout)
+    self.contour_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignHCenter)
 
     self.left_controls_layout.addWidget(self.contour_groupbox)
 
@@ -150,20 +166,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.displace_layout.addWidget(self.displace_magnitude_text, alignment=QtCore.Qt.AlignLeft)
 
     self.left_controls_layout.addWidget(self.displace_groupbox)
-
-    self.reset_layout = QtGui.QHBoxLayout()
-    self.draw_edges_checkbox = QtGui.QCheckBox("View Mesh")
-    self.draw_edges_checkbox.setToolTip('Show mesh elements')
-    self.draw_edges_checkbox.stateChanged[int].connect(self._drawEdgesChanged)
-    self.reset_layout.addWidget(self.draw_edges_checkbox, alignment=QtCore.Qt.AlignHCenter)
-
-    self.reset_button = QtGui.QPushButton('Reset View')
-    self.reset_button.setMaximumWidth(100)
-    self.reset_button.setToolTip('Recenter the camera on the current result')
-    self.reset_button.clicked.connect(self._resetView)
-    self.reset_layout.addWidget(self.reset_button, alignment=QtCore.Qt.AlignHCenter)
-
-    self.left_controls_layout.addLayout(self.reset_layout)
 
     self.beginning_button = QtGui.QToolButton()
     self.beginning_button.setToolTip('Go to first timestep')
