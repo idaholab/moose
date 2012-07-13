@@ -12,6 +12,18 @@ class GeneratedMeshRenderer(MeshRenderer):
   def __init__(self, render_widget, mesh_item_data):
     MeshRenderer.__init__(self, render_widget, mesh_item_data)
 
+    self.blocks = [0]
+    self.sidets = []
+    self.nodesets = []
+
+    self.block_id_to_name = {}
+    self.sideset_id_to_name = {}
+    self.nodeset_id_to_name = {}
+
+    self.name_to_block_id = {}
+    self.name_to_sideset_id = {}
+    self.name_to_nodeset_id = {}
+
     self.dim = int(mesh_item_data['dim'])
 
     self.xmin = 0.0
@@ -88,38 +100,53 @@ class GeneratedMeshRenderer(MeshRenderer):
     self.block_actors['0'] = GeneratedMeshActor(self.renderer, self.main_block)
 
     if self.dim == 3:
-      self.sideset_actors['front'] = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,self.zmax,True,True,False))
-      self.sideset_actors['5']     = self.sideset_actors['front']
+      self.sidesets = [0,1,2,3,4,5]
+      self.sideset_actors['5'] = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,self.zmax,True,True,False))
+      self.sideset_id_to_name[5] = 'front'
+      self.name_to_sideset_id['front'] = 5
       
-      self.sideset_actors['back']  = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,self.zmin,True,True,False))
-      self.sideset_actors['0']     = self.sideset_actors['back']
+      self.sideset_actors['0']  = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,self.zmin,True,True,False))
+      self.sideset_id_to_name[0] = 'back'
+      self.name_to_sideset_id['back'] = 0
 
-      self.sideset_actors['left']  = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmin,self.ymin,self.zmin,False,True,True))
-      self.sideset_actors['4']     = self.sideset_actors['left']
-      self.sideset_actors['right'] = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymin,self.zmin,False,True,True))
-      self.sideset_actors['2']     = self.sideset_actors['right']
+      self.sideset_actors['4']  = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmin,self.ymin,self.zmin,False,True,True))
+      self.sideset_id_to_name[4] = 'left'
+      self.name_to_sideset_id['left'] = 4
+      self.sideset_actors['2'] = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymin,self.zmin,False,True,True))
+      self.sideset_id_to_name[2] = 'right'
+      self.name_to_sideset_id['right'] = 2
 
-      self.sideset_actors['top']   = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,self.zmin,True,False,True))
-      self.sideset_actors['3']     = self.sideset_actors['top']
-      self.sideset_actors['bottom']= GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymin,self.zmin,True,False,True))
-      self.sideset_actors['1']     = self.sideset_actors['bottom']
+      self.sideset_actors['3']   = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,self.zmin,True,False,True))
+      self.sideset_id_to_name[3] = 'top'
+      self.name_to_sideset_id['top'] = 3
+      self.sideset_actors['1']= GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymin,self.zmin,True,False,True))
+      self.sideset_id_to_name[1] = 'bottom'
+      self.name_to_sideset_id['bottom'] = 1
 
     if self.dim == 2:
-      self.sideset_actors['left']   = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmin,self.ymax,0.0,False,True,False))
-      self.sideset_actors['3']      = self.sideset_actors['left']
-      self.sideset_actors['right']  = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,0.0,False,True,False))
-      self.sideset_actors['1']      = self.sideset_actors['right']
+      self.sidesets = [0,1,2,3]
+      self.sideset_actors['3']   = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmin,self.ymax,0.0,False,True,False))
+      self.sideset_id_to_name[3] = 'left'
+      self.name_to_sideset_id['left'] = 3
+      self.sideset_actors['1']  = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,0.0,False,True,False))
+      self.sideset_id_to_name[1] = 'right'
+      self.name_to_sideset_id['right'] = 1
 
-      self.sideset_actors['top']    = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,0.0,True,False,False))
-      self.sideset_actors['2']      = self.sideset_actors['top']
-      self.sideset_actors['bottom'] = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymin,0.0,True,False,False))
-      self.sideset_actors['0']      = self.sideset_actors['bottom']
+      self.sideset_actors['2']    = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,0.0,True,False,False))
+      self.sideset_id_to_name[2] = 'top'
+      self.name_to_sideset_id['top'] = 2
+      self.sideset_actors['0'] = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymin,0.0,True,False,False))
+      self.sideset_id_to_name[0] = 'bottom'
+      self.name_to_sideset_id['bottom'] = 0
 
     if self.dim == 1:
-      self.sideset_actors['left']   = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmin,self.ymax,0.0,False,False,False))
-      self.sideset_actors['0']      = self.sideset_actors['left']
-      self.sideset_actors['right']  = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,0.0,False,False,False))
-      self.sideset_actors['1']      = self.sideset_actors['right']
+      self.sidesets = [0,1]
+      self.sideset_actors['0']   = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmin,self.ymax,0.0,False,False,False))
+      self.sideset_id_to_name[0] = 'left'
+      self.name_to_sideset_id['left'] = 0
+      self.sideset_actors['1']  = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,0.0,False,False,False))
+      self.sideset_id_to_name[1] = 'right'
+      self.name_to_sideset_id['right'] = 1
 
     for actor_name, actor in self.block_actors.items():
       self.clipped_block_actors[actor_name] = ClippedActor(actor, self.plane)

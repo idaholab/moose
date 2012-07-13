@@ -31,8 +31,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     self.action_syntax = self.input_file_widget.action_syntax
 
     self.setExpandsOnDoubleClick(False)
-#    self.setMaximumWidth(400)
-#    self.setMinimumWidth(250)
+    self.setMinimumWidth(200)
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.connect(self,QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self._newContext)    
     self.addHardPathsToTree()

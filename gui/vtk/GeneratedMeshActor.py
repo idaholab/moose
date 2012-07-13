@@ -8,14 +8,10 @@ class GeneratedMeshActor(PeacockActor):
     PeacockActor.__init__(self, renderer)
     self.mesh = mesh
 
-#    self.mapper = vtk.vtkDataSetMapper();
-#    self.mapper.SetInput(self.geom);
     self.geom = vtk.vtkDataSetSurfaceFilter()
     self.geom.SetInput(self.mesh)
     self.geom.Update()
 
-#    self.mapper = vtk.vtkDataSetMapper()
-#    self.mapper.SetInput(self.mesh)
     self.mapper = vtk.vtkPolyDataMapper()
     self.mapper.SetInput(self.geom.GetOutput())
 

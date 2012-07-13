@@ -242,6 +242,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       if 'ObjectId' not in variable:
         self.variable_contour.addItem(variable)
 
+    self.block_view_model.clear()
     for block in self.exodus_result.blocks:
       block_display_name = str(block)
       if block in self.exodus_result.block_to_name:

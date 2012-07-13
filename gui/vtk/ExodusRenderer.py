@@ -43,27 +43,45 @@ class ExodusRenderer(MeshRenderer):
 
     self.sidesets = []
     self.sideset_id_to_exodus_block = {}
+    self.sideset_id_to_name = {}
+    self.name_to_sideset_id = {}
     for i in xrange(num_sidesets):
       sideset_id = reader.GetObjectId(vtk.vtkExodusIIReader.SIDE_SET,i)
       self.sidesets.append(sideset_id)
       self.sideset_id_to_exodus_block[sideset_id] = i
       reader.SetObjectStatus(vtk.vtkExodusIIReader.SIDE_SET, i, 1)
+      name = reader.GetObjectName(vtk.vtkExodusIIReader.SIDE_SET,i).split(' ')
+      if 'Unnamed' not in name:
+        self.sideset_id_to_name[sideset_id] = name[0]
+        self.name_to_sideset_id[name[0]] = sideset_id
 
     self.nodesets = []
     self.nodeset_id_to_exodus_block = {}
+    self.nodeset_id_to_name = {}
+    self.name_to_nodeset_id = {}
     for i in xrange(num_nodesets):
       nodeset_id = reader.GetObjectId(vtk.vtkExodusIIReader.NODE_SET,i)
       self.nodesets.append(nodeset_id)
       self.nodeset_id_to_exodus_block[nodeset_id] = i
       reader.SetObjectStatus(vtk.vtkExodusIIReader.NODE_SET, i, 1)
+      name = reader.GetObjectName(vtk.vtkExodusIIReader.NODE_SET,i).split(' ')
+      if 'Unnamed' not in name:
+        self.nodeset_id_to_name[nodeset_id] = name[0]
+        self.name_to_nodeset_id[name[0]] = nodeset_id
 
     self.blocks = []
     self.block_id_to_exodus_block = {}
+    self.block_id_to_name = {}
+    self.name_to_block_id = {}
     for i in xrange(num_blocks):
       block_id = reader.GetObjectId(vtk.vtkExodusIIReader.ELEM_BLOCK,i)
       self.blocks.append(block_id)
-      self.block_id_to_exodus_block[block_id] = i
-    
+      self.block_id_to_exodus_block[block_id] = i    
+      name = reader.GetObjectName(vtk.vtkExodusIIReader.ELEM_BLOCK,i).split(' ')
+      if 'Unnamed' not in name:
+        self.block_id_to_name[block_id] = name[0]
+        self.name_to_block_id[name[0]] = block_id
+        
     reader.SetTimeStep(1)
     reader.Update()
 
@@ -78,11 +96,6 @@ class ExodusRenderer(MeshRenderer):
       self.clipped_sideset_actors[str(self.sidesets[i])] = clipped_actor
       self.all_actors.append(clipped_actor)
       
-      name = reader.GetObjectName(vtk.vtkExodusIIReader.SIDE_SET,i).split(' ')
-      if 'Unnamed' not in name:
-        self.sideset_actors[name[0]] = actor
-        self.clipped_sideset_actors[name[0]] = clipped_actor
-
     for i in xrange(num_nodesets):
       actor = ExodusActor(self.renderer, self.data, ExodusMap.nodeset_vtk_block, i)
       self.nodeset_actors[str(self.nodesets[i])] = actor
@@ -92,11 +105,6 @@ class ExodusRenderer(MeshRenderer):
       self.clipped_nodeset_actors[str(self.nodesets[i])] = clipped_actor
       self.all_actors.append(clipped_actor)
 
-      name = reader.GetObjectName(vtk.vtkExodusIIReader.NODE_SET,i).split(' ')
-      if 'Unnamed' not in name:
-        self.nodeset_actors[name[0]] = actor
-        self.clipped_nodeset_actors[name[0]] = clipped_actor
-
     for i in xrange(num_blocks):
       actor = ExodusActor(self.renderer, self.data, ExodusMap.element_vtk_block, i)
       self.block_actors[str(self.blocks[i])] = actor
@@ -105,9 +113,4 @@ class ExodusRenderer(MeshRenderer):
       clipped_actor = ClippedActor(actor, self.plane)
       self.clipped_block_actors[str(self.blocks[i])] = clipped_actor
       self.all_actors.append(clipped_actor)
-      
-      name = reader.GetObjectName(vtk.vtkExodusIIReader.ELEM_BLOCK,i).split(' ')
-      if 'Unnamed' not in name:
-        self.block_actors[name[0]] = actor
-        self.clipped_block_actors[name[0]] = clipped_actor
     
