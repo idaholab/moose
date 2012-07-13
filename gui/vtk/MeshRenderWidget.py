@@ -39,6 +39,7 @@ class MeshRenderWidget(QtGui.QWidget):
     self.highlight_layout = QtGui.QHBoxLayout()
 
     self.view_mesh_checkbox = QtGui.QCheckBox('View Mesh')
+    self.view_mesh_checkbox.setToolTip('Toggle viewing of mesh elements')
     self.view_mesh_checkbox.setCheckState(QtCore.Qt.Checked)
     self.view_mesh_checkbox.stateChanged.connect(self.viewMeshCheckboxChanged)
     self.highlight_layout.addWidget(self.view_mesh_checkbox)
@@ -46,6 +47,7 @@ class MeshRenderWidget(QtGui.QWidget):
     self.highlight_block_label = QtGui.QLabel('Block:')
     self.highlight_block_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
     self.highlight_block_combo = QtGui.QComboBox()
+    self.highlight_block_combo.setToolTip('Highlight a block in the mesh')
     self.highlight_block_combo.currentIndexChanged[str].connect(self.showBlockSelected)
     self.highlight_layout.addWidget(self.highlight_block_label)
     self.highlight_layout.addWidget(self.highlight_block_combo)
@@ -53,6 +55,7 @@ class MeshRenderWidget(QtGui.QWidget):
     self.highlight_sideset_label = QtGui.QLabel('Sideset:')
     self.highlight_sideset_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
     self.highlight_sideset_combo = QtGui.QComboBox()
+    self.highlight_sideset_combo.setToolTip('Highlight a sideset in the mesh')
     self.highlight_sideset_combo.currentIndexChanged[str].connect(self.showSidesetSelected)
     self.highlight_layout.addWidget(self.highlight_sideset_label)
     self.highlight_layout.addWidget(self.highlight_sideset_combo)
@@ -60,11 +63,13 @@ class MeshRenderWidget(QtGui.QWidget):
     self.highlight_nodeset_label = QtGui.QLabel('Nodeset:')
     self.highlight_nodeset_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
     self.highlight_nodeset_combo = QtGui.QComboBox()
+    self.highlight_nodeset_combo.setToolTip('Highlight a nodeset in the mesh')
     self.highlight_nodeset_combo.currentIndexChanged[str].connect(self.showNodesetSelected)
     self.highlight_layout.addWidget(self.highlight_nodeset_label)
     self.highlight_layout.addWidget(self.highlight_nodeset_combo)
 
     self.highlight_clear = QtGui.QPushButton('Clear')
+    self.highlight_clear.setToolTip('Clear highlighting')
     self.highlight_clear.setDisabled(True)
     self.highlight_clear.clicked.connect(self.clearHighlight)
     self.highlight_layout.addWidget(self.highlight_clear)
@@ -76,6 +81,7 @@ class MeshRenderWidget(QtGui.QWidget):
     self.plane.SetNormal(1, 0, 0)
 
     self.clip_groupbox = QtGui.QGroupBox("Clip")
+    self.clip_groupbox.setToolTip('Toggle clip mode to slice the mesh open along a plane')
     self.clip_groupbox.setCheckable(True)
     self.clip_groupbox.setChecked(False)
     self.clip_groupbox.setMaximumHeight(70)
@@ -83,6 +89,7 @@ class MeshRenderWidget(QtGui.QWidget):
     clip_layout = QtGui.QHBoxLayout()
     
     self.clip_plane_combobox = QtGui.QComboBox()
+    self.clip_plane_combobox.setToolTip('Direction of the normal for the clip plane')
     self.clip_plane_combobox.addItem('x')
     self.clip_plane_combobox.addItem('y')
     self.clip_plane_combobox.addItem('z')
@@ -91,6 +98,7 @@ class MeshRenderWidget(QtGui.QWidget):
     clip_layout.addWidget(self.clip_plane_combobox)
     
     self.clip_plane_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+    self.clip_plane_slider.setToolTip('Slide to change plane position')
     self.clip_plane_slider.setRange(0, 100)
     self.clip_plane_slider.setSliderPosition(50)
     self.clip_plane_slider.sliderMoved[int].connect(self._clipSliderMoved)

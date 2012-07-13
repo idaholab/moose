@@ -78,10 +78,12 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.controls_layout.addLayout(self.right_controls_layout)
     
     self.draw_edges_checkbox = QtGui.QCheckBox("View Mesh")
+    self.draw_edges_checkbox.setToolTip('Show mesh elements')
     self.draw_edges_checkbox.stateChanged[int].connect(self._drawEdgesChanged)
     self.left_controls_layout.addWidget(self.draw_edges_checkbox)
 
     self.automatic_update_checkbox = QtGui.QCheckBox("Automatically Update")
+    self.automatic_update_checkbox.setToolTip('Toggle automattically reading new timesteps as they finish computing')
     self.automatic_update_checkbox.setCheckState(QtCore.Qt.Checked)
     self.automatically_update = True
     self.automatic_update_checkbox.stateChanged[int].connect(self._automaticUpdateChanged)
@@ -92,6 +94,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.contour_groupbox.setLayout(self.contour_layout)
     self.contour_label = QtGui.QLabel("Contour:")
     self.variable_contour = QtGui.QComboBox()
+    self.variable_contour.setToolTip('Which variable to color by')
     self.variable_contour.currentIndexChanged[str].connect(self._contourVariableSelected)
 #    self.contour_layout.addWidget(self.contour_label, alignment=QtCore.Qt.AlignRight)
     self.contour_layout.addWidget(self.variable_contour, alignment=QtCore.Qt.AlignLeft)
@@ -99,6 +102,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.component_layout = QtGui.QHBoxLayout()
     self.component_label = QtGui.QLabel("Component:")
     self.variable_component = QtGui.QComboBox()
+    self.variable_component.setToolTip('If the variable is a vector this selects what component of that vector (or the Magnitude) to color by') 
     self.variable_component.currentIndexChanged[str].connect(self._variableComponentSelected)
 #    self.component_layout.addWidget(self.component_label, alignment=QtCore.Qt.AlignRight)
     self.component_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignLeft)
@@ -107,36 +111,44 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.left_controls_layout.addWidget(self.contour_groupbox)
 
     self.reset_button = QtGui.QPushButton('Reset View')
+    self.reset_button.setToolTip('Recenter the camera on the current result')
     self.reset_button.clicked.connect(self._resetView)
     self.left_controls_layout.addWidget(self.reset_button)
     
 
     self.beginning_button = QtGui.QToolButton()
+    self.beginning_button.setToolTip('Go to first timestep')
     self.beginning_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrFirst32.png'))
     self.beginning_button.clicked.connect(self._beginningClicked)
 
     self.back_button = QtGui.QToolButton()
+    self.back_button.setToolTip('Previous timestep')
     self.back_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrBack32.png'))
     self.back_button.clicked.connect(self._backClicked)
 
     self.play_button = QtGui.QToolButton()
+    self.play_button.setToolTip('Play through the currently computed timesteps')
     self.play_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrPlay32.png'))
     self.play_button.clicked.connect(self._playClicked)
 
     self.pause_button = QtGui.QToolButton()
+    self.pause_button.setToolTip('If playing this will pause playback')
     self.pause_button.setDisabled(True)
     self.pause_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrPause32.png'))
     self.pause_button.clicked.connect(self._pauseClicked)
 
     self.forward_button = QtGui.QToolButton()
+    self.forward_button.setToolTip('Next timestep')
     self.forward_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrForward32.png'))
     self.forward_button.clicked.connect(self._forwardClicked)
 
     self.last_button = QtGui.QToolButton()
+    self.last_button.setToolTip('Go to last timestep')
     self.last_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrLast32.png'))
     self.last_button.clicked.connect(self._lastClicked)
 
     self.loop_button = QtGui.QToolButton()
+    self.loop_button.setToolTip('Toggle replaying all timesteps when the end is reached during playback.  Note that as new timesteps finish they will automatically be picked up and added to the end of the sequence.')
     self.loop_button.setCheckable(True)
     self.loop_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrLoop24.png'))
     self.loop_button.toggled.connect(self._loopClicked)
@@ -145,12 +157,14 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.time_slider_label = QtGui.QLabel("Timestep:")
     self.time_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+    self.time_slider.setToolTip('Slide to select a timestep to display')
     self.time_slider.setMaximumWidth(600)
     
     self.time_slider.valueChanged.connect(self._timeSliderChanged)
     self.time_slider.sliderReleased.connect(self._timeSliderReleased)
     
     self.time_slider_textbox = QtGui.QLineEdit()
+    self.time_slider_textbox.setToolTip('Enter a number and press Enter to go to that timestep')
     self.time_slider_textbox.setMaximumWidth(30)
     self.time_slider_textbox.returnPressed.connect(self._sliderTextboxReturn)
 
@@ -174,6 +188,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.right_controls_layout.addWidget(self.time_groupbox)
 
     self.clip_groupbox = QtGui.QGroupBox("Clip")
+    self.clip_groupbox.setToolTip('Toggle clipping mode where the solution can be sliced open')
     self.clip_groupbox.setCheckable(True)
     self.clip_groupbox.setChecked(False)
     self.clip_groupbox.setMaximumHeight(70)
@@ -181,6 +196,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     clip_layout = QtGui.QHBoxLayout()
     
     self.clip_plane_combobox = QtGui.QComboBox()
+    self.clip_plane_combobox.setToolTip('Direction of the normal for the clip plane')
     self.clip_plane_combobox.addItem('x')
     self.clip_plane_combobox.addItem('y')
     self.clip_plane_combobox.addItem('z')
@@ -189,6 +205,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     clip_layout.addWidget(self.clip_plane_combobox)
     
     self.clip_plane_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+    self.clip_plane_slider.setToolTip('Slide to change plane position')
     self.clip_plane_slider.setRange(0, 100)
     self.clip_plane_slider.setSliderPosition(50)
     self.clip_plane_slider.sliderReleased.connect(self._clipSliderReleased)

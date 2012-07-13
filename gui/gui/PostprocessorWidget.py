@@ -20,6 +20,7 @@ class PostprocessorWidget(QtGui.QWidget):
         # uses the postprocessor selected by the user to pass the information required for plotting
         
         self.comboWidget = QtGui.QComboBox(self)
+        self.comboWidget.setToolTip('Select a postprocessor from this list to add a plot for that postprocessor')
         self.fillComboWidget()
         self.comboWidget.activated[str].connect(self.createPlot)
         self.plotObjectDict = {}
@@ -27,10 +28,12 @@ class PostprocessorWidget(QtGui.QWidget):
 
         # adds a button to the widget that will be used to clear plot selectons
         self.clearButton = QtGui.QPushButton("Clear")
+        self.clearButton.setToolTip('Clear current plots')
         self.clearButton.resize(self.clearButton.sizeHint())
         self.clearButton.clicked.connect(self.clearClick)
         # adds an open box to the widget
         self.openButton = QtGui.QPushButton("Open")
+        self.openButton.setToolTip('Select an existing CSV file to read so the postprocessor values can be plotted')
         self.openButton.resize(self.clearButton.sizeHint())
         self.openButton.clicked.connect(self.openClick)
             

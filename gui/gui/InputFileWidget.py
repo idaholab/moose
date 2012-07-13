@@ -129,8 +129,11 @@ class InputFileWidget(QtGui.QWidget):
 
   def init_buttons(self, layout):
     self.buttonOpen = QtGui.QPushButton("Open")
+    self.buttonOpen.setToolTip("Open existing input file")
     self.buttonSave = QtGui.QPushButton("Save")
+    self.buttonSave.setToolTip("Save current tree items to an input file")
     self.buttonClear = QtGui.QPushButton("Clear")
+    self.buttonClear.setToolTip("Clear the current tree items")
     QtCore.QObject.connect(self.buttonOpen, QtCore.SIGNAL("clicked()"), self.click_open)
     QtCore.QObject.connect(self.buttonSave, QtCore.SIGNAL("clicked()"), self.click_save)
     QtCore.QObject.connect(self.buttonClear, QtCore.SIGNAL("clicked()"), self.click_clear)
