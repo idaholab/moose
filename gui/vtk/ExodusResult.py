@@ -38,6 +38,14 @@ class ExodusResult:
     self.current_elemental_components = {}
     self.component_index = -1
 
+    num_blocks = self.reader.GetNumberOfElementBlockArrays()
+    self.blocks = set()
+    self.block_to_name = {}
+    for i in xrange(num_blocks):
+      block_num = self.reader.GetObjectId(vtk.vtkExodusIIReader.ELEM_BLOCK,i)
+      self.blocks.add(block_num)
+      if 'Unnamed' not in self.reader.GetObjectName(vtk.vtkExodusIIReader.ELEM_BLOCK,i).split(' '):
+        self.block_to_name[block_num] = self.reader.GetObjectName(vtk.vtkExodusIIReader.ELEM_BLOCK,i).split(' ')[0]
 
     cdp = vtk.vtkCompositeDataPipeline()
     vtk.vtkAlgorithm.SetDefaultExecutivePrototype(cdp)
@@ -105,4 +113,10 @@ class ExodusResult:
     self.scalar_bar.SetNumberOfLabels(4)
     
     self.current_bounds = self.actor.GetBounds()
+
+  def hideBlock(self, block_num):
+    self.reader.SetElementBlockArrayStatus(self.reader.GetElementBlockArrayName(self.reader.GetObjectIndex(vtk.vtkExodusIIReader.ELEM_BLOCK, block_num)), 0)
+
+  def showBlock(self, block_num):
+    self.reader.SetElementBlockArrayStatus(self.reader.GetElementBlockArrayName(self.reader.GetObjectIndex(vtk.vtkExodusIIReader.ELEM_BLOCK, block_num)), 1)
 

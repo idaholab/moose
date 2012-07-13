@@ -48,6 +48,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.setLayout(self.main_layout)
 
     self.vtkwidget = vtk.QVTKWidget2()
+    self.vtkwidget.setMinimumHeight(600)
 
     self.renderer = vtk.vtkRenderer()
     self.renderer.SetBackground(0.2,0.2,0.2)
@@ -71,9 +72,26 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.controls_layout = QtGui.QHBoxLayout()
     self.main_layout.addLayout(self.controls_layout)
 
+    self.leftest_controls_layout = QtGui.QVBoxLayout()
     self.left_controls_layout = QtGui.QVBoxLayout()
     self.right_controls_layout = QtGui.QVBoxLayout()
 
+    self.block_view_group_box = QtGui.QGroupBox('Show Blocks')
+    self.block_view_group_box.setMaximumWidth(200)
+    self.block_view_group_box.setMaximumHeight(200)
+    
+    self.block_view_layout = QtGui.QVBoxLayout()
+    self.block_view_list = QtGui.QListView()
+    self.block_view_model = QtGui.QStandardItemModel()
+    self.block_view_model.itemChanged.connect(self._blockViewItemChanged)
+    self.block_view_list.setModel(self.block_view_model)
+    self.block_view_layout.addWidget(self.block_view_list)
+
+    self.block_view_group_box.setLayout(self.block_view_layout)
+
+    self.leftest_controls_layout.addWidget(self.block_view_group_box)
+
+    self.controls_layout.addLayout(self.leftest_controls_layout)
     self.controls_layout.addLayout(self.left_controls_layout)
     self.controls_layout.addLayout(self.right_controls_layout)
     
@@ -217,15 +235,23 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.right_controls_layout.addWidget(self.clip_groupbox)
 
 
-
-
-
   def _updateControls(self):
     self.old_contour = self.variable_contour.currentText()
     self.variable_contour.clear()
     for variable in self.exodus_result.current_variables:
       if 'ObjectId' not in variable:
         self.variable_contour.addItem(variable)
+
+    for block in self.exodus_result.blocks:
+      block_display_name = str(block)
+      if block in self.exodus_result.block_to_name:
+        block_display_name += ' : ' + self.exodus_result.block_to_name[block]
+        
+      item = QtGui.QStandardItem(str(block_display_name))
+      item.exodus_block = block
+      item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
+      item.setCheckState(QtCore.Qt.Checked)
+      self.block_view_model.appendRow(item)
 
     # Try to restore back to the view of the variable we were looking at
     found_index = self.variable_contour.findText(self.old_contour)
@@ -239,7 +265,20 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_slider.setMaximum(self.exodus_result.max_timestep)
     self.time_slider.setSliderPosition(self.exodus_result.max_timestep)
     
-
+  def _blockViewItemChanged(self, item):
+    if item.checkState() == QtCore.Qt.Checked:
+      self.exodus_result.showBlock(item.exodus_block)
+      self.exodus_result.reader.Update()
+      self.exodus_result.geom.Update()
+      self.current_bounds = self.exodus_result.actor.GetBounds()
+      self._updateContours()
+    else:
+      self.exodus_result.hideBlock(item.exodus_block)
+      self.exodus_result.reader.Update()
+      self.exodus_result.geom.Update()
+      self.current_bounds = self.exodus_result.actor.GetBounds()
+      self._updateContours()
+    
   def _drawEdgesChanged(self, value):
     if value == QtCore.Qt.Checked:
       self.exodus_result.actor.GetProperty().EdgeVisibilityOn()
@@ -306,15 +345,19 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.exodus_result.clip_mapper.Update()
 
     if self.current_variable in self.exodus_result.current_nodal_components:
-      self.exodus_result.mapper.SetScalarModeToUsePointFieldData()
-      self.exodus_result.mapper.SetScalarRange(self.exodus_result.data.GetPointData().GetVectors(self.current_variable).GetRange(self.component_index))
-      self.exodus_result.clip_mapper.SetScalarModeToUsePointFieldData()
-      self.exodus_result.clip_mapper.SetScalarRange(self.exodus_result.data.GetPointData().GetVectors(self.current_variable).GetRange(self.component_index))
+      data = self.exodus_result.data.GetPointData().GetVectors(self.current_variable)
+      if data:
+        self.exodus_result.mapper.SetScalarModeToUsePointFieldData()
+        self.exodus_result.mapper.SetScalarRange(data.GetRange(self.component_index))
+        self.exodus_result.clip_mapper.SetScalarModeToUsePointFieldData()
+        self.exodus_result.clip_mapper.SetScalarRange(data.GetRange(self.component_index))
     elif self.current_variable in self.exodus_result.current_elemental_components:
-      self.exodus_result.mapper.SetScalarModeToUseCellFieldData()
-      self.exodus_result.mapper.SetScalarRange(self.exodus_result.data.GetCellData().GetVectors(self.current_variable).GetRange(self.component_index))
-      self.exodus_result.clip_mapper.SetScalarModeToUseCellFieldData()
-      self.exodus_result.clip_mapper.SetScalarRange(self.exodus_result.data.GetCellData().GetVectors(self.current_variable).GetRange(self.component_index))
+      data = self.exodus_result.data.GetCellData().GetVectors(self.current_variable)
+      if data:
+        self.exodus_result.mapper.SetScalarModeToUseCellFieldData()
+        self.exodus_result.mapper.SetScalarRange(data.GetRange(self.component_index))
+        self.exodus_result.clip_mapper.SetScalarModeToUseCellFieldData()
+        self.exodus_result.clip_mapper.SetScalarRange(data.GetRange(self.component_index))
 
     self.exodus_result.mapper.SelectColorArray(self.current_variable)
     self.exodus_result.clip_mapper.SelectColorArray(self.current_variable)
@@ -411,6 +454,14 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           self.exodus_result.actor.GetProperty().EdgeVisibilityOn()
         else:
           self.exodus_result.actor.GetProperty().EdgeVisibilityOff()
+
+      num_block_view_items = self.block_view_model.rowCount()
+      for i in xrange(num_block_view_items):
+        item = self.block_view_model.item(i)
+        if item.checkState() == QtCore.Qt.Checked:
+          self.exodus_result.showBlock(item.exodus_block)
+        else:
+          self.exodus_result.hideBlock(item.exodus_block)
 
     if self.exodus_result.reader:
       self.exodus_result.reader.SetTimeStep(self.timestep_to_timestep[int(textbox_string)])
