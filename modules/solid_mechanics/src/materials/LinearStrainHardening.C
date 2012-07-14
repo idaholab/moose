@@ -1,5 +1,6 @@
 #include "LinearStrainHardening.h"
 
+#include "MooseException.h"
 #include "SymmIsotropicElasticityTensor.h"
 
 
@@ -91,7 +92,17 @@ LinearStrainHardening::computeStress()
 
     if(it == _max_its)
     {
-      mooseError("Max sub-newton iteration hit during plasticity increment solve!");
+      std::stringstream errorMsg;
+      errorMsg << "Max sub-newton iteration hit during plasticity increment solve!";
+      if (libMesh::n_processors()>1)
+      {
+        mooseError(errorMsg.str());
+      }
+      else
+      {
+        std::cout<<std::endl<<errorMsg.str()<<std::endl<<std::endl;
+        throw MooseException();
+      }
     }
 
 
