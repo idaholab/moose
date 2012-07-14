@@ -4,6 +4,7 @@ import vtk
 import time
 from ExodusResult import ExodusResult
 import glob
+from ContourChoices import *
 
 pathname = os.path.dirname(sys.argv[0])        
 pathname = os.path.abspath(pathname)
@@ -67,7 +68,15 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.has_displacements = False
     self.current_displacement_magnitude = 1.0
+    
+    self.current_variable = None
+    self.current_component = None
+    
+    # Holds a mapping of variable name to contour choices so they can be restored when variables are selected
+    self.contour_choices = {}
 
+    # If we are currently restoring contours then don't save the intermediate ones
+    self.currently_restoring_contours = False
     self.setupControls()
 
   def setupControls(self):
@@ -99,7 +108,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.controls_layout.addLayout(self.right_controls_layout)
 
     self.controls_layout.setStretchFactor(self.leftest_controls_layout,1.0)
-    self.controls_layout.setStretchFactor(self.left_controls_layout,2.0)
+    self.controls_layout.setStretchFactor(self.left_controls_layout,1.5)
     self.controls_layout.setStretchFactor(self.right_controls_layout,4.0)    
 
     self.automatic_update_checkbox = QtGui.QCheckBox("Automatically Update")
@@ -114,38 +123,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.draw_edges_checkbox.setToolTip('Show mesh elements')
     self.draw_edges_checkbox.stateChanged[int].connect(self._drawEdgesChanged)
     self.reset_layout.addWidget(self.draw_edges_checkbox, alignment=QtCore.Qt.AlignHCenter)
-
-    self.reset_button = QtGui.QPushButton('Reset View')
-    self.reset_button.setMaximumWidth(100)
-    self.reset_button.setToolTip('Recenter the camera on the current result')
-    self.reset_button.clicked.connect(self._resetView)
-    self.reset_layout.addWidget(self.reset_button, alignment=QtCore.Qt.AlignHCenter)
-
-    self.left_controls_layout.addLayout(self.reset_layout)
-
-
-    self.contour_groupbox = QtGui.QGroupBox("Contour")
-    self.contour_groupbox.setMaximumHeight(70)
-    self.contour_layout = QtGui.QHBoxLayout()
-    self.contour_groupbox.setLayout(self.contour_layout)
-    self.contour_label = QtGui.QLabel("Contour:")
-    self.variable_contour = QtGui.QComboBox()
-    self.variable_contour.setToolTip('Which variable to color by')
-    self.variable_contour.currentIndexChanged[str].connect(self._contourVariableSelected)
-#    self.contour_layout.addWidget(self.contour_label, alignment=QtCore.Qt.AlignRight)
-    self.contour_layout.addWidget(self.variable_contour, alignment=QtCore.Qt.AlignHCenter)
-
-#    self.component_layout = QtGui.QHBoxLayout()
-    self.component_label = QtGui.QLabel("Component:")
-    self.variable_component = QtGui.QComboBox()
-    self.variable_component.setToolTip('If the variable is a vector this selects what component of that vector (or the Magnitude) to color by') 
-    self.variable_component.currentIndexChanged[str].connect(self._variableComponentSelected)
-#    self.component_layout.addWidget(self.component_label, alignment=QtCore.Qt.AlignRight)
-#    self.component_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignLeft)
-#    self.contour_layout.addLayout(self.component_layout)
-    self.contour_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignHCenter)
-
-    self.left_controls_layout.addWidget(self.contour_groupbox)
 
     self.displace_groupbox = QtGui.QGroupBox("Displace")
     self.displace_groupbox.setCheckable(True)
@@ -165,7 +142,115 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.displace_layout.addWidget(self.displace_magnitude_label, alignment=QtCore.Qt.AlignRight)
     self.displace_layout.addWidget(self.displace_magnitude_text, alignment=QtCore.Qt.AlignLeft)
 
-    self.left_controls_layout.addWidget(self.displace_groupbox)
+    self.reset_layout.addWidget(self.displace_groupbox)
+
+
+    self.reset_button = QtGui.QPushButton('Reset View')
+    self.reset_button.setMaximumWidth(100)
+    self.reset_button.setToolTip('Recenter the camera on the current result')
+    self.reset_button.clicked.connect(self._resetView)
+    self.reset_layout.addWidget(self.reset_button, alignment=QtCore.Qt.AlignHCenter)
+
+
+
+    self.right_controls_layout.addLayout(self.reset_layout)
+
+
+    self.contour_groupbox = QtGui.QGroupBox("Contour")
+#    self.contour_groupbox.setMaximumHeight(70)
+    self.contour_layout = QtGui.QVBoxLayout()
+    self.contour_groupbox.setLayout(self.contour_layout)
+
+    self.variable_contour_layout = QtGui.QHBoxLayout()
+    self.contour_layout.addLayout(self.variable_contour_layout)
+    self.contour_label = QtGui.QLabel("Contour:")
+    self.variable_contour = QtGui.QComboBox()
+    self.variable_contour.setToolTip('Which variable to color by')
+    self.variable_contour.currentIndexChanged[str].connect(self._contourVariableSelected)
+#    self.variable_contour_layout.addWidget(self.contour_label, alignment=QtCore.Qt.AlignRight)
+    self.variable_contour_layout.addWidget(self.variable_contour, alignment=QtCore.Qt.AlignHCenter)
+
+#    self.component_layout = QtGui.QHBoxLayout()
+    self.component_label = QtGui.QLabel("Component:")
+    self.variable_component = QtGui.QComboBox()
+    self.variable_component.setToolTip('If the variable is a vector this selects what component of that vector (or the Magnitude) to color by') 
+    self.variable_component.currentIndexChanged[str].connect(self._variableComponentSelected)
+#    self.component_layout.addWidget(self.component_label, alignment=QtCore.Qt.AlignRight)
+#    self.component_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignLeft)
+#    self.variable_contour_layout.addLayout(self.component_layout)
+    self.variable_contour_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignHCenter)
+
+    self.minmax_contour_layout = QtGui.QHBoxLayout()
+    self.contour_layout.addLayout(self.minmax_contour_layout)
+
+    self.min_groupbox = QtGui.QGroupBox("Min")
+    self.min_layout = QtGui.QVBoxLayout()
+    self.min_groupbox.setLayout(self.min_layout)
+
+    self.min_radio_layout = QtGui.QVBoxLayout()
+    
+    self.min_current_radio = QtGui.QRadioButton('Current')
+    self.min_current_radio.setChecked(QtCore.Qt.Checked)
+    self.min_current_radio.toggled.connect(self._updateContours)
+    self.min_global_radio = QtGui.QRadioButton('Global')
+    self.min_global_radio.toggled.connect(self._updateContours)
+    self.min_radio_layout.addWidget(self.min_current_radio)
+#    self.min_radio_layout.addWidget(self.min_global_radio)
+    
+    self.min_custom_layout = QtGui.QHBoxLayout()
+    self.min_custom_layout.setSpacing(0)
+    self.min_custom_radio = QtGui.QRadioButton()
+    self.min_custom_radio.toggled.connect(self._updateContours)
+    self.min_custom_text = QtGui.QLineEdit()
+    self.min_custom_text.returnPressed.connect(self._updateContours)
+    self.min_custom_text.setDisabled(True)
+    self.min_custom_text.setMaximumWidth(50)
+    self.min_custom_layout.addWidget(self.min_custom_radio, alignment=QtCore.Qt.AlignLeft)
+    self.min_custom_layout.addWidget(self.min_custom_text, alignment=QtCore.Qt.AlignLeft)
+    self.min_custom_layout.addStretch()
+
+    self.min_layout.addLayout(self.min_radio_layout)
+    self.min_layout.addLayout(self.min_custom_layout)
+    
+    self.minmax_contour_layout.addWidget(self.min_groupbox)
+
+
+
+    self.max_groupbox = QtGui.QGroupBox("Max")
+    self.max_layout = QtGui.QVBoxLayout()
+    self.max_groupbox.setLayout(self.max_layout)
+
+    self.max_radio_layout = QtGui.QVBoxLayout()
+    
+    self.max_current_radio = QtGui.QRadioButton('Current')
+    self.max_current_radio.setChecked(QtCore.Qt.Checked)
+    self.max_current_radio.toggled.connect(self._updateContours)
+    self.max_global_radio = QtGui.QRadioButton('Global')
+    self.max_global_radio.toggled.connect(self._updateContours)
+    self.max_radio_layout.addWidget(self.max_current_radio)
+#    self.max_radio_layout.addWidget(self.max_global_radio)
+    
+    self.max_custom_layout = QtGui.QHBoxLayout()
+    self.max_custom_layout.setSpacing(0)
+    self.max_custom_radio = QtGui.QRadioButton()
+    self.max_custom_radio.toggled.connect(self._updateContours)
+    self.max_custom_text = QtGui.QLineEdit()
+    self.max_custom_text.returnPressed.connect(self._updateContours)
+    self.max_custom_text.setDisabled(True)
+    self.max_custom_text.setMaximumWidth(50)
+    self.max_custom_layout.addWidget(self.max_custom_radio, alignment=QtCore.Qt.AlignLeft)
+    self.max_custom_layout.addWidget(self.max_custom_text, alignment=QtCore.Qt.AlignLeft)
+    self.max_custom_layout.addStretch()
+
+    self.max_layout.addLayout(self.max_radio_layout)
+    self.max_layout.addLayout(self.max_custom_layout)
+    
+    self.minmax_contour_layout.addWidget(self.max_groupbox)
+
+
+
+
+    self.left_controls_layout.addWidget(self.contour_groupbox)
 
     self.beginning_button = QtGui.QToolButton()
     self.beginning_button.setToolTip('Go to first timestep')
@@ -346,12 +431,12 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       
     if num_components > 1 and  self.exodus_result.current_dim == 3:
       self.variable_component.addItem('Z')
-
-    self._variableComponentSelected('Magnitude')
     
   def _contourVariableSelected(self, value):
     value_string = str(value)
     self.current_variable = value_string
+
+    self.currently_restoring_contours = True
 
     # Maybe results haven't been written yet...
     if not self.exodus_result.data.GetPointData().GetVectors(value_string) and not self.exodus_result.data.GetCellData().GetVectors(value_string):
@@ -361,9 +446,17 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self._fillComponentCombo(value_string, self.exodus_result.current_nodal_components)
     elif value_string in self.exodus_result.current_elemental_components:
       self._fillComponentCombo(value_string, self.exodus_result.current_elemental_components)
+
+    if self.current_variable not in self.contour_choices:
+      self.contour_choices[self.current_variable] = ContourChoices()
+
+    self.contour_choices[self.current_variable].restore(self)
+    self.currently_restoring_contours = False
+      
     
   def _variableComponentSelected(self, value):
     value_string = str(value)
+    self.current_component = value_string
     if value_string == 'Magnitude':
       self.exodus_result.lut.SetVectorModeToMagnitude()
       self.component_index = -1
@@ -389,20 +482,60 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.exodus_result.clip_geom.Update()
       self.exodus_result.clip_mapper.Update()
 
+    data = None
     if self.current_variable in self.exodus_result.current_nodal_components:
       data = self.exodus_result.data.GetPointData().GetVectors(self.current_variable)
-      if data:
-        self.exodus_result.mapper.SetScalarModeToUsePointFieldData()
-        self.exodus_result.mapper.SetScalarRange(data.GetRange(self.component_index))
-        self.exodus_result.clip_mapper.SetScalarModeToUsePointFieldData()
-        self.exodus_result.clip_mapper.SetScalarRange(data.GetRange(self.component_index))
+      self.exodus_result.mapper.SetScalarModeToUsePointFieldData()
+      self.exodus_result.clip_mapper.SetScalarModeToUsePointFieldData()
     elif self.current_variable in self.exodus_result.current_elemental_components:
       data = self.exodus_result.data.GetCellData().GetVectors(self.current_variable)
-      if data:
-        self.exodus_result.mapper.SetScalarModeToUseCellFieldData()
-        self.exodus_result.mapper.SetScalarRange(data.GetRange(self.component_index))
-        self.exodus_result.clip_mapper.SetScalarModeToUseCellFieldData()
-        self.exodus_result.clip_mapper.SetScalarRange(data.GetRange(self.component_index))
+      self.exodus_result.mapper.SetScalarModeToUseCellFieldData()
+      self.exodus_result.clip_mapper.SetScalarModeToUseCellFieldData()
+
+    if data:
+      self.current_range = data.GetRange(self.component_index)
+
+      if self.min_current_radio.isChecked():
+        self.min_custom_text.setText(str(self.current_range[0]))
+        self.min_custom_text.setCursorPosition(0)
+
+      if self.max_current_radio.isChecked():
+        self.max_custom_text.setText(str(self.current_range[1]))
+        self.max_custom_text.setCursorPosition(0)
+
+      if self.min_custom_radio.isChecked():
+        self.min_custom_text.setDisabled(False)
+      else:
+        self.min_custom_text.setDisabled(True)
+
+      if self.max_custom_radio.isChecked():
+        self.max_custom_text.setDisabled(False)
+      else:
+        self.max_custom_text.setDisabled(True)
+
+      min = 0.0      
+      try:
+        min = float(self.min_custom_text.displayText())
+      except:
+        min = 0.0
+
+      max = 0.0      
+      try:
+        max = float(self.max_custom_text.displayText())
+      except:
+        max = 0.0
+
+      if self.current_variable not in self.contour_choices:
+        self.contour_choices[self.current_variable] = ContourChoices()
+
+      if not self.currently_restoring_contours:
+        self.contour_choices[self.current_variable].save(self)
+
+      the_range = (min, max)
+
+      if min < max:
+        self.exodus_result.mapper.SetScalarRange(the_range)
+        self.exodus_result.clip_mapper.SetScalarRange(the_range)
 
     self.exodus_result.mapper.SelectColorArray(self.current_variable)
     self.exodus_result.clip_mapper.SelectColorArray(self.current_variable)
