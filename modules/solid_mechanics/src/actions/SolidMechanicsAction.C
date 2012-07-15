@@ -15,6 +15,7 @@ InputParameters validParams<SolidMechanicsAction>()
   params.addParam<std::string>("temp", "", "The temperature");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.set<bool>("use_displaced_mesh") = true;
+  params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that these kernels will be applied to");
   return params;
 }
 
@@ -33,7 +34,18 @@ SolidMechanicsAction::act()
 {
   // list of subdomains IDs per coordinate system
   std::map<Moose::CoordinateSystemType, std::vector<SubdomainName> > coord_map;
-  const std::set<SubdomainID> & subdomains = _problem->mesh().meshSubdomains();
+  std::set<SubdomainID> subdomains;
+  
+  if(isParamValid("block")) // Should it be restricted to certain blocks?
+  {
+    std::cout<<"Restricting to blocks!"<<std::endl;
+    std::vector<SubdomainName> block = getParam<std::vector<SubdomainName> >("block");
+    for(unsigned int i=0; i < block.size(); i++)
+      subdomains.insert(_problem->mesh().getSubdomainID(block[i]));
+  }  
+  else // Put it everywhere
+    subdomains = _problem->mesh().meshSubdomains();
+  
   for (std::set<SubdomainID>::const_iterator it = subdomains.begin(); it != subdomains.end(); ++it)
   {
     SubdomainID sid = *it;
@@ -46,6 +58,7 @@ SolidMechanicsAction::act()
 
     coord_map[coord_type].push_back(sname);
   }
+  
 
   for (std::map<Moose::CoordinateSystemType, std::vector<SubdomainName> >::iterator it = coord_map.begin(); it != coord_map.end(); ++it)
   {
