@@ -3,6 +3,10 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.Qt import *
 from GenSyntax import *
 
+pathname = os.path.dirname(sys.argv[0])        
+pathname = os.path.abspath(pathname)
+
+
 try:
   _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -88,12 +92,11 @@ class ParamTable:
     
     self.init_menu(self.layoutV)
     self.table_widget = QtGui.QTableWidget()
-    self.table_widget.setColumnCount(5)
+    self.table_widget.setColumnCount(4)
     self.table_widget.setHorizontalHeaderItem(0, QtGui.QTableWidgetItem('Name'))
     self.table_widget.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem('Value'))
     self.table_widget.setHorizontalHeaderItem(2, QtGui.QTableWidgetItem('Options'))
-    self.table_widget.setHorizontalHeaderItem(3, QtGui.QTableWidgetItem('Description'))
-    self.table_widget.setHorizontalHeaderItem(4, QtGui.QTableWidgetItem('Comment'))
+    self.table_widget.setHorizontalHeaderItem(3, QtGui.QTableWidgetItem('Comment'))
     self.table_widget.verticalHeader().setVisible(False)
     self.table_widget.setMinimumHeight(300)
     self.layoutV.addWidget(self.table_widget)
@@ -178,7 +181,7 @@ class ParamTable:
           item.setText(str(the_data[row_name]))
 
         if row_name in self.param_comments:
-          item = self.table_widget.item(i,4)
+          item = self.table_widget.item(i,3)
           item.setText(self.param_comments[row_name])
           
         used_params.append(row_name)
@@ -192,7 +195,7 @@ class ParamTable:
         comment_item = QtGui.QTableWidgetItem()
         self.table_widget.setItem(self.table_widget.rowCount()-1,0,name_item)
         self.table_widget.setItem(self.table_widget.rowCount()-1,1,value_item)
-        self.table_widget.setItem(self.table_widget.rowCount()-1,4,comment_item)
+        self.table_widget.setItem(self.table_widget.rowCount()-1,3,comment_item)
 
         
 
@@ -222,7 +225,7 @@ class ParamTable:
           if param_name == 'parent_params' or param_name == 'type':  #Pass through type and parent_params even if we didn't change them
              the_data[param_name] = param_value
 
-      comment = str(self.table_widget.item(i,4).text())
+      comment = str(self.table_widget.item(i,3).text())
 
       if comment != '':
         self.param_comments[param_name] = comment
@@ -266,6 +269,8 @@ class ParamTable:
 
   def click_new_row(self):
     self.table_widget.insertRow(self.table_widget.rowCount())
+    comment_item = QtGui.QTableWidgetItem()
+    self.table_widget.setItem(self.table_widget.rowCount()-1, 3, comment_item)
 
   def result(self):
     return self.table_data
@@ -438,19 +443,16 @@ class ParamTable:
         options_item = OptionsWidget(self.table_widget,row,param['options'].split(' '), self.isVectorType(param['cpp_type']))
         self.table_widget.setCellWidget(row, 2, options_item)
       
-      doc_item = QtGui.QTableWidgetItem(param['description'])
-
       name_item.setFlags(QtCore.Qt.ItemIsEnabled)
-      doc_item.setFlags(QtCore.Qt.ItemIsEnabled)
+      name_item.setToolTip(param['description'])
 
       if ((has_type_subblock or not has_parent_params_set) and param['name'] == 'type' and str(item) != '*') or param['name'] == 'parent_params' or (has_parent_params_set and param['name'] == 'Name'):
         value_item.setFlags(QtCore.Qt.NoItemFlags)
 
       self.table_widget.setItem(row, 0, name_item)
-      self.table_widget.setItem(row, 3, doc_item)
       
       comment_item = QtGui.QTableWidgetItem()
-      self.table_widget.setItem(row, 4, comment_item)
+      self.table_widget.setItem(row, 3, comment_item)
       
       row += 1
 
@@ -460,8 +462,6 @@ class ParamTable:
       self.fillTableWithData(saved_data, old_params=saved_params)
 
     self.table_widget.resizeColumnsToContents()
-    
-    self.table_widget.cellChanged.connect(self.cellChanged)
     
   def cellChanged(self, row, col):
     pass
