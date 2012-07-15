@@ -307,6 +307,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       variables_item = variables_items[0]
       variable_names = self._getChildNames(variables_item)
       if len(variable_names):
+        type_options['std::vector<NonlinearVariableName>'] = set(variable_names)
+        type_options['NonlinearVariableName'] = set(variable_names)
         type_options['std::vector<VariableName>'] = set(variable_names)
         type_options['VariableName'] = set(variable_names)
 
@@ -315,6 +317,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       aux_variables_item = aux_variables_items[0]
       aux_variable_names = self._getChildNames(aux_variables_item)
       if len(aux_variable_names):
+        type_options['std::vector<AuxVariableName>'] = set(aux_variable_names)
+        type_options['AuxVariableName'] = set(aux_variable_names)
         type_options['std::vector<VariableName>'] |= set(aux_variable_names)
         type_options['VariableName'] |= set(aux_variable_names)
 

@@ -287,9 +287,6 @@ class ParamTable:
     if new_text != '' and param['name'] == 'type':
       param['default'] = new_text['name'].split('/').pop()
 
-    if param['name'] == 'variable':
-      param['cpp_type'] = 'VariableName'
-
     if param['name'] == 'block':
       param['cpp_type'] = 'std::vector<BlockName>'
 
@@ -298,9 +295,6 @@ class ParamTable:
 
     if param['name'] == 'function':
       param['cpp_type'] = 'FunctionName'
-
-    if param['name'] == 'file':
-      param['cpp_type'] = 'FileType'
 
   def isVectorType(self, cpp_type):
     if 'vector' in cpp_type:
@@ -432,7 +426,7 @@ class ParamTable:
         value_item = QtGui.QTableWidgetItem(value)
         self.table_widget.setItem(row, 1, value_item)
         
-      if 'cpp_type' in param and param['cpp_type'] == 'FileType':
+      if 'cpp_type' in param and param['cpp_type'] == 'MeshFileName':
         options_item = FileOpenWidget(self.table_widget,row,self.isVectorType(param['cpp_type']))
         self.table_widget.setCellWidget(row, 2, options_item)
 
