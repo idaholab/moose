@@ -81,6 +81,8 @@ class ExodusResult:
     self.mapper.SetInput(self.data)
     self.mapper.ScalarVisibilityOn()
     self.mapper.SetLookupTable(self.lut)
+    self.mapper.SetColorModeToMapScalars()
+    self.mapper.InterpolateScalarsBeforeMappingOn()
     
     self.actor = vtk.vtkActor()
     self.current_actors.append(self.actor)
