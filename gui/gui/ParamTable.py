@@ -341,7 +341,7 @@ class ParamTable:
           found_it = True
           #the_table_data.append({'name':'type','default':new_text['name'].split('/').pop(),'description':'The object type','required':True})
           for param in new_text['parameters']:
-            if 'defualt' not in param:
+            if 'default' not in param:
               param['default'] = ''
             self.modifyCppType(param, new_text)
             the_table_data.append(param)
@@ -360,7 +360,7 @@ class ParamTable:
                   found_it = True
                   has_parent_params_set = True
                   for param in sb['parameters']:
-                    if 'defualt' not in param:
+                    if 'default' not in param:
                       param['default'] = ''
                     self.modifyCppType(param, sb)
 
@@ -379,7 +379,7 @@ class ParamTable:
       for param in self.main_data['parameters']:
         if has_type_subblock and param['name'] == 'type':
           continue
-        if 'defualt' not in param:
+        if 'default' not in param:
           param['default'] = ''
         self.modifyCppType(param, '')
           
