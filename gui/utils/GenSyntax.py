@@ -68,8 +68,6 @@ class GenSyntax():
       pickle.dump(raw_data, open(raw_yaml_dump_file_name, 'wb'))
       self.saved_raw_data = raw_data
       
-      print "\nRecaching syntax. Subsequent startup times will be greatly reduced."
-      
       data = yaml.load(raw_data)
       pickle.dump(data, open(yaml_dump_file_name, 'wb'))
 
