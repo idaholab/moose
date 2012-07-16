@@ -42,7 +42,7 @@
   active = empty
 
   [./empty]
-    type = EmptyMaterial
+    type = MTMaterial
     block = 0
   [../]
 []

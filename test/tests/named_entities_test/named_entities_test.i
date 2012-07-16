@@ -93,7 +93,7 @@
   [../]
 
   [./empty]
-    type = EmptyMaterial
+    type = MTMaterial
     block = 'center_block'
   [../]
 []

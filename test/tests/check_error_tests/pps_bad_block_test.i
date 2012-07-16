@@ -38,15 +38,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
-[]
-
 [Postprocessors]
   [./avg_block_2]
     type = ElementAverageValue

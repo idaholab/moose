@@ -45,13 +45,6 @@
   [../]
 []
 
-[Materials]
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
-[]
-
 [Executioner]
   type = Steady
   petsc_options = '-snes_mf_operator'

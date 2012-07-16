@@ -53,13 +53,6 @@
   [../]
 []
 
-[Materials]
-  [./empty]
-    type = EmptyMaterial
-    block = 0
-  [../]
-[]
-
 [Executioner]
   type = Transient
 

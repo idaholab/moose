@@ -51,7 +51,7 @@
   active = empty
 
   [./empty]
-    type = EmptyMaterial
+    type = MTMaterial
     block = 'wood steel'
   [../]
 []

@@ -50,13 +50,6 @@
   [../]
 []
 
-[Materials]
-  [./empty]
-    type = EmptyMaterial
-    block = '1 2'
-  [../]
-[]
-
 [Postprocessors]
   [./volume]
     type = ElementIntegral

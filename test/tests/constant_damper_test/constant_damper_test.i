@@ -39,15 +39,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
-[]
-
 [Dampers]
   [./u_damp]
     type = ConstantDamper

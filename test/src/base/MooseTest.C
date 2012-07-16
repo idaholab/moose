@@ -50,7 +50,6 @@
 
 #include "TEIC.h"
 
-#include "EmptyMaterial.h"
 #include "MTMaterial.h"
 #include "Diff1Material.h"
 #include "Diff2Material.h"
@@ -164,7 +163,6 @@ MooseTestApp::registerObjects()
   registerInitialCondition(TEIC);
 
   // Materials
-  registerMaterial(EmptyMaterial);
   registerMaterial(MTMaterial);
   registerMaterial(Diff1Material);
   registerMaterial(Diff2Material);

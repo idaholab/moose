@@ -11,15 +11,6 @@
   petsc_options = '-snes_mf_operator'
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
-[]
-
 [BCs]
   active = 'left right'
 

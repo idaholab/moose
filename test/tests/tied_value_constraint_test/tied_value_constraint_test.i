@@ -46,15 +46,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
-[]
-
 [Preconditioning]
 #  active = 'FDP'
   active = ' '

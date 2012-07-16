@@ -83,15 +83,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 0 #This is 0 because we are creating our own Mesh
-  [../]
-[]
-
 [Executioner]
   type = Transient
   dt = .1
