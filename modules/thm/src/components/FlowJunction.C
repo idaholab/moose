@@ -6,6 +6,9 @@
 #include <sstream>
 
 #include "FlowJunctionConstraint.h"
+#include "OneDMassStaticPandTBC.h"
+#include "OneDMomentumCoupledPTBC.h"
+#include "OneDEnergyCoupledPTBC.h"
 
 #include "Function.h"
 #include "EquationOfState.h"
@@ -117,7 +120,7 @@ FlowJunction::addVariables()
   Function & func = feproblem.getFunction(getParam<std::string>("eos_function"));
   EquationOfState& _eos = dynamic_cast<EquationOfState&>(func);
 
-  std::cout << "initial T " << _initial_T << std::endl;
+  //std::cout << "initial T " << _initial_T << std::endl;
 
   Real _initial_specific_int_energy = 0.;
   if(_model_type == Model::EQ_MODEL_3)
@@ -125,21 +128,29 @@ FlowJunction::addVariables()
 	  _initial_specific_int_energy = _eos.invert_eos_internal_energy(_initial_T);
   }
 
-  std::cout << "initial e " << _initial_specific_int_energy << std::endl;
+  //std::cout << "initial e " << _initial_specific_int_energy << std::endl;
 
   Real _initial_rho = _eos.invert_eos_rho(_initial_P, _initial_specific_int_energy);
 
   if(_model_type == Model::EQ_MODEL_2)
   {
-	  _sim.addVariable(true, _FlowJunction_var_name, FEType(FIRST, SCALAR), 0, 1.);	//FIXME: is '1' the best scaling factor?
-	  _sim.addScalarInitialCondition(_FlowJunction_var_name, _initial_rho);
-  }
-  else if (_model_type == Model::EQ_MODEL_3)
-  {
+	  //_sim.addVariable(true, _FlowJunction_var_name, FEType(FIRST, SCALAR), 0, 1.);	//FIXME: is '1' the best scaling factor?
 	  _sim.addVariable(true, _FlowJunction_var_name, FEType(SECOND, SCALAR), 0, 1.);	//FIXME: is '1' the best scaling factor?
 	  std::vector<Real> _initial_conditions(2, 0.);
 	  _initial_conditions[0] = _initial_rho;
-	  _initial_conditions[1] = _initial_specific_int_energy;
+	  _initial_conditions[1] = 0.;
+	  //std::cout << "~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+	  //std::cout << _initial_conditions[0] << " " << _initial_conditions[1] << std::endl;
+	  _sim.addScalarInitialCondition(_FlowJunction_var_name, _initial_conditions);
+  }
+  else if (_model_type == Model::EQ_MODEL_3)
+  {
+	  //_sim.addVariable(true, _FlowJunction_var_name, FEType(SECOND, SCALAR), 0, 1.);	//FIXME: is '1' the best scaling factor?
+	  _sim.addVariable(true, _FlowJunction_var_name, FEType(THIRD, SCALAR), 0, 1.);	//rho_branch, e_branch, net_mass_in_branch
+	  std::vector<Real> _initial_conditions(3, 0.);
+	  _initial_conditions[0] = _initial_rho;
+	  _initial_conditions[1] = 0.;
+	  _initial_conditions[2] = _initial_specific_int_energy;
 	  _sim.addScalarInitialCondition(_FlowJunction_var_name, _initial_conditions);
   }
   else
@@ -154,6 +165,8 @@ FlowJunction::addMooseObjects()
   std::vector<std::string> cv_rho(1, Model::RHO);
   std::vector<std::string> cv_rhou(1, Model::RHOU);
   std::vector<std::string> cv_rhoE(1, Model::RHOE);
+
+  std::vector<std::string> cv_flowjunction_var(1, _FlowJunction_var_name);
 
   //add constraint
   {
@@ -181,4 +194,45 @@ FlowJunction::addMooseObjects()
     _sim.addScalarKernel("FlowJunctionConstraint", genName("ScalarKernel", _id, _name), params);
   }
 
+  //add BC's
+  for (unsigned int i = 0; i < _bnd_id.size(); i++)
+  {
+	  std::vector<unsigned int> bnd_id(1, _bnd_id[i]);
+	  // adding mass equation BC
+	  {
+	    InputParameters params = validParams<OneDMassStaticPandTBC>();
+	    //params.set<std::string>("variable") = Model::RHO;
+	    params.set<NonlinearVariableName>("variable") = Model::RHO;
+	    params.set<std::vector<unsigned int> >("boundary") = bnd_id;
+	    // coupling
+	    params.set<std::vector<std::string> >("u") = cv_u;
+	    params.set<std::vector<std::string> >("rhou") = cv_rhou;
+	    // additional params
+	    //params.set<Real>("p_in") = _p_bc;
+	    //params.set<Real>("T_in") = _T_bc;
+	    //params.set<std::string>("eos_function") = getParam<std::string>("eos_function");
+
+	    _sim.addBoundaryCondition("OneDMassStaticPandTBC", genName("bc", _id * 1000 + i, "rho"), params);
+	  }
+	  /*
+	  {
+	    InputParameters params = validParams<OneDMomentumCoupledPTBC>();
+	    params.set<std::string>("variable") = Model::RHOU;
+	    params.set<std::vector<unsigned int> >("boundary") = bnd_id;
+	    // coupling
+	    params.set<std::vector<std::string> >("u") = cv_u;
+	    params.set<std::vector<std::string> >("rho") = cv_rho;
+	    // additional params
+	    //params.set<Real>("p_in") = _p_bc;
+	    //params.set<Real>("T_in") = _T_bc;
+	    params.set<std::string>("eos_function") = getParam<std::string>("eos_function");
+
+	    params.set<std::vector<std::string> >("FlowJunctionVar") = cv_flowjunction_var;
+	    params.set<Real>("k_coeff") = _k_coeffs[i];
+	    params.set<Real>("k_coeff_reverse") = _k_coeffs[i];	//FIXME
+
+	    _sim.addBoundaryCondition("OneDMomentumCoupledPTBC", genName("bc", _id * 1000 + i, "rhou"), params);
+	  }
+	  */
+  }
 }
