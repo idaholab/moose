@@ -42,9 +42,6 @@ function_file_test4 = { INPUT : 'function_file_test4.i',
 bad_material_block_test = { INPUT : 'bad_material_block_test.i',
                             EXPECT_ERR : 'Material block \S+ specified in the input file does not exist' }
 
-missing_material_test = { INPUT : 'missing_material_test.i',
-                          EXPECT_ERR : "The following blocks from your input mesh do not contain on active material: \d+" }
-
 missing_material_prop_test = { INPUT : 'missing_material_prop_test.i',
                                EXPECT_ERR : "No material defined on block \d+" }
 
