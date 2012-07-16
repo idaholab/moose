@@ -25,7 +25,7 @@ DEP_APPS	?= $(shell scripts/find_dep_apps.py MOOSE)
 
 #Note: If you are a developer this will not work
 # This line assumes that moose and libmesh are peer dirs
-LIBMESH_DIR     ?= $(shell pwd)/../libmesh
+LIBMESH_DIR     ?= $(ROOT_DIR)/libmesh
 include build.mk
 include moose.mk
 
