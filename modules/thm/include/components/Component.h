@@ -67,6 +67,23 @@ public:
    */
   virtual std::string variableName(std::string piece) = 0;
 
+  template<typename T>
+  const T &
+  getRParam(const std::string & param_name);
+
+  template<typename T>
+  void
+  setRParam(const std::string & param_name, const T & value);
+
+  /**
+   * Get the names of MOOSE objects for given RAVEN name
+   * @param rname The RAVEN name
+   * @return the MOOSE object names
+   */
+  const std::vector<std::string> & getMooseObjectsByName(const std::string rname) { return _rname_map[rname]; }
+
+  void connectObject(const std::string & rname, const std::string & mooseName);
+
   //LZou test
   //virtual void update();
   virtual void onResidual() {}
@@ -83,16 +100,22 @@ protected:
   std::string _input_file_name;
   std::vector<unsigned int> _subdomains;     ///< List of subdomain IDs this components owns
 
+  /// Mapping from a friendly name to MOOSE object name
+  std::map<std::string, std::vector<std::string> > _rname_map;
+
   virtual unsigned int getNextSubdomainId();
   virtual unsigned int getNextBCId();
 
   static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
   static std::string genName(const std::string & prefix, const std::string & suffix);
 
+  static std::vector<std::string> split(const std::string & rname);
+
 private:
   // Do not want users to touch these, they _must_ use the API
   static unsigned int subdomain_ids;
   static unsigned int bc_ids;
 };
+
 
 #endif /* COMPONENT_H */
