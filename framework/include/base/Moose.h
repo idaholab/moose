@@ -32,9 +32,9 @@
  */
 typedef Real                     PostprocessorValue;
 typedef boundary_id_type         BoundaryID;
-typedef std::string              BoundaryName;
+//typedef std::string              BoundaryName;
 typedef subdomain_id_type        SubdomainID;
-typedef std::string              SubdomainName;
+//typedef std::string              SubdomainName;
 
 /**
  * MOOSE wrapped versions of useful libMesh macros (see libmesh_common.h)

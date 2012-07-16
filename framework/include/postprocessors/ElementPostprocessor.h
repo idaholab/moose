@@ -24,6 +24,7 @@
 #include "UserObjectInterface.h"
 // libMesh
 #include "elem.h"
+#include "MooseTypes.h"
 
 //Forward Declarations
 class ElementPostprocessor;

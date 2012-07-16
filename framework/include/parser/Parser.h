@@ -152,21 +152,9 @@ protected:
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
    * since they are called only from this Object
    */
-
   template<typename T>
   void setScalarParameter(const std::string & full_name, const std::string & short_name,
                           InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
-
-//  template<>
-//  void setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name,
-//                                     InputParameters::Parameter<MooseEnum>* param, bool in_global, GlobalParamsAction *global_block);
-
-
-  void setRealVectorValue(const std::string & full_name, const std::string & short_name,
-                          InputParameters::Parameter<RealVectorValue>* param, bool in_global, GlobalParamsAction *global_block);
-
-  void setRealTensorValue(const std::string & full_name, const std::string & short_name,
-                          InputParameters::Parameter<RealTensorValue>* param, bool in_global, GlobalParamsAction *global_block);
 
   template<typename T>
   void setVectorParameter(const std::string & full_name, const std::string & short_name,

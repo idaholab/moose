@@ -68,7 +68,7 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
   if(dynamic_cast<ElementPostprocessor*>(postprocessor))
   {
     const std::vector<SubdomainName> & blocks = dynamic_cast<ElementPostprocessor*>(postprocessor)->blocks();
-    for (std::vector<std::string>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+    for (std::vector<SubdomainName>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
     {
       SubdomainID block_id;
       // Switch the Any Block Id string to a number type here

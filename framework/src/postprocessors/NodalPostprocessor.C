@@ -23,7 +23,7 @@ InputParameters validParams<NodalPostprocessor>()
 {
   InputParameters params = validParams<Postprocessor>();
   params.addRequiredParam<VariableName>("variable", "The name of the variable that this postprocessor operates on");
-  std::vector<std::string> everywhere(1);
+  std::vector<BoundaryName> everywhere(1);
   everywhere[0] = "ANY_BOUNDARY_ID";
   params.addParam<std::vector<BoundaryName> >("boundary", everywhere, "boundary ID or name where the postprocessor works");
   return params;

@@ -20,6 +20,7 @@
 #include "BndNode.h"
 #include "BndElement.h"
 #include "Moose.h"
+#include "MooseTypes.h"
 
 // libMesh
 #include "mesh.h"
@@ -178,12 +179,12 @@ public:
   /**
    * This method returns a writable reference to a subdomain name based on the id parameter
    */
-  SubdomainName & subdomainName(SubdomainID subdomain_id) { return _mesh.subdomain_name(subdomain_id); }
+  void setSubdomainName(SubdomainID subdomain_id, SubdomainName name);
 
   /**
    * This method returns a writable reference to a boundary name based on the id parameter
    */
-  BoundaryName & boundaryName(BoundaryID boundary_id);
+  void setBoundaryName(BoundaryID boundary_id, BoundaryName name);
 
   libMesh::Mesh _mesh;
 

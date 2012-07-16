@@ -30,7 +30,7 @@ AddMaterialAction::AddMaterialAction(const std::string & name, InputParameters p
 void
 AddMaterialAction::act()
 {
-  std::vector<std::string> blocks = _moose_object_pars.get<std::vector<std::string> >("block");
+  std::vector<SubdomainName> blocks = _moose_object_pars.get<std::vector<SubdomainName> >("block");
 
   _problem->addMaterial(_type, getShortName(), _moose_object_pars);
 }

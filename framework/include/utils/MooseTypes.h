@@ -36,5 +36,7 @@ DerivativeStringClass(MeshFileName);
 DerivativeStringClass(VariableName);
 DerivativeStringClass(NonlinearVariableName);
 DerivativeStringClass(AuxVariableName);
+DerivativeStringClass(BoundaryName);
+DerivativeStringClass(SubdomainName);
 
 #endif // FILENAME_H

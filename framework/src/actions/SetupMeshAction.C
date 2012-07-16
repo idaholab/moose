@@ -103,7 +103,7 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
       if (seen_it.find(names[i]) != seen_it.end())
         mooseError("The following dynamic block name is not unique: " + names[i]);
       seen_it.insert(names[i]);
-      mesh->subdomainName(ids[i]) = names[i];
+      mesh->setSubdomainName(ids[i], names[i]);
     }
 
   }
@@ -120,7 +120,7 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
     {
       if (seen_it.find(names[i]) != seen_it.end())
         mooseError("The following dynamic boundary name is not unique: " + names[i]);
-      mesh->boundaryName(ids[i]) = names[i];
+      mesh->setBoundaryName(ids[i], names[i]);
       seen_it.insert(names[i]);
     }
   }

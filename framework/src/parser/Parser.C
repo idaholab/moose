@@ -50,6 +50,14 @@ template<>
 void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name,
                                            InputParameters::Parameter<MooseEnum>* param, bool in_global, GlobalParamsAction *global_block);
 
+template<>
+void Parser::setScalarParameter<RealVectorValue>(const std::string & full_name, const std::string & short_name,
+                                                 InputParameters::Parameter<RealVectorValue> * param, bool in_global, GlobalParamsAction * global_block);
+
+template<>
+void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, const std::string & short_name,
+                                                 InputParameters::Parameter<RealTensorValue> * param, bool in_global, GlobalParamsAction * global_block);
+
 
 Parser::Parser(ActionWarehouse & action_wh) :
     _action_wh(action_wh),
@@ -537,6 +545,8 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       InputParameters::Parameter<unsigned int>  * uint_param  = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it->second);
       InputParameters::Parameter<SubdomainID>  * subdomain_id_param  = dynamic_cast<InputParameters::Parameter<SubdomainID>*>(it->second);
       InputParameters::Parameter<BoundaryID>  * boundary_id_param  = dynamic_cast<InputParameters::Parameter<BoundaryID>*>(it->second);
+      InputParameters::Parameter<SubdomainName>  * subdomain_name_param  = dynamic_cast<InputParameters::Parameter<SubdomainName>*>(it->second);
+      InputParameters::Parameter<BoundaryName>  * boundary_name_param  = dynamic_cast<InputParameters::Parameter<BoundaryName>*>(it->second);
       InputParameters::Parameter<bool> * bool_param = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
       InputParameters::Parameter<RealVectorValue> * real_vec_val_param = dynamic_cast<InputParameters::Parameter<RealVectorValue>*>(it->second);
       InputParameters::Parameter<RealTensorValue> * real_tensor_val_param = dynamic_cast<InputParameters::Parameter<RealTensorValue>*>(it->second);
@@ -560,6 +570,8 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       InputParameters::Parameter<std::vector<VariableName> > * vec_var_name_param = dynamic_cast<InputParameters::Parameter<std::vector<VariableName> >*>(it->second);
       InputParameters::Parameter<std::vector<NonlinearVariableName> > * vec_nl_var_name_param = dynamic_cast<InputParameters::Parameter<std::vector<NonlinearVariableName> >*>(it->second);
       InputParameters::Parameter<std::vector<AuxVariableName> > * vec_aux_var_name_param = dynamic_cast<InputParameters::Parameter<std::vector<AuxVariableName> >*>(it->second);
+      InputParameters::Parameter<std::vector<SubdomainName>  > * vec_subdomain_name_param  = dynamic_cast<InputParameters::Parameter<std::vector<SubdomainName> >*>(it->second);
+      InputParameters::Parameter<std::vector<BoundaryName>  > * vec_boundary_name_param  = dynamic_cast<InputParameters::Parameter<std::vector<BoundaryName> >*>(it->second);
 
 
       if (real_param)
@@ -570,15 +582,19 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setScalarParameter<SubdomainID>(full_name, it->first, subdomain_id_param, in_global, global_params_block);
       else if (boundary_id_param)
         setScalarParameter<BoundaryID>(full_name, it->first, boundary_id_param, in_global, global_params_block);
+      else if (subdomain_name_param)
+        setScalarParameter<SubdomainName>(full_name, it->first, subdomain_name_param, in_global, global_params_block);
+      else if (boundary_name_param)
+        setScalarParameter<BoundaryName>(full_name, it->first, boundary_name_param, in_global, global_params_block);
       else if (uint_param)
         setScalarParameter<unsigned int>(full_name, it->first, uint_param, in_global, global_params_block);
       else if (bool_param)
         setScalarParameter<bool>(full_name, it->first, bool_param, in_global, global_params_block);
       // Real Vector Param
       else if (real_vec_val_param)
-        setRealVectorValue(full_name, it->first, real_vec_val_param, in_global, global_params_block);
+        setScalarParameter<RealVectorValue>(full_name, it->first, real_vec_val_param, in_global, global_params_block);
       else if (real_tensor_val_param)
-        setRealTensorValue(full_name, it->first, real_tensor_val_param, in_global, global_params_block);
+        setScalarParameter<RealTensorValue>(full_name, it->first, real_tensor_val_param, in_global, global_params_block);
       else if (string_param)
         setScalarParameter<std::string>(full_name, it->first, string_param, in_global, global_params_block);
       else if (file_name_param)
@@ -613,34 +629,12 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setVectorParameter<NonlinearVariableName>(full_name, it->first, vec_nl_var_name_param, in_global, global_params_block);
       else if (vec_aux_var_name_param)
         setVectorParameter<AuxVariableName>(full_name, it->first, vec_aux_var_name_param, in_global, global_params_block);
+      else if (vec_subdomain_name_param)
+        setVectorParameter<SubdomainName>(full_name, it->first, vec_subdomain_name_param, in_global, global_params_block);
+      else if (vec_boundary_name_param)
+        setVectorParameter<BoundaryName>(full_name, it->first, vec_boundary_name_param, in_global, global_params_block);
     }
   }
-}
-
-void Parser::setRealVectorValue(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<RealVectorValue> * param, bool in_global, GlobalParamsAction * global_block)
-{
-  GetPot *gp;
-
-  // See if this variable was passed on the command line
-  // if it was then we will retrieve the value from the command line instead of the file
-  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
-    gp = Moose::app->commandLine().getPot();
-  else
-    gp = &_getpot_file;
-
-  int vec_size = gp->vector_variable_size(full_name.c_str());
-
-  if (vec_size != LIBMESH_DIM)
-    mooseError(std::string("Error in RealVectorValue parameter ") + full_name + ": size is " << vec_size
-               << ", should be " << LIBMESH_DIM);
-
-  RealVectorValue value;
-  for (int i = 0; i < vec_size; ++i)
-    value(i) = Real(gp->get_value_no_default(full_name.c_str(), (Real) 0.0, i));
-
-  param->set() = value;
-  if (in_global)
-    global_block->setScalarParam<RealVectorValue>(short_name) = value;
 }
 
 template<typename T>
@@ -688,7 +682,55 @@ void Parser::setVectorParameter(const std::string & full_name, const std::string
   }
 }
 
-void Parser::setRealTensorValue(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<RealTensorValue> * param, bool in_global, GlobalParamsAction * global_block)
+template<>
+void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<MooseEnum> * param, bool in_global, GlobalParamsAction * global_block)
+{
+  GetPot *gp;
+
+  // See if this variable was passed on the command line
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
+    gp = Moose::app->commandLine().getPot();
+  else
+    gp = &_getpot_file;
+
+  std::string current_name = param->get();
+
+  std::string value = gp->get_value_no_default(full_name.c_str(), current_name);
+  param->set() = value;
+  if (in_global)
+    global_block->setScalarParam<MooseEnum>(short_name) = value;
+}
+
+template<>
+void Parser::setScalarParameter<RealVectorValue>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<RealVectorValue> * param, bool in_global, GlobalParamsAction * global_block)
+{
+  GetPot *gp;
+
+  // See if this variable was passed on the command line
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
+    gp = Moose::app->commandLine().getPot();
+  else
+    gp = &_getpot_file;
+
+  int vec_size = gp->vector_variable_size(full_name.c_str());
+
+  if (vec_size != LIBMESH_DIM)
+    mooseError(std::string("Error in RealVectorValue parameter ") + full_name + ": size is " << vec_size
+               << ", should be " << LIBMESH_DIM);
+
+  RealVectorValue value;
+  for (int i = 0; i < vec_size; ++i)
+    value(i) = Real(gp->get_value_no_default(full_name.c_str(), (Real) 0.0, i));
+
+  param->set() = value;
+  if (in_global)
+    global_block->setScalarParam<RealVectorValue>(short_name) = value;
+}
+
+template<>
+void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<RealTensorValue> * param, bool in_global, GlobalParamsAction * global_block)
 {
   GetPot *gp;
 
@@ -712,26 +754,6 @@ void Parser::setRealTensorValue(const std::string & full_name, const std::string
   param->set() = value;
   if (in_global)
     global_block->setScalarParam<RealTensorValue>(short_name) = value;
-}
-
-template<>
-void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<MooseEnum> * param, bool in_global, GlobalParamsAction * global_block)
-{
-  GetPot *gp;
-
-  // See if this variable was passed on the command line
-  // if it was then we will retrieve the value from the command line instead of the file
-  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
-    gp = Moose::app->commandLine().getPot();
-  else
-    gp = &_getpot_file;
-
-  std::string current_name = param->get();
-
-  std::string value = gp->get_value_no_default(full_name.c_str(), current_name);
-  param->set() = value;
-  if (in_global)
-    global_block->setScalarParam<MooseEnum>(short_name) = value;
 }
 
 //--------------------------------------------------------------------------
