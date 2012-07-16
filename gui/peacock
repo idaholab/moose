@@ -30,8 +30,8 @@ except AttributeError:
 class UiBox(QtGui.QMainWindow):
   def __init__(self, options, args, app_path, qt_app, win_parent = None):
     QtGui.QMainWindow.__init__(self, win_parent)
-    self.setWindowTitle('Peacock - MOOSE front end')
     self.app_path = os.path.abspath(app_path)
+    self.setWindowTitle('Peacock - ' + os.path.basename(self.app_path))
     self.plugin_classes = findPlugins(os.path.dirname(self.app_path))
     self.qt_app = qt_app
 
