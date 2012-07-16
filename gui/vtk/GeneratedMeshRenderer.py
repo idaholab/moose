@@ -87,13 +87,13 @@ class GeneratedMeshRenderer(MeshRenderer):
     self.z_coords = vtk.vtkFloatArray()
 
     for i in xrange(self.nx):
-      self.x_coords.InsertNextValue(float(i)*self.dx)
+      self.x_coords.InsertNextValue(self.xmin+(float(i)*self.dx))
 
     for j in xrange(self.ny):
-      self.y_coords.InsertNextValue(float(j)*self.dy)
+      self.y_coords.InsertNextValue(self.ymin+(float(j)*self.dy))
 
     for k in xrange(self.nz):
-      self.z_coords.InsertNextValue(float(k)*self.dz)
+      self.z_coords.InsertNextValue(self.zmin+(float(k)*self.dz))
 
     self.main_block = self.generateMesh(self.xmin,self.ymin,self.zmin,True,True,True)
     
