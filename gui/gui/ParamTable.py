@@ -295,9 +295,6 @@ class ParamTable:
     if param['name'] == 'block':
       param['cpp_type'] = 'std::vector<BlockName>'
 
-    if param['name'] == 'boundary':
-      param['cpp_type'] = 'std::vector<BoundaryName>'
-
     if param['name'] == 'function':
       param['cpp_type'] = 'FunctionName'
 
@@ -391,11 +388,11 @@ class ParamTable:
 
     row = 0
 
-    self.param_names = []
+    self.param_names = set()
     name_to_param = {}
 
     for param in the_table_data:
-      self.param_names.append(param['name'])
+      self.param_names.add(param['name'])
       name_to_param[param['name']] = param
 
     for param_name in sorted(self.param_names):

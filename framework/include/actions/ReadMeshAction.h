@@ -36,9 +36,6 @@ public:
 
   virtual void act();
 
-  // This needs to be public - possible C++ bug
-  static const std::string no_file_supplied;
-
 private:
   void readMesh(const std::string & mesh_file);
 };

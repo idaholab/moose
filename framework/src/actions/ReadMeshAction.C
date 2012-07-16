@@ -25,8 +25,6 @@
 #include "nemesis_io.h"
 #include "parallel_mesh.h"
 
-const std::string ReadMeshAction::no_file_supplied = "(no file supplied)";
-
 template<>
 InputParameters validParams<ReadMeshAction>()
 {
@@ -38,9 +36,7 @@ InputParameters validParams<ReadMeshAction>()
    */
   params.set<std::string>("type") = "MooseMesh";
 
-  params.addParam<MeshFileName>("file", ReadMeshAction::no_file_supplied, "The name of the mesh file to read (required unless using dynamic generation)");
   params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
-  params.addParam<bool>("nemesis", false, "If nemesis=true and file=foo.e, actually reads foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, where N = # CPUs, with NemesisIO.");
   params.addParam<std::vector<unsigned int> >("ghosted_boundaries", "Boundaries to be ghosted if using Nemesis");
   params.addParam<std::vector<Real> >("ghosted_boundaries_inflation", "If you are using ghosted boundaries you will want to set this value to a vector of amounts to inflate the bounding boxes by.  ie if you are running a 3D problem you might set it to '0.2 0.1 0.4'");
   params.addParam<bool>("skip_partitioning", false, "If true the mesh won't be partitioned.  Probably not a good idea to use it with a serial mesh!");
@@ -60,9 +56,8 @@ ReadMeshAction::act()
   std::string mesh_type = getParam<std::string>("type");
   if (mesh_type == std::string("MooseMesh"))
   {
-    std::string mesh_file = getParam<MeshFileName>("file");
-    if (mesh_file != no_file_supplied)
-      readMesh(mesh_file);
+    std::string mesh_file = _moose_object_pars.get<MeshFileName>("file");
+    readMesh(mesh_file);
   }
   else
   {
@@ -118,7 +113,8 @@ void ReadMeshAction::readMesh(const std::string & mesh_file)
   mesh->setPatchSize(getParam<unsigned int>("patch_size"));
 
   Moose::setup_perf_log.push("Read Mesh","Setup");
-  if (getParam<bool>("nemesis"))
+  std::string mesh_type = getParam<std::string>("type");
+  if (mesh_type == std::string("MooseMesh") && _moose_object_pars.get<bool>("nemesis"))
   {
     // Nemesis_IO only takes a reference to ParallelMesh, so we can't be quite so short here.
     ParallelMesh& pmesh = libmesh_cast_ref<ParallelMesh&>(mesh->getMesh());
@@ -152,7 +148,7 @@ void ReadMeshAction::readMesh(const std::string & mesh_file)
 
     Moose::setup_perf_log.push("Read Displaced Mesh","Setup");
 
-    if (getParam<bool>("nemesis"))
+    if (mesh_type == std::string("MooseMesh") && _moose_object_pars.get<bool>("nemesis"))
     {
       // Nemesis_IO only takes a reference to ParallelMesh
       ParallelMesh & pmesh = libmesh_cast_ref<ParallelMesh&>(displaced_mesh->getMesh());

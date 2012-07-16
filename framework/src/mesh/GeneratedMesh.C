@@ -24,7 +24,7 @@
 template<>
 InputParameters validParams<GeneratedMesh>()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = validParams<MooseObject>();
 
   params.addRequiredParam<int>("dim", "The dimension of the mesh to be generated");
   params.addParam<int>("nx", 1, "Number of elements in the X direction");
@@ -37,6 +37,8 @@ InputParameters validParams<GeneratedMesh>()
   params.addParam<Real>("ymax", 1.0, "Upper Y Coordinate of the generated mesh");
   params.addParam<Real>("zmax", 1.0, "Upper Z Coordinate of the generated mesh");
   params.addParam<std::string>("elem_type", "The type of element from libMesh to generate");
+  params.addPrivateParam<int>("_dimension", 1);
+  params.addPrivateParam<std::string>("built_by_action", "read_mesh");
 
   return params;
 }
