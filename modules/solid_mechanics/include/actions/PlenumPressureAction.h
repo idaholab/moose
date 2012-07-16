@@ -17,7 +17,7 @@ public:
   virtual void act();
 
 private:
-  const std::vector<std::string> _boundary;
+  const std::vector<BoundaryName> _boundary;
   const NonlinearVariableName _disp_x;
   const NonlinearVariableName _disp_y;
   const NonlinearVariableName _disp_z;

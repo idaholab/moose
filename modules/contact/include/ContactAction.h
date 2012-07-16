@@ -17,8 +17,8 @@ public:
   virtual void act();
 
 private:
-  const std::string _master;
-  const std::string _slave;
+  const BoundaryName _master;
+  const BoundaryName _slave;
   const NonlinearVariableName _disp_x;
   const NonlinearVariableName _disp_y;
   const NonlinearVariableName _disp_z;

@@ -9,8 +9,8 @@ template<>
 InputParameters validParams<ContactMaster>()
 {
   InputParameters params = validParams<DiracKernel>();
-  params.addRequiredParam<std::string>("boundary", "The master boundary");
-  params.addRequiredParam<std::string>("slave", "The slave boundary");
+  params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
+  params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
@@ -30,7 +30,7 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   DiracKernel(name, parameters),
   _component(getParam<unsigned int>("component")),
   _model(contactModel(getParam<std::string>("model"))),
-  _penetration_locator(getPenetrationLocator(getParam<std::string>("boundary"), getParam<std::string>("slave"), Utility::string_to_enum<Order>(getParam<std::string>("order")))),
+  _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<std::string>("order")))),
   _penalty(getParam<Real>("penalty")),
   _tension_release(getParam<Real>("tension_release")),
   _updateContactSet(true),
