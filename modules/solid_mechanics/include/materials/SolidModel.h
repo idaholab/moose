@@ -58,6 +58,9 @@ protected:
   Real _shear_modulus;
   Real _youngs_modulus;
 
+  Function * const _youngs_modulus_function;
+  Function * const _poissons_ratio_function;
+
   const CRACKING_RELEASE _cracking_release;
   const Real _cracking_stress;
   const Real _cracking_residual_stress;
@@ -113,6 +116,8 @@ protected:
   virtual void initialSetup();
 
   virtual void computeProperties();
+
+  virtual void computeElasticityTensor();
 
   virtual void elementInit() {}
 

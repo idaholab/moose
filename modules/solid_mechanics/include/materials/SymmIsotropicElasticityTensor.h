@@ -29,6 +29,11 @@ public:
 
   virtual ~SymmIsotropicElasticityTensor() {}
 
+  void unsetConstants()
+  {
+    _lambda_set = _mu_set = _E_set = _nu_set = _k_set = false;
+  }
+
   /**
    * Set the first Lame Coefficient.
    */

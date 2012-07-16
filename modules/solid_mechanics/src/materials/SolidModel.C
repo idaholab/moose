@@ -7,7 +7,6 @@
 
 #include "Problem.h"
 #include "SymmIsotropicElasticityTensor.h"
-#include "SymmIsotropicElasticityTensorRZ.h"
 #include "VolumetricModel.h"
 
 template<>
@@ -17,9 +16,11 @@ InputParameters validParams<SolidModel>()
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
   params.addParam<Real>("lambda", "Lame's first parameter for the material.");
-  params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material");
+  params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
+  params.addParam<std::string>("poissons_ratio_function", "", "Scale factor for Poisson's ratio as a function of temperature.");
   params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
+  params.addParam<std::string>("youngs_modulus_function", "", "Scale factor for Young's modulus as a function of temperature.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addCoupledVar("temp", "Coupled Temperature");
   params.addParam<std::string>("cracking_release", "abrupt", "The cracking release type.  Choices are abrupt (default) and exponential.");
@@ -74,6 +75,8 @@ SolidModel::SolidModel( const std::string & name,
    _poissons_ratio( _poissons_ratio_set ?  getParam<Real>("poissons_ratio") : -1 ),
    _shear_modulus( _shear_modulus_set ? getParam<Real>("shear_modulus") : -1 ),
    _youngs_modulus( _youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1 ),
+   _youngs_modulus_function( getParam<std::string>("youngs_modulus_function") != "" ? &getFunction("youngs_modulus_function") : NULL),
+   _poissons_ratio_function( getParam<std::string>("poissons_ratio_function") != "" ? &getFunction("poissons_ratio_function") : NULL),
    _cracking_release( getCrackingModel( getParam<std::string>("cracking_release"))),
    _cracking_stress( parameters.isParamValid("cracking_stress") ?
                      (getParam<Real>("cracking_stress") > 0 ? getParam<Real>("cracking_stress") : -1) : -1 ),
@@ -167,6 +170,7 @@ SolidModel::SolidModel( const std::string & name,
   if(_lambda_set && _shear_modulus_set) // First and second Lame
   {
     _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
+    _poissons_ratio = 0.5 * _lambda / (_lambda + _shear_modulus);
   }
   else if(_lambda_set && _poissons_ratio_set)
   {
@@ -178,10 +182,12 @@ SolidModel::SolidModel( const std::string & name,
   {
     _shear_modulus = 3.0 * (_bulk_modulus - _lambda) / 2.0;
     _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
+    _poissons_ratio = _lambda / ( 3 * _bulk_modulus - _lambda );
   }
   else if(_lambda_set && _youngs_modulus_set)
   {
     _shear_modulus = ( (_youngs_modulus - 3.0*_lambda) / 4.0 ) + ( std::sqrt( (_youngs_modulus-3.0*_lambda)*(_youngs_modulus-3.0*_lambda) + 8.0*_lambda*_youngs_modulus ) / 4.0 );
+    _poissons_ratio = _lambda / ( 3 * _bulk_modulus - _lambda );
   }
   else if(_shear_modulus_set && _poissons_ratio_set)
   {
@@ -192,10 +198,12 @@ SolidModel::SolidModel( const std::string & name,
   {
     _lambda = _bulk_modulus - 2.0 * _shear_modulus / 3.0;
     _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
+    _poissons_ratio = (3*_bulk_modulus-2*_shear_modulus)/(2*(3*_bulk_modulus+_shear_modulus));
   }
   else if(_shear_modulus_set && _youngs_modulus_set)
   {
     _lambda = ((2.0*_shear_modulus - _youngs_modulus) * _shear_modulus) / (_youngs_modulus - 3.0*_shear_modulus);
+    _poissons_ratio = 0.5*_youngs_modulus/_shear_modulus - 1;
   }
   else if(_poissons_ratio_set && _bulk_modulus_set)
   {
@@ -212,11 +220,13 @@ SolidModel::SolidModel( const std::string & name,
   {
     _lambda = 3.0 * _bulk_modulus * (3.0 * _bulk_modulus - _youngs_modulus) / (9.0 * _bulk_modulus - _youngs_modulus);
     _shear_modulus = 3.0 * _youngs_modulus * _bulk_modulus / (9.0 * _bulk_modulus - _youngs_modulus);
+    _poissons_ratio = (3*_bulk_modulus-_youngs_modulus)/(6*_bulk_modulus);
   }
 
   _lambda_set = true;
   _shear_modulus_set = true;
   _youngs_modulus_set = true;
+  _poissons_ratio_set = true;
 
   createElasticityTensor();
 
@@ -269,29 +279,18 @@ void
 SolidModel::createElasticityTensor()
 {
   bool constant(true);
-  if ( _cracking_stress > 0 )
+  if ( _cracking_stress > 0 || _youngs_modulus_function || _poissons_ratio_function )
   {
     constant = false;
   }
-  // The IsoRZ and Iso are actually the same...
-  if (_coord_type == Moose::COORD_RZ)
-  {
-    SymmIsotropicElasticityTensorRZ * t = new SymmIsotropicElasticityTensorRZ(constant);
-    mooseAssert(_lambda_set, "Internal error:  lambda not set");
-    t->setLambda(_lambda);
-    mooseAssert(_shear_modulus_set, "Internal error:  shear modulus not set");
-    t->setShearModulus(_shear_modulus);
-    t->calculate(0);
-    elasticityTensor( t );
-  }
-  else
-  {
-    SymmIsotropicElasticityTensor * iso = new SymmIsotropicElasticityTensor(constant);
-    iso->setLambda( _lambda );
-    iso->setShearModulus( _shear_modulus );
-    iso->calculate(0);
-    elasticityTensor( iso );
-  }
+
+  SymmIsotropicElasticityTensor * iso = new SymmIsotropicElasticityTensor(constant);
+  mooseAssert(_youngs_modulus_set, "Internal error:  Youngs modulus not set");
+  mooseAssert(_poissons_ratio_set, "Internal error:  Poissons ratio not set");
+  iso->setYoungsModulus( _youngs_modulus );
+  iso->setPoissonsRatio( _poissons_ratio );
+  iso->calculate(0);
+  elasticityTensor( iso );
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -389,9 +388,7 @@ SolidModel::computeProperties()
   for ( _qp = 0; _qp < _qrule->n_points(); ++_qp )
   {
 
-    _local_elasticity_tensor->calculate(_qp);
-
-    _elasticity_tensor[_qp] = *_local_elasticity_tensor;
+    computeElasticityTensor();
 
     _element->computeStrain( _qp,
                              _total_strain_old[_qp],
@@ -414,6 +411,28 @@ SolidModel::computeProperties()
     computePreconditioning();
 
   }
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+SolidModel::computeElasticityTensor()
+{
+  if (_youngs_modulus_function || _poissons_ratio_function)
+  {
+    SymmIsotropicElasticityTensor * t = dynamic_cast<SymmIsotropicElasticityTensor*>(_local_elasticity_tensor);
+    if (!t)
+    {
+      mooseError("Cannot use Youngs modulus or Poissons ratio functions");
+    }
+    t->unsetConstants();
+    Point p;
+    t->setYoungsModulus( _youngs_modulus_function->value(_temperature[_qp], p));
+    t->setPoissonsRatio( _poissons_ratio * _poissons_ratio_function->value(_temperature[_qp], p));
+  }
+  _local_elasticity_tensor->calculate(_qp);
+
+  _elasticity_tensor[_qp] = *_local_elasticity_tensor;
 }
 
 ////////////////////////////////////////////////////////////////////////
