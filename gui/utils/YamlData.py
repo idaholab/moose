@@ -10,9 +10,14 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class YamlData():
-  def __init__(self, app_path, recache):
+  def __init__(self, qt_app, app_path, recache):
+    self.qt_app = qt_app
     self.app_path = app_path
-    self.yaml_data = GenSyntax(app_path, recache).GetSyntax()    
+    self.gen_syntax = GenSyntax(qt_app, app_path)
+    self.yaml_data = self.gen_syntax.GetSyntax(recache)
+
+  def recache(self, recache):
+    self.yaml_data = self.gen_syntax.GetSyntax(recache)
     
   def recursiveYamlDataSearch(self, path, current_yaml):
     if current_yaml['name'] == path:

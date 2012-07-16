@@ -348,6 +348,9 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     return type_options
     
   def _doubleClickedItem(self, item, column):
+    # Make sure the syntax is up to date
+    self.input_file_widget.recache()
+    
     this_path = self.generatePathFromItem(item)
 
     if not self.action_syntax.isPath(this_path) or self._itemHasEditableParameters(item):

@@ -25,8 +25,9 @@ class InputFileWidget(QtGui.QWidget):
     self.options = options
     self.peacock_ui = peacock_ui
     self.qt_app = qt_app
+    self.yaml_data = None
 
-    self._recache()
+    self.recache()
     
     self.action_syntax = ActionSyntax(app_path)
 
@@ -121,11 +122,6 @@ class InputFileWidget(QtGui.QWidget):
     mesh_view_action = QtGui.QAction("Mesh View", self)
     mesh_view_action.triggered.connect(self._view_mesh_view)
     self.view_menu.addAction(mesh_view_action)    
-
-    self.advanced_menu = self.menubar.addMenu('&Advanced')
-    recache_action = QtGui.QAction("Recache Syntax", self)
-    recache_action.triggered.connect(self._selected_recache)
-    self.advanced_menu.addAction(recache_action)
 
   def init_buttons(self, layout):
     self.buttonOpen = QtGui.QPushButton("Open")
@@ -241,20 +237,11 @@ class InputFileWidget(QtGui.QWidget):
       self.layout_with_textbox.setSizes(sizes)
     
   def _selected_recache(self):
-    self._recache(True)
+    self.recache(True)
 
-  def _recache(self, force_recache = False):
-    progress = QtGui.QProgressDialog("Caching Syntax...", "Abort", 0, 10, self)
-    progress.setWindowModality(Qt.WindowModal)
-    progress.show()
+  def recache(self, force_recache = False):
 
-    for i in xrange(0,7):
-      progress.setValue(i)
-      self.qt_app.processEvents()
-      self.qt_app.flush()
-
-    self.yaml_data = YamlData(self.app_path, force_recache or self.options.recache)
-
-    progress.setValue(8)
-    progress.setValue(9)
-    progress.setValue(10)
+    if not self.yaml_data:
+      self.yaml_data = YamlData(self.qt_app, self.app_path, force_recache or self.options.recache)
+    else:
+      self.yaml_data.recache(False)

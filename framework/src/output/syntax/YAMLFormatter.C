@@ -57,26 +57,31 @@ YAMLFormatter::printParams(InputParameters &params, short depth, const std::stri
 
     oss << indent << "  - name: " << name << "\n";
     oss << indent << "    required: " << required << "\n";
-    oss << indent << "    default: !!str ";
 
-    //prints the value, which is the default value when dumping the tree
-    //because it hasn't been changed
-
-    // remove additional '\n' possibly generated in output (breaks YAML parsing)
-    std::ostringstream toss;
-    iter->second->print(toss);
-    std::string tmp_str = toss.str();
-    for(std::string::iterator it=tmp_str.begin(); it!=tmp_str.end(); ++it)
+    // Only output default if it has one
+    if(params.isParamValid(iter->first))
     {
-      if ( *it == '\n')
+      oss << indent << "    default: !!str ";
+
+      //prints the value, which is the default value when dumping the tree
+      //because it hasn't been changed
+
+      // remove additional '\n' possibly generated in output (breaks YAML parsing)
+      std::ostringstream toss;
+      iter->second->print(toss);
+      std::string tmp_str = toss.str();
+      for(std::string::iterator it=tmp_str.begin(); it!=tmp_str.end(); ++it)
       {
-        *it = ' ';
+        if ( *it == '\n')
+        {
+          *it = ' ';
+        }
       }
+      oss << tmp_str;
     }
 
     std::string doc = params.getDocString(iter->first);
     Parser::escape(doc);
-    oss << tmp_str;
     // Print the type
     oss << "\n" << indent << "    cpp_type: " << params.type(iter->first);
 
