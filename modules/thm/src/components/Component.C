@@ -41,7 +41,22 @@ Component::split(const std::string & rname)
 {
   std::vector<std::string> splitted;
   Parser::tokenize(rname, splitted, 1, ":");
-  return splitted;
+
+  std::string section_name("");
+  for (unsigned int i = 0; i < splitted.size() - 1; i++)
+  {
+    if (i > 0)
+      section_name.append(":");
+    section_name.append(splitted[i]);
+  }
+  std::string prop_name = splitted[splitted.size() - 1];
+
+  // construct the 2 element array with section and property name
+  std::vector<std::string> result(2);
+  result[0] = section_name;
+  result[1] = prop_name;
+
+  return result;
 }
 
 Component::Component(const std::string & name, InputParameters parameters) :

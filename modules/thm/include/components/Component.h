@@ -109,6 +109,11 @@ protected:
   static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
   static std::string genName(const std::string & prefix, const std::string & suffix);
 
+  /**
+   * Split the "RAVEN" name into "section name" and "property name"
+   * @param rname
+   * @return
+   */
   static std::vector<std::string> split(const std::string & rname);
 
 private:
