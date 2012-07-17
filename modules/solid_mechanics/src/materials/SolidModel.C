@@ -17,10 +17,10 @@ InputParameters validParams<SolidModel>()
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
   params.addParam<Real>("lambda", "Lame's first parameter for the material.");
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
-  params.addParam<std::string>("poissons_ratio_function", "", "Poisson's ratio as a function of temperature.");
+  params.addParam<FunctionName>("poissons_ratio_function", "", "Poisson's ratio as a function of temperature.");
   params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
-  params.addParam<std::string>("youngs_modulus_function", "", "Young's modulus as a function of temperature.");
+  params.addParam<FunctionName>("youngs_modulus_function", "", "Young's modulus as a function of temperature.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addCoupledVar("temp", "Coupled Temperature");
   params.addParam<std::string>("cracking_release", "abrupt", "The cracking release type.  Choices are abrupt (default) and exponential.");
@@ -75,8 +75,8 @@ SolidModel::SolidModel( const std::string & name,
    _poissons_ratio( _poissons_ratio_set ?  getParam<Real>("poissons_ratio") : -1 ),
    _shear_modulus( _shear_modulus_set ? getParam<Real>("shear_modulus") : -1 ),
    _youngs_modulus( _youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1 ),
-   _youngs_modulus_function( getParam<std::string>("youngs_modulus_function") != "" ? &getFunction("youngs_modulus_function") : NULL),
-   _poissons_ratio_function( getParam<std::string>("poissons_ratio_function") != "" ? &getFunction("poissons_ratio_function") : NULL),
+   _youngs_modulus_function( getParam<FunctionName>("youngs_modulus_function") != "" ? &getFunction("youngs_modulus_function") : NULL),
+   _poissons_ratio_function( getParam<FunctionName>("poissons_ratio_function") != "" ? &getFunction("poissons_ratio_function") : NULL),
    _cracking_release( getCrackingModel( getParam<std::string>("cracking_release"))),
    _cracking_stress( parameters.isParamValid("cracking_stress") ?
                      (getParam<Real>("cracking_stress") > 0 ? getParam<Real>("cracking_stress") : -1) : -1 ),
