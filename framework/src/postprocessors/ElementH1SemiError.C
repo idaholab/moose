@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<ElementH1SemiError>()
 {
   InputParameters params = validParams<ElementIntegral>();
-  params.addRequiredParam<std::string>("function", "The analytic solution to compare against");
+  params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   return params;
 }
 

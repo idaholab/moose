@@ -19,8 +19,7 @@ template<>
 InputParameters validParams<FunctionDirichletBC>()
 {
   InputParameters params = validParams<NodalBC>();
-//  params.set<bool>("_integrated") = false;
-  params.addRequiredParam<std::string>("function", "The forcing function.");
+  params.addRequiredParam<FunctionName>("function", "The forcing function.");
   return params;
 }
 

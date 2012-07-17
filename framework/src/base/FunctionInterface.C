@@ -15,6 +15,7 @@
 #include "FunctionInterface.h"
 #include "Function.h"
 #include "Problem.h"
+#include "MooseTypes.h"
 
 FunctionInterface::FunctionInterface(InputParameters & params) :
     _fni_problem(*params.get<Problem *>("_problem")),
@@ -26,7 +27,7 @@ FunctionInterface::FunctionInterface(InputParameters & params) :
 Function &
 FunctionInterface::getFunction(const std::string & name)
 {
-  return _fni_problem.getFunction(_fni_params.get<std::string>(name), _fni_tid);
+  return _fni_problem.getFunction(_fni_params.get<FunctionName>(name), _fni_tid);
 }
 
 Function &

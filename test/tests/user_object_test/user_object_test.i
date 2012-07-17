@@ -47,13 +47,13 @@
   [./ffn]
     type = UserObjectKernel
     variable = u
-    user_data = ud 
+    user_object = ud
   []
 []
 
 [BCs]
   active = 'all'
-  
+
   [./all]
     type = FunctionDirichletBC
     variable = u

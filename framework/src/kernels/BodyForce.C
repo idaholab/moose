@@ -22,14 +22,14 @@ InputParameters validParams<BodyForce>()
 {
   InputParameters params = validParams<Kernel>();
   params.set<Real>("value")=0.0;
-  params.addParam<std::string>("function", "", "A function that describes the body force");
+  params.addParam<FunctionName>("function", "", "A function that describes the body force");
   return params;
 }
 
 BodyForce::BodyForce(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
     _value(getParam<Real>("value")),
-    _has_function(getParam<std::string>("function") != ""),
+    _has_function(getParam<FunctionName>("function") != ""),
     _function( _has_function ? &getFunction("function") : NULL )
 {
 }

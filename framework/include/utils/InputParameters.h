@@ -389,7 +389,6 @@ namespace libMesh
     for (unsigned int i=0; i<_value.size(); i++)
       os << _value[i] << " ";
   }
-
 } // libMesh
 
 #endif /* INPUTPARAMETERS_H */

@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<FunctionIC>()
 {
   InputParameters params = validParams<InitialCondition>();
-  params.addRequiredParam<std::string>("function", "The initial condition function.");
+  params.addRequiredParam<FunctionName>("function", "The initial condition function.");
   return params;
 }
 

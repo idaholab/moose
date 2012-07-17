@@ -18,13 +18,13 @@ template<>
 InputParameters validParams<UserObjectKernel>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<std::string>("user_data", "The name of user data object to use.");
+  params.addRequiredParam<UserObjectName>("user_object", "The name of user data object to use.");
   return params;
 }
 
 UserObjectKernel::UserObjectKernel(const std::string & name, InputParameters params) :
     Kernel(name, params),
-    _mutley(getUserObject<MTUserObject>("user_data"))   // get user-data object and cast it down so we can use it
+    _mutley(getUserObject<MTUserObject>("user_object"))   // get user-data object and cast it down so we can use it
 {
 }
 

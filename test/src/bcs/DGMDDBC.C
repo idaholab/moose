@@ -22,7 +22,7 @@ InputParameters validParams<DGMDDBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addParam<Real>("value", 0.0, "The value the variable should have on the boundary");
-  params.addRequiredParam<std::string>("function", "The forcing function.");
+  params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addRequiredParam<Real>("epsilon", "Epsilon");
   params.addRequiredParam<Real>("sigma", "Sigma");
   params.addRequiredParam<std::string>("prop_name", "diff1");

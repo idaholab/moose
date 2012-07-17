@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<FunctionPresetBC>()
 {
   InputParameters params = validParams<PresetNodalBC>();
-  params.addRequiredParam<std::string>("function", "The forcing function.");
+  params.addRequiredParam<FunctionName>("function", "The forcing function.");
   return params;
 }
 

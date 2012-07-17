@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<FunctionAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<std::string>("function", "The function to use as the value");
+  params.addRequiredParam<FunctionName>("function", "The function to use as the value");
   return params;
 }
 

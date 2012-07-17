@@ -558,6 +558,9 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       InputParameters::Parameter<NonlinearVariableName> * nl_var_name_param = dynamic_cast<InputParameters::Parameter<NonlinearVariableName>*>(it->second);
       InputParameters::Parameter<AuxVariableName> * aux_var_name_param = dynamic_cast<InputParameters::Parameter<AuxVariableName>*>(it->second);
 
+      InputParameters::Parameter<FunctionName> * function_name_param = dynamic_cast<InputParameters::Parameter<FunctionName>*>(it->second);
+      InputParameters::Parameter<UserObjectName> * user_object_name_param = dynamic_cast<InputParameters::Parameter<UserObjectName>*>(it->second);
+
       InputParameters::Parameter<MooseEnum> * enum_param = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(it->second);
       InputParameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<InputParameters::Parameter<std::vector<Real> >*>(it->second);
       InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
@@ -607,6 +610,10 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setScalarParameter<NonlinearVariableName>(full_name, it->first, nl_var_name_param, in_global, global_params_block);
       else if (aux_var_name_param)
         setScalarParameter<AuxVariableName>(full_name, it->first, aux_var_name_param, in_global, global_params_block);
+      else if (function_name_param)
+        setScalarParameter<FunctionName>(full_name, it->first, function_name_param, in_global, global_params_block);
+      else if (user_object_name_param)
+        setScalarParameter<UserObjectName>(full_name, it->first, user_object_name_param, in_global, global_params_block);
       else if (enum_param)
         setScalarParameter<MooseEnum>(full_name, it->first, enum_param, in_global, global_params_block);
       else if (vec_real_param)

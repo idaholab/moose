@@ -17,6 +17,11 @@
 
 #include <string>
 
+/**
+ * This Macro is used to generate std::string derived types useful for
+ * strong type checking and special handling in the GUI.  It does not
+ * extend std::string in any way so it is generally "safe"
+ */
 #define DerivativeStringClass(TheName)                                  \
   class TheName : public std::string                                    \
   {                                                                     \
@@ -30,13 +35,29 @@
     TheName(size_t n, char c): std::string(n, c) {}                     \
   } /* No semicolon here because this is a macro */
 
-// Create Classes
+// Instantiate new Types
+
+/// This type is for expected filenames, it can be used to trigger open file dialogs in the GUI
 DerivativeStringClass(FileName);
+/// This type is similar to "FileName", but is used to further filter file dialogs on known file mesh types
 DerivativeStringClass(MeshFileName);
-DerivativeStringClass(VariableName);
+
+/// This type is used for objects that expect nonlinear variable names (i.e. Kernels, BCs)
 DerivativeStringClass(NonlinearVariableName);
+/// This type is used for objects that expect Auxiliary variable names (i.e. AuxKernels, AuxBCs)
 DerivativeStringClass(AuxVariableName);
+/// This type is used for objects that expect either Nonlinear or Auxiliary Variables such as postprocessors
+DerivativeStringClass(VariableName);
+
+/// This type is used for objects that expect Boundary Names/Ids read from or generated on the current mesh
 DerivativeStringClass(BoundaryName);
+/// This type is similar to BoundaryName but is used for "blocks" or subdomains in the current mesh
 DerivativeStringClass(SubdomainName);
+
+/// This type is used for objects that expect Moose Function objects
+DerivativeStringClass(FunctionName);
+
+/// This type is used for objects that expect "UserObject" names
+DerivativeStringClass(UserObjectName);
 
 #endif // FILENAME_H

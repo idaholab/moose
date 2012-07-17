@@ -18,6 +18,7 @@
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
 #include "Problem.h"
+#include "MooseTypes.h"
 
 class UserObject;
 
@@ -63,7 +64,7 @@ template<class T>
 const T &
 UserObjectInterface::getUserObject(const std::string & name)
 {
-  return _uoi_problem.getUserObject<T>(_uoi_params.get<std::string>(name), _uoi_tid);
+  return _uoi_problem.getUserObject<T>(_uoi_params.get<UserObjectName>(name), _uoi_tid);
 }
 
 template<class T>

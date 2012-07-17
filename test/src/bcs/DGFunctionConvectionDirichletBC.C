@@ -8,7 +8,7 @@ InputParameters validParams<DGFunctionConvectionDirichletBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addParam<Real>("value", 0.0, "The value the variable should have on the boundary");
-  params.addRequiredParam<std::string>("function", "The forcing function.");
+  params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addRequiredParam<Real>("x", "Component of the velocity in the x direction");
   params.addRequiredParam<Real>("y", "Component of the velocity in the y direction");
   params.addParam<Real>("z", 0.0, "Component of the velocity in the z direction");

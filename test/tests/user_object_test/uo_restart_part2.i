@@ -41,7 +41,7 @@
     variable = u
   [../]
 
-  # this kernel will user user data object from above
+  # this kernel will use the UserObject from above
   [./ffn]
     type = UserForcingFunction
     variable = u
@@ -51,7 +51,7 @@
 
 [BCs]
   active = 'all'
-  
+
   [./all]
     type = FunctionDirichletBC
     variable = u
@@ -63,7 +63,7 @@
 [Postprocessors]
   [./ud_pps]
     type = UserObjectPPS
-    user_data = ud
+    user_object = ud
   [../]
 []
 

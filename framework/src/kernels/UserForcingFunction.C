@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<UserForcingFunction>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<std::string>("function", "The forcing function");
+  params.addRequiredParam<FunctionName>("function", "The forcing function");
   return params;
 }
 

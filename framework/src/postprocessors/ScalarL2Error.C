@@ -21,7 +21,7 @@ InputParameters validParams<ScalarL2Error>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<std::string>("variable", "The name of the scalar variable");
-  params.addRequiredParam<std::string>("function", "The analytic solution to compare against");
+  params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   return params;
 }
 
