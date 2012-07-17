@@ -6,8 +6,8 @@
 #include "R7Mesh.h"
 #include "ActionWarehouse.h"
 #include "Model.h"
+#include "Simulation.h"
 
-class Simulation;
 class Component;
 class FEProblem;
 //class ComponentPostProcessor;
@@ -117,5 +117,51 @@ private:
   static unsigned int bc_ids;
 };
 
+
+
+template<typename T>
+const T &
+Component::getRParam(const std::string & param_name)
+{
+
+  std::vector<std::string> s = split(param_name);
+
+  const std::vector<std::string> & names = getMooseObjectsByName(s[0]);
+  for (std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
+  {
+    std::string nm = *it;
+    const std::vector<Material *> & mats = _sim.feproblem().getMaterialsByName(nm, 0);
+    for(std::vector<Material *>::const_iterator it=mats.begin() ; it != mats.end(); it++){
+      Material * mat = *it;
+      if (mat->parameters().have_parameter<T>(s[1]))
+        return mat->parameters().get<T>(s[1]);
+   }
+
+  }
+}
+
+template<typename T>
+void
+Component::setRParam(const std::string & param_name, const T & value)
+{
+  std::vector<std::string> s = split(param_name);
+
+  const std::vector<std::string> & names = getMooseObjectsByName(s[0]);
+  for (std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
+  {
+    std::string nm = *it;
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    {
+      const std::vector<Material *> & mats = _sim.feproblem().getMaterialsByName(nm, tid);
+
+      for(std::vector<Material *>::const_iterator it=mats.begin() ; it != mats.end(); it++)
+      {
+        Material * mat = *it;
+        if (mat->parameters().have_parameter<T>(s[1]))
+          mat->parameters().set<T>(s[1]) = value;
+      }
+    }
+  }
+}
 
 #endif /* COMPONENT_H */
