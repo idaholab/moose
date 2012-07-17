@@ -12,7 +12,7 @@ InputParameters validParams<TemperatureAux>()
   params.addRequiredCoupledVar("rhoE", "total energy");
 
   // The EOS function is a required parameter.
-  params.addRequiredParam<std::string>("eos_function", "The EOS function object");
+  params.addRequiredParam<FunctionName>("eos_function", "The EOS function object");
   
   return params;
 }
