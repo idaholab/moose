@@ -6,7 +6,7 @@ InputParameters validParams<PresetVelocity>()
 {
   InputParameters p = validParams<NodalBC>();
   p.addParam<Real>("velocity", 1, "Value of the velocity.  Used as scale factor if function is given.");
-  p.addParam<std::string>("function", "", "Function describing the velocity.");
+  p.addParam<FunctionName>("function", "", "Function describing the velocity.");
   return p;
 }
 
@@ -15,7 +15,7 @@ PresetVelocity::PresetVelocity(const std::string & name, InputParameters paramet
   PresetNodalBC(name, parameters),
   _u_old(valueOld()),
   _velocity(parameters.get<Real>("velocity")),
-  _function(parameters.get<std::string>("function") != "" ? &getFunction("function") : NULL)
+  _function(parameters.get<FunctionName>("function") != "" ? &getFunction("function") : NULL)
 {
 }
 

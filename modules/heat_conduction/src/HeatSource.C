@@ -5,7 +5,7 @@ InputParameters validParams<HeatSource>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("value",1.0,"Value of heat source.  Multiplied by function if present.");
-  params.addParam<std::string>("function", "", "Function describing the volumetric heat source");
+  params.addParam<FunctionName>("function", "", "Function describing the volumetric heat source");
   return params;
 }
 

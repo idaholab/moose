@@ -13,7 +13,7 @@ InputParameters validParams<PressureAction>()
   params.addRequiredParam<NonlinearVariableName>("disp_y", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
   params.addParam<Real>("factor", 1.0, "The factor to use in computing the pressure");
-  params.addParam<std::string>("function", "", "The function that describes the pressure");
+  params.addParam<FunctionName>("function", "", "The function that describes the pressure");
   return params;
 }
 
@@ -24,7 +24,7 @@ PressureAction::PressureAction(const std::string & name, InputParameters params)
   _disp_y(getParam<NonlinearVariableName>("disp_y")),
   _disp_z(getParam<NonlinearVariableName>("disp_z")),
   _factor(getParam<Real>("factor")),
-  _function(getParam<std::string>("function")),
+  _function(getParam<FunctionName>("function")),
   _kernel_name("Pressure"),
   _use_displaced_mesh(true)
 {
@@ -59,7 +59,7 @@ PressureAction::act()
 
     params.set<std::vector<BoundaryName> >("boundary") = _boundary;
     params.set<Real>("factor") = _factor;
-    params.set<std::string>("function") = _function;
+    params.set<FunctionName>("function") = _function;
 
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 

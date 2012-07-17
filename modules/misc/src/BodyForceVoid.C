@@ -23,7 +23,7 @@ InputParameters validParams<BodyForceVoid>()
   InputParameters params = validParams<Kernel>();
   params.set<Real>("value")=0.0;
   params.addRequiredCoupledVar("c","void concentration");
-  params.addParam<std::string>("function", "", "A function that describes the body force");
+  params.addParam<FunctionName>("function", "", "A function that describes the body force");
   return params;
 }
 
@@ -31,7 +31,7 @@ BodyForceVoid::BodyForceVoid(const std::string & name, InputParameters parameter
     Kernel(name, parameters),
     _value(getParam<Real>("value")),
     _c(coupledValue("c")),
-    _has_function(getParam<std::string>("function") != ""),
+    _has_function(getParam<FunctionName>("function") != ""),
     _function( _has_function ? &getFunction("function") : NULL )
 {
 }
