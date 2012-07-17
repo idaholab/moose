@@ -17,10 +17,10 @@ InputParameters validParams<SolidModel>()
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
   params.addParam<Real>("lambda", "Lame's first parameter for the material.");
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
-  params.addParam<std::string>("poissons_ratio_function", "", "Scale factor for Poisson's ratio as a function of temperature.");
+  params.addParam<std::string>("poissons_ratio_function", "", "Poisson's ratio as a function of temperature.");
   params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
-  params.addParam<std::string>("youngs_modulus_function", "", "Scale factor for Young's modulus as a function of temperature.");
+  params.addParam<std::string>("youngs_modulus_function", "", "Young's modulus as a function of temperature.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addCoupledVar("temp", "Coupled Temperature");
   params.addParam<std::string>("cracking_release", "abrupt", "The cracking release type.  Choices are abrupt (default) and exponential.");
@@ -427,8 +427,8 @@ SolidModel::computeElasticityTensor()
     }
     t->unsetConstants();
     Point p;
-    t->setYoungsModulus( _youngs_modulus * (_youngs_modulus_function ? _youngs_modulus_function->value(_temperature[_qp], p) : 1));
-    t->setPoissonsRatio( _poissons_ratio * (_poissons_ratio_function ? _poissons_ratio_function->value(_temperature[_qp], p) : 1));
+    t->setYoungsModulus( (_youngs_modulus_function ? _youngs_modulus_function->value(_temperature[_qp], p) : _youngs_modulus) );
+    t->setPoissonsRatio( (_poissons_ratio_function ? _poissons_ratio_function->value(_temperature[_qp], p) : _poissons_ratio) );
   }
   _local_elasticity_tensor->calculate(_qp);
 
