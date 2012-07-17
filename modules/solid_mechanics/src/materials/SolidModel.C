@@ -427,8 +427,8 @@ SolidModel::computeElasticityTensor()
     }
     t->unsetConstants();
     Point p;
-    t->setYoungsModulus( _youngs_modulus_function->value(_temperature[_qp], p));
-    t->setPoissonsRatio( _poissons_ratio * _poissons_ratio_function->value(_temperature[_qp], p));
+    t->setYoungsModulus( _youngs_modulus * (_youngs_modulus_function ? _youngs_modulus_function->value(_temperature[_qp], p) : 1));
+    t->setPoissonsRatio( _poissons_ratio * (_poissons_ratio_function ? _poissons_ratio_function->value(_temperature[_qp], p) : 1));
   }
   _local_elasticity_tensor->calculate(_qp);
 
