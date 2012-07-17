@@ -32,7 +32,7 @@ InputParameters validParams<MooseMesh>()
   InputParameters params = validParams<MooseObject>();
 
   params.addPrivateParam<int>("_dimension", 1);
-  params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read (required unless using dynamic generation)");
+  params.addParam<MeshFileName>("file", "The name of the mesh file to read (required unless using dynamic generation)");
   params.addParam<bool>("nemesis", false, "If nemesis=true and file=foo.e, actually reads foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, where N = # CPUs, with NemesisIO.");
   params.addPrivateParam<std::string>("built_by_action", "read_mesh");
 

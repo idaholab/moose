@@ -56,8 +56,11 @@ ReadMeshAction::act()
   std::string mesh_type = getParam<std::string>("type");
   if (mesh_type == std::string("MooseMesh"))
   {
-    std::string mesh_file = _moose_object_pars.get<MeshFileName>("file");
-    readMesh(mesh_file);
+    if(_moose_object_pars.isParamValid("file"))
+    {
+      std::string mesh_file = _moose_object_pars.get<MeshFileName>("file");
+      readMesh(mesh_file);
+    }
   }
   else
   {
