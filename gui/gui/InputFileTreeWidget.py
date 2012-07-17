@@ -337,8 +337,19 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       functions_item = functions_items[0]
       function_names = self._getChildNames(functions_item)
       if len(function_names):
+        type_options['std::vector<FunctionName, std::allocator<FunctionName> >'] = set(function_names)
         type_options['std::vector<FunctionName>'] = set(function_names)
         type_options['FunctionName'] = set(function_names)
+
+    # Userobjects
+    userobjects_items = self.input_file_widget.tree_widget.findItems("UserObjects", QtCore.Qt.MatchExactly)
+    if userobjects_items:
+      userobjects_item = userobjects_items[0]
+      userobject_names = self._getChildNames(userobjects_item)
+      if len(userobject_names):
+        type_options['std::vector<UserObjectName, std::allocator<UserObjectName> >'] = set(userobject_names)
+        type_options['std::vector<UserObjectName>'] = set(userobject_names)
+        type_options['UserObjectName'] = set(userobject_names)
 
     # Mesh stuff
     mesh_data = self.getMeshItemData()
