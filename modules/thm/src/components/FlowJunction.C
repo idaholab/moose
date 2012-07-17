@@ -27,7 +27,7 @@ InputParameters validParams<FlowJunction>()
   //params.addRequiredParam<Real>("Initial_pressure", "Initial pressure of this branch");
   params.addParam<Real>("initial_P", 1.e5, "Initial pressure of this branch");
 
-  params.addRequiredParam<std::string>("eos_function", "The EOS function object");
+  params.addRequiredParam<FunctionName>("eos_function", "The EOS function object");
   return params;
 }
 
@@ -117,7 +117,7 @@ FlowJunction::addVariables()
 
 
   FEProblem & feproblem = _sim.feproblem();
-  Function & func = feproblem.getFunction(getParam<std::string>("eos_function"));
+  Function & func = feproblem.getFunction(getParam<FunctionName>("eos_function"));
   EquationOfState& _eos = dynamic_cast<EquationOfState&>(func);
 
   //std::cout << "initial T " << _initial_T << std::endl;
@@ -178,7 +178,7 @@ FlowJunction::addMooseObjects()
     params.set<std::vector<Real> >("areas") = _Areas;
     params.set<Real>("Volume") = _ref_volume;
     params.set<std::vector<Real> >("normals") = _normals;
-    params.set<std::string>("eos_function") = getParam<std::string>("eos_function");
+    params.set<FunctionName>("eos_function") = getParam<FunctionName>("eos_function");
 
     params.set<std::vector<Real> >("K") = _k_coeffs;
     params.set<Real>("Area") = _ref_area;

@@ -31,7 +31,7 @@ InputParameters validParams<PipeBase>()
   params.addRequiredParam<unsigned int>("n_elems", "number of element in this pipe");
   params.addRequiredParam<Real>("A", "Area of the pipe");
 
-  params.addRequiredParam<std::string>("eos_function", "The EOS function object");
+  params.addRequiredParam<FunctionName>("eos_function", "The EOS function object");
 
   //Input parameters default values could be given.
   params.addParam<Real>("aw", 0.0, "Heating surface density");
@@ -162,7 +162,7 @@ PipeBase::addVariables()
   Model::addVariables(_subdomain_id);
 
   FEProblem & feproblem = _sim.feproblem();
-  Function & func = feproblem.getFunction(getParam<std::string>("eos_function"));
+  Function & func = feproblem.getFunction(getParam<FunctionName>("eos_function"));
   EquationOfState& _eos = dynamic_cast<EquationOfState&>(func);
 
   Real initial_P = _sim.getParam<Real>("global_init_P");
