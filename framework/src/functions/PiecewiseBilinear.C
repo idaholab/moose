@@ -94,25 +94,25 @@ PiecewiseBilinear::value( Real t, const Point & p)
   Real retVal(0);
   if (_axisValid)
   {
-    retVal = _bilinear_interp->sample( _scale_factor*p(_axis), t );
+    retVal = _bilinear_interp->sample( p(_axis), t );
   }
   else if (_yaxisValid)
   {
     if (_xaxisValid)
     {
-      retVal = _bilinear_interp->sample( _scale_factor*p(_xaxis), _scale_factor*p(_yaxis) );
+      retVal = _bilinear_interp->sample( p(_xaxis), p(_yaxis) );
     }
     else
     {
-      retVal = _bilinear_interp->sample( t, _scale_factor*p(_yaxis) );
+      retVal = _bilinear_interp->sample( t, p(_yaxis) );
     }
   }
   else
   {
-    retVal = _bilinear_interp->sample( _scale_factor*p(_xaxis), t );
+    retVal = _bilinear_interp->sample( p(_xaxis), t );
   }
 
-  return retVal;
+  return retVal * _scale_factor;
 }
 
 void

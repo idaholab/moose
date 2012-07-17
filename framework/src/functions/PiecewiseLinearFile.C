@@ -73,13 +73,13 @@ PiecewiseLinearFile::~PiecewiseLinearFile()
 Real
 PiecewiseLinearFile::value(Real t, const Point &)
 {
-  return  _linear_interp->sample( t );
+  return  _linear_interp->sample( t ) * _scale_factor;
 }
 
 Real
 PiecewiseLinearFile::integral()
 {
-  return _linear_interp->integrate();
+  return _linear_interp->integrate() * _scale_factor;
 }
 
 Real
