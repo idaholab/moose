@@ -334,21 +334,24 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     # Mesh stuff
     mesh_data = self.getMeshItemData()
-    print 'Mesh Data:', mesh_data
     if mesh_data:
       mesh_info = MeshInfoFactory.getMeshInfo(mesh_data)
-      print 'Mesh Info:', mesh_info
 
       if mesh_info:
-        type_options['BlockName'] = mesh_info.blockNames()
         type_options['std::vector<BlockName>'] = mesh_info.blockNames()
-        type_options['BoundaryName'] = mesh_info.sidesetNames()
-        print 'Adding boundary names:', mesh_info.sidesetNames()
+        type_options['BlockName'] = mesh_info.blockNames()
+        
+        type_options['std::vector<BoundaryName, std::allocator<BoundaryName> >'] = mesh_info.sidesetNames()
         type_options['std::vector<BoundaryName>'] = mesh_info.sidesetNames()
+        type_options['BoundaryName'] = mesh_info.sidesetNames()
+        
+        type_options['std::vector<BoundaryName, std::allocator<BoundaryName> >'].update(mesh_info.nodesetNames())
+        type_options['std::vector<BoundaryName>'].update(mesh_info.nodesetNames())
         type_options['BoundaryName'].update(mesh_info.nodesetNames())
-        type_options['std::vector<BoundaryName>'].update(mesh_info.sidesetNames())
-        type_options['SubdomainName'].update(mesh_info.blockNames())
-        type_options['std::vector<SubdomainName>'].update(mesh_info.blockNames())
+
+        type_options['std::vector<SubdomainName, std::allocator<SubdomainName> >'] = mesh_info.blockNames()
+        type_options['std::vector<SubdomainName>'] = mesh_info.blockNames()
+        type_options['SubdomainName'] = mesh_info.blockNames()
       
     return type_options
     

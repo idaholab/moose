@@ -383,17 +383,21 @@ class ParamTable:
         the_table_data.append(param)
         self.param_is_required[param['name']] = param['required']
 
-    total_rows = len(the_table_data)
-    self.table_widget.setRowCount(total_rows)
 
     row = 0
 
-    self.param_names = set()
+    self.param_names = []
     name_to_param = {}
 
+    seen_it = set()
     for param in the_table_data:
-      self.param_names.add(param['name'])
-      name_to_param[param['name']] = param
+      if param['name'] not in seen_it:
+        seen_it.add(param['name'])
+        self.param_names.append(param['name'])
+        name_to_param[param['name']] = param    
+
+    total_rows = len(self.param_names)
+    self.table_widget.setRowCount(total_rows)
 
     for param_name in sorted(self.param_names):
       param = name_to_param[param_name]
