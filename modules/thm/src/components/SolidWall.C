@@ -13,7 +13,7 @@ InputParameters validParams<SolidWall>()
   InputParameters params = validParams<BoundaryBase>();
   params.addRequiredParam<std::string>("input", "Pipe name");
 
-  params.addRequiredParam<std::string>("eos_function", "The EOS function object");
+  params.addRequiredParam<FunctionName>("eos_function", "The EOS function object");
   return params;
 }
 
@@ -75,7 +75,7 @@ SolidWall::addMooseObjects()
     params.set<NonlinearVariableName>("variable") = Model::RHOU;
     params.set<std::vector<unsigned int> >("boundary") = bnd_id;
     //params.set<std::string>("eos_function") = Model::EOS_FUNCTION;
-    params.set<std::string>("eos_function") = getParam<std::string>("eos_function");
+    params.set<FunctionName>("eos_function") = getParam<FunctionName>("eos_function");
 
     // coupling
     params.set<std::vector<std::string> >("p") = cv_p;
@@ -91,7 +91,7 @@ SolidWall::addMooseObjects()
     params.set<NonlinearVariableName>("variable") = Model::RHOE;
     params.set<std::vector<unsigned int> >("boundary") = bnd_id;
     //params.set<std::string>("eos_function") = Model::EOS_FUNCTION;
-    params.set<std::string>("eos_function") = getParam<std::string>("eos_function");
+    params.set<FunctionName>("eos_function") = getParam<FunctionName>("eos_function");
 
     // There is no coupling for the energy equation solid wall BC.
     // It simply returns zero...
