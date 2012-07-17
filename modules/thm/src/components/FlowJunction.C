@@ -44,12 +44,6 @@ FlowJunction::FlowJunction(const std::string & name, InputParameters params) :
 	_initial_P(_has_initial_P ? getParam<Real>("initial_P") : _sim.getParam<Real>("global_init_P")),
 	_initial_T(_has_initial_T ? getParam<Real>("initial_T") : _sim.getParam<Real>("global_init_T"))
 {
-  //Generate variable name for the pressure variable of this branch
-  //_density_var_name = genName("density_", _id, "_FlowJunction");
-  //even this is an optional variable, still gives it a name
-  //_specific_int_energy_var_name = genName("specific_int_energy_", _id, "_FlowJunction");
-
-
 	_FlowJunction_var_name = genName("variables_of_", _id, "_FlowJunction");
 }
 
@@ -113,14 +107,13 @@ FlowJunction::addVariables()
 {
   // add scalar variable
   // Note the physical meaning of this scalar variable is the "pressure of the branch, P_Branch"
-
-
-
   FEProblem & feproblem = _sim.feproblem();
   Function & func = feproblem.getFunction(getParam<FunctionName>("eos_function"));
   EquationOfState& _eos = dynamic_cast<EquationOfState&>(func);
 
-  //std::cout << "initial T " << _initial_T << std::endl;
+  // Debug
+  // std::cout << "initial T " << _initial_T << std::endl;
+  // End of debug
 
   Real _initial_specific_int_energy = 0.;
   if(_model_type == Model::EQ_MODEL_3)
@@ -128,7 +121,9 @@ FlowJunction::addVariables()
 	  _initial_specific_int_energy = _eos.invert_eos_internal_energy(_initial_T);
   }
 
-  //std::cout << "initial e " << _initial_specific_int_energy << std::endl;
+  // Debug
+  // std::cout << "initial e " << _initial_specific_int_energy << std::endl;
+  // End of debug
 
   Real _initial_rho = _eos.invert_eos_rho(_initial_P, _initial_specific_int_energy);
 
@@ -139,8 +134,6 @@ FlowJunction::addVariables()
 	  std::vector<Real> _initial_conditions(2, 0.);
 	  _initial_conditions[0] = _initial_rho;
 	  _initial_conditions[1] = 0.;
-	  //std::cout << "~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
-	  //std::cout << _initial_conditions[0] << " " << _initial_conditions[1] << std::endl;
 	  _sim.addScalarInitialCondition(_FlowJunction_var_name, _initial_conditions);
   }
   else if (_model_type == Model::EQ_MODEL_3)
@@ -189,8 +182,6 @@ FlowJunction::addMooseObjects()
     if(_model_type == Model::EQ_MODEL_3)
     	params.set<std::vector<std::string> >("rhoE") = cv_rhoE;
 
-    //params.set<Model::EModelType>("model_type") = _model_type;
-
     _sim.addScalarKernel("FlowJunctionConstraint", genName("ScalarKernel", _id, _name), params);
   }
 
@@ -201,19 +192,16 @@ FlowJunction::addMooseObjects()
 	  // adding mass equation BC
 	  {
 	    InputParameters params = validParams<OneDMassStaticPandTBC>();
-	    //params.set<std::string>("variable") = Model::RHO;
 	    params.set<NonlinearVariableName>("variable") = Model::RHO;
 	    params.set<std::vector<unsigned int> >("boundary") = bnd_id;
 	    // coupling
 	    params.set<std::vector<std::string> >("u") = cv_u;
 	    params.set<std::vector<std::string> >("rhou") = cv_rhou;
-	    // additional params
-	    //params.set<Real>("p_in") = _p_bc;
-	    //params.set<Real>("T_in") = _T_bc;
-	    //params.set<std::string>("eos_function") = getParam<std::string>("eos_function");
 
 	    _sim.addBoundaryCondition("OneDMassStaticPandTBC", genName("bc", _id * 1000 + i, "rho"), params);
 	  }
+
+	  // Debug
 	  /*
 	  {
 	    InputParameters params = validParams<OneDMomentumCoupledPTBC>();
@@ -234,5 +222,6 @@ FlowJunction::addMooseObjects()
 	    _sim.addBoundaryCondition("OneDMomentumCoupledPTBC", genName("bc", _id * 1000 + i, "rhou"), params);
 	  }
 	  */
+	  // End of debug
   }
 }
