@@ -378,6 +378,7 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
       }
     }
     _kernels[tid].addKernel(kernel, blk_ids);
+    _mproblem._objects_by_name[tid][name].push_back(kernel);
   }
 }
 
@@ -392,6 +393,7 @@ NonlinearSystem::addScalarKernel(const  std::string & kernel_name, const std::st
     mooseAssert(kernel != NULL, "Not a Kernel object");
 
     _kernels[tid].addScalarKernel(kernel);
+    _mproblem._objects_by_name[tid][name].push_back(kernel);
   }
 }
 
@@ -416,6 +418,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
 
       BoundaryCondition * bc = static_cast<BoundaryCondition *>(Factory::instance()->create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a BoundaryCondition object");
+      _mproblem._objects_by_name[tid][name].push_back(bc);
 
       if (dynamic_cast<PresetNodalBC*>(bc) != NULL)
       {
@@ -449,6 +452,7 @@ NonlinearSystem::addConstraint(const std::string & c_name, const std::string & n
   parameters.set<THREAD_ID>("_tid") = 0;
 
   MooseObject * obj = Factory::instance()->create(c_name, name, parameters);
+  _mproblem._objects_by_name[0][name].push_back(obj);
 
   NodalConstraint    * nc = dynamic_cast<NodalConstraint *>(obj);
   NodeFaceConstraint * nfc = dynamic_cast<NodeFaceConstraint *>(obj);
@@ -480,6 +484,7 @@ NonlinearSystem::addDiracKernel(const  std::string & kernel_name, const std::str
     mooseAssert(kernel != NULL, "Not a Dirac Kernel object");
 
     _dirac_kernels[tid].addDiracKernel(kernel);
+    _mproblem._objects_by_name[tid][name].push_back(kernel);
   }
 }
 
@@ -496,6 +501,7 @@ NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & nam
     mooseAssert(dg_kernel != NULL, "Not a DG Kernel object");
 
     _dg_kernels[tid].addDGKernel(dg_kernel);
+    _mproblem._objects_by_name[tid][name].push_back(dg_kernel);
   }
 
   _doing_dg = true;
@@ -511,6 +517,7 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
 
     Damper * damper = static_cast<Damper *>(Factory::instance()->create(damper_name, name, parameters));
     _dampers[tid].addDamper(damper);
+    _mproblem._objects_by_name[tid][name].push_back(damper);
   }
 }
 

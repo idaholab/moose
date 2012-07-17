@@ -55,6 +55,11 @@ Problem::~Problem()
 }
 
 void
+Problem::addFunction(std::string type, const std::string & name, InputParameters parameters)
+{
+}
+
+void
 Problem::addUserObject(const std::string & type, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;

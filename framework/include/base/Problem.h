@@ -163,7 +163,7 @@ public:
   virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0) = 0;
 
   // Function /////
-  virtual void addFunction(std::string type, const std::string & name, InputParameters parameters) = 0;
+  virtual void addFunction(std::string type, const std::string & name, InputParameters parameters);
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0) = 0;
 
   // UserData /////

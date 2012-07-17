@@ -155,6 +155,12 @@ public:
   virtual void copyOldSolutions();
   virtual void restoreSolutions();
 
+  virtual const std::vector<MooseObject *> & getObjectsByName(const std::string & name, THREAD_ID tid);
+
+  // Function /////
+  virtual void addFunction(std::string type, const std::string & name, InputParameters parameters);
+  virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
+
   // NL /////
   NonlinearSystem & getNonlinearSystem() { return _nl; }
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
@@ -202,6 +208,7 @@ public:
   virtual void reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int side, THREAD_ID tid);
   virtual void reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid);
 
+  virtual void addUserObject(const std::string & type, const std::string & name, InputParameters parameters);
 
   // Postprocessors /////
   virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
@@ -319,6 +326,9 @@ public:
 
 
 protected:
+  /// Objects by names, indexing: [thread][name]->array of moose objects with name 'name'
+  std::vector<std::map<std::string, std::vector<MooseObject *> > > _objects_by_name;
+
   NonlinearSystem _nl;
   AuxiliarySystem _aux;
 
@@ -328,6 +338,9 @@ protected:
   // quadrature
   Order _quadrature_order;                              ///< Quadrature order required by all variables to integrated over them.
   std::vector<Assembly *> _assembly;
+
+  /// functions
+  std::vector<std::map<std::string, Function *> > _functions;
 
   // material properties
   MaterialPropertyStorage _material_props;

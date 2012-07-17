@@ -103,6 +103,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   }
 
   _pps_data.resize(n_threads);
+  _objects_by_name.resize(n_threads);
 }
 
 FEProblem::~FEProblem()
@@ -122,6 +123,9 @@ FEProblem::~FEProblem()
       delete _bnd_material_data[i];
       delete _neighbor_material_data[i];
     }
+
+    for (std::map<std::string, Function *>::iterator it = _functions[i].begin(); it != _functions[i].end(); ++it)
+      delete it->second;
   }
 
   if (stateful_props)
@@ -775,6 +779,42 @@ FEProblem::subdomainSetupSide(SubdomainID subdomain, THREAD_ID tid)
   }
 }
 
+const std::vector<MooseObject *> &
+FEProblem::getObjectsByName(const std::string & name, THREAD_ID tid)
+{
+  std::map<std::string, std::vector<MooseObject *> >::iterator it = _objects_by_name[tid].find(name);
+  if (it != _objects_by_name[tid].end())
+    return (*it).second;
+  else
+    mooseError("Unable to find objects with a given name.");
+}
+
+void
+FEProblem::addFunction(std::string type, const std::string & name, InputParameters parameters)
+{
+  parameters.set<Problem *>("_problem") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+    Function * func = static_cast<Function *>(Factory::instance()->create(type, name, parameters));
+    _functions[tid][name] = func;
+    _objects_by_name[tid][name].push_back(func);
+  }
+}
+
+Function &
+FEProblem::getFunction(const std::string & name, THREAD_ID tid)
+{
+  Function * function = _functions[tid][name];
+  if (!function)
+  {
+    mooseError("Unable to find function " + name);
+  }
+  return *function;
+}
+
 void
 FEProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
@@ -1061,6 +1101,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       Material *volume_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
       mooseAssert(volume_material != NULL, "Not a Material object");
       _materials[tid].addMaterial(block_ids, volume_material);
+      _objects_by_name[tid][name].push_back(volume_material);
 
       // face material
       parameters.set<bool>("_bnd") = true;
@@ -1068,6 +1109,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       Material *face_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
       mooseAssert(face_material != NULL, "Not a Material object");
       _materials[tid].addFaceMaterial(block_ids, face_material);
+      _objects_by_name[tid][name].push_back(face_material);
 
       // neighbor material
       parameters.set<bool>("_bnd") = true;
@@ -1075,6 +1117,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       Material *neighbor_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
       mooseAssert(neighbor_material != NULL, "Not a Material object");
       _materials[tid].addNeighborMaterial(block_ids, neighbor_material);
+      _objects_by_name[tid][name].push_back(neighbor_material);
     }
     else if (boundaries.size() > 0)
     {
@@ -1083,6 +1126,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       Material *bnd_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
       mooseAssert(bnd_material != NULL, "Not a Material object");
       _materials[tid].addBoundaryMaterial(boundary_ids, bnd_material);
+      _objects_by_name[tid][name].push_back(bnd_material);
     }
     else
       mooseError("Material '" + name + "' did not specify either block or boundary parameter");
@@ -1174,6 +1218,18 @@ FEProblem::reinitMaterialsBoundary(BoundaryID bnd_id, THREAD_ID tid)
   }
 }
 
+void
+FEProblem::addUserObject(const std::string & type, const std::string & name, InputParameters parameters)
+{
+  parameters.set<Problem *>("_problem") = this;
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+    UserObject * uo = static_cast<UserObject *>(Factory::instance()->create(type, name, parameters));
+    _user_objects[tid].addUserObject(name, uo);
+    _objects_by_name[tid][name].push_back(uo);
+  }
+}
 
 void
 FEProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters)
@@ -1204,6 +1260,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 //      {
         Postprocessor * pp = static_cast<Postprocessor *>(Factory::instance()->create(pp_name, name, parameters));
         _pps(type)[tid].addPostprocessor(pp);
+        _objects_by_name[tid][name].push_back(pp);
 //      }
 //      else
 //        mooseError("Duplicate postprocessor name '" + name + "'");
@@ -1218,6 +1275,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 //      {
         Postprocessor * pp = static_cast<Postprocessor *>(Factory::instance()->create(pp_name, name, parameters));
         _pps(type)[tid].addPostprocessor(pp);
+        _objects_by_name[tid][name].push_back(pp);
 //      }
 //      else
 //        mooseError("Duplicate postprocessor name '" + name + "'");

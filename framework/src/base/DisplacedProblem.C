@@ -593,6 +593,12 @@ DisplacedProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
   return _mproblem.getPostprocessorValue(name, tid);
 }
 
+Function &
+DisplacedProblem::getFunction(const std::string & name, THREAD_ID tid)
+{
+  return _mproblem.getFunction(name, tid);
+}
+
 void
 DisplacedProblem::addGhostedElem(unsigned int elem_id)
 {

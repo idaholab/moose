@@ -160,6 +160,7 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
     }
 
     _auxs(kernel->execFlag())[tid].addAuxKernel(kernel, blk_ids);
+    _mproblem._objects_by_name[tid][name].push_back(kernel);
   }
 }
 
@@ -174,6 +175,7 @@ AuxiliarySystem::addScalarKernel(const  std::string & kernel_name, const std::st
     mooseAssert(kernel != NULL, "Not a AuxScalarKernel object");
 
     _auxs(kernel->execFlag())[tid].addScalarKernel(kernel);
+    _mproblem._objects_by_name[tid][name].push_back(kernel);
   }
 }
 
@@ -197,6 +199,7 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
       mooseAssert(bc != NULL, "Not a AuxBoundaryCondition object");
 
       _auxs(bc->execFlag())[tid].addActiveBC(boundary, bc);
+      _mproblem._objects_by_name[tid][name].push_back(bc);
 
       _vars[tid].addBoundaryVar(boundary, &bc->variable());
     }
