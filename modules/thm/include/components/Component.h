@@ -128,7 +128,6 @@ template<typename T>
 const T &
 Component::getRParam(const std::string & param_name)
 {
-
   std::vector<std::string> s = split(param_name);
 
   const std::vector<std::string> & names = getMooseObjectsByName(s[0]);
@@ -136,13 +135,15 @@ Component::getRParam(const std::string & param_name)
   {
     std::string nm = *it;
     const std::vector<Material *> & mats = _sim.feproblem().getMaterialsByName(nm, 0);
-    for(std::vector<Material *>::const_iterator it=mats.begin() ; it != mats.end(); it++){
+    for(std::vector<Material *>::const_iterator it=mats.begin() ; it != mats.end(); it++)
+    {
       Material * mat = *it;
       if (mat->parameters().have_parameter<T>(s[1]))
         return mat->parameters().get<T>(s[1]);
-   }
-
+    }
   }
+
+  mooseError("Parameter '" + param_name + "' was not found in component '" + name() + "'.");
 }
 
 template<typename T>
