@@ -54,15 +54,15 @@ protected:
   Real _length;                                 ///< Length of the pipe
   unsigned int _n_elems;                        ///< Number of elements this pipe is divided into
 
-  Real _A;                                      ///< Pipe area (A_i)
-  Real _aw;					///< Heat transfer surface density
-						///< Physical meaning:
-						///< _aw = A_heating_surface_per_length / A_pipe_flow_are [1/m]
+  const Real & _A;                              ///< Pipe area (A_i)
+  const Real & _aw;                             ///< Heat transfer surface density
+                                                ///< Physical meaning:
+                                                ///< _aw = A_heating_surface_per_length / A_pipe_flow_are [1/m]
 
   bool _has_f;
-  Real _f;                                      ///< friction
-  Real _Hw;                                     ///< Convective heat transfer coefficient
-  Real _Tw;                                     ///< Wall temperature
+  const Real & _f;                              ///< friction
+  const Real & _Hw;                             ///< Convective heat transfer coefficient
+  const Real & _Tw;                             ///< Wall temperature
 
 
   unsigned int _subdomain_id;                   ///< Subdomain id this pipe defined
@@ -80,13 +80,13 @@ protected:
   //Function& _func;				///< A function interface to access the EOS function
   //EquationOfState& _eos;		///< EOS function
 
-  bool _has_initial_P;				///< Is initial pressure provided from user input
-  bool _has_initial_V;				///< Is initial velocity provided from user input
-  bool _has_initial_T;				///< Is initial temperature provided from user input
+  bool _has_initial_P;              ///< Is initial pressure provided from user input
+  bool _has_initial_V;              ///< Is initial velocity provided from user input
+  bool _has_initial_T;              ///< Is initial temperature provided from user input
 
-  Real _initial_P;				///< Initial pressure from user input (if provided)
-  Real _initial_V;				///< Initial velocity from user input (if provided)
-  Real _initial_T;				///< Initial temperature from user input (if provided)
+  const Real & _initial_P;          ///< Initial pressure from user input (if provided)
+  const Real & _initial_V;          ///< Initial velocity from user input (if provided)
+  const Real & _initial_T;          ///< Initial temperature from user input (if provided)
 
 public:
   static const std::string _type;

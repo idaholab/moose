@@ -182,7 +182,9 @@ FlowJunction::addMooseObjects()
     if(_model_type == Model::EQ_MODEL_3)
     	params.set<std::vector<std::string> >("rhoE") = cv_rhoE;
 
-    _sim.addScalarKernel("FlowJunctionConstraint", genName("ScalarKernel", _id, _name), params);
+    std::string mon = genName(name(), _id, "_flowJunction");
+    _sim.addScalarKernel("FlowJunctionConstraint", mon, params);
+    connectObject("", mon);
   }
 
   //add BC's
