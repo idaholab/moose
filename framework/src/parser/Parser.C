@@ -45,20 +45,6 @@
 // libMesh
 #include "getpot.h"
 
-
-template<>
-void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name,
-                                           InputParameters::Parameter<MooseEnum>* param, bool in_global, GlobalParamsAction *global_block);
-
-template<>
-void Parser::setScalarParameter<RealVectorValue>(const std::string & full_name, const std::string & short_name,
-                                                 InputParameters::Parameter<RealVectorValue> * param, bool in_global, GlobalParamsAction * global_block);
-
-template<>
-void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, const std::string & short_name,
-                                                 InputParameters::Parameter<RealTensorValue> * param, bool in_global, GlobalParamsAction * global_block);
-
-
 Parser::Parser(ActionWarehouse & action_wh) :
     _action_wh(action_wh),
     _syntax(_action_wh.syntax()),
@@ -498,6 +484,51 @@ Parser::getSortFlag() const
   return _sort_alpha;
 }
 
+/*****************************************
+ *****************************************
+ *     Parameter Extraction Routines     *
+ *****************************************
+ ****************************************/
+using std::string;
+
+// Template Specializations for retrieving special types from the input file
+template<>
+void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name,
+                                           InputParameters::Parameter<MooseEnum>* param, bool in_global, GlobalParamsAction *global_block);
+
+template<>
+void Parser::setScalarParameter<RealVectorValue>(const std::string & full_name, const std::string & short_name,
+                                                 InputParameters::Parameter<RealVectorValue> * param, bool in_global, GlobalParamsAction * global_block);
+
+template<>
+void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, const std::string & short_name,
+                                                 InputParameters::Parameter<RealTensorValue> * param, bool in_global, GlobalParamsAction * global_block);
+
+// Macros for parameter extraction
+#define dynamicCastAndExtractScalar(type, param, full_name, short_name, in_global, global_block)                       \
+  InputParameters::Parameter<type> * type ## _scalar =                                                                 \
+                                dynamic_cast<InputParameters::Parameter<type>*>(param);                                \
+  if (type ## _scalar)                                                                                                 \
+    setScalarParameter<type>(full_name, short_name, type ## _scalar, in_global, global_block)
+
+#define dynamicCastAndExtractScalar2(type, type2, param, full_name, short_name, in_global, global_block)              \
+  InputParameters::Parameter<type type2> * type ## type2 ## _scalar =                                                 \
+                                dynamic_cast<InputParameters::Parameter<type type2>*>(param);                         \
+  if (type ## type2 ## _scalar)                                                                                       \
+    setScalarParameter<type type2>(full_name, short_name, type ## type2 ## _scalar, in_global, global_block)
+
+#define dynamicCastAndExtractVector(type, param, full_name, short_name, in_global, global_block)                      \
+  InputParameters::Parameter<std::vector<type> > * type ## _vector =                                                  \
+                                dynamic_cast<InputParameters::Parameter<std::vector<type> >*>(param);                 \
+  if (type ## _vector)                                                                                                \
+    setVectorParameter<type>(full_name, short_name, type ## _vector, in_global, global_block)
+
+#define dynamicCastAndExtractVector2(type, type2, param, full_name, short_name, in_global, global_block)              \
+  InputParameters::Parameter<std::vector<type type2> > * type ## type2 ## _vector =                                   \
+                                dynamic_cast<InputParameters::Parameter<std::vector<type type2> >*>(param);           \
+  if (type ## type2 ## _vector)                                                                                       \
+    setVectorParameter<type type2>(full_name, short_name, type ## type2 ## _vector, in_global, global_block)
+
 void
 Parser::extractParams(const std::string & prefix, InputParameters &p)
 {
@@ -540,106 +571,55 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
 
     if (found)
     {
-      InputParameters::Parameter<Real> * real_param = dynamic_cast<InputParameters::Parameter<Real>*>(it->second);
-      InputParameters::Parameter<int>  * int_param  = dynamic_cast<InputParameters::Parameter<int>*>(it->second);
-      InputParameters::Parameter<unsigned int>  * uint_param  = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it->second);
-      InputParameters::Parameter<SubdomainID>  * subdomain_id_param  = dynamic_cast<InputParameters::Parameter<SubdomainID>*>(it->second);
-      InputParameters::Parameter<BoundaryID>  * boundary_id_param  = dynamic_cast<InputParameters::Parameter<BoundaryID>*>(it->second);
-      InputParameters::Parameter<SubdomainName>  * subdomain_name_param  = dynamic_cast<InputParameters::Parameter<SubdomainName>*>(it->second);
-      InputParameters::Parameter<BoundaryName>  * boundary_name_param  = dynamic_cast<InputParameters::Parameter<BoundaryName>*>(it->second);
-      InputParameters::Parameter<bool> * bool_param = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
-      InputParameters::Parameter<RealVectorValue> * real_vec_val_param = dynamic_cast<InputParameters::Parameter<RealVectorValue>*>(it->second);
-      InputParameters::Parameter<RealTensorValue> * real_tensor_val_param = dynamic_cast<InputParameters::Parameter<RealTensorValue>*>(it->second);
+      /**
+       * Scalar types
+       */
+      // built-ins
+      dynamicCastAndExtractScalar (Real                  , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (int                   , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar2(unsigned,int          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (bool                  , it->second, full_name, it->first, in_global, global_params_block);
 
-      InputParameters::Parameter<std::string> * string_param = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
-      InputParameters::Parameter<FileName> * file_name_param = dynamic_cast<InputParameters::Parameter<FileName>*>(it->second);
-      InputParameters::Parameter<MeshFileName> * mesh_file_name_param = dynamic_cast<InputParameters::Parameter<MeshFileName>*>(it->second);
-      InputParameters::Parameter<VariableName> * var_name_param = dynamic_cast<InputParameters::Parameter<VariableName>*>(it->second);
-      InputParameters::Parameter<NonlinearVariableName> * nl_var_name_param = dynamic_cast<InputParameters::Parameter<NonlinearVariableName>*>(it->second);
-      InputParameters::Parameter<AuxVariableName> * aux_var_name_param = dynamic_cast<InputParameters::Parameter<AuxVariableName>*>(it->second);
+      // Moose Scalars
+      dynamicCastAndExtractScalar (SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (BoundaryID            , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (RealVectorValue       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (RealTensorValue       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (MooseEnum             , it->second, full_name, it->first, in_global, global_params_block);
 
-      InputParameters::Parameter<FunctionName> * function_name_param = dynamic_cast<InputParameters::Parameter<FunctionName>*>(it->second);
-      InputParameters::Parameter<UserObjectName> * user_object_name_param = dynamic_cast<InputParameters::Parameter<UserObjectName>*>(it->second);
+      // Moose String-derived scalars
+      dynamicCastAndExtractScalar (/*std::*/string       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (SubdomainName         , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (BoundaryName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (FileName              , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (MeshFileName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (VariableName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (NonlinearVariableName , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (AuxVariableName       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (FunctionName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (UserObjectName        , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar (PostprocessorName     , it->second, full_name, it->first, in_global, global_params_block);
 
-      InputParameters::Parameter<MooseEnum> * enum_param = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(it->second);
-      InputParameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<InputParameters::Parameter<std::vector<Real> >*>(it->second);
-      InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
-      InputParameters::Parameter<std::vector<unsigned int>  > * vec_uint_param  = dynamic_cast<InputParameters::Parameter<std::vector<unsigned int> >*>(it->second);
-      InputParameters::Parameter<std::vector<SubdomainID>  > * vec_subdomain_id_param  = dynamic_cast<InputParameters::Parameter<std::vector<SubdomainID> >*>(it->second);
-      InputParameters::Parameter<std::vector<BoundaryID>  > * vec_boundary_id_param  = dynamic_cast<InputParameters::Parameter<std::vector<BoundaryID> >*>(it->second);
-      InputParameters::Parameter<std::vector<bool>  > * vec_bool_param  = dynamic_cast<InputParameters::Parameter<std::vector<bool> >*>(it->second);
+      /**
+       * Vector types
+       */
+      // built-ins
+      dynamicCastAndExtractVector (Real                  , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector (int                   , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector2(unsigned,int          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector (bool                  , it->second, full_name, it->first, in_global, global_params_block);
 
-      InputParameters::Parameter<std::vector<std::string> > * vec_string_param = dynamic_cast<InputParameters::Parameter<std::vector<std::string> >*>(it->second);
-      InputParameters::Parameter<std::vector<VariableName> > * vec_var_name_param = dynamic_cast<InputParameters::Parameter<std::vector<VariableName> >*>(it->second);
-      InputParameters::Parameter<std::vector<NonlinearVariableName> > * vec_nl_var_name_param = dynamic_cast<InputParameters::Parameter<std::vector<NonlinearVariableName> >*>(it->second);
-      InputParameters::Parameter<std::vector<AuxVariableName> > * vec_aux_var_name_param = dynamic_cast<InputParameters::Parameter<std::vector<AuxVariableName> >*>(it->second);
-      InputParameters::Parameter<std::vector<SubdomainName>  > * vec_subdomain_name_param  = dynamic_cast<InputParameters::Parameter<std::vector<SubdomainName> >*>(it->second);
-      InputParameters::Parameter<std::vector<BoundaryName>  > * vec_boundary_name_param  = dynamic_cast<InputParameters::Parameter<std::vector<BoundaryName> >*>(it->second);
+      // Moose Vectors
+      dynamicCastAndExtractVector (SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector (BoundaryID            , it->second, full_name, it->first, in_global, global_params_block);
 
-
-      if (real_param)
-        setScalarParameter<Real>(full_name, it->first, real_param, in_global, global_params_block);
-      else if (int_param)
-        setScalarParameter<int>(full_name, it->first, int_param, in_global, global_params_block);
-      else if (subdomain_id_param)
-        setScalarParameter<SubdomainID>(full_name, it->first, subdomain_id_param, in_global, global_params_block);
-      else if (boundary_id_param)
-        setScalarParameter<BoundaryID>(full_name, it->first, boundary_id_param, in_global, global_params_block);
-      else if (subdomain_name_param)
-        setScalarParameter<SubdomainName>(full_name, it->first, subdomain_name_param, in_global, global_params_block);
-      else if (boundary_name_param)
-        setScalarParameter<BoundaryName>(full_name, it->first, boundary_name_param, in_global, global_params_block);
-      else if (uint_param)
-        setScalarParameter<unsigned int>(full_name, it->first, uint_param, in_global, global_params_block);
-      else if (bool_param)
-        setScalarParameter<bool>(full_name, it->first, bool_param, in_global, global_params_block);
-      // Real Vector Param
-      else if (real_vec_val_param)
-        setScalarParameter<RealVectorValue>(full_name, it->first, real_vec_val_param, in_global, global_params_block);
-      else if (real_tensor_val_param)
-        setScalarParameter<RealTensorValue>(full_name, it->first, real_tensor_val_param, in_global, global_params_block);
-      else if (string_param)
-        setScalarParameter<std::string>(full_name, it->first, string_param, in_global, global_params_block);
-      else if (file_name_param)
-        setScalarParameter<FileName>(full_name, it->first, file_name_param, in_global, global_params_block);
-      else if (mesh_file_name_param)
-        setScalarParameter<MeshFileName>(full_name, it->first, mesh_file_name_param, in_global, global_params_block);
-      else if (var_name_param)
-        setScalarParameter<VariableName>(full_name, it->first, var_name_param, in_global, global_params_block);
-      else if (nl_var_name_param)
-        setScalarParameter<NonlinearVariableName>(full_name, it->first, nl_var_name_param, in_global, global_params_block);
-      else if (aux_var_name_param)
-        setScalarParameter<AuxVariableName>(full_name, it->first, aux_var_name_param, in_global, global_params_block);
-      else if (function_name_param)
-        setScalarParameter<FunctionName>(full_name, it->first, function_name_param, in_global, global_params_block);
-      else if (user_object_name_param)
-        setScalarParameter<UserObjectName>(full_name, it->first, user_object_name_param, in_global, global_params_block);
-      else if (enum_param)
-        setScalarParameter<MooseEnum>(full_name, it->first, enum_param, in_global, global_params_block);
-      else if (vec_real_param)
-        setVectorParameter<Real>(full_name, it->first, vec_real_param, in_global, global_params_block);
-      else if (vec_int_param)
-        setVectorParameter<int>(full_name, it->first, vec_int_param, in_global, global_params_block);
-      else if (vec_uint_param)
-        setVectorParameter<unsigned int>(full_name, it->first, vec_uint_param, in_global, global_params_block);
-      else if (vec_subdomain_id_param)
-        setVectorParameter<SubdomainID>(full_name, it->first, vec_subdomain_id_param, in_global, global_params_block);
-      else if (vec_boundary_id_param)
-        setVectorParameter<BoundaryID>(full_name, it->first, vec_boundary_id_param, in_global, global_params_block);
-      else if (vec_bool_param)
-        setVectorParameter<bool>(full_name, it->first, vec_bool_param, in_global, global_params_block);
-      else if (vec_string_param)
-        setVectorParameter<std::string>(full_name, it->first, vec_string_param, in_global, global_params_block);
-      else if (vec_var_name_param)
-        setVectorParameter<VariableName>(full_name, it->first, vec_var_name_param, in_global, global_params_block);
-      else if (vec_nl_var_name_param)
-        setVectorParameter<NonlinearVariableName>(full_name, it->first, vec_nl_var_name_param, in_global, global_params_block);
-      else if (vec_aux_var_name_param)
-        setVectorParameter<AuxVariableName>(full_name, it->first, vec_aux_var_name_param, in_global, global_params_block);
-      else if (vec_subdomain_name_param)
-        setVectorParameter<SubdomainName>(full_name, it->first, vec_subdomain_name_param, in_global, global_params_block);
-      else if (vec_boundary_name_param)
-        setVectorParameter<BoundaryName>(full_name, it->first, vec_boundary_name_param, in_global, global_params_block);
+      // Moose String-derived scalars
+      dynamicCastAndExtractVector (/*std::*/string       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector (SubdomainName         , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector (BoundaryName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector (VariableName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector (NonlinearVariableName , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector (AuxVariableName       , it->second, full_name, it->first, in_global, global_params_block);
     }
   }
 }

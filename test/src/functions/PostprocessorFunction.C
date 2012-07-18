@@ -13,18 +13,19 @@
 /****************************************************************/
 
 #include "PostprocessorFunction.h"
+#include "MooseTypes.h"
 
 template<>
 InputParameters validParams<PostprocessorFunction>()
 {
   InputParameters params = validParams<Function>();
-  params.addRequiredParam<std::string>("pp", "The name of the postprocessor you are trying to get.");
+  params.addRequiredParam<PostprocessorName>("pp", "The name of the postprocessor you are trying to get.");
   return params;
 }
 
 PostprocessorFunction::PostprocessorFunction(const std::string & name, InputParameters parameters) :
     Function(name, parameters),
-    _pp(getPostprocessorValue(getParam<std::string>("pp")))
+    _pp(getPostprocessorValue(getParam<PostprocessorName>("pp")))
 {
   std::cout<<"Stuff!"<<std::endl;
 }
