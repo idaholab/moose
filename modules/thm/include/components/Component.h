@@ -134,12 +134,12 @@ Component::getRParam(const std::string & param_name)
   for (std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
   {
     std::string nm = *it;
-    const std::vector<Material *> & mats = _sim.feproblem().getMaterialsByName(nm, 0);
-    for(std::vector<Material *>::const_iterator it=mats.begin() ; it != mats.end(); it++)
+    const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(nm, 0);
+    for(std::vector<MooseObject *>::const_iterator it=objs.begin() ; it != objs.end(); it++)
     {
-      Material * mat = *it;
-      if (mat->parameters().have_parameter<T>(s[1]))
-        return mat->parameters().get<T>(s[1]);
+      MooseObject * obj = *it;
+      if (obj->parameters().have_parameter<T>(s[1]))
+        return obj->parameters().get<T>(s[1]);
     }
   }
 
@@ -158,13 +158,13 @@ Component::setRParam(const std::string & param_name, const T & value)
     std::string nm = *it;
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
-      const std::vector<Material *> & mats = _sim.feproblem().getMaterialsByName(nm, tid);
+      const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(nm, tid);
 
-      for(std::vector<Material *>::const_iterator it=mats.begin() ; it != mats.end(); it++)
+      for(std::vector<MooseObject *>::const_iterator it=objs.begin() ; it != objs.end(); it++)
       {
-        Material * mat = *it;
-        if (mat->parameters().have_parameter<T>(s[1]))
-          mat->parameters().set<T>(s[1]) = value;
+        MooseObject * obj = *it;
+        if (obj->parameters().have_parameter<T>(s[1]))
+          obj->parameters().set<T>(s[1]) = value;
       }
     }
   }
