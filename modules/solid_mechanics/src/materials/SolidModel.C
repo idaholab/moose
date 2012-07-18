@@ -429,6 +429,11 @@ SolidModel::computeElasticityTensor()
     Point p;
     t->setYoungsModulus( (_youngs_modulus_function ? _youngs_modulus_function->value(_temperature[_qp], p) : _youngs_modulus) );
     t->setPoissonsRatio( (_poissons_ratio_function ? _poissons_ratio_function->value(_temperature[_qp], p) : _poissons_ratio) );
+    _stress_old = (*t)*_elastic_strain_old[_qp];
+  }
+  else
+  {
+    _stress_old = _stress_old_prop[_qp];
   }
   _local_elasticity_tensor->calculate(_qp);
 
@@ -491,7 +496,6 @@ SolidModel::initialSetup()
 void
 SolidModel::crackingStrainDirections()
 {
-  _stress_old = _stress_old_prop[_qp];
   bool cracking_locally_active( false );
   if (_cracking_stress > 0)
   {

@@ -8,7 +8,8 @@
 # The cube is displaced by 1e-6 units in x, 2e-6 in y, and 3e-6 in z.
 #  The faces are sheared as well (1e-6, 2e-6, and 3e-6 for xy, yz, and
 #  zx).  This gives a uniform strain/stress state for all six unique
-#  tensor components.
+#  tensor components.  This displacement is again applied in the second
+#  step.
 
 # With Young's modulus at 1e6 and Poisson's ratio at 0, the shear
 #  modulus is 5e5 (G=E/2/(1+nu)).  Therefore, for the mechanical strain,
@@ -24,30 +25,22 @@
 # Young's modulus is a function of temperature for this test.  The
 #  temperature changes from 100 to 500.  The Young's modulus drops
 #  due to that temperature change from 1e6 to 6e5.
-#
+
 # Poisson's ratio also is a function of temperature and changes from
 #  0 to 0.25.
-#
+
 # At the end of the temperature ramp, E=6e5 and nu=0.25.  This gives
-#  G=2.4e=5.  lambda=E*nu/(1+nu)/(1-2*nu)=2.4E5.  The second stress
-#  increment is therefore
-#
-#  stress xx = 2.4e5 * 6e-6 + 2*2.4e5*1e-6 = 1.92
-#  stress yy = 2.4e5 * 6e-6 + 2*2.4e5*2e-6 = 2.40
-#  stress zz = 2.4e5 * 6e-6 + 2*2.4e5*3e-6 = 2.88
-#  stress xy = 2 * 2.4e5 * 1e-6 / 2 = 0.24
+#  G=2.4e=5.  lambda=E*nu/(1+nu)/(1-2*nu)=2.4E5.  The final stress
+#  is therefore
+
+#  stress xx = 2.4e5 * 12e-6 + 2*2.4e5*2e-6 = 3.84
+#  stress yy = 2.4e5 * 12e-6 + 2*2.4e5*4e-6 = 4.80
+#  stress zz = 2.4e5 * 12e-6 + 2*2.4e5*6e-6 = 5.76
+#  stress xy = 2 * 2.4e5 * 2e-6 / 2 = 0.48
 #             (2 * G   * gamma_xy / 2 = 2 * G * epsilon_xy)
-#  stress yz = 2 * 2.4e5 * 2e-6 / 2 = 0.48
-#  stress zx = 2 * 2.4e5 * 3e-6 / 2 = 0.72
-#
-# This gives a final stress of
-#
-#  stress xx = 1.0 + 1.92 = 2.92
-#  stress yy = 2.0 + 2.40 = 4.40
-#  stress zz = 3.0 + 2.88 = 5.88
-#  stress xy = 0.5 + 0.24 = 0.74
-#  stress yz = 1.0 + 0.48 = 1.48
-#  stress zx = 1.5 + 0.72 = 2.22
+#  stress yz = 2 * 2.4e5 * 4e-6 / 2 = 0.96
+#  stress zx = 2 * 2.4e5 * 6e-6 / 2 = 1.44
+
 
 [Mesh]#Comment
   file = thermal_elastic.e
