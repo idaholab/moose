@@ -37,6 +37,7 @@ InputParameters::clear()
 {
   Parameters::clear();
   _doc_string.clear();
+  _custom_type.clear();
   _required_params.clear();
   _valid_params.clear();
   _private_params.clear();
@@ -89,6 +90,7 @@ InputParameters::operator=(const InputParameters &rhs)
   Parameters::operator=(rhs);
 
   this->_doc_string = rhs._doc_string;
+  this->_custom_type = rhs._custom_type;
   this->_required_params = rhs._required_params;
   this->_private_params = rhs._private_params;
   this->_valid_params = rhs._valid_params;
@@ -104,6 +106,7 @@ InputParameters::operator+=(const InputParameters &rhs)
   Parameters::operator+=(rhs);
 
   _doc_string.insert(rhs._doc_string.begin(), rhs._doc_string.end());
+  _custom_type.insert(rhs._custom_type.begin(), rhs._custom_type.end());
   _required_params.insert(rhs._required_params.begin(), rhs._required_params.end());
   _private_params.insert(rhs._private_params.begin(), rhs._private_params.end());
   _valid_params.insert(rhs._valid_params.begin(), rhs._valid_params.end());
@@ -208,6 +211,8 @@ InputParameters::type(const std::string &name)
 {
   if (_coupled_vars.find(name) != _coupled_vars.end())
     return "std::vector<VariableName>";
+  else if (_custom_type.find(name) != _custom_type.end())
+    return _custom_type[name];
   else
     return _values[name]->type();
 }

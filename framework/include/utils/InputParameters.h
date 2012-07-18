@@ -92,6 +92,17 @@ public:
   void addParam(const std::string &name, const std::string &doc_string);
 
   /**
+   * These methods add an option parameter and with a customer type to the InputParameters object.  The custom
+   * type will be output in YAML dumps and can be used within the GUI application.
+   */
+  template <typename T>
+  void addRequiredCustomTypeParam(const std::string &name, const std::string &custom_type, const std::string &doc_string);
+  template <typename T>
+  void addCustomTypeParam(const std::string &name, const T &value, const std::string &custom_type, const std::string &doc_string);
+  template <typename T>
+  void addCustomTypeParam(const std::string &name, const std::string &custom_type, const std::string &doc_string);
+
+  /**
    * These method adds a parameter to the InputParameters object which can be retrieved
    * like any other parameter.  This parameter however is not printed in the Input file syntax
    * dump or web page dump so does not take a documentation string.  The first version
@@ -110,7 +121,7 @@ public:
   void addCoupledVar(const std::string &name, const std::string &doc_string);
 
   /**
-   * Utility functions for retrieving on of the MooseTypes variables into the common "string" base class.
+   * Utility functions for retrieving one of the MooseTypes variables into the common "string" base class.
    * Scalar and Vector versions are supplied
    */
   std::string getMooseType(const std::string &name) const;
@@ -209,7 +220,13 @@ private:
   InputParameters() {}
 
 private:
+  /// The documentation strings for each parameter
   std::map<std::string, std::string> _doc_string;
+
+  /// The custom type that will be printed in the YAML dump for a parameter if supplied
+  std::map<std::string, std::string> _custom_type;
+
+  /// The set of parameters that are required (i.e. will cause an abort if not supplied)
   std::set<std::string> _required_params;
 
   /// The set of parameters either seen in the input file or provided a default value when added
@@ -248,6 +265,27 @@ void InputParameters::addParam(const std::string &name, const std::string &doc_s
 {
   Parameters::insert<T>(name);
   _doc_string[name] = doc_string;
+}
+
+template <typename T>
+void InputParameters::addRequiredCustomTypeParam(const std::string &name, const std::string &custom_type, const std::string &doc_string)
+{
+  addRequiredParam<T>(name, doc_string);
+  _custom_type[name] = custom_type;
+}
+
+template <typename T>
+void InputParameters::addCustomTypeParam(const std::string &name, const T &value, const std::string &custom_type, const std::string &doc_string)
+{
+  addParam<T>(name, value, doc_string);
+  _custom_type[name] = custom_type;
+}
+
+template <typename T>
+void InputParameters::addCustomTypeParam(const std::string &name, const std::string &custom_type, const std::string &doc_string)
+{
+  addParam<T>(name, doc_string);
+  _custom_type[name] = custom_type;
 }
 
 template <typename T>

@@ -55,7 +55,7 @@ Problem::~Problem()
 }
 
 void
-Problem::addFunction(std::string type, const std::string & name, InputParameters parameters)
+Problem::addFunction(std::string /*type*/, const std::string & /*name*/, InputParameters /*parameters*/)
 {
 }
 
