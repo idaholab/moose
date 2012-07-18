@@ -32,6 +32,8 @@ class MeshRenderWidget(QtGui.QWidget):
     self.renderer.ResetCamera()
     
     self.this_layout.addWidget(self.vtkwidget)
+    self.this_layout.setStretchFactor(self.vtkwidget, 10)
+
     self.vtkwidget.setMinimumHeight(600)
     self.vtkwidget.show()    
 
@@ -135,7 +137,7 @@ class MeshRenderWidget(QtGui.QWidget):
     self.right_controls_layout.addWidget(self.clip_groupbox)
 
     self.this_layout.addLayout(self.controls_layout)
-
+    self.this_layout.setStretchFactor(self.controls_layout, 1)
 
     self.bounds = {}
     self.bounds['x'] = [0.0, 0.0]
