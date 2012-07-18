@@ -32,7 +32,7 @@ class UiBox(QtGui.QMainWindow):
     QtGui.QMainWindow.__init__(self, win_parent)
     self.app_path = os.path.abspath(app_path)
     self.setWindowTitle('Peacock - ' + os.path.basename(self.app_path))
-    self.plugin_classes = findPlugins(os.path.dirname(self.app_path))
+    self.tab_plugin_classes = findTabPlugins(os.path.dirname(self.app_path))
     self.qt_app = qt_app
 
     self.initUI()
@@ -58,7 +58,7 @@ class UiBox(QtGui.QMainWindow):
     self.tab_widget.addTab(self.postprocessor_widget, "Postprocess")
     self.tab_widget.addTab(self.visualize_widget, "Visualize")
 
-    for plugin_class in self.plugin_classes:
+    for plugin_class in self.tab_plugin_classes:
       instance = plugin_class(self)
       self.tab_widget.addTab(instance, instance.name())
     
@@ -111,7 +111,7 @@ def findExecutable(executable_option, method_option):
 
     return executable
   
-def findPlugins(executable_path):
+def findTabPlugins(executable_path):
   
   for dirpath, dirnames, filenames in os.walk(executable_path+'/gui'):
     for file in filenames:

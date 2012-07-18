@@ -433,6 +433,9 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       self._itemChanged(item, 0)
 
   def _addItem(self):
+    # Make sure the syntax is up to date
+    self.input_file_widget.recache()
+
     item = self.currentItem()
     this_path = self.generatePathFromItem(item)
     this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
