@@ -48,7 +48,7 @@
 #
 #  Another way to think of fred is:
 #
-#                                   |0 1 3| - These values can be spacial positions corresponging to
+#                                   |0 1 3| - These values can be spacial positions corresponding to
 #                                             axis= 0,1, or 2, or time
 #
 #
@@ -105,6 +105,10 @@
     family = LAGRANGE
   [../]
   [./A]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./scaled_u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -200,6 +204,16 @@
 # that vary in time and along the length of a fuel rod, or a fission rate distribution in metal fuel that varies
 # as a function of x and y postion, but is constant in time.
 #
+#
+  [./scaled_u]
+    type = PiecewiseBilinear
+    yourFileName = fred.csv
+    axis = 0
+    scale_factor = 2
+  [../]
+#
+# Example 5 - variable scaled_u.  This is just a scaled version of Example 1 to see if the scale_factor works
+#
 []
 
 [Kernels]
@@ -219,6 +233,10 @@
   [./diffA]
     type = Diffusion
     variable = A
+  [../]
+  [./diff_scaled_u]
+    type = Diffusion
+    variable = u
   [../]
 []
 
@@ -247,6 +265,12 @@
     variable = A
     boundary = '1'
     function = A
+  [../]
+  [./scaled_u]
+    type = FunctionDirichletBC
+    variable = scaled_u
+    boundary = '1'
+    function = scaled_u
   [../]
 []
 
