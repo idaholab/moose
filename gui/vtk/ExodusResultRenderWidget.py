@@ -58,6 +58,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.renderer.ResetCamera()
     
     self.main_layout.addWidget(self.vtkwidget)
+    self.main_layout.setStretchFactor(self.vtkwidget, 10)
+
     self.vtkwidget.show()
 
     self.vtkwidget.GetRenderWindow().AddRenderer(self.renderer)
@@ -83,6 +85,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.controls_widget = QtGui.QWidget()
     self.controls_layout = QtGui.QHBoxLayout()
     self.main_layout.addLayout(self.controls_layout)
+    self.main_layout.setStretchFactor(self.controls_layout, 0.1)
 
     self.leftest_controls_layout = QtGui.QVBoxLayout()
     self.left_controls_layout = QtGui.QVBoxLayout()
@@ -302,6 +305,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_slider_textbox = QtGui.QLineEdit()
     self.time_slider_textbox.setToolTip('Enter a number and press Enter to go to that timestep')
     self.time_slider_textbox.setMaximumWidth(30)
+    self.time_slider_textbox.setMinimumWidth(30)
     self.time_slider_textbox.returnPressed.connect(self._sliderTextboxReturn)
 
     self.time_groupbox = QtGui.QGroupBox("Time")
