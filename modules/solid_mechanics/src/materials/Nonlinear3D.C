@@ -280,12 +280,13 @@ Nonlinear3D::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
 ////////////////////////////////////////////////////////////////////////
 
 void
-Nonlinear3D::finalizeStress( SymmTensor & strain,
-                             SymmTensor & stress )
+Nonlinear3D::finalizeStress( std::vector<SymmTensor*> & t)
 {
   // Using the incremental rotation, update the stress to the current configuration (R*T*R^T)
-  Element::rotateSymmetricTensor( _incremental_rotation, stress, stress );
-  Element::rotateSymmetricTensor( _incremental_rotation, strain, strain );
+  for (unsigned i(0); i < t.size(); ++i)
+  {
+    Element::rotateSymmetricTensor( _incremental_rotation, *t[i], *t[i]);
+  }
 
 }
 

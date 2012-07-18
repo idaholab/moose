@@ -445,8 +445,11 @@ SolidModel::computeElasticityTensor()
 void
 SolidModel::finalizeStress()
 {
-  _element->finalizeStress(_total_strain[_qp],
-                           _stress[_qp]);
+  std::vector<SymmTensor*> t(3);
+  t[0] = &_elastic_strain[_qp];
+  t[1] = &_total_strain[_qp];
+  t[2] = &_stress[_qp];
+  _element->finalizeStress(t);
 }
 
 ////////////////////////////////////////////////////////////////////////

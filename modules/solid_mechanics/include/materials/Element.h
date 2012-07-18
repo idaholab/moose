@@ -56,8 +56,7 @@ public:
                               SymmTensor & strain_increment ) = 0;
 
   /// Rotate stress to current configuration
-  virtual void finalizeStress( SymmTensor & /*strain*/,
-                               SymmTensor & /*stress*/ ) {}
+  virtual void finalizeStress( std::vector<SymmTensor*> & /*t*/ ) {}
 
   virtual unsigned int getNumKnownCrackDirs() const
   {

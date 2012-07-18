@@ -64,8 +64,7 @@ protected:
                               SymmTensor & strain_increment );
 
   /// Rotate stress to current configuration
-  virtual void finalizeStress( SymmTensor & strain,
-                               SymmTensor & stress );
+  virtual void finalizeStress( std::vector<SymmTensor*> & t );
 
 
   void computeIncrementalDeformationGradient( std::vector<ColumnMajorMatrix> & Fhat);
