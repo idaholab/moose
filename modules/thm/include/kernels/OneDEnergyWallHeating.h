@@ -32,9 +32,9 @@ protected:
   unsigned _rho_var_number; 
 
   // Parameters
-  Real _Hw; // convective heat transfer coefficient, W/m^2-K
-  Real _aw; // heat transfer area density, m^2 / m^3
-  Real _Tw; // Wall temperature, K
+  const Real & _Hw; // convective heat transfer coefficient, W/m^2-K
+  const Real & _aw; // heat transfer area density, m^2 / m^3
+  const Real & _Tw; // Wall temperature, K
 };
  
 #endif
