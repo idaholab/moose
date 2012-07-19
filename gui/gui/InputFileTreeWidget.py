@@ -134,7 +134,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     output_data = None
 
-    if oversampling_item.checkState(0) == QtCore.Qt.Checked:
+    if oversampling_item and oversampling_item.checkState(0) == QtCore.Qt.Checked:
       output_data =  output_item.table_data
 
       if output_data:
@@ -154,13 +154,13 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     type_to_extension = {'exodus':'.e', 'tecplot':'.plt'}
 
-    # FIXME: Hack to make raven and r7 work for now
-    if 'raven' in self.input_file_widget.app_path or 'r7' in self.input_file_widget.app_path:
-      file_base += '_displaced'
-
     for atype,extension in type_to_extension.items():
       if output_data and atype in output_data and (output_data[atype] == 'true' or output_data[atype] == '1'):
         file_names.append(file_base + extension)
+
+    # FIXME: Hack to make raven and r7 work for now
+    if 'raven' in self.input_file_widget.app_path or 'r7' in self.input_file_widget.app_path:
+      file_names = [file_base + '_displaced.e']
 
     return file_names
     

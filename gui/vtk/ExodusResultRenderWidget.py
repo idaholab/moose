@@ -15,10 +15,11 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class ExodusResultRenderWidget(QtGui.QWidget):
-  def __init__(self, input_file_widget, execution_widget, qt_app):
+  def __init__(self, input_file_widget, execution_widget, qt_app, application):
     QtGui.QWidget.__init__(self)
     self.input_file_widget = input_file_widget
     self.qt_app = qt_app
+    self.application = application
 
     self.plane = vtk.vtkPlane()
     self.plane.SetOrigin(-1000, 0, 0)

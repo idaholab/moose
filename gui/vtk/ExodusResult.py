@@ -76,9 +76,12 @@ class ExodusResult:
       self.current_variables.append(var_name)
       components = self.data.GetCellData().GetVectors(var_name).GetNumberOfComponents()
       self.current_elemental_components[var_name] = components      
+
+    self.application_filter = self.render_widget.application.filterResult(self.geom)
     
     self.mapper = vtk.vtkPolyDataMapper()
-    self.mapper.SetInput(self.data)
+#    self.mapper.SetInputConnection(self.tf.GetOutputPort())
+    self.mapper.SetInputConnection(self.application_filter.GetOutputPort())
     self.mapper.ScalarVisibilityOn()
     self.mapper.SetLookupTable(self.lut)
     self.mapper.SetColorModeToMapScalars()
@@ -100,8 +103,10 @@ class ExodusResult:
     
     self.clip_data = self.clip_geom.GetOutput()
 
+    self.clip_application_filter = self.render_widget.application.filterResult(self.clip_geom)
+
     self.clip_mapper = vtk.vtkPolyDataMapper()
-    self.clip_mapper.SetInput(self.clip_data)
+    self.clip_mapper.SetInputConnection(self.clip_application_filter.GetOutputPort())
     self.clip_mapper.ScalarVisibilityOn()
     self.clip_mapper.SetLookupTable(self.lut)
 

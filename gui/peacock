@@ -51,7 +51,7 @@ class UiBox(QtGui.QMainWindow):
     self.input_file_widget = InputFileWidget(self.app_path, options, self, self.qt_app, self.application)
     self.execute_widget = ExecuteWidget(self.app_path, self.input_file_widget, self.qt_app)
     self.postprocessor_widget = PostprocessorWidget(self.input_file_widget, self.execute_widget)
-    self.visualize_widget = ExodusResultRenderWidget(self.input_file_widget, self.execute_widget, self.qt_app)
+    self.visualize_widget = ExodusResultRenderWidget(self.input_file_widget, self.execute_widget, self.qt_app, self.application)
     
     self.tab_widget = QtGui.QTabWidget()
 

@@ -97,3 +97,10 @@ class PeacockApplication(object):
       The return value is a boolean. '''
   def showMeshRenderWidgetByDefault(self):
     return False
+
+  ''' This function allows you to apply VTK filters to the result before it is rendered in the visualize widget.
+      The incoming object is vtkPolyData... you will most likely want to create a VTK filter and then attach the output of the result_vtk_object
+      to the input of your filter.
+      The return value of this function MUST be a VTK object that provides vtkPolyData on its output port '''
+  def filterResult(self, result_vtk_object):
+    return result_vtk_object
