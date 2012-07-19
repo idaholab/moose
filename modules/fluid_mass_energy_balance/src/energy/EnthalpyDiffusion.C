@@ -22,8 +22,10 @@ InputParameters validParams<EnthalpyDiffusion>()
   InputParameters params = validParams<Diffusion>();
   params.addCoupledVar("pressure", "TODO: add description");
   params.addCoupledVar("temperature", "TODO: add description");
-  params.addCoupledVar("dTdH_P", "TODO: add description");
-  params.addCoupledVar("dTdP_H", "TODO: add description");
+  params.addRequiredParam<std::string>("dTdP_H", "Derivative of temperature w.r.t. pressure");    //(added by Kat)
+  params.addRequiredParam<std::string>("dTdH_P", "Derivative of temperature w.r.t. enthalpy");    //(added by Kat)
+  //params.addCoupledVar("dTdH_P", "TODO: add description");        (removed by Kat)
+  //params.addCoupledVar("dTdP_H", "TODO: add description");        (removed by Kat)
   return params;
 }
 
@@ -31,14 +33,18 @@ EnthalpyDiffusion::EnthalpyDiffusion(const std::string & name, InputParameters p
   :Diffusion(name, parameters),
    
     _grad_T(coupledGradient("temperature")),
-    _dTdH_P(coupledValue("dTdH_P")),
-    _dTdP_H(coupledValue("dTdP_H")),
+    //_dTdH_P(coupledValue("dTdH_P")),                  (removed by Kat)
+    //_dTdP_H(coupledValue("dTdP_H")),                  (removed by Kat)
     _p_var(coupled("pressure")), 
 //   _pressure(coupledValue("pressure")),
 //   _grad_p(coupledGradient("pressure")),
 //   _dTbydP_H(getMaterialProperty<Real>("dTbydP_H")),
 //   _dTbydH_P(getMaterialProperty<Real>("dTbydH_P")),
-   _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity"))
+    _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity")),
+    _prop_name_dTdP_H(getParam<std::string>("dTdP_H")),          //(added by Kat)
+    _dTdP_H(getMaterialProperty<Real>(_prop_name_dTdP_H)),       //(added by Kat)
+    _prop_name_dTdH_P(getParam<std::string>("dTdH_P")),          //(added by Kat)
+    _dTdH_P(getMaterialProperty<Real>(_prop_name_dTdH_P))        //(added by Kat)
 {}
 
 Real
