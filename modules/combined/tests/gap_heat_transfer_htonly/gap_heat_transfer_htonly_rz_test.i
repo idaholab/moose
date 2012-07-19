@@ -64,8 +64,6 @@
 []
 
 [Variables]
-  active = 'temp'
-
   [./temp]
     order = FIRST
     family = LAGRANGE
@@ -73,9 +71,14 @@
   [../]
 []
 
-[Kernels]
-  active = 'heat'
+[AuxVariables]
+  [./gap_cond]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
 
+[Kernels]
   [./heat]
     type = HeatConduction
     variable = temp
@@ -84,8 +87,6 @@
 
 
 [BCs]
-  active = 'temp_far_left temp_far_right'
-
   [./temp_far_left]
     type = FunctionPresetBC
     boundary = 1
@@ -98,6 +99,15 @@
     boundary = 4
     variable = temp
     value = 100
+  [../]
+[]
+
+[AuxBCs]
+  [./conductance]
+    type = MaterialRealAux
+    property = gap_conductance
+    variable = gap_cond
+    boundary = 2
   [../]
 []
 
