@@ -20,9 +20,9 @@ InputParameters validParams<EnthalpyConvectionWater>()
 {
     InputParameters params = validParams<Kernel>();
     params.addRequiredParam<std::string>("enthalpy_water", "material property, enthalpy of water");         //(added by Kat)
-    params.addRequiredParam("enthalpy_water", "Use CoupledAuxwater enthalpy here");                  (removed by Kat)
-    params.addRequiredParam("denthalpy_waterdH_P", "Use CoupledAux dsteamenthalpydh_P here");        (removed by Kat)
-    params.addRequiredParam("denthalpy_waterdP_H"," use coupledAux");                                (removed by Kat)
+    //params.addRequiredCoupledVar("enthalpy_water", "Use CoupledAuxwater enthalpy here");                  (removed by Kat)
+    //params.addRequiredCoupledVar("denthalpy_waterdH_P", "Use CoupledAux dsteamenthalpydh_P here");        (removed by Kat)
+    //params.addRequiredCoupledVar("denthalpy_waterdP_H"," use coupledAux");                                (removed by Kat)
     params.addCoupledVar("pressure", "Use CoupledVar pressure here");
     return params;
 }
