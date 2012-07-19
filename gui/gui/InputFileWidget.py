@@ -19,12 +19,13 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class InputFileWidget(QtGui.QWidget):
-  def __init__(self, app_path, options, peacock_ui, qt_app, win_parent=None):
+  def __init__(self, app_path, options, peacock_ui, qt_app, application, win_parent=None):
     QtGui.QWidget.__init__(self, win_parent)
     self.app_path = app_path
     self.options = options
     self.peacock_ui = peacock_ui
     self.qt_app = qt_app
+    self.application = application
     self.yaml_data = None
 
     self.recache()

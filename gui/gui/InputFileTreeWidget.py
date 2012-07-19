@@ -28,6 +28,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     self.comment = ''
 
     self.input_file_widget = input_file_widget
+    self.application = self.input_file_widget.application
     self.action_syntax = self.input_file_widget.action_syntax
 
     self.setExpandsOnDoubleClick(False)
@@ -281,7 +282,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
             child = parent.topLevelItem(i)
           self._recursivelyAddTreeItems(split_path[1:], child)
 
-  def _getChildNames(self, parent):
+  def getChildNames(self, parent):
     try: # This will fail when we're dealing with the QTreeWidget itself
       num_children = parent.childCount()
     except:
@@ -299,80 +300,6 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       children_names.append(child.text(0))
       
     return children_names
-
-  def _typeOptions(self):
-    type_options = {}
-
-    # Variables
-    variables_items = self.input_file_widget.tree_widget.findItems("Variables", QtCore.Qt.MatchExactly)
-    if variables_items:
-      variables_item = variables_items[0]
-      variable_names = self._getChildNames(variables_item)
-      if len(variable_names):
-        type_options['std::vector<NonlinearVariableName, std::allocator<NonlinearVariableName> >'] = set(variable_names)
-        type_options['std::vector<NonlinearVariableName>'] = set(variable_names)
-        type_options['NonlinearVariableName'] = set(variable_names)
-
-        type_options['std::vector<VariableName, std::allocator<VariableName> >'] = set(variable_names)
-        type_options['std::vector<VariableName>'] = set(variable_names)
-        type_options['VariableName'] = set(variable_names)
-
-    # Aux Vars
-    aux_variables_items = self.input_file_widget.tree_widget.findItems("AuxVariables", QtCore.Qt.MatchExactly)
-    if aux_variables_items:
-      aux_variables_item = aux_variables_items[0]
-      aux_variable_names = self._getChildNames(aux_variables_item)
-      if len(aux_variable_names):
-        type_options['std::vector<AuxVariableName, std::allocator<AuxVariableName> >'] = set(aux_variable_names)
-        type_options['std::vector<AuxVariableName>'] = set(aux_variable_names)
-        type_options['AuxVariableName'] = set(aux_variable_names)
-        
-        type_options['std::vector<VariableName, std::allocator<VariableName> >'] |= set(aux_variable_names)
-        type_options['std::vector<VariableName>'] |= set(aux_variable_names)
-        type_options['VariableName'] |= set(aux_variable_names)
-
-    # Functions
-    functions_items = self.input_file_widget.tree_widget.findItems("Functions", QtCore.Qt.MatchExactly)
-    if functions_items:
-      functions_item = functions_items[0]
-      function_names = self._getChildNames(functions_item)
-      if len(function_names):
-        type_options['std::vector<FunctionName, std::allocator<FunctionName> >'] = set(function_names)
-        type_options['std::vector<FunctionName>'] = set(function_names)
-        type_options['FunctionName'] = set(function_names)
-
-    # Userobjects
-    userobjects_items = self.input_file_widget.tree_widget.findItems("UserObjects", QtCore.Qt.MatchExactly)
-    if userobjects_items:
-      userobjects_item = userobjects_items[0]
-      userobject_names = self._getChildNames(userobjects_item)
-      if len(userobject_names):
-        type_options['std::vector<UserObjectName, std::allocator<UserObjectName> >'] = set(userobject_names)
-        type_options['std::vector<UserObjectName>'] = set(userobject_names)
-        type_options['UserObjectName'] = set(userobject_names)
-
-    # Mesh stuff
-    mesh_data = self.getMeshItemData()
-    if mesh_data:
-      mesh_info = MeshInfoFactory.getMeshInfo(mesh_data)
-
-      if mesh_info:
-        type_options['std::vector<BlockName>'] = mesh_info.blockNames()
-        type_options['BlockName'] = mesh_info.blockNames()
-        
-        type_options['std::vector<BoundaryName, std::allocator<BoundaryName> >'] = mesh_info.sidesetNames()
-        type_options['std::vector<BoundaryName>'] = mesh_info.sidesetNames()
-        type_options['BoundaryName'] = mesh_info.sidesetNames()
-        
-        type_options['std::vector<BoundaryName, std::allocator<BoundaryName> >'].update(mesh_info.nodesetNames())
-        type_options['std::vector<BoundaryName>'].update(mesh_info.nodesetNames())
-        type_options['BoundaryName'].update(mesh_info.nodesetNames())
-
-        type_options['std::vector<SubdomainName, std::allocator<SubdomainName> >'] = mesh_info.blockNames()
-        type_options['std::vector<SubdomainName>'] = mesh_info.blockNames()
-        type_options['SubdomainName'] = mesh_info.blockNames()
-      
-    return type_options
     
   def _doubleClickedItem(self, item, column):
     # Make sure the syntax is up to date
@@ -397,7 +324,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         parent_path = '/' + self.action_syntax.getPath(parent_path)
       yaml_entry = self.input_file_widget.yaml_data.findYamlEntry(parent_path)
 
-      new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, item.param_comments, item.comment, False, self._typeOptions())
+      new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, item.param_comments, item.comment, False, self.application.typeOptions())
 
       if item.table_data:
         new_gui.incoming_data = item.table_data
@@ -441,7 +368,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
     yaml_entry = self.input_file_widget.yaml_data.findYamlEntry(this_path)
 
-    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, None, None, False, self._typeOptions())
+    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, None, None, False, self.application.typeOptions())
     if self.new_gui.exec_():
       table_data = self.new_gui.result()
       param_comments = self.new_gui.param_table.param_comments

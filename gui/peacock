@@ -21,6 +21,7 @@ from ExodusResultRenderWidget import *
 from ParseGetPot import readInputFile, GPNode
 
 from PeacockTab import PeacockTab
+from PeacockApplication import PeacockApplication
 
 try:
   _fromUtf8 = QtCore.QString.fromUtf8
@@ -31,6 +32,7 @@ class UiBox(QtGui.QMainWindow):
   def __init__(self, options, args, app_path, qt_app, win_parent = None):
     QtGui.QMainWindow.__init__(self, win_parent)
     self.app_path = os.path.abspath(app_path)
+    self.application = getApplication(os.path.dirname(self.app_path), self)
     self.setWindowTitle('Peacock - ' + os.path.basename(self.app_path))
     self.tab_plugin_classes = findTabPlugins(os.path.dirname(self.app_path))
     self.qt_app = qt_app
@@ -40,13 +42,13 @@ class UiBox(QtGui.QMainWindow):
     # Pull this window to the foreground
     self.raise_()
     
-  def initUI(self):
+  def initUI(self):    
     self.main_ui = QtGui.QWidget(self)
     self.main_ui.setObjectName(_fromUtf8("Dialog"))
     self.main_layout = QtGui.QVBoxLayout()
     self.setCentralWidget(self.main_ui)
 
-    self.input_file_widget = InputFileWidget(self.app_path, options, self, self.qt_app)
+    self.input_file_widget = InputFileWidget(self.app_path, options, self, self.qt_app, self.application)
     self.execute_widget = ExecuteWidget(self.app_path, self.input_file_widget, self.qt_app)
     self.postprocessor_widget = PostprocessorWidget(self.input_file_widget, self.execute_widget)
     self.visualize_widget = ExodusResultRenderWidget(self.input_file_widget, self.execute_widget, self.qt_app)
@@ -123,7 +125,24 @@ def findTabPlugins(executable_path):
         __import__(module_name)
 
   return PeacockTab.__subclasses__()
-  
+
+
+def getApplication(executable_path, main_window):
+    
+  for dirpath, dirnames, filenames in os.walk(executable_path+'/gui'):
+    for file in filenames:
+      if file[-2:] == 'py':
+        module_name = file[:-3]
+        sys.path.append(os.path.abspath(dirpath))
+
+        # dynamically load the module
+        __import__(module_name)
+
+  if len(PeacockApplication.__subclasses__()):
+    return PeacockApplication.__subclasses__()[0](main_window)
+  else:
+    return PeacockApplication(main_window)
+
 if __name__ == '__main__':
   parser = OptionParser()
   parser.add_option("-e", "--executable", dest="executable",
