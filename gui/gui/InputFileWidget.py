@@ -9,7 +9,6 @@ from YamlData import *
 from GetPotData import *
 from InputFileTreeWidget import *
 from InputFileTextbox import *
-from MeshRenderWidget import *
 
 from ParseGetPot import readInputFile, GPNode
 
@@ -79,8 +78,9 @@ class InputFileWidget(QtGui.QWidget):
     self.layout_with_textbox.addWidget(self.tree_widget_layout_widget)
 #    self.layout_with_textbox.addLayout(self.edit_param_layout_spot)
 
-    self.mesh_render_widget = MeshRenderWidget(self.tree_widget)
-    self.mesh_render_widget.hide()
+    self.mesh_render_widget = self.application.meshRenderWidget(self)
+    if not self.application.showMeshRenderWidgetByDefault():
+      self.mesh_render_widget.hide()
     self.layout_with_textbox.addWidget(self.mesh_render_widget)
 
     self.input_file_textbox_layout_widget = QtGui.QWidget()

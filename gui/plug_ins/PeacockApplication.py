@@ -1,5 +1,6 @@
 from PyQt4 import QtCore, QtGui
 import MeshInfoFactory
+from MeshRenderWidget import *
 
 class PeacockApplication(object):
   def __init__(self, main_window):
@@ -84,3 +85,15 @@ class PeacockApplication(object):
         type_options['SubdomainName'] = mesh_info.blockNames()
       
     return type_options
+
+  ''' This is the graphical view of the mesh that is shown next to the input file tree view.
+      This function should return a QWidget derived class.'''
+  def meshRenderWidget(self, input_file_widget):
+    return MeshRenderWidget(input_file_widget.tree_widget)
+
+  ''' Whether or not to show the meshrenderwidget by default.
+      For normal MOOSE based applications this is False and the meshrenderwidget is only shown
+      after the Mesh block has been edited.  But, some applications don't have Mesh blocks...
+      The return value is a boolean. '''
+  def showMeshRenderWidgetByDefault(self):
+    return False
