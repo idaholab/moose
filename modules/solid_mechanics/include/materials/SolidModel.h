@@ -117,7 +117,11 @@ protected:
 
   virtual void computeProperties();
 
-  virtual void computeElasticityTensor();
+  void computeElasticityTensor();
+  /**
+   * Return true if the elasticity tensor changed.
+   */
+  virtual bool updateElasticityTensor(SymmElasticityTensor & tensor);
 
   virtual void elementInit() {}
 

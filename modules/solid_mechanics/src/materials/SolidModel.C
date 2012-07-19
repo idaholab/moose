@@ -418,9 +418,29 @@ SolidModel::computeProperties()
 void
 SolidModel::computeElasticityTensor()
 {
+  _stress_old = _stress_old_prop[_qp];
+
+  bool changed = updateElasticityTensor( *_local_elasticity_tensor );
+
+  _local_elasticity_tensor->calculate(_qp);
+
+  if (changed)
+  {
+    _stress_old = (*_local_elasticity_tensor)*_elastic_strain_old[_qp];
+  }
+
+  _elasticity_tensor[_qp] = *_local_elasticity_tensor;
+}
+
+////////////////////////////////////////////////////////////////////////
+
+bool
+SolidModel::updateElasticityTensor(SymmElasticityTensor & tensor)
+{
+  bool changed(false);
   if (_youngs_modulus_function || _poissons_ratio_function)
   {
-    SymmIsotropicElasticityTensor * t = dynamic_cast<SymmIsotropicElasticityTensor*>(_local_elasticity_tensor);
+    SymmIsotropicElasticityTensor * t = dynamic_cast<SymmIsotropicElasticityTensor*>(&tensor);
     if (!t)
     {
       mooseError("Cannot use Youngs modulus or Poissons ratio functions");
@@ -429,15 +449,9 @@ SolidModel::computeElasticityTensor()
     Point p;
     t->setYoungsModulus( (_youngs_modulus_function ? _youngs_modulus_function->value(_temperature[_qp], p) : _youngs_modulus) );
     t->setPoissonsRatio( (_poissons_ratio_function ? _poissons_ratio_function->value(_temperature[_qp], p) : _poissons_ratio) );
-    _stress_old = (*t)*_elastic_strain_old[_qp];
+    changed = true;
   }
-  else
-  {
-    _stress_old = _stress_old_prop[_qp];
-  }
-  _local_elasticity_tensor->calculate(_qp);
-
-  _elasticity_tensor[_qp] = *_local_elasticity_tensor;
+  return changed;
 }
 
 ////////////////////////////////////////////////////////////////////////
