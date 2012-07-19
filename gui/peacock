@@ -126,6 +126,21 @@ def findTabPlugins(executable_path):
 
   return PeacockTab.__subclasses__()
 
+''' Will return one class which is the "most leaf class" of the class passed in '''
+def getLeafClass(classes):  
+  leaf_class = None
+  possible_leaf_class = None
+
+  if len(classes):
+    leaf_class = classes[-1]
+
+  for aclass in classes:
+    possible_leaf_class = getLeafClass(aclass.__subclasses__())
+
+  if possible_leaf_class:
+    return possible_leaf_class
+  else:
+    return leaf_class
 
 def getApplication(executable_path, main_window):
     
@@ -139,7 +154,7 @@ def getApplication(executable_path, main_window):
         __import__(module_name)
 
   if len(PeacockApplication.__subclasses__()):
-    return PeacockApplication.__subclasses__()[0](main_window)
+    return getLeafClass(PeacockApplication.__subclasses__())(main_window)
   else:
     return PeacockApplication(main_window)
 
