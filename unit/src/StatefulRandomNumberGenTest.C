@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "StatefulRandomNumberGenTest.h"
+#include <cmath>
 
 CPPUNIT_TEST_SUITE_REGISTRATION( StatefulRandomNumberGenTest );
 
@@ -31,13 +32,13 @@ StatefulRandomNumberGenTest::testRandomGen()
   mrand.saveState();
 
   std::vector<double> numbers(n_gens * n_nums);
-  
+
   // Interleave the generators
   for (unsigned int i=0; i<n_nums; ++i)
     for (unsigned int j=0; j<n_gens; ++j)
       numbers[i*n_gens+j] = mrand.rand(j);
-  
-  
+
+
   // Reset the state
   mrand.restoreState();
 
