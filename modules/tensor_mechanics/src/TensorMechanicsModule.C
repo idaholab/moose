@@ -7,6 +7,8 @@
 #include "TensorMechanicsAction.h"
 #include "StressDivergenceTensors.h"
 #include "LinearElasticMaterial.h"
+#include "RankTwoAux.h"
+#include "RankFourAux.h"
 
 void
 Elk::TensorMechanics::registerObjects()
@@ -15,6 +17,9 @@ Elk::TensorMechanics::registerObjects()
   registerKernel(StressDivergenceTensors);
 
   registerMaterial(LinearElasticMaterial);
+
+  registerAux(RankTwoAux);
+  registerAux(RankFourAux);
 }
 
 void
