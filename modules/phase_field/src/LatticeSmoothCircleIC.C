@@ -1,4 +1,5 @@
 #include "LatticeSmoothCircleIC.h"
+#include "MooseRandom.h"
 
 template<>
 InputParameters validParams<LatticeSmoothCircleIC>()
@@ -41,7 +42,7 @@ LatticeSmoothCircleIC::LatticeSmoothCircleIC(const std::string & name,
   _bubcent.resize(_numbub);
   _bubradi.resize(_numbub);
    
-  Moose::seed(_rnd_seed);
+  MooseRandom::seed(_rnd_seed);
 
   Real x_sep = _Lx/(circles_per_side[0]);
   Real y_sep = _Ly/(circles_per_side[1]);
@@ -63,7 +64,7 @@ LatticeSmoothCircleIC::LatticeSmoothCircleIC(const std::string & name,
       for (unsigned int k=0; k<z_num; k++)
       {
         //Vary circle radius
-       _bubradi[cnt] = _radius*(1.0 + (1.0 - 2.0*Moose::rand())*_radius_variation);
+       _bubradi[cnt] = _radius*(1.0 + (1.0 - 2.0*MooseRandom::rand())*_radius_variation);
        
        if (_bubradi[cnt] < 0.0)
          _bubradi[cnt] = 0.0;
@@ -73,11 +74,11 @@ LatticeSmoothCircleIC::LatticeSmoothCircleIC(const std::string & name,
         Real zz = z_sep/2.0 + k*z_sep;
         
         //Vary circle position
-        xx = xx + (1.0 - 2.0*Moose::rand())*_Rnd_variation;
-        yy = yy + (1.0 - 2.0*Moose::rand())*_Rnd_variation;
+        xx = xx + (1.0 - 2.0*MooseRandom::rand())*_Rnd_variation;
+        yy = yy + (1.0 - 2.0*MooseRandom::rand())*_Rnd_variation;
 
         if (_Lz != 0.0)
-          zz = zz + (1.0 - 2.0*Moose::rand())*_Rnd_variation;
+          zz = zz + (1.0 - 2.0*MooseRandom::rand())*_Rnd_variation;
         
         //Verify not out of bounds
         if (xx < _bubradi[cnt]+_int_width)

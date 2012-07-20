@@ -1,4 +1,5 @@
 #include "MultiSmoothCircleIC.h"
+#include "MooseRandom.h"
 
 template<>
 InputParameters validParams<MultiSmoothCircleIC>()
@@ -34,11 +35,11 @@ MultiSmoothCircleIC::MultiSmoothCircleIC(const std::string & name,
    _bubcent.resize(_numbub);
    _bubradi.resize(_numbub);
    
-   Moose::seed(_rnd_seed);
+   MooseRandom::seed(_rnd_seed);
    for(unsigned int i=0; i<_numbub; i++)
      {
        //Vary bubble radius
-       _bubradi[i] = _radius*(1.0 + (1.0 - 2.0*Moose::rand())*_radius_variation);
+       _bubradi[i] = _radius*(1.0 + (1.0 - 2.0*MooseRandom::rand())*_radius_variation);
        if (_bubradi[i] < 0.0)
          _bubradi[i] = 0.0;
 
@@ -53,9 +54,9 @@ MultiSmoothCircleIC::MultiSmoothCircleIC(const std::string & name,
          num_tries++;
          //std::cout<<"num_tries: "<<num_tries<<std::endl;
          
-         Real ran1 = Moose::rand();
-         Real ran2 = Moose::rand();
-         Real ran3 = Moose::rand();
+         Real ran1 = MooseRandom::rand();
+         Real ran2 = MooseRandom::rand();
+         Real ran3 = MooseRandom::rand();
 
          xx = ran1*(_Lx - _bubspac) + 0.5*_bubspac;
          yy = ran2*(_Ly - _bubspac) + 0.5*_bubspac;

@@ -1,4 +1,5 @@
 #include "RndSmoothCircleIC.h"
+#include "MooseRandom.h"
 
 template<>
 InputParameters validParams<RndSmoothCircleIC>()
@@ -35,7 +36,7 @@ RndSmoothCircleIC::RndSmoothCircleIC(const std::string & name,
 {
   mooseAssert(_range_invalue >= 0.0, "Inside Min > Max for RndSmoothCircleIC!");
   mooseAssert(_range_outvalue >= 0.0, "Outside Min > Max for RndSmoothCircleIC!");
-  Moose::seed(getParam<unsigned int>("seed"));
+  MooseRandom::seed(getParam<unsigned int>("seed"));
 }
 
 Real
@@ -51,7 +52,7 @@ RndSmoothCircleIC::value(const Point & p)
   rad = sqrt(rad);
   
   //Random number between 0 and 1
-  Real rand_num = Moose::rand();
+  Real rand_num = MooseRandom::rand();
   
   if (rad <= _radius)
     value = _mn_invalue + rand_num*(_range_invalue);

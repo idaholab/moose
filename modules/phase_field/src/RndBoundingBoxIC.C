@@ -1,4 +1,5 @@
 #include "RndBoundingBoxIC.h"
+#include "MooseRandom.h"
 
 template<>
 InputParameters validParams<RndBoundingBoxIC>()
@@ -46,7 +47,7 @@ Real
 RndBoundingBoxIC::value(const Point & p)
 {
   //Random number between 0 and 1
-  Real rand_num = Moose::rand();
+  Real rand_num = MooseRandom::rand();
   
   for(unsigned int i=0; i<LIBMESH_DIM; i++)
     if(p(i) < _bottom_left(i) || p(i) > _top_right(i))
