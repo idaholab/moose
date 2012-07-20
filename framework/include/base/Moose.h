@@ -176,18 +176,6 @@ const SubdomainID ANY_BLOCK_ID = (SubdomainID) -1;
 
 const BoundaryID ANY_BOUNDARY_ID = (BoundaryID) -1;
 
-/* Wrappers for extern random number generator */
-inline void seed(unsigned int s)
-{
-  mt_seed32new(s);
-}
-
-inline double rand()
-{
-  // For now we will try the 64-bit values
-  return mt_ldrand();
-}
-
 } // namespace Moose
 
 

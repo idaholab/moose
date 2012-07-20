@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "RandomIC.h"
+#include "MooseRandom.h"
 
 template<>
 InputParameters validParams<RandomIC>()
@@ -31,14 +32,14 @@ RandomIC::RandomIC(const std::string & name, InputParameters parameters) :
     _range(_max - _min)
 {
   mooseAssert(_range > 0.0, "Min > Max for RandomIC!");
-  Moose::seed(getParam<unsigned int>("seed"));
+  MooseRandom::seed(getParam<unsigned int>("seed"));
 }
 
 Real
 RandomIC::value(const Point & /*p*/)
 {
   //Random number between 0 and 1
-  Real rand_num = Moose::rand();
+  Real rand_num = MooseRandom::rand();
 
   //Between 0 and range
   rand_num *= _range;
