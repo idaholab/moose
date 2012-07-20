@@ -81,9 +81,9 @@ protected:
   bool _has_initial_V;              ///< Is initial velocity provided from user input
   bool _has_initial_T;              ///< Is initial temperature provided from user input
 
-  const Real & _initial_P;          ///< Initial pressure from user input (if provided)
-  const Real & _initial_V;          ///< Initial velocity from user input (if provided)
-  const Real & _initial_T;          ///< Initial temperature from user input (if provided)
+  Real _initial_P;                  ///< Initial pressure from user input (if provided)
+  Real _initial_V;                  ///< Initial velocity from user input (if provided)
+  Real _initial_T;                  ///< Initial temperature from user input (if provided)
 
 public:
   static const std::string _type;
