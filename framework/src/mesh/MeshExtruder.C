@@ -35,7 +35,6 @@ InputParameters validParams<MeshExtruder>()
 {
   InputParameters params = validParams<MooseMesh>();
 
-  params.addRequiredParam<std::string>("file", "The 2D Mesh file to extrude");
   params.addRequiredParam<unsigned int>("num_layers", "The number of layers in the extruded mesh");
   params.addRequiredParam<Real>("height", "The height of the Mesh");
   params.addRequiredParam<unsigned int>("extrusion_axis", "The axis that the mesh will be extruded upon");
@@ -51,7 +50,7 @@ MeshExtruder::MeshExtruder(const std::string & name, InputParameters parameters)
     _extrusion_axis(getParam<unsigned int>("extrusion_axis"))
 {
   // Read in the 2D Mesh
-  _src_mesh.read(getParam<std::string>("file"));
+  _src_mesh.read(getParam<MeshFileName>("file"));
 
   _src_mesh.prepare_for_use();
 
