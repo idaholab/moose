@@ -49,7 +49,7 @@ LinearElasticMaterial::LinearElasticMaterial(const std::string & name,
   
   //rotate the C_ijkl matrix original data
   // to leave the original data, use the x = a.rotate() method instead
-  _Cijkl.selfRotate(_euler_angle_1,_euler_angle_2,_euler_angle_3);
+//  _Cijkl.selfRotate(_euler_angle_1,_euler_angle_2,_euler_angle_3);
 }
 
 void

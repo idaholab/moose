@@ -70,20 +70,20 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> input, bool all)
     _vals[1][1][1][1] = input[6]; //C2222
     _vals[1][1][2][2] = input[7]; //C2233
     _vals[1][1][1][2] = input[8]; //C2223
-    _vals[1][1][0][2] = input[9]; //C2213
-    _vals[1][1][0][1] = input[10]; //C2212
+    _vals[0][2][1][1] = input[9]; //C2213  //flipped for filling purposes
+    _vals[0][1][1][1] = input[10]; //C2212 //flipped for filling purposes
 
     _vals[2][2][2][2] = input[11]; //C3333
-    _vals[2][2][1][2] = input[12]; //C3323
-    _vals[2][2][0][2] = input[13]; //C3313
-    _vals[2][2][0][1] = input[14]; //C3312
+    _vals[1][2][2][2] = input[12]; //C3323 //flipped for filling purposes
+    _vals[0][2][2][2] = input[13]; //C3313 //flipped for filling purposes
+    _vals[0][1][2][2] = input[14]; //C3312 //flipped for filling purposes
     
     _vals[1][2][1][2] = input[15]; //C2323
-    _vals[1][2][0][2] = input[16]; //C2313
-    _vals[1][2][0][1] = input[17]; //C2312
-    
+    _vals[0][2][1][2] = input[16]; //C2313 //flipped for filling purposes
+    _vals[0][1][1][2] = input[17]; //C2312 //flipped for filling purposes
+     
     _vals[0][2][0][2] = input[18]; //C1313
-    _vals[0][2][0][1] = input[19]; //C1312
+    _vals[0][1][0][2] = input[19]; //C1312 //flipped for filling purposes
     
     _vals[0][1][0][1] = input[20]; //C1212
   }

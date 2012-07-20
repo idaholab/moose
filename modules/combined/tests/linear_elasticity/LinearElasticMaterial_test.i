@@ -35,6 +35,40 @@
   [../]
 []
 
+[AuxVariables]
+#stresses
+  [./s11_aux]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+
+  [./s12_aux]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+
+  [./s13_aux]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+
+  [./s22_aux]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+
+  [./s23_aux]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+
+  [./s33_aux]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+
 [TensorMechanics]
   [./solid]
     disp_x = disp_x
@@ -48,6 +82,56 @@
     variable = diffused
   [../]
 [] 
+
+[AuxKernels]
+  [./matl_s11]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 1
+    index_j = 1
+    variable = s11_aux
+  [../]
+ 
+ [./matl_s12]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 1
+    index_j = 2
+    variable = s12_aux
+  [../]
+
+  [./matl_s13]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 1
+    index_j = 3
+    variable = s13_aux
+  [../]
+
+  [./matl_s22]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 2
+    index_j = 2
+    variable = s22_aux
+  [../]
+
+  [./matl_s23]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 2
+    index_j = 3
+    variable = s23_aux
+  [../]
+
+  [./matl_s33]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 3
+    index_j = 3
+    variable = s33_aux
+  [../]
+[]
 
 [Materials]
   [./Anisotropic]
