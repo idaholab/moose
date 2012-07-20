@@ -29,6 +29,7 @@ public:
 
   virtual void buildMesh();
   virtual void addVariables();
+  virtual void addMooseObjects();
   virtual const std::string & getType() { return _type; }
 
   virtual Point getPosition() { return _position; }
@@ -51,16 +52,18 @@ protected:
   Real _length;                                 ///< Length of the pipe
   unsigned int _n_elems;                        ///< Number of elements this pipe is divided into
 
-  const Real & _A;                              ///< Pipe area (A_i)
-  const Real & _aw;                             ///< Heat transfer surface density
+  Real _A;                                      ///< Pipe area (A_i)
+  Real _aw;                                     ///< Heat transfer surface density
                                                 ///< Physical meaning:
                                                 ///< _aw = A_heating_surface_per_length / A_pipe_flow_are [1/m]
+  Real _Dh;                                     ///< Pipe hydraulic diameter, [m]
 
   bool _has_f;
-  const Real & _f;                              ///< friction
-  const Real & _Hw;                             ///< Convective heat transfer coefficient
-  const Real & _Tw;                             ///< Wall temperature
+  Real _f;                                      ///< friction
+  Real _Hw;                                     ///< Convective heat transfer coefficient
+  Real _Tw;                                     ///< Wall temperature
 
+  Real _gx;                                     ///< Gravity
 
   unsigned int _subdomain_id;                   ///< Subdomain id this pipe defined
 

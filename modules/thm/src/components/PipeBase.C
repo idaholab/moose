@@ -3,16 +3,11 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 #include "R7Conversion.h"
-#include "OneDEnergyWallHeating.h"
+#include "Factory.h"
 
 #include "edge_edge2.h"
 #include "fe_type.h"
 
-// physics
-#include "Diffusion.h"
-
-#include "Function.h"
-#include "EquationOfState.h"
 
 const std::string PipeBase::_type("pipe");
 
@@ -33,7 +28,6 @@ InputParameters validParams<PipeBase>()
   params.addRequiredParam<UserObjectName>("eos", "The name of EOS to use");
 
   //Input parameters default values could be given.
-  params.addParam<Real>("aw", 0.0, "Heating surface density");
   params.addParam<Real>("f", 0.0, "friction");
   params.addParam<Real>("Hw", 0.0, "Convective heat transfer coefficient");
   params.addParam<Real>("Tw", 400, "Wall temperature");
@@ -55,7 +49,6 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
     _length(getParam<Real>("length")),
     _n_elems(getParam<unsigned int>("n_elems")),
     _A(getParam<Real>("A")),
-    _aw(getParam<Real>("aw")),
     _has_f(params.wasSeenInInput("f")),
     _f(getParam<Real>("f")),
     _Hw(getParam<Real>("Hw")),
@@ -69,6 +62,10 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
 {
   const std::vector<Real> & dir = getParam<std::vector<Real> >("orientation");
   _dir = VectorValue<Real>(dir[0], dir[1], dir[2]);
+
+  //compute the gravity along the pipe direction.
+  RealVectorValue gravity_vector = _sim.getParam<VectorValue<Real> >("gravity");
+  _gx = _dir * gravity_vector / _dir.size();
 }
 
 PipeBase::~PipeBase()
@@ -191,6 +188,49 @@ PipeBase::addVariables()
 	  mooseError("wrong model type");
 
   Model::addInitialConditions(_subdomain_id, initial_P, initial_V, initial_rho, initial_rhou, initial_T, initial_rhoE, initial_enthalpy);
+}
+
+void
+PipeBase::addMooseObjects()
+{
+  std::vector<unsigned int> blocks(1, _subdomain_id);
+
+  InputParameters pars = emptyInputParameters();
+  pars.set<std::vector<unsigned int> >("block") = blocks;
+
+  pars.set<Real>("gx") = _gx;
+  pars.set<Real>("dh") = _Dh;
+  pars.set<Real>("aw") = _aw;
+  if (_has_f)
+    pars.set<Real>("f") = _f;
+  pars.set<Real>("Hw") = _Hw;
+  pars.set<Real>("Tw") = _Tw;
+  pars.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
+
+  Model::addKernels(pars);
+
+  if (_model_type == EQ_MODEL_3)
+  {
+    // for 3 eqn model, add wall heating term
+
+    std::vector<std::string> cv_rho(1, RHO);
+    std::vector<std::string> cv_temperature(1, TEMPERATURE);
+
+    InputParameters params = Factory::instance()->getValidParams("OneDEnergyWallHeating");
+    params.set<NonlinearVariableName>("variable") = Model::RHOE;
+    params.set<std::vector<unsigned int> >("block") = blocks;
+
+    params.set<Real>("Hw") = _Hw;
+    params.set<Real>("aw") = _aw;
+    params.set<Real>("Tw") = _Tw;
+
+    params.set<std::vector<std::string> >("rho") = cv_rho;
+    params.set<std::vector<std::string> >("temperature") = cv_temperature;
+
+    std::string mon = genName(name(), _id, "_pipe");
+    _sim.addKernel("OneDEnergyWallHeating", mon, params);
+    connectObject("", mon);
+  }
 }
 
 std::vector<unsigned int>
