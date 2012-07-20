@@ -4,7 +4,7 @@
 #include "Conversion.h"
 #include "R7Conversion.h"
 #include "Factory.h"
-
+// libMesh
 #include "edge_edge2.h"
 #include "fe_type.h"
 
@@ -158,11 +158,11 @@ PipeBase::addVariables()
   Real initial_V = _sim.getParam<Real>("global_init_V");
   Real initial_T = _sim.getParam<Real>("global_init_T");
   if(_has_initial_P)
-	  initial_P = _initial_P;			//replace by local initial conditions
+    initial_P = _initial_P;			//replace by local initial conditions
   if(_has_initial_V)
-	  initial_V = _initial_V;
+    initial_V = _initial_V;
   if(_has_initial_T)
-	  initial_T = _initial_T;
+   initial_T = _initial_T;
 
   //Model::addInitialConditions(_subdomain_id, initial_P, initial_V, initial_T);
 
@@ -174,19 +174,19 @@ PipeBase::addVariables()
   Real initial_enthalpy = 0.;
   if(_model_type == EQ_MODEL_2)
   {
-	  initial_rho = eos.invert_eos_rho(initial_P);
-	  initial_rhou = initial_rho * initial_V;
+    initial_rho = eos.invert_eos_rho(initial_P);
+    initial_rhou = initial_rho * initial_V;
   }
   else if(_model_type == EQ_MODEL_3)
   {
-	  initial_e = eos.invert_eos_internal_energy(initial_T);
-	  initial_rho = eos.invert_eos_rho(initial_P, initial_e);
-	  initial_rhou = initial_rho * initial_V;
-	  initial_rhoE = initial_rho * initial_e + initial_rho * 0.5 * initial_V * initial_V;
-	  initial_enthalpy = (initial_rhoE + initial_P) / initial_rho;
+    initial_e = eos.invert_eos_internal_energy(initial_T);
+    initial_rho = eos.invert_eos_rho(initial_P, initial_e);
+    initial_rhou = initial_rho * initial_V;
+    initial_rhoE = initial_rho * initial_e + initial_rho * 0.5 * initial_V * initial_V;
+    initial_enthalpy = (initial_rhoE + initial_P) / initial_rho;
   }
   else
-	  mooseError("wrong model type");
+    mooseError("wrong model type");
 
   Model::addInitialConditions(_subdomain_id, initial_P, initial_V, initial_rho, initial_rhou, initial_T, initial_rhoE, initial_enthalpy);
 }
