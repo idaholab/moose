@@ -48,6 +48,9 @@ missing_material_prop_test = { INPUT : 'missing_material_prop_test.i',
 missing_material_prop_test2 = { INPUT : 'missing_material_prop_test2.i',
                                EXPECT_ERR : "Material property 'diff1' is not defined on block \d+" }
 
+missing_coupled_mat_prop_test = { INPUT : 'missing_coupled_mat_prop_test.i',
+                                  EXPECT_ERR : 'One or more Material Properties were not supplied on block' }
+
 bad_kernel_var_test = { INPUT : 'bad_kernel_var_test.i',
                         EXPECT_ERR : 'Unknown variable' }
 

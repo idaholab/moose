@@ -15,6 +15,8 @@
 #include "MaterialWarehouse.h"
 #include "DependencyResolver.h"
 
+#include <fstream>
+
 // FIXME: !
 #define unlikely(a) a
 
@@ -236,6 +238,9 @@ MaterialWarehouse::sortMaterials(std::map<SubdomainID, std::vector<Material *> >
   {
     DependencyResolver<Material *> resolver;
 
+    /// These two sets are used to make sure that all depenedent props on a block are actually supplied
+    std::set<std::string> block_depend_props, block_supplied_props;
+
     /**
      * For each block we have to run through the dependency list since
      * the property provided by a material can change from block to block
@@ -244,6 +249,7 @@ MaterialWarehouse::sortMaterials(std::map<SubdomainID, std::vector<Material *> >
     for (std::vector<Material *>::const_iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
     {
       const std::set<std::string> & depend_props = (*mat_iter)->getPropertyDependencies();
+      block_depend_props.insert(depend_props.begin(), depend_props.end());
 
       // See if any of the active materials supply this property
       for (std::vector<Material *>::const_iterator mat_iter2=j->second.begin(); mat_iter2 != j->second.end(); ++mat_iter2)
@@ -252,6 +258,7 @@ MaterialWarehouse::sortMaterials(std::map<SubdomainID, std::vector<Material *> >
         if (mat_iter == mat_iter2) continue;
 
         const std::set<std::string> & supplied_props = (*mat_iter2)->getSuppliedPropertiesList();
+        block_supplied_props.insert(supplied_props.begin(), supplied_props.end());
 
         std::set<std::string> intersect;
         std::set_intersection(depend_props.begin(), depend_props.end(), supplied_props.begin(),
@@ -276,6 +283,20 @@ MaterialWarehouse::sortMaterials(std::map<SubdomainID, std::vector<Material *> >
       const std::multimap<Material *, Material *> & depends = e.getCyclicDependencies();
       for (std::multimap<Material *, Material *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
         oss << it->first->name() << " -> " << it->second->name() << "\n";
+      mooseError(oss.str());
+    }
+
+    // Error check to make sure all propoerites consumed by materials are supplied on this block
+    std::set<std::string> difference;
+    std::set_difference(block_depend_props.begin(), block_depend_props.end(), block_supplied_props.begin(), block_supplied_props.end(),
+                        std::inserter(difference, difference.end()));
+
+    if (!difference.empty())
+    {
+      std::ostringstream oss;
+      oss << "One or more Material Properties were not supplied on block " << j->first << ":\n";
+      for (std::set<std::string>::iterator i = difference.begin(); i != difference.end();  ++i)
+        oss << *i << "\n";
       mooseError(oss.str());
     }
   }
