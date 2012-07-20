@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<ConvectionDiffusionAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<std::vector<std::string> >("variables", "The names of the convection and diffusion variables in the simulation");
+  params.addRequiredParam<std::vector<NonlinearVariableName> >("variables", "The names of the convection and diffusion variables in the simulation");
 
   return params;
 }
@@ -34,8 +34,8 @@ ConvectionDiffusionAction::ConvectionDiffusionAction(const std::string & name, I
 void
 ConvectionDiffusionAction::act()
 {
-  std::vector<std::string> variables = getParam<std::vector<std::string> > ("variables");
-  std::vector<std::string> vel_vec_variable;
+  std::vector<NonlinearVariableName> variables = getParam<std::vector<NonlinearVariableName> > ("variables");
+  std::vector<NonlinearVariableName> vel_vec_variable;
 
   /**
    * We need to manually setup our Convection-Diffusion and Diffusion variables on our two
@@ -48,18 +48,18 @@ ConvectionDiffusionAction::act()
 
   // Setup our Diffusion Kernel on the "u" variable
   InputParameters conv_diff_params = Factory::instance()->getValidParams("Diffusion");
-  conv_diff_params.set<std::string>("variable") = variables[0];
+  conv_diff_params.set<NonlinearVariableName>("variable") = variables[0];
   _problem->addKernel("Diffusion", "diff_u", conv_diff_params);
 
   // Setup our Convection Kernel on the "u" variable coupled to the diffusion variable "v"
   conv_diff_params.addCoupledVar("some_variable", "The gradient of this var");
   vel_vec_variable.push_back(variables[1]);
-  conv_diff_params.set<std::vector<std::string> >("some_variable") = vel_vec_variable;
+  conv_diff_params.set<std::vector<NonlinearVariableName> >("some_variable") = vel_vec_variable;
   _problem->addKernel("Convection", "conv", conv_diff_params);
 
   // Setup out Diffusion Kernel on the "v" variable
   InputParameters conv_params = Factory::instance()->getValidParams("Convection");
-  conv_params.set<std::string>("variable") = variables[1];
+  conv_params.set<NonlinearVariableName>("variable") = variables[1];
   _problem->addKernel("Diffusion", "diff_v", conv_params);
 }
 
