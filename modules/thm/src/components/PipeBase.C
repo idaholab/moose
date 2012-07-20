@@ -16,6 +16,7 @@ template<>
 InputParameters validParams<PipeBase>()
 {
   InputParameters params = validParams<Component>();
+  params.addParam("component_type", PipeBase::_type, "The type of the component");
   //Input parameters [NO] default values should be given.
   params.addRequiredParam<std::vector<Real> >("position", "Origin (start) of the pipe");
 
