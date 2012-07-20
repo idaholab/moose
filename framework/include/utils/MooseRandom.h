@@ -59,11 +59,11 @@ public:
 
   /**
    * This method returns the next random number (long format) from the generator
-   * @return      the next random number in the range [0,max(uinit64_t)) with 64-bit precision
+   * @return      the next random number in the range [0,max(uinit32_t)) with 32-bit number
    */
-  static inline uint64_t randl()
+  static inline uint32_t randl()
   {
-    return mt_llrand();
+    return mt_lrand();
   }
 
   /**
@@ -89,11 +89,11 @@ public:
   /**
    * This method returns the next random number (long format) from the specified generator
    * @param i     the index of the generator
-   * @return      the next random number in the range [0,max(uinit64_t)) with 64-bit precision
+   * @return      the next random number in the range [0,max(uinit32_t)) with 32-bit number
    */
-  inline uint64_t randl(unsigned int i)
+  inline uint32_t randl(unsigned int i)
   {
-    return mts_llrand(&(_states[i]));
+    return mts_lrand(&(_states[i]));
   }
 
   /**
