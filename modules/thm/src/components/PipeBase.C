@@ -30,8 +30,7 @@ InputParameters validParams<PipeBase>()
   params.addRequiredParam<Real>("length", "Length of the pipe");
   params.addRequiredParam<unsigned int>("n_elems", "number of element in this pipe");
   params.addRequiredParam<Real>("A", "Area of the pipe");
-
-  params.addRequiredParam<FunctionName>("eos_function", "The EOS function object");
+  params.addRequiredParam<UserObjectName>("eos", "The name of EOS to use");
 
   //Input parameters default values could be given.
   params.addParam<Real>("aw", 0.0, "Heating surface density");
@@ -61,21 +60,15 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
     _f(getParam<Real>("f")),
     _Hw(getParam<Real>("Hw")),
     _Tw(getParam<Real>("Tw")),
-    //_func(_sim.feproblem().getFunction(getParam<std::string>("eos_function"))),
-    //_eos(dynamic_cast<EquationOfState&>(_func))
-	_has_initial_P(params.wasSeenInInput("initial_P")),
-	_has_initial_V(params.wasSeenInInput("initial_V")),
-	_has_initial_T(params.wasSeenInInput("initial_T")),
-	_initial_P(_has_initial_P ? getParam<Real>("initial_P") : 0.),
-	_initial_V(_has_initial_V ? getParam<Real>("initial_V") : 0.),
-	_initial_T(_has_initial_T ? getParam<Real>("initial_T") : 300.)
+    _has_initial_P(params.wasSeenInInput("initial_P")),
+    _has_initial_V(params.wasSeenInInput("initial_V")),
+    _has_initial_T(params.wasSeenInInput("initial_T")),
+    _initial_P(_has_initial_P ? getParam<Real>("initial_P") : 0.),
+    _initial_V(_has_initial_V ? getParam<Real>("initial_V") : 0.),
+    _initial_T(_has_initial_T ? getParam<Real>("initial_T") : 300.)
 {
   const std::vector<Real> & dir = getParam<std::vector<Real> >("orientation");
   _dir = VectorValue<Real>(dir[0], dir[1], dir[2]);
-
-  //FEProblem & feproblem = _sim.feproblem();
-  //Function & func = feproblem.getFunction(getParam<std::string>("eos_function"));
-  //_eos = dynamic_cast<EquationOfState&>(func);
 }
 
 PipeBase::~PipeBase()
@@ -161,9 +154,7 @@ PipeBase::addVariables()
 {
   Model::addVariables(_subdomain_id);
 
-  FEProblem & feproblem = _sim.feproblem();
-  Function & func = feproblem.getFunction(getParam<FunctionName>("eos_function"));
-  EquationOfState& _eos = dynamic_cast<EquationOfState&>(func);
+  const EquationOfState & eos = _sim.getEquationOfState(getParam<UserObjectName>("eos"));
 
   Real initial_P = _sim.getParam<Real>("global_init_P");
   Real initial_V = _sim.getParam<Real>("global_init_V");
@@ -185,13 +176,13 @@ PipeBase::addVariables()
   Real initial_enthalpy = 0.;
   if(_model_type == EQ_MODEL_2)
   {
-	  initial_rho = _eos.invert_eos_rho(initial_P);
+	  initial_rho = eos.invert_eos_rho(initial_P);
 	  initial_rhou = initial_rho * initial_V;
   }
   else if(_model_type == EQ_MODEL_3)
   {
-	  initial_e = _eos.invert_eos_internal_energy(initial_T);
-	  initial_rho = _eos.invert_eos_rho(initial_P, initial_e);
+	  initial_e = eos.invert_eos_internal_energy(initial_T);
+	  initial_rho = eos.invert_eos_rho(initial_P, initial_e);
 	  initial_rhou = initial_rho * initial_V;
 	  initial_rhoE = initial_rho * initial_e + initial_rho * 0.5 * initial_V * initial_V;
 	  initial_enthalpy = (initial_rhoE + initial_P) / initial_rho;

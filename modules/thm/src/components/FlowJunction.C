@@ -27,7 +27,7 @@ InputParameters validParams<FlowJunction>()
   //params.addRequiredParam<Real>("Initial_pressure", "Initial pressure of this branch");
   params.addParam<Real>("initial_P", 1.e5, "Initial pressure of this branch");
 
-  params.addRequiredParam<FunctionName>("eos_function", "The EOS function object");
+  params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
   return params;
 }
 
@@ -107,9 +107,7 @@ FlowJunction::addVariables()
 {
   // add scalar variable
   // Note the physical meaning of this scalar variable is the "pressure of the branch, P_Branch"
-  FEProblem & feproblem = _sim.feproblem();
-  Function & func = feproblem.getFunction(getParam<FunctionName>("eos_function"));
-  EquationOfState& _eos = dynamic_cast<EquationOfState&>(func);
+  const EquationOfState & eos = _sim.getEquationOfState(getParam<UserObjectName>("eos"));
 
   // Debug
   // std::cout << "initial T " << _initial_T << std::endl;
@@ -118,14 +116,14 @@ FlowJunction::addVariables()
   Real _initial_specific_int_energy = 0.;
   if(_model_type == Model::EQ_MODEL_3)
   {
-	  _initial_specific_int_energy = _eos.invert_eos_internal_energy(_initial_T);
+	  _initial_specific_int_energy = eos.invert_eos_internal_energy(_initial_T);
   }
 
   // Debug
   // std::cout << "initial e " << _initial_specific_int_energy << std::endl;
   // End of debug
 
-  Real _initial_rho = _eos.invert_eos_rho(_initial_P, _initial_specific_int_energy);
+  Real _initial_rho = eos.invert_eos_rho(_initial_P, _initial_specific_int_energy);
 
   if(_model_type == Model::EQ_MODEL_2)
   {
@@ -171,7 +169,7 @@ FlowJunction::addMooseObjects()
     params.set<std::vector<Real> >("areas") = _Areas;
     params.set<Real>("Volume") = _ref_volume;
     params.set<std::vector<Real> >("normals") = _normals;
-    params.set<FunctionName>("eos_function") = getParam<FunctionName>("eos_function");
+    params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
 
     params.set<std::vector<Real> >("K") = _k_coeffs;
     params.set<Real>("Area") = _ref_area;
@@ -215,7 +213,7 @@ FlowJunction::addMooseObjects()
 	    // additional params
 	    //params.set<Real>("p_in") = _p_bc;
 	    //params.set<Real>("T_in") = _T_bc;
-	    params.set<std::string>("eos_function") = getParam<std::string>("eos_function");
+            pars.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
 
 	    params.set<std::vector<std::string> >("FlowJunctionVar") = cv_flowjunction_var;
 	    params.set<Real>("k_coeff") = _k_coeffs[i];

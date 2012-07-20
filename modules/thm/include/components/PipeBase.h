@@ -8,9 +8,6 @@
 #include "Component.h"
 #include "Model.h"
 
-//#include "Function.h"
-//#include "EquationOfState.h"
-
 class PipeBase;
 
 template<>
@@ -76,9 +73,6 @@ protected:
   std::map<RELAP7::EEndType, unsigned int> _bnd_ids;    ///< Boundary id of this pipe (indexing: local "node id" => boundary_id).
 
   std::map<RELAP7::EEndType, int> _bnd_out_norm;	///< Out norm (either 1 or -1) on boundaries
-
-  //Function& _func;				///< A function interface to access the EOS function
-  //EquationOfState& _eos;		///< EOS function
 
   bool _has_initial_P;              ///< Is initial pressure provided from user input
   bool _has_initial_V;              ///< Is initial velocity provided from user input
