@@ -34,10 +34,7 @@ protected:
   VariableValue & _rhou;
   VariableValue & _rhoE;
   
-  // Reference to base Function class.  Must be cast to an EquationOfState in the
-  // constructor so that we can properly call its extended interface...
-  Function& _func;
-  EquationOfState& _eos;
+  const EquationOfState & _eos;
 };
 
 #endif 

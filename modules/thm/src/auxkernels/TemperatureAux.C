@@ -12,7 +12,7 @@ InputParameters validParams<TemperatureAux>()
   params.addRequiredCoupledVar("rhoE", "total energy");
 
   // The EOS function is a required parameter.
-  params.addRequiredParam<FunctionName>("eos_function", "The EOS function object");
+  params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
   
   return params;
 }
@@ -33,8 +33,7 @@ TemperatureAux::TemperatureAux(const std::string & name, InputParameters paramet
     _rho(coupledValue("rho")),
     _rhou(coupledValue("rhou")),
     _rhoE(coupledValue("rhoE")),
-    _func(getFunction("eos_function")),
-    _eos( dynamic_cast<EquationOfState&>(_func))
+    _eos(getUserObject<EquationOfState>("eos"))
 {}
 
 
