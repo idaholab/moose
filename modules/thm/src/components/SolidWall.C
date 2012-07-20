@@ -2,10 +2,7 @@
 #include "Simulation.h"
 #include "FEProblem.h"
 #include "Pipe.h"
-//
-#include "OneDMassSolidWallBC.h"
-#include "OneDMomentumSolidWallBC.h"
-#include "OneDEnergySolidWallBC.h"
+#include "Factory.h"
 
 template<>
 InputParameters validParams<SolidWall>()
@@ -65,13 +62,13 @@ SolidWall::addMooseObjects()
   // boundary id
   std::vector<unsigned int> bnd_id(1, _boundary_id);
   {
-    InputParameters params = validParams<OneDMassSolidWallBC>();
+    InputParameters params = Factory::instance()->getValidParams("OneDMassSolidWallBC");
     params.set<NonlinearVariableName>("variable") = Model::RHO;
     params.set<std::vector<unsigned int> >("boundary") = bnd_id;
     _sim.addBoundaryCondition("OneDMassSolidWallBC", genName("bc", _id, "rho"), params);
   }
   {
-    InputParameters params = validParams<OneDMomentumSolidWallBC>();
+    InputParameters params = Factory::instance()->getValidParams("OneDMomentumSolidWallBC");
     params.set<NonlinearVariableName>("variable") = Model::RHOU;
     params.set<std::vector<unsigned int> >("boundary") = bnd_id;
     params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
@@ -86,7 +83,7 @@ SolidWall::addMooseObjects()
 
   if (_model_type == Model::EQ_MODEL_3)
   {
-    InputParameters params = validParams<OneDEnergySolidWallBC>();
+    InputParameters params = Factory::instance()->getValidParams("OneDEnergySolidWallBC");
     params.set<NonlinearVariableName>("variable") = Model::RHOE;
     params.set<std::vector<unsigned int> >("boundary") = bnd_id;
     params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
