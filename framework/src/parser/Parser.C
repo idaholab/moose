@@ -505,29 +505,22 @@ void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, 
                                                  InputParameters::Parameter<RealTensorValue> * param, bool in_global, GlobalParamsAction * global_block);
 
 // Macros for parameter extraction
-#define dynamicCastAndExtractScalar(type, param, full_name, short_name, in_global, global_block)                       \
-  InputParameters::Parameter<type> * type ## _scalar =                                                                 \
-                                dynamic_cast<InputParameters::Parameter<type>*>(param);                                \
-  if (type ## _scalar)                                                                                                 \
-    setScalarParameter<type>(full_name, short_name, type ## _scalar, in_global, global_block)
+#define dynamicCastAndExtractScalar(type, param, full_name, short_name, in_global, global_block)                                        \
+  do                                                                                                                                    \
+  {                                                                                                                                     \
+    InputParameters::Parameter<type> * scalar_p = dynamic_cast<InputParameters::Parameter<type>*>(param);                               \
+    if (scalar_p)                                                                                                                       \
+      setScalarParameter<type>(full_name, short_name, scalar_p, in_global, global_block);                                               \
+  } while(0)
 
-#define dynamicCastAndExtractScalar2(type, type2, param, full_name, short_name, in_global, global_block)              \
-  InputParameters::Parameter<type type2> * type ## type2 ## _scalar =                                                 \
-                                dynamic_cast<InputParameters::Parameter<type type2>*>(param);                         \
-  if (type ## type2 ## _scalar)                                                                                       \
-    setScalarParameter<type type2>(full_name, short_name, type ## type2 ## _scalar, in_global, global_block)
 
-#define dynamicCastAndExtractVector(type, param, full_name, short_name, in_global, global_block)                      \
-  InputParameters::Parameter<std::vector<type> > * type ## _vector =                                                  \
-                                dynamic_cast<InputParameters::Parameter<std::vector<type> >*>(param);                 \
-  if (type ## _vector)                                                                                                \
-    setVectorParameter<type>(full_name, short_name, type ## _vector, in_global, global_block)
-
-#define dynamicCastAndExtractVector2(type, type2, param, full_name, short_name, in_global, global_block)              \
-  InputParameters::Parameter<std::vector<type type2> > * type ## type2 ## _vector =                                   \
-                                dynamic_cast<InputParameters::Parameter<std::vector<type type2> >*>(param);           \
-  if (type ## type2 ## _vector)                                                                                       \
-    setVectorParameter<type type2>(full_name, short_name, type ## type2 ## _vector, in_global, global_block)
+#define dynamicCastAndExtractVector(type, param, full_name, short_name, in_global, global_block)                                        \
+  do                                                                                                                                    \
+  {                                                                                                                                     \
+    InputParameters::Parameter<std::vector<type> > * vector_p = dynamic_cast<InputParameters::Parameter<std::vector<type> >*>(param);   \
+    if (vector_p)                                                                                                                       \
+      setVectorParameter<type>(full_name, short_name, vector_p, in_global, global_block);                                               \
+  } while(0)
 
 void
 Parser::extractParams(const std::string & prefix, InputParameters &p)
@@ -575,51 +568,51 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
        * Scalar types
        */
       // built-ins
-      dynamicCastAndExtractScalar (Real                  , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (int                   , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar2(unsigned,int          , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (bool                  , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(Real                  , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(int                   , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(unsigned int          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(bool                  , it->second, full_name, it->first, in_global, global_params_block);
 
       // Moose Scalars
-      dynamicCastAndExtractScalar (SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (BoundaryID            , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (RealVectorValue       , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (RealTensorValue       , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (MooseEnum             , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(BoundaryID            , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(RealVectorValue       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(RealTensorValue       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(MooseEnum             , it->second, full_name, it->first, in_global, global_params_block);
 
       // Moose String-derived scalars
-      dynamicCastAndExtractScalar (/*std::*/string       , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (SubdomainName         , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (BoundaryName          , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (FileName              , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (MeshFileName          , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (VariableName          , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (NonlinearVariableName , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (AuxVariableName       , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (FunctionName          , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (UserObjectName        , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar (PostprocessorName     , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(/*std::*/string       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(SubdomainName         , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(BoundaryName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(FileName              , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(MeshFileName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(VariableName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(NonlinearVariableName , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(AuxVariableName       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(FunctionName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(UserObjectName        , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(PostprocessorName     , it->second, full_name, it->first, in_global, global_params_block);
 
       /**
        * Vector types
        */
       // built-ins
-      dynamicCastAndExtractVector (Real                  , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractVector (int                   , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractVector2(unsigned,int          , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractVector (bool                  , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(Real                  , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(int                   , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(unsigned int          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(bool                  , it->second, full_name, it->first, in_global, global_params_block);
 
       // Moose Vectors
-      dynamicCastAndExtractVector (SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractVector (BoundaryID            , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(BoundaryID            , it->second, full_name, it->first, in_global, global_params_block);
 
       // Moose String-derived scalars
-      dynamicCastAndExtractVector (/*std::*/string       , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractVector (SubdomainName         , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractVector (BoundaryName          , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractVector (VariableName          , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractVector (NonlinearVariableName , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractVector (AuxVariableName       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(/*std::*/string       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(SubdomainName         , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(BoundaryName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(VariableName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(NonlinearVariableName , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(AuxVariableName       , it->second, full_name, it->first, in_global, global_params_block);
     }
   }
 }

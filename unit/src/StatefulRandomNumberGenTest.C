@@ -20,7 +20,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( StatefulRandomNumberGenTest );
 void
 StatefulRandomNumberGenTest::testRandomGen()
 {
-  MooseStatefulRandom mrand;
+  MooseRandom mrand;
 
   const int n_gens = 3;
   const int n_nums = 2;

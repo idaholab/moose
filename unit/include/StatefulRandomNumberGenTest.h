@@ -18,7 +18,7 @@
 //CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
-#include "MooseStatefulRandom.h"
+#include "MooseRandom.h"
 
 #include <string>
 
