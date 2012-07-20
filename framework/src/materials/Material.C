@@ -107,15 +107,12 @@ Material::initStatefulProperties(unsigned int n_points)
   if (_has_stateful_property)
     for (_qp = 0; _qp < n_points; ++_qp)
       initQpStatefulProperties();
-  else
-    for (_qp = 0; _qp < n_points; ++_qp)
-      computeQpProperties();
 }
 
 void
 Material::initQpStatefulProperties()
 {
-  libmesh_do_once(mooseWarning(std::string("Material \"") + _name + "\" declares one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class."));
+  mooseDoOnce(mooseWarning(std::string("Material \"") + _name + "\" declares one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class."));
 }
 
 void
