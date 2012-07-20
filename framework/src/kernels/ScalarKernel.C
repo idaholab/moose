@@ -38,6 +38,7 @@ ScalarKernel::ScalarKernel(const std::string & name, InputParameters parameters)
     ScalarCoupleable(parameters),
     SetupInterface(parameters),
     FunctionInterface(parameters),
+    UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
     TransientInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),

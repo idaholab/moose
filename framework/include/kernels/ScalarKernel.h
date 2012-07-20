@@ -19,6 +19,7 @@
 #include "Coupleable.h"
 #include "SetupInterface.h"
 #include "FunctionInterface.h"
+#include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "TransientInterface.h"
 #include "Assembly.h"
@@ -45,6 +46,7 @@ class ScalarKernel :
   public ScalarCoupleable,
   public SetupInterface,
   public FunctionInterface,
+  public UserObjectInterface,
   public PostprocessorInterface,
   public TransientInterface
 {
