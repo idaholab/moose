@@ -8,24 +8,29 @@ template<>
 InputParameters validParams<SolidMechanicsAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::string>("disp_x", "", "The x displacement");
-  params.addParam<std::string>("disp_y", "", "The y displacement");
-  params.addParam<std::string>("disp_z", "", "The z displacement");
-  params.addParam<std::string>("disp_r", "", "The r displacement");
-  params.addParam<std::string>("temp", "", "The temperature");
+  params.addParam<NonlinearVariableName>("disp_x", "", "The x displacement");
+  params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");
+  params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
+  params.addParam<NonlinearVariableName>("disp_r", "", "The r displacement");
+  params.addParam<NonlinearVariableName>("temp", "", "The temperature");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that these kernels will be applied to");
+  
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_x", "Auxiliary variables to save the x displacement residuals.");
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_y", "Auxiliary variables to save the y displacement residuals.");
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_z", "Auxiliary variables to save the z displacement residuals.");
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_r", "Auxiliary variables to save the r displacement residuals.");
   return params;
 }
 
 SolidMechanicsAction::SolidMechanicsAction(const std::string & name, InputParameters params) :
   Action(name, params),
-  _disp_x(getParam<std::string>("disp_x")),
-  _disp_y(getParam<std::string>("disp_y")),
-  _disp_z(getParam<std::string>("disp_z")),
-  _disp_r(getParam<std::string>("disp_r")),
-  _temp(getParam<std::string>("temp"))
+  _disp_x(getParam<NonlinearVariableName>("disp_x")),
+  _disp_y(getParam<NonlinearVariableName>("disp_y")),
+  _disp_z(getParam<NonlinearVariableName>("disp_z")),
+  _disp_r(getParam<NonlinearVariableName>("disp_r")),
+  _temp(getParam<NonlinearVariableName>("temp"))
 {
 }
 
@@ -70,6 +75,7 @@ SolidMechanicsAction::act()
     unsigned int dim(1);
     std::vector<std::string> keys;
     std::vector<std::string> vars;
+    std::vector<std::vector<AuxVariableName> > save_in;
     std::string type("StressDivergence");
     if (coord_type == Moose::COORD_RZ)
     {
@@ -78,7 +84,14 @@ SolidMechanicsAction::act()
       keys.push_back("disp_r");
       keys.push_back("disp_z");
       vars.push_back(_disp_r);
-      vars.push_back(_disp_z);
+      vars.push_back(_disp_z);      
+      save_in.resize(dim);
+      if(isParamValid("save_in_disp_r"))
+        save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_r");
+      
+      if(isParamValid("save_in_disp_z"))
+        save_in[1] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
+
       type = "StressDivergenceRZ";
     }
 
@@ -103,7 +116,20 @@ SolidMechanicsAction::act()
           vars.push_back(_disp_z);
         }
       }
+
+      save_in.resize(dim);
+      if(isParamValid("save_in_disp_x"))
+        save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_x");
+
+      if(isParamValid("save_in_disp_y"))
+        save_in[1] = getParam<std::vector<AuxVariableName> >("save_in_disp_y");
+
+      if(isParamValid("save_in_disp_z"))
+        save_in[2] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
+
     }
+
+
 
     unsigned int num_coupled(dim);
     if (_temp != "")
@@ -138,6 +164,7 @@ SolidMechanicsAction::act()
       params.set<unsigned int>("component") = i;
       params.set<NonlinearVariableName>("variable") = vars[i];
       params.set<std::vector<SubdomainName> >("block") = blocks;
+      params.set<std::vector<AuxVariableName> >("save_in") = save_in[i];
 
       _problem->addKernel(type, name.str(), params);
     }
