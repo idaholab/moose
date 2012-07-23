@@ -16,9 +16,18 @@
 #define MOOSEPRECONDITIONER_H
 
 #include "MooseObject.h"
+// libMesh include
+#include "numeric_vector.h"
+
+//Forward declarations
+namespace libMesh
+{
+  class MeshBase;
+}
 
 class FEProblem;
 class MoosePreconditioner;
+
 
 template<>
 InputParameters validParams<MoosePreconditioner>();
@@ -31,6 +40,13 @@ class MoosePreconditioner : public MooseObject
 public:
   MoosePreconditioner(const std::string & name, InputParameters params);
   virtual ~MoosePreconditioner();
+
+  /**
+   * Helper function for copying values associated with variables in vectors from two different systems.
+   */
+  static void copyVarValues(MeshBase & mesh,
+                     const unsigned int from_system, const unsigned int from_var, const NumericVector<Number> & from_vector,
+                     const unsigned int to_system, const unsigned int to_var, NumericVector<Number> & to_vector);
 
 protected:
   /// Subproblem this preconditioner is part of

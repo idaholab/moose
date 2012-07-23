@@ -24,13 +24,6 @@
 #include "system.h"
 #include "linear_implicit_system.h"
 
-//Forward declarations
-namespace libMesh
-{
-  class EquationSystems;
-  class MeshBase;
-}
-
 
 class FEProblem;
 class NonlinearSystem;
@@ -79,12 +72,6 @@ public:
    */
   virtual void init ();
 
-  /**
-   * Helper function for copying values associated with variables in vectors from two different systems.
-   */
-  static void copyVarValues(MeshBase & mesh,
-                     const unsigned int from_system, const unsigned int from_var, const NumericVector<Number> & from_vector,
-                     const unsigned int to_system, const unsigned int to_var, NumericVector<Number> & to_vector);
 
 protected:
   /// The nonlinear system this PBP is associated with (convenience reference)
