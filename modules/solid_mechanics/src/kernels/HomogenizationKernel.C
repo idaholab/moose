@@ -75,10 +75,12 @@ HomogenizationKernel::computeQpResidual()
 
   Real value(0);
 
+
+      
   for(unsigned j = 0; j < 3; j++)
   {
     const unsigned I = 3 * j + _component;
-    value -= E(I,J) * _grad_test[_i][_qp](j);
+    value = value - E(I,J) * _grad_test[_i][_qp](j);
   }
 
   return value;
