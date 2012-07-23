@@ -1042,6 +1042,11 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   ComputeResidualThread cr(_mproblem, *this, residual);
   Threads::parallel_reduce(elem_range, cr);
+
+  // Close the Aux system solution because "save_in" kernels might have written to it
+  _mproblem.getAuxiliarySystem().sys().solution->close();
+  _mproblem.getAuxiliarySystem().update();
+
   // do scalar kernels (not sure how to thread this)
   const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
   if (scalars.size() > 0)

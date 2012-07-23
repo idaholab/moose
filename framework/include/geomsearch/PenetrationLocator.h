@@ -70,6 +70,7 @@ public:
     std::vector<RealGradient> _dxyzdxi;
     std::vector<RealGradient> _dxyzdeta;
     std::vector<RealGradient> _d2xyzdxideta;
+    bool _update;
   };
 
   SubProblem & _subproblem;

@@ -79,7 +79,12 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   _dof_map(_sys.dofMap()),
   _node_to_elem_map(_mesh.nodeToElemMap()),
 
-  _overwrite_slave_residual(true)
+  _overwrite_slave_residual(true),
+
+  _real_zero(_problem._real_zero[_tid]),
+  _zero(_problem._zero[_tid]),
+  _grad_zero(_problem._grad_zero[_tid]),
+  _second_zero(_problem._second_zero[_tid])
 {
   if (parameters.isParamValid("tangential_tolerance"))
   {

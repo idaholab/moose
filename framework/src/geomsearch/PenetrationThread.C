@@ -97,7 +97,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
     // See if we already have info about this node
     if(info)
     {
-      if (!_update_location && info->_distance >= 0)
+      if ((!_update_location || !info->_update) && info->_distance >= 0)
       {
         const Point contact_ref = info->_closest_point_ref;
         const Real distance = info->_distance;

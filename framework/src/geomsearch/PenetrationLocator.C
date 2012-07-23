@@ -136,7 +136,8 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const Node * node, const El
    _side_phi(side_phi),
    _dxyzdxi(dxyzdxi),
    _dxyzdeta(dxyzdeta),
-   _d2xyzdxideta(d2xyzdxideta)
+   _d2xyzdxideta(d2xyzdxideta),
+   _update(true)
 {}
 
 
@@ -156,7 +157,8 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p) 
     _side_phi(p._side_phi),
     _dxyzdxi(p._dxyzdxi),
     _dxyzdeta(p._dxyzdeta),
-    _d2xyzdxideta(p._d2xyzdxideta)
+    _d2xyzdxideta(p._d2xyzdxideta),
+    _update(p._update)
 {}
 
 PenetrationLocator::PenetrationInfo::~PenetrationInfo()

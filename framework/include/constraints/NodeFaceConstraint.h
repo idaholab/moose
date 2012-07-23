@@ -188,6 +188,12 @@ protected:
    */
   bool _overwrite_slave_residual;
 
+  // Single Instance Variables
+  Real & _real_zero;
+  MooseArray<Real> & _zero;
+  MooseArray<RealGradient> & _grad_zero;
+  MooseArray<RealTensor> & _second_zero;
+
 public:
   std::vector<unsigned int> _connected_dof_indices;
 
