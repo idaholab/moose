@@ -14,11 +14,13 @@
 
 #include "GeneratedMesh.h"
 #include "Moose.h"
+#include "NonlinearSystem.h"
 
 // libMesh includes
 #include "getpot.h"
 #include "mesh_generation.h"
 #include "string_to_enum.h"
+#include "periodic_boundaries.h"
 
 
 template<>
@@ -108,4 +110,22 @@ GeneratedMesh::dimensionWidth(unsigned int dim) const
   default:
     mooseError("Requested dimension out of bounds");
   }
+}
+
+bool
+GeneratedMesh::isPeriodic(NonlinearSystem &nl, unsigned int var_num, unsigned int dim)
+{
+  if (dim >= _mesh.mesh_dimension())
+    mooseError("Requested dimension out of bounds");
+
+  PeriodicBoundaries *pbs = nl.dofMap().get_periodic_boundaries();
+
+  static const int pb_map[3][3] = {{0, -99, -99},{3, 0, -99},{4, 1, 5}};
+
+  PeriodicBoundary *pb = pbs->boundary(pb_map[_mesh.mesh_dimension()-1][dim]);
+
+  if (pb != NULL)
+    return pb->is_my_variable(var_num);
+  else
+    return false;
 }

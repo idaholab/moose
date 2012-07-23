@@ -18,6 +18,7 @@
 #include "MooseMesh.h"
 
 class GeneratedMesh;
+class NonlinearSystem;
 
 template<>
 InputParameters validParams<GeneratedMesh>();
@@ -35,6 +36,12 @@ public:
    * Returns the width of the requested dimension
    */
   Real dimensionWidth(unsigned int dim) const;
+
+  /**
+   * Returns whether this generated mesh is periodic in the given dimension
+   * for the given variable
+   */
+  bool isPeriodic(NonlinearSystem &nl, unsigned int var_num, unsigned int dim);
 
 protected:
   /// The dimension of the mesh
