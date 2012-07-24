@@ -21,6 +21,7 @@
 #include "node_range.h"
 
 class Problem;
+class SubProblem;
 
 class ComputeNodalPPSThread
 {

@@ -15,18 +15,29 @@
 #ifndef USEROBJECT_H
 #define USEROBJECT_H
 
+//MOOSE includes
+#include "Moose.h"
 #include "MooseObject.h"
+#include "SetupInterface.h"
+#include "ParallelUniqueId.h"
+
+//libMesh includes
+#include "libmesh_common.h"
+#include "parallel.h"
 
 class UserObject;
+class Problem;
+class SubProblem;
 
 template<>
 InputParameters validParams<UserObject>();
 
-
 /**
  * Base class for user-specific data
  */
-class UserObject : public MooseObject
+class UserObject :
+  public MooseObject,
+  public SetupInterface
 {
 public:
   UserObject(const std::string & name, InputParameters params);
@@ -50,6 +61,21 @@ public:
    */
   virtual void store(std::ofstream & stream);
 
+  /**
+   * Returns a reference to the subproblem that
+   * this postprocessor is tied to
+   */
+  SubProblem & getSubProblem() const { return _subproblem; }
+
+protected:
+  Problem & _problem;
+  SubProblem & _subproblem;
+
+  /// Thread ID of this postprocessor
+  THREAD_ID _tid;
+
+  /// Coordinate system
+  const Moose::CoordinateSystemType & _coord_sys;
 };
 
 #endif /* USEROBJECT_H */

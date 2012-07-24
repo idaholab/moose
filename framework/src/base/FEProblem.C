@@ -30,6 +30,11 @@
 #include "ElementH1Error.h"
 #include "Function.h"
 
+#include "ElementPostprocessor.h"
+#include "NodalPostprocessor.h"
+#include "SidePostprocessor.h"
+#include "GeneralPostprocessor.h"
+
 unsigned int FEProblem::_n = 0;
 
 static
@@ -1216,6 +1221,16 @@ void
 FEProblem::addUserObject(const std::string & type, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
+
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
+  }
+  else
+  {
+    parameters.set<SubProblem *>("_subproblem") = this;
+  }
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
@@ -1223,6 +1238,39 @@ FEProblem::addUserObject(const std::string & type, const std::string & name, Inp
     _user_objects[tid].addUserObject(name, uo);
     _objects_by_name[tid][name].push_back(uo);
   }
+}
+
+/**
+ * Small helper function used by addPostprocessor to try to get a Postprocessor pointer from a MooseObject
+ */
+Postprocessor *
+getPostprocessorPointer(MooseObject * mo)
+{
+  {
+    ElementPostprocessor * intermediate = dynamic_cast<ElementPostprocessor *>(mo);
+    if(intermediate)
+      return static_cast<Postprocessor *>(intermediate);
+  }
+
+  {
+    NodalPostprocessor * intermediate = dynamic_cast<NodalPostprocessor *>(mo);
+    if(intermediate)
+      return static_cast<Postprocessor *>(intermediate);
+  }
+
+  {
+    SidePostprocessor * intermediate = dynamic_cast<SidePostprocessor *>(mo);
+    if(intermediate)
+      return static_cast<Postprocessor *>(intermediate);
+  }
+
+  {
+    GeneralPostprocessor * intermediate = dynamic_cast<GeneralPostprocessor *>(mo);
+    if(intermediate)
+      return static_cast<Postprocessor *>(intermediate);
+  }
+
+  mooseError("Unable to determine type for Postprocessor: " + mo->name());
 }
 
 void
@@ -1250,14 +1298,12 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
         _reinit_displaced_face = true;
 
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-//      if (!_pps_data[tid].hasPostprocessor(name))
-//      {
-        Postprocessor * pp = static_cast<Postprocessor *>(Factory::instance()->create(pp_name, name, parameters));
-        _pps(type)[tid].addPostprocessor(pp);
-        _objects_by_name[tid][name].push_back(pp);
-//      }
-//      else
-//        mooseError("Duplicate postprocessor name '" + name + "'");
+
+      MooseObject * mo = Factory::instance()->create(pp_name, name, parameters);
+
+      Postprocessor * pp = getPostprocessorPointer(mo);
+      _pps(type)[tid].addPostprocessor(pp);
+      _objects_by_name[tid][name].push_back(mo);
     }
     else
     {
@@ -1265,14 +1311,10 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
         _reinit_displaced_elem = true;
 
       parameters.set<MaterialData *>("_material_data") = _material_data[tid];
-//      if (!_pps_data[tid].hasPostprocessor(name))
-//      {
-        Postprocessor * pp = static_cast<Postprocessor *>(Factory::instance()->create(pp_name, name, parameters));
-        _pps(type)[tid].addPostprocessor(pp);
-        _objects_by_name[tid][name].push_back(pp);
-//      }
-//      else
-//        mooseError("Duplicate postprocessor name '" + name + "'");
+      MooseObject * mo = Factory::instance()->create(pp_name, name, parameters);
+      Postprocessor * pp = getPostprocessorPointer(mo);
+      _pps(type)[tid].addPostprocessor(pp);
+      _objects_by_name[tid][name].push_back(mo);
     }
   }
 }
@@ -1315,7 +1357,7 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
       {
         SubdomainID block_id = *block_it;
 
-        for (std::vector<Postprocessor *>::const_iterator postprocessor_it = pps[tid].elementPostprocessors(block_id).begin();
+        for (std::vector<ElementPostprocessor *>::const_iterator postprocessor_it = pps[tid].elementPostprocessors(block_id).begin();
             postprocessor_it != pps[tid].elementPostprocessors(block_id).end();
             ++postprocessor_it)
           (*postprocessor_it)->initialize();
@@ -1327,7 +1369,7 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
       {
         //note: for threaded applications where the elements get broken up it
         //may be more efficient to initialize these on demand inside the loop
-        for (std::vector<Postprocessor *>::const_iterator side_postprocessor_it = pps[tid].sidePostprocessors(*boundary_it).begin();
+        for (std::vector<SidePostprocessor *>::const_iterator side_postprocessor_it = pps[tid].sidePostprocessors(*boundary_it).begin();
             side_postprocessor_it != pps[tid].sidePostprocessors(*boundary_it).end();
             ++side_postprocessor_it)
           (*side_postprocessor_it)->initialize();
@@ -1337,7 +1379,7 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
           boundary_it != pps[tid].nodesetIds().end();
           ++boundary_it)
       {
-        for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[tid].nodalPostprocessors(*boundary_it).begin();
+        for (std::vector<NodalPostprocessor *>::const_iterator nodal_postprocessor_it = pps[tid].nodalPostprocessors(*boundary_it).begin();
              nodal_postprocessor_it != pps[tid].nodalPostprocessors(*boundary_it).end();
              ++nodal_postprocessor_it)
         {
@@ -1359,12 +1401,12 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
     {
       SubdomainID block_id = *block_ids_it;
 
-      const std::vector<Postprocessor *> & element_postprocessors = pps[0].elementPostprocessors(block_id);
+      const std::vector<ElementPostprocessor *> & element_postprocessors = pps[0].elementPostprocessors(block_id);
       // Store element postprocessors values
       for (unsigned int i = 0; i < element_postprocessors.size(); ++i)
       {
-        Postprocessor *ps = element_postprocessors[i];
-        std::string name = ps->name();
+        ElementPostprocessor *ps = element_postprocessors[i];
+        std::string name = ps->PPName();
 
         // join across the threads (gather the value in thread #0)
         if (already_gathered.find(ps) == already_gathered.end())
@@ -1391,10 +1433,10 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
     {
       BoundaryID boundary_id = *boundary_ids_it;
 
-      const std::vector<Postprocessor *> & side_postprocessors = pps[0].sidePostprocessors(boundary_id);
+      const std::vector<SidePostprocessor *> & side_postprocessors = pps[0].sidePostprocessors(boundary_id);
       for (unsigned int i = 0; i < side_postprocessors.size(); ++i)
       {
-        Postprocessor *ps = side_postprocessors[i];
+        SidePostprocessor *ps = side_postprocessors[i];
         std::string name = ps->name();
 
         // join across the threads (gather the value in thread #0)
@@ -1428,10 +1470,10 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
       {
         BoundaryID boundary_id = *boundary_ids_it;
 
-        const std::vector<Postprocessor *> & nodal_postprocessors = pps[0].nodalPostprocessors(boundary_id);
+        const std::vector<NodalPostprocessor *> & nodal_postprocessors = pps[0].nodalPostprocessors(boundary_id);
         for (unsigned int i = 0; i < nodal_postprocessors.size(); ++i)
         {
-          Postprocessor *ps = nodal_postprocessors[i];
+          NodalPostprocessor *ps = nodal_postprocessors[i];
           std::string name = ps->name();
 
           // join across the threads (gather the value in thread #0)
@@ -1454,7 +1496,7 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
   }
 
   // Compute and store generic postprocessors values
-  for (std::vector<Postprocessor *>::const_iterator generic_postprocessor_it = pps[0].genericPostprocessors().begin();
+  for (std::vector<GeneralPostprocessor *>::const_iterator generic_postprocessor_it = pps[0].genericPostprocessors().begin();
       generic_postprocessor_it != pps[0].genericPostprocessors().end();
       ++generic_postprocessor_it)
   {
@@ -1515,7 +1557,7 @@ FEProblem::addPPSValuesToTable(ExecFlagType type)
     Moose::PPSOutputType out_type = pps->getOutput();
     if (out_type != Moose::PPS_OUTPUT_NONE)
     {
-      std::string name = pps->name();
+      std::string name = pps->PPName();
       Real value = _pps_data[0].getPostprocessorValue(name);
       switch (out_type)
       {
@@ -2119,7 +2161,7 @@ FEProblem::checkPPSs()
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
   {
     for (std::vector<Postprocessor *>::const_iterator it = _pps(types[i])[0].all().begin(); it != _pps(types[i])[0].all().end(); ++it)
-      names.insert((*it)->name());
+      names.insert((*it)->PPName());
 
     pps_blocks.insert(_pps(types[i])[0].blocks().begin(), _pps(types[i])[0].blocks().end());
   }

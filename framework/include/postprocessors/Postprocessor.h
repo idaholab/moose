@@ -19,25 +19,15 @@
 
 //MOOSE includes
 #include "Moose.h"
-#include "MooseObject.h"
-#include "SetupInterface.h"
-#include "ParallelUniqueId.h"
-
-//libMesh includes
-#include "libmesh_common.h"
-#include "parallel.h"
+#include "InputParameters.h"
 
 class Postprocessor;
-class Problem;
-class SubProblem;
 
 template<>
 InputParameters validParams<Postprocessor>();
 
 
-class Postprocessor :
-  public MooseObject,
-  public SetupInterface
+class Postprocessor
 {
 public:
   Postprocessor(const std::string & name, InputParameters parameters);
@@ -88,8 +78,6 @@ public:
     Parallel::broadcast(proxy, rank);
   }
 
-  virtual void threadJoin(const Postprocessor & /*pps*/) = 0;
-
   /**
    * Get the postprocessor output type
    * @return postprocessor output type
@@ -97,18 +85,13 @@ public:
   Moose::PPSOutputType getOutput() { return _output; }
 
   /**
-   * Returns a reference to the subproblem that
-   * this postprocessor is tied to
+   * Returns the name of the Postprocessor.
    */
-  SubProblem & getSubProblem() const { return _subproblem; }
+  std::string PPName() { return _pp_name; }
 
 protected:
-  Problem & _problem;
-  SubProblem & _subproblem;
-  /// Thread ID of this postprocessor
-  THREAD_ID _tid;
-  /// Coordinate system
-  const Moose::CoordinateSystemType & _coord_sys;
+  std::string _pp_name;
+
   /// If and where is the postprocessor output
   Moose::PPSOutputType _output;
 };

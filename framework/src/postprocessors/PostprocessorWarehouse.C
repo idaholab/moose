@@ -16,6 +16,7 @@
 #include "ElementPostprocessor.h"
 #include "SidePostprocessor.h"
 #include "NodalPostprocessor.h"
+#include "GeneralPostprocessor.h"
 #include "MooseMesh.h"
 #include "SubProblem.h"
 #include "Parser.h"
@@ -33,28 +34,96 @@ PostprocessorWarehouse::~PostprocessorWarehouse()
 void
 PostprocessorWarehouse::initialSetup()
 {
-  for(std::vector<Postprocessor *>::const_iterator i=all().begin(); i!=all().end(); ++i)
+  for(std::vector<ElementPostprocessor *>::const_iterator i=_all_element_postprocessors.begin();
+      i!=_all_element_postprocessors.end();
+      ++i)
+    (*i)->initialSetup();
+
+  for(std::vector<NodalPostprocessor *>::const_iterator i=_all_nodal_postprocessors.begin();
+      i!=_all_nodal_postprocessors.end();
+      ++i)
+    (*i)->initialSetup();
+
+  for(std::vector<SidePostprocessor *>::const_iterator i=_all_side_postprocessors.begin();
+      i!=_all_side_postprocessors.end();
+      ++i)
+    (*i)->initialSetup();
+
+  for(std::vector<GeneralPostprocessor *>::const_iterator i=_all_generic_postprocessors.begin();
+      i!=_all_generic_postprocessors.end();
+      ++i)
     (*i)->initialSetup();
 }
 
 void
 PostprocessorWarehouse::timestepSetup()
 {
-  for(std::vector<Postprocessor *>::const_iterator i=all().begin(); i!=all().end(); ++i)
+  for(std::vector<ElementPostprocessor *>::const_iterator i=_all_element_postprocessors.begin();
+      i!=_all_element_postprocessors.end();
+      ++i)
+    (*i)->timestepSetup();
+
+  for(std::vector<NodalPostprocessor *>::const_iterator i=_all_nodal_postprocessors.begin();
+      i!=_all_nodal_postprocessors.end();
+      ++i)
+    (*i)->timestepSetup();
+
+  for(std::vector<SidePostprocessor *>::const_iterator i=_all_side_postprocessors.begin();
+      i!=_all_side_postprocessors.end();
+      ++i)
+    (*i)->timestepSetup();
+
+  for(std::vector<GeneralPostprocessor *>::const_iterator i=_all_generic_postprocessors.begin();
+      i!=_all_generic_postprocessors.end();
+      ++i)
     (*i)->timestepSetup();
 }
 
 void
 PostprocessorWarehouse::residualSetup()
 {
-  for(std::vector<Postprocessor *>::const_iterator i=all().begin(); i!=all().end(); ++i)
+  for(std::vector<ElementPostprocessor *>::const_iterator i=_all_element_postprocessors.begin();
+      i!=_all_element_postprocessors.end();
+      ++i)
+    (*i)->residualSetup();
+
+  for(std::vector<NodalPostprocessor *>::const_iterator i=_all_nodal_postprocessors.begin();
+      i!=_all_nodal_postprocessors.end();
+      ++i)
+    (*i)->residualSetup();
+
+  for(std::vector<SidePostprocessor *>::const_iterator i=_all_side_postprocessors.begin();
+      i!=_all_side_postprocessors.end();
+      ++i)
+    (*i)->residualSetup();
+
+  for(std::vector<GeneralPostprocessor *>::const_iterator i=_all_generic_postprocessors.begin();
+      i!=_all_generic_postprocessors.end();
+      ++i)
     (*i)->residualSetup();
 }
 
 void
 PostprocessorWarehouse::jacobianSetup()
 {
-  for(std::vector<Postprocessor *>::const_iterator i=all().begin(); i!=all().end(); ++i)
+  for(std::vector<ElementPostprocessor *>::const_iterator i=_all_element_postprocessors.begin();
+      i!=_all_element_postprocessors.end();
+      ++i)
+    (*i)->jacobianSetup();
+
+  for(std::vector<NodalPostprocessor *>::const_iterator i=_all_nodal_postprocessors.begin();
+      i!=_all_nodal_postprocessors.end();
+      ++i)
+    (*i)->jacobianSetup();
+
+  for(std::vector<SidePostprocessor *>::const_iterator i=_all_side_postprocessors.begin();
+      i!=_all_side_postprocessors.end();
+      ++i)
+    (*i)->jacobianSetup();
+
+  for(std::vector<GeneralPostprocessor *>::const_iterator i=_all_generic_postprocessors.begin();
+      i!=_all_generic_postprocessors.end();
+      ++i)
     (*i)->jacobianSetup();
 }
 
@@ -63,11 +132,12 @@ void
 PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
 {
   _all_postprocessors.push_back(postprocessor);
-  MooseMesh &mesh = postprocessor->getSubProblem().mesh();
 
   if(dynamic_cast<ElementPostprocessor*>(postprocessor))
   {
-    const std::vector<SubdomainName> & blocks = dynamic_cast<ElementPostprocessor*>(postprocessor)->blocks();
+    ElementPostprocessor * elem_pp = dynamic_cast<ElementPostprocessor*>(postprocessor);
+    MooseMesh &mesh = elem_pp->getSubProblem().mesh();
+    const std::vector<SubdomainName> & blocks = dynamic_cast<ElementPostprocessor*>(elem_pp)->blocks();
     for (std::vector<SubdomainName>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
     {
       SubdomainID block_id;
@@ -76,24 +146,32 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
         block_id = Moose::ANY_BLOCK_ID;
       else
         block_id = mesh.getSubdomainID(*it);
-      _element_postprocessors[block_id].push_back(postprocessor);
+      _element_postprocessors[block_id].push_back(elem_pp);
+      _all_element_postprocessors.push_back(elem_pp);
       _block_ids_with_postprocessors.insert(block_id);
     }
   }
   else if(dynamic_cast<SidePostprocessor*>(postprocessor))
   {
-    const std::vector<BoundaryName> & bnds = dynamic_cast<SidePostprocessor*>(postprocessor)->boundaries();
+    SidePostprocessor * side_pp = dynamic_cast<SidePostprocessor*>(postprocessor);
+    MooseMesh &mesh = side_pp->getSubProblem().mesh();
+
+    const std::vector<BoundaryName> & bnds = dynamic_cast<SidePostprocessor*>(side_pp)->boundaries();
     for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
     {
       BoundaryID boundary_id = mesh.getBoundaryID(*it);
 
-      _side_postprocessors[boundary_id].push_back(postprocessor);
+      _side_postprocessors[boundary_id].push_back(side_pp);
+      _all_side_postprocessors.push_back(side_pp);
       _boundary_ids_with_postprocessors.insert(boundary_id);
     }
   }
   else if(dynamic_cast<NodalPostprocessor*>(postprocessor))
   {
-    const std::vector<BoundaryName> & bnds = dynamic_cast<NodalPostprocessor*>(postprocessor)->boundaries();
+    NodalPostprocessor * nodal_pp = dynamic_cast<NodalPostprocessor*>(postprocessor);
+    MooseMesh &mesh = nodal_pp->getSubProblem().mesh();
+
+    const std::vector<BoundaryName> & bnds = dynamic_cast<NodalPostprocessor*>(nodal_pp)->boundaries();
     for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
     {
       BoundaryID boundary_id;
@@ -102,13 +180,17 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
         boundary_id = Moose::ANY_BOUNDARY_ID;
       else
         boundary_id = mesh.getBoundaryID(*it);
-      _nodal_postprocessors[boundary_id].push_back(postprocessor);
+      _nodal_postprocessors[boundary_id].push_back(nodal_pp);
+      _all_nodal_postprocessors.push_back(nodal_pp);
       _nodeset_ids_with_postprocessors.insert(boundary_id);
     }
   }
   else
   {
+    GeneralPostprocessor * general_pp = dynamic_cast<GeneralPostprocessor*>(postprocessor);
+
     // FIXME: generic pps multithreaded
-    _generic_postprocessors.push_back(postprocessor);
+    _generic_postprocessors.push_back(general_pp);
+    _all_generic_postprocessors.push_back(general_pp);
   }
 }

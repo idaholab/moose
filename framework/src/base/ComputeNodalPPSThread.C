@@ -16,6 +16,7 @@
 
 #include "AuxiliarySystem.h"
 #include "SubProblem.h"
+#include "NodalPostprocessor.h"
 
 // libmesh includes
 #include "threads.h"
@@ -46,7 +47,7 @@ ComputeNodalPPSThread::operator() (const ConstNodeRange & range)
     _sub_problem.reinitNode(node, _tid);
 
     // All Nodes
-    for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it =
+    for (std::vector<NodalPostprocessor *>::const_iterator nodal_postprocessor_it =
            _pps[_tid].nodalPostprocessors(Moose::ANY_BOUNDARY_ID).begin();
          nodal_postprocessor_it != _pps[_tid].nodalPostprocessors(Moose::ANY_BOUNDARY_ID).end();
          ++nodal_postprocessor_it)
@@ -58,7 +59,7 @@ ComputeNodalPPSThread::operator() (const ConstNodeRange & range)
 
     for (std::vector<BoundaryID>::iterator it = nodeset_ids.begin(); it != nodeset_ids.end(); ++it)
     {
-      for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = _pps[_tid].nodalPostprocessors(*it).begin();
+      for (std::vector<NodalPostprocessor *>::const_iterator nodal_postprocessor_it = _pps[_tid].nodalPostprocessors(*it).begin();
            nodal_postprocessor_it != _pps[_tid].nodalPostprocessors(*it).end();
            ++nodal_postprocessor_it)
       {

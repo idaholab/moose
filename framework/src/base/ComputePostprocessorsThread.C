@@ -17,6 +17,8 @@
 #include "Problem.h"
 #include "SystemBase.h"
 
+#include "ElementPostprocessor.h"
+#include "SidePostprocessor.h"
 
 ComputePostprocessorsThread::ComputePostprocessorsThread(Problem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<PostprocessorWarehouse> & pps) :
     ThreadedElementLoop<ConstElemRange>(problem, sys),
@@ -41,12 +43,12 @@ ComputePostprocessorsThread::onElement(const Elem * elem)
   _problem.reinitMaterials(subdomain, _tid);
 
   //Global Postprocessors
-  for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps[_tid].elementPostprocessors(Moose::ANY_BLOCK_ID).begin();
+  for (std::vector<ElementPostprocessor *>::const_iterator postprocessor_it = _pps[_tid].elementPostprocessors(Moose::ANY_BLOCK_ID).begin();
       postprocessor_it != _pps[_tid].elementPostprocessors(Moose::ANY_BLOCK_ID).end();
       ++postprocessor_it)
     (*postprocessor_it)->execute();
 
-  for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps[_tid].elementPostprocessors(subdomain).begin();
+  for (std::vector<ElementPostprocessor *>::const_iterator postprocessor_it = _pps[_tid].elementPostprocessors(subdomain).begin();
       postprocessor_it != _pps[_tid].elementPostprocessors(subdomain).end();
       ++postprocessor_it)
     (*postprocessor_it)->execute();
@@ -60,7 +62,7 @@ ComputePostprocessorsThread::onBoundary(const Elem *elem, unsigned int side, Bou
     _problem.reinitElemFace(elem, side, bnd_id, _tid);
     _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
 
-    for (std::vector<Postprocessor *>::const_iterator side_postprocessor_it = _pps[_tid].sidePostprocessors(bnd_id).begin();
+    for (std::vector<SidePostprocessor *>::const_iterator side_postprocessor_it = _pps[_tid].sidePostprocessors(bnd_id).begin();
         side_postprocessor_it != _pps[_tid].sidePostprocessors(bnd_id).end();
         ++side_postprocessor_it)
       (*side_postprocessor_it)->execute();

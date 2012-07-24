@@ -16,14 +16,7 @@
 #define NODALPOSTPROCESSOR_H
 
 #include "Postprocessor.h"
-#include "Coupleable.h"
-#include "UserObjectInterface.h"
-#include "MooseVariableInterface.h"
-#include "MooseVariable.h"
-#include "TransientInterface.h"
-#include "MaterialPropertyInterface.h"
-// libMesh
-#include "elem.h"
+#include "NodalUserObject.h"
 
 class MooseVariable;
 
@@ -34,31 +27,23 @@ template<>
 InputParameters validParams<NodalPostprocessor>();
 
 class NodalPostprocessor :
-  public Postprocessor,
-  public Coupleable,
-  public UserObjectInterface,
-  public MooseVariableInterface,
-  public TransientInterface,
-  public MaterialPropertyInterface
+  public NodalUserObject,
+  public Postprocessor
 {
 public:
   NodalPostprocessor(const std::string & name, InputParameters parameters);
 
-  const std::vector<BoundaryName> & boundaries() { return _boundaries; }
+  /**
+   * Called before deleting the object. Free memory allocated by your derived classes, etc.
+   */
+  virtual void destroy(){}
 
-protected:
-  MooseVariable & _var;
-  std::vector<BoundaryName> _boundaries;
-
-  const unsigned int _qp;
-  const Node * & _current_node;
-
-  /// Holds the solution at current quadrature points
-  VariableValue & _u;
-
-  // Single Instance Variables
-  Real & _real_zero;
-  MooseArray<Real> & _zero;
+  /**
+   * Must override.
+   *
+   * @param uo The UserObject to be joined into _this_ object.  Take the data from the uo object and "add" it into the data for this object.
+   */
+  virtual void threadJoin(const Postprocessor & y) = 0;
 };
 
 #endif

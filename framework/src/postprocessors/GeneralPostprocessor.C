@@ -17,14 +17,12 @@
 template<>
 InputParameters validParams<GeneralPostprocessor>()
 {
-  InputParameters params = validParams<Postprocessor>();
+  InputParameters params = validParams<GeneralUserObject>();
+  params += validParams<Postprocessor>();
   return params;
 }
 
 GeneralPostprocessor::GeneralPostprocessor(const std::string & name, InputParameters parameters) :
-    Postprocessor(name, parameters),
-    TransientInterface(parameters),
-    FunctionInterface(parameters),
-    UserObjectInterface(parameters),
-    PostprocessorInterface(parameters)
+    GeneralUserObject(name, parameters),
+    Postprocessor(name, parameters)
 {}

@@ -25,18 +25,12 @@ InputParameters validParams<Postprocessor>()
   params.addParam<std::string>("execute_on", "timestep", "Set to (residual|timestep|timestep_begin) to execute only at that moment");
 
   params.addParam<std::string>("output", "both", "The values are: none, screen, file, both (no output, output to screen only, output to files only, output both to screen and files)");
-  params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_postprocessor");
   return params;
 }
 
 Postprocessor::Postprocessor(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
-    SetupInterface(parameters),
-    _problem(*parameters.get<Problem *>("_problem")),
-    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _coord_sys(_subproblem.coordSystem(_tid)),
+    _pp_name(name),
     _output(Moose::stringToEnum<Moose::PPSOutputType>(parameters.get<std::string>("output")))
 {
 }

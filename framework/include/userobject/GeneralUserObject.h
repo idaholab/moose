@@ -12,11 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef GENERALPOSTPROCESSOR_H
-#define GENERALPOSTPROCESSOR_H
+#ifndef GENERALUSEROBJECT_H
+#define GENERALUSEROBJECT_H
 
-#include "Postprocessor.h"
-#include "GeneralUserObject.h"
+#include "UserObject.h"
 #include "TransientInterface.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
@@ -25,26 +24,24 @@
 
 
 //Forward Declarations
-class GeneralPostprocessor;
+class GeneralUserObject;
 
 template<>
-InputParameters validParams<GeneralPostprocessor>();
+InputParameters validParams<GeneralUserObject>();
 
 /* This class is here to combine the Postprocessor interface and the
  * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
-class GeneralPostprocessor :
-  public GeneralUserObject,
-  public Postprocessor
+class GeneralUserObject :
+  public UserObject,
+  public TransientInterface,
+  public FunctionInterface,
+  public UserObjectInterface,
+  protected PostprocessorInterface
 {
 public:
-  GeneralPostprocessor(const std::string & name, InputParameters parameters);
+  GeneralUserObject(const std::string & name, InputParameters parameters);
 
-  virtual ~GeneralPostprocessor() {}
-
-  /**
-   * Called before deleting the object. Free memory allocated by your derived classes, etc.
-   */
-  virtual void destroy(){}
+  virtual ~GeneralUserObject() {}
 };
 
 #endif

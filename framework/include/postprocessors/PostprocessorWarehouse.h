@@ -21,6 +21,10 @@
 #include <map>
 #include <set>
 
+class ElementPostprocessor;
+class NodalPostprocessor;
+class SidePostprocessor;
+class GeneralPostprocessor;
 
 /**
  * Holds postprocessors and provides some services
@@ -42,27 +46,27 @@ public:
    * @param block_id Block ID
    * @return The list of all elemental postprocessors
    */
-  const std::vector<Postprocessor *> & elementPostprocessors(SubdomainID block_id) { return _element_postprocessors[block_id]; }
+  const std::vector<ElementPostprocessor *> & elementPostprocessors(SubdomainID block_id) { return _element_postprocessors[block_id]; }
 
   /**
    * Get the list of side postprocessors
    * @param boundary_id Boundary ID
    * @return The list of side postprocessors
    */
-  const std::vector<Postprocessor *> & sidePostprocessors(BoundaryID boundary_id) { return _side_postprocessors[boundary_id]; }
+  const std::vector<SidePostprocessor *> & sidePostprocessors(BoundaryID boundary_id) { return _side_postprocessors[boundary_id]; }
 
   /**
    * Get the list of nodal postprocessors
    * @param boundary_id Boundary ID
    * @return The list of all nodal postprocessors
    */
-  const std::vector<Postprocessor *> & nodalPostprocessors(BoundaryID boundary_id) { return _nodal_postprocessors[boundary_id]; }
+  const std::vector<NodalPostprocessor *> & nodalPostprocessors(BoundaryID boundary_id) { return _nodal_postprocessors[boundary_id]; }
 
   /**
    * Get the list general postprocessors
    * @return The list of general postprocessors
    */
-  const std::vector<Postprocessor *> & genericPostprocessors() { return _generic_postprocessors; }
+  const std::vector<GeneralPostprocessor *> & genericPostprocessors() { return _generic_postprocessors; }
 
   /**
    * Get the list of all postprocessors
@@ -96,11 +100,16 @@ public:
 
 
 protected:
-  std::map<SubdomainID, std::vector<Postprocessor *> > _element_postprocessors;
-  std::map<BoundaryID, std::vector<Postprocessor *> > _side_postprocessors;
-  std::map<BoundaryID, std::vector<Postprocessor *> > _nodal_postprocessors;
+  std::vector<ElementPostprocessor *> _all_element_postprocessors;
+  std::vector<NodalPostprocessor *> _all_nodal_postprocessors;
+  std::vector<SidePostprocessor *> _all_side_postprocessors;
+  std::vector<GeneralPostprocessor *> _all_generic_postprocessors;
 
-  std::vector<Postprocessor *> _generic_postprocessors;
+  std::map<SubdomainID, std::vector<ElementPostprocessor *> > _element_postprocessors;
+  std::map<BoundaryID, std::vector<SidePostprocessor *> > _side_postprocessors;
+  std::map<BoundaryID, std::vector<NodalPostprocessor *> > _nodal_postprocessors;
+
+  std::vector<GeneralPostprocessor *> _generic_postprocessors;
   std::vector<Postprocessor *> _all_postprocessors;
 
   /// All of the block ids that have postprocessors specified to act on them

@@ -12,36 +12,60 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SIDEPOSTPROCESSOR_H
-#define SIDEPOSTPROCESSOR_H
+#ifndef NODALUSEROBJECT_H
+#define NODALUSEROBJECT_H
 
-#include "SideUserObject.h"
-#include "Postprocessor.h"
+#include "UserObject.h"
+#include "Coupleable.h"
+#include "UserObjectInterface.h"
+#include "MooseVariableInterface.h"
+#include "MooseVariable.h"
+#include "TransientInterface.h"
+#include "MaterialPropertyInterface.h"
+// libMesh
+#include "elem.h"
+
+class MooseVariable;
 
 //Forward Declarations
-class SidePostprocessor;
+class NodalUserObject;
 
 template<>
-InputParameters validParams<SidePostprocessor>();
+InputParameters validParams<NodalUserObject>();
 
-class SidePostprocessor :
-  public SideUserObject,
-  public Postprocessor
+class NodalUserObject :
+  public UserObject,
+  public Coupleable,
+  public UserObjectInterface,
+  public MooseVariableInterface,
+  public TransientInterface,
+  public MaterialPropertyInterface
 {
 public:
-  SidePostprocessor(const std::string & name, InputParameters parameters);
+  NodalUserObject(const std::string & name, InputParameters parameters);
 
-  /**
-   * Called before deleting the object. Free memory allocated by your derived classes, etc.
-   */
-  virtual void destroy(){}
+  const std::vector<BoundaryName> & boundaries() { return _boundaries; }
 
   /**
    * Must override.
    *
    * @param uo The UserObject to be joined into _this_ object.  Take the data from the uo object and "add" it into the data for this object.
    */
-  virtual void threadJoin(const Postprocessor & y) = 0;
+//  virtual void threadJoin(const NodalUserObject & uo) = 0;
+
+protected:
+  MooseVariable & _var;
+  std::vector<BoundaryName> _boundaries;
+
+  const unsigned int _qp;
+  const Node * & _current_node;
+
+  /// Holds the solution at current quadrature points
+  VariableValue & _u;
+
+  // Single Instance Variables
+  Real & _real_zero;
+  MooseArray<Real> & _zero;
 };
 
 #endif
