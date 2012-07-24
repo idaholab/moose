@@ -51,7 +51,18 @@ Density::computeProperties()
       const Real Ayz = _grad_disp_y[qp](2);
       const Real Azx = _grad_disp_z[qp](0);
       const Real Azy = _grad_disp_z[qp](1);
-      const Real Azz = (_is_RZ ? _disp_r[qp]/_q_point[qp](0) : _grad_disp_z[qp](2)) + 1;
+      Real Azz(1.0);
+      if (_is_RZ)
+      {
+        if (_q_point[qp](0)!=0.0)
+        {
+          Azz=_disp_r[qp]/_q_point[qp](0)+1;
+        }
+      }
+      else
+      {
+        Azz = _grad_disp_z[qp](2) + 1;
+      }
       d /= Axx*Ayy*Azz + Axy*Ayz*Azx + Axz*Ayx*Azy - Azx*Ayy*Axz - Azy*Ayz*Axx - Azz*Ayx*Axy;
     }
     _density[qp] = d;
