@@ -743,7 +743,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     pass
     
   def _runStarted(self):
-    self.application.addExodusResultActors(cd teself.renderer)
+    self.application.addExodusResultActors(self.renderer)
     self.file_name = None
     self.file_names = []
 
