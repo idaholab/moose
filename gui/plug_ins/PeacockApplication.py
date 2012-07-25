@@ -104,3 +104,6 @@ class PeacockApplication(object):
       The return value of this function MUST be a VTK object that provides vtkPolyData on its output port '''
   def filterResult(self, result_vtk_object):
     return result_vtk_object
+
+  def addExodusResultActors(self, appRenderer):
+    pass
