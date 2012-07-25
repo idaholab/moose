@@ -34,7 +34,6 @@ public:
   static
   void sort(Iter start, Iter end)
     {
-      int counter = 0;
       DependencyResolver<DependencyResolverInterface *> resolver;
 
       for (Iter iter = start; iter != end ; ++iter)
