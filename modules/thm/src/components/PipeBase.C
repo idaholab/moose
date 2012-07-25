@@ -233,25 +233,3 @@ PipeBase::addMooseObjects()
     connectObject("", mon);
   }
 }
-
-std::vector<unsigned int>
-PipeBase::getIDs(std::string part)
-{
-  std::vector<unsigned int> ids;
-
-  if(part == "PIPE")
-    ids.push_back(_subdomain_id);
-  else
-    mooseError(part + " is not a valid part of PipeBase!");
-
-  return ids;
-}
-
-std::string
-PipeBase::variableName(std::string part)
-{
-  if(part == "FLUID_TEMP")
-    return Model::TEMPERATURE;
-  else
-    mooseError(part + " is not a valid part of PipeBase!");
-}

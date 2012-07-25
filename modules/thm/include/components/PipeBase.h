@@ -35,9 +35,6 @@ public:
   virtual Point getPosition() { return _position; }
   virtual RealVectorValue getDirection() { return _dir; }
 
-  virtual std::vector<unsigned int> getIDs(std::string piece);
-  virtual std::string variableName(std::string piece);
-
   // Pipe specific interface ----
   virtual Node * getBoundaryNode(RELAP7::EEndType id);
   virtual unsigned int getBoundaryId(RELAP7::EEndType id);
