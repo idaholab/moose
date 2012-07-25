@@ -24,9 +24,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.plane = vtk.vtkPlane()
     self.plane.SetOrigin(-1000, 0, 0)
     self.plane.SetNormal(1, 0, 0)
-
-    self.exodus_result = None
     
+    self.exodus_result = None
+      
     # The multiple (from adaptivity)
     self.exodus_results = []
 
@@ -743,6 +743,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     pass
     
   def _runStarted(self):
+    self.application.addExodusResultActors(cd teself.renderer)
     self.file_name = None
     self.file_names = []
 
@@ -824,4 +825,4 @@ class ExodusResultRenderWidget(QtGui.QWidget):
                          position if direction == 'z' else old[2])    
 
     self._updateContours()
-    self.vtkwidget.updateGL()    
+    self.vtkwidget.updateGL()   
