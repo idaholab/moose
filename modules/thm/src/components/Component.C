@@ -103,15 +103,6 @@ Component::init()
 	*/
 }
 
-void
-Component::parseInput()
-{
-  if (!_input_file_name.empty())
-  {
-    // TODO: parse local input file
-  }
-}
-
 unsigned int
 Component::getNextSubdomainId()
 {
