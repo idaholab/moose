@@ -76,6 +76,8 @@ public:
   const std::set<SubdomainID> & blocks() { return _blocks; }
   const std::set<BoundaryID> & boundaries() { return _boundaries; }
 
+  void checkMaterialDependSanity();
+
 protected:
   /// A list of material associated with the block (subdomain)
   std::map<SubdomainID, std::vector<Material *> > _active_materials;
@@ -105,8 +107,13 @@ private:
    * This routine uses the Dependency Resolver to sort Materials based on dependencies they
    * might have on coupled values
    */
-  void sortMaterials(std::map<SubdomainID, std::vector<Material *> > & materials_map);
-  void sortBndMaterials(std::map<BoundaryID, std::vector<Material *> > & materials_map);
+  void sortMaterials(std::vector<Material *> & materials_map);
+
+  /**
+   * This routine checks to make sure that all requests for material properties, specifically
+   * by other materials make sense for the given block.
+   */
+  void checkDependMaterials(std::map<SubdomainID, std::vector<Material *> > & materials_map);
 };
 
 #endif // MATERIALWAREHOUSE_H

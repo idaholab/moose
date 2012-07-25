@@ -28,6 +28,7 @@
 #include "ParallelUniqueId.h"
 #include "Problem.h"
 #include "SubProblem.h"
+#include "DependencyResolverInterface.h"
 
 // libMesh includes
 #include "quadrature_gauss.h"
@@ -63,7 +64,8 @@ class Material :
   public UserObjectInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
-  public PostprocessorInterface
+  public PostprocessorInterface,
+  public DependencyResolverInterface
 {
 public:
   Material(const std::string & name, InputParameters parameters);
@@ -104,6 +106,15 @@ public:
 
   const std::set<std::string> &
   getSuppliedPropertiesList() const { return _supplied_props; }
+
+  virtual
+  const std::set<std::string> &
+  getRequestedItems() { return _depend_props; }
+
+  virtual
+  const std::set<std::string> &
+  getSuppliedItems() { return _supplied_props; }
+
 
 protected:
   Problem & _problem;

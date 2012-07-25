@@ -56,8 +56,11 @@ MaterialWarehouse::initialSetup()
 {
   // Sort the materials in each subdomain to get correct execution order
   for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
-    sortMaterials(**i);
-  sortBndMaterials(_active_boundary_materials);
+    for (std::map<SubdomainID, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
+      sortMaterials(j->second);
+
+  for (std::map<BoundaryID, std::vector<Material *> >::iterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
+     sortMaterials(j->second);
 
   for(unsigned int i=0; i<_mats.size(); i++)
     _mats[i]->initialSetup();
@@ -232,20 +235,20 @@ void MaterialWarehouse::addBoundaryMaterial(std::vector<BoundaryID> boundaries, 
 }
 
 void
-MaterialWarehouse::sortMaterials(std::map<SubdomainID, std::vector<Material *> > & materials_map)
+MaterialWarehouse::checkMaterialDependSanity()
+{
+  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+    checkDependMaterials(**i);
+}
+
+void
+MaterialWarehouse::checkDependMaterials(std::map<SubdomainID, std::vector<Material *> > & materials_map)
 {
   for (std::map<SubdomainID, std::vector<Material *> >::iterator j = materials_map.begin(); j != materials_map.end(); ++j)
   {
-    DependencyResolver<Material *> resolver;
-
     /// These two sets are used to make sure that all depenedent props on a block are actually supplied
     std::set<std::string> block_depend_props, block_supplied_props;
 
-    /**
-     * For each block we have to run through the dependency list since
-     * the property provided by a material can change from block to block
-     * which can change the dependencies
-     */
     for (std::vector<Material *>::const_iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
     {
       const std::set<std::string> & depend_props = (*mat_iter)->getPropertyDependencies();
@@ -259,31 +262,7 @@ MaterialWarehouse::sortMaterials(std::map<SubdomainID, std::vector<Material *> >
 
         const std::set<std::string> & supplied_props = (*mat_iter2)->getSuppliedPropertiesList();
         block_supplied_props.insert(supplied_props.begin(), supplied_props.end());
-
-        std::set<std::string> intersect;
-        std::set_intersection(depend_props.begin(), depend_props.end(), supplied_props.begin(),
-                              supplied_props.end(), std::inserter(intersect, intersect.end()));
-
-        // If the intersection isn't empty then there is a dependency here
-        if (!intersect.empty())
-          resolver.insertDependency(*mat_iter, *mat_iter2);
       }
-    }
-
-    try
-    {
-      // Sort based on dependencies
-      std::sort(j->second.begin(), j->second.end(), resolver);
-    }
-    catch(CyclicDependencyException<Material *> & e)
-    {
-      std::ostringstream oss;
-
-      oss << "Cyclic dependency detected in material property couplings:\n";
-      const std::multimap<Material *, Material *> & depends = e.getCyclicDependencies();
-      for (std::multimap<Material *, Material *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
-        oss << it->first->name() << " -> " << it->second->name() << "\n";
-      mooseError(oss.str());
     }
 
     // Error check to make sure all propoerites consumed by materials are supplied on this block
@@ -303,58 +282,22 @@ MaterialWarehouse::sortMaterials(std::map<SubdomainID, std::vector<Material *> >
 }
 
 void
-MaterialWarehouse::sortBndMaterials(std::map<BoundaryID, std::vector<Material *> > & materials_map)
+MaterialWarehouse::sortMaterials(std::vector<Material *> & materials_map)
 {
-  // NOTE: I was really lazy here (it was Friday afternoon), so I just copy and pasted sortMaterials and made it to work with
-  // Boundary materials.  I realize that it is poor CS practice, but hell it is Friday afternoon... If someone makes this
-  // nicer without code duplication, I'll buy him/her a beer.
-
-  for (std::map<BoundaryID, std::vector<Material *> >::iterator j = materials_map.begin(); j != materials_map.end(); ++j)
+  try
   {
-    DependencyResolver<Material *> resolver;
+    // Sort based on dependencies
+    DependencyResolverInterface::sort(materials_map.begin(), materials_map.end());
+  }
+  catch(CyclicDependencyException<Material *> & e)
+  {
+    std::ostringstream oss;
 
-    /**
-     * For each block we have to run through the dependency list since
-     * the property provided by a material can change from block to block
-     * which can change the dependencies
-     */
-    for (std::vector<Material *>::const_iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
-    {
-      const std::set<std::string> & depend_props = (*mat_iter)->getPropertyDependencies();
-
-      // See if any of the active materials supply this property
-      for (std::vector<Material *>::const_iterator mat_iter2=j->second.begin(); mat_iter2 != j->second.end(); ++mat_iter2)
-      {
-        // Don't check THIS material for a coupled property
-        if (mat_iter == mat_iter2) continue;
-
-        const std::set<std::string> & supplied_props = (*mat_iter2)->getSuppliedPropertiesList();
-
-        std::set<std::string> intersect;
-        std::set_intersection(depend_props.begin(), depend_props.end(), supplied_props.begin(),
-                              supplied_props.end(), std::inserter(intersect, intersect.end()));
-
-        // If the intersection isn't empty then there is a dependency here
-        if (!intersect.empty())
-          resolver.insertDependency(*mat_iter, *mat_iter2);
-      }
-    }
-
-    try
-    {
-      // Sort based on dependencies
-      std::sort(j->second.begin(), j->second.end(), resolver);
-    }
-    catch(CyclicDependencyException<Material *> & e)
-    {
-      std::ostringstream oss;
-
-      oss << "Cyclic dependency detected in material property couplings:\n";
-      const std::multimap<Material *, Material *> & depends = e.getCyclicDependencies();
-      for (std::multimap<Material *, Material *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
-        oss << it->first->name() << " -> " << it->second->name() << "\n";
-      mooseError(oss.str());
-    }
+    oss << "Cyclic dependency detected in material property couplings:\n";
+    const std::multimap<Material *, Material *> & depends = e.getCyclicDependencies();
+    for (std::multimap<Material *, Material *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
+      oss << it->first->name() << " -> " << it->second->name() << "\n";
+    mooseError(oss.str());
   }
 }
 

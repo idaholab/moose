@@ -41,6 +41,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),
+    DependencyResolverInterface(),
     _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _displaced_subproblem(parameters.get<SubProblem *>("_subproblem_displaced")),
