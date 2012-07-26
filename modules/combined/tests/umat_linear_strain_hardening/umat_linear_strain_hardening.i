@@ -93,6 +93,7 @@
     disp_z = disp_z
     mechanical_constants = '1000. 0.3 10. 100.'
     plugin = ../../plugins/solid_mechanics/linear_strain_hardening-opt.plugin
+    num_state_vars = 3
   [../]
 []
 

@@ -26,6 +26,8 @@ protected:
   FileName _plugin;
   std::vector<Real> _mechanical_constants;
   std::vector<Real> _thermal_constants;
+  unsigned int _num_state_vars;
+  unsigned int _num_props;
 
   /// The plugin library handle
   void * _handle;
@@ -40,17 +42,16 @@ protected:
   int  _NDI, _NSHR, _NTENS, _NSTATV, _NPROPS, _NOEL, _NPT, _LAYER, _KSPT, _KSTEP, _KINC, i;
 
   //Dimension arrays from FORTRAN file
-  Real _STATEV[], _DDSDDT[], _DRPLDE[], _STRAN[], _PREDEF[1], _DPRED[1], _COORDS[3], _DROT[3][3], _DFGRD0[3][3], _DFGRD1[3][3], _STRESS[6], _DDSDDE[6][6], _DSTRAN[6], _TIME[2], _PROPS[];
+  Real * _STATEV,  * _DDSDDT, * _DRPLDE, * _STRAN, _PREDEF[1], _DPRED[1], _COORDS[3], _DROT[3][3], _DFGRD0[3][3], _DFGRD1[3][3], _STRESS[6], _DDSDDE[6][6], _DSTRAN[6], _TIME[2], * _PROPS;
   
   //Dimension arrays to be used as references from FORTRAN arrays
   Real mySTRESS[6];
-  
+
+  virtual void initQpStatefulProperties();
   virtual void computeStress();
 
-  MaterialProperty<Real> & _pstrain;
-  MaterialProperty<Real> & _pstrain_old;
-  MaterialProperty<Real> & _hardeningvariable;
-  MaterialProperty<Real> & _hardeningvariable_old;
+  MaterialProperty<std::vector<Real> > & _state_var;
+  MaterialProperty<std::vector<Real> > & _state_var_old;  
 };
 
 #endif //ABAQUSUMATMATERIAL_H
