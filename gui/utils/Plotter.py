@@ -93,7 +93,7 @@ class MPLPlotter(QtGui.QWidget):
         self.yData = self.plotData[1]
         
         # MPL plots
-        self.canvas.axes.plot(self.xData, self.yData, self.plotColor)
+        self.canvas.axes.plot(self.xData, self.yData, self.plotColor, linewidth = 2.5)
         self.canvas.axes.set_xlabel('time')
         self.canvas.axes.set_ylabel(self.plotName)
         self.canvas.axes.set_title(self.plotTitle)
