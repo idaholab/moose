@@ -1,4 +1,4 @@
-C      INCLUDE 'SPRINCInterface.f'
+      INCLUDE 'SPRINCInterface.f'
 
 ****************************************************************************************
 **  UMAT, FOR ABAQUS/STANDARD INCORPORATING ELASTO-VISCOPLASTICITY WITH LINEAR        **
@@ -30,7 +30,7 @@ C
       PARAMETER (ONE=1.0,TWO=2.0,THREE=3.0)
 C
       DIMENSION DPSTRAN(6), STRESSOLD(6), DESTRAN(6), DSTRESS(6),
-     +          PS(3), DIR(6)        
+     +          PS(3), DIR(6)     
 C
 C
 C     PROPS(1) - E
@@ -92,15 +92,14 @@ C
          STRESS(K) = STRESS(K) + DSTRESS(K)
       END DO
 C
-C      CALL SPRINC(STRESS,PS,1,NDI,NSHR)
+      CALL SPRINC(STRESS,PS,1,NDI,NSHR)
 C
+C      PRINT *, AN
 C    DETERMINE EFFECTIVE TRIAL STRESS
 C
-      PJ = (ONE/SQRT(TWO))*SQRT((STRESS(1)-STRESS(2))**2.+
-     1     (STRESS(2)-STRESS(3))**2.+(STRESS(1)-STRESS(3))**2.+
-     2     6.*(STRESS(4)**2.+STRESS(5)**2.+STRESS(6)**2.))     
-C      PJ = (ONE/SQRT(TWO))*SQRT((PS(1)-PS(2))**2 + 
-C     +     (PS(2)-PS(3))**2 + (PS(3)-PS(1))**2)
+      PJ = (ONE/SQRT(TWO))*SQRT((PS(1)-PS(2))**2 + 
+     +     (PS(2)-PS(3))**2 + (PS(3)-PS(1))**2)
+C      PRINT *, PJ
 C
 C
       FLOW = PJ - R - YIELD

@@ -2,8 +2,6 @@
 
 #include <dlfcn.h>
 
-
-
 template<>
 InputParameters validParams<AbaqusUmatMaterial>()
 {
@@ -42,9 +40,12 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const std::string  & name,
   }
   
   _STATEV = new Real[_num_state_vars];
-  _DDSDDT = NULL;
-  _DRPLDE = NULL;
+  _DDSDDT = new Real[_NTENS];
+  _DRPLDE = new Real[_NTENS];
   _STRAN  = new Real[_NTENS];
+  _STRESS = new Real[_NTENS];
+  _DDSDDE = new Real[_NTENS*_NTENS];
+  _DSTRAN = new Real[_NTENS];
   _PROPS  = new Real[_num_props];
 
   //Assign materials properties from vector form into an array
@@ -86,9 +87,12 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const std::string  & name,
 AbaqusUmatMaterial::~AbaqusUmatMaterial()
 {
   delete _STATEV;
-//  delete _DDSDDT;
-//  delete _DRPLDE;
+  delete _DDSDDT;
+  delete _DRPLDE;
   delete _STRAN;
+  delete _STRESS;
+  delete _DDSDDE;
+  delete _DSTRAN;
   delete _PROPS;
 
   dlclose(_handle);
@@ -109,8 +113,6 @@ void AbaqusUmatMaterial::initQpStatefulProperties()
 void AbaqusUmatMaterial::computeStress()
 {  
   //Recover "old" state variables to input into UMAT
-  //_STATEV[0]= _pstrain_old[_qp];
-  //_STATEV[1]= _hardeningvariable_old[_qp];
   for (i=0; i<_num_state_vars; i++)
     _STATEV[i]=_state_var_old[_qp][i];
   
@@ -128,21 +130,12 @@ void AbaqusUmatMaterial::computeStress()
   _TIME[1] = _t;     //Value of total time at the beginning of the current increment
   _DTIME = _dt;      //Time increment
 
-  //std::cout<<_STATEV[0]<<", "<<_STATEV[1]<<", "<<_STATEV[2]<<std::endl;
-  
   //Connection to extern statement
   _umat(_STRESS, _STATEV, _DDSDDE, &_SSE, &_SPD, &_SCD, &_RPL, _DDSDDT, _DRPLDE, &_DRPLDT, _STRAN, _DSTRAN, _TIME, &_DTIME, &_TEMP, &_DTEMP, _PREDEF, _DPRED, &_CMNAME, &_NDI, &_NSHR, &_NTENS, &_NSTATV, _PROPS, &_NPROPS, _COORDS, _DROT, &_PNEWDT, &_CELENT, _DFGRD0, _DFGRD1, &_NOEL, &_NPT, &_LAYER, &_KSPT, &_KSTEP, &_KINC);
 
-  //std::cout<<_STATEV[0]<<", "<<_STATEV[1]<<", "<<_STATEV[2]<<std::endl;
- 
   //Update state variables
-  //pstrain[_qp]=_STATEV[0];
-  //_hardeningvariable[_qp]=_STATEV[1];
-  //_depvar[_qp].insert (_depvar[_qp].begin(), _STATEV, _STATEV+_NSTATV);
   for (i=0; i<_num_state_vars; i++)
     _state_var[_qp][i]=_STATEV[i];
-
-  //std::cout<<_depvar[_qp][0]<<", "<<_depvar[_qp][1]<<", "<<_depvar[_qp][2]<<std::endl;
   
   // Update stress
   for (i=0; i<_NTENS; i++)
