@@ -23,6 +23,9 @@ moose_objects	:= $(patsubst %.C, %.$(obj-suffix), $(moose_srcfiles))
 moose_objects	+= $(patsubst %.c, %.$(obj-suffix), $(moose_csrcfiles))
 moose_objects += $(patsubst %.f, %.$(obj-suffix), $(moose_fsrcfiles))
 moose_objects += $(patsubst %.f90, %.$(obj-suffix), $(moose_f90srcfiles))
+# dependency files
+moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
+              $(patsubst %.c, %.$(obj-suffix).d, $(moose_csrcfiles))
 
 # revision header
 revision_header = $(MOOSE_DIR)/include/base/HerdRevision.h
@@ -54,9 +57,7 @@ endif
 endif
 
 # include MOOSE dep files
--include $(MOOSE_DIR)/src/*/*.d
--include $(MOOSE_DIR)/src/*/*/*.d
-
+-include $(moose_deps)
 -include $(MOOSE_DIR)/contrib/mtwist-1.1/src/*.d
 
 #
@@ -94,3 +95,7 @@ clobber::
 
 cleanall::
 	make -C $(MOOSE_DIR) clean
+
+
+echo:
+	@echo $(moose_deps)
