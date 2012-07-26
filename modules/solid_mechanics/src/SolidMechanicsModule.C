@@ -31,6 +31,7 @@
 #include "MaterialSymmElasticityTensorAux.h"
 #include "HomogenizedElasticConstants.h"
 #include "Mass.h"
+#include "AbaqusUmatMaterial.h"
 
 void
 Elk::SolidMechanics::registerObjects()
@@ -48,6 +49,7 @@ Elk::SolidMechanics::registerObjects()
   registerMaterial(PLSHPlasticMaterial);
   registerMaterial(PowerLawCreep);
   registerMaterial(LinearGeneralAnisotropicMaterial);
+  registerMaterial(AbaqusUmatMaterial);
 
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PlenumPressure);
