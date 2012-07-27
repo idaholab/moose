@@ -6,10 +6,12 @@
 template<>
 InputParameters validParams<GapHeatPointSourceMaster>()
 {
+  MooseEnum orders("CONSTANT FIRST SECOND THIRD FORTH", "FIRST");
+  
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
-  params.addParam<std::string>("order", "FIRST", "The finite element order");
+  params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
 
@@ -18,7 +20,7 @@ InputParameters validParams<GapHeatPointSourceMaster>()
 
 GapHeatPointSourceMaster::GapHeatPointSourceMaster(const std::string & name, InputParameters parameters)
   :DiracKernel(name, parameters),
-   _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<std::string>("order")))),
+   _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
    _slave_flux(_sys.getVector("slave_flux"))
 {
   if (parameters.isParamValid("tangential_tolerance"))

@@ -13,6 +13,8 @@ static const std::string PENETRATION_VAR_NAME = "penetration";
 template<>
 InputParameters validParams<ThermalContactAction>()
 {
+  MooseEnum orders("CONSTANT FIRST SECOND THIRD FORTH", "FIRST");
+  
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::string>("type", "A string representing the Moose object that will be used for heat conduction over the gap");
   params.addParam<std::string>("gap_type", "GapValueAux", "A string representing the Moose object that will be used for computing the gap siz\
@@ -24,7 +26,7 @@ e");
   params.addParam<NonlinearVariableName>("disp_y", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "The z displacement");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
-  params.addParam<std::string>("order", "FIRST", "The finite element order");
+  params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
 
   return params;
@@ -121,7 +123,7 @@ ThermalContactAction::addAuxVariables()
       action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
       action_params.set<std::string>("action") = "add_aux_variable";
       action_params.set<std::string>("name") = "AuxVariables/" + GAP_VALUE_VAR_NAME;
-      action_params.set<std::string>("order") = getParam<std::string>("order");
+      action_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
       // gap_value
       Action *action = ActionFactory::instance()->create("AddVariableAction", action_params);
       _awh.addActionBlock(action);
@@ -183,7 +185,7 @@ ThermalContactAction::addAuxBcs()
     std::vector<VariableName> vars(1, getParam<NonlinearVariableName>("variable"));
     params.set<std::vector<VariableName> >("paired_variable") = vars;
     
-    params.set<std::string>("order") = getParam<std::string>("order");
+    params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
     if (isParamValid("tangential_tolerance"))
     {
       params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");

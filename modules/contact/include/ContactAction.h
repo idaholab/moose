@@ -3,6 +3,7 @@
 
 #include "Action.h"
 #include "MooseTypes.h"
+#include "MooseEnum.h"
 
 class ContactAction;
 
@@ -25,7 +26,7 @@ private:
   const Real _penalty;
   const Real _tension_release;
   const std::string _model;
-  const std::string _order;
+  const MooseEnum _order;
 };
 
 

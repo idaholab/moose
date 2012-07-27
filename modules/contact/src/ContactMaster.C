@@ -8,6 +8,8 @@
 template<>
 InputParameters validParams<ContactMaster>()
 {
+  MooseEnum orders("CONSTANT FIRST SECOND THIRD FORTH", "FIRST");
+  
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
@@ -20,7 +22,7 @@ InputParameters validParams<ContactMaster>()
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
-  params.addParam<std::string>("order", "FIRST", "The finite element order");
+  params.addParam<MooseEnum>("order", orders, "The finite element order");
 
   params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  Must be positive.");
   return params;
@@ -30,7 +32,7 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   DiracKernel(name, parameters),
   _component(getParam<unsigned int>("component")),
   _model(contactModel(getParam<std::string>("model"))),
-  _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<std::string>("order")))),
+  _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
   _penalty(getParam<Real>("penalty")),
   _tension_release(getParam<Real>("tension_release")),
   _updateContactSet(true),
