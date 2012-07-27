@@ -20,6 +20,7 @@ adapt_cycles_test = {
 
 patch_test = { INPUT : 'patch_recovery_test.i',
                EXODIFF : ['patch_out.e-s002'],
+               MAX_THREADS : 1,
                GROUP : 'adaptive'}
 
 initial_adaptivity_test = {

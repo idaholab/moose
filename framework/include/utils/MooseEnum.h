@@ -54,9 +54,15 @@ public:
 
   /**
    * Method for returning the raw name strings for this instance
-   * @return a space seperated list of names
+   * @return a comma seperated list of names
    */
   const std::string & getRawNames() const { return _raw_names; }
+
+  /**
+   * Method for returning the raw name strings for this instance
+   * @return a space seperated list of names
+   */
+  const std::string & getRawNamesNoCommas() const { return _raw_names_no_commas; }
 
   /**
    * Cast operators to make this object behave as value_types and std::string
@@ -109,8 +115,11 @@ private:
   /// The vector of enumeration names
   std::vector<std::string> _names;
 
-  /// The raw string of names
+  /// The raw string of names sepearted by commas
   std::string _raw_names;
+
+  /// The raw string of names seperated by space
+  std::string _raw_names_no_commas;
 
   /// The map of names to enumeration constants
   std::map<std::string, int> _name_to_id;

@@ -94,8 +94,12 @@ MooseEnum::fillNames(std::string names)
 
     // preserve case for raw options, append to list
     if (i)
+    {
       _raw_names += ", ";
+      _raw_names_no_commas += " ";
+    }
     _raw_names += name_value[0];
+    _raw_names_no_commas += name_value[0];
 
     // convert name to uppercase
     std::string upper(name_value[0]);

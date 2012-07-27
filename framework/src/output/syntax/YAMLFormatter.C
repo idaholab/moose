@@ -86,7 +86,7 @@ YAMLFormatter::printParams(InputParameters &params, short depth, const std::stri
 
     InputParameters::Parameter<MooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(iter->second);
     if (enum_type)
-      oss << "\n" << indent << "    options: " << enum_type->get().getRawNames();
+      oss << "\n" << indent << "    options: " << enum_type->get().getRawNamesNoCommas();
 
     oss << "\n" << indent << "    description: |\n      " << indent
          << doc << "\n";
