@@ -63,14 +63,9 @@ public:
    */
   std::string getClassDescription() const;
 
-  /*
-  template<typename T >
-  T & set (const std::string & name)
-  {
-    _valid_params.insert(name);
-    return Parameters::set<T>(name);
-  }
-  */
+  /**
+   * Override from libMesh to set user-defined attributes on our parameter
+   */
   virtual void set_attributes(const std::string & name, bool inserted_only);
 
   /**
@@ -237,7 +232,11 @@ private:
   /// The set of parameters that are required (i.e. will cause an abort if not supplied)
   std::set<std::string> _required_params;
 
-  /// The set of parameters either seen in the input file or provided a default value when added
+  /**
+   * The set of parameters either seen in the input file or provided a default value when added
+   * Note: We do not store MooseEnum names in valid params, instead we asked MooseEnums whether
+   *       they are valid or not.
+   */
   std::set<std::string> _valid_params;
 
   /// The set of parameters that will NOT appear in the the dump of the parser tree
@@ -314,7 +313,6 @@ void InputParameters::addPrivateParam(const std::string &name, const T &value)
   _private_params.insert(name);
 }
 
-
 // Specializations for MooseEnum
 template <>
 inline
@@ -323,25 +321,7 @@ void InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const
   Parameters::set<MooseEnum>(name) = moose_enum;                    // valid parameter is set by set_attributes
   _required_params.insert(name);
   _doc_string[name] = doc_string;
-
-  // By setting the value, we just marked this parameter as valid, but we don't want it marked as valid if it
-  // is required so we are going to unmark it
-  _valid_params.erase(name);
 }
-
-template <>
-inline
-void InputParameters::addParam<MooseEnum>(const std::string &name, const MooseEnum &moose_enum, const std::string &doc_string)
-{
-  Parameters::set<MooseEnum>(name) = moose_enum;                    // valid parameter is set by set_attributes
-  _doc_string[name] = doc_string;
-
-  if (!moose_enum.isValid())
-    // By setting the value, we just marked this parameter as valid, but we don't want it marked as valid if it
-    // is valid so we are going to unmark it
-    _valid_params.erase(name);
-}
-
 
 /**
  * Generic valid params

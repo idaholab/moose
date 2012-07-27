@@ -30,10 +30,7 @@ MooseEnum::MooseEnum(std::string names) :
 MooseEnum::MooseEnum(std::string names, std::string default_name)
 {
   fillNames(names);
-
-  std::string upper(default_name);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-  *this = upper;
+  *this = default_name;
 }
 
 /**
@@ -54,6 +51,7 @@ MooseEnum::operator=(const std::string & name)
     mooseError(std::string("Invalid option \"") + upper + "\" in MooseEnum.  Valid options are \"" + _raw_names << "\".");
 
   _current_name = upper;
+  _current_name_preserved = name;
   _current_id = _name_to_id[upper];
   return *this;
 }

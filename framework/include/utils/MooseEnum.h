@@ -69,7 +69,7 @@ public:
    * these methods can be used so that this class behaves more like a normal value_type enumeration
    */
   operator int() const { return _current_id; }
-  operator std::string() const { return _current_name; }
+  operator std::string() const { return _current_name_preserved; }
 
   /**
    * Comparison operator for comparing with strings or character constants
@@ -97,7 +97,7 @@ public:
   friend class libMesh::Parameters;
 
   /// Operator for printing to iostreams
-  friend std::ostream & operator<<(std::ostream & out, const MooseEnum & obj) { out << obj._current_name; return out; }
+  friend std::ostream & operator<<(std::ostream & out, const MooseEnum & obj) { out << obj._current_name_preserved; return out; }
 
 private:
 
@@ -129,6 +129,7 @@ private:
 
   /// The corresponding name
   std::string _current_name;
+  std::string _current_name_preserved;
 };
 
 #endif //MOOSEENUM_H

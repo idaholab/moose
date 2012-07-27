@@ -54,10 +54,9 @@ InputParameters::addClassDescription(const std::string &doc_string)
 void
 InputParameters::set_attributes(const std::string & name, bool inserted_only)
 {
-  if (!inserted_only)
-    // Check to see if this is a MooseEnum, if it is, then we need to ask the Enum itself if it is valid
-    if (!have_parameter<MooseEnum>(name) || (have_parameter<MooseEnum>(name) && get<MooseEnum>(name).isValid()))
-      _valid_params.insert(name);
+  // valid_params don't make sense for MooseEnums
+  if (!inserted_only && !have_parameter<MooseEnum>(name))
+    _valid_params.insert(name);
 }
 
 std::string
@@ -69,22 +68,6 @@ InputParameters::getClassDescription() const
   else
     return std::string();
 }
-
-/*
-Parameters &
-InputParameters::operator=(const Parameters &rhs)
-{
-  Parameters::operator=(rhs);
-  return *this;
-}
-
-Parameters &
-InputParameters::operator+=(const Parameters &rhs)
-{
-  Parameters::operator+=(rhs);
-  return *this;
-}
-*/
 
 InputParameters &
 InputParameters::operator=(const InputParameters &rhs)
@@ -138,7 +121,8 @@ InputParameters::addRequiredCoupledVar(const std::string &name, const std::strin
 void
 InputParameters::seenInInputFile(const std::string &name)
 {
-  _valid_params.insert(name);
+  if (!have_parameter<MooseEnum>(name))
+    _valid_params.insert(name);
   _seen_in_input.insert(name);
 }
 
@@ -167,7 +151,10 @@ InputParameters::isParamRequired(const std::string &name) const
 bool
 InputParameters::isParamValid(const std::string &name) const
 {
-  return _valid_params.find(name) != _valid_params.end();
+  if (have_parameter<MooseEnum>(name))
+    return get<MooseEnum>(name).isValid();
+  else
+    return _valid_params.find(name) != _valid_params.end();
 }
 
 bool
