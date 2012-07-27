@@ -22,8 +22,10 @@
 template<>
 InputParameters validParams<NodeFaceConstraint>()
 {
+  MooseEnum execute_options(SetupInterface::getExecuteOptions());
+
   InputParameters params = validParams<MooseObject>();
-  params.addParam<std::string>("execute_on", "residual", "Set to (residual|timestep|timestep_begin) to execute only at that moment");
+  params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|timestep|timestep_begin) to execute only at that moment");
   params.addRequiredParam<std::string>("variable", "The name of the variable that this constraint is applied to.");
   params.addRequiredParam<BoundaryName>("slave", "The boundary ID associated with the slave side");
   params.addRequiredParam<BoundaryName>("master", "The boundary ID associated with the master side");

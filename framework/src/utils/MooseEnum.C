@@ -33,7 +33,10 @@ MooseEnum::MooseEnum(std::string names, std::string default_name) :
 {
   fillNames(names);
   buildNameToIDMap();
-  *this = default_name;
+
+  std::string upper(default_name);
+  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+  *this = upper;
 }
 
 /**
@@ -47,20 +50,36 @@ MooseEnum::MooseEnum() :
 MooseEnum &
 MooseEnum::operator=(const std::string & name)
 {
-  if (std::find(_names.begin(), _names.end(), name) == _names.end())
-    mooseError(std::string("Invalid option \"") + name + "\" in MooseEnum.  Valid options are \"" + _raw_names << "\".");
+  std::string upper(name);
+  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
-  _current_name = name;
-  _current_id = _name_to_id[name];
+  if (std::find(_names.begin(), _names.end(), upper) == _names.end())
+    mooseError(std::string("Invalid option \"") + upper + "\" in MooseEnum.  Valid options are \"" + _raw_names << "\".");
+
+  _current_name = upper;
+  _current_id = _name_to_id[upper];
   return *this;
+}
+
+bool
+MooseEnum::operator==(const char * name) const
+{
+  std::string upper(name);
+  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+  return _current_name == upper;
 }
 
 void
 MooseEnum::fillNames(std::string names)
 {
+  // Case preserving/Case insensitive
   _raw_names = names;
 
-  std::istringstream iss(names);
+  std::string upper(names);
+  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+  std::istringstream iss(upper);
   std::copy(std::istream_iterator<std::string>(iss),
             std::istream_iterator<std::string>(),
             std::back_inserter<std::vector<std::string> >(_names));

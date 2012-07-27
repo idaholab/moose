@@ -69,7 +69,7 @@ public:
    * @param name - character constant for comparing with this enumeration object
    * @return bool - the truth value for the comparison
    */
-  bool operator==(const char * name) const { return _current_name == name; }
+  bool operator==(const char * name) const;
 
   /**
    * Assignment operators

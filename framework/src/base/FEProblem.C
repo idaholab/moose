@@ -1286,7 +1286,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
     parameters.set<SubProblem *>("_subproblem") = this;
   }
 
-  ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<std::string>("execute_on"));
+  ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<MooseEnum>("execute_on"));
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;

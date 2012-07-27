@@ -23,8 +23,8 @@ SetupInterface::SetupInterface(InputParameters & params)
    * Our way of dealing with this is by not having those particular classes add the this classes valid params to their own.  In
    * those cases it won't exist so we just set it to a default and ignore it.
    */
-  if (params.have_parameter<std::string>("execute_on"))
-    _exec_flags = Moose::stringToEnum<ExecFlagType>(params.get<std::string>("execute_on"));
+  if (params.have_parameter<MooseEnum>("execute_on"))
+    _exec_flags = Moose::stringToEnum<ExecFlagType>(params.get<MooseEnum>("execute_on"));
   else
     _exec_flags = EXEC_RESIDUAL;   // ignored
 }

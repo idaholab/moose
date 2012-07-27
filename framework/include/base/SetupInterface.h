@@ -17,7 +17,7 @@
 
 #include "InputParameters.h"
 #include "ExecStore.h"
-
+#include "MooseEnum.h"
 
 class SetupInterface
 {
@@ -58,6 +58,8 @@ public:
    * Set the execution flag for the object
    */
   virtual void execFlag(ExecFlagType type);
+
+  static MooseEnum getExecuteOptions() { return MooseEnum("initial residual jacobian timestep timestep_begin", "residual"); }
 
 protected:
   /// execution flag (when is the object executed/evaluated)

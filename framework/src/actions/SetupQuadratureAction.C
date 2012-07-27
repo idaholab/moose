@@ -15,22 +15,27 @@
 #include "SetupQuadratureAction.h"
 #include "Conversion.h"
 #include "FEProblem.h"
+#include "MooseEnum.h"
 
 template<>
 InputParameters validParams<SetupQuadratureAction>()
 {
+  MooseEnum types("CLOUGH CONICAL GAUSS GRID MONOMIAL SIMPSON TRAP", "GAUSS");
+  MooseEnum order("AUTO CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH TENTH", "AUTO");
+
+
   InputParameters params = validParams<Action>();
 
-  params.addParam<std::string>("type", "GAUSS", "Type of the quadrature rule");
-  params.addParam<std::string>("order", "AUTO", "Order of the quadrature");
+  params.addParam<MooseEnum>("type", types, "Type of the quadrature rule");
+  params.addParam<MooseEnum>("order", order, "Order of the quadrature");
 
   return params;
 }
 
 SetupQuadratureAction::SetupQuadratureAction(const std::string & name, InputParameters parameters) :
     Action(name, parameters),
-    _type(Moose::stringToEnum<QuadratureType>(getParam<std::string>("type"))),
-    _order(Moose::stringToEnum<Order>(getParam<std::string>("order")))
+    _type(Moose::stringToEnum<QuadratureType>(getParam<MooseEnum>("type"))),
+    _order(Moose::stringToEnum<Order>(getParam<MooseEnum>("order")))
 {
 }
 

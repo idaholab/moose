@@ -25,6 +25,8 @@
 template<>
 InputParameters validParams<CreateExecutionerAction>()
 {
+  MooseEnum schemes("backward-euler implicit-euler explicit-euler crank-nicolson bdf2", "backward-euler");
+
   InputParameters params = validParams<MooseObjectAction>();
   params.addParam<Real>        ("l_tol",           1.0e-5,   "Linear Tolerance");
   params.addParam<Real>        ("l_abs_step_tol",  -1,       "Linear Absolute Step Tolerance");
@@ -36,9 +38,9 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<Real>        ("nl_abs_step_tol", 1.0e-50,  "Nonlinear Absolute step Tolerance");
   params.addParam<Real>        ("nl_rel_step_tol", 1.0e-50,  "Nonlinear Relative step Tolerance");
   params.addParam<bool>        ("no_fe_reinit",    false,    "Specifies whether or not to reinitialize FEs");
-
+  params.addParam<MooseEnum>   ("scheme",          schemes,  "Time integration scheme used.");
 //  params.addParam<bool>        ("auto_scaling",    false,    "Turns on automatic variable scaling");
-  params.addParam<std::string> ("scheme",          "backward-euler",  "Time integration scheme used.");
+
 
   //params.addPrivateParam<unsigned int>("steps", 0);  // This is initial adaptivity steps - it'll be set
                                                      // in the adaptivity block later but needs to be here now
@@ -120,7 +122,7 @@ CreateExecutionerAction::act()
 //    _moose_system._no_fe_reinit = getParam<bool>("no_fe_reinit");
 
     NonlinearSystem & nl = mproblem->getNonlinearSystem();
-    nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<std::string>("scheme")));
+    nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<MooseEnum>("scheme")));
 
     _problem = mproblem;
   }
