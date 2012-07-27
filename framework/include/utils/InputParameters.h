@@ -24,6 +24,7 @@
 
 #include "Moose.h"
 #include "MooseTypes.h"
+#include "MooseEnum.h"
 
 class MooseObject;
 class GlobalParamsAction;
@@ -79,6 +80,13 @@ public:
    */
   template <typename T>
   void addRequiredParam(const std::string &name, const std::string &doc_string);
+
+  /**
+   * This version of addRequiredParam is here for a consistent use with MooseEnum.  Use of
+   * this function for any other type will throw an error.
+   */
+  template <typename T>
+  void addRequiredParam(const std::string &name, const T &moose_enum, const std::string &doc_string);
 
   /**
    * These methods add an option parameter and a documentation string to the InputParameters object.
@@ -242,7 +250,6 @@ private:
   std::set<std::string> _coupled_vars;
 };
 
-
 // Template and inline function implementations
 template <typename T>
 void InputParameters::addRequiredParam(const std::string &name, const std::string &doc_string)
@@ -252,6 +259,11 @@ void InputParameters::addRequiredParam(const std::string &name, const std::strin
   _doc_string[name] = doc_string;
 }
 
+template <typename T>
+void InputParameters::addRequiredParam(const std::string &name, const T &value, const std::string &doc_string)
+{
+  mooseError("You cannont call addRequiredParam and supply a default value for this type, please use addParam instead");
+}
 
 template <typename T>
 void InputParameters::addParam(const std::string &name, const T &value, const std::string &doc_string)

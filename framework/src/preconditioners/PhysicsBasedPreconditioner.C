@@ -17,6 +17,8 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"
+#include "MooseEnum.h"
+
 //libMesh Includes
 #include "libmesh_common.h"
 #include "equation_systems.h"

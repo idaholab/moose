@@ -15,9 +15,6 @@
 
 #include "SystemBase.h"
 
-// libMesh includes
-#include "string_to_enum.h"
-
 template<>
 InputParameters validParams<TiedValueConstraint>()
 {

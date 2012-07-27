@@ -674,12 +674,13 @@ void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const 
   else
     gp = &_getpot_file;
 
-  std::string current_name = param->get();
+  MooseEnum current_param = param->get();
+  std::string current_name = current_param;
 
   std::string value = gp->get_value_no_default(full_name.c_str(), current_name);
   param->set() = value;
   if (in_global)
-    global_block->setScalarParam<MooseEnum>(short_name) = value;
+    global_block->setScalarParam<MooseEnum>(short_name) = current_param;
 }
 
 template<>

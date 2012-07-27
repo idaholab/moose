@@ -15,6 +15,7 @@
 
 #include "SystemBase.h"
 #include "PenetrationLocator.h"
+#include "MooseEnum.h"
 
 // libMesh includes
 #include "string_to_enum.h"
@@ -23,6 +24,7 @@ template<>
 InputParameters validParams<NodeFaceConstraint>()
 {
   MooseEnum execute_options(SetupInterface::getExecuteOptions());
+  MooseEnum orders("FIRST SECOND THIRD FORTH", "FIRST");
 
   InputParameters params = validParams<MooseObject>();
   params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|timestep|timestep_begin) to execute only at that moment");
@@ -30,7 +32,7 @@ InputParameters validParams<NodeFaceConstraint>()
   params.addRequiredParam<BoundaryName>("slave", "The boundary ID associated with the slave side");
   params.addRequiredParam<BoundaryName>("master", "The boundary ID associated with the master side");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
-  params.addParam<std::string>("order", "FIRST", "The finite element order used for projections");
+  params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_constraint");
   return params;
@@ -61,7 +63,7 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   _master_qrule(_subproblem.qRuleFace(_tid)),
 
   _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("master"), getParam<BoundaryName>("slave"),
-                                             Utility::string_to_enum<Order>(getParam<std::string>("order")))),
+                                             Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
 
   _current_node(_var.node()),
   _current_master(_var.neighbor()),

@@ -45,5 +45,4 @@ public:
     return parameters().set<std::vector<T> >(name);
   }
 };
-
 #endif //GLOBALPARAMSACTION_H

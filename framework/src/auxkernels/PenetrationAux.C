@@ -13,16 +13,19 @@
 /****************************************************************/
 
 #include "PenetrationAux.h"
+#include "MooseEnum.h"
 
 #include "string_to_enum.h"
 
 template<>
 InputParameters validParams<PenetrationAux>()
 {
+  MooseEnum orders("FIRST SECOND THIRD FORTH", "FIRST");
+
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
-  params.addParam<std::string>("order", "FIRST", "The finite element order");
+  params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<std::string>("quantity","distance","The quantity to recover from the available penetration information: distance(default), tangential_distance, normal_x, normal_y, normal_z, closest_point_x, closest_point_y, closest_point_z, element_id");
   return params;
@@ -32,7 +35,7 @@ PenetrationAux::PenetrationAux(const std::string & name, InputParameters paramet
     AuxKernel(name, parameters),
     _quantity_string( getParam<std::string>("quantity") ),
     _quantity(PA_DISTANCE),
-    _penetration_locator(getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<std::string>("order"))))
+    _penetration_locator(getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))))
 {
   if (parameters.isParamValid("tangential_tolerance"))
   {

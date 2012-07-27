@@ -16,25 +16,28 @@
 
 #include "MooseMesh.h"
 #include "SystemBase.h"
+#include "MooseEnum.h"
 
 #include "string_to_enum.h"
 
 template<>
 InputParameters validParams<GapValueAux>()
 {
+  MooseEnum orders("FIRST SECOND THIRD FORTH", "FIRST");
+
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary on the other side of a gap.");
   params.addRequiredCoupledVar("paired_variable", "The variable to get the value of.");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
-  params.addParam<std::string>("order", "FIRST", "The finite element order");
+  params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
   return params;
 }
 
 GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _penetration_locator(getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], parameters.isParamValid("order") ? Utility::string_to_enum<Order>(parameters.get<std::string>("order")) : FIRST)),
+    _penetration_locator(getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
     _serialized_solution(_nl_sys.currentSolution()),
     _dof_map(_nl_sys.dofMap()),
     _paired_variable(coupled("paired_variable")),
@@ -46,7 +49,7 @@ GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
   }
   Order pairedVarOrder(pv.getOrder());
-  Order gvaOrder(Utility::string_to_enum<Order>(parameters.get<std::string>("order")));
+  Order gvaOrder(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
   if (pairedVarOrder != gvaOrder)
   {
     mooseError("ERROR: specified order for GapValueAux ("<<Utility::enum_to_string<Order>(gvaOrder)

@@ -43,7 +43,6 @@ void
 StatefulMaterial::initQpStatefulProperties()
 {
   _diffusivity[_qp] = _initial_diffusivity;
-  _diffusivity_old[_qp] = _initial_diffusivity;
 }
 
 void

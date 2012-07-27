@@ -17,6 +17,8 @@
 
 #include "MooseMesh.h"
 
+#include "MooseEnum.h"
+
 class GeneratedMesh;
 class NonlinearSystem;
 
@@ -45,7 +47,7 @@ public:
 
 protected:
   /// The dimension of the mesh
-  int _dim;
+  MooseEnum _dim;
   /// Number of elements in x, y, z direction
   int _nx, _ny, _nz;
   /// Min and max in x direction

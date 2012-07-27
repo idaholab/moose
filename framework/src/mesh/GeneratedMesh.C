@@ -28,7 +28,10 @@ InputParameters validParams<GeneratedMesh>()
 {
   InputParameters params = validParams<MooseObject>();
 
-  params.addRequiredParam<int>("dim", "The dimension of the mesh to be generated");
+  MooseEnum elem_types("EDGE EDGE2 EDGE3 EDGE4 QUAD QUAD4 QUAD8 QUAD9 HEX HEX8 HEX20 HEX27");
+  MooseEnum dims("1 2 3");
+
+  params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");
   params.addParam<int>("nx", 1, "Number of elements in the X direction");
   params.addParam<int>("ny", 1, "Number of elements in the Y direction");
   params.addParam<int>("nz", 1, "Number of elements in the Z direction");
@@ -38,7 +41,7 @@ InputParameters validParams<GeneratedMesh>()
   params.addParam<Real>("xmax", 1.0, "Upper X Coordinate of the generated mesh");
   params.addParam<Real>("ymax", 1.0, "Upper Y Coordinate of the generated mesh");
   params.addParam<Real>("zmax", 1.0, "Upper Z Coordinate of the generated mesh");
-  params.addParam<std::string>("elem_type", "The type of element from libMesh to generate");
+  params.addParam<MooseEnum>("elem_type", elem_types, "The type of element from libMesh to generate (default: linear element for requested dimension)");
   params.addPrivateParam<int>("_dimension", 1);
   params.addPrivateParam<std::string>("built_by_action", "read_mesh");
 
@@ -47,7 +50,7 @@ InputParameters validParams<GeneratedMesh>()
 
 GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameters) :
     MooseMesh(name, parameters),
-    _dim(getParam<int>("dim")),
+    _dim(getParam<MooseEnum>("dim")),
     _nx(getParam<int>("nx")),
     _ny(getParam<int>("ny")),
     _nz(getParam<int>("nz")),
@@ -58,32 +61,34 @@ GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameter
     _zmin(getParam<Real>("zmin")),
     _zmax(getParam<Real>("zmax"))
 {
-  std::string elem_type_str;
+  MooseEnum elem_type_str = getParam<MooseEnum>("elem_type");
 
-  if (isParamValid("elem_type"))
-    elem_type_str = getParam<std::string>("elem_type");
-  else
+  if (!isParamValid("elem_type"))
+  {
     switch (_dim)
     {
-    case 1: elem_type_str = "EDGE2"; break;
-    case 2: elem_type_str = "QUAD4"; break;
-    case 3: elem_type_str = "HEX8"; break;
+    case 0: elem_type_str = "EDGE2"; break; // dimension = 1
+    case 1: elem_type_str = "QUAD4"; break; // dimension = 2
+    case 2: elem_type_str = "HEX8"; break;  // dimension = 3
     default:
       mooseError("Unable to generate mesh for unknown dimension");
       break;
     }
+    std::cerr << "INSIDE SWITCH!" << elem_type_str;
+  }
+
 
   ElemType elem_type = Utility::string_to_enum<ElemType>(elem_type_str);
 
   switch (_dim)
   {
-  case 1:
+  case 0: // dimension = 1
     MeshTools::Generation::build_line(_mesh, _nx, _xmin, _xmax, elem_type);
     break;
-  case 2:
+  case 1: // dimension = 2
     MeshTools::Generation::build_square(_mesh, _nx, _ny, _xmin, _xmax, _ymin, _ymax, elem_type);
     break;
-  case 3:
+  case 2: // dimension = 3
     MeshTools::Generation::build_cube(_mesh, _nx, _ny, _nz, _xmin, _xmax, _ymin, _ymax, _zmin, _zmax, elem_type);
     break;
   }

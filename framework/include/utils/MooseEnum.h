@@ -79,6 +79,12 @@ public:
    */
   MooseEnum & operator=(const std::string &name);
 
+  /**
+   * IsValid
+   * @return - a Boolean indicating whether this Enumeration has been set
+   */
+  bool isValid() const { return _current_id >= 0; }
+
   // InputParameters is allowed to create an empty enum but is responsible for
   // filling it in after the fact
   friend class libMesh::Parameters;
