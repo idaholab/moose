@@ -91,7 +91,6 @@ MooseEnum::fillNames(std::string names)
     }
 
     name_value[0] = Parser::trim(name_value[0]);
-    std::cerr << "Raw: " << name_value[0] << "\n";
 
     // preserve case for raw options, append to list
     if (i)
