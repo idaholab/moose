@@ -1,8 +1,7 @@
 from options import *
 
 testRestart1 = { INPUT : 'LinearStrainHardeningRestart1.i',
-                 ABS_ZERO : 1e-9,
-                 PREREQ : 'test',
+                 ABS_ZERO : 1e-9
                }
 
 testRestart2 = { INPUT : 'LinearStrainHardeningRestart2.i',
