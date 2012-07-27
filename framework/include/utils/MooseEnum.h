@@ -105,11 +105,6 @@ private:
    */
   void fillNames(std::string names);
 
-  /**
-   * Populates the name to id map
-   */
-  void buildNameToIDMap();
-
   /// The vector of enumeration names
   std::vector<std::string> _names;
 

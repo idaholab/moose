@@ -37,7 +37,7 @@ public:
   /**
    * Returns the width of the requested dimension
    */
-  Real dimensionWidth(unsigned int dim) const;
+  Real dimensionWidth(unsigned int component) const;
 
   /**
    * Returns whether this generated mesh is periodic in the given dimension

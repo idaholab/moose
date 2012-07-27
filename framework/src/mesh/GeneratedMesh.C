@@ -29,7 +29,7 @@ InputParameters validParams<GeneratedMesh>()
   InputParameters params = validParams<MooseObject>();
 
   MooseEnum elem_types("EDGE EDGE2 EDGE3 EDGE4 QUAD QUAD4 QUAD8 QUAD9 HEX HEX8 HEX20 HEX27");
-  MooseEnum dims("1 2 3");
+  MooseEnum dims("1=1 2 3");
 
   params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");
   params.addParam<int>("nx", 1, "Number of elements in the X direction");
@@ -61,34 +61,34 @@ GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameter
     _zmin(getParam<Real>("zmin")),
     _zmax(getParam<Real>("zmax"))
 {
-  MooseEnum elem_type_str = getParam<MooseEnum>("elem_type");
+  MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
 
   if (!isParamValid("elem_type"))
   {
+    // Switching on MooseEnum
     switch (_dim)
     {
-    case 0: elem_type_str = "EDGE2"; break; // dimension = 1
-    case 1: elem_type_str = "QUAD4"; break; // dimension = 2
-    case 2: elem_type_str = "HEX8"; break;  // dimension = 3
+    case 1: elem_type_enum = "EDGE2"; break;
+    case 2: elem_type_enum = "QUAD4"; break;
+    case 3: elem_type_enum = "HEX8"; break;
     default:
       mooseError("Unable to generate mesh for unknown dimension");
       break;
     }
-    std::cerr << "INSIDE SWITCH!" << elem_type_str;
   }
 
+  ElemType elem_type = Utility::string_to_enum<ElemType>(elem_type_enum);
 
-  ElemType elem_type = Utility::string_to_enum<ElemType>(elem_type_str);
-
+  // Switching on MooseEnum
   switch (_dim)
   {
-  case 0: // dimension = 1
+  case 1:
     MeshTools::Generation::build_line(_mesh, _nx, _xmin, _xmax, elem_type);
     break;
-  case 1: // dimension = 2
+  case 2:
     MeshTools::Generation::build_square(_mesh, _nx, _ny, _xmin, _xmax, _ymin, _ymax, elem_type);
     break;
-  case 2: // dimension = 3
+  case 3:
     MeshTools::Generation::build_cube(_mesh, _nx, _ny, _nz, _xmin, _xmax, _ymin, _ymax, _zmin, _zmax, elem_type);
     break;
   }
@@ -99,9 +99,9 @@ GeneratedMesh::~GeneratedMesh()
 }
 
 Real
-GeneratedMesh::dimensionWidth(unsigned int dim) const
+GeneratedMesh::dimensionWidth(unsigned int component) const
 {
-  switch (dim)
+  switch (component)
   {
   case 0:
     return _xmax - _xmin;

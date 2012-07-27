@@ -14,6 +14,7 @@
 
 #include "MooseEnum.h"
 #include "Moose.h"
+#include "Parser.h"
 
 #include <sstream>
 #include <algorithm>
@@ -25,14 +26,12 @@ MooseEnum::MooseEnum(std::string names) :
     _current_id(-1)
 {
   fillNames(names);
-  buildNameToIDMap();
 }
 
 MooseEnum::MooseEnum(std::string names, std::string default_name) :
     _raw_names(names)
 {
   fillNames(names);
-  buildNameToIDMap();
 
   std::string upper(default_name);
   std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
@@ -73,21 +72,37 @@ MooseEnum::operator==(const char * name) const
 void
 MooseEnum::fillNames(std::string names)
 {
-  // Case preserving/Case insensitive
-  _raw_names = names;
+  std::vector<std::string> elements;
+  // split on whitespace
+  Parser::tokenize(names, elements, 1, " \t\n\v\f\r");
 
-  std::string upper(names);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+  _names.resize(elements.size());
+  int value=0;
+  for (unsigned int i=0; i<elements.size(); ++i)
+  {
+    std::vector<std::string> name_value;
+    // split on equals sign
+    Parser::tokenize(elements[i], name_value, 1, "=");
 
-  std::istringstream iss(upper);
-  std::copy(std::istream_iterator<std::string>(iss),
-            std::istream_iterator<std::string>(),
-            std::back_inserter<std::vector<std::string> >(_names));
-}
+    // See if there is a value supplied for this option
+    mooseAssert(name_value.size() <= 2, "Invalid option supplied in MooseEnum");
+    if (name_value.size() == 2)
+    {
+      std::istringstream iss(name_value[1]);
+      iss >> value;
+    }
 
-void
-MooseEnum::buildNameToIDMap()
-{
-  for(unsigned int i=0; i<_names.size(); i++)
-    _name_to_id[_names[i]] = i;
+    // preserve case for raw options, append to list
+    if (i)
+      _raw_names += ' ';
+    _raw_names += name_value[0];
+
+    // convert name to uppercase
+    std::string upper(name_value[0]);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    // populate internal datastructures
+    _names[i] = upper;
+    _name_to_id[upper] = value++;
+  }
 }
