@@ -28,8 +28,8 @@ InputParameters validParams<GeneratedMesh>()
 {
   InputParameters params = validParams<MooseObject>();
 
-  MooseEnum elem_types("EDGE EDGE2 EDGE3 EDGE4 QUAD QUAD4 QUAD8 QUAD9 HEX HEX8 HEX20 HEX27");
-  MooseEnum dims("1=1 2 3");
+  MooseEnum elem_types("EDGE, EDGE2, EDGE3, EDGE4, QUAD, QUAD4, QUAD8, QUAD9, HEX, HEX8, HEX20, HEX27"); // no default
+  MooseEnum dims("1 = 1, 2, 3");
 
   params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");
   params.addParam<int>("nx", 1, "Number of elements in the X direction");

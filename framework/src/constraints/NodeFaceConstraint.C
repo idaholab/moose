@@ -24,7 +24,7 @@ template<>
 InputParameters validParams<NodeFaceConstraint>()
 {
   MooseEnum execute_options(SetupInterface::getExecuteOptions());
-  MooseEnum orders("FIRST SECOND THIRD FORTH", "FIRST");
+  MooseEnum orders("FIRST, SECOND, THIRD, FORTH", "FIRST");
 
   InputParameters params = validParams<MooseObject>();
   params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|timestep|timestep_begin) to execute only at that moment");

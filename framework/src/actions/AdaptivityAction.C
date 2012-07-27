@@ -31,7 +31,7 @@ template<>
 InputParameters validParams<AdaptivityAction>()
 {
   InputParameters params = validParams<Action>();
-  MooseEnum estimators("KellyErrorEstimator LaplacianErrorEstimator PatchRecoveryErrorEstimator", "KellyErrorEstimator");
+  MooseEnum estimators("KellyErrorEstimator, LaplacianErrorEstimator, PatchRecoveryErrorEstimator", "KellyErrorEstimator");
 
   params.addParam<unsigned int>("steps",                       0, "The number of adaptivity steps to perform at any one time for steady state");
   params.addParam<unsigned int>("initial_adaptivity",          0, "The number of adaptivity steps to perform using the initial conditions");

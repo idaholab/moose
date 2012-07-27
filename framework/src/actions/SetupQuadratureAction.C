@@ -20,8 +20,8 @@
 template<>
 InputParameters validParams<SetupQuadratureAction>()
 {
-  MooseEnum types("CLOUGH CONICAL GAUSS GRID MONOMIAL SIMPSON TRAP", "GAUSS");
-  MooseEnum order("AUTO CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH TENTH", "AUTO");
+  MooseEnum types("CLOUGH, CONICAL, GAUSS, GRID, MONOMIAL, SIMPSON, TRAP", "GAUSS");
+  MooseEnum order("AUTO, CONSTANT, FIRST, SECOND, THIRD, FOURTH", "AUTO");
 
 
   InputParameters params = validParams<Action>();

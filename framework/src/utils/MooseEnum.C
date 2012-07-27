@@ -22,14 +22,12 @@
 
 
 MooseEnum::MooseEnum(std::string names) :
-    _raw_names(names),
     _current_id(-1)
 {
   fillNames(names);
 }
 
-MooseEnum::MooseEnum(std::string names, std::string default_name) :
-    _raw_names(names)
+MooseEnum::MooseEnum(std::string names, std::string default_name)
 {
   fillNames(names);
 
@@ -73,8 +71,8 @@ void
 MooseEnum::fillNames(std::string names)
 {
   std::vector<std::string> elements;
-  // split on whitespace
-  Parser::tokenize(names, elements, 1, " \t\n\v\f\r");
+  // split on commas
+  Parser::tokenize(names, elements, 1, ",");
 
   _names.resize(elements.size());
   int value=0;
@@ -82,7 +80,7 @@ MooseEnum::fillNames(std::string names)
   {
     std::vector<std::string> name_value;
     // split on equals sign
-    Parser::tokenize(elements[i], name_value, 1, "=");
+    Parser::tokenize(Parser::trim(elements[i]), name_value, 1, "=");
 
     // See if there is a value supplied for this option
     mooseAssert(name_value.size() <= 2, "Invalid option supplied in MooseEnum");
@@ -92,9 +90,12 @@ MooseEnum::fillNames(std::string names)
       iss >> value;
     }
 
+    name_value[0] = Parser::trim(name_value[0]);
+    std::cerr << "Raw: " << name_value[0] << "\n";
+
     // preserve case for raw options, append to list
     if (i)
-      _raw_names += ' ';
+      _raw_names += ", ";
     _raw_names += name_value[0];
 
     // convert name to uppercase

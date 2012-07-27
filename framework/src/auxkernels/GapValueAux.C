@@ -23,7 +23,7 @@
 template<>
 InputParameters validParams<GapValueAux>()
 {
-  MooseEnum orders("FIRST SECOND THIRD FORTH", "FIRST");
+  MooseEnum orders("FIRST, SECOND, THIRD, FORTH", "FIRST");
 
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary on the other side of a gap.");

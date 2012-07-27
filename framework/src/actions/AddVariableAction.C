@@ -36,8 +36,8 @@ const Real AddVariableAction::_abs_zero_tol = 1e-12;
 template<>
 InputParameters validParams<AddVariableAction>()
 {
-  MooseEnum families("LAGRANGE MONOMIAL HERMITE SCALAR", "LAGRANGE");
-  MooseEnum orders("CONSTANT FIRST SECOND THIRD FORTH", "FIRST");
+  MooseEnum families("LAGRANGE, MONOMIAL, HERMITE, SCALAR", "LAGRANGE");
+  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FORTH", "FIRST");
 
   InputParameters params = validParams<Action>();
   params.addParam<MooseEnum>("family", families, "Specifies the family of FE shape functions to use for this variable");

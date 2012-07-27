@@ -55,7 +55,7 @@ void
 InputParameters::set_attributes(const std::string & name, bool inserted_only)
 {
   if (!inserted_only)
-    // is this a MooseEnum?
+    // Check to see if this is a MooseEnum, if it is, then we need to ask the Enum itself if it is valid
     if (!have_parameter<MooseEnum>(name) || (have_parameter<MooseEnum>(name) && get<MooseEnum>(name).isValid()))
       _valid_params.insert(name);
 }
@@ -264,29 +264,3 @@ InputParameters::getVecMooseType(const std::string &name) const
 
   return svars;
 }
-
-// Specializations for MooseEnum
-template <>
-void InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const MooseEnum &moose_enum, const std::string &doc_string)
-{
-  Parameters::set<MooseEnum>(name) = moose_enum;                    // valid parameter is set by set_attributes
-  _required_params.insert(name);
-  _doc_string[name] = doc_string;
-
-  // By setting the value, we just marked this parameter as valid, but we don't want it marked as valid if it
-  // is required so we are going to unmark it
-  _valid_params.erase(name);
-}
-
-template <>
-void InputParameters::addParam<MooseEnum>(const std::string &name, const MooseEnum &moose_enum, const std::string &doc_string)
-{
-  Parameters::set<MooseEnum>(name) = moose_enum;                    // valid parameter is set by set_attributes
-  _doc_string[name] = doc_string;
-
-  if (!moose_enum.isValid())
-    // By setting the value, we just marked this parameter as valid, but we don't want it marked as valid if it
-    // is valid so we are going to unmark it
-    _valid_params.erase(name);
-}
-

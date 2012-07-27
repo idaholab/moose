@@ -24,9 +24,10 @@
 
 /**
  * This is a "smart" enum class intended to replace many of the shortcomings in the C++ enum type
- * It should be initialized with a space-seperated list of strings which become the enum values.
- * It can be used any place where an integer, const char* (switch statements) or std::string is
- * expected.  In addition the InputParameters system has full support for this Enum type
+ * It should be initialized with a comma-seperated list of strings which become the enum values.
+ * You may also optionally supply numeric ints for one or more values similar to a C++ enum.  This
+ * is done with the "=" sign. It can be used any place where an integer (switch statements), const char*
+ * or std::string is expected.  In addition the InputParameters system has full support for this Enum type
  */
 class MooseEnum
 {

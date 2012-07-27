@@ -315,6 +315,34 @@ void InputParameters::addPrivateParam(const std::string &name, const T &value)
 }
 
 
+// Specializations for MooseEnum
+template <>
+inline
+void InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const MooseEnum &moose_enum, const std::string &doc_string)
+{
+  Parameters::set<MooseEnum>(name) = moose_enum;                    // valid parameter is set by set_attributes
+  _required_params.insert(name);
+  _doc_string[name] = doc_string;
+
+  // By setting the value, we just marked this parameter as valid, but we don't want it marked as valid if it
+  // is required so we are going to unmark it
+  _valid_params.erase(name);
+}
+
+template <>
+inline
+void InputParameters::addParam<MooseEnum>(const std::string &name, const MooseEnum &moose_enum, const std::string &doc_string)
+{
+  Parameters::set<MooseEnum>(name) = moose_enum;                    // valid parameter is set by set_attributes
+  _doc_string[name] = doc_string;
+
+  if (!moose_enum.isValid())
+    // By setting the value, we just marked this parameter as valid, but we don't want it marked as valid if it
+    // is valid so we are going to unmark it
+    _valid_params.erase(name);
+}
+
+
 /**
  * Generic valid params
  */
