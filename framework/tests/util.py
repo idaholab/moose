@@ -139,3 +139,20 @@ def getParmeshOption(libmesh_dir):
   f.close()
   return parmesh
 
+def getSharedOption(libmesh_dir):
+  # Some tests may only run properly with shared libraries on/off
+  # We need to detect this condition
+  shared_option = set()
+  shared_option.add('ALL')
+  f = open(libmesh_dir + '/Make.common')
+  for line in f.readlines():
+    if line.find('enable-shared') != -1:
+      m = re.search(r'=\s*(\S+)', line)
+      if m != None:
+        if m.group(1) == 'yes':
+          shared_option.add('DYNAMIC')
+        else:
+          shared_option.add('STATIC')
+        break
+  f.close()
+  return shared_option

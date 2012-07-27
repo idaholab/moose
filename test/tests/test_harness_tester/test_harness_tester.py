@@ -29,7 +29,13 @@ test_parmesh_check= { INPUT : '2d_diffusion_test.i',
 test_method_check= { INPUT : '2d_diffusion_test2.i',
                      EXODIFF : ['out2.e'],
                      METHOD : ['OPT'],
-                     PREREQ : 'test_parmesh_check'
+                     PREREQ : 'test_petsc_check'
+}
+
+test_library_check= { INPUT : '2d_diffusion_test2.i',
+                      EXODIFF : ['out2.e'],
+                      LIBRARY_MODE : ['DYNAMIC'],
+                      PREREQ : 'test_method_check'
 }
 
 test_combined= { INPUT : '2d_diffusion_test.i',

@@ -32,6 +32,7 @@ class TestHarness:
     self.checks[COMPILER] = getCompilers(self.libmesh_dir)
     self.checks[PETSC_VERSION] = getPetscVersion(self.libmesh_dir)
     self.checks[MESH_MODE] = getParmeshOption(self.libmesh_dir)
+    self.checks[LIBRARY_MODE] = getSharedOption(self.libmesh_dir)
 
     method = set()
     method.add('ALL')
@@ -162,7 +163,7 @@ class TestHarness:
     elif self.options.store_time and test[SCALE_REFINE] == 0:
       return False
 
-    checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE, METHOD]
+    checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE, METHOD, LIBRARY_MODE]
     for check in checks:
       test_platforms = set()
       for x in test[check]:
@@ -253,17 +254,10 @@ class TestHarness:
     did_pass = True
     if reason == '':
       # It ran OK but is this test set to be skipped on any platform, compiler, so other reason?
-# TODO: Refactor this mess
-      if not 'ALL' in test[PLATFORM]:
-        caveats.append(', '.join(test[PLATFORM]))
-      if not 'ALL' in test[COMPILER]:
-        caveats.append(', '.join(test[COMPILER]))
-      if not 'ALL' in test[PETSC_VERSION]:
-        caveats.append(', '.join(test[PETSC_VERSION]))
-      if not 'ALL' in test[MESH_MODE]:
-        caveats.append(', '.join(test[MESH_MODE]))
-      if not 'ALL' in test[METHOD]:
-        caveats.append(', '.join(test[METHOD]))
+      checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE, METHOD, LIBRARY_MODE]
+      for check in checks:
+        if not 'ALL' in test[check]:
+          caveats.append(', '.join(test[check]))
       if len(caveats):
         result = '[' + ', '.join(caveats) + '] OK'
       else:

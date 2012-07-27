@@ -12,6 +12,7 @@ COMPILER      = '[compiler]'     # A test that runs only on a given compiler set
 PETSC_VERSION = '[version]'      # A test that runs only on the matching PETSC version
 MESH_MODE     = '[mesh_mode]'    # A test that only runs on a given set of mesh modes 'ALL', 'SERIAL', and/or 'PARALLEL'
 METHOD        = '[method]'       # A test that only runs under an executable built by the specified method 'ALL', 'OPT', 'DBG', 'DEV'
+LIBRARY_MODE  = '[shared_mode]'  # A test that only runs when libraries are built in a certain mode 'ALL', 'STATIC', 'DYNAMIC'
 
 CLI_ARGS      = '[]'             # Additional argument vector to pass to test
 
@@ -74,6 +75,7 @@ DEFAULTS = { EXODIFF : [],
              PETSC_VERSION : ['ALL'],
              MESH_MODE : ['ALL'],
              METHOD : ['ALL'],
+             LIBRARY_MODE : ['ALL'],
              SHOULD_CRASH : False,
              EXPECT_ERR : None,
              EXPECT_OUT : None,
