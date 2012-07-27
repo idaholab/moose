@@ -7,7 +7,7 @@
 template<>
 InputParameters validParams<ContactAction>()
 {
-  MooseEnum orders("CONSTANT FIRST SECOND THIRD FORTH", "FIRST");
+  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FORTH", "FIRST");
   
   InputParameters params = validParams<Action>();
   params.addRequiredParam<BoundaryName>("master", "The master surface");

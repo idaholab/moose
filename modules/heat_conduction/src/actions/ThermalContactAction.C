@@ -13,7 +13,7 @@ static const std::string PENETRATION_VAR_NAME = "penetration";
 template<>
 InputParameters validParams<ThermalContactAction>()
 {
-  MooseEnum orders("CONSTANT FIRST SECOND THIRD FORTH", "FIRST");
+  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FORTH", "FIRST");
   
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::string>("type", "A string representing the Moose object that will be used for heat conduction over the gap");
