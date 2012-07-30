@@ -3,10 +3,12 @@
 template<>
 InputParameters validParams<MaterialVectorAux>()
 {
+  MooseEnum quantities("length=1");
+
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<std::string>("vector", "The material tensor name.");
   params.addParam<int>("index", -1, "The index into the tensor, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
-  params.addParam<std::string>("quantity", "", "A scalar quantity to compute: (only option is Length).");
+  params.addParam<MooseEnum>("quantity", quantities, "A scalar quantity to compute: (only option is Length).");
   return params;
 }
 
@@ -15,27 +17,21 @@ MaterialVectorAux::MaterialVectorAux( const std::string & name,
   :AuxKernel( name, parameters ),
    _vector( getMaterialProperty<RealVectorValue>( getParam<std::string>("vector") ) ),
    _index( getParam<int>("index") ),
-   _quantity_string( getParam<std::string>("quantity") ),
-   _quantity( MVA_COMPONENT )
+   _quantity_moose_enum( getParam<MooseEnum>("quantity") )
 {
-  std::transform(_quantity_string.begin(), _quantity_string.end(),
-                 _quantity_string.begin(), ::tolower);
-  if ( _quantity_string == "" && _index < 0 )
+  if (_quantity_moose_enum.isValid())
   {
-    mooseError("Neither an index nor a quantity listed for " + _name);
+    if ( _index > 0 )
+      mooseError("Cannot define an index and a quantity in " + _name);
+    else
+      _quantity = MVA_ENUM(int(_quantity_moose_enum));
   }
-  else if ( _quantity_string == "length" )
+  else
   {
-    _quantity = MVA_LENGTH;
-  }
-  else if ( _quantity_string != "" )
-  {
-    mooseError("Unrecognized quantity in " + _name);
-  }
-
-  if (_index > 0 && _quantity != MVA_COMPONENT)
-  {
-    mooseError("Cannot define an index and a quantity in " + _name);
+    if ( _index < 0 )
+      mooseError("Neither an index nor a quantity listed for " + _name);
+    else
+      _quantity = MVA_COMPONENT;  // default
   }
 
   if (_index > -1 && _index > 2)

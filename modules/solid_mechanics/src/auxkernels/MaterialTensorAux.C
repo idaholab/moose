@@ -5,73 +5,39 @@
 template<>
 InputParameters validParams<MaterialTensorAux>()
 {
+  MooseEnum quantities("VonMises=1, PlasticStrainMag, Hydrostatic, Hoop, FirstInvariant, SecondInvariant, ThirdInvariant, TriAxiality");
+
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<std::string>("tensor", "The material tensor name.");
   params.addParam<int>("index", -1, "The index into the tensor, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
-  params.addParam<std::string>("quantity", "", "A scalar quantity to compute: VonMises, Hydrostatic, Hoop, FirstInvariant, SecondInvariant, ThirdInvariant, TriAxiality.");
-  std::vector<Real> fred(3,0.0);
-  params.addParam<std::vector<Real> >("point1", fred, "Point one for defining an axis");
-  fred[1] = 1;
-  params.addParam<std::vector<Real> >("point2", fred, "Point two for defining an axis");
+  params.addParam<MooseEnum>("quantity", quantities, "A scalar quantity to compute: " + quantities.getRawNames());
+
+  qparams.addParam<RealVectorValue>("point1", RealVectorValue(3, 0, 0), "Point one for defining an axis");
+  params.addParam<RealVectorValue>("point2", RealVectorValue(3, 1, 0), "Point two for defining an axis");
   return params;
 }
 
-MaterialTensorAux::MaterialTensorAux( const std::string & name,
-                                      InputParameters parameters )
-  :AuxKernel( name, parameters ),
-   _tensor( getMaterialProperty<SymmTensor>( getParam<std::string>("tensor") ) ),
-   _index( getParam<int>("index") ),
-   _quantity_string( getParam<std::string>("quantity") ),
-   _quantity( MTA_COMPONENT ),
-   _p1( getParam<std::vector<Real> >("point1")[0], getParam<std::vector<Real> >("point1")[1], getParam<std::vector<Real> >("point1")[2] ),
-   _p2( getParam<std::vector<Real> >("point2")[0], getParam<std::vector<Real> >("point2")[1], getParam<std::vector<Real> >("point2")[2] )
+MaterialTensorAux::MaterialTensorAux( const std::string & name, InputParameters parameters ) :
+    AuxKernel( name, parameters ),
+    _tensor( getMaterialProperty<SymmTensor>( getParam<std::string>("tensor") ) ),
+    _index( getParam<int>("index") ),
+    _quantity_moose_enum( getParam<MooseEnum>("quantity") ),
+    _p1( getParam<RealVectorValue>("point1") ),
+    _p2( getParam<RealVectorValue>("point2") )
 {
-  std::transform(_quantity_string.begin(), _quantity_string.end(),
-                 _quantity_string.begin(), ::tolower);
-  if ( _quantity_string == "" && _index < 0 )
+  if (_quantity_moose_enum.isValid())
   {
-    mooseError("Neither an index nor a quantity listed for " + _name);
+    if ( _index > 0 )
+      mooseError("Cannot define an index and a quantity in " + _name);
+    else
+      _quantity = MTA_ENUM(int(_quantity_moose_enum));
   }
-  else if ( _quantity_string == "vonmises" )
+  else
   {
-    _quantity = MTA_VONMISES;
-  }
-  else if ( _quantity_string == "plasticstrainmag" )
-  {
-    _quantity = MTA_PLASTICSTRAINMAG;
-  }
-  else if ( _quantity_string == "hydrostatic" )
-  {
-    _quantity = MTA_HYDROSTATIC;
-  }
-  else if ( _quantity_string == "hoop" )
-  {
-    _quantity = MTA_HOOP;
-  }
-  else if ( _quantity_string == "firstinvariant" )
-  {
-    _quantity = MTA_FIRSTINVARIANT;
-  }
-  else if ( _quantity_string == "secondinvariant" )
-  {
-    _quantity = MTA_SECONDINVARIANT;
-  }
-  else if ( _quantity_string == "thirdinvariant" )
-  {
-    _quantity = MTA_THIRDINVARIANT;
-  }
-  else if ( _quantity_string == "triaxiality" )
-  {
-    _quantity = MTA_TRIAXIALITY;
-  }
-  else if ( _quantity_string != "" )
-  {
-    mooseError("Unrecognized quantity in " + _name);
-  }
-
-  if (_index > 0 && _quantity != MTA_COMPONENT)
-  {
-    mooseError("Cannot define an index and a quantity in " + _name);
+    if ( _index < 0 )
+      mooseError("Neither an index nor a quantity listed for " + _name);
+    else
+      _quantity = MTA_COMPONENT; // default
   }
 
   if (_index > -1 && _index > 5)

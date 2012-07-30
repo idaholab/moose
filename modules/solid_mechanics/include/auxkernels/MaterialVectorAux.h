@@ -28,7 +28,7 @@ protected:
 
   MaterialProperty<RealVectorValue> & _vector;
   const int _index;
-  std::string _quantity_string;
+  MooseEnum _quantity_moose_enum;
   MVA_ENUM _quantity;
 
 };

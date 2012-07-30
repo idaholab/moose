@@ -36,7 +36,7 @@ protected:
 
   MaterialProperty<SymmTensor> & _tensor;
   const int _index;
-  std::string _quantity_string;
+  MooseEnum _quantity_moose_enum;
   MTA_ENUM _quantity;
 
   const Point _p1;
