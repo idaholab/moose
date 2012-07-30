@@ -7,7 +7,8 @@ test = { INPUT : 'material_test.i',
 
 dg_test = { INPUT : 'material_test_dg.i',
             EXODIFF : ['out_dg.e'],
-            SCALE_REFINE : 3
+            SCALE_REFINE : 3,
+            MAX_THREADS : 1
             }
 
 coupled_material_test = { INPUT : 'coupled_material_test.i',
