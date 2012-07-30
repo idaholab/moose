@@ -62,18 +62,7 @@ $(target): $(fobjects) $(f90objects) $(objects) $(cobjects) $(mesh_library) $(AD
 	@echo "Linking "$@"..."
 	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(cobjects) $(fobjects) $(f90objects) -o $@ $(LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_LIBS)
 
-clean::
-	@rm -fr $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-* $(exodiff)
-	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
-                -or -name "*.mod" \) -exec rm '{}' \;
-	@rm -fr *.mod
-
-clobber::
-	@rm -fr $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-* $(exodiff)
-	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
-                -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \
-                -or -name "*.mod" \) -exec rm '{}' \;
-	@rm -fr *.mod
+delete_list := $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-*
 
 # Clean only the opt intermediate files
 cleanopt::
@@ -103,5 +92,4 @@ cleanall::
 -include src/*/*.d
 -include src/*/*/*.d
 -include src/*/*/*/*.d
-
 

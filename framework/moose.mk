@@ -82,14 +82,16 @@ $(exodiff_APP): $(exodiff_objfiles)
 #
 # Maintenance
 #
+delete_list := $(moose_LIB) $(exodiff_APP)
+
 clean::
-	@rm -fr $(moose_LIB)
-	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \) -exec rm '{}' \;
+	@rm -fr $(delete_list)
+	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" \) -exec rm '{}' \;
 	@rm -fr *.mod
 
 clobber::
-	@rm -fr $(moose_LIB)
-	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
+	@rm -fr $(delete_list)
+	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" \
                 -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \) -exec rm '{}' \;
 	@rm -fr *.mod
 
