@@ -12,7 +12,7 @@ InputParameters validParams<MaterialTensorAux>()
   params.addParam<int>("index", -1, "The index into the tensor, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
   params.addParam<MooseEnum>("quantity", quantities, "A scalar quantity to compute: " + quantities.getRawNames());
 
-  qparams.addParam<RealVectorValue>("point1", RealVectorValue(3, 0, 0), "Point one for defining an axis");
+  params.addParam<RealVectorValue>("point1", RealVectorValue(3, 0, 0), "Point one for defining an axis");
   params.addParam<RealVectorValue>("point2", RealVectorValue(3, 1, 0), "Point two for defining an axis");
   return params;
 }
