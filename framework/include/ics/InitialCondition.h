@@ -18,6 +18,7 @@
 #include "Moose.h"
 #include "MooseObject.h"
 #include "FunctionInterface.h"
+#include "UserObjectInterface.h"
 #include "ParallelUniqueId.h"
 
 // System includes
@@ -43,7 +44,8 @@ InputParameters validParams<InitialCondition>();
  */
 class InitialCondition :
   public MooseObject,
-  public FunctionInterface
+  public FunctionInterface,
+  public UserObjectInterface
 {
 public:
   /**
