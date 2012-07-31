@@ -14,6 +14,8 @@
 #include "BulkCoolantBC.h"
 #include "ThermalContactAction.h"
 #include "HeatSource.h"
+#include "HomogenizationHeatConduction.h"
+#include "HomogenizedThermalConductivity.h"
 
 void
 Elk::HeatConduction::registerObjects()
@@ -27,6 +29,8 @@ Elk::HeatConduction::registerObjects()
   registerMaterial(GapConductance);
   registerMaterial(HeatConductionMaterial);
   registerDiracKernel(GapHeatPointSourceMaster);
+  registerKernel(HomogenizationHeatConduction);
+  registerPostprocessor(HomogenizedThermalConductivity);
 }
 
 void

@@ -1,17 +1,3 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
-
 #include "HomogenizedElasticConstants.h"
 #include "SymmElasticityTensor.h"
 
@@ -233,9 +219,9 @@ HomogenizedElasticConstants::computeQpIntegral()
     grad[5][2] = &_grad_disp_z_zx;
 
 
-    for(int p = 0; p < 2; p++)
+    for(int p = 0; p < 3; p++)
     {
-      for(int q = 0; q < 2; q++)
+      for(int q = 0; q < 3; q++)
       {
         value = value + E(_I,3 * q + p) * (*grad[_column][p])[_qp](q);
       }

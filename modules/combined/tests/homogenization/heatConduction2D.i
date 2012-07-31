@@ -1,0 +1,141 @@
+#
+# Homogenization of thermal conductivity according to
+#   Homogenization of Temperature-Dependent Thermal Conductivity in Composite
+#   Materials, Journal of Thermophysics and Heat Transfer, Vol. 15, No. 1,
+#   January-March 2001.
+#
+# The problem solved here is a simple square with two blocks.  The square is
+#   divided vertically between the blocks.  One block has a thermal conductivity
+#   of 10.  The other block's thermal conductivity is 100.
+#
+# The analytic solution for the homogenized thermal conductivity in the
+#   horizontal direction is found by summing the thermal resistance, recognizing
+#   that the blocks are in series:
+#
+#   R = L/A/k = R1 + R2 = L1/A1/k1 + L2/A2/k2 = .5/1/10 + .5/1/100
+#   Since L = A = 1, k_xx = 18.1818.
+#
+# The analytic solution for the homogenized thermal conductivity in the vertical
+#   direction is found by summing reciprocals of resistance, recognizing that
+#   the blocks are in parallel:
+#
+#   1/R = k*A/L = 1/R1 + 1/R2 = 10*.5/1 + 100*.5/1
+#   Since L = A = 1, k_yy = 55.0.
+#
+
+[Mesh]
+  file = heatConduction2D.e
+[] # Mesh
+
+[Variables]
+
+  [./temp]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+
+[] # Variables
+
+[Kernels]
+
+  [./heat]
+    type = HeatConduction
+    variable = temp
+  [../]
+
+  [./heat_rhs]
+    type = HomogenizationHeatConduction
+    variable = temp
+    component = 0
+  [../]
+
+[] # Kernels
+
+[BCs]
+
+ [./Periodic]
+   [./left_right]
+     primary = 10
+     secondary = 20
+     translation = '1 0 0'
+   [../]
+   [./bottom_top]
+     primary = 30
+     secondary = 40
+     translation = '0 1 0'
+   [../]
+ [../]
+
+ [./fix_center]
+   type = DirichletBC
+   variable = temp
+   value = 100
+   boundary = 1
+ [../]
+
+[] # BCs
+
+[Materials]
+
+  [./heat1]
+    type = HeatConductionMaterial
+    block = 1
+
+    specific_heat = 0.116
+    thermal_conductivity = 10
+  [../]
+
+  [./heat2]
+    type = HeatConductionMaterial
+    block = 2
+
+    specific_heat = 0.116
+    thermal_conductivity = 100
+  [../]
+
+  [./density]
+    type = Density
+    block = '1 2'
+    density = 0.283
+  [../]
+
+[] # Materials
+
+[Executioner]
+
+  type = Steady
+  petsc_options = '-snes_mf_operator -ksp_monitor'
+  petsc_options_iname = '-pc_type -snes_type -snes_ls -ksp_gmres_restart'
+  petsc_options_value = 'lu       ls         basic    101'
+
+  nl_abs_tol = 1e-11
+  nl_rel_tol = 1e-10
+
+
+  l_max_its = 20
+
+[] # Executioner
+
+[Output]
+  interval = 1
+  output_initial = true
+  exodus = true
+  perf_log = true
+[] # Output
+
+[Postprocessors]
+  [./k_xx]
+    type = HomogenizedThermalConductivity
+    variable = temp
+    temp_x = temp
+    temp_y = temp
+    component = 0
+  [../]
+  [./k_yy]
+    type = HomogenizedThermalConductivity
+    variable = temp
+    temp_x = temp
+    temp_y = temp
+    component = 1
+  [../]
+[]
