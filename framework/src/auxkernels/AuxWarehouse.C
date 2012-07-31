@@ -30,6 +30,22 @@ AuxWarehouse::~AuxWarehouse()
 void
 AuxWarehouse::initialSetup()
 {
+  // Sort the auxKernels
+  sortAuxKernels(_active_nodal_aux_kernels);
+  sortAuxKernels(_active_element_aux_kernels);
+
+  for (std::map<SubdomainID, std::vector<AuxKernel *> >::iterator i = _active_block_nodal_aux_kernels.begin();
+       i != _active_block_nodal_aux_kernels.end(); ++i)
+    sortAuxKernels(i->second);
+
+  for (std::map<SubdomainID, std::vector<AuxKernel *> >::iterator i = _active_block_element_aux_kernels.begin();
+       i != _active_block_element_aux_kernels.end(); ++i)
+    sortAuxKernels(i->second);
+
+  for (std::map<BoundaryID, std::vector<AuxKernel *> >::iterator i =  _active_nodal_bcs.begin();
+       i != _active_nodal_bcs.end(); ++i)
+    sortAuxKernels(i->second);
+
   for (std::vector<AuxKernel *>::const_iterator i = all().begin(); i != all().end(); ++i)
     (*i)->initialSetup();
 }
@@ -111,4 +127,11 @@ void
 AuxWarehouse::addScalarKernel(AuxScalarKernel *kernel)
 {
   _scalar_kernels.push_back(kernel);
+}
+
+void
+AuxWarehouse::sortAuxKernels(std::vector<AuxKernel *> & aux_vector)
+{
+  // Sort based on dependencies
+  DependencyResolverInterface::sort(aux_vector.begin(), aux_vector.end());
 }

@@ -33,33 +33,31 @@ public:
   template<typename Iter>
   static
   void sort(Iter start, Iter end)
+  {
+    DependencyResolver<DependencyResolverInterface *> resolver;
+
+    for (Iter iter = start; iter != end ; ++iter)
     {
-      DependencyResolver<DependencyResolverInterface *> resolver;
+      const std::set<std::string> & requested_items = (*iter)->getRequestedItems();
 
-      for (Iter iter = start; iter != end ; ++iter)
+      for (Iter iter2 = start; iter2 != end; ++iter2)
       {
-        const std::set<std::string> & requested_items = (*iter)->getRequestedItems();
+        if (iter == iter2) continue;
+        const std::set<std::string> & supplied_items = (*iter2)->getSuppliedItems();
 
-        for (Iter iter2 = start; iter2 != end; ++iter2)
-        {
-          if (iter == iter2) continue;
-          const std::set<std::string> & supplied_items = (*iter2)->getSuppliedItems();
+        std::set<std::string> intersect;
+        std::set_intersection(requested_items.begin(), requested_items.end(), supplied_items.begin(),
+                              supplied_items.end(), std::inserter(intersect, intersect.end()));
 
-
-          std::set<std::string> intersect;
-          std::set_intersection(requested_items.begin(), requested_items.end(), supplied_items.begin(),
-                                supplied_items.end(), std::inserter(intersect, intersect.end()));
-
-          // If the intersection isn't empty then there is a dependency here
-          if (!intersect.empty())
-            resolver.insertDependency(*iter, *iter2);
-        }
+        // If the intersection isn't empty then there is a dependency here
+        if (!intersect.empty())
+          resolver.insertDependency(*iter, *iter2);
       }
-
-      // Sort based on dependencies
-      std::sort(start, end, resolver);
     }
 
+    // Sort based on dependencies
+    std::sort(start, end, resolver);
+  }
 };
 
 #endif // DEPENDENCYRESOLVERINTERFACE_H

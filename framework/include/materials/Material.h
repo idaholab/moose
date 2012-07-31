@@ -101,12 +101,6 @@ public:
   template<typename T>
   MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
-  const std::set<std::string> &
-  getPropertyDependencies() const { return _depend_props; }
-
-  const std::set<std::string> &
-  getSuppliedPropertiesList() const { return _supplied_props; }
-
   virtual
   const std::set<std::string> &
   getRequestedItems() { return _depend_props; }

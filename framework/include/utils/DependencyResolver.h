@@ -317,12 +317,17 @@ DependencyResolver<T>::operator() (const T & a, const T & b)
   typename std::vector<T>::const_iterator a_it = std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), a);
   typename std::vector<T>::const_iterator b_it = std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), b);
 
-  // it's possible that a and/or b are not in the resolver in which case
-  // we want those values to come out first
+  /**
+   * It's possible that a and/or b are not in the resolver in which case
+   *  we want those values to come out first.  However, we need to make
+   *  sure that we maintain strict weak ordering so we'll compare b_it first,
+   *  which will return false for a_it < b_it and b_it < a_it when both values
+   *  are not in the oredered_items vector.
+   */
+  if (b_it == _ordered_items_vector.end())
+    return false;
   if (a_it == _ordered_items_vector.end())
     return true;
-  else if (b_it == _ordered_items_vector.end())
-    return false;
   else
     return a_it < b_it;  // Yes - compare the iterators...
 }

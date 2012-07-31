@@ -107,6 +107,13 @@ protected:
 
   /// Scalar kernels
   std::vector<AuxScalarKernel *> _scalar_kernels;
+
+private:
+  /**
+   * This routine uses the Dependency Resolver to sort AuxKernels based on dependencies they
+   * might have on coupled values
+   */
+  void sortAuxKernels(std::vector<AuxKernel *> & aux_vector);
 };
 
 #endif // AUXWAREHOUSE_H

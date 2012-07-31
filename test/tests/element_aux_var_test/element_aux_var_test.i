@@ -81,7 +81,6 @@
     value = 1
   [../]
 
-  #Intentionally out of order to test dependancies in AuxKernels
   [./coupled_nine]
     variable = coupled_nine
     type = CoupledAux

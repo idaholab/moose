@@ -252,7 +252,7 @@ MaterialWarehouse::checkDependMaterials(std::map<SubdomainID, std::vector<Materi
 
     for (std::vector<Material *>::const_iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
     {
-      const std::set<std::string> & depend_props = (*mat_iter)->getPropertyDependencies();
+      const std::set<std::string> & depend_props = (*mat_iter)->getRequestedItems();
       block_depend_props.insert(depend_props.begin(), depend_props.end());
 
       // See if any of the active materials supply this property
@@ -261,7 +261,7 @@ MaterialWarehouse::checkDependMaterials(std::map<SubdomainID, std::vector<Materi
         // Don't check THIS material for a coupled property
         if (mat_iter == mat_iter2) continue;
 
-        const std::set<std::string> & supplied_props = (*mat_iter2)->getSuppliedPropertiesList();
+        const std::set<std::string> & supplied_props = (*mat_iter2)->getSuppliedItems();
         block_supplied_props.insert(supplied_props.begin(), supplied_props.end());
       }
     }
@@ -283,12 +283,12 @@ MaterialWarehouse::checkDependMaterials(std::map<SubdomainID, std::vector<Materi
 }
 
 void
-MaterialWarehouse::sortMaterials(std::vector<Material *> & materials_map)
+MaterialWarehouse::sortMaterials(std::vector<Material *> & materials_vector)
 {
   try
   {
     // Sort based on dependencies
-    DependencyResolverInterface::sort(materials_map.begin(), materials_map.end());
+    DependencyResolverInterface::sort(materials_vector.begin(), materials_vector.end());
   }
   catch(CyclicDependencyException<DependencyResolverInterface *> & e)
   {

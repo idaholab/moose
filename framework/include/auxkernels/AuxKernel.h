@@ -24,6 +24,7 @@
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
+#include "DependencyResolverInterface.h"
 #include "GeometricSearchInterface.h"
 #include "MooseMesh.h"
 
@@ -52,6 +53,7 @@ class AuxKernel :
   public TransientInterface,
   public MaterialPropertyInterface,
   public PostprocessorInterface,
+  public DependencyResolverInterface,
   protected GeometricSearchInterface
 {
 public:
@@ -75,6 +77,14 @@ public:
    * @return true if this is a nodal kernel, otherwise false
    */
   bool isNodal();
+
+  virtual
+  const std::set<std::string> &
+  getRequestedItems() { return _depend_vars; }
+
+  virtual
+  const std::set<std::string> &
+  getSuppliedItems() { return _supplied_vars; }
 
   /**
    * Override functions from MaterialPropertyInterface for error checking
@@ -150,6 +160,9 @@ protected:
   MooseArray<RealGradient> & _grad_zero;
   /// Zero second derivative in quadrature points
   MooseArray<RealTensor> & _second_zero;
+
+  std::set<std::string> _depend_vars;
+  std::set<std::string> _supplied_vars;
 };
 
 template<typename T>

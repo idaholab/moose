@@ -53,6 +53,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),
+    DependencyResolverInterface(),
     GeometricSearchInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
@@ -90,6 +91,12 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _grad_zero(_problem._grad_zero[_tid]),
     _second_zero(_problem._second_zero[_tid])
 {
+  _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
+
+  std::map<std::string, std::vector<MooseVariable *> > coupled_vars = getCoupledVars();
+  for (std::map<std::string, std::vector<MooseVariable *> >::iterator it = coupled_vars.begin(); it != coupled_vars.end(); ++it)
+    for (std::vector<MooseVariable *>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+      _depend_vars.insert((*it2)->name());
 }
 
 void

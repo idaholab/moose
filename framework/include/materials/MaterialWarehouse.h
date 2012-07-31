@@ -107,7 +107,7 @@ private:
    * This routine uses the Dependency Resolver to sort Materials based on dependencies they
    * might have on coupled values
    */
-  void sortMaterials(std::vector<Material *> & materials_map);
+  void sortMaterials(std::vector<Material *> & materials_vector);
 
   /**
    * This routine checks to make sure that all requests for material properties, specifically

@@ -16,3 +16,5 @@ init_test = {
 multi_update_test = { INPUT : 'multi_update_var_test.i',
                       EXODIFF : ['out_multi_var.e'] }
 
+sort_test = { INPUT : 'nodal_sort_test.i',
+              EXODIFF : ['nodal_sort_test_out.e'] }

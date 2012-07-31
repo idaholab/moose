@@ -19,17 +19,19 @@ InputParameters validParams<CoupledAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
+  MooseEnum operators("+, -, *, /", "+");
+
   params.addRequiredCoupledVar("coupled", "Coupled Value for Calculation");
 
   params.addParam<Real>("value", 0.0, "A value to use in the binary arithmetic operation of this coupled auxkernel");
-  params.addParam<std::string>("operator", "+", "The binary operator to use in the calculation");
+  params.addParam<MooseEnum>("operator", operators, "The binary operator to use in the calculation");
   return params;
 }
 
 CoupledAux::CoupledAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
     _value(getParam<Real>("value")),
-    _operator(getParam<std::string>("operator")),
+    _operator(getParam<MooseEnum>("operator")),
     _coupled(coupled("coupled")),
     _coupled_val(coupledValue("coupled"))
 {
@@ -45,7 +47,11 @@ CoupledAux::computeValue()
   else if (_operator == "*")
     return _coupled_val[_qp]*_value;
   else if (_operator == "/")
-    return _coupled_val[_qp]/_value;
-  else
-    mooseError("Unknown operator");
+    // We are going to do division for this operation
+    // This is useful for testing evalutation order
+    // when we attempt to divide by zero!
+    return _value / _coupled_val[_qp];
+
+  // Won't reach this statement
+  return 0;
 }
