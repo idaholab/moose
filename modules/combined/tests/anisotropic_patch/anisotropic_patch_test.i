@@ -181,9 +181,6 @@
   [./elastic_energy]
     type = ElasticEnergyAux
     variable = elastic_energy
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
   [./vonmises]
     type = MaterialTensorAux
