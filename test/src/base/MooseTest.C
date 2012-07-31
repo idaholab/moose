@@ -189,7 +189,7 @@ MooseTestApp::registerObjects()
 
   registerPostprocessor(UserObjectPPS);
 
-  registerUserData(MTUserObject);
+  registerUserObject(MTUserObject);
 
   registerExecutioner(ExceptionSteady);
 }
