@@ -157,6 +157,43 @@ RankTwoTensor::rotate(const Real a1, const Real a2, const Real a3)
   return a;
 }
 
+RankTwoTensor
+RankTwoTensor::rotateXyPlane(const Real a)
+{
+  RankTwoTensor b;
+
+  Real x, y, xy;
+  x = _vals[0][0]*std::cos(a)*std::cos(a)
+    + _vals[1][1]*std::sin(a)*std::sin(a)
+    + 2.0*_vals[0][1]*std::cos(a)*std::sin(a);
+
+  y = _vals[0][0]*std::sin(a)*std::sin(a)
+    + _vals[1][1]*std::cos(a)*std::cos(a)
+    - 2.0*_vals[0][1]*std::cos(a)*std::sin(a);
+
+  xy = 2.0*(_vals[1][1] - _vals[0][0])*std::cos(a)*std::sin(a)
+     + 2.0*_vals[0][1]*(std::cos(a)*std::cos(a) - std::sin(a)*std::sin(a));
+
+  xy /= 2.0;
+
+
+  /* std::cout<<"x="<<x<<std::endl;
+  std::cout<<"y="<<y<<std::endl;
+  std::cout<<"xy="<<xy<<std::endl; */
+  
+  b.setValue(x, 1, 1);
+  b.setValue(y, 2, 2);
+  b.setValue(xy, 1, 2);
+  b.setValue(xy, 2, 1);
+  b.setValue(_vals[0][2], 1, 3);
+  b.setValue(_vals[2][0], 3, 1);
+  b.setValue(_vals[1][2], 2, 3);
+  b.setValue(_vals[2][1], 3, 2);
+  b.setValue(_vals[2][2], 3, 3);
+  
+  return b;
+}
+
 void
 RankTwoTensor::setRotationMatrix()
 {

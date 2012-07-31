@@ -62,6 +62,8 @@ public:
    */ 
   virtual RankTwoTensor rotate(const Real a1, const Real a2, const Real a3);
 
+  virtual RankTwoTensor rotateXyPlane(const Real a);
+
   virtual void setRotationMatrix();
 
   void setFirstEulerAngle(const Real a1);
