@@ -1,8 +1,6 @@
 // Original class author: A.M. Jokisaari, O. Heinonen
 
 #include "LinearElasticMaterial.h"
-#include <ostream>
-
 
 /**
  * LinearElasticMaterial handles a fully anisotropic, single-crystal material's elastic
@@ -48,7 +46,6 @@ LinearElasticMaterial::LinearElasticMaterial(const std::string & name,
   _Cijkl.fillFromInputVector(_Cijkl_vector, _all_21);
   
   //rotate the C_ijkl matrix original data
-  // to leave the original data, use the x = a.rotate() method instead
   _Cijkl.selfRotate(_euler_angle_1,_euler_angle_2,_euler_angle_3);
 }
 

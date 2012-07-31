@@ -86,6 +86,8 @@ public:
 
   RankTwoTensor operator* (const Real &a);
 
+  Real doubleContraction(const RankTwoTensor &a);
+
 protected:
   
 private:

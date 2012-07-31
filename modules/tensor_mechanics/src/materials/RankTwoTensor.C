@@ -272,3 +272,15 @@ RankTwoTensor::operator*(const Real &a)
 
   return result;
 }
+
+Real
+RankTwoTensor::doubleContraction(const RankTwoTensor &a)
+{
+  Real result(0.0);
+  
+  for(unsigned int i(0); i<3; i++)
+    for(unsigned int j(0); j<3; j++)
+      result += _vals[i][j]* a.getValue(i+1, j+1);
+
+  return result;
+}

@@ -63,7 +63,6 @@ protected:
   bool _all_21;
 
   //Individual material information
-  // SymmAnisotropicElasticityTensor _Cijkl_matrix;
   RankFourTensor _Cijkl;
   
 //  MaterialProperty<RankTwoTensor> & _d_stress_dT;
