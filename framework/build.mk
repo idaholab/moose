@@ -143,6 +143,23 @@ endif
 
 CURRENT_APP ?= $(shell basename `pwd`)
 
+#
+# Plugins
+#
+%-$(METHOD).plugin : %.C
+	@echo "Compiling C++ (in "$(mode)" mode) "$<"..."
+	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
+%-$(METHOD).plugin : %.c
+	@echo "Compiling C (in "$(mode)" mode) "$<"..."
+	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
+%-$(METHOD).plugin : %.f
+	@echo "Compiling Fortan Plugin (in "$(mode)" mode) "$<"..."		
+	@$(libmesh_F77) $(libmesh_FFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
+%-$(METHOD).plugin : %.f90
+	@echo "Compiling Fortan Plugin (in "$(mode)" mode) "$<"..."		
+	@$(libmesh_F90) $(libmesh_FFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
+
+
 # Build appliations up the tree
 up: all
 	@echo ====== Building the following applications: $(CURRENT_APP) $(DEP_APPS) ======

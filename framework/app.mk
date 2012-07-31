@@ -25,6 +25,18 @@ cobjects    := $(patsubst %.c, %.$(obj-suffix), $(csrcfiles))
 fobjects    := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
 f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
 
+# plugin files
+plugfiles   := $(shell find $(CURR_DIR)/plugins -name *.C 2>/dev/null)
+cplugfiles  := $(shell find $(CURR_DIR)/plugins -name *.c 2>/dev/null)
+fplugfiles  := $(shell find $(CURR_DIR)/plugins -name *.f 2>/dev/null)
+f90plugfiles:= $(shell find $(CURR_DIR)/plugins -name *.f90 2>/dev/null)
+
+# plugins
+plugins	    := $(patsubst %.C, %-$(METHOD).plugin, $(plugfiles))
+plugins	    += $(patsubst %.c, %-$(METHOD).plugin, $(cplugfiles))
+plugins	    += $(patsubst %.f, %-$(METHOD).plugin, $(fplugfiles))
+plugins	    += $(patsubst %.f90, %-$(METHOD).plugin, $(f90plugfiles))
+
 #
 # header files
 
@@ -58,7 +70,7 @@ $(target): $(elk_LIB)
 endif
 
 # Normal Executable
-$(target): $(fobjects) $(f90objects) $(objects) $(cobjects) $(mesh_library) $(ADDITIONAL_DEPS)
+$(target): $(fobjects) $(f90objects) $(objects) $(cobjects) $(mesh_library) $(ADDITIONAL_DEPS) $(plugins)
 	@echo "Linking "$@"..."
 	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(cobjects) $(fobjects) $(f90objects) -o $@ $(LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_LIBS)
 
