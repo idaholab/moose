@@ -37,7 +37,10 @@ public:
   void insertNode(std::string syntax, const std::string &action, bool is_action_params=true,
                   InputParameters *params=NULL);
 
-  std::string print(const std::string &search_string) const;
+  std::string print(const std::string &search_string);
+
+  void seenIt(const std::string &prefix, const std::string &item);
+  bool haveSeenIt(const std::string &prefix, const std::string &item) const;
 
 protected:
   /**
@@ -46,12 +49,12 @@ protected:
   class TreeNode
   {
   public:
-    TreeNode(const std::string &name, const SyntaxTree &syntax_tree, const std::string *action=NULL, InputParameters *params=NULL, TreeNode *parent=NULL);
+    TreeNode(const std::string &name, SyntaxTree &syntax_tree, const std::string *action=NULL, InputParameters *params=NULL, TreeNode *parent=NULL);
     virtual ~TreeNode();
 
     void insertNode(std::string &syntax, const std::string &action, bool is_action_params=true,
                     InputParameters *params=NULL);
-    std::string print(short depth, const std::string &search_string, bool &found) const;
+    std::string print(short depth, const std::string &search_string, bool &found);
 
     std::string getLongName(const std::string &delim="/") const;
 
@@ -63,7 +66,7 @@ protected:
     std::multimap<std::string, InputParameters *> _moose_object_params;
     std::string _name;
     TreeNode *_parent;
-    const SyntaxTree &_syntax_tree;
+    SyntaxTree &_syntax_tree;
   };
 
   bool isLongNames() const { return _use_long_names; }
@@ -72,6 +75,9 @@ protected:
 
   TreeNode *_root;
   bool _use_long_names;
+
+private:
+  std::set<std::string> _params_printed;
 };
 
 

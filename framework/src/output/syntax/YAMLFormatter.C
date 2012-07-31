@@ -39,7 +39,7 @@ YAMLFormatter::postscript() const
 }
 
 std::string
-YAMLFormatter::printParams(InputParameters &params, short depth, const std::string &search_string, bool &found) const
+YAMLFormatter::printParams(const std::string &prefix, InputParameters &params, short depth, const std::string &search_string, bool &found)
 {
   std::ostringstream oss;
   std::string indent(depth*2, ' ');
@@ -48,10 +48,14 @@ YAMLFormatter::printParams(InputParameters &params, short depth, const std::stri
   {
     std::string name = iter->first;
     // First make sure we want to see this parameter, also block active and type
-    if (params.isPrivate(iter->first) || name == "active" || (search_string != "" && search_string != iter->first))
+    if (params.isPrivate(iter->first) || name == "active" || (search_string != "" && search_string != iter->first) || haveSeenIt(prefix, iter->first))
       continue;
 
     found = true;
+
+    // Mark it as "seen"
+    seenIt(prefix, iter->first);
+
     // Block params may be required and will have a doc string
     std::string required = params.isParamRequired(iter->first) ? "Yes" : "No";
 

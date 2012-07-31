@@ -42,10 +42,13 @@ SyntaxTree::insertNode(std::string syntax, const std::string &action, bool is_ac
 }
 
 std::string
-SyntaxTree::print(const std::string &search_string) const
+SyntaxTree::print(const std::string &search_string)
 {
   bool found=false;
   std::string output;
+
+  // Clear the list of "seen" parameters before printing the tree
+  _params_printed.clear();
 
   if (_root)
     output = _root->print(-1, search_string, found);
@@ -56,7 +59,19 @@ SyntaxTree::print(const std::string &search_string) const
     return "";
 }
 
-SyntaxTree::TreeNode::TreeNode(const std::string &name, const SyntaxTree &syntax_tree, const std::string *action, InputParameters *params, TreeNode *parent) :
+void
+SyntaxTree::seenIt(const std::string &prefix, const std::string &item)
+{
+  _params_printed.insert(prefix + item);
+}
+
+bool
+SyntaxTree::haveSeenIt(const std::string &prefix, const std::string &item) const
+{
+  return _params_printed.find(prefix + item) != _params_printed.end();
+}
+
+SyntaxTree::TreeNode::TreeNode(const std::string &name, SyntaxTree &syntax_tree, const std::string *action, InputParameters *params, TreeNode *parent) :
     _name(name),
     _parent(parent),
     _syntax_tree(syntax_tree)
@@ -119,7 +134,7 @@ SyntaxTree::TreeNode::insertParams(const std::string &action, bool is_action_par
 }
 
 std::string
-SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool &found) const
+SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool &found)
 {
   std::string type;
   std::string long_name(getLongName());
@@ -164,7 +179,7 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
     for (std::multimap<std::string, InputParameters *>::const_iterator a_it = _action_params.begin(); a_it != _action_params.end(); ++a_it)
       if(a_it->first != "EmptyAction")
       {
-        local_out += _syntax_tree.printParams(*a_it->second, depth, local_search_string, local_found);
+        local_out += _syntax_tree.printParams(name, *a_it->second, depth, local_search_string, local_found);
         found |= local_found;   // Update the current frame's found variable
         //DEBUG
         // std::cout << "\n" << indent << "(" << ait->first << ")";
@@ -173,7 +188,7 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
 
     if (it != _moose_object_params.end())
     {
-      local_out += _syntax_tree.printParams(*it->second, depth, local_search_string, local_found);
+      local_out += _syntax_tree.printParams(name, *it->second, depth, local_search_string, local_found);
       found |= local_found;
       //DEBUG
       // std::cout << "\n" << indent << "{" << it->first << "}";

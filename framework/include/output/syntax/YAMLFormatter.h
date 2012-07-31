@@ -17,6 +17,9 @@
 
 #include "SyntaxTree.h"
 
+/**
+ * This class produces produces a yaml dump of the InputFileParameters that is machine parsable by any YAML formatter.
+ */
 class YAMLFormatter : public SyntaxTree
 {
 public:
@@ -28,7 +31,7 @@ public:
   virtual std::string preTraverse(short depth) const;
   virtual std::string printBlockOpen(const std::string &name, short depth, const std::string &type) const;
   virtual std::string printBlockClose(const std::string &name, short depth) const;
-  virtual std::string printParams(InputParameters &params, short depth, const std::string &search_string, bool &found) const;
+  virtual std::string printParams(const std::string &prefix, InputParameters &params, short depth, const std::string &search_string, bool &found);
 
 protected:
   bool _dump_mode;

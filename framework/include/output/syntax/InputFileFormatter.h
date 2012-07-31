@@ -17,6 +17,9 @@
 
 #include "SyntaxTree.h"
 
+/**
+ * This class produces produces a dump of the InputFileParameters that appears like the normal input file syntax.
+ */
 class InputFileFormatter : public SyntaxTree
 {
 public:
@@ -24,7 +27,7 @@ public:
 
   virtual std::string printBlockOpen(const std::string &name, short depth, const std::string &type) const;
   virtual std::string printBlockClose(const std::string &name, short depth) const;
-  virtual std::string printParams(InputParameters &params, short depth, const std::string &search_string, bool &found) const;
+  virtual std::string printParams(const std::string &prefix, InputParameters &params, short depth, const std::string &search_string, bool &found);
 
 protected:
   bool _dump_mode;

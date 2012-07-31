@@ -51,10 +51,9 @@ InputFileFormatter::printBlockClose(const std::string & /*name*/, short depth) c
 }
 
 std::string
-InputFileFormatter::printParams(InputParameters &params, short depth, const std::string &search_string, bool &found) const
+InputFileFormatter::printParams(const std::string &prefix, InputParameters &params, short depth, const std::string &search_string, bool &found)
 {
   std::stringstream oss;
-  std::set<std::string> seen_it;
 
   std::string quotes   = "";
   std::string spacing  = "";
@@ -70,8 +69,8 @@ InputFileFormatter::printParams(InputParameters &params, short depth, const std:
 
   for (InputParameters::iterator iter = params.begin(); iter != params.end(); ++iter)
   {
-    // We only want non-private params
-    if (params.isPrivate(iter->first))
+    // We only want non-private params and params that we haven't already seen
+    if (params.isPrivate(iter->first) || haveSeenIt(prefix, iter->first))
       continue;
 
     // Print the parameter's value to a stringstream.
@@ -90,6 +89,9 @@ InputFileFormatter::printParams(InputParameters &params, short depth, const std:
         if (val != NULL && active.size() == 1 && active[0] == "__all__")
           continue;
       }
+
+      // Mark it as "seen"
+      seenIt(prefix, iter->first);
 
       // Don't print type if it is blank
       if (iter->first == "type")
