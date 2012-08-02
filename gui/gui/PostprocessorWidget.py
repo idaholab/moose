@@ -125,7 +125,6 @@ class PostprocessorWidget(QtGui.QWidget):
         # and for each plot calls the getPlotData function to update every plot that has been selected
         if self.first:
             self.first = False
-            self.getFileName()
             self.fillComboWidget()
             self.comboWidget.setCurrentIndex(-1)
         
@@ -181,6 +180,7 @@ class PostprocessorWidget(QtGui.QWidget):
     
     def clearClick(self):
         
+        self.getFileName()
         self.first = True
         for i in range(self.flowLayout.count()):
             self.flowLayout.itemAt(i).widget().close()
