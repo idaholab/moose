@@ -1,7 +1,8 @@
 from options import *
 
 test = { INPUT : 'pbp_test.i',
-         EXODIFF : ['out.e'] }
+         EXODIFF : ['out.e'],
+         MAX_PARALLEL : 1}
 
 check_petsc_options_test = { INPUT : 'pbp_test_options.i',
                              EXPECT_ERR : 'KSP Residual'}

@@ -2,7 +2,8 @@ from options import *
 
 testperiodic = { INPUT : 'periodic_bc_test.i',
                  EXODIFF : ['out.e'],
-                 MAX_THREADS : 1}
+                 MAX_THREADS : 1,
+                 MAX_PARALLEL: 1}
 
 testwedge = { INPUT : 'wedge.i',
               EXODIFF : ['out_wedge.e'],
@@ -27,8 +28,10 @@ subdomain_restricted_vars_test = { INPUT : 'periodic_subdomain_restricted_test.i
 
 auto_wrap_2d_test = { INPUT : 'auto_periodic_bc_test.i',
                       EXODIFF : ['out_auto.e'],
-                      MAX_THREADS : 1}
+                      MAX_THREADS : 1,
+                      MAX_PARALLEL: 1}
 
 auto_wrap_3d_test = { INPUT : 'auto_periodic_bc_test_3d.i',
                       EXODIFF : ['out_auto_3d.e'],
-                      MAX_THREADS : 1}
+                      MAX_THREADS : 1,
+                      MAX_PARALLEL: 1}

@@ -11,16 +11,19 @@ test_time   = { INPUT : 'adapt_time_test.i',
 displaced_test = {
 	INPUT : 'displaced_adapt_test.i',
 	EXODIFF : ['displaced_adapt_test_out.e-s002' , 'displaced_adapt_test_out.e-s002'],
+        MAX_PARALLEL : 1,
         GROUP : 'adaptive'}
 
 adapt_cycles_test = {
         INPUT : 'adapt_test_cycles.i',
         EXODIFF : ['out_cycles.e', 'out_cycles.e-s002'],
+        MAX_PARALLEL : 1,
         GROUP : 'adaptive'}
 
 patch_test = { INPUT : 'patch_recovery_test.i',
                EXODIFF : ['patch_out.e-s002'],
                MAX_THREADS : 1,
+               MAX_PARALLEL : 1,
                GROUP : 'adaptive'}
 
 initial_adaptivity_test = {

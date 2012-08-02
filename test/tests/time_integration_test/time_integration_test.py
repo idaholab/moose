@@ -7,7 +7,8 @@ testbdf2 = { INPUT : 'bdf2.i',
              EXODIFF : ['out_bdf2.e'] }
 
 testcranic = { INPUT : 'cranic.i',
-               EXODIFF : ['out_cranic.e'] }
+               EXODIFF : ['out_cranic.e'],
+               MAX_PARALLEL : 1}
 
 testdt2 = { INPUT : 'dt2.i',
             EXODIFF : ['out_dt2.e'] }
@@ -32,7 +33,7 @@ testdt2 = { INPUT : 'dt2_adapt.i',
             GROUP : 'adaptive'}
 
 # The test varies the time step based on wall clock solve time
-# which is not consistent for testing - we will check only that 
+# which is not consistent for testing - we will check only that
 # the output file exists
 test_solution_time_adaptive = { INPUT : 'time-adaptive.i',
                                 CHECK_FILES : ['out_time_adaptive.e'] }
