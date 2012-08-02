@@ -181,7 +181,7 @@ class TestHarness:
     return True
 
   ## Finish the test by inspecting the raw output
-  def testOutputAndFinish(self, test, retcode, output):
+  def testOutputAndFinish(self, test, retcode, output, start=0, end=0):
     reason = ''
     caveats = []
     if 'CAVEATS' in test:
@@ -265,7 +265,7 @@ class TestHarness:
     else:
       result = 'FAILED (%s)' % reason
       did_pass = False
-    self.handleTestResult(test, output, result)
+    self.handleTestResult(test, output, result, start, end)
     return did_pass
 
   def getTiming(self, output):
@@ -283,17 +283,17 @@ class TestHarness:
 
   ## Update global variables and print output based on the test result
   # Containing OK means it passed, skipped means skipped, anything else means it failed
-  def handleTestResult(self, test, output, result):
+  def handleTestResult(self, test, output, result, start=0, end=0):
     timing = ''
 
     if self.options.timing:
       timing = self.getTiming(output)
 
-    self.test_table.append( (test, output, result, timing) )
+    self.test_table.append( (test, output, result, timing, start, end) )
 
     self.postRun(test, timing)
 
-    print printResult(test[TEST_NAME], result, timing, self.options)
+    print printResult(test[TEST_NAME], result, timing, start, end, self.options)
 
     if result.find('OK') != -1:
       self.num_passed += 1
@@ -307,13 +307,13 @@ class TestHarness:
 
     if not 'skipped' in result:
       if self.options.file:
-        self.file.write(printResult( test[TEST_NAME], result, timing, self.options, color=False) + '\n')
+        self.file.write(printResult( test[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
         self.file.write(output)
 
       if self.options.sep_files or (self.options.fail_files and 'FAILED' in result) or (self.options.ok_files and result.find('OK') != -1):
         fname = os.path.join(test[TEST_DIR], test[TEST_NAME] + '.' + result[:6] + '.txt')
         f = open(fname, 'w')
-        f.write(printResult( test[TEST_NAME], result, timing, self.options, color=False) + '\n')
+        f.write(printResult( test[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
         f.write(output)
         f.close()
 
@@ -331,8 +331,8 @@ class TestHarness:
     # tests as they were running
     if self.options.verbose or (self.num_failed != 0 and not self.options.quiet):
       print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
-      for (test, output, result, timing) in self.test_table:
-        print printResult(test[TEST_NAME], result, timing, self.options)
+      for (test, output, result, timing, start, end) in self.test_table:
+        print printResult(test[TEST_NAME], result, timing, start, end, self.options)
 
     time = clock() - self.start_time
     print '-' * (TERM_COLS-1)
@@ -422,6 +422,7 @@ class TestHarness:
                       help="Number of processors to use when running mpiexec")
     parser.add_option('--threads', action="store", type='int', dest="nthreads",default=1,
                       help="Number of threads to use when running mpiexec")
+    parser.add_option('-d', action='store_true', dest='debug_harness', default=False, help='Turn on Test Harness debugging')
 
     outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show the output of every test that fails')

@@ -1,5 +1,6 @@
 import os, re
 from subprocess import *
+from time import strftime, gmtime, ctime, localtime, asctime
 
 TERM_COLS = 90
 
@@ -17,7 +18,7 @@ def runCommand(cmd):
 # 1) options.colored is False,
 # 2) the environment variable BITTEN_NOCOLOR is true, or
 # 3) the color parameter is False.
-def printResult(test_name, result, timing, options, color=True):
+def printResult(test_name, result, timing, start, end, options, color=True):
   f_result = ''
 
   cnt = (TERM_COLS-2) - len(test_name + result)
@@ -29,6 +30,8 @@ def printResult(test_name, result, timing, options, color=True):
   # Tack on the timing if it exists
   if timing:
     f_result += ' [' + '%0.3f' % float(timing) + 's]'
+  if options.debug_harness:
+    f_result += ' Start: ' + '%0.3f' % start + ' End: ' + '%0.3f' % end
   return f_result
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because

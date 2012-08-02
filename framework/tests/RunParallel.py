@@ -90,19 +90,20 @@ class RunParallel:
 
     log( 'Command %d done:    %s' % (job_index, command) )
     did_pass = True
+
     if p.poll() == None: # process has not completed, it timed out
       output = self.readOutput(f)
       output += '\n' + "#"*80 + '\nProcess terminated by test harness\n' + "#"*80 + '\n'
       f.close()
       p.terminate()
 
-      if not self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, output):
+      if not self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, output, time, time, clock()):
         did_pass = False
     else:
       output = 'Running command: ' + command + '\n'
       output += self.readOutput(f)
       f.close()
-      if not self.harness.testOutputAndFinish(test, p.returncode, output):
+      if not self.harness.testOutputAndFinish(test, p.returncode, output, time, clock()):
         did_pass = False
 
     if did_pass:
