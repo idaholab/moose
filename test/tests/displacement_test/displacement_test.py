@@ -2,6 +2,7 @@ from options import *
 
 test = { INPUT : 'displacement_test.i',
          EXODIFF : ['out_displaced.e-s002'],
+         MAX_PARALLEL : 1,
          GROUP : 'adaptive'}
 
 displacement_transient_test = {

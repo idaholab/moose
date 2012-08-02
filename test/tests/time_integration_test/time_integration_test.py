@@ -1,7 +1,8 @@
 from options import *
 
 testie = { INPUT : 'ie.i',
-           EXODIFF : ['out_ie.e'] }
+           EXODIFF : ['out_ie.e'],
+           MAX_PARALLEL : 1}
 
 testbdf2 = { INPUT : 'bdf2.i',
              EXODIFF : ['out_bdf2.e'] }
