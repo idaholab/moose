@@ -97,7 +97,7 @@ class RunParallel:
       f.close()
       p.terminate()
 
-      if not self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, output, time, time, clock()):
+      if not self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, output, time, clock()):
         did_pass = False
     else:
       output = 'Running command: ' + command + '\n'
