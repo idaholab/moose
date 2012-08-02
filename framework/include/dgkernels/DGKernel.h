@@ -23,6 +23,7 @@
 #include "UserObjectInterface.h"
 #include "MooseVariable.h"
 #include "Coupleable.h"
+#include "FunctionInterface.h"
 #include "MooseVariableInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 #include "Assembly.h"
@@ -45,6 +46,7 @@ InputParameters validParams<DGKernel>();
 class DGKernel :
   public MooseObject,
   public SetupInterface,
+  public FunctionInterface,
   public UserObjectInterface,
   public NeighborCoupleable,
   public ScalarCoupleable,
