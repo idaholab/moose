@@ -7,7 +7,7 @@ test = { INPUT : 'elastic_patch.i',
 test2Procs = { INPUT : 'elastic_patch.i',
                EXODIFF : ['elastic_patch_out.e'],
                MIN_PARALLEL : '2',
-               PREREQ : 'test',
+               PREREQ : ['test'],
                PLATFORM : ['DARWIN'] }
 
 test_quadratic = { INPUT : 'elastic_patch_quadratic.i',
