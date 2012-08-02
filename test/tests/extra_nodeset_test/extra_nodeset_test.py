@@ -5,4 +5,4 @@ test = { INPUT : 'extra_nodeset_test.i',
 
 test_coord =  { INPUT : 'extra_nodeset_coord_test.i',
                 EXODIFF : ['out.e'],
-                PREREQ : 'test' }
+                PREREQ : ['test'] }

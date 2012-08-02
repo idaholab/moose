@@ -13,5 +13,5 @@ restart_uo_test_1 = {
 restart_uo_test_2 = {
   INPUT : 'uo_restart_part2.i',
   EXODIFF : ['uo_restart_part2_out.e'],
-  PREREQ : 'restart_uo_test_1'
+  PREREQ : ['restart_uo_test_1']
 }

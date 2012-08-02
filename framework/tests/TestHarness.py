@@ -75,7 +75,11 @@ class TestHarness:
                 test.update( { TEST_NAME : testname, TEST_DIR : test_dir } )
 
                 if test[PREREQ] != None:
-                  test[PREREQ] = module_name + '.' + test[PREREQ]
+                  if type(test[PREREQ]) != list:
+                    print "Option 'PREREQ' needs to be of type list in " + module_name + '.' + test[TEST_NAME]
+                    sys.exit(1)
+                  test[PREREQ] = [module_name + '.' + item for item in test[PREREQ]]
+
 
                 if self.checkIfRunTest(test):
                   self.prepareTest(test)

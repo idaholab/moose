@@ -61,7 +61,7 @@ CUSTOM_CMP    = 'custom_cmp'     # Custom comparison file
 USE_OLD_FLOOR = 'True|False'     # Use Exodiff old floor option
 
 # Test Ordering
-PREREQ        = '[prereq]'
+PREREQ        = '[prereq]'       # The list of prereq tests that need to be complete before launching this test
 
 # Default test options: these are use if an option is not specified
 DEFAULTS = { EXODIFF : [],

@@ -26,12 +26,12 @@ gnuplot_ps_out_test = { INPUT : 'output_test_gnuplot.i',
 gnuplot_png_out_test = { INPUT : 'output_test_gnuplot.i',
                          CLI_ARGS : ['Output/gnuplot_format=png'],
                          CHECK_FILES : ['out.gp', 'out.dat'],
-                         PREREQ : 'gnuplot_ps_out_test' }
+                         PREREQ : ['gnuplot_ps_out_test'] }
 
 gnuplot_gif_out_test = { INPUT : 'output_test_gnuplot.i',
                          CLI_ARGS : ['Output/gnuplot_format=gif'],
                          CHECK_FILES : ['out.gp', 'out.dat'],
-                         PREREQ : 'gnuplot_png_out_test' }
+                         PREREQ : ['gnuplot_png_out_test'] }
 
 gnuplot_bad_out_test = { INPUT : 'output_test_gnuplot.i',
                          CLI_ARGS : ['Output/gnuplot_format=magic'],

@@ -46,7 +46,7 @@ class RunParallel:
       self.startReadyJobs()
 
     # Now make sure that this job doesn't have an unsatisfied prereq
-    if test[PREREQ] != None and not test[PREREQ] in self.finished_jobs:
+    if test[PREREQ] != None and len(set(test[PREREQ]) - self.finished_jobs):
       self.queue.append([test, command, os.getcwd()])
       return
 
@@ -151,7 +151,7 @@ class RunParallel:
         queue_items = len(self.queue)
         for i in range(0, queue_items):
           (test, command, dirpath) = self.queue.popleft()
-          if test[PREREQ] in self.skipped_jobs:
+          if len(set(test[PREREQ]) & self.skipped_jobs):
             self.harness.handleTestResult(test, '', 'skipped (skipped dependency)')
             self.skipped_jobs.add(test[TEST_NAME])
             keep_going = True

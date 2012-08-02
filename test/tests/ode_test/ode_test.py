@@ -2,7 +2,8 @@ from options import *
 
 test_expl = {
   INPUT : 'ode_expl_test.i',
-  EXODIFF : ['ode_expl_test_out.e']
+  EXODIFF : ['ode_expl_test_out.e'],
+  MAX_PARALLEL : 1
 }
 
 test_sys_impl = {
