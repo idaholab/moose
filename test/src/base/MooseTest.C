@@ -77,6 +77,9 @@
 
 #include "TimestepSetupFunction.h"
 #include "PostprocessorFunction.h"
+#include "MTPiecewiseConst1D.h"
+#include "MTPiecewiseConst2D.h"
+#include "MTPiecewiseConst3D.h"
 
 // meshes
 #include "StripeMesh.h"
@@ -185,6 +188,9 @@ MooseTestApp::registerObjects()
   // Functions
   registerFunction(TimestepSetupFunction);
   registerFunction(PostprocessorFunction);
+  registerFunction(MTPiecewiseConst1D);
+  registerFunction(MTPiecewiseConst2D);
+  registerFunction(MTPiecewiseConst3D);
 
   // meshes
   registerObject(StripeMesh);
