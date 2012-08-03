@@ -65,6 +65,8 @@
 #include "EnhancedDGMatDiffusion.h"
 #include "DGMDDBC.h"
 #include "DGFunctionConvectionDirichletBC.h"
+#include "PenaltyDirichletBC.h"
+#include "FunctionPenaltyDirichletBC.h"
 
 #include "ExplicitODE.h"
 #include "ImplicitODEx.h"
@@ -158,6 +160,8 @@ MooseTestApp::registerObjects()
 
   registerBoundaryCondition(DGMDDBC);
   registerBoundaryCondition(DGFunctionConvectionDirichletBC);
+  registerBoundaryCondition(PenaltyDirichletBC);
+  registerBoundaryCondition(FunctionPenaltyDirichletBC);
 
   // Initial conditions
   registerInitialCondition(TEIC);
