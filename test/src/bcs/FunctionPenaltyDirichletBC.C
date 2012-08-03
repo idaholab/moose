@@ -7,7 +7,7 @@ InputParameters validParams<FunctionPenaltyDirichletBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addParam<Real>("penalty",1e6,"Penalty scalar");
-  params.addRequiredParam<std::string>("function", "Forcing function");
+  params.addRequiredParam<FunctionName>("function", "Forcing function");
   
   return params;
 }
