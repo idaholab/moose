@@ -11,7 +11,7 @@ InputParameters validParams<OneDEnergyWallHeating>()
   params.addRequiredCoupledVar("temperature", "");
 
   // Required parameters
-  params.addRequiredParam<Real>("Hw", "Convective heat transfer coefficient");
+  //params.addRequiredParam<Real>("Hw", "Convective heat transfer coefficient");
   params.addRequiredParam<Real>("aw", "heat transfer area density, m^2 / m^3");  
   params.addRequiredParam<Real>("Tw", "Wall temperature, K");  
       
@@ -25,9 +25,10 @@ OneDEnergyWallHeating::OneDEnergyWallHeating(const std::string & name, InputPara
       //_pressure(coupledValue("pressure")),
       _temperature(coupledValue("temperature")),
       _rho_var_number(coupled("rho")),  
-      _Hw(getParam<Real>("Hw")), 
+      //_Hw(getParam<Real>("Hw")), 
       _aw(getParam<Real>("aw")),
-      _Tw(getParam<Real>("Tw"))
+      _Tw(getParam<Real>("Tw")),
+      _wallheattransfer(getMaterialProperty<Real>("wallheattransfer"))
 {}
 
 
@@ -54,7 +55,8 @@ OneDEnergyWallHeating::computeQpResidual()
   }
 */
   // heat transfer term: Hw * aw * (T-Tw) * psi
-  return _Hw * _aw * (_temperature[_qp]-_Tw) * _test[_i][_qp];
+  //return _Hw * _aw * (_temperature[_qp]-_Tw) * _test[_i][_qp];
+  return _wallheattransfer[_qp]* _aw * (_temperature[_qp]-_Tw) * _test[_i][_qp];
 }
 
 
