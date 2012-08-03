@@ -32,6 +32,7 @@
 #include "UserObjectKernel.h"
 #include "DiffusionPrecompute.h"
 #include "ConvectionPrecompute.h"
+#include "CoupledKernelValueTest.h"
 
 #include "CoupledAux.h"
 #include "PolyConstantAux.h"
@@ -139,6 +140,7 @@ MooseTestApp::registerObjects()
   registerKernel(UserObjectKernel);
   registerKernel(DiffusionPrecompute);
   registerKernel(ConvectionPrecompute);
+  registerKernel(CoupledKernelValueTest);
 
   // Aux kernels
   registerAux(CoupledAux);
