@@ -1,5 +1,6 @@
 #include "PowerLawCreep.h"
 
+#include "MooseException.h"
 #include "SymmIsotropicElasticityTensor.h"
 
 template<>
@@ -90,7 +91,20 @@ PowerLawCreep::computeStress()
     ++it;
   }
 
-  if(it == _max_its) mooseError("Max sub-newton iteration hit during creep solve!");
+  if(it == _max_its)
+  {
+    std::stringstream errorMsg;
+    errorMsg << "Max sub-newton iteration hit during creep solve!";
+    if (libMesh::n_processors()>1)
+    {
+      mooseError(errorMsg.str());
+    }
+    else
+    {
+      std::cout<<std::endl<<errorMsg.str()<<std::endl<<std::endl;
+      throw MooseException();
+    }
+  }
 
 
   // compute creep and elastic strain increments (avoid potential divide by zero - how should this be done)?
