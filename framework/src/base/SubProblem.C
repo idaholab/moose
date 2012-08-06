@@ -64,7 +64,13 @@ SubProblem::getCoordSystem(SubdomainID sid)
   if (it != _coord_sys.end())
     return (*it).second;
   else
-    mooseError("Requested subdomain does not exist.");
+  {
+    std::stringstream err;
+    err << "Requested subdomain "
+        << sid
+        << " does not exist.";
+    mooseError(err.str());
+  }
 }
 
 void
