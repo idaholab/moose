@@ -34,7 +34,7 @@ def findRepoRevision(moose_dir):
     p = subprocess.Popen('git config -l', stdout=subprocess.PIPE, shell=True, stderr=None)
     buffer = p.communicate()[0]
     os.chdir(saved_dir)
-    m = srre.search(buffer)
+    m = srre.search(str(buffer))
     if m != None:
       # It has a SVN remote -- get the ID from the svn commit
       command = 'git svn log --limit 1'
@@ -60,7 +60,7 @@ def findRepoRevision(moose_dir):
   os.chdir(saved_dir)
 
   # find the revision
-  m = regex.search(buffer)
+  m = regex.search(str(buffer))
   if m != None:
     revision = m.group(1)
   if vcs == 'GIT':
