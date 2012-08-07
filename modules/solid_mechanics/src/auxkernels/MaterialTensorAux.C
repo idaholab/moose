@@ -44,6 +44,7 @@ MaterialTensorAux::MaterialTensorAux( const std::string & name, InputParameters 
   {
     mooseError("MaterialTensorAux requires the index to be >= 0 and <= 5 OR < 0 (off).");
   }
+  
 }
 
 Real
