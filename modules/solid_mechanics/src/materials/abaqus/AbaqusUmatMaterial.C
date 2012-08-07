@@ -42,7 +42,7 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const std::string  & name,
 
   //Size and create full (mechanical+thermal) material property array
   _num_props = _mechanical_constants.size() + _thermal_constants.size();
-  Real * props_array = new Real[_num_props];
+  std::vector<Real> props_array(_num_props);
   for (unsigned int i=0; i<_mechanical_constants.size(); i++)
     props_array[i] = _mechanical_constants[i];
   for (unsigned int i=_mechanical_constants.size(); i<_num_props; i++)
@@ -73,6 +73,36 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const std::string  & name,
   _DSTRAN = new Real[_NTENS];
   _PROPS  = new Real[_num_props];
 
+  for(unsigned int i=0;i<_num_state_vars; i++)
+    _STATEV[i] = 0.0;
+
+  for(unsigned int i=0;i<_NTENS; i++)
+    _DDSDDT[i] = 0.0;
+
+  for(unsigned int i=0;i<_NTENS; i++)
+    _DRPLDE[i] = 0.0;
+
+  for(unsigned int i=0;i<_NTENS; i++)
+    _STRAN[i]  = 0.0;
+
+  for(unsigned int i=0;i<9; i++)
+    _DFGRD0[i] = 0.0;
+  
+  for(unsigned int i=0;i<9; i++)
+    _DFGRD1[i] = 0.0;
+  
+  for(unsigned int i=0;i<_NTENS; i++)
+    _STRESS[i] = 0.0;
+  
+  for(unsigned int i=0;i<_NTENS*_NTENS; i++)
+    _DDSDDE[i] = 0.0;
+  
+  for(unsigned int i=0;i<_NTENS; i++)
+    _DSTRAN[i] = 0.0;
+  
+  for(unsigned int i=0;i<_num_props; i++)
+    _PROPS[i] = 0.0;
+  
   //Assign materials properties from vector form into an array
   for (unsigned int i=0; i<_num_props; i++)
     _PROPS[i] = props_array[i];
