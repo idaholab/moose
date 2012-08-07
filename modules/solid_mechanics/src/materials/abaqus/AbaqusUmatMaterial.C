@@ -42,7 +42,7 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const std::string  & name,
 
   //Size and create full (mechanical+thermal) material property array
   _num_props = _mechanical_constants.size() + _thermal_constants.size();
-  Real props_array[_num_props];
+  Real * props_array = new Real[_num_props];
   for (unsigned int i=0; i<_mechanical_constants.size(); i++)
     props_array[i] = _mechanical_constants[i];
   for (unsigned int i=_mechanical_constants.size(); i<_num_props; i++)
