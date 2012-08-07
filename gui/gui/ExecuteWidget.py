@@ -51,6 +51,8 @@ class ExecuteWidget(QtGui.QWidget):
     self.threads_text.setMaximumWidth(30)
     self.threads_layout.addWidget(self.threads_text, alignment=Qt.AlignHCenter)
     self.command_layout.addLayout(self.threads_layout)
+      
+    self.input_file_widget.application.addNumberHistory(self.command_layout)
 
     self.other_options_layout = QtGui.QVBoxLayout()
     self.other_options_layout.addWidget(QtGui.QLabel("Other Options"), alignment=Qt.AlignHCenter)

@@ -136,6 +136,7 @@ class InputFileWidget(QtGui.QWidget):
     QtCore.QObject.connect(self.buttonClear, QtCore.SIGNAL("clicked()"), self.click_clear)
     layout.addWidget(self.buttonOpen)
     layout.addWidget(self.buttonSave)
+    self.application.addRelapSave(layout)
     layout.addWidget(self.buttonClear)
     
   def getOutputFileNames(self):

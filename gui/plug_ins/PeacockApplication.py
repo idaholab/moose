@@ -107,3 +107,10 @@ class PeacockApplication(object):
 
   def addExodusResultActors(self, appRenderer):
     pass
+
+
+  def addRelapSave(self, layout):       
+    pass
+
+  def addNumberHistory(self, command_layout):
+    pass
