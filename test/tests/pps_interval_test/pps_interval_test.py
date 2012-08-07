@@ -9,11 +9,17 @@ test_interval_verify = { INPUT : 'pps_out_interval.i',
                          PREREQ : ['test_interval'] }
 
 test_bad_interval = { INPUT : 'pps_bad_interval.i',
-                      EXPECT_ERR : '\"screen_interval \(\d+\)\" must evenly divide \"interval' }
+                      EXPECT_ERR : '\"screen_interval \(\d+\)\" must evenly divide \"interval',
+                      MAX_PARALLEL: 1
+                      }
 
 test_bad_interval2 = { INPUT : 'pps_bad_interval2.i',
-                       EXPECT_ERR : '\"screen_interval \(\d+\)\" must be less than or equal to \"interval' }
+                       EXPECT_ERR : '\"screen_interval \(\d+\)\" must be less than or equal to \"interval',
+                       MAX_PARALLEL: 1
+                       }
 
 test_bad_interval3 = { INPUT : 'pps_bad_interval3.i',
-                       EXPECT_ERR : '\"output_initial\" is set to false' }
+                       EXPECT_ERR : '\"output_initial\" is set to false',
+                       MAX_PARALLEL : 1
+                       }
 
