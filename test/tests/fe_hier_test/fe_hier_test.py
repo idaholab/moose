@@ -28,7 +28,8 @@ test_hier_2_3d = { INPUT : 'hier-2-3d.i',
                   }
 
 test_hier_3_1d = { INPUT : 'hier-3-1d.i',
-                   EXODIFF : ['hier-3-1d_out.e']
+                   EXODIFF : ['hier-3-1d_out.e'],
+                   MAX_PARALLEL : 4
                   }
 
 test_hier_3_2d = { INPUT : 'hier-3-2d.i',

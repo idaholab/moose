@@ -11,6 +11,6 @@ test_monomial_constant_2d = { INPUT : 'monomial-const-2d.i',
 
 test_monomial_constant_3d = { INPUT : 'monomial-const-3d.i',
                   EXODIFF : ['monomial-const-3d_out.e'],
-                  MAX_PARALLEL : 3
+                  MAX_PARALLEL : 1
                   }
 
