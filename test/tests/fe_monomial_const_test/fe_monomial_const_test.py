@@ -6,7 +6,7 @@ test_monomial_constant_1d = { INPUT : 'monomial-const-1d.i',
 
 test_monomial_constant_2d = { INPUT : 'monomial-const-2d.i',
                   EXODIFF : ['monomial-const-2d_out.e'],
-                  ABS_ZERO : 1e-9
+                  SCALE_REFINE : 5
                   }
 
 test_monomial_constant_3d = { INPUT : 'monomial-const-3d.i',
