@@ -55,12 +55,16 @@ protected:
                                                 ///< _aw = A_heating_surface_per_length / A_pipe_flow_are [1/m]
   Real _Dh;                                     ///< Pipe hydraulic diameter, [m]
 
-  bool _has_f;
+  bool _has_f;                                  ///< true if user provides a constant f
   Real _f;                                      ///< friction
+  bool _has_Hw;                                 ///< true if user provides a constant Hw
   Real _Hw;                                     ///< Convective heat transfer coefficient
   Real _Tw;                                     ///< Wall temperature
-
-  Real _gx;                                     ///< Gravity
+  unsigned int _HT_geometry_code;               ///< Heat transfer geometry, represented by a number, 
+                                                ///<   use same code as RELAP5/3D for different geometry, could be changed to MooseEnum type
+  const Real & _PoD; // pitch to diameter ratio for parellel bundle heat transfer
+  Real _gx;                                     ///< Gravity projected on the pipe direction
+  Real _g;                                      ///< Gravity constant, i.e., 9.8
 
   unsigned int _subdomain_id;                   ///< Subdomain id this pipe defined
 

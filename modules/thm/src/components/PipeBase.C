@@ -32,7 +32,8 @@ InputParameters validParams<PipeBase>()
   params.addParam<Real>("f", 0.0, "friction");
   params.addParam<Real>("Hw", 0.0, "Convective heat transfer coefficient");
   params.addParam<Real>("Tw", 400, "Wall temperature");
-
+  params.addParam<unsigned int>("HT_geometry_code", 0, "Heat transfer geometry code");
+  params.addParam<Real>("PoD", 1, "pitch to diameter ratio for parellel bundle heat transfer");
 
   params.addParam<Real>("initial_P", 0., "Initial pressure in the pipe");
   params.addParam<Real>("initial_V", 0., "Initial velocity in the pipe");
@@ -52,8 +53,11 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
     _A(getParam<Real>("A")),
     _has_f(params.wasSeenInInput("f")),
     _f(getParam<Real>("f")),
+    _has_Hw(params.wasSeenInInput("Hw")),
     _Hw(getParam<Real>("Hw")),
     _Tw(getParam<Real>("Tw")),
+    _HT_geometry_code(getParam<unsigned int>("HT_geometry_code")),
+    _PoD(getParam<Real>("PoD")),
     _has_initial_P(params.wasSeenInInput("initial_P")),
     _has_initial_V(params.wasSeenInInput("initial_V")),
     _has_initial_T(params.wasSeenInInput("initial_T")),
@@ -67,6 +71,7 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
   //compute the gravity along the pipe direction.
   RealVectorValue gravity_vector = _sim.getParam<VectorValue<Real> >("gravity");
   _gx = _dir * gravity_vector / _dir.size();
+  _g = gravity_vector.size(); // Gravity constant
 }
 
 PipeBase::~PipeBase()
@@ -200,12 +205,16 @@ PipeBase::addMooseObjects()
   pars.set<std::vector<unsigned int> >("block") = blocks;
 
   pars.set<Real>("gx") = _gx;
+  pars.set<Real>("g") = _g; // gravity constant
   pars.set<Real>("dh") = _Dh;
   pars.set<Real>("aw") = _aw;
   if (_has_f)
     pars.set<Real>("f") = _f;
-  pars.set<Real>("Hw") = _Hw;
+  if(_has_Hw) 
+    pars.set<Real>("Hw") = _Hw;
   pars.set<Real>("Tw") = _Tw;
+  pars.set<unsigned int>("HT_geometry_code") = _HT_geometry_code;
+  pars.set<Real>("PoD") = _PoD; 
   pars.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
 
   Model::addKernels(pars);
