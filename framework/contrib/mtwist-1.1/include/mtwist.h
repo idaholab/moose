@@ -251,6 +251,44 @@ extern int		mt_loadstate(FILE* statefile);
 #endif
 
 /*
+ * C++ just takes multiple inline definitions
+ * Legacy GCC requires one non-inline definition and any number of inline definitions
+ * C99 requires one "extern inline" declaration and any number of inline definitions
+ */
+#ifdef MT_GENERATE_CODE_IN_HEADER /* defined at this point in the file only once (by mtwist.c) */
+# if defined(__cplusplus)
+#  define MT_EXTERN
+#  define MT_IMPLEXTERN
+# elif defined(__STDC__) && __STDC_VERSION__ >= 199901L
+#  define MT_EXTERN       extern
+#  define MT_IMPLEXTERN
+# else  /* GCC convention */
+#  define MT_EXTERN
+#  define MT_IMPLEXTERN
+# endif
+#else  /* do not want symbols */
+# if defined(__cplusplus)
+#  define MT_EXTERN
+#  define MT_IMPLEXTERN
+# elif defined(__STDC__) && __STDC_VERSION__ >= 199901L
+#  define MT_EXTERN
+#  define MT_IMPLEXTERN
+# else  /* GCC convention */
+#  define MT_EXTERN       extern
+#  define MT_IMPLEXTERN   extern
+# endif
+#endif /* MT_GENERATE_CODE_IN_HEADER */
+
+/*
+ * Make it possible for mtwist.c to disable the inline keyword.  We
+ * use our own keyword so that we don't interfere with inlining in
+ * C/C++ header files, above.
+ */
+#ifndef MT_INLINE
+#define MT_INLINE	inline		/* Compiler has inlining */
+#endif /* MT_INLINE */
+
+/*
  * Functions for generating random numbers.  The actual code of the
  * functions is given in this file so that it can be declared inline.
  * For compilers that don't have the inline feature, mtwist.c will
@@ -261,28 +299,28 @@ extern int		mt_loadstate(FILE* statefile);
 #ifdef __cplusplus
 #endif /* __cplusplus */
 
-extern uint32_t		mts_lrand(mt_state* state);
+MT_EXTERN MT_INLINE uint32_t		mts_lrand(mt_state* state);
 					/* Generate 32-bit value, any gen. */
 #ifdef UINT64_MAX
-extern uint64_t		mts_llrand(mt_state* state);
+MT_EXTERN MT_INLINE uint64_t		mts_llrand(mt_state* state);
 					/* Generate 64-bit value, any gen. */
 #endif /* UINT64_MAX */
-extern double		mts_drand(mt_state* state);
+MT_EXTERN MT_INLINE double		mts_drand(mt_state* state);
 					/* Generate floating value, any gen. */
 					/* Fast, with only 32-bit precision */
-extern double		mts_ldrand(mt_state* state);
+MT_EXTERN MT_INLINE double		mts_ldrand(mt_state* state);
 					/* Generate floating value, any gen. */
 					/* Slower, with 64-bit precision */
 
-extern uint32_t		mt_lrand(void);	/* Generate 32-bit random value */
+MT_EXTERN MT_INLINE uint32_t		mt_lrand(void);	/* Generate 32-bit random value */
 #ifdef UINT64_MAX
-extern uint64_t		mt_llrand(void);
+MT_EXTERN MT_INLINE uint64_t		mt_llrand(void);
 					/* Generate 64-bit random value */
 #endif /* UINT64_MAX */
-extern double		mt_drand(void);
+MT_EXTERN MT_INLINE double		mt_drand(void);
 					/* Generate floating value */
 					/* Fast, with only 32-bit precision */
-extern double		mt_ldrand(void);
+MT_EXTERN MT_INLINE double		mt_ldrand(void);
 					/* Generate floating value */
 					/* Slower, with 64-bit precision */
 
@@ -340,28 +378,6 @@ extern double		mt_64_to_double;
 					/* Mult'r to cvt long long to dbl */
 
 /*
- * In gcc, inline functions must be declared extern or they'll produce
- * assembly code (and thus linking errors).  We have to work around
- * that difficulty with the MT_EXTERN define.
- */
-#ifndef MT_EXTERN
-#ifdef __cplusplus
-#define MT_EXTERN			/* C++ doesn't need static */
-#else /* __cplusplus */
-#define MT_EXTERN	extern		/* C (at least gcc) needs extern */
-#endif /* __cplusplus */
-#endif /* MT_EXTERN */
-
-/*
- * Make it possible for mtwist.c to disable the inline keyword.  We
- * use our own keyword so that we don't interfere with inlining in
- * C/C++ header files, above.
- */
-#ifndef MT_INLINE
-#define MT_INLINE	inline		/* Compiler has inlining */
-#endif /* MT_INLINE */
-
-/*
  * Try to guess whether the compiler is one (like gcc) that requires
  * inline code to be available in the header file, or a smarter one
  * that gets inlines directly from object files.  But if we've been
@@ -385,7 +401,7 @@ extern double		mt_64_to_double;
  * the pseudorandom numbers are generated in batches of MT_STATE_SIZE.  This
  * saves the cost of a modulus operation in the critical path.
  */
-MT_EXTERN MT_INLINE uint32_t mts_lrand(
+MT_IMPLEXTERN MT_INLINE uint32_t mts_lrand(
     register mt_state*	state)		/* State for the PRNG */
     {
     register uint32_t	random_value;	/* Pseudorandom value generated */
@@ -414,7 +430,7 @@ MT_EXTERN MT_INLINE uint32_t mts_lrand(
  * optimize it out.  Doing so would be messy, since it would require two
  * nearly-identical internal implementations of mts_lrand.
  */
-MT_EXTERN MT_INLINE uint64_t mts_llrand(
+MT_IMPLEXTERN MT_INLINE uint64_t mts_llrand(
     register mt_state*	state)		/* State for the PRNG */
     {
     register uint32_t	random_value_1;	/* 1st pseudorandom value generated */
@@ -456,7 +472,7 @@ MT_EXTERN MT_INLINE uint64_t mts_llrand(
  * (exclusive).  This function is optimized for speed, but it only generates
  * 32 bits of precision.  Use mts_ldrand to get 64 bits of precision.
  */
-MT_EXTERN MT_INLINE double mts_drand(
+MT_IMPLEXTERN MT_INLINE double mts_drand(
     register mt_state*	state)		/* State for the PRNG */
     {
     register uint32_t	random_value;	/* Pseudorandom value generated */
@@ -475,7 +491,7 @@ MT_EXTERN MT_INLINE double mts_drand(
  * (exclusive).  This function generates 64 bits of precision.  Use
  * mts_drand for more speed but less precision.
  */
-MT_EXTERN MT_INLINE double mts_ldrand(
+MT_IMPLEXTERN MT_INLINE double mts_ldrand(
     register mt_state*	state)		/* State for the PRNG */
     {
 #ifdef UINT64_MAX
@@ -524,7 +540,7 @@ MT_EXTERN MT_INLINE double mts_ldrand(
  *
  * See mts_lrand for full commentary.
  */
-MT_EXTERN MT_INLINE uint32_t mt_lrand()
+MT_IMPLEXTERN MT_INLINE uint32_t mt_lrand()
     {
     register uint32_t	random_value;	/* Pseudorandom value generated */
 
@@ -544,7 +560,7 @@ MT_EXTERN MT_INLINE uint32_t mt_lrand()
  *
  * See mts_llrand for full commentary.
  */
-MT_EXTERN MT_INLINE uint64_t mt_llrand()
+MT_IMPLEXTERN MT_INLINE uint64_t mt_llrand()
     {
     register uint32_t	random_value_1;	/* 1st pseudorandom value generated */
     register uint32_t	random_value_2;	/* 2nd pseudorandom value generated */
@@ -588,7 +604,7 @@ MT_EXTERN MT_INLINE uint64_t mt_llrand()
  * (exclusive).  This function is optimized for speed, but it only generates
  * 32 bits of precision.  Use mt_ldrand to get 64 bits of precision.
  */
-MT_EXTERN MT_INLINE double mt_drand()
+MT_IMPLEXTERN MT_INLINE double mt_drand()
     {
     register uint32_t	random_value;	/* Pseudorandom value generated */
 
@@ -606,7 +622,7 @@ MT_EXTERN MT_INLINE double mt_drand()
  * (exclusive).  This function generates 64 bits of precision.  Use
  * mts_drand for more speed but less precision.
  */
-MT_EXTERN MT_INLINE double mt_ldrand(void)
+MT_IMPLEXTERN MT_INLINE double mt_ldrand(void)
     {
 #ifdef UINT64_MAX
     uint64_t		final_value;	/* Final (integer) value */

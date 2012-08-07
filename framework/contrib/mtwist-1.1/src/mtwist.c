@@ -169,10 +169,8 @@ static char Rcs_Id[] =
  * resides in that file rather than here.  We need to arrange for the
  * code to be compiled into this .o file, either because inlines
  * aren't supported or because somebody might want to take a pointer
- * to a function.  We do so with a couple of careful #defines.
+ * to a function.  This define causes mtwist.h to produce symbols.
  */
-#define MT_INLINE			/* Disable the inline keyword */
-#define MT_EXTERN			/* Generate real code for functions */
 #undef MT_GENERATE_CODE_IN_HEADER
 #define MT_GENERATE_CODE_IN_HEADER 1	/* Generate code when #including */
 
