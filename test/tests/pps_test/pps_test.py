@@ -16,7 +16,9 @@ test_inital = { INPUT : 'initial_pps.i',
                 EXODIFF : ['out_initial_pps.e'] }
 
 test_nodal_max = { INPUT : 'nodal_max_value_test.i',
-                   EXODIFF : ['out_nodal_max.e'] }
+                   EXODIFF : ['out_nodal_max.e'],
+                   MAX_PARALLEL : 11
+                   }
 
 test_elem_multi_block = {
   INPUT : 'elem_pps_multi_block_test.i',

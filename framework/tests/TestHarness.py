@@ -436,8 +436,8 @@ class TestHarness:
     outputgroup.add_option('-x', '--sep-files', action='store_true', dest='sep_files', default=False, metavar='FILE', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
     outputgroup.add_option('--sep-files-ok', action='store_true', dest='ok_files', default=False, metavar='FILE', help='Write the output of each passed test to a separate file')
     outputgroup.add_option('-a', '--sep-files-fail', action='store_true', dest='fail_files', default=False, metavar='FILE', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
-    outputgroup.add_option("--store-timing", action="store_true", dest="store_time", default=False, help="Store timing in the database (Currently not implemented)")
-    outputgroup.add_option("--revision", action="store", dest="revision", help="REQUIRED: the current revision (Currently not implemented)")
+    outputgroup.add_option("--store-timing", action="store_true", dest="store_time", default=False, help="Store timing in the SQL database: $HOME/timingDB/timing.sqlite A parent directory (timingDB) must exist.")
+    outputgroup.add_option("--revision", action="store", dest="revision", help="The current revision being tested. Required when using --store-timing.")
 
 
     parser.add_option_group(outputgroup)
