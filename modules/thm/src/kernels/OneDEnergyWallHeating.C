@@ -28,7 +28,7 @@ OneDEnergyWallHeating::OneDEnergyWallHeating(const std::string & name, InputPara
       //_Hw(getParam<Real>("Hw")), 
       _aw(getParam<Real>("aw")),
       _Tw(getParam<Real>("Tw")),
-      _wallheattransfer(getMaterialProperty<Real>("wallheattransfer"))
+      _HTC(getMaterialProperty<Real>("HeatTransferCoefficient"))
 {}
 
 
@@ -56,7 +56,7 @@ OneDEnergyWallHeating::computeQpResidual()
 */
   // heat transfer term: Hw * aw * (T-Tw) * psi
   //return _Hw * _aw * (_temperature[_qp]-_Tw) * _test[_i][_qp];
-  return _wallheattransfer[_qp]* _aw * (_temperature[_qp]-_Tw) * _test[_i][_qp];
+  return _HTC[_qp]* _aw * (_temperature[_qp]-_Tw) * _test[_i][_qp];
 }
 
 

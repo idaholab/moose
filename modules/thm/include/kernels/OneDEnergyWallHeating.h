@@ -35,7 +35,7 @@ protected:
   //const Real & _Hw; // convective heat transfer coefficient, W/m^2-K
   const Real & _aw; // heat transfer area density, m^2 / m^3
   const Real & _Tw; // Wall temperature, K
-  MaterialProperty<Real> & _wallheattransfer;
+  MaterialProperty<Real> & _HTC; // convective heat transfer coefficient, W/m^2-K
 };
  
 #endif
