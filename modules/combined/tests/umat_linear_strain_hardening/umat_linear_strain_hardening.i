@@ -1,4 +1,4 @@
-# Testing the PlasticFortranInterface - creep linear strain hardening model using the small strain formulation - visco-plastic material.  
+# Testing the UMAT Interface - creep linear strain hardening model using the small strain formulation - visco-plastic material.  
 # Note that this isn't a thermal or irradiation creep model.
 
 [Mesh]
@@ -92,7 +92,7 @@
     disp_y = disp_y
     disp_z = disp_z
     mechanical_constants = '1000. 0.3 10. 100.'
-    plugin = ../../plugins/solid_mechanics/linear_strain_hardening-opt.plugin
+    plugin = ../../plugins/solid_mechanics/linear_strain_hardening
     num_state_vars = 3
   [../]
 []

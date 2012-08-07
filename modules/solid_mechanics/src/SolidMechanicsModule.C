@@ -32,6 +32,7 @@
 #include "HomogenizedElasticConstants.h"
 #include "Mass.h"
 #include "AbaqusUmatMaterial.h"
+#include "AbaqusCreepMaterial.h"
 
 void
 Elk::SolidMechanics::registerObjects()
@@ -50,6 +51,7 @@ Elk::SolidMechanics::registerObjects()
   registerMaterial(PowerLawCreep);
   registerMaterial(LinearGeneralAnisotropicMaterial);
   registerMaterial(AbaqusUmatMaterial);
+  registerMaterial(AbaqusCreepMaterial);
 
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PlenumPressure);

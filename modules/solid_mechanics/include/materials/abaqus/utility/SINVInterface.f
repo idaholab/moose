@@ -10,12 +10,25 @@
       SUBROUTINE SINV(S, SINV1, SINV2, NDI, NSHR)
 
       INTEGER NDI, NSHR
-      DIMENSION S(6)
-      REAL SINV1, SINV2, P
+      DOUBLE PRECISION SINV1, SINV2, P, S(6)
 
       PARAMETER (ONE=1.D0,TWO=2.D0,THREE=3.D0, SIX = 6.D0,
      1     THIRD = ONE/THREE, SIXTH = ONE/SIX
-
+C
+C======================================================================+
+C-----------
+C  INPUT :
+C-----------
+C  S     	: STRESS TENSOR
+C  NSHR 	: NUMBER OF SHEAR COMPONENTS 
+C  NDI  	: NUMBER OF DIRECT COMPONENTS
+C-----------
+C  OUTPUT :
+C-----------
+C  SINV1	: FIRST INVARIANT
+C  SINV2        : SECOND INVARIANT
+C----------------------------------------------------------------------+
+C=======================================================================
 C
 C     CALCULATE FIRST INVARIANT
 C

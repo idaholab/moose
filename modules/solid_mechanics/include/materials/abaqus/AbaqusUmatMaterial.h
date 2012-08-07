@@ -3,9 +3,7 @@
 #ifndef ABAQUSUMATMATERIAL_H
 #define ABAQUSUMATMATERIAL_H
 
-
-typedef void (*umat_t)(Real STRESS[], Real STATEV[], Real DDSDDE[], Real* SSE, Real* SPD, Real* SCD, Real* RPL, Real DDSDDT[], Real DRPLDE[], Real* DRPLDT, Real STRAN[], Real DSTRAN[], Real TIME[], Real* DTIME, Real* TEMP, Real* DTEMP, Real PREDEF[], Real DPRED[], Real* CMNAME, int* NDI, int*NSHR, int*NTENS, int* NSTATV, Real PROPS[], int* NPROPS, Real COORDS[], Real DROT[][3], Real* PNEWDT, Real* CELENT, Real DFGRD0[][3], Real DFGRD1[][3], int* NOEL, int* NPT, int* LAYER, int* KSPT, int* KSTEP, int* KINC);
-
+typedef void (*umat_t)(Real STRESS[], Real STATEV[], Real DDSDDE[], Real* SSE, Real* SPD, Real* SCD, Real* RPL, Real DDSDDT[], Real DRPLDE[], Real* DRPLDT, Real STRAN[], Real DSTRAN[], Real TIME[], Real* DTIME, Real* TEMP, Real* DTEMP, Real PREDEF[], Real DPRED[], Real* CMNAME, int* NDI, int*NSHR, int*NTENS, int* NSTATV, Real PROPS[], int* NPROPS, Real COORDS[], Real DROT[][3], Real* PNEWDT, Real* CELENT, Real DFGRD0[], Real DFGRD1[], int* NOEL, int* NPT, int* LAYER, int* KSPT, int* KSTEP, int* KINC);
 
 //Forward Declaration
 class AbaqusUmatMaterial;
@@ -13,7 +11,7 @@ class AbaqusUmatMaterial;
 template<>
 InputParameters validParams<AbaqusUmatMaterial>();
 
-//Plastic Fortran Interface class define a property
+//AbaqusUmatMateral class define a property
 class AbaqusUmatMaterial : public SolidModel
 {
 public:
@@ -21,7 +19,6 @@ public:
                   InputParameters parameters);
   virtual ~AbaqusUmatMaterial();
   
-    
 protected:
   FileName _plugin;
   std::vector<Real> _mechanical_constants;
@@ -29,29 +26,37 @@ protected:
   unsigned int _num_state_vars;
   unsigned int _num_props;
 
-  /// The plugin library handle
+  // The plugin library handle
   void * _handle;
 
-  /// Function pointer to the dynamically loaded function
+  // Function pointer to the dynamically loaded function
   umat_t _umat;
 
-  //Dimension real scalar values
+  //UMAT real scalar values
   Real  _SSE, _SPD, _SCD, _DRPLDT, _RPL, _PNEWDT, _DTIME, _TEMP, _DTEMP, _CMNAME, _CELENT;
 
-  //Dimension integer values
-  int  _NDI, _NSHR, _NTENS, _NSTATV, _NPROPS, _NOEL, _NPT, _LAYER, _KSPT, _KSTEP, _KINC, i;
+  //UMAT integer values
+  int  _NDI, _NSHR, _NTENS, _NSTATV, _NPROPS, _NOEL, _NPT, _LAYER, _KSPT, _KSTEP, _KINC;
 
-  //Dimension arrays from FORTRAN file
-  Real * _STATEV,  * _DDSDDT, * _DRPLDE, * _STRAN, _PREDEF[1], _DPRED[1], _COORDS[3], _DROT[3][3], _DFGRD0[3][3], _DFGRD1[3][3], * _STRESS, * _DDSDDE, * _DSTRAN, _TIME[2], * _PROPS;
-  
-  //Dimension arrays to be used as references from FORTRAN arrays
-  Real mySTRESS[6];
+  //UMAT arrays
+  Real * _STATEV,  * _DDSDDT, * _DRPLDE, * _STRAN, _PREDEF[1], _DPRED[1], _COORDS[3], _DROT[3][3], * _DFGRD0, * _DFGRD1, * _STRESS, * _DDSDDE, * _DSTRAN, _TIME[2], * _PROPS;
 
   virtual void initQpStatefulProperties();
   virtual void computeStress();
 
+  VariableGradient & _grad_disp_x;
+  VariableGradient & _grad_disp_y;
+  VariableGradient & _grad_disp_z;
+  VariableGradient & _grad_disp_x_old;
+  VariableGradient & _grad_disp_y_old;
+  VariableGradient & _grad_disp_z_old;
   MaterialProperty<std::vector<Real> > & _state_var;
-  MaterialProperty<std::vector<Real> > & _state_var_old;  
+  MaterialProperty<std::vector<Real> > & _state_var_old;
+  MaterialProperty<ColumnMajorMatrix> & _Fbar;
+  MaterialProperty<ColumnMajorMatrix> & _Fbar_old;
+  MaterialProperty<Real> & _elastic_strain_energy;
+  MaterialProperty<Real> & _plastic_dissipation;
+  MaterialProperty<Real> & _creep_dissipation;  
 };
 
 #endif //ABAQUSUMATMATERIAL_H

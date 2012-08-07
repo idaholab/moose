@@ -1,4 +1,6 @@
       INCLUDE 'SPRINCInterface.f'
+      INCLUDE 'DROTCalc.f'
+      INCLUDE 'ROTSIGInterface.f'
 
 ****************************************************************************************
 **  UMAT, FOR ABAQUS/STANDARD INCORPORATING ELASTO-VISCOPLASTICITY WITH LINEAR        **
@@ -30,7 +32,7 @@ C
       PARAMETER (ONE=1.0,TWO=2.0,THREE=3.0)
 C
       DIMENSION DPSTRAN(6), STRESSOLD(6), DESTRAN(6), DSTRESS(6),
-     +          PS(3), DIR(6)     
+     +          PS(3), DIR(6), STRESSROT(NTENS)    
 C
 C
 C     PROPS(1) - E
@@ -78,13 +80,17 @@ C
          DDSDDE(K1, K1)=EG
       END DO
 C
+C      PRINT *, DDSDDE
 C     SAVE STRESS AT BEGINNING OF TIME STEP IN STRESSOLD
 C
+C      PRINT *, STRESS
+
       DO K=1,NTENS
          STRESSOLD(K) = STRESS(K)
       END DO
 C
 C     OBTAIN TRIAL (ELASTIC) STRESS
+C      PRINT *, DSTRAN
 C
       CALL KMLT1(DDSDDE,DSTRAN,DSTRESS,NTENS)
 C
@@ -92,28 +98,31 @@ C
          STRESS(K) = STRESS(K) + DSTRESS(K)
       END DO
 C
+C      PRINT *, STRESS
       CALL SPRINC(STRESS,PS,1,NDI,NSHR)
 C
-C      PRINT *, AN
+C      PRINT *, PS
 C    DETERMINE EFFECTIVE TRIAL STRESS
 C
       PJ = (ONE/SQRT(TWO))*SQRT((PS(1)-PS(2))**2 + 
      +     (PS(2)-PS(3))**2 + (PS(3)-PS(1))**2)
 C      PRINT *, PJ
 C
-C
       FLOW = PJ - R - YIELD
 C
+C      PRINT *, FLOW
+
       STATEV(3) = FLOW
+      
+      XDP = 0.
+      XFLOW = 1.
+      XPHI = 1.
+      XPHIDP = 1.
+      XPHIR = 1.
+      XRES = 1.
 
       IF(FLOW.GT.0.)THEN
 C
-         XDP = 0.
-         XFLOW = 1.
-         XPHI = 1.
-         XPHIDP = 1.
-         XPHIR = 1.
-         XRES = 1.
 C     USE NEWTON ITERATION TO DETERMINE EFFECTIVE PLASTIC
 C     STRAIN INCREMENT
 C
@@ -123,7 +132,7 @@ C
             XPHI =  ALPHA*SINH(XFLOW)
             XPHIDP = -THREE*EG*ALPHA*BETA*COSH(XFLOW)
             XPHIR = -ALPHA*BETA*COSH(XFLOW)
-            XRES = XPHI - (XDP/DTIME)
+            XRES = XPHI - (XDP/DTIME) 
             DEQPL = XRES/((ONE/DTIME) - XPHIDP - (H*XPHIR))
             XDP = XDP + DEQPL
             R = R0 + H*XDP
@@ -133,12 +142,23 @@ C
 C
       END IF
 C
+C      PRINT *, XFLOW
+C      PRINT *, XPHI
+C      PRINT *, XPHIDP
+C      PRINT *, XPHIR
+C      PRINT *, XRES
+C      PRINT *, DEQPL
+C      PRINT *, XDP
+C      PRINT *, R
+
 C     DETERMINE THE INCREMENTS IN PLASTIC STRAIN (ENGINEERING SHEAR)
 C
       SIGM = (ONE/THREE)*(STRESS(1) + STRESS(2) +
      +       STRESS(3))
 C
-      IF(PJ.GT.0.)THEN
+C      PRINT *, SIGM
+C      PRINT *, PJ
+      IF(PJ.GT.1.E-10)THEN
          DO K=1,NDI
             DIR(K) = ((THREE/TWO)*(STRESS(K)-SIGM))/PJ
          END DO
@@ -146,12 +166,15 @@ C
             DIR(K) = ((THREE/TWO)*STRESS(K))/PJ
          END DO
       END IF
+C      PRINT *, DIR
       DO K=1,NDI
          DPSTRAN(K) = XDP*DIR(K)
       END DO
       DO K=NDI+1,NTENS
          DPSTRAN(K) = TWO*XDP*DIR(K)
       END DO
+
+C      PRINT *, DPSTRAN
 C      
 C     CALCULATE THE ELASTIC STRAIN INCREMENTS      
 C      
@@ -168,9 +191,21 @@ C     UPDATE THE STRESS, EFFECTIVE PLASTIC STRAIN
 C     (NOTE: ISOTROPIC HARDENING VARIABLE ALREADY UPDATED)
 C
       DO K = 1,NTENS
-         STRESS(K) = DSTRESS(K)
+         STRESS(K) = STRESSOLD(K) + DSTRESS(K)
       END DO
 
+********************************************************
+**    TESTING ROTSIG                                  **
+********************************************************
+      CALL DROTCalc(DSTRAN, DROT, DFGRD0, DFGRD1, DTIME, NTENS)
+      CALL ROTSIG(STRESS, DROT, STRESSROT, 1, NDI, NSHR)
+C
+      DO K =1,6
+         STRESS(K) = STRESSROT(K)
+      END DO
+
+********************************************************
+********************************************************
 C
       P = P + XDP
 C
