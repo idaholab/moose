@@ -90,7 +90,7 @@ class ExecuteWidget(QtGui.QWidget):
     
     self.execution_text = QtGui.QTextEdit()
     self.execution_text.setToolTip('The text output from the simulation will show here.  If this is scrolled to the bottom it will automatically scroll as output comes out.')
-    self.execution_text.setMinimumHeight(400)
+    self.execution_text.setMinimumHeight(300)
     self.execution_text.setMinimumWidth(800)
     self.execution_text.setFontFamily('Courier')
     self.execution_text.setFontPointSize(10)

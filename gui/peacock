@@ -67,7 +67,7 @@ class UiBox(QtGui.QMainWindow):
     self.main_layout.addWidget(self.tab_widget)
     
     self.main_ui.setLayout(self.main_layout)
-    self.resize(700,800)
+    self.resize(700,600)
     
 def recursiveFindExecutable(current_path, p):
   files = os.listdir(current_path)

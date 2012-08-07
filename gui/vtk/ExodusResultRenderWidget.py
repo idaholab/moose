@@ -50,7 +50,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.setLayout(self.main_layout)
 
     self.vtkwidget = vtk.QVTKWidget2()
-    self.vtkwidget.setMinimumHeight(600)
+    self.vtkwidget.setMinimumHeight(300)
 
     self.renderer = vtk.vtkRenderer()
     self.renderer.SetBackground(0.2,0.2,0.2)
