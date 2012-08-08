@@ -179,8 +179,6 @@ public:
   virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
   virtual void outputPps(const FormattedTable & table);
 
-  virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
-
   /**
    * Set which variables will be written in output files
    * @param output_variables The list of variable names to write in the output files

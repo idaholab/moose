@@ -19,7 +19,7 @@
 #include "point.h"
 #include "periodic_boundaries.h"
 
-class SubProblem;
+class FEProblem;
 class Function;
 
 /**
@@ -32,7 +32,7 @@ public:
   /**
    * Initialize the periodic boundary with three function
    */
-  FunctionPeriodicBoundary(SubProblem & subproblem, std::vector<std::string> fn_names);
+  FunctionPeriodicBoundary(FEProblem & subproblem, std::vector<std::string> fn_names);
 
   /**
    * Copy constructor for creating the periodic boundary and inverse periodic boundary

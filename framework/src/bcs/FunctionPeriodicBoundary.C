@@ -13,19 +13,19 @@
 /****************************************************************/
 
 #include "FunctionPeriodicBoundary.h"
-#include "SubProblem.h"
+#include "FEProblem.h"
 #include "Function.h"
 
 /**
  */
-FunctionPeriodicBoundary::FunctionPeriodicBoundary(SubProblem & subproblem, std::vector<std::string> fn_names) :
+FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblem & feproblem, std::vector<std::string> fn_names) :
     _dim(fn_names.size()),
     _dir(1.0),
-    _tr_x(&subproblem.getFunction(fn_names[0])),
-    _tr_y(fn_names.size() > 1 ? &subproblem.getFunction(fn_names[1]) : NULL),
-    _tr_z(fn_names.size() > 2 ? &subproblem.getFunction(fn_names[2]) : NULL)
+    _tr_x(&feproblem.getFunction(fn_names[0])),
+    _tr_y(fn_names.size() > 1 ? &feproblem.getFunction(fn_names[1]) : NULL),
+    _tr_z(fn_names.size() > 2 ? &feproblem.getFunction(fn_names[2]) : NULL)
 {
-  if (_dim != subproblem.mesh().dimension())
+  if (_dim != feproblem.mesh().dimension())
     mooseError("Transform function has to have the same dimension as the problem being solved.");
 }
 

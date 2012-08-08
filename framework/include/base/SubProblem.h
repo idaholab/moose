@@ -127,9 +127,6 @@ public:
    */
   virtual bool computingInitialResidual() = 0;
 
-  // Function /////
-  virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0) = 0;
-
 public:
   /**
    * Convenience zeros
