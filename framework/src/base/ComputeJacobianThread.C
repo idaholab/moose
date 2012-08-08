@@ -23,7 +23,6 @@
 ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _jacobian(jacobian),
-    _problem(*fe_problem.parent()),
     _fe_problem(fe_problem),
     _sys(sys)
 {}
@@ -32,7 +31,6 @@ ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSy
 ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
     _jacobian(x._jacobian),
-    _problem(x._problem),
     _fe_problem(x._fe_problem),
     _sys(x._sys)
 {}
@@ -80,17 +78,17 @@ ComputeJacobianThread::computeInternalFaceJacobian()
 void
 ComputeJacobianThread::onElement(const Elem *elem)
 {
-  _problem.prepare(elem, _tid);
-  _problem.reinitElem(elem, _tid);
+  _fe_problem.prepare(elem, _tid);
+  _fe_problem.reinitElem(elem, _tid);
 
   SubdomainID subdomain = elem->subdomain_id();
   if (subdomain != _subdomain)
   {
-    _problem.subdomainSetup(subdomain, _tid);
+    _fe_problem.subdomainSetup(subdomain, _tid);
     _sys._kernels[_tid].updateActiveKernels(subdomain);
   }
 
-  _problem.reinitMaterials(subdomain, _tid);
+  _fe_problem.reinitMaterials(subdomain, _tid);
 
   computeJacobian();
 }
@@ -101,13 +99,13 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
   std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {
-    _problem.reinitElemFace(elem, side, bnd_id, _tid);
+    _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
     unsigned int subdomain = elem->subdomain_id();
     if (subdomain != _subdomain)
-      _problem.subdomainSetupSide(subdomain, _tid);
+      _fe_problem.subdomainSetupSide(subdomain, _tid);
 
-    _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
+    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
 
     computeFaceJacobian(bnd_id);
   }
@@ -128,16 +126,16 @@ ComputeJacobianThread::onInternalSide(const Elem *elem, unsigned int side)
     std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
     if (dgks.size() > 0)
     {
-      _problem.reinitNeighbor(elem, side, _tid);
+      _fe_problem.reinitNeighbor(elem, side, _tid);
 
-      _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
-      _problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
+      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
+      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
 
       computeInternalFaceJacobian();
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _problem.addJacobianNeighbor(_jacobian, _tid);
+        _fe_problem.addJacobianNeighbor(_jacobian, _tid);
       }
     }
   }
@@ -147,7 +145,7 @@ void
 ComputeJacobianThread::postElement(const Elem * /*elem*/)
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-  _problem.addJacobian(_jacobian, _tid);
+  _fe_problem.addJacobian(_jacobian, _tid);
 }
 
 void ComputeJacobianThread::join(const ComputeJacobianThread & /*y*/)

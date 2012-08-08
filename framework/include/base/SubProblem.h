@@ -45,7 +45,6 @@ public:
   SubProblem(const std::string & name, InputParameters parameters);
   virtual ~SubProblem();
 
-  virtual Problem * parent() { return _parent; }
   virtual EquationSystems & es() { return _eq; }
   virtual MooseMesh & mesh() { return _mesh; }
 
@@ -134,10 +133,56 @@ public:
    */
   virtual std::vector<SubdomainName> getMaterialPropertyBlockNames(const std::string prop_name);
 
+  /**
+   * Returns true if the problem is in the process of computing it's initial residual.
+   * @return Whether or not the problem is currently computing the initial residual.
+   */
+  virtual bool computingInitialResidual() = 0;
+
+  // Function /////
+  virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0) = 0;
+
+  // UserData /////
+  /**
+   * Get the user object by its name
+   * @param name The name of the user object being retrieved
+   * @param tid The thread ID
+   * @return Const reference to the user object
+   */
+  template <class T>
+  const T & getUserObject(const std::string & name, THREAD_ID tid = 0)
+  {
+    UserObject * user_object = _user_objects[tid].getUserObjectByName(name);
+    if (user_object == NULL)
+    {
+      mooseError("Unable to find user object with name '" + name + "'");
+    }
+    return dynamic_cast<const T &>(*user_object);
+  }
+
+  /**
+   * Check if there if a user object of given name
+   * @param name The name of the user object being checked for
+   * @param tid  The thread ID
+   * @return true if the user object exists, false otherwise
+   */
+  bool hasUserObject(const std::string & name, THREAD_ID tid = 0)
+  {
+    return _user_objects[tid].hasUserObject(name);
+  }
+
+public:
+  /**
+   * Convenience zeros
+   */
+  MooseArray<Real> _real_zero;
+  MooseArray<MooseArray<Real> > _zero;
+  MooseArray<MooseArray<RealGradient> > _grad_zero;
+  MooseArray<MooseArray<RealTensor> > _second_zero;
+
 protected:
-  Problem * _parent;
   MooseMesh & _mesh;
-  EquationSystems & _eq;
+  EquationSystems _eq;
 
   /// Type of coordinate system per subdomain
   std::map<SubdomainID, Moose::CoordinateSystemType> _coord_sys;
@@ -155,6 +200,9 @@ protected:
 
   /// the map of material properties (block_id -> list of properties)
   std::map<unsigned int, std::set<std::string> > _map_material_props;
+
+  /// User objects
+  std::vector<UserObjectWarehouse> _user_objects;
 };
 
 

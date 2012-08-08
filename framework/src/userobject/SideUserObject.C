@@ -45,10 +45,10 @@ SideUserObject::SideUserObject(const std::string & name, InputParameters paramet
     _u(_var.sln()),
     _grad_u(_var.gradSln()),
     //
-    _real_zero(_problem._real_zero[_tid]),
-    _zero(_problem._zero[_tid]),
-    _grad_zero(_problem._grad_zero[_tid]),
-    _second_zero(_problem._second_zero[_tid])
+    _real_zero(_subproblem._real_zero[_tid]),
+    _zero(_subproblem._zero[_tid]),
+    _grad_zero(_subproblem._grad_zero[_tid]),
+    _second_zero(_subproblem._second_zero[_tid])
 {}
 
 Real

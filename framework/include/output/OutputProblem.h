@@ -34,9 +34,6 @@ public:
   OutputProblem(const std::string & name, InputParameters parameters);
   virtual ~OutputProblem();
 
-  virtual EquationSystems & es() { return _eq; }
-  virtual Problem * parent() { return NULL; }
-
   // Variables /////
   virtual bool hasVariable(const std::string & /*var_name*/) { return false; } // TODO
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) { return _mproblem.getVariable(tid, var_name); } // TODO
@@ -67,8 +64,6 @@ public:
 
   // Solve /////
   virtual void init();
-
-  virtual bool computingInitialResidual() { return false; }
 
   virtual void computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & /*soln*/, NumericVector<Number> & /*residual*/) {}
   virtual void computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & /*soln*/, SparseMatrix<Number> & /*jacobian*/) {}

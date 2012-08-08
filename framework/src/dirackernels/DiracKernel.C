@@ -45,7 +45,6 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     TransientInterface(parameters, name, "dirac_kernels"),
     MaterialPropertyInterface(parameters),
     GeometricSearchInterface(parameters),
-    _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
@@ -73,10 +72,10 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu()),
 
-    _real_zero(_problem._real_zero[_tid]),
-    _zero(_problem._zero[_tid]),
-    _grad_zero(_problem._grad_zero[_tid]),
-    _second_zero(_problem._second_zero[_tid])
+    _real_zero(_subproblem._real_zero[_tid]),
+    _zero(_subproblem._zero[_tid]),
+    _grad_zero(_subproblem._grad_zero[_tid]),
+    _second_zero(_subproblem._second_zero[_tid])
 {
 }
 

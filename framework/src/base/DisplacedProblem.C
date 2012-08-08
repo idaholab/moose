@@ -106,7 +106,6 @@ protected:
 
 DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, InputParameters params) :
     SubProblem(mproblem.name() + "_disp", params),
-    _problem(*mproblem.parent()),
     _mproblem(mproblem),
     _mesh(displaced_mesh),
     _eq(displaced_mesh),

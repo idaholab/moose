@@ -123,7 +123,6 @@ public:
   SparseMatrix<Number> * _jacobian;
 
 protected:
-  Problem & _problem;
   SubProblem & _subproblem;
   SystemBase & _sys;
 

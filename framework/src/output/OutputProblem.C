@@ -24,7 +24,6 @@ InputParameters validParams<OutputProblem>()
 {
   InputParameters params = validParams<Problem>();
   params.addRequiredParam<FEProblem *>("mproblem", "The FE problem containing this OutputProblem");
-  params.addParam<Problem *>("parent", NULL, "This problem's parent problem (if any)");
   params.addRequiredParam<unsigned int>("refinements", "The number of refinements to use in the oversampled mesh");
   return params;
 }

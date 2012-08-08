@@ -55,13 +55,12 @@ public:
 
 protected:
   /**
-   * This MUST be overriden by a child damper.
+   * This MUST be overridden by a child damper.
    *
    * This is where they actually compute a number between 0 and 1.
    */
   virtual Real computeQpDamping() = 0;
 
-  Problem & _problem;
   SubProblem & _subproblem;
   SystemBase & _sys;
 

@@ -144,7 +144,6 @@ protected:
    */
   const Elem * addPoint(Point p);
 
-  Problem & _problem;
   SubProblem & _subproblem;
   SystemBase & _sys;
 

@@ -78,7 +78,6 @@ public:
 
 
 protected:
-  Problem & _problem;
   SubProblem & _subproblem;
   SystemBase & _sys;
 

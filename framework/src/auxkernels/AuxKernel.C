@@ -55,7 +55,6 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     PostprocessorInterface(parameters),
     DependencyResolverInterface(),
     GeometricSearchInterface(parameters),
-    _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _nl_sys(*parameters.get<SystemBase *>("_nl_sys")),
@@ -86,10 +85,10 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
 
     _solution(_aux_sys.solution()),
 
-    _real_zero(_problem._real_zero[_tid]),
-    _zero(_problem._zero[_tid]),
-    _grad_zero(_problem._grad_zero[_tid]),
-    _second_zero(_problem._second_zero[_tid])
+    _real_zero(_subproblem._real_zero[_tid]),
+    _zero(_subproblem._zero[_tid]),
+    _grad_zero(_subproblem._grad_zero[_tid]),
+    _second_zero(_subproblem._second_zero[_tid])
 {
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 

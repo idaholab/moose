@@ -51,9 +51,6 @@ public:
   Problem(const std::string & name, InputParameters parameters);
   virtual ~Problem();
 
-  virtual EquationSystems & es() = 0;
-  virtual Problem * parent() = 0;
-
   /**
    * Get the name of this problem
    * @return The name of this problem
@@ -117,12 +114,6 @@ public:
   // Solve /////
   virtual void init() = 0;
 
-  /**
-   * Returns true if the problem is in the process of computing it's initial residual.
-   * @return Whether or not the problem is currently computing the initial residual.
-   */
-  virtual bool computingInitialResidual() = 0;
-
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual) = 0;
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian) = 0;
   virtual void computeBounds(NonlinearImplicitSystem & sys, NumericVector<Number> & lower, NumericVector<Number> & upper) = 0;
@@ -151,45 +142,6 @@ public:
   virtual void outputPostprocessors(bool force = false) = 0;
   virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0) = 0;
 
-  // Function /////
-  virtual void addFunction(std::string type, const std::string & name, InputParameters parameters);
-  virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0) = 0;
-
-  // UserData /////
-  /**
-   * Adds an user object to this problem
-   * @param type The type (C++ class name) of the user object
-   * @param name The name of the user object
-   * @param parameters Parameters of the user object
-   */
-  virtual void addUserObject(const std::string & type, const std::string & name, InputParameters parameters);
-  /**
-   * Get the user object by its name
-   * @param name The name of the user object being retrieved
-   * @param tid The thread ID
-   * @return Const reference to the user object
-   */
-  template <class T>
-  const T & getUserObject(const std::string & name, THREAD_ID tid = 0)
-  {
-    UserObject * user_object = _user_objects[tid].getUserObjectByName(name);
-    if (user_object == NULL)
-    {
-      mooseError("Unable to find user object with name '" + name + "'");
-    }
-    return dynamic_cast<const T &>(*user_object);
-  }
-
-  /**
-   * Check if there if a user object of given name
-   * @param name The name of the user object being checked for
-   * @param tid  The thread ID
-   * @return true if the user object exists, false otherwise
-   */
-  bool hasUserObject(const std::string & name, THREAD_ID tid = 0)
-  {
-    return _user_objects[tid].hasUserObject(name);
-  }
 
   // Transient /////
   virtual void copySolutionsBackwards() = 0;
@@ -218,23 +170,11 @@ public:
 
   const std::vector<TimePeriod *> & getTimePeriods() const;
 
-public:
-  /**
-   * Convenience zeros
-   */
-  MooseArray<Real> _real_zero;
-  MooseArray<MooseArray<Real> > _zero;
-  MooseArray<MooseArray<RealGradient> > _grad_zero;
-  MooseArray<MooseArray<RealTensor> > _second_zero;
-
 protected:
   /// The name of the problem
   std::string _name;
   /// Generic parameters object used during construction
   InputParameters _pars;
-
-  /// User objects
-  std::vector<UserObjectWarehouse> _user_objects;
 
   /// output initial condition if true
   bool _output_initial;

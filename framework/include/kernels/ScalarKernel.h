@@ -72,7 +72,6 @@ public:
   virtual bool isActive() { return true; }
 
 protected:
-  Problem & _problem;
   SubProblem & _subproblem;
   SystemBase & _sys;
 

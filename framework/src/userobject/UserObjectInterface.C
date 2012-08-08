@@ -16,7 +16,7 @@
 #include "UserObject.h"
 
 UserObjectInterface::UserObjectInterface(InputParameters & params) :
-    _uoi_problem(*params.get<Problem *>("_problem")),
+    _uoi_subproblem(*params.get<SubProblem *>("_subproblem")),
     _uoi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
     _uoi_params(params)
 {

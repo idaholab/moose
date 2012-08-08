@@ -208,6 +208,12 @@ public:
   virtual void reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int side, THREAD_ID tid);
   virtual void reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid);
 
+  /**
+   * Adds an user object to this problem
+   * @param type The type (C++ class name) of the user object
+   * @param name The name of the user object
+   * @param parameters Parameters of the user object
+   */
   virtual void addUserObject(const std::string & type, const std::string & name, InputParameters parameters);
 
   // Postprocessors /////

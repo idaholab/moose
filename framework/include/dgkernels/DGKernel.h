@@ -89,7 +89,6 @@ public:
   virtual void computeOffDiagJacobian(unsigned int jvar);
 
 protected:
-  Problem & _problem;
   SubProblem & _subproblem;
   SystemBase & _sys;
 

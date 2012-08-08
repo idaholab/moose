@@ -339,7 +339,6 @@ public:
   virtual void addVariableToCopy(const std::string & name, unsigned int timestep) = 0;
 
 protected:
-  Problem & _problem;
   SubProblem & _subproblem;
   MooseMesh & _mesh;
   /// The name of this system

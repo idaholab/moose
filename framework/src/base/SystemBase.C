@@ -42,7 +42,6 @@ void extraSparsity(SparsityPattern::Graph & sparsity,
 }
 
 SystemBase::SystemBase(SubProblem & subproblem, const std::string & name) :
-    _problem(*subproblem.parent()),
     _subproblem(subproblem),
     _mesh(subproblem.mesh()),
     _name(name),
@@ -283,7 +282,6 @@ SystemBase::reinitScalars(THREAD_ID tid)
 void
 SystemBase::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = &_problem;
   parameters.set<SubProblem *>("_subproblem") = &_subproblem;
   parameters.set<SystemBase *>("_sys") = this;
 
@@ -307,7 +305,6 @@ SystemBase::addInitialCondition(const std::string & ic_name, const std::string &
 void
 SystemBase::addScalarInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = &_problem;
   parameters.set<SubProblem *>("_subproblem") = &_subproblem;
   parameters.set<SystemBase *>("_sys") = this;
 

@@ -17,7 +17,7 @@
 
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
-#include "Problem.h"
+#include "SubProblem.h"
 #include "MooseTypes.h"
 
 class UserObject;
@@ -53,7 +53,7 @@ public:
   const T & getUserObjectByName(const std::string & name);
 
 private:
-  Problem & _uoi_problem;
+  SubProblem & _uoi_subproblem;
   /// Thread ID
   THREAD_ID _uoi_tid;
   /// Parameters of the object with this interface
@@ -64,14 +64,14 @@ template<class T>
 const T &
 UserObjectInterface::getUserObject(const std::string & name)
 {
-  return _uoi_problem.getUserObject<T>(_uoi_params.get<UserObjectName>(name), _uoi_tid);
+  return _uoi_subproblem.getUserObject<T>(_uoi_params.get<UserObjectName>(name), _uoi_tid);
 }
 
 template<class T>
 const T &
 UserObjectInterface::getUserObjectByName(const std::string & name)
 {
-  return _uoi_problem.getUserObject<T>(name, _uoi_tid);
+  return _uoi_subproblem.getUserObject<T>(name, _uoi_tid);
 }
 
 #endif //USEROBJECTFACE_H

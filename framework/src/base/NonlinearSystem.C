@@ -57,23 +57,21 @@
 #endif
 
 namespace Moose {
-  void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys);
-
   void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys)
   {
-    Problem * p = sys.get_equation_systems().parameters.get<Problem *>("_problem");
+    SubProblem * p = sys.get_equation_systems().parameters.get<SubProblem *>("_subproblem");
     p->computeJacobian(sys, soln, jacobian);
   }
 
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys)
   {
-    Problem * p = sys.get_equation_systems().parameters.get<Problem *>("_problem");
+    SubProblem * p = sys.get_equation_systems().parameters.get<SubProblem *>("_subproblem");
     p->computeResidual(sys, soln, residual);
   }
 
   void compute_bounds (NumericVector<Number>& lower, NumericVector<Number>& upper, NonlinearImplicitSystem& sys)
   {
-    Problem * p = sys.get_equation_systems().parameters.get<Problem *>("_problem");
+    SubProblem * p = sys.get_equation_systems().parameters.get<SubProblem *>("_subproblem");
     p->computeBounds(sys, lower, upper);
   }
 
@@ -664,7 +662,7 @@ NonlinearSystem::setInitialSolution()
     if(node->processor_id() == libMesh::processor_id())
     {
       // reinit variables in nodes
-      _problem.reinitNodeFace(node, boundary_id, 0);
+      _subproblem.reinitNodeFace(node, boundary_id, 0);
 
       std::vector<PresetNodalBC*> p( _bcs[0].activePresetNodal(boundary_id) );
       for (std::vector<PresetNodalBC *>::iterator it = p.begin(); it != p.end(); ++it)
@@ -797,8 +795,8 @@ NonlinearSystem::enforceNodalConstraintsResidual(NumericVector<Number> & residua
 
     Node & master_node = _mesh.node(nc->getMasterNodeId());
     // reinit variables at the master node
-    _problem.reinitNode(&master_node, tid);
-    _problem.prepareAssembly(tid);
+    _subproblem.reinitNode(&master_node, tid);
+    _subproblem.prepareAssembly(tid);
 
     // go over slave nodes
     std::vector<unsigned int> slave_nodes = nc->getSlaveNodeId();
@@ -806,7 +804,7 @@ NonlinearSystem::enforceNodalConstraintsResidual(NumericVector<Number> & residua
     {
       Node & slave_node = _mesh.node(*it);
       // reinit variables on the slave node
-      _problem.reinitNodeNeighbor(&slave_node, tid);
+      _subproblem.reinitNodeNeighbor(&slave_node, tid);
       // compute residual
       nc->computeResidual(residual);
     }
@@ -825,8 +823,8 @@ NonlinearSystem::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian
 
     Node & master_node = _mesh.node(nc->getMasterNodeId());
     // reinit variables at the master node
-    _problem.reinitNode(&master_node, tid);
-    _problem.prepareAssembly(tid);
+    _subproblem.reinitNode(&master_node, tid);
+    _subproblem.prepareAssembly(tid);
 
     // go over slave nodes
     std::vector<unsigned int> slave_nodes = nc->getSlaveNodeId();
@@ -834,7 +832,7 @@ NonlinearSystem::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian
     {
       Node & slave_node = _mesh.node(*it);
       // reinit variables on the slave node
-      _problem.reinitNodeNeighbor(&slave_node, tid);
+      _subproblem.reinitNodeNeighbor(&slave_node, tid);
       // compute residual
       nc->computeJacobian(jacobian);
     }
@@ -893,15 +891,15 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
             unsigned int master_side = info._side_num;
 
             // reinit variables at the node
-            _problem.reinitNodeFace(&slave_node, slave_boundary, 0);
+            _subproblem.reinitNodeFace(&slave_node, slave_boundary, 0);
 
-            _problem.prepareAssembly(0);
+            _subproblem.prepareAssembly(0);
 
             std::vector<Point> points;
             points.push_back(info._closest_point);
 
             // reinit variables on the master element's face at the contact point
-            _problem.reinitNeighborPhys(master_elem, master_side, points, 0);
+            _subproblem.reinitNeighborPhys(master_elem, master_side, points, 0);
 
             for(unsigned int c=0; c < constraints.size(); c++)
             {
@@ -981,15 +979,15 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
             unsigned int master_side = info._side_num;
 
             // reinit variables at the node
-            _problem.reinitNodeFace(&slave_node, slave_boundary, 0);
+            _subproblem.reinitNodeFace(&slave_node, slave_boundary, 0);
 
-            _problem.prepareAssembly(0);
+            _subproblem.prepareAssembly(0);
 
             std::vector<Point> points;
             points.push_back(info._closest_point);
 
             // reinit variables on the master element's face at the contact point
-            _problem.reinitNeighborPhys(master_elem, master_side, points, 0);
+            _subproblem.reinitNeighborPhys(master_elem, master_side, points, 0);
 
             for(unsigned int c=0; c < constraints.size(); c++)
             {
@@ -1001,10 +999,10 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
                 nfc->computeResidual();
 
                 if(nfc->overwriteSlaveResidual())
-                  _problem.setResidual(residual, 0);
+                  _subproblem.setResidual(residual, 0);
                 else
-                  _problem.cacheResidual(0);
-                _problem.cacheResidualNeighbor(0);
+                  _subproblem.cacheResidual(0);
+                _subproblem.cacheResidualNeighbor(0);
               }
             }
           }
@@ -1019,7 +1017,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
   if(constraints_applied)
   {
     residual.close();
-    _problem.addCachedResidual(residual, 0);
+    _subproblem.addCachedResidual(residual, 0);
   }
 }
 
@@ -1128,7 +1126,7 @@ NonlinearSystem::finishResidual(NumericVector<Number> & residual)
     if(node->processor_id() == libMesh::processor_id())
     {
       // reinit variables in nodes
-      _problem.reinitNodeFace(node, boundary_id, 0);
+      _subproblem.reinitNodeFace(node, boundary_id, 0);
 
       std::vector<NodalBC *> bcs = _bcs[0].activeNodal(boundary_id);
       for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
@@ -1315,15 +1313,15 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
             unsigned int master_side = info._side_num;
 
             // reinit variables at the node
-            _problem.reinitNodeFace(&slave_node, slave_boundary, 0);
+            _subproblem.reinitNodeFace(&slave_node, slave_boundary, 0);
 
-            _problem.prepareAssembly(0);
+            _subproblem.prepareAssembly(0);
 
             std::vector<Point> points;
             points.push_back(info._closest_point);
 
             // reinit variables on the master element's face at the contact point
-            _problem.reinitNeighborPhys(master_elem, master_side, points, 0);
+            _subproblem.reinitNeighborPhys(master_elem, master_side, points, 0);
             for(unsigned int c=0; c < constraints.size(); c++)
             {
               NodeFaceConstraint * nfc = constraints[c];
@@ -1353,8 +1351,8 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
                 // Cache the jacobian block for the master side
                 _subproblem.assembly(0).cacheJacobianBlock(nfc->_Kne, nfc->variable().dofIndicesNeighbor(), nfc->_connected_dof_indices, nfc->variable().scalingFactor());
 
-                _problem.cacheJacobian(0);
-                _problem.cacheJacobianNeighbor(0);
+                _subproblem.cacheJacobian(0);
+                _subproblem.cacheJacobianNeighbor(0);
               }
             }
           }
@@ -1388,7 +1386,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
     jacobian.close();
     jacobian.zero_rows(zero_rows, 0.0);
     jacobian.close();
-    _problem.addCachedJacobian(jacobian, 0);
+    _subproblem.addCachedJacobian(jacobian, 0);
     jacobian.close();
   }
 }
@@ -1522,7 +1520,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 
       if(node->processor_id() == libMesh::processor_id())
       {
-        _problem.reinitNodeFace(node, boundary_id, 0);
+        _subproblem.reinitNodeFace(node, boundary_id, 0);
 
         for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
         {
@@ -1628,17 +1626,17 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
       dof_map.dof_indices(elem, dof_indices);
       if(dof_indices.size())
       {
-        _problem.prepare(elem, ivar, jvar, dof_indices, tid);
-        _problem.reinitElem(elem, tid);
+        _subproblem.prepare(elem, ivar, jvar, dof_indices, tid);
+        _subproblem.reinitElem(elem, tid);
 
         if(cur_subdomain != subdomain)
         {
           subdomain = cur_subdomain;
-          _problem.subdomainSetup(subdomain, tid);
+          _subproblem.subdomainSetup(subdomain, tid);
           _kernels[tid].updateActiveKernels(cur_subdomain);
         }
 
-        _problem.parent()->reinitMaterials(cur_subdomain, tid);
+        _subproblem.reinitMaterials(cur_subdomain, tid);
 
         //Kernels
         std::vector<Kernel *> kernels = _kernels[tid].active();
@@ -1665,8 +1663,8 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
               std::vector<IntegratedBC *> bcs = _bcs[tid].activeIntegrated(bnd_id);
               if (bcs.size() > 0)
               {
-                _problem.reinitElemFace(elem, side, bnd_id, tid);
-                _problem.parent()->reinitMaterialsFace(elem->subdomain_id(), side, tid);
+                _subproblem.reinitElemFace(elem, side, bnd_id, tid);
+                _subproblem.reinitMaterialsFace(elem->subdomain_id(), side, tid);
 
                 for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
                 {
@@ -1699,10 +1697,10 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
               std::vector<DGKernel *> dgks = _dg_kernels[tid].active();
               if (dgks.size() > 0)
               {
-                _problem.reinitNeighbor(elem, side, tid);
+                _subproblem.reinitNeighbor(elem, side, tid);
 
-                _problem.reinitMaterialsFace(elem->subdomain_id(), side, tid);
-                _problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, tid);
+                _subproblem.reinitMaterialsFace(elem->subdomain_id(), side, tid);
+                _subproblem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, tid);
 
                 for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
                 {
@@ -1718,14 +1716,14 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
                 dof_map.dof_indices(neighbor, neighbor_dof_indices);
                 {
                   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-                  _problem.addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tid);
+                  _subproblem.addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tid);
                 }
               }
             }
           }
         }
 
-        _problem.addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tid);
+        _subproblem.addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tid);
       }
     }
   }
@@ -1747,7 +1745,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
     {
       if (node->processor_id() == libMesh::processor_id())
       {
-        _problem.parent()->reinitNodeFace(node, boundary_id, 0);
+        _subproblem.reinitNodeFace(node, boundary_id, 0);
 
         for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
         {
@@ -1789,7 +1787,7 @@ NonlinearSystem::computeDamping(const NumericVector<Number>& update)
   if(_dampers[0].all().size() > 0)
   {
     *_increment_vec = update;
-    ComputeDampingThread cid(_problem, *this);
+    ComputeDampingThread cid(_subproblem, *this);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
     damping = cid.damping();
   }

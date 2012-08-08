@@ -39,7 +39,6 @@ public:
 
 protected:
   SparseMatrix<Number> & _jacobian;
-  Problem & _problem;
   FEProblem & _fe_problem;
   NonlinearSystem & _sys;
 

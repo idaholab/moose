@@ -791,7 +791,6 @@ FEProblem::getObjectsByName(const std::string & name, THREAD_ID tid)
 void
 FEProblem::addFunction(std::string type, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -845,7 +844,6 @@ FEProblem::addScalarVariable(const std::string & var_name, Order order, Real sca
 void
 FEProblem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -863,7 +861,6 @@ FEProblem::addKernel(const std::string & kernel_name, const std::string & name, 
 void
 FEProblem::addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -880,7 +877,6 @@ FEProblem::addScalarKernel(const std::string & kernel_name, const std::string & 
 void
 FEProblem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -900,7 +896,6 @@ FEProblem::addConstraint(const std::string & c_name, const std::string & name, I
 {
   _has_constraints = true;
 
-  parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -951,7 +946,6 @@ FEProblem::addAuxScalarVariable(const std::string & var_name, Order order, Real 
 void
 FEProblem::addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -971,7 +965,6 @@ FEProblem::addAuxKernel(const std::string & kernel_name, const std::string & nam
 void
 FEProblem::addAuxScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -988,7 +981,6 @@ FEProblem::addAuxScalarKernel(const std::string & kernel_name, const std::string
 void
 FEProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
 
@@ -1009,7 +1001,6 @@ FEProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::strin
 void
 FEProblem::addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -1029,7 +1020,6 @@ FEProblem::addDiracKernel(const std::string & kernel_name, const std::string & n
 void
 FEProblem::addDGKernel(const std::string & dg_kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -1073,7 +1063,6 @@ FEProblem::projectSolution()
 void
 FEProblem::addMaterial(const std::string & mat_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<SubProblem *>("_subproblem_displaced") = _displaced_problem;
 
@@ -1220,8 +1209,6 @@ FEProblem::reinitMaterialsBoundary(BoundaryID bnd_id, THREAD_ID tid)
 void
 FEProblem::addUserObject(const std::string & type, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
-
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -1276,7 +1263,6 @@ getPostprocessorPointer(MooseObject * mo)
 void
 FEProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -1621,7 +1607,6 @@ FEProblem::outputPostprocessors(bool force/* = false*/)
 void
 FEProblem::addDamper(std::string damper_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<SystemBase *>("_sys") = &_nl;
 

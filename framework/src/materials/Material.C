@@ -42,7 +42,6 @@ Material::Material(const std::string & name, InputParameters parameters) :
     MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),
     DependencyResolverInterface(),
-    _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _displaced_subproblem(parameters.get<SubProblem *>("_subproblem_displaced")),
     _tid(parameters.get<THREAD_ID>("_tid")),
@@ -58,10 +57,10 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _dim(_mesh.dimension()),
     _coord_sys(_subproblem.coordSystem(_tid)),
     _block_id(_mesh.getSubdomainIDs(parameters.get<std::vector<SubdomainName> >("block"))),
-    _real_zero(_problem._real_zero[_tid]),
-    _zero(_problem._zero[_tid]),
-    _grad_zero(_problem._grad_zero[_tid]),
-    _second_zero(_problem._second_zero[_tid]),
+    _real_zero(_subproblem._real_zero[_tid]),
+    _zero(_subproblem._zero[_tid]),
+    _grad_zero(_subproblem._grad_zero[_tid]),
+    _second_zero(_subproblem._second_zero[_tid]),
     _has_stateful_property(false)
 {
 /*

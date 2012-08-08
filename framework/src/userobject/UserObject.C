@@ -28,7 +28,6 @@ InputParameters validParams<UserObject>()
 UserObject::UserObject(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
-    _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _coord_sys(_subproblem.coordSystem(_tid))

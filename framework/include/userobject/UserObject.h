@@ -68,7 +68,6 @@ public:
   SubProblem & getSubProblem() const { return _subproblem; }
 
 protected:
-  Problem & _problem;
   SubProblem & _subproblem;
 
   /// Thread ID of this postprocessor

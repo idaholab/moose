@@ -43,9 +43,7 @@ public:
   DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, InputParameters params);
   virtual ~DisplacedProblem();
 
-  virtual EquationSystems & es() { return _eq; }
   virtual MooseMesh & mesh() { return _mesh; }
-  virtual Problem * parent() { return _mproblem.parent(); }
   MooseMesh & refMesh() { return _ref_mesh; }
 
   DisplacedSystem & nlSys() { return _displaced_nl; }
@@ -191,8 +189,8 @@ public:
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
 
   /**
-   * Set which variables will be written in ouput files
-   * @param output_variables The list of variable names to write in the ouput files
+   * Set which variables will be written in output files
+   * @param output_variables The list of variable names to write in the output files
    */
   virtual void setOutputVariables(std::vector<std::string> output_variables);
 
@@ -207,7 +205,6 @@ public:
   virtual void addGhostedBoundary(BoundaryID boundary_id);
 
 protected:
-  Problem & _problem;
   FEProblem & _mproblem;
   MooseMesh & _mesh;
   EquationSystems _eq;

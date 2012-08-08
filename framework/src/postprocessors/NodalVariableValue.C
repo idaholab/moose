@@ -64,7 +64,7 @@ NodalVariableValue::getValue()
   Real value = 0;
 
   if(_node.processor_id() == libMesh::processor_id())
-    value = _problem.getVariable(_tid, _var_name).getNodalValue(_node);
+    value = _subproblem.getVariable(_tid, _var_name).getNodalValue(_node);
 
   gatherSum(value);
 

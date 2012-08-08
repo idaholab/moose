@@ -23,7 +23,6 @@ InputParameters validParams<SubProblem>()
 {
   InputParameters params = validParams<Problem>();
   params.addRequiredParam<MooseMesh *>("mesh", "The Mesh");
-  params.addParam<Problem *>("parent", NULL, "This problem's parent problem (if any)");
   return params;
 }
 
@@ -31,30 +30,43 @@ InputParameters validParams<SubProblem>()
 
 SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
     Problem(name, parameters),
-    _parent(parameters.get<Problem *>("parent") == NULL ? this : parameters.get<Problem *>("parent")),
     _mesh(*parameters.get<MooseMesh *>("mesh")),
-    _eq(_parent == this ? *new EquationSystems(_mesh) : _parent->es()),
+    _eq(_mesh),
     _transient(false),
     _time(_eq.parameters.set<Real>("time")),
     _time_old(_eq.parameters.set<Real>("time_old")),
     _t_step(_eq.parameters.set<int>("t_step")),
     _dt(_eq.parameters.set<Real>("dt"))
 {
-  if (_parent == this)
-  {
-    _time = 0.0;
-    _time_old = 0.0;
-    _t_step = 0;
-    _dt = 0;
-    _dt_old = _dt;
-    _eq.parameters.set<Problem *>("_problem") = this;
-  }
+  _time = 0.0;
+  _time_old = 0.0;
+  _t_step = 0;
+  _dt = 0;
+  _dt_old = _dt;
+  _eq.parameters.set<SubProblem *>("_subproblem") = this;
+
+  unsigned int n_threads = libMesh::n_threads();
+  _real_zero.resize(n_threads, 0.);
+  _zero.resize(n_threads);
+  _grad_zero.resize(n_threads);
+  _second_zero.resize(n_threads);
+
+  _user_objects.resize(n_threads);
 }
 
 SubProblem::~SubProblem()
 {
-  if (_parent == this)
-    delete &_eq;
+  unsigned int n_threads = libMesh::n_threads();
+  for (unsigned int i = 0; i < n_threads; i++)
+  {
+    _zero[i].release();
+    _grad_zero[i].release();
+    _second_zero[i].release();
+  }
+  _real_zero.release();
+  _zero.release();
+  _grad_zero.release();
+  _second_zero.release();
 }
 
 Moose::CoordinateSystemType
@@ -187,3 +199,4 @@ SubProblem::checkMatProp(SubdomainID block_id, const std::string & name)
     mooseError("No material defined on block " + Moose::stringify(block_id));
   }
 }
+

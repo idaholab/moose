@@ -99,8 +99,6 @@ public:
 protected:
   virtual Real computeValue() = 0;
 
-  /// Problem this kernel is part of
-  Problem & _problem;
   /// Subproblem this kernel is part of
   SubProblem & _subproblem;
   /// System this kernel is part of

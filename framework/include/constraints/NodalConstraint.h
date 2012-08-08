@@ -111,7 +111,6 @@ protected:
 
 //  unsigned int _boundary_id;                                            ///< Boundary ID of the master node
 
-  Problem & _problem;
   SubProblem & _subproblem;
   SystemBase & _sys;
 

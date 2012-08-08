@@ -111,7 +111,6 @@ public:
 
 
 protected:
-  Problem & _problem;
   SubProblem & _subproblem;
   SubProblem * _displaced_subproblem;          // materials do not distinguish between non-displaced and displaced problems
   THREAD_ID _tid;

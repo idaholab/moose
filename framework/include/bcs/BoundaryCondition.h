@@ -78,7 +78,6 @@ public:
   virtual bool shouldApply();
 
 protected:
-  Problem & _problem;
   SubProblem & _subproblem;
   SystemBase & _sys;
   /// thread id

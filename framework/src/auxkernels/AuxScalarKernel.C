@@ -39,7 +39,6 @@ AuxScalarKernel::AuxScalarKernel(const std::string & name, InputParameters param
     UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
     TransientInterface(parameters, name, "scalar_aux_kernels"),
-    _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
 
@@ -52,7 +51,7 @@ AuxScalarKernel::AuxScalarKernel(const std::string & name, InputParameters param
     _u(_var.sln()),
     _u_old(_var.slnOld()),
 
-    _real_zero(_problem._real_zero[_tid])
+    _real_zero(_subproblem._real_zero[_tid])
 {
 }
 

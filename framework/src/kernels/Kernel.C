@@ -50,7 +50,6 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     PostprocessorInterface(parameters),
     MaterialPropertyInterface(parameters),
     GeometricSearchInterface(parameters),
-    _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
@@ -77,10 +76,10 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu()),
 
-    _real_zero(_problem._real_zero[_tid]),
-    _zero(_problem._zero[_tid]),
-    _grad_zero(_problem._grad_zero[_tid]),
-    _second_zero(_problem._second_zero[_tid]),
+    _real_zero(_subproblem._real_zero[_tid]),
+    _zero(_subproblem._zero[_tid]),
+    _grad_zero(_subproblem._grad_zero[_tid]),
+    _second_zero(_subproblem._second_zero[_tid]),
 
     _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in"))
 {
@@ -88,7 +87,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
 
   for(unsigned int i=0; i<_save_in_strings.size(); i++)
   {
-    MooseVariable * var = &_problem.getVariable(_tid, _save_in_strings[i]);
+    MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
     if(var->feType() != _var.feType())
       mooseError("Error in " + _name + ". When saving residual values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");

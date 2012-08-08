@@ -42,7 +42,7 @@ NodalUserObject::NodalUserObject(const std::string & name, InputParameters param
     _current_node(_var.node()),
     _u(_var.nodalSln()),
 
-    _real_zero(_problem._real_zero[_tid]),
-    _zero(_problem._zero[_tid])
+    _real_zero(_subproblem._real_zero[_tid]),
+    _zero(_subproblem._zero[_tid])
 {
 }
