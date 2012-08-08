@@ -6,6 +6,7 @@
 
 //Forward Declarations
 class HeatConductionMaterial;
+class Function;
 
 template<>
 InputParameters validParams<HeatConductionMaterial>();

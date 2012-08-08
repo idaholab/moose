@@ -1,4 +1,5 @@
 #include "HeatConductionMaterial.h"
+#include "Function.h"
 
 template<>
 InputParameters validParams<HeatConductionMaterial>()
