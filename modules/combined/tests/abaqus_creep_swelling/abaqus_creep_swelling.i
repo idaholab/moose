@@ -144,7 +144,7 @@
   petsc_options = '-snes_mf_operator -snes_ksp_ew -ksp_monitor'
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type'
   petsc_options_value = '101 hypre boomeramg'
-  nl_rel_tol = 1e-10
+  nl_rel_tol = 1e-8
   l_tol = 1e-5
   start_time = 0.0
   dt = 1

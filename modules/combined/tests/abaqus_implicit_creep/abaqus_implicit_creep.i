@@ -154,6 +154,7 @@
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type'
   petsc_options_value = '101 hypre boomeramg'
   nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-7
   l_tol = 1e-5
   start_time = 0.0
   dt = 1
