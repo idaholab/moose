@@ -229,7 +229,7 @@
     variable = disp_y
     boundary = 5
     function = velocity_y
-    time_periods = 'p2 p3'
+#    time_periods = 'p2 p3'
   [../]
 
   [./fix_z]
@@ -243,7 +243,7 @@
     variable = disp_z
     boundary = 6
     function = velocity_z
-    time_periods = 'p3'
+#    time_periods = 'p3'
   [../]
 []
 
@@ -289,8 +289,25 @@
 #  dt = 0.005
   dt = 0.01
 
-  time_periods = 'p1 p2 p3'
-  time_period_starts = '0.0 1.0 2.0'
+  [./TimePeriods]
+    [./p1]
+      start = 0.0
+      inactive_kernels = ''
+      inactive_bcs = 'move_y move_z'
+    [../]
+
+    [./p2]
+      start = 1.0
+      inactive_kernels = ''
+      inactive_bcs = 'move_z'
+    [../]
+
+    [./p3]
+      start = 2.0
+      inactive_kernels = ''
+      inactive_bcs = ''
+    [../]
+  [../]
 []
 
 [Output]
