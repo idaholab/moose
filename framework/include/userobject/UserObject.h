@@ -69,6 +69,7 @@ public:
 
 protected:
   SubProblem & _subproblem;
+  FEProblem & _fe_problem;
 
   /// Thread ID of this postprocessor
   THREAD_ID _tid;

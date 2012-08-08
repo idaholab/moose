@@ -29,6 +29,7 @@ UserObject::UserObject(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
+    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _coord_sys(_subproblem.coordSystem(_tid))
 {

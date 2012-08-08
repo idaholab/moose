@@ -79,6 +79,7 @@ public:
 
 protected:
   SubProblem & _subproblem;
+  FEProblem & _fe_problem;
   SystemBase & _sys;
 
   THREAD_ID _tid;
