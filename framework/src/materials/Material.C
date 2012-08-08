@@ -44,6 +44,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     DependencyResolverInterface(),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _displaced_subproblem(parameters.get<SubProblem *>("_subproblem_displaced")),
+    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _bnd(parameters.get<bool>("_bnd")),
     _material_data(*parameters.get<MaterialData *>("_material_data")),

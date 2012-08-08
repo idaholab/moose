@@ -113,6 +113,7 @@ public:
 protected:
   SubProblem & _subproblem;
   SubProblem * _displaced_subproblem;          // materials do not distinguish between non-displaced and displaced problems
+  FEProblem & _fe_problem;
   THREAD_ID _tid;
   bool _bnd;
   MaterialData & _material_data;
