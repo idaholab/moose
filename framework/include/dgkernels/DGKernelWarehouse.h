@@ -18,9 +18,10 @@
 #include <vector>
 #include <map>
 #include <set>
+#include "libmesh_common.h"
 
-#include "DGKernel.h"
 
+class DGKernel;
 
 /**
  * Holds kernels and provides some services

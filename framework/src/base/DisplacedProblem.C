@@ -565,11 +565,6 @@ DisplacedProblem::meshChanged()
 }
 
 void
-DisplacedProblem::computePostprocessors(ExecFlagType)
-{
-}
-
-void
 DisplacedProblem::outputPostprocessors(bool)
 {
 }

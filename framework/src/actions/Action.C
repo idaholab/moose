@@ -15,7 +15,6 @@
 #include "Action.h"
 #include "ActionWarehouse.h"
 #include "MooseMesh.h"
-#include "FEProblem.h"
 
 template<>
 InputParameters validParams<Action>()

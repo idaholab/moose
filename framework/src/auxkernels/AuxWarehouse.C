@@ -13,6 +13,9 @@
 /****************************************************************/
 
 #include "AuxWarehouse.h"
+#include "AuxKernel.h"
+#include "AuxScalarKernel.h"
+
 
 AuxWarehouse::AuxWarehouse()
 {

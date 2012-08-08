@@ -20,6 +20,7 @@
 #include "MaterialPropertyStorage.h"
 #include "MaterialData.h"
 #include "Assembly.h"
+#include "AuxKernel.h"
 
 // libmesh includes
 #include "threads.h"

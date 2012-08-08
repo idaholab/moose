@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "TransientInterface.h"
-#include "SubProblem.h"
+#include "FEProblem.h"
 #include "TimePeriod.h"
 
 template<>
@@ -26,16 +26,16 @@ InputParameters validParams<TransientInterface>()
 
 
 TransientInterface::TransientInterface(InputParameters & parameters, const std::string & name, const std::string & object_type) :
-    _ti_subproblem(*parameters.get<SubProblem *>("_subproblem")),
+    _ti_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
     _is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true),
-    _t(_is_implicit ? _ti_subproblem.time() : _ti_subproblem.timeOld()),
-    _t_step(_ti_subproblem.timeStep()),
-    _dt(_ti_subproblem.dt()),
-    _dt_old(_ti_subproblem.dtOld()),
-    _time_weight(_ti_subproblem.timeWeights()),
-    _is_transient(_ti_subproblem.isTransient()),
+    _t(_is_implicit ? _ti_feproblem.time() : _ti_feproblem.timeOld()),
+    _t_step(_ti_feproblem.timeStep()),
+    _dt(_ti_feproblem.dt()),
+    _dt_old(_ti_feproblem.dtOld()),
+    _time_weight(_ti_feproblem.timeWeights()),
+    _is_transient(_ti_feproblem.isTransient()),
     _object_type(object_type),
-    _time_periods(_ti_subproblem.getTimePeriods()),
+    _time_periods(_ti_feproblem.getTimePeriods()),
     _ti_name(name)
 {
   /*
@@ -44,7 +44,7 @@ TransientInterface::TransientInterface(InputParameters & parameters, const std::
     const std::vector<std::string> & tp = parameters.get<std::vector<std::string> >("time_periods");
     for (std::vector<std::string>::const_iterator it = tp.begin(); it != tp.end(); ++it)
     {
-      TimePeriod * tp = _ti_subproblem.getTimePeriodByName(*it);
+      TimePeriod * tp = _ti_feproblem.getTimePeriodByName(*it);
       if (tp != NULL)
         _time_periods.push_back(tp);
       else

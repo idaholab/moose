@@ -17,6 +17,7 @@
 #include "AuxiliarySystem.h"
 #include "Problem.h"
 #include "FEProblem.h"
+#include "AuxKernel.h"
 
 // libmesh includes
 #include "threads.h"

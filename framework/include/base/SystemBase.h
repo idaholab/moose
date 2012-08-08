@@ -17,12 +17,6 @@
 
 #include <vector>
 
-#include "Kernel.h"
-#include "NodalBC.h"
-#include "IntegratedBC.h"
-#include "InitialCondition.h"
-#include "ScalarInitialCondition.h"
-
 #include "MooseMesh.h"
 #include "VariableWarehouse.h"
 #include "Assembly.h"
@@ -30,7 +24,6 @@
 #include "SubProblem.h"
 #include "MooseVariableScalar.h"
 #include "ComputeInitialConditionThread.h"
-
 // libMesh
 #include "equation_systems.h"
 #include "dof_map.h"
@@ -102,7 +95,7 @@ public:
   virtual void copyOldSolutions() = 0;
   virtual void restoreSolutions() = 0;
 
-  virtual void projectSolution() = 0;
+  virtual void projectSolution();
 
   /**
    * The solution vector that is currently being operated on.
@@ -512,8 +505,6 @@ public:
     _sys.update();
   }
 
-  virtual void projectSolution();
-
   /**
    * Get a reference to libMesh system object
    * @return the reference to the libMesh object
@@ -559,59 +550,5 @@ protected:
 
   std::vector<VarCopyInfo> _var_to_copy;
 };
-
-
-template<typename T>
-void
-SystemTempl<T>::projectSolution()
-{
-  if (_sys.n_dofs() <= 0)
-    return;
-
-  START_LOG("projectSolution()", "SystemTempl");
-
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  ComputeInitialConditionThread cic(_subproblem, *this, _solution);
-  Threads::parallel_reduce(elem_range, cic);
-
-  // Also, load values into the SCALAR dofs
-  // Note: We assume that all SCALAR dofs are on the
-  // processor with highest ID
-  if(libMesh::processor_id() == (libMesh::n_processors()-1))
-  {
-    THREAD_ID tid = 0;
-    std::vector<MooseVariableScalar *> & scalar_vars = _vars[tid].scalars();
-    for (unsigned int vn = 0; vn < scalar_vars.size(); vn++)
-    {
-      MooseVariableScalar * var = scalar_vars[vn];
-      ScalarInitialCondition * sic = _vars[tid].getScalarInitialCondition(var->name());
-      if (sic != NULL)
-      {
-        var->reinit();
-
-        DenseVector<Number> vals(var->order());
-        sic->compute(vals);
-
-        const unsigned int n_SCALAR_dofs = var->dofIndices().size();
-        for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
-        {
-          const unsigned int global_index = var->dofIndices()[i];
-          _solution.set(global_index, vals(i));
-        }
-      }
-    }
-  }
-
-  _solution.close();
-
-#ifdef LIBMESH_ENABLE_CONSTRAINTS
-  dofMap().enforce_constraints_exactly(_sys, &_solution);
-#endif
-
-  STOP_LOG("projectSolution()", "SystemTempl");
-
-  _solution.localize(*_sys.current_local_solution, dofMap().get_send_list());
-}
-
 
 #endif /* SYSTEMBASE_H */

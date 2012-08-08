@@ -20,7 +20,8 @@
 #include "Parser.h"
 #include "AllLocalDofIndicesThread.h"
 #include "MooseTypes.h"
-
+#include "InitialCondition.h"
+#include "ScalarInitialCondition.h"
 // libMesh
 #include "quadrature_gauss.h"
 
@@ -317,3 +318,53 @@ SystemBase::addScalarInitialCondition(const std::string & ic_name, const std::st
   }
 }
 
+void
+SystemBase::projectSolution()
+{
+  if (system().n_dofs() <= 0)
+    return;
+
+  START_LOG("projectSolution()", "SystemTempl");
+
+  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  ComputeInitialConditionThread cic(_subproblem, *this, solution());
+  Threads::parallel_reduce(elem_range, cic);
+
+  // Also, load values into the SCALAR dofs
+  // Note: We assume that all SCALAR dofs are on the
+  // processor with highest ID
+  if(libMesh::processor_id() == (libMesh::n_processors()-1))
+  {
+    THREAD_ID tid = 0;
+    std::vector<MooseVariableScalar *> & scalar_vars = _vars[tid].scalars();
+    for (unsigned int vn = 0; vn < scalar_vars.size(); vn++)
+    {
+      MooseVariableScalar * var = scalar_vars[vn];
+      ScalarInitialCondition * sic = _vars[tid].getScalarInitialCondition(var->name());
+      if (sic != NULL)
+      {
+        var->reinit();
+
+        DenseVector<Number> vals(var->order());
+        sic->compute(vals);
+
+        const unsigned int n_SCALAR_dofs = var->dofIndices().size();
+        for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+        {
+          const unsigned int global_index = var->dofIndices()[i];
+          solution().set(global_index, vals(i));
+        }
+      }
+    }
+  }
+
+  solution().close();
+
+#ifdef LIBMESH_ENABLE_CONSTRAINTS
+  dofMap().enforce_constraints_exactly(system(), &solution());
+#endif
+
+  STOP_LOG("projectSolution()", "SystemTempl");
+
+  solution().localize(*system().current_local_solution, dofMap().get_send_list());
+}

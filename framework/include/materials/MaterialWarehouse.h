@@ -17,8 +17,10 @@
 
 #include <vector>
 #include <map>
+#include "Moose.h"
 
-#include "Material.h"
+
+class Material;
 
 // Forward Declaration
 template <class T> class DependencyResolver;

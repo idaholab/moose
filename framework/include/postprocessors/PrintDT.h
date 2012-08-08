@@ -35,6 +35,9 @@ public:
    * This will return the current time step size.
    */
   virtual Real getValue();
+
+protected:
+  FEProblem & _feproblem;
 };
 
 #endif //PRINTDT_H

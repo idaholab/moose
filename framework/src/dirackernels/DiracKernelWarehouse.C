@@ -13,6 +13,8 @@
 /****************************************************************/
 
 #include "DiracKernelWarehouse.h"
+#include "DiracKernel.h"
+
 
 DiracKernelWarehouse::DiracKernelWarehouse()
 {

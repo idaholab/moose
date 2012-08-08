@@ -16,10 +16,11 @@
 #define COMPUTERESIDUALTHREAD_H
 
 #include "ThreadedElementLoop.h"
-
 // libMesh includes
 #include "elem_range.h"
 
+
+class FEProblem;
 class NonlinearSystem;
 
 

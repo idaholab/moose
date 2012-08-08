@@ -13,6 +13,9 @@
 /****************************************************************/
 
 #include "BCWarehouse.h"
+#include "IntegratedBC.h"
+#include "NodalBC.h"
+#include "PresetNodalBC.h"
 
 BCWarehouse::BCWarehouse()
 {

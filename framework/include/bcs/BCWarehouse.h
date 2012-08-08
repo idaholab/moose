@@ -17,10 +17,11 @@
 
 #include <map>
 #include <vector>
+#include "Moose.h"
 
-#include "IntegratedBC.h"
-#include "NodalBC.h"
-#include "PresetNodalBC.h"
+class IntegratedBC;
+class NodalBC;
+class PresetNodalBC;
 
 /**
  * Warehouse for storing boundary conditions (for non-linear variables)

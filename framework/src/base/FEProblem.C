@@ -24,6 +24,7 @@
 #include "ActionWarehouse.h"
 #include "Conversion.h"
 #include "Moose.h"
+#include "Material.h"
 #include "ConstantIC.h"
 #include "FP.h"
 #include "Parser.h"
@@ -48,11 +49,22 @@ std::string name_sys(const std::string & name, unsigned int n)
 template<>
 InputParameters validParams<FEProblem>()
 {
-  return validParams<SubProblem>();
+  InputParameters params = validParams<SubProblem>();
+  params.addRequiredParam<MooseMesh *>("mesh", "The Mesh");
+  return params;
 }
 
 FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     SubProblem(name, parameters),
+    _mesh(*parameters.get<MooseMesh *>("mesh")),
+    _eq(_mesh),
+
+    _transient(false),
+    _time(_eq.parameters.set<Real>("time")),
+    _time_old(_eq.parameters.set<Real>("time_old")),
+    _t_step(_eq.parameters.set<int>("t_step")),
+    _dt(_eq.parameters.set<Real>("dt")),
+
     _nl(*this, name_sys("nl", _n)),
     _aux(*this, name_sys("aux", _n)),
     _coupling(Moose::COUPLING_DIAG),
@@ -88,6 +100,12 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 {
   _n++;
 
+  _time = 0.0;
+  _time_old = 0.0;
+  _t_step = 0;
+  _dt = 0;
+  _dt_old = _dt;
+
   unsigned int n_threads = libMesh::n_threads();
 
   _assembly.resize(n_threads);
@@ -108,7 +126,10 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   }
 
   _pps_data.resize(n_threads);
+  _user_objects.resize(n_threads);
   _objects_by_name.resize(n_threads);
+
+  _eq.parameters.set<SubProblem *>("_subproblem") = this;
 }
 
 FEProblem::~FEProblem()
@@ -146,12 +167,59 @@ FEProblem::~FEProblem()
     delete _out_problem;
 }
 
+Moose::CoordinateSystemType
+FEProblem::getCoordSystem(SubdomainID sid)
+{
+  std::map<SubdomainID, Moose::CoordinateSystemType>::iterator it = _coord_sys.find(sid);
+  if (it != _coord_sys.end())
+    return (*it).second;
+  else
+  {
+    std::stringstream err;
+    err << "Requested subdomain "
+        << sid
+        << " does not exist.";
+    mooseError(err.str());
+  }
+}
+
 void
 FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const std::vector<std::string> & coord_sys)
 {
-  SubProblem::setCoordSystem(blocks, coord_sys);
-  if (_displaced_problem)
-    _displaced_problem->setCoordSystem(blocks, coord_sys);
+  const std::set<SubdomainID> & subdomains = _mesh.meshSubdomains();
+  if (blocks.size() == 0)
+  {
+    // no blocks specified -> assume the whole domain
+    Moose::CoordinateSystemType coord_type = Moose::COORD_XYZ;                          // all is going to be XYZ by default
+    if (coord_sys.size() == 0)
+      ; // relax, do nothing
+    else if (coord_sys.size() == 1)
+      coord_type = Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[0]);      // one system specified, the whole domain is going to have that system
+    else
+      mooseError("Multiple coordinate systems specified, but no blocks given.");
+
+    for (std::set<SubdomainID>::const_iterator it = subdomains.begin(); it != subdomains.end(); ++it)
+      _coord_sys[*it] = coord_type;
+  }
+  else
+  {
+    if (blocks.size() != coord_sys.size())
+      mooseError("Number of blocks and coordinate systems does not match.");
+
+    for (unsigned int i = 0; i < blocks.size(); i++)
+    {
+      SubdomainID sid = _mesh.getSubdomainID(blocks[i]);
+      Moose::CoordinateSystemType coord_type = Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[i]);
+      _coord_sys[sid] = coord_type;
+    }
+
+    for (std::set<SubdomainID>::const_iterator it = subdomains.begin(); it != subdomains.end(); ++it)
+    {
+      SubdomainID sid = *it;
+      if (_coord_sys.find(sid) == _coord_sys.end())
+        mooseError("Subdomain '" + Moose::stringify(sid) + "' does not have a coordinate system specified.");
+    }
+  }
 }
 
 void FEProblem::initialSetup()
@@ -791,6 +859,7 @@ FEProblem::getObjectsByName(const std::string & name, THREAD_ID tid)
 void
 FEProblem::addFunction(std::string type, const std::string & name, InputParameters parameters)
 {
+  parameters.set<FEProblem *>("_fe_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -844,6 +913,7 @@ FEProblem::addScalarVariable(const std::string & var_name, Order order, Real sca
 void
 FEProblem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
+  parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -861,6 +931,7 @@ FEProblem::addKernel(const std::string & kernel_name, const std::string & name, 
 void
 FEProblem::addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
+  parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -877,6 +948,7 @@ FEProblem::addScalarKernel(const std::string & kernel_name, const std::string & 
 void
 FEProblem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
+  parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -896,6 +968,7 @@ FEProblem::addConstraint(const std::string & c_name, const std::string & name, I
 {
   _has_constraints = true;
 
+  parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -946,6 +1019,7 @@ FEProblem::addAuxScalarVariable(const std::string & var_name, Order order, Real 
 void
 FEProblem::addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
+  parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -965,6 +1039,7 @@ FEProblem::addAuxKernel(const std::string & kernel_name, const std::string & nam
 void
 FEProblem::addAuxScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
+  parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -981,9 +1056,9 @@ FEProblem::addAuxScalarKernel(const std::string & kernel_name, const std::string
 void
 FEProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
+  parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
-
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
     parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->nlSys();
@@ -1001,6 +1076,7 @@ FEProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::strin
 void
 FEProblem::addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
+  parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -1020,6 +1096,7 @@ FEProblem::addDiracKernel(const std::string & kernel_name, const std::string & n
 void
 FEProblem::addDGKernel(const std::string & dg_kernel_name, const std::string & name, InputParameters parameters)
 {
+  parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -1039,6 +1116,7 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
 {
   const std::string & var_name = parameters.get<VariableName>("variable");
 
+  parameters.set<FEProblem *>("_fe_problem") = this;
   if (_nl.hasVariable(var_name))
     _nl.addInitialCondition(ic_name, name, parameters);
   else if (_nl.hasScalarVariable(var_name))
@@ -1063,6 +1141,7 @@ FEProblem::projectSolution()
 void
 FEProblem::addMaterial(const std::string & mat_name, const std::string & name, InputParameters parameters)
 {
+  parameters.set<FEProblem *>("_fe_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<SubProblem *>("_subproblem_displaced") = _displaced_problem;
 
@@ -1209,6 +1288,7 @@ FEProblem::reinitMaterialsBoundary(BoundaryID bnd_id, THREAD_ID tid)
 void
 FEProblem::addUserObject(const std::string & type, const std::string & name, InputParameters parameters)
 {
+  parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -1263,14 +1343,11 @@ getPostprocessorPointer(MooseObject * mo)
 void
 FEProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters)
 {
+  parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-  {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
-  }
   else
-  {
     parameters.set<SubProblem *>("_subproblem") = this;
-  }
 
   ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<MooseEnum>("execute_on"));
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
@@ -1607,6 +1684,7 @@ FEProblem::outputPostprocessors(bool force/* = false*/)
 void
 FEProblem::addDamper(std::string damper_name, const std::string & name, InputParameters parameters)
 {
+  parameters.set<FEProblem *>("_fe_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<SystemBase *>("_sys") = &_nl;
 
@@ -1742,7 +1820,7 @@ FEProblem::init()
 
 
   Moose::setup_perf_log.push("eq.init()","Setup");
-  SubProblem::init();
+  _eq.init();
   Moose::setup_perf_log.pop("eq.init()","Setup");
 
   Moose::setup_perf_log.push("mesh.applyMeshModifications()","Setup");

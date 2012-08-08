@@ -15,6 +15,7 @@
 #include "MaterialWarehouse.h"
 #include "DependencyResolver.h"
 #include "DependencyResolverInterface.h"
+#include "Material.h"
 
 #include <fstream>
 

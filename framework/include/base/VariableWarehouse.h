@@ -15,15 +15,15 @@
 #ifndef VARIABLEWAREHOUSE_H
 #define VARIABLEWAREHOUSE_H
 
+#include "Moose.h"
 #include <vector>
 #include <map>
 #include <set>
 
-#include "MooseVariable.h"
-#include "MooseVariableScalar.h"
-#include "InitialCondition.h"
-#include "ScalarInitialCondition.h"
-
+class MooseVariable;
+class MooseVariableScalar;
+class InitialCondition;
+class ScalarInitialCondition;
 
 /**
  * Holds variables and provides some services

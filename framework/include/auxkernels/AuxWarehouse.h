@@ -19,10 +19,10 @@
 #include <map>
 #include <string>
 #include <list>
+#include "Moose.h"
 
-#include "AuxKernel.h"
-#include "AuxScalarKernel.h"
-
+class AuxKernel;
+class AuxScalarKernel;
 
 /**
  * Warehouse for storing auxiliary kernels

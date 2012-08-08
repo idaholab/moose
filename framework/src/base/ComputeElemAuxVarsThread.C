@@ -13,12 +13,12 @@
 /****************************************************************/
 
 #include "ComputeElemAuxVarsThread.h"
-
 #include "AuxiliarySystem.h"
+#include "AuxKernel.h"
 #include "FEProblem.h"
-
 // libmesh includes
 #include "threads.h"
+
 
 ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & mproblem,
                                                    AuxiliarySystem & sys,

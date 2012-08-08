@@ -45,11 +45,8 @@ public:
   SubProblem(const std::string & name, InputParameters parameters);
   virtual ~SubProblem();
 
-  virtual EquationSystems & es() { return _eq; }
-  virtual MooseMesh & mesh() { return _mesh; }
-
-  Moose::CoordinateSystemType getCoordSystem(SubdomainID sid);
-  virtual void setCoordSystem(const std::vector<SubdomainName> & blocks, const std::vector<std::string> & coord_sys);
+  virtual EquationSystems & es() = 0;
+  virtual MooseMesh & mesh() = 0;
 
   /**
    * Whether or not this problem should utilize FE shape function caching.
@@ -58,23 +55,13 @@ public:
    */
   virtual void useFECache(bool fe_cache) = 0;
 
-  virtual void init();
   virtual void solve() = 0;
   virtual bool converged() = 0;
 
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;
 
-  virtual Real & time() { return _time; }
-  virtual Real & timeOld() { return _time_old; }
-  virtual int & timeStep() { return _t_step; }
-  virtual Real & dt() { return _dt; }
-  virtual Real & dtOld() { return _dt_old; }
-
-  virtual void transient(bool trans) { _transient = trans; }
-  virtual bool isTransient() { return _transient; }
-
-  virtual std::vector<Real> & timeWeights() { return _time_weights; }
+  virtual bool isTransient() = 0;
 
   virtual Order getQuadratureOrder() = 0;
 
@@ -83,6 +70,7 @@ public:
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
 
+  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) = 0;
   virtual const Moose::CoordinateSystemType & coordSystem(THREAD_ID tid) = 0;
   virtual QBase * & qRule(THREAD_ID tid) = 0;
   virtual const MooseArray<Point> & points(THREAD_ID tid) = 0;
@@ -142,35 +130,6 @@ public:
   // Function /////
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0) = 0;
 
-  // UserData /////
-  /**
-   * Get the user object by its name
-   * @param name The name of the user object being retrieved
-   * @param tid The thread ID
-   * @return Const reference to the user object
-   */
-  template <class T>
-  const T & getUserObject(const std::string & name, THREAD_ID tid = 0)
-  {
-    UserObject * user_object = _user_objects[tid].getUserObjectByName(name);
-    if (user_object == NULL)
-    {
-      mooseError("Unable to find user object with name '" + name + "'");
-    }
-    return dynamic_cast<const T &>(*user_object);
-  }
-
-  /**
-   * Check if there if a user object of given name
-   * @param name The name of the user object being checked for
-   * @param tid  The thread ID
-   * @return true if the user object exists, false otherwise
-   */
-  bool hasUserObject(const std::string & name, THREAD_ID tid = 0)
-  {
-    return _user_objects[tid].hasUserObject(name);
-  }
-
 public:
   /**
    * Convenience zeros
@@ -181,28 +140,13 @@ public:
   MooseArray<MooseArray<RealTensor> > _second_zero;
 
 protected:
-  MooseMesh & _mesh;
-  EquationSystems _eq;
-
   /// Type of coordinate system per subdomain
   std::map<SubdomainID, Moose::CoordinateSystemType> _coord_sys;
-
-  bool _transient;
-  Real & _time;
-  Real & _time_old;
-  int & _t_step;
-  Real & _dt;
-  Real _dt_old;
-
-  std::vector<Real> _time_weights;
 
   DiracKernelInfo _dirac_kernel_info;
 
   /// the map of material properties (block_id -> list of properties)
   std::map<unsigned int, std::set<std::string> > _map_material_props;
-
-  /// User objects
-  std::vector<UserObjectWarehouse> _user_objects;
 };
 
 

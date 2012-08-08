@@ -15,7 +15,6 @@
 #ifndef INITIALCONDITION_H
 #define INITIALCONDITION_H
 
-#include "Moose.h"
 #include "MooseObject.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"

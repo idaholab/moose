@@ -14,6 +14,7 @@
 
 #include "ComputeInitialConditionThread.h"
 #include "SystemBase.h"
+#include "InitialCondition.h"
 // libmesh includes
 #include "threads.h"
 #include "fe_interface.h"

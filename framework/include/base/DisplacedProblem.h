@@ -43,6 +43,7 @@ public:
   DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, InputParameters params);
   virtual ~DisplacedProblem();
 
+  virtual EquationSystems & es() { return _eq; }
   virtual MooseMesh & mesh() { return _mesh; }
   MooseMesh & refMesh() { return _ref_mesh; }
 
@@ -64,6 +65,9 @@ public:
 
   virtual void syncSolutions(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
   virtual void updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
+
+  virtual bool isTransient() { return _mproblem.isTransient(); }
+  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) { return _mproblem.getCoordSystem(sid); }
 
   // Variables /////
   virtual bool hasVariable(const std::string & var_name);
@@ -168,20 +172,9 @@ public:
   virtual void onTimestepBegin() {}
   virtual void onTimestepEnd() {}
 
-  virtual Real & time() { return _mproblem.time(); }
-  virtual int & timeStep() { return _mproblem.timeStep(); }
-  virtual Real & dt() { return _mproblem.dt(); }
-  virtual Real & dtOld() { return _mproblem.dtOld(); }
-
-  virtual void transient(bool trans) { _mproblem.transient(trans); }
-  virtual bool isTransient() { return _mproblem.isTransient(); }
-
-  virtual std::vector<Real> & timeWeights() { return _mproblem.timeWeights(); }
-
   virtual Order getQuadratureOrder() { return _mproblem.getQuadratureOrder(); }
 
   // Postprocessors /////
-  virtual void computePostprocessors(ExecFlagType type = EXEC_TIMESTEP);
   virtual void outputPostprocessors(bool force = false);
   virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
   virtual void outputPps(const FormattedTable & table);

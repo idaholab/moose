@@ -15,13 +15,13 @@
 #ifndef CONSTRAINTWAREHOUSE_H
 #define CONSTRAINTWAREHOUSE_H
 
-// Moose includes
-#include "NodalConstraint.h"
-#include "NodeFaceConstraint.h"
-
 // system includes
 #include <map>
 #include <vector>
+#include "Moose.h"
+
+class NodalConstraint;
+class NodeFaceConstraint;
 
 /**
  * Warehouse for storing boundary conditions (for non-linear variables)

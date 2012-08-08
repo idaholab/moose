@@ -48,6 +48,10 @@ public:
   FEProblem(const std::string & name, InputParameters parameters);
   virtual ~FEProblem();
 
+  virtual EquationSystems & es() { return _eq; }
+  virtual MooseMesh & mesh() { return _mesh; }
+
+  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid);
   virtual void setCoordSystem(const std::vector<SubdomainName> & blocks, const std::vector<std::string> & coord_sys);
 
   /**
@@ -150,6 +154,17 @@ public:
   virtual void onTimestepBegin();
   virtual void onTimestepEnd();
 
+  virtual Real & time() { return _time; }
+  virtual Real & timeOld() { return _time_old; }
+  virtual int & timeStep() { return _t_step; }
+  virtual Real & dt() { return _dt; }
+  virtual Real & dtOld() { return _dt_old; }
+
+  virtual void transient(bool trans) { _transient = trans; }
+  virtual bool isTransient() { return _transient; }
+
+  virtual std::vector<Real> & timeWeights() { return _time_weights; }
+
   virtual void copySolutionsBackwards();
   // Update backward time solution vectors
   virtual void copyOldSolutions();
@@ -208,6 +223,8 @@ public:
   virtual void reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int side, THREAD_ID tid);
   virtual void reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid);
 
+  // UserData /////
+
   /**
    * Adds an user object to this problem
    * @param type The type (C++ class name) of the user object
@@ -215,6 +232,34 @@ public:
    * @param parameters Parameters of the user object
    */
   virtual void addUserObject(const std::string & type, const std::string & name, InputParameters parameters);
+
+  /**
+   * Get the user object by its name
+   * @param name The name of the user object being retrieved
+   * @param tid The thread ID
+   * @return Const reference to the user object
+   */
+  template <class T>
+  const T & getUserObject(const std::string & name, THREAD_ID tid = 0)
+  {
+    UserObject * user_object = _user_objects[tid].getUserObjectByName(name);
+    if (user_object == NULL)
+    {
+      mooseError("Unable to find user object with name '" + name + "'");
+    }
+    return dynamic_cast<const T &>(*user_object);
+  }
+
+  /**
+   * Check if there if a user object of given name
+   * @param name The name of the user object being checked for
+   * @param tid  The thread ID
+   * @return true if the user object exists, false otherwise
+   */
+  bool hasUserObject(const std::string & name, THREAD_ID tid = 0)
+  {
+    return _user_objects[tid].hasUserObject(name);
+  }
 
   // Postprocessors /////
   virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
@@ -332,6 +377,18 @@ public:
 
 
 protected:
+  MooseMesh & _mesh;
+  EquationSystems _eq;
+
+  bool _transient;
+  Real & _time;
+  Real & _time_old;
+  int & _t_step;
+  Real & _dt;
+  Real _dt_old;
+
+  std::vector<Real> _time_weights;
+
   /// Objects by names, indexing: [thread][name]->array of moose objects with name 'name'
   std::vector<std::map<std::string, std::vector<MooseObject *> > > _objects_by_name;
 
@@ -367,6 +424,9 @@ protected:
   /// Table with postprocessors that will go on screen
   FormattedTable _pps_output_table_screen;
   unsigned int _pps_output_table_max_rows;
+
+  /// User objects
+  std::vector<UserObjectWarehouse> _user_objects;
 
   void computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pps);
 

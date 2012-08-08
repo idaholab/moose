@@ -13,6 +13,8 @@
 /****************************************************************/
 
 #include "KernelWarehouse.h"
+#include "Kernel.h"
+#include "ScalarKernel.h"
 
 KernelWarehouse::KernelWarehouse()
 {

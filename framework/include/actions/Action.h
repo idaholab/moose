@@ -16,7 +16,6 @@
 #define ACTION_H
 
 #include "InputParameters.h"
-#include "Moose.h"
 
 #include <string>
 #include <ostream>

@@ -17,6 +17,7 @@
 #include "FEProblem.h"
 #include "Factory.h"
 #include "AuxKernel.h"
+#include "AuxScalarKernel.h"
 #include "MaterialData.h"
 #include "Assembly.h"
 #include "GeometricSearchData.h"

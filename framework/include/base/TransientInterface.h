@@ -18,7 +18,7 @@
 #include "InputParameters.h"
 
 
-class SubProblem;
+class FEProblem;
 class TimePeriod;
 class TransientInterface;
 
@@ -42,7 +42,7 @@ public:
   virtual bool isActive();
 
 private:
-  SubProblem & _ti_subproblem;
+  FEProblem & _ti_feproblem;
 
 protected:
   /// If the object is using implicit or explicit form. This does NOT mean time scheme, but which values are going to be used in the object - either from current time or old time. Note that

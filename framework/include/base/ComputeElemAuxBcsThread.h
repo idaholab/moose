@@ -17,8 +17,7 @@
 
 #include "ParallelUniqueId.h"
 #include "AuxWarehouse.h"
-// libMesh includes
-#include "node_range.h"
+#include "BndElement.h"
 
 class FEProblem;
 class AuxiliarySystem;

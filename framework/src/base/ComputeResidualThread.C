@@ -12,11 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 #include "ComputeResidualThread.h"
-
 #include "NonlinearSystem.h"
 #include "Problem.h"
 #include "FEProblem.h"
-
+#include "Kernel.h"
+#include "IntegratedBC.h"
+#include "DGKernel.h"
+#include "Material.h"
 // libmesh includes
 #include "threads.h"
 

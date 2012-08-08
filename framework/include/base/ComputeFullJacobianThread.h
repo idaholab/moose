@@ -16,11 +16,13 @@
 #define COMPUTEFULLJACOBIANTHREAD_H
 
 #include "ComputeJacobianThread.h"
-
 // libMesh includes
 #include "elem_range.h"
 
+
+class FEProblem;
 class NonlinearSystem;
+
 
 class ComputeFullJacobianThread : public ComputeJacobianThread
 {

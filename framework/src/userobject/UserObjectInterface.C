@@ -13,10 +13,10 @@
 /****************************************************************/
 
 #include "UserObjectInterface.h"
-#include "UserObject.h"
+#include "FEProblem.h"
 
 UserObjectInterface::UserObjectInterface(InputParameters & params) :
-    _uoi_subproblem(*params.get<SubProblem *>("_subproblem")),
+    _uoi_feproblem(*params.get<FEProblem *>("_fe_problem")),
     _uoi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
     _uoi_params(params)
 {

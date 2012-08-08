@@ -18,8 +18,8 @@
 #include "MooseObject.h"
 #include "SetupInterface.h"
 #include "TransientInterface.h"
-#include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
+#include "UserObjectInterface.h"
 
 // libMesh
 #include "vector_value.h"

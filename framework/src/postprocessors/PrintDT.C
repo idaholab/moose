@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "PrintDT.h"
-#include "SubProblem.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<PrintDT>()
@@ -23,11 +23,12 @@ InputParameters validParams<PrintDT>()
 }
 
 PrintDT::PrintDT(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters)
+    GeneralPostprocessor(name, parameters),
+    _feproblem(dynamic_cast<FEProblem &>(_subproblem))
 {}
 
 Real
 PrintDT::getValue()
 {
-  return _subproblem.dt();
+  return _feproblem.dt();
 }

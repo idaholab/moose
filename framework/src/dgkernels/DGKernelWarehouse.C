@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "DGKernelWarehouse.h"
+#include "DGKernel.h"
 
 DGKernelWarehouse::DGKernelWarehouse()
 {

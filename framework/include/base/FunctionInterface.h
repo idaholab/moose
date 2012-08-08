@@ -17,9 +17,9 @@
 
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
-#include "Function.h"
 
-class SubProblem;
+class Function;
+class FEProblem;
 
 /**
  * Interface for objects that need to use functions
@@ -53,7 +53,7 @@ public:
   Function & getFunctionByName(const std::string & name);
 
 private:
-  SubProblem & _fni_subproblem;
+  FEProblem & _fni_feproblem;
   /// Thread ID
   THREAD_ID _fni_tid;
   /// Parameters of the object with this interface

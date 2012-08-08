@@ -13,9 +13,9 @@
 /****************************************************************/
 
 #include "ComputeElemAuxBcsThread.h"
-
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
+#include "AuxKernel.h"
 
 // libmesh includes
 #include "threads.h"

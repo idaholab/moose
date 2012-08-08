@@ -138,7 +138,6 @@ public:
   virtual void addCachedJacobian(SparseMatrix<Number> & /*jacobian*/, THREAD_ID /*tid*/) {}
 
   // Postprocessors /////
-  virtual void computePostprocessors(ExecFlagType type = EXEC_TIMESTEP) = 0;
   virtual void outputPostprocessors(bool force = false) = 0;
   virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0) = 0;
 

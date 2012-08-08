@@ -13,6 +13,10 @@
 /****************************************************************/
 
 #include "VariableWarehouse.h"
+#include "MooseVariable.h"
+#include "MooseVariableScalar.h"
+#include "InitialCondition.h"
+#include "ScalarInitialCondition.h"
 
 VariableWarehouse::VariableWarehouse()
 {

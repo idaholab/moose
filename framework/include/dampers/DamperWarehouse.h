@@ -15,12 +15,11 @@
 #ifndef DAMPERWAREHOUSE_H
 #define DAMPERWAREHOUSE_H
 
-#include "Damper.h"
-
 #include <vector>
 #include <map>
 #include <set>
 
+class Damper;
 
 /**
  * Holds dampers and provides some services

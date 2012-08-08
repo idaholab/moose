@@ -72,22 +72,12 @@ public:
   virtual void initialCondition(EquationSystems & /*es*/, const std::string & /*system_name*/) {}
 
   // Postprocessors /////
-  virtual void computePostprocessors(ExecFlagType /*type*/ = EXEC_TIMESTEP) {}
   virtual void outputPostprocessors(bool /*force*/ = false) {}
   virtual Real & getPostprocessorValue(const std::string & /*name*/, THREAD_ID /*tid*/ = 0) { return _dummy; } // TODO
 
   // Function /////
   virtual void addFunction(std::string /*type*/, const std::string & /*name*/, InputParameters /*parameters*/) { mooseError("Can't add Functions to the output problem"); }
   virtual Function & getFunction(const std::string & /*name*/, THREAD_ID /*tid*/ = 0) { mooseError("Can't get Functions from the OutputProblem!"); }
-
-  // Transient /////
-  virtual void transient(bool /*trans*/) {}
-  virtual bool isTransient() { return _mproblem.isTransient(); }
-
-  virtual Real & time() { return _mproblem.time(); }
-  virtual int & timeStep() { return _mproblem.timeStep(); }
-  virtual Real & dt() { return _mproblem.dt(); }
-  virtual Real & dtOld() { return _mproblem.dtOld(); }
 
   virtual void copySolutionsBackwards() {}
 

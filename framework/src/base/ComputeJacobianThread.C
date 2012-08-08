@@ -16,6 +16,8 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "TimeDerivative.h"
+#include "IntegratedBC.h"
+#include "DGKernel.h"
 
 // libmesh includes
 #include "threads.h"

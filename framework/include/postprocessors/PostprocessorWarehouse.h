@@ -15,12 +15,12 @@
 #ifndef POSTPROCESSORWAREHOUSE_H
 #define POSTPROCESSORWAREHOUSE_H
 
-#include "Postprocessor.h"
-
 #include <vector>
 #include <map>
 #include <set>
+#include "Moose.h"
 
+class Postprocessor;
 class ElementPostprocessor;
 class NodalPostprocessor;
 class SidePostprocessor;

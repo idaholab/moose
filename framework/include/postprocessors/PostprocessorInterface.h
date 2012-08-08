@@ -23,7 +23,7 @@
 #include "ParallelUniqueId.h"
 
 // Forward Declarations
-class SubProblem;
+class FEProblem;
 
 class PostprocessorInterface
 {
@@ -36,7 +36,7 @@ public:
   PostprocessorValue & getPostprocessorValue(const std::string & name);
 
 private:
-  SubProblem & _pi_subproblem;
+  FEProblem & _pi_feproblem;
   THREAD_ID _pi_tid;
 };
 

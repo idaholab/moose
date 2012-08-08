@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "PostprocessorWarehouse.h"
+#include "Postprocessor.h"
 #include "ElementPostprocessor.h"
 #include "SidePostprocessor.h"
 #include "NodalPostprocessor.h"

@@ -13,6 +13,8 @@
 /****************************************************************/
 
 #include "ConstraintWarehouse.h"
+#include "NodalConstraint.h"
+#include "NodeFaceConstraint.h"
 
 ConstraintWarehouse::ConstraintWarehouse()
 {

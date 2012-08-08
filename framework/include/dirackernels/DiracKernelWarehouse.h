@@ -15,9 +15,9 @@
 #ifndef DIRACKERNELWAREHOUSE_H
 #define DIRACKERNELWAREHOUSE_H
 
-#include "DiracKernel.h"
-
 #include <vector>
+
+class DiracKernel;
 
 /**
  * Holds DiracKernels and provides some services

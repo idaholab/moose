@@ -18,10 +18,10 @@
 #include <vector>
 #include <map>
 #include <set>
+#include "Moose.h"
 
-#include "Kernel.h"
-#include "ScalarKernel.h"
-
+class Kernel;
+class ScalarKernel;
 
 /**
  * Holds kernels and provides some services

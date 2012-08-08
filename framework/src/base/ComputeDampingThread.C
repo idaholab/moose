@@ -15,6 +15,7 @@
 #include "ComputeDampingThread.h"
 #include "NonlinearSystem.h"
 #include "Problem.h"
+#include "Damper.h"
 
 // libmesh includes
 #include "threads.h"
