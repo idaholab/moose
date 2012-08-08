@@ -125,7 +125,7 @@ protected:
   enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
 
 private:
-  /// Inidicates whether warnings or errors are displayed when overrridden parameters are detected
+  /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
 };
 
