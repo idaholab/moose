@@ -65,27 +65,27 @@
 namespace Moose {
   void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys)
   {
-    SubProblem * p = sys.get_equation_systems().parameters.get<SubProblem *>("_subproblem");
+    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
     p->computeJacobian(sys, soln, jacobian);
   }
 
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys)
   {
-    SubProblem * p = sys.get_equation_systems().parameters.get<SubProblem *>("_subproblem");
+    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
     p->computeResidual(sys, soln, residual);
   }
 
   void compute_bounds (NumericVector<Number>& lower, NumericVector<Number>& upper, NonlinearImplicitSystem& sys)
   {
-    SubProblem * p = sys.get_equation_systems().parameters.get<SubProblem *>("_subproblem");
+    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
     p->computeBounds(sys, lower, upper);
   }
-
 } // namespace Moose
 
-NonlinearSystem::NonlinearSystem(FEProblem & subproblem, const std::string & name) :
-    SystemTempl<TransientNonlinearImplicitSystem>(subproblem, name, Moose::VAR_NONLINEAR),
-    _mproblem(subproblem),
+
+NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & name) :
+    SystemTempl<TransientNonlinearImplicitSystem>(fe_problem, name, Moose::VAR_NONLINEAR),
+    _fe_problem(fe_problem),
     _last_rnorm(0),
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
@@ -97,11 +97,11 @@ NonlinearSystem::NonlinearSystem(FEProblem & subproblem, const std::string & nam
     _residual_ghosted(_sys.add_vector("residual_ghosted", false, GHOSTED)),
     _serialized_solution(*NumericVector<Number>::build().release()),
     _residual_copy(*NumericVector<Number>::build().release()),
-    _t(subproblem.time()),
-    _dt(subproblem.dt()),
-    _dt_old(subproblem.dtOld()),
-    _t_step(subproblem.timeStep()),
-    _time_weight(subproblem.timeWeights()),
+    _t(fe_problem.time()),
+    _dt(fe_problem.dt()),
+    _dt_old(fe_problem.dtOld()),
+    _t_step(fe_problem.timeStep()),
+    _time_weight(fe_problem.timeWeights()),
     _increment_vec(NULL),
     _preconditioner(NULL),
     _use_finite_differenced_preconditioner(false),
@@ -173,7 +173,7 @@ NonlinearSystem::solve()
     //Calculate the initial residual for use in the convergence criterion.  The initial
     //residual
     _computing_initial_residual = true;
-    _mproblem.computeResidual(_sys, *_current_solution, *_sys.rhs);
+    _fe_problem.computeResidual(_sys, *_current_solution, *_sys.rhs);
     _computing_initial_residual = false;
 
     _sys.rhs->close();
@@ -360,7 +360,7 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _mproblem._material_data[tid];
+    parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
     Kernel *kernel = static_cast<Kernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
@@ -382,7 +382,7 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
       }
     }
     _kernels[tid].addKernel(kernel, blk_ids);
-    _mproblem._objects_by_name[tid][name].push_back(kernel);
+    _fe_problem._objects_by_name[tid][name].push_back(kernel);
   }
 }
 
@@ -397,7 +397,7 @@ NonlinearSystem::addScalarKernel(const  std::string & kernel_name, const std::st
     mooseAssert(kernel != NULL, "Not a Kernel object");
 
     _kernels[tid].addScalarKernel(kernel);
-    _mproblem._objects_by_name[tid][name].push_back(kernel);
+    _fe_problem._objects_by_name[tid][name].push_back(kernel);
   }
 }
 
@@ -418,11 +418,11 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       parameters.set<THREAD_ID>("_tid") = tid;
-      parameters.set<MaterialData *>("_material_data") = _mproblem._bnd_material_data[tid];
+      parameters.set<MaterialData *>("_material_data") = _fe_problem._bnd_material_data[tid];
 
       BoundaryCondition * bc = static_cast<BoundaryCondition *>(Factory::instance()->create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a BoundaryCondition object");
-      _mproblem._objects_by_name[tid][name].push_back(bc);
+      _fe_problem._objects_by_name[tid][name].push_back(bc);
 
       if (dynamic_cast<PresetNodalBC*>(bc) != NULL)
       {
@@ -456,7 +456,7 @@ NonlinearSystem::addConstraint(const std::string & c_name, const std::string & n
   parameters.set<THREAD_ID>("_tid") = 0;
 
   MooseObject * obj = Factory::instance()->create(c_name, name, parameters);
-  _mproblem._objects_by_name[0][name].push_back(obj);
+  _fe_problem._objects_by_name[0][name].push_back(obj);
 
   NodalConstraint    * nc = dynamic_cast<NodalConstraint *>(obj);
   NodeFaceConstraint * nfc = dynamic_cast<NodeFaceConstraint *>(obj);
@@ -482,13 +482,13 @@ NonlinearSystem::addDiracKernel(const  std::string & kernel_name, const std::str
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _mproblem._material_data[tid];
+    parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
     DiracKernel *kernel = static_cast<DiracKernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Dirac Kernel object");
 
     _dirac_kernels[tid].addDiracKernel(kernel);
-    _mproblem._objects_by_name[tid][name].push_back(kernel);
+    _fe_problem._objects_by_name[tid][name].push_back(kernel);
   }
 }
 
@@ -498,14 +498,14 @@ NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & nam
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _mproblem._bnd_material_data[tid];
-    parameters.set<MaterialData *>("_neighbor_material_data") = _mproblem._neighbor_material_data[tid];
+    parameters.set<MaterialData *>("_material_data") = _fe_problem._bnd_material_data[tid];
+    parameters.set<MaterialData *>("_neighbor_material_data") = _fe_problem._neighbor_material_data[tid];
 
     DGKernel *dg_kernel = static_cast<DGKernel *>(Factory::instance()->create(dg_kernel_name, name, parameters));
     mooseAssert(dg_kernel != NULL, "Not a DG Kernel object");
 
     _dg_kernels[tid].addDGKernel(dg_kernel);
-    _mproblem._objects_by_name[tid][name].push_back(dg_kernel);
+    _fe_problem._objects_by_name[tid][name].push_back(dg_kernel);
   }
 
   _doing_dg = true;
@@ -517,11 +517,11 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _mproblem._material_data[tid];
+    parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
     Damper * damper = static_cast<Damper *>(Factory::instance()->create(damper_name, name, parameters));
     _dampers[tid].addDamper(damper);
-    _mproblem._objects_by_name[tid][name].push_back(damper);
+    _fe_problem._objects_by_name[tid][name].push_back(damper);
   }
 }
 
@@ -682,7 +682,7 @@ NonlinearSystem::setInitialSolution()
   // Set constraint slave values
   setConstraintSlaveValues(initial_solution, false);
 
-  if(_mproblem.getDisplacedProblem())
+  if(_fe_problem.getDisplacedProblem())
     setConstraintSlaveValues(initial_solution, true);
 }
 
@@ -738,7 +738,7 @@ NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
 void
 NonlinearSystem::computeTimeDerivatives()
 {
-  if (!_mproblem.isTransient())
+  if (!_fe_problem.isTransient())
     return;
 
   switch (_time_stepping_scheme)
@@ -852,12 +852,12 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
 
   if(!displaced)
   {
-    GeometricSearchData & geom_search_data = _mproblem.geomSearchData();
+    GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
     penetration_locators = &geom_search_data._penetration_locators;
   }
   else
   {
-    GeometricSearchData & displaced_geom_search_data = _mproblem.getDisplacedProblem()->geomSearchData();
+    GeometricSearchData & displaced_geom_search_data = _fe_problem.getDisplacedProblem()->geomSearchData();
     penetration_locators = &displaced_geom_search_data._penetration_locators;
   }
 
@@ -940,12 +940,12 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
   if(!displaced)
   {
-    GeometricSearchData & geom_search_data = _mproblem.geomSearchData();
+    GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
     penetration_locators = &geom_search_data._penetration_locators;
   }
   else
   {
-    GeometricSearchData & displaced_geom_search_data = _mproblem.getDisplacedProblem()->geomSearchData();
+    GeometricSearchData & displaced_geom_search_data = _fe_problem.getDisplacedProblem()->geomSearchData();
     penetration_locators = &displaced_geom_search_data._penetration_locators;
   }
 
@@ -1044,12 +1044,12 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   }
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  ComputeResidualThread cr(_mproblem, *this, residual);
+  ComputeResidualThread cr(_fe_problem, *this, residual);
   Threads::parallel_reduce(elem_range, cr);
 
   // Close the Aux system solution because "save_in" kernels might have written to it
-  _mproblem.getAuxiliarySystem().sys().solution->close();
-  _mproblem.getAuxiliarySystem().update();
+  _fe_problem.getAuxiliarySystem().sys().solution->close();
+  _fe_problem.getAuxiliarySystem().update();
 
   // do scalar kernels (not sure how to thread this)
   const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
@@ -1059,10 +1059,10 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
     {
       ScalarKernel * kernel = *it;
 
-      _mproblem.reinitScalars(0);
+      _fe_problem.reinitScalars(0);
       kernel->reinit();
       kernel->computeResidual();
-      _mproblem.addResidualScalar(residual);
+      _fe_problem.addResidualScalar(residual);
     }
   }
 
@@ -1089,20 +1089,20 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   residual.close();
   Moose::perf_log.pop("residual.close3()","Solve");
 
-  if(_mproblem._has_constraints)
+  if(_fe_problem._has_constraints)
   {
     enforceNodalConstraintsResidual(residual);
   }
   residual.close();
 
   // Add in Residual contributions from Constraints
-  if(_mproblem._has_constraints)
+  if(_fe_problem._has_constraints)
   {
     // Undisplaced Constraints
     constraintResiduals(residual, false);
 
     // Displaced Constraints
-    if(_mproblem.getDisplacedProblem())
+    if(_fe_problem.getDisplacedProblem())
       constraintResiduals(residual, true);
   }
 }
@@ -1274,12 +1274,12 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
   if(!displaced)
   {
-    GeometricSearchData & geom_search_data = _mproblem.geomSearchData();
+    GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
     penetration_locators = &geom_search_data._penetration_locators;
   }
   else
   {
-    GeometricSearchData & displaced_geom_search_data = _mproblem.getDisplacedProblem()->geomSearchData();
+    GeometricSearchData & displaced_geom_search_data = _fe_problem.getDisplacedProblem()->geomSearchData();
     penetration_locators = &displaced_geom_search_data._penetration_locators;
   }
 
@@ -1413,16 +1413,16 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
         ScalarKernel * kernel = *it;
         if (kernel->variable().number() == ivar)
         {
-          _mproblem.reinitScalars(0);
+          _fe_problem.reinitScalars(0);
           kernel->reinit();
           kernel->computeOffDiagJacobian(jvar);
-          _mproblem.addJacobianScalar(jacobian);
+          _fe_problem.addJacobianScalar(jacobian);
         }
       }
     }
   }
 
-  _mproblem.addJacobianScalar(jacobian);
+  _fe_problem.addJacobianScalar(jacobian);
 
 }
 
@@ -1473,11 +1473,11 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     if (_time_stepping_scheme != Moose::EXPLICIT_EULER)
     {
-      switch (_mproblem.coupling())
+      switch (_fe_problem.coupling())
       {
       case Moose::COUPLING_DIAG:
         {
-          ComputeJacobianThread cj(_mproblem, *this, jacobian);
+          ComputeJacobianThread cj(_fe_problem, *this, jacobian);
           Threads::parallel_reduce(elem_range, cj);
         }
         break;
@@ -1485,7 +1485,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
       default:
       case Moose::COUPLING_CUSTOM:
         {
-          ComputeFullJacobianThread cj(_mproblem, *this, jacobian);
+          ComputeFullJacobianThread cj(_fe_problem, *this, jacobian);
           Threads::parallel_reduce(elem_range, cj);
         }
         break;
@@ -1493,7 +1493,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
     }
     else
     {
-      ComputeExplicitJacobianThread cj(_mproblem, *this, jacobian);
+      ComputeExplicitJacobianThread cj(_fe_problem, *this, jacobian);
       Threads::parallel_reduce(elem_range, cj);
     }
 
@@ -1503,13 +1503,13 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
     static bool first = true;
 
     // This adds zeroes into geometric coupling entries to ensure they stay in the matrix
-    if(first && (_add_implicit_geometric_coupling_entries_to_jacobian || _mproblem._has_constraints))
+    if(first && (_add_implicit_geometric_coupling_entries_to_jacobian || _fe_problem._has_constraints))
     {
       first = false;
-      addImplicitGeometricCouplingEntries(jacobian, _mproblem.geomSearchData());
+      addImplicitGeometricCouplingEntries(jacobian, _fe_problem.geomSearchData());
 
-      if(_mproblem.getDisplacedProblem())
-        addImplicitGeometricCouplingEntries(jacobian, _mproblem.getDisplacedProblem()->geomSearchData());
+      if(_fe_problem.getDisplacedProblem())
+        addImplicitGeometricCouplingEntries(jacobian, _fe_problem.getDisplacedProblem()->geomSearchData());
     }
 
     jacobian.close();
@@ -1542,7 +1542,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
     jacobian.close();
 
     // Add in Jacobian contributions from Constraints
-    if(_mproblem._has_constraints)
+    if(_fe_problem._has_constraints)
     {
       // Nodal Constraints
       enforceNodalConstraintsJacobian(jacobian);
@@ -1551,7 +1551,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
       constraintJacobians(jacobian, false);
 
       // Displaced Constraints
-      if(_mproblem.getDisplacedProblem())
+      if(_fe_problem.getDisplacedProblem())
         constraintJacobians(jacobian, true);
     }
 
@@ -1811,7 +1811,7 @@ NonlinearSystem::computeDiracContributions(NumericVector<Number> * residual,
 {
   Moose::perf_log.push("computeDiracContributions()","Solve");
 
-  _mproblem.clearDiracInfo();
+  _fe_problem.clearDiracInfo();
 
   std::set<const Elem *> dirac_elements;
 
@@ -1826,9 +1826,9 @@ NonlinearSystem::computeDiracContributions(NumericVector<Number> * residual,
 
   if (_dirac_kernels[0].all().size() > 0)
   {
-    ComputeDiracThread cd(_mproblem, *this, residual, jacobian);
+    ComputeDiracThread cd(_fe_problem, *this, residual, jacobian);
 
-    _mproblem.getDiracElements(dirac_elements);
+    _fe_problem.getDiracElements(dirac_elements);
 
     DistElemRange range(dirac_elements.begin(),
                         dirac_elements.end(),
@@ -1859,7 +1859,7 @@ NonlinearSystem::residualGhosted()
 void
 NonlinearSystem::augmentSendList(std::vector<unsigned int> & send_list)
 {
-  std::set<unsigned int> & ghosted_elems = _mproblem._ghosted_elems;
+  std::set<unsigned int> & ghosted_elems = _fe_problem._ghosted_elems;
 
   DofMap & dof_map = dofMap();
 
@@ -1884,16 +1884,16 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
                                  std::vector<unsigned int> & n_oz)
 {
 
-  if(_add_implicit_geometric_coupling_entries_to_jacobian || _mproblem._has_constraints)
+  if(_add_implicit_geometric_coupling_entries_to_jacobian || _fe_problem._has_constraints)
   {
-    _mproblem.updateGeomSearch();
+    _fe_problem.updateGeomSearch();
 
     std::map<unsigned int, std::vector<unsigned int> > graph;
 
-    findImplicitGeometricCouplingEntries(_mproblem.geomSearchData(), graph);
+    findImplicitGeometricCouplingEntries(_fe_problem.geomSearchData(), graph);
 
-    if(_mproblem.getDisplacedProblem())
-      findImplicitGeometricCouplingEntries(_mproblem.getDisplacedProblem()->geomSearchData(), graph);
+    if(_fe_problem.getDisplacedProblem())
+      findImplicitGeometricCouplingEntries(_fe_problem.getDisplacedProblem()->geomSearchData(), graph);
 
     const unsigned int first_dof_on_proc = dofMap().first_dof(libMesh::processor_id());
     const unsigned int end_dof_on_proc   = dofMap().end_dof(libMesh::processor_id());

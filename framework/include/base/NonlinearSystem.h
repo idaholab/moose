@@ -331,7 +331,7 @@ public:
   }
 
 public:
-  FEProblem & _mproblem;
+  FEProblem & _fe_problem;
   // FIXME: make these protected and create getters/setters
   Real _last_rnorm;
   Real _last_nl_rnorm;

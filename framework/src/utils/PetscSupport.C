@@ -493,7 +493,7 @@ PetscErrorCode petscNewtonUpdate(SNES snes, PetscInt /*step*/)
 
 void petscSetupDampers(NonlinearImplicitSystem& sys)
 {
-  FEProblem * problem = static_cast<FEProblem *>(sys.get_equation_systems().parameters.get<SubProblem *>("_subproblem"));
+  FEProblem * problem = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
   NonlinearSystem & nl = problem->getNonlinearSystem();
   PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
   SNES snes = petsc_solver->snes();

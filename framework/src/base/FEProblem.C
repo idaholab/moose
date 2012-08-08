@@ -131,7 +131,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
   _resurrector = new Resurrector(*this);
 
-  _eq.parameters.set<SubProblem *>("_subproblem") = this;
+  _eq.parameters.set<FEProblem *>("_fe_problem") = this;
 }
 
 FEProblem::~FEProblem()
