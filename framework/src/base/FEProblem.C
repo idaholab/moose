@@ -92,7 +92,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _input_file_saved(false),
     _has_dampers(false),
     _has_constraints(false),
-    _resurrector(*this),
+    _resurrector(NULL),
 //    _solve_only_perf_log("Solve Only"),
     _output_setup_log_early(false),
     // debugging
@@ -128,6 +128,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   _pps_data.resize(n_threads);
   _user_objects.resize(n_threads);
   _objects_by_name.resize(n_threads);
+
+  _resurrector = new Resurrector(*this);
 
   _eq.parameters.set<SubProblem *>("_subproblem") = this;
 }
@@ -165,6 +167,8 @@ FEProblem::~FEProblem()
 
   if (_out_problem)
     delete _out_problem;
+
+  delete _resurrector;
 }
 
 Moose::CoordinateSystemType
@@ -225,7 +229,7 @@ FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const std::
 void FEProblem::initialSetup()
 {
   if (isRestarting())
-    _resurrector.restartFromFile();
+    _resurrector->restartFromFile();
   else
   {
     if (_ex_reader != NULL)
@@ -274,11 +278,11 @@ void FEProblem::initialSetup()
     if (_material_props.hasStatefulProperties())
     {
       // load the stateful material props from a file
-      _resurrector.restartStatefulMaterialProps();
+      _resurrector->restartStatefulMaterialProps();
     }
 
     if (_user_objects[0].size() > 0)
-      _resurrector.restartUserData();
+      _resurrector->restartUserData();
   }
 
 //  // RUN initial postprocessors
@@ -373,7 +377,7 @@ void FEProblem::initialSetup()
   if (_material_props.hasStatefulProperties())
   {
     if (isRestarting())
-      _resurrector.restartStatefulMaterialProps();
+      _resurrector->restartStatefulMaterialProps();
     else
     {
       ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
@@ -2098,7 +2102,7 @@ FEProblem::output(bool force/*= false*/)
     }
   }
 
-  _resurrector.write();
+  _resurrector->write();
 }
 
 void
@@ -2265,19 +2269,19 @@ FEProblem::serializeSolution()
 void
 FEProblem::setRestartFile(const std::string & file_name)
 {
-  _resurrector.setRestartFile(file_name);
+  _resurrector->setRestartFile(file_name);
 }
 
 void
 FEProblem::setNumRestartFiles(unsigned int num_files)
 {
-  _resurrector.setNumRestartFiles(num_files);
+  _resurrector->setNumRestartFiles(num_files);
 }
 
 bool
 FEProblem::isRestarting()
 {
-  return _resurrector.isOn();
+  return _resurrector->isOn();
 }
 
 std::vector<std::string>

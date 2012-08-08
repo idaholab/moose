@@ -480,7 +480,7 @@ protected:
   bool _has_constraints;
 
   /// Object responsible for restart (read/write)
-  Resurrector _resurrector;
+  Resurrector * _resurrector;
 
   /// Elements that should have Dofs ghosted to the local processor
   std::set<unsigned int> _ghosted_elems;
