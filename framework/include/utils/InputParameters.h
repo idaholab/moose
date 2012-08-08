@@ -325,13 +325,14 @@ void InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const
 
 /**
  * Generic valid params
- */
+
 template<class T>
 InputParameters validParams()
 {
   InputParameters params;
   return params;
 }
+*/
 
 InputParameters emptyInputParameters();
 
