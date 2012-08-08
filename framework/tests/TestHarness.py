@@ -48,10 +48,7 @@ class TestHarness:
       if (self.test_match.search(dirpath)):
         for file in filenames:
           # See if there were other arguments (test names) passed on the command line
-          if (file[-2:] == 'py' and  # TODO make it so if a leftover appears in any test_name it will run
-              self.test_match.search(file) and
-              (len(self.tests) == 0 or len([item for item in self.tests if re.match(item, file)]) == 1)):
-
+          if file[-2:] == 'py' and self.test_match.search(file):
             module_name = file[:-3]
             saved_cwd = os.getcwd()
             sys.path.append(os.path.abspath(dirpath))
@@ -68,6 +65,21 @@ class TestHarness:
 
                 # insert default values where none provided
                 testname = module_name + '.' + test_name
+
+                # Filter tests that we want to run
+                will_run = False
+                if len(self.tests) == 0:
+                  will_run = True
+                else:
+                  for item in self.tests:
+                    pos = item.find(".")
+                    # Does the passed in argument have a "dot"?
+                    if (pos > -1 and item == testname) or (pos == -1 and item == module_name):
+                      will_run = True
+
+                if not will_run:
+                  continue
+
                 test = DEFAULTS.copy()
 
                 # Now update all the base level keys
