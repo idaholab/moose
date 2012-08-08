@@ -20,7 +20,7 @@
 
 // Forward declarations
 class MooseMesh;
-class SubProblem;
+class FEProblem;
 
 class ParsedFunctionTest : public CppUnit::TestFixture
 {
@@ -44,7 +44,7 @@ public:
 
 protected:
   MooseMesh * _mesh;
-  SubProblem * _subproblem;
+  FEProblem * _fe_problem;
 };
 
 #endif  // USERFUNCTIONTEST_H
