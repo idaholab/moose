@@ -2,7 +2,7 @@
 #define SOLIDMODEL_H
 
 #include "Material.h"
-
+#include "Function.h"
 #include "SymmTensor.h"
 
 // Forward declarations

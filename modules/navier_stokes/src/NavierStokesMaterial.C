@@ -280,9 +280,6 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
   // we want to use a form of Tau that requires it.
   // Real soundspeed = std::sqrt(_gamma * _R * _temperature[qp]);
   
-  // The timestep size, get this from the SubProblem reference we have.
-  Real dt = _subproblem.dt();
-
   // If velmag == 0, then _hsupg should be zero as well.  Then tau
   // will have only the time-derivative contribution (or zero, if we
   // are not including dt terms in our taus!)  Note that using the
@@ -297,7 +294,7 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
     // _taue[qp] = 0.;
 
     // 2.) Tau *with* dt terms
-    _tauc[qp] = _taum[qp] = _taue[qp] = 0.5 * dt;
+    _tauc[qp] = _taum[qp] = _taue[qp] = 0.5 * _dt;
   }
   else
   {
@@ -335,7 +332,7 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
     // 2.) Tau with timestep dependence (guarantees stabilization even
     // in zero-velocity limit) incorporated via the "r-switch" method,
     // with r=2.
-    Real sqrt_term = 4./dt/dt + velmag*velmag/h2;
+    Real sqrt_term = 4./_dt/_dt + velmag*velmag/h2;
 
     // For use with option "2", i.e. the option that uses dt in the definition of tau
     _tauc[qp] = 1. / std::sqrt(sqrt_term);
