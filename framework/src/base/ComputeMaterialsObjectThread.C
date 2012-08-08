@@ -58,8 +58,6 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjec
 void
 ComputeMaterialsObjectThread::onElement(const Elem *elem)
 {
-//  _problem.prepare(elem, _tid);
-//  _problem.reinitElem(elem, _tid);
   _assembly[0]->reinit(elem);
 
   SubdomainID subdomain = elem->subdomain_id();
@@ -67,9 +65,7 @@ ComputeMaterialsObjectThread::onElement(const Elem *elem)
   mooseAssert(_materials[_tid].hasMaterials(subdomain), "No materials on subdomain block " + elem->id());
   if (subdomain != _subdomain)
   {
-    _problem.subdomainSetup(subdomain, _tid);
-//    _sys._kernels[_tid].updateActiveKernels(subdomain);
-//    if (_sys._doing_dg) _sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
+    _fe_problem.subdomainSetup(subdomain, _tid);
   }
 
   // TODO: Asserts on blocks?
@@ -84,13 +80,6 @@ ComputeMaterialsObjectThread::onElement(const Elem *elem)
     unsigned int n_points = _assembly[_tid]->qRuleFace()->n_points();
     _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(subdomain), n_points, *elem, side);
   }
-
-
-//  _problem.reinitMaterials(subdomain, _tid);
-
-//  const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
-//  for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-//    (*it)->computeResidual();
 }
 
 void

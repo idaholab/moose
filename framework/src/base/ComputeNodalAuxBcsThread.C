@@ -15,17 +15,16 @@
 #include "ComputeNodalAuxBcsThread.h"
 
 #include "AuxiliarySystem.h"
-#include "Problem.h"
 #include "FEProblem.h"
 #include "AuxKernel.h"
 
 // libmesh includes
 #include "threads.h"
 
-ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(Problem & problem,
+ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(FEProblem & fe_problem,
                                                    AuxiliarySystem & sys,
                                                    std::vector<AuxWarehouse> & auxs) :
-    _problem(problem),
+    _fe_problem(fe_problem),
     _sys(sys),
     _auxs(auxs)
 {
@@ -33,7 +32,7 @@ ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(Problem & problem,
 
 // Splitting Constructor
 ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split /*split*/) :
-    _problem(x._problem),
+    _fe_problem(x._fe_problem),
     _sys(x._sys),
     _auxs(x._auxs)
 {
@@ -67,7 +66,7 @@ ComputeNodalAuxBcsThread::operator() (const ConstBndNodeRange & range)
 
       if(node->processor_id() == libMesh::processor_id())
       {
-        _problem.reinitNodeFace(node, boundary_id, _tid);
+        _fe_problem.reinitNodeFace(node, boundary_id, _tid);
 
         for (std::vector<AuxKernel *>::const_iterator aux_it = _auxs[_tid].activeBCs(boundary_id).begin();
             aux_it != _auxs[_tid].activeBCs(boundary_id).end();

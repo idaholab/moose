@@ -344,7 +344,7 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
   if (auxs[0].activeNodalKernels().size() > 0 || have_block_kernels)
   {
     ConstNodeRange & range = *_mesh.getLocalNodeRange();
-    ComputeNodalAuxVarsThread navt(_subproblem, *this, auxs);
+    ComputeNodalAuxVarsThread navt(_mproblem, *this, auxs);
     Threads::parallel_reduce(range, navt);
   }
   Moose::perf_log.pop("update_aux_vars_nodal()","Solve");
@@ -353,7 +353,7 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
   Moose::perf_log.push("update_aux_vars_nodal_bcs()","Solve");
   // after converting this into NodeRange, we can run it in parallel
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-  ComputeNodalAuxBcsThread nabt(_subproblem, *this, auxs);
+  ComputeNodalAuxBcsThread nabt(_mproblem, *this, auxs);
   Threads::parallel_reduce(bnd_nodes, nabt);
   Moose::perf_log.pop("update_aux_vars_nodal_bcs()","Solve");
 }

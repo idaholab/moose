@@ -16,7 +16,6 @@
 #define COMPUTEEXPLICITJACOBIANTHREAD_H
 
 #include "ComputeJacobianThread.h"
-
 // libMesh includes
 #include "elem_range.h"
 

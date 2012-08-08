@@ -39,7 +39,6 @@ public:
 
 protected:
   SparseMatrix<Number> & _jacobian;
-  FEProblem & _fe_problem;
   NonlinearSystem & _sys;
 
   virtual void computeJacobian();

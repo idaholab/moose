@@ -13,19 +13,17 @@
 /****************************************************************/
 
 #include "ComputeNodalAuxVarsThread.h"
-
 #include "AuxiliarySystem.h"
-#include "Problem.h"
 #include "FEProblem.h"
 #include "AuxKernel.h"
 
 // libmesh includes
 #include "threads.h"
 
-ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(Problem & problem,
+ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(FEProblem & fe_problem,
                                                      AuxiliarySystem & sys,
                                                      std::vector<AuxWarehouse> & auxs) :
-    _problem(problem),
+    _fe_problem(fe_problem),
     _sys(sys),
     _auxs(auxs)
 {
@@ -33,7 +31,7 @@ ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(Problem & problem,
 
 // Splitting Constructor
 ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split /*split*/) :
-    _problem(x._problem),
+    _fe_problem(x._fe_problem),
     _sys(x._sys),
     _auxs(x._auxs)
 {
@@ -59,7 +57,7 @@ ComputeNodalAuxVarsThread::operator() (const ConstNodeRange & range)
 //  if(unlikely(_calculate_element_time))
 //    startNodeTiming(node->id());
 
-    _problem.reinitNode(node, _tid);
+    _fe_problem.reinitNode(node, _tid);
 
     // compute global aux kernels
     for (std::vector<AuxKernel *>::const_iterator aux_it = _auxs[_tid].activeNodalKernels().begin();

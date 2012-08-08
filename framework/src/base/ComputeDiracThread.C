@@ -25,11 +25,11 @@
 // libmesh includes
 #include "threads.h"
 
-ComputeDiracThread::ComputeDiracThread(Problem & problem,
+ComputeDiracThread::ComputeDiracThread(FEProblem & feproblem,
                                        NonlinearSystem & system,
                                        NumericVector<Number> * residual,
                                        SparseMatrix<Number> * jacobian) :
-    ThreadedElementLoop<DistElemRange>(problem, system),
+    ThreadedElementLoop<DistElemRange>(feproblem, system),
     _residual(residual),
     _jacobian(jacobian),
     _sys(system)
@@ -54,7 +54,7 @@ ComputeDiracThread::pre()
 void
 ComputeDiracThread::onElement(const Elem * elem)
 {
-  bool has_dirac_kernels_on_elem = _problem.reinitDirac(elem, _tid);
+  bool has_dirac_kernels_on_elem = _fe_problem.reinitDirac(elem, _tid);
 
   if(has_dirac_kernels_on_elem)
   {
@@ -83,9 +83,9 @@ ComputeDiracThread::postElement(const Elem * /*elem*/)
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
   if (_residual)
-    _problem.addResidual(*_residual, _tid);
+    _fe_problem.addResidual(*_residual, _tid);
   else
-    _problem.addJacobian(*_jacobian, _tid);
+    _fe_problem.addJacobian(*_jacobian, _tid);
 }
 
 void

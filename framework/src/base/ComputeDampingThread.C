@@ -20,9 +20,9 @@
 // libmesh includes
 #include "threads.h"
 
-ComputeDampingThread::ComputeDampingThread(Problem & problem,
+ComputeDampingThread::ComputeDampingThread(FEProblem & feproblem,
                                            NonlinearSystem & sys) :
-    ThreadedElementLoop<ConstElemRange>(problem, sys),
+    ThreadedElementLoop<ConstElemRange>(feproblem, sys),
     _damping(1.0),
     _nl(sys)
 {
@@ -39,8 +39,8 @@ ComputeDampingThread::ComputeDampingThread(ComputeDampingThread & x, Threads::sp
 void
 ComputeDampingThread::onElement(const Elem *elem)
 {
-  _problem.prepare(elem, _tid);
-  _problem.reinitElem(elem, _tid);
+  _fe_problem.prepare(elem, _tid);
+  _fe_problem.reinitElem(elem, _tid);
   _nl.reinitDampers(_tid);
 
   for(std::vector<Damper *>::const_iterator damper_it = _nl._dampers[_tid].all().begin();

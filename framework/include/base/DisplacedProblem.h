@@ -86,9 +86,6 @@ public:
   virtual void initAdaptivity();
   virtual void meshChanged();
 
-  virtual void subdomainSetup(SubdomainID /*subdomain*/, THREAD_ID /*tid*/) {}
-  virtual void subdomainSetupSide(SubdomainID /*subdomain*/, THREAD_ID /*tid*/) {}
-
   // reinit /////
 
   virtual void prepare(const Elem * elem, THREAD_ID tid);
@@ -106,10 +103,6 @@ public:
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid);
   virtual void reinitScalars(THREAD_ID tid);
-
-  virtual void reinitMaterials(SubdomainID /*blk_id*/, THREAD_ID /*tid*/) { }
-  virtual void reinitMaterialsFace(SubdomainID /*blk_id*/, unsigned int /*side*/, THREAD_ID /*tid*/) { }
-  virtual void reinitMaterialsBoundary(BoundaryID /*bnd_id*/, THREAD_ID /*tid*/) { }
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & elems);
@@ -160,9 +153,6 @@ public:
   virtual void updateGeomSearch();
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
-  // Transient /////
-  virtual void copySolutionsBackwards() {}
-
   virtual bool computingInitialResidual() { return _mproblem.computingInitialResidual(); }
 
   virtual void onTimestepBegin() {}
@@ -171,8 +161,6 @@ public:
   virtual Order getQuadratureOrder() { return _mproblem.getQuadratureOrder(); }
 
   // Postprocessors /////
-  virtual void outputPostprocessors(bool force = false);
-  virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
   virtual void outputPps(const FormattedTable & table);
 
   /**

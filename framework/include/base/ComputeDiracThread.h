@@ -21,16 +21,18 @@
 #include "DiracKernel.h"
 #include "ThreadedElementLoop.h"
 #include "NonlinearSystem.h"
-
 // libMesh includes
 #include "elem_range.h"
 
 #include <vector>
+
 typedef StoredRange<std::set<const Elem *>::const_iterator, const Elem *> DistElemRange;
+
+
 class ComputeDiracThread : public ThreadedElementLoop<DistElemRange>
 {
 public:
-  ComputeDiracThread(Problem & problem, NonlinearSystem & system, NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
+  ComputeDiracThread(FEProblem & feproblem, NonlinearSystem & system, NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
 
   // Splitting Constructor
   ComputeDiracThread(ComputeDiracThread & x, Threads::split);

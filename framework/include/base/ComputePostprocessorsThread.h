@@ -17,7 +17,6 @@
 
 #include "ThreadedElementLoop.h"
 #include "PostprocessorWarehouse.h"
-
 // libMesh includes
 #include "elem_range.h"
 #include "numeric_vector.h"
@@ -26,7 +25,7 @@
 class ComputePostprocessorsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputePostprocessorsThread(Problem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<PostprocessorWarehouse> & pps);
+  ComputePostprocessorsThread(FEProblem & fe_problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<PostprocessorWarehouse> & pps);
   ComputePostprocessorsThread(ComputePostprocessorsThread & x, Threads::split);                 // Splitting Constructor
 
   virtual void onElement(const Elem *elem);

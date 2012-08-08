@@ -326,6 +326,7 @@ public:
   virtual void output(bool force = false);
   virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
   virtual void outputSolutionHistory(bool state = true) { _output_solution_history = state; }
+  void outputInitial(bool out_init) { _output_initial = out_init; }
   /**
    * Set which variables will be written in ouput files
    * @param output_variables The list of variable names to write in the ouput files
@@ -453,6 +454,8 @@ protected:
   // Output system
   Output _out;
   OutputProblem * _out_problem;
+  /// output initial condition if true
+  bool _output_initial;
 
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;

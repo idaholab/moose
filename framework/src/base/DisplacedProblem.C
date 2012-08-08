@@ -565,11 +565,6 @@ DisplacedProblem::meshChanged()
 }
 
 void
-DisplacedProblem::outputPostprocessors(bool)
-{
-}
-
-void
 DisplacedProblem::outputPps(const FormattedTable & table)
 {
   _ex.outputPps(_mproblem.out().fileBase() + "_displaced", table, _mproblem.time());
@@ -579,12 +574,6 @@ void
 DisplacedProblem::setOutputVariables(std::vector<std::string> output_variables)
 {
   _ex.setOutputVariables(output_variables);
-}
-
-Real &
-DisplacedProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
-{
-  return _mproblem.getPostprocessorValue(name, tid);
 }
 
 void

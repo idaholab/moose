@@ -65,6 +65,12 @@ public:
 
   virtual Order getQuadratureOrder() = 0;
 
+  // Variables /////
+  virtual bool hasVariable(const std::string & var_name) = 0;
+  virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
+  virtual bool hasScalarVariable(const std::string & var_name) = 0;
+  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) = 0;
+
   virtual Assembly & assembly(THREAD_ID tid) = 0;
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
@@ -91,6 +97,52 @@ public:
   virtual Real finalNonlinearResidual() { return 0; }
   virtual unsigned int nNonlinearIterations() { return 0; }
   virtual unsigned int nLinearIterations() { return 0; }
+
+  virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
+  virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;
+
+  virtual void cacheResidual(THREAD_ID tid) = 0;
+  virtual void cacheResidualNeighbor(THREAD_ID tid) = 0;
+  virtual void addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
+
+  virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
+  virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;
+
+  virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
+  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
+  virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid) = 0;
+  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid) = 0;
+
+  virtual void cacheJacobian(THREAD_ID tid) = 0;
+  virtual void cacheJacobianNeighbor(THREAD_ID tid) = 0;
+  virtual void addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
+
+  virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
+  virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid) = 0;
+  virtual void prepareAssembly(THREAD_ID tid) = 0;
+
+  virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) = 0;
+  virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
+  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid) = 0;
+  virtual void reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid) = 0;
+  virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
+  virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid) = 0;
+  virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid) = 0;
+  virtual void reinitScalars(THREAD_ID tid) = 0;
+
+  /**
+   * Returns true if the Problem has Dirac kernels it needs to compute on elem.
+   */
+  virtual bool reinitDirac(const Elem * elem, THREAD_ID tid) = 0;
+  /**
+   * Fills "elems" with the elements that should be looped over for Dirac Kernels
+   */
+  virtual void getDiracElements(std::set<const Elem *> & elems);
+  /**
+   * Gets called before Dirac Kernels are asked to add the points they are supposed to be evaluated in
+   */
+  virtual void clearDiracInfo() = 0;
 
   // Geom Search
   virtual void updateGeomSearch() = 0;

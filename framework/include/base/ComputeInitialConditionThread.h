@@ -25,7 +25,7 @@ class SystemBase;
 class ComputeInitialConditionThread
 {
 public:
-  ComputeInitialConditionThread(SubProblem & problem, SystemBase & sys, NumericVector<Number> & solution);
+  ComputeInitialConditionThread(SubProblem & subproblem, SystemBase & sys, NumericVector<Number> & solution);
   // Splitting Constructor
   ComputeInitialConditionThread(ComputeInitialConditionThread & x, Threads::split split);
 

@@ -18,7 +18,7 @@
 #include "Moose.h"
 #include "ParallelUniqueId.h"
 #include "MooseMesh.h"
-#include "Problem.h"
+#include "FEProblem.h"
 #include "SystemBase.h"
 
 /**
@@ -29,7 +29,7 @@ template<typename RangeType>
 class ThreadedElementLoop
 {
 public:
-  ThreadedElementLoop(Problem & problem, SystemBase & system);
+  ThreadedElementLoop(FEProblem & feproblem, SystemBase & system);
 
   ThreadedElementLoop(ThreadedElementLoop & x, Threads::split split);
 
@@ -78,23 +78,23 @@ public:
 
 protected:
   SystemBase & _system;
-  Problem & _problem;
+  FEProblem & _fe_problem;
   THREAD_ID _tid;
   unsigned int _subdomain;
 };
 
 
 template<typename RangeType>
-ThreadedElementLoop<RangeType>::ThreadedElementLoop(Problem & problem, SystemBase & system) :
+ThreadedElementLoop<RangeType>::ThreadedElementLoop(FEProblem & fe_problem, SystemBase & system) :
     _system(system),
-    _problem(problem)
+    _fe_problem(fe_problem)
 {
 }
 
 template<typename RangeType>
 ThreadedElementLoop<RangeType>::ThreadedElementLoop(ThreadedElementLoop & x, Threads::split /*split*/) :
     _system(x._system),
-    _problem(x._problem)
+    _fe_problem(x._fe_problem)
 {
 }
 

@@ -41,7 +41,6 @@ public:
 
 protected:
   NumericVector<Number> & _residual;
-  FEProblem & _fe_problem;
   NonlinearSystem & _sys;
 };
 

@@ -21,12 +21,12 @@
 #include "node_range.h"
 
 class Problem;
-class SubProblem;
+class FEProblem;
 
 class ComputeNodalPPSThread
 {
 public:
-  ComputeNodalPPSThread(SubProblem & problem, std::vector<PostprocessorWarehouse> & pps);
+  ComputeNodalPPSThread(FEProblem & fe_problem, std::vector<PostprocessorWarehouse> & pps);
   // Splitting Constructor
   ComputeNodalPPSThread(ComputeNodalPPSThread & x, Threads::split split);
 
@@ -35,7 +35,7 @@ public:
   void join(const ComputeNodalPPSThread & /*y*/);
 
 protected:
-  SubProblem & _sub_problem;
+  FEProblem & _fe_problem;
   THREAD_ID _tid;
 
   std::vector<PostprocessorWarehouse> & _pps;

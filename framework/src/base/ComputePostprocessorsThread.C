@@ -14,21 +14,20 @@
 
 #include "ComputePostprocessorsThread.h"
 
-#include "Problem.h"
+#include "FEProblem.h"
 #include "SystemBase.h"
-
 #include "ElementPostprocessor.h"
 #include "SidePostprocessor.h"
 
-ComputePostprocessorsThread::ComputePostprocessorsThread(Problem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<PostprocessorWarehouse> & pps) :
-    ThreadedElementLoop<ConstElemRange>(problem, sys),
+ComputePostprocessorsThread::ComputePostprocessorsThread(FEProblem & fe_problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<PostprocessorWarehouse> & pps) :
+    ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _soln(in_soln),
     _pps(pps)
 {}
 
 // Splitting Constructor
 ComputePostprocessorsThread::ComputePostprocessorsThread(ComputePostprocessorsThread & x, Threads::split) :
-    ThreadedElementLoop<ConstElemRange>(x._problem, x._system),
+    ThreadedElementLoop<ConstElemRange>(x._fe_problem, x._system),
     _soln(x._soln),
     _pps(x._pps)
 {}
@@ -38,9 +37,9 @@ ComputePostprocessorsThread::onElement(const Elem * elem)
 {
   unsigned int subdomain = elem->subdomain_id();
 
-  _problem.prepare(elem, _tid);
-  _problem.reinitElem(elem, _tid);
-  _problem.reinitMaterials(subdomain, _tid);
+  _fe_problem.prepare(elem, _tid);
+  _fe_problem.reinitElem(elem, _tid);
+  _fe_problem.reinitMaterials(subdomain, _tid);
 
   //Global Postprocessors
   for (std::vector<ElementPostprocessor *>::const_iterator postprocessor_it = _pps[_tid].elementPostprocessors(Moose::ANY_BLOCK_ID).begin();
@@ -59,8 +58,8 @@ ComputePostprocessorsThread::onBoundary(const Elem *elem, unsigned int side, Bou
 {
   if (_pps[_tid].sidePostprocessors(bnd_id).size() > 0)
   {
-    _problem.reinitElemFace(elem, side, bnd_id, _tid);
-    _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
+    _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
+    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
 
     for (std::vector<SidePostprocessor *>::const_iterator side_postprocessor_it = _pps[_tid].sidePostprocessors(bnd_id).begin();
         side_postprocessor_it != _pps[_tid].sidePostprocessors(bnd_id).end();

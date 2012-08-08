@@ -15,22 +15,22 @@
 #include "ComputeNodalPPSThread.h"
 
 #include "AuxiliarySystem.h"
-#include "SubProblem.h"
+#include "FEProblem.h"
 #include "NodalPostprocessor.h"
 
 // libmesh includes
 #include "threads.h"
 
-ComputeNodalPPSThread::ComputeNodalPPSThread(SubProblem & problem,
+ComputeNodalPPSThread::ComputeNodalPPSThread(FEProblem & fe_problem,
                                              std::vector<PostprocessorWarehouse> & pps) :
-    _sub_problem(problem),
+    _fe_problem(fe_problem),
     _pps(pps)
 {
 }
 
 // Splitting Constructor
 ComputeNodalPPSThread::ComputeNodalPPSThread(ComputeNodalPPSThread & x, Threads::split /*split*/) :
-    _sub_problem(x._sub_problem),
+    _fe_problem(x._fe_problem),
     _pps(x._pps)
 {
 }
@@ -44,7 +44,7 @@ ComputeNodalPPSThread::operator() (const ConstNodeRange & range)
   for (ConstNodeRange::const_iterator node_it = range.begin() ; node_it != range.end(); ++node_it)
   {
     const Node * node = *node_it;
-    _sub_problem.reinitNode(node, _tid);
+    _fe_problem.reinitNode(node, _tid);
 
     // All Nodes
     for (std::vector<NodalPostprocessor *>::const_iterator nodal_postprocessor_it =
@@ -55,7 +55,7 @@ ComputeNodalPPSThread::operator() (const ConstNodeRange & range)
       (*nodal_postprocessor_it)->execute();
     }
 
-    std::vector<BoundaryID> nodeset_ids = _sub_problem.mesh().getMesh().boundary_info->boundary_ids(node);
+    std::vector<BoundaryID> nodeset_ids = _fe_problem.mesh().getMesh().boundary_info->boundary_ids(node);
 
     for (std::vector<BoundaryID>::iterator it = nodeset_ids.begin(); it != nodeset_ids.end(); ++it)
     {

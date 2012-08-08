@@ -27,7 +27,6 @@ ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem,
                                              NumericVector<Number> & residual) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _residual(residual),
-    _fe_problem(fe_problem),
     _sys(sys)
 {
 }
@@ -36,7 +35,6 @@ ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem,
 ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
     _residual(x._residual),
-    _fe_problem(x._fe_problem),
     _sys(x._sys)
 {
 }
@@ -44,18 +42,18 @@ ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads:
 void
 ComputeResidualThread::onElement(const Elem *elem)
 {
-  _problem.prepare(elem, _tid);
-  _problem.reinitElem(elem, _tid);
+  _fe_problem.prepare(elem, _tid);
+  _fe_problem.reinitElem(elem, _tid);
 
   unsigned int subdomain = elem->subdomain_id();
   if (subdomain != _subdomain)
   {
-    _problem.subdomainSetup(subdomain, _tid);
+    _fe_problem.subdomainSetup(subdomain, _tid);
     _sys._kernels[_tid].updateActiveKernels(subdomain);
     if (_sys._doing_dg) _sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
   }
 
-  _problem.reinitMaterials(subdomain, _tid);
+  _fe_problem.reinitMaterials(subdomain, _tid);
 
   const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
   for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
@@ -68,14 +66,14 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
   std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {
-    _problem.reinitElemFace(elem, side, bnd_id, _tid);
+    _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
     unsigned int subdomain = elem->subdomain_id();
     if (subdomain != _subdomain)
-      _problem.subdomainSetupSide(subdomain, _tid);
+      _fe_problem.subdomainSetupSide(subdomain, _tid);
 
-    _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
-    _problem.reinitMaterialsBoundary(bnd_id, _tid);
+    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
+    _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
     for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
     {
@@ -101,10 +99,10 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
     std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
     if (dgks.size() > 0)
     {
-      _problem.reinitNeighbor(elem, side, _tid);
+      _fe_problem.reinitNeighbor(elem, side, _tid);
 
-      _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
-      _problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
+      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
+      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
       for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
       {
         DGKernel * dg = *it;
@@ -113,7 +111,7 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _problem.addResidualNeighbor(_residual, _tid);
+        _fe_problem.addResidualNeighbor(_residual, _tid);
       }
     }
   }
@@ -123,7 +121,7 @@ void
 ComputeResidualThread::postElement(const Elem * /*elem*/)
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-  _problem.addResidual(_residual, _tid);
+  _fe_problem.addResidual(_residual, _tid);
 }
 
 void

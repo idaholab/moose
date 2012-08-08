@@ -78,6 +78,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _ex_reader(NULL),
     _out(*this, _eq),
     _out_problem(NULL),
+    _output_initial(false),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
     _uniform_refine_level(0),

@@ -25,7 +25,7 @@ class NonlinearSystem;
 class ComputeDampingThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeDampingThread(Problem & problem, NonlinearSystem & sys);
+  ComputeDampingThread(FEProblem & feproblem, NonlinearSystem & sys);
 
   // Splitting Constructor
   ComputeDampingThread(ComputeDampingThread & x, Threads::split split);

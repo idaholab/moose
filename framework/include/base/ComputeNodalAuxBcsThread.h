@@ -19,14 +19,14 @@
 #include "AuxWarehouse.h"
 #include "BndNode.h"
 
-class Problem;
+class FEProblem;
 class AuxiliarySystem;
 
 
 class ComputeNodalAuxBcsThread
 {
 public:
-  ComputeNodalAuxBcsThread(Problem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs);
+  ComputeNodalAuxBcsThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs);
   // Splitting Constructor
   ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split);
 
@@ -35,7 +35,7 @@ public:
   void join(const ComputeNodalAuxBcsThread & /*y*/);
 
 protected:
-  Problem & _problem;
+  FEProblem & _fe_problem;
   AuxiliarySystem & _sys;
   THREAD_ID _tid;
 

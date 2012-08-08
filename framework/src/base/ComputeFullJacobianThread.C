@@ -15,7 +15,6 @@
 #include "ComputeFullJacobianThread.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
-#include "Problem.h"
 #include "Kernel.h"
 #include "IntegratedBC.h"
 #include "DGKernel.h"
