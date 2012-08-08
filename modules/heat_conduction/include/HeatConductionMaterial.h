@@ -22,12 +22,17 @@ public:
 protected:
   virtual void computeProperties();
 
+  const bool _has_temp;
+  VariableValue & _temperature;
+
   const Real & _my_thermal_conductivity;
   Real _my_specific_heat;
 
   MaterialProperty<Real> & _thermal_conductivity;
   MaterialProperty<Real> & _thermal_conductivity_dT;
   MaterialProperty<Real> & _specific_heat;
+  Function * const _thermal_conductivity_temperature_function;
+  
 };
 
 #endif //HEATCONDUCTIONMATERIAL_H
