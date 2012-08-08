@@ -33,7 +33,7 @@ NodalConstraint::NodalConstraint(const std::string & name, InputParameters param
   NeighborMooseVariableInterface(parameters, true),
   FunctionInterface(parameters),
   UserObjectInterface(parameters),
-  TransientInterface(parameters),
+  TransientInterface(parameters, name, "nodal_constraints"),
   GeometricSearchInterface(parameters),
 
   _problem(*parameters.get<Problem *>("_problem")),

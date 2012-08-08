@@ -19,6 +19,7 @@
 #include "Factory.h"
 #include "SubProblem.h"
 #include "ProblemFactory.h"
+#include "TimePeriod.h"
 
 //libMesh includes
 #include "implicit_system.h"
@@ -102,39 +103,6 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     else
       mooseError("Input value for predictor_scale = "<< predscale << ", outside of permissible range (0 to 1)");
   }
-
-  // process time periods
-  const std::vector<std::string> & time_period_names = getParam<std::vector<std::string> >("time_periods");
-  const std::vector<Real> & time_start = getParam<std::vector<Real> >("time_period_starts");
-  const std::vector<Real> & time_end = getParam<std::vector<Real> >("time_period_ends");
-  for (unsigned int i = 0; i < time_period_names.size(); ++i)
-  {
-    Real t_start = time_start[i];
-    Real t_end = 0;
-    if (time_end.size() > 0)
-      t_end = time_end[i];                              // use the time end specified in the input file
-    else
-    {
-      if (i < time_period_names.size() - 1)
-        t_end = time_start[i + 1];                      // use the next start time as an end time of this period
-      else
-        t_end = std::numeric_limits<Real>::max();       // use the max as the end
-    }
-    _problem.addTimePeriod(time_period_names[i], t_start, t_end);
-    _sync_times.push_back(t_start);
-  }
-
-  const std::vector<Real> & time = getParam<std::vector<Real> >("time_t");
-  if (_use_time_ipol)
-    _sync_times.insert(_sync_times.end(), time.begin()+1, time.end());          // insert times as sync points except the very first one
-  sort(_sync_times.begin(), _sync_times.end());
-  _sync_times.erase(std::unique(_sync_times.begin(), _sync_times.end()), _sync_times.end());    // remove duplicates (needs sorted array)
-
-  // Advance to the first sync time if one is provided in sim time range
-  _curr_sync_time_iter = _sync_times.begin();
-  while (_remaining_sync_time && *_curr_sync_time_iter <= _time)
-    if (++_curr_sync_time_iter == _sync_times.end())
-      _remaining_sync_time = false;
 
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
@@ -389,5 +357,23 @@ Transient::lastSolveConverged()
 void
 Transient::preExecute()
 {
-  Executioner::preExecute();
+  // process time periods
+  const std::vector<TimePeriod *> _time_periods = _problem.getTimePeriods();
+  for (unsigned int i = 0; i < _time_periods.size(); ++i)
+  {
+    std::cout << "Time Period: " << _time_periods[i]->name() << "\n";
+    _sync_times.push_back(_time_periods[i]->start());
+  }
+
+  const std::vector<Real> & time = getParam<std::vector<Real> >("time_t");
+  if (_use_time_ipol)
+    _sync_times.insert(_sync_times.end(), time.begin()+1, time.end());          // insert times as sync points except the very first one
+  sort(_sync_times.begin(), _sync_times.end());
+  _sync_times.erase(std::unique(_sync_times.begin(), _sync_times.end()), _sync_times.end());    // remove duplicates (needs sorted array)
+
+  // Advance to the first sync time if one is provided in sim time range
+  _curr_sync_time_iter = _sync_times.begin();
+  while (_remaining_sync_time && *_curr_sync_time_iter <= _time)
+    if (++_curr_sync_time_iter == _sync_times.end())
+      _remaining_sync_time = false;
 }

@@ -27,7 +27,7 @@ InputParameters validParams<Function>()
 Function::Function(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
-    TransientInterface(parameters),
+    TransientInterface(parameters, name, "functions"),
     PostprocessorInterface(parameters),
     UserObjectInterface(parameters)
 {

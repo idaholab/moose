@@ -36,22 +36,11 @@ class MooseVariableScalar;
 class Output;
 class Material;
 class Function;
-
+class TimePeriod;
 class Problem;
 
 template<>
 InputParameters validParams<Problem>();
-
-/**
- * Data structure to keep info about the time period
- */
-struct TimePeriod
-{
-  /// Time when this period starts (included)
-  Real _start;
-  /// Time when this period ends (excluded)
-  Real _end;
-};
 
 /**
  * Class that hold the whole problem being solved.
@@ -218,7 +207,7 @@ public:
    * @param start_time Start time of the time period
    * @param end_time End time of the time period
    */
-  void addTimePeriod(const std::string & name, Real start_time, Real end_time);
+  TimePeriod & addTimePeriod(const std::string & name, Real start_time);
 
   /**
    * Get time period by name
@@ -227,6 +216,7 @@ public:
    */
   virtual TimePeriod * getTimePeriodByName(const std::string & name);
 
+  const std::vector<TimePeriod *> & getTimePeriods() const;
 
 public:
   /**
@@ -249,8 +239,8 @@ protected:
   /// output initial condition if true
   bool _output_initial;
 
-  /// Time periods by name
-  std::map<std::string, TimePeriod *> _time_periods;
+  /// Time periods
+  std::vector<TimePeriod *> _time_periods;
 };
 
 #endif /* PROBLEM_H */

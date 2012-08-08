@@ -12,19 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "GeneralUserObject.h"
+#ifndef SETUPTIMEPERIODSACTION_H
+#define SETUPTIMEPERIODSACTION_H
+
+#include "MooseObjectAction.h"
+
+class SetupTimePeriodsAction;
 
 template<>
-InputParameters validParams<GeneralUserObject>()
-{
-  InputParameters params = validParams<UserObject>();
-  return params;
-}
+InputParameters validParams<SetupTimePeriodsAction>();
 
-GeneralUserObject::GeneralUserObject(const std::string & name, InputParameters parameters) :
-    UserObject(name, parameters),
-    TransientInterface(parameters, name, "general_user_objects"),
-    FunctionInterface(parameters),
-    UserObjectInterface(parameters),
-    PostprocessorInterface(parameters)
-{}
+
+class SetupTimePeriodsAction : public Action
+{
+public:
+  SetupTimePeriodsAction(const std::string & name, InputParameters params);
+
+  virtual void act();
+};
+
+#endif // SETUPTIMEPERIODSACTION_H

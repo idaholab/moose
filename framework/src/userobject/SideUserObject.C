@@ -30,7 +30,7 @@ SideUserObject::SideUserObject(const std::string & name, InputParameters paramet
     Coupleable(parameters, false),
     UserObjectInterface(parameters),
     MooseVariableInterface(parameters, false),
-    TransientInterface(parameters),
+    TransientInterface(parameters, name, "side_user_objects"),
     MaterialPropertyInterface(parameters),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),

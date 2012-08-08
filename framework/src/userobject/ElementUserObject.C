@@ -33,7 +33,7 @@ ElementUserObject::ElementUserObject(const std::string & name, InputParameters p
     Coupleable(parameters, false),
     UserObjectInterface(parameters),
     MooseVariableInterface(parameters, false),
-    TransientInterface(parameters),
+    TransientInterface(parameters, name, "element_user_objects"),
     MaterialPropertyInterface(parameters),
     _blocks(parameters.get<std::vector<SubdomainName> >("block")),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),

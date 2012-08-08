@@ -168,6 +168,7 @@
 #include "AddDamperAction.h"
 #include "AddFunctionAction.h"
 #include "CreateExecutionerAction.h"
+#include "SetupTimePeriodsAction.h"
 #include "ReadMeshAction.h"
 #include "EmptyAction.h"
 #include "InitProblemAction.h"
@@ -358,6 +359,7 @@ addActionTypes(Syntax & syntax)
   registerActionName("read_mesh", false);
   registerActionName("add_mesh_modifier", false);
   registerActionName("add_extra_nodeset", false);
+  registerActionName("setup_time_periods", true);
   registerActionName("add_material", false);
   registerActionName("add_function", false);
   registerActionName("add_aux_variable", false);
@@ -409,6 +411,7 @@ addActionTypes(Syntax & syntax)
 "(setup_mesh)"
 "(add_mesh_modifier, setup_mesh_complete)"
 "(setup_executioner)"
+"(setup_time_periods)"
 "(init_displaced_problem)"
 "(setup_subproblem)"
 "(add_user_object)"
@@ -474,6 +477,7 @@ registerActions(Syntax & syntax)
 
   registerAction(AddFunctionAction, "add_function");
   registerAction(CreateExecutionerAction, "setup_executioner");
+  registerAction(SetupTimePeriodsAction, "setup_time_periods");
   registerAction(InitDisplacedProblemAction, "init_displaced_problem");
   registerAction(SetupSubProblemAction, "setup_subproblem");
   registerAction(SetupOutputAction, "setup_output");

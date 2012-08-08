@@ -14,18 +14,18 @@
 
 #include "TransientInterface.h"
 #include "SubProblem.h"
+#include "TimePeriod.h"
 
 template<>
 InputParameters validParams<TransientInterface>()
 {
   InputParameters params = emptyInputParameters();
-  params.addParam<std::vector<std::string> >("time_periods", "Names of time periods this object will be active in, empty means all the time");
   params.addPrivateParam<bool>("implicit", true);
   return params;
 }
 
 
-TransientInterface::TransientInterface(InputParameters & parameters) :
+TransientInterface::TransientInterface(InputParameters & parameters, const std::string & name, const std::string & object_type) :
     _ti_subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true),
     _t(_is_implicit ? _ti_subproblem.time() : _ti_subproblem.timeOld()),
@@ -33,8 +33,12 @@ TransientInterface::TransientInterface(InputParameters & parameters) :
     _dt(_ti_subproblem.dt()),
     _dt_old(_ti_subproblem.dtOld()),
     _time_weight(_ti_subproblem.timeWeights()),
-    _is_transient(_ti_subproblem.isTransient())
+    _is_transient(_ti_subproblem.isTransient()),
+    _object_type(object_type),
+    _time_periods(_ti_subproblem.getTimePeriods()),
+    _ti_name(name)
 {
+  /*
   if (parameters.have_parameter<std::vector<std::string> >("time_periods"))
   {
     const std::vector<std::string> & tp = parameters.get<std::vector<std::string> >("time_periods");
@@ -47,6 +51,7 @@ TransientInterface::TransientInterface(InputParameters & parameters) :
         mooseWarning("Time period '" + *it + "' does not exists. Typo?");
     }
   }
+  */
 }
 
 TransientInterface::~TransientInterface()
@@ -56,16 +61,23 @@ TransientInterface::~TransientInterface()
 bool
 TransientInterface::isActive()
 {
-  // no time period specified -> active all the time
-  if (_time_periods.empty())
+  // if we have zero or one time periods -> all objects are active all the time
+  if (_time_periods.size() <= 1)
     return true;
 
   // look if _t lies in one of our time periods
-  for (std::vector<TimePeriod *>::const_iterator it = _time_periods.begin(); it != _time_periods.end(); ++it)
-  {
-    TimePeriod * period = *it;
-    if ((period->_start <= _t) && (_t < period->_end))
-      return true;
-  }
+  for (unsigned int i=1; i <= _time_periods.size(); ++i)  // Careful! We are purposely indexing one past the end of the array
+    if ((i == _time_periods.size()) || // Are we in the last time period?
+        (_time_periods[i-1]->start() <= _t) && (_t < _time_periods[i]->start()))  // OR are we in one of the intermediate periods?
+    {
+      bool ret_value;
+      const std::vector<std::string> & objects = _time_periods[i-1]->getObjectList(_object_type, ret_value);
+
+      if (std::find(objects.begin(), objects.end(), _ti_name) != objects.end())
+        return ret_value;
+      else
+        return !ret_value;
+    }
+
   return false;
 }

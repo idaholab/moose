@@ -19,7 +19,7 @@
     type = ParsedFunction
     value = (x*x+y*y)-4*t
   [../]
-  
+
   [./exact_p2]
     type = ParsedFunction
     value = t*((x*x*x)+(y*y*y))
@@ -42,24 +42,22 @@
     type = TimeDerivative
     variable = u
   [../]
-  
+
   [./diff]
     type = Diffusion
     variable = u
   [../]
-  
+
   [./ffn1]
     type = UserForcingFunction
     variable = u
     function = ffn_p1
-    time_periods = p1
   [../]
-  
+
   [./ffn2]
     type = UserForcingFunction
     variable = u
     function = ffn_p2
-    time_periods = p2
   [../]
 []
 
@@ -69,26 +67,35 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_p1
-    time_periods = p1
   [../]
   [./all2]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_p2
-    time_periods = p2
   [../]
 []
 
 [Executioner]
   type = Transient
-  
+
   start_time = 0
   dt = 0.1
   num_steps = 10
 
-  time_periods       = 'p1 p2'
-  time_period_starts = '0  0.45'
+  [./TimePeriods]
+    [./first_period]
+      start = 0.0
+      active_kernels = 'td diff ffn1'
+      active_bcs = 'all1'
+    [../]
+
+    [./second_period]
+      start = 0.45
+      active_kernels = 'td diff ffn2'
+      active_bcs = 'all2'
+    [../]
+  [../]
 []
 
 [Output]

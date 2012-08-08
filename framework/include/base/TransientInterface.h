@@ -32,7 +32,7 @@ InputParameters validParams<TransientInterface>();
 class TransientInterface
 {
 public:
-  TransientInterface(InputParameters & parameters);
+  TransientInterface(InputParameters & parameters, const std::string & name, const std::string & object_type);
   virtual ~TransientInterface();
 
   /**
@@ -62,8 +62,12 @@ protected:
   // NOTE: dunno if it is set properly in time of instantiation (might be a source of bugs)
   bool _is_transient;
 
-  /// Time periods this object is active in (sorted in ascending order)
-  std::vector<TimePeriod *> _time_periods;
+  const std::string _object_type;
+
+  const std::vector<TimePeriod *> & _time_periods;
+
+private:
+  const std::string _ti_name;
 };
 
 #endif /* TRANSIENTINTERFACE_H */

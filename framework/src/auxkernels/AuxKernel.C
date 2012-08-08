@@ -50,7 +50,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     MooseVariableInterface(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).feType().family == LAGRANGE), // horrible
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    TransientInterface(parameters),
+    TransientInterface(parameters, name, "aux_kernels"),
     MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),
     DependencyResolverInterface(),

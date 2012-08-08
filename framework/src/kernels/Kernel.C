@@ -46,7 +46,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     MooseVariableInterface(parameters, false),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    TransientInterface(parameters),
+    TransientInterface(parameters, name, "kernels"),
     PostprocessorInterface(parameters),
     MaterialPropertyInterface(parameters),
     GeometricSearchInterface(parameters),

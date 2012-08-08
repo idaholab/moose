@@ -44,7 +44,7 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   Coupleable(parameters, true),
   MooseVariableInterface(parameters, true),
   FunctionInterface(parameters),
-  TransientInterface(parameters),
+  TransientInterface(parameters, name, "node_face_constraints"),
   GeometricSearchInterface(parameters),
 
   _problem(*parameters.get<Problem *>("_problem")),

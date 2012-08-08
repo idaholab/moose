@@ -102,6 +102,7 @@ void associateSyntax(Syntax & syntax)
   syntax.registerActionSyntax("SetupPreconditionerAction", "Preconditioning/*");
 
   syntax.registerActionSyntax("CreateExecutionerAction", "Executioner");
+  syntax.registerActionSyntax("SetupTimePeriodsAction", "Executioner/TimePeriods/*");
   syntax.registerActionSyntax("SetupQuadratureAction", "Executioner/Quadrature");
 #ifdef LIBMESH_ENABLE_AMR
   syntax.registerActionSyntax("AdaptivityAction", "Executioner/Adaptivity");

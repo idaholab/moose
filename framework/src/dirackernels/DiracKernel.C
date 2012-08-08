@@ -42,7 +42,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     MooseVariableInterface(parameters, false),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    TransientInterface(parameters),
+    TransientInterface(parameters, name, "dirac_kernels"),
     MaterialPropertyInterface(parameters),
     GeometricSearchInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),

@@ -12,19 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "GeneralUserObject.h"
+#include "TimePeriod.h"
 
-template<>
-InputParameters validParams<GeneralUserObject>()
+TimePeriod::TimePeriod(const std::string & name, Real start) :
+    _name(name),
+    _start(start)
+{}
+
+void
+TimePeriod::addActiveObjects(std::string kind, const std::vector<std::string> & object_list)
 {
-  InputParameters params = validParams<UserObject>();
-  return params;
+  _objects[kind] = object_list;
+  _list_type[kind] = true;
 }
 
-GeneralUserObject::GeneralUserObject(const std::string & name, InputParameters parameters) :
-    UserObject(name, parameters),
-    TransientInterface(parameters, name, "general_user_objects"),
-    FunctionInterface(parameters),
-    UserObjectInterface(parameters),
-    PostprocessorInterface(parameters)
-{}
+void
+TimePeriod::addInactiveObjects(std::string kind, const std::vector<std::string> & object_list)
+{
+  _objects[kind] = object_list;
+  _list_type[kind] = false;
+}
+
+const std::vector<std::string> &
+TimePeriod::getObjectList(const std::string & kind, bool & is_active)
+{
+  is_active = _list_type[kind];
+  return _objects[kind];
+}

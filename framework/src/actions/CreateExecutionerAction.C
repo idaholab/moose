@@ -127,4 +127,12 @@ CreateExecutionerAction::act()
     _problem = mproblem;
   }
   _awh.executioner() = executioner;
+
+
+  /*
+  Transient * transient_exec = dynamic_cast<Transient *>(_awh.executioner());
+
+  if (!transient_exec)
+    mooseError("Time Periods are not valid for Steady executioners");
+  */
 }
