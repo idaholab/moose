@@ -453,8 +453,6 @@ protected:
   // Output system
   Output _out;
   OutputProblem * _out_problem;
-  /// output initial condition if true
-  bool _output_initial;
 
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
