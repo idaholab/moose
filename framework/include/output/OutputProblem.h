@@ -44,7 +44,6 @@ public:
 
   virtual Output & out() { return _out; }       // NOTE: don't like this -> remove and replace with better design
   virtual void output(bool /*force*/ = false) { _out.output(); }
-  void outputInitial(bool out_init) { _output_initial = out_init; }
 
   virtual void outputPps(const FormattedTable & table);
   virtual void outputInput();
@@ -54,8 +53,6 @@ protected:
   MooseMesh _mesh;
   EquationSystems _eq;
   Output _out;
-  /// output initial condition if true
-  bool _output_initial;
   std::vector<std::vector<MeshFunction *> > _mesh_functions;
   NumericVector<Number> * _serialized_solution;
 };

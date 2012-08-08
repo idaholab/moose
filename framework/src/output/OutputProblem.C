@@ -34,8 +34,7 @@ OutputProblem::OutputProblem(const std::string & name, InputParameters parameter
     _mproblem(*parameters.get<FEProblem *>("mproblem")),
     _mesh(_mproblem.mesh()),
     _eq(_mesh),
-    _out(_mproblem, _eq),
-    _output_initial(false)
+    _out(_mproblem, _eq)
 {
   // The mesh in this system will be finer than the nonlinear system mesh
   MeshRefinement mesh_refinement(_mesh);

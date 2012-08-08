@@ -65,6 +65,7 @@ public:
 
   // Output system /////
   virtual void output(bool force = false) = 0;
+  void outputInitial(bool out_init) { _output_initial = out_init; }
 
   // Time periods //////
 
@@ -90,6 +91,9 @@ protected:
   std::string _name;
   /// Generic parameters object used during construction
   InputParameters _pars;
+
+  /// output initial condition if true
+  bool _output_initial;
 
   /// Time periods
   std::vector<TimePeriod *> _time_periods;

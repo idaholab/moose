@@ -27,7 +27,8 @@ InputParameters validParams<Problem>()
 
 Problem::Problem(const std::string & name, InputParameters parameters):
   _name(name),
-  _pars(parameters)
+  _pars(parameters),
+  _output_initial(false)
 {
 }
 
