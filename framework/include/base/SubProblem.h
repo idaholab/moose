@@ -138,7 +138,7 @@ public:
   /**
    * Fills "elems" with the elements that should be looped over for Dirac Kernels
    */
-  virtual void getDiracElements(std::set<const Elem *> & elems);
+  virtual void getDiracElements(std::set<const Elem *> & elems) = 0;
   /**
    * Gets called before Dirac Kernels are asked to add the points they are supposed to be evaluated in
    */
