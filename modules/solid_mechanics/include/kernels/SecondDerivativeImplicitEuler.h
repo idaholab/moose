@@ -32,8 +32,6 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  Real & _dt;
-
   VariableValue & _u_old;
   VariableValue & _u_older;
 };
