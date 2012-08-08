@@ -242,14 +242,20 @@ class TestHarness:
                custom_cmp = ' -f ' + os.path.join(test[TEST_DIR], test[CUSTOM_CMP])
             if test[USE_OLD_FLOOR]:
                old_floor = ' -use_old_floor'
-            command = self.moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F' + ' ' + str(test[ABS_ZERO]) + old_floor + ' -t ' + str(test[REL_ERR]) \
-                      + ' ' + ' '.join(test[EXODIFF_OPTS]) + ' ' + os.path.join(test[TEST_DIR], test[GOLD_DIR], file) + ' ' + os.path.join(test[TEST_DIR], file)
-            exo_output = runCommand(command)
 
-            output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(test[EXODIFF_OPTS])
+            # see if the output file has been written
+            if os.path.exists(os.path.join(test[TEST_DIR], file)):
+              command = self.moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F' + ' ' + str(test[ABS_ZERO]) + old_floor + ' -t ' + str(test[REL_ERR]) \
+                  + ' ' + ' '.join(test[EXODIFF_OPTS]) + ' ' + os.path.join(test[TEST_DIR], test[GOLD_DIR], file) + ' ' + os.path.join(test[TEST_DIR], file)
+              exo_output = runCommand(command)
 
-            if ('different' in exo_output or 'ERROR' in exo_output) and not "Files are the same" in exo_output:
-              reason = 'EXODIFF'
+              output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(test[EXODIFF_OPTS])
+
+              if ('different' in exo_output or 'ERROR' in exo_output) and not "Files are the same" in exo_output:
+                reason = 'EXODIFF'
+                break;
+            else:
+              reason = "NO FILE"
               break;
 
           # if still no errors, diff CSVs
