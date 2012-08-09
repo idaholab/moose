@@ -97,7 +97,7 @@ NodalFloodCount::getValue()
 }
 
 void
-NodalFloodCount::threadJoin(const Postprocessor &y)
+NodalFloodCount::threadJoin(const UserObject &y)
 {
    const NodalFloodCount & pps = dynamic_cast<const NodalFloodCount &>(y);
 
