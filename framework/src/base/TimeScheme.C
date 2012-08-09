@@ -268,7 +268,6 @@ TimeScheme::applyPredictor(NumericVector<Number> & initial_solution)
     }
     return;
   }
-  std::cout<<_dt_old<<std::endl;
   if (_dt_old > 0)
   {
     std::streamsize cur_precision(std::cout.precision());
