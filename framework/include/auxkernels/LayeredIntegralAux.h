@@ -12,34 +12,37 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SIDEPOSTPROCESSOR_H
-#define SIDEPOSTPROCESSOR_H
+#ifndef LAYEREDINTEGRALAUX_H
+#define LAYEREDINTEGRALAUX_H
 
-#include "SideUserObject.h"
-#include "Postprocessor.h"
+#include "AuxKernel.h"
 
 //Forward Declarations
-class SidePostprocessor;
+class LayeredIntegralAux;
+class LayeredIntegral;
 
 template<>
-InputParameters validParams<SidePostprocessor>();
+InputParameters validParams<LayeredIntegralAux>();
 
-class SidePostprocessor :
-  public SideUserObject,
-  public Postprocessor
+/**
+ * Function auxiliary value
+ */
+class LayeredIntegralAux : public AuxKernel
 {
 public:
-  SidePostprocessor(const std::string & name, InputParameters parameters);
-
   /**
-   * Called before deleting the object. Free memory allocated by your derived classes, etc.
+   * Factory constructor, takes parameters so that all derived classes can be built using the same
+   * constructor.
    */
-  virtual void destroy(){}
+  LayeredIntegralAux(const std::string & name, InputParameters parameters);
 
-  /**
-   * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
-   */
-  virtual void finalize(){}
+  virtual ~LayeredIntegralAux() {}
+
+protected:
+  virtual Real computeValue();
+
+  /// Function being used to compute the value of this kernel
+  const LayeredIntegral & _layered_integral;
 };
 
-#endif
+#endif // LAYEREDINTEGRALAUX_H

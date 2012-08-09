@@ -1558,6 +1558,8 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps)
           for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
             ps->threadJoin(*pps[tid].elementUserObjects(block_id)[i]);
 
+          ps->finalize();
+
           Postprocessor * pp = getPostprocessorPointer(ps);
 
           if(pp)
@@ -1593,6 +1595,8 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps)
         {
           for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
             ps->threadJoin(*pps[tid].sideUserObjects(boundary_id)[i]);
+
+          ps->finalize();
 
           Postprocessor * pp = getPostprocessorPointer(ps);
 
@@ -1636,6 +1640,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps)
             for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
               ps->threadJoin(*pps[tid].nodalUserObjects(boundary_id)[i]);
 
+            ps->finalize();
 
             Postprocessor * pp = getPostprocessorPointer(ps);
 
@@ -1663,6 +1668,8 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps)
     std::string name = (*generic_user_object_it)->name();
     (*generic_user_object_it)->initialize();
     (*generic_user_object_it)->execute();
+
+    (*generic_user_object_it)->finalize();
 
     Postprocessor * pp = getPostprocessorPointer(*generic_user_object_it);
 

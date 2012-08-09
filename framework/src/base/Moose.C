@@ -65,6 +65,7 @@
 #include "MaterialRealAux.h"
 #include "DebugResidualAux.h"
 #include "BoundsAux.h"
+#include "LayeredIntegralAux.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
@@ -133,6 +134,9 @@
 #include "ScalarL2Error.h"
 #include "ElementalVariableValue.h"
 #include "ElementL2Norm.h"
+
+// user objects
+#include "LayeredIntegral.h"
 
 // preconditioners
 #include "PhysicsBasedPreconditioner.h"
@@ -256,6 +260,7 @@ registerObjects()
   registerAux(MaterialRealAux);
   registerAux(DebugResidualAux);
   registerAux(BoundsAux);
+  registerAux(LayeredIntegralAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
@@ -314,6 +319,10 @@ registerObjects()
   registerPostprocessor(NodalProxyMaxValue);
   registerPostprocessor(ElementalVariableValue);
   registerPostprocessor(ElementL2Norm);
+
+  // user objects
+  registerUserObject(LayeredIntegral);
+
   // preconditioners
   registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");
   registerNamedPreconditioner(FiniteDifferencePreconditioner, "FDP");
@@ -417,11 +426,11 @@ addActionTypes(Syntax & syntax)
 "(setup_time_periods)"
 "(init_displaced_problem)"
 "(setup_subproblem)"
+"(add_aux_variable, add_variable)"
+"(setup_variable_complete)"
 "(add_user_object)"
 "(add_function)"
 "(setup_function_complete)"
-"(add_aux_variable, add_variable)"
-"(setup_variable_complete)"
 "(setup_adaptivity)"
 "(add_ic, add_periodic_bc)"
 "(add_preconditioning, add_constraint)"

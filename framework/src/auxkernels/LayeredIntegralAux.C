@@ -12,34 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SIDEPOSTPROCESSOR_H
-#define SIDEPOSTPROCESSOR_H
-
-#include "SideUserObject.h"
-#include "Postprocessor.h"
-
-//Forward Declarations
-class SidePostprocessor;
+#include "LayeredIntegralAux.h"
+#include "LayeredIntegral.h"
 
 template<>
-InputParameters validParams<SidePostprocessor>();
-
-class SidePostprocessor :
-  public SideUserObject,
-  public Postprocessor
+InputParameters validParams<LayeredIntegralAux>()
 {
-public:
-  SidePostprocessor(const std::string & name, InputParameters parameters);
+  InputParameters params = validParams<AuxKernel>();
+  params.addRequiredParam<UserObjectName>("layered_integral", "The LayeredIntegral UserObject to get values from.");
+  return params;
+}
 
-  /**
-   * Called before deleting the object. Free memory allocated by your derived classes, etc.
-   */
-  virtual void destroy(){}
+LayeredIntegralAux::LayeredIntegralAux(const std::string & name, InputParameters parameters) :
+    AuxKernel(name, parameters),
+    _layered_integral(getUserObject<LayeredIntegral>("layered_integral"))
+{
+}
 
-  /**
-   * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
-   */
-  virtual void finalize(){}
-};
-
-#endif
+Real
+LayeredIntegralAux::computeValue()
+{
+  return _layered_integral.value(_current_elem->centroid());
+}

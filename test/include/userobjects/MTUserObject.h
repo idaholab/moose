@@ -33,14 +33,16 @@ public:
   virtual ~MTUserObject();
 
   /**
+   * Called before execute() is ever called so that data can be cleared.
+   */
+  virtual void initialize(){}
+
+  /**
    * Called when this object needs to compute something.
    */
   virtual void execute() {}
 
-  /**
-   * Called before execute() is ever called so that data can be cleared.
-   */
-  virtual void initialize(){}
+  virtual void finalize() {}
 
   virtual void destroy();
 

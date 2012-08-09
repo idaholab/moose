@@ -54,6 +54,11 @@ public:
   virtual void destroy() = 0;
 
   /**
+   * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
+   */
+  virtual void finalize() = 0;
+
+  /**
    * Load user data object from a stream
    * @param stream Stream to load from
    */
