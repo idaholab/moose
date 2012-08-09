@@ -261,27 +261,28 @@ TimeScheme::applyPredictor(NumericVector<Number> & initial_solution)
   // the residual is likely to be much lower after applying the predictor, which would
   // result in a much more stringent criterion for convergence than would have been
   // used if the predictor were not enabled.
-
-
+  if(_use_AB2){
+    if(_t_step >2)
+    {
+      Adams_Bashforth2P(initial_solution);
+    }
+    return;
+  }
   if (_dt_old > 0)
   {
-    if(_use_AB2 && _t_step>=3){
-      Adams_Bashforth2P(initial_solution);
-      return;
-    }else{
-      if(_use_AB2){return;}
-    }
     std::streamsize cur_precision(std::cout.precision());
     std::cout << "  Applying predictor with scale factor = "<<std::fixed<<std::setprecision(2)<<_nl->_predictor_scale<<"\n";
     std::cout << std::scientific << std::setprecision(cur_precision);
     Real dt_adjusted_scale_factor = _nl->_predictor_scale * _dt / _dt_old;
-    NumericVector<Number> & previous_solution = _time_stack[_time_stack.size() - 2].getSolution();
+    NumericVector<Number> & previous_solution = _trash1;
+    previous_solution.localize(_time_stack[_time_stack.size()-2].getSolution());
+
     if (dt_adjusted_scale_factor != 0.0)
     {
       initial_solution *= (1.0 + dt_adjusted_scale_factor);
       previous_solution *= dt_adjusted_scale_factor;
       initial_solution -= previous_solution;
-      previous_solution *= 1.0/dt_adjusted_scale_factor;
+
     }
   }
 }
