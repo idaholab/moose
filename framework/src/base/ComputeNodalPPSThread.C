@@ -17,6 +17,7 @@
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "NodalPostprocessor.h"
+#include "MooseTypes.h"
 
 // libmesh includes
 #include "threads.h"

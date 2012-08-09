@@ -16,6 +16,8 @@
 #define VARIABLEWAREHOUSE_H
 
 #include "Moose.h"
+#include "MooseTypes.h"
+
 #include <vector>
 #include <map>
 #include <set>

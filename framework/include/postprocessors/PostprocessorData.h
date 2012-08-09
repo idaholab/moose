@@ -18,6 +18,7 @@
 #include <map>
 //MOOSE includes
 #include "Moose.h"
+#include "MooseTypes.h"
 
 class PostprocessorData
 {

@@ -18,7 +18,9 @@
 // system includes
 #include <map>
 #include <vector>
+
 #include "Moose.h"
+#include "MooseTypes.h"
 
 class NodalConstraint;
 class NodeFaceConstraint;

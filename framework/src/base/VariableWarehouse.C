@@ -17,6 +17,7 @@
 #include "MooseVariableScalar.h"
 #include "InitialCondition.h"
 #include "ScalarInitialCondition.h"
+#include "MooseTypes.h"
 
 VariableWarehouse::VariableWarehouse()
 {

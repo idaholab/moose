@@ -17,6 +17,23 @@
 
 #include <string>
 
+// libMesh includes
+#include "id_types.h"
+
+/**
+ * MOOSE typedefs
+ */
+typedef Real                     PostprocessorValue;
+typedef boundary_id_type         BoundaryID;
+typedef subdomain_id_type        SubdomainID;
+
+namespace Moose
+{
+const SubdomainID ANY_BLOCK_ID = (SubdomainID) -1;
+
+const BoundaryID ANY_BOUNDARY_ID = (BoundaryID) -1;
+}
+
 /**
  * This Macro is used to generate std::string derived types useful for
  * strong type checking and special handling in the GUI.  It does not

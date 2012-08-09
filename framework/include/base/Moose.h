@@ -20,21 +20,10 @@
 #include "print_trace.h"
 #include "libmesh_common.h"
 #include "perf_log.h"
-#include "mtwist.h"
-#include "id_types.h"
 #include "stored_range.h"
 #include "parallel.h"
 
 #include <string>
-
-/**
- * MOOSE typedefs
- */
-typedef Real                     PostprocessorValue;
-typedef boundary_id_type         BoundaryID;
-//typedef std::string              BoundaryName;
-typedef subdomain_id_type        SubdomainID;
-//typedef std::string              SubdomainName;
 
 /**
  * MOOSE wrapped versions of useful libMesh macros (see libmesh_common.h)
@@ -171,10 +160,6 @@ enum PPSOutputType
   PPS_OUTPUT_FILE,
   PPS_OUTPUT_BOTH
 };
-
-const SubdomainID ANY_BLOCK_ID = (SubdomainID) -1;
-
-const BoundaryID ANY_BOUNDARY_ID = (BoundaryID) -1;
 
 } // namespace Moose
 

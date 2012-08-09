@@ -18,6 +18,7 @@
 #include "SystemBase.h"
 #include "ElementPostprocessor.h"
 #include "SidePostprocessor.h"
+#include "MooseTypes.h"
 
 ComputePostprocessorsThread::ComputePostprocessorsThread(FEProblem & fe_problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<PostprocessorWarehouse> & pps) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),

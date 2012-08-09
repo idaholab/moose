@@ -17,7 +17,9 @@
 
 #include <vector>
 #include <map>
+
 #include "Moose.h"
+#include "MooseTypes.h"
 
 
 class Material;

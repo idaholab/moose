@@ -18,6 +18,7 @@
 #include "Moose.h"
 #include "MooseArray.h"
 #include "ParallelUniqueId.h"
+#include "MooseTypes.h"
 
 // libMesh
 #include "quadrature.h"

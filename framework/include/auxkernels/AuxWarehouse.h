@@ -20,6 +20,7 @@
 #include <string>
 #include <list>
 #include "Moose.h"
+#include "MooseTypes.h"
 
 class AuxKernel;
 class AuxScalarKernel;
