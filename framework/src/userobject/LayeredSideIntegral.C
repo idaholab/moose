@@ -12,15 +12,15 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "LayeredIntegral.h"
+#include "LayeredSideIntegral.h"
 
 // libmesh includes
 #include "mesh_tools.h"
 
 template<>
-InputParameters validParams<LayeredIntegral>()
+InputParameters validParams<LayeredSideIntegral>()
 {
-  InputParameters params = validParams<ElementIntegral>();
+  InputParameters params = validParams<SideIntegral>();
   params.set<std::string>("built_by_action") = "add_user_object";
 
   MooseEnum directions("x, y, z");
@@ -31,8 +31,8 @@ InputParameters validParams<LayeredIntegral>()
   return params;
 }
 
-LayeredIntegral::LayeredIntegral(const std::string & name, InputParameters parameters) :
-    ElementIntegral(name, parameters),
+LayeredSideIntegral::LayeredSideIntegral(const std::string & name, InputParameters parameters) :
+    SideIntegral(name, parameters),
     _direction_enum(parameters.get<MooseEnum>("direction")),
     _direction(_direction_enum),
     _num_layers(parameters.get<unsigned int>("num_layers"))
@@ -45,7 +45,7 @@ LayeredIntegral::LayeredIntegral(const std::string & name, InputParameters param
 }
 
 Real
-LayeredIntegral::integralValue(Point p) const
+LayeredSideIntegral::integralValue(Point p) const
 {
   unsigned int layer = getLayer(p);
 
@@ -53,16 +53,16 @@ LayeredIntegral::integralValue(Point p) const
 }
 
 void
-LayeredIntegral::initialize()
+LayeredSideIntegral::initialize()
 {
-  ElementIntegral::initialize();
+  SideIntegral::initialize();
 
   for(unsigned int i=0; i<_layer_values.size(); i++)
     _layer_values[i] = 0.0;
 }
 
 void
-LayeredIntegral::execute()
+LayeredSideIntegral::execute()
 {
   Real integral_value = computeIntegral();
 
@@ -72,22 +72,22 @@ LayeredIntegral::execute()
 }
 
 void
-LayeredIntegral::finalize()
+LayeredSideIntegral::finalize()
 {
   gatherSum(_layer_values);
 }
 
 void
-LayeredIntegral::threadJoin(const UserObject & y)
+LayeredSideIntegral::threadJoin(const UserObject & y)
 {
-  ElementIntegral::threadJoin(y);
-  const LayeredIntegral & li = dynamic_cast<const LayeredIntegral &>(y);
+  SideIntegral::threadJoin(y);
+  const LayeredSideIntegral & li = dynamic_cast<const LayeredSideIntegral &>(y);
   for(unsigned int i=0; i<_layer_values.size(); i++)
     _layer_values[i] += li._layer_values[i];
 }
 
 unsigned int
-LayeredIntegral::getLayer(Point p) const
+LayeredSideIntegral::getLayer(Point p) const
 {
   Real direction_x = p(_direction);
 

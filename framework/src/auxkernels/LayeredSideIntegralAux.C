@@ -12,25 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "LayeredIntegralAux.h"
-#include "LayeredIntegral.h"
+#include "LayeredSideIntegralAux.h"
+#include "LayeredSideIntegral.h"
 
 template<>
-InputParameters validParams<LayeredIntegralAux>()
+InputParameters validParams<LayeredSideIntegralAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<UserObjectName>("layered_integral", "The LayeredIntegral UserObject to get values from.");
+  params.addRequiredParam<UserObjectName>("layered_integral", "The LayeredSideIntegral UserObject to get values from.");
   return params;
 }
 
-LayeredIntegralAux::LayeredIntegralAux(const std::string & name, InputParameters parameters) :
+LayeredSideIntegralAux::LayeredSideIntegralAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _layered_integral(getUserObject<LayeredIntegral>("layered_integral"))
+    _layered_integral(getUserObject<LayeredSideIntegral>("layered_integral"))
 {
 }
 
 Real
-LayeredIntegralAux::computeValue()
+LayeredSideIntegralAux::computeValue()
 {
   return _layered_integral.integralValue(_current_elem->centroid());
 }

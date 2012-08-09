@@ -12,25 +12,37 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "LayeredIntegralAux.h"
-#include "LayeredIntegral.h"
+#ifndef LAYEREDSIDEINTEGRALAUX_H
+#define LAYEREDSIDEINTEGRALAUX_H
+
+#include "AuxKernel.h"
+
+//Forward Declarations
+class LayeredSideIntegralAux;
+class LayeredSideIntegral;
 
 template<>
-InputParameters validParams<LayeredIntegralAux>()
-{
-  InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<UserObjectName>("layered_integral", "The LayeredIntegral UserObject to get values from.");
-  return params;
-}
+InputParameters validParams<LayeredSideIntegralAux>();
 
-LayeredIntegralAux::LayeredIntegralAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
-    _layered_integral(getUserObject<LayeredIntegral>("layered_integral"))
+/**
+ * Function auxiliary value
+ */
+class LayeredSideIntegralAux : public AuxKernel
 {
-}
+public:
+  /**
+   * Factory constructor, takes parameters so that all derived classes can be built using the same
+   * constructor.
+   */
+  LayeredSideIntegralAux(const std::string & name, InputParameters parameters);
 
-Real
-LayeredIntegralAux::computeValue()
-{
-  return _layered_integral.integralValue(_current_elem->centroid());
-}
+  virtual ~LayeredSideIntegralAux() {}
+
+protected:
+  virtual Real computeValue();
+
+  /// Function being used to compute the value of this kernel
+  const LayeredSideIntegral & _layered_integral;
+};
+
+#endif // LAYEREDSIDEINTEGRALAUX_H

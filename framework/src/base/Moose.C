@@ -66,6 +66,7 @@
 #include "DebugResidualAux.h"
 #include "BoundsAux.h"
 #include "LayeredIntegralAux.h"
+#include "LayeredSideIntegralAux.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
@@ -137,6 +138,7 @@
 
 // user objects
 #include "LayeredIntegral.h"
+#include "LayeredSideIntegral.h"
 
 // preconditioners
 #include "PhysicsBasedPreconditioner.h"
@@ -261,6 +263,7 @@ registerObjects()
   registerAux(DebugResidualAux);
   registerAux(BoundsAux);
   registerAux(LayeredIntegralAux);
+  registerAux(LayeredSideIntegralAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
@@ -322,6 +325,7 @@ registerObjects()
 
   // user objects
   registerUserObject(LayeredIntegral);
+  registerUserObject(LayeredSideIntegral);
 
   // preconditioners
   registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");

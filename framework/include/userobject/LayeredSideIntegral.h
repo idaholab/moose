@@ -12,27 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef LAYEREDINTEGRAL_H
-#define LAYEREDINTEGRAL_H
+#ifndef LAYEREDSIDEINTEGRAL_H
+#define LAYEREDSIDEINTEGRAL_H
 
-#include "ElementIntegral.h"
+#include "SideIntegral.h"
 
 // libmesh includes
 #include "mesh_tools.h"
 
 //Forward Declarations
-class LayeredIntegral;
+class LayeredSideIntegral;
 
 template<>
-InputParameters validParams<LayeredIntegral>();
+InputParameters validParams<LayeredSideIntegral>();
 
 /**
  * This UserObject computes volume integrals of a variable storing partial sums for the specified number of intervals in a direction (x,y,z).c
  */
-class LayeredIntegral : public ElementIntegral
+class LayeredSideIntegral : public SideIntegral
 {
 public:
-  LayeredIntegral(const std::string & name, InputParameters parameters);
+  LayeredSideIntegral(const std::string & name, InputParameters parameters);
 
   /**
    * Given a Point return the integral value associated with the layer that point falls in.
