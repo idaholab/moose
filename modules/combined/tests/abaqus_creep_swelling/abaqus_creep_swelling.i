@@ -33,7 +33,7 @@
 []
 
 [AuxVariables]
-  active = 'stress_yy stress_zz stress_xx'
+  active = ''
   [./stress_mag]
     order = CONSTANT
     family = MONOMIAL
@@ -58,7 +58,7 @@
 []
 
 [AuxKernels]
-  active = 'stress_yy stress_zz stress_xx'
+  active = ''
   [./stress_yy]
     type = MaterialTensorAux
     tensor = stress
