@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "KernelWarehouse.h"
+#include "TimeDerivative.h"
 #include "Kernel.h"
 #include "ScalarKernel.h"
 
@@ -64,14 +65,28 @@ KernelWarehouse::addKernel(Kernel *kernel, const std::set<SubdomainID> & block_i
 
   if (block_ids.empty())
   {
-    _global_kernels.push_back(kernel);
+    if (dynamic_cast<TimeKernel *>(kernel) != NULL)
+    {
+      _time_global_kernels.push_back(kernel);
+    }
+    else
+    {
+      _nontime_global_kernels.push_back(kernel);
+    }
   }
   else
   {
     for (std::set<SubdomainID>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
     {
       SubdomainID blk_id = *it;
-      _block_kernels[blk_id].push_back(kernel);
+      if (dynamic_cast<TimeKernel *>(kernel) != NULL)
+      {
+        _time_block_kernels[blk_id].push_back(kernel);
+      }
+      else
+      {
+        _nt_block_kernels[blk_id].push_back(kernel);
+      }
     }
   }
 }
@@ -87,24 +102,47 @@ KernelWarehouse::updateActiveKernels(unsigned int subdomain_id)
 {
   _active_kernels.clear();
   _active_var_kernels.clear();
-
+  _time_kernels.clear();
+  _non_time_kernels.clear();
   // add kernels that live everywhere
-  for (std::vector<Kernel *>::const_iterator it = _global_kernels.begin(); it != _global_kernels.end(); ++it)
+  for (std::vector<Kernel *>::const_iterator it = _time_global_kernels.begin(); it != _time_global_kernels.end(); ++it)
   {
     Kernel * kernel = *it;
     if (kernel->isActive())
     {
+      _time_kernels.push_back(kernel);
+      _active_kernels.push_back(kernel);
+      _active_var_kernels[kernel->variable().number()].push_back(kernel);
+    }
+  }
+  for (std::vector<Kernel *>::const_iterator it = _nontime_global_kernels.begin(); it != _nontime_global_kernels.end(); ++it)
+  {
+    Kernel * kernel = *it;
+    if (kernel->isActive())
+    {
+      _non_time_kernels.push_back(kernel);
+      _active_kernels.push_back(kernel);
+      _active_var_kernels[kernel->variable().number()].push_back(kernel);
+    }
+  }
+  // then kernels that live on a specified block
+  for (std::vector<Kernel *>::const_iterator it = _time_block_kernels[subdomain_id].begin(); it != _time_block_kernels[subdomain_id].end(); ++it)
+  {
+    Kernel * kernel = *it;
+    if (kernel->isActive())
+    {
+      _time_kernels.push_back(kernel);
       _active_kernels.push_back(kernel);
       _active_var_kernels[kernel->variable().number()].push_back(kernel);
     }
   }
 
-  // then kernels that live on a specified block
-  for (std::vector<Kernel *>::const_iterator it = _block_kernels[subdomain_id].begin(); it != _block_kernels[subdomain_id].end(); ++it)
+  for (std::vector<Kernel *>::const_iterator it = _nt_block_kernels[subdomain_id].begin(); it != _nt_block_kernels[subdomain_id].end(); ++it)
   {
     Kernel * kernel = *it;
     if (kernel->isActive())
     {
+      _non_time_kernels.push_back(kernel);
       _active_kernels.push_back(kernel);
       _active_var_kernels[kernel->variable().number()].push_back(kernel);
     }
@@ -116,12 +154,15 @@ KernelWarehouse::subdomains_covered(std::set<SubdomainID> & return_set) const
 {
   return_set.clear();
 
-  if (!_global_kernels.empty())
+  if (!_time_global_kernels.empty() || !_nontime_global_kernels.empty())
     return true;
   else
   {
-    for (std::map<SubdomainID, std::vector<Kernel *> >::const_iterator it = _block_kernels.begin();
-         it != _block_kernels.end(); ++it)
+    for (std::map<SubdomainID, std::vector<Kernel *> >::const_iterator it = _time_block_kernels.begin();
+         it != _time_block_kernels.end(); ++it)
+      return_set.insert(it->first);
+    for (std::map<SubdomainID, std::vector<Kernel *> >::const_iterator it = _nt_block_kernels.begin();
+         it != _nt_block_kernels.end(); ++it)
       return_set.insert(it->first);
     return false;
   }

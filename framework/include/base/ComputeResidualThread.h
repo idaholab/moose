@@ -27,12 +27,11 @@ class NonlinearSystem;
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys, NumericVector<Number> & residual);
-
+  ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys, NumericVector<Number> & residual, Moose::KernelType selector=Moose::KT_ALL);
   // Splitting Constructor
   ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
 
-  virtual void onElement(const Elem *elem);
+  virtual void onElement(const Elem *elem );
   virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
   virtual void onInternalSide(const Elem *elem, unsigned int side);
   virtual void postElement(const Elem * /*elem*/);
@@ -42,6 +41,8 @@ public:
 protected:
   NumericVector<Number> & _residual;
   NonlinearSystem & _sys;
+  // selector tells to use all kernels, time kernels, or non time kernels as 0,1,2 respectively.
+  Moose::KernelType _selector;
 };
 
 #endif //COMPUTERESIDUALTHREAD_H

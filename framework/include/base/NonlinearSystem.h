@@ -34,6 +34,7 @@
 #include "coupling_matrix.h"
 
 class FEProblem;
+class TimeScheme;
 
 /**
  * Nonlinear system to be solved
@@ -151,8 +152,7 @@ public:
    * Modify the initial solution vector to apply a predictor
    * @param initial_solution The initial solution vector
    */
-  void applyPredictor(NumericVector<Number> & initial_solution,
-                      NumericVector<Number> & previous_solution);
+  void applyPredictor(NumericVector<Number> & initial_solution);
 
   /**
    * Add residual contributions from Constraints
@@ -166,6 +166,15 @@ public:
    * @param residual Residual is formed in here
    */
   void computeResidual(NumericVector<Number> & residual);
+
+  /**
+   * For computing all of little f given a big F. Currently it saves the current solution,
+   * sets the current solution to bigF, computes little f.
+   *
+   * The M matrix is not gotten or inverted and applied currently.
+   * TODO: Retrieve M matrix, invert, apply.
+   */
+  void computeLittlef(const NumericVector<Number> & bigF, NumericVector<Number> & littlef, Real time = -1, bool mass = true);
 
   /**
    * Finds the implicit sparsity graph between geometrically related dofs.
@@ -242,8 +251,8 @@ public:
 
   virtual void set_solution(const NumericVector<Number> & soln);
 
-  virtual NumericVector<Number> & solutionUDot() { return _solution_u_dot; }
-  virtual NumericVector<Number> & solutionDuDotDu() { return _solution_du_dot_du; }
+  virtual NumericVector<Number> & solutionUDot();
+  virtual NumericVector<Number> & solutionDuDotDu();
 
   virtual const NumericVector<Number> * & currentSolution() { return _current_solution; }
 
@@ -254,6 +263,14 @@ public:
   virtual NumericVector<Number> & residualGhosted();
 
   virtual void augmentSendList(std::vector<unsigned int> & send_list);
+
+  /**
+   * computes the residual of all the kernels except for the time kernels for the purpose
+   * of solving the time ODE M(dU/dt) = f(U,t)
+   * @param residual The residual which is f(U,t)
+   */
+  virtual void computeNonTimeResidual(NumericVector<Number> & residual);
+  virtual void computeTimeResidual(NumericVector<Number> & mmmatrix);
 
   virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
                                std::vector<unsigned int> & n_nz,
@@ -368,16 +385,17 @@ protected:
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
   void enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian);
 
+
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
   /// solution vector from step prior to previous step
-  NumericVector<Number> & _older_solution;
+  //NumericVector<Number> & _older_solution;
   /// solution vector for u^dot
-  NumericVector<Number> & _solution_u_dot;
+  //NumericVector<Number> & _solution_u_dot;
   /// solution vector for {du^dot}\over{du}
-  NumericVector<Number> & _solution_du_dot_du;
+  //NumericVector<Number> & _solution_du_dot_du;
   /// residual evaluated at the old time step (need for Crank-Nicolson)
-  NumericVector<Number> * _residual_old;
+  //NumericVector<Number> * _residual_old;
   /// ghosted form of the residual
   NumericVector<Number> & _residual_ghosted;
 
@@ -403,7 +421,6 @@ protected:
   Real _time_stepping_order;
 
   // holders
-
   /// Kernel storage for each thread
   std::vector<KernelWarehouse> _kernels;
   /// BC storage for each thread
@@ -418,6 +435,7 @@ protected:
 public:
   /// Constraints for each thread
   std::vector<ConstraintWarehouse> _constraints;
+
 
 protected:
   /// increment vector
@@ -464,14 +482,17 @@ protected:
   /**
    * If this is non-NULL, it holds an exception that we will re-throw
    */
-  MooseException * _exception;
-
+ MooseException * _exception;
+public:
+  /// Time stepping scheme class where the actual work is done
+  TimeScheme * _time_scheme;
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;
   friend class ComputeFullJacobianThread;
   friend class ComputeExplicitJacobianThread;
   friend class ComputeDiracThread;
   friend class ComputeDampingThread;
+  friend class TimeScheme;
 };
 
 #endif /* NONLINEARSYSTEM_H */

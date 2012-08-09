@@ -87,6 +87,7 @@
 #include "Transient.h"
 #include "SolutionTimeAdaptive.h"
 #include "DT2Transient.h"
+#include "AdaptiveErrorEstimateTransient.h"
 
 // functions
 #include "Composite.h"
@@ -269,6 +270,8 @@ registerObjects()
   registerExecutioner(Transient);
   registerExecutioner(SolutionTimeAdaptive);
   registerExecutioner(DT2Transient);
+  registerExecutioner(AdaptiveErrorEstimateTransient);
+
   // functions
   registerFunction(Composite);
   registerNamedFunction(MooseParsedFunction, "ParsedFunction");

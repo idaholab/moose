@@ -100,7 +100,15 @@ enum TimeSteppingScheme
   IMPLICIT_EULER,
   EXPLICIT_EULER,
   BDF2,
-  CRANK_NICOLSON
+  CRANK_NICOLSON,
+  PETSC_TS
+};
+
+enum KernelType
+{
+  KT_TIME,
+  KT_NONTIME,
+  KT_ALL
 };
 
 // Bit mask flags to be able to combine them through or-operator (|)

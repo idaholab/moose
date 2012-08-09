@@ -53,6 +53,19 @@ public:
   const std::vector<Kernel *> & active() { return _active_kernels; }
 
   /**
+   * Get the list of all active time kernels
+   * @return The list of all active time kernels
+   */
+  const std::vector<Kernel *> & activeTime(){ return _time_kernels;}
+
+
+  /**
+   * Get the list of all active non-time kernels
+   * @return The list of all active non-time kernels
+   */
+  const std::vector<Kernel *> & activeNonTime(){ return _non_time_kernels;}
+
+  /**
    * Get the list of all active kernels for a variable
    * @param var The variable number
    * @return The list of all active kernels
@@ -97,15 +110,25 @@ public:
 protected:
   /// Kernels active on a block and in specified time
   std::vector<Kernel *> _active_kernels;
+  ///  active TimeDerivitive Kernels
+  std::vector<Kernel *> _time_kernels;
+
+  /// active NonTimeDerivitive Kernels
+  std::vector<Kernel *> _non_time_kernels;
+
   /// Kernels active on a block and in specified time per variable
   std::map<SubdomainID, std::vector<Kernel *> > _active_var_kernels;
   /// All instances of kernels
   std::vector<Kernel *> _all_kernels;
   /// Kernels that live everywhere (on the whole domain)
-  std::vector<Kernel *> _global_kernels;
-  /// Kernels that live on a specified block
-  std::map<SubdomainID, std::vector<Kernel *> > _block_kernels;
+  std::vector<Kernel *> _time_global_kernels;
 
+  /// Kernels that live everywhere (on the whole domain)
+  std::vector<Kernel *> _nontime_global_kernels;
+  /// Kernels that live on a specified block
+  std::map<SubdomainID, std::vector<Kernel *> > _time_block_kernels;
+  /// Kernels that live on a specified block
+  std::map<SubdomainID, std::vector<Kernel *> > _nt_block_kernels;
   /// Scalar kernels
   std::vector<ScalarKernel *> _scalar_kernels;
 };

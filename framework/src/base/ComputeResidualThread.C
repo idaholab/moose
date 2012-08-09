@@ -24,10 +24,11 @@
 
 ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem,
                                              NonlinearSystem & sys,
-                                             NumericVector<Number> & residual) :
+                                             NumericVector<Number> & residual, Moose::KernelType selector) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _residual(residual),
-    _sys(sys)
+    _sys(sys),
+    _selector(selector)
 {
 }
 
@@ -35,7 +36,8 @@ ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem,
 ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
     _residual(x._residual),
-    _sys(x._sys)
+    _sys(x._sys),
+    _selector(x._selector)
 {
 }
 
@@ -55,9 +57,40 @@ ComputeResidualThread::onElement(const Elem *elem)
 
   _fe_problem.reinitMaterials(subdomain, _tid);
 
-  const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
-  for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-    (*it)->computeResidual();
+
+  switch( _selector)
+  {
+  case Moose::KT_TIME:
+  {
+    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeTime();
+    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+    {
+       (*it)->computeResidual();
+    }
+    break;
+  }
+  case Moose::KT_NONTIME:
+  {
+    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeNonTime();
+    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+    {
+      (*it)->computeResidual();
+    }
+    break;
+  }
+  case Moose::KT_ALL:
+  {
+    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
+    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+    {
+      (*it)->computeResidual();
+    }
+    break;
+  }
+  }
+
+
+
 }
 
 void

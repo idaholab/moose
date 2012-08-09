@@ -42,6 +42,7 @@
 #include "NodeFaceConstraint.h"
 #include "ScalarKernel.h"
 #include "Parser.h"
+#include "TimeScheme.h"
 
 
 // libMesh
@@ -90,10 +91,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
     _current_solution(NULL),
-    _older_solution(solutionOlder()),
-    _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
-    _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
-    _residual_old(NULL),
     _residual_ghosted(_sys.add_vector("residual_ghosted", false, GHOSTED)),
     _serialized_solution(*NumericVector<Number>::build().release()),
     _residual_copy(*NumericVector<Number>::build().release()),
@@ -116,7 +113,8 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _final_residual(0.),
     _use_predictor(false),
     _predictor_scale(0.0),
-    _exception(NULL)
+    _exception(NULL),
+    _time_scheme(new TimeScheme(this))
 {
   _sys.nonlinear_solver->residual = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian = Moose::compute_jacobian;
@@ -124,7 +122,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
 
   _time_weight.resize(3);
   timeSteppingScheme(Moose::IMPLICIT_EULER);                   // default time stepping scheme
-
   unsigned int n_threads = libMesh::n_threads();
   _kernels.resize(n_threads);
   _bcs.resize(n_threads);
@@ -139,6 +136,7 @@ NonlinearSystem::~NonlinearSystem()
   delete _preconditioner;
   delete &_serialized_solution;
   delete &_residual_copy;
+  delete _time_scheme;
 }
 
 void
@@ -534,6 +532,12 @@ NonlinearSystem::addVector(const std::string & vector_name, const bool project, 
     _vecs_to_zero_for_residual.push_back(vec);
 }
 
+///Doxygen comment in .h needed.
+///NOT TESTED YET!!!
+void NonlinearSystem::computeLittlef(const NumericVector<Number> & bigF, NumericVector<Number> & littlef, Real time, bool mass)
+{
+ _time_scheme->computeLittlef(bigF, littlef, time, mass);
+}
 
 void
 NonlinearSystem::computeResidual(NumericVector<Number> & residual)
@@ -589,64 +593,29 @@ NonlinearSystem::timeSteppingScheme(Moose::TimeSteppingScheme scheme)
   {
   case Moose::EXPLICIT_EULER:
   case Moose::IMPLICIT_EULER:
-    _time_weight[0] = 1;
-    _time_weight[1] = 0;
-    _time_weight[2] = 0;
     _time_stepping_order = 1;
     break;
 
   case Moose::CRANK_NICOLSON:
-    _residual_old = &_sys.add_vector("residual_old", true, GHOSTED);
 
-    _time_weight[0] = 1;
-    _time_weight[1] = 0;
-    _time_weight[2] = 0;
+
     _time_stepping_order = 2;
     break;
 
   case Moose::BDF2:
-    _time_weight[0] = 0;
-    _time_weight[1] = -1.;
-    _time_weight[2] = 1.;
     _time_stepping_order = 2;
     break;
+  case Moose::PETSC_TS:
+    mooseError("PETSc TS not implemented");
+    break;
   }
+  _time_scheme->timeSteppingScheme(scheme);
 }
 
 void
 NonlinearSystem::onTimestepBegin()
 {
-  Real sum;
-
-  switch (_time_stepping_scheme)
-  {
-    case Moose::CRANK_NICOLSON:
-      _solution_u_dot = solutionOld();
-      _solution_u_dot *= -2.0 / _dt;
-      _solution_u_dot.close();
-
-      _solution_du_dot_du.zero();
-      _solution_du_dot_du.close();
-
-      {
-        const NumericVector<Real> * current_solution = currentSolution();
-        set_solution(solutionOld());                    // use old_solution for computing with correct solution vector
-        computeResidualInternal(*_residual_old);
-        set_solution(*current_solution);                    // reset the solution vector
-      }
-    break;
-
-  case Moose::BDF2:
-    sum = _dt+_dt_old;
-    _time_weight[0] = 1.+_dt/sum;
-    _time_weight[1] =-sum/_dt_old;
-    _time_weight[2] =_dt*_dt/_dt_old/sum;
-    break;
-
-  default:
-    break;
-  }
-
+  _time_scheme->onTimestepBegin();
 }
 
 void
@@ -655,7 +624,7 @@ NonlinearSystem::setInitialSolution()
   NumericVector<Number> & initial_solution( solution() );
 
   if (_use_predictor)
-    applyPredictor(initial_solution,_older_solution);
+    applyPredictor(initial_solution);
 
   // do nodal BC
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
@@ -687,44 +656,9 @@ NonlinearSystem::setInitialSolution()
 }
 
 void
-NonlinearSystem::applyPredictor(NumericVector<Number> & initial_solution,
-                                NumericVector<Number> & previous_solution)
+NonlinearSystem::applyPredictor(NumericVector<Number> & initial_solution)
 {
-  // A Predictor is an algorithm that will predict the next solution based on
-  // previous solutions.  Basically, it works like:
-  //
-  //             sol - prev_sol
-  // sol = sol + -------------- * dt * scale_factor
-  //                 dt_old
-  //
-  // The scale factor can be set to 1 for times when the solution is expected
-  // to change linearly or smoothly.  If the solution is less continuous over
-  // time, it may be better to set to to 0.
-  //   In the ideal case of a linear model with linearly changing bcs, the Predictor
-  // can determine the solution before the solver is invoked (a solution is computed
-  // in zero solver iterations).  Even outside the ideal case, a good Predictor
-  // significantly reduces the number of solver iterations required.
-  //   It is important to compute the initial residual to be used as a relative
-  // convergence criterion before applying the predictor.  If this is not done,
-  // the residual is likely to be much lower after applying the predictor, which would
-  // result in a much more stringent criterion for convergence than would have been
-  // used if the predictor were not enabled.
-
-  if (_dt_old > 0)
-  {
-    std::streamsize cur_precision(std::cout.precision());
-    std::cout << "  Applying predictor with scale factor = "<<std::fixed<<std::setprecision(2)<<_predictor_scale<<"\n";
-    std::cout << std::scientific << std::setprecision(cur_precision);
-    Real dt_adjusted_scale_factor = _predictor_scale * _dt / _dt_old;
-
-    if (dt_adjusted_scale_factor != 0.0)
-    {
-      initial_solution *= (1.0 + dt_adjusted_scale_factor);
-      previous_solution *= dt_adjusted_scale_factor;
-      initial_solution -= previous_solution;
-      previous_solution *= 1.0/dt_adjusted_scale_factor;
-    }
-  }
+  _time_scheme->applyPredictor(initial_solution);
 }
 
 void
@@ -735,58 +669,19 @@ NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
     (*kernel_it)->subdomainSetup();
 }
 
+NumericVector<Number> &
+NonlinearSystem::solutionUDot() { return _time_scheme->solutionUDot(); }
+
+NumericVector<Number> &
+NonlinearSystem::solutionDuDotDu() { return _time_scheme->solutionDuDotDu(); }
+
 void
 NonlinearSystem::computeTimeDerivatives()
 {
   if (!_fe_problem.isTransient())
     return;
 
-  switch (_time_stepping_scheme)
-  {
-  case Moose::IMPLICIT_EULER:
-  case Moose::EXPLICIT_EULER:
-    _solution_u_dot = *currentSolution();
-    _solution_u_dot -= solutionOld();
-    _solution_u_dot /= _dt;
-
-    _solution_du_dot_du = 1.0 / _dt;
-    break;
-
-  case Moose::CRANK_NICOLSON:
-    _solution_u_dot = *currentSolution();
-    _solution_u_dot *= 2. / _dt;
-
-    _solution_du_dot_du = 1.0/_dt;
-    break;
-
-  case Moose::BDF2:
-    if (_t_step == 1)
-    {
-      // Use backward-euler for the first step
-      _solution_u_dot = *currentSolution();
-      _solution_u_dot -= solutionOld();
-      _solution_u_dot /= _dt;
-
-      _solution_du_dot_du = 1.0/_dt;
-    }
-    else
-    {
-      _solution_u_dot.zero();
-      _solution_u_dot.add(_time_weight[0], *currentSolution());
-      _solution_u_dot.add(_time_weight[1], solutionOld());
-      _solution_u_dot.add(_time_weight[2], solutionOlder());
-      _solution_u_dot.scale(1./_dt);
-
-      _solution_du_dot_du = _time_weight[0]/_dt;
-    }
-    break;
-
-  default:
-    break;
-  }
-
-  _solution_u_dot.close();
-  _solution_du_dot_du.close();
+  _time_scheme->computeTimeDerivatives();
 }
 
 void
@@ -1027,9 +922,21 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
   }
 }
 
+void
+NonlinearSystem::computeTimeResidual(NumericVector<Number> & mmmatrix)
+{
+  mmmatrix.zero();
+  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  {
+    _kernels[i].residualSetup();
+  }
+  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  ComputeResidualThread cr(_fe_problem, *this, mmmatrix, Moose::KT_TIME);
+  Threads::parallel_reduce(elem_range, cr);
+}
 
 void
-NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
+NonlinearSystem::computeNonTimeResidual(NumericVector<Number> & residual)
 {
   residual.zero();
 
@@ -1044,7 +951,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   }
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  ComputeResidualThread cr(_fe_problem, *this, residual);
+  ComputeResidualThread cr(_fe_problem, *this, residual, Moose::KT_NONTIME);
   Threads::parallel_reduce(elem_range, cr);
 
   // Close the Aux system solution because "save_in" kernels might have written to it
@@ -1107,19 +1014,86 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   }
 }
 
+
+void
+NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
+{
+  residual.zero();
+
+  // residualSetup() /////
+  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  {
+    _kernels[i].residualSetup();
+    _bcs[i].residualSetup();
+    _dirac_kernels[i].residualSetup();
+    if (_doing_dg) _dg_kernels[i].residualSetup();
+    _constraints[i].residualSetup();
+  }
+
+  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  ComputeResidualThread cr(_fe_problem, *this, residual);
+  Threads::parallel_reduce(elem_range, cr);
+  // do scalar kernels (not sure how to thread this)
+  const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
+  if (scalars.size() > 0)
+  {
+    for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
+    {
+            if (dynamic_cast<TimeKernel *>(*it) == NULL){
+                    ScalarKernel * kernel = *it;
+
+                    _fe_problem.reinitScalars(0);
+                    kernel->reinit();
+                    kernel->computeResidual();
+                    _fe_problem.addResidualScalar(residual);}
+    }
+  }
+
+  if(_need_residual_copy)
+  {
+    Moose::perf_log.push("residual.close1()","Solve");
+    residual.close();
+    Moose::perf_log.pop("residual.close1()","Solve");
+    residual.localize(_residual_copy);
+  }
+
+  if(_need_residual_ghosted)
+  {
+    Moose::perf_log.push("residual.close2()","Solve");
+    residual.close();
+    Moose::perf_log.pop("residual.close2()","Solve");
+    _residual_ghosted = residual;
+    _residual_ghosted.close();
+  }
+
+  computeDiracContributions(&residual);
+
+  Moose::perf_log.push("residual.close3()","Solve");
+  residual.close();
+  Moose::perf_log.pop("residual.close3()","Solve");
+
+  if(_fe_problem._has_constraints)
+  {
+    enforceNodalConstraintsResidual(residual);
+  }
+  residual.close();
+
+  // Add in Residual contributions from Constraints
+  if(_fe_problem._has_constraints)
+  {
+    // Undisplaced Constraints
+    constraintResiduals(residual, false);
+
+    // Displaced Constraints
+    if(_fe_problem.getDisplacedProblem())
+      constraintResiduals(residual, true);
+  }
+}
+
 void
 NonlinearSystem::finishResidual(NumericVector<Number> & residual)
 {
-  switch (_time_stepping_scheme)
-  {
-  case Moose::CRANK_NICOLSON:
-    residual.add(*_residual_old);
-    residual.close();
-    break;
-
-  default:
-    break;
-  }
+        residual = _time_scheme->finishResidual(residual);
 
   // last thing to do are nodal BCs
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
@@ -1159,6 +1133,7 @@ NonlinearSystem::finishResidual(NumericVector<Number> & residual)
     _residual_ghosted.close();
   }
 }
+
 
 void
 NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<unsigned int, std::vector<unsigned int> > & graph)

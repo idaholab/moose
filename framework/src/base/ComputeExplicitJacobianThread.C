@@ -35,15 +35,11 @@ void
 ComputeExplicitJacobianThread::computeJacobian()
 {
   // process only time derivative kernel
-  const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
+  const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeTime();
   for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
   {
     Kernel * kernel = *it;
-    TimeDerivative * td = dynamic_cast<TimeDerivative *>(kernel);
-    if (td != NULL)
-    {
-      kernel->subProblem().prepareShapes(kernel->variable().number(), _tid);
-      kernel->computeJacobian();
-    }
+     kernel->subProblem().prepareShapes(kernel->variable().number(), _tid);
+     kernel->computeJacobian();
   }
 }
