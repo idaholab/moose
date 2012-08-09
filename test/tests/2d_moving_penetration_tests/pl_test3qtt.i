@@ -51,7 +51,7 @@
     variable = distance
     boundary = 11            #slave
     paired_boundary = 12     #master
-    tangential_tolerance = 0.1
+    tangential_tolerance = 0.09
   [../]
 
   [./penetrate2]
@@ -59,7 +59,7 @@
     variable = distance
     boundary = 12            #slave
     paired_boundary = 11     #master
-    tangential_tolerance = 0.1
+    tangential_tolerance = 0.09
   [../]
 
   [./penetrate3]
@@ -217,11 +217,11 @@
   type = Transient
   petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
 
-  nl_abs_tol = 1e-7
+  nl_rel_tol = 1e-9
   l_max_its = 10
 
   start_time = 0.0
-  dt = 0.0125
+  dt = 0.02
   end_time = 1.0
   [./Quadrature]
     order = THIRD
