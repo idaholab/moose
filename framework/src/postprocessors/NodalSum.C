@@ -52,7 +52,7 @@ NodalSum::getValue()
 }
 
 void
-NodalSum::threadJoin(const Postprocessor & y)
+NodalSum::threadJoin(const UserObject & y)
 {
   const NodalSum & pps = dynamic_cast<const NodalSum &>(y);
   _sum += pps._sum;

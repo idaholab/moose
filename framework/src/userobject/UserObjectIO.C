@@ -38,6 +38,10 @@ UserObjectIO::~UserObjectIO()
 void
 UserObjectIO::write(const std::string & file_name)
 {
+}
+
+/*
+{
   std::ofstream out(file_name.c_str(), std::ios::out | std::ios::binary);
 
   // header
@@ -75,10 +79,14 @@ UserObjectIO::write(const std::string & file_name)
     out.seekp(end);
   }
 }
-
+*/
 void
 UserObjectIO::read(const std::string & file_name)
 {
+}
+
+/*
+  {
   std::ifstream in(file_name.c_str(), std::ios::in | std::ios::binary);
 
   // header
@@ -126,3 +134,4 @@ UserObjectIO::read(const std::string & file_name)
     }
   }
 }
+*/

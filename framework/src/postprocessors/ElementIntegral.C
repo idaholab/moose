@@ -46,7 +46,7 @@ ElementIntegral::getValue()
 }
 
 void
-ElementIntegral::threadJoin(const Postprocessor & y)
+ElementIntegral::threadJoin(const UserObject & y)
 {
   const ElementIntegral & pps = dynamic_cast<const ElementIntegral &>(y);
   _integral_value += pps._integral_value;

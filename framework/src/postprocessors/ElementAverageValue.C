@@ -53,7 +53,7 @@ ElementAverageValue::getValue()
 }
 
 void
-ElementAverageValue::threadJoin(const Postprocessor & y)
+ElementAverageValue::threadJoin(const UserObject & y)
 {
   ElementIntegral::threadJoin(y);
   const ElementAverageValue & pps = dynamic_cast<const ElementAverageValue &>(y);

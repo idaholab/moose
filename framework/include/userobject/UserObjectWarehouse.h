@@ -12,16 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef USEROBJECTWAREHOUSE_H
-#define USEROBJECTWAREHOUSE_H
-
-#include <vector>
-#include <map>
+#ifndef USER_OBJECTWAREHOUSE_H
+#define USER_OBJECTWAREHOUSE_H
 
 #include "UserObject.h"
 
+#include <vector>
+#include <map>
+#include <set>
+
+class ElementUserObject;
+class NodalUserObject;
+class SideUserObject;
+class GeneralUserObject;
+
 /**
- * Warehouse for storing user objects.
+ * Holds user_objects and provides some services
  */
 class UserObjectWarehouse
 {
@@ -29,43 +35,99 @@ public:
   UserObjectWarehouse();
   virtual ~UserObjectWarehouse();
 
-  /**
-   * Check if there is a user object with given name
-   * @param name The name of the object being checked for
-   * @return true if the object exists, false otherwise
-   */
-  bool hasUserObject(const std::string & name);
+  // Setup /////
+  void initialSetup();
+  void timestepSetup();
+  void residualSetup();
+  void jacobianSetup();
 
   /**
-   * Get user object by its name
-   * @param name Name of the object
-   * @return Pointer to the user object
+   * Get a user object by its name.
+   * @param name The name of the user object you want to get back.
+   * @return A pointer pointing to the user object you are trying to get or NULL if its not found.
    */
-  UserObject * getUserObjectByName(const std::string & name);
-  /**
-   * Add an user object
-   * @param name Name of the object
-   * @param user_data Pointer to the object being added
-   */
-  void addUserObject(const std::string & name, UserObject * user_object);
+  UserObject * getUserObjectByName(std::string name) { return _name_to_user_objects[name]; }
 
   /**
-   * Get the number of user data objects stored in this warehouse
-   * @return The number of objects stored in this warehouse
+   * Get the list of all  elemental user_objects
+   * @param block_id Block ID
+   * @return The list of all elemental user_objects
    */
-  unsigned int size() { return _user_objects.size(); }
+  const std::vector<ElementUserObject *> & elementUserObjects(SubdomainID block_id) { return _element_user_objects[block_id]; }
 
   /**
-   * Get the reference to the list of objects in this warehouse
-   * @return The reference to the list of objects in this warehouse
+   * Get the list of side user_objects
+   * @param boundary_id Boundary ID
+   * @return The list of side user_objects
    */
-  std::vector<UserObject *> & getObjects() { return _user_objects; }
+  const std::vector<SideUserObject *> & sideUserObjects(BoundaryID boundary_id) { return _side_user_objects[boundary_id]; }
+
+  /**
+   * Get the list of nodal user_objects
+   * @param boundary_id Boundary ID
+   * @return The list of all nodal user_objects
+   */
+  const std::vector<NodalUserObject *> & nodalUserObjects(BoundaryID boundary_id) { return _nodal_user_objects[boundary_id]; }
+
+  /**
+   * Get the list general user_objects
+   * @return The list of general user_objects
+   */
+  const std::vector<GeneralUserObject *> & genericUserObjects() { return _generic_user_objects; }
+
+  /**
+   * Get the list of all user_objects
+   * @return The list of all user_objects
+   */
+  const std::vector<UserObject *> & all() { return _all_user_objects; }
+
+  /**
+   * Add a user_object
+   * @param user_object UserObject being added
+   */
+  void addUserObject(UserObject *user_object);
+
+  /**
+   * Get the list of blocks with user_objects
+   * @return The list of block IDs with user_objects
+   */
+  const std::set<SubdomainID> & blocks() { return _block_ids_with_user_objects; }
+
+  /**
+   * Get the list of boundary IDs with user_objects
+   * @return The list of boundary IDs with user_objects
+   */
+  const std::set<BoundaryID> & boundaryIds() { return _boundary_ids_with_user_objects; }
+
+  /**
+   * Get the list of nodeset IDs with user_objects
+   * @return The list of nodeset IDs with user_objects
+   */
+  const std::set<BoundaryID> & nodesetIds() { return _nodeset_ids_with_user_objects; }
+
 
 protected:
-  /// storage for user objects
-  std::vector<UserObject *> _user_objects;
-  /// Map of names to user objects
   std::map<std::string, UserObject *> _name_to_user_objects;
+
+  std::vector<ElementUserObject *> _all_element_user_objects;
+  std::vector<NodalUserObject *> _all_nodal_user_objects;
+  std::vector<SideUserObject *> _all_side_user_objects;
+  std::vector<GeneralUserObject *> _all_generic_user_objects;
+
+  std::map<SubdomainID, std::vector<ElementUserObject *> > _element_user_objects;
+  std::map<BoundaryID, std::vector<SideUserObject *> > _side_user_objects;
+  std::map<BoundaryID, std::vector<NodalUserObject *> > _nodal_user_objects;
+
+  std::vector<GeneralUserObject *> _generic_user_objects;
+  std::vector<UserObject *> _all_user_objects;
+
+  /// All of the block ids that have user_objects specified to act on them
+  std::set<SubdomainID> _block_ids_with_user_objects;
+  /// All of the boundary ids that have user_objects specified to act on them
+  std::set<BoundaryID> _boundary_ids_with_user_objects;
+  /// All of the nodeset ids that have user_objects specified to act on them
+  std::set<BoundaryID> _nodeset_ids_with_user_objects;
+
 };
 
-#endif // USEROBJECTWAREHOUSE_H
+#endif // USER_OBJECTWAREHOUSE_H

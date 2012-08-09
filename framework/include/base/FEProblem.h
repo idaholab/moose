@@ -24,6 +24,7 @@
 #include "MaterialWarehouse.h"
 #include "MaterialPropertyStorage.h"
 #include "PostprocessorWarehouse.h"
+#include "UserObjectWarehouse.h"
 #include "PostprocessorData.h"
 #include "Output.h"
 #include "Adaptivity.h"
@@ -223,15 +224,12 @@ public:
   virtual void reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int side, THREAD_ID tid);
   virtual void reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid);
 
-  // UserData /////
+  // Postprocessors /////
+  virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
 
-  /**
-   * Adds an user object to this problem
-   * @param type The type (C++ class name) of the user object
-   * @param name The name of the user object
-   * @param parameters Parameters of the user object
-   */
-  virtual void addUserObject(const std::string & type, const std::string & name, InputParameters parameters);
+
+  // UserObjects /////
+  virtual void addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters);
 
   /**
    * Get the user object by its name
@@ -240,13 +238,17 @@ public:
    * @return Const reference to the user object
    */
   template <class T>
-  const T & getUserObject(const std::string & name, THREAD_ID tid = 0)
+  const T & getUserObject(const std::string & name)
   {
-    UserObject * user_object = _user_objects[tid].getUserObjectByName(name);
-    if (user_object == NULL)
-    {
+    UserObject * user_object = NULL;
+
+    ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL };
+    for (unsigned int i = 0; i < LENGTHOF(types) && !user_object; i++)
+      user_object = _user_objects(types[i])[0].getUserObjectByName(name);
+
+    if(!user_object)
       mooseError("Unable to find user object with name '" + name + "'");
-    }
+
     return dynamic_cast<const T &>(*user_object);
   }
 
@@ -256,19 +258,13 @@ public:
    * @param tid  The thread ID
    * @return true if the user object exists, false otherwise
    */
-  bool hasUserObject(const std::string & name, THREAD_ID tid = 0)
-  {
-    return _user_objects[tid].hasUserObject(name);
-  }
-
-  // Postprocessors /////
-  virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
+  bool hasUserObject(const std::string & name);
 
   /**
    * Get a reference to the value associated with the postprocessor.
    */
   Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
-  virtual void computePostprocessors(ExecFlagType type = EXEC_TIMESTEP);
+  virtual void computeUserObjects(ExecFlagType type = EXEC_TIMESTEP);
   virtual void computeAuxiliaryKernels(ExecFlagType type = EXEC_RESIDUAL);
   virtual void outputPostprocessors(bool force = false);
 
@@ -419,16 +415,17 @@ protected:
   // postprocessors
   std::vector<PostprocessorData> _pps_data;
   ExecStore<PostprocessorWarehouse> _pps;
+
+  // user objects
+  ExecStore<UserObjectWarehouse> _user_objects;
+
   /// Table with postprocessors that will go into files
   FormattedTable _pps_output_table_file;
   /// Table with postprocessors that will go on screen
   FormattedTable _pps_output_table_screen;
   unsigned int _pps_output_table_max_rows;
 
-  /// User objects
-  std::vector<UserObjectWarehouse> _user_objects;
-
-  void computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pps);
+  void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects);
 
   // TODO: PPS output subsystem, and this will go away
   // postprocessor output
@@ -442,7 +439,7 @@ public:
   ExodusII_IO * _ex_reader;
 
 protected:
-  void checkPPSs();
+  void checkUserObjects();
 
   /**
    * Add postprocessor values to the output table

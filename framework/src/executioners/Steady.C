@@ -70,13 +70,13 @@ Steady::execute()
     preSolve();
     _problem.updateMaterials();
     _problem.timestepSetup();
-    _problem.computePostprocessors(EXEC_TIMESTEP_BEGIN);
+    _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN);
     _problem.solve();
     postSolve();
 
     _problem.onTimestepEnd();
 
-    _problem.computePostprocessors();
+    _problem.computeUserObjects();
     _problem.output();
     _problem.outputPostprocessors();
 

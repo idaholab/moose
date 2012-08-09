@@ -28,8 +28,9 @@ PostprocessorWarehouse::PostprocessorWarehouse()
 
 PostprocessorWarehouse::~PostprocessorWarehouse()
 {
-  for (std::vector<Postprocessor *>::iterator i=_all_postprocessors.begin(); i!=_all_postprocessors.end(); ++i)
-    delete *i;
+  // We don't need to free because that's taken care of by the UserObjectWarehouse
+//  for (std::vector<Postprocessor *>::iterator i=_all_postprocessors.begin(); i!=_all_postprocessors.end(); ++i)
+//    delete *i;
 }
 
 void

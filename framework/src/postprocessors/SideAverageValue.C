@@ -52,7 +52,7 @@ SideAverageValue::getValue()
 
 
 void
-SideAverageValue::threadJoin(const Postprocessor & y)
+SideAverageValue::threadJoin(const UserObject & y)
 {
   SideIntegral::threadJoin(y);
   const SideAverageValue & pps = dynamic_cast<const SideAverageValue &>(y);

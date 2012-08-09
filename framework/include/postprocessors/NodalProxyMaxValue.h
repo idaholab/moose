@@ -34,7 +34,7 @@ public:
   virtual void execute();
   virtual Real getValue();
 
-  void threadJoin(const Postprocessor & y);
+  void threadJoin(const UserObject & y);
 
 protected:
 

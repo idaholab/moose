@@ -35,20 +35,6 @@ public:
   virtual ~Postprocessor(){ }
 
   /**
-   * Called before execute() is ever called so that data can be cleared.
-   */
-  virtual void initialize() = 0;
-
-  /**
-   * This function will get called on each geometric object this postprocessor acts on
-   * (ie Elements, Sides or Nodes).  This will most likely get called multiple times
-   * before getValue() is called.
-   *
-   * Someone somewhere has to override this.
-   */
-  virtual void execute() = 0;
-
-  /**
    * This will get called to actually grab the final value the postprocessor has calculated.
    */
   virtual PostprocessorValue getValue() = 0;

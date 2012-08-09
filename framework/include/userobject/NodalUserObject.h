@@ -47,11 +47,20 @@ public:
   const std::vector<BoundaryName> & boundaries() { return _boundaries; }
 
   /**
+   * This function will get called on each geometric object this postprocessor acts on
+   * (ie Elements, Sides or Nodes).  This will most likely get called multiple times
+   * before getValue() is called.
+   *
+   * Someone somewhere has to override this.
+   */
+  virtual void execute() = 0;
+
+  /**
    * Must override.
    *
    * @param uo The UserObject to be joined into _this_ object.  Take the data from the uo object and "add" it into the data for this object.
    */
-//  virtual void threadJoin(const NodalUserObject & uo) = 0;
+  virtual void threadJoin(const UserObject & uo) = 0;
 
 protected:
   MooseVariable & _var;

@@ -149,7 +149,7 @@ override_name_variable_test = {
 }
 
 pps_bad_block_test = { INPUT : 'pps_bad_block_test.i',
-                       EXPECT_ERR : "One or more Postprocessors is referencing a nonexistent block" }
+                       EXPECT_ERR : "One or more UserObjects is referencing a nonexistent block" }
 
 dynamic_check_name_block_test = { INPUT : 'check_dynamic_name_block.i',
                                   EXPECT_ERR : "The following dynamic block name is not unique: \w+" }

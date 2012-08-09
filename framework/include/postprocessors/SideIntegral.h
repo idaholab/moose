@@ -37,7 +37,7 @@ public:
   virtual void initialize();
   virtual void execute();
   virtual Real getValue();
-  virtual void threadJoin(const Postprocessor & y);
+  virtual void threadJoin(const UserObject & y);
 
 protected:
   virtual Real computeQpIntegral();

@@ -41,6 +41,13 @@ class GeneralUserObject :
 public:
   GeneralUserObject(const std::string & name, InputParameters parameters);
 
+  /**
+   * This function will get called when this user object needs to update its values
+   *
+   * Someone somewhere has to override this.
+   */
+  virtual void execute() = 0;
+
   virtual ~GeneralUserObject() {}
 };
 

@@ -124,7 +124,7 @@ DT2Transient::postSolve()
 
     _time -= _dt_full;
 
-    _problem.computePostprocessors();
+    _problem.computeUserObjects();
 
     // cut the time step in half
     _dt = _dt_full / 2;
@@ -142,7 +142,7 @@ DT2Transient::postSolve()
     nl_sys.update();
 
     _problem.copyOldSolutions();
-    _problem.computePostprocessors();
+    _problem.computeUserObjects();
 
     // 2. step
     _problem.onTimestepBegin();

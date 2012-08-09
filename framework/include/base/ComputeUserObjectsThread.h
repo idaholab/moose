@@ -12,29 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SIDEPOSTPROCESSOR_H
-#define SIDEPOSTPROCESSOR_H
+#ifndef COMPUTEUSEROBJECTSTHREAD_H
+#define COMPUTEUSEROBJECTSTHREAD_H
 
-#include "SideUserObject.h"
-#include "Postprocessor.h"
+#include "ThreadedElementLoop.h"
+#include "UserObjectWarehouse.h"
 
-//Forward Declarations
-class SidePostprocessor;
+// libMesh includes
+#include "elem_range.h"
+#include "numeric_vector.h"
 
-template<>
-InputParameters validParams<SidePostprocessor>();
-
-class SidePostprocessor :
-  public SideUserObject,
-  public Postprocessor
+//
+class ComputeUserObjectsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  SidePostprocessor(const std::string & name, InputParameters parameters);
+  ComputeUserObjectsThread(FEProblem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<UserObjectWarehouse> & user_objects);
+  ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split);                 // Splitting Constructor
 
-  /**
-   * Called before deleting the object. Free memory allocated by your derived classes, etc.
-   */
-  virtual void destroy(){}
+  virtual void onElement(const Elem *elem);
+  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
+
+  void join(const ComputeUserObjectsThread & /*y*/);
+
+protected:
+  const NumericVector<Number>& _soln;
+  std::vector<UserObjectWarehouse> & _user_objects;
 };
 
-#endif
+#endif //COMPUTEUSEROBJECTSTHREAD_H

@@ -56,7 +56,7 @@ AverageElementSize::getValue()
 }
 
 void
-AverageElementSize::threadJoin(const Postprocessor & y)
+AverageElementSize::threadJoin(const UserObject & y)
 {
   ElementAverageValue::threadJoin(y);
   const AverageElementSize & pps = dynamic_cast<const AverageElementSize &>(y);

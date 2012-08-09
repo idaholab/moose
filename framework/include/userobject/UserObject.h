@@ -44,10 +44,14 @@ public:
   virtual ~UserObject();
 
   /**
+   * Called before execute() is ever called so that data can be cleared.
+   */
+  virtual void initialize() = 0;
+
+  /**
    * Called before deleting the object. Free memory allocated by your derived classes, etc.
    */
   virtual void destroy() = 0;
-
 
   /**
    * Load user data object from a stream

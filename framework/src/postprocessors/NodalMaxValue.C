@@ -49,7 +49,7 @@ NodalMaxValue::getValue()
 }
 
 void
-NodalMaxValue::threadJoin(const Postprocessor & y)
+NodalMaxValue::threadJoin(const UserObject & y)
 {
   const NodalMaxValue & pps = static_cast<const NodalMaxValue &>(y);
   _value = std::max(_value, pps._value);

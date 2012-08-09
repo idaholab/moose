@@ -15,7 +15,7 @@
 #ifndef MTUSEROBJECT_H
 #define MTUSEROBJECT_H
 
-#include "UserObject.h"
+#include "GeneralUserObject.h"
 
 class MTUserObject;
 
@@ -26,11 +26,21 @@ InputParameters validParams<MTUserObject>();
 /**
  * Demonstration of user-data object
  */
-class MTUserObject : public UserObject
+class MTUserObject : public GeneralUserObject
 {
 public:
   MTUserObject(const std::string & name, InputParameters params);
   virtual ~MTUserObject();
+
+  /**
+   * Called when this object needs to compute something.
+   */
+  virtual void execute() {}
+
+  /**
+   * Called before execute() is ever called so that data can be cleared.
+   */
+  virtual void initialize(){}
 
   virtual void destroy();
 

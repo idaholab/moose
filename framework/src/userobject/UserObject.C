@@ -20,6 +20,12 @@ template<>
 InputParameters validParams<UserObject>()
 {
   InputParameters params = validParams<MooseObject>();
+
+  MooseEnum execute_options(SetupInterface::getExecuteOptions());
+  execute_options = "timestep";  // set the default
+
+  params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|timestep|timestep_begin) to execute only at that moment");
+
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_user_object");
   return params;

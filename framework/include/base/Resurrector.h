@@ -79,7 +79,7 @@ protected:
   /// Stateful material property output
   MaterialPropertyIO _mat;
   /// User Data IO
-  UserObjectIO _user_object;
+//  UserObjectIO _user_object;
   /// list of file names we keep around
   std::list<std::string> _restart_file_names;
 

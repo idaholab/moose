@@ -46,7 +46,7 @@ SideIntegral::getValue()
 }
 
 void
-SideIntegral::threadJoin(const Postprocessor & y)
+SideIntegral::threadJoin(const UserObject & y)
 {
   const SideIntegral & pps = dynamic_cast<const SideIntegral &>(y);
   _integral_value += pps._integral_value;

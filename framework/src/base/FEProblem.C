@@ -18,8 +18,8 @@
 #include "DisplacedProblem.h"
 #include "OutputProblem.h"
 #include "MaterialData.h"
-#include "ComputePostprocessorsThread.h"
-#include "ComputeNodalPPSThread.h"
+#include "ComputeUserObjectsThread.h"
+#include "ComputeNodalUserObjectsThread.h"
 #include "ComputeMaterialsObjectThread.h"
 #include "ActionWarehouse.h"
 #include "Conversion.h"
@@ -30,11 +30,17 @@
 #include "Parser.h"
 #include "ElementH1Error.h"
 #include "Function.h"
+#include "Material.h"
 
 #include "ElementPostprocessor.h"
 #include "NodalPostprocessor.h"
 #include "SidePostprocessor.h"
 #include "GeneralPostprocessor.h"
+
+#include "ElementUserObject.h"
+#include "NodalUserObject.h"
+#include "SideUserObject.h"
+#include "GeneralUserObject.h"
 
 unsigned int FEProblem::_n = 0;
 
@@ -126,7 +132,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   }
 
   _pps_data.resize(n_threads);
-  _user_objects.resize(n_threads);
   _objects_by_name.resize(n_threads);
 
   _resurrector = new Resurrector(*this);
@@ -281,8 +286,9 @@ void FEProblem::initialSetup()
       _resurrector->restartStatefulMaterialProps();
     }
 
-    if (_user_objects[0].size() > 0)
-      _resurrector->restartUserData();
+    // TODO: Reenable restarting for UserObjects!
+//    if (_user_objects[0].size() > 0)
+//      _resurrector->restartUserData();
   }
 
 //  // RUN initial postprocessors
@@ -348,12 +354,12 @@ void FEProblem::initialSetup()
   _aux.initialSetup();
   _aux.compute(EXEC_TIMESTEP_BEGIN);
 
-  Moose::setup_perf_log.push("Initial computePostprocessors()","Setup");
-  computePostprocessors();
-  computePostprocessors(EXEC_INITIAL);
-  computePostprocessors(EXEC_TIMESTEP_BEGIN);
-  computePostprocessors(EXEC_RESIDUAL);
-  Moose::setup_perf_log.pop("Initial computePostprocessors()","Setup");
+  Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
+  computeUserObjects();
+  computeUserObjects(EXEC_INITIAL);
+  computeUserObjects(EXEC_TIMESTEP_BEGIN);
+  computeUserObjects(EXEC_RESIDUAL);
+  Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
 
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
@@ -1289,28 +1295,6 @@ FEProblem::reinitMaterialsBoundary(BoundaryID bnd_id, THREAD_ID tid)
   }
 }
 
-void
-FEProblem::addUserObject(const std::string & type, const std::string & name, InputParameters parameters)
-{
-  parameters.set<FEProblem *>("_fe_problem") = this;
-  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-  {
-    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
-  }
-  else
-  {
-    parameters.set<SubProblem *>("_subproblem") = this;
-  }
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    parameters.set<THREAD_ID>("_tid") = tid;
-    UserObject * uo = static_cast<UserObject *>(Factory::instance()->create(type, name, parameters));
-    _user_objects[tid].addUserObject(name, uo);
-    _objects_by_name[tid][name].push_back(uo);
-  }
-}
-
 /**
  * Small helper function used by addPostprocessor to try to get a Postprocessor pointer from a MooseObject
  */
@@ -1341,7 +1325,7 @@ getPostprocessorPointer(MooseObject * mo)
       return static_cast<Postprocessor *>(intermediate);
   }
 
-  mooseError("Unable to determine type for Postprocessor: " + mo->name());
+  return NULL;
 }
 
 void
@@ -1367,9 +1351,83 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
 
       MooseObject * mo = Factory::instance()->create(pp_name, name, parameters);
+      if(!mo)
+        mooseError("Unable to determine type for Postprocessor: " + mo->name());
 
       Postprocessor * pp = getPostprocessorPointer(mo);
       _pps(type)[tid].addPostprocessor(pp);
+      _objects_by_name[tid][name].push_back(mo);
+
+      // Add it to the user object warehouse as well...
+      {
+        UserObject * user_object = dynamic_cast<UserObject *>(mo);
+        if(!user_object)
+          mooseError("Unknown user object type: " + pp_name);
+
+        _user_objects(type)[tid].addUserObject(user_object);
+      }
+    }
+    else
+    {
+      if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+        _reinit_displaced_elem = true;
+
+      parameters.set<MaterialData *>("_material_data") = _material_data[tid];
+
+      MooseObject * mo = Factory::instance()->create(pp_name, name, parameters);
+      if(!mo)
+        mooseError("Unable to determine type for Postprocessor: " + mo->name());
+
+      Postprocessor * pp = getPostprocessorPointer(mo);
+      _pps(type)[tid].addPostprocessor(pp);
+      _objects_by_name[tid][name].push_back(mo);
+
+      // Add it to the user object warehouse as well...
+      {
+        UserObject * user_object = dynamic_cast<UserObject *>(mo);
+        if(!user_object)
+          mooseError("Unknown user object type: " + pp_name);
+
+        _user_objects(type)[tid].addUserObject(user_object);
+      }
+    }
+  }
+}
+
+void
+FEProblem::addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<FEProblem *>("_fe_problem") = this;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
+  }
+  else
+  {
+    parameters.set<SubProblem *>("_subproblem") = this;
+  }
+
+  ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<MooseEnum>("execute_on"));
+
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+
+    // distinguish between side and the rest of USER_OBJECTs to provide the right material object
+    if(parameters.have_parameter<std::vector<BoundaryName> >("boundary"))
+    {
+      if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+        _reinit_displaced_face = true;
+
+      parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
+
+      MooseObject * mo = Factory::instance()->create(user_object_name, name, parameters);
+
+      UserObject * user_object = dynamic_cast<UserObject *>(mo);
+      if(!user_object)
+        mooseError("Unknown user object type: " + user_object_name);
+
+      _user_objects(type)[tid].addUserObject(user_object);
       _objects_by_name[tid][name].push_back(mo);
     }
     else
@@ -1378,12 +1436,31 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
         _reinit_displaced_elem = true;
 
       parameters.set<MaterialData *>("_material_data") = _material_data[tid];
-      MooseObject * mo = Factory::instance()->create(pp_name, name, parameters);
-      Postprocessor * pp = getPostprocessorPointer(mo);
-      _pps(type)[tid].addPostprocessor(pp);
+      MooseObject * mo = Factory::instance()->create(user_object_name, name, parameters);
+
+      UserObject * user_object = dynamic_cast<UserObject *>(mo);
+      if(!user_object)
+        mooseError("Unknown user object type: " + user_object_name);
+
+      _user_objects(type)[tid].addUserObject(user_object);
       _objects_by_name[tid][name].push_back(mo);
     }
   }
+}
+
+bool
+FEProblem::hasUserObject(const std::string & name)
+{
+  UserObject * user_object = NULL;
+
+  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL };
+  for (unsigned int i = 0; i < LENGTHOF(types); i++)
+    user_object = _user_objects(types[i])[0].getUserObjectByName(name);
+
+  if(!user_object)
+    return false;
+
+  return true;
 }
 
 Real &
@@ -1393,15 +1470,15 @@ FEProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
 }
 
 void
-FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pps)
+FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps)
 {
   if (pps[0].blocks().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0)
   {
 
-    /* Note: The fact that we compute the aux system when we compute the postprocessors
+    /* Note: The fact that we compute the aux system when we compute the user_objects
      * is a very bad behavior that some of our applications have come to rely on.  This
      * needs to be fixed.  For now we cannot easily change this behavior without
-     * affecting a number of applications.  However when I added the nodal postprocessors
+     * affecting a number of applications.  However when I added the nodal user_objects
      * this also changed the behavior so this hack is here to maintain saneness for now
      */
     if (!pps[0].nodesetIds().size())
@@ -1424,10 +1501,10 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
       {
         SubdomainID block_id = *block_it;
 
-        for (std::vector<ElementPostprocessor *>::const_iterator postprocessor_it = pps[tid].elementPostprocessors(block_id).begin();
-            postprocessor_it != pps[tid].elementPostprocessors(block_id).end();
-            ++postprocessor_it)
-          (*postprocessor_it)->initialize();
+        for (std::vector<ElementUserObject *>::const_iterator user_object_it = pps[tid].elementUserObjects(block_id).begin();
+            user_object_it != pps[tid].elementUserObjects(block_id).end();
+            ++user_object_it)
+          (*user_object_it)->initialize();
       }
 
       for (std::set<BoundaryID>::const_iterator boundary_it = pps[tid].boundaryIds().begin();
@@ -1436,63 +1513,68 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
       {
         //note: for threaded applications where the elements get broken up it
         //may be more efficient to initialize these on demand inside the loop
-        for (std::vector<SidePostprocessor *>::const_iterator side_postprocessor_it = pps[tid].sidePostprocessors(*boundary_it).begin();
-            side_postprocessor_it != pps[tid].sidePostprocessors(*boundary_it).end();
-            ++side_postprocessor_it)
-          (*side_postprocessor_it)->initialize();
+        for (std::vector<SideUserObject *>::const_iterator side_user_object_it = pps[tid].sideUserObjects(*boundary_it).begin();
+            side_user_object_it != pps[tid].sideUserObjects(*boundary_it).end();
+            ++side_user_object_it)
+          (*side_user_object_it)->initialize();
       }
 
       for (std::set<BoundaryID>::const_iterator boundary_it = pps[tid].nodesetIds().begin();
           boundary_it != pps[tid].nodesetIds().end();
           ++boundary_it)
       {
-        for (std::vector<NodalPostprocessor *>::const_iterator nodal_postprocessor_it = pps[tid].nodalPostprocessors(*boundary_it).begin();
-             nodal_postprocessor_it != pps[tid].nodalPostprocessors(*boundary_it).end();
-             ++nodal_postprocessor_it)
+        for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it = pps[tid].nodalUserObjects(*boundary_it).begin();
+             nodal_user_object_it != pps[tid].nodalUserObjects(*boundary_it).end();
+             ++nodal_user_object_it)
         {
-          (*nodal_postprocessor_it)->initialize();
+          (*nodal_user_object_it)->initialize();
           have_nodal_pps = true;
         }
       }
     }
 
     // compute
-    ComputePostprocessorsThread cppt(*this, getNonlinearSystem(), *getNonlinearSystem().currentSolution(), pps);
+    ComputeUserObjectsThread cppt(*this, getNonlinearSystem(), *getNonlinearSystem().currentSolution(), pps);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
 
-    // Store element postprocessors values
-    std::set<Postprocessor *> already_gathered;
+    // Store element user_objects values
+    std::set<UserObject *> already_gathered;
     for (std::set<SubdomainID>::const_iterator block_ids_it = pps[0].blocks().begin();
         block_ids_it != pps[0].blocks().end();
         ++block_ids_it)
     {
       SubdomainID block_id = *block_ids_it;
 
-      const std::vector<ElementPostprocessor *> & element_postprocessors = pps[0].elementPostprocessors(block_id);
-      // Store element postprocessors values
-      for (unsigned int i = 0; i < element_postprocessors.size(); ++i)
+      const std::vector<ElementUserObject *> & element_user_objects = pps[0].elementUserObjects(block_id);
+      // Store element user_objects values
+      for (unsigned int i = 0; i < element_user_objects.size(); ++i)
       {
-        ElementPostprocessor *ps = element_postprocessors[i];
-        std::string name = ps->PPName();
+        ElementUserObject *ps = element_user_objects[i];
+        std::string name = ps->name();
 
         // join across the threads (gather the value in thread #0)
         if (already_gathered.find(ps) == already_gathered.end())
         {
           for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
-            ps->threadJoin(*pps[tid].elementPostprocessors(block_id)[i]);
+            ps->threadJoin(*pps[tid].elementUserObjects(block_id)[i]);
 
-          Real value = ps->getValue();
-          // store the value in each thread
+          Postprocessor * pp = getPostprocessorPointer(ps);
 
-          for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-            _pps_data[tid].storeValue(name, value);
+          if(pp)
+          {
+            Real value = pp->getValue();
+            // store the value in each thread
+
+            for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+              _pps_data[tid].storeValue(name, value);
+          }
 
           already_gathered.insert(ps);
         }
       }
     }
 
-    // Store side postprocessors values
+    // Store side user_objects values
     already_gathered.clear();
     for (std::set<BoundaryID>::const_iterator boundary_ids_it = pps[0].boundaryIds().begin();
          boundary_ids_it != pps[0].boundaryIds().end();
@@ -1500,36 +1582,41 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
     {
       BoundaryID boundary_id = *boundary_ids_it;
 
-      const std::vector<SidePostprocessor *> & side_postprocessors = pps[0].sidePostprocessors(boundary_id);
-      for (unsigned int i = 0; i < side_postprocessors.size(); ++i)
+      const std::vector<SideUserObject *> & side_user_objects = pps[0].sideUserObjects(boundary_id);
+      for (unsigned int i = 0; i < side_user_objects.size(); ++i)
       {
-        SidePostprocessor *ps = side_postprocessors[i];
+        SideUserObject *ps = side_user_objects[i];
         std::string name = ps->name();
 
         // join across the threads (gather the value in thread #0)
         if (already_gathered.find(ps) == already_gathered.end())
         {
           for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
-            ps->threadJoin(*pps[tid].sidePostprocessors(boundary_id)[i]);
+            ps->threadJoin(*pps[tid].sideUserObjects(boundary_id)[i]);
 
-          Real value = ps->getValue();
+          Postprocessor * pp = getPostprocessorPointer(ps);
 
-          // store the value in each thread
-          for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-            _pps_data[tid].storeValue(name, value);
+          if(pp)
+          {
+            Real value = pp->getValue();
+
+            // store the value in each thread
+            for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+              _pps_data[tid].storeValue(name, value);
+          }
 
           already_gathered.insert(ps);
         }
       }
     }
 
-    // Don't waste time looping over nodes if there aren't any nodal postprocessors to calculate
+    // Don't waste time looping over nodes if there aren't any nodal user_objects to calculate
     if (have_nodal_pps)
     {
-      ComputeNodalPPSThread cnppt(*this, pps);
+      ComputeNodalUserObjectsThread cnppt(*this, pps);
       Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
 
-      // Store nodal postprocessors values
+      // Store nodal user_objects values
       already_gathered.clear();
       for (std::set<BoundaryID>::const_iterator boundary_ids_it = pps[0].nodesetIds().begin();
            boundary_ids_it != pps[0].nodesetIds().end();
@@ -1537,23 +1624,29 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
       {
         BoundaryID boundary_id = *boundary_ids_it;
 
-        const std::vector<NodalPostprocessor *> & nodal_postprocessors = pps[0].nodalPostprocessors(boundary_id);
-        for (unsigned int i = 0; i < nodal_postprocessors.size(); ++i)
+        const std::vector<NodalUserObject *> & nodal_user_objects = pps[0].nodalUserObjects(boundary_id);
+        for (unsigned int i = 0; i < nodal_user_objects.size(); ++i)
         {
-          NodalPostprocessor *ps = nodal_postprocessors[i];
+          NodalUserObject *ps = nodal_user_objects[i];
           std::string name = ps->name();
 
           // join across the threads (gather the value in thread #0)
           if (already_gathered.find(ps) == already_gathered.end())
           {
             for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
-              ps->threadJoin(*pps[tid].nodalPostprocessors(boundary_id)[i]);
+              ps->threadJoin(*pps[tid].nodalUserObjects(boundary_id)[i]);
 
-            Real value = ps->getValue();
-            // store the value in each thread
 
-            for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-              _pps_data[tid].storeValue(name, value);
+            Postprocessor * pp = getPostprocessorPointer(ps);
+
+            if(pp)
+            {
+              Real value = pp->getValue();
+
+              // store the value in each thread
+              for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+                _pps_data[tid].storeValue(name, value);
+            }
 
             already_gathered.insert(ps);
           }
@@ -1562,53 +1655,59 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
     }
   }
 
-  // Compute and store generic postprocessors values
-  for (std::vector<GeneralPostprocessor *>::const_iterator generic_postprocessor_it = pps[0].genericPostprocessors().begin();
-      generic_postprocessor_it != pps[0].genericPostprocessors().end();
-      ++generic_postprocessor_it)
+  // Compute and store generic user_objects values
+  for (std::vector<GeneralUserObject *>::const_iterator generic_user_object_it = pps[0].genericUserObjects().begin();
+      generic_user_object_it != pps[0].genericUserObjects().end();
+      ++generic_user_object_it)
   {
-    std::string name = (*generic_postprocessor_it)->name();
-    (*generic_postprocessor_it)->initialize();
-    (*generic_postprocessor_it)->execute();
-    Real value = (*generic_postprocessor_it)->getValue();
+    std::string name = (*generic_user_object_it)->name();
+    (*generic_user_object_it)->initialize();
+    (*generic_user_object_it)->execute();
 
-    // store the value in each thread
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-      _pps_data[tid].storeValue(name, value);
+    Postprocessor * pp = getPostprocessorPointer(*generic_user_object_it);
+
+    if(pp)
+    {
+      Real value = pp->getValue();
+
+      // store the value in each thread
+      for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+        _pps_data[tid].storeValue(name, value);
+    }
   }
 }
 
 void
-FEProblem::computePostprocessors(ExecFlagType type/* = EXEC_TIMESTEP*/)
+FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP*/)
 {
-  Moose::perf_log.push("compute_postprocessors()","Solve");
+  Moose::perf_log.push("compute_user_objects()","Solve");
 
   switch (type)
   {
   case EXEC_RESIDUAL:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-      _pps(type)[tid].residualSetup();
+      _user_objects(type)[tid].residualSetup();
     break;
 
   case EXEC_JACOBIAN:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-      _pps(type)[tid].jacobianSetup();
+      _user_objects(type)[tid].jacobianSetup();
     break;
 
   case EXEC_TIMESTEP:
   case EXEC_TIMESTEP_BEGIN:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-      _pps(type)[tid].timestepSetup();
+      _user_objects(type)[tid].timestepSetup();
     break;
 
   case EXEC_INITIAL:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-      _pps(type)[tid].initialSetup();
+      _user_objects(type)[tid].initialSetup();
     break;
   }
-  computePostprocessorsInternal(_pps(type));
+  computeUserObjectsInternal(_user_objects(type));
 
-  Moose::perf_log.pop("compute_postprocessors()","Solve");
+  Moose::perf_log.pop("compute_user_objects()","Solve");
 }
 
 void
@@ -1931,7 +2030,7 @@ FEProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVecto
   _nl.zeroVariables();
   _aux.zeroVariables();
 
-  computePostprocessors(EXEC_RESIDUAL);
+  computeUserObjects(EXEC_RESIDUAL);
 
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(soln, *_aux.currentSolution());
@@ -1960,7 +2059,7 @@ void
 FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
 {
   _nl.set_solution(soln);
-  computePostprocessors(EXEC_JACOBIAN);
+  computeUserObjects(EXEC_JACOBIAN);
 
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(soln, *_aux.currentSolution());
@@ -2214,44 +2313,44 @@ FEProblem::checkProblemIntegrity()
   // Check that BCs used in your simulation exist in your mesh
   _nl.checkBCCoverage();
 
-  checkPPSs();
+  checkUserObjects();
 }
 
 void
-FEProblem::checkPPSs()
+FEProblem::checkUserObjects()
 {
-  // Check pps block coverage
+  // Check user_objects block coverage
   std::set<SubdomainID> mesh_subdomains = _mesh.meshSubdomains();
-  std::set<SubdomainID> pps_blocks;
+  std::set<SubdomainID> user_objects_blocks;
 
-  // gather names of all postprocessors that were defined in the input file
+  // gather names of all user_objects that were defined in the input file
   // and the blocks that they are defined on
   std::set<std::string> names;
   ExecFlagType types[] = { EXEC_INITIAL, EXEC_RESIDUAL, EXEC_JACOBIAN, EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN };
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
   {
-    for (std::vector<Postprocessor *>::const_iterator it = _pps(types[i])[0].all().begin(); it != _pps(types[i])[0].all().end(); ++it)
-      names.insert((*it)->PPName());
+    for (std::vector<UserObject *>::const_iterator it = _user_objects(types[i])[0].all().begin(); it != _user_objects(types[i])[0].all().end(); ++it)
+      names.insert((*it)->name());
 
-    pps_blocks.insert(_pps(types[i])[0].blocks().begin(), _pps(types[i])[0].blocks().end());
+    user_objects_blocks.insert(_user_objects(types[i])[0].blocks().begin(), _user_objects(types[i])[0].blocks().end());
   }
 
   // See if all referenced blocks are covered
   mesh_subdomains.insert(Moose::ANY_BLOCK_ID);
   std::set<SubdomainID> difference;
-  std::set_difference(pps_blocks.begin(), pps_blocks.end(), mesh_subdomains.begin(), mesh_subdomains.end(),
+  std::set_difference(user_objects_blocks.begin(), user_objects_blocks.end(), mesh_subdomains.begin(), mesh_subdomains.end(),
                       std::inserter(difference, difference.end()));
 
   if (!difference.empty())
   {
     std::ostringstream oss;
-    oss << "One or more Postprocessors is referencing a nonexistent block:\n";
+    oss << "One or more UserObjects is referencing a nonexistent block:\n";
     for (std::set<SubdomainID>::iterator i = difference.begin(); i != difference.end();  ++i)
       oss << *i << "\n";
     mooseError(oss.str());
   }
 
-  // check that all requested PPS were defined in the input file
+  // check that all requested UserObjects were defined in the input file
   for (std::map<std::string, PostprocessorValue>::const_iterator it = _pps_data[0].values().begin(); it != _pps_data[0].values().end(); ++it)
   {
     if (names.find(it->first) == names.end())

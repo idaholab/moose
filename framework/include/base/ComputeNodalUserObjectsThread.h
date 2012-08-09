@@ -12,29 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SIDEPOSTPROCESSOR_H
-#define SIDEPOSTPROCESSOR_H
+#ifndef COMPUTENODALUserObjectsTHREAD_H
+#define COMPUTENODALUserObjectsTHREAD_H
 
-#include "SideUserObject.h"
-#include "Postprocessor.h"
+#include "ParallelUniqueId.h"
+#include "UserObjectWarehouse.h"
+// libMesh includes
+#include "node_range.h"
 
-//Forward Declarations
-class SidePostprocessor;
+class Problem;
+class SubProblem;
 
-template<>
-InputParameters validParams<SidePostprocessor>();
-
-class SidePostprocessor :
-  public SideUserObject,
-  public Postprocessor
+class ComputeNodalUserObjectsThread
 {
 public:
-  SidePostprocessor(const std::string & name, InputParameters parameters);
+  ComputeNodalUserObjectsThread(SubProblem & problem, std::vector<UserObjectWarehouse> & user_objects);
+  // Splitting Constructor
+  ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split split);
 
-  /**
-   * Called before deleting the object. Free memory allocated by your derived classes, etc.
-   */
-  virtual void destroy(){}
+  void operator() (const ConstNodeRange & range);
+
+  void join(const ComputeNodalUserObjectsThread & /*y*/);
+
+protected:
+  SubProblem & _sub_problem;
+  THREAD_ID _tid;
+
+  std::vector<UserObjectWarehouse> & _user_objects;
 };
 
-#endif
+#endif //COMPUTENODALUserObjectsTHREAD_H

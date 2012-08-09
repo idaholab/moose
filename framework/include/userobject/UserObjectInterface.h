@@ -63,7 +63,7 @@ template<class T>
 const T &
 UserObjectInterface::getUserObject(const std::string & name)
 {
-  return _uoi_feproblem.getUserObject<T>(_uoi_params.get<UserObjectName>(name), _uoi_tid);
+  return _uoi_feproblem.getUserObject<T>(_uoi_params.get<UserObjectName>(name));
 }
 
 template<class T>

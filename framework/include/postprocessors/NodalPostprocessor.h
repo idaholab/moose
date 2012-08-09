@@ -37,13 +37,6 @@ public:
    * Called before deleting the object. Free memory allocated by your derived classes, etc.
    */
   virtual void destroy(){}
-
-  /**
-   * Must override.
-   *
-   * @param uo The UserObject to be joined into _this_ object.  Take the data from the uo object and "add" it into the data for this object.
-   */
-  virtual void threadJoin(const Postprocessor & y) = 0;
 };
 
 #endif

@@ -37,7 +37,7 @@ public:
    */
   virtual Real getValue();
 
-  void threadJoin(const Postprocessor & y);
+  void threadJoin(const UserObject & y);
 
 protected:
   Real _avg;

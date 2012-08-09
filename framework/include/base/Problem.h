@@ -21,7 +21,6 @@
 #include "ExecStore.h"
 #include "MooseMesh.h"
 #include "MooseArray.h"
-#include "UserObjectWarehouse.h"
 
 // libMesh
 #include "libmesh_common.h"

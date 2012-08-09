@@ -15,17 +15,14 @@
 #include "Postprocessor.h"
 #include "SubProblem.h"
 #include "Conversion.h"
+#include "UserObject.h"
 
 // libMesh includes
 
 template<>
 InputParameters validParams<Postprocessor>()
 {
-  MooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "timestep";  // set the default
-
-  InputParameters params = validParams<MooseObject>();
-  params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|timestep|timestep_begin) to execute only at that moment");
+  InputParameters params = validParams<UserObject>();
 
   params.addParam<std::string>("output", "both", "The values are: none, screen, file, both (no output, output to screen only, output to files only, output both to screen and files)");
   params.addPrivateParam<std::string>("built_by_action", "add_postprocessor");

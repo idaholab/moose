@@ -63,7 +63,7 @@ NodalProxyMaxValue::getValue()
 }
 
 void
-NodalProxyMaxValue::threadJoin(const Postprocessor & y)
+NodalProxyMaxValue::threadJoin(const UserObject & y)
 {
   const NodalProxyMaxValue & pps = static_cast<const NodalProxyMaxValue &>(y);
   if (pps._value > _value)
