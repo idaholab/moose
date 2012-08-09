@@ -13,7 +13,8 @@ test_nodal_var_1 = { INPUT : 'nodal_part1.i',
 
 test_nodal_var_2 = { INPUT : 'nodal_var_restart.i',
                      EXODIFF : ['out_nodal_var_restart.e'],
-                     PREREQ : ['test_nodal_var_1'] }
+                     PREREQ : ['test_nodal_var_1'],
+                     MAX_PARALLEL : 1}
 
 
 test_xda_restart_part_1 = { INPUT : 'xda_restart_part1.i',
