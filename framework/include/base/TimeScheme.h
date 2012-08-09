@@ -37,14 +37,22 @@ class TimeScheme
   {
   public:
 
-    TimeStep(Real & time, int t_step, NonlinearSystem * nl ) :
+    TimeStep(Real & time, int t_step, NonlinearSystem * nl, std::vector<NumericVector<Number> *> workvecs) :
     _nl(nl),
     _time(time),
     _t_step(t_step),
-    _solution(&_nl->_sys.add_vector(Moose::stringify(time), true, GHOSTED)),
-    _time_derivitive(&_nl->_sys.add_vector(Moose::stringify(time)+"dt", false, GHOSTED)),
     _dt(0.0)
     {
+      if (workvecs.empty()) _solution = &_nl->_sys.add_vector(Moose::stringify(time), true, GHOSTED);
+      else {
+        _solution = workvecs.back();
+        workvecs.pop_back();
+      }
+      if (workvecs.empty()) _time_derivitive = &_nl->_sys.add_vector(Moose::stringify(time)+"dt", false, GHOSTED);
+      else {
+        _time_derivitive = workvecs.back();
+        workvecs.pop_back();
+      }
     }
     TimeStep(NonlinearSystem * nl ) :
     _nl(nl),
@@ -229,14 +237,19 @@ protected:
 
   ///deque might be better to use than vector, forgetting the bottom of the stack to minimize memory usage might
   ///be good. Removing the bottom is not in the code currently.
-  std::deque<TimeStep> & _time_stack;
+  std::deque<TimeStep> _time_stack;
+
+  std::vector<NumericVector<Number> *> _workvecs;
+
+  // moves vectors contained in TimeStep into _workvecs, libMesh::System manages backing memory
+  void reclaimTimeStep(TimeStep &timestep);
 
   ///Currently set to true, this is for AB2 in case one wishes to estimate the pridictor but not take the step.
   bool _apply_predictor;
 
   ///default to false, used to determine if AB2 predictor should be used
   bool _use_AB2;
-  TimeStep & _dt2_check;
+  TimeStep *_dt2_check;
   bool _dt2_bool;
   int _time_stack_size;
   friend class NonlinearSystem;

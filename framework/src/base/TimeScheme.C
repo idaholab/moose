@@ -53,18 +53,27 @@ _dt_old( c->_dt_old),
 _time_weight( c->_time_weight),
 _time_stepping_scheme( c->_time_stepping_scheme),
 _t_step(c->_t_step),
-_time_stack(*new std::deque<TimeStep>() ),
+_time_stack(std::deque<TimeStep>()),
+_workvecs(std::vector<NumericVector<Number> *>()),
 _apply_predictor(true),
 _use_AB2(false),
-_dt2_check(*new TimeStep( _nl)),
+_dt2_check(NULL),
 _dt2_bool(false)
 {
-  _time_stack.push_back(TimeStep(_nl->_t, _t_step, _nl));
+  _time_stack.push_back(TimeStep(_nl->_t, _t_step, _nl, _workvecs));
   _time_stack.back().setDt(_dt);
 
 }
 
 TimeScheme::~TimeScheme(){
+  delete _dt2_check;
+}
+
+void TimeScheme::reclaimTimeStep(TimeStep &timestep)
+{
+  // time derivative first because it is not zeroed
+  _workvecs.push_back(&timestep.getTimeDerivitive());
+  _workvecs.push_back(&timestep.getSolution());
 }
 
 void
@@ -73,9 +82,12 @@ TimeScheme::onTimestepBegin()
   if(_dt2_bool)
   {
     //fix stack if DT2Transient
-    _time_stack.pop_back();
-    _time_stack.pop_back();
-    _time_stack.push_back(_dt2_check);
+    for (int i=0; i<2; i++)
+    { // reject last two short steps
+      reclaimTimeStep(_time_stack.back());
+      _time_stack.pop_back();
+    }
+    _time_stack.push_back(*_dt2_check);
     _dt2_bool = false;
   }
   _time_stepping_scheme = _nl->_time_stepping_scheme;
@@ -87,7 +99,12 @@ TimeScheme::onTimestepBegin()
     if(_dt != _dt_old)
     {
      //Solve Fail
-      _dt2_check = *new TimeStep(_time_stack.back());
+      if (_dt2_check)
+      {
+        reclaimTimeStep(*_dt2_check);
+        delete _dt2_check;
+      }
+      _dt2_check = new TimeStep(_time_stack.back());
       _time_stack.pop_back();
     }
     else
@@ -101,6 +118,7 @@ TimeScheme::onTimestepBegin()
     //This 4 should be tied to the order of the time scheme.
     if(_time_stack.size()>4)
     {
+      reclaimTimeStep(_time_stack.front());
       _time_stack.pop_front();
     }
   }
@@ -113,7 +131,7 @@ TimeScheme::onTimestepBegin()
     _nl->_solution_older = _time_stack[_time_stack.size()-2].getSolution();
   }
   ///push back the current time step
-  _time_stack.push_back(TimeStep(_nl->_t, _t_step, _nl));
+  _time_stack.push_back(TimeStep(_nl->_t, _t_step, _nl, _workvecs));
   _time_stack.back().setDt(_dt);
   Real sum;
   if(_t_step > 1)
