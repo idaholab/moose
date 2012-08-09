@@ -32,6 +32,7 @@
 #include "UserObjectKernel.h"
 #include "DiffusionPrecompute.h"
 #include "ConvectionPrecompute.h"
+#include "CoupledKernelGradTest.h"
 #include "CoupledKernelValueTest.h"
 
 #include "CoupledAux.h"
@@ -66,6 +67,7 @@
 #include "EnhancedDGMatDiffusion.h"
 #include "DGMDDBC.h"
 #include "DGFunctionConvectionDirichletBC.h"
+#include "CoupledKernelGradBC.h"
 #include "PenaltyDirichletBC.h"
 #include "FunctionPenaltyDirichletBC.h"
 
@@ -140,6 +142,7 @@ MooseTestApp::registerObjects()
   registerKernel(UserObjectKernel);
   registerKernel(DiffusionPrecompute);
   registerKernel(ConvectionPrecompute);
+  registerKernel(CoupledKernelGradTest);
   registerKernel(CoupledKernelValueTest);
 
   // Aux kernels
@@ -167,6 +170,8 @@ MooseTestApp::registerObjects()
   registerBoundaryCondition(DGFunctionConvectionDirichletBC);
   registerBoundaryCondition(PenaltyDirichletBC);
   registerBoundaryCondition(FunctionPenaltyDirichletBC);
+
+  registerBoundaryCondition(CoupledKernelGradBC);
 
   // Initial conditions
   registerInitialCondition(TEIC);
