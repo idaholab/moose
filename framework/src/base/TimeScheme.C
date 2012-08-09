@@ -129,8 +129,8 @@ TimeScheme::onTimestepBegin()
   }
   _dt_old = _time_stack.back().getDt();
   ///Set solution to right values
-  _nl->_solution = _time_stack.back().getSolution();
-  _nl->_solution_old = _time_stack.back().getSolution();
+  _nl->_solution.localize( _time_stack.back().getSolution());
+  _nl->_solution_old.localize(_time_stack.back().getSolution());
   if(_t_step>1)
   {
     _nl->_solution_older = _time_stack[_time_stack.size()-2].getSolution();
@@ -268,21 +268,20 @@ TimeScheme::applyPredictor(NumericVector<Number> & initial_solution)
     }
     return;
   }
+  std::cout<<_dt_old<<std::endl;
   if (_dt_old > 0)
   {
     std::streamsize cur_precision(std::cout.precision());
     std::cout << "  Applying predictor with scale factor = "<<std::fixed<<std::setprecision(2)<<_nl->_predictor_scale<<"\n";
     std::cout << std::scientific << std::setprecision(cur_precision);
-    Real dt_adjusted_scale_factor = _nl->_predictor_scale * _dt / _dt_old;
+    Real dt_adjusted_scale_factor = _nl->_predictor_scale *_dt/_dt_old;
     NumericVector<Number> & previous_solution = _trash1;
-    previous_solution.localize(_time_stack[_time_stack.size()-2].getSolution());
-
+    _time_stack[_time_stack.size()-3].getSolution().localize(previous_solution);
     if (dt_adjusted_scale_factor != 0.0)
     {
       initial_solution *= (1.0 + dt_adjusted_scale_factor);
       previous_solution *= dt_adjusted_scale_factor;
       initial_solution -= previous_solution;
-
     }
   }
 }
