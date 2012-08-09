@@ -314,7 +314,7 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, PetscBool * changed_y, PetscBool * /*changed_w*/)
 #else
 // PETSc 3.3.0+
-PetscErrorCode dampedCheck(SNESLineSearch /* linesearch */, Vec /*x*/, Vec w, Vec y, PetscBool * /*changed_w*/, PetscBool * changed_y, void *lsctx)
+  PetscErrorCode dampedCheck(SNESLineSearch /* linesearch */, Vec /*x*/, Vec y, Vec w, PetscBool * changed_y, PetscBool * /*changed_w*/, void *lsctx)
 #endif
 {
 //   From SNESLineSearchSetPostCheck docs:
@@ -323,9 +323,9 @@ PetscErrorCode dampedCheck(SNESLineSearch /* linesearch */, Vec /*x*/, Vec w, Ve
 // .  w - new solution vector
 // .  changed_y - indicates that the line search changed y
 // .  changed_w - indicates that the line search changed w
-  //w = updated solution = x- scaling*y
+  //w = updated solution = x - scaling*y
   //x = current solution
-  //y = updates.
+  //y = update.
 
   int ierr = 0;
   Real damping = 1.0;
