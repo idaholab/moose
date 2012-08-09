@@ -60,8 +60,6 @@ _use_AB2(false),
 _dt2_check(NULL),
 _dt2_bool(false)
 {
-  _time_stack.push_back(TimeStep(_nl->_t, _t_step, _nl, _workvecs));
-  _time_stack.back().setDt(_dt);
 
 }
 
@@ -79,6 +77,12 @@ void TimeScheme::reclaimTimeStep(TimeStep &timestep)
 void
 TimeScheme::onTimestepBegin()
 {
+  if (_time_stack.empty())
+  {
+    _time_stack.push_back(TimeStep(_nl->_t, 0, _nl, _workvecs));
+    _time_stack.back().setDt(_dt_old);
+  }
+
   if(_dt2_bool)
   {
     //fix stack if DT2Transient
@@ -88,6 +92,7 @@ TimeScheme::onTimestepBegin()
       _time_stack.pop_back();
     }
     _time_stack.push_back(*_dt2_check);
+    _dt2_check = NULL;
     _dt2_bool = false;
   }
   _time_stepping_scheme = _nl->_time_stepping_scheme;

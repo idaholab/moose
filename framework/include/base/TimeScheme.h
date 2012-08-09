@@ -37,7 +37,7 @@ class TimeScheme
   {
   public:
 
-    TimeStep(Real & time, int t_step, NonlinearSystem * nl, std::vector<NumericVector<Number> *> workvecs) :
+    TimeStep(Real time, int t_step, NonlinearSystem * nl, std::vector<NumericVector<Number> *> workvecs) :
     _nl(nl),
     _time(time),
     _t_step(t_step),
