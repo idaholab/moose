@@ -47,8 +47,6 @@ ComputeResidualThread::onElement(const Elem *elem)
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
 
-  std::cout << "Hello from " << _tid << "\n";
-
   unsigned int subdomain = elem->subdomain_id();
   if (subdomain != _subdomain)
   {
