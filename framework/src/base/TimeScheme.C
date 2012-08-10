@@ -388,13 +388,3 @@ TimeScheme::computeTimeDerivatives()
   _solution_u_dot.close();
   _solution_du_dot_du.close();
 }
-ot_du = _time_weight[0]/_dt;
-    }
-    break;
-
-  default:
-    break;
-  }
-  _solution_u_dot.close();
-  _solution_du_dot_du.close();
-}
