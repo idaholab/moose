@@ -12,27 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ANALYTICALINDICATOR_H
-#define ANALYTICALINDICATOR_H
+#ifndef COMPUTEMARKERTHREAD_H
+#define COMPUTEMARKERTHREAD_H
 
-#include "ElementIntegralIndicator.h"
+#include "ThreadedElementLoop.h"
 
-class AnalyticalIndicator;
+// libMesh includes
+#include "elem_range.h"
 
-template<>
-InputParameters validParams<AnalyticalIndicator>();
+class AuxiliarySystem;
 
-class AnalyticalIndicator :
-  public ElementIntegralIndicator
+class ComputeMarkerThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  AnalyticalIndicator(const std::string & name, InputParameters parameters);
-  virtual ~AnalyticalIndicator(){};
+  ComputeMarkerThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<MarkerWarehouse> & marker_whs);
+
+  // Splitting Constructor
+  ComputeMarkerThread(ComputeMarkerThread & x, Threads::split split);
+
+  virtual void onElement(const Elem *elem);
+  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
+  virtual void onInternalSide(const Elem *elem, unsigned int side);
+  virtual void postElement(const Elem * /*elem*/);
+
+  void join(const ComputeMarkerThread & /*y*/);
 
 protected:
-  virtual Real computeQpIntegral();
-
-  Function & _func;
+  FEProblem & _fe_problem;
+  AuxiliarySystem & _aux_sys;
+  std::vector<MarkerWarehouse> & _marker_whs;
 };
 
-#endif /* ANALYTICALINDICATOR_H */
+#endif //COMPUTEMARKERTHREAD_H

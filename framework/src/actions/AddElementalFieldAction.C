@@ -12,29 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AddIndicatorVariableAction.h"
+#include "AddElementalFieldAction.h"
 #include "FEProblem.h"
 
 // libmesh includes
 #include "fe.h"
 
 template<>
-InputParameters validParams<AddIndicatorVariableAction>()
+InputParameters validParams<AddElementalFieldAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<std::vector<SubdomainName> >("block", "The block id where this variable lives");
-  params.addRequiredParam<std::string>("variable", "The name of the indicator field");
-  params.addRequiredParam<VariableName>("field_name", "The name of the indicator field");
+  params.addRequiredParam<FieldName>("field_name", "The name of the indicator field");
   return params;
 }
 
-AddIndicatorVariableAction::AddIndicatorVariableAction(const std::string & name, InputParameters params) :
+AddElementalFieldAction::AddElementalFieldAction(const std::string & name, InputParameters params) :
     Action(name, params)
 {
 }
 
 void
-AddIndicatorVariableAction::act()
+AddElementalFieldAction::act()
 {
   std::set<SubdomainID> blocks;
   std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName> >("block");
@@ -46,7 +45,7 @@ AddIndicatorVariableAction::act()
 
   FEType fe_type(CONSTANT, MONOMIAL);
 
-  std::string variable = getParam<VariableName>("field_name");
+  std::string variable = getParam<FieldName>("field_name");
 
   if (blocks.empty())
     _problem->addAuxVariable(variable, fe_type);

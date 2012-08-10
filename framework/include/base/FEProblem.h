@@ -30,6 +30,7 @@
 #include "Adaptivity.h"
 #include "Resurrector.h"
 #include "IndicatorWarehouse.h"
+#include "MarkerWarehouse.h"
 
 class DisplacedProblem;
 class OutputProblem;
@@ -281,6 +282,10 @@ public:
   // Indicators /////
   void addIndicator(std::string indicator_name, const std::string & name, InputParameters parameters);
 
+  // Markers //////
+  void addMarker(std::string marker_name, const std::string & name, InputParameters parameters);
+
+
   ////
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual);
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);
@@ -289,6 +294,7 @@ public:
   virtual void computeBounds(NonlinearImplicitSystem & sys, NumericVector<Number> & lower, NumericVector<Number> & upper);
 
   virtual void computeIndicators();
+  virtual void computeAndApplyMarkers();
 
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
@@ -418,8 +424,11 @@ protected:
   // materials
   std::vector<MaterialWarehouse> _materials;
 
-  /// functions
+  // indicators
   std::vector<IndicatorWarehouse> _indicators;
+
+  // markers
+  std::vector<MarkerWarehouse> _markers;
 
   // postprocessors
   std::vector<PostprocessorData> _pps_data;

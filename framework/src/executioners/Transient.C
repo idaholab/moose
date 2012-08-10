@@ -178,6 +178,9 @@ Transient::takeStep(Real input_dt)
   // Compute the Error Indicators
   _problem.computeIndicators();
 
+  // Compute and apply the refinement Markers
+  _problem.computeAndApplyMarkers();
+
   // Compute TimestepBegin Postprocessors
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN);
 

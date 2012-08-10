@@ -12,27 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ANALYTICALINDICATOR_H
-#define ANALYTICALINDICATOR_H
-
-#include "ElementIntegralIndicator.h"
-
-class AnalyticalIndicator;
+#include "AddMarkerAction.h"
+#include "FEProblem.h"
 
 template<>
-InputParameters validParams<AnalyticalIndicator>();
-
-class AnalyticalIndicator :
-  public ElementIntegralIndicator
+InputParameters validParams<AddMarkerAction>()
 {
-public:
-  AnalyticalIndicator(const std::string & name, InputParameters parameters);
-  virtual ~AnalyticalIndicator(){};
+  return validParams<MooseObjectAction>();
+}
 
-protected:
-  virtual Real computeQpIntegral();
+AddMarkerAction::AddMarkerAction(const std::string & name, InputParameters params) :
+    MooseObjectAction(name, params)
+{
+}
 
-  Function & _func;
-};
-
-#endif /* ANALYTICALINDICATOR_H */
+void
+AddMarkerAction::act()
+{
+    _problem->addMarker(_type, getShortName(), _moose_object_pars);
+}

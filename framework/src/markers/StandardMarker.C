@@ -12,27 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ANALYTICALINDICATOR_H
-#define ANALYTICALINDICATOR_H
-
-#include "ElementIntegralIndicator.h"
-
-class AnalyticalIndicator;
+#include "StandardMarker.h"
 
 template<>
-InputParameters validParams<AnalyticalIndicator>();
-
-class AnalyticalIndicator :
-  public ElementIntegralIndicator
+InputParameters validParams<StandardMarker>()
 {
-public:
-  AnalyticalIndicator(const std::string & name, InputParameters parameters);
-  virtual ~AnalyticalIndicator(){};
+  InputParameters params = validParams<Marker>();
+  return params;
+}
 
-protected:
-  virtual Real computeQpIntegral();
 
-  Function & _func;
-};
+StandardMarker::StandardMarker(const std::string & name, InputParameters parameters) :
+    Marker(name, parameters)
+{
+}
 
-#endif /* ANALYTICALINDICATOR_H */
+int
+StandardMarker::computeElementMarker()
+{
+  return -1;
+}
+

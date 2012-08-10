@@ -16,23 +16,61 @@
 #define MARKER_H
 
 #include "MooseObject.h"
+#include "MooseVariableInterface.h"
+#include "InputParameters.h"
+#include "SetupInterface.h"
 
+// libmesh Includes
+#include "threads.h"
+
+class MooseMesh;
+class Problem;
+class SubProblem;
+class SystemBase;
+class Assembly;
+class MooseVariable;
 class Marker;
 
 template<>
 InputParameters validParams<Marker>();
 
 class Marker :
-  public MooseObject
+  public MooseObject,
+  public SetupInterface,
+  public MooseVariableInterface
 {
 public:
   Marker(const std::string & name, InputParameters parameters);
-  virtual ~Marker(){};
+  virtual ~Marker(){}
 
-  virtual Real creatEV();
+  /**
+   * Create an Error Vector from the Marker field
+   * TODO: Fix this return type
+   */
+  void getErrorVector() {}
+
+  virtual void computeMarker();
+
+  // TODO: Fixme
+  const bool isActive() { return true; }
+
+  virtual void markerSetup() {}
 
 protected:
 
+  virtual int computeElementMarker() = 0;
+
+  SubProblem & _subproblem;
+  FEProblem & _fe_problem;
+  SystemBase & _sys;
+
+  THREAD_ID _tid;
+
+  Assembly & _assembly;
+
+  MooseVariable & _field_var;
+
+  MooseMesh & _mesh;
 };
 
 #endif /* MARKER_H */

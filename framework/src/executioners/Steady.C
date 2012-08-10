@@ -78,6 +78,7 @@ Steady::execute()
 
     _problem.computeUserObjects();
     _problem.computeIndicators();
+    _problem.computeAndApplyMarkers();
 
     _problem.output();
     _problem.outputPostprocessors();

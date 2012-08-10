@@ -80,4 +80,7 @@ DerivativeStringClass(FunctionName);
 /// This type is used for objects that expect "UserObject" names
 DerivativeStringClass(UserObjectName);
 
+/// This type is used for objects that expect an elemental field name (CONSTANT MONOMIAL)
+DerivativeStringClass(FieldName);
+
 #endif // FILENAME_H

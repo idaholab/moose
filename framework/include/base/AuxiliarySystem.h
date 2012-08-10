@@ -127,6 +127,7 @@ protected:
   friend class ComputeElemAuxVarsThread;
   friend class ComputeElemAuxBcsThread;
   friend class ComputeIndicatorThread;
+  friend class ComputeMarkerThread;
 };
 
 #endif /* EXPLICITSYSTEM_H */

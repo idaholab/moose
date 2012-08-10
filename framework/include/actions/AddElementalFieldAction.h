@@ -12,27 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ANALYTICALINDICATOR_H
-#define ANALYTICALINDICATOR_H
+#ifndef ADDELEMENTALFIELDACTION_H
+#define ADDELEMENTALFIELDACTION_H
 
-#include "ElementIntegralIndicator.h"
+#include "InputParameters.h"
+#include "Moose.h"
+#include "Action.h"
 
-class AnalyticalIndicator;
+#include <string>
+
+class AddElementalFieldAction;
 
 template<>
-InputParameters validParams<AnalyticalIndicator>();
+InputParameters validParams<AddElementalFieldAction>();
 
-class AnalyticalIndicator :
-  public ElementIntegralIndicator
+
+class AddElementalFieldAction : public Action
 {
 public:
-  AnalyticalIndicator(const std::string & name, InputParameters parameters);
-  virtual ~AnalyticalIndicator(){};
+  AddElementalFieldAction(const std::string & name, InputParameters params);
 
-protected:
-  virtual Real computeQpIntegral();
-
-  Function & _func;
+  virtual void act();
 };
 
-#endif /* ANALYTICALINDICATOR_H */
+#endif // ADDELEMENTALFIELDACTION_H

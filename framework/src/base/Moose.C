@@ -166,6 +166,9 @@
 #include "GradientJumpIndicator.h"
 #include "FluxJumpIndicator.h"
 
+// markers
+#include "StandardMarker.h"
+
 // Actions
 #include "AddMeshModifierAction.h"
 #include "AddBCAction.h"
@@ -205,8 +208,9 @@
 #include "InitDisplacedProblemAction.h"
 #include "SetupSubProblemAction.h"
 #include "AddUserObjectAction.h"
+#include "AddElementalFieldAction.h"
 #include "AddIndicatorAction.h"
-#include "AddIndicatorVariableAction.h"
+#include "AddMarkerAction.h"
 
 
 namespace Moose {
@@ -358,6 +362,9 @@ registerObjects()
   registerIndicator(GradientJumpIndicator);
   registerIndicator(FluxJumpIndicator);
 
+  // markers
+  registerMarker(StandardMarker);
+
   registered = true;
 }
 
@@ -414,8 +421,9 @@ addActionTypes(Syntax & syntax)
   registerActionName("add_constraint", false);
   registerActionName("add_user_object", false);
   registerActionName("add_bounds_vectors", false);
-  registerActionName("add_indicator_variable", false);
+  registerActionName("add_elemental_field_variable", false);
   registerActionName("add_indicator", false);
+  registerActionName("add_marker", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_mesh_complete", false);
@@ -446,7 +454,7 @@ addActionTypes(Syntax & syntax)
 "(setup_time_periods)"
 "(init_displaced_problem)"
 "(setup_subproblem)"
-"(add_aux_variable, add_variable add_indicator_variable"
+"(add_aux_variable, add_variable, add_elemental_field_variable"
 "(setup_variable_complete)"
 "(add_user_object)"
 "(add_function)"
@@ -465,7 +473,7 @@ addActionTypes(Syntax & syntax)
 "(add_material)"
 "(add_postprocessor)"
 "(setup_pps_complete)"
-"(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, setup_output)"
+"(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker, setup_output)"
 "(setup_oversampling)"
 "(check_integrity)"
 "(setup_debug)"
@@ -544,9 +552,9 @@ registerActions(Syntax & syntax)
   registerAction(DeprecatedBlockAction, "deprecated_block");
   registerAction(AddConstraintAction, "add_constraint");
   registerAction(AddUserObjectAction, "add_user_object");
-  registerAction(AddIndicatorVariableAction, "add_indicator_variable");
+  registerAction(AddElementalFieldAction, "add_elemental_field_variable");
   registerAction(AddIndicatorAction, "add_indicator");
-
+  registerAction(AddMarkerAction, "add_marker");
 
 #ifdef LIBMESH_ENABLE_AMR
   registerAction(AdaptivityAction, "setup_adaptivity");

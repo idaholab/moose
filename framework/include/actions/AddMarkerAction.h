@@ -12,27 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADDINDICATORVARIABLEACTION_H
-#define ADDINDICATORVARIABLEACTION_H
+#ifndef ADDMARKERACTION_H
+#define ADDMARKERACTION_H
 
 #include "InputParameters.h"
 #include "Moose.h"
-#include "Action.h"
+#include "MooseObjectAction.h"
 
 #include <string>
 
-class AddIndicatorVariableAction;
+class AddMarkerAction;
 
 template<>
-InputParameters validParams<AddIndicatorVariableAction>();
+InputParameters validParams<AddMarkerAction>();
 
 
-class AddIndicatorVariableAction : public Action
+class AddMarkerAction : public MooseObjectAction
 {
 public:
-  AddIndicatorVariableAction(const std::string & name, InputParameters params);
+  AddMarkerAction(const std::string & name, InputParameters params);
 
   virtual void act();
+
+private:
+
 };
 
-#endif // ADDINDICATORVARIABLEACTION_H
+#endif // ADDMARKERACTION_H

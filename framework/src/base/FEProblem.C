@@ -23,6 +23,7 @@
 #include "ComputeNodalUserObjectsThread.h"
 #include "ComputeMaterialsObjectThread.h"
 #include "ComputeIndicatorThread.h"
+#include "ComputeMarkerThread.h"
 #include "ActionWarehouse.h"
 #include "Conversion.h"
 #include "Moose.h"
@@ -39,6 +40,7 @@
 #include "SidePostprocessor.h"
 #include "GeneralPostprocessor.h"
 #include "Indicator.h"
+#include "Marker.h"
 
 #include "ElementUserObject.h"
 #include "NodalUserObject.h"
@@ -138,6 +140,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   _objects_by_name.resize(n_threads);
 
   _indicators.resize(n_threads);
+  _markers.resize(n_threads);
 
   _resurrector = new Resurrector(*this);
 
@@ -1526,6 +1529,25 @@ FEProblem::computeIndicators()
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
 }
 
+void
+FEProblem::computeAndApplyMarkers()
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    ComputeMarkerThread cmt(*this, getAuxiliarySystem(), _markers);
+    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cmt);
+  }
+
+  MeshBase::const_element_iterator it = _mesh.active_local_elements_begin();
+  MeshBase::const_element_iterator it_end = _mesh.active_local_elements_end();
+
+  for (; it != it_end; ++it)
+  {
+    const Elem *elem = *it;
+    //TODO: Mark flags - perhaps in Adaptivty?
+    //   elem->set_refinement_flag(RefinementState::DO_NOTHING);
+  }
+}
 
 void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps)
 {
@@ -1891,7 +1913,6 @@ FEProblem::addIndicator(std::string indicator_name, const std::string & name, In
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _material_data[tid];
 
-    parameters.print();
     Indicator *indicator = static_cast<Indicator *>(Factory::instance()->create(indicator_name, name, parameters) );
     mooseAssert(indicator != NULL, "Not a Indicator object");
 
@@ -1916,6 +1937,58 @@ FEProblem::addIndicator(std::string indicator_name, const std::string & name, In
     _indicators[tid].addIndicator(indicator, block_ids);
 
     _objects_by_name[tid][name].push_back(indicator);
+  }
+}
+
+void
+FEProblem::addMarker(std::string marker_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<FEProblem *>("_fe_problem") = this;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    _reinit_displaced_elem = true;
+  }
+  else
+  {
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = &_aux;
+  }
+
+//    std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
+//    std::vector<SubdomainID> block_ids(blocks.size());
+
+//  this->addAuxVariable(parameters.get<std::string>("field_name"), FEType(CONSTANT, MONOMIAL) );
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+
+    Marker *marker = static_cast<Marker *>(Factory::instance()->create(marker_name, name, parameters) );
+    mooseAssert(marker != NULL, "Not a Marker object");
+
+
+    /*    std::set<SubdomainID> blk_ids;
+          if (!parameters.isParamValid("block"))
+          blk_ids = _var_map[indicator->variable().number()];
+          else
+          {
+          std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
+          for (unsigned int i=0; i<blocks.size(); ++i)
+          {
+          SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
+
+          if (_var_map[indicator->variable().number()].count(blk_id) > 0 || _var_map[indicator->variable().number()].size() == 0)
+          blk_ids.insert(blk_id);
+          else
+          mooseError("indicator (" + indicator->name() + "): block outside of the domain of the variable");
+          }
+          }*/
+    std::vector<SubdomainID> block_ids;
+    _markers[tid].addMarker(marker, block_ids);
+
+    _objects_by_name[tid][name].push_back(marker);
   }
 }
 
