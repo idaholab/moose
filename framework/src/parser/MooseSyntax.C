@@ -129,11 +129,11 @@ void associateSyntax(Syntax & syntax)
   syntax.registerActionSyntax("EmptyAction", "SubProblems");
 
   // Indicator
-  syntax.registerActionSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*", "add_indicator");
+  syntax.registerActionSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");
   syntax.registerActionSyntax("AddIndicatorAction", "Adaptivity/Indicators/*");
 
   // Marker
-  syntax.registerActionSyntax("AddElementalFieldAction", "Adaptivity/Markers/*", "add_marker");
+  syntax.registerActionSyntax("AddElementalFieldAction", "Adaptivity/Markers/*");
   syntax.registerActionSyntax("AddMarkerAction", "Adaptivity/Markers/*");
 
   addActionTypes(syntax);
