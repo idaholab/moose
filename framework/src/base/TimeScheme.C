@@ -79,7 +79,7 @@ TimeScheme::onTimestepBegin()
 {
   if (_time_stack.empty())
   {
-    _time_stack.push_back(TimeStep(_nl->_t, 0, _nl, _workvecs));
+    _time_stack.push_back(TimeStep((_nl->_t - _dt), 0, _nl, _workvecs));
     _time_stack.back().setDt(_dt_old);
   }
 
@@ -164,19 +164,20 @@ TimeScheme::onTimestepBegin()
 
 }
 
-/*void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
+void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
 {
   if(_dt ==0 || _dt_old == 0 || _t_step<3){
     return;
   }
   initial_solution.localize(_predicted_solution);
-  NumericVector<Number> & my_old_solution_u_dot = *NumericVector<Number>::build().release(); //change to trash1
-  my_old_solution_u_dot.init(_nl->_sys.n_dofs(), false, SERIAL);
-  my_old_solution_u_dot = _time_stack[_time_stack.size()-2].getTimeDerivitive();
+  NumericVector<Number> & my_old_solution_u_dot = _trash1; //change to trash1
+  _time_stack[_time_stack.size()-3].getTimeDerivitive().localize(my_old_solution_u_dot);
   my_old_solution_u_dot *= -1.0;
-  my_old_solution_u_dot += _time_stack[_time_stack.size()-3].getTimeDerivitive();
+  my_old_solution_u_dot += _time_stack[_time_stack.size()-2].getTimeDerivitive();
   my_old_solution_u_dot *= (.5*_dt*_dt)/ _time_stack[_time_stack.size()-2].getDt();
-  _old_solution_u_dot *= _dt; change to trash2 and _time_stack[_time_stack.size()-1].getTimeDerivitive();
+  NumericVector<Number> & _old_solution_u_dot = _trash2;
+  _time_stack[_time_stack.size()-2].getTimeDerivitive().localize(_old_solution_u_dot);
+  _old_solution_u_dot *= _dt;
   _predicted_solution += my_old_solution_u_dot;
   _predicted_solution += _old_solution_u_dot;
   if(_apply_predictor)
@@ -185,12 +186,9 @@ TimeScheme::onTimestepBegin()
     _old_solution_u_dot *= _nl->_predictor_scale;
     initial_solution += my_old_solution_u_dot;
     initial_solution += _old_solution_u_dot;
-    _old_solution_u_dot *= 1/_nl->_predictor_scale;
   }
-  _old_solution_u_dot *= 1/_dt;
-  delete & my_old_solution_u_dot;
-}*/
-void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
+}
+/*void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
 {
 
   NumericVector<Number> & residual_older = _trash1;
@@ -206,7 +204,7 @@ void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
   initial_solution +=  (residual_old);
   initial_solution -= residual_older;
   initial_solution.localize(_predicted_solution);
-}
+}*/
 
 Real
 TimeScheme::estimateTimeError(NumericVector<Number> & solution)
@@ -381,6 +379,16 @@ TimeScheme::computeTimeDerivatives()
       _solution_u_dot.add(_time_weight[2], _time_stack[_time_stack.size()-3].getSolution()); //_time_stack[_time_stack.size()-2].getSolution());
       _solution_u_dot.scale(1./_dt);
       _solution_du_dot_du = _time_weight[0]/_dt;
+    }
+    break;
+
+  default:
+    break;
+  }
+  _solution_u_dot.close();
+  _solution_du_dot_du.close();
+}
+ot_du = _time_weight[0]/_dt;
     }
     break;
 
