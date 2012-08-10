@@ -32,15 +32,13 @@ ElementIntegralIndicator::computeIndicator()
 {
   Real sum = 0;
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    sum += _JxW[_qp]*_coord[_qp]*computeQpIndicator();
-
-  std::cout << "Sum: " << sum << std::endl;
+    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
 
   _field_var.setNodalValue(sum);   // update variable data, which is referenced by other kernels, so the value is up-to-date
 }
 
 Real
-ElementIntegralIndicator::computeQpIndicator()
+ElementIntegralIndicator::computeQpIntegral()
 {
   return _u[_qp];
 }

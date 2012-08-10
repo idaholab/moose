@@ -18,18 +18,21 @@ template<>
 InputParameters validParams<AnalyticalIndicator>()
 {
   InputParameters params = validParams<ElementIntegralIndicator>();
+  params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   return params;
 }
 
 
 AnalyticalIndicator::AnalyticalIndicator(const std::string & name, InputParameters parameters) :
-    ElementIntegralIndicator(name, parameters)
+    ElementIntegralIndicator(name, parameters),
+    _func(getFunction("function"))
 {
 }
 
 Real
-AnalyticalIndicator::computeQpIndicator()
+AnalyticalIndicator::computeQpIntegral()
 {
-  return 1;
+  Real diff = _u[_qp]-_func.value(_t, _q_point[_qp]);
+  return diff*diff;
 }
 

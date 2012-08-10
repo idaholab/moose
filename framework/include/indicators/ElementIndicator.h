@@ -56,6 +56,9 @@ protected:
     const MooseArray<Real> & _JxW;
     const MooseArray<Real> & _coord;
 
+    MooseVariable & _var;
+
+
     /// Holds the solution at current quadrature points
     VariableValue & _u;
     /// Holds the solution gradient at the current quadrature points

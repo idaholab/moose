@@ -30,8 +30,9 @@ public:
   virtual ~AnalyticalIndicator(){};
 
 protected:
+  virtual Real computeQpIntegral();
 
-  virtual Real computeQpIndicator();
+  Function & _func;
 };
 
 #endif /* ANATICALINDICATOR_H */

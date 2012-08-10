@@ -28,6 +28,7 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
+#include "Function.h"
 
 
 class MooseMesh;

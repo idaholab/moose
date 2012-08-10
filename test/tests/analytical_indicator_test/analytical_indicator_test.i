@@ -1,54 +1,58 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 2
-  ny = 2
-  nz = 0
-  zmin = 0
-  zmax = 0
-  elem_type = QUAD4
+  nx = 10
+  ny = 10
+  nz = 10
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
-[Kernels]
-  active = 'diff'
+[Functions]
+  [./solution]
+    type = ParsedFunction
+    value = (exp(x)-1)/(exp(1)-1)
+  [../]
+[]
 
+[Kernels]
   [./diff]
     type = Diffusion
     variable = u
   [../]
+  [./conv]
+    type = Convection
+    variable = u
+    velocity = '1 0 0'
+  [../]
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = left
     value = 0
   [../]
-
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = right
     value = 1
   [../]
 []
 
 [Indicators]
-  [./test]
+  [./ai]
+    function = solution
     type = AnalyticalIndicator
-    variable = 'indicator'
+    field_name = error
+    variable = u
   [../]
 []
 
@@ -58,14 +62,9 @@
 []
 
 [Output]
-  file_base = out
   output_initial = true
-  interval = 1
   exodus = true
   print_linear_residuals = true
   perf_log = true
 []
 
-[Debug]
-  show_actions = true
-[]

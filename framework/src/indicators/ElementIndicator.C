@@ -49,10 +49,12 @@ ElementIndicator::ElementIndicator(const std::string & name, InputParameters par
     _JxW(_subproblem.JxW(_tid)),
     _coord(_subproblem.coords(_tid)),
 
-    _u(_is_implicit ? _field_var.sln() : _field_var.slnOld()),
-    _grad_u(_is_implicit ? _field_var.gradSln() : _field_var.gradSlnOld()),
-    _u_dot(_field_var.uDot()),
-    _du_dot_du(_field_var.duDotDu()),
+    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+
+    _u(_var.sln()),
+    _grad_u(_var.gradSln()),
+    _u_dot(_var.uDot()),
+    _du_dot_du(_var.duDotDu()),
 
     _real_zero(_subproblem._real_zero[_tid]),
     _zero(_subproblem._zero[_tid]),

@@ -146,6 +146,14 @@
   [../]
 []
 
+[Indicators]
+  [./*]
+    type = stuff
+    variable = junk
+    field_name = otherstuff
+  [../]
+[]
+
 [Preconditioning]
   [./*]
     type = FDP

@@ -32,7 +32,7 @@ public:
   virtual void computeIndicator();
 
 protected:
-  virtual Real computeQpIndicator();
+  virtual Real computeQpIntegral();
 };
 
 #endif /* ELEMENTINTEGRALINDICATOR_H */
