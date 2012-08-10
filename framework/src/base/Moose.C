@@ -162,7 +162,6 @@
 
 // indicators
 #include "AnalyticalIndicator.h"
-#include "ReferenceIndicator.h"
 #include "LaplacianJumpIndicator.h"
 #include "GradientJumpIndicator.h"
 #include "FluxJumpIndicator.h"
@@ -355,7 +354,6 @@ registerObjects()
 
   // indicators
   registerIndicator(AnalyticalIndicator);
-  registerIndicator(ReferenceIndicator);
   registerIndicator(LaplacianJumpIndicator);
   registerIndicator(GradientJumpIndicator);
   registerIndicator(FluxJumpIndicator);
