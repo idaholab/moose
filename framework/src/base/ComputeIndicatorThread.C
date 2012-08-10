@@ -26,6 +26,7 @@ ComputeIndicatorThread::ComputeIndicatorThread(FEProblem & fe_problem,
                                                std::vector<IndicatorWarehouse> & indicator_whs) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _fe_problem(fe_problem),
+    _aux_sys(sys),
     _indicator_whs(indicator_whs)
 {
 }
@@ -34,6 +35,7 @@ ComputeIndicatorThread::ComputeIndicatorThread(FEProblem & fe_problem,
 ComputeIndicatorThread::ComputeIndicatorThread(ComputeIndicatorThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
     _fe_problem(x._fe_problem),
+    _aux_sys(x._aux_sys),
     _indicator_whs(x._indicator_whs)
 {
 }
@@ -41,6 +43,12 @@ ComputeIndicatorThread::ComputeIndicatorThread(ComputeIndicatorThread & x, Threa
 void
 ComputeIndicatorThread::onElement(const Elem *elem)
 {
+
+  for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
+  {
+    MooseVariable * var = it->second;
+    var->prepare_aux();
+  }
 
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
@@ -50,7 +58,12 @@ ComputeIndicatorThread::onElement(const Elem *elem)
   {
     _fe_problem.subdomainSetup(subdomain, _tid);
     _indicator_whs[_tid].updateActiveIndicators(subdomain);
-    //   if (_sys._doing_dg) _sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
+
+    const std::vector<Indicator *> & indicators = _indicator_whs[_tid].active();
+    for (std::vector<Indicator *>::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
+      (*it)->subdomainSetup();
+
+    //   if (_aux_sys._doing_dg) _aux_sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
   }
 
   _fe_problem.reinitMaterials(subdomain, _tid);
@@ -58,13 +71,23 @@ ComputeIndicatorThread::onElement(const Elem *elem)
   const std::vector<Indicator *> & indicators = _indicator_whs[_tid].active();
   for (std::vector<Indicator *>::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
     (*it)->computeIndicator();
+
+
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
+    {
+      MooseVariable * var = it->second;
+      var->insert(_aux_sys.solution());
+      }
+  }
 }
 
 void
 ComputeIndicatorThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
   /*
-  std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
+  std::vector<IntegratedBC *> bcs = _aux_sys._bcs[_tid].activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
@@ -99,7 +122,7 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
 
   if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
   {
-    std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
+    std::vector<DGKernel *> dgks = _aux_sys._dg_kernels[_tid].active();
     if (dgks.size() > 0)
     {
       _problem.reinitNeighbor(elem, side, _tid);

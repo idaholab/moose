@@ -26,8 +26,7 @@ template<>
 InputParameters validParams<Indicator>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<AuxVariableName>("variable", "The name of the variable that this Indicator operates on");
-//  params.addRequiredParam<std::string>("field_name", "The name of the indicator field");
+  params.addRequiredParam<VariableName>("field_name", "The name of the indicator field");
 
   // testing, dude
   params.addPrivateParam<bool>("use_displaced_mesh", false);
@@ -51,7 +50,7 @@ Indicator::Indicator(const std::string & name, InputParameters parameters) :
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
 
-    _field_var(_sys.getVariable(_tid, parameters.get<AuxVariableName>("variable"))),
+    _field_var(_sys.getVariable(_tid, parameters.get<VariableName>("field_name"))),
 
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension())

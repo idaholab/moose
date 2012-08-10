@@ -24,6 +24,7 @@ InputParameters validParams<AddIndicatorVariableAction>()
   InputParameters params = validParams<Action>();
   params.addParam<std::vector<SubdomainName> >("block", "The block id where this variable lives");
   params.addRequiredParam<std::string>("variable", "The name of the indicator field");
+  params.addRequiredParam<VariableName>("field_name", "The name of the indicator field");
   return params;
 }
 
@@ -45,7 +46,7 @@ AddIndicatorVariableAction::act()
 
   FEType fe_type(CONSTANT, MONOMIAL);
 
-  std::string variable = getParam<std::string>("variable");
+  std::string variable = getParam<VariableName>("field_name");
 
   if (blocks.empty())
     _problem->addAuxVariable(variable, fe_type);

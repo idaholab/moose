@@ -26,7 +26,12 @@ template<>
 InputParameters validParams<ElementIndicator>()
 {
   InputParameters params = validParams<Indicator>();
-  params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that this Indicator will be applied to");
+  params.addRequiredParam<VariableName>("variable", "The name of the variable that this Indicator operates on");
+
+  std::vector<SubdomainName> everywhere(1);
+  everywhere[0] = "ANY_BLOCK_ID";
+  params.addParam<std::vector<SubdomainName> >("block", everywhere, "block ID or name where the object works");
+
   params += validParams<TransientInterface>();
   return params;
 }

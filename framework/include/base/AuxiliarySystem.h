@@ -126,6 +126,7 @@ protected:
   friend class ComputeNodalAuxBcsThread;
   friend class ComputeElemAuxVarsThread;
   friend class ComputeElemAuxBcsThread;
+  friend class ComputeIndicatorThread;
 };
 
 #endif /* EXPLICITSYSTEM_H */

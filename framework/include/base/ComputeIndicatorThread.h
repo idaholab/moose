@@ -39,6 +39,7 @@ public:
 
 protected:
   FEProblem & _fe_problem;
+  AuxiliarySystem & _aux_sys;
   std::vector<IndicatorWarehouse> & _indicator_whs;
 };
 
