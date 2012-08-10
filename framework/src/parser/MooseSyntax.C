@@ -128,6 +128,10 @@ void associateSyntax(Syntax & syntax)
   // Loose Coupling
   syntax.registerActionSyntax("EmptyAction", "SubProblems");
 
+  // Indicator
+  syntax.registerActionSyntax("AddIndicatorVariableAction", "Indicators/*");
+  syntax.registerActionSyntax("AddIndicatorAction", "Indicators/*");
+
   addActionTypes(syntax);
   registerActions(syntax);
 }

@@ -45,6 +45,8 @@
 #define registerScalarKernel(name)                  registerObject(name)
 #define registerUserObject(name)                    registerObject(name)
 #define registerPreconditioner(name)                registerObject(name)
+#define registerIndicator(name)                     registerObject(name)
+#define registerMarker(name)                        registerObject(name)
 
 #define registerNamedKernel(obj, name)              registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)   registerNamedObject(obj, name)
@@ -61,6 +63,8 @@
 #define registerNamedConstraint(obj, name)          registerNamedObject(obj, name)
 #define registerNamedUserObject(obj, name)          registerNamedObject(obj, name)
 #define registerNamedPreconditioner(obj, name)      registerNamedObject(obj, name)
+#define registerNamedIndicator(obj, name)           registerNamedObject(obj, name)
+#define registerNamedMarker(obj, name)              registerNamedObject(obj, name)
 
 
 /**

@@ -77,6 +77,8 @@ Steady::execute()
     _problem.onTimestepEnd();
 
     _problem.computeUserObjects();
+    _problem.computeIndicators();
+
     _problem.output();
     _problem.outputPostprocessors();
 

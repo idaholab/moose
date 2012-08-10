@@ -175,6 +175,9 @@ Transient::takeStep(Real input_dt)
   // Compute TimestepBegin AuxKernels
   _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_BEGIN);
 
+  // Compute the Error Indicators
+  _problem.computeIndicators();
+
   // Compute TimestepBegin Postprocessors
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN);
 

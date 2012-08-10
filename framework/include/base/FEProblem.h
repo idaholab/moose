@@ -29,6 +29,7 @@
 #include "Output.h"
 #include "Adaptivity.h"
 #include "Resurrector.h"
+#include "IndicatorWarehouse.h"
 
 class DisplacedProblem;
 class OutputProblem;
@@ -277,12 +278,17 @@ public:
    */
   bool hasDampers() { return _has_dampers; }
 
+  // Indicators /////
+  void addIndicator(std::string indicator_name, const std::string & name, InputParameters parameters);
+
   ////
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual);
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);
   virtual void computeJacobianBlock(SparseMatrix<Number> &  jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
   virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
   virtual void computeBounds(NonlinearImplicitSystem & sys, NumericVector<Number> & lower, NumericVector<Number> & upper);
+
+  virtual void computeIndicators();
 
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
@@ -411,6 +417,9 @@ protected:
 
   // materials
   std::vector<MaterialWarehouse> _materials;
+
+  /// functions
+  std::vector<IndicatorWarehouse> _indicators;
 
   // postprocessors
   std::vector<PostprocessorData> _pps_data;

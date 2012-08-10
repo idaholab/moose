@@ -11,93 +11,62 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "ComputeResidualThread.h"
-#include "NonlinearSystem.h"
+#include "ComputeIndicatorThread.h"
+
+#include "AuxiliarySystem.h"
 #include "Problem.h"
 #include "FEProblem.h"
-#include "Kernel.h"
-#include "IntegratedBC.h"
-#include "DGKernel.h"
-#include "Material.h"
+#include "Indicator.h"
+
 // libmesh includes
 #include "threads.h"
 
-ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem,
-                                             NonlinearSystem & sys,
-                                             NumericVector<Number> & residual, Moose::KernelType selector) :
+ComputeIndicatorThread::ComputeIndicatorThread(FEProblem & fe_problem,
+                                               AuxiliarySystem & sys,
+                                               std::vector<IndicatorWarehouse> & indicator_whs) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
-    _residual(residual),
-    _sys(sys),
-    _selector(selector)
+    _fe_problem(fe_problem),
+    _indicator_whs(indicator_whs)
 {
 }
 
 // Splitting Constructor
-ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split) :
+ComputeIndicatorThread::ComputeIndicatorThread(ComputeIndicatorThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
-    _residual(x._residual),
-    _sys(x._sys),
-    _selector(x._selector)
+    _fe_problem(x._fe_problem),
+    _indicator_whs(x._indicator_whs)
 {
 }
 
 void
-ComputeResidualThread::onElement(const Elem *elem)
+ComputeIndicatorThread::onElement(const Elem *elem)
 {
+
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
 
   std::cout << "Hello from " << _tid << "\n";
 
+
   unsigned int subdomain = elem->subdomain_id();
   if (subdomain != _subdomain)
   {
     _fe_problem.subdomainSetup(subdomain, _tid);
-    _sys._kernels[_tid].updateActiveKernels(subdomain);
-    if (_sys._doing_dg) _sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
+    _indicator_whs[_tid].updateActiveIndicators(subdomain);
+    //   if (_sys._doing_dg) _sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
   }
 
   _fe_problem.reinitMaterials(subdomain, _tid);
 
-
-  switch( _selector)
-  {
-  case Moose::KT_TIME:
-  {
-    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeTime();
-    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-    {
-       (*it)->computeResidual();
-    }
-    break;
-  }
-  case Moose::KT_NONTIME:
-  {
-    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeNonTime();
-    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-    {
-      (*it)->computeResidual();
-    }
-    break;
-  }
-  case Moose::KT_ALL:
-  {
-    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
-    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-    {
-      (*it)->computeResidual();
-    }
-    break;
-  }
-  }
-
-
-
+  const std::vector<Indicator *> & indicators = _indicator_whs[_tid].active();
+  for (std::vector<Indicator *>::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
+    (*it)->computeIndicator();
 }
 
 void
-ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+ComputeIndicatorThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
+  /*
   std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {
@@ -114,14 +83,16 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
     {
       IntegratedBC * bc = (*it);
       if (bc->shouldApply())
-        bc->computeResidual();
+        bc->computeIndicator();
     }
   }
+  */
 }
 
 void
-ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
+ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
 {
+/*
   // Pointer to the neighbor we are currently working on.
   const Elem * neighbor = elem->neighbor(side);
 
@@ -134,32 +105,32 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
     std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
     if (dgks.size() > 0)
     {
-      _fe_problem.reinitNeighbor(elem, side, _tid);
+      _problem.reinitNeighbor(elem, side, _tid);
 
-      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
-      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
+      _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
+      _problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
       for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
       {
         DGKernel * dg = *it;
-        dg->computeResidual();
+        dg->computeIndicator();
       }
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.addResidualNeighbor(_residual, _tid);
+        _problem.addIndicatorNeighbor(_Indicator, _tid);
       }
     }
-  }
+  }*/
 }
 
 void
-ComputeResidualThread::postElement(const Elem * /*elem*/)
+ComputeIndicatorThread::postElement(const Elem * /*elem*/)
 {
-  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-  _fe_problem.addResidual(_residual, _tid);
+//  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+//  _problem.addIndicator(_Indicator, _tid);
 }
 
 void
-ComputeResidualThread::join(const ComputeResidualThread & /*y*/)
+ComputeIndicatorThread::join(const ComputeIndicatorThread & /*y*/)
 {
 }

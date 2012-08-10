@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "FEProblem.h"
+//#include "SystemBase.h"
 #include "Factory.h"
 #include "ProblemFactory.h"
 #include "DisplacedProblem.h"
@@ -21,6 +22,7 @@
 #include "ComputeUserObjectsThread.h"
 #include "ComputeNodalUserObjectsThread.h"
 #include "ComputeMaterialsObjectThread.h"
+#include "ComputeIndicatorThread.h"
 #include "ActionWarehouse.h"
 #include "Conversion.h"
 #include "Moose.h"
@@ -36,6 +38,7 @@
 #include "NodalPostprocessor.h"
 #include "SidePostprocessor.h"
 #include "GeneralPostprocessor.h"
+#include "Indicator.h"
 
 #include "ElementUserObject.h"
 #include "NodalUserObject.h"
@@ -133,6 +136,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
   _pps_data.resize(n_threads);
   _objects_by_name.resize(n_threads);
+
+  _indicators.resize(n_threads);
 
   _resurrector = new Resurrector(*this);
 
@@ -1470,7 +1475,59 @@ FEProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
 }
 
 void
-FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps)
+FEProblem::computeIndicators()
+{
+
+  // init
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+/*
+    for (std::set<SubdomainID>::const_iterator block_it = _indicators[tid].blocks().begin();
+         block_it != pps[tid].blocks().end();
+         ++block_it)
+      {
+        SubdomainID block_id = *block_it;
+
+        for (std::vector<ElementPostprocessor *>::const_iterator postprocessor_it = pps[tid].elementPostprocessors(block_id).begin();
+            postprocessor_it != pps[tid].elementPostprocessors(block_id).end();
+            ++postprocessor_it)
+          (*postprocessor_it)->initialize();
+      }
+
+
+      for (std::set<BoundaryID>::const_iterator boundary_it = pps[tid].boundaryIds().begin();
+          boundary_it != pps[tid].boundaryIds().end();
+          ++boundary_it)
+      {
+        //note: for threaded applications where the elements get broken up it
+        //may be more efficient to initialize these on demand inside the loop
+        for (std::vector<SidePostprocessor *>::const_iterator side_postprocessor_it = pps[tid].sidePostprocessors(*boundary_it).begin();
+            side_postprocessor_it != pps[tid].sidePostprocessors(*boundary_it).end();
+            ++side_postprocessor_it)
+          (*side_postprocessor_it)->initialize();
+      }
+
+      for (std::set<BoundaryID>::const_iterator boundary_it = pps[tid].nodesetIds().begin();
+          boundary_it != pps[tid].nodesetIds().end();
+          ++boundary_it)
+      {
+        for (std::vector<NodalPostprocessor *>::const_iterator nodal_postprocessor_it = pps[tid].nodalPostprocessors(*boundary_it).begin();
+             nodal_postprocessor_it != pps[tid].nodalPostprocessors(*boundary_it).end();
+             ++nodal_postprocessor_it)
+        {
+          (*nodal_postprocessor_it)->initialize();
+          have_nodal_pps = true;
+        }
+      }
+*/
+    }
+    // compute
+    ComputeIndicatorThread cit(*this, getAuxiliarySystem(), _indicators);
+    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
+}
+
+
+void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps)
 {
   if (pps[0].blocks().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0)
   {
@@ -1806,6 +1863,60 @@ void
 FEProblem::setupDampers()
 {
   _nl.setupDampers();
+}
+
+void
+FEProblem::addIndicator(std::string indicator_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<FEProblem *>("_fe_problem") = this;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    _reinit_displaced_elem = true;
+  }
+  else
+  {
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = &_aux;
+  }
+
+//    std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
+//    std::vector<SubdomainID> block_ids(blocks.size());
+
+//  this->addAuxVariable(parameters.get<std::string>("field_name"), FEType(CONSTANT, MONOMIAL) );
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+    parameters.set<MaterialData *>("_material_data") = _material_data[tid];
+
+    parameters.print();
+    Indicator *indicator = static_cast<Indicator *>(Factory::instance()->create(indicator_name, name, parameters) );
+    mooseAssert(indicator != NULL, "Not a Indicator object");
+
+
+    /*    std::set<SubdomainID> blk_ids;
+          if (!parameters.isParamValid("block"))
+          blk_ids = _var_map[indicator->variable().number()];
+          else
+          {
+          std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
+          for (unsigned int i=0; i<blocks.size(); ++i)
+          {
+          SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
+
+          if (_var_map[indicator->variable().number()].count(blk_id) > 0 || _var_map[indicator->variable().number()].size() == 0)
+          blk_ids.insert(blk_id);
+          else
+          mooseError("indicator (" + indicator->name() + "): block outside of the domain of the variable");
+          }
+          }*/
+    std::vector<SubdomainID> block_ids;
+    _indicators[tid].addIndicator(indicator, block_ids);
+
+    _objects_by_name[tid][name].push_back(indicator);
+  }
 }
 
 bool
