@@ -29,7 +29,7 @@ LaplacianJumpIndicator::LaplacianJumpIndicator(const std::string & name, InputPa
 
 
 Real
-LaplacianJumpIndicator::computeQpIndicator()
+LaplacianJumpIndicator::computeQpIntegral()
 {
   return 0;
 }

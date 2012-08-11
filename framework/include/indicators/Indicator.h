@@ -55,6 +55,13 @@ public:
   Indicator(const std::string & name, InputParameters parameters);
   virtual ~Indicator(){};
 
+  /**
+   * Pure virtual that must be overriden.
+   *
+   * This is generally overriden by an intermediate base class.
+   * Usually you will want to inherit from InternalSideIndicator or ElementIndicator.
+   * They contain other virtual functions you will probably want to override instead.
+   */
   virtual void computeIndicator() = 0;
 
   /**

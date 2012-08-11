@@ -29,7 +29,7 @@ FluxJumpIndicator::FluxJumpIndicator(const std::string & name, InputParameters p
 
 
 Real
-FluxJumpIndicator::computeQpIndicator()
+FluxJumpIndicator::computeQpIntegral()
 {
   return 0;
 }

@@ -161,6 +161,7 @@ void
 MooseVariable::prepare_aux()
 {
   _has_nodal_value = false;
+  _has_nodal_value_neighbor = false;
 }
 
 void
@@ -199,10 +200,33 @@ MooseVariable::reinit_aux()
   if (_elem->n_dofs(_sys.number(), _var_num) > 0)
   {
     _nodal_dof_index = _elem->dof_number(_sys.number(), _var_num, 0);
+    _nodal_u.resize(1);
+
+    const NumericVector<Real> & current_solution = *_sys.currentSolution();
+    _nodal_u[0] = current_solution(_nodal_dof_index);
+
     _is_defined = true;
   }
   else
     _is_defined = false;
+}
+
+void
+MooseVariable::reinit_aux_neighbor()
+{
+  _dof_map.dof_indices (_neighbor, _dof_indices, _var_num);
+  if (_neighbor->n_dofs(_sys.number(), _var_num) > 0)
+  {
+    _nodal_dof_index_neighbor = _neighbor->dof_number(_sys.number(), _var_num, 0);
+    _nodal_u_neighbor.resize(1);
+
+    const NumericVector<Real> & current_solution = *_sys.currentSolution();
+    _nodal_u_neighbor[0] = current_solution(_nodal_dof_index_neighbor);
+
+    _is_defined_neighbor = true;
+  }
+  else
+    _is_defined_neighbor = false;
 }
 
 void
@@ -226,6 +250,19 @@ MooseVariable::insert(NumericVector<Number> & residual)
 {
   if (_has_nodal_value)
     residual.set(_nodal_dof_index, _nodal_u[0]);
+
+  if (_has_nodal_value_neighbor)
+    residual.set(_nodal_dof_index_neighbor, _nodal_u_neighbor[0]);
+}
+
+void
+MooseVariable::add(NumericVector<Number> & residual)
+{
+  if (_has_nodal_value)
+    residual.add(_nodal_dof_index, _nodal_u[0]);
+
+  if (_has_nodal_value_neighbor)
+    residual.add(_nodal_dof_index_neighbor, _nodal_u_neighbor[0]);
 }
 
 const VariablePhiValue &
@@ -955,9 +992,15 @@ MooseVariable::computeNodalNeighborValues()
 void
 MooseVariable::setNodalValue(Number value)
 {
-  _nodal_u.resize(1);
   _nodal_u[0] = value;                  // update variable nodal value
   _has_nodal_value = true;
+}
+
+void
+MooseVariable::setNodalValueNeighbor(Number value)
+{
+  _nodal_u_neighbor[0] = value;                  // update variable nodal value
+  _has_nodal_value_neighbor = true;
 }
 
 void

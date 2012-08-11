@@ -65,6 +65,8 @@ public:
   void reinit_node();
   void reinit_nodeNeighbor();
   void reinit_aux();
+  void reinit_aux_neighbor();
+
   void reinitNodes(const std::vector<unsigned int> & nodes);
 
   /**
@@ -219,6 +221,12 @@ public:
    * Set the nodal value for this variable (to keep everything up to date
    */
   void setNodalValue(Number value);
+
+  /**
+   * Set the neighbor nodal value for this variable
+   */
+  void setNodalValueNeighbor(Number value);
+
   /**
    * Compute damping for this variable based on increment_vec
    */
@@ -235,6 +243,7 @@ public:
   std::vector<unsigned int> & dofIndicesNeighbor() { return _dof_indices_neighbor; }
 
   void insert(NumericVector<Number> & residual);
+  void add(NumericVector<Number> & residual);
 
   /**
    * Get the value of this variable at given node
@@ -394,6 +403,7 @@ protected:
   bool _is_defined;
   /// If true, the nodal value gets inserted on calling insert()
   bool _has_nodal_value;
+  bool _has_nodal_value_neighbor;
   const Node * & _node;
   unsigned int _nodal_dof_index;
   VariableValue _nodal_u;

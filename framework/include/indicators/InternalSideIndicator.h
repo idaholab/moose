@@ -83,6 +83,10 @@ protected:
 
   BoundaryID _boundary_id;
 
+  MooseVariable & _var;
+
+  bool _scale_by_flux_faces;
+
   /// Holds the current solution at the current quadrature point on the face.
   VariableValue & _u;
 
@@ -98,10 +102,12 @@ protected:
   VariableGradient & _grad_u_neighbor;
 
   /**
-   * This is the virtual that derived classes should override for computing the indicator on neighboring element.
+   * The virtual function you will want to override to compute error contributions.
+   * This is called once per quadrature point on each interior side of every element.
+   *
+   * You should return the error^2
    */
-//  virtual Real computeQpIndicator(Moose::DGResidualType type) = 0;
-  virtual Real computeQpIndicator() = 0;
+  virtual Real computeQpIntegral() = 0;
 
 public:
   // boundary id used for internal edges (all DG kernels lives on this boundary id -- a made-up number)

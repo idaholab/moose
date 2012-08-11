@@ -42,20 +42,19 @@ public:
    * Get list of all Indicators
    * @return The list of all active Indicators
    */
-  const std::vector<Indicator *> & all() { return _all_Indicators; }
+  const std::vector<Indicator *> & all() { return _all_indicators; }
 
   /**
    * Get the list of all active Indicators
    * @return The list of all active Indicators
    */
-  const std::vector<Indicator *> & active() { return _active_Indicators; }
+  const std::vector<Indicator *> & active() { return _active_indicators; }
 
   /**
-   * Get the list of all active Indicators for a variable
-   * @param var The variable number
-   * @return The list of all active Indicators
+   * Get the list of all active Indicators
+   * @return The list of all active InternalSideIndicators
    */
-  //const std::vector<Indicator *> & activeVar(unsigned int var) { return _active_var_Indicators[var]; }
+  const std::vector<Indicator *> & activeInternalSideIndicators() { return _active_internal_side_indicators; }
 
   /**
    * Add a Indicators
@@ -75,16 +74,24 @@ public:
 
 protected:
   /// Indicators active on a block and in specified time
-  std::vector<Indicator *> _active_Indicators;
-  /// Indicators active on a block and in specified time per variable
-//  std::map<SubdomainID, std::vector<Indicator *> > _active_var_Indicators;
-  /// All instances of Indicators
-  std::vector<Indicator *> _all_Indicators;
-  /// Indicators that live everywhere (on the whole domain)
-  std::vector<Indicator *> _global_Indicators;
-  /// Indicators that live on a specified block
-  std::map<SubdomainID, std::vector<Indicator *> > _block_Indicators;
+  std::vector<Indicator *> _active_indicators;
 
+  std::vector<Indicator *> _active_internal_side_indicators;
+
+  /// All instances of Indicators
+  std::vector<Indicator *> _all_indicators;
+
+  /// Indicators that live everywhere (on the whole domain)
+  std::vector<Indicator *> _global_indicators;
+
+  /// Indicators that live on a specified block
+  std::map<SubdomainID, std::vector<Indicator *> > _block_indicators;
+
+  /// Indicators that live everywhere (on the whole domain)
+  std::vector<Indicator *> _global_internal_side_indicators;
+
+  /// Indicators that live on a specified block
+  std::map<SubdomainID, std::vector<Indicator *> > _block_internal_side_indicators;
 };
 
 #endif // INDICATORWAREHOUSE_H

@@ -31,7 +31,7 @@ public:
 
 protected:
 
-  virtual Real computeQpIndicator();
+  virtual Real computeQpIntegral();
 };
 
 #endif /* LAPLACIANJUMPINDICATOR_H */

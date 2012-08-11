@@ -35,10 +35,12 @@ template<>
 InputParameters validParams<InternalSideIndicator>()
 {
   InputParameters params = validParams<Indicator>();
-  // params.addRequiredParam<std::string>("variable", "The name of the variable that this side indicator applies to");
+  params.addRequiredParam<VariableName>("variable", "The name of the variable that this side indicator applies to");
+  params.addParam<bool>("scale_by_flux_faces", true, "Whether or not to scale the error values by the number of flux faces.  This attempts to not penalize elements on boundaries for having less neighbors.");
+
   params.addPrivateParam<BoundaryID>("_boundary_id", InternalSideIndicator::InternalBndId);
 
-//  params.addPrivateParam<std::string>("built_by_action", "add_side_indicator");
+  params.addPrivateParam<std::string>("built_by_action", "add_indicator");
   return params;
 }
 
@@ -63,13 +65,16 @@ InternalSideIndicator::InternalSideIndicator(const std::string & name, InputPara
 
     _boundary_id(parameters.get<BoundaryID>("_boundary_id")),
 
-    _u(_field_var.sln()),
-    _grad_u(_field_var.gradSln()),
+    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _scale_by_flux_faces(parameters.get<bool>("scale_by_flux_faces")),
+
+    _u(_var.sln()),
+    _grad_u(_var.gradSln()),
 
     _normals(_field_var.normals()),
 
-    _u_neighbor(_field_var.slnNeighbor()),
-    _grad_u_neighbor(_field_var.gradSlnNeighbor())
+    _u_neighbor(_var.slnNeighbor()),
+    _grad_u_neighbor(_var.gradSlnNeighbor())
 {
 }
 
@@ -81,19 +86,28 @@ void
 InternalSideIndicator::computeIndicator()
 {
   Moose::perf_log.push("computeIndicator()","InternalSideIndicator");
-  /*
-  DenseVector<Number> & re = _assembly.residualBlock(_field_var.number());
-  DenseVector<Number> & neighbor_re = _assembly.residualBlockNeighbor(_field_var.number());
+
+  unsigned int n_flux_faces = 0;
+
+  if(_scale_by_flux_faces)
+  {
+    // Figure out the total number of sides contributing to the error.
+    // We'll scale by this so boundary elements aren't penalized
+    for (unsigned int side=0; side<_current_elem->n_sides(); side++)
+      if(_current_elem->neighbor(side) != NULL)
+        n_flux_faces++;
+  }
+  else
+    n_flux_faces = 1;
+
+  Real sum = 0;
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
-  {
-    for (_i=0; _i<_test.size(); _i++)
-      re(_i) += _JxW[_qp]*_coord[_qp]*computeQpResidual(Moose::Element);
+    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
 
-    for (_i=0; _i<_test_neighbor.size(); _i++)
-      neighbor_re(_i) += _JxW[_qp]*_coord[_qp]*computeQpResidual(Moose::Neighbor);
-  }
-  */
+  _field_var.setNodalValue(_field_var.nodalSln()[0]+(sum/(Real)n_flux_faces));
+  _field_var.setNodalValueNeighbor(_field_var.nodalSlnNeighbor()[0]+(sum/(Real)n_flux_faces));
+
   Moose::perf_log.pop("computeIndicator()","InternalSideIndicator");
 }
 

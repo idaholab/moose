@@ -78,8 +78,8 @@ ComputeIndicatorThread::onElement(const Elem *elem)
     for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
     {
       MooseVariable * var = it->second;
-      var->insert(_aux_sys.solution());
-      }
+      var->add(_aux_sys.solution());
+    }
   }
 }
 
@@ -112,7 +112,6 @@ ComputeIndicatorThread::onBoundary(const Elem *elem, unsigned int side, Boundary
 void
 ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
 {
-/*
   // Pointer to the neighbor we are currently working on.
   const Elem * neighbor = elem->neighbor(side);
 
@@ -122,25 +121,33 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
 
   if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
   {
-    std::vector<DGKernel *> dgks = _aux_sys._dg_kernels[_tid].active();
-    if (dgks.size() > 0)
+    for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
     {
-      _problem.reinitNeighbor(elem, side, _tid);
+      MooseVariable * var = it->second;
+      var->prepare_aux();
+    }
 
-      _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
-      _problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
-      for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
-      {
-        DGKernel * dg = *it;
-        dg->computeIndicator();
-      }
+    const std::vector<Indicator *> & indicators = _indicator_whs[_tid].activeInternalSideIndicators();
+    if (indicators.size() > 0)
+    {
+      _fe_problem.reinitNeighbor(elem, side, _tid);
+
+      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
+      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
+
+      for (std::vector<Indicator *>::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
+        (*it)->computeIndicator();
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _problem.addIndicatorNeighbor(_Indicator, _tid);
+        for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
+        {
+          MooseVariable * var = it->second;
+          var->add(_aux_sys.solution());
+        }
       }
     }
-  }*/
+  }
 }
 
 void

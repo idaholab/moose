@@ -237,6 +237,7 @@ AuxiliarySystem::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, Bo
   {
     MooseVariable *var = it->second;
     var->reinit_aux();
+    var->reinit_aux_neighbor();
     var->computeElemValuesFace();
   }
 }

@@ -47,6 +47,8 @@
 #include "SideUserObject.h"
 #include "GeneralUserObject.h"
 
+#include "InternalSideIndicator.h"
+
 unsigned int FEProblem::_n = 0;
 
 static
@@ -1913,8 +1915,15 @@ FEProblem::addIndicator(std::string indicator_name, const std::string & name, In
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _material_data[tid];
 
+    //if(dynamic_cast<InternalSideIndicator*>(indicator))
+//    {
+      parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
+      parameters.set<MaterialData *>("_neighbor_material_data") = _neighbor_material_data[tid];
+//    }
+
     Indicator *indicator = static_cast<Indicator *>(Factory::instance()->create(indicator_name, name, parameters) );
     mooseAssert(indicator != NULL, "Not a Indicator object");
+
 
 
     /*    std::set<SubdomainID> blk_ids;
