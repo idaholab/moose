@@ -43,6 +43,12 @@ public:
   virtual ~Marker(){}
 
   /**
+   * Helper function for getting the valid refinement flag states a marker can use as a MooseEnum.
+   * @return A MooseEnum that is filled with the valid states.  These are perfectly transferable to libMesh Elem::RefinementStates.
+   */
+  static MooseEnum markerStates();
+
+  /**
    * Create an Error Vector from the Marker field
    * TODO: Fix this return type
    */
@@ -68,6 +74,7 @@ protected:
   Assembly & _assembly;
 
   MooseVariable & _field_var;
+  const Elem * & _current_elem;
 
   MooseMesh & _mesh;
 };

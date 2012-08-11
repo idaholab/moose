@@ -168,6 +168,7 @@
 
 // markers
 #include "StandardMarker.h"
+#include "BoxMarker.h"
 
 // Actions
 #include "AddMeshModifierAction.h"
@@ -364,6 +365,7 @@ registerObjects()
 
   // markers
   registerMarker(StandardMarker);
+  registerMarker(BoxMarker);
 
   registered = true;
 }

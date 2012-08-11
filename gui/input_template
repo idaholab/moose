@@ -146,14 +146,6 @@
   [../]
 []
 
-[Indicators]
-  [./*]
-    type = stuff
-    variable = junk
-    field_name = otherstuff
-  [../]
-[]
-
 [Preconditioning]
   [./*]
     type = FDP
@@ -194,6 +186,28 @@
     max_h_level = 5
     print_changed_info = true
   []
+[]
+
+[Adaptivity]
+  [./Indicators]
+    [./*]
+      type = stuff
+      variable = junk
+      field_name = otherstuff
+    [../]
+  []
+
+  [./Markers]
+    [./*]
+      type = BoxMarker
+      field_name = box
+      indicator_name = dummy
+      bottom_left = '0.3 0.3 0'
+      top_right = '0.6 0.6 0'
+      inside = refine
+      outside = do_nothing
+    [../]
+  [../]
 []
 
 [Output]

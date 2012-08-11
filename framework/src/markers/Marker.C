@@ -18,6 +18,7 @@
 #include "Assembly.h"
 #include "MooseVariable.h"
 
+
 template<>
 InputParameters validParams<Marker>()
 {
@@ -40,9 +41,19 @@ Marker::Marker(const std::string & name, InputParameters parameters) :
     _assembly(_subproblem.assembly(_tid)),
 
     _field_var(_sys.getVariable(_tid, parameters.get<FieldName>("field_name"))),
+    _current_elem(_field_var.currentElem()),
 
     _mesh(_subproblem.mesh())
 {}
+
+MooseEnum
+Marker::markerStates()
+{
+  // MooseEnum marker_states("COARSEN = 0, DO_NOTHING, REFINE, JUST_REFINED, JUST_COARSENED, INACTIVE, COARSEN_INACTIVE, INVALID_REFINEMENTSTATE");
+  MooseEnum marker_states("coarsen, do_nothing, refine");
+
+  return marker_states;
+}
 
 void
 Marker::computeMarker()
