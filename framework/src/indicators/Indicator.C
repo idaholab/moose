@@ -26,9 +26,9 @@ template<>
 InputParameters validParams<Indicator>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<VariableName>("field_name", "The name of the indicator field");
+  params.addRequiredParam<FieldName>("field_name", "The name of the indicator field this indicator will add contributions to.");
+  params.addParam<std::vector<SubdomainName> >("block", "The block id where this Indicator lives.");
 
-  // testing, dude
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_indicator");
   return params;

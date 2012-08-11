@@ -30,5 +30,5 @@ AddIndicatorAction::AddIndicatorAction(const std::string & name, InputParameters
 void
 AddIndicatorAction::act()
 {
-    _problem->addIndicator(_type, getShortName(), _moose_object_pars);
+  _problem->addIndicator(_type, getShortName(), _moose_object_pars);
 }

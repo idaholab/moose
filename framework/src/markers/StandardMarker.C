@@ -18,6 +18,7 @@ template<>
 InputParameters validParams<StandardMarker>()
 {
   InputParameters params = validParams<Marker>();
+  params.addRequiredParam<VariableName>("indicator_field", "The name of the Indicator field that this Marker operates on.");
   return params;
 }
 
@@ -30,6 +31,6 @@ StandardMarker::StandardMarker(const std::string & name, InputParameters paramet
 int
 StandardMarker::computeElementMarker()
 {
-  return -1;
+  return 1;
 }
 

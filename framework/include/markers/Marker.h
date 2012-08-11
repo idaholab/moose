@@ -36,8 +36,7 @@ InputParameters validParams<Marker>();
 
 class Marker :
   public MooseObject,
-  public SetupInterface,
-  public MooseVariableInterface
+  public SetupInterface
 {
 public:
   Marker(const std::string & name, InputParameters parameters);

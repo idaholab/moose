@@ -29,5 +29,5 @@ AddMarkerAction::AddMarkerAction(const std::string & name, InputParameters param
 void
 AddMarkerAction::act()
 {
-    _problem->addMarker(_type, getShortName(), _moose_object_pars);
+  _problem->addMarker(_type, getShortName(), _moose_object_pars);
 }

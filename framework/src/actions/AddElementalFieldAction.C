@@ -22,8 +22,9 @@ template<>
 InputParameters validParams<AddElementalFieldAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::vector<SubdomainName> >("block", "The block id where this variable lives");
-  params.addRequiredParam<FieldName>("field_name", "The name of the indicator field");
+  params.addRequiredParam<FieldName>("field_name", "The name of the field to store into.");
+  params.addParam<std::vector<SubdomainName> >("block", "The block id where this object lives.");
+
   return params;
 }
 
@@ -46,6 +47,8 @@ AddElementalFieldAction::act()
   FEType fe_type(CONSTANT, MONOMIAL);
 
   std::string variable = getParam<FieldName>("field_name");
+
+  std::cout<<"Adding: "<<variable<<std::endl;
 
   if (blocks.empty())
     _problem->addAuxVariable(variable, fe_type);
