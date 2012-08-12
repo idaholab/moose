@@ -59,7 +59,7 @@ public:
   virtual void computeMarker();
 
   // TODO: Fixme
-  const bool isActive() { return true; }
+  bool isActive() const { return true; }
 
   virtual void markerSetup() {}
 
