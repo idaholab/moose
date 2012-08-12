@@ -50,7 +50,7 @@ Indicator::Indicator(const std::string & name, InputParameters parameters) :
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
 
-    _field_var(_sys.getVariable(_tid, parameters.get<VariableName>("field_name"))),
+    _field_var(_sys.getVariable(_tid, parameters.get<FieldName>("field_name"))),
 
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension())

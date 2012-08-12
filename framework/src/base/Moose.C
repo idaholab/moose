@@ -212,7 +212,7 @@
 #include "AddElementalFieldAction.h"
 #include "AddIndicatorAction.h"
 #include "AddMarkerAction.h"
-
+#include "SetAdaptivityOptionsAction.h"
 
 namespace Moose {
 
@@ -426,6 +426,7 @@ addActionTypes(Syntax & syntax)
   registerActionName("add_elemental_field_variable", false);
   registerActionName("add_indicator", false);
   registerActionName("add_marker", false);
+  registerActionName("set_adaptivity_options", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_mesh_complete", false);
@@ -462,6 +463,7 @@ addActionTypes(Syntax & syntax)
 "(add_function)"
 "(setup_function_complete)"
 "(setup_adaptivity)"
+"(set_adaptivity_options)"
 "(add_ic, add_periodic_bc)"
 "(add_preconditioning, add_constraint)"
 "(ready_to_init)"
@@ -557,6 +559,7 @@ registerActions(Syntax & syntax)
   registerAction(AddElementalFieldAction, "add_elemental_field_variable");
   registerAction(AddIndicatorAction, "add_indicator");
   registerAction(AddMarkerAction, "add_marker");
+  registerAction(SetAdaptivityOptionsAction, "set_adaptivity_options");
 
 #ifdef LIBMESH_ENABLE_AMR
   registerAction(AdaptivityAction, "setup_adaptivity");

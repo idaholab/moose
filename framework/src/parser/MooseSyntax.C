@@ -136,6 +136,9 @@ void associateSyntax(Syntax & syntax)
   syntax.registerActionSyntax("AddElementalFieldAction", "Adaptivity/Markers/*");
   syntax.registerActionSyntax("AddMarkerAction", "Adaptivity/Markers/*");
 
+  // New Adaptivity System
+  syntax.registerActionSyntax("SetAdaptivityOptionsAction", "Adaptivity");
+
   addActionTypes(syntax);
   registerActions(syntax);
 }

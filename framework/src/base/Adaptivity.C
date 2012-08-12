@@ -19,6 +19,8 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "DisplacedProblem.h"
+#include "FlagElementsThread.h"
+
 // libMesh
 #include "equation_systems.h"
 #include "kelly_error_estimator.h"
@@ -41,7 +43,8 @@ Adaptivity::Adaptivity(FEProblem & subproblem) :
     _print_mesh_changed(false),
     _t(_subproblem.time()),
     _start_time(-std::numeric_limits<Real>::max()),
-    _stop_time(std::numeric_limits<Real>::max())
+    _stop_time(std::numeric_limits<Real>::max()),
+    _cycles_per_step(1)
 {
 }
 
@@ -110,11 +113,27 @@ Adaptivity::adaptMesh()
 {
   if (_mesh_refinement_on && (_start_time <= _t && _t < _stop_time))
   {
-    // Compute the error for each active element
-    _error_estimator->estimate_error(_subproblem.getNonlinearSystem().sys(), *_error);
+    if(_marker_variable_name != "") // Are we using the new adaptivity system?
+    {
+      std::vector<Number> serialized_solution;
+      _subproblem.getAuxiliarySystem().solution().close();
+      _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);
 
-    // Flag elements to be refined and coarsened
-    _mesh_refinement->flag_elements_by_error_fraction (*_error);
+      FlagElementsThread fet(_subproblem, serialized_solution);
+      ConstElemRange all_elems(_subproblem.mesh().getMesh().active_elements_begin(),
+                               _subproblem.mesh().getMesh().active_elements_end(), 1);
+      Threads::parallel_reduce(all_elems, fet);
+      _subproblem.getAuxiliarySystem().solution().close();
+    }
+    else
+    {
+      // Compute the error for each active element
+      _error_estimator->estimate_error(_subproblem.getNonlinearSystem().sys(), *_error);
+
+      // Flag elements to be refined and coarsened
+      _mesh_refinement->flag_elements_by_error_fraction (*_error);
+    }
+
     // Perform refinement and coarsening
     _mesh_refinement->refine_and_coarsen_elements();
 
@@ -155,6 +174,18 @@ Adaptivity::setTimeActive(Real start_time, Real stop_time)
 {
   _start_time = start_time;
   _stop_time = stop_time;
+}
+
+void
+Adaptivity::setMarkerVariableName(std::string marker_field)
+{
+  _marker_variable_name = marker_field;
+}
+
+MooseVariable &
+Adaptivity::getMarkerVariable()
+{
+  return _subproblem.getVariable(0, _marker_variable_name);
 }
 
 #endif //LIBMESH_ENABLE_AMR

@@ -214,16 +214,21 @@ MooseVariable::reinit_aux()
 void
 MooseVariable::reinit_aux_neighbor()
 {
-  _dof_map.dof_indices (_neighbor, _dof_indices, _var_num);
-  if (_neighbor->n_dofs(_sys.number(), _var_num) > 0)
+  if(_neighbor)
   {
-    _nodal_dof_index_neighbor = _neighbor->dof_number(_sys.number(), _var_num, 0);
-    _nodal_u_neighbor.resize(1);
+    _dof_map.dof_indices (_neighbor, _dof_indices, _var_num);
+    if (_neighbor->n_dofs(_sys.number(), _var_num) > 0)
+    {
+      _nodal_dof_index_neighbor = _neighbor->dof_number(_sys.number(), _var_num, 0);
+      _nodal_u_neighbor.resize(1);
 
-    const NumericVector<Real> & current_solution = *_sys.currentSolution();
-    _nodal_u_neighbor[0] = current_solution(_nodal_dof_index_neighbor);
+      const NumericVector<Real> & current_solution = *_sys.currentSolution();
+      _nodal_u_neighbor[0] = current_solution(_nodal_dof_index_neighbor);
 
-    _is_defined_neighbor = true;
+      _is_defined_neighbor = true;
+    }
+    else
+      _is_defined_neighbor = false;
   }
   else
     _is_defined_neighbor = false;

@@ -31,6 +31,7 @@
 class FEProblem;
 class MooseMesh;
 class DisplacedProblem;
+class MooseVariable;
 
 /**
  * Takes care of everything related to mesh adaptivity
@@ -121,6 +122,23 @@ public:
    */
   void setTimeActive(Real start_time, Real stop_time);
 
+  /**
+   * Sets the name of the field variable to actually use to flag elements for refinement / coarsening.
+   * This must be a CONSTANT, MONOMIAL Auxiliary Variable Name that contains values
+   * corresponding to libMesh::Elem::RefinementState.
+   *
+   * @param marker_field The name of the field to use for refinement / coarsening.
+   */
+  void setMarkerVariableName(std::string marker_field);
+
+  /**
+   * Get the MooseVariable corresponding to the Marker Field Name that is actually going to be used
+   * to refine / coarsen the mesh.
+   *
+   * @return The MooseVariable
+   */
+  MooseVariable & getMarkerVariable();
+
 protected:
   FEProblem & _subproblem;
   MooseMesh & _mesh;
@@ -154,6 +172,9 @@ protected:
   Real _stop_time;
   /// The number of adaptivity cycles per step
   unsigned int _cycles_per_step;
+
+  /// Name of the marker variable if using the new adaptivity system
+  std::string _marker_variable_name;
 };
 
 template<typename T>
