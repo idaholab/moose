@@ -1921,6 +1921,20 @@ NonlinearSystem::set_solution(const NumericVector<Number> & soln)
     serializeSolution();
 }
 
+void
+NonlinearSystem::setSolutionUDot(const NumericVector<Number> & udot)
+{
+  // This is nasty, but the vector is currently stored in _time_scheme and the routine below returns that reference.
+  solutionUDot() = udot;
+}
+
+void
+NonlinearSystem::setSolutionDuDotDu(Real value)
+{
+  // This is nasty, but the vector is currently stored in _time_scheme and the routine below returns that reference.
+  solutionDuDotDu() = value;
+}
+
 NumericVector<Number> &
 NonlinearSystem::serializedSolution()
 {

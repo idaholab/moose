@@ -192,6 +192,8 @@ public:
 
   void computeLittlef(const NumericVector<Number> & bigF, NumericVector<Number> & littlef, Real time = -1, bool mass = true);
 
+  void setSolutionDuDotDu(Real value);
+
 protected:
   /**
    * Computes the time derivative vector

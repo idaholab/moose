@@ -2215,6 +2215,28 @@ FEProblem::computeAuxiliaryKernels(ExecFlagType type)
 }
 
 void
+FEProblem::computeTransientImplicitResidual(Real time, const NumericVector<Number>& u, const NumericVector<Number>& udot, NumericVector<Number>& residual)
+{
+  _nl.setSolutionUDot(udot);
+  NonlinearImplicitSystem &sys = _nl.sys();
+  _time = time;
+  computeResidual(sys,u,residual);
+}
+
+void
+FEProblem::computeTransientImplicitJacobian(Real time, const NumericVector<Number>& u, const NumericVector<Number>& udot, Real shift, SparseMatrix<Number> &jacobian)
+{
+  if (0)
+  { // The current interface guarantees that the residual is called before Jacobian, thus udot has already been set
+    _nl.setSolutionUDot(udot);
+  }
+  _nl.setSolutionDuDotDu(shift);
+  NonlinearImplicitSystem &sys = _nl.sys();
+  _time = time;
+  computeJacobian(sys,u,jacobian);
+}
+
+void
 FEProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, NumericVector<Number>& residual)
 {
   _nl.set_solution(soln);

@@ -90,6 +90,7 @@
 #include "SolutionTimeAdaptive.h"
 #include "DT2Transient.h"
 #include "AdaptiveErrorEstimateTransient.h"
+#include "TransientAdaptive.h"
 
 // functions
 #include "Composite.h"
@@ -292,6 +293,11 @@ registerObjects()
   registerExecutioner(SolutionTimeAdaptive);
   registerExecutioner(DT2Transient);
   registerExecutioner(AdaptiveErrorEstimateTransient);
+#if defined(LIBMESH_HAVE_PETSC) && defined(PETSC_VERSION_LE)
+#if !PETSC_VERSION_LE(3,3,0)
+  registerExecutioner(TransientAdaptive);
+#endif
+#endif
 
   // functions
   registerFunction(Composite);

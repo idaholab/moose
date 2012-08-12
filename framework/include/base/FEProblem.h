@@ -285,6 +285,11 @@ public:
   // Markers //////
   void addMarker(std::string marker_name, const std::string & name, InputParameters parameters);
 
+  /// Evaluates transient residual G in canonical semidiscrete form G(t,U,Udot) = F(t,U)
+  void computeTransientImplicitResidual(Real time, const NumericVector<Number>& u, const NumericVector<Number>& udot, NumericVector<Number>& residual);
+
+  /// Evaluates transient Jacobian J_a = dG/dU + a*dG/dUdot from canonical semidiscrete form G(t,U,Udot) = F(t,U)
+  void computeTransientImplicitJacobian(Real time, const NumericVector<Number>& u, const NumericVector<Number>& udot, Real shift, SparseMatrix<Number> &jacobian);
 
   ////
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual);

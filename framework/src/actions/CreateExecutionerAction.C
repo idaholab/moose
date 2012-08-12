@@ -25,7 +25,7 @@
 template<>
 InputParameters validParams<CreateExecutionerAction>()
 {
-  MooseEnum schemes("backward-euler, implicit-euler, explicit-euler, crank-nicolson, bdf2", "backward-euler");
+  MooseEnum schemes("backward-euler, implicit-euler, explicit-euler, crank-nicolson, bdf2, petsc", "backward-euler");
 
   InputParameters params = validParams<MooseObjectAction>();
   params.addParam<Real>        ("l_tol",           1.0e-5,   "Linear Tolerance");

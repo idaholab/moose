@@ -311,6 +311,8 @@ void TimeScheme::computeLittlef(const NumericVector<Number> & bigF, NumericVecto
     cls.close();
     littlef.pointwise_mult(littlef, _mmatrix);
     _mmatrix.close();
+#else
+    mooseError("Reciprocal not available");
 #endif
   }
 

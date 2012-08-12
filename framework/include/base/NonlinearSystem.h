@@ -251,6 +251,21 @@ public:
 
   virtual void set_solution(const NumericVector<Number> & soln);
 
+  /**
+   * Set transient term used by residual and Jacobian evaluation.
+   * @param udot transient term
+   * @note If the calling sequence for residual evaluation was changed, this could become an explicit argument.
+   */
+  virtual void setSolutionUDot(const NumericVector<Number> & udot);
+
+  /**
+   * Set multiplier of udot for Jacobian evaluation.
+   * @param shift temporal shift for Jacobian
+   * @note If the residual is G(u,udot) = 0, the Jacobian is dG/du + shift*dG/dudot
+   * @note If the calling sequence for residual evaluation was changed, this could become an explicit argument.
+   */
+  virtual void setSolutionDuDotDu(Real shift);
+
   virtual NumericVector<Number> & solutionUDot();
   virtual NumericVector<Number> & solutionDuDotDu();
 
@@ -388,14 +403,6 @@ protected:
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
-  /// solution vector from step prior to previous step
-  //NumericVector<Number> & _older_solution;
-  /// solution vector for u^dot
-  //NumericVector<Number> & _solution_u_dot;
-  /// solution vector for {du^dot}\over{du}
-  //NumericVector<Number> & _solution_du_dot_du;
-  /// residual evaluated at the old time step (need for Crank-Nicolson)
-  //NumericVector<Number> * _residual_old;
   /// ghosted form of the residual
   NumericVector<Number> & _residual_ghosted;
 
