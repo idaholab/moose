@@ -589,27 +589,27 @@ void
 NonlinearSystem::timeSteppingScheme(Moose::TimeSteppingScheme scheme)
 {
   _time_stepping_scheme = scheme;
+  _time_scheme->timeSteppingScheme(scheme);
+}
+
+int
+NonlinearSystem::getTimeSteppingOrder() const
+{
   switch (_time_stepping_scheme)
   {
   case Moose::EXPLICIT_EULER:
   case Moose::IMPLICIT_EULER:
-    _time_stepping_order = 1;
+    return 1;
     break;
-
   case Moose::CRANK_NICOLSON:
-
-
-    _time_stepping_order = 2;
-    break;
-
   case Moose::BDF2:
-    _time_stepping_order = 2;
+    return 2;
     break;
   case Moose::PETSC_TS:
-    mooseError("PETSc TS not implemented");
+    mooseError("The side-effect expected by this query is not provided by PETSc TS");
     break;
   }
-  _time_scheme->timeSteppingScheme(scheme);
+  return 0;
 }
 
 void

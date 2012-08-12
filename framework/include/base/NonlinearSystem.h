@@ -235,7 +235,7 @@ public:
   /**
    * Get the order of used time integration scheme
    */
-  Real getTimeSteppingOrder() { return _time_stepping_order; }
+  int getTimeSteppingOrder() const;
 
   /**
    * Called at the beginning of th time step
@@ -417,8 +417,6 @@ protected:
   std::vector<Real> & _time_weight;
   /// Time stepping scheme used for time discretization
   Moose::TimeSteppingScheme _time_stepping_scheme;
-  /// The order of the time stepping scheme
-  Real _time_stepping_order;
 
   // holders
   /// Kernel storage for each thread
