@@ -12,25 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "StandardMarker.h"
+#ifndef ERRORTOLERANCEMARKER_H
+#define ERRORTOLERANCEMARKER_H
+
+#include "IndicatorMarker.h"
+
+class ErrorToleranceMarker;
 
 template<>
-InputParameters validParams<StandardMarker>()
+InputParameters validParams<ErrorToleranceMarker>();
+
+class ErrorToleranceMarker : public IndicatorMarker
 {
-  InputParameters params = validParams<Marker>();
-  params.addRequiredParam<VariableName>("indicator_field", "The name of the Indicator field that this Marker operates on.");
-  return params;
-}
+public:
+  ErrorToleranceMarker(const std::string & name, InputParameters parameters);
+  virtual ~ErrorToleranceMarker(){};
 
+protected:
+  virtual int computeElementMarker();
 
-StandardMarker::StandardMarker(const std::string & name, InputParameters parameters) :
-    Marker(name, parameters)
-{
-}
+  Real _coarsen;
+  Real _refine;
+};
 
-int
-StandardMarker::computeElementMarker()
-{
-  return 1;
-}
-
+#endif /* ERRORTOLERANCEMARKER_H */

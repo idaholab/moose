@@ -167,7 +167,7 @@
 #include "FluxJumpIndicator.h"
 
 // markers
-#include "StandardMarker.h"
+#include "ErrorToleranceMarker.h"
 #include "BoxMarker.h"
 
 // Actions
@@ -364,7 +364,7 @@ registerObjects()
   registerIndicator(FluxJumpIndicator);
 
   // markers
-  registerMarker(StandardMarker);
+  registerMarker(ErrorToleranceMarker);
   registerMarker(BoxMarker);
 
   registered = true;

@@ -20,12 +20,14 @@
 #include "NonlinearSystem.h"
 #include "DisplacedProblem.h"
 #include "FlagElementsThread.h"
+#include "UpdateErrorVectorsThread.h"
 
 // libMesh
 #include "equation_systems.h"
 #include "kelly_error_estimator.h"
 #include "patch_recovery_error_estimator.h"
 #include "fourth_error_estimators.h"
+#include "parallel.h"
 
 #ifdef LIBMESH_ENABLE_AMR
 
@@ -186,6 +188,40 @@ MooseVariable &
 Adaptivity::getMarkerVariable()
 {
   return _subproblem.getVariable(0, _marker_variable_name);
+}
+
+ErrorVector &
+Adaptivity::getErrorVector(std::string indicator_field)
+{
+  ErrorVector * ev = _indicator_field_to_error_vector[indicator_field];
+
+  if(!ev)
+  {
+    ev = new ErrorVector;
+    _indicator_field_to_error_vector[indicator_field] = ev;
+  }
+
+  return *ev;
+}
+
+void
+Adaptivity::updateErrorVectors()
+{
+  // Resize all of the ErrorVectors in case the mesh has changed
+  for(std::map<std::string, ErrorVector *>::iterator it=_indicator_field_to_error_vector.begin();
+      it != _indicator_field_to_error_vector.end();
+      ++it)
+    it->second->resize(_mesh.getMesh().max_elem_id());
+
+  // Fill the vectors with the local contributions
+  UpdateErrorVectorsThread uevt(_subproblem, _indicator_field_to_error_vector);
+  Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), uevt);
+
+  // Now sum across all processors
+  for(std::map<std::string, ErrorVector *>::iterator it=_indicator_field_to_error_vector.begin();
+      it != _indicator_field_to_error_vector.end();
+      ++it)
+    Parallel::sum((std::vector<float>&)*(it->second));
 }
 
 #endif //LIBMESH_ENABLE_AMR

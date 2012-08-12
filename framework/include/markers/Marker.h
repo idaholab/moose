@@ -22,6 +22,7 @@
 
 // libmesh Includes
 #include "threads.h"
+#include "error_vector.h"
 
 class MooseMesh;
 class Problem;
@@ -30,6 +31,7 @@ class SystemBase;
 class Assembly;
 class MooseVariable;
 class Marker;
+class Adaptivity;
 
 template<>
 InputParameters validParams<Marker>();
@@ -65,8 +67,19 @@ protected:
 
   virtual int computeElementMarker() = 0;
 
+  /**
+   * Get an ErrorVector that will be filled up with values corresponding to the
+   * indicator field name passed in.
+   *
+   * Note that this returns a reference... and the return value should be stored as a reference!
+   *
+   * @param indicator_field The name of the field to get an ErrorVector for.
+   */
+  ErrorVector & getErrorVector(std::string indicator_field);
+
   SubProblem & _subproblem;
   FEProblem & _fe_problem;
+  Adaptivity & _adaptivity;
   SystemBase & _sys;
 
   THREAD_ID _tid;

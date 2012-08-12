@@ -36,6 +36,7 @@ Marker::Marker(const std::string & name, InputParameters parameters) :
     SetupInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _adaptivity(_fe_problem.adaptivity()),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
@@ -60,5 +61,11 @@ Marker::computeMarker()
 {
   int mark = computeElementMarker();
   _field_var.setNodalValue(mark);
+}
+
+ErrorVector &
+Marker::getErrorVector(std::string indicator_field)
+{
+  return _adaptivity.getErrorVector(indicator_field);
 }
 

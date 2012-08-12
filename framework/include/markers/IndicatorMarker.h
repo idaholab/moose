@@ -12,24 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef STANDARDMARKER_H
-#define STANDARDMARKER_H
+#ifndef INDICATORMARKER_H
+#define INDICATORMARKER_H
 
 #include "Marker.h"
 
-class StandardMarker;
+class IndicatorMarker;
 
 template<>
-InputParameters validParams<StandardMarker>();
+InputParameters validParams<IndicatorMarker>();
 
-class StandardMarker : public Marker
+class IndicatorMarker : public Marker
 {
 public:
-  StandardMarker(const std::string & name, InputParameters parameters);
-  virtual ~StandardMarker(){};
+  IndicatorMarker(const std::string & name, InputParameters parameters);
+  virtual ~IndicatorMarker(){};
 
 protected:
-  virtual int computeElementMarker();
+  ErrorVector & _error_vector;
 };
 
-#endif /* STANDARDMARKER_H */
+#endif /* INDICATORMARKER_H */

@@ -1534,20 +1534,12 @@ FEProblem::computeIndicators()
 void
 FEProblem::computeAndApplyMarkers()
 {
+  _adaptivity.updateErrorVectors();
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     ComputeMarkerThread cmt(*this, getAuxiliarySystem(), _markers);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cmt);
-  }
-
-  MeshBase::const_element_iterator it = _mesh.active_local_elements_begin();
-  MeshBase::const_element_iterator it_end = _mesh.active_local_elements_end();
-
-  for (; it != it_end; ++it)
-  {
-    const Elem *elem = *it;
-    //TODO: Mark flags - perhaps in Adaptivty?
-    //   elem->set_refinement_flag(RefinementState::DO_NOTHING);
   }
 }
 

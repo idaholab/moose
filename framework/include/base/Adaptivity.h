@@ -139,6 +139,21 @@ public:
    */
   MooseVariable & getMarkerVariable();
 
+  /**
+   * Get an ErrorVector that will be filled up with values corresponding to the
+   * indicator field name passed in.
+   *
+   * Note that this returns a reference... and the return value should be stored as a reference!
+   *
+   * @param indicator_field The name of the field to get an ErrorVector for.
+   */
+  ErrorVector & getErrorVector(std::string indicator_field);
+
+  /**
+   * Update the ErrorVectors that have been requested through calls to getErrorVector().
+   */
+  void updateErrorVectors();
+
 protected:
   FEProblem & _subproblem;
   MooseMesh & _mesh;
@@ -175,6 +190,9 @@ protected:
 
   /// Name of the marker variable if using the new adaptivity system
   std::string _marker_variable_name;
+
+  /// Stores pointers to ErrorVectors associated with indicator field names
+  std::map<std::string, ErrorVector *> _indicator_field_to_error_vector;
 };
 
 template<typename T>
