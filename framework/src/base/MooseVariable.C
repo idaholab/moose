@@ -73,7 +73,12 @@ MooseVariable::MooseVariable(unsigned int var_num, unsigned int mvn, const FETyp
 
     _normals(_assembly.normals()),
 
+    _is_defined(false),
+    _has_nodal_value(false),
+    _has_nodal_value_neighbor(false),
+
     _node(_assembly.node()),
+    _is_defined_neighbor(false),
     _node_neighbor(_assembly.nodeNeighbor()),
     _scaling_factor(1.0)
 {}
@@ -149,12 +154,16 @@ void
 MooseVariable::prepare()
 {
   _dof_map.dof_indices (_elem, _dof_indices, _var_num);
+  _has_nodal_value = false;
+  _has_nodal_value_neighbor = false;
 }
 
 void
 MooseVariable::prepareNeighbor()
 {
   _dof_map.dof_indices (_neighbor, _dof_indices_neighbor, _var_num);
+  _has_nodal_value = false;
+  _has_nodal_value_neighbor = false;
 }
 
 void
