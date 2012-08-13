@@ -532,15 +532,8 @@ NonlinearSystem::addVector(const std::string & vector_name, const bool project, 
     _vecs_to_zero_for_residual.push_back(vec);
 }
 
-///Doxygen comment in .h needed.
-///NOT TESTED YET!!!
-void NonlinearSystem::computeLittlef(const NumericVector<Number> & bigF, NumericVector<Number> & littlef, Real time, bool mass)
-{
- _time_scheme->computeLittlef(bigF, littlef, time, mass);
-}
-
 void
-NonlinearSystem::computeResidual(NumericVector<Number> & residual)
+NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::KernelType type)
 {
   Moose::perf_log.push("compute_residual()","Solve");
 
@@ -556,9 +549,15 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual)
 
   try
   {
-    computeTimeDerivatives();
-    computeResidualInternal(residual);
-    finishResidual(residual);
+    if(type == Moose::KT_ALL)
+    {
+      computeTimeDerivatives();
+    }
+    computeResidualInternal(residual, type);
+    if(type != Moose::KT_TIME)
+    {
+      finishResidual(residual, type);
+    }
   }
   catch (MooseException & e)
   {
@@ -922,21 +921,11 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
   }
 }
 
-void
-NonlinearSystem::computeTimeResidual(NumericVector<Number> & mmmatrix)
-{
-  mmmatrix.zero();
-  for(unsigned int i=0; i<libMesh::n_threads(); i++)
-  {
-    _kernels[i].residualSetup();
-  }
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  ComputeResidualThread cr(_fe_problem, *this, mmmatrix, Moose::KT_TIME);
-  Threads::parallel_reduce(elem_range, cr);
-}
+
+
 
 void
-NonlinearSystem::computeNonTimeResidual(NumericVector<Number> & residual)
+NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose::KernelType type)
 {
   residual.zero();
 
@@ -944,95 +933,23 @@ NonlinearSystem::computeNonTimeResidual(NumericVector<Number> & residual)
   for(unsigned int i=0; i<libMesh::n_threads(); i++)
   {
     _kernels[i].residualSetup();
-    _bcs[i].residualSetup();
-    _dirac_kernels[i].residualSetup();
-    if (_doing_dg) _dg_kernels[i].residualSetup();
-    _constraints[i].residualSetup();
-  }
-
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  ComputeResidualThread cr(_fe_problem, *this, residual, Moose::KT_NONTIME);
-  Threads::parallel_reduce(elem_range, cr);
-
-  // Close the Aux system solution because "save_in" kernels might have written to it
-  _fe_problem.getAuxiliarySystem().sys().solution->close();
-  _fe_problem.getAuxiliarySystem().update();
-
-  // do scalar kernels (not sure how to thread this)
-  const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
-  if (scalars.size() > 0)
-  {
-    for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
+    if(type != Moose::KT_TIME )
     {
-      ScalarKernel * kernel = *it;
-
-      _fe_problem.reinitScalars(0);
-      kernel->reinit();
-      kernel->computeResidual();
-      _fe_problem.addResidualScalar(residual);
+      _bcs[i].residualSetup();
+      _dirac_kernels[i].residualSetup();
+      if (_doing_dg) _dg_kernels[i].residualSetup();
+      _constraints[i].residualSetup();
     }
   }
 
-  if(_need_residual_copy)
-  {
-    Moose::perf_log.push("residual.close1()","Solve");
-    residual.close();
-    Moose::perf_log.pop("residual.close1()","Solve");
-    residual.localize(_residual_copy);
-  }
-
-  if(_need_residual_ghosted)
-  {
-    Moose::perf_log.push("residual.close2()","Solve");
-    residual.close();
-    Moose::perf_log.pop("residual.close2()","Solve");
-    _residual_ghosted = residual;
-    _residual_ghosted.close();
-  }
-
-  computeDiracContributions(&residual);
-
-  Moose::perf_log.push("residual.close3()","Solve");
-  residual.close();
-  Moose::perf_log.pop("residual.close3()","Solve");
-
-  if(_fe_problem._has_constraints)
-  {
-    enforceNodalConstraintsResidual(residual);
-  }
-  residual.close();
-
-  // Add in Residual contributions from Constraints
-  if(_fe_problem._has_constraints)
-  {
-    // Undisplaced Constraints
-    constraintResiduals(residual, false);
-
-    // Displaced Constraints
-    if(_fe_problem.getDisplacedProblem())
-      constraintResiduals(residual, true);
-  }
-}
-
-
-void
-NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
-{
-  residual.zero();
-
-  // residualSetup() /////
-  for(unsigned int i=0; i<libMesh::n_threads(); i++)
-  {
-    _kernels[i].residualSetup();
-    _bcs[i].residualSetup();
-    _dirac_kernels[i].residualSetup();
-    if (_doing_dg) _dg_kernels[i].residualSetup();
-    _constraints[i].residualSetup();
-  }
-
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  ComputeResidualThread cr(_fe_problem, *this, residual);
+  ComputeResidualThread cr(_fe_problem, *this, residual, type);
   Threads::parallel_reduce(elem_range, cr);
+  if(type == Moose::KT_TIME)
+  {
+    residual.close();
+    return;
+  }
   // do scalar kernels (not sure how to thread this)
   const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
   if (scalars.size() > 0)
@@ -1091,9 +1008,12 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
 }
 
 void
-NonlinearSystem::finishResidual(NumericVector<Number> & residual)
+NonlinearSystem::finishResidual(NumericVector<Number> & residual, Moose::KernelType type )
 {
-        residual = _time_scheme->finishResidual(residual);
+  if(type == Moose::KT_ALL )
+  {
+    residual = _time_scheme->finishResidual(residual);
+  }
 
   // last thing to do are nodal BCs
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();

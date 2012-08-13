@@ -15,6 +15,7 @@
 #include "TimeScheme.h"
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"
+#include "FEProblem.h"
 
 // libMesh
 #include "nonlinear_solver.h"
@@ -148,6 +149,7 @@ TimeScheme::onTimestepBegin()
   case Moose::CRANK_NICOLSON:
     {
       computeLittlef(_time_stack[_time_stack.size()-2].getSolution(), _residual_old, -1, false);
+      _residual_old.close();
     }
     break;
 
@@ -285,6 +287,7 @@ TimeScheme::applyPredictor(NumericVector<Number> & initial_solution)
 
 void TimeScheme::computeLittlef(const NumericVector<Number> & bigF, NumericVector<Number> & littlef, Real time, bool mass)
 {
+
   NumericVector<Number> & my_solution_u_dot = _trash3;
 
    if(mass)
@@ -300,11 +303,13 @@ void TimeScheme::computeLittlef(const NumericVector<Number> & bigF, NumericVecto
   }
   _nl->set_solution(bigF);// use old_solution for computing with correct solution vector
   littlef.close();
-  _nl->computeNonTimeResidual(littlef);
+
+  _nl->_fe_problem.computeResidualType( bigF, littlef, Moose::KT_NONTIME);
+
   if(mass)
   {
 #ifdef LIBMESH_HAVE_PETSC
-    _nl->computeTimeResidual(_mmatrix);
+    _nl->computeResidual(_mmatrix, Moose::KT_TIME);
     PetscVector<Number> cls((static_cast<PetscVector<Number> & > (_mmatrix)).vec());
     if( VecReciprocal(cls.vec()) != 0)
       mooseError("VecReciprocal");
@@ -341,7 +346,10 @@ NumericVector<Number> & TimeScheme::finishResidual(NumericVector<Number> & resid
 void
 TimeScheme::computeTimeDerivatives()
 {
-
+  if(_time_stack.empty())
+  {
+    return;
+  }
   switch (_time_stepping_scheme)
   {
   case Moose::IMPLICIT_EULER:

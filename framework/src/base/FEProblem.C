@@ -2220,8 +2220,13 @@ FEProblem::computeAuxiliaryKernels(ExecFlagType type)
 {
   _aux.compute(type);
 }
+void FEProblem::computeResidual(NonlinearImplicitSystem &/*sys*/, const NumericVector<Number> & soln, NumericVector<Number> & residual )
+{
+  computeResidualType( soln, residual, Moose::KT_ALL);
+}
 
 void
+
 FEProblem::computeTransientImplicitResidual(Real time, const NumericVector<Number>& u, const NumericVector<Number>& udot, NumericVector<Number>& residual)
 {
   _nl.setSolutionUDot(udot);
@@ -2244,7 +2249,7 @@ FEProblem::computeTransientImplicitJacobian(Real time, const NumericVector<Numbe
 }
 
 void
-FEProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, NumericVector<Number>& residual)
+FEProblem::computeResidualType( const NumericVector<Number>& soln, NumericVector<Number>& residual, Moose::KernelType type)
 {
   _nl.set_solution(soln);
 
@@ -2270,7 +2275,7 @@ FEProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVecto
   _aux.residualSetup();
 
   _aux.compute();
-  _nl.computeResidual(residual);
+  _nl.computeResidual(residual, type);
 
   if (_dbg_top_residuals)
     _nl.printTopResiduals(residual, _dbg_top_residuals);

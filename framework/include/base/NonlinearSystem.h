@@ -165,16 +165,7 @@ public:
    * Computes residual
    * @param residual Residual is formed in here
    */
-  void computeResidual(NumericVector<Number> & residual);
-
-  /**
-   * For computing all of little f given a big F. Currently it saves the current solution,
-   * sets the current solution to bigF, computes little f.
-   *
-   * The M matrix is not gotten or inverted and applied currently.
-   * TODO: Retrieve M matrix, invert, apply.
-   */
-  void computeLittlef(const NumericVector<Number> & bigF, NumericVector<Number> & littlef, Real time = -1, bool mass = true);
+  void computeResidual(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
 
   /**
    * Finds the implicit sparsity graph between geometrically related dofs.
@@ -279,14 +270,6 @@ public:
 
   virtual void augmentSendList(std::vector<unsigned int> & send_list);
 
-  /**
-   * computes the residual of all the kernels except for the time kernels for the purpose
-   * of solving the time ODE M(dU/dt) = f(U,t)
-   * @param residual The residual which is f(U,t)
-   */
-  virtual void computeNonTimeResidual(NumericVector<Number> & residual);
-  virtual void computeTimeResidual(NumericVector<Number> & mmmatrix);
-
   virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
                                std::vector<unsigned int> & n_nz,
                                std::vector<unsigned int> & n_oz);
@@ -382,13 +365,13 @@ protected:
    * Compute the residual
    * @param residual[out] Residual is formed here
    */
-  void computeResidualInternal(NumericVector<Number> & residual);
+  void computeResidualInternal(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL  );
 
   /**
    * Completes the assembly of residual
    * @param residual[out] Residual is formed here
    */
-  void finishResidual(NumericVector<Number> & residual);
+  void finishResidual(NumericVector<Number> & residual, Moose::KernelType type);
 
   void computeDiracContributions(NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
 
