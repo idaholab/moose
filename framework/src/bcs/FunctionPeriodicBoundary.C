@@ -20,7 +20,6 @@
  */
 FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblem & feproblem, std::vector<std::string> fn_names) :
     _dim(fn_names.size()),
-    _dir(1.0),
     _tr_x(&feproblem.getFunction(fn_names[0])),
     _tr_y(fn_names.size() > 1 ? &feproblem.getFunction(fn_names[1]) : NULL),
     _tr_z(fn_names.size() > 2 ? &feproblem.getFunction(fn_names[2]) : NULL)
@@ -32,7 +31,6 @@ FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblem & feproblem, std::v
 FunctionPeriodicBoundary::FunctionPeriodicBoundary(const FunctionPeriodicBoundary & o, bool inverse/* = false*/) :
     PeriodicBoundary(o, inverse),
     _dim(o._dim),
-    _dir(inverse ? -1.0 : 1.0),
     _tr_x(o._tr_x),
     _tr_y(o._tr_y),
     _tr_z(o._tr_z)
@@ -50,9 +48,12 @@ FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt) const
     return Point(_tr_x->value(t, pt));
 
   case 2:
+    mooseAssert(_tr_y, "Must provide a function to map y in 2D.");
     return Point(_tr_x->value(t, pt), _tr_y->value(t, pt));
 
   case 3:
+    mooseAssert(_tr_y, "Must provide a function to map y in 2D.");
+    mooseAssert(_tr_z, "Must provide a function to map z in 3D.");
     return Point(_tr_x->value(t, pt), _tr_y->value(t, pt), _tr_z->value(t, pt));
 
   default:

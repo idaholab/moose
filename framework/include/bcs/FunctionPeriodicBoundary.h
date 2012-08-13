@@ -52,7 +52,6 @@ public:
 protected:
   /// The dimension of the problem (says which _tr_XYZ member variables are active)
   unsigned int _dim;
-  Real _dir;
 
   Function * _tr_x;
   Function * _tr_y;

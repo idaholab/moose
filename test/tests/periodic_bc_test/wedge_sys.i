@@ -74,6 +74,7 @@
       primary = 1
       secondary = 2
       transform_func = 'tr_x tr_y'
+      inv_transform_func = 'tr_x tr_y'
       variable = u
     [../]
   [../]

@@ -140,8 +140,10 @@ AddPeriodicBCAction::act()
     }
     else
     {
-      // symmetric translation vector
-      ipb = new FunctionPeriodicBoundary(*pb, true);
+      // The user *must* provide an inverse transformation function if he provides a forward
+      // transformation!  There's no default behavior we can do that would make sense (like there
+      // is for translation, where you can just multiply the translation vector by -1.)
+      mooseError("You must provide an inv_transform_func for FunctionPeriodicBoundary!");
     }
 
     nl.dofMap().add_periodic_boundary(pb, ipb);
