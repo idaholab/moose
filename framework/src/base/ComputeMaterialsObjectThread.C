@@ -58,7 +58,7 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjec
 void
 ComputeMaterialsObjectThread::onElement(const Elem *elem)
 {
-  _assembly[0]->reinit(elem);
+  _assembly[_tid]->reinit(elem);
 
   SubdomainID subdomain = elem->subdomain_id();
 
