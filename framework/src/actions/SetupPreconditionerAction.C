@@ -56,18 +56,15 @@ SetupPreconditionerAction::act()
       mooseError("Failed to build the preconditioner.");
 
     _problem->getNonlinearSystem().setPreconditioner(pc);
-  }
 
-  /**
-   * Go ahead and set common precondition options here.  The child classes will still be called
-   * through the action warehouse
-   */
+    /**
+     * Go ahead and set common precondition options here.  The child classes will still be called
+     * through the action warehouse
+     */
 #ifdef LIBMESH_HAVE_PETSC
-  std::vector<std::string> petsc_options,  petsc_inames, petsc_values;
-  petsc_options = getParam<std::vector<std::string> >("petsc_options");
-  petsc_inames = getParam<std::vector<std::string> >("petsc_options_iname");
-  petsc_values = getParam<std::vector<std::string> >("petsc_options_value");
-
-  Moose::PetscSupport::petscSetOptions(petsc_options, petsc_inames, petsc_values);
+    _problem->storePetscOptions(getParam<std::vector<std::string> >("petsc_options"),
+                                getParam<std::vector<std::string> >("petsc_options_iname"), getParam<std::vector<std::string> >("petsc_options_value"));
+    Moose::PetscSupport::petscSetOptions(*_problem);
 #endif //LIBMESH_HAVE_PETSC
+  }
 }

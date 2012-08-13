@@ -111,6 +111,13 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     // debugging
     _dbg_top_residuals(0)
 {
+#ifdef LIBMESH_HAVE_PETSC
+  // put in empty arrays for PETSc options
+  this->parameters().set<std::vector<std::string> >("petsc_options") = std::vector<std::string>();
+  this->parameters().set<std::vector<std::string> >("petsc_inames") = std::vector<std::string>();
+  this->parameters().set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
+#endif
+
   _n++;
 
   _time = 0.0;
@@ -2610,3 +2617,33 @@ FEProblem::getVariableNames()
 
   return names;
 }
+
+#ifdef LIBMESH_HAVE_PETSC
+void
+FEProblem::storePetscOptions(const std::vector<std::string> & petsc_options,
+                             const std::vector<std::string> & petsc_options_inames,
+                             const std::vector<std::string> & petsc_options_values)
+{
+  std::vector<std::string> & po = parameters().set<std::vector<std::string> >("petsc_options");         // set because we need a writable reference
+  for (unsigned int i = 0; i < petsc_options.size(); i++)
+    if (find(po.begin(), po.end(), petsc_options[i]) == po.end())
+      po.push_back(petsc_options[i]);
+
+  std::vector<std::string> & pn = parameters().set<std::vector<std::string> >("petsc_inames");         // set because we need a writable reference
+  std::vector<std::string> & pv = parameters().set<std::vector<std::string> >("petsc_values");         // set because we need a writable reference
+  for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
+  {
+    if (find(pn.begin(), pn.end(), petsc_options_inames[i]) == pn.end())
+    {
+      pn.push_back(petsc_options_inames[i]);
+      pv.push_back(petsc_options_values[i]);
+    }
+    else
+    {
+      for (unsigned int j = 0; j < pn.size(); j++)
+        if (pn[j] == petsc_options_inames[i])
+          pv[j] = petsc_options_values[i];
+    }
+  }
+}
+#endif

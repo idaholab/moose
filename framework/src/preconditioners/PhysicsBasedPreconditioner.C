@@ -92,7 +92,8 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const std::string & name
 #ifdef LIBMESH_HAVE_PETSC
   std::vector<std::string> petsc_options(1), petsc_inames, petsc_values;
   petsc_options[0] = "-snes_mf";  // SNES Matrix Free
-  Moose::PetscSupport::petscSetOptions(petsc_options, petsc_inames, petsc_values);
+  _fe_problem.storePetscOptions(petsc_options, petsc_inames, petsc_values);
+  Moose::PetscSupport::petscSetOptions(_fe_problem);
 #endif
 }
 

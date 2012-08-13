@@ -19,6 +19,7 @@
 
 #ifdef LIBMESH_HAVE_PETSC
 
+#include "Problem.h"
 // libMesh
 #include "petsc_nonlinear_solver.h"
 
@@ -28,9 +29,7 @@ namespace Moose
 {
 namespace PetscSupport
 {
-void petscSetOptions(const std::vector<std::string> & petsc_options,
-                     const std::vector<std::string> & petsc_options_inames,
-                     const std::vector<std::string> & petsc_options_values);
+void petscSetOptions(Problem & problem);
 
 //    PetscErrorCode petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedReason *reason,void *dummy);
 //    PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal pnorm,PetscReal fnorm,SNESConvergedReason *reason,void *dummy);

@@ -68,15 +68,6 @@ CreateExecutionerAction::act()
   // Steady and derived Executioners need to know the number of adaptivity steps to take.  This parameter
   // is held in the child block Adaptivity and needs to be pulled early
 
-#ifdef LIBMESH_HAVE_PETSC
-  std::vector<std::string> petsc_options,  petsc_inames, petsc_values;
-  petsc_options = getParam<std::vector<std::string> >("petsc_options");
-  petsc_inames = getParam<std::vector<std::string> >("petsc_options_iname");
-  petsc_values = getParam<std::vector<std::string> >("petsc_options_value");
-
-  Moose::PetscSupport::petscSetOptions(petsc_options, petsc_inames, petsc_values);
-#endif //LIBMESH_HAVE_PETSC
-
   _moose_object_pars.set<MooseMesh *>("_mesh") = _mesh;
   Moose::setup_perf_log.push("Create Executioner","Setup");
   Executioner * executioner = static_cast<Executioner *>(Factory::instance()->create(_type, "Executioner", _moose_object_pars));
@@ -85,6 +76,11 @@ CreateExecutionerAction::act()
   FEProblem *mproblem = dynamic_cast<FEProblem *>(&executioner->problem());
   if (mproblem != NULL)
   {
+#ifdef LIBMESH_HAVE_PETSC
+    mproblem->storePetscOptions(getParam<std::vector<std::string> >("petsc_options"),
+                                getParam<std::vector<std::string> >("petsc_options_iname"), getParam<std::vector<std::string> >("petsc_options_value"));
+#endif //LIBMESH_HAVE_PETSC
+
     mproblem->_ex_reader = _awh.exReader();               // FIXME: do not access members directly
 
     // solver params
@@ -125,6 +121,10 @@ CreateExecutionerAction::act()
     nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<MooseEnum>("scheme")));
 
     _problem = mproblem;
+
+#ifdef LIBMESH_HAVE_PETSC
+    Moose::PetscSupport::petscSetOptions(*_problem);
+#endif //LIBMESH_HAVE_PETSC
   }
   _awh.executioner() = executioner;
 

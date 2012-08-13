@@ -75,6 +75,11 @@ public:
 
   std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries(THREAD_ID tid) { return _assembly[tid]->couplingEntries(); }
 
+#ifdef LIBMESH_HAVE_PETSC
+  void storePetscOptions(const std::vector<std::string> & petsc_options,
+                         const std::vector<std::string> & petsc_options_inames,
+                         const std::vector<std::string> & petsc_options_values);
+#endif
 
   virtual bool hasVariable(const std::string & var_name);
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);

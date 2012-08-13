@@ -56,10 +56,12 @@ namespace Moose
 namespace PetscSupport
 {
 
-void petscSetOptions(const std::vector<std::string> & petsc_options,
-                     const std::vector<std::string> & petsc_options_inames,
-                     const std::vector<std::string> & petsc_options_values)
+void petscSetOptions(Problem & problem)
 {
+  const std::vector<std::string> & petsc_options = problem.parameters().get<std::vector<std::string> >("petsc_options");
+  const std::vector<std::string> & petsc_options_inames = problem.parameters().get<std::vector<std::string> >("petsc_inames");
+  const std::vector<std::string> & petsc_options_values = problem.parameters().get<std::vector<std::string> >("petsc_values");
+
   if (petsc_options_inames.size() != petsc_options_values.size())
     mooseError("Petsc names and options are not the same length");
 
