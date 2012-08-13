@@ -1536,6 +1536,8 @@ FEProblem::computeIndicators()
     // compute
     ComputeIndicatorThread cit(*this, getAuxiliarySystem(), _indicators);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
+    _aux.solution().close();
+    _aux.update();
 }
 
 void

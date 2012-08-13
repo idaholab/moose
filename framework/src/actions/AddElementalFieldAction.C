@@ -48,10 +48,14 @@ AddElementalFieldAction::act()
 
   std::string variable = getParam<FieldName>("field_name");
 
-  std::cout<<"Adding: "<<variable<<std::endl;
-
   if (blocks.empty())
+  {
     _problem->addAuxVariable(variable, fe_type);
+    _problem->getAuxiliarySystem().addVariableToZeroOnResidual(variable);
+  }
   else
+  {
     _problem->addAuxVariable(variable, fe_type, &blocks);
+    _problem->getAuxiliarySystem().addVariableToZeroOnResidual(variable);
+  }
 }

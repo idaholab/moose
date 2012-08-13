@@ -137,15 +137,6 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
 
       for (std::vector<Indicator *>::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
         (*it)->computeIndicator();
-
-      {
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
-        {
-          MooseVariable * var = it->second;
-          var->add(_aux_sys.solution());
-        }
-      }
     }
   }
 }
@@ -153,8 +144,6 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
 void
 ComputeIndicatorThread::postElement(const Elem * /*elem*/)
 {
-//  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-//  _problem.addIndicator(_Indicator, _tid);
 }
 
 void

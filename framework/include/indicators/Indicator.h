@@ -80,6 +80,7 @@ protected:
   SubProblem & _subproblem;
   FEProblem & _fe_problem;
   SystemBase & _sys;
+  NumericVector<Number> & _solution;
 
   THREAD_ID _tid;
 

@@ -105,8 +105,13 @@ InternalSideIndicator::computeIndicator()
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
     sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
 
-  _field_var.setNodalValue(_field_var.nodalSln()[0]+(sum/(Real)n_flux_faces));
-  _field_var.setNodalValueNeighbor(_field_var.nodalSlnNeighbor()[0]+(sum/(Real)n_flux_faces));
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+
+    _solution.add(_field_var.nodalDofIndex(), sum/(Real)n_flux_faces);
+    _solution.add(_field_var.nodalDofIndexNeighbor(), sum/(Real)n_flux_faces);
+  }
+
 
   Moose::perf_log.pop("computeIndicator()","InternalSideIndicator");
 }
