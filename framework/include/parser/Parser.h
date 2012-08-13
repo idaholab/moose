@@ -160,6 +160,11 @@ protected:
   void setVectorParameter(const std::string & full_name, const std::string & short_name,
                           InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block);
 
+  template<typename T>
+  void setScalarComponentParameter(const std::string & full_name, const std::string & short_name,
+                                   InputParameters::Parameter<T> * param, bool in_global, GlobalParamsAction * global_block);
+
+
   SyntaxTree * _syntax_formatter;
 
   /// Contains all of the sections that are not active during the parse phase so that blocks

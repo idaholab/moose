@@ -501,6 +501,10 @@ void Parser::setScalarParameter<RealVectorValue>(const std::string & full_name, 
                                                  InputParameters::Parameter<RealVectorValue> * param, bool in_global, GlobalParamsAction * global_block);
 
 template<>
+void Parser::setScalarParameter<Point>(const std::string & full_name, const std::string & short_name,
+                                       InputParameters::Parameter<Point> * param, bool in_global, GlobalParamsAction * global_block);
+
+template<>
 void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, const std::string & short_name,
                                                  InputParameters::Parameter<RealTensorValue> * param, bool in_global, GlobalParamsAction * global_block);
 
@@ -577,6 +581,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractScalar(SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(BoundaryID            , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(RealVectorValue       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(Point                 , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(RealTensorValue       , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(MooseEnum             , it->second, full_name, it->first, in_global, global_params_block);
 
@@ -663,6 +668,33 @@ void Parser::setVectorParameter(const std::string & full_name, const std::string
   }
 }
 
+template<typename T>
+void Parser::setScalarComponentParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T> * param, bool in_global, GlobalParamsAction * global_block)
+{
+  GetPot *gp;
+
+  // See if this variable was passed on the command line
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
+    gp = Moose::app->commandLine().getPot();
+  else
+    gp = &_getpot_file;
+
+  int vec_size = gp->vector_variable_size(full_name.c_str());
+
+  if (vec_size != LIBMESH_DIM)
+    mooseError(std::string("Error in Scalar Component parameter ") + full_name + ": size is " << vec_size
+               << ", should be " << LIBMESH_DIM);
+
+  T value;
+  for (int i = 0; i < vec_size; ++i)
+    value(i) = Real(gp->get_value_no_default(full_name.c_str(), (Real) 0.0, i));
+
+  param->set() = value;
+  if (in_global)
+    global_block->setScalarParam<T>(short_name) = value;
+}
+
 template<>
 void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<MooseEnum> * param, bool in_global, GlobalParamsAction * global_block)
 {
@@ -687,28 +719,13 @@ void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const 
 template<>
 void Parser::setScalarParameter<RealVectorValue>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<RealVectorValue> * param, bool in_global, GlobalParamsAction * global_block)
 {
-  GetPot *gp;
+  setScalarComponentParameter(full_name, short_name, param, in_global, global_block);
+}
 
-  // See if this variable was passed on the command line
-  // if it was then we will retrieve the value from the command line instead of the file
-  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
-    gp = Moose::app->commandLine().getPot();
-  else
-    gp = &_getpot_file;
-
-  int vec_size = gp->vector_variable_size(full_name.c_str());
-
-  if (vec_size != LIBMESH_DIM)
-    mooseError(std::string("Error in RealVectorValue parameter ") + full_name + ": size is " << vec_size
-               << ", should be " << LIBMESH_DIM);
-
-  RealVectorValue value;
-  for (int i = 0; i < vec_size; ++i)
-    value(i) = Real(gp->get_value_no_default(full_name.c_str(), (Real) 0.0, i));
-
-  param->set() = value;
-  if (in_global)
-    global_block->setScalarParam<RealVectorValue>(short_name) = value;
+template<>
+void Parser::setScalarParameter<Point>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<Point> * param, bool in_global, GlobalParamsAction * global_block)
+{
+  setScalarComponentParameter(full_name, short_name, param, in_global, global_block);
 }
 
 template<>
