@@ -42,3 +42,21 @@ auto_wrap_3d_test = { INPUT : 'auto_periodic_bc_test_3d.i',
                       MAX_THREADS : 1,
                       MAX_PARALLEL: 1,
                       GROUP : 'periodic'}
+
+all_periodic_trans_test = { INPUT : 'all_periodic_trans.i',
+                            EXODIFF : ['all_periodic_trans_out.e'],
+                            MAX_THREADS : 1,
+                            MAX_PARALLEL: 1,
+                            GROUP : 'periodic'}
+
+orthogonal_pbc_on_square_test = { INPUT : 'orthogonal_pbc_on_square.i',
+                                  EXODIFF : ['orthogonal_pbc_on_square_out.e'],
+                                  MAX_THREADS : 1,
+                                  MAX_PARALLEL: 1,
+                                  GROUP : 'periodic'}
+
+parallel_pbc_using_trans_test = { INPUT : 'parallel_pbc_using_trans.i',
+                                  EXODIFF : ['parallel_pbc_using_trans_out.e'],
+                                  MAX_THREADS : 1,
+                                  MAX_PARALLEL: 1,
+                                  GROUP : 'periodic'}
