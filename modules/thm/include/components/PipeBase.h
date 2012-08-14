@@ -54,6 +54,7 @@ protected:
                                                 ///< Physical meaning:
                                                 ///< _aw = A_heating_surface_per_length / A_pipe_flow_are [1/m]
   Real _Dh;                                     ///< Pipe hydraulic diameter, [m]
+  Real _roughness;                              ///< Roughness of pipe surface, [m]
 
   bool _has_f;                                  ///< true if user provides a constant f
   Real _f;                                      ///< friction

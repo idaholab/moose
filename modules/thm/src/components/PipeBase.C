@@ -29,6 +29,7 @@ InputParameters validParams<PipeBase>()
   params.addRequiredParam<UserObjectName>("eos", "The name of EOS to use");
 
   //Input parameters default values could be given.
+  params.addParam<Real>("roughness", 0.0, "roughness, [m]");
   params.addParam<Real>("f", 0.0, "friction");
   params.addParam<Real>("Hw", 0.0, "Convective heat transfer coefficient");
   params.addParam<Real>("Tw", 400, "Wall temperature");
@@ -51,6 +52,7 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
     _length(getParam<Real>("length")),
     _n_elems(getParam<unsigned int>("n_elems")),
     _A(getParam<Real>("A")),
+    _roughness(getParam<Real>("roughness")),
     _has_f(params.wasSeenInInput("f")),
     _f(getParam<Real>("f")),
     _has_Hw(params.wasSeenInInput("Hw")),
@@ -204,6 +206,7 @@ PipeBase::addMooseObjects()
   pars.set<Real>("gx") = _gx;
   pars.set<Real>("g") = _g; // gravity constant
   pars.set<Real>("dh") = _Dh;
+  pars.set<Real>("roughness") = _roughness;
   pars.set<Real>("aw") = _aw;
   if (_has_f)
     pars.set<Real>("f") = _f;
