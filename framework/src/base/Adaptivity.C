@@ -211,7 +211,12 @@ Adaptivity::updateErrorVectors()
   for(std::map<std::string, ErrorVector *>::iterator it=_indicator_field_to_error_vector.begin();
       it != _indicator_field_to_error_vector.end();
       ++it)
-    it->second->resize(_mesh.getMesh().max_elem_id());
+  {
+    ErrorVector & vec = *(it->second);
+    vec.resize(_mesh.getMesh().max_elem_id());
+    for(unsigned int i=0; i<vec.size(); i++)
+      vec[i] = 0.0;
+  }
 
   // Fill the vectors with the local contributions
   UpdateErrorVectorsThread uevt(_subproblem, _indicator_field_to_error_vector);
