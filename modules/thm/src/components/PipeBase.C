@@ -169,9 +169,6 @@ PipeBase::addVariables()
   if(_has_initial_T)
    initial_T = _initial_T;
 
-  //Model::addInitialConditions(_subdomain_id, initial_P, initial_V, initial_T);
-
-
   Real initial_rho = 0.;
   Real initial_rhou = 0.;
   Real initial_e = 0.;

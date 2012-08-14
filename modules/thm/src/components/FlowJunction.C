@@ -196,6 +196,7 @@ FlowJunction::addMooseObjects()
   {
 	  std::vector<unsigned int> bnd_id(1, _bnd_id[i]);
 	  // adding mass equation BC
+	  /*
 	  {
 	    InputParameters params = validParams<OneDFreeMassBC>();
 	    params.set<NonlinearVariableName>("variable") = Model::RHO;
@@ -206,6 +207,7 @@ FlowJunction::addMooseObjects()
 
 	    _sim.addBoundaryCondition("OneDFreeMassBC", genName("bc", _id * 1000 + i, "rho"), params);		//FIXME use a better name
 	  }
+	  */
 	  // Debug
 	  /*
 	  {
