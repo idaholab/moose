@@ -166,46 +166,49 @@ TimeScheme::onTimestepBegin()
 
 }
 
-/*void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
-{
-  if(_dt ==0 || _dt_old == 0 || _t_step<3){
-    return;
-  }
-  initial_solution.localize(_predicted_solution);
-  NumericVector<Number> & my_old_solution_u_dot = _trash1; //change to trash1
-  _time_stack[_time_stack.size()-3].getTimeDerivitive().localize(my_old_solution_u_dot);
-  my_old_solution_u_dot *= -1.0;
-  my_old_solution_u_dot += _time_stack[_time_stack.size()-2].getTimeDerivitive();
-  my_old_solution_u_dot *= (.5*_dt*_dt)/ _time_stack[_time_stack.size()-2].getDt();
-  NumericVector<Number> & _old_solution_u_dot = _trash2;
-  _time_stack[_time_stack.size()-2].getTimeDerivitive().localize(_old_solution_u_dot);
-  _old_solution_u_dot *= _dt;
-  _predicted_solution += my_old_solution_u_dot;
-  _predicted_solution += _old_solution_u_dot;
-  if(_apply_predictor)
-  {
-    my_old_solution_u_dot *= _nl->_predictor_scale;
-    _old_solution_u_dot *= _nl->_predictor_scale;
-    initial_solution += my_old_solution_u_dot;
-    initial_solution += _old_solution_u_dot;
-  }
-}*/
 void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
 {
-
-  NumericVector<Number> & residual_older = _trash1;
-  NumericVector<Number> & residual_old = _trash2;
-
-  computeLittlef(_time_stack[_time_stack.size()-3].getSolution(), residual_older);
-  computeLittlef(_time_stack[_time_stack.size() -2].getSolution(), residual_old);
-  if(_dt ==0 || _dt_old == 0){
-    std::cout<<"help me!!"<<std::endl;
+  if(!_nl->containsTimeKernel())
+  {
+    if(_dt ==0 || _dt_old == 0 || _t_step<3){
+      return;
+    }
+    initial_solution.localize(_predicted_solution);
+    NumericVector<Number> & my_old_solution_u_dot = _trash1; //change to trash1
+    _time_stack[_time_stack.size()-3].getTimeDerivitive().localize(my_old_solution_u_dot);
+    my_old_solution_u_dot *= -1.0;
+    my_old_solution_u_dot += _time_stack[_time_stack.size()-2].getTimeDerivitive();
+    my_old_solution_u_dot *= (.5*_dt*_dt)/ _time_stack[_time_stack.size()-2].getDt();
+    NumericVector<Number> & _old_solution_u_dot = _trash2;
+    _time_stack[_time_stack.size()-2].getTimeDerivitive().localize(_old_solution_u_dot);
+    _old_solution_u_dot *= _dt;
+    _predicted_solution += my_old_solution_u_dot;
+    _predicted_solution += _old_solution_u_dot;
+    if(_apply_predictor)
+    {
+      my_old_solution_u_dot *= _nl->_predictor_scale;
+      _old_solution_u_dot *= _nl->_predictor_scale;
+      initial_solution += my_old_solution_u_dot;
+      initial_solution += _old_solution_u_dot;
+    }
+    return;
   }
-  residual_older *= -1.0*(_dt*_dt)/(2.0*_dt_old);
-  residual_old *= -1.0*(_dt + (_dt*_dt)/(2.0*_dt_old));
-  initial_solution +=  (residual_old);
-  initial_solution -= residual_older;
-  initial_solution.localize(_predicted_solution);
+  else
+  {
+    NumericVector<Number> & residual_older = _trash1;
+    NumericVector<Number> & residual_old = _trash2;
+
+    computeLittlef(_time_stack[_time_stack.size()-3].getSolution(), residual_older);
+    computeLittlef(_time_stack[_time_stack.size() -2].getSolution(), residual_old);
+    if(_dt ==0 || _dt_old == 0){
+      std::cout<<"help me!!"<<std::endl;
+    }
+    residual_older *= -1.0*(_dt*_dt)/(2.0*_dt_old);
+    residual_old *= -1.0*(_dt + (_dt*_dt)/(2.0*_dt_old));
+    initial_solution +=  (residual_old);
+    initial_solution -= residual_older;
+    initial_solution.localize(_predicted_solution);
+  }
 }
 
 Real
