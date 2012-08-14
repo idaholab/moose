@@ -79,7 +79,7 @@ NodalFloodCount::execute()
   {
     const Node *node = _current_elem->get_node(i);
 
-    flood(node, 0);
+    flood(node, 0, -1);
   }
 }
 
@@ -91,7 +91,7 @@ NodalFloodCount::finalize()
   Parallel::allgather(_packed_data, false);
   unpack(_packed_data);
 
-  mergeSets();  
+  mergeSets();
 }
 
 Real
@@ -257,7 +257,7 @@ NodalFloodCount::mergeSets()
 }
 
 void
-NodalFloodCount::flood(const Node *node, unsigned int region)
+NodalFloodCount::flood(const Node *node, unsigned int region, int current_idx)
 {
   if (node == NULL)
     return;
@@ -268,12 +268,33 @@ NodalFloodCount::flood(const Node *node, unsigned int region)
   if (_bubble_map.find(node_id) != _bubble_map.end())
     return;
 
-  // This node hasn't been marked - is it in a bubble?
-  if (_var.getNodalValue(*node) < _threshold)
+  /**
+   * This node hasn't been marked - check to see if it in a bubble.
+   * If current_idx is set (>= zero) then we are in the process of marking a bubble.
+   */
+  if (current_idx >= 0)
   {
-    // No - mark and return
-    _bubble_map[node_id] = 0;
-    return;
+    if (_vars[current_idx]->getNodalValue(*node) < _threshold)
+    {
+      // No - mark and return
+      _bubble_map[node_id] = 0;
+      return;
+    }
+  }
+  else  // If current_idx is not set (< zero), then we can look for the start of a new bubble
+  {
+    for (unsigned int i=0; i<_vars.size(); ++i)
+      if (_vars[i]->getNodalValue(*node) >= _threshold)
+      {
+        current_idx = i;
+        break;
+      }
+    // Did we still fail to find any new bubbles?
+    if (current_idx < 0)
+    {
+      _bubble_map[node_id] = 0;
+      return;
+    }
   }
 
   std::vector< const Node * > neighbors;
@@ -286,17 +307,22 @@ NodalFloodCount::flood(const Node *node, unsigned int region)
     return;
   }
 
-  // Yay! A bubble -> Mark it! (If region is zero that signifies that this is a new bubble)
-  _bubble_map[node_id] = region ? region : ++_region_count;
-  // If this is a periodic boudnary then there may be multiple corresponding nodes that need to
-  // be marked depending on the number of mapped directions and node position - we'll do that now!
+  // Yay! A bubble -> Mark it! (If region is zero, that signifies that this is a new bubble)
+  if (region == 0)
+  {
+    _bubble_map[node_id] = ++_region_count;
+    _region_to_var_idx[_region_count] = current_idx;  // Save the variable idx which owns this region
+  }
+  else
+    _bubble_map[node_id] = region;
 
+  // Flood neighboring nodes that are also above this threshold with recursion
   for (unsigned int i=0; i<neighbors.size(); ++i)
   {
     // Only recurse on nodes this processor owns
     if (!region || isNodeValueValid(neighbors[i]->id()))
     {
-      flood(neighbors[i], _bubble_map[node_id]);
+      flood(neighbors[i], _bubble_map[node_id], current_idx);
     }
   }
 }
