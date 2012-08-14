@@ -75,8 +75,11 @@ ActionWarehouse::addActionBlock(Action * blk)
     if (mparams.have_parameter<std::string>("built_by_action"))
     {
       std::string moose_action_name = moa->getObjectParams().get<std::string>("built_by_action");
-      if (moose_action_name != action_name &&
-          moose_action_name != "add_aux_bc" && moose_action_name != "add_aux_kernel") // The exception
+      if ((moose_action_name != action_name) &&  // if there is a mismatch, that means there is an object in the wrong section, unless...
+          ! // NOT in the exception list...
+          ((action_name == "add_aux_bc" && moose_action_name == "add_aux_kernel") ||
+           (action_name == "add_postprocessor" && moose_action_name == "add_user_object") ||
+           (action_name == "add_user_object" && moose_action_name == "add_postprocessor")))
         mooseError("Inconsistent Action Name detected! Action that satisfies " + action_name + " is building a MOOSE Object that normally satisfies " + moose_action_name);
     }
   }
