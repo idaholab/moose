@@ -56,6 +56,12 @@ class InputFileWidget(QtGui.QWidget):
         msgBox.setStandardButtons(QMessageBox.Ok)
         msgBox.setDefaultButton(QMessageBox.Ok)
         msgBox.exec_()
+
+    self.modifyUI()
+
+  ''' This will be called after the interface is completely setup to allow an application to modify this tab '''
+  def modifyUI(self):
+    pass
     
   def initUI(self):
     # Just a holder so the edit param_widget can go in where we want
@@ -123,6 +129,10 @@ class InputFileWidget(QtGui.QWidget):
     mesh_view_action = QtGui.QAction("Mesh View", self)
     mesh_view_action.triggered.connect(self._view_mesh_view)
     self.view_menu.addAction(mesh_view_action)    
+
+  ''' Return the name to use for this tab '''
+  def name(self):
+    return 'Input File'
 
   def init_buttons(self, layout):
     self.buttonOpen = QtGui.QPushButton("Open")

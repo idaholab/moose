@@ -74,6 +74,17 @@ class PostprocessorWidget(QtGui.QWidget):
         self.Layout.addWidget(self.comboWidget)
         self.Layout.addLayout(self.plotHBox)
         self.Layout.addLayout(self.buttonHBox)
+
+        self.modifyUI()
+
+    ''' This will be called after the interface is completely setup to allow an application to modify this tab '''
+    def modifyUI(self):
+        pass
+        
+        
+    ''' Return the name to use for this tab '''
+    def name(self):
+        return 'Postprocess'
     
     def getFileName(self):
         

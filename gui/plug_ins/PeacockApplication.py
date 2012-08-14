@@ -2,9 +2,33 @@ from PyQt4 import QtCore, QtGui
 import MeshInfoFactory
 from MeshRenderWidget import *
 
+from InputFileWidget import *
+from ExecuteWidget import *
+from PostprocessorWidget import *
+from ExodusResultRenderWidget import *
+
 class PeacockApplication(object):
   def __init__(self, main_window):
     self.main_window = main_window
+
+  ''' Should create and return a map of "Tab Name" to the associated Tab object in the order you want them to show up in Peacock.
+      For the main tabs (input_file_widget, execute_widget, postprocessor_widget and visualize_widget) it should also set those
+      member variables on the main_ui object that is passed in.'''
+  def tabs(self, main_ui):
+    tabs = []
+
+    main_ui.input_file_widget = InputFileWidget(main_ui.app_path, main_ui.options, main_ui, main_ui.qt_app, main_ui.application)
+    main_ui.execute_widget = ExecuteWidget(main_ui.app_path, main_ui.input_file_widget, main_ui.qt_app)
+    main_ui.postprocessor_widget = PostprocessorWidget(main_ui.input_file_widget, main_ui.execute_widget)
+    main_ui.visualize_widget = ExodusResultRenderWidget(main_ui.input_file_widget, main_ui.execute_widget, main_ui.qt_app, main_ui.application)
+
+    tabs.append(main_ui.input_file_widget)
+    tabs.append(main_ui.execute_widget)
+    tabs.append(main_ui.postprocessor_widget)
+    tabs.append(main_ui.visualize_widget)
+
+    return tabs
+
 
   ''' This function is responsible for filling in the valid options for each "cpp_type" for parameters.
       The return value must be a dictionary... where the key is the cpp_type and the value is a set()

@@ -125,6 +125,15 @@ class ExecuteWidget(QtGui.QWidget):
     QtCore.QObject.connect(self.input_file_widget.buttonOpen, QtCore.SIGNAL("clicked()"), self.click_open)
     QtCore.QObject.connect(self.input_file_widget.buttonSave, QtCore.SIGNAL("clicked()"), self.click_save)
 
+    self.modifyUI()
+
+  ''' This will be called after the interface is completely setup to allow an application to modify this tab '''
+  def modifyUI(self):
+    pass
+
+  ''' Return the name to use for this tab '''
+  def name(self):
+    return 'Execute'
     
   def getNumSteps(self):
     executioner_item = self.input_file_widget.tree_widget.findItems("Executioner", QtCore.Qt.MatchExactly)[0]

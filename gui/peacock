@@ -31,6 +31,7 @@ except AttributeError:
 class UiBox(QtGui.QMainWindow):
   def __init__(self, options, args, app_path, qt_app, win_parent = None):
     QtGui.QMainWindow.__init__(self, win_parent)
+    self.options = options
     self.app_path = os.path.abspath(app_path)
     self.application = getApplication(os.path.dirname(self.app_path), self)
     self.setWindowTitle('Peacock - ' + os.path.basename(self.app_path))
@@ -48,17 +49,12 @@ class UiBox(QtGui.QMainWindow):
     self.main_layout = QtGui.QVBoxLayout()
     self.setCentralWidget(self.main_ui)
 
-    self.input_file_widget = InputFileWidget(self.app_path, options, self, self.qt_app, self.application)
-    self.execute_widget = ExecuteWidget(self.app_path, self.input_file_widget, self.qt_app)
-    self.postprocessor_widget = PostprocessorWidget(self.input_file_widget, self.execute_widget)
-    self.visualize_widget = ExodusResultRenderWidget(self.input_file_widget, self.execute_widget, self.qt_app, self.application)
+    self.tabs = self.application.tabs(self)
     
     self.tab_widget = QtGui.QTabWidget()
 
-    self.tab_widget.addTab(self.input_file_widget, "Input File")
-    self.tab_widget.addTab(self.execute_widget, "Execute")
-    self.tab_widget.addTab(self.postprocessor_widget, "Postprocess")
-    self.tab_widget.addTab(self.visualize_widget, "Visualize")
+    for tab in self.tabs:
+      self.tab_widget.addTab(tab, tab.name())
 
     for plugin_class in self.tab_plugin_classes:
       instance = plugin_class(self)

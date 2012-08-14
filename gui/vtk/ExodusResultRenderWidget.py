@@ -82,6 +82,16 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.currently_restoring_contours = False
     self.setupControls()
 
+    self.modifyUI()
+
+  ''' This will be called after the interface is completely setup to allow an application to modify this tab '''
+  def modifyUI(self):
+    pass
+
+  ''' Return the name to use for this tab '''
+  def name(self):
+    return 'Visualize'
+
   def setupControls(self):
     self.controls_widget = QtGui.QWidget()
     self.controls_layout = QtGui.QHBoxLayout()
