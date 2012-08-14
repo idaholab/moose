@@ -101,6 +101,22 @@ Parser::isSectionActive(const std::string & s,
   return retValue;
 }
 
+std::string
+Parser::getFileName(bool stripLeadingPath) const
+{
+  if (!stripLeadingPath)
+    return _input_filename;
+
+  std::string filename;
+  size_t pos = _input_filename.find_last_of('/');
+  if (pos != std::string::npos)
+    filename = _input_filename.substr(pos + 1);
+  else
+    filename = _input_filename;
+
+  return filename;
+}
+
 void
 Parser::parse(const std::string &input_filename)
 {
@@ -186,6 +202,8 @@ Parser::parse(const std::string &input_filename)
 
   // Check to make sure that all sections in the input file that are explicitly listed are actually present
   checkActiveUsed(section_names, active_lists);
+
+  _input_filename = input_filename;
 }
 
 void

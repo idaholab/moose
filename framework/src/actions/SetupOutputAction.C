@@ -122,7 +122,7 @@ SetupOutputAction::act()
     // If the user didn't provide a filename - see if the parser has a filename that we can use as a base
     if (!_pars.isParamValid("file_base"))
     {
-      std::string input_file_name = Moose::app->getFileName();
+      std::string input_file_name = _parser->getFileName();
       mooseAssert(input_file_name != "", "Input Filename is NULL");
       size_t pos = input_file_name.find_last_of('.');
       mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");

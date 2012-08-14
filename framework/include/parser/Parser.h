@@ -56,6 +56,11 @@ public:
                        const std::map<std::string, std::vector<std::string> > & active_lists);
 
   /**
+   * Return the filename that was parsed
+   */
+  std::string getFileName(bool stripLeadingPath) const;
+
+  /**
    * Parse an input file consisting of getpot syntax and setup objects
    * in the MOOSE derived application
    */

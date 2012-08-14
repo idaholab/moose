@@ -260,15 +260,5 @@ MooseApp::run()
 std::string
 MooseApp::getFileName(bool stripLeadingPath) const
 {
-  if (!stripLeadingPath)
-    return _input_filename;
-
-  std::string filename;
-  size_t pos = _input_filename.find_last_of('/');
-  if (pos != std::string::npos)
-    filename = _input_filename.substr(pos + 1);
-  else
-    filename = _input_filename;
-
-  return filename;
+  return _parser.getFileName(stripLeadingPath);
 }
