@@ -48,7 +48,7 @@ class TimeScheme
         _solution = workvecs.back();
         workvecs.pop_back();
       }
-      if (workvecs.empty()) _time_derivitive = &_nl->_sys.add_vector(Moose::stringify(time)+"dt", false, GHOSTED);
+      if (workvecs.empty()) _time_derivitive = &_nl->_sys.add_vector(Moose::stringify(time)+"dt", true, GHOSTED);
       else {
         _time_derivitive = workvecs.back();
         workvecs.pop_back();
@@ -59,7 +59,7 @@ class TimeScheme
     _time(0.0),
     _t_step(0),
     _solution(&_nl->_sys.add_vector("dt2check", true, GHOSTED)),
-    _time_derivitive(&_nl->_sys.add_vector("dt2check_dt", false, GHOSTED)),
+    _time_derivitive(&_nl->_sys.add_vector("dt2check_dt", true, GHOSTED)),
     _dt(0.0)
     {
     }
@@ -245,6 +245,7 @@ protected:
 
   // moves vectors contained in TimeStep into _workvecs, libMesh::System manages backing memory
   void reclaimTimeStep(TimeStep &timestep);
+  void firstOrderTD();
 
   ///Currently set to true, this is for AB2 in case one wishes to estimate the pridictor but not take the step.
   bool _apply_predictor;

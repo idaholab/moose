@@ -621,10 +621,8 @@ void
 NonlinearSystem::setInitialSolution()
 {
   NumericVector<Number> & initial_solution( solution() );
-
   if (_use_predictor)
     applyPredictor(initial_solution);
-
   // do nodal BC
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
   for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)

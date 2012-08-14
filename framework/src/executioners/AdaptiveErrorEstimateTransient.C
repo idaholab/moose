@@ -36,7 +36,7 @@ InputParameters validParams<AdaptiveErrorEstimateTransient>()
   params.addRequiredParam<Real>("e_max","Maximum acceptable error.");
   params.addParam<Real>("max_increase", 1.0e9,    "Maximum ratio that the time step can increase.");
   params.addParam<int>("steps_between_increase",1,"the number of time steps before recalculating dt");
-  params.addParam<int>("start_adapting",3, "when to start taking adaptive time steps");
+  params.addParam<int>("start_adapting",2, "when to start taking adaptive time steps");
   params.addParam<Real>("scaling_parameter", .8, "scaling parameter for dt selection");
   return params;
 }

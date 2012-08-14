@@ -166,7 +166,7 @@ TimeScheme::onTimestepBegin()
 
 }
 
-void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
+/*void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
 {
   if(_dt ==0 || _dt_old == 0 || _t_step<3){
     return;
@@ -189,8 +189,8 @@ void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
     initial_solution += my_old_solution_u_dot;
     initial_solution += _old_solution_u_dot;
   }
-}
-/*void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
+}*/
+void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
 {
 
   NumericVector<Number> & residual_older = _trash1;
@@ -206,34 +206,62 @@ void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
   initial_solution +=  (residual_old);
   initial_solution -= residual_older;
   initial_solution.localize(_predicted_solution);
-}*/
+}
 
 Real
 TimeScheme::estimateTimeError(NumericVector<Number> & solution)
 {
   Real ret = -1;
   if(_dt_old >0){
-    switch (_time_stepping_scheme)
+    if(_use_AB2)
     {
-      case Moose::CRANK_NICOLSON:
+      switch (_time_stepping_scheme)
       {
-        _predicted_solution -= solution;
-         _predicted_solution *= (_dt)/(3.0 * (_dt +_dt_old));
-         ret = _predicted_solution.l2_norm();
-         return ret;
+        case Moose::CRANK_NICOLSON:
+        {
+          _predicted_solution -= solution;
+          _predicted_solution *= (_dt)/(3.0 * (_dt +_dt_old));
+          ret = _predicted_solution.l2_norm();
+          return ret;
+        }
+        case Moose::BDF2:
+        {
+          _predicted_solution *= -1.0;
+          _predicted_solution += solution;
+          Real topcalc = 2.0*(_dt + _dt_old)*(_dt +_dt_old);
+          Real bottomcalc = 6.0*_dt*_dt + 12.0*_dt*_dt_old + 5.0*_dt_old*_dt_old;
+          _predicted_solution *= topcalc/bottomcalc;
+          ret = _predicted_solution.l2_norm();
+          return ret;
+        }
+        case Moose::IMPLICIT_EULER:
+        {
+          //I am not sure this is actually correct.
+          _predicted_solution *= -1;
+          _predicted_solution += solution;
+          Real calc = _dt*_dt*.5;
+          _predicted_solution *= calc;
+          ret = _predicted_solution.l2_norm();
+          return ret;
+        }
+        default:
+          break;
       }
-      case Moose::BDF2:
+    }
+    else
+    {
+      switch (_time_stepping_scheme)
       {
-        _predicted_solution *= -1.0;
-        _predicted_solution += solution;
-        Real topcalc = 2.0*(_dt + _dt_old)*(_dt +_dt_old);
-        Real bottomcalc = 6.0*_dt*_dt + 12.0*_dt*_dt_old + 5.0*_dt_old*_dt_old;
-        _predicted_solution *= topcalc/bottomcalc;
-        ret = _predicted_solution.l2_norm();
-        return ret;
+        case Moose::IMPLICIT_EULER:
+        case Moose::BDF2:
+        case Moose::CRANK_NICOLSON:
+        {
+          //Error estimate for the FE predictor should go here.
+          return ret;
+        }
+        default:
+          break;
       }
-      default:
-        break;
     }
   }
   return ret;
@@ -273,14 +301,13 @@ TimeScheme::applyPredictor(NumericVector<Number> & initial_solution)
     std::streamsize cur_precision(std::cout.precision());
     std::cout << "  Applying predictor with scale factor = "<<std::fixed<<std::setprecision(2)<<_nl->_predictor_scale<<"\n";
     std::cout << std::scientific << std::setprecision(cur_precision);
-    Real dt_adjusted_scale_factor = _nl->_predictor_scale *_dt/_dt_old;
+    Real dt_adjusted_scale_factor = _nl->_predictor_scale*_dt;
     NumericVector<Number> & previous_solution = _trash1;
-    _time_stack[_time_stack.size()-3].getSolution().localize(previous_solution);
+    _time_stack[_time_stack.size()-2].getTimeDerivitive().localize(previous_solution);
     if (dt_adjusted_scale_factor != 0.0)
     {
-      initial_solution *= (1.0 + dt_adjusted_scale_factor);
       previous_solution *= dt_adjusted_scale_factor;
-      initial_solution -= previous_solution;
+      initial_solution += previous_solution;
     }
   }
 }
@@ -305,11 +332,10 @@ void TimeScheme::computeLittlef(const NumericVector<Number> & bigF, NumericVecto
   littlef.close();
 
   _nl->_fe_problem.computeResidualType( bigF, littlef, Moose::KT_NONTIME);
-
-  if(mass)
+  if(mass && _nl->containsTimeKernel())
   {
 #ifdef LIBMESH_HAVE_PETSC
-    _nl->computeResidual(_mmatrix, Moose::KT_TIME);
+    _nl->computeResidualInternal( _mmatrix, Moose::KT_TIME);
     PetscVector<Number> cls((static_cast<PetscVector<Number> & > (_mmatrix)).vec());
     if( VecReciprocal(cls.vec()) != 0)
       mooseError("VecReciprocal");
@@ -320,7 +346,6 @@ void TimeScheme::computeLittlef(const NumericVector<Number> & bigF, NumericVecto
     mooseError("Reciprocal not available");
 #endif
   }
-
   _nl->set_solution(*current_solution);
   _nl->_t = currenttime;
   if(mass)
@@ -344,6 +369,16 @@ NumericVector<Number> & TimeScheme::finishResidual(NumericVector<Number> & resid
 }
 
 void
+TimeScheme::firstOrderTD()
+{
+  _solution_u_dot = *_nl->currentSolution();
+  _solution_u_dot -= _time_stack[_time_stack.size() -2].getSolution();
+  _solution_u_dot /= _dt;
+
+  _solution_du_dot_du = 1.0 / _dt;
+}
+
+void
 TimeScheme::computeTimeDerivatives()
 {
   if(_time_stack.empty())
@@ -354,30 +389,18 @@ TimeScheme::computeTimeDerivatives()
   {
   case Moose::IMPLICIT_EULER:
   case Moose::EXPLICIT_EULER:
-    _solution_u_dot = *_nl->currentSolution();
-    _solution_u_dot -= _time_stack[_time_stack.size() -2].getSolution();
-    _solution_u_dot /= _dt;
-
-    _solution_du_dot_du = 1.0 / _dt;
+    firstOrderTD();
     break;
 
   case Moose::CRANK_NICOLSON:
-    _solution_u_dot = *_nl->currentSolution();
-    _solution_u_dot -=  _time_stack[_time_stack.size() -2].getSolution();
-    _solution_u_dot *=  2.0/_dt;
-    //_solution_u_dot += *_residual_old;
-    _solution_du_dot_du = 1.0/_dt;
+    firstOrderTD();
+    _solution_u_dot *=  2.0;
     break;
 
   case Moose::BDF2:
     if (_t_step == 1)
     {
-      // Use backward-euler for the first step
-      _solution_u_dot = *_nl->currentSolution();
-      _solution_u_dot -=  _time_stack[_time_stack.size() -2].getSolution();
-      _solution_u_dot /= _dt;
-
-      _solution_du_dot_du = 1.0/_dt;
+      firstOrderTD();
     }
     else
     {
