@@ -42,15 +42,18 @@ SetupTimePeriodsAction::SetupTimePeriodsAction(const std::string & name, InputPa
 void
 SetupTimePeriodsAction::act()
 {
-  TimePeriod & tp = _problem->addTimePeriod(getShortName(), getParam<Real>("start"));
+  if (_problem != NULL)
+  {
+    TimePeriod & tp = _problem->addTimePeriod(getShortName(), getParam<Real>("start"));
 
-  if (_pars.isParamValid("active_kernels"))
-    tp.addActiveObjects("kernels", getParam<std::vector<std::string> >("active_kernels"));
-  else if (_pars.isParamValid("inactive_kernels"))
-    tp.addInactiveObjects("kernels", getParam<std::vector<std::string> >("inactive_kernels"));
+    if (_pars.isParamValid("active_kernels"))
+      tp.addActiveObjects("kernels", getParam<std::vector<std::string> >("active_kernels"));
+    else if (_pars.isParamValid("inactive_kernels"))
+      tp.addInactiveObjects("kernels", getParam<std::vector<std::string> >("inactive_kernels"));
 
-  if (_pars.isParamValid("active_bcs"))
-    tp.addActiveObjects("bcs", getParam<std::vector<std::string> >("active_bcs"));
-  else if (_pars.isParamValid("inactive_bcs"))
-    tp.addInactiveObjects("bcs", getParam<std::vector<std::string> >("inactive_bcs"));
+    if (_pars.isParamValid("active_bcs"))
+      tp.addActiveObjects("bcs", getParam<std::vector<std::string> >("active_bcs"));
+    else if (_pars.isParamValid("inactive_bcs"))
+      tp.addInactiveObjects("bcs", getParam<std::vector<std::string> >("inactive_bcs"));
+  }
 }

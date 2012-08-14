@@ -12,28 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "CheckIntegrityAction.h"
-#include "ActionWarehouse.h"
-#include "FEProblem.h"
-#include "Parser.h"
+#ifndef ADDFEPROBLEM_H
+#define ADDFEPROBLEM_H
+
+#include "Action.h"
+
+class AddFEProblemAction;
 
 template<>
-InputParameters validParams<CheckIntegrityAction>()
-{
-  InputParameters params = validParams<Action>();
-  return params;
-}
+InputParameters validParams<AddFEProblemAction>();
 
-
-CheckIntegrityAction::CheckIntegrityAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+/**
+ *
+ */
+class AddFEProblemAction : public Action
 {
-}
+public:
+  AddFEProblemAction(const std::string & name, InputParameters parameters);
+  virtual ~AddFEProblemAction();
 
-void
-CheckIntegrityAction::act()
-{
-  _awh.checkUnsatisfiedActions();
-  if (_problem != NULL)
-    _problem->checkProblemIntegrity();
-}
+  virtual void act();
+
+protected:
+  FileName _input_filename;
+};
+
+#endif /* ADDFEPROBLEM_H */

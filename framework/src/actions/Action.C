@@ -39,7 +39,8 @@ Action::Action(const std::string & name, InputParameters params) :
     _awh(*getParam<ActionWarehouse *>("awh")),
     _mesh(_awh.mesh()),
     _displaced_mesh(_awh.displacedMesh()),
-    _problem(_awh.problem())
+    _problem(_awh.problem()),
+    _executioner(_awh.executioner())
 {
 }
 

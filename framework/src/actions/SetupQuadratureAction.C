@@ -46,5 +46,6 @@ SetupQuadratureAction::~SetupQuadratureAction()
 void
 SetupQuadratureAction::act()
 {
-  _problem->createQRules(_type, _order);
+  if (_problem != NULL)
+    _problem->createQRules(_type, _order);
 }

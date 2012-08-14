@@ -91,7 +91,7 @@
 #include "UserObjectPPS.h"
 
 #include "ExceptionSteady.h"
-
+#include "SteadyTransientExecutioner.h"
 
 #include "ConvDiffMetaAction.h"
 
@@ -209,6 +209,7 @@ MooseTestApp::registerObjects()
   registerUserObject(MTUserObject);
 
   registerExecutioner(ExceptionSteady);
+  registerExecutioner(SteadyTransientExecutioner);
 }
 
 void

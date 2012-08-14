@@ -12,28 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "CheckIntegrityAction.h"
-#include "ActionWarehouse.h"
-#include "FEProblem.h"
-#include "Parser.h"
+#include "AddFEProblemAction.h"
+#include "CoupledExecutioner.h"
 
 template<>
-InputParameters validParams<CheckIntegrityAction>()
+InputParameters validParams<AddFEProblemAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addRequiredParam<FileName>("input_file", "File name of the input file");
   return params;
 }
 
+AddFEProblemAction::AddFEProblemAction(const std::string & name, InputParameters parameters) :
+    Action(name, parameters),
+    _input_filename(getParam<FileName>("input_file"))
+{
+}
 
-CheckIntegrityAction::CheckIntegrityAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+AddFEProblemAction::~AddFEProblemAction()
 {
 }
 
 void
-CheckIntegrityAction::act()
+AddFEProblemAction::act()
 {
-  _awh.checkUnsatisfiedActions();
-  if (_problem != NULL)
-    _problem->checkProblemIntegrity();
+  CoupledExecutioner * master_executioner = dynamic_cast<CoupledExecutioner *>(_executioner);
+  if (master_executioner != NULL)
+  {
+    master_executioner->addFEProblem(getShortName(), _input_filename);
+  }
 }

@@ -12,28 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "CheckIntegrityAction.h"
-#include "ActionWarehouse.h"
-#include "FEProblem.h"
-#include "Parser.h"
+#include "CoupledProblem.h"
 
 template<>
-InputParameters validParams<CheckIntegrityAction>()
+InputParameters validParams<CoupledProblem>()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = validParams<Problem>();
   return params;
 }
 
 
-CheckIntegrityAction::CheckIntegrityAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+CoupledProblem::CoupledProblem(const std::string & name, InputParameters params) :
+    Problem(name, params)
+{
+}
+
+CoupledProblem::~CoupledProblem()
 {
 }
 
 void
-CheckIntegrityAction::act()
+CoupledProblem::init()
 {
-  _awh.checkUnsatisfiedActions();
-  if (_problem != NULL)
-    _problem->checkProblemIntegrity();
+  std::cerr << "INIT" << std::endl;
+}
+
+void
+CoupledProblem::output(bool force)
+{
 }

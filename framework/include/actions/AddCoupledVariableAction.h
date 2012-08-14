@@ -12,28 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "CheckIntegrityAction.h"
-#include "ActionWarehouse.h"
-#include "FEProblem.h"
-#include "Parser.h"
+#ifndef ADDCOUPLEDVARIABLEACTION_H
+#define ADDCOUPLEDVARIABLEACTION_H
+
+#include "Action.h"
+
+
+class AddCoupledVariableAction;
 
 template<>
-InputParameters validParams<CheckIntegrityAction>()
-{
-  InputParameters params = validParams<Action>();
-  return params;
-}
+InputParameters validParams<AddCoupledVariableAction>();
 
-
-CheckIntegrityAction::CheckIntegrityAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+/**
+ *
+ */
+class AddCoupledVariableAction : public Action
 {
-}
+public:
+  AddCoupledVariableAction(const std::string & name, InputParameters parameters);
+  virtual ~AddCoupledVariableAction();
 
-void
-CheckIntegrityAction::act()
-{
-  _awh.checkUnsatisfiedActions();
-  if (_problem != NULL)
-    _problem->checkProblemIntegrity();
-}
+  virtual void act();
+
+protected:
+  std::string _from;
+  std::string _var_name;
+};
+
+#endif /* ADDCOUPLEDVARIABLEACTION_H */

@@ -38,6 +38,9 @@ SetupResidualDebugAction::~SetupResidualDebugAction()
 void
 SetupResidualDebugAction::act()
 {
+  if (_problem == NULL)
+    return;
+
   _problem->getNonlinearSystem().debuggingResiduals(true);
 
   // debug variable residuals

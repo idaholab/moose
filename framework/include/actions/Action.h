@@ -24,6 +24,7 @@ class Action;
 class ActionWarehouse;
 class MooseMesh;
 class FEProblem;
+class Executioner;
 
 template<>
 InputParameters validParams<Action>();
@@ -75,6 +76,8 @@ protected:
   MooseMesh * & _displaced_mesh;
   /// Convenience reference to a problem this action works on
   FEProblem * & _problem;
+  /// Convenience reference to an executioner
+  Executioner * & _executioner;
 };
 
 #endif // ACTION_H

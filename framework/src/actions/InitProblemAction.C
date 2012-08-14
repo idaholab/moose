@@ -15,6 +15,7 @@
 #include "InitProblemAction.h"
 #include "FEProblem.h"
 #include "Parser.h"
+#include "CoupledExecutioner.h"
 
 template<>
 InputParameters validParams<InitProblemAction>()
@@ -32,5 +33,14 @@ InitProblemAction::InitProblemAction(const std::string & name, InputParameters p
 void
 InitProblemAction::act()
 {
-  _problem->init();
+  if (_problem != NULL)
+    _problem->init();
+  else
+  {
+    // init_problem is a mandatory action, we have an executioner at this point and all FEProblems are
+    // already added, we build the coupled system
+    CoupledExecutioner * ex = dynamic_cast<CoupledExecutioner *>(_executioner);
+    if (ex != NULL)
+      ex->build();
+  }
 }

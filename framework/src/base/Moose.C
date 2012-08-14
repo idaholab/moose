@@ -28,6 +28,7 @@
 // problems
 #include "FEProblem.h"
 #include "OutputProblem.h"
+#include "CoupledProblem.h"
 // kernels
 #include "TimeDerivative.h"
 #include "Diffusion.h"
@@ -213,6 +214,8 @@
 #include "AddIndicatorAction.h"
 #include "AddMarkerAction.h"
 #include "SetAdaptivityOptionsAction.h"
+#include "AddFEProblemAction.h"
+#include "AddCoupledVariableAction.h"
 
 namespace Moose {
 
@@ -232,6 +235,7 @@ registerObjects()
   // problems
   registerProblem(FEProblem);
   registerProblem(OutputProblem);
+  registerProblem(CoupledProblem);
 
   // kernels
   registerKernel(TimeDerivative);
@@ -431,6 +435,8 @@ addActionTypes(Syntax & syntax)
   registerActionName("add_indicator", false);
   registerActionName("add_marker", false);
   registerActionName("set_adaptivity_options", false);
+  registerActionName("add_feproblem", false);
+  registerActionName("add_coupled_variable", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_mesh_complete", false);
@@ -458,10 +464,12 @@ addActionTypes(Syntax & syntax)
 "(setup_mesh)"
 "(add_mesh_modifier, setup_mesh_complete)"
 "(setup_executioner)"
+"(add_feproblem)"
 "(setup_time_periods)"
 "(init_displaced_problem)"
 "(setup_subproblem)"
-"(add_aux_variable, add_variable, add_elemental_field_variable"
+"(add_aux_variable, add_variable, add_elemental_field_variable)"
+"(add_coupled_variable)"
 "(setup_variable_complete)"
 "(add_user_object)"
 "(add_function)"
@@ -581,6 +589,10 @@ registerActions(Syntax & syntax)
   registerAction(EmptyAction, "ready_to_init");
   registerAction(InitProblemAction, "init_problem");
   registerAction(CheckIntegrityAction, "check_integrity");
+
+  // coupling
+  registerAction(AddFEProblemAction, "add_feproblem");
+  registerAction(AddCoupledVariableAction, "add_coupled_variable");
 
   // TODO: Why is this here?
   registerActionName("finish_input_file_output", false);

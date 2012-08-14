@@ -58,7 +58,7 @@ public:
   /**
    * Return the filename that was parsed
    */
-  std::string getFileName(bool stripLeadingPath) const;
+  std::string getFileName(bool stripLeadingPath = true) const;
 
   /**
    * Parse an input file consisting of getpot syntax and setup objects

@@ -41,7 +41,8 @@ SetupDebugAction::~SetupDebugAction()
 void
 SetupDebugAction::act()
 {
-  _problem->setDebugTopResiduals(_top_residuals);
+  if (_problem != NULL)
+    _problem->setDebugTopResiduals(_top_residuals);
 }
 
 

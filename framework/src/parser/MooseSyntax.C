@@ -125,8 +125,9 @@ void associateSyntax(Syntax & syntax)
   // This works because the AddKernelAction will build AuxKernels if the path doesn't contain Kernels!
   syntax.registerActionSyntax("AddKernelAction", "Bounds/*", "add_aux_kernel");
 
-  // Loose Coupling
-  syntax.registerActionSyntax("EmptyAction", "SubProblems");
+  // Coupling
+  syntax.registerActionSyntax("AddFEProblemAction", "Problems/*");
+  syntax.registerActionSyntax("AddCoupledVariableAction", "Problems/*/*");
 
   // Indicator
   syntax.registerActionSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");
