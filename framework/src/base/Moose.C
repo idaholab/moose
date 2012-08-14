@@ -98,7 +98,6 @@
 #include "MooseParsedGradFunction.h"
 #include "PiecewiseLinear.h"
 #include "SolutionFunction.h"
-#include "SphereFunction.h"
 #include "PiecewiseBilinear.h"
 #include "PiecewiseLinearFile.h"
 
@@ -305,7 +304,6 @@ registerObjects()
   registerNamedFunction(MooseParsedGradFunction, "ParsedGradFunction");
   registerFunction(PiecewiseLinear);
   registerFunction(SolutionFunction);
-  registerFunction(SphereFunction);
   registerFunction(PiecewiseBilinear);
   registerFunction(PiecewiseLinearFile);
   // materials
