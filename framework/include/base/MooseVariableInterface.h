@@ -28,8 +28,9 @@ public:
    * Constructing the object
    * @param parameters Parameters that come from constructing the object
    * @param nodal true if the variable is nodal
+   * @param var_param_name the parameter name where we will find the coupled variable name
    */
-  MooseVariableInterface(InputParameters & parameters, bool nodal);
+  MooseVariableInterface(InputParameters & parameters, bool nodal, std::string var_param_name = "variable");
 
   virtual ~MooseVariableInterface();
 

@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<ElementUserObject>()
 {
   InputParameters params = validParams<UserObject>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable that this object operates on");
+  params.addRequiredParam<std::vector<VariableName> >("variable", "The name of the variable that this object operates on");
   std::vector<SubdomainName> everywhere(1);
   everywhere[0] = "ANY_BLOCK_ID";
   params.addParam<std::vector<SubdomainName> >("block", everywhere, "block ID or name where the object works");
@@ -36,7 +36,7 @@ ElementUserObject::ElementUserObject(const std::string & name, InputParameters p
     TransientInterface(parameters, name, "element_user_objects"),
     MaterialPropertyInterface(parameters),
     _blocks(parameters.get<std::vector<SubdomainName> >("block")),
-    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _var(_subproblem.getVariable(_tid, parameters.get<std::vector<VariableName> >("variable")[0])),
     _q_point(_subproblem.points(_tid)),
     _qrule(_subproblem.qRule(_tid)),
     _JxW(_subproblem.JxW(_tid)),
@@ -50,4 +50,10 @@ ElementUserObject::ElementUserObject(const std::string & name, InputParameters p
     _grad_zero(_subproblem._grad_zero[_tid]),
     _second_zero(_subproblem._second_zero[_tid])
 {
+  std::vector<VariableName> vars = getParam<std::vector<VariableName> >("variable");
+  _vars.resize(vars.size());
+
+  // initialize our vector of variable pointers
+  for (unsigned int i=0; i<vars.size(); ++i)
+    _vars[i] = &_subproblem.getVariable(0, vars[i]);
 }
