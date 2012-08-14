@@ -18,6 +18,7 @@
 #include "RndBoundingBoxIC.h"
 #include "PFMobility.h"
 #include "NodalFloodCount.h"
+#include "NodalFloodCountAux.h"
 
 void
 Elk::PhaseField::registerObjects()
@@ -37,5 +38,6 @@ Elk::PhaseField::registerObjects()
   registerInitialCondition(LatticeSmoothCircleIC);
   registerInitialCondition(RndBoundingBoxIC);
   registerMaterial(PFMobility);
-  registerPostprocessor(NodalFloodCount);
+  registerUserObject(NodalFloodCount);
+  registerAux(NodalFloodCountAux);
 }

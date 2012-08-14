@@ -83,16 +83,20 @@ NodalFloodCount::execute()
   }
 }
 
-Real
-NodalFloodCount::getValue()
+void
+NodalFloodCount::finalize()
 {
   // Exchange data in parallel
   pack(_packed_data);
   Parallel::allgather(_packed_data, false);
   unpack(_packed_data);
 
-  mergeSets();
+  mergeSets();  
+}
 
+Real
+NodalFloodCount::getValue()
+{
   return _bubble_sets.size();
 }
 
@@ -237,6 +241,19 @@ NodalFloodCount::mergeSets()
       }
     }
   } while (set_merged);
+
+  /**
+   * Finally update the original bubble map with field data from the merged sets
+   */
+  unsigned int counter = 1;
+  for (std::list<std::set<unsigned int> >::iterator it1 = _bubble_sets.begin(); it1 != _bubble_sets.end(); ++it1)
+  {
+    for (std::set<unsigned int>::iterator it2 = it1->begin(); it2 != it1->end(); ++it2)
+    {
+      _bubble_map[*it2] = counter;
+    }
+    ++counter;
+  }
 }
 
 void

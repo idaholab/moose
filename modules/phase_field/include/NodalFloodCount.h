@@ -38,7 +38,11 @@ public:
   virtual void initialize();
   virtual void execute();
   virtual void threadJoin(const UserObject & y);
+  virtual void finalize();
   virtual Real getValue();
+
+  // Get the bubble map
+  Real getNodeValue(unsigned int node_id) const { return _bubble_map.at(node_id); }
 
 protected:
   /**
