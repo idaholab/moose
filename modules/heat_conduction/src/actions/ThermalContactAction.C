@@ -17,8 +17,7 @@ InputParameters validParams<ThermalContactAction>()
   
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::string>("type", "A string representing the Moose object that will be used for heat conduction over the gap");
-  params.addParam<std::string>("gap_type", "GapValueAux", "A string representing the Moose object that will be used for computing the gap siz\
-e");
+  params.addParam<std::string>("gap_type", "GapValueAux", "A string representing the Moose object that will be used for computing the gap size");
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
@@ -28,6 +27,7 @@ e");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
+  params.addParam<std::vector<std::string> >("save_in", "The Auxiliary Variable to (optionally) save the boundary flux in");
 
   return params;
 }
@@ -68,11 +68,15 @@ ThermalContactAction::addBcs()
   _parser->extractParams(_name, bc_params);
   params += bc_params;
 
+  if(isParamValid("save_in"))
+    params.set<std::vector<std::string> >("save_in") = getParam<std::vector<std::string> >("save_in");  
+
   params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("variable");
   std::vector<AuxVariableName> vars(1);
   vars[0] = PENETRATION_VAR_NAME;
   params.set<std::vector<AuxVariableName> >("gap_distance") = vars;
-  vars[0] = GAP_VALUE_VAR_NAME;
+//  vars[0] = GAP_VALUE_VAR_NAME;
+  vars[0] = "fake_gap_temp";
   params.set<std::vector<AuxVariableName> >("gap_temp") = vars;
   std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
   params.set<std::vector<BoundaryName> >("boundary") = bnds;
