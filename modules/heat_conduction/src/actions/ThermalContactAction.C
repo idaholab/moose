@@ -75,8 +75,7 @@ ThermalContactAction::addBcs()
   std::vector<AuxVariableName> vars(1);
   vars[0] = PENETRATION_VAR_NAME;
   params.set<std::vector<AuxVariableName> >("gap_distance") = vars;
-//  vars[0] = GAP_VALUE_VAR_NAME;
-  vars[0] = "fake_gap_temp";
+  vars[0] = GAP_VALUE_VAR_NAME;
   params.set<std::vector<AuxVariableName> >("gap_temp") = vars;
   std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
   params.set<std::vector<BoundaryName> >("boundary") = bnds;
