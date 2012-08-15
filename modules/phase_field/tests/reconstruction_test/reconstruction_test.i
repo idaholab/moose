@@ -18,7 +18,6 @@
 [GlobalParams]
   crys_num = 2
   var_name_base = gr
-  v = 'gr0 gr1'
 []
 
 [Variables]
