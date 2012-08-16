@@ -45,7 +45,9 @@ Marker::Marker(const std::string & name, InputParameters parameters) :
     _current_elem(_field_var.currentElem()),
 
     _mesh(_subproblem.mesh())
-{}
+{
+  _supplied_field.insert(parameters.get<FieldName>("field_name"));
+}
 
 MooseEnum
 Marker::markerStates()
@@ -69,3 +71,9 @@ Marker::getErrorVector(std::string indicator_field)
   return _adaptivity.getErrorVector(indicator_field);
 }
 
+VariableValue &
+Marker::getMarkerFieldValue(std::string field_name)
+{
+  _depend_field.insert(field_name);
+  return _sys.getVariable(_tid, field_name).nodalSln();
+}

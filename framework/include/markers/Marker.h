@@ -19,6 +19,7 @@
 #include "MooseVariableInterface.h"
 #include "InputParameters.h"
 #include "SetupInterface.h"
+#include "DependencyResolverInterface.h"
 
 // libmesh Includes
 #include "threads.h"
@@ -38,7 +39,8 @@ InputParameters validParams<Marker>();
 
 class Marker :
   public MooseObject,
-  public SetupInterface
+  public SetupInterface,
+  public DependencyResolverInterface
 {
 public:
   Marker(const std::string & name, InputParameters parameters);
@@ -50,18 +52,23 @@ public:
    */
   static MooseEnum markerStates();
 
-  /**
-   * Create an Error Vector from the Marker field
-   * TODO: Fix this return type
-   */
-  void getErrorVector() {}
-
   virtual void computeMarker();
 
   // TODO: Fixme
   bool isActive() const { return true; }
 
+  /**
+   * Is called before any element looping is started so any "global" computation can be done.
+   */
   virtual void markerSetup() {}
+
+  virtual
+  const std::set<std::string> &
+  getRequestedItems() { return _depend_field; }
+
+  virtual
+  const std::set<std::string> &
+  getSuppliedItems() { return _supplied_field; }
 
 protected:
 
@@ -77,6 +84,15 @@ protected:
    */
   ErrorVector & getErrorVector(std::string indicator_field);
 
+  /**
+   * This is used to get the values of _other_ Marker's fields.  This is useful for making combo-markers that
+   * take multiple marker fields and combine them to make one field.
+   *
+   * @param field_name The name of the _other_ Marker field that you want to have access to.
+   * @return A _reference_ that will hold the value of the marker field in it's 0 (zeroth) position.
+   */
+  VariableValue & getMarkerFieldValue(std::string field_name);
+
   SubProblem & _subproblem;
   FEProblem & _fe_problem;
   Adaptivity & _adaptivity;
@@ -90,6 +106,10 @@ protected:
   const Elem * & _current_elem;
 
   MooseMesh & _mesh;
+
+  /// Depend Markers
+  std::set<std::string> _depend_field;
+  std::set<std::string> _supplied_field;
 };
 
 #endif /* MARKER_H */

@@ -171,6 +171,7 @@
 #include "ErrorToleranceMarker.h"
 #include "ErrorFractionMarker.h"
 #include "BoxMarker.h"
+#include "ComboMarker.h"
 
 // Actions
 #include "AddMeshModifierAction.h"
@@ -376,6 +377,7 @@ registerObjects()
   registerMarker(ErrorToleranceMarker);
   registerMarker(ErrorFractionMarker);
   registerMarker(BoxMarker);
+  registerMarker(ComboMarker);
 
   registered = true;
 }

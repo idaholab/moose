@@ -93,4 +93,6 @@ MarkerWarehouse::updateActiveMarkers(unsigned int subdomain_id)
       //_active_var_Markers[Marker->variable().number()].push_back(Marker);
     }
   }
+
+  DependencyResolverInterface::sort(_active_markers.begin(), _active_markers.end());
 }

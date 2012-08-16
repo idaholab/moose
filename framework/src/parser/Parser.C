@@ -630,13 +630,14 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractVector(SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(BoundaryID            , it->second, full_name, it->first, in_global, global_params_block);
 
-      // Moose String-derived scalars
+      // Moose String-derived vectors
       dynamicCastAndExtractVector(/*std::*/string       , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(SubdomainName         , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(BoundaryName          , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(VariableName          , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(NonlinearVariableName , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(AuxVariableName       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(FieldName             , it->second, full_name, it->first, in_global, global_params_block);
     }
   }
 }
