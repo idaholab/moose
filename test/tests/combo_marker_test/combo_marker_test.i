@@ -46,7 +46,6 @@
   [./Markers]
     [./box]
       type = BoxMarker
-      field_name = box
       bottom_left = '0.3 0.3 0'
       top_right = '0.6 0.6 0'
       inside = refine
@@ -55,11 +54,10 @@
     [./combo]
       type = ComboMarker
       field_name = combo
-      marker_fields = 'box box2'
+      markers = 'box box2'
     [../]
     [./box2]
       type = BoxMarker
-      field_name = box2
       bottom_left = '0.5 0.5 0'
       top_right = '0.8 0.8 0'
       inside = refine

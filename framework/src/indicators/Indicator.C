@@ -26,7 +26,6 @@ template<>
 InputParameters validParams<Indicator>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<FieldName>("field_name", "The name of the indicator field this indicator will add contributions to.");
   params.addParam<std::vector<SubdomainName> >("block", "The block id where this Indicator lives.");
 
   params.addPrivateParam<bool>("use_displaced_mesh", false);
@@ -51,7 +50,7 @@ Indicator::Indicator(const std::string & name, InputParameters parameters) :
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
 
-    _field_var(_sys.getVariable(_tid, parameters.get<FieldName>("field_name"))),
+    _field_var(_sys.getVariable(_tid, name)),
 
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension())

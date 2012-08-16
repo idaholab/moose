@@ -54,20 +54,18 @@
 
 [Adaptivity]
   [./Indicators]
-    [./ai]
-      function = solution
+    [./error]
       type = AnalyticalIndicator
-      field_name = error
       variable = u
+      function = solution
     [../]
   [../]
   [./Markers]
-    [./efm]
+    [./marker]
       type = ErrorFractionMarker
-      field_name = marker
       coarsen = 0.1
+      indicator = error
       refine = 0.3
-      indicator_field = error
     [../]
   [../]
 []

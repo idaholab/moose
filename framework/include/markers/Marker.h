@@ -64,34 +64,33 @@ public:
 
   virtual
   const std::set<std::string> &
-  getRequestedItems() { return _depend_field; }
+  getRequestedItems() { return _depend; }
 
   virtual
   const std::set<std::string> &
-  getSuppliedItems() { return _supplied_field; }
+  getSuppliedItems() { return _supplied; }
 
 protected:
 
   virtual int computeElementMarker() = 0;
 
   /**
-   * Get an ErrorVector that will be filled up with values corresponding to the
-   * indicator field name passed in.
+   * Get an ErrorVector that will be filled up with values corresponding to the indicator passed in.
    *
    * Note that this returns a reference... and the return value should be stored as a reference!
    *
-   * @param indicator_field The name of the field to get an ErrorVector for.
+   * @param indicatorThe name of the indicator to get an ErrorVector for.
    */
-  ErrorVector & getErrorVector(std::string indicator_field);
+  ErrorVector & getErrorVector(std::string indicator);
 
   /**
-   * This is used to get the values of _other_ Marker's fields.  This is useful for making combo-markers that
-   * take multiple marker fields and combine them to make one field.
+   * This is used to get the values of _other_ Markers.  This is useful for making combo-markers that
+   * take multiple markers and combine them to make one.
    *
-   * @param field_name The name of the _other_ Marker field that you want to have access to.
-   * @return A _reference_ that will hold the value of the marker field in it's 0 (zeroth) position.
+   * @param name The name of the _other_ Marker that you want to have access to.
+   * @return A _reference_ that will hold the value of the marker in it's 0 (zeroth) position.
    */
-  VariableValue & getMarkerFieldValue(std::string field_name);
+  VariableValue & getMarkerValue(std::string name);
 
   SubProblem & _subproblem;
   FEProblem & _fe_problem;
@@ -108,8 +107,8 @@ protected:
   MooseMesh & _mesh;
 
   /// Depend Markers
-  std::set<std::string> _depend_field;
-  std::set<std::string> _supplied_field;
+  std::set<std::string> _depend;
+  std::set<std::string> _supplied;
 };
 
 #endif /* MARKER_H */

@@ -54,11 +54,10 @@
 
 [Adaptivity]
   [./Indicators]
-    [./ai]
-      function = solution
+    [./error]
       type = AnalyticalIndicator
-      field_name = error
       variable = u
+      function = solution
     [../]
   [../]
 []

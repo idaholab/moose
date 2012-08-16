@@ -54,20 +54,18 @@
 
 [Adaptivity]
   [./Indicators]
-    [./ai]
-      function = solution
+    [./error]
       type = AnalyticalIndicator
-      field_name = error
       variable = u
+      function = solution
     [../]
   [../]
   [./Markers]
-    [./etm]
+    [./marker]
       type = ErrorToleranceMarker
-      field_name = marker
       coarsen = 4e-9
+      indicator = error
       refine = 1e-8
-      indicator_field = error
     [../]
   [../]
 []

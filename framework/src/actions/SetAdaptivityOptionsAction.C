@@ -22,7 +22,7 @@ template<>
 InputParameters validParams<SetAdaptivityOptionsAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<FieldName>("field_name", "The name of the marker field to use to actually adapt the mesh.");
+  params.addParam<MarkerName>("marker", "The name of the Marker to use to actually adapt the mesh.");
   params.addParam<unsigned int>("steps", 0, "The number of adaptive steps to use when doing a Steady simulation.");
   params.addParam<unsigned int>("initial_steps", 0, "The number of adaptive steps to do based on the initial condition.");
   return params;
@@ -36,8 +36,8 @@ SetAdaptivityOptionsAction::SetAdaptivityOptionsAction(const std::string & name,
 void
 SetAdaptivityOptionsAction::act()
 {
-  if(isParamValid("field_name"))
-    _problem->adaptivity().setMarkerVariableName(getParam<FieldName>("field_name"));
+  if(isParamValid("marker"))
+    _problem->adaptivity().setMarkerVariableName(getParam<MarkerName>("marker"));
 
   _problem->adaptivity().init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_steps"));
 }

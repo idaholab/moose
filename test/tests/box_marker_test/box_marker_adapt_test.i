@@ -43,8 +43,8 @@
 []
 
 [Adaptivity]
-  field_name = box
   steps = 1
+  marker = box
   [./Markers]
     [./box]
       bottom_left = '0.3 0.3 0'
@@ -52,7 +52,6 @@
       top_right = '0.6 0.6 0'
       outside = do_nothing
       type = BoxMarker
-      field_name = box
     [../]
   [../]
 []

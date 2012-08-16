@@ -37,9 +37,9 @@ public:
 protected:
   virtual int computeElementMarker();
 
-  std::vector<FieldName> _field_names;
+  std::vector<MarkerName> _names;
 
-  std::vector<VariableValue *> _other_fields;
+  std::vector<VariableValue *> _markers;
 };
 
 #endif /* COMBOMARKER_H */

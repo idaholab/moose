@@ -49,10 +49,9 @@
 
 [Adaptivity]
   [./Indicators]
-    [./gji]
+    [./error]
       type = GradientJumpIndicator
       variable = u
-      field_name = error
     [../]
   [../]
 []

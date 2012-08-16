@@ -23,7 +23,6 @@ template<>
 InputParameters validParams<Marker>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<FieldName>("field_name", "The name of the field that this Marker fills.");
   params.addParam<std::vector<SubdomainName> >("block", "The block id where this object lives.");
 
   params.addPrivateParam<bool>("use_displaced_mesh", false);
@@ -41,12 +40,12 @@ Marker::Marker(const std::string & name, InputParameters parameters) :
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
 
-    _field_var(_sys.getVariable(_tid, parameters.get<FieldName>("field_name"))),
+    _field_var(_sys.getVariable(_tid, name)),
     _current_elem(_field_var.currentElem()),
 
     _mesh(_subproblem.mesh())
 {
-  _supplied_field.insert(parameters.get<FieldName>("field_name"));
+  _supplied.insert(name);
 }
 
 MooseEnum
@@ -66,14 +65,14 @@ Marker::computeMarker()
 }
 
 ErrorVector &
-Marker::getErrorVector(std::string indicator_field)
+Marker::getErrorVector(std::string indicator)
 {
-  return _adaptivity.getErrorVector(indicator_field);
+  return _adaptivity.getErrorVector(indicator);
 }
 
 VariableValue &
-Marker::getMarkerFieldValue(std::string field_name)
+Marker::getMarkerValue(std::string name)
 {
-  _depend_field.insert(field_name);
-  return _sys.getVariable(_tid, field_name).nodalSln();
+  _depend.insert(name);
+  return _sys.getVariable(_tid, name).nodalSln();
 }
