@@ -40,52 +40,54 @@ class PeacockApplication(object):
     type_options = {}
 
     # Variables
-    variables_items = input_file_widget.tree_widget.findItems("Variables", QtCore.Qt.MatchExactly)
-    if variables_items:
-      variables_item = variables_items[0]
-      variable_names = tree_widget.getChildNames(variables_item)
-      if len(variable_names):
-        type_options['std::vector<NonlinearVariableName, std::allocator<NonlinearVariableName> >'] = set(variable_names)
-        type_options['std::vector<NonlinearVariableName>'] = set(variable_names)
-        type_options['NonlinearVariableName'] = set(variable_names)
+    variable_names = tree_widget.getChildNamesOfPath('Variables')
+    if len(variable_names):
+      type_options['std::vector<NonlinearVariableName, std::allocator<NonlinearVariableName> >'] = set(variable_names)
+      type_options['std::vector<NonlinearVariableName>'] = set(variable_names)
+      type_options['NonlinearVariableName'] = set(variable_names)
 
-        type_options['std::vector<VariableName, std::allocator<VariableName> >'] = set(variable_names)
-        type_options['std::vector<VariableName>'] = set(variable_names)
-        type_options['VariableName'] = set(variable_names)
+      type_options['std::vector<VariableName, std::allocator<VariableName> >'] = set(variable_names)
+      type_options['std::vector<VariableName>'] = set(variable_names)
+      type_options['VariableName'] = set(variable_names)
 
     # Aux Vars
-    aux_variables_items = input_file_widget.tree_widget.findItems("AuxVariables", QtCore.Qt.MatchExactly)
-    if aux_variables_items:
-      aux_variables_item = aux_variables_items[0]
-      aux_variable_names = tree_widget.getChildNames(aux_variables_item)
-      if len(aux_variable_names):
-        type_options['std::vector<AuxVariableName, std::allocator<AuxVariableName> >'] = set(aux_variable_names)
-        type_options['std::vector<AuxVariableName>'] = set(aux_variable_names)
-        type_options['AuxVariableName'] = set(aux_variable_names)
+    aux_variable_names = tree_widget.getChildNamesOfPath('AuxVariables')
+    if len(aux_variable_names):
+      type_options['std::vector<AuxVariableName, std::allocator<AuxVariableName> >'] = set(aux_variable_names)
+      type_options['std::vector<AuxVariableName>'] = set(aux_variable_names)
+      type_options['AuxVariableName'] = set(aux_variable_names)
         
-        type_options['std::vector<VariableName, std::allocator<VariableName> >'] |= set(aux_variable_names)
-        type_options['std::vector<VariableName>'] |= set(aux_variable_names)
-        type_options['VariableName'] |= set(aux_variable_names)
+      type_options['std::vector<VariableName, std::allocator<VariableName> >'] |= set(aux_variable_names)
+      type_options['std::vector<VariableName>'] |= set(aux_variable_names)
+      type_options['VariableName'] |= set(aux_variable_names)
 
     # Functions
-    functions_items = input_file_widget.tree_widget.findItems("Functions", QtCore.Qt.MatchExactly)
-    if functions_items:
-      functions_item = functions_items[0]
-      function_names = tree_widget.getChildNames(functions_item)
-      if len(function_names):
-        type_options['std::vector<FunctionName, std::allocator<FunctionName> >'] = set(function_names)
-        type_options['std::vector<FunctionName>'] = set(function_names)
-        type_options['FunctionName'] = set(function_names)
+    function_names = tree_widget.getChildNamesOfPath('Functions')
+    if len(function_names):
+      type_options['std::vector<FunctionName, std::allocator<FunctionName> >'] = set(function_names)
+      type_options['std::vector<FunctionName>'] = set(function_names)
+      type_options['FunctionName'] = set(function_names)
 
-    # Userobjects
-    userobjects_items = input_file_widget.tree_widget.findItems("UserObjects", QtCore.Qt.MatchExactly)
-    if userobjects_items:
-      userobjects_item = userobjects_items[0]
-      userobject_names = tree_widget.getChildNames(userobjects_item)
-      if len(userobject_names):
-        type_options['std::vector<UserObjectName, std::allocator<UserObjectName> >'] = set(userobject_names)
-        type_options['std::vector<UserObjectName>'] = set(userobject_names)
-        type_options['UserObjectName'] = set(userobject_names)
+    # UserObjects
+    user_object_names = tree_widget.getChildNamesOfPath('UserObjects')
+    if len(user_object_names):
+      type_options['std::vector<UserObjectName, std::allocator<UserObjectName> >'] = set(user_object_names)
+      type_options['std::vector<UserObjectName>'] = set(user_object_names)
+      type_options['UserObjectName'] = set(user_object_names)
+
+    # Markers
+    marker_names = tree_widget.getChildNamesOfPath('Adaptivity/Markers')
+    if len(marker_names):
+      type_options['std::vector<MarkerName, std::allocator<MarkerName> >'] = set(marker_names)
+      type_options['std::vector<MarkerName>'] = set(marker_names)
+      type_options['MarkerName'] = set(marker_names)
+
+    # Indicators
+    indicator_names = tree_widget.getChildNamesOfPath('Adaptivity/Indicators')
+    if len(indicator_names):
+      type_options['std::vector<IndicatorName, std::allocator<IndicatorName> >'] = set(indicator_names)
+      type_options['std::vector<IndicatorName>'] = set(indicator_names)
+      type_options['IndicatorName'] = set(indicator_names)
 
     # Mesh stuff
     mesh_data = tree_widget.getMeshItemData()

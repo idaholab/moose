@@ -76,7 +76,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     if item.parent():
       from_parent = self.generatePathFromItem(item.parent())
       
-    return from_parent + '/' + str(item.text(0))
+    return from_parent + '/' + str(item.text(0))    
 
   ''' Looks for a child item of parent named "name"... with return None if there is no child named that '''
   def findChildItemWithName(self, parent, name):
@@ -300,6 +300,28 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       children_names.append(child.text(0))
       
     return children_names
+
+  def getChildNamesOfPathRecurse(self, current_item, path_pieces):
+    if not len(path_pieces):
+      children = self.getChildNames(current_item)
+
+      if not children:
+        return []
+
+      return children
+
+    next_item = self.findChildItemWithName(current_item, path_pieces[0])
+
+    if not next_item:
+      return []
+
+    return self.getChildNamesOfPathRecurse(next_item, path_pieces[1:])
+    
+  ''' Pass in a path, get out the children names underneath that path
+      Will return an empty list on failure '''
+  def getChildNamesOfPath(self, path):
+    path_pieces = path.strip('/').split('/')
+    return self.getChildNamesOfPathRecurse(self, path_pieces)
     
   def _doubleClickedItem(self, item, column):
     # Make sure the syntax is up to date
