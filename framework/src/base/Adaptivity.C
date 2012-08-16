@@ -117,6 +117,8 @@ Adaptivity::adaptMesh()
   {
     if(_marker_variable_name != "") // Are we using the new adaptivity system?
     {
+
+
       std::vector<Number> serialized_solution;
       _subproblem.getAuxiliarySystem().solution().close();
       _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);

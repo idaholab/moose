@@ -169,6 +169,7 @@
 
 // markers
 #include "ErrorToleranceMarker.h"
+#include "ErrorFractionMarker.h"
 #include "BoxMarker.h"
 
 // Actions
@@ -373,6 +374,7 @@ registerObjects()
 
   // markers
   registerMarker(ErrorToleranceMarker);
+  registerMarker(ErrorFractionMarker);
   registerMarker(BoxMarker);
 
   registered = true;

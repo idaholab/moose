@@ -1553,10 +1553,10 @@ FEProblem::computeAndApplyMarkers()
   _adaptivity.updateErrorVectors();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-  {
-    ComputeMarkerThread cmt(*this, getAuxiliarySystem(), _markers);
-    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cmt);
-  }
+    _markers[tid].markerSetup();
+
+  ComputeMarkerThread cmt(*this, getAuxiliarySystem(), _markers);
+  Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cmt);
 }
 
 void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)

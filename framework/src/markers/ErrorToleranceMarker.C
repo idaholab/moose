@@ -19,7 +19,7 @@ InputParameters validParams<ErrorToleranceMarker>()
 {
   InputParameters params = validParams<IndicatorMarker>();
   params.addParam<Real>("coarsen", 0, "Elements with error less than this will be coarsened.");
-  params.addParam<Real>("refine", std::numeric_limits<unsigned int>::max(), "Elements with error more than this will be refined.");
+  params.addParam<Real>("refine", std::numeric_limits<Real>::max(), "Elements with error more than this will be refined.");
   return params;
 }
 
