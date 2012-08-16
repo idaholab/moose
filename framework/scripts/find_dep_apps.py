@@ -6,8 +6,10 @@
 
 import os, sys, re
 
-def findDepApps(app_name):
+def findDepApps(dep_names):
   apps_file = '.build_apps'
+
+  dep_name = dep_names.split('~')[0]
 
   # Locate the .build_apps file
   found_it = False
@@ -22,7 +24,7 @@ def findDepApps(app_name):
     sys.exit(1)
 
   # Are we just looking for the ROOT?
-  if app_name == 'ROOT':
+  if dep_name == 'ROOT':
     return apps_dir
 
   # Read list of all apps
@@ -32,7 +34,7 @@ def findDepApps(app_name):
 
   # See which apps in this file are children or dependents of this app
   dep_apps = []
-  appNameDirRE=re.compile("^\s*"+app_name.upper()+"_DIR",re.MULTILINE)
+  appNameDirRE=re.compile("^\s*"+dep_name.upper()+"_DIR",re.MULTILINE)
   for app in apps:
     if os.path.exists(apps_dir + app + '/Makefile'):
       f = open(apps_dir + app + '/Makefile')
@@ -40,7 +42,7 @@ def findDepApps(app_name):
       f.close()
 
       # See if this app is listed in the Makefile
-      if app_name != app and appNameDirRE.search(lines):
+      if app.upper() not in [x.upper() for x in dep_names.split('~')] and appNameDirRE.search(lines):
         dep_apps.append(app)
 
   return ' '.join(dep_apps)
