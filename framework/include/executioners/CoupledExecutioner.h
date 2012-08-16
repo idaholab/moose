@@ -104,6 +104,15 @@ protected:
    * @param fep
    */
   void projectVariables(FEProblem & fep);
+
+  /**
+   * Get problem by its name (the name that was specified in an input file)
+   * @param name Name of the problem we want to get
+   * @return Pointer to the problem
+   */
+  virtual FEProblem * getProblemByName(const std::string & name);
+
+  virtual Executioner * getExecutionerByName(const std::string & name);
 };
 
 

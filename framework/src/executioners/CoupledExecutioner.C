@@ -180,3 +180,17 @@ CoupledExecutioner::projectVariables(FEProblem & fep)
     dest_sys.update();
   }
 }
+
+FEProblem *
+CoupledExecutioner::getProblemByName(const std::string & name)
+{
+  unsigned int i = _name_index[name];
+  return _fe_problems[i];
+}
+
+Executioner *
+CoupledExecutioner::getExecutionerByName(const std::string & name)
+{
+  unsigned int i = _name_index[name];
+  return _executioners[i];
+}
