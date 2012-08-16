@@ -60,6 +60,7 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
     _Tw(getParam<Real>("Tw")),
     _HT_geometry_code(getParam<unsigned int>("HT_geometry_code")),
     _PoD(getParam<Real>("PoD")),
+    _has_PoD(params.wasSeenInInput("PoD")),
     _has_initial_P(params.wasSeenInInput("initial_P")),
     _has_initial_V(params.wasSeenInInput("initial_V")),
     _has_initial_T(params.wasSeenInInput("initial_T")),
@@ -214,7 +215,8 @@ PipeBase::addMooseObjects()
     pars.set<Real>("Hw") = _Hw;
   pars.set<Real>("Tw") = _Tw;
   pars.set<unsigned int>("HT_geometry_code") = _HT_geometry_code;
-  pars.set<Real>("PoD") = _PoD; 
+  if (_has_PoD)  
+    pars.set<Real>("PoD") = _PoD; 
   pars.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
 
   Model::addKernels(pars);
