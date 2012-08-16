@@ -29,6 +29,7 @@
 NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh, BoundaryID boundary1, BoundaryID boundary2) :
     _subproblem(subproblem),
     _mesh(mesh),
+    _slave_node_range(NULL),
     _boundary1(boundary1),
     _boundary2(boundary2),
     _first(true)
