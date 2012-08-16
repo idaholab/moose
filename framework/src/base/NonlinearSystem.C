@@ -555,9 +555,7 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
     }
     computeResidualInternal(residual, type);
     if(type != Moose::KT_TIME)
-    {
       finishResidual(residual, type);
-    }
   }
   catch (MooseException & e)
   {
@@ -1010,6 +1008,7 @@ NonlinearSystem::finishResidual(NumericVector<Number> & residual, Moose::KernelT
 {
   if(type == Moose::KT_ALL )
   {
+    residual.close();
     residual = _time_scheme->finishResidual(residual);
   }
 
