@@ -35,3 +35,4 @@ DEP_APPS    ?= $(shell $(MOOSE_DIR)/scripts/find_dep_apps.py MOOSE)
 include $(MOOSE_DIR)/build.mk
 include $(MOOSE_DIR)/moose.mk
 include $(MOOSE_DIR)/app.mk
+
