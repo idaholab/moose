@@ -303,6 +303,21 @@ AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
   }
 }
 
+std::set<std::string>
+AuxiliarySystem::getDependObjects(ExecFlagType type)
+{
+  std::set<std::string> depend_objects;
+
+  const std::vector<AuxKernel *> & auxs = _auxs(type)[0].all();
+  for (std::vector<AuxKernel *>::const_iterator it = auxs.begin(); it != auxs.end(); ++it)
+  {
+    const std::set<std::string> & uo = (*it)->getDependObjects();
+    depend_objects.insert(uo.begin(), uo.end());
+  }
+  return depend_objects;
+}
+
+
 void
 AuxiliarySystem::computeScalarVars(std::vector<AuxWarehouse> & auxs)
 {

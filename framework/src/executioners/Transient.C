@@ -172,6 +172,9 @@ Transient::takeStep(Real input_dt)
 
   _problem.timestepSetup();
 
+  // Compute Pre-Aux User Objects (Timestep begin)
+  _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::PRE_AUX);
+
   // Compute TimestepBegin AuxKernels
   _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_BEGIN);
 
@@ -181,12 +184,15 @@ Transient::takeStep(Real input_dt)
   // Compute and apply the refinement Markers
   _problem.computeAndApplyMarkers();
 
-  // Compute TimestepBegin Postprocessors
-  _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN);
+  // Compute Post-Aux User Objects (Timestep begin)
+  _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
 
   _problem.solve();
 
   _converged = _problem.converged();
+
+  // Compute Pre-Aux User Objects
+  _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
 
   postSolve();
 
@@ -198,7 +204,7 @@ Transient::takeStep(Real input_dt)
   // If _reset_dt is true, the time step was synced to the user defined value and we dump the solution in an output file
   if (last_solve_converged)
   {
-    _problem.computeUserObjects();
+    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
   }
 }
 

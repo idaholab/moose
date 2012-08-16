@@ -99,6 +99,13 @@ public:
    */
   virtual void compute(ExecFlagType type = EXEC_RESIDUAL);
 
+  /**
+   * Get a list of dependent UserObjects for this exec type
+   * @param type Execution flag type
+   * @return a set of dependent user objects
+   */
+  std::set<std::string> getDependObjects(ExecFlagType type);
+
 protected:
   void computeScalarVars(std::vector<AuxWarehouse> & auxs);
   void computeNodalVars(std::vector<AuxWarehouse> & auxs);

@@ -20,10 +20,11 @@
 #include "ElementUserObject.h"
 #include "SideUserObject.h"
 
-ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<UserObjectWarehouse> & user_objects) :
+ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group) :
     ThreadedElementLoop<ConstElemRange>(problem, sys),
     _soln(in_soln),
-    _user_objects(user_objects)
+    _user_objects(user_objects),
+    _group(group)
 {}
 
 // Splitting Constructor
@@ -43,14 +44,14 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
   _fe_problem.reinitMaterials(subdomain, _tid);
 
   //Global UserObjects
-  for (std::vector<ElementUserObject *>::const_iterator UserObject_it = _user_objects[_tid].elementUserObjects(Moose::ANY_BLOCK_ID).begin();
-      UserObject_it != _user_objects[_tid].elementUserObjects(Moose::ANY_BLOCK_ID).end();
-      ++UserObject_it)
+  for (std::vector<ElementUserObject *>::const_iterator UserObject_it = _user_objects[_tid].elementUserObjects(Moose::ANY_BLOCK_ID, _group).begin();
+       UserObject_it != _user_objects[_tid].elementUserObjects(Moose::ANY_BLOCK_ID, _group).end();
+       ++UserObject_it)
     (*UserObject_it)->execute();
 
-  for (std::vector<ElementUserObject *>::const_iterator UserObject_it = _user_objects[_tid].elementUserObjects(subdomain).begin();
-      UserObject_it != _user_objects[_tid].elementUserObjects(subdomain).end();
-      ++UserObject_it)
+  for (std::vector<ElementUserObject *>::const_iterator UserObject_it = _user_objects[_tid].elementUserObjects(subdomain, _group).begin();
+       UserObject_it != _user_objects[_tid].elementUserObjects(subdomain, _group).end();
+       ++UserObject_it)
     (*UserObject_it)->execute();
 }
 
@@ -62,9 +63,9 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
     _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
 
-    for (std::vector<SideUserObject *>::const_iterator side_UserObject_it = _user_objects[_tid].sideUserObjects(bnd_id).begin();
-        side_UserObject_it != _user_objects[_tid].sideUserObjects(bnd_id).end();
-        ++side_UserObject_it)
+    for (std::vector<SideUserObject *>::const_iterator side_UserObject_it = _user_objects[_tid].sideUserObjects(bnd_id, _group).begin();
+         side_UserObject_it != _user_objects[_tid].sideUserObjects(bnd_id, _group).end();
+         ++side_UserObject_it)
       (*side_UserObject_it)->execute();
   }
 }

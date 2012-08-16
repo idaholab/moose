@@ -271,7 +271,7 @@ public:
    * Get a reference to the value associated with the postprocessor.
    */
   Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
-  virtual void computeUserObjects(ExecFlagType type = EXEC_TIMESTEP);
+  virtual void computeUserObjects(ExecFlagType type = EXEC_TIMESTEP, UserObjectWarehouse::GROUP group = UserObjectWarehouse::ALL);
   virtual void computeAuxiliaryKernels(ExecFlagType type = EXEC_RESIDUAL);
   virtual void outputPostprocessors(bool force = false);
 
@@ -454,7 +454,7 @@ protected:
   FormattedTable _pps_output_table_screen;
   unsigned int _pps_output_table_max_rows;
 
-  void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects);
+  void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
 
   // TODO: PPS output subsystem, and this will go away
   // postprocessor output

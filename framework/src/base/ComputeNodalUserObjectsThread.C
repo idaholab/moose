@@ -21,10 +21,10 @@
 // libmesh includes
 #include "threads.h"
 
-ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(SubProblem & problem,
-                                             std::vector<UserObjectWarehouse> & user_objects) :
+ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(SubProblem & problem, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group) :
     _sub_problem(problem),
-    _user_objects(user_objects)
+    _user_objects(user_objects),
+    _group(group)
 {
 }
 
@@ -48,8 +48,8 @@ ComputeNodalUserObjectsThread::operator() (const ConstNodeRange & range)
 
     // All Nodes
     for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it =
-           _user_objects[_tid].nodalUserObjects(Moose::ANY_BOUNDARY_ID).begin();
-         nodal_user_object_it != _user_objects[_tid].nodalUserObjects(Moose::ANY_BOUNDARY_ID).end();
+           _user_objects[_tid].nodalUserObjects(Moose::ANY_BOUNDARY_ID, _group).begin();
+         nodal_user_object_it != _user_objects[_tid].nodalUserObjects(Moose::ANY_BOUNDARY_ID, _group).end();
          ++nodal_user_object_it)
     {
       (*nodal_user_object_it)->execute();
@@ -59,8 +59,8 @@ ComputeNodalUserObjectsThread::operator() (const ConstNodeRange & range)
 
     for (std::vector<BoundaryID>::iterator it = nodeset_ids.begin(); it != nodeset_ids.end(); ++it)
     {
-      for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it = _user_objects[_tid].nodalUserObjects(*it).begin();
-           nodal_user_object_it != _user_objects[_tid].nodalUserObjects(*it).end();
+      for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it = _user_objects[_tid].nodalUserObjects(*it, _group).begin();
+           nodal_user_object_it != _user_objects[_tid].nodalUserObjects(*it, _group).end();
            ++nodal_user_object_it)
       {
         (*nodal_user_object_it)->execute();

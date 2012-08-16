@@ -78,6 +78,8 @@ public:
    */
   bool isNodal();
 
+  const std::set<std::string> & getDependObjects() const { return _depend_uo; }
+
   virtual
   const std::set<std::string> &
   getRequestedItems() { return _depend_vars; }
@@ -95,6 +97,9 @@ public:
   MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template<typename T>
   MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+
+  template<typename T>
+  const T & getUserObject(const std::string & name);
 
 protected:
   virtual Real computeValue() = 0;
@@ -159,8 +164,12 @@ protected:
   /// Zero second derivative in quadrature points
   MooseArray<RealTensor> & _second_zero;
 
+  /// Depend AuxKernels
   std::set<std::string> _depend_vars;
   std::set<std::string> _supplied_vars;
+
+  /// Depend UserObjects
+  std::set<std::string> _depend_uo;
 };
 
 template<typename T>
@@ -188,6 +197,14 @@ AuxKernel::getMaterialPropertyOlder(const std::string & name)
   if (isNodal())
     mooseError(std::string("Nodal AuxKernel '") + _name + "' attempted to reference material property '" + name + "'");
   return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
+}
+
+template<typename T>
+const T &
+AuxKernel::getUserObject(const std::string & name)
+{
+  _depend_uo.insert(_pars.get<UserObjectName>(name));
+  return UserObjectInterface::getUserObject<T>(name);
 }
 
 #endif //AUXKERNEL_H

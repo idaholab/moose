@@ -32,8 +32,18 @@ class GeneralUserObject;
 class UserObjectWarehouse
 {
 public:
+
+  enum GROUP
+  {
+    ALL,
+    PRE_AUX,
+    POST_AUX
+  };
+
   UserObjectWarehouse();
   virtual ~UserObjectWarehouse();
+
+  void updateDependObjects(const std::set<std::string> & depend_uo);
 
   // Setup /////
   void initialSetup();
@@ -53,27 +63,27 @@ public:
    * @param block_id Block ID
    * @return The list of all elemental user_objects
    */
-  const std::vector<ElementUserObject *> & elementUserObjects(SubdomainID block_id) { return _element_user_objects[block_id]; }
+  const std::vector<ElementUserObject *> & elementUserObjects(SubdomainID block_id, GROUP group = ALL);
 
   /**
    * Get the list of side user_objects
    * @param boundary_id Boundary ID
    * @return The list of side user_objects
    */
-  const std::vector<SideUserObject *> & sideUserObjects(BoundaryID boundary_id) { return _side_user_objects[boundary_id]; }
+  const std::vector<SideUserObject *> & sideUserObjects(BoundaryID boundary_id, GROUP group = ALL);
 
   /**
    * Get the list of nodal user_objects
    * @param boundary_id Boundary ID
    * @return The list of all nodal user_objects
    */
-  const std::vector<NodalUserObject *> & nodalUserObjects(BoundaryID boundary_id) { return _nodal_user_objects[boundary_id]; }
+  const std::vector<NodalUserObject *> & nodalUserObjects(BoundaryID boundary_id, GROUP group = ALL);
 
   /**
    * Get the list general user_objects
    * @return The list of general user_objects
    */
-  const std::vector<GeneralUserObject *> & genericUserObjects() { return _generic_user_objects; }
+  const std::vector<GeneralUserObject *> & genericUserObjects(GROUP group = ALL);
 
   /**
    * Get the list of all user_objects
@@ -113,13 +123,24 @@ protected:
   std::vector<NodalUserObject *> _all_nodal_user_objects;
   std::vector<SideUserObject *> _all_side_user_objects;
   std::vector<GeneralUserObject *> _all_generic_user_objects;
+  std::vector<UserObject *> _all_user_objects;
 
   std::map<SubdomainID, std::vector<ElementUserObject *> > _element_user_objects;
   std::map<BoundaryID, std::vector<SideUserObject *> > _side_user_objects;
   std::map<BoundaryID, std::vector<NodalUserObject *> > _nodal_user_objects;
-
   std::vector<GeneralUserObject *> _generic_user_objects;
-  std::vector<UserObject *> _all_user_objects;
+
+  // PreAux UO
+  std::map<SubdomainID, std::vector<ElementUserObject *> > _pre_element_user_objects;
+  std::map<BoundaryID, std::vector<SideUserObject *> > _pre_side_user_objects;
+  std::map<BoundaryID, std::vector<NodalUserObject *> > _pre_nodal_user_objects;
+  std::vector<GeneralUserObject *> _pre_generic_user_objects;
+
+  // PostAux UO
+  std::map<SubdomainID, std::vector<ElementUserObject *> > _post_element_user_objects;
+  std::map<BoundaryID, std::vector<SideUserObject *> > _post_side_user_objects;
+  std::map<BoundaryID, std::vector<NodalUserObject *> > _post_nodal_user_objects;
+  std::vector<GeneralUserObject *> _post_generic_user_objects;
 
   /// All of the block ids that have user_objects specified to act on them
   std::set<SubdomainID> _block_ids_with_user_objects;

@@ -67,16 +67,18 @@ Steady::execute()
   for(unsigned int r_step=0; r_step<=steps; r_step++)
   {
 #endif //LIBMESH_ENABLE_AMR
+    _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::PRE_AUX);
     preSolve();
     _problem.updateMaterials();
     _problem.timestepSetup();
-    _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN);
+    _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
     _problem.solve();
     postSolve();
 
+    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
     _problem.onTimestepEnd();
 
-    _problem.computeUserObjects();
+    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
     _problem.computeIndicators();
     _problem.computeAndApplyMarkers();
 

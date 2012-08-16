@@ -32,6 +32,46 @@ UserObjectWarehouse::~UserObjectWarehouse()
 }
 
 void
+UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo)
+{
+  // Bin the user objects into either Pre or Post AuxKernel bins
+  for (std::map<SubdomainID, std::vector<ElementUserObject *> >::iterator it1 = _element_user_objects.begin(); it1 != _element_user_objects.end(); ++it1)
+    for (std::vector<ElementUserObject *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
+    {
+      if (depend_uo.find((*it2)->name()) != depend_uo.end())
+        _pre_element_user_objects[it1->first].push_back(*it2);
+      else
+        _post_element_user_objects[it1->first].push_back(*it2);
+    }
+
+  for (std::map<BoundaryID, std::vector<SideUserObject *> >::iterator it1 = _side_user_objects.begin(); it1 != _side_user_objects.end(); ++it1)
+    for (std::vector<SideUserObject *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
+    {
+      if (depend_uo.find((*it2)->name()) != depend_uo.end())
+        _pre_side_user_objects[it1->first].push_back(*it2);
+      else
+        _post_side_user_objects[it1->first].push_back(*it2);
+    }
+
+  for (std::map<BoundaryID, std::vector<NodalUserObject *> >::iterator it1 = _nodal_user_objects.begin(); it1 != _nodal_user_objects.end(); ++it1)
+    for (std::vector<NodalUserObject *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
+    {
+      if (depend_uo.find((*it2)->name()) != depend_uo.end())
+        _pre_nodal_user_objects[it1->first].push_back(*it2);
+      else
+        _post_nodal_user_objects[it1->first].push_back(*it2);
+    }
+
+  for (std::vector<GeneralUserObject *>::iterator it2 = _generic_user_objects.begin(); it2 != _generic_user_objects.end(); ++it2)
+  {
+    if (depend_uo.find((*it2)->name()) != depend_uo.end())
+      _pre_generic_user_objects.push_back(*it2);
+    else
+      _post_generic_user_objects.push_back(*it2);
+  }
+}
+
+void
 UserObjectWarehouse::initialSetup()
 {
   for(std::vector<ElementUserObject *>::const_iterator i=_all_element_user_objects.begin();
@@ -195,3 +235,68 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
     _all_generic_user_objects.push_back(general_pp);
   }
 }
+
+const std::vector<ElementUserObject *> &
+UserObjectWarehouse::elementUserObjects(SubdomainID block_id, GROUP group)
+{
+  switch(group)
+  {
+  case ALL:
+    return _element_user_objects[block_id];
+  case PRE_AUX:
+    return _pre_element_user_objects[block_id];
+  case POST_AUX:
+    return _post_element_user_objects[block_id];
+  default:
+    mooseError("Bad Enum");
+  }
+}
+
+const std::vector<SideUserObject *> &
+UserObjectWarehouse::sideUserObjects(BoundaryID boundary_id, GROUP group)
+{
+  switch(group)
+  {
+  case ALL:
+    return _side_user_objects[boundary_id];
+  case PRE_AUX:
+    return _pre_side_user_objects[boundary_id];
+  case POST_AUX:
+    return _post_side_user_objects[boundary_id];
+  default:
+    mooseError("Bad Enum");
+  }
+}
+
+const std::vector<NodalUserObject *> &
+UserObjectWarehouse::nodalUserObjects(BoundaryID boundary_id, GROUP group)
+{
+  switch(group)
+  {
+  case ALL:
+    return _nodal_user_objects[boundary_id];
+  case PRE_AUX:
+    return _pre_nodal_user_objects[boundary_id];
+  case POST_AUX:
+    return _post_nodal_user_objects[boundary_id];
+  default:
+    mooseError("Bad Enum");
+  }
+}
+
+const std::vector<GeneralUserObject *> &
+UserObjectWarehouse::genericUserObjects(GROUP group)
+{
+  switch(group)
+  {
+  case ALL:
+    return _generic_user_objects;
+  case PRE_AUX:
+    return _pre_generic_user_objects;
+  case POST_AUX:
+    return _post_generic_user_objects;
+  default:
+    mooseError("Bad Enum");
+  }
+}
+

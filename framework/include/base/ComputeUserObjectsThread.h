@@ -26,7 +26,7 @@
 class ComputeUserObjectsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeUserObjectsThread(FEProblem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<UserObjectWarehouse> & user_objects);
+  ComputeUserObjectsThread(FEProblem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP);
   ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split);                 // Splitting Constructor
 
   virtual void onElement(const Elem *elem);
@@ -37,6 +37,7 @@ public:
 protected:
   const NumericVector<Number>& _soln;
   std::vector<UserObjectWarehouse> & _user_objects;
+  UserObjectWarehouse::GROUP _group;
 };
 
 #endif //COMPUTEUSEROBJECTSTHREAD_H

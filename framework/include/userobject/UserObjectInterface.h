@@ -42,14 +42,6 @@ public:
   template<class T>
   const T & getUserObject(const std::string & name);
 
-  /**
-   * Get a user object with a given name
-   * @param name The name of the user object to retrieve
-   * @return The user object with name 'name'
-   */
-  template<class T>
-  const T & getUserObjectByName(const std::string & name);
-
 private:
   FEProblem & _uoi_feproblem;
   /// Thread ID
@@ -64,13 +56,6 @@ const T &
 UserObjectInterface::getUserObject(const std::string & name)
 {
   return _uoi_feproblem.getUserObject<T>(_uoi_params.get<UserObjectName>(name));
-}
-
-template<class T>
-const T &
-UserObjectInterface::getUserObjectByName(const std::string & name)
-{
-  return _uoi_feproblem.getUserObject<T>(name, _uoi_tid);
 }
 
 #endif //USEROBJECTINTERFACE_H

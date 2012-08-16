@@ -26,7 +26,7 @@ class SubProblem;
 class ComputeNodalUserObjectsThread
 {
 public:
-  ComputeNodalUserObjectsThread(SubProblem & problem, std::vector<UserObjectWarehouse> & user_objects);
+  ComputeNodalUserObjectsThread(SubProblem & problem, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
   // Splitting Constructor
   ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split split);
 
@@ -39,6 +39,7 @@ protected:
   THREAD_ID _tid;
 
   std::vector<UserObjectWarehouse> & _user_objects;
+  UserObjectWarehouse::GROUP _group;
 };
 
 #endif //COMPUTENODALUserObjectsTHREAD_H
