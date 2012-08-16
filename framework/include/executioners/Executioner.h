@@ -56,18 +56,6 @@ public:
    */
   virtual void execute() = 0;
 
-  virtual Problem & problem() = 0;
-
-protected:
-  MooseMesh * _mesh;
-
-  /// Initial Residual Variables
-  Real _initial_residual_norm;
-  Real _old_initial_residual_norm;
-
-  // Restart
-  std::string _restart_file_base;
-
   /**
    * Override this for actions that should take place before execution
    */
@@ -87,6 +75,18 @@ protected:
    * Override this for actions that should take place after execution
    */
   virtual void postSolve();
+
+  virtual Problem & problem() = 0;
+
+protected:
+  MooseMesh * _mesh;
+
+  /// Initial Residual Variables
+  Real _initial_residual_norm;
+  Real _old_initial_residual_norm;
+
+  // Restart
+  std::string _restart_file_base;
 };
 
 #endif //EXECUTIONER_H
