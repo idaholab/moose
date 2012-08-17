@@ -372,10 +372,7 @@ Transient::preExecute()
   // process time periods
   const std::vector<TimePeriod *> _time_periods = _problem.getTimePeriods();
   for (unsigned int i = 0; i < _time_periods.size(); ++i)
-  {
-    std::cout << "Time Period: " << _time_periods[i]->name() << "\n";
     _sync_times.push_back(_time_periods[i]->start());
-  }
 
   const std::vector<Real> & time = getParam<std::vector<Real> >("time_t");
   if (_use_time_ipol)
