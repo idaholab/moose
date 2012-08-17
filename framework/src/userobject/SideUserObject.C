@@ -20,7 +20,7 @@ template<>
 InputParameters validParams<SideUserObject>()
 {
   InputParameters params = validParams<UserObject>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable that this boundary condition applies to");
+  params.addRequiredParam<std::vector<VariableName> >("variable", "The name of the variable that this boundary condition applies to");
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs or names from the mesh where this boundary condition applies");
   return params;
 }
@@ -32,7 +32,7 @@ SideUserObject::SideUserObject(const std::string & name, InputParameters paramet
     MooseVariableInterface(parameters, false),
     TransientInterface(parameters, name, "side_user_objects"),
     MaterialPropertyInterface(parameters),
-    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _var(_subproblem.getVariable(_tid, parameters.get<std::vector<VariableName> >("variable")[0])),
     _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),
     _q_point(_subproblem.pointsFace(_tid)),
     _qrule(_subproblem.qRuleFace(_tid)),
@@ -44,12 +44,18 @@ SideUserObject::SideUserObject(const std::string & name, InputParameters paramet
     _current_side_volume(_subproblem.sideElemVolume(_tid)),
     _u(_var.sln()),
     _grad_u(_var.gradSln()),
-    //
     _real_zero(_subproblem._real_zero[_tid]),
     _zero(_subproblem._zero[_tid]),
     _grad_zero(_subproblem._grad_zero[_tid]),
     _second_zero(_subproblem._second_zero[_tid])
-{}
+{
+  std::vector<VariableName> vars = getParam<std::vector<VariableName> >("variable");
+  _vars.resize(vars.size());
+
+  // initialize our vector of variable pointers
+  for (unsigned int i=0; i<vars.size(); ++i)
+    _vars[i] = &_subproblem.getVariable(0, vars[i]);
+}
 
 Real
 SideUserObject::computeIntegral()

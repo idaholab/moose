@@ -117,6 +117,13 @@ public:
   void addPrivateParam(const std::string &name);
 
   /**
+   * This method supresses an inherited parameter so that it isn't required or valid
+   * in the derived class.
+   */
+  template <typename T>
+  void suppressParameter(const std::string &name);
+
+  /**
    * This method adds a coupled variable name pair.  The parser will look for variable
    * name pair in the input file and can return a reference to the storage location
    * for the coupled variable if found
@@ -311,6 +318,13 @@ void InputParameters::addPrivateParam(const std::string &name, const T &value)
 {
   Parameters::set<T>(name) = value;
   _private_params.insert(name);
+}
+
+template <typename T>
+void InputParameters::suppressParameter(const std::string &name)
+{
+  _required_params.erase(name);
+  _valid_params.erase(name);
 }
 
 // Specializations for MooseEnum

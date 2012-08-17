@@ -64,6 +64,10 @@ public:
 
 protected:
   MooseVariable & _var;
+
+  /// list of variables when working on more than one
+  std::vector<MooseVariable *> _vars;
+
   std::vector<BoundaryName> _boundaries;
 
   const unsigned int _qp;
