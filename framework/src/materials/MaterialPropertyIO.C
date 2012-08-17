@@ -61,8 +61,11 @@ MaterialPropertyIO::write(const std::string & file_name)
   out.write((const char *) &n_blocks, sizeof(n_blocks));
 
   // number of quadrature points
-  // we go grab element 0, side 0 (it's volumetric mat. properties) and 0th property (all should be sized the same)
-  unsigned int n_qps = props[0][0][0]->size();     // we expect to have element 0 always (lame)
+  // we go grab element 0, side 0 (it's volumetric mat. properties) and we will use the first stateful property to get the number of QPs (all should be sized the same)
+  unsigned int n_qps = 0;
+  for (MaterialProperties::iterator it = props[0][0].begin(); it != props[0][0].end(); ++it)        // we expect to have element 0 always (lame)
+    if (*it != NULL)
+      n_qps = (*it)->size();
   out.write((const char *) &n_qps, sizeof(n_qps));
 
   // save the number of elements in this block (since we do only 1 block right now, we store everything)
