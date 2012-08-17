@@ -60,7 +60,7 @@ InputParameters validParams<Transient>()
   params.addParam<std::vector<Real> >("time_period_starts", "The start times of time periods");
   params.addParam<std::vector<Real> >("time_period_ends", "The end times of time periods");
   params.addParam<bool>("use_AB2", false, "Whether to use the Adams-Bashforth 2 predictor");
-  params.addParam<bool>("use_littlef", true, "if a function evaluation should be used or time deriv's in predictors");
+  params.addParam<bool>("use_littlef", false, "if a function evaluation should be used or time deriv's in predictors");
   params.addParam<bool>("abort_on_solve_fail", false, "abort if solve not converged rather than cut timestep");
   return params;
 }
