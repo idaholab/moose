@@ -20,7 +20,7 @@
 #include "SubProblem.h"
 #include "ProblemFactory.h"
 #include "TimePeriod.h"
-
+#include "TimeScheme.h"
 //libMesh includes
 #include "implicit_system.h"
 #include "nonlinear_implicit_system.h"
@@ -59,7 +59,9 @@ InputParameters validParams<Transient>()
   params.addParam<std::vector<std::string> >("time_periods", "The names of periods");
   params.addParam<std::vector<Real> >("time_period_starts", "The start times of time periods");
   params.addParam<std::vector<Real> >("time_period_ends", "The end times of time periods");
-
+  params.addParam<bool>("use_AB2", false, "Whether to use the Adams-Bashforth 2 predictor");
+  params.addParam<bool>("use_littlef", true, "if a function evaluation should be used or time deriv's in predictors");
+  params.addParam<bool>("abort_on_solve_fail", false, "abort if solve not converged rather than cut timestep");
   return params;
 }
 
@@ -89,7 +91,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
                getParam<std::vector<Real> >("time_dt")),
     _use_time_ipol(_time_ipol.getSampleSize() > 0),
     _growth_factor(getParam<Real>("growth_factor")),
-    _cutback_occurred(false)
+    _cutback_occurred(false),
+    _abort(getParam<bool>("abort_on_solve_fail"))
 {
   _t_step = 0;
   _dt = 0;
@@ -102,6 +105,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
       _problem.getNonlinearSystem().setPredictorScale(getParam<Real>("predictor_scale"));
     else
       mooseError("Input value for predictor_scale = "<< predscale << ", outside of permissible range (0 to 1)");
+    _problem.getTimeScheme()->_use_AB2 = getParam<bool>("use_AB2");
+    _problem.getTimeScheme()->_use_littlef = getParam<bool>("use_littlef");
   }
 
   if (!_restart_file_base.empty())
@@ -347,6 +352,12 @@ Transient::keepGoing()
       // Print steady-state relative error norm
       std::cout<<"Steady-State Relative Differential Norm: "<<ss_relerr_norm<<std::endl;
     }
+  }
+
+  if(!_converged && _abort)
+  {
+    std::cout<<"Aborting as solve did not converge and input selected to abort"<<std::endl;
+    return false;
   }
 
   // Check for stop condition based upon number of simulation steps and/or solution end time:

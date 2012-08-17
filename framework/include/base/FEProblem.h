@@ -31,9 +31,10 @@
 #include "Resurrector.h"
 #include "IndicatorWarehouse.h"
 #include "MarkerWarehouse.h"
-
+#include "TimeScheme.h"
 class DisplacedProblem;
 class OutputProblem;
+class TimeScheme;
 
 class FEProblem;
 
@@ -167,6 +168,7 @@ public:
   virtual int & timeStep() { return _t_step; }
   virtual Real & dt() { return _dt; }
   virtual Real & dtOld() { return _dt_old; }
+  virtual TimeScheme * getTimeScheme(){ return _nl.getTimeScheme();}
 
   virtual void transient(bool trans) { _transient = trans; }
   virtual bool isTransient() { return _transient; }

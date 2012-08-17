@@ -59,7 +59,8 @@ _workvecs(std::vector<NumericVector<Number> *>()),
 _apply_predictor(true),
 _use_AB2(false),
 _dt2_check(NULL),
-_dt2_bool(false)
+_dt2_bool(false),
+_use_littlef(true)
 {
 
 }
@@ -142,6 +143,10 @@ TimeScheme::onTimestepBegin()
   Real sum;
   if(_t_step > 1)
   {
+    if(_time_stepping_scheme == Moose::CRANK_NICOLSON)
+    {
+      _solution_u_dot *= .5;
+    }
     _time_stack[_time_stack.size()-2].setTimeDerivitive(_solution_u_dot);
   }
   switch (_time_stepping_scheme)
@@ -168,9 +173,9 @@ TimeScheme::onTimestepBegin()
 
 void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
 {
-  if(!_nl->containsTimeKernel())
+  if(!_nl->containsTimeKernel() || !_use_littlef)
   {
-    if(_dt ==0 || _dt_old == 0 || _t_step<3){
+    if(_dt ==0 || _dt_old == 0 || _t_step<2){
       return;
     }
     initial_solution.localize(_predicted_solution);
@@ -197,17 +202,20 @@ void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
   {
     NumericVector<Number> & residual_older = _trash1;
     NumericVector<Number> & residual_old = _trash2;
-
-    computeLittlef(_time_stack[_time_stack.size()-3].getSolution(), residual_older);
+    initial_solution.localize(_predicted_solution);
+    computeLittlef(_time_stack[_time_stack.size()-3].getSolution(), residual_older, _time_stack[_time_stack.size()-3].getTime());
     computeLittlef(_time_stack[_time_stack.size() -2].getSolution(), residual_old);
     if(_dt ==0 || _dt_old == 0){
       std::cout<<"help me!!"<<std::endl;
     }
     residual_older *= -1.0*(_dt*_dt)/(2.0*_dt_old);
     residual_old *= -1.0*(_dt + (_dt*_dt)/(2.0*_dt_old));
-    initial_solution +=  (residual_old);
-    initial_solution -= residual_older;
-    initial_solution.localize(_predicted_solution);
+    _predicted_solution +=  (residual_old);
+    _predicted_solution -= residual_older;
+    if(_apply_predictor)
+    {
+      _predicted_solution.localize(initial_solution);
+    }
   }
 }
 
@@ -299,20 +307,39 @@ TimeScheme::applyPredictor(NumericVector<Number> & initial_solution)
     }
     return;
   }
-  if (_dt_old > 0)
+  if(!_use_littlef )
   {
-    std::streamsize cur_precision(std::cout.precision());
-    std::cout << "  Applying predictor with scale factor = "<<std::fixed<<std::setprecision(2)<<_nl->_predictor_scale<<"\n";
-    std::cout << std::scientific << std::setprecision(cur_precision);
-    Real dt_adjusted_scale_factor = _nl->_predictor_scale*_dt;
-    NumericVector<Number> & previous_solution = _trash1;
-    _time_stack[_time_stack.size()-2].getTimeDerivitive().localize(previous_solution);
-    if (dt_adjusted_scale_factor != 0.0)
+    if (_dt_old > 0)
     {
-      previous_solution *= dt_adjusted_scale_factor;
-      initial_solution += previous_solution;
+      std::streamsize cur_precision(std::cout.precision());
+      std::cout << "  Applying predictor with scale factor = "<<std::fixed<<std::setprecision(2)<<_nl->_predictor_scale<<"\n";
+      std::cout << std::scientific << std::setprecision(cur_precision);
+      Real dt_adjusted_scale_factor = _nl->_predictor_scale*_dt;
+      NumericVector<Number> & previous_solution = _trash1;
+      _time_stack[_time_stack.size()-2].getTimeDerivitive().localize(previous_solution);
+      if (dt_adjusted_scale_factor != 0.0)
+      {
+        previous_solution *= dt_adjusted_scale_factor;
+        initial_solution += previous_solution;
+        initial_solution.localize(_predicted_solution);
+      }
     }
   }
+  else
+  {
+     std::streamsize cur_precision(std::cout.precision());
+     std::cout << "  Applying predictor with scale factor = "<<std::fixed<<std::setprecision(2)<<_nl->_predictor_scale<<"\n";
+     std::cout << std::scientific << std::setprecision(cur_precision);
+     Real dt_adjusted_scale_factor = _nl->_predictor_scale *_dt;
+     NumericVector<Number> & previous_solution = _trash1;
+     if(dt_adjusted_scale_factor != 0.0)
+     {
+       computeLittlef(initial_solution, previous_solution);
+       previous_solution *= dt_adjusted_scale_factor;
+       initial_solution += previous_solution;
+       initial_solution.localize(_predicted_solution);
+     }
+   }
 }
 
 void TimeScheme::computeLittlef(const NumericVector<Number> & bigF, NumericVector<Number> & littlef, Real time, bool mass)

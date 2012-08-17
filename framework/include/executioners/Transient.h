@@ -137,6 +137,7 @@ protected:
   bool _use_time_ipol;
   Real _growth_factor;
   bool _cutback_occurred;
+  bool _abort;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

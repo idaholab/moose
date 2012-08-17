@@ -14,6 +14,12 @@ testcranic = { INPUT : 'cranic.i',
 testdt2 = { INPUT : 'dt2.i',
             EXODIFF : ['out_dt2.e'] }
 
+testabort = { INPUT : 'aborttest.i',
+             EXODIFF : ['out_abort.e']}
+
+testAEE = { INPUT : 'AEEtest.i',
+           EXODIFF: ['out_AEE.e']}
+
 # versions with adaptivity
 
 test_ie_adapt = { INPUT : 'ie_adapt.i',

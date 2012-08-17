@@ -251,10 +251,14 @@ protected:
   bool _apply_predictor;
 
   ///default to false, used to determine if AB2 predictor should be used
+public:
   bool _use_AB2;
+protected:
   TimeStep *_dt2_check;
   bool _dt2_bool;
   int _time_stack_size;
+public:
+  bool _use_littlef;
   friend class NonlinearSystem;
 };
 #endif /* TIMESCHEME_H */

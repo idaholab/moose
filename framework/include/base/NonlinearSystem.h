@@ -474,6 +474,7 @@ protected:
 public:
   /// Time stepping scheme class where the actual work is done
   TimeScheme * _time_scheme;
+  TimeScheme * getTimeScheme(){ return _time_scheme;}
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;
   friend class ComputeFullJacobianThread;
