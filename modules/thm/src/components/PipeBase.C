@@ -36,7 +36,7 @@ InputParameters validParams<PipeBase>()
   params.addParam<unsigned int>("HT_geometry_code", 0, "Heat transfer geometry code");
   params.addParam<Real>("PoD", 1, "pitch to diameter ratio for parellel bundle heat transfer");
 
-  params.addParam<Real>("initial_P", 0., "Initial pressure in the pipe");
+  params.addParam<Real>("initial_P", 1e5, "Initial pressure in the pipe");
   params.addParam<Real>("initial_V", 0., "Initial velocity in the pipe");
   params.addParam<Real>("initial_T", 300., "Initial temperature in the pipe");
 
@@ -64,9 +64,9 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
     _has_initial_P(params.wasSeenInInput("initial_P")),
     _has_initial_V(params.wasSeenInInput("initial_V")),
     _has_initial_T(params.wasSeenInInput("initial_T")),
-    _initial_P(_has_initial_P ? getParam<Real>("initial_P") : 0.),
-    _initial_V(_has_initial_V ? getParam<Real>("initial_V") : 0.),
-    _initial_T(_has_initial_T ? getParam<Real>("initial_T") : 300.)
+    _initial_P(getParam<Real>("initial_P")),
+    _initial_V(getParam<Real>("initial_V")),
+    _initial_T(getParam<Real>("initial_T"))
 {
   const std::vector<Real> & dir = getParam<std::vector<Real> >("orientation");
   _dir = VectorValue<Real>(dir[0], dir[1], dir[2]);
