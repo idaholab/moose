@@ -50,6 +50,7 @@ DT2Transient::DT2Transient(const std::string & name, InputParameters parameters)
     _e_max(getParam<Real>("e_max")),
     _max_increase(getParam<Real>("max_increase"))
 {
+  _error=0;
 }
 
 DT2Transient::~DT2Transient()
@@ -101,7 +102,7 @@ DT2Transient::preSolve()
 void
 DT2Transient::postSolve()
 {
-  /*NonlinearSystem & nl =*/ _problem.getNonlinearSystem(); // returned reference is not used for anything?
+  NonlinearSystem & nl = _problem.getNonlinearSystem(); // returned reference is not used for anything?
   TransientNonlinearImplicitSystem & nl_sys = _problem.getNonlinearSystem().sys();
   TransientExplicitSystem & aux_sys = _problem.getAuxiliarySystem().sys();
   if (_converged)
@@ -112,7 +113,7 @@ DT2Transient::postSolve()
 
     *_aux1 = *aux_sys.current_local_solution;
     _aux1->close();
-
+   // _problem.onTimestepEnd();
     // take two steps with dt/2
     std::cout << "Taking two dt/2 time steps" << std::endl;
 
@@ -124,25 +125,46 @@ DT2Transient::postSolve()
 
     _time -= _dt_full;
 
-    _problem.computeUserObjects();
+    //_problem.computeUserObjects();
 
     // cut the time step in half
     _dt = _dt_full / 2;
 
     // 1. step
+
     _problem.onTimestepBegin();
     _time += _dt;
 
+/*    _problem.timestepSetup();
+
+    // Compute Pre-Aux User Objects (Timestep begin)
+    _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::PRE_AUX);
+
+    // Compute TimestepBegin AuxKernels
+    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_BEGIN);
+
+    // Compute the Error Indicators
+    _problem.computeIndicators();
+
+    // Compute and apply the refinement Markers
+    _problem.computeAndApplyMarkers();
+*/
+    // Compute Post-Aux User Objects (Timestep begin)
+    _problem.computeUserObjects();
+
+
     std::cout << "  - 1. step" << std::endl;
     Moose::setSolverDefaults(_problem);
-    nl_sys.solve();
+
+    nl.solve();
 
     _converged = nl_sys.nonlinear_solver->converged;
     if (!_converged) return;
     nl_sys.update();
 
+    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
     _problem.copyOldSolutions();
-    _problem.computeUserObjects();
+   // _problem.onTimestepEnd();
 
     // 2. step
     _problem.onTimestepBegin();
@@ -150,7 +172,7 @@ DT2Transient::postSolve()
 
     std::cout << "  - 2. step" << std::endl;
     Moose::setSolverDefaults(_problem);
-    nl_sys.solve();
+    nl.solve();
 
     _converged = nl_sys.nonlinear_solver->converged;
     if (!_converged) return;

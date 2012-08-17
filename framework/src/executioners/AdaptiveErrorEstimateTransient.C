@@ -61,6 +61,7 @@ AdaptiveErrorEstimateTransient::AdaptiveErrorEstimateTransient(const std::string
     _infnorm(0),
     _scaling_parameter(getParam<Real>("scaling_parameter"))
 {
+  _error=0;
   _problem.getNonlinearSystem()._time_scheme->useAB2Predictor();
 
 }

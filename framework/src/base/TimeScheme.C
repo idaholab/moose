@@ -40,6 +40,8 @@
 
 
 TimeScheme::TimeScheme(NonlinearSystem * c) :
+_use_AB2(false),
+_use_littlef(true),
 _nl(c),
 _solution_u_dot(c->_sys.add_vector("u_dot", false, GHOSTED)),
 _solution_du_dot_du(c->_sys.add_vector("du_dot_du", false, GHOSTED)),
@@ -57,10 +59,8 @@ _t_step(c->_t_step),
 _time_stack(std::deque<TimeStep>()),
 _workvecs(std::vector<NumericVector<Number> *>()),
 _apply_predictor(true),
-_use_AB2(false),
 _dt2_check(NULL),
-_dt2_bool(false),
-_use_littlef(true)
+_dt2_bool(false)
 {
 
 }

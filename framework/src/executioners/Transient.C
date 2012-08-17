@@ -102,9 +102,13 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
   {
     Real predscale(getParam<Real>("predictor_scale"));
     if (predscale >= 0.0 and predscale <= 1.0)
+    {
       _problem.getNonlinearSystem().setPredictorScale(getParam<Real>("predictor_scale"));
+    }
     else
+    {
       mooseError("Input value for predictor_scale = "<< predscale << ", outside of permissible range (0 to 1)");
+    }
     _problem.getTimeScheme()->_use_AB2 = getParam<bool>("use_AB2");
     _problem.getTimeScheme()->_use_littlef = getParam<bool>("use_littlef");
   }

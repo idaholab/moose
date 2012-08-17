@@ -168,6 +168,7 @@ NonlinearSystem::solve()
 {
   try
   {
+
     //Calculate the initial residual for use in the convergence criterion.  The initial
     //residual
     _computing_initial_residual = true;
