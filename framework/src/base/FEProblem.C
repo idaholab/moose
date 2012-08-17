@@ -2298,6 +2298,10 @@ FEProblem::computeResidualType( const NumericVector<Number>& soln, NumericVector
   _aux.compute();
   _nl.computeResidual(residual, type);
 
+  // Need to close and update the aux system in case residuals were saved to it.
+  _aux.solution().close();
+  _aux.update();
+
   if (_dbg_top_residuals)
     _nl.printTopResiduals(residual, _dbg_top_residuals);
 }

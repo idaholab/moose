@@ -38,6 +38,8 @@ public:
 
   virtual const NumericVector<Number> * & currentSolution() { return _undisplaced_system.currentSolution(); }
 
+  virtual NumericVector<Number> & solution() { return _undisplaced_system.solution(); }
+
   virtual NumericVector<Number> & solutionUDot() { return _undisplaced_system.solutionUDot(); }
   virtual NumericVector<Number> & solutionDuDotDu() { return _undisplaced_system.solutionDuDotDu(); }
 
