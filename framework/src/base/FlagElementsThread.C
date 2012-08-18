@@ -50,8 +50,13 @@ void
 FlagElementsThread::onElement(const Elem *elem)
 {
   unsigned int dof_number = elem->dof_number(_system_number, _field_var_number, 0);
-  Elem::RefinementState marker_value = (Elem::RefinementState)_serialized_solution[dof_number];
-  const_cast<Elem *>(elem)->set_refinement_flag(marker_value);
+  Marker::MarkerValue marker_value = (Marker::MarkerValue)_serialized_solution[dof_number];
+
+  // If no Markers cared about what happened to this element let's just leave it alone
+  if(marker_value == Marker::DONT_MARK)
+    marker_value = Marker::DO_NOTHING;
+
+  const_cast<Elem *>(elem)->set_refinement_flag((Elem::RefinementState)marker_value);
 }
 
 void

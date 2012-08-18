@@ -22,7 +22,7 @@
 
 
 MooseEnum::MooseEnum(std::string names) :
-    _current_id(-1)
+    _current_id(-std::numeric_limits<int>::max())
 {
   fillNames(names);
 }
