@@ -172,6 +172,7 @@
 #include "ErrorFractionMarker.h"
 #include "BoxMarker.h"
 #include "ComboMarker.h"
+#include "ValueThresholdMarker.h"
 
 // Actions
 #include "AddMeshModifierAction.h"
@@ -378,6 +379,7 @@ registerObjects()
   registerMarker(ErrorFractionMarker);
   registerMarker(BoxMarker);
   registerMarker(ComboMarker);
+  registerMarker(ValueThresholdMarker);
 
   registered = true;
 }

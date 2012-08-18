@@ -81,6 +81,11 @@ public:
   SystemBase & sys() { return _sys; }
 
   /**
+   * The DofMap associated with the system this variable is in.
+   */
+  const DofMap & dofMap() { return _dof_map; }
+
+  /**
    * Get the variable number
    * @return The variable number
    */
