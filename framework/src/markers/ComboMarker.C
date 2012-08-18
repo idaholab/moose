@@ -31,14 +31,14 @@ ComboMarker::ComboMarker(const std::string & name, InputParameters parameters) :
     _markers.push_back(&getMarkerValue(_names[i]));
 }
 
-int
+Marker::MarkerValue
 ComboMarker::computeElementMarker()
 {
-  // We start with COARSEN because it's _0_
-  int marker_value = Elem::COARSEN;
+  // We start with DONT_MARK because it's -1
+  MarkerValue marker_value = DONT_MARK;
 
   for(unsigned int i=0; i<_markers.size(); i++)
-    marker_value = std::max(marker_value, (int)(*_markers[i])[0]);
+    marker_value = std::max(marker_value, (MarkerValue)(*_markers[i])[0]);
 
   return marker_value;
 }

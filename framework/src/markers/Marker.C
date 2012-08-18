@@ -52,7 +52,7 @@ MooseEnum
 Marker::markerStates()
 {
   // MooseEnum marker_states("COARSEN = 0, DO_NOTHING, REFINE, JUST_REFINED, JUST_COARSENED, INACTIVE, COARSEN_INACTIVE, INVALID_REFINEMENTSTATE");
-  MooseEnum marker_states("coarsen, do_nothing, refine");
+  MooseEnum marker_states("dont_mark = -1, coarsen, do_nothing, refine");
 
   return marker_states;
 }

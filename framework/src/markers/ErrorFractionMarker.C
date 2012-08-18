@@ -53,16 +53,16 @@ ErrorFractionMarker::markerSetup()
   _coarsen_cutoff = _coarsen*_delta + _min;
 }
 
-int
+Marker::MarkerValue
 ErrorFractionMarker::computeElementMarker()
 {
   Real error = _error_vector[_current_elem->id()];
 
   if(error > _refine_cutoff)
-    return Elem::REFINE;
+    return REFINE;
   else if(error < _coarsen_cutoff)
-    return Elem::COARSEN;
+    return COARSEN;
 
-  return Elem::DO_NOTHING;
+  return DO_NOTHING;
 }
 

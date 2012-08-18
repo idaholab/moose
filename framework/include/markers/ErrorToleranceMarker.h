@@ -29,7 +29,7 @@ public:
   virtual ~ErrorToleranceMarker(){};
 
 protected:
-  virtual int computeElementMarker();
+  virtual MarkerValue computeElementMarker();
 
   Real _coarsen;
   Real _refine;

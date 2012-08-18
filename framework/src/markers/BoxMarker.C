@@ -32,13 +32,13 @@ InputParameters validParams<BoxMarker>()
 
 BoxMarker::BoxMarker(const std::string & name, InputParameters parameters) :
     Marker(name, parameters),
-    _inside(parameters.get<MooseEnum>("inside")),
-    _outside(parameters.get<MooseEnum>("outside")),
+    _inside((MarkerValue)(int)parameters.get<MooseEnum>("inside")),
+    _outside((MarkerValue)(int)parameters.get<MooseEnum>("outside")),
     _bounding_box(parameters.get<RealVectorValue>("bottom_left"), parameters.get<RealVectorValue>("top_right"))
 {
 }
 
-int
+Marker::MarkerValue
 BoxMarker::computeElementMarker()
 {
   RealVectorValue centroid = _current_elem->centroid();

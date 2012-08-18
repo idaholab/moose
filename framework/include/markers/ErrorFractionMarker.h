@@ -31,7 +31,7 @@ public:
   virtual void markerSetup();
 
 protected:
-  virtual int computeElementMarker();
+  virtual MarkerValue computeElementMarker();
 
   Real _coarsen;
   Real _refine;

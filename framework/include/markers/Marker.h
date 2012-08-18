@@ -46,6 +46,15 @@ public:
   Marker(const std::string & name, InputParameters parameters);
   virtual ~Marker(){}
 
+  /// This mirrors the main refinement flag values in libMesh in Elem::RefinementState but adds "dont_mark"
+  enum MarkerValue
+  {
+    DONT_MARK = -1,
+    COARSEN,
+    DO_NOTHING,
+    REFINE
+  };
+
   /**
    * Helper function for getting the valid refinement flag states a marker can use as a MooseEnum.
    * @return A MooseEnum that is filled with the valid states.  These are perfectly transferable to libMesh Elem::RefinementStates.
@@ -72,7 +81,7 @@ public:
 
 protected:
 
-  virtual int computeElementMarker() = 0;
+  virtual MarkerValue computeElementMarker() = 0;
 
   /**
    * Get an ErrorVector that will be filled up with values corresponding to the indicator passed in.

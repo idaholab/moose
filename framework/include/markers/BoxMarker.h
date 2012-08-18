@@ -32,10 +32,10 @@ public:
   virtual ~BoxMarker(){};
 
 protected:
-  virtual int computeElementMarker();
+  virtual MarkerValue computeElementMarker();
 
-  int _inside;
-  int _outside;
+  MarkerValue _inside;
+  MarkerValue _outside;
 
   MeshTools::BoundingBox _bounding_box;
 };

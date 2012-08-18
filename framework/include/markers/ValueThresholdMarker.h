@@ -32,7 +32,7 @@ public:
   virtual ~ValueThresholdMarker(){};
 
 protected:
-  virtual int computeElementMarker();
+  virtual MarkerValue computeElementMarker();
 
   bool _coarsen_set;
   Real _coarsen;

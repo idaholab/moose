@@ -35,7 +35,7 @@ public:
   virtual ~ComboMarker(){};
 
 protected:
-  virtual int computeElementMarker();
+  virtual MarkerValue computeElementMarker();
 
   std::vector<MarkerName> _names;
 

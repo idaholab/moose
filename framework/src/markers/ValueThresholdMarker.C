@@ -50,7 +50,7 @@ ValueThresholdMarker::ValueThresholdMarker(const std::string & name, InputParame
     mooseError("ValueThresholdMarker can only be used with variables of type Lagrange or Constant Monomial!");
 }
 
-int
+Marker::MarkerValue
 ValueThresholdMarker::computeElementMarker()
 {
   _variable_dof_map.dof_indices(_current_elem, _variable_dof_indices, _variable_number);
@@ -66,24 +66,24 @@ ValueThresholdMarker::computeElementMarker()
   if(!_invert)
   {
     if(_refine_set && max_value > _refine)
-      return Elem::REFINE;
+      return REFINE;
 
     if(_coarsen_set && max_value < _coarsen)
-      return Elem::COARSEN;
+      return COARSEN;
   }
   else
   {
     if(_refine_set && max_value < _refine)
-      return Elem::REFINE;
+      return REFINE;
 
     if(_coarsen_set && max_value > _coarsen)
-      return Elem::COARSEN;
+      return COARSEN;
   }
 
   if(_dont_mark)
-    return Elem::DO_NOTHING; //-1; // Don't mark
+    return DONT_MARK;
   else
-    return Elem::DO_NOTHING;
+    return DO_NOTHING;
 }
 
 
