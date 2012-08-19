@@ -19,7 +19,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
-
+#include <limits>
 
 MooseEnum::MooseEnum(std::string names) :
     _current_id(-std::numeric_limits<int>::max())

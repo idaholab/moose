@@ -36,7 +36,8 @@ AllLocalDofIndicesThread::AllLocalDofIndicesThread(System & sys,
 AllLocalDofIndicesThread::AllLocalDofIndicesThread(AllLocalDofIndicesThread & x, Threads::split /*split*/) :
     _sys(x._sys),
     _dof_map(x._dof_map),
-    _vars(x._vars)
+    _vars(x._vars),
+    _var_numbers(x._var_numbers)
 {
 }
 
