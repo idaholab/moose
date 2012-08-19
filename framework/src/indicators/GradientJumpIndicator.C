@@ -31,6 +31,8 @@ GradientJumpIndicator::GradientJumpIndicator(const std::string & name, InputPara
 Real
 GradientJumpIndicator::computeQpIntegral()
 {
-  return std::abs((_grad_u[_qp] - _grad_u_neighbor[_qp])*_normals[_qp]);
+  Real jump = (_grad_u[_qp] - _grad_u_neighbor[_qp])*_normals[_qp];
+
+  return jump*jump;
 }
 

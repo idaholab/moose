@@ -1540,11 +1540,22 @@ FEProblem::computeIndicators()
       }
 */
     }
-    // compute
+
+  // compute
+  {
     ComputeIndicatorThread cit(*this, getAuxiliarySystem(), _indicators);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
     _aux.solution().close();
     _aux.update();
+  }
+
+  // finalize
+  {
+    ComputeIndicatorThread cit(*this, getAuxiliarySystem(), _indicators, true);
+    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
+    _aux.solution().close();
+    _aux.update();
+  }
 }
 
 void

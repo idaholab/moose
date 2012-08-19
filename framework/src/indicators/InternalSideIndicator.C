@@ -36,7 +36,7 @@ InputParameters validParams<InternalSideIndicator>()
 {
   InputParameters params = validParams<Indicator>();
   params.addRequiredParam<VariableName>("variable", "The name of the variable that this side indicator applies to");
-  params.addParam<bool>("scale_by_flux_faces", true, "Whether or not to scale the error values by the number of flux faces.  This attempts to not penalize elements on boundaries for having less neighbors.");
+  params.addParam<bool>("scale_by_flux_faces", false, "Whether or not to scale the error values by the number of flux faces.  This attempts to not penalize elements on boundaries for having less neighbors.");
 
   params.addPrivateParam<BoundaryID>("_boundary_id", InternalSideIndicator::InternalBndId);
 
@@ -85,21 +85,6 @@ InternalSideIndicator::~InternalSideIndicator()
 void
 InternalSideIndicator::computeIndicator()
 {
-  Moose::perf_log.push("computeIndicator()","InternalSideIndicator");
-
-  unsigned int n_flux_faces = 0;
-
-  if(_scale_by_flux_faces)
-  {
-    // Figure out the total number of sides contributing to the error.
-    // We'll scale by this so boundary elements aren't penalized
-    for (unsigned int side=0; side<_current_elem->n_sides(); side++)
-      if(_current_elem->neighbor(side) != NULL)
-        n_flux_faces++;
-  }
-  else
-    n_flux_faces = 1;
-
   Real sum = 0;
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
@@ -108,12 +93,32 @@ InternalSideIndicator::computeIndicator()
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-    _solution.add(_field_var.nodalDofIndex(), sum/(Real)n_flux_faces);
-    _solution.add(_field_var.nodalDofIndexNeighbor(), sum/(Real)n_flux_faces);
+    _solution.add(_field_var.nodalDofIndex(), sum*_current_elem->hmax());
+    _solution.add(_field_var.nodalDofIndexNeighbor(), sum*_neighbor_elem->hmax());
   }
-
-
-  Moose::perf_log.pop("computeIndicator()","InternalSideIndicator");
 }
 
+void
+InternalSideIndicator::finalize()
+{
+  unsigned int n_flux_faces = 0;
 
+  if(_scale_by_flux_faces)
+  {
+    // Figure out the total number of sides contributing to the error.
+    // We'll scale by this so boundary elements are less penalized
+    for (unsigned int side=0; side<_current_elem->n_sides(); side++)
+      if(_current_elem->neighbor(side) != NULL)
+        n_flux_faces++;
+  }
+  else
+    n_flux_faces = 1;
+
+  // The 0 is because CONSTANT MONOMIALS only have one coefficient per element...
+  Real value = _field_var.nodalSln()[0];
+
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    _solution.set(_field_var.nodalDofIndex(), std::sqrt(value)/(Real)n_flux_faces);
+  }
+}

@@ -60,6 +60,8 @@ public:
    */
   virtual void computeIndicator();
 
+  virtual void finalize();
+
 protected:
 
   const Elem * & _current_elem;

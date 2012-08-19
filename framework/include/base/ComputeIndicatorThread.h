@@ -25,7 +25,10 @@ class AuxiliarySystem;
 class ComputeIndicatorThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeIndicatorThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<IndicatorWarehouse> & indicator_whs);
+  /**
+   * @param finalize Whether or not we are just in the "finalize" stage or not.
+   */
+  ComputeIndicatorThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<IndicatorWarehouse> & indicator_whs, bool finalize = false);
 
   // Splitting Constructor
   ComputeIndicatorThread(ComputeIndicatorThread & x, Threads::split split);
@@ -41,6 +44,7 @@ protected:
   FEProblem & _fe_problem;
   AuxiliarySystem & _aux_sys;
   std::vector<IndicatorWarehouse> & _indicator_whs;
+  bool _finalize;
 };
 
 #endif //COMPUTEINDICATORTHREAD_H

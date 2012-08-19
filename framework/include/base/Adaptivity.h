@@ -123,6 +123,11 @@ public:
   void setTimeActive(Real start_time, Real stop_time);
 
   /**
+   * Tells this object we're using the "new" adaptivity sytem.
+   */
+  void setUseNewSystem();
+
+  /**
    * Sets the name of the field variable to actually use to flag elements for refinement / coarsening.
    * This must be a CONSTANT, MONOMIAL Auxiliary Variable Name that contains values
    * corresponding to libMesh::Elem::RefinementState.
@@ -187,6 +192,9 @@ protected:
   Real _stop_time;
   /// The number of adaptivity cycles per step
   unsigned int _cycles_per_step;
+
+  /// Whether or not to use the "new" adaptivity sytem
+  bool _use_new_system;
 
   /// Name of the marker variable if using the new adaptivity system
   std::string _marker_variable_name;

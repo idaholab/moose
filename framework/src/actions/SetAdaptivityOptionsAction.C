@@ -40,4 +40,5 @@ SetAdaptivityOptionsAction::act()
     _problem->adaptivity().setMarkerVariableName(getParam<MarkerName>("marker"));
 
   _problem->adaptivity().init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_steps"));
+  _problem->adaptivity().setUseNewSystem();
 }

@@ -34,7 +34,9 @@ ElementIntegralIndicator::computeIndicator()
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
     sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
 
-  _field_var.setNodalValue(_field_var.nodalSln()[0]+sum);
+//  sum = std::sqrt(sum);
+
+  _field_var.setNodalValue(sum);
 }
 
 Real

@@ -46,7 +46,8 @@ Adaptivity::Adaptivity(FEProblem & subproblem) :
     _t(_subproblem.time()),
     _start_time(-std::numeric_limits<Real>::max()),
     _stop_time(std::numeric_limits<Real>::max()),
-    _cycles_per_step(1)
+    _cycles_per_step(1),
+    _use_new_system(false)
 {
 }
 
@@ -115,19 +116,22 @@ Adaptivity::adaptMesh()
 {
   if (_mesh_refinement_on && (_start_time <= _t && _t < _stop_time))
   {
-    if(_marker_variable_name != "") // Are we using the new adaptivity system?
+    if(_use_new_system)
     {
-      _mesh_refinement->clean_refinement_flags();
+      if(_marker_variable_name != "") // Only flag if a marker variable name has been set
+      {
+        _mesh_refinement->clean_refinement_flags();
 
-      std::vector<Number> serialized_solution;
-      _subproblem.getAuxiliarySystem().solution().close();
-      _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);
+        std::vector<Number> serialized_solution;
+        _subproblem.getAuxiliarySystem().solution().close();
+        _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);
 
-      FlagElementsThread fet(_subproblem, serialized_solution);
-      ConstElemRange all_elems(_subproblem.mesh().getMesh().active_elements_begin(),
-                               _subproblem.mesh().getMesh().active_elements_end(), 1);
-      Threads::parallel_reduce(all_elems, fet);
-      _subproblem.getAuxiliarySystem().solution().close();
+        FlagElementsThread fet(_subproblem, serialized_solution);
+        ConstElemRange all_elems(_subproblem.mesh().getMesh().active_elements_begin(),
+                                 _subproblem.mesh().getMesh().active_elements_end(), 1);
+        Threads::parallel_reduce(all_elems, fet);
+        _subproblem.getAuxiliarySystem().solution().close();
+      }
     }
     else
     {
@@ -178,6 +182,12 @@ Adaptivity::setTimeActive(Real start_time, Real stop_time)
 {
   _start_time = start_time;
   _stop_time = stop_time;
+}
+
+void
+Adaptivity::setUseNewSystem()
+{
+  _use_new_system = true;
 }
 
 void

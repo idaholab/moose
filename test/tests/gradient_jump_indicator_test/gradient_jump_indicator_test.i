@@ -1,3 +1,5 @@
+# This test has been verified to give the same error calculation as the libMesh kelly_error_estimator.  If this test is diffing... the diff is wrong!
+
 [Mesh]
   type = GeneratedMesh
   dim = 2

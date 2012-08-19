@@ -23,11 +23,13 @@
 
 ComputeIndicatorThread::ComputeIndicatorThread(FEProblem & fe_problem,
                                                AuxiliarySystem & sys,
-                                               std::vector<IndicatorWarehouse> & indicator_whs) :
+                                               std::vector<IndicatorWarehouse> & indicator_whs,
+                                               bool finalize) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _fe_problem(fe_problem),
     _aux_sys(sys),
-    _indicator_whs(indicator_whs)
+    _indicator_whs(indicator_whs),
+    _finalize(finalize)
 {
 }
 
@@ -36,14 +38,14 @@ ComputeIndicatorThread::ComputeIndicatorThread(ComputeIndicatorThread & x, Threa
     ThreadedElementLoop<ConstElemRange>(x, split),
     _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
-    _indicator_whs(x._indicator_whs)
+    _indicator_whs(x._indicator_whs),
+    _finalize(x._finalize)
 {
 }
 
 void
 ComputeIndicatorThread::onElement(const Elem *elem)
 {
-
   for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
   {
     MooseVariable * var = it->second;
@@ -69,10 +71,24 @@ ComputeIndicatorThread::onElement(const Elem *elem)
   _fe_problem.reinitMaterials(subdomain, _tid);
 
   const std::vector<Indicator *> & indicators = _indicator_whs[_tid].active();
-  for (std::vector<Indicator *>::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
-    (*it)->computeIndicator();
 
+  if(!_finalize)
+    for (std::vector<Indicator *>::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
+      (*it)->computeIndicator();
+  else
+  {
+    for (std::vector<Indicator *>::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
+      (*it)->finalize();
 
+    // Now finalize the side integral side_indicators as well
+    {
+      const std::vector<Indicator *> & side_indicators = _indicator_whs[_tid].activeInternalSideIndicators();
+      for (std::vector<Indicator *>::const_iterator it = side_indicators.begin(); it != side_indicators.end(); ++it)
+        (*it)->finalize();
+    }
+  }
+
+  if(!_finalize) // During finalize the Indicators should be setting values in the vectors manually
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
@@ -112,6 +128,9 @@ ComputeIndicatorThread::onBoundary(const Elem *elem, unsigned int side, Boundary
 void
 ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
 {
+  if(_finalize) // If finalizing we only do something on the elements
+    return;
+
   // Pointer to the neighbor we are currently working on.
   const Elem * neighbor = elem->neighbor(side);
 

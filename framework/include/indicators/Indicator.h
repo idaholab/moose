@@ -65,9 +65,11 @@ public:
   virtual void computeIndicator() = 0;
 
   /**
-   * The variable number that this Indicator operates on.
+   * Can be overridden to do a final postprocessing of the indicator field.
+   * This will allow you to sum up error from multiple places and then do something like take the
+   * square root of it in this function.
    */
-//  MooseVariable & variable() { return _var; }
+  virtual void finalize() {};
 
   SubProblem & subProblem() { return _subproblem; }
 
