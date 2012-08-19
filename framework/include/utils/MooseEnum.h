@@ -21,6 +21,7 @@
 #include <vector>
 #include <map>
 #include <ostream>
+#include <limits>
 
 /**
  * This is a "smart" enum class intended to replace many of the shortcomings in the C++ enum type
