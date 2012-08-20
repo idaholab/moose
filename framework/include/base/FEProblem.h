@@ -307,8 +307,7 @@ public:
   virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
   virtual void computeBounds(NonlinearImplicitSystem & sys, NumericVector<Number> & lower, NumericVector<Number> & upper);
 
-  virtual void computeIndicators();
-  virtual void computeAndApplyMarkers();
+  virtual void computeIndicatorsAndMarkers();
 
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);

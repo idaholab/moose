@@ -1493,22 +1493,36 @@ FEProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
 }
 
 void
-FEProblem::computeIndicators()
+FEProblem::computeIndicatorsAndMarkers()
 {
   // Zero them out first
   {
-    std::vector<std::string> indicator_fields;
-    const std::vector<Indicator *> & all_indicators = _indicators[0].all();
+    std::vector<std::string> fields;
 
-    for(std::vector<Indicator *>::const_iterator i=all_indicators.begin();
-        i != all_indicators.end();
-        ++i)
-      indicator_fields.push_back((*i)->name());
+    // Add Indicator Fields
+    {
+      const std::vector<Indicator *> & all_indicators = _indicators[0].all();
 
-    _aux.zeroVariables(indicator_fields);
+      for(std::vector<Indicator *>::const_iterator i=all_indicators.begin();
+          i != all_indicators.end();
+          ++i)
+        fields.push_back((*i)->name());
+    }
+
+    // Add Marker Fields
+    {
+      const std::vector<Marker *> & all_markers = _markers[0].all();
+
+      for(std::vector<Marker *>::const_iterator i=all_markers.begin();
+          i != all_markers.end();
+          ++i)
+        fields.push_back((*i)->name());
+    }
+
+    _aux.zeroVariables(fields);
   }
 
-  // compute
+  // compute Indicators
   {
     ComputeIndicatorThread cit(*this, getAuxiliarySystem(), _indicators);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
@@ -1516,41 +1530,27 @@ FEProblem::computeIndicators()
     _aux.update();
   }
 
-  // finalize
+  // finalize Indicators
   {
     ComputeIndicatorThread cit(*this, getAuxiliarySystem(), _indicators, true);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
     _aux.solution().close();
     _aux.update();
   }
-}
 
-void
-FEProblem::computeAndApplyMarkers()
-{
-  _adaptivity.updateErrorVectors();
-
-  // Zero them out first
+  // compute Markers
   {
-    std::vector<std::string> marker_fields;
-    const std::vector<Marker *> & all_markers = _markers[0].all();
+    _adaptivity.updateErrorVectors();
 
-    for(std::vector<Marker *>::const_iterator i=all_markers.begin();
-        i != all_markers.end();
-        ++i)
-      marker_fields.push_back((*i)->name());
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+      _markers[tid].markerSetup();
 
-    _aux.zeroVariables(marker_fields);
+    ComputeMarkerThread cmt(*this, getAuxiliarySystem(), _markers);
+    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cmt);
+
+    _aux.solution().close();
+    _aux.update();
   }
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    _markers[tid].markerSetup();
-
-  ComputeMarkerThread cmt(*this, getAuxiliarySystem(), _markers);
-  Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cmt);
-
-  _aux.solution().close();
-  _aux.update();
 }
 
 void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)

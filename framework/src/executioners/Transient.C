@@ -187,12 +187,6 @@ Transient::takeStep(Real input_dt)
   // Compute TimestepBegin AuxKernels
   _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_BEGIN);
 
-  // Compute the Error Indicators
-  _problem.computeIndicators();
-
-  // Compute and apply the refinement Markers
-  _problem.computeAndApplyMarkers();
-
   // Compute Post-Aux User Objects (Timestep begin)
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
 
@@ -220,6 +214,9 @@ Transient::takeStep(Real input_dt)
 void
 Transient::endStep()
 {
+  // Compute the Error Indicators and Markers
+  _problem.computeIndicatorsAndMarkers();
+
   // if _reset_dt is true, force the output no matter what
   _problem.output(_reset_dt);
   _problem.outputPostprocessors(_reset_dt);

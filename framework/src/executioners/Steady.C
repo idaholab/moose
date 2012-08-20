@@ -79,8 +79,7 @@ Steady::execute()
     _problem.onTimestepEnd();
 
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
-    _problem.computeIndicators();
-    _problem.computeAndApplyMarkers();
+    _problem.computeIndicatorsAndMarkers();
 
     _problem.output();
     _problem.outputPostprocessors();
