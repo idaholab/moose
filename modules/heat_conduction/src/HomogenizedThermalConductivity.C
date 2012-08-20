@@ -57,7 +57,7 @@ HomogenizedThermalConductivity::getValue()
 
 
 void
-HomogenizedThermalConductivity::threadJoin(const Postprocessor & y)
+HomogenizedThermalConductivity::threadJoin(const UserObject & y)
 {
   const HomogenizedThermalConductivity & pps = dynamic_cast<const HomogenizedThermalConductivity &>(y);
 

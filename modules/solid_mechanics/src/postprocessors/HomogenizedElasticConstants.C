@@ -177,7 +177,7 @@ HomogenizedElasticConstants::getValue()
 
 
 void
-HomogenizedElasticConstants::threadJoin(const Postprocessor & y)
+HomogenizedElasticConstants::threadJoin(const UserObject & y)
 {
   const HomogenizedElasticConstants & pps = dynamic_cast<const HomogenizedElasticConstants &>(y);
 
