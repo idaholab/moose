@@ -22,6 +22,7 @@
 
 // Moose Includes
 #include "MooseInit.h"
+#include "Moose.h"
 #include "MooseApp.h"
 
 // Example 3 Includes

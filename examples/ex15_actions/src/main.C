@@ -22,6 +22,7 @@
 
 //Moose Includes
 #include "MooseInit.h"
+#include "Moose.h"
 #include "Ex15App.h"
 
 // libMesh includes
