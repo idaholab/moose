@@ -1,7 +1,6 @@
 #include "Pressure.h"
-
 #include "Function.h"
-#include "Moose.h"
+#include "MooseError.h"
 
 template<>
 InputParameters validParams<Pressure>()

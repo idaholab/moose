@@ -1,8 +1,6 @@
 #ifndef ADDSLAVEFLUXVECTORACTION_H
 #define ADDSLAVEFLUXVECTORACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "MooseObjectAction.h"
 
 #include <string>

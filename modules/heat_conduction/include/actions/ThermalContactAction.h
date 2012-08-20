@@ -1,8 +1,6 @@
 #ifndef THERMALCONTACTACTION_H
 #define THERMALCONTACTACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "MooseObjectAction.h"
 
 #include <string>
