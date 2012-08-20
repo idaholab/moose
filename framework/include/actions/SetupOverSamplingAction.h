@@ -15,11 +15,7 @@
 #ifndef SETUPOVERSAMPLINGACTION_H
 #define SETUPOVERSAMPLINGACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "SetupOutputAction.h"
-
-#include <string>
 
 class SetupOverSamplingAction;
 class Output;

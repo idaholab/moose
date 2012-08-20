@@ -15,11 +15,7 @@
 #ifndef ADDMATERIALACTION_H
 #define ADDMATERIALACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "MooseObjectAction.h"
-
-#include <string>
 
 class AddMaterialAction;
 

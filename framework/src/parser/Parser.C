@@ -31,7 +31,6 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "Executioner.h"
-#include "Moose.h"
 #include "MooseApp.h"
 
 #include "GlobalParamsAction.h"

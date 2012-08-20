@@ -13,12 +13,11 @@
 /****************************************************************/
 
 #include "NearestNodeLocator.h"
-#include "Moose.h"
 #include "MooseMesh.h"
 #include "SubProblem.h"
 #include "SlaveNeighborhoodThread.h"
 #include "NearestNodeThread.h"
-
+#include "Moose.h"
 // libMesh
 #include "boundary_info.h"
 #include "elem.h"

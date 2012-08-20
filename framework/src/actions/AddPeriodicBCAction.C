@@ -15,7 +15,6 @@
 #include "AddPeriodicBCAction.h"
 #include "InputParameters.h"
 #include "Parser.h"
-#include "Moose.h"
 #include "FunctionPeriodicBoundary.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"

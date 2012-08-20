@@ -16,7 +16,6 @@
 #define USEROBJECT_H
 
 //MOOSE includes
-#include "Moose.h"
 #include "MooseObject.h"
 #include "SetupInterface.h"
 #include "ParallelUniqueId.h"
@@ -26,8 +25,8 @@
 #include "parallel.h"
 
 class UserObject;
-class Problem;
 class SubProblem;
+class FEProblem;
 
 template<>
 InputParameters validParams<UserObject>();

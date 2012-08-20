@@ -16,7 +16,6 @@
 #define NEARESTNODETHREAD_H
 
 #include "NearestNodeLocator.h"
-#include "Moose.h"
 
 class NearestNodeThread
 {

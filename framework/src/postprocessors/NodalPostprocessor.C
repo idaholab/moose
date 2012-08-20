@@ -12,7 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Moose.h"
 #include "NodalPostprocessor.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"

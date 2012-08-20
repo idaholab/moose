@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "GeneratedMesh.h"
-#include "Moose.h"
 #include "NonlinearSystem.h"
 
 // libMesh includes

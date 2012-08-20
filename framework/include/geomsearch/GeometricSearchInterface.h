@@ -18,7 +18,6 @@
 #include "InputParameters.h"
 
 #include "enum_order.h"
-#include "Moose.h"
 
 // Forward Declarations
 class GeometricSearchData;

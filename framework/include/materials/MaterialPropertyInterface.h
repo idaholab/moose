@@ -18,7 +18,6 @@
 #include <map>
 #include <string>
 
-#include "Moose.h"
 #include "MaterialProperty.h"
 #include "InputParameters.h"
 #include "MaterialData.h"

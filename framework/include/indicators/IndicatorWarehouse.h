@@ -19,7 +19,6 @@
 #include <map>
 #include <set>
 
-#include "Moose.h"
 #include "MooseTypes.h"
 
 class Indicator;

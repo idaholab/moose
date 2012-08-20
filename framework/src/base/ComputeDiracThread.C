@@ -15,7 +15,6 @@
 #include "ComputeDiracThread.h"
 
 //Moose Includes
-#include "Moose.h"
 #include "ParallelUniqueId.h"
 #include "DiracKernel.h"
 #include "Problem.h"

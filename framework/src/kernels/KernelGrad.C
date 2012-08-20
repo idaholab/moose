@@ -14,7 +14,6 @@
 
 #include "KernelGrad.h"
 #include "SubProblem.h"
-#include "Moose.h"
 #include "SystemBase.h"
 
 template<>

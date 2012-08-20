@@ -14,7 +14,6 @@
 
 #include "AddFunctionAction.h"
 #include "Factory.h"
-#include "Moose.h"
 #include "Parser.h"
 #include "FEProblem.h"
 

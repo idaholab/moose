@@ -15,7 +15,6 @@
 #ifndef THREADEDELEMENTLOOP_H
 #define THREADEDELEMENTLOOP_H
 
-#include "Moose.h"
 #include "ParallelUniqueId.h"
 #include "MooseMesh.h"
 #include "FEProblem.h"

@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "Composite.h"
-#include "Moose.h"
 
 template<>
 InputParameters validParams<Composite>()

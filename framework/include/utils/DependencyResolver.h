@@ -22,9 +22,7 @@
 #include <algorithm>
 #include <sstream>
 #include <exception>
-
-#include "Moose.h"
-
+#include "MooseError.h"
 
 template <typename T>
 class DependencyResolver

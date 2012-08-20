@@ -16,7 +16,6 @@
 
 #ifdef LIBMESH_ENABLE_AMR
 
-#include "Moose.h"
 #include "Parser.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"

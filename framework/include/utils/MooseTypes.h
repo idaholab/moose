@@ -12,13 +12,15 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef FILENAME_H
-#define FILENAME_H
+#ifndef MOOSETYPES_H
+#define MOOSETYPES_H
 
 #include <string>
+#include <vector>
 
 // libMesh includes
 #include "id_types.h"
+#include "stored_range.h"
 
 /**
  * MOOSE typedefs
@@ -27,11 +29,98 @@ typedef Real                     PostprocessorValue;
 typedef boundary_id_type         BoundaryID;
 typedef subdomain_id_type        SubdomainID;
 
+typedef StoredRange<std::vector<unsigned int>::iterator, unsigned int> NodeIdRange;
+
 namespace Moose
 {
 const SubdomainID ANY_BLOCK_ID = (SubdomainID) -1;
 
 const BoundaryID ANY_BOUNDARY_ID = (BoundaryID) -1;
+
+/**
+ * Framework-wide stuff
+ */
+
+enum VarKindType
+{
+  VAR_NONLINEAR,
+  VAR_AUXILIARY
+};
+
+enum TimeSteppingScheme
+{
+  IMPLICIT_EULER,
+  EXPLICIT_EULER,
+  BDF2,
+  CRANK_NICOLSON,
+  PETSC_TS
+};
+
+enum KernelType
+{
+  KT_TIME,
+  KT_NONTIME,
+  KT_ALL
+};
+
+// Bit mask flags to be able to combine them through or-operator (|)
+enum PostprocessorType
+{
+  PPS_RESIDUAL = 0x01,
+  PPS_JACOBIAN = 0x02,
+  PPS_TIMESTEP = 0x04,
+  PPS_NEWTONIT = 0x08
+};
+
+enum CouplingType
+{
+  COUPLING_DIAG,
+  COUPLING_FULL,
+  COUPLING_CUSTOM
+};
+
+enum DGResidualType
+{
+  Element,
+  Neighbor
+};
+
+enum DGJacobianType
+{
+  ElementElement,
+  ElementNeighbor,
+  NeighborElement,
+  NeighborNeighbor
+};
+
+enum ConstraintType
+{
+  Slave = Element,
+  Master = Neighbor
+};
+
+enum ConstraintJacobianType
+{
+  SlaveSlave = ElementElement,
+  SlaveMaster = ElementNeighbor,
+  MasterSlave = NeighborElement,
+  MasterMaster = NeighborNeighbor
+};
+
+enum CoordinateSystemType
+{
+  COORD_XYZ,
+  COORD_RZ
+};
+
+enum PPSOutputType
+{
+  PPS_OUTPUT_NONE,
+  PPS_OUTPUT_SCREEN,
+  PPS_OUTPUT_FILE,
+  PPS_OUTPUT_BOTH
+};
+
 }
 
 /**
@@ -86,4 +175,4 @@ DerivativeStringClass(IndicatorName);
 /// This type is used for objects that expect an Marker object name
 DerivativeStringClass(MarkerName);
 
-#endif // FILENAME_H
+#endif // MOOSETYPES_H

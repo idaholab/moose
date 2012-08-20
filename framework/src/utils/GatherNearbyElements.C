@@ -14,7 +14,6 @@
 // Moose
 #include "MooseMesh.h"
 #include "Moose.h"
-
 // libMesh
 #include "boundary_info.h"
 #include "elem.h"

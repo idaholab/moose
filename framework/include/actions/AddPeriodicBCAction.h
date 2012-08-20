@@ -15,11 +15,7 @@
 #ifndef ADDPERIODICBCACTION_H
 #define ADDPERIODICBCACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "Action.h"
-
-#include <string>
 
 // libMesh includes
 #include "periodic_boundaries.h"

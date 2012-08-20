@@ -16,7 +16,6 @@
 #define PENETRATIONTHREAD_H
 
 #include "PenetrationLocator.h"
-#include "Moose.h"
 #include "ParallelUniqueId.h"
 
 class PenetrationThread

@@ -16,7 +16,6 @@
 #define ASSEMBLY_H
 
 #include <vector>
-#include "Moose.h"
 #include "ParallelUniqueId.h"
 #include "MooseVariable.h"
 #include "MooseVariableScalar.h"

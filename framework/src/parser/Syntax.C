@@ -14,7 +14,6 @@
 
 #include "Syntax.h"
 #include "Parser.h"
-#include "Moose.h"
 
 
 Syntax::Syntax()

@@ -13,8 +13,6 @@
 /****************************************************************/
 
 #include "PenetrationLocator.h"
-
-#include "Moose.h"
 #include "ArbitraryQuadrature.h"
 #include "LineSegment.h"
 #include "NearestNodeLocator.h"
@@ -22,6 +20,7 @@
 #include "SubProblem.h"
 #include "GeometricSearchData.h"
 #include "PenetrationThread.h"
+#include "Moose.h"
 
 PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh,
                                        const BoundaryName & master, const BoundaryName & slave, Order order) :

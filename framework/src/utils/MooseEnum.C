@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "MooseEnum.h"
-#include "Moose.h"
 #include "Parser.h"
 
 #include <sstream>

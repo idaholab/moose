@@ -16,35 +16,13 @@
 #define MOOSE_H
 
 // libMesh includes
-#include "libmesh_config.h"
-#include "print_trace.h"
-#include "libmesh_common.h"
+//#include "libmesh_config.h"
+//#include "print_trace.h"
+//#include "libmesh_common.h"
 #include "perf_log.h"
-#include "stored_range.h"
 #include "parallel.h"
 
 #include <string>
-
-/**
- * MOOSE wrapped versions of useful libMesh macros (see libmesh_common.h)
- */
-#ifdef GRACEFUL_ERROR
-#define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; print_trace(); exit(1); } while(0)
-#else
-#define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; print_trace(); libmesh_error(); } while(0)
-#endif
-
-#ifdef NDEBUG
-#define mooseAssert(asserted, msg)
-#else
-#define mooseAssert(asserted, msg)  do { if (!(asserted)) { std::cerr << "\n\nAssertion `" #asserted "' failed\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << std::endl; print_trace(); libmesh_error(); } } while(0)
-#endif
-
-#define mooseWarning(msg) do { std::cerr << "\n\n*** Warning ***\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << "\n" << std::endl; } while(0)
-
-#define mooseDoOnce(do_this) do { static bool did_this_already = false; if (!did_this_already) { did_this_already = true; do_this; } } while (0)
-
-#define mooseDeprecated() mooseDoOnce(std::cout << "*** Warning, This code is deprecated, and likely to be removed in future library versions! " << __FILE__ << ", line " << __LINE__ << ", compiled " << __DATE__ << " at " << __TIME__ << " ***" << std::endl;)
 
 /**
  * Testing a condition on a local CPU that need to be propagated across all processes.
@@ -59,8 +37,6 @@
 // forward declarations
 class Syntax;
 class FEProblem;
-
-typedef StoredRange<std::vector<unsigned int>::iterator, unsigned int> NodeIdRange;
 
 namespace Moose
 {
@@ -84,90 +60,6 @@ void addActionTypes(Syntax & syntax);
 void registerActions(Syntax & syntax);
 
 void setSolverDefaults(FEProblem & problem);
-
-/**
- * Framework-wide stuff
- */
-
-enum VarKindType
-{
-  VAR_NONLINEAR,
-  VAR_AUXILIARY
-};
-
-enum TimeSteppingScheme
-{
-  IMPLICIT_EULER,
-  EXPLICIT_EULER,
-  BDF2,
-  CRANK_NICOLSON,
-  PETSC_TS
-};
-
-enum KernelType
-{
-  KT_TIME,
-  KT_NONTIME,
-  KT_ALL
-};
-
-// Bit mask flags to be able to combine them through or-operator (|)
-enum PostprocessorType
-{
-  PPS_RESIDUAL = 0x01,
-  PPS_JACOBIAN = 0x02,
-  PPS_TIMESTEP = 0x04,
-  PPS_NEWTONIT = 0x08
-};
-
-enum CouplingType
-{
-  COUPLING_DIAG,
-  COUPLING_FULL,
-  COUPLING_CUSTOM
-};
-
-enum DGResidualType
-{
-  Element,
-  Neighbor
-};
-
-enum DGJacobianType
-{
-  ElementElement,
-  ElementNeighbor,
-  NeighborElement,
-  NeighborNeighbor
-};
-
-enum ConstraintType
-{
-  Slave = Element,
-  Master = Neighbor
-};
-
-enum ConstraintJacobianType
-{
-  SlaveSlave = ElementElement,
-  SlaveMaster = ElementNeighbor,
-  MasterSlave = NeighborElement,
-  MasterMaster = NeighborNeighbor
-};
-
-enum CoordinateSystemType
-{
-  COORD_XYZ,
-  COORD_RZ
-};
-
-enum PPSOutputType
-{
-  PPS_OUTPUT_NONE,
-  PPS_OUTPUT_SCREEN,
-  PPS_OUTPUT_FILE,
-  PPS_OUTPUT_BOTH
-};
 
 } // namespace Moose
 

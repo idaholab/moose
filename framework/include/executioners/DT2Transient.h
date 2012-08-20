@@ -15,7 +15,6 @@
 #ifndef DT2TRANSIENT_H
 #define DT2TRANSIENT_H
 
-#include "Moose.h"
 #include "Transient.h"
 
 // LibMesh includes

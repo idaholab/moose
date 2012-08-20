@@ -16,7 +16,6 @@
 #include "Factory.h"
 #include "PetscSupport.h"
 #include "Conversion.h"
-#include "Moose.h"
 #include "MooseApp.h"
 #include "Executioner.h"
 #include "FEProblem.h"

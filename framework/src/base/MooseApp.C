@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "MooseApp.h"
+#include "Moose.h"
 #include "MooseSyntax.h"
 #include "MooseInit.h"
 #include "Executioner.h"

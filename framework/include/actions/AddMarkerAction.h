@@ -15,11 +15,7 @@
 #ifndef ADDMARKERACTION_H
 #define ADDMARKERACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "MooseObjectAction.h"
-
-#include <string>
 
 class AddMarkerAction;
 

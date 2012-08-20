@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "InputParameters.h"
-#include "Moose.h"
 #include "MooseTypes.h"
 
 InputParameters emptyInputParameters()

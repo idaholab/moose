@@ -15,8 +15,7 @@
 #ifndef COLUMNMAJORMATRIX_H
 #define COLUMNMAJORMATRIX_H
 
-#include "Moose.h"
-
+#include "MooseError.h"
 // libmesh includes
 #include "type_tensor.h"
 #include "dense_matrix.h"

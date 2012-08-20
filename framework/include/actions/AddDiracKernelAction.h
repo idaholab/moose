@@ -15,11 +15,7 @@
 #ifndef ADDDIRACKERNELACTION_H
 #define ADDDIRACKERNELACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "MooseObjectAction.h"
-
-#include <string>
 
 class AddDiracKernelAction;
 

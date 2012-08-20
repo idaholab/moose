@@ -17,8 +17,8 @@
 
 #include <vector>
 #include <map>
+#include <set>
 
-#include "Moose.h"
 #include "MooseTypes.h"
 
 

@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "Coupleable.h"
-#include "Moose.h"
 #include "Problem.h"
 #include "SubProblem.h"
 

@@ -19,8 +19,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-
-#include "Moose.h"
+#include "libmesh_common.h"
 
 /**
  * This class applies the Least Squares algorithm to a set of points to provide a smooth curve for

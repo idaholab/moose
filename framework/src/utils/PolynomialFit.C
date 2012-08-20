@@ -13,8 +13,8 @@
 /****************************************************************/
 
 #include "PolynomialFit.h"
+#include "MooseError.h"
 #include "libmesh_common.h"
-#include "Moose.h"
 
 extern "C" void dgels_ ( ... );
 

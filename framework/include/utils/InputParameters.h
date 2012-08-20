@@ -22,7 +22,7 @@
 // libMesh
 #include "parameters.h"
 
-#include "Moose.h"
+#include "MooseError.h"
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 

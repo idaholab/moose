@@ -25,7 +25,6 @@
  **/
 
 #include "PiecewiseLinearFile.h"
-#include "Moose.h"
 
 template<>
 InputParameters validParams<PiecewiseLinearFile>()

@@ -19,7 +19,6 @@
 #include <map>
 #include <set>
 
-#include "Moose.h"
 #include "Action.h"
 #include "InputParameters.h"
 #include "ActionWarehouse.h"

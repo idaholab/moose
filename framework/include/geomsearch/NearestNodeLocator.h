@@ -16,7 +16,6 @@
 #define NEARESTNODELOCATOR_H
 
 // Moose
-#include "Moose.h"
 #include "MooseMesh.h"
 #include "vector_value.h"
 

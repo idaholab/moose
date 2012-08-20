@@ -15,7 +15,6 @@
 #include "Executioner.h"
 
 // Moose includes
-#include "Moose.h"
 #include "MooseMesh.h"
 #include "FEProblem.h"
 

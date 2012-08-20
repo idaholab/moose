@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "PiecewiseLinear.h"
-#include "Moose.h"
 
 template<>
 InputParameters validParams<PiecewiseLinear>()

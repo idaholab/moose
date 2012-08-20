@@ -18,7 +18,6 @@
 #include <set>
 #include <map>
 
-#include "Moose.h"
 #include "MooseArray.h"
 // libMesh
 #include "elem.h"

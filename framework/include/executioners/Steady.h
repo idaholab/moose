@@ -15,7 +15,6 @@
 #ifndef STEADY_H
 #define STEADY_H
 
-#include "Moose.h"
 #include "Executioner.h"
 #include "FEProblem.h"
 

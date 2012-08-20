@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "AuxiliarySystem.h"
-#include "Moose.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "AuxKernel.h"

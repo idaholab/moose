@@ -14,7 +14,6 @@
 
 #include "Adaptivity.h"
 
-#include "Moose.h"
 #include "MooseMesh.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"

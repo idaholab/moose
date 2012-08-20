@@ -15,11 +15,7 @@
 #ifndef INITPROBLEMACTION_H
 #define INITPROBLEMACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "Action.h"
-
-#include <string>
 
 class InitProblemAction;
 

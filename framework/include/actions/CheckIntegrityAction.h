@@ -15,11 +15,7 @@
 #ifndef CHECKINTEGRITYACTION_H
 #define CHECKINTEGRITYACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "Action.h"
-
-#include <string>
 
 class CheckIntegrityAction;
 

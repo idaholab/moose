@@ -15,11 +15,7 @@
 #ifndef ADDELEMENTALFIELDACTION_H
 #define ADDELEMENTALFIELDACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "Action.h"
-
-#include <string>
 
 class AddElementalFieldAction;
 

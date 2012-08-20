@@ -15,13 +15,7 @@
 #ifndef READMESHACTION_H
 #define READMESHACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "MooseObjectAction.h"
-
-#include "MooseMesh.h"
-
-#include <string>
 
 class ReadMeshAction;
 

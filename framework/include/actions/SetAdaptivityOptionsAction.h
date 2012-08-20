@@ -15,11 +15,7 @@
 #ifndef SETADAPTIVITYOPTIONSACTION_H
 #define SETADAPTIVITYOPTIONSACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "Action.h"
-
-#include <string>
 
 class SetAdaptivityOptionsAction;
 

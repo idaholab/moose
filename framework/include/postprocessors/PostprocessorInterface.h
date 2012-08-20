@@ -18,7 +18,6 @@
 #include <map>
 #include <string>
 
-#include "Moose.h"
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
 

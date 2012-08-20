@@ -17,7 +17,6 @@
 
 #include <vector>
 
-#include "Moose.h"
 #include "InputParameters.h"
 
 /**

@@ -26,8 +26,8 @@
 #include "error_vector.h"
 
 class MooseMesh;
-class Problem;
 class SubProblem;
+class FEProblem;
 class SystemBase;
 class Assembly;
 class MooseVariable;

@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "MooseInit.h"
-#include "Moose.h"
 #include "ParallelUniqueId.h"
 #include "Factory.h"
 #include "ActionFactory.h"

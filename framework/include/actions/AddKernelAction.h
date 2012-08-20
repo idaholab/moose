@@ -15,11 +15,7 @@
 #ifndef ADDKERNELACTION_H
 #define ADDKERNELACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "MooseObjectAction.h"
-
-#include <string>
 
 class AddKernelAction;
 

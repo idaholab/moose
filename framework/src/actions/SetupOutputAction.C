@@ -14,7 +14,6 @@
 
 #include "SetupOutputAction.h"
 
-#include "Moose.h"
 #include "MooseApp.h"
 #include "Output.h"
 #include "FEProblem.h"

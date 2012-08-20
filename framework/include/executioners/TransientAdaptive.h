@@ -15,7 +15,6 @@
 #ifndef TRANSIENTADAPTIVE_H
 #define TRANSIENTADAPTIVE_H
 
-#include "Moose.h"
 #include "Executioner.h"
 #include "LinearInterpolation.h"
 #include "FEProblem.h"

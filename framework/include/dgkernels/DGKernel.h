@@ -16,7 +16,6 @@
 #define DGKERNEL_H
 
 // local includes
-#include "Moose.h"
 #include "MooseArray.h"
 #include "MooseObject.h"
 #include "SetupInterface.h"

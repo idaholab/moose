@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "MooseSyntax.h"
+#include "Syntax.h"
 #include "Moose.h"
 
 

@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "Function.h"
-#include "Moose.h"
 
 template<>
 InputParameters validParams<Function>()

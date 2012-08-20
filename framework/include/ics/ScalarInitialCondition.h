@@ -15,7 +15,6 @@
 #ifndef SCALARINITIALCONDITION_H
 #define SCALARINITIALCONDITION_H
 
-#include "Moose.h"
 #include "MooseObject.h"
 #include "ParallelUniqueId.h"
 

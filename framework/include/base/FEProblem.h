@@ -15,6 +15,7 @@
 #ifndef FEPROBLEM_H
 #define FEPROBLEM_H
 
+#include "Moose.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "NonlinearSystem.h"

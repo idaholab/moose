@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "FormattedTable.h"
-#include "Moose.h"
+#include "MooseError.h"
 
 #include <iomanip>
 #include <iterator>

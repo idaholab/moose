@@ -15,8 +15,8 @@
 #ifndef CONVERSION_H
 #define CONVERSION_H
 
-#include "Moose.h"
 #include "ExecStore.h"
+#include "MooseTypes.h"
 // libMesh
 #include "enum_order.h"
 #include "enum_quadrature_type.h"

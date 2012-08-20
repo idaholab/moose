@@ -29,7 +29,6 @@
 
 #include "BilinearInterpolation.h"
 #include "libmesh_common.h"
-#include "Moose.h"
 
 int BilinearInterpolation::_file_number = 0;
 

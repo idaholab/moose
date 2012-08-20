@@ -16,10 +16,10 @@
 #define POSTPROCESSOR_H
 
 #include <string>
-
-//MOOSE includes
-#include "Moose.h"
+// MOOSE includes
 #include "InputParameters.h"
+// libMesh
+#include "parallel.h"
 
 class Postprocessor;
 

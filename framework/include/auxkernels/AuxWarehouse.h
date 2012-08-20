@@ -19,7 +19,7 @@
 #include <map>
 #include <string>
 #include <list>
-#include "Moose.h"
+#include <set>
 #include "MooseTypes.h"
 
 class AuxKernel;

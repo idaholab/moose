@@ -15,7 +15,6 @@
 #ifndef SUBPROBLEM_H
 #define SUBPROBLEM_H
 
-#include "Moose.h"
 #include "ParallelUniqueId.h"
 #include "Problem.h"
 #include "DiracKernelInfo.h"

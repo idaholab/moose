@@ -13,7 +13,6 @@
 /****************************************************************/
 
 // Moose
-#include "Moose.h"
 #include "PenetrationLocator.h"
 
 // libMesh

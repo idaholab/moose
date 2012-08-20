@@ -15,11 +15,7 @@
 #ifndef ADDCONSTRAINTACTION_H
 #define ADDCONSTRAINTACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "MooseObjectAction.h"
-
-#include <string>
 
 class AddConstraintAction;
 

@@ -26,7 +26,6 @@
 #include "ComputeMarkerThread.h"
 #include "ActionWarehouse.h"
 #include "Conversion.h"
-#include "Moose.h"
 #include "Material.h"
 #include "ConstantIC.h"
 #include "FP.h"

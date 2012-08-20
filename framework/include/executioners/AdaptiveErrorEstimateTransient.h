@@ -15,7 +15,6 @@
 #ifndef AdaptiveErrorEstimateTRANSIENT_H
 #define AdaptiveErrorEstimateTRANSIENT_H
 
-#include "Moose.h"
 #include "Transient.h"
 #include <iostream>
 #include <fstream>

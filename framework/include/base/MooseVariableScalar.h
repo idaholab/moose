@@ -15,7 +15,6 @@
 #ifndef MOOSEVARIABLESCALAR_H
 #define MOOSEVARIABLESCALAR_H
 
-#include "Moose.h"
 #include "MooseArray.h"
 #include "ParallelUniqueId.h"
 #include "MooseVariable.h"

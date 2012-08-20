@@ -15,7 +15,6 @@
 #include "MemDataTest.h"
 
 // Moose includes
-#include "Moose.h" // Real
 #include "MemData.h"
 
 // This macro declares a static variable whose construction

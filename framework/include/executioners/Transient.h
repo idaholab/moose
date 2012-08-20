@@ -15,7 +15,6 @@
 #ifndef TRANSIENT_H
 #define TRANSIENT_H
 
-#include "Moose.h"
 #include "Executioner.h"
 #include "LinearInterpolation.h"
 #include "FEProblem.h"

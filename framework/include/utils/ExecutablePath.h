@@ -12,6 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#ifndef EXECUTABLEPATH_H
+#define EXECUTABLEPATH_H
+
 #include <string>
 
 namespace Moose {
@@ -24,3 +27,5 @@ namespace Moose {
  */
 std::string getExecutablePath();
 }
+
+#endif // EXECUTABLEPATH_H

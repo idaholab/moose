@@ -15,8 +15,6 @@
 #ifndef DEPRECATEDBLOCKACTION_H
 #define DEPRECATEDBLOCKACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "Action.h"
 
 class DeprecatedBlockAction;

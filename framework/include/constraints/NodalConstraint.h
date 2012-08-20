@@ -16,7 +16,6 @@
 #define NODALCONSTRAINT_H
 
 //MOOSE includes
-#include "Moose.h"
 #include "MooseObject.h"
 #include "SetupInterface.h"
 #include "Coupleable.h"

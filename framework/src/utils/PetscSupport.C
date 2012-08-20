@@ -16,7 +16,6 @@
 
 #ifdef LIBMESH_HAVE_PETSC
 
-#include "Moose.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "NonlinearSystem.h"

@@ -12,7 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Moose.h"
 #include "NodalUserObject.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"

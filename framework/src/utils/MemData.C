@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Moose.h" // mooseError, mooseWarning
+#include "MooseError.h"
 #include "MemData.h"
 
 void MemData::start()

@@ -15,11 +15,7 @@
 #ifndef SETUPDAMPERSACTION_H
 #define SETUPDAMPERSACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "Action.h"
-
-#include <string>
 
 class SetupDampersAction;
 

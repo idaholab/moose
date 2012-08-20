@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "ExecutablePath.h"
-#include "Moose.h"
+#include "MooseError.h"
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>

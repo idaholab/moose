@@ -15,11 +15,7 @@
 #ifndef ADDSCALARKERNELACTION_H
 #define ADDSCALARKERNELACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "MooseObjectAction.h"
-
-#include <string>
 
 class AddScalarKernelAction;
 

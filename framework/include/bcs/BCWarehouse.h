@@ -17,8 +17,7 @@
 
 #include <map>
 #include <vector>
-
-#include "Moose.h"
+#include <set>
 #include "MooseTypes.h"
 
 class IntegratedBC;

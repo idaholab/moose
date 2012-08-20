@@ -13,6 +13,8 @@
 /****************************************************************/
 
 #include "Conversion.h"
+#include "MooseTypes.h"
+#include "MooseError.h"
 #include <map>
 #include <algorithm>
 #include "string_to_enum.h"

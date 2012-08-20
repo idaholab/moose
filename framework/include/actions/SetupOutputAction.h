@@ -15,11 +15,7 @@
 #ifndef SETUPOUTPUTACTION_H
 #define SETUPOUTPUTACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "Action.h"
-
-#include <string>
 
 class SetupOutputAction;
 class Output;

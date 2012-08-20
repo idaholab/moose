@@ -15,7 +15,6 @@
 #include "AuxKernel.h"
 
 //local includes
-#include "Moose.h"
 #include "SubProblem.h"
 #include "AuxiliarySystem.h"
 #include "MooseTypes.h"

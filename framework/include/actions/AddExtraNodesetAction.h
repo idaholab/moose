@@ -15,8 +15,6 @@
 #ifndef ADDEXTRANODESETACTION_H
 #define ADDEXTRANODESETACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "Action.h"
 
 //Forward Declaration

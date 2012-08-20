@@ -18,7 +18,6 @@
 #include <string>
 
 //MOOSE includes
-#include "Moose.h"
 #include "DiracKernelData.h"
 #include "DiracKernelInfo.h"
 #include "MooseObject.h"

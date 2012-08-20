@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "DeprecatedBlockAction.h"
-#include "Moose.h"
 
 template<>
 InputParameters validParams<DeprecatedBlockAction>()

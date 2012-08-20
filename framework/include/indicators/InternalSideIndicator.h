@@ -16,7 +16,6 @@
 #define INTERNALSIDEINDICATOR_H
 
 // local includes
-#include "Moose.h"
 #include "MooseArray.h"
 #include "Indicator.h"
 #include "TwoMaterialPropertyInterface.h"

@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "MeshExtruder.h"
-#include "Moose.h"
 #include "Parser.h"
 #include "InputParameters.h"
 

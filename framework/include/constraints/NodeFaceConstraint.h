@@ -16,7 +16,6 @@
 #define NODEFACECONSTRAINT_H
 
 //MOOSE includes
-#include "Moose.h"
 #include "DiracKernelData.h"
 #include "DiracKernelInfo.h"
 #include "MooseObject.h"

@@ -19,7 +19,6 @@
 #include "MooseObject.h"
 #include "BndNode.h"
 #include "BndElement.h"
-#include "Moose.h"
 #include "MooseTypes.h"
 
 // libMesh

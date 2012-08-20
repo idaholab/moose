@@ -15,8 +15,6 @@
 #ifndef MOOSEOBJECTACTION_H
 #define MOOSEOBJECTACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "ObjectAction.h"
 
 #include <string>

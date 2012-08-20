@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "MooseVariableInterface.h"
-#include "Moose.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"

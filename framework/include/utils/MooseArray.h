@@ -15,7 +15,9 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
-#include "Moose.h"
+#include <vector>
+#include "MooseError.h"
+
 
 template<typename T>
 class MooseArray

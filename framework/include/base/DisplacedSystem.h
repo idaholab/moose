@@ -15,7 +15,6 @@
 #ifndef DISPLACEDSYSTEM_H
 #define DISPLACEDSYSTEM_H
 
-#include "Moose.h"
 #include "SystemBase.h"
 // libMesh include
 #include "explicit_system.h"

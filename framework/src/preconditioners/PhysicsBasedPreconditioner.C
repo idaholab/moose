@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "PhysicsBasedPreconditioner.h"
-#include "Moose.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"

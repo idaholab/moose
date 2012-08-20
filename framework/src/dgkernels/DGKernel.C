@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "DGKernel.h"
-#include "Moose.h"
 #include "Assembly.h"
 #include "MooseVariable.h"
 #include "Problem.h"

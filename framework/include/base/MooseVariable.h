@@ -15,7 +15,6 @@
 #ifndef MOOSEVARIABLE_H
 #define MOOSEVARIABLE_H
 
-#include "Moose.h"
 #include "MooseArray.h"
 #include "ParallelUniqueId.h"
 #include "MooseTypes.h"

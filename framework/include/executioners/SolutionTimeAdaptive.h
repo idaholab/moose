@@ -15,7 +15,6 @@
 #ifndef SOLUTIONTIMEADAPTIVE_H
 #define SOLUTIONTIMEADAPTIVE_H
 
-#include "Moose.h"
 #include "Transient.h"
 
 // LibMesh includes

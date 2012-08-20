@@ -16,7 +16,6 @@
 #define GLOBALPARAMSACTION_H
 
 #include "Action.h"
-#include "Moose.h"
 
 class GlobalParamsAction;
 

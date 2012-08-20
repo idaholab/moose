@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "SetupSubProblemAction.h"
-#include "Moose.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "Conversion.h"

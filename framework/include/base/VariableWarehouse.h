@@ -15,7 +15,6 @@
 #ifndef VARIABLEWAREHOUSE_H
 #define VARIABLEWAREHOUSE_H
 
-#include "Moose.h"
 #include "MooseTypes.h"
 
 #include <vector>

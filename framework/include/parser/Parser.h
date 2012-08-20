@@ -19,6 +19,7 @@
 #include "MooseSyntax.h"
 #include "CommandLine.h"
 #include "MooseEnum.h"
+#include "Syntax.h"
 
 // libMesh
 #include "getpot.h"

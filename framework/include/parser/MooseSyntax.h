@@ -17,7 +17,8 @@
 
 #include <string>
 #include <map>
-#include "Syntax.h"
+
+class Syntax;
 
 namespace Moose
 {

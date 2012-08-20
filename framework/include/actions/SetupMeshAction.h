@@ -15,10 +15,7 @@
 #ifndef SETUPMESHACTION_H
 #define SETUPMESHACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
 #include "Action.h"
-#include "MooseObjectAction.h"
 
 //Forward Declaration
 class SetupMeshAction;
