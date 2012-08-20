@@ -5,8 +5,8 @@
 #include "Elk.h"
 //Moose Includes
 #include "MooseInit.h"
+#include "Moose.h"
 #include "ElkTestApp.h"
-
 // libMesh includes
 #include "perf_log.h"
 
