@@ -1496,50 +1496,18 @@ FEProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
 void
 FEProblem::computeIndicators()
 {
-
-  // init
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  // Zero them out first
   {
-/*
-    for (std::set<SubdomainID>::const_iterator block_it = _indicators[tid].blocks().begin();
-         block_it != pps[tid].blocks().end();
-         ++block_it)
-      {
-        SubdomainID block_id = *block_it;
+    std::vector<std::string> indicator_fields;
+    const std::vector<Indicator *> & all_indicators = _indicators[0].all();
 
-        for (std::vector<ElementPostprocessor *>::const_iterator postprocessor_it = pps[tid].elementPostprocessors(block_id).begin();
-            postprocessor_it != pps[tid].elementPostprocessors(block_id).end();
-            ++postprocessor_it)
-          (*postprocessor_it)->initialize();
-      }
+    for(std::vector<Indicator *>::const_iterator i=all_indicators.begin();
+        i != all_indicators.end();
+        ++i)
+      indicator_fields.push_back((*i)->name());
 
-
-      for (std::set<BoundaryID>::const_iterator boundary_it = pps[tid].boundaryIds().begin();
-          boundary_it != pps[tid].boundaryIds().end();
-          ++boundary_it)
-      {
-        //note: for threaded applications where the elements get broken up it
-        //may be more efficient to initialize these on demand inside the loop
-        for (std::vector<SidePostprocessor *>::const_iterator side_postprocessor_it = pps[tid].sidePostprocessors(*boundary_it).begin();
-            side_postprocessor_it != pps[tid].sidePostprocessors(*boundary_it).end();
-            ++side_postprocessor_it)
-          (*side_postprocessor_it)->initialize();
-      }
-
-      for (std::set<BoundaryID>::const_iterator boundary_it = pps[tid].nodesetIds().begin();
-          boundary_it != pps[tid].nodesetIds().end();
-          ++boundary_it)
-      {
-        for (std::vector<NodalPostprocessor *>::const_iterator nodal_postprocessor_it = pps[tid].nodalPostprocessors(*boundary_it).begin();
-             nodal_postprocessor_it != pps[tid].nodalPostprocessors(*boundary_it).end();
-             ++nodal_postprocessor_it)
-        {
-          (*nodal_postprocessor_it)->initialize();
-          have_nodal_pps = true;
-        }
-      }
-*/
-    }
+    _aux.zeroVariables(indicator_fields);
+  }
 
   // compute
   {
@@ -1563,11 +1531,27 @@ FEProblem::computeAndApplyMarkers()
 {
   _adaptivity.updateErrorVectors();
 
+  // Zero them out first
+  {
+    std::vector<std::string> marker_fields;
+    const std::vector<Marker *> & all_markers = _markers[0].all();
+
+    for(std::vector<Marker *>::const_iterator i=all_markers.begin();
+        i != all_markers.end();
+        ++i)
+      marker_fields.push_back((*i)->name());
+
+    _aux.zeroVariables(marker_fields);
+  }
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     _markers[tid].markerSetup();
 
   ComputeMarkerThread cmt(*this, getAuxiliarySystem(), _markers);
   Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cmt);
+
+  _aux.solution().close();
+  _aux.update();
 }
 
 void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)
@@ -2285,8 +2269,8 @@ FEProblem::computeResidualType( const NumericVector<Number>& soln, NumericVector
 {
   _nl.set_solution(soln);
 
-  _nl.zeroVariables();
-  _aux.zeroVariables();
+  _nl.zeroVariablesForResidual();
+  _aux.zeroVariablesForResidual();
 
   computeUserObjects(EXEC_RESIDUAL);
 

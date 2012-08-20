@@ -73,9 +73,9 @@ public:
   virtual void addVariableToZeroOnResidual(std::string var_name) { _undisplaced_system.addVariableToZeroOnResidual(var_name); }
 
   /**
-   * Zero out the variables that have been specified to be zeroed during each residual evaluation.
+   * Zero out the solution for the list of variables passed in.
    */
-  virtual void zeroVariables() { _undisplaced_system.zeroVariables(); }
+  virtual void zeroVariables(std::vector<std::string> & vars_to_be_zeroed) { _undisplaced_system.zeroVariables(vars_to_be_zeroed); }
 
 protected:
   SystemBase & _undisplaced_system;

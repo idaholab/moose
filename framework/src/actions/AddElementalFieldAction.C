@@ -48,13 +48,7 @@ AddElementalFieldAction::act()
   std::string variable = getShortName();
 
   if (blocks.empty())
-  {
     _problem->addAuxVariable(variable, fe_type);
-    _problem->getAuxiliarySystem().addVariableToZeroOnResidual(variable);
-  }
   else
-  {
     _problem->addAuxVariable(variable, fe_type, &blocks);
-    _problem->getAuxiliarySystem().addVariableToZeroOnResidual(variable);
-  }
 }

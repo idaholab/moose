@@ -240,9 +240,17 @@ public:
   virtual void addVariableToZeroOnResidual(std::string var_name);
 
   /**
-   * Zero out the variables that have been specified to be zeroed during each residual evaluation.
+   * Zero out the solution for the list of variables passed in.
+   *
+   * @ param vars_to_be_zeroed The variable names in this vector will have their solutions set to zero after this call
    */
-  virtual void zeroVariables();
+  virtual void zeroVariables(std::vector<std::string> & vars_to_be_zeroed);
+
+  /**
+   * Zero out the solution for the variables that were registered as needing to have their solutions
+   * zeroed on out on residual evaluation by a call to addVariableToZeroOnResidual()
+   */
+  virtual void zeroVariablesForResidual();
 
   /**
    * Get minimal quadrature order needed for integrating variables in this system

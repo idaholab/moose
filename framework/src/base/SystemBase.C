@@ -105,17 +105,17 @@ SystemBase::addVariableToZeroOnResidual(std::string var_name)
 }
 
 void
-SystemBase::zeroVariables()
+SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
 {
-  if(_vars_to_be_zeroed_on_residual.size() > 0)
+  if(vars_to_be_zeroed.size() > 0)
   {
-    AllLocalDofIndicesThread aldit(system(), _vars_to_be_zeroed_on_residual);
+    NumericVector<Number> & solution = this->solution();
+
+    AllLocalDofIndicesThread aldit(system(), vars_to_be_zeroed);
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 
     std::set<unsigned int> dof_indices_to_zero = aldit._all_dof_indices;
-
-    NumericVector<Number> & solution = this->solution();
 
     solution.close();
 
@@ -130,6 +130,13 @@ SystemBase::zeroVariables()
     system().update();
   }
 }
+
+void
+SystemBase::zeroVariablesForResidual()
+{
+  zeroVariables(_vars_to_be_zeroed_on_residual);
+}
+
 
 Order
 SystemBase::getMinQuadratureOrder()
