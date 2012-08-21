@@ -34,6 +34,8 @@ Problem::Problem(const std::string & name, InputParameters parameters):
 
 Problem::~Problem()
 {
+  for (unsigned int i=0; i<_time_periods.size(); ++i)
+    delete _time_periods[i];
 }
 
 TimePeriod &

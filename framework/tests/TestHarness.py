@@ -138,7 +138,10 @@ class TestHarness:
     if ncpus > 1 or nthreads > 1:
       command = 'mpiexec -host ' + self.host_name + ' -n ' + str(ncpus) + ' ' + self.executable + ' --n-threads=' + str(nthreads) + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
     else:
-      command = self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
+      if self.options.enable_valgrind:
+        command = 'valgrind --tool=memcheck --dsymutil=yes -v ' + self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
+      else:
+        command = self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
 
     if self.options.scaling and test[SCALE_REFINE] > 0:
       command += ' -r ' + str(test[SCALE_REFINE])
@@ -219,6 +222,9 @@ class TestHarness:
       if self.options.method == 'dbg':  # Only check asserts in debug mode
         if not self.checkExpectError(output, test[EXPECT_ASSERT]):
           reason = 'NO EXPECTED ASSERT'
+    elif (self.options.enable_valgrind and retcode == 0):
+      if 'ERROR SUMMARY: 0 errors' not in output:
+        reason = 'MEMORY LEAK'
     else:
       # Check the general error message and program crash possibilities
       if len( filter( lambda x: x in output, test[ERRORS] ) ) > 0:
@@ -454,6 +460,7 @@ class TestHarness:
     parser.add_option('--threads', action="store", type='int', dest="nthreads",default=1,
                       help="Number of threads to use when running mpiexec")
     parser.add_option('-d', action='store_true', dest='debug_harness', default=False, help='Turn on Test Harness debugging')
+    parser.add_option('--valgrind', action='store_true', dest='enable_valgrind', default=False, help='Enable Valgrind')
 
     outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show the output of every test that fails')
