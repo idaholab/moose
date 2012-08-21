@@ -42,6 +42,7 @@ class NodalFloodCount : public ElementPostprocessor
 {
 public:
   NodalFloodCount(const std::string & name, InputParameters parameters);
+  virtual ~NodalFloodCount() {}
 
   virtual void initialize();
   virtual void execute();
@@ -53,6 +54,18 @@ public:
   Real getNodeValue(unsigned int node_id) const { return _bubble_map.at(node_id); }
 
 protected:
+  class BubbleData
+  {
+  public:
+    BubbleData(std::set<unsigned int> & nodes, unsigned int var_idx) :
+        _nodes(nodes),
+        _var_idx(var_idx)
+      {}
+
+    std::set<unsigned int> _nodes;
+    unsigned int _var_idx;
+  };
+
   /**
    * This method will "mark" all nodes on neighboring elements that
    * are above the supplied threshold
@@ -107,11 +120,11 @@ protected:
   /// The data structure used to find neighboring elements give a node ID
   std::vector< std::vector< const Elem * > > _nodes_to_elem_map;
 
-  /// The data structure used to join partial bubbles between prcoesses and/or threads
-  std::list<std::set<unsigned int> > _bubble_sets;
+  /// This data structure is used to keep track of which bubbles are owned by which variables (index).
+  std::vector<unsigned int> _region_to_var_idx;
 
-  /// The data structure used to record which variable "owns" which region
-  std::map<unsigned int, unsigned int> _region_to_var_idx;
+  /// The data structure used to join partial bubbles between prcoesses and/or threads
+  std::list<BubbleData> _bubble_sets;
 
   /// The scalar counter used during the marking stage of the flood algorithm
   unsigned int _region_count;

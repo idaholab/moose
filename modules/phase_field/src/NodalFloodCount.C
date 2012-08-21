@@ -60,6 +60,9 @@ NodalFloodCount::initialize()
   // Reset the packed data structure
   _packed_data.clear();
 
+  // Reset the ownership structure
+  _region_to_var_idx.clear();
+
   // Reset the region counter
   _region_count = 0;
 
@@ -141,16 +144,20 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data) const
 
   {
     /**
-     * The size of the packed data structure should be the total number of marked
-     * nodes plus inserted periodic neighbor information plus the number of unique bubbles.
+     * The size of the packed data structure should be the sum of all of the following:
+     * total number of marked nodes
+     * the owning variable index for the current bubble
+     * inserted periodic neighbor information
+     * the number of unique bubbles.
+     *
      * This first resize will be an overesitmate because we aren't going to store nodes
      * marked with zeros (outside of bubbles).
      *
      * We will pack the data into a series of groups representing each unique bubble
      * the nodes for each group will be proceeded by the number of nodes in that group
-     * [ <n_nodes> <n_0> <n_1> ... <n_n> <m_nodes> <n_0> <n_1> ... <n_m> ]
+     * [ <i_nodes> <var_idx> <n_0> <n_1> ... <n_i> <j_nodes> <var_idx> <n_0> <n_1> ... <n_j> ]
      */
-    packed_data.resize(_bubble_map.size() + n_periodic_nodes + _region_count);
+    packed_data.resize(_bubble_map.size() + n_periodic_nodes + _region_count*2 /* <- owning idx + number of unique bubbles */);
 
     // Now pack it up
     unsigned int current_idx = 0;
@@ -159,10 +166,11 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data) const
     // that into our packed data structure so start at 1 here!
     for (unsigned int i=1 /* Yes - start at 1 */; i<=_region_count; ++i)
     {
-      packed_data[current_idx++] = data[i].size();
+      packed_data[current_idx++] = data[i].size();                      // The number of nodes in the current bubble
+      packed_data[current_idx++] = _region_to_var_idx[i-1];             // The variable owning this bubble
       std::set<unsigned int>::iterator end = data[i].end();
       for (std::set<unsigned int>::iterator it = data[i].begin(); it != end; ++it)
-        packed_data[current_idx++] = *it;
+        packed_data[current_idx++] = *it;                               // The individual node ids
     }
 
     // Resize the structure to it's actual final size
@@ -176,6 +184,7 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
   bool next_set = true;
   unsigned int curr_set_length=0;
   std::set<unsigned int> curr_set;
+  unsigned int curr_region;
 
   _bubble_sets.clear();
   for (unsigned int i=0; i<packed_data.size(); ++i)
@@ -184,12 +193,15 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
     {
       if (i > 0)
       {
-        _bubble_sets.push_back(curr_set);
+        _bubble_sets.push_back(BubbleData(curr_set, curr_region));
         curr_set.clear();
       }
 
       // Get the length of the next set
       curr_set_length = packed_data[i];
+      // Also get the owning variable idx.
+      // Note: We are intentionally advancing "i" here too!
+      curr_region = packed_data[++i];
     }
     else
     {
@@ -200,7 +212,7 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
 
     next_set = !(curr_set_length);
   }
-  _bubble_sets.push_back(curr_set);
+  _bubble_sets.push_back(BubbleData(curr_set, curr_region));
 
   mooseAssert(curr_set_length == 0, "Error in unpacking data");
 }
@@ -219,20 +231,20 @@ NodalFloodCount::mergeSets()
   do
   {
     set_merged = false;
-    std::list<std::set<unsigned int> >::iterator end = _bubble_sets.end();
-    for (std::list<std::set<unsigned int> >::iterator it1 = _bubble_sets.begin(); it1 != end; ++it1)
+    std::list<BubbleData>::iterator end = _bubble_sets.end();
+    for (std::list<BubbleData>::iterator it1 = _bubble_sets.begin(); it1 != end; ++it1)
     {
-      std::list<std::set<unsigned int> >::iterator it2 = it1;
+      std::list<BubbleData>::iterator it2 = it1;
       ++it2; // Don't compare this set with itself - advance the iterator to the next set
       while (it2 != end)
       {
         set_union.clear();
-        std::set_union(it1->begin(), it1->end(), it2->begin(), it2->end(),
+        std::set_union(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end(),
                        std::inserter(set_union, set_union.end()));
 
-        if (set_union.size() < it1->size() + it2->size())
+        if (set_union.size() < it1->_nodes.size() + it2->_nodes.size())
         {
-          *it1 = set_union;
+          it1->_nodes = set_union;
           _bubble_sets.erase(it2++);
           set_merged = true;
         }
@@ -246,9 +258,9 @@ NodalFloodCount::mergeSets()
    * Finally update the original bubble map with field data from the merged sets
    */
   unsigned int counter = 1;
-  for (std::list<std::set<unsigned int> >::iterator it1 = _bubble_sets.begin(); it1 != _bubble_sets.end(); ++it1)
+  for (std::list<BubbleData>::iterator it1 = _bubble_sets.begin(); it1 != _bubble_sets.end(); ++it1)
   {
-    for (std::set<unsigned int>::iterator it2 = it1->begin(); it2 != it1->end(); ++it2)
+    for (std::set<unsigned int>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
     {
       _bubble_map[*it2] = counter;
     }
@@ -311,7 +323,7 @@ NodalFloodCount::flood(const Node *node, unsigned int region, int current_idx)
   if (region == 0)
   {
     _bubble_map[node_id] = ++_region_count;
-    _region_to_var_idx[_region_count] = current_idx;  // Save the variable idx which owns this region
+    _region_to_var_idx.push_back(current_idx);
   }
   else
     _bubble_map[node_id] = region;
