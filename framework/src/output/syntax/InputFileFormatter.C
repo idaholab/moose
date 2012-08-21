@@ -73,10 +73,14 @@ InputFileFormatter::printParams(const std::string &prefix, InputParameters &para
     if (params.isPrivate(iter->first) || haveSeenIt(prefix, iter->first))
       continue;
 
-    // Print the parameter's value to a stringstream.
-    std::ostringstream toss;
-    iter->second->print(toss);
-    std::string value = Parser::trim(toss.str());
+    std::string value;
+    if (params.isParamValid(iter->first))
+    {
+      // Print the parameter's value to a stringstream.
+      std::ostringstream toss;
+      iter->second->print(toss);
+      std::string value = Parser::trim(toss.str());
+    }
 
     // See if we match the search string
     if (wildCardMatch(iter->first, search_string) || wildCardMatch(value, search_string))
