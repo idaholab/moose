@@ -940,8 +940,23 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose
   }
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  ComputeResidualThread cr(_fe_problem, *this, residual, type);
-  Threads::parallel_reduce(elem_range, cr);
+  if(type != Moose::KT_ALL)
+  {
+    ComputeResidualThread cr(_fe_problem, *this, residual, type);
+    Threads::parallel_reduce(elem_range, cr);
+  }
+  else
+  {
+    ComputeResidualThread cr(_fe_problem, *this, residual, Moose::KT_TIME);
+    Threads::parallel_reduce(elem_range, cr);
+    if(_time_stepping_scheme == Moose::CRANK_NICOLSON)
+    {
+      residual *= 2;
+    }
+    ComputeResidualThread crnt(_fe_problem, *this, residual, Moose::KT_NONTIME);
+    Threads::parallel_reduce(elem_range, crnt);
+  }
+
   if(type == Moose::KT_TIME)
   {
     residual.close();

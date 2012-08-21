@@ -187,6 +187,7 @@ public:
   void setPredictorScale(Real scale)
   {
     _use_predictor = true;
+    _apply_predictor = true;
     _predictor_scale = scale;
   }
 
