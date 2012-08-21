@@ -88,6 +88,10 @@ public:
   virtual void onTimestepBegin() {}
   virtual void onTimestepEnd() {}
 
+public:
+  static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
+  static std::string genName(const std::string & prefix, const std::string & suffix);
+
 protected:
   unsigned int _id;                     ///< Unique ID of this component
 
@@ -103,9 +107,6 @@ protected:
 
   virtual unsigned int getNextSubdomainId();
   virtual unsigned int getNextBCId();
-
-  static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
-  static std::string genName(const std::string & prefix, const std::string & suffix);
 
   /**
    * Split the "RAVEN" name into "section name" and "property name"

@@ -204,6 +204,7 @@ PipeBase::addMooseObjects()
   InputParameters pars = emptyInputParameters();
   pars.set<std::vector<unsigned int> >("block") = blocks;
 
+  pars.set<Component *>("component") = this;
   pars.set<Real>("gx") = _gx;
   pars.set<Real>("g") = _g; // gravity constant
   pars.set<Real>("dh") = _Dh;
