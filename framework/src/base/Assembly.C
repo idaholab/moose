@@ -18,6 +18,8 @@
 #include "SubProblem.h"
 #include "ArbitraryQuadrature.h"
 #include "SystemBase.h"
+#include "MooseTypes.h"
+
 // libMesh
 #include "quadrature_gauss.h"
 #include "fe_interface.h"
@@ -47,7 +49,8 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _currently_fe_caching(true),
 
     _max_cached_residuals(0),
-    _max_cached_jacobians(0)
+    _max_cached_jacobians(0),
+    _block_diagonal_matrix(false)
 {
   // Build fe's for the helpers
   getFE(FEType(FIRST, LAGRANGE));
@@ -516,15 +519,38 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int /*neighbo
 }
 
 DenseMatrix<Number> &
+Assembly::jacobianBlock(unsigned int ivar, unsigned int jvar)
+{
+  if(_block_diagonal_matrix)
+    return _sub_Kee[ivar][0];
+  else
+    return _sub_Kee[ivar][jvar];
+}
+
+DenseMatrix<Number> &
 Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar)
 {
-  switch (type)
+  if(_block_diagonal_matrix)
   {
-  default:
-  case Moose::ElementElement: return _sub_Kee[ivar][jvar];
-  case Moose::ElementNeighbor: return _sub_Ken[ivar][jvar];
-  case Moose::NeighborElement: return _sub_Kne[ivar][jvar];
-  case Moose::NeighborNeighbor: return _sub_Knn[ivar][jvar];
+    switch (type)
+    {
+    default:
+    case Moose::ElementElement: return _sub_Kee[ivar][0];
+    case Moose::ElementNeighbor: return _sub_Ken[ivar][0];
+    case Moose::NeighborElement: return _sub_Kne[ivar][0];
+    case Moose::NeighborNeighbor: return _sub_Knn[ivar][0];
+    }
+  }
+  else
+  {
+    switch (type)
+    {
+    default:
+    case Moose::ElementElement: return _sub_Kee[ivar][jvar];
+    case Moose::ElementNeighbor: return _sub_Ken[ivar][jvar];
+    case Moose::NeighborElement: return _sub_Kne[ivar][jvar];
+    case Moose::NeighborNeighbor: return _sub_Knn[ivar][jvar];
+    }
   }
 }
 
@@ -535,10 +561,27 @@ Assembly::init()
 
   // I want the blocks to go by columns first to reduce copying of shape function in assembling "full" Jacobian
   _cm_entry.clear();
+
+  unsigned int max_rows_per_column = 0;  // If this is 1 then we are using a block-diagonal preconditioner and we can save a bunch of memory.
+
   for (unsigned int j = 0; j < n_vars; ++j)
+  {
+    unsigned int max_rows_per_this_column = 0;
+
     for (unsigned int i = 0; i < n_vars; ++i)
+    {
       if ((*_cm)(i, j) != 0)
+      {
+        max_rows_per_this_column++;
         _cm_entry.push_back(std::pair<unsigned int, unsigned int>(i, j));
+      }
+    }
+
+    max_rows_per_column = std::max(max_rows_per_column, max_rows_per_this_column);
+  }
+
+  if(max_rows_per_column == 1)
+    _block_diagonal_matrix = true;
 
   _sub_Re.resize(n_vars);
   _sub_Rn.resize(n_vars);
@@ -547,12 +590,23 @@ Assembly::init()
   _sub_Ken.resize(n_vars);
   _sub_Kne.resize(n_vars);
   _sub_Knn.resize(n_vars);
+
   for (unsigned int i = 0; i < n_vars; ++i)
   {
-    _sub_Kee[i].resize(n_vars);
-    _sub_Ken[i].resize(n_vars);
-    _sub_Kne[i].resize(n_vars);
-    _sub_Knn[i].resize(n_vars);
+    if(!_block_diagonal_matrix)
+    {
+      _sub_Kee[i].resize(n_vars);
+      _sub_Ken[i].resize(n_vars);
+      _sub_Kne[i].resize(n_vars);
+      _sub_Knn[i].resize(n_vars);
+    }
+    else
+    {
+      _sub_Kee[i].resize(1);
+      _sub_Ken[i].resize(1);
+      _sub_Kne[i].resize(1);
+      _sub_Knn[i].resize(1);
+    }
   }
 
   unsigned int n_scalar_vars = _sys.nScalarVariables();
@@ -583,8 +637,8 @@ Assembly::prepare()
     MooseVariable & ivar = _sys.getVariable(_tid, vi);
     MooseVariable & jvar = _sys.getVariable(_tid, vj);
 
-    _sub_Kee[vi][vj].resize(ivar.dofIndices().size(), jvar.dofIndices().size());
-    _sub_Kee[vi][vj].zero();
+    jacobianBlock(vi,vj).resize(ivar.dofIndices().size(), jvar.dofIndices().size());
+    jacobianBlock(vi,vj).zero();
   }
 
   unsigned int n_vars = _sys.nVariables();
@@ -607,14 +661,14 @@ Assembly::prepareNeighbor()
     MooseVariable & ivar = _sys.getVariable(_tid, vi);
     MooseVariable & jvar = _sys.getVariable(_tid, vj);
 
-    _sub_Ken[vi][vj].resize(ivar.dofIndices().size(), jvar.dofIndicesNeighbor().size());
-    _sub_Ken[vi][vj].zero();
+    jacobianBlockNeighbor(Moose::ElementNeighbor, vi, vj).resize(ivar.dofIndices().size(), jvar.dofIndicesNeighbor().size());
+    jacobianBlockNeighbor(Moose::ElementNeighbor, vi, vj).zero();
 
-    _sub_Kne[vi][vj].resize(ivar.dofIndicesNeighbor().size(), jvar.dofIndices().size());
-    _sub_Kne[vi][vj].zero();
+    jacobianBlockNeighbor(Moose::NeighborElement, vi, vj).resize(ivar.dofIndicesNeighbor().size(), jvar.dofIndices().size());
+    jacobianBlockNeighbor(Moose::NeighborElement, vi, vj).zero();
 
-    _sub_Knn[vi][vj].resize(ivar.dofIndicesNeighbor().size(), jvar.dofIndicesNeighbor().size());
-    _sub_Knn[vi][vj].zero();
+    jacobianBlockNeighbor(Moose::NeighborNeighbor, vi, vj).resize(ivar.dofIndicesNeighbor().size(), jvar.dofIndicesNeighbor().size());
+    jacobianBlockNeighbor(Moose::NeighborNeighbor, vi, vj).zero();
   }
 
   unsigned int n_vars = _sys.nVariables();
@@ -629,8 +683,8 @@ Assembly::prepareNeighbor()
 void
 Assembly::prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices)
 {
-  _sub_Kee[ivar][jvar].resize(dof_indices.size(), dof_indices.size());
-  _sub_Kee[ivar][jvar].zero();
+  jacobianBlock(ivar,jvar).resize(dof_indices.size(), dof_indices.size());
+  jacobianBlock(ivar,jvar).zero();
 
   _sub_Re[ivar].resize(dof_indices.size());
   _sub_Re[ivar].zero();
@@ -1011,7 +1065,7 @@ Assembly::addJacobian(SparseMatrix<Number> & jacobian)
         MooseVariable & ivar = _sys.getVariable(_tid, vi);
         MooseVariable & jvar = _sys.getVariable(_tid, vj);
 
-        addJacobianBlock(jacobian, _sub_Kee[vi][vj], ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
+        addJacobianBlock(jacobian, jacobianBlock(vi,vj), ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
       }
     }
   }
@@ -1029,9 +1083,9 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian)
         MooseVariable & ivar = _sys.getVariable(_tid, vi);
         MooseVariable & jvar = _sys.getVariable(_tid, vj);
 
-        addJacobianBlock(jacobian, _sub_Ken[vi][vj], ivar.dofIndices(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
-        addJacobianBlock(jacobian, _sub_Kne[vi][vj], ivar.dofIndicesNeighbor(), jvar.dofIndices(), ivar.scalingFactor());
-        addJacobianBlock(jacobian, _sub_Knn[vi][vj], ivar.dofIndicesNeighbor(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
+        addJacobianBlock(jacobian, jacobianBlockNeighbor(Moose::ElementNeighbor, vi, vj), ivar.dofIndices(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
+        addJacobianBlock(jacobian, jacobianBlockNeighbor(Moose::NeighborElement, vi, vj), ivar.dofIndicesNeighbor(), jvar.dofIndices(), ivar.scalingFactor());
+        addJacobianBlock(jacobian, jacobianBlockNeighbor(Moose::NeighborNeighbor, vi, vj), ivar.dofIndicesNeighbor(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
       }
     }
   }
@@ -1049,7 +1103,7 @@ Assembly::cacheJacobian()
         MooseVariable & ivar = _sys.getVariable(_tid, vi);
         MooseVariable & jvar = _sys.getVariable(_tid, vj);
 
-        cacheJacobianBlock(_sub_Kee[vi][vj], ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
+        cacheJacobianBlock(jacobianBlock(vi,vj), ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
       }
     }
   }
@@ -1067,9 +1121,9 @@ Assembly::cacheJacobianNeighbor()
         MooseVariable & ivar = _sys.getVariable(_tid, vi);
         MooseVariable & jvar = _sys.getVariable(_tid, vj);
 
-        cacheJacobianBlock(_sub_Ken[vi][vj], ivar.dofIndices(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
-        cacheJacobianBlock(_sub_Kne[vi][vj], ivar.dofIndicesNeighbor(), jvar.dofIndices(), ivar.scalingFactor());
-        cacheJacobianBlock(_sub_Knn[vi][vj], ivar.dofIndicesNeighbor(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
+        cacheJacobianBlock(jacobianBlockNeighbor(Moose::ElementNeighbor, vi, vj), ivar.dofIndices(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
+        cacheJacobianBlock(jacobianBlockNeighbor(Moose::NeighborElement, vi, vj), ivar.dofIndicesNeighbor(), jvar.dofIndices(), ivar.scalingFactor());
+        cacheJacobianBlock(jacobianBlockNeighbor(Moose::NeighborNeighbor, vi, vj), ivar.dofIndicesNeighbor(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
       }
     }
   }
@@ -1163,4 +1217,3 @@ Assembly::addJacobianScalar(SparseMatrix<Number> & jacobian)
     }
   }
 }
-

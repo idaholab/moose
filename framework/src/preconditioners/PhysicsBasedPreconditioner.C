@@ -33,11 +33,11 @@ InputParameters validParams<PhysicsBasedPreconditioner>()
 {
   InputParameters params = validParams<MoosePreconditioner>();
 
-  params.addRequiredParam<std::vector<std::string> >("solve_order", "TODO: docstring");
+  params.addRequiredParam<std::vector<std::string> >("solve_order", "The order the block rows will be solved in.  Put the name of variables here to stand for solving that variable's block row.  A variable may appear more than once (to create cylces if you like).");
   params.addRequiredParam<std::vector<std::string> >("preconditioner", "TODO: docstring");
 
-  params.addParam<std::vector<std::string> >("off_diag_row", "TODO: docstring");
-  params.addParam<std::vector<std::string> >("off_diag_column", "TODO: docstring");
+  params.addParam<std::vector<std::string> >("off_diag_row", "The off diagonal row you want to add into the matrix, it will be associated with an off diagonal column from the same position in off_diag_colum.");
+  params.addParam<std::vector<std::string> >("off_diag_column", "The off diagonal column you want to add into the matrix, it will be associated with an off diagonal row from the same position in off_diag_row.");
 
 
   return params;
@@ -54,6 +54,42 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const std::string & name
   _off_diag.resize(num_systems);
   _off_diag_mats.resize(num_systems);
   _pre_type.resize(num_systems);
+
+  { // Setup the Coupling Matrix so MOOSE knows what we're doing
+    NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
+    unsigned int n_vars = nl.nVariables();
+    unsigned int n_scalar_vars = nl.nScalarVariables();
+
+    CouplingMatrix * cm = new CouplingMatrix(n_vars + n_scalar_vars);
+
+    bool full = false; //getParam<bool>("full"); // TODO: add a FULL option for PBP
+
+    if (!full)
+    {
+      // put 1s on diagonal
+      for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
+        (*cm)(i, i) = 1;
+
+      // off-diagonal entries
+      std::vector<std::vector<unsigned int> > off_diag(n_vars);
+      for (unsigned int i = 0; i < getParam<std::vector<std::string> >("off_diag_row").size(); i++)
+      {
+        unsigned int row = nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_row")[i]).number();
+        unsigned int column = nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_column")[i]).number();
+        (*cm)(row, column) = 1;
+      }
+
+      // TODO: handle coupling entries between NL-vars and SCALAR-vars
+    }
+    else
+    {
+      for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
+        for (unsigned int j = 0; j < n_vars + n_scalar_vars; j++)
+          (*cm)(i,j) = 1;
+    }
+
+    _fe_problem.setCouplingMatrix(cm);
+  }
 
   // PC types
   const std::vector<std::string> & pc_types = getParam<std::vector<std::string> >("preconditioner");

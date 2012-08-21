@@ -319,7 +319,7 @@ public:
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num) { return _sub_Rn[var_num]; }
   DenseVector<Number> & residualBlockScalar(unsigned int var_num) { return _scalar_Re[var_num]; }
 
-  DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar) { return _sub_Kee[ivar][jvar]; }
+  DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar);
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar);
   DenseMatrix<Number> & jacobianBlockScalar(unsigned int ivar, unsigned int jvar) { return _scalar_Kee[ivar][jvar]; }
   DenseMatrix<Number> & jacobianBlockScalarLM(unsigned int ivar, unsigned int jvar) { return _scalar_Ken[ivar][jvar]; }
@@ -592,6 +592,9 @@ protected:
   std::vector<unsigned int> _cached_jacobian_cols;
 
   unsigned int _max_cached_jacobians;
+
+  /// Will be true if our preconditioning matrix is a block-diagonal matrix.  Which means that we can take some shortcuts.
+  unsigned int _block_diagonal_matrix;
 };
 
 #endif /* ASSEMBLY_H */
