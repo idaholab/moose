@@ -298,7 +298,7 @@ MaterialWarehouse::sortMaterials(std::vector<Material *> & materials_vector)
     oss << "Cyclic dependency detected in material property couplings:\n";
     const std::multimap<DependencyResolverInterface *, DependencyResolverInterface *> & depends = e.getCyclicDependencies();
     for (std::multimap<DependencyResolverInterface *, DependencyResolverInterface *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
-      oss << (static_cast<Material *>(it->first))->name() << " -> " << (static_cast<Material *>(it->first))->name() << "\n";
+      oss << (static_cast<Material *>(it->first))->name() << " -> " << (static_cast<Material *>(it->second))->name() << "\n";
     mooseError(oss.str());
   }
 }

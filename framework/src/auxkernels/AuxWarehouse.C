@@ -135,6 +135,19 @@ AuxWarehouse::addScalarKernel(AuxScalarKernel *kernel)
 void
 AuxWarehouse::sortAuxKernels(std::vector<AuxKernel *> & aux_vector)
 {
-  // Sort based on dependencies
-  DependencyResolverInterface::sort(aux_vector.begin(), aux_vector.end());
+  try
+  {
+    // Sort based on dependencies
+    DependencyResolverInterface::sort(aux_vector.begin(), aux_vector.end());
+  }
+  catch(CyclicDependencyException<DependencyResolverInterface *> & e)
+  {
+    std::ostringstream oss;
+
+    oss << "Cyclic dependency detected in aux kernel ordering:\n";
+    const std::multimap<DependencyResolverInterface *, DependencyResolverInterface *> & depends = e.getCyclicDependencies();
+    for (std::multimap<DependencyResolverInterface *, DependencyResolverInterface *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
+      oss << (static_cast<AuxKernel *>(it->first))->name() << " -> " << (static_cast<AuxKernel *>(it->second))->name() << "\n";
+    mooseError(oss.str());
+  }
 }
