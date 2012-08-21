@@ -26,12 +26,12 @@
 
 COORDINATES absolute 1.e-6    # min separation = 0.2
 
-TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:             0.1 @ t11
+TIME STEPS relative 1.e-6 floor 1e-6     # min:               0 @ t1 max:             0.1 @ t11
 
-GLOBAL VARIABLES relative 1.e-6 floor 0.0
+GLOBAL VARIABLES relative 1.e-6 floor 1e-6
 	react_x  # min:               0 @ t1	max:           1e+08 @ t11
 
-NODAL VARIABLES relative 1.e-6 floor 0.0
+NODAL VARIABLES relative 1.e-6 floor 1e-6
 	disp_x   # min:               0 @ t1,n1	max:             0.1 @ t11,n1
 	disp_y  absolute 1e-6  # min:               0 @ t1,n1	max:   2.0134285e-16 @ t2,n21
 	resid_x  # min:               0 @ t1,n1	max:        20000000 @ t11,n2
