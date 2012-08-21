@@ -137,11 +137,10 @@ class TestHarness:
       test['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
     if ncpus > 1 or nthreads > 1:
       command = 'mpiexec -host ' + self.host_name + ' -n ' + str(ncpus) + ' ' + self.executable + ' --n-threads=' + str(nthreads) + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+    elif self.options.enable_valgrind:
+      command = 'valgrind --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
     else:
-      if self.options.enable_valgrind:
-        command = 'valgrind --tool=memcheck --dsymutil=yes -v ' + self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
-      else:
-        command = self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
+      command = self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
 
     if self.options.scaling and test[SCALE_REFINE] > 0:
       command += ' -r ' + str(test[SCALE_REFINE])
