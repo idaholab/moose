@@ -41,7 +41,7 @@
 
 TimeScheme::TimeScheme(NonlinearSystem * c) :
 _use_AB2(false),
-_use_littlef(true),
+_use_littlef(false),
 _nl(c),
 _solution_u_dot(c->_sys.add_vector("u_dot", false, GHOSTED)),
 _solution_du_dot_du(c->_sys.add_vector("du_dot_du", false, GHOSTED)),
@@ -58,7 +58,7 @@ _time_stepping_scheme( c->_time_stepping_scheme),
 _t_step(c->_t_step),
 _time_stack(std::deque<TimeStep>()),
 _workvecs(std::vector<NumericVector<Number> *>()),
-_apply_predictor(true),
+_apply_predictor(false),
 _dt2_check(NULL),
 _dt2_bool(false)
 {
@@ -143,10 +143,6 @@ TimeScheme::onTimestepBegin()
   Real sum;
   if(_t_step > 1)
   {
-    if(_time_stepping_scheme == Moose::CRANK_NICOLSON)
-    {
-      _solution_u_dot *= .5;
-    }
     _time_stack[_time_stack.size()-2].setTimeDerivitive(_solution_u_dot);
   }
   switch (_time_stepping_scheme)
@@ -203,8 +199,8 @@ void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
     NumericVector<Number> & residual_older = _trash1;
     NumericVector<Number> & residual_old = _trash2;
     initial_solution.localize(_predicted_solution);
-    computeLittlef(_time_stack[_time_stack.size()-3].getSolution(), residual_older, _time_stack[_time_stack.size()-3].getTime());
-    computeLittlef(_time_stack[_time_stack.size() -2].getSolution(), residual_old);
+    computeLittlef(_time_stack[_time_stack.size()-3].getSolution(), residual_older, _time_stack[_time_stack.size()-2].getTime());
+    computeLittlef(_time_stack[_time_stack.size() -2].getSolution(), residual_old, _time_stack[_time_stack.size()-1].getTime());
     if(_dt ==0 || _dt_old == 0){
       std::cout<<"help me!!"<<std::endl;
     }
@@ -301,7 +297,7 @@ TimeScheme::applyPredictor(NumericVector<Number> & initial_solution)
   // result in a much more stringent criterion for convergence than would have been
   // used if the predictor were not enabled.
   if(_use_AB2){
-    if(_t_step >2)
+    if(_t_step >1)
     {
       Adams_Bashforth2P(initial_solution);
     }
@@ -419,14 +415,9 @@ TimeScheme::computeTimeDerivatives()
   {
   case Moose::IMPLICIT_EULER:
   case Moose::EXPLICIT_EULER:
-    firstOrderTD();
-    break;
-
   case Moose::CRANK_NICOLSON:
     firstOrderTD();
-    _solution_u_dot *=  2.0;
     break;
-
   case Moose::BDF2:
     if (_t_step == 1)
     {

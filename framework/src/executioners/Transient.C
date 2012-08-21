@@ -110,10 +110,10 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     {
       mooseError("Input value for predictor_scale = "<< predscale << ", outside of permissible range (0 to 1)");
     }
-    _problem.getTimeScheme()->_use_AB2 = getParam<bool>("use_AB2");
-    _problem.getTimeScheme()->_use_littlef = getParam<bool>("use_littlef");
   }
 
+  _problem.getTimeScheme()->_use_AB2 = getParam<bool>("use_AB2");
+  _problem.getTimeScheme()->_use_littlef = getParam<bool>("use_littlef");
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
 }

@@ -96,6 +96,10 @@ ComputeResidualThread::onElement(const Elem *elem)
 void
 ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
+  if(_selector == Moose::KT_TIME)
+  {
+    return;
+  }
   std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {
@@ -120,6 +124,10 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 void
 ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 {
+  if(_selector == Moose::KT_TIME)
+  {
+    return;
+  }
   // Pointer to the neighbor we are currently working on.
   const Elem * neighbor = elem->neighbor(side);
 
