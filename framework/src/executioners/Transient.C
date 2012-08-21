@@ -84,6 +84,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _trans_ss_check(getParam<bool>("trans_ss_check")),
     _ss_check_tol(getParam<Real>("ss_check_tol")),
     _ss_tmin(getParam<Real>("ss_tmin")),
+    _old_time_solution_norm(0.0),
     _converged(true),
     _sync_times(getParam<std::vector<Real> >("sync_times")),
     _remaining_sync_time(true),
