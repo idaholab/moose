@@ -88,7 +88,7 @@ Resurrector::write()
   _xda.output(s, _fe_problem.time());                   // time does not have any effect here actually
   if (_fe_problem._material_props.hasStatefulProperties())
     _mat.write(file_base + MAT_PROP_EXT);
-  THREAD_ID tid = 0;
+  //  THREAD_ID tid = 0;
   /*
   if (_fe_problem._user_objects[tid].size() > 0)
     _user_object.write(file_base + USER_DATA_EXT);

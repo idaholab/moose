@@ -84,7 +84,7 @@ ComputeMarkerThread::onElement(const Elem *elem)
 }
 
 void
-ComputeMarkerThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+ComputeMarkerThread::onBoundary(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/)
 {
   /*
   std::vector<IntegratedBC *> bcs = _aux_sys._bcs[_tid].activeIntegrated(bnd_id);
@@ -110,7 +110,7 @@ ComputeMarkerThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID 
 }
 
 void
-ComputeMarkerThread::onInternalSide(const Elem *elem, unsigned int side)
+ComputeMarkerThread::onInternalSide(const Elem * /*elem*/, unsigned int /*side*/)
 {
 /*
   // Pointer to the neighbor we are currently working on.

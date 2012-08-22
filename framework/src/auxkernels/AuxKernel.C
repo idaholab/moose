@@ -98,6 +98,18 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
 }
 
 void
+AuxKernel::coupledCallback(const std::string & var_name, bool is_old)
+{
+  if (is_old)
+  {
+    std::vector<std::string> var_names = getParam<std::vector<std::string> >(var_name);
+    for (std::vector<std::string>::const_iterator it = var_names.begin(); it != var_names.end(); ++it)
+      _depend_vars.erase(*it);
+    //std::cout << "Removing Depend: " << name() << ": " << getParam<std::vector<AuxVariableName> >(var_name) << "\n";
+  }
+}
+
+void
 AuxKernel::compute()
 {
   Real value = 0;

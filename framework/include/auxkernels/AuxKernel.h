@@ -80,6 +80,8 @@ public:
 
   const std::set<std::string> & getDependObjects() const { return _depend_uo; }
 
+  void coupledCallback(const std::string & var_name, bool is_old);
+
   virtual
   const std::set<std::string> &
   getRequestedItems() { return _depend_vars; }

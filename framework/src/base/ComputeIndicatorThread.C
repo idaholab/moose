@@ -100,7 +100,7 @@ ComputeIndicatorThread::onElement(const Elem *elem)
 }
 
 void
-ComputeIndicatorThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+ComputeIndicatorThread::onBoundary(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/)
 {
   /*
   std::vector<IntegratedBC *> bcs = _aux_sys._bcs[_tid].activeIntegrated(bnd_id);
