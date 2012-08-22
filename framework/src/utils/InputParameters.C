@@ -159,6 +159,7 @@ InputParameters::isParamValid(const std::string &name) const
 bool
 InputParameters::wasSeenInInput(const std::string &name) const
 {
+  mooseWarning("wasSeenInInput is a deprecated method, use isParamValid instead");
   return _seen_in_input.find(name) != _seen_in_input.end();
 }
 
