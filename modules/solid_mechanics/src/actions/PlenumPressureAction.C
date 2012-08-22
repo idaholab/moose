@@ -53,10 +53,10 @@ PlenumPressureAction::PlenumPressureAction(const std::string & name, InputParame
   _kernel_name("PlenumPressure"),
   _use_displaced_mesh(true)
 {
-  if (params.wasSeenInInput("refab_time") &&
-      !(params.wasSeenInInput("refab_pressure") &&
-        params.wasSeenInInput("refab_temperature") &&
-        params.wasSeenInInput("refab_volume")))
+  if (params.isParamValid("refab_time") &&
+      !(params.isParamValid("refab_pressure") &&
+        params.isParamValid("refab_temperature") &&
+        params.isParamValid("refab_volume")))
   {
     mooseError("PlenumPressure error: refabrication time given but not complete set of refabrication data");
   }
