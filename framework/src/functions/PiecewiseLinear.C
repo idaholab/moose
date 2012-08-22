@@ -32,7 +32,7 @@ PiecewiseLinear::PiecewiseLinear(const std::string & name, InputParameters param
   _scale_factor( getParam<Real>("scale_factor") ),
   _has_axis(false)
 {
-  if (parameters.wasSeenInInput("axis"))
+  if (parameters.isParamValid("axis"))
   {
     _axis=parameters.get<int>("axis");
     if (_axis < 0 || _axis > 2)

@@ -99,7 +99,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
   _dt = 0;
   _time = _time_old = getParam<Real>("start_time");
   _problem.transient(true);
-  if (parameters.wasSeenInInput("predictor_scale"))
+  if (parameters.isParamValid("predictor_scale"))
   {
     Real predscale(getParam<Real>("predictor_scale"));
     if (predscale >= 0.0 and predscale <= 1.0)
