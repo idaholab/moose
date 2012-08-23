@@ -3,7 +3,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.Qt import *
 from GenSyntax import *
 
-pathname = os.path.dirname(sys.argv[0])        
+pathname = os.path.dirname(os.path.realpath(sys.argv[0]))        
 pathname = os.path.abspath(pathname)
 
 

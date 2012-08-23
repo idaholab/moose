@@ -38,7 +38,7 @@ class InputFileWidget(QtGui.QWidget):
       self.input_file_template_root_node = readInputFile(input_file_template_name)
       self.input_file_template_getpot_data = GetPotData(self.input_file_template_root_node, self)
     else: # If they haven't specified their own template... let's use a default one:
-      input_file_template_name = os.path.dirname(sys.argv[0]) + '/input_template'
+      input_file_template_name = os.path.dirname(os.path.realpath(sys.argv[0])) + '/input_template'
       self.input_file_template_root_node = readInputFile(input_file_template_name)
       self.input_file_template_getpot_data = GetPotData(self.input_file_template_root_node, self)
       

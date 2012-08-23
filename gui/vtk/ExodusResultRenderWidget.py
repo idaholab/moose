@@ -6,7 +6,7 @@ from ExodusResult import ExodusResult
 import glob
 from ContourChoices import *
 
-pathname = os.path.dirname(sys.argv[0])        
+pathname = os.path.dirname(os.path.realpath(sys.argv[0]))        
 pathname = os.path.abspath(pathname)
 
 try:

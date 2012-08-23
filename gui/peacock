@@ -3,8 +3,11 @@ import os, sys, PyQt4, re, inspect
 from PyQt4 import QtCore, QtGui
 
 # Get the real path of peacock
-pathname = os.path.dirname(sys.argv[0])        
-pathname = os.path.abspath(pathname)
+if(os.path.islink(sys.argv[0])):
+  pathname = os.path.dirname(os.path.realpath(sys.argv[0]))
+else:
+  pathname = os.path.dirname(sys.argv[0])        
+  pathname = os.path.abspath(pathname)
 
 subdirs = ['gui','utils','vtk','mesh_info','plug_ins']
 
