@@ -117,17 +117,16 @@ FlowJunction::addVariables()
   // std::cout << "initial T " << _initial_T << std::endl;
   // End of debug
 
+  Real _initial_rho = eos.rho_from_p_T(_initial_P, _initial_T);
   Real _initial_specific_int_energy = 0.;
   if(_model_type == Model::EQ_MODEL_3)
   {
-	  _initial_specific_int_energy = eos.invert_eos_internal_energy(_initial_T);
+	  _initial_specific_int_energy = eos.e_from_p_rho(_initial_P, _initial_rho);
   }
 
   // Debug
   // std::cout << "initial e " << _initial_specific_int_energy << std::endl;
   // End of debug
-
-  Real _initial_rho = eos.invert_eos_rho(_initial_P, _initial_specific_int_energy);
 
   if(_model_type == Model::EQ_MODEL_2)
   {

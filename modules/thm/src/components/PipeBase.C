@@ -179,13 +179,13 @@ PipeBase::addVariables()
   Real initial_enthalpy = 0.;
   if(_model_type == EQ_MODEL_2)
   {
-    initial_rho = eos.invert_eos_rho(initial_P);
+    initial_rho = eos.rho_from_p_T(initial_P);
     initial_rhou = initial_rho * initial_V;
   }
   else if(_model_type == EQ_MODEL_3)
   {
-    initial_e = eos.invert_eos_internal_energy(initial_T);
-    initial_rho = eos.invert_eos_rho(initial_P, initial_e);
+    initial_rho = eos.rho_from_p_T(initial_P, initial_T);
+    initial_e = eos.e_from_p_rho(initial_P, initial_rho);
     initial_rhou = initial_rho * initial_V;
     initial_rhoE = initial_rho * initial_e + initial_rho * 0.5 * initial_V * initial_V;
     initial_enthalpy = (initial_rhoE + initial_P) / initial_rho;
