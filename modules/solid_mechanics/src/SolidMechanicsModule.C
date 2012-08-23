@@ -4,6 +4,7 @@
 #include "Parser.h"
 
 // solid_mechanics
+#include "AdaptiveTransient.h"
 #include "CLSHPlasticMaterial.h"
 #include "Elastic.h"
 #include "ElasticEnergyAux.h"
@@ -38,6 +39,8 @@ void
 Elk::SolidMechanics::registerObjects()
 {
   // solid_mechanics
+  registerExecutioner(AdaptiveTransient);
+
   registerMaterial(CLSHPlasticMaterial);
   registerMaterial(Elastic);
   registerKernel(Gravity);
