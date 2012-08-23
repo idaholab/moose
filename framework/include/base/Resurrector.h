@@ -58,6 +58,13 @@ public:
    * @param num_files Number of files to keep around
    */
   void setNumRestartFiles(unsigned int num_files);
+
+  /**
+   * Gets the number of restart files to save
+   * @return the number of files to keep around
+   */
+  unsigned int getNumRestartFiles() { return _num_restart_files; }
+
   /**
    * Write out a restart file and rotate already written ones
    */

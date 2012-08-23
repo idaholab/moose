@@ -370,6 +370,12 @@ public:
   virtual void setNumRestartFiles(unsigned int num_files);
 
   /**
+   * Gets the number of restart files to save
+   * @return the number of files to keep around
+   */
+  virtual unsigned int getNumRestartFiles();
+
+  /**
    * Was this subproblem initialized from a restart file
    * @return true if we restarted form a file, otherwise false
    */

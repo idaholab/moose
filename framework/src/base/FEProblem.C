@@ -2622,6 +2622,12 @@ FEProblem::setNumRestartFiles(unsigned int num_files)
   _resurrector->setNumRestartFiles(num_files);
 }
 
+unsigned int
+FEProblem::getNumRestartFiles()
+{
+  return _resurrector->getNumRestartFiles();
+}
+
 bool
 FEProblem::isRestarting()
 {
