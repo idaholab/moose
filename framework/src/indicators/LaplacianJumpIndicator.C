@@ -23,7 +23,9 @@ InputParameters validParams<LaplacianJumpIndicator>()
 
 
 LaplacianJumpIndicator::LaplacianJumpIndicator(const std::string & name, InputParameters parameters) :
-    JumpIndicator(name, parameters)
+    JumpIndicator(name, parameters),
+    _second_u(second()),
+    _second_u_neighbor(neighborSecond())
 {
 }
 
@@ -31,6 +33,8 @@ LaplacianJumpIndicator::LaplacianJumpIndicator(const std::string & name, InputPa
 Real
 LaplacianJumpIndicator::computeQpIntegral()
 {
-  return 0;
+  Real jump = (_second_u[_qp].tr() - _second_u_neighbor[_qp].tr());
+
+  return jump*jump;
 }
 

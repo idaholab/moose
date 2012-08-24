@@ -41,6 +41,11 @@ ElementIndicator::ElementIndicator(const std::string & name, InputParameters par
     Indicator(name, parameters),
     TransientInterface(parameters, name, "indicators"),
     PostprocessorInterface(parameters),
+    Coupleable(parameters, false),
+    ScalarCoupleable(parameters),
+    MooseVariableInterface(parameters, false),
+
+    _field_var(_sys.getVariable(_tid, name)),
 
     _current_elem(_field_var.currentElem()),
     _current_elem_volume(_subproblem.elemVolume(_tid)),

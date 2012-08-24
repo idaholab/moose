@@ -50,6 +50,8 @@ InternalSideIndicator::InternalSideIndicator(const std::string & name, InputPara
     NeighborMooseVariableInterface(parameters, false),
     TwoMaterialPropertyInterface(parameters),
 
+    _field_var(_sys.getVariable(_tid, name)),
+
     _current_elem(_assembly.elem()),
     _neighbor_elem(_assembly.neighbor()),
 

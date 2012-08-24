@@ -18,8 +18,6 @@
 #include "MooseObject.h"
 #include "SetupInterface.h"
 
-#include "Coupleable.h"
-#include "MooseVariableInterface.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
 #include "MaterialPropertyInterface.h"
@@ -44,9 +42,6 @@ InputParameters validParams<Indicator>();
 class Indicator :
   public MooseObject,
   public SetupInterface,
-  public Coupleable,
-  public ScalarCoupleable,
-  public MooseVariableInterface,
   public FunctionInterface,
   public UserObjectInterface,
   public MaterialPropertyInterface
@@ -88,7 +83,6 @@ protected:
 
   Assembly & _assembly;
 
-  MooseVariable & _field_var;
 //  const MooseVariable & _var;
 
   MooseMesh & _mesh;

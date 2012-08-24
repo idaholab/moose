@@ -19,6 +19,8 @@
 #include "MooseArray.h"
 #include "Indicator.h"
 #include "TwoMaterialPropertyInterface.h"
+#include "Coupleable.h"
+#include "MooseVariableInterface.h"
 
 #include "Assembly.h"
 #include "MooseVariable.h"
@@ -62,6 +64,7 @@ public:
   virtual void finalize();
 
 protected:
+  MooseVariable & _field_var;
 
   const Elem * & _current_elem;
   /// The neighboring element

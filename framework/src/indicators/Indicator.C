@@ -37,9 +37,6 @@ InputParameters validParams<Indicator>()
 Indicator::Indicator(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
-    Coupleable(parameters, false),
-    ScalarCoupleable(parameters),
-    MooseVariableInterface(parameters, false),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     MaterialPropertyInterface(parameters),
@@ -49,8 +46,6 @@ Indicator::Indicator(const std::string & name, InputParameters parameters) :
     _solution(_sys.solution()),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-
-    _field_var(_sys.getVariable(_tid, name)),
 
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension())

@@ -49,6 +49,7 @@
 #include "TEJumpBC.h"
 #include "OnOffDirichletBC.h"
 #include "OnOffNeumannBC.h"
+#include "DivergenceBC.h"
 
 #include "TEIC.h"
 
@@ -172,6 +173,8 @@ MooseTestApp::registerObjects()
   registerBoundaryCondition(FunctionPenaltyDirichletBC);
 
   registerBoundaryCondition(CoupledKernelGradBC);
+
+  registerBoundaryCondition(DivergenceBC);
 
   // Initial conditions
   registerInitialCondition(TEIC);

@@ -22,6 +22,8 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
+#include "Coupleable.h"
+#include "MooseVariableInterface.h"
 
 // libMesh
 #include "fe.h"
@@ -36,15 +38,19 @@ template<>
 InputParameters validParams<ElementIndicator>();
 
 class ElementIndicator :
-public Indicator,
-public TransientInterface,
-public PostprocessorInterface
+  public Indicator,
+  public TransientInterface,
+  public PostprocessorInterface,
+  public Coupleable,
+  public ScalarCoupleable,
+  public MooseVariableInterface
 {
 public:
     ElementIndicator(const std::string & name, InputParameters parameters);
     virtual ~ElementIndicator(){};
 
 protected:
+    MooseVariable & _field_var;
 
     const Elem * & _current_elem;
     /// Volume of the current element
