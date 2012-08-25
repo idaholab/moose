@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if(($# != 1))
+  then
+    echo Please supply the name of the new test directory
+    exit 1
+fi
+
+cp -r simple_diffusion_test $1
+cd $1
+
+rm -f *~*
+rm -f *#*
+rm -f *out*
+rm -f peacock*
+rm -f *.pyc
+rm gold/*
+
+mv simple_diffusion_test.i $1.i
+mv simple_diffusion_test.py $1.py
+
+sed -i "" "s/simple_diffusion_test/$1/g" $1.py
