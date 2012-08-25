@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if(($# < 2))
+  then
+    echo Usage: ./clone existing_test new_test
+    echo Note: Depending on how well the existing test conforms to protocol this might not work all that well
+    exit 1
+fi
+
+cp -r $1 $2
+cd $2
+
+rm -f *~*
+rm -f *#*
+rm -f *out*
+rm -f peacock*
+rm -f *.pyc
+rm gold/*
+
+mv $1.i $2.i
+mv $1.py $2.py
+
+sed -i "" "s/$1/$2/g" $2.py
