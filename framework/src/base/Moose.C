@@ -104,6 +104,7 @@
 
 // materials
 #include "GenericConstantMaterial.h"
+#include "GenericFunctionMaterial.h"
 
 // PPS
 #include "AverageElementSize.h"
@@ -315,6 +316,8 @@ registerObjects()
   registerFunction(PiecewiseLinearFile);
   // materials
   registerMaterial(GenericConstantMaterial);
+  registerMaterial(GenericFunctionMaterial);
+
   // PPS
   registerPostprocessor(AverageElementSize);
   registerPostprocessor(AverageNodalVariableValue);

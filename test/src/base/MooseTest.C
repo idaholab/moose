@@ -22,6 +22,7 @@
 #include "AdvDiffReaction1.h"
 #include "Advection0.h"
 #include "Diffusion0.h"
+#include "GenericDiffusion.h"
 #include "ForcingFunctionXYZ0.h"
 #include "TEJumpFFN.h"
 #include "NanKernel.h"
@@ -131,6 +132,7 @@ MooseTestApp::registerObjects()
   registerKernel(MMSForcing);
   registerKernel(MMSReaction);
   registerKernel(Diffusion0);
+  registerKernel(GenericDiffusion);
   registerKernel(Advection0);
   registerKernel(AdvDiffReaction1);
   registerKernel(ForcingFunctionXYZ0);
