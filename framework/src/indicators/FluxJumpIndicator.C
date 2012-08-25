@@ -18,12 +18,16 @@ template<>
 InputParameters validParams<FluxJumpIndicator>()
 {
   InputParameters params = validParams<JumpIndicator>();
+  params.addRequiredParam<std::string>("property", "The name of the material property to used as the 'diffusivity'");
   return params;
 }
 
 
 FluxJumpIndicator::FluxJumpIndicator(const std::string & name, InputParameters parameters) :
-    JumpIndicator(name, parameters)
+    JumpIndicator(name, parameters),
+    _property_name(parameters.get<std::string>("property")),
+    _property(getMaterialProperty<Real>(_property_name)),
+    _property_neighbor(getNeighborMaterialProperty<Real>(_property_name))
 {
 }
 
@@ -31,6 +35,8 @@ FluxJumpIndicator::FluxJumpIndicator(const std::string & name, InputParameters p
 Real
 FluxJumpIndicator::computeQpIntegral()
 {
-  return 0;
+  Real jump = (_property[_qp]*_grad_u[_qp] - _property_neighbor[_qp]*_grad_u_neighbor[_qp])*_normals[_qp];
+
+  return jump*jump;
 }
 

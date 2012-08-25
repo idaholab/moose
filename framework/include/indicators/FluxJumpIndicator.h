@@ -32,6 +32,10 @@ public:
 protected:
 
   virtual Real computeQpIntegral();
+
+  std::string _property_name;
+  MaterialProperty<Real> & _property;
+  MaterialProperty<Real> & _property_neighbor;
 };
 
 #endif /* FLUXJUMPINDICATOR_H */

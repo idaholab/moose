@@ -43,8 +43,7 @@ class Indicator :
   public MooseObject,
   public SetupInterface,
   public FunctionInterface,
-  public UserObjectInterface,
-  public MaterialPropertyInterface
+  public UserObjectInterface
 {
 public:
   Indicator(const std::string & name, InputParameters parameters);

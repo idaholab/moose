@@ -43,7 +43,8 @@ class ElementIndicator :
   public PostprocessorInterface,
   public Coupleable,
   public ScalarCoupleable,
-  public MooseVariableInterface
+  public MooseVariableInterface,
+  public MaterialPropertyInterface
 {
 public:
     ElementIndicator(const std::string & name, InputParameters parameters);
