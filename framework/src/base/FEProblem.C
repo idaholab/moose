@@ -414,6 +414,13 @@ void FEProblem::initialSetup()
       Threads::parallel_reduce(elem_range, cmt);
     }
   }
+
+
+  for(unsigned int i=0; i<n_threads; i++)
+  {
+    _indicators[i].initialSetup();
+    _markers[i].initialSetup();
+  }
 }
 
 void FEProblem::timestepSetup()
@@ -432,6 +439,13 @@ void FEProblem::timestepSetup()
 
   _aux.timestepSetup();
   _nl.timestepSetup();
+
+  for(unsigned int i=0; i<n_threads; i++)
+  {
+    _indicators[i].timestepSetup();
+    _markers[i].timestepSetup();
+  }
+
   _out.timestepSetup();
   if (_out_problem)
     _out_problem->timestepSetup();
