@@ -3,9 +3,10 @@
 
 #include "Kernel.h"
 
-
 // Forward Declarations
 class OneDEnergyWallHeating;
+//class Function;
+class EquationOfState;
 
 template<>
 InputParameters validParams<OneDEnergyWallHeating>();
@@ -23,7 +24,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   // Coupled variables
-  //VariableValue & _rho;
+  VariableValue & _rho;
+  VariableValue & _rhou;
   //VariableValue & _u_vel;
   //VariableValue & _pressure;
   VariableValue & _temperature;
@@ -36,6 +38,8 @@ protected:
   const Real & _aw; // heat transfer area density, m^2 / m^3
   const Real & _Tw; // Wall temperature, K
   MaterialProperty<Real> & _HTC; // convective heat transfer coefficient, W/m^2-K
+
+  const EquationOfState & _eos;
 };
  
 #endif
