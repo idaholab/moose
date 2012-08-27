@@ -4,6 +4,7 @@
 #include "Conversion.h"
 #include "R7Conversion.h"
 #include "Factory.h"
+#include "EquationOfState.h"
 // libMesh
 #include "edge_edge2.h"
 #include "fe_type.h"
@@ -227,6 +228,7 @@ PipeBase::addMooseObjects()
     // for 3 eqn model, add wall heating term
 
     std::vector<std::string> cv_rho(1, RHO);
+    std::vector<std::string> cv_rhou(1, RHOU);
     std::vector<std::string> cv_temperature(1, TEMPERATURE);
 
     InputParameters params = Factory::instance()->getValidParams("OneDEnergyWallHeating");
@@ -238,7 +240,10 @@ PipeBase::addMooseObjects()
     params.set<Real>("Tw") = _Tw;
 
     params.set<std::vector<std::string> >("rho") = cv_rho;
+    params.set<std::vector<std::string> >("rhou") = cv_rhou;
     params.set<std::vector<std::string> >("temperature") = cv_temperature;
+
+    params.set<UserObjectName>("eos") = pars.get<UserObjectName>("eos");
 
     std::string mon = genName(name(), _id, "_pipe");
     _sim.addKernel("OneDEnergyWallHeating", mon, params);
