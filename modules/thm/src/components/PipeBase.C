@@ -31,15 +31,15 @@ InputParameters validParams<PipeBase>()
 
   //Input parameters default values could be given.
   params.addParam<Real>("roughness", 0.0, "roughness, [m]");
-  params.addParam<Real>("f", 0.0, "friction");
-  params.addParam<Real>("Hw", 0.0, "Convective heat transfer coefficient");
+  params.addParam<Real>("f", "friction");
+  params.addParam<Real>("Hw", "Convective heat transfer coefficient");
   params.addParam<Real>("Tw", 400, "Wall temperature");
   params.addParam<unsigned int>("HT_geometry_code", 0, "Heat transfer geometry code");
   params.addParam<Real>("PoD", 1, "pitch to diameter ratio for parellel bundle heat transfer");
 
-  params.addParam<Real>("initial_P", 1e5, "Initial pressure in the pipe");
-  params.addParam<Real>("initial_V", 0., "Initial velocity in the pipe");
-  params.addParam<Real>("initial_T", 300., "Initial temperature in the pipe");
+  params.addParam<Real>("initial_P", "Initial pressure in the pipe");
+  params.addParam<Real>("initial_V", "Initial velocity in the pipe");
+  params.addParam<Real>("initial_T", "Initial temperature in the pipe");
 
   return params;
 }
@@ -54,20 +54,20 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
     _n_elems(getParam<unsigned int>("n_elems")),
     _A(getParam<Real>("A")),
     _roughness(getParam<Real>("roughness")),
-    _has_f(params.wasSeenInInput("f")),
-    _f(getParam<Real>("f")),
-    _has_Hw(params.wasSeenInInput("Hw")),
-    _Hw(getParam<Real>("Hw")),
+    _has_f(params.isParamValid("f")),
+    _f(_has_f ? getParam<Real>("f") : 0.),
+    _has_Hw(params.isParamValid("Hw")),
+    _Hw(_has_Hw ? getParam<Real>("Hw") : 0.),
     _Tw(getParam<Real>("Tw")),
     _HT_geometry_code(getParam<unsigned int>("HT_geometry_code")),
     _PoD(getParam<Real>("PoD")),
-    _has_PoD(params.wasSeenInInput("PoD")),
-    _has_initial_P(params.wasSeenInInput("initial_P")),
-    _has_initial_V(params.wasSeenInInput("initial_V")),
-    _has_initial_T(params.wasSeenInInput("initial_T")),
-    _initial_P(getParam<Real>("initial_P")),
-    _initial_V(getParam<Real>("initial_V")),
-    _initial_T(getParam<Real>("initial_T"))
+    _has_PoD(params.isParamValid("PoD")),
+    _has_initial_P(params.isParamValid("initial_P")),
+    _has_initial_V(params.isParamValid("initial_V")),
+    _has_initial_T(params.isParamValid("initial_T")),
+    _initial_P(_has_initial_P ? getParam<Real>("initial_P") : 1e5),
+    _initial_V(_has_initial_V ? getParam<Real>("initial_V") : 0.),
+    _initial_T(_has_initial_T ? getParam<Real>("initial_T") : 300)
 {
   const std::vector<Real> & dir = getParam<std::vector<Real> >("orientation");
   _dir = VectorValue<Real>(dir[0], dir[1], dir[2]);

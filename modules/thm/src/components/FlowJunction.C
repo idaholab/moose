@@ -43,8 +43,8 @@ FlowJunction::FlowJunction(const std::string & name, InputParameters params) :
     _k_coeffs(getParam<std::vector<Real> >("K")),
     _ref_area(getParam<Real>("Area")),
     _ref_volume(getParam<Real>("Volume")),
-	_has_initial_P(params.wasSeenInInput("initial_P")),
-	_has_initial_T(params.wasSeenInInput("initial_T")),
+	_has_initial_P(params.isParamValid("initial_P")),
+	_has_initial_T(params.isParamValid("initial_T")),
 	_initial_P(_has_initial_P ? getParam<Real>("initial_P") : _sim.getParam<Real>("global_init_P")),
 	_initial_T(_has_initial_T ? getParam<Real>("initial_T") : _sim.getParam<Real>("global_init_T"))
 {
