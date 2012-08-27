@@ -490,9 +490,12 @@ class TestHarness:
     if opts.store_time and not (opts.revision):
       print 'ERROR: --store-timing is specified but no revision'
       sys.exit(1)
-    if opts.store_time and not(opts.timing or opts.scaling):
+    if opts.store_time and not (opts.timing or opts.scaling):
       opts.timing = True
       opts.scaling = True
+    if opts.enable_valgrind and (opts.parallel > 1 or opts.nthreads > 1):
+      print 'ERROR: --parallel and/or --threads can not be used with --valgrind'
+      sys.exit(1)
 
     # Update any keys from the environment as necessary
     if not self.options.method:
