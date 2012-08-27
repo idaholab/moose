@@ -1,16 +1,3 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
 
 #include "AdaptiveTransient.h"
 
@@ -58,12 +45,12 @@ InputParameters validParams<AdaptiveTransient>()
   params.addParam<std::vector<Real> >("time_dt", "The values of dt");
   params.addParam<Real>("growth_factor",   2, "Factor to apply to timestep if easy convergence (if 'optimal_iterations' is specified) or if recovering from failed solve");
   params.addParam<Real>("cutback_factor",  0.5, "Factor to apply to timestep if difficult convergence (if 'optimal_iterations' is specified) or if solution failed.");
-  params.addParam<Real>("predictor_scale", 0.0,    "The scale factor for the predictor (can range from 0 to 1)");
+  params.addParam<Real>("predictor_scale", "The scale factor for the predictor (can range from 0 to 1)");
   params.addParam<int> ("optimal_iterations", "The target number of nonlinear iterations for adaptive timestepping");
   params.addParam<int> ("iteration_window",  "The size of the nonlinear iteration window for adaptive timestepping (default = 0.2*optimal_iterations)");
   params.addParam<int> ("linear_iteration_ratio", 25, "The ratio of linear to nonlinear iterations to determine target linear iterations and window for adaptive timestepping (default = 25)");
-  params.addParam<std::string> ("timestep_limiting_function", "", "A function used to control the timestep by limiting the change in the function over a timestep");
-  params.addParam<Real> ("max_function_change", -1.0, "The absolute value of the maximum change in timestep_limiting_function over a timestep");
+  params.addParam<std::string> ("timestep_limiting_function", "A function used to control the timestep by limiting the change in the function over a timestep");
+  params.addParam<Real> ("max_function_change", "The absolute value of the maximum change in timestep_limiting_function over a timestep");
 
   return params;
 }
@@ -105,20 +92,20 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
   _dt = 0;
   _time = getParam<Real>("start_time");
   _problem.transient(true);
-  if (parameters.wasSeenInInput("predictor_scale"))
+  if (isParamValid("predictor_scale"))
   {
     Real predscale(getParam<Real>("predictor_scale"));
     if (predscale >= 0.0 and predscale <= 1.0)
-      _problem.getNonlinearSystem().setPredictorScale(getParam<Real>("predictor_scale"));
+      _problem.getNonlinearSystem().setPredictorScale(predscale);
     else
       mooseError("Input value for predictor_scale = "<< predscale << ", outside of permissible range (0 to 1)");
   }
 
-  if (parameters.wasSeenInInput("optimal_iterations"))
+  if (isParamValid("optimal_iterations"))
   {
     _adaptive_timestepping=true;
     _optimal_iterations = getParam<int>("optimal_iterations");
-    if (parameters.wasSeenInInput("iteration_window"))
+    if (isParamValid("iteration_window"))
     {
       _iteration_window = getParam<int>("iteration_window");
     }
@@ -129,7 +116,7 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
   }
   else
   {
-    if (parameters.wasSeenInInput("iteration_window"))
+    if (isParamValid("iteration_window"))
     {
       mooseError("'optimal_iterations' must be used for 'iteration_window' to be used");
     }
@@ -139,12 +126,13 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
     }
   }
 
-  if (parameters.wasSeenInInput("timestep_limiting_function"))
+  if (isParamValid("timestep_limiting_function"))
   {
     _timestep_limiting_function_name = getParam<std::string>("timestep_limiting_function");
     //TODO:  It would be nice to grab the function here, but it doesn't seem to exist yet.  This doesn't work:
     //_timestep_limiting_function = &_problem.getFunction(_timestep_limiting_function_name);
-    _max_function_change = getParam<Real>("max_function_change");
+    _max_function_change = isParamValid("max_function_change") ?
+        getParam<Real>("max_function_change") : -1;
     if (_max_function_change < 0.0)
     {
       mooseError("'max_function_change' must be specified and be greater than 0");
@@ -152,7 +140,7 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
   }
   else
   {
-    if (parameters.wasSeenInInput("max_function_change"))
+    if (isParamValid("max_function_change"))
     {
       mooseError("'timestep_limiting_function' must be used for 'max_function_change' to be used");
     }
@@ -289,7 +277,7 @@ AdaptiveTransient::takeStep(Real input_dt)
       _problem.computeUserObjects();
 
     std::cout << std::endl;
-  } 
+  }
 }
 
 void
@@ -572,7 +560,7 @@ AdaptiveTransient::computeAdaptiveDT(Real &dt, bool allowToGrow, bool allowToShr
       OSSRealzeroleft(_diag,9,6,dt);
       _diag << std::endl;
     }
-  } 
+  }
 }
 
 Real

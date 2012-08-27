@@ -1,16 +1,3 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
 
 #ifndef ADAPTIVETRANSIENT_H
 #define ADAPTIVETRANSIENT_H
@@ -120,7 +107,7 @@ protected:
   Real _dtmax;
   Real _num_steps;
   int _n_startup_steps;
-  
+
   int _optimal_iterations;
   int _iteration_window;
   int _linear_iteration_ratio;
