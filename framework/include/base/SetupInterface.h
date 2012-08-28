@@ -53,11 +53,7 @@ public:
   /**
    * Get the execution falg for the object
    */
-  virtual ExecFlagType execFlag();
-  /**
-   * Set the execution flag for the object
-   */
-  virtual void execFlag(ExecFlagType type);
+  virtual ExecFlagType execFlag() const;
 
   static MooseEnum getExecuteOptions() { return MooseEnum("initial, residual, jacobian, timestep, timestep_begin", "residual"); }
 

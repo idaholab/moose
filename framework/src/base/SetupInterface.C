@@ -49,13 +49,7 @@ void
 SetupInterface::subdomainSetup() {}
 
 ExecFlagType
-SetupInterface::execFlag()
+SetupInterface::execFlag() const
 {
   return _exec_flags;
-}
-
-void
-SetupInterface::execFlag(ExecFlagType type)
-{
-  _exec_flags = type;
 }
