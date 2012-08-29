@@ -28,8 +28,11 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
-  MaterialProperty<Real> & _k;
-  const bool _has_k_dT;
+  const unsigned _dim;
+  MaterialProperty<Real> * const _k;
   MaterialProperty<Real> * const _k_dT;
+
+  MaterialProperty<Real> * _k_i[3];
+  MaterialProperty<Real> * _k_i_dT[3];
 };
 #endif //HEATCONDUCTIONKERNEL_H
