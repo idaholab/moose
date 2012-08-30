@@ -104,7 +104,7 @@ MultiSmoothCircleIC::value(const Point & p)
   for(unsigned int i=0; i<_numbub; i++)
     {
       _radius = _bubradi[i];
-      _center = Point(_bubcent[i](0),_bubcent[i](1),_bubcent[i](2));
+      _center = _bubcent[i];
 
       if((p-_center).size() < _radius + _int_width/2.0)
       {
@@ -126,10 +126,12 @@ MultiSmoothCircleIC::gradient(const Point & p)
     {
       _radius = _bubradi[i];
       _center = _bubcent[i];
-      grad2 = SmoothCircleIC::gradient(p)/_numbub;
-      if (grad.size() < grad2.size())
-        grad = grad2;
-      
+      if((p-_center).size() < _radius + _int_width/2.0)
+      {
+        grad2 = SmoothCircleIC::gradient(p)/_numbub;
+        //if (grad.size() < grad2.size())
+          grad = grad2;
+      }
     }
   
   return grad;

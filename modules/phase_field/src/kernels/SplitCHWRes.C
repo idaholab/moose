@@ -22,17 +22,13 @@ SplitCHWRes::SplitCHWRes(const std::string & name, InputParameters parameters)
 Real
 SplitCHWRes::computeQpResidual()
 {
-
   return  _mob[_qp]*_grad_u[_qp] * _grad_test[_i][_qp];
 }
 
 Real
 SplitCHWRes::computeQpJacobian()
 {
-
-// The following line is used to test parameter switch Jacobian. That is, w Jacobian, instead of c Jacobian, is calcualted here.
-
-    return _mob[_qp]*_grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  return _mob[_qp]*_grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }
 
 Real
