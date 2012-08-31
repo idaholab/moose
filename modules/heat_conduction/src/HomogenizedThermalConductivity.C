@@ -8,7 +8,7 @@ InputParameters validParams<HomogenizedThermalConductivity>()
 {
   InputParameters params = validParams<ElementAverageValue>();
   params.addRequiredCoupledVar("temp_x", "solution in x");
-  params.addRequiredCoupledVar("temp_y", "solution in y");
+  params.addCoupledVar("temp_y", "solution in y");
   params.addCoupledVar("temp_z", "solution in z");
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction this pp acts in (0 for x, 1 for y, 2 for z)");
   return params;

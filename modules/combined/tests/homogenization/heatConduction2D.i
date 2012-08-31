@@ -29,7 +29,11 @@
 
 [Variables]
 
-  [./temp]
+  [./temp_x]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./temp_y]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -38,15 +42,26 @@
 
 [Kernels]
 
-  [./heat]
+  [./heat_x]
     type = HeatConduction
-    variable = temp
+    variable = temp_x
   [../]
 
-  [./heat_rhs]
+  [./heat_y]
+    type = HeatConduction
+    variable = temp_y
+  [../]
+
+  [./heat_rhs_x]
     type = HomogenizationHeatConduction
-    variable = temp
+    variable = temp_x
     component = 0
+  [../]
+
+  [./heat_rhs_y]
+    type = HomogenizationHeatConduction
+    variable = temp_y
+    component = 1
   [../]
 
 [] # Kernels
@@ -66,9 +81,16 @@
    [../]
  [../]
 
- [./fix_center]
+ [./fix_center_x]
    type = DirichletBC
-   variable = temp
+   variable = temp_x
+   value = 100
+   boundary = 1
+ [../]
+
+ [./fix_center_y]
+   type = DirichletBC
+   variable = temp_y
    value = 100
    boundary = 1
  [../]
@@ -126,16 +148,16 @@
 [Postprocessors]
   [./k_xx]
     type = HomogenizedThermalConductivity
-    variable = temp
-    temp_x = temp
-    temp_y = temp
+    variable = temp_x
+    temp_x = temp_x
+    temp_y = temp_y
     component = 0
   [../]
   [./k_yy]
     type = HomogenizedThermalConductivity
-    variable = temp
-    temp_x = temp
-    temp_y = temp
+    variable = temp_y
+    temp_x = temp_x
+    temp_y = temp_y
     component = 1
   [../]
 []
