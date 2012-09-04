@@ -20,15 +20,6 @@ class LinearElasticMaterial;
 template<>
 InputParameters validParams<LinearElasticMaterial>();
 
-template <>
-PropertyValue *
-MaterialProperty<RankFourTensor>::init(int size);
-
-template <>
-PropertyValue *
-MaterialProperty<RankTwoTensor>::init(int size);
-
-
 class LinearElasticMaterial : public Material
 {
 public:

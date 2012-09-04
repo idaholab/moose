@@ -83,23 +83,3 @@ void LinearElasticMaterial::computeQpStress()
   // stress = C * e
   _stress[_qp] = _elasticity_tensor[_qp]*_elastic_strain[_qp];
 }
-
-template <>
-PropertyValue *
-MaterialProperty<RankFourTensor>::init(int size)
-{
-  MaterialProperty<RankFourTensor> *copy
-    = new MaterialProperty<RankFourTensor>();
-  copy->_value.resize(size);
-  return copy;
-}
-
-template <>
-PropertyValue *
-MaterialProperty<RankTwoTensor>::init(int size)
-{
-  MaterialProperty<RankTwoTensor> *copy
-    = new MaterialProperty<RankTwoTensor>();
-  copy->_value.resize(size);
-  return copy;
-}
