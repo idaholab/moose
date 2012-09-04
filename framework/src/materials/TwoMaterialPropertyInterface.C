@@ -17,9 +17,6 @@
 
 TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(InputParameters & parameters) :
     MaterialPropertyInterface(parameters),
-    _neighbor_material_data(*parameters.get<MaterialData *>("_neighbor_material_data")),
-    _neighbor_material_props(_neighbor_material_data.props()),
-    _neighbor_material_props_old(_neighbor_material_data.propsOld()),
-    _neighbor_material_props_older(_neighbor_material_data.propsOlder())
+    _neighbor_material_data(*parameters.get<MaterialData *>("_neighbor_material_data"))
 {
 }

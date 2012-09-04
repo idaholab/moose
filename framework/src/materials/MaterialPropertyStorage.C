@@ -16,6 +16,8 @@
 #include "Material.h"
 #include "MaterialData.h"
 
+std::map<std::string, unsigned int> MaterialPropertyStorage::_prop_ids;
+
 /**
  * Shallow copy the material properties
  * @param prop_ids List of IDs with properties to shallow copy
@@ -153,25 +155,60 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data, const Elem & ele
     shallowCopyData(_stateful_props, propsOlder()[elem_id][side], material_data.propsOlder());
 }
 
-void
-MaterialPropertyStorage::addProperty (unsigned int prop_id, const std::string & prop_name)
+bool
+MaterialPropertyStorage::hasProperty(const std::string & prop_name) const
 {
-  _prop_names[prop_id] = prop_name;
+  std::map<std::string, unsigned int>::const_iterator it = _prop_ids.find(prop_name);
+  return (it != _prop_ids.end());
 }
 
-void
-MaterialPropertyStorage::addPropertyOld (unsigned int prop_id, const std::string & prop_name)
+unsigned int
+MaterialPropertyStorage::addProperty (const std::string & prop_name)
 {
-  addProperty(prop_id, prop_name);
+  unsigned int prop_id = addPropertyId(prop_name);
+  _prop_names[prop_id] = prop_name;
+  return prop_id;
+}
+
+unsigned int
+MaterialPropertyStorage::addPropertyOld (const std::string & prop_name)
+{
+  unsigned int prop_id = addProperty(prop_name);
   _has_stateful_props = true;
   _stateful_props.insert(prop_id);
+  return prop_id;
 }
 
-void
-MaterialPropertyStorage::addPropertyOlder (unsigned int prop_id, const std::string & prop_name)
+unsigned int
+MaterialPropertyStorage::addPropertyOlder (const std::string & prop_name)
 {
-  addProperty(prop_id, prop_name);
+  unsigned int prop_id = addProperty(prop_name);
   _has_stateful_props = true;
   _has_older_prop = true;
   _stateful_props.insert(prop_id);
+  return prop_id;
+}
+
+unsigned int
+MaterialPropertyStorage::getPropertyId (const std::string & prop_name) const
+{
+  std::map<std::string, unsigned int>::const_iterator it = _prop_ids.find(prop_name);
+  if (it == _prop_ids.end())
+    mooseError("No property name mapping for '" + prop_name + "'");
+
+  return it->second;
+}
+
+unsigned int
+MaterialPropertyStorage::addPropertyId (const std::string & prop_name)
+{
+  std::map<std::string, unsigned int>::iterator it = _prop_ids.find(prop_name);
+  if (it == _prop_ids.end())
+  {
+    unsigned int id = _prop_ids.size();
+    _prop_ids[prop_name] = id;
+    return id;
+  }
+  else
+    return it->second;
 }

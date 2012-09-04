@@ -34,7 +34,8 @@ MaterialData::~MaterialData()
 void
 MaterialData::size(unsigned int n_qpoints)
 {
-  for (MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
+  unsigned int j = 0;
+  for (MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it, j++)
   {
     if (*it != NULL)
       (*it)->resize(n_qpoints);
@@ -79,18 +80,17 @@ MaterialData::reinit(std::vector<Material *> & mats, unsigned int n_qpoints, con
 bool
 MaterialData::have_property_name(const std::string & prop_name) const
 {
-  std::map<std::string, unsigned int>::const_iterator it = _prop_ids.find(prop_name);
-  return (it != _prop_ids.end());
+  return _storage.hasProperty(prop_name);
 }
 
 bool
 MaterialData::have_property_name_old(const std::string & prop_name) const
 {
-  return have_property_name(prop_name);
+  return _storage.hasProperty(prop_name);
 }
 
 bool
 MaterialData::have_property_name_older(const std::string & prop_name) const
 {
-  return have_property_name(prop_name);
+  return _storage.hasProperty(prop_name);
 }

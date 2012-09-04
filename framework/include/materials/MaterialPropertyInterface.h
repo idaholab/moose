@@ -31,10 +31,7 @@ class MaterialPropertyInterface
 {
 public:
   MaterialPropertyInterface(InputParameters & parameters) :
-      _material_data(*parameters.get<MaterialData *>("_material_data")),
-      _material_props(_material_data.props()),
-      _material_props_old(_material_data.propsOld()),
-      _material_props_older(_material_data.propsOlder())
+      _material_data(*parameters.get<MaterialData *>("_material_data"))
     {
     }
 
@@ -42,13 +39,13 @@ public:
    * Retrieve the property named "name"
    */
   template<typename T>
-  MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  MaterialProperty<T> & getMaterialProperty(const std::string & name) const;
 
   template<typename T>
-  MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
+  MaterialProperty<T> & getMaterialPropertyOld(const std::string & name) const;
 
   template<typename T>
-  MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+  MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name) const;
 
   /**
    * Check if the material property exists
@@ -60,46 +57,28 @@ public:
 
 protected:
   MaterialData & _material_data;
-  MaterialProperties & _material_props;
-  MaterialProperties & _material_props_old;
-  MaterialProperties & _material_props_older;
 };
 
 
 template<typename T>
 MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialProperty(const std::string & name)
+MaterialPropertyInterface::getMaterialProperty(const std::string & name) const
 {
-  unsigned int prop_id = _material_data.getPropertyId(name);
-  MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_material_props[prop_id]);
-  if (prop != NULL)
-    return *prop;
-  else
-    mooseError("Material has no property named: " + name);
+  return _material_data.getProperty<T>(name);
 }
 
 template<typename T>
 MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
+MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name) const
 {
-  unsigned int prop_id = _material_data.getPropertyId(name);
-  MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_material_props_old[prop_id]);
-  if (prop != NULL)
-    return *prop;
-  else
-    mooseError("Material has no property named: " + name);
+  return _material_data.getPropertyOld<T>(name);
 }
 
 template<typename T>
 MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
+MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name) const
 {
-  unsigned int prop_id = _material_data.getPropertyId(name);
-  MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_material_props_older[prop_id]);
-  if (prop != NULL)
-    return *prop;
-  else
-    mooseError("Material has no property named: " + name);
+  return _material_data.getPropertyOlder<T>(name);
 }
 
 template<typename T>

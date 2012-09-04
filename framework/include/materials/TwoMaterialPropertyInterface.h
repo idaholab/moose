@@ -42,9 +42,6 @@ public:
 
 protected:
   MaterialData & _neighbor_material_data;
-  MaterialProperties & _neighbor_material_props;
-  MaterialProperties & _neighbor_material_props_old;
-  MaterialProperties & _neighbor_material_props_older;
 };
 
 
@@ -52,36 +49,21 @@ template<typename T>
 MaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborMaterialProperty(const std::string & name)
 {
-  unsigned int prop_id = _neighbor_material_data.getPropertyId(name);
-  MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_neighbor_material_props[prop_id]);
-  if (prop != NULL)
-    return *prop;
-  else
-    mooseError("Material has no property named: " + name);
+  return _neighbor_material_data.getProperty<T>(name);
 }
 
 template<typename T>
 MaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborMaterialPropertyOld(const std::string & name)
 {
-  unsigned int prop_id = _neighbor_material_data.getPropertyId(name);
-  MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_neighbor_material_props_old[prop_id]);
-  if (prop != NULL)
-    return *prop;
-  else
-    mooseError("Material has no property named: " + name);
+  return _neighbor_material_data.getPropertyOld<T>(name);
 }
 
 template<typename T>
 MaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborMaterialPropertyOlder(const std::string & name)
 {
-  unsigned int prop_id = _neighbor_material_data.getPropertyId(name);
-  MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_neighbor_material_props_older[prop_id]);
-  if (prop != NULL)
-    return *prop;
-  else
-    mooseError("Material has no property named: " + name);
+  return _neighbor_material_data.getPropertyOlder<T>(name);
 }
 
 #endif //TWOMATERIALPROPERTYINTERFACE_H

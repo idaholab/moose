@@ -85,18 +85,26 @@ public:
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & propsOld() { return *_props_elem_old; }
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & propsOlder() { return *_props_elem_older; }
 
-  void addProperty (unsigned int prop_id, const std::string & prop_name);
-  void addPropertyOld (unsigned int prop_id, const std::string & prop_name);
-  void addPropertyOlder (unsigned int prop_id, const std::string & prop_name);
+  bool hasProperty(const std::string & prop_name) const;
+  unsigned int addProperty(const std::string & prop_name);
+  unsigned int addPropertyOld(const std::string & prop_name);
+  unsigned int addPropertyOlder(const std::string & prop_name);
 
   std::set<unsigned int> & statefulProps() { return _stateful_props; }
   std::map<unsigned int, std::string> statefulPropNames() { return _prop_names; }
+
+  unsigned int getPropertyId (const std::string & prop_name) const;
 
 protected:
   // indexing: [element][side]->material_properties
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > * _props_elem;
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > * _props_elem_old;
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > * _props_elem_older;
+
+  /// mapping from property name to property ID
+  /// NOTE: this is static so the property numbering is global within the simulation (not just FEProblem - should be useful when we will use material properties from
+  /// one FEPRoblem in another one - if we will ever do it)
+  static std::map<std::string, unsigned int> _prop_ids;
 
   /**
    * Whether or not we have stateful properties.  This will get automatically
@@ -114,6 +122,8 @@ protected:
   std::map<unsigned int, std::string> _prop_names;
   /// list of property ids of stateful material properties
   std::set<unsigned int> _stateful_props;
+
+  unsigned int addPropertyId (const std::string & prop_name);
 };
 
 
