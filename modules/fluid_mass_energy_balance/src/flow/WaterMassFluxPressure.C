@@ -20,7 +20,7 @@ InputParameters validParams<WaterMassFluxPressure>()
 {
   InputParameters params = validParams<Diffusion>();
   params.addCoupledVar("enthalpy", "Use CoupledVar pressure here");
-  params.addCoupledVar("pressure", "Use CoupledVar pressure here");
+  //params.addCoupledVar("pressure", "Use CoupledVar pressure here");
   return params;
 }
 
@@ -28,7 +28,8 @@ WaterMassFluxPressure::WaterMassFluxPressure(const std::string & name,
                                              InputParameters parameters)
   :Diffusion(name, parameters),
    _h_var(coupled("enthalpy")),
-   _grad_p(coupledGradient("pressure")),
+   //_grad_p(coupledGradient("pressure")),
+   _grad_p(gradient()),
    _Dtau_waterDP(getMaterialProperty<Real>("Dtau_waterDP")),
    _Dtau_waterDH(getMaterialProperty<Real>("Dtau_waterDH")),
    _tau_water(getMaterialProperty<Real>("tau_water")),

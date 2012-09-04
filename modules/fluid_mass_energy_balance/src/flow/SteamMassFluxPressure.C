@@ -20,7 +20,7 @@ InputParameters validParams<SteamMassFluxPressure>()
 {
   InputParameters params = validParams<Diffusion>();
    params.addCoupledVar("enthalpy", "Use CoupledVar pressure here");
-  params.addCoupledVar("pressure", "Use CoupledVar pressure here");
+  //params.addCoupledVar("pressure", "Use CoupledVar pressure here");
   return params;
 }
 
@@ -28,7 +28,8 @@ SteamMassFluxPressure::SteamMassFluxPressure(const std::string & name,
                                              InputParameters parameters)
   :Diffusion(name, parameters),
    _h_var(coupled("enthalpy")),
-   _grad_p(coupledGradient("pressure")),
+   //_grad_p(coupledGradient("pressure")),
+   _grad_p(gradient()),
    _Dtau_steamDP(getMaterialProperty<Real>("Dtau_steamDP")),
    _Dtau_steamDH(getMaterialProperty<Real>("Dtau_steamDH")),
    _tau_steam(getMaterialProperty<Real>("tau_steam")),

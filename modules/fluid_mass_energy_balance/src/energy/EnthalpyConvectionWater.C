@@ -19,24 +19,30 @@ template<>
 InputParameters validParams<EnthalpyConvectionWater>()
 {
     InputParameters params = validParams<Kernel>();
-    params.addRequiredCoupledVar("enthalpy_water", "Use CoupledAuxwater enthalpy here");
-    params.addRequiredCoupledVar("denthalpy_waterdH_P", "Use CoupledAux dsteamenthalpydh_P here");
-    params.addRequiredCoupledVar("denthalpy_waterdP_H"," use coupledAux");
+    //params.addRequiredParam("enthalpy_water", "Use CoupledAuxwater enthalpy here");                  //(removed by Kat)
+    //params.addRequiredParam("denthalpy_waterdH_P", "Use CoupledAux dsteamenthalpydh_P here");        //(removed by Kat)
+    //params.addRequiredParam("denthalpy_waterdP_H"," use coupledAux");                                //(removed by Kat)
     params.addCoupledVar("pressure", "Use CoupledVar pressure here");
     return params;
 }
 
 EnthalpyConvectionWater::EnthalpyConvectionWater(const std::string & name, InputParameters parameters)
 :Kernel(name, parameters),
- _Dtau_waterDH(getMaterialProperty<Real>("Dtau_waterDH")),
- _Dtau_waterDP(getMaterialProperty<Real>("Dtau_waterDP")),
-_darcy_mass_flux_water(getMaterialProperty<RealGradient>("darcy_mass_flux_water")),
- _tau_water(getMaterialProperty<Real>("tau_water")),
-_enthalpy_water(coupledValue("enthalpy_water")),
- _denthalpy_waterdH_P(coupledValue("denthalpy_waterdH_P")),
- _denthalpy_waterdP_H(coupledValue("denthalpy_waterdP_H")),
- _p_var(coupled("pressure")),
- _grad_p(coupledGradient("pressure"))
+    _Dtau_waterDH(getMaterialProperty<Real>("Dtau_waterDH")),
+    _Dtau_waterDP(getMaterialProperty<Real>("Dtau_waterDP")),
+    _darcy_mass_flux_water(getMaterialProperty<RealGradient>("darcy_mass_flux_water")),
+    _tau_water(getMaterialProperty<Real>("tau_water")),
+    //_enthalpy_water(coupledValue("enthalpy_water")),              (removed by Kat)
+    //_denthalpy_waterdH_P(coupledValue("denthalpy_waterdH_P")),    (removed by Kat)
+    //_denthalpy_waterdP_H(coupledValue("denthalpy_waterdP_H")),    (removed by Kat)
+//_prop_name_enthalpy_water(getParam<std::string>("enthalpy_water")),                  //(added by Kat)
+    _enthalpy_water(getMaterialProperty<Real>("enthalpy_water")),           //(added by Kat)
+//_prop_name_denthalpy_waterdH_P(getParam<std::string>("denthalpy_waterdH_P")),        //(added by Kat)
+    _denthalpy_waterdH_P(getMaterialProperty<Real>("denthalpy_waterdH_P")), //(added by Kat)
+//_prop_name_denthalpy_waterdP_H(getParam<std::string>("denthalpy_waterdP_H")),        //(added by Kat)
+    _denthalpy_waterdP_H(getMaterialProperty<Real>("denthalpy_waterdP_H")), //(added by Kat)
+    _p_var(coupled("pressure")),
+    _grad_p(coupledGradient("pressure"))
 {}
 
 Real EnthalpyConvectionWater::computeQpResidual()
@@ -45,6 +51,8 @@ Real EnthalpyConvectionWater::computeQpResidual()
     
    // return  _darcy_mass_flux_water[_qp]*_grad_enthalpy_water[_qp]*_test[_i][_qp];
   return  -_darcy_mass_flux_water[_qp]*_enthalpy_water[_qp]*_grad_test[_i][_qp]; 
+    
+    std::cout << _denthalpy_waterdH_P[_qp] << " " << std::endl;
 }
 
 Real EnthalpyConvectionWater::computeQpJacobian()

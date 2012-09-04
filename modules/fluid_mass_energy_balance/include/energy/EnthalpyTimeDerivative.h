@@ -13,12 +13,14 @@
 /****************************************************************/
 
 #include "TimeDerivative.h"
+#include "WaterSteamEOS.h"
 
 #ifndef ENTHALPYTIMEDERIVATIVE
 #define ENTHALPYTIMEDERIVATIVE
 
 //Forward Declarations
 class EnthalpyTimeDerivative;
+class WaterSteamEOS;
 
 template<>
 InputParameters validParams<EnthalpyTimeDerivative>();
@@ -32,25 +34,31 @@ public:
 protected:
     virtual Real computeQpResidual();
     virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  
+    virtual Real computeQpOffDiagJacobian(unsigned int jvar);
     
-    VariableValue  & _density;
-    VariableValue  & _density_old;
-    VariableValue  & _temperature;
-    VariableValue  & _temperature_old;
-    VariableValue  & _dTdH_P; //derivative of water density vs. temperature
-    VariableValue  & _dTdP_H;
-    VariableValue  & _ddensitydH_P;
-    VariableValue  & _pressure_old;
+    const WaterSteamEOS & _water_steam_properties;  
+    
+    MaterialProperty<Real> & _density;               //changed from VariableValue
+    MaterialProperty<Real> & _time_old_density;      //changed from VariableValue
+    
+    //VariableValue & _temperature;
+    //VariableValue  & _temperature_old;
+    MaterialProperty<Real> & _temperature;
+    MaterialProperty<Real> & _time_old_material_temp;       //added by kat
+    
+    MaterialProperty<Real> & _dTdH_P;                //changed from VariableValue
+    MaterialProperty<Real> & _dTdP_H;                //changed from VariableValue
+    MaterialProperty<Real> & _ddensitydH_P;          //changed from VariableValue
+    MaterialProperty<Real> & _ddensitydp_H;          //changed from VariableValue
+    
+    VariableValue  & _pressure_old;                 
     unsigned int _p_var;
-    VariableValue & _ddensitydp_H;
   
     //  VariableValue  & _porosity_old;
     MaterialProperty<Real> & _porosity;
     MaterialProperty<Real> & _specific_heat_rock;
     MaterialProperty<Real> & _density_rock;
     
-  VariableValue & _u_old;
+    VariableValue & _u_old;
 };
 #endif //ENTHALPYTIMEDERIVATIVE
