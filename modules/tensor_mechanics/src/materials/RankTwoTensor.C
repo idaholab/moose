@@ -37,6 +37,18 @@ RankTwoTensor::RankTwoTensor() :
   
 }
 
+RankTwoTensor::RankTwoTensor(const TypeVector<Real> & col1, const TypeVector<Real> & col2, const TypeVector<Real> & col3) 
+{
+  for(unsigned int i=0; i<3; i++)
+    _vals[i][0] = col1(i);
+
+  for(unsigned int i=0; i<3; i++)
+    _vals[i][1] = col2(i);
+
+  for(unsigned int i=0; i<3; i++)
+    _vals[i][2] = col3(i);
+}
+
 RankTwoTensor::RankTwoTensor(const RankTwoTensor &a)
 {
   *this = a;
@@ -318,6 +330,18 @@ RankTwoTensor::doubleContraction(const RankTwoTensor &a)
   for(unsigned int i(0); i<3; i++)
     for(unsigned int j(0); j<3; j++)
       result += _vals[i][j]* a.getValue(i+1, j+1);
+
+  return result;
+}
+
+RankTwoTensor
+RankTwoTensor::transpose() 
+{
+  RankTwoTensor result;
+
+  for(unsigned int i=0; i<3; i++)
+    for(unsigned int j=0; j<3; j++)
+      result.setValue(_vals[i][j], i+1, j+1);
 
   return result;
 }

@@ -24,6 +24,11 @@ public:
   * Default constructor; fills to zero
   */
   RankTwoTensor();
+  
+ /**
+   * Constructor that takes in 3 vectors and uses them to create columns
+   */
+  RankTwoTensor(const TypeVector<Real> & col1, const TypeVector<Real> & col2, const TypeVector<Real> & col3);
 
   /**
    * Copy constructor
@@ -78,7 +83,11 @@ public:
 
   Real thirdEulerAngle() const;
 
-  void zero();
+  void zero();/**
+   * Returns a matrix that is the transpose of the matrix this
+   * was called on.
+   */
+  RankTwoTensor transpose();
 
   RankTwoTensor & operator= (const RankTwoTensor &a);
 
@@ -100,5 +109,6 @@ private:
 
   std::vector<std::vector<Real> > _rotation_matrix;
 };
+
 
 #endif //RANKTWOTENSOR_H
