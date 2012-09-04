@@ -10,3 +10,8 @@ lattice_test = { INPUT : 'latticesmoothcircleIC_test.i',
                  SCALE_REFINE : 1
                  }
 
+specified_test = { INPUT : 'specifiedsmoothcircleIC_test.i',
+                 EXODIFF : ['specifiedsmoothcircleIC_test_out.e'],
+                 SCALE_REFINE : 1
+                 }
+

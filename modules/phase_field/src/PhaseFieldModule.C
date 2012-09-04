@@ -15,6 +15,7 @@
 #include "RndSmoothCircleIC.h"
 #include "MultiSmoothCircleIC.h"
 #include "LatticeSmoothCircleIC.h"
+#include "SpecifiedSmoothCircleIC.h"
 #include "RndBoundingBoxIC.h"
 #include "PFMobility.h"
 #include "NodalFloodCount.h"
@@ -36,6 +37,7 @@ Elk::PhaseField::registerObjects()
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(MultiSmoothCircleIC);
   registerInitialCondition(LatticeSmoothCircleIC);
+  registerInitialCondition(SpecifiedSmoothCircleIC);
   registerInitialCondition(RndBoundingBoxIC);
   registerMaterial(PFMobility);
   registerUserObject(NodalFloodCount);

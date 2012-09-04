@@ -55,21 +55,6 @@ SmoothCircleIC::value(const Point & p)
   
 }
 
-/*RealGradient
-SmoothCircleIC::gradient(const Point & p)
-{
-  Point pxminus = p, pxplus = p, pyminus = p, pyplus = p;
-  pxminus(0) -= TOLERANCE;
-  pyminus(1) -= TOLERANCE;
-  pxplus(0)  += TOLERANCE;
-  pyplus(1)  += TOLERANCE;
-  Number uxminus = value(pxminus),
-    uxplus  = value(pxplus),
-    uyminus = value(pyminus),
-    uyplus  = value(pyplus);
-  return Gradient((uxplus-uxminus)/2./TOLERANCE,
-                  (uyplus-uyminus)/2./TOLERANCE);
-                  }*/
 
 RealGradient
 SmoothCircleIC::gradient(const Point & p)
