@@ -5,6 +5,7 @@
 
 // heat_conduction
 #include "AddSlaveFluxVectorAction.h"
+#include "ConvectiveFluxFunction.h"
 #include "GapConductance.h"
 #include "GapHeatPointSourceMaster.h"
 #include "GapHeatTransfer.h"
@@ -24,6 +25,7 @@ Elk::HeatConduction::registerObjects()
   registerNamedKernel(HeatConductionKernel, "HeatConduction");
   registerKernel(HeatConductionImplicitEuler);
   registerKernel(HeatSource);
+  registerBoundaryCondition(ConvectiveFluxFunction);
   registerBoundaryCondition(GapHeatTransfer);
   registerBoundaryCondition(BulkCoolantBC);
   registerMaterial(GapConductance);

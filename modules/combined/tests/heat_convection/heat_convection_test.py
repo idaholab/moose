@@ -16,3 +16,7 @@ test_3d = { INPUT : 'heat_convection_3d_test.i',
                   EXODIFF : ['out_3d.e'],
                   ABS_ZERO : 1e-10 }
 
+test_function = { INPUT : 'heat_convection_function.i',
+                  EXODIFF : ['heat_convection_function_out.e']
+                }
+
