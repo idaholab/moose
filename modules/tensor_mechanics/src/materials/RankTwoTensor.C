@@ -7,7 +7,6 @@
 #include <ostream>
 
 RankTwoTensor::RankTwoTensor() :
-    _vals(),
     _euler_angle(3),
     _rotation_matrix()
 {
@@ -37,16 +36,32 @@ RankTwoTensor::RankTwoTensor() :
   
 }
 
-RankTwoTensor::RankTwoTensor(const TypeVector<Real> & col1, const TypeVector<Real> & col2, const TypeVector<Real> & col3) 
+RankTwoTensor::RankTwoTensor(const TypeVector<Real> & col1, const TypeVector<Real> & col2, const TypeVector<Real> & col3) :
+    _euler_angle(3)
 {
+  // Initialize the Tensor matrix from the passed in vectors
+  _vals.resize(3);
   for(unsigned int i=0; i<3; i++)
+  {
+    _vals[i].resize(3);
     _vals[i][0] = col1(i);
-
+  }
   for(unsigned int i=0; i<3; i++)
     _vals[i][1] = col2(i);
 
   for(unsigned int i=0; i<3; i++)
     _vals[i][2] = col3(i);
+
+  // Initialize the rotation matrix
+  _rotation_matrix.resize(3);
+  for(unsigned int i(0); i<3; i++)
+  {
+    _rotation_matrix[i].resize(3);
+    for(unsigned int j(0); j<3; j++)
+    {
+      _rotation_matrix[i][j] = 0.0;
+    }
+  }
 }
 
 RankTwoTensor::RankTwoTensor(const RankTwoTensor &a)
