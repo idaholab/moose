@@ -50,28 +50,38 @@ public:
   }
 
   explicit
-  SymmTensor(std::vector<Real> &init_list) :
+  SymmTensor(const std::vector<Real> & init_list) :
       _xx(init_list[0]),
       _yy(init_list[1]),
       _zz(init_list[2]),
-      _xy(init_list[5]), //e_12
-      _yz(init_list[3]), //e_23
-      _zx(init_list[4])  //e_13
-
+      _xy(init_list[3]),
+      _yz(init_list[4]),
+      _zx(init_list[5])
+  {
+    // test the length to make sure it's 6 long
+    if(init_list.size() != 6)
     {
-      // test the length to make sure it's 6 long
-      if(init_list.size() != 6)
-        mooseError("please enter a vector with 6 entries.");
+      mooseError("SymmTensor initialization error: please enter a vector with 6 entries.");
     }
-
- SymmTensor(const SymmTensor &a)
-    {
-      *this = a;
-    }
+  }
 
 
   ~SymmTensor() {}
 
+
+  void fillFromInputVector(const std::vector<Real> & input)
+  {
+    if (input.size() != 6)
+    {
+      mooseError("SymmTensor error.  Input vector must have six entries.");
+    }
+    _xx = input[0];
+    _yy = input[1];
+    _zz = input[2];
+    _xy = input[3];
+    _yz = input[4];
+    _zx = input[5];
+  }
 
   Real rowDot(const unsigned int r,
               const libMesh::TypeVector<Real> & v) const
@@ -529,35 +539,6 @@ public:
 
   friend std::ostream & operator<<(std::ostream & stream, const SymmTensor & obj);
 
-
-/**
- * Rotate the strain around the c-axis
- */
-  void rotate(const Real a)
-    {
-      Real angle = a*pi/180.0;
-      Real s = std::sin(angle);
-      Real c = std::cos(angle);
-
-      _xx = _xx*c*c + _yy*s*s + 2.0*_xy*s*c;
-      _yy = _xx*s*s + _yy*c*c - 2.0*_xy*s*c;
-      //_zz = _zz;
-      _xy = -2.0*(_xx - _yy)*s*c + 2.0*_xy*(c*c - s*s);
-      //_yz = _yz;
-      //_zx = _zx;
-    }
-
-  void fillFromInputVector(std::vector<Real> input)
-    {
-      if (input.size() != 6)
-        mooseError("Please check the number of entries in the eigenstrain input vector");
-      _xx = input[0];
-      _yy = input[1];
-      _zz = input[2];
-      _xy = input[5];
-      _yz = input[3];
-      _zx = input[4];
-    }
 
 
 private:

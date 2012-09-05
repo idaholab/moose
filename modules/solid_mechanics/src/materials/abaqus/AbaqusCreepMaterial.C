@@ -48,11 +48,11 @@ AbaqusCreepMaterial::AbaqusCreepMaterial(const std::string  & name,
     _total_swell_old(declarePropertyOld<Real>("total_swell"))
 {
 #ifdef DEBUG
-  _plugin += "-dbg.plugin";  
+  _plugin += "-dbg.plugin";
 #else
   _plugin += "-opt.plugin";
 #endif
-  
+
   _STATEV = new Real[_num_state_vars];
 
   //Set subroutine values
@@ -70,22 +70,25 @@ AbaqusCreepMaterial::AbaqusCreepMaterial(const std::string  & name,
   _elasticity_tensor[0] = _elam+_eg2;
   _elasticity_tensor[1] = _elam;
   _elasticity_tensor[2] = _eg;
-  
+
   // Open the library
   _handle = dlopen(_plugin.c_str(), RTLD_LAZY);
-  
+
   if (!_handle)
   {
     std::ostringstream error;
     error << "Cannot open library: " << dlerror() << '\n';
-    mooseError(error.str());  
+    mooseError(error.str());
   }
 
   // Reset errors
   dlerror();
 
   // Snag the function pointer from the library
-  _creep = (creep_t) dlsym(_handle, "creep_");
+  {
+    void * pointer = dlsym(_handle, "creep_");
+    _creep = *reinterpret_cast<creep_t*>( &pointer );
+  }
 
   // Catch errors
   const char *dlsym_error = dlerror();
@@ -95,7 +98,7 @@ AbaqusCreepMaterial::AbaqusCreepMaterial(const std::string  & name,
     std::ostringstream error;
     error << "Cannot load symbol 'creep_': " << dlsym_error << '\n';
     mooseError(error.str());
-  }    
+  }
 }
 
 AbaqusCreepMaterial::~AbaqusCreepMaterial()
@@ -131,13 +134,13 @@ void AbaqusCreepMaterial::modifyStrain(const unsigned int qp,
     _DECRA[i] = 0.0;
     _DESWA[i] = 0.0;
   }
-  
+
   //Calculate stress array components
   _stress_component[0] = (_elasticity_tensor[0]*strain_increment.component(0))+(_elasticity_tensor[1]*strain_increment.component(1))+(_elasticity_tensor[1]*strain_increment.component(2));
   _stress_component[1] = (_elasticity_tensor[1]*strain_increment.component(0))+(_elasticity_tensor[0]*strain_increment.component(1))+(_elasticity_tensor[1]*strain_increment.component(2));
   _stress_component[2] = (_elasticity_tensor[1]*strain_increment.component(0))+(_elasticity_tensor[1]*strain_increment.component(1))+(_elasticity_tensor[0]*strain_increment.component(2));
   _stress_component[3] = (_elasticity_tensor[2]*strain_increment.component(3));
-  _stress_component[4] = (_elasticity_tensor[2]*strain_increment.component(4)); 
+  _stress_component[4] = (_elasticity_tensor[2]*strain_increment.component(4));
   _stress_component[5] = (_elasticity_tensor[2]*strain_increment.component(5));
 
   //Calculate trial stress and deviatoric trail stress
@@ -167,7 +170,7 @@ void AbaqusCreepMaterial::modifyStrain(const unsigned int qp,
   }
 
   SymmTensor grad_dts(grad_dts_potential[0], grad_dts_potential[1],grad_dts_potential[2],grad_dts_potential[3],grad_dts_potential[4],grad_dts_potential[5]);
-  
+
   //Pass variables in for information
   _KSTEP = _t_step;                   //Step number
   _TIME[0] = _dt;                     //Value of step time at the end of the increment - Check
@@ -193,7 +196,7 @@ void AbaqusCreepMaterial::modifyStrain(const unsigned int qp,
   _creep_inc[qp] = _DECRA[0];
   _total_creep[qp] = _creep_inc[qp];
   _total_creep[qp] += _total_creep_old[qp];
-  
+
   _swell_inc[qp] = _DESWA[0];
   _total_swell[qp] = _swell_inc[qp];
   _total_swell[qp] += _total_swell_old[qp];
@@ -229,7 +232,7 @@ void AbaqusCreepMaterial::modifyStrain(const unsigned int qp,
     creep_inc_used = (_DECRA[4]*(_ets[qp]-_ets_old[qp]))+_creep_inc_old[qp];
     swell_inc_used = (_DESWA[4]*(_ets[qp]-_ets_old[qp]))+_swell_inc_old[qp];
   }
-  
+
   //Calculate Incremental Creep Strain (total_effects)
   //Incremental creep strain = ((1/3)*(swell_inc_used)*R) + (creep_inc_used*grad_dts)
   //R = The matrix with the anisotropic swelling ratios in the diagonal if anisotropic swelling is defined; Otherwise R = Identity
@@ -242,5 +245,5 @@ void AbaqusCreepMaterial::modifyStrain(const unsigned int qp,
   //Update Stress
   SymmTensor stressnew(_stress_component[0],_stress_component[1],_stress_component[2],_stress_component[3],_stress_component[4],_stress_component[5]);
   _stress[qp] = stressnew;
-  _stress[qp] += _stress_old[qp];  
+  _stress[qp] += _stress_old[qp];
 }
