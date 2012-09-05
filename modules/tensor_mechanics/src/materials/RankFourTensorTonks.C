@@ -2,7 +2,7 @@
 
 // Any other includes here
 #include <vector>
-#include "type_tensor.h"
+#include "tensor_value.h"
 #include "MaterialProperty.h"
 #include "libmesh.h"
 #include <ostream>
@@ -56,8 +56,8 @@ RankFourTensorTonks::operator= (const RankFourTensorTonks &a)
   return *this; 
 }
 
-TypeTensor<Real>
-RankFourTensorTonks::operator*(const TypeTensor<Real> &a)
+RealTensorValue
+RankFourTensorTonks::operator*(const RealTensorValue &a)
 {
   RealTensorValue result;
   
@@ -111,12 +111,9 @@ RankFourTensorTonks::operator+(const RankFourTensorTonks &a) const
 }
 
 
-RankFourTensorTonks
-RankFourTensorTonks::rotate(TypeTensor<Real> &R)
+void
+RankFourTensorTonks::rotate(RealTensorValue &R)
 {
-  RankFourTensorTonks a;
-  Real temp;
-  
   for(int i(0); i<N; i++)
     for(int j(0); j<N; j++)
       for(int k(0); k<N; k++)
@@ -125,8 +122,6 @@ RankFourTensorTonks::rotate(TypeTensor<Real> &R)
             for(int n(0); n<N; n++)
               for(int o(0); o<N; o++)
                 for(int p(0); p<N; p++)
-                  a(i,j,k,l) = R(i,m)*R(j,n)*R(k,o)*R(l,p)*_vals[m][n][o][p];
-  
-  return a;
+                  _vals[i][j][k][l] = R(i,m)*R(j,n)*R(k,o)*R(l,p)*_vals[m][n][o][p];
 }
 

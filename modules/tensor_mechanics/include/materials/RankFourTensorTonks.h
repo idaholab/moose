@@ -12,7 +12,7 @@
 #define RANKFOURTENSORTONKS_H
 
 // Any requisite includes here
-#include "type_tensor.h"
+#include "tensor_value.h"
 #include <vector>
 #include "libmesh.h"
 #include "vector_value.h"
@@ -52,7 +52,7 @@ public:
 
   RankFourTensorTonks & operator=(const RankFourTensorTonks &a);
   
-  TypeTensor<Real> operator*(const TypeTensor<Real> &a);
+  RealTensorValue operator*(const RealTensorValue &a);
 
   RankFourTensorTonks operator*(const Real &a);
 
@@ -64,7 +64,7 @@ public:
   
   RankFourTensorTonks operator-(const RankFourTensorTonks &a) const;
 
-  virtual RankFourTensorTonks rotate(TypeTensor<Real> &R);
+  virtual void rotate(RealTensorValue &R);
   
   
 protected:
