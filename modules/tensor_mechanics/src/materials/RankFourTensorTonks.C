@@ -113,19 +113,25 @@ RankFourTensorTonks::operator+(const RankFourTensorTonks &a) const
 
 void
 RankFourTensorTonks::rotate(RealTensorValue &R)
-{  
+{
+  Real temp;
+  
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       for(unsigned int k(0); k<N; k++)
         for(unsigned int l(0); l<N; l++)
+        {
+          temp = 0.0;
           for(unsigned int m(0); m<N; m++)
             for(unsigned int n(0); n<N; n++)
               for(unsigned int o(0); o<N; o++)
                 for(unsigned int p(0); p<N; p++)
-                {
-                  //std::cout << _vals[i][j][k][l];
-                  _vals[i][j][k][l] = R(i,m)*R(j,n)*R(k,o)*R(l,p)*_vals[m][n][o][p];
-                }
+                  temp += R(i,m)*R(j,n)*R(k,o)*R(l,p)*_vals[m][n][o][p];
+          
+          _vals[i][j][k][l] = temp;
+        }
+  
+                
   std::cout << std::endl;
   
   
