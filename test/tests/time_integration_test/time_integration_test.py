@@ -31,6 +31,7 @@ test_cranic_adapt = { INPUT : 'cranic_adapt.i',
 
 testdt2 = { INPUT : 'dt2_adapt.i',
             EXODIFF : ['out_dt2_adapt.e-s038'],
+            NO_VALGRIND : True,
             GROUP : 'adaptive'}
 
 # The test varies the time step based on wall clock solve time

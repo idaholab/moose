@@ -137,7 +137,7 @@ class TestHarness:
       test['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
     if ncpus > 1 or nthreads > 1:
       command = 'mpiexec -host ' + self.host_name + ' -n ' + str(ncpus) + ' ' + self.executable + ' --n-threads=' + str(nthreads) + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
-    elif self.options.enable_valgrind:
+    elif self.options.enable_valgrind and not test[NO_VALGRIND]:
       command = 'valgrind --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
     else:
       command = self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
@@ -221,7 +221,7 @@ class TestHarness:
       if self.options.method == 'dbg':  # Only check asserts in debug mode
         if not self.checkExpectError(output, test[EXPECT_ASSERT]):
           reason = 'NO EXPECTED ASSERT'
-    elif (self.options.enable_valgrind and retcode == 0):
+    elif (self.options.enable_valgrind and retcode == 0) and not test[NO_VALGRIND]:
       if 'ERROR SUMMARY: 0 errors' not in output:
         reason = 'MEMORY LEAK'
     else:

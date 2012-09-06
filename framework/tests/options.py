@@ -63,6 +63,9 @@ USE_OLD_FLOOR = 'True|False'     # Use Exodiff old floor option
 # Test Ordering
 PREREQ        = '[prereq]'       # The list of prereq tests that need to be complete before launching this test
 
+# Valgrind Options
+NO_VALGRIND   = '[no_valgrind]'  # Set to True to skip test when testing with --valgrind
+
 # Default test options: these are use if an option is not specified
 DEFAULTS = { EXODIFF : [],
              EXODIFF_OPTS : [],
@@ -98,7 +101,8 @@ DEFAULTS = { EXODIFF : [],
              CUSTOM_CMP : None,     # Exodiff option
              USE_OLD_FLOOR : False, # Exodiff option
              GOLD_DIR : 'gold',
-             PREREQ : None
+             PREREQ : None,
+             NO_VALGRIND : False
              # TEST_DIR is automatically populated to the location of the py file
              # TEST_NAME is automatically populated to module_name.dict_name
 }
