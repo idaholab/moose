@@ -49,7 +49,11 @@
 []
 
 [BCs]
-  active = 'bc_all'
+  # Note: MOOSE's DirichletBCs do not work properly with shape functions that do not
+  #       have no DOFs at the element edges.  This test works because the solution
+  #       has been designed to be zero at the boundary which is satisfied by the IC
+  #       Ticket #1352
+  active = ''
   [./bc_all]
     type=FunctionDirichletBC
     variable = u
