@@ -14,6 +14,7 @@ InputParameters validParams<TensorMechanicsAction>()
   params.addParam<NonlinearVariableName>("disp_r", "", "The r displacement");
   params.addParam<NonlinearVariableName>("temp", "", "The te mperature");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
+  params.addParam<bool>("Tonks_form",false,"Indicates if new formulation will be used");
 
   // changed this from true to false
   params.set<bool>("use_displaced_mesh") = false;
@@ -26,7 +27,8 @@ TensorMechanicsAction::TensorMechanicsAction(const std::string & name, InputPara
   _disp_y(getParam<NonlinearVariableName>("disp_y")),
   _disp_z(getParam<NonlinearVariableName>("disp_z")),
   _disp_r(getParam<NonlinearVariableName>("disp_r")),
-  _temp(getParam<NonlinearVariableName>("temp"))
+  _temp(getParam<NonlinearVariableName>("temp")),
+  _Tonks_form(getParam<bool>("Tonks_form"))
 {
 }
 
@@ -39,6 +41,11 @@ TensorMechanicsAction::act()
   std::vector<std::string> keys;
   std::vector<std::string> vars;
   std::string type("StressDivergenceTensors");
+
+  if (_Tonks_form)
+    type = "StressDivergenceTensorsTonks";
+  
+      
   /* if (_problem->coordSystem() == Moose::COORD_RZ)
   {
     rz = true;

@@ -6,6 +6,7 @@
 // tensor_mechanics
 #include "TensorMechanicsAction.h"
 #include "StressDivergenceTensors.h"
+#include "StressDivergenceTensorsTonks.h"
 #include "LinearElasticMaterial.h"
 #include "RankTwoAux.h"
 #include "RankFourAux.h"
@@ -15,6 +16,7 @@ Elk::TensorMechanics::registerObjects()
 {
   // tensor_mechanics
   registerKernel(StressDivergenceTensors);
+  registerKernel(StressDivergenceTensorsTonks);
 
   registerMaterial(LinearElasticMaterial);
 

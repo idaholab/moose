@@ -65,6 +65,10 @@ public:
   RankFourTensorTonks operator-(const RankFourTensorTonks &a) const;
 
   virtual void rotate(RealTensorValue &R);
+  /**
+   * Print the tensor
+   */
+  void print();
   
   
 protected:
