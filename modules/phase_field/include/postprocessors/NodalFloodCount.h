@@ -77,7 +77,7 @@ protected:
    * communication operations. See the comments in these routines for the exact
    * data structure layout.
    */
-  void pack(std::vector<unsigned int> &) const;
+  void pack(std::vector<unsigned int> &, bool merge_periodic_info=true) const;
   void unpack(const std::vector<unsigned int> &);
 
   /**
