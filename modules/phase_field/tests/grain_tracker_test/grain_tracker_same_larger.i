@@ -9,8 +9,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 25
-  ny = 25
+  nx = 50
+  ny = 50
   nz = 0
   xmax = 500
   ymax = 500
@@ -58,7 +58,6 @@
   [../]
   [./mapper]
     type = GrainTrackerAux
-#    type = NodalFloodCountAux
     variable = grain_map
     execute_on = timestep
     bubble_object = grains
@@ -85,12 +84,8 @@
 [UserObjects]
   [./grains]
     type = GrainTracker
-#    type = NodalFloodCount
     threshold = 0.9
-    tracking_step = 1
     execute_on = timestep
-
-    variable = 'gr0 gr1 gr2 gr3 gr4 gr5 gr6 gr7 gr8 gr9 gr10 gr11'
   [../]
 []
 
@@ -105,7 +100,7 @@
   nl_max_its = 20
   nl_rel_tol = 1.0e-9
   start_time = 0.0
-  num_steps = 5
+  num_steps = 200
   dt = 15.0
 []
 
