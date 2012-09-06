@@ -7,5 +7,6 @@ test_penalty_dirichlet_bc = { INPUT : 'penalty_dirichlet_bc_test.i',
 test_function_penalty_dirichlet_bc = { INPUT : 'function_penalty_dirichlet_bc_test.i',
                                        EXODIFF : ['function_penalty_dirichlet_bc_test_out.e'],
                                        SCALE_REFINE : 3,
-                                       MAX_PARALLEL : 11
+                                       MAX_PARALLEL : 11,
+                                       ABS_ZERO : 1e-5
                                        }
