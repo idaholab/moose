@@ -63,10 +63,20 @@ public:
   
   RankFourTensor operator+(const RankFourTensor &a) const;
 
+/**
+ * Deprecated function: stiffness.  Use instead elasticJacobian
+ */
   virtual Real stiffness( const int i, const int j,
-                          const RealGradient & t,
-                          const RealGradient & p);
+                          const RealGradient & grad_test,
+                          const RealGradient & grad_phi);
 
+/**
+ * calculates the Jacobian of the elastic stiffness tensor.
+ */
+  virtual Real elasticJacobian( const int i, const int k,
+                                const RealGradient & t,
+                                const RealGradient & p);
+  
   virtual void selfRotate(const Real a1, const Real a2, const Real a3);
 
   virtual RankFourTensor rotate(const Real a1, const Real a2, const Real a3);

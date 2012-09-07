@@ -218,6 +218,9 @@ RankFourTensor::operator+(const RankFourTensor &a) const
   return result;
 }
 
+/**
+ * Deprecating this fugly mess.  Use elasticJacobian instead.
+ */
 Real
 RankFourTensor::stiffness( const int i, const int j,
                            const RealGradient & test,
@@ -276,6 +279,25 @@ RankFourTensor::stiffness( const int i, const int j,
   return test*b;
 }
 
+Real
+RankFourTensor::elasticJacobian( const int i, const int k,
+                      const RealGradient & grad_test,
+                      const RealGradient & grad_phi)
+{
+  //Calculating Sum over (j,l) C_ijkl*grad_phi(k)[l]*grad_test(i)[j]
+  Real a(0.0);
+
+  for(int j(0); j<3; j++)
+  {
+    for (int l(0); l<3; l++)
+    {
+      a += _vals[i][j][k][l]*grad_phi(l)*grad_test(j);
+    }
+  }
+
+  return a;
+}
+
 void
 RankFourTensor::selfRotate(const Real a1, const Real a2, const Real a3)
 {
@@ -316,7 +338,6 @@ RankFourTensor::selfRotate(const Real a1, const Real a2, const Real a3)
     }
   }
   //congratulations! you've reached the end of this endless loop.
-  //have some glitter!
 }
 
 RankFourTensor
@@ -361,9 +382,7 @@ RankFourTensor::rotate(const Real a1, const Real a2, const Real a3)
     }
   }
   //congratulations! you've reached the end of this endless loop.
-  //have some more glitter!
-  
-  return a;
+ return a;
 }
 
 void
