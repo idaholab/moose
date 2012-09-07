@@ -56,6 +56,8 @@ public:
 
   RankFourTensorTonks operator*(const Real &a);
 
+  RankFourTensorTonks & operator*=(const Real &a);
+
   RankFourTensorTonks & operator+=(const RankFourTensorTonks &a);
   
   RankFourTensorTonks operator+(const RankFourTensorTonks &a) const;

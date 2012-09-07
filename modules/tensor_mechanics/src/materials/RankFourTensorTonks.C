@@ -85,6 +85,18 @@ return result;
 }
 
 RankFourTensorTonks &
+RankFourTensorTonks::operator*=(const Real &a)
+{
+  for(unsigned int i(0); i<N; i++)
+    for(unsigned int j(0); j<N; j++)
+      for(unsigned int k(0); k<N; k++)
+        for(unsigned int l(0); l<N; l++)
+          _vals[i][j][k][l] = _vals[i][j][k][l]*a;
+  
+  return *this;
+}
+
+RankFourTensorTonks &
 RankFourTensorTonks::operator+=(const RankFourTensorTonks &a)
 {
   for(unsigned int i(0); i<N; i++)

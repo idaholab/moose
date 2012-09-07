@@ -65,59 +65,17 @@
             _vals[l][k][i][j] = _vals[i][j][k][l];
  }
 
-  
 Real
-ElasticityTensorR4::stiffness( const unsigned int i, const unsigned int j, const RealGradient & test, const RealGradient & phi)
+ElasticityTensorR4::elasticJacobian( const unsigned int i, const unsigned int k,
+                      const RealGradient & grad_test,
+                      const RealGradient & grad_phi)
 {
-  RealGradient b(0);
-  
-  unsigned int A[N], B[N], C[N], D[N];
+  //Calculating Sum over (j,l) C_ijkl*grad_phi(k)[l]*grad_test(i)[j]
+  Real a(0.0);
 
-  //these are actual crystal indices
-  if (i == 0)
-  {
-    A[0] = 1; A[1] = 2; A[2] = 1;
-    B[0] = 1; B[1] = 3; B[2] = 2;
-  }
-  if (i == 1)
-  {
-    A[0] = 1; A[1] = 2; A[2] = 1;
-    B[0] = 1; B[1] = 3; B[2] = 2;
-  }
-  if (i == 2)
-  {
-    A[0] = 1; A[1] = 2; A[2] = 1;
-    B[0] = 1; B[1] = 3; B[2] = 2;
-  }
-  if (j == 0)
-  {
-    C[0] = 1; C[1] = 2; C[2] = 1;
-    D[0] = 1; D[1] = 3; D[2] = 2;
-  }
-  if (j == 1)
-  {
-    C[0] = 1; C[1] = 2; C[2] = 1;
-    D[0] = 1; D[1] = 3; D[2] = 2;
-  }
-  if (j == 2)
-  {
-    C[0] = 1; C[1] = 2; C[2] = 1;
-    D[0] = 1; D[1] = 3; D[2] = 2;
-  }
+  for(unsigned int j(0); j<N; j++)
+    for (unsigned int l(0); l<N; l++)
+      a += _vals[i][j][k][l]*grad_phi(l)*grad_test(j);
 
-  for(unsigned int k(0); k<N; k++)
-  {
-    for(unsigned int l(0); l<N; l++)
-    {
-      // array indices - thus subtracting 1
-      unsigned int m, n, o, p;
-      m = A[k] - 1;
-      n = B[k] - 1;
-      o = C[l] - 1;
-      p = D[l] - 1;
-      
-      b(k) = b(k) + _vals[m][n][o][p]*phi(l);
-    }
-  }
-  return test*b;
+  return a;
 }

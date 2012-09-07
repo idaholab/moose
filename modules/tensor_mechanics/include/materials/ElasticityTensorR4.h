@@ -29,9 +29,12 @@ public:
   */
   void fillFromInputVector(const std::vector<Real> input, bool all);
   
-  virtual Real stiffness( const unsigned int i, const unsigned int j,
-                          const RealGradient & test,
-                          const RealGradient & phi);
+  /**
+ * calculates the Jacobian of the elastic stiffness tensor.
+ */
+  virtual Real elasticJacobian( const unsigned int i, const unsigned int k,
+                                const RealGradient & grad_test,
+                                const RealGradient & grad_phi);
   
   
 protected:
