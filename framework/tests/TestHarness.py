@@ -181,6 +181,10 @@ class TestHarness:
     # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
     elif self.options.store_time and test[SCALE_REFINE] == 0:
       return False
+    # If were testing with valgrind, then skip tests that require parallel or threads
+    elif self.options.enable_valgrind and (test[MIN_PARALLEL] > 1 or test[MIN_THREADS] > 1):
+      self.handleTestResult(test, '', 'skipped (Valgrind requires serial)')
+      return False
 
     checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE, METHOD, LIBRARY_MODE]
     for check in checks:
