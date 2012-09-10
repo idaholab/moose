@@ -188,11 +188,16 @@ public:
   libMesh::Mesh _mesh;
 
   /**
-   * This routine builds a multip map of boundary ids to matching boundary ids across all periodic boudnaries
+   * This routine builds a multimap of boundary ids to matching boundary ids across all periodic boudnaries
    * in the system.  It does this only for active local elements so the list will not be globally complete when
    * run in parallel!
    */
   void buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & periodic_node_map, unsigned int var_number, PeriodicBoundaries *pbs) const;
+
+  /**
+   * This routine builds a datastructure of node ids organized by periodic boundary ids
+   */
+  void buildPeriodicNodeSets(std::map<BoundaryID, std::set<unsigned int> > & periodic_node_sets, unsigned int var_number, PeriodicBoundaries *pbs) const;
 
 protected:
   /// true if mesh is changed (i.e. after adaptivity step)

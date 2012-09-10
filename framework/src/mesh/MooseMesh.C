@@ -628,3 +628,29 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & peri
     }
   }
 }
+
+void
+MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<unsigned int> > & periodic_node_sets, unsigned int var_number, PeriodicBoundaries *pbs) const
+{
+  periodic_node_sets.clear();
+
+  std::vector<unsigned int> nl;
+  std::vector<boundary_id_type> il;
+
+  _mesh.boundary_info->build_node_list(nl, il);
+
+  // Loop over all the boundary nodes adding the periodic nodes to the appropriate set
+  for (unsigned int i=0; i<nl.size(); ++i)
+  {
+    // Is this current node on a known periodic boundary?
+    if (periodic_node_sets.find(il[i]) != periodic_node_sets.end())
+      periodic_node_sets[il[i]].insert(nl[i]);
+    else // This still might be a periodic node but we just haven't seen this boundary_id yet
+    {
+      const PeriodicBoundary *periodic = pbs->boundary(il[i]);
+      if (periodic && periodic->is_my_variable(var_number))
+        periodic_node_sets[il[i]].insert(nl[i]);
+    }
+  }
+}
+
