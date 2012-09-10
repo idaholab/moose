@@ -75,22 +75,37 @@ CoupledExecutioner::addFEProblem(const std::string & name, const FileName & file
 void
 CoupledExecutioner::addVariableAction(const std::string & action_name, ActionWarehouse & src, const std::string & src_var_name, ActionWarehouse & dest, const std::string & dest_var_name)
 {
-  for (ActionIterator ai = src.actionBlocksWithActionBegin(action_name); ai != src.actionBlocksWithActionEnd(action_name); ai++)
+  // first, try to find if the destination warehouse already has the variable we are going to add
+  bool dest_var_exists = false;
+  for (ActionIterator ai = dest.actionBlocksWithActionBegin(action_name); ai != dest.actionBlocksWithActionEnd(action_name); ai++)
   {
     Action * action = *ai;
-    if (action->getShortName() == src_var_name)
+    if (action->getShortName() == dest_var_name)
     {
-      // take the action params and change them to create an aux variable
-      InputParameters params = action->parameters();
-      params.set<std::string>("action") = "add_aux_variable";
-      std::string dest_name("AuxVariables/" + dest_var_name);
-      params.set<std::string>("name") = dest_name;
-      params.set<Parser *>("parser") = NULL;                    // set parser to NULL, since this action was not create by a parser
-      params.set<ActionWarehouse *>("awh") = &dest;             // move the action into destination action warehouse
+      dest_var_exists = true;
+      break;
+    }
+  }
 
-      Action * dest_action = ActionFactory::instance()->create("AddVariableAction", params);
-      mooseAssert (dest_action != NULL, std::string("Action AddVariableAction not created"));
-      dest.addActionBlock(dest_action);
+  if (!dest_var_exists)
+  {
+    for (ActionIterator ai = src.actionBlocksWithActionBegin(action_name); ai != src.actionBlocksWithActionEnd(action_name); ai++)
+    {
+      Action * action = *ai;
+      if (action->getShortName() == src_var_name)
+      {
+        // take the action params and change them to create an aux variable
+        InputParameters params = action->parameters();
+        params.set<std::string>("action") = "add_aux_variable";
+        std::string dest_name("AuxVariables/" + dest_var_name);
+        params.set<std::string>("name") = dest_name;
+        params.set<Parser *>("parser") = NULL;                    // set parser to NULL, since this action was not create by a parser
+        params.set<ActionWarehouse *>("awh") = &dest;             // move the action into destination action warehouse
+
+        Action * dest_action = ActionFactory::instance()->create("AddVariableAction", params);
+        mooseAssert (dest_action != NULL, std::string("Action AddVariableAction not created"));
+        dest.addActionBlock(dest_action);
+      }
     }
   }
 }
@@ -107,7 +122,7 @@ CoupledExecutioner::addCoupledVariable(const std::string & dest, const std::stri
   unsigned int isrc = ini->second;
   unsigned int idest = _name_index[dest];
 
-  std::string action_name = "add_variable";
+  // FIXME: we do not handle the case where the variable with the same name exists as nonlinear in one problem and as an auxiliary in another
   addVariableAction("add_variable", *_awhs[isrc], src_var_name, *_awhs[idest], dest_var_name);
   addVariableAction("add_aux_variable", *_awhs[isrc], src_var_name, *_awhs[idest], dest_var_name);
 
