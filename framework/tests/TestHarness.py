@@ -186,7 +186,14 @@ class TestHarness:
       self.handleTestResult(test, '', 'skipped (Valgrind requires serial)')
       return False
 
-    checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE, METHOD, LIBRARY_MODE]
+    # Check for PETSc versions
+    if not self.checkPetscVersion(test):
+      self.handleTestResult(test, '', 'skipped (PETSc version ' + \
+                              str(' '.join(test[PETSC_VERSION])) + ' != ' + str(self.checks[PETSC_VERSION]) + ')')
+      return False
+
+    # PETSc is being explicitly checked above
+    checks = [PLATFORM, COMPILER, MESH_MODE, METHOD, LIBRARY_MODE]
     for check in checks:
       test_platforms = set()
       for x in test[check]:
@@ -202,6 +209,34 @@ class TestHarness:
       return False
 
     return True
+
+  # Break down petsc version logic in a new define
+  # TODO: find a way to eval() logic instead
+  def checkPetscVersion(self, test):
+    # If any version of petsc works, return true immediately
+    if 'ALL' in set(test[PETSC_VERSION]):
+      return True
+    # Iterate through petsc versions in test[PETSC_VERSION] and match it against check[PETSC_VERSION]
+    for petsc_version in test[PETSC_VERSION]:
+      version = re.search(r'(?<=)\w+\S+', petsc_version).group(0)
+      logic = re.search(r'^\W+', petsc_version)
+      # Exact match
+      if logic == None:
+        if version == self.checks[PETSC_VERSION]:
+          return True
+        else:
+          return False
+      # Logical match
+      if logic.group(0) == '>' and self.checks[PETSC_VERSION][0:3] > version[0:3]:
+        return True
+      elif logic.group(0) == '>=' and self.checks[PETSC_VERSION][0:3] >= version[0:3]:
+        return True
+      elif logic.group(0) == '<' and self.checks[PETSC_VERSION][0:3] < version[0:3]:
+        return True
+      elif logic.group(0) == '<=' and self.checks[PETSC_VERSION][0:3] <= version[0:3]:
+        return True
+
+    return False
 
   ## Finish the test by inspecting the raw output
   def testOutputAndFinish(self, test, retcode, output, start=0, end=0):

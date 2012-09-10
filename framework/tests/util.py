@@ -109,15 +109,13 @@ def getPetscVersion(libmesh_dir):
   # We'll use the petsc-major string from $LIBMESH_DIR/Make.common
   # to figure this out
   # Supported versions are 2, 3
-  petsc_version = set()
-  petsc_version.add('ALL')
   f = open(libmesh_dir + '/Make.common')
   for line in f.readlines():
     if line.find('petsc-version') != -1:
       m = re.search(r'=\s*(\S+)', line)
       if m != None:
         raw_version = m.group(1)
-        petsc_version.add(raw_version)
+        petsc_version = raw_version
         break
   f.close()
   return petsc_version
