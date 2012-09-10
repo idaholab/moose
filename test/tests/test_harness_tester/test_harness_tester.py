@@ -16,7 +16,7 @@ test_platform_check= { INPUT : '2d_diffusion_test.i',
 
 test_petsc_check= { INPUT : '2d_diffusion_test2.i',
                     EXODIFF : ['out2.e'],
-                    PETSC_VERSION : ['3.1.0'],
+                    PETSC_VERSION : ['>=3.1'],
                     PREREQ : ['test_compiler_check', 'test_platform_check']   # Two Prereqs
 }
 
