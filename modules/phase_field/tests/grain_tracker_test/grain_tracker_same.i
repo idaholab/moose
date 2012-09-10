@@ -58,7 +58,6 @@
   [../]
   [./mapper]
     type = GrainTrackerAux
-#    type = NodalFloodCountAux
     variable = grain_map
     execute_on = timestep
     bubble_object = grains
