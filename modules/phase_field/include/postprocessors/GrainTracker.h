@@ -24,6 +24,13 @@ public:
   Real getNodeValue(unsigned int node_id) const;
 
 protected:
+  enum STATUS 
+  {
+    NOT_MARKED,
+    MARKED,
+    INACTIVE
+  };
+  
   /**
    * This class holds the nodesets and bounding boxes for each
    * flooded region.
@@ -31,10 +38,11 @@ protected:
   class BoundingBoxInfo
   {
   public:
-    BoundingBoxInfo(unsigned int node_id, const Point & min, const Point & max);
-
+    BoundingBoxInfo(unsigned int node_id, const RealVectorValue & trans_vector, const Point & min, const Point & max);
+    
     unsigned int member_node_id;
     MeshTools::BoundingBox *b_box;
+    RealVectorValue translation_vector;
   };
 
   /**
@@ -44,20 +52,22 @@ protected:
   class UniqueGrain
   {
   public:
-    UniqueGrain(unsigned int var_idx, const std::vector<MeshTools::BoundingBox *> & b_box_ptrs);
+    UniqueGrain(unsigned int var_idx, const std::vector<BoundingBoxInfo *> & b_box_ptrs, const Point & p_centroid);
     ~UniqueGrain();
 
     unsigned int variable_idx;
     Point centroid;
-    std::vector<MeshTools::BoundingBox *> box_ptrs;
+    std::vector<BoundingBoxInfo *> box_ptrs;
+    STATUS status;
   };
 
 
   void buildBoundingBoxes();
   void trackGrains();
+  Point calculateCentroid(const std::vector<BoundingBoxInfo *> & box_ptrs) const;
 
   unsigned int _tracking_step;
-  std::list<BoundingBoxInfo> _bounding_boxes;
+  std::list<BoundingBoxInfo *> _bounding_boxes;
   std::map<unsigned int, UniqueGrain *> _unique_grains;
   std::map<unsigned int, unsigned int> _region_to_grain;
 };
