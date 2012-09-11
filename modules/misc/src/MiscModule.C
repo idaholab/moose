@@ -12,6 +12,7 @@
 #include "JouleHeating.h"
 #include "CoefTimeDerivative.h"
 #include "GaussContForcing.h"
+#include "SharpInterfaceForcing.h"
 
 void
 Elk::Misc::registerObjects()
@@ -29,4 +30,5 @@ Elk::Misc::registerObjects()
   registerMaterial(Density);
 
   registerPostprocessor(InternalVolume);
+  registerPostprocessor(SharpInterfaceForcing);
 }

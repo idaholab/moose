@@ -132,6 +132,9 @@ protected:
   /// A pointer to the periodic boundary constraints object
   PeriodicBoundaries *_pbs;
 
+  /// Average value of the domain which can optionally be used to find bubbles in a field
+  Real & _element_average_value;
+
   /**
    * The data structure which is a list of nodes that are constrained to other nodes
    * based on the imposed periodic boundary conditions.

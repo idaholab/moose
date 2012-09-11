@@ -35,6 +35,7 @@ InputParameters validParams<NodalFloodCount>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
   params.addParam<Real>("threshold", 0.5, "The threshold value of the bubble boundary");
+  params.addParam<std::string>("elem_avg_value", "If supplied, will be used to find the scaled threshold of the bubble edges");
   return params;
 }
 
@@ -44,7 +45,8 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _mesh(_subproblem.mesh()),
     _var_number(_var.number()),
     _region_count(0),
-    _pbs(NULL)
+    _pbs(NULL),
+    _element_average_value(parameters.isParamValid("elem_avg_value") ? _real_zero : _real_zero)
 {}
 
 void
