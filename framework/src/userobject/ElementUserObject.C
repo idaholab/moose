@@ -34,6 +34,7 @@ ElementUserObject::ElementUserObject(const std::string & name, InputParameters p
     MooseVariableInterface(parameters, false),
     TransientInterface(parameters, name, "element_user_objects"),
     MaterialPropertyInterface(parameters),
+    PostprocessorInterface(parameters),
     _blocks(parameters.get<std::vector<SubdomainName> >("block")),
     _var(_subproblem.getVariable(_tid, parameters.get<std::vector<VariableName> >("variable")[0])),
     _q_point(_subproblem.points(_tid)),

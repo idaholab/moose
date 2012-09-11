@@ -22,6 +22,7 @@
 #include "TransientInterface.h"
 #include "UserObjectInterface.h"
 #include "MaterialPropertyInterface.h"
+#include "PostprocessorInterface.h"
 
 //Forward Declarations
 class SideUserObject;
@@ -35,7 +36,8 @@ class SideUserObject :
   public UserObjectInterface,
   public MooseVariableInterface,
   public TransientInterface,
-  public MaterialPropertyInterface
+  public MaterialPropertyInterface,
+  protected PostprocessorInterface
 {
 public:
   SideUserObject(const std::string & name, InputParameters parameters);

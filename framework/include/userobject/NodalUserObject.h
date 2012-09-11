@@ -22,6 +22,7 @@
 #include "MooseVariable.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
+#include "PostprocessorInterface.h"
 // libMesh
 #include "elem.h"
 
@@ -39,7 +40,8 @@ class NodalUserObject :
   public UserObjectInterface,
   public MooseVariableInterface,
   public TransientInterface,
-  public MaterialPropertyInterface
+  public MaterialPropertyInterface,
+  protected PostprocessorInterface
 {
 public:
   NodalUserObject(const std::string & name, InputParameters parameters);

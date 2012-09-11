@@ -22,6 +22,8 @@
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "UserObjectInterface.h"
+#include "PostprocessorInterface.h"
+
 // libMesh
 #include "elem.h"
 #include "MooseTypes.h"
@@ -38,7 +40,8 @@ class ElementUserObject :
   public UserObjectInterface,
   public MooseVariableInterface,
   public TransientInterface,
-  public MaterialPropertyInterface
+  public MaterialPropertyInterface,
+  protected PostprocessorInterface
 {
 public:
   ElementUserObject(const std::string & name, InputParameters parameters);

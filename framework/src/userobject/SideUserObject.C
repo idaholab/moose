@@ -32,6 +32,7 @@ SideUserObject::SideUserObject(const std::string & name, InputParameters paramet
     MooseVariableInterface(parameters, false),
     TransientInterface(parameters, name, "side_user_objects"),
     MaterialPropertyInterface(parameters),
+    PostprocessorInterface(parameters),
     _var(_subproblem.getVariable(_tid, parameters.get<std::vector<VariableName> >("variable")[0])),
     _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),
     _q_point(_subproblem.pointsFace(_tid)),
