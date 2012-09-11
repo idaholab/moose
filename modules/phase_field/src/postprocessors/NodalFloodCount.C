@@ -46,7 +46,7 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _var_number(_var.number()),
     _region_count(0),
     _pbs(NULL),
-    _element_average_value(parameters.isParamValid("elem_avg_value") ? _real_zero : _real_zero)
+    _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero)
 {}
 
 void
@@ -293,7 +293,7 @@ NodalFloodCount::flood(const Node *node, unsigned int region, int current_idx)
    */
   if (current_idx >= 0)
   {
-    if (_vars[current_idx]->getNodalValue(*node) < _threshold)
+    if (_vars[current_idx]->getNodalValue(*node) < _element_average_value + _threshold)
     {
       // No - mark and return
       _bubble_map[node_id] = 0;
@@ -303,7 +303,7 @@ NodalFloodCount::flood(const Node *node, unsigned int region, int current_idx)
   else  // If current_idx is not set (< zero), then we can look for the start of a new bubble
   {
     for (unsigned int i=0; i<_vars.size(); ++i)
-      if (_vars[i]->getNodalValue(*node) >= _threshold)
+      if (_vars[i]->getNodalValue(*node) >= _element_average_value + _threshold)
       {
         current_idx = i;
         break;
