@@ -218,67 +218,6 @@ RankFourTensor::operator+(const RankFourTensor &a) const
   return result;
 }
 
-/**
- * Deprecating this fugly mess.  Use elasticJacobian instead.
- */
-Real
-RankFourTensor::stiffness( const int i, const int j,
-                           const RealGradient & test,
-                           const RealGradient & phi)
-{
-  RealGradient b(0);
-  
-  int A[3], B[3], C[3], D[3];
-
-  //these are actual crystal indices
-  if (i == 0)
-  {
-    A[0] = 1; A[1] = 2; A[2] = 1;
-    B[0] = 1; B[1] = 3; B[2] = 2;
-  }
-  if (i == 1)
-  {
-    A[0] = 1; A[1] = 2; A[2] = 1;
-    B[0] = 1; B[1] = 3; B[2] = 2;
-  }
-  if (i == 2)
-  {
-    A[0] = 1; A[1] = 2; A[2] = 1;
-    B[0] = 1; B[1] = 3; B[2] = 2;
-  }
-  if (j == 0)
-  {
-    C[0] = 1; C[1] = 2; C[2] = 1;
-    D[0] = 1; D[1] = 3; D[2] = 2;
-  }
-  if (j == 1)
-  {
-    C[0] = 1; C[1] = 2; C[2] = 1;
-    D[0] = 1; D[1] = 3; D[2] = 2;
-  }
-  if (j == 2)
-  {
-    C[0] = 1; C[1] = 2; C[2] = 1;
-    D[0] = 1; D[1] = 3; D[2] = 2;
-  }
-
-  for(int k(0); k<3; k++)
-  {
-    for(int l(0); l<3; l++)
-    {
-      // array indices - thus subtracting 1
-      int m, n, o, p;
-      m = A[k] - 1;
-      n = B[k] - 1;
-      o = C[l] - 1;
-      p = D[l] - 1;
-      
-      b(k) = b(k) + _vals[m][n][o][p]*phi(l);
-    }
-  }
-  return test*b;
-}
-
 Real
 RankFourTensor::elasticJacobian( const int i, const int k,
                       const RealGradient & grad_test,

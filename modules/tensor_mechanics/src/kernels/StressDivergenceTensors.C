@@ -49,8 +49,6 @@ Real
 StressDivergenceTensors::computeQpJacobian()
 {
   return _Jacobian_mult[_qp].elasticJacobian(_component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
-  //return _Jacobian_mult[_qp].stiffness( _component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp] );
-  //return 0.0;
 }
 
 Real
@@ -78,10 +76,7 @@ StressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 
   if ( active )
   {
-    return _Jacobian_mult[_qp].elasticJacobian(_component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp]); 
-    
-    //return _Jacobian_mult[_qp].stiffness( _component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp] );
-    //return 0.0;
+    return _Jacobian_mult[_qp].elasticJacobian(_component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
   }
 
   if ( _temp_coupled && jvar == _temp_var )
