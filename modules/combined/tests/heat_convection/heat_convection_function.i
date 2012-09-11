@@ -8,6 +8,10 @@
     type = ParsedFunction
     value = '300'
   [../]
+  [./htc]
+    type = ParsedFunction
+    value = 10.0
+  []
 []
 
 [Variables]	# Variables Start
@@ -33,9 +37,10 @@
     type = ConvectiveFluxFunction	# Convective flux, e.g. q'' = h*(Tw - Tf)
     boundary = 12
     variable = temp
-    coefficient = 57		        # convective heat transfer coefficient (w/m^2-K)[50 BTU/hr-ft^2-F]
+    coefficient = 5.7                   # convective heat transfer coefficient (w/m^2-K)[50 BTU/hr-ft^2-F]
+    coefficient_function = htc
     T_infinity = t_infinity
-  [../]					# Convective End
+  [../]	                                # Convective End
 
   [./fixed]
     type = DirichletBC

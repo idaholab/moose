@@ -8,6 +8,7 @@ InputParameters validParams<ConvectiveFluxFunction>()
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<FunctionName>("T_infinity", "Function describing far-field temperature");
   params.addRequiredParam<Real>("coefficient", "Heat transfer coefficient");
+  params.addParam<FunctionName>("coefficient_function", "Heat transfer coefficient function");
 
   return params;
 }
@@ -15,18 +16,21 @@ InputParameters validParams<ConvectiveFluxFunction>()
 ConvectiveFluxFunction::ConvectiveFluxFunction(const std::string & name, InputParameters parameters) :
     IntegratedBC(name, parameters),
     _T_infinity(getFunction("T_infinity")),
-    _coefficient(getParam<Real>("coefficient"))
+    _coefficient(getParam<Real>("coefficient")),
+    _coef_func(isParamValid("coefficient_function") ? &getFunction("coefficient_function") : NULL)
 {}
 
 
 Real
 ConvectiveFluxFunction::computeQpResidual()
 {
-  return _test[_i][_qp] *_coefficient * (_u[_qp] - _T_infinity.value(_t, _q_point[_qp]));
+  const Real coef(_coefficient * (_coef_func ? _coef_func->value(_t, _q_point[_qp]) : 1));
+  return _test[_i][_qp] * coef * (_u[_qp] - _T_infinity.value(_t, _q_point[_qp]));
 }
 
 Real
 ConvectiveFluxFunction::computeQpJacobian()
 {
-  return _test[_i][_qp] * _coefficient * _phi[_j][_qp];
+  const Real coef(_coefficient * (_coef_func ? _coef_func->value(_t, _q_point[_qp]) : 1));
+  return _test[_i][_qp] * coef * _phi[_j][_qp];
 }

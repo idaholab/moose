@@ -16,6 +16,7 @@ protected:
 
   Function & _T_infinity;
   const Real _coefficient;
+  Function * const _coef_func;
 };
 
 template<>
