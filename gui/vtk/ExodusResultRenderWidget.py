@@ -71,7 +71,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.has_displacements = False
     self.current_displacement_magnitude = 1.0
-    
+
+    self.current_scale_x_magnitude = 1.0
+    self.current_scale_y_magnitude = 1.0
+    self.current_scale_z_magnitude = 1.0
+
     self.current_variable = None
     self.current_component = None
     
@@ -151,12 +155,56 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.displace_magnitude_label = QtGui.QLabel("Multiplier: ")
     self.displace_magnitude_text = QtGui.QLineEdit("1.0")
     self.displace_magnitude_text.setMaximumWidth(50)
+    self.displace_magnitude_text.setMinimumWidth(10)
     self.displace_magnitude_text.returnPressed.connect(self._displaceMagnitudeTextReturn)
 
     self.displace_layout.addWidget(self.displace_magnitude_label, alignment=QtCore.Qt.AlignRight)
     self.displace_layout.addWidget(self.displace_magnitude_text, alignment=QtCore.Qt.AlignLeft)
 
     self.reset_layout.addWidget(self.displace_groupbox)
+
+
+    self.scale_groupbox = QtGui.QGroupBox("Scale")
+    self.scale_groupbox.setCheckable(True)
+    self.scale_groupbox.setChecked(False)
+    self.scale_groupbox.setDisabled(False)
+    self.scale_groupbox.setMaximumHeight(70)
+    self.scale_groupbox.toggled[bool].connect(self._scaleToggled)
+    self.scale_layout = QtGui.QHBoxLayout()
+    self.scale_layout.setSpacing(0)
+    self.scale_groupbox.setLayout(self.scale_layout)
+
+    self.scale_x_label = QtGui.QLabel("x: ")
+    self.scale_x_text = QtGui.QLineEdit("1.0")
+    self.scale_x_text.setMinimumWidth(10)
+    self.scale_x_text.setMaximumWidth(30)
+
+    self.scale_y_label = QtGui.QLabel("y: ")
+    self.scale_y_text = QtGui.QLineEdit("1.0")
+    self.scale_y_text.setMinimumWidth(10)
+    self.scale_y_text.setMaximumWidth(30)
+
+    self.scale_z_label = QtGui.QLabel("z: ")
+    self.scale_z_text = QtGui.QLineEdit("1.0")
+    self.scale_z_text.setMinimumWidth(10)
+    self.scale_z_text.setMaximumWidth(30)
+
+    self.scale_x_text.returnPressed.connect(self._scaleMagnitudeTextReturn)
+    self.scale_y_text.returnPressed.connect(self._scaleMagnitudeTextReturn)
+    self.scale_z_text.returnPressed.connect(self._scaleMagnitudeTextReturn)
+
+    self.scale_layout.addWidget(self.scale_x_label, alignment=QtCore.Qt.AlignRight)
+    self.scale_layout.addWidget(self.scale_x_text, alignment=QtCore.Qt.AlignLeft)
+
+    self.scale_layout.addWidget(self.scale_y_label, alignment=QtCore.Qt.AlignRight)
+    self.scale_layout.addWidget(self.scale_y_text, alignment=QtCore.Qt.AlignLeft)
+
+    self.scale_layout.addWidget(self.scale_z_label, alignment=QtCore.Qt.AlignRight)
+    self.scale_layout.addWidget(self.scale_z_text, alignment=QtCore.Qt.AlignLeft)
+
+    self.reset_layout.addWidget(self.scale_groupbox)
+
+
 
 
     self.reset_button = QtGui.QPushButton('Reset View')
@@ -419,9 +467,18 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
   def _displaceToggled(self, value):
     self._timeSliderReleased()
+    
+  def _scaleToggled(self, value):
+    self._timeSliderReleased()
 
   def _displaceMagnitudeTextReturn(self):
     self.current_displacement_magnitude = float(self.displace_magnitude_text.text())
+    self._timeSliderReleased()    
+
+  def _scaleMagnitudeTextReturn(self):
+    self.current_scale_x_magnitude = float(self.scale_x_text.text())
+    self.current_scale_y_magnitude = float(self.scale_y_text.text())
+    self.current_scale_z_magnitude = float(self.scale_z_text.text())
     self._timeSliderReleased()    
     
   def _drawEdgesChanged(self, value):
@@ -664,6 +721,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.exodus_result.reader.SetDisplacementMagnitude(float(self.current_displacement_magnitude))
       else:
         self.exodus_result.reader.SetApplyDisplacements(0)
+
+      if self.scale_groupbox.isChecked():
+        self.exodus_result.actor.SetScale(self.current_scale_x_magnitude, self.current_scale_y_magnitude, self.current_scale_z_magnitude)
+      else:
+        self.exodus_result.actor.SetScale(1.0, 1.0, 1.0)
 
     if self.exodus_result.reader:
       self.exodus_result.reader.SetTimeStep(self.timestep_to_timestep[int(textbox_string)])
