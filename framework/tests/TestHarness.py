@@ -164,6 +164,14 @@ class TestHarness:
     if self.options.not_group <> '' and self.options.not_group in test[GROUP]:
       return False
 
+    # Store regexp for matching tests if --re is used
+    if self.options.reg_exp:
+      match_regexp = re.compile(self.options.reg_exp)
+
+    # If --re then only test matching regexp. Needs to run before other SKIP methods
+    if self.options.reg_exp and not match_regexp.search(test[TEST_NAME]):
+      return False
+
     # Check for skipped tests
     if type(test[SKIP]) is bool:
       # Backwards compatible (no reason)
@@ -499,6 +507,7 @@ class TestHarness:
                       help="Number of threads to use when running mpiexec")
     parser.add_option('-d', action='store_true', dest='debug_harness', default=False, help='Turn on Test Harness debugging')
     parser.add_option('--valgrind', action='store_true', dest='enable_valgrind', default=False, help='Enable Valgrind')
+    parser.add_option('--re', action='store', type='string', dest='reg_exp', default='', help='Run tests that match --re=regular_expression')
 
     outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show the output of every test that fails')
