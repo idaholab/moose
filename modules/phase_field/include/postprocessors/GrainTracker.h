@@ -24,13 +24,13 @@ public:
   Real getNodeValue(unsigned int node_id) const;
 
 protected:
-  enum STATUS 
+  enum STATUS
   {
     NOT_MARKED,
     MARKED,
     INACTIVE
   };
-  
+
   /**
    * This class holds the nodesets and bounding boxes for each
    * flooded region.
@@ -39,7 +39,7 @@ protected:
   {
   public:
     BoundingBoxInfo(unsigned int node_id, const RealVectorValue & trans_vector, const Point & min, const Point & max);
-    
+
     unsigned int member_node_id;
     MeshTools::BoundingBox *b_box;
     RealVectorValue translation_vector;

@@ -35,7 +35,7 @@ GrainTracker::getNodeValue(unsigned int node_id) const
 {
   if (_t_step < _tracking_step)
     return 0;
-  
+
   unsigned int region_id = _bubble_map.at(node_id);
   return _region_to_grain.at(region_id);
 }
@@ -69,7 +69,7 @@ GrainTracker::buildBoundingBoxes()
   // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
-  
+
   std::map<BoundaryID, std::set<unsigned int> > pb_nodes;
   // Build a list of periodic nodes
   _mesh.buildPeriodicNodeSets(pb_nodes, _var_number, _pbs);
@@ -84,7 +84,7 @@ GrainTracker::buildBoundingBoxes()
 //    std::cout << "\n";
 //  }
 //  // DEBUG
-  
+
 
   MeshBase & mesh = _mesh._mesh;
   unsigned int counter = 0;
@@ -109,7 +109,7 @@ GrainTracker::buildBoundingBoxes()
 //    std::cout << "\n";
 //    // DEBUG
 
-    RealVectorValue translation_vector;  
+    RealVectorValue translation_vector;
     if (_pbs)
     {
       for (std::map<BoundaryID, std::set<unsigned int> >::iterator nodeset_it = pb_nodes.begin(); nodeset_it != pb_nodes.end(); ++nodeset_it)
@@ -117,7 +117,7 @@ GrainTracker::buildBoundingBoxes()
         std::set<unsigned int> intersection;
         std::set_intersection(it1->_nodes.begin(), it1->_nodes.end(), nodeset_it->second.begin(), nodeset_it->second.end(),
                        std::inserter(intersection, intersection.end()));
-        
+
         if (!intersection.empty())
         {
 //          // DEBUG
@@ -126,7 +126,7 @@ GrainTracker::buildBoundingBoxes()
 //            std::cout << *bar << " ";
 //          std::cout << "\n\n";
 //          // DEBUG
-          
+
           PeriodicBoundary *pb = _pbs->boundary(nodeset_it->first);
           mooseAssert(pb != NULL, "Error Periodic Boundary is NULL in GrainTracker");
 
@@ -143,12 +143,15 @@ GrainTracker::buildBoundingBoxes()
            */
           Point boundary_point = mesh.point(*nodeset_it->second.begin());
           Point corresponding_point = pb->get_corresponding_pos(boundary_point);
-          
+
           translation_vector += boundary_point - corresponding_point;
-        } 
+        }
       }
     }
-    
+
+    // DEBUG
+    std::cout << "Bounding Box: (" << min << ", " << max << ")\n";
+    // DEBUG
     _bounding_boxes.push_back(new BoundingBoxInfo(some_node_id, translation_vector, min, max));
   }
 }
@@ -177,7 +180,7 @@ GrainTracker::trackGrains()
   {
     std::vector<BoundingBoxInfo *> box_ptrs;
     unsigned int curr_var = it1->_var_idx;
-    
+
     for (std::list<BoundingBoxInfo *>::iterator it2 = _bounding_boxes.begin(); it2 != _bounding_boxes.end(); /* No increment here! */)
     {
       /**
@@ -195,7 +198,7 @@ GrainTracker::trackGrains()
       else
         ++it2;
     }
-    
+
     // Calculate the centroid from the list of bounding boxes taking into account periodic boundary conditions
     Point curr_centroid = calculateCentroid(box_ptrs);
 
@@ -219,7 +222,7 @@ GrainTracker::trackGrains()
         // Skip over inactive grains
         if (grain_it->second->status == INACTIVE)
           continue;
-        
+
         // Look for matching variable indexes first
         if (grain_it->second->variable_idx == curr_var)
         {
@@ -248,11 +251,11 @@ GrainTracker::trackGrains()
     }
     ++counter;
   }
-  
+
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
     if (grain_it->second->status == NOT_MARKED)
       grain_it->second->status = INACTIVE;
-  
+
   // Check to make sure that we consumed all of the bounding box datastructures
   if (!_bounding_boxes.empty())
     mooseError("BoundingBoxes where not completely used by the GrainTracker");
@@ -277,7 +280,8 @@ GrainTracker::calculateCentroid(const std::vector<BoundingBoxInfo *> & box_ptrs)
   Point centroid;
   for (std::vector<BoundingBoxInfo *>::const_iterator it = box_ptrs.begin(); it != box_ptrs.end(); ++it)
   {
-    Point curr_adj_centroid = ((*it)->b_box->max() - (*it)->b_box->min()) + (*it)->translation_vector;
+    Point curr_adj_centroid = (((*it)->b_box->max() + (*it)->b_box->min()) / 2.0) + (*it)->translation_vector;
+
     centroid += curr_adj_centroid;
   }
   centroid /= box_ptrs.size();
