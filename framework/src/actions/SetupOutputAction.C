@@ -37,7 +37,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("tecplot_binary", false, "Specifies that you would like Tecplot binary output solution files(s)");
   params.addParam<bool>("xda", false, "Specifies that you would like xda output solution files(s)");
   params.addParam<bool>("postprocessor_screen", true, "Specifies that you would like PostProcessor output to the screen (stdout)");
-  params.addParam<unsigned int>("max_pps_rows_screen", 0, "The maximum number of postprocessor values displayed on screen during a timestep");
+  params.addParam<unsigned int>("max_pps_rows_screen", 15, "The maximum number of postprocessor values displayed on screen during a timestep (set to 0 for unlimited)");
   params.addParam<bool>("postprocessor_csv", false, "Specifies that you would like a PostProcessor comma separated values file");
   params.addParam<bool>("postprocessor_gnuplot", false, "Specifies that you would like plots of the postprocessor output");
   params.addParam<std::string>("gnuplot_format", "ps", "Specifies which output format gnuplot will produce. Currently supported: ps, gif, and png");
