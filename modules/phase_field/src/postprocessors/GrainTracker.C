@@ -51,16 +51,7 @@ GrainTracker::initialize()
 {
   NodalFloodCount::initialize();
 
-  // Initialize the periodic variable for each of our dimensions to false
-  _periodic_dim.resize(LIBMESH_DIM, false);
-  if (_gen_mesh)
-  {
-    for (unsigned int i=0; i<_gen_mesh->dimension(); ++i)
-      // Assumption: We are going to assume that all variables are periodic together
-      _periodic_dim[i] = _gen_mesh->isPeriodic(_nl, _var_number, i);
-
-    _half_range = Point(_gen_mesh->dimensionWidth(0)/2.0, _gen_mesh->dimensionWidth(1)/2.0, _gen_mesh->dimensionWidth(2)/2.0);
-  }
+  _gen_mesh->initPeriodicDistanceForVariable(_nl, _var_number);
 }
 
 void
@@ -268,7 +259,7 @@ GrainTracker::trackGrains()
         if (grain_it->second->variable_idx == curr_var)
         {
           // Now check to see how close this centroid is to the previous centroid
-          Real curr_centroid_diff = minPeriodicDistance(grain_it->second->centroid, curr_centroid);
+          Real curr_centroid_diff = _gen_mesh->minPeriodicDistance(grain_it->second->centroid, curr_centroid);
 
 //          // DEBUG
 //          std::cout << "Centroids: " << grain_it->second->centroid << curr_centroid << " Diff: " <<  curr_centroid_diff << "\n";
@@ -371,29 +362,4 @@ GrainTracker::UniqueGrain::~UniqueGrain()
     delete box_ptrs[i]->b_box;
     delete box_ptrs[i];
   }
-}
-
-Real
-GrainTracker::minPeriodicDistance(Point p, Point q)
-{
-  for (unsigned int i=0; i<LIBMESH_DIM; ++i)
-  {
-    // check to see if we're closer in real or periodic space in x, y, and z
-    if (_periodic_dim[i])
-    {
-      // Need to test order before differencing
-      if (p(i) > q(i))
-      {
-        if (p(i) - q(i) > _half_range(i))
-          p(i) -= _half_range(i) * 2;
-      }
-      else
-      {
-        if (q(i) - p(i) > _half_range(i))
-          p(i) += _half_range(i) * 2;
-      }
-    }
-  }
-
-  return (p-q).size();
 }
