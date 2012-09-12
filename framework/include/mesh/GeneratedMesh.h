@@ -45,6 +45,22 @@ public:
    */
   bool isPeriodic(NonlinearSystem &nl, unsigned int var_num, unsigned int dim);
 
+  /**
+   * This function initializes the data structures necessary for calling minPeriodicDistance.
+   * @param nl - A reference to the nonlinear system
+   * @param var_num - The variable inspected for periodicity
+   */
+  void initPeriodicDistanceForVariable(NonlinearSystem &nl, unsigned int var_num);
+
+  /**
+   * This function returns the distance between two points taking into account periodicity.  A call
+   * to initPeriodicDistanceForVariable should be made prior to calling this function or it will
+   * not factor in any PBCs.
+   * @param p, q - The points for which to compute a minimum distance
+   * @return Real - The L2 distance between p and q
+   */
+  Real minPeriodicDistance(Point p, Point q) const;
+
 protected:
   /// The dimension of the mesh
   MooseEnum _dim;
@@ -56,6 +72,9 @@ protected:
   Real _ymin, _ymax;
   /// Min and max in z direction
   Real _zmin, _zmax;
+
+  std::vector<bool> _periodic_dim;
+  Point _half_range;
 };
 
 #endif /* GENERATEDMESH_H */

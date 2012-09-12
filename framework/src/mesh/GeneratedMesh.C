@@ -58,7 +58,8 @@ GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameter
     _ymin(getParam<Real>("ymin")),
     _ymax(getParam<Real>("ymax")),
     _zmin(getParam<Real>("zmin")),
-    _zmax(getParam<Real>("zmax"))
+    _zmax(getParam<Real>("zmax")),
+    _periodic_dim(false, LIBMESH_DIM)
 {
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
 
@@ -133,3 +134,38 @@ GeneratedMesh::isPeriodic(NonlinearSystem &nl, unsigned int var_num, unsigned in
   else
     return false;
 }
+
+void
+GeneratedMesh::initPeriodicDistanceForVariable(NonlinearSystem &nl, unsigned int var_num)
+{
+  for (unsigned int i=0; i<dimension(); ++i)
+    _periodic_dim[i] = isPeriodic(nl, var_num, i);
+
+  _half_range = Point(dimensionWidth(0)/2.0, dimensionWidth(1)/2.0, dimensionWidth(2)/2.0);
+}
+
+Real
+GeneratedMesh::minPeriodicDistance(Point p, Point q) const
+{
+  for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+  {
+    // check to see if we're closer in real or periodic space in x, y, and z
+    if (_periodic_dim[i])
+    {
+      // Need to test order before differencing
+      if (p(i) > q(i))
+      {
+        if (p(i) - q(i) > _half_range(i))
+          p(i) -= _half_range(i) * 2;
+      }
+      else
+      {
+        if (q(i) - p(i) > _half_range(i))
+          p(i) += _half_range(i) * 2;
+      }
+    }
+  }
+
+  return (p-q).size();
+}
+
