@@ -3,6 +3,9 @@
 #include "AddV.h"
 #include "GeneratedMesh.h"
 
+// LibMesh includes
+#include "periodic_boundary_base.h"
+
 #include <limits>
 
 template<>
@@ -147,7 +150,7 @@ GrainTracker::buildBoundingBoxes()
 //          std::cout << "\n\n";
 //          // DEBUG
 
-          PeriodicBoundary *pb = _pbs->boundary(nodeset_it->first);
+          PeriodicBoundaryBase *pb = _pbs->boundary(nodeset_it->first);
           mooseAssert(pb != NULL, "Error Periodic Boundary is NULL in GrainTracker");
 
           bool prefered_direction = false;
