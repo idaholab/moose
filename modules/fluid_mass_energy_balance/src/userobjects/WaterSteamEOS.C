@@ -40,7 +40,7 @@ WaterSteamEOS::destroy()
 { }
 
 //Suplimentary functions used within the two main functions bellow (Equations_of_State_Properties and Equations_of_State_Derivative_Properties):
-Real WaterSteamEOS::phase_determ(Real _enth_in, Real _press_in, Real& _phase, Real& _temp_sat, Real& _enth_water_sat, Real& _enth_steam_sat, Real& _dens_water_sat, Real& _dens_steam_sat) const
+Real WaterSteamEOS::phaseDetermine (Real enth_in, Real press_in, Real& phase, Real& temp_sat, Real& enth_water_sat, Real& enth_steam_sat, Real& dens_water_sat, Real& dens_steam_sat) const
 {
     ///////////This funtion determines what region of the pressure/temperature graph the water is in (compressed water, steam, 
     ///////////or saturated mixture) using the gibbs free energy equations and the 'IAPWS Industrial Formulation 1997 for the 
@@ -142,15 +142,15 @@ Real WaterSteamEOS::phase_determ(Real _enth_in, Real _press_in, Real& _phase, Re
     ////////PART I:
     //Determine the saturation temp given pressure and enthalpy
     //using region 4 saturatuion-pressure equation (formerly tsat function):
-    beta2 = sqrt(_press_in / pstar);
+    beta2 = sqrt(press_in / pstar);
     beta = sqrt(beta2);
     n = beta2 + nr[2] * beta + nr[5];
     q = nr[0] * beta2 + nr[3] * beta + nr[6];
     r = nr[1] * beta2 + nr[4] * beta + nr[7];
     m = 2.0e0 * r / (-q - sqrt(q * q - 4.e0 * n * r));
     x = nr[9] + m;
-    _temp_sat = 0.5e0 * (nr[9] + m - sqrt(x * x - 4.e0 * (nr[8] + nr[9] * m))) - C_to_K;
-    temp_kelvin = _temp_sat + C_to_K;
+    temp_sat = 0.5e0 * (nr[9] + m - sqrt(x * x - 4.e0 * (nr[8] + nr[9] * m))) - C_to_K;
+    temp_kelvin = temp_sat + C_to_K;
     
     
     ////////PART II:
@@ -158,9 +158,9 @@ Real WaterSteamEOS::phase_determ(Real _enth_in, Real _press_in, Real& _phase, Re
     //using region 1 gibbs free energy equation (formerly cowat function):
     //input - temp_sat, press_in
     //output - enth_water
-    if ((_temp_sat <= 350.0e0 + ttol) && (_press_in <= 100.e6))
+    if ((temp_sat <= 350.0e0 + ttol) && (press_in <= 100.e6))
     {
-        pie1 = _press_in / pstar1;
+        pie1 = press_in / pstar1;
         tau1 = tstar1 / temp_kelvin;
         
         //gibbs free energy terms for region 1
@@ -171,9 +171,9 @@ Real WaterSteamEOS::phase_determ(Real _enth_in, Real _press_in, Real& _phase, Re
         }
         
         rt1 = rconst * temp_kelvin;
-        _dens_water_sat = pstar1 / (rt1 * gamma_pie1);
+        dens_water_sat = pstar1 / (rt1 * gamma_pie1);
         intern_energy_water = rt1 * (tau1 * gamma_tau1 - pie1 * gamma_pie1);
-        _enth_water_sat = intern_energy_water + _press_in / _dens_water_sat;
+        enth_water_sat = intern_energy_water + press_in / dens_water_sat;
     }
     
     ///////PART III:
@@ -181,9 +181,9 @@ Real WaterSteamEOS::phase_determ(Real _enth_in, Real _press_in, Real& _phase, Re
     //using region 2 gibbs free energy equation (formerly supst function):
     //input - temp_sat, press_in
     //output - enth_steam
-    if ((_temp_sat <= 350.0e0 + ttol) && (_press_in <= 100.e6))
+    if ((temp_sat <= 350.0e0 + ttol) && (press_in <= 100.e6))
     {
-        pie2 = _press_in / pstar2;
+        pie2 = press_in / pstar2;
         tau2 = tstar2 / temp_kelvin;
         
         //gibbs ideal gas terms for region 2
@@ -206,37 +206,37 @@ Real WaterSteamEOS::phase_determ(Real _enth_in, Real _press_in, Real& _phase, Re
         gamma_tau2 = gamma_tau2_0 + gamma_tau2_r;
         
         rt2 = rconst * temp_kelvin;
-        _dens_steam_sat = pstar2 / (rt2 * gamma_pie2);
+        dens_steam_sat = pstar2 / (rt2 * gamma_pie2);
         intern_energy_steam = rt2 * (tau2 * gamma_tau2 - pie2 * gamma_pie2);
-        _enth_steam_sat = intern_energy_steam + _press_in / _dens_steam_sat;
+        enth_steam_sat = intern_energy_steam + press_in / dens_steam_sat;
     }
     
     
     
     ////////PART IV:
     //Deterining the phase ([1] = Cold Water. [2] = Superheated Steam, [3] = Saturated Mixture
-    if ((_press_in > press_sat_350C) && (_enth_in <= enth_water_350C))
+    if ((press_in > press_sat_350C) && (enth_in <= enth_water_350C))
     {
-        _phase = 1; //Cold water
+        phase = 1; //Cold water
     }
-    else if (_enth_in >= _enth_steam_sat)
+    else if (enth_in >= enth_steam_sat)
     {
-        _phase = 2; //Superheated steam
+        phase = 2; //Superheated steam
     }
-    else if ((_enth_in <= _enth_steam_sat) && (_enth_in >= _enth_water_sat))
+    else if ((enth_in <= enth_steam_sat) && (enth_in >= enth_water_sat))
     {
-        _phase = 3; //Saturated mixture
+        phase = 3; //Saturated mixture
     }
     else
     {
-        _phase = 1;        
+        phase = 1;        
     }
     
     return (0);
     
 }
 
-Real WaterSteamEOS::water_eq_of_state(Real _enth_in, Real _press_in, Real _temp_sat, Real& _temp1, Real& _dens1, Real& _enth1) const
+Real WaterSteamEOS::waterEquationOfStatePH (Real enth_in, Real press_in, Real temp_sat, Real& temp1, Real& dens1, Real& enth1) const
 {   
     //Variables:
     Real C_to_K = 273.15e0;                                     //Convertion factor from Celcius to Kelvin *formerly tc_k
@@ -275,7 +275,7 @@ Real WaterSteamEOS::water_eq_of_state(Real _enth_in, Real _press_in, Real _temp_
     Real dif;
     
     //Obtain an better initial guess for the output temp.
-    init_temp_guess = _temp_sat - 1.e-6;
+    init_temp_guess = temp_sat - 1.e-6;
     itr_temp1 = init_temp_guess + C_to_K;
     
     //Newton iterations of cold water density and enthalpy calculations for region 1
@@ -288,11 +288,11 @@ Real WaterSteamEOS::water_eq_of_state(Real _enth_in, Real _press_in, Real _temp_
         ////Part 1 (fist itteration):
         
         //Initialize variables
-        pie1 = _press_in / pstar1;
+        pie1 = press_in / pstar1;
         tau1 = tstar1 / itr_temp1;
-        _enth1 = 0.0;
+        enth1 = 0.0;
         intern_energy1 = 0.0;
-        _dens1 = 0.0;
+        dens1 = 0.0;
         rt1 = 0.0;
         gamma_pie1 = 0.0;
         gamma_tau1 = 0.0;
@@ -305,12 +305,12 @@ Real WaterSteamEOS::water_eq_of_state(Real _enth_in, Real _press_in, Real _temp_
         }
         
         rt1 = rconst * itr_temp1;
-        _dens1 = pstar1 / (rt1 * gamma_pie1);
+        dens1 = pstar1 / (rt1 * gamma_pie1);
         intern_energy1 = rt1 * (tau1 * gamma_tau1 - pie1 * gamma_pie1);
-        _enth1 = intern_energy1 + _press_in / _dens1;
+        enth1 = intern_energy1 + press_in / dens1;
         
         
-        dif = std:: abs((_enth1 - _enth_in) * 1.e-6);
+        dif = std:: abs((enth1 - enth_in) * 1.e-6);
         
         if (dif <= 1.0e-14)
         {
@@ -322,10 +322,10 @@ Real WaterSteamEOS::water_eq_of_state(Real _enth_in, Real _press_in, Real _temp_
         ////Part 2 (second itteration):
         
         //Re-initialize variables
-        pie1 = _press_in / pstar1;
+        pie1 = press_in / pstar1;
         tau1 = tstar1 / itr_temp2;
         intern_energy1 = 0.0;
-        _dens1 = 0.0;
+        dens1 = 0.0;
         rt1 = 0.0;
         gamma_pie1 = 0.0;
         gamma_tau1 = 0.0;
@@ -338,10 +338,10 @@ Real WaterSteamEOS::water_eq_of_state(Real _enth_in, Real _press_in, Real _temp_
         }
         
         rt1 = rconst * itr_temp2;
-        _dens1 = pstar1 / (rt1 * gamma_pie1);
+        dens1 = pstar1 / (rt1 * gamma_pie1);
         intern_energy1 = rt1 * (tau1 * gamma_tau1 - pie1 * gamma_pie1);
-        enth1_x = intern_energy1 + _press_in / _dens1;
-        itr_temp1 = itr_temp1 + (_enth_in - _enth1) * dt / (enth1_x - _enth1);
+        enth1_x = intern_energy1 + press_in / dens1;
+        itr_temp1 = itr_temp1 + (enth_in - enth1) * dt / (enth1_x - enth1);
         
         itr = itr + 1;
         
@@ -352,12 +352,12 @@ Real WaterSteamEOS::water_eq_of_state(Real _enth_in, Real _press_in, Real _temp_
         }
     }
     
-    _temp1 = itr_temp1 - C_to_K;
+    temp1 = itr_temp1 - C_to_K;
     
     return (0);
 }
 
-Real WaterSteamEOS::steam_eq_of_state(Real _enth_in, Real _press_in, Real _temp_sat, Real& _temp2, Real& _dens2, Real& _enth2) const
+Real WaterSteamEOS::steamEquationOfStatePH (Real enth_in, Real press_in, Real temp_sat, Real& temp2, Real& dens2, Real& enth2) const
 {   //Variables:
     Real C_to_K = 273.15e0;                                     //Convertion factor from Celcius to Kelvin *formerly tc_k
     Real init_temp_guess;                                       //initial guess at final temp2 value
@@ -411,7 +411,7 @@ Real WaterSteamEOS::steam_eq_of_state(Real _enth_in, Real _press_in, Real _temp_
     
     
     //Obtain an better initial guess for the output temp.
-    init_temp_guess = _temp_sat + 1.0e-6;
+    init_temp_guess = temp_sat + 1.0e-6;
     itr_temp1 = init_temp_guess + C_to_K;
     
     
@@ -425,11 +425,11 @@ Real WaterSteamEOS::steam_eq_of_state(Real _enth_in, Real _press_in, Real _temp_
         ////Part 1 (first itteration):
         
         //Initialize variables
-        pie2 = _press_in / pstar2;
+        pie2 = press_in / pstar2;
         tau2 = tstar2 / itr_temp1;
-        _enth2 = 0.0;
+        enth2 = 0.0;
         intern_energy2 = 0.0;
-        _dens2 = 0.0;
+        dens2 = 0.0;
         rt2 = 0.0;
         gamma_tau2_0 = 0.0;
         gamma_pie2_0 = 0.0;
@@ -458,12 +458,12 @@ Real WaterSteamEOS::steam_eq_of_state(Real _enth_in, Real _press_in, Real _temp_
         gamma_tau2 = gamma_tau2_0 + gamma_tau2_r;
         
         rt2 = rconst * itr_temp1;
-        _dens2 = pstar2 / (rt2 * gamma_pie2);
+        dens2 = pstar2 / (rt2 * gamma_pie2);
         intern_energy2 = rt2 * (tau2 * gamma_tau2 - pie2 * gamma_pie2);
-        _enth2 = intern_energy2 + _press_in / _dens2;
+        enth2 = intern_energy2 + press_in / dens2;
         
         
-        dif = std::abs((_enth2 - _enth_in) * 1.e-6);
+        dif = std::abs((enth2 - enth_in) * 1.e-6);
         
         
         if (dif <= 1.0e-15)
@@ -476,10 +476,10 @@ Real WaterSteamEOS::steam_eq_of_state(Real _enth_in, Real _press_in, Real _temp_
         ////Part 2 (second itteration):
         
         //Re-initialize variables
-        pie2 = _press_in / pstar2;
+        pie2 = press_in / pstar2;
         tau2 = tstar2 / itr_temp2;
         intern_energy2 = 0.0;
-        _dens2 = 0.0;
+        dens2 = 0.0;
         rt2 = 0.0;
         gamma_tau2_0 = 0.0;
         gamma_pie2_0 = 0.0;
@@ -508,10 +508,10 @@ Real WaterSteamEOS::steam_eq_of_state(Real _enth_in, Real _press_in, Real _temp_
         gamma_tau2 = gamma_tau2_0 + gamma_tau2_r;
         
         rt2 = rconst * itr_temp2;
-        _dens2 = pstar2 / (rt2 * gamma_pie2);
+        dens2 = pstar2 / (rt2 * gamma_pie2);
         intern_energy2 = rt2 * (tau2 * gamma_tau2 - pie2 * gamma_pie2);
-        enth2_x = intern_energy2 + _press_in / _dens2;
-        itr_temp1 = itr_temp1 + (_enth_in - _enth2) * dt / (enth2_x - _enth2);
+        enth2_x = intern_energy2 + press_in / dens2;
+        itr_temp1 = itr_temp1 + (enth_in - enth2) * dt / (enth2_x - enth2);
         
         
         itr = itr + 1;
@@ -525,13 +525,13 @@ Real WaterSteamEOS::steam_eq_of_state(Real _enth_in, Real _press_in, Real _temp_
         }
     }
     
-    _temp2 = itr_temp1 - C_to_K;
+    temp2 = itr_temp1 - C_to_K;
     
     return (0);
     
 }
 
-Real WaterSteamEOS::viscosity(Real _density, Real _temp, Real& _viscosity) const
+Real WaterSteamEOS::viscosity (Real density, Real temp, Real& viscosity) const
 {   
     //Calculates dynamic viscosity of water or steam, given the density
     //and temperature, using the IAPWS industrial formulation 2008.
@@ -558,9 +558,9 @@ Real WaterSteamEOS::viscosity(Real _density, Real _temp, Real& _viscosity) const
         2.57399e-1, -3.25372e-2, 6.98452e-2, 8.72102e-3, -4.35673e-3,
         -5.93264e-4};                                               //H coefficients for viscosity and summation 1 term
     
-    temp_kelvin = _temp + C_to_K;
+    temp_kelvin = temp + C_to_K;
     tau = temp_kelvin / tstar;
-    del = _density / dstar;
+    del = density / dstar;
     
     //Viscosity in dilute-gas limit:
     for (int i=0; i<4; i++)
@@ -578,13 +578,13 @@ Real WaterSteamEOS::viscosity(Real _density, Real _temp, Real& _viscosity) const
     
     mu1 = exp(del * summation1);
     
-    _viscosity = mu0 * mu1 * mustar;
+    viscosity = mu0 * mu1 * mustar;
     
-    return (_viscosity);
+    return (viscosity);
     
 }
 
-Real WaterSteamEOS::water_EOS_deriv_init_values(Real _press_in, Real _temp_0, Real& _enth_water_0, Real& _dens_water_0) const
+Real WaterSteamEOS::waterEquationOfStatePT (Real press_in, Real temp, Real& enth_water, Real& dens_water) const
 {
     //Variables:
     Real C_to_K = 273.15e0;                                         //Convertion factor from Celcius to Kelvin *formerly tc_k
@@ -597,7 +597,7 @@ Real WaterSteamEOS::water_EOS_deriv_init_values(Real _press_in, Real _temp_0, Re
     Real rt;                                                        //gas constant * temperature, RT from ideal gas law
     Real pstar = 16.53e6;                                           //pressure shifting term, p*
     Real tstar = 1386.e0;                                           //temperature shifting term, T*
-    Real intern_energy_0;                                           //*formerly u
+    Real intern_energy_water;                                           //*formerly u
     Real n[34] = { 0.14632971213167e0, -0.84548187169114e0, -0.37563603672040e1,
         0.33855169168385e1, -0.95791963387872e0, 0.15772038513228e0,
         -0.16616417199501e-1,0.81214629983568e-3, 0.28319080123804e-3,
@@ -618,8 +618,8 @@ Real WaterSteamEOS::water_EOS_deriv_init_values(Real _press_in, Real _temp_0, Re
         -31, -38, -39, -40, -41 };                                  //J coefficients of region 1 gibbs eq.
     
     //Obtain initial conditions:
-    temp_kelvin = _temp_0 + C_to_K;
-    pie = _press_in / pstar;
+    temp_kelvin = temp + C_to_K;
+    pie = press_in / pstar;
     tau = tstar / temp_kelvin;
     
     //gibbs free energy terms for resion 1
@@ -630,14 +630,14 @@ Real WaterSteamEOS::water_EOS_deriv_init_values(Real _press_in, Real _temp_0, Re
     }
     
     rt = rconst * temp_kelvin;
-    _dens_water_0 = pstar / (rt * gamma_pie);
-    intern_energy_0 = rt * (tau * gamma_tau - pie * gamma_pie);
-    _enth_water_0 = intern_energy_0 + _press_in / _dens_water_0;
+    dens_water = pstar / (rt * gamma_pie);
+    intern_energy_water = rt * (tau * gamma_tau - pie * gamma_pie);
+    enth_water = intern_energy_water + press_in / dens_water;
     
     return (0);
 }
 
-Real WaterSteamEOS::steam_EOS_deriv_init_values(Real _press_in, Real _temp_0, Real& _enth_steam_0, Real& _dens_steam_0) const
+Real WaterSteamEOS::steamEquationOfStatePT (Real press_in, Real temp, Real& enth_steam, Real& dens_steam) const
 { 
     //Variables:
     Real C_to_K = 273.15e0;                                         //Convertion factor from Celcius to Kelvin *formerly tc_k
@@ -656,7 +656,7 @@ Real WaterSteamEOS::steam_EOS_deriv_init_values(Real _press_in, Real _temp_0, Re
     Real rt;                                                        //gas constant * temperature, RT from ideal gas law
     Real pstar = 1.0e6;                                             //pressure shifting term, p*
     Real tstar = 540.e0;                                            //temperature shifting term, T*
-    Real intern_energy_0;                                           //*formerly u
+    Real intern_energy_steam;                                           //*formerly u
     Real n_0[9] = { -0.96927686500217e1, 0.10086655968018e2,-0.56087911283020e-2,
         0.71452738081455e-1, -0.40710498223928e0, 0.14240819171444e1,
         -0.43839511319450e1,  -0.28408632460772e0, 0.21268463753307e-1 }; //n coefficietns of region 2 gibbs ideal gas term
@@ -684,8 +684,8 @@ Real WaterSteamEOS::steam_EOS_deriv_init_values(Real _press_in, Real _temp_0, Re
         24, 24, 24 };                                               //I coefficients of region 2 gibbs residual term
     
     //Obtain initial conditions:
-    temp_kelvin = _temp_0 + C_to_K;
-    pie = _press_in / pstar;
+    temp_kelvin = temp + C_to_K;
+    pie = press_in / pstar;
     tau = tstar / temp_kelvin;
     
     //gibbs ideal gas terms for region 2
@@ -708,9 +708,9 @@ Real WaterSteamEOS::steam_EOS_deriv_init_values(Real _press_in, Real _temp_0, Re
     gamma_tau = gamma_tau_0 + gamma_tau_r;
     
     rt = rconst * temp_kelvin;
-    _dens_steam_0 = pstar / (rt * gamma_pie);
-    intern_energy_0 = rt * (tau * gamma_tau - pie * gamma_pie);
-    _enth_steam_0 = intern_energy_0 + _press_in / _dens_steam_0;
+    dens_steam = pstar / (rt * gamma_pie);
+    intern_energy_steam = rt * (tau * gamma_tau - pie * gamma_pie);
+    enth_steam = intern_energy_steam + press_in / dens_steam;
     
     return (0);
 }
@@ -721,14 +721,13 @@ Real WaterSteamEOS::steam_EOS_deriv_init_values(Real _press_in, Real _temp_0, Re
 
 //WaterSteamEOS: phase_determ, water_eq_of_state, steam_eq_of_state, and viscosity functions are callsed whithin the bellow function.
 //This allows for more orginization and the flexibility to call each of these subfunctions without having to call the main function.
-//Call this function if the derivatives of the EOS properties w.r.t. pressure and enthalpy are NOT needed.
-Real WaterSteamEOS::Equations_of_State_Properties(Real _enth_in, Real _press_in, Real& _phase, Real& _temp_out, Real& _temp_sat, Real& _sat_fraction_out, Real& _dens_out, Real& _dens_water_out, Real& _dens_steam_out, Real& _enth_water_out, Real& _enth_steam_out, Real& _visc_water_out, Real& _visc_steam_out, Real& _del_press, Real& _del_enth) const
+//Call this function if the derivatives of the EOS properties w.r.t. pressure and enthalpy ARE NOT needed.
+Real WaterSteamEOS::waterAndSteamEquationOfStatePropertiesPH (Real enth_in, Real press_in, Real& phase, Real& temp_out, Real& temp_sat, Real& sat_fraction_out, Real& dens_out, Real& dens_water_out, Real& dens_steam_out, Real& enth_water_out, Real& enth_steam_out, Real& visc_water_out, Real& visc_steam_out, Real& del_press, Real& del_enth) const
 {
     /////VARIABLES:
     Real visc1, visc2, visc3;                   //output - viscosity, 1 = comp. water, 2 = steam, 3 = sat. mix.
     Real dens1, dens2, dens3;                   //output - density, 1 = comp. water, 2 = steam, 3 = sat. mix.
     Real enth1, enth2, enth3;                   //output - enthalpy, 1 = comp. water, 2 = steam, 3 = sat. mix
-    Real temp_sat;                              //*formerly Ts
     Real temp1, temp2;                          //*formerly T
     Real enth_water;                            //*formerly hw
     Real enth_steam;                            //*formerly hg
@@ -743,7 +742,7 @@ Real WaterSteamEOS::Equations_of_State_Properties(Real _enth_in, Real _press_in,
     
     /////Part I - Determining Phase of Water (compressed water, steam, or saturated mixture):
     //Function calls
-    phase_determ (_enth_in, _press_in, _phase, _temp_sat, enth_water, enth_steam, dens_water, dens_steam);
+    phaseDetermine (enth_in, press_in, phase, temp_sat, enth_water, enth_steam, dens_water, dens_steam);
                                                                         //inputs - enthalpy, pressure
                                                                         //outputs - phase ([1], [2], or [3]),
                                                                         //          saturation temp,
@@ -751,11 +750,11 @@ Real WaterSteamEOS::Equations_of_State_Properties(Real _enth_in, Real _press_in,
                                                                         //          enthalpy and density of saturated steam
             
     /////Part II - Running Equations of State:
-    if (_phase == 1)                                                     //if water is in the compressed water phase it
+    if (phase == 1)                                                     //if water is in the compressed water phase it
                                                                         //will run this loop
     {
         //Function calls
-        water_eq_of_state (_enth_in, _press_in, _temp_sat, temp1, dens1, enth1);       
+        waterEquationOfStatePH (enth_in, press_in, temp_sat, temp1, dens1, enth1);       
                                                                         //inputs - enthalpy, pressure, saturation temp
                                                                         //outputs - temperature, density, and enthalpy
                                                                         //Performs Newton itterations to find the temperature
@@ -766,23 +765,23 @@ Real WaterSteamEOS::Equations_of_State_Properties(Real _enth_in, Real _press_in,
                                                                         //output - viscosity of comp. water
                 
         //outputs to falcon for non-derivatives:
-        _temp_out = temp1;                                              //*T
-        _sat_fraction_out = 1.0;                                        //*sw
-        _dens_water_out = dens1;                                        //*Denw
-        _dens_steam_out = -99999;                                       //*Dens
-        _enth_water_out = _enth_in;                                      //*hw
-        _enth_steam_out = 0.0;                                          //*hs or hg
-        _dens_out = dens1;                                              //*Den
-        _visc_water_out = visc1;                                                    
-        _visc_steam_out = -99999;                                                   
+        temp_out = temp1;                                              //*T
+        sat_fraction_out = 1.0;                                        //*sw
+        dens_water_out = dens1;                                        //*Denw
+        dens_steam_out = 1e-15;                                       //*Dens
+        enth_water_out = enth_in;                                      //*hw
+        enth_steam_out = 0.0;                                          //*hs or hg
+        dens_out = dens1;                                              //*Den
+        visc_water_out = visc1;                                                    
+        visc_steam_out = 1e-15;                                                   
         visc_out = visc1;                                              //*visc
-        _del_press = 0.1;
-        _del_enth = -0.1;
+        del_press = 0.1;
+        del_enth = -0.1;
     }
-    else if (_phase == 2)                                                //if water is in the steam phase it will run this loop
+    else if (phase == 2)                                                //if water is in the steam phase it will run this loop
     {
         //Function calls
-        steam_eq_of_state (_enth_in, _press_in, _temp_sat, temp2, dens2, enth2);       
+        steamEquationOfStatePH (enth_in, press_in, temp_sat, temp2, dens2, enth2);       
                                                                         //inputs - enthalpy, pressure, saturation temp
                                                                         //outputs - temperature, density, and enthalpy
                                                                         //Performs Newton itterations to find the temperature
@@ -793,42 +792,42 @@ Real WaterSteamEOS::Equations_of_State_Properties(Real _enth_in, Real _press_in,
                                                                         //output - viscosity of steam
                 
         //outputs to falcon for non-derivatives:
-        _temp_out = temp2;                                              //*T
-        _sat_fraction_out = 0.0;                                        //*sw
-        _dens_water_out = -99999;                                       //*Denw
-        _dens_steam_out = dens2;                                        //*Dens
-        _enth_water_out = 0.0;                                          //*hw
-        _enth_steam_out = _enth_in;                                      //*hs or hg
-        _dens_out = dens2;                                              //*Den
-        _visc_water_out = -99999;                                                   
-        _visc_steam_out = visc2;                                                    
+        temp_out = temp2;                                              //*T
+        sat_fraction_out = 0.0;                                        //*sw
+        dens_water_out = 1e-15;                                       //*Denw
+        dens_steam_out = dens2;                                        //*Dens
+        enth_water_out = 0.0;                                          //*hw
+        enth_steam_out = enth_in;                                      //*hs or hg
+        dens_out = dens2;                                              //*Den
+        visc_water_out = 1e-15;                                                   
+        visc_steam_out = visc2;                                                    
         visc_out = visc2;                                              //*visc
-        _del_press = -0.1;
-        _del_enth = 0.1;
+        del_press = -0.1;
+        del_enth = 0.1;
     }
-    else if (_phase == 3)                                                //if water is a saturated mixture it will run this loop
+    else if (phase == 3)                                                //if water is a saturated mixture it will run this loop
     {
         //Function calls
-        viscosity (dens_water, _temp_sat, visc_water);                  //inputs - density of water at sat. temp., saturation 
+        viscosity (dens_water, temp_sat, visc_water);                  //inputs - density of water at sat. temp., saturation 
                                                                         //temp from phase_determ func.
                                                                         //outputs - viscosity of saturated liquid
-        viscosity (dens_steam, _temp_sat, visc_steam);                  //inputs - density of steam at sat. temp., saturation 
+        viscosity (dens_steam, temp_sat, visc_steam);                  //inputs - density of steam at sat. temp., saturation 
                                                                         //temp from phase_determ func.
                                                                         //outputs - viscosity of saturated steam
                 
         //outputs to falcon for non-derivatives:
-        _temp_out = _temp_sat;                                           //*T
-        _sat_fraction_out = 1.e0 / (1.e0 - dens_water / dens_steam * (enth_water - _enth_in)/ (enth_steam - _enth_in)); //*sw
-        _dens_water_out = dens_water;                                   //*Denw
-        _dens_steam_out = dens_steam;                                   //*Dens
-        _enth_water_out = enth_water;                                   //*hw
-        _enth_steam_out = enth_steam;                                   //*hs or hg
-        _dens_out = _sat_fraction_out * dens_water + (1.e0 - _sat_fraction_out) * dens_steam;  //*Den
-        _visc_water_out = visc_water;                                               
-        _visc_steam_out = visc_steam;                                                   
-        visc_out = _sat_fraction_out * visc_water + (1.e0 - _sat_fraction_out) * visc_steam;  //*visc
-        _del_press = 0.1;
-        _del_enth = 0.1;
+        temp_out = temp_sat;                                           //*T
+        sat_fraction_out = 1.e0 / (1.e0 - dens_water / dens_steam * (enth_water - enth_in)/ (enth_steam - enth_in)); //*sw
+        dens_water_out = dens_water;                                   //*Denw
+        dens_steam_out = dens_steam;                                   //*Dens
+        enth_water_out = enth_water;                                   //*hw
+        enth_steam_out = enth_steam;                                   //*hs or hg
+        dens_out = sat_fraction_out * dens_water + (1.e0 - sat_fraction_out) * dens_steam;  //*Den
+        visc_water_out = visc_water;                                               
+        visc_steam_out = visc_steam;                                                   
+        visc_out = sat_fraction_out * visc_water + (1.e0 - sat_fraction_out) * visc_steam;  //*visc
+        del_press = 0.1;
+        del_enth = 0.1;
     }
     else
     { }
@@ -840,13 +839,13 @@ Real WaterSteamEOS::Equations_of_State_Properties(Real _enth_in, Real _press_in,
 //WaterSteamEOS: Equations_of_State_Properties, phase_determ, water_eq_of_state, steam_eq_of_state, water_EOS__deriv_init_values, 
 //and steam_EOS_deriv_init_values are called within the bellow funtion.  This allows for more organization and flexibility.  
 //Call this function if the derivatives of the EOS properties w.r.t. pressure and enthalpy ARE needed.
-Real WaterSteamEOS::Equations_of_State_Derivative_Properties(Real _enth_in, Real _press_in, Real& _temp_out, Real& _sat_fraction_out, Real& _dens_out, Real& _dens_water_out, Real& _dens_steam_out, Real& _enth_water_out, Real& _enth_steam_out, Real& _visc_water_out, Real& _visc_steam_out, Real& _del_press, Real& _del_enth, Real& _d_enth_water_d_press, Real& _d_enth_steam_d_press, Real& _d_dens_d_press, Real& _d_temp_d_press, Real& _d_enth_water_d_enth, Real& _d_enth_steam_d_enth, Real& _d_dens_d_enth, Real& _d_temp_d_enth, Real& _d_sat_fraction_d_enth) const
+Real WaterSteamEOS::waterAndSteamEquationOfStatePropertiesWithDerivativesPH (Real enth_in, Real press_in, Real& temp_out, Real& sat_fraction_out, Real& dens_out, Real& dens_water_out, Real& dens_steam_out, Real& enth_water_out, Real& enth_steam_out, Real& visc_water_out, Real& visc_steam_out, Real& d_enth_water_d_press, Real& d_enth_steam_d_press, Real& d_dens_d_press, Real& d_temp_d_press, Real& d_enth_water_d_enth, Real& d_enth_steam_d_enth, Real& d_dens_d_enth, Real& d_temp_d_enth, Real& d_sat_fraction_d_enth) const
 {
     //Variables
     //new pressure and enthalpy values shifted by del_press and del_enth:
     Real new_press;                              //*formerly p+delp
     Real new_enth;                               //*formerly h+delh
-    Real _temp_sat;                              //saturation temperature, *formerly Tsat
+    Real temp_sat;                              //saturation temperature, *formerly Tsat
     //inital values for derivative calulations:
     Real temp_0;                                 //*formerly t0 - inital value of temperature
     Real enth_water_0;                           //*formerly hw0 - initial value of water enthalpy
@@ -871,108 +870,105 @@ Real WaterSteamEOS::Equations_of_State_Derivative_Properties(Real _enth_in, Real
     Real dens_water_1h;                          //*formerly dw1 - final value of water density after enthalpy shift
     Real dens_steam_1h;                          //*formerly dg1 - final value of steam density after enthalpy figt
     Real sat_fraction_1h;                        //*formerly sw1 - final value of saturation fraction after enthalpy shift
-    Real _phase;
+    Real phase;                                  //current phase of fluid (water, steam, saturated mix)
+    Real del_press, del_enth;                    //delta increments added to enthalpy and pressure to determine derivatives
     
     
     //Obtain non-derivative properties:
-    Equations_of_State_Properties(_enth_in, _press_in, _phase, _temp_out, _temp_sat, _sat_fraction_out, _dens_out, _dens_water_out,  _dens_steam_out, _enth_water_out, _enth_steam_out, _visc_water_out, _visc_steam_out, _del_press, _del_enth);
+    waterAndSteamEquationOfStatePropertiesPH (enth_in, press_in, phase, temp_out, temp_sat, sat_fraction_out, dens_out, dens_water_out, dens_steam_out, enth_water_out, enth_steam_out, visc_water_out, visc_steam_out, del_press, del_enth);
                                                    //viscosity terms outputs from this function are not used
     
     //New-incremented pressure and enthalpy:
-    new_press = _press_in + _del_press;
-    new_enth = _enth_in + _del_enth;
-    temp_0 = _temp_out;
+    new_press = press_in + del_press;
+    new_enth = enth_in + del_enth;
+    temp_0 = temp_out;
     
-    if (_phase == 1)                                                     //if water is in a compressed water phase it will run this loop
+    if (phase == 1)                                                     //if water is in a compressed water phase it will run this loop
     {        
         //Function calls
-        water_EOS_deriv_init_values (_press_in, temp_0, enth_water_0, dens_0);                
+        waterEquationOfStatePT (press_in, temp_0, enth_water_0, dens_0);                
                                                                         //Determining initial enthalpy and density for derivative 
                                                                         //calculations
                                                                         //inputs - press_in, temp_0
                                                                         //outputs - enth_water_0, dens_0
-        
-        water_eq_of_state (_enth_in, new_press, _temp_sat, temp_1p, dens_1p, enth_water_1p);   
+    
+        waterEquationOfStatePH (enth_in, new_press, temp_sat, temp_1p, dens_1p, enth_water_1p);   
                                                                         //Determining final enthalpy and density w.r.t new 'incremented' 
                                                                         //pressure value (new_press = press_in + del_press)
                                                                         //inputs - enth_in, new_press, temp_sat
                                                                         //outputs - temp_1p, dens_1p, enth_water_1p
         
-        water_eq_of_state (new_enth, _press_in, _temp_sat, temp_1h, dens_1h, enth_water_1h);   
+        waterEquationOfStatePH (new_enth, press_in, temp_sat, temp_1h, dens_1h, enth_water_1h);   
                                                                         //Determining final enthalpy and density w.r.t new 'incremented' 
                                                                         //enthalpy value (new_enth = enth_in + del_enth)
                                                                         //inputs - new_enth, press_in, temp_sat
                                                                         //outputs - temp_1h, dens_1h, enth_water_1h
         
         //outputs to falcon - derivatives with respect to pressure
-        _d_enth_water_d_press = ((enth_water_1p - enth_water_0) / _del_press) * 10e-7;//*dhwdp
+        d_enth_water_d_press = ((enth_water_1p - enth_water_0) / del_press) * 10e-7;//*dhwdp
         //_d_enth_water_d_press = 1e-9;
-        _d_enth_steam_d_press = 0.0;                                    //*dhshp  
-        _d_dens_d_press = (dens_1p - dens_0) / _del_press;              //*dDendp
-        _d_temp_d_press = (temp_1p - temp_0) / _del_press;              //*dTdp
+        d_enth_steam_d_press = 0.0;                                    //*dhshp  
+        d_dens_d_press = (dens_1p - dens_0) / del_press;              //*dDendp
+        d_temp_d_press = (temp_1p - temp_0) / del_press;              //*dTdp
         
-        //std::cout << _d_temp_d_press << std::endl;
         
         //outputs to falcon - derivatives with respect to enthalpy
-        _d_enth_water_d_enth = ((enth_water_1h - enth_water_0) / _del_enth) * 10.e-7; //*dhwdh
+        d_enth_water_d_enth = ((enth_water_1h - enth_water_0) / del_enth) * 10.e-7; //*dhwdh
         //_d_enth_water_d_enth = 0.0;
-        _d_enth_steam_d_enth = 0.0;                                     //*dhsdh
-        _d_dens_d_enth = ((dens_1h - dens_0) / _del_enth) / 10e-7;      //*dDendh
-        _d_temp_d_enth = ((temp_1h - temp_0) / _del_enth) / 10e-7;      //*dTdh
-        _d_sat_fraction_d_enth = 0.0;                                   //*dswdh
+        d_enth_steam_d_enth = 0.0;                                     //*dhsdh
+        d_dens_d_enth = ((dens_1h - dens_0) / del_enth) / 10e-7;      //*dDendh
+        d_temp_d_enth = ((temp_1h - temp_0) / del_enth) / 10e-7;      //*dTdh
+        d_sat_fraction_d_enth = 0.0;                                   //*dswdh
         
-        //std::cout << "1. " << dens_1h << " 2. " << dens_0 << std::endl;
-        
-        //std::cout << _d_temp_d_enth << std::endl;
     }
     
-    else if (_phase == 2)                                                //if water is in a steam phase it will run this loop
+    else if (phase == 2)                                                //if water is in a steam phase it will run this loop
     {        
         //Function calls
-        steam_EOS_deriv_init_values (_press_in, temp_0, enth_steam_0, dens_0);                
+        steamEquationOfStatePT (press_in, temp_0, enth_steam_0, dens_0);                
                                                                         //Determining initial enthalpy and density for derivative 
                                                                         //calculations
                                                                         //inputs - press_in, temp_0
                                                                         //outputs - enth_steam_0, dens_0
         
-        steam_eq_of_state (_enth_in, new_press, _temp_sat, temp_1p, dens_1p, enth_steam_1p);   
+        steamEquationOfStatePH (enth_in, new_press, temp_sat, temp_1p, dens_1p, enth_steam_1p);   
                                                                         //Determining final enthalpy and density w.r.t new 'incremented' 
                                                                         //pressure value (new_press = press_in + del_press)
                                                                         //inputs - enth_in, new_press, temp_sat
                                                                         //outputs - temp_1p, dens_1p, enth_steam_1p
         
-        steam_eq_of_state (new_enth, _press_in, _temp_sat, temp_1h, dens_1h, enth_steam_1h);   
+        steamEquationOfStatePH (new_enth, press_in, temp_sat, temp_1h, dens_1h, enth_steam_1h);   
                                                                         //Determining final enthalpy and density w.r.t new 'incremented' 
                                                                         //enthalpy value (new_enth = enth_in + del_enth)
                                                                         //inputs - new_enth, press_in, temp_sat
                                                                         //outputs - temp_1h, dens_1h, enth_steam_1h
         
         //outputs to falcon - derivatives with respect to pressure
-        _d_enth_water_d_press = 0.0;                                    //*dhwdp
-        _d_enth_steam_d_press = ((enth_steam_1p - enth_steam_0) / _del_press) * 10e-7; //*dhsdp
-        _d_dens_d_press = (dens_1p - dens_0) / _del_press;              //*dDendp
-        _d_temp_d_press = (temp_1p - temp_0) / _del_press;              //*dTdp
+        d_enth_water_d_press = 0.0;                                    //*dhwdp
+        d_enth_steam_d_press = ((enth_steam_1p - enth_steam_0) / del_press) * 10e-7; //*dhsdp
+        d_dens_d_press = (dens_1p - dens_0) / del_press;              //*dDendp
+        d_temp_d_press = (temp_1p - temp_0) / del_press;              //*dTdp
                 
         //outputs to falcon - derivatives with respect to enthalpy
-        _d_enth_water_d_enth = 0.0;                                     //*dhwdh 
-        _d_enth_steam_d_enth = 1.e0;                                    //*dhsdh
-        _d_dens_d_enth = ((dens_1h - dens_0) / _del_enth) / 10e-7;      //*dDendh
-        _d_temp_d_enth = ((temp_1h - temp_0) / _del_enth) / 10e-7;      //*dTdh
-        _d_sat_fraction_d_enth = 0.0;                                   //*dswdh
+        d_enth_water_d_enth = 0.0;                                     //*dhwdh 
+        d_enth_steam_d_enth = 1.e0;                                    //*dhsdh
+        d_dens_d_enth = ((dens_1h - dens_0) / del_enth) / 10e-7;      //*dDendh
+        d_temp_d_enth = ((temp_1h - temp_0) / del_enth) / 10e-7;      //*dTdh
+        d_sat_fraction_d_enth = 0.0;                                   //*dswdh
         
     }
-    else if (_phase == 3)                                                //if water is in a saturated mixture phase it will run this loop
+    else if (phase == 3)                                                //if water is in a saturated mixture phase it will run this loop
     {        
         //Reassigning calcuated variables from Equations_of_State_Properties function to new variables for phase 3 derivative loop
-        dens_water_0 = _dens_water_out;
-        enth_water_0 = _enth_water_out;
-        sat_fraction_0 = _sat_fraction_out;
-        dens_steam_0 = _dens_steam_out;
-        enth_steam_0 = _enth_steam_out;
-        dens_0 = _dens_out;
+        dens_water_0 = dens_water_out;
+        enth_water_0 = enth_water_out;
+        sat_fraction_0 = sat_fraction_out;
+        dens_steam_0 = dens_steam_out;
+        enth_steam_0 = enth_steam_out;
+        dens_0 = dens_out;
         
         //Function calls
-        phase_determ (_enth_in, new_press, _phase, temp_1p, enth_water_1p, enth_steam_1p, dens_water_1p, dens_steam_1p);
+        phaseDetermine (enth_in, new_press, phase, temp_1p, enth_water_1p, enth_steam_1p, dens_water_1p, dens_steam_1p);
                                                                         //Determining final enthalpy, density, and saturation fraction
                                                                         //values with respect to new 'incremented' pressure value
                                                                         //(new_press = press_in + del_press)
@@ -981,23 +977,23 @@ Real WaterSteamEOS::Equations_of_State_Derivative_Properties(Real _enth_in, Real
                                                                         //          dens_water_1p, dens_steam_1p
         
         //Some calculations to determine final values of saturation fraction and density
-        sat_fraction_1p = 1.e0 / (1.e0 - dens_water_1p / dens_steam_1p * (enth_water_1p - _enth_in) / (enth_steam_1p - _enth_in));
+        sat_fraction_1p = 1.e0 / (1.e0 - dens_water_1p / dens_steam_1p * (enth_water_1p - enth_in) / (enth_steam_1p - enth_in));
         sat_fraction_1h = 1.e0 / (1.e0 - dens_water_0 / dens_steam_0 * (enth_water_0 - new_enth) / (enth_steam_0 - new_enth));
         dens_1p = sat_fraction_1p * dens_water_1p + (1.e0 - sat_fraction_1p) * dens_steam_1p;
         dens_1h = sat_fraction_1h * dens_water_0 + (1.e0 - sat_fraction_1h) * dens_steam_0;
         
         //outputs to falcon - derivatives with repect to pressure
-        _d_enth_water_d_press = ((enth_water_1p - enth_water_0) / _del_press) * 10e-7;     //*dhwdp
-        _d_enth_steam_d_press = ((enth_steam_1p - enth_steam_0) / _del_press) * 10e-7;     //*dhsdp
-        _d_dens_d_press = (dens_1p - dens_0) / _del_press;              //*dDendp
-        _d_temp_d_press = (temp_1p - temp_0) / _del_press;              //*dTdp
+        d_enth_water_d_press = ((enth_water_1p - enth_water_0) / del_press) * 10e-7;     //*dhwdp
+        d_enth_steam_d_press = ((enth_steam_1p - enth_steam_0) / del_press) * 10e-7;     //*dhsdp
+        d_dens_d_press = (dens_1p - dens_0) / del_press;              //*dDendp
+        d_temp_d_press = (temp_1p - temp_0) / del_press;              //*dTdp
         
         //outputs to falcon - derivatives with respect to enthalpy
-        _d_enth_water_d_enth = 0.0;                                     //*dhwdh
-        _d_enth_steam_d_enth = 0.0;                                     //*dhsdh
-        _d_dens_d_enth = ((dens_1h - dens_0) / _del_enth) / 10e-7;      //*dDendh
-        _d_temp_d_enth = 0.0;                                           //*dTdh
-        _d_sat_fraction_d_enth = ((sat_fraction_1h - sat_fraction_0) / _del_enth) / 10e-7; //*dswdh
+        d_enth_water_d_enth = 0.0;                                     //*dhwdh
+        d_enth_steam_d_enth = 0.0;                                     //*dhsdh
+        d_dens_d_enth = ((dens_1h - dens_0) / del_enth) / 10e-7;      //*dDendh
+        d_temp_d_enth = 0.0;                                           //*dTdh
+        d_sat_fraction_d_enth = ((sat_fraction_1h - sat_fraction_0) / del_enth) / 10e-7; //*dswdh
     }
     return (0);
 }

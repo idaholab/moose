@@ -35,11 +35,8 @@ EnthalpyConvectionWater::EnthalpyConvectionWater(const std::string & name, Input
     //_enthalpy_water(coupledValue("enthalpy_water")),              (removed by Kat)
     //_denthalpy_waterdH_P(coupledValue("denthalpy_waterdH_P")),    (removed by Kat)
     //_denthalpy_waterdP_H(coupledValue("denthalpy_waterdP_H")),    (removed by Kat)
-//_prop_name_enthalpy_water(getParam<std::string>("enthalpy_water")),                  //(added by Kat)
     _enthalpy_water(getMaterialProperty<Real>("enthalpy_water")),           //(added by Kat)
-//_prop_name_denthalpy_waterdH_P(getParam<std::string>("denthalpy_waterdH_P")),        //(added by Kat)
     _denthalpy_waterdH_P(getMaterialProperty<Real>("denthalpy_waterdH_P")), //(added by Kat)
-//_prop_name_denthalpy_waterdP_H(getParam<std::string>("denthalpy_waterdP_H")),        //(added by Kat)
     _denthalpy_waterdP_H(getMaterialProperty<Real>("denthalpy_waterdP_H")), //(added by Kat)
     _p_var(coupled("pressure")),
     _grad_p(coupledGradient("pressure"))

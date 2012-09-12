@@ -20,17 +20,17 @@ InputParameters validParams<EnthalpyImplicitEuler>()
 {
   InputParameters params = validParams<ImplicitEuler>();
   params.addCoupledVar("temperature", "TODO: add description");
-  params.addCoupledVar("density", "TODO: add description");
+  //params.addCoupledVar("density", "TODO: add description");
   return params;
 }
 
 EnthalpyImplicitEuler::EnthalpyImplicitEuler(const std::string & name, InputParameters parameters)
   :ImplicitEuler(name, parameters),
    
-   _temperature(getMaterialProperty<Real>("temperature")),
-   _temperature_old(getMaterialProperty<Real>("temperature_old")),
+   _temperature(coupledValue("temperature")),
+   _temperature_old(coupledValue("temperature_old")),
    _density(getMaterialProperty<Real>("density")),
-   _density_old(getMaterialProperty<Real>("density_old")),
+   _density_old(getMaterialProperty<Real>("time_old_density")),
 
    _porosity(getMaterialProperty<Real>("porosity")),
    _density_rock(getMaterialProperty<Real>("density_rock")),

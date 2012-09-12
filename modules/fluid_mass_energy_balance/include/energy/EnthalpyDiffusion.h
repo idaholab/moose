@@ -34,8 +34,6 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   
-  //std::string _prop_name_dTdH_P;       //(added by Kat)
-  //std::string _prop_name_dTdP_H;       //(added by Kat)
     VariableGradient & _grad_T;
     //VariableValue & _dTdH_P;      //(removed by Kat)
     //VariableValue & _dTdP_H;      //(removed by Kat)

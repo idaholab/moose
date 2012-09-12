@@ -34,21 +34,21 @@ MassFluxTimeDerivative::MassFluxTimeDerivative(const std::string & name, InputPa
 
 _water_steam_properties(getUserObject<WaterSteamEOS>("water_steam_properties")),
    
-   //_density(coupledValue("density")),                         //removed by kat
-   //_density_old(coupledValueOld("density")),                  //removed by kat
-   //_ddensitydH_P(coupledValue("ddensitydH_P")),               //removed by kat
-   //_ddensitydp_H(coupledValue("ddensitydp_H")),               //removed by kat
+//_density(coupledValue("density")),                         //removed by kat
+//_density_old(coupledValueOld("density")),                  //removed by kat
+//_ddensitydH_P(coupledValue("ddensitydH_P")),               //removed by kat
+//_ddensitydp_H(coupledValue("ddensitydp_H")),               //removed by kat
 _density(getMaterialProperty<Real>("density")),                     //added by kat
 _time_old_density(getMaterialProperty<Real>("time_old_density")),   //added by kat
 _ddensitydp_H(getMaterialProperty<Real>("ddensitydp_H")),           //added by kat
 _ddensitydH_P(getMaterialProperty<Real>("ddensitydH_P")),           //added by kat
 
-   _enthalpy_old(coupledValueOld("enthalpy")),
-   _h_var(coupled("enthalpy")),
-   _porosity (getMaterialProperty<Real>("material_porosity")),
+_enthalpy_old(coupledValueOld("enthalpy")),
+_h_var(coupled("enthalpy")),
+_porosity (getMaterialProperty<Real>("material_porosity")),
 //   _porosity(coupledValue("porosity")),
 //   _porosity_old(coupledValueOld("porosity"))
-   _u_old(valueOld())
+_u_old(valueOld())
 {}
 
 Real
@@ -56,17 +56,15 @@ MassFluxTimeDerivative::computeQpResidual()
 {
     Real _den_old;
     Real _var[12];
-    Real _time_deriv_den_mix;
+    Real _time_old_den;
     
     if (_t_step==1)
-    {
-        //_den_old = _density[_qp];
+    {        
+        _water_steam_properties.waterAndSteamEquationOfStatePropertiesPH (_enthalpy_old[_qp], _u_old[_qp], _var[0], _var[1], 
+                                                                          _var[2], _var[3], _time_old_den, _var[4], _var[5], 
+                                                                          _var[6],_var[7], _var[8], _var[9], _var[10], _var[11]); 
         
-        _water_steam_properties.Equations_of_State_Properties(_enthalpy_old[_qp], _u_old[_qp], _var[0], _var[1], 
-                                                              _var[2], _var[3], _time_deriv_den_mix, _var[4], _var[5], 
-                                                              _var[6],_var[7], _var[8], _var[9], _var[10], _var[11]); 
-        
-        _den_old = _time_deriv_den_mix; 
+        _den_old = _time_old_den; 
     }
     else
     {

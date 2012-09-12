@@ -44,7 +44,7 @@ protected:
     //VariableValue & _temperature;
     //VariableValue  & _temperature_old;
     MaterialProperty<Real> & _temperature;
-    MaterialProperty<Real> & _time_old_material_temp;       //added by kat
+    MaterialProperty<Real> & _time_old_temperature;       //added by kat
     
     MaterialProperty<Real> & _dTdH_P;                //changed from VariableValue
     MaterialProperty<Real> & _dTdP_H;                //changed from VariableValue

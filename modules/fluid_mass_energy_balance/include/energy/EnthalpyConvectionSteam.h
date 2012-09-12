@@ -39,9 +39,6 @@ protected:
     MaterialProperty<Real> & _Dtau_steamDP;
     MaterialProperty<RealGradient> & _darcy_mass_flux_steam;
     MaterialProperty<Real> & _tau_steam;
-  //std::string _prop_name_enthalpy_steam;
-  //std::string _prop_name_denthalpy_steamdH_P;
-  //std::string _prop_name_denthalpy_steamdP_H;
     MaterialProperty<Real> &_enthalpy_steam;            //(added by Kat)
     MaterialProperty<Real> &_denthalpy_steamdH_P;       //(added by Kat)
     MaterialProperty<Real> &_denthalpy_steamdP_H;       //(added by Kat)
