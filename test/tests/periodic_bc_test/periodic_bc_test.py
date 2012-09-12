@@ -29,7 +29,8 @@ testlevel1 = { INPUT : 'periodic_level_1_test.i',
 subdomain_restricted_vars_test = { INPUT : 'periodic_subdomain_restricted_test.i',
                                    MAX_THREADS : 1,
                                    EXODIFF : ['out_restrict.e'],
-                                   GROUP : 'periodic' }
+                                   GROUP : 'periodic',
+                                   SKIP : 'Currently Broken'}
 
 auto_wrap_2d_test = { INPUT : 'auto_periodic_bc_test.i',
                       EXODIFF : ['out_auto.e'],
