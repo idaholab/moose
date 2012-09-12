@@ -35,6 +35,18 @@ RankFourTensorTonks::operator()(unsigned int i, unsigned int j, unsigned int k, 
 }
 
 void
+RankFourTensorTonks::setValue(Real val, unsigned int i, unsigned int j, unsigned int k, unsigned int l)
+{
+  _vals[i-1][j-1][k-1][l-1] = val; //Note, indcies go from 1 to 3
+}
+
+Real
+RankFourTensorTonks::getValue(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const
+{
+  return _vals[i-1][j-1][k-1][l-1];//Note, indcies go from 1 to 3
+}
+
+void
 RankFourTensorTonks::zero()
 {
   for (unsigned int i(0); i<N; i++)
@@ -54,6 +66,20 @@ RankFourTensorTonks::operator= (const RankFourTensorTonks &a)
           _vals[i][j][k][l] = a._vals[i][j][k][l];
   
   return *this; 
+}
+
+RealTensorValue
+RankFourTensorTonks::operator*(const RankTwoTensorTonks &a)
+{
+  RealTensorValue result;
+  
+  for(unsigned int i(0); i<N; i++)
+    for(unsigned int j(0); j<N; j++)
+      for(unsigned int k(0); k<N; k++)
+        for(unsigned int l(0); l<N; l++)
+          result(i,j) += _vals[i][j][k][l]*a(k,l);
+  
+  return result;
 }
 
 RealTensorValue
@@ -95,6 +121,31 @@ RankFourTensorTonks::operator*=(const Real &a)
   
   return *this;
 }
+RankFourTensorTonks
+RankFourTensorTonks::operator/(const Real &a)
+{
+  RankFourTensorTonks result;
+  
+  for(unsigned int i(0); i<N; i++)
+    for(unsigned int j(0); j<N; j++)
+      for(unsigned int k(0); k<N; k++)
+        for(unsigned int l(0); l<N; l++)
+          result(i,j,k,l) = _vals[i][j][k][l]/a;
+
+return result;
+}
+
+RankFourTensorTonks &
+RankFourTensorTonks::operator/=(const Real &a)
+{
+  for(unsigned int i(0); i<N; i++)
+    for(unsigned int j(0); j<N; j++)
+      for(unsigned int k(0); k<N; k++)
+        for(unsigned int l(0); l<N; l++)
+          _vals[i][j][k][l] = _vals[i][j][k][l]/a;
+  
+  return *this;
+}
 
 RankFourTensorTonks &
 RankFourTensorTonks::operator+=(const RankFourTensorTonks &a)
@@ -118,6 +169,46 @@ RankFourTensorTonks::operator+(const RankFourTensorTonks &a) const
       for(unsigned int k(0); k<N; k++)
         for(unsigned int l(0); l<N; l++)
           result(i,j,k,l) = _vals[i][j][k][l] + a(i,j,k,l);
+
+  return result;
+}
+
+RankFourTensorTonks &
+RankFourTensorTonks::operator-=(const RankFourTensorTonks &a)
+{
+  for(unsigned int i(0); i<N; i++)
+    for(unsigned int j(0); j<N; j++)
+      for(unsigned int k(0); k<N; k++)
+        for(unsigned int l(0); l<N; l++)
+          _vals[i][j][k][l] = _vals[i][j][k][l] - a(i,j,k,l);
+  
+  return *this;
+}
+
+RankFourTensorTonks
+RankFourTensorTonks::operator-(const RankFourTensorTonks &a) const
+{
+  RankFourTensorTonks result;
+  
+  for(unsigned int i(0); i<N; i++)
+    for(unsigned int j(0); j<N; j++)
+      for(unsigned int k(0); k<N; k++)
+        for(unsigned int l(0); l<N; l++)
+          result(i,j,k,l) = _vals[i][j][k][l] - a(i,j,k,l);
+
+  return result;
+}
+
+RankFourTensorTonks
+RankFourTensorTonks::operator - () const
+{
+  RankFourTensorTonks result;
+
+  for(unsigned int i(0); i<N; i++)
+    for(unsigned int j(0); j<N; j++)
+      for(unsigned int k(0); k<N; k++)
+        for(unsigned int l(0); l<N; l++)
+          result(i,j,k,l) = -_vals[i][j][k][l];
 
   return result;
 }

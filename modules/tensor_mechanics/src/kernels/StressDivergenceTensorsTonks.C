@@ -1,7 +1,8 @@
 #include "StressDivergenceTensorsTonks.h"
 
 #include "Material.h"
-#include "ElasticityTensorR4.h"c
+#include "ElasticityTensorR4.h"
+#include "RankTwoTensorTonks.h"
 
 template<>
 InputParameters validParams<StressDivergenceTensorsTonks>()
@@ -24,7 +25,7 @@ InputParameters validParams<StressDivergenceTensorsTonks>()
 
 StressDivergenceTensorsTonks::StressDivergenceTensorsTonks(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
-   _stress(getMaterialProperty<RealTensorValue>("stress" + getParam<std::string>("appended_property_name"))),
+   _stress(getMaterialProperty<RankTwoTensorTonks>("stress" + getParam<std::string>("appended_property_name"))),
    _Jacobian_mult(getMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
    // _d_stress_dT(getMaterialProperty<RankTwoTensor>("d_stress_dT"+ getParam<std::string>("appended_property_name"))),
    _component(getParam<unsigned int>("component")),

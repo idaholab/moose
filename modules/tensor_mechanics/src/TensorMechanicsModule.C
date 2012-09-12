@@ -9,6 +9,7 @@
 #include "StressDivergenceTensorsTonks.h"
 #include "LinearElasticMaterial.h"
 #include "RankTwoAux.h"
+#include "RankTwoTonksAux.h"
 #include "RealTensorValueAux.h"
 #include "RankFourAux.h"
 
@@ -22,6 +23,7 @@ Elk::TensorMechanics::registerObjects()
   registerMaterial(LinearElasticMaterial);
 
   registerAux(RankTwoAux);
+  registerAux(RankTwoTonksAux);
   registerAux(RealTensorValueAux);
   registerAux(RankFourAux);
 }

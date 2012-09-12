@@ -3,6 +3,7 @@
 
 #include "Kernel.h"
 
+
 /** StressDivergenceTensorsTonks mostly copies from StressDivergence.  There are small changes to use
  * RankFourTensor and RankTwoTensorsTonks instead of SymmElasticityTensorsTonks and SymmTensorsTonks.  This is done
  * to allow for more mathematical transparancy.
@@ -11,6 +12,7 @@
 //Forward Declarations
 class StressDivergenceTensorsTonks;
 class ElasticityTensorR4;
+class RankTwoTensorTonks;
 
 template<>
 InputParameters validParams<StressDivergenceTensorsTonks>();
@@ -28,7 +30,7 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  MaterialProperty<RealTensorValue> & _stress;
+  MaterialProperty<RankTwoTensorTonks> & _stress;
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
 

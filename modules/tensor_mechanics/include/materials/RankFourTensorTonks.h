@@ -16,6 +16,7 @@
 #include <vector>
 #include "libmesh.h"
 #include "vector_value.h"
+#include "RankTwoTensorTonks.h"
 
 class RankFourTensorTonks
 {
@@ -46,17 +47,33 @@ public:
   Real operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const;
 
   /**
+   * Sets the value for the index specified
+   */
+  void setValue(Real val, unsigned int i, unsigned int j, unsigned int k, unsigned int l);
+
+  /**
+   * Gets the value for the index specified.  Takes index = 1,2,3
+   */
+  Real getValue(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const;
+
+  /**
   * Zeros out the tensor.
   */
   void zero();
 
   RankFourTensorTonks & operator=(const RankFourTensorTonks &a);
   
+  RealTensorValue operator*(const RankTwoTensorTonks &a);
+  
   RealTensorValue operator*(const RealTensorValue &a);
 
   RankFourTensorTonks operator*(const Real &a);
 
   RankFourTensorTonks & operator*=(const Real &a);
+
+  RankFourTensorTonks operator/(const Real &a);
+
+  RankFourTensorTonks & operator/=(const Real &a);
 
   RankFourTensorTonks & operator+=(const RankFourTensorTonks &a);
   
@@ -65,6 +82,8 @@ public:
   RankFourTensorTonks & operator-=(const RankFourTensorTonks &a);
   
   RankFourTensorTonks operator-(const RankFourTensorTonks &a) const;
+
+  RankFourTensorTonks operator - () const;
 
   virtual void rotate(RealTensorValue &R);
   /**
