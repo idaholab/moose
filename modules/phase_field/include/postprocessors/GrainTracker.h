@@ -26,8 +26,6 @@ public:
   // Get the bubble map
   Real getNodeValue(unsigned int node_id) const;
 
-  Real minPeriodicDistance(Point p, Point q);
-
 protected:
   enum STATUS
   {
@@ -86,10 +84,8 @@ protected:
 
   /// A reference to the nonlinear system
   NonlinearSystem & _nl;
-
-  std::vector<bool> _periodic_dim;
+  
   GeneratedMesh *_gen_mesh;
-  Point _half_range;
 };
 
 #endif
