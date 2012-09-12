@@ -1,6 +1,7 @@
 #include "GrainTracker.h"
 #include "MooseMesh.h"
 #include "AddV.h"
+#include "GeneratedMesh.h"
 
 #include <limits>
 
@@ -19,7 +20,9 @@ InputParameters validParams<GrainTracker>()
 
 GrainTracker::GrainTracker(const std::string & name, InputParameters parameters) :
     NodalFloodCount(name, AddV(parameters, "variable")),
-    _tracking_step(getParam<unsigned int>("tracking_step"))
+    _tracking_step(getParam<unsigned int>("tracking_step")),
+    _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
+    _gen_mesh(dynamic_cast<GeneratedMesh *>(&_mesh))
 {
   _region_to_grain[0] = 0; // Zero indicates no grain - we need a place holder for this one postion
 }
@@ -38,6 +41,23 @@ GrainTracker::getNodeValue(unsigned int node_id) const
 
   unsigned int region_id = _bubble_map.at(node_id);
   return _region_to_grain.at(region_id);
+}
+
+void
+GrainTracker::initialize()
+{
+  NodalFloodCount::initialize();
+
+  // Initialize the periodic variable for each of our dimensions to false
+  _periodic_dim.resize(LIBMESH_DIM, false);
+  if (_gen_mesh)
+  {
+    for (unsigned int i=0; i<_gen_mesh->dimension(); ++i)
+      // Assumption: We are going to assume that all variables are periodic together
+      _periodic_dim[i] = _gen_mesh->isPeriodic(_nl, _var_number, i);
+
+    _half_range = Point(_gen_mesh->dimensionWidth(0)/2.0, _gen_mesh->dimensionWidth(1)/2.0, _gen_mesh->dimensionWidth(2)/2.0);
+  }
 }
 
 void
@@ -130,28 +150,46 @@ GrainTracker::buildBoundingBoxes()
           PeriodicBoundary *pb = _pbs->boundary(nodeset_it->first);
           mooseAssert(pb != NULL, "Error Periodic Boundary is NULL in GrainTracker");
 
-          /**
-           * Assumptions: This call will only work with serial mesh since we may not have this particular point
-           *              on this particular processor in parallel.
-           *              Also, we can only use a single translation vector with constant translation PBCs.
-           */
+          bool prefered_direction = false;
+          if (_prefered_pb_pair.find(pb->myboundary) != _prefered_pb_pair.end())
+            prefered_direction = true;
 
-          /**
-           * TODO: This is a workaround for not having access to the translation vector.  We can take an arbitrary point,
-           * get the corresponding point and subtract the two to recover the translation vector.  We need an accessor in
-           * libMesh.
-           */
-          Point boundary_point = mesh.point(*nodeset_it->second.begin());
-          Point corresponding_point = pb->get_corresponding_pos(boundary_point);
+          // See if we need to add this after making sure that it's not in the "non-prefered" orientation
+          if (_nonprefered_pb_pair.find(pb->myboundary) == _nonprefered_pb_pair.end())
+          {
+            _prefered_pb_pair[pb->myboundary] = pb->pairedboundary;
+            _nonprefered_pb_pair[pb->pairedboundary] = pb->myboundary;
+            prefered_direction = true;
+          }
 
-          translation_vector += boundary_point - corresponding_point;
+          if (prefered_direction)
+          {
+            /**
+             * Assumptions: This call will only work with serial mesh since we may not have this particular point
+             *              on this particular processor in parallel.
+             *              Also, we can only use a single translation vector with constant translation PBCs.
+             */
+
+            /**
+             * TODO: This is a workaround for not having access to the translation vector.  We can take an arbitrary point,
+             * get the corresponding point and subtract the two to recover the translation vector.  We need an accessor in
+             * libMesh.
+             */
+
+//            // DEBUG
+//            std::cout << "Primary: " << pb->myboundary << "\n";
+//            std::cout << "Secondary: " << pb->pairedboundary << "\n";
+//            // DEBUG
+
+            Point boundary_point = mesh.point(*nodeset_it->second.begin());
+            Point corresponding_point = pb->get_corresponding_pos(boundary_point);
+
+            translation_vector += boundary_point - corresponding_point;
+          }
         }
       }
     }
 
-    // DEBUG
-    std::cout << "Bounding Box: (" << min << ", " << max << ")\n";
-    // DEBUG
     _bounding_boxes.push_back(new BoundingBoxInfo(some_node_id, translation_vector, min, max));
   }
 }
@@ -227,7 +265,12 @@ GrainTracker::trackGrains()
         if (grain_it->second->variable_idx == curr_var)
         {
           // Now check to see how close this centroid is to the previous centroid
-          Real curr_centroid_diff = (grain_it->second->centroid - curr_centroid).size();
+          Real curr_centroid_diff = minPeriodicDistance(grain_it->second->centroid, curr_centroid);
+
+//          // DEBUG
+//          std::cout << "Centroids: " << grain_it->second->centroid << curr_centroid << " Diff: " <<  curr_centroid_diff << "\n";
+//          // DEBUG
+
           if (curr_centroid_diff <= min_centroid_diff)
           {
             found_one = true;
@@ -280,11 +323,25 @@ GrainTracker::calculateCentroid(const std::vector<BoundingBoxInfo *> & box_ptrs)
   Point centroid;
   for (std::vector<BoundingBoxInfo *>::const_iterator it = box_ptrs.begin(); it != box_ptrs.end(); ++it)
   {
-    Point curr_adj_centroid = (((*it)->b_box->max() + (*it)->b_box->min()) / 2.0) + (*it)->translation_vector;
+//    // DEBUG
+//    std::cout << "Bounding Box: (" << (*it)->b_box->min() << ", " << (*it)->b_box->max() << ")\n";
+//    // DEBUG
+    Point curr_adj_centroid = (((*it)->b_box->max() + (*it)->b_box->min()) / 2.0) - (*it)->translation_vector;
+
+//    // DEBUG
+//    std::cout << "Translation Vector: " << (*it)->translation_vector << "\n";
+//    std::cout << "Centroid: " << curr_adj_centroid << "\n";
+//    // DEBUG
 
     centroid += curr_adj_centroid;
   }
   centroid /= box_ptrs.size();
+
+  // TODO:  Make sure that the final centroid is in the domain
+
+//  // DEBUG
+//  std::cout << "Combined Centroid: " << centroid << "\n\n";
+//  // DEBUG
 
   return centroid;
 }
@@ -311,4 +368,29 @@ GrainTracker::UniqueGrain::~UniqueGrain()
     delete box_ptrs[i]->b_box;
     delete box_ptrs[i];
   }
+}
+
+Real
+GrainTracker::minPeriodicDistance(Point p, Point q)
+{
+  for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+  {
+    // check to see if we're closer in real or periodic space in x, y, and z
+    if (_periodic_dim[i])
+    {
+      // Need to test order before differencing
+      if (p(i) > q(i))
+      {
+        if (p(i) - q(i) > _half_range(i))
+          p(i) -= _half_range(i) * 2;
+      }
+      else
+      {
+        if (q(i) - p(i) > _half_range(i))
+          p(i) += _half_range(i) * 2;
+      }
+    }
+  }
+
+  return (p-q).size();
 }
