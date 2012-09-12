@@ -23,6 +23,7 @@
 #include "parallel.h"
 #include "mesh_communication.h"
 #include "parallel_mesh.h"
+#include "periodic_boundary_base.h"
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 
@@ -592,7 +593,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & peri
       for (std::vector<boundary_id_type>::const_iterator id_it = bc_ids.begin(); id_it!=bc_ids.end(); ++id_it)
       {
         const boundary_id_type boundary_id = *id_it;
-        const PeriodicBoundary *periodic = pbs->boundary(boundary_id);
+        const PeriodicBoundaryBase *periodic = pbs->boundary(boundary_id);
         if (periodic && periodic->is_my_variable(var_number))
         {
           const Elem* neigh = pbs->neighbor(boundary_id, point_locator, elem, s);
@@ -647,7 +648,7 @@ MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<unsigned int> > &
       periodic_node_sets[il[i]].insert(nl[i]);
     else // This still might be a periodic node but we just haven't seen this boundary_id yet
     {
-      const PeriodicBoundary *periodic = pbs->boundary(il[i]);
+      const PeriodicBoundaryBase *periodic = pbs->boundary(il[i]);
       if (periodic && periodic->is_my_variable(var_number))
         periodic_node_sets[il[i]].insert(nl[i]);
     }

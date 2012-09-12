@@ -20,7 +20,7 @@
 #include "mesh_generation.h"
 #include "string_to_enum.h"
 #include "periodic_boundaries.h"
-
+#include "periodic_boundary_base.h"
 
 template<>
 InputParameters validParams<GeneratedMesh>()
@@ -126,7 +126,7 @@ GeneratedMesh::isPeriodic(NonlinearSystem &nl, unsigned int var_num, unsigned in
 
   static const int pb_map[3][3] = {{0, -99, -99},{3, 0, -99},{4, 1, 5}};
 
-  PeriodicBoundary *pb = pbs->boundary(pb_map[_mesh.mesh_dimension()-1][dim]);
+  PeriodicBoundaryBase *pb = pbs->boundary(pb_map[_mesh.mesh_dimension()-1][dim]);
 
   if (pb != NULL)
     return pb->is_my_variable(var_num);

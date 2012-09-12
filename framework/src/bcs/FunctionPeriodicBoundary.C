@@ -16,8 +16,6 @@
 #include "FEProblem.h"
 #include "Function.h"
 
-/**
- */
 FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblem & feproblem, std::vector<std::string> fn_names) :
     _dim(fn_names.size()),
     _tr_x(&feproblem.getFunction(fn_names[0])),
@@ -28,8 +26,8 @@ FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblem & feproblem, std::v
     mooseError("Transform function has to have the same dimension as the problem being solved.");
 }
 
-FunctionPeriodicBoundary::FunctionPeriodicBoundary(const FunctionPeriodicBoundary & o, bool inverse/* = false*/) :
-    PeriodicBoundary(o, inverse),
+FunctionPeriodicBoundary::FunctionPeriodicBoundary(const FunctionPeriodicBoundary & o) :
+    PeriodicBoundaryBase(o),
     _dim(o._dim),
     _tr_x(o._tr_x),
     _tr_y(o._tr_y),
@@ -62,4 +60,14 @@ FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt) const
   }
 
   return pt;
+}
+
+
+
+AutoPtr<PeriodicBoundaryBase> FunctionPeriodicBoundary::clone(TransformationType t) const
+{
+  if (t==INVERSE)
+    mooseError("No way to automatically clone() an inverse FunctionPeriodicBoundary object");
+
+  return AutoPtr<PeriodicBoundaryBase>(new FunctionPeriodicBoundary(*this));
 }

@@ -20,6 +20,9 @@
 #include "FEProblem.h"
 #include "GeneratedMesh.h"
 
+// LibMesh includes
+#include "periodic_boundary.h" // translation PBCs provided by libmesh
+
 template<>
 InputParameters validParams<AddPeriodicBCAction>()
 {
@@ -42,7 +45,7 @@ AddPeriodicBCAction::AddPeriodicBCAction(const std::string & name, InputParamete
 }
 
 void
-AddPeriodicBCAction::setPeriodicVars(PeriodicBoundary & p, const std::vector<std::string> & var_names)
+AddPeriodicBCAction::setPeriodicVars(PeriodicBoundaryBase & p, const std::vector<std::string> & var_names)
 {
   NonlinearSystem & nl = _problem->getNonlinearSystem();
 
@@ -118,33 +121,25 @@ AddPeriodicBCAction::act()
   }
   else if (getParam<std::vector<std::string> >("transform_func") != std::vector<std::string>())
   {
+    std::vector<std::string> inv_fn_names = getParam<std::vector<std::string> >("inv_transform_func");
     std::vector<std::string> fn_names = getParam<std::vector<std::string> >("transform_func");
 
-    FunctionPeriodicBoundary *pb = new FunctionPeriodicBoundary(*_problem, fn_names);
-    pb->myboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("primary"));
-    pb->pairedboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("secondary"));
-    setPeriodicVars(*pb, getParam<std::vector<std::string> >("variable"));
-
-    FunctionPeriodicBoundary *ipb = NULL;
-    if (getParam<std::vector<std::string> >("inv_transform_func") != std::vector<std::string>())
-    {
-      // asymmetric translation vector
-      std::vector<std::string> inv_fn_names = getParam<std::vector<std::string> >("inv_transform_func");
-
-      ipb = new FunctionPeriodicBoundary(*_problem, inv_fn_names);
-      // these are switched, because we are forming the inverse translation
-      ipb->myboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("secondary"));
-      ipb->pairedboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("primary"));
-      setPeriodicVars(*ipb, getParam<std::vector<std::string> >("variable"));
-    }
-    else
-    {
-      // The user *must* provide an inverse transformation function if he provides a forward
-      // transformation!  There's no default behavior we can do that would make sense (like there
-      // is for translation, where you can just multiply the translation vector by -1.)
+    // If the user provided a forward transformation, he must also provide an inverse -- we can't
+    // form the inverse of an arbitrary function automatically...
+    if (inv_fn_names == std::vector<std::string>())
       mooseError("You must provide an inv_transform_func for FunctionPeriodicBoundary!");
-    }
 
+    FunctionPeriodicBoundary pb(*_problem, fn_names);
+    pb.myboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("primary"));
+    pb.pairedboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("secondary"));
+    setPeriodicVars(pb, getParam<std::vector<std::string> >("variable"));
+
+    FunctionPeriodicBoundary ipb(*_problem, inv_fn_names);
+    ipb.myboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("secondary"));   // these are swapped
+    ipb.pairedboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("primary")); // these are swapped
+    setPeriodicVars(ipb, getParam<std::vector<std::string> >("variable"));
+
+    // Add the pair of periodic boundaries to the dof map
     nl.dofMap().add_periodic_boundary(pb, ipb);
   }
   else

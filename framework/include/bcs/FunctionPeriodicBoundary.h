@@ -15,9 +15,10 @@
 #ifndef FUNCTIONPERIODICBOUNDARY_H
 #define FUNCTIONPERIODICBOUNDARY_H
 
+#include <vector>
 
 #include "point.h"
-#include "periodic_boundaries.h"
+#include "periodic_boundary_base.h"
 
 class FEProblem;
 class Function;
@@ -25,12 +26,12 @@ class Function;
 /**
  * Periodic boundary for calculation periodic BC on domains where the translation is given by functions
  */
-class FunctionPeriodicBoundary : public PeriodicBoundary
+class FunctionPeriodicBoundary : public PeriodicBoundaryBase
 {
 public:
 
   /**
-   * Initialize the periodic boundary with three function
+   * Initialize the periodic boundary with three functions
    */
   FunctionPeriodicBoundary(FEProblem & subproblem, std::vector<std::string> fn_names);
 
@@ -38,9 +39,8 @@ public:
    * Copy constructor for creating the periodic boundary and inverse periodic boundary
    *
    * @param o - Periodic boundary being copied
-   * @param inverse - true if creating the inverse periodic boundary
    */
-  FunctionPeriodicBoundary(const FunctionPeriodicBoundary & o, bool inverse = false);
+  FunctionPeriodicBoundary(const FunctionPeriodicBoundary & o);
 
   /**
    * Get the translation based on point 'pt'
@@ -48,6 +48,11 @@ public:
    * @return point on the paired boundary
    */
   virtual Point get_corresponding_pos(const Point & pt) const;
+
+  /**
+   * Required interface, this class must be able to clone itself
+   */
+  virtual AutoPtr<PeriodicBoundaryBase> clone(TransformationType t) const;
 
 protected:
   /// The dimension of the problem (says which _tr_XYZ member variables are active)
