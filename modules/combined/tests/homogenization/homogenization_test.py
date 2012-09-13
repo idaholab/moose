@@ -9,6 +9,5 @@ longFiber_test = { INPUT : 'anisoLongFiber.i',
                  }
 
 heatConduction_test = { INPUT : 'heatConduction2D.i',
-                        EXODIFF : ['heatConduction2D_out.e'],
-                        SKIP : 'Reinvestigate'
+                        EXODIFF : ['heatConduction2D_out.e']
                       }

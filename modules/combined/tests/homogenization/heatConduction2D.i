@@ -32,10 +32,12 @@
   [./temp_x]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 100
   [../]
   [./temp_y]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 100
   [../]
 
 [] # Variables
