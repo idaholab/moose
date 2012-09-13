@@ -35,14 +35,13 @@ GROUP         = 'group'          # Specify a single group or a list of groups th
 HEAVY         = 'heavy'          # Set to true if this test should only be run when the --heavy option is used
 
 # Scaling options
-#PARALLEL      = 'parallel'      # String: Number of processes to use
-MAX_PARALLEL   = 'max_parallel'  # String: When running in parallel, regardles of processes to use, use this number instead
-MIN_PARALLEL   = 'min_parallel'  # String: When running in parallel, regardles of processes to use, use this number instead
-SCALE_REFINE  = '<n>'            # The number of refinements to do when scaling
+MAX_PARALLEL   = 'max_parallel'  # Maximum number of MPI processes this test can be run with      (Default: 1000)
+MIN_PARALLEL   = 'min_parallel'  # Minimum number of MPI processes that this test can be run with (Default: 1)
 
-MAX_THREADS     = 'max_thread'    # String: Max number of threads 16
-MIN_THREADS     = 'min_thread'    # String: Min number of threads 1
-#SCALE_REFINE   = '<n>'           # The number of refinements to do when scaling
+MAX_THREADS     = 'max_thread'   # String: Max number of threads (Default: 16)
+MIN_THREADS     = 'min_thread'   # String: Min number of threads (Default: 1)
+
+SCALE_REFINE   = '<n>'           # The number of refinements to do when scaling
 
 # These options are not currently implemented.  Please contact the MOOSE Team if you are ready to use them.
 #SCALE    = 'scale'              # Set to True to scale?
