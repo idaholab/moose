@@ -53,6 +53,12 @@ public:
   Real operator()(unsigned int i, unsigned int j) const;
 
   /**
+  * fillFromInputVector takes 6 or 9 inputs to fill in the Rank-2 tensor. If 6 inputs, the appropriate crystal
+  * symmetries are maintained.  I.e., S_ij = S_ji
+  */
+  void fillFromInputVector(const std::vector<Real> input);
+
+  /**
   * Sets the value for the index specified.  Takes index = 1,2,3
   */
   void setValue(Real val, unsigned int i, unsigned int j);
@@ -65,9 +71,14 @@ public:
   TypeVector<Real> row(const unsigned int r) const;
 
   /**
-   *rotates the tensor data given three Euler angles
+   *rotates the tensor data given the rotation tensor
    */
   virtual void rotate(RealTensorValue &R);
+
+  /**
+   *rotates the tensor data around the z-axis given an angle in radians
+   */
+  virtual RankTwoTensorTonks rotateXyPlane(const Real a);
   
   void zero();
 

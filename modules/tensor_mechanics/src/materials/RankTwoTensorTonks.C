@@ -52,6 +52,38 @@ RankTwoTensorTonks::operator()(unsigned int i, unsigned int j) const
 }
 
 void
+RankTwoTensorTonks::fillFromInputVector(const std::vector<Real> input)
+{   
+  if (input.size() == 6)
+  {
+    std::cout << "Rank 2 tensor input size =" << input.size() << std::endl;
+    
+    _vals[0][0] = input[0]; //S11
+    _vals[1][1] = input[1]; //S22
+    _vals[2][2] = input[2]; //S33
+    _vals[1][2] = _vals[2][1] = input[3]; //S23
+    _vals[0][2] = _vals[2][0] = input[4]; //S13
+    _vals[0][1] = _vals[1][0] = input[5]; //S12
+  }
+  else if (input.size() == 9)
+  {
+    std::cout << "Rank 2 tensor input size =" << input.size() << std::endl;
+    
+    _vals[0][0] = input[0]; //S11
+    _vals[1][0] = input[1]; //S21
+    _vals[2][0] = input[2]; //S31
+    _vals[0][1] = input[3]; //S12
+    _vals[1][1] = input[4]; //S22
+    _vals[2][1] = input[5]; //S32
+    _vals[0][2] = input[6]; //S13
+    _vals[1][2] = input[7]; //S23
+    _vals[2][2] = input[8]; //S33
+  }
+  else
+    mooseError("Please check the number of entries in the eigenstrain input vector");
+} 
+
+void
 RankTwoTensorTonks::setValue(Real val, unsigned int i, unsigned int j)
 {
   _vals[i-1][j-1] = val;
@@ -88,6 +120,43 @@ RankTwoTensorTonks::rotate(RealTensorValue &R)
       _vals[i][j] = temp;
     }
 
+}
+
+RankTwoTensorTonks
+RankTwoTensorTonks::rotateXyPlane(const Real a)
+{
+  RankTwoTensorTonks b;
+
+  Real x, y, xy;
+  x = _vals[0][0]*std::cos(a)*std::cos(a)
+    + _vals[1][1]*std::sin(a)*std::sin(a)
+    + 2.0*_vals[0][1]*std::cos(a)*std::sin(a);
+
+  y = _vals[0][0]*std::sin(a)*std::sin(a)
+    + _vals[1][1]*std::cos(a)*std::cos(a)
+    - 2.0*_vals[0][1]*std::cos(a)*std::sin(a);
+
+  xy = 2.0*(_vals[1][1] - _vals[0][0])*std::cos(a)*std::sin(a)
+     + 2.0*_vals[0][1]*(std::cos(a)*std::cos(a) - std::sin(a)*std::sin(a));
+
+  xy /= 2.0;
+
+
+  /* std::cout<<"x="<<x<<std::endl;
+  std::cout<<"y="<<y<<std::endl;
+  std::cout<<"xy="<<xy<<std::endl; */
+  
+  b.setValue(x, 1, 1);
+  b.setValue(y, 2, 2);
+  b.setValue(xy, 1, 2);
+  b.setValue(xy, 2, 1);
+  b.setValue(_vals[0][2], 1, 3);
+  b.setValue(_vals[2][0], 3, 1);
+  b.setValue(_vals[1][2], 2, 3);
+  b.setValue(_vals[2][1], 3, 2);
+  b.setValue(_vals[2][2], 3, 3);
+  
+  return b;
 }
 
 void
