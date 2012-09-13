@@ -29,6 +29,7 @@
 #include "Problem.h"
 #include "SubProblem.h"
 #include "DependencyResolverInterface.h"
+#include "Function.h"
 
 // libMesh includes
 #include "quadrature_gauss.h"
