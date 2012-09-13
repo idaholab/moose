@@ -13,6 +13,7 @@
 #include "RankTwoTonksAux.h"
 #include "RealTensorValueAux.h"
 #include "RankFourAux.h"
+#include "RankFourTonksAux.h"
 
 void
 Elk::TensorMechanics::registerObjects()
@@ -29,6 +30,7 @@ Elk::TensorMechanics::registerObjects()
   registerAux(RankTwoTonksAux);
   registerAux(RealTensorValueAux);
   registerAux(RankFourAux);
+  registerAux(RankFourTonksAux);
 }
 
 void

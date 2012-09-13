@@ -73,6 +73,7 @@
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
+    Tonks_form = true
  [../]
 []
 
@@ -85,7 +86,7 @@
 
 [AuxKernels]
   [./matl_s11]
-    type = RankTwoAux
+    type = RankTwoTonksAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 1
@@ -93,7 +94,7 @@
   [../]
  
  [./matl_s12]
-    type = RankTwoAux
+    type = RankTwoTonksAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 2
@@ -101,7 +102,7 @@
   [../]
 
   [./matl_s13]
-    type = RankTwoAux
+    type = RankTwoTonksAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 3
@@ -109,7 +110,7 @@
   [../]
 
   [./matl_s22]
-    type = RankTwoAux
+    type = RankTwoTonksAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
@@ -117,7 +118,7 @@
   [../]
 
   [./matl_s23]
-    type = RankTwoAux
+    type = RankTwoTonksAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 3
@@ -125,7 +126,7 @@
   [../]
 
   [./matl_s33]
-    type = RankTwoAux
+    type = RankTwoTonksAux
     rank_two_tensor = stress
     index_i = 3
     index_j = 3
@@ -135,7 +136,7 @@
 
 [Materials]
   [./Anisotropic]
-    type = LinearElasticMaterial
+    type = TensorElasticMaterial
     block = 0
     disp_x = disp_x
     disp_y = disp_y
@@ -149,42 +150,42 @@
 
 [BCs]
   [./bottom]
-    type = DirichletBC
+    type = PresetBC
     variable = diffused
     boundary = '1'
     value = 1
   [../]
 
   [./top]
-    type = DirichletBC
+    type = PresetBC
     variable = diffused
     boundary = '2'
     value = 0
   [../]
 
   [./disp_x_BC]
-    type = DirichletBC
+    type = PresetBC
     variable = disp_x
     boundary = '0 2'
     value = 0.5
   [../]
 
   [./disp_x_BC2]
-    type = DirichletBC
+    type = PresetBC
     variable = disp_x
     boundary = '1 3'
     value = 0.01
   [../]
 
   [./disp_y_BC]
-    type = DirichletBC
+    type = PresetBC
     variable = disp_y
     boundary = '0 2'
     value = 0.8
   [../]
 
   [./disp_y_BC2]
-    type = DirichletBC
+    type = PresetBC
     variable = disp_y
     boundary = '1 3'
     value = 0.02
