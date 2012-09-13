@@ -17,7 +17,7 @@ InputParameters validParams<RankFourAux>()
 
 RankFourAux::RankFourAux(const std::string & name, InputParameters parameters)
     : AuxKernel(name, parameters),
-      _tensor(getMaterialProperty<RankFourTensor>(getParam<std::string>("rank_four_tensor"))),
+      _tensor(getMaterialProperty<ElasticityTensorR4>(getParam<std::string>("rank_four_tensor"))),
       _i(getParam<int>("index_i")),
       _j(getParam<int>("index_j")),
       _k(getParam<int>("index_k")),

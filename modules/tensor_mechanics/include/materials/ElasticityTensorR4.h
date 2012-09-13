@@ -13,9 +13,9 @@
 #define ELASTICITYTENSORR4_H
 
 // Any requisite includes here
-#include "RankFourTensorTonks.h"
+#include "RankFourTensor.h"
 
-class ElasticityTensorR4 : public RankFourTensorTonks
+class ElasticityTensorR4 : public RankFourTensor
 {
 public:
 

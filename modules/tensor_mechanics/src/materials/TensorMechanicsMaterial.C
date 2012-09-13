@@ -1,4 +1,4 @@
-// Original class author: A.M. Jokisaari, O. Heinonen
+// Original class author: A.M. Jokisaari, O. Heinonen, M. R. Tonks
 
 #include "TensorMechanicsMaterial.h"
 #include "RotationTensor.h"
@@ -34,11 +34,11 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
       _grad_disp_x_old(coupledGradientOld("disp_x")),
       _grad_disp_y_old(coupledGradientOld("disp_y")),
       _grad_disp_z_old(_dim == 3 ? coupledGradientOld("disp_z") : _grad_zero),
-      _stress(declareProperty<RankTwoTensorTonks>("stress")),
+      _stress(declareProperty<RankTwoTensor>("stress")),
       _elasticity_tensor(declareProperty<ElasticityTensorR4>("elasticity_tensor")),
       _Jacobian_mult(declareProperty<ElasticityTensorR4>("Jacobian_mult")),
-      _elastic_strain(declareProperty<RankTwoTensorTonks>("elastic_strain")),
-      //_d_stress_dT(declareProperty<RankTwoTensorTonks>("d_stress_dT")),
+      _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
+      //_d_stress_dT(declareProperty<RankTwoTensor>("d_stress_dT")),
       _euler_angle_1(getParam<Real>("euler_angle_1")),
       _euler_angle_2(getParam<Real>("euler_angle_2")),
       _euler_angle_3(getParam<Real>("euler_angle_3")),
@@ -75,10 +75,10 @@ void TensorMechanicsMaterial::computeQpElasticityTensor()
 
 void TensorMechanicsMaterial::computeQpStrain()
 {
-  RankTwoTensorTonks grad_tensor(_grad_disp_x[_qp],_grad_disp_y[_qp],_grad_disp_z[_qp]);
+  RankTwoTensor grad_tensor(_grad_disp_x[_qp],_grad_disp_y[_qp],_grad_disp_z[_qp]);
   _elastic_strain[_qp] = (grad_tensor + grad_tensor.transpose())/2.0;
 
-  /*RankTwoTensorTonks strain_old(_grad_disp_x_old[_qp],_grad_disp_y_old[_qp],_grad_disp_z_old[_qp]);
+  /*RankTwoTensor strain_old(_grad_disp_x_old[_qp],_grad_disp_y_old[_qp],_grad_disp_z_old[_qp]);
    * strain_old += strain_old.transpose();
    * strain_old = strain_old*0.5;
 

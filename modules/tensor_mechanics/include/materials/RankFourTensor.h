@@ -1,10 +1,10 @@
 /**
- * RankFourTensor is designed to handle the Stiffness Tensor for a fully anisotropic material.
+ * RankFourTensor is designed to handle any fourth order tensor.
  * It is designed to allow for maximum clarity of the mathematics and ease of use.
- * Original class authors: A. M. Jokisaari, O. Heinonen
+ * Original class authors: A. M. Jokisaari, O. Heinonen, M.R. Tonks
  *
  * RankFourTensor holds the 81 separate C_ijkl entries; the entries are accessed by index, with
- * i, j, k, and l equal to 1, 2, or 3.
+ * i, j, k, and l equal to 0, 1, 2
  * 
  */
 
@@ -12,10 +12,11 @@
 #define RANKFOURTENSOR_H
 
 // Any requisite includes here
-#include "RankTwoTensor.h"
+#include "tensor_value.h"
 #include <vector>
 #include "libmesh.h"
 #include "vector_value.h"
+#include "RankTwoTensor.h"
 
 class RankFourTensor
 {
@@ -32,77 +33,75 @@ public:
   RankFourTensor(const RankFourTensor &a);
 
   ~RankFourTensor() {}
-
- /**
-  * fillFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in
-  * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
-  * C_ijkl = C_ijlk, C_ijkl = C_jikl
-  */
-  void fillFromInputVector(const std::vector<Real> input, bool all);
   
+  /**
+   * Gets the value for the index specified.  Takes index = 0,1,2
+   */
+  Real & operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
+
+
+  /**
+   * Gets the value for the index specified.  Takes index = 0,1,2,
+   * used for const
+   */
+  Real operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const;
+
   /**
    * Sets the value for the index specified
    */
-  void setValue(Real val, int i, int j, int k, int l);
+  void setValue(Real val, unsigned int i, unsigned int j, unsigned int k, unsigned int l);
 
   /**
    * Gets the value for the index specified.  Takes index = 1,2,3
    */
-  Real getValue(int i, int j, int k, int l) const;
+  Real getValue(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const;
 
   /**
   * Zeros out the tensor.
   */
   void zero();
 
-  RankTwoTensor operator*(const RankTwoTensor &a);
+  RankFourTensor & operator=(const RankFourTensor &a);
+  
+  RealTensorValue operator*(const RankTwoTensor &a);
+  
+  RealTensorValue operator*(const RealTensorValue &a);
 
   RankFourTensor operator*(const Real &a);
+
+  RankFourTensor & operator*=(const Real &a);
+
+  RankFourTensor operator/(const Real &a);
+
+  RankFourTensor & operator/=(const Real &a);
 
   RankFourTensor & operator+=(const RankFourTensor &a);
   
   RankFourTensor operator+(const RankFourTensor &a) const;
-
-/**
- * calculates the Jacobian of the elastic stiffness tensor.
- */
-  virtual Real elasticJacobian( const int i, const int k,
-                                const RealGradient & t,
-                                const RealGradient & p);
   
-  virtual void selfRotate(const Real a1, const Real a2, const Real a3);
+  RankFourTensor & operator-=(const RankFourTensor &a);
+  
+  RankFourTensor operator-(const RankFourTensor &a) const;
 
-  virtual RankFourTensor rotate(const Real a1, const Real a2, const Real a3);
+  RankFourTensor operator - () const;
 
-  virtual void setRotationMatrix();
-
-  void setFirstEulerAngle(const Real a1);
-
-  void setSecondEulerAngle(const Real a2);
-
-  void setThirdEulerAngle(const Real a3);
-
-  Real firstEulerAngle() const;
-
-  Real secondEulerAngle() const;
-
-  Real thirdEulerAngle() const;
-
-  RankFourTensor & operator= (const RankFourTensor &a);
+  virtual void rotate(RealTensorValue &R);
+  /**
+   * Print the tensor
+   */
+  void print();
   
   
 protected:
 
-private:
-
 /**
- * Contains the actual data for the Rank Four tensor.  Takes index= 1,2,3
+ * Contains the actual data for the Rank Four tensor. 
  */
-  std::vector<std::vector<std::vector<std::vector<Real> > > > _vals;
+  static const unsigned int N = 3;
+  
+  Real _vals[N][N][N][N];
 
-  std::vector<Real> _euler_angle;
-
-  std::vector<std::vector<Real> > _rotation_matrix;
+private:
 
 };
 

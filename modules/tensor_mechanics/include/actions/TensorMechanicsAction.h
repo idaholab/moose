@@ -21,7 +21,6 @@ private:
   const std::string _disp_z;
   const std::string _disp_r;
   const std::string _temp;
-  bool _Tonks_form;
 };
 
 

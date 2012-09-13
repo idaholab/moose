@@ -1,7 +1,7 @@
 /**
  * RankTwoTensor is designed to handle the Stress or Strain Tensor for a fully anisotropic material.
  * It is designed to allow for maximum clarity of the mathematics and ease of use.
- * Original class authors: A. M. Jokisaari, O. Heinonen
+ * Original class authors: A. M. Jokisaari, O. Heinonen, M. R. Tonks
  *
  * RankTwoTensor holds the 9 separate Sigma_ij or Epsilon_ij entries; the entries are accessed by
  * index, with i, j equal to 1, 2, or 3.
@@ -15,6 +15,7 @@
 #include <vector>
 #include "libmesh.h"
 #include "vector_value.h"
+#include "tensor_value.h"
 
 class RankTwoTensor
 {
@@ -26,64 +27,62 @@ public:
   RankTwoTensor();
   
  /**
-   * Constructor that takes in 3 vectors and uses them to create columns
+   * Constructor that takes in 3 vectors and uses them to create rows
    */
-  RankTwoTensor(const TypeVector<Real> & col1, const TypeVector<Real> & col2, const TypeVector<Real> & col3);
+  RankTwoTensor(const TypeVector<Real> & row1, const TypeVector<Real> & row2, const TypeVector<Real> & row3);
 
   /**
    * Copy constructor
    */
   RankTwoTensor(const RankTwoTensor &a);
+
+  /**
+   * Copy constructor from RealTensorValue
+   */
+  RankTwoTensor(const TypeTensor<Real> &a);
   
   ~RankTwoTensor() {}
   
   /**
-  * fillFromInputVector takes 6 inputs to fill in the Rank-2 tensor, with the appropriate crystal
-  * symmetries maintained.  I.e., S_ij = S_ji
+   * Gets the value for the index specified.  Takes index = 0,1,2
+   */
+  Real & operator()(unsigned int i, unsigned int j);
+  /**
+   * Gets the value for the index specified.  Takes index = 0,1,2, used for const
+   */
+  Real operator()(unsigned int i, unsigned int j) const;
+
+  /**
+  * fillFromInputVector takes 6 or 9 inputs to fill in the Rank-2 tensor. If 6 inputs, the appropriate crystal
+  * symmetries are maintained.  I.e., S_ij = S_ji
   */
   void fillFromInputVector(const std::vector<Real> input);
-  
+
   /**
   * Sets the value for the index specified.  Takes index = 1,2,3
   */
-  void setValue(Real val, int i, int j);
+  void setValue(Real val, unsigned int i, unsigned int j);
 
   /**
-   *@return A Real value for the index specified.
-   *@param i is index of 1, 2, 3
-   *@param j is index of 1, 2, 3
+   *@return A Real value for the index specified. Takes index = 1,2,3
    */
-  Real getValue(int i, int j) const;
+  Real getValue(unsigned int i, unsigned int j) const;
 
-  Real rowDot(const unsigned int r, const libMesh::TypeVector<Real> & v) const;
+  TypeVector<Real> row(const unsigned int r) const;
 
   /**
-   *rotates the tensor data given three Euler angles
+   *rotates the tensor data given the rotation tensor
    */
-  virtual void selfRotate(const Real a1, const Real a2, const Real a3);
+  virtual void rotate(RealTensorValue &R);
 
   /**
-   *@return A RankTwoTensor of the rotated data.
-   */ 
-  virtual RankTwoTensor rotate(const Real a1, const Real a2, const Real a3);
-
+   *rotates the tensor data around the z-axis given an angle in radians
+   */
   virtual RankTwoTensor rotateXyPlane(const Real a);
+  
+  void zero();
 
-  virtual void setRotationMatrix();
-
-  void setFirstEulerAngle(const Real a1);
-
-  void setSecondEulerAngle(const Real a2);
-
-  void setThirdEulerAngle(const Real a3);
-
-  Real firstEulerAngle() const;
-
-  Real secondEulerAngle() const;
-
-  Real thirdEulerAngle() const;
-
-  void zero();/**
+  /**
    * Returns a matrix that is the transpose of the matrix this
    * was called on.
    */
@@ -93,21 +92,46 @@ public:
 
   RankTwoTensor & operator+= (const RankTwoTensor &a);
 
-  RankTwoTensor operator- (const RankTwoTensor &a) const;
+  RankTwoTensor operator+ (const RankTwoTensor &a) const;
 
-  RankTwoTensor operator* (const Real &a);
+  RankTwoTensor & operator-= (const RankTwoTensor &a);
+
+  RankTwoTensor operator- (const RankTwoTensor &a) const;
+  /**
+   * Return the opposite of a tensor
+   */
+  RankTwoTensor operator - () const;
+
+  RankTwoTensor & operator*= (const Real &a);
+
+  RankTwoTensor operator* (const Real &a) const;
+
+  RankTwoTensor & operator/= (const Real &a);
+
+  RankTwoTensor operator/ (const Real &a) const;
+  
+  //Defines multiplication with another RankTwoTensor
+  RankTwoTensor operator* (const RankTwoTensor &a) const;
+  
+  //Defines multiplication with a TypeTensor<Real>
+  RankTwoTensor operator* (const TypeTensor<Real> &a) const;
 
   Real doubleContraction(const RankTwoTensor &a);
+
+  Real trace();
+
+  //Calculate the determine of the tensor
+  Real det();
+
+  //Calculate the inverse of the tensor
+  RankTwoTensor inverse();
 
 protected:
   
 private:
-
-  std::vector<std::vector<Real> > _vals;
-
-  std::vector<Real> _euler_angle;
-
-  std::vector<std::vector<Real> > _rotation_matrix;
+  static const unsigned int N = 3;
+  
+  Real _vals[N][N];
 };
 
 

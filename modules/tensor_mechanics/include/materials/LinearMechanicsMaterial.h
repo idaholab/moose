@@ -1,10 +1,10 @@
-// Original class author: A.M. Jokisaari,  O. Heinonen, M.R. Tonks
+// Original class author: A.M. Jokisaari,  O. Heinonen
 
 #ifndef TENSORMECHANICSMATERIAL_H
 #define TENSORMECHANICSMATERIAL_H
 
 #include "Material.h"
-#include "RankTwoTensor.h"
+#include "RankTwoTensorTonks.h"
 #include "ElasticityTensorR4.h"
 
 /**
@@ -42,10 +42,10 @@ protected:
   VariableGradient & _grad_disp_y_old;
   VariableGradient & _grad_disp_z_old;
 
-  MaterialProperty<RankTwoTensor> & _stress;
+  MaterialProperty<RankTwoTensorTonks> & _stress;
   MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
-  MaterialProperty<RankTwoTensor> & _elastic_strain;
+  MaterialProperty<RankTwoTensorTonks> & _elastic_strain;
 
   Real _euler_angle_1;
   Real _euler_angle_2;
@@ -60,8 +60,8 @@ protected:
   //Individual material information
   ElasticityTensorR4 _Cijkl;
   
-//  MaterialProperty<RankTwoTensor> & _d_stress_dT;
-  RankTwoTensor _strain_increment;
+//  MaterialProperty<RankTwoTensorTonks> & _d_stress_dT;
+  RankTwoTensorTonks _strain_increment;
 
   RealVectorValue _Euler_angles;
 

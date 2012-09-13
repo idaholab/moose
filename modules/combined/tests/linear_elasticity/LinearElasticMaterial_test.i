@@ -73,7 +73,6 @@
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
-    Tonks_form = true
  [../]
 []
 
@@ -86,7 +85,7 @@
 
 [AuxKernels]
   [./matl_s11]
-    type = RankTwoTonksAux
+    type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 1
@@ -94,7 +93,7 @@
   [../]
  
  [./matl_s12]
-    type = RankTwoTonksAux
+    type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 2
@@ -102,7 +101,7 @@
   [../]
 
   [./matl_s13]
-    type = RankTwoTonksAux
+    type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 3
@@ -110,7 +109,7 @@
   [../]
 
   [./matl_s22]
-    type = RankTwoTonksAux
+    type = RankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
@@ -118,7 +117,7 @@
   [../]
 
   [./matl_s23]
-    type = RankTwoTonksAux
+    type = RankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 3
@@ -126,7 +125,7 @@
   [../]
 
   [./matl_s33]
-    type = RankTwoTonksAux
+    type = RankTwoAux
     rank_two_tensor = stress
     index_i = 3
     index_j = 3
@@ -136,7 +135,7 @@
 
 [Materials]
   [./Anisotropic]
-    type = TensorElasticMaterial
+    type = LinearElasticMaterial
     block = 0
     disp_x = disp_x
     disp_y = disp_y

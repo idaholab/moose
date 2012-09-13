@@ -180,7 +180,6 @@
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
-    Tonks_form = true
  [../]
 []
 
@@ -193,7 +192,7 @@
 
 [AuxKernels]
   [./matl_C1111]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 1
     index_j = 1
@@ -203,7 +202,7 @@
   [../]
 
    [./matl_C1122]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 1
     index_j = 1
@@ -213,7 +212,7 @@
   [../]
 
   [./matl_C1133]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 1
     index_j = 1
@@ -223,7 +222,7 @@
   [../]
 
   [./matl_C1123]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 1
     index_j = 1
@@ -233,7 +232,7 @@
   [../]
 
   [./matl_C1113]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 1
     index_j = 1
@@ -243,7 +242,7 @@
   [../]
 
   [./matl_C1112]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 1
     index_j = 1
@@ -253,7 +252,7 @@
   [../]
 
   [./matl_C2222]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 2
     index_j = 2
@@ -263,7 +262,7 @@
   [../]
 
   [./matl_C2233]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 2
     index_j = 2
@@ -273,7 +272,7 @@
   [../]
   
   [./matl_C2223]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 2
     index_j = 2
@@ -283,7 +282,7 @@
   [../]
 
   [./matl_C2213]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 2
     index_j = 2
@@ -293,7 +292,7 @@
   [../]
 
   [./matl_C2212]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 2
     index_j = 2
@@ -303,7 +302,7 @@
   [../]
 
  [./matl_C3333]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 3
     index_j = 3
@@ -313,7 +312,7 @@
   [../]
 
   [./matl_C3323]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 3
     index_j = 3
@@ -323,7 +322,7 @@
   [../]
 
   [./matl_C3313]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 3
     index_j = 3
@@ -333,7 +332,7 @@
   [../]
 
   [./matl_C3312]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 3
     index_j = 3
@@ -343,7 +342,7 @@
   [../]
 
   [./matl_C2323]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 2
     index_j = 3
@@ -353,7 +352,7 @@
   [../]
 
   [./matl_C2313]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 2
     index_j = 3
@@ -363,7 +362,7 @@
   [../]
 
   [./matl_C2312]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 2
     index_j = 3
@@ -373,7 +372,7 @@
   [../]
 
   [./matl_C1313]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 1
     index_j = 3
@@ -383,7 +382,7 @@
   [../]
 
   [./matl_C1312]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 1
     index_j = 3
@@ -393,7 +392,7 @@
   [../]
 
   [./matl_C1212]
-    type = RankFourTonksAux
+    type = RankFourAux
     rank_four_tensor = elasticity_tensor
     index_i = 1
     index_j = 2
@@ -403,7 +402,7 @@
   [../]
 
   [./matl_s11]
-    type = RankTwoTonksAux
+    type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 1
@@ -411,7 +410,7 @@
   [../]
  
  [./matl_s12]
-    type = RankTwoTonksAux
+    type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 2
@@ -419,7 +418,7 @@
   [../]
 
   [./matl_s13]
-    type = RankTwoTonksAux
+    type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 3
@@ -427,7 +426,7 @@
   [../]
 
   [./matl_s22]
-    type = RankTwoTonksAux
+    type = RankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
@@ -435,7 +434,7 @@
   [../]
 
   [./matl_s23]
-    type = RankTwoTonksAux
+    type = RankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 3
@@ -443,7 +442,7 @@
   [../]
 
   [./matl_s33]
-    type = RankTwoTonksAux
+    type = RankTwoAux
     rank_two_tensor = stress
     index_i = 3
     index_j = 3
@@ -453,7 +452,7 @@
 
 [Materials]
   [./Anisotropic]
-    type = TensorElasticMaterial
+    type = LinearElasticMaterial
     block = 0
     disp_x = disp_x
     disp_y = disp_y

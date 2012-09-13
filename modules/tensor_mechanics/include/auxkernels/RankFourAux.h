@@ -2,12 +2,12 @@
 #define RANKFOURAUX_H
 
 #include "AuxKernel.h"
-#include "RankFourTensor.h"
+#include "ElasticityTensorR4.h"
 
 class RankFourAux;
 
 /**
- * RankFourAux is designed to take the data in the RankFourTensor material
+ * RankFourAux is designed to take the data in the ElasticityTensorR4 material
  * property, for example stiffness, and output the value for the
  * supplied indices.
  */
@@ -25,7 +25,7 @@ public:
 protected:
   virtual Real computeValue();
 
-private:  MaterialProperty<RankFourTensor> & _tensor;
+private:  MaterialProperty<ElasticityTensorR4> & _tensor;
   const int _i;
   const int _j;
   const int _k;
