@@ -131,12 +131,17 @@ Transient::execute()
 
   preExecute();
 
+  // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have a wrong answer and might need to be regolded.
+  // The reason is that we actually move the solution back in time before we actually start solving (which I think is wrong).  So this call here
+  // is to maintain backward compatibility and so that MOOSE is giving the same answer.  However, we might remove this call and regold the test
+  // in the future eventually.
+  _problem.copyOldSolutions();
+
   // Start time loop...
   while(keepGoing())
   {
     takeStep();
-    if (lastSolveConverged())
-      endStep();
+    endStep();
   }
   postExecute();
 }
@@ -144,11 +149,6 @@ Transient::execute()
 void
 Transient::takeStep(Real input_dt)
 {
-  if (_converged)
-    _problem.copyOldSolutions();
-  else
-    _problem.restoreSolutions();
-
   _dt_old = _dt;
   if (input_dt == -1.0)
     _dt = computeConstrainedDT();
@@ -215,23 +215,30 @@ Transient::takeStep(Real input_dt)
 void
 Transient::endStep()
 {
-  // Compute the Error Indicators and Markers
-  _problem.computeIndicatorsAndMarkers();
+  if (lastSolveConverged())
+  {
+    // Compute the Error Indicators and Markers
+    _problem.computeIndicatorsAndMarkers();
 
-  // if _reset_dt is true, force the output no matter what
-  _problem.output(_reset_dt);
-  _problem.outputPostprocessors(_reset_dt);
+    // if _reset_dt is true, force the output no matter what
+    _problem.output(_reset_dt);
+    _problem.outputPostprocessors(_reset_dt);
 
 #ifdef LIBMESH_ENABLE_AMR
-  if (_problem.adaptivity().isOn())
-  {
-    _problem.adaptMesh();
-    _problem.out().meshChanged();
-  }
+    if (_problem.adaptivity().isOn())
+    {
+      _problem.adaptMesh();
+      _problem.out().meshChanged();
+    }
 #endif
 
-  _time_old = _time;
-  _t_step++;
+    _time_old = _time;
+    _t_step++;
+
+    _problem.copyOldSolutions();
+  }
+  else
+    _problem.restoreSolutions();
 }
 
 Real
