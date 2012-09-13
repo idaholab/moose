@@ -666,7 +666,7 @@ PenetrationThread::findRidgeContactPoint(Point &contact_point,
   {
     if (closest_node1) //point is off the ridge between the two elements
     {
-      mooseAssert(closest_node1 == closest_node2,"If off edge of ridge, closest node must be the same on both elements");
+      mooseAssert((closest_node1 == closest_node2 || closest_node2 == NULL),"If off edge of ridge, closest node must be the same on both elements");
       closest_node = closest_node1;
 
       RealGradient off_face = *closest_node1 - contact_point;
