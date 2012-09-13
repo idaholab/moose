@@ -24,8 +24,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( ParsedFunctionTest );
 void
 ParsedFunctionTest::init()
 {
-  InputParameters mesh_params = emptyInputParameters();
-  mesh_params.set<int>("_dimension") = 1;
+  InputParameters mesh_params = validParams<MooseMesh>();
   _mesh = new MooseMesh("mesh", mesh_params);
 
   InputParameters problem_params = validParams<FEProblem>();
