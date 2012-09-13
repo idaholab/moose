@@ -109,7 +109,7 @@ void ReadMeshAction::readMesh(const std::string & mesh_file)
   mooseAssert(_mesh == NULL, "Mesh already exists, and you are trying to read another");
 
   // Create the mesh and save it off
-  InputParameters params = emptyInputParameters();
+  InputParameters params = validParams<MooseMesh>();
   params.set<int>("_dimension") = 1;
   MooseMesh * mesh = new MooseMesh("mesh", params);
 

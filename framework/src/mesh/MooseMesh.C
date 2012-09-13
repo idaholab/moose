@@ -45,7 +45,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     _mesh(getParam<int>("_dimension")),
     _is_changed(false),
-    //_is_parallel(false),
+    _is_parallel(getParam<bool>("nemesis")),
     _active_local_elem_range(NULL),
     _active_semilocal_node_range(NULL),
     _active_node_range(NULL),
@@ -60,7 +60,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     MooseObject(other_mesh._name, other_mesh._pars),
     _mesh(other_mesh._mesh),
     _is_changed(false),
-    //_is_parallel(false),
+    _is_parallel(getParam<bool>("nemesis")),
     _active_local_elem_range(NULL),
     _active_semilocal_node_range(NULL),
     _active_node_range(NULL),
@@ -108,7 +108,10 @@ MooseMesh::freeBndElems()
 void
 MooseMesh::read(const std::string file_name)
 {
-  _mesh.read(file_name, NULL, true);
+  if (dynamic_cast<ParallelMesh *>(&_mesh) && !_is_parallel)
+    _mesh.read(file_name, NULL, false);
+  else
+    _mesh.read(file_name, NULL, true);
 }
 
 void
@@ -119,7 +122,12 @@ MooseMesh::prepare()
 //  if(parallel())
 //    MeshCommunication().gather_neighboring_elements(libmesh_cast_ref<ParallelMesh&>(getMesh()));
 //
-  _mesh.prepare_for_use(true);
+  std::cerr << "Mesh is serial: " << (bool)dynamic_cast<ParallelMesh *>(&_mesh) << "\n";
+
+  if (dynamic_cast<ParallelMesh *>(&_mesh) && !_is_parallel)
+    _mesh.prepare_for_use(false);
+  else
+    _mesh.prepare_for_use(true);
 
   // If using ParallelMesh this will delete non-local elements from the current processor
   // If using SerialMesh, this function is a no-op.

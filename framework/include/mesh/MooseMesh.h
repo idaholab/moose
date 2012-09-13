@@ -86,8 +86,7 @@ public:
   bool changed() { return _is_changed; }
   void changed(bool state) { _is_changed = state; }
 
-  //bool parallel() { return _is_parallel; }
-  //void parallel(bool state) { _is_parallel = state; }
+  bool parallel() { return _is_parallel; }
 
   void meshChanged();
 
@@ -203,7 +202,7 @@ protected:
   /// true if mesh is changed (i.e. after adaptivity step)
   bool _is_changed;
 
-  // bool _is_parallel;           /// True if using a TRUE parallel mesh (ie Nemesis)
+  bool _is_parallel;           /// True if using a TRUE parallel mesh (ie Nemesis)
 
   /// Used for generating the semilocal node range
   std::set<Node *> _semilocal_node_list;

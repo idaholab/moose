@@ -22,6 +22,7 @@
 #include "numeric_vector.h"
 #include "nonlinear_implicit_system.h"
 #include "transient_system.h"
+#include "parallel_mesh.h"
 
 template<>
 InputParameters validParams<SolutionFunction>()
@@ -90,7 +91,10 @@ SolutionFunction::SolutionFunction(const std::string & name, InputParameters par
     int num_exo_times = _exodus_times->size();
     if (num_exo_times == 0)
       mooseError("In SolutionFunction, exodus file contains no timesteps.");
-    _mesh->prepare_for_use();
+    if (dynamic_cast<ParallelMesh *>(_mesh))
+      _mesh->prepare_for_use(false);
+    else
+      _mesh->prepare_for_use(true);
 
     _es = new EquationSystems(*_mesh);
     _es->add_system<ExplicitSystem> (_system_name);

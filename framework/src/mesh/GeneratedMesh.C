@@ -25,7 +25,7 @@
 template<>
 InputParameters validParams<GeneratedMesh>()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = validParams<MooseMesh>();
 
   MooseEnum elem_types("EDGE, EDGE2, EDGE3, EDGE4, QUAD, QUAD4, QUAD8, QUAD9, TRI3, TRI6, HEX, HEX8, HEX20, HEX27, TET4, TET10"); // no default
   MooseEnum dims("1 = 1, 2, 3");
@@ -41,7 +41,6 @@ InputParameters validParams<GeneratedMesh>()
   params.addParam<Real>("ymax", 1.0, "Upper Y Coordinate of the generated mesh");
   params.addParam<Real>("zmax", 1.0, "Upper Z Coordinate of the generated mesh");
   params.addParam<MooseEnum>("elem_type", elem_types, "The type of element from libMesh to generate (default: linear element for requested dimension)");
-  params.addPrivateParam<int>("_dimension", 1);
   params.addPrivateParam<std::string>("built_by_action", "read_mesh");
 
   return params;
