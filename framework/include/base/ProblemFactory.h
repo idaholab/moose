@@ -105,11 +105,6 @@ public:
    */
   virtual Problem *create(const std::string & obj_name, const std::string & name, InputParameters parameters);
 
-  /**
-   * Helper function useful for creating a MooseProblem (FEProblem) in an initialization list
-   */
-  FEProblem *createFEProblem(MooseMesh *mesh);
-
   registeredProblemsIterator registeredObjectsBegin() { return _name_to_params_pointer.begin(); }
   registeredProblemsIterator registeredObjectsEnd() { return _name_to_params_pointer.end(); }
 

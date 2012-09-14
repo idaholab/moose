@@ -54,15 +54,3 @@ ProblemFactory::create(const std::string & obj_name, const std::string & name, I
 
   return (*_name_to_build_pointer[obj_name])(name, parameters);
 }
-
-FEProblem *
-ProblemFactory::createFEProblem(MooseMesh *mesh)
-{
-  InputParameters params = validParams<FEProblem>();
-  params.set<std::string>("name") = "Moose Problem";
-  params.set<MooseMesh *>("mesh") = mesh;
-  return static_cast<FEProblem *>(create("FEProblem", "Moose Problem", params));
-}
-
-
-

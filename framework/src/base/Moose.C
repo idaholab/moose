@@ -212,7 +212,7 @@
 #include "DeprecatedBlockAction.h"
 #include "AddConstraintAction.h"
 #include "InitDisplacedProblemAction.h"
-#include "SetupSubProblemAction.h"
+#include "CreateProblemAction.h"
 #include "AddUserObjectAction.h"
 #include "AddElementalFieldAction.h"
 #include "AddIndicatorAction.h"
@@ -399,7 +399,7 @@ addActionTypes(Syntax & syntax)
   registerActionName("add_kernel", false);
   registerActionName("setup_executioner", true);
   registerActionName("init_displaced_problem", false);
-  registerActionName("setup_subproblem", true);
+  registerActionName("create_problem", true);
   registerActionName("setup_output", false);
   registerActionName("init_problem", true);
   registerActionName("copy_nodal_vars", true);
@@ -472,11 +472,11 @@ addActionTypes(Syntax & syntax)
 "(add_extra_nodeset)"
 "(setup_mesh)"
 "(add_mesh_modifier, setup_mesh_complete)"
+"(create_problem)"
 "(setup_executioner)"
 "(add_feproblem)"
 "(setup_time_periods)"
 "(init_displaced_problem)"
-"(setup_subproblem)"
 "(add_aux_variable, add_variable, add_elemental_field_variable)"
 "(add_coupled_variable)"
 "(setup_variable_complete)"
@@ -544,7 +544,7 @@ registerActions(Syntax & syntax)
   registerAction(CreateExecutionerAction, "setup_executioner");
   registerAction(SetupTimePeriodsAction, "setup_time_periods");
   registerAction(InitDisplacedProblemAction, "init_displaced_problem");
-  registerAction(SetupSubProblemAction, "setup_subproblem");
+  registerAction(CreateProblemAction, "create_problem");
   registerAction(SetupOutputAction, "setup_output");
   registerAction(GlobalParamsAction, "set_global_params");
 

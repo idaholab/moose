@@ -21,7 +21,6 @@ template<>
 InputParameters validParams<Problem>()
 {
   InputParameters params;
-  params.addParam<std::string>("name", "Problem", "The name of the object");
   return params;
 }
 

@@ -62,17 +62,15 @@ CreateExecutionerAction::CreateExecutionerAction(const std::string & name, Input
 void
 CreateExecutionerAction::act()
 {
-  //InputParameters class_params = getClassParams();
-
   // Steady and derived Executioners need to know the number of adaptivity steps to take.  This parameter
   // is held in the child block Adaptivity and needs to be pulled early
 
-  _moose_object_pars.set<MooseMesh *>("_mesh") = _mesh;
   Moose::setup_perf_log.push("Create Executioner","Setup");
+  _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem;
   Executioner * executioner = static_cast<Executioner *>(Factory::instance()->create(_type, "Executioner", _moose_object_pars));
-
   Moose::setup_perf_log.pop("Create Executioner","Setup");
-  FEProblem *mproblem = dynamic_cast<FEProblem *>(&executioner->problem());
+
+  FEProblem *mproblem = _problem;
   if (mproblem != NULL)
   {
 #ifdef LIBMESH_HAVE_PETSC
@@ -114,12 +112,9 @@ CreateExecutionerAction::act()
 #ifdef LIBMESH_HAVE_PETSC
     mproblem->getNonlinearSystem()._l_abs_step_tol = getParam<Real>("l_abs_step_tol");
 #endif
-//    _moose_system._no_fe_reinit = getParam<bool>("no_fe_reinit");
 
     NonlinearSystem & nl = mproblem->getNonlinearSystem();
     nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<MooseEnum>("scheme")));
-
-    _problem = mproblem;
 
 #ifdef LIBMESH_HAVE_PETSC
     Moose::PetscSupport::petscSetOptions(*_problem);

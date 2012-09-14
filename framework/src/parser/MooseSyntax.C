@@ -27,7 +27,7 @@ void associateSyntax(Syntax & syntax)
    * satisfied based on the syntax encountered for classes which are registered
    * to satisfy more than one action_name
    */
-  syntax.registerActionSyntax("SetupSubProblemAction", "Problem");
+  syntax.registerActionSyntax("CreateProblemAction", "Problem");
   syntax.registerActionSyntax("ReadMeshAction", "Mesh");
   syntax.registerActionSyntax("SetupMeshAction", "Mesh");
   syntax.registerActionSyntax("InitialRefinementAction", "Mesh");

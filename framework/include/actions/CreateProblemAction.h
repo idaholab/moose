@@ -12,33 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SETUPSUBPROBLEMACTION_H
-#define SETUPSUBPROBLEMACTION_H
+#ifndef CREATEPROBLEMACTION_H
+#define CREATEPROBLEMACTION_H
 
 #include "Action.h"
 
-class SetupSubProblemAction;
+class CreateProblemAction;
 
 template<>
-InputParameters validParams<SetupSubProblemAction>();
+InputParameters validParams<CreateProblemAction>();
 
-/**
- * Setup the SubProblem-derived classes
- */
-class SetupSubProblemAction : public Action
+class CreateProblemAction : public Action
 {
 public:
-  SetupSubProblemAction(const std::string & name, InputParameters parameters);
-  virtual ~SetupSubProblemAction();
+  CreateProblemAction(const std::string & name, InputParameters parameters);
 
   virtual void act();
 
 protected:
+  std::string _type;
+  std::string _problem_name;
   std::vector<SubdomainName> _blocks;
   std::vector<std::string> _coord_sys;
-
   bool _fe_cache;
 };
 
-
-#endif /* SETUPSUBPROBLEMACTION_H */
+#endif /* CREATEPROBLEMACTION_H */

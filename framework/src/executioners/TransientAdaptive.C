@@ -239,7 +239,7 @@ TimeStepper *createTimeStepper(Moose::TimeSteppingScheme scheme, FEProblem &fe_p
 
 TransientAdaptive::TransientAdaptive(const std::string & name, InputParameters parameters) :
   Executioner(name, parameters),
-  _fe_problem(*ProblemFactory::instance()->createFEProblem(_mesh)),
+  _fe_problem(*getParam<FEProblem *>("_fe_problem")),
   _time_stepper(NULL)
 {
   if (!_restart_file_base.empty())

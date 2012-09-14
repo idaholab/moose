@@ -35,7 +35,6 @@ InputParameters validParams<Executioner>()
 
 Executioner::Executioner(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    _mesh(getParam<MooseMesh *>("_mesh")),
     _initial_residual_norm(std::numeric_limits<Real>::max()),
     _old_initial_residual_norm(std::numeric_limits<Real>::max()),
     _restart_file_base(getParam<std::string>("restart_file_base"))
@@ -44,7 +43,6 @@ Executioner::Executioner(const std::string & name, InputParameters parameters) :
 
 Executioner::~Executioner()
 {
-  delete _mesh;
 }
 
 void

@@ -139,13 +139,13 @@ SetupMeshAction::act()
   if (_displaced_mesh)
     setupMesh(_displaced_mesh);
 
-  // There is no setup execution action satisfied, create the MProblem class by ourselves
-  if (_awh.actionBlocksWithActionBegin("setup_executioner") ==
-      _awh.actionBlocksWithActionEnd("setup_executioner"))
-  {
-    Moose::setup_perf_log.push("Create FEProblem","Setup");
-    // Use the Factory to build a normal MOOSE problem
-    _problem = ProblemFactory::instance()->createFEProblem(_mesh);
-    Moose::setup_perf_log.pop("Create FEProblem","Setup");
-  }
+//  // There is no setup execution action satisfied, create the MProblem class by ourselves
+//  if (_awh.actionBlocksWithActionBegin("setup_executioner") ==
+//      _awh.actionBlocksWithActionEnd("setup_executioner"))
+//  {
+//    Moose::setup_perf_log.push("Create FEProblem","Setup");
+//    // Use the Factory to build a normal MOOSE problem
+//    _problem = ProblemFactory::instance()->createFEProblem(_mesh);
+//    Moose::setup_perf_log.pop("Create FEProblem","Setup");
+//  }
 }

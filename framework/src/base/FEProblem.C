@@ -190,6 +190,7 @@ FEProblem::~FEProblem()
     delete _out_problem;
 
   delete _resurrector;
+  delete &_mesh;
 }
 
 Moose::CoordinateSystemType
