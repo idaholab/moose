@@ -270,7 +270,7 @@ class TestHarness:
           reason = 'NO EXPECTED ASSERT'
     elif (self.options.enable_valgrind and retcode == 0) and not test[NO_VALGRIND]:
       if 'ERROR SUMMARY: 0 errors' not in output:
-        reason = 'MEMORY LEAK'
+        reason = 'MEMORY ERROR'
     else:
       # Check the general error message and program crash possibilities
       if len( filter( lambda x: x in output, test[ERRORS] ) ) > 0:

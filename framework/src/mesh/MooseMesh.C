@@ -122,8 +122,6 @@ MooseMesh::prepare()
 //  if(parallel())
 //    MeshCommunication().gather_neighboring_elements(libmesh_cast_ref<ParallelMesh&>(getMesh()));
 //
-  std::cerr << "Mesh is serial: " << (bool)dynamic_cast<ParallelMesh *>(&_mesh) << "\n";
-
   if (dynamic_cast<ParallelMesh *>(&_mesh) && !_is_parallel)
     _mesh.prepare_for_use(false);
   else
