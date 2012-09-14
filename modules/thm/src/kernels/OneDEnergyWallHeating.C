@@ -13,7 +13,6 @@ InputParameters validParams<OneDEnergyWallHeating>()
   params.addRequiredCoupledVar("temperature", "");
 
   // Required parameters
-  //params.addRequiredParam<Real>("Hw", "Convective heat transfer coefficient");
   params.addRequiredParam<Real>("aw", "heat transfer area density, m^2 / m^3");  
   params.addRequiredParam<Real>("Tw", "Wall temperature, K");
 

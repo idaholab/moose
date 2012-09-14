@@ -34,7 +34,6 @@ protected:
   unsigned _rho_var_number; 
 
   // Parameters
-  //const Real & _Hw; // convective heat transfer coefficient, W/m^2-K
   const Real & _aw; // heat transfer area density, m^2 / m^3
   const Real & _Tw; // Wall temperature, K
   MaterialProperty<Real> & _HTC; // convective heat transfer coefficient, W/m^2-K
