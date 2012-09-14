@@ -1,4 +1,4 @@
-[Problems]
+[CoupledProblems]
   [./steady]
     input_file = steady.i
   [../]

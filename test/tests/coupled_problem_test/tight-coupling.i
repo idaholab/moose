@@ -1,4 +1,4 @@
-[Problems]
+[CoupledProblems]
   [./pr1]
     input_file = problem1.i
   [../]

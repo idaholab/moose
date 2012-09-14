@@ -127,8 +127,8 @@ void associateSyntax(Syntax & syntax)
   syntax.registerActionSyntax("AddKernelAction", "Bounds/*", "add_aux_kernel");
 
   // Coupling
-  syntax.registerActionSyntax("AddFEProblemAction", "Problems/*");
-  syntax.registerActionSyntax("AddCoupledVariableAction", "Problems/*/*");
+  syntax.registerActionSyntax("AddFEProblemAction", "CoupledProblems/*");
+  syntax.registerActionSyntax("AddCoupledVariableAction", "CoupledProblems/*/*");
 
   // Indicator
   syntax.registerActionSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");
