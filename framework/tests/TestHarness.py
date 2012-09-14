@@ -226,8 +226,7 @@ class TestHarness:
       return True
     # Iterate through petsc versions in test[PETSC_VERSION] and match it against check[PETSC_VERSION]
     for petsc_version in test[PETSC_VERSION]:
-      version = re.search(r'(?<=)\w+\S+', petsc_version).group(0)
-      logic = re.search(r'^\W+', petsc_version)
+      logic, version = re.search(r'(.*?)(\d\S+)', petsc_version).groups()
       # Exact match
       if logic == None:
         if version == self.checks[PETSC_VERSION]:
@@ -235,13 +234,13 @@ class TestHarness:
         else:
           return False
       # Logical match
-      if logic.group(0) == '>' and self.checks[PETSC_VERSION][0:3] > version[0:3]:
+      if logic == '>' and self.checks[PETSC_VERSION][0:3] > version[0:3]:
         return True
-      elif logic.group(0) == '>=' and self.checks[PETSC_VERSION][0:3] >= version[0:3]:
+      elif logic == '>=' and self.checks[PETSC_VERSION][0:3] >= version[0:3]:
         return True
-      elif logic.group(0) == '<' and self.checks[PETSC_VERSION][0:3] < version[0:3]:
+      elif logic == '<' and self.checks[PETSC_VERSION][0:3] < version[0:3]:
         return True
-      elif logic.group(0) == '<=' and self.checks[PETSC_VERSION][0:3] <= version[0:3]:
+      elif logic == '<=' and self.checks[PETSC_VERSION][0:3] <= version[0:3]:
         return True
 
     return False
