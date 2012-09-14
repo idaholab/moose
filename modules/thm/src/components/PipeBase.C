@@ -235,7 +235,6 @@ PipeBase::addMooseObjects()
     params.set<NonlinearVariableName>("variable") = Model::RHOE;
     params.set<std::vector<unsigned int> >("block") = blocks;
 
-    params.set<Real>("Hw") = _Hw;
     params.set<Real>("aw") = _aw;
     params.set<Real>("Tw") = _Tw;
 
