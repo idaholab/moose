@@ -65,7 +65,7 @@ class RunParallel:
     # to hold the output as it is produced
     try:
       f = TemporaryFile()
-      p = Popen([command],stdout=f,stderr=STDOUT,close_fds=False, shell=True)
+      p = Popen([command],stdout=f,stderr=f,close_fds=False, shell=True)
     except:
       print "Error in launching a new task"
       raise
