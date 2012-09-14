@@ -57,7 +57,7 @@ InputParameters validParams<AdaptiveTransient>()
 
 AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
-    _problem(*ProblemFactory::instance()->createFEProblem(_mesh)),
+    _problem(*getParam<FEProblem *>("_fe_problem")),
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
     _time_old(_time),
