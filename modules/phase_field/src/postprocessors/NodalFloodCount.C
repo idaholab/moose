@@ -59,6 +59,9 @@ NodalFloodCount::initialize()
   // Clear the bubble marking map
   _bubble_map.clear();
 
+  // Clear the packed data structure
+  _packed_data.clear();
+  
   // Reset the ownership structure
   _region_to_var_idx.clear();
 
@@ -89,7 +92,9 @@ void
 NodalFloodCount::finalize()
 {
   // Exchange data in parallel
-  pack(_packed_data);
+
+//  if (_packed_data.empty())
+    pack(_packed_data);
   Parallel::allgather(_packed_data, false);
   unpack(_packed_data);
 
@@ -106,7 +111,7 @@ void
 NodalFloodCount::threadJoin(const UserObject &y)
 {
    const NodalFloodCount & pps = dynamic_cast<const NodalFloodCount &>(y);
-
+   
    // Pack up the data on both of the threads
    pack(_packed_data);
 
@@ -121,7 +126,11 @@ NodalFloodCount::threadJoin(const UserObject &y)
 void
 NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_periodic_info) const
 {
-  packed_data.clear();
+  // Don't repack the data if it's already packed - we might lose data that was updated
+  // or stored into the packed_data that is not available in the local thread.
+  // This happens when we call threadJoin which does not unpack the data on the local thread.
+  if (!packed_data.empty())
+    return;
 
   std::vector<std::set<unsigned int> > data(_region_count+1);
   unsigned int n_periodic_nodes = 0;
