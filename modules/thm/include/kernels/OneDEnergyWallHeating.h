@@ -26,12 +26,11 @@ protected:
   // Coupled variables
   VariableValue & _rho;
   VariableValue & _rhou;
-  //VariableValue & _u_vel;
-  //VariableValue & _pressure;
   VariableValue & _temperature;
 
   // For Jacobian terms
   unsigned _rho_var_number; 
+  unsigned _rhou_var_number; 
 
   // Parameters
   const Real & _aw; // heat transfer area density, m^2 / m^3
