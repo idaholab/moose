@@ -40,10 +40,16 @@ public:
   Real dimensionWidth(unsigned int component) const;
 
   /**
+   * Returns the min or max of the requested dimension respectively
+   */
+  Real getMinInDimension(unsigned int component) const;
+  Real getMaxInDimension(unsigned int component) const;
+
+  /**
    * Returns whether this generated mesh is periodic in the given dimension
    * for the given variable
    */
-  bool isPeriodic(NonlinearSystem &nl, unsigned int var_num, unsigned int dim);
+  bool isPeriodic(NonlinearSystem &nl, unsigned int var_num, unsigned int component);
 
   /**
    * This function initializes the data structures necessary for calling minPeriodicDistance.
@@ -66,12 +72,12 @@ protected:
   MooseEnum _dim;
   /// Number of elements in x, y, z direction
   int _nx, _ny, _nz;
-  /// Min and max in x direction
-  Real _xmin, _xmax;
-  /// Min and max in y direction
-  Real _ymin, _ymax;
-  /// Min and max in z direction
-  Real _zmin, _zmax;
+
+  enum {X=0, Y, Z};
+  enum {MIN=0, MAX};
+
+  /// The bounds in each direction of the mesh
+  std::vector<std::vector<Real> > _bounds;
 
   std::vector<bool> _periodic_dim;
   Point _half_range;

@@ -31,7 +31,8 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem, SystemBa
 ComputeUserObjectsThread::ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split) :
     ThreadedElementLoop<ConstElemRange>(x._fe_problem, x._system),
     _soln(x._soln),
-    _user_objects(x._user_objects)
+    _user_objects(x._user_objects),
+    _group(x._group)
 {}
 
 void

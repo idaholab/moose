@@ -28,12 +28,12 @@ StripeMesh::StripeMesh(const std::string & name, InputParameters parameters) :
     GeneratedMesh(name, parameters),
     _n_stripes(getParam<unsigned int>("stripes"))
 {
-  Real h = (_xmax - _xmin) / _n_stripes;                        // width of the stripe
+  Real h = dimensionWidth(0) / _n_stripes;                      // width of the stripe
   for (unsigned int en = 0; en < n_elem(); en++)
   {
     Elem * e = elem(en);                                        // get an element
     Point centroid = e->centroid();                             // get its centroid
-    subdomain_id_type sid = floor((centroid(0) - _xmin) / h);   // figure out the subdomain ID
+    subdomain_id_type sid = floor((centroid(0) - _bounds[X][MIN]) / h);   // figure out the subdomain ID
     e->subdomain_id() = sid;
   }
 }

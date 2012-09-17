@@ -52,14 +52,19 @@ GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameter
     _nx(getParam<int>("nx")),
     _ny(getParam<int>("ny")),
     _nz(getParam<int>("nz")),
-    _xmin(getParam<Real>("xmin")),
-    _xmax(getParam<Real>("xmax")),
-    _ymin(getParam<Real>("ymin")),
-    _ymax(getParam<Real>("ymax")),
-    _zmin(getParam<Real>("zmin")),
-    _zmax(getParam<Real>("zmax")),
     _periodic_dim(false, LIBMESH_DIM)
 {
+  _bounds.resize(3);
+  for (unsigned int i=0; i<_bounds.size(); ++i)
+    _bounds[i].resize(2);
+
+  _bounds[X][MIN] = getParam<Real>("xmin");
+  _bounds[X][MAX] = getParam<Real>("xmax");
+  _bounds[Y][MIN] = getParam<Real>("ymin");
+  _bounds[Y][MAX] = getParam<Real>("ymax");
+  _bounds[Z][MIN] = getParam<Real>("zmin");
+  _bounds[Z][MAX] = getParam<Real>("zmax");
+
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
 
   if (!isParamValid("elem_type"))
@@ -82,13 +87,13 @@ GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameter
   switch (_dim)
   {
   case 1:
-    MeshTools::Generation::build_line(_mesh, _nx, _xmin, _xmax, elem_type);
+    MeshTools::Generation::build_line(_mesh, _nx, _bounds[X][MIN], _bounds[X][MAX], elem_type);
     break;
   case 2:
-    MeshTools::Generation::build_square(_mesh, _nx, _ny, _xmin, _xmax, _ymin, _ymax, elem_type);
+    MeshTools::Generation::build_square(_mesh, _nx, _ny, _bounds[X][MIN], _bounds[X][MAX], _bounds[Y][MIN], _bounds[Y][MAX], elem_type);
     break;
   case 3:
-    MeshTools::Generation::build_cube(_mesh, _nx, _ny, _nz, _xmin, _xmax, _ymin, _ymax, _zmin, _zmax, elem_type);
+    MeshTools::Generation::build_cube(_mesh, _nx, _ny, _nz, _bounds[X][MIN], _bounds[X][MAX], _bounds[Y][MIN], _bounds[Y][MAX], _bounds[Z][MIN], _bounds[Z][MAX], elem_type);
     break;
   }
 }
@@ -100,33 +105,37 @@ GeneratedMesh::~GeneratedMesh()
 Real
 GeneratedMesh::dimensionWidth(unsigned int component) const
 {
-  switch (component)
-  {
-  case 0:
-    return _xmax - _xmin;
-    break;
-  case 1:
-    return _ymax - _ymin;
-    break;
-  case 2:
-    return _zmax - _zmin;
-    break;
-  default:
-    mooseError("Requested dimension out of bounds");
-  }
+  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
+
+  return _bounds[component][MAX] - _bounds[component][MIN];
+}
+
+Real
+GeneratedMesh::getMinInDimension(unsigned int component) const
+{
+  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
+
+  return _bounds[component][MIN];
+}
+
+Real
+GeneratedMesh::getMaxInDimension(unsigned int component) const
+{
+  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
+
+  return _bounds[component][MAX];
 }
 
 bool
-GeneratedMesh::isPeriodic(NonlinearSystem &nl, unsigned int var_num, unsigned int dim)
+GeneratedMesh::isPeriodic(NonlinearSystem &nl, unsigned int var_num, unsigned int component)
 {
-  if (dim >= _mesh.mesh_dimension())
-    mooseError("Requested dimension out of bounds");
+  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
 
   PeriodicBoundaries *pbs = nl.dofMap().get_periodic_boundaries();
 
   static const int pb_map[3][3] = {{0, -99, -99},{3, 0, -99},{4, 1, 5}};
 
-  PeriodicBoundaryBase *pb = pbs->boundary(pb_map[_mesh.mesh_dimension()-1][dim]);
+  PeriodicBoundaryBase *pb = pbs->boundary(pb_map[_mesh.mesh_dimension()-1][component]);
 
   if (pb != NULL)
     return pb->is_my_variable(var_num);
