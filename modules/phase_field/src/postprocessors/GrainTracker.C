@@ -41,6 +41,12 @@ GrainTracker::getNodeValue(unsigned int node_id) const
 {
   if (_t_step < _tracking_step)
     return 0;
+
+  // When running threaded - we won't have the complete map
+  // since we don't exchange areas marked with zero.  In this
+  // case we can just return zero for nodes NOT in the map
+  if (_bubble_map.find(node_id) == _bubble_map.end())
+    return 0;
   
   unsigned int region_id = _bubble_map.at(node_id);
   return _region_to_grain.at(region_id);
