@@ -24,6 +24,7 @@ testtrapezoid = { INPUT : 'trapezoid.i',
 testlevel1 = { INPUT : 'periodic_level_1_test.i',
                EXODIFF : ['level1.e', 'level1.e-s010', 'level1.e-s020'],
                MAX_THREADS : 1,
+               NO_VALGRIND: True,   # Test takes too long through Valgrind
                GROUP : 'adaptive, periodic'}
 
 subdomain_restricted_vars_test = { INPUT : 'periodic_subdomain_restricted_test.i',
@@ -42,6 +43,7 @@ auto_wrap_3d_test = { INPUT : 'auto_periodic_bc_test_3d.i',
                       EXODIFF : ['out_auto_3d.e'],
                       MAX_THREADS : 1,
                       MAX_PARALLEL: 1,
+                      NO_VALGRIND: True,   # Test takes too long through Valgrind
                       GROUP : 'periodic'}
 
 all_periodic_trans_test = { INPUT : 'all_periodic_trans.i',
