@@ -41,7 +41,7 @@ GrainTracker::getNodeValue(unsigned int node_id) const
 {
   if (_t_step < _tracking_step)
     return 0;
-
+  
   unsigned int region_id = _bubble_map.at(node_id);
   return _region_to_grain.at(region_id);
 }
@@ -55,6 +55,25 @@ GrainTracker::initialize()
 }
 
 void
+GrainTracker::threadJoin(const UserObject & y)
+{ 
+  // Don't track grains if the current simulation step is before the specified tracking step
+  if (_t_step < _tracking_step)
+    return;
+
+  const GrainTracker & pps = dynamic_cast<const GrainTracker &>(y);
+
+  pack(_packed_data, false);
+  
+  std::vector<unsigned int> pps_packed_data;
+  pps.pack(pps_packed_data, false);
+  
+  // Append the packed data structures together
+  std::copy(pps_packed_data.begin(), pps_packed_data.end(), std::back_inserter(_packed_data));
+}
+
+
+void
 GrainTracker::finalize()
 {
  // Don't track grains if the current simulation step is before the specified tracking step
@@ -66,6 +85,8 @@ GrainTracker::finalize()
   Parallel::allgather(_packed_data, false);
   unpack(_packed_data);
   mergeSets();
+
+  _packed_data.clear();
 
   buildBoundingBoxes();                      // Build bounding box information
   pack(_packed_data, true);                  // Pack the data again but this time add periodic neighbor information
@@ -331,7 +352,15 @@ GrainTracker::calculateCentroid(const std::vector<BoundingBoxInfo *> & box_ptrs)
   }
   centroid /= box_ptrs.size();
 
-  // TODO:  Make sure that the final centroid is in the domain
+  // Make sure that the final centroid is in the domain
+  for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+  {
+    if (centroid(i) < _gen_mesh->getMinInDimension(i))
+      centroid(i) += _gen_mesh->dimensionWidth(i);
+    else if (centroid(i) > _gen_mesh->getMaxInDimension(i))
+      centroid(i) -= _gen_mesh->dimensionWidth(i);
+  }
+
 
 //  // DEBUG
 //  std::cout << "Combined Centroid: " << centroid << "\n\n";
