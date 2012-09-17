@@ -195,9 +195,10 @@ class TestHarness:
       return False
 
     # Check for PETSc versions
-    if not self.checkPetscVersion(test):
+    (petsc_status, logic_reason, petsc_version) = self.checkPetscVersion(test)
+    if not petsc_status:
       self.handleTestResult(test, '', 'skipped (PETSc version ' + \
-                              str(' '.join(test[PETSC_VERSION])) + ' != ' + str(self.checks[PETSC_VERSION]) + ')')
+                              str(self.checks[PETSC_VERSION]) + ' ' + logic_reason + ' ' + petsc_version + ')')
       return False
 
     # PETSc is being explicitly checked above
@@ -223,27 +224,26 @@ class TestHarness:
   def checkPetscVersion(self, test):
     # If any version of petsc works, return true immediately
     if 'ALL' in set(test[PETSC_VERSION]):
-      return True
+      return (True, None, None)
     # Iterate through petsc versions in test[PETSC_VERSION] and match it against check[PETSC_VERSION]
     for petsc_version in test[PETSC_VERSION]:
       logic, version = re.search(r'(.*?)(\d\S+)', petsc_version).groups()
       # Exact match
-      if logic == None:
+      if logic == '' or logic == '=':
         if version == self.checks[PETSC_VERSION]:
-          return True
+          return (True, None, version)
         else:
-          return False
+          return (False, '!=', version)
       # Logical match
       if logic == '>' and self.checks[PETSC_VERSION][0:3] > version[0:3]:
-        return True
+        return (True, None, version)
       elif logic == '>=' and self.checks[PETSC_VERSION][0:3] >= version[0:3]:
-        return True
+        return (True, None, version)
       elif logic == '<' and self.checks[PETSC_VERSION][0:3] < version[0:3]:
-        return True
+        return (True, None, version)
       elif logic == '<=' and self.checks[PETSC_VERSION][0:3] <= version[0:3]:
-        return True
-
-    return False
+        return (True, None, version)
+    return (False, logic, version)
 
   ## Finish the test by inspecting the raw output
   def testOutputAndFinish(self, test, retcode, output, start=0, end=0):
