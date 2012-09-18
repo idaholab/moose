@@ -100,7 +100,7 @@ class RunParallel:
       if not self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, output, time, clock()):
         did_pass = False
     else:
-      output = 'Running command: ' + command + '\n'
+      output = 'Working Directory: ' + test[TEST_DIR] + '\nRunning command: ' + command + '\n'
       output += self.readOutput(f)
       f.close()
       if not self.harness.testOutputAndFinish(test, p.returncode, output, time, clock()):
