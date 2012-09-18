@@ -25,7 +25,7 @@ AppliedStressDivergence::AppliedStressDivergence(const std::string & name, Input
 {
   //Initialize applied strain tensor from input vector
   _applied_strain.fillFromInputVector(_applied_strain_vector);
-  //_applied_strain.print();
+  _applied_strain.print();
 }
 
 Real

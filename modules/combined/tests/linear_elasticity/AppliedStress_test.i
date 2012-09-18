@@ -58,7 +58,7 @@
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
-    applied_strain_vector = '0.005 0.005 0 0 0 .005'
+    applied_strain_vector = '0.0014 -0.005 0 0 0 0'
   [../]
 []
 
@@ -122,45 +122,10 @@
 
 [BCs]
   active = 'Periodic'
-  [./bottom]
-    type = PresetBC
-    variable = diffused
-    boundary = '1'
-    value = 1
-  [../]
-  [./top]
-    type = PresetBC
-    variable = diffused
-    boundary = '2'
-    value = 0
-  [../]
-  [./disp_x_BC]
-    type = PresetBC
-    variable = disp_x
-    boundary = '0 2'
-    value = 0.5
-  [../]
-  [./disp_x_BC2]
-    type = PresetBC
-    variable = disp_x
-    boundary = '1 3'
-    value = 0.01
-  [../]
-  [./disp_y_BC]
-    type = PresetBC
-    variable = disp_y
-    boundary = '0 2'
-    value = 0.8
-  [../]
-  [./disp_y_BC2]
-    type = PresetBC
-    variable = disp_y
-    boundary = '1 3'
-    value = 0.02
-  [../]
   [./Periodic]
     active = ''
-    [./]
+    [./all]
+      auto_direction = 'x y'
     [../]
   [../]
 []
