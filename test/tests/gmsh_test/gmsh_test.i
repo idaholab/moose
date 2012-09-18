@@ -1,6 +1,6 @@
 [Mesh]
   type = MooseMesh
-  file = /Users/gastdr/projects/herd_trunk/moose_test/tests/gmsh_test/sample.msh
+  file = sample.msh
   dim = 3
   [./ExtraNodesets]
     [./left]
