@@ -1376,6 +1376,11 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
     parameters.set<SubProblem *>("_subproblem") = this;
 
   ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<MooseEnum>("execute_on"));
+
+  // Check for name collision
+  if (_user_objects(type)[0].getUserObjectByName(name))
+    mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a Postprocessor by the same name.");
+
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
