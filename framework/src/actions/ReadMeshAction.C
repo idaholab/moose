@@ -109,9 +109,7 @@ void ReadMeshAction::readMesh(const std::string & mesh_file)
   mooseAssert(_mesh == NULL, "Mesh already exists, and you are trying to read another");
 
   // Create the mesh and save it off
-  InputParameters params = validParams<MooseMesh>();
-  params.set<int>("_dimension") = 1;
-  MooseMesh * mesh = new MooseMesh("mesh", params);
+  MooseMesh * mesh = new MooseMesh("mesh", _moose_object_pars);
 
   mesh->setFileName(mesh_file);
   mesh->setPatchSize(getParam<unsigned int>("patch_size"));
@@ -147,7 +145,7 @@ void ReadMeshAction::readMesh(const std::string & mesh_file)
   if (isParamValid("displacements"))
   {
     // Create the displaced mesh
-    MooseMesh * displaced_mesh = new MooseMesh("displaced_mesh", params);
+    MooseMesh * displaced_mesh = new MooseMesh("displaced_mesh", _moose_object_pars);
     displaced_mesh->setPatchSize(getParam<unsigned int>("patch_size"));
 
     Moose::setup_perf_log.push("Read Displaced Mesh","Setup");
