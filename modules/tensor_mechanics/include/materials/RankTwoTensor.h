@@ -126,6 +126,9 @@ public:
   //Calculate the inverse of the tensor
   RankTwoTensor inverse();
 
+  //Print the rank two tensor
+  void print();
+
 protected:
   
 private:

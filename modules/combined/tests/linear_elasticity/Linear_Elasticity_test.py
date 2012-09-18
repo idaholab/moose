@@ -8,3 +8,6 @@ linear_elastic_material_test = { INPUT : 'LinearElasticMaterial_test.i',
 
 tensor_test = { INPUT : 'Tensor_test.i',
          EXODIFF : ['Tensor_test.e']}
+
+AppliedStress_test = { INPUT : 'AppliedStress_test.i',
+	 EXODIFF : ['Applied.e']}

@@ -371,3 +371,15 @@ RankTwoTensor::inverse()
   
   return result;
 }
+
+void
+RankTwoTensor::print()
+{
+  for(unsigned int i=0; i<N; i++)
+  {
+    for(unsigned int j=0; j<N; j++)
+      std::cout << std::setw(15) <<_vals[i][j]<<" ";
+    std::cout <<std::endl;
+  }
+}
+
