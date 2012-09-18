@@ -1381,7 +1381,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
     parameters.set<THREAD_ID>("_tid") = tid;
 
     // distinguish between side and the rest of PPs to provide the right material object
-    if(parameters.have_parameter<std::vector<BoundaryName> >("boundary"))
+    if(parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal"))
     {
       if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
         _reinit_displaced_face = true;
@@ -1452,7 +1452,7 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
     parameters.set<THREAD_ID>("_tid") = tid;
 
     // distinguish between side and the rest of USER_OBJECTs to provide the right material object
-    if(parameters.have_parameter<std::vector<BoundaryName> >("boundary"))
+    if(parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal"))
     {
       if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
         _reinit_displaced_face = true;
@@ -1570,7 +1570,7 @@ FEProblem::computeIndicatorsAndMarkers()
 
 void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)
 {
-  if (pps[0].blocks().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0)
+  if (pps[0].blocks().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0 || pps[0].blockNodalIds().size() > 0)
   {
 
     /* Note: The fact that we compute the aux system when we compute the user_objects
@@ -1631,6 +1631,20 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
       {
         for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it = pps[tid].nodalUserObjects(*boundary_it, group).begin();
              nodal_user_object_it != pps[tid].nodalUserObjects(*boundary_it, group).end();
+             ++nodal_user_object_it)
+        {
+          (*nodal_user_object_it)->initialize();
+          have_nodal_uo = true;
+        }
+      }
+
+      // Block restricted nodal user objects
+      for (std::set<SubdomainID>::const_iterator block_it = pps[tid].blockNodalIds().begin();
+          block_it != pps[tid].blockNodalIds().end();
+          ++block_it)
+      {
+        for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it = pps[tid].blockNodalUserObjects(*block_it, group).begin();
+             nodal_user_object_it != pps[tid].blockNodalUserObjects(*block_it, group).end();
              ++nodal_user_object_it)
         {
           (*nodal_user_object_it)->initialize();
@@ -1749,6 +1763,43 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
           {
             for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
               ps->threadJoin(*pps[tid].nodalUserObjects(boundary_id, group)[i]);
+
+            ps->finalize();
+
+            Postprocessor * pp = getPostprocessorPointer(ps);
+
+            if(pp)
+            {
+              Real value = pp->getValue();
+
+              // store the value in each thread
+              for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+                _pps_data[tid].storeValue(name, value);
+            }
+
+            already_gathered.insert(ps);
+          }
+        }
+      }
+
+      // Block restricted nodal user_objects
+      for (std::set<SubdomainID>::const_iterator block_ids_it = pps[0].blockNodalIds().begin();
+           block_ids_it != pps[0].blockNodalIds().end();
+           ++block_ids_it)
+      {
+        SubdomainID block_id = *block_ids_it;
+
+        const std::vector<NodalUserObject *> & nodal_user_objects = pps[0].blockNodalUserObjects(block_id, group);
+        for (unsigned int i = 0; i < nodal_user_objects.size(); ++i)
+        {
+          NodalUserObject *ps = nodal_user_objects[i];
+          std::string name = ps->name();
+
+          // join across the threads (gather the value in thread #0)
+          if (already_gathered.find(ps) == already_gathered.end())
+          {
+            for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
+              ps->threadJoin(*pps[tid].blockNodalUserObjects(block_id, group)[i]);
 
             ps->finalize();
 

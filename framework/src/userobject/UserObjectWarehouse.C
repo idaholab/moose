@@ -62,6 +62,15 @@ UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo
         _post_nodal_user_objects[it1->first].push_back(*it2);
     }
 
+  for (std::map<SubdomainID, std::vector<NodalUserObject *> >::iterator it1 = _block_nodal_user_objects.begin(); it1 != _block_nodal_user_objects.end(); ++it1)
+    for (std::vector<NodalUserObject *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
+    {
+      if (depend_uo.find((*it2)->name()) != depend_uo.end())
+        _pre_block_nodal_user_objects[it1->first].push_back(*it2);
+      else
+        _post_block_nodal_user_objects[it1->first].push_back(*it2);
+    }
+
   for (std::vector<GeneralUserObject *>::iterator it2 = _generic_user_objects.begin(); it2 != _generic_user_objects.end(); ++it2)
   {
     if (depend_uo.find((*it2)->name()) != depend_uo.end())
@@ -212,19 +221,36 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
     NodalUserObject * nodal_pp = dynamic_cast<NodalUserObject*>(user_object);
     MooseMesh &mesh = nodal_pp->getSubProblem().mesh();
 
+    // NodalUserObjects can be "block" restricted or "boundary" restricted
     const std::vector<BoundaryName> & bnds = nodal_pp->boundaries();
-    for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
-    {
-      BoundaryID boundary_id;
+    const std::vector<SubdomainName> & blocks = nodal_pp->blocks();
 
-      if (*it == "ANY_BOUNDARY_ID")
-        boundary_id = Moose::ANY_BOUNDARY_ID;
-      else
-        boundary_id = mesh.getBoundaryID(*it);
-      _nodal_user_objects[boundary_id].push_back(nodal_pp);
-      _all_nodal_user_objects.push_back(nodal_pp);
-      _nodeset_ids_with_user_objects.insert(boundary_id);
-    }
+    if (blocks[0] == "ANY_BLOCK_ID")
+      for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
+      {
+        BoundaryID boundary_id;
+
+        if (*it == "ANY_BOUNDARY_ID")
+          boundary_id = Moose::ANY_BOUNDARY_ID;
+        else
+          boundary_id = mesh.getBoundaryID(*it);
+        _nodal_user_objects[boundary_id].push_back(nodal_pp);
+        _all_nodal_user_objects.push_back(nodal_pp);
+        _nodeset_ids_with_user_objects.insert(boundary_id);
+      }
+    else
+      for (std::vector<SubdomainName>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+      {
+        SubdomainID block_id;
+
+        if (*it == "ANY_BLOCK_ID")
+          block_id = Moose::ANY_BLOCK_ID;
+        else
+          block_id = mesh.getSubdomainID(*it);
+        _block_nodal_user_objects[block_id].push_back(nodal_pp);
+        _all_nodal_user_objects.push_back(nodal_pp);
+        _block_ids_with_nodal_user_objects.insert(block_id);
+      }
   }
   else
   {
@@ -279,6 +305,22 @@ UserObjectWarehouse::nodalUserObjects(BoundaryID boundary_id, GROUP group)
     return _pre_nodal_user_objects[boundary_id];
   case POST_AUX:
     return _post_nodal_user_objects[boundary_id];
+  default:
+    mooseError("Bad Enum");
+  }
+}
+
+const std::vector<NodalUserObject *> &
+UserObjectWarehouse::blockNodalUserObjects(SubdomainID subdomain_id, GROUP group)
+{
+  switch(group)
+  {
+  case ALL:
+    return _block_nodal_user_objects[subdomain_id];
+  case PRE_AUX:
+    return _pre_block_nodal_user_objects[subdomain_id];
+  case POST_AUX:
+    return _post_block_nodal_user_objects[subdomain_id];
   default:
     mooseError("Bad Enum");
   }

@@ -164,3 +164,5 @@ dynamic_check_name_boundary_mismatch_test = { INPUT : 'check_dynamic_name_bounda
                                               EXPECT_ERR : "You must supply the same number of boundary ids and names parameters" }
 add_aux_variable_multiple_test = { INPUT : 'add_aux_variable_multiple_test.i',
                                    EXPECT_ERR : "AuxVariable with name 'q' already exists but is of a differing type!" }
+double_restrict_uo_test = { INPUT : 'double_restrict_uo.i',
+                            EXPECT_ERR : "The parameter 'boundary' and 'block' were both supplied for \w+" }

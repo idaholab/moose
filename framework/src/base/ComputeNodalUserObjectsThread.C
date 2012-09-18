@@ -55,12 +55,25 @@ ComputeNodalUserObjectsThread::operator() (const ConstNodeRange & range)
       (*nodal_user_object_it)->execute();
     }
 
+    // Boundary Restricted UserObjects
     std::vector<BoundaryID> nodeset_ids = _sub_problem.mesh().getMesh().boundary_info->boundary_ids(node);
 
     for (std::vector<BoundaryID>::iterator it = nodeset_ids.begin(); it != nodeset_ids.end(); ++it)
     {
       for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it = _user_objects[_tid].nodalUserObjects(*it, _group).begin();
            nodal_user_object_it != _user_objects[_tid].nodalUserObjects(*it, _group).end();
+           ++nodal_user_object_it)
+      {
+        (*nodal_user_object_it)->execute();
+      }
+    }
+
+    // Subdomain Restricted UserObjects
+    const std::set<SubdomainID> & block_ids = _sub_problem.mesh().getNodeBlockIds(*node);
+    for (std::set<SubdomainID>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
+    {
+      for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it = _user_objects[_tid].blockNodalUserObjects(*block_it, _group).begin();
+           nodal_user_object_it != _user_objects[_tid].blockNodalUserObjects(*block_it, _group).end();
            ++nodal_user_object_it)
       {
         (*nodal_user_object_it)->execute();

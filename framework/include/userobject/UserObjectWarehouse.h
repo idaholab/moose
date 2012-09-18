@@ -80,6 +80,13 @@ public:
   const std::vector<NodalUserObject *> & nodalUserObjects(BoundaryID boundary_id, GROUP group = ALL);
 
   /**
+   * Get the list of nodal user_objects restricted on the specified subdomain
+   * @param subdomain_id Subdomain ID
+   * @return The list of all block nodal user_objects
+   */
+  const std::vector<NodalUserObject *> & blockNodalUserObjects(SubdomainID subdomain_id, GROUP group = ALL);
+
+  /**
    * Get the list general user_objects
    * @return The list of general user_objects
    */
@@ -115,6 +122,11 @@ public:
    */
   const std::set<BoundaryID> & nodesetIds() { return _nodeset_ids_with_user_objects; }
 
+  /**
+   * Get the list of subdomain IDs with *nodal* user_objects
+   * @return The list of subdomain IDs with user_objects
+   */
+  const std::set<SubdomainID> & blockNodalIds() { return _block_ids_with_nodal_user_objects; }
 
 protected:
   std::map<std::string, UserObject *> _name_to_user_objects;
@@ -128,18 +140,22 @@ protected:
   std::map<SubdomainID, std::vector<ElementUserObject *> > _element_user_objects;
   std::map<BoundaryID, std::vector<SideUserObject *> > _side_user_objects;
   std::map<BoundaryID, std::vector<NodalUserObject *> > _nodal_user_objects;
+  // Block restricted nodal user objects
+  std::map<SubdomainID, std::vector<NodalUserObject *> > _block_nodal_user_objects;
   std::vector<GeneralUserObject *> _generic_user_objects;
 
   // PreAux UO
   std::map<SubdomainID, std::vector<ElementUserObject *> > _pre_element_user_objects;
   std::map<BoundaryID, std::vector<SideUserObject *> > _pre_side_user_objects;
   std::map<BoundaryID, std::vector<NodalUserObject *> > _pre_nodal_user_objects;
+  std::map<SubdomainID, std::vector<NodalUserObject *> > _pre_block_nodal_user_objects;
   std::vector<GeneralUserObject *> _pre_generic_user_objects;
 
   // PostAux UO
   std::map<SubdomainID, std::vector<ElementUserObject *> > _post_element_user_objects;
   std::map<BoundaryID, std::vector<SideUserObject *> > _post_side_user_objects;
   std::map<BoundaryID, std::vector<NodalUserObject *> > _post_nodal_user_objects;
+  std::map<SubdomainID, std::vector<NodalUserObject *> > _post_block_nodal_user_objects;
   std::vector<GeneralUserObject *> _post_generic_user_objects;
 
   /// All of the block ids that have user_objects specified to act on them
@@ -148,7 +164,8 @@ protected:
   std::set<BoundaryID> _boundary_ids_with_user_objects;
   /// All of the nodeset ids that have user_objects specified to act on them
   std::set<BoundaryID> _nodeset_ids_with_user_objects;
-
+  /// All of the block ids that have nodal user_objects specified to act on them
+  std::set<SubdomainID> _block_ids_with_nodal_user_objects;
 };
 
 #endif // USER_OBJECTWAREHOUSE_H

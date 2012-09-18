@@ -173,19 +173,36 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
     NodalPostprocessor * nodal_pp = dynamic_cast<NodalPostprocessor*>(postprocessor);
     MooseMesh &mesh = nodal_pp->getSubProblem().mesh();
 
-    const std::vector<BoundaryName> & bnds = dynamic_cast<NodalPostprocessor*>(nodal_pp)->boundaries();
-    for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
-    {
-      BoundaryID boundary_id;
+    // NodalPostprocessors can be "block" restricted or "boundary" restricted
+    const std::vector<BoundaryName> & bnds = nodal_pp->boundaries();
+    const std::vector<SubdomainName> & blocks = nodal_pp->blocks();
 
-      if (*it == "ANY_BOUNDARY_ID")
-        boundary_id = Moose::ANY_BOUNDARY_ID;
-      else
-        boundary_id = mesh.getBoundaryID(*it);
-      _nodal_postprocessors[boundary_id].push_back(nodal_pp);
-      _all_nodal_postprocessors.push_back(nodal_pp);
-      _nodeset_ids_with_postprocessors.insert(boundary_id);
-    }
+    if (blocks[0] == "ANY_BLOCK_ID")
+      for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
+      {
+        BoundaryID boundary_id;
+
+        if (*it == "ANY_BOUNDARY_ID")
+          boundary_id = Moose::ANY_BOUNDARY_ID;
+        else
+          boundary_id = mesh.getBoundaryID(*it);
+        _nodal_postprocessors[boundary_id].push_back(nodal_pp);
+        _all_nodal_postprocessors.push_back(nodal_pp);
+        _nodeset_ids_with_postprocessors.insert(boundary_id);
+      }
+    else
+      for (std::vector<SubdomainName>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+      {
+        SubdomainID block_id;
+
+        if (*it == "ANY_BLOCK_ID")
+          block_id = Moose::ANY_BLOCK_ID;
+        else
+          block_id = mesh.getSubdomainID(*it);
+        _block_nodal_postprocessors[block_id].push_back(nodal_pp);
+        _all_nodal_postprocessors.push_back(nodal_pp);
+        _block_ids_with_nodal_postprocessors.insert(block_id);
+      }
   }
   else
   {

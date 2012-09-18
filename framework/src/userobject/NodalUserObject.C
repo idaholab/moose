@@ -22,9 +22,15 @@ InputParameters validParams<NodalUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params.addRequiredParam<std::vector<VariableName> >("variable", "The name of the variable that this postprocessor operates on");
+
+  // NodalUserObjects can be restricted to either Nodesets or Domains
   std::vector<BoundaryName> everywhere(1);
   everywhere[0] = "ANY_BOUNDARY_ID";
   params.addParam<std::vector<BoundaryName> >("boundary", everywhere, "boundary ID or name where the postprocessor works");
+  std::vector<SubdomainName> block_everywhere(1);
+  block_everywhere[0] = "ANY_BLOCK_ID";
+  params.addParam<std::vector<SubdomainName> >("block", block_everywhere, "block ID or name where the object works");
+
   return params;
 }
 
@@ -38,6 +44,7 @@ NodalUserObject::NodalUserObject(const std::string & name, InputParameters param
     PostprocessorInterface(parameters),
     _var(_subproblem.getVariable(_tid, parameters.get<std::vector<VariableName> >("variable")[0])),
     _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),
+    _blocks(parameters.get<std::vector<SubdomainName> >("block")),
     _qp(0),
     _current_node(_var.node()),
     _u(_var.nodalSln()),
