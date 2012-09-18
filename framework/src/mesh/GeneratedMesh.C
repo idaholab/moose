@@ -52,7 +52,7 @@ GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameter
     _nx(getParam<int>("nx")),
     _ny(getParam<int>("ny")),
     _nz(getParam<int>("nz")),
-    _periodic_dim(false, LIBMESH_DIM)
+    _periodic_dim(LIBMESH_DIM, false)
 {
   _bounds.resize(3);
   for (unsigned int i=0; i<_bounds.size(); ++i)
