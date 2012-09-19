@@ -263,10 +263,7 @@ InputParameters::addParamNamesToGroup(const std::string &space_delim_names, cons
   Parser::tokenize(space_delim_names, elements, 1, " \t\n\v\f\r");  // tokenize on whitespace
 
   for (std::vector<std::string>::const_iterator it = elements.begin(); it != elements.end(); ++it)
-  {
-    std::cout << "Group: " << *it << ": " << group_name << "\n";
     _group[*it] = group_name;
-  }
 
 }
 
