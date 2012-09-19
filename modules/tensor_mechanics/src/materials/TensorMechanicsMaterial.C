@@ -21,6 +21,7 @@ InputParameters validParams<TensorMechanicsMaterial>()
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addRequiredCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addParam<std::vector<Real> >("applied_strain_vector","Applied strain: e11, e22, e33, e23, e13, e12");
 
   return params;
 }
@@ -45,7 +46,8 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
       _Cijkl_vector(getParam<std::vector<Real> >("C_ijkl")),
       _all_21(getParam<bool>("all_21")),
       _Cijkl(),
-      _Euler_angles(_euler_angle_1, _euler_angle_2, _euler_angle_3)
+      _Euler_angles(_euler_angle_1, _euler_angle_2, _euler_angle_3),
+      _applied_strain_vector(getParam<std::vector<Real> >("applied_strain_vector"))
 {
   // fill in the local tensors from the input vector information
   
@@ -55,6 +57,14 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
   RotationTensor R(_Euler_angles);
   
   _Cijkl.rotate(R);
+
+  //Fill applied strain
+  if (_applied_strain_vector.size() == 6)
+  {
+    _applied_strain.fillFromInputVector(_applied_strain_vector); //create homogeneous applied strain tensor
+  }
+  else
+    _applied_strain.zero();
   
 }
 
@@ -77,11 +87,5 @@ void TensorMechanicsMaterial::computeQpStrain()
 {
   RankTwoTensor grad_tensor(_grad_disp_x[_qp],_grad_disp_y[_qp],_grad_disp_z[_qp]);
   _elastic_strain[_qp] = (grad_tensor + grad_tensor.transpose())/2.0;
-
-  /*RankTwoTensor strain_old(_grad_disp_x_old[_qp],_grad_disp_y_old[_qp],_grad_disp_z_old[_qp]);
-   * strain_old += strain_old.transpose();
-   * strain_old = strain_old*0.5;
-
-  _strain_increment = _elastic_strain[_qp] - strain_old; */
-  
+  _elastic_strain[_qp] += _applied_strain;
 }

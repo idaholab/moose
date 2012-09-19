@@ -13,7 +13,6 @@ InputParameters validParams<TensorMechanicsAction>()
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
   params.addParam<NonlinearVariableName>("disp_r", "", "The r displacement");
   params.addParam<NonlinearVariableName>("temp", "", "The te mperature");
-  params.addParam<std::vector<Real> >("applied_strain_vector","Applied strain: e11, e22, e33, e23, e13, e12");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
   // changed this from true to false
@@ -27,8 +26,7 @@ TensorMechanicsAction::TensorMechanicsAction(const std::string & name, InputPara
   _disp_y(getParam<NonlinearVariableName>("disp_y")),
   _disp_z(getParam<NonlinearVariableName>("disp_z")),
   _disp_r(getParam<NonlinearVariableName>("disp_r")),
-  _temp(getParam<NonlinearVariableName>("temp")),
-  _applied_strain_vector(getParam<std::vector<Real> >("applied_strain_vector"))
+  _temp(getParam<NonlinearVariableName>("temp"))
 {
 }
 
@@ -112,30 +110,4 @@ TensorMechanicsAction::act()
 
     _problem->addKernel(type, name.str(), params);
   }
-  
-  //-----Add applied load tensor, if vector is passed in----------
-  if (_applied_strain_vector.size() == 6)
-  {
-    type = "AppliedStressDivergence";
-    short_name = "Applied";
-    InputParameters params = Factory::instance()->getValidParams(type);
-    params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-    params.set<std::string>("appended_property_name") = getParam<std::string>("appended_property_name");
-    params.set<std::vector<Real> >("applied_strain_vector") = _applied_strain_vector;
-
-    for (unsigned int i(0); i < dim; ++i)
-    {
-      std::stringstream name;
-      name << "Kernels/";
-      name << short_name;
-      name << i;
-
-      params.set<unsigned int>("component") = i;
-      params.set<NonlinearVariableName>("variable") = vars[i];
-      
-      _problem->addKernel(type, name.str(), params);
-    }
-  }
-  
-
 }

@@ -21,7 +21,6 @@ private:
   const std::string _disp_z;
   const std::string _disp_r;
   const std::string _temp;
-  std::vector<Real> _applied_strain_vector;
 };
 
 
