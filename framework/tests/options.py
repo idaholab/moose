@@ -23,6 +23,7 @@ CSVDIFF       = '[csvdiff]'      # A list of files to CSV diff
 CHECK_FILES   = '[testfiles]'    # A list of files to check for existence
 GOLD_DIR      = 'gold_dir'       # The directory where the "golden standard" files resides relative to TEST_DIR
 TEST_DIR      = 'test_dir'       # The directory where the test resides, this is populated automatically
+RELATIVE_PATH = 'relative_path'  # The relative directory where the test resides, this is populated automatically
 SHOULD_CRASH  = 'should_crash'   # Set to true if this test should crash and we don't really care what the error says
 EXPECT_ERR    = 'expect_err'     # string - This string must occur in the output for the test to pass
                                  #          The program may crash if an error is expected and still be considered OK

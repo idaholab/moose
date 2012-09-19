@@ -83,9 +83,12 @@ class TestHarness:
 
                 test = DEFAULTS.copy()
 
+                # Get relative path to test[TEST_DIR]
+                relative_path = test_dir.replace(self.executable.split(self.executable.split('/').pop())[0], '')
+
                 # Now update all the base level keys
                 test.update(test_opts)
-                test.update( { TEST_NAME : testname, TEST_DIR : test_dir } )
+                test.update( { TEST_NAME : testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path } )
 
                 if test[PREREQ] != None:
                   if type(test[PREREQ]) != list:
@@ -160,7 +163,6 @@ class TestHarness:
     # Are we running only tests in a specific group?
     if self.options.group <> 'ALL' and self.options.group not in test[GROUP]:
       return False
-
     if self.options.not_group <> '' and self.options.not_group in test[GROUP]:
       return False
 
@@ -375,7 +377,10 @@ class TestHarness:
 
     self.postRun(test, timing)
 
-    print printResult(test[TEST_NAME], result, timing, start, end, self.options)
+    if self.options.show_directory:
+      print printResult(test[RELATIVE_PATH] + '/' + test[TEST_NAME], result, timing, start, end, self.options)
+    else:
+      print printResult(test[TEST_NAME], result, timing, start, end, self.options)
 
     if result.find('OK') != -1:
       self.num_passed += 1
@@ -389,8 +394,12 @@ class TestHarness:
 
     if not 'skipped' in result:
       if self.options.file:
-        self.file.write(printResult( test[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
-        self.file.write(output)
+        if self.options.show_directory:
+          self.file.write(printResult( test[RELATIVE_PATH] + '/' + test[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
+          self.file.write(output)
+        else:
+          self.file.write(printResult( test[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
+          self.file.write(output)
 
       if self.options.sep_files or (self.options.fail_files and 'FAILED' in result) or (self.options.ok_files and result.find('OK') != -1):
         fname = os.path.join(test[TEST_DIR], test[TEST_NAME] + '.' + result[:6] + '.txt')
@@ -414,7 +423,10 @@ class TestHarness:
     if self.options.verbose or (self.num_failed != 0 and not self.options.quiet):
       print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
       for (test, output, result, timing, start, end) in self.test_table:
-        print printResult(test[TEST_NAME], result, timing, start, end, self.options)
+        if self.options.show_directory:
+          print printResult(test[RELATIVE_PATH] + '/' + test[TEST_NAME], result, timing, start, end, self.options)
+        else:
+          print printResult(test[TEST_NAME], result, timing, start, end, self.options)
 
     time = clock() - self.start_time
     print '-' * (TERM_COLS-1)
@@ -511,6 +523,7 @@ class TestHarness:
     outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show the output of every test that fails')
     outputgroup.add_option('-q', '--quiet', action='store_true', dest='quiet', default=False, help='only show the result of every test, don\'t show test output even if it fails')
+    outputgroup.add_option('--show-directory', action='store_true', dest='show_directory', default=False, help='Print test directory path in out messages')
     outputgroup.add_option('-o', '--output-dir', action='store', dest='output_dir', default='', metavar='DIR', help='Save all output files in the directory, and create it if necessary')
     outputgroup.add_option('-f', '--file', action='store', dest='file', default=None, metavar='FILE', help='Write verbose output of each test to FILE and quiet output to terminal')
     outputgroup.add_option('-x', '--sep-files', action='store_true', dest='sep_files', default=False, metavar='FILE', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
