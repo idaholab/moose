@@ -36,8 +36,7 @@ InputParameters validParams<MooseMesh>()
   params.addParam<bool>("nemesis", false, "If nemesis=true and file=foo.e, actually reads foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, where N = # CPUs, with NemesisIO.");
   params.addPrivateParam<std::string>("built_by_action", "read_mesh");
 
-  MooseEnum dims("1 = 1, 2, 3");
-
+  MooseEnum dims("1 = 1, 2, 3", "3");
   params.addParam<MooseEnum>("dim", dims, "This is only required for certain mesh formats where the dimension of the mesh cannot be autodetected.  Inparticular you must supply this for GMSH meshes.  Note: This is completely ignored for ExodusII meshes!");
 
   return params;
