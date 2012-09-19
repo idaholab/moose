@@ -14,6 +14,7 @@
 
 #include "InputParameters.h"
 #include "MooseTypes.h"
+#include "Parser.h"
 
 InputParameters emptyInputParameters()
 {
@@ -37,6 +38,7 @@ InputParameters::clear()
   Parameters::clear();
   _doc_string.clear();
   _custom_type.clear();
+  _group.clear();
   _required_params.clear();
   _valid_params.clear();
   _private_params.clear();
@@ -75,6 +77,7 @@ InputParameters::operator=(const InputParameters &rhs)
 
   this->_doc_string = rhs._doc_string;
   this->_custom_type = rhs._custom_type;
+  this->_group = rhs._group;
   this->_required_params = rhs._required_params;
   this->_private_params = rhs._private_params;
   this->_valid_params = rhs._valid_params;
@@ -91,6 +94,7 @@ InputParameters::operator+=(const InputParameters &rhs)
 
   _doc_string.insert(rhs._doc_string.begin(), rhs._doc_string.end());
   _custom_type.insert(rhs._custom_type.begin(), rhs._custom_type.end());
+  _group.insert(rhs._group.begin(), rhs._group.end());
   _required_params.insert(rhs._required_params.begin(), rhs._required_params.end());
   _private_params.insert(rhs._private_params.begin(), rhs._private_params.end());
   _valid_params.insert(rhs._valid_params.begin(), rhs._valid_params.end());
@@ -250,4 +254,29 @@ InputParameters::getVecMooseType(const std::string &name) const
   }
 
   return svars;
+}
+
+void
+InputParameters::addParamNamesToGroup(const std::string &space_delim_names, const std::string group_name)
+{
+  std::vector<std::string> elements;
+  Parser::tokenize(space_delim_names, elements, 1, " \t\n\v\f\r");  // tokenize on whitespace
+
+  for (std::vector<std::string>::const_iterator it = elements.begin(); it != elements.end(); ++it)
+  {
+    std::cout << "Group: " << *it << ": " << group_name << "\n";
+    _group[*it] = group_name;
+  }
+
+}
+
+std::string
+InputParameters::getGroupName(const std::string &param_name) const
+{
+  std::map<std::string, std::string>::const_iterator it = _group.find(param_name);
+
+  if (it != _group.end())
+    return it->second;
+  else
+    return std::string();
 }

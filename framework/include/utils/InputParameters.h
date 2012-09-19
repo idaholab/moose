@@ -117,8 +117,22 @@ public:
   void addPrivateParam(const std::string &name);
 
   /**
+   * This method takes a space delimited list of parameter names and adds them to the specified group name.
+   * This information is used in the GUI to group parameters into logical sections.
+   */
+  void addParamNamesToGroup(const std::string &space_delim_names, const std::string group_name);
+
+
+  /**
+   * This method retrieves the group name for the passed parameter name if one exists.  Otherwise an
+   * empty string is returned.
+   */
+  std::string getGroupName(const std::string &param_name) const;
+
+  /**
    * This method supresses an inherited parameter so that it isn't required or valid
-   * in the derived class.
+   * in the derived class.  Suppressing a parameter can have dire consequences.
+   * Use at your own risk!
    */
   template <typename T>
   void suppressParameter(const std::string &name);
@@ -235,6 +249,9 @@ private:
 
   /// The custom type that will be printed in the YAML dump for a parameter if supplied
   std::map<std::string, std::string> _custom_type;
+
+  /// The names of the parameters organized into groups
+  std::map<std::string, std::string> _group;
 
   /// The set of parameters that are required (i.e. will cause an abort if not supplied)
   std::set<std::string> _required_params;

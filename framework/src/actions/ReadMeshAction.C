@@ -42,6 +42,9 @@ InputParameters validParams<ReadMeshAction>()
   params.addParam<bool>("skip_partitioning", false, "If true the mesh won't be partitioned.  Probably not a good idea to use it with a serial mesh!");
   params.addParam<unsigned int>("patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
 
+  // groups
+  params.addParamNamesToGroup("displacements ghosted_boundaries ghosted_boundaries_inflation skip_partitioning patch_size", "Advanced");
+
   return params;
 }
 
