@@ -166,6 +166,7 @@ PipeBase::addVariables()
   Real initial_P = _sim.getParam<Real>("global_init_P");
   Real initial_V = _sim.getParam<Real>("global_init_V");
   Real initial_T = _sim.getParam<Real>("global_init_T");
+  
   if(_has_initial_P)
     initial_P = _initial_P;			//replace by local initial conditions
   if(_has_initial_V)
