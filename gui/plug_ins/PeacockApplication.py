@@ -57,9 +57,9 @@ class PeacockApplication(object):
       type_options['std::vector<AuxVariableName>'] = set(aux_variable_names)
       type_options['AuxVariableName'] = set(aux_variable_names)
         
-      type_options['std::vector<VariableName, std::allocator<VariableName> >'] |= set(aux_variable_names)
-      type_options['std::vector<VariableName>'] |= set(aux_variable_names)
-      type_options['VariableName'] |= set(aux_variable_names)
+      type_options['std::vector<AuxVariableName, std::allocator<AuxVariableName> >'] |= set(aux_variable_names)
+      type_options['std::vector<AuxVariableName>'] |= set(aux_variable_names)
+      type_options['AuxVariableName'] |= set(aux_variable_names)
 
     # Functions
     function_names = tree_widget.getChildNamesOfPath('Functions')
