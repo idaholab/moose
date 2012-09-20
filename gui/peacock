@@ -14,6 +14,9 @@ subdirs = ['gui','utils','vtk','mesh_info','plug_ins']
 for subdir in subdirs:
   sys.path.append(pathname + '/' + subdir)
 
+# Add the utilities/python_getpot directory
+sys.path.append(pathname + '/../utilities/python_getpot')
+
 from optparse import OptionParser
 
 from InputFileWidget import *
