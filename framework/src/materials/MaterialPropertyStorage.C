@@ -112,6 +112,24 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data, std::ve
   for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
     (*it)->initStatefulProperties(n_qpoints);
   swapBack(material_data, elem, side);
+
+  if (hasStatefulProperties())
+  {
+    shift(); // Old
+    swap(material_data, elem, side);
+    for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
+      (*it)->initStatefulProperties(n_qpoints);
+    swapBack(material_data, elem, side);
+
+    if (_has_older_prop)
+    {
+      shift(); // Older
+      swap(material_data, elem, side);
+      for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
+        (*it)->initStatefulProperties(n_qpoints);
+      swapBack(material_data, elem, side);
+    }
+  }
 }
 
 void
