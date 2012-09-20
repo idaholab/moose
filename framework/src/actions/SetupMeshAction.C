@@ -30,8 +30,12 @@ InputParameters validParams<SetupMeshAction>()
   InputParameters params = validParams<Action>();
 
   params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
-  params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation. Available options: linear, centroid");
-  params.addParam<std::string>("centroid_partitioner_direction", "Specifies the sort direction if using the centroid partitioner. Available options: x, y, z, radial");
+
+  MooseEnum partitioning("linear, centroid");
+  params.addParam<MooseEnum>("partitioner", partitioning, "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation.");
+
+  MooseEnum direction("x, y, z, radial");
+  params.addParam<MooseEnum>("centroid_partitioner_direction", direction, "Specifies the sort direction if using the centroid partitioner. Available options: x, y, z, radial");
   params.addParam<bool>("construct_side_list_from_node_list", false, "If true, construct side lists from the nodesets in the mesh (i.e. if every node on a give side is in a nodeset then add that side to a sideset");
 
   params.addParam<std::vector<SubdomainID> >("block_id", "IDs of the block id/name pairs");
@@ -53,17 +57,15 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   if (getParam<bool>("second_order"))
     mesh->_mesh.all_second_order(true);
 
-  if (getParam<std::string>("partitioner") == "linear")
+  if (isParamValid("partitioner") && getParam<MooseEnum>("partitioner") == "linear")
     mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
 
-  if (getParam<std::string>("partitioner") == "centroid")
+  if (isParamValid("partitioner") && getParam<MooseEnum>("partitioner") == "centroid")
   {
     if(!isParamValid("centroid_partitioner_direction"))
       mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
 
-    std::string direction = getParam<std::string>("centroid_partitioner_direction");
-
-    std::cout<<"Direction: "<<direction;
+    MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
     if(direction == "x")
       mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
