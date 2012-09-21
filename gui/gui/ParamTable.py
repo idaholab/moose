@@ -100,11 +100,14 @@ class ParamTable:
 #    self.layoutV = QtGui.QVBoxLayout(self.main_layout)
     self.layoutV = QtGui.QVBoxLayout()
 
-    
     self.init_menu(self.layoutV)
 
+    self.splitter = QtGui.QSplitter()
+    self.splitter.setOrientation(Qt.Vertical)
+    self.layoutV.addWidget(self.splitter)
+
     self.tab_widget = QtGui.QTabWidget()
-    self.layoutV.addWidget(self.tab_widget)
+    self.splitter.addWidget(self.tab_widget)
 
     self.table_widget = self.createTableWidget()
     self.tab_widget.addTab(self.table_widget, "Main")
@@ -117,9 +120,14 @@ class ParamTable:
     self.comment_box = QtGui.QTextEdit()
     self.comment_box.insertPlainText(self.comment)
 
-    self.layoutV.addWidget(self.comment_label)
-    self.layoutV.addWidget(self.comment_box)
+    self.comment_widget = QtGui.QWidget()
+    self.comment_layout = QtGui.QVBoxLayout()
     
+    self.comment_widget.setLayout(self.comment_layout)
+    self.comment_layout.addWidget(self.comment_label)
+    self.comment_layout.addWidget(self.comment_box)
+
+    self.splitter.addWidget(self.comment_widget)
 
     self.drop_menu.setCurrentIndex(-1)
     found_index = self.drop_menu.findText('*')
