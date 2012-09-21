@@ -85,22 +85,33 @@ class ParamTable:
     self.already_has_parent_params = already_has_parent_params
     self.initUI()
 
+  def createTableWidget(self):
+    table_widget = QtGui.QTableWidget()
+    table_widget.setColumnCount(4)
+    table_widget.setHorizontalHeaderItem(0, QtGui.QTableWidgetItem('Name'))
+    table_widget.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem('Value'))
+    table_widget.setHorizontalHeaderItem(2, QtGui.QTableWidgetItem('Options'))
+    table_widget.setHorizontalHeaderItem(3, QtGui.QTableWidgetItem('Comment'))
+    table_widget.verticalHeader().setVisible(False)
+    table_widget.setMinimumHeight(300)
+    return table_widget
+
   def initUI(self):
 #    self.layoutV = QtGui.QVBoxLayout(self.main_layout)
     self.layoutV = QtGui.QVBoxLayout()
 
     
     self.init_menu(self.layoutV)
-    self.table_widget = QtGui.QTableWidget()
-    self.table_widget.setColumnCount(4)
-    self.table_widget.setHorizontalHeaderItem(0, QtGui.QTableWidgetItem('Name'))
-    self.table_widget.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem('Value'))
-    self.table_widget.setHorizontalHeaderItem(2, QtGui.QTableWidgetItem('Options'))
-    self.table_widget.setHorizontalHeaderItem(3, QtGui.QTableWidgetItem('Comment'))
-    self.table_widget.verticalHeader().setVisible(False)
-    self.table_widget.setMinimumHeight(300)
-    self.layoutV.addWidget(self.table_widget)
 
+    self.tab_widget = QtGui.QTabWidget()
+    self.layoutV.addWidget(self.tab_widget)
+
+    self.table_widget = self.createTableWidget()
+    self.tab_widget.addTab(self.table_widget, "Main")
+
+    # Hold table widgets for the other groups
+    self.group_table_widgets = {}
+    self.group_table_widgets['Main'] = self.table_widget
 
     self.comment_label = QtGui.QLabel('Comment:')
     self.comment_box = QtGui.QTextEdit()
@@ -154,7 +165,8 @@ class ParamTable:
     
     self.layoutV.addLayout(button_layout)
 
-    self.table_widget.resizeColumnsToContents()
+    for group_name, table_widget in self.group_table_widgets.items():
+      table_widget.resizeColumnsToContents()
 
 
   ### Takes a dictionary containing name value pairs
@@ -162,29 +174,30 @@ class ParamTable:
 
     used_params = []
     # First, loop through and add all data that corresponds to YAML
-    for i in xrange(0,self.table_widget.rowCount()):
-      row_name = str(self.table_widget.item(i,0).text())
+    for group_name,table_widget in self.group_table_widgets.items():
+      for i in xrange(0,table_widget.rowCount()):
+        row_name = str(table_widget.item(i,0).text())
 
-      if row_name in the_data and (overwrite_type == True or row_name != 'type'):
-        if type(self.table_widget.cellWidget(i,1)) is QtGui.QComboBox:
-          incoming_value = None
-          if the_data[row_name] == '1' or the_data[row_name] == 'true':
-            incoming_value = 'true'
+        if row_name in the_data and (overwrite_type == True or row_name != 'type'):
+          if type(table_widget.cellWidget(i,1)) is QtGui.QComboBox:
+            incoming_value = None
+            if the_data[row_name] == '1' or the_data[row_name] == 'true':
+              incoming_value = 'true'
+            else:
+              incoming_value = 'false'
+
+            cb = table_widget.cellWidget(i,1)
+            found_index = cb.findText(incoming_value)
+            cb.setCurrentIndex(found_index)
           else:
-            incoming_value = 'false'
-            
-          cb = self.table_widget.cellWidget(i,1)
-          found_index = cb.findText(incoming_value)
-          cb.setCurrentIndex(found_index)
-        else:
-          item = self.table_widget.item(i,1)
-          item.setText(str(the_data[row_name]))
+            item = table_widget.item(i,1)
+            item.setText(str(the_data[row_name]))
 
-        if row_name in self.param_comments:
-          item = self.table_widget.item(i,3)
-          item.setText(self.param_comments[row_name])
-          
-        used_params.append(row_name)
+          if row_name in self.param_comments:
+            item = table_widget.item(i,3)
+            item.setText(self.param_comments[row_name])
+
+          used_params.append(row_name)
 
     # Now look to see if we have more data that wasn't in YAML and add additional rows for that
     for name,value in the_data.items():
@@ -204,31 +217,32 @@ class ParamTable:
 
   def tableToDict(self, only_not_in_original = False):
     the_data = {}
-    for i in xrange(0,self.table_widget.rowCount()):
-      param_name = str(self.table_widget.item(i,0).text())
-      param_value = None
-      if type(self.table_widget.cellWidget(i,1)) is QtGui.QComboBox:
-        param_value = self.table_widget.cellWidget(i,1).currentText()
-      else:
-        param_value = str(self.table_widget.item(i,1).text())
-        
-      if param_value == '':
-        continue
+    for group_name,table_widget in self.group_table_widgets.items():
+      for i in xrange(0,table_widget.rowCount()):
+        param_name = str(table_widget.item(i,0).text())
+        param_value = None
+        if type(table_widget.cellWidget(i,1)) is QtGui.QComboBox:
+          param_value = table_widget.cellWidget(i,1).currentText()
+        else:
+          param_value = str(table_widget.item(i,1).text())
 
-      if ' ' in param_value:
-        param_value = "'"+param_value.strip("'")+"'"
-        
-      if not param_name in self.original_table_data or self.original_table_data[param_name] != param_value: #If we changed it - definitely include it
+        if param_value == '':
+          continue
+
+        if ' ' in param_value:
+          param_value = "'"+param_value.strip("'")+"'"
+
+        if not param_name in self.original_table_data or self.original_table_data[param_name] != param_value: #If we changed it - definitely include it
           the_data[param_name] = param_value
-      else:
-        if not only_not_in_original: # If we want stuff other than what we changed
-          if param_name == 'parent_params' or param_name == 'type':  #Pass through type and parent_params even if we didn't change them
-             the_data[param_name] = param_value
+        else:
+          if not only_not_in_original: # If we want stuff other than what we changed
+            if param_name == 'parent_params' or param_name == 'type':  #Pass through type and parent_params even if we didn't change them
+              the_data[param_name] = param_value
 
-      comment = str(self.table_widget.item(i,3).text())
+        comment = str(table_widget.item(i,3).text())
 
-      if comment != '':
-        self.param_comments[param_name] = comment
+        if comment != '':
+          self.param_comments[param_name] = comment
 #          else:
 #            if param_name in self.param_is_required and self.param_is_required[param_name]: #Pass through any 'required' parameters
 #              the_data[param_name] = param_value
@@ -262,7 +276,10 @@ class ParamTable:
 
   def click_add(self):
 #    self.table_widget.clearFocus()
-    self.table_widget.setCurrentCell(0,0)
+
+    for group_name,table_widget in self.group_table_widgets.items():
+      table_widget.setCurrentCell(0,0)
+      
     self.table_data = self.tableToDict()
     self.parent_class.accept_params()
     return
@@ -315,7 +332,10 @@ class ParamTable:
     saved_params = self.param_names #Save off the params from the previous YAML
     saved_data = self.tableToDict(True) # Pass true so we only save off stuff the user has entered
 
-    self.table_widget.clearContents()
+    self.tab_widget.clear()
+
+    for group_name,table_widget in self.group_table_widgets.items():
+      table_widget.clearContents()
 
     # Build the Table
     the_table_data = []
@@ -340,6 +360,7 @@ class ParamTable:
           for param in new_text['parameters']:
             if 'default' not in param:
               param['default'] = ''
+              
             self.modifyCppType(param, new_text)
             the_table_data.append(param)
             self.param_is_required[param['name']] = param['required']
@@ -378,29 +399,52 @@ class ParamTable:
           continue
         if 'default' not in param:
           param['default'] = ''
-        self.modifyCppType(param, '')
+        self.modifyCppType(param, '')        
           
         the_table_data.append(param)
         self.param_is_required[param['name']] = param['required']
 
-
-    row = 0
+    group_current_row = {}
 
     self.param_names = []
     name_to_param = {}
+
+    group_param_names = {}
 
     seen_it = set()
     for param in the_table_data:
       if param['name'] not in seen_it:
         seen_it.add(param['name'])
         self.param_names.append(param['name'])
-        name_to_param[param['name']] = param    
+        name_to_param[param['name']] = param
+        if 'group_name' not in param or param['group_name'] == None:
+          param['group_name'] = 'Main'
 
-    total_rows = len(self.param_names)
-    self.table_widget.setRowCount(total_rows)
+        if param['group_name'] not in group_param_names:
+          group_param_names[param['group_name']] = []
+          
+        group_param_names[param['group_name']].append(param['name'])
+
+    for group_name in group_param_names:
+      if group_name not in self.group_table_widgets:
+        new_table_widget = self.createTableWidget()
+        self.group_table_widgets[group_name] = new_table_widget
+
+      table_widget = self.group_table_widgets[group_name]
+      if self.tab_widget.indexOf(table_widget) == -1:  # If this table widget hasn't been added to the tabs yet
+        self.tab_widget.addTab(table_widget, group_name)
+
+      total_rows = len(group_param_names[group_name])
+      table_widget.setRowCount(total_rows)
+      group_current_row[group_name] = 0
 
     for param_name in sorted(self.param_names):
       param = name_to_param[param_name]
+      group_name = param['group_name']
+      table_widget = self.group_table_widgets[group_name]
+
+      row = group_current_row[group_name]
+      
       # Populate table with data:
       name_item = QtGui.QTableWidgetItem(param['name'])
 
@@ -432,22 +476,22 @@ class ParamTable:
         else:
           value_item.setCurrentIndex(0)
           
-        self.table_widget.setCellWidget(row, 1, value_item)
+        table_widget.setCellWidget(row, 1, value_item)
       else:
         value_item = QtGui.QTableWidgetItem(value)
-        self.table_widget.setItem(row, 1, value_item)
+        table_widget.setItem(row, 1, value_item)
         
       if 'cpp_type' in param and param['cpp_type'] == 'MeshFileName':
-        options_item = FileOpenWidget(self.table_widget,row,self.isVectorType(param['cpp_type']))
-        self.table_widget.setCellWidget(row, 2, options_item)
+        options_item = FileOpenWidget(table_widget,row,self.isVectorType(param['cpp_type']))
+        table_widget.setCellWidget(row, 2, options_item)
 
       if 'cpp_type' in param and param['cpp_type'] in self.type_options:
-        options_item = OptionsWidget(self.table_widget,row,self.type_options[param['cpp_type']], self.isVectorType(param['cpp_type']))
-        self.table_widget.setCellWidget(row, 2, options_item)
+        options_item = OptionsWidget(table_widget,row,self.type_options[param['cpp_type']], self.isVectorType(param['cpp_type']))
+        table_widget.setCellWidget(row, 2, options_item)
 
       if 'cpp_type' in param and param['cpp_type'] == 'MooseEnum':
-        options_item = OptionsWidget(self.table_widget,row,param['options'].split(' '), self.isVectorType(param['cpp_type']))
-        self.table_widget.setCellWidget(row, 2, options_item)
+        options_item = OptionsWidget(table_widget,row,param['options'].split(' '), self.isVectorType(param['cpp_type']))
+        table_widget.setCellWidget(row, 2, options_item)
       
       name_item.setFlags(QtCore.Qt.ItemIsEnabled)
       name_item.setToolTip(param['description'])
@@ -455,19 +499,20 @@ class ParamTable:
       if ((has_type_subblock or not has_parent_params_set) and param['name'] == 'type' and str(item) != '*') or param['name'] == 'parent_params' or (has_parent_params_set and param['name'] == 'Name'):
         value_item.setFlags(QtCore.Qt.NoItemFlags)
 
-      self.table_widget.setItem(row, 0, name_item)
+      table_widget.setItem(row, 0, name_item)
       
       comment_item = QtGui.QTableWidgetItem()
-      self.table_widget.setItem(row, 3, comment_item)
+      table_widget.setItem(row, 3, comment_item)
       
-      row += 1
+      group_current_row[group_name] += 1
 
 
     # Try to restore saved data
     if len(saved_data):
       self.fillTableWithData(saved_data, old_params=saved_params)
 
-    self.table_widget.resizeColumnsToContents()
+    for group_name, table_widget in self.group_table_widgets.items():
+      table_widget.resizeColumnsToContents()
     
   def cellChanged(self, row, col):
     pass
