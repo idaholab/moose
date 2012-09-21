@@ -471,6 +471,10 @@ class ParamTable:
 
       value_item = None
 
+      options_item = QtGui.QTableWidgetItem()
+      options_item.setFlags(QtCore.Qt.ItemIsEnabled)
+      table_widget.setItem(row, 2, options_item)
+
       if 'cpp_type' in param and param['cpp_type'] == 'bool':
         value_item = QtGui.QComboBox()
         value_item.addItem('')
@@ -503,6 +507,7 @@ class ParamTable:
       
       name_item.setFlags(QtCore.Qt.ItemIsEnabled)
       name_item.setToolTip(param['description'])
+
 
       if ((has_type_subblock or not has_parent_params_set) and param['name'] == 'type' and str(item) != '*') or param['name'] == 'parent_params' or (has_parent_params_set and param['name'] == 'Name'):
         value_item.setFlags(QtCore.Qt.NoItemFlags)
