@@ -342,6 +342,8 @@ class ParamTable:
 
     self.tab_widget.clear()
 
+    self.tab_widget.addTab(self.table_widget, 'Main')
+
     for group_name,table_widget in self.group_table_widgets.items():
       table_widget.clearContents()
 
@@ -433,7 +435,7 @@ class ParamTable:
           
         group_param_names[param['group_name']].append(param['name'])
 
-    for group_name in group_param_names:
+    for group_name in sorted(group_param_names):
       if group_name not in self.group_table_widgets:
         new_table_widget = self.createTableWidget()
         self.group_table_widgets[group_name] = new_table_widget

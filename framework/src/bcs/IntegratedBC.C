@@ -24,6 +24,8 @@ InputParameters validParams<IntegratedBC>()
   InputParameters params = validParams<BoundaryCondition>();
   params.addParam<std::vector<std::string> >("save_in", "The name of auxiliary variables to save this Kernel's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
 
+  params.addParamNamesToGroup("save_in", "Advanced");
+
   return params;
 }
 

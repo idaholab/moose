@@ -29,7 +29,7 @@ InputParameters validParams<SetupMeshAction>()
 {
   InputParameters params = validParams<Action>();
 
-  params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
+  params.addParam<bool>("second_order", false, "Converts a first order mesh to a second order mesh.  Note: This is NOT needed if you are reading an actual first order mesh.");
 
   MooseEnum partitioning("linear, centroid");
   params.addParam<MooseEnum>("partitioner", partitioning, "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation.");
@@ -43,6 +43,11 @@ InputParameters validParams<SetupMeshAction>()
 
   params.addParam<std::vector<BoundaryID> >("boundary_id", "IDs of the boundary id/name pairs");
   params.addParam<std::vector<BoundaryName> >("boundary_name", "Names of the boundary id/name pairs (must correspond with \"boundary_id\"");
+
+  params.addParamNamesToGroup("second_order construct_side_list_from_node_list", "Advanced");
+  params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
+  params.addParamNamesToGroup("block_id block_name boundary_id boundary_name", "Add Names");
+
   return params;
 }
 

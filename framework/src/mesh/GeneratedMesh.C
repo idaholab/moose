@@ -43,6 +43,8 @@ InputParameters validParams<GeneratedMesh>()
   params.addParam<MooseEnum>("elem_type", elem_types, "The type of element from libMesh to generate (default: linear element for requested dimension)");
   params.addPrivateParam<std::string>("built_by_action", "read_mesh");
 
+  params.addParamNamesToGroup("dim", "Main");
+
   return params;
 }
 

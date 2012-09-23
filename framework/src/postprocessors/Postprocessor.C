@@ -26,6 +26,9 @@ InputParameters validParams<Postprocessor>()
 
   params.addParam<std::string>("output", "both", "The values are: none, screen, file, both (no output, output to screen only, output to files only, output both to screen and files)");
   params.addPrivateParam<std::string>("built_by_action", "add_postprocessor");
+
+  params.addParamNamesToGroup("output", "Advanced");
+
   return params;
 }
 

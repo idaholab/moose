@@ -60,6 +60,13 @@ InputParameters validParams<SetupOutputAction>()
   // restart options
   params.addParam<unsigned int>("num_restart_files", 0, "Number of the restart files to save (0 = no restart files)");
 
+  params.addParamNamesToGroup("interval output_displaced output_solution_history print_linear_residuals iteration_plot_start_time elemental_as_nodal exodus_inputfile_output", "Advanced");
+  params.addParamNamesToGroup("nemesis gmv tecplot tecplot_binary xda", "Format");
+  params.addParamNamesToGroup("screen_interval postprocessor_screen max_pps_rows_screen postprocessor_csv postprocessor_gnuplot gnuplot_format", "Postprocessor");
+  params.addParamNamesToGroup("perf_log show_setup_log_early", "Logging");
+  params.addParamNamesToGroup("num_restart_files", "Restart");
+
+
   return params;
 }
 

@@ -26,6 +26,9 @@ InputParameters validParams<CopyNodalVarsAction>()
   params.addParam<int>("initial_from_file_timestep", 2, "Gives the timestep for which to read a solution from a file for a given variable");
   params.addParam<std::string>("initial_from_file_var", "Gives the name of a variable for which to read an initial condition from a mesh file");
 
+  params.addParamNamesToGroup("initial_from_file_timestep initial_from_file_var", "Initial From File");
+
+
   return params;
 }
 

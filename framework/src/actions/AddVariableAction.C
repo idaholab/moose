@@ -46,6 +46,8 @@ InputParameters validParams<AddVariableAction>()
   params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
   params.addParam<std::vector<SubdomainName> >("block", "The block id where this variable lives");
 
+  params.addParamNamesToGroup("scaling", "Advanced");
+
   return params;
 }
 

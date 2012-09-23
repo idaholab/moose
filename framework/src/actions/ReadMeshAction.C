@@ -43,7 +43,8 @@ InputParameters validParams<ReadMeshAction>()
   params.addParam<unsigned int>("patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
 
   // groups
-  params.addParamNamesToGroup("displacements ghosted_boundaries ghosted_boundaries_inflation skip_partitioning patch_size", "Advanced");
+  params.addParamNamesToGroup("displacements ghosted_boundaries ghosted_boundaries_inflation patch_size", "Advanced");
+  params.addParamNamesToGroup("skip_partitioning", "Partitioning");
 
   return params;
 }

@@ -34,6 +34,9 @@ InputParameters validParams<Kernel>()
   // testing, dude
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_kernel");
+
+  params.addParamNamesToGroup("save_in", "Advanced");
+
   return params;
 }
 

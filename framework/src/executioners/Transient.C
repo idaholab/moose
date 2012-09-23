@@ -62,6 +62,11 @@ InputParameters validParams<Transient>()
   params.addParam<bool>("use_AB2", false, "Whether to use the Adams-Bashforth 2 predictor");
   params.addParam<bool>("use_littlef", false, "if a function evaluation should be used or time deriv's in predictors");
   params.addParam<bool>("abort_on_solve_fail", false, "abort if solve not converged rather than cut timestep");
+
+  params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol ss_tmin sync_times time_t time_dt growth_factor predictor_scale use_AB2 use_littlef abort_on_solve_fail", "Advanced");
+
+  params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
+
   return params;
 }
 

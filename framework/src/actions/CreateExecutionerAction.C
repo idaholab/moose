@@ -50,6 +50,9 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<std::vector<std::string> >("petsc_options_value", "Values of Petsc name/value pairs (must correspond with \"petsc_options_iname\"");
 #endif //LIBMESH_HAVE_PETSC
 
+  params.addParamNamesToGroup("l_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol", "Solver");
+  params.addParamNamesToGroup("no_fe_reinit", "Advanced");
+
   return params;
 }
 
