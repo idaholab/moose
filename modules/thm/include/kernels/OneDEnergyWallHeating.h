@@ -27,15 +27,15 @@ protected:
   VariableValue & _rho;
   VariableValue & _rhou;
   VariableValue & _temperature;
+  VariableValue & _HTC_aux; // convective heat transfer coefficient, W/m^2-K 
 
   // For Jacobian terms
   unsigned _rho_var_number; 
   unsigned _rhou_var_number; 
 
   // Parameters
-  const Real & _aw; // heat transfer area density, m^2 / m^3
-  const Real & _Tw; // Wall temperature, K
-  MaterialProperty<Real> & _HTC; // convective heat transfer coefficient, W/m^2-K
+  Real _aw; // heat transfer area density, m^2 / m^3
+  Real _Tw; // Wall temperature, K
 
   const EquationOfState & _eos;
 };
