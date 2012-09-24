@@ -231,6 +231,7 @@ PipeBase::addMooseObjects()
     std::vector<std::string> cv_rho(1, RHO);
     std::vector<std::string> cv_rhou(1, RHOU);
     std::vector<std::string> cv_temperature(1, TEMPERATURE);
+    std::vector<std::string> cv_HTC(1, HeatTransferCoefficient); 
 
     InputParameters params = Factory::instance()->getValidParams("OneDEnergyWallHeating");
     params.set<NonlinearVariableName>("variable") = Model::RHOE;
@@ -242,6 +243,7 @@ PipeBase::addMooseObjects()
     params.set<std::vector<std::string> >("rho") = cv_rho;
     params.set<std::vector<std::string> >("rhou") = cv_rhou;
     params.set<std::vector<std::string> >("temperature") = cv_temperature;
+    params.set<std::vector<std::string> >("heat_transfer_coefficient") = cv_HTC; 
 
     params.set<UserObjectName>("eos") = pars.get<UserObjectName>("eos");
 
