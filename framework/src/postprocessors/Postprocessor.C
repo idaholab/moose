@@ -24,7 +24,9 @@ InputParameters validParams<Postprocessor>()
 {
   InputParameters params = validParams<UserObject>();
 
-  params.addParam<std::string>("output", "both", "The values are: none, screen, file, both (no output, output to screen only, output to files only, output both to screen and files)");
+  MooseEnum output_opts("none, screen, file, both", "both");
+  params.addParam<MooseEnum>("output", output_opts,
+                             "The values are: none, screen, file, both (no output, output to screen only, output to files only, output both to screen and files)");
   params.addPrivateParam<std::string>("built_by_action", "add_postprocessor");
 
   params.addParamNamesToGroup("output", "Advanced");
@@ -34,6 +36,6 @@ InputParameters validParams<Postprocessor>()
 
 Postprocessor::Postprocessor(const std::string & name, InputParameters parameters) :
     _pp_name(name),
-    _output(Moose::stringToEnum<Moose::PPSOutputType>(parameters.get<std::string>("output")))
+    _output(Moose::stringToEnum<Moose::PPSOutputType>(parameters.get<MooseEnum>("output")))
 {
 }
