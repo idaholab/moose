@@ -25,13 +25,9 @@
   [../]
 []
 
-[Postprocessors]
-	[./Residual]
-		[./pps_1]
-			type = ElementAverageValue
-			variable = u
-		[../]
-	[../]
+[DeprecatedBlock]
+  type = ElementAverageValue
+  variable = u
 []
 
 [Executioner]

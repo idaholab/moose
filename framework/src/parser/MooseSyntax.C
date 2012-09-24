@@ -32,7 +32,6 @@ void associateSyntax(Syntax & syntax)
   syntax.registerActionSyntax("SetupMeshAction", "Mesh");
   syntax.registerActionSyntax("InitialRefinementAction", "Mesh");
   syntax.registerActionSyntax("InitDisplacedProblemAction", "Mesh");
-//  syntax.registerActionSyntax("DeprecatedBlockAction", "Mesh/Generation");
 //  syntax.registerActionSyntax("EmptyAction", "Mesh/ExtraNodesets");
   syntax.registerActionSyntax("AddExtraNodesetAction", "Mesh/ExtraNodesets/*");
   syntax.registerActionSyntax("AddMeshModifierAction", "Mesh/Modifier/*");
@@ -85,13 +84,6 @@ void associateSyntax(Syntax & syntax)
 //  syntax.registerActionSyntax("EmptyAction", "Postprocessors");
   syntax.registerActionSyntax("AddPostprocessorAction", "Postprocessors/*");
 
-//  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Residual");
-//  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Jacobian");
-//  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/NewtonIter");
-//  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Residual/*");
-//  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Jacobian/*");
-//  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/NewtonIter/*");
-
 //  syntax.registerActionSyntax("EmptyAction", "Dampers");
   syntax.registerActionSyntax("AddDamperAction", "Dampers/*");
 
@@ -140,6 +132,9 @@ void associateSyntax(Syntax & syntax)
 
   // New Adaptivity System
   syntax.registerActionSyntax("SetAdaptivityOptionsAction", "Adaptivity");
+
+  // Deprecated Block
+  syntax.registerActionSyntax("DeprecatedBlockAction", "DeprecatedBlock");
 
   addActionTypes(syntax);
   registerActions(syntax);

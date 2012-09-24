@@ -118,8 +118,7 @@ bad_enum_test = { INPUT : 'bad_enum_test.i',
 
 deprecated_block_test = {
   INPUT : 'deprecated_block_test.i',
-  EXPECT_ERR : "Input file block '\S+' has been deprecated.",
-  SKIP : 'out-dated test'
+  EXPECT_ERR : "Input file block '\S+' has been deprecated."
 }
 
 unused_param_test = {
