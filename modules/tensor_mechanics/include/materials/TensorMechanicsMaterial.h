@@ -30,7 +30,7 @@ protected:
 
   virtual void computeQpElasticityTensor();
 
-  virtual void computeQpStrain();
+  virtual void computeQpStrain() = 0;
 
   virtual void computeQpStress() = 0;
 

@@ -83,9 +83,3 @@ void TensorMechanicsMaterial::computeQpElasticityTensor()
   _Jacobian_mult[_qp] = _Cijkl;
 }
 
-void TensorMechanicsMaterial::computeQpStrain()
-{
-  RankTwoTensor grad_tensor(_grad_disp_x[_qp],_grad_disp_y[_qp],_grad_disp_z[_qp]);
-  _elastic_strain[_qp] = (grad_tensor + grad_tensor.transpose())/2.0;
-  _elastic_strain[_qp] += _applied_strain;
-}

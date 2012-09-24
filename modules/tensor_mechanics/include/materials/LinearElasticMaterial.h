@@ -18,6 +18,7 @@ public:
   LinearElasticMaterial(const std:: string & name, InputParameters parameters);
 
 protected:
+  virtual void computeQpStrain();
   virtual void computeQpStress();
   
 private:

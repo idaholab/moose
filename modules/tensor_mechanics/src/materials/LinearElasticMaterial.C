@@ -22,6 +22,14 @@ LinearElasticMaterial::LinearElasticMaterial(const std::string & name,
 {
 }
 
+void LinearElasticMaterial::computeQpStrain()
+{
+  //strain = (grad_disp + grad_disp^T)/2
+  RankTwoTensor grad_tensor(_grad_disp_x[_qp],_grad_disp_y[_qp],_grad_disp_z[_qp]);
+  _elastic_strain[_qp] = (grad_tensor + grad_tensor.transpose())/2.0;
+  _elastic_strain[_qp] += _applied_strain;
+}
+
 void LinearElasticMaterial::computeQpStress()
 {
   // stress = C * e
