@@ -1438,6 +1438,14 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 }
 
 void
+FEProblem::clearPostprocessorTables()
+{
+  // Clear the tables for cases when this routine is called multiple times by an executioner
+  _pps_output_table_file.clear();
+  _pps_output_table_screen.clear();
+}
+
+void
 FEProblem::addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<FEProblem *>("_fe_problem") = this;

@@ -237,6 +237,7 @@ public:
   // Postprocessors /////
   virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
 
+  void clearPostprocessorTables();
 
   // UserObjects /////
   virtual void addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters);

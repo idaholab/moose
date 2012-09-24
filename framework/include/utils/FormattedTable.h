@@ -50,6 +50,8 @@ public:
    */
   Real & getLastData(const std::string & name);
 
+  void clear();
+
   const std::map<Real, std::map<std::string, Real> > & getData() const { return _data; }
 
   /**

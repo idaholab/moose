@@ -309,3 +309,9 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
     mooseError("gnuplot command failed");
 */
 }
+
+void
+FormattedTable::clear()
+{
+  _data.clear();
+}
