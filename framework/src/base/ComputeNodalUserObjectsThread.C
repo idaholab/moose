@@ -31,7 +31,8 @@ ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(SubProblem & proble
 // Splitting Constructor
 ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split /*split*/) :
     _sub_problem(x._sub_problem),
-    _user_objects(x._user_objects)
+    _user_objects(x._user_objects),
+    _group(x._group)
 {
 }
 
