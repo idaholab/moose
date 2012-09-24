@@ -1,4 +1,5 @@
 import os, sys, re, inspect, types, errno, pprint
+import ParseGetPot
 from socket import gethostname
 from options import *
 from util import *
@@ -12,6 +13,7 @@ from timeit import default_timer as clock
 
 class TestHarness:
   def __init__(self, argv, app_name, moose_dir):
+    self.input_file_name = 'tests'  # This is the file we look for, when looking for test specifications.
     self.test_table = []
     self.num_passed = 0
     self.num_failed = 0
@@ -49,64 +51,28 @@ class TestHarness:
       if (self.test_match.search(dirpath)):
         for file in filenames:
           # See if there were other arguments (test names) passed on the command line
-          if file[-2:] == 'py' and self.test_match.search(file):
-            module_name = file[:-3]
+          if file == self.input_file_name or file[-2:] == 'py' and self.test_match.search(file):
             saved_cwd = os.getcwd()
             sys.path.append(os.path.abspath(dirpath))
             os.chdir(dirpath)
+            if file == self.input_file_name:  # New GetPot file formatted test
+              tests = self.parseGetPotTestFormat(file)
+            elif file[-2:] == 'py' and self.test_match.search(file): # Legacy file formatted test
+              tests = self.parseLegacyTestFormat(file)
 
-            # dynamically load the module
-            module = __import__(module_name)
-            test_dir = os.path.dirname(module.__file__)
+            # Go through the list of test specs and run them
+            for test in tests:
+              if self.checkIfRunTest(test):
+                self.prepareTest(test)
+                execute = self.createCommand(test)
 
-            # look for dicts that match the test regex
-            for test_name, test_opts in inspect.getmembers(module):
-              if isinstance(test_opts, types.DictType) and self.test_match.search(test_name):
-                pp = pprint.PrettyPrinter()
+                # This method spawns another process and allows this loop to continue looking for tests
+                # RunParallel will call self.testOutputAndFinish when the test has completed running
+                # This method will block when the maximum allowed parallel processes are running
 
-                # insert default values where none provided
-                testname = module_name + '.' + test_name
-
-                # Filter tests that we want to run
-                will_run = False
-                if len(self.tests) == 0:
-                  will_run = True
-                else:
-                  for item in self.tests:
-                    pos = item.find(".")
-                    # Does the passed in argument have a "dot"?
-                    if (pos > -1 and item == testname) or (pos == -1 and item == module_name):
-                      will_run = True
-
-                if not will_run:
-                  continue
-
-                test = DEFAULTS.copy()
-
-                # Get relative path to test[TEST_DIR]
-                relative_path = test_dir.replace(self.executable.split(self.executable.split('/').pop())[0], '')
-
-                # Now update all the base level keys
-                test.update(test_opts)
-                test.update( { TEST_NAME : testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path } )
-
-                if test[PREREQ] != None:
-                  if type(test[PREREQ]) != list:
-                    print "Option 'PREREQ' needs to be of type list in " + module_name + '.' + test[TEST_NAME]
-                    sys.exit(1)
-                  test[PREREQ] = [module_name + '.' + item for item in test[PREREQ]]
-
-
-                if self.checkIfRunTest(test):
-                  self.prepareTest(test)
-                  execute = self.createCommand(test)
-
-                  # This method spawns another process and allows this loop to continue looking for tests
-                  # RunParallel will call self.testOutputAndFinish when the test has completed running
-                  # This method will block when the maximum allowed parallel processes are running
-                  self.runner.run(test, execute)
-                else: # This job is skipped - notify the runner
-                  self.runner.jobSkipped(test[TEST_NAME])
+                self.runner.run(test, execute)
+              else: # This job is skipped - notify the runner
+                self.runner.jobSkipped(test[TEST_NAME])
 
             os.chdir(saved_cwd)
             sys.path.pop()
@@ -114,6 +80,105 @@ class TestHarness:
     # Wait for all tests to finish
     self.runner.join()
     self.cleanupAndExit()
+
+  def parseGetPotTestFormat(self, filename):
+    data = ParseGetPot.readInputFile(filename)
+    test_dir = os.path.abspath(os.path.dirname(filename))
+#    module_name = 'tests'   # Legacy support
+    tests = []
+
+    # We expect our root node to be called "Tests"
+    if 'Tests' in data.children:
+      tests_node = data.children['Tests']
+
+      for testname, test_node in tests_node.children.iteritems():
+        test = DEFAULTS.copy()
+
+        # Get relative path to test[TEST_DIR]
+        relative_path = test_dir.replace(self.executable.split(self.executable.split('/').pop())[0], '')
+
+        # Now update all the base level keys
+        for key, value in test_node.params.iteritems():
+          if key in test and type(test[key]) == list:
+            test[key] = value.split(' ')
+          else:
+            test[key] = value
+
+        test.update( { TEST_NAME : relative_path + '.' + testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path } )
+
+        if test[PREREQ] != None:
+          if type(test[PREREQ]) != list:
+            print "Option 'PREREQ' needs to be of type list in " + test[TEST_NAME]
+            sys.exit(1)
+#          test[PREREQ] = [module_name + '.' + item for item in test[PREREQ]]
+
+        # Build a list of test specs (dicts) to return
+        tests.append(test)
+    return tests
+
+
+  def parseLegacyTestFormat(self, filename):
+    # dynamically load the module
+    module_name = filename[:-3]   # Always a python file (*.py)
+    module = __import__(module_name)
+    test_dir = os.path.dirname(module.__file__)
+    tests = []
+
+    for test_name, test_opts in inspect.getmembers(module):
+      if isinstance(test_opts, types.DictType) and self.test_match.search(test_name):
+
+        # insert default values where none provided
+        testname = module_name + '.' + test_name
+
+        # Filter tests that we want to run
+        will_run = False
+        if len(self.tests) == 0:
+          will_run = True
+        else:
+          for item in self.tests:
+            pos = item.find(".")
+            # Does the passed in argument have a "dot"?
+            if (pos > -1 and item == testname) or (pos == -1 and item == module_name):
+              will_run = True
+
+        if not will_run:
+          continue
+
+        test = DEFAULTS.copy()
+
+        # Get relative path to test[TEST_DIR]
+        relative_path = test_dir.replace(self.executable.split(self.executable.split('/').pop())[0], '')
+
+        # Now update all the base level keys
+        test.update(test_opts)
+        test.update( { TEST_NAME : testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path } )
+
+        if test[PREREQ] != None:
+          if type(test[PREREQ]) != list:
+            print "Option 'PREREQ' needs to be of type list in " + module_name + '.' + test[TEST_NAME]
+            sys.exit(1)
+          test[PREREQ] = [module_name + '.' + item for item in test[PREREQ]]
+
+        # Build a list of test specs (dicts) to return
+        tests.append(test)
+    return tests
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   # Create the command line string to run
   def createCommand(self, test):

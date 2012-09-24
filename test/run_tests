@@ -13,6 +13,9 @@ if os.environ.has_key("MOOSE_DIR"):
 elif os.environ.has_key("MOOSE_DEV"):
   MOOSE_DIR = '../devel/moose'
 
+UTILITIES_DIR = '../utilities'
+sys.path.append(UTILITIES_DIR + '/python_getpot')
+
 # Import the TestHarness and Helper functions from the MOOSE toolkit
 sys.path.append(MOOSE_DIR + '/tests')
 import tools
