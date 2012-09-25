@@ -167,7 +167,7 @@ class RunParallel:
   # This function reads output from the file (i.e. the test output)
   # but trims it down to the specified size.  It'll save the first two thirds
   # of the requested size and the last third trimming from the middle
-  def readOutput(self, f, max_size=1048576):
+  def readOutput(self, f, max_size=100000):
     first_part = int(max_size*(2.0/3.0))
     second_part = int(max_size*(1.0/3.0))
 
