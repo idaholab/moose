@@ -22,7 +22,7 @@ moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name *.f)
 moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name *.f90)
 # object files
 ifdef PRECOMPILED
-moose_precompiled_headers_objects := $(patsubst %.h, %.h.gch, $(moose_precompiled_headers))
+moose_precompiled_headers_objects := $(patsubst %.h, %.h.gch/$(METHOD).h.gch, $(moose_precompiled_headers))
 else
 moose_precompiled_headers_objects := 
 endif
@@ -66,7 +66,7 @@ endif
 # include MOOSE dep files
 -include $(moose_deps)
 -include $(MOOSE_DIR)/contrib/mtwist-1.1/src/*.d
--include $(MOOSE_DIR)/include/base/Precompiled.h.gch.d
+-include $(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch.d
 
 #
 # exodiff
@@ -94,14 +94,16 @@ delete_list := $(moose_LIB) $(exodiff_APP)
 
 clean::
 	@rm -fr $(delete_list)
-	@find . \( -name "*~" -or -name "*.o" -or -name "*.gch" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" \) -exec rm '{}' \;
+	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" \) -exec rm '{}' \;
 	@rm -fr *.mod
+	@find . \( -type d -name *.gch \) | xargs rm -rf
 
 clobber::
 	@rm -fr $(delete_list)
 	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" \
                 -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \) -exec rm '{}' \;
 	@rm -fr *.mod
+	@find . \( -type d -name *.gch \) | xargs rm -rf
 
 cleanall::
 	make -C $(MOOSE_DIR) clean

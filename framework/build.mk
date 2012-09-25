@@ -38,8 +38,9 @@ ifdef PRECOMPILED
 # Precompiled Header Rules
 #
 
-%.h.gch : %.h
+%.h.gch/$(METHOD).h.gch : %.h
 	@echo "Pre-Compiling Header (in "$(mode)" mode) "$<"..."
+	@mkdir -p $(MOOSE_DIR)/include/base/Precompiled.h.gch
 	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
 
 #
@@ -47,7 +48,7 @@ ifdef PRECOMPILED
 #
 
 %.$(obj-suffix) : %.C
-%.$(obj-suffix) : %.C $(MOOSE_DIR)/include/base/Precompiled.h.gch
+%.$(obj-suffix) : %.C $(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch
 	@echo "Compiling C++ With PCH (in "$(mode)" mode) "$<"..."
 	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED -include Precompiled.h -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
 endif
