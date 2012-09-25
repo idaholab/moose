@@ -36,6 +36,9 @@ UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo
 {
   // Bin the user objects into either Pre or Post AuxKernel bins
   for (std::map<SubdomainID, std::vector<ElementUserObject *> >::iterator it1 = _element_user_objects.begin(); it1 != _element_user_objects.end(); ++it1)
+  {
+    _pre_element_user_objects[it1->first].clear();
+    _post_element_user_objects[it1->first].clear();
     for (std::vector<ElementUserObject *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
     {
       if (depend_uo.find((*it2)->name()) != depend_uo.end())
@@ -43,8 +46,12 @@ UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo
       else
         _post_element_user_objects[it1->first].push_back(*it2);
     }
+  }
 
   for (std::map<BoundaryID, std::vector<SideUserObject *> >::iterator it1 = _side_user_objects.begin(); it1 != _side_user_objects.end(); ++it1)
+  {
+    _pre_side_user_objects[it1->first].clear();
+    _post_side_user_objects[it1->first].clear();
     for (std::vector<SideUserObject *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
     {
       if (depend_uo.find((*it2)->name()) != depend_uo.end())
@@ -52,8 +59,12 @@ UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo
       else
         _post_side_user_objects[it1->first].push_back(*it2);
     }
+  }
 
   for (std::map<BoundaryID, std::vector<NodalUserObject *> >::iterator it1 = _nodal_user_objects.begin(); it1 != _nodal_user_objects.end(); ++it1)
+  {
+    _pre_nodal_user_objects[it1->first].clear();
+    _post_nodal_user_objects[it1->first].clear();
     for (std::vector<NodalUserObject *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
     {
       if (depend_uo.find((*it2)->name()) != depend_uo.end())
@@ -61,8 +72,12 @@ UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo
       else
         _post_nodal_user_objects[it1->first].push_back(*it2);
     }
+  }
 
   for (std::map<SubdomainID, std::vector<NodalUserObject *> >::iterator it1 = _block_nodal_user_objects.begin(); it1 != _block_nodal_user_objects.end(); ++it1)
+  {
+    _pre_block_nodal_user_objects[it1->first].clear();
+    _post_block_nodal_user_objects[it1->first].clear();
     for (std::vector<NodalUserObject *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
     {
       if (depend_uo.find((*it2)->name()) != depend_uo.end())
@@ -70,7 +85,10 @@ UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo
       else
         _post_block_nodal_user_objects[it1->first].push_back(*it2);
     }
+  }
 
+  _pre_generic_user_objects.clear();
+  _post_generic_user_objects.clear();
   for (std::vector<GeneralUserObject *>::iterator it2 = _generic_user_objects.begin(); it2 != _generic_user_objects.end(); ++it2)
   {
     if (depend_uo.find((*it2)->name()) != depend_uo.end())
