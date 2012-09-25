@@ -1,4 +1,5 @@
 [Mesh]
+  type = MooseMesh
   dim = 3
   file = cube.e
 []
@@ -24,7 +25,6 @@
     prop_name = thermal_conductivity
     prop_state = 'old'                  # Use the "Old" value to compute conductivity
   [../]
-
   [./ie]
     type = TimeDerivative
     variable = u
@@ -46,7 +46,6 @@
     boundary = 1
     value = 0.0
   [../]
-
   [./top]
     type = DirichletBC
     variable = u
@@ -72,9 +71,7 @@
 [Executioner]
   type = Transient
   petsc_options = '-snes_mf_operator'
-
   l_max_its = 10
-
   start_time = 0.0
   num_steps = 5
   dt = .1
@@ -83,8 +80,8 @@
 [Output]
   file_base = out
   output_initial = true
-  interval = 1
   exodus = true
   perf_log = true
+  postprocessor_csv = true
 []
 

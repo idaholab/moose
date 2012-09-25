@@ -86,5 +86,6 @@
   interval = 1
   exodus = true
   perf_log = true
+  postprocessor_csv = true
 []
 

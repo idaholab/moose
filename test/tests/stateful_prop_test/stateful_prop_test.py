@@ -2,13 +2,15 @@ from options import *
 
 test = { INPUT : 'stateful_prop_test.i',
          EXODIFF : ['out.e'],
+         CSVDIFF : ['out.csv'],
          MAX_THREADS : 1,
          MAX_PARALLEL : 1}
 
-test = { INPUT : 'stateful_prop_test_older.i',
-         EXODIFF : ['out_older.e'],
-         MAX_THREADS : 1,
-         MAX_PARALLEL : 1}
+test_older = { INPUT : 'stateful_prop_test_older.i',
+               EXODIFF : ['out_older.e'],
+               CSVDIFF : ['out_older.csv'],
+               MAX_THREADS : 1,
+               MAX_PARALLEL : 1}
 
 spatial_test = { INPUT : 'stateful_prop_spatial_test.i',
                  EXODIFF : ['out_spatial.e'],
