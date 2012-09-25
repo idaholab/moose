@@ -96,14 +96,14 @@ clean::
 	@rm -fr $(delete_list)
 	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" \) -exec rm '{}' \;
 	@rm -fr *.mod
-	@find . \( -type d -name *.gch \) | xargs rm -rf
+	@find . \( -name *.gch \) | xargs rm -rf
 
 clobber::
 	@rm -fr $(delete_list)
 	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" \
                 -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \) -exec rm '{}' \;
 	@rm -fr *.mod
-	@find . \( -type d -name *.gch \) | xargs rm -rf
+	@find . \( -name *.gch \) | xargs rm -rf
 
 cleanall::
 	make -C $(MOOSE_DIR) clean
