@@ -20,7 +20,7 @@ template<>
 InputParameters validParams<EnthalpyTimeDerivative>()
 {
     InputParameters params = validParams<TimeDerivative>();
-    params.addCoupledVar("temperature", "Use CoupledAuxTemperature here");
+    //params.addCoupledVar("temperature", "Use CoupledAuxTemperature here");
     params.addCoupledVar("pressure","Use coupled pressuer here to calculate the time derivative");
     params.addRequiredParam<UserObjectName>("water_steam_properties", "EOS functions, calculate water and steam properties");
     //params.addRequiredCoupledVar("density", "Use CoupledAuxDensity here");                        //reomved by kat
@@ -39,6 +39,7 @@ _water_steam_properties(getUserObject<WaterSteamEOS>("water_steam_properties")),
 
 //_density(coupledValue("density")),                    //removed by Kat
 //_density_old(coupledValueOld("density")),             //removed by Kat
+
 _density(getMaterialProperty<Real>("density")),                         //added by Kat
 _time_old_density(getMaterialProperty<Real>("time_old_density")),       //added by Kat
 
@@ -56,7 +57,7 @@ _dTdP_H(getMaterialProperty<Real>("dTdP_H")),                           //added 
 _ddensitydH_P(getMaterialProperty<Real>("ddensitydH_P")),               //added by kat
 _ddensitydp_H(getMaterialProperty<Real>("ddensitydp_H")),               //added by kat
 
-_pressure_old(coupledValueOld("pressure")),
+//_pressure_old(coupledValueOld("pressure")),
 _p_var(coupled("pressure")),
 
 //_ddensitydp_H(coupledValue("ddensitydp_H")),          //removed by kat
@@ -69,42 +70,31 @@ _u_old(valueOld())
 
 Real
 EnthalpyTimeDerivative::computeQpResidual()
-{
-    Real _var[11];
-    Real _time_old_den;
-    Real _time_old_temp;
-    Real _den_old;
-    Real _temp_old;
+{   
     
-    if (_t_step==1) 
-    {
-        _water_steam_properties.waterAndSteamEquationOfStatePropertiesPH (_u_old[_qp], _pressure_old[_qp], _var[0], _time_old_temp, 
-                                                                          _var[1], _var[2], _time_old_den, _var[3], _var[4], 
-                                                                          _var[5],_var[6], _var[7], _var[8], _var[9], _var[10]); 
-                
-        _den_old = _time_old_den; 
-        _temp_old = _time_old_temp; 
-    } 
-    else 
-    {
-        _den_old= _time_old_density[_qp]; 
-        _temp_old = _time_old_temperature[_qp]; 
-    }
+    /*Real tmp1 = (((_porosity[_qp] * _density[_qp] * _u[_qp]) + ((1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _temperature[_qp])) 
+                 - ((_porosity[_qp] * _time_old_density[_qp] * _u_old[_qp]) + ((1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _time_old_temperature[_qp])))
+                * _test[_i][_qp] /_dt;
+     */
     
-    Real tmp1 = (_porosity[_qp] * _density[_qp] * _u[_qp] + (1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _temperature[_qp] 
-                 - _porosity[_qp] * _den_old * _u_old[_qp] - (1.0-_porosity[_qp])* _density_rock[_qp] * _specific_heat_rock[_qp] * _temp_old)
-    * _test[_i][_qp] /_dt;
 
+    Real tmp1 = (((_porosity[_qp] * _density[_qp] * _u[_qp]) + ((1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _temperature[_qp])) 
+               - ((_porosity[_qp] * _time_old_density[_qp] * _u_old[_qp]) + ((1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _time_old_temperature[_qp])))
+                * _test[_i][_qp] /_dt;
+    
+    //Real tmp1 = (((_porosity[_qp] * _density[_qp]) + ((1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _temperature[_qp])) 
+      //           - ((_porosity[_qp] * _time_old_density[_qp]) + ((1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _time_old_temperature[_qp])))*TimeDerivative:://computeQpResidual();    
+    
     
     //REAL dphirho_dt = ((_porosity[_qp]*_density_water[_qp])-(_porosity_old[_qp]*_density_water_old[_qp]))/_dt;
     // std::cout <<_porosity[_qp]<< "\n";
     /*
-     Real tmp1=(((_porosity[_qp]*_density_water[_qp]*_specific_heat_water[_qp])+
-     ((1.0-_porosity[_qp])*_density_rock[_qp]*_specific_heat_rock[_qp]))*_u[_qp]-
-     ((_porosity[_qp]*_density_water_old[_qp]*_specific_heat_water[_qp])+
-     ((1.0-_porosity[_qp])*_density_rock[_qp]*_specific_heat_rock[_qp]))*_u_old[_qp])*_test[_i][_qp]/_dt;
-     */
-         
+    Real tmp1=(((_porosity[_qp]*_density_water[_qp]*_specific_heat_water[_qp])+
+                ((1.0-_porosity[_qp])*_density_rock[_qp]*_specific_heat_rock[_qp]))*_u[_qp]-
+               ((_porosity[_qp]*_density_water_old[_qp]*_specific_heat_water[_qp])+
+                ((1.0-_porosity[_qp])*_density_rock[_qp]*_specific_heat_rock[_qp]))*_u_old[_qp])*_test[_i][_qp]/_dt;    
+    */
+             
     return tmp1;
     
 }
@@ -116,6 +106,11 @@ EnthalpyTimeDerivative::computeQpJacobian()
     Real tmp1 = (_porosity[_qp] * (_density[_qp] * _phi[_j][_qp] + _ddensitydH_P[_qp] * _u[_qp] * _phi[_j][_qp])
                  + (1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _dTdH_P[_qp] * _phi[_j][_qp])
                 *_test[_i][_qp] /_dt;  
+    
+    //Real tmp1 = (_porosity[_qp] * (_density[_qp] + _ddensitydH_P[_qp])
+      //          + (1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _dTdH_P[_qp])
+        //        *TimeDerivative::computeQpJacobian();     
+    
     
     /*    
      Real tmp1 = (((_porosity[_qp]*_density_water[_qp]*_specific_heat_water[_qp])+
@@ -131,8 +126,9 @@ Real EnthalpyTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar==_p_var)
   {
     return  (_porosity[_qp]*_ddensitydp_H[_qp]*_u[_qp]*_phi[_j][_qp]+
-                (1.0-_porosity[_qp])*_density_rock[_qp]*_specific_heat_rock[_qp]*_dTdP_H[_qp]*_phi[_j][_qp])
-                *_test[_i][_qp] /_dt; 
+            (1.0-_porosity[_qp])*_density_rock[_qp]*_specific_heat_rock[_qp]*_dTdP_H[_qp]*_phi[_j][_qp])
+               *_test[_i][_qp] /_dt; 
+
   }
   else
   {

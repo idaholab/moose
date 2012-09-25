@@ -51,7 +51,7 @@ protected:
     MaterialProperty<Real> & _ddensitydH_P;          //changed from VariableValue
     MaterialProperty<Real> & _ddensitydp_H;          //changed from VariableValue
     
-    VariableValue  & _pressure_old;                 
+    //VariableValue  & _pressure_old;                //removed by kat
     unsigned int _p_var;
   
     //  VariableValue  & _porosity_old;

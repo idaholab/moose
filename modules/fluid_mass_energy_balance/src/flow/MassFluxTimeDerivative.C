@@ -43,7 +43,7 @@ _time_old_density(getMaterialProperty<Real>("time_old_density")),   //added by k
 _ddensitydp_H(getMaterialProperty<Real>("ddensitydp_H")),           //added by kat
 _ddensitydH_P(getMaterialProperty<Real>("ddensitydH_P")),           //added by kat
 
-_enthalpy_old(coupledValueOld("enthalpy")),
+//_enthalpy_old(coupledValueOld("enthalpy")),                   //removed by kat
 _h_var(coupled("enthalpy")),
 _porosity (getMaterialProperty<Real>("material_porosity")),
 //   _porosity(coupledValue("porosity")),
@@ -54,24 +54,8 @@ _u_old(valueOld())
 Real
 MassFluxTimeDerivative::computeQpResidual()
 {
-    Real _den_old;
-    Real _var[12];
-    Real _time_old_den;
     
-    if (_t_step==1)
-    {        
-        _water_steam_properties.waterAndSteamEquationOfStatePropertiesPH (_enthalpy_old[_qp], _u_old[_qp], _var[0], _var[1], 
-                                                                          _var[2], _var[3], _time_old_den, _var[4], _var[5], 
-                                                                          _var[6],_var[7], _var[8], _var[9], _var[10], _var[11]); 
-        
-        _den_old = _time_old_den; 
-    }
-    else
-    {
-        _den_old = _time_old_density[_qp];
-    }
-        
-    return (((_porosity[_qp]*_density[_qp])-(_porosity[_qp]*_den_old))/_dt) * _test[_i][_qp];
+    return (((_porosity[_qp]*_density[_qp])-(_porosity[_qp]*_time_old_density[_qp]))/_dt) * _test[_i][_qp];
 }
 
 Real

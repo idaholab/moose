@@ -43,7 +43,7 @@ protected:
     MaterialProperty<Real> & _ddensitydp_H;        //changed from VariableValue
     MaterialProperty<Real> & _ddensitydH_P;        //changed from VariableValue
 
-    VariableValue & _enthalpy_old;
+    //VariableValue & _enthalpy_old;            //removed by kat
     unsigned int _h_var;
   
     
