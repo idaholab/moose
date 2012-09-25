@@ -30,6 +30,10 @@ class GPNode:
     for child in self.children_list:
       self.children[child].Print(prefix + self.name + '/')
 
+class ParseException(Exception):
+  def __init__(self, expr, msg):
+    self.expr = expr
+    self.msg = msg
 
 class ParseGetPot:
   def __init__(self, file_name):
@@ -101,7 +105,7 @@ class ParseGetPot:
 
             current_position += 1
           if not found_it:
-            sys.exit(1)
+            raise ParseException("TODO", "TODO")
 
         current_node.params[param_name] = param_value
         current_node.params_list.append(param_name)

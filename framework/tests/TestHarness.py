@@ -82,10 +82,14 @@ class TestHarness:
     self.cleanupAndExit()
 
   def parseGetPotTestFormat(self, filename):
-    data = ParseGetPot.readInputFile(filename)
-    test_dir = os.path.abspath(os.path.dirname(filename))
-#    module_name = 'tests'   # Legacy support
     tests = []
+    test_dir = os.path.abspath(os.path.dirname(filename))
+
+    try:
+      data = ParseGetPot.readInputFile(filename)
+    except ParseGetPot.ParseException as e:
+      print "Parse Error: " + test_dir + "/" + filename
+      return tests
 
     # We expect our root node to be called "Tests"
     if 'Tests' in data.children:
@@ -115,7 +119,6 @@ class TestHarness:
         # Build a list of test specs (dicts) to return
         tests.append(test)
     return tests
-
 
   def parseLegacyTestFormat(self, filename):
     # dynamically load the module
@@ -162,23 +165,6 @@ class TestHarness:
         # Build a list of test specs (dicts) to return
         tests.append(test)
     return tests
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   # Create the command line string to run
   def createCommand(self, test):
