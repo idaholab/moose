@@ -13,6 +13,10 @@ InputParameters validParams<PlenumPressureAction>()
   params.addRequiredParam<NonlinearVariableName>("disp_y", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
 
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_x", "The save_in variables for x displacement");
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_y", "The save_in variables for y displacement");
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_z", "The save_in variables for z displacement");
+
   params.addParam<Real>("initial_pressure", 0, "The initial pressure in the plenum.  If not given, a zero initial pressure will be used.");
   params.addParam<std::string>("material_input", "", "The name of the postprocessor value that holds the amount of material injected into the plenum.");
   params.addRequiredParam<Real>("R", "The universal gas constant for the units used.");
@@ -60,6 +64,14 @@ PlenumPressureAction::PlenumPressureAction(const std::string & name, InputParame
   {
     mooseError("PlenumPressure error: refabrication time given but not complete set of refabrication data");
   }
+
+  _save_in_vars.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_x"));
+  _save_in_vars.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_y"));
+  _save_in_vars.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_z"));
+
+  _has_save_in_vars.push_back(params.isParamValid("save_in_disp_x"));
+  _has_save_in_vars.push_back(params.isParamValid("save_in_disp_y"));
+  _has_save_in_vars.push_back(params.isParamValid("save_in_disp_z"));
 }
 
 void
@@ -108,6 +120,18 @@ PlenumPressureAction::act()
 
     params.set<int>("component") = i;
     params.set<NonlinearVariableName>("variable") = vars[i];
+    if (_has_save_in_vars[i])
+    {
+      std::vector<std::string> siv;
+      for (unsigned int j(0); j<_save_in_vars[i].size(); ++j)
+      {
+        std::string svar=_save_in_vars[i][j];
+        siv.push_back(svar);
+      }
+      params.set<std::vector<std::string> >("save_in") = siv;
+//TODO: Why doesn't IntegratedBC accept a vec of AuxVariableNames:
+//      params.set<std::vector<AuxVariableName> >("save_in") = _save_in_vars[i];
+    }
 
     _problem->addBoundaryCondition(_kernel_name, name.str(), params);
   }
