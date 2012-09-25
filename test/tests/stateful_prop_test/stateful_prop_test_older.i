@@ -22,7 +22,7 @@
     type = MatDiffusion
     variable = u
     prop_name = thermal_conductivity
-    prop_state = 'old'                  # Use the "Old" value to compute conductivity
+    prop_state = 'older'                  # Use the "Older" value to compute conductivity
   [../]
 
   [./ie]
@@ -81,7 +81,7 @@
 []
 
 [Output]
-  file_base = out
+  file_base = out_older
   output_initial = true
   interval = 1
   exodus = true

@@ -5,6 +5,11 @@ test = { INPUT : 'stateful_prop_test.i',
          MAX_THREADS : 1,
          MAX_PARALLEL : 1}
 
+test = { INPUT : 'stateful_prop_test_older.i',
+         EXODIFF : ['out_older.e'],
+         MAX_THREADS : 1,
+         MAX_PARALLEL : 1}
+
 spatial_test = { INPUT : 'stateful_prop_spatial_test.i',
                  EXODIFF : ['out_spatial.e'],
                  MAX_THREADS : 1,

@@ -25,6 +25,7 @@ protected:
 
   MaterialProperty<Real> & _thermal_conductivity;
   MaterialProperty<Real> & _thermal_conductivity_old;
+  MaterialProperty<Real> & _thermal_conductivity_older;
 };
 
 #endif //STATEFULTEST_H

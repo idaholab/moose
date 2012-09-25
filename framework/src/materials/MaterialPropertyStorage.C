@@ -104,7 +104,7 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data, std::ve
     if (props()[elem_id][side][prop_id] == NULL) props()[elem_id][side][prop_id] = material_data.props()[prop_id]->init(n_qpoints);
     if (propsOld()[elem_id][side][prop_id] == NULL) propsOld()[elem_id][side][prop_id] = material_data.propsOld()[prop_id]->init(n_qpoints);
     if (hasOlderProperties())
-      if (propsOlder()[elem_id][side][prop_id] == NULL) propsOlder()[elem_id][side][prop_id] = material_data.propsOld()[prop_id]->init(n_qpoints);
+      if (propsOlder()[elem_id][side][prop_id] == NULL) propsOlder()[elem_id][side][prop_id] = material_data.propsOlder()[prop_id]->init(n_qpoints);
   }
   // copy from storage to material data
   swap(material_data, elem, side);
