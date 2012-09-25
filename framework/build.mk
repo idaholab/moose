@@ -8,24 +8,55 @@
 
 include $(LIBMESH_DIR)/Make.common
 
+#Get which compiler is being used
+cxx_compiler := $(libmesh_CXX) 
+
+# If $(libmesh_CXX) is an mpiXXX compiler script, use -show
+# to determine the base compiler
+ifneq (,$(findstring mpi,$(cxx_compiler)))
+	cxx_compiler = $(shell $(libmesh_CXX) -show)
+endif
+
+MOOSE_PRECOMPILED ?= true
+
+# Check if using precompiled headers is possible 
+# cxx compiler could be used to define which compiler is being used
+# so that different compiler options are usable. Libmesh only 
+# appears to check if GCC is used
+ifeq ($(MOOSE_PRECOMPILED), true)
+  ifneq (,$(filter $(cxx_compiler), g++))
+	  PRECOMPILED = true
+  endif
+endif
+
 # Number of JOBS to run in parallel used in run_tests
 JOBS ?= 1
 
 all::
+ifdef PRECOMPILED
+#
+# Precompiled Header Rules
+#
+
+%.h.gch : %.h
+	@echo "Pre-Compiling Header (in "$(mode)" mode) "$<"..."
+	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
 
 #
 # C++ rules
 #
 
 %.$(obj-suffix) : %.C
-	@echo "Compiling C++ (in "$(mode)" mode) "$<"..."
-	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
+%.$(obj-suffix) : %.C $(MOOSE_DIR)/include/base/Precompiled.h.gch
+	@echo "Compiling C++ With PCH (in "$(mode)" mode) "$<"..."
+	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED -include Precompiled.h -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
+endif
 
 #
 # C rules
 #
 
-%.$(obj-suffix) : %.c
+%.$(obj-suffix) : %.c $(MOOSE_DIR)/include/base/Precompiled.h.gch
 	@echo "Compiling C (in "$(mode)" mode) "$<"..."
 	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
 

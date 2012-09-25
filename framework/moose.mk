@@ -13,12 +13,19 @@ libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
 moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(libext)
 LIBS += $(moose_LIB)
 
-# source files
+# source filese
+moose_precompiled_headers := $(MOOSE_DIR)/include/base/Precompiled.h
+#$(shell find $(MOOSE_DIR)/include/base -name *.h)
 moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -name *.C)
 moose_csrcfiles   := $(shell find $(moose_SRC_DIRS) -name *.c)
 moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name *.f)
 moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name *.f90)
 # object files
+ifdef PRECOMPILED
+moose_precompiled_headers_objects := $(patsubst %.h, %.h.gch, $(moose_precompiled_headers))
+else
+moose_precompiled_headers_objects := 
+endif
 moose_objects	:= $(patsubst %.C, %.$(obj-suffix), $(moose_srcfiles))
 moose_objects	+= $(patsubst %.c, %.$(obj-suffix), $(moose_csrcfiles))
 moose_objects += $(patsubst %.f, %.$(obj-suffix), $(moose_fsrcfiles))
@@ -40,17 +47,17 @@ moose: $(moose_LIB)
 # build rule for MOOSE
 ifeq ($(enable-shared),yes)
 # Build dynamic library
-$(moose_LIB): $(moose_objects)
+$(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects)
 	@echo "Linking "$@"..."
 	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(moose_objects) $(libmesh_LDFLAGS)
 else
 # Build static library
 ifeq ($(findstring darwin,$(hostos)),darwin)
-$(moose_LIB): $(moose_objects)
+$(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects)
 	@echo "Linking "$@"..."
 	@libtool -static -o $@ $(moose_objects)
 else
-$(moose_LIB): $(moose_objects)
+$(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects)
 	@echo "Linking "$@"..."
 	@$(AR) rv $@ $(moose_objects)
 endif
@@ -59,6 +66,7 @@ endif
 # include MOOSE dep files
 -include $(moose_deps)
 -include $(MOOSE_DIR)/contrib/mtwist-1.1/src/*.d
+-include $(MOOSE_DIR)/include/base/Precompiled.h.gch.d
 
 #
 # exodiff
@@ -86,7 +94,7 @@ delete_list := $(moose_LIB) $(exodiff_APP)
 
 clean::
 	@rm -fr $(delete_list)
-	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" \) -exec rm '{}' \;
+	@find . \( -name "*~" -or -name "*.o" -or -name "*.gch" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" \) -exec rm '{}' \;
 	@rm -fr *.mod
 
 clobber::
@@ -100,4 +108,4 @@ cleanall::
 
 
 echo:
-	@echo $(moose_deps)
+	@echo $(MOOSE_DIR)/include/base/Precompiled.h.gch.d
