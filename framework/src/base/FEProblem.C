@@ -2383,6 +2383,10 @@ void
 FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
 {
   _nl.set_solution(soln);
+
+  _nl.zeroVariablesForJacobian();
+  _aux.zeroVariablesForJacobian();
+
   computeUserObjects(EXEC_JACOBIAN);
 
   if (_displaced_problem != NULL)

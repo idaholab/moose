@@ -23,8 +23,9 @@ InputParameters validParams<IntegratedBC>()
 {
   InputParameters params = validParams<BoundaryCondition>();
   params.addParam<std::vector<AuxVariableName> >("save_in", "The name of auxiliary variables to save this Kernel's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
+  params.addParam<std::vector<AuxVariableName> >("diag_save_in", "The name of auxiliary variables to save this Kernel's diagonal jacobian contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
 
-  params.addParamNamesToGroup("save_in", "Advanced");
+  params.addParamNamesToGroup("diag_save_in save_in", "Advanced");
 
   return params;
 }
@@ -55,9 +56,11 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
 
-    _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in"))
+    _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in")),
+    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName> >("diag_save_in"))
 {
   _save_in.resize(_save_in_strings.size());
+  _diag_save_in.resize(_diag_save_in_strings.size());
 
   for(unsigned int i=0; i<_save_in_strings.size(); i++)
   {
@@ -71,6 +74,19 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
   }
 
   _has_save_in = _save_in.size() > 0;
+
+  for(unsigned int i=0; i<_diag_save_in_strings.size(); i++)
+  {
+    MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
+
+    if(var->feType() != _var.feType())
+      mooseError("Error in " + _name + ". When saving diagonal Jacobian values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
+
+    _diag_save_in[i] = var;
+    var->sys().addVariableToZeroOnJacobian(_diag_save_in_strings[i]);
+  }
+
+  _has_diag_save_in = _diag_save_in.size() > 0;
 }
 
 void
@@ -98,14 +114,26 @@ void
 IntegratedBC::computeJacobian()
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+  _local_ke.resize(ke.m(), ke.n());
+  _local_ke.zero();
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-  {
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
-      {
-        ke(_i, _j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian();
-      }
+        _local_ke(_i, _j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian();
+
+  ke += _local_ke;
+
+  if(_has_diag_save_in)
+  {
+    unsigned int rows = ke.m();
+    DenseVector<Number> diag(rows);
+    for(unsigned int i=0; i<rows; i++)
+      diag(i) = _local_ke(i,i);
+
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for(unsigned int i=0; i<_diag_save_in.size(); i++)
+      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }
 }
 

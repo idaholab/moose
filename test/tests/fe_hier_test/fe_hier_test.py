@@ -40,5 +40,5 @@ test_hier_3_2d = { INPUT : 'hier-3-2d.i',
 
 test_hier_3_3d = { INPUT : 'hier-3-3d.i',
                    EXODIFF : ['hier-3-3d_out.e'],
-                   ABS_ZERO : 1e-9
+                   ABS_ZERO : 1e-8
                   }

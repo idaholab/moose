@@ -105,6 +105,12 @@ SystemBase::addVariableToZeroOnResidual(std::string var_name)
 }
 
 void
+SystemBase::addVariableToZeroOnJacobian(std::string var_name)
+{
+  _vars_to_be_zeroed_on_jacobian.push_back(var_name);
+}
+
+void
 SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
 {
   if(vars_to_be_zeroed.size() > 0)
@@ -137,6 +143,11 @@ SystemBase::zeroVariablesForResidual()
   zeroVariables(_vars_to_be_zeroed_on_residual);
 }
 
+void
+SystemBase::zeroVariablesForJacobian()
+{
+  zeroVariables(_vars_to_be_zeroed_on_jacobian);
+}
 
 Order
 SystemBase::getMinQuadratureOrder()

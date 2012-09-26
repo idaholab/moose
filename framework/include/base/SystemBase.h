@@ -240,6 +240,12 @@ public:
   virtual void addVariableToZeroOnResidual(std::string var_name);
 
   /**
+   * Adds this variable to the list of variables to be zeroed during each Jacobian evaluation.
+   * @param var_name The name of the variable to be zeroed.
+   */
+  virtual void addVariableToZeroOnJacobian(std::string var_name);
+
+  /**
    * Zero out the solution for the list of variables passed in.
    *
    * @ param vars_to_be_zeroed The variable names in this vector will have their solutions set to zero after this call
@@ -251,6 +257,12 @@ public:
    * zeroed on out on residual evaluation by a call to addVariableToZeroOnResidual()
    */
   virtual void zeroVariablesForResidual();
+
+  /**
+   * Zero out the solution for the variables that were registered as needing to have their solutions
+   * zeroed on out on Jacobian evaluation by a call to addVariableToZeroOnResidual()
+   */
+  virtual void zeroVariablesForJacobian();
 
   /**
    * Get minimal quadrature order needed for integrating variables in this system
@@ -354,6 +366,7 @@ protected:
   std::map<unsigned int, std::set<SubdomainID> > _var_map;
 
   std::vector<std::string> _vars_to_be_zeroed_on_residual;
+  std::vector<std::string> _vars_to_be_zeroed_on_jacobian;
 
   friend class ComputeInitialConditionThread;
 };

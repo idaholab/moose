@@ -70,9 +70,9 @@ KernelGrad::computeResidual()
 void
 KernelGrad::computeJacobian()
 {
-//  Moose::perf_log.push("computeJacobian()",_name);
-
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+  _local_ke.resize(ke.m(), ke.n());
+  _local_ke.zero();
 
   unsigned int n_qp = _qrule->n_points();
   unsigned int n_phi = _phi.size();
@@ -88,11 +88,23 @@ KernelGrad::computeJacobian()
       _value = precomputeQpJacobian();
 
       for (_i=0; _i<n_test; _i++)
-        ke(_i,_j) += jxw*coord*_value*_grad_test[_i][_qp];
+        _local_ke(_i, _j) += jxw*coord*_value*_grad_test[_i][_qp];
     }
   }
 
-//  Moose::perf_log.pop("computeJacobian()",_name);
+  ke += _local_ke;
+
+  if(_has_diag_save_in)
+  {
+    unsigned int rows = ke.m();
+    DenseVector<Number> diag(rows);
+    for(unsigned int i=0; i<rows; i++)
+      diag(i) = _local_ke(i,i);
+
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for(unsigned int i=0; i<_diag_save_in.size(); i++)
+      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+  }
 }
 
 void

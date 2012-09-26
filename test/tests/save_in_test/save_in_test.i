@@ -1,11 +1,8 @@
 [Mesh]
-  file = square.e
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
-  nz = 0
-  _dimension = 2
+  nx = 2
+  ny = 2
 []
 
 [Variables]
@@ -22,6 +19,10 @@
   [../]
   [./accumulated]
   [../]
+  [./diag_saved]
+  [../]
+  [./bc_diag_saved]
+  [../]
 []
 
 [Kernels]
@@ -29,6 +30,7 @@
     type = Diffusion
     variable = u
     save_in = 'saved accumulated'
+    diag_save_in = diag_saved
   [../]
 []
 
@@ -45,6 +47,7 @@
     boundary = right
     value = 1
     save_in = 'bc_saved accumulated'
+    diag_save_in = bc_diag_saved
   [../]
 []
 
@@ -58,7 +61,7 @@
 
 [Executioner]
   type = Steady
-  petsc_options = '-snes_mf_operator'
+  petsc_options = -snes_mf_operator
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
