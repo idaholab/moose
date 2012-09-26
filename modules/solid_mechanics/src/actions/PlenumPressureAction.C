@@ -122,15 +122,7 @@ PlenumPressureAction::act()
     params.set<NonlinearVariableName>("variable") = vars[i];
     if (_has_save_in_vars[i])
     {
-      std::vector<std::string> siv;
-      for (unsigned int j(0); j<_save_in_vars[i].size(); ++j)
-      {
-        std::string svar=_save_in_vars[i][j];
-        siv.push_back(svar);
-      }
-      params.set<std::vector<std::string> >("save_in") = siv;
-//TODO: Why doesn't IntegratedBC accept a vec of AuxVariableNames:
-//      params.set<std::vector<AuxVariableName> >("save_in") = _save_in_vars[i];
+      params.set<std::vector<AuxVariableName> >("save_in") = _save_in_vars[i];
     }
 
     _problem->addBoundaryCondition(_kernel_name, name.str(), params);
