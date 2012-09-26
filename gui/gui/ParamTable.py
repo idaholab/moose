@@ -237,8 +237,8 @@ class ParamTable:
         if param_value == '':
           continue
 
-        if ' ' in param_value:
-          param_value = "'"+param_value.strip("'")+"'"
+        # If they put single quotes in... just remove them
+        param_value = param_value.strip("'")
 
         if not param_name in self.original_table_data or self.original_table_data[param_name] != param_value: #If we changed it - definitely include it
           the_data[param_name] = param_value

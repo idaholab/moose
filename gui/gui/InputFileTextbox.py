@@ -160,7 +160,12 @@ class InputFileTextbox(QtGui.QTextEdit):
           comment = ''
           if param in item.param_comments:
             comment = ' # ' + item.param_comments[param]
-          self.the_string += indent_string + '  ' + param + ' = ' + item.table_data[param] + comment + '\n'
+
+          param_value = item.table_data[param]
+          if ' ' in param_value:
+            param_value = "'"+param_value.strip("'")+"'"
+
+          self.the_string += indent_string + '  ' + param + ' = ' + param_value + comment + '\n'
           printed_params.append(param)
         
         for param,value in item.table_data.items():
@@ -168,7 +173,12 @@ class InputFileTextbox(QtGui.QTextEdit):
             comment = ''
             if param in item.param_comments:
               comment = ' # ' + item.param_comments[param]
-            self.the_string += indent_string + '  ' + param + ' = ' + value + comment + '\n'
+
+            param_value = value
+            if ' ' in param_value:
+              param_value = "'"+param_value.strip("'")+"'"
+  
+            self.the_string += indent_string + '  ' + param + ' = ' + param_value + comment + '\n'
       except:
         pass
 

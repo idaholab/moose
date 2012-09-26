@@ -15,12 +15,13 @@ for subdir in subdirs:
   sys.path.append(pathname + '/' + subdir)
 
 # Add the utilities/python_getpot directory
-MOOSE_DIR = '../moose'
+MOOSE_DIR = pathname + '/../moose'
 #### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
 elif os.environ.has_key("MOOSE_DEV"):
-  MOOSE_DIR = '../devel/moose'
+  MOOSE_DIR = pathname + '/../devel/moose'
+
 sys.path.append(MOOSE_DIR + '/tests')
 
 from optparse import OptionParser

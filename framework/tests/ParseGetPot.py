@@ -107,7 +107,7 @@ class ParseGetPot:
           if not found_it:
             raise ParseException("TODO", "TODO")
 
-        current_node.params[param_name] = param_value
+        current_node.params[param_name] = param_value.strip("'")
         current_node.params_list.append(param_name)
 
         # See if this parameter has a comment after it
@@ -138,6 +138,7 @@ class ParseGetPot:
 
 def readInputFile(file_name):
   pgp = ParseGetPot(file_name)
+#  pgp.root_node.Print()
   return pgp.root_node
 
 
