@@ -22,7 +22,7 @@ template<>
 InputParameters validParams<IntegratedBC>()
 {
   InputParameters params = validParams<BoundaryCondition>();
-  params.addParam<std::vector<std::string> >("save_in", "The name of auxiliary variables to save this Kernel's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
+  params.addParam<std::vector<AuxVariableName> >("save_in", "The name of auxiliary variables to save this Kernel's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
 
   params.addParamNamesToGroup("save_in", "Advanced");
 
@@ -55,7 +55,7 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
 
-    _save_in_strings(parameters.get<std::vector<std::string> >("save_in"))
+    _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in"))
 {
   _save_in.resize(_save_in_strings.size());
 
