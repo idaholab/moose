@@ -34,14 +34,10 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-
-  //VariableValue  & _density_water;            //removed by kat
-    MaterialProperty<Real> & _density_water;    //added by kat
-
-  
-  MaterialProperty<Real> & _tau_water;
-  MaterialProperty<Real> & _gravity;
-  MaterialProperty<RealVectorValue> & _gravity_vector;
+    MaterialProperty<Real> & _density_water;
+    MaterialProperty<Real> & _tau_water;
+    MaterialProperty<Real> & _gravity;
+    MaterialProperty<RealVectorValue> & _gravity_vector;
 
 };
 #endif //WATERMASSFLUXELEVATION

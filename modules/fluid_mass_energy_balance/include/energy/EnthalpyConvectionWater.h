@@ -39,12 +39,10 @@ protected:
     MaterialProperty<Real> & _Dtau_waterDP;
     MaterialProperty<RealGradient> & _darcy_mass_flux_water;
     MaterialProperty<Real> & _tau_water;
-    MaterialProperty<Real> & _enthalpy_water;           //(added by Kat)
-    MaterialProperty<Real> & _denthalpy_waterdH_P;      //(added by Kat)
-    MaterialProperty<Real> & _denthalpy_waterdP_H;      //(added by Kat)
-    //VariableValue  & _enthalpy_water;                 //(removed by kat)
-    //VariableValue & _denthalpy_waterdH_P;             //(removed by Kat)
-    //VariableValue & _denthalpy_waterdP_H;             //(removed by Kat)
+    MaterialProperty<Real> & _enthalpy_water;
+    MaterialProperty<Real> & _denthalpy_waterdH_P;
+    MaterialProperty<Real> & _denthalpy_waterdP_H;
+
     unsigned int  _p_var;
     VariableGradient & _grad_p;
   

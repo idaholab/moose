@@ -38,14 +38,12 @@ protected:
     
     const WaterSteamEOS & _water_steam_properties;
   
-    MaterialProperty<Real> & _density;             //changed from VariableValue
-    MaterialProperty<Real> & _time_old_density;  //changed from VariableValue
-    MaterialProperty<Real> & _ddensitydp_H;        //changed from VariableValue
-    MaterialProperty<Real> & _ddensitydH_P;        //changed from VariableValue
+    MaterialProperty<Real> & _density;
+    MaterialProperty<Real> & _time_old_density;
+    MaterialProperty<Real> & _ddensitydp_H;
+    MaterialProperty<Real> & _ddensitydH_P;
 
-    //VariableValue & _enthalpy_old;            //removed by kat
     unsigned int _h_var;
-  
     
     MaterialProperty<Real> & _porosity;  
 //  VariableValue  & _porosity;

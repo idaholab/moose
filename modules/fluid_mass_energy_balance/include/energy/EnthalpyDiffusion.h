@@ -35,12 +35,10 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   
     VariableGradient & _grad_T;
-    //VariableValue & _dTdH_P;      //(removed by Kat)
-    //VariableValue & _dTdP_H;      //(removed by Kat)
     unsigned int _p_var;
     MaterialProperty<Real> &_thermal_conductivity;
-      MaterialProperty<Real> &_dTdP_H;    //(added by Kat)
-    MaterialProperty<Real> &_dTdH_P;    //(added by Kat)
+      MaterialProperty<Real> &_dTdP_H;
+    MaterialProperty<Real> &_dTdH_P;
   
 };
 #endif //ENTHALPYDIFFUSION

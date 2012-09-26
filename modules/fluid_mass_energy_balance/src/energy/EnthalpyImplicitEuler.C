@@ -20,7 +20,6 @@ InputParameters validParams<EnthalpyImplicitEuler>()
 {
   InputParameters params = validParams<ImplicitEuler>();
   params.addCoupledVar("temperature", "TODO: add description");
-  //params.addCoupledVar("density", "TODO: add description");
   return params;
 }
 

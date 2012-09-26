@@ -19,9 +19,6 @@ template<>
 InputParameters validParams<EnthalpyConvectionWater>()
 {
     InputParameters params = validParams<Kernel>();
-    //params.addRequiredParam("enthalpy_water", "Use CoupledAuxwater enthalpy here");                  //(removed by Kat)
-    //params.addRequiredParam("denthalpy_waterdH_P", "Use CoupledAux dsteamenthalpydh_P here");        //(removed by Kat)
-    //params.addRequiredParam("denthalpy_waterdP_H"," use coupledAux");                                //(removed by Kat)
     params.addCoupledVar("pressure", "Use CoupledVar pressure here");
     return params;
 }
@@ -32,12 +29,9 @@ EnthalpyConvectionWater::EnthalpyConvectionWater(const std::string & name, Input
     _Dtau_waterDP(getMaterialProperty<Real>("Dtau_waterDP")),
     _darcy_mass_flux_water(getMaterialProperty<RealGradient>("darcy_mass_flux_water")),
     _tau_water(getMaterialProperty<Real>("tau_water")),
-    //_enthalpy_water(coupledValue("enthalpy_water")),              (removed by Kat)
-    //_denthalpy_waterdH_P(coupledValue("denthalpy_waterdH_P")),    (removed by Kat)
-    //_denthalpy_waterdP_H(coupledValue("denthalpy_waterdP_H")),    (removed by Kat)
-    _enthalpy_water(getMaterialProperty<Real>("enthalpy_water")),           //(added by Kat)
-    _denthalpy_waterdH_P(getMaterialProperty<Real>("denthalpy_waterdH_P")), //(added by Kat)
-    _denthalpy_waterdP_H(getMaterialProperty<Real>("denthalpy_waterdP_H")), //(added by Kat)
+    _enthalpy_water(getMaterialProperty<Real>("enthalpy_water")),
+    _denthalpy_waterdH_P(getMaterialProperty<Real>("denthalpy_waterdH_P")),
+    _denthalpy_waterdP_H(getMaterialProperty<Real>("denthalpy_waterdP_H")),
     _p_var(coupled("pressure")),
     _grad_p(coupledGradient("pressure"))
 {}

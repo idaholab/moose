@@ -20,11 +20,8 @@ template<>
 InputParameters validParams<MassFluxTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
-   //params.addRequiredCoupledVar("density", "Use Coupled density here to calculate the time derivative");  //removed by kat
-   //params.addRequiredCoupledVar("ddensitydp_H", "derivative of water density vs temperature");            //removed by kat
    params.addCoupledVar("enthalpy"," Use Coupled enthalpy to calculate the time derivative");
-   //params.addRequiredCoupledVar("ddensitydH_P","derivative of density vs enthalpy");                      //removed by kat
-    params.addRequiredParam<UserObjectName>("water_steam_properties", "EOS functions, calculate water and steam properties");
+   params.addRequiredParam<UserObjectName>("water_steam_properties", "EOS functions, calculate water and steam properties");
     
     return params;
 }
@@ -34,16 +31,11 @@ MassFluxTimeDerivative::MassFluxTimeDerivative(const std::string & name, InputPa
 
 _water_steam_properties(getUserObject<WaterSteamEOS>("water_steam_properties")),
    
-//_density(coupledValue("density")),                         //removed by kat
-//_density_old(coupledValueOld("density")),                  //removed by kat
-//_ddensitydH_P(coupledValue("ddensitydH_P")),               //removed by kat
-//_ddensitydp_H(coupledValue("ddensitydp_H")),               //removed by kat
-_density(getMaterialProperty<Real>("density")),                     //added by kat
-_time_old_density(getMaterialProperty<Real>("time_old_density")),   //added by kat
-_ddensitydp_H(getMaterialProperty<Real>("ddensitydp_H")),           //added by kat
-_ddensitydH_P(getMaterialProperty<Real>("ddensitydH_P")),           //added by kat
+_density(getMaterialProperty<Real>("density")),
+_time_old_density(getMaterialProperty<Real>("time_old_density")),
+_ddensitydp_H(getMaterialProperty<Real>("ddensitydp_H")),
+_ddensitydH_P(getMaterialProperty<Real>("ddensitydH_P")),
 
-//_enthalpy_old(coupledValueOld("enthalpy")),                   //removed by kat
 _h_var(coupled("enthalpy")),
 _porosity (getMaterialProperty<Real>("material_porosity")),
 //   _porosity(coupledValue("porosity")),

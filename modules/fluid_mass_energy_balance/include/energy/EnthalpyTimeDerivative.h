@@ -38,20 +38,17 @@ protected:
     
     const WaterSteamEOS & _water_steam_properties;  
     
-    MaterialProperty<Real> & _density;               //changed from VariableValue
-    MaterialProperty<Real> & _time_old_density;      //changed from VariableValue
+    MaterialProperty<Real> & _density;
+    MaterialProperty<Real> & _time_old_density;
     
-    //VariableValue & _temperature;
-    //VariableValue  & _temperature_old;
     MaterialProperty<Real> & _temperature;
-    MaterialProperty<Real> & _time_old_temperature;       //added by kat
+    MaterialProperty<Real> & _time_old_temperature;
     
-    MaterialProperty<Real> & _dTdH_P;                //changed from VariableValue
-    MaterialProperty<Real> & _dTdP_H;                //changed from VariableValue
-    MaterialProperty<Real> & _ddensitydH_P;          //changed from VariableValue
-    MaterialProperty<Real> & _ddensitydp_H;          //changed from VariableValue
+    MaterialProperty<Real> & _dTdH_P;
+    MaterialProperty<Real> & _dTdP_H;
+    MaterialProperty<Real> & _ddensitydH_P;
+    MaterialProperty<Real> & _ddensitydp_H;
     
-    //VariableValue  & _pressure_old;                //removed by kat
     unsigned int _p_var;
   
     //  VariableValue  & _porosity_old;
