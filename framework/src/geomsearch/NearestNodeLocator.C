@@ -32,7 +32,17 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh
     _boundary1(boundary1),
     _boundary2(boundary2),
     _first(true)
-{}
+{
+  //sanity check on boundary ids
+  const std::set<BoundaryID>& bids=_mesh.get_boundary_ids();
+  std::set<BoundaryID>::const_iterator sit;
+  sit=bids.find(_boundary1);
+  if (sit == bids.end())
+    mooseError("NearestNodeLocator being created for boundaries "<<_boundary1<<" and "<<_boundary2<<", but boundary "<<_boundary1<<" does not exist");
+  sit=bids.find(_boundary2);
+  if (sit == bids.end())
+    mooseError("NearestNodeLocator being created for boundaries "<<_boundary1<<" and "<<_boundary2<<", but boundary "<<_boundary2<<" does not exist");
+}
 
 NearestNodeLocator::~NearestNodeLocator()
 {
