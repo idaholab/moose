@@ -21,6 +21,10 @@ InputParameters validParams<SolidMechanicsAction>()
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_y", "Auxiliary variables to save the y displacement residuals.");
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_z", "Auxiliary variables to save the z displacement residuals.");
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_r", "Auxiliary variables to save the r displacement residuals.");
+  params.addParam<std::vector<AuxVariableName> >("diag_save_in_disp_x", "Auxiliary variables to save the x displacement diagonal preconditioner terms.");
+  params.addParam<std::vector<AuxVariableName> >("diag_save_in_disp_y", "Auxiliary variables to save the y displacement diagonal preconditioner terms.");
+  params.addParam<std::vector<AuxVariableName> >("diag_save_in_disp_z", "Auxiliary variables to save the z displacement diagonal preconditioner terms.");
+  params.addParam<std::vector<AuxVariableName> >("diag_save_in_disp_r", "Auxiliary variables to save the r displacement diagonal preconditioner terms.");
   return params;
 }
 
@@ -76,6 +80,7 @@ SolidMechanicsAction::act()
     std::vector<std::string> keys;
     std::vector<std::string> vars;
     std::vector<std::vector<AuxVariableName> > save_in;
+    std::vector<std::vector<AuxVariableName> > diag_save_in;
     std::string type("StressDivergence");
     if (coord_type == Moose::COORD_RZ)
     {
@@ -91,6 +96,13 @@ SolidMechanicsAction::act()
       
       if(isParamValid("save_in_disp_z"))
         save_in[1] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
+
+      diag_save_in.resize(dim);
+      if(isParamValid("diag_save_in_disp_r"))
+        diag_save_in[0] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_r");
+      
+      if(isParamValid("diag_save_in_disp_z"))
+        diag_save_in[1] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_z");
 
       type = "StressDivergenceRZ";
     }
@@ -126,6 +138,16 @@ SolidMechanicsAction::act()
 
       if(isParamValid("save_in_disp_z"))
         save_in[2] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
+
+      diag_save_in.resize(dim);
+      if(isParamValid("diag_save_in_disp_x"))
+        diag_save_in[0] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_x");
+
+      if(isParamValid("diag_save_in_disp_y"))
+        diag_save_in[1] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_y");
+
+      if(isParamValid("diag_save_in_disp_z"))
+        diag_save_in[2] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_z");
 
     }
 
@@ -165,6 +187,7 @@ SolidMechanicsAction::act()
       params.set<NonlinearVariableName>("variable") = vars[i];
       params.set<std::vector<SubdomainName> >("block") = blocks;
       params.set<std::vector<AuxVariableName> >("save_in") = save_in[i];
+      params.set<std::vector<AuxVariableName> >("diag_save_in") = diag_save_in[i];
 
       _problem->addKernel(type, name.str(), params);
     }
