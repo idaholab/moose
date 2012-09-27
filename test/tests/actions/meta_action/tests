@@ -1,0 +1,6 @@
+[Tests]
+  [./test_meta_action]
+    input = 'meta_action_test.i'
+    exodiff = 'out.e'
+  [../]
+[]
