@@ -128,6 +128,9 @@ public:
 
   //Print the rank two tensor
   void print();
+  
+  //Add identity times a
+  void addIa(const Real &a);
 
 protected:
   

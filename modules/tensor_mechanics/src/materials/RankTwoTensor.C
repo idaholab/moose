@@ -364,9 +364,12 @@ RankTwoTensor::inverse()
   result(2,2) = _vals[0][0]*_vals[1][1] - _vals[0][1]*_vals[1][0];
 
   Real det =  _vals[0][0]*(_vals[1][1]*_vals[2][2] - _vals[2][1]*_vals[1][2]);
-  det -= _vals[1][0]*(_vals[0][1]*_vals[2][2] - _vals[2][1]*_vals[0][2]);
-  det += _vals[2][0]*(_vals[0][1]*_vals[1][2] - _vals[1][1]*_vals[0][2]);
-
+  det += _vals[0][1]*(_vals[1][2]*_vals[2][0] - _vals[1][0]*_vals[2][2]);
+  det += _vals[0][2]*(_vals[1][0]*_vals[2][1] - _vals[1][1]*_vals[2][0]);
+  
+  if (det == 0)
+    mooseError("Rank Two Tensor is singular");
+  
   result /= det;
   
   return result;
@@ -383,3 +386,9 @@ RankTwoTensor::print()
   }
 }
 
+void
+RankTwoTensor::addIa(const Real &a)
+{
+  for(unsigned int i=0; i<N; i++)
+    _vals[i][i] += a;
+}
