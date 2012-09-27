@@ -347,6 +347,8 @@ public:
   virtual void output(bool force = false);
   virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
   virtual void outputSolutionHistory(bool state = true) { _output_solution_history = state; }
+  virtual void outputESInfo(bool state = true) { _output_es_info = state; }
+
   /**
    * Set which variables will be written in ouput files
    * @param output_variables The list of variable names to write in the ouput files
@@ -504,6 +506,8 @@ protected:
   bool _output_displaced;
   /// true for outputting solution history
   bool _output_solution_history;
+  /// true for outputting equations systems information
+  bool _output_es_info;
   /// whether input file has been written
   bool _input_file_saved;
 

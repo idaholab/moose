@@ -44,6 +44,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file");
   params.addParam<bool>("output_displaced", false, "Requests that displaced mesh files are written at each solve");
   params.addParam<bool>("output_solution_history", false, "Requests that the 'solution history' is output, the solution history is the number of nonlinear / linear solves that are done for each step.");
+  params.addParam<bool>("output_es_info", true, "Requests that we output Equation Systems info during calls to initialSetup (normallly at the beginning of a simulation.)");
 
 #ifdef LIBMESH_HAVE_PETSC
   params.addParam<bool>("print_linear_residuals", false, "Specifies whether the linear residuals are printed during the solve");
@@ -60,7 +61,7 @@ InputParameters validParams<SetupOutputAction>()
   // restart options
   params.addParam<unsigned int>("num_restart_files", 0, "Number of the restart files to save (0 = no restart files)");
 
-  params.addParamNamesToGroup("interval output_displaced output_solution_history print_linear_residuals iteration_plot_start_time elemental_as_nodal exodus_inputfile_output", "Advanced");
+  params.addParamNamesToGroup("interval output_displaced output_solution_history print_linear_residuals iteration_plot_start_time elemental_as_nodal exodus_inputfile_output output_es_info", "Advanced");
   params.addParamNamesToGroup("nemesis gmv tecplot tecplot_binary xda", "Format");
   params.addParamNamesToGroup("screen_interval postprocessor_screen max_pps_rows_screen postprocessor_csv postprocessor_gnuplot gnuplot_format", "Postprocessor");
   params.addParamNamesToGroup("perf_log show_setup_log_early", "Logging");
@@ -155,6 +156,7 @@ SetupOutputAction::act()
 
     _problem->outputDisplaced(getParam<bool>("output_displaced"));
     _problem->outputSolutionHistory(getParam<bool>("output_solution_history"));
+    _problem->outputESInfo(getParam<bool>("output_es_info"));
 
     _problem->setNumRestartFiles(getParam<unsigned int>("num_restart_files"));
 

@@ -101,6 +101,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _reinit_displaced_face(false),
     _output_displaced(false),
     _output_solution_history(false),
+    _output_es_info(true),
     _input_file_saved(false),
     _has_dampers(false),
     _has_constraints(false),
@@ -272,7 +273,8 @@ void FEProblem::initialSetup()
   if (!isRestarting())
     projectSolution();
 
-  _eq.print_info();
+  if (_output_es_info)
+    _eq.print_info();
 
   unsigned int n_threads = libMesh::n_threads();
 
