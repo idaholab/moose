@@ -16,7 +16,7 @@ namespace Numerics {
         while ( n<= n_max)
         {
                 if(std::fabs(res)<tola && std::fabs((xnew-xold)/xold)<tolr) {
-                        std::cout<<"  Newton iteration: total iteration "<<n<<" res= "<<res<<std::endl; //debug
+                        //std::cout<<"  Newton iteration: total iteration "<<n<<" res= "<<res<<std::endl; //debug
                         return xnew;
                 }
 
@@ -24,9 +24,9 @@ namespace Numerics {
                 xold=xnew;
                 res=(*fct)(xold, f0);
                 xnew=xold-res/(*dfct)(xold);
-                std::cout<<"  Newton iteration: n= "<<n<<" xnew= "<<xnew<<" res= "<<res<<std::endl; //debug
+                //std::cout<<"  Newton iteration: n= "<<n<<" xnew= "<<xnew<<" res= "<<res<<std::endl; //debug
         }
-        std::cout << "ERROR: Newton iteration cannot converge after "<<n-1<< std::endl;
+        std::cerr << "ERROR: Newton iteration cannot converge after "<<n-1<< std::endl;
         return 0;
   }
  
