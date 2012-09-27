@@ -1502,16 +1502,11 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
 bool
 FEProblem::hasUserObject(const std::string & name)
 {
-  UserObject * user_object = NULL;
-
   ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL };
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
-    user_object = _user_objects(types[i])[0].getUserObjectByName(name);
-
-  if(!user_object)
-    return false;
-
-  return true;
+    if (_user_objects(types[i])[0].hasUserObject(name))
+      return true;
+  return false;
 }
 
 Real &

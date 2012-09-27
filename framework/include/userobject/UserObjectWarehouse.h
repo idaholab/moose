@@ -52,6 +52,13 @@ public:
   void jacobianSetup();
 
   /**
+   * Find out if a user object of a given name exists.
+   * @param name The name of the user object
+   * @return true if user object exists
+   */
+  bool hasUserObject(std::string name) { return _name_to_user_objects.find(name) != _name_to_user_objects.end(); }
+
+  /**
    * Get a user object by its name.
    * @param name The name of the user object you want to get back.
    * @return A pointer pointing to the user object you are trying to get or NULL if its not found.

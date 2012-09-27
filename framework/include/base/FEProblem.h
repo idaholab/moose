@@ -251,16 +251,15 @@ public:
   template <class T>
   const T & getUserObject(const std::string & name)
   {
-    UserObject * user_object = NULL;
-
     ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL };
-    for (unsigned int i = 0; i < LENGTHOF(types) && !user_object; i++)
-      user_object = _user_objects(types[i])[0].getUserObjectByName(name);
+    for (unsigned int i = 0; i < LENGTHOF(types); i++)
+      if (_user_objects(types[i])[0].hasUserObject(name))
+      {
+        UserObject * user_object = _user_objects(types[i])[0].getUserObjectByName(name);
+        return dynamic_cast<const T &>(*user_object);
+      }
 
-    if(!user_object)
-      mooseError("Unable to find user object with name '" + name + "'");
-
-    return dynamic_cast<const T &>(*user_object);
+    mooseError("Unable to find user object with name '" + name + "'");
   }
 
   /**
