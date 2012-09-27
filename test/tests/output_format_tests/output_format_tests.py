@@ -41,3 +41,14 @@ gnuplot_bad_out_test = { INPUT : 'output_test_gnuplot.i',
 yaml_dump_test = { INPUT : 'IGNORED',
                    CLI_ARGS : ['--yaml'],
                    EXPECT_OUT : 'START YAML DATA.*END YAML DATA'}
+
+# Test the --dump is working
+dump_test = { INPUT : 'IGNORED',
+              CLI_ARGS : ['--dump'],
+              EXPECT_OUT : 'block\s*=\s*ANY_BLOCK_ID'}  # Look for one of the default parameters
+
+# Test the --show-input is working
+show_input_test = { INPUT : 'output_test_gmv.i',
+                    CLI_ARGS : ['--show-input'],
+                    PREREQ : ['gmv_out_test'],
+                    EXPECT_OUT : 'type\s*=\s*GeneratedMesh'}  # Look for one of the supplied parameters from the input file

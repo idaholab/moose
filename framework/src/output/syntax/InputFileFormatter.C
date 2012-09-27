@@ -79,7 +79,7 @@ InputFileFormatter::printParams(const std::string &prefix, InputParameters &para
       // Print the parameter's value to a stringstream.
       std::ostringstream toss;
       iter->second->print(toss);
-      std::string value = Parser::trim(toss.str());
+      value = Parser::trim(toss.str());
     }
 
     // See if we match the search string
@@ -109,6 +109,7 @@ InputFileFormatter::printParams(const std::string &prefix, InputParameters &para
       found = true;
       oss << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
       size_t l_offset = 30;
+
       if (!_dump_mode || params.isParamValid(iter->first))
       {
         // If the value has spaces, surround it with quotes, otherwise no quotes
