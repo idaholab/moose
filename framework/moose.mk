@@ -94,15 +94,13 @@ delete_list := $(moose_LIB) $(exodiff_APP)
 
 clean::
 	@rm -fr $(delete_list)
-	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" \) -exec rm '{}' \;
-	@rm -fr *.mod
+	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \) -exec rm '{}' \;
 	@find . \( -name *.gch \) | xargs rm -rf
 
 clobber::
 	@rm -fr $(delete_list)
-	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" \
+	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
                 -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \) -exec rm '{}' \;
-	@rm -fr *.mod
 	@find . \( -name *.gch \) | xargs rm -rf
 
 cleanall::

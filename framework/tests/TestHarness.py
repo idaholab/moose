@@ -87,7 +87,7 @@ class TestHarness:
 
     try:
       data = ParseGetPot.readInputFile(filename)
-    except ParseGetPot.ParseException as e:
+    except e:        # ParseGetPot class
       print "Parse Error: " + test_dir + "/" + filename
       return tests
 
