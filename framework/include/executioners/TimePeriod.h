@@ -49,7 +49,7 @@ public:
   /**
    * @return - The name of this time period
    */
-  const std::string & name() const { return _name; }
+  const std::string & name() const;
 
 private:
   /// The name of the time period

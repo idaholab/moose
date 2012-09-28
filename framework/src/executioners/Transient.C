@@ -411,3 +411,9 @@ Transient::preExecute()
     if (++_curr_sync_time_iter == _sync_times.end())
       _remaining_sync_time = false;
 }
+
+Problem &
+Transient::problem()
+{
+  return _problem;
+}

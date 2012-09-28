@@ -124,3 +124,9 @@ KernelValue::computeQpResidual()
 {
   return 0;
 }
+
+Real
+KernelValue::precomputeQpJacobian()
+{
+  return 0;
+}

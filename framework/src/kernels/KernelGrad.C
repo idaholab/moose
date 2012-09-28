@@ -152,3 +152,9 @@ KernelGrad::computeQpResidual()
 {
   return 0;
 }
+
+RealGradient
+KernelGrad::precomputeQpJacobian()
+{
+  return RealGradient();
+}

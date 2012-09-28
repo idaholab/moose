@@ -68,7 +68,7 @@ protected:
   /**
    * Called before forming the jacobian for an element
    */
-  virtual Real precomputeQpJacobian(){ return 0; }
+  virtual Real precomputeQpJacobian();
 
   virtual Real computeQpResidual();
 

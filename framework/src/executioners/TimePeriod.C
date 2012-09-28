@@ -39,3 +39,9 @@ TimePeriod::getObjectList(const std::string & kind, bool & is_active)
   is_active = _list_type[kind];
   return _objects[kind];
 }
+
+const std::string &
+TimePeriod::name() const
+{
+  return _name;
+}

@@ -53,7 +53,7 @@ public:
 
   virtual ~Transient();
 
-  virtual Problem & problem() { return _problem; }
+  virtual Problem & problem();
 
   /**
    * This will call solve() on the NonlinearSystem.

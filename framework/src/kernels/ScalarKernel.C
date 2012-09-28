@@ -66,3 +66,9 @@ void
 ScalarKernel::computeOffDiagJacobian(unsigned int /*jvar*/)
 {
 }
+
+bool
+ScalarKernel::isActive()
+{
+  return true;
+}
