@@ -85,6 +85,18 @@ class TestHarness:
     tests = []
     test_dir = os.path.abspath(os.path.dirname(filename))
 
+    # Filter tests that we want to run
+    # Under the new format, we will filter based on directory not filename since it is fixed
+    will_run = False
+    if len(self.tests) == 0:
+      will_run = True
+    else:
+      for item in self.tests:
+        if test_dir.find(item) > -1:
+          will_run = True
+    if not will_run:
+      return tests
+
     try:
       data = ParseGetPot.readInputFile(filename)
     except e:        # ParseGetPot class
