@@ -17,7 +17,7 @@
 
 #include "ScalarKernel.h"
 #include "Coupleable.h"
-
+#include "MooseVariableDependencyInterface.h"
 
 class NodalScalarKernel;
 
@@ -29,7 +29,8 @@ InputParameters validParams<NodalScalarKernel>();
  */
 class NodalScalarKernel :
   public ScalarKernel,
-  public Coupleable
+  public Coupleable,
+  public MooseVariableDependencyInterface
 {
 public:
   NodalScalarKernel(const std::string & name, InputParameters parameters);

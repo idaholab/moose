@@ -14,7 +14,6 @@
 
 #include "InternalSideIndicator.h"
 #include "Assembly.h"
-#include "MooseVariable.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
@@ -46,8 +45,7 @@ InputParameters validParams<InternalSideIndicator>()
 
 InternalSideIndicator::InternalSideIndicator(const std::string & name, InputParameters parameters) :
     Indicator(name, parameters),
-    NeighborCoupleable(parameters, false),
-    NeighborMooseVariableInterface(parameters, false),
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     TwoMaterialPropertyInterface(parameters),
 
     _field_var(_sys.getVariable(_tid, name)),

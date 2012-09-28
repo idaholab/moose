@@ -16,8 +16,7 @@
 #define SIDEUSEROBJECT_H
 
 #include "UserObject.h"
-#include "Coupleable.h"
-#include "MooseVariableInterface.h"
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MooseVariable.h"
 #include "TransientInterface.h"
 #include "UserObjectInterface.h"
@@ -32,9 +31,8 @@ InputParameters validParams<SideUserObject>();
 
 class SideUserObject :
   public UserObject,
-  public Coupleable,
+  public CoupleableMooseVariableDependencyIntermediateInterface,
   public UserObjectInterface,
-  public MooseVariableInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
   protected PostprocessorInterface

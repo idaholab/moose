@@ -41,9 +41,7 @@ ElementIndicator::ElementIndicator(const std::string & name, InputParameters par
     Indicator(name, parameters),
     TransientInterface(parameters, name, "indicators"),
     PostprocessorInterface(parameters),
-    Coupleable(parameters, false),
-    ScalarCoupleable(parameters),
-    MooseVariableInterface(parameters, false),
+    CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     MaterialPropertyInterface(parameters),
 
     _field_var(_sys.getVariable(_tid, name)),

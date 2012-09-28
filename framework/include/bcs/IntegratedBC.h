@@ -16,8 +16,7 @@
 #define INTEGRATEDBC_H
 
 #include "BoundaryCondition.h"
-#include "Coupleable.h"
-#include "MooseVariableInterface.h"
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MooseVariable.h"
 #include "MaterialPropertyInterface.h"
 
@@ -35,9 +34,7 @@ InputParameters validParams<IntegratedBC>();
  */
 class IntegratedBC :
   public BoundaryCondition,
-  public Coupleable,
-  public ScalarCoupleable,
-  public MooseVariableInterface,
+  public CoupleableMooseVariableDependencyIntermediateInterface,
   public MaterialPropertyInterface
 {
 public:

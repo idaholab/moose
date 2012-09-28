@@ -16,9 +16,8 @@
 #define NODALUSEROBJECT_H
 
 #include "UserObject.h"
-#include "Coupleable.h"
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "UserObjectInterface.h"
-#include "MooseVariableInterface.h"
 #include "MooseVariable.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
@@ -36,9 +35,8 @@ InputParameters validParams<NodalUserObject>();
 
 class NodalUserObject :
   public UserObject,
-  public Coupleable,
+  public CoupleableMooseVariableDependencyIntermediateInterface,
   public UserObjectInterface,
-  public MooseVariableInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
   protected PostprocessorInterface

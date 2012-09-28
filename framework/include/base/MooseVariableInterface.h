@@ -32,6 +32,12 @@ public:
    */
   MooseVariableInterface(InputParameters & parameters, bool nodal, std::string var_param_name = "variable");
 
+  /**
+   * Get the variable that this object is using.
+   * @return The variable this object is using.
+   */
+  MooseVariable * mooseVariable() { return _variable; }
+
   virtual ~MooseVariableInterface();
 
 protected:

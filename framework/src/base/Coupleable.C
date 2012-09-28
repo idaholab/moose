@@ -36,7 +36,11 @@ Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
       {
         std::string coupled_var_name = vars[i];
         if (problem.hasVariable(coupled_var_name))
-          _coupled_vars[name].push_back(&problem.getVariable(tid, coupled_var_name));
+        {
+          MooseVariable * moose_var = &problem.getVariable(tid, coupled_var_name);
+          _coupled_vars[name].push_back(moose_var);
+          _coupled_moose_vars.push_back(moose_var);
+        }
         else if (problem.hasScalarVariable(coupled_var_name))
           ; // ignore scalar variables
         else

@@ -35,6 +35,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
     Coupleable(parameters, false),
+    MooseVariableDependencyInterface(),
     ScalarCoupleable(parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
@@ -64,35 +65,14 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _second_zero(_subproblem._second_zero[_tid]),
     _has_stateful_property(false)
 {
-/*
-  for (unsigned int i = 0; i < _coupled_to.size(); i++)
-  {
-    std::string coupled_var_name = _coupled_to[i];
-
-    //Is it in the nonlinear system or the aux system?
-    if (_moose_system.hasVariable(coupled_var_name))
-    {
-      unsigned int coupled_var_num = _moose_system.getVariableNumber(coupled_var_name);
-      _data._var_nums.insert(coupled_var_num);
-    }
-    //Look for it in the Aux system
-    else if (_moose_system.hasAuxVariable(coupled_var_name))
-    {
-      unsigned int coupled_var_num = _moose_system.getAuxVariableNumber(coupled_var_name);
-      _data._aux_var_nums.insert(coupled_var_num);
-    }
-    else
-      mooseError("Coupled variable '" + coupled_var_name + "' not found.");
-  }
-  */
+  // Fill in the MooseVariable dependencies
+  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
+  for(unsigned int i=0; i<coupled_vars.size(); i++)
+    addMooseVariableDependency(coupled_vars[i]);
 }
 
 Material::~Material()
 {
-  // TODO: Implement destructor to clean up after the _qp_prev and _qp_curr data objects
-
-  //std::for_each(_qp_prev.begin(), _qp_prev.end(), DeleteFunctor());
-  //std::for_each(_qp_curr.begin(), _qp_curr.end(), DeleteFunctor());
 }
 
 void

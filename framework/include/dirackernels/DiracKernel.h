@@ -22,8 +22,7 @@
 #include "DiracKernelInfo.h"
 #include "MooseObject.h"
 #include "SetupInterface.h"
-#include "Coupleable.h"
-#include "MooseVariableInterface.h"
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
 #include "MaterialPropertyInterface.h"
@@ -57,9 +56,7 @@ InputParameters validParams<DiracKernel>();
 class DiracKernel :
   public MooseObject,
   public SetupInterface,
-  public Coupleable,
-  public ScalarCoupleable,
-  public MooseVariableInterface,
+  public CoupleableMooseVariableDependencyIntermediateInterface,
   public FunctionInterface,
   public UserObjectInterface,
   public TransientInterface,

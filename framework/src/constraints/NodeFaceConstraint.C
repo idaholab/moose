@@ -41,8 +41,7 @@ InputParameters validParams<NodeFaceConstraint>()
 NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters parameters) :
   MooseObject(name, parameters),
   SetupInterface(parameters),
-  Coupleable(parameters, true),
-  MooseVariableInterface(parameters, true),
+  CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
   FunctionInterface(parameters),
   TransientInterface(parameters, name, "node_face_constraints"),
   GeometricSearchInterface(parameters),

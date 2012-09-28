@@ -20,8 +20,7 @@
 #include "MooseObject.h"
 #include "SetupInterface.h"
 #include "UserObjectInterface.h"
-#include "MooseVariable.h"
-#include "Coupleable.h"
+#include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "FunctionInterface.h"
 #include "MooseVariableInterface.h"
 #include "TwoMaterialPropertyInterface.h"
@@ -47,9 +46,7 @@ class DGKernel :
   public SetupInterface,
   public FunctionInterface,
   public UserObjectInterface,
-  public NeighborCoupleable,
-  public ScalarCoupleable,
-  public NeighborMooseVariableInterface,
+  public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
   protected TwoMaterialPropertyInterface
 {
 public:

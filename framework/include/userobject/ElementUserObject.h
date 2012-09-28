@@ -16,13 +16,12 @@
 #define ELEMENTUSEROBJECT_H
 
 #include "UserObject.h"
-#include "Coupleable.h"
-#include "MooseVariableInterface.h"
 #include "MooseVariable.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
 // libMesh
 #include "elem.h"
@@ -36,9 +35,8 @@ InputParameters validParams<ElementUserObject>();
 
 class ElementUserObject :
   public UserObject,
-  public Coupleable,
   public UserObjectInterface,
-  public MooseVariableInterface,
+  public CoupleableMooseVariableDependencyIntermediateInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
   protected PostprocessorInterface

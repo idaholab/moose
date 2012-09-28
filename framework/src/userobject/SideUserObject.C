@@ -27,9 +27,8 @@ InputParameters validParams<SideUserObject>()
 
 SideUserObject::SideUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
-    Coupleable(parameters, false),
+    CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     UserObjectInterface(parameters),
-    MooseVariableInterface(parameters, false),
     TransientInterface(parameters, name, "side_user_objects"),
     MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),

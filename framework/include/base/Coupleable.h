@@ -40,7 +40,13 @@ public:
    * Get the list of coupled variables
    * @return The list of coupled variables
    */
-  std::map<std::string, std::vector<MooseVariable *> > & getCoupledVars() { return _coupled_vars; }
+  const std::map<std::string, std::vector<MooseVariable *> > & getCoupledVars() { return _coupled_vars; }
+
+  /**
+   * Get the list of coupled variables
+   * @return The list of coupled variables
+   */
+  const std::vector<MooseVariable *> & getCoupledMooseVars() { return _coupled_moose_vars; }
 
 protected:
   /**
@@ -77,6 +83,8 @@ protected:
 
 protected:
   std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;   ///< Coupled vars whose values we provide
+  std::vector<MooseVariable *> _coupled_moose_vars;
+
   bool _nodal;                                                          ///< true if we provide coupling to nodal values
 
   MooseVariable *getVar(const std::string & var_name, unsigned int comp);

@@ -22,8 +22,7 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
-#include "Coupleable.h"
-#include "MooseVariableInterface.h"
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
 // libMesh
 #include "fe.h"
@@ -41,9 +40,7 @@ class ElementIndicator :
   public Indicator,
   public TransientInterface,
   public PostprocessorInterface,
-  public Coupleable,
-  public ScalarCoupleable,
-  public MooseVariableInterface,
+  public CoupleableMooseVariableDependencyIntermediateInterface,
   public MaterialPropertyInterface
 {
 public:

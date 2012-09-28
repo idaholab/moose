@@ -17,8 +17,7 @@
 
 #include "MooseObject.h"
 #include "SetupInterface.h"
-#include "Coupleable.h"
-#include "MooseVariableInterface.h"
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
@@ -45,9 +44,7 @@ InputParameters validParams<AuxKernel>();
 class AuxKernel :
   public MooseObject,
   public SetupInterface,
-  public Coupleable,
-  public ScalarCoupleable,
-  public MooseVariableInterface,
+  public CoupleableMooseVariableDependencyIntermediateInterface,
   public FunctionInterface,
   public UserObjectInterface,
   public TransientInterface,

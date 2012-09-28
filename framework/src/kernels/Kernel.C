@@ -45,9 +45,7 @@ InputParameters validParams<Kernel>()
 Kernel::Kernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
-    Coupleable(parameters, false),
-    ScalarCoupleable(parameters),
-    MooseVariableInterface(parameters, false),
+    CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     TransientInterface(parameters, name, "kernels"),

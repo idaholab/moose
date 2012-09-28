@@ -29,9 +29,8 @@ InputParameters validParams<ElementUserObject>()
 
 ElementUserObject::ElementUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
-    Coupleable(parameters, false),
     UserObjectInterface(parameters),
-    MooseVariableInterface(parameters, false),
+    CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     TransientInterface(parameters, name, "element_user_objects"),
     MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),

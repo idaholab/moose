@@ -47,11 +47,8 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     SetupInterface(parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    NeighborCoupleable(parameters, false),
-    ScalarCoupleable(parameters),
-    NeighborMooseVariableInterface(parameters, false),
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     TwoMaterialPropertyInterface(parameters),
-
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
