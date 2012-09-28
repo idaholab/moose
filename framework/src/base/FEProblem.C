@@ -1914,6 +1914,7 @@ FEProblem::addPPSValuesToTable(ExecFlagType type)
         break;
 
       case Moose::PPS_OUTPUT_BOTH:
+      case Moose::PPS_OUTPUT_AUTO:
         _pps_output_table_file.addData(name, value, _time);
         _pps_output_table_screen.addData(name, value, _time);
         break;
@@ -2638,6 +2639,7 @@ FEProblem::checkProblemIntegrity()
   // Check that BCs used in your simulation exist in your mesh
   _nl.checkBCCoverage();
 
+  // Check UserObjects and Postprocessors
   checkUserObjects();
 }
 
@@ -2680,6 +2682,20 @@ FEProblem::checkUserObjects()
   {
     if (names.find(it->first) == names.end())
       mooseError("Postprocessor '" + it->first + "' requested but not specified in the input file.");
+  }
+
+  // check to see if we have inconsistent output requests
+  for (unsigned int i = 0; i < LENGTHOF(types); i++)
+  {
+    for (std::vector<Postprocessor *>::const_iterator it = _pps(types[i])[0].all().begin(); it != _pps(types[i])[0].all().end(); ++it)
+    {
+      Moose::PPSOutputType out_type = (*it)->getOutput();
+
+      if ((out_type == Moose::PPS_OUTPUT_FILE || out_type == Moose::PPS_OUTPUT_BOTH) && _out.PpsFileOutputEnabled() == false)
+        mooseWarning("Postprocessor file output has been requested, but there are no file formats enabled that support this feature.");
+      else if ((out_type == Moose::PPS_OUTPUT_SCREEN || out_type == Moose::PPS_OUTPUT_BOTH) && _postprocessor_screen_output == false)
+        mooseWarning("Postprocessor screen output has been requested, but it has been turned off.");
+    }
   }
 }
 

@@ -30,6 +30,7 @@ public:
 
   virtual void output(const std::string & file_base, Real time);
   virtual void outputPps(const std::string & file_base, const FormattedTable & table, Real time);
+  virtual bool supportsPpsOutput() { return true; }
   virtual void outputInput();
 
   virtual void meshChanged();

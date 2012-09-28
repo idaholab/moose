@@ -80,6 +80,7 @@ namespace Moose {
     if (pps_output_type_to_enum.empty())
     {
       pps_output_type_to_enum["NONE"]   = PPS_OUTPUT_NONE;
+      pps_output_type_to_enum["AUTO"]   = PPS_OUTPUT_AUTO;
       pps_output_type_to_enum["SCREEN"] = PPS_OUTPUT_SCREEN;
       pps_output_type_to_enum["FILE"]   = PPS_OUTPUT_FILE;
       pps_output_type_to_enum["BOTH"]   = PPS_OUTPUT_BOTH;

@@ -169,6 +169,15 @@ Output::isOutputterActive(Type type)
   return _outputter_types.find(type) != _outputter_types.end();
 }
 
+bool
+Output::PpsFileOutputEnabled()
+{
+  bool supports_pps_output = false;
+  for (unsigned int i = 0; i < _outputters.size(); i++)
+    supports_pps_output |= _outputters[i]->supportsPpsOutput();
+  return supports_pps_output;
+}
+
 void
 Output::outputPps(const FormattedTable & table)
 {

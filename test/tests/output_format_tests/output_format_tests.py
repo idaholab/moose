@@ -17,6 +17,13 @@ nemesis_out_check_test = { INPUT : 'output_test_nemesis.i',
                            EXPECT_ERR : 'Nemesis not supported when compiled without --enable-parmesh',
                            MESH_MODE : ['SERIAL'] }
 
+# Postprocessor output conflict warnings
+pps_screen_out_warn_test = { INPUT : 'pps_screen_out_warn.i',
+                             EXPECT_OUT : 'Postprocessor screen output has been requested' }
+
+pps_file_out_warn_test = { INPUT : 'pps_file_out_warn.i',
+                           EXPECT_OUT : 'Postprocessor file output has been requested' }
+
 # Note that for these tests
 # we are supplying one of the parameters via CLI
 gnuplot_ps_out_test = { INPUT : 'output_test_gnuplot.i',

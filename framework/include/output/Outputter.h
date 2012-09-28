@@ -34,6 +34,9 @@ public:
    */
   virtual void output(const std::string & file_base, Real time) = 0;
   virtual void outputPps(const std::string & file_base, const FormattedTable & table, Real time) = 0;
+  /// Returns a Boolean indicating whether this Outputter supports PPS values
+  virtual bool supportsPpsOutput() { return false; }
+
   virtual void outputInput() {}
 
   virtual void meshChanged() = 0;

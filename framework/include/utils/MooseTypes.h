@@ -116,6 +116,7 @@ enum CoordinateSystemType
 enum PPSOutputType
 {
   PPS_OUTPUT_NONE,
+  PPS_OUTPUT_AUTO,
   PPS_OUTPUT_SCREEN,
   PPS_OUTPUT_FILE,
   PPS_OUTPUT_BOTH

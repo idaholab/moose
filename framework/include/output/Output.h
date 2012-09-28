@@ -90,6 +90,8 @@ public:
    */
   void setOutputVariables(std::vector<std::string> output_variables) { _output_variables = output_variables; }
 
+  bool PpsFileOutputEnabled();
+
 protected:
   std::string _file_base;
 
