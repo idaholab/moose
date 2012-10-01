@@ -97,6 +97,7 @@ public:
   std::map<unsigned int, bool> _has_penetrated;
   std::map<unsigned int, unsigned> _locked_this_step;
   std::map<unsigned int, unsigned> _unlocked_this_step;
+  std::map<unsigned int, Real> _lagrange_multiplier;
 
   void setUpdate(bool update);
   void setTangentialTolerance(Real tangential_tolerance);
