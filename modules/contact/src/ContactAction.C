@@ -7,8 +7,9 @@
 template<>
 InputParameters validParams<ContactAction>()
 {
-  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FORTH", "FIRST");
-  
+  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST");
+  MooseEnum formulation("DEFAULT, PENALTY, AUGMENTED_LAGRANGE", "DEFAULT");
+
   InputParameters params = validParams<Action>();
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
@@ -20,6 +21,7 @@ InputParameters validParams<ContactAction>()
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
+  params.addParam<MooseEnum>("formulation", formulation, "The contact formulation");
   return params;
 }
 
@@ -33,6 +35,7 @@ ContactAction::ContactAction(const std::string & name, InputParameters params) :
   _penalty(getParam<Real>("penalty")),
   _tension_release(getParam<Real>("tension_release")),
   _model(getParam<std::string>("model")),
+  _formulation(getParam<MooseEnum>("formulation")),
   _order(getParam<MooseEnum>("order"))
 {
 }
@@ -70,6 +73,7 @@ ContactAction::act()
 
     // Create master objects
     params.set<std::string>("model") = _model;
+    params.set<std::string>("formulation") = _formulation;
     params.set<MooseEnum>("order") = _order;
     params.set<BoundaryName>("boundary") = _master;
     params.set<BoundaryName>("slave") = _slave;
@@ -116,6 +120,7 @@ ContactAction::act()
 
     // Create slave objects
     params.set<std::string>("model") = _model;
+    params.set<std::string>("formulation") = _formulation;
     params.set<MooseEnum>("order") = _order;
     params.set<BoundaryName>("boundary") = _slave;
     params.set<BoundaryName>("master") = _master;

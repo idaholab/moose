@@ -25,6 +25,7 @@ public:
 protected:
   const unsigned int _component;
   const ContactModel _model;
+  const ContactFormulation _formulation;
   PenetrationLocator & _penetration_locator;
 
   Real _penalty;

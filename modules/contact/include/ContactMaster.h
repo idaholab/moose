@@ -21,6 +21,14 @@ enum ContactModel
   CM_EXPERIMENTAL
 };
 
+enum ContactFormulation
+{
+  CF_INVALID,
+  CF_DEFAULT,
+  CF_PENALTY,
+  CF_AUGMENTED_LAGRANGE
+};
+
 class ContactMaster : public DiracKernel
 {
 public:
@@ -38,6 +46,7 @@ public:
 protected:
   const unsigned int _component;
   const ContactModel _model;
+  const ContactFormulation _formulation;
   PenetrationLocator & _penetration_locator;
 
   const Real _penalty;
@@ -56,5 +65,6 @@ protected:
 };
 
 ContactModel contactModel(const std::string & the_name);
+ContactFormulation contactFormulation(const std::string & the_name);
 
 #endif //CONTACTMASTER_H

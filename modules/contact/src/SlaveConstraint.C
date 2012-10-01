@@ -26,6 +26,7 @@ InputParameters validParams<SlaveConstraint>()
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
+  params.addParam<std::string>("formulation", "default", "The contact formulation");
   return params;
 }
 
@@ -33,6 +34,7 @@ SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters param
   :DiracKernel(name, parameters),
    _component(getParam<unsigned int>("component")),
    _model(contactModel(getParam<std::string>("model"))),
+   _formulation(contactFormulation(getParam<std::string>("formulation"))),
    _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("master"), getParam<BoundaryName>("boundary"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
    _penalty(getParam<Real>("penalty")),
    _residual_copy(_sys.residualGhosted()),
@@ -96,6 +98,8 @@ SlaveConstraint::addPoints()
 Real
 SlaveConstraint::computeQpResidual()
 {
+  std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
+
   PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
   const Node * node = pinfo->_node;
 
@@ -115,16 +119,44 @@ SlaveConstraint::computeQpResidual()
   case CM_FRICTIONLESS:
   case CM_EXPERIMENTAL:
 
-    resid = pinfo->_normal(_component) * (pinfo->_normal * ( pen_force - res_vec ));
+    switch(_formulation)
+    {
+    case CF_DEFAULT:
+      resid = pinfo->_normal(_component) * (pinfo->_normal * ( pen_force - res_vec ));
+      break;
+    case CF_PENALTY:
+      resid = pinfo->_normal(_component) * (pinfo->_normal * ( pen_force ));
+      break;
+    case CF_AUGMENTED_LAGRANGE:
+      resid = pinfo->_normal(_component) * (pinfo->_normal *
+          //( pen_force + (lagrange_multiplier[node->id()]/distance_vec.size())*distance_vec));
+          ( pen_force + (lagrange_multiplier[node->id()] * pinfo->_normal)));
+      break;
+    default:
+      mooseError("Invalid contact formulation");
+      break;
+    }
 
     break;
 
   case CM_GLUED:
   case CM_TIED:
 
-    resid = pen_force(_component)
-          - res_vec(_component)
-          ;
+    switch(_formulation)
+    {
+    case CF_DEFAULT:
+      resid = pen_force(_component) - res_vec(_component);
+      break;
+    case CF_PENALTY:
+      resid = pen_force(_component);
+      break;
+    case CF_AUGMENTED_LAGRANGE:
+      resid = lagrange_multiplier[node->id()]*distance_vec(_component)/distance_vec.size() + pen_force(_component);
+      break;
+    default:
+      mooseError("Invalid contact formulation");
+      break;
+    }
 
     break;
 
@@ -133,13 +165,17 @@ SlaveConstraint::computeQpResidual()
     break;
   }
 
-//  std::cout<<node->id()<<":: "<<constraint_mag<<std::endl;
   return _test[_i][_qp] * resid;
 }
 
 Real
 SlaveConstraint::computeQpJacobian()
 {
+
+  // TODO: for the default formulation,
+  //   we should subtract off the existing Jacobian weighted by the effect of the normal
+
+
   PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
   const Node * node = pinfo->_node;
 //   long int dof_number = node->dof_number(0, _var.number(), 0);

@@ -26,6 +26,7 @@ private:
   const Real _penalty;
   const Real _tension_release;
   const std::string _model;
+  const std::string _formulation;
   const MooseEnum _order;
 };
 

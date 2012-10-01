@@ -25,13 +25,18 @@ InputParameters validParams<ContactMaster>()
   params.addParam<MooseEnum>("order", orders, "The finite element order");
 
   params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  Must be positive.");
+
+  params.addParam<std::string>("formulation", "default", "The contact formulation");
   return params;
 }
+
+
 
 ContactMaster::ContactMaster(const std::string & name, InputParameters parameters) :
   DiracKernel(name, parameters),
   _component(getParam<unsigned int>("component")),
   _model(contactModel(getParam<std::string>("model"))),
+  _formulation(contactFormulation(getParam<std::string>("formulation"))),
   _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
   _penalty(getParam<Real>("penalty")),
   _tension_release(getParam<Real>("tension_release")),
@@ -87,6 +92,7 @@ ContactMaster::updateContactSet()
   std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
   std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
   std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._locked_this_step;
+  std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
@@ -99,6 +105,7 @@ ContactMaster::updateContactSet()
     {
       continue;
     }
+    const unsigned int slave_node_num = it->first;
 
     if (_model == CM_EXPERIMENTAL)
     {
@@ -112,34 +119,14 @@ ContactMaster::updateContactSet()
         res_vec(i) = _residual_copy(dof_number);
       }
 
-      Real resid(0);
-      switch(_model)
-      {
-      case CM_FRICTIONLESS:
-      case CM_EXPERIMENTAL:
-
-        resid = pinfo->_normal * res_vec;
-        break;
-
-      case CM_GLUED:
-      case CM_TIED:
-
-        resid = pinfo->_normal * res_vec;
-        break;
-
-      default:
-        mooseError("Invalid or unavailable contact model");
-        break;
-      }
-
-      unsigned int slave_node_num = it->first;
+      Real resid( pinfo->_normal * res_vec );
 
       // std::cout << locked_this_step[slave_node_num] << " " << pinfo->_distance << std::endl;
       const Real distance( pinfo->_normal * (pinfo->_closest_point - _mesh.node(node->id())));
 
       if (has_penetrated[slave_node_num] && resid < -_tension_release && locked_this_step[slave_node_num] < 2)
       {
-        std::cout << "Releasing node " << node->id() << " " << resid << std::endl;
+        std::cout << "Releasing node " << node->id() << " " << resid << " < " << -_tension_release << std::endl;
         has_penetrated[slave_node_num] = false;
         ++unlocked_this_step[slave_node_num];
       }
@@ -157,9 +144,15 @@ ContactMaster::updateContactSet()
     {
       if (pinfo->_distance > 0)
       {
-        unsigned int slave_node_num = it->first;
-        has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
+        //unsigned int slave_node_num = it->first;
+        //has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
+        has_penetrated[slave_node_num] = true;
       }
+    }
+    if (_formulation == CF_AUGMENTED_LAGRANGE && has_penetrated[slave_node_num])
+    {
+      const RealVectorValue distance_vec(_mesh.node(slave_node_num) - pinfo->_closest_point);
+      lagrange_multiplier[slave_node_num] += _penalty * pinfo->_normal * distance_vec;
     }
   }
 }
@@ -167,7 +160,6 @@ ContactMaster::updateContactSet()
 void
 ContactMaster::addPoints()
 {
-
   _point_to_info.clear();
 
   std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
@@ -198,6 +190,8 @@ ContactMaster::addPoints()
 Real
 ContactMaster::computeQpResidual()
 {
+  std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
+
   PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
   const Node * node = pinfo->_node;
 //  std::cout<<node->id()<<std::endl;
@@ -214,20 +208,50 @@ ContactMaster::computeQpResidual()
     long int dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);
   }
-//   const RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
-//   const RealVectorValue pen_force(_penalty * distance_vec);
+  const RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
+  const RealVectorValue pen_force(_penalty * distance_vec);
   switch(_model)
   {
   case CM_FRICTIONLESS:
   case CM_EXPERIMENTAL:
 
-    resid = pinfo->_normal(_component) * (pinfo->_normal * res_vec);
+    switch (_formulation)
+    {
+    case CF_DEFAULT:
+      resid = pinfo->_normal(_component) * (pinfo->_normal * res_vec);
+      break;
+    case CF_PENALTY:
+      resid = -pinfo->_normal(_component) * (pinfo->_normal * pen_force);
+      break;
+    case CF_AUGMENTED_LAGRANGE:
+      resid = -(pinfo->_normal(_component) * (pinfo->_normal *
+          //( pen_force + (lagrange_multiplier[node->id()]/distance_vec.size())*distance_vec)));
+          ( pen_force + lagrange_multiplier[node->id()] * pinfo->_normal)));
+      break;
+    default:
+      mooseError("Invalid contact formulation");
+      break;
+    }
     break;
 
   case CM_GLUED:
   case CM_TIED:
-    resid = res_vec(_component);
-//     resid -= pen_force(_component);
+    switch(_formulation)
+    {
+    case CF_DEFAULT:
+      resid = res_vec(_component);
+      break;
+    case CF_PENALTY:
+      resid = -pen_force(_component);
+      break;
+    case CF_AUGMENTED_LAGRANGE:
+      resid = -(pen_force(_component) +
+          lagrange_multiplier[node->id()]*distance_vec(_component)/distance_vec.size());
+      break;
+    default:
+      mooseError("Invalid contact formulation");
+      break;
+    }
     break;
 
   default:
@@ -242,14 +266,26 @@ Real
 ContactMaster::computeQpJacobian()
 {
 
-//   return _test[_i][_qp] * _penalty * _phi[_j][_qp];
+  PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
+  switch (_formulation)
+  {
+  case CF_DEFAULT:
+    return 0;
+    break;
+  case CF_PENALTY:
+  case CF_AUGMENTED_LAGRANGE:
+    return _test[_i][_qp] * _penalty * _phi[_j][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
+    break;
+  default:
+    mooseError("Invalid contact formulation");
+    break;
+  }
 
   return 0;
 /*
   if(_i != _j)
     return 0;
 
-  PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
   Node * node = pinfo->_node;
 
   RealVectorValue jac_vec;
@@ -300,4 +336,31 @@ contactModel(const std::string & the_name)
     mooseError( err );
   }
   return model;
+}
+
+ContactFormulation
+contactFormulation(const std::string & the_name)
+{
+  ContactFormulation formulation(CF_INVALID);
+  std::string name(the_name);
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  if ("default" == name)
+  {
+    formulation = CF_DEFAULT;
+  }
+  else if ("penalty" == name)
+  {
+    formulation = CF_PENALTY;
+  }
+  else if ("augmented_lagrange" == name)
+  {
+    formulation = CF_AUGMENTED_LAGRANGE;
+  }
+  if (formulation == CF_INVALID)
+  {
+    std::string err("Invalid formulation found: ");
+    err += name;
+    mooseError( err );
+  }
+  return formulation;
 }
