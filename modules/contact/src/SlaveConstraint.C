@@ -11,7 +11,7 @@
 template<>
 InputParameters validParams<SlaveConstraint>()
 {
-  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FORTH", "FIRST");
+  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST");
 
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<BoundaryName>("boundary", "The slave boundary");
