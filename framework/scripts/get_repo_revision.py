@@ -93,7 +93,7 @@ def writeRevision(moose_dir, revision):
     # We have to have something listed as a revision if we didn't find one
     if revision == "":
       revision = '"N/A"';
-    f.write("#ifndef HERDREVISION_H\n#define HERDREVISION_H\n\n#define HERD_REVISION " + revision + "\n\n#endif //HERDREVISION_H")
+    f.write("#ifndef HERDREVISION_H\n#define HERDREVISION_H\n\n#define HERD_REVISION " + revision + "\n\n#endif //HERDREVISION_H\n")
     f.close()
 
 # Entry point

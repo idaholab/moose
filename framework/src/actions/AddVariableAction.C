@@ -53,9 +53,7 @@ InputParameters validParams<AddVariableAction>()
 
 
 AddVariableAction::AddVariableAction(const std::string & name, InputParameters params) :
-    Action(name, params),
-    _variable_to_read(""),
-    _timestep_to_read(2)
+    Action(name, params)
 {
 }
 

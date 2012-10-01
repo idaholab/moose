@@ -100,7 +100,7 @@ Adaptivity::setErrorEstimator(const MooseEnum & error_estimator_name)
   else if (error_estimator_name == "PatchRecoveryErrorEstimator")
     _error_estimator = new PatchRecoveryErrorEstimator;
   else
-    mooseError("Unknown error_estimator selection: " + error_estimator_name);
+    mooseError(std::string("Unknown error_estimator selection: ") + std::string(error_estimator_name));
 }
 
 void

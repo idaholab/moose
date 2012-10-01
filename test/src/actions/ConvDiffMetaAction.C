@@ -52,7 +52,7 @@ ConvDiffMetaAction::act()
    */
 
   // Do some error checking
-  mooseAssert(variables.size() == 2, "Expected 2 variables, received " + variables.size());
+  mooseAssert(variables.size() == 2, "Expected 2 variables");
 
   //*******************************************//
   //**************** Variables ****************//

@@ -137,10 +137,12 @@ InputParameters::getDocString(const std::string &name) const
   if (doc_string_it != _doc_string.end())
     for (std::string::const_iterator it = (doc_string_it->second).begin();
          it != (doc_string_it->second).end(); ++it)
+    {
       if (*it == '\n')
         doc_string += " ... ";
       else
         doc_string += *it;
+    }
 
   return doc_string;
 }

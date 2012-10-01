@@ -68,7 +68,7 @@ TransientInterface::isActive()
   // look if _t lies in one of our time periods
   for (unsigned int i=1; i <= _time_periods.size(); ++i)  // Careful! We are purposely indexing one past the end of the array
     if ((i == _time_periods.size()) || // Are we in the last time period?
-        (_time_periods[i-1]->start() <= _t) && (_t < _time_periods[i]->start()))  // OR are we in one of the intermediate periods?
+        ((_time_periods[i-1]->start() <= _t) && (_t < _time_periods[i]->start())))  // OR are we in one of the intermediate periods?
     {
       bool ret_value;
       const std::vector<std::string> & objects = _time_periods[i-1]->getObjectList(_object_type, ret_value);

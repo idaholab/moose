@@ -38,6 +38,6 @@ CoupledProblem::init()
 }
 
 void
-CoupledProblem::output(bool force)
+CoupledProblem::output(bool /*force*/)
 {
 }

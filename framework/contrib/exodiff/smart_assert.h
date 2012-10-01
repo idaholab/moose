@@ -376,7 +376,7 @@ namespace smart_assert {
 // "debug" mode
 #define SMART_ASSERT( expr) \
     if ( (expr) ) ; \
-    else ::smart_assert::make_assert( #expr).print_context( __FILE__, __LINE__).SMART_ASSERT_A \
+    else ::smart_assert::make_assert( #expr).print_context( __FILE__, __LINE__).SMART_ASSERT_A
     /**/
 
 #else
@@ -391,7 +391,7 @@ namespace smart_assert {
 
 #define SMART_VERIFY( expr) \
     if ( (expr) ) ; \
-    else ::smart_assert::make_assert( #expr).error().print_context( __FILE__, __LINE__).SMART_ASSERT_A \
+    else ::smart_assert::make_assert( #expr).error().print_context( __FILE__, __LINE__).SMART_ASSERT_A
     /**/
 
 

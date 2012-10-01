@@ -29,9 +29,6 @@ public:
   AddDiracKernelAction(const std::string & name, InputParameters params);
 
   virtual void act();
-
-private:
-  bool is_kernels_action;
 };
 
 #endif // ADDDIRACKERNELACTION_H

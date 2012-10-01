@@ -36,7 +36,7 @@ UserObjectIO::~UserObjectIO()
 }
 
 void
-UserObjectIO::write(const std::string & file_name)
+UserObjectIO::write(const std::string & /*file_name*/)
 {
 }
 
@@ -81,7 +81,7 @@ UserObjectIO::write(const std::string & file_name)
 }
 */
 void
-UserObjectIO::read(const std::string & file_name)
+UserObjectIO::read(const std::string & /*file_name*/)
 {
 }
 

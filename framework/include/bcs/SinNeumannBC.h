@@ -44,9 +44,6 @@ private:
   Real _initial;
   Real _final;
   Real _duration;
-
-  /// Value of grad(u) on the boundary.
-  Real _value;
 };
 
 #endif //SINNEUMANNBC_H

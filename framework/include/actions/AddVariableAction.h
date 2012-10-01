@@ -33,7 +33,6 @@ public:
 private:
   static const Real _abs_zero_tol;
   std::string _variable_to_read;
-  unsigned int _timestep_to_read;
 };
 
 #endif // ADDVARIABLEACTION_H

@@ -283,7 +283,7 @@ void InputParameters::addRequiredParam(const std::string &name, const std::strin
 }
 
 template <typename T>
-void InputParameters::addRequiredParam(const std::string &name, const T &value, const std::string &doc_string)
+void InputParameters::addRequiredParam(const std::string & /*name*/, const T & /*value*/, const std::string & /*doc_string*/)
 {
   mooseError("You cannont call addRequiredParam and supply a default value for this type, please use addParam instead");
 }
