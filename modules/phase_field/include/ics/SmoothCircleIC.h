@@ -55,7 +55,10 @@ protected:
   Real _outvalue;
   Real _radius;
   Real _int_width;
+  bool _3D_spheres;
   Point _center;
+
+  unsigned int _num_dim;
 
 };
 

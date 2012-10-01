@@ -30,3 +30,8 @@ rndboxIC_test = { INPUT : 'CH_RndBndingBoxIC_test.i',
                   SCALE_REFINE : 1
                   }
 
+circleIC_3D_test = { INPUT : 'SmoothCircleIC_3D_test.i',
+                  EXODIFF : ['circle_3D.e'],
+                  SCALE_REFINE : 1
+                  }
+
