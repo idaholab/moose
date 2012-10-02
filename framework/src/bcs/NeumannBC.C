@@ -24,9 +24,8 @@ InputParameters validParams<NeumannBC>()
 
 NeumannBC::NeumannBC(const std::string & name, InputParameters parameters) :
   IntegratedBC(name, parameters),
-  _value(parameters.get<Real>("value"))
-{
-}
+  _value(getParam<Real>("value"))
+{}
 
 Real
 NeumannBC::computeQpResidual()

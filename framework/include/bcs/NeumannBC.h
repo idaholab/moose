@@ -41,7 +41,7 @@ protected:
   virtual Real computeQpResidual();
 
   /// Value of grad(u) on the boundary.
-  Real _value;
+  const Real & _value;
 };
 
 
