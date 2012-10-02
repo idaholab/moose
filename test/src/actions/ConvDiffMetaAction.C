@@ -64,13 +64,11 @@ ConvDiffMetaAction::act()
 //  {
 
   // Create and Add First Variable Action
-  variable_params.set<std::string>("name") = "Variables/" + variables[0];
-  action = ActionFactory::instance()->create("AddVariableAction", variable_params);
+  action = ActionFactory::instance()->create("AddVariableAction", "Variables/" + variables[0], variable_params);
   _awh.addActionBlock(action);
 
   // Create and Add Second Variable Action
-  variable_params.set<std::string>("name") = "Variables/" + variables[1];
-  action = ActionFactory::instance()->create("AddVariableAction", variable_params);
+  action = ActionFactory::instance()->create("AddVariableAction", "Variables/" + variables[1], variable_params);
   _awh.addActionBlock(action);
 //  }
 
@@ -83,8 +81,7 @@ ConvDiffMetaAction::act()
 
   // Setup our Diffusion Kernel on the "u" variable
   action_params.set<std::string>("type") = "Diffusion";
-  action_params.set<std::string>("name") = "Kernels/diff_u";
-  action = ActionFactory::instance()->create("AddKernelAction", action_params);
+  action = ActionFactory::instance()->create("AddKernelAction", "Kernels/diff_u", action_params);
   moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
   {
@@ -95,8 +92,7 @@ ConvDiffMetaAction::act()
   }
 
   // Setup our Diffusion Kernel on the "v" variable
-  action_params.set<std::string>("name") = "Kernels/diff_v";
-  action = ActionFactory::instance()->create("AddKernelAction", action_params);
+  action = ActionFactory::instance()->create("AddKernelAction", "Kernels/diff_v", action_params);
 
   moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
@@ -109,8 +105,7 @@ ConvDiffMetaAction::act()
 
   // Setup our Convection Kernel on the "u" variable coupled to the diffusion variable "v"
   action_params.set<std::string>("type") = "Convection";
-  action_params.set<std::string>("name") = "Kernels/conv_u";
-  action = ActionFactory::instance()->create("AddKernelAction", action_params);
+  action = ActionFactory::instance()->create("AddKernelAction", "Kernels/conv_u", action_params);
   moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
   {

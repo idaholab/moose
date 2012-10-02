@@ -38,10 +38,9 @@ ActionFactory::~ActionFactory()
 }
 
 Action *
-ActionFactory::create(const std::string & action, InputParameters params)
+ActionFactory::create(const std::string & action, const std::string & name, InputParameters params)
 {
   std::map<std::string, BuildInfo>::iterator it = _name_to_build_info.find(action);
-  std::string name = params.have_parameter<std::string>("name") ? params.get<std::string>("name") : "";
 
   if (it == _name_to_build_info.end())
     mooseError(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + name);
@@ -68,12 +67,7 @@ ActionFactory::getValidParams(const std::string & name)
   if (iter == _name_to_build_info.end())
     mooseError(std::string("A '") + name + "' is not a registered Action\n\n");
 
-  InputParameters params = (iter->second._params_pointer)();
-
-  // Add a default name which can be overridden by the parser or whatever other future driver
-  params.addPrivateParam<std::string>("name", iter->second._action_name);
-
-  return params;
+  return (iter->second._params_pointer)();
 }
 
 std::string

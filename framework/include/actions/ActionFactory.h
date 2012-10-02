@@ -81,7 +81,7 @@ public:
 
   std::string getActionName(const std::string & action);
 
-  Action * create(const std::string & action, InputParameters params);
+  Action * create(const std::string & action, const std::string & name, InputParameters params);
 
   InputParameters getValidParams(const std::string & name);
 

@@ -175,11 +175,10 @@ Parser::parse(const std::string &input_filename)
           params.checkParams(curr_identifier);
 
           // Add the parsed syntax to the parameters object for consumption by the Action
-          params.set<std::string>("name") = curr_identifier;
           params.set<std::string>("action") = i->second._action_name;
 
           // Create the Action
-          Action * action = ActionFactory::instance()->create(i->second._action, params);
+          Action * action = ActionFactory::instance()->create(i->second._action, curr_identifier, params);
           mooseAssert (action != NULL, std::string("Action") + i->second._action + " not created");
 
           // extract the MooseObject params if necessary

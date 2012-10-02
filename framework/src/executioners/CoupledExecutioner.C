@@ -98,11 +98,10 @@ CoupledExecutioner::addVariableAction(const std::string & action_name, ActionWar
         InputParameters params = action->parameters();
         params.set<std::string>("action") = "add_aux_variable";
         std::string dest_name("AuxVariables/" + dest_var_name);
-        params.set<std::string>("name") = dest_name;
         params.set<Parser *>("parser") = NULL;                    // set parser to NULL, since this action was not create by a parser
         params.set<ActionWarehouse *>("awh") = &dest;             // move the action into destination action warehouse
 
-        Action * dest_action = ActionFactory::instance()->create("AddVariableAction", params);
+        Action * dest_action = ActionFactory::instance()->create("AddVariableAction", dest_name, params);
         mooseAssert (dest_action != NULL, std::string("Action AddVariableAction not created"));
         dest.addActionBlock(dest_action);
       }

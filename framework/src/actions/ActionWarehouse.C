@@ -114,7 +114,7 @@ ActionWarehouse::buildBuildableActions(const std::string &action_name)
 
       if (params.areAllRequiredParamsValid())
       {
-        addActionBlock(ActionFactory::instance()->create(it->second, params));
+        addActionBlock(ActionFactory::instance()->create(it->second, "", params));
         ret_value = true;
       }
     }
