@@ -141,7 +141,7 @@ def process_args():
   return opts[0]
 
 if __name__ == '__main__':
-  if socket.gethostname().split('.')[0] == head_node:
+  if socket.gethostname().split('.')[0] in head_node:
     runCMD(comment_syntax_cmd)
     runCMD(rsync_comment_syntax_cmd)
     arg_revision = process_args()
@@ -182,5 +182,5 @@ if __name__ == '__main__':
       # This is the system 'head_node', but buildStatus() returned False... so exit as an error
       sys.exit(1)
   else:
-    # This is not the system 'head_node', so exit normally
+    # This is not one of the systems in 'head_node', so exit normally
     sys.exit(0)
