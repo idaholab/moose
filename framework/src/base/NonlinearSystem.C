@@ -940,6 +940,10 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose
     }
   }
 
+  // reinit scalar variables
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+    _fe_problem.reinitScalars(tid);
+
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   if(type != Moose::KT_ALL || (type == Moose::KT_ALL && _time_stepping_scheme != Moose::CRANK_NICOLSON))
   {
@@ -973,7 +977,6 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose
             if (dynamic_cast<TimeKernel *>(*it) == NULL){
                     ScalarKernel * kernel = *it;
 
-                    _fe_problem.reinitScalars(0);
                     kernel->reinit();
                     kernel->computeResidual();
                     _fe_problem.addResidualScalar(residual);}
@@ -1323,7 +1326,6 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
         ScalarKernel * kernel = *it;
         if (kernel->variable().number() == ivar)
         {
-          _fe_problem.reinitScalars(0);
           kernel->reinit();
           kernel->computeOffDiagJacobian(jvar);
           _fe_problem.addJacobianScalar(jacobian);
@@ -1379,6 +1381,10 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
       _constraints[i].jacobianSetup();
       if (_doing_dg) _dg_kernels[i].jacobianSetup();
     }
+
+    // reinit scalar variables
+    for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+      _fe_problem.reinitScalars(tid);
 
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     if (_time_stepping_scheme != Moose::EXPLICIT_EULER)
@@ -1533,6 +1539,8 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
     std::vector<unsigned int> dof_indices;
 
     jacobian.zero();
+
+    _fe_problem.reinitScalars(tid);
 
     for (; el != end_el; ++el)
     {
