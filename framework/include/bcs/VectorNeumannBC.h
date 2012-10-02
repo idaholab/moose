@@ -45,7 +45,7 @@ protected:
   virtual Real computeQpResidual();
 
   /// Vector to dot with the normal.
-  RealVectorValue _value;
+  const RealVectorValue & _value;
 };
 
 #endif //NEUMANNBC_H
