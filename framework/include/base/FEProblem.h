@@ -480,6 +480,9 @@ public:
 protected:
   void checkUserObjects();
 
+  /// Verify that there are no element type/coordinate type conflicts
+  void checkCoordinateSystems();
+
   /**
    * Add postprocessor values to the output table
    * @param type type of PPS to add to the table

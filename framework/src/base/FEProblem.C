@@ -2648,6 +2648,9 @@ FEProblem::checkProblemIntegrity()
 
   // Check UserObjects and Postprocessors
   checkUserObjects();
+
+  // Verify that we don't have any Element type/Coordinate Type conflicts
+  checkCoordinateSystems();
 }
 
 void
@@ -2703,6 +2706,20 @@ FEProblem::checkUserObjects()
       else if ((out_type == Moose::PPS_OUTPUT_SCREEN || out_type == Moose::PPS_OUTPUT_BOTH) && _postprocessor_screen_output == false)
         mooseWarning("Postprocessor screen output has been requested, but it has been turned off.");
     }
+  }
+}
+
+void
+FEProblem::checkCoordinateSystems()
+{
+  MeshBase::const_element_iterator it = _mesh._mesh.elements_begin();
+  MeshBase::const_element_iterator it_end = _mesh._mesh.elements_end();
+
+  for ( ; it != it_end; ++it)
+  {
+    SubdomainID sid = (*it)->subdomain_id();
+    if (_coord_sys[sid] == Moose::COORD_RZ && (*it)->dim() == 3)
+      mooseError("An RZ coordinate system was requested for subdomain " + Moose::stringify(sid) + " which contains 3D elements.");
   }
 }
 
