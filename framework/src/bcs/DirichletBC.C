@@ -25,7 +25,7 @@ InputParameters validParams<DirichletBC>()
 
 DirichletBC::DirichletBC(const std::string & name, InputParameters parameters) :
   NodalBC(name, parameters),
-  _value(parameters.get<Real>("value"))
+  _value(getParam<Real>("value"))
 {}
 
 Real
