@@ -25,7 +25,7 @@ InputParameters validParams<PresetBC>()
 
 PresetBC::PresetBC(const std::string & name, InputParameters parameters) :
   PresetNodalBC(name, parameters),
-  _value(parameters.get<Real>("value"))
+  _value(getParam<Real>("value"))
 {
 
 }

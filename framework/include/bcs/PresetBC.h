@@ -33,7 +33,7 @@ public:
 protected:
   virtual Real computeQpValue();
 
-  Real _value;
+  const Real & _value;
 };
 
 #endif /* PRESETBC_H */
