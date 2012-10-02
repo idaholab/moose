@@ -55,9 +55,10 @@ MAX_THREADS   = 'max_thread'     # Max number of threads (Default: 16)
 MIN_THREADS   = 'min_thread'     # Min number of threads (Default: 1)
 SCALE_REFINE  = 'scale_refine'      # The number of refinements to do when scaling
 
-# EXODIFF options
+# EXODIFF/CSV options
 ABS_ZERO      = 'abs_zero'       # Absolute zero value passed to the exodiff tool
 REL_ERR       = 'rel_err'        # Relative error value passed to the exodiff tool
+# EXODIFF options
 CUSTOM_CMP    = 'custom_cmp'     # Custom comparison file
 USE_OLD_FLOOR = 'use_old_floor'  # Boolean: Use Exodiff old floor option
 

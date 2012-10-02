@@ -385,7 +385,7 @@ class TestHarness:
 
           # if still no errors, diff CSVs
           if reason == '' and len(test[CSVDIFF]) > 0:
-            differ = CSVDiffer( test[TEST_DIR], test[CSVDIFF] )
+            differ = CSVDiffer( test[TEST_DIR], test[CSVDIFF], test[ABS_ZERO], test[REL_ERR] )
             msg = differ.diff()
             output += 'Running CSVDiffer.py\n' + msg
             if msg != '':
