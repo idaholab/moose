@@ -101,6 +101,8 @@ def getCompilers(libmesh_dir):
           compilers.add("INTEL")
         elif re.search('gcc', raw_compiler, re.I) != None:
           compilers.add("GCC")
+        elif re.search('clang', raw_compiler, re.I) != None:
+          compilers.add("CLANG")
         break
   f.close()
   return compilers

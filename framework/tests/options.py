@@ -14,7 +14,7 @@ RELATIVE_PATH = 'relative_path'  # The relative directory where the test resides
 ################################
 # All parameters in this section must be supplied in list format
 PLATFORM      = 'platform'       # A list of platforms set to 'ALL', 'DARWIN', 'LINUX', 'SL', and/or 'LION'
-COMPILER      = 'compiler'       # A test that runs only on a given compiler set to 'ALL', 'GCC', and/or 'INTEL'
+COMPILER      = 'compiler'       # A test that runs only on a given compiler set to 'ALL', 'GCC', 'INTEL' and/or 'CLANG'
 PETSC_VERSION = 'petsc_version'  # A test that runs only on the matching PETSC version
 MESH_MODE     = 'mesh_mode'      # A test that only runs on a given set of mesh modes 'ALL', 'SERIAL', and/or 'PARALLEL'
 METHOD        = 'method'         # A test that only runs under an executable built by the specified method 'ALL', 'OPT', 'DBG', 'DEV'
