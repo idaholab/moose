@@ -2312,13 +2312,14 @@ FEProblem::computeAuxiliaryKernels(ExecFlagType type)
 {
   _aux.compute(type);
 }
-void FEProblem::computeResidual(NonlinearImplicitSystem &/*sys*/, const NumericVector<Number> & soln, NumericVector<Number> & residual )
+
+void
+FEProblem::computeResidual(NonlinearImplicitSystem &/*sys*/, const NumericVector<Number> & soln, NumericVector<Number> & residual)
 {
-  computeResidualType( soln, residual, Moose::KT_ALL);
+  computeResidualType(soln, residual, Moose::KT_ALL);
 }
 
 void
-
 FEProblem::computeTransientImplicitResidual(Real time, const NumericVector<Number>& u, const NumericVector<Number>& udot, NumericVector<Number>& residual)
 {
   _nl.setSolutionUDot(udot);

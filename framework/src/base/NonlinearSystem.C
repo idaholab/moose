@@ -977,6 +977,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose
             if (dynamic_cast<TimeKernel *>(*it) == NULL){
                     ScalarKernel * kernel = *it;
 
+                    _fe_problem.reinitScalars(0);
                     kernel->reinit();
                     kernel->computeResidual();
                     _fe_problem.addResidualScalar(residual);}
@@ -1326,6 +1327,7 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
         ScalarKernel * kernel = *it;
         if (kernel->variable().number() == ivar)
         {
+          _fe_problem.reinitScalars(0);
           kernel->reinit();
           kernel->computeOffDiagJacobian(jvar);
           _fe_problem.addJacobianScalar(jacobian);
@@ -1653,6 +1655,9 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
   }
 
   jacobian.close();
+
+  computeDiracContributions(NULL, &jacobian);
+  computeScalarKernelsJacobians(jacobian);
 
   //Dirichlet BCs
   std::vector<int> zero_rows;

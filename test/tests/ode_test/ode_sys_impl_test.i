@@ -96,7 +96,7 @@
 []
 
 [Postprocessors]
-  active = 'exact_x l2err_x x'
+  active = 'exact_x l2err_x x y'
 
   [./x]
     type = PrintScalarVariable
@@ -126,7 +126,7 @@
   type = Transient
   start_time = 0
   dt = 0.01
-  num_steps = 10
+  num_steps = 100
   petsc_options = '-snes_mf_operator'
 []
 
