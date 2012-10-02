@@ -141,7 +141,7 @@ def process_args():
   return opts[0]
 
 if __name__ == '__main__':
-  if socket.gethostname().split('.')[0] in head_node:
+  if head_node in socket.gethostname().split('.')[0]:
     runCMD(comment_syntax_cmd)
     runCMD(rsync_comment_syntax_cmd)
     arg_revision = process_args()
