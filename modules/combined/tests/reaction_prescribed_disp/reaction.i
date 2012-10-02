@@ -16,6 +16,10 @@
   [../]
   [./resid_y]
   [../]
+  [./diag_stiff_x]
+  [../]
+  [./diag_stiff_y]
+  [../]
 []
 
 [Functions]
@@ -31,6 +35,8 @@
     disp_y = disp_y
     save_in_disp_x = resid_x
     save_in_disp_y = resid_y
+    diag_save_in_disp_x = diag_stiff_x
+    diag_save_in_disp_y = diag_stiff_y
   [../]
 []
 
