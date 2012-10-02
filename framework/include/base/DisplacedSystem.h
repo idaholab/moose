@@ -65,11 +65,17 @@ public:
    */
   virtual bool currentlyComputingJacobian() { return _undisplaced_system.currentlyComputingJacobian(); }
 
-    /**
+  /**
    * Adds this variable to the list of variables to be zeroed during each residual evaluation.
    * @param var_name The name of the variable to be zeroed.
    */
   virtual void addVariableToZeroOnResidual(std::string var_name) { _undisplaced_system.addVariableToZeroOnResidual(var_name); }
+
+  /**
+   * Adds this variable to the list of variables to be zeroed during each jacobian evaluation.
+   * @param var_name The name of the variable to be zeroed.
+   */
+  virtual void addVariableToZeroOnJacobian(std::string var_name) { _undisplaced_system.addVariableToZeroOnJacobian(var_name); }
 
   /**
    * Zero out the solution for the list of variables passed in.
