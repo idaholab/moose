@@ -34,7 +34,6 @@ CoupledProblem::~CoupledProblem()
 void
 CoupledProblem::init()
 {
-  std::cerr << "INIT" << std::endl;
 }
 
 void
