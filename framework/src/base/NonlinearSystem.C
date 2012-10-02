@@ -1415,7 +1415,6 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
       Threads::parallel_reduce(elem_range, cj);
     }
 
-    computeDiracContributions(NULL, &jacobian);
     computeScalarKernelsJacobians(jacobian);
 
     static bool first = true;
