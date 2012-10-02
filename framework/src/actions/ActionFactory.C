@@ -18,8 +18,6 @@
 // Static Member initialization
 ActionFactory *ActionFactory::_instance = NULL;
 
-unsigned int ActionFactory::_unique_id = 0;
-
 // Action Factory Members
 ActionFactory *ActionFactory::instance()
 {
@@ -42,37 +40,19 @@ ActionFactory::~ActionFactory()
 Action *
 ActionFactory::create(const std::string & action, InputParameters params)
 {
-  std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
-  BuildInfo *build_info = NULL;
+  std::map<std::string, BuildInfo>::iterator it = _name_to_build_info.find(action);
   std::string name = params.have_parameter<std::string>("name") ? params.get<std::string>("name") : "";
 
-  iters = _name_to_build_info.equal_range(action);
-
-  // Find the Action that matches the one we have registered based on unique_id
-  unsigned short count = 0;
-  for (ActionFactory::iterator it = iters.first; it != iters.second; ++it)
-  {
-    ++count;
-    if (params.have_parameter<unsigned int>("unique_id") && it->second._unique_id == params.get<unsigned int>("unique_id"))
-    {
-      build_info = &(it->second);
-      break;
-    }
-  }
-  // For backwards compatibility - If there is only one Action registered but it doesn't contain a unique_id that
-  // matches - then it surely it must still be the correct one
-  if (count == 1 && !build_info)
-    build_info = &(iters.first->second);
-
-  if (!build_info)
+  if (it == _name_to_build_info.end())
     mooseError(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + name);
+  else
+  {
+    BuildInfo & build_info = (*it).second;
+    if (params.get<std::string>("action") == "")
+      params.set<std::string>("action") = build_info._action_name;
+    return (build_info._build_pointer)(name, params);
+  }
 
-  if (params.get<std::string>("action") == "")
-    params.set<std::string>("action") = build_info->_action_name;
-
-//  std::cerr << "*** " << params.get<std::string>("name") << " " << params.get<std::string>("action") << " ***\n";
-
-  return (*build_info->_build_pointer)(name, params);
 }
 
 InputParameters
@@ -89,8 +69,6 @@ ActionFactory::getValidParams(const std::string & name)
     mooseError(std::string("A '") + name + "' is not a registered Action\n\n");
 
   InputParameters params = (iter->second._params_pointer)();
-
-  params.addPrivateParam<unsigned int>("unique_id", iter->second._unique_id);
 
   // Add a default name which can be overridden by the parser or whatever other future driver
   params.addPrivateParam<std::string>("name", iter->second._action_name);
