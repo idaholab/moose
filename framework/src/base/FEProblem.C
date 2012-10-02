@@ -2404,7 +2404,13 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
   }
 
   _aux.jacobianSetup();
+
+  // TODO: This can be made more efficient if we group the kernels together in a single group to be
+  //       executed.  If the user has both Residual and Jacobian aux kernels, we are looping over both
+  //       groups separately.
   _aux.compute();
+  _aux.compute(EXEC_JACOBIAN);
+
   _nl.computeJacobian(jacobian);
 
   // This call is here to make sure the residual vector is up to date with any decisions that have been made in

@@ -29,7 +29,7 @@ InputParameters validParams<AuxKernel>()
   MooseEnum execute_options(SetupInterface::getExecuteOptions());
 
   InputParameters params = validParams<MooseObject>();
-  params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|timestep|timestep_begin) to execute only at that moment");
+  params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin) to execute only at that moment");
 
   params.addRequiredParam<AuxVariableName>("variable", "The name of the variable that this object applies to");
   params.addPrivateParam<bool>("use_displaced_mesh", false);

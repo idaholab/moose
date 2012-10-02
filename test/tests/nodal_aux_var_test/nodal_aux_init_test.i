@@ -67,6 +67,7 @@
     variable = aux1
     type = ConstantAux
     value = 1
+    execute_on = jacobian
   [../]
 
   #AuxKernel that is setup only before the simulation starts
