@@ -2,6 +2,7 @@
 #include "Moose.h"
 #include "Factory.h"
 #include "ActionFactory.h"
+#include "ProblemFactory.h"
 
 #include "CoupledConvection.h"
 #include "ForcingFn.h"
@@ -94,6 +95,9 @@
 
 #include "ExceptionSteady.h"
 #include "SteadyTransientExecutioner.h"
+
+// problems
+#include "MooseTestProblem.h"
 
 #include "ConvDiffMetaAction.h"
 
@@ -215,6 +219,8 @@ MooseTestApp::registerObjects()
 
   registerExecutioner(ExceptionSteady);
   registerExecutioner(SteadyTransientExecutioner);
+
+  registerProblem(MooseTestProblem);
 }
 
 void
