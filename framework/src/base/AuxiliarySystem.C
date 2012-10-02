@@ -75,6 +75,7 @@ AuxiliarySystem::timestepSetup()
   {
     _auxs(EXEC_RESIDUAL)[i].timestepSetup();
     _auxs(EXEC_TIMESTEP)[i].timestepSetup();
+    _auxs(EXEC_TIMESTEP_BEGIN)[i].timestepSetup();
   }
 }
 

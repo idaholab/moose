@@ -285,6 +285,7 @@ void FEProblem::initialSetup()
   for(unsigned int i=0; i<n_threads; i++)
     _materials[i].initialSetup();
 
+  _aux.initialSetup();
   _aux.compute(EXEC_INITIAL);
 
   if (_material_props.hasStatefulProperties())
@@ -377,7 +378,6 @@ void FEProblem::initialSetup()
       vit->second->initialSetup();
   }
 
-  _aux.initialSetup();
   _aux.compute(EXEC_TIMESTEP_BEGIN);
 
   Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
