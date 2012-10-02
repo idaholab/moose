@@ -1415,6 +1415,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
       Threads::parallel_reduce(elem_range, cj);
     }
 
+    computeDiracContributions(NULL, &jacobian);
     computeScalarKernelsJacobians(jacobian);
 
     static bool first = true;
@@ -1654,9 +1655,6 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
   }
 
   jacobian.close();
-
-  computeDiracContributions(NULL, &jacobian);
-  computeScalarKernelsJacobians(jacobian);
 
   //Dirichlet BCs
   std::vector<int> zero_rows;
