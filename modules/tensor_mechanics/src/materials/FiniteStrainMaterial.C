@@ -37,9 +37,8 @@ void FiniteStrainMaterial::computeQpStrain()
   RankTwoTensor Fhat = A*Fbar.inverse();
   Fhat.addIa(1.0);
 
-   //C = Fhat^-1 Fhat^-T;
-  RankTwoTensor Chat(Fhat.inverse());
-  Chat *= Chat.transpose();
+   //C = Fhat Fhat^T;
+  RankTwoTensor Chat = Fhat*Fhat.transpose();
 
   //strain rate D from Taylor expansion, D = 1/dt(-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
   RankTwoTensor Cinv_I(Chat.inverse());
