@@ -36,7 +36,8 @@ pl_test3tt = { INPUT : 'pl_test3tt.i',
                EXODIFF : ['pl_test3tt_out.e'] }
 
 pl_test3q = { INPUT : 'pl_test3q.i',
-              EXODIFF : ['pl_test3q_out.e'] }
+              EXODIFF : ['pl_test3q_out.e'],
+              ABS_ZERO : 1e-9 }
 
 #pl_test3qtt = { INPUT : 'pl_test3qtt.i',
 #                EXODIFF : ['pl_test3qtt_out.e'] }
@@ -48,7 +49,8 @@ pl_test4tt = { INPUT : 'pl_test4tt.i',
                EXODIFF : ['pl_test4tt_out.e'] }
 
 pl_test4q = { INPUT : 'pl_test4q.i',
-              EXODIFF : ['pl_test4q_out.e'] }
+              EXODIFF : ['pl_test4q_out.e'],
+              ABS_ZERO : 1e-9 }
 
 #pl_test4qtt = { INPUT : 'pl_test4qtt.i',
 #                EXODIFF : ['pl_test4qtt_out.e'] }

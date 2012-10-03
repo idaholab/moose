@@ -277,7 +277,7 @@
   l_max_its = 10
 
   start_time = 0.0
-  dt = 0.05
+  dt = 0.06
   end_time = 1.0
   [./Quadrature]
     order = THIRD
