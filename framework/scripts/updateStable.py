@@ -50,7 +50,7 @@ def getCoverage():
                  '*/libmesh/*'
                  ]
   # Use the same commands from the coverage_html script to generate the raw.info file
-  coverage_cmd = [ 'lcov',
+  coverage_cmd = [ os.getenv('LCOV_BIN'),
                    '--base-directory', 'moose',
                    '--directory', 'moose/src/',
                    '--capture',
@@ -58,7 +58,7 @@ def getCoverage():
                    '--output-file', 'raw.info'
                    ]
   # Put the lcov filtering command together
-  filter_cmd = ['lcov']
+  filter_cmd = [os.getenv('LCOV_BIN')]
   for sgl_filter in filter_out:
     filter_cmd.extend(['-r', 'raw.info', sgl_filter])
   filter_cmd.extend(['-o', 'moose.info'])
