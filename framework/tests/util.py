@@ -2,7 +2,7 @@ import os, re
 from subprocess import *
 from time import strftime, gmtime, ctime, localtime, asctime
 
-TERM_COLS = 90
+TERM_COLS = 110
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
 def runCommand(cmd):

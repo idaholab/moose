@@ -4,8 +4,8 @@
   nx = 2
   ny = 2
   nz = 2
-  zmin = 1
-  zmax = 0
+  zmin = 0
+  zmax = 1
 []
 
 [Variables]
