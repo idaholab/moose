@@ -148,11 +148,11 @@ if __name__ == '__main__':
     coverage_status = getCoverage()
     if buildStatus() and coverage_status:
       # Checking out moose-stable
-      checkout_moose_stable = ['svn', 'co', '--quiet', moose_stable, 'moose-stable']
+      checkout_moose_stable = [os.getenv('SVN_BIN'), 'co', '--quiet', moose_stable, 'moose-stable']
       runCMD(checkout_moose_stable)
       # Get Merged version numbers
       print 'Get revisions merged...'
-      get_merged_revisions = ['svn', 'mergeinfo', moose_devel, '--show-revs', 'eligible', 'moose-stable']
+      get_merged_revisions = [os.getenv('SVN_BIN'), 'mergeinfo', moose_devel, '--show-revs', 'eligible', 'moose-stable']
       log_versions = runCMD(get_merged_revisions)
       # Group the revisions together and build our 'svn log -r' command
       get_revision_logs = ['svn', 'log' ]
@@ -172,11 +172,11 @@ if __name__ == '__main__':
       writeLog(parseLOG(log_data))
       # Merge our local created moose-stable with moose-trunk
       print 'Merging moose-stable from moose-devel only to the revision at which bitten was commanded to checkout'
-      merge_moose_trunk = ['svn', 'merge', '-r1:' + str(arg_revision), moose_devel, 'moose-stable' ]
+      merge_moose_trunk = [os.getenv('SVN_BIN'), 'merge', '-r1:' + str(arg_revision), moose_devel, 'moose-stable' ]
       runCMD(merge_moose_trunk)
       # Commit the changes!
       print 'Commiting merged moose-stable'
-      commit_moose_stable = ['svn', 'ci', '--username', 'moosetest', '-F', 'svn_log.log', 'moose-stable']
+      commit_moose_stable = [os.getenv('SVN_BIN'), 'ci', '--username', 'moosetest', '-F', 'svn_log.log', 'moose-stable']
       runCMD(commit_moose_stable)
     else:
       # This is the system 'head_node', but buildStatus() returned False... so exit as an error
