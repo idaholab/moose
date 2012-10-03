@@ -109,6 +109,8 @@ public:
   RankTwoTensor & operator/= (const Real &a);
 
   RankTwoTensor operator/ (const Real &a) const;
+
+  RankTwoTensor & operator*= (const RankTwoTensor &a);
   
   //Defines multiplication with another RankTwoTensor
   RankTwoTensor operator* (const RankTwoTensor &a) const;

@@ -24,42 +24,51 @@ FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name,
 
 void FiniteStrainMaterial::computeQpStrain()
 {
+  //Method from Rashid, 1993
   //Deformation gradient
   RankTwoTensor A(_grad_disp_x[_qp],_grad_disp_y[_qp],_grad_disp_z[_qp]); //Deformation gradient
   RankTwoTensor Fbar(_grad_disp_x_old[_qp],_grad_disp_y_old[_qp],_grad_disp_z_old[_qp]); //Deformation gradient
 
-  A -= Fbar;
+  A -= Fbar; //A = gradU - gradUold
 
-  Fbar.addIa(1.0);
+  Fbar.addIa(1.0); //Fbar = ( I + gradUold)
   
-  //Incremental deformation gradient
+  //Incremental deformation gradient Fhat = I + A Fbar^-1
   RankTwoTensor Fhat = A*Fbar.inverse();
   Fhat.addIa(1.0);
 
-  //From Rashid, 1993
+   //C = Fhat^-1 Fhat^-T;
+  RankTwoTensor Chat(Fhat.inverse());
+  Chat *= Chat.transpose();
+
+  //strain rate D from Taylor expansion, D = 1/dt(-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
+  RankTwoTensor Cinv_I(Chat.inverse());
+  Chat.addIa(-1.0);
+  RankTwoTensor D = (-Cinv_I/2.0 + Cinv_I*Cinv_I/4.0)/_t_step;
+
+  //Calculate rotation Rhat
   RankTwoTensor U(Fhat.inverse());
+  Real ax = U(1,2) - U(2,1);
+  Real ay = U(2,0) - U(0,2);
+  Real az = U(0,1) - U(1,0);
+  Real q = (ax*ax + ay*ay + az*az)/4.0;
+  Real p = (U.trace() - 1.0)*(U.trace() - 1.0)/4.0;
+  Real y = 1.0/((q + p)*(q + p)*(q + p));
 
-  Real Ax = U(1,2) - U(2,1);
-  Real Ay = U(2,0) - U(0,2);
-  Real Az = U(0,1) - U(1,0);
-  Real Q = (Ax*Ax + Ay*Ay + Az*Az)/4.0;
-  Real P = (U.trace() - 1.0)*(U.trace() - 1.0);
-  Real Y = 1.0/((Q + P)*(Q + P)*(Q + P));
-
-  Real C1 = std::sqrt(P * (1 + (P*(Q+Q+(Q+P))) * (1-(Q+P)) * Y));
-  Real C2 = 0.125 + Q * 0.03125 * (P*P - 12*(P-1)) / (P*P);
-  Real C3 = 0.5 * std::sqrt( (P*Q*(3-Q) + P*P*P + Q*Q) / (P+Q)*(P+Q)*(P+Q) );
+  Real C1 = std::sqrt(p * (1 + (p*(q+q+(q+p))) * (1-(q+p)) * y));
+  Real C2 = 0.125 + q * 0.03125 * (p*p - 12*(p-1)) / (p*p);
+  Real C3 = 0.5 * std::sqrt( (p*q*(3-q) + p*p*p + q*q) / (p+q)*(p+q)*(p+q) );
 
   RankTwoTensor R_incr;
-  R_incr(0,0) = C1 + (C2*Ax)*Ax;
-  R_incr(0,1) =      (C2*Ay)*Ax + (C3*Az);
-  R_incr(0,2) =      (C2*Az)*Ax - (C3*Ay);
-  R_incr(1,0) =      (C2*Ax)*Ay - (C3*Az);
-  R_incr(1,1) = C1 + (C2*Ay)*Ay;
-  R_incr(1,2) =      (C2*Az)*Ay + (C3*Ax);
-  R_incr(2,0) =      (C2*Ax)*Az + (C3*Ay);
-  R_incr(2,1) =      (C2*Ay)*Az - (C3*Ax);
-  R_incr(2,2) = C1 + (C2*Az)*Az;
+  R_incr(0,0) = C1 + (C2*ax)*ax;
+  R_incr(0,1) =      (C2*ay)*ax + (C3*az);
+  R_incr(0,2) =      (C2*az)*ax - (C3*ay);
+  R_incr(1,0) =      (C2*ax)*ay - (C3*az);
+  R_incr(1,1) = C1 + (C2*ay)*ay;
+  R_incr(1,2) =      (C2*az)*ay + (C3*ax);
+  R_incr(2,0) =      (C2*ax)*az + (C3*ay);
+  R_incr(2,1) =      (C2*ay)*az - (C3*ax);
+  R_incr(2,2) = C1 + (C2*az)*az;
 }
 
 void FiniteStrainMaterial::computeQpStress()

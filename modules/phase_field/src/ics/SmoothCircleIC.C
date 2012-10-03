@@ -36,7 +36,6 @@ SmoothCircleIC::SmoothCircleIC(const std::string & name,
   else
     _num_dim = 2;
 
-  std::cout << "sum dim = " << _num_dim << std::endl;
 }
 
 Real

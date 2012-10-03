@@ -275,6 +275,19 @@ RankTwoTensor::operator/(const Real &a) const
   return result;
 }
 
+RankTwoTensor &
+RankTwoTensor::operator*=(const RankTwoTensor &a)
+{
+  RankTwoTensor & s = (*this);
+
+  for(unsigned int i(0); i<N; i++)
+    for(unsigned int j(0); j<N; j++)
+      for(unsigned int k(0); k<N; k++)
+        _vals[i][j] = s(i,j)*a(j,k);
+  
+  return *this;
+}
+
 RankTwoTensor
 RankTwoTensor::operator*(const RankTwoTensor &a) const
 {
