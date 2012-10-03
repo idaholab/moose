@@ -78,6 +78,7 @@ def getCoverage():
 
 
 def runCMD(cmd_opts, quiet=False):
+  print 'Running command:', cmd_opts
   a_proc = subprocess.Popen(cmd_opts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   retstr = a_proc.communicate()
   if not a_proc.poll() == 0:
@@ -155,7 +156,7 @@ if __name__ == '__main__':
       get_merged_revisions = [os.getenv('SVN_BIN'), 'mergeinfo', moose_devel, '--show-revs', 'eligible', 'moose-stable']
       log_versions = runCMD(get_merged_revisions)
       # Group the revisions together and build our 'svn log -r' command
-      get_revision_logs = ['svn', 'log' ]
+      get_revision_logs = [os.getenv('SVN_BIN'), 'log' ]
       merged_revisions = string.split(log_versions, '\n')
       if merged_revisions[0] != '':
         for revision in merged_revisions:
