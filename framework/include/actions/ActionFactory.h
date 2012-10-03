@@ -145,7 +145,7 @@ ActionFactory::const_iterator ActionFactory::end() const
 }
 
 inline
-std::pair<std::multimap<std::string, std::string>::iterator, std::multimap<std::string, std::string>::iterator>
+std::pair<std::map<std::string, std::string>::iterator, std::map<std::string, std::string>::iterator>
 ActionFactory::getA(const std::string & action_name)
 {
   return _action_to_name_map.equal_range(action_name);
