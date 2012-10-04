@@ -94,9 +94,29 @@ class ParamTable:
     table_widget.setHorizontalHeaderItem(3, QtGui.QTableWidgetItem('Comment'))
     table_widget.verticalHeader().setVisible(False)
     table_widget.setMinimumHeight(300)
+    table_widget.cellChanged.connect(self.cellChanged)
+
     return table_widget
 
   def initUI(self):
+
+    self.apply_button = None
+        # Build the Add and Cancel buttons
+    if self.incoming_data and len(self.incoming_data):
+      self.apply_button = QtGui.QPushButton("Apply")
+    else:
+      self.apply_button = QtGui.QPushButton("Add")
+
+    self.apply_button.setDisabled(True)
+
+    new_row_button = QtGui.QPushButton("New Parameter")
+    cancel_button = QtGui.QPushButton("Cancel")
+    
+    QtCore.QObject.connect(self.apply_button, QtCore.SIGNAL("clicked()"), self.click_add)
+    QtCore.QObject.connect(new_row_button, QtCore.SIGNAL("clicked()"), self.click_new_row)
+    QtCore.QObject.connect(cancel_button, QtCore.SIGNAL("clicked()"), self.click_cancel)
+
+    
 #    self.layoutV = QtGui.QVBoxLayout(self.main_layout)
     self.layoutV = QtGui.QVBoxLayout()
 
@@ -146,28 +166,13 @@ class ParamTable:
           if found_index != -1:
             self.drop_menu.setCurrentIndex(found_index)
               
-      self.table_widget.cellChanged.connect(self.cellChanged)
       self.fillTableWithData(self.incoming_data, True)
-      self.table_widget.cellChanged.disconnect(self.cellChanged)
+#      self.table_widget.cellChanged.disconnect(self.cellChanged)
     self.main_layout.addLayout(self.layoutV)
-
-    apply_button = None
-        # Build the Add and Cancel buttons
-    if self.incoming_data and len(self.incoming_data):
-      apply_button = QtGui.QPushButton("Apply")
-    else:
-      apply_button = QtGui.QPushButton("Add")
-
-    new_row_button = QtGui.QPushButton("New Parameter")
-    cancel_button = QtGui.QPushButton("Cancel")
-    
-    QtCore.QObject.connect(apply_button, QtCore.SIGNAL("clicked()"), self.click_add)
-    QtCore.QObject.connect(new_row_button, QtCore.SIGNAL("clicked()"), self.click_new_row)
-    QtCore.QObject.connect(cancel_button, QtCore.SIGNAL("clicked()"), self.click_cancel)
     
     button_layout = QtGui.QHBoxLayout()
 
-    button_layout.addWidget(apply_button)
+    button_layout.addWidget(self.apply_button)
     button_layout.addWidget(new_row_button)
     button_layout.addWidget(cancel_button)
     
@@ -175,6 +180,8 @@ class ParamTable:
 
     for group_name, table_widget in self.group_table_widgets.items():
       table_widget.resizeColumnsToContents()
+
+    self.possiblyActivateApply()
 
 
   ### Takes a dictionary containing name value pairs
@@ -255,8 +262,25 @@ class ParamTable:
 #            if param_name in self.param_is_required and self.param_is_required[param_name]: #Pass through any 'required' parameters
 #              the_data[param_name] = param_value
     return the_data 
-    
 
+  ''' See if all of the required parameters are satisfied '''
+  def possiblyActivateApply(self):
+    disable_it = False
+    for group_name,table_widget in self.group_table_widgets.items():
+      for i in xrange(0,table_widget.rowCount()):
+        if(table_widget.item(i,0)):
+          param_name = str(table_widget.item(i,0).text())
+          if param_name == 'Name' or (param_name in self.param_is_required and self.param_is_required[param_name]):
+            param_value = None
+            if type(table_widget.cellWidget(i,1)) is QtGui.QComboBox:
+              param_value = table_widget.cellWidget(i,1).currentText()
+            else:
+              param_value = str(table_widget.item(i,1).text())
+   
+            if param_value == '':
+              disable_it = True
+    self.apply_button.setDisabled(disable_it)
+    
   def init_menu(self, layout):
     self.drop_menu = QtGui.QComboBox()
     self.has_type = False
@@ -530,4 +554,4 @@ class ParamTable:
       table_widget.resizeColumnsToContents()
     
   def cellChanged(self, row, col):
-    pass
+    self.possiblyActivateApply()
