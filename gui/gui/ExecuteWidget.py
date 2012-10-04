@@ -165,6 +165,7 @@ class ExecuteWidget(QtGui.QWidget):
     return cur_steps + 2 + 1 # The +2 is for setup steps the +1 is so there is always a bit left...      
     
   def clickedRun(self):
+    self.run_started.emit()
     num_steps = self.getNumSteps()
     if num_steps:
       self.pb.reset()
@@ -196,7 +197,6 @@ class ExecuteWidget(QtGui.QWidget):
     self.connect(self.proc,QtCore.SIGNAL("readyReadStandardOutput()"),self.output)
     self.connect(self.proc,QtCore.SIGNAL("finished(int)"),self.processFinished)
     self.proc.setProcessChannelMode(QtCore.QProcess.MergedChannels)
-    self.run_started.emit()
     self.proc.start(command)
     self.kill_button.setDisabled(False)
     self.clear_button.setDisabled(False)

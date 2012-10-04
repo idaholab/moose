@@ -605,7 +605,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
       the_range = (min, max)
 
-      if min < max:
+      if min <= max:
         self.exodus_result.mapper.SetScalarRange(the_range)
         self.exodus_result.clip_mapper.SetScalarRange(the_range)
 
@@ -751,13 +751,12 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.timestep_to_exodus_result[self.current_max_timestep] = result
         self.timestep_to_timestep[self.current_max_timestep] = timestep
     
-  def _timestepBegin(self):
+  def _timestepBegin(self):    
     # Check to see if there are new exodus files with adapted timesteps in them.
     if self.file_name:
-      base_stamp = os.path.getmtime(self.file_name)
       for file_name in sorted(glob.glob(self.file_name + '-s*')):
         file_stamp = os.path.getmtime(file_name)
-        if file_stamp >= base_stamp and file_name not in self.file_names:
+        if file_stamp >= self.base_stamp and file_name not in self.file_names:
           self.file_names.append(file_name)
           exodus_result = ExodusResult(self, self.plane)
           exodus_result.setFileName(file_name)
@@ -770,26 +769,31 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
       for file_name in output_file_names:
         if '.e' in file_name and os.path.exists(file_name):
-          self.file_name = file_name
-          self.exodus_result = ExodusResult(self, self.plane)
-          self.exodus_result.setFileName(file_name)
-          self.exodus_results.append(self.exodus_result)
-          self.current_max_timestep = self.exodus_result.max_timestep
-          self.renderer.AddActor(self.exodus_result.actor)
-          self._drawEdgesChanged(self.draw_edges_checkbox.checkState())
+          file_stamp = os.path.getmtime(file_name)          
+          time.sleep(0.1)
+          file_stamp = os.path.getmtime(file_name)
 
-          if self.first:
-            self.first = False
-            self.renderer.ResetCamera()
-
-          # Avoid z-buffer fighting
-          vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
-
-          if self.clip_groupbox.isChecked():
-            _clippingToggled(True)
-      
-          self.vtkwidget.updateGL()
-          self._updateControls()
+          if(int(file_stamp) >= int(self.base_stamp)):
+            self.file_name = file_name
+            self.exodus_result = ExodusResult(self, self.plane)
+            self.exodus_result.setFileName(file_name)
+            self.exodus_results.append(self.exodus_result)
+            self.current_max_timestep = self.exodus_result.max_timestep
+            self.renderer.AddActor(self.exodus_result.actor)
+            self._drawEdgesChanged(self.draw_edges_checkbox.checkState())
+   
+            if self.first:
+              self.first = False
+              self.renderer.ResetCamera()
+   
+            # Avoid z-buffer fighting
+            vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
+   
+            if self.clip_groupbox.isChecked():
+              _clippingToggled(True)
+   
+            self.vtkwidget.updateGL()
+            self._updateControls()
 
 
     if self.exodus_result and self.automatically_update:
@@ -815,6 +819,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     pass
     
   def _runStarted(self):
+    # Set the base time
+    self.base_stamp = time.time()
+
     self.application.addExodusResultActors(self.renderer)
     self.file_name = None
     self.file_names = []
@@ -832,6 +839,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.timestep_to_exodus_result = {}
     
   def _runStopped(self):
+    time.sleep(1.0)
     self._timestepBegin()
     
 
