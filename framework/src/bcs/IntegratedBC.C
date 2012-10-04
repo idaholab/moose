@@ -69,6 +69,7 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
 
     _save_in[i] = var;
     var->sys().addVariableToZeroOnResidual(_save_in_strings[i]);
+    addMooseVariableDependency(var);
   }
 
   _has_save_in = _save_in.size() > 0;
@@ -82,6 +83,7 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
 
     _diag_save_in[i] = var;
     var->sys().addVariableToZeroOnJacobian(_diag_save_in_strings[i]);
+    addMooseVariableDependency(var);
   }
 
   _has_diag_save_in = _diag_save_in.size() > 0;

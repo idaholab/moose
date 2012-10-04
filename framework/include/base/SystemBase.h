@@ -277,6 +277,15 @@ public:
   virtual void prepare(THREAD_ID tid);
 
   /**
+   * Prepare the system for use on sides
+   *
+   * This will try to reuse the preparation done on the element.
+   *
+   * @param tid ID of the thread
+   */
+  virtual void prepareFace(THREAD_ID tid);
+
+  /**
    * Prepare the system for use
    * @param tid ID of the thread
    */

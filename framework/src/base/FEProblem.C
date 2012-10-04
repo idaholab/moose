@@ -151,6 +151,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   _indicators.resize(n_threads);
   _markers.resize(n_threads);
 
+  _active_elemental_moose_variables.resize(n_threads);
+
   _resurrector = new Resurrector(*this);
 
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
@@ -465,6 +467,16 @@ FEProblem::prepare(const Elem * elem, THREAD_ID tid)
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
     _displaced_problem->prepare(_displaced_mesh->elem(elem->id()), tid);
+}
+
+void
+FEProblem::prepareFace(const Elem * elem, THREAD_ID tid)
+{
+  _nl.prepareFace(tid);
+  _aux.prepareFace(tid);
+
+  if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
+    _displaced_problem->prepareFace(_displaced_mesh->elem(elem->id()), tid);
 }
 
 void
@@ -1292,6 +1304,31 @@ FEProblem::updateMaterials()
 }
 
 void
+FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
+{
+  if (_materials[tid].hasMaterials(blk_id))
+  {
+    std::set<MooseVariable *> needed_moose_vars;
+
+    std::vector<Material *> & materials = _materials[tid].getMaterials(blk_id);
+
+    for(std::vector<Material *>::iterator it = materials.begin();
+        it != materials.end();
+        ++it)
+    {
+      const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
+
+    const std::set<MooseVariable *> & current_active_elemental_moose_variables = getActiveElementalMooseVariables(tid);
+
+    needed_moose_vars.insert(current_active_elemental_moose_variables.begin(), current_active_elemental_moose_variables.end());
+
+    setActiveElementalMooseVariables(needed_moose_vars, tid);
+  }
+}
+
+void
 FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid)
 {
   if (_materials[tid].hasMaterials(blk_id))
@@ -1521,6 +1558,7 @@ void
 FEProblem::computeIndicatorsAndMarkers()
 {
   // Zero them out first
+  if(_indicators[0].all().size() || _markers[0].all().size())
   {
     std::vector<std::string> fields;
 
@@ -1548,6 +1586,7 @@ FEProblem::computeIndicatorsAndMarkers()
   }
 
   // compute Indicators
+  if(_indicators[0].all().size())
   {
     ComputeIndicatorThread cit(*this, getAuxiliarySystem(), _indicators);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
@@ -1556,6 +1595,7 @@ FEProblem::computeIndicatorsAndMarkers()
   }
 
   // finalize Indicators
+  if(_indicators[0].all().size())
   {
     ComputeIndicatorThread cit(*this, getAuxiliarySystem(), _indicators, true);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
@@ -1564,6 +1604,7 @@ FEProblem::computeIndicatorsAndMarkers()
   }
 
   // compute Markers
+  if(_markers[0].all().size())
   {
     _adaptivity.updateErrorVectors();
 

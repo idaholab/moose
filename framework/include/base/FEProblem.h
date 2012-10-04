@@ -119,6 +119,7 @@ public:
   virtual void timestepSetup();
 
   virtual void prepare(const Elem * elem, THREAD_ID tid);
+  virtual void prepareFace(const Elem * elem, THREAD_ID tid);
   virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid);
 
   virtual void prepareAssembly(THREAD_ID tid);
@@ -229,6 +230,14 @@ public:
   virtual const std::vector<Material*> & getFaceMaterials(SubdomainID block_id, THREAD_ID tid);
   virtual const std::vector<Material*> & getBndMaterials(BoundaryID block_id, THREAD_ID tid);
   virtual void updateMaterials();
+
+  /**
+   * Add the MooseVariables that the current materials depend on to the dependency list.
+   *
+   * This MUST be done after the dependency list has been set for all the other objects!
+   */
+  virtual void prepareMaterials(SubdomainID blk_id, THREAD_ID tid);
+
   virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid);
   virtual void reinitMaterialsFace(SubdomainID blk_id, unsigned int side, THREAD_ID tid);
   virtual void reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int side, THREAD_ID tid);
@@ -403,7 +412,6 @@ public:
    * Set the number of top residual to be printed out (0 = no output)
    */
   void setDebugTopResiduals(unsigned int n) { _dbg_top_residuals = n; }
-
 
 protected:
   MooseMesh & _mesh;

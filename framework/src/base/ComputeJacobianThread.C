@@ -76,19 +76,32 @@ ComputeJacobianThread::computeInternalFaceJacobian()
 
 
 void
+ComputeJacobianThread::subdomainChanged()
+{
+  _fe_problem.subdomainSetup(_subdomain, _tid);
+  _sys._kernels[_tid].updateActiveKernels(_subdomain);
+
+  std::set<MooseVariable *> needed_moose_vars;
+
+  const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
+  for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+  {
+    const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+  }
+
+  _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+  _fe_problem.prepareMaterials(_subdomain, _tid);
+}
+
+void
 ComputeJacobianThread::onElement(const Elem *elem)
 {
   _fe_problem.prepare(elem, _tid);
+
   _fe_problem.reinitElem(elem, _tid);
 
-  SubdomainID subdomain = elem->subdomain_id();
-  if (subdomain != _subdomain)
-  {
-    _fe_problem.subdomainSetup(subdomain, _tid);
-    _sys._kernels[_tid].updateActiveKernels(subdomain);
-  }
-
-  _fe_problem.reinitMaterials(subdomain, _tid);
+  _fe_problem.reinitMaterials(_subdomain, _tid);
 
   computeJacobian();
 }
@@ -99,11 +112,11 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
   std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {
+    _fe_problem.prepareFace(elem, _tid);
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
-    unsigned int subdomain = elem->subdomain_id();
-    if (subdomain != _subdomain)
-      _fe_problem.subdomainSetupSide(subdomain, _tid);
+    if (_subdomain != _old_subdomain)
+      _fe_problem.subdomainSetupSide(_subdomain, _tid);
 
     _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
 
@@ -126,6 +139,7 @@ ComputeJacobianThread::onInternalSide(const Elem *elem, unsigned int side)
     std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
     if (dgks.size() > 0)
     {
+      _fe_problem.prepareFace(elem, _tid);
       _fe_problem.reinitNeighbor(elem, side, _tid);
 
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
@@ -146,6 +160,12 @@ ComputeJacobianThread::postElement(const Elem * /*elem*/)
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
   _fe_problem.addJacobian(_jacobian, _tid);
+}
+
+void
+ComputeJacobianThread::post()
+{
+  _fe_problem.clearActiveElementalMooseVariables(_tid);
 }
 
 void ComputeJacobianThread::join(const ComputeJacobianThread & /*y*/)

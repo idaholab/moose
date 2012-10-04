@@ -21,6 +21,7 @@
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
 #include "MaterialPropertyInterface.h"
+#include "MooseVariableDependencyInterface.h"
 
 #include "Assembly.h"
 #include "MooseVariable.h"
@@ -43,7 +44,8 @@ class Indicator :
   public MooseObject,
   public SetupInterface,
   public FunctionInterface,
-  public UserObjectInterface
+  public UserObjectInterface,
+  public MooseVariableDependencyInterface
 {
 public:
   Indicator(const std::string & name, InputParameters parameters);

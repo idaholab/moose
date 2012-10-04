@@ -19,7 +19,9 @@
 #include "MooseArray.h"
 #include "Indicator.h"
 #include "TwoMaterialPropertyInterface.h"
-#include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "Coupleable.h"
+#include "MooseVariableInterface.h"
+#include "MooseVariableDependencyInterface.h"
 
 #include "Assembly.h"
 #include "MooseVariable.h"
@@ -41,7 +43,9 @@ InputParameters validParams<InternalSideIndicator>();
  */
 class InternalSideIndicator :
   public Indicator,
-  public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+  public NeighborCoupleable,
+  public ScalarCoupleable,
+  public NeighborMooseVariableInterface,
   protected TwoMaterialPropertyInterface
 {
 public:

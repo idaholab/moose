@@ -35,6 +35,8 @@ SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
   _zero.resize(n_threads);
   _grad_zero.resize(n_threads);
   _second_zero.resize(n_threads);
+  _active_elemental_moose_variables.resize(n_threads);
+  _has_active_elemental_moose_variables.resize(n_threads);
 }
 
 SubProblem::~SubProblem()
@@ -50,6 +52,32 @@ SubProblem::~SubProblem()
   _zero.release();
   _grad_zero.release();
   _second_zero.release();
+}
+
+void
+SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid)
+{
+  _has_active_elemental_moose_variables[tid] = true;
+  _active_elemental_moose_variables[tid] = moose_vars;
+}
+
+const std::set<MooseVariable *> &
+SubProblem::getActiveElementalMooseVariables(THREAD_ID tid)
+{
+  return _active_elemental_moose_variables[tid];
+}
+
+bool
+SubProblem::hasActiveElementalMooseVariables(THREAD_ID tid)
+{
+  return _has_active_elemental_moose_variables[tid];
+}
+
+void
+SubProblem::clearActiveElementalMooseVariables(THREAD_ID tid)
+{
+  _has_active_elemental_moose_variables[tid] = false;
+  _active_elemental_moose_variables[tid].clear();
 }
 
 std::vector<SubdomainID>

@@ -48,6 +48,8 @@ ValueThresholdMarker::ValueThresholdMarker(const std::string & name, InputParame
 {
   if(_variable_fe_type.family != LAGRANGE && _variable_fe_type != FEType(CONSTANT, MONOMIAL))
     mooseError("ValueThresholdMarker can only be used with variables of type Lagrange or Constant Monomial!");
+
+  addMooseVariableDependency(&_variable);
 }
 
 Marker::MarkerValue

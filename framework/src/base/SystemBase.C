@@ -167,10 +167,41 @@ SystemBase::getMinQuadratureOrder()
 void
 SystemBase::prepare(THREAD_ID tid)
 {
-  for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+  if(_subproblem.hasActiveElementalMooseVariables(tid))
   {
-    MooseVariable *var = *it;
-    var->prepare();
+    const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
+    for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+      (*it)->clearDofIndices();
+
+    for(std::set<MooseVariable *>::iterator it = active_elemental_moose_variables.begin();
+        it != active_elemental_moose_variables.end();
+        ++it)
+      if(&(*it)->sys() == this)
+        (*it)->prepare();
+  }
+  else
+  {
+    for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+    {
+      MooseVariable *var = *it;
+      var->prepare();
+    }
+  }
+}
+
+void
+SystemBase::prepareFace(THREAD_ID tid)
+{
+  if(_subproblem.hasActiveElementalMooseVariables(tid)) // We only need to do something if the element prepare was restricted
+  {
+    const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
+
+    for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+    {
+      MooseVariable *var = *it;
+      if(!active_elemental_moose_variables.count(var)) // If it wasnt in the active list we need to prepare it
+        var->prepare();
+    }
   }
 }
 
@@ -188,21 +219,30 @@ SystemBase::prepareNeighbor(THREAD_ID tid)
 void
 SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 {
-  for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+  const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
+
+  if(_subproblem.hasActiveElementalMooseVariables(tid))
   {
-    MooseVariable *var = *it;
-    var->computeElemValues();
+    for(std::set<MooseVariable *>::iterator it = active_elemental_moose_variables.begin();
+        it != active_elemental_moose_variables.end();
+        ++it)
+      if(&(*it)->sys() == this)
+        (*it)->computeElemValues();
+  }
+  else
+  {
+    const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
+    for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+    {
+      MooseVariable *var = *it;
+      var->computeElemValues();
+    }
   }
 }
 
 void
 SystemBase::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
-/*
-  for (std::set<MooseVariable *>::iterator it = _vars[tid].boundaryVars(bnd_id).begin();
-    it != _vars[tid].boundaryVars(bnd_id).end();
-     ++it)
-*/
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
     MooseVariable *var = *it;

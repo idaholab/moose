@@ -58,6 +58,11 @@ public:
   MooseVariable(unsigned int var_num, unsigned int mvn, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
   virtual ~MooseVariable();
 
+  /**
+   * Clear out the dof indices.  We do this in case this variable is not going to be prepared at all...
+   */
+  void clearDofIndices();
+
   void prepare();
   void prepareNeighbor();
   void prepare_aux();

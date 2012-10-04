@@ -151,6 +151,12 @@ MooseVariable::isNodal()
 }
 
 void
+MooseVariable::clearDofIndices()
+{
+  _dof_indices.clear();
+}
+
+void
 MooseVariable::prepare()
 {
   _dof_map.dof_indices (_elem, _dof_indices, _var_num);

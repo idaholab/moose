@@ -75,11 +75,24 @@ public:
    */
   virtual void onInternalSide(const Elem *elem, unsigned int side);
 
+  /**
+   * Called every time the current subdoain changes (ie the subdomain of _this_ element
+   * is not the same as the subdomain of the last element).  Beware of overusing this!
+   * You might think that you can do some expensive stuff in here and get away with it...
+   * but there are applications that have TONS of subdomains....
+   */
+  virtual void subdomainChanged();
+
 protected:
   SystemBase & _system;
   FEProblem & _fe_problem;
   THREAD_ID _tid;
+
+  /// The subdomain for the current element
   unsigned int _subdomain;
+
+  /// The subdomain for the last element
+  unsigned int _old_subdomain;
 };
 
 
@@ -118,6 +131,12 @@ ThreadedElementLoop<RangeType>::operator () (const RangeType & range)
     const Elem* elem = *el;
     unsigned int cur_subdomain = elem->subdomain_id();
 
+    _old_subdomain = _subdomain;
+    _subdomain = cur_subdomain;
+
+    if(_subdomain != _old_subdomain)
+      subdomainChanged();
+
     onElement(elem);
 
     for (unsigned int side=0; side<elem->n_sides(); side++)
@@ -125,17 +144,14 @@ ThreadedElementLoop<RangeType>::operator () (const RangeType & range)
       std::vector<BoundaryID> boundary_ids = _system.mesh().boundary_ids (elem, side);
 
       if (boundary_ids.size() > 0)
-      {
         for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
           onBoundary(elem, side, *it);
-      }
 
       if (elem->neighbor(side) != NULL)
         onInternalSide(elem, side);
     } // sides
     postElement(elem);
 
-    _subdomain = cur_subdomain;
   } // range
 
   post();
@@ -176,6 +192,12 @@ ThreadedElementLoop<RangeType>::onBoundary(const Elem * /*elem*/, unsigned int /
 template<typename RangeType>
 void
 ThreadedElementLoop<RangeType>::onInternalSide(const Elem * /*elem*/, unsigned int /*side*/)
+{
+}
+
+template<typename RangeType>
+void
+ThreadedElementLoop<RangeType>::subdomainChanged()
 {
 }
 

@@ -46,6 +46,8 @@ Marker::Marker(const std::string & name, InputParameters parameters) :
     _mesh(_subproblem.mesh())
 {
   _supplied.insert(name);
+
+  addMooseVariableDependency(&_field_var);
 }
 
 MooseEnum

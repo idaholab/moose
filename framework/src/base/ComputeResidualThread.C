@@ -42,21 +42,59 @@ ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads:
 }
 
 void
+ComputeResidualThread::subdomainChanged()
+{
+  _fe_problem.subdomainSetup(_subdomain, _tid);
+  _sys._kernels[_tid].updateActiveKernels(_subdomain);
+  if (_sys._doing_dg)
+    _sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
+
+  std::set<MooseVariable *> needed_moose_vars;
+
+  switch( _selector)
+  {
+  case Moose::KT_TIME:
+  {
+    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeTime();
+    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+    {
+      const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
+    break;
+  }
+  case Moose::KT_NONTIME:
+  {
+    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeNonTime();
+    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+    {
+      const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
+    break;
+  }
+  case Moose::KT_ALL:
+  {
+    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
+    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+    {
+      const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
+    break;
+  }
+  }
+
+  _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+  _fe_problem.prepareMaterials(_subdomain, _tid);
+}
+
+void
 ComputeResidualThread::onElement(const Elem *elem)
 {
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
-
-  unsigned int subdomain = elem->subdomain_id();
-  if (subdomain != _subdomain)
-  {
-    _fe_problem.subdomainSetup(subdomain, _tid);
-    _sys._kernels[_tid].updateActiveKernels(subdomain);
-    if (_sys._doing_dg) _sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
-  }
-
-  _fe_problem.reinitMaterials(subdomain, _tid);
-
+  _fe_problem.reinitMaterials(_subdomain, _tid);
 
   switch( _selector)
   {
@@ -103,6 +141,7 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
   std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {
+    _fe_problem.prepareFace(elem, _tid);
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
     unsigned int subdomain = elem->subdomain_id();
@@ -164,6 +203,13 @@ ComputeResidualThread::postElement(const Elem * /*elem*/)
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
   _fe_problem.addResidual(_residual, _tid);
 }
+
+void
+ComputeResidualThread::post()
+{
+  _fe_problem.clearActiveElementalMooseVariables(_tid);
+}
+
 
 void
 ComputeResidualThread::join(const ComputeResidualThread & /*y*/)

@@ -1,0 +1,6 @@
+[Tests]
+  [./var_coupling]
+    input = 'var_coupling.i'
+    exodiff = 'var_coupling_out.e'
+  [../]
+[]

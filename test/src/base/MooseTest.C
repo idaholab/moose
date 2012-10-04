@@ -65,6 +65,7 @@
 #include "CoupledMaterial.h"
 #include "CoupledMaterial2.h"
 #include "LinearInterpolationMaterial.h"
+#include "VarCouplingMaterial.h"
 
 #include "DGMatDiffusion.h"
 #include "EnhancedDGMatDiffusion.h"
@@ -100,6 +101,7 @@
 #include "MooseTestProblem.h"
 
 #include "ConvDiffMetaAction.h"
+#include "AddLotsOfAuxVariablesAction.h"
 
 // From MOOSE
 #include "AddVariableAction.h"
@@ -196,6 +198,7 @@ MooseTestApp::registerObjects()
   registerMaterial(CoupledMaterial);
   registerMaterial(CoupledMaterial2);
   registerMaterial(LinearInterpolationMaterial);
+  registerMaterial(VarCouplingMaterial);
 
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);
@@ -231,6 +234,8 @@ MooseTestApp::associateSyntax()
 
   // and add more
   registerAction(ConvDiffMetaAction, "meta_action");
+  registerAction(AddLotsOfAuxVariablesAction, "meta_action");
   _syntax.registerActionSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
   _syntax.registerActionSyntax("AddVariableAction", "MoreAuxVariables/*", "add_variable");
+  _syntax.registerActionSyntax("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
 }

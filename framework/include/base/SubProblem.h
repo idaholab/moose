@@ -70,6 +70,36 @@ public:
   virtual bool hasScalarVariable(const std::string & var_name) = 0;
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) = 0;
 
+  /**
+   * Set the MOOSE variables to be reinited on each element.
+   * @param moose_vars A set of variables that need to be reinited each time reinit() is called.
+   *
+   * @param tid The thread id
+   */
+  void setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid);
+
+  /**
+   * Get the MOOSE variables to be reinited on each element.
+   *
+   * @param tid The thread id
+   */
+  const std::set<MooseVariable *> & getActiveElementalMooseVariables(THREAD_ID tid);
+
+  /**
+   * Whether or not a list of active elemental moose variables has been set.
+   *
+   * @return True if there has been a list of active elemental moose variables set, False otherwise
+   */
+  bool hasActiveElementalMooseVariables(THREAD_ID tid);
+
+  /**
+   * Clear the active elmental MooseVariable.  If there are no active variables then they will all be reinited.
+   * Call this after finishing the computation that was using a restricted set of MooseVariables
+   *
+   * @param tid The thread id
+   */
+  void clearActiveElementalMooseVariables(THREAD_ID tid);
+
   virtual Assembly & assembly(THREAD_ID tid) = 0;
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
@@ -117,6 +147,7 @@ public:
   virtual void addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
+  virtual void prepareFace(const Elem * elem, THREAD_ID tid) = 0;
   virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid) = 0;
   virtual void prepareAssembly(THREAD_ID tid) = 0;
 
@@ -195,6 +226,13 @@ protected:
 
   /// the map of material properties (block_id -> list of properties)
   std::map<unsigned int, std::set<std::string> > _map_material_props;
+
+  /// This is the set of MooseVariables that will actually get reinited by a call to reinit(elem)
+  std::vector<std::set<MooseVariable *> > _active_elemental_moose_variables;
+
+  /// Whether or not there is currently a list of active elemental moose variables
+  std::vector<bool> _has_active_elemental_moose_variables;
+
 };
 
 

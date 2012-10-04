@@ -20,90 +20,99 @@
 #include "threads.h"
 
 
-ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & mproblem,
-                                                   AuxiliarySystem & sys,
-                                                   std::vector<AuxWarehouse> & auxs) :
-    _mproblem(mproblem),
-    _sys(sys),
+ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs) :
+    ThreadedElementLoop<ConstElemRange>(problem, sys),
+    _aux_sys(sys),
     _auxs(auxs)
 {
 }
 
 // Splitting Constructor
 ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split /*split*/) :
-    _mproblem(x._mproblem),
-    _sys(x._sys),
+    ThreadedElementLoop<ConstElemRange>(x._fe_problem, x._system),
+    _aux_sys(x._aux_sys),
     _auxs(x._auxs)
 {
 }
 
+
 void
-ComputeElemAuxVarsThread::operator() (const ConstElemRange & range)
+ComputeElemAuxVarsThread::subdomainChanged()
 {
-  ParallelUniqueId puid;
-  _tid = puid.id;
-
-  unsigned int subdomain = std::numeric_limits<unsigned int>::max();
-  for (ConstElemRange::const_iterator elem_it = range.begin() ; elem_it != range.end(); ++elem_it)
+  // prepare variables
+  for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
   {
-    const Elem * elem = *elem_it;
+    MooseVariable * var = it->second;
+    var->prepare_aux();
+  }
 
-    // prepare variables
-    for (std::map<std::string, MooseVariable *>::iterator it = _sys._elem_vars[_tid].begin(); it != _sys._elem_vars[_tid].end(); ++it)
-    {
-      MooseVariable * var = it->second;
-      var->prepare_aux();
-    }
+  // TODO: No subdomain setup for block elemental aux-kernels?
 
-    unsigned int cur_subdomain = elem->subdomain_id();
+  for(std::vector<AuxKernel *>::const_iterator aux_it=_auxs[_tid].activeElementKernels().begin();
+      aux_it != _auxs[_tid].activeElementKernels().end();
+      aux_it++)
+    (*aux_it)->subdomainSetup();
 
-//    if(unlikely(_calculate_element_time))
-//      startElementTiming(elem->id());
+  std::set<MooseVariable *> needed_moose_vars;
 
-    if(_auxs[_tid].activeBlockElementKernels(cur_subdomain).size() > 0 || _auxs[_tid].activeElementKernels().size() > 0)
-    {
-      _mproblem.prepare(elem, _tid);
-      _mproblem.reinitElem(elem, _tid);
-      _mproblem.reinitMaterials(elem->subdomain_id(), _tid);
+  // block
+  for(std::vector<AuxKernel*>::const_iterator block_element_aux_it = _auxs[_tid].activeBlockElementKernels(_subdomain).begin();
+      block_element_aux_it != _auxs[_tid].activeBlockElementKernels(_subdomain).end(); ++block_element_aux_it)
+  {
+    const std::set<MooseVariable *> & mv_deps = (*block_element_aux_it)->getMooseVariableDependencies();
+    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+  }
 
-      if(cur_subdomain != subdomain)
-      {
-        subdomain = cur_subdomain;
+  // global
+  for(std::vector<AuxKernel *>::const_iterator aux_it = _auxs[_tid].activeElementKernels().begin();
+      aux_it!=_auxs[_tid].activeElementKernels().end();
+      aux_it++)
+  {
+    const std::set<MooseVariable *> & mv_deps = (*aux_it)->getMooseVariableDependencies();
+    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+  }
 
-        // TODO: No subdomain setup for block elemental aux-kernels?
+  _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+  _fe_problem.prepareMaterials(_subdomain, _tid);
+}
 
-        for(std::vector<AuxKernel *>::const_iterator aux_it=_auxs[_tid].activeElementKernels().begin();
-            aux_it != _auxs[_tid].activeElementKernels().end();
-            aux_it++)
-          (*aux_it)->subdomainSetup();
-      }
 
-      // block
-      for(std::vector<AuxKernel*>::const_iterator block_element_aux_it = _auxs[_tid].activeBlockElementKernels(cur_subdomain).begin();
-          block_element_aux_it != _auxs[_tid].activeBlockElementKernels(cur_subdomain).end(); ++block_element_aux_it)
-        (*block_element_aux_it)->compute();
+void
+ComputeElemAuxVarsThread::onElement(const Elem * elem)
+{
+  if(_auxs[_tid].activeBlockElementKernels(_subdomain).size() > 0 || _auxs[_tid].activeElementKernels().size() > 0)
+  {
+    _fe_problem.prepare(elem, _tid);
+    _fe_problem.reinitElem(elem, _tid);
+    _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
-      // global
-      for(std::vector<AuxKernel *>::const_iterator aux_it = _auxs[_tid].activeElementKernels().begin();
-          aux_it!=_auxs[_tid].activeElementKernels().end();
-          aux_it++)
-        (*aux_it)->compute();
-    }
+    // block
+    for(std::vector<AuxKernel*>::const_iterator block_element_aux_it = _auxs[_tid].activeBlockElementKernels(_subdomain).begin();
+        block_element_aux_it != _auxs[_tid].activeBlockElementKernels(_subdomain).end(); ++block_element_aux_it)
+      (*block_element_aux_it)->compute();
 
-//    if(unlikely(_calculate_element_time))
-//      stopElementTiming(elem->id());
+    // global
+    for(std::vector<AuxKernel *>::const_iterator aux_it = _auxs[_tid].activeElementKernels().begin();
+        aux_it!=_auxs[_tid].activeElementKernels().end();
+        aux_it++)
+      (*aux_it)->compute();
 
     // update the solution vector
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (std::map<std::string, MooseVariable *>::iterator it = _sys._elem_vars[_tid].begin(); it != _sys._elem_vars[_tid].end(); ++it)
+      for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
       {
         MooseVariable * var = it->second;
-        var->insert(_sys.solution());
+        var->insert(_system.solution());
       }
     }
-
   }
+}
+
+void
+ComputeElemAuxVarsThread::post()
+{
+  _fe_problem.clearActiveElementalMooseVariables(_tid);
 }
 
 void

@@ -287,6 +287,13 @@ DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
 }
 
 void
+DisplacedProblem::prepareFace(const Elem * elem, THREAD_ID tid)
+{
+  _displaced_nl.prepareFace(tid);
+  _displaced_aux.prepareFace(tid);
+}
+
+void
 DisplacedProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
 {
   _assembly[tid]->reinit(elem);

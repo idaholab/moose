@@ -89,6 +89,7 @@ public:
   // reinit /////
 
   virtual void prepare(const Elem * elem, THREAD_ID tid);
+  virtual void prepareFace(const Elem * elem, THREAD_ID tid);
   virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid);
   virtual void prepareAssembly(THREAD_ID tid);
   virtual void prepareAssemblyNeighbor(THREAD_ID tid);

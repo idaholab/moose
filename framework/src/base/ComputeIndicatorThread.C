@@ -44,6 +44,38 @@ ComputeIndicatorThread::ComputeIndicatorThread(ComputeIndicatorThread & x, Threa
 }
 
 void
+ComputeIndicatorThread::subdomainChanged()
+{
+  _fe_problem.subdomainSetup(_subdomain, _tid);
+  _indicator_whs[_tid].updateActiveIndicators(_subdomain);
+
+  const std::vector<Indicator *> & indicators = _indicator_whs[_tid].active();
+  for (std::vector<Indicator *>::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
+    (*it)->subdomainSetup();
+
+  std::set<MooseVariable *> needed_moose_vars;
+
+  for (std::vector<Indicator *>::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
+  {
+    const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+  }
+
+  const std::vector<Indicator *> & internal_side_indicators = _indicator_whs[_tid].activeInternalSideIndicators();
+  if (internal_side_indicators.size() > 0)
+  {
+    for (std::vector<Indicator *>::const_iterator it = internal_side_indicators.begin(); it != internal_side_indicators.end(); ++it)
+    {
+      const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
+  }
+
+  _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+  _fe_problem.prepareMaterials(_subdomain, _tid);
+}
+
+void
 ComputeIndicatorThread::onElement(const Elem *elem)
 {
   for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
@@ -55,20 +87,7 @@ ComputeIndicatorThread::onElement(const Elem *elem)
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
 
-  unsigned int subdomain = elem->subdomain_id();
-  if (subdomain != _subdomain)
-  {
-    _fe_problem.subdomainSetup(subdomain, _tid);
-    _indicator_whs[_tid].updateActiveIndicators(subdomain);
-
-    const std::vector<Indicator *> & indicators = _indicator_whs[_tid].active();
-    for (std::vector<Indicator *>::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
-      (*it)->subdomainSetup();
-
-    //   if (_aux_sys._doing_dg) _aux_sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
-  }
-
-  _fe_problem.reinitMaterials(subdomain, _tid);
+  _fe_problem.reinitMaterials(_subdomain, _tid);
 
   const std::vector<Indicator *> & indicators = _indicator_whs[_tid].active();
 
@@ -102,27 +121,6 @@ ComputeIndicatorThread::onElement(const Elem *elem)
 void
 ComputeIndicatorThread::onBoundary(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/)
 {
-  /*
-  std::vector<IntegratedBC *> bcs = _aux_sys._bcs[_tid].activeIntegrated(bnd_id);
-  if (bcs.size() > 0)
-  {
-    _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
-
-    unsigned int subdomain = elem->subdomain_id();
-    if (subdomain != _subdomain)
-      _fe_problem.subdomainSetupSide(subdomain, _tid);
-
-    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
-    _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
-
-    for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
-    {
-      IntegratedBC * bc = (*it);
-      if (bc->shouldApply())
-        bc->computeIndicator();
-    }
-  }
-  */
 }
 
 void
@@ -163,6 +161,12 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
 void
 ComputeIndicatorThread::postElement(const Elem * /*elem*/)
 {
+}
+
+void
+ComputeIndicatorThread::post()
+{
+  _fe_problem.clearActiveElementalMooseVariables(_tid);
 }
 
 void

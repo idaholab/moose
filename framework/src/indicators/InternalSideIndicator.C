@@ -45,7 +45,9 @@ InputParameters validParams<InternalSideIndicator>()
 
 InternalSideIndicator::InternalSideIndicator(const std::string & name, InputParameters parameters) :
     Indicator(name, parameters),
-    NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
+    NeighborCoupleable(parameters, false),
+    ScalarCoupleable(parameters),
+    NeighborMooseVariableInterface(parameters, false),
     TwoMaterialPropertyInterface(parameters),
 
     _field_var(_sys.getVariable(_tid, name)),
@@ -75,6 +77,11 @@ InternalSideIndicator::InternalSideIndicator(const std::string & name, InputPara
     _u_neighbor(_var.slnNeighbor()),
     _grad_u_neighbor(_var.gradSlnNeighbor())
 {
+  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
+  for(unsigned int i=0; i<coupled_vars.size(); i++)
+    addMooseVariableDependency(coupled_vars[i]);
+
+  addMooseVariableDependency(mooseVariable());
 }
 
 InternalSideIndicator::~InternalSideIndicator()

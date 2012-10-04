@@ -15,7 +15,7 @@
 #ifndef COMPUTEELEMAUXVARSTHREAD_H
 #define COMPUTEELEMAUXVARSTHREAD_H
 
-#include "ParallelUniqueId.h"
+#include "ThreadedElementLoop.h"
 #include "AuxWarehouse.h"
 // libMesh includes
 #include "elem_range.h"
@@ -24,22 +24,21 @@ class FEProblem;
 class AuxiliarySystem;
 
 
-class ComputeElemAuxVarsThread
+class ComputeElemAuxVarsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeElemAuxVarsThread(FEProblem & mproblem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs);
+  ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs);
   // Splitting Constructor
   ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split split);
 
-  void operator() (const ConstElemRange & range);
+  virtual void subdomainChanged();
+  virtual void onElement(const Elem *elem);
+  virtual void post();
 
   void join(const ComputeElemAuxVarsThread & /*y*/);
 
 protected:
-  FEProblem & _mproblem;
-  AuxiliarySystem & _sys;
-  THREAD_ID _tid;
-
+  AuxiliarySystem & _aux_sys;
   std::vector<AuxWarehouse> & _auxs;
 };
 

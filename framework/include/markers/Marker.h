@@ -20,6 +20,7 @@
 #include "InputParameters.h"
 #include "SetupInterface.h"
 #include "DependencyResolverInterface.h"
+#include "MooseVariableDependencyInterface.h"
 
 // libmesh Includes
 #include "threads.h"
@@ -40,7 +41,8 @@ InputParameters validParams<Marker>();
 class Marker :
   public MooseObject,
   public SetupInterface,
-  public DependencyResolverInterface
+  public DependencyResolverInterface,
+  public MooseVariableDependencyInterface
 {
 public:
   Marker(const std::string & name, InputParameters parameters);

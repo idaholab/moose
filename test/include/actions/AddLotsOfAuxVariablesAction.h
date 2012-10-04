@@ -1,4 +1,3 @@
-
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
@@ -13,34 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPUTEELEMAUXBCSTHREAD_H
-#define COMPUTEELEMAUXBCSTHREAD_H
+#ifndef ADDLOTSOFAUXVARIABLESACTION_H
+#define ADDLOTSOFAUXVARIABLESACTION_H
 
-#include "ParallelUniqueId.h"
-#include "AuxWarehouse.h"
-#include "BndElement.h"
+#include "Action.h"
 
-class FEProblem;
-class AuxiliarySystem;
+class AddLotsOfAuxVariablesAction;
+
+template<>
+InputParameters validParams<AddLotsOfAuxVariablesAction>();
 
 
-class ComputeElemAuxBcsThread
+class AddLotsOfAuxVariablesAction : public Action
 {
 public:
-  ComputeElemAuxBcsThread(FEProblem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs);
-  // Splitting Constructor
-  ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split split);
+  AddLotsOfAuxVariablesAction(const std::string & name, InputParameters params);
 
-  void operator() (const ConstBndElemRange & range);
+  virtual void act();
 
-  void join(const ComputeElemAuxBcsThread & /*y*/);
-
-protected:
-  FEProblem & _problem;
-  AuxiliarySystem & _sys;
-  THREAD_ID _tid;
-
-  std::vector<AuxWarehouse> & _auxs;
+private:
+  static const Real _abs_zero_tol;
+  std::string _variable_to_read;
 };
 
-#endif //COMPUTEELEMAUXBCSTHREAD_H
+#endif // ADDLOTSOFAUXVARIABLESACTION_H

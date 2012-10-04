@@ -236,7 +236,7 @@
   [../]
   [./diff_scaled_u]
     type = Diffusion
-    variable = u
+    variable = scaled_u
   [../]
 []
 

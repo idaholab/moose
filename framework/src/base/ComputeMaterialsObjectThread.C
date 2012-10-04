@@ -56,29 +56,28 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjec
 }
 
 void
+ComputeMaterialsObjectThread::subdomainChanged()
+{
+  mooseAssert(_materials[_tid].hasMaterials(_subdomain), "No materials on subdomain block");
+  _fe_problem.subdomainSetup(_subdomain, _tid);
+}
+
+void
 ComputeMaterialsObjectThread::onElement(const Elem *elem)
 {
   _assembly[_tid]->reinit(elem);
 
-  SubdomainID subdomain = elem->subdomain_id();
-
-  mooseAssert(_materials[_tid].hasMaterials(subdomain), "No materials on subdomain block");
-  if (subdomain != _subdomain)
-  {
-    _fe_problem.subdomainSetup(subdomain, _tid);
-  }
-
   // TODO: Asserts on blocks?
 
   unsigned int n_points = _assembly[_tid]->qRule()->n_points();
-  _material_props.initStatefulProps(*_material_data[_tid], _materials[_tid].getMaterials(subdomain), n_points, *elem);
+  _material_props.initStatefulProps(*_material_data[_tid], _materials[_tid].getMaterials(_subdomain), n_points, *elem);
 
   for (unsigned int side=0; side<elem->n_sides(); side++)
   {
-    mooseAssert(_materials[_tid].hasFaceMaterials(subdomain), "No face materials on subdomain block");
+    mooseAssert(_materials[_tid].hasFaceMaterials(_subdomain), "No face materials on subdomain block");
     _assembly[_tid]->reinit(elem, side);
     unsigned int n_points = _assembly[_tid]->qRuleFace()->n_points();
-    _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(subdomain), n_points, *elem, side);
+    _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(_subdomain), n_points, *elem, side);
   }
 }
 
