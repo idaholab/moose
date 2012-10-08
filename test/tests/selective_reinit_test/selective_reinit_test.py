@@ -5,10 +5,8 @@ test = { INPUT : 'selective_reinit_test.i',
          MAX_TIME : 20,
          MAX_THREADS : 1,
          MAX_PARALLEL : 1,
+         COMPILER : ['GCC', 'CLANG'],
          METHOD : ['OPT'],
          NO_VALGRIND : True
          }
-
-
-
 
