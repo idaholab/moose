@@ -31,6 +31,7 @@ InputParameters validParams<PipeBase>()
 
   //Input parameters default values could be given.
   params.addParam<Real>("roughness", 0.0, "roughness, [m]");
+  params.addParam<Real>("shape_factor", 1.0, "a user-input shape factor for laminar fricton factor for noncircular flow channels"); 
   params.addParam<Real>("f", "friction");
   params.addParam<Real>("Hw", "Convective heat transfer coefficient");
   params.addParam<Real>("Tw", 400, "Wall temperature");
@@ -54,6 +55,7 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
     _n_elems(getParam<unsigned int>("n_elems")),
     _A(getParam<Real>("A")),
     _roughness(getParam<Real>("roughness")),
+    _shape_factor(getParam<Real>("shape_factor")),
     _has_f(params.isParamValid("f")),
     _f(_has_f ? getParam<Real>("f") : 0.),
     _has_Hw(params.isParamValid("Hw")),
@@ -211,6 +213,7 @@ PipeBase::addMooseObjects()
   pars.set<Real>("g") = _g; // gravity constant
   pars.set<Real>("dh") = _Dh;
   pars.set<Real>("roughness") = _roughness;
+  pars.set<Real>("shape_factor") = _shape_factor;
   pars.set<Real>("aw") = _aw;
   if (_has_f)
     pars.set<Real>("f") = _f;

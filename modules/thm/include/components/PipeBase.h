@@ -55,6 +55,7 @@ protected:
                                                 ///< _aw = A_heating_surface_per_length / A_pipe_flow_area [1/m]
   Real _Dh;                                     ///< Pipe hydraulic diameter, [m]
   Real _roughness;                              ///< Roughness of pipe surface, [m]
+  Real _shape_factor;                           /// a user-input shape factor for laminar fricton factor for noncircular flow channels
 
   bool _has_f;                                  ///< True if user provides a constant f
   Real _f;                                      ///< Friction
