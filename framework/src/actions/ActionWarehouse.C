@@ -99,6 +99,12 @@ ActionWarehouse::actionBlocksWithActionEnd(const std::string & action_name)
   return _action_blocks[action_name].end();
 }
 
+const std::vector<Action *> &
+ActionWarehouse::getActionsByName(const std::string & action_name) const
+{
+  return _action_blocks.at(action_name);
+}
+
 void
 ActionWarehouse::buildBuildableActions(const std::string &action_name)
 {

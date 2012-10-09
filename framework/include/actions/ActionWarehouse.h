@@ -59,7 +59,7 @@ public:
   ActionIterator actionBlocksWithActionBegin(const std::string & action_name);
   ActionIterator actionBlocksWithActionEnd(const std::string & action_name);
 
-  std::map<std::string, std::vector<Action *> > & actionBlocks() { return _action_blocks; }
+  const std::vector<Action *> & getActionsByName(const std::string & action_name) const;
 
   /**
    * This method loops over all actions in the warehouse and executes them.  Meta-actions
