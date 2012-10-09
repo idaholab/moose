@@ -86,6 +86,12 @@ protected:
    */
   static bool verifyInput(const std::string & name, const std::string & value);
 
+  /**
+   * This method verifies that none of the implied variables are being re-declared as
+   * variables in the parsed function.
+   */
+  static const std::vector<std::string> * verifyVars(const std::vector<std::string> * vars);
+
   std::vector<Real> _vals;
 
   ParsedFunction<Real> _function;

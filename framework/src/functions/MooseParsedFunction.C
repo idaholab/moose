@@ -29,7 +29,7 @@ InputParameters validParams<MooseParsedFunction>()
 MooseParsedFunction::MooseParsedFunction(const std::string & name, InputParameters parameters) :
     Function(name, parameters),
     _function(verifyInput(name, getParam<std::string>("value")) ? getParam<std::string>("value") : "",
-              isParamValid("vars") ? &getParam<std::vector<std::string> >("vars") : NULL,
+              isParamValid("vars") ? verifyVars(&getParam<std::vector<std::string> >("vars")) : NULL,
               isParamValid("vals") ? &getParam<std::vector<Real> >("vals") : NULL)
 {}
 
@@ -48,3 +48,12 @@ MooseParsedFunction::verifyInput(const std::string & name, const std::string & v
   return true;
 }
 
+const std::vector<std::string> *
+MooseParsedFunction::verifyVars(const std::vector<std::string> * vars)
+{
+  for (unsigned int i=0; i < vars->size(); ++i)
+    if ((*vars)[i].find_first_of("xyzt") != std::string::npos)
+      mooseError("ParsedFunction: The variables \"x, y, z, and t\" are pre-declared for use and must not be declared in \"vars\"");
+
+  return vars;
+}
