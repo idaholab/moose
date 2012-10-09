@@ -169,3 +169,5 @@ uo_pps_name_collision_test = { INPUT : 'uo_pps_name_collision_test.i',
                                EXPECT_ERR : 'A UserObject with the name "\w+" already exists' }
 rz_3d_error_check_test = { INPUT : '3D_RZ_error_check.i',
                            EXPECT_ERR : 'An RZ coordinate system was requested for subdomain \d+ which contains 3D elements' }
+bad_parsed_function_vars_test = { INPUT : 'bad_parsed_function_vars.i',
+                                  EXPECT_ERR : 'ParsedFunction: The variables "x, y, z, and t" are pre-declared' }

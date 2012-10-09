@@ -52,7 +52,7 @@ const std::vector<std::string> *
 MooseParsedFunction::verifyVars(const std::vector<std::string> * vars)
 {
   for (unsigned int i=0; i < vars->size(); ++i)
-    if ((*vars)[i].find_first_of("xyzt") != std::string::npos)
+    if ((*vars)[i].find_first_of("xyzt") != std::string::npos && (*vars)[i].size() == 1)
       mooseError("ParsedFunction: The variables \"x, y, z, and t\" are pre-declared for use and must not be declared in \"vars\"");
 
   return vars;
