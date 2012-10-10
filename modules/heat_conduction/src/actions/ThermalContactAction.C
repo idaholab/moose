@@ -13,8 +13,8 @@ static const std::string PENETRATION_VAR_NAME = "penetration";
 template<>
 InputParameters validParams<ThermalContactAction>()
 {
-  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FORTH", "FIRST");
-  
+  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST");
+
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::string>("type", "A string representing the Moose object that will be used for heat conduction over the gap");
   params.addParam<std::string>("gap_type", "GapValueAux", "A string representing the Moose object that will be used for computing the gap size");
@@ -68,7 +68,9 @@ ThermalContactAction::addBcs()
   params += bc_params;
 
   if(isParamValid("save_in"))
-    params.set<std::vector<std::string> >("save_in") = getParam<std::vector<std::string> >("save_in");  
+  {
+    params.set<std::vector<std::string> >("save_in") = getParam<std::vector<std::string> >("save_in");
+  }
 
   params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("variable");
   std::vector<AuxVariableName> vars(1);
@@ -181,7 +183,7 @@ ThermalContactAction::addAuxBcs()
 
     std::vector<VariableName> vars(1, getParam<NonlinearVariableName>("variable"));
     params.set<std::vector<VariableName> >("paired_variable") = vars;
-    
+
     params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
     if (isParamValid("tangential_tolerance"))
     {
