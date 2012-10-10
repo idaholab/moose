@@ -59,6 +59,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _dim(_mesh.dimension()),
     _coord_sys(_subproblem.coordSystem(_tid)),
     _block_id(_mesh.getSubdomainIDs(parameters.get<std::vector<SubdomainName> >("block"))),
+    _boundary_id(_mesh.getBoundaryIDs(parameters.get<std::vector<BoundaryName> >("boundary"))),
     _real_zero(_subproblem._real_zero[_tid]),
     _zero(_subproblem._zero[_tid]),
     _grad_zero(_subproblem._grad_zero[_tid]),

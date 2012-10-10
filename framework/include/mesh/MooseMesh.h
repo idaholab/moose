@@ -159,6 +159,14 @@ public:
   BoundaryID getBoundaryID(const BoundaryName & boundary_name) const;
 
   /**
+   * Get the associated BoundaryID for the boundary names that are passed in.
+   *
+   * @return param boundary_name The names of the boundaries.
+   * @return the boundary ids from the passed boundary names.
+   */
+  std::vector<BoundaryID> getBoundaryIDs(const std::vector<BoundaryName> & boundary_name) const;
+
+  /**
    * Get the associated subdomain ID for the subdomain name.
    *
    * @param subdomain_name The name of the subdomain

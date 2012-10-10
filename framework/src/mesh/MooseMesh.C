@@ -532,6 +532,24 @@ MooseMesh::getBoundaryID(const BoundaryName & boundary_name) const
   return id;
 }
 
+std::vector<BoundaryID>
+MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name) const
+{
+  std::vector<BoundaryID> ids(boundary_name.size());
+
+  for(unsigned int i=0; i<boundary_name.size(); i++)
+  {
+    BoundaryID id;
+    std::istringstream ss(boundary_name[i]);
+
+    if (!(ss >> id))
+      id = _mesh.boundary_info->get_id_by_name(boundary_name[i]);
+
+    ids[i] = id;
+  }
+
+  return ids;
+}
 
 SubdomainID
 MooseMesh::getSubdomainID(const SubdomainName & subdomain_name) const
