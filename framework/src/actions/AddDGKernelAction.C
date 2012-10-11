@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "AddDGKernelAction.h"
-#include "Parser.h"
 #include "FEProblem.h"
 
 template<>

@@ -14,7 +14,6 @@
 
 #include "InitProblemAction.h"
 #include "FEProblem.h"
-#include "Parser.h"
 #include "CoupledExecutioner.h"
 
 template<>

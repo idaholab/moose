@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "AddBCAction.h"
-#include "Parser.h"
 #include "FEProblem.h"
 
 template<>
@@ -30,7 +29,7 @@ AddBCAction::AddBCAction(const std::string & name, InputParameters params) :
 void
 AddBCAction::act()
 {
-  if (Parser::pathContains(_name, "BCs"))
+  if (getAction() == "add_bc")
     _problem->addBoundaryCondition(_type, getShortName(), _moose_object_pars);
   else
     _problem->addAuxBoundaryCondition(_type, getShortName(), _moose_object_pars);

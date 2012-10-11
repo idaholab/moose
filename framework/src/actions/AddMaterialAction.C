@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "AddMaterialAction.h"
-#include "Parser.h"
 #include "FEProblem.h"
 
 template<>

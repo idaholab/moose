@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "CopyNodalVarsAction.h"
-#include "Parser.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 

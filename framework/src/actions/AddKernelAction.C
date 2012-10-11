@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "AddKernelAction.h"
-#include "Parser.h"
 #include "FEProblem.h"
 
 template<>
@@ -30,9 +29,7 @@ AddKernelAction::AddKernelAction(const std::string & name, InputParameters param
 void
 AddKernelAction::act()
 {
-  is_kernels_action = Parser::pathContains(_name, "Kernels");
-
-  if (is_kernels_action)
+  if (getAction() == "add_kernel")
     _problem->addKernel(_type, getShortName(), _moose_object_pars);
   else
     _problem->addAuxKernel(_type, getShortName(), _moose_object_pars);

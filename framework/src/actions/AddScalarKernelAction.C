@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "AddScalarKernelAction.h"
-#include "Parser.h"
 #include "FEProblem.h"
 
 template<>
@@ -30,8 +29,7 @@ AddScalarKernelAction::AddScalarKernelAction(const std::string & name, InputPara
 void
 AddScalarKernelAction::act()
 {
-  bool is_kernels_action = Parser::pathContains(_name, "ScalarKernels");
-  if (is_kernels_action)
+  if (getAction() == "add_scalar_kernel")
     _problem->addScalarKernel(_type, getShortName(), _moose_object_pars);
   else
     _problem->addAuxScalarKernel(_type, getShortName(), _moose_object_pars);

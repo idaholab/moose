@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "SetupDampersAction.h"
-#include "Parser.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 

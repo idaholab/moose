@@ -23,7 +23,7 @@ InputParameters validParams<GlobalParamsAction>()
 
   /* GlobalParams should not have children or other standard public Action attributes */
   params.addPrivateParam<std::vector<std::string> >("active", blocks);
-  params.addPrivateParam<Parser *>("parser_handle");
+//  params.addPrivateParam<Parser *>("parser_handle");
   return params;
 }
 

@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "AddConstraintAction.h"
-#include "Parser.h"
 #include "FEProblem.h"
 
 template<>

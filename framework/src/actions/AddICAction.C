@@ -13,9 +13,9 @@
 /****************************************************************/
 
 #include "AddICAction.h"
-#include "Parser.h"
 #include "FEProblem.h"
 #include "MooseTypes.h"
+#include "Parser.h"
 
 template<>
 InputParameters validParams<AddICAction>()
