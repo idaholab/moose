@@ -48,7 +48,7 @@ InputParameters validParams<AdaptiveTransient>()
   params.addParam<Real>("predictor_scale", "The scale factor for the predictor (can range from 0 to 1)");
   params.addParam<int> ("optimal_iterations", "The target number of nonlinear iterations for adaptive timestepping");
   params.addParam<int> ("iteration_window",  "The size of the nonlinear iteration window for adaptive timestepping (default = 0.2*optimal_iterations)");
-  params.addParam<int> ("linear_iteration_ratio", 25, "The ratio of linear to nonlinear iterations to determine target linear iterations and window for adaptive timestepping (default = 25)");
+  params.addParam<int> ("linear_iteration_ratio", "The ratio of linear to nonlinear iterations to determine target linear iterations and window for adaptive timestepping (default = 25)");
   params.addParam<std::string> ("timestep_limiting_function", "A function used to control the timestep by limiting the change in the function over a timestep");
   params.addParam<Real> ("max_function_change", "The absolute value of the maximum change in timestep_limiting_function over a timestep");
 
@@ -71,7 +71,7 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
     _dtmax(getParam<Real>("dtmax")),
     _num_steps(getParam<Real>("num_steps")),
     _n_startup_steps(getParam<int>("n_startup_steps")),
-    _linear_iteration_ratio(getParam<int>("linear_iteration_ratio")),
+    _linear_iteration_ratio(isParamValid("linear_iteration_ratio") ? getParam<int>("linear_iteration_ratio") : 25),  // Default to 25
     _adaptive_timestepping(false),
     _timestep_limiting_function(NULL),
     _max_function_change(-1.0),
@@ -120,7 +120,7 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
     {
       mooseError("'optimal_iterations' must be used for 'iteration_window' to be used");
     }
-    if (parameters.wasSeenInInput("linear_iteration_ratio"))
+    if (isParamValid("linear_iteration_ratio"))
     {
       mooseError("'optimal_iterations' must be used for 'linear_iteration_ratio' to be used");
     }
