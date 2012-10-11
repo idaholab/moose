@@ -177,12 +177,6 @@ public:
   bool isParamValid(const std::string &name) const;
 
   /**
-   * This method returns a truth value to indicate whether a parameter was seen in the input
-   * file or not
-   */
-  bool wasSeenInInput(const std::string &name) const;
-
-  /**
    * This method returns true if all of the parameters in this object are valid
    * (i.e. isParamValid(name) == true - for all parameters)
    */
@@ -205,12 +199,6 @@ public:
   using Parameters::operator+=;
   InputParameters & operator=(const InputParameters &rhs);
   InputParameters & operator+=(const InputParameters &rhs);
-
-  /**
-   * This function is called from the parser to indicate which parameters are seen
-   * as they are read from the input file.
-   */
-  void seenInInputFile(const std::string &name);
 
   /**
    * This function checks parameters stored in the object to make sure they are in the correct
@@ -257,7 +245,7 @@ private:
   std::set<std::string> _required_params;
 
   /**
-   * The set of parameters either seen in the input file or provided a default value when added
+   * The set of parameters either explicitly set or provided a default value when added
    * Note: We do not store MooseEnum names in valid params, instead we asked MooseEnums whether
    *       they are valid or not.
    */
@@ -265,9 +253,6 @@ private:
 
   /// The set of parameters that will NOT appear in the the dump of the parser tree
   std::set<std::string> _private_params;
-
-  /// The set of parameters seen in the input file only
-  std::set<std::string> _seen_in_input;
 
   /// The coupled variables set
   std::set<std::string> _coupled_vars;

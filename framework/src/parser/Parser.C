@@ -380,7 +380,6 @@ Parser::buildFullTree(const std::string &search_string)
           }
 
           moose_obj_params.set<std::string>("type") = moose_obj->first;
-          moose_obj_params.seenInInputFile("type");
 
           _syntax_formatter->insertNode(name, moose_obj->first, false, &moose_obj_params);
         }
@@ -565,7 +564,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
     // Mark parameters appearing in the input file or command line
     if (_getpot_file.have_variable(full_name.c_str()) || Moose::app->commandLine().haveVariable(full_name.c_str()))
     {
-      p.seenInInputFile(it->first);
+      p.set_attributes(it->first, false);
       _extracted_vars.insert(full_name);  // Keep track of all variables extracted from the input file
       found = true;
     }
@@ -575,7 +574,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       full_name = global_params_block_name + "/" + it->first;
       if (_getpot_file.have_variable(full_name.c_str()))
       {
-        p.seenInInputFile(it->first);
+        p.set_attributes(it->first, false);
         _extracted_vars.insert(full_name);  // Keep track of all variables extracted from the input file
         found = true;
         in_global = true;

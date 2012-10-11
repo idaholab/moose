@@ -42,7 +42,6 @@ InputParameters::clear()
   _required_params.clear();
   _valid_params.clear();
   _private_params.clear();
-  _seen_in_input.clear();
   _coupled_vars.clear();
 }
 
@@ -82,7 +81,6 @@ InputParameters::operator=(const InputParameters &rhs)
   this->_private_params = rhs._private_params;
   this->_valid_params = rhs._valid_params;
   this->_coupled_vars = rhs._coupled_vars;
-  this->_seen_in_input = rhs._seen_in_input;
 
   return *this;
 }
@@ -99,7 +97,6 @@ InputParameters::operator+=(const InputParameters &rhs)
   _private_params.insert(rhs._private_params.begin(), rhs._private_params.end());
   _valid_params.insert(rhs._valid_params.begin(), rhs._valid_params.end());
   _coupled_vars.insert(rhs._coupled_vars.begin(), rhs._coupled_vars.end());
-  _seen_in_input.insert(rhs._seen_in_input.begin(), rhs._seen_in_input.end());
 
   return *this;
 }
@@ -119,14 +116,6 @@ InputParameters::addRequiredCoupledVar(const std::string &name, const std::strin
   _required_params.insert(name);
   _doc_string[name] = doc_string;
   _coupled_vars.insert(name);
-}
-
-void
-InputParameters::seenInInputFile(const std::string &name)
-{
-  if (!have_parameter<MooseEnum>(name))
-    _valid_params.insert(name);
-  _seen_in_input.insert(name);
 }
 
 std::string
@@ -160,13 +149,6 @@ InputParameters::isParamValid(const std::string &name) const
     return get<MooseEnum>(name).isValid();
   else
     return _valid_params.find(name) != _valid_params.end();
-}
-
-bool
-InputParameters::wasSeenInInput(const std::string &name) const
-{
-  mooseWarning("wasSeenInInput is a deprecated method, use isParamValid instead");
-  return _seen_in_input.find(name) != _seen_in_input.end();
 }
 
 bool
