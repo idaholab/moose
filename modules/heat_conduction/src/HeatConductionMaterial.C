@@ -60,8 +60,8 @@ HeatConductionMaterial::HeatConductionMaterial(const std::string & name, InputPa
     mooseError("Cannot define both thermal conductivity and thermal conductivity temperature function");
   }
   if (!_isotropic_thcond &&
-      (_subproblem.mesh().dimension() > 1 && !_thermal_conductivity_y) ||
-      (_subproblem.mesh().dimension() > 2 && !_thermal_conductivity_z))
+      ((_subproblem.mesh().dimension() > 1 && !_thermal_conductivity_y) ||
+       (_subproblem.mesh().dimension() > 2 && !_thermal_conductivity_z)))
   {
     mooseError("Incomplete set of orthotropic thermal conductivity parameters");
   }
