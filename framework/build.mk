@@ -198,7 +198,7 @@ up: all
 	@for app in $(CURRENT_APP) $(DEP_APPS); \
 	do \
 		echo ====== Making in $${app} ====== ; \
-		$(MAKE) -C $(ROOT_DIR)/$$app || break; \
+		$(MAKE) -C $(ROOT_DIR)/$$app || exit; \
 	done
 
 
