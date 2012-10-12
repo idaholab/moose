@@ -8,9 +8,9 @@ InputParameters validParams<HeatConductionMaterial>()
   params.addCoupledVar("temp", "Coupled Temperature");
 
   params.addParam<Real>("thermal_conductivity", "The thermal conductivity value");
-  params.addParam<Real>("thermal_conductivity_x", "The thermal conductivity value in the x direction");
-  params.addParam<Real>("thermal_conductivity_y", "The thermal conductivity value in the y direction");
-  params.addParam<Real>("thermal_conductivity_z", "The thermal conductivity value in the z direction");
+  params.addParam<PostprocessorName>("thermal_conductivity_x", "The thermal conductivity PP name in the x direction");
+  params.addParam<PostprocessorName>("thermal_conductivity_y", "The thermal conductivity PP name in the y direction");
+  params.addParam<PostprocessorName>("thermal_conductivity_z", "The thermal conductivity PP name in the z direction");
   params.addParam<FunctionName>("thermal_conductivity_temperature_function", "", "Thermal conductivity as a function of temperature.");
 
   params.addParam<Real>("specific_heat", "The specific heat value");
@@ -25,9 +25,9 @@ HeatConductionMaterial::HeatConductionMaterial(const std::string & name, InputPa
     _has_temp(isCoupled("temp")),
     _temperature(_has_temp ? coupledValue("temp") : _zero),
     _my_thermal_conductivity(isParamValid("thermal_conductivity") ? getParam<Real>("thermal_conductivity") : 0),
-    _my_thermal_conductivity_x(isParamValid("thermal_conductivity_x") ? getParam<Real>("thermal_conductivity_x") : 0),
-    _my_thermal_conductivity_y(isParamValid("thermal_conductivity_y") ? getParam<Real>("thermal_conductivity_y") : 0),
-    _my_thermal_conductivity_z(isParamValid("thermal_conductivity_z") ? getParam<Real>("thermal_conductivity_z") : 0),
+    _my_thermal_conductivity_x(isParamValid("thermal_conductivity_x") ? &getPostprocessorValue(getParam<PostprocessorName>("thermal_conductivity_x")) : NULL),
+    _my_thermal_conductivity_y(isParamValid("thermal_conductivity_y") ? &getPostprocessorValue(getParam<PostprocessorName>("thermal_conductivity_y")) : NULL),
+    _my_thermal_conductivity_z(isParamValid("thermal_conductivity_z") ? &getPostprocessorValue(getParam<PostprocessorName>("thermal_conductivity_z")) : NULL),
     _my_specific_heat(isParamValid("specific_heat") ? getParam<Real>("specific_heat") : 0),
     _isotropic_thcond(isParamValid("thermal_conductivity") || getParam<FunctionName>("thermal_conductivity_temperature_function") != ""),
 
@@ -96,17 +96,17 @@ HeatConductionMaterial::computeProperties()
     }
     else
     {
-      (*_thermal_conductivity_x)[qp] = _my_thermal_conductivity_x;
+      (*_thermal_conductivity_x)[qp] = *_my_thermal_conductivity_x;
       (*_thermal_conductivity_x_dT)[qp] = 0;
 
       if (_thermal_conductivity_y)
       {
-        (*_thermal_conductivity_y)[qp] = _my_thermal_conductivity_y;
+        (*_thermal_conductivity_y)[qp] = *_my_thermal_conductivity_y;
         (*_thermal_conductivity_y_dT)[qp] = 0;
       }
       if (_thermal_conductivity_z)
       {
-        (*_thermal_conductivity_z)[qp] = _my_thermal_conductivity_z;
+        (*_thermal_conductivity_z)[qp] = *_my_thermal_conductivity_z;
         (*_thermal_conductivity_z_dT)[qp] = 0;
       }
     }

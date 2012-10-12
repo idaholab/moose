@@ -56,9 +56,9 @@
     block = 1
 
     specific_heat = 0.116
-    thermal_conductivity_x = 1000
-    thermal_conductivity_y = 100
-    thermal_conductivity_z = 10
+    thermal_conductivity_x = tcx
+    thermal_conductivity_y = tcy
+    thermal_conductivity_z = tcz
   [../]
 
   [./density]
@@ -90,3 +90,21 @@
   exodus = true
   perf_log = true
 [] # Output
+
+[Postprocessors]
+  [./tcx]
+    type = Reporter
+    default = 1000
+    output = none
+  [../]
+  [./tcy]
+    type = Reporter
+    default = 100
+    output = none
+  [../]
+  [./tcz]
+    type = Reporter
+    default = 10
+    output = none
+  [../]
+[]

@@ -27,9 +27,9 @@ protected:
   VariableValue & _temperature;
 
   const Real _my_thermal_conductivity;
-  const Real _my_thermal_conductivity_x;
-  const Real _my_thermal_conductivity_y;
-  const Real _my_thermal_conductivity_z;
+  const PostprocessorValue * const _my_thermal_conductivity_x;
+  const PostprocessorValue * const _my_thermal_conductivity_y;
+  const PostprocessorValue * const _my_thermal_conductivity_z;
   const Real _my_specific_heat;
 
   const bool _isotropic_thcond;
