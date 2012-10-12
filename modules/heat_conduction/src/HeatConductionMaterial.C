@@ -47,11 +47,11 @@ HeatConductionMaterial::HeatConductionMaterial(const std::string & name, InputPa
   {
     mooseError("Must couple with temperature if using thermal conductivity function");
   }
-  if (_thermal_conductivity && (_thermal_conductivity_x || _thermal_conductivity_y || _thermal_conductivity_z))
+  if (_isotropic_thcond && (_thermal_conductivity_x || _thermal_conductivity_y || _thermal_conductivity_z))
   {
     mooseError("Cannot define both isotropic and orthotropic thermal conductivity");
   }
-  if (!_thermal_conductivity && !_thermal_conductivity_x)
+  if (!_isotropic_thcond && !_thermal_conductivity_x)
   {
     mooseError("Must define either isotropic or orthotropic thermal conductivity");
   }
@@ -59,12 +59,9 @@ HeatConductionMaterial::HeatConductionMaterial(const std::string & name, InputPa
   {
     mooseError("Cannot define both thermal conductivity and thermal conductivity temperature function");
   }
-  if (_thermal_conductivity_temperature_function && (_thermal_conductivity_x || _thermal_conductivity_y || _thermal_conductivity_z))
-  {
-    mooseError("Thermal conductivity function cannot be used with orthotropic conductivity");
-  }
-  if ((_subproblem.mesh().dimension() > 1 && _thermal_conductivity_x && !_thermal_conductivity_y) ||
-      (_subproblem.mesh().dimension() == 3 && _thermal_conductivity_x && !_thermal_conductivity_z))
+  if (!_isotropic_thcond &&
+      (_subproblem.mesh().dimension() > 1 && !_thermal_conductivity_y) ||
+      (_subproblem.mesh().dimension() > 2 && !_thermal_conductivity_z))
   {
     mooseError("Incomplete set of orthotropic thermal conductivity parameters");
   }
@@ -83,37 +80,34 @@ HeatConductionMaterial::computeProperties()
 {
   for(unsigned int qp(0); qp < _qrule->n_points(); ++qp)
   {
-    if (_thermal_conductivity_temperature_function)
+    if (_isotropic_thcond)
     {
-      Point p;
-      (*_thermal_conductivity)[qp] = _thermal_conductivity_temperature_function->value(_temperature[qp], p);
-      (*_thermal_conductivity_dT)[qp] = 0;
-    }
-
-    else
-    {
-      if (_thermal_conductivity)
+      if (_thermal_conductivity_temperature_function)
       {
-        (*_thermal_conductivity)[qp] = _my_thermal_conductivity;
+        Point p;
+        (*_thermal_conductivity)[qp] = _thermal_conductivity_temperature_function->value(_temperature[qp], p);
         (*_thermal_conductivity_dT)[qp] = 0;
       }
       else
       {
-        if (_thermal_conductivity_x)
-        {
-          (*_thermal_conductivity_x)[qp] = _my_thermal_conductivity_x;
-          (*_thermal_conductivity_x_dT)[qp] = 0;
-        }
-        if (_thermal_conductivity_y)
-        {
-          (*_thermal_conductivity_y)[qp] = _my_thermal_conductivity_y;
-          (*_thermal_conductivity_y_dT)[qp] = 0;
-        }
-        if (_thermal_conductivity_z)
-        {
-          (*_thermal_conductivity_z)[qp] = _my_thermal_conductivity_z;
-          (*_thermal_conductivity_z_dT)[qp] = 0;
-        }
+        (*_thermal_conductivity)[qp] = _my_thermal_conductivity;
+        (*_thermal_conductivity_dT)[qp] = 0;
+      }
+    }
+    else
+    {
+      (*_thermal_conductivity_x)[qp] = _my_thermal_conductivity_x;
+      (*_thermal_conductivity_x_dT)[qp] = 0;
+
+      if (_thermal_conductivity_y)
+      {
+        (*_thermal_conductivity_y)[qp] = _my_thermal_conductivity_y;
+        (*_thermal_conductivity_y_dT)[qp] = 0;
+      }
+      if (_thermal_conductivity_z)
+      {
+        (*_thermal_conductivity_z)[qp] = _my_thermal_conductivity_z;
+        (*_thermal_conductivity_z_dT)[qp] = 0;
       }
     }
 
@@ -126,7 +120,5 @@ HeatConductionMaterial::computeProperties()
     {
       _specific_heat[qp] = _my_specific_heat;
     }
-
-
   }
 }
