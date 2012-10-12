@@ -46,6 +46,12 @@
     y = '1   1   2'
   [../]
 
+  [./c_func]
+    type = PiecewiseLinear
+    x = '100    200'
+    y = '0.116  0.116'
+  [../]
+
   [./t_func]
     type = PiecewiseLinear
     x = '0   1   2'
@@ -96,10 +102,9 @@
   [./heat]
     type = HeatConductionMaterial
     block = 1
-    specific_heat = 0.116
-    thermal_conductivity = 1
     temp = temp
     thermal_conductivity_temperature_function = k_func
+    specific_heat_temperature_function = c_func
   [../]
 
   [./density]

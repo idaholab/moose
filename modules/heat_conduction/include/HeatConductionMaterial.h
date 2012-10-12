@@ -32,6 +32,8 @@ protected:
   const Real _my_thermal_conductivity_z;
   const Real _my_specific_heat;
 
+  const bool _isotropic_thcond;
+
   MaterialProperty<Real> * const _thermal_conductivity;
   MaterialProperty<Real> * const _thermal_conductivity_dT;
   MaterialProperty<Real> * const _thermal_conductivity_x;
@@ -40,8 +42,10 @@ protected:
   MaterialProperty<Real> * const _thermal_conductivity_y_dT;
   MaterialProperty<Real> * const _thermal_conductivity_z;
   MaterialProperty<Real> * const _thermal_conductivity_z_dT;
-  MaterialProperty<Real> & _specific_heat;
   Function * const _thermal_conductivity_temperature_function;
+
+  MaterialProperty<Real> & _specific_heat;
+  Function * const _specific_heat_temperature_function;
 
 };
 
