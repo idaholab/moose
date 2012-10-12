@@ -346,7 +346,13 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         parent_path = '/' + self.action_syntax.getPath(parent_path)
       yaml_entry = self.input_file_widget.yaml_data.findYamlEntry(parent_path)
 
-      new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, item.param_comments, item.comment, False, self.application.typeOptions())
+      global_params = {}
+      global_params_item = self.findChildItemWithName(self, 'GlobalParams')
+
+      if global_params_item:
+        global_params = global_params_item.table_data
+
+      new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, item.param_comments, item.comment, False, self.application.typeOptions(), global_params)
 
       if item.table_data:
         new_gui.incoming_data = item.table_data
@@ -390,7 +396,13 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
     yaml_entry = self.input_file_widget.yaml_data.findYamlEntry(this_path)
 
-    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, None, None, False, self.application.typeOptions())
+    global_params = {}
+    global_params_item = self.findChildItemWithName(self, 'GlobalParams')
+
+    if global_params_item:
+      global_params = global_params_item.table_data
+
+    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, None, None, False, self.application.typeOptions(), global_params)
     if self.new_gui.exec_():
       table_data = self.new_gui.result()
       param_comments = self.new_gui.param_table.param_comments

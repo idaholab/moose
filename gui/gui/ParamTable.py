@@ -58,12 +58,13 @@ class FileOpenWidget(QtGui.QPushButton):
 
 
 class ParamTable:
-  def __init__(self, main_data, action_syntax, single_options, incoming_data, incoming_param_comments, incoming_comment, main_layout, parent_class, already_has_parent_params, type_options):
+  def __init__(self, main_data, action_syntax, single_options, incoming_data, incoming_param_comments, incoming_comment, main_layout, parent_class, already_has_parent_params, type_options, global_params):
     self.main_data = main_data
     self.action_syntax = action_syntax
     self.type_options = type_options
     self.param_comments = {}
     self.comment = ''
+    self.global_params = global_params
 
     if incoming_param_comments:
       self.param_comments = incoming_param_comments
@@ -78,6 +79,8 @@ class ParamTable:
       
     self.param_names = {}      
     self.original_table_data = {}
+    self.param_is_required = {}
+
     self.incoming_data = incoming_data
     self.incoming_param_comments = incoming_param_comments
     self.main_layout = main_layout
@@ -272,13 +275,18 @@ class ParamTable:
           param_name = str(table_widget.item(i,0).text())
           if param_name == 'Name' or (param_name in self.param_is_required and self.param_is_required[param_name]):
             param_value = None
+            
             if type(table_widget.cellWidget(i,1)) is QtGui.QComboBox:
               param_value = table_widget.cellWidget(i,1).currentText()
-            else:
+            elif table_widget.item(i,1):
               param_value = str(table_widget.item(i,1).text())
-   
+
+            if param_name in self.global_params:
+              param_value = self.global_params[param_name]
+
             if param_value == '':
               disable_it = True
+              
     self.apply_button.setDisabled(disable_it)
     
   def init_menu(self, layout):
