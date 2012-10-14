@@ -31,7 +31,7 @@ namespace Numerics {
     
     std::stringstream error_message;
     error_message << "Newton iteration cannot converge after " << (n-1)<<"; final value is "<<xnew;
-    mooseError(error_message.str() );
+    std::cerr << error_message.str() << std::endl;
     return 0.;
   }
  
