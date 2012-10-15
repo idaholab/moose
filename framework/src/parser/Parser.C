@@ -170,7 +170,6 @@ Parser::parse(const std::string &input_filename)
         if (isSectionActive(curr_identifier, active_lists))
         {
           params.set<ActionWarehouse *>("awh") = &_action_wh;
-          params.set<Parser *>("parser") = this;
 
           extractParams(curr_identifier, params);
 
