@@ -168,6 +168,12 @@ public:
   const Elem * & neighbor() { return _current_neighbor_elem; }
 
   /**
+   * Returns the reference to the current quadrature being used on a current neighbor
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  QBase * & qRuleNeighbor() { return _current_qrule_neighbor; }
+
+  /**
    * Returns the reference to the node
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -205,6 +211,16 @@ public:
   void setFaceQRule(QBase * qrule, unsigned int dim);
 
   /**
+   * Set the qrule to be used for neighbor integration.
+   *
+   * Note: This is normally set internally, only use if you know what you are doing!
+   *
+   * @param qrule The qrule you want to set
+   * @param dim The spatial dimension of the qrule
+   */
+  void setNeighborQRule(QBase * qrule, unsigned int dim);
+
+  /**
    * Reinitialize objects (JxW, q_points, ...) for an elements
    *
    * @param elem The element we want to reinitialize on
@@ -227,17 +243,23 @@ public:
   void reinit(const Elem * elem, unsigned int side);
 
   /**
-   * Reinitialize element and its neighbor
+   * Reinitialize an element and its neighbor along a particular side.
+   *
    * @param elem Element being reinitialized
    * @param side Side of the element
    * @param neighbor Neighbor facing the element on the side 'side'
    */
-  void reinit(const Elem * elem, unsigned int side, const Elem * neighbor);
+  void reinitElemAndNeighbor(const Elem * elem, unsigned int side, const Elem * neighbor);
 
   /**
-   * Reinitializes the neighbor's face at the physical coordinates given.
+   * Reinitializes the neighbor at the reference coordinates given.
    */
-  void reinitNeighborAtPhysical(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points);
+  void reinitNeighborAtReference(const Elem * neighbor, const std::vector<Point> & reference_points);
+
+  /**
+   * Reinitializes the neighbor at the physical coordinates given.
+   */
+  void reinitNeighborAtPhysical(const Elem * neighbor, const std::vector<Point> & physical_points);
 
   /**
    * Reinitialize assembly data for a node
@@ -469,6 +491,10 @@ protected:
   /// types of finite elements
   std::map<unsigned int, std::map<FEType, FEBase *> > _fe_neighbor;
 
+  /// quadrature rule used on neighbors
+  QBase * _current_qrule_neighbor;
+  /// Holds arbitrary qrules for each dimension
+  std::map<unsigned int, ArbitraryQuadrature *> _holder_qrule_neighbor;
 
   /// The current "element" we are currently on.
   const Elem * _current_elem;

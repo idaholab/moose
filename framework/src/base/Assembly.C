@@ -37,6 +37,7 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _current_qrule_arbitrary(NULL),
     _current_qrule_face(NULL),
     _current_qface_arbitrary(NULL),
+    _current_qrule_neighbor(NULL),
 
     _current_elem(NULL),
     _current_side(0),
@@ -89,6 +90,9 @@ Assembly::~Assembly()
   for (std::map<unsigned int, ArbitraryQuadrature *>::iterator it = _holder_qface_arbitrary.begin(); it != _holder_qface_arbitrary.end(); ++it)
     delete it->second;
   for (std::map<unsigned int, QBase *>::iterator it = _holder_qrule_face.begin(); it != _holder_qrule_face.end(); ++it)
+    delete it->second;
+
+  for (std::map<unsigned int, ArbitraryQuadrature *>::iterator it = _holder_qrule_neighbor.begin(); it != _holder_qrule_neighbor.end(); ++it)
     delete it->second;
 
   for (std::map<FEType, FEShapeData * >::iterator it = _fe_shape_data.begin(); it != _fe_shape_data.end(); ++it)
@@ -162,6 +166,10 @@ Assembly::createQRules(QuadratureType type, Order o)
   for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
     _holder_qrule_face[dim] = QBase::build(type, dim - 1, o).release();
 
+  _holder_qrule_neighbor.clear();
+  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+    _holder_qrule_neighbor[dim] = new ArbitraryQuadrature(dim, o);
+
   _holder_qrule_arbitrary.clear();
   for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
     _holder_qrule_arbitrary[dim] = new ArbitraryQuadrature(dim, o);
@@ -185,6 +193,15 @@ Assembly::setFaceQRule(QBase * qrule, unsigned int dim)
 
   for (std::map<FEType, FEBase *>::iterator it = _fe_face[dim].begin(); it != _fe_face[dim].end(); ++it)
     it->second->attach_quadrature_rule(_current_qrule_face);
+}
+
+void
+Assembly::setNeighborQRule(QBase * qrule, unsigned int dim)
+{
+  _current_qrule_neighbor = qrule;
+
+  for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor[dim].begin(); it != _fe_neighbor[dim].end(); ++it)
+    it->second->attach_quadrature_rule(_current_qrule_neighbor);
 }
 
 void
@@ -448,42 +465,21 @@ Assembly::reinitNodeNeighbor(const Node * node)
 }
 
 void
-Assembly::reinit(const Elem * elem, unsigned int side, const Elem * neighbor)
+Assembly::reinitElemAndNeighbor(const Elem * elem, unsigned int side, const Elem * neighbor)
 {
-  // reinit this element
   reinit(elem, side);
 
   unsigned int neighbor_dim = neighbor->dim();
 
-  // reinit neighbor element
-  for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor[neighbor_dim].begin(); it != _fe_neighbor[neighbor_dim].end(); ++it)
-  {
-    FEBase * fe_neighbor = it->second;
-    const FEType & fe_type = it->first;
-    FEShapeData * fesd = _fe_shape_data_face_neighbor[fe_type];
+  std::vector<Point> reference_points;
+  FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, _current_q_points_face.stdVector(), reference_points);
 
-    // Find locations of quadrature points on the neighbor
-    std::vector<Point> qface_neighbor_point;
-    libMesh::FEInterface::inverse_map (neighbor_dim, fe_type, neighbor, _current_q_points_face.stdVector(), qface_neighbor_point);
-    // Calculate the neighbor element shape functions at those locations
-    it->second->reinit(neighbor, &qface_neighbor_point);
-
-    _current_fe_neighbor[fe_type] = fe_neighbor;
-
-    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_neighbor->get_phi()));
-    fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_neighbor->get_dphi()));
-    if(_need_second_derivative[fe_type])
-      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_neighbor->get_d2phi()));
-  }
-
-  _current_neighbor_elem = neighbor;
+  reinitNeighborAtReference(neighbor, reference_points);
 }
 
 void
-Assembly::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int /*neighbor_side*/, const std::vector<Point> & physical_points)
+Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Point> & reference_points)
 {
-  std::vector<Point> reference_points;
-
   unsigned int neighbor_dim = neighbor->dim();
 
   // reinit neighbor element
@@ -492,8 +488,6 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int /*neighbo
     FEBase * fe_neighbor = it->second;
     FEType fe_type = it->first;
     FEShapeData * fesd = _fe_shape_data_face_neighbor[fe_type];
-
-    FEInterface::inverse_map(neighbor_dim, fe_type, neighbor, physical_points, reference_points);
 
     it->second->reinit(neighbor, &reference_points);
 
@@ -505,17 +499,25 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int /*neighbo
       fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_neighbor->get_d2phi()));
   }
 
+  ArbitraryQuadrature * neighbor_rule = _holder_qrule_neighbor[neighbor_dim];
+  neighbor_rule->setPoints(reference_points);
+  setNeighborQRule(neighbor_rule, neighbor_dim);
+
+  _current_neighbor_elem = neighbor;
+}
+
+void
+Assembly::reinitNeighborAtPhysical(const Elem * neighbor, const std::vector<Point> & physical_points)
+{
+  std::vector<Point> reference_points;
+
+  unsigned int neighbor_dim = neighbor->dim();
+  FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, physical_points, reference_points);
+
+  reinitNeighborAtReference(neighbor, reference_points);
+
   // Save off the physical points
   _current_physical_points = physical_points;
-
-  _current_qrule_arbitrary = _holder_qrule_arbitrary[neighbor_dim];
-
-  // Make sure the qrule is the right one
-  if(_current_qrule != _current_qrule_arbitrary)
-    setVolumeQRule(_current_qrule_arbitrary, neighbor_dim);
-
-  _current_qrule_arbitrary->setPoints(reference_points);
-  _current_neighbor_elem = neighbor;
 }
 
 DenseMatrix<Number> &

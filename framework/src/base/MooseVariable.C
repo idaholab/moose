@@ -35,6 +35,7 @@ MooseVariable::MooseVariable(unsigned int var_num, unsigned int mvn, const FETyp
     _assembly(assembly),
     _qrule(_assembly.qRule()),
     _qrule_face(_assembly.qRuleFace()),
+    _qrule_neighbor(_assembly.qRuleNeighbor()),
     _elem(_assembly.elem()),
     _current_side(_assembly.side()),
     _neighbor(_assembly.neighbor()),
@@ -692,7 +693,7 @@ void
 MooseVariable::computeNeighborValuesFace()
 {
   bool is_transient = _subproblem.isTransient();
-  unsigned int nqp = _qrule_face->n_points();
+  unsigned int nqp = _qrule_neighbor->n_points();
 
   _u_neighbor.resize(nqp);
   _grad_u_neighbor.resize(nqp);
@@ -822,7 +823,7 @@ void
 MooseVariable::computeNeighborValues()
 {
   bool is_transient = _subproblem.isTransient();
-  unsigned int nqp = _qrule->n_points();
+  unsigned int nqp = _qrule_neighbor->n_points();
 
   _u_neighbor.resize(nqp);
   _grad_u_neighbor.resize(nqp);

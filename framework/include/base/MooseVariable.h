@@ -322,6 +322,8 @@ protected:
   QBase * & _qrule;
   /// Quadrature rule for the face
   QBase * & _qrule_face;
+  /// Quadrature rule for the neighbor
+  QBase * & _qrule_neighbor;
 
   /// current element
   const Elem * & _elem;

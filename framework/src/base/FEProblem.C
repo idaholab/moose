@@ -804,7 +804,7 @@ FEProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
   const Elem * neighbor = elem->neighbor(side);
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
 
-  _assembly[tid]->reinit(elem, side, neighbor);
+  _assembly[tid]->reinitElemAndNeighbor(elem, side, neighbor);
 
   _nl.prepareNeighbor(tid);
   _aux.prepareNeighbor(tid);
@@ -823,7 +823,7 @@ void
 FEProblem::reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
 {
   // Reinits shape the functions at the physical points
-  _assembly[tid]->reinitNeighborAtPhysical(neighbor, neighbor_side, physical_points);
+  _assembly[tid]->reinitNeighborAtPhysical(neighbor, physical_points);
 
   // Sets the neighbor dof indices
   _nl.prepareNeighbor(tid);
