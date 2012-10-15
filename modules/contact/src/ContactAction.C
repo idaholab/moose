@@ -3,6 +3,7 @@
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Parser.h"
+#include "MooseApp.h"
 
 template<>
 InputParameters validParams<ContactAction>()
@@ -68,8 +69,8 @@ ContactAction::act()
     InputParameters params = Factory::instance()->getValidParams("ContactMaster");
 
     // Extract global params
-    const std::string syntax = _parser->getSyntaxByAction("ContactMaster", "");
-    _parser->extractParams(syntax, params);
+    const std::string syntax = Moose::app->parser().getSyntaxByAction("ContactMaster", "");
+    Moose::app->parser().extractParams(syntax, params);
 
     // Create master objects
     params.set<std::string>("model") = _model;
@@ -115,8 +116,8 @@ ContactAction::act()
     InputParameters params = Factory::instance()->getValidParams("SlaveConstraint");
 
     // Extract global params
-    const std::string syntax = _parser->getSyntaxByAction("SlaveConstraint", "");
-    _parser->extractParams(syntax, params);
+    const std::string syntax = Moose::app->parser().getSyntaxByAction("SlaveConstraint", "");
+    Moose::app->parser().extractParams(syntax, params);
 
     // Create slave objects
     params.set<std::string>("model") = _model;

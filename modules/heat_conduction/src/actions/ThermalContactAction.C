@@ -64,7 +64,7 @@ ThermalContactAction::addBcs()
 
   // get valid params for the BC specified in 'type' field
   InputParameters bc_params = Factory::instance()->getValidParams(getParam<std::string>("type"));
-  _parser->extractParams(_name, bc_params);
+  Moose::app->parser().extractParams(_name, bc_params);
   params += bc_params;
 
   if(isParamValid("save_in"))
@@ -237,7 +237,7 @@ ThermalContactAction::addMaterials()
 
     // get valid params for the Material
     InputParameters material_params = Factory::instance()->getValidParams(type);
-    _parser->extractParams(_name, material_params);
+    Moose::app->parser().extractParams(_name, material_params);
     params += material_params;
 
     params.set<std::vector<VariableName> >("variable") = std::vector<VariableName>(1, getParam<NonlinearVariableName>("variable"));
