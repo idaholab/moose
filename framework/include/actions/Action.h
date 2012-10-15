@@ -69,7 +69,6 @@ protected:
   InputParameters _pars;
 
   std::string _action;
-  Parser * _parser;
   /// Reference to ActionWarehouse where we store object build by actions
   ActionWarehouse & _awh;
   MooseMesh * & _mesh;

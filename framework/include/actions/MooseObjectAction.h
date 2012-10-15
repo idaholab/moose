@@ -15,7 +15,7 @@
 #ifndef MOOSEOBJECTACTION_H
 #define MOOSEOBJECTACTION_H
 
-#include "ObjectAction.h"
+#include "Action.h"
 
 #include <string>
 
@@ -25,7 +25,7 @@ template<>
 InputParameters validParams<MooseObjectAction>();
 
 
-class MooseObjectAction : public ObjectAction
+class MooseObjectAction : public Action
 {
 public:
   MooseObjectAction(const std::string & name, InputParameters params);

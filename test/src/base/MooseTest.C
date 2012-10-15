@@ -236,6 +236,6 @@ MooseTestApp::associateSyntax()
   registerAction(ConvDiffMetaAction, "meta_action");
   registerAction(AddLotsOfAuxVariablesAction, "meta_action");
   _syntax.registerActionSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
-  _syntax.registerActionSyntax("AddVariableAction", "MoreAuxVariables/*", "add_variable");
+  _syntax.registerActionSyntax("AddVariableAction", "MoreAuxVariables/*", "add_aux_variable");
   _syntax.registerActionSyntax("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
 }

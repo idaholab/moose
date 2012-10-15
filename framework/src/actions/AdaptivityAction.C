@@ -15,6 +15,7 @@
 #include "AdaptivityAction.h"
 
 #ifdef LIBMESH_ENABLE_AMR
+
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "Adaptivity.h"

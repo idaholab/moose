@@ -148,6 +148,8 @@ enum PPSOutputType
 DerivativeStringClass(FileName);
 /// This type is similar to "FileName", but is used to further filter file dialogs on known file mesh types
 DerivativeStringClass(MeshFileName);
+/// This type is for output file base
+DerivativeStringClass(OutFileBase);
 
 /// This type is used for objects that expect nonlinear variable names (i.e. Kernels, BCs)
 DerivativeStringClass(NonlinearVariableName);

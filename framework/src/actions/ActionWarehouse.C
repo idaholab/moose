@@ -68,7 +68,7 @@ ActionWarehouse::addActionBlock(Action * blk)
 
   // Make sure that the ObjectAction action_name and Action action_name are consistent
   // otherwise that means that is action was built by the wrong type
-  ObjectAction * moa = dynamic_cast<ObjectAction *>(blk);
+  MooseObjectAction * moa = dynamic_cast<MooseObjectAction *>(blk);
   if (moa)
   {
     InputParameters mparams = moa->getObjectParams();
@@ -204,7 +204,7 @@ ActionWarehouse::executeActionsWithAction(const std::string & name)
   {
     // Delay the InputParameters check of MOOSE based objects until just before "acting"
     // so that Meta-Actions can complete the build of parameters as necessary
-    ObjectAction * obj_action = dynamic_cast<ObjectAction *>(*act_iter);
+    MooseObjectAction * obj_action = dynamic_cast<MooseObjectAction *>(*act_iter);
     if (obj_action != NULL)
       obj_action->getObjectParams().checkParams(obj_action->name());
 

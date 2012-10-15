@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "AddVariableAction.h"
-#include "Parser.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseEnum.h"
@@ -63,7 +62,8 @@ AddVariableAction::act()
   std::string var_name = getShortName();
   FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                  Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
-  bool is_variables_block = Parser::pathContains(_name, "Variables");
+
+  bool is_variables_block = getAction() == "add_variable";
 
   std::set<SubdomainID> blocks;
   std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName> >("block");

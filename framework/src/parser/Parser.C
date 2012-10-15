@@ -125,6 +125,9 @@ Parser::parse(const std::string &input_filename)
   InputParameters active_list_params = validParams<Action>();
   InputParameters params = validParams<EmptyAction>();
 
+  // Save the filename
+  _input_filename = input_filename;
+
   // vector for initializing active blocks
   std::vector<std::string> all(1);
   all[0] = "__all__";
@@ -182,7 +185,7 @@ Parser::parse(const std::string &input_filename)
           mooseAssert (action != NULL, std::string("Action") + i->second._action + " not created");
 
           // extract the MooseObject params if necessary
-          ObjectAction * object_action = dynamic_cast<ObjectAction *>(action);
+          MooseObjectAction * object_action = dynamic_cast<MooseObjectAction *>(action);
           if (object_action)
             extractParams(curr_identifier, object_action->getObjectParams());
 
@@ -200,8 +203,6 @@ Parser::parse(const std::string &input_filename)
 
   // Check to make sure that all sections in the input file that are explicitly listed are actually present
   checkActiveUsed(section_names, active_lists);
-
-  _input_filename = input_filename;
 }
 
 void
@@ -581,7 +582,23 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       }
     }
 
-    if (found)
+    if (!found)
+    {
+      // In the case where we have OutFileName but it wasn't actually found in the input filename,
+      // we will populate it with the actual parsed filename which is available here in the parser.
+
+      InputParameters::Parameter<OutFileBase> * scalar_p = dynamic_cast<InputParameters::Parameter<OutFileBase>*>(it->second);
+      if (scalar_p)
+      {
+        std::string input_file_name = getFileName();
+        mooseAssert(input_file_name != "", "Input Filename is NULL");
+        size_t pos = input_file_name.find_last_of('.');
+        mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
+        scalar_p->set() = input_file_name.substr(0,pos) + "_out";
+        p.set_attributes(it->first, false);
+      }
+    }
+    else
     {
       /**
        * Scalar types
@@ -606,6 +623,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractScalar(BoundaryName          , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(FileName              , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(MeshFileName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(OutFileBase           , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(VariableName          , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(NonlinearVariableName , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(AuxVariableName       , it->second, full_name, it->first, in_global, global_params_block);

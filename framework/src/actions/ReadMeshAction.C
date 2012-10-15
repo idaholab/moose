@@ -69,8 +69,7 @@ ReadMeshAction::act()
   }
   else
   {
-    InputParameters pars = Factory::instance()->getValidParams(mesh_type);
-    _parser->extractParams("Mesh", pars);
+    InputParameters pars = getObjectParams();
     _mesh = dynamic_cast<MooseMesh *>(Factory::instance()->create(mesh_type, "mesh", pars));
 
     if (isParamValid("displacements"))

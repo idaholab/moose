@@ -27,7 +27,7 @@ InputParameters validParams<SetupOutputAction>()
 {
   InputParameters params = validParams<Action>();
 
-  params.addParam<std::string>("file_base", "The desired solution output name without an extension (Defaults to the mesh file name + '_out' or 'out' if generating the mesh by some other means)");
+  params.addParam<OutFileBase>("file_base", "The desired solution output name without an extension (Defaults to the mesh file name + '_out' or 'out' if generating the mesh by some other means)");
   params.addParam<unsigned int>("interval", 1, "The interval at which timesteps are output to the solution file");
   params.addParam<unsigned int>("screen_interval", 1, "The interval at which postprocessors are output to the screen. This value must evenly divide \"interval\" so that postprocessors are calculated at corresponding solution timesteps. In addition, if \"screen_interval\" is strictly greater than \"interval\", \"output_initial\" must be set to true");
   params.addParam<bool>("exodus", false, "Specifies that you would like Exodus output solution file(s)");
@@ -80,7 +80,7 @@ SetupOutputAction::SetupOutputAction(const std::string & name, InputParameters p
 void
 SetupOutputAction::setupOutputObject(Output &output, InputParameters & params)
 {
-  output.fileBase(params.get<std::string>("file_base"));
+  output.fileBase(params.get<OutFileBase>("file_base"));
 
   mooseAssert(params.have_parameter<std::vector<std::string> >("output_variables"), "Output Variables are required");
 
@@ -128,16 +128,10 @@ SetupOutputAction::act()
 
     // If the user didn't provide a filename - see if the parser has a filename that we can use as a base
     if (!_pars.isParamValid("file_base"))
-    {
-      std::string input_file_name = _parser->getFileName();
-      mooseAssert(input_file_name != "", "Input Filename is NULL");
-      size_t pos = input_file_name.find_last_of('.');
-      mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
-      _pars.set<std::string>("file_base") = input_file_name.substr(0,pos) + "_out";
-    }
+      mooseError("\"file_base\" wasn't populated either by the input file or the parser.");
   }
   else
-    _pars.set<std::string>("file_base") = "out";
+    _pars.set<OutFileBase>("file_base") = "out";
 
   Output & output = _problem->out();                       // can't use use this with coupled problems on different meshes
   setupOutputObject(output, _pars);
@@ -195,11 +189,11 @@ SetupOutputAction::act()
 #endif
 
  // Test to make sure that the user can write to the directory specified in file_base
-  std::string base = "./" + getParam<std::string>("file_base");
+  std::string base = "./" + getParam<OutFileBase>("file_base");
   base = base.substr(0, base.find_last_of('/'));
 
   // TODO: We have a function that tests read/write in the Parser namespace.  We should probably
   // use that instead of creating another one here
   if (access(base.c_str(), W_OK) == -1)
-    mooseError("Can not write to directory: " + base + " for file base: " + getParam<std::string>("file_base"));
+    mooseError("Can not write to directory: " + base + " for file base: " + getParam<OutFileBase>("file_base"));
 }

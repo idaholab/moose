@@ -18,13 +18,14 @@
 template<>
 InputParameters validParams<MooseObjectAction>()
 {
-  InputParameters params = validParams<ObjectAction>();
+  InputParameters params = validParams<Action>();
   params.addRequiredParam<std::string>("type", "A string representing the Moose Object that will be built by this Action");
+  params.addPrivateParam<bool>("isObjectAction", true);
   return params;
 }
 
 MooseObjectAction::MooseObjectAction(const std::string & name, InputParameters params) :
-    ObjectAction(name, params),
+    Action(name, params),
     _type(getParam<std::string>("type")),
 
     // We will create a second parameters object from the main factory unless instructed otherwise

@@ -18,12 +18,10 @@ template<>
 InputParameters validParams<GlobalParamsAction>()
 {
   InputParameters params = validParams<Action>();
-  std::vector<std::string> blocks(1);
-  blocks[0] = "";
+  std::vector<std::string> blocks(1, "");
 
   /* GlobalParams should not have children or other standard public Action attributes */
   params.addPrivateParam<std::vector<std::string> >("active", blocks);
-//  params.addPrivateParam<Parser *>("parser_handle");
   return params;
 }
 

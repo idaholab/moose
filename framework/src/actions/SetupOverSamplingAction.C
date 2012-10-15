@@ -29,7 +29,7 @@ InputParameters validParams<SetupOverSamplingAction>()
   // in this block for now.  We may make a common ancestor at some point to clean this up
   InputParameters params = validParams<Action>();
 
-  params.addParam<std::string>("file_base", "The desired oversampled solution output name without an extension.  If not supplied, the main file_base will be used with a '_oversample' suffix added.");
+  params.addParam<OutFileBase>("file_base", "The desired oversampled solution output name without an extension.  If not supplied, the main file_base will be used with a '_oversample' suffix added.");
 
   params.addParam<unsigned int>("refinements", 1, "The number of refinements to output for the over sampled solution");
 
@@ -70,9 +70,7 @@ SetupOverSamplingAction::act()
     _pars.set<std::vector<std::string> >("output_variables") = _problem->getVariableNames();
   }
 
-  // If no filebase was supplied in the parameters object - borrow the main problem's filebase
-  if (!_pars.isParamValid("file_base"))
-    _pars.set<std::string>("file_base") = _problem->out().fileBase() + "_oversample";
+  _pars.set<OutFileBase>("file_base") = _problem->out().fileBase() + "_oversample";
 
   setupOutputObject(output, _pars);
 
@@ -89,8 +87,8 @@ SetupOverSamplingAction::act()
   output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
 
 // Test to make sure that the user can write to the directory specified in file_base
-  std::string base = "./" + getParam<std::string>("file_base");
+  std::string base = "./" + getParam<OutFileBase>("file_base");
   base = base.substr(0, base.find_last_of('/'));
   if (access(base.c_str(), W_OK) == -1)
-    mooseError("Can not write to directory: " + base + " for file base: " + getParam<std::string>("file_base"));
+    mooseError("Can not write to directory: " + base + " for file base: " + getParam<OutFileBase>("file_base"));
 }

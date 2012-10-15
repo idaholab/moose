@@ -29,9 +29,6 @@ public:
   AddKernelAction(const std::string & name, InputParameters params);
 
   virtual void act();
-
-private:
-  bool is_kernels_action;
 };
 
 #endif // ADDKERNELACTION_H
