@@ -795,7 +795,7 @@ Assembly::copyNeighborShapes(unsigned int var)
 void
 Assembly::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, const std::vector<unsigned int> & dof_indices, Real scaling_factor)
 {
-  if (dof_indices.size() > 0)
+  if (dof_indices.size() > 0 && res_block.size())
   {
     std::vector<unsigned int> di(dof_indices);
     _dof_map.constrain_element_vector(res_block, di, false);
@@ -816,7 +816,7 @@ Assembly::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
 void
 Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor)
 {
-  if (dof_indices.size() > 0)
+  if (dof_indices.size() > 0 && res_block.size())
   {
     std::vector<unsigned int> di(dof_indices);
     _dof_map.constrain_element_vector(res_block, di, false);
@@ -976,7 +976,7 @@ Assembly::setResidualNeighbor(NumericVector<Number> & residual)
 void
 Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, const std::vector<unsigned int> & idof_indices, const std::vector<unsigned int> & jdof_indices, Real scaling_factor)
 {
-  if ((idof_indices.size() > 0) && (jdof_indices.size() > 0))
+  if ((idof_indices.size() > 0) && (jdof_indices.size() > 0) && jac_block.n() && jac_block.m())
   {
     std::vector<unsigned int> di(idof_indices);
     std::vector<unsigned int> dj(jdof_indices);
@@ -996,7 +996,7 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> 
 void
 Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<unsigned int> & idof_indices, std::vector<unsigned int> & jdof_indices, Real scaling_factor)
 {
-  if ((idof_indices.size() > 0) && (jdof_indices.size() > 0))
+  if ((idof_indices.size() > 0) && (jdof_indices.size() > 0) && jac_block.n() && jac_block.m())
   {
     std::vector<unsigned int> di(idof_indices);
     std::vector<unsigned int> dj(jdof_indices);
