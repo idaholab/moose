@@ -348,7 +348,7 @@ NodalFloodCount::flood(const Node *node, unsigned int region, int current_idx)
   for (unsigned int i=0; i<neighbors.size(); ++i)
   {
     // Only recurse on nodes this processor owns
-    if (!region || isNodeValueValid(neighbors[i]->id()))
+    if (isNodeValueValid(neighbors[i]->id()))
     {
       flood(neighbors[i], _bubble_map[node_id], current_idx);
     }
