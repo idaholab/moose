@@ -314,6 +314,8 @@ public:
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);
   virtual void computeJacobianBlock(SparseMatrix<Number> &  jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
   virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
+  virtual bool shouldUpdateSolution();
+  virtual bool updateSolution(NumericVector<Number>& vec_solution, const NumericVector<Number>& ghosted_solution);
   virtual void computeBounds(NonlinearImplicitSystem & sys, NumericVector<Number> & lower, NumericVector<Number> & upper);
 
   virtual void computeIndicatorsAndMarkers();

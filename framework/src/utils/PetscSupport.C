@@ -202,16 +202,16 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 // PETSc 3.2.x-
-PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, PetscBool * changed_y, PetscBool * /*changed_w*/)
+PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, PetscBool * /*changed_y*/, PetscBool * changed_w)
 #else
 // PETSc 3.3.0+
-  PetscErrorCode dampedCheck(SNESLineSearch /* linesearch */, Vec /*x*/, Vec y, Vec w, PetscBool * changed_y, PetscBool * /*changed_w*/, void *lsctx)
+  PetscErrorCode dampedCheck(SNESLineSearch /* linesearch */, Vec x, Vec y, Vec w, PetscBool * /*changed_y*/, PetscBool * changed_w, void *lsctx)
 #endif
 {
   // From SNESLineSearchSetPostCheck docs:
   // +  x - old solution vector
   // .  y - search direction vector
-  // .  w - new solution vector
+  // .  w - new solution vector  w = x-y
   // .  changed_y - indicates that the line search changed y
   // .  changed_w - indicates that the line search changed w
 
@@ -246,8 +246,26 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, 
     damping = problem.computeDamping(ghosted_w, ghosted_y);
     if(damping < 1.0)
     {
-      VecScale(y, damping);
-      *changed_y = PETSC_TRUE;
+      //recalculate w=-damping*y + x
+      VecWAXPY(w, -damping, y, x);
+      *changed_w = PETSC_TRUE;
+    }
+
+    if (problem.shouldUpdateSolution())
+    {
+      //Update the ghosted copy of w
+      if (*changed_w == PETSC_TRUE)
+      {
+        VecCopy(w, ghosted_w.vec());
+        ghosted_w.close();
+      }
+
+      //Create vector to directly modify w
+      PetscVector<Number> vec_w(w);
+
+      bool updatedSolution = problem.updateSolution(vec_w, ghosted_w);
+      if (updatedSolution)
+        *changed_w = PETSC_TRUE;
     }
   }
 

@@ -2523,6 +2523,18 @@ FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector
   return damping;
 }
 
+bool
+FEProblem::shouldUpdateSolution()
+{
+  return false;
+}
+
+bool
+FEProblem::updateSolution(NumericVector<Number>& vec_solution, const NumericVector<Number>& ghosted_solution)
+{
+  return false;
+}
+
 void
 FEProblem::initDisplacedProblem(MooseMesh * displaced_mesh, InputParameters params)
 {
