@@ -59,7 +59,7 @@
   [./dummy_name]
     master = 20
     slave = 10
-    penalty = 1e6
+    penalty = 1e7
     formulation = augmented_lagrange
 #    model = glued
     tangential_tolerance = 1e-3
@@ -137,6 +137,13 @@
     type = MaxIncrement
     max_increment = 1e-5
     variable = disp_x
+  [../]
+[]
+
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
   [../]
 []
 
