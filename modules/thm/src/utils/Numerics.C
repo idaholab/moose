@@ -1,5 +1,6 @@
 #include "Numerics.h"
 #include <sstream>
+#include "MooseError.h"
 
 namespace Numerics {
 
@@ -26,12 +27,13 @@ namespace Numerics {
       xold=xnew;
       res=(*fct)(xold, f0);
       xnew=xold-res/(*dfct)(xold);
-      std::cout<<"  Newton iteration: n= "<<n<<" xold= "<<xold<<" xnew= "<<xnew<<" res= "<<res<<std::endl; //debug
+      //std::cout<<"  Newton iteration: n= "<<n<<" xold= "<<xold<<" xnew= "<<xnew<<" res= "<<res<<std::endl; //debug
     }
     
     std::stringstream error_message;
     error_message << "Newton iteration cannot converge after " << (n-1)<<"; final value is "<<xnew;
-    std::cerr << error_message.str() << std::endl;
+    //std::cerr << error_message.str() << std::endl;
+    mooseError(error_message.str() );
     return 0.;
   }
  
