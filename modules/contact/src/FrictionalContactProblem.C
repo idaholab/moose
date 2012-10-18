@@ -238,103 +238,13 @@ FrictionalContactProblem::slipUpdate(NumericVector<Number>& vec_solution, const 
                 slip_inc_vec(i) = aux_solution(inc_slip_dofs(i));
               }
 
-              RealVectorValue normal_residual = info._normal * (info._normal * res_vec);
-              Real normal_force = normal_residual.size();
-
-//              std::cout<<"normal="<<info._normal<<std::endl;
-//              std::cout<<"normal_force="<<normal_force<<std::endl;
-//              std::cout<<"residual="<<res_vec<<std::endl;
-//              std::cout<<"stiffness="<<stiff_vec<<std::endl;
-
-              RealVectorValue tangential_force = normal_residual - res_vec ; // swap sign to make the code more manageable
-              Real tangential_force_magnitude = tangential_force.size();
-
-              Real capacity = normal_force * friction_coefficient;
-              if(capacity < 0.0)
-                capacity = 0.0;
-
-              Real slip_inc = slip_inc_vec.size();
               RealVectorValue slip_iterative(0.0,0.0,0.0);
+              ContactState state = calculateSlip(slip_iterative, info._normal, res_vec, slip_inc_vec, stiff_vec, friction_coefficient, slip_factor, dim);
 
-              bool slipped_too_far = false;
-              bool slipping = false;
-
-              if (slip_inc > 0)
-              {
-                Real slip_dot_tang_force = slip_inc_vec*tangential_force / slip_inc;
-                if (slip_dot_tang_force < capacity)
-                {
-                  slipped_too_far = true;
-                  slipping = true;
-//                  std::cout<<"STF slip_dot_force: "<<slip_dot_tang_force<<" capacity: "<<capacity<<std::endl;
-                }
-              }
-
-              if (!slipped_too_far)
-              {
-                Real fraction_of_capacity = tangential_force_magnitude/capacity;
-//                std::cout<<"fraction of capacity="<<fraction_of_capacity<<std::endl;
-                if (fraction_of_capacity > max_fraction_of_capacity)
-                {
-                  max_fraction_of_capacity = fraction_of_capacity;
-                }
-              }
-
-              Real excess_force = tangential_force_magnitude - capacity;
-              if (excess_force < 0.0)
-                excess_force = 0;
-
-              if (slipped_too_far)
-              {
-                RealVectorValue slip_inc_direction = slip_inc_vec / slip_inc;
-                Real tangential_force_in_slip_dir = slip_inc_direction*tangential_force;
-
-                RealVectorValue force_from_unit_slip(0.0,0.0,0.0);
-                for(unsigned int i=0; i<dim; ++i)
-                {
-                  force_from_unit_slip(i) = stiff_vec(i) * slip_inc_direction(i);
-                }
-                Real stiffness_slipdir = force_from_unit_slip * slip_inc_direction; //k=f resolved to slip dir because f=kd and d is a unit vector
-
-                Real slip_distance = slip_factor * (capacity - tangential_force_in_slip_dir) / stiffness_slipdir;
-                if (slip_distance < slip_inc)
-                {
-//                  std::cout<<"STF"<<std::endl;
-                  slip_iterative = slip_inc_direction * -slip_distance;
-                }
-                else
-                {
-//                  std::cout<<"STF max"<<std::endl;
-                  slip_iterative = -slip_inc_vec;
-                }
-              }
-              else if(excess_force > 0)
-              {
-                slipping = true;
-                Real tangential_force_magnitude = tangential_force.size();
-
-                RealVectorValue tangential_direction = tangential_force / tangential_force_magnitude;
-                RealVectorValue excess_force_vector = tangential_direction * excess_force;
-
-
-                for(unsigned int i=0; i<dim; ++i)
-                {
-                  slip_iterative(i) = slip_factor * excess_force_vector(i) / stiff_vec(i);
-                }
-
-                //zero out component of slip_iterative in normal direction
-                RealVectorValue slip_iterative_normal_dir = info._normal * (info._normal * slip_iterative);
-                slip_iterative = slip_iterative - slip_iterative_normal_dir;
-              }
-//              std::cout<<"excess f="<<excess_force<<" cap="<<capacity<<std::endl;
-//              std::cout<<"tang f  ="<<tangential_force<<std::endl;
-//              std::cout<<"it slip ="<<slip_iterative<<std::endl;
-//              std::cout<<"inc slip="<<slip_inc_vec<<std::endl;
-
-              if (slipping)
+              if (state == SLIPPING || state == SLIPPED_TOO_FAR)
               {
                 num_slipping++;
-                if (slipped_too_far)
+                if (state == SLIPPED_TOO_FAR)
                   num_slipped_too_far++;
                 for(unsigned int i=0; i<dim; ++i)
                 {
@@ -355,12 +265,10 @@ FrictionalContactProblem::slipUpdate(NumericVector<Number>& vec_solution, const 
     Parallel::sum(num_contact_nodes);
     Parallel::sum(num_slipping);
     Parallel::sum(num_slipped_too_far);
-    Parallel::max(max_fraction_of_capacity);
 
     std::cout<<"Num contact nodes: "<<num_contact_nodes<<std::endl;
     std::cout<<"Num slipping: "<<num_slipping<<std::endl;
     std::cout<<"Num slipped too far: "<<num_slipped_too_far<<std::endl;
-    std::cout<<"Max fraction of capacity: "<<max_fraction_of_capacity<<std::endl;
 //    nlsystem._did_slip_update=true;
     if (num_slipping > 0)
       updatedSolution = true;
@@ -371,4 +279,98 @@ FrictionalContactProblem::slipUpdate(NumericVector<Number>& vec_solution, const 
 //  }
 
   return updatedSolution;
+}
+
+ContactState
+FrictionalContactProblem::calculateSlip(RealVectorValue &slip,
+                                        const RealVectorValue &normal,
+                                        const RealVectorValue &residual,
+                                        const RealVectorValue &incremental_slip,
+                                        const RealVectorValue &stiffness,
+                                        const Real friction_coefficient,
+                                        const Real slip_factor,
+                                        const int dim)
+{
+
+  ContactState state = STICKING;
+
+  RealVectorValue normal_residual = normal * (normal * residual);
+  Real normal_force = normal_residual.size();
+
+//  std::cout<<"normal="<<info._normal<<std::endl;
+//  std::cout<<"normal_force="<<normal_force<<std::endl;
+//  std::cout<<"residual="<<residual<<std::endl;
+//  std::cout<<"stiffness="<<stiff_vec<<std::endl;
+
+  RealVectorValue tangential_force = normal_residual - residual ; // swap sign to make the code more manageable
+  Real tangential_force_magnitude = tangential_force.size();
+
+  Real capacity = normal_force * friction_coefficient;
+  if(capacity < 0.0)
+    capacity = 0.0;
+
+  Real slip_inc = incremental_slip.size();
+
+  slip(0)=0.0;
+  slip(1)=0.0;
+  slip(2)=0.0;
+
+  if (slip_inc > 0)
+  {
+    state = SLIPPING;
+    Real slip_dot_tang_force = incremental_slip*tangential_force / slip_inc;
+    if (slip_dot_tang_force < capacity)
+    {
+      state = SLIPPED_TOO_FAR;
+//      std::cout<<"STF slip_dot_force: "<<slip_dot_tang_force<<" capacity: "<<capacity<<std::endl;
+    }
+  }
+
+  Real excess_force = tangential_force_magnitude - capacity;
+  if (excess_force < 0.0)
+    excess_force = 0;
+
+  if (state == SLIPPED_TOO_FAR)
+  {
+    RealVectorValue slip_inc_direction = incremental_slip / slip_inc;
+    Real tangential_force_in_slip_dir = slip_inc_direction*tangential_force;
+
+    RealVectorValue force_from_unit_slip(0.0,0.0,0.0);
+    for(unsigned int i=0; i<dim; ++i)
+    {
+      force_from_unit_slip(i) = stiffness(i) * slip_inc_direction(i);
+    }
+    Real stiffness_slipdir = force_from_unit_slip * slip_inc_direction; //k=f resolved to slip dir because f=kd and d is a unit vector
+
+    Real slip_distance = slip_factor * (capacity - tangential_force_in_slip_dir) / stiffness_slipdir;
+    if (slip_distance < slip_inc)
+    {
+//      std::cout<<"STF"<<std::endl;
+      slip = slip_inc_direction * -slip_distance;
+    }
+    else
+    {
+//      std::cout<<"STF max"<<std::endl;
+      slip = -incremental_slip;
+    }
+  }
+  else if(excess_force > 0)
+  {
+    state = SLIPPING;
+    Real tangential_force_magnitude = tangential_force.size();
+
+    RealVectorValue tangential_direction = tangential_force / tangential_force_magnitude;
+    RealVectorValue excess_force_vector = tangential_direction * excess_force;
+
+
+    for(unsigned int i=0; i<dim; ++i)
+    {
+      slip(i) = slip_factor * excess_force_vector(i) / stiffness(i);
+    }
+
+    //zero out component of slip in normal direction
+    RealVectorValue slip_normal_dir = normal * (normal * slip);
+    slip = slip - slip_normal_dir;
+  }
+  return state;
 }

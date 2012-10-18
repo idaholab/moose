@@ -24,6 +24,13 @@ struct InteractionParams{
   Real _slip_factor;
 };
 
+enum ContactState
+{
+  STICKING,
+  SLIPPING,
+  SLIPPED_TOO_FAR
+};
+
 template<>
 InputParameters validParams<FrictionalContactProblem>();
 
@@ -38,6 +45,14 @@ public:
   virtual bool shouldUpdateSolution();
   virtual bool updateSolution(NumericVector<Number>& vec_solution, const NumericVector<Number>& ghosted_solution);
   virtual bool slipUpdate(NumericVector<Number>& vec_solution, const NumericVector<Number>& ghosted_solution);
+  static ContactState calculateSlip(RealVectorValue &slip,
+                                    const RealVectorValue &normal,
+                                    const RealVectorValue &residual,
+                                    const RealVectorValue &incremental_slip,
+                                    const RealVectorValue &stiffness,
+                                    const Real friction_coefficient,
+                                    const Real slip_factor,
+                                    const int dim);
 
 protected:
   std::map<std::pair<int,int>,InteractionParams> _interaction_params;
