@@ -47,7 +47,7 @@ CreateProblemAction::act()
   {
     // build the problem only if we have mesh
     {
-      InputParameters params = validParams<FEProblem>();
+      InputParameters params = ProblemFactory::instance()->getValidParams(_type);
       params.set<MooseMesh *>("mesh") = _mesh;
       _problem = dynamic_cast<FEProblem *>(ProblemFactory::instance()->create(_type, _problem_name, params));
       if (_problem == NULL)
