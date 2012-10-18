@@ -7,5 +7,6 @@ pressurePenalty_test = { INPUT : 'pressurePenalty.i',
 
 pressureAugLag_test = { INPUT : 'pressureAugLag.i',
                         EXODIFF : ['pressureAugLag_out.e'],
-                        CUSTOM_CMP : 'pressure.exodiff'
+                        CUSTOM_CMP : 'pressure.exodiff',
+                        PETSC_VERSION : ['>=3.1']
                       }
