@@ -45,10 +45,10 @@ GrainTracker::getNodeValue(unsigned int node_id) const
   // When running threaded - we won't have the complete map
   // since we don't exchange areas marked with zero.  In this
   // case we can just return zero for nodes NOT in the map
-  if (_bubble_map.find(node_id) == _bubble_map.end())
+  if (_bubble_maps[0].find(node_id) == _bubble_maps[0].end())   // Single mode ONLY
     return 0;
-  
-  unsigned int region_id = _bubble_map.at(node_id);
+
+  unsigned int region_id = _bubble_maps[0].at(node_id);
   return _region_to_grain.at(region_id);
 }
 
@@ -62,7 +62,7 @@ GrainTracker::initialize()
 
 void
 GrainTracker::threadJoin(const UserObject & y)
-{ 
+{
   // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
@@ -70,10 +70,10 @@ GrainTracker::threadJoin(const UserObject & y)
   const GrainTracker & pps = dynamic_cast<const GrainTracker &>(y);
 
   pack(_packed_data, false);
-  
+
   std::vector<unsigned int> pps_packed_data;
   pps.pack(pps_packed_data, false);
-  
+
   // Append the packed data structures together
   std::copy(pps_packed_data.begin(), pps_packed_data.end(), std::back_inserter(_packed_data));
 }
@@ -129,7 +129,7 @@ GrainTracker::buildBoundingBoxes()
 
   MeshBase & mesh = _mesh._mesh;
   unsigned int counter = 0;
-  for (std::list<BubbleData>::const_iterator it1 = _bubble_sets.begin(); it1 != _bubble_sets.end(); ++it1)
+  for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[0].begin(); it1 != _bubble_sets[0].end(); ++it1)
   {
     Point min( 1.e30,  1.e30,  1.e30);
     Point max(-1.e30, -1.e30, -1.e30);
@@ -235,7 +235,7 @@ GrainTracker::trackGrains()
       grain_it->second->status = NOT_MARKED;
 
   // Loop over all the current regions and match them up to our grain list
-  for (std::list<BubbleData>::const_iterator it1 = _bubble_sets.begin(); it1 != _bubble_sets.end(); ++it1)
+  for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[0].begin(); it1 != _bubble_sets[0].end(); ++it1)
   {
     std::vector<BoundingBoxInfo *> box_ptrs;
     unsigned int curr_var = it1->_var_idx;
