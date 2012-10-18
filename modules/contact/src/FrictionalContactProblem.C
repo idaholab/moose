@@ -17,6 +17,7 @@
 #include "NonlinearSystem.h"
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
+#include "MooseApp.h"
 
 template<>
 InputParameters validParams<FrictionalContactProblem>()
