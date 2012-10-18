@@ -1,6 +1,7 @@
 #include "ContactModule.h"
 #include "Factory.h"
 #include "ActionFactory.h"
+#include "ProblemFactory.h"
 #include "Parser.h"
 
 // contact
@@ -9,6 +10,7 @@
 #include "SlaveConstraint.h"
 #include "OneDContactConstraint.h"
 #include "MultiDContactConstraint.h"
+#include "FrictionalContactProblem.h"
 
 void
 Elk::Contact::registerObjects()
@@ -18,6 +20,7 @@ Elk::Contact::registerObjects()
   registerDiracKernel(SlaveConstraint);
   registerConstraint(OneDContactConstraint);
   registerConstraint(MultiDContactConstraint);
+  registerProblem(FrictionalContactProblem);
 }
 
 void
