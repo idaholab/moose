@@ -15,6 +15,7 @@
 #include "FrictionalContactProblem.h"
 
 #include "NonlinearSystem.h"
+#include "DisplacedProblem.h"
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
 #include "MooseApp.h"
