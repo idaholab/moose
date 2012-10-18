@@ -20,17 +20,19 @@ InputParameters validParams<NodalFloodCountAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<UserObjectName>("bubble_object", "The NodalFloodCount UserObject to get values from.");
+  params.addParam<unsigned int>("var_idx", "TODO:");
   return params;
 }
 
 NodalFloodCountAux::NodalFloodCountAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _flood_counter(getUserObject<NodalFloodCount>("bubble_object"))
+    _flood_counter(getUserObject<NodalFloodCount>("bubble_object")),
+    _var_idx(isParamValid("var_idx") ? getParam<unsigned int>("var_idx") : 0)
 {
 }
 
 Real
 NodalFloodCountAux::computeValue()
 {
-  return _flood_counter.getNodeValue(_current_node->id());
+  return _flood_counter.getNodeValue(_current_node->id(), _var_idx);
 }

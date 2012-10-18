@@ -36,6 +36,7 @@ InputParameters validParams<NodalFloodCount>()
   InputParameters params = validParams<ElementPostprocessor>();
   params.addParam<Real>("threshold", 0.5, "The threshold value of the bubble boundary");
   params.addParam<std::string>("elem_avg_value", "If supplied, will be used to find the scaled threshold of the bubble edges");
+  params.addParam<bool>("use_single_map", true, "Determine whether information is tracked per coupled variable or consolidated into one (default: true)");
   return params;
 }
 
@@ -44,10 +45,16 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _threshold(getParam<Real>("threshold")),
     _mesh(_subproblem.mesh()),
     _var_number(_var.number()),
-    _region_count(0),
+    _single_map_mode(getParam<bool>("use_single_map")),
+    _maps_size(_single_map_mode ? 1 : _vars.size()),
     _pbs(NULL),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero)
-{}
+{
+  // Size the data structures to hold the correct number of maps
+  _bubble_maps.resize(_maps_size);
+  _bubble_sets.resize(_maps_size);
+  _region_counts.resize(_maps_size);
+}
 
 void
 NodalFloodCount::initialize()
@@ -56,17 +63,21 @@ NodalFloodCount::initialize()
   // TODO: Can we do this in the constructor (i.e. are all objects necessary for this call in existance during ctor?)
   _pbs = dynamic_cast<FEProblem *>(&_subproblem)->getNonlinearSystem().dofMap().get_periodic_boundaries();
 
-  // Clear the bubble marking map
-  _bubble_map.clear();
+  // Clear the bubble marking maps and region counters
+  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+  {
+    _bubble_maps[map_num].clear();
+    _region_counts[map_num] = 0;
+  }
+
+  // Clear the visited nodes map
+  _nodes_visited.clear();
 
   // Clear the packed data structure
   _packed_data.clear();
-  
+
   // Reset the ownership structure
   _region_to_var_idx.clear();
-
-  // Reset the region counter
-  _region_count = 0;
 
   // Build a new node to element map
   _nodes_to_elem_map.clear();
@@ -84,7 +95,7 @@ NodalFloodCount::execute()
   {
     const Node *node = _current_elem->get_node(i);
 
-    flood(node, 0, -1);
+    flood(node, std::map<unsigned int, unsigned int>());
   }
 }
 
@@ -92,9 +103,7 @@ void
 NodalFloodCount::finalize()
 {
   // Exchange data in parallel
-
-//  if (_packed_data.empty())
-    pack(_packed_data);
+  pack(_packed_data);
   Parallel::allgather(_packed_data, false);
   unpack(_packed_data);
 
@@ -104,14 +113,30 @@ NodalFloodCount::finalize()
 Real
 NodalFloodCount::getValue()
 {
-  return _bubble_sets.size();
+  unsigned int count = 0;
+
+  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+    count += _bubble_sets[map_num].size();
+
+  return count;
+}
+
+Real
+NodalFloodCount::getNodeValue(unsigned int node_id, unsigned int var_idx) const
+{
+  std::map<unsigned int, int>::const_iterator node_it = _bubble_maps[var_idx].find(node_id);
+
+  if (node_it != _bubble_maps[var_idx].end())
+    return node_it->second;
+  else
+    return 0;
 }
 
 void
 NodalFloodCount::threadJoin(const UserObject &y)
 {
    const NodalFloodCount & pps = dynamic_cast<const NodalFloodCount &>(y);
-   
+
    // Pack up the data on both of the threads
    pack(_packed_data);
 
@@ -126,84 +151,106 @@ NodalFloodCount::threadJoin(const UserObject &y)
 void
 NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_periodic_info) const
 {
-  // Don't repack the data if it's already packed - we might lose data that was updated
-  // or stored into the packed_data that is not available in the local thread.
-  // This happens when we call threadJoin which does not unpack the data on the local thread.
+  /**
+   * Don't repack the data if it's already packed - we might lose data that was updated
+   * or stored into the packed_data that is not available in the local thread.
+   * This happens when we call threadJoin which does not unpack the data on the local thread.
+   */
   if (!packed_data.empty())
     return;
 
-  std::vector<std::set<unsigned int> > data(_region_count+1);
-  unsigned int n_periodic_nodes = 0;
+  /**
+   * We need a data structure that reorganizes the region markings into sets so that we can pack them up
+   * in a form to marshall them between processors.  The set of nodes are stored by map_num, region_num.
+   **/
+  std::vector<std::vector<std::set<unsigned int> > > data(_maps_size);
 
+  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
-    std::map<unsigned int, int>::const_iterator end = _bubble_map.end();
-    // Reorganize the data by values
-    for (std::map<unsigned int, int>::const_iterator it = _bubble_map.begin(); it != end; ++it)
-      data[(it->second)].insert(it->first);
+    data[map_num].resize(_region_counts[map_num]+1);
 
-    // Append our periodic neighbor nodes to the data structure before packing
-    if (merge_periodic_info)
-      n_periodic_nodes = appendPeriodicNeighborNodes(data);
-
-    mooseAssert(_region_count+1 == data.size(), "Error in packing data");
-  }
-
-  {
-    /**
-     * The size of the packed data structure should be the sum of all of the following:
-     * total number of marked nodes
-     * the owning variable index for the current bubble
-     * inserted periodic neighbor information
-     * the number of unique bubbles.
-     *
-     * This first resize will be an overesitmate because we aren't going to store nodes
-     * marked with zeros (outside of bubbles).
-     *
-     * We will pack the data into a series of groups representing each unique bubble
-     * the nodes for each group will be proceeded by the number of nodes in that group
-     * [ <i_nodes> <var_idx> <n_0> <n_1> ... <n_i> <j_nodes> <var_idx> <n_0> <n_1> ... <n_j> ]
-     */
-    packed_data.resize(_bubble_map.size() + n_periodic_nodes + _region_count*2 /* <- owning idx + number of unique bubbles */);
-
-    // Now pack it up
-    unsigned int current_idx = 0;
-
-    // Note: The zeroth "region" is everything outside of a bubble - we don't want to put
-    // that into our packed data structure so start at 1 here!
-    for (unsigned int i=1 /* Yes - start at 1 */; i<=_region_count; ++i)
+    unsigned int n_periodic_nodes = 0;
     {
-      packed_data[current_idx++] = data[i].size();                      // The number of nodes in the current bubble
-      mooseAssert(i-1 < _region_to_var_idx.size(), "Index out of bounds in NodalFloodCounter");
-      packed_data[current_idx++] = _region_to_var_idx[i-1];             // The variable owning this bubble
+      std::map<unsigned int, int>::const_iterator end = _bubble_maps[map_num].end();
+      // Reorganize the data by values
 
-      std::set<unsigned int>::iterator end = data[i].end();
-      for (std::set<unsigned int>::iterator it = data[i].begin(); it != end; ++it)
-        packed_data[current_idx++] = *it;                               // The individual node ids
+      for (std::map<unsigned int, int>::const_iterator it = _bubble_maps[map_num].begin(); it != end; ++it)
+        data[map_num][(it->second)].insert(it->first);
+
+      // Append our periodic neighbor nodes to the data structure before packing
+      if (merge_periodic_info)
+        n_periodic_nodes = appendPeriodicNeighborNodes(data[map_num]);
+
+      mooseAssert(_region_counts[map_num]+1 == data[map_num].size(), "Error in packing data");
     }
 
-    // Resize the structure to it's actual final size
-    packed_data.resize(current_idx);
+    {
+      /**
+       * The size of the packed data structure should be the sum of all of the following:
+       * total number of marked nodes
+       * the owning variable index for the current bubble
+       * inserted periodic neighbor information
+       * the number of unique bubbles.
+       *
+       * We will pack the data into a series of groups representing each unique bubble
+       * the nodes for each group will be proceeded by the number of nodes in that group
+       * [ <i_nodes> <var_idx> <n_0> <n_1> ... <n_i> <j_nodes> <var_idx> <n_0> <n_1> ... <n_j> ]
+       */
+
+      // Note the _region_counts[mar_num]*2 takes into account the number of nodes and the variable index for each region
+      std::vector<unsigned int> partial_packed_data(_bubble_maps[map_num].size() + n_periodic_nodes + _region_counts[map_num]*2);
+
+      // Now pack it up
+      unsigned int current_idx = 0;
+
+      mooseAssert(data[map_num][0].empty(), "We have nodes marked with zeros - something is not correct");
+      // Note: The zeroth "region" is everything outside of a bubble - we don't want to put
+      // that into our packed data structure so start at 1 here!
+      for (unsigned int i=1 /* Yes - start at 1 */; i<=_region_counts[map_num]; ++i)
+      {
+        partial_packed_data[current_idx++] = data[map_num][i].size();     // The number of nodes in the current region
+
+        if (_single_map_mode)
+        {
+          mooseAssert(i-1 < _region_to_var_idx.size(), "Index out of bounds in NodalFloodCounter");
+          partial_packed_data[current_idx++] = _region_to_var_idx[i-1];   // The variable owning this bubble
+        }
+        else
+          partial_packed_data[current_idx++] = map_num;                   // The variable owning this bubble
+
+        std::set<unsigned int>::iterator end = data[map_num][i].end();
+        for (std::set<unsigned int>::iterator it = data[map_num][i].begin(); it != end; ++it)
+          partial_packed_data[current_idx++] = *it;                       // The individual node ids
+      }
+
+      packed_data.insert(packed_data.end(), partial_packed_data.begin(), partial_packed_data.end());
+    }
   }
 }
 
 void
 NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
 {
-  bool next_set = true;
+  bool start_next_set = true;
+  bool has_data_to_save = false;
+
   unsigned int curr_set_length=0;
   std::set<unsigned int> curr_set;
-  unsigned int curr_region = std::numeric_limits<unsigned int>::max();
+  unsigned int curr_var_idx = std::numeric_limits<unsigned int>::max();
 
-  _bubble_sets.clear();
+  for (unsigned int i=0; i<_maps_size; ++i)
+    _bubble_sets[i].clear();
+
   _region_to_var_idx.clear();
   for (unsigned int i=0; i<packed_data.size(); ++i)
   {
-    if (next_set)
+    if (start_next_set)
     {
-      if (i > 0)
+      if (has_data_to_save)
       {
-        _bubble_sets.push_back(BubbleData(curr_set, curr_region));
-        _region_to_var_idx.push_back(curr_region);
+        // See Note at the bottom of this routine
+        _bubble_sets[_single_map_mode ? 0 : curr_var_idx].push_back(BubbleData(curr_set, curr_var_idx));
+        _region_to_var_idx.push_back(curr_var_idx);
         curr_set.clear();
       }
 
@@ -211,7 +258,7 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
       curr_set_length = packed_data[i];
       // Also get the owning variable idx.
       // Note: We are intentionally advancing "i" here too!
-      curr_region = packed_data[++i];
+      curr_var_idx = packed_data[++i];
     }
     else
     {
@@ -220,10 +267,20 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
       --curr_set_length;
     }
 
-    next_set = !(curr_set_length);
+    start_next_set = !(curr_set_length);
+    has_data_to_save = true;
   }
-  _bubble_sets.push_back(BubbleData(curr_set, curr_region));
-  _region_to_var_idx.push_back(curr_region);
+
+  /**
+   * Note: In multi-map mode the var_idx information stored inside of BubbleData is redundant with
+   * the outer index of the _bubble_sets data-structure.  We need this information for single-map
+   * mode when we have multiple variables coupled in.
+   */
+  if (has_data_to_save)
+  {
+    _bubble_sets[_single_map_mode ? 0 : curr_var_idx].push_back(BubbleData(curr_set, curr_var_idx));
+    _region_to_var_idx.push_back(curr_var_idx);
+  }
 
   mooseAssert(curr_set_length == 0, "Error in unpacking data");
 }
@@ -232,117 +289,134 @@ void
 NodalFloodCount::mergeSets()
 {
   std::set<unsigned int> set_union;
-  bool set_merged;
 
   /**
    * This loop will continue as long as sets of nodes are merged
    * creating "new" sets.  There may be other ways to optimize this loop
    * but it should not be a bottleneck in practice.
    */
-  do
+  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
-    set_merged = false;
-    std::list<BubbleData>::iterator end = _bubble_sets.end();
-    for (std::list<BubbleData>::iterator it1 = _bubble_sets.begin(); it1 != end; ++it1)
+    bool set_merged;
+    do
     {
-      std::list<BubbleData>::iterator it2 = it1;
-      ++it2; // Don't compare this set with itself - advance the iterator to the next set
-      while (it2 != end)
+      set_merged = false;
+      std::list<BubbleData>::iterator end = _bubble_sets[map_num].end();
+      for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != end; ++it1)
       {
-        set_union.clear();
-        std::set_union(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end(),
-                       std::inserter(set_union, set_union.end()));
-
-        if (set_union.size() < it1->_nodes.size() + it2->_nodes.size())
+        std::list<BubbleData>::iterator it2 = it1;
+        ++it2; // Don't compare this set with itself - advance the iterator to the next set
+        while (it2 != end)
         {
-          // Merge these two sets and remove the duplicate set
-          it1->_nodes = set_union;
-          _bubble_sets.erase(it2++);
-          set_merged = true;
+          set_union.clear();
+          std::set_union(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end(),
+                         std::inserter(set_union, set_union.end()));
+
+          if (set_union.size() < it1->_nodes.size() + it2->_nodes.size())
+          {
+            // Merge these two sets and remove the duplicate set
+            it1->_nodes = set_union;
+            _bubble_sets[map_num].erase(it2++);
+            set_merged = true;
+          }
+          else
+            ++it2;
         }
-        else
-          ++it2;
       }
-    }
-  } while (set_merged);
-
-  /**
-   * Finally update the original bubble map with field data from the merged sets
-   */
-  _region_to_var_idx.resize(_bubble_sets.size());
-  unsigned int counter = 1;
-  for (std::list<BubbleData>::iterator it1 = _bubble_sets.begin(); it1 != _bubble_sets.end(); ++it1)
-  {
-    for (std::set<unsigned int>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
-      _bubble_map[*it2] = counter;
-
-    _region_to_var_idx[counter-1] = it1->_var_idx;
-
-    ++counter;
+    } while (set_merged);
   }
 
-  _region_count = counter-1;
+  // This variable is only relevant in single map mode
+  _region_to_var_idx.resize(_bubble_sets[0].size());
+
+
+  // Finally update the original bubble map with field data from the merged sets
+  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+  {
+    unsigned int counter = 1;
+    for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != _bubble_sets[map_num].end(); ++it1)
+    {
+      for (std::set<unsigned int>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
+        _bubble_maps[map_num][*it2] = counter;
+
+      _region_to_var_idx[counter-1] = it1->_var_idx;
+      ++counter;
+    }
+
+    _region_counts[map_num] = counter-1;
+  }
 }
 
 void
-NodalFloodCount::flood(const Node *node, unsigned int region, int current_idx)
+NodalFloodCount::flood(const Node *node, std::map<unsigned int, unsigned int> live_region)
 {
   if (node == NULL)
     return;
-
   unsigned int node_id = node->id();
 
   // Has this node already been marked? - if so move along
-  if (_bubble_map.find(node_id) != _bubble_map.end())
+  if (_nodes_visited.find(node_id) != _nodes_visited.end())
     return;
 
   /**
-   * This node hasn't been marked - check to see if it in a bubble.
-   * If current_idx is set (>= zero) then we are in the process of marking a bubble.
+   * In single map mode, we can only have one live region at time even though the possibility
+   * exists that multiple variables might actually be active in a region.  We'll favor the active
+   * region first before looking at values of the rest of the variables.
    */
-  if (current_idx >= 0)
+  bool already_marked = false;
+  if (_single_map_mode && !live_region.empty())
   {
-    if (_vars[current_idx]->getNodalValue(*node) < _element_average_value + _threshold)
+    mooseAssert(live_region.size() == 1, "More than one active region in single_map_mode");
+
+    if (_vars[live_region.begin()->first]->getNodalValue(*node) >= _element_average_value + _threshold)
     {
-      // No - mark and return
-      _bubble_map[node_id] = 0;
-      return;
+      _bubble_maps[0][node_id] = live_region.begin()->second;
+      already_marked = true;
     }
+    /**
+     * If we fail to meet the threshold here, then unmarking of the live region will happen properly
+     * during the search for another variable in the loop below
+     */
   }
-  else  // If current_idx is not set (< zero), then we can look for the start of a new bubble
+
+  // Loop over all the variables and mark appropriately
+  if (!already_marked)
   {
-    for (unsigned int i=0; i<_vars.size(); ++i)
-      if (_vars[i]->getNodalValue(*node) >= _element_average_value + _threshold)
+    for (unsigned int var_num=0; var_num<_vars.size(); ++var_num)
+    {
+      unsigned int map_num = _single_map_mode ? 0 : var_num;
+
+      if (_vars[var_num]->getNodalValue(*node) >= _element_average_value + _threshold)
       {
-        current_idx = i;
-        break;
+        // TODO: There are still a few issues with overlapping variables and live_regions
+        // that need to be sorted out
+
+        // This variable is in a region at this node
+        if (live_region.find(var_num) == live_region.end())     // Is there an live region for this variable?
+        {
+          live_region[var_num] = ++_region_counts[map_num];     // If not, then this is a new region!
+          _region_to_var_idx.push_back(var_num);                // save the variable index that owns this region
+        }
+
+        _bubble_maps[map_num][node_id] = live_region[var_num];  // Mark it
       }
-    // Did we still fail to find any new bubbles?
-    if (current_idx < 0)
-    {
-      _bubble_map[node_id] = 0;
-      return;
+      else
+      {
+        // This variable is NOT in a region at this node
+        live_region.erase(var_num);
+      }
     }
   }
+
+  // Mark the node as visited
+  _nodes_visited[node_id] = true;
+
+  // If no variables are in a live region then we can avoid the recursion step
+  if (live_region.empty())
+    return;
 
   std::vector< const Node * > neighbors;
   MeshTools::find_nodal_neighbors(_mesh._mesh, *node, _nodes_to_elem_map, neighbors);
-  // Important!  If this node doesn't have any neighbors (i.e. floating node in the center
-  // of an element) we need to just unmark it for now since it can't be easiliy flooded
-  if (neighbors.size() == 0)
-  {
-    _bubble_map[node_id] = 0;
-    return;
-  }
-
-  // Yay! A bubble -> Mark it! (If region is zero, that signifies that this is a new bubble)
-  if (region == 0)
-  {
-    _bubble_map[node_id] = ++_region_count;
-    _region_to_var_idx.push_back(current_idx);
-  }
-  else
-    _bubble_map[node_id] = region;
 
   // Flood neighboring nodes that are also above this threshold with recursion
   for (unsigned int i=0; i<neighbors.size(); ++i)
@@ -350,7 +424,7 @@ NodalFloodCount::flood(const Node *node, unsigned int region, int current_idx)
     // Only recurse on nodes this processor owns
     if (isNodeValueValid(neighbors[i]->id()))
     {
-      flood(neighbors[i], _bubble_map[node_id], current_idx);
+      flood(neighbors[i], live_region);
     }
   }
 }

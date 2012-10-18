@@ -51,7 +51,7 @@ public:
   virtual Real getValue();
 
   // Get the bubble map
-  Real getNodeValue(unsigned int node_id) const { return _bubble_map.at(node_id); }
+  Real getNodeValue(unsigned int node_id, unsigned int var_idx=0) const;
 
 protected:
   class BubbleData
@@ -70,7 +70,7 @@ protected:
    * This method will "mark" all nodes on neighboring elements that
    * are above the supplied threshold
    */
-  void flood(const Node *node, unsigned int region, int current_idx);
+  void flood(const Node *node, std::map<unsigned int, unsigned int> live_region);
 
   /**
    * These routines packs/unpack the _bubble_map data into a structure suitable for parallel
@@ -111,8 +111,24 @@ protected:
    */
   unsigned int _var_number;
 
-  /// The data structure used to hold the map of marked nodes.
-  std::map<unsigned int, int> _bubble_map;
+  /// This variable is used to indicate whether or not multiple maps are used during flooding
+  bool _single_map_mode;
+
+  /// Convienence variable holding the size of all the datastructures size by the number of maps
+  const unsigned int _maps_size;
+
+  /**
+   * This variable keeps track of which nodes have been visited during execution.  We don't use the _bubble_map
+   * for this since we don't want to explicitly store data for all the unmarked nodes in a serialized datastructures.
+   * This keeps our overhead down since this variable never needs to be communicated.
+   */
+  std::map<unsigned int, bool> _nodes_visited;
+
+  /**
+   * The bubble maps contain the raw flooded node information.  We have a vector of them so we can create one per variable
+   * if that level of detail is desired.
+   */
+  std::vector<std::map<unsigned int, int> > _bubble_maps;
 
   /// The data structure used to marshall the data between processes and/or threads
   std::vector<unsigned int> _packed_data;
@@ -123,11 +139,14 @@ protected:
   /// This data structure is used to keep track of which bubbles are owned by which variables (index).
   std::vector<unsigned int> _region_to_var_idx;
 
-  /// The data structure used to join partial bubbles between prcoesses and/or threads
-  std::list<BubbleData> _bubble_sets;
+  /**
+   * The data structure used to join partial bubbles between processes and/or threads.  We may have a list of BubbleData
+   * per variable in multi-map mode
+   */
+  std::vector<std::list<BubbleData> > _bubble_sets;
 
-  /// The scalar counter used during the marking stage of the flood algorithm
-  unsigned int _region_count;
+  /// The scalar counters used during the marking stage of the flood algorithm.  Up to one per variable
+  std::vector<unsigned int> _region_counts;
 
   /// A pointer to the periodic boundary constraints object
   PeriodicBoundaries *_pbs;

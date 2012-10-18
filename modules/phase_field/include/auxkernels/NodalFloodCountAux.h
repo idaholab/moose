@@ -43,6 +43,8 @@ protected:
 
   /// Function being used to compute the value of this kernel
   const NodalFloodCount & _flood_counter;
+
+  const unsigned int _var_idx;
 };
 
 #endif // NODALFLOODCOUNTAUX_H
