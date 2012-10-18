@@ -84,7 +84,7 @@ protected:
 
   /// A reference to the nonlinear system
   NonlinearSystem & _nl;
-  
+
   GeneratedMesh *_gen_mesh;
 };
 
