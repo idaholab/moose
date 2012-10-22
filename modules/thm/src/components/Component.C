@@ -18,6 +18,35 @@ InputParameters validParams<Component>()
   return params;
 }
 
+/*
+ * Class used by Component class to map vector variables through friendly names
+ * i.e. friendly name = inlet:K_loss; variableName = K_loss, position = 1
+ */
+RavenMapContainer::RavenMapContainer()
+{
+}
+/*
+ * CHANGE VARIABLENAME to ControllableName
+ */
+RavenMapContainer::RavenMapContainer(const std::string & controllableParName, unsigned int & position):
+   _controllableParName(controllableParName),
+   _position(position)
+{
+}
+RavenMapContainer::~RavenMapContainer(){
+}
+const std::string &
+RavenMapContainer::getControllableParName(){
+   return _controllableParName;
+}
+unsigned int &
+RavenMapContainer::getControllableParPosition(){
+   return _position;
+}
+
+/*
+ * Component implementation
+ */
 static unsigned int comp_id = 0;
 
 std::string
@@ -33,6 +62,13 @@ Component::genName(const std::string & prefix, const std::string & suffix)
 {
   std::stringstream ss;
   ss << prefix << ":" << suffix;
+  return ss.str();
+}
+std::string
+Component::genName(const std::string & prefix, const std::string & middle, const std::string & suffix)
+{
+  std::stringstream ss;
+  ss << prefix << middle << suffix;
   return ss.str();
 }
 
@@ -68,7 +104,6 @@ Component::Component(const std::string & name, InputParameters parameters) :
 
     _input_file_name(getParam<std::string>("physics_input_file"))
 {
-
 }
 
 Component::~Component()
@@ -124,4 +159,9 @@ void
 Component::connectObject(const std::string & rname, const std::string & mooseName)
 {
   _rname_map[rname].push_back(mooseName);
+}
+
+void
+Component::createVectorControllableParMapping(const std::string & rname, const std::string & mooseName, unsigned int pos){
+  _rvect_map[rname] = RavenMapContainer(mooseName,pos);
 }

@@ -10,10 +10,30 @@
 
 class Component;
 class FEProblem;
+class RavenMapContainer;
 //class ComponentPostProcessor;
 
 template<>
 InputParameters validParams<Component>();
+
+/*
+ * Class used by Component class to map vector parameters through friendly names
+ * i.e. friendly name = inlet:K_loss; variableName = K_loss, position = 1.
+ * Since this class is only privately used by the class Component,
+ * it's been added in this file
+ */
+class RavenMapContainer{
+public:
+   RavenMapContainer();
+   RavenMapContainer(const std::string & controllableParName, unsigned int & position);
+   virtual ~ RavenMapContainer();
+   const std::string & getControllableParName();
+   unsigned int & getControllableParPosition();
+protected:
+   std::string        _controllableParName;     ///< Variable name (i.e. K_loss)
+   unsigned int       _position;                ///< Position in the vector (i.e. 1)
+};
+
 
 /**
  * Base class for R7 components
@@ -81,6 +101,13 @@ public:
   const std::vector<std::string> & getMooseObjectsByName(const std::string rname) { return _rname_map[rname]; }
 
   void connectObject(const std::string & rname, const std::string & mooseName);
+  /*
+   * This function creates a mapping between a RAVEN friendly name and a vector variable within a MOOSE object
+   * @ rname, raven friendly name
+   * @ mooseName, vector parameter name within an object
+   * @ pos, position in the vector
+   */
+  void createVectorControllableParMapping(const std::string & rname, const std::string & mooseName, unsigned int pos);
 
   //LZou test
   //virtual void update();
@@ -91,6 +118,7 @@ public:
 public:
   static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
   static std::string genName(const std::string & prefix, const std::string & suffix);
+  static std::string genName(const std::string & prefix, const std::string & middle, const std::string & suffix);
 
 protected:
   unsigned int _id;                     ///< Unique ID of this component
@@ -102,8 +130,9 @@ protected:
   std::string _input_file_name;
   std::vector<unsigned int> _subdomains;     ///< List of subdomain IDs this components owns
 
-  /// Mapping from a friendly name to MOOSE object name
-  std::map<std::string, std::vector<std::string> > _rname_map;
+  std::map<std::string, std::vector<std::string> > _rname_map; ///< Mapping from a friendly name to MOOSE object name
+
+  std::map<std::string, RavenMapContainer> _rvect_map;         ///< Mapping from a friendly name to a vector variable within a MOOSE object
 
   virtual unsigned int getNextSubdomainId();
   virtual unsigned int getNextBCId();
@@ -141,7 +170,17 @@ Component::getRParam(const std::string & param_name)
         return obj->parameters().get<T>(s[1]);
     }
   }
-
+  /*
+   * Specialization for RAVEN. At this point the variable has not been found.
+   * Try to search into the vector parameter mapping.
+   */
+  if(_rvect_map.find(param_name) == _rvect_map.end()){
+    mooseError("Parameter '" + param_name + "' was not found in component '" + name() + "'.");
+  }
+  RavenMapContainer name_cont = _rvect_map.find(param_name) -> second;
+  if(parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName())){
+    return parameters().get< std::vector<T> >(name_cont.getControllableParName())[name_cont.getControllableParPosition()];
+  }
   mooseError("Parameter '" + param_name + "' was not found in component '" + name() + "'.");
 }
 
@@ -150,6 +189,7 @@ void
 Component::setRParam(const std::string & param_name, const T & value)
 {
   std::vector<std::string> s = split(param_name);
+  bool found = false;
 
   const std::vector<std::string> & names = getMooseObjectsByName(s[0]);
   for (std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
@@ -164,7 +204,21 @@ Component::setRParam(const std::string & param_name, const T & value)
         MooseObject * obj = *it;
         if (obj->parameters().have_parameter<T>(s[1]))
           obj->parameters().set<T>(s[1]) = value;
+          found = true;
       }
+    }
+  }
+
+  /*
+   * Specialization for RAVEN. At this point the variable has not been found.
+   * Try to search into the vector parameter mapping
+   */
+  if(not found){
+    RavenMapContainer name_cont = _rvect_map.find(param_name) -> second;
+    if(parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName())){
+      std::vector<T> tempp = parameters().get< std::vector<T> >(name_cont.getControllableParName());
+      tempp[name_cont.getControllableParPosition()] = value;
+      parameters().set< std::vector<T> >(name_cont.getControllableParName())=tempp;
     }
   }
 }
