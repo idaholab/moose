@@ -209,12 +209,49 @@ MooseMesh::update()
 {
   // Rebuild the boundary conditions
   build_node_list_from_side_list();
+
   //Update the node to elem map
   _node_to_elem_map.clear();
-  MeshTools::build_nodes_to_elem_map(_mesh, _node_to_elem_map);
+
   buildNodeList();
   buildBndElemList();
   cacheInfo();
+}
+
+const Node &
+MooseMesh::node(const unsigned int i) const
+{
+  if(i > _mesh.max_node_id())
+    return *(*_quadrature_nodes.find(i)).second;
+
+  return _mesh.node(i);
+}
+
+Node &
+MooseMesh::node(const unsigned int i)
+{
+  if(i > _mesh.max_node_id())
+    return *_quadrature_nodes[i];
+
+  return _mesh.node(i);
+}
+
+const Node*
+MooseMesh::node_ptr(const unsigned int i) const
+{
+  if(i > _mesh.max_node_id())
+    return (*_quadrature_nodes.find(i)).second;
+
+  return _mesh.node_ptr(i);
+}
+
+Node*
+MooseMesh::node_ptr(const unsigned int i)
+{
+  if(i > _mesh.max_node_id())
+    return _quadrature_nodes[i];
+
+  return _mesh.node_ptr(i);
 }
 
 void
@@ -305,6 +342,13 @@ MooseMesh::buildNodeList()
     _bnd_nodes[i] = new BndNode(&_mesh.node(nodes[i]), ids[i]);
     _node_set_nodes[ids[i]].push_back(nodes[i]);
   }
+
+  _bnd_nodes.reserve(_bnd_nodes.size() + _extra_bnd_nodes.size());
+  for(unsigned int i=0; i<_extra_bnd_nodes.size(); i++)
+  {
+    BndNode * bnode = new BndNode(_extra_bnd_nodes[i]._node, _extra_bnd_nodes[i]._bnd_id);
+    _bnd_nodes.push_back(bnode);
+  }
 }
 
 void
@@ -325,6 +369,24 @@ MooseMesh::buildBndElemList()
     _bnd_elems[i] = new BndElement(_mesh.elem(elems[i]), sides[i], ids[i]);
   }
 }
+
+std::map<unsigned int, std::vector<unsigned int> > &
+MooseMesh::nodeToElemMap()
+{
+  if(!_node_to_elem_map.size())
+  {
+    MeshBase::const_element_iterator       el  = _mesh.elements_begin();
+    const MeshBase::const_element_iterator end = _mesh.elements_end();
+
+    for (; el != end; ++el)
+      for (unsigned int n=0; n<(*el)->n_nodes(); n++)
+        _node_to_elem_map[(*el)->node(n)].push_back((*el)->id());
+  }
+
+  return _node_to_elem_map;
+}
+
+
 
 ConstElemRange *
 MooseMesh::getActiveLocalElementRange()
@@ -518,6 +580,50 @@ MooseMesh::addUniqueNode(const Point & p, Real tol)
 
   mooseAssert(node != NULL, "Node is NULL");
   return node;
+}
+
+Node *
+MooseMesh::addQuadratureNode(const Elem * elem, const unsigned short int side, const unsigned int qp, BoundaryID bid, const Point & point)
+{
+  Node * qnode;
+
+  if(_elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side].find(qp) == _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side].end())
+  {
+    // Create a new node id starting from the max node id and counting down.  This will be the least
+    // likely to collide with an existing node id.
+    unsigned int max_id = std::numeric_limits<unsigned int>::max()-100;
+    unsigned int new_id = max_id - _quadrature_nodes.size();
+
+    if(new_id <= _mesh.max_node_id())
+      mooseError("Quadrature node id collides with existing node id!");
+
+    qnode = new Node(point, new_id);
+
+    // Keep track of this new node in two different ways for easy lookup
+    _quadrature_nodes[new_id] = qnode;
+    _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side][qp] = qnode;
+
+    _node_to_elem_map[new_id].push_back(elem->id());
+  }
+  else
+    qnode = _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side][qp];
+
+  BndNode * bnode = new BndNode(qnode, bid);
+  _bnd_nodes.push_back(bnode);
+
+  _extra_bnd_nodes.push_back(*bnode);
+
+  // Do this so the range will be regenerated next time it is accessed
+  delete _bnd_node_range;
+  _bnd_node_range = NULL;
+
+  return qnode;
+}
+
+Node *
+MooseMesh::getQuadratureNode(const Elem * elem, const unsigned short int side, const unsigned int qp)
+{
+  return _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side][qp];
 }
 
 BoundaryID

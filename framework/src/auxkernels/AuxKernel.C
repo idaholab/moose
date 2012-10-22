@@ -75,6 +75,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _u_older(_nodal ? _var.nodalSlnOlder() : _var.slnOlder()),
 
     _current_elem(_var.currentElem()),
+    _current_side(_var.currentSide()),
     _current_elem_volume(_subproblem.elemVolume(_tid)),
     _current_side_volume(_subproblem.sideElemVolume(_tid)),
 

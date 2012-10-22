@@ -40,6 +40,11 @@ public:
    */
   NearestNodeLocator & getNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave);
 
+  /**
+   * Retrieve a Gauss NearestNodeLocator associated with the two sides.
+   */
+  NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave);
+
 protected:
   GeometricSearchData & _geometric_search_data;
 };

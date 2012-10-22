@@ -24,9 +24,9 @@
 class SlaveNeighborhoodThread
 {
 public:
-  SlaveNeighborhoodThread(const MeshBase & mesh,
+  SlaveNeighborhoodThread(const MooseMesh & mesh,
                           const std::vector<unsigned int> & trial_master_nodes,
-                          const std::vector<std::vector<unsigned int> > & node_to_elem_map,
+                          std::map<unsigned int, std::vector<unsigned int> > & node_to_elem_map,
                           const unsigned int patch_size);
 
 
@@ -48,13 +48,13 @@ public:
 
 protected:
   /// The Mesh
-  const MeshBase & _mesh;
+  const MooseMesh & _mesh;
 
   /// Nodes to search against
   const std::vector<unsigned int> & _trial_master_nodes;
 
   /// Node to elem map
-  const std::vector<std::vector<unsigned int> > & _node_to_elem_map;
+  std::map<unsigned int, std::vector<unsigned int> > & _node_to_elem_map;
 
   /// The number of nodes to keep
   unsigned int _patch_size;

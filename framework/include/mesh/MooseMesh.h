@@ -56,6 +56,7 @@ public:
 
   void buildNodeList ();
   void buildBndElemList();
+  std::map<unsigned int, std::vector<unsigned int> > & nodeToElemMap();
 
   virtual bnd_node_iterator bnd_nodes_begin ();
   virtual bnd_node_iterator bnd_nodes_end ();
@@ -76,12 +77,13 @@ public:
   virtual unsigned int n_nodes () const { return _mesh.n_nodes(); }
   virtual unsigned int n_elem () const { return _mesh.n_elem(); }
 
-  std::vector<std::vector<unsigned int> > & nodeToElemMap() { return _node_to_elem_map; }
-
-  virtual const Node & node (const unsigned int i) const { return _mesh.node(i); }
-  virtual Node & node (const unsigned int i) { return _mesh.node(i); }
+  virtual const Node & node (const unsigned int i) const;
+  virtual Node & node (const unsigned int i);
+  virtual const Node* node_ptr (const unsigned int i) const;
+  virtual Node* node_ptr (const unsigned int i);
 
   virtual Elem * elem(const unsigned int i) { return _mesh.elem(i); }
+  virtual const Elem * elem(const unsigned int i) const { return _mesh.elem(i); }
 
   bool changed() { return _is_changed; }
   void changed(bool state) { _is_changed = state; }
@@ -149,6 +151,26 @@ public:
    * will be returned
    */
   const Node * addUniqueNode(const Point & p, Real tol=1e-6);
+
+  /**
+   * Adds a ficticious "QuadratureNode".  This doesn't actually add it to the libMesh mesh...
+   * we just keep track of these here in MooseMesh.
+   *
+   * QuadratureNodes are fictitious "Nodes" that are located at quadrature points.  This is useful for using
+   * the geometric search system to do searches based on quadrature point locations....
+   *
+   * @param elem The element
+   */
+  Node * addQuadratureNode(const Elem * elem, const unsigned short int side, const unsigned int qp, BoundaryID bid, const Point & point);
+
+  /**
+   * Get a specified quadrature node.
+   *
+   * @param elem The element the quadrature point is on
+   * @param side The side the quadrature point is on
+   * @param qp The quadrature point number associated with the point
+   */
+  Node * getQuadratureNode(const Elem * elem, const unsigned short int side, const unsigned int qp);
 
   /**
    * Get the associated BoundaryID for the boundary name.
@@ -227,7 +249,7 @@ protected:
   ConstBndElemRange * _bnd_elem_range;
 
   /// A map of all of the current nodes to the elements that they are connected to.
-  std::vector<std::vector<unsigned int> > _node_to_elem_map;
+  std::map<unsigned int, std::vector<unsigned int> > _node_to_elem_map;
 
   /**
    * A set of subdomain IDs currently present in the mesh.
@@ -255,6 +277,10 @@ protected:
   std::vector<BndElement *> _bnd_elems;
   typedef std::vector<BndElement *>::iterator             bnd_elem_iterator_imp;
   typedef std::vector<BndElement *>::const_iterator const_bnd_elem_iterator_imp;
+
+  std::map<unsigned int, Node *> _quadrature_nodes;
+  std::map<unsigned int, std::map<unsigned int, std::map<unsigned int, Node *> > > _elem_to_side_to_qp_to_quadrature_nodes;
+  std::vector<BndNode> _extra_bnd_nodes;
 
   /// list of nodes that belongs to a specified block (domain)
   std::map<unsigned int, std::set<SubdomainID> > _block_node_list;

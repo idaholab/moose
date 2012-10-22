@@ -139,6 +139,9 @@ protected:
 
   /// Current element (valid only for elemental kernels)
   const Elem * & _current_elem;
+  /// current side of the current element
+  unsigned int & _current_side;
+
   /// Volume of the current element
   const Real & _current_elem_volume;
   /// Volume of the current side

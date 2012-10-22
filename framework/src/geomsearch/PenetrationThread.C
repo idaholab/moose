@@ -26,7 +26,7 @@
 // Mutex to use when accessing _penetration_info;
 Threads::spin_mutex pinfo_mutex;
 
-PenetrationThread::PenetrationThread(const MeshBase & mesh,
+PenetrationThread::PenetrationThread(const MooseMesh & mesh,
                                      BoundaryID master_boundary,
                                      BoundaryID slave_boundary,
                                      std::map<unsigned int, PenetrationLocator::PenetrationInfo *> & penetration_info,
@@ -35,7 +35,7 @@ PenetrationThread::PenetrationThread(const MeshBase & mesh,
                                      std::vector<FEBase * > & fes,
                                      FEType & fe_type,
                                      NearestNodeLocator & nearest_node,
-                                     std::vector<std::vector<unsigned int> > & node_to_elem_map,
+                                     std::map<unsigned int, std::vector<unsigned int> > & node_to_elem_map,
                                      std::vector< unsigned int > & elem_list,
                                      std::vector< unsigned short int > & side_list,
                                      std::vector< short int > & id_list) :

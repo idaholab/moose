@@ -20,7 +20,7 @@
 class NearestNodeThread
 {
 public:
-  NearestNodeThread(const MeshBase & mesh,
+  NearestNodeThread(const MooseMesh & mesh,
                     std::map<unsigned int, std::vector<unsigned int> > & neighbor_nodes);
 
   // Splitting Constructor
@@ -35,7 +35,7 @@ public:
 
 protected:
   // The Mesh
-  const MeshBase & _mesh;
+  const MooseMesh & _mesh;
 
   // The neighborhood nodes associated with each node
   std::map<unsigned int, std::vector<unsigned int> > & _neighbor_nodes;

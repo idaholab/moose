@@ -34,3 +34,9 @@ GeometricSearchInterface::getNearestNodeLocator(const BoundaryName & master, con
 {
   return _geometric_search_data.getNearestNodeLocator(master, slave);
 }
+
+NearestNodeLocator &
+GeometricSearchInterface::getQuadratureNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave)
+{
+  return _geometric_search_data.getQuadratureNearestNodeLocator(master, slave);
+}

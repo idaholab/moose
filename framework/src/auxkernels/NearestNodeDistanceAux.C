@@ -25,7 +25,7 @@ InputParameters validParams<NearestNodeDistanceAux>()
 
 NearestNodeDistanceAux::NearestNodeDistanceAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _nearest_node(getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0]))
+    _nearest_node(_nodal ? getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0]) : getQuadratureNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0]))
 {
   if(getParam<std::vector<BoundaryName> >("boundary").size() > 1)
     mooseError("NearestNodeDistanceAux can only be used with one boundary at a time!");
@@ -34,5 +34,10 @@ NearestNodeDistanceAux::NearestNodeDistanceAux(const std::string & name, InputPa
 Real
 NearestNodeDistanceAux::computeValue()
 {
-  return _nearest_node.distance(_current_node->id());
+  if(_nodal)
+    return _nearest_node.distance(_current_node->id());
+
+  Node * qnode = _mesh.getQuadratureNode(_current_elem, _current_side, _qp);
+
+  return _nearest_node.distance(qnode->id());
 }

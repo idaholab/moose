@@ -1,0 +1,74 @@
+[Mesh]
+  # uniform_refine = 1
+  type = MooseMesh
+  file = 2dcontact_collide.e
+[]
+
+[Variables]
+  [./u]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+
+[AuxVariables]
+  [./distance]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[Kernels]
+  [./diff]
+    type = Diffusion
+    variable = u
+  [../]
+[]
+
+[AuxBCs]
+  [./distance]
+    type = NearestNodeDistanceAux
+    variable = distance
+    boundary = 2
+    paired_boundary = 3
+  [../]
+[]
+
+[BCs]
+  [./block1_left]
+    type = DirichletBC
+    variable = u
+    boundary = 1
+    value = 0
+  [../]
+  [./block1_right]
+    type = DirichletBC
+    variable = u
+    boundary = 2
+    value = 1
+  [../]
+  [./block2_left]
+    type = DirichletBC
+    variable = u
+    boundary = 3
+    value = 0
+  [../]
+  [./block2_right]
+    type = DirichletBC
+    variable = u
+    boundary = 4
+    value = 1
+  [../]
+[]
+
+[Executioner]
+  type = Steady
+  petsc_options = -snes_mf_operator
+[]
+
+[Output]
+  output_initial = true
+  exodus = true
+  perf_log = true
+[]
+

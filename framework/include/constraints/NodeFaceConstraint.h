@@ -174,7 +174,7 @@ protected:
   /// DOF map
   const DofMap & _dof_map;
 
-  std::vector<std::vector<unsigned int> > & _node_to_elem_map;
+  std::map<unsigned int, std::vector<unsigned int> > & _node_to_elem_map;
 
   /**
    * Whether or not the slave's residual should be overwritten.

@@ -33,6 +33,7 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh
     _boundary2(boundary2),
     _first(true)
 {
+  /*
   //sanity check on boundary ids
   const std::set<BoundaryID>& bids=_mesh.get_boundary_ids();
   std::set<BoundaryID>::const_iterator sit;
@@ -42,6 +43,7 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh
   sit=bids.find(_boundary2);
   if (sit == bids.end())
     mooseError("NearestNodeLocator being created for boundaries "<<_boundary1<<" and "<<_boundary2<<", but boundary "<<_boundary2<<" does not exist");
+  */
 }
 
 NearestNodeLocator::~NearestNodeLocator()
@@ -121,7 +123,7 @@ NearestNodeLocator::findNodes()
     // don't need the BB anymore
     delete my_inflated_box;
 
-    std::vector<std::vector<unsigned int> > & node_to_elem_map = _mesh.nodeToElemMap();
+    std::map<unsigned int, std::vector<unsigned int> > & node_to_elem_map = _mesh.nodeToElemMap();
 
     NodeIdRange trial_slave_node_range(trial_slave_nodes.begin(), trial_slave_nodes.end(), 1);
 

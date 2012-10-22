@@ -36,9 +36,9 @@ public:
   }
 };
 
-SlaveNeighborhoodThread::SlaveNeighborhoodThread(const MeshBase & mesh,
+SlaveNeighborhoodThread::SlaveNeighborhoodThread(const MooseMesh & mesh,
                                                  const std::vector<unsigned int> & trial_master_nodes,
-                                                 const std::vector<std::vector<unsigned int> > & node_to_elem_map,
+                                                 std::map<unsigned int, std::vector<unsigned int> > & node_to_elem_map,
                                                  const unsigned int patch_size) :
   _mesh(mesh),
   _trial_master_nodes(trial_master_nodes),

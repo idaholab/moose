@@ -35,6 +35,9 @@ public:
   PenetrationLocator & getPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order=FIRST);
 
   NearestNodeLocator & getNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave);
+  NearestNodeLocator & getNearestNodeLocator(const unsigned int master_id, const unsigned int slave_id);
+
+  NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave);
 
   /**
    * Update all of the search objects.

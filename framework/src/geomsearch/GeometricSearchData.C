@@ -88,6 +88,12 @@ GeometricSearchData::getNearestNodeLocator(const BoundaryName & master, const Bo
   unsigned int master_id = _mesh.getBoundaryID(master);
   unsigned int slave_id  = _mesh.getBoundaryID(slave);
 
+  return getNearestNodeLocator(master_id, slave_id);
+}
+
+NearestNodeLocator &
+GeometricSearchData::getNearestNodeLocator(const unsigned int master_id, const unsigned int slave_id)
+{
   NearestNodeLocator * nnl = _nearest_node_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)];
 
   if(!nnl)
@@ -98,3 +104,47 @@ GeometricSearchData::getNearestNodeLocator(const BoundaryName & master, const Bo
 
   return *nnl;
 }
+
+NearestNodeLocator &
+GeometricSearchData::getQuadratureNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave)
+{
+  unsigned int master_id = _mesh.getBoundaryID(master);
+  unsigned int slave_id  = _mesh.getBoundaryID(slave);
+
+  // Generate a new boundary id
+  // TODO: Make this better!
+  unsigned int base_id = 1e6;
+  unsigned int qslave_id = slave_id + base_id;
+
+  QBase * & qrule_face = _subproblem.qRuleFace(0);
+  const MooseArray<Point> & points_face = _subproblem.pointsFace(0);
+
+  ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
+  for (ConstBndElemRange::const_iterator elem_it = range.begin() ; elem_it != range.end(); ++elem_it)
+  {
+    const BndElement * belem = *elem_it;
+
+    const Elem * elem = belem->_elem;
+    unsigned short int side = belem->_side;
+    BoundaryID boundary_id = belem->_bnd_id;
+
+    if (elem->processor_id() == libMesh::processor_id())
+    {
+      if(boundary_id == slave_id)
+      {
+        _subproblem.prepare(elem, 0);
+        _subproblem.reinitElemFace(elem, side, boundary_id, 0);
+
+        for(unsigned int qp=0; qp<points_face.size(); qp++)
+        {
+          _mesh.addQuadratureNode(elem, side, qp, qslave_id, points_face[qp]);
+        }
+      }
+    }
+  }
+
+  return getNearestNodeLocator(master_id, qslave_id);
+}
+
+
+

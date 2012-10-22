@@ -17,7 +17,7 @@
 // libmesh includes
 #include "threads.h"
 
-NearestNodeThread::NearestNodeThread(const MeshBase & mesh,
+NearestNodeThread::NearestNodeThread(const MooseMesh & mesh,
                                      std::map<unsigned int, std::vector<unsigned int> > & neighbor_nodes) :
   _mesh(mesh),
   _neighbor_nodes(neighbor_nodes)
