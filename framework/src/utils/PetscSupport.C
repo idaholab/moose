@@ -73,23 +73,24 @@ void petscSetOptions(Problem & problem)
 
 PetscErrorCode  petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedReason *reason,void *dummy)
 {
-  NonlinearSystem *system = (NonlinearSystem *) dummy;      // C strikes
+  FEProblem & problem = *static_cast<FEProblem *>(dummy);
+  NonlinearSystem & system = problem.getNonlinearSystem();
 
   *reason = KSP_CONVERGED_ITERATING;
 
   //If it's the beginning of a new set of iterations, reset last_rnorm
   if (!n)
-    system->_last_rnorm = 1e99;
+    system._last_rnorm = 1e99;
 
-  PetscReal norm_diff = std::fabs(rnorm - system->_last_rnorm);
+  PetscReal norm_diff = std::fabs(rnorm - system._last_rnorm);
 
-  if(norm_diff < system->_l_abs_step_tol)
+  if(norm_diff < system._l_abs_step_tol)
   {
     *reason = KSP_CONVERGED_RTOL;
     return(0);
   }
 
-  system->_last_rnorm = rnorm;
+  system._last_rnorm = rnorm;
 
   // From here, we want the default behavior of the KSPDefaultConverged
   // test, but we don't want PETSc to die in that function with a
@@ -113,14 +114,15 @@ PetscErrorCode  petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedRe
   if (n >= ksp->max_it) *reason = KSP_CONVERGED_ITS;
 
   if(*reason == KSP_CONVERGED_ITS || *reason == KSP_CONVERGED_RTOL)
-    system->_current_l_its.push_back(n);
+    system._current_l_its.push_back(n);
 
   return 0;
 }
 
 PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal pnorm,PetscReal fnorm,SNESConvergedReason *reason,void * dummy)
 {
-  NonlinearSystem *system = (NonlinearSystem *) dummy;      // C strikes
+  FEProblem & problem = *static_cast<FEProblem *>(dummy);
+  NonlinearSystem & system = problem.getNonlinearSystem();
 
   *reason = SNES_CONVERGED_ITERATING;
 
@@ -128,8 +130,8 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
   {
     /* set parameter for default relative tolerance convergence test */
     /* _initial_residual has already been computed by the NonlinearSystem at this point */
-    snes->ttol = system->_initial_residual*snes->rtol;
-    system->_last_nl_rnorm = system->_initial_residual;
+    snes->ttol = system._initial_residual*snes->rtol;
+    system._last_nl_rnorm = system._initial_residual;
   }
   if (fnorm != fnorm)
   {
@@ -147,8 +149,8 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
     *reason = SNES_DIVERGED_FUNCTION_COUNT;
   }
   else if(it &&
-          snes->rtol > system->_last_nl_rnorm &&
-          fnorm >= system->_initial_residual * (1.0/snes->rtol))
+          snes->rtol > system._last_nl_rnorm &&
+          fnorm >= system._initial_residual * (1.0/snes->rtol))
   {
     PetscInfo2(snes,"Nonlinear solve was blowing up!",snes->nfuncs,snes->max_funcs);
 #if PETSC_VERSION_LESS_THAN(3,2,0)
@@ -184,16 +186,16 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
   }
 
   if (it)
-    system->_last_nl_rnorm = snes->rtol;
+    system._last_nl_rnorm = snes->rtol;
 
 #if PETSC_VERSION_LESS_THAN(3,3,0)
   // PETSc 3.2.x
   if(*reason == SNES_CONVERGED_PNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_ABS)
-    system->_current_nl_its = it;
+    system._current_nl_its = it;
 #else
   // PETSc 3.3.0+
   if(*reason == SNES_CONVERGED_SNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_ABS)
-    system->_current_nl_its = it;
+    system._current_nl_its = it;
 #endif
   return(0);
 }
@@ -309,8 +311,8 @@ void petscSetDefaults(FEProblem & problem)
 
 #if PETSC_VERSION_LESS_THAN(3,0,0)
   // PETSc 2.3.3-
-  KSPSetConvergenceTest(ksp, petscConverged, &nl);
-  SNESSetConvergenceTest(snes, petscNonlinearConverged, &nl);
+  KSPSetConvergenceTest(ksp, petscConverged, &problem);
+  SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem);
 #else
   // PETSc 3.0.0+
 
@@ -322,12 +324,12 @@ void petscSetDefaults(FEProblem & problem)
   {
     PetscErrorCode ierr = KSPSetConvergenceTest(ksp,
                                                 petscConverged,
-                                                &nl,
+                                                &problem,
                                                 PETSC_NULL);
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
     ierr = SNESSetConvergenceTest(snes,
                                   petscNonlinearConverged,
-                                  &nl,
+                                  &problem,
                                   PETSC_NULL);
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
   }
