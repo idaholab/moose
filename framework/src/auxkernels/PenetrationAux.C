@@ -35,7 +35,7 @@ PenetrationAux::PenetrationAux(const std::string & name, InputParameters paramet
     AuxKernel(name, parameters),
     _quantity_string( getParam<std::string>("quantity") ),
     _quantity(PA_DISTANCE),
-    _penetration_locator(getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))))
+    _penetration_locator(_nodal ?  getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))) : getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))))
 {
   if (parameters.isParamValid("tangential_tolerance"))
   {
@@ -75,7 +75,14 @@ PenetrationAux::PenetrationAux(const std::string & name, InputParameters paramet
 Real
 PenetrationAux::computeValue()
 {
-  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+  const Node * current_node = NULL;
+
+  if(_nodal)
+    current_node = _current_node;
+  else
+    current_node = _mesh.getQuadratureNode(_current_elem, _current_side, _qp);
+
+  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[current_node->id()];
 
   Real retVal(-999999);
   if(pinfo)

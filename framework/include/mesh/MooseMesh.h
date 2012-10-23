@@ -250,6 +250,7 @@ protected:
 
   /// A map of all of the current nodes to the elements that they are connected to.
   std::map<unsigned int, std::vector<unsigned int> > _node_to_elem_map;
+  bool _node_to_elem_map_built;
 
   /**
    * A set of subdomain IDs currently present in the mesh.

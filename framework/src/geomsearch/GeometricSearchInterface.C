@@ -29,6 +29,12 @@ GeometricSearchInterface::getPenetrationLocator(const BoundaryName & master, con
   return _geometric_search_data.getPenetrationLocator(master, slave, order);
 }
 
+PenetrationLocator &
+GeometricSearchInterface::getQuadraturePenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order)
+{
+  return _geometric_search_data.getQuadraturePenetrationLocator(master, slave, order);
+}
+
 NearestNodeLocator &
 GeometricSearchInterface::getNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave)
 {

@@ -1,0 +1,6 @@
+[Tests]
+  [./qpl]
+    input = 'quadrature_penetration_locator.i'
+    exodiff = 'quadrature_penetration_locator_out.e'
+  [../]
+[]

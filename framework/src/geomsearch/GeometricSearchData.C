@@ -75,8 +75,30 @@ GeometricSearchData::getPenetrationLocator(const BoundaryName & master, const Bo
 
   if(!pl)
   {
-    pl = new PenetrationLocator(_subproblem, *this, _mesh, master, slave, order);
+    pl = new PenetrationLocator(_subproblem, *this, _mesh, master_id, slave_id, order, getNearestNodeLocator(master_id, slave_id));
     _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)] = pl;
+  }
+
+  return *pl;
+}
+
+PenetrationLocator &
+GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order)
+{
+  unsigned int master_id = _mesh.getBoundaryID(master);
+  unsigned int slave_id  = _mesh.getBoundaryID(slave);
+
+  // Generate a new boundary id
+  // TODO: Make this better!
+  unsigned int base_id = 1e6;
+  unsigned int qslave_id = slave_id + base_id;
+
+  PenetrationLocator * pl = _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, qslave_id)];
+
+  if(!pl)
+  {
+    pl = new PenetrationLocator(_subproblem, *this, _mesh, master_id, qslave_id, order, getQuadratureNearestNodeLocator(master_id, slave_id));
+    _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, qslave_id)] = pl;
   }
 
   return *pl;
@@ -111,11 +133,24 @@ GeometricSearchData::getQuadratureNearestNodeLocator(const BoundaryName & master
   unsigned int master_id = _mesh.getBoundaryID(master);
   unsigned int slave_id  = _mesh.getBoundaryID(slave);
 
-  // Generate a new boundary id
+  return getQuadratureNearestNodeLocator(master_id, slave_id);
+}
+
+NearestNodeLocator &
+GeometricSearchData::getQuadratureNearestNodeLocator(const unsigned int master_id, const unsigned int slave_id)
+{
   // TODO: Make this better!
   unsigned int base_id = 1e6;
   unsigned int qslave_id = slave_id + base_id;
 
+  generateQuadratureNodes(slave_id, qslave_id);
+
+  return getNearestNodeLocator(master_id, qslave_id);
+}
+
+void
+GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int qslave_id)
+{
   QBase * & qrule_face = _subproblem.qRuleFace(0);
   const MooseArray<Point> & points_face = _subproblem.pointsFace(0);
 
@@ -142,8 +177,6 @@ GeometricSearchData::getQuadratureNearestNodeLocator(const BoundaryName & master
       }
     }
   }
-
-  return getNearestNodeLocator(master_id, qslave_id);
 }
 
 

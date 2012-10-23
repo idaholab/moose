@@ -37,7 +37,7 @@ class GeometricSearchData;
 class PenetrationLocator
 {
 public:
-  PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh, const BoundaryName & master, const BoundaryName & slave, Order order);
+  PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh, const unsigned int master_id, const unsigned int slave_id, Order order, NearestNodeLocator & nearest_node);
   ~PenetrationLocator();
   void detectPenetration();
 

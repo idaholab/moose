@@ -33,11 +33,13 @@ public:
   virtual ~GeometricSearchData();
 
   PenetrationLocator & getPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order=FIRST);
+  PenetrationLocator & getQuadraturePenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order=FIRST);
 
   NearestNodeLocator & getNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave);
   NearestNodeLocator & getNearestNodeLocator(const unsigned int master_id, const unsigned int slave_id);
 
   NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave);
+  NearestNodeLocator & getQuadratureNearestNodeLocator(const unsigned int master_id, const unsigned int slave_id);
 
   /**
    * Update all of the search objects.
@@ -51,6 +53,9 @@ public:
   MooseMesh & _mesh;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> _penetration_locators;
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> _nearest_node_locators;
+
+private:
+  void generateQuadratureNodes(unsigned int slave_id, unsigned int qslave_id);
 };
 
 #endif //GEOMETRICSEARCHDATA_H

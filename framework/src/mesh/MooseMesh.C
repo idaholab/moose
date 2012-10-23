@@ -57,6 +57,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     _local_node_range(NULL),
     _bnd_node_range(NULL),
     _bnd_elem_range(NULL),
+    _node_to_elem_map_built(false),
     _patch_size(40)
 {
 }
@@ -72,6 +73,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _local_node_range(NULL),
     _bnd_node_range(NULL),
     _bnd_elem_range(NULL),
+    _node_to_elem_map_built(false),
     _patch_size(40)
 {
   (*_mesh.boundary_info) = (*other_mesh._mesh.boundary_info);
@@ -212,6 +214,7 @@ MooseMesh::update()
 
   //Update the node to elem map
   _node_to_elem_map.clear();
+  _node_to_elem_map_built = false;
 
   buildNodeList();
   buildBndElemList();
@@ -373,8 +376,9 @@ MooseMesh::buildBndElemList()
 std::map<unsigned int, std::vector<unsigned int> > &
 MooseMesh::nodeToElemMap()
 {
-  if(!_node_to_elem_map.size())
+  if(!_node_to_elem_map_built)
   {
+    _node_to_elem_map_built = true;
     MeshBase::const_element_iterator       el  = _mesh.elements_begin();
     const MeshBase::const_element_iterator end = _mesh.elements_end();
 
