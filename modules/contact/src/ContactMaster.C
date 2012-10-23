@@ -81,6 +81,7 @@ ContactMaster::timestepSetup()
   {
     _penetration_locator._unlocked_this_step.clear();
     _penetration_locator._locked_this_step.clear();
+    _penetration_locator.setStartingContactPoint();
     updateContactSet();
     _updateContactSet = false;
   }
