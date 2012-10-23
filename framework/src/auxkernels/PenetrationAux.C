@@ -27,7 +27,7 @@ InputParameters validParams<PenetrationAux>()
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.set<bool>("use_displaced_mesh") = true;
-  params.addParam<std::string>("quantity","distance","The quantity to recover from the available penetration information: distance(default), tangential_distance, normal_x, normal_y, normal_z, closest_point_x, closest_point_y, closest_point_z, element_id");
+  params.addParam<std::string>("quantity","distance","The quantity to recover from the available penetration information: distance(default), tangential_distance, normal_x, normal_y, normal_z, closest_point_x, closest_point_y, closest_point_z, element_id, incremental_slip_x, incremental_slip_y, incremental_slip_z");
   return params;
 }
 
@@ -62,6 +62,12 @@ PenetrationAux::PenetrationAux(const std::string & name, InputParameters paramet
     _quantity = PA_ELEM_ID;
   else if ( _quantity_string == "side" )
     _quantity = PA_SIDE;
+  else if ( _quantity_string == "incremental_slip_x" )
+    _quantity = PA_INCREMENTAL_SLIP_X;
+  else if ( _quantity_string == "incremental_slip_y" )
+    _quantity = PA_INCREMENTAL_SLIP_Y;
+  else if ( _quantity_string == "incremental_slip_z" )
+    _quantity = PA_INCREMENTAL_SLIP_Z;
   else
     mooseError("Invalid quantity type in PenetrationAux: "<<_quantity_string);
 }
@@ -94,6 +100,12 @@ PenetrationAux::computeValue()
       retVal = (Real) (pinfo->_elem->id()+1);
     else if (_quantity == PA_SIDE)
       retVal = (Real) (pinfo->_side_num);
+    else if (_quantity == PA_INCREMENTAL_SLIP_X)
+      retVal = pinfo->_incremental_slip(0);
+    else if (_quantity == PA_INCREMENTAL_SLIP_Y)
+      retVal = pinfo->_incremental_slip(1);
+    else if (_quantity == PA_INCREMENTAL_SLIP_Z)
+      retVal = pinfo->_incremental_slip(2);
   }
 
   return retVal;

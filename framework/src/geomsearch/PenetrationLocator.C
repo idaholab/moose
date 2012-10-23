@@ -119,6 +119,19 @@ PenetrationLocator::setTangentialTolerance(Real tangential_tolerance)
   _tangential_tolerance = tangential_tolerance;
 }
 
+void
+PenetrationLocator::setStartingContactPoint()
+{
+  std::map<unsigned int, PenetrationInfo *>::iterator it( _penetration_info.begin() );
+  const std::map<unsigned int, PenetrationInfo *>::iterator it_end( _penetration_info.end() );
+  for ( ; it != it_end; ++it )
+  {
+    it->second->_starting_side = it->second->_side;
+    it->second->_starting_closest_point_ref = it->second->_closest_point_ref;
+  }
+}
+
+
 
 PenetrationLocator::PenetrationInfo::PenetrationInfo(const Node * node, const Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, Real tangential_distance, const Point & closest_point, const Point & closest_point_ref, const Point & closest_point_on_face_ref, std::vector<Node*> off_edge_nodes, const std::vector<std::vector<Real> > & side_phi, const std::vector<RealGradient> & dxyzdxi, const std::vector<RealGradient> & dxyzdeta, const std::vector<RealGradient> & d2xyzdxideta)
   :_node(node),
@@ -157,6 +170,8 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p) 
     _dxyzdxi(p._dxyzdxi),
     _dxyzdeta(p._dxyzdeta),
     _d2xyzdxideta(p._d2xyzdxideta),
+    _starting_side(p._starting_side),
+    _starting_closest_point_ref(p._starting_closest_point_ref),
     _update(p._update)
 {}
 

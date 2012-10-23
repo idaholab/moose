@@ -412,6 +412,11 @@ PenetrationThread::operator() (const NodeIdRange & range)
       delete p_info[j];
     }
 
+    if (info)
+    {
+      computeSlip( *fe, *info );
+    }
+
   }
 }
 
@@ -896,4 +901,17 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
     }
   }
   return off_of_this_edge;
+}
+
+void
+PenetrationThread::computeSlip(FEBase & fe,
+                               PenetrationLocator::PenetrationInfo & info)
+{
+  // Slip is current projected position of slave node minus
+  //   original projected position of slave node
+  std::vector<Point> points(1);
+  points[0] = info._starting_closest_point_ref;
+  fe.reinit(info._side, &points);
+  const std::vector<Point> & starting_point = fe.get_xyz();
+  info._incremental_slip = info._closest_point - starting_point[0];
 }

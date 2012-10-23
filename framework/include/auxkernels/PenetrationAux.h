@@ -52,7 +52,10 @@ protected:
     PA_CLOSEST_POINT_Y,
     PA_CLOSEST_POINT_Z,
     PA_ELEM_ID,
-    PA_SIDE
+    PA_SIDE,
+    PA_INCREMENTAL_SLIP_X,
+    PA_INCREMENTAL_SLIP_Y,
+    PA_INCREMENTAL_SLIP_Z
   };
 
   std::string _quantity_string;

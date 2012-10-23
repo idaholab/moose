@@ -70,6 +70,9 @@ public:
     std::vector<RealGradient> _dxyzdxi;
     std::vector<RealGradient> _dxyzdeta;
     std::vector<RealGradient> _d2xyzdxideta;
+    const Elem * _starting_side;
+    Point _starting_closest_point_ref;
+    Point _incremental_slip;
     bool _update;
   };
 
@@ -101,6 +104,7 @@ public:
 
   void setUpdate(bool update);
   void setTangentialTolerance(Real tangential_tolerance);
+  void setStartingContactPoint();
 
 protected:
   bool _update_location; // Update the penetration location for nodes found last time

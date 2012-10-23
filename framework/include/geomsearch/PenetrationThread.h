@@ -109,6 +109,11 @@ protected:
                                      Node* &closest_node,
                                      const Elem* side,
                                      const std::vector<Node*> &edge_nodes);
+
+  void
+  computeSlip( FEBase & fe,
+               PenetrationLocator::PenetrationInfo & info );
+
   struct RidgeData
   {
     unsigned int _index1;
