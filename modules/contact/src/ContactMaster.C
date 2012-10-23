@@ -268,17 +268,44 @@ ContactMaster::computeQpJacobian()
 {
 
   PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
-  switch (_formulation)
+
+  switch(_model)
   {
-  case CF_DEFAULT:
-    return 0;
+  case CM_FRICTIONLESS:
+  case CM_EXPERIMENTAL:
+    switch (_formulation)
+    {
+    case CF_DEFAULT:
+      return 0;
+      break;
+    case CF_PENALTY:
+    case CF_AUGMENTED_LAGRANGE:
+      return _test[_i][_qp] * _penalty * _phi[_j][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
+      break;
+    default:
+      mooseError("Invalid contact formulation");
+      break;
+    }
     break;
-  case CF_PENALTY:
-  case CF_AUGMENTED_LAGRANGE:
-    return _test[_i][_qp] * _penalty * _phi[_j][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
+  case CM_GLUED:
+  case CM_COULOMB:
+  case CM_TIED:
+    switch (_formulation)
+    {
+    case CF_DEFAULT:
+      return 0;
+      break;
+    case CF_PENALTY:
+    case CF_AUGMENTED_LAGRANGE:
+      return _test[_i][_qp] * _penalty * _phi[_j][_qp];
+      break;
+    default:
+      mooseError("Invalid contact formulation");
+      break;
+    }
     break;
   default:
-    mooseError("Invalid contact formulation");
+    mooseError("Invalid or unavailable contact model");
     break;
   }
 
