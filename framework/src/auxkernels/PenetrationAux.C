@@ -20,7 +20,7 @@
 template<>
 InputParameters validParams<PenetrationAux>()
 {
-  MooseEnum orders("FIRST, SECOND, THIRD, FORTH", "FIRST");
+  MooseEnum orders("FIRST, SECOND, THIRD, FOURTH", "FIRST");
 
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");

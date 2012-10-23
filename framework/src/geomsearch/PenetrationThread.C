@@ -118,6 +118,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
 
         mooseAssert(info->_distance >= 0, "Error in PenetrationLocator: Slave node contained in element but contact distance was negative!");
 
+        computeSlip( *fe, *info );
         continue;
       }
       else
@@ -132,6 +133,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
         {
           if (info->_tangential_distance <= 0.0) //on the face
           {
+            computeSlip( *fe, *info );
             continue;
           }
           else if(info->_tangential_distance > 0.0 && old_tangential_distance > 0.0)
@@ -139,27 +141,16 @@ PenetrationThread::operator() (const NodeIdRange & range)
             if (info->_side->dim()==2 && info->_off_edge_nodes.size()<2)
             { //Closest point on face is on a node rather than an edge.  Another
               //face might be a better candidate.
-              delete info;
-              info = NULL;
             }
             else
+            {
+              computeSlip( *fe, *info );
               continue;
+            }
           }
-          else
-          {
-            delete info;
-            info = NULL;
-          }
-        }
-        else
-        {
-          delete info;
-          info = NULL;
         }
       }
     }
-
-    mooseAssert(info==NULL,"Shouldn't have info at this point");
 
     const Node * closest_node = _nearest_node.nearestNode(node.id());
     std::vector<unsigned int> & closest_elems = _node_to_elem_map[closest_node->id()];
@@ -220,14 +211,14 @@ PenetrationThread::operator() (const NodeIdRange & range)
       }
     }
 
-    mooseAssert(info==NULL,"Shouldn't have info at this point");
+    bool info_set(false);
 
     if (p_info.size() == 1)
     {
       if (p_info[0]->_tangential_distance <= _tangential_tolerance)
       {
-        info = p_info[0];
-        p_info[0] = NULL; // Set this to NULL so that we don't delete it (now owned by _penetration_info).
+        switchInfo( info, p_info[0] );
+        info_set = true;
       }
     }
     else if (p_info.size() > 1)
@@ -375,15 +366,15 @@ PenetrationThread::operator() (const NodeIdRange & range)
           p_info[face_index]->_dxyzdeta = fe->get_dxyzdeta();
           p_info[face_index]->_d2xyzdxideta = fe->get_d2xyzdxideta();
 
-          info = p_info[face_index];
-          p_info[face_index] = NULL; // Set this to NULL so that we don't delete it (now owned by _penetration_info).
+          switchInfo( info, p_info[face_index] );
+          info_set = true;
         }
         else
         {//todo:remove invalid ridge cases so they don't mess up individual face competition????
         }
       }
 
-      if (!info) //contact wasn't on a ridge -- compete individual interactions
+      if (!info_set) //contact wasn't on a ridge -- compete individual interactions
       {
         unsigned int best(0),i(1);
         do{
@@ -401,8 +392,8 @@ PenetrationThread::operator() (const NodeIdRange & range)
         while(i<p_info.size() && best<p_info.size());
         if (best < p_info.size())
         {
-          info = p_info[best];
-          p_info[best] = NULL; // Set this to NULL so that we don't delete it (now owned by _penetration_info).
+          switchInfo( info, p_info[best] );
+          info_set = true;
         }
       }
     }
@@ -412,6 +403,12 @@ PenetrationThread::operator() (const NodeIdRange & range)
       delete p_info[j];
     }
 
+    if (!info_set)
+    {
+      delete info;
+      info = NULL;
+    }
+
     if (info)
     {
       computeSlip( *fe, *info );
@@ -419,6 +416,29 @@ PenetrationThread::operator() (const NodeIdRange & range)
 
   }
 }
+
+void
+PenetrationThread::switchInfo( PenetrationLocator::PenetrationInfo * & info,
+                               PenetrationLocator::PenetrationInfo * & infoNew )
+{
+  mooseAssert(infoNew != NULL, "infoNew object is null");
+  if (info)
+  {
+    infoNew->_starting_elem = info->_starting_elem;
+    infoNew->_starting_side_num = info->_starting_side_num;
+    infoNew->_starting_closest_point_ref = info->_starting_closest_point_ref;
+  }
+  else
+  {
+    infoNew->_starting_elem = infoNew->_elem;
+    infoNew->_starting_side_num = infoNew->_side_num;
+    infoNew->_starting_closest_point_ref = infoNew->_closest_point_ref;
+  }
+  delete info;
+  info = infoNew;
+  infoNew = NULL; // Set this to NULL so that we don't delete it (now owned by _penetration_info).
+}
+
 
 void
 PenetrationThread::join(const PenetrationThread & /*other*/)
@@ -911,7 +931,9 @@ PenetrationThread::computeSlip(FEBase & fe,
   //   original projected position of slave node
   std::vector<Point> points(1);
   points[0] = info._starting_closest_point_ref;
-  fe.reinit(info._side, &points);
+  Elem * side = (info._starting_elem->build_side(info._starting_side_num,false)).release();
+  fe.reinit(side, &points);
   const std::vector<Point> & starting_point = fe.get_xyz();
   info._incremental_slip = info._closest_point - starting_point[0];
+  delete side;
 }

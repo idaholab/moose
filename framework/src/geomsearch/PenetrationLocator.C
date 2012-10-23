@@ -126,7 +126,8 @@ PenetrationLocator::setStartingContactPoint()
   const std::map<unsigned int, PenetrationInfo *>::iterator it_end( _penetration_info.end() );
   for ( ; it != it_end; ++it )
   {
-    it->second->_starting_side = it->second->_side;
+    it->second->_starting_elem = it->second->_elem;
+    it->second->_starting_side_num = it->second->_side_num;
     it->second->_starting_closest_point_ref = it->second->_closest_point_ref;
   }
 }
@@ -170,7 +171,8 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p) 
     _dxyzdxi(p._dxyzdxi),
     _dxyzdeta(p._dxyzdeta),
     _d2xyzdxideta(p._d2xyzdxideta),
-    _starting_side(p._starting_side),
+    _starting_elem(p._starting_elem),
+    _starting_side_num(p._starting_side_num),
     _starting_closest_point_ref(p._starting_closest_point_ref),
     _update(p._update)
 {}

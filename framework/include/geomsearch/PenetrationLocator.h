@@ -70,7 +70,8 @@ public:
     std::vector<RealGradient> _dxyzdxi;
     std::vector<RealGradient> _dxyzdeta;
     std::vector<RealGradient> _d2xyzdxideta;
-    const Elem * _starting_side;
+    const Elem * _starting_elem;
+    unsigned int _starting_side_num;
     Point _starting_closest_point_ref;
     Point _incremental_slip;
     bool _update;

@@ -114,6 +114,10 @@ protected:
   computeSlip( FEBase & fe,
                PenetrationLocator::PenetrationInfo & info );
 
+  void
+  switchInfo( PenetrationLocator::PenetrationInfo * & info,
+              PenetrationLocator::PenetrationInfo * & infoNew );
+
   struct RidgeData
   {
     unsigned int _index1;
