@@ -177,9 +177,11 @@ Component::getRParam(const std::string & param_name)
   if(_rvect_map.find(param_name) == _rvect_map.end()){
     mooseError("Parameter '" + param_name + "' was not found in component '" + name() + "'.");
   }
-  RavenMapContainer name_cont = _rvect_map.find(param_name) -> second;
-  if(parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName())){
-    return parameters().get< std::vector<T> >(name_cont.getControllableParName())[name_cont.getControllableParPosition()];
+  else{
+    RavenMapContainer name_cont = _rvect_map.find(param_name) -> second;
+    if(parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName())){
+      return parameters().get< std::vector<T> >(name_cont.getControllableParName())[name_cont.getControllableParPosition()];
+    }
   }
   mooseError("Parameter '" + param_name + "' was not found in component '" + name() + "'.");
 }
@@ -214,11 +216,13 @@ Component::setRParam(const std::string & param_name, const T & value)
    * Try to search into the vector parameter mapping
    */
   if(not found){
-    RavenMapContainer name_cont = _rvect_map.find(param_name) -> second;
-    if(parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName())){
-      std::vector<T> tempp = parameters().get< std::vector<T> >(name_cont.getControllableParName());
-      tempp[name_cont.getControllableParPosition()] = value;
-      parameters().set< std::vector<T> >(name_cont.getControllableParName())=tempp;
+    if(_rvect_map.find(param_name) != _rvect_map.end()){
+      RavenMapContainer name_cont = _rvect_map.find(param_name) -> second;
+      if(parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName())){
+        std::vector<T> tempp = parameters().get< std::vector<T> >(name_cont.getControllableParName());
+        tempp[name_cont.getControllableParPosition()] = value;
+        parameters().set< std::vector<T> >(name_cont.getControllableParName())=tempp;
+      }
     }
   }
 }
