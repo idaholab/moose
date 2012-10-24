@@ -1,7 +1,11 @@
 #include "QuadratureGapHeatTransfer.h"
 #include "GapConductance.h"
+#include "PenetrationLocator.h"
 
 #include "SystemBase.h"
+
+// libmesh
+#include "string_to_enum.h"
 
 template<>
 InputParameters validParams<QuadratureGapHeatTransfer>()
