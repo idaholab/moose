@@ -1,0 +1,6 @@
+[Tests]
+  [./perfect]
+    input = 'perfect.i'
+    exodiff = 'perfect_out.e'
+  [../]
+[]

@@ -9,6 +9,7 @@
 #include "GapConductance.h"
 #include "GapHeatPointSourceMaster.h"
 #include "GapHeatTransfer.h"
+#include "QuadratureGapHeatTransfer.h"
 #include "HeatConduction.h"
 #include "HeatConductionImplicitEuler.h"
 #include "HeatConductionMaterial.h"
@@ -27,6 +28,7 @@ Elk::HeatConduction::registerObjects()
   registerKernel(HeatSource);
   registerBoundaryCondition(ConvectiveFluxFunction);
   registerBoundaryCondition(GapHeatTransfer);
+  registerBoundaryCondition(QuadratureGapHeatTransfer);
   registerBoundaryCondition(BulkCoolantBC);
   registerMaterial(GapConductance);
   registerMaterial(HeatConductionMaterial);
