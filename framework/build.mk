@@ -175,6 +175,14 @@ endif
 
 CURRENT_APP ?= $(shell basename `pwd`)
 
+ifeq ($(CURRENT_APP),moose)
+  CONTAINING_DIR_FULLPATH = $(shell dirname `pwd`)
+  CONTAINING_DIR = $(shell basename $(CONTAINING_DIR_FULLPATH))
+  ifeq ($(CONTAINING_DIR), devel)
+    CURRENT_APP = "devel/moose"
+  endif
+endif
+
 #
 # Plugins
 #
