@@ -2821,6 +2821,68 @@ FEProblem::getVariableNames()
   return names;
 }
 
+MooseNonlinearConvergenceReason
+FEProblem::checkNonlinearConvergence(std::string &msg, const int it, const Real xnorm, const Real snorm, const Real fnorm, Real &ttol, const Real rtol, const Real stol, const Real abstol, const int nfuncs, const int max_funcs)
+{
+  NonlinearSystem & system = getNonlinearSystem();
+  MooseNonlinearConvergenceReason reason = MOOSE_ITERATING;
+  std::stringstream oss;
+
+  if (!it)
+  {
+    // set parameter for default relative tolerance convergence test
+    // _initial_residual has already been computed by the NonlinearSystem at this point
+    ttol = system._initial_residual*rtol;
+    system._last_nl_rnorm = system._initial_residual;
+  }
+  if (fnorm != fnorm)
+  {
+    oss << "Failed to converge, function norm is NaN\n";
+    reason = MOOSE_DIVERGED_FNORM_NAN;
+  }
+  else if (fnorm < abstol)
+  {
+    oss << "Converged due to function norm " << fnorm << " < " << abstol << std::endl;
+    reason = MOOSE_CONVERGED_FNORM_ABS;
+  }
+  else if (nfuncs >= max_funcs)
+  {
+    oss << "Exceeded maximum number of function evaluations: " << nfuncs << " > " << max_funcs << std::endl;
+    reason = MOOSE_DIVERGED_FUNCTION_COUNT;
+  }
+  else if(it &&
+          rtol > system._last_nl_rnorm &&
+          fnorm >= system._initial_residual * (1.0/rtol))
+  {
+    oss << "Nonlinear solve was blowing up! " << nfuncs << " " <<max_funcs << std::endl;
+    reason = MOOSE_DIVERGED_LINE_SEARCH;
+  }
+
+  if (it && !reason)
+  {
+    if (fnorm <= ttol)
+    {
+      oss << "Converged due to function norm " << fnorm << " < " << " (relative tolerance)" << std::endl;
+      reason = MOOSE_CONVERGED_FNORM_RELATIVE;
+    }
+    else if (snorm < stol*xnorm)
+    {
+      oss << "Converged due to small update length: " << snorm << " < " << stol << " * " << xnorm << std::endl;
+      reason = MOOSE_CONVERGED_SNORM_RELATIVE;
+    }
+  }
+
+  if (it)
+    system._last_nl_rnorm = rtol;
+
+  if(reason == MOOSE_CONVERGED_SNORM_RELATIVE || reason == MOOSE_CONVERGED_FNORM_RELATIVE || reason == MOOSE_CONVERGED_FNORM_ABS)
+    system._current_nl_its = it;
+
+  msg = oss.str();
+
+  return(reason);
+}
+
 #ifdef LIBMESH_HAVE_PETSC
 void
 FEProblem::storePetscOptions(const std::vector<std::string> & petsc_options,

@@ -119,88 +119,66 @@ PetscErrorCode  petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedRe
   return 0;
 }
 
-PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal pnorm,PetscReal fnorm,SNESConvergedReason *reason,void * dummy)
+PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal snorm,PetscReal fnorm,SNESConvergedReason *reason,void * dummy)
 {
+
+  // xnorm: norm of current iterate
+  // pnorm (snorm): norm of
+  // fnorm: norm of function
   FEProblem & problem = *static_cast<FEProblem *>(dummy);
-  NonlinearSystem & system = problem.getNonlinearSystem();
 
-  *reason = SNES_CONVERGED_ITERATING;
-
-  if (!it)
-  {
-    /* set parameter for default relative tolerance convergence test */
-    /* _initial_residual has already been computed by the NonlinearSystem at this point */
-    snes->ttol = system._initial_residual*snes->rtol;
-    system._last_nl_rnorm = system._initial_residual;
-  }
-  if (fnorm != fnorm)
-  {
-    PetscInfo(snes,"Failed to converge, function norm is NaN\n");
-    *reason = SNES_DIVERGED_FNORM_NAN;
-  }
-  else if (fnorm < snes->abstol)
-  {
-    PetscInfo2(snes,"Converged due to function norm %G < %G\n",fnorm,snes->abstol);
-    *reason = SNES_CONVERGED_FNORM_ABS;
-  }
-  else if (snes->nfuncs >= snes->max_funcs)
-  {
-    PetscInfo2(snes,"Exceeded maximum number of function evaluations: %D > %D\n",snes->nfuncs,snes->max_funcs);
-    *reason = SNES_DIVERGED_FUNCTION_COUNT;
-  }
-  else if(it &&
-          snes->rtol > system._last_nl_rnorm &&
-          fnorm >= system._initial_residual * (1.0/snes->rtol))
-  {
-    PetscInfo2(snes,"Nonlinear solve was blowing up!",snes->nfuncs,snes->max_funcs);
-#if PETSC_VERSION_LESS_THAN(3,2,0)
-    *reason = SNES_DIVERGED_LS_FAILURE;
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+  PetscInt stol = snes->xtol;
 #else
-    // PETSc 3.2.0 +
-    *reason = SNES_DIVERGED_LINE_SEARCH;
+  PetscInt stol = snes->stol;
 #endif
-  }
+  std::string msg;
 
-  if (it && !*reason)
+  MooseNonlinearConvergenceReason moose_reason = problem.checkNonlinearConvergence(msg, it, xnorm, snorm, fnorm, snes->ttol, snes->rtol, stol, snes->abstol, snes->nfuncs, snes->max_funcs);
+
+  if (msg.length() > 0)
+    PetscInfo(snes,msg.c_str());
+
+  switch (moose_reason)
   {
-    if (fnorm <= snes->ttol)
-    {
-      PetscInfo2(snes,"Converged due to function norm %G < %G (relative tolerance)\n",fnorm,snes->ttol);
+    case MOOSE_ITERATING:
+      *reason = SNES_CONVERGED_ITERATING;
+      break;
+
+    case MOOSE_CONVERGED_FNORM_ABS:
+      *reason = SNES_CONVERGED_FNORM_ABS;
+      break;
+
+    case MOOSE_CONVERGED_FNORM_RELATIVE:
       *reason = SNES_CONVERGED_FNORM_RELATIVE;
-    }
+      break;
+
+    case MOOSE_CONVERGED_SNORM_RELATIVE:
 #if PETSC_VERSION_LESS_THAN(3,3,0)
-    // PETSc 3.2.x-
-    else if (pnorm < snes->xtol*xnorm)
-    {
-      PetscInfo3(snes,"Converged due to small update length: %G < %G * %G\n",pnorm,snes->xtol,xnorm);
       *reason = SNES_CONVERGED_PNORM_RELATIVE;
-    }
 #else
-    // PETSc 3.3.0+
-    else if (pnorm < snes->stol*xnorm)
-    {
-      PetscInfo3(snes,"Converged due to small update length: %G < %G * %G\n",pnorm,snes->stol,xnorm);
       *reason = SNES_CONVERGED_SNORM_RELATIVE;
-    }
 #endif
-  }
+      break;
 
-  if (it)
-    system._last_nl_rnorm = snes->rtol;
+    case MOOSE_DIVERGED_FUNCTION_COUNT:
+      *reason = SNES_DIVERGED_FUNCTION_COUNT;
+      break;
 
-#if PETSC_VERSION_LESS_THAN(3,3,0)
-  // PETSc 3.2.x
-  if(*reason == SNES_CONVERGED_PNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_ABS)
-    system._current_nl_its = it;
+    case MOOSE_DIVERGED_FNORM_NAN:
+      *reason = SNES_DIVERGED_FNORM_NAN;
+      break;
+
+    case MOOSE_DIVERGED_LINE_SEARCH:
+#if PETSC_VERSION_LESS_THAN(3,2,0)
+      *reason = SNES_DIVERGED_LS_FAILURE;
 #else
-  // PETSc 3.3.0+
-  if(*reason == SNES_CONVERGED_SNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_ABS)
-    system._current_nl_its = it;
+      *reason = SNES_DIVERGED_LINE_SEARCH;
 #endif
-  return(0);
+      break;
+  }
+  return (0);
 }
-
-
 
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 // PETSc 3.2.x-

@@ -42,6 +42,17 @@ class FEProblem;
 template<>
 InputParameters validParams<FEProblem>();
 
+enum MooseNonlinearConvergenceReason
+{
+  MOOSE_ITERATING                = 0,
+  MOOSE_CONVERGED_FNORM_ABS      = 2,
+  MOOSE_CONVERGED_FNORM_RELATIVE = 3,
+  MOOSE_CONVERGED_SNORM_RELATIVE = 4,
+  MOOSE_DIVERGED_FUNCTION_COUNT  = -2,
+  MOOSE_DIVERGED_FNORM_NAN       = -4,
+  MOOSE_DIVERGED_LINE_SEARCH     = -6,
+};
+
 /**
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
@@ -76,6 +87,22 @@ public:
   CouplingMatrix * & couplingMatrix() { return _cm; }
 
   std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries(THREAD_ID tid) { return _assembly[tid]->couplingEntries(); }
+
+  /**
+   * Check for converence of the nonlinear solution
+   * @param msg        Error message that gets sent back to the solver
+   * @param it         Iteration counter
+   * @param xnorm      Norm of the solution vector
+   * @param snorm      Norm of the change in the solution vector
+   * @param fnorm      Norm of the residual vector
+   * @param ttol       Residual at relative convergence target
+   * @param rtol       Relative residual convergence tolerance
+   * @param stol       Solution change convergence tolerance
+   * @param abstol     Absolute residual convergence tolerance
+   * @param nfuncs     Number of function evaluations
+   * @param max_funcs  Maximum Number of function evaluations
+   */
+  MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg, const int it, const Real xnorm, const Real snorm, const Real fnorm, Real &ttol, const Real rtol, const Real stol, const Real abstol, const int nfuncs, const int max_funcs);
 
 #ifdef LIBMESH_HAVE_PETSC
   void storePetscOptions(const std::vector<std::string> & petsc_options,
