@@ -16,6 +16,7 @@
 #define SLAVENEIGHBORHOODTHREAD_H
 
 #include "MooseTypes.h"
+#include "MooseMesh.h"
 // libMesh
 #include "mesh_base.h"
 // System
