@@ -82,9 +82,6 @@
 #include "RandomIC.h"
 #include "ScalarConstantIC.h"
 
-// mesh modifiers
-#include "ElementDeleter.h"
-
 // executioners
 #include "Steady.h"
 #include "Transient.h"
@@ -292,8 +289,7 @@ registerObjects()
   registerInitialCondition(FunctionIC);
   registerInitialCondition(RandomIC);
   registerInitialCondition(ScalarConstantIC);
-  // Mesh Modifiers
-  registerMeshModifier(ElementDeleter);
+
   // executioners
   registerExecutioner(Steady);
   registerExecutioner(Transient);
