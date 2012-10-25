@@ -130,9 +130,15 @@ MooseMesh::prepare()
 //    MeshCommunication().gather_neighboring_elements(libmesh_cast_ref<ParallelMesh&>(getMesh()));
 //
   if (dynamic_cast<ParallelMesh *>(&_mesh) && !_is_parallel)
+  {
+    _mesh.allow_renumbering(true);
     _mesh.prepare_for_use(false);
+  }
   else
+  {
+    _mesh.allow_renumbering(false);
     _mesh.prepare_for_use(true);
+  }
 
   // If using ParallelMesh this will delete non-local elements from the current processor
   // If using SerialMesh, this function is a no-op.
