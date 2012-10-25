@@ -2873,9 +2873,9 @@ FEProblem::checkNonlinearConvergence(std::string &msg, const int it, const Real 
   }
 
   if (it)
-    system._last_nl_rnorm = rtol;
+    system._last_nl_rnorm = fnorm;
 
-  if(reason == MOOSE_CONVERGED_SNORM_RELATIVE || reason == MOOSE_CONVERGED_FNORM_RELATIVE || reason == MOOSE_CONVERGED_FNORM_ABS)
+  if(reason > 0) //converged
     system._current_nl_its = it;
 
   msg = oss.str();
