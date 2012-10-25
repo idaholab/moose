@@ -47,6 +47,8 @@ class FileOpenWidget(QtGui.QPushButton):
     
   def clicked(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Find Mesh File", os.getcwd(), "File (*)")
+
+    file_name = os.path.relpath(str(file_name))
     
     if file_name:
       table_value_item = self.table_widget.item(self.row,1)
