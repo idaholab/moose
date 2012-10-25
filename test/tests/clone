@@ -7,6 +7,9 @@ if(($# < 2))
     exit 1
 fi
 
+basename1=`basename $1`
+basename2=`basename $2`
+
 cp -r $1 $2
 cd $2
 
@@ -17,7 +20,6 @@ rm -f peacock*
 rm -f *.pyc
 rm gold/*
 
-mv $1.i $2.i
-mv $1.py $2.py
+mv $basename1.i $basename2.i
 
-sed -i "" "s/$1/$2/g" $2.py
+sed -i "" "s/$basename1/$basename2/g" tests
