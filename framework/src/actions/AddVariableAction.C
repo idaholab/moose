@@ -36,7 +36,7 @@ template<>
 InputParameters validParams<AddVariableAction>()
 {
   MooseEnum families("LAGRANGE, MONOMIAL, HERMITE, SCALAR, HIERARCHIC, CLOUGH, XYZ, SZABAB, BERNSTEIN", "LAGRANGE");
-  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FORTH", "FIRST");
+  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST");
 
   InputParameters params = validParams<Action>();
   params.addParam<MooseEnum>("family", families, "Specifies the family of FE shape functions to use for this variable");
