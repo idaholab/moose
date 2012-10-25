@@ -42,10 +42,12 @@ class FrictionalContactProblem : public FEProblem
 public:
   FrictionalContactProblem(const std::string & name, InputParameters params);
   virtual ~FrictionalContactProblem();
+  virtual void timestepSetup();
   virtual bool shouldUpdateSolution();
   virtual bool updateSolution(NumericVector<Number>& vec_solution, const NumericVector<Number>& ghosted_solution);
   virtual bool slipUpdate(NumericVector<Number>& vec_solution, const NumericVector<Number>& ghosted_solution);
   static ContactState calculateSlip(RealVectorValue &slip,
+                                    Real &slip_residual,
                                     const RealVectorValue &normal,
                                     const RealVectorValue &residual,
                                     const RealVectorValue &incremental_slip,
@@ -53,6 +55,7 @@ public:
                                     const Real friction_coefficient,
                                     const Real slip_factor,
                                     const int dim);
+  virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg, const int it, const Real xnorm, const Real snorm, const Real fnorm, Real &ttol, const Real rtol, const Real stol, const Real abstol, const int nfuncs, const int max_funcs);
 
 protected:
   std::map<std::pair<int,int>,InteractionParams> _interaction_params;
@@ -68,6 +71,14 @@ protected:
   AuxVariableName _inc_slip_x;
   AuxVariableName _inc_slip_y;
   AuxVariableName _inc_slip_z;
+
+  Real _slip_residual;
+  bool _do_slip_update;
+  int _num_slip_updates;
+  int _min_slip_iters;
+  int _max_slip_iters;
+  Real _target_contact_residual;
+  Real _contact_slip_tol_factor;
 };
 
 #endif /* FRICTIONALCONTACTPROBLEM_H */

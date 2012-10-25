@@ -40,12 +40,18 @@ InputParameters validParams<FrictionalContactProblem>()
   params.addRequiredParam<AuxVariableName>("inc_slip_x","Auxiliary variable to store the x incremental slip");
   params.addRequiredParam<AuxVariableName>("inc_slip_y","Auxiliary variable to store the y incremental slip");
   params.addParam<AuxVariableName>        ("inc_slip_z","Auxiliary variable to store the z incremental slip");
+  params.addParam<int>         ("minimum_slip_iterations",1,"Minimum number of slip iterations per step");
+  params.addParam<int>         ("maximum_slip_iterations",100,"Maximum number of slip iterations per step");
+  params.addRequiredParam<Real>("target_contact_residual","Frictional contact residual convergence criterion");
+  params.addParam<Real>        ("contact_slip_tolerance_factor",10.0,"Multiplier on convergence criteria to determine when to start slipping");
   return params;
 }
 
-
 FrictionalContactProblem::FrictionalContactProblem(const std::string & name, InputParameters params) :
-    FEProblem(name, params)
+    FEProblem(name, params),
+    _slip_residual(0.0),
+    _do_slip_update(false),
+    _num_slip_updates(0)
 {
   Moose::app->parser().extractParams("Problem", params);
   params.checkParams("Problem");
@@ -101,11 +107,22 @@ FrictionalContactProblem::FrictionalContactProblem(const std::string & name, Inp
     _interaction_params[ms_pair] = ip;
   }
 
-  std::map<std::pair<int,int>,InteractionParams>::iterator it;
+  _min_slip_iters = params.get<int>("minimum_slip_iterations");
+  _max_slip_iters = params.get<int>("maximum_slip_iterations");
+  _target_contact_residual = params.get<Real>("target_contact_residual");
+  _contact_slip_tol_factor = params.get<Real>("contact_slip_tolerance_factor");
 }
 
 FrictionalContactProblem::~FrictionalContactProblem()
 {}
+
+void
+FrictionalContactProblem::timestepSetup()
+{
+  _do_slip_update = false;
+  _num_slip_updates = 0;
+  FEProblem::timestepSetup();
+}
 
 bool
 FrictionalContactProblem::shouldUpdateSolution()
@@ -116,7 +133,14 @@ FrictionalContactProblem::shouldUpdateSolution()
 bool
 FrictionalContactProblem::updateSolution(NumericVector<Number>& vec_solution, const NumericVector<Number>& ghosted_solution)
 {
-  return slipUpdate(vec_solution, ghosted_solution);
+  bool slipped_nodes(false);
+  if (_do_slip_update)
+  {
+    slipped_nodes = slipUpdate(vec_solution, ghosted_solution);
+    _num_slip_updates++;
+  }
+  _do_slip_update = false;
+  return slipped_nodes;
 }
 
 bool
@@ -146,12 +170,11 @@ FrictionalContactProblem::slipUpdate(NumericVector<Number>& vec_solution, const 
   }
 
   bool updatedSolution = false;
+  _slip_residual = 0.0;
   TransientNonlinearImplicitSystem & system = getNonlinearSystem().sys();
-//  NonlinearSystem & nlsystem = getNonlinearSystem();
 
   if(getDisplacedProblem() && _interaction_params.size() > 0)
   {
-//    nlsystem._did_slip_update=false;
     computeResidual(system, ghosted_solution, *system.rhs);
 
     Real max_fraction_of_capacity(0.0);
@@ -161,6 +184,9 @@ FrictionalContactProblem::slipUpdate(NumericVector<Number>& vec_solution, const 
 
     GeometricSearchData & displaced_geom_search_data = getDisplacedProblem()->geomSearchData();
     std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = &displaced_geom_search_data._penetration_locators;
+
+    AuxiliarySystem & aux_sys = getAuxiliarySystem();
+    NumericVector<Number> & aux_solution = aux_sys.solution();
 
     for(std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator plit = penetration_locators->begin();
       plit != penetration_locators->end();
@@ -178,7 +204,6 @@ FrictionalContactProblem::slipUpdate(NumericVector<Number>& vec_solution, const 
         frictional_contact_this_interaction = true;
 
       if(frictional_contact_this_interaction)
-//      if((frictional_contact_this_interaction)&&(nlsystem._do_slip_update))
       {
 
         InteractionParams & interaction_params = ipit->second;
@@ -211,8 +236,6 @@ FrictionalContactProblem::slipUpdate(NumericVector<Number>& vec_solution, const 
                                                       node->dof_number(nonlinear_sys.number(), disp_y_var->number(), 0),
                                                       (disp_z_var ? node->dof_number(nonlinear_sys.number(), disp_z_var->number(), 0) : 0));
 
-              AuxiliarySystem & aux_sys = getAuxiliarySystem();
-
               VectorValue<unsigned int> residual_dofs(node->dof_number(aux_sys.number(), residual_x_var->number(), 0),
                                                       node->dof_number(aux_sys.number(), residual_y_var->number(), 0),
                                                       (residual_z_var ? node->dof_number(nonlinear_sys.number(), residual_z_var->number(), 0) : 0));
@@ -224,8 +247,6 @@ FrictionalContactProblem::slipUpdate(NumericVector<Number>& vec_solution, const 
               VectorValue<unsigned int> inc_slip_dofs(node->dof_number(aux_sys.number(), inc_slip_x_var->number(), 0),
                                                       node->dof_number(aux_sys.number(), inc_slip_y_var->number(), 0),
                                                       (inc_slip_z_var ? node->dof_number(nonlinear_sys.number(), inc_slip_z_var->number(), 0) : 0));
-
-              NumericVector<Number> & aux_solution = aux_sys.solution();
 
               RealVectorValue res_vec;
               RealVectorValue stiff_vec;
@@ -239,7 +260,9 @@ FrictionalContactProblem::slipUpdate(NumericVector<Number>& vec_solution, const 
               }
 
               RealVectorValue slip_iterative(0.0,0.0,0.0);
-              ContactState state = calculateSlip(slip_iterative, info._normal, res_vec, slip_inc_vec, stiff_vec, friction_coefficient, slip_factor, dim);
+              Real interaction_slip_residual = 0.0;
+              ContactState state = calculateSlip(slip_iterative, interaction_slip_residual, info._normal, res_vec, slip_inc_vec, stiff_vec, friction_coefficient, slip_factor, dim);
+              _slip_residual += interaction_slip_residual*interaction_slip_residual;
 
               if (state == SLIPPING || state == SLIPPED_TOO_FAR)
               {
@@ -253,36 +276,36 @@ FrictionalContactProblem::slipUpdate(NumericVector<Number>& vec_solution, const 
                 }
               }
 
-              aux_solution.close();
             }
           }
         }
 
       }
-      vec_solution.close(); //does this do anything if it's not a ghosted vector?
     }
+
+    aux_solution.close();
+    vec_solution.close();
 
     Parallel::sum(num_contact_nodes);
     Parallel::sum(num_slipping);
     Parallel::sum(num_slipped_too_far);
+    Parallel::sum(_slip_residual);
+    _slip_residual = std::sqrt(_slip_residual);
 
     std::cout<<"Num contact nodes: "<<num_contact_nodes<<std::endl;
     std::cout<<"Num slipping: "<<num_slipping<<std::endl;
     std::cout<<"Num slipped too far: "<<num_slipped_too_far<<std::endl;
-//    nlsystem._did_slip_update=true;
+    std::cout<<"Slip residual: "<<_slip_residual<<std::endl;
     if (num_slipping > 0)
       updatedSolution = true;
   }
-//  if (nlsystem._do_slip_update)
-//  {
-//    nlsystem._do_slip_update = false;
-//  }
 
   return updatedSolution;
 }
 
 ContactState
 FrictionalContactProblem::calculateSlip(RealVectorValue &slip,
+                                        Real &slip_residual,
                                         const RealVectorValue &normal,
                                         const RealVectorValue &residual,
                                         const RealVectorValue &incremental_slip,
@@ -334,6 +357,7 @@ FrictionalContactProblem::calculateSlip(RealVectorValue &slip,
   {
     RealVectorValue slip_inc_direction = incremental_slip / slip_inc;
     Real tangential_force_in_slip_dir = slip_inc_direction*tangential_force;
+    slip_residual = capacity - tangential_force_in_slip_dir;
 
     RealVectorValue force_from_unit_slip(0.0,0.0,0.0);
     for(unsigned int i=0; i<dim; ++i)
@@ -358,6 +382,7 @@ FrictionalContactProblem::calculateSlip(RealVectorValue &slip,
   {
     state = SLIPPING;
     Real tangential_force_magnitude = tangential_force.size();
+    slip_residual = excess_force;
 
     RealVectorValue tangential_direction = tangential_force / tangential_force_magnitude;
     RealVectorValue excess_force_vector = tangential_direction * excess_force;
@@ -373,4 +398,43 @@ FrictionalContactProblem::calculateSlip(RealVectorValue &slip,
     slip = slip - slip_normal_dir;
   }
   return state;
+}
+
+MooseNonlinearConvergenceReason
+FrictionalContactProblem::checkNonlinearConvergence(std::string &msg, const int it, const Real xnorm, const Real snorm, const Real fnorm, Real &ttol, const Real rtol, const Real stol, const Real abstol, const int nfuncs, const int max_funcs)
+{
+  MooseNonlinearConvergenceReason reason = FEProblem::checkNonlinearConvergence(msg, it, xnorm, snorm, fnorm, ttol, rtol, stol, abstol, nfuncs, max_funcs);
+
+  if (reason >= 0) //converged or iterating
+  {
+    if (fnorm < abstol*_contact_slip_tol_factor || fnorm <= ttol*_contact_slip_tol_factor)
+    {
+      std::cout<<"Slip iteration "<<_num_slip_updates<<" ";
+      if (_num_slip_updates < _min_slip_iters)
+      { //force another iteration, and do a slip update
+        reason = MOOSE_ITERATING;
+        _do_slip_update = true;
+        std::cout<<"Force slip update < min iterations"<<std::endl;
+      }
+      else if (_num_slip_updates < _max_slip_iters)
+      { //do a slip update if there is another iteration
+        _do_slip_update = true;
+
+        if (_slip_residual > _target_contact_residual)
+        { //force it to keep iterating
+          reason = MOOSE_ITERATING;
+          std::cout<<"Force slip update slip_resid > target"<<std::endl;
+        }
+        else
+          std::cout<<"Not forcing slip update"<<std::endl;
+      }
+      else
+      { //maxed out
+        std::cout<<"Max slip iterations"<<std::endl;
+        reason = MOOSE_DIVERGED_FUNCTION_COUNT;
+      }
+    }
+  }
+
+  return(reason);
 }
