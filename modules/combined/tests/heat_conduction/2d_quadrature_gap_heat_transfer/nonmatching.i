@@ -1,6 +1,6 @@
 [Mesh]
   type = MooseMesh
-  file = /Users/gastdr/projects/herd_trunk/elk/tests/heat_conduction/2d_quadrature_gap_heat_transfer/nonmatching.e
+  file = nonmatching.e
 []
 
 [Variables]
