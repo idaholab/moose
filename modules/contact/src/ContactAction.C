@@ -21,8 +21,8 @@ InputParameters validParams<ContactAction>()
   params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  Must be positive.");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
-  params.addParam<MooseEnum>("order", orders, "The finite element order");
-  params.addParam<MooseEnum>("formulation", formulation, "The contact formulation");
+  params.addParam<MooseEnum>("order", orders, "The finite element order: FIRST, SECOND, etc.");
+  params.addParam<MooseEnum>("formulation", formulation, "The contact formulation: default, penalty, augmented_lagrange");
   return params;
 }
 
