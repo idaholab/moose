@@ -102,7 +102,7 @@ public:
    * @param nfuncs     Number of function evaluations
    * @param max_funcs  Maximum Number of function evaluations
    */
-  MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg, const int it, const Real xnorm, const Real snorm, const Real fnorm, Real &ttol, const Real rtol, const Real stol, const Real abstol, const int nfuncs, const int max_funcs);
+  virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg, const int it, const Real xnorm, const Real snorm, const Real fnorm, Real &ttol, const Real rtol, const Real stol, const Real abstol, const int nfuncs, const int max_funcs);
 
 #ifdef LIBMESH_HAVE_PETSC
   void storePetscOptions(const std::vector<std::string> & petsc_options,
