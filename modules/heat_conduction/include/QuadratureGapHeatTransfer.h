@@ -38,6 +38,8 @@ protected:
 
   Real _gap_temp;
   Real _gap_distance;
+
+  bool _has_info;
   
 private:
   void computeGapTempAndDistance();

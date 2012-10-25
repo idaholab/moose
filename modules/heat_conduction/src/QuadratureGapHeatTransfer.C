@@ -28,6 +28,9 @@ QuadratureGapHeatTransfer::QuadratureGapHeatTransfer(const std::string & name, I
    _gap_conductance_dT(getMaterialProperty<Real>("gap_conductance_dT")),
    _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap")),
+   _gap_temp(0),
+   _gap_distance(88888),
+   _has_info(false),
    _xdisp_coupled(isCoupled("disp_x")),
    _ydisp_coupled(isCoupled("disp_y")),
    _zdisp_coupled(isCoupled("disp_z")),
@@ -46,10 +49,15 @@ Real
 QuadratureGapHeatTransfer::computeQpResidual()
 {
   computeGapTempAndDistance();
-  
-  Real grad_t = (_u[_qp] - _gap_temp) * _gap_conductance[_qp];
 
-  return _test[_i][_qp]*grad_t;
+  if(_has_info)
+  {
+    Real grad_t = (_u[_qp] - _gap_temp) * _gap_conductance[_qp];
+
+    return _test[_i][_qp]*grad_t;
+  }
+  else
+    return 0;
 }
 
 Real
@@ -160,10 +168,14 @@ QuadratureGapHeatTransfer::computeGapTempAndDistance()
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[qnode->id()];
 
   _gap_temp = 0.0;
-  _gap_distance = pinfo->_distance;
+  _gap_distance = 88888;
+  _has_info = false;
 
   if (pinfo)
   {
+    _gap_distance = pinfo->_distance;
+    _has_info = true;
+    
     Elem * slave_side = pinfo->_side;
     std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
     std::vector<unsigned int> slave_side_dof_indices;

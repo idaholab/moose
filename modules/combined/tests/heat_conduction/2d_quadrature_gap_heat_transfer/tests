@@ -3,4 +3,9 @@
     input = 'perfect.i'
     exodiff = 'perfect_out.e'
   [../]
+
+  [./nonmatching]
+    input = 'nonmatching.i'
+    exodiff = 'nonmatching_out.e'
+  [../]
 []
