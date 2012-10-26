@@ -87,9 +87,10 @@ namespace Moose {
 NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & name) :
     SystemTempl<TransientNonlinearImplicitSystem>(fe_problem, name, Moose::VAR_NONLINEAR),
     _fe_problem(fe_problem),
-    _last_rnorm(0),
+    _last_rnorm(0.),
+    _last_nl_rnorm(0.),
     _l_abs_step_tol(1e-10),
-    _initial_residual(0),
+    _initial_residual(0.),
     _current_nl_its(0),
     _current_solution(NULL),
     _residual_ghosted(_sys.add_vector("residual_ghosted", false, GHOSTED)),

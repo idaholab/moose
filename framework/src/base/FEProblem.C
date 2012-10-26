@@ -2831,9 +2831,7 @@ FEProblem::checkNonlinearConvergence(std::string &msg, const int it, const Real 
   if (!it)
   {
     // set parameter for default relative tolerance convergence test
-    // _initial_residual has already been computed by the NonlinearSystem at this point
     ttol = system._initial_residual*rtol;
-    system._last_nl_rnorm = system._initial_residual;
   }
   if (fnorm != fnorm)
   {
@@ -2851,10 +2849,10 @@ FEProblem::checkNonlinearConvergence(std::string &msg, const int it, const Real 
     reason = MOOSE_DIVERGED_FUNCTION_COUNT;
   }
   else if(it &&
-          rtol > system._last_nl_rnorm &&
+          fnorm > system._last_nl_rnorm &&
           fnorm >= system._initial_residual * (1.0/rtol))
   {
-    oss << "Nonlinear solve was blowing up! " << nfuncs << " " <<max_funcs << std::endl;
+    oss << "Nonlinear solve was blowing up!" << std::endl;
     reason = MOOSE_DIVERGED_LINE_SEARCH;
   }
 
@@ -2872,8 +2870,7 @@ FEProblem::checkNonlinearConvergence(std::string &msg, const int it, const Real 
     }
   }
 
-  if (it)
-    system._last_nl_rnorm = fnorm;
+  system._last_nl_rnorm = fnorm;
   system._current_nl_its = it;
 
   msg = oss.str();
