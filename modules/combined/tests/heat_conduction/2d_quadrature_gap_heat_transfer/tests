@@ -8,4 +8,9 @@
     input = 'nonmatching.i'
     exodiff = 'nonmatching_out.e'
   [../]
+
+  [./second_order]
+    input = 'second_order.i'
+    exodiff = 'second_order_out.e'
+  [../]
 []
