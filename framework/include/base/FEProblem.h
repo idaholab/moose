@@ -354,7 +354,7 @@ public:
    * @param ghosted_solution  Ghosted solution vector
    * @return true if the solution was modified, false otherwise
    */
-  virtual bool updateSolution(NumericVector<Number>& vec_solution, const NumericVector<Number>& ghosted_solution);
+  virtual bool updateSolution(NumericVector<Number>& vec_solution, NumericVector<Number>& ghosted_solution);
 
   virtual void computeBounds(NonlinearImplicitSystem & sys, NumericVector<Number> & lower, NumericVector<Number> & upper);
 
