@@ -42,6 +42,7 @@ InputParameters validParams<FrictionalContactProblem>()
   params.addParam<AuxVariableName>        ("inc_slip_z","Auxiliary variable to store the z incremental slip");
   params.addParam<int>         ("minimum_slip_iterations",1,"Minimum number of slip iterations per step");
   params.addParam<int>         ("maximum_slip_iterations",100,"Maximum number of slip iterations per step");
+  params.addParam<int>         ("slip_updates_per_iteration",1,"Number of slip updates per contact iteration");
   params.addRequiredParam<Real>("target_contact_residual","Frictional contact residual convergence criterion");
   params.addParam<Real>        ("contact_slip_tolerance_factor",10.0,"Multiplier on convergence criteria to determine when to start slipping");
   return params;
@@ -51,7 +52,7 @@ FrictionalContactProblem::FrictionalContactProblem(const std::string & name, Inp
     FEProblem(name, params),
     _slip_residual(0.0),
     _do_slip_update(false),
-    _num_slip_updates(0)
+    _num_slip_iterations(0)
 {
   Moose::app->parser().extractParams("Problem", params);
   params.checkParams("Problem");
@@ -109,6 +110,7 @@ FrictionalContactProblem::FrictionalContactProblem(const std::string & name, Inp
 
   _min_slip_iters = params.get<int>("minimum_slip_iterations");
   _max_slip_iters = params.get<int>("maximum_slip_iterations");
+  _slip_updates_per_iter = params.get<int>("slip_updates_per_iteration");
   _target_contact_residual = params.get<Real>("target_contact_residual");
   _contact_slip_tol_factor = params.get<Real>("contact_slip_tolerance_factor");
 }
@@ -120,7 +122,7 @@ void
 FrictionalContactProblem::timestepSetup()
 {
   _do_slip_update = false;
-  _num_slip_updates = 0;
+  _num_slip_iterations = 0;
   FEProblem::timestepSetup();
 }
 
@@ -131,14 +133,26 @@ FrictionalContactProblem::shouldUpdateSolution()
 }
 
 bool
-FrictionalContactProblem::updateSolution(NumericVector<Number>& vec_solution, const NumericVector<Number>& ghosted_solution)
+FrictionalContactProblem::updateSolution(NumericVector<Number>& vec_solution, NumericVector<Number>& ghosted_solution)
 {
   bool slipped_nodes(false);
   if (_do_slip_update)
   {
-    slipped_nodes = slipUpdate(vec_solution, ghosted_solution);
-    _num_slip_updates++;
+    for (unsigned i=0; i<_slip_updates_per_iter; i++)
+    {
+      if (i>0)
+      {
+        ghosted_solution = vec_solution;
+        ghosted_solution.close();
+      }
+
+      bool updated_this_iter = slipUpdate(vec_solution, ghosted_solution);
+      slipped_nodes |= updated_this_iter;
+      if (!updated_this_iter)
+        break;
+    }
   }
+  _num_slip_iterations++;
   _do_slip_update = false;
   return slipped_nodes;
 }
@@ -409,14 +423,14 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg, const int 
   {
     if (fnorm < abstol*_contact_slip_tol_factor || fnorm <= ttol*_contact_slip_tol_factor)
     {
-      std::cout<<"Slip iteration "<<_num_slip_updates<<" ";
-      if (_num_slip_updates < _min_slip_iters)
+      std::cout<<"Slip iteration "<<_num_slip_iterations<<" ";
+      if (_num_slip_iterations < _min_slip_iters)
       { //force another iteration, and do a slip update
         reason = MOOSE_ITERATING;
         _do_slip_update = true;
         std::cout<<"Force slip update < min iterations"<<std::endl;
       }
-      else if (_num_slip_updates < _max_slip_iters)
+      else if (_num_slip_iterations < _max_slip_iters)
       { //do a slip update if there is another iteration
         _do_slip_update = true;
 

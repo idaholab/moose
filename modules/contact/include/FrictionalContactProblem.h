@@ -44,7 +44,7 @@ public:
   virtual ~FrictionalContactProblem();
   virtual void timestepSetup();
   virtual bool shouldUpdateSolution();
-  virtual bool updateSolution(NumericVector<Number>& vec_solution, const NumericVector<Number>& ghosted_solution);
+  virtual bool updateSolution(NumericVector<Number>& vec_solution, NumericVector<Number>& ghosted_solution);
   virtual bool slipUpdate(NumericVector<Number>& vec_solution, const NumericVector<Number>& ghosted_solution);
   static ContactState calculateSlip(RealVectorValue &slip,
                                     Real &slip_residual,
@@ -74,9 +74,10 @@ protected:
 
   Real _slip_residual;
   bool _do_slip_update;
-  int _num_slip_updates;
+  int _num_slip_iterations;
   int _min_slip_iters;
   int _max_slip_iters;
+  int _slip_updates_per_iter;
   Real _target_contact_residual;
   Real _contact_slip_tol_factor;
 };
