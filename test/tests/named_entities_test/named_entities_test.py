@@ -9,6 +9,7 @@ test_periodic_names = { INPUT : 'periodic_bc_names_test.i',
                         EXODIFF : ['periodic_bc_names_test_out.e'],
                         MAX_THREADS : 1,
                         MAX_PARALLEL : 1,
+                        MESH_MODE : ['SERIAL'],
                         GROUP : 'periodic'
                       }
 

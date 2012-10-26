@@ -5,5 +5,7 @@ test_hermite_converge_neumann = { INPUT : 'hermite_converge_neumann.i',
                   }
 
 test_hermite_converge_periodic = { INPUT : 'hermite_converge_periodic.i',
-                  EXODIFF : ['hermite_converge_periodic_out.e-s003']
+                  EXODIFF : ['hermite_converge_periodic_out.e-s003'],
+                  GROUP : 'periodic',
+                  MESH_MODE : ['SERIAL']
                   }

@@ -2,5 +2,7 @@
   [./qnnl]
     input = 'quadrature_nearest_node_locator.i'
     exodiff = 'quadrature_nearest_node_locator_out.e'
+    group = 'geometric'
+    mesh_mode = 'serial'
   [../]
 []
