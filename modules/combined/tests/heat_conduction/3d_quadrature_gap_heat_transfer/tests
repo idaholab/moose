@@ -1,0 +1,6 @@
+[Tests]
+  [./nonmatching]
+    input = 'nonmatching.i'
+    exodiff = 'nonmatching_out.e'
+  [../]
+[]
