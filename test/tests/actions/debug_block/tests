@@ -1,5 +1,6 @@
 [Tests]
   [./test_debug_block]
+    type = Exodiff
     input = 'debug_print_actions_test.i'
     # Currently this can't be quoted - needs to be fixed in the parser
     expect_out = [DBG][ACT]
