@@ -1,6 +1,16 @@
-from socket import gethostname
+import sys, os
+
+subdirs = ['testers']
+module_path = os.path.dirname(__file__)
+for subdir in subdirs:
+  sys.path.append(module_path + '/' + subdir)
+
 from TestTimer import TestTimer
 from TestHarness import TestHarness
+
+# Testers
+from Exodiff import Exodiff
+from CSVDiff import CSVDiff
 
 # Basic flow of control:
 # initialize() - parse command line options, etc
@@ -12,14 +22,14 @@ from TestHarness import TestHarness
 
 ## Called by ./run_tests in an application directory
 def runTests(argv, app_name, moose_dir):
-  host_name = gethostname()
-  if host_name == 'service0' or host_name == 'service1':
-    print 'Testing not supported on Icestorm head node'
-    sys.exit(0)
   if '--store-timing' in argv:
     # Pass control to TestTimer class for Test Timing
     harness = TestTimer(argv, app_name, moose_dir)
-    harness.findAndRunTests()
   else:
     harness = TestHarness(argv, app_name, moose_dir)
-    harness.findAndRunTests()
+
+  # Registration
+  harness.registerTester(Exodiff, 'Exodiff')
+  harness.registerTester(CSVDiff, 'CSVDiff')
+
+  harness.findAndRunTests()

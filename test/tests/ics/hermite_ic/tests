@@ -1,5 +1,6 @@
 [Tests]
   [./test]
+    type = 'Exodiff'
     input = 'hermite_ic.i'
     exodiff = 'hermite_ic_out.e'
   [../]

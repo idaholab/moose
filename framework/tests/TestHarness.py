@@ -6,6 +6,7 @@ from util import *
 from time import sleep
 from RunParallel import RunParallel
 from CSVDiffer import CSVDiffer
+from Tester import Tester
 
 from optparse import OptionParser, OptionGroup
 #from optparse import OptionG
@@ -13,6 +14,7 @@ from timeit import default_timer as clock
 
 class TestHarness:
   def __init__(self, argv, app_name, moose_dir):
+    self.testers = {}   # The registered 'Tester' types
     self.input_file_name = 'tests'  # This is the file we look for, when looking for test specifications.
     self.test_table = []
     self.num_passed = 0
@@ -63,14 +65,19 @@ class TestHarness:
             # Go through the list of test specs and run them
             for test in tests:
               if self.checkIfRunTest(test):
+                self.augmentTestSpecs(test)
                 self.prepareTest(test)
-                execute = self.createCommand(test)
+
+                # Build the requested Tester object and run
+                tester = self.create(test[TYPE], test)
+                command = tester.getCommand(self.options)
+
+                tester.prepare()
 
                 # This method spawns another process and allows this loop to continue looking for tests
                 # RunParallel will call self.testOutputAndFinish when the test has completed running
                 # This method will block when the maximum allowed parallel processes are running
-
-                self.runner.run(test, execute)
+                self.runner.run(tester, command)
               else: # This job is skipped - notify the runner
                 self.runner.jobSkipped(test[TEST_NAME])
 
@@ -120,6 +127,10 @@ class TestHarness:
           else:
             test[key] = value
 
+        if TYPE not in test:
+          print "Type missing in " + test_dir + filename
+          sys.exit(1)
+
         test.update( { TEST_NAME : relative_path + '.' + testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path } )
 
         if test[PREREQ] != None:
@@ -166,7 +177,12 @@ class TestHarness:
 
         # Now update all the base level keys
         test.update(test_opts)
-        test.update( { TEST_NAME : testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path } )
+
+        if len(test[CSVDIFF]) > 0 and TYPE not in test:
+          print 'CSVDIFF is deprecated in the legacy test format unless "type" is supplied. Please convert to the new format:\n' + test_dir + '/' + filename
+          sys.exit(1)
+
+        test.update( { TEST_NAME : testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path, TYPE : 'Exodiff' } )
 
         if test[PREREQ] != None:
           if type(test[PREREQ]) != list:
@@ -178,39 +194,9 @@ class TestHarness:
         tests.append(test)
     return tests
 
-  # Create the command line string to run
-  def createCommand(self, test):
-    command = ''
-
-    # Raise the floor
-    ncpus = max(self.options.parallel, int(test[MIN_PARALLEL]))
-    # Lower the ceiling
-    ncpus = min(ncpus, int(test[MAX_PARALLEL]))
-
-    #Set number of threads to be used lower bound
-    nthreads = max(self.options.nthreads, int(test[MIN_THREADS]))
-    #Set number of threads to be used upper bound
-    nthreads = min(nthreads, int(test[MAX_THREADS]))
-
-    if nthreads > self.options.nthreads:
-      test['CAVEATS'] = ['MIN_THREADS=' + str(nthreads)]
-    elif nthreads < self.options.nthreads:
-      test['CAVEATS'] = ['MAX_THREADS=' + str(nthreads)]
-    # TODO: Refactor this caveats business
-    if ncpus > self.options.parallel:
-      test['CAVEATS'] = ['MIN_CPUS=' + str(ncpus)]
-    elif ncpus < self.options.parallel:
-      test['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
-    if ncpus > 1 or nthreads > 1:
-      command = 'mpiexec -host ' + self.host_name + ' -n ' + str(ncpus) + ' ' + self.executable + ' --n-threads=' + str(nthreads) + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
-    elif self.options.enable_valgrind and not test[NO_VALGRIND]:
-      command = 'valgrind --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
-    else:
-      command = self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
-
-    if self.options.scaling and test[SCALE_REFINE] > 0:
-      command += ' -r ' + str(test[SCALE_REFINE])
-    return command
+  def augmentTestSpecs(self, test):
+    test[EXECUTABLE] = self.executable
+    test[HOSTNAME] = self.host_name
 
   ## Delete old output files
   def prepareTest(self, test):
@@ -311,9 +297,11 @@ class TestHarness:
     return (False, logic, version)
 
   ## Finish the test by inspecting the raw output
-  def testOutputAndFinish(self, test, retcode, output, start=0, end=0):
+  def testOutputAndFinish(self, tester, retcode, output, start=0, end=0):
     reason = ''
     caveats = []
+    test = tester.specs  # Need to refactor
+
     if 'CAVEATS' in test:
       caveats = test['CAVEATS']
 
@@ -352,44 +340,15 @@ class TestHarness:
         if self.options.scaling and test[SCALE_REFINE]:
           caveats.append('SCALED')
         else:
-          for file in test[EXODIFF]:
-            custom_cmp = ''
-            old_floor = ''
-            if test[CUSTOM_CMP] != None:
-               custom_cmp = ' -f ' + os.path.join(test[TEST_DIR], test[CUSTOM_CMP])
-            if test[USE_OLD_FLOOR]:
-               old_floor = ' -use_old_floor'
+          tester.processResults(self.moose_dir, retcode, output)
 
-            # see if the output file has been written (keep trying...)
-            file_found = False
-            for i in xrange(0, 10):
-              if os.path.exists(os.path.join(test[TEST_DIR], file)):
-                file_found = True
-                break
-              else:
-                sleep(0.5)
-
-            if file_found:
-              command = self.moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F' + ' ' + str(test[ABS_ZERO]) + old_floor + ' -t ' + str(test[REL_ERR]) \
-                  + ' ' + ' '.join(test[EXODIFF_OPTS]) + ' ' + os.path.join(test[TEST_DIR], test[GOLD_DIR], file) + ' ' + os.path.join(test[TEST_DIR], file)
-              exo_output = runCommand(command)
-
-              output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(test[EXODIFF_OPTS])
-
-              if ('different' in exo_output or 'ERROR' in exo_output) and not "Files are the same" in exo_output:
-                reason = 'EXODIFF'
-                break
-            else:
-              reason = 'NO EXODIFF FILE'
-              break
-
-          # if still no errors, diff CSVs
-          if reason == '' and len(test[CSVDIFF]) > 0:
-            differ = CSVDiffer( test[TEST_DIR], test[CSVDIFF], test[ABS_ZERO], test[REL_ERR] )
-            msg = differ.diff()
-            output += 'Running CSVDiffer.py\n' + msg
-            if msg != '':
-              reason = 'CSVDIFF'
+#          # if still no errors, diff CSVs
+#          if reason == '' and len(test[CSVDIFF]) > 0:
+#            differ = CSVDiffer( test[TEST_DIR], test[CSVDIFF], test[ABS_ZERO], test[REL_ERR] )
+#            msg = differ.diff()
+#            output += 'Running CSVDiffer.py\n' + msg
+#            if msg != '':
+#              reason = 'CSVDIFF'
 
           # if still no errors, check other files (just for existence)
           if reason == '':
@@ -412,7 +371,7 @@ class TestHarness:
     else:
       result = 'FAILED (%s)' % reason
       did_pass = False
-    self.handleTestResult(test, output, result, start, end)
+    self.handleTestResult(tester.specs, output, result, start, end)
     return did_pass
 
   def getTiming(self, output):
@@ -430,20 +389,20 @@ class TestHarness:
 
   ## Update global variables and print output based on the test result
   # Containing OK means it passed, skipped means skipped, anything else means it failed
-  def handleTestResult(self, test, output, result, start=0, end=0):
+  def handleTestResult(self, specs, output, result, start=0, end=0):
     timing = ''
 
     if self.options.timing:
       timing = self.getTiming(output)
 
-    self.test_table.append( (test, output, result, timing, start, end) )
+    self.test_table.append( (specs, output, result, timing, start, end) )
 
-    self.postRun(test, timing)
+    self.postRun(specs, timing)
 
     if self.options.show_directory:
-      print printResult(test[RELATIVE_PATH] + '/' + test[TEST_NAME], result, timing, start, end, self.options)
+      print printResult(specs[RELATIVE_PATH] + '/' + specs[TEST_NAME], result, timing, start, end, self.options)
     else:
-      print printResult(test[TEST_NAME], result, timing, start, end, self.options)
+      print printResult(specs[TEST_NAME], result, timing, start, end, self.options)
 
     if result.find('OK') != -1:
       self.num_passed += 1
@@ -458,16 +417,16 @@ class TestHarness:
     if not 'skipped' in result:
       if self.options.file:
         if self.options.show_directory:
-          self.file.write(printResult( test[RELATIVE_PATH] + '/' + test[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
+          self.file.write(printResult( specs[RELATIVE_PATH] + '/' + specs[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
           self.file.write(output)
         else:
-          self.file.write(printResult( test[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
+          self.file.write(printResult( specs[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
           self.file.write(output)
 
       if self.options.sep_files or (self.options.fail_files and 'FAILED' in result) or (self.options.ok_files and result.find('OK') != -1):
-        fname = os.path.join(test[TEST_DIR], test[TEST_NAME] + '.' + result[:6] + '.txt')
+        fname = os.path.join(specs[TEST_DIR], specs[TEST_NAME] + '.' + result[:6] + '.txt')
         f = open(fname, 'w')
-        f.write(printResult( test[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
+        f.write(printResult( specs[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
         f.write(output)
         f.close()
 
@@ -636,5 +595,14 @@ class TestHarness:
 
   def preRun(self):
     return
+
+  # Factory Methods
+  def registerTester(self, type, name):
+    self.testers[name] = type
+
+  def create(self, name, specs):
+    return self.testers[name]('exodiff', specs)
+# Tester(self.testers[name], specs)
+
 # Notes:
 # SHOULD_CRASH returns > 0, cuz < 0 means process interrupted

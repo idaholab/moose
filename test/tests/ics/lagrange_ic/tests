@@ -1,5 +1,6 @@
 [Tests]
   [./3d_second_order]
+    type = 'Exodiff'
     input = '3d_second_order.i'
     exodiff = '3d_second_order_out.e'
   [../]
