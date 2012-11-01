@@ -15,7 +15,6 @@
 #include "MooseMesh.h"
 #include "Factory.h"
 #include "MeshModifier.h"
-#include "GatherNearbyElements.h"
 
 // libMesh
 #include "boundary_info.h"
@@ -144,8 +143,8 @@ MooseMesh::prepare()
   // If using SerialMesh, this function is a no-op.
   _mesh.delete_remote_elements();
 
-  if(!_mesh.is_serial())
-    Moose::gatherNearbyElements(*this, _ghosted_boundaries, _ghosted_boundaries_inflation);
+//  if(!_mesh.is_serial())
+//    Moose::gatherNearbyElements(*this, _ghosted_boundaries, _ghosted_boundaries_inflation);
 
   // Collect (local) subdomain IDs
   const MeshBase::element_iterator el_end = _mesh.elements_end();
