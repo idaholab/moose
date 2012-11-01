@@ -58,8 +58,8 @@ protected:
   {
   public:
     BubbleData(std::set<unsigned int> & nodes, unsigned int var_idx) :
-        _nodes(nodes),
-        _var_idx(var_idx)
+	_nodes(nodes),
+	_var_idx(var_idx)
       {}
 
     std::set<unsigned int> _nodes;
@@ -70,7 +70,7 @@ protected:
    * This method will "mark" all nodes on neighboring elements that
    * are above the supplied threshold
    */
-  void flood(const Node *node, std::map<unsigned int, unsigned int> live_region);
+  void flood(const Node *node, int current_idx, unsigned int live_region);
 
   /**
    * These routines packs/unpack the _bubble_map data into a structure suitable for parallel
@@ -122,7 +122,7 @@ protected:
    * for this since we don't want to explicitly store data for all the unmarked nodes in a serialized datastructures.
    * This keeps our overhead down since this variable never needs to be communicated.
    */
-  std::map<unsigned int, bool> _nodes_visited;
+  std::vector<std::map<unsigned int, bool> > _nodes_visited;
 
   /**
    * The bubble maps contain the raw flooded node information.  We have a vector of them so we can create one per variable
@@ -145,7 +145,7 @@ protected:
    */
   std::vector<std::list<BubbleData> > _bubble_sets;
 
-  /// The scalar counters used during the marking stage of the flood algorithm.  Up to one per variable
+  /// The scalar counters used during the marking stage of the flood algorithm. Up to one per variable
   std::vector<unsigned int> _region_counts;
 
   /// A pointer to the periodic boundary constraints object

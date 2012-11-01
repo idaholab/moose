@@ -44,7 +44,7 @@
     variable = bubble_map0
     execute_on = timestep
     bubble_object = bubbles
-    var_idx = 0
+    map_index = 0
   [../]
 
   [./mapper1]
@@ -52,7 +52,7 @@
     variable = bubble_map1
     execute_on = timestep
     bubble_object = bubbles
-    var_idx = 1
+    map_index = 1
   [../]
 []
 
