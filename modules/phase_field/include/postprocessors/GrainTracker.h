@@ -67,7 +67,9 @@ protected:
 
   void buildBoundingBoxes();
   void trackGrains();
+  void remapGrains();
   Point calculateCentroid(const std::vector<BoundingBoxInfo *> & box_ptrs) const;
+//  void reflood(const Node *node, std::map<unsigned int, int> &bubble_map, int current_idx);
 
   unsigned int _tracking_step;
   std::list<BoundingBoxInfo *> _bounding_boxes;
