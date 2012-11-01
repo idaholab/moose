@@ -6,8 +6,6 @@ from options import *
 from tempfile import TemporaryFile
 #from Queue import Queue
 from collections import deque
-from Tester import Tester
-
 import os, sys
 
 ## This class provides an interface to run commands in parallel
@@ -42,14 +40,14 @@ class RunParallel:
     self.skipped_jobs = set()
 
   ## run the command asynchronously and call testharness.testOutputAndFinish when complete
-  def run(self, tester, command, recurse=True):
+  def run(self, test, command, recurse=True):
     # First see if any of the queued jobs can be run but only if recursion is allowed on this run
     if recurse:
       self.startReadyJobs()
 
     # Now make sure that this job doesn't have an unsatisfied prereq
-    if tester.specs[PREREQ] != None and len(set(tester.specs[PREREQ]) - self.finished_jobs):
-      self.queue.append([tester, command, os.getcwd()])
+    if test[PREREQ] != None and len(set(test[PREREQ]) - self.finished_jobs):
+      self.queue.append([test, command, os.getcwd()])
       return
 
     # Make sure we are complying with the requested load average
@@ -72,23 +70,23 @@ class RunParallel:
       print "Error in launching a new task"
       raise
 
-    self.jobs[job_index] = (p, command, tester, clock() + tester.specs[MAX_TIME], f)
+    self.jobs[job_index] = (p, command, test, clock() + test[MAX_TIME], f)
 
   def startReadyJobs(self):
     queue_items = len(self.queue)
     for i in range(0, queue_items):
-      (tester, command, dirpath) = self.queue.popleft()
+      (test, command, dirpath) = self.queue.popleft()
       saved_dir = os.getcwd()
       sys.path.append(os.path.abspath(dirpath))
       os.chdir(dirpath)
       # We want to avoid "dual" recursion so pass a False flag here
-      self.run(tester, command, False)
+      self.run(test, command, False)
       os.chdir(saved_dir)
       sys.path.pop()
 
   ## Return control the the test harness by finalizing the test output and calling the callback
   def returnToTestHarness(self, job_index):
-    (p, command, tester, time, f) = self.jobs[job_index]
+    (p, command, test, time, f) = self.jobs[job_index]
 
     log( 'Command %d done:    %s' % (job_index, command) )
     did_pass = True
@@ -99,19 +97,19 @@ class RunParallel:
       f.close()
       p.terminate()
 
-      if not self.harness.testOutputAndFinish(tester, RunParallel.TIMEOUT, output, time, clock()):
+      if not self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, output, time, clock()):
         did_pass = False
     else:
-      output = 'Working Directory: ' + tester.specs[TEST_DIR] + '\nRunning command: ' + command + '\n'
+      output = 'Working Directory: ' + test[TEST_DIR] + '\nRunning command: ' + command + '\n'
       output += self.readOutput(f)
       f.close()
-      if not self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock()):
+      if not self.harness.testOutputAndFinish(test, p.returncode, output, time, clock()):
         did_pass = False
 
     if did_pass:
-      self.finished_jobs.add(tester.specs[TEST_NAME])
+      self.finished_jobs.add(test[TEST_NAME])
     else:
-      self.skipped_jobs.add(tester.specs[TEST_NAME])
+      self.skipped_jobs.add(test[TEST_NAME])
 
     self.jobs[job_index] = None
 
@@ -124,7 +122,7 @@ class RunParallel:
     job_index = 0
     for tuple in self.jobs:
       if tuple != None:
-        (p, command, tester, time, f) = tuple
+        (p, command, test, time, f) = tuple
         if p.poll() != None or now > time:
           self.returnToTestHarness(job_index)
           break
@@ -152,18 +150,18 @@ class RunParallel:
         keep_going = False
         queue_items = len(self.queue)
         for i in range(0, queue_items):
-          (tester, command, dirpath) = self.queue.popleft()
-          if len(set(tester.specs[PREREQ]) & self.skipped_jobs):
-            self.harness.handleTestResult(tester.specs, '', 'skipped (skipped dependency)')
-            self.skipped_jobs.add(tester.specs[TEST_NAME])
+          (test, command, dirpath) = self.queue.popleft()
+          if len(set(test[PREREQ]) & self.skipped_jobs):
+            self.harness.handleTestResult(test, '', 'skipped (skipped dependency)')
+            self.skipped_jobs.add(test[TEST_NAME])
             keep_going = True
           else:
-            self.queue.append([tester, command, dirpath])
+            self.queue.append([test, command, dirpath])
       # Anything left is a cyclic dependency
       if len(self.queue) != 0:
         print "Cyclic or Invalid Dependency Detected!"
-        for (tester, command, dirpath) in self.queue:
-          print tester.specs[TEST_NAME]
+        for (test, command, dirpath) in self.queue:
+          print test[TEST_NAME]
         sys.exit(1)
 
   # This function reads output from the file (i.e. the test output)

@@ -1,5 +1,4 @@
 from options import *
 
 test = { INPUT : 'curvilinear_element_test.i',
-         CSVDIFF : ['out.csv'],
-         TYPE : 'CSVDiff' }
+         CSVDIFF : ['out.csv'] }

@@ -1,6 +1,5 @@
 [Tests]
   [./test_meta_action]
-    type = 'Exodiff'
     input = 'meta_action_test.i'
     exodiff = 'out.e'
   [../]
