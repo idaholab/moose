@@ -143,7 +143,7 @@ ContactMaster::updateContactSet()
     }
     else
     {
-      if (pinfo->_distance > 0)
+      if (pinfo->_distance >= 0)
       {
         //unsigned int slave_node_num = it->first;
         //has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));

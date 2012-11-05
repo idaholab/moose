@@ -92,7 +92,7 @@
     slave = 2
     disp_x = disp_x
     disp_y = disp_y
-    penalty = 1e6
+    penalty = 1e5
   [../]
 []
 
@@ -193,7 +193,8 @@
   petsc_options_iname = '-pc_type -snes_type -snes_ls'
   petsc_options_value = 'lu       ls         basic'
 
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 1e-9
+  nl_rel_tol = 1e-9
 
   l_max_its = 20
   dt = 1.0
