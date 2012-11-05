@@ -345,7 +345,8 @@ NodalFloodCount::mergeSets()
       for (std::set<unsigned int>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
 	_bubble_maps[map_num][*it2] = counter;
 
-      _region_to_var_idx[counter-1] = it1->_var_idx;
+      if (_single_map_mode)
+        _region_to_var_idx[counter-1] = it1->_var_idx;
       ++counter;
     }
 
