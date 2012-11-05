@@ -40,6 +40,7 @@ public:
   virtual unsigned int getBoundaryId(RELAP7::EEndType id);
   virtual int getBoundaryOutNorm(RELAP7::EEndType id);
   virtual Real getArea() { return _A; }
+  virtual Real getLength() { return _length; }
 
 protected:
   Point _position;                              ///< Physical position in the space
