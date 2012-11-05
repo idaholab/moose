@@ -913,24 +913,24 @@ Real WaterSteamEOS::waterAndSteamEquationOfStatePropertiesWithDerivativesPH (Rea
     //outputs - temp_1h, dens_1h, enth_water_1h
         
     //outputs to falcon - derivatives with respect to pressure
-    d_enth_water_d_press = ((enth_water_1p - enth_water_0) / del_press) * 10e-7;//*dhwdp
+    d_enth_water_d_press = ((enth_water_1p - enth_water_0) / del_press);//*dhwdp
     //_d_enth_water_d_press = 1e-9;
     d_enth_steam_d_press = 0.0;                                    //*dhshp  
-    d_dens_d_press = (dens_1p - dens_0) / del_press;              //*dDendp
-    d_temp_d_press = (temp_1p - temp_0) / del_press;              //*dTdp
+    d_dens_d_press = (dens_1p - dens_0) / del_press;               //*dDendp
+    d_temp_d_press = (temp_1p - temp_0) / del_press;               //*dTdp
         
         
     //outputs to falcon - derivatives with respect to enthalpy
-    d_enth_water_d_enth = ((enth_water_1h - enth_water_0) / del_enth) * 10.e-7; //*dhwdh
+    d_enth_water_d_enth = ((enth_water_1h - enth_water_0) / del_enth); //*dhwdh
     //_d_enth_water_d_enth = 0.0;
     d_enth_steam_d_enth = 0.0;                                     //*dhsdh
-    d_dens_d_enth = ((dens_1h - dens_0) / del_enth) / 10e-7;      //*dDendh
-    d_temp_d_enth = ((temp_1h - temp_0) / del_enth) / 10e-7;      //*dTdh
+    d_dens_d_enth = ((dens_1h - dens_0) / del_enth);               //*dDendh
+    d_temp_d_enth = ((temp_1h - temp_0) / del_enth);               //*dTdh
     d_sat_fraction_d_enth = 0.0;                                   //*dswdh
         
   }
     
-  else if (phase == 2)                                                //if water is in a steam phase it will run this loop
+  else if (phase == 2)                                             //if water is in a steam phase it will run this loop
   {        
     //Function calls
     steamEquationOfStatePT (press_in, temp_0, enth_steam_0, dens_0);                
@@ -953,15 +953,15 @@ Real WaterSteamEOS::waterAndSteamEquationOfStatePropertiesWithDerivativesPH (Rea
         
     //outputs to falcon - derivatives with respect to pressure
     d_enth_water_d_press = 0.0;                                    //*dhwdp
-    d_enth_steam_d_press = ((enth_steam_1p - enth_steam_0) / del_press) * 10e-7; //*dhsdp
-    d_dens_d_press = (dens_1p - dens_0) / del_press;              //*dDendp
-    d_temp_d_press = (temp_1p - temp_0) / del_press;              //*dTdp
+    d_enth_steam_d_press = ((enth_steam_1p - enth_steam_0) / del_press); //*dhsdp
+    d_dens_d_press = (dens_1p - dens_0) / del_press;               //*dDendp
+    d_temp_d_press = (temp_1p - temp_0) / del_press;               //*dTdp
                 
     //outputs to falcon - derivatives with respect to enthalpy
     d_enth_water_d_enth = 0.0;                                     //*dhwdh 
     d_enth_steam_d_enth = 1.e0;                                    //*dhsdh
-    d_dens_d_enth = ((dens_1h - dens_0) / del_enth) / 10e-7;      //*dDendh
-    d_temp_d_enth = ((temp_1h - temp_0) / del_enth) / 10e-7;      //*dTdh
+    d_dens_d_enth = ((dens_1h - dens_0) / del_enth);               //*dDendh
+    d_temp_d_enth = ((temp_1h - temp_0) / del_enth);               //*dTdh
     d_sat_fraction_d_enth = 0.0;                                   //*dswdh
         
   }
@@ -991,17 +991,17 @@ Real WaterSteamEOS::waterAndSteamEquationOfStatePropertiesWithDerivativesPH (Rea
     dens_1h = sat_fraction_1h * dens_water_0 + (1.e0 - sat_fraction_1h) * dens_steam_0;
         
     //outputs to falcon - derivatives with repect to pressure
-    d_enth_water_d_press = ((enth_water_1p - enth_water_0) / del_press) * 10e-7;     //*dhwdp
-    d_enth_steam_d_press = ((enth_steam_1p - enth_steam_0) / del_press) * 10e-7;     //*dhsdp
-    d_dens_d_press = (dens_1p - dens_0) / del_press;              //*dDendp
-    d_temp_d_press = (temp_1p - temp_0) / del_press;              //*dTdp
+    d_enth_water_d_press = ((enth_water_1p - enth_water_0) / del_press);     //*dhwdp
+    d_enth_steam_d_press = ((enth_steam_1p - enth_steam_0) / del_press);     //*dhsdp
+    d_dens_d_press = (dens_1p - dens_0) / del_press;               //*dDendp
+    d_temp_d_press = (temp_1p - temp_0) / del_press;               //*dTdp
         
     //outputs to falcon - derivatives with respect to enthalpy
     d_enth_water_d_enth = 0.0;                                     //*dhwdh
     d_enth_steam_d_enth = 0.0;                                     //*dhsdh
-    d_dens_d_enth = ((dens_1h - dens_0) / del_enth) / 10e-7;      //*dDendh
+    d_dens_d_enth = ((dens_1h - dens_0) / del_enth);               //*dDendh
     d_temp_d_enth = 0.0;                                           //*dTdh
-    d_sat_fraction_d_enth = ((sat_fraction_1h - sat_fraction_0) / del_enth) / 10e-7; //*dswdh
+    d_sat_fraction_d_enth = ((sat_fraction_1h - sat_fraction_0) / del_enth); //*dswdh
   }
   return (0);
 }
