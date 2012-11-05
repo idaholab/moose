@@ -131,6 +131,17 @@ PenetrationLocator::setStartingContactPoint()
   }
 }
 
+void
+PenetrationLocator::saveContactForce()
+{
+  std::map<unsigned int, PenetrationInfo *>::iterator it( _penetration_info.begin() );
+  const std::map<unsigned int, PenetrationInfo *>::iterator it_end( _penetration_info.end() );
+  for ( ; it != it_end; ++it )
+  {
+    it->second->_contact_force_old = it->second->_contact_force;
+  }
+}
+
 
 
 PenetrationLocator::PenetrationInfo::PenetrationInfo(const Node * node, const Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, Real tangential_distance, const Point & closest_point, const Point & closest_point_ref, const Point & closest_point_on_face_ref, std::vector<Node*> off_edge_nodes, const std::vector<std::vector<Real> > & side_phi, const std::vector<RealGradient> & dxyzdxi, const std::vector<RealGradient> & dxyzdeta, const std::vector<RealGradient> & d2xyzdxideta)
@@ -173,6 +184,8 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p) 
     _starting_elem(p._starting_elem),
     _starting_side_num(p._starting_side_num),
     _starting_closest_point_ref(p._starting_closest_point_ref),
+    _contact_force(p._contact_force),
+    _contact_force_old(p._contact_force_old),
     _update(p._update)
 {}
 

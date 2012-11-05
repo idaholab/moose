@@ -426,6 +426,8 @@ PenetrationThread::switchInfo( PenetrationLocator::PenetrationInfo * & info,
     infoNew->_starting_elem = info->_starting_elem;
     infoNew->_starting_side_num = info->_starting_side_num;
     infoNew->_starting_closest_point_ref = info->_starting_closest_point_ref;
+    infoNew->_contact_force = info->_contact_force;
+    infoNew->_contact_force_old = info->_contact_force_old;
   }
   else
   {
@@ -930,9 +932,8 @@ PenetrationThread::computeSlip(FEBase & fe,
   //   original projected position of slave node
   std::vector<Point> points(1);
   points[0] = info._starting_closest_point_ref;
-  Elem * side = (info._starting_elem->build_side(info._starting_side_num,false)).release();
-  fe.reinit(side, &points);
+  libMesh::AutoPtr<Elem> side = (info._starting_elem->build_side(info._starting_side_num,false));
+  fe.reinit(side.get(), &points);
   const std::vector<Point> & starting_point = fe.get_xyz();
   info._incremental_slip = info._closest_point - starting_point[0];
-  delete side;
 }

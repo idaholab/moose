@@ -74,6 +74,8 @@ public:
     unsigned int _starting_side_num;
     Point _starting_closest_point_ref;
     Point _incremental_slip;
+    RealVectorValue _contact_force;
+    RealVectorValue _contact_force_old;
     bool _update;
   };
 
@@ -106,6 +108,7 @@ public:
   void setUpdate(bool update);
   void setTangentialTolerance(Real tangential_tolerance);
   void setStartingContactPoint();
+  void saveContactForce();
 
 protected:
   bool _update_location; // Update the penetration location for nodes found last time
