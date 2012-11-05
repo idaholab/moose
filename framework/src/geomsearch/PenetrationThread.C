@@ -114,9 +114,8 @@ PenetrationThread::operator() (const NodeIdRange & range)
 
         // Restore the original reference coordinates
         info->_closest_point_ref = contact_ref;
-        info->_distance = distance;
-
-        mooseAssert(info->_distance >= 0, "Error in PenetrationLocator: Slave node contained in element but contact distance was negative!");
+        // Just calculated as the distance of the contact point off the surface (0).  Set to 0 to avoid round-off.
+        info->_distance = 0.0;
 
         computeSlip( *fe, *info );
         continue;
