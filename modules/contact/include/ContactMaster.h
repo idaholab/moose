@@ -50,8 +50,10 @@ protected:
   PenetrationLocator & _penetration_locator;
 
   const Real _penalty;
+  const Real _friction_coefficient;
   const Real _tension_release;
   bool _updateContactSet;
+  Real _time_last_called;
 
   NumericVector<Number> & _residual_copy;
 

@@ -1,4 +1,5 @@
 #include "ContactMaster.h"
+#include "FrictionalContactProblem.h"
 #include "SystemBase.h"
 
 // libmesh includes
@@ -21,6 +22,7 @@ InputParameters validParams<ContactMaster>()
 
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
+  params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
 
@@ -39,8 +41,10 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   _formulation(contactFormulation(getParam<std::string>("formulation"))),
   _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
   _penalty(getParam<Real>("penalty")),
+  _friction_coefficient(getParam<Real>("friction_coefficient")),
   _tension_release(getParam<Real>("tension_release")),
   _updateContactSet(true),
+  _time_last_called(-std::numeric_limits<Real>::max()),
   _residual_copy(_sys.residualGhosted()),
   _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
   _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
@@ -58,6 +62,10 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   if (_tension_release < 0)
   {
     mooseError("The parameter 'tension_release' must be non-negative");
+  }
+  if (_friction_coefficient < 0)
+  {
+    mooseError("The friction coefficient must be nonnegative");
   }
 }
 
@@ -84,6 +92,11 @@ ContactMaster::timestepSetup()
     _penetration_locator.setStartingContactPoint();
     updateContactSet();
     _updateContactSet = false;
+    if (_t > _time_last_called)
+    {
+      _penetration_locator.saveContactForce();
+    }
+    _time_last_called = _t;
   }
 }
 
@@ -209,12 +222,14 @@ ContactMaster::computeQpResidual()
     long int dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);
   }
-  const RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
-  const RealVectorValue pen_force(_penalty * distance_vec);
-  switch(_model)
+  RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
+  RealVectorValue pen_force(_penalty * distance_vec);
+  RealVectorValue tan_residual(0,0,0);
+  Real tan_residual_mag(0);
+  RealVectorValue unity(1.0, 1.0, 1.0);
+  if (_model == CM_FRICTIONLESS ||
+      _model == CM_EXPERIMENTAL)
   {
-  case CM_FRICTIONLESS:
-  case CM_EXPERIMENTAL:
 
     switch (_formulation)
     {
@@ -233,10 +248,46 @@ ContactMaster::computeQpResidual()
       mooseError("Invalid contact formulation");
       break;
     }
-    break;
+  }
+  else if (_model == CM_COULOMB)
+  {
 
-  case CM_GLUED:
-  case CM_TIED:
+    if (_formulation == CF_PENALTY)
+    {
+      distance_vec = pinfo->_incremental_slip + (pinfo->_normal * (_mesh.node(node->id()) - pinfo->_closest_point)) * pinfo->_normal;
+      pen_force = _penalty * distance_vec;
+
+      resid = pinfo->_normal * pen_force;
+    }
+    else
+    {
+      mooseError("Invalid contact formulation");
+    }
+
+    // Frictional capacity
+    // const Real capacity( _friction_coefficient * (pen_force * pinfo->_normal < 0 ? -resid : 0) );
+    const Real capacity( _friction_coefficient * (res_vec * pinfo->_normal > 0 ? res_vec * pinfo->_normal : 0) );
+
+    // Elastic predictor
+    pinfo->_contact_force = pen_force + (pinfo->_contact_force_old - pinfo->_normal*(pinfo->_normal*pinfo->_contact_force_old));
+    RealVectorValue contact_force_normal( (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal );
+    RealVectorValue contact_force_tangential( pinfo->_contact_force - contact_force_normal );
+
+    // Tangential magnitude of elastic predictor
+    const Real tan_mag( contact_force_tangential.size() );
+
+    if ( tan_mag > capacity )
+    {
+      pinfo->_contact_force = contact_force_normal + capacity * contact_force_tangential / tan_mag;
+    }
+
+    // Change the sign since master force is equal and opposite slave force
+    resid = -pinfo->_contact_force(_component);
+
+  }
+  else if (_model == CM_GLUED ||
+           _model == CM_TIED)
+  {
     switch(_formulation)
     {
     case CF_DEFAULT:
@@ -253,11 +304,10 @@ ContactMaster::computeQpResidual()
       mooseError("Invalid contact formulation");
       break;
     }
-    break;
-
-  default:
+  }
+  else
+  {
     mooseError("Invalid or unavailable contact model");
-    break;
   }
 
   return _test[_i][_qp] * resid;

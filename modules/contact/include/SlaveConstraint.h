@@ -28,17 +28,18 @@ protected:
   const ContactFormulation _formulation;
   PenetrationLocator & _penetration_locator;
 
-  Real _penalty;
+  const Real _penalty;
+  const Real _friction_coefficient;
 
   NumericVector<Number> & _residual_copy;
 
   std::map<Point, PenetrationLocator::PenetrationInfo *> _point_to_info;
 
-  unsigned int _x_var;
-  unsigned int _y_var;
-  unsigned int _z_var;
+  const unsigned int _x_var;
+  const unsigned int _y_var;
+  const unsigned int _z_var;
 
-  RealVectorValue _vars;
+  const RealVectorValue _vars;
 };
 
 #endif //SLAVECONSTRAINT_H

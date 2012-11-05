@@ -24,6 +24,7 @@ private:
   const NonlinearVariableName _disp_y;
   const NonlinearVariableName _disp_z;
   const Real _penalty;
+  const Real _friction_coefficient;
   const Real _tension_release;
   const std::string _model;
   const std::string _formulation;
