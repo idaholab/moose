@@ -2530,7 +2530,7 @@ FEProblem::shouldUpdateSolution()
 }
 
 bool
-FEProblem::updateSolution(NumericVector<Number>& vec_solution, NumericVector<Number>& ghosted_solution)
+FEProblem::updateSolution(NumericVector<Number>& /*vec_solution*/, NumericVector<Number>& /*ghosted_solution*/)
 {
   return false;
 }
