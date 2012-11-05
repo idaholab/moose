@@ -191,7 +191,6 @@ FrictionalContactProblem::slipUpdate(NumericVector<Number>& vec_solution, const 
   {
     computeResidual(system, ghosted_solution, *system.rhs);
 
-    Real max_fraction_of_capacity(0.0);
     int num_contact_nodes(0);
     int num_slipping(0);
     int num_slipped_too_far(0);
@@ -226,8 +225,6 @@ FrictionalContactProblem::slipUpdate(NumericVector<Number>& vec_solution, const 
 
 
         std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
-
-        unsigned int slave_boundary = pen_loc._slave_boundary;
 
         for(unsigned int i=0; i<slave_nodes.size(); i++)
         {
@@ -374,7 +371,7 @@ FrictionalContactProblem::calculateSlip(RealVectorValue &slip,
     slip_residual = capacity - tangential_force_in_slip_dir;
 
     RealVectorValue force_from_unit_slip(0.0,0.0,0.0);
-    for(unsigned int i=0; i<dim; ++i)
+    for(int i=0; i<dim; ++i)
     {
       force_from_unit_slip(i) = stiffness(i) * slip_inc_direction(i);
     }
@@ -402,7 +399,7 @@ FrictionalContactProblem::calculateSlip(RealVectorValue &slip,
     RealVectorValue excess_force_vector = tangential_direction * excess_force;
 
 
-    for(unsigned int i=0; i<dim; ++i)
+    for(int i=0; i<dim; ++i)
     {
       slip(i) = slip_factor * excess_force_vector(i) / stiffness(i);
     }
