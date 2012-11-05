@@ -34,21 +34,18 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-    
-    const WaterSteamEOS & _water_steam_properties;
-  
-    MaterialProperty<Real> & _density;
-    MaterialProperty<Real> & _time_old_density;
-    MaterialProperty<Real> & _ddensitydp_H;
-    MaterialProperty<Real> & _ddensitydH_P;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);  
+  MaterialProperty<Real> & _density;
+  MaterialProperty<Real> & _time_old_density;
+  MaterialProperty<Real> & _ddensitydp_H;
+  MaterialProperty<Real> & _ddensitydH_P;
 
-    unsigned int _h_var;
+  unsigned int _h_var;
     
-    MaterialProperty<Real> & _porosity;  
+  MaterialProperty<Real> & _porosity;  
 //  VariableValue  & _porosity;
 //  VariableValue  & _porosity_old;
 
-    VariableValue & _u_old;
+  VariableValue & _u_old;
 };
 #endif //MASSFLUXTIMEDERIVATIVE
