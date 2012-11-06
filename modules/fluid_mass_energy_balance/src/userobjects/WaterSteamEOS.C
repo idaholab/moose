@@ -318,9 +318,9 @@ Real WaterSteamEOS::waterEquationOfStatePH (Real enth_in, Real press_in, Real te
     enth1 = intern_energy1 + press_in / dens1;
         
         
-    dif = std:: abs((enth1 - enth_in) * 1.e-6);
+    dif = std:: abs(enth1 - enth_in);
         
-    if (dif <= 1.0e-14)
+    if (dif <= 1.0e-8)
     {
       break;
     }
@@ -471,10 +471,10 @@ Real WaterSteamEOS::steamEquationOfStatePH (Real enth_in, Real press_in, Real te
     enth2 = intern_energy2 + press_in / dens2;
         
         
-    dif = std::abs((enth2 - enth_in) * 1.e-6);
+    dif = std::abs(enth2 - enth_in);
         
         
-    if (dif <= 1.0e-15)
+    if (dif <= 1.0e-8)
     {
       break;
     }
