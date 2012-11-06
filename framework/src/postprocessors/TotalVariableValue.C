@@ -12,31 +12,41 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PostprocessorInterface.h"
-#include "PostprocessorData.h"
-#include "FEProblem.h"
+#include "TotalVariableValue.h"
 
-PostprocessorInterface::PostprocessorInterface(InputParameters & params) :
-    _pi_feproblem(*params.get<FEProblem *>("_fe_problem")),
-    _pi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0)
-{}
-
-PostprocessorValue &
-PostprocessorInterface::getPostprocessorValue(const std::string & name)
+template<>
+InputParameters validParams<TotalVariableValue>()
 {
-  return _pi_feproblem.getPostprocessorValue(name, _pi_tid);
-
-
-  // std::map<std::string, Real>::iterator it = _postprocessor_data._values.find(name);
-
-//   if (it != _postprocessor_data._values.end())
-//     return it->second;
-
-  //mooseError("No Postprocessor named: " + name);
+  InputParameters params = validParams<GeneralPostprocessor>();
+  params.addParam<std::string>("value", "The name of the postprocessor");
+  return params;
 }
 
-PostprocessorValue &
-PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
+TotalVariableValue::TotalVariableValue(const std::string & name, InputParameters parameters) :
+    GeneralPostprocessor(name, parameters),
+    _value(0),
+    _pps_value(getPostprocessorValue(getParam<std::string>("value"))),
+    _pps_value_old(getPostprocessorValueOld(getParam<std::string>("value")))
 {
-  return _pi_feproblem.getPostprocessorValueOld(name, _pi_tid);
+}
+
+TotalVariableValue::~TotalVariableValue()
+{
+}
+
+void
+TotalVariableValue::initialize()
+{
+}
+
+void
+TotalVariableValue::execute()
+{
+  _value += 0.5 * (_pps_value + _pps_value_old) * _dt;
+}
+
+Real
+TotalVariableValue::getValue()
+{
+  return _value;
 }

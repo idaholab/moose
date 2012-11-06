@@ -35,14 +35,29 @@ PostprocessorData::getPostprocessorValue(const std::string & name)
   return _values[name];
 }
 
+PostprocessorValue &
+PostprocessorData::getPostprocessorValueOld(const std::string & name)
+{
+  return _values_old[name];
+}
+
+
 void
 PostprocessorData::init(const std::string & name)
 {
   _values[name] = 0.0;
+  _values_old[name] = 0.0;
 }
 
 void
 PostprocessorData::storeValue(const std::string & name, PostprocessorValue value)
 {
   _values[name] = value;
+}
+
+void
+PostprocessorData::copyValuesBack()
+{
+  for (std::map<std::string, PostprocessorValue>::iterator it = _values.begin(); it != _values.end(); ++it)
+    _values_old[it->first] = it->second;
 }

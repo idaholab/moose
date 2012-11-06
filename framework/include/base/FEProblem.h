@@ -310,6 +310,14 @@ public:
    * Get a reference to the value associated with the postprocessor.
    */
   Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
+  /**
+   * Get the reference to the old value of a post-processor
+   * @param name The name of the post-processor
+   * @param tid Thread ID
+   * @return The reference to the old value
+   */
+  Real & getPostprocessorValueOld(const std::string & name, THREAD_ID tid = 0);
+
   virtual void computeUserObjects(ExecFlagType type = EXEC_TIMESTEP, UserObjectWarehouse::GROUP group = UserObjectWarehouse::ALL);
   virtual void computeAuxiliaryKernels(ExecFlagType type = EXEC_RESIDUAL);
   virtual void outputPostprocessors(bool force = false);

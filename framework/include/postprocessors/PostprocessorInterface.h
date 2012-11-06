@@ -34,6 +34,13 @@ public:
    */
   PostprocessorValue & getPostprocessorValue(const std::string & name);
 
+  /**
+   * Retrieve the old value of a post-processor
+   * @param name The name of the post-processor
+   * @return The value of the post-processor
+   */
+  PostprocessorValue & getPostprocessorValueOld(const std::string & name);
+
 private:
   FEProblem & _pi_feproblem;
   THREAD_ID _pi_tid;

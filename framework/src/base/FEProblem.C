@@ -1554,6 +1554,12 @@ FEProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
   return _pps_data[tid].getPostprocessorValue(name);
 }
 
+Real &
+FEProblem::getPostprocessorValueOld(const std::string & name, THREAD_ID tid)
+{
+  return _pps_data[tid].getPostprocessorValueOld(name);
+}
+
 void
 FEProblem::computeIndicatorsAndMarkers()
 {
@@ -2339,6 +2345,9 @@ void
 FEProblem::onTimestepBegin()
 {
   _nl.onTimestepBegin();
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    _pps_data[tid].copyValuesBack();
 }
 
 void

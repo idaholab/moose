@@ -12,31 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PostprocessorInterface.h"
-#include "PostprocessorData.h"
-#include "FEProblem.h"
+#ifndef TOTALVARIABLEVALUE_H
+#define TOTALVARIABLEVALUE_H
 
-PostprocessorInterface::PostprocessorInterface(InputParameters & params) :
-    _pi_feproblem(*params.get<FEProblem *>("_fe_problem")),
-    _pi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0)
-{}
+#include "GeneralPostprocessor.h"
 
-PostprocessorValue &
-PostprocessorInterface::getPostprocessorValue(const std::string & name)
+class TotalVariableValue;
+
+template<>
+InputParameters validParams<TotalVariableValue>();
+
+/**
+ * Integrate a post-processor value over time using trapezoidal rule
+ */
+class TotalVariableValue : public GeneralPostprocessor
 {
-  return _pi_feproblem.getPostprocessorValue(name, _pi_tid);
+public:
+  TotalVariableValue(const std::string & name, InputParameters parameters);
+  virtual ~TotalVariableValue();
 
+  virtual void initialize();
+  virtual void execute();
+  virtual Real getValue();
 
-  // std::map<std::string, Real>::iterator it = _postprocessor_data._values.find(name);
+protected:
+  /// The total value of the variable
+  Real _value;
+  /// The current post-processor value
+  PostprocessorValue & _pps_value;
+  /// The old post-processor value
+  PostprocessorValue & _pps_value_old;
+};
 
-//   if (it != _postprocessor_data._values.end())
-//     return it->second;
-
-  //mooseError("No Postprocessor named: " + name);
-}
-
-PostprocessorValue &
-PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
-{
-  return _pi_feproblem.getPostprocessorValueOld(name, _pi_tid);
-}
+#endif /* TOTALVARIABLEVALUE_H */

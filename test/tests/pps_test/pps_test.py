@@ -39,3 +39,8 @@ pps_output_test = {
   INPUT : 'pps_output_test.i',
   EXODIFF : ['pps_output_test_out.e']
 }
+
+pps_old_test = {
+  INPUT : 'pps_old_value.i',
+  EXODIFF : ['pps_old_value_out.e']
+}

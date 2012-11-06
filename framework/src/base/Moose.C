@@ -134,6 +134,7 @@
 #include "ScalarL2Error.h"
 #include "ElementalVariableValue.h"
 #include "ElementL2Norm.h"
+#include "TotalVariableValue.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -345,6 +346,7 @@ registerObjects()
   registerPostprocessor(NodalProxyMaxValue);
   registerPostprocessor(ElementalVariableValue);
   registerPostprocessor(ElementL2Norm);
+  registerPostprocessor(TotalVariableValue);
 
   // user objects
   registerUserObject(LayeredIntegral);

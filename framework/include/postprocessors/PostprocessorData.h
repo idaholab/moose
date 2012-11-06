@@ -30,6 +30,13 @@ public:
 
   PostprocessorValue & getPostprocessorValue(const std::string & name);
 
+  /**
+   * The the old value of an post-processor
+   * @param name The name of the post-processor
+   * @return The reference to the old value
+   */
+  PostprocessorValue & getPostprocessorValueOld(const std::string & name);
+
   void storeValue(const std::string & name, PostprocessorValue value);
 
   /**
@@ -37,8 +44,15 @@ public:
    */
   const std::map<std::string, PostprocessorValue> & values() const { return _values; }
 
+  /**
+   * Copy the current post-processor values into old (i.e. shift it "back in time")
+   */
+  void copyValuesBack();
+
 protected:
   std::map<std::string, PostprocessorValue> _values;
+  /// Values of the post-processors at the time t-1
+  std::map<std::string, PostprocessorValue> _values_old;
 };
 
 #endif //POSTPROCESSORDATA_H
