@@ -1,0 +1,323 @@
+[Tests]
+  [./add_aux_variable_multiple_test]
+    type = 'RunException'
+    input = 'add_aux_variable_multiple_test.i'
+    expect_err = "AuxVariable with name 'q' already exists but is of a differing type!"
+  [../]
+
+  [./bad_bc_test]
+    type = 'RunException'
+    input = 'bad_bc_test.i'
+    expect_err = "A '\w+' is not a registered object"
+  [../]
+
+  [./bad_bc_var_test]
+    type = 'RunException'
+    input = 'bad_bc_var_test.i'
+    expect_err = "variable foo does not exist in this system"
+  [../]
+
+  [./bad_enum_test]
+    type = 'RunException'
+    input = 'bad_enum_test.i'
+    expect_err = 'Invalid option "\w+" in MooseEnum.'
+  [../]
+
+  [./bad_executioner_test]
+    type = 'RunException'
+    input = 'bad_executioner_test.i'
+    expect_err = "A '\w+' is not a registered object"
+  [../]
+
+  [./bad_kernel_test]
+    type = 'RunException'
+    input = 'bad_kernel_test.i'
+    expect_err = "A '\w+' is not a registered object"
+  [../]
+
+  [./bad_kernel_var_test]
+    type = 'RunException'
+    input = 'bad_kernel_var_test.i'
+    expect_err = "Unknown variable"
+  [../]
+
+  [./bad_material_block_test]
+    type = 'RunException'
+    input = 'bad_material_block_test.i'
+    expect_err = "Material block \S+ specified in the input file does not exist"
+  [../]
+
+  [./bad_material_test]
+    type = 'RunException'
+    input = 'bad_material_test.i'
+    expect_err = "A '\w+' is not a registered object"
+  [../]
+
+  [./bad_parsed_function_vars_test]
+    type = 'RunException'
+    input = 'bad_parsed_function_vars.i'
+    expect_err = 'ParsedFunction: The variables "x, y, z, and t" are pre-declared'
+  [../]
+
+  [./bad_second_order_test]
+    type = 'RunException'
+    input = 'bad_second_order_test.i'
+    skip = 'Inconsistent Error'
+    expect_err = 'Error in libMesh internal logic'
+    should_crash = True
+  [../]
+
+  [./coupled_dot_aux_var_test]
+    type = 'RunException'
+    input = 'coupled_dot_aux_var_test.i'
+    expect_err = "Coupling time derivative of an auxiliary variable is not allowed."
+  [../]
+
+  [./deprecated_block_test]
+    type = 'RunException'
+    input = 'deprecated_block_test.i'
+    expect_err = "Input file block '\S+' has been deprecated."
+  [../]
+
+  [./double_restrict_uo_test]
+    type = 'RunException'
+    input = 'double_restrict_uo.i'
+    expect_err = "The parameter 'boundary' and 'block' were both supplied for \w+"
+  [../]
+
+  [./dynamic_check_name_block_mismatch_test]
+    type = 'RunException'
+    input = 'check_dynamic_name_block_mismatch.i'
+    expect_err = "You must supply the same number of block ids and names parameters"
+  [../]
+
+  [./dynamic_check_name_block_test]
+    type = 'RunException'
+    input = 'check_dynamic_name_block.i'
+    expect_err = "The following dynamic block name is not unique: \w+"
+  [../]
+
+  [./dynamic_check_name_boundary_mismatch_test]
+    type = 'RunException'
+    input = 'check_dynamic_name_boundary_mismatch.i'
+    expect_err = "You must supply the same number of boundary ids and names parameters"
+  [../]
+
+  [./dynamic_check_name_boundary_test]
+    type = 'RunException'
+    input = 'check_dynamic_name_boundary.i'
+    expect_err = "The following dynamic boundary name is not unique: \w+"
+  [../]
+
+  [./exception_test]
+    type = 'RunException'
+    input = 'exception_test.i'
+    expect_err = "Exception caught: MOOSE exception"
+    petsc_version = '3.0.0'
+  [../]
+
+  [./function_file_test1]
+    type = 'RunException'
+    input = 'function_file_test1.i'
+    expect_err = "Read more than two rows of data from file '\S+' for PiecewiseLinearFile function.  Did you mean to use \"format = columns\"?"
+  [../]
+
+  [./function_file_test2]
+    type = 'RunException'
+    input = 'function_file_test2.i'
+    expect_err = "Read more than 2 columns of data from file '\S+' for PiecewiseLinearFile function.  Did you mean to use \"format = rows\"?"
+  [../]
+
+  [./function_file_test3]
+    type = 'RunException'
+    input = 'function_file_test3.i'
+    expect_err = "Lengths of x and y data do not match in file '\S+' for PiecewiseLinearFile function."
+  [../]
+
+  [./function_file_test4]
+    type = 'RunException'
+    input = 'function_file_test4.i'
+    expect_err = "Invalid option for format: \S+ in PiecewiseLinearFile.  Valid options are rows and columns."
+  [../]
+
+  [./incomplete_kernel_block_coverage_test]
+    type = 'RunException'
+    input = 'incomplete_kernel_block_coverage_test.i'
+    expect_err = "The following block\(s\) lack an active kernel:"
+  [../]
+
+  [./invalid_elemental_to_nodal_couple_test]
+    type = 'RunException'
+    input = 'invalid_aux_coupling_test.i'
+    expect_err = "You cannot couple an elemental variable to a nodal variable"
+  [../]
+
+  [./invalid_steady_exec_test]
+    type = 'RunException'
+    input = 'invalid_steady_exec_test.i'
+    expect_err = "You have specified time kernels in your steady state simulation"
+  [../]
+
+  [./missing_active_section_test]
+    type = 'RunException'
+    input = 'missing_active_section.i'
+    expect_err = "One or more active lists in the input file are missing a referenced section"
+  [../]
+
+  [./missing_coupled_mat_prop_test]
+    type = 'RunException'
+    input = 'missing_coupled_mat_prop_test.i'
+    expect_err = "One or more Material Properties were not supplied on block"
+  [../]
+
+  [./missing_function_file_test]
+    type = 'RunException'
+    input = 'missing_function_file_test.i'
+    expect_err = "Error opening file \S+ from PiecewiseLinearFile function"
+  [../]
+
+  [./missing_function_test]
+    type = 'RunException'
+    input = 'missing_function_test.i'
+    expect_err = "Unable to find function \S+"
+  [../]
+
+  [./missing_material_prop_test]
+    type = 'RunException'
+    input = 'missing_material_prop_test.i'
+    expect_err = "No material defined on block \d+"
+  [../]
+
+  [./missing_material_prop_test2]
+    type = 'RunException'
+    input = 'missing_material_prop_test2.i'
+    expect_err = "Material property 'diff1' is not defined on block \d+"
+  [../]
+
+  [./missing_mesh_bcs_test]
+    type = 'RunException'
+    input = 'missing_mesh_bcs_test.i'
+    expect_err = "The following boundary ids from your input file do not exist in the input mesh \d+"
+  [../]
+
+  [./missing_mesh_test]
+    type = 'RunException'
+    input = 'missing_mesh_test.i'
+    expect_err = "Unable to open file \S+"
+  [../]
+
+  [./missing_req_par_action_obj_test]
+    type = 'RunException'
+    input = 'missing_req_par_action_obj_test.i'
+    expect_err = "The required parameter '\S+' is missing"
+  [../]
+
+  [./missing_req_par_mesh_block_test]
+    type = 'RunException'
+    input = 'missing_req_par_mesh_block_test.i'
+    expect_err = "The required parameter '\S+' is missing"
+  [../]
+
+  [./missing_req_par_moose_obj_test]
+    type = 'RunException'
+    input = 'missing_req_par_moose_obj_test.i'
+    expect_err = "The required parameter '\S+' is missing"
+  [../]
+
+  [./multi_precond_test]
+    type = 'RunException'
+    input = 'multi_precond_test.i'
+    expect_err = "More than one active Preconditioner Action detected while building \S+"
+  [../]
+
+  [./nan_test]
+    type = 'RunException'
+    input = 'nan_test.i'
+    expect_err = "Floating point exception"
+  [../]
+
+  [./no_output_dir_test]
+    type = 'RunException'
+    input = 'no_output_dir_test.i'
+    expect_err = "Can not write to directory: \S+ for file base: \S+"
+  [../]
+
+  [./nodal_material_test]
+    type = 'RunException'
+    input = 'nodal_material_test.i'
+    expect_err = "Nodal AuxKernel '\w+' attempted to reference material property '\w+'"
+  [../]
+
+  [./override_name_variable_test]
+    type = 'RunException'
+    input = 'override_name_variable_test.i'
+    expect_out = "The following variables were overridden or supplied multiple times:"
+  [../]
+
+  [./pps_bad_block_test]
+    type = 'RunException'
+    input = 'pps_bad_block_test.i'
+    expect_err = "One or more UserObjects is referencing a nonexistent block"
+  [../]
+
+  [./rz_3d_error_check_test]
+    type = 'RunException'
+    input = '3D_RZ_error_check.i'
+    expect_err = "An RZ coordinate system was requested for subdomain \d+ which contains 3D elements"
+  [../]
+
+  [./same_name_variable_test]
+    type = 'RunException'
+    input = 'same_name_variable_test.i'
+    expect_err = "Cannot have an auxiliary variable and a nonlinear variable with the same name!"
+  [../]
+
+  [./stateful_adaptive_error_test]
+    type = 'RunException'
+    input = 'stateful_adaptive_error_test.i'
+    expect_err = "Cannot use Material classes with stateful properties while utilizing adaptivity"
+  [../]
+
+  [./subdomain_restricted_auxkernel_test]
+    type = 'RunException'
+    input = 'subdomain_restricted_auxkernel_mismatch.i'
+    expect_err = "AuxKernel \(\w+\): block outside of the domain of the variable"
+  [../]
+
+  [./subdomain_restricted_kernel_test]
+    type = 'RunException'
+    input = 'subdomain_restricted_kernel_mismatch.i'
+    expect_err = "Kernel \(\w+\): block outside of the domain of the variable"
+  [../]
+
+  [./unused_param_test]
+    type = 'RunException'
+    expect_out = "WARNING: The following parameters were unused in your input file"
+    input = 'unused_param_test.i'
+    cli_args = '--warn-unused'
+  [../]
+
+  [./uo_pps_name_collision_test]
+    type = 'RunException'
+    input = 'uo_pps_name_collision_test.i'
+    expect_err = 'A UserObject with the name "\w+" already exists'
+  [../]
+
+  [./windows_line_endings_test]
+    type = 'RunException'
+    input = 'windows_line_endings.i'
+    expect_err = "\S+ contains Windows\(DOS\) line endings"
+  [../]
+
+  [./wrong_object_test]
+    type = 'RunException'
+    input = 'wrong_moose_object_test.i'
+    expect_err = "Inconsistent Action Name detected!"
+  [../]
+
+  [./wrong_object_test2]
+    type = 'RunException'
+    input = 'nonexistent_pps_test.i'
+    expect_err = "Postprocessor '\S+' requested but not specified in the input file."
+  [../]
+[]

@@ -36,6 +36,6 @@ class RunException(RunApp):
         reason = 'NO EXPECTED ERR'
 
     if reason != '':
-      reason = RunApp.processResults(self, moose_dir, retcode, options, output)
+      (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
 
     return (reason, output)

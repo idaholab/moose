@@ -132,7 +132,10 @@ class TestHarness:
           if key in test and type(test[key]) == list:
             test[key] = value.split(' ')
           else:
-            test[key] = value
+	    if re.match('".*"', value):  # Strip quotes
+	      test[key] = value[1:-1]
+	    else:
+              test[key] = value
 
         if TYPE not in test:
           print "Type missing in " + test_dir + filename
@@ -166,6 +169,13 @@ class TestHarness:
 
     for test_name, test_opts in inspect.getmembers(module):
       if isinstance(test_opts, types.DictType) and self.test_match.search(test_name):
+
+        if filename == 'check_error_tests.py':
+	  print "  [./" + test_name + "]"
+          print "    type = 'RunException'"
+	  for key, value in test_opts.items():
+            print "    " + key + " = '", value, "'"
+          print "  [../]\n"
 
         # insert default values where none provided
         testname = module_name + '.' + test_name
@@ -324,6 +334,7 @@ class TestHarness:
       caveats = test['CAVEATS']
 
     (reason, output) = tester.processResults(self.moose_dir, retcode, self.options, output)
+#    print tester.processResults(self.moose_dir, retcode, self.options, output)
 
     if self.options.scaling and test[SCALE_REFINE]:
       caveats.append('SCALED')
