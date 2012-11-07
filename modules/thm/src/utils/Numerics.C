@@ -15,7 +15,7 @@ namespace Numerics {
     Real xnew=x0;
     Real xold=x0;
 
-    while ( n<= n_max)
+    while (n <= n_max)
     {
       if(std::fabs(res)<tola && std::fabs((xnew-xold)/xold)<tolr) 
       {
@@ -36,6 +36,5 @@ namespace Numerics {
     mooseError(error_message.str() );
     return 0.;
   }
- 
 }
 

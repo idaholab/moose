@@ -23,26 +23,26 @@ SolidMaterial::SolidMaterial(const std::string & name, InputParameters parameter
 
 void SolidMaterial::computeProperties()
 {
-   Real K=0.0;
-   Real Cp=0.0;
-   Real Rho = 0.0;
-   for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
-   {
+  Real K=0.0;
+  Real Cp=0.0;
+  Real Rho = 0.0;
+  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+  {
     if (_name_of_hs == "fuel")
-       fuelProperties(K, Rho, Cp, _tw[qp]);
+      fuelProperties(K, Rho, Cp, _tw[qp]);
     else if (_name_of_hs =="gap")
-       gapProperties(K, Rho, Cp, _tw[qp]);
+      gapProperties(K, Rho, Cp, _tw[qp]);
     else if (_name_of_hs == "clad")
-       cladProperties(K, Rho, Cp, _tw[qp]);
+      cladProperties(K, Rho, Cp, _tw[qp]);
     else
-       mooseError("Heat structure is not specified");
+      mooseError("Heat structure is not specified");
 
-     _thermal_conductivity[qp] = K;
-     _density[qp] = Rho;
-     _specific_heat[qp] = Cp;
-     //std::cout<<"name_of_hs="<< _name_of_hs<<std::endl;
-     //std::cout<<"qp="<<qp<<" tw="<<_tw[qp]<<" conductivity="<<_thermal_conductivity[qp]<<" density="<<_density[qp]<<"  Cp="<<_specific_heat[qp]<<std::endl;
-   } 
+    _thermal_conductivity[qp] = K;
+    _density[qp] = Rho;
+    _specific_heat[qp] = Cp;
+    //std::cout<<"name_of_hs="<< _name_of_hs<<std::endl;
+    //std::cout<<"qp="<<qp<<" tw="<<_tw[qp]<<" conductivity="<<_thermal_conductivity[qp]<<" density="<<_density[qp]<<"  Cp="<<_specific_heat[qp]<<std::endl;
+  }
 }
 
 void SolidMaterial::gapProperties(Real & K, Real & Rho, Real & Cp, Real Temp)
@@ -59,22 +59,21 @@ void SolidMaterial::gapProperties(Real & K, Real & Rho, Real & Cp, Real Temp)
   
   unsigned int N = sizeof(K_gap)/sizeof(K_gap[0]);
   if (Temp <= T_gap[0])
-     K = K_gap[0];
+    K = K_gap[0];
   else if (Temp >=T_gap[N-1])
-     K = K_gap[N-1];
+    K = K_gap[N-1];
   else
   {
-     unsigned int i=1;
-     for (; i<N; i++)
-     {
-       if (Temp<=T_gap[i])
-         break;
-     }
-       K = ((Temp-T_gap[i-1])*K_gap[i] + (T_gap[i]-Temp)*K_gap[i-1])/(T_gap[i]-T_gap[i-1]);
+    unsigned int i=1;
+    for (; i<N; i++)
+    {
+      if (Temp<=T_gap[i])
+        break;
+    }
+    K = ((Temp-T_gap[i-1])*K_gap[i] + (T_gap[i]-Temp)*K_gap[i-1])/(T_gap[i]-T_gap[i-1]);
   }
   Rho = 183.06;
   Cp =  186.65;
-  return;
 }
 
 void SolidMaterial::fuelProperties(Real & K, Real & Rho, Real & Cp, Real Temp)
@@ -92,18 +91,18 @@ void SolidMaterial::fuelProperties(Real & K, Real & Rho, Real & Cp, Real Temp)
 
   unsigned int N = sizeof(K_fuel)/sizeof(K_fuel[0]);
   if (Temp <= T_fuel_K[0])
-     K = K_fuel[0];
+    K = K_fuel[0];
   else if (Temp >=T_fuel_K[N-1])
-     K = K_fuel[N-1];
+    K = K_fuel[N-1];
   else
   {
-     unsigned int i=1;
-     for (; i<N; i++)
-     {
-       if (Temp<=T_fuel_K[i])
-         break;
-     }
-     K = ((Temp-T_fuel_K[i-1])*K_fuel[i] + (T_fuel_K[i]-Temp)*K_fuel[i-1])/(T_fuel_K[i]-T_fuel_K[i-1]);
+    unsigned int i=1;
+    for (; i<N; i++)
+    {
+      if (Temp<=T_fuel_K[i])
+        break;
+    }
+    K = ((Temp-T_fuel_K[i-1])*K_fuel[i] + (T_fuel_K[i]-Temp)*K_fuel[i-1])/(T_fuel_K[i]-T_fuel_K[i-1]);
   }
 
   Real T_fuel_Cp[] = { 5.0,   300.0,  400.0,  500.0,  600.0,  700.0,  800.0,  900.0, 1000.0,
@@ -118,22 +117,21 @@ void SolidMaterial::fuelProperties(Real & K, Real & Rho, Real & Cp, Real Temp)
 
   unsigned int M = sizeof(Cp_fuel)/sizeof(Cp_fuel[0]);
   if (Temp <= T_fuel_Cp[0])
-     Cp = Cp_fuel[0];
+    Cp = Cp_fuel[0];
   else if (Temp >=T_fuel_Cp[M-1])
-     Cp = Cp_fuel[M-1];
+    Cp = Cp_fuel[M-1];
   else
   {
-     unsigned int i=1;
-     for (; i<M; i++)
-     {
-       if (Temp<=T_fuel_Cp[i])
-         break;
-     }
-     Cp = ((Temp-T_fuel_Cp[i-1])*Cp_fuel[i] + (T_fuel_Cp[i]-Temp)*Cp_fuel[i-1])/(T_fuel_Cp[i]-T_fuel_Cp[i-1]);
+    unsigned int i=1;
+    for (; i<M; i++)
+    {
+      if (Temp<=T_fuel_Cp[i])
+        break;
+    }
+    Cp = ((Temp-T_fuel_Cp[i-1])*Cp_fuel[i] + (T_fuel_Cp[i]-Temp)*Cp_fuel[i-1])/(T_fuel_Cp[i]-T_fuel_Cp[i-1]);
   }
 
   Rho = 10980.0;
-  return;
 }
 
 
@@ -149,18 +147,18 @@ void SolidMaterial::cladProperties(Real & K, Real & Rho, Real & Cp, Real Temp)
 
   unsigned int N = sizeof(K_clad)/sizeof(K_clad[0]);
   if (Temp <= T_clad_K[0])
-     K = K_clad[0];
+    K = K_clad[0];
   else if (Temp >=T_clad_K[N-1])
-     K = K_clad[N-1];
+    K = K_clad[N-1];
   else
   {
-     unsigned int i=1;
-     for (; i<N; i++)
-     {
-       if (Temp<=T_clad_K[i])
-         break;
-     }
-       K = ((Temp-T_clad_K[i-1])*K_clad[i] + (T_clad_K[i]-Temp)*K_clad[i-1])/(T_clad_K[i]-T_clad_K[i-1]);
+    unsigned int i=1;
+    for (; i<N; i++)
+    {
+      if (Temp<=T_clad_K[i])
+        break;
+    }
+    K = ((Temp-T_clad_K[i-1])*K_clad[i] + (T_clad_K[i]-Temp)*K_clad[i-1])/(T_clad_K[i]-T_clad_K[i-1]);
   }
 
   Real T_clad_Cp[] = { 5.0,   300.0,  400.0, 640.0, 1090.0,  1093.0,  1113.0,  1133.0,
@@ -170,18 +168,18 @@ void SolidMaterial::cladProperties(Real & K, Real & Rho, Real & Cp, Real Temp)
 
   unsigned int M = sizeof(Cp_clad)/sizeof(Cp_clad[0]);
   if (Temp <= T_clad_Cp[0])
-     Cp = Cp_clad[0];
+    Cp = Cp_clad[0];
   else if (Temp >=T_clad_Cp[M-1])
-     Cp = Cp_clad[M-1];
+    Cp = Cp_clad[M-1];
   else
   {
-     unsigned int i=1;
-     for (; i<M; i++)
-     {
-       if (Temp<=T_clad_Cp[i])
-         break;
-     }
-     Cp = ((Temp-T_clad_Cp[i-1])*Cp_clad[i] + (T_clad_Cp[i]-Temp)*Cp_clad[i-1])/(T_clad_Cp[i]-T_clad_Cp[i-1]);
+    unsigned int i=1;
+    for (; i<M; i++)
+    {
+      if (Temp<=T_clad_Cp[i])
+        break;
+    }
+    Cp = ((Temp-T_clad_Cp[i-1])*Cp_clad[i] + (T_clad_Cp[i]-Temp)*Cp_clad[i-1])/(T_clad_Cp[i]-T_clad_Cp[i-1]);
   }
 
   Rho = 6551.0;
