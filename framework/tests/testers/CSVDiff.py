@@ -15,7 +15,7 @@ class CSVDiff(RunApp):
   def prepare(self):
     # Note: We cannot automatically blow away files if this test contains prereqs.  This generally implies
     #       that we are using the output of one test as the input of another.
-    if self.specs[PREREQ] != None:
+    if self.specs[PREREQ] == None:
       for file in self.specs[CSVDIFF]:
         try:
           os.remove(os.path.join(self.specs[TEST_DIR], file))
