@@ -38,4 +38,4 @@ class RunException(RunApp):
     if reason != '':
       reason = RunApp.processResults(self, moose_dir, retcode, options, output)
 
-    return reason
+    return (reason, output)

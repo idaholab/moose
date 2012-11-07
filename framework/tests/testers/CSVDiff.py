@@ -23,7 +23,7 @@ class CSVDiff(RunApp):
           pass
 
   def processResults(self, moose_dir, retcode, options, output):
-    reason = RunApp.processResults(self, moose_dir, retcode, options, output)
+    (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
     if reason != '':
       return reason
 
@@ -36,4 +36,4 @@ class CSVDiff(RunApp):
       if msg != '':
         reason = 'CSVDIFF'
 
-    return reason
+    return (reason, output)

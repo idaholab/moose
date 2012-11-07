@@ -39,7 +39,7 @@ testdt2 = { INPUT : 'dt2_adapt.i',
 # the output file exists
 test_solution_time_adaptive = { INPUT : 'time-adaptive.i',
                                 CHECK_FILES : ['out_time_adaptive.e'],
-				TYPE = 'CheckFiles' }
+				TYPE : 'CheckFiles' }
 
 testabort = { INPUT : 'aborttest.i',
              EXODIFF : ['out_abort.e'] }

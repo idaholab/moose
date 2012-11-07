@@ -88,7 +88,7 @@ class RunApp(Tester):
       elif retcode > 0 and specs[SHOULD_CRASH]:
         reason = 'NO CRASH'
 
-    return reason
+    return (reason, output)
 
 
   def checkOutputForPattern(self, output, re_pattern):

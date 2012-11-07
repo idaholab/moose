@@ -32,7 +32,7 @@ class Exodiff(RunApp):
           pass
 
   def processResults(self, moose_dir, retcode, options, output):
-    reason = RunApp.processResults(self, moose_dir, retcode, options, output)
+    (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
     if reason != '':
       return reason
 
@@ -56,16 +56,23 @@ class Exodiff(RunApp):
 #          sleep(0.5)
 
 #      if file_found:
-      command = moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F' + ' ' + str(specs[ABS_ZERO]) + old_floor + ' -t ' + str(specs[REL_ERR]) \
-          + ' ' + ' '.join(specs[EXODIFF_OPTS]) + ' ' + os.path.join(specs[TEST_DIR], specs[GOLD_DIR], file) + ' ' + os.path.join(specs[TEST_DIR], file)
-      exo_output = runCommand(command)
 
-      output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(specs[EXODIFF_OPTS])
-
-      if ('different' in exo_output or 'ERROR' in exo_output) and not "Files are the same" in exo_output:
-        reason = 'EXODIFF'
+      if not os.path.exists(os.path.join(specs[TEST_DIR], specs[GOLD_DIR], file)):
+        output += "File Not Found: " + os.path.join(specs[TEST_DIR], specs[GOLD_DIR], file)
+        reason = 'MISSING GOLD FILE'
         break
+      else:
+        command = moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F' + ' ' + str(specs[ABS_ZERO]) + old_floor + ' -t ' + str(specs[REL_ERR]) \
+            + ' ' + ' '.join(specs[EXODIFF_OPTS]) + ' ' + os.path.join(specs[TEST_DIR], specs[GOLD_DIR], file) + ' ' + os.path.join(specs[TEST_DIR], file)
+        exo_output = runCommand(command)
+
+        output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(specs[EXODIFF_OPTS])
+
+        if ('different' in exo_output or 'ERROR' in exo_output) and not "Files are the same" in exo_output:
+          reason = 'EXODIFF'
+          break
 #      else:
 #        reason = 'NO EXODIFF FILE'
 #        break
-    return reason
+
+    return (reason, output)

@@ -323,7 +323,7 @@ class TestHarness:
     if 'CAVEATS' in test:
       caveats = test['CAVEATS']
 
-    reason = tester.processResults(self.moose_dir, retcode, self.options, output)
+    (reason, output) = tester.processResults(self.moose_dir, retcode, self.options, output)
 
     if self.options.scaling and test[SCALE_REFINE]:
       caveats.append('SCALED')

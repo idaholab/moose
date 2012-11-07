@@ -24,7 +24,7 @@ class CheckFiles(RunApp):
         pass
 
   def processResults(self, moose_dir, retcode, options, output):
-    reason = RunApp.processResults(self, moose_dir, retcode, options, output)
+    (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
 
     # if still no errors, check other files (just for existence)
     if reason == '':
@@ -33,4 +33,4 @@ class CheckFiles(RunApp):
           reason = 'MISSING FILES'
           break
 
-    return reason
+    return (reason, output)
