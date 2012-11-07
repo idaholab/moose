@@ -23,8 +23,10 @@ public:
   virtual void addMooseObjects();
 
 protected:
-  std::string _input;                                   ///< Name of the input
-  unsigned int _boundary_id;                            ///< boundary ID where is our BC imposed
+  /// Name of the input
+  std::string _input;
+  /// boundary ID where is our BC imposed
+  unsigned int _boundary_id;
 };
 
 #endif /* SOLIDWALL_H */
