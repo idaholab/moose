@@ -18,16 +18,6 @@ InputParameters validParams<TemperatureAux>()
 }
 
 
-
-
-TemperatureAux::~TemperatureAux()
-{
-  // Destructor, empty
-}
-
-
-
-
 TemperatureAux::TemperatureAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
     _rho(coupledValue("rho")),
@@ -37,8 +27,10 @@ TemperatureAux::TemperatureAux(const std::string & name, InputParameters paramet
 {}
 
 
-
-
+TemperatureAux::~TemperatureAux()
+{
+  // Destructor, empty
+}
 
 Real TemperatureAux::computeValue()
 {
