@@ -28,6 +28,7 @@ InputParameters validParams<PlotFunction>()
 PlotFunction::PlotFunction(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     _func(getFunction("function")),
+    _point(isParamValid("point") ? getParam<Point>("point") : Point()),
     _scale_factor(getParam<Real>("scale_factor"))
 {
 }
@@ -49,6 +50,5 @@ PlotFunction::execute()
 Real
 PlotFunction::getValue()
 {
-  Point p;
-  return _scale_factor * _func.value(_t, p);
+  return _scale_factor * _func.value(_t, _point);
 }

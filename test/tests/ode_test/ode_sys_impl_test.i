@@ -19,7 +19,7 @@
     type = ParsedFunction
     value = x*x+y*y
   [../]
-  
+
   # ODEs
   [./exact_x_fn]
     type = ParsedFunction
@@ -52,7 +52,7 @@
   [./td]
     type = TimeDerivative
     variable = u
-  [../]  
+  [../]
   [./diff]
     type = Diffusion
     variable = u
@@ -74,7 +74,7 @@
     variable = x
     y = y
   [../]
-  
+
   [./td2]
     type = ODETimeDerivative
     variable = y
@@ -113,6 +113,7 @@
     type = PlotFunction
     function = exact_x_fn
     execute_on = timestep
+    point = '0 0 0'
   [../]
 
   [./l2err_x]
