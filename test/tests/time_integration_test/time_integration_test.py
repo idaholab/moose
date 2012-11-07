@@ -38,7 +38,8 @@ testdt2 = { INPUT : 'dt2_adapt.i',
 # which is not consistent for testing - we will check only that
 # the output file exists
 test_solution_time_adaptive = { INPUT : 'time-adaptive.i',
-                                CHECK_FILES : ['out_time_adaptive.e'] }
+                                CHECK_FILES : ['out_time_adaptive.e'],
+				TYPE = 'CheckFiles' }
 
 testabort = { INPUT : 'aborttest.i',
              EXODIFF : ['out_abort.e'] }
