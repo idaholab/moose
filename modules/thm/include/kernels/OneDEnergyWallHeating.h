@@ -17,7 +17,7 @@ class OneDEnergyWallHeating : public Kernel
 public:
 
   OneDEnergyWallHeating(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
@@ -34,8 +34,10 @@ protected:
   unsigned _rhou_var_number; 
 
   // Parameters
-  Real _aw; // heat transfer area density, m^2 / m^3
-  Real _Tw; // Wall temperature, K
+  /// heat transfer area density, m^2 / m^3
+  Real _aw;
+  /// Wall temperature, K
+  Real _Tw;
 
   const EquationOfState & _eos;
 };

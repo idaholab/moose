@@ -22,17 +22,17 @@ InputParameters validParams<OneDEnergyWallHeating>()
   return params;
 }
 
-OneDEnergyWallHeating::OneDEnergyWallHeating(const std::string & name, InputParameters parameters)
-    : Kernel(name, parameters),
-      _rho(coupledValue("rho")),
-      _rhou(coupledValue("rhou")),
-      _temperature(coupledValue("temperature")),
-      _HTC_aux(coupledValue("heat_transfer_coefficient")),  
-      _rho_var_number(coupled("rho")),  
-      _rhou_var_number(coupled("rhou")),  
-      _aw(getParam<Real>("aw")),
-      _Tw(getParam<Real>("Tw")),
-      _eos(getUserObject<EquationOfState>("eos"))
+OneDEnergyWallHeating::OneDEnergyWallHeating(const std::string & name, InputParameters parameters) :
+    Kernel(name, parameters),
+    _rho(coupledValue("rho")),
+    _rhou(coupledValue("rhou")),
+    _temperature(coupledValue("temperature")),
+    _HTC_aux(coupledValue("heat_transfer_coefficient")),
+    _rho_var_number(coupled("rho")),
+    _rhou_var_number(coupled("rhou")),
+    _aw(getParam<Real>("aw")),
+    _Tw(getParam<Real>("Tw")),
+    _eos(getUserObject<EquationOfState>("eos"))
 {}
 
 
