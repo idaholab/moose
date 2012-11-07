@@ -113,31 +113,31 @@ Component::~Component()
 void
 Component::init()
 {
-        // Testing
-        // std::cout << "ComponentPostProcessor is added for " << _name << std::endl;
-	/**/
-	{
-		InputParameters params = validParams<ComponentPostProcessor>();
-		params.set<Component*>("Component") = this;
-		params.set<std::string>("output") = "none";
-		params.set<std::string>("execute_on") = "residual";
-		_sim.addPostprocessor("ComponentPostProcessor", genName("ComponentPPS_", _id, "_onResidual"), params);
-	}
-	{
-		InputParameters params = validParams<ComponentPostProcessor>();
-		params.set<Component*>("Component") = this;
-		params.set<std::string>("output") = "none";
-		params.set<std::string>("execute_on") = "timestep_begin";
-		_sim.addPostprocessor("ComponentPostProcessor", genName("ComponentPPS_", _id, "_onTimestepBegin"), params);
-	}
-	{
-		InputParameters params = validParams<ComponentPostProcessor>();
-		params.set<Component*>("Component") = this;
-		params.set<std::string>("output") = "none";
-		params.set<std::string>("execute_on") = "timestep";
-		_sim.addPostprocessor("ComponentPostProcessor", genName("ComponentPPS_", _id, "_onTimestepEnd"), params);
-	}
-	/**/
+  // Testing
+  // std::cout << "ComponentPostProcessor is added for " << _name << std::endl;
+  /**/
+  {
+    InputParameters params = validParams<ComponentPostProcessor>();
+    params.set<Component*>("Component") = this;
+    params.set<std::string>("output") = "none";
+    params.set<std::string>("execute_on") = "residual";
+    _sim.addPostprocessor("ComponentPostProcessor", genName("ComponentPPS_", _id, "_onResidual"), params);
+  }
+  {
+    InputParameters params = validParams<ComponentPostProcessor>();
+    params.set<Component*>("Component") = this;
+    params.set<std::string>("output") = "none";
+    params.set<std::string>("execute_on") = "timestep_begin";
+    _sim.addPostprocessor("ComponentPostProcessor", genName("ComponentPPS_", _id, "_onTimestepBegin"), params);
+  }
+  {
+    InputParameters params = validParams<ComponentPostProcessor>();
+    params.set<Component*>("Component") = this;
+    params.set<std::string>("output") = "none";
+    params.set<std::string>("execute_on") = "timestep";
+    _sim.addPostprocessor("ComponentPostProcessor", genName("ComponentPPS_", _id, "_onTimestepEnd"), params);
+  }
+  /**/
 }
 
 unsigned int

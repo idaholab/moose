@@ -22,7 +22,8 @@ InputParameters validParams<Component>();
  * Since this class is only privately used by the class Component,
  * it's been added in this file
  */
-class RavenMapContainer{
+class RavenMapContainer
+{
 public:
    RavenMapContainer();
    RavenMapContainer(const std::string & controllableParName, unsigned int & position);
@@ -30,8 +31,10 @@ public:
    const std::string & getControllableParName();
    unsigned int & getControllableParPosition();
 protected:
-   std::string        _controllableParName;     ///< Variable name (i.e. K_loss)
-   unsigned int       _position;                ///< Position in the vector (i.e. 1)
+   /// Variable name (i.e. K_loss)
+   std::string _controllableParName;
+   /// Position in the vector (i.e. 1)
+   unsigned int _position;
 };
 
 
@@ -121,18 +124,25 @@ public:
   static std::string genName(const std::string & prefix, const std::string & middle, const std::string & suffix);
 
 protected:
-  unsigned int _id;                     ///< Unique ID of this component
+  /// Unique ID of this component
+  unsigned int _id;
 
-  Simulation & _sim;                    ///< Simulation this component is part of
-  R7Mesh & _mesh;                       ///< Global mesh this component works on
-  Model::EModelType _model_type;        ///< Convenience variable that stores model type
+  /// Simulation this component is part of
+  Simulation & _sim;
+  /// Global mesh this component works on
+  R7Mesh & _mesh;
+  /// Convenience variable that stores model type
+  Model::EModelType _model_type;
 
   std::string _input_file_name;
-  std::vector<unsigned int> _subdomains;     ///< List of subdomain IDs this components owns
+  /// List of subdomain IDs this components owns
+  std::vector<unsigned int> _subdomains;
 
-  std::map<std::string, std::vector<std::string> > _rname_map; ///< Mapping from a friendly name to MOOSE object name
+  /// Mapping from a friendly name to MOOSE object name
+  std::map<std::string, std::vector<std::string> > _rname_map;
 
-  std::map<std::string, RavenMapContainer> _rvect_map;         ///< Mapping from a friendly name to a vector variable within a MOOSE object
+  /// Mapping from a friendly name to a vector variable within a MOOSE object
+  std::map<std::string, RavenMapContainer> _rvect_map;
 
   virtual unsigned int getNextSubdomainId();
   virtual unsigned int getNextBCId();

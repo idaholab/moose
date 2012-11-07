@@ -33,14 +33,21 @@ protected:
 
   std::string _FlowJunction_var_name;
 
-  std::vector<Real> _k_coeffs;        ///< A vector to store user inputed K loss (form loss, minor loss) coefficients.
-  Real _ref_area;                     ///< A reference area for this flow junction to calculate its reference velocity (User input)
-  Real _ref_volume;                   ///< A reference volume for this flow junction
+  /// A vector to store user inputed K loss (form loss, minor loss) coefficients.
+  std::vector<Real> _k_coeffs;
+  /// A reference area for this flow junction to calculate its reference velocity (User input)
+  Real _ref_area;
+  /// A reference volume for this flow junction
+  Real _ref_volume;
 
-  bool _has_initial_P;                ///< Is initial pressure provided from user input
-  bool _has_initial_T;                ///< Is initial temperature provided from user input
-  Real _initial_P;                    ///< Initial pressure from user input (if provided)
-  Real _initial_T;                    ///< Initial temperature from user input (if provided)
+  /// Is initial pressure provided from user input
+  bool _has_initial_P;
+  /// Is initial temperature provided from user input
+  bool _has_initial_T;
+  /// Initial pressure from user input (if provided)
+  Real _initial_P;
+  /// Initial temperature from user input (if provided)
+  Real _initial_T;
 };
 
 #endif /* FLOWJUNCTION_H */
