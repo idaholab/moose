@@ -1,17 +1,21 @@
 from options import *
 
 gmv_out_test = { INPUT : 'output_test_gmv.i',
-                 CHECK_FILES : ['out_0000.gmv'] }
+                 CHECK_FILES : ['out_0000.gmv'],
+		 TYPE : 'CheckFiles' }
 
 tecplot_out_test = { INPUT : 'output_test_tecplot.i',
-                     CHECK_FILES : ['out_0000.plt'] }
+                     CHECK_FILES : ['out_0000.plt'],
+		     TYPE : 'CheckFiles' }
 
 sln_out_test = { INPUT : 'output_test_sln.i',
-                 CHECK_FILES : ['out.slh'] }
+                 CHECK_FILES : ['out.slh'],
+		 TYPE : 'CheckFiles' }
 
 nemesis_out_test = { INPUT : 'output_test_nemesis.i',
                      MESH_MODE : ['PARALLEL'],
-                     CHECK_FILES : ['out.e.1.0'] }
+                     CHECK_FILES : ['out.e.1.0'],
+		     TYPE : 'CheckFiles' }
 
 nemesis_out_check_test = { INPUT : 'output_test_nemesis.i',
                            EXPECT_ERR : 'Nemesis not supported when compiled without --enable-parmesh',
@@ -28,17 +32,20 @@ pps_file_out_warn_test = { INPUT : 'pps_file_out_warn.i',
 # we are supplying one of the parameters via CLI
 gnuplot_ps_out_test = { INPUT : 'output_test_gnuplot.i',
                         CLI_ARGS : ['Output/gnuplot_format=ps'],
-                        CHECK_FILES : ['out.gp', 'out.dat'] }
+                        CHECK_FILES : ['out.gp', 'out.dat'],
+			TYPE : 'CheckFiles' }
 
 gnuplot_png_out_test = { INPUT : 'output_test_gnuplot.i',
                          CLI_ARGS : ['Output/gnuplot_format=png'],
                          CHECK_FILES : ['out.gp', 'out.dat'],
-                         PREREQ : ['gnuplot_ps_out_test'] }
+                         PREREQ : ['gnuplot_ps_out_test'],
+    			 TYPE : 'CheckFiles' }
 
 gnuplot_gif_out_test = { INPUT : 'output_test_gnuplot.i',
                          CLI_ARGS : ['Output/gnuplot_format=gif'],
                          CHECK_FILES : ['out.gp', 'out.dat'],
-                         PREREQ : ['gnuplot_png_out_test'] }
+                         PREREQ : ['gnuplot_png_out_test'],
+    			 TYPE : 'CheckFiles' }
 
 gnuplot_bad_out_test = { INPUT : 'output_test_gnuplot.i',
                          CLI_ARGS : ['Output/gnuplot_format=magic'],

@@ -64,12 +64,19 @@ class TestHarness:
 
             # Go through the list of test specs and run them
             for test in tests:
+
+	      # TODO: Refactor all this - these should be methods on the Tester not part of the TestHarness
               if self.checkIfRunTest(test):
                 self.augmentTestSpecs(test)
-                self.prepareTest(test)
+
+		# Get the validParams for the requested Tester type
+		params = self.getValidParams(test[TYPE])
+
+		# Update the params object using the raw test specs dictionary
+		params = self.populateParams(params, test)
 
                 # Build the requested Tester object and run
-                tester = self.create(test[TYPE], test)
+                tester = self.create(test[TYPE], params)
                 command = tester.getCommand(self.options)
 
                 tester.prepare()
@@ -131,7 +138,14 @@ class TestHarness:
           print "Type missing in " + test_dir + filename
           sys.exit(1)
 
-        test.update( { TEST_NAME : relative_path + '.' + testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path } )
+	# TODO: In progress formatting
+	formatted_name = relative_path + '.' + testname
+#        formatted_name += ' (' + relative_path
+#        if test[INPUT] != 'input':  # See if a testname was provided
+#          formatted_name += '/' + test[INPUT]
+#        formatted_name += ')'
+
+        test.update( { TEST_NAME : formatted_name, TEST_DIR : test_dir, RELATIVE_PATH : relative_path } )
 
         if test[PREREQ] != None:
           if type(test[PREREQ]) != list:
@@ -178,11 +192,16 @@ class TestHarness:
         # Now update all the base level keys
         test.update(test_opts)
 
+	# Backwards compatibility
         if len(test[CSVDIFF]) > 0 and TYPE not in test:
           print 'CSVDIFF is deprecated in the legacy test format unless "type" is supplied. Please convert to the new format:\n' + test_dir + '/' + filename
           sys.exit(1)
+	if (test[EXPECT_ERR] != None or test[EXPECT_ASSERT] != None or test[SHOULD_CRASH] == True) and not TYPE in test:
+	  test[TYPE] = 'RunException'
 
-        test.update( { TEST_NAME : testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path, TYPE : 'Exodiff' } )
+        test.update( { TEST_NAME : testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path } )
+	if TYPE not in test:
+	  test.update( { TYPE : "Exodiff" } )
 
         if test[PREREQ] != None:
           if type(test[PREREQ]) != list:
@@ -199,12 +218,12 @@ class TestHarness:
     test[HOSTNAME] = self.host_name
 
   ## Delete old output files
-  def prepareTest(self, test):
-    for file in (test[CSVDIFF] + test[EXODIFF]):
-      try:
-        os.remove(os.path.join(test[TEST_DIR], file))
-      except:
-        pass
+#  def prepareTest(self, test):
+#    for file in (test[CSVDIFF] + test[EXODIFF]):
+#      try:
+#        os.remove(os.path.join(test[TEST_DIR], file))
+#      except:
+#        pass
 
   # If the test is not to be run for any reason, print skipped as the result and return False,
   # otherwise return True
@@ -240,7 +259,7 @@ class TestHarness:
     # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
     elif self.options.store_time and test[SCALE_REFINE] == 0:
       return False
-    # If were testing with valgrind, then skip tests that require parallel or threads
+    # If we're testing with valgrind, then skip tests that require parallel or threads
     elif self.options.enable_valgrind and (test[MIN_PARALLEL] > 1 or test[MIN_THREADS] > 1):
       self.handleTestResult(test, '', 'skipped (Valgrind requires serial)')
       return False
@@ -298,64 +317,23 @@ class TestHarness:
 
   ## Finish the test by inspecting the raw output
   def testOutputAndFinish(self, tester, retcode, output, start=0, end=0):
-    reason = ''
     caveats = []
     test = tester.specs  # Need to refactor
 
     if 'CAVEATS' in test:
       caveats = test['CAVEATS']
 
-    # Expected errors and assertions might do a lot of things including crash so we
-    # will handle them seperately
-    if test[EXPECT_ERR] != None:
-      if not self.checkExpectError(output, test[EXPECT_ERR]):
-        reason = 'NO EXPECTED ERR'
-    elif test[EXPECT_OUT] != None:
-      out_ok = self.checkExpectError(output, test[EXPECT_OUT])
-      if (out_ok and retcode != 0):
-        reason = 'OUT FOUND BUT CRASH'
-      elif (not out_ok):
-        reason = 'NO EXPECTED OUT'
-    elif test[EXPECT_ASSERT] != None:
-      if self.options.method == 'dbg':  # Only check asserts in debug mode
-        if not self.checkExpectError(output, test[EXPECT_ASSERT]):
-          reason = 'NO EXPECTED ASSERT'
-    elif (self.options.enable_valgrind and retcode == 0) and not test[NO_VALGRIND]:
-      if 'ERROR SUMMARY: 0 errors' not in output:
-        reason = 'MEMORY ERROR'
-    else:
-      # Check the general error message and program crash possibilities
-      if len( filter( lambda x: x in output, test[ERRORS] ) ) > 0:
-        reason = 'ERRMSG'
-      elif test[EXPECT_ERR] != None and test[EXPECT_ERR] not in output:
-        reason = 'NO EXPECTED ERR'
-      elif retcode == RunParallel.TIMEOUT:
-        reason = 'TIMEOUT'
-      elif retcode != 0 and not test[SHOULD_CRASH]:
-        reason = 'CRASH'
-      elif retcode > 0 and test[SHOULD_CRASH]:
-        reason = 'NO CRASH'
-      else:  # Now test more involved things like CSV and EXODIFF
-        # There may be other reasons we don't run exodiff (this is the only one for now
-        if self.options.scaling and test[SCALE_REFINE]:
-          caveats.append('SCALED')
-        else:
-          tester.processResults(self.moose_dir, retcode, output)
+    reason = tester.processResults(self.moose_dir, retcode, self.options, output)
 
-#          # if still no errors, diff CSVs
-#          if reason == '' and len(test[CSVDIFF]) > 0:
-#            differ = CSVDiffer( test[TEST_DIR], test[CSVDIFF], test[ABS_ZERO], test[REL_ERR] )
-#            msg = differ.diff()
-#            output += 'Running CSVDiffer.py\n' + msg
-#            if msg != '':
-#              reason = 'CSVDIFF'
+    if self.options.scaling and test[SCALE_REFINE]:
+      caveats.append('SCALED')
 
-          # if still no errors, check other files (just for existence)
-          if reason == '':
-            for file in test[CHECK_FILES]:
-              if not os.path.isfile(os.path.join(test[TEST_DIR], file)):
-                reason = 'MISSING FILES'
-                break
+    # if still no errors, check other files (just for existence)
+#    if reason == '':
+#      for file in test[CHECK_FILES]:
+#        if not os.path.isfile(os.path.join(test[TEST_DIR], file)):
+#          reason = 'MISSING FILES'
+#          break
 
     did_pass = True
     if reason == '':
@@ -596,13 +574,25 @@ class TestHarness:
   def preRun(self):
     return
 
-  # Factory Methods
+  def populateParams(self, params, test):
+    # TODO: Print errors or warnings about unused parameters
+    # Set difference
+    unused_params = test.viewkeys() - params.desc
+    params.valid.update(test)
+
+    return params
+
+
+  #### Factory Methods
   def registerTester(self, type, name):
     self.testers[name] = type
 
-  def create(self, name, specs):
-    return self.testers[name]('exodiff', specs)
-# Tester(self.testers[name], specs)
+  def getValidParams(self, type):
+    return self.testers[type].getValidParams()
+
+  def create(self, type, specs):
+    return self.testers[type]('exodiff', specs)
+  ###
 
 # Notes:
 # SHOULD_CRASH returns > 0, cuz < 0 means process interrupted

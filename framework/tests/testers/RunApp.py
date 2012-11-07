@@ -1,12 +1,32 @@
 from options import *
+import re, os
 from Tester import Tester
+from RunParallel import RunParallel # For TIMEOUT value
 
 class RunApp(Tester):
+
+  def getValidParams():
+    params = Tester.getValidParams()
+    params.addParam('cli_args',           "Additional arguments to be passed to the test.")
+    params.addParam('input',              "The input file to use for this test.")
+    params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
+    params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
+
+    # Parallel/Thread testing
+    params.addParam('max_parallel', 1000, "Maximum number of MPI processes this test can be run with      (Default: 1000)")
+    params.addParam('min_parallel',    1, "Minimum number of MPI processes that this test can be run with (Default: 1)")
+    params.addParam('max_thread',     16, "Max number of threads (Default: 16)")
+    params.addParam('min_thread',      1, "Min number of threads (Default: 1)")
+    params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
+
+    # Valgrind
+    params.addParam('no_valgrind', False, "Set to True to skip test when running with --valgrind")
+
+    return params
+  getValidParams = staticmethod(getValidParams)
+
   def __init__(self, klass, specs):
     Tester.__init__(self, klass, specs)
-
-  def prepare(self):
-    return
 
   def getCommand(self, options):
     # Create the command line string to run
@@ -44,6 +64,36 @@ class RunApp(Tester):
       command += ' -r ' + str(specs[SCALE_REFINE])
     return command
 
-  def processResults(self, moose_dir, retcode, output):
-    return
+  def processResults(self, moose_dir, retcode, options, output):
+    reason = ''
+    specs = self.specs
+
+    if specs[EXPECT_OUT] != None:
+      out_ok = self.checkOutputForPattern(output, specs[EXPECT_OUT])
+      if (out_ok and retcode != 0):
+        reason = 'OUT FOUND BUT CRASH'
+      elif (not out_ok):
+        reason = 'NO EXPECTED OUT'
+    elif (options.enable_valgrind and retcode == 0) and not specs[NO_VALGRIND]:
+      if 'ERROR SUMMARY: 0 errors' not in output:
+        reason = 'MEMORY ERROR'
+    else:
+      # Check the general error message and program crash possibilities
+      if len( filter( lambda x: x in output, specs[ERRORS] ) ) > 0:
+        reason = 'ERRMSG'
+      elif retcode == RunParallel.TIMEOUT:
+        reason = 'TIMEOUT'
+      elif retcode != 0 and not specs[SHOULD_CRASH]:
+        reason = 'CRASH'
+      elif retcode > 0 and specs[SHOULD_CRASH]:
+        reason = 'NO CRASH'
+
+    return reason
+
+
+  def checkOutputForPattern(self, output, re_pattern):
+    if re.search(re_pattern, output, re.MULTILINE | re.DOTALL) == None:
+      return False
+    else:
+      return True
 

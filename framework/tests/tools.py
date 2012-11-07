@@ -11,6 +11,8 @@ from TestHarness import TestHarness
 # Testers
 from Exodiff import Exodiff
 from CSVDiff import CSVDiff
+from RunException import RunException
+from CheckFiles import CheckFiles
 
 # Basic flow of control:
 # initialize() - parse command line options, etc
@@ -31,5 +33,7 @@ def runTests(argv, app_name, moose_dir):
   # Registration
   harness.registerTester(Exodiff, 'Exodiff')
   harness.registerTester(CSVDiff, 'CSVDiff')
+  harness.registerTester(RunException, 'RunException')
+  harness.registerTester(CheckFiles, 'CheckFiles')
 
   harness.findAndRunTests()
