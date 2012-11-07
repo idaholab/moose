@@ -34,7 +34,7 @@ class Exodiff(RunApp):
   def processResults(self, moose_dir, retcode, options, output):
     (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
     if reason != '':
-      return reason
+      return (reason, output)
 
     specs = self.specs
 
