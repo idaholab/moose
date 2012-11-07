@@ -23,6 +23,7 @@ InputParameters validParams<SolidModel>()
   params.addParam<FunctionName>("youngs_modulus_function", "", "Young's modulus as a function of temperature.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addCoupledVar("temp", "Coupled Temperature");
+  params.addParam<Real>("stress_free_temperature", "The stress-free temperature.  If not specified, the initial temperature is used.");
   params.addParam<std::string>("cracking_release", "abrupt", "The cracking release type.  Choices are abrupt (default) and exponential.");
   params.addParam<Real>("cracking_stress", 0.0, "The stress threshold beyond which cracking occurs.  Must be positive.");
   params.addParam<std::vector<unsigned int> >("active_crack_planes", "Planes on which cracks are allowed (0,1,2 -> x,z,theta in RZ)");
@@ -88,6 +89,8 @@ SolidModel::SolidModel( const std::string & name,
    _temperature(_has_temp ? coupledValue("temp") : _zero),
    _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
    _alpha(getParam<Real>("thermal_expansion")),
+   _has_stress_free_temp(false),
+   _stress_free_temp(0.0),
    _volumetric_models(),
    _stress(createProperty<SymmTensor>("stress")),
    _stress_old_prop(createPropertyOld<SymmTensor>("stress")),
@@ -263,6 +266,14 @@ SolidModel::SolidModel( const std::string & name,
     }
   }
 
+  if (parameters.isParamValid("stress_free_temperature"))
+  {
+    _has_stress_free_temp = true;
+    _stress_free_temp = getParam<Real>("stress_free_temperature");
+    if (!_has_temp)
+      mooseError("Cannot specify stress_free_temperature without coupling to temperature");
+  }
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -309,7 +320,15 @@ SolidModel::modifyStrainIncrement()
 {
   if ( _has_temp && _t_step != 0 )
   {
-    const Real tStrain( _alpha * (_temperature[_qp] - _temperature_old[_qp]) );
+    Real tStrain;
+    if (_t_step == 1 && _has_stress_free_temp)
+    {
+      tStrain = _alpha * (_temperature[_qp] - _stress_free_temp);
+    }
+    else
+    {
+      tStrain = _alpha * (_temperature[_qp] - _temperature_old[_qp]);
+    }
     _strain_increment.addDiag( -tStrain );
 
     _d_strain_dT.zero();

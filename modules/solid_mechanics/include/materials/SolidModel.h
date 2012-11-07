@@ -71,6 +71,8 @@ protected:
   VariableValue & _temperature;
   VariableValue & _temperature_old;
   const Real _alpha;
+  bool _has_stress_free_temp;
+  Real _stress_free_temp;
 
   std::map<SubdomainID, std::vector<VolumetricModel*> > _volumetric_models;
 
