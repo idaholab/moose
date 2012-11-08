@@ -20,6 +20,13 @@
   [../]
 []
 
+[AuxVariables]
+  [./periodic_dist]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+
 [Kernels]
   active = 'diff forcing dot'
 
@@ -37,6 +44,14 @@
   [./dot]
     type = TimeDerivative
     variable = u
+  [../]
+[]
+
+[AuxKernels]
+  [./periodic_dist]
+    type = PeriodicDistanceAux
+    variable = periodic_dist
+    point = '4 6 0'
   [../]
 []
 

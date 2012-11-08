@@ -46,6 +46,12 @@ auto_wrap_2d_test = { INPUT : 'auto_periodic_bc_test.i',
                       MESH_MODE : ['SERIAL'],
                       GROUP : 'periodic'}
 
+auto_wrap_2d_test_error_check = { INPUT : 'auto_periodic_bc_test.i',
+			          CLI_ARGS : ['AuxKernels/periodic_dist/point="0 99999 0"'],
+			          EXPECT_ERR : '"point" is outside of the domain',
+                                  GROUP : 'periodic',
+				  PREREQ : ['auto_wrap_2d_test'] }
+
 auto_wrap_3d_test = { INPUT : 'auto_periodic_bc_test_3d.i',
                       EXODIFF : ['out_auto_3d.e'],
                       MAX_THREADS : 1,

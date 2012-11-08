@@ -42,6 +42,7 @@
 #include "MMSConstantAux.h"
 #include "DoNothingAux.h"
 #include "MultipleUpdateAux.h"
+#include "PeriodicDistanceAux.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -160,6 +161,7 @@ MooseTestApp::registerObjects()
   registerAux(MMSConstantAux);
   registerAux(DoNothingAux);
   registerAux(MultipleUpdateAux);
+  registerAux(PeriodicDistanceAux);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);
