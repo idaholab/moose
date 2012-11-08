@@ -5,6 +5,8 @@ InputParameters validParams<InternalVolume>()
 {
   InputParameters params = validParams<SideIntegral>();
   params.addParam<unsigned int>("component", 1, "The component to use in the integration");
+  params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the internal volume calculation");
+  params.addParam<Real>("addition", 0, "An additional volume to be included in the internal volume calculation");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
@@ -12,7 +14,9 @@ InputParameters validParams<InternalVolume>()
 InternalVolume::InternalVolume(const std::string & name,
                                InputParameters parameters)
   : SideIntegral( name, parameters ),
-    _component( getParam<unsigned int>("component") )
+    _component( getParam<unsigned int>("component") ),
+    _scale( getParam<Real>("scale_factor") ),
+    _addition( getParam<Real>("addition") )
 {}
 
 //    /              /
@@ -46,4 +50,10 @@ Real
 InternalVolume::computeQpIntegral()
 {
   return -_q_point[_qp](_component)*_normals[_qp](_component);
+}
+
+Real
+InternalVolume::getValue()
+{
+  return _scale * SideIntegral::getValue() + _addition;
 }

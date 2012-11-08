@@ -31,8 +31,11 @@ public:
 protected:
 
   virtual Real computeQpIntegral();
+  virtual Real getValue();
 
   const unsigned int _component;
+  const Real _scale;
+  const Real _addition;
 
 };
 
