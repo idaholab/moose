@@ -588,7 +588,9 @@ class TestHarness:
   def populateParams(self, params, test):
     # TODO: Print errors or warnings about unused parameters
     # Set difference
-    unused_params = test.viewkeys() - params.desc
+
+    # viewkeys does not work with older Python...
+#    unused_params = test.viewkeys() - params.desc
     params.valid.update(test)
 
     return params
