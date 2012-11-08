@@ -45,6 +45,14 @@
   [../]
 []
 
+[Postprocessors]
+  [./avg_block]
+    type = ElementAverageValue
+    variable = u
+    output = both
+  [../]
+[]
+
 [Executioner]
   type = Steady
   petsc_options = '-snes_mf_operator'
@@ -54,7 +62,7 @@
   file_base = out
   output_initial = true
   interval = 1
-  nemesis = 1 
+  nemesis = 1
   print_linear_residuals = true
   perf_log = true
 []

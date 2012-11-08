@@ -30,7 +30,6 @@ InputParameters validParams<AuxScalarKernel>()
   return params;
 }
 
-
 AuxScalarKernel::AuxScalarKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     ScalarCoupleable(parameters),
@@ -52,6 +51,10 @@ AuxScalarKernel::AuxScalarKernel(const std::string & name, InputParameters param
     _u_old(_var.slnOld()),
 
     _real_zero(_subproblem._real_zero[_tid])
+{
+}
+
+AuxScalarKernel::~AuxScalarKernel()
 {
 }
 

@@ -77,9 +77,6 @@ GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameter
     case 1: elem_type_enum = "EDGE2"; break;
     case 2: elem_type_enum = "QUAD4"; break;
     case 3: elem_type_enum = "HEX8"; break;
-    default:
-      mooseError("Unable to generate mesh for unknown dimension");
-      break;
     }
   }
 

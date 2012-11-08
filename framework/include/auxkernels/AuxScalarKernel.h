@@ -55,6 +55,8 @@ class AuxScalarKernel :
 public:
   AuxScalarKernel(const std::string & name, InputParameters parameters);
 
+  virtual ~AuxScalarKernel();
+
   /**
    * Evaluate the kernel
    */

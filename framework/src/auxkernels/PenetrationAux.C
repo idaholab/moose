@@ -72,6 +72,10 @@ PenetrationAux::PenetrationAux(const std::string & name, InputParameters paramet
     mooseError("Invalid quantity type in PenetrationAux: "<<_quantity_string);
 }
 
+PenetrationAux::~PenetrationAux()
+{
+}
+
 Real
 PenetrationAux::computeValue()
 {

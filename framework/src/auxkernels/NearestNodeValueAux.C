@@ -37,6 +37,10 @@ NearestNodeValueAux::NearestNodeValueAux(const std::string & name, InputParamete
     mooseError("NearestNodeValueAux can only be used with one boundary at a time!");
 }
 
+NearestNodeValueAux::~NearestNodeValueAux()
+{
+}
+
 Real
 NearestNodeValueAux::computeValue()
 {

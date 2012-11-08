@@ -56,7 +56,7 @@ class AuxKernel :
 public:
   AuxKernel(const std::string & name, InputParameters parameters);
 
-  virtual ~AuxKernel() {}
+  virtual ~AuxKernel();
 
   /**
    * Computes the value and stores it in the solution vector
@@ -79,13 +79,9 @@ public:
 
   void coupledCallback(const std::string & var_name, bool is_old);
 
-  virtual
-  const std::set<std::string> &
-  getRequestedItems() { return _depend_vars; }
+  virtual const std::set<std::string> & getRequestedItems();
 
-  virtual
-  const std::set<std::string> &
-  getSuppliedItems() { return _supplied_vars; }
+  virtual const std::set<std::string> & getSuppliedItems();
 
   /**
    * Override functions from MaterialPropertyInterface for error checking

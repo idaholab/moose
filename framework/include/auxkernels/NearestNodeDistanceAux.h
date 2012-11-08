@@ -37,7 +37,7 @@ public:
    */
   NearestNodeDistanceAux(const std::string & name, InputParameters parameters);
 
-  virtual ~NearestNodeDistanceAux() {}
+  virtual ~NearestNodeDistanceAux();
 
 protected:
   virtual Real computeValue();

@@ -38,7 +38,7 @@ public:
    */
   PenetrationAux(const std::string & name, InputParameters parameters);
 
-  virtual ~PenetrationAux() {}
+  virtual ~PenetrationAux();
 
 protected:
   enum PA_ENUM

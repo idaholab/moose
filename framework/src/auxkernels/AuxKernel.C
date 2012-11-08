@@ -96,6 +96,22 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
       _depend_vars.insert((*it2)->name());
 }
 
+AuxKernel::~AuxKernel()
+{
+}
+
+const std::set<std::string> &
+AuxKernel::getRequestedItems()
+{
+  return _depend_vars;
+}
+
+const std::set<std::string> &
+AuxKernel::getSuppliedItems()
+{
+  return _supplied_vars;
+}
+
 void
 AuxKernel::coupledCallback(const std::string & var_name, bool is_old)
 {

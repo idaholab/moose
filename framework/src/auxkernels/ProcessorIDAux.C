@@ -23,7 +23,12 @@ InputParameters validParams<ProcessorIDAux>()
 
 ProcessorIDAux::ProcessorIDAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters)
-{}
+{
+}
+
+ProcessorIDAux::~ProcessorIDAux()
+{
+}
 
 Real
 ProcessorIDAux::computeValue()

@@ -58,6 +58,10 @@ GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
   }
 }
 
+GapValueAux::~GapValueAux()
+{
+}
+
 Real
 GapValueAux::computeValue()
 {

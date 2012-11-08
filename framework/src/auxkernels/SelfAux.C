@@ -26,6 +26,9 @@ SelfAux::SelfAux(const std::string & name, InputParameters parameters) :
 {
 }
 
+SelfAux::~SelfAux()
+{
+}
 
 Real
 SelfAux::computeValue()
