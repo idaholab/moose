@@ -21,6 +21,7 @@ InputParameters validParams<PlotFunction>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<FunctionName>("function", "Name of the function to plot (i.e. sample)");
+  params.addParam<Point>("point", "A point in space to be given to the function");
   params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the function");
   return params;
 }
