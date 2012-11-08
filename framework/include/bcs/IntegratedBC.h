@@ -40,6 +40,8 @@ class IntegratedBC :
 public:
   IntegratedBC(const std::string & name, InputParameters parameters);
 
+  virtual ~IntegratedBC();
+
   virtual void computeResidual();
   virtual void computeJacobian();
   /**

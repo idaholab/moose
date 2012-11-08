@@ -31,6 +31,8 @@ public:
   // Splitting Constructor
   ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split split);
 
+  virtual ~ComputeElemAuxVarsThread();
+
   virtual void subdomainChanged();
   virtual void onElement(const Elem *elem);
   virtual void post();

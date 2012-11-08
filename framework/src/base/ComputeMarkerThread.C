@@ -40,6 +40,10 @@ ComputeMarkerThread::ComputeMarkerThread(ComputeMarkerThread & x, Threads::split
 {
 }
 
+ComputeMarkerThread::~ComputeMarkerThread()
+{
+}
+
 void
 ComputeMarkerThread::subdomainChanged()
 {

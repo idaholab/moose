@@ -33,6 +33,8 @@ public:
   // Splitting Constructor
   ComputeIndicatorThread(ComputeIndicatorThread & x, Threads::split split);
 
+  virtual ~ComputeIndicatorThread();
+
   virtual void subdomainChanged();
   virtual void onElement(const Elem *elem);
   virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);

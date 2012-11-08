@@ -28,6 +28,10 @@ MaxIncrement::MaxIncrement(std::string name, InputParameters parameters) :
 {
 }
 
+MaxIncrement::~MaxIncrement()
+{
+}
+
 Real
 MaxIncrement::computeQpDamping()
 {

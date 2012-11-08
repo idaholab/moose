@@ -37,6 +37,8 @@ public:
   // Splitting Constructor
   ComputeMaterialsObjectThread(ComputeMaterialsObjectThread & x, Threads::split split);
 
+  virtual ~ComputeMaterialsObjectThread();
+
   virtual void subdomainChanged();
   virtual void onElement(const Elem *elem);
 

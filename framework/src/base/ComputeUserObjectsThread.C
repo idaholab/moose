@@ -25,7 +25,8 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem, SystemBa
     _soln(in_soln),
     _user_objects(user_objects),
     _group(group)
-{}
+{
+}
 
 // Splitting Constructor
 ComputeUserObjectsThread::ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split) :
@@ -33,7 +34,12 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(ComputeUserObjectsThread & x,
     _soln(x._soln),
     _user_objects(x._user_objects),
     _group(x._group)
-{}
+{
+}
+
+ComputeUserObjectsThread::~ComputeUserObjectsThread()
+{
+}
 
 void
 ComputeUserObjectsThread::subdomainChanged()

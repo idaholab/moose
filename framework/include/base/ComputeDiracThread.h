@@ -37,6 +37,8 @@ public:
   // Splitting Constructor
   ComputeDiracThread(ComputeDiracThread & x, Threads::split);
 
+  virtual ~ComputeDiracThread();
+
   virtual void pre();
   virtual void onElement(const Elem *elem);
   virtual void postElement(const Elem * /*elem*/);

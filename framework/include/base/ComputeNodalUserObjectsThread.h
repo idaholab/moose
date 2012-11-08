@@ -30,6 +30,8 @@ public:
   // Splitting Constructor
   ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split split);
 
+  virtual ~ComputeNodalUserObjectsThread();
+
   void operator() (const ConstNodeRange & range);
 
   void join(const ComputeNodalUserObjectsThread & /*y*/);

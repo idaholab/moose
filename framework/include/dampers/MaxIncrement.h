@@ -32,6 +32,8 @@ class MaxIncrement : public Damper
 public:
   MaxIncrement(std::string name, InputParameters parameters);
 
+  virtual ~MaxIncrement();
+
 protected:
   virtual Real computeQpDamping();
 

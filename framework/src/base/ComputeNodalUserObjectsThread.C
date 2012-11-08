@@ -36,6 +36,10 @@ ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(ComputeNodalUserObj
 {
 }
 
+ComputeNodalUserObjectsThread::~ComputeNodalUserObjectsThread()
+{
+}
+
 void
 ComputeNodalUserObjectsThread::operator() (const ConstNodeRange & range)
 {

@@ -31,6 +31,10 @@ ComputeExplicitJacobianThread::ComputeExplicitJacobianThread(ComputeExplicitJaco
 {
 }
 
+ComputeExplicitJacobianThread::~ComputeExplicitJacobianThread()
+{
+}
+
 void
 ComputeExplicitJacobianThread::computeJacobian()
 {

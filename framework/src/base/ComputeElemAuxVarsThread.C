@@ -35,6 +35,9 @@ ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x,
 {
 }
 
+ComputeElemAuxVarsThread::~ComputeElemAuxVarsThread()
+{
+}
 
 void
 ComputeElemAuxVarsThread::subdomainChanged()

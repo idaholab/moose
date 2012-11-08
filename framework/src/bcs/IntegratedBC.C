@@ -89,6 +89,10 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
   _has_diag_save_in = _diag_save_in.size() > 0;
 }
 
+IntegratedBC::~IntegratedBC()
+{
+}
+
 void
 IntegratedBC::computeResidual()
 {

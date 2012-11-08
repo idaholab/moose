@@ -31,6 +31,8 @@ public:
   // Splitting Constructor
   ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
 
+  virtual ~ComputeResidualThread();
+
   virtual void subdomainChanged();
   virtual void onElement(const Elem *elem );
   virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);

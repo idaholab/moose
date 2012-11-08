@@ -63,7 +63,7 @@ protected:
    */
   unsigned int coupledComponents(const std::string & var_name);
 
-  virtual void coupledCallback(const std::string & /*var_name*/, bool /*is_old*/) {}
+  virtual void coupledCallback(const std::string & var_name, bool is_old);
 
   virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
   virtual VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);

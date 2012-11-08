@@ -43,6 +43,10 @@ ComputeIndicatorThread::ComputeIndicatorThread(ComputeIndicatorThread & x, Threa
 {
 }
 
+ComputeIndicatorThread::~ComputeIndicatorThread()
+{
+}
+
 void
 ComputeIndicatorThread::subdomainChanged()
 {

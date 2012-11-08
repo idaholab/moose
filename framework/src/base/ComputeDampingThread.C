@@ -36,6 +36,10 @@ ComputeDampingThread::ComputeDampingThread(ComputeDampingThread & x, Threads::sp
 {
 }
 
+ComputeDampingThread::~ComputeDampingThread()
+{
+}
+
 void
 ComputeDampingThread::onElement(const Elem *elem)
 {
@@ -51,6 +55,12 @@ ComputeDampingThread::onElement(const Elem *elem)
     if(cur_damping < _damping)
       _damping = cur_damping;
   }
+}
+
+Real
+ComputeDampingThread::damping()
+{
+  return _damping;
 }
 
 void

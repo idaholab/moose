@@ -26,14 +26,20 @@ ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSy
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _jacobian(jacobian),
     _sys(sys)
-{}
+{
+}
 
 // Splitting Constructor
 ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
     _jacobian(x._jacobian),
     _sys(x._sys)
-{}
+{
+}
+
+ComputeJacobianThread::~ComputeJacobianThread()
+{
+}
 
 void
 ComputeJacobianThread::computeJacobian()

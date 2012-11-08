@@ -29,6 +29,8 @@ public:
   // Splitting Constructor
   ComputeExplicitJacobianThread(ComputeExplicitJacobianThread & x, Threads::split split);
 
+  virtual ~ComputeExplicitJacobianThread();
+
   void join(const ComputeJacobianThread & /*y*/)
   {}
 

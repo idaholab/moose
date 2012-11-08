@@ -41,6 +41,10 @@ ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads:
 {
 }
 
+ComputeResidualThread::~ComputeResidualThread()
+{
+}
+
 void
 ComputeResidualThread::subdomainChanged()
 {

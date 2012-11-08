@@ -54,6 +54,11 @@ Coupleable::~Coupleable()
 {
 }
 
+void
+Coupleable::coupledCallback(const std::string & /*var_name*/, bool /*is_old*/)
+{
+}
+
 bool
 Coupleable::isCoupled(const std::string & var_name, unsigned int i)
 {

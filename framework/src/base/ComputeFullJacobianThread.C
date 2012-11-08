@@ -32,6 +32,10 @@ ComputeFullJacobianThread::ComputeFullJacobianThread(ComputeFullJacobianThread &
 {
 }
 
+ComputeFullJacobianThread::~ComputeFullJacobianThread()
+{
+}
+
 void
 ComputeFullJacobianThread::computeJacobian()
 {

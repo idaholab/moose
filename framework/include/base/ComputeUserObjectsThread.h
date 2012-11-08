@@ -29,6 +29,8 @@ public:
   ComputeUserObjectsThread(FEProblem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP);
   ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split);                 // Splitting Constructor
 
+  virtual ~ComputeUserObjectsThread();
+
   virtual void onElement(const Elem *elem);
   virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
   virtual void post();

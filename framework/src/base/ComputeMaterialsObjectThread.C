@@ -55,6 +55,10 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjec
 {
 }
 
+ComputeMaterialsObjectThread::~ComputeMaterialsObjectThread()
+{
+}
+
 void
 ComputeMaterialsObjectThread::subdomainChanged()
 {

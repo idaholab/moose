@@ -42,6 +42,10 @@ ComputeDiracThread::ComputeDiracThread(ComputeDiracThread & x, Threads::split sp
     _sys(x._sys)
 {}
 
+ComputeDiracThread::~ComputeDiracThread()
+{
+}
+
 void
 ComputeDiracThread::pre()
 {

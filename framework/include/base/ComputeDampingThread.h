@@ -30,11 +30,13 @@ public:
   // Splitting Constructor
   ComputeDampingThread(ComputeDampingThread & x, Threads::split split);
 
+  virtual ~ComputeDampingThread();
+
   virtual void onElement(const Elem *elem);
 
   void join(const ComputeDampingThread & /*y*/);
 
-  Real damping() { return _damping; }
+  Real damping();
 
 protected:
   Real _damping;
