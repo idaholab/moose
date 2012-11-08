@@ -7,6 +7,8 @@
 # The mesh is composed of one block (1) with an interior cavity of volume 8.
 #   Block 2 sits in the cavity and has a volume of 1.  Thus, the total volume
 #   is 7.
+# The internal volume is scaled by two and adjusted by negative seven.  Thus,
+#   the net result is seven.
 #
 
 [Mesh]#Comment
@@ -130,6 +132,8 @@
     type = InternalVolume
     boundary = 100
     variable = disp_x
+    scale_factor = 2
+    addition = -7
   [../]
 
   [./dispZ]
