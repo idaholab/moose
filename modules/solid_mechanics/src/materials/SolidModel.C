@@ -21,7 +21,8 @@ InputParameters validParams<SolidModel>()
   params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
   params.addParam<FunctionName>("youngs_modulus_function", "", "Young's modulus as a function of temperature.");
-  params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
+  params.addParam<Real>("thermal_expansion", "The thermal expansion coefficient.");
+  params.addParam<FunctionName>("thermal_expansion_function", "Thermal expansion coefficient as a function of temperature.");
   params.addCoupledVar("temp", "Coupled Temperature");
   params.addParam<Real>("stress_free_temperature", "The stress-free temperature.  If not specified, the initial temperature is used.");
   params.addParam<std::string>("cracking_release", "abrupt", "The cracking release type.  Choices are abrupt (default) and exponential.");
@@ -88,7 +89,8 @@ SolidModel::SolidModel( const std::string & name,
    _has_temp(isCoupled("temp")),
    _temperature(_has_temp ? coupledValue("temp") : _zero),
    _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
-   _alpha(getParam<Real>("thermal_expansion")),
+   _alpha(parameters.isParamValid("thermal_expansion") ? getParam<Real>("thermal_expansion") : 0.),
+   _alpha_function( parameters.isParamValid("thermal_expansion_function") ? &getFunction("thermal_expansion_function") : NULL),
    _has_stress_free_temp(false),
    _stress_free_temp(0.0),
    _volumetric_models(),
@@ -274,6 +276,9 @@ SolidModel::SolidModel( const std::string & name,
       mooseError("Cannot specify stress_free_temperature without coupling to temperature");
   }
 
+  if (parameters.isParamValid("thermal_expansion") && parameters.isParamValid("thermal_expansion_function"))
+    mooseError("Cannot specify both thermal_expansion and thermal_expansion_function");
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -321,18 +326,24 @@ SolidModel::modifyStrainIncrement()
   if ( _has_temp && _t_step != 0 )
   {
     Real tStrain;
+    Real alpha(_alpha);
+    if (_alpha_function)
+    {
+      Point p;
+      alpha = _alpha_function->value(_temperature[_qp],p);
+    }
     if (_t_step == 1 && _has_stress_free_temp)
     {
-      tStrain = _alpha * (_temperature[_qp] - _stress_free_temp);
+      tStrain = alpha * (_temperature[_qp] - _stress_free_temp);
     }
     else
     {
-      tStrain = _alpha * (_temperature[_qp] - _temperature_old[_qp]);
+      tStrain = alpha * (_temperature[_qp] - _temperature_old[_qp]);
     }
     _strain_increment.addDiag( -tStrain );
 
     _d_strain_dT.zero();
-    _d_strain_dT.addDiag( -_alpha );
+    _d_strain_dT.addDiag( -alpha );
   }
 
   const SubdomainID current_block = _current_elem->subdomain_id();

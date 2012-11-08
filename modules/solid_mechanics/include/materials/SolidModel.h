@@ -71,6 +71,7 @@ protected:
   VariableValue & _temperature;
   VariableValue & _temperature_old;
   const Real _alpha;
+  Function * const _alpha_function;
   bool _has_stress_free_temp;
   Real _stress_free_temp;
 
