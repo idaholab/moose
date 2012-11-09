@@ -1,0 +1,124 @@
+[Tests]
+  [./all_periodic_trans_test]
+    type = 'Exodiff'
+    input = 'all_periodic_trans.i'
+    exodiff = 'all_periodic_trans_out.e'
+    max_thread = 1
+    max_parallel = 1
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./auto_wrap_2d_test]
+    type = 'Exodiff'
+    input =  'auto_periodic_bc_test.i'
+    exodiff = 'out_auto.e'
+    max_thread = 1
+    max_parallel = 1
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./auto_wrap_2d_test_error_check]
+    type = 'RunException'
+    input = 'auto_periodic_bc_test.i'
+    expect_err = '"point" is outside of the domain'
+    cli_args = 'AuxKernels/periodic_dist/point="0 99999 0"'
+    prereq = 'auto_wrap_2d_test'
+    group = 'periodic'
+  [../]
+
+  [./auto_wrap_3d_test]
+    type = 'Exodiff'
+    input = ' auto_periodic_bc_test_3d.i '
+    exodiff = 'out_auto_3d.e'
+    max_thread = 1
+    max_parallel = 1
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+    no_valgrind = True
+  [../]
+
+  [./orthogonal_pbc_on_square_test]
+    type = 'Exodiff'
+    input = 'orthogonal_pbc_on_square.i'
+    exodiff = 'orthogonal_pbc_on_square_out.e'
+    max_thread = 1
+    max_parallel = 1
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./parallel_pbc_using_trans_test]
+    type = 'Exodiff'
+    input = ' parallel_pbc_using_trans.i '
+    exodiff = 'parallel_pbc_using_trans_out.e'
+    max_thread = 1
+    max_parallel = 1
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./subdomain_restricted_vars_test]
+    type = 'Exodiff'
+    input = 'periodic_subdomain_restricted_test.i'
+    exodiff = 'out_restrict.e'
+    max_thread = 1
+    max_parallel = 1
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+    deleted = 'Libmesh Bug #1410'
+  [../]
+
+  [./testlevel1]
+    type = 'Exodiff'
+    input = 'periodic_level_1_test.i'
+    exodiff = 'level1.e level1.e-s010 level1.e-s020'
+    max_thread = 1
+    max_parallel = 1
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+    group = 'adaptive  periodic'
+    no_valgrind = True
+  [../]
+
+  [./testperiodic]
+    type = 'Exodiff'
+    input = 'periodic_bc_test.i'
+    exodiff = 'out.e'
+    max_thread = 1
+    max_parallel = 1
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./testtrapezoid]
+    type = 'Exodiff'
+    input = 'trapezoid.i'
+    exodiff = 'out_trapezoid.e'
+    max_thread = 1
+    max_parallel = 1
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./testwedge]
+    type = 'Exodiff'
+    input = 'wedge.i'
+    exodiff = 'out_wedge.e'
+    max_thread = 1
+    max_parallel = 1
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./testwedgesys]
+    type = 'Exodiff'
+    input = ' wedge_sys.i '
+    exodiff = 'out_wedge_sys.e'
+    max_thread = 1
+    max_parallel = 1
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+  [../]
+[]

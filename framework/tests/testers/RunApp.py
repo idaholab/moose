@@ -7,6 +7,7 @@ class RunApp(Tester):
 
   def getValidParams():
     params = Tester.getValidParams()
+    params.addParam('test_name',          "The name of the test - populated automatically")
     params.addParam('cli_args',           "Additional arguments to be passed to the test.")
     params.addParam('input',              "The input file to use for this test.")
     params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")

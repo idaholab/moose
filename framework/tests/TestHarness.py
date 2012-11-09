@@ -154,7 +154,7 @@ class TestHarness:
           if type(test[PREREQ]) != list:
             print "Option 'PREREQ' needs to be of type list in " + test[TEST_NAME]
             sys.exit(1)
-#          test[PREREQ] = [module_name + '.' + item for item in test[PREREQ]]
+          test[PREREQ] = [relative_path + '.' + item for item in test[PREREQ]]
 
         # Build a list of test specs (dicts) to return
         tests.append(test)
@@ -170,12 +170,12 @@ class TestHarness:
     for test_name, test_opts in inspect.getmembers(module):
       if isinstance(test_opts, types.DictType) and self.test_match.search(test_name):
 
-#        if filename == 'check_error_tests.py':
-#	  print "  [./" + test_name + "]"
-#          print "    type = 'RunException'"
-#	  for key, value in test_opts.items():
-#            print "    " + key + " = '", value, "'"
-#          print "  [../]\n"
+        if filename == 'periodic_bc_test.py':
+	  print "  [./" + test_name + "]"
+          print "    type = 'Exodiff'"
+	  for key, value in test_opts.items():
+            print "    " + key + " = '", value, "'"
+          print "  [../]\n"
 
         # insert default values where none provided
         testname = module_name + '.' + test_name
