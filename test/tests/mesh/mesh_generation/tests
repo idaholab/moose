@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'mesh_generation_test.i'
+    exodiff = 'out.e'
+  [../]
+[]
