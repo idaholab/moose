@@ -11,6 +11,7 @@ RELATIVE_PATH = 'relative_path'  # The relative directory where the test resides
 EXECUTABLE    = 'executable'     # The name of the executable, this is populated automatically - DO NOT OVERRIDE!
 HOSTNAME      = 'hostname'       # The name of machine that the harness is executing on, populated automatically - DO NOT OVERRIDE!
 TYPE          = 'type'           # The type of tester to create
+DELETED       = 'deleted'        # Tests that only show up when using the "-f" option (Permanently skipped or not implemented)
 
 ################################
 ##### LIST TYPE PARAMETERS #####
@@ -94,6 +95,7 @@ DEFAULTS = { EXODIFF : [],
              MAX_THREADS: 16,
              MAX_TIME : 300,
              SKIP : '',
+	     DELETED : '',
              ABS_ZERO : 1e-10,      # Exodiff option
              REL_ERR : 5.5e-6,      # Exodiff option
              CUSTOM_CMP : None,     # Exodiff option

@@ -14,5 +14,5 @@ restart_uo_test_2 = {
   INPUT : 'uo_restart_part2.i',
   EXODIFF : ['uo_restart_part2_out.e'],
   PREREQ : ['restart_uo_test_1'],
-  SKIP : 'UO restart disabled'
+  DELETED : 'UO restart disabled - #1169'
 }

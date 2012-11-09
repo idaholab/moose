@@ -27,7 +27,7 @@ test_bdf2_adapt = { INPUT : 'bdf2_adapt.i',
 test_cranic_adapt = { INPUT : 'cranic_adapt.i',
                       EXODIFF : ['out_cranic_adapt.e-s005'],
                       GROUP : 'adaptive',
-                      SKIP : 'wrong' }
+                      DELETED : 'Incorrect implementation - #1522' }
 
 testdt2 = { INPUT : 'dt2_adapt.i',
             EXODIFF : ['out_dt2_adapt.e-s038'],

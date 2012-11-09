@@ -37,7 +37,7 @@ subdomain_restricted_vars_test = { INPUT : 'periodic_subdomain_restricted_test.i
                                    EXODIFF : ['out_restrict.e'],
                                    GROUP : 'periodic',
                                    MESH_MODE : ['SERIAL'],
-                                   SKIP : 'Libmesh Bug #1410'}
+                                   DELETED : 'Libmesh Bug #1410'}
 
 auto_wrap_2d_test = { INPUT : 'auto_periodic_bc_test.i',
                       EXODIFF : ['out_auto.e'],

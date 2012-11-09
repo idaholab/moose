@@ -170,12 +170,12 @@ class TestHarness:
     for test_name, test_opts in inspect.getmembers(module):
       if isinstance(test_opts, types.DictType) and self.test_match.search(test_name):
 
-        if filename == 'check_error_tests.py':
-	  print "  [./" + test_name + "]"
-          print "    type = 'RunException'"
-	  for key, value in test_opts.items():
-            print "    " + key + " = '", value, "'"
-          print "  [../]\n"
+#        if filename == 'check_error_tests.py':
+#	  print "  [./" + test_name + "]"
+#          print "    type = 'RunException'"
+#	  for key, value in test_opts.items():
+#            print "    " + key + " = '", value, "'"
+#          print "  [../]\n"
 
         # insert default values where none provided
         testname = module_name + '.' + test_name
@@ -227,14 +227,6 @@ class TestHarness:
     test[EXECUTABLE] = self.executable
     test[HOSTNAME] = self.host_name
 
-  ## Delete old output files
-#  def prepareTest(self, test):
-#    for file in (test[CSVDIFF] + test[EXODIFF]):
-#      try:
-#        os.remove(os.path.join(test[TEST_DIR], file))
-#      except:
-#        pass
-
   # If the test is not to be run for any reason, print skipped as the result and return False,
   # otherwise return True
   def checkIfRunTest(self, test):
@@ -250,6 +242,17 @@ class TestHarness:
 
     # If --re then only test matching regexp. Needs to run before other SKIP methods
     if self.options.reg_exp and not match_regexp.search(test[TEST_NAME]):
+      return False
+
+    # Check for deleted tests
+    if test[DELETED]:
+      if self.options.extra_info:
+        # We might want to trim the string so it formats nicely
+        if len(test[DELETED]) >= TERM_COLS - (len(test)+21):
+          test_reason = (test[DELETED])[:(TERM_COLS - (len(test)+24))] + '...'
+        else:
+          test_reason = test[DELETED]
+        self.handleTestResult(test, '', 'deleted (' + test_reason + ')')
       return False
 
     # Check for skipped tests
@@ -349,10 +352,11 @@ class TestHarness:
     did_pass = True
     if reason == '':
       # It ran OK but is this test set to be skipped on any platform, compiler, so other reason?
-      checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE, METHOD, LIBRARY_MODE]
-      for check in checks:
-        if not 'ALL' in test[check]:
-          caveats.append(', '.join(test[check]))
+      if self.options.extra_info:
+        checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE, METHOD, LIBRARY_MODE]
+        for check in checks:
+          if not 'ALL' in test[check]:
+            caveats.append(', '.join(test[check]))
       if len(caveats):
         result = '[' + ', '.join(caveats) + '] OK'
       else:
@@ -503,6 +507,8 @@ class TestHarness:
     parser.add_option('--dev', action='store_const', dest='method', const='dev', help='test the app_name-dev binary')
     parser.add_option('-j', '--jobs', action='store', type='int', dest='jobs', default=1,
                       help='run test binaries in parallel')
+    parser.add_option('-e', action="store_true", dest="extra_info", default=False,
+    	              help='Display "extra" information including all caveats and deleted tests')
     parser.add_option("-c", "--no-color", action="store_false", dest="colored", default=True,
                       help="Do not show colored output")
     parser.add_option('--heavy', action='store_true', dest='heavy_tests', default=False,

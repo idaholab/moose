@@ -5,4 +5,4 @@ test = { INPUT : 'element_aux_var_test.i',
 
 sort_test = { INPUT : 'elemental_sort_test.i',
               EXODIFF : ['elemental_sort_test_out.e'],
-              SKIP : 'Waiting for Elem DOF update' }
+              DELETED : 'Waiting for Elem DOF update - #1200' }

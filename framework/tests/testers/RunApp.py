@@ -53,7 +53,7 @@ class RunApp(Tester):
       specs['CAVEATS'] = ['MIN_CPUS=' + str(ncpus)]
     elif ncpus < options.parallel:
       specs['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
-    if ncpus > 1 or nthreads > 1:
+    if options.parallel or nthreads > 1:
       command = 'mpiexec -host localhost -n ' + str(ncpus) + ' ' + specs[EXECUTABLE] + ' --n-threads=' + str(nthreads) + ' -i ' + specs[INPUT] + ' ' +  ' '.join(specs[CLI_ARGS])
     elif options.enable_valgrind and not specs[NO_VALGRIND]:
       command = 'valgrind --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs[EXECUTABLE] + ' -i ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])

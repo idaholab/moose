@@ -62,7 +62,7 @@
   [./bad_second_order_test]
     type = 'RunException'
     input = 'bad_second_order_test.i'
-    skip = 'Inconsistent Error'
+    deleted = 'Inconsistent Error - Ticket 1521'
     expect_err = 'Error in libMesh internal logic'
     should_crash = True
   [../]
@@ -113,7 +113,7 @@
     type = 'RunException'
     input = 'exception_test.i'
     expect_err = "Exception caught: MOOSE exception"
-    petsc_version = '3.0.0'
+    petsc_version = '>=3.1.0'
   [../]
 
   [./function_file_test1]
