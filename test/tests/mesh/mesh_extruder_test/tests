@@ -1,0 +1,13 @@
+[Tests]
+  [./quad_test]
+    type = 'Exodiff'
+    input = 'extruder_quad.i'
+    exodiff = 'out_quad.e'
+  [../]
+
+  [./tri_test]
+    type = 'Exodiff'
+    input = 'extruder_tri.i'
+    exodiff = 'out_tri.e'
+  [../]
+[]
