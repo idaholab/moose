@@ -1,0 +1,26 @@
+[Tests]
+  [./test_steady_adapt]
+    type = 'Exodiff'
+    input = 'steady-adapt.i'
+    exodiff = 'out_steady_adapt.e-s004'
+    group = 'adaptive'
+  [../]
+
+  [./test_stead_state_check]
+    type = 'Exodiff'
+    input = 'steady_state_check_test.i'
+    exodiff = 'out_ss_check.e'
+  [../]
+
+  [./test_steady]
+    type = 'Exodiff'
+    input = 'steady.i'
+    exodiff = 'out_steady.e'
+  [../]
+
+  [./test_transient]
+    type = 'Exodiff'
+    input = 'transient.i'
+    exodiff = 'out_transient.e'
+  [../]
+[]

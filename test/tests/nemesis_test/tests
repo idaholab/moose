@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'nemesis_test.i'
+    exodiff = 'out.e.4.0 out.e.4.1 out.e.4.2 out.e.4.3'
+    max_parallel = 4
+    min_parallel = 4
+    mesh_mode = 'PARALLEL'
+  [../]
+[]

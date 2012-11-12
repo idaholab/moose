@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'over_sampling_test.i'
+    exodiff = 'out.e out_oversample.e'
+  [../]
+[]

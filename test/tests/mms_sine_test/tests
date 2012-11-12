@@ -1,0 +1,25 @@
+[Tests]
+  [./test3dMesh]
+    type = 'Exodiff'
+    input = '3_d_mms_sine_test.i'
+    exodiff = '3_d_out.e'
+  [../]
+
+  [./test2dMesh]
+    type = 'Exodiff'
+    input = '2_d_mms_sine_test.i'
+    exodiff = '2_d_out.e'
+  [../]
+
+  [./test3dCSV]
+    type = 'CSVDiff'
+    input = '3_d_mms_sine_postprocessor_test.i'
+    csvdiff = '3_d_postprocessor_out.csv'
+  [../]
+
+  [./test2dCSV]
+    type = 'CSVDiff'
+    input = '2_d_mms_sine_postprocessor_test.i'
+    csvdiff = '2_d_postprocessor_out.csv'
+  [../]
+[]

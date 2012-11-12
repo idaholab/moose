@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'block_nodal_pps_test.i'
+    exodiff = 'block_nodal_pps_test_out.e'
+    scale_refine = 5
+  [../]
+[]

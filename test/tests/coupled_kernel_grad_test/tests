@@ -1,0 +1,9 @@
+[Tests]
+  [./test_coupled_kernel_grad]
+    type = 'Exodiff'
+    input = 'coupled_kernel_grad_test.i'
+    exodiff = 'coupled_kernel_grad_test_out.e'
+    max_parallel = 1
+    scale_refine = 2
+  [../]
+[]

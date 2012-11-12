@@ -1,0 +1,16 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'constant_ic_test.i'
+    exodiff = 'out.e'
+    scale_refine = 5
+  [../]
+
+  [./subdomain_test]
+    type = 'Exodiff'
+    input = 'subdomain_constant_ic_test.i'
+    exodiff = 'subdomain_constant_ic_test_out.e'
+    max_parallel = 1
+    scale_refine = 5
+  [../]
+[]

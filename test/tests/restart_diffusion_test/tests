@@ -1,0 +1,34 @@
+[Tests]
+  [./uniform_refine_refine_test_2]
+    type = 'Exodiff'
+    input = 'exodus_refined_refined_restart_2_test.i'
+    exodiff = 'exodus_refined_refined_restart_2.e'
+    prereq = 'uniform_refine_test_1'
+  [../]
+
+  [./uniform_refine_test_2]
+    type = 'Exodiff'
+    input = 'exodus_refined_restart_2_test.i'
+    exodiff = 'exodus_refined_restart_2.e'
+    prereq = 'uniform_refine_test_1'
+  [../]
+
+  [./uniform_refine_test_1]
+    type = 'Exodiff'
+    input = 'exodus_refined_restart_1_test.i'
+    exodiff = 'exodus_refined_restart_1.e'
+  [../]
+
+  [./test_2]
+    type = 'Exodiff'
+    input = 'restart_diffusion_test_transient.i'
+    exodiff = 'out.e'
+    prereq = 'test_1'
+  [../]
+
+  [./test_1]
+    type = 'Exodiff'
+    input = 'restart_diffusion_test_steady.i'
+    exodiff = 'steady_out.e'
+  [../]
+[]

@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'tied_value_constraint_test.i'
+    exodiff = 'out.e'
+    max_parallel = 1
+  [../]
+[]

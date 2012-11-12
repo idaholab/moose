@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'flux_jump_indicator_test.i'
+    exodiff = 'flux_jump_indicator_test_out.e'
+    abs_zero = 1e-08
+    scale_refine = 2
+  [../]
+[]

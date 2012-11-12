@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'random_ic_test.i'
+    exodiff = 'out.e'
+    max_parallel = 1
+  [../]
+[]

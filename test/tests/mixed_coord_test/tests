@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'mixed_coord_test.i'
+    exodiff = 'out.e'
+    scale_refine = 5
+  [../]
+[]

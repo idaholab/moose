@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'gradient_jump_indicator_test.i'
+    exodiff = 'gradient_jump_indicator_test_out.e'
+    scale_refine = 2
+  [../]
+[]

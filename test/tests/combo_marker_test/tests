@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'combo_marker_test.i'
+    exodiff = 'combo_marker_test_out.e'
+    scale_refine = 2
+  [../]
+[]

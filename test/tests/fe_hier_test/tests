@@ -1,0 +1,62 @@
+[Tests]
+  [./test_hier_2_1d]
+    type = 'Exodiff'
+    input = 'hier-2-1d.i'
+    exodiff = 'hier-2-1d_out.e'
+  [../]
+
+  [./test_hier_1_1d]
+    type = 'Exodiff'
+    input = 'hier-1-1d.i'
+    exodiff = 'hier-1-1d_out.e'
+    max_parallel = 1
+  [../]
+
+  [./test_hier_3_2d]
+    type = 'Exodiff'
+    input = 'hier-3-2d.i'
+    exodiff = 'hier-3-2d_out.e'
+    abs_zero = 1e-08
+  [../]
+
+  [./test_hier_1_3d]
+    type = 'Exodiff'
+    input = 'hier-1-3d.i'
+    exodiff = 'hier-1-3d_out.e'
+    abs_zero = 1e-09
+  [../]
+
+  [./test_hier_1_2d]
+    type = 'Exodiff'
+    input = 'hier-1-2d.i'
+    exodiff = 'hier-1-2d_out.e'
+    max_parallel = 1
+  [../]
+
+  [./test_hier_3_3d]
+    type = 'Exodiff'
+    input = 'hier-3-3d.i'
+    exodiff = 'hier-3-3d_out.e'
+    abs_zero = 1e-08
+  [../]
+
+  [./test_hier_2_3d]
+    type = 'Exodiff'
+    input = 'hier-2-3d.i'
+    exodiff = 'hier-2-3d_out.e'
+  [../]
+
+  [./test_hier_3_1d]
+    type = 'Exodiff'
+    input = 'hier-3-1d.i'
+    exodiff = 'hier-3-1d_out.e'
+    max_parallel = 4
+  [../]
+
+  [./test_hier_2_2d]
+    type = 'Exodiff'
+    input = 'hier-2-2d.i'
+    exodiff = 'hier-2-2d_out.e'
+    abs_zero = 1e-09
+  [../]
+[]

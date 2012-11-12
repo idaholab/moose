@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'element_average_value_test.i'
+    csvdiff = 'out.csv'
+  [../]
+[]

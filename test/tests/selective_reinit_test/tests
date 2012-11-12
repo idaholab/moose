@@ -1,0 +1,11 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'selective_reinit_test.i'
+    exodiff = 'selective_reinit_test_out.e'
+    max_parallel = 1
+    max_time = 20
+    compiler = 'GCC CLANG'
+    method = 'OPT'
+  [../]
+[]

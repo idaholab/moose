@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'mixed_order_variables_test.i'
+    exodiff = 'out.e'
+    max_parallel = 1
+  [../]
+[]

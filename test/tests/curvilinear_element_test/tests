@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'curvilinear_element_test.i'
+    csvdiff = 'out.csv'
+  [../]
+[]

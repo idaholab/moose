@@ -1,0 +1,97 @@
+[Tests]
+  [./nemesis_out_test]
+    type = 'CheckFiles'
+    input = 'output_test_nemesis.i'
+    check_files = 'out.e.1.0'
+    mesh_mode = 'PARALLEL'
+  [../]
+
+  [./pps_file_out_warn_test]
+    type = 'RunApp'
+    input = 'pps_file_out_warn.i'
+    expect_out = 'Postprocessor file output has been requested'
+  [../]
+
+  [./gmv_out_test]
+    type = 'CheckFiles'
+    input = 'output_test_gmv.i'
+    check_files = 'out_0000.gmv'
+  [../]
+
+  [./yaml_dump_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = 'START YAML DATA.*END YAML DATA'
+    cli_args = '--yaml'
+  [../]
+
+  [./gnuplot_ps_out_test]
+    type = 'CheckFiles'
+    input = 'output_test_gnuplot.i'
+    check_files = 'out.gp out.dat'
+    cli_args = 'Output/gnuplot_format=ps'
+  [../]
+
+  [./tecplot_out_test]
+    type = 'CheckFiles'
+    input = 'output_test_tecplot.i'
+    check_files = 'out_0000.plt'
+  [../]
+
+  [./dump_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = 'block\s*=\s*ANY_BLOCK_ID'
+    cli_args = '--dump'
+  [../]
+
+  [./nemesis_out_check_test]
+    type = 'RunException'
+    input = 'output_test_nemesis.i'
+    expect_err = 'Nemesis not supported when compiled without --enable-parmesh'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./gnuplot_bad_out_test]
+    type = 'RunException'
+    input = 'output_test_gnuplot.i'
+    expect_err = 'gnuplot format .*? is not supported'
+    cli_args = 'Output/gnuplot_format=magic'
+  [../]
+
+  [./gnuplot_gif_out_test]
+    type = 'CheckFiles'
+    input = 'output_test_gnuplot.i'
+    check_files = 'out.gp out.dat'
+    cli_args = 'Output/gnuplot_format=gif'
+    prereq = 'gnuplot_png_out_test'
+  [../]
+
+  [./gnuplot_png_out_test]
+    type = 'CheckFiles'
+    input = 'output_test_gnuplot.i'
+    check_files = 'out.gp out.dat'
+    cli_args = 'Output/gnuplot_format=png'
+    prereq = 'gnuplot_ps_out_test'
+  [../]
+
+  [./pps_screen_out_warn_test]
+    type = 'RunApp'
+    input = 'pps_screen_out_warn.i'
+    expect_out = 'Postprocessor screen output has been requested'
+  [../]
+
+  [./show_input_test]
+    type = 'RunApp'
+    input = 'output_test_gmv.i'
+    expect_out = 'type\s*=\s*GeneratedMesh'
+    cli_args = '--show-input'
+    prereq = 'gmv_out_test'
+  [../]
+
+  [./sln_out_test]
+    type = 'CheckFiles'
+    input = 'output_test_sln.i'
+    check_files = 'out.slh'
+  [../]
+[]

@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'kernel_precompute_test.i'
+    exodiff = 'out.e'
+    scale_refine = 5
+  [../]
+[]

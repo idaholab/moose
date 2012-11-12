@@ -1,0 +1,13 @@
+[Tests]
+  [./bc_function_nodal_test]
+    type = 'Exodiff'
+    input = 'bc_function_preset.i'
+    exodiff = 'bc_func_out.e'
+  [../]
+
+  [./bc_preset_nodal_test]
+    type = 'Exodiff'
+    input = 'bc_preset_nodal.i'
+    exodiff = 'bc_preset_out.e'
+  [../]
+[]

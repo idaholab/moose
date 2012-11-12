@@ -1,0 +1,7 @@
+[Tests]
+  [./testlinear]
+    type = 'CheckFiles'
+    input = 'linear_interp_mat_test.i'
+    check_files = 'diffusivity0000.plt diffusivity_pts0000.dat'
+  [../]
+[]

@@ -1,0 +1,15 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'block_kernel_test.i'
+    exodiff = 'out.e'
+    scale_refine = 4
+  [../]
+
+  [./testvars]
+    type = 'Exodiff'
+    input = 'block_vars.i'
+    exodiff = 'out_vars.e'
+    scale_refine = 4
+  [../]
+[]

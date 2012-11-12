@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'save_in_test.i'
+    exodiff = 'out.e'
+    scale_refine = 4
+  [../]
+[]

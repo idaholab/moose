@@ -1,0 +1,13 @@
+[Tests]
+  [./sinneumann_test]
+    type = 'Exodiff'
+    input = 'sin_neumann_test.i'
+    exodiff = 'sin_neumann_test_out.e'
+  [../]
+
+  [./sindirichlet_test]
+    type = 'Exodiff'
+    input = 'sin_dirichlet_test.i'
+    exodiff = 'sin_dirichlet_test_out.e'
+  [../]
+[]

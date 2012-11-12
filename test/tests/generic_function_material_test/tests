@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'generic_function_material_test.i'
+    exodiff = 'generic_function_material_test_out.e'
+    scale_refine = 5
+  [../]
+[]

@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'constant_point_source_test.i'
+    exodiff = 'out.e'
+  [../]
+[]

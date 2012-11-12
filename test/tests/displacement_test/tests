@@ -1,0 +1,25 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'displacement_test.i'
+    exodiff = 'out_displaced.e-s002'
+    group = 'adaptive'
+    max_parallel = 1
+  [../]
+
+  [./displaced_eq_test]
+    type = 'Exodiff'
+    input = 'displaced_eq_transient_test.i'
+    exodiff = 'displaced_eq_transient_test_out_displaced.e-s011'
+    group = 'adaptive'
+    max_parallel = 1
+  [../]
+
+  [./displacement_transient_test]
+    type = 'Exodiff'
+    input = 'displacement_transient_test.i'
+    exodiff = 'displacement_transient_test_out_displaced.e-s011'
+    group = 'adaptive'
+    max_parallel = 1
+  [../]
+[]

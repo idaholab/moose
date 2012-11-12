@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'element_integral_test.i'
+    csvdiff = 'out.csv'
+  [../]
+
+  [./block_test]
+    type = 'CSVDiff'
+    input = 'element_block_integral_test.i'
+    csvdiff = 'out_block.csv'
+  [../]
+[]

@@ -1,0 +1,13 @@
+[Tests]
+  [./onedtwod_test]
+    type = 'Exodiff'
+    input = '1d_2d.i'
+    exodiff = 'out.e'
+  [../]
+
+  [./onedthreed_test]
+    type = 'Exodiff'
+    input = '1d_3d.i'
+    exodiff = '1d_3d_out.e'
+  [../]
+[]

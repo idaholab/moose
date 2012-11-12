@@ -1,0 +1,77 @@
+[Tests]
+  [./test_threads_test]
+    type = 'Exodiff'
+    input = '2d_diffusion_test2.i'
+    exodiff = 'out2.e'
+    prereq = 'test_method_check'
+  [../]
+
+  [./test_petsc_check]
+    type = 'Exodiff'
+    input = '2d_diffusion_test2.i'
+    exodiff = 'out2.e'
+    petsc_version = '>=3.1'
+    prereq = 'test_compiler_check test_platform_check'
+  [../]
+
+  [./test_compiler_check]
+    type = 'Exodiff'
+    input = '2d_diffusion_test2.i'
+    exodiff = 'out2.e'
+    compiler = 'GCC'
+  [../]
+
+  [./test_combined]
+    type = 'Exodiff'
+    input = '2d_diffusion_test.i'
+    exodiff = 'out.e'
+    platform = 'DARWIN'
+    compiler = 'GCC'
+    mesh_mode = 'SERIAL'
+    prereq = 'test_parmesh_check'
+  [../]
+
+  [./test_platform_check]
+    type = 'Exodiff'
+    input = '2d_diffusion_test.i'
+    exodiff = 'out.e'
+    platform = 'DARWIN'
+    prereq = 'test_compiler_check'
+  [../]
+
+  [./test_skip_depend_test]
+    type = 'Exodiff'
+    input = '2d_diffusion_test.i'
+    exodiff = 'out.e'
+    prereq = 'test_always_skipped'
+  [../]
+
+  [./test_parmesh_check]
+    type = 'Exodiff'
+    input = '2d_diffusion_test.i'
+    exodiff = 'out.e'
+    mesh_mode = 'SERIAL'
+    prereq = 'test_platform_check'
+  [../]
+
+  [./test_method_check]
+    type = 'Exodiff'
+    input = '2d_diffusion_test2.i'
+    exodiff = 'out2.e'
+    method = 'OPT'
+    prereq = 'test_petsc_check'
+  [../]
+
+  [./test_always_skipped]
+    type = 'RunApp'
+    input = 'no_filename.i'
+    skip = 'Dependency Skip Test OK'
+  [../]
+
+  [./test_library_check]
+    type = 'Exodiff'
+    input = '2d_diffusion_test2.i'
+    exodiff = 'out2.e'
+    prereq = 'test_method_check'
+  [../]
+[]

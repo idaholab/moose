@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'cli_arg_test.i'
+    exodiff = 'out.e'
+    cli_args = 'BCs/left/value=2 Materials/empty/block=1'
+  [../]
+[]

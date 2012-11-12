@@ -1,0 +1,19 @@
+[Tests]
+  [./testParseCheck]
+    type = 'RunException'
+    input = 'forcing_function_error_check.i'
+    expect_err = 'The value in ParsedFunction ".*?" contains quotes'
+  [../]
+
+  [./testDirichletbc]
+    type = 'Exodiff'
+    input = 'forcing_function_test.i'
+    exodiff = 'out.e'
+  [../]
+
+  [./testNeumannbc]
+    type = 'Exodiff'
+    input = 'forcing_function_neumannbc_test.i'
+    exodiff = 'neumannbc_out.e'
+  [../]
+[]

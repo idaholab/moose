@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'active_section_test.i'
+    exodiff = 'out.e'
+  [../]
+[]

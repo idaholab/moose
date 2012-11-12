@@ -1,0 +1,15 @@
+[Tests]
+  [./testdamper]
+    type = 'Exodiff'
+    input = 'constant_damper_test.i'
+    exodiff = 'out.e'
+    scale_refine = 5
+  [../]
+
+  [./testverifydamping]
+    type = 'RunApp'
+    input = 'constant_damper_test.i'
+    expect_out = 'NL step\s+8'
+    prereq = 'testdamper'
+  [../]
+[]

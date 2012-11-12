@@ -1,0 +1,25 @@
+[Tests]
+  [./convective_flux_bc_test]
+    type = 'Exodiff'
+    input = 'convective_flux_bc.i'
+    exodiff = 'convective_flux_bc_out.e'
+  [../]
+
+  [./vacuumbc_test]
+    type = 'Exodiff'
+    input = 'vacuum_bc_test.i'
+    exodiff = 'vacuum_bc_test_out.e'
+  [../]
+
+  [./vector_neumann_test]
+    type = 'Exodiff'
+    input = 'vector_neumann_bc_test.i'
+    exodiff = 'vector_neumann_bc_test_out.e'
+  [../]
+
+  [./weak_gradient_bc_test]
+    type = 'Exodiff'
+    input = 'weak_gradient_bc_test.i'
+    exodiff = 'weak_gradient_bc_test_out.e'
+  [../]
+[]

@@ -11,7 +11,7 @@ RELATIVE_PATH = 'relative_path'  # The relative directory where the test resides
 EXECUTABLE    = 'executable'     # The name of the executable, this is populated automatically - DO NOT OVERRIDE!
 HOSTNAME      = 'hostname'       # The name of machine that the harness is executing on, populated automatically - DO NOT OVERRIDE!
 TYPE          = 'type'           # The type of tester to create
-DELETED       = 'deleted'        # Tests that only show up when using the "-f" option (Permanently skipped or not implemented)
+DELETED       = 'deleted'        # Tests that only show up when using the "-e" option (Permanently skipped or not implemented)
 
 ################################
 ##### LIST TYPE PARAMETERS #####

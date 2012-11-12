@@ -1,0 +1,14 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'extra_nodeset_test.i'
+    exodiff = 'out.e'
+  [../]
+
+  [./test_coord]
+    type = 'Exodiff'
+    input = 'extra_nodeset_coord_test.i'
+    exodiff = 'out.e'
+    prereq = 'test'
+  [../]
+[]

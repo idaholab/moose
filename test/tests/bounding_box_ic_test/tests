@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'bounding_box_ic_test.i'
+    exodiff = 'out.e'
+  [../]
+[]

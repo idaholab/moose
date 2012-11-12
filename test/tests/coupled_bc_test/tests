@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'coupled_bc_test.i'
+    exodiff = 'out.e'
+  [../]
+[]

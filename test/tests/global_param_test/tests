@@ -1,0 +1,7 @@
+[Tests]
+  [./global_param_test]
+    type = 'Exodiff'
+    input = 'global_param_test.i'
+    exodiff = 'out.e'
+  [../]
+[]

@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = '2d_penetration_locator_test.i'
+    exodiff = 'out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+[]

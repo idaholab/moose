@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'element_h1_error_pp_test.i'
+    csvdiff = 'out.csv'
+  [../]
+[]

@@ -1,0 +1,9 @@
+[Tests]
+  [./misc_pps_test]
+    type = 'Exodiff'
+    input = 'misc_pps_test.i'
+    exodiff = 'pps_out.e'
+    custom_cmp = 'misc_pps_test.cmp'
+    max_parallel = 1
+  [../]
+[]

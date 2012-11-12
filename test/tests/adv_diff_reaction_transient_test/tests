@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'adv_diff_reaction_transient_test.i'
+    exodiff = 'out.e'
+    scale_refine = 2
+  [../]
+[]

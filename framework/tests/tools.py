@@ -9,6 +9,7 @@ from TestTimer import TestTimer
 from TestHarness import TestHarness
 
 # Testers
+from RunApp import RunApp
 from Exodiff import Exodiff
 from CSVDiff import CSVDiff
 from RunException import RunException
@@ -31,6 +32,7 @@ def runTests(argv, app_name, moose_dir):
     harness = TestHarness(argv, app_name, moose_dir)
 
   # Registration
+  harness.registerTester(RunApp, 'RunApp')
   harness.registerTester(Exodiff, 'Exodiff')
   harness.registerTester(CSVDiff, 'CSVDiff')
   harness.registerTester(RunException, 'RunException')

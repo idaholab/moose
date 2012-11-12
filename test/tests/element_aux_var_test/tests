@@ -1,0 +1,14 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'element_aux_var_test.i'
+    exodiff = 'out.e'
+  [../]
+
+  [./sort_test]
+    type = 'Exodiff'
+    input = 'elemental_sort_test.i'
+    exodiff = 'elemental_sort_test_out.e'
+    deleted = 'Waiting for Elem DOF update - #1200'
+  [../]
+[]

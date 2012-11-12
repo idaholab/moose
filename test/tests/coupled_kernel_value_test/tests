@@ -1,0 +1,7 @@
+[Tests]
+  [./test_coupled_kernel_value_test]
+    type = 'Exodiff'
+    input = 'coupled_kernel_value_test.i'
+    exodiff = 'coupled_kernel_value_test_out.e'
+  [../]
+[]

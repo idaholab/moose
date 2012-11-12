@@ -1,0 +1,15 @@
+[Tests]
+  [./testnodalnodest]
+    type = 'Exodiff'
+    input = 'nodal_nodeset_pps_test.i'
+    exodiff = 'nodal_nodeset_pps_test_out.e'
+  [../]
+
+  [./testnodalpps]
+    type = 'Exodiff'
+    input = 'nodal_max_pps_test.i'
+    exodiff = 'nodal_max_pps_test_out.e'
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+  [../]
+[]

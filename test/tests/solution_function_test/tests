@@ -1,0 +1,19 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'solution_function_test.i'
+    exodiff = 'out.e'
+  [../]
+
+  [./exodus_interp_test]
+    type = 'Exodiff'
+    input = 'solution_function_exodus_interp_test.i'
+    exodiff = 'solution_function_exodus_interp_test_out.e'
+  [../]
+
+  [./exodus_test]
+    type = 'Exodiff'
+    input = 'solution_function_exodus_test.i'
+    exodiff = 'solution_function_exodus_test_out.e'
+  [../]
+[]

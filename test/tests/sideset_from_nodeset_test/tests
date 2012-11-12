@@ -1,0 +1,13 @@
+[Tests]
+  [./test_hex]
+    type = 'Exodiff'
+    input = 'sideset_from_nodeset_test.i'
+    exodiff = 'cube_hex_out.e'
+  [../]
+
+  [./test_tet]
+    type = 'Exodiff'
+    input = 'sideset_from_nodeset_test2.i'
+    exodiff = 'cube_tet_out.e'
+  [../]
+[]

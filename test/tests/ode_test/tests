@@ -1,0 +1,15 @@
+[Tests]
+  [./test_expl]
+    type = 'Exodiff'
+    input = 'ode_expl_test.i'
+    exodiff = 'ode_expl_test_out.e'
+    max_parallel = 1
+  [../]
+
+  [./test_sys_impl]
+    type = 'Exodiff'
+    input = 'ode_sys_impl_test.i'
+    exodiff = 'ode_sys_impl_test_out.e'
+    max_parallel = 1
+  [../]
+[]

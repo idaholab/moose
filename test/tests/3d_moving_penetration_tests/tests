@@ -1,0 +1,115 @@
+[Tests]
+  [./pl_test1q]
+    type = 'Exodiff'
+    input = 'pl_test1q.i'
+    exodiff = 'pl_test1q_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test1qtt]
+    type = 'Exodiff'
+    input = 'pl_test1qtt.i'
+    exodiff = 'pl_test1qtt_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test2qtt]
+    type = 'Exodiff'
+    input = 'pl_test2qtt.i'
+    exodiff = 'pl_test2qtt_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test2q]
+    type = 'Exodiff'
+    input = 'pl_test2q.i'
+    exodiff = 'pl_test2q_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test1tt]
+    type = 'Exodiff'
+    input = 'pl_test1tt.i'
+    exodiff = 'pl_test1tt_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test4q]
+    type = 'Exodiff'
+    input = 'pl_test4q.i'
+    exodiff = 'pl_test4q_out.e'
+    abs_zero = 1e-09
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test1]
+    type = 'Exodiff'
+    input = 'pl_test1.i'
+    exodiff = 'pl_test1_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test2tt]
+    type = 'Exodiff'
+    input = 'pl_test2tt.i'
+    exodiff = 'pl_test2tt_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test3]
+    type = 'Exodiff'
+    input = 'pl_test3.i'
+    exodiff = 'pl_test3_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test2]
+    type = 'Exodiff'
+    input = 'pl_test2.i'
+    exodiff = 'pl_test2_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test4]
+    type = 'Exodiff'
+    input = 'pl_test4.i'
+    exodiff = 'pl_test4_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test3q]
+    type = 'Exodiff'
+    input = 'pl_test3q.i'
+    exodiff = 'pl_test3q_out.e'
+    abs_zero = 1e-09
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test4tt]
+    type = 'Exodiff'
+    input = 'pl_test4tt.i'
+    exodiff = 'pl_test4tt_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test3tt]
+    type = 'Exodiff'
+    input = 'pl_test3tt.i'
+    exodiff = 'pl_test3tt_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+[]

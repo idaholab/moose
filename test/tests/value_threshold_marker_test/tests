@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'value_threshold_marker_test.i'
+    exodiff = 'value_threshold_marker_test_out.e'
+    scale_refine = 2
+  [../]
+[]

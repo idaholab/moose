@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = '3d_diffusion_dg_test.i'
+    exodiff = 'out.e'
+    group = 'adaptive'
+    max_parallel = 1
+  [../]
+[]

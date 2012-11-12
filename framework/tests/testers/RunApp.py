@@ -11,6 +11,7 @@ class RunApp(Tester):
     params.addParam('cli_args',           "Additional arguments to be passed to the test.")
     params.addParam('input',              "The input file to use for this test.")
     params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
+    params.addParam('deleted',            "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
     params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
 
     # Parallel/Thread testing

@@ -1,0 +1,23 @@
+[Tests]
+  [./test_names]
+    type = 'Exodiff'
+    input = 'named_entities_test.i'
+    exodiff = 'named_entities_test_out.e'
+    max_parallel = 1
+  [../]
+
+  [./test_periodic_names]
+    type = 'Exodiff'
+    input = 'periodic_bc_names_test.i'
+    exodiff = 'periodic_bc_names_test_out.e'
+    group = 'periodic'
+    max_parallel = 1
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./on_the_fly_test]
+    type = 'Exodiff'
+    input = 'name_on_the_fly.i'
+    exodiff = 'name_on_the_fly_out.e'
+  [../]
+[]

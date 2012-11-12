@@ -1,0 +1,48 @@
+[Tests]
+  [./displaced_test]
+    type = 'Exodiff'
+    input = 'displaced_adapt_test.i'
+    exodiff = 'displaced_adapt_test_out.e-s002 displaced_adapt_test_out.e-s002'
+    group = 'adaptive'
+    max_parallel = 1
+  [../]
+
+  [./test_time]
+    type = 'Exodiff'
+    input = 'adapt_time_test.i'
+    exodiff = 'out_time.e-s007'
+    group = 'adaptive'
+  [../]
+
+  [./initial_adaptivity_test]
+    type = 'Exodiff'
+    input = 'initial_adaptivity_test.i'
+    exodiff = 'initial_adaptivity_test_out.e'
+    abs_zero = 1e-08
+    group = 'adaptive'
+    max_parallel = 3
+  [../]
+
+  [./patch_test]
+    type = 'Exodiff'
+    input = 'patch_recovery_test.i'
+    exodiff = 'patch_out.e-s002'
+    group = 'adaptive'
+    max_parallel = 1
+  [../]
+
+  [./adapt_cycles_test]
+    type = 'Exodiff'
+    input = 'adapt_test_cycles.i'
+    exodiff = 'out_cycles.e out_cycles.e-s002'
+    group = 'adaptive'
+    max_parallel = 1
+  [../]
+
+  [./test]
+    type = 'Exodiff'
+    input = 'adapt_test.i'
+    exodiff = 'out.e-s002'
+    group = 'adaptive'
+  [../]
+[]

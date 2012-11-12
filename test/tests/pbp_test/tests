@@ -1,0 +1,22 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'pbp_test.i'
+    exodiff = 'out.e'
+    max_parallel = 1
+  [../]
+
+  [./pbp_adapt_test]
+    type = 'Exodiff'
+    input = 'pbp_adapt_test.i'
+    exodiff = 'out_pbp_adapt.e-s004'
+    custom_cmp = 'pbp_adapt_test.cmp'
+    group = 'adaptive'
+  [../]
+
+  [./check_petsc_options_test]
+    type = 'RunException'
+    input = 'pbp_test_options.i'
+    expect_err = 'KSP Residual'
+  [../]
+[]

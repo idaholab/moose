@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'laplacian_jump_indicator_test.i'
+    exodiff = 'laplacian_jump_indicator_test_out.e'
+    scale_refine = 2
+  [../]
+[]

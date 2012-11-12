@@ -1,0 +1,71 @@
+[Tests]
+  [./test_nodal_max]
+    type = 'Exodiff'
+    input = 'nodal_max_value_test.i'
+    exodiff = 'out_nodal_max.e'
+    max_parallel = 11
+  [../]
+
+  [./test_side_multi_bnd]
+    type = 'Exodiff'
+    input = 'side_pps_multi_bnd_test.i'
+    exodiff = 'side_pps_multi_bnd_test_out.e'
+  [../]
+
+  [./pps_output_test]
+    type = 'Exodiff'
+    input = 'pps_output_test.i'
+    exodiff = 'pps_output_test_out.e'
+  [../]
+
+  [./test_elem_multi_block]
+    type = 'Exodiff'
+    input = 'elem_pps_multi_block_test.i'
+    exodiff = 'elem_pps_multi_block_test_out.e'
+  [../]
+
+  [./pps_old_test]
+    type = 'Exodiff'
+    input = 'pps_old_value.i'
+    exodiff = 'pps_old_value_out.e'
+  [../]
+
+  [./test_nodal_aux_var_value]
+    type = 'Exodiff'
+    input = 'nodal_aux_var_value.i'
+    exodiff = 'out_nodal_aux_var_value.e'
+  [../]
+
+  [./test_avg_nodal_var_value]
+    type = 'Exodiff'
+    input = 'avg_nodal_var_value.i'
+    exodiff = 'out_avg_nodal_var_value.e'
+  [../]
+
+  [./screen_output_test]
+    type = 'RunApp'
+    input = 'screen_output_test.i'
+    expect_out = '^:\s+:.*
+(?:^\|\s+\d\.\d.*
+){2}^\+(-+\+)+
+'
+  [../]
+
+  [./test_nodal_var_value]
+    type = 'Exodiff'
+    input = 'nodal_var_value.i'
+    exodiff = 'out_nodal_var_value.e'
+  [../]
+
+  [./test_avg_nodal_var_value_ts_begin]
+    type = 'Exodiff'
+    input = 'avg_nodal_var_value_ts_begin.i'
+    exodiff = 'out_avg_nodal_var_value_ts_begin.e'
+  [../]
+
+  [./test_inital]
+    type = 'Exodiff'
+    input = 'initial_pps.i'
+    exodiff = 'out_initial_pps.e'
+  [../]
+[]

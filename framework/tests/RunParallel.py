@@ -72,7 +72,7 @@ class RunParallel:
       print "Error in launching a new task"
       raise
 
-    self.jobs[job_index] = (p, command, tester, clock() + tester.specs[MAX_TIME], f)
+    self.jobs[job_index] = (p, command, tester, clock() + float(tester.specs[MAX_TIME]), f)
 
   def startReadyJobs(self):
     queue_items = len(self.queue)

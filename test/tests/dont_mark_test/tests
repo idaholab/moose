@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'dont_mark_test.i'
+    exodiff = 'dont_mark_test_out.e'
+    scale_refine = 2
+  [../]
+[]

@@ -1,0 +1,55 @@
+[Tests]
+  [./adv_mat_couple_test]
+    type = 'Exodiff'
+    input = 'adv_mat_couple_test.i'
+    exodiff = 'out_adv_coupled.e'
+    scale_refine = 4
+  [../]
+
+  [./coupled_material_test]
+    type = 'Exodiff'
+    input = 'coupled_material_test.i'
+    exodiff = 'out_coupled.e'
+    scale_refine = 3
+  [../]
+
+  [./dg_test]
+    type = 'Exodiff'
+    input = 'material_test_dg.i'
+    exodiff = 'out_dg.e'
+    scale_refine = 3
+  [../]
+
+  [./bnd_material_test]
+    type = 'Exodiff'
+    input = 'bnd_material_test.i'
+    exodiff = 'bnd_material_test_out.e'
+  [../]
+
+  [./adv_mat_couple_test2]
+    type = 'Exodiff'
+    input = 'adv_mat_couple_test2.i'
+    exodiff = 'out_adv_coupled2.e'
+    scale_refine = 4
+  [../]
+
+  [./mat_cyclic_dep_error_test]
+    type = 'RunException'
+    input = 'mat_cyclic_coupling.i'
+    expect_err = 'Cyclic dependency detected'
+  [../]
+
+  [./three_coupled_mat_test]
+    type = 'Exodiff'
+    input = 'three_coupled_mat_test.i'
+    exodiff = 'out_three.e'
+    scale_refine = 3
+  [../]
+
+  [./test]
+    type = 'Exodiff'
+    input = 'material_test.i'
+    exodiff = 'out.e'
+    scale_refine = 3
+  [../]
+[]

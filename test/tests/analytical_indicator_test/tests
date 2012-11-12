@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'analytical_indicator_test.i'
+    exodiff = 'analytical_indicator_test_out.e'
+    scale_refine = 2
+  [../]
+[]

@@ -1,0 +1,69 @@
+[Tests]
+  [./test_solution_time_adaptive]
+    type = 'CheckFiles'
+    input = 'time-adaptive.i'
+    check_files = 'out_time_adaptive.e'
+  [../]
+
+  [./test_ie_adapt]
+    type = 'Exodiff'
+    input = 'ie_adapt.i'
+    exodiff = 'out_ie_adapt.e-s005'
+    group = 'adaptive'
+  [../]
+
+  [./testbdf2]
+    type = 'Exodiff'
+    input = 'bdf2.i'
+    exodiff = 'out_bdf2.e'
+  [../]
+
+  [./test_bdf2_adapt]
+    type = 'Exodiff'
+    input = 'bdf2_adapt.i'
+    exodiff = 'out_bdf2_adapt.e-s005'
+    group = 'adaptive'
+  [../]
+
+  [./testAEE]
+    type = 'Exodiff'
+    input = 'AEEtest.i'
+    exodiff = 'out_AEE.e'
+    rel_err = 0.003
+  [../]
+
+  [./test_cranic_adapt]
+    type = 'Exodiff'
+    input = 'cranic_adapt.i'
+    exodiff = 'out_cranic_adapt.e-s005'
+    group = 'adaptive'
+    deleted = 'Incorrect implementation - #1522'
+  [../]
+
+  [./testabort]
+    type = 'Exodiff'
+    input = 'aborttest.i'
+    exodiff = 'out_abort.e'
+  [../]
+
+  [./testie]
+    type = 'Exodiff'
+    input = 'ie.i'
+    exodiff = 'out_ie.e'
+    max_parallel = 1
+  [../]
+
+  [./testdt2]
+    type = 'Exodiff'
+    input = 'dt2_adapt.i'
+    exodiff = 'out_dt2_adapt.e-s038'
+    group = 'adaptive'
+  [../]
+
+  [./testcranic]
+    type = 'Exodiff'
+    input = 'cranic.i'
+    exodiff = 'out_cranic.e'
+    max_parallel = 1
+  [../]
+[]

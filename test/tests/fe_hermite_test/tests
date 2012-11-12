@@ -1,0 +1,22 @@
+[Tests]
+  [./test_hermite_3_2d]
+    type = 'Exodiff'
+    input = 'hermite-3-2d.i'
+    exodiff = 'hermite-3-2d_out.e'
+    max_parallel = 1
+  [../]
+
+  [./test_hermite_3_3d]
+    type = 'Exodiff'
+    input = 'hermite-3-3d.i'
+    exodiff = 'hermite-3-3d_out.e'
+    abs_zero = 1e-07
+  [../]
+
+  [./test_hermite_3_1d]
+    type = 'Exodiff'
+    input = 'hermite-3-1d.i'
+    exodiff = 'hermite-3-1d_out.e'
+    abs_zero = 1e-07
+  [../]
+[]

@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'adv_diff_reaction_test.i'
+    exodiff = 'out.e'
+    max_parallel = 1
+  [../]
+[]

@@ -1,0 +1,20 @@
+[Tests]
+  [./testmixed]
+    type = 'Exodiff'
+    input = 'parse_depend_mixed_test.i'
+    exodiff = '2d_diffusion_out.e'
+  [../]
+
+  [./testpbp]
+    type = 'Exodiff'
+    input = 'parse_depend_pbp_test.i'
+    exodiff = 'pbp_out.e'
+    max_parallel = 1
+  [../]
+
+  [./testreverse]
+    type = 'Exodiff'
+    input = 'parse_depend_reverse_test.i'
+    exodiff = '2d_diffusion_reverse_out.e'
+  [../]
+[]

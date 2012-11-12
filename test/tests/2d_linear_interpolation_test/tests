@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = '2d_linear_interpolation_test.i'
+    exodiff = 'out.e'
+  [../]
+[]

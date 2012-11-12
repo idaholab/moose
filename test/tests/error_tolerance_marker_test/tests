@@ -1,0 +1,15 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'error_tolerance_marker_test.i'
+    exodiff = 'error_tolerance_marker_test_out.e'
+    scale_refine = 2
+  [../]
+
+  [./adapt_test]
+    type = 'Exodiff'
+    input = 'error_tolerance_marker_adapt_test.i'
+    exodiff = 'error_tolerance_marker_adapt_test_out.e-s002'
+    scale_refine = 2
+  [../]
+[]

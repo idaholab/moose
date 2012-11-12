@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'layered_side_integral_test.i'
+    exodiff = 'out.e'
+  [../]
+[]

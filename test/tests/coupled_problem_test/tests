@@ -1,0 +1,13 @@
+[Tests]
+  [./steady_transient_test]
+    type = 'Exodiff'
+    input = 'steady-transient.i'
+    exodiff = 'steady_out.e transient_out.e'
+  [../]
+
+  [./tightly_coupled_test]
+    type = 'Exodiff'
+    input = 'tight-coupling.i'
+    exodiff = 'problem1_out.e problem2_out.e'
+  [../]
+[]

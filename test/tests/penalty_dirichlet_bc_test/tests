@@ -1,0 +1,16 @@
+[Tests]
+  [./test_penalty_dirichlet_bc]
+    type = 'Exodiff'
+    input = 'penalty_dirichlet_bc_test.i'
+    exodiff = 'penalty_dirichlet_bc_test_out.e'
+  [../]
+
+  [./test_function_penalty_dirichlet_bc]
+    type = 'Exodiff'
+    input = 'function_penalty_dirichlet_bc_test.i'
+    exodiff = 'function_penalty_dirichlet_bc_test_out.e'
+    abs_zero = 1e-05
+    max_parallel = 11
+    scale_refine = 3
+  [../]
+[]

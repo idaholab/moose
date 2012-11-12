@@ -1,0 +1,15 @@
+[Tests]
+  [./testdirichlet]
+    type = 'Exodiff'
+    input = '2d_diffusion_test.i'
+    exodiff = 'out.e'
+    scale_refine = 5
+  [../]
+
+  [./testneumann]
+    type = 'Exodiff'
+    input = '2d_diffusion_neumannbc_test.i'
+    exodiff = 'neumannbc_out.e'
+    scale_refine = 5
+  [../]
+[]

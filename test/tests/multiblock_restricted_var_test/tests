@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'multiblock_restricted_var_test.i'
+    exodiff = 'multiblock_restricted_var_test_out.e'
+    scale_refine = 5
+  [../]
+[]

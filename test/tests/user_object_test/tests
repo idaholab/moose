@@ -1,0 +1,21 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'user_object_test.i'
+    exodiff = 'out.e'
+  [../]
+
+  [./restart_uo_test_2]
+    type = 'Exodiff'
+    input = 'uo_restart_part2.i'
+    exodiff = 'uo_restart_part2_out.e'
+    prereq = 'restart_uo_test_1'
+    deleted = 'UO restart disabled - #1169'
+  [../]
+
+  [./restart_uo_test_1]
+    type = 'Exodiff'
+    input = 'uo_restart_part1.i'
+    exodiff = 'uo_restart_part1_out.e'
+  [../]
+[]

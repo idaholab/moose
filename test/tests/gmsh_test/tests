@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'gmsh_test.i'
+    exodiff = 'gmsh_test_out.e'
+    scale_refine = 5
+  [../]
+[]

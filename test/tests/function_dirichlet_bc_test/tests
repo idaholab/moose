@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'function_dirichlet_bc_test.i'
+    exodiff = 'out.e'
+  [../]
+[]
