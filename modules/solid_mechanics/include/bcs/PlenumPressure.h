@@ -46,12 +46,14 @@ protected:
   PostprocessorValue * const _initial_moles;
   PostprocessorValue * const _output;
 
-  bool _refab_needed;
+  const unsigned _refab_needed;
   Real _refab_gas_released;
-  const Real _refab_time;
-  const Real _refab_pressure;
-  const Real _refab_temperature;
-  const Real _refab_volume;
+  const std::vector<Real> _refab_time;
+  const std::vector<Real> _refab_pressure;
+  const std::vector<Real> _refab_temperature;
+  const std::vector<Real> _refab_volume;
+  const std::vector<unsigned> _refab_type;
+  unsigned _refab_counter;
 
   Real _my_value;
 

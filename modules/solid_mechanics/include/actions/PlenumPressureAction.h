@@ -31,10 +31,6 @@ private:
   const Real _startup_time;
   const std::string _output_initial_moles;
   const std::string _output;
-  const Real _refab_time;
-  const Real _refab_pressure;
-  const Real _refab_temperature;
-  const Real _refab_volume;
 
 protected:
   std::string _kernel_name;

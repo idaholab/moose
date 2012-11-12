@@ -14,17 +14,18 @@ InputParameters validParams<PlenumPressure>()
   params.addParam<std::string>("output_initial_moles", "", "The reporting postprocessor to use for the initial moles of gas.");
   params.addParam<std::string>("output", "", "The reporting postprocessor to use for the plenum pressure value.");
 
-  params.addParam<Real>("refab_time", -1, "The time at which the plenum pressure must be reinitialized due to fuel rod refabrication.");
-  params.addParam<Real>("refab_pressure", -1, "The pressure of fill gas at refabrication.");
-  params.addParam<Real>("refab_temperature", -1, "The temperature at refabrication.");
-  params.addParam<Real>("refab_volume", -1, "The gas volume at refabrication.");
+  params.addParam<std::vector<Real> >("refab_time", "The time at which the plenum pressure must be reinitialized due to fuel rod refabrication.");
+  params.addParam<std::vector<Real> >("refab_pressure", "The pressure of fill gas at refabrication.");
+  params.addParam<std::vector<Real> >("refab_temperature", "The temperature at refabrication.");
+  params.addParam<std::vector<Real> >("refab_volume", "The gas volume at refabrication.");
+  params.addParam<std::vector<unsigned> >("refab_type", "The type of refabrication.  0 for instantaneous reset of gas, 1 for reset with constant fraction until next refabrication");
 
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
-PlenumPressure::PlenumPressure(const std::string & name, InputParameters parameters)
-  :IntegratedBC(name, parameters),
+PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
+  :IntegratedBC(name, params),
    _n0(0),
    _component(getParam<int>("component")),
    _initial_pressure(getParam<Real>("initial_pressure")),
@@ -35,14 +36,41 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters paramet
    _startup_time( getParam<Real>("startup_time")),
    _initial_moles( getParam<std::string>("output_initial_moles") != "" ? &getPostprocessorValue(getParam<std::string>("output_initial_moles")) : NULL ),
    _output( getParam<std::string>("output") != "" ? &getPostprocessorValue(getParam<std::string>("output")) : NULL ),
-   _refab_needed(getParam<Real>("refab_time") > 0),
+   _refab_needed(isParamValid("refab_time") ? getParam<std::vector<Real> >("refab_time").size() : 0),
    _refab_gas_released(0),
-   _refab_time(getParam<Real>("refab_time")),
-   _refab_pressure(getParam<Real>("refab_pressure")),
-   _refab_temperature(getParam<Real>("refab_temperature")),
-   _refab_volume(getParam<Real>("refab_volume")),
+   _refab_time( isParamValid("refab_time") ?
+                getParam<std::vector<Real> >("refab_time") :
+                std::vector<Real>(1, -std::numeric_limits<Real>::max()) ),
+   _refab_pressure( isParamValid("refab_pressure") ?
+                    getParam<std::vector<Real> >("refab_pressure") :
+                    std::vector<Real>(_refab_time.size(), 0) ),
+   _refab_temperature( isParamValid("refab_temperature") ?
+                       getParam<std::vector<Real> >("refab_temperature") :
+                       std::vector<Real>(_refab_time.size(), 0) ),
+   _refab_volume( isParamValid("refab_volume") ?
+                  getParam<std::vector<Real> >("refab_volume") :
+                  std::vector<Real>(_refab_time.size(), 0) ),
+   _refab_type( isParamValid("refab_type") ?
+                getParam<std::vector<unsigned> >("refab_type") :
+                std::vector<unsigned>(_refab_time.size(), 0) ),
+   _refab_counter(0),
    _my_value(0)
 {
+  if (params.isParamValid("refab_time") &&
+      !(params.isParamValid("refab_pressure") &&
+        params.isParamValid("refab_temperature") &&
+        params.isParamValid("refab_volume")))
+  {
+    mooseError("PlenumPressure error: refabrication time given but not complete set of refabrication data");
+  }
+  if (_refab_time.size() != _refab_pressure.size() ||
+      _refab_pressure.size() != _refab_temperature.size() ||
+      _refab_temperature.size() != _refab_volume.size() ||
+      _refab_volume.size() != _refab_type.size())
+  {
+    mooseError("Refab parameters do not have equal lengths");
+  }
+
   if(_component < 0 || _component > 2 )
   {
     std::stringstream errMsg;
@@ -83,31 +111,41 @@ PlenumPressure::initialSetup()
 void
 PlenumPressure::timestepSetup()
 {
-  if (_refab_needed && _refab_time <= _t)
+  if (_refab_counter < _refab_needed && _refab_time[_refab_counter] <= _t)
   {
-    _refab_needed = false;
     _refab_gas_released = _material_input;
 
-    _n0 = _refab_pressure * _refab_volume / (_R * _refab_temperature);
+    _n0 = _refab_pressure[_refab_counter] * _refab_volume[_refab_counter] / (_R * _refab_temperature[_refab_counter]);
 
     if ( _initial_moles )
     {
       *_initial_moles = _n0;
     }
     const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
-    _my_value = factor * _refab_pressure;
+    _my_value = factor * _refab_pressure[_refab_counter];
     if (_output)
     {
       *_output = _my_value;
     }
+    ++_refab_counter;
   }
 }
 
 void
 PlenumPressure::residualSetup()
 {
-  const Real n = _n0 + (_material_input - _refab_gas_released);
-  const Real pressure = n * _R * _temperature / _volume;
+  Real pressure(0);
+  if (!_refab_needed ||
+      _refab_counter == 0 || // refab has not occurred
+      _refab_type[_refab_counter-1] == 0 ) // flush gas, not hold
+  {
+    const Real n = _n0 + (_material_input - _refab_gas_released);
+    pressure = n * _R * _temperature / _volume;
+  }
+  else
+  {
+    pressure = _refab_pressure[_refab_counter-1];
+  }
 
   const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
   _my_value = factor * pressure;
