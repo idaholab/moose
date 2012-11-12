@@ -18,6 +18,7 @@
   [../]
 
   [./moving]
+    type = 'Exodiff'
     input = 'moving.i'
     exodiff = 'moving_out.e'
   [../]
