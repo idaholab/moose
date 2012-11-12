@@ -25,13 +25,6 @@
     cli_args = '--yaml'
   [../]
 
-  [./gnuplot_ps_out_test]
-    type = 'CheckFiles'
-    input = 'output_test_gnuplot.i'
-    check_files = 'out.gp out.dat'
-    cli_args = 'Output/gnuplot_format=ps'
-  [../]
-
   [./tecplot_out_test]
     type = 'CheckFiles'
     input = 'output_test_tecplot.i'
@@ -52,19 +45,11 @@
     mesh_mode = 'SERIAL'
   [../]
 
-  [./gnuplot_bad_out_test]
-    type = 'RunException'
-    input = 'output_test_gnuplot.i'
-    expect_err = 'gnuplot format .*? is not supported'
-    cli_args = 'Output/gnuplot_format=magic'
-  [../]
-
-  [./gnuplot_gif_out_test]
+  [./gnuplot_ps_out_test]
     type = 'CheckFiles'
     input = 'output_test_gnuplot.i'
     check_files = 'out.gp out.dat'
-    cli_args = 'Output/gnuplot_format=gif'
-    prereq = 'gnuplot_png_out_test'
+    cli_args = 'Output/gnuplot_format=ps'
   [../]
 
   [./gnuplot_png_out_test]
@@ -73,6 +58,22 @@
     check_files = 'out.gp out.dat'
     cli_args = 'Output/gnuplot_format=png'
     prereq = 'gnuplot_ps_out_test'
+  [../]
+
+ [./gnuplot_gif_out_test]
+    type = 'CheckFiles'
+    input = 'output_test_gnuplot.i'
+    check_files = 'out.gp out.dat'
+    cli_args = 'Output/gnuplot_format=gif'
+    prereq = 'gnuplot_png_out_test'
+  [../]
+
+  [./gnuplot_bad_out_test]
+    type = 'RunException'
+    input = 'output_test_gnuplot.i'
+    expect_err = 'gnuplot format .*? is not supported'
+    cli_args = 'Output/gnuplot_format=magic'
+    prereq = 'gnuplot_gif_out_test'
   [../]
 
   [./pps_screen_out_warn_test]

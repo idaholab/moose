@@ -125,7 +125,8 @@ class TestHarness:
         test = DEFAULTS.copy()
 
         # Get relative path to test[TEST_DIR]
-        relative_path = test_dir.replace(self.executable.split(self.executable.split('/').pop())[0], '')
+        executable_path = os.path.dirname(self.executable)
+        relative_path = test_dir.replace(executable_path, '')
 
         # Now update all the base level keys
         for key, value in test_node.params.iteritems():
@@ -142,7 +143,9 @@ class TestHarness:
           sys.exit(1)
 
 	# TODO: In progress formatting
-	formatted_name = relative_path + '.' + testname
+#        formatted_name = relative_path + '.' + testname
+        formatted_name = relative_path.replace('/tests/', '') + '.' + testname
+#	formatted_name = '/'.join(relative_path.split('/')[1:]) + '.' + testname
 #        formatted_name += ' (' + relative_path
 #        if test[INPUT] != 'input':  # See if a testname was provided
 #          formatted_name += '/' + test[INPUT]
@@ -154,7 +157,7 @@ class TestHarness:
           if type(test[PREREQ]) != list:
             print "Option 'PREREQ' needs to be of type list in " + test[TEST_NAME]
             sys.exit(1)
-          test[PREREQ] = [relative_path + '.' + item for item in test[PREREQ]]
+          test[PREREQ] = [relative_path.replace('/tests/', '') + '.' + item for item in test[PREREQ]]
 
         # Build a list of test specs (dicts) to return
         tests.append(test)
