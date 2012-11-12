@@ -1,5 +1,11 @@
 #include "GapConductance.h"
 
+// Moose Includes
+#include "PenetrationLocator.h"
+
+// libMesh Includes
+#include "string_to_enum.h"
+
 template<>
 InputParameters validParams<GapConductance>()
 {
