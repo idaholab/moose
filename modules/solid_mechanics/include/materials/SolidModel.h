@@ -187,6 +187,8 @@ protected:
     return declarePropertyOld<T>(name);
   }
 
+  virtual void checkElasticConstants();
+
 private:
 
   void computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_strain );

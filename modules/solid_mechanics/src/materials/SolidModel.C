@@ -131,13 +131,73 @@ SolidModel::SolidModel( const std::string & name,
   _coord_type = _subproblem.getCoordSystem(_block_id[0]);
   _element = createElement(name, parameters);
 
+
+  _cracking_alpha = -_youngs_modulus;
+
+  if (_cracking_stress > 0)
+  {
+    _crack_flags = &createProperty<RealVectorValue>("crack_flags");
+    _crack_flags_old = &createPropertyOld<RealVectorValue>("crack_flags");
+    _crack_rotation = &createProperty<ColumnMajorMatrix>("crack_rotation");
+    _crack_rotation_old = &createPropertyOld<ColumnMajorMatrix>("crack_rotation");
+    _crack_max_strain = &createProperty<RealVectorValue>("crack_max_strain");
+    _crack_max_strain_old = &createPropertyOld<RealVectorValue>("crack_max_strain");
+    _crack_strain = &createProperty<RealVectorValue>("crack_strain");
+    _crack_strain_old = &createPropertyOld<RealVectorValue>("crack_strain");
+    _crack_strain_zero_stress = &createProperty<RealVectorValue>("crack_strain_zero_stress");
+    _crack_strain_zero_stress_old = &createPropertyOld<RealVectorValue>("crack_strain_zero_stress");
+
+    if (parameters.isParamValid( "active_crack_planes" ))
+    {
+      const std::vector<unsigned int> & planes = getParam<std::vector<unsigned> >("active_crack_planes");
+      for (unsigned i(0); i < 3; ++i)
+      {
+        _active_crack_planes[i] = 0;
+      }
+      for (unsigned i(0); i < planes.size(); ++i)
+      {
+        if (planes[i] > 2)
+        {
+          mooseError("Active planes must be 0, 1, or 2");
+        }
+        _active_crack_planes[planes[i]] = 1;
+      }
+    }
+  }
+
+  if (parameters.isParamValid("stress_free_temperature"))
+  {
+    _has_stress_free_temp = true;
+    _stress_free_temp = getParam<Real>("stress_free_temperature");
+    if (!_has_temp)
+      mooseError("Cannot specify stress_free_temperature without coupling to temperature");
+  }
+
+  if (parameters.isParamValid("thermal_expansion") && parameters.isParamValid("thermal_expansion_function"))
+    mooseError("Cannot specify both thermal_expansion and thermal_expansion_function");
+
+}
+
+////////////////////////////////////////////////////////////////////////
+
+SolidModel::~SolidModel()
+{
+  delete _local_elasticity_tensor;
+  delete _element;
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+SolidModel::checkElasticConstants()
+{
   int num_elastic_constants =
-    _bulk_modulus_set + _lambda_set + _poissons_ratio_set + _shear_modulus_set + _youngs_modulus_set;
+      _bulk_modulus_set + _lambda_set + _poissons_ratio_set + _shear_modulus_set + _youngs_modulus_set;
 
   if ( num_elastic_constants != 2 )
   {
     std::string err("Exactly two elastic constants must be defined for material '");
-    err += name;
+    err += _name;
     err += "'.";
     mooseError(err);
   }
@@ -145,28 +205,28 @@ SolidModel::SolidModel( const std::string & name,
   if ( _bulk_modulus_set && _bulk_modulus <= 0 )
   {
     std::string err("Bulk modulus must be positive in material '");
-    err += name;
+    err += _name;
     err += "'.";
     mooseError(err);
   }
   if ( _poissons_ratio_set && (_poissons_ratio <= -1.0 || _poissons_ratio >= 0.5) )
   {
     std::string err("Poissons ratio must be greater than -1 and less than 0.5 in material '");
-    err += name;
+    err += _name;
     err += "'.";
     mooseError(err);
   }
   if ( _shear_modulus_set &&  _shear_modulus < 0 )
   {
     std::string err("Shear modulus must not be negative in material '");
-    err += name;
+    err += _name;
     err += "'.";
     mooseError(err);
   }
   if ( _youngs_modulus_set &&  _youngs_modulus <= 0 )
   {
     std::string err("Youngs modulus must be positive in material '");
-    err += name;
+    err += _name;
     err += "'.";
     mooseError(err);
   }
@@ -232,61 +292,6 @@ SolidModel::SolidModel( const std::string & name,
   _shear_modulus_set = true;
   _youngs_modulus_set = true;
   _poissons_ratio_set = true;
-
-  createElasticityTensor();
-
-  _cracking_alpha = -_youngs_modulus;
-
-  if (_cracking_stress > 0)
-  {
-    _crack_flags = &createProperty<RealVectorValue>("crack_flags");
-    _crack_flags_old = &createPropertyOld<RealVectorValue>("crack_flags");
-    _crack_rotation = &createProperty<ColumnMajorMatrix>("crack_rotation");
-    _crack_rotation_old = &createPropertyOld<ColumnMajorMatrix>("crack_rotation");
-    _crack_max_strain = &createProperty<RealVectorValue>("crack_max_strain");
-    _crack_max_strain_old = &createPropertyOld<RealVectorValue>("crack_max_strain");
-    _crack_strain = &createProperty<RealVectorValue>("crack_strain");
-    _crack_strain_old = &createPropertyOld<RealVectorValue>("crack_strain");
-    _crack_strain_zero_stress = &createProperty<RealVectorValue>("crack_strain_zero_stress");
-    _crack_strain_zero_stress_old = &createPropertyOld<RealVectorValue>("crack_strain_zero_stress");
-
-    if (parameters.isParamValid( "active_crack_planes" ))
-    {
-      const std::vector<unsigned int> & planes = getParam<std::vector<unsigned> >("active_crack_planes");
-      for (unsigned i(0); i < 3; ++i)
-      {
-        _active_crack_planes[i] = 0;
-      }
-      for (unsigned i(0); i < planes.size(); ++i)
-      {
-        if (planes[i] > 2)
-        {
-          mooseError("Active planes must be 0, 1, or 2");
-        }
-        _active_crack_planes[planes[i]] = 1;
-      }
-    }
-  }
-
-  if (parameters.isParamValid("stress_free_temperature"))
-  {
-    _has_stress_free_temp = true;
-    _stress_free_temp = getParam<Real>("stress_free_temperature");
-    if (!_has_temp)
-      mooseError("Cannot specify stress_free_temperature without coupling to temperature");
-  }
-
-  if (parameters.isParamValid("thermal_expansion") && parameters.isParamValid("thermal_expansion_function"))
-    mooseError("Cannot specify both thermal_expansion and thermal_expansion_function");
-
-}
-
-////////////////////////////////////////////////////////////////////////
-
-SolidModel::~SolidModel()
-{
-  delete _local_elasticity_tensor;
-  delete _element;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -512,6 +517,12 @@ SolidModel::computePreconditioning()
 void
 SolidModel::initialSetup()
 {
+
+  checkElasticConstants();
+
+
+  createElasticityTensor();
+
   // Load in the volumetric models
 
   for(unsigned i(0); i < _block_id.size(); ++i)
