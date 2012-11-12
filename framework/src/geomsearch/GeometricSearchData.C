@@ -44,6 +44,12 @@ GeometricSearchData::~GeometricSearchData()
 void
 GeometricSearchData::update()
 {
+  // Update the position of quadrature nodes first
+  for(std::set<unsigned int>::iterator qbnd_it = _quadrature_boundaries.begin();
+      qbnd_it != _quadrature_boundaries.end();
+      ++qbnd_it)
+    updateQuadratureNodes(*qbnd_it);
+
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_it = _nearest_node_locators.begin();
   const std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_end = _nearest_node_locators.end();
 
@@ -85,6 +91,9 @@ GeometricSearchData::getPenetrationLocator(const BoundaryName & master, const Bo
 PenetrationLocator &
 GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order)
 {
+  MeshBase & mesh = _mesh.getMesh();
+  BoundaryInfo & boundary_info = *mesh.boundary_info;
+
   unsigned int master_id = _mesh.getBoundaryID(master);
   unsigned int slave_id  = _mesh.getBoundaryID(slave);
 
@@ -151,6 +160,12 @@ GeometricSearchData::getQuadratureNearestNodeLocator(const unsigned int master_i
 void
 GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int qslave_id)
 {
+  // Have we already generaged quadrature nodes for this boundary id?
+  if(_quadrature_boundaries.find(slave_id) != _quadrature_boundaries.end())
+    return;
+
+  _quadrature_boundaries.insert(slave_id);
+
   QBase * & qrule_face = _subproblem.qRuleFace(0);
   const MooseArray<Point> & points_face = _subproblem.pointsFace(0);
 
@@ -174,6 +189,35 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
         {
           _mesh.addQuadratureNode(elem, side, qp, qslave_id, points_face[qp]);
         }
+      }
+    }
+  }
+}
+
+void
+GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
+{
+  QBase * & qrule_face = _subproblem.qRuleFace(0);
+  const MooseArray<Point> & points_face = _subproblem.pointsFace(0);
+
+  ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
+  for (ConstBndElemRange::const_iterator elem_it = range.begin() ; elem_it != range.end(); ++elem_it)
+  {
+    const BndElement * belem = *elem_it;
+
+    const Elem * elem = belem->_elem;
+    unsigned short int side = belem->_side;
+    BoundaryID boundary_id = belem->_bnd_id;
+
+    if (elem->processor_id() == libMesh::processor_id())
+    {
+      if(boundary_id == slave_id)
+      {
+        _subproblem.prepare(elem, 0);
+        _subproblem.reinitElemFace(elem, side, boundary_id, 0);
+
+        for(unsigned int qp=0; qp<points_face.size(); qp++)
+          (*_mesh.getQuadratureNode(elem, side, qp)) = points_face[qp];
       }
     }
   }

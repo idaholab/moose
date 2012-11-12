@@ -55,6 +55,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _q_point(_bnd ? _subproblem.pointsFace(_tid) : _subproblem.points(_tid)),
     _normals(_subproblem.assembly(_tid).normals()),
     _current_elem(_subproblem.elem(_tid)),
+    _current_side(_subproblem.assembly(_tid).side()),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
     _coord_sys(_subproblem.coordSystem(_tid)),

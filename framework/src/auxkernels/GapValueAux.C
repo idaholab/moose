@@ -37,7 +37,7 @@ InputParameters validParams<GapValueAux>()
 
 GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _penetration_locator(getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
+    _penetration_locator(_nodal ?  getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))) : getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
     _serialized_solution(_nl_sys.currentSolution()),
     _dof_map(_nl_sys.dofMap()),
     _paired_variable(coupled("paired_variable")),
@@ -65,7 +65,14 @@ GapValueAux::~GapValueAux()
 Real
 GapValueAux::computeValue()
 {
-  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+  const Node * current_node = NULL;
+
+  if(_nodal)
+    current_node = _current_node;
+  else
+    current_node = _mesh.getQuadratureNode(_current_elem, _current_side, _qp);
+
+  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[current_node->id()];
 
   Real gap_temp(0.0);
 
@@ -89,7 +96,7 @@ GapValueAux::computeValue()
     {
       std::stringstream msg;
       msg << "No gap value information found for node ";
-      msg << _current_node->id();
+      msg << current_node->id();
       msg << " on processor ";
       msg << libMesh::processor_id();
       mooseWarning( msg.str() );

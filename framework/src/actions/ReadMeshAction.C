@@ -162,7 +162,7 @@ void ReadMeshAction::readMesh(const std::string & mesh_file)
     else // not reading Nemesis files
     {
       // Here we are fine with read, since we are not doing "copy_nodal_vars" on displaced mesh (yet ;-))
-      displaced_mesh->read(mesh_file);
+      ExodusII_IO(displaced_mesh->getMesh()).read(mesh_file);
     }
 
     Moose::setup_perf_log.pop("Read Displaced Mesh","Setup");

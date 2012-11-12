@@ -116,6 +116,7 @@ public:
 protected:
   SubProblem & _subproblem;
   SubProblem * _displaced_subproblem;          // materials do not distinguish between non-displaced and displaced problems
+
   FEProblem & _fe_problem;
   THREAD_ID _tid;
   bool _bnd;
@@ -131,6 +132,9 @@ protected:
   const MooseArray<Point> & _normals;
 
   const Elem * & _current_elem;
+
+  /// current side of the current element
+  unsigned int & _current_side;
 
   MooseMesh & _mesh;
   unsigned int _dim;

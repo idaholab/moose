@@ -632,6 +632,10 @@ MooseMesh::addQuadratureNode(const Elem * elem, const unsigned short int side, c
 Node *
 MooseMesh::getQuadratureNode(const Elem * elem, const unsigned short int side, const unsigned int qp)
 {
+  mooseAssert(_elem_to_side_to_qp_to_quadrature_nodes.find(elem->id()) != _elem_to_side_to_qp_to_quadrature_nodes.end(), "Elem has no quadrature nodes!");
+  mooseAssert(_elem_to_side_to_qp_to_quadrature_nodes[elem->id()].find(side) != _elem_to_side_to_qp_to_quadrature_nodes[elem->id()].end(), "Side has no quadrature nodes!");
+  mooseAssert(_elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side].find(qp) != _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side].end(), "qp not found on side!");
+
   return _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side][qp];
 }
 
