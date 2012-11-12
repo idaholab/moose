@@ -3,7 +3,11 @@
 
 #include "Material.h"
 
-class GapConductance : public Material
+/**
+ * Generic gap heat transfer model, with h_gap =  h_conduction + h_contact + h_radiation
+ */
+class GapConductance :
+  public Material
 {
 public:
 
@@ -11,21 +15,33 @@ public:
 
   virtual ~GapConductance(){}
 
-  static  Real gapLength(Real distance, Real min_gap, Real max_gap);
+  static Real gapLength(Real distance, Real min_gap, Real max_gap);
 
 protected:
-/**
- * Generic gap heat transfer model, with h_gap =  h_conduction + h_contact + h_radiation
- */
 
   virtual void computeQpProperties();
+
+  /**
+   * Override this to compute the conductance at _qp
+   */
+  virtual void computeQpConductance();
+
 
   virtual Real h_conduction();
   virtual Real dh_conduction();
   virtual Real gapK();
 
+  void computeGapTempAndDistance();
+
+  bool _quadrature;
+
   Real _gap_temp;
-  const VariableValue & _gap_distance;
+  Real _gap_distance;
+  
+  bool _has_info;
+
+  const VariableValue & _gap_distance_value;
+  const VariableValue & _gap_temp_value;
   MaterialProperty<Real> & _gap_conductance;
   MaterialProperty<Real> & _gap_conductance_dT;
 
@@ -34,8 +50,12 @@ protected:
   Real _min_gap;
   Real _max_gap;
 
-private:
-
+  MooseVariable * _temp_var;
+  PenetrationLocator * _penetration_locator;
+  MooseMesh * _current_mesh;
+  const NumericVector<Number> * * _serialized_solution;
+  DofMap * _dof_map;
+  const bool _warnings;
 };
 
 template<>

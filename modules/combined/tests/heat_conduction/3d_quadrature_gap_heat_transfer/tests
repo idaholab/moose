@@ -10,4 +10,9 @@
     input = 'second.i'
     exodiff = 'second_out.e'
   [../]
+
+  [./moving]
+    input = 'moving.i'
+    exodiff = 'moving_out.e'
+  [../]
 []

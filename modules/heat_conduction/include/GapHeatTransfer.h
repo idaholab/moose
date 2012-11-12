@@ -30,10 +30,9 @@ protected:
 
   virtual Real computeSlaveFluxContribution(Real grad_t);
 
-  NumericVector<Number> & _slave_flux;
+  bool _quadrature;
 
-  const VariableValue & _gap_distance;
-  const VariableValue & _gap_temp;
+  NumericVector<Number> * _slave_flux;
 
   const MaterialProperty<Real> & _gap_conductance;
   const MaterialProperty<Real> & _gap_conductance_dT;
@@ -41,7 +40,14 @@ protected:
   const Real _min_gap;
   const Real _max_gap;
 
-private:
+  Real _gap_temp;
+  Real _gap_distance;
+
+  bool _has_info;
+
+//private:
+  void computeGapTempAndDistance();
+
   const bool _xdisp_coupled;
   const bool _ydisp_coupled;
   const bool _zdisp_coupled;
@@ -50,6 +56,13 @@ private:
   const unsigned int _ydisp_var;
   const unsigned int _zdisp_var;
 
+  const VariableValue & _gap_distance_value;
+  const VariableValue & _gap_temp_value;
+
+  PenetrationLocator * _penetration_locator;
+  const NumericVector<Number> * & _serialized_solution;
+  DofMap & _dof_map;
+  const bool _warnings;
 };
 
 #endif //GAPHEATTRANSFER_H

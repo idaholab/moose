@@ -1,7 +1,7 @@
 #include "QuadratureGapHeatTransfer.h"
+
 #include "GapConductance.h"
 #include "PenetrationLocator.h"
-
 #include "SystemBase.h"
 
 // libmesh
@@ -142,7 +142,21 @@ QuadratureGapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
 Real
 QuadratureGapHeatTransfer::gapLength() const
 {
-  return GapConductance::gapLength( -(_gap_distance), _min_gap, _max_gap );
+//  return GapConductance::gapLength( -(_gap_distance), _min_gap, _max_gap );
+  if(!_has_info)
+    return 1.0;
+  
+  Real gap_L = -_gap_distance;
+
+  if(gap_L > _max_gap)
+  {
+    gap_L = _max_gap;
+  }
+
+  gap_L = std::max(_min_gap, gap_L);
+
+  return gap_L;
+
 }
 
 Real

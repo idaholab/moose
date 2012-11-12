@@ -16,4 +16,9 @@
     input = 'second_order.i'
     exodiff = 'second_order_out.e'
   [../]
+
+  [./moving]
+    input = 'moving.i'
+    exodiff = 'moving_out.e'
+  [../]
 []

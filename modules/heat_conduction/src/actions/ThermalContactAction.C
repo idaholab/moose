@@ -28,6 +28,8 @@ InputParameters validParams<ThermalContactAction>()
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
   params.addParam<std::vector<std::string> >("save_in", "The Auxiliary Variable to (optionally) save the boundary flux in");
+  
+  params.addParam<bool>("quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
 
   return params;
 }
@@ -53,6 +55,8 @@ ThermalContactAction::addBcs()
    * [../]
    */
 
+  bool quadrature = getParam<bool>("quadrature");
+
   InputParameters action_params = ActionFactory::instance()->getValidParams("AddBCAction");
   action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
   action_params.set<std::string>("type") = getParam<std::string>("type");
@@ -73,11 +77,23 @@ ThermalContactAction::addBcs()
   }
 
   params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("variable");
-  std::vector<AuxVariableName> vars(1);
-  vars[0] = PENETRATION_VAR_NAME;
-  params.set<std::vector<AuxVariableName> >("gap_distance") = vars;
-  vars[0] = GAP_VALUE_VAR_NAME;
-  params.set<std::vector<AuxVariableName> >("gap_temp") = vars;
+
+  if(!quadrature)
+  { 
+    std::vector<AuxVariableName> vars(1);
+    vars[0] = PENETRATION_VAR_NAME;
+    params.set<std::vector<AuxVariableName> >("gap_distance") = vars;
+    vars[0] = GAP_VALUE_VAR_NAME;
+    params.set<std::vector<AuxVariableName> >("gap_temp") = vars;
+  }
+  else
+  {
+    params.set<bool>("quadrature") = true;
+    params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
+    params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+    params.set<bool>("warnings") = getParam<bool>("warnings");
+  } 
+
   std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
   params.set<std::vector<BoundaryName> >("boundary") = bnds;
 
@@ -103,6 +119,24 @@ ThermalContactAction::addBcs()
   // add it to the warehouse
   _awh.addActionBlock(action);
 
+  // When we're doing quadrature based gap heat transfer we create two boundary conditions - one on each side
+  // So here we're going to add the other one
+  if(quadrature)
+  {
+    Action *second_action = ActionFactory::instance()->create("AddBCAction", "BCs/gap_bc_" + Moose::stringify(n+10000), action_params);
+    MooseObjectAction *second_moose_object_action = dynamic_cast<MooseObjectAction *>(second_action);
+    mooseAssert (second_moose_object_action, "Dynamic Cast failed");
+
+    InputParameters & second_params = second_moose_object_action->getObjectParams();
+    second_params = params; // Copy the params for the BC we just made    
+
+    // Swap master and slave for this one
+    std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));
+    second_params.set<std::vector<BoundaryName> >("boundary") = bnds;
+    second_params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
+    
+    _awh.addActionBlock(second_action);
+  }
 }
 
 void
@@ -119,7 +153,9 @@ ThermalContactAction::addAuxVariables()
   [../]
   */
 
-  // We need to add the variables only once
+  bool quadrature = getParam<bool>("quadrature");
+
+  // We need to add the variables only once...
   if (n == 0)
   {
       InputParameters action_params = ActionFactory::instance()->getValidParams("AddVariableAction");
@@ -127,6 +163,13 @@ ThermalContactAction::addAuxVariables()
       action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
       action_params.set<std::string>("action") = "add_aux_variable";
       action_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+      
+      if(quadrature)
+      {
+        action_params.set<MooseEnum>("order") = "CONSTANT";
+        action_params.set<MooseEnum>("family") = "MONOMIAL";
+      } 
+
       // gap_value
       Action *action = ActionFactory::instance()->create("AddVariableAction", "AuxVariables/" + GAP_VALUE_VAR_NAME, action_params);
       _awh.addActionBlock(action);
@@ -218,6 +261,8 @@ ThermalContactAction::addAuxBcs()
 void
 ThermalContactAction::addMaterials()
 {
+  bool quadrature = getParam<bool>("quadrature");
+
   InputParameters action_params = ActionFactory::instance()->getValidParams("AddMaterialAction");
   action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
   action_params.set<std::string>("action") = "add_material";
@@ -241,16 +286,51 @@ ThermalContactAction::addMaterials()
     params += material_params;
 
     params.set<std::vector<VariableName> >("variable") = std::vector<VariableName>(1, getParam<NonlinearVariableName>("variable"));
-    params.set<std::vector<AuxVariableName> >("gap_temp") = std::vector<AuxVariableName>(1, GAP_VALUE_VAR_NAME);
-    std::vector<AuxVariableName> vars(1);
-    vars[0] = PENETRATION_VAR_NAME;
-    params.set<std::vector<AuxVariableName> >("gap_distance") = vars;
+
+    if(!quadrature)
+    {  
+      params.set<std::vector<AuxVariableName> >("gap_temp") = std::vector<AuxVariableName>(1, GAP_VALUE_VAR_NAME);
+      std::vector<AuxVariableName> vars(1);
+      vars[0] = PENETRATION_VAR_NAME;
+      params.set<std::vector<AuxVariableName> >("gap_distance") = vars;
+    }
+    else
+    {
+      std::vector<VariableName> vars(1);
+      vars[0] = getParam<NonlinearVariableName>("variable");
+      params.set<std::vector<VariableName> >("temp") = vars;
+      params.set<bool>("quadrature") = true;
+      
+      params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
+
+      params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+      params.set<bool>("warnings") = getParam<bool>("warnings");
+    }
 
     std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
     params.set<std::vector<BoundaryName> >("boundary") = bnds;
 
     // add it to the warehouse
     _awh.addActionBlock(action);
+
+    // Since we have BCs on both sides when we're doing quadrature based transfer we need to add a material to the other side
+    if(quadrature)
+    {
+      Action * second_action = ActionFactory::instance()->create("AddMaterialAction", "Materials/gap_value_" + Moose::stringify(n+10000), action_params);
+      MooseObjectAction * second_moose_object_action = dynamic_cast<MooseObjectAction *>(second_action);
+      mooseAssert (second_moose_object_action, "Dynamic Cast failed");
+
+      InputParameters & second_params = second_moose_object_action->getObjectParams();
+      second_params = params;
+
+      second_params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
+      
+      std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));
+      second_params.set<std::vector<BoundaryName> >("boundary") = bnds;
+
+      // add it to the warehouse
+      _awh.addActionBlock(second_action);
+    }
   }
 
 }

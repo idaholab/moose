@@ -1,70 +1,105 @@
 #include "GapHeatTransfer.h"
-#include "GapConductance.h"
 
+#include "GapConductance.h"
+#include "PenetrationLocator.h"
 #include "SystemBase.h"
+
+// libmesh
+#include "string_to_enum.h"
 
 Threads::spin_mutex slave_flux_mutex;
 
 template<>
 InputParameters validParams<GapHeatTransfer>()
 {
+  MooseEnum orders("FIRST, SECOND, THIRD, FOURTH", "FIRST");
+
   InputParameters params = validParams<IntegratedBC>();
-  params.addRequiredCoupledVar("gap_distance", "Distance across the gap");
-  params.addRequiredCoupledVar("gap_temp", "Temperature on the other side of the gap");
-  params.addRequiredCoupledVar("gap_conductance", "Variable to hold the gap conductance");
-  params.addRequiredCoupledVar("gap_conductance_dT", "Variable to hold the derivative of gap conductance wrt temperature");
+
+  // Common
   params.addParam<Real>("min_gap", 1.0e-6, "A minimum gap size");
   params.addParam<Real>("max_gap", 1.0e6, "A maximum gap size");
+
+  // Quadrature based
+  params.addParam<bool>("quadrature", false, "Whether or not to do Quadrature point based gap heat transfer.  If this is true then gap_distance and gap_temp shoul NOT be provided (and will be ignored) however paired_boundary IS then required.");
+  params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
+  params.addParam<MooseEnum>("order", orders, "The finite element order");
+  params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
+
+  // Node based options
+  params.addCoupledVar("gap_distance", "Distance across the gap");
+  params.addCoupledVar("gap_temp", "Temperature on the other side of the gap");
+
+  return params;
+}
+
+InputParameters & setUseDisplacedMesh(InputParameters & params)
+{
+  if(params.get<bool>("quadrature"))
+    params.set<bool>("use_displaced_mesh") = true;
+
   return params;
 }
 
 GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters parameters)
-  :IntegratedBC(name, parameters),
-   _slave_flux(_sys.getVector("slave_flux")),
-   _gap_distance(coupledValue("gap_distance")),
-   _gap_temp(coupledValue("gap_temp")),
+   :IntegratedBC(name, setUseDisplacedMesh(parameters)),
+   _quadrature(getParam<bool>("quadrature")),
+   _slave_flux(!_quadrature ? &_sys.getVector("slave_flux") : NULL),
    _gap_conductance(getMaterialProperty<Real>("gap_conductance")),
    _gap_conductance_dT(getMaterialProperty<Real>("gap_conductance_dT")),
    _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap")),
+   _gap_temp(0),
+   _gap_distance(88888),
+   _has_info(false),
    _xdisp_coupled(isCoupled("disp_x")),
    _ydisp_coupled(isCoupled("disp_y")),
    _zdisp_coupled(isCoupled("disp_z")),
    _xdisp_var(_xdisp_coupled ? coupled("disp_x") : 0),
    _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
-   _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0)
+   _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
+   _gap_distance_value(_quadrature ? _zero : coupledValue("gap_distance")),
+   _gap_temp_value(_quadrature ? _zero : coupledValue("gap_temp")),
+   _penetration_locator(!_quadrature ? NULL : &getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"),
+                                                                               getParam<std::vector<BoundaryName> >("boundary")[0],
+                                                                               Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
+   _serialized_solution(_sys.currentSolution()),
+   _dof_map(_sys.dofMap()),
+   _warnings(getParam<bool>("warnings"))
 {
+  if(_quadrature)
+  {
+    if(!parameters.isParamValid("paired_boundary"))
+      mooseError(std::string("No 'paired_boundary' provided for ") + _name);
+  }
+  else
+  {
+    if(!isCoupled("gap_distance"))
+      mooseError(std::string("No 'gap_distance' provided for ") + _name);
+    
+    if(!isCoupled("gap_temp"))
+      mooseError(std::string("No 'gap_temp' provided for ") + _name);
+  }
 }
 
 
 Real
 GapHeatTransfer::computeQpResidual()
 {
-  Real grad_t = (_u[_qp] - _gap_temp[_qp]) * _gap_conductance[_qp];
+  computeGapTempAndDistance();
+
+  if(_quadrature && !_has_info)
+    return 0;
+  
+  Real grad_t = (_u[_qp] - _gap_temp) * _gap_conductance[_qp];
 
   // This is keeping track of this residual contribution so it can be used as the flux on the other side of the gap.
+  if(!_quadrature)
   {
     Threads::spin_mutex::scoped_lock lock(slave_flux_mutex);
     const Real slave_flux = computeSlaveFluxContribution(grad_t);
-    _slave_flux.add(_var.dofIndices()[_i], slave_flux);
+    _slave_flux->add(_var.dofIndices()[_i], slave_flux);  
   }
-
-//   if (!libmesh_isnan(grad_t))
-//   {
-//   }
-//   else
-//   {
-//     std::cerr << "NaN found at " << __LINE__ << " in " << __FILE__ << "!\n"
-//               << "Processor: " << libMesh::processor_id() << "\n"
-//               << "_u[_qp]: " << _u[_qp] << "\n"
-//               << "_gap_temp[_qp]: " << _gap_temp[_qp] << "\n"
-//               << "h_gap: " << h_gap << "\n"
-//               << "h_conduction(): " << h_conduction() << "\n"
-//               << "Elem: " << _current_elem->id() << "\n"
-//               << "Qp: " << _qp << "\n"
-//               << "Qpoint: " << _q_point[_qp] << "\n"
-//               << std::endl;
-//   }
 
   return _test[_i][_qp]*grad_t;
 }
@@ -78,12 +113,22 @@ GapHeatTransfer::computeSlaveFluxContribution( Real grad_t )
 Real
 GapHeatTransfer::computeQpJacobian()
 {
-  return _test[_i][_qp] * ((_u[_qp] - _gap_temp[_qp]) * _gap_conductance_dT[_qp] + _gap_conductance[_qp]) * _phi[_j][_qp];
+  computeGapTempAndDistance();
+
+  if(_quadrature && !_has_info)
+    return 0;
+  
+  return _test[_i][_qp] * ((_u[_qp] - _gap_temp) * _gap_conductance_dT[_qp] + _gap_conductance[_qp]) * _phi[_j][_qp];
 }
 
 Real
 GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
 {
+  computeGapTempAndDistance();
+
+  if(_quadrature && !_has_info)
+    return 0;
+
   unsigned coupled_component(0);
   bool active(false);
   if ( _xdisp_coupled && jvar == _xdisp_var )
@@ -108,9 +153,9 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
     // Compute dR/du_[xyz]
     // Residual is based on
     //   h_gap = h_conduction() + h_contact() + h_radiation();
-    //   grad_t = (_u[_qp] - _gap_temp[_qp]) * h_gap;
+    //   grad_t = (_u[_qp] - _gap_temp) * h_gap;
     // So we need
-    //   (_u[_qp] - _gap_temp[_qp]) * (dh_gap/du_[xyz]);
+    //   (_u[_qp] - _gap_temp) * (dh_gap/du_[xyz]);
     // Assuming dh_contact/du_[xyz] = dh_radiation/du_[xyz] = 0,
     //   we need dh_conduction/du_[xyz]
     // Given
@@ -138,7 +183,7 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
     const Point & normal( _normals[_qp] );
 
     const Real dgap = dgapLength( -normal(coupled_component) );
-    dRdx = -(_u[_qp]-_gap_temp[_qp])*_gap_conductance[_qp]/gapL * dgap;
+    dRdx = -(_u[_qp]-_gap_temp)*_gap_conductance[_qp]/gapL * dgap;
   }
   return _test[_i][_qp] * dRdx * _phi[_j][_qp];
 }
@@ -147,7 +192,19 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
 Real
 GapHeatTransfer::gapLength() const
 {
-  return GapConductance::gapLength( -(_gap_distance[_qp]), _min_gap, _max_gap );
+  if(!_has_info)
+    return 1.0;
+  
+  Real gap_L = -_gap_distance;
+  
+  if(gap_L > _max_gap)
+  {
+    gap_L = _max_gap;
+  }
+
+  gap_L = std::max(_min_gap, gap_L);
+
+  return gap_L;
 }
 
 Real
@@ -163,5 +220,55 @@ GapHeatTransfer::dgapLength( Real normalComponent ) const
   }
 
   return dgap;
+}
+
+void
+GapHeatTransfer::computeGapTempAndDistance()
+{
+  if(!_quadrature)
+  {
+    _has_info = true;
+    _gap_temp = _gap_temp_value[_qp];
+    _gap_distance = _gap_distance_value[_qp];
+    return;
+  }
+  
+  Node * qnode = _mesh.getQuadratureNode(_current_elem, _current_side, _qp);
+  
+  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator->_penetration_info[qnode->id()];
+
+  _gap_temp = 0.0;
+  _gap_distance = 88888;
+  _has_info = false;
+
+  if (pinfo)
+  {
+    _gap_distance = pinfo->_distance;
+    _has_info = true;
+    
+    Elem * slave_side = pinfo->_side;
+    std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
+    std::vector<unsigned int> slave_side_dof_indices;
+
+    _dof_map.dof_indices(slave_side, slave_side_dof_indices, _variable->number());
+
+    for(unsigned int i=0; i<slave_side_dof_indices.size(); ++i)
+    {
+      //The zero index is because we only have one point that the phis are evaluated at
+      _gap_temp += slave_side_phi[i][0] * (*_serialized_solution)(slave_side_dof_indices[i]);
+    }
+  }
+  else
+  {
+    if (_warnings)
+    {
+      std::stringstream msg;
+      msg << "No gap value information found for node ";
+      msg << qnode->id();
+      msg << " on processor ";
+      msg << libMesh::processor_id();
+      mooseWarning( msg.str() );
+    }
+  }
 }
 
