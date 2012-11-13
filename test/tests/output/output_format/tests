@@ -48,23 +48,23 @@
   [./gnuplot_ps_out_test]
     type = 'CheckFiles'
     input = 'output_test_gnuplot.i'
-    check_files = 'out.gp out.dat'
-    cli_args = 'Output/gnuplot_format=ps'
+    check_files = 'out_ps.gp out_ps.dat'
+    cli_args = 'Output/gnuplot_format=ps Output/file_base=out_ps'
   [../]
 
   [./gnuplot_png_out_test]
     type = 'CheckFiles'
     input = 'output_test_gnuplot.i'
-    check_files = 'out.gp out.dat'
-    cli_args = 'Output/gnuplot_format=png'
+    check_files = 'out_png.gp out_png.dat'
+    cli_args = 'Output/gnuplot_format=png Output/file_base=out_png'
     prereq = 'gnuplot_ps_out_test'
   [../]
 
  [./gnuplot_gif_out_test]
     type = 'CheckFiles'
     input = 'output_test_gnuplot.i'
-    check_files = 'out.gp out.dat'
-    cli_args = 'Output/gnuplot_format=gif'
+    check_files = 'out_gif.gp out_gif.dat'
+    cli_args = 'Output/gnuplot_format=gif Output/file_base=out_gif'
     prereq = 'gnuplot_png_out_test'
   [../]
 
