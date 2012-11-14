@@ -279,6 +279,9 @@ class TestHarness:
     elif self.options.enable_valgrind and (test[MIN_PARALLEL] > 1 or test[MIN_THREADS] > 1):
       self.handleTestResult(test, '', 'skipped (Valgrind requires serial)')
       return False
+    elif self.options.enable_valgrind and test[NO_VALGRIND]:
+      self.handleTestResult(test, '', 'skipped (NO VALGRIND)')
+      return False
 
     # Check for PETSc versions
     (petsc_status, logic_reason, petsc_version) = self.checkPetscVersion(test)

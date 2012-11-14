@@ -7,5 +7,6 @@
     max_time = 20
     compiler = 'GCC CLANG'
     method = 'OPT'
+    no_valgrind = true
   [../]
 []
