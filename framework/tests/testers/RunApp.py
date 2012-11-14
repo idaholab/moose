@@ -36,8 +36,13 @@ class RunApp(Tester):
 
     specs = self.specs
 
+    if options.parallel == None:
+      default_ncpus = 1
+    else:
+      default_ncpus = options.parallel
+
     # Raise the floor
-    ncpus = max(options.parallel, int(specs[MIN_PARALLEL]))
+    ncpus = max(default_ncpus, int(specs[MIN_PARALLEL]))
     # Lower the ceiling
     ncpus = min(ncpus, int(specs[MAX_PARALLEL]))
 
@@ -51,11 +56,11 @@ class RunApp(Tester):
     elif nthreads < options.nthreads:
       specs['CAVEATS'] = ['MAX_THREADS=' + str(nthreads)]
     # TODO: Refactor this caveats business
-    if ncpus > options.parallel:
+    if ncpus > default_ncpus:
       specs['CAVEATS'] = ['MIN_CPUS=' + str(ncpus)]
-    elif ncpus < options.parallel:
+    elif ncpus < default_ncpus:
       specs['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
-    if options.parallel or nthreads > 1:
+    if options.parallel or ncpus > 1 or nthreads > 1:
       command = 'mpiexec -host localhost -n ' + str(ncpus) + ' ' + specs[EXECUTABLE] + ' --n-threads=' + str(nthreads) + ' -i ' + specs[INPUT] + ' ' +  ' '.join(specs[CLI_ARGS])
     elif options.enable_valgrind and not specs[NO_VALGRIND]:
       command = 'valgrind --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs[EXECUTABLE] + ' -i ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])

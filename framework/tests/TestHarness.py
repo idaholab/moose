@@ -532,7 +532,7 @@ class TestHarness:
                       help="Scale problems that have SCALE_REFINE set")
     parser.add_option('--libmesh_dir', action="store", type='string', dest="libmesh_dir", default='',
                       help="Currently only needed for bitten code coverage")
-    parser.add_option('--parallel', '-p', action="store", type='int', dest="parallel", default=1,
+    parser.add_option('--parallel', '-p', action="store", type='int', dest="parallel",
                       help="Number of processors to use when running mpiexec")
     parser.add_option('--threads', action="store", type='int', dest="nthreads",default=1,
                       help="Number of threads to use when running mpiexec")
