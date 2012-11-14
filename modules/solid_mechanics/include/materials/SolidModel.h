@@ -129,6 +129,7 @@ protected:
 
   /// Modify increment for things like thermal strain
   virtual void modifyStrainIncrement();
+  virtual void applyThermalStrain();
 
   /// Determine cracking directions.  Rotate elasticity tensor.
   virtual void crackingStrainDirections();
@@ -189,14 +190,14 @@ protected:
 
   virtual void checkElasticConstants();
 
+  virtual void createElasticityTensor();
+
 private:
 
   void computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_strain );
 
   Elk::SolidMechanics::Element * createElement( const std::string & name,
                                                 InputParameters & parameters );
-
-  void createElasticityTensor();
 
   Elk::SolidMechanics::Element * _element;
 

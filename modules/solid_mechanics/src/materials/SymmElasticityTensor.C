@@ -22,6 +22,11 @@ SymmElasticityTensor::calculate(unsigned int qp)
 }
 
 void
+SymmElasticityTensor::calculateEntries(unsigned int /*qp*/)
+{
+}
+
+void
 SymmElasticityTensor::multiply( const SymmTensor & x, SymmTensor & b ) const
 {
   const Real xx = x.xx();
@@ -115,12 +120,6 @@ SymmElasticityTensor::stiffness( const unsigned int i, const unsigned int j,
     mooseError( s.str() );
   }
   return test * b;
-}
-
-void
-SymmElasticityTensor::calculateEntries(unsigned int /*qp*/)
-{
-  mooseError( "calculateEntries must be called on a derived class" );
 }
 
 void

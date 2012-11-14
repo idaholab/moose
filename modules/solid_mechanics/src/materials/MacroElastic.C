@@ -32,8 +32,6 @@ MacroElastic::MacroElastic( const std::string & name,
    _C2323(getPostprocessorValue(getParam<PostprocessorName>("C2323"))),
    _C3131(getPostprocessorValue(getParam<PostprocessorName>("C3131")))
 {
-  SymmElasticityTensor * set = new SymmElasticityTensor();
-  elasticityTensor( set );
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -63,3 +61,8 @@ MacroElastic::updateElasticityTensor(SymmElasticityTensor & tensor)
   return true;
 }
 
+void
+MacroElastic::createElasticityTensor()
+{
+  elasticityTensor( new SymmElasticityTensor(false) );
+}

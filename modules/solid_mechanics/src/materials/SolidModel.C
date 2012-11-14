@@ -328,6 +328,21 @@ SolidModel::elasticityTensor( SymmElasticityTensor * e )
 void
 SolidModel::modifyStrainIncrement()
 {
+  applyThermalStrain();
+
+  const SubdomainID current_block = _current_elem->subdomain_id();
+  const std::vector<VolumetricModel*> & vm( _volumetric_models[current_block] );
+  for (unsigned int i(0); i < vm.size(); ++i)
+  {
+    vm[i]->modifyStrain(_qp, _strain_increment, _d_strain_dT);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+SolidModel::applyThermalStrain()
+{
   if ( _has_temp && _t_step != 0 )
   {
     Real tStrain;
@@ -349,13 +364,6 @@ SolidModel::modifyStrainIncrement()
 
     _d_strain_dT.zero();
     _d_strain_dT.addDiag( -alpha );
-  }
-
-  const SubdomainID current_block = _current_elem->subdomain_id();
-  const std::vector<VolumetricModel*> & vm( _volumetric_models[current_block] );
-  for (unsigned int i(0); i < vm.size(); ++i)
-  {
-    vm[i]->modifyStrain(_qp, _strain_increment, _d_strain_dT);
   }
 }
 

@@ -14,9 +14,8 @@ protected:
 
   virtual void initQpStatefulProperties() {}
 
+  virtual void createElasticityTensor();
 
-
-  /// Compute the stress (sigma += deltaSigma)
   virtual bool updateElasticityTensor(SymmElasticityTensor & tensor);
 
   virtual void checkElasticConstants() {}
