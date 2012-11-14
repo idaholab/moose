@@ -44,7 +44,7 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
    _gap_conductivity(getParam<Real>("gap_conductivity")),
    _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap")),
-   _temp_var(_quadrature ? getVar("temp",0) : NULL),   
+   _temp_var(_quadrature ? getVar("temp",0) : NULL),
    _penetration_locator(NULL),
    _current_mesh(NULL),
    _serialized_solution(_quadrature ? &_temp_var->sys().currentSolution() : NULL),
@@ -55,7 +55,7 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
   {
     if(!parameters.isParamValid("paired_boundary"))
       mooseError(std::string("No 'paired_boundary' provided for ") + _name);
-    
+
     if(!isCoupled("temp"))
       mooseError(std::string("No 'temp' provided for ") + _name);
   }
@@ -63,12 +63,12 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
   {
     if(!isCoupled("gap_distance"))
       mooseError(std::string("No 'gap_distance' provided for ") + _name);
-    
+
     if(!isCoupled("gap_temp"))
       mooseError(std::string("No 'gap_temp' provided for ") + _name);
   }
 
-  
+
   if(_quadrature)
   {
     if(_displaced_subproblem)
@@ -92,7 +92,7 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
 void
 GapConductance::computeQpProperties()
 {
-  computeGapTempAndDistance();  
+  computeGapTempAndDistance();
   computeQpConductance();
 }
 
@@ -148,9 +148,9 @@ GapConductance::computeGapTempAndDistance()
     _gap_distance = _gap_distance_value[_qp];
     return;
   }
-  
+
   Node * qnode = _current_mesh->getQuadratureNode(_current_elem, _current_side, _qp);
-  
+
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator->_penetration_info[qnode->id()];
 
   _gap_temp = 0.0;
@@ -161,7 +161,7 @@ GapConductance::computeGapTempAndDistance()
   {
     _gap_distance = pinfo->_distance;
     _has_info = true;
-    
+
     Elem * slave_side = pinfo->_side;
     std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
     std::vector<unsigned int> slave_side_dof_indices;
