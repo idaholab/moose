@@ -1207,8 +1207,6 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
   parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<SubProblem *>("_subproblem_displaced") = _displaced_problem;
 
-  std::cout<<"addMaterial "<<mat_name<<" "<<name<<" "<<parameters<<std::endl;
-
   std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
   std::vector<SubdomainID> block_ids(blocks.size());
 

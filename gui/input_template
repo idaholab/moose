@@ -114,6 +114,16 @@
   [../]
 []
 
+[ThermalContact]
+  [./*]
+    type = GapHeatTransfer
+    variable = temp
+    master = rightleft
+    slave = leftright
+    quadrature = true
+  [../]
+[]
+
 [Constraints]
   [./*]
     type = TiedValueConstraint
