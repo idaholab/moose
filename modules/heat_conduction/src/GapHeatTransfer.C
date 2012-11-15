@@ -33,16 +33,8 @@ InputParameters validParams<GapHeatTransfer>()
   return params;
 }
 
-InputParameters & setUseDisplacedMesh(InputParameters & params)
-{
-  if(params.get<bool>("quadrature"))
-    params.set<bool>("use_displaced_mesh") = true;
-
-  return params;
-}
-
 GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters parameters)
-   :IntegratedBC(name, setUseDisplacedMesh(parameters)),
+   :IntegratedBC(name, parameters),
    _quadrature(getParam<bool>("quadrature")),
    _slave_flux(!_quadrature ? &_sys.getVector("slave_flux") : NULL),
    _gap_conductance(getMaterialProperty<Real>("gap_conductance")),
@@ -88,7 +80,7 @@ GapHeatTransfer::computeQpResidual()
 {
   computeGapTempAndDistance();
 
-  if(_quadrature && !_has_info)
+  if(!_has_info)
     return 0;
   
   Real grad_t = (_u[_qp] - _gap_temp) * _gap_conductance[_qp];
@@ -115,7 +107,7 @@ GapHeatTransfer::computeQpJacobian()
 {
   computeGapTempAndDistance();
 
-  if(_quadrature && !_has_info)
+  if(!_has_info)
     return 0;
   
   return _test[_i][_qp] * ((_u[_qp] - _gap_temp) * _gap_conductance_dT[_qp] + _gap_conductance[_qp]) * _phi[_j][_qp];
@@ -126,7 +118,7 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
 {
   computeGapTempAndDistance();
 
-  if(_quadrature && !_has_info)
+  if(!_has_info)
     return 0;
 
   unsigned coupled_component(0);
@@ -245,7 +237,7 @@ GapHeatTransfer::computeGapTempAndDistance()
   {
     _gap_distance = pinfo->_distance;
     _has_info = true;
-    
+
     Elem * slave_side = pinfo->_side;
     std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
     std::vector<unsigned int> slave_side_dof_indices;

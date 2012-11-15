@@ -92,6 +92,7 @@ ThermalContactAction::addBcs()
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
     params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
     params.set<bool>("warnings") = getParam<bool>("warnings");
+    params.set<bool>("use_displaced_mesh") = true;
   } 
 
   std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));

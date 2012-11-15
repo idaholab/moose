@@ -28,17 +28,15 @@
     boundary = rightright
     value = 400
   [../]
+[]
+
+[ThermalContact]
   [./left_to_right]
-    type = QuadratureGapHeatTransfer
+    slave = leftright
+    quadrature = true
+    master = rightleft
     variable = temp
-    boundary = leftright
-    paired_boundary = rightleft
-  [../]
-  [./right_to_left]
-    type = QuadratureGapHeatTransfer
-    variable = temp
-    boundary = rightleft
-    paired_boundary = leftright
+    type = GapHeatTransfer
   [../]
 []
 

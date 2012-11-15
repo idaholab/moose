@@ -28,17 +28,15 @@
     boundary = rightright
     value = 400
   [../]
+[]
+
+[ThermalContact]
   [./left_to_right]
-    type = QuadratureGapHeatTransfer
+    slave = leftright
+    quadrature = true
+    master = rightleft
     variable = temp
-    boundary = leftright
-    paired_boundary = rightleft
-  [../]
-  [./right_to_left]
-    type = QuadratureGapHeatTransfer
-    variable = temp
-    boundary = rightleft
-    paired_boundary = leftright
+    type = GapHeatTransfer
   [../]
 []
 
@@ -48,12 +46,6 @@
     block = 'left right'
     specific_heat = 1
     thermal_conductivity = 1
-  [../]
-  [./gap_conductance]
-    type = GenericConstantMaterial
-    prop_names = 'gap_conductance gap_conductance_dT'
-    boundary = 'leftright rightleft'
-    prop_values = '1 0'
   [../]
 []
 
@@ -66,4 +58,3 @@
   output_initial = true
   exodus = true
 []
-
