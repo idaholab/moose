@@ -90,7 +90,7 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
 {
   _t_step = 0;
   _dt = 0;
-  _time = getParam<Real>("start_time");
+  _time = _time_old = getParam<Real>("start_time");
   _problem.transient(true);
   if (isParamValid("predictor_scale"))
   {
