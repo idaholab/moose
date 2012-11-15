@@ -125,9 +125,12 @@ PenetrationLocator::setStartingContactPoint()
   const std::map<unsigned int, PenetrationInfo *>::iterator it_end( _penetration_info.end() );
   for ( ; it != it_end; ++it )
   {
-    it->second->_starting_elem = it->second->_elem;
-    it->second->_starting_side_num = it->second->_side_num;
-    it->second->_starting_closest_point_ref = it->second->_closest_point_ref;
+    if (it->second != NULL)
+    {
+      it->second->_starting_elem = it->second->_elem;
+      it->second->_starting_side_num = it->second->_side_num;
+      it->second->_starting_closest_point_ref = it->second->_closest_point_ref;
+    }
   }
 }
 
@@ -138,7 +141,10 @@ PenetrationLocator::saveContactForce()
   const std::map<unsigned int, PenetrationInfo *>::iterator it_end( _penetration_info.end() );
   for ( ; it != it_end; ++it )
   {
-    it->second->_contact_force_old = it->second->_contact_force;
+    if (it->second != NULL)
+    {
+      it->second->_contact_force_old = it->second->_contact_force;
+    }
   }
 }
 
