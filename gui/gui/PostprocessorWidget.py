@@ -18,21 +18,21 @@ class PostprocessorWidget(QtGui.QWidget):
     self.input_file_widget = input_file_widget
     self.execute_widget = execute_widget
     
-    self.currentFile = None
+    self.current_file = None
     self.getFileName()
     
     #Create the post processor list view
-    self.postProcessorListView = QtGui.QListView()
-    self.postProcessorListModel = QtGui.QStandardItemModel()
-    self.postProcessorListView.setModel(self.postProcessorListModel)
+    self.post_processor_list_view = QtGui.QListView()
+    self.post_processor_list_model = QtGui.QStandardItemModel()
+    self.post_processor_list_view.setModel(self.post_processor_list_model)
     self.postProcessorModelFill()
    
     # adds a scroll layout to the main widget so all of the plots don't take up too much space       
     # scroll area widget contents - layout                                                                                                                        
     scroll = ResizeScrollArea()                                                                      
     wrapper = QtGui.QWidget()                                                                        
-    self.flowLayout = FlowLayout()                                                                   
-    wrapper.setLayout(self.flowLayout)                                                               
+    self.flow_layout = FlowLayout()                                                                   
+    wrapper.setLayout(self.flow_layout)                                                               
     scroll.setWidget(wrapper)                                                                        
     scroll.setWidgetResizable(True)                                                                                                                                   
     pal = QtGui.QPalette(scroll.palette())                                                           
@@ -40,33 +40,38 @@ class PostprocessorWidget(QtGui.QWidget):
     scroll.setPalette(pal)
 
     #assemble the top layout                                                                                         
-    self.topLayout = QtGui.QGridLayout()
-    self.topLayout.setColumnStretch (1, 2)
-    self.topLayout.addWidget(self.postProcessorListView,0,0)
-    self.topLayout.addWidget(scroll,0,1)
+    self.top_layout = QtGui.QSplitter()
+    self.top_layout.addWidget(self.post_processor_list_view)
+    self.top_layout.addWidget(scroll)
+
+    self.top_layout.setStretchFactor(0,0.1)
+    self.top_layout.setStretchFactor(1,0.9)
+
+    self.top_layout.setSizes([100,500])
+
 
     # adds a button to the widget that will be used to clear plot selections
-    self.clearButton = QtGui.QPushButton("Clear")
-    self.clearButton.setToolTip('Clear current plots')
-    self.clearButton.resize(self.clearButton.sizeHint())
-    self.clearButton.clicked.connect(self.clearClick)
+    self.clear_button = QtGui.QPushButton("Clear")
+    self.clear_button.setToolTip('Clear current plots')
+    self.clear_button.resize(self.clear_button.sizeHint())
+    self.clear_button.clicked.connect(self.clearClick)
 
     # adds an open box to the widget
-    self.openButton = QtGui.QPushButton("Open")
-    self.openButton.setToolTip('Select an existing CSV file to read so the postprocessor values can be plotted')
-    self.openButton.resize(self.clearButton.sizeHint())
-    self.openButton.clicked.connect(self.openClick)
+    self.open_button = QtGui.QPushButton("Open")
+    self.open_button.setToolTip('Select an existing CSV file to read so the postprocessor values can be plotted')
+    self.open_button.resize(self.clear_button.sizeHint())
+    self.open_button.clicked.connect(self.openClick)
 
     #assemble the bottom layout
-    self.buttonHBox = QtGui.QHBoxLayout()
-    self.buttonHBox.addWidget(self.openButton)
-    self.buttonHBox.addWidget(self.clearButton)
+    self.button_layout = QtGui.QHBoxLayout()
+    self.button_layout.addWidget(self.open_button)
+    self.button_layout.addWidget(self.clear_button)
                                                                          
     #assemble the overall layout
-    self.mainLayout = QtGui.QVBoxLayout()
-    self.mainLayout.addLayout(self.topLayout)
-    self.mainLayout.addLayout(self.buttonHBox)
-    self.setLayout(self.mainLayout)
+    self.main_layout = QtGui.QVBoxLayout()
+    self.main_layout.addWidget(self.top_layout)
+    self.main_layout.addLayout(self.button_layout)
+    self.setLayout(self.main_layout)
  
     self.timerSetUp()    
 
@@ -88,27 +93,27 @@ class PostprocessorWidget(QtGui.QWidget):
     '''
     output_item = self.input_file_widget.tree_widget.findItems("Output", QtCore.Qt.MatchExactly)[0]
     cwd = str(self.execute_widget.cwd_text.text())
-    self.currentFile = cwd +'/peacock_run_tmp_out.csv'
+    self.current_file = cwd +'/peacock_run_tmp_out.csv'
     if output_item:
       outputTable_data = output_item.table_data
       if 'file_base' in outputTable_data:
-        self.currentFile = cwd +'/'+ outputTable_data['file_base'] + '.csv'
+        self.current_file = cwd +'/'+ outputTable_data['file_base'] + '.csv'
           
   def postProcessorModelFill(self):
     '''
-    clean (if needed) and fill  the postProcessorListModel
+    clean (if needed) and fill  the post_processor_list_model
     '''
-    self.plotObjectDict  = {} #kept updated by addPlot
-    self.plotDataDict    = {} #kept updated by addPlot
-    self.plotHandlerDict = {} #kept updated by addPlot
-    if self.currentFile and os.path.exists(self.currentFile):
-      if os.path.getsize(self.currentFile) > 0: 
-        self.postProcessorListModel.clear()
+    self.plot_objects  = {} #kept updated by addPlot
+    self.plot_datas    = {} #kept updated by addPlot
+    self.plot_handlers = {} #kept updated by addPlot
+    if self.current_file and os.path.exists(self.current_file):
+      if os.path.getsize(self.current_file) > 0: 
+        self.post_processor_list_model.clear()
         try:
-          self.postProcessorListModel.itemChanged.disconnect(self.itemChangedOnPostProcessorList)
+          self.post_processor_list_model.itemChanged.disconnect(self.itemChangedOnPostProcessorList)
         except:
           pass
-        self.names = open(self.currentFile,'rb').readline()
+        self.names = open(self.current_file,'rb').readline()
         self.names = self.names.strip()
         self.names = self.names.split(',')
         for index in range(len(self.names)-1):
@@ -117,20 +122,20 @@ class PostprocessorWidget(QtGui.QWidget):
           item.setData(QtCore.QVariant(QtCore.Qt.Checked), QtCore.Qt.CheckStateRole) #add the QtCore.Qt.Checked data (in a q form) to _item and set the QtCore.Qt.CheckStateRole as visualizzation rule
           item.setEditable(False)
           item.setCheckState(QtCore.Qt.Unchecked)
-          self.postProcessorListModel.appendRow(item)
-        self.postProcessorListModel.itemChanged.connect(self.itemChangedOnPostProcessorList)
+          self.post_processor_list_model.appendRow(item)
+        self.post_processor_list_model.itemChanged.connect(self.itemChangedOnPostProcessorList)
       
   def itemChangedOnPostProcessorList(self,item):
     '''
     retrieve which item was changed and if present delete it otherwise add it
     '''
     text = str(item.text())
-    if text in self.plotObjectDict.keys():
-      self.plotHandlerDict[text].close()
-      self.flowLayout.removeWidget(self.plotHandlerDict[text])
-      del self.plotObjectDict[text]
-      del self.plotDataDict[text]
-      del self.plotHandlerDict[text]
+    if text in self.plot_objects.keys():
+      self.plot_handlers[text].close()
+      self.flow_layout.removeWidget(self.plot_handlers[text])
+      del self.plot_objects[text]
+      del self.plot_datas[text]
+      del self.plot_handlers[text]
     else:
       self.addPlot(text)
 
@@ -141,12 +146,12 @@ class PostprocessorWidget(QtGui.QWidget):
     # then the getPlotData function is called to begin the first plot
 #    print('adding plot ',str(plotName))
     time = [0]
-    postData = [0]
-    plotData = [time, postData]
-    self.plotObjectDict[plotName] = MPLPlotter(plotData,plotName)
-    self.plotDataDict[plotName] = [plotData]
-    self.flowLayout.addWidget(self.plotObjectDict[plotName])
-    self.plotHandlerDict[plotName] = self.flowLayout.itemAt(self.flowLayout.count()-1).widget()
+    post_data = [0]
+    plot_data = [time, post_data]
+    self.plot_objects[plotName] = MPLPlotter(plot_data,plotName)
+    self.plot_datas[plotName] = [plot_data]
+    self.flow_layout.addWidget(self.plot_objects[plotName])
+    self.plot_handlers[plotName] = self.flow_layout.itemAt(self.flow_layout.count()-1).widget()
     self.updatePlots()
   
                     
@@ -154,9 +159,9 @@ class PostprocessorWidget(QtGui.QWidget):
       # this method loops through all of the plot objects in the plot dictionary
       # and for each plot calls the getPlotData function to update every plot that has been selected
 #      print('updating plots')
-      if self.currentFile and os.path.exists(self.currentFile):
-          if os.path.getsize(self.currentFile) > 0:
-              self.data = numpy.genfromtxt(self.currentFile,delimiter = ',' , names = True , invalid_raise = False)
+      if self.current_file and os.path.exists(self.current_file):
+          if os.path.getsize(self.current_file) > 0:
+              self.data = numpy.genfromtxt(self.current_file,delimiter = ',' , names = True , invalid_raise = False)
               self.time = []
 
               try:
@@ -165,35 +170,35 @@ class PostprocessorWidget(QtGui.QWidget):
 
                           self.time.append(line[0])
 
-                      for key in self.plotObjectDict.keys():
-                          self.postData = []
+                      for key in self.plot_objects.keys():
+                          self.post_data = []
                           self.getPlotData(key)
-                          plotData = [self.time, self.postData]
-                          self.plotDataDict[key] = plotData
+                          plot_data = [self.time, self.post_data]
+                          self.plot_datas[key] = plot_data
 
-                      for key in self.plotDataDict:
-                          self.plotObjectDict[key].setPlotData(self.plotDataDict[key],key)
+                      for key in self.plot_datas:
+                          self.plot_objects[key].setPlotData(self.plot_datas[key],key)
               except:
                   pass
 
   
   def getPlotData(self, plotName):
 #    print('getting plot data for '+str(plotName))
-    indexCol = self.names.index(plotName)
+    index_col = self.names.index(plotName)
     for line in self.data:
-        self.postData.append(line[indexCol])
+        self.post_data.append(line[index_col])
   
 
   def flushPlots(self):
     '''
-    clean the flowLayout
+    clean the flow_layout
     '''
 #    print('flushing')
     i=0
-    activeplot = self.flowLayout.count()
-    while i < activeplot:
-      self.flowLayout.itemAt(0).widget().close()
-      self.flowLayout.removeWidget(self.flowLayout.itemAt(0).widget())
+    active_plot = self.flow_layout.count()
+    while i < active_plot:
+      self.flow_layout.itemAt(0).widget().close()
+      self.flow_layout.removeWidget(self.flow_layout.itemAt(0).widget())
       i +=1
     
   
@@ -202,11 +207,11 @@ class PostprocessorWidget(QtGui.QWidget):
     collect the active plot rebuild the list and reactivate same name plot
     '''
 #    print('replotting')
-    cliked = self.plotHandlerDict.keys()
+    cliked = self.plot_handlers.keys()
     self.postProcessorModelFill()
     for text in cliked:
       try:
-        self.postProcessorListModel.findItems(text)[0].setCheckState(QtCore.Qt.Checked) #assuming we do not have more than one PP with the same name
+        self.post_processor_list_model.findItems(text)[0].setCheckState(QtCore.Qt.Checked) #assuming we do not have more than one PP with the same name
       except:
         pass
 
