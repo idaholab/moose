@@ -115,49 +115,57 @@ class ExecuteWidget(QtGui.QWidget):
     '''
     overload this method to change the top layout
     '''
-    self.top_layout  = QtGui.QGridLayout()
-    self.top_layout.setSpacing(15)
-    self.top_layout.setColumnStretch (0,1)
-    self.top_layout.setColumnStretch (1,1)
-    self.embededGrid = {}
-    self.embededGrid['up'] = QtGui.QGridLayout()
-    self.embededGrid['down']  = QtGui.QGridLayout()
-    self.embededGrid['up'].setSpacing(15)
-    self.embededGrid['down'].setSpacing(15)
-    self.embededGrid['up'].setColumnStretch (0,1)
-    self.embededGrid['down'].setColumnStretch (0,1)
-    self.embededGrid['up'].setColumnStretch (1,1)
-    self.embededGrid['down'].setColumnStretch (1,1)
+    self.top_layout = QtGui.QVBoxLayout()
+    self.run_layout  = QtGui.QHBoxLayout()
 
-    #The button activating the run setting windows
-    self.runSetButton = QtGui.QPushButton("Advanced Parallel Setting")
-    self.runSetButton.setToolTip('Specialize the command line used for parallel and multi-thread')
-    QtCore.QObject.connect(self.runSetButton, QtCore.SIGNAL("clicked()"), self.clickedOneRunSetting)
-    self.top_layout.addWidget(self.runSetButton, 0, 0)
+    self.run_layout.addStretch(10)
+
     #the number of mpi processors
-    _labelMpiProc              = QtGui.QLabel('Number of MPI processes')
-    self.mpiProcLine           = QtGui.QLineEdit()
-    self.embededGrid['up'].addWidget(_labelMpiProc, 0, 0) 
-    self.embededGrid['up'].addWidget(self.mpiProcLine, 0, 1)
-    self.top_layout.addLayout(self.embededGrid['up'], 1, 0)
+    mpi_proc_label = QtGui.QLabel('MPI:')
+    self.mpi_proc_line = QtGui.QLineEdit()
+    self.mpi_proc_line.setMaximumWidth(40)
+    self.mpi_proc_line.setToolTip('Number of MPI processes to be used.')
+    self.run_layout.addWidget(mpi_proc_label)
+    self.run_layout.addWidget(self.mpi_proc_line)
+
+    self.run_layout.addStretch(10)
+
     #the number of threads
-    _labelMultiThreadsProc     = QtGui.QLabel('Number of threads')
-    self.multiThreadsProcLine  = QtGui.QLineEdit()
-    self.embededGrid['down'].addWidget(_labelMultiThreadsProc, 0, 0) 
-    self.embededGrid['down'].addWidget(self.multiThreadsProcLine, 0, 1)
-    self.top_layout.addLayout(self.embededGrid['down'], 2, 0)
-    #The run command
-    self.run_button = QtGui.QPushButton("Run")
-    self.run_button.setToolTip('Will run the executable with the input file described on the Input File tab.')
-    QtCore.QObject.connect(self.run_button, QtCore.SIGNAL("clicked()"), self.clickedRun)
-    self.top_layout.addWidget(self.run_button, 0, 1)    
-    #the CVS flag
+    threads_label = QtGui.QLabel('Threads:')
+    self.threads_line  = QtGui.QLineEdit()
+    self.threads_line.setMaximumWidth(40)
+    self.threads_line.setToolTip('Number of threads to be used.')
+    self.run_layout.addWidget(threads_label) 
+    self.run_layout.addWidget(self.threads_line)
+
+    self.run_layout.addStretch(10)
+
+    #the CSV flag
     self.postprocessor_csv = QtGui.QCheckBox("Enable Postprocessor CSV Output")
     self.postprocessor_csv.setToolTip('This should be checked if you wish to view postprocessor plots on the Postprocess tab.')
     self.postprocessor_csv.setCheckState(QtCore.Qt.Checked)
-    self.top_layout.addWidget(self.postprocessor_csv, 1, 1)        
+    self.run_layout.addWidget(self.postprocessor_csv)        
 
-  def clickedOneRunSetting(self):      
+    self.run_layout.addStretch(10)
+
+    #The button activating the run setting windows
+    self.advanced_button = QtGui.QPushButton("Advanced")
+    self.advanced_button.setToolTip('Specialize the command line used for parallel and multi-thread')
+    QtCore.QObject.connect(self.advanced_button, QtCore.SIGNAL("clicked()"), self.clickedAdvanced)
+    self.run_layout.addWidget(self.advanced_button)
+
+    self.run_layout.addStretch(10)
+
+    #The run button
+    self.run_button = QtGui.QPushButton("Run")
+    self.run_button.setToolTip('Will run the executable with the input file described on the Input File tab.')
+    QtCore.QObject.connect(self.run_button, QtCore.SIGNAL("clicked()"), self.clickedRun)
+    self.run_layout.addWidget(self.run_button)
+
+    self.top_layout.addLayout(self.run_layout)
+    
+
+  def clickedAdvanced(self):      
     #setting the dialog box up
     self.oneRunSetting = QtGui.QDialog( parent = self)
     self.oneRunSetting.setModal(True)
@@ -209,7 +217,7 @@ class ExecuteWidget(QtGui.QWidget):
     self.oneRunSetting.setLayout(_grid)
     self.oneRunSetting.show()
 
-  #attribute handling the default/copy to from the clickedOneRunSetting dialog box for running setups for each single run
+  #attribute handling the default/copy to from the clickedAdvanced dialog box for running setups for each single run
   def oneRunInfoSet(self,_fromWhere): 
     if _fromWhere == 'fromMain':
       self.oneRunSetting.mpiCommand.setText(self.mpiCommand)
@@ -272,8 +280,8 @@ class ExecuteWidget(QtGui.QWidget):
   #constructing the command line
   def buildCommand(self,_inFile):
     
-    self.multiThreadsProc      = self.multiThreadsProcLine.text()
-    self.mpiProc               = self.mpiProcLine.text()
+    self.multiThreadsProc      = self.threads_line.text()
+    self.mpiProc               = self.mpi_proc_line.text()
     _command = self.app_path + ' -i ' + _inFile
     if self.mpiProc != '':
       _command = self.mpiCommand + ' ' + self.mpiProc + ' ' + _command
