@@ -31,7 +31,7 @@ class PostprocessorWidget(QtGui.QWidget):
     # scroll area widget contents - layout                                                                                                                        
     scroll = ResizeScrollArea()                                                                      
     wrapper = QtGui.QWidget()                                                                        
-    self.flow_layout = FlowLayout()                                                                   
+    self.flow_layout = FlowLayout()
     wrapper.setLayout(self.flow_layout)                                                               
     scroll.setWidget(wrapper)                                                                        
     scroll.setWidgetResizable(True)                                                                                                                                   
@@ -75,7 +75,7 @@ class PostprocessorWidget(QtGui.QWidget):
  
     self.timerSetUp()    
 
-    self.executeSinglasLinking()        
+    self.executeSignalLinking()        
 
     self.modifyUI()
     ''' This will be called after the interface is completely setup to allow an application to modify this tab '''
@@ -194,6 +194,8 @@ class PostprocessorWidget(QtGui.QWidget):
     clean the flow_layout
     '''
 #    print('flushing')
+
+
     i=0
     active_plot = self.flow_layout.count()
     while i < active_plot:
@@ -230,15 +232,14 @@ class PostprocessorWidget(QtGui.QWidget):
     '''
     retrive again the file name and rebuild 
     '''
-    self.getFileName()
     self.flushPlots()
+    self.getFileName()
     self.postProcessorModelFill()
     
   def runClicked(self):
-    self.getFileName()
     self.flushPlots()
+    self.getFileName()
     self.rePlot()
-
     
   def timerSetUp(self):
     # start and connect the time controls for updating the plots
@@ -246,17 +247,26 @@ class PostprocessorWidget(QtGui.QWidget):
     self.timer.stop()
     self.timer.setInterval(1000)
     self.timer.timeout.connect(self.updatePlots)
+
+  ''' Here to provide a buffer for run stoppage '''
+  def runStoppedExecute(self):
+    self.flushPlots()
+    self.rePlot()
+    self.updatePlots()
+
+  def runStopped(self):
+    self.timer.stop
+    self.run_stopped_timer = QtCore.QTimer()
+    self.run_stopped_timer.setInterval(1000) # Wait a second before updating the plots one last time
+    self.run_stopped_timer.setSingleShot(True)
+    self.run_stopped_timer.timeout.connect(self.runStoppedExecute)
+    self.run_stopped_timer.start()
     
-  def executeSinglasLinking(self):
+  def executeSignalLinking(self):
     #set up the signals from the simulation 
     self.execute_widget.run_button.clicked.connect(self.runClicked)
     self.execute_widget.run_button.clicked.connect(self.timer.start)
-    self.execute_widget.run_stopped.connect(self.updatePlots)
-    self.execute_widget.run_stopped.connect(self.timer.stop)
-   
-
-
-
+    self.execute_widget.run_stopped.connect(self.runStopped)
     
 class ResizeScrollArea(QtGui.QScrollArea):
   
