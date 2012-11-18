@@ -167,76 +167,84 @@ class ExecuteWidget(QtGui.QWidget):
 
   def clickedAdvanced(self):      
     #setting the dialog box up
-    self.oneRunSetting = QtGui.QDialog( parent = self)
-    self.oneRunSetting.setModal(True)
-    self.oneRunSetting.setSizeGripEnabled (True)
+    self.advanced_settings = QtGui.QDialog(parent = self)
+    self.advanced_settings.setModal(True)
+    self.advanced_settings.setSizeGripEnabled (True)
+    
     #labels
-    _labelMpiCommand           = QtGui.QLabel('MPI command')
-    _labelMultiThreadsCommand  = QtGui.QLabel('Multi-threads command')
-    _labelOtherOptionsText     = QtGui.QLabel('Other running options ')
+    mpi_label         = QtGui.QLabel('MPI Command')
+    thread_label      = QtGui.QLabel('Threading Option')
+    other_label       = QtGui.QLabel('Other Options')
+    
     #text boxes                             
-    self.oneRunSetting.mpiCommand           = QtGui.QLineEdit()
-    self.oneRunSetting.multiThreadsCommand  = QtGui.QLineEdit()
-    self.oneRunSetting.otherOptionsText     = QtGui.QLineEdit()
+    self.advanced_settings.mpi_command    = QtGui.QLineEdit()
+    self.advanced_settings.thread_command = QtGui.QLineEdit()
+    self.advanced_settings.other_options  = QtGui.QLineEdit()
+    
     #button for accepting setting
-    _acceptButton = QtGui.QPushButton("Accept")
-    _acceptButton.clicked.connect(lambda:self.oneRunInfoSet('fromDialogBox'))
-    self.oneRunInfoSetCopied.connect(self.oneRunSetting.close)
+    accept_button = QtGui.QPushButton("Accept")
+    accept_button.clicked.connect(lambda:self.oneRunInfoSet('fromDialogBox'))
+    self.oneRunInfoSetCopied.connect(self.advanced_settings.close)
+    
     #button to reset default settings
-    _defaultButton = QtGui.QPushButton("Reset default")
-    _defaultButton.clicked.connect(lambda:self.oneRunInfoSet('deafaultInDialogBox'))
+    default_button = QtGui.QPushButton("Reset")
+    default_button.clicked.connect(lambda:self.oneRunInfoSet('deafaultInDialogBox'))
+    
     #button to discharge any changes
-    _cancelButton = QtGui.QPushButton("Reject")
-    _cancelButton.clicked.connect(self.oneRunSetting.close)
+    cancel_button = QtGui.QPushButton("Cancel")
+    cancel_button.clicked.connect(self.advanced_settings.close)
+    
     #Tool tips
-    self.oneRunSetting.mpiCommand.setToolTip('MPI command to be used.')
-    self.oneRunSetting.multiThreadsCommand.setToolTip('multi-threading command.')
-    self.oneRunSetting.otherOptionsText.setToolTip('Other options to add on the command line.  PETSc options are valid to put here.')
-    _acceptButton.setToolTip('Accept displayed values')
-    _defaultButton.setToolTip('Brings back default options')
-    _cancelButton.setToolTip('Discharge modifications')
+    self.advanced_settings.mpi_command.setToolTip('MPI command to be used.')
+    self.advanced_settings.thread_command.setToolTip('Option used for threading.')
+    
+    self.advanced_settings.other_options.setToolTip('Other options to add on the command line.  PETSc options are valid to put here.')
+    accept_button.setToolTip('Accept displayed values')
+    default_button.setToolTip('Reset to default options')
+    cancel_button.setToolTip('Close without modifying values')
+    
     #set text
     if self.oneRunInfoSetSaved:
       self.oneRunInfoSet('fromMain')
     else:
       self.oneRunInfoSet('deafaultInDialogBox')
      #set the dialog box layout
-    _grid = QtGui.QGridLayout()
-    _grid.setSpacing(10)
+    grid = QtGui.QGridLayout()
+    grid.setSpacing(10)
      #adding the grid element
-    _grid.addWidget(_labelMpiCommand, 0, 0)
-    _grid.addWidget(self.oneRunSetting.mpiCommand, 0, 1,1,2)
-    _grid.addWidget(_labelMultiThreadsCommand, 2, 0)
-    _grid.addWidget(self.oneRunSetting.multiThreadsCommand, 2, 1,1,2)
-    _grid.addWidget(_labelOtherOptionsText, 4, 0)
-    _grid.addWidget(self.oneRunSetting.otherOptionsText, 4, 1,1,2)
-    _grid.addWidget(_acceptButton,5,0)
-    _grid.addWidget(_defaultButton,5,1)
-    _grid.addWidget(_cancelButton,5,2)
+    grid.addWidget(mpi_label, 0, 0)
+    grid.addWidget(self.advanced_settings.mpi_command, 0, 1,1,2)
+    grid.addWidget(thread_label, 2, 0)
+    grid.addWidget(self.advanced_settings.thread_command, 2, 1,1,2)
+    grid.addWidget(other_label, 4, 0)
+    grid.addWidget(self.advanced_settings.other_options, 4, 1,1,2)
+    grid.addWidget(accept_button,5,0)
+    grid.addWidget(default_button,5,1)
+    grid.addWidget(cancel_button,5,2)
     #show off the beautiful job
-    self.oneRunSetting.setLayout(_grid)
-    self.oneRunSetting.show()
+    self.advanced_settings.setLayout(grid)
+    self.advanced_settings.show()
 
   #attribute handling the default/copy to from the clickedAdvanced dialog box for running setups for each single run
   def oneRunInfoSet(self,_fromWhere): 
     if _fromWhere == 'fromMain':
-      self.oneRunSetting.mpiCommand.setText(self.mpiCommand)
-      self.oneRunSetting.multiThreadsCommand.setText(self.multiThreadsCommand)
-      self.oneRunSetting.otherOptionsText.setText(self.otherOptionsText)
+      self.advanced_settings.mpi_command.setText(self.mpi_command)
+      self.advanced_settings.thread_command.setText(self.thread_command)
+      self.advanced_settings.other_options.setText(self.other_options)
     elif _fromWhere == 'fromDialogBox':
-      self.mpiCommand          = self.oneRunSetting.mpiCommand.text()
-      self.multiThreadsCommand = self.oneRunSetting.multiThreadsCommand.text()
-      self.otherOptionsText    = self.oneRunSetting.otherOptionsText.text()
+      self.mpi_command          = self.advanced_settings.mpi_command.text()
+      self.thread_command = self.advanced_settings.thread_command.text()
+      self.other_options    = self.advanced_settings.other_options.text()
       self.oneRunInfoSetCopied.emit()
       self.oneRunInfoSetSaved = True
     elif _fromWhere == 'deafaultInDialogBox':
-      self.oneRunSetting.mpiCommand.setText(' mpiexec -n ')
-      self.oneRunSetting.multiThreadsCommand.setText(' --n-threads=')
-      self.oneRunSetting.otherOptionsText.setText('')
+      self.advanced_settings.mpi_command.setText(' mpiexec -n ')
+      self.advanced_settings.thread_command.setText(' --n-threads=')
+      self.advanced_settings.other_options.setText('')
     elif _fromWhere == 'deafaultInMain':
-      self.mpiCommand           =  ' mpiexec -n '
-      self.multiThreadsCommand  = ' --n-threads='
-      self.otherOptionsText     = ''
+      self.mpi_command           =  ' mpiexec -n '
+      self.thread_command  = ' --n-threads='
+      self.other_options     = ''
 
   #the running begin: set up, run, and connecting the end signal
   def clickedRun(self):
@@ -280,18 +288,18 @@ class ExecuteWidget(QtGui.QWidget):
   #constructing the command line
   def buildCommand(self,_inFile):
     
-    self.multiThreadsProc      = self.threads_line.text()
-    self.mpiProc               = self.mpi_proc_line.text()
+    self.thread_proc      = self.threads_line.text()
+    self.mpi_proc               = self.mpi_proc_line.text()
     _command = self.app_path + ' -i ' + _inFile
-    if self.mpiProc != '':
-      _command = self.mpiCommand + ' ' + self.mpiProc + ' ' + _command
-    if self.multiThreadsProc != '':
-      _command = _command + self.multiThreadsCommand + self.multiThreadsProc
-    _command += ' ' + self.otherOptionsText
+    if self.mpi_proc != '':
+      _command = self.mpi_command + ' ' + self.mpi_proc + ' ' + _command
+    if self.thread_proc != '':
+      _command = _command + self.thread_command + self.thread_proc
     if self.postprocessor_csv.checkState() == Qt.Checked:
       _command += ' Output/postprocessor_csv=true '
-    if self.otherOptionsText !='':
-      _command += _command
+      
+    _command += ' ' + self.other_options
+    
     return _command
 
   #we are running it for real  
