@@ -53,7 +53,7 @@ class ParseGetPot:
     self.comment_re = re.compile(r"[^']*(?:'.*')?\s*#\s*(.*)")
 
     self.unmatched_single_tick_re = re.compile(r"[^']*'[^']*\n")
-    self.independent_data_re = re.compile(r"\s*([^(#.*\n)]+)")
+    self.independent_data_re = re.compile(r"\s*([^'\n]+)")
 
     self._parseFile()
 
