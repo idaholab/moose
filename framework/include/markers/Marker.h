@@ -21,6 +21,7 @@
 #include "SetupInterface.h"
 #include "DependencyResolverInterface.h"
 #include "MooseVariableDependencyInterface.h"
+#include "UserObjectInterface.h"
 
 // libmesh Includes
 #include "threads.h"
@@ -42,7 +43,8 @@ class Marker :
   public MooseObject,
   public SetupInterface,
   public DependencyResolverInterface,
-  public MooseVariableDependencyInterface
+  public MooseVariableDependencyInterface,
+  public UserObjectInterface
 {
 public:
   Marker(const std::string & name, InputParameters parameters);

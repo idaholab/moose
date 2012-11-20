@@ -287,7 +287,7 @@ public:
   template <class T>
   const T & getUserObject(const std::string & name)
   {
-    ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL };
+    ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
     for (unsigned int i = 0; i < LENGTHOF(types); i++)
       if (_user_objects(types[i])[0].hasUserObject(name))
       {

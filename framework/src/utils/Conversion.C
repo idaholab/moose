@@ -49,6 +49,7 @@ namespace Moose {
       execstore_type_to_enum["JACOBIAN"] = EXEC_JACOBIAN;
       execstore_type_to_enum["TIMESTEP"] = EXEC_TIMESTEP;
       execstore_type_to_enum["TIMESTEP_BEGIN"] = EXEC_TIMESTEP_BEGIN;
+      execstore_type_to_enum["CUSTOM"] = EXEC_CUSTOM;
     }
   }
 

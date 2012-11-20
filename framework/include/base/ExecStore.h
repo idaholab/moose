@@ -30,7 +30,9 @@ enum ExecFlagType {
   /// Object is evaluated at the end of every time step
   EXEC_TIMESTEP,
   /// Object is evaluated at the beginning of every time step
-  EXEC_TIMESTEP_BEGIN
+  EXEC_TIMESTEP_BEGIN,
+  /// For use with custom executioners that want to fire objects at a specific time
+  EXEC_CUSTOM
 };
 
 
@@ -48,7 +50,8 @@ public:
       _obj_res(libMesh::n_threads()),
       _obj_jac(libMesh::n_threads()),
       _obj_timestep(libMesh::n_threads()),
-      _obj_ts_begin(libMesh::n_threads())
+      _obj_ts_begin(libMesh::n_threads()),
+      _obj_custom(libMesh::n_threads())
   {
   }
 
@@ -66,6 +69,7 @@ public:
     case EXEC_TIMESTEP: return _obj_timestep;
     case EXEC_TIMESTEP_BEGIN: return _obj_ts_begin;
     case EXEC_JACOBIAN: return _obj_jac;
+    case EXEC_CUSTOM: return _obj_custom;
     case EXEC_RESIDUAL:
     default:
       return _obj_res;
@@ -83,6 +87,8 @@ protected:
   std::vector<T> _obj_timestep;
   /// executed at the beginning of every time step
   std::vector<T> _obj_ts_begin;
+  /// executed at a custom time by the Exeuctioner
+  std::vector<T> _obj_custom;
 };
 
 #endif /* EXECSTORE_H */

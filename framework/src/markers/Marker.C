@@ -33,6 +33,7 @@ InputParameters validParams<Marker>()
 Marker::Marker(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
+    UserObjectInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _adaptivity(_fe_problem.adaptivity()),

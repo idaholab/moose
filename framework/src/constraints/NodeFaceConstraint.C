@@ -27,7 +27,7 @@ InputParameters validParams<NodeFaceConstraint>()
   MooseEnum orders("FIRST, SECOND, THIRD, FORTH", "FIRST");
 
   InputParameters params = validParams<MooseObject>();
-  params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|timestep|timestep_begin) to execute only at that moment");
+  params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|timestep|timestep_begin|custom) to execute only at that moment");
   params.addRequiredParam<std::string>("variable", "The name of the variable that this constraint is applied to.");
   params.addRequiredParam<BoundaryName>("slave", "The boundary ID associated with the slave side");
   params.addRequiredParam<BoundaryName>("master", "The boundary ID associated with the master side");

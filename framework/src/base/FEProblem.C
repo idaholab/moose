@@ -367,12 +367,14 @@ void FEProblem::initialSetup()
     _user_objects(EXEC_TIMESTEP)[i].updateDependObjects(_aux.getDependObjects(EXEC_TIMESTEP));
     _user_objects(EXEC_TIMESTEP_BEGIN)[i].updateDependObjects(_aux.getDependObjects(EXEC_TIMESTEP_BEGIN));
     _user_objects(EXEC_INITIAL)[i].updateDependObjects(_aux.getDependObjects(EXEC_INITIAL));
+    _user_objects(EXEC_CUSTOM)[i].updateDependObjects(_aux.getDependObjects(EXEC_CUSTOM));
 
     _user_objects(EXEC_RESIDUAL)[i].initialSetup();
     _user_objects(EXEC_JACOBIAN)[i].initialSetup();
     _user_objects(EXEC_TIMESTEP)[i].initialSetup();
     _user_objects(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
     _user_objects(EXEC_INITIAL)[i].initialSetup();
+    _user_objects(EXEC_CUSTOM)[i].initialSetup();
 
     for(std::map<std::string, Function *>::iterator vit = _functions[i].begin();
         vit != _functions[i].end();
@@ -1541,7 +1543,7 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
 bool
 FEProblem::hasUserObject(const std::string & name)
 {
-  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL };
+  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
     if (_user_objects(types[i])[0].hasUserObject(name))
       return true;
@@ -1976,7 +1978,7 @@ FEProblem::addPPSValuesToTable(ExecFlagType type)
 void
 FEProblem::outputPostprocessors(bool force/* = false*/)
 {
-  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL };
+  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
     addPPSValuesToTable(types[i]);
 
@@ -2725,7 +2727,7 @@ FEProblem::checkUserObjects()
   // gather names of all user_objects that were defined in the input file
   // and the blocks that they are defined on
   std::set<std::string> names;
-  ExecFlagType types[] = { EXEC_INITIAL, EXEC_RESIDUAL, EXEC_JACOBIAN, EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN };
+  ExecFlagType types[] = { EXEC_INITIAL, EXEC_RESIDUAL, EXEC_JACOBIAN, EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_CUSTOM };
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
   {
     for (std::vector<UserObject *>::const_iterator it = _user_objects(types[i])[0].all().begin(); it != _user_objects(types[i])[0].all().end(); ++it)

@@ -82,12 +82,17 @@
 
 #include "EqualValueNodalConstraint.h"
 #include "MTUserObject.h"
+#include "RandomHitUserObject.h"
+#include "RandomHitSolutionModifier.h"
 
 #include "TimestepSetupFunction.h"
 #include "PostprocessorFunction.h"
 #include "MTPiecewiseConst1D.h"
 #include "MTPiecewiseConst2D.h"
 #include "MTPiecewiseConst3D.h"
+
+// markers
+#include "RandomHitMarker.h"
 
 // meshes
 #include "StripeMesh.h"
@@ -97,6 +102,7 @@
 
 #include "ExceptionSteady.h"
 #include "SteadyTransientExecutioner.h"
+#include "AdaptAndModify.h"
 
 // problems
 #include "MooseTestProblem.h"
@@ -221,9 +227,14 @@ MooseTestApp::registerObjects()
   registerPostprocessor(UserObjectPPS);
 
   registerUserObject(MTUserObject);
+  registerUserObject(RandomHitUserObject);
+  registerUserObject(RandomHitSolutionModifier);
+
+  registerMarker(RandomHitMarker);
 
   registerExecutioner(ExceptionSteady);
   registerExecutioner(SteadyTransientExecutioner);
+  registerExecutioner(AdaptAndModify);
 
   registerProblem(MooseTestProblem);
 }

@@ -55,7 +55,7 @@ public:
    */
   virtual ExecFlagType execFlag() const;
 
-  static MooseEnum getExecuteOptions() { return MooseEnum("initial, residual, jacobian, timestep, timestep_begin", "residual"); }
+  static MooseEnum getExecuteOptions() { return MooseEnum("initial, residual, jacobian, timestep, timestep_begin, custom", "residual"); }
 
 protected:
   /// execution flag (when is the object executed/evaluated)
