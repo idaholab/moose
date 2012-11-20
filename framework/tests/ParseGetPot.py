@@ -24,7 +24,7 @@ class GPNode:
       comment = ''
       if param in self.param_comments:
         comment = '# ' + self.param_comments[param]
-      print prefix + self.name + '/' + param + ": " + str(self.params[param]) + '|' + comment
+      print prefix + self.name + '/' + param + ": " + str(self.params[param]) + ' | ' + comment
 
 
     for child in self.children_list:
@@ -48,7 +48,9 @@ class ParseGetPot:
 
     self.parameter_re = re.compile(r"\s*(\w+)\s*=\s*([^#\n]+?)\s*(#.*)?\n")
 
-    self.comment_re = re.compile(r"[^#]*#\s*(.*)")
+    self.parameter_in_single_quotes_re = re.compile(r"\s*(\w+)\s*=\s*'([^\n]+?)'\s*(#.*)?\n")
+
+    self.comment_re = re.compile(r"[^']*(?:'.*')?\s*#\s*(.*)")
 
     self.unmatched_single_tick_re = re.compile(r"[^']*'[^']*\n")
     self.independent_data_re = re.compile(r"\s*([^(#.*\n)]+)")
@@ -78,8 +80,13 @@ class ParseGetPot:
 
         continue
 
+
       # Look for a parameter on this line
-      m = self.parameter_re.match(line)
+      m = self.parameter_in_single_quotes_re.match(line)
+
+      if not m:
+        m = self.parameter_re.match(line)
+
       if m:
         param_name = m.group(1)
         param_value = m.group(2)
