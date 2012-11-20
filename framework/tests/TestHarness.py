@@ -258,8 +258,8 @@ class TestHarness:
     if test.isValid(DELETED):
       if self.options.extra_info:
         # We might want to trim the string so it formats nicely
-        if len(test[DELETED]) >= TERM_COLS - (len(test)+21):
-          test_reason = (test[DELETED])[:(TERM_COLS - (len(test)+24))] + '...'
+        if len(test[DELETED]) >= TERM_COLS - (len(test[TEST_NAME])+21):
+          test_reason = (test[DELETED])[:(TERM_COLS - (len(test[TEST_NAME])+24))] + '...'
         else:
           test_reason = test[DELETED]
         self.handleTestResult(test, '', 'deleted (' + test_reason + ')')
@@ -274,10 +274,10 @@ class TestHarness:
     elif test.isValid(SKIP):
       skip_message = test[SKIP]
       # We might want to trim the string so it formats nicely
- #     if len(skip_message) >= TERM_COLS - (len(test)+21):
- #       test_reason = (skip_message)[:(TERM_COLS - (len(test)+24))] + '...'
- #     else:
-      test_reason = skip_message
+      if len(skip_message) >= TERM_COLS - (len(test[TEST_NAME])+21):
+        test_reason = (skip_message)[:(TERM_COLS - (len(test[TEST_NAME])+24))] + '...'
+      else:
+        test_reason = skip_message
       self.handleTestResult(test, '', 'skipped (' + test_reason + ')')
       return False
     # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
