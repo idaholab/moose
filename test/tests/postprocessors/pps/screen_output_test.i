@@ -124,7 +124,6 @@
 []
 
 [Output]
-  file_base = out_nodal_var_value
   output_initial = false
   postprocessor_csv = false
   interval = 1

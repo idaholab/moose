@@ -45,10 +45,7 @@
   [./screen_output_test]
     type = 'RunApp'
     input = 'screen_output_test.i'
-    expect_out = '^:\s+:.*
-(?:^\|\s+\d\.\d.*
-){2}^\+(-+\+)+
-'
+    expect_out = '^:\s+:.*\n(?:^\|\s+\d\.\d.*\n){2}^\+(-+\+)+'
   [../]
 
   [./test_nodal_var_value]
