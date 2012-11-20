@@ -59,6 +59,9 @@ class RunParallel:
     while self.jobs.count(None) == 0:
       self.spinwait()
 
+    # Pre-run preperation
+    tester.prepare()
+
     job_index = self.jobs.index(None) # find an empty slot
     log( 'Command %d started: %s' % (job_index, command) )
 

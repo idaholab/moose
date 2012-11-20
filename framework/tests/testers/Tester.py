@@ -10,9 +10,11 @@ class Tester(object):
     params.addRequiredParam('type', "The type of test of Tester to create for this test.")
     params.addParam('max_time',   300, "The maximum in seconds that the test will be allowed to run.")
     params.addParam('skip',     False, "If supplied will skip the test and print the reason given for doing so.")
+    params.addParam('deleted',         "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
+
     params.addParam('heavy',    False, "Set to True if this test should only be run when the '--heavy' option is used.")
-    params.addParam('group',           "A list of groups for which this test belongs.")
-    params.addParam('prereq',          "A list of prereq tests that need to run successfully before launching this test.")
+    params.addParam('group',       [], "A list of groups for which this test belongs.")
+    params.addParam('prereq',      [], "A list of prereq tests that need to run successfully before launching this test.")
 
     # Test Filters
     params.addParam('platform',      ['ALL'], "A list of platforms for which this test will run on. ('ALL', 'DARWIN', 'LINUX', 'SL', 'LION', 'ML')")
@@ -25,8 +27,8 @@ class Tester(object):
     return params
   getValidParams = staticmethod(getValidParams)
 
-  def __init__(self, klass, specs):
-    self.specs = specs
+  def __init__(self, name, params):
+    self.specs = params
 
   def prepare(self):
     return

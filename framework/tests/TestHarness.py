@@ -7,6 +7,7 @@ from time import sleep
 from RunParallel import RunParallel
 from CSVDiffer import CSVDiffer
 from Tester import Tester
+from InputParameters import InputParameters
 
 from optparse import OptionParser, OptionGroup
 #from optparse import OptionG
@@ -67,26 +68,18 @@ class TestHarness:
 
 	      # TODO: Refactor all this - these should be methods on the Tester not part of the TestHarness
               if self.checkIfRunTest(test):
-                self.augmentTestSpecs(test)
-
-		# Get the validParams for the requested Tester type
-		params = self.getValidParams(test[TYPE])
-
-		# Update the params object using the raw test specs dictionary
-		params = self.populateParams(params, test)
 
                 # Build the requested Tester object and run
-                tester = self.create(test[TYPE], params)
-                command = tester.getCommand(self.options)
+                tester = self.create(test.valid[TYPE], test)
 
-                tester.prepare()
+                command = tester.getCommand(self.options)
 
                 # This method spawns another process and allows this loop to continue looking for tests
                 # RunParallel will call self.testOutputAndFinish when the test has completed running
                 # This method will block when the maximum allowed parallel processes are running
                 self.runner.run(tester, command)
               else: # This job is skipped - notify the runner
-                self.runner.jobSkipped(test[TEST_NAME])
+                self.runner.jobSkipped(test.valid[TEST_NAME])
 
             os.chdir(saved_cwd)
             sys.path.pop()
@@ -98,6 +91,9 @@ class TestHarness:
   def parseGetPotTestFormat(self, filename):
     tests = []
     test_dir = os.path.abspath(os.path.dirname(filename))
+    # Get relative path to test[TEST_DIR]
+    executable_path = os.path.dirname(self.executable)
+    relative_path = test_dir.replace(executable_path, '')
 
     # Filter tests that we want to run
     # Under the new format, we will filter based on directory not filename since it is fixed
@@ -122,25 +118,35 @@ class TestHarness:
       tests_node = data.children['Tests']
 
       for testname, test_node in tests_node.children.iteritems():
-        test = DEFAULTS.copy()
-
-        # Get relative path to test[TEST_DIR]
-        executable_path = os.path.dirname(self.executable)
-        relative_path = test_dir.replace(executable_path, '')
-
-        # Now update all the base level keys
-        for key, value in test_node.params.iteritems():
-          if key in test and type(test[key]) == list:
-            test[key] = value.split(' ')
-          else:
-	    if re.match('".*"', value):  # Strip quotes
-	      test[key] = value[1:-1]
-	    else:
-              test[key] = value
-
-        if TYPE not in test:
+        # First retrieve the type so we can get the valid params
+        if TYPE not in test_node.params:
           print "Type missing in " + test_dir + filename
           sys.exit(1)
+
+        params = self.getValidParams(test_node.params[TYPE])
+
+        # Now update all the base level keys
+        params_parsed = set()
+        params_ignored = set()
+        for key, value in test_node.params.iteritems():
+          params_parsed.add(key)
+          if key in params:
+            if params.type(key) == list:
+              params[key] = value.split(' ')
+            else:
+	      if re.match('".*"', value):  # Strip quotes
+	        params[key] = value[1:-1]
+	      else:
+                params[key] = value
+          else:
+            params_ignored.add(key)
+
+        # Make sure that all required parameters are supplied
+        required_params_missing = params.required_keys() - params_parsed
+        if len(required_params_missing):
+          print 'Required Missing Parameter(s): ', required_params_missing
+        if len(params_ignored):
+          print 'Ignored Parameter(s): ', params_ignored
 
 	# TODO: In progress formatting
 #        formatted_name = relative_path + '.' + testname
@@ -151,16 +157,20 @@ class TestHarness:
 #          formatted_name += '/' + test[INPUT]
 #        formatted_name += ')'
 
-        test.update( { TEST_NAME : formatted_name, TEST_DIR : test_dir, RELATIVE_PATH : relative_path } )
+        params[TEST_NAME] = formatted_name
+        params[TEST_DIR] = test_dir
+        params[RELATIVE_PATH] = relative_path
+        params[EXECUTABLE] = self.executable
+        params[HOSTNAME] = self.host_name
 
-        if test[PREREQ] != None:
-          if type(test[PREREQ]) != list:
-            print "Option 'PREREQ' needs to be of type list in " + test[TEST_NAME]
+        if params.isValid(PREREQ):
+          if type(params[PREREQ]) != list:
+            print "Option 'PREREQ' needs to be of type list in " + params[TEST_NAME]
             sys.exit(1)
-          test[PREREQ] = [relative_path.replace('/tests/', '') + '.' + item for item in test[PREREQ]]
+          params[PREREQ] = [relative_path.replace('/tests/', '') + '.' + item for item in params[PREREQ]]
 
         # Build a list of test specs (dicts) to return
-        tests.append(test)
+        tests.append(params)
     return tests
 
   def parseLegacyTestFormat(self, filename):
@@ -172,13 +182,6 @@ class TestHarness:
 
     for test_name, test_opts in inspect.getmembers(module):
       if isinstance(test_opts, types.DictType) and self.test_match.search(test_name):
-
-        if filename == 'periodic_bc_test.py':
-	  print "  [./" + test_name + "]"
-          print "    type = 'Exodiff'"
-	  for key, value in test_opts.items():
-            print "    " + key + " = '", value, "'"
-          print "  [../]\n"
 
         # insert default values where none provided
         testname = module_name + '.' + test_name
@@ -212,7 +215,8 @@ class TestHarness:
 	if (test[EXPECT_ERR] != None or test[EXPECT_ASSERT] != None or test[SHOULD_CRASH] == True) and not TYPE in test:
 	  test[TYPE] = 'RunException'
 
-        test.update( { TEST_NAME : testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path } )
+        test.update( { TEST_NAME : testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path, EXECUTABLE : self.executable, HOSTNAME : self.host_name } )
+
 	if TYPE not in test:
 	  test.update( { TYPE : "Exodiff" } )
 
@@ -222,8 +226,11 @@ class TestHarness:
             sys.exit(1)
           test[PREREQ] = [module_name + '.' + item for item in test[PREREQ]]
 
+	# Create an InputParmaters object using the raw test specs dictionary
+	params = self.populateParams(InputParameters(), test)
+
         # Build a list of test specs (dicts) to return
-        tests.append(test)
+        tests.append(params)
     return tests
 
   def augmentTestSpecs(self, test):
@@ -248,7 +255,7 @@ class TestHarness:
       return False
 
     # Check for deleted tests
-    if test[DELETED]:
+    if test.isValid(DELETED):
       if self.options.extra_info:
         # We might want to trim the string so it formats nicely
         if len(test[DELETED]) >= TERM_COLS - (len(test)+21):
@@ -259,17 +266,18 @@ class TestHarness:
       return False
 
     # Check for skipped tests
-    if type(test[SKIP]) is bool:
+    if test.type(SKIP) is bool:
       # Backwards compatible (no reason)
       if test[SKIP]:
         self.handleTestResult(test, '', 'skipped')
         return False
-    elif test[SKIP] != '':
+    elif test.isValid(SKIP):
+      skip_message = test[SKIP]
       # We might want to trim the string so it formats nicely
-      if len(test[SKIP]) >= TERM_COLS - (len(test)+21):
-        test_reason = (test[SKIP])[:(TERM_COLS - (len(test)+24))] + '...'
-      else:
-        test_reason = test[SKIP]
+ #     if len(skip_message) >= TERM_COLS - (len(test)+21):
+ #       test_reason = (skip_message)[:(TERM_COLS - (len(test)+24))] + '...'
+ #     else:
+      test_reason = skip_message
       self.handleTestResult(test, '', 'skipped (' + test_reason + ')')
       return False
     # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
@@ -603,8 +611,7 @@ class TestHarness:
 
     # viewkeys does not work with older Python...
 #    unused_params = test.viewkeys() - params.desc
-    params.valid.update(test)
-
+    params.valid = test
     return params
 
 

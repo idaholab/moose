@@ -25,7 +25,7 @@ METHOD        = 'method'         # A test that only runs under an executable bui
 LIBRARY_MODE  = 'library_mode'   # A test that only runs when libraries are built in a certain mode 'ALL', 'STATIC', 'DYNAMIC'
 
 EXODIFF       = 'exodiff'        # A list of files to exodiff
-EXODIFF_OPTS  = 'extra_opt'      # A place where the user can put in what ever else needs to be sent out.
+EXODIFF_OPTS  = 'exodiff_opts'   # A place where the user can put in what ever else needs to be sent out.
 CSVDIFF       = 'csvdiff'        # A list of files to CSV diff
 CHECK_FILES   = 'check_files'    # A list of files to check for existence
 
@@ -94,8 +94,8 @@ DEFAULTS = { EXODIFF : [],
              MIN_THREADS: 1,
              MAX_THREADS: 16,
              MAX_TIME : 300,
-             SKIP : '',
-	     DELETED : '',
+             SKIP : None,
+	     DELETED : None,
              ABS_ZERO : 1e-10,      # Exodiff option
              REL_ERR : 5.5e-6,      # Exodiff option
              CUSTOM_CMP : None,     # Exodiff option

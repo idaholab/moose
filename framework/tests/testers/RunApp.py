@@ -7,11 +7,10 @@ class RunApp(Tester):
 
   def getValidParams():
     params = Tester.getValidParams()
+    params.addRequiredParam('input',      "The input file to use for this test.")
     params.addParam('test_name',          "The name of the test - populated automatically")
-    params.addParam('cli_args',           "Additional arguments to be passed to the test.")
-    params.addParam('input',              "The input file to use for this test.")
+    params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
     params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
-    params.addParam('deleted',            "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
     params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
 
     # Parallel/Thread testing
@@ -27,8 +26,8 @@ class RunApp(Tester):
     return params
   getValidParams = staticmethod(getValidParams)
 
-  def __init__(self, klass, specs):
-    Tester.__init__(self, klass, specs)
+  def __init__(self, name, params):
+    Tester.__init__(self, name, params)
 
   def getCommand(self, options):
     # Create the command line string to run
@@ -75,7 +74,7 @@ class RunApp(Tester):
     reason = ''
     specs = self.specs
 
-    if specs[EXPECT_OUT] != None:
+    if specs.isValid(EXPECT_OUT):
       out_ok = self.checkOutputForPattern(output, specs[EXPECT_OUT])
       if (out_ok and retcode != 0):
         reason = 'OUT FOUND BUT CRASH'

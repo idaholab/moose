@@ -7,16 +7,15 @@ class CheckFiles(RunApp):
 
   def getValidParams():
     params = RunApp.getValidParams()
-    params.addParam('check_files', "A list of files to exodiff.")
+    params.addParam('check_files', [], "A list of files to exodiff.")
 
     return params
   getValidParams = staticmethod(getValidParams)
 
-  def __init__(self, klass, specs):
-    RunApp.__init__(self, klass, specs)
+  def __init__(self, name, params):
+    RunApp.__init__(self, name, params)
 
   def prepare(self):
-    # Note: We are going to blow away all files listed in 'check_files'.  Prereqs SHOULD NOT rely on these files existing.
     for file in self.specs[CHECK_FILES]:
       try:
         os.remove(os.path.join(self.specs[TEST_DIR], file))

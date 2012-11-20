@@ -14,8 +14,8 @@ class RunException(RunApp):
     return params
   getValidParams = staticmethod(getValidParams)
 
-  def __init__(self, klass, specs):
-    RunApp.__init__(self, klass, specs)
+  def __init__(self, name, params):
+    RunApp.__init__(self, name, params)
 
   def processResults(self, moose_dir, retcode, options, output):
     reason = ''
@@ -23,17 +23,17 @@ class RunException(RunApp):
 
     # Expected errors and assertions might do a lot of things including crash so we
     # will handle them seperately
-    if specs[EXPECT_ERR] != None:
+    if specs.isValid(EXPECT_ERR):
       if not self.checkOutputForPattern(output, specs[EXPECT_ERR]):
         reason = 'NO EXPECTED ERR'
-    elif specs[EXPECT_ASSERT] != None:
+    elif specs.isValid(EXPECT_ASSERT):
       if options.method == 'dbg':  # Only check asserts in debug mode
         if not self.checkOutputForPattern(output, specs[EXPECT_ASSERT]):
           reason = 'NO EXPECTED ASSERT'
-    else:
-      # Check the general error message and program crash possibilities
-      if specs[EXPECT_ERR] != None and specs[EXPECT_ERR] not in output:
-        reason = 'NO EXPECTED ERR'
+#    else:
+#      # Check the general error message and program crash possibilities
+#      if specs[EXPECT_ERR] != None and specs[EXPECT_ERR] not in output:
+#        reason = 'NO EXPECTED ERR'
 
     if reason != '':
       (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
