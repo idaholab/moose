@@ -27,6 +27,9 @@ GrainTracker::GrainTracker(const std::string & name, InputParameters parameters)
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
     _gen_mesh(dynamic_cast<GeneratedMesh *>(&_mesh))
 {
+  // Size the data structures to hold the correct number of maps
+  _bounding_boxes.resize(_maps_size);
+  
   _region_to_grain[0] = 0; // Zero indicates no grain - we need a place holder for this one postion
 }
 
@@ -161,7 +164,7 @@ GrainTracker::buildBoundingBoxes()
           std::set<unsigned int> intersection;
           std::set_intersection(it1->_nodes.begin(), it1->_nodes.end(), nodeset_it->second.begin(), nodeset_it->second.end(),
                                 std::inserter(intersection, intersection.end()));
-
+          
           if (!intersection.empty())
           {
 //          // DEBUG
@@ -214,7 +217,7 @@ GrainTracker::buildBoundingBoxes()
         }
       }
 
-      _bounding_boxes.push_back(new BoundingBoxInfo(some_node_id, translation_vector, min, max));
+      _bounding_boxes[map_num].push_back(new BoundingBoxInfo(some_node_id, translation_vector, min, max));
     }
   }
 }
@@ -231,7 +234,7 @@ GrainTracker::trackGrains()
   unsigned int counter=1;
 
   // TODO: Used to keep track of which bounding box indexes have been used by which unique_grains
-  std::vector<bool> used_idx(_bounding_boxes.size(), false);
+  // std::vector<bool> used_idx(_bounding_boxes.size(), false);
 
   // Reset Status on active unique grains
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
@@ -240,14 +243,14 @@ GrainTracker::trackGrains()
 
   // Loop over all the current regions and match them up to our grain list
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
-  {  
+  { 
     for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[map_num].begin(); it1 != _bubble_sets[map_num].end(); ++it1)
     {
       std::vector<BoundingBoxInfo *> box_ptrs;
       unsigned int curr_var = it1->_var_idx;
-
-      for (std::list<BoundingBoxInfo *>::iterator it2 = _bounding_boxes.begin(); it2 != _bounding_boxes.end(); /* No increment here! */)
-      {
+      
+      for (std::list<BoundingBoxInfo *>::iterator it2 = _bounding_boxes[map_num].begin(); it2 != _bounding_boxes[map_num].end(); /* No increment here! */)
+      { 
         /**
          * See which of the bounding boxes belong to the current region (bubble set) by looking at a
          * member node id.  A single region may have multiple bounding boxes as members if it spans
@@ -258,7 +261,7 @@ GrainTracker::trackGrains()
           // Transfer ownership of the bounding box info to "box_ptrs" which will be stored in the unique grain
           box_ptrs.push_back(*it2);
           // Now delete the current BoundingBox structure so that it won't be inspected or reused
-          _bounding_boxes.erase(it2++);
+          _bounding_boxes[map_num].erase(it2++);
         }
         else
           ++it2;
@@ -328,8 +331,9 @@ GrainTracker::trackGrains()
       grain_it->second->status = INACTIVE;
 
   // Check to make sure that we consumed all of the bounding box datastructures
-  if (!_bounding_boxes.empty())
-    mooseError("BoundingBoxes where not completely used by the GrainTracker");
+  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+    if (!_bounding_boxes[map_num].empty())
+      mooseError("BoundingBoxes where not completely used by the GrainTracker");
 
   //DEBUG
    std::cout << "TimeStep: " << _t_step << "\n";
@@ -358,9 +362,9 @@ GrainTracker::remapGrains()
   case 1:
     mooseError("1D is not supported");
   case 2:
-    p.assign(Point(15, 15, 0));
+    p.assign(Point(0.02, 0.02, 0));
   case 3:
-    p.assign(Point(15, 15, 15));
+    p.assign(Point(0.02, 0.02, 0.02));
   }
   
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it1 = _unique_grains.begin(); grain_it1 != _unique_grains.end(); ++grain_it1)
