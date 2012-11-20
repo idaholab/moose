@@ -227,8 +227,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.contour_layout.addLayout(self.variable_contour_layout)
     self.contour_label = QtGui.QLabel("Contour:")
     self.variable_contour = QtGui.QComboBox()
+    self.variable_contour_is_nodal = {}
     self.variable_contour.setToolTip('Which variable to color by')
-    self.variable_contour.currentIndexChanged[str].connect(self._contourVariableSelected)
+    self.variable_contour.currentIndexChanged[int].connect(self._contourVariableSelected)
 #    self.variable_contour_layout.addWidget(self.contour_label, alignment=QtCore.Qt.AlignRight)
     self.variable_contour_layout.addWidget(self.variable_contour, alignment=QtCore.Qt.AlignHCenter)
 
@@ -420,9 +421,21 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.old_contour = self.variable_contour.currentText()
     self.variable_contour.clear()
     self.has_displacements = False
-    for variable in self.exodus_result.current_variables:
+    for variable in self.exodus_result.current_nodal_variables:
       if 'ObjectId' not in variable:
         self.variable_contour.addItem(variable)
+        item_num = self.variable_contour.count()-1
+        self.variable_contour.setItemIcon(item_num,QtGui.QIcon(pathname + '/resources/from_paraview/pqNodalData16.png'))
+        self.variable_contour_is_nodal[item_num] = True
+        if 'disp' in variable:
+          self.has_displacements = True
+          
+    for variable in self.exodus_result.current_elemental_variables:
+      if 'ObjectId' not in variable:
+        self.variable_contour.addItem(variable)
+        item_num = self.variable_contour.count()-1
+        self.variable_contour.setItemIcon(item_num,QtGui.QIcon(pathname + '/resources/from_paraview/pqElemData16.png'))
+        self.variable_contour_is_nodal[item_num] = False
         if 'disp' in variable:
           self.has_displacements = True
 
@@ -504,9 +517,16 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     if num_components > 1 and  self.exodus_result.current_dim == 3:
       self.variable_component.addItem('Z')
     
-  def _contourVariableSelected(self, value):
-    value_string = str(value)
+  def _contourVariableSelected(self, index):
+    
+    value_string = str(self.variable_contour.itemText(index))
     self.current_variable = value_string
+    self.current_variable_index = index
+
+    if index in self.variable_contour_is_nodal:
+      self.current_variable_is_nodal = self.variable_contour_is_nodal[index]
+    else:
+      self.current_variable_is_nodal = True
 
     self.currently_restoring_contours = True
 
@@ -555,7 +575,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.exodus_result.clip_mapper.Update()
 
     data = None
-    if self.current_variable in self.exodus_result.current_nodal_components:
+    if self.current_variable_is_nodal and self.current_variable in self.exodus_result.current_nodal_components:
       data = self.exodus_result.data.GetPointData().GetVectors(self.current_variable)
       self.exodus_result.mapper.SetScalarModeToUsePointFieldData()
       self.exodus_result.clip_mapper.SetScalarModeToUsePointFieldData()

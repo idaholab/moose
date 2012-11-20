@@ -33,7 +33,8 @@ class ExodusResult:
     self.reader.SetTimeStep(self.max_timestep)
     self.reader.Update()
     self.current_variable_point_data = {}
-    self.current_variables = []
+    self.current_nodal_variables = []
+    self.current_elemental_variables = []
     self.current_nodal_components = {}
     self.current_elemental_components = {}
     self.component_index = -1
@@ -65,7 +66,7 @@ class ExodusResult:
     num_nodal_variables = self.data.GetPointData().GetNumberOfArrays()
     for var_num in xrange(num_nodal_variables):
       var_name = self.data.GetPointData().GetArrayName(var_num)
-      self.current_variables.append(var_name)
+      self.current_nodal_variables.append(var_name)
       components = self.data.GetPointData().GetVectors(var_name).GetNumberOfComponents()
       self.current_nodal_components[var_name] = components
       # self.data.GetPointData().GetVectors(value_string).GetComponentName(0)
@@ -73,7 +74,7 @@ class ExodusResult:
     num_elemental_variables = self.data.GetCellData().GetNumberOfArrays()
     for var_num in xrange(num_elemental_variables):
       var_name = self.data.GetCellData().GetArrayName(var_num)
-      self.current_variables.append(var_name)
+      self.current_elemental_variables.append(var_name)
       components = self.data.GetCellData().GetVectors(var_name).GetNumberOfComponents()
       self.current_elemental_components[var_name] = components      
 
