@@ -12,12 +12,13 @@ class RunApp(Tester):
     params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
     params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
     params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
+    params.addParam('should_crash',False, "Inidicates that the test is expected to crash or otherwise terminate early")
 
     # Parallel/Thread testing
     params.addParam('max_parallel', 1000, "Maximum number of MPI processes this test can be run with      (Default: 1000)")
     params.addParam('min_parallel',    1, "Minimum number of MPI processes that this test can be run with (Default: 1)")
-    params.addParam('max_thread',     16, "Max number of threads (Default: 16)")
-    params.addParam('min_thread',      1, "Min number of threads (Default: 1)")
+    params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
+    params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
     params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
 
     # Valgrind
@@ -51,14 +52,14 @@ class RunApp(Tester):
     nthreads = min(nthreads, int(specs[MAX_THREADS]))
 
     if nthreads > options.nthreads:
-      specs['CAVEATS'] = ['MIN_THREADS=' + str(nthreads)]
+      self.specs['CAVEATS'] = ['MIN_THREADS=' + str(nthreads)]
     elif nthreads < options.nthreads:
-      specs['CAVEATS'] = ['MAX_THREADS=' + str(nthreads)]
+      self.specs['CAVEATS'] = ['MAX_THREADS=' + str(nthreads)]
     # TODO: Refactor this caveats business
     if ncpus > default_ncpus:
-      specs['CAVEATS'] = ['MIN_CPUS=' + str(ncpus)]
+      self.specs['CAVEATS'] = ['MIN_CPUS=' + str(ncpus)]
     elif ncpus < default_ncpus:
-      specs['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
+      self.specs['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
     if options.parallel or ncpus > 1 or nthreads > 1:
       command = 'mpiexec -host localhost -n ' + str(ncpus) + ' ' + specs[EXECUTABLE] + ' --n-threads=' + str(nthreads) + ' -i ' + specs[INPUT] + ' ' +  ' '.join(specs[CLI_ARGS])
     elif options.enable_valgrind and not specs[NO_VALGRIND]:
@@ -68,6 +69,7 @@ class RunApp(Tester):
 
     if options.scaling and specs[SCALE_REFINE] > 0:
       command += ' -r ' + str(specs[SCALE_REFINE])
+
     return command
 
   def processResults(self, moose_dir, retcode, options, output):

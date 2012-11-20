@@ -55,8 +55,8 @@ HEAVY         = 'heavy'          # Boolean: Set to true if this test should only
 # Parallel testing
 MAX_PARALLEL  = 'max_parallel'   # Maximum number of MPI processes this test can be run with      (Default: 1000)
 MIN_PARALLEL  = 'min_parallel'   # Minimum number of MPI processes that this test can be run with (Default: 1)
-MAX_THREADS   = 'max_thread'     # Max number of threads (Default: 16)
-MIN_THREADS   = 'min_thread'     # Min number of threads (Default: 1)
+MAX_THREADS   = 'max_threads'    # Max number of threads (Default: 16)
+MIN_THREADS   = 'min_threads'    # Min number of threads (Default: 1)
 SCALE_REFINE  = 'scale_refine'      # The number of refinements to do when scaling
 
 # EXODIFF/CSV options

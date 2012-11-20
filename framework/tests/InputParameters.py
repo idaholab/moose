@@ -44,6 +44,12 @@ class InputParameters:
   def required_keys(self):
     return self.required
 
+  def isRequired(self, key):
+    return key in self.required
+
+  def getDescription(self, key):
+    return self.desc[key]
+
   def printParams(self):
     for k in self.desc:
       value = ''

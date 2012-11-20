@@ -347,21 +347,13 @@ class TestHarness:
     caveats = []
     test = tester.specs  # Need to refactor
 
-    if 'CAVEATS' in test:
+    if test.isValid('CAVEATS'):
       caveats = test['CAVEATS']
 
     (reason, output) = tester.processResults(self.moose_dir, retcode, self.options, output)
-#    print tester.processResults(self.moose_dir, retcode, self.options, output)
 
     if self.options.scaling and test[SCALE_REFINE]:
       caveats.append('SCALED')
-
-    # if still no errors, check other files (just for existence)
-#    if reason == '':
-#      for file in test[CHECK_FILES]:
-#        if not os.path.isfile(os.path.join(test[TEST_DIR], file)):
-#          reason = 'MISSING FILES'
-#          break
 
     did_pass = True
     if reason == '':
@@ -562,7 +554,8 @@ class TestHarness:
     outputgroup.add_option('-a', '--sep-files-fail', action='store_true', dest='fail_files', default=False, metavar='FILE', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
     outputgroup.add_option("--store-timing", action="store_true", dest="store_time", default=False, help="Store timing in the SQL database: $HOME/timingDB/timing.sqlite A parent directory (timingDB) must exist.")
     outputgroup.add_option("--revision", action="store", dest="revision", help="The current revision being tested. Required when using --store-timing.")
-
+    outputgroup.add_option("--yaml", action="store_true", dest="yaml", default=False, help="Dump the parameters for the testers in Yaml Format")
+    outputgroup.add_option("--dump", action="store_true", dest="dump", default=False, help="Dump the parameters for the testers in GetPot Format")
 
     parser.add_option_group(outputgroup)
 
@@ -603,7 +596,10 @@ class TestHarness:
     return
 
   def preRun(self):
-    return
+    if self.options.yaml:
+      self.printYaml()
+    elif self.options.dump:
+      self.printDump()
 
   def populateParams(self, params, test):
     # TODO: Print errors or warnings about unused parameters
@@ -625,6 +621,60 @@ class TestHarness:
   def create(self, type, specs):
     return self.testers[type]('exodiff', specs)
   ###
+
+  ### Parameter Dump ###
+  def printDump(self):
+    print "[Tests]"
+
+    for name, tester in self.testers.iteritems():
+      print "  [./" + name + "]"
+
+      params = self.getValidParams(name)
+      for key in params.valid:
+        required = 'No'
+        if params.isRequired(key):
+          required = 'Yes'
+        default = ''
+        if params.isValid(key):
+          default = str(params[key])
+
+        print "%4s%-30s = %-30s # %s" % ('', key, default, params.getDescription(key))
+      print "  [../]\n"
+    print "[]"
+
+    sys.exit(0)
+
+  def printYaml(self):
+    print "**START YAML DATA**"
+    print "- name: /Tests"
+    print "  description: !!str"
+    print "  type:"
+    print "  parameters:"
+    print "  subblocks:"
+
+    for name, tester in self.testers.iteritems():
+      print "  - name: /Tests/" + name
+      print "    description:"
+      print "    type:"
+      print "    parameters:"
+
+      params = self.getValidParams(name)
+      for key in params.valid:
+        required = 'No'
+        if params.isRequired(key):
+          required = 'Yes'
+        default = ''
+        if params.isValid(key):
+          default = str(params[key])
+
+        print "    - name: " + key
+        print "      required: " + required
+        print "      default: !!str " + default
+        print "      description: |"
+        print "        " + params.getDescription(key)
+
+    print "**END YAML DATA**"
+    sys.exit(0)
 
 # Notes:
 # SHOULD_CRASH returns > 0, cuz < 0 means process interrupted

@@ -60,7 +60,7 @@
     input = '2d_diffusion_test.i'
     exodiff = 'out.e'
     prereq = 'test_method_check test_combined'
-    min_theads = 2
+    min_threads = 2
   [../]
 
   [./test_skip_depend_test]
