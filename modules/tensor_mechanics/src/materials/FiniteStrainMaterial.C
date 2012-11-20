@@ -37,12 +37,12 @@ void FiniteStrainMaterial::computeQpStrain()
   RankTwoTensor Fhat = A*Fbar.inverse();
   Fhat.addIa(1.0);
 
-   //C = Fhat Fhat^T;
-  RankTwoTensor Chat = Fhat*Fhat.transpose();
+   //Cinv - I = B B^T - B - B^T;
+  RankTwoTensor B(-Fbar.inverse()); //B = I - Fbarinv
+  B.addIa(1.0);
+  RankTwoTensor Cinv_I = B*B.transpose() - B - B.transpose();
 
   //strain rate D from Taylor expansion, D = 1/dt(-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
-  RankTwoTensor Cinv_I(Chat.inverse());
-  Chat.addIa(-1.0);
   RankTwoTensor D = (-Cinv_I/2.0 + Cinv_I*Cinv_I/4.0)/_t_step;
 
   //Calculate rotation Rhat
