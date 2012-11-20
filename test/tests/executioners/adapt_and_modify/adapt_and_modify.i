@@ -62,7 +62,7 @@
 []
 
 [Adaptivity]
-  marker = combo
+  marker = rhm # Switch to combo to get the effect of both
   [./Indicators]
     [./gji]
       type = GradientJumpIndicator
