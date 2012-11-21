@@ -265,12 +265,11 @@ class TestHarness:
       return False
 
     # Check for skipped tests
-    if test.type(SKIP) is bool:
+    if test.type(SKIP) is bool and test[SKIP]:
       # Backwards compatible (no reason)
-      if test[SKIP]:
-        self.handleTestResult(test, '', 'skipped')
-        return False
-    elif test.isValid(SKIP):
+      self.handleTestResult(test, '', 'skipped')
+      return False
+    elif test.type(SKIP) is not bool and test.isValid(SKIP):
       skip_message = test[SKIP]
       # We might want to trim the string so it formats nicely
       if len(skip_message) >= TERM_COLS - (len(test[TEST_NAME])+21):
@@ -407,7 +406,7 @@ class TestHarness:
 
     if result.find('OK') != -1:
       self.num_passed += 1
-    elif 'skipped' in result:
+    elif result.find('skipped') != -1:
       self.num_skipped += 1
     else:
       self.num_failed += 1
