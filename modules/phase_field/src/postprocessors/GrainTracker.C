@@ -32,7 +32,7 @@ GrainTracker::GrainTracker(const std::string & name, InputParameters parameters)
   // Size the data structures to hold the correct number of maps
   _bounding_boxes.resize(_maps_size);
   
-  _region_to_grain[0] = 0; // Zero indicates no grain - we need a place holder for this one postion
+//  _region_to_grain[0] = 0; // Zero indicates no grain - we need a place holder for this one postion
 }
 
 GrainTracker::~GrainTracker()
@@ -48,15 +48,11 @@ GrainTracker::getNodeValue(unsigned int node_id, unsigned int var_idx) const
   
   if (_t_step < _tracking_step)
     return 0;
-
-  // When running threaded - we won't have the complete map
-  // since we don't exchange areas marked with zero.  In this
-  // case we can just return zero for nodes NOT in the map
+  
   if (_bubble_maps[var_idx].find(node_id) == _bubble_maps[var_idx].end())
     return 0;
-  
-  unsigned int region_id = _bubble_maps[var_idx].at(node_id) + _region_offsets[var_idx];
-  return _region_to_grain.at(region_id);
+  else
+    return _bubble_maps[var_idx].at(node_id);
 }
 
 void
@@ -111,10 +107,10 @@ GrainTracker::finalize()
 
   remapGrains();
 
+  updateNodeInfo();
+  
   // Update the region offsets so we can get unique bubble numbers in multimap mode
-  if (_global_numbering)
-    for (unsigned int map_num=1; map_num < _maps_size; ++map_num)
-      _region_offsets[map_num] = _region_offsets[map_num -1] + _region_counts[map_num - 1];
+//  updateRegionOffsets();
 }
 
 void
@@ -287,7 +283,7 @@ GrainTracker::trackGrains()
       if (_t_step == _tracking_step) // Start tracking when the time_step == the tracking_step
       {
         _unique_grains[counter] = new UniqueGrain(curr_var, box_ptrs, curr_centroid, &it1->_nodes);
-        _region_to_grain[counter] = counter;
+//        _region_to_grain[counter] = counter;
       }
       else // See if we can match up new grains with the existing grains
       {
@@ -329,7 +325,7 @@ GrainTracker::trackGrains()
         // add the new
         closest_match->second = new UniqueGrain(curr_var, box_ptrs, curr_centroid, &it1->_nodes);
 
-        _region_to_grain[counter] = closest_match->first;
+//        _region_to_grain[counter] = closest_match->first;
       }
       ++counter;
     }
@@ -446,15 +442,35 @@ GrainTracker::remapGrains()
               }
               // Update the variable index in the unique grain datastructure
               grain_it1->second->variable_idx = variable_idx;
+//              // Update other data structures that will be effected by this remapping
+//              _region_counts[variable_idx]++;
+//              _region_counts[curr_var_idx]--;
+//              updateRegionOffsets();
               
               _fe_problem.getNonlinearSystem().solution().close();
               _fe_problem.getNonlinearSystem().sys().update();
             }
-
-            // TODO: Need to update _region_counts and _region_offsets and perhaps other datastructures that could be out of date?
           }
         }
       }
+    }
+  }
+}
+
+void
+GrainTracker::updateNodeInfo()
+{
+  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+    _bubble_maps[map_num].clear();
+  
+  for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
+  {
+    unsigned int curr_var = grain_it->second->variable_idx;
+    for (std::set<unsigned int>::const_iterator node_it = grain_it->second->nodes_ptr->begin();
+         node_it != grain_it->second->nodes_ptr->end(); ++node_it)
+    {
+      const Node & curr_node = _mesh.node(*node_it);
+      _bubble_maps[_single_map_mode ? 0 : curr_var][curr_node.id()] = grain_it->first;
     }
   }
 }
