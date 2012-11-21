@@ -196,28 +196,31 @@ class ParamTable:
     # First, loop through and add all data that corresponds to YAML
     for group_name,table_widget in self.group_table_widgets.items():
       for i in xrange(0,table_widget.rowCount()):
-        row_name = str(table_widget.item(i,0).text())
+        item = table_widget.item(i,0)
 
-        if row_name in the_data and (overwrite_type == True or row_name != 'type'):
-          if type(table_widget.cellWidget(i,1)) is QtGui.QComboBox:
-            incoming_value = None
-            if the_data[row_name] == '1' or the_data[row_name] == 'true':
-              incoming_value = 'true'
+        if item:
+          row_name = str(item.text())
+
+          if row_name in the_data and (overwrite_type == True or row_name != 'type'):
+            if type(table_widget.cellWidget(i,1)) is QtGui.QComboBox:
+              incoming_value = None
+              if the_data[row_name] == '1' or the_data[row_name] == 'true':
+                incoming_value = 'true'
+              else:
+                incoming_value = 'false'
+
+              cb = table_widget.cellWidget(i,1)
+              found_index = cb.findText(incoming_value)
+              cb.setCurrentIndex(found_index)
             else:
-              incoming_value = 'false'
+              item = table_widget.item(i,1)
+              item.setText(str(the_data[row_name]))
 
-            cb = table_widget.cellWidget(i,1)
-            found_index = cb.findText(incoming_value)
-            cb.setCurrentIndex(found_index)
-          else:
-            item = table_widget.item(i,1)
-            item.setText(str(the_data[row_name]))
+            if row_name in self.param_comments:
+              item = table_widget.item(i,3)
+              item.setText(self.param_comments[row_name])
 
-          if row_name in self.param_comments:
-            item = table_widget.item(i,3)
-            item.setText(self.param_comments[row_name])
-
-          used_params.append(row_name)
+            used_params.append(row_name)
 
     # Now look to see if we have more data that wasn't in YAML and add additional rows for that
     for name,value in the_data.items():
@@ -239,30 +242,32 @@ class ParamTable:
     the_data = {}
     for group_name,table_widget in self.group_table_widgets.items():
       for i in xrange(0,table_widget.rowCount()):
-        param_name = str(table_widget.item(i,0).text())
-        param_value = None
-        if type(table_widget.cellWidget(i,1)) is QtGui.QComboBox:
-          param_value = table_widget.cellWidget(i,1).currentText()
-        else:
-          param_value = str(table_widget.item(i,1).text())
+        item = table_widget.item(i,0)
+        if item:
+          param_name = str(item.text())
+          param_value = None
+          if type(table_widget.cellWidget(i,1)) is QtGui.QComboBox:
+            param_value = table_widget.cellWidget(i,1).currentText()
+          else:
+            param_value = str(table_widget.item(i,1).text())
 
-        if param_value == '':
-          continue
+          if param_value == '':
+            continue
 
-        # If they put single quotes in... just remove them
-        param_value = str(param_value).strip("'")
+          # If they put single quotes in... just remove them
+          param_value = str(param_value).strip("'")
 
-        if not param_name in self.original_table_data or self.original_table_data[param_name] != param_value: #If we changed it - definitely include it
-          the_data[param_name] = param_value
-        else:
-          if not only_not_in_original: # If we want stuff other than what we changed
-            if param_name == 'parent_params' or param_name == 'type':  #Pass through type and parent_params even if we didn't change them
-              the_data[param_name] = param_value
+          if not param_name in self.original_table_data or self.original_table_data[param_name] != param_value: #If we changed it - definitely include it
+            the_data[param_name] = param_value
+          else:
+            if not only_not_in_original: # If we want stuff other than what we changed
+              if param_name == 'parent_params' or param_name == 'type':  #Pass through type and parent_params even if we didn't change them
+                the_data[param_name] = param_value
 
-        comment = str(table_widget.item(i,3).text())
+          comment = str(table_widget.item(i,3).text())
 
-        if comment != '':
-          self.param_comments[param_name] = comment
+          if comment != '':
+            self.param_comments[param_name] = comment
 #          else:
 #            if param_name in self.param_is_required and self.param_is_required[param_name]: #Pass through any 'required' parameters
 #              the_data[param_name] = param_value
