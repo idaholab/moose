@@ -71,7 +71,8 @@ protected:
   Point calculateCentroid(const std::vector<BoundingBoxInfo *> & box_ptrs) const;
 //  void reflood(const Node *node, std::map<unsigned int, int> &bubble_map, int current_idx);
 
-  unsigned int _tracking_step;
+  const unsigned int _tracking_step;
+  const Real _hull_buffer;
   std::vector<std::list<BoundingBoxInfo *> > _bounding_boxes;
   std::map<unsigned int, UniqueGrain *> _unique_grains;
   std::map<unsigned int, unsigned int> _region_to_grain;

@@ -15,6 +15,7 @@ InputParameters validParams<GrainTracker>()
   params.addRequiredParam<int>("crys_num","number of grains");
   params.addRequiredParam<std::string>("var_name_base","base for variable names");
   params.addParam<unsigned int>("tracking_step", 1, "The timestep for when we should start tracking grains");
+  params.addParam<Real>("convex_hull_buffer", 1.0, "The buffer around the convex hull used to determine when features intersect");
 
   params.suppressParameter<std::vector<VariableName> >("variable");
 
@@ -24,6 +25,7 @@ InputParameters validParams<GrainTracker>()
 GrainTracker::GrainTracker(const std::string & name, InputParameters parameters) :
     NodalFloodCount(name, AddV(parameters, "variable")),
     _tracking_step(getParam<unsigned int>("tracking_step")),
+    _hull_buffer(getParam<Real>("convex_hull_buffer")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
     _gen_mesh(dynamic_cast<GeneratedMesh *>(&_mesh))
 {
@@ -358,15 +360,15 @@ GrainTracker::remapGrains()
    * Loop over each grain and see if the bounding boxes of the current grain intersect with the boxes of any other grains
    * represented by the same variable.
    */
-  Point p;
+  Point buffer;
   switch (_gen_mesh->dimension())
   {
   case 1:
     mooseError("1D is not supported");
   case 2:
-    p.assign(Point(0.02, 0.02, 0));
+    buffer.assign(Point(_hull_buffer, _hull_buffer, 0));
   case 3:
-    p.assign(Point(0.02, 0.02, 0.02));
+    buffer.assign(Point(_hull_buffer, _hull_buffer, _hull_buffer));
   }
   
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it1 = _unique_grains.begin(); grain_it1 != _unique_grains.end(); ++grain_it1)
@@ -385,14 +387,14 @@ GrainTracker::remapGrains()
       for (std::vector<BoundingBoxInfo *>::iterator box_it1 = grain_box1.begin(); box_it1 != grain_box1.end(); ++box_it1)
       {
         MeshTools::BoundingBox box1 = *(*box_it1)->b_box;
-        box1.min() -= p;  
-        box1.max() += p;
+        box1.min() -= buffer;  
+        box1.max() += buffer;
         
         for (std::vector<BoundingBoxInfo *>::iterator box_it2 = grain_box2.begin(); box_it2 != grain_box2.end(); ++box_it2)
         {
           MeshTools::BoundingBox box2 = *(*box_it2)->b_box;
-          box2.min() -= p;  
-          box2.max() += p;
+          box2.min() -= buffer;  
+          box2.max() += buffer;
           
           if (box1.intersect(box2) &&                                               // Do the boxes intersect
               grain_it1->second->variable_idx == grain_it2->second->variable_idx)   // and are the represented by the same variable?
