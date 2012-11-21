@@ -1,5 +1,3 @@
-from sets import Set
-
 class InputParameters:
   def __init__(self):
     self.valid = {}
