@@ -117,9 +117,7 @@ NodalFloodCount::finalize()
   mergeSets();
 
   // Update the region offsets so we can get unique bubble numbers in multimap mode
-  if (_global_numbering)
-    for (unsigned int map_num=1; map_num < _maps_size; ++map_num)
-      _region_offsets[map_num] = _region_offsets[map_num -1] + _region_counts[map_num - 1];
+  updateRegionOffsets();
 }
 
 Real
@@ -446,4 +444,13 @@ NodalFloodCount::appendPeriodicNeighborNodes(std::vector<std::set<unsigned int> 
     data[i] = merged_sets;
   }
   return inserted_counts;
+}
+
+void
+NodalFloodCount::updateRegionOffsets()
+{
+  if (_global_numbering)
+    // Note: We never need to touch offset zero - it should *always* be zero
+    for (unsigned int map_num=1; map_num < _maps_size; ++map_num)
+      _region_offsets[map_num] = _region_offsets[map_num -1] + _region_counts[map_num - 1];
 }

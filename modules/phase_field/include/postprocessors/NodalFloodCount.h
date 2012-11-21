@@ -98,6 +98,12 @@ protected:
    */
   unsigned int appendPeriodicNeighborNodes(std::vector<std::set<unsigned int> > & data) const;
 
+  /**
+   * This routine updates the _region_offsets variable which is useful for quickly determining
+   * the proper global number for a bubble when using multimap mode
+   */
+  void updateRegionOffsets();
+
   /// The threshold above which neighboring nodes are flooding with adjacent markings
   Real _threshold;
 
