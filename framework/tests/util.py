@@ -109,18 +109,52 @@ def getCompilers(libmesh_dir):
   return compilers
 
 def getPetscVersion(libmesh_dir):
-  # We'll use the petsc-major string from $LIBMESH_DIR/Make.common
-  # to figure this out
-  # Supported versions are 2, 3
-  f = open(libmesh_dir + '/Make.common')
+  # We'll use PETSc's own header file to determine the PETSc major version
+  # Supported versions are 2, 3.
+  #
+  # Note: we used to find this info in Make.common, but in the
+  # automake version of libmesh, this information is no longer stored
+  # in Make.common, but rather in
+  #
+  # $LIBMESH_DIR/lib/${AC_ARCH}_${METHOD}/pkgconfig/Make.common.${METHOD}
+  #
+  # where ${AC_ARCH} is an architecture-dependent string determined by
+  # libmesh's config.guess.  So we could try to look there, but it's
+  # easier and more portable to look in ${PETSC_DIR}.
+
+  # Default to something that doesn't make sense
+  petsc_version = '1'
+
+  # Get user's PETSC_DIR from environment.
+  petsc_dir = os.environ.get('PETSC_DIR')
+
+  # environ.get returns 'none' if no such environment variable exists.
+  if petsc_dir == 'none':
+    print "PETSC_DIR not found in environment!  Cannot detect PETSc version!"
+    exit(1)
+
+  # FIXME: handle I/O exceptions when opening this file
+  f = open(petsc_dir + '/include/petscversion.h')
+
   for line in f.readlines():
-    if line.find('petsc-version') != -1:
-      m = re.search(r'=\s*(\S+)', line)
-      if m != None:
-        raw_version = m.group(1)
-        petsc_version = raw_version
-        break
+    if line.find('#define PETSC_VERSION_MAJOR') != -1:
+      # The line is probably (hopefully!) always going to be of the form
+      # #define PETSC_VERSION_MAJOR      X
+      # where X is some number, so in python, we can split the string and
+      # pop the last substring (the version) off the end.
+      petsc_version = line.split().pop()
+      break
+
+  # Done with the file, so we can close it now
   f.close()
+
+  # If petsc_version was not found (i.e. it's still 1) then we can't continue :(
+  if petsc_version == '1':
+    print("Error: could not determine valid PETSc major version.")
+    exit(1)
+
+  # print "Running tests assuming PETSc version", petsc_version
+
   return petsc_version
 
 
