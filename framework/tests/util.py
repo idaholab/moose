@@ -123,25 +123,60 @@ def getPetscVersion(libmesh_dir):
   f.close()
   return petsc_version
 
+
+
 def getParmeshOption(libmesh_dir):
   # Some tests work differently with parallel mesh enabled
   # We need to detect this condition
   parmesh = set()
-  f = open(libmesh_dir + '/include/base/libmesh_config.h')
-  for line in f.readlines():
-    m = re.search(r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)', line)
-    if m != None:
-      if m.group(1) == '1':
-        parmesh.add('PARALLEL')
-      else:
-        parmesh.add('SERIAL')
+
+  # We check libmesh_config.h for LIBMESH_ENABLE_PARMESH
+  filenames = [
+    libmesh_dir + '/include/base/libmesh_config.h',   # Old location
+    libmesh_dir + '/include/libmesh/libmesh_config.h' # New location
+    ];
+
+  success = 0
+
+  for filename in filenames:
+    if success == 1:
       break
+
+    try:
+      f = open(filename)
+
+      for line in f.readlines():
+        m = re.search(r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)', line)
+        if m != None:
+          if m.group(1) == '1':
+            parmesh.add('PARALLEL')
+          else:
+            parmesh.add('SERIAL')
+          break
+
+      f.close()
+      success = 1
+
+    except IOError as e:
+      #print "Warning: I/O Error trying to read", filename, ":", e.strerror, "... Will try other locations."
+      pass
+
+
+  if success == 0:
+    print "Error! Could not find libmesh_config.h in any of the usual locations!"
+    exit(1)
+
+
   # If we didn't find the #define indicated by having no entries in our set, then parmesh is off
   if not len(parmesh):
     parmesh.add('SERIAL')
   parmesh.add('ALL')
-  f.close()
+
   return parmesh
+
+
+
+
 
 def getSharedOption(libmesh_dir):
   # Some tests may only run properly with shared libraries on/off
