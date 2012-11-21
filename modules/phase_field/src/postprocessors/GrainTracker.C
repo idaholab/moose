@@ -55,7 +55,7 @@ GrainTracker::getNodeValue(unsigned int node_id, unsigned int var_idx) const
   if (_bubble_maps[var_idx].find(node_id) == _bubble_maps[var_idx].end())
     return 0;
   
-  unsigned int region_id = _bubble_maps[var_idx].at(node_id);
+  unsigned int region_id = _bubble_maps[var_idx].at(node_id) + _region_offsets[var_idx];
   return _region_to_grain.at(region_id);
 }
 
@@ -110,6 +110,11 @@ GrainTracker::finalize()
   trackGrains();
 
   remapGrains();
+
+  // Update the region offsets so we can get unique bubble numbers in multimap mode
+  if (_global_numbering)
+    for (unsigned int map_num=1; map_num < _maps_size; ++map_num)
+      _region_offsets[map_num] = _region_offsets[map_num -1] + _region_counts[map_num - 1];
 }
 
 void
@@ -404,7 +409,7 @@ GrainTracker::remapGrains()
              * We need to map to the variable furthest away from this one (by centroids).
              */
             Real max_distance = 0;
-            Real variable_idx = std::numeric_limits<unsigned int>::max();
+            unsigned int variable_idx = std::numeric_limits<unsigned int>::max();
             for (std::map<unsigned int, UniqueGrain *>::iterator grain_it3 = _unique_grains.begin(); grain_it3 != _unique_grains.end(); ++grain_it3)
             {
               // Skip grains that are represented by this variable, you can't remap to yourself!
@@ -415,7 +420,7 @@ GrainTracker::remapGrains()
               if (max_distance < curr_centroid_diff)
               {
                 max_distance = curr_centroid_diff;
-                variable_idx = grain_it1->second->variable_idx;
+                variable_idx = grain_it3->second->variable_idx;
               }
             }
 
