@@ -37,6 +37,7 @@ InputParameters validParams<NodalFloodCount>()
   params.addParam<Real>("threshold", 0.5, "The threshold value of the bubble boundary");
   params.addParam<std::string>("elem_avg_value", "If supplied, will be used to find the scaled threshold of the bubble edges");
   params.addParam<bool>("use_single_map", true, "Determine whether information is tracked per coupled variable or consolidated into one (default: true)");
+  params.addParam<bool>("use_global_numbering", false, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: false)");
   return params;
 }
 
@@ -46,6 +47,7 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _mesh(_subproblem.mesh()),
     _var_number(_var.number()),
     _single_map_mode(getParam<bool>("use_single_map")),
+    _global_numbering(getParam<bool>("use_global_numbering")),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
     _pbs(NULL),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero)
@@ -54,6 +56,7 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
   _bubble_maps.resize(_maps_size);
   _bubble_sets.resize(_maps_size);
   _region_counts.resize(_maps_size);
+  _region_offsets.resize(_maps_size);
 
   // This map is always size to the number of variables
   _nodes_visited.resize(_vars.size());
@@ -112,6 +115,11 @@ NodalFloodCount::finalize()
   unpack(_packed_data);
 
   mergeSets();
+
+  // Update the region offsets so we can get unique bubble numbers in multimap mode
+  if (_global_numbering)
+    for (unsigned int map_num=1; map_num < _maps_size; ++map_num)
+      _region_offsets[map_num] = _region_offsets[map_num -1] + _region_counts[map_num - 1];
 }
 
 Real
@@ -133,7 +141,7 @@ NodalFloodCount::getNodeValue(unsigned int node_id, unsigned int var_idx) const
   std::map<unsigned int, int>::const_iterator node_it = _bubble_maps[var_idx].find(node_id);
 
   if (node_it != _bubble_maps[var_idx].end())
-    return node_it->second;
+    return node_it->second + _region_offsets[var_idx];
   else
     return 0;
 }

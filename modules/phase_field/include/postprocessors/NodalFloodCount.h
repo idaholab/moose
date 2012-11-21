@@ -114,6 +114,9 @@ protected:
   /// This variable is used to indicate whether or not multiple maps are used during flooding
   bool _single_map_mode;
 
+  /// This variable is used to indicate whether or not we identify bubbles with unique numbers on multiple maps
+  bool _global_numbering;
+
   /// Convienence variable holding the size of all the datastructures size by the number of maps
   const unsigned int _maps_size;
 
@@ -138,6 +141,9 @@ protected:
 
   /// This data structure is used to keep track of which bubbles are owned by which variables (index).
   std::vector<unsigned int> _region_to_var_idx;
+
+  /// This data structure holds the offset value for unique bubble ids (updated inside of finalize)
+  std::vector<unsigned int> _region_offsets;
 
   /**
    * The data structure used to join partial bubbles between processes and/or threads.  We may have a list of BubbleData

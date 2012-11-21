@@ -163,6 +163,7 @@
     threshold = 0.3
     execute_on = timestep
     use_single_map = false
+    use_global_numbering = true
   [../]
 []
 
