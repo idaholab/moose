@@ -109,8 +109,8 @@ def getCompilers(libmesh_dir):
   return compilers
 
 def getPetscVersion(libmesh_dir):
-  # We'll use PETSc's own header file to determine the PETSc major version
-  # Supported versions are 2, 3.
+  # We'll use PETSc's own header file to determine the PETSc version
+  # (major.minor).  If necessary in the future we'll also detect subminor...
   #
   # Note: we used to find this info in Make.common, but in the
   # automake version of libmesh, this information is no longer stored
@@ -123,7 +123,8 @@ def getPetscVersion(libmesh_dir):
   # easier and more portable to look in ${PETSC_DIR}.
 
   # Default to something that doesn't make sense
-  petsc_version = '1'
+  petsc_version_major = 'x'
+  petsc_version_minor = 'x'
 
   # Get user's PETSC_DIR from environment.
   petsc_dir = os.environ.get('PETSC_DIR')
@@ -136,22 +137,34 @@ def getPetscVersion(libmesh_dir):
   # FIXME: handle I/O exceptions when opening this file
   f = open(petsc_dir + '/include/petscversion.h')
 
+  # The version lines are (hopefully!) always going to be of the form
+  # #define PETSC_VERSION_MAJOR      X
+  # where X is some number, so in python, we can split the string and
+  # pop the last substring (the version) off the end.
   for line in f.readlines():
     if line.find('#define PETSC_VERSION_MAJOR') != -1:
-      # The line is probably (hopefully!) always going to be of the form
-      # #define PETSC_VERSION_MAJOR      X
-      # where X is some number, so in python, we can split the string and
-      # pop the last substring (the version) off the end.
-      petsc_version = line.split().pop()
+      petsc_version_major = line.split().pop()
+
+    elif line.find('#define PETSC_VERSION_MINOR') != -1:
+      petsc_version_minor = line.split().pop()
+
+    # See if we're done.
+    if (petsc_version_major != 'x' and petsc_version_minor != 'x'):
       break
 
   # Done with the file, so we can close it now
   f.close()
 
-  # If petsc_version was not found (i.e. it's still 1) then we can't continue :(
-  if petsc_version == '1':
+  # If either version was not found, then we can't continue :(
+  if petsc_version_major == 'x':
     print("Error: could not determine valid PETSc major version.")
     exit(1)
+
+  if petsc_version_minor == 'x':
+    print("Error: could not determine valid PETSc minor version.")
+    exit(1)
+
+  petsc_version = petsc_version_major + '.' + petsc_version_minor
 
   # print "Running tests assuming PETSc version", petsc_version
 
