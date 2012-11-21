@@ -5,7 +5,7 @@
 #include "vector_value.h"
 
 #include "RELAP7.h"
-#include "Component.h"
+#include "GeometricalComponent.h"
 #include "Model.h"
 
 class PipeBase;
@@ -20,7 +20,7 @@ InputParameters validParams<PipeBase>();
  * Mesh: mesh is generated in such a way, that the pipe starts at the origin (0, 0, 0) and is aligned with x-axis. Its
  * subdivided into _n_elems elements (of type EDGE2).
  */
-class PipeBase : public Component,
+class PipeBase : public GeometricalComponent,
     public Model
 {
 public:
@@ -32,9 +32,6 @@ public:
   virtual void addMooseObjects();
   virtual const std::string & getType() { return _type; }
 
-  virtual Point getPosition() { return _position; }
-  virtual RealVectorValue getDirection() { return _dir; }
-
   // Pipe specific interface ----
   virtual Node * getBoundaryNode(RELAP7::EEndType id);
   virtual unsigned int getBoundaryId(RELAP7::EEndType id);
@@ -43,12 +40,8 @@ public:
   virtual Real getLength() { return _length; }
 
 protected:
-  /// Physical position in the space
-  Point _position;
   /// Offset for mesh generation
   Point _offset;
-  /// Direction this pipe is going to
-  RealVectorValue _dir;
   /// Length of the pipe
   Real _length;
   /// Number of elements this pipe is divided into

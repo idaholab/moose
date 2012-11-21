@@ -16,14 +16,12 @@ const std::string PipeBase::_type("pipe");
 template<>
 InputParameters validParams<PipeBase>()
 {
-  InputParameters params = validParams<Component>();
+  InputParameters params = validParams<GeometricalComponent>();
   params.addParam("component_type", PipeBase::_type, "The type of the component");
   //Input parameters [NO] default values should be given.
-  params.addRequiredParam<std::vector<Real> >("position", "Origin (start) of the pipe");
 
   std::vector<Real> zr(LIBMESH_DIM, 0.);
   params.addParam<std::vector<Real> >("offset", zr, "Offset of the origin for mesh generation");
-  params.addRequiredParam<std::vector<Real> >("orientation", "Orientation vector of the pipe");
   params.addRequiredParam<Real>("length", "Length of the pipe");
   params.addRequiredParam<unsigned int>("n_elems", "number of element in this pipe");
   params.addRequiredParam<Real>("A", "Area of the pipe");
@@ -47,9 +45,8 @@ InputParameters validParams<PipeBase>()
 
 
 PipeBase::PipeBase(const std::string & name, InputParameters params) :
-    Component(name, params),
+    GeometricalComponent(name, params),
     Model(params),
-    _position(toPoint(getParam<std::vector<Real> >("position"))),
     _offset(toPoint(getParam<std::vector<Real> >("offset"))),
     _length(getParam<Real>("length")),
     _n_elems(getParam<unsigned int>("n_elems")),
@@ -71,9 +68,6 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
     _initial_V(_has_initial_V ? getParam<Real>("initial_V") : 0.),
     _initial_T(_has_initial_T ? getParam<Real>("initial_T") : 300)
 {
-  const std::vector<Real> & dir = getParam<std::vector<Real> >("orientation");
-  _dir = VectorValue<Real>(dir[0], dir[1], dir[2]);
-
   //compute the gravity along the pipe direction.
   RealVectorValue gravity_vector = _sim.getParam<VectorValue<Real> >("gravity");
   _gx = _dir * gravity_vector / _dir.size();
