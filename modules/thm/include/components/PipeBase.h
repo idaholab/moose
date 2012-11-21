@@ -33,9 +33,6 @@ public:
   virtual const std::string & getType() { return _type; }
 
   // Pipe specific interface ----
-  virtual Node * getBoundaryNode(RELAP7::EEndType id);
-  virtual unsigned int getBoundaryId(RELAP7::EEndType id);
-  virtual int getBoundaryOutNorm(RELAP7::EEndType id);
   virtual Real getArea() { return _A; }
   virtual Real getLength() { return _length; }
 
@@ -89,16 +86,6 @@ protected:
   std::vector<unsigned int> node_ids;
   /// Elements ids of this pipe component
   std::vector<unsigned int> elem_ids;
-
-  /// Boundary nodes of this pipe (indexing: local "node id" => Node).
-  /// Local node IDs are used by other components for connecting
-  std::map<RELAP7::EEndType, Node *> _bnd_nodes;
-
-  /// Boundary id of this pipe (indexing: local "node id" => boundary_id).
-  std::map<RELAP7::EEndType, unsigned int> _bnd_ids;
-
-  /// Out norm (either 1 or -1) on boundaries
-  std::map<RELAP7::EEndType, int> _bnd_out_norm;
 
   /// Is initial pressure provided from user input
   bool _has_initial_P;

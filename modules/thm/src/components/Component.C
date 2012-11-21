@@ -98,6 +98,7 @@ Component::split(const std::string & rname)
 Component::Component(const std::string & name, InputParameters parameters) :
     R7Object(name, parameters),
     _id(comp_id++),
+    _parent(parameters.have_parameter<Component *>("_parent") ? getParam<Component *>("_parent") : NULL),
     _sim(*getParam<Simulation *>("_sim")),
     _mesh(_sim.mesh()),
     _model_type(_sim.getParam<Model::EModelType>("model_type")),
@@ -145,6 +146,8 @@ Component::getNextSubdomainId()
 {
   unsigned int sd_id = subdomain_ids++;
   _subdomains.push_back(sd_id);
+  if (_parent)
+    _parent->_subdomains.push_back(sd_id);
   return sd_id;
 }
 

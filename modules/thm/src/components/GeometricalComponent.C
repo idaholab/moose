@@ -22,3 +22,34 @@ GeometricalComponent::GeometricalComponent(const std::string & name, InputParame
 GeometricalComponent::~GeometricalComponent()
 {
 }
+
+Node *
+GeometricalComponent::getBoundaryNode(RELAP7::EEndType id)
+{
+  std::map<RELAP7::EEndType, Node *>::iterator it = _bnd_nodes.find(id);
+  if (it != _bnd_nodes.end())
+    return it->second;
+  else
+    return NULL;
+}
+
+unsigned int
+GeometricalComponent::getBoundaryId(RELAP7::EEndType id)
+{
+  std::map<RELAP7::EEndType, unsigned int>::iterator it = _bnd_ids.find(id);
+  if (it != _bnd_ids.end())
+    return it->second;
+  else
+    mooseError("Component " << name() << " does not have this type of end defined.");
+}
+
+Real
+GeometricalComponent::getBoundaryOutNorm(RELAP7::EEndType id)
+{
+  std::map<RELAP7::EEndType, Real>::iterator it = _bnd_out_norm.find(id);
+  if (it != _bnd_out_norm.end())
+    return it->second;
+  else
+    mooseError("Component " << name() << " does not have this type of end defined.");
+  return 0;
+}

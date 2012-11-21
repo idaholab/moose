@@ -126,6 +126,8 @@ public:
 protected:
   /// Unique ID of this component
   unsigned int _id;
+  /// Pointer to a parent component (used in composed compoennts)
+  Component * _parent;
 
   /// Simulation this component is part of
   Simulation & _sim;
