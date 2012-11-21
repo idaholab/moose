@@ -55,13 +55,19 @@ protected:
   class UniqueGrain
   {
   public:
-    UniqueGrain(unsigned int var_idx, const std::vector<BoundingBoxInfo *> & b_box_ptrs, const Point & p_centroid);
+    UniqueGrain(unsigned int var_idx, const std::vector<BoundingBoxInfo *> & b_box_ptrs, const Point & p_centroid, const std::set<unsigned int> *nodes_pt);
     ~UniqueGrain();
 
     unsigned int variable_idx;
     Point centroid;
     std::vector<BoundingBoxInfo *> box_ptrs;
     STATUS status;
+    /**
+     * Pointer to the actual nodes ids.  Note: This pointer is not always valid.  It is invalid
+     * after new sets are built before "trackGrains" has been re-run.  This is intentional and lets us
+     * avoid making unnecessary copies of the set when we don't need it.
+     */
+    const std::set<unsigned int> *nodes_ptr;
   };
 
 

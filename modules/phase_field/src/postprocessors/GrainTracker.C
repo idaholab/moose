@@ -286,7 +286,7 @@ GrainTracker::trackGrains()
        */
       if (_t_step == _tracking_step) // Start tracking when the time_step == the tracking_step
       {
-        _unique_grains[counter] = new UniqueGrain(curr_var, box_ptrs, curr_centroid);
+        _unique_grains[counter] = new UniqueGrain(curr_var, box_ptrs, curr_centroid, &it1->_nodes);
         _region_to_grain[counter] = counter;
       }
       else // See if we can match up new grains with the existing grains
@@ -327,7 +327,7 @@ GrainTracker::trackGrains()
         // Now we want to update the grain information
         delete closest_match->second;
         // add the new
-        closest_match->second = new UniqueGrain(curr_var, box_ptrs, curr_centroid);
+        closest_match->second = new UniqueGrain(curr_var, box_ptrs, curr_centroid, &it1->_nodes);
 
         _region_to_grain[counter] = closest_match->first;
       }
@@ -426,89 +426,38 @@ GrainTracker::remapGrains()
 
             std::cout << "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first << "\n";
             std::cout << "Remapping to: " << variable_idx << " at a distance of " << max_distance << "\n";
-            /**
-             * At this point we've found a grain that needs to be remapped.  We need to flood all of it's values again with a lower tolerance
-             * than we may have used previously.  There really isn't any good way around this.  We'd have to maintain multiple bubble maps
-             * for multiple order parameters if we wanted to flood them all completely and then we'd have overlapping regions in series of maps.
-             */
+            
+            // Remap the grain
+            {
+              unsigned int curr_var_idx = grain_it1->second->variable_idx;
+              for (std::set<unsigned int>::const_iterator node_it = grain_it1->second->nodes_ptr->begin();
+                   node_it != grain_it1->second->nodes_ptr->end(); ++node_it)
+              {
+                Node * curr_node = _mesh.node_ptr(*node_it);
 
-//            // Now we need to reflood this particular grain so that we can remap all of its values to another variable
-//            std::map<unsigned int, int> local_grain_map;
-//            for (std::vector<BoundingBoxInfo *>::iterator box_it3 = grain_box1.begin(); box_it1 != grain_box1.end(); ++box_it1)
-//            {
-//              // retrieve a Node * from the mesh based for each bounding box
-//              Node &node = _mesh.node((*box_it3)->member_node_id);
-// 
-//              // TODO: Figure out how to remark all nodes in this grain in parallel
-//              //       The member_node_id is the first id in the _bubble_sets data structure.
-//              //       We should be able to loop over the _bubble_sets looking the the matching set
-//              //       of nodes.
-//              //
-//              //       In parallel we can use this information to fully seed the information we need
-//              //       to reflood (actually we probably can't - DAMNIT)
-//            }
-// 
-//            //DEBUG
-//            std::cout << "The Following Nodes will be remapped:\n";
-//            for (std::map<unsigned int, int>::iterator node_it = local_grain_map.begin(); node_it != local_grain_map.end(); ++node_it)
-//            {
-//              if (node_it->second == 1)
-//                std::cout << node_it->first << " ";
-//            }
-//            std::cout << "\n";
-//            //DEBUG
+                // Copy Value from intersecting variable to new variable
+                _subproblem.reinitNode(curr_node, 0);
+                _vars[variable_idx]->setNodalValue(_vars[curr_var_idx]->getNodalValue(*curr_node));
+                _vars[variable_idx]->insert(_fe_problem.getNonlinearSystem().solution());
 
-            // TODO : Make sure we aren't intersecting still
+                // Set the value in the intersecting variable to zero
+                _vars[curr_var_idx]->setNodalValue(0.0);
+                _vars[curr_var_idx]->insert(_fe_problem.getNonlinearSystem().solution());
+              }
+              // Update the variable index in the unique grain datastructure
+              grain_it1->second->variable_idx = variable_idx;
+              
+              _fe_problem.getNonlinearSystem().solution().close();
+              _fe_problem.getNonlinearSystem().sys().update();
+            }
+
+            // TODO: Need to update _region_counts and _region_offsets and perhaps other datastructures that could be out of date?
           }
         }
       }
     }
   }
 }
-
-/*
-void
-GrainTracker::reflood(const Node *node, std::map<unsigned int, int> &bubble_map, int current_idx)
-{
-  if (node == NULL)
-    return;
-  
-  unsigned int node_id = node->id();
-
-  // Has this node already been marked? - if so move along
-  if (bubble_map.find(node_id) != bubble_map.end())
-    return;
-
-  
-  //  This node hasn't been marked - check to see if it in a bubble.
-  //  If current_idx is set (>= zero) then we are in the process of marking a bubble.
-  if (_vars[current_idx]->getNodalValue(*node) < 1e-5)
-  {
-    // No - mark and return
-    _bubble_map[node_id] = 0;
-    return;
-  }
-
-  std::vector< const Node * > neighbors;
-  MeshTools::find_nodal_neighbors(_mesh._mesh, *node, _nodes_to_elem_map, neighbors);
-  // Important!  If this node doesn't have any neighbors (i.e. floating node in the center
-  // of an element) we need to just unmark it for now since it can't be easiliy flooded
-  if (neighbors.size() == 0)
-  {
-    _bubble_map[node_id] = 0;
-    return;
-  }
-
-  // Yay! A bubble -> Mark it! (If region is zero, that signifies that this is a new bubble)
-  bubble_map[node_id] = 1;
-
-  // Flood neighboring nodes that are also above this threshold with recursion
-  for (unsigned int i=0; i<neighbors.size(); ++i)
-    // Only recurse on nodes this processor owns
-    if (isNodeValueValid(neighbors[i]->id()))
-      reflood(neighbors[i], bubble_map, current_idx);
-}
-*/
 
 Point
 GrainTracker::calculateCentroid(const std::vector<BoundingBoxInfo *> & box_ptrs) const
@@ -555,11 +504,12 @@ GrainTracker::BoundingBoxInfo::BoundingBoxInfo(unsigned int node_id, const RealV
 {}
 
 // Unique Grain
-GrainTracker::UniqueGrain::UniqueGrain(unsigned int var_idx, const std::vector<BoundingBoxInfo *> & b_box_ptrs, const Point & p_centroid) :
+GrainTracker::UniqueGrain::UniqueGrain(unsigned int var_idx, const std::vector<BoundingBoxInfo *> & b_box_ptrs, const Point & p_centroid, const std::set<unsigned int> *nodes_pt) :
     variable_idx(var_idx),
     centroid(p_centroid),
     box_ptrs(b_box_ptrs),
-    status(MARKED)
+    status(MARKED),
+    nodes_ptr(nodes_pt)
 {}
 
 GrainTracker::UniqueGrain::~UniqueGrain()
