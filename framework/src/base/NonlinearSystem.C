@@ -657,6 +657,7 @@ void
 NonlinearSystem::applyPredictor(NumericVector<Number> & initial_solution)
 {
   _time_scheme->applyPredictor(initial_solution);
+  _fe_problem.predictorCleanup(initial_solution);
 }
 
 void

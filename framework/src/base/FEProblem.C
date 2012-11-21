@@ -2547,6 +2547,10 @@ FEProblem::updateSolution(NumericVector<Number>& /*vec_solution*/, NumericVector
 }
 
 void
+FEProblem::predictorCleanup(NumericVector<Number>& /*ghosted_solution*/)
+{}
+
+void
 FEProblem::initDisplacedProblem(MooseMesh * displaced_mesh, InputParameters params)
 {
   if (displaced_mesh == NULL)

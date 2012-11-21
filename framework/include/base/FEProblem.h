@@ -364,6 +364,12 @@ public:
    */
   virtual bool updateSolution(NumericVector<Number>& vec_solution, NumericVector<Number>& ghosted_solution);
 
+  /**
+   * Perform cleanup tasks after application of predictor to solution vector
+   * @param ghosted_solution  Ghosted solution vector
+   */
+  virtual void predictorCleanup(NumericVector<Number>& ghosted_solution);
+
   virtual void computeBounds(NonlinearImplicitSystem & sys, NumericVector<Number> & lower, NumericVector<Number> & upper);
 
   virtual void computeIndicatorsAndMarkers();
