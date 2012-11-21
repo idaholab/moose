@@ -3,7 +3,7 @@ from PyQt4 import QtCore, QtGui
 import vtk
 import time
 from ExodusResult import ExodusResult
-import glob
+import glob, math
 from ContourChoices import *
 
 pathname = os.path.dirname(os.path.realpath(sys.argv[0]))        
@@ -639,6 +639,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     
   def _resetView(self):
     self.renderer.ResetCamera()
+    fp = self.renderer.GetActiveCamera().GetFocalPoint()
+    p = self.renderer.GetActiveCamera().GetPosition()
+    dist = math.sqrt( (p[0]-fp[0])**2 + (p[1]-fp[1])**2 + (p[2]-fp[2])**2 )
+    self.renderer.GetActiveCamera().SetPosition(fp[0], fp[1], fp[2]+dist)
+    self.renderer.GetActiveCamera().SetViewUp(0.0, 1.0, 0.0)
     self.vtkwidget.updateGL()
     
   def _automaticUpdateChanged(self, value):
