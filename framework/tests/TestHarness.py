@@ -162,7 +162,6 @@ class TestHarness:
         params[RELATIVE_PATH] = relative_path
         params[EXECUTABLE] = self.executable
         params[HOSTNAME] = self.host_name
-
         if params.isValid(PREREQ):
           if type(params[PREREQ]) != list:
             print "Option 'PREREQ' needs to be of type list in " + params[TEST_NAME]
@@ -314,6 +313,10 @@ class TestHarness:
       self.handleTestResult(test, '', 'skipped (HEAVY)')
       return False
 
+    # Check for positive scale refine values when using store timing options
+    if test[SCALE_REFINE] == 0 and self.options.store_time:
+      return False
+
     return True
 
   # Break down petsc version logic in a new define
@@ -395,7 +398,6 @@ class TestHarness:
       timing = self.getTiming(output)
 
     self.test_table.append( (specs, output, result, timing, start, end) )
-
     self.postRun(specs, timing)
 
     if self.options.show_directory:
@@ -592,7 +594,7 @@ class TestHarness:
     if opts.libmesh_dir != '':
       self.libmesh_dir = opts.libmesh_dir
 
-  def postRun(self, test, timing):
+  def postRun(self, specs, timing):
     return
 
   def preRun(self):
