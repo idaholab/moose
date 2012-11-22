@@ -16,6 +16,8 @@ class MeshRenderWidget(QtGui.QWidget):
 
     self.mesh_file_name = ''
 
+    self.mesh_renderer = None
+
     self.current_block_actors = {}
     self.current_sideset_actors = {}
     self.current_nodeset_actors = {}
@@ -179,9 +181,10 @@ class MeshRenderWidget(QtGui.QWidget):
 
   def meshItemChanged(self, item):
     # Disconnect some actions while we fill stuff in
-    self.highlight_block_combo.currentIndexChanged[str].disconnect(self.showBlockSelected)
-    self.highlight_sideset_combo.currentIndexChanged[str].disconnect(self.showSidesetSelected)
-    self.highlight_nodeset_combo.currentIndexChanged[str].disconnect(self.showNodesetSelected)
+    if self.mesh_renderer:
+      self.highlight_block_combo.currentIndexChanged[str].disconnect(self.showBlockSelected)
+      self.highlight_sideset_combo.currentIndexChanged[str].disconnect(self.showSidesetSelected)
+      self.highlight_nodeset_combo.currentIndexChanged[str].disconnect(self.showNodesetSelected)
     
     self.clear()
     
