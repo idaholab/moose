@@ -204,16 +204,21 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.reset_layout.addWidget(self.scale_groupbox)
 
-
-
+    self.view_layout = QtGui.QVBoxLayout()
 
     self.reset_button = QtGui.QPushButton('Reset View')
     self.reset_button.setMaximumWidth(100)
     self.reset_button.setToolTip('Recenter the camera on the current result')
     self.reset_button.clicked.connect(self._resetView)
-    self.reset_layout.addWidget(self.reset_button, alignment=QtCore.Qt.AlignHCenter)
+    self.view_layout.addWidget(self.reset_button, alignment=QtCore.Qt.AlignHCenter)
 
+    self.save_button = QtGui.QPushButton('Save View')
+    self.save_button.setMaximumWidth(100)
+    self.save_button.setToolTip('Save the current view to a file')
+    self.save_button.clicked.connect(self._saveView)
+    self.view_layout.addWidget(self.save_button, alignment=QtCore.Qt.AlignHCenter)
 
+    self.reset_layout.addLayout(self.view_layout)
 
     self.right_controls_layout.addLayout(self.reset_layout)
 
@@ -645,6 +650,19 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.renderer.GetActiveCamera().SetPosition(fp[0], fp[1], fp[2]+dist)
     self.renderer.GetActiveCamera().SetViewUp(0.0, 1.0, 0.0)
     self.vtkwidget.updateGL()
+
+  def _saveView(self):
+    file_name = QtGui.QFileDialog.getSaveFileName(self, "Image File Name", "~/", "Image Files (*.png)")
+
+    if file_name != '':
+      w2i = vtk.vtkWindowToImageFilter()
+      writer = vtk.vtkPNGWriter()
+      w2i.SetInput(self.vtkwidget.GetRenderWindow())
+      w2i.Update()
+      writer.SetInputConnection(w2i.GetOutputPort())
+      writer.SetFileName(str(file_name))
+      self.vtkwidget.GetRenderWindow().Render()
+      writer.Write()
     
   def _automaticUpdateChanged(self, value):
     if value == QtCore.Qt.Checked:
@@ -930,4 +948,4 @@ class ExodusResultRenderWidget(QtGui.QWidget):
                          position if direction == 'z' else old[2])    
 
     self._updateContours()
-    self.vtkwidget.updateGL()   
+    self.vtkwidget.updateGL()
