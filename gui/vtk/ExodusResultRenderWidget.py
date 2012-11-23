@@ -44,13 +44,28 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.execution_widget.run_stopped.connect(self._runStopped)
     self.execution_widget.timestep_begin.connect(self._timestepBegin)
     self.execution_widget.timestep_end.connect(self._timestepEnd)
+
+    self.main_layout = QtGui.QHBoxLayout()
+#    self.main_layout.setSpacing(0)
+
+    self.right_layout = QtGui.QVBoxLayout()
     
-    self.main_layout = QtGui.QVBoxLayout()
-    self.setMinimumWidth(700)
+    self.left_layout = QtGui.QVBoxLayout()
+    self.left_widget = QtGui.QWidget()
+    self.left_widget.setMaximumWidth(1)
+
+    self.left_widget.setLayout(self.left_layout)
+    self.left_layout.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
+
+    self.main_layout.addWidget(self.left_widget)
+    self.right_layout.setStretchFactor(self.left_layout, 0.01)
+    self.main_layout.addLayout(self.right_layout)
+    
+#    self.setMinimumWidth(700)
     self.setLayout(self.main_layout)
 
     self.vtkwidget = vtk.QVTKWidget2()
-    self.vtkwidget.setMinimumHeight(300)
+#    self.vtkwidget.setMinimumHeight(300)
 
     self.renderer = vtk.vtkRenderer()
     self.renderer.SetBackground(0.2,0.2,0.2)
@@ -58,8 +73,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.renderer.SetGradientBackground(1)
     self.renderer.ResetCamera()
     
-    self.main_layout.addWidget(self.vtkwidget)
-    self.main_layout.setStretchFactor(self.vtkwidget, 10)
+    self.right_layout.addWidget(self.vtkwidget)
+    self.right_layout.setStretchFactor(self.vtkwidget, 100)
 
     self.vtkwidget.show()
 
@@ -98,16 +113,21 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
   def setupControls(self):
     self.controls_widget = QtGui.QWidget()
-    self.controls_layout = QtGui.QHBoxLayout()
-    self.main_layout.addLayout(self.controls_layout)
-    self.main_layout.setStretchFactor(self.controls_layout, 0.1)
+    self.controls_layout = QtGui.QVBoxLayout()
+    
+    self.bottom_controls_layout = QtGui.QHBoxLayout()
+    
+    self.left_layout.addLayout(self.controls_layout)
+    self.main_layout.setStretchFactor(self.left_layout, 0.1)
+
+#    self.main_layout.addLayout(self.bottom_controls_layout)
 
     self.leftest_controls_layout = QtGui.QVBoxLayout()
     self.left_controls_layout = QtGui.QVBoxLayout()
     self.right_controls_layout = QtGui.QVBoxLayout()
 
     self.block_view_group_box = QtGui.QGroupBox('Show Blocks')
-    self.block_view_group_box.setMaximumWidth(200)
+#    self.block_view_group_box.setMaximumWidth(200)
 #    self.block_view_group_box.setMaximumHeight(200)
     
     self.block_view_layout = QtGui.QVBoxLayout()
@@ -136,7 +156,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.automatic_update_checkbox.stateChanged[int].connect(self._automaticUpdateChanged)
 #    self.left_controls_layout.addWidget(self.automatic_update_checkbox)
 
-    self.reset_layout = QtGui.QHBoxLayout()
+    self.reset_layout = QtGui.QVBoxLayout()
     self.draw_edges_checkbox = QtGui.QCheckBox("View Mesh")
     self.draw_edges_checkbox.setToolTip('Show mesh elements')
     self.draw_edges_checkbox.stateChanged[int].connect(self._drawEdgesChanged)
@@ -177,17 +197,17 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.scale_x_label = QtGui.QLabel("x: ")
     self.scale_x_text = QtGui.QLineEdit("1.0")
     self.scale_x_text.setMinimumWidth(10)
-    self.scale_x_text.setMaximumWidth(30)
+    self.scale_x_text.setMaximumWidth(50)
 
     self.scale_y_label = QtGui.QLabel("y: ")
     self.scale_y_text = QtGui.QLineEdit("1.0")
     self.scale_y_text.setMinimumWidth(10)
-    self.scale_y_text.setMaximumWidth(30)
+    self.scale_y_text.setMaximumWidth(50)
 
     self.scale_z_label = QtGui.QLabel("z: ")
     self.scale_z_text = QtGui.QLineEdit("1.0")
     self.scale_z_text.setMinimumWidth(10)
-    self.scale_z_text.setMaximumWidth(30)
+    self.scale_z_text.setMaximumWidth(50)
 
     self.scale_x_text.returnPressed.connect(self._scaleMagnitudeTextReturn)
     self.scale_y_text.returnPressed.connect(self._scaleMagnitudeTextReturn)
@@ -204,7 +224,38 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.reset_layout.addWidget(self.scale_groupbox)
 
-    self.view_layout = QtGui.QVBoxLayout()
+    self.clip_groupbox = QtGui.QGroupBox("Clip")
+    self.clip_groupbox.setToolTip('Toggle clipping mode where the solution can be sliced open')
+    self.clip_groupbox.setCheckable(True)
+    self.clip_groupbox.setChecked(False)
+    self.clip_groupbox.setMaximumHeight(70)
+    self.clip_groupbox.toggled[bool].connect(self._clippingToggled)
+    clip_layout = QtGui.QHBoxLayout()
+    
+    self.clip_plane_combobox = QtGui.QComboBox()
+    self.clip_plane_combobox.setToolTip('Direction of the normal for the clip plane')
+    self.clip_plane_combobox.addItem('x')
+    self.clip_plane_combobox.addItem('y')
+    self.clip_plane_combobox.addItem('z')
+    self.clip_plane_combobox.currentIndexChanged[str].connect(self._clipNormalChanged)
+
+    clip_layout.addWidget(self.clip_plane_combobox)
+    
+    self.clip_plane_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+    self.clip_plane_slider.setToolTip('Slide to change plane position')
+    self.clip_plane_slider.setRange(0, 100)
+    self.clip_plane_slider.setSliderPosition(50)
+    self.clip_plane_slider.sliderReleased.connect(self._clipSliderReleased)
+    self.clip_plane_slider.sliderMoved[int].connect(self._clipSliderMoved)
+    clip_layout.addWidget(self.clip_plane_slider)
+#     vbox->addStretch(1);
+    self.clip_groupbox.setLayout(clip_layout)
+
+    self.reset_layout.addWidget(self.clip_groupbox)
+    
+
+
+    self.view_layout = QtGui.QHBoxLayout()
 
     self.reset_button = QtGui.QPushButton('Reset View')
     self.reset_button.setMaximumWidth(100)
@@ -320,6 +371,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.left_controls_layout.addWidget(self.contour_groupbox)
 
+
     self.beginning_button = QtGui.QToolButton()
     self.beginning_button.setToolTip('Go to first timestep')
     self.beginning_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrFirst32.png'))
@@ -390,36 +442,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.time_groupbox.setLayout(self.time_layout)
 
-    self.right_controls_layout.addWidget(self.time_groupbox)
-
-    self.clip_groupbox = QtGui.QGroupBox("Clip")
-    self.clip_groupbox.setToolTip('Toggle clipping mode where the solution can be sliced open')
-    self.clip_groupbox.setCheckable(True)
-    self.clip_groupbox.setChecked(False)
-    self.clip_groupbox.setMaximumHeight(70)
-    self.clip_groupbox.toggled[bool].connect(self._clippingToggled)
-    clip_layout = QtGui.QHBoxLayout()
+    self.right_layout.addWidget(self.time_groupbox)
     
-    self.clip_plane_combobox = QtGui.QComboBox()
-    self.clip_plane_combobox.setToolTip('Direction of the normal for the clip plane')
-    self.clip_plane_combobox.addItem('x')
-    self.clip_plane_combobox.addItem('y')
-    self.clip_plane_combobox.addItem('z')
-    self.clip_plane_combobox.currentIndexChanged[str].connect(self._clipNormalChanged)
-
-    clip_layout.addWidget(self.clip_plane_combobox)
-    
-    self.clip_plane_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
-    self.clip_plane_slider.setToolTip('Slide to change plane position')
-    self.clip_plane_slider.setRange(0, 100)
-    self.clip_plane_slider.setSliderPosition(50)
-    self.clip_plane_slider.sliderReleased.connect(self._clipSliderReleased)
-    self.clip_plane_slider.sliderMoved[int].connect(self._clipSliderMoved)
-    clip_layout.addWidget(self.clip_plane_slider)
-#     vbox->addStretch(1);
-    self.clip_groupbox.setLayout(clip_layout)
-
-    self.right_controls_layout.addWidget(self.clip_groupbox)
 
 
   def _updateControls(self):
