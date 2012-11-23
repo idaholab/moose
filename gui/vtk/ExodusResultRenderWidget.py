@@ -257,17 +257,23 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.view_layout = QtGui.QHBoxLayout()
 
-    self.reset_button = QtGui.QPushButton('Reset View')
-    self.reset_button.setMaximumWidth(100)
-    self.reset_button.setToolTip('Recenter the camera on the current result')
-    self.reset_button.clicked.connect(self._resetView)
-    self.view_layout.addWidget(self.reset_button, alignment=QtCore.Qt.AlignHCenter)
+    self.open_button = QtGui.QPushButton('Open Result')
+    self.open_button.setMaximumWidth(100)
+    self.open_button.setToolTip('Open an existing result')
+    self.open_button.clicked.connect(self._clickedOpen)
+    self.view_layout.addWidget(self.open_button, alignment=QtCore.Qt.AlignHCenter)
 
     self.save_button = QtGui.QPushButton('Save View')
     self.save_button.setMaximumWidth(100)
     self.save_button.setToolTip('Save the current view to a file')
     self.save_button.clicked.connect(self._saveView)
     self.view_layout.addWidget(self.save_button, alignment=QtCore.Qt.AlignHCenter)
+
+    self.reset_button = QtGui.QPushButton('Reset View')
+    self.reset_button.setMaximumWidth(100)
+    self.reset_button.setToolTip('Recenter the camera on the current result')
+    self.reset_button.clicked.connect(self._resetView)
+    self.view_layout.addWidget(self.reset_button, alignment=QtCore.Qt.AlignHCenter)
 
     self.reset_layout.addLayout(self.view_layout)
 
@@ -664,6 +670,22 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.exodus_result.scalar_bar.SetTitle(self.current_variable)
     self.renderer.AddActor2D(self.exodus_result.scalar_bar)
     self.vtkwidget.updateGL()
+    
+  def _clickedOpen(self):
+    file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Result", "~/", "Input Files (*.e)")
+
+    if file_name:
+      self._runStarted()
+      
+      self.base_stamp = os.path.getmtime(file_name)
+      self.file_name = str(file_name)
+
+      self._timestepBegin()
+      self._timestepBegin() # Call it again to read any adaptive results
+
+      self._lastClicked() # Go to the last timestep
+
+      self._resetView() # Reset the camera
 
     
   def _resetView(self):
@@ -820,7 +842,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     
   def _timestepBegin(self):    
     # Check to see if there are new exodus files with adapted timesteps in them.
-    if self.file_name:
+    if self.file_name and self.exodus_result:
       for file_name in sorted(glob.glob(self.file_name + '-s*')):
         file_stamp = os.path.getmtime(file_name)
         if int(file_stamp) >= int(self.base_stamp) and file_name not in self.file_names:
@@ -830,7 +852,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           self.exodus_results.append(exodus_result)
       
     if not self.exodus_result:
-      output_file_names = self.input_file_widget.getOutputFileNames()
+      if not self.file_name: # Might have been set by opening a file
+        output_file_names = self.input_file_widget.getOutputFileNames()
+      else:
+        output_file_names = [self.file_name]
 
       output_file = ''
 
@@ -908,7 +933,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   def _runStopped(self):
     time.sleep(1.0)
     self._timestepBegin()
-    
 
   def _clippingToggled(self, value):
     if value:
