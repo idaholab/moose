@@ -77,6 +77,13 @@ class UiBox(QtGui.QMainWindow):
     
     self.main_ui.setLayout(self.main_layout)
     self.resize(700,600)
+
+    # If they specified a file to visualize - open it!
+    if(options.visualize_result):
+      for tab in self.tabs:
+        if tab.name() == 'Visualize':
+          self.tab_widget.setCurrentWidget(tab)
+          tab._openFile(options.visualize_result)
     
 def recursiveFindExecutable(current_path, p):
   files = os.listdir(current_path)
@@ -168,12 +175,18 @@ def getApplication(executable_path, main_window):
     return PeacockApplication(main_window)
 
 if __name__ == '__main__':
-  parser = OptionParser()
+  usage = "Usage: %prog [options] [input_file] [exodus_file]"
+  description = "Note: You can directly supply either an input file or an Exodus file (or both!) without specifying any options.  The correct thing will automatically happen."
+  parser = OptionParser(usage=usage, description=description)
+
   parser.add_option("-e", "--executable", dest="executable",
                     help="The executable you would like to build an input file for.  If not supplied an executable will be searched for.  The searched for executable will default to the optimized version of the executable (if available).")
 
   parser.add_option("-i", "--input-file", dest="input_file",
                     help="An input file you would optionally like to open.")
+
+  parser.add_option("-v", "--visualize-result", dest="visualize_result",
+                    help="An Exodus file name containing a result you would like to visualize.")
 
   parser.add_option("-m", "--method", dest="method",
                     help="Pass either opt, dbg or devel.  Works the same as setting the $METHOD environment variable.")
@@ -181,6 +194,12 @@ if __name__ == '__main__':
   parser.add_option("-r", "--recache-syntax", action="store_true", dest="recache", help="Force a recache of the syntax for this executable. Use if you add new syntax or objects.")
   
   (options, args) = parser.parse_args()
+
+  for arg in args:
+    if '.e' in arg:
+      options.visualize_result = arg
+    elif '.i' in arg:
+      options.input_file = arg
 
   executable = findExecutable(options.executable, options.method)
 

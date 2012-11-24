@@ -257,19 +257,19 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.view_layout = QtGui.QHBoxLayout()
 
-    self.open_button = QtGui.QPushButton('Open Result')
+    self.open_button = QtGui.QPushButton('Open')
     self.open_button.setMaximumWidth(100)
     self.open_button.setToolTip('Open an existing result')
     self.open_button.clicked.connect(self._clickedOpen)
     self.view_layout.addWidget(self.open_button, alignment=QtCore.Qt.AlignHCenter)
 
-    self.save_button = QtGui.QPushButton('Save View')
+    self.save_button = QtGui.QPushButton('Save')
     self.save_button.setMaximumWidth(100)
     self.save_button.setToolTip('Save the current view to a file')
     self.save_button.clicked.connect(self._saveView)
     self.view_layout.addWidget(self.save_button, alignment=QtCore.Qt.AlignHCenter)
 
-    self.reset_button = QtGui.QPushButton('Reset View')
+    self.reset_button = QtGui.QPushButton('Reset')
     self.reset_button.setMaximumWidth(100)
     self.reset_button.setToolTip('Recenter the camera on the current result')
     self.reset_button.clicked.connect(self._resetView)
@@ -670,23 +670,25 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.exodus_result.scalar_bar.SetTitle(self.current_variable)
     self.renderer.AddActor2D(self.exodus_result.scalar_bar)
     self.vtkwidget.updateGL()
+
+  def _openFile(self, file_name):
+    self._runStarted()
+
+    self.base_stamp = os.path.getmtime(file_name)
+    self.file_name = str(file_name)
+
+    self._timestepBegin()
+    self._timestepBegin() # Call it again to read any adaptive results
+
+    self._lastClicked() # Go to the last timestep
+
+    self._resetView() # Reset the camera
     
   def _clickedOpen(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Result", "~/", "Input Files (*.e)")
 
     if file_name:
-      self._runStarted()
-      
-      self.base_stamp = os.path.getmtime(file_name)
-      self.file_name = str(file_name)
-
-      self._timestepBegin()
-      self._timestepBegin() # Call it again to read any adaptive results
-
-      self._lastClicked() # Go to the last timestep
-
-      self._resetView() # Reset the camera
-
+      self._openFile(file_name)
     
   def _resetView(self):
     self.renderer.ResetCamera()
