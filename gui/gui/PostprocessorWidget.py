@@ -39,17 +39,6 @@ class PostprocessorWidget(QtGui.QWidget):
     pal.setColor(QtGui.QPalette.Window, QtGui.QColor('lightgray'))                                   
     scroll.setPalette(pal)
 
-    #assemble the top layout                                                                                         
-    self.top_layout = QtGui.QSplitter()
-    self.top_layout.addWidget(self.post_processor_list_view)
-    self.top_layout.addWidget(scroll)
-
-    self.top_layout.setStretchFactor(0,0.1)
-    self.top_layout.setStretchFactor(1,0.9)
-
-    self.top_layout.setSizes([100,500])
-
-
     # adds a button to the widget that will be used to clear plot selections
     self.clear_button = QtGui.QPushButton("Clear")
     self.clear_button.setToolTip('Clear current plots')
@@ -66,11 +55,27 @@ class PostprocessorWidget(QtGui.QWidget):
     self.button_layout = QtGui.QHBoxLayout()
     self.button_layout.addWidget(self.open_button)
     self.button_layout.addWidget(self.clear_button)
+
+    #assemble the top layout
+    self.left_widget = QtGui.QWidget()
+    self.left_layout = QtGui.QVBoxLayout()
+    self.left_widget.setLayout(self.left_layout)
+    
+    self.left_layout.addWidget(self.post_processor_list_view)
+    self.left_layout.addLayout(self.button_layout)
+    
+    self.top_layout = QtGui.QSplitter()
+    self.top_layout.addWidget(self.left_widget)
+    self.top_layout.addWidget(scroll)
+
+    self.top_layout.setStretchFactor(0,0.1)
+    self.top_layout.setStretchFactor(1,0.9)
+
+    self.top_layout.setSizes([100,500])    
                                                                          
     #assemble the overall layout
     self.main_layout = QtGui.QVBoxLayout()
     self.main_layout.addWidget(self.top_layout)
-    self.main_layout.addLayout(self.button_layout)
     self.setLayout(self.main_layout)
  
     self.timerSetUp()    
