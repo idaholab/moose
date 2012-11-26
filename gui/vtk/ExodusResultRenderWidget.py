@@ -38,6 +38,14 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.file_names = []
 
     self.current_max_timestep = 0
+
+    # Whether or not there is new data to read
+    self.new_stuff_to_read = False
+
+    self.timer = QtCore.QTimer()
+    self.timer.stop()
+    self.timer.setInterval(1000)
+    self.timer.timeout.connect(self._updateData)
     
     self.execution_widget = execution_widget
     self.execution_widget.run_started.connect(self._runStarted)
@@ -675,13 +683,13 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.vtkwidget.updateGL()
 
   def _openFile(self, file_name):
-    self._runStarted()
+    self._clear()
 
     self.base_stamp = os.path.getmtime(file_name)
     self.file_name = str(file_name)
 
-    self._timestepBegin()
-    self._timestepBegin() # Call it again to read any adaptive results
+    self._updateData()
+    self._updateData() # Call it again to read any adaptive results
 
     self._lastClicked() # Go to the last timestep
 
@@ -845,7 +853,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.timestep_to_exodus_result[self.current_max_timestep] = result
         self.timestep_to_timestep[self.current_max_timestep] = timestep
     
-  def _timestepBegin(self):    
+  def _updateData(self):    
     # Check to see if there are new exodus files with adapted timesteps in them.
     if self.file_name and self.exodus_result:
       for file_name in sorted(glob.glob(self.file_name + '-s*')):
@@ -867,7 +875,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       for file_name in output_file_names:
         if '.e' in file_name and os.path.exists(file_name):
           file_stamp = os.path.getmtime(file_name)          
-          time.sleep(0.1)
           file_stamp = os.path.getmtime(file_name)
 
           if(int(file_stamp) >= int(self.base_stamp)):
@@ -891,9 +898,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
    
             self.vtkwidget.updateGL()
             self._updateControls()
+            self.time_slider.setSliderPosition(self.current_max_timestep)
 
-
-    if self.exodus_result and self.automatically_update:
+    if self.new_stuff_to_read and self.exodus_result and self.automatically_update:
       self._associateResultsWithTimesteps()
 #      self.exodus_result.reader.UpdateTimeInformation()
 #      range = self.exodus_result.reader.GetTimeStepRange()
@@ -912,13 +919,16 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       else:
         self.time_slider.setMaximum(self.current_max_timestep)
 
+    self.new_stuff_to_read = False
+
+  def _timestepBegin(self):
+    self.new_stuff_to_read = True
+  
   def _timestepEnd(self):
     pass
-    
-  def _runStarted(self):
-    # Set the base time
-    self.base_stamp = time.time()
 
+
+  def _clear(self):
     self.application.addExodusResultActors(self.renderer)
     self.file_name = None
     self.file_names = []
@@ -934,10 +944,22 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.exodus_result = None
     self.exodus_results = []
     self.timestep_to_exodus_result = {}
+
+  def _runStarted(self):
+    # Set the base time
+    self.base_stamp = time.time()
+    self._clear()
+    self.timer.start()
     
   def _runStopped(self):
-    time.sleep(1.0)
-    self._timestepBegin()
+    self.new_stuff_to_read = True # Set this to true so we get one more update
+    
+    self.timer.stop
+    self.run_stopped_timer = QtCore.QTimer()
+    self.run_stopped_timer.setInterval(1000) # Wait a second before updating the plots one last time
+    self.run_stopped_timer.setSingleShot(True)
+    self.run_stopped_timer.timeout.connect(self._updateData)
+    self.run_stopped_timer.start()
 
   def _clippingToggled(self, value):
     if value:
