@@ -287,7 +287,7 @@ DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
 }
 
 void
-DisplacedProblem::prepareFace(const Elem * elem, THREAD_ID tid)
+DisplacedProblem::prepareFace(const Elem * /*elem*/, THREAD_ID tid)
 {
   _displaced_nl.prepareFace(tid);
   _displaced_aux.prepareFace(tid);
@@ -398,7 +398,7 @@ DisplacedProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID
 }
 
 void
-DisplacedProblem::reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
+DisplacedProblem::reinitNeighborPhys(const Elem * neighbor, unsigned int /*neighbor_side*/, const std::vector<Point> & physical_points, THREAD_ID tid)
 {
   // Reinit shape functions
   _assembly[tid]->reinitNeighborAtPhysical(neighbor, physical_points);

@@ -48,8 +48,6 @@ ComputeFullJacobianThread::computeJacobian()
     MooseVariable & ivariable = _sys.getVariable(_tid, ivar);
     MooseVariable & jvariable = _sys.getVariable(_tid, jvar);
 
-    const std::set<MooseVariable *> & active_elemental_moose_variables = _fe_problem.getActiveElementalMooseVariables(_tid);
-
     if (ivariable.dofIndices().size() > 0 && jvariable.dofIndices().size() > 0)
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)

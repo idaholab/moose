@@ -1931,6 +1931,8 @@ FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP*/, UserObjectW
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
       _user_objects(type)[tid].initialSetup();
     break;
+  case EXEC_CUSTOM:
+    break;
   }
   computeUserObjectsInternal(_user_objects(type), group);
 

@@ -100,7 +100,6 @@ PenetrationThread::operator() (const NodeIdRange & range)
       if ((!_update_location || !info->_update) && info->_distance >= 0)
       {
         const Point contact_ref = info->_closest_point_ref;
-        const Real distance = info->_distance;
         bool contact_point_on_side(false);
 
         // Slave position must be the previous contact point

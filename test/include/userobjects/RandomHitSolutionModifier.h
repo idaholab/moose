@@ -16,7 +16,7 @@
 #define RANDOMHITSOLUTIONMODIFIER_H
 
 // Moose
-#include "GeneralUserObject.h"                  \
+#include "GeneralUserObject.h"
 #include "MooseMesh.h"
 
 //Forward Declarations

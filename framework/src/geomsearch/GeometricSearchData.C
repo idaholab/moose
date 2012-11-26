@@ -91,9 +91,6 @@ GeometricSearchData::getPenetrationLocator(const BoundaryName & master, const Bo
 PenetrationLocator &
 GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order)
 {
-  MeshBase & mesh = _mesh.getMesh();
-  BoundaryInfo & boundary_info = *mesh.boundary_info;
-
   unsigned int master_id = _mesh.getBoundaryID(master);
   unsigned int slave_id  = _mesh.getBoundaryID(slave);
 
@@ -166,7 +163,6 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
 
   _quadrature_boundaries.insert(slave_id);
 
-  QBase * & qrule_face = _subproblem.qRuleFace(0);
   const MooseArray<Point> & points_face = _subproblem.pointsFace(0);
 
   ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
@@ -180,7 +176,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
 
     if (elem->processor_id() == libMesh::processor_id())
     {
-      if(boundary_id == slave_id)
+      if(boundary_id == (short)slave_id)
       {
         _subproblem.prepare(elem, 0);
         _subproblem.reinitElemFace(elem, side, boundary_id, 0);
@@ -197,7 +193,6 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
 void
 GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
 {
-  QBase * & qrule_face = _subproblem.qRuleFace(0);
   const MooseArray<Point> & points_face = _subproblem.pointsFace(0);
 
   ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
@@ -211,7 +206,7 @@ GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
 
     if (elem->processor_id() == libMesh::processor_id())
     {
-      if(boundary_id == slave_id)
+      if(boundary_id == (short)slave_id)
       {
         _subproblem.prepare(elem, 0);
         _subproblem.reinitElemFace(elem, side, boundary_id, 0);
