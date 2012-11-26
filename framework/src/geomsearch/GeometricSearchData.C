@@ -176,7 +176,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
 
     if (elem->processor_id() == libMesh::processor_id())
     {
-      if(boundary_id == (short)slave_id)
+      if(boundary_id == (BoundaryID)slave_id)
       {
         _subproblem.prepare(elem, 0);
         _subproblem.reinitElemFace(elem, side, boundary_id, 0);
@@ -206,7 +206,7 @@ GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
 
     if (elem->processor_id() == libMesh::processor_id())
     {
-      if(boundary_id == (short)slave_id)
+      if(boundary_id == (BoundaryID)slave_id)
       {
         _subproblem.prepare(elem, 0);
         _subproblem.reinitElemFace(elem, side, boundary_id, 0);
