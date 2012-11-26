@@ -24,7 +24,7 @@ private:
   std::vector<std::vector<AuxVariableName> > _save_in_vars;
   std::vector<bool> _has_save_in_vars;
   const Real _initial_pressure;
-  const std::string _material_input;
+  const std::vector<std::string> _material_input;
   const Real _R;
   const std::string _temperature;
   const std::string _volume;

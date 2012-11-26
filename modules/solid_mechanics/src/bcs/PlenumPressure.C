@@ -6,7 +6,7 @@ InputParameters validParams<PlenumPressure>()
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<int>("component", "The component for the PlenumPressure");
   params.addParam<Real>("initial_pressure", 0, "The initial pressure in the plenum.  If not given, a zero initial pressure will be used.");
-  params.addParam<std::string>("material_input", "", "The name of the postprocessor value that holds the amount of material injected into the plenum.");
+  params.addParam<std::vector<std::string> >("material_input", "The name of the postprocessor(s) that holds the amount of material injected into the plenum.");
   params.addRequiredParam<Real>("R", "The universal gas constant for the units used.");
   params.addRequiredParam<std::string>("temperature", "The name of the average temperature postprocessor value.");
   params.addRequiredParam<std::string>("volume", "The name of the internal volume postprocessor value.");
@@ -29,7 +29,7 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
    _n0(0),
    _component(getParam<int>("component")),
    _initial_pressure(getParam<Real>("initial_pressure")),
-   _material_input( getParam<std::string>("material_input") != "" ? getPostprocessorValue(getParam<std::string>("material_input")) : _real_zero ),
+   _material_input(),
    _R(getParam<Real>("R")),
    _temperature( getPostprocessorValue(getParam<std::string>("temperature"))),
    _volume( getPostprocessorValue(getParam<std::string>("volume"))),
@@ -56,6 +56,17 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
    _refab_counter(0),
    _my_value(0)
 {
+
+  if (isParamValid("material_input"))
+  {
+    std::vector<std::string> ppn = params.get<std::vector<std::string> >("material_input");
+    const unsigned len = ppn.size();
+    for (unsigned i(0); i < len; ++i)
+    {
+      _material_input.push_back( &getPostprocessorValue(ppn[i]) );
+    }
+  }
+
   if (params.isParamValid("refab_time") &&
       !(params.isParamValid("refab_pressure") &&
         params.isParamValid("refab_temperature") &&
@@ -113,7 +124,11 @@ PlenumPressure::timestepSetup()
 {
   if (_refab_counter < _refab_needed && _refab_time[_refab_counter] <= _t)
   {
-    _refab_gas_released = _material_input;
+    _refab_gas_released = 0;
+    for (unsigned i(0); i < _material_input.size(); ++i)
+    {
+      _refab_gas_released += *_material_input[i];
+    }
 
     _n0 = _refab_pressure[_refab_counter] * _refab_volume[_refab_counter] / (_R * _refab_temperature[_refab_counter]);
 
@@ -139,7 +154,12 @@ PlenumPressure::residualSetup()
       _refab_counter == 0 || // refab has not occurred
       _refab_type[_refab_counter-1] == 0 ) // flush gas, not hold
   {
-    const Real n = _n0 + (_material_input - _refab_gas_released);
+    Real mat(0);
+    for (unsigned i(0); i < _material_input.size(); ++i)
+    {
+      mat += *_material_input[i];
+    }
+    const Real n = _n0 + (mat - _refab_gas_released);
     pressure = n * _R * _temperature / _volume;
   }
   else

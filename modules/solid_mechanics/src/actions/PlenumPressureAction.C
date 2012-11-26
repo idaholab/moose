@@ -18,7 +18,7 @@ InputParameters validParams<PlenumPressureAction>()
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_z", "The save_in variables for z displacement");
 
   params.addParam<Real>("initial_pressure", 0, "The initial pressure in the plenum.  If not given, a zero initial pressure will be used.");
-  params.addParam<std::string>("material_input", "", "The name of the postprocessor value that holds the amount of material injected into the plenum.");
+  params.addParam<std::vector<std::string> >("material_input", "The name of the postprocessor(s) that holds the amount of material injected into the plenum.");
   params.addRequiredParam<Real>("R", "The universal gas constant for the units used.");
   params.addRequiredParam<std::string>("temperature", "The name of the average temperature postprocessor value.");
   params.addRequiredParam<std::string>("volume", "The name of the internal volume postprocessor value.");
@@ -42,7 +42,7 @@ PlenumPressureAction::PlenumPressureAction(const std::string & name, InputParame
   _disp_y(getParam<NonlinearVariableName>("disp_y")),
   _disp_z(getParam<NonlinearVariableName>("disp_z")),
   _initial_pressure(getParam<Real>("initial_pressure")),
-  _material_input(getParam<std::string>("material_input")),
+  _material_input(getParam<std::vector<std::string> >("material_input")),
   _R(getParam<Real>("R")),
   _temperature(getParam<std::string>("temperature")),
   _volume(getParam<std::string>("volume")),
@@ -92,7 +92,7 @@ PlenumPressureAction::act()
     params.set<std::vector<BoundaryName> >("boundary") = _boundary;
 
     params.set<Real>("initial_pressure") = _initial_pressure;
-    params.set<std::string>("material_input") = _material_input;
+    params.set<std::vector<std::string> >("material_input") = _material_input;
     params.set<Real>("R") = _R;
     params.set<std::string>("temperature") = _temperature;
     params.set<std::string>("volume") = _volume;
@@ -130,5 +130,4 @@ PlenumPressureAction::act()
 
     _problem->addBoundaryCondition(_kernel_name, name.str(), params);
   }
-
 }
