@@ -281,7 +281,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
 
     self.contour_groupbox = QtGui.QGroupBox("Contour")
+#    self.contour_groupbox.setMaximumHeight(10)
 #    self.contour_groupbox.setMaximumHeight(70)
+#    contour_groupbox_policy = QtGui.QSizePolicy()
+    self.contour_groupbox.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
     self.contour_layout = QtGui.QVBoxLayout()
     self.contour_groupbox.setLayout(self.contour_layout)
 
@@ -305,11 +308,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 #    self.variable_contour_layout.addLayout(self.component_layout)
     self.variable_contour_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignHCenter)
 
-    self.minmax_contour_layout = QtGui.QHBoxLayout()
+    self.minmax_contour_layout = QtGui.QVBoxLayout()
     self.contour_layout.addLayout(self.minmax_contour_layout)
 
     self.min_groupbox = QtGui.QGroupBox("Min")
-    self.min_layout = QtGui.QVBoxLayout()
+    self.min_layout = QtGui.QHBoxLayout()
     self.min_groupbox.setLayout(self.min_layout)
 
     self.min_radio_layout = QtGui.QVBoxLayout()
@@ -329,7 +332,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.min_custom_text = QtGui.QLineEdit()
     self.min_custom_text.returnPressed.connect(self._updateContours)
     self.min_custom_text.setDisabled(True)
-    self.min_custom_text.setMaximumWidth(50)
+    self.min_custom_text.setMaximumWidth(100)
     self.min_custom_layout.addWidget(self.min_custom_radio, alignment=QtCore.Qt.AlignLeft)
     self.min_custom_layout.addWidget(self.min_custom_text, alignment=QtCore.Qt.AlignLeft)
     self.min_custom_layout.addStretch()
@@ -342,7 +345,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
 
     self.max_groupbox = QtGui.QGroupBox("Max")
-    self.max_layout = QtGui.QVBoxLayout()
+    self.max_layout = QtGui.QHBoxLayout()
     self.max_groupbox.setLayout(self.max_layout)
 
     self.max_radio_layout = QtGui.QVBoxLayout()
@@ -362,7 +365,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.max_custom_text = QtGui.QLineEdit()
     self.max_custom_text.returnPressed.connect(self._updateContours)
     self.max_custom_text.setDisabled(True)
-    self.max_custom_text.setMaximumWidth(50)
+    self.max_custom_text.setMaximumWidth(100)
     self.max_custom_layout.addWidget(self.max_custom_radio, alignment=QtCore.Qt.AlignLeft)
     self.max_custom_layout.addWidget(self.max_custom_text, alignment=QtCore.Qt.AlignLeft)
     self.max_custom_layout.addStretch()
@@ -420,7 +423,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_slider_label = QtGui.QLabel("Timestep:")
     self.time_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
     self.time_slider.setToolTip('Slide to select a timestep to display')
-    self.time_slider.setMaximumWidth(600)
+#    self.time_slider.setMaximumWidth(600)
     
     self.time_slider.valueChanged.connect(self._timeSliderChanged)
     self.time_slider.sliderReleased.connect(self._timeSliderReleased)
