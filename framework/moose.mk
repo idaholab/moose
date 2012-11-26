@@ -66,7 +66,9 @@ endif
 # include MOOSE dep files
 -include $(moose_deps)
 -include $(MOOSE_DIR)/contrib/mtwist-1.1/src/*.d
+ifdef PRECOMPILED
 -include $(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch.d
+endif
 
 #
 # exodiff

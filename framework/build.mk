@@ -18,6 +18,8 @@ ifneq (,$(findstring mpi,$(cxx_compiler)))
 endif
 
 MOOSE_PRECOMPILED ?= true
+PCH_FLAGS=
+PCH_MODE=
 
 # Check if using precompiled headers is possible 
 # cxx compiler could be used to define which compiler is being used
@@ -44,22 +46,29 @@ ifdef PRECOMPILED
 	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
 
 #
+# add dependency
+#
+%.$(obj-suffix) : $(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch
+
+PCH_FLAGS="-DPRECOMPILED -include Precompiled.h"
+PCH_MODE="with PCH "
+endif
+
+#
 # C++ rules
 #
 
 %.$(obj-suffix) : %.C
-%.$(obj-suffix) : %.C $(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch
-	@echo "Compiling C++ With PCH (in "$(mode)" mode) "$<"..."
-	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED -include Precompiled.h -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
-endif
+	@echo "Compiling C++ $(PCH_MODE)(in "$(mode)" mode) "$<"..."
+	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
 
 #
 # C rules
 #
 
-%.$(obj-suffix) : %.c $(MOOSE_DIR)/include/base/Precompiled.h.gch
-	@echo "Compiling C (in "$(mode)" mode) "$<"..."
-	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
+%.$(obj-suffix) : %.c
+	@echo "Compiling C $(PCH_MODE)(in "$(mode)" mode) "$<"..."
+	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(PCH_FLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
 
 #
 # Fortran77 rules
