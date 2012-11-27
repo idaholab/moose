@@ -10,4 +10,10 @@
     input = 'tight-coupling.i'
     exodiff = 'problem1_out.e problem2_out.e'
   [../]
+
+  [./tightly_coupled_displaced_test]
+    type = 'Exodiff'
+    input = 'tight-coupling-displaced.i'
+    exodiff = 'therm_out.e mech_out.e'
+  [../]
 []
