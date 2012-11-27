@@ -1,0 +1,66 @@
+#include "CoupledTransientExecutioner.h"
+#include "CoupledProblem.h"
+#include "Transient.h"
+
+template<>
+InputParameters validParams<CoupledTransientExecutioner>()
+{
+  InputParameters params = validParams<CoupledExecutioner>();
+  params.addParam<unsigned int>("num_steps",       std::numeric_limits<unsigned int>::max(),     "The number of timesteps in a transient run");
+  return params;
+}
+
+CoupledTransientExecutioner::CoupledTransientExecutioner(const std::string & name, InputParameters parameters) :
+    CoupledExecutioner(name, parameters),
+    _time(0),
+    _dt(0),
+    _t_step(0),
+    _n_steps(getParam<unsigned int>("num_steps"))
+{
+}
+
+CoupledTransientExecutioner::~CoupledTransientExecutioner()
+{
+}
+
+void
+CoupledTransientExecutioner::execute()
+{
+  if (_executioners.size() != _fe_problems.size())
+    mooseError("The number of executioners of different that the number of problems.");
+
+  unsigned int n_problems = _executioners.size();
+  // initial setup
+  for (unsigned int i = 0; i < n_problems; i++)
+    _fe_problems[i]->initialSetup();
+  // preExecute
+  for (unsigned int i = 0; i < n_problems; i++)
+    _executioners[i]->preExecute();
+
+  std::vector<Transient *> trans(n_problems);
+  for (unsigned int i = 0; i < n_problems; i++)
+  {
+    Transient * exec = dynamic_cast<Transient *>(_executioners[i]);
+    if (exec == NULL)
+      mooseError("Executioner for problem '" << _fe_problems[i]->name() << "' has to be of a transient type.");
+    trans[i] = exec;
+  }
+
+  for (_t_step = 0; _t_step < _n_steps; _t_step++)
+  {
+    _dt = trans[0]->computeConstrainedDT();
+    for (unsigned int i = 1; i < n_problems; i++)
+      trans[i]->computeConstrainedDT();
+    _time += _dt;
+
+    for (unsigned int i = 0; i < n_problems; i++)
+    {
+      std::cout << "Solving '" << _fep_mapping[_fe_problems[i]] << "'" << std::endl;
+      trans[i]->takeStep(_dt);
+      projectVariables(*_fe_problems[(i + 1) % n_problems]);
+    }
+
+    for (unsigned int i = 0; i < n_problems; i++)
+      trans[i]->endStep();
+  }
+}
