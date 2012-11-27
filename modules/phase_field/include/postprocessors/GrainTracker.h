@@ -94,6 +94,9 @@ protected:
   NonlinearSystem & _nl;
 
   GeneratedMesh *_gen_mesh;
+
+  /// Inidicates whether remapping should be done or not
+  const bool _remap;
 };
 
 #endif
