@@ -68,7 +68,7 @@ GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters param
   {
     if(!isCoupled("gap_distance"))
       mooseError(std::string("No 'gap_distance' provided for ") + _name);
-    
+
     if(!isCoupled("gap_temp"))
       mooseError(std::string("No 'gap_temp' provided for ") + _name);
   }
@@ -82,7 +82,7 @@ GapHeatTransfer::computeQpResidual()
 
   if(!_has_info)
     return 0;
-  
+
   Real grad_t = (_u[_qp] - _gap_temp) * _gap_conductance[_qp];
 
   // This is keeping track of this residual contribution so it can be used as the flux on the other side of the gap.
@@ -90,7 +90,7 @@ GapHeatTransfer::computeQpResidual()
   {
     Threads::spin_mutex::scoped_lock lock(slave_flux_mutex);
     const Real slave_flux = computeSlaveFluxContribution(grad_t);
-    _slave_flux->add(_var.dofIndices()[_i], slave_flux);  
+    _slave_flux->add(_var.dofIndices()[_i], slave_flux);
   }
 
   return _test[_i][_qp]*grad_t;
@@ -109,7 +109,7 @@ GapHeatTransfer::computeQpJacobian()
 
   if(!_has_info)
     return 0;
-  
+
   return _test[_i][_qp] * ((_u[_qp] - _gap_temp) * _gap_conductance_dT[_qp] + _gap_conductance[_qp]) * _phi[_j][_qp];
 }
 
@@ -186,17 +186,8 @@ GapHeatTransfer::gapLength() const
 {
   if(!_has_info)
     return 1.0;
-  
-  Real gap_L = -_gap_distance;
-  
-  if(gap_L > _max_gap)
-  {
-    gap_L = _max_gap;
-  }
 
-  gap_L = std::max(_min_gap, gap_L);
-
-  return gap_L;
+  return GapConductance::gapLength( -_gap_distance, _min_gap, _max_gap );
 }
 
 Real
@@ -224,9 +215,9 @@ GapHeatTransfer::computeGapTempAndDistance()
     _gap_distance = _gap_distance_value[_qp];
     return;
   }
-  
+
   Node * qnode = _mesh.getQuadratureNode(_current_elem, _current_side, _qp);
-  
+
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator->_penetration_info[qnode->id()];
 
   _gap_temp = 0.0;
