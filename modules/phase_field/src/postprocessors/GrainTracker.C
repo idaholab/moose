@@ -16,6 +16,7 @@ InputParameters validParams<GrainTracker>()
   params.addRequiredParam<std::string>("var_name_base","base for variable names");
   params.addParam<unsigned int>("tracking_step", 1, "The timestep for when we should start tracking grains");
   params.addParam<Real>("convex_hull_buffer", 1.0, "The buffer around the convex hull used to determine when features intersect");
+  params.addParam<bool>("remap_grains", true, "Indicates whether remapping should be done or not (default: true)");
 
   params.suppressParameter<std::vector<VariableName> >("variable");
 
@@ -27,7 +28,8 @@ GrainTracker::GrainTracker(const std::string & name, InputParameters parameters)
     _tracking_step(getParam<unsigned int>("tracking_step")),
     _hull_buffer(getParam<Real>("convex_hull_buffer")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
-    _gen_mesh(dynamic_cast<GeneratedMesh *>(&_mesh))
+    _gen_mesh(dynamic_cast<GeneratedMesh *>(&_mesh)),
+    _remap(getParam<bool>("remap_grains"))
 {
   // Size the data structures to hold the correct number of maps
   _bounding_boxes.resize(_maps_size);
@@ -105,7 +107,8 @@ GrainTracker::finalize()
 
   trackGrains();
 
-  remapGrains();
+  if (_remap)
+    remapGrains();
 
   updateNodeInfo();
   
@@ -225,6 +228,15 @@ GrainTracker::buildBoundingBoxes()
       _bounding_boxes[map_num].push_back(new BoundingBoxInfo(some_node_id, translation_vector, min, max));
     }
   }
+  
+//  // DEBUG
+//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+//  {
+//    std::cout << "Bounding Boxes for variable index: " << map_num << "\n";
+//    for (std::list<BoundingBoxInfo *>::iterator box_it = _bounding_boxes[map_num].begin(); box_it != _bounding_boxes[map_num].end(); ++box_it)
+//      std::cout << (*box_it)->b_box->min() << (*box_it)->b_box->max() << "\n";
+//  }
+//  // DEBUG
 }
 
 void
@@ -290,29 +302,19 @@ GrainTracker::trackGrains()
         std::map<unsigned int, UniqueGrain *>::iterator grain_it, closest_match;
         bool found_one = false;
         Real min_centroid_diff = std::numeric_limits<Real>::max();
+        
         for (grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
         {
-          // Skip over inactive grains
-          if (grain_it->second->status == INACTIVE)
-            continue;
-
-          // Look for matching variable indexes first
-          if (grain_it->second->variable_idx == curr_var)
+          // Only unmarked grains and with matching variable indicies will be considered
+          if (grain_it->second->status == NOT_MARKED &&
+              grain_it->second->variable_idx == curr_var)
           {
-            // Now check to see how close this centroid is to the previous centroid
             Real curr_centroid_diff = _gen_mesh->minPeriodicDistance(grain_it->second->centroid, curr_centroid);
-
-//          // DEBUG
-//          std::cout << "Centroids: " << grain_it->second->centroid << curr_centroid << " Diff: " <<  curr_centroid_diff << "\n";
-//          // DEBUG
-
             if (curr_centroid_diff <= min_centroid_diff)
             {
               found_one = true;
               closest_match = grain_it;
               min_centroid_diff = curr_centroid_diff;
-              grain_it->second->status = MARKED;
-              // TODO: Make sure we don't overwrite the same grain twice in this loop
             }
           }
         }
@@ -330,10 +332,14 @@ GrainTracker::trackGrains()
       ++counter;
     }
   }
-
+  
+  // Any grain that we didn't match will now be inactive
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
     if (grain_it->second->status == NOT_MARKED)
+    {
+      std::cout << "Marking Grain: " << grain_it->first << " as INACTIVE\n";
       grain_it->second->status = INACTIVE;
+    }
 
   // Check to make sure that we consumed all of the bounding box datastructures
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
@@ -346,10 +352,12 @@ GrainTracker::trackGrains()
    for (std::map<unsigned int, UniqueGrain *>::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
    {
      std::cout << "Unique Number: " << it->first
+               << "\nStatus: " << it->second->status
                << "\nVariable idx: " << it->second->variable_idx
                << "\nBounding Boxes:\n";
        for (unsigned int i=0; i<it->second->box_ptrs.size(); ++i)
          std::cout << it->second->box_ptrs[i]->b_box->min() << it->second->box_ptrs[i]->b_box->max() << "\n";
+       std::cout << "Nodes Ptr: " << it->second->nodes_ptr << std::endl;
    }
   //DEBUG
 }
@@ -357,6 +365,10 @@ GrainTracker::trackGrains()
 void
 GrainTracker::remapGrains()
 {
+  NumericVector<Real> & solution         =  _nl.solution();
+  NumericVector<Real> & solution_old     =  _nl.solutionOld();
+  NumericVector<Real> & solution_older   =  _nl.solutionOlder();
+  
   /**
    * Loop over each grain and see if the bounding boxes of the current grain intersect with the boxes of any other grains
    * represented by the same variable.
@@ -402,26 +414,26 @@ GrainTracker::remapGrains()
           {
             /**
              * If we get into this case, that means that we have two grains that are getting close represented by the same order parameter.
-             * We need to map to the variable furthest away from this one (by centroids).
+             * We need to map to the variable whose closest grain to this one is furthest away (by centroids).
              */
-            Real max_distance = 0;
-            unsigned int variable_idx = std::numeric_limits<unsigned int>::max();
+            std::vector<Real> min_distances(_vars.size(), std::numeric_limits<Real>::max());
             for (std::map<unsigned int, UniqueGrain *>::iterator grain_it3 = _unique_grains.begin(); grain_it3 != _unique_grains.end(); ++grain_it3)
             {
-              // Skip grains that are represented by this variable, you can't remap to yourself!
-              if (grain_it1->second->variable_idx == grain_it3->second->variable_idx)
-                continue;
-
+              unsigned int curr_var_idx = grain_it3->second->variable_idx;
+              
               Real curr_centroid_diff = _gen_mesh->minPeriodicDistance(grain_it1->second->centroid, grain_it3->second->centroid);
-              if (max_distance < curr_centroid_diff)
-              {
-                max_distance = curr_centroid_diff;
-                variable_idx = grain_it3->second->variable_idx;
-              }
+              if (curr_centroid_diff < min_distances[curr_var_idx])
+                min_distances[curr_var_idx] = curr_centroid_diff;
             }
 
+            /**
+             * We have a vector of the distances to the closest grains represented by each of our variables.  We just need to pick
+             * the maximum of this this list: (max of the mins).
+             */
+            unsigned int variable_idx = std::distance(min_distances.begin(), std::max_element(min_distances.begin(), min_distances.end()));
+
             std::cout << "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first << "\n";
-            std::cout << "Remapping to: " << variable_idx << " at a distance of " << max_distance << "\n";
+            std::cout << "Remapping to: " << variable_idx << " whose closest grain is at a distance of " << min_distances[variable_idx] << "\n";
             
             // Remap the grain
             {
@@ -431,23 +443,55 @@ GrainTracker::remapGrains()
               {
                 Node * curr_node = _mesh.node_ptr(*node_it);
 
-                // Copy Value from intersecting variable to new variable
-                _subproblem.reinitNode(curr_node, 0);
-                _vars[variable_idx]->setNodalValue(_vars[curr_var_idx]->getNodalValue(*curr_node));
-                _vars[variable_idx]->insert(_fe_problem.getNonlinearSystem().solution());
+                if (curr_node->processor_id() == libMesh::processor_id())
+                {
+                  _subproblem.reinitNode(curr_node, 0);
+                  {
+                    VariableValue & value = _vars[curr_var_idx]->nodalSln();
+                    VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
+                    VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
+                  
+                    // Copy Value from intersecting variable to new variable
+                    unsigned int & dof_index = _vars[variable_idx]->nodalDofIndex();
 
-                // Set the value in the intersecting variable to zero
-                _vars[curr_var_idx]->setNodalValue(0.0);
-                _vars[curr_var_idx]->insert(_fe_problem.getNonlinearSystem().solution());
+                    // Set the only DOF for this variable on this node
+                    solution.set(dof_index, value[0]);
+                    solution_old.set(dof_index, value_old[0]);
+                    solution_older.set(dof_index, value_older[0]);
+                  }
+                  {
+                    VariableValue & value = _vars[variable_idx]->nodalSln();
+                    VariableValue & value_old = _vars[variable_idx]->nodalSlnOld();
+                    VariableValue & value_older = _vars[variable_idx]->nodalSlnOlder();
+                  
+                    // Copy Value from intersecting variable to new variable
+                    unsigned int & dof_index = _vars[curr_var_idx]->nodalDofIndex();
+
+                    // Set the only DOF for this variable on this node
+                    solution.set(dof_index, value[0]);
+                    solution_old.set(dof_index, value_old[0]);
+                    solution_older.set(dof_index, value_older[0]);
+                  }
+                  
+                  // Set the value in the intersecting variable to zero
+//                  unsigned int & from_dof_index = _vars[curr_var_idx]->nodalDofIndex();
+//                  solution.set(from_dof_index, 0.0);
+//                  solution_old.set(from_dof_index, 0.0);
+//                  solution_older.set(from_dof_index, 0.0);
+                }
               }
               // Update the variable index in the unique grain datastructure
               grain_it1->second->variable_idx = variable_idx;
+//              grain_it1->second->nodes_ptr = grain_it2->second->nodes_ptr;
 //              // Update other data structures that will be effected by this remapping
 //              _region_counts[variable_idx]++;
 //              _region_counts[curr_var_idx]--;
 //              updateRegionOffsets();
+
+              solution.close();
+              solution_old.close();
+              solution_older.close();
               
-              _fe_problem.getNonlinearSystem().solution().close();
               _fe_problem.getNonlinearSystem().sys().update();
             }
           }
@@ -462,16 +506,30 @@ GrainTracker::updateNodeInfo()
 {
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
     _bubble_maps[map_num].clear();
-  
+
+  // DEBUG
+//  std::cout << "******************* UPDATE NODE INFO *********************************\n";
+//  std::cout << "Unique Grain Size: " << _unique_grains.size() << "\n";
+  // DEBUG
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
   {
+    // DEBUG
+//    std::cout << "Unique Number: " << grain_it->first
+//              << "\nVariable idx: " << grain_it->second->variable_idx
+//              << "\nBounding Boxes:\n";
+//    for (unsigned int i=0; i<grain_it->second->box_ptrs.size(); ++i)
+//      std::cout << grain_it->second->box_ptrs[i]->b_box->min() << grain_it->second->box_ptrs[i]->b_box->max() << "\n";
+//    std::cout << "Nodes Ptr: " << grain_it->second->nodes_ptr << std::endl;
+    //DEBUG
+    
     unsigned int curr_var = grain_it->second->variable_idx;
-    for (std::set<unsigned int>::const_iterator node_it = grain_it->second->nodes_ptr->begin();
-         node_it != grain_it->second->nodes_ptr->end(); ++node_it)
-    {
-      const Node & curr_node = _mesh.node(*node_it);
-      _bubble_maps[_single_map_mode ? 0 : curr_var][curr_node.id()] = grain_it->first;
-    }
+    if (grain_it->second->status != INACTIVE)
+      for (std::set<unsigned int>::const_iterator node_it = grain_it->second->nodes_ptr->begin();
+           node_it != grain_it->second->nodes_ptr->end(); ++node_it)
+      {
+        const Node & curr_node = _mesh.node(*node_it);
+        _bubble_maps[_single_map_mode ? 0 : curr_var][curr_node.id()] = grain_it->first;
+      }
   }
 }
 
