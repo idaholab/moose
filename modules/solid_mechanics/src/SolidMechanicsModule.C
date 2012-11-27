@@ -23,6 +23,7 @@
 #include "MaterialSymmElasticityTensorAux.h"
 #include "MaterialTensorAux.h"
 #include "MaterialVectorAux.h"
+#include "AccumulateAux.h"
 #include "PLC_LSH.h"
 #include "PowerLawCreep.h"
 #include "PlenumPressure.h"
@@ -43,6 +44,7 @@ Elk::SolidMechanics::registerObjects()
   registerAux(MaterialSymmElasticityTensorAux);
   registerAux(MaterialTensorAux);
   registerAux(MaterialVectorAux);
+  registerAux(AccumulateAux);
 
   registerExecutioner(AdaptiveTransient);
 
