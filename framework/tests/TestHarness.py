@@ -400,7 +400,7 @@ class TestHarness:
     self.postRun(specs, timing)
 
     if self.options.show_directory:
-      print printResult(specs[RELATIVE_PATH] + '/' + specs[TEST_NAME], result, timing, start, end, self.options)
+      print printResult(specs[RELATIVE_PATH] + '/' + specs[TEST_NAME].split('/')[-1], result, timing, start, end, self.options)
     else:
       print printResult(specs[TEST_NAME], result, timing, start, end, self.options)
 
@@ -417,14 +417,14 @@ class TestHarness:
     if not 'skipped' in result:
       if self.options.file:
         if self.options.show_directory:
-          self.file.write(printResult( specs[RELATIVE_PATH] + '/' + specs[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
+          self.file.write(printResult( specs[RELATIVE_PATH] + '/' + specs[TEST_NAME].split('/')[-1], result, timing, start, end, self.options, color=False) + '\n')
           self.file.write(output)
         else:
           self.file.write(printResult( specs[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
           self.file.write(output)
 
       if self.options.sep_files or (self.options.fail_files and 'FAILED' in result) or (self.options.ok_files and result.find('OK') != -1):
-        fname = os.path.join(specs[TEST_DIR], specs[TEST_NAME] + '.' + result[:6] + '.txt')
+        fname = os.path.join(specs[TEST_DIR], specs[TEST_NAME].split('/')[-1] + '.' + result[:6] + '.txt')
         f = open(fname, 'w')
         f.write(printResult( specs[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
         f.write(output)
@@ -446,7 +446,7 @@ class TestHarness:
       print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
       for (test, output, result, timing, start, end) in self.test_table:
         if self.options.show_directory:
-          print printResult(test[RELATIVE_PATH] + '/' + test[TEST_NAME], result, timing, start, end, self.options)
+          print printResult(test[RELATIVE_PATH] + '/' + specs[TEST_NAME].split('/')[-1], result, timing, start, end, self.options)
         else:
           print printResult(test[TEST_NAME], result, timing, start, end, self.options)
 

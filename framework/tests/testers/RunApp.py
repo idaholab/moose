@@ -10,6 +10,7 @@ class RunApp(Tester):
     params.addRequiredParam('input',      "The input file to use for this test.")
     params.addParam('test_name',          "The name of the test - populated automatically")
     params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
+    params.addParam('input_switch', '-i', "The default switch used for indicating an input to the executable")
     params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
     params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
     params.addParam('should_crash',False, "Inidicates that the test is expected to crash or otherwise terminate early")
@@ -61,11 +62,11 @@ class RunApp(Tester):
     elif ncpus < default_ncpus:
       self.specs['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
     if options.parallel or ncpus > 1 or nthreads > 1:
-      command = 'mpiexec -host localhost -n ' + str(ncpus) + ' ' + specs[EXECUTABLE] + ' --n-threads=' + str(nthreads) + ' -i ' + specs[INPUT] + ' ' +  ' '.join(specs[CLI_ARGS])
+      command = 'mpiexec -host localhost -n ' + str(ncpus) + ' ' + specs[EXECUTABLE] + ' --n-threads=' + str(nthreads) + ' ' + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' +  ' '.join(specs[CLI_ARGS])
     elif options.enable_valgrind and not specs[NO_VALGRIND]:
-      command = 'valgrind --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs[EXECUTABLE] + ' -i ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
+      command = 'valgrind --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs[EXECUTABLE] + ' ' + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
     else:
-      command = specs[EXECUTABLE] + ' -i ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
+      command = specs[EXECUTABLE] + ' ' + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
 
     if options.scaling and specs[SCALE_REFINE] > 0:
       command += ' -r ' + str(specs[SCALE_REFINE])

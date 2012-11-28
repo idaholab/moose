@@ -320,4 +320,11 @@
     input = 'nonexistent_pps_test.i'
     expect_err = "Postprocessor '\S+' requested but not specified in the input file."
   [../]
+
+  [./wrong_input_switch]
+    type = 'RunException'
+    input = 'Foo'
+    input_switch = '-m'
+    expect_err = '^Usage:'
+  [../]
 []

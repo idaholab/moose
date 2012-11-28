@@ -11,6 +11,7 @@ RELATIVE_PATH = 'relative_path'  # The relative directory where the test resides
 EXECUTABLE    = 'executable'     # The name of the executable, this is populated automatically - DO NOT OVERRIDE!
 HOSTNAME      = 'hostname'       # The name of machine that the harness is executing on, populated automatically - DO NOT OVERRIDE!
 TYPE          = 'type'           # The type of tester to create
+INPUT_SWITCH  = 'input_switch'   # The default switch used for indicating an input to the executable
 DELETED       = 'deleted'        # Tests that only show up when using the "-e" option (Permanently skipped or not implemented)
 
 ################################
@@ -75,6 +76,7 @@ DEFAULTS = { EXODIFF : [],
              CSVDIFF : [],
              CHECK_FILES : [],
              CLI_ARGS : [],
+             INPUT_SWITCH : '-i',
              ERRORS : ['ERROR', 'command not found', 'erminate called after throwing an instance of'],
              PLATFORM : ['ALL'],
              COMPILER : ['ALL'],
