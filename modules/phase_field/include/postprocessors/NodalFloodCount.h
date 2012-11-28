@@ -49,7 +49,7 @@ public:
   virtual void threadJoin(const UserObject & y);
   virtual void finalize();
   virtual Real getValue();
-
+  
   // Get the bubble map
   Real getNodeValue(unsigned int node_id, unsigned int var_idx=0) const;
 
@@ -118,10 +118,13 @@ protected:
   unsigned int _var_number;
 
   /// This variable is used to indicate whether or not multiple maps are used during flooding
-  bool _single_map_mode;
+  const bool _single_map_mode;
 
   /// This variable is used to indicate whether or not we identify bubbles with unique numbers on multiple maps
-  bool _global_numbering;
+  const bool _global_numbering;
+
+  /// This variable is used to inidicate whether the maps will continue unique region information or just the variable numbers owning those regions
+  const bool _var_index_mode;
 
   /// Convienence variable holding the size of all the datastructures size by the number of maps
   const unsigned int _maps_size;

@@ -38,6 +38,7 @@ InputParameters validParams<NodalFloodCount>()
   params.addParam<std::string>("elem_avg_value", "If supplied, will be used to find the scaled threshold of the bubble edges");
   params.addParam<bool>("use_single_map", true, "Determine whether information is tracked per coupled variable or consolidated into one (default: true)");
   params.addParam<bool>("use_global_numbering", false, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: false)");
+  params.addParam<bool>("show_var_coloring", false, "Show the variable index instead of 'region' information.");
   return params;
 }
 
@@ -48,6 +49,7 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _var_number(_var.number()),
     _single_map_mode(getParam<bool>("use_single_map")),
     _global_numbering(getParam<bool>("use_global_numbering")),
+    _var_index_mode(getParam<bool>("show_var_coloring")),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
     _pbs(NULL),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero)
@@ -349,7 +351,8 @@ NodalFloodCount::mergeSets()
     for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != _bubble_sets[map_num].end(); ++it1)
     {
       for (std::set<unsigned int>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
-	_bubble_maps[map_num][*it2] = counter;
+        // Color the map with either a unique region, or just the variable index
+	_bubble_maps[map_num][*it2] = _var_index_mode ? it1->_var_idx : counter;
 
       if (_single_map_mode)
         _region_to_var_idx[counter-1] = it1->_var_idx;
