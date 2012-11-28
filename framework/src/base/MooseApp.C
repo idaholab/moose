@@ -227,7 +227,10 @@ MooseApp::runInputFile()
     _parser.checkOverriddenParams(false);
 
   // run the simulation
-  _executioner->execute();
+  if (_executioner)
+    _executioner->execute();
+  else
+    mooseError("No executioner was specified (go fix your input file)");
 }
 
 void
