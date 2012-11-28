@@ -2263,6 +2263,8 @@ FEProblem::init()
   _nl.dofMap()._dof_coupling = _cm;
   _nl.dofMap().attach_extra_sparsity_function(&extraSparsity, &_nl);
 
+  if (n_vars + n_scalar_vars == 0)
+    mooseError("No variables specified in the FEProblem '" << name() << "'.");
 
   Moose::setup_perf_log.push("eq.init()","Setup");
   _eq.init();
