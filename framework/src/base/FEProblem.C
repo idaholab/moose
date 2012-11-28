@@ -2841,7 +2841,19 @@ FEProblem::getVariableNames()
 }
 
 MooseNonlinearConvergenceReason
-FEProblem::checkNonlinearConvergence(std::string &msg, const int it, const Real xnorm, const Real snorm, const Real fnorm, Real &ttol, const Real rtol, const Real stol, const Real abstol, const int nfuncs, const int max_funcs)
+FEProblem::checkNonlinearConvergence(std::string &msg,
+                                     const int it,
+                                     const Real xnorm,
+                                     const Real snorm,
+                                     const Real fnorm,
+                                     Real &ttol,
+                                     const Real rtol,
+                                     const Real stol,
+                                     const Real abstol,
+                                     const int nfuncs,
+                                     const int max_funcs,
+                                     const Real ref_resid,
+                                     const Real div_threshold)
 {
   NonlinearSystem & system = getNonlinearSystem();
   MooseNonlinearConvergenceReason reason = MOOSE_ITERATING;
@@ -2850,7 +2862,7 @@ FEProblem::checkNonlinearConvergence(std::string &msg, const int it, const Real 
   if (!it)
   {
     // set parameter for default relative tolerance convergence test
-    ttol = system._initial_residual*rtol;
+    ttol = ref_resid*rtol;
   }
   if (fnorm != fnorm)
   {
@@ -2869,7 +2881,7 @@ FEProblem::checkNonlinearConvergence(std::string &msg, const int it, const Real 
   }
   else if(it &&
           fnorm > system._last_nl_rnorm &&
-          fnorm >= system._initial_residual * (1.0/rtol))
+          fnorm >= div_threshold)
   {
     oss << "Nonlinear solve was blowing up!" << std::endl;
     reason = MOOSE_DIVERGED_LINE_SEARCH;
@@ -2877,7 +2889,7 @@ FEProblem::checkNonlinearConvergence(std::string &msg, const int it, const Real 
 
   if (it && !reason)
   {
-    if (fnorm <= ttol)
+    if (fnorm <= ref_resid*rtol)
     {
       oss << "Converged due to function norm " << fnorm << " < " << " (relative tolerance)" << std::endl;
       reason = MOOSE_CONVERGED_FNORM_RELATIVE;

@@ -126,6 +126,7 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
   // pnorm (snorm): norm of
   // fnorm: norm of function
   FEProblem & problem = *static_cast<FEProblem *>(dummy);
+  NonlinearSystem & system = problem.getNonlinearSystem();
 
 #if PETSC_VERSION_LESS_THAN(3,3,0)
   PetscInt stol = snes->xtol;
@@ -134,7 +135,19 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 #endif
   std::string msg;
 
-  MooseNonlinearConvergenceReason moose_reason = problem.checkNonlinearConvergence(msg, it, xnorm, snorm, fnorm, snes->ttol, snes->rtol, stol, snes->abstol, snes->nfuncs, snes->max_funcs);
+  MooseNonlinearConvergenceReason moose_reason = problem.checkNonlinearConvergence(msg,
+                                                                                   it,
+                                                                                   xnorm,
+                                                                                   snorm,
+                                                                                   fnorm,
+                                                                                   snes->ttol,
+                                                                                   snes->rtol,
+                                                                                   stol,
+                                                                                   snes->abstol,
+                                                                                   snes->nfuncs,
+                                                                                   snes->max_funcs,
+                                                                                   system._initial_residual,
+                                                                                   system._initial_residual*(1/snes->rtol));
 
   if (msg.length() > 0)
     PetscInfo(snes,msg.c_str());
