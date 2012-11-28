@@ -1,7 +1,7 @@
 from options import *
 
 test = { INPUT : 'gap_heat_transfer_htonly_test.i',
-         EXODIFF : ['out.e'],
+         EXODIFF : ['gap_heat_transfer_htonly_test_out.e'],
          ABS_ZERO : 1e-6 }
 
 test_it = { INPUT : 'gap_heat_transfer_htonly_it_plot_test.i',

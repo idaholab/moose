@@ -8,8 +8,8 @@
 #
 # The conductivity of both blocks is set very large to achieve a uniform temperature
 #  across each block. The temperature of the far left boundary
-#  is ramped from 100 to 200 over one time unit, and then held fixed for an additional
-#  time unit.  The temperature of the far right boundary is held fixed at 100.
+#  is ramped from 100 to 200 over one time unit.  The temperature of the far right
+#  boundary is held fixed at 100.
 #
 # A simple analytical solution is possible for the heat flux between the blocks:
 #
@@ -20,11 +20,15 @@
 #  gapK(Tavg) = 1.0*Tavg
 #
 #
-# The heat flux across the gap at time = 2 is then:
+# The heat flux across the gap at time = 1 is then:
 #
 #  Flux(2) = 100 * (1.0/1.0) = 100
 #
 # For comparison, see results from the flux post processors
+#
+# This test has been augmented with a second scalar field that solves nearly
+#   the same problem.  The conductivity has been changed to 10.  Thus, the
+#   flux for the second field is 1000.
 #
 
 
@@ -48,10 +52,23 @@
     master = 3
     slave = 2
   [../]
+  [./awesomium_contact]
+    type = GapHeatTransfer
+    variable = awesomium
+    master = 3
+    slave = 2
+    gap_conductivity = 10
+    appended_property_name = _awesomium
+  [../]
 []
 
 [Variables]
   [./temp]
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 100
+  [../]
+  [./awesomium]
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
@@ -63,12 +80,20 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./gap_cond_awesomium]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
   [./heat]
     type = HeatConduction
     variable = temp
+  [../]
+  [./awe]
+    type = HeatConduction
+    variable = awesomium
   [../]
 []
 
@@ -80,11 +105,22 @@
     variable = temp
     function = temp
   [../]
-
   [./temp_far_right]
     type = PresetBC
     boundary = 4
     variable = temp
+    value = 100
+  [../]
+  [./awesomium_far_left]
+    type = FunctionPresetBC
+    boundary = 1
+    variable = awesomium
+    function = temp
+  [../]
+  [./awesomium_far_right]
+    type = PresetBC
+    boundary = 4
+    variable = awesomium
     value = 100
   [../]
 []
@@ -94,6 +130,12 @@
     type = MaterialRealAux
     property = gap_conductance
     variable = gap_cond
+    boundary = 2
+  [../]
+  [./conductance_awe]
+    type = MaterialRealAux
+    property = gap_conductance_awesomium
+    variable = gap_cond_awesomium
     boundary = 2
   [../]
 []
@@ -106,7 +148,6 @@
     specific_heat = 1.0
     thermal_conductivity = 100000000.0
   [../]
-
   [./density]
     type = Density
     block = '1 2'
@@ -122,14 +163,14 @@
   petsc_options_value = 'ls         basic    201                hypre    boomeramg      4'
 
   nl_abs_tol = 1e-6
-  nl_rel_tol = 1e-10
+  nl_rel_tol = 1e-6
 
   l_tol = 1e-3
   l_max_its = 100
 
   start_time = 0.0
   dt = 1e-1
-  end_time = 2.0
+  end_time = 1.0
 []
 
 [Postprocessors]
@@ -159,10 +200,35 @@
     boundary = 3
     diffusivity = thermal_conductivity
   [../]
+
+  [./awe_left]
+    type = SideAverageValue
+    boundary = 2
+    variable = awesomium
+  [../]
+
+  [./awe_right]
+    type = SideAverageValue
+    boundary = 3
+    variable = awesomium
+  [../]
+
+  [./awe_flux_left]
+    type = SideFluxIntegral
+    variable = awesomium
+    boundary = 2
+    diffusivity = thermal_conductivity
+  [../]
+
+  [./awe_flux_right]
+    type = SideFluxIntegral
+    variable = awesomium
+    boundary = 3
+    diffusivity = thermal_conductivity
+  [../]
 []
 
 [Output]
-  file_base = out
   interval = 1
   output_initial = true
   exodus = true

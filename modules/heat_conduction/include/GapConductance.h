@@ -33,11 +33,13 @@ protected:
 
   void computeGapTempAndDistance();
 
+  const std::string _appended_property_name;
+
   bool _quadrature;
 
   Real _gap_temp;
   Real _gap_distance;
-  
+
   bool _has_info;
 
   const VariableValue & _gap_distance_value;

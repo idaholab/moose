@@ -18,6 +18,7 @@ public:
   virtual void act();
 
 protected:
+  std::string getGapValueName() const;
   void addBcs();
   void addAuxVariables();
   void addAuxBcs();

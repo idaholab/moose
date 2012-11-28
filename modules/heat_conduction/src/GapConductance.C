@@ -12,6 +12,7 @@ InputParameters validParams<GapConductance>()
   MooseEnum orders("FIRST, SECOND, THIRD, FOURTH", "FIRST");
 
   InputParameters params = validParams<Material>();
+  params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
   // Node based
   params.addCoupledVar("gap_distance", "Distance across the gap");
@@ -20,7 +21,7 @@ InputParameters validParams<GapConductance>()
 
   // Quadrature based
   params.addCoupledVar("temp", "The temperature variable");
-  params.addParam<bool>("quadrature", false, "Whether or not to do Quadrature point based gap heat transfer.  If this is true then gap_distance and gap_temp shoul NOT be provided (and will be ignored) however paired_boundary IS then required and so is 'temp'.");
+  params.addParam<bool>("quadrature", false, "Whether or not to do Quadrature point based gap heat transfer.  If this is true then gap_distance and gap_temp should NOT be provided (and will be ignored) however paired_boundary IS then required and so is 'temp'.");
   params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
@@ -33,14 +34,15 @@ InputParameters validParams<GapConductance>()
 
 GapConductance::GapConductance(const std::string & name, InputParameters parameters)
   :Material(name, parameters),
+   _appended_property_name( getParam<std::string>("appended_property_name") ),
    _quadrature(getParam<bool>("quadrature")),
    _gap_temp(0),
    _gap_distance(88888),
    _has_info(false),
    _gap_distance_value(_quadrature ? _zero : coupledValue("gap_distance")),
    _gap_temp_value(_quadrature ? _zero : coupledValue("gap_temp")),
-   _gap_conductance(declareProperty<Real>("gap_conductance")),
-   _gap_conductance_dT(declareProperty<Real>("gap_conductance_dT")),
+   _gap_conductance(declareProperty<Real>("gap_conductance"+_appended_property_name)),
+   _gap_conductance_dT(declareProperty<Real>("gap_conductance"+_appended_property_name+"_dT")),
    _gap_conductivity(getParam<Real>("gap_conductivity")),
    _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap")),

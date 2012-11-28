@@ -15,6 +15,7 @@ InputParameters validParams<GapHeatTransfer>()
   MooseEnum orders("FIRST, SECOND, THIRD, FOURTH", "FIRST");
 
   InputParameters params = validParams<IntegratedBC>();
+  params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
   // Common
   params.addParam<Real>("min_gap", 1.0e-6, "A minimum gap size");
@@ -37,8 +38,8 @@ GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters param
    :IntegratedBC(name, parameters),
    _quadrature(getParam<bool>("quadrature")),
    _slave_flux(!_quadrature ? &_sys.getVector("slave_flux") : NULL),
-   _gap_conductance(getMaterialProperty<Real>("gap_conductance")),
-   _gap_conductance_dT(getMaterialProperty<Real>("gap_conductance_dT")),
+    _gap_conductance(getMaterialProperty<Real>("gap_conductance"+getParam<std::string>("appended_property_name"))),
+   _gap_conductance_dT(getMaterialProperty<Real>("gap_conductance"+getParam<std::string>("appended_property_name")+"_dT")),
    _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap")),
    _gap_temp(0),
