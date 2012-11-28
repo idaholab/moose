@@ -20,6 +20,8 @@
 #include "NearestNodeLocator.h"
 #include "MooseApp.h"
 
+#include <limits>
+
 template<>
 InputParameters validParams<FrictionalContactProblem>()
 {
@@ -726,6 +728,8 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
                                                     const Real ref_resid,
                                                     const Real div_threshold)
 {
+  Real my_max_funcs = std::numeric_limits<int>::max();
+  Real my_div_threshold = std::numeric_limits<Real>::max();
   Real my_ref_resid = ref_resid;
 
   MooseNonlinearConvergenceReason reason = FEProblem::checkNonlinearConvergence(msg,
@@ -738,9 +742,9 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
                                                                                 stol,
                                                                                 abstol,
                                                                                 nfuncs,
-                                                                                max_funcs,
+                                                                                my_max_funcs,
                                                                                 my_ref_resid,
-                                                                                div_threshold);
+                                                                                my_div_threshold);
 
   int min_nl_its_since_contact_update = 1;
   ++_num_nl_its_since_contact_update;
