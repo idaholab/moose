@@ -90,17 +90,19 @@ public:
 
   /**
    * Check for converence of the nonlinear solution
-   * @param msg        Error message that gets sent back to the solver
-   * @param it         Iteration counter
-   * @param xnorm      Norm of the solution vector
-   * @param snorm      Norm of the change in the solution vector
-   * @param fnorm      Norm of the residual vector
-   * @param ttol       Residual at relative convergence target
-   * @param rtol       Relative residual convergence tolerance
-   * @param stol       Solution change convergence tolerance
-   * @param abstol     Absolute residual convergence tolerance
-   * @param nfuncs     Number of function evaluations
-   * @param max_funcs  Maximum Number of function evaluations
+   * @param msg            Error message that gets sent back to the solver
+   * @param it             Iteration counter
+   * @param xnorm          Norm of the solution vector
+   * @param snorm          Norm of the change in the solution vector
+   * @param fnorm          Norm of the residual vector
+   * @param ttol           Residual at relative convergence target
+   * @param rtol           Relative residual convergence tolerance
+   * @param stol           Solution change convergence tolerance
+   * @param abstol         Absolute residual convergence tolerance
+   * @param nfuncs         Number of function evaluations
+   * @param max_funcs      Maximum Number of function evaluations
+   * @param ref_resid      Reference residual to be used in relative convergence check
+   * @param div_threshold  Maximum value of residual before triggering divergence check
    */
   virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
                                                                     const int it,

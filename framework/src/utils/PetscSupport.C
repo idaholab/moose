@@ -135,6 +135,9 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 #endif
   std::string msg;
 
+  const Real ref_resid = system._initial_residual;
+  const Real div_threshold = system._initial_residual*(1.0/snes->rtol);
+
   MooseNonlinearConvergenceReason moose_reason = problem.checkNonlinearConvergence(msg,
                                                                                    it,
                                                                                    xnorm,
@@ -146,8 +149,8 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
                                                                                    snes->abstol,
                                                                                    snes->nfuncs,
                                                                                    snes->max_funcs,
-                                                                                   system._initial_residual,
-                                                                                   system._initial_residual*(1/snes->rtol));
+                                                                                   ref_resid,
+                                                                                   div_threshold);
 
   if (msg.length() > 0)
     PetscInfo(snes,msg.c_str());
