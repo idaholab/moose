@@ -320,7 +320,14 @@ GrainTracker::trackGrains()
         }
 
         if (!found_one)
-          mooseError("Couldn't find a matching grain");
+        {
+          std::cerr << "Couldn't find a matching grain while working on variable index: " << map_num
+                    << "\nCentroid: " << curr_centroid << " (num boxes: " << box_ptrs.size() << ")\n";
+          mooseError("FAIL");
+        }
+        
+          
+        
 
         // Now we want to update the grain information
         delete closest_match->second;
