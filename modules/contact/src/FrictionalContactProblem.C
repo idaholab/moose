@@ -712,9 +712,35 @@ FrictionalContactProblem::numLocalFrictionalConstraints()
 }
 
 MooseNonlinearConvergenceReason
-FrictionalContactProblem::checkNonlinearConvergence(std::string &msg, const int it, const Real xnorm, const Real snorm, const Real fnorm, Real &ttol, const Real rtol, const Real stol, const Real abstol, const int nfuncs, const int max_funcs)
+FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
+                                                    const int it,
+                                                    const Real xnorm,
+                                                    const Real snorm,
+                                                    const Real fnorm,
+                                                    Real &ttol,
+                                                    const Real rtol,
+                                                    const Real stol,
+                                                    const Real abstol,
+                                                    const int nfuncs,
+                                                    const int max_funcs,
+                                                    const Real ref_resid,
+                                                    const Real div_threshold)
 {
-  MooseNonlinearConvergenceReason reason = FEProblem::checkNonlinearConvergence(msg, it, xnorm, snorm, fnorm, ttol, rtol, stol, abstol, nfuncs, max_funcs);
+  Real my_ref_resid = ref_resid;
+
+  MooseNonlinearConvergenceReason reason = FEProblem::checkNonlinearConvergence(msg,
+                                                                                it,
+                                                                                xnorm,
+                                                                                snorm,
+                                                                                fnorm,
+                                                                                ttol,
+                                                                                rtol,
+                                                                                stol,
+                                                                                abstol,
+                                                                                nfuncs,
+                                                                                max_funcs,
+                                                                                my_ref_resid,
+                                                                                div_threshold);
 
   int min_nl_its_since_contact_update = 1;
   ++_num_nl_its_since_contact_update;

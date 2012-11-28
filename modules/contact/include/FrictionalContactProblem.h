@@ -78,7 +78,19 @@ public:
                  NumericVector<Number>& ghosted_solution,
                  std::vector<SlipData> & iterative_slip);
   unsigned int numLocalFrictionalConstraints();
-  virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg, const int it, const Real xnorm, const Real snorm, const Real fnorm, Real &ttol, const Real rtol, const Real stol, const Real abstol, const int nfuncs, const int max_funcs);
+  virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
+                                                                    const int it,
+                                                                    const Real xnorm,
+                                                                    const Real snorm,
+                                                                    const Real fnorm,
+                                                                    Real &ttol,
+                                                                    const Real rtol,
+                                                                    const Real stol,
+                                                                    const Real abstol,
+                                                                    const int nfuncs,
+                                                                    const int max_funcs,
+                                                                    const Real ref_resid,
+                                                                    const Real div_threshold);
   void updateContactPoints(NumericVector<Number>& ghosted_solution,
                            bool update_incremental_slip);
   void updateIncrementalSlip();
