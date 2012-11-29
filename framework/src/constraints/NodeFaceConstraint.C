@@ -28,7 +28,7 @@ InputParameters validParams<NodeFaceConstraint>()
 
   InputParameters params = validParams<MooseObject>();
   params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|timestep|timestep_begin|custom) to execute only at that moment");
-  params.addRequiredParam<std::string>("variable", "The name of the variable that this constraint is applied to.");
+  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this constraint is applied to.");
   params.addRequiredParam<BoundaryName>("slave", "The boundary ID associated with the slave side");
   params.addRequiredParam<BoundaryName>("master", "The boundary ID associated with the master side");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
@@ -50,7 +50,7 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   _sys(*parameters.get<SystemBase *>("_sys")),
   _tid(parameters.get<THREAD_ID>("_tid")),
   _assembly(_subproblem.assembly(_tid)),
-  _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
+  _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
   _mesh(_subproblem.mesh()),
   _dim(_mesh.dimension()),
 

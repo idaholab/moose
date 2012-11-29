@@ -23,7 +23,7 @@ template<>
 InputParameters validParams<ElementalVariableValue>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<std::string>("variable", "The variable to be monitored");
+  params.addRequiredParam<VariableName>("variable", "The variable to be monitored");
   params.addRequiredParam<unsigned int>("elementid", "The ID of the element where we monitor");
   return params;
 }
@@ -31,7 +31,7 @@ InputParameters validParams<ElementalVariableValue>()
 ElementalVariableValue::ElementalVariableValue(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     _mesh(_subproblem.mesh()),
-    _var_name(parameters.get<std::string>("variable")),
+    _var_name(parameters.get<VariableName>("variable")),
     _element(_mesh.elem(parameters.get<unsigned int>("elementid")))
 {
 }

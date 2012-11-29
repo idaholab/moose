@@ -20,7 +20,7 @@ template<>
 InputParameters validParams<Damper>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<std::string>("variable", "The name of the variable that this damper operates on");
+  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this damper operates on");
 
   params.addPrivateParam<std::string>("built_by_action", "add_damper");
   return params;
@@ -34,7 +34,7 @@ Damper::Damper(const std::string & name, InputParameters parameters) :
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _coord_sys(_subproblem.coordSystem(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
 
     _current_elem(_var.currentElem()),
     _q_point(_subproblem.points(_tid)),

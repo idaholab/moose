@@ -34,7 +34,7 @@ template<>
 InputParameters validParams<DGKernel>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
+  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this boundary condition applies to");
   params.addPrivateParam<BoundaryID>("_boundary_id", DGKernel::InternalBndId);
 
   params.addPrivateParam<std::string>("built_by_action", "add_dg_kernel");
@@ -53,7 +53,7 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
 

@@ -24,7 +24,7 @@ template<>
 InputParameters validParams<ScalarKernel>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
+  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this kernel operates on");
 
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_scalar_kernel");
@@ -46,7 +46,7 @@ ScalarKernel::ScalarKernel(const std::string & name, InputParameters parameters)
 
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getScalarVariable(_tid, parameters.get<std::string>("variable"))),
+    _var(_sys.getScalarVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
 

@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<NodalConstraint>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<std::string>("variable", "The name of the variable that this constraint is applied to.");
+  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this constraint is applied to.");
   params.addRequiredParam<unsigned int>("master", "The ID of the master node");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_constraint");
@@ -39,7 +39,7 @@ NodalConstraint::NodalConstraint(const std::string & name, InputParameters param
   _sys(*parameters.get<SystemBase *>("_sys")),
   _tid(parameters.get<THREAD_ID>("_tid")),
   _assembly(_subproblem.assembly(_tid)),
-  _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
+  _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
   _mesh(_subproblem.mesh()),
   _dim(_mesh.dimension()),
 
