@@ -221,7 +221,8 @@ C-------  Elimination
             DO J=1,N
                A(I,J)=A(I,J)-C*A(II,J)
             END DO
- 30      END DO
+ 30         CONTINUE
+         END DO
       END DO
 C---------------------------------------------------------------------+
 C
@@ -240,7 +241,8 @@ C-------  Switch columns J and J1
             A(I,J)=A(I,J1)
             A(I,J1)=C
          END DO
-110   END DO
+110      CONTINUE
+      END DO
 C
 C---------------------------------------------------------------------+
 1000  CONTINUE
