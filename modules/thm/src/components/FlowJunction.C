@@ -158,8 +158,8 @@ FlowJunction::addMooseObjects()
   //add constraint
   {
     InputParameters params = validParams<FlowJunctionConstraint>();
-    params.set<std::string>("variable") = _FlowJunction_var_name;
-    params.set<std::string>("ced_variable") = Model::RHO;
+    params.set<NonlinearVariableName>("variable") = _FlowJunction_var_name;
+    params.set<NonlinearVariableName>("ced_variable") = Model::RHO;
 
     params.set<std::vector<unsigned int> >("nodes") = _nodes;
     params.set<std::vector<Real> >("areas") = _Areas;
