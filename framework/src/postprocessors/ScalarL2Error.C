@@ -20,14 +20,14 @@ template<>
 InputParameters validParams<ScalarL2Error>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<std::string>("variable", "The name of the scalar variable");
+  params.addRequiredParam<VariableName>("variable", "The name of the scalar variable");
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   return params;
 }
 
 ScalarL2Error::ScalarL2Error(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
-    _var(_subproblem.getScalarVariable(_tid, getParam<std::string>("variable"))),
+    _var(_subproblem.getScalarVariable(_tid, getParam<VariableName>("variable"))),
     _func(getFunction("function"))
 {
 }

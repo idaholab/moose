@@ -32,7 +32,7 @@ InputParameters validParams<SolutionFunction>()
   params.addParam<std::string>("file_type","xda","The type of format that is to be read (xda | exodusII).");
   params.addParam<std::string>("es", "The name of the file holding the equation system info in xda format (xda only).");
   params.addParam<std::string>("system", "NonlinearSystem", "The name of the system to pull values out of (xda only).");
-  params.addRequiredParam<std::string>("variable", "The name of the variable you want to use for values.");
+  params.addRequiredParam<VariableName>("variable", "The name of the variable you want to use for values.");
   params.addParam<int>("timestep", -1, "Index of the single timestep used (exodusII only).  If not supplied, time interpolation will occur.");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the values");
   return params;
@@ -44,7 +44,7 @@ SolutionFunction::SolutionFunction(const std::string & name, InputParameters par
     _file_type(getSolutionFileType(getParam<std::string>("file_type"))),
     _es_file(getParam<std::string>("es")),
     _system_name(getParam<std::string>("system")),
-    _var_name(getParam<std::string>("variable")),
+    _var_name(getParam<VariableName>("variable")),
     _exodus_time_index(getParam<int>("timestep")),
     _interpolate_times(false),
     _mesh(NULL),

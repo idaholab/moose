@@ -19,14 +19,14 @@ template<>
 InputParameters validParams<PrintScalarVariable>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<std::string>("variable", "Name of the variable");
+  params.addRequiredParam<VariableName>("variable", "Name of the variable");
   params.addParam<unsigned int>("idx", 0, "Index for this variable");
   return params;
 }
 
 PrintScalarVariable::PrintScalarVariable(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
-    _var(_subproblem.getScalarVariable(_tid, getParam<std::string>("variable"))),
+    _var(_subproblem.getScalarVariable(_tid, getParam<VariableName>("variable"))),
     _idx(getParam<unsigned int>("idx"))
 {
 }
