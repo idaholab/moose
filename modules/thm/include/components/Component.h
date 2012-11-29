@@ -11,7 +11,6 @@
 class Component;
 class FEProblem;
 class RavenMapContainer;
-//class ComponentPostProcessor;
 
 template<>
 InputParameters validParams<Component>();
