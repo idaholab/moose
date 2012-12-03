@@ -320,20 +320,19 @@ GrainTracker::trackGrains()
 
         if (!found_one)
         {
-          std::cerr << "Couldn't find a matching grain while working on variable index: " << map_num
-                    << "\nCentroid: " << curr_centroid << " (num boxes: " << box_ptrs.size() << ")\n";
-          mooseError("FAIL");
+          std::cout << "Couldn't find a matching grain while working on variable index: " << curr_var
+                    << "\nCentroid: " << curr_centroid << " (num boxes: " << box_ptrs.size() << ")"
+                    << "\nCreating new unique grain: " << _unique_grains.size() + 1 << "\n";
+
+          _unique_grains[_unique_grains.size() + 1] = new UniqueGrain(curr_var, box_ptrs, curr_centroid, &it1->_nodes);
         }
-        
-          
-        
-
-        // Now we want to update the grain information
-        delete closest_match->second;
-        // add the new
-        closest_match->second = new UniqueGrain(curr_var, box_ptrs, curr_centroid, &it1->_nodes);
-
-//        _region_to_grain[counter] = closest_match->first;
+        else
+        {
+          // Now we want to update the grain information
+          delete closest_match->second;
+          // add the new
+          closest_match->second = new UniqueGrain(curr_var, box_ptrs, curr_centroid, &it1->_nodes);
+        }
       }
       ++counter;
     }
