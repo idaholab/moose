@@ -15,6 +15,7 @@
 #include "MooseMesh.h"
 #include "Factory.h"
 #include "MeshModifier.h"
+#include "NonlinearSystem.h"
 
 // libMesh
 #include "boundary_info.h"
@@ -57,7 +58,9 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     _bnd_node_range(NULL),
     _bnd_elem_range(NULL),
     _node_to_elem_map_built(false),
-    _patch_size(40)
+    _patch_size(40),
+    _regular_orthogonal_mesh(false),
+    _periodic_dim(LIBMESH_DIM, false)
 {
 }
 
@@ -73,7 +76,9 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _bnd_node_range(NULL),
     _bnd_elem_range(NULL),
     _node_to_elem_map_built(false),
-    _patch_size(40)
+    _patch_size(40),
+    _regular_orthogonal_mesh(false),
+    _periodic_dim(LIBMESH_DIM, false)
 {
   (*_mesh.boundary_info) = (*other_mesh._mesh.boundary_info);
 }
@@ -169,44 +174,46 @@ MooseMesh::prepare()
 
   // Communicate subdomain and boundary IDs if this is a parallel mesh
   if (!_mesh.is_serial())
-    {
-      // Subdomain size before
-      // std::cout << "(before) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
+  {
+    // Subdomain size before
+    // std::cout << "(before) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
 
-      // Pack our subdomain IDs into a vector
-      std::vector<SubdomainID> mesh_subdomains_vector(_mesh_subdomains.begin(),
-                                                      _mesh_subdomains.end());
+    // Pack our subdomain IDs into a vector
+    std::vector<SubdomainID> mesh_subdomains_vector(_mesh_subdomains.begin(),
+                                                    _mesh_subdomains.end());
 
-      // Gather them all into an enlarged vector
-      Parallel::allgather(mesh_subdomains_vector);
+    // Gather them all into an enlarged vector
+    Parallel::allgather(mesh_subdomains_vector);
 
-      // Attempt to insert any new IDs into the set (any existing ones will be skipped)
-      _mesh_subdomains.insert(mesh_subdomains_vector.begin(),
-                              mesh_subdomains_vector.end());
+    // Attempt to insert any new IDs into the set (any existing ones will be skipped)
+    _mesh_subdomains.insert(mesh_subdomains_vector.begin(),
+                            mesh_subdomains_vector.end());
 
-      // Subdomain size after
-      // std::cout << "(after) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
-
-
+    // Subdomain size after
+    // std::cout << "(after) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
 
 
-      // Boundary ID size before
-      // std::cout << "(before) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
 
-      // Pack our boundary IDs into a vector for communication
-      std::vector<BoundaryID> mesh_boundary_ids_vector(_mesh_boundary_ids.begin(),
-                                                       _mesh_boundary_ids.end());
 
-      // Gather them all into an enlarged vector
-      Parallel::allgather(mesh_boundary_ids_vector);
+    // Boundary ID size before
+    // std::cout << "(before) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
 
-      // Attempt to insert any new IDs into the set (any existing ones will be skipped)
-      _mesh_boundary_ids.insert(mesh_boundary_ids_vector.begin(),
-				mesh_boundary_ids_vector.end());
+    // Pack our boundary IDs into a vector for communication
+    std::vector<BoundaryID> mesh_boundary_ids_vector(_mesh_boundary_ids.begin(),
+                                                     _mesh_boundary_ids.end());
 
-      // Boundary ID size after
-      // std::cout << "(after) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
-    }
+    // Gather them all into an enlarged vector
+    Parallel::allgather(mesh_boundary_ids_vector);
+
+    // Attempt to insert any new IDs into the set (any existing ones will be skipped)
+    _mesh_boundary_ids.insert(mesh_boundary_ids_vector.begin(),
+                              mesh_boundary_ids_vector.end());
+
+    // Boundary ID size after
+    // std::cout << "(after) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
+  }
+
+  detectOrthogonalDimRanges();
 
   update();
 }
@@ -803,3 +810,227 @@ MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<unsigned int> > &
   }
 }
 
+bool
+MooseMesh::detectOrthogonalDimRanges(Real tol)
+{
+  // If this mesh is already regular orthogonal, we don't need to do any extra work!
+  if (_regular_orthogonal_mesh)
+  {
+    // Make sure that bounds has also been set
+    if (_bounds.size() != LIBMESH_DIM)
+      mooseError("\"_regular_orthogonal_mesh\" has been set, but \"_bounds\" has not been properly initialized.");
+    return true;
+  }
+
+  std::vector<Real> min(3, std::numeric_limits<Real>::max());
+  std::vector<Real> max(3, std::numeric_limits<Real>::min());
+  unsigned int dim = _mesh.mesh_dimension();
+
+  // Find the bounding box of our mesh
+  const MeshBase::node_iterator nd_end = _mesh.nodes_end();
+  for (MeshBase::node_iterator nd = _mesh.nodes_begin(); nd != nd_end; ++nd)
+  {
+    Node &node = **nd;
+    for (unsigned int i=0; i<dim; ++i)
+    {
+      if (node(i) < min[i])
+        min[i] = node(i);
+      if (node(i) > max[i])
+        max[i] = node(i);
+    }
+  }
+
+  std::vector<Node *> extreme_nodes(8);  // 2^LIBMESH_DIM
+  // Now make sure that there are actual nodes at all of the extremes
+  unsigned int extreme_matches = 0;
+  std::vector<unsigned int> comp_map(3);
+  for (MeshBase::node_iterator nd = _mesh.nodes_begin(); nd != nd_end; ++nd)
+  {
+    // See if the current node is located at one of the extremes
+    Node &node = **nd;
+    unsigned int coord_match = 0;
+
+    for (unsigned int i=0; i<dim; ++i)
+    {
+      if (std::abs(node(i) - min[i]) < tol)
+      {
+        comp_map[i] = MIN;
+        ++coord_match;
+      }
+      else if (std::abs(node(i) - max[i]) <tol)
+      {
+        comp_map[i] = MAX;
+        ++coord_match;
+      }
+    }
+
+    if (coord_match == dim)  // Found a coordinate at one of the extremes
+    {
+      extreme_nodes[comp_map[X]*4 + comp_map[Y]*2 + comp_map[Z]] = &node;
+      ++extreme_matches;
+    }
+  }
+
+  // See if we matched all of the extremes for the mesh dimension
+  if (extreme_matches != std::pow(2, dim))
+    return false;                    // This is not a regular orthogonal mesh
+
+  // This is a regular orthogonal mesh, so set the bounds
+  _regular_orthogonal_mesh = true;
+  _bounds.resize(LIBMESH_DIM);
+  for (unsigned int i=0; i<dim; ++i)
+  {
+    _bounds[i].resize(2);
+    _bounds[i][MIN] = min[i];
+    _bounds[i][MAX] = max[i];
+  }
+  for (unsigned int i=dim; i<LIBMESH_DIM; ++i)
+  {
+    _bounds[i].resize(2);
+    _bounds[i][MIN] = 0;
+    _bounds[i][MAX] = 0;
+  }
+
+  // detect the paired sidesets for use by the PBC functions
+  detectPairedSidesets(extreme_nodes);
+
+  return true;
+}
+
+void
+MooseMesh::detectPairedSidesets(std::vector<Node *> &corner_nodes)
+{
+  /**
+   * Autodetect sidesets:  We need to inspect all of the nodes on the bounding box of each dimension to find the common
+   * sideset.  This is rather tricky in higher dimensions.  We use the strides array below to help us index into the
+   * corner nodes vector with the proper pattern.  To find the common boundary we simply locate the
+   * boundary with the most unique hits (common to all of the nodes on that particular boundary).
+   */
+  unsigned int strides[3][3] = {{4, 2, 1}, {2, 4, 1}, {1, 4, 2}};
+
+  _mesh.boundary_info->build_node_list_from_side_list();
+  unsigned int dim = _mesh.mesh_dimension();
+  unsigned int z_dim = dim == 3 ? 2 : 1;  // Determine how many z loops there are, we always need to loop at least once!
+  for (unsigned int curr_dim=0; curr_dim < dim; ++curr_dim)
+  {
+    std::pair<BoundaryID, BoundaryID> paired_boundary;
+    for (unsigned int i=0; i<2; ++i)
+    {
+      std::map<BoundaryID, unsigned int> boundary_counts;
+      for (unsigned int j=0; j<2; ++j)
+        for (unsigned int k=0; k<z_dim; ++k)
+        {
+          std::vector<BoundaryID> bounds_ids = _mesh.boundary_info->boundary_ids(corner_nodes[i*strides[curr_dim][0] + j*strides[curr_dim][1] + k*strides[curr_dim][2]]);
+          for (unsigned int l=0; l<bounds_ids.size(); ++l)
+            ++boundary_counts[bounds_ids[l]];
+        }
+
+      BoundaryID common_boundary;
+      unsigned int max_count = 0;
+      for (std::map<BoundaryID, unsigned int>::const_iterator it=boundary_counts.begin(); it != boundary_counts.end(); ++it)
+      {
+        if (it->second > max_count)
+        {
+          common_boundary = it->first;
+          max_count = it->second;
+        }
+      }
+      if (i==0)
+        paired_boundary.first = common_boundary;
+      else
+        paired_boundary.second = common_boundary;
+    }
+    _paired_boundary.push_back(paired_boundary);
+  }
+}
+
+
+Real
+MooseMesh::dimensionWidth(unsigned int component) const
+{
+  mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
+  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
+
+  return _bounds[component][MAX] - _bounds[component][MIN];
+}
+
+Real
+MooseMesh::getMinInDimension(unsigned int component) const
+{
+  mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
+  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
+
+  return _bounds[component][MIN];
+}
+
+Real
+MooseMesh::getMaxInDimension(unsigned int component) const
+{
+  mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
+  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
+
+  return _bounds[component][MAX];
+}
+
+bool
+MooseMesh::isPeriodic(NonlinearSystem &nl, unsigned int var_num, unsigned int component)
+{
+  mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
+  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
+
+  PeriodicBoundaries *pbs = nl.dofMap().get_periodic_boundaries();
+
+  static const int pb_map[3][3] = {{0, -99, -99},{3, 0, -99},{4, 1, 5}};
+
+  PeriodicBoundaryBase *pb = pbs->boundary(pb_map[_mesh.mesh_dimension()-1][component]);
+
+  if (pb != NULL)
+    return pb->is_my_variable(var_num);
+  else
+    return false;
+}
+
+void
+MooseMesh::initPeriodicDistanceForVariable(NonlinearSystem &nl, unsigned int var_num)
+{
+  for (unsigned int i=0; i<dimension(); ++i)
+    _periodic_dim[i] = isPeriodic(nl, var_num, i);
+
+  _half_range = Point(dimensionWidth(0)/2.0, dimensionWidth(1)/2.0, dimensionWidth(2)/2.0);
+}
+
+Real
+MooseMesh::minPeriodicDistance(Point p, Point q) const
+{
+  mooseAssert(_half_range != RealVectorValue(0, 0, 0), "\"initPeriodicDistanceForVariable\" has not been called!");
+
+  for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+  {
+    // check to see if we're closer in real or periodic space in x, y, and z
+    if (_periodic_dim[i])
+    {
+      // Need to test order before differencing
+      if (p(i) > q(i))
+      {
+        if (p(i) - q(i) > _half_range(i))
+          p(i) -= _half_range(i) * 2;
+      }
+      else
+      {
+        if (q(i) - p(i) > _half_range(i))
+          p(i) += _half_range(i) * 2;
+      }
+    }
+  }
+
+  return (p-q).size();
+}
+
+std::pair<BoundaryID, BoundaryID>
+MooseMesh::getPairedBoundaryMapping(unsigned int component) const
+{
+  mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
+  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
+
+  return _paired_boundary[component];
+}

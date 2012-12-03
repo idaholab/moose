@@ -32,16 +32,14 @@
 
 //forward declaration
 class MeshModifier;
+class MooseMesh;
+class NonlinearSystem;
 
 typedef StoredRange<std::set<Node *>::iterator, Node*> SemiLocalNodeRange;
-
-class MooseMesh;
 
 template<>
 InputParameters validParams<MooseMesh>();
 
-// NOTE: maybe inheritance would be better here
-//
 class MooseMesh : public MooseObject
 {
 public:
@@ -228,11 +226,58 @@ public:
    */
   void buildPeriodicNodeSets(std::map<BoundaryID, std::set<unsigned int> > & periodic_node_sets, unsigned int var_number, PeriodicBoundaries *pbs) const;
 
+  /**
+   * Returns the width of the requested dimension
+   */
+  Real dimensionWidth(unsigned int component) const;
+
+  /**
+   * Returns the min or max of the requested dimension respectively
+   */
+  Real getMinInDimension(unsigned int component) const;
+  Real getMaxInDimension(unsigned int component) const;
+
+  /**
+   * Returns whether this generated mesh is periodic in the given dimension
+   * for the given variable
+   */
+  bool isPeriodic(NonlinearSystem &nl, unsigned int var_num, unsigned int component);
+
+  /**
+   * This function initializes the data structures necessary for calling minPeriodicDistance.
+   * @param nl - A reference to the nonlinear system
+   * @param var_num - The variable inspected for periodicity
+   * @param component - An integer representing the desired component (dimension)
+   */
+  void initPeriodicDistanceForVariable(NonlinearSystem &nl, unsigned int var_num);
+
+  /**
+   * This function returns the distance between two points taking into account periodicity.  A call
+   * to initPeriodicDistanceForVariable should be made prior to calling this function or it will
+   * not factor in any PBCs.
+   * @param p, q - The points for which to compute a minimum distance
+   * @return Real - The L2 distance between p and q
+   */
+  Real minPeriodicDistance(Point p, Point q) const;
+
+  /**
+   * This function returns the paired boundary ids for the given component.  For example, in a generated
+   * 2D mesh, passing 0 for the "x" component will return (3, 1).
+   * @param component - An integer representing the desired component (dimension)
+   * @return std::pair - The matching boundary pairs for the passed component
+   */
+  std::pair<BoundaryID, BoundaryID> getPairedBoundaryMapping(unsigned int component) const;
+
 protected:
+  /// Convienence enums
+  enum {X=0, Y, Z};
+  enum {MIN=0, MAX};
+
   /// true if mesh is changed (i.e. after adaptivity step)
   bool _is_changed;
 
-  bool _is_parallel;           /// True if using a TRUE parallel mesh (ie Nemesis)
+  /// True if using a TRUE parallel mesh (ie Nemesis)
+  bool _is_parallel;
 
   /// Used for generating the semilocal node range
   std::set<Node *> _semilocal_node_list;
@@ -301,9 +346,45 @@ protected:
   /// Vector of all the Nodes in the mesh for determining when to add a new point
   std::vector<Node *> _node_map;
 
+  /// Boolean indiciating whether this mesh was detected to be regular and orthogonal
+  bool _regular_orthogonal_mesh;
+
+  /// The bounds in each dimension of the mesh for regular orthogonal meshes
+  std::vector<std::vector<Real> > _bounds;
+
+  /// A vector holding the paired boundaries for a regular orthogonal mesh
+  std::vector<std::pair<BoundaryID, BoundaryID> > _paired_boundary;
+
   void cacheInfo();
   void freeBndNodes();
   void freeBndElems();
+
+private:
+  /**
+   * A vector indicating which dimensions are periodic in a regular orthogonal mesh.  This
+   * data structure is populated by initPeriodicDistanceForVariable.
+   */
+  std::vector<bool> _periodic_dim;
+
+  /// A convience vector used to hold values in each dimension representing half of the range
+  RealVectorValue _half_range;
+
+  /**
+   * This routine determines whether the Mesh is a regular orthogonal mesh (i.e. square in 2D, cubic in 3D).
+   * If it is, then we can use a number of convience functions when periodic boundary conditions
+   * are applied.  This routine populates the _range vector which is necessary for these convenience functions.
+   * Note:  This routine can potentially identify meshes with concave faces that still "fit" in the convex hull
+   * of the corresponding regular orthogonal mesh.  This case is highly unlikely in practice and if a user
+   * does this, well.... release the kicker!
+   */
+  bool detectOrthogonalDimRanges(Real tol=1e-6);
+
+  /**
+   * This routine detects paired sidesets of a regular orthogonal mesh (.i.e. parallel sidesets "across" from one and other).
+   * The _paired_boundary datastructure is populated with this information.
+   * @param corner_nodes: A vector of the corner nodes of the given mesh.  Should be 2^dim in size.
+   */
+  void detectPairedSidesets(std::vector<Node *> &corner_nodes);
 };
 
 #endif /* MOOSEMESH_H */

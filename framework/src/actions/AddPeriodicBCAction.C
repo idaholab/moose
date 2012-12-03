@@ -57,39 +57,40 @@ AddPeriodicBCAction::autoTranslationBoundaries()
 {
   if (isParamValid("auto_direction"))
   {
-    GeneratedMesh *gen_mesh = dynamic_cast<GeneratedMesh *>(&_problem->mesh());
-    if (!gen_mesh)
-      mooseError("\"auto_direction\" is only supported for type \"GeneratedMesh\"");
+    MooseMesh & mesh = _problem->mesh();
 
     NonlinearSystem & nl = _problem->getNonlinearSystem();
     std::vector<std::string> auto_dirs = getParam<std::vector<std::string> >("auto_direction");
 
-    unsigned int dim_offset = gen_mesh->dimension() - 2;
+    int dim_offset = mesh.dimension() - 2;
     for (unsigned int i=0; i<auto_dirs.size(); ++i)
     {
+      int component = -1;
       if (auto_dirs[i] == "X" || auto_dirs[i] == "x")
-      {
-        PeriodicBoundary p(RealVectorValue(gen_mesh->dimensionWidth(0), 0, 0));
-        p.myboundary = _paired_boundary_map[0][dim_offset][0];
-        p.pairedboundary = _paired_boundary_map[0][dim_offset][1];
-        setPeriodicVars(p, getParam<std::vector<std::string> >("variable"));
-        nl.dofMap().add_periodic_boundary(p);
-      }
+        component = 0;
       else if (auto_dirs[i] == "Y" || auto_dirs[i] == "y")
       {
-        PeriodicBoundary p(RealVectorValue(0, gen_mesh->dimensionWidth(1), 0));
-        p.myboundary = _paired_boundary_map[1][dim_offset][0];
-        p.pairedboundary = _paired_boundary_map[1][dim_offset][1];
-        setPeriodicVars(p, getParam<std::vector<std::string> >("variable"));
-        nl.dofMap().add_periodic_boundary(p);
+        if (dim_offset < 0)
+          mooseError("Cannot wrap 'Y' direction when using a 1D mesh");
+        component = 1;
       }
       else if (auto_dirs[i] == "Z" || auto_dirs[i] == "z")
       {
-        if (dim_offset == 0)
-          mooseError("Cannot wrap 'Z' direction when using a 2D mesh");
-        PeriodicBoundary p(RealVectorValue(0., 0., gen_mesh->dimensionWidth(2)));
-        p.myboundary = _paired_boundary_map[2][dim_offset][0];
-        p.pairedboundary = _paired_boundary_map[2][dim_offset][1];
+        if (dim_offset <= 0)
+          mooseError("Cannot wrap 'Z' direction when using a 1D or 2D mesh");
+        component = 2;
+      }
+
+      if (component >= 0)
+      {
+        std::pair<BoundaryID, BoundaryID> boundary_ids = mesh.getPairedBoundaryMapping(component);
+
+        RealVectorValue v;
+        v(component) = mesh.dimensionWidth(component);
+        PeriodicBoundary p(v);
+
+        p.myboundary = boundary_ids.first;
+        p.pairedboundary = boundary_ids.second;
         setPeriodicVars(p, getParam<std::vector<std::string> >("variable"));
         nl.dofMap().add_periodic_boundary(p);
       }
@@ -146,13 +147,3 @@ AddPeriodicBCAction::act()
     mooseError("You have to specify either 'auto_direction', 'translation' or 'trans_func' in your period boundary section '" + _name + "'");
   }
 }
-
-const Real AddPeriodicBCAction::_paired_boundary_map[3][2][2] =
-{
-  // X mappings (2D and 3D)
-  {{3, 1}, {4, 2}},
-  // Y mappings (2D and 3D)
-  {{0, 2}, {1, 3}},
-  // Z mappings (3D)
-  {{-1, -1}, {0, 5}}
-};

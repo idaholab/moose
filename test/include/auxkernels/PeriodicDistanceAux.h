@@ -32,6 +32,8 @@ public:
   PeriodicDistanceAux(const std::string & name, InputParameters parameters);
   virtual ~PeriodicDistanceAux();
 
+  virtual void initialSetup();
+
 protected:
   virtual Real computeValue();
 
@@ -40,9 +42,6 @@ protected:
 
   /// A point of interest in the domain
   Point _point;
-
-  /// A pointer to generated mesh (This AuxKernel is only intended to work with generated meshes)
-  GeneratedMesh *_gen_mesh;
 };
 
 

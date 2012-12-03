@@ -19,6 +19,16 @@
     mesh_mode = 'SERIAL'
   [../]
 
+  [./auto_wrap_2d_test_non_generated]
+    type = 'Exodiff'
+    input =  'auto_periodic_bc_non_generated.i'
+    exodiff = 'out_auto_non_generated.e'
+    max_threads = 1
+    max_parallel = 1
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+  [../]
+
   [./auto_wrap_2d_test_error_check]
     type = 'RunException'
     input = 'auto_periodic_bc_test.i'

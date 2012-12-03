@@ -46,8 +46,6 @@ protected:
   bool autoTranslationBoundaries();
 
   void setPeriodicVars(PeriodicBoundaryBase & p, const std::vector<std::string> & var_names);
-
-  static const Real _paired_boundary_map[3][2][2];
 };
 
 #endif // ADDPERIODICBCACTION_H
