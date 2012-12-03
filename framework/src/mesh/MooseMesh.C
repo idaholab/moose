@@ -872,7 +872,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
   }
 
   // See if we matched all of the extremes for the mesh dimension
-  if (extreme_matches != std::pow(2, dim))
+  if (extreme_matches != std::pow(2.0, dim))
     return false;                    // This is not a regular orthogonal mesh
 
   // This is a regular orthogonal mesh, so set the bounds
