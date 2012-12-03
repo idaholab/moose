@@ -17,6 +17,7 @@
 #include "HeatSource.h"
 #include "HomogenizationHeatConduction.h"
 #include "HomogenizedThermalConductivity.h"
+#include "ThermalCond.h"
 
 void
 Elk::HeatConduction::registerObjects()
@@ -33,6 +34,7 @@ Elk::HeatConduction::registerObjects()
   registerDiracKernel(GapHeatPointSourceMaster);
   registerKernel(HomogenizationHeatConduction);
   registerPostprocessor(HomogenizedThermalConductivity);
+  registerPostprocessor(ThermalCond);
 }
 
 void
