@@ -218,6 +218,8 @@ void
 RankFourTensor::rotate(RealTensorValue &R)
 {
   Real temp;
+  RankFourTensor old;
+  old=*this;
   
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
@@ -229,7 +231,7 @@ RankFourTensor::rotate(RealTensorValue &R)
             for(unsigned int n(0); n<N; n++)
               for(unsigned int o(0); o<N; o++)
                 for(unsigned int p(0); p<N; p++)
-                  temp += R(i,m)*R(j,n)*R(k,o)*R(l,p)*_vals[m][n][o][p];
+                  temp += R(i,m)*R(j,n)*R(k,o)*R(l,p)*old._vals[m][n][o][p];
           
           _vals[i][j][k][l] = temp;
         }
