@@ -8,7 +8,6 @@
 #include "auto_ptr.h"
 
 class GrainTracker;
-class GeneratedMesh;
 
 template<>
 InputParameters validParams<GrainTracker>();
@@ -92,8 +91,6 @@ protected:
 
   /// A reference to the nonlinear system
   NonlinearSystem & _nl;
-
-  GeneratedMesh *_gen_mesh;
 
   /// Inidicates whether remapping should be done or not
   const bool _remap;
