@@ -28,7 +28,6 @@ GrainTracker::GrainTracker(const std::string & name, InputParameters parameters)
     _tracking_step(getParam<unsigned int>("tracking_step")),
     _hull_buffer(getParam<Real>("convex_hull_buffer")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
-    _gen_mesh(dynamic_cast<GeneratedMesh *>(&_mesh)),
     _remap(getParam<bool>("remap_grains"))
 {
   // Size the data structures to hold the correct number of maps
@@ -62,7 +61,7 @@ GrainTracker::initialize()
 {
   NodalFloodCount::initialize();
 
-  _gen_mesh->initPeriodicDistanceForVariable(_nl, _var_number);
+  _mesh.initPeriodicDistanceForVariable(_nl, _var_number);
 }
 
 void
@@ -309,7 +308,7 @@ GrainTracker::trackGrains()
           if (grain_it->second->status == NOT_MARKED &&
               grain_it->second->variable_idx == curr_var)
           {
-            Real curr_centroid_diff = _gen_mesh->minPeriodicDistance(grain_it->second->centroid, curr_centroid);
+            Real curr_centroid_diff = _mesh.minPeriodicDistance(grain_it->second->centroid, curr_centroid);
             if (curr_centroid_diff <= min_centroid_diff)
             {
               found_one = true;
@@ -381,7 +380,7 @@ GrainTracker::remapGrains()
    * represented by the same variable.
    */
   Point buffer;
-  switch (_gen_mesh->dimension())
+  switch (_mesh.dimension())
   {
   case 1:
     mooseError("1D is not supported");
@@ -428,7 +427,7 @@ GrainTracker::remapGrains()
             {
               unsigned int curr_var_idx = grain_it3->second->variable_idx;
               
-              Real curr_centroid_diff = _gen_mesh->minPeriodicDistance(grain_it1->second->centroid, grain_it3->second->centroid);
+              Real curr_centroid_diff = _mesh.minPeriodicDistance(grain_it1->second->centroid, grain_it3->second->centroid);
               if (curr_centroid_diff < min_distances[curr_var_idx])
                 min_distances[curr_var_idx] = curr_centroid_diff;
             }
@@ -563,10 +562,10 @@ GrainTracker::calculateCentroid(const std::vector<BoundingBoxInfo *> & box_ptrs)
   // Make sure that the final centroid is in the domain
   for (unsigned int i=0; i<LIBMESH_DIM; ++i)
   {
-    if (centroid(i) < _gen_mesh->getMinInDimension(i))
-      centroid(i) += _gen_mesh->dimensionWidth(i);
-    else if (centroid(i) > _gen_mesh->getMaxInDimension(i))
-      centroid(i) -= _gen_mesh->dimensionWidth(i);
+    if (centroid(i) < _mesh.getMinInDimension(i))
+      centroid(i) += _mesh.dimensionWidth(i);
+    else if (centroid(i) > _mesh.getMaxInDimension(i))
+      centroid(i) -= _mesh.dimensionWidth(i);
   }
 
 
