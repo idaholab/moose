@@ -112,7 +112,7 @@ InputParameters::addCoupledVar(const std::string &name, const std::string &doc_s
 void
 InputParameters::addRequiredCoupledVar(const std::string &name, const std::string &doc_string)
 {
-  Parameters::set<std::vector<std::string> >(name);
+  Parameters::insert<std::vector<std::string> >(name);
   _required_params.insert(name);
   _doc_string[name] = doc_string;
   _coupled_vars.insert(name);

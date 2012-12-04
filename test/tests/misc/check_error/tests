@@ -224,6 +224,12 @@
     expect_err = "The required parameter '\S+' is missing"
   [../]
 
+  [./missing_required_coupled_test]
+    type = 'RunException'
+    input = 'missing_required_coupled.i'
+    expect_err = "The required parameter '\S+' is missing"
+  [../]
+
   [./multi_precond_test]
     type = 'RunException'
     input = 'multi_precond_test.i'
