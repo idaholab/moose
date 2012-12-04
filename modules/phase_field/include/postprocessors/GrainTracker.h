@@ -24,7 +24,7 @@ public:
 
   // Get the bubble map
   Real getNodeValue(unsigned int node_id, unsigned int var_idx=0) const;
-
+  
 protected:
   enum STATUS
   {
@@ -80,6 +80,8 @@ protected:
   const Real _hull_buffer;
   std::vector<std::list<BoundingBoxInfo *> > _bounding_boxes;
   std::map<unsigned int, UniqueGrain *> _unique_grains;
+  
+  std::vector<UniqueGrain *> _remapped_grains;
 
   /**
    * Since PBCs always map both directions we will have to pick one and ignore the other
@@ -94,6 +96,14 @@ protected:
 
   /// Inidicates whether remapping should be done or not
   const bool _remap;
+
+  const GrainTracker * _grain_remapper;
+
+public:
+  const std::vector<UniqueGrain *> & getRemappedGrains() const
+  {
+    return _remapped_grains;
+  }
 };
 
 #endif

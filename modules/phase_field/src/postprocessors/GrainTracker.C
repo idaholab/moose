@@ -17,6 +17,7 @@ InputParameters validParams<GrainTracker>()
   params.addParam<unsigned int>("tracking_step", 1, "The timestep for when we should start tracking grains");
   params.addParam<Real>("convex_hull_buffer", 1.0, "The buffer around the convex hull used to determine when features intersect");
   params.addParam<bool>("remap_grains", true, "Indicates whether remapping should be done or not (default: true)");
+  params.addParam<UserObjectName>("grain_remapper", "The GrainTracker UserObject to couple to for remap information (optional).");
 
   params.suppressParameter<std::vector<VariableName> >("variable");
 
@@ -28,7 +29,8 @@ GrainTracker::GrainTracker(const std::string & name, InputParameters parameters)
     _tracking_step(getParam<unsigned int>("tracking_step")),
     _hull_buffer(getParam<Real>("convex_hull_buffer")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
-    _remap(getParam<bool>("remap_grains"))
+    _remap(getParam<bool>("remap_grains")),
+    _grain_remapper(parameters.isParamValid("grain_remapper") ? &getUserObject<GrainTracker>("grain_remapper") : NULL)
 {
   // Size the data structures to hold the correct number of maps
   _bounding_boxes.resize(_maps_size);
@@ -86,10 +88,35 @@ GrainTracker::threadJoin(const UserObject & y)
 void
 GrainTracker::finalize()
 {
+  std::cout << "***************************Running: " << _name << "\n";
+  
  // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
 
+  /*
+  std::vector<UniqueGrain *> remap_info;
+  if (_grain_remapper)
+    remap_info = _grain_remapper->getRemappedGrains();
+
+  // Update the unique grains if they were remapped by another instance of this object
+  for (std::vector<UniqueGrain *>::iterator remap_it = remap_info.begin(); remap_it != remap_info.end(); ++remap_it)
+  {
+    for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
+    {
+      std::set<unsigned int> intersection;
+      std::set_intersection((*remap_it)->nodes_ptr->begin(), (*remap_it)->nodes_ptr->end(), grain_it->second->nodes_ptr->begin(), grain_it->second->nodes_ptr->end(),
+                            std::inserter(intersection, intersection.end()));
+
+      if (!intersection.empty())
+      { 
+        grain_it->second->variable_idx = (*remap_it)->variable_idx;
+        break;
+      }
+    }
+  }
+  */
+  
   // Exchange data in parallel
   pack(_packed_data, false);                 // Make sure we delay packing of periodic neighbor information
   Parallel::allgather(_packed_data, false);
@@ -108,7 +135,7 @@ GrainTracker::finalize()
 
   if (_remap)
     remapGrains();
-
+  
   updateNodeInfo();
   
   // Update the region offsets so we can get unique bubble numbers in multimap mode
@@ -251,11 +278,13 @@ GrainTracker::trackGrains()
 
   // TODO: Used to keep track of which bounding box indexes have been used by which unique_grains
   // std::vector<bool> used_idx(_bounding_boxes.size(), false);
-
+  
   // Reset Status on active unique grains
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
+  {
     if (grain_it->second->status != INACTIVE)
       grain_it->second->status = NOT_MARKED;
+  }
 
   // Loop over all the current regions and match them up to our grain list
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
@@ -370,6 +399,9 @@ GrainTracker::trackGrains()
 void
 GrainTracker::remapGrains()
 {
+  // Clear the remapped grain structures
+  _remapped_grains.clear();
+  
   NumericVector<Real> & solution         =  _nl.solution();
   NumericVector<Real> & solution_old     =  _nl.solutionOld();
   NumericVector<Real> & solution_older   =  _nl.solutionOlder();
@@ -487,6 +519,9 @@ GrainTracker::remapGrains()
               }
               // Update the variable index in the unique grain datastructure
               grain_it1->second->variable_idx = variable_idx;
+              // Update the map of remapped grains
+              _remapped_grains.push_back(grain_it1->second);
+              
 //              grain_it1->second->nodes_ptr = grain_it2->second->nodes_ptr;
 //              // Update other data structures that will be effected by this remapping
 //              _region_counts[variable_idx]++;
@@ -511,13 +546,13 @@ GrainTracker::updateNodeInfo()
 {
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
     _bubble_maps[map_num].clear();
-
+  
   // DEBUG
 //  std::cout << "******************* UPDATE NODE INFO *********************************\n";
 //  std::cout << "Unique Grain Size: " << _unique_grains.size() << "\n";
   // DEBUG
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
-  {
+  { 
     // DEBUG
 //    std::cout << "Unique Number: " << grain_it->first
 //              << "\nVariable idx: " << grain_it->second->variable_idx
@@ -526,7 +561,7 @@ GrainTracker::updateNodeInfo()
 //      std::cout << grain_it->second->box_ptrs[i]->b_box->min() << grain_it->second->box_ptrs[i]->b_box->max() << "\n";
 //    std::cout << "Nodes Ptr: " << grain_it->second->nodes_ptr << std::endl;
     //DEBUG
-    
+      
     unsigned int curr_var = grain_it->second->variable_idx;
     if (grain_it->second->status != INACTIVE)
       for (std::set<unsigned int>::const_iterator node_it = grain_it->second->nodes_ptr->begin();
