@@ -15,7 +15,7 @@
 #ifndef FRICTIONALCONTACTPROBLEM_H
 #define FRICTIONALCONTACTPROBLEM_H
 
-#include "FEProblem.h"
+#include "ReferenceResidualProblem.h"
 
 class FrictionalContactProblem;
 
@@ -39,7 +39,7 @@ InputParameters validParams<FrictionalContactProblem>();
 /**
  * FEProblem derived class for frictional contact-specific callbacks
  */
-class FrictionalContactProblem : public FEProblem
+class FrictionalContactProblem : public ReferenceResidualProblem
 {
 public:
   FrictionalContactProblem(const std::string & name, InputParameters params);

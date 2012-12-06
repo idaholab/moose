@@ -25,7 +25,7 @@
 template<>
 InputParameters validParams<FrictionalContactProblem>()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = validParams<ReferenceResidualProblem>();
   params.addRequiredParam<std::vector<int> >("master","IDs of the master surfaces for which the slip should be calculated");
   params.addRequiredParam<std::vector<int> >("slave","IDs of the slave surfaces for which the slip should be calculated");
   params.addRequiredParam<std::vector<Real> >("friction_coefficient","Coefficient of friction for sliding contact for each interaction");
@@ -67,7 +67,7 @@ FrictionalContactProblem::SlipData::~SlipData()
 {}
 
 FrictionalContactProblem::FrictionalContactProblem(const std::string & name, InputParameters params) :
-    FEProblem(name, params),
+    ReferenceResidualProblem(name, params),
     _slip_residual(0.0),
     _do_slip_update(false),
     _num_slip_iterations(0),
@@ -152,7 +152,7 @@ FrictionalContactProblem::timestepSetup()
   _do_slip_update = false;
   _num_slip_iterations = 0;
   _num_nl_its_since_contact_update = 0;
-  FEProblem::timestepSetup();
+  ReferenceResidualProblem::timestepSetup();
 }
 
 bool
@@ -730,21 +730,20 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
 {
   Real my_max_funcs = std::numeric_limits<int>::max();
   Real my_div_threshold = std::numeric_limits<Real>::max();
-  Real my_ref_resid = ref_resid;
 
-  MooseNonlinearConvergenceReason reason = FEProblem::checkNonlinearConvergence(msg,
-                                                                                it,
-                                                                                xnorm,
-                                                                                snorm,
-                                                                                fnorm,
-                                                                                ttol,
-                                                                                rtol,
-                                                                                stol,
-                                                                                abstol,
-                                                                                nfuncs,
-                                                                                my_max_funcs,
-                                                                                my_ref_resid,
-                                                                                my_div_threshold);
+  MooseNonlinearConvergenceReason reason = ReferenceResidualProblem::checkNonlinearConvergence(msg,
+                                                                                               it,
+                                                                                               xnorm,
+                                                                                               snorm,
+                                                                                               fnorm,
+                                                                                               ttol,
+                                                                                               rtol,
+                                                                                               stol,
+                                                                                               abstol,
+                                                                                               nfuncs,
+                                                                                               my_max_funcs,
+                                                                                               ref_resid,
+                                                                                               my_div_threshold);
 
   int min_nl_its_since_contact_update = 1;
   ++_num_nl_its_since_contact_update;
