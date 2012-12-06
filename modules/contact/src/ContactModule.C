@@ -11,6 +11,7 @@
 #include "OneDContactConstraint.h"
 #include "MultiDContactConstraint.h"
 #include "FrictionalContactProblem.h"
+#include "ReferenceResidualProblem.h"
 
 void
 Elk::Contact::registerObjects()
@@ -21,6 +22,7 @@ Elk::Contact::registerObjects()
   registerConstraint(OneDContactConstraint);
   registerConstraint(MultiDContactConstraint);
   registerProblem(FrictionalContactProblem);
+  registerProblem(ReferenceResidualProblem);
 }
 
 void
