@@ -205,7 +205,7 @@ ColumnMajorMatrix::eigenNonsym(ColumnMajorMatrix & eval_real, ColumnMajorMatrix 
 void
 ColumnMajorMatrix::exp(ColumnMajorMatrix & z) const
 {
-    mooseAssert(*this.n() == *this.m(), "The Matrix being exponetiated is not square");
+    mooseAssert(_n_rows == _n_cols, "The Matrix being exponentiated is not square");
     ColumnMajorMatrix a(*this);
     ColumnMajorMatrix evals_real(_n_rows,1), evals_img(_n_rows,1), evals_real2(_n_rows,_n_cols);
     ColumnMajorMatrix evec_right(_n_rows,_n_cols), evec_left(_n_rows,_n_cols);
