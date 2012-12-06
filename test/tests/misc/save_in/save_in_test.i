@@ -57,6 +57,11 @@
     variable = saved
     boundary = 1
   [../]
+  [./saved_norm]
+    type = NodalL2Norm
+    variable = saved
+    execute_on = timestep
+  [../]
 []
 
 [Executioner]
