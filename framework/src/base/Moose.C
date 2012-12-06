@@ -135,6 +135,7 @@
 #include "ScalarL2Error.h"
 #include "ElementalVariableValue.h"
 #include "ElementL2Norm.h"
+#include "NodalL2Norm.h"
 #include "TotalVariableValue.h"
 
 // user objects
@@ -348,6 +349,7 @@ registerObjects()
   registerPostprocessor(NodalProxyMaxValue);
   registerPostprocessor(ElementalVariableValue);
   registerPostprocessor(ElementL2Norm);
+  registerPostprocessor(NodalL2Norm);
   registerPostprocessor(TotalVariableValue);
 
   // user objects
