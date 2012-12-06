@@ -14,6 +14,7 @@
 
 #include "ColumnMajorMatrix.h"
 extern "C" void dsyev_ ( ... );
+extern "C" void dgeev_ ( ... );
 extern "C" void dgetri_ ( ... );
 extern "C" void dgetrf_ ( ... );
 
@@ -162,7 +163,64 @@ ColumnMajorMatrix::eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) con
 
   if (return_value)
     mooseError("error in lapack eigen solve");
+}
 
+void
+ColumnMajorMatrix::eigenNonsym(ColumnMajorMatrix & eval_real, ColumnMajorMatrix & eval_img, ColumnMajorMatrix & evec_right, ColumnMajorMatrix & evec_left) const
+{
+    mooseAssert(_n_rows == _n_cols, "Cannot solve eigen system of a non-square matrix!");
+
+    ColumnMajorMatrix a(*this);
+
+    char jobvl = 'V';
+    char jobvr = 'V';
+    int n = _n_rows;
+    int return_value = 0;
+
+    eval_real._n_rows = _n_rows;
+    eval_real._n_cols = 1;
+    eval_real._n_entries = _n_rows;
+    eval_real._values.resize(_n_rows);
+
+    eval_img._n_rows = _n_rows;
+    eval_img._n_cols = 1;
+    eval_img._n_entries = _n_rows;
+    eval_img._values.resize(_n_rows);
+
+    Real * a_data = a.rawData();
+    Real * eval_r = eval_real.rawData();
+    Real * eval_i = eval_img.rawData();
+    Real * evec_ri = evec_right.rawData();
+    Real * evec_le = evec_left.rawData();
+
+    int buffer_size = n * 64;
+    std::vector<Real> buffer(buffer_size);
+
+    dgeev_(&jobvl, &jobvr, &n, a_data, &n, eval_r, eval_i, evec_le, &n, evec_ri, &n, &buffer[0], &buffer_size, &return_value);
+
+    if (return_value)
+        mooseError("error in lapack eigen solve");
+}
+
+void
+ColumnMajorMatrix::exp(ColumnMajorMatrix & z) const
+{
+    mooseAssert(*this.n() == *this.m(), "The Matrix being exponetiated is not square");
+    ColumnMajorMatrix a(*this);
+    ColumnMajorMatrix evals_real(_n_rows,1), evals_img(_n_rows,1), evals_real2(_n_rows,_n_cols);
+    ColumnMajorMatrix evec_right(_n_rows,_n_cols), evec_left(_n_rows,_n_cols);
+    ColumnMajorMatrix evec_right_inverse(_n_rows,_n_cols);
+
+    a.eigenNonsym(evals_real, evals_img, evec_right, evec_left);
+
+    for(unsigned int i=0; i<_n_rows; i++)
+    {
+        evals_real2(i,i) = std::exp(evals_real(i,0));
+    }
+
+    evec_right.inverse(evec_right_inverse);
+
+    z = evec_right * evals_real2 * evec_right_inverse;
 }
 
 void

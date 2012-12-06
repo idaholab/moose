@@ -186,6 +186,15 @@ public:
    */
   void eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) const;
 
+  /**
+   * Returns eigen system solve for a nonsymetric real matrix
+   */
+  void eigenNonsym(ColumnMajorMatrix & eval_real, ColumnMajorMatrix & eval_img, ColumnMajorMatrix & evec_right, ColumnMajorMatrix & eve_left) const;
+
+  /**
+   * Returns matrix that is the exponential of the matrix this was called on
+   */
+  void exp(ColumnMajorMatrix & z) const;
 
   /**
    * Returns inverse of a general matrix

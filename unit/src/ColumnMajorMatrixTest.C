@@ -551,12 +551,12 @@ ColumnMajorMatrixTest::kronecker()
 void
 ColumnMajorMatrixTest::inverse()
 {
-  ColumnMajorMatrix matrix(3,3), matrix_inverse(3,3);
+  ColumnMajorMatrix matrix(3,3), matrix_inverse(3,3), e_val(3,3), e_vec(3,3);
 
   matrix(0,0) = 1.0;
   matrix(0,1) = 3.0;
   matrix(0,2) = 3.0;
-  
+
   matrix(1,0) = 1.0;
   matrix(1,1) = 4.0;
   matrix(1,2) = 3.0;
@@ -571,15 +571,140 @@ ColumnMajorMatrixTest::inverse()
   CPPUNIT_ASSERT( matrix_inverse(0,0) == 7.0 );
   CPPUNIT_ASSERT( matrix_inverse(0,1) == -3.0 );
   CPPUNIT_ASSERT( matrix_inverse(0,2) == -3.0 );
-  
+
   CPPUNIT_ASSERT( matrix_inverse(1,0) == -1.0 );
   CPPUNIT_ASSERT( matrix_inverse(1,1) == 1.0 );
   CPPUNIT_ASSERT( matrix_inverse(1,2) == 0.0 );
-  
+
   CPPUNIT_ASSERT( matrix_inverse(2,0) == -1.0 );
   CPPUNIT_ASSERT( matrix_inverse(2,1) == 0.0 );
   CPPUNIT_ASSERT( matrix_inverse(2,2) == 1.0 );
-  
+
+
+    /*matrix(0,0) = 2.0;
+    matrix(0,1) = 1.0;
+    matrix(0,2) = 1.0;
+
+    matrix(1,0) = 1.0;
+    matrix(1,1) = 2.0;
+    matrix(1,2) = 1.0;
+
+    matrix(2,0) = 1.0;
+    matrix(2,1) = 1.0;
+    matrix(2,2) = 2.0;
+
+    matrix.eigen(e_val, e_vec);
+    e_vec.inverse(matrix_inverse);
+
+    e_val.print();
+    e_vec.print();
+    matrix_inverse.print();*/
 }
 
+void
+ColumnMajorMatrixTest::eigen()
+{
+    ColumnMajorMatrix matrix(2,2), e_vec(2,2), e_val(2,2);
+    Real err = 1.0e-14;
 
+    matrix(0,0) = 1.0;
+    matrix(0,1) = 2.0;
+    matrix(1,0) = 2.0;
+    matrix(1,1) = 4.0;
+
+    matrix.eigen(e_val, e_vec);
+
+    CPPUNIT_ASSERT( std::abs(e_vec(0,0) - -2/sqrt(5)) < err );
+    CPPUNIT_ASSERT( std::abs(e_vec(0,1) - 1/sqrt(5)) < err );
+    CPPUNIT_ASSERT( std::abs(e_vec(1,0) - 1/sqrt(5)) < err );
+    CPPUNIT_ASSERT( std::abs(e_vec(1,1) - 2/sqrt(5)) < err );
+
+    CPPUNIT_ASSERT( e_val(0,0) == 0.0 );
+    CPPUNIT_ASSERT( e_val(0,1) == 0.0 );
+    CPPUNIT_ASSERT( e_val(1,0) == 5.0 );
+    CPPUNIT_ASSERT( e_val(1,1) == 0.0 );
+}
+
+void
+ColumnMajorMatrixTest::eigenNonsym()
+{
+    ColumnMajorMatrix matrix(2,2), e_vector_right(2,2), e_vector_left(2,2), e_values_real(2,2), e_values_img(2,2);
+    Real err = 1.0e-14;
+
+    matrix(0,0) = 2.0;
+    matrix(0,1) = 1.0;
+    matrix(1,0) = 1.0;
+    matrix(1,1) = 2.0;
+
+    matrix.eigenNonsym(e_values_real, e_values_img, e_vector_right, e_vector_left);
+
+    CPPUNIT_ASSERT( std::abs(e_vector_right(0,0) - 1/sqrt(2)) < err );
+    CPPUNIT_ASSERT( std::abs(e_vector_right(0,1) - -1/sqrt(2)) < err );
+    CPPUNIT_ASSERT( std::abs(e_vector_right(1,0) - 1/sqrt(2)) < err );
+    CPPUNIT_ASSERT( std::abs(e_vector_right(1,1) - 1/sqrt(2)) < err );
+
+    CPPUNIT_ASSERT( e_values_real(0,0) == 3.0 );
+    CPPUNIT_ASSERT( e_values_real(0,1) == 0.0 );
+    CPPUNIT_ASSERT( e_values_real(1,0) == 1.0 );
+    CPPUNIT_ASSERT( e_values_real(1,1) == 0.0 );
+
+    CPPUNIT_ASSERT( e_values_img(0,0) == 0.0 );
+    CPPUNIT_ASSERT( e_values_img(0,1) == 0.0 );
+    CPPUNIT_ASSERT( e_values_img(1,0) == 0.0 );
+    CPPUNIT_ASSERT( e_values_img(1,1) == 0.0 );
+}
+
+void
+ColumnMajorMatrixTest::exp()
+{
+    ColumnMajorMatrix matrix1(3,3), matrix_exp1(3,3);
+    ColumnMajorMatrix matrix2(3,3), matrix_exp2(3,3);
+    Real err = 1.0e-10;
+    Real e = 2.71828182846;
+    Real e1 = (e*e*e*e - e)/3, e2 = (2*e + e*e*e*e)/3;
+
+    matrix1(0,0) = 2.0;
+    matrix1(0,1) = 1.0;
+    matrix1(0,2) = 1.0;
+    matrix1(1,0) = 1.0;
+    matrix1(1,1) = 2.0;
+    matrix1(1,2) = 1.0;
+    matrix1(2,0) = 1.0;
+    matrix1(2,1) = 1.0;
+    matrix1(2,2) = 2.0;
+
+    matrix1.exp(matrix_exp1);
+
+    CPPUNIT_ASSERT( std::abs(matrix_exp1(0,0) - e2) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp1(0,1) - e1) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp1(0,2) - e1) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp1(1,0) - e1) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp1(1,1) - e2) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp1(1,2) - e1) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp1(2,0) - e1) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp1(2,1) - e1) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp1(2,2) - e2) < err );
+
+    matrix2(0,0) = 1.0;
+    matrix2(0,1) = 1.0;
+    matrix2(0,2) = 0.0;
+    matrix2(1,0) = 0.0;
+    matrix2(1,1) = 0.0;
+    matrix2(1,2) = 2.0;
+    matrix2(2,0) = 0.0;
+    matrix2(2,1) = 0.0;
+    matrix2(2,2) = -1.0;
+
+    matrix2.exp(matrix_exp2);
+
+    CPPUNIT_ASSERT( std::abs(matrix_exp2(0,0) - e) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp2(0,1) - (e-1)) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp2(0,2) - (-(-(e*e)+(2*e)-1)/e)) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp2(1,0) - 0.0) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp2(1,1) - 1) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp2(1,2) - (2*(e-1)/e)) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp2(2,0) - 0.0) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp2(2,1) - 0.0) < err );
+    CPPUNIT_ASSERT( std::abs(matrix_exp2(2,2) - (1/e)) < err );
+
+     }
