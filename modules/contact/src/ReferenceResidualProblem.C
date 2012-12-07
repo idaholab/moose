@@ -48,9 +48,10 @@ ReferenceResidualProblem::timestepSetup()
   FEProblem::timestepSetup();
 }
 
-bool
+void
 ReferenceResidualProblem::updateReferenceResidual()
 {
+  NonlinearSystem & nonlinear_sys = getNonlinearSystem();
   if (_haveReferenceResid)
   {
     computeUserObjects(EXEC_CUSTOM);
@@ -61,8 +62,21 @@ ReferenceResidualProblem::updateReferenceResidual()
       residsq += sqrtresid*sqrtresid;
     }
     _refResid = std::sqrt(residsq);
+
+    if (_refResid == 0.0)
+    {
+      _refResid = nonlinear_sys._initial_residual;
+      std::cout<<"User-defined reference residual=0  Using default: "<<_refResid<<std::endl;
+    }
+    else
+    {
+      std::cout<<"User-defined reference residual: "<<_refResid<<std::endl;
+    }
   }
-  return (_haveReferenceResid);
+  else
+  {
+    _refResid = nonlinear_sys._initial_residual;
+  }
 }
 
 MooseNonlinearConvergenceReason
@@ -77,23 +91,10 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
                                                     const Real abstol,
                                                     const int nfuncs,
                                                     const int max_funcs,
-                                                    const Real ref_resid,
+                                                    const Real /*ref_resid*/,
                                                     const Real div_threshold)
 {
-  Real my_ref_resid = ref_resid;
-  if (updateReferenceResidual())
-  {
-    if (_refResid == 0.0)
-    {
-      _refResid = ref_resid;
-      std::cout<<"User-defined reference residual=0  Using default: "<<ref_resid<<std::endl;
-    }
-    else
-    {
-      std::cout<<"User-defined reference residual: "<<_refResid<<std::endl;
-    }
-    my_ref_resid = _refResid;
-  }
+  updateReferenceResidual();
 
   MooseNonlinearConvergenceReason reason = FEProblem::checkNonlinearConvergence(msg,
                                                                                 it,
@@ -106,7 +107,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
                                                                                 abstol,
                                                                                 nfuncs,
                                                                                 max_funcs,
-                                                                                my_ref_resid,
+                                                                                _refResid,
                                                                                 div_threshold);
 
 //  std::cout<<msg<<std::endl; //Print convergence diagnostic message

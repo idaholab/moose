@@ -46,7 +46,8 @@ InputParameters validParams<FrictionalContactProblem>()
   params.addParam<int>         ("minimum_slip_iterations",1,"Minimum number of slip iterations per step");
   params.addParam<int>         ("maximum_slip_iterations",100,"Maximum number of slip iterations per step");
   params.addParam<int>         ("slip_updates_per_iteration",1,"Number of slip updates per contact iteration");
-  params.addRequiredParam<Real>("target_contact_residual","Frictional contact residual convergence criterion");
+  params.addParam<Real>        ("target_contact_residual","Frictional contact residual convergence criterion");
+  params.addParam<Real>        ("target_relative_contact_residual","Frictional contact relative residual convergence criterion");
   params.addParam<Real>        ("contact_slip_tolerance_factor",10.0,"Multiplier on convergence criteria to determine when to start slipping");
   return params;
 }
@@ -71,6 +72,8 @@ FrictionalContactProblem::FrictionalContactProblem(const std::string & name, Inp
     _slip_residual(0.0),
     _do_slip_update(false),
     _num_slip_iterations(0),
+    _target_contact_residual(0.0),
+    _target_relative_contact_residual(0.0),
     _num_nl_its_since_contact_update(0),
     _num_contact_nodes(0),
     _num_slipping(0),
@@ -139,7 +142,22 @@ FrictionalContactProblem::FrictionalContactProblem(const std::string & name, Inp
   _min_slip_iters = params.get<int>("minimum_slip_iterations");
   _max_slip_iters = params.get<int>("maximum_slip_iterations");
   _slip_updates_per_iter = params.get<int>("slip_updates_per_iteration");
-  _target_contact_residual = params.get<Real>("target_contact_residual");
+
+  bool have_target = false;
+  bool have_target_relative = false;
+  if (params.isParamValid("target_contact_residual"))
+  {
+    _target_contact_residual = params.get<Real>("target_contact_residual");
+    have_target = true;
+  }
+  if (params.isParamValid("target_relative_contact_residual"))
+  {
+    _target_relative_contact_residual = params.get<Real>("target_relative_contact_residual");
+    have_target_relative = true;
+  }
+  if (!(have_target || have_target_relative))
+    mooseError("Must specify either target_contact_residual or target_relative_contact_residual");
+
   _contact_slip_tol_factor = params.get<Real>("contact_slip_tolerance_factor");
 }
 
@@ -175,6 +193,7 @@ FrictionalContactProblem::updateSolution(NumericVector<Number>& vec_solution, Nu
 
   if (_do_slip_update)
   {
+    updateReferenceResidual();
     std::cout<<"Slip Update: "<<_num_slip_iterations<<std::endl;
     std::cout<<"Iter  #Cont     #Slip     #TooFar   Slip resid  Inc Slip    It Slip"<<std::endl;
 
@@ -193,9 +212,10 @@ FrictionalContactProblem::updateSolution(NumericVector<Number>& vec_solution, Nu
 
       if (updated_this_iter)
       {
-        if (_slip_residual < _target_contact_residual)
+        if (_slip_residual < _target_contact_residual ||
+            _slip_residual < _target_relative_contact_residual*_refResid)
         {
-          std::cout<<"     Converged: Slip resid < slip tolerance, not applying this slip update"<<std::endl;
+          std::cout<<"     Converged: Slip resid < tolerance, not applying this slip update"<<std::endl;
           break;
         }
         else
@@ -771,7 +791,8 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
 
           bool updated_this_iter = calculateSlip(*ghosted_solution, NULL);
 
-          if (_slip_residual > _target_contact_residual)
+          if (_slip_residual > _target_contact_residual &&
+              _slip_residual > _target_relative_contact_residual*_refResid)
           { //force it to keep iterating
             reason = MOOSE_ITERATING;
             std::cout<<"Force slip update slip_resid > target: "<<_slip_residual<<std::endl;
@@ -784,7 +805,8 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
         }
         else
         {
-          if (_slip_residual > _target_contact_residual)
+          if (_slip_residual > _target_contact_residual &&
+              _slip_residual > _target_relative_contact_residual*_refResid)
           { //force it to keep iterating
             reason = MOOSE_ITERATING;
             std::cout<<"Forcing another nonlinear iteration before slip iteration: " <<_num_nl_its_since_contact_update <<std::endl;

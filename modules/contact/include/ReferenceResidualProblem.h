@@ -32,7 +32,7 @@ public:
   virtual ~ReferenceResidualProblem();
 
   virtual void timestepSetup();
-  bool updateReferenceResidual();
+  void updateReferenceResidual();
   virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
                                                                     const int it,
                                                                     const Real xnorm,
