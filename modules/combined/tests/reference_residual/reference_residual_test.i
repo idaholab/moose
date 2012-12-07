@@ -195,6 +195,9 @@
     execute_on = custom
     variable = saved_t
   [../]
+  [./nonlinear_its]
+    type = PrintNumNonlinearIters
+  []
 []
 
 [Output]
