@@ -165,8 +165,7 @@
   type = Transient
   petsc_options = '-snes_mf_operator'
 
-#  nl_rel_tol = 1e-14
-  nl_rel_tol = 1e-6
+  nl_rel_tol = 1e-10
 
   l_tol = 1e-3
   l_max_its = 100
