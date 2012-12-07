@@ -69,17 +69,17 @@ FlowJunction::buildMesh()
     RELAP7::getConnectionInfo(_inputs[i], comp_name, end_type);
 
     Component * comp = _sim.getComponentByName(comp_name);
-    if (dynamic_cast<PipeBase *>(comp) != NULL)
+    if (dynamic_cast<GeometricalComponent *>(comp) != NULL)
     {
-      PipeBase * pipe = dynamic_cast<PipeBase *>(comp);
+      GeometricalComponent * cg = dynamic_cast<GeometricalComponent *>(comp);
 
       // get the boundary node from the pipe
-      Node * nd = pipe->getBoundaryNode(end_type);
+      Node * nd = cg->getBoundaryNode(end_type);
       _nodes.push_back(nd->id());
-      _Areas.push_back(pipe->getArea(end_type));
+      _Areas.push_back(cg->getArea(end_type));
       //_normals.push_back(1.);
-      _normals.push_back(pipe->getBoundaryOutNorm(end_type));
-      _bnd_id.push_back(pipe->getBoundaryId(end_type));
+      _normals.push_back(cg->getBoundaryOutNorm(end_type));
+      _bnd_id.push_back(cg->getBoundaryId(end_type));
     }
   }
 
@@ -91,17 +91,17 @@ FlowJunction::buildMesh()
     RELAP7::getConnectionInfo(_outputs[i], comp_name, end_type);
 
     Component * comp = _sim.getComponentByName(comp_name);
-    if (dynamic_cast<PipeBase *>(comp) != NULL)
+    if (dynamic_cast<GeometricalComponent *>(comp) != NULL)
     {
-      PipeBase * pipe = dynamic_cast<PipeBase *>(comp);
+      GeometricalComponent * cg = dynamic_cast<GeometricalComponent *>(comp);
 
       // get the boundary node from the pipe
-      Node * nd = pipe->getBoundaryNode(end_type);
+      Node * nd = cg->getBoundaryNode(end_type);
       _nodes.push_back(nd->id());
-      _Areas.push_back(pipe->getArea(end_type));
+      _Areas.push_back(cg->getArea(end_type));
       //_normals.push_back(-1.);
-      _normals.push_back(pipe->getBoundaryOutNorm(end_type));
-      _bnd_id.push_back(pipe->getBoundaryId(end_type));
+      _normals.push_back(cg->getBoundaryOutNorm(end_type));
+      _bnd_id.push_back(cg->getBoundaryId(end_type));
     }
   }
 }
