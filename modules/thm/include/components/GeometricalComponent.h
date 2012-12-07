@@ -25,6 +25,7 @@ public:
   virtual Node * getBoundaryNode(RELAP7::EEndType id);
   virtual unsigned int getBoundaryId(RELAP7::EEndType id);
   virtual Real getBoundaryOutNorm(RELAP7::EEndType id);
+  virtual Real getArea(RELAP7::EEndType id) = 0;
 
 protected:
   /// Physical position in the space

@@ -30,7 +30,6 @@ public:
   virtual const std::string & getType() { return _type; }
 
   // Pipe specific interface ----
-  virtual Real getArea() = 0;
   virtual Real getLength() = 0;
 
 public:

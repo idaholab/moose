@@ -76,7 +76,7 @@ FlowJunction::buildMesh()
       // get the boundary node from the pipe
       Node * nd = pipe->getBoundaryNode(end_type);
       _nodes.push_back(nd->id());
-      _Areas.push_back(pipe->getArea());
+      _Areas.push_back(pipe->getArea(end_type));
       //_normals.push_back(1.);
       _normals.push_back(pipe->getBoundaryOutNorm(end_type));
       _bnd_id.push_back(pipe->getBoundaryId(end_type));
@@ -98,7 +98,7 @@ FlowJunction::buildMesh()
       // get the boundary node from the pipe
       Node * nd = pipe->getBoundaryNode(end_type);
       _nodes.push_back(nd->id());
-      _Areas.push_back(pipe->getArea());
+      _Areas.push_back(pipe->getArea(end_type));
       //_normals.push_back(-1.);
       _normals.push_back(pipe->getBoundaryOutNorm(end_type));
       _bnd_id.push_back(pipe->getBoundaryId(end_type));
