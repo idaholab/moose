@@ -854,7 +854,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.timestep_to_exodus_result[self.current_max_timestep] = result
         self.timestep_to_timestep[self.current_max_timestep] = timestep
     
-  def _updateData(self):    
+  def _updateData(self):
     # Check to see if there are new exodus files with adapted timesteps in them.
     if self.file_name and self.exodus_result:
       for file_name in sorted(glob.glob(self.file_name + '-s*')):
@@ -864,6 +864,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           exodus_result = ExodusResult(self, self.plane)
           exodus_result.setFileName(file_name)
           self.exodus_results.append(exodus_result)
+          self.new_stuff_to_read = True
       
     if not self.exodus_result:
       if not self.file_name: # Might have been set by opening a file
@@ -951,15 +952,19 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.base_stamp = time.time()
     self._clear()
     self.timer.start()
-    
-  def _runStopped(self):
+
+  def _finalRead(self):
     self.new_stuff_to_read = True # Set this to true so we get one more update
+    # Do it twice in case of adapted results
+    self._updateData()
+    self._updateData()
     
-    self.timer.stop
+  def _runStopped(self):    
+    self.timer.stop()
     self.run_stopped_timer = QtCore.QTimer()
     self.run_stopped_timer.setInterval(1000) # Wait a second before updating the plots one last time
     self.run_stopped_timer.setSingleShot(True)
-    self.run_stopped_timer.timeout.connect(self._updateData)
+    self.run_stopped_timer.timeout.connect(self._finalRead)
     self.run_stopped_timer.start()
 
   def _clippingToggled(self, value):
