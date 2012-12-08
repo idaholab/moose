@@ -688,6 +688,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.base_stamp = os.path.getmtime(file_name)
     self.file_name = str(file_name)
 
+    self.new_stuff_to_read = True
     self._updateData()
     self._updateData() # Call it again to read any adaptive results
 
