@@ -22,6 +22,7 @@
 #include "ComputeUserObjectsThread.h"
 #include "ComputeNodalUserObjectsThread.h"
 #include "ComputeMaterialsObjectThread.h"
+#include "ProjectMaterialProperties.h"
 #include "ComputeIndicatorThread.h"
 #include "ComputeMarkerThread.h"
 #include "ActionWarehouse.h"
@@ -105,6 +106,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _input_file_saved(false),
     _has_dampers(false),
     _has_constraints(false),
+    _has_initialized_stateful(false),
     _resurrector(NULL),
 //    _solve_only_perf_log("Solve Only"),
     _output_setup_log_early(false),
@@ -295,6 +297,7 @@ void FEProblem::initialSetup()
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _material_props, _bnd_material_props, _materials, _assembly);
     Threads::parallel_reduce(elem_range, cmt);
+    _has_initialized_stateful = true;
   }
 
   if (isRestarting())
@@ -321,6 +324,7 @@ void FEProblem::initialSetup()
   for (unsigned int i = 0; i < adaptivity().getInitialSteps(); i++)
   {
     adaptMesh();
+
     //reproject the initial condition
 //    _nl.sys().project_solution(Moose::initial_value, Moose::initial_gradient, _eq.parameters);
     _nl.projectSolution();
@@ -2270,6 +2274,10 @@ FEProblem::init()
   _eq.init();
   Moose::setup_perf_log.pop("eq.init()","Setup");
 
+  Moose::setup_perf_log.push("mesh.buildRefinementAndCoarseningMaps()","Setup");
+  _mesh.buildRefinementAndCoarseningMaps(_assembly[0]);
+  Moose::setup_perf_log.pop("mesh.buildRefinementAndCoarseningMaps()","Setup");
+
   Moose::setup_perf_log.push("mesh.applyMeshModifications()","Setup");
   _mesh.applyMeshModifications();
   Moose::setup_perf_log.pop("mesh.applyMeshModifications()","Setup");
@@ -2648,6 +2656,9 @@ FEProblem::adaptMesh()
 void
 FEProblem::meshChanged()
 {
+  if (_material_props.hasStatefulProperties())
+    _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material properties
+
   // mesh changed
   _eq.reinit();
   _mesh.meshChanged();
@@ -2665,6 +2676,21 @@ FEProblem::meshChanged()
     _displaced_problem->meshChanged();
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
   }
+
+  // We need to create new storage for the new elements and copy stateful properties from the old elements.
+  if (_has_initialized_stateful && _material_props.hasStatefulProperties())
+  {
+    {
+      ProjectMaterialProperties pmp(true, *this, _nl, _material_data, _bnd_material_data, _material_props, _bnd_material_props, _materials, _assembly);
+      Threads::parallel_reduce(*_mesh.refinedElementRange(), pmp);
+    }
+
+    {
+      ProjectMaterialProperties pmp(false, *this, _nl, _material_data, _bnd_material_data, _material_props, _bnd_material_props, _materials, _assembly);
+      Threads::parallel_reduce(*_mesh.coarsenedElementRange(), pmp);
+    }
+
+  }
 }
 
 void
@@ -2679,7 +2705,19 @@ FEProblem::checkProblemIntegrity()
   {
 #ifdef LIBMESH_ENABLE_AMR
     if (_material_props.hasStatefulProperties() && _adaptivity.isOn())
-      mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
+    {
+      std::cout<<"Using EXPERIMENTAL Stateful Material Property projection with Adaptivity!"<<std::endl;
+
+      if(libMesh::n_processors() > 1)
+      {
+        std::cout<<std::endl<<"Warning! Mesh re-partitioning is disabled while using stateful material properties!  This can lead to large load imblances and degreaded performance!!"<<std::endl;
+        _mesh.getMesh().skip_partitioning(true);
+        if(_displaced_problem)
+          _displaced_problem->mesh().getMesh().skip_partitioning(true);
+      }
+
+      std::cout<<std::endl;
+    }
 #endif
 
     std::set<SubdomainID> local_mesh_subs(mesh_subdomains);

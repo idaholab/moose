@@ -27,6 +27,7 @@
 #include "elem_range.h"
 #include "node_range.h"
 #include "periodic_boundaries.h"
+#include "quadrature.h"
 
 #include <map>
 
@@ -34,12 +35,33 @@
 class MeshModifier;
 class MooseMesh;
 class NonlinearSystem;
+class Assembly;
 
 typedef StoredRange<std::set<Node *>::iterator, Node*> SemiLocalNodeRange;
 
 template<>
 InputParameters validParams<MooseMesh>();
 
+/**
+ * Helper object for holding qp mapping info.
+ */
+class QpMap
+{
+public:
+  QpMap():_distance(std::numeric_limits<Real>::max()) {}
+
+  /// The qp to map from
+  unsigned int _from;
+
+  /// The qp to map to
+  unsigned int _to;
+
+  /// The distance between them
+  Real _distance;
+};
+
+// NOTE: maybe inheritance would be better here
+//
 class MooseMesh : public MooseObject
 {
 public:
@@ -89,6 +111,34 @@ public:
   bool parallel() { return _is_parallel; }
 
   void meshChanged();
+
+  /**
+   * Cache information about what elements were refined and coarsened in the previous step.
+   */
+  void cacheChangedLists();
+
+  /**
+   * Return a range that is suitable for threaded execution over elements that were just refined.
+   *
+   * @return The _Parent_ elements that are now set to be INACTIVE.  Their _children_ are the new elements.
+   */
+  ConstElemPointerRange * refinedElementRange();
+
+  /**
+   * Return a range that is suitable for threaded execution over elements that were just coarsend.
+   * Note that these are the _Parent_ elements that are now set to be INACTIVE.  Their _children_
+   * are the elements that were just removed.  Use coarsenedElementChildren() to get the elment
+   * IDs for the children that were just removed for a particular parent element.
+   */
+  ConstElemPointerRange * coarsenedElementRange();
+
+  /**
+   * Get the newly removed children element ids for an element that was just coarsened.
+   *
+   * @parent_id The element ID of the parent element that was coarsened to.
+   * @return The child element ids in Elem::child() order.
+   */
+  std::vector<const Elem *> & coarsenedElementChildren(const Elem * elem);
 
   void updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems);
 
@@ -268,6 +318,39 @@ public:
    */
   std::pair<BoundaryID, BoundaryID> getPairedBoundaryMapping(unsigned int component) const;
 
+  /**
+   * Create the refinement and coarsening maps necessary for projection of stateful material properties
+   * when using adaptivity.
+   *
+   * @param qrule A representative volume qrule
+   * @param qrule_face A representative face qrule
+   */
+  void buildRefinementAndCoarseningMaps(Assembly * assembly);
+
+  /**
+   * Get the refinement map for a given element type.  This will tell you what quadrature points
+   * to copy from and to for stateful material properties on newly created elements from Adaptivity.
+   *
+   * @param elem The element that represents the element type you need the refinement map for.
+   * @param qrule The quadrature rule in use.
+   * @param qrule_face The current face quadrature rule
+   * @param parent_side The side of the parent to map (-1 if not mapping parent sides)
+   * @param child The child number (-1 if not mapping child internal sides)
+   * @param child_side The side number of the child (-1 if not mapping sides)
+   */
+  const std::vector<std::vector<QpMap> > & getRefinementMap(const Elem & elem, int parent_side, int child, int child_side);
+
+  /**
+   * Get the coarsening map for a given element type.  This will tell you what quadrature points
+   * to copy from and to for stateful material properties on newly created elements from Adaptivity.
+   *
+   * @param elem The element that represents the element type you need the coarsening map for.
+   * @param qrule The quadrature rule in use.
+   * @param qrule_face The current face quadrature rule
+   * @param input_side The side to map
+   */
+  const std::vector<std::pair<unsigned int, QpMap> > & getCoarseningMap(const Elem & elem, int input_side);
+
 protected:
   /// Convienence enums
   enum {X=0, Y, Z};
@@ -278,6 +361,15 @@ protected:
 
   /// True if using a TRUE parallel mesh (ie Nemesis)
   bool _is_parallel;
+
+  /// The elements that were just refined.
+  ConstElemPointerRange * _refined_elements;
+
+  /// The elements that were just coarsened.
+  ConstElemPointerRange * _coarsened_elements;
+
+  /// Map of Parent elements to child elements for elements that were just coarsened.  NOTE: the child element pointers ARE PROBABLY INVALID.  Only use them for indexing!
+  std::map<const Elem *, std::vector<const Elem *> > _coarsened_element_children;
 
   /// Used for generating the semilocal node range
   std::set<Node *> _semilocal_node_list;
@@ -385,6 +477,75 @@ private:
    * @param corner_nodes: A vector of the corner nodes of the given mesh.  Should be 2^dim in size.
    */
   void detectPairedSidesets(std::vector<Node *> &corner_nodes);
+
+  /**
+   * Build the refinement map for a given element type.  This will tell you what quadrature points
+   * to copy from and to for stateful material properties on newly created elements from Adaptivity.
+   *
+   * @param elem The element that represents the element type you need the refinement map for.
+   * @param qrule The quadrature rule in use.
+   * @param qrule_face The current face quadrature rule
+   * @param parent_side The side of the parent to map (-1 if not mapping parent sides)
+   * @param child The child number (-1 if not mapping child internal sides)
+   * @param child_side The side number of the child (-1 if not mapping sides)
+   */
+  void buildRefinementMap(const Elem & elem, QBase & qrule, QBase & qrule_face, int parent_side, int child, int child_side);
+
+  /**
+   * Build the coarsening map for a given element type.  This will tell you what quadrature points
+   * to copy from and to for stateful material properties on newly created elements from Adaptivity.
+   *
+   * @param elem The element that represents the element type you need the coarsening map for.
+   * @param qrule The quadrature rule in use.
+   * @param qrule_face The current face quadrature rule
+   * @param input_side The side to map
+   */
+  void buildCoarseningMap(const Elem & elem, QBase & qrule, QBase & qrule_face, int input_side);
+
+  /**
+   * Find the closest points that map "from" to "to" and fill up "qp_map".
+   * Essentially, for each point in "from" find the closest point in "to".
+   *
+   * @param from The reference positions in the parent of the the points we're mapping _from_
+   * @param from The reference positions in the parent of the the points we're mapping _to_
+   * @param qp_map This will be filled with QpMap objects holding the mappings.
+   */
+  void mapPoints(const std::vector<Point> & from, const std::vector<Point> & to, std::vector<QpMap> & qp_map);
+
+  /**
+   * Given an elem type, get maps that tell us what qp's are closest to eachother between a parent and it's children.
+   * This is mainly used for mapping stateful material properties during adaptivity.
+   *
+   * There are 3 cases here:
+   *
+   * 1. Volume to volume (parent_side = -1, child = -1, child_side = -1)
+   * 2. Parent side to child side (parent_side = 0+, child = -1, child_side = 0+)
+   * 3. Child side to parent volume (parent_side = -1, child = 0+, child_side = 0+)
+   *
+   * Case 3 only happens under refinement (need to invent data at internal child sides).
+   *
+   * @param template_elem An element of the type that we need to find the maps for
+   * @param qrule The quadrature rule that we need to find the maps for
+   * @param refinement_map The map to use when an element gets split
+   * @param coarsen_map The map to use when an element is coarsened.
+   */
+  void findAdaptivityQpMaps(const Elem * template_elem,
+                            QBase & qrule,
+                            QBase & qrule_face,
+                            std::vector<std::vector<QpMap> > & refinement_map,
+                            std::vector<std::pair<unsigned int, QpMap> > & coarsen_map,
+                            int parent_side,
+                            int child,
+                            int child_side);
+
+  /// Holds mappings for volume to volume and parent side to child side
+  std::map<std::pair<int, ElemType>, std::vector<std::vector<QpMap> > > _elem_type_to_refinement_map;
+
+  /// Holds mappings for "internal" child sides to parent volume.  The second key is (child, child_side).
+  std::map<ElemType, std::map<std::pair<int, int>, std::vector<std::vector<QpMap> > > > _elem_type_to_child_side_refinement_map;
+
+  /// Holds mappings for volume to volume and parent side to child side
+  std::map<std::pair<int, ElemType>, std::vector<std::pair<unsigned int, QpMap> > > _elem_type_to_coarsening_map;
 };
 
 #endif /* MOOSEMESH_H */

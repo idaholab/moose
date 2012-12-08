@@ -42,4 +42,16 @@
     exodiff = 'out.e'
     max_parallel = 1
   [../]
+
+  [./adaptivity]
+    type = 'Exodiff'
+    input = 'stateful_prop_adaptivity_test.i'
+    exodiff = 'stateful_prop_adaptivity_test_out.e-s003'
+  [../]
+
+  [./spatial_adaptivity]
+    type = 'Exodiff'
+    input = 'spatial_adaptivity_test.i'
+    exodiff = 'spatial_adaptivity_test_out.e-s003'
+  [../]
 []

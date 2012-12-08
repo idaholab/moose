@@ -72,6 +72,15 @@ public:
 
   virtual void shallowCopy (PropertyValue *rhs) = 0;
 
+  /**
+   * Copy the value of a Property from one specific to a specific qp in this Property.
+   *
+   * @param to_qp The quadrature point in _this_ Property that you want to copy to.
+   * @param rhs The Property you want to copy _from_.
+   * @param from_qp The quadrature point in rhs you want to copy _from_.
+   */
+  virtual void qpCopy (const unsigned int to_qp, PropertyValue *rhs, const unsigned int from_qp) = 0;
+
   // save/restore in a file
   virtual void store(std::ofstream & stream) = 0;
   virtual void load(std::ifstream & stream) = 0;
@@ -131,6 +140,15 @@ public:
    *
    */
   virtual void shallowCopy (PropertyValue *rhs);
+
+  /**
+   * Copy the value of a Property from one specific to a specific qp in this Property.
+   *
+   * @param to_qp The quadrature point in _this_ Property that you want to copy to.
+   * @param rhs The Property you want to copy _from_.
+   * @param from_qp The quadrature point in rhs you want to copy _from_.
+   */
+  virtual void qpCopy (const unsigned int to_qp, PropertyValue *rhs, const unsigned int from_qp);
 
   /**
    * Store the property into a binary stream
@@ -197,6 +215,14 @@ MaterialProperty<T>::shallowCopy (PropertyValue *rhs)
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");
   _value.shallowCopy(libmesh_cast_ptr<const MaterialProperty<T>*>(rhs)->_value);
+}
+
+template <typename T>
+inline void
+MaterialProperty<T>::qpCopy (const unsigned int to_qp, PropertyValue *rhs, const unsigned int from_qp)
+{
+  mooseAssert(rhs != NULL, "Assigning NULL?");
+  _value[to_qp] = libmesh_cast_ptr<const MaterialProperty<T>*>(rhs)->_value[from_qp];
 }
 
 template<typename T>

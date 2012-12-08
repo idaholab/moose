@@ -60,6 +60,7 @@
 #include "Diff1Material.h"
 #include "Diff2Material.h"
 #include "StatefulMaterial.h"
+#include "SpatialStatefulMaterial.h"
 #include "ComputingInitialTest.h"
 #include "StatefulTest.h"
 #include "StatefulSpatialTest.h"
@@ -200,6 +201,7 @@ MooseTestApp::registerObjects()
   registerMaterial(Diff1Material);
   registerMaterial(Diff2Material);
   registerMaterial(StatefulMaterial);
+  registerMaterial(SpatialStatefulMaterial);
   registerMaterial(ComputingInitialTest);
   registerMaterial(StatefulTest);
   registerMaterial(StatefulSpatialTest);

@@ -278,12 +278,6 @@
     expect_err = "Cannot have an auxiliary variable and a nonlinear variable with the same name!"
   [../]
 
-  [./stateful_adaptive_error_test]
-    type = 'RunException'
-    input = 'stateful_adaptive_error_test.i'
-    expect_err = "Cannot use Material classes with stateful properties while utilizing adaptivity"
-  [../]
-
   [./subdomain_restricted_auxkernel_test]
     type = 'RunException'
     input = 'subdomain_restricted_auxkernel_mismatch.i'

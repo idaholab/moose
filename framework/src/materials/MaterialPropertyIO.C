@@ -47,13 +47,13 @@ MaterialPropertyIO::write(const std::string & file_name)
   head._file_version = file_version;
   out.write((const char *) &head, sizeof(head));
 
-  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & props = _material_props.props();
-  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & propsOld = _material_props.propsOld();
-  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & propsOlder = _material_props.propsOlder();
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props = _material_props.props();
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOld = _material_props.propsOld();
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOlder = _material_props.propsOlder();
 
-  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & bnd_props = _bnd_material_props.props();
-  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & bnd_propsOld = _bnd_material_props.propsOld();
-  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & bnd_propsOlder = _bnd_material_props.propsOlder();
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & bnd_props = _bnd_material_props.props();
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & bnd_propsOld = _bnd_material_props.propsOld();
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & bnd_propsOlder = _bnd_material_props.propsOlder();
 
   // number of blocks
   // TODO: go over elements and figure out the groups of elements we are going to write in a file
@@ -88,20 +88,27 @@ MaterialPropertyIO::write(const std::string & file_name)
     out.write(prop_name.c_str(), prop_name.length() + 1);                 // do not forget the trailing zero ;-)
   }
 
-  // save current material properties
-  for (unsigned int e = 0; e < n_elems; e++)
-  {
-    unsigned int elem_id = e;
-    out.write((const char *) &elem_id, sizeof(elem_id));
+  std::cout<<"props size: "<<props.size()<<std::endl;
 
-    // write out the properties themselves
-    for (unsigned int i = 0; i < n_props; i++)
+  // save current material properties
+  for (HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> >::iterator props_it=props.begin(); props_it != props.end(); ++props_it)
+  {
+    const Elem * elem = props_it->first;
+
+    if(elem)
     {
-      unsigned int pid = prop_ids[i];
-      props[e][0][pid]->store(out);
-      propsOld[e][0][pid]->store(out);
-      if (_material_props.hasOlderProperties())
-        propsOlder[e][0][pid]->store(out);
+      unsigned int elem_id = elem->id();
+      out.write((const char *) &elem_id, sizeof(elem_id));
+
+      // write out the properties themselves
+      for (unsigned int i = 0; i < n_props; i++)
+      {
+        unsigned int pid = prop_ids[i];
+        props[elem][0][pid]->store(out);
+        propsOld[elem][0][pid]->store(out);
+        if (_material_props.hasOlderProperties())
+          propsOlder[elem][0][pid]->store(out);
+      }
     }
   }
 
@@ -110,21 +117,27 @@ MaterialPropertyIO::write(const std::string & file_name)
   out.write((const char *) &n_sides, sizeof(n_sides));
 
   // save current material properties
-  for (unsigned int e = 0; e < n_elems; e++)
+  for (HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> >::iterator props_it=props.begin(); props_it != props.end(); ++props_it)
   {
-    unsigned int elem_id = e;
-    out.write((const char *) &elem_id, sizeof(elem_id));
+    const Elem * elem = props_it->first;
 
-    for (unsigned int s = 0; s < n_sides; s++)
+    if(elem)
     {
-      // write out the properties themselves
-      for (unsigned int i = 0; i < n_props; i++)
+
+      unsigned int elem_id = elem->id();
+      out.write((const char *) &elem_id, sizeof(elem_id));
+
+      for (unsigned int s = 0; s < n_sides; s++)
       {
-        unsigned int pid = prop_ids[i];
-        bnd_props[e][s][pid]->store(out);
-        bnd_propsOld[e][s][pid]->store(out);
-        if (_material_props.hasOlderProperties())
-          bnd_propsOlder[e][s][pid]->store(out);
+        // write out the properties themselves
+        for (unsigned int i = 0; i < n_props; i++)
+        {
+          unsigned int pid = prop_ids[i];
+          bnd_props[elem][s][pid]->store(out);
+          bnd_propsOld[elem][s][pid]->store(out);
+          if (_material_props.hasOlderProperties())
+            bnd_propsOlder[elem][s][pid]->store(out);
+        }
       }
     }
   }
@@ -151,13 +164,13 @@ MaterialPropertyIO::read(const std::string & file_name)
     mooseError("Trying to restart from a newer file version - you need to update MOOSE");
 
   // grab some references we will need to later
-  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & props = _material_props.props();
-  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & propsOld = _material_props.propsOld();
-  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & propsOlder = _material_props.propsOlder();
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props = _material_props.props();
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOld = _material_props.propsOld();
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOlder = _material_props.propsOlder();
 
-  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & bnd_props = _bnd_material_props.props();
-  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & bnd_propsOld = _bnd_material_props.propsOld();
-  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & bnd_propsOlder = _bnd_material_props.propsOlder();
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & bnd_props = _bnd_material_props.props();
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & bnd_propsOld = _bnd_material_props.propsOld();
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & bnd_propsOlder = _bnd_material_props.propsOlder();
 
   std::map<unsigned int, std::string> stateful_prop_names = _material_props.statefulPropNames();
   std::map<std::string, unsigned int> stateful_prop_ids;                                // inverse map of stateful_prop_names
@@ -195,20 +208,25 @@ MaterialPropertyIO::read(const std::string & file_name)
       prop_names.push_back(prop_name);
     }
 
-    for (unsigned int e = 0; e < n_elems; e++)
+    for (HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> >::iterator props_it=props.begin(); props_it != props.end(); ++props_it)
     {
-      unsigned int elem_id = 0;
-      in.read((char *) &elem_id, sizeof(elem_id));
+      const Elem * elem = props_it->first;
 
-      // read in the properties themselves
-      for (unsigned int i = 0; i < n_props; i++)
+      if(elem)
       {
-        unsigned int pid = stateful_prop_ids[prop_names[i]];
+        unsigned int elem_id = elem->id();
+        in.read((char *) &elem_id, sizeof(elem_id));
 
-        props[e][0][pid]->load(in);
-        propsOld[e][0][pid]->load(in);
-        if (_material_props.hasOlderProperties())               // this should actually check if the value is stored in the file (we do not store it right now)
-          propsOlder[e][0][pid]->load(in);
+        // read in the properties themselves
+        for (unsigned int i = 0; i < n_props; i++)
+        {
+          unsigned int pid = stateful_prop_ids[prop_names[i]];
+
+          props[elem][0][pid]->load(in);
+          propsOld[elem][0][pid]->load(in);
+          if (_material_props.hasOlderProperties())               // this should actually check if the value is stored in the file (we do not store it right now)
+            propsOlder[elem][0][pid]->load(in);
+        }
       }
     }
 
@@ -216,26 +234,30 @@ MaterialPropertyIO::read(const std::string & file_name)
     unsigned int n_sides = 0;
     in.read((char *) &n_sides, sizeof(n_sides));
 
-    for (unsigned int e = 0; e < n_elems; e++)
+    for (HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> >::iterator props_it=props.begin(); props_it != props.end(); ++props_it)
     {
-      unsigned int elem_id = 0;
-      in.read((char *) &elem_id, sizeof(elem_id));
+      const Elem * elem = props_it->first;
 
-      for (unsigned int s = 0; s < n_sides; s++)
+      if(elem)
       {
-        // read in the properties themselves
-        for (unsigned int i = 0; i < n_props; i++)
-        {
-          unsigned int pid = stateful_prop_ids[prop_names[i]];
+        unsigned int elem_id = elem->id();
+        in.read((char *) &elem_id, sizeof(elem_id));
 
-          bnd_props[e][s][pid]->load(in);
-          bnd_propsOld[e][s][pid]->load(in);
-          if (_material_props.hasOlderProperties())               // this should actually check if the value is stored in the file (we do not store it right now)
-            bnd_propsOlder[e][s][pid]->load(in);
+        for (unsigned int s = 0; s < n_sides; s++)
+        {
+          // read in the properties themselves
+          for (unsigned int i = 0; i < n_props; i++)
+          {
+            unsigned int pid = stateful_prop_ids[prop_names[i]];
+
+            bnd_props[elem][s][pid]->load(in);
+            bnd_propsOld[elem][s][pid]->load(in);
+            if (_material_props.hasOlderProperties())               // this should actually check if the value is stored in the file (we do not store it right now)
+              bnd_propsOlder[elem][s][pid]->load(in);
+          }
         }
       }
     }
-
   }
 
   in.close();
