@@ -596,24 +596,29 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     value_string = str(value)
     self.current_component = value_string
     if value_string == 'Magnitude':
-      self.exodus_result.lut.SetVectorModeToMagnitude()
       self.component_index = -1
     elif value_string == 'X':
-      self.exodus_result.lut.SetVectorModeToComponent()
-      self.exodus_result.lut.SetVectorComponent(0)
       self.component_index = 0
     elif value_string == 'Y':
-      self.exodus_result.lut.SetVectorModeToComponent()
-      self.exodus_result.lut.SetVectorComponent(1)
       self.component_index = 1
     elif value_string == 'Z':
-      self.exodus_result.lut.SetVectorModeToComponent()
-      self.exodus_result.lut.SetVectorComponent(2)
       self.component_index = 2
 
     self._updateContours()
 
   def _updateContours(self):
+    if self.component_index == -1:
+      self.exodus_result.lut.SetVectorModeToMagnitude()
+    elif self.component_index == 0:
+      self.exodus_result.lut.SetVectorModeToComponent()
+      self.exodus_result.lut.SetVectorComponent(0)
+    elif self.component_index == 1:
+      self.exodus_result.lut.SetVectorModeToComponent()
+      self.exodus_result.lut.SetVectorComponent(1)
+    elif self.component_index == 2:
+      self.exodus_result.lut.SetVectorModeToComponent()
+      self.exodus_result.lut.SetVectorComponent(2)
+    
     if self.clip_groupbox.isChecked():
       self.exodus_result.clipper.Modified()
       self.exodus_result.clipper.Update()
@@ -630,6 +635,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.exodus_result.mapper.SetScalarModeToUseCellFieldData()
       self.exodus_result.clip_mapper.SetScalarModeToUseCellFieldData()
 
+    self.exodus_result.mapper.SelectColorArray(self.current_variable)
+    self.exodus_result.clip_mapper.SelectColorArray(self.current_variable)
+    
     if data:
       self.current_range = data.GetRange(self.component_index)
 
@@ -675,8 +683,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.exodus_result.mapper.SetScalarRange(the_range)
         self.exodus_result.clip_mapper.SetScalarRange(the_range)
 
-    self.exodus_result.mapper.SelectColorArray(self.current_variable)
-    self.exodus_result.clip_mapper.SelectColorArray(self.current_variable)
     
     self.exodus_result.scalar_bar.SetTitle(self.current_variable)
     self.renderer.AddActor2D(self.exodus_result.scalar_bar)
