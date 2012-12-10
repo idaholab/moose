@@ -171,6 +171,7 @@
 // markers
 #include "ErrorToleranceMarker.h"
 #include "ErrorFractionMarker.h"
+#include "UniformMarker.h"
 #include "BoxMarker.h"
 #include "ComboMarker.h"
 #include "ValueThresholdMarker.h"
@@ -382,6 +383,7 @@ registerObjects()
   // markers
   registerMarker(ErrorToleranceMarker);
   registerMarker(ErrorFractionMarker);
+  registerMarker(UniformMarker);
   registerMarker(BoxMarker);
   registerMarker(ComboMarker);
   registerMarker(ValueThresholdMarker);
