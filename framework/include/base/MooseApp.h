@@ -106,6 +106,8 @@ public:
 protected:
   virtual void runInputFile();
 
+  virtual void meshOnly(std::string mesh_file_name);
+
   /// Input file name used
   std::string _input_filename;
   /// Command line object

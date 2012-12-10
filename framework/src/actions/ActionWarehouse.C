@@ -18,7 +18,7 @@
 #include "MooseObjectAction.h"
 #include "InputFileFormatter.h"
 #include "InputParameters.h"
-
+#include "MooseMesh.h"
 
 ActionWarehouse::ActionWarehouse(Syntax & syntax) :
     _syntax(syntax),

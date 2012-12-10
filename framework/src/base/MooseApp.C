@@ -19,6 +19,7 @@
 #include "Executioner.h"
 #include "InputFileFormatter.h"
 #include "YAMLFormatter.h"
+#include "MooseMesh.h"
 
 namespace Moose
 {
@@ -63,6 +64,14 @@ MooseApp::initCommandLineOptions()
   cli_opt.required = false;
   cli_opt.optional_argument = true;
   _command_line.addOption("InputFile", cli_opt);
+
+  syntax.clear();
+  cli_opt.description = "Setup and Output the input mesh only, can optionally supply a filename to write";
+  syntax.push_back("--mesh-only");
+  cli_opt.cli_syntax = syntax;
+  cli_opt.required = false;
+  cli_opt.optional_argument = true;
+  _command_line.addOption("MeshOnly", cli_opt);
 
   syntax.clear();
   cli_opt.description = "Shows the parsed input file before running the simulation";
@@ -188,7 +197,14 @@ MooseApp::parseCommandLine()
   else if (_command_line.search("InputFile", &input_filename))
   {
     _input_filename = input_filename;
-    runInputFile();
+    _parser.parse(_input_filename);
+    _action_warehouse.build();
+
+    std::string mesh_file_name;
+    if (_command_line.search("MeshOnly", &mesh_file_name))
+      meshOnly(mesh_file_name);
+    else
+      runInputFile();
   }
   else
     _command_line.printUsage();
@@ -197,9 +213,6 @@ MooseApp::parseCommandLine()
 void
 MooseApp::runInputFile()
 {
-  _parser.parse(_input_filename);
-
-  _action_warehouse.build();
   // Print the input file syntax if requested
   if (_command_line.search("ShowTree"))
   {
@@ -231,6 +244,33 @@ MooseApp::runInputFile()
     _executioner->execute();
   else
     mooseError("No executioner was specified (go fix your input file)");
+}
+
+void
+MooseApp::meshOnly(std::string mesh_file_name)
+{
+  /**
+   * These actions should be the minimum set necessary to generate and output
+   * a Mesh.
+   */
+  _action_warehouse.executeActionsWithAction("set_global_params");
+  _action_warehouse.executeActionsWithAction("read_mesh");
+  _action_warehouse.executeActionsWithAction("add_extra_nodeset");
+  _action_warehouse.executeActionsWithAction("setup_mesh");
+  _action_warehouse.executeActionsWithAction("add_mesh_modifier");
+  _action_warehouse.executeActionsWithAction("setup_mesh_complete");
+  _action_warehouse.executeActionsWithAction("create_problem");
+
+  if (mesh_file_name == "")
+  {
+    mesh_file_name = _parser.getFileName();
+    size_t pos = mesh_file_name.find_last_of('.');
+
+    // Default to writing out an ExodusII mesh base on the input filename.
+    mesh_file_name = mesh_file_name.substr(0,pos) + "_in.e";
+  }
+
+  _action_warehouse.mesh()->getMesh().write(mesh_file_name);
 }
 
 void

@@ -188,6 +188,7 @@ FEProblem::~FEProblem()
     _bnd_material_props.releaseProperties();
   }
 
+  delete &_mesh;
   delete _displaced_mesh;
   delete _displaced_problem;
 
@@ -195,7 +196,6 @@ FEProblem::~FEProblem()
     delete _out_problem;
 
   delete _resurrector;
-  delete &_mesh;
 }
 
 Moose::CoordinateSystemType
