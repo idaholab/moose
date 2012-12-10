@@ -41,6 +41,7 @@ public:
   void testConstants();
 
   void init();
+  void finalize();
 
 protected:
   MooseMesh * _mesh;

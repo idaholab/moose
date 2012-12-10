@@ -33,6 +33,13 @@ ParsedFunctionTest::init()
 }
 
 void
+ParsedFunctionTest::finalize()
+{
+  delete _fe_problem;
+}
+
+
+void
 ParsedFunctionTest::basicConstructor()
 {
   init();
@@ -44,6 +51,8 @@ ParsedFunctionTest::basicConstructor()
   params.set<std::string>("value") = std::string("x + 1.5*y + 2 * z + t/4");
   MooseParsedFunction f("test", params);
   CPPUNIT_ASSERT(f.value(4, Point(1,2,3)) == 11);
+
+  finalize();
 }
 
 void
@@ -115,6 +124,8 @@ ParsedFunctionTest::advancedConstructor()
   CPPUNIT_ASSERT( f4.value(0, Point(2, 4)) == 6 );
   f4.getVarAddr("r") = 4;
   CPPUNIT_ASSERT( f4.value(0, Point(2, 4)) == 5 );
+
+  finalize();
 }
 
 void
@@ -166,6 +177,8 @@ ParsedFunctionTest::testVariables()
   CPPUNIT_ASSERT( f2.value(0, Point(2, 4)) == 8 );
   w2 = 3;
   CPPUNIT_ASSERT( f2.value(0, Point(2, 6)) == 9 );
+
+  finalize();
 }
 
 void
@@ -192,4 +205,6 @@ ParsedFunctionTest::testConstants()
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 0, f2.value(0,1), 0.0000001 );
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 1, f2.value(0,0.5), 0.0000001 );
   CPPUNIT_ASSERT_DOUBLES_EQUAL( -1, f2.value(0,1.5), 0.0000001 );
+
+  finalize();
 }
