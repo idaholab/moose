@@ -259,7 +259,6 @@ MooseApp::meshOnly(std::string mesh_file_name)
   _action_warehouse.executeActionsWithAction("setup_mesh");
   _action_warehouse.executeActionsWithAction("add_mesh_modifier");
   _action_warehouse.executeActionsWithAction("setup_mesh_complete");
-  _action_warehouse.executeActionsWithAction("create_problem");
 
   if (mesh_file_name == "")
   {
@@ -271,6 +270,12 @@ MooseApp::meshOnly(std::string mesh_file_name)
   }
 
   _action_warehouse.mesh()->getMesh().write(mesh_file_name);
+
+  // Since we are not going to create a problem the mesh
+  // will not get cleaned up, so we'll do it here
+  delete _action_warehouse.mesh();
+  delete _action_warehouse.displacedMesh();
+
 }
 
 void

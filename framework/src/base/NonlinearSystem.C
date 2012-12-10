@@ -1938,9 +1938,9 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
 {
   // Check kernel coverage of subdomains (blocks) in your mesh
   std::set<SubdomainID> input_subdomains;
+  std::set<std::string> kernel_variables;
 
-  bool global_kernels_exist = _kernels[0].subdomains_covered(input_subdomains);
-
+  bool global_kernels_exist = _kernels[0].subdomains_covered(input_subdomains, kernel_variables);
   if (!global_kernels_exist)
   {
     std::set<SubdomainID> difference;
@@ -1951,12 +1951,25 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
     if (!difference.empty())
     {
       std::stringstream missing_block_ids;
-
       std::copy (difference.begin(), difference.end(), std::ostream_iterator<unsigned int>( missing_block_ids, " "));
-
       mooseError("Each subdomain must contain at least one Kernel.\nThe following block(s) lack an active kernel: "
                  + missing_block_ids.str());
     }
+  }
+
+  std::set<std::string> variables(getVariableNames().begin(), getVariableNames().end());
+
+  std::set<std::string> difference;
+  std::set_difference (variables.begin(), variables.end(),
+                       kernel_variables.begin(), kernel_variables.end(),
+                       std::inserter(difference, difference.end()));
+
+  if (!difference.empty())
+  {
+    std::stringstream missing_kernel_vars;
+    std::copy (difference.begin(), difference.end(), std::ostream_iterator<std::string>( missing_kernel_vars, " "));
+    mooseError("Each variable must be referenced by at least one active Kernel.\nThe following variable(s) lack an active kernel: "
+               + missing_kernel_vars.str());
   }
 }
 

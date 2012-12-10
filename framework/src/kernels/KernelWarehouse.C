@@ -150,9 +150,13 @@ KernelWarehouse::updateActiveKernels(unsigned int subdomain_id)
 }
 
 bool
-KernelWarehouse::subdomains_covered(std::set<SubdomainID> & return_set) const
+KernelWarehouse::subdomains_covered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const
 {
-  return_set.clear();
+  subdomains_covered.clear();
+  unique_variables.clear();
+
+  for (std::vector<Kernel *>::const_iterator it = _all_kernels.begin(); it != _all_kernels.end(); ++it)
+    unique_variables.insert((*it)->variable().name());
 
   if (!_time_global_kernels.empty() || !_nontime_global_kernels.empty())
     return true;
@@ -160,10 +164,11 @@ KernelWarehouse::subdomains_covered(std::set<SubdomainID> & return_set) const
   {
     for (std::map<SubdomainID, std::vector<Kernel *> >::const_iterator it = _time_block_kernels.begin();
          it != _time_block_kernels.end(); ++it)
-      return_set.insert(it->first);
+      subdomains_covered.insert(it->first);
     for (std::map<SubdomainID, std::vector<Kernel *> >::const_iterator it = _nt_block_kernels.begin();
          it != _nt_block_kernels.end(); ++it)
-      return_set.insert(it->first);
+      subdomains_covered.insert(it->first);
+
     return false;
   }
 }

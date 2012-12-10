@@ -102,9 +102,13 @@ public:
    * This returns a boolean to indicate whether this warehouse contains kernels
    * representing all of the subdomains, if not then the supplied set is filled in
    * with the complete set of subdomains represented which may or may not represent
-   * the entire domain.
+   * the entire domain.  In addition a count variables containing one or more kernels
+   * is returned through the reference paramater.
+   * @param subdomains_covered A writeable reference to a list of subdomains with active kernels on them if no global kernels exist
+   * @param unique_variable_count A writeable reference to a count of variables containing one or kernels
+   * @return bool A Boolean indicating whether all subdomains are covered by kernels
    */
-  bool subdomains_covered(std::set<SubdomainID> & return_set) const;
+  bool subdomains_covered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variable_count) const;
 
 protected:
   /// Kernels active on a block and in specified time

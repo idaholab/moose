@@ -2869,10 +2869,10 @@ FEProblem::getVariableNames()
 {
   std::vector<std::string> names;
 
-  std::vector<std::string> & nl_var_names = _nl.getVariableNames();
+  const std::vector<std::string> & nl_var_names = _nl.getVariableNames();
   names.insert(names.end(), nl_var_names.begin(), nl_var_names.end());
 
-  std::vector<std::string> & aux_var_names = _aux.getVariableNames();
+  const std::vector<std::string> & aux_var_names = _aux.getVariableNames();
   names.insert(names.end(), aux_var_names.begin(), aux_var_names.end());
 
   return names;

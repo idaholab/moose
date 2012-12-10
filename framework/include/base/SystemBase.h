@@ -476,7 +476,7 @@ public:
 
   virtual unsigned int nScalarVariables() { return _vars[0].scalars().size(); }
 
-  std::vector<std::string> & getVariableNames() { return _var_names; }
+  const std::vector<std::string> & getVariableNames() const { return _var_names; }
 
   virtual void computeVariables(const NumericVector<Number>& /*soln*/)
   {
