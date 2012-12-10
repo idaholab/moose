@@ -17,13 +17,17 @@
 #include "Problem.h"
 #include "FEProblem.h"
 #include "Marker.h"
+#include "DisplacedProblem.h"
 
 // libmesh includes
 #include "threads.h"
 
-FlagElementsThread::FlagElementsThread(FEProblem & fe_problem, std::vector<Number> & serialized_solution) :
+FlagElementsThread::FlagElementsThread(FEProblem & fe_problem,
+                                       std::vector<Number> & serialized_solution,
+                                       DisplacedProblem * displaced_problem) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, fe_problem.getAuxiliarySystem()),
     _fe_problem(fe_problem),
+    _displaced_problem(displaced_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _system_number(_aux_sys.number()),
     _adaptivity(_fe_problem.adaptivity()),
@@ -37,6 +41,7 @@ FlagElementsThread::FlagElementsThread(FEProblem & fe_problem, std::vector<Numbe
 FlagElementsThread::FlagElementsThread(FlagElementsThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
     _fe_problem(x._fe_problem),
+    _displaced_problem(x._displaced_problem),
     _aux_sys(x._aux_sys),
     _system_number(x._system_number),
     _adaptivity(x._adaptivity),
@@ -57,6 +62,9 @@ FlagElementsThread::onElement(const Elem *elem)
     marker_value = Marker::DO_NOTHING;
 
   const_cast<Elem *>(elem)->set_refinement_flag((Elem::RefinementState)marker_value);
+
+  if(_displaced_problem)
+    _displaced_problem->mesh().elem(elem->id())->set_refinement_flag((Elem::RefinementState)marker_value);
 }
 
 void

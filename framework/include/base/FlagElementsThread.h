@@ -22,11 +22,12 @@
 
 class AuxiliarySystem;
 class Adaptivity;
+class DisplacedProblem;
 
 class FlagElementsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  FlagElementsThread(FEProblem & fe_problem, std::vector<Number> & serialized_solution);
+  FlagElementsThread(FEProblem & fe_problem, std::vector<Number> & serialized_solution, DisplacedProblem * displaced_problem);
 
   // Splitting Constructor
   FlagElementsThread(FlagElementsThread & x, Threads::split split);
@@ -37,6 +38,7 @@ public:
 
 protected:
   FEProblem & _fe_problem;
+  DisplacedProblem * _displaced_problem;
   AuxiliarySystem & _aux_sys;
   unsigned int _system_number;
   Adaptivity & _adaptivity;

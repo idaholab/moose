@@ -125,7 +125,7 @@ Adaptivity::adaptMesh()
         _subproblem.getAuxiliarySystem().solution().close();
         _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);
 
-        FlagElementsThread fet(_subproblem, serialized_solution);
+        FlagElementsThread fet(_subproblem, serialized_solution, _displaced_problem);
         ConstElemRange all_elems(_subproblem.mesh().getMesh().active_elements_begin(),
                                  _subproblem.mesh().getMesh().active_elements_end(), 1);
         Threads::parallel_reduce(all_elems, fet);
@@ -139,17 +139,17 @@ Adaptivity::adaptMesh()
 
       // Flag elements to be refined and coarsened
       _mesh_refinement->flag_elements_by_error_fraction (*_error);
+
+      if (_displaced_problem)
+        // Reuse the error vector and refine the displaced mesh
+        _displaced_mesh_refinement->flag_elements_by_error_fraction (*_error);
     }
 
     // Perform refinement and coarsening
     _mesh_refinement->refine_and_coarsen_elements();
 
     if (_displaced_problem)
-    {
-      // Reuse the error vector and refine the displaced mesh
-      _displaced_mesh_refinement->flag_elements_by_error_fraction (*_error);
       _displaced_mesh_refinement->refine_and_coarsen_elements();
-    }
 
     if (_print_mesh_changed)
     {
