@@ -156,7 +156,8 @@ CoupledExecutioner::projectVariables(FEProblem & fep)
 {
   std::string dest = _fep_mapping[&fep];
   if (_var_mapping.find(dest) == _var_mapping.end())
-    mooseError("Unable to find problem with name '" + dest + "'");
+    return;
+
   std::vector<ProjInfo *> & proj_list = _var_mapping[dest];
   for (std::vector<ProjInfo *>::iterator it = proj_list.begin(); it != proj_list.end(); ++it)
   {
