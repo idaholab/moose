@@ -204,7 +204,7 @@ def getParmeshOption(libmesh_dir):
       f.close()
       success = 1
 
-    except IOError as e:
+    except e:
       #print "Warning: I/O Error trying to read", filename, ":", e.strerror, "... Will try other locations."
       pass
 
