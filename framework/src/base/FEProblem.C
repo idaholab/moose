@@ -71,6 +71,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     SubProblem(name, parameters),
     _mesh(*parameters.get<MooseMesh *>("mesh")),
     _eq(_mesh),
+    _initialized(false),
 
     _transient(false),
     _time(_eq.parameters.set<Real>("time")),
@@ -2240,6 +2241,9 @@ FEProblem::useFECache(bool fe_cache)
 void
 FEProblem::init()
 {
+  if (_initialized)
+    return;
+
   unsigned int n_vars = _nl.nVariables();
   unsigned int n_scalar_vars = _nl.nScalarVariables();
   switch (_coupling)
@@ -2289,6 +2293,8 @@ FEProblem::init()
   init2();
 
   _out.init();
+
+  _initialized = true;
 }
 
 void

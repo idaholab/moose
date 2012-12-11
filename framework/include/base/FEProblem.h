@@ -486,6 +486,7 @@ public:
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
+  bool _initialized;
 
   bool _transient;
   Real & _time;
