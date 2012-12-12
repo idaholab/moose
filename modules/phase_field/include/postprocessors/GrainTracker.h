@@ -24,7 +24,7 @@ public:
 
   // Get the bubble map
   Real getNodeValue(unsigned int node_id, unsigned int var_idx=0) const;
-  
+
 protected:
   enum STATUS
   {
@@ -69,18 +69,32 @@ protected:
     const std::set<unsigned int> *nodes_ptr;
   };
 
-
+  /**
+   * This routine uses the bubble sets to build bounding boxes around each cluster of nodes.  In this class it will be called before periodic
+   * information has been added so that each bubble piece will have a unique box.  It populates the _bounding_boxes vector.
+   */
   void buildBoundingBoxes();
+
+  /**
+   * This rountine first finds all of the bounding boxes from the _bounding_boxes vector that belong to the same bubble by using the overlapping
+   * periodic information (if periodic boundary conditions are active).  These boxes are used to caluclate a centroid for the current grain.
+   *
+   * If this is the first step that we beginning to track grains, each of these sets of boxes and the centroid are used to designate a unique grain
+   * which is stored in the _unique_grains datastructure.
+   */
   void trackGrains();
   void remapGrains();
+  void swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator & grain_it1, std::map<unsigned int, UniqueGrain *>::iterator & grain_it2);
   void updateNodeInfo();
+
+  bool doBoxesIntersect(std::vector<BoundingBoxInfo *> & boxes1, std::vector<BoundingBoxInfo *> & boxes2, const RealVectorValue & buffer) const;
   Point calculateCentroid(const std::vector<BoundingBoxInfo *> & box_ptrs) const;
 
   const unsigned int _tracking_step;
   const Real _hull_buffer;
   std::vector<std::list<BoundingBoxInfo *> > _bounding_boxes;
   std::map<unsigned int, UniqueGrain *> _unique_grains;
-  
+
   std::set<std::pair<unsigned int, unsigned int> > _remapped_grains;
 
   /**
