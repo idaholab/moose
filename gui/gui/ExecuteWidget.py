@@ -256,9 +256,9 @@ class ExecuteWidget(QtGui.QWidget):
       self.pb.show()
       self.pb.setValue(0)
     tmp_file_name = 'peacock_run_tmp.i'
-    file = open(tmp_file_name,'w')
-    file.write(self.input_file_widget.input_file_textbox.buildInputString())
-    file.close()
+    tmp_file = open(tmp_file_name,'w')
+    tmp_file.write(self.input_file_widget.input_file_textbox.buildInputString())
+    tmp_file.close()
     command = self.buildCommand(tmp_file_name)
     self.runIt(command)
 
@@ -371,9 +371,9 @@ class ExecuteWidget(QtGui.QWidget):
   def clickedSaveLog(self):
     file_name = QtGui.QFileDialog.getSaveFileName(self, "Save Log", "~/", "Log Files (*.log)")
     if file_name != '':
-      file = open(file_name,'w')
-      file.write(self.execution_text.toPlainText())
-      file.close()
+      tmp_file = open(file_name,'w')
+      tmp_file.write(self.execution_text.toPlainText())
+      tmp_file.close()
 
   def clickedCwd(self):
     dir_name = QtGui.QFileDialog.getExistingDirectory(self, "Choose CWD")
