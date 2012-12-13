@@ -5,6 +5,7 @@
 
 // LibMesh includes
 #include "periodic_boundary_base.h"
+#include "sphere.h"
 
 #include <limits>
 
@@ -381,17 +382,6 @@ GrainTracker::remapGrains()
    * Loop over each grain and see if the bounding boxes of the current grain intersect with the boxes of any other grains
    * represented by the same variable.
    */
-  RealVectorValue buffer;
-  switch (_mesh.dimension())
-  {
-  case 1:
-    mooseError("1D is not supported");
-  case 2:
-    buffer.assign(Point(_hull_buffer, _hull_buffer, 0));
-  case 3:
-    buffer.assign(Point(_hull_buffer, _hull_buffer, _hull_buffer));
-  }
-
   unsigned times_through_loop = 0;
   bool variables_remapped;
   do
@@ -403,21 +393,21 @@ GrainTracker::remapGrains()
     {
       if (grain_it1->second->status == INACTIVE)
         continue;
-      
+
       for (std::map<unsigned int, UniqueGrain *>::iterator grain_it2 = _unique_grains.begin(); grain_it2 != _unique_grains.end(); ++grain_it2)
       {
         // Don't compare a grain with itself and don't try to remap inactive grains
         if (grain_it1 == grain_it2 || grain_it2->second->status == INACTIVE)
           continue;
 
-        if (grain_it1->second->variable_idx == grain_it2->second->variable_idx &&                 // Are the grains represented by the same variable? 
-            doBoxesIntersect(grain_it1->second->box_ptrs, grain_it2->second->box_ptrs, buffer))   // If so do their boxes intersect?
+        if (grain_it1->second->variable_idx == grain_it2->second->variable_idx &&                  // Are the grains represented by the same variable?
+            boundingRegionDistance(grain_it1->second->box_ptrs, grain_it2->second->box_ptrs) < 0)  // If so, do their boxes intersect?
         {
           // If so, remap one of them
           swapSolutionValues(grain_it1, grain_it2);
-          
+
           // Since something was remapped, we need to inspect all the grains again to make sure that previously ok grains
-          // aren't in some new nearly intersecting state.  Setting this Boolean to true will trigger the loop again 
+          // aren't in some new nearly intersecting state.  Setting this Boolean to true will trigger the loop again
           variables_remapped = true;
 
           // Since the current grain has just been remapped we don't want to loop over any more potential grains (the inner for loop)
@@ -444,19 +434,27 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
    * We have two grains that are getting close represented by the same order parameter.
    * We need to map to the variable whose closest grain to this one is furthest away (by centroids).
    */
+//  Old Bounding Box Version
+//  std::vector<Real> min_distances(_vars.size(), std::numeric_limits<Real>::max());
+//  for (std::map<unsigned int, UniqueGrain *>::iterator grain_it3 = _unique_grains.begin(); grain_it3 != _unique_grains.end(); ++grain_it3)
+//  {
+//    unsigned int potential_var_idx = grain_it3->second->variable_idx;
+//
+//    Real curr_centroid_diff = _mesh.minPeriodicDistance(grain_it1->second->centroid, grain_it3->second->centroid);
+//    if (curr_centroid_diff < min_distances[potential_var_idx])
+//      min_distances[potential_var_idx] = curr_centroid_diff;
+//  }
+
   std::vector<Real> min_distances(_vars.size(), std::numeric_limits<Real>::max());
-//  std::vector<UniqueGrain *> grain_at_min_distance(_vars.size(), NULL);
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it3 = _unique_grains.begin(); grain_it3 != _unique_grains.end(); ++grain_it3)
   {
     unsigned int potential_var_idx = grain_it3->second->variable_idx;
 
-    Real curr_centroid_diff = _mesh.minPeriodicDistance(grain_it1->second->centroid, grain_it3->second->centroid);
-    if (curr_centroid_diff < min_distances[potential_var_idx])
-    {
-      min_distances[potential_var_idx] = curr_centroid_diff;
-//      grain_at_min_distance[potential_var_idx] = grain_it3->second;
-    }
+    Real curr_bounding_box_diff = boundingRegionDistance(grain_it1->second->box_ptrs, grain_it3->second->box_ptrs);
+    if (curr_bounding_box_diff < min_distances[potential_var_idx])
+      min_distances[potential_var_idx] = curr_bounding_box_diff;
   }
+
 
   /**
    * We have a vector of the distances to the closest grains represented by each of our variables.  We just need to pick
@@ -551,9 +549,21 @@ GrainTracker::updateNodeInfo()
   }
 }
 
-bool
-GrainTracker::doBoxesIntersect(std::vector<BoundingBoxInfo *> & boxes1, std::vector<BoundingBoxInfo *> & boxes2, const RealVectorValue & buffer) const
+Real
+GrainTracker::boundingRegionDistance(std::vector<BoundingBoxInfo *> & boxes1, std::vector<BoundingBoxInfo *> & boxes2) const
 {
+  /* Original Box Routine
+  RealVectorValue buffer;
+  switch (_mesh.dimension())
+  {
+  case 1:
+    mooseError("1D is not supported");
+  case 2:
+    buffer.assign(Point(_hull_buffer, _hull_buffer, 0));
+  case 3:
+    buffer.assign(Point(_hull_buffer, _hull_buffer, _hull_buffer));
+  }
+
   // Check the individual bounding boxes
   for (std::vector<BoundingBoxInfo *>::iterator box_it1 = boxes1.begin(); box_it1 != boxes1.end(); ++box_it1)
   {
@@ -571,8 +581,41 @@ GrainTracker::doBoxesIntersect(std::vector<BoundingBoxInfo *> & boxes1, std::vec
         return true;
     }
   }
+  */
+  Real min_distance = std::numeric_limits<Real>::max();
 
-  return false;
+  for (std::vector<BoundingBoxInfo *>::iterator box_it1 = boxes1.begin(); box_it1 != boxes1.end(); ++box_it1)
+  {
+    Point centroid1(((*box_it1)->b_box->max() + (*box_it1)->b_box->min()) / 2.0);
+    Real radius1 = ((*box_it1)->b_box->max() - centroid1).size() + _hull_buffer;
+    Sphere s1(centroid1, radius1);
+
+    for (std::vector<BoundingBoxInfo *>::iterator box_it2 = boxes2.begin(); box_it2 != boxes2.end(); ++box_it2)
+    {
+      Point centroid2(((*box_it2)->b_box->max() + (*box_it2)->b_box->min()) / 2.0);
+      Real radius2 = ((*box_it2)->b_box->max() - centroid2).size() + _hull_buffer;
+      Sphere s2(centroid2, radius2);
+
+      Real curr_distance = s1.distance(s2);
+
+      if (curr_distance < min_distance)
+        min_distance = curr_distance;
+
+//      if (s1.distance(s2) < 0)
+//      {
+//        std::cout << "Centroid1: " << centroid1
+//                  << "\nRadius1: " << ((*box_it1)->b_box->max() - centroid1).size()
+//                  << "\nAdj Radius1: " << radius1 << "\n";
+//
+//        std::cout << "Centroid2: " << centroid2
+//                  << "\nRadius2: " << ((*box_it2)->b_box->max() - centroid2).size()
+//                  << "\nAdj Radius2: " << radius2 << "\n";
+//        return true;
+//      }
+    }
+  }
+
+  return min_distance;
 }
 
 Point
