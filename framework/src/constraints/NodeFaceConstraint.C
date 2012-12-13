@@ -186,3 +186,21 @@ NodeFaceConstraint::computeJacobian()
     for (_j=0; _j<_phi_master.size(); _j++)
       Knn(_i,_j) += computeQpJacobian(Moose::MasterMaster);
 }
+
+MooseVariable &
+NodeFaceConstraint::variable()
+{
+  return _var;
+}
+
+SubProblem &
+NodeFaceConstraint::subProblem()
+{
+  return _subproblem;
+}
+
+bool
+NodeFaceConstraint::overwriteSlaveResidual()
+{
+  return _overwrite_slave_residual;
+}

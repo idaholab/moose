@@ -64,24 +64,19 @@ public:
   void fileBase(const std::string & file_base) { _file_base = file_base; }
   std::string & fileBase() { return _file_base; }
 
-  void interval(unsigned int interval) { _interval = interval; }
-  int interval() { return _interval; }
-  void screen_interval(unsigned int screen_interval) { _screen_interval = screen_interval; }
-  int screen_interval() { return _screen_interval; }
+  void interval(unsigned int interval);
+  int interval();
+  void screen_interval(unsigned int screen_interval);
+  int screen_interval();
 
   void meshChanged();
   void sequence(bool state);
 
   bool isOutputterActive(Type type);
 
-  void iterationPlotStartTime(Real t)
-  {
-    _iteration_plot_start_time = t;
-  }
-  Real iterationPlotStartTime()
-  {
-    return _iteration_plot_start_time;
-  }
+  void iterationPlotStartTime(Real t);
+
+  Real iterationPlotStartTime();
 
   /**
    * Sets the variables to be output.

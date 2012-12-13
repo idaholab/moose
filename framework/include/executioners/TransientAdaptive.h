@@ -63,7 +63,7 @@ public:
 
   virtual void execute();
 
-  virtual Problem &problem() { return _fe_problem; }
+  virtual Problem & problem();
 
 protected:
   FEProblem & _fe_problem;

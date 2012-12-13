@@ -154,3 +154,15 @@ DiracKernel::clearPoints()
   _elements.clear();
   _points.clear();
 }
+
+MooseVariable &
+DiracKernel::variable()
+{
+  return _var;
+}
+
+SubProblem &
+DiracKernel::subProblem()
+{
+  return _subproblem;
+}

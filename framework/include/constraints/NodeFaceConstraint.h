@@ -83,9 +83,12 @@ public:
   /**
    * The variable number that this object operates on.
    */
-  MooseVariable & variable() { return _var; }
+  MooseVariable & variable();
 
-  SubProblem & subProblem() { return _subproblem; }
+  /**
+   * Return a reference to the subproblem.
+   */
+  SubProblem & subProblem();
 
   /**
    * Compute the value the slave node should have at the beginning of a timestep.
@@ -115,7 +118,7 @@ public:
    * When this returns true the slave's residual as computed by the constraint will _replace_
    * the residual previously at that node for that variable.
    */
-  bool overwriteSlaveResidual() { return _overwrite_slave_residual; }
+  bool overwriteSlaveResidual();
 
   SparseMatrix<Number> * _jacobian;
 

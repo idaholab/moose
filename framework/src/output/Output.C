@@ -208,6 +208,30 @@ Output::outputSolutionHistory()
 }
 
 void
+Output::interval(unsigned int interval)
+{
+  _interval = interval;
+}
+
+int
+Output::interval()
+{
+  return _interval;
+}
+
+void
+Output::screen_interval(unsigned int screen_interval)
+{
+  _screen_interval = screen_interval;
+}
+
+int
+Output::screen_interval()
+{
+  return _screen_interval;
+}
+
+void
 Output::meshChanged()
 {
   for (unsigned int i = 0; i < _outputters.size(); i++)
@@ -219,4 +243,16 @@ Output::sequence(bool state)
 {
   for (unsigned int i = 0; i < _outputters.size(); i++)
     _outputters[i]->sequence(state);
+}
+
+void
+Output::iterationPlotStartTime(Real t)
+{
+  _iteration_plot_start_time = t;
+}
+
+Real
+Output::iterationPlotStartTime()
+{
+  return _iteration_plot_start_time;
 }

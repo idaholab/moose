@@ -273,6 +273,12 @@ TransientAdaptive::~TransientAdaptive()
   delete _time_stepper;
 }
 
+Problem &
+TransientAdaptive::problem()
+{
+  return _fe_problem;
+}
+
 bool
 TransientAdaptive::keepGoing(TimeStepperStatus status,Real /* time */) const
 {

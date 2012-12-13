@@ -44,7 +44,7 @@ public:
    * Returns the start time for this time period
    * @return - A real indicating the start time
    */
-  inline Real start() const { return _start; }
+  Real start() const;
 
   /**
    * @return - The name of this time period

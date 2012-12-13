@@ -65,9 +65,12 @@ public:
   /**
    * The variable number that this kernel operates on.
    */
-  MooseVariable & variable() { return _var; }
+  MooseVariable & variable();
 
-  SubProblem & subProblem() { return _subproblem; }
+  /**
+   * Return a reference to the subproblem.
+   */
+  SubProblem & subProblem();
 
   /**
    * Computes the residual for the current side.

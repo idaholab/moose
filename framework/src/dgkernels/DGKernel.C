@@ -188,3 +188,15 @@ DGKernel::computeQpOffDiagJacobian(Moose::DGJacobianType /*type*/, unsigned int 
 {
   return 0.;
 }
+
+MooseVariable &
+DGKernel::variable()
+{
+  return _var;
+}
+
+SubProblem &
+DGKernel::subProblem()
+{
+  return _subproblem;
+}

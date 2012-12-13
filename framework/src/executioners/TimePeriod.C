@@ -45,3 +45,9 @@ TimePeriod::name() const
 {
   return _name;
 }
+
+Real
+TimePeriod::start() const
+{
+  return _start;
+}

@@ -52,6 +52,16 @@ NodalConstraint::NodalConstraint(const std::string & name, InputParameters param
 {
 }
 
+NodalConstraint::~NodalConstraint()
+{
+}
+
+unsigned int
+NodalConstraint::getMasterNodeId()
+{
+  return _master_node_id;
+}
+
 void
 NodalConstraint::computeResidual(NumericVector<Number> & residual)
 {

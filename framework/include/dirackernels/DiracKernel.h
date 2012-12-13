@@ -78,11 +78,14 @@ public:
   virtual void computeJacobian();
 
   /**
-   * The variable number that this object operates on.
+   * The variable number that this kernel operates on.
    */
-  MooseVariable & variable() { return _var; }
+  MooseVariable & variable();
 
-  SubProblem & subProblem() { return _subproblem; }
+  /**
+   * Return a reference to the subproblem.
+   */
+  SubProblem & subProblem();
 
   /**
    * This is where the DiracKernel should call addPoint() for each point it needs to have a

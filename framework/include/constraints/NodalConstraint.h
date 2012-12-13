@@ -54,13 +54,13 @@ class NodalConstraint :
 {
 public:
   NodalConstraint(const std::string & name, InputParameters parameters);
-  virtual ~NodalConstraint() {}
+  virtual ~NodalConstraint();
 
   /**
    * Get the node ID of the master
    * @return node ID
    */
-  unsigned int getMasterNodeId() { return _master_node_id; }
+  unsigned int getMasterNodeId();
 
   /**
    * Get the list of connected slave nodes
