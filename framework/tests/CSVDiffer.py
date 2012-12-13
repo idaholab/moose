@@ -18,7 +18,7 @@ class CSVDiffer:
         f1 = open( os.path.join(test_dir,out_file) )
         f2 = open( os.path.join(test_dir, 'gold', out_file) )
         self.addCSVPair(out_file, f1.read(), f2.read())
-      except IOError:
+      except:
         self.addError(out_file, 'File does not exist!')
 
 
