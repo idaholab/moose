@@ -38,7 +38,6 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
       _stress(declareProperty<RankTwoTensor>("stress")),
       _elasticity_tensor(declareProperty<ElasticityTensorR4>("elasticity_tensor")),
       _Jacobian_mult(declareProperty<ElasticityTensorR4>("Jacobian_mult")),
-      _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
       //_d_stress_dT(declareProperty<RankTwoTensor>("d_stress_dT")),
       _euler_angle_1(getParam<Real>("euler_angle_1")),
       _euler_angle_2(getParam<Real>("euler_angle_2")),
@@ -69,11 +68,15 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
 }
 
 void
-TensorMechanicsMaterial::computeQpProperties()
+TensorMechanicsMaterial::computeProperties()
 {
-  computeQpElasticityTensor();
-  computeQpStrain();
-  computeQpStress();
+  computeStrain();
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+  {
+    computeQpElasticityTensor();
+    computeQpStress();
+  }
+  
 }
 
 void TensorMechanicsMaterial::computeQpElasticityTensor()
@@ -81,5 +84,12 @@ void TensorMechanicsMaterial::computeQpElasticityTensor()
   // Fill in the matrix stiffness material property
   _elasticity_tensor[_qp] = _Cijkl;
   _Jacobian_mult[_qp] = _Cijkl;
+}
+
+void TensorMechanicsMaterial::computeStrain()
+{
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    computeQpStrain();
+  
 }
 

@@ -21,6 +21,8 @@ protected:
   virtual void computeQpStrain();
   virtual void computeQpStress();
   
+  MaterialProperty<RankTwoTensor> & _elastic_strain;
+  
 private:
 
 };

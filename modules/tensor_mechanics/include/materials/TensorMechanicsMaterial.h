@@ -26,9 +26,11 @@ public:
   TensorMechanicsMaterial(const std:: string & name, InputParameters parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void computeProperties();
 
   virtual void computeQpElasticityTensor();
+
+  virtual void computeStrain();
 
   virtual void computeQpStrain() = 0;
 
@@ -45,7 +47,6 @@ protected:
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
-  MaterialProperty<RankTwoTensor> & _elastic_strain;
 
   Real _euler_angle_1;
   Real _euler_angle_2;
