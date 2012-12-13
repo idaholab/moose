@@ -25,6 +25,17 @@ InputParameters validParams<GrainTracker>()
   return params;
 }
 
+// TODO: This utility function will go away after libMesh is patched
+Real distance (const Sphere& a, const Sphere& b)
+{
+  libmesh_assert_greater ( a.radius(), 0. );
+  libmesh_assert_greater ( b.radius(), 0. );
+
+  const Real distance = (a.center() - b.center()).size();
+
+  return distance - (a.radius() + b.radius());
+}
+
 GrainTracker::GrainTracker(const std::string & name, InputParameters parameters) :
     NodalFloodCount(name, AddV(parameters, "variable")),
     _tracking_step(getParam<unsigned int>("tracking_step")),
@@ -596,7 +607,9 @@ GrainTracker::boundingRegionDistance(std::vector<BoundingBoxInfo *> & boxes1, st
       Real radius2 = ((*box_it2)->b_box->max() - centroid2).size() + _hull_buffer;
       Sphere s2(centroid2, radius2);
 
-      Real curr_distance = s1.distance(s2);
+      // TODO - Turn this back on
+      Real curr_distance = distance(s1, s2);
+/*      Real curr_distance = s1.distance(s2);  */
 
       if (curr_distance < min_distance)
         min_distance = curr_distance;
