@@ -381,6 +381,12 @@ class TestHarness:
     if m != None:
       return m.group(1)
 
+  def getSolveTime(self, output):
+    time = ''
+    m = re.search(r"solve().*", output)
+    if m != None:
+      return m.group().split()[5]
+
   def checkExpectError(self, output, expect_error):
     if re.search(expect_error, output, re.MULTILINE | re.DOTALL) == None:
       #print "%" * 100, "\nExpect Error Pattern not found:\n", expect_error, "\n", "%" * 100, "\n"
@@ -395,6 +401,8 @@ class TestHarness:
 
     if self.options.timing:
       timing = self.getTiming(output)
+    elif self.options.store_time:
+      timing = self.getSolveTime(output)
 
     self.test_table.append( (specs, output, result, timing, start, end) )
     self.postRun(specs, timing)
@@ -575,8 +583,10 @@ class TestHarness:
     if opts.store_time and not (opts.revision):
       print 'ERROR: --store-timing is specified but no revision'
       sys.exit(1)
-    if opts.store_time and not (opts.timing or opts.scaling):
-      opts.timing = True
+    if opts.store_time:
+      # timing returns Active Time, while store_timing returns Solve Time.
+      # Thus we need to turn off timing.
+      opts.timing = False
       opts.scaling = True
     if opts.enable_valgrind and (opts.parallel > 1 or opts.nthreads > 1):
       print 'ERROR: --parallel and/or --threads can not be used with --valgrind'
