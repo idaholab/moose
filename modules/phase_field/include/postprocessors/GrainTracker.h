@@ -87,7 +87,7 @@ protected:
   void swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator & grain_it1, std::map<unsigned int, UniqueGrain *>::iterator & grain_it2);
   void updateNodeInfo();
 
-  bool doBoxesIntersect(std::vector<BoundingBoxInfo *> & boxes1, std::vector<BoundingBoxInfo *> & boxes2, const RealVectorValue & buffer) const;
+  Real boundingRegionDistance(std::vector<BoundingBoxInfo *> & boxes1, std::vector<BoundingBoxInfo *> & boxes2) const;
   Point calculateCentroid(const std::vector<BoundingBoxInfo *> & box_ptrs) const;
 
   const unsigned int _tracking_step;
