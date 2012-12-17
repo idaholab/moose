@@ -20,9 +20,16 @@ FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name,
                                              InputParameters parameters)
     : TensorMechanicsMaterial(name, parameters),      
       _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),  
-      _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),     
+      _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
+      _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
+      _elastic_strain_old(declarePropertyOld<RankTwoTensor>("elastic_strain")),
       _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment"))
 {
+}
+
+void FiniteStrainMaterial::initQpStatefulProperties()
+{
+  _elastic_strain[_qp].zero();
 }
 
 void FiniteStrainMaterial::computeStrain()
@@ -47,42 +54,49 @@ void FiniteStrainMaterial::computeStrain()
     Fhat[_qp] = A*Fbar.inverse();
     Fhat[_qp].addIa(1.0);
 
+    //Calculate average Fhat for volumetric locking correction
     ave_Fhat += Fhat[_qp]*_JxW[_qp];
     volume += _JxW[_qp];
   }
 
-  ave_Fhat /= volume;
+  ave_Fhat /= volume; //This is needed for volumetric locking correction
   
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     Real factor( std::pow( ave_Fhat.det()/Fhat[_qp].det(), 1.0/3.0));
-    Fhat[_qp] *= factor;
+    Fhat[_qp] *= factor; //Finalize volumetric locking correction
     
     computeQpStrain(Fhat[_qp]);
   }
   
 }
+void FiniteStrainMaterial::computeQpStrain()
+{
+  mooseError("Wrong computeQpStrain called in FiniteStrainMaterial");
+}
 
 void FiniteStrainMaterial::computeQpStrain(RankTwoTensor Fhat)
 {
-
-  //Cinv - I = B B^T - B - B^T;
-  RankTwoTensor A(-Fhat.inverse()); //B = I - Fhatinv
+  //Cinv - I = A A^T - A - A^T;
+  RankTwoTensor A(-Fhat.inverse()); //A = I - Fhatinv
   A.addIa(1.0);
   RankTwoTensor Cinv_I = A*A.transpose() - A - A.transpose();
 
   //strain rate D from Taylor expansion, D = 1/dt(-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
-  RankTwoTensor D = (-Cinv_I/2.0 + Cinv_I*Cinv_I/4.0)/_t_step;
+  _strain_increment[_qp] = -Cinv_I/2.0 + Cinv_I*Cinv_I/4.0;
+  RankTwoTensor D = _strain_increment[_qp]/_t_step;
   _strain_rate[_qp] = D;
-  _strain_increment[_qp] = D*_t_step; //This assumes a specific time integration
 
   //Calculate rotation Rhat
-  RankTwoTensor U(-A);
-  Real ax = U(1,2) - U(2,1);
-  Real ay = U(2,0) - U(0,2);
-  Real az = U(0,1) - U(1,0);
+  RankTwoTensor invFhat(Fhat.inverse());
+  Real ax = invFhat(1,2) - invFhat(2,1);
+  Real ay = invFhat(2,0) - invFhat(0,2);
+  Real az = invFhat(0,1) - invFhat(1,0);
   Real q = (ax*ax + ay*ay + az*az)/4.0;
-  Real p = (U.trace() - 1.0)*(U.trace() - 1.0)/4.0;
+  Real trFhatinv_1 = invFhat.trace() - 1.0;
+  Real p = trFhatinv_1*trFhatinv_1/4.0;
+  //Real cos2tha = p + 3.0*p*p*(1.0 - (p + q))/((p+q)*(p+q)) - 2.0*p*p*p*(1-(p+q))/((p+q)*(p+q)*(p+q]);
+  
   Real y = 1.0/((q + p)*(q + p)*(q + p));
 
   Real C1 = std::sqrt(p * (1 + (p*(q+q+(q+p))) * (1-(q+p)) * y));
@@ -99,15 +113,16 @@ void FiniteStrainMaterial::computeQpStrain(RankTwoTensor Fhat)
   R_incr(2,0) =      (C2*ax)*az + (C3*ay);
   R_incr(2,1) =      (C2*ay)*az - (C3*ax);
   R_incr(2,2) = C1 + (C2*az)*az;
-  
+
   _rotation_increment[_qp] = R_incr;
 }
 
 void FiniteStrainMaterial::computeQpStress()
 {
+  //In elastic problem, all the strain is elastic
+  _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
   // stress = C * e
-  RankTwoTensor unrotated_stress = _elasticity_tensor[_qp]*_strain_increment[_qp];
-  //Rotate the stress to the current configuration T = R T0 R^T
-  _stress[_qp] = _rotation_increment[_qp]*unrotated_stress*_rotation_increment[_qp].transpose();
-  
+  _stress[_qp] = _elasticity_tensor[_qp]*_elastic_strain[_qp]; //Calculate stress in intermediate configruation
+  //Rotate the stress to the current configuration 
+  _stress[_qp].rotate(_rotation_increment[_qp]);
 }

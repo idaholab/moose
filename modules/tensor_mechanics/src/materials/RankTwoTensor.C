@@ -122,6 +122,23 @@ RankTwoTensor::rotate(RealTensorValue &R)
 
 }
 
+void
+RankTwoTensor::rotate(RankTwoTensor &R)
+{
+  Real temp;
+
+  for(unsigned int i(0); i<N; i++)
+    for(unsigned int j(0); j<N; j++)
+    {
+      temp = 0.0;
+      for(unsigned int k(0); k<N; k++)
+        for(unsigned int l(0); l<N; l++)
+          temp += R(i,k)*R(j,l)*_vals[i][j];
+      _vals[i][j] = temp;
+    }
+
+}
+
 RankTwoTensor
 RankTwoTensor::rotateXyPlane(const Real a)
 {
@@ -182,7 +199,7 @@ RankTwoTensor::operator+=(const RankTwoTensor &a)
 {
    for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
-      _vals[i][j] = _vals[i][j] + a(i,j);
+      _vals[i][j] += a(i,j);
   return *this;
 }
 
@@ -203,7 +220,7 @@ RankTwoTensor::operator-=(const RankTwoTensor &a)
 {
    for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
-      _vals[i][j] = _vals[i][j] - a(i,j);
+      _vals[i][j] -= a(i,j);
   return *this;
 }
 
@@ -236,7 +253,7 @@ RankTwoTensor::operator*=(const Real &a)
 {
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
-      _vals[i][j] = _vals[i][j]*a;
+      _vals[i][j] *= a;
 
   return *this;
 }
@@ -258,7 +275,7 @@ RankTwoTensor::operator/=(const Real &a)
 {
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
-      _vals[i][j] = _vals[i][j]/a;
+      _vals[i][j] /= a;
 
   return *this;
 }
@@ -283,7 +300,7 @@ RankTwoTensor::operator*=(const RankTwoTensor &a)
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       for(unsigned int k(0); k<N; k++)
-        _vals[i][j] = s(i,j)*a(j,k);
+        _vals[i][j] += s(i,j)*a(j,k);
   
   return *this;
 }
@@ -296,7 +313,7 @@ RankTwoTensor::operator*(const RankTwoTensor &a) const
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       for(unsigned int k(0); k<N; k++)
-        result(i,k) = _vals[i][j]*a(j,k);
+        result(i,k) += _vals[i][j]*a(j,k);
 
   return result;
 }
@@ -309,7 +326,7 @@ RankTwoTensor::operator*(const TypeTensor<Real> &a) const
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       for(unsigned int k(0); k<N; k++)
-        result(i,k) = _vals[i][j]*a(j,k);
+        result(i,k) += _vals[i][j]*a(j,k);
 
   return result;
 }

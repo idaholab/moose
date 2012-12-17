@@ -76,6 +76,11 @@ public:
   virtual void rotate(RealTensorValue &R);
 
   /**
+   *rotates the tensor data given a rank two tensor rotation tensor
+   */
+  virtual void rotate(RankTwoTensor &R);
+
+  /**
    *rotates the tensor data around the z-axis given an angle in radians
    */
   virtual RankTwoTensor rotateXyPlane(const Real a);

@@ -18,12 +18,16 @@ public:
   FiniteStrainMaterial(const std:: string & name, InputParameters parameters);
 
 protected:
+  virtual void initQpStatefulProperties();
   virtual void computeStrain();
+  virtual void computeQpStrain();
   virtual void computeQpStrain(RankTwoTensor Fhat);
   virtual void computeQpStress();
 
   MaterialProperty<RankTwoTensor> & _strain_rate;
   MaterialProperty<RankTwoTensor> & _strain_increment;
+  MaterialProperty<RankTwoTensor> & _elastic_strain;
+  MaterialProperty<RankTwoTensor> & _elastic_strain_old;
   MaterialProperty<RankTwoTensor> & _rotation_increment;
   
 private:
