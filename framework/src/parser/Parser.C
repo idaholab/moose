@@ -173,9 +173,6 @@ Parser::parse(const std::string &input_filename)
 
           extractParams(curr_identifier, params);
 
-          // Check Action Parameters Now
-          params.checkParams(curr_identifier);
-
           // Add the parsed syntax to the parameters object for consumption by the Action
           params.set<std::string>("action") = i->second._action_name;
 

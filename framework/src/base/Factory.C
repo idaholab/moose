@@ -50,5 +50,8 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
   if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
     mooseError("Object '" + obj_name + "' was not registered.");
 
+  // Check to make sure that all required parameters are supplied
+  parameters.checkParams(obj_name);
+
   return (*_name_to_build_pointer[obj_name])(name, parameters);
 }

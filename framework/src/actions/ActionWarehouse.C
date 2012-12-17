@@ -202,12 +202,6 @@ ActionWarehouse::executeActionsWithAction(const std::string & name)
        act_iter != actionBlocksWithActionEnd(name);
        ++act_iter)
   {
-    // Delay the InputParameters check of MOOSE based objects until just before "acting"
-    // so that Meta-Actions can complete the build of parameters as necessary
-    MooseObjectAction * obj_action = dynamic_cast<MooseObjectAction *>(*act_iter);
-    if (obj_action != NULL)
-      obj_action->getObjectParams().checkParams(obj_action->name());
-
     if (_show_actions)
       std::cerr << "[DBG][ACT] - " << (*act_iter)->name() << std::endl;
     (*act_iter)->act();

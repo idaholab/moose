@@ -44,6 +44,9 @@ ActionFactory::create(const std::string & action, const std::string & name, Inpu
   std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
   BuildInfo *build_info = NULL;
 
+  // Check to make sure that all required parameters are supplied
+  params.checkParams(name);
+
   iters = _name_to_build_info.equal_range(action);
 
   // Find the Action that matches the one we have registered based on unique_id
