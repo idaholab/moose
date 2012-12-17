@@ -10,6 +10,7 @@
 #include "NavierStokesModule.h"
 #include "LinearElasticityModule.h"
 #include "FluidMassEnergyBalanceModule.h"
+#include "ChemicalReactionsModule.h"
 #include "MiscModule.h"
 
 void
@@ -23,6 +24,7 @@ Elk::registerObjects()
   NavierStokes::registerObjects();
   LinearElasticity::registerObjects();
   FluidMassEnergyBalance::registerObjects();
+  ChemicalReactions::registerObjects();
   Misc::registerObjects();
 }
 
