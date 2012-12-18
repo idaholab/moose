@@ -18,8 +18,7 @@ InputParameters validParams<LinearElasticMaterial>()
 
 LinearElasticMaterial::LinearElasticMaterial(const std::string & name, 
                                              InputParameters parameters)
-    : TensorMechanicsMaterial(name, parameters),
-      _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain"))
+    : TensorMechanicsMaterial(name, parameters)
 {
 }
 

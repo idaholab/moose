@@ -1,12 +1,6 @@
-// Original class author: A.M. Jokisaari, O. Heinonen
+// Original class author: M.R. Tonks
 
 #include "FiniteStrainMaterial.h"
-
-/**
- * FiniteStrainMaterial handles a fully anisotropic, single-crystal material's elastic
- * constants.  It takes all 21 independent stiffness tensor inputs.  This can be extended or
- * simplified to specify HCP, monoclinic, cubic, etc as needed.
- */
 
 template<>
 InputParameters validParams<FiniteStrainMaterial>()
@@ -21,7 +15,6 @@ FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name,
     : TensorMechanicsMaterial(name, parameters),      
       _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),  
       _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
-      _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
       _elastic_strain_old(declarePropertyOld<RankTwoTensor>("elastic_strain")),
       _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment"))
 {
@@ -115,14 +108,4 @@ void FiniteStrainMaterial::computeQpStrain(RankTwoTensor Fhat)
   R_incr(2,2) = C1 + (C2*az)*az;
 
   _rotation_increment[_qp] = R_incr;
-}
-
-void FiniteStrainMaterial::computeQpStress()
-{
-  //In elastic problem, all the strain is elastic
-  _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
-  // stress = C * e
-  _stress[_qp] = _elasticity_tensor[_qp]*_elastic_strain[_qp]; //Calculate stress in intermediate configruation
-  //Rotate the stress to the current configuration 
-  _stress[_qp].rotate(_rotation_increment[_qp]);
 }

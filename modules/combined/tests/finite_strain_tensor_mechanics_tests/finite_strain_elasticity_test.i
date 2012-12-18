@@ -310,7 +310,7 @@
   # Materials
   [./Goo]
     # reading C_11  C_12  C_13  C_22  C_23  C_33  C_44  C_55  C_66
-    type = FiniteStrainMaterial
+    type = FiniteStrainElasticMaterial
     block = '1 2 3 4 5 6 7'
     all_21 = false
     disp_x = disp_x
