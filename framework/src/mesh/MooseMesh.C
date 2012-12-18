@@ -27,6 +27,7 @@
 #include "parallel_mesh.h"
 #include "periodic_boundary_base.h"
 #include "fe_interface.h"
+#include "serial_mesh.h"
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 
@@ -1262,7 +1263,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
                                 int child,
                                 int child_side)
 {
-  Mesh mesh;
+  SerialMesh mesh;
   mesh.skip_partitioning(true);
 
   unsigned int dim = template_elem->dim();
