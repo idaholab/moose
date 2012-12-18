@@ -1,7 +1,6 @@
 #include "ContactModule.h"
 #include "Factory.h"
 #include "ActionFactory.h"
-#include "ProblemFactory.h"
 #include "Parser.h"
 
 // contact

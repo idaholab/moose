@@ -81,9 +81,6 @@ FrictionalContactProblem::FrictionalContactProblem(const std::string & name, Inp
     _inc_slip_norm(0.0),
     _it_slip_norm(0.0)
 {
-  Moose::app->parser().extractParams("Problem", params);
-  params.checkParams("Problem");
-
   std::vector<int> master = params.get<std::vector<int> >("master");
   std::vector<int> slave = params.get<std::vector<int> >("slave");
   std::vector<Real> friction_coefficient = params.get<std::vector<Real> >("friction_coefficient");
