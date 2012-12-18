@@ -978,7 +978,7 @@ MooseMesh::detectPairedSidesets(std::vector<Node *> &corner_nodes)
       }
 
       if (max_count < std::pow(2.0, (int)dim - 1))
-        mooseWarning ("Couldn't auto-detect a paired boundary for use with periodic boundary conditions");
+        mooseDoOnce(mooseWarning ("Couldn't auto-detect a paired boundary for use with periodic boundary conditions"));
 
       if (i==0)
         paired_boundary.first = common_boundary;

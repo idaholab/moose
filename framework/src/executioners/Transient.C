@@ -18,7 +18,6 @@
 #include "Kernel.h"
 #include "Factory.h"
 #include "SubProblem.h"
-#include "ProblemFactory.h"
 #include "TimePeriod.h"
 #include "TimeScheme.h"
 //libMesh includes

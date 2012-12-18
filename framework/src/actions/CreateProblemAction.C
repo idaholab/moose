@@ -13,15 +13,15 @@
 /****************************************************************/
 
 #include "CreateProblemAction.h"
-#include "ProblemFactory.h"
+#include "Factory.h"
 #include "FEProblem.h"
 
 template<>
 InputParameters validParams<CreateProblemAction>()
 {
-  InputParameters params = validParams<Action>();
-  params.addParam<std::string>("type", "FEProblem", "Type of the problem to build");
-  params.addParam<std::string>("name", "MOOSE Problem", "The name the problem");
+  InputParameters params = validParams<MooseObjectAction>();
+  params.addParam<std::string>("type", "FEProblem", "Type of the problem to build");  // Provide a default for MooseObjectAction::type
+  params.addParam<std::string>("name", "MOOSE Problem", "The name the problem");      // Provide a default for Action::name
   params.addParam<std::vector<SubdomainName> >("block", "Block IDs for the coordinate systems");
   params.addParam<std::vector<std::string> >("coord_type", "Type of the coordinate system per block param");
 
@@ -31,8 +31,7 @@ InputParameters validParams<CreateProblemAction>()
 
 
 CreateProblemAction::CreateProblemAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters),
-    _type(getParam<std::string>("type")),
+    MooseObjectAction(name, parameters),
     _problem_name(getParam<std::string>("name")),
     _blocks(getParam<std::vector<SubdomainName> >("block")),
     _coord_sys(getParam<std::vector<std::string> >("coord_type")),
@@ -47,9 +46,8 @@ CreateProblemAction::act()
   {
     // build the problem only if we have mesh
     {
-      InputParameters params = ProblemFactory::instance()->getValidParams(_type);
-      params.set<MooseMesh *>("mesh") = _mesh;
-      _problem = dynamic_cast<FEProblem *>(ProblemFactory::instance()->create(_type, _problem_name, params));
+      _moose_object_pars.set<MooseMesh *>("mesh") = _mesh;
+      _problem = dynamic_cast<FEProblem *>(Factory::instance()->create(_type, _problem_name, _moose_object_pars));
       if (_problem == NULL)
         mooseError("Problem has to be of a FEProblem type");
     }

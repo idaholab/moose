@@ -169,15 +169,15 @@ InputParameters::isPrivate(const std::string &name) const
 void
 InputParameters::checkParams(const std::string &prefix) const
 {
+  std::string l_prefix = this->have_parameter<std::string>("long_name") ? this->get<std::string>("long_name") : prefix;
+
   for (InputParameters::const_iterator it = this->begin(); it != this->end(); ++it)
   {
-    std::string orig_name = prefix + "/" + it->first;
-
     if (!isParamValid(it->first) && isParamRequired(it->first))
     {
       // The parameter is required but missing
       std::string doc = getDocString(it->first);
-      mooseError("The required parameter '" + orig_name + "' is missing\nDoc String: \"" +
+      mooseError("The required parameter '" + l_prefix + "/" + it->first + "' is missing\nDoc String: \"" +
                  getDocString(it->first) + "\"");
     }
   }

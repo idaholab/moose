@@ -15,14 +15,14 @@
 #ifndef CREATEPROBLEMACTION_H
 #define CREATEPROBLEMACTION_H
 
-#include "Action.h"
+#include "MooseObjectAction.h"
 
 class CreateProblemAction;
 
 template<>
 InputParameters validParams<CreateProblemAction>();
 
-class CreateProblemAction : public Action
+class CreateProblemAction : public MooseObjectAction
 {
 public:
   CreateProblemAction(const std::string & name, InputParameters parameters);
@@ -30,7 +30,6 @@ public:
   virtual void act();
 
 protected:
-  std::string _type;
   std::string _problem_name;
   std::vector<SubdomainName> _blocks;
   std::vector<std::string> _coord_sys;

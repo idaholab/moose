@@ -43,7 +43,7 @@ InputParameters validParams<Problem>();
 /**
  * Class that hold the whole problem being solved.
  */
-class Problem
+class Problem : public MooseObject
 {
 public:
   Problem(const std::string & name, InputParameters parameters);
@@ -85,11 +85,6 @@ public:
   const std::vector<TimePeriod *> & getTimePeriods() const;
 
 protected:
-  /// The name of the problem
-  std::string _name;
-  /// Generic parameters object used during construction
-  InputParameters _pars;
-
   /// output initial condition if true
   bool _output_initial;
 

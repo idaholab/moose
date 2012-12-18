@@ -2,7 +2,6 @@
 #include "Moose.h"
 #include "Factory.h"
 #include "ActionFactory.h"
-#include "ProblemFactory.h"
 
 #include "CoupledConvection.h"
 #include "ForcingFn.h"

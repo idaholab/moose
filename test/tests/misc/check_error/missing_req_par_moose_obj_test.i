@@ -1,4 +1,3 @@
-
 [Mesh]
   file = square.e
 []

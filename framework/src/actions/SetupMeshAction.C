@@ -17,7 +17,7 @@
 #include "MooseMesh.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
-#include "ProblemFactory.h"
+#include "Factory.h"
 
 // libmesh includes
 #include "linear_partitioner.h"

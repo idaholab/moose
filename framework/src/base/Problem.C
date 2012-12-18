@@ -24,10 +24,9 @@ InputParameters validParams<Problem>()
   return params;
 }
 
-Problem::Problem(const std::string & name, InputParameters parameters):
-  _name(name),
-  _pars(parameters),
-  _output_initial(false)
+Problem::Problem(const std::string & name, InputParameters parameters) :
+    MooseObject(name, parameters),
+    _output_initial(false)
 {
 }
 

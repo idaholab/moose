@@ -15,7 +15,6 @@
 #include "FEProblem.h"
 //#include "SystemBase.h"
 #include "Factory.h"
-#include "ProblemFactory.h"
 #include "DisplacedProblem.h"
 #include "OutputProblem.h"
 #include "MaterialData.h"
@@ -2641,7 +2640,7 @@ FEProblem::getOutputProblem(unsigned int refinements)
     params.set<FEProblem *>("mproblem") = this;
     params.set<unsigned int>("refinements") = refinements;
     params.set<MooseMesh *>("mesh") = &_mesh;
-    _out_problem = static_cast<OutputProblem *>(ProblemFactory::instance()->create("OutputProblem", "Output Problem", params));
+    _out_problem = static_cast<OutputProblem *>(Factory::instance()->create("OutputProblem", "Output Problem", params));
   }
   return *_out_problem;
 }

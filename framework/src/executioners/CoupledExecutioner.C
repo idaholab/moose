@@ -14,7 +14,7 @@
 
 #include "CoupledExecutioner.h"
 #include "CoupledProblem.h"
-#include "ProblemFactory.h"
+#include "Factory.h"
 #include "ActionWarehouse.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
@@ -37,7 +37,7 @@ CoupledExecutioner::CoupledExecutioner(const std::string & name, InputParameters
     _problem(NULL)
 {
   InputParameters params = emptyInputParameters();
-  _problem = static_cast<CoupledProblem *>(ProblemFactory::instance()->create("CoupledProblem", "master_problem", params));
+  _problem = static_cast<CoupledProblem *>(Factory::instance()->create("CoupledProblem", "master_problem", params));
 }
 
 CoupledExecutioner::~CoupledExecutioner()

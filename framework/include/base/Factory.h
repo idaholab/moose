@@ -46,6 +46,7 @@
 #define registerPreconditioner(name)                registerObject(name)
 #define registerIndicator(name)                     registerObject(name)
 #define registerMarker(name)                        registerObject(name)
+#define registerProblem(name)                       registerObject(name)
 
 #define registerNamedKernel(obj, name)              registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)   registerNamedObject(obj, name)
