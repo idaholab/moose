@@ -111,7 +111,7 @@
     type = HeatConductionMaterial
     block = 1
     specific_heat = 826.4
-    thermal_conductivity = 1.937	# this makes alpha 9.74e-7 m^2/s
+    #thermal_conductivity = 1.937	# this makes alpha 9.74e-7 m^2/s
     thermal_conductivity = 193.7	# this makes alpha 9.74e-5 m^2/s
 					# above conductivity arbitrarily increased by 2 decades to make the
 					#   object soak faster for the present purposes

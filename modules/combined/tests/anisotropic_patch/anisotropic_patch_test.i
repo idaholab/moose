@@ -197,12 +197,6 @@
   [./fi]
     type = MaterialTensorAux
     tensor = stress
-    variable = first
-    quantity = firstinvariant
-  [../]
-  [./fi]
-    type = MaterialTensorAux
-    tensor = stress
     variable = firstinv
     quantity = firstinvariant
   [../]

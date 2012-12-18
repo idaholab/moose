@@ -19,8 +19,10 @@ int main (int argc, char** argv)
   MooseInit init (argc, argv);
   ElkTestApp app(argc, argv);
 
-  app.setCheckUnusedFlag( true );
+  app.setCheckUnusedFlag(true);
+  app.setErrorOverridden();
   app.setSortAlpha( true );
+
   app.run();
 
   return 0;

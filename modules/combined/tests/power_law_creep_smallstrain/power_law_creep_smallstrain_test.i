@@ -217,14 +217,6 @@
   [./density]
     type = Density
     block = 1
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
-  [../]
-
-  [./density]
-    type = Density
-    block = 1
     density = 1.0
     disp_x = disp_x
     disp_y = disp_y
