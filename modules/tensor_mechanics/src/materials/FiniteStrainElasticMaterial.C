@@ -31,6 +31,6 @@ void FiniteStrainElasticMaterial::computeQpStress()
   _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp]*_strain_increment[_qp]; //Calculate stress in intermediate configruation
   
   //Rotate the stress to the current configuration
-  _stress[_qp] = _rotation_increment[_qp].transpose()*_stress[_qp]*_rotation_increment[_qp];
+  _stress[_qp] = _rotation_increment[_qp]*_stress[_qp]*_rotation_increment[_qp].transpose();
   
 }

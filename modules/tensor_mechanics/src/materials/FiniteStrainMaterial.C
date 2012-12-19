@@ -118,6 +118,7 @@ void FiniteStrainMaterial::computeQpStrain(RankTwoTensor Fhat)
   
   Real C3 = 0.5*std::sqrt((p*q*(3.0 - q) + p*p*p + q*q)/((p + q)*(p + q)*(p + q))); //sin theta_a/(2 sqrt(q))
 
+  //Calculate incremental rotation. Note that this value is the transpose of that from Rashid, 93, so we transpose it before storing
   RankTwoTensor R_incr;
   R_incr.addIa(C1);
   for (unsigned int i=0; i<3; ++i)
@@ -130,5 +131,5 @@ void FiniteStrainMaterial::computeQpStrain(RankTwoTensor Fhat)
   R_incr(1,2) += C3*a[0];
   R_incr(2,0) += C3*a[1];
   R_incr(2,1) -= C3*a[0];
-  _rotation_increment[_qp] = R_incr;
+  _rotation_increment[_qp] = R_incr.transpose();
 }
