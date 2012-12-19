@@ -61,9 +61,9 @@ public:
   /**
    * The variable that this kernel operates on.
    */
-  MooseVariableScalar & variable() { return _var; }
+  MooseVariableScalar & variable();
 
-  SubProblem & subProblem() { return _subproblem; }
+  SubProblem & subProblem();
 
   /**
    * Use this to enable/disable the constraint

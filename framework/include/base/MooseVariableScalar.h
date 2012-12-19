@@ -42,7 +42,7 @@ public:
   /**
    * Get the variable number
    */
-  unsigned int number() { return _moose_var_num; }
+  unsigned int number();
 
   /**
    * Get the variable number
@@ -52,7 +52,7 @@ public:
   /**
    * Kind of the variable (Nonlinear, Auxiliary, ...)
    */
-  Moose::VarKindType kind() { return _var_kind; }
+  Moose::VarKindType kind();
 
   /**
    * Get the order of this variable
@@ -71,11 +71,11 @@ public:
   /**
    * Set the scaling factor for this variable
    */
-  void scalingFactor(Real factor) { _scaling_factor = factor; }
+  void scalingFactor(Real factor);
   /**
    * Get the scaling factor for this variable
    */
-  Real scalingFactor() { return _scaling_factor; }
+  Real scalingFactor();
 
   /**
    * Set the nodal value for this variable (to keep everything up to date

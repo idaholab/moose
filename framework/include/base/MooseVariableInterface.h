@@ -36,7 +36,7 @@ public:
    * Get the variable that this object is using.
    * @return The variable this object is using.
    */
-  MooseVariable * mooseVariable() { return _variable; }
+  MooseVariable * mooseVariable();
 
   virtual ~MooseVariableInterface();
 

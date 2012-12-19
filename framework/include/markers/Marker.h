@@ -48,7 +48,7 @@ class Marker :
 {
 public:
   Marker(const std::string & name, InputParameters parameters);
-  virtual ~Marker(){}
+  virtual ~Marker() {}
 
   /// This mirrors the main refinement flag values in libMesh in Elem::RefinementState but adds "dont_mark"
   enum MarkerValue
@@ -67,21 +67,16 @@ public:
 
   virtual void computeMarker();
 
-  // TODO: Fixme
-  bool isActive() const { return true; }
+  bool isActive() const;
 
   /**
    * Is called before any element looping is started so any "global" computation can be done.
    */
-  virtual void markerSetup() {}
+  virtual void markerSetup();
 
-  virtual
-  const std::set<std::string> &
-  getRequestedItems() { return _depend; }
+  virtual const std::set<std::string> & getRequestedItems();
 
-  virtual
-  const std::set<std::string> &
-  getSuppliedItems() { return _supplied; }
+  virtual const std::set<std::string> & getSuppliedItems();
 
 protected:
 

@@ -45,7 +45,7 @@ public:
 
   virtual EquationSystems & es() { return _eq; }
   virtual MooseMesh & mesh() { return _mesh; }
-  MooseMesh & refMesh() { return _ref_mesh; }
+  MooseMesh & refMesh();
 
   DisplacedSystem & nlSys() { return _displaced_nl; }
   DisplacedSystem & auxSys() { return _displaced_aux; }
@@ -60,8 +60,8 @@ public:
   virtual void useFECache(bool fe_cache);
 
   virtual void init();
-  virtual void solve() {}
-  virtual bool converged() { return _mproblem.converged(); }
+  virtual void solve();
+  virtual bool converged();
 
   virtual void syncSolutions(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
   virtual void updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
@@ -133,10 +133,10 @@ public:
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid);
 
   virtual Assembly & assembly(THREAD_ID tid) { return *_assembly[tid]; }
-  virtual const Moose::CoordinateSystemType & coordSystem(THREAD_ID tid) { return _assembly[tid]->coordSystem(); }
+  virtual const Moose::CoordinateSystemType & coordSystem(THREAD_ID tid);
   virtual QBase * & qRule(THREAD_ID tid) { return _assembly[tid]->qRule(); }
   virtual const MooseArray<Point> & points(THREAD_ID tid) { return _assembly[tid]->qPoints(); }
-  virtual const MooseArray<Point> & physicalPoints(THREAD_ID tid) { return _assembly[tid]->physicalPoints(); }
+  virtual const MooseArray<Point> & physicalPoints(THREAD_ID tid);
   virtual const MooseArray<Real> & JxW(THREAD_ID tid) { return _assembly[tid]->JxW(); }
   virtual const Real & elemVolume(THREAD_ID tid) { return _assembly[tid]->elemVolume(); }
   virtual const MooseArray<Real> & coords(THREAD_ID tid) { return _assembly[tid]->coordTransformation(); } // have to use coord transformation from undisplaced problem
@@ -144,22 +144,22 @@ public:
   virtual const MooseArray<Point> & pointsFace(THREAD_ID tid) { return _assembly[tid]->qPointsFace(); }
   virtual const MooseArray<Real> & JxWFace(THREAD_ID tid) { return _assembly[tid]->JxWFace(); }
   virtual const Real & sideElemVolume(THREAD_ID tid) { return _assembly[tid]->sideElemVolume(); }
-  virtual const Elem * & elem(THREAD_ID tid) { return _assembly[tid]->elem(); }
-  virtual unsigned int & side(THREAD_ID tid) { return _assembly[tid]->side(); }
-  virtual const Elem * & sideElem(THREAD_ID tid) { return _assembly[tid]->sideElem(); }
-  virtual const Node * & node(THREAD_ID tid) { return _assembly[tid]->node(); }
-  virtual const Node * & nodeNeighbor(THREAD_ID tid) { return _assembly[tid]->nodeNeighbor(); }
+  virtual const Elem * & elem(THREAD_ID tid);
+  virtual unsigned int & side(THREAD_ID tid);
+  virtual const Elem * & sideElem(THREAD_ID tid);
+  virtual const Node * & node(THREAD_ID tid);
+  virtual const Node * & nodeNeighbor(THREAD_ID tid);
 
   // Geom Search /////
   virtual void updateGeomSearch();
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
-  virtual bool computingInitialResidual() { return _mproblem.computingInitialResidual(); }
+  virtual bool computingInitialResidual();
 
-  virtual void onTimestepBegin() {}
-  virtual void onTimestepEnd() {}
+  virtual void onTimestepBegin();
+  virtual void onTimestepEnd();
 
-  virtual Order getQuadratureOrder() { return _mproblem.getQuadratureOrder(); }
+  virtual Order getQuadratureOrder();
 
   // Postprocessors /////
   virtual void outputPps(const FormattedTable & table);

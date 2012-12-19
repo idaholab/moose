@@ -150,3 +150,32 @@ SubProblem::checkMatProp(SubdomainID block_id, const std::string & name)
   }
 }
 
+DiracKernelInfo &
+SubProblem::diracKernelInfo()
+{
+  return _dirac_kernel_info;
+}
+
+Real
+SubProblem::finalNonlinearResidual()
+{
+  return 0;
+}
+
+unsigned int
+SubProblem::nNonlinearIterations()
+{
+  return 0;
+}
+
+unsigned int
+SubProblem::nLinearIterations()
+{
+  return 0;
+}
+
+void
+SubProblem::meshChanged()
+{
+  mooseError("This system does not support changing the mesh");
+}

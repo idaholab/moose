@@ -53,7 +53,8 @@ public:
    * Get the name of this problem
    * @return The name of this problem
    */
-  virtual const std::string & name() { return _name; }
+  virtual const std::string & name();
+
   /**
    * Get reference to all-purpose parameters
    */
@@ -63,7 +64,7 @@ public:
 
   // Output system /////
   virtual void output(bool force = false) = 0;
-  void outputInitial(bool out_init) { _output_initial = out_init; }
+  void outputInitial(bool out_init);
 
   // Time periods //////
 

@@ -111,3 +111,15 @@ Resurrector::write()
     remove(fn.c_str());           // user data
   }
 }
+
+bool
+Resurrector::isOn()
+{
+  return _restart;
+}
+
+unsigned int
+Resurrector::getNumRestartFiles()
+{
+  return _num_restart_files;
+}

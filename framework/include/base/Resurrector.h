@@ -43,7 +43,8 @@ public:
    * Are we restarting from a file
    * @return true if we are restarting, otherwise false
    */
-  bool isOn() { return _restart; }
+  bool isOn();
+
   /**
    * Perform a restart from a file
    */
@@ -63,7 +64,7 @@ public:
    * Gets the number of restart files to save
    * @return the number of files to keep around
    */
-  unsigned int getNumRestartFiles() { return _num_restart_files; }
+  unsigned int getNumRestartFiles();
 
   /**
    * Write out a restart file and rotate already written ones

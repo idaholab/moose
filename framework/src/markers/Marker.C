@@ -79,3 +79,26 @@ Marker::getMarkerValue(std::string name)
   _depend.insert(name);
   return _sys.getVariable(_tid, name).nodalSln();
 }
+
+bool
+Marker::isActive() const
+{
+  return true;
+}
+
+void
+Marker::markerSetup()
+{
+}
+
+const std::set<std::string> &
+Marker::getRequestedItems()
+{
+  return _depend;
+}
+
+const std::set<std::string> &
+Marker::getSuppliedItems()
+{
+  return _supplied;
+}

@@ -39,6 +39,11 @@ MooseVariableInterface::~MooseVariableInterface()
 {
 }
 
+MooseVariable *
+MooseVariableInterface::mooseVariable()
+{
+  return _variable;
+}
 
 VariableValue &
 MooseVariableInterface::value()

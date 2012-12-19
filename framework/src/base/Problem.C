@@ -59,3 +59,15 @@ Problem::getTimePeriods() const
 {
   return _time_periods;
 }
+
+const std::string &
+Problem::name()
+{
+  return _name;
+}
+
+void
+Problem::outputInitial(bool out_init)
+{
+  _output_initial = out_init;
+}

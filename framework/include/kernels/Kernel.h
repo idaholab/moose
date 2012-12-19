@@ -65,9 +65,9 @@ public:
   /**
    * The variable number that this kernel operates on.
    */
-  MooseVariable & variable() { return _var; }
+  MooseVariable & variable();
 
-  SubProblem & subProblem() { return _subproblem; }
+  SubProblem & subProblem();
 
   // materials
   template<typename T>

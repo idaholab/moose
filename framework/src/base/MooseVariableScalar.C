@@ -102,3 +102,27 @@ MooseVariableScalar::insert(NumericVector<Number> & soln)
   for (unsigned int i = 0; i < _dof_indices.size(); i++)
     soln.set(_dof_indices[i], _u[i]);
 }
+
+unsigned int
+MooseVariableScalar::number()
+{
+  return _moose_var_num;
+}
+
+Moose::VarKindType
+MooseVariableScalar::kind()
+{
+  return _var_kind;
+}
+
+void
+MooseVariableScalar::scalingFactor(Real factor)
+{
+  _scaling_factor = factor;
+}
+
+Real
+MooseVariableScalar::scalingFactor()
+{
+  return _scaling_factor;
+}

@@ -72,3 +72,15 @@ ScalarKernel::isActive()
 {
   return true;
 }
+
+MooseVariableScalar &
+ScalarKernel::variable()
+{
+  return _var;
+}
+
+SubProblem &
+ScalarKernel::subProblem()
+{
+  return _subproblem;
+}

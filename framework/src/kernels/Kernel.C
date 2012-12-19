@@ -206,3 +206,15 @@ void
 Kernel::precalculateResidual()
 {
 }
+
+MooseVariable &
+Kernel::variable()
+{
+  return _var;
+}
+
+SubProblem &
+Kernel::subProblem()
+{
+  return _subproblem;
+}

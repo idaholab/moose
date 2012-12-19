@@ -122,10 +122,10 @@ public:
   virtual const Elem * & sideElem(THREAD_ID tid) = 0;
   virtual const Node * & node(THREAD_ID tid) = 0;
   virtual const Node * & nodeNeighbor(THREAD_ID tid) = 0;
-  virtual DiracKernelInfo & diracKernelInfo() { return _dirac_kernel_info; }
-  virtual Real finalNonlinearResidual() { return 0; }
-  virtual unsigned int nNonlinearIterations() { return 0; }
-  virtual unsigned int nLinearIterations() { return 0; }
+  virtual DiracKernelInfo & diracKernelInfo();
+  virtual Real finalNonlinearResidual();
+  virtual unsigned int nNonlinearIterations();
+  virtual unsigned int nLinearIterations();
 
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
   virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;
@@ -178,7 +178,7 @@ public:
   virtual void updateGeomSearch() = 0;
   virtual GeometricSearchData & geomSearchData() = 0;
 
-  virtual void meshChanged() { mooseError("This system does not support changing the mesh"); }
+  virtual void meshChanged();
 
   virtual void storeMatPropName(SubdomainID block_id, const std::string & name);
   virtual void checkMatProp(SubdomainID block_id, const std::string & name);
