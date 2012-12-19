@@ -227,6 +227,13 @@
   [../]
 []
 
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+  [../]
+[]
+
 [Executioner]
   # Executioner
   type = Transient
