@@ -239,6 +239,12 @@ Nonlinear3D::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
   ColumnMajorMatrix Fhat_inverse;
   invertMatrix( Fhat, Fhat_inverse );
   Fhat_inverse = Fhat;
+  /*std::cout << "Fhat = " << std::endl;
+  ColumnMajorMatrix out(Fhat);
+  out.print();
+  std::cout << "Fhat_inverse = " << std::endl;
+  out = Fhat_inverse;
+  out.print();*/
 
   const Real Uxx = Fhat_inverse(0,0);
   const Real Uxy = Fhat_inverse(0,1);

@@ -16,6 +16,7 @@ FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name,
       _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),  
       _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
       _elastic_strain_old(declarePropertyOld<RankTwoTensor>("elastic_strain")),
+      _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
       _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment"))
 {
 }
@@ -23,6 +24,9 @@ FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name,
 void FiniteStrainMaterial::initQpStatefulProperties()
 {
   _elastic_strain[_qp].zero();
+  _elastic_strain_old[_qp].zero();
+  _stress[_qp].zero();
+  _stress_old[_qp].zero();
 }
 
 void FiniteStrainMaterial::computeStrain()
@@ -91,10 +95,17 @@ void FiniteStrainMaterial::computeQpStrain(RankTwoTensor Fhat)
 
   //Calculate rotation R_incr
   RankTwoTensor invFhat(Fhat.inverse());
-  Real ax = invFhat(1,2) - invFhat(2,1);
-  Real ay = invFhat(2,0) - invFhat(0,2);
-  Real az = invFhat(0,1) - invFhat(1,0);
-  Real q = (ax*ax + ay*ay + az*az)/4.0;
+  
+  /*std::cout << "Fhat = " << std::endl;
+  Fhat.print();
+  std::cout << "invFhat = " << std::endl;
+  invFhat.print();*/
+  
+  std::vector<Real> a(3);
+  a[0] = invFhat(1,2) - invFhat(2,1);
+  a[1] = invFhat(2,0) - invFhat(0,2);
+  a[2] = invFhat(0,1) - invFhat(1,0);
+  Real q = (a[0]*a[0] + a[1]*a[1] + a[2]*a[2])/4.0;
   Real trFhatinv_1 = invFhat.trace() - 1.0;
   Real p = trFhatinv_1*trFhatinv_1/4.0;
   //Real cos2tha = p + 3.0*p*p*(1.0 - (p + q))/((p+q)*(p+q)) - 2.0*p*p*p*(1-(p+q))/((p+q)*(p+q)*(p+q]);
@@ -106,15 +117,16 @@ void FiniteStrainMaterial::computeQpStrain(RankTwoTensor Fhat)
   Real C3 = 0.5 * std::sqrt( (p*q*(3-q) + p*p*p + q*q) / (p+q)*(p+q)*(p+q) );
   
   RankTwoTensor R_incr;
-  R_incr(0,0) = C1 + (C2*ax)*ax;
-  R_incr(0,1) =      (C2*ay)*ax + (C3*az);
-  R_incr(0,2) =      (C2*az)*ax - (C3*ay);
-  R_incr(1,0) =      (C2*ax)*ay - (C3*az);
-  R_incr(1,1) = C1 + (C2*ay)*ay;
-  R_incr(1,2) =      (C2*az)*ay + (C3*ax);
-  R_incr(2,0) =      (C2*ax)*az + (C3*ay);
-  R_incr(2,1) =      (C2*ay)*az - (C3*ax);
-  R_incr(2,2) = C1 + (C2*az)*az;
-
+  R_incr.addIa(C1);
+  for (unsigned int i=0; i<3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      R_incr(i,j) += C2*a[i]*a[j];
+         
+  R_incr(0,1) += C3*a[2];
+  R_incr(0,2) -= C3*a[1];
+  R_incr(1,0) -= C3*a[2];
+  R_incr(1,2) += C3*a[0];
+  R_incr(2,0) += C3*a[1];
+  R_incr(2,1) -= C3*a[0];
   _rotation_increment[_qp] = R_incr;
 }

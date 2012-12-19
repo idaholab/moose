@@ -5,3 +5,9 @@ test = { INPUT : 'finite_strain_elasticity_test.i',
          SCALE_REFINE : 1
          }
 
+
+rotation_test = { INPUT : 'elastic_rotation_test.i',
+         EXODIFF : ['elastic_rotation.e'],
+         SCALE_REFINE : 1
+         }
+

@@ -320,6 +320,33 @@
   [../]
 []
 
+[Postprocessors]
+  [./stress_xx]
+    type = ElementAverageValue
+    variable = stress_xx
+  [../]
+  [./stress_yy]
+    type = ElementAverageValue
+    variable = stress_yy
+  [../]
+  [./stress_zz]
+    type = ElementAverageValue
+    variable = stress_zz
+  [../]
+  [./stress_xy]
+    type = ElementAverageValue
+    variable = stress_xy
+  [../]
+  [./stress_yz]
+    type = ElementAverageValue
+    variable = stress_yz
+  [../]
+  [./stress_zx]
+    type = ElementAverageValue
+    variable = stress_zx
+  [../]
+[]
+
 [Preconditioning]
   active = 'SMP'
   [./FD]

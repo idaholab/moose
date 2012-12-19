@@ -116,7 +116,7 @@ RankTwoTensor::rotate(RealTensorValue &R)
       temp = 0.0;
       for(unsigned int k(0); k<N; k++)
         for(unsigned int l(0); l<N; l++)
-          temp += R(i,k)*R(j,l)*_vals[i][j];
+          temp += R(i,k)*R(j,l)*_vals[k][l];
       _vals[i][j] = temp;
     }
 
@@ -133,7 +133,7 @@ RankTwoTensor::rotate(RankTwoTensor &R)
       temp = 0.0;
       for(unsigned int k(0); k<N; k++)
         for(unsigned int l(0); l<N; l++)
-          temp += R(i,k)*R(j,l)*_vals[i][j];
+          temp += R(i,k)*R(j,l)*_vals[k][l];
       _vals[i][j] = temp;
     }
 
@@ -393,9 +393,7 @@ RankTwoTensor::inverse()
   result(2,1) = _vals[0][1]*_vals[2][0] - _vals[0][0]*_vals[2][1];
   result(2,2) = _vals[0][0]*_vals[1][1] - _vals[0][1]*_vals[1][0];
 
-  Real det =  _vals[0][0]*(_vals[1][1]*_vals[2][2] - _vals[2][1]*_vals[1][2]);
-  det += _vals[0][1]*(_vals[1][2]*_vals[2][0] - _vals[1][0]*_vals[2][2]);
-  det += _vals[0][2]*(_vals[1][0]*_vals[2][1] - _vals[1][1]*_vals[2][0]);
+  Real det = (*this).det();
   
   if (det == 0)
     mooseError("Rank Two Tensor is singular");
