@@ -266,7 +266,7 @@ Nonlinear3D::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
 
   const Real C1 = std::sqrt(P * (1 + (P*(Q+Q+(Q+P))) * (1-(Q+P)) * Y));
   const Real C2 = 0.125 + Q * 0.03125 * (P*P - 12*(P-1)) / (P*P);
-  const Real C3 = 0.5 * std::sqrt( (P*Q*(3-Q) + P*P*P + Q*Q) / ((P+Q)*(P+Q)*(P+Q)) );
+  const Real C3 = 0.5 * std::sqrt( (P*Q*(3-Q) + P*P*P + Q*Q) * Y );
 
   // Since the input to this routine is the incremental deformation gradient
   //   and not the inverse incremental gradient, this result is the transpose
