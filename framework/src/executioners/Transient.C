@@ -37,7 +37,7 @@ InputParameters validParams<Transient>()
 {
   InputParameters params = validParams<Executioner>();
   std::vector<Real> sync_times(1);
-  sync_times[0] = -1;
+  sync_times[0] = -std::numeric_limits<Real>::max();
 
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
   params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
