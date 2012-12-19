@@ -5,7 +5,6 @@
 
 // LibMesh includes
 #include "periodic_boundary_base.h"
-#include "sphere.h"
 
 #include <limits>
 
@@ -23,17 +22,6 @@ InputParameters validParams<GrainTracker>()
   params.suppressParameter<std::vector<VariableName> >("variable");
 
   return params;
-}
-
-// TODO: This utility function will go away after libMesh is patched
-Real distance (const Sphere& a, const Sphere& b)
-{
-  libmesh_assert_greater ( a.radius(), 0. );
-  libmesh_assert_greater ( b.radius(), 0. );
-
-  const Real distance = (a.center() - b.center()).size();
-
-  return distance - (a.radius() + b.radius());
 }
 
 GrainTracker::GrainTracker(const std::string & name, InputParameters parameters) :
@@ -599,17 +587,17 @@ GrainTracker::boundingRegionDistance(std::vector<BoundingBoxInfo *> & boxes1, st
   {
     Point centroid1(((*box_it1)->b_box->max() + (*box_it1)->b_box->min()) / 2.0);
     Real radius1 = ((*box_it1)->b_box->max() - centroid1).size() + _hull_buffer;
-    Sphere s1(centroid1, radius1);
 
     for (std::vector<BoundingBoxInfo *>::iterator box_it2 = boxes2.begin(); box_it2 != boxes2.end(); ++box_it2)
     {
       Point centroid2(((*box_it2)->b_box->max() + (*box_it2)->b_box->min()) / 2.0);
       Real radius2 = ((*box_it2)->b_box->max() - centroid2).size() + _hull_buffer;
-      Sphere s2(centroid2, radius2);
 
-      // TODO - Turn this back on
-      Real curr_distance = distance(s1, s2);
-/*      Real curr_distance = s1.distance(s2);  */
+      // We need to see if these two grains are close to each other.  To do that, we need to look
+      // at the minimum periodic distance between the two centroids, as well as the distance between
+      // the outer edge of each grain's bounding sphere.
+      Real curr_distance = _mesh.minPeriodicDistance(centroid1, centroid2)  // distance between the centroids
+        - (radius1 + radius2);                                              // minus the sum of the two radii
 
       if (curr_distance < min_distance)
         min_distance = curr_distance;
