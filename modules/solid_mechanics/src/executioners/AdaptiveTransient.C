@@ -527,9 +527,9 @@ AdaptiveTransient::computeAdaptiveDT(Real &dt, bool allowToGrow, bool allowToShr
 {
   unsigned int nl_its = _problem.getNonlinearSystem().nNonlinearIterations();
   unsigned int l_its = _problem.getNonlinearSystem().nLinearIterations();
-  unsigned int growth_nl_its(_optimal_iterations - _iteration_window);
+  unsigned int growth_nl_its(_optimal_iterations > _iteration_window ? _optimal_iterations - _iteration_window : 0);
   unsigned int shrink_nl_its(_optimal_iterations + _iteration_window);
-  unsigned int growth_l_its(_linear_iteration_ratio*(_optimal_iterations - _iteration_window));
+  unsigned int growth_l_its(_optimal_iterations > _iteration_window ? _linear_iteration_ratio*(_optimal_iterations - _iteration_window) : 0);
   unsigned int shrink_l_its(_linear_iteration_ratio*(_optimal_iterations + _iteration_window));
 
   if (nl_its < growth_nl_its && l_its < growth_l_its)
