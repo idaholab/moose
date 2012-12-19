@@ -31,6 +31,7 @@ public:
   ReferenceResidualProblem(const std::string & name, InputParameters params);
   virtual ~ReferenceResidualProblem();
 
+  virtual void initialSetup();
   virtual void timestepSetup();
   void updateReferenceResidual();
   virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
@@ -47,10 +48,17 @@ public:
                                                                     const Real ref_resid,
                                                                     const Real div_threshold);
 
+  bool checkRelativeConvergence(const Real fnorm,
+                                const Real rtol,
+                                const Real ref_resid);
+
 protected:
-  std::vector<std::string> _refResidPPNames;
-  Real _refResid;
-  bool _haveReferenceResid;
+  std::vector<std::string> _solnVarNames;
+  std::vector<std::string> _refResidVarNames;
+  std::vector<unsigned int> _solnVars;
+  std::vector<unsigned int> _refResidVars;
+  std::vector<Real> _refResid;
+  std::vector<Real> _resid;
 };
 
 #endif /* REFERENCERESIDUALPROBLEM_H */

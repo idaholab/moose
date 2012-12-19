@@ -4,7 +4,8 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  reference_residual = 'ref_resid_x ref_resid_y ref_resid_z ref_resid_t'
+  solution_variables = 'disp_x disp_y disp_z temp'
+  reference_residual_variables = 'saved_x saved_y saved_z saved_t'
 []
 
 [Variables]
@@ -177,22 +178,22 @@
 [Postprocessors]
   [./ref_resid_x]
     type = NodalL2Norm
-    execute_on = custom
+    execute_on = timestep
     variable = saved_x
   [../]
   [./ref_resid_y]
     type = NodalL2Norm
-    execute_on = custom
+    execute_on = timestep
     variable = saved_y
   [../]
   [./ref_resid_z]
     type = NodalL2Norm
-    execute_on = custom
+    execute_on = timestep
     variable = saved_z
   [../]
   [./ref_resid_t]
     type = NodalL2Norm
-    execute_on = custom
+    execute_on = timestep
     variable = saved_t
   [../]
   [./nonlinear_its]

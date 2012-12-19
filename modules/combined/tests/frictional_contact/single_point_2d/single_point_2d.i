@@ -171,12 +171,12 @@
   [../]
   [./ref_resid_x]
     type = NodalL2Norm
-    execute_on = custom
+    execute_on = timestep
     variable = saved_x
   [../]
   [./ref_resid_y]
     type = NodalL2Norm
-    execute_on = custom
+    execute_on = timestep
     variable = saved_y
   [../]
 []
@@ -236,5 +236,6 @@
   maximum_slip_iterations = 50
   minimum_slip_iterations = 1
   slip_updates_per_iteration = 5
-  reference_residual = 'ref_resid_x ref_resid_y'
+  solution_variables = 'disp_x disp_y'
+  reference_residual_variables = 'saved_x saved_y'
 []

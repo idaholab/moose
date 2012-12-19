@@ -57,6 +57,7 @@ public:
       Real _slip;
   };
 
+  virtual void initialSetup();
   virtual void timestepSetup();
   virtual bool shouldUpdateSolution();
   virtual bool updateSolution(NumericVector<Number>& vec_solution, NumericVector<Number>& ghosted_solution);
@@ -78,6 +79,7 @@ public:
                  NumericVector<Number>& ghosted_solution,
                  std::vector<SlipData> & iterative_slip);
   unsigned int numLocalFrictionalConstraints();
+  void updateContactReferenceResidual();
   virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
                                                                     const int it,
                                                                     const Real xnorm,
@@ -109,6 +111,10 @@ protected:
   AuxVariableName _inc_slip_x;
   AuxVariableName _inc_slip_y;
   AuxVariableName _inc_slip_z;
+
+  std::vector<std::string> _contactRefResidVarNames;
+  std::vector<unsigned int> _contactRefResidVarIndices;
+  Real _refResidContact;
 
   Real _slip_residual;
   bool _do_slip_update;

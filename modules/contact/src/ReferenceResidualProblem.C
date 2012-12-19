@@ -15,68 +15,131 @@
 #include "ReferenceResidualProblem.h"
 
 #include "MooseApp.h"
+#include <sstream>
 
 template<>
 InputParameters validParams<ReferenceResidualProblem>()
 {
   InputParameters params = validParams<FEProblem>();
-  params.addParam<std::vector<std::string> >("reference_residual","Set of postprocessors that calculate the reference residual to use in the relative convergence criterion");
+  params.addParam<std::vector<std::string> >("solution_variables","Set of solution variables to be checked for relative convergence");
+  params.addParam<std::vector<std::string> >("reference_residual_variables","Set of variables that provide reference residuals for relative convergence check");
   return params;
 }
 
 ReferenceResidualProblem::ReferenceResidualProblem(const std::string & name, InputParameters params) :
-    FEProblem(name, params),
-    _refResid(0.0),
-    _haveReferenceResid(false)
+    FEProblem(name, params)
 {
   Moose::app->parser().extractParams("Problem", params);
   params.checkParams("Problem");
 
-  if (params.isParamValid("reference_residual"))
-    _refResidPPNames = params.get<std::vector<std::string> >("reference_residual");
-  if (_refResidPPNames.size() > 0)
-    _haveReferenceResid = true;
+  if (params.isParamValid("solution_variables"))
+    _solnVarNames = params.get<std::vector<std::string> >("solution_variables");
+  if (params.isParamValid("reference_residual_variables"))
+    _refResidVarNames = params.get<std::vector<std::string> >("reference_residual_variables");
+  if (_solnVarNames.size() != _refResidVarNames.size() )
+  {
+    std::ostringstream err;
+    err << "In ReferenceResidualProblem, size of solution_variables ("<<_solnVarNames.size()
+        <<") != size of reference_residual_variables ("<<_refResidVarNames.size()<<")";
+    mooseError(err.str());
+  }
 }
 
 ReferenceResidualProblem::~ReferenceResidualProblem()
 {}
 
 void
+ReferenceResidualProblem::initialSetup()
+{
+  NonlinearSystem & nonlinear_sys = getNonlinearSystem();
+  AuxiliarySystem & aux_sys = getAuxiliarySystem();
+  TransientNonlinearImplicitSystem &s = nonlinear_sys.sys();
+  TransientExplicitSystem &as = aux_sys.sys();
+
+  if (_solnVarNames.size() > 0 &&
+      _solnVarNames.size() != s.n_vars())
+  {
+    std::ostringstream err;
+    err << "In ReferenceResidualProblem, size of solution_variables ("<<_solnVarNames.size()
+        <<") != number of variables in system ("<<s.n_vars()<<")";
+    mooseError(err.str());
+  }
+
+  _solnVars.clear();
+  for (unsigned int i=0; i<_solnVarNames.size(); ++i)
+  {
+    bool foundMatch = false;
+    for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
+    {
+      if (_solnVarNames[i] == s.variable_name(var_num))
+      {
+        _solnVars.push_back(var_num);
+        _resid.push_back(0.0);
+        foundMatch = true;
+        break;
+      }
+    }
+    if (!foundMatch)
+    {
+      std::ostringstream err;
+      err << "Could not find solution variable '"<<_solnVarNames[i]<<"' in system";
+      mooseError(err.str());
+    }
+  }
+
+  _refResidVars.clear();
+  for (unsigned int i=0; i<_refResidVarNames.size(); ++i)
+  {
+    bool foundMatch=false;
+    for (unsigned int var_num = 0; var_num < as.n_vars(); var_num++)
+    {
+      if (_refResidVarNames[i] == as.variable_name(var_num))
+      {
+        _refResidVars.push_back(var_num);
+        _refResid.push_back(0.0);
+        foundMatch = true;
+        break;
+      }
+    }
+    if (!foundMatch)
+      mooseError("Could not find variable '"<<_refResidVarNames[i]<<"' in auxiliary system");
+  }
+
+  FEProblem::initialSetup();
+}
+
+void
 ReferenceResidualProblem::timestepSetup()
 {
-  _refResid=0.0;
+  for (unsigned int i=0; i<_refResid.size(); ++i)
+  {
+    _refResid[i] = 0.0;
+    _resid[i] = 0.0;
+  }
   FEProblem::timestepSetup();
 }
 
 void
 ReferenceResidualProblem::updateReferenceResidual()
 {
-  NonlinearSystem & nonlinear_sys = getNonlinearSystem();
-  if (_haveReferenceResid)
   {
-    computeUserObjects(EXEC_CUSTOM);
-    Real residsq=0.0;
-    for (int i=0; i<_refResidPPNames.size(); ++i)
-    {
-      Real sqrtresid = getPostprocessorValue(_refResidPPNames[i]);
-      residsq += sqrtresid*sqrtresid;
-    }
-    _refResid = std::sqrt(residsq);
+    NonlinearSystem & nonlinear_sys = getNonlinearSystem();
+    AuxiliarySystem & aux_sys = getAuxiliarySystem();
+    TransientNonlinearImplicitSystem &s = nonlinear_sys.sys();
+    TransientExplicitSystem &as = aux_sys.sys();
 
-    if (_refResid == 0.0)
+    for (unsigned int i=0; i<_solnVars.size(); ++i)
     {
-      _refResid = nonlinear_sys._initial_residual;
-      std::cout<<"User-defined reference residual=0  Using default: "<<_refResid<<std::endl;
+      _resid[i] = s.calculate_norm(*s.rhs,_solnVars[i],DISCRETE_L2);
     }
-    else
+
+    for (unsigned int i=0; i<_refResidVars.size(); ++i)
     {
-      std::cout<<"User-defined reference residual: "<<_refResid<<std::endl;
+      _refResid[i] = as.calculate_norm(*as.current_local_solution,_refResidVars[i],DISCRETE_L2);
     }
+
   }
-  else
-  {
-    _refResid = nonlinear_sys._initial_residual;
-  }
+
 }
 
 MooseNonlinearConvergenceReason
@@ -91,25 +154,106 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
                                                     const Real abstol,
                                                     const int nfuncs,
                                                     const int max_funcs,
-                                                    const Real /*ref_resid*/,
+                                                    const Real ref_resid,
                                                     const Real div_threshold)
 {
   updateReferenceResidual();
 
-  MooseNonlinearConvergenceReason reason = FEProblem::checkNonlinearConvergence(msg,
-                                                                                it,
-                                                                                xnorm,
-                                                                                snorm,
-                                                                                fnorm,
-                                                                                ttol,
-                                                                                rtol,
-                                                                                stol,
-                                                                                abstol,
-                                                                                nfuncs,
-                                                                                max_funcs,
-                                                                                _refResid,
-                                                                                div_threshold);
+  if (_solnVars.size() > 0)
+  {
+    std::cout<<"Solution, reference convergence variable norms:"<<std::endl;
+    unsigned int maxwsv=0;
+    unsigned int maxwrv=0;
+    for (unsigned int i=0; i<_solnVars.size(); ++i)
+    {
+      if (_solnVarNames[i].size() > maxwsv)
+        maxwsv = _solnVarNames[i].size();
+      if (_refResidVarNames[i].size() > maxwrv)
+        maxwrv = _refResidVarNames[i].size();
+    }
+
+    for (unsigned int i=0; i<_solnVars.size(); ++i)
+    {
+      std::cout<<std::setw(maxwsv+2)<<std::left<<_solnVarNames[i]+":"<<_resid[i]<<"  "<<std::setw(maxwrv+2)<<_refResidVarNames[i]+":"<<_refResid[i]<<std::endl;
+    }
+  }
+
+  NonlinearSystem & system = getNonlinearSystem();
+  MooseNonlinearConvergenceReason reason = MOOSE_ITERATING;
+  std::stringstream oss;
+
+  if (!it)
+  {
+    // set parameter for default relative tolerance convergence test
+    ttol = ref_resid*rtol;
+  }
+  if (fnorm != fnorm)
+  {
+    oss << "Failed to converge, function norm is NaN\n";
+    reason = MOOSE_DIVERGED_FNORM_NAN;
+  }
+  else if (fnorm < abstol)
+  {
+    oss << "Converged due to function norm " << fnorm << " < " << abstol << std::endl;
+    reason = MOOSE_CONVERGED_FNORM_ABS;
+  }
+  else if (nfuncs >= max_funcs)
+  {
+    oss << "Exceeded maximum number of function evaluations: " << nfuncs << " > " << max_funcs << std::endl;
+    reason = MOOSE_DIVERGED_FUNCTION_COUNT;
+  }
+  else if(it &&
+          fnorm > system._last_nl_rnorm &&
+          fnorm >= div_threshold)
+  {
+    oss << "Nonlinear solve was blowing up!" << std::endl;
+    reason = MOOSE_DIVERGED_LINE_SEARCH;
+  }
+
+  if (it && !reason)
+  {
+    if (checkRelativeConvergence(fnorm, rtol, ref_resid))
+    {
+      if (_resid.size() > 0)
+        oss << "Converged due to function norm " << " < " << " (relative tolerance) for all solution variables" << std::endl;
+      else
+        oss << "Converged due to function norm " << fnorm << " < " << " (relative tolerance)" << std::endl;
+      reason = MOOSE_CONVERGED_FNORM_RELATIVE;
+    }
+    else if (snorm < stol*xnorm)
+    {
+      oss << "Converged due to small update length: " << snorm << " < " << stol << " * " << xnorm << std::endl;
+      reason = MOOSE_CONVERGED_SNORM_RELATIVE;
+    }
+  }
+
+  system._last_nl_rnorm = fnorm;
+  system._current_nl_its = it;
+
+  msg = oss.str();
 
 //  std::cout<<msg<<std::endl; //Print convergence diagnostic message
   return(reason);
+}
+
+
+
+bool
+ReferenceResidualProblem::checkRelativeConvergence(const Real fnorm,
+                                                   const Real rtol,
+                                                   const Real ref_resid)
+{
+  bool convergedRelative = true;
+  if (_resid.size() > 0)
+  {
+    for (unsigned int i=0; i<_resid.size(); ++i)
+    {
+      convergedRelative &= (_resid[i] < _refResid[i]*rtol);
+    }
+  }
+  else if (fnorm > ref_resid*rtol)
+  {
+    convergedRelative = false;
+  }
+  return (convergedRelative);
 }
