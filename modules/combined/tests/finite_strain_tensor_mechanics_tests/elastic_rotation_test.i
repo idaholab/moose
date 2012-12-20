@@ -75,6 +75,7 @@
 
 [AuxVariables]
   # AuxVariables
+active = ''
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -107,6 +108,7 @@
 
 [AuxKernels]
   # AuxKernels
+active = ''
   [./stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -226,10 +228,11 @@
 [Executioner]
   # Executioner
   type = Transient
-  petsc_options = '-snes -ksp_monitor'
+  petsc_options = '-snes_mf_operator -ksp_monitor'
   petsc_options_iname = '-pc_type '
   petsc_options_value = 'lu'
   nl_rel_tol = 1e-30
+  nl_abs_tol = 1e-20
   l_max_its = 20
   start_time = 0.0
   dt = 0.01
@@ -237,6 +240,7 @@
 []
 
 [Postprocessors]
+active = ''
   [./stress_xx]
     type = ElementAverageValue
     variable = stress_xx
