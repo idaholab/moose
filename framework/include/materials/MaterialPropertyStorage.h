@@ -149,7 +149,7 @@ public:
   unsigned int addPropertyOld(const std::string & prop_name);
   unsigned int addPropertyOlder(const std::string & prop_name);
 
-  std::set<unsigned int> & statefulProps() { return _stateful_props; }
+  std::vector<unsigned int> & statefulProps() { return _stateful_prop_id_to_prop_id; }
   std::map<unsigned int, std::string> statefulPropNames() { return _prop_names; }
 
   unsigned int getPropertyId (const std::string & prop_name) const;
@@ -179,8 +179,8 @@ protected:
 
   /// mapping from property ID to property name
   std::map<unsigned int, std::string> _prop_names;
-  /// list of property ids of stateful material properties
-  std::set<unsigned int> _stateful_props;
+  /// the vector of stateful property ids (the vector index is the map to stateful prop_id)
+  std::vector<unsigned int> _stateful_prop_id_to_prop_id;
 
   unsigned int addPropertyId (const std::string & prop_name);
 };

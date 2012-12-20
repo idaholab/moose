@@ -73,10 +73,10 @@ MaterialPropertyIO::write(const std::string & file_name)
   out.write((const char *) &n_elems, sizeof(n_elems));
 
   // properties
-  std::set<unsigned int> & stateful_props = _material_props.statefulProps();
-  std::vector<unsigned int> prop_ids;
-  prop_ids.insert(prop_ids.end(), stateful_props.begin(), stateful_props.end());
-  std::sort(prop_ids.begin(), prop_ids.end());
+  std::vector<unsigned int> & prop_ids = _material_props.statefulProps();
+//  std::vector<unsigned int> prop_ids;
+//  prop_ids.insert(prop_ids.end(), stateful_props.begin(), stateful_props.end());
+//  std::sort(prop_ids.begin(), prop_ids.end());
 
   unsigned int n_props = prop_ids.size();        // number of properties in this block
   out.write((const char *) &n_props, sizeof(n_props));
@@ -103,11 +103,11 @@ MaterialPropertyIO::write(const std::string & file_name)
       // write out the properties themselves
       for (unsigned int i = 0; i < n_props; i++)
       {
-        unsigned int pid = prop_ids[i];
-        props[elem][0][pid]->store(out);
-        propsOld[elem][0][pid]->store(out);
+//        unsigned int pid = prop_ids[i];
+        props[elem][0][i]->store(out);
+        propsOld[elem][0][i]->store(out);
         if (_material_props.hasOlderProperties())
-          propsOlder[elem][0][pid]->store(out);
+          propsOlder[elem][0][i]->store(out);
       }
     }
   }
@@ -220,12 +220,12 @@ MaterialPropertyIO::read(const std::string & file_name)
         // read in the properties themselves
         for (unsigned int i = 0; i < n_props; i++)
         {
-          unsigned int pid = stateful_prop_ids[prop_names[i]];
+//          unsigned int pid = stateful_prop_ids[prop_names[i]];
 
-          props[elem][0][pid]->load(in);
-          propsOld[elem][0][pid]->load(in);
+          props[elem][0][i]->load(in);
+          propsOld[elem][0][i]->load(in);
           if (_material_props.hasOlderProperties())               // this should actually check if the value is stored in the file (we do not store it right now)
-            propsOlder[elem][0][pid]->load(in);
+            propsOlder[elem][0][i]->load(in);
         }
       }
     }
