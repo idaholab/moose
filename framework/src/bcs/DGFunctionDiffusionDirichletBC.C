@@ -59,9 +59,9 @@ DGFunctionDiffusionDirichletBC::computeQpJacobian()
   const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./pow(elem_b_order, 2.);
 
   Real r = 0;
-  r -= (_grad_test[_j][_qp] * _normals[_qp] * _test[_i][_qp]);
-  r += _epsilon * _test[_j][_qp] * _grad_test[_i][_qp] * _normals[_qp];
-  r += _sigma/h_elem * _test[_j][_qp] * _test[_i][_qp];
+  r -= (_grad_phi[_j][_qp] * _normals[_qp] * _test[_i][_qp]);
+  r += _epsilon * _phi[_j][_qp] * _grad_test[_i][_qp] * _normals[_qp];
+  r += _sigma/h_elem * _phi[_j][_qp] * _test[_i][_qp];
 
   return r;
 }

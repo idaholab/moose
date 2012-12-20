@@ -75,6 +75,7 @@ ComputeJacobianThread::computeInternalFaceJacobian()
   for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
   {
     DGKernel * dg = *it;
+    dg->subProblem().prepareFaceShapes(dg->variable().number(), _tid);
     dg->subProblem().prepareNeighborShapes(dg->variable().number(), _tid);
     dg->computeJacobian();
   }
