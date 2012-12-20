@@ -112,8 +112,10 @@ void FiniteStrainMaterial::computeQpStrain(RankTwoTensor Fhat)
   */
     
   Real C1 = std::sqrt(p + 3.0*p*p*(1.0 - (p + q))/((p+q)*(p+q)) - 2.0*p*p*p*(1-(p+q))/((p+q)*(p+q)*(p+q))); //cos theta_a
-  Real C2 = (1.0 - C1)/(4.0*q); // (1-cos theta_a)/4q
-  if (q < 0.01) //alternate form for small q
+  Real C2 = 0.0;
+  if (q > 0.01)
+    C2 = (1.0 - C1)/(4.0*q); // (1-cos theta_a)/4q
+  else //alternate form for small q
     C2 = 0.125 + q*0.03125*(p*p - 12*(p-1))/(p*p) + q*q*(p - 2.0)*(p*p - 10.0*p + 32.0)/(p*p*p) + q*q*q*(1104.0 - 992.0*p + 376.0*p*p - 72*p*p*p + 5.0*p*p*p*p)/(512.0*p*p*p*p);
   
   Real C3 = 0.5*std::sqrt((p*q*(3.0 - q) + p*p*p + q*q)/((p + q)*(p + q)*(p + q))); //sin theta_a/(2 sqrt(q))
