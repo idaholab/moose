@@ -83,10 +83,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./stress_xy]
     order = CONSTANT
     family = MONOMIAL
@@ -124,13 +120,6 @@
     variable = stress_yy
     index_i = 2
     index_j = 2
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 3
-    index_j = 3
   [../]
   [./stress_xy]
     type = RankTwoAux
@@ -264,6 +253,7 @@
   interval = 1
   output_initial = true
   elemental_as_nodal = true
-  exodus = true  perf_log = true
+  exodus = true 
+  perf_log = true
 []
 
