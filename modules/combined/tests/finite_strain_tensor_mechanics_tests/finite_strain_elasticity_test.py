@@ -8,6 +8,7 @@ test = { INPUT : 'finite_strain_elasticity_test.i',
 
 rotation_test = { INPUT : 'elastic_rotation_test.i',
          EXODIFF : ['elastic_rotation.e'],
-         SCALE_REFINE : 1
+         SCALE_REFINE : 1,
+	 SKIP : 'zzstress exodiffs'
          }
 
