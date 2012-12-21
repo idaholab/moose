@@ -58,6 +58,7 @@
     input = 'dt2_adapt.i'
     exodiff = 'out_dt2_adapt.e-s038'
     group = 'adaptive'
+    max_time = 600
     no_valgrind = true
   [../]
 
