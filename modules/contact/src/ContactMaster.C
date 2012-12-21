@@ -125,15 +125,7 @@ ContactMaster::updateContactSet()
     {
       const Node * node = pinfo->_node;
 
-      // Build up residual vector
-      RealVectorValue res_vec;
-      for(unsigned int i=0; i<_dim; ++i)
-      {
-        int dof_number = node->dof_number(0, _vars(i), 0);
-        res_vec(i) = _residual_copy(dof_number);
-      }
-
-      Real resid( pinfo->_normal * res_vec );
+      Real resid( pinfo->_normal * -pinfo->_contact_force );
 
       // std::cout << locked_this_step[slave_node_num] << " " << pinfo->_distance << std::endl;
       const Real distance( pinfo->_normal * (pinfo->_closest_point - _mesh.node(node->id())));
@@ -142,6 +134,7 @@ ContactMaster::updateContactSet()
       {
         std::cout << "Releasing node " << node->id() << " " << resid << " < " << -_tension_release << std::endl;
         has_penetrated[slave_node_num] = false;
+        pinfo->_contact_force.zero();
         ++unlocked_this_step[slave_node_num];
       }
       else if (distance > 0)
@@ -248,6 +241,7 @@ ContactMaster::computeQpResidual()
       mooseError("Invalid contact formulation");
       break;
     }
+    pinfo->_contact_force(_component) = -resid;
   }
   else if (_model == CM_COULOMB)
   {
@@ -304,6 +298,7 @@ ContactMaster::computeQpResidual()
       mooseError("Invalid contact formulation");
       break;
     }
+    pinfo->_contact_force(_component) = -resid;
   }
   else
   {
