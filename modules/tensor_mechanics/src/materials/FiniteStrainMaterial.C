@@ -24,9 +24,7 @@ FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name,
 void FiniteStrainMaterial::initQpStatefulProperties()
 {
   _elastic_strain[_qp].zero();
-  _elastic_strain_old[_qp].zero();
   _stress[_qp].zero();
-  _stress_old[_qp].zero();
 }
 
 void FiniteStrainMaterial::computeStrain()
