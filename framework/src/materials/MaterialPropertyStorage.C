@@ -339,7 +339,7 @@ MaterialPropertyStorage::addPropertyOld (const std::string & prop_name)
   unsigned int prop_id = addProperty(prop_name);
   _has_stateful_props = true;
 
-  if (! std::binary_search(_stateful_prop_id_to_prop_id.begin(), _stateful_prop_id_to_prop_id.end(), prop_id))
+  if (std::find(_stateful_prop_id_to_prop_id.begin(), _stateful_prop_id_to_prop_id.end(), prop_id) == _stateful_prop_id_to_prop_id.end())
     _stateful_prop_id_to_prop_id.push_back(prop_id);
 
   return prop_id;
@@ -352,12 +352,8 @@ MaterialPropertyStorage::addPropertyOlder (const std::string & prop_name)
   _has_stateful_props = true;
   _has_older_prop = true;
 
-  // The property ids are generated in order so they will be in order in the stateful prop array
-  if (! std::binary_search(_stateful_prop_id_to_prop_id.begin(), _stateful_prop_id_to_prop_id.end(), prop_id))
+  if (std::find(_stateful_prop_id_to_prop_id.begin(), _stateful_prop_id_to_prop_id.end(), prop_id) == _stateful_prop_id_to_prop_id.end())
     _stateful_prop_id_to_prop_id.push_back(prop_id);
-
-//  for (unsigned int i=0; i<_stateful_prop_id_to_prop_id.size(); ++i)
-//    std::cout << i << ": " << _stateful_prop_id_to_prop_id[i] << "\n";
 
   return prop_id;
 }

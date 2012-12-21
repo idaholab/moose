@@ -253,7 +253,7 @@ inline
 T &
 MooseArray<T>::operator[](const unsigned int i)
 {
-  mooseAssert(i < _size, "Access out of bounds in MooseArray!");
+  mooseAssert(i < _size, "Access out of bounds in MooseArray (i: " << i << " size: " << _size << ")");
 
   return _data[i];
 }
@@ -263,7 +263,7 @@ inline
 const T &
 MooseArray<T>::operator[](const unsigned int i) const
 {
-  mooseAssert(i < _size, "Access out of bounds in MooseArray!");
+  mooseAssert(i < _size, "Access out of bounds in MooseArray (i: " << i << " size: " << _size << ")");
 
   return _data[i];
 }

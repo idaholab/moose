@@ -144,22 +144,13 @@ protected:
   std::set<std::string> _depend_props;
   std::set<std::string> _supplied_props;
 
-// struct DeleteFunctor
-//   {
-//     void operator()(const std::pair<const unsigned int, MooseMooseArray<QpData *> > & p) const
-//     {
-//       //for(MooseArray<QpData *>::iterator i = p.second.begin(); i != p.second.end(); ++i)
-//       //  delete *i;
-//       std::cerr << p.first << " ";
-//       //MooseArray<const QpData *>::iterator i = p.second;
-//       std::cerr << p.second[0] << std::endl;
-//     }
-//  };
-
   enum QP_Data_Type { CURR, PREV };
 
   /**
-   * Initialize stateful properties at quadrature points
+   * Initialize stateful properties at quadrature points.  Note when using this function you only need to address
+   * the "current" material properties not the old ones directly, i.e. if you have a property named "_diffusivity"
+   * and an older property named "_diffusivity_old".  You only need to initialize diffusivity.  MOOSE will use
+   * copy that initial value to the old and older values as necesary.
    */
   virtual void initQpStatefulProperties();
 
