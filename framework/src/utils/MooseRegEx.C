@@ -12,5 +12,42 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "HashMap.h"
+#include "MooseRegEx.h"
+#include "MooseError.h"
 
+MooseRegEx::MooseRegEx() :
+    _re(NULL)
+{
+}
+
+MooseRegEx::~MooseRegEx()
+{
+  cleanUp();
+}
+
+void
+MooseRegEx::compile(const std::string & pattern)
+{
+  const TRexChar *error;
+  cleanUp();
+  _re = trex_compile(pattern.c_str(), &error);
+
+  if (!_re)
+    mooseError(std::string("Error compiling RegEx: ") + error);
+}
+
+bool
+MooseRegEx::search(const std::string & text)
+{
+  mooseAssert(_re, "regular expression is NULL");
+
+  return trex_search(_re, text.c_str(), NULL, NULL);
+}
+
+void
+MooseRegEx::cleanUp()
+{
+  if(_re)
+    trex_free(_re);
+  _re = NULL;
+}

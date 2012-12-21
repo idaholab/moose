@@ -1,19 +1,19 @@
 This directory is for 3rd party codes that are redistributed with MOOSE.  
 
-fparser/
-  /***************************************************************************\
-  |* Function Parser for C++ v4.2                                            *|
-  |*-------------------------------------------------------------------------*|
-  |* Copyright: Juha Nieminen, Joel Yliluoma                                 *|
-  |* License: lgpl v3 (http://www.gnu.org/copyleft/lesser.html)              *|
-  /***************************************************************************\
-
 mtwist-1.1/
   /***************************************************************************\
   |* Mersenne Twist Pseudorandom Number Generator Package                    *|
   |*-------------------------------------------------------------------------*|
   |* Copyright: Geoff Kuenning                                               *|
   |* License: lgpl v3 (http://www.gnu.org/copyleft/lesser.html)              *|
+  /***************************************************************************\
+
+trex/
+  /***************************************************************************\
+  |* T-Rex a tine regular expression library                                 *|
+  |*-------------------------------------------------------------------------*|
+  |* Copyright: Alberto Demichelis                                           *|
+  |* License: no specific license (freely alterable and distributable)       *|
   /***************************************************************************\
 
 exodiff/

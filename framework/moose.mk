@@ -3,6 +3,7 @@
 #
 moose_SRC_DIRS := $(MOOSE_DIR)/src
 moose_SRC_DIRS += $(MOOSE_DIR)/contrib/mtwist-1.1
+moose_SRC_DIRS += $(MOOSE_DIR)/contrib/trex
 
 moose_INC_DIRS := $(shell find $(MOOSE_DIR)/include -type d -not -path "*/.svn*")
 moose_INC_DIRS += $(shell find $(MOOSE_DIR)/contrib/*/include -type d -not -path "*/.svn*")
@@ -66,6 +67,7 @@ endif
 # include MOOSE dep files
 -include $(moose_deps)
 -include $(MOOSE_DIR)/contrib/mtwist-1.1/src/*.d
+-include $(MOOSE_DIR)/contrib/trex/src/*.d
 ifdef PRECOMPILED
 -include $(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch.d
 endif
