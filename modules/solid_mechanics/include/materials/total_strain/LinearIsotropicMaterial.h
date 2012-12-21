@@ -35,11 +35,6 @@ protected:
 
   virtual Real computeAlpha();
   
-  /**
-   * The current quadrature point.
-   */
-  unsigned int _qp;
-
   Real _youngs_modulus;
   Real _poissons_ratio;
 
