@@ -35,4 +35,5 @@ Elk::associateSyntax(Syntax & syntax)
   TensorMechanics::associateSyntax(syntax);
   Contact::associateSyntax(syntax);
   HeatConduction::associateSyntax(syntax);
+  ChemicalReactions::associateSyntax(syntax);
 }
