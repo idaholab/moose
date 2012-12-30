@@ -1,0 +1,9 @@
+Title: UserObjects
+ex20.i
+include/userobjects/BlockAverageValue.h
+src/userobjects/BlockAverageValue.C
+include/materials/BlockAverageDiffusionMaterial.h
+src/materials/BlockAverageDiffusionMaterial.C
+include/kernels/ExampleDiffusion.h
+src/kernels/ExampleDiffusion.C
+src/main.C
