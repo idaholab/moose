@@ -13,7 +13,7 @@
 #include "RealTensorValueAux.h"
 #include "RankFourAux.h"
 #include "TensorElasticEnergyAux.h"
-
+#include "VolumePostprocessor.h"
 void
 Elk::TensorMechanics::registerObjects()
 {
@@ -29,6 +29,7 @@ Elk::TensorMechanics::registerObjects()
   registerAux(RealTensorValueAux);
   registerAux(RankFourAux);
   registerAux(TensorElasticEnergyAux);
+  registerPostprocessor(VolumePostprocessor);
 }
 
 void
