@@ -27,16 +27,12 @@
 /**
  * MOOSE wrapped versions of useful libMesh macros (see libmesh_common.h)
  */
-#ifdef GRACEFUL_ERROR
-#define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; print_trace(); exit(1); } while(0)
-#else
-#define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; libmesh_error(); } while(0)
-#endif
+#define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; if (libMesh::n_processors() == 1) print_trace(); libmesh_here(); MPI_Abort(libMesh::COMM_WORLD,1); exit(1); } while(0)
 
 #ifdef NDEBUG
 #define mooseAssert(asserted, msg)
 #else
-#define mooseAssert(asserted, msg)  do { if (!(asserted)) { std::cerr << "\n\nAssertion `" #asserted "' failed\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << std::endl; libmesh_error(); } } while(0)
+#define mooseAssert(asserted, msg)  do { if (!(asserted)) { std::cerr << "\n\nAssertion `" #asserted "' failed\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << std::endl; if (libMesh::n_processors() == 1) print_trace(); libmesh_here(); MPI_Abort(libMesh::COMM_WORLD,1); } } while(0)
 #endif
 
 #define mooseWarning(msg) do { std::cerr << "\n\n*** Warning ***\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << "\n" << std::endl; } while(0)
