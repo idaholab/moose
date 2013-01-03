@@ -25,6 +25,9 @@ protected:
   void addMaterials();
   void addDiracKernels();
   void addVectors();
+
+  const std::string _penetration_var_name;
+  const std::string _qpoint_penetration_var_name;
 };
 
 #endif // THERMALCONTACTACTION_H

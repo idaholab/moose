@@ -8,7 +8,6 @@
 
 static unsigned int n = 0;                                  // numbering for gap heat transfer objects (we can have them on multiple interfaces)
 static const std::string GAP_VALUE_VAR_BASE_NAME = "gap_";
-static const std::string PENETRATION_VAR_NAME = "penetration";
 
 template<>
 InputParameters validParams<ThermalContactAction>()
@@ -37,7 +36,9 @@ InputParameters validParams<ThermalContactAction>()
 }
 
 ThermalContactAction::ThermalContactAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+    Action(name, params),
+    _penetration_var_name("penetration"),
+    _qpoint_penetration_var_name("qpoint_penetration")
 {
 }
 
@@ -89,7 +90,7 @@ ThermalContactAction::addBcs()
   if(!quadrature)
   {
     std::vector<AuxVariableName> vars(1);
-    vars[0] = PENETRATION_VAR_NAME;
+    vars[0] = _penetration_var_name;
     params.set<std::vector<AuxVariableName> >("gap_distance") = vars;
     vars[0] = getGapValueName();
     params.set<std::vector<AuxVariableName> >("gap_temp") = vars;
@@ -175,17 +176,20 @@ ThermalContactAction::addAuxVariables()
     action_params.set<std::string>("action") = "add_aux_variable";
     action_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
 
+    std::string penetration_var_name(_penetration_var_name);
+
     if(quadrature)
     {
       action_params.set<MooseEnum>("order") = "CONSTANT";
       action_params.set<MooseEnum>("family") = "MONOMIAL";
+      penetration_var_name = _qpoint_penetration_var_name;
     }
 
     // gap_value
     Action *action = ActionFactory::instance()->create("AddVariableAction", "AuxVariables/" + getGapValueName(), action_params);
     _awh.addActionBlock(action);
     // penetration
-    action = ActionFactory::instance()->create("AddVariableAction", "AuxVariables/" + PENETRATION_VAR_NAME, action_params);
+    action = ActionFactory::instance()->create("AddVariableAction", "AuxVariables/" + penetration_var_name, action_params);
     _awh.addActionBlock(action);
 
     action_params = ActionFactory::instance()->getValidParams("CopyNodalVarsAction");
@@ -195,7 +199,7 @@ ThermalContactAction::addAuxVariables()
     action = ActionFactory::instance()->create("CopyNodalVarsAction", "AuxVariables/" + getGapValueName(), action_params);
     _awh.addActionBlock(action);
     // penetration
-    action = ActionFactory::instance()->create("CopyNodalVarsAction", "AuxVariables/" + PENETRATION_VAR_NAME, action_params);
+    action = ActionFactory::instance()->create("CopyNodalVarsAction", "AuxVariables/" + penetration_var_name, action_params);
     _awh.addActionBlock(action);
   }
 }
@@ -256,7 +260,13 @@ ThermalContactAction::addAuxBcs()
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
     InputParameters & params = moose_object_action->getObjectParams();
-    params.set<AuxVariableName>("variable") = PENETRATION_VAR_NAME;
+
+    std::string penetration_var_name(_penetration_var_name);
+    if (getParam<bool>("quadrature"))
+    {
+      penetration_var_name = _qpoint_penetration_var_name;
+    }
+    params.set<AuxVariableName>("variable") = penetration_var_name;
     params.set<std::vector<BoundaryName> >("boundary") = bnds;
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
     if (isParamValid("tangential_tolerance"))
@@ -302,7 +312,7 @@ ThermalContactAction::addMaterials()
     {
       params.set<std::vector<AuxVariableName> >("gap_temp") = std::vector<AuxVariableName>(1, getGapValueName());
       std::vector<AuxVariableName> vars(1);
-      vars[0] = PENETRATION_VAR_NAME;
+      vars[0] = _penetration_var_name;
       params.set<std::vector<AuxVariableName> >("gap_distance") = vars;
     }
     else
