@@ -882,7 +882,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
     }
   }
 
-  std::vector<Node *> extreme_nodes(8);  // 2^LIBMESH_DIM
+  _extreme_nodes.resize(8);  // 2^LIBMESH_DIM
   // Now make sure that there are actual nodes at all of the extremes
   unsigned int extreme_matches = 0;
   std::vector<unsigned int> comp_map(3);
@@ -908,7 +908,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 
     if (coord_match == dim)  // Found a coordinate at one of the extremes
     {
-      extreme_nodes[comp_map[X]*4 + comp_map[Y]*2 + comp_map[Z]] = &node;
+      _extreme_nodes[comp_map[X]*4 + comp_map[Y]*2 + comp_map[Z]] = &node;
       ++extreme_matches;
     }
   }
@@ -933,14 +933,11 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
     _bounds[i][MAX] = 0;
   }
 
-  // detect the paired sidesets for use by the PBC functions
-  detectPairedSidesets(extreme_nodes);
-
   return true;
 }
 
 void
-MooseMesh::detectPairedSidesets(std::vector<Node *> &corner_nodes)
+MooseMesh::detectPairedSidesets()
 {
   /**
    * Autodetect sidesets:  We need to inspect all of the nodes on the bounding box of each dimension to find the common
@@ -962,7 +959,7 @@ MooseMesh::detectPairedSidesets(std::vector<Node *> &corner_nodes)
       for (unsigned int j=0; j<2; ++j)
         for (unsigned int k=0; k<z_dim; ++k)
         {
-          std::vector<BoundaryID> bounds_ids = _mesh.boundary_info->boundary_ids(corner_nodes[i*strides[curr_dim][0] + j*strides[curr_dim][1] + k*strides[curr_dim][2]]);
+          std::vector<BoundaryID> bounds_ids = _mesh.boundary_info->boundary_ids(_extreme_nodes[i*strides[curr_dim][0] + j*strides[curr_dim][1] + k*strides[curr_dim][2]]);
           for (unsigned int l=0; l<bounds_ids.size(); ++l)
             ++boundary_counts[bounds_ids[l]];
         }
@@ -979,7 +976,7 @@ MooseMesh::detectPairedSidesets(std::vector<Node *> &corner_nodes)
       }
 
       if (max_count < std::pow(2.0, (int)dim - 1))
-        mooseDoOnce(mooseWarning ("Couldn't auto-detect a paired boundary for use with periodic boundary conditions"));
+        mooseError("Couldn't auto-detect a paired boundary for use with periodic boundary conditions");
 
       if (i==0)
         paired_boundary.first = common_boundary;
@@ -1072,10 +1069,18 @@ MooseMesh::minPeriodicDistance(Point p, Point q) const
 }
 
 std::pair<BoundaryID, BoundaryID>
-MooseMesh::getPairedBoundaryMapping(unsigned int component) const
+MooseMesh::getPairedBoundaryMapping(unsigned int component)
 {
   mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
   mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
+
+  if (_paired_boundary.empty())
+  {
+    if (_regular_orthogonal_mesh)
+      detectPairedSidesets();
+    else
+      mooseError("Trying to retrieve automatic paired mapping for a mesh that is not regular and orthogonal");
+  }
 
   return _paired_boundary[component];
 }

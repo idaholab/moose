@@ -316,7 +316,7 @@ public:
    * @param component - An integer representing the desired component (dimension)
    * @return std::pair - The matching boundary pairs for the passed component
    */
-  std::pair<BoundaryID, BoundaryID> getPairedBoundaryMapping(unsigned int component) const;
+  std::pair<BoundaryID, BoundaryID> getPairedBoundaryMapping(unsigned int component);
 
   /**
    * Create the refinement and coarsening maps necessary for projection of stateful material properties
@@ -461,6 +461,9 @@ private:
   /// A convience vector used to hold values in each dimension representing half of the range
   RealVectorValue _half_range;
 
+  /// A vector containing the nodes at the corners of a regular orthogonal mesh
+  std::vector<Node *> _extreme_nodes;
+
   /**
    * This routine determines whether the Mesh is a regular orthogonal mesh (i.e. square in 2D, cubic in 3D).
    * If it is, then we can use a number of convience functions when periodic boundary conditions
@@ -474,9 +477,8 @@ private:
   /**
    * This routine detects paired sidesets of a regular orthogonal mesh (.i.e. parallel sidesets "across" from one and other).
    * The _paired_boundary datastructure is populated with this information.
-   * @param corner_nodes: A vector of the corner nodes of the given mesh.  Should be 2^dim in size.
    */
-  void detectPairedSidesets(std::vector<Node *> &corner_nodes);
+  void detectPairedSidesets();
 
   /**
    * Build the refinement map for a given element type.  This will tell you what quadrature points
