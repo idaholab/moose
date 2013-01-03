@@ -34,24 +34,10 @@
     family = MONOMIAL
   [../]
 
-  [./penetration]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
 [] # AuxVariables
 
 [SolidMechanics]
   [./solid]
-  [../]
-[]
-
-[AuxBCs]
-  [./penetration]
-    type = PenetrationAux
-    variable = penetration
-    boundary = 10
-    paired_boundary = 20
   [../]
 []
 

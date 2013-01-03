@@ -22,7 +22,7 @@ InputParameters validParams<GapHeatTransfer>()
   params.addParam<Real>("max_gap", 1.0e6, "A maximum gap size");
 
   // Quadrature based
-  params.addParam<bool>("quadrature", false, "Whether or not to do Quadrature point based gap heat transfer.  If this is true then gap_distance and gap_temp shoul NOT be provided (and will be ignored) however paired_boundary IS then required.");
+  params.addParam<bool>("quadrature", false, "Whether or not to do Quadrature point based gap heat transfer.  If this is true then gap_distance and gap_temp should NOT be provided (and will be ignored) however paired_boundary IS then required.");
   params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
@@ -38,7 +38,7 @@ GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters param
    :IntegratedBC(name, parameters),
    _quadrature(getParam<bool>("quadrature")),
    _slave_flux(!_quadrature ? &_sys.getVector("slave_flux") : NULL),
-    _gap_conductance(getMaterialProperty<Real>("gap_conductance"+getParam<std::string>("appended_property_name"))),
+   _gap_conductance(getMaterialProperty<Real>("gap_conductance"+getParam<std::string>("appended_property_name"))),
    _gap_conductance_dT(getMaterialProperty<Real>("gap_conductance"+getParam<std::string>("appended_property_name")+"_dT")),
    _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap")),

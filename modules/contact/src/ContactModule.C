@@ -6,6 +6,8 @@
 // contact
 #include "ContactAction.h"
 #include "ContactMaster.h"
+#include "ContactPenetrationAuxAction.h"
+#include "ContactPenetrationVarAction.h"
 #include "SlaveConstraint.h"
 #include "OneDContactConstraint.h"
 #include "MultiDContactConstraint.h"
@@ -28,6 +30,10 @@ void
 Elk::Contact::associateSyntax(Syntax & syntax)
 {
   syntax.registerActionSyntax("ContactAction", "Contact/*");
+  syntax.registerActionSyntax("ContactPenetrationAuxAction", "Contact/*");
+  syntax.registerActionSyntax("ContactPenetrationVarAction", "Contact/*");
 
   registerAction(ContactAction, "add_dg_kernel");
+  registerAction(ContactPenetrationAuxAction, "add_aux_bc");
+  registerAction(ContactPenetrationVarAction, "add_aux_variable");
 }

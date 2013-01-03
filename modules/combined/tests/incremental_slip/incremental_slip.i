@@ -69,10 +69,6 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  [./penetration]
-    order = FIRST
-    family = LAGRANGE
-  [../]
 
 [] # AuxVariables
 
@@ -103,12 +99,6 @@
     type = PenetrationAux
     variable = inc_slip_z
     quantity = incremental_slip_z
-    boundary = 3
-    paired_boundary = 2
-  [../]
-  [./penetration]
-    type = PenetrationAux
-    variable = penetration
     boundary = 3
     paired_boundary = 2
   [../]

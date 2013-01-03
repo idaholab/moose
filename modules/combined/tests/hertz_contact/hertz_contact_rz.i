@@ -101,9 +101,6 @@
     family = MONOMIAL
   [../]
 
-  [./penetration]
-  [../]
-
 [] # AuxVariables
 
 [SolidMechanics]
@@ -189,15 +186,6 @@
   [../]
 
 [] # BCs
-
-[AuxBCs]
-  [./penetration]
-    type = PenetrationAux
-    variable = penetration
-    boundary = 100
-    paired_boundary = 1000
-  [../]
-[]
 
 [Contact]
   [./dummy_name]

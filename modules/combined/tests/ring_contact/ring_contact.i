@@ -35,27 +35,11 @@
   [../]
 []
 
-[AuxVariables]
-
-  [./penetration]
-  [../]
-
-[] # AuxVariables
-
 [SolidMechanics]
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-  [../]
-[]
-
-[AuxBCs]
-  [./penetration]
-    type = PenetrationAux
-    variable = penetration
-    boundary = 2
-    paired_boundary = 3
   [../]
 []
 
