@@ -61,5 +61,4 @@ ContactPenetrationAuxAction::act()
                                       name.str(),
                                       params);
   }
-  std::cout << "JDH DEBUG: " << _slave << ", " << _master << ", " << _order << std::endl;
 }

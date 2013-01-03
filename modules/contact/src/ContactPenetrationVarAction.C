@@ -33,5 +33,4 @@ ContactPenetrationVarAction::act()
                            FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                                   Utility::string_to_enum<FEFamily>("LAGRANGE")));
 
-  std::cout << "JDH DEBUG2: " << getParam<MooseEnum>("order") << std::endl;
 }
