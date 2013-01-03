@@ -3,3 +3,4 @@ ex02.i
 include/kernels/Convection.h
 src/kernels/Convection.C
 src/main.C
+ex02_oversample.i
