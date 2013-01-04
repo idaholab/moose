@@ -149,7 +149,7 @@ Assembly::getFEFaceNeighbor(FEType type)
   for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
   {
     if (!_fe_neighbor[dim][type])
-      _fe_neighbor[dim][type] = FEBase::build(_mesh_dimension, type).release();
+      _fe_neighbor[dim][type] = FEBase::build(dim, type).release();
   }
 
   return _current_fe_neighbor[type];
@@ -504,6 +504,44 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
   setNeighborQRule(neighbor_rule, neighbor_dim);
 
   _current_neighbor_elem = neighbor;
+
+  // Calculate the volume of the neighbor
+
+  FEType fe_type (neighbor->default_order() , LAGRANGE);
+  AutoPtr<FEBase> fe (FEBase::build(neighbor->dim(), fe_type));
+
+  const std::vector<Real> & JxW = fe->get_JxW();
+  const std::vector<Point> & q_points = fe->get_xyz();
+
+  // The default quadrature rule should integrate the mass matrix,
+  // thus it should be plenty to compute the area
+  QGauss qrule (neighbor->dim(), fe_type.default_quadrature_order());
+  fe->attach_quadrature_rule(&qrule);
+  fe->reinit(neighbor);
+
+  // set the coord transformation
+  MooseArray<Real> coord;
+  coord.resize(qrule.n_points());
+  switch (_coord_type) // coord type should be the same for the neighbor
+  {
+  case Moose::COORD_XYZ:
+    for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+      coord[qp] = 1.;
+    break;
+
+  case Moose::COORD_RZ:
+    for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+      coord[qp] = 2 * M_PI * q_points[qp](0);
+    break;
+
+  default:
+    mooseError("Unknown coordinate system");
+    break;
+  }
+
+  _current_neighbor_volume = 0.;
+  for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+    _current_neighbor_volume += JxW[qp] * coord[qp];
 }
 
 void

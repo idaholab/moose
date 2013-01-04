@@ -99,13 +99,23 @@ protected:
   unsigned int _dim;
 
   const Elem * & _current_elem;
+
+  /// The volume (or length) of the current element
+  const Real & _current_elem_volume;
+
   /// The neighboring element
   const Elem * & _neighbor_elem;
+
+  /// The volume (or length) of the current neighbor
+  const Real & _neighbor_elem_volume;
 
   /// Current side
   unsigned int & _current_side;
   /// Current side element
   const Elem * & _current_side_elem;
+
+  /// The volume (or length) of the current side
+  const Real & _current_side_volume;
 
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;

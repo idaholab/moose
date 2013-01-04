@@ -58,10 +58,14 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     _dim(_mesh.dimension()),
 
     _current_elem(_assembly.elem()),
+    _current_elem_volume(_subproblem.elemVolume(_tid)),
+
     _neighbor_elem(_assembly.neighbor()),
+    _neighbor_elem_volume(_subproblem.neighborVolume(_tid)),
 
     _current_side(_assembly.side()),
     _current_side_elem(_assembly.sideElem()),
+    _current_side_volume(_subproblem.sideElemVolume(_tid)),
 
     _coord_sys(_subproblem.coordSystem(_tid)),
     _q_point(_subproblem.pointsFace(_tid)),

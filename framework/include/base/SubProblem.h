@@ -112,6 +112,7 @@ public:
   virtual const MooseArray<Point> & physicalPoints(THREAD_ID tid) = 0;
   virtual const MooseArray<Real> & JxW(THREAD_ID tid) = 0;
   virtual const Real & elemVolume(THREAD_ID tid) = 0;
+  virtual const Real & neighborVolume(THREAD_ID tid) = 0;
   virtual const MooseArray<Real> & coords(THREAD_ID tid) = 0;
   virtual QBase * & qRuleFace(THREAD_ID tid) = 0;
   virtual const MooseArray<Point> & pointsFace(THREAD_ID tid) = 0;

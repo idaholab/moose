@@ -168,6 +168,7 @@ public:
   virtual const MooseArray<Point> & physicalPoints(THREAD_ID tid) { return _assembly[tid]->physicalPoints(); }
   virtual const MooseArray<Real> & JxW(THREAD_ID tid) { return _assembly[tid]->JxW(); }
   virtual const Real & elemVolume(THREAD_ID tid) { return _assembly[tid]->elemVolume(); }
+  virtual const Real & neighborVolume(THREAD_ID tid) { return _assembly[tid]->neighborVolume(); }
   virtual const MooseArray<Real> & coords(THREAD_ID tid) { return _assembly[tid]->coordTransformation(); }
   virtual QBase * & qRuleFace(THREAD_ID tid) { return _assembly[tid]->qRuleFace(); }
   virtual const MooseArray<Point> & pointsFace(THREAD_ID tid) { return _assembly[tid]->qPointsFace(); }

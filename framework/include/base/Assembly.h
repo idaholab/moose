@@ -168,6 +168,12 @@ public:
   const Elem * & neighbor() { return _current_neighbor_elem; }
 
   /**
+   * Returns the reference to the current neighbor volume
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  const Real & neighborVolume() { return _current_neighbor_volume; }
+
+  /**
    * Returns the reference to the current quadrature being used on a current neighbor
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -515,6 +521,8 @@ protected:
   Real _current_side_volume;
   /// The current neighbor "element"
   const Elem * _current_neighbor_elem;
+  /// Volume of the current neighbor
+  Real _current_neighbor_volume;
   /// The current node we are working with
   const Node * _current_node;
   /// The current neighboring node we are working with
