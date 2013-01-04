@@ -49,7 +49,7 @@ public:
   virtual void threadJoin(const UserObject & y);
   virtual void finalize();
   virtual Real getValue();
-  
+
   // Get the bubble map
   Real getNodeValue(unsigned int node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
 

@@ -148,7 +148,7 @@ NodalFloodCount::getNodeValue(unsigned int node_id, unsigned int var_idx, bool s
   if (show_var_coloring)
   {
     std::map<unsigned int, int>::const_iterator node_it = _var_index_maps[var_idx].find(node_id);
-    
+
     if (node_it != _var_index_maps[var_idx].end())
       return node_it->second;
     else
@@ -323,53 +323,42 @@ NodalFloodCount::mergeSets()
 {
   Moose::perf_log.push("mergeSets()","NodalFloodCount");
   std::set<unsigned int> set_union;
+  std::insert_iterator<std::set<unsigned int> > set_union_inserter(set_union, set_union.begin());
 
-  /**
-   * This loop will continue as long as sets of nodes are merged
-   * creating "new" sets.  There may be other ways to optimize this loop
-   * but it should not be a bottleneck in practice.
-   */
   Moose::perf_log.push("mergeSets()::set_unions","NodalFloodCount");
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
-    bool set_merged;
-    do
+    std::list<BubbleData>::iterator end = _bubble_sets[map_num].end();
+    for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != end; ++it1)
     {
-      unsigned int merge_throwaway = 0;
-      unsigned int merge_keep = 0;
-      set_merged = false;
-      std::list<BubbleData>::iterator end = _bubble_sets[map_num].end();
-      for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != end; ++it1)
+      std::list<BubbleData>::iterator it2 = it1;
+      while (it2 != end)
       {
-	std::list<BubbleData>::iterator it2 = it1;
-	++it2; // Don't compare this set with itself - advance the iterator to the next set
-	while (it2 != end)
-	{
-	  set_union.clear();
-	  std::set_union(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end(),
-			 std::inserter(set_union, set_union.end()));
+        if (it1 == it2 ||                       // Don't compare this set with itself
+            it1->_var_idx != it2->_var_idx)     // and don't try to merge bubbles with different variable indices.
+        {
+          ++it2;
+          continue;
+        }
 
-	  if (set_union.size() < it1->_nodes.size() + it2->_nodes.size())
-	  {
-	    // Merge these two sets and remove the duplicate set
-	    it1->_nodes = set_union;
-	    _bubble_sets[map_num].erase(it2++);
-	    set_merged = true;
-            ++merge_keep;
-	  }
-	  else
-          {
-	    ++it2;
-            ++merge_throwaway;
-          }
-	}
+        set_union.clear();
+        std::set_union(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end(), set_union_inserter);
+
+        if (set_union.size() < it1->_nodes.size() + it2->_nodes.size())
+        {
+          // Merge these two sets and remove the duplicate set
+          it1->_nodes = set_union;
+          _bubble_sets[map_num].erase(it2);
+
+          it2 = _bubble_sets[map_num].begin();  // We have to loop over the earlier sets now that the current set has changed!
+        }
+        else
+          ++it2;
       }
-      std::cout << "\nMerge Throwaway: " << merge_throwaway
-                << "\nMerge Keep: " << merge_keep << "\n";
-    } while (set_merged);
+    }
   }
   Moose::perf_log.pop("mergeSets()::set_unions","NodalFloodCount");
-  
+
   // This variable is only relevant in single map mode
   _region_to_var_idx.resize(_bubble_sets[0].size());
 
@@ -397,7 +386,7 @@ NodalFloodCount::mergeSets()
     _region_counts[map_num] = counter-1;
   }
   Moose::perf_log.pop("mergeSets()::updatemap","NodalFloodCount");
-  
+
   Moose::perf_log.pop("mergeSets()","NodalFloodCount");
 }
 
