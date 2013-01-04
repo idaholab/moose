@@ -23,7 +23,7 @@ public:
   virtual void finalize();
 
   // Get the bubble map
-  Real getNodeValue(unsigned int node_id, unsigned int var_idx=0) const;
+  Real getNodeValue(unsigned int node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
 
 protected:
   enum STATUS
