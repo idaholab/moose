@@ -35,8 +35,10 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     MaterialPropertyInterface(parameters),
     _current_elem(_assembly.elem()),
+    _current_elem_volume(_subproblem.elemVolume(_tid)),
     _current_side(_assembly.side()),
     _current_side_elem(_assembly.sideElem()),
+    _current_side_volume(_subproblem.sideElemVolume(_tid)),
 
     _normals(_var.normals()),
 
