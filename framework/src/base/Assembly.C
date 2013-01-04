@@ -653,6 +653,27 @@ Assembly::prepare()
 }
 
 void
+Assembly::prepareVariable(MooseVariable * var)
+{
+  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
+  {
+    unsigned int vi = (*it).first;
+    unsigned int vj = (*it).second;
+
+    if(vi == var->number() || vj == var->number())
+    {
+      MooseVariable & ivar = _sys.getVariable(_tid, vi);
+      MooseVariable & jvar = _sys.getVariable(_tid, vj);
+
+      jacobianBlock(vi,vj).resize(ivar.dofIndices().size(), jvar.dofIndices().size());
+    }
+  }
+
+  _sub_Re[var->number()].resize(var->dofIndices().size());
+  _sub_Re[var->number()].zero();
+}
+
+void
 Assembly::prepareNeighbor()
 {
   for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)

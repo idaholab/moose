@@ -281,6 +281,13 @@ public:
   void useFECache(bool fe_cache) { _should_use_fe_cache = fe_cache; }
 
   void prepare();
+
+  /**
+   * Used for preparing the dense residual and jacobian blocks for one particular variable.
+   *
+   * @param var The variable that needs to have it's datastructures prepared
+   */
+  void prepareVariable(MooseVariable * var);
   void prepareNeighbor();
   void prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices);
   void prepareScalar();

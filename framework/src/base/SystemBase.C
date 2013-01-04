@@ -196,12 +196,21 @@ SystemBase::prepareFace(THREAD_ID tid)
   {
     const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
 
+    std::vector<MooseVariable *> newly_prepared_vars;
+
     for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
     {
       MooseVariable *var = *it;
-      if(!active_elemental_moose_variables.count(var)) // If it wasnt in the active list we need to prepare it
+      if(&var->sys() == this && !active_elemental_moose_variables.count(var)) // If it wasnt in the active list we need to prepare it
+      {
         var->prepare();
+        newly_prepared_vars.push_back(var);
+      }
     }
+
+    // Make sure to resize the residual and jacobian datastructures for all the new variables
+    for(unsigned int i=0; i<newly_prepared_vars.size(); i++)
+      _subproblem.assembly(tid).prepareVariable(newly_prepared_vars[i]);
   }
 }
 

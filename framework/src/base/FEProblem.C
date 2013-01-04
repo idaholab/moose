@@ -2192,6 +2192,36 @@ FEProblem::getScalarVariable(THREAD_ID tid, const std::string & var_name)
 }
 
 void
+FEProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid)
+{
+  SubProblem::setActiveElementalMooseVariables(moose_vars, tid);
+
+  if (_displaced_problem)
+    _displaced_problem->setActiveElementalMooseVariables(moose_vars, tid);
+}
+
+const std::set<MooseVariable *> &
+FEProblem::getActiveElementalMooseVariables(THREAD_ID tid)
+{
+  return SubProblem::getActiveElementalMooseVariables(tid);
+}
+
+bool
+FEProblem::hasActiveElementalMooseVariables(THREAD_ID tid)
+{
+  return SubProblem::hasActiveElementalMooseVariables(tid);
+}
+
+void
+FEProblem::clearActiveElementalMooseVariables(THREAD_ID tid)
+{
+  SubProblem::clearActiveElementalMooseVariables(tid);
+
+  if (_displaced_problem)
+    _displaced_problem->clearActiveElementalMooseVariables(tid);
+}
+
+void
 FEProblem::createQRules(QuadratureType type, Order order)
 {
   if (order == INVALID_ORDER)

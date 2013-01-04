@@ -76,21 +76,21 @@ public:
    *
    * @param tid The thread id
    */
-  void setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid);
+  virtual void setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid);
 
   /**
    * Get the MOOSE variables to be reinited on each element.
    *
    * @param tid The thread id
    */
-  const std::set<MooseVariable *> & getActiveElementalMooseVariables(THREAD_ID tid);
+  virtual const std::set<MooseVariable *> & getActiveElementalMooseVariables(THREAD_ID tid);
 
   /**
    * Whether or not a list of active elemental moose variables has been set.
    *
    * @return True if there has been a list of active elemental moose variables set, False otherwise
    */
-  bool hasActiveElementalMooseVariables(THREAD_ID tid);
+  virtual bool hasActiveElementalMooseVariables(THREAD_ID tid);
 
   /**
    * Clear the active elmental MooseVariable.  If there are no active variables then they will all be reinited.
@@ -98,7 +98,7 @@ public:
    *
    * @param tid The thread id
    */
-  void clearActiveElementalMooseVariables(THREAD_ID tid);
+  virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
 
   virtual Assembly & assembly(THREAD_ID tid) = 0;
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;

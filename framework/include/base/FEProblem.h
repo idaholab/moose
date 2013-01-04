@@ -129,6 +129,36 @@ public:
   virtual bool hasScalarVariable(const std::string & var_name);
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name);
 
+  /**
+   * Set the MOOSE variables to be reinited on each element.
+   * @param moose_vars A set of variables that need to be reinited each time reinit() is called.
+   *
+   * @param tid The thread id
+   */
+  virtual void setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid);
+
+  /**
+   * Get the MOOSE variables to be reinited on each element.
+   *
+   * @param tid The thread id
+   */
+  virtual const std::set<MooseVariable *> & getActiveElementalMooseVariables(THREAD_ID tid);
+
+  /**
+   * Whether or not a list of active elemental moose variables has been set.
+   *
+   * @return True if there has been a list of active elemental moose variables set, False otherwise
+   */
+  virtual bool hasActiveElementalMooseVariables(THREAD_ID tid);
+
+  /**
+   * Clear the active elmental MooseVariable.  If there are no active variables then they will all be reinited.
+   * Call this after finishing the computation that was using a restricted set of MooseVariables
+   *
+   * @param tid The thread id
+   */
+  virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
+
   virtual void createQRules(QuadratureType type, Order order);
   virtual Order getQuadratureOrder() { return _quadrature_order; }
   virtual Assembly & assembly(THREAD_ID tid) { return *_assembly[tid]; }
