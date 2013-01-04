@@ -1191,10 +1191,6 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar
   Real scaling_factor = _sys.getVariable(_tid, ivar).scalingFactor();
   if (scaling_factor != 1.0)
   {
-    _tmp_Ke = kee;
-    _tmp_Ke *= scaling_factor;
-    jacobian.add_matrix(_tmp_Ke, di);
-
     _tmp_Ke = ken;
     _tmp_Ke *= scaling_factor;
     jacobian.add_matrix(_tmp_Ke, di, dn);
@@ -1209,7 +1205,6 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar
   }
   else
   {
-    jacobian.add_matrix(kee, di);
     jacobian.add_matrix(ken, di, dn);
     jacobian.add_matrix(kne, dn, di);
     jacobian.add_matrix(knn, dn);

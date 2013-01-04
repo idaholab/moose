@@ -1591,8 +1591,10 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
               std::vector<IntegratedBC *> bcs = _bcs[tid].activeIntegrated(bnd_id);
               if (bcs.size() > 0)
               {
+                _fe_problem.prepareFace(elem, tid);
                 _fe_problem.reinitElemFace(elem, side, bnd_id, tid);
                 _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, tid);
+                _fe_problem.reinitMaterialsBoundary(bnd_id, tid);
 
                 for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
                 {
@@ -1625,6 +1627,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
               std::vector<DGKernel *> dgks = _dg_kernels[tid].active();
               if (dgks.size() > 0)
               {
+                _fe_problem.prepareFace(elem, tid);
                 _fe_problem.reinitNeighbor(elem, side, tid);
 
                 _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, tid);
@@ -1635,6 +1638,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
                   DGKernel * dg = *it;
                   if(dg->variable().number() == ivar)
                   {
+                    dg->subProblem().prepareFaceShapes(jvar, tid);
                     dg->subProblem().prepareNeighborShapes(jvar, tid);
                     dg->computeOffDiagJacobian(jvar);
                   }

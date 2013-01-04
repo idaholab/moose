@@ -165,19 +165,39 @@ DGKernel::computeOffDiagJacobian(unsigned int jvar)
   {
     for (_i=0; _i<_test.size(); _i++)
       for (_j=0; _j<_phi.size(); _j++)
-        Kee(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(Moose::ElementElement, jvar);
+      {
+        if(jvar == _var.number())
+          Kee(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian(Moose::ElementElement);
+        else
+          Kee(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(Moose::ElementElement, jvar);
+      }
 
     for (_i=0; _i<_test.size(); _i++)
       for (_j=0; _j<_phi_neighbor.size(); _j++)
-        Ken(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(Moose::ElementNeighbor, jvar);
+      {
+        if(jvar == _var.number())
+          Ken(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian(Moose::ElementNeighbor);
+        else
+          Ken(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(Moose::ElementNeighbor, jvar);
+      }
 
     for (_i=0; _i<_test_neighbor.size(); _i++)
       for (_j=0; _j<_phi.size(); _j++)
-        Kne(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(Moose::NeighborElement, jvar);
+      {
+        if(jvar == _var.number())
+          Kne(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian(Moose::NeighborElement);
+        else
+          Kne(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(Moose::NeighborElement, jvar);
+      }
 
     for (_i=0; _i<_test_neighbor.size(); _i++)
       for (_j=0; _j<_phi_neighbor.size(); _j++)
-        Knn(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(Moose::NeighborNeighbor, jvar);
+      {
+        if(jvar == _var.number())
+          Knn(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian(Moose::NeighborNeighbor);
+        else
+          Knn(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(Moose::NeighborNeighbor, jvar);
+      }
   }
 
   Moose::perf_log.pop("computeOffDiagJacobian()","DGKernel");

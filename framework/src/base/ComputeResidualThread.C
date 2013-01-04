@@ -183,6 +183,7 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
     std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
     if (dgks.size() > 0)
     {
+      _fe_problem.prepareFace(elem, _tid);
       _fe_problem.reinitNeighbor(elem, side, _tid);
 
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
