@@ -282,8 +282,9 @@ public:
    * This will try to reuse the preparation done on the element.
    *
    * @param tid ID of the thread
+   * @param resize_data Pass True if this system needs to resize residual and jacobian datastructures based on preparing this face
    */
-  virtual void prepareFace(THREAD_ID tid);
+  virtual void prepareFace(THREAD_ID tid, bool resize_data);
 
   /**
    * Prepare the system for use

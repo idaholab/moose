@@ -478,8 +478,8 @@ FEProblem::prepare(const Elem * elem, THREAD_ID tid)
 void
 FEProblem::prepareFace(const Elem * elem, THREAD_ID tid)
 {
-  _nl.prepareFace(tid);
-  _aux.prepareFace(tid);
+  _nl.prepareFace(tid, true);
+  _aux.prepareFace(tid, false);
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
     _displaced_problem->prepareFace(_displaced_mesh->elem(elem->id()), tid);

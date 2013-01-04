@@ -289,8 +289,8 @@ DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
 void
 DisplacedProblem::prepareFace(const Elem * /*elem*/, THREAD_ID tid)
 {
-  _displaced_nl.prepareFace(tid);
-  _displaced_aux.prepareFace(tid);
+  _displaced_nl.prepareFace(tid, true);
+  _displaced_aux.prepareFace(tid, false);
 }
 
 void

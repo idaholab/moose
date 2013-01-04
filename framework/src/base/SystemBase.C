@@ -190,7 +190,7 @@ SystemBase::prepare(THREAD_ID tid)
 }
 
 void
-SystemBase::prepareFace(THREAD_ID tid)
+SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
 {
   if(_subproblem.hasActiveElementalMooseVariables(tid)) // We only need to do something if the element prepare was restricted
   {
@@ -209,8 +209,9 @@ SystemBase::prepareFace(THREAD_ID tid)
     }
 
     // Make sure to resize the residual and jacobian datastructures for all the new variables
-    for(unsigned int i=0; i<newly_prepared_vars.size(); i++)
-      _subproblem.assembly(tid).prepareVariable(newly_prepared_vars[i]);
+    if(resize_data)
+      for(unsigned int i=0; i<newly_prepared_vars.size(); i++)
+        _subproblem.assembly(tid).prepareVariable(newly_prepared_vars[i]);
   }
 }
 
