@@ -43,17 +43,12 @@ GrainTracker::~GrainTracker()
 }
 
 Real
-GrainTracker::getNodeValue(unsigned int node_id, unsigned int var_idx) const
+GrainTracker::getNodeValue(unsigned int node_id, unsigned int var_idx, bool show_var_coloring) const
 {
-  mooseAssert(var_idx < _maps_size, "Index out of range");
-
   if (_t_step < _tracking_step)
     return 0;
 
-  if (_bubble_maps[var_idx].find(node_id) == _bubble_maps[var_idx].end())
-    return 0;
-  else
-    return _bubble_maps[var_idx].at(node_id);
+  return NodalFloodCount::getNodeValue(node_id, var_idx, show_var_coloring);
 }
 
 void
@@ -86,10 +81,11 @@ GrainTracker::threadJoin(const UserObject & y)
 void
 GrainTracker::finalize()
 {
+  Moose::perf_log.push("finalize()","GrainTracker");
  // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
-
+  
   // Exchange data in parallel
   pack(_packed_data, false);                 // Make sure we delay packing of periodic neighbor information
   Parallel::allgather(_packed_data, false);
@@ -98,18 +94,25 @@ GrainTracker::finalize()
 
   _packed_data.clear();
 
+  Moose::perf_log.push("buildboxs()","GrainTracker");
   buildBoundingBoxes();                      // Build bounding box information
+  Moose::perf_log.pop("buildboxs()","GrainTracker");
   pack(_packed_data, true);                  // Pack the data again but this time add periodic neighbor information
   Parallel::allgather(_packed_data, false);
   unpack(_packed_data);
   mergeSets();
 
+  Moose::perf_log.push("trackGrains()","GrainTracker");
   trackGrains();
+  Moose::perf_log.pop("trackGrains()","GrainTracker");
 
+  Moose::perf_log.push("remapGrains()","GrainTracker");
   if (_remap)
     remapGrains();
+  Moose::perf_log.pop("remapGrains()","GrainTracker");
 
   updateNodeInfo();
+  Moose::perf_log.pop("finalize()","GrainTracker");
 }
 
 void
