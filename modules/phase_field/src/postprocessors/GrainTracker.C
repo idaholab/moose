@@ -85,7 +85,7 @@ GrainTracker::finalize()
  // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
-  
+
   // Exchange data in parallel
   pack(_packed_data, false);                 // Make sure we delay packing of periodic neighbor information
   Parallel::allgather(_packed_data, false);
