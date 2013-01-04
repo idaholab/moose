@@ -51,7 +51,7 @@ public:
   virtual Real getValue();
   
   // Get the bubble map
-  Real getNodeValue(unsigned int node_id, unsigned int var_idx=0) const;
+  Real getNodeValue(unsigned int node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
 
 protected:
   class BubbleData
@@ -137,10 +137,17 @@ protected:
   std::vector<std::map<unsigned int, bool> > _nodes_visited;
 
   /**
-   * The bubble maps contain the raw flooded node information.  We have a vector of them so we can create one per variable
-   * if that level of detail is desired.
+   * The bubble maps contain the raw flooded node information and eventually the unique grain numvers.  We have a vector
+   * of them so we can create one per variable if that level of detail is desired.
    */
   std::vector<std::map<unsigned int, int> > _bubble_maps;
+
+  /**
+   * This map keeps track of which variables own which nodes.  We need a vector of them for multimap mode where
+   * multiple variables can own a single mode.  Note: This map is only populated when "show_var_coloring" is set
+   * to true.
+   */
+  std::vector<std::map<unsigned int, int> > _var_index_maps;
 
   /// The data structure used to marshall the data between processes and/or threads
   std::vector<unsigned int> _packed_data;

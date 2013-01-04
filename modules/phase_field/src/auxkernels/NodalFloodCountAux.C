@@ -20,19 +20,21 @@ InputParameters validParams<NodalFloodCountAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<UserObjectName>("bubble_object", "The NodalFloodCount UserObject to get values from.");
-  params.addParam<unsigned int>("map_index", "The index of which map to retrieve values from when using NodalFloodCount with multiple maps.");
+  params.addParam<unsigned int>("map_index", 0, "The index of which map to retrieve values from when using NodalFloodCount with multiple maps.");
+  params.addParam<bool>("show_var_coloring", false, "Display the variable index instead of the unique bubble id.");
   return params;
 }
 
 NodalFloodCountAux::NodalFloodCountAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
     _flood_counter(getUserObject<NodalFloodCount>("bubble_object")),
-    _var_idx(isParamValid("map_index") ? getParam<unsigned int>("map_index") : 0)
+    _var_idx(getParam<unsigned int>("map_index")),
+    _var_coloring(getParam<bool>("show_var_coloring"))
 {
 }
 
 Real
 NodalFloodCountAux::computeValue()
 {
-  return _flood_counter.getNodeValue(_current_node->id(), _var_idx);
+  return _flood_counter.getNodeValue(_current_node->id(), _var_idx, _var_coloring);
 }

@@ -38,7 +38,7 @@ InputParameters validParams<NodalFloodCount>()
   params.addParam<std::string>("elem_avg_value", "If supplied, will be used to find the scaled threshold of the bubble edges");
   params.addParam<bool>("use_single_map", true, "Determine whether information is tracked per coupled variable or consolidated into one (default: true)");
   params.addParam<bool>("use_global_numbering", false, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: false)");
-  params.addParam<bool>("show_var_coloring", false, "Show the variable index instead of 'region' information.");
+  params.addParam<bool>("enable_var_coloring", false, "Instruct the UO to populate the variable index map.");
   return params;
 }
 
@@ -49,7 +49,7 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _var_number(_var.number()),
     _single_map_mode(getParam<bool>("use_single_map")),
     _global_numbering(getParam<bool>("use_global_numbering")),
-    _var_index_mode(getParam<bool>("show_var_coloring")),
+    _var_index_mode(getParam<bool>("enable_var_coloring")),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
     _pbs(NULL),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero)
@@ -59,6 +59,9 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
   _bubble_sets.resize(_maps_size);
   _region_counts.resize(_maps_size);
   _region_offsets.resize(_maps_size);
+
+  if (_var_index_mode)
+    _var_index_maps.resize(_maps_size);
 
   // This map is always size to the number of variables
   _nodes_visited.resize(_vars.size());
@@ -77,6 +80,9 @@ NodalFloodCount::initialize()
     _bubble_maps[map_num].clear();
     _region_counts[map_num] = 0;
     _nodes_visited[map_num].clear();
+
+    if (_var_index_mode)
+      _var_index_maps[map_num].clear();
   }
   for (unsigned int var_num=0; var_num < _vars.size(); ++var_num)
     _nodes_visited[var_num].clear();
@@ -134,16 +140,29 @@ NodalFloodCount::getValue()
 }
 
 Real
-NodalFloodCount::getNodeValue(unsigned int node_id, unsigned int var_idx) const
+NodalFloodCount::getNodeValue(unsigned int node_id, unsigned int var_idx, bool show_var_coloring) const
 {
   mooseAssert(var_idx < _maps_size, "Index out of range");
+  mooseAssert(!show_var_coloring || _var_index_mode, "Cannot use \"show_var_coloring\" without \"enable_var_coloring\"");
 
-  std::map<unsigned int, int>::const_iterator node_it = _bubble_maps[var_idx].find(node_id);
-
-  if (node_it != _bubble_maps[var_idx].end())
-    return node_it->second + _region_offsets[var_idx];
+  if (show_var_coloring)
+  {
+    std::map<unsigned int, int>::const_iterator node_it = _var_index_maps[var_idx].find(node_id);
+    
+    if (node_it != _var_index_maps[var_idx].end())
+      return node_it->second;
+    else
+      return 0;
+  }
   else
-    return 0;
+  {
+    std::map<unsigned int, int>::const_iterator node_it = _bubble_maps[var_idx].find(node_id);
+
+    if (node_it != _bubble_maps[var_idx].end())
+      return node_it->second + _region_offsets[var_idx];
+    else
+      return 0;
+  }
 }
 
 void
@@ -302,6 +321,7 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
 void
 NodalFloodCount::mergeSets()
 {
+  Moose::perf_log.push("mergeSets()","NodalFloodCount");
   std::set<unsigned int> set_union;
 
   /**
@@ -309,11 +329,14 @@ NodalFloodCount::mergeSets()
    * creating "new" sets.  There may be other ways to optimize this loop
    * but it should not be a bottleneck in practice.
    */
+  Moose::perf_log.push("mergeSets()::set_unions","NodalFloodCount");
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
     bool set_merged;
     do
     {
+      unsigned int merge_throwaway = 0;
+      unsigned int merge_keep = 0;
       set_merged = false;
       std::list<BubbleData>::iterator end = _bubble_sets[map_num].end();
       for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != end; ++it1)
@@ -332,27 +355,39 @@ NodalFloodCount::mergeSets()
 	    it1->_nodes = set_union;
 	    _bubble_sets[map_num].erase(it2++);
 	    set_merged = true;
+            ++merge_keep;
 	  }
 	  else
+          {
 	    ++it2;
+            ++merge_throwaway;
+          }
 	}
       }
+      std::cout << "\nMerge Throwaway: " << merge_throwaway
+                << "\nMerge Keep: " << merge_keep << "\n";
     } while (set_merged);
   }
-
+  Moose::perf_log.pop("mergeSets()::set_unions","NodalFloodCount");
+  
   // This variable is only relevant in single map mode
   _region_to_var_idx.resize(_bubble_sets[0].size());
 
 
   // Finally update the original bubble map with field data from the merged sets
+  Moose::perf_log.push("mergeSets()::updatemap","NodalFloodCount");
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
     unsigned int counter = 1;
     for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != _bubble_sets[map_num].end(); ++it1)
     {
       for (std::set<unsigned int>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
-        // Color the map with either a unique region, or just the variable index
-	_bubble_maps[map_num][*it2] = _var_index_mode ? it1->_var_idx : counter;
+      {
+        // Color the bubble map with a unique region
+	_bubble_maps[map_num][*it2] = counter;
+        if (_var_index_mode)
+          _var_index_maps[map_num][*it2] = it1->_var_idx;
+      }
 
       if (_single_map_mode)
         _region_to_var_idx[counter-1] = it1->_var_idx;
@@ -361,6 +396,9 @@ NodalFloodCount::mergeSets()
 
     _region_counts[map_num] = counter-1;
   }
+  Moose::perf_log.pop("mergeSets()::updatemap","NodalFloodCount");
+  
+  Moose::perf_log.pop("mergeSets()","NodalFloodCount");
 }
 
 void
