@@ -90,7 +90,7 @@ protected:
   Real boundingRegionDistance(std::vector<BoundingBoxInfo *> & boxes1, std::vector<BoundingBoxInfo *> & boxes2) const;
   Point calculateCentroid(const std::vector<BoundingBoxInfo *> & box_ptrs) const;
 
-  const unsigned int _tracking_step;
+  const int _tracking_step;
   const Real _hull_buffer;
   std::vector<std::list<BoundingBoxInfo *> > _bounding_boxes;
   std::map<unsigned int, UniqueGrain *> _unique_grains;

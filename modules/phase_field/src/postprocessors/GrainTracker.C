@@ -14,7 +14,7 @@ InputParameters validParams<GrainTracker>()
   InputParameters params = validParams<NodalFloodCount>();
   params.addRequiredParam<int>("crys_num","number of grains");
   params.addRequiredParam<std::string>("var_name_base","base for variable names");
-  params.addParam<unsigned int>("tracking_step", 1, "The timestep for when we should start tracking grains");
+  params.addParam<int>("tracking_step", 1, "The timestep for when we should start tracking grains");
   params.addParam<Real>("convex_hull_buffer", 1.0, "The buffer around the convex hull used to determine when features intersect");
   params.addParam<bool>("remap_grains", true, "Indicates whether remapping should be done or not (default: true)");
   params.addParam<UserObjectName>("grain_remapper", "The GrainTracker UserObject to couple to for remap information (optional).");
@@ -26,7 +26,7 @@ InputParameters validParams<GrainTracker>()
 
 GrainTracker::GrainTracker(const std::string & name, InputParameters parameters) :
     NodalFloodCount(name, AddV(parameters, "variable")),
-    _tracking_step(getParam<unsigned int>("tracking_step")),
+    _tracking_step(getParam<int>("tracking_step")),
     _hull_buffer(getParam<Real>("convex_hull_buffer")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
     _remap(getParam<bool>("remap_grains")),
@@ -81,10 +81,10 @@ GrainTracker::threadJoin(const UserObject & y)
 void
 GrainTracker::finalize()
 {
-  Moose::perf_log.push("finalize()","GrainTracker");
  // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
+  Moose::perf_log.push("finalize()","GrainTracker");
 
   // Exchange data in parallel
   pack(_packed_data, false);                 // Make sure we delay packing of periodic neighbor information
@@ -138,7 +138,6 @@ GrainTracker::buildBoundingBoxes()
 //  // DEBUG
 
   MeshBase & mesh = _mesh._mesh;
-  unsigned int counter = 0;
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
     for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[map_num].begin(); it1 != _bubble_sets[map_num].end(); ++it1)
@@ -243,8 +242,6 @@ GrainTracker::trackGrains()
   // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
-
-  MeshBase & mesh = _mesh._mesh;
 
   unsigned int counter=1;
 
