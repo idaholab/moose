@@ -38,6 +38,43 @@ AddCoupledEqSpeciesKernelsAction::AddCoupledEqSpeciesKernelsAction(const std::st
 void
 AddCoupledEqSpeciesKernelsAction::act()
 {
+/**
+ * New Regex Code to be added
+ */
+/* 
+  MooseRegEx re_reaction("\\S+");
+  MooseRegEx re_term("([\\d\\.]*)(\\D.*)");
+
+  std::vector<std::string> reactions;
+  reactions.push_back("H+ + HCO3- = CO2(aq)");
+  reactions.push_back("HCO3- - H+ = CO3--");
+  reactions.push_back("Ca2+ + HPO4-- - H+ = CaPO4(aq)");
+  reactions.push_back("HPO4-- + Na+ = NaHPO4-");
+  reactions.push_back("H+ + HPO4-- = PO4---");
+  reactions.push_back("2OH- + Ca2+ = Ca(OH)2(aq)");
+  reactions.push_back("0.375Ca2+ + 0.375Cl- = CaCl2(aq)");
+  reactions.push_back("5Ca2+ + 3HPO4-- - 4H+ = Ca5(OH)(PO4)3(s)");
+  reactions.push_back("3Ca2+ + 2HPO4-- - 2H+= CaHPO4:2H2O(s)");
+
+  for (unsigned int r=0; r<reactions.size(); ++r)
+  {
+    std::cout << "Reaction " << r << ":\n";
+
+    std::vector<std::string> groups;
+    re_reaction.findall(reactions[r], groups);
+
+    for (unsigned int i=0; i<groups.size(); ++i)
+    {
+      std::vector<std::string> coefs;
+      re_term.search(groups[i], coefs);
+
+      for (unsigned int j=1; j<coefs.size(); ++j)
+        std::cout << "[" << j << "]:" <<  coefs[j] << "\n";
+      std::cout << "\n";
+    }
+  }
+*/
+
   std::vector<NonlinearVariableName> vars = getParam<std::vector<NonlinearVariableName> >("primary_species");
   std::vector<std::string> reactions = getParam<std::vector<std::string> >("eq_reactions");
   std::vector<Real> keq = getParam<std::vector<Real> >("eq_constants");
