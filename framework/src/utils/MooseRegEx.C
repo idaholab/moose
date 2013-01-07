@@ -20,6 +20,12 @@ MooseRegEx::MooseRegEx() :
 {
 }
 
+MooseRegEx::MooseRegEx(const std::string & pattern) :
+    _re(NULL)
+{
+  compile(pattern);
+}
+
 MooseRegEx::~MooseRegEx()
 {
   cleanUp();
@@ -37,11 +43,64 @@ MooseRegEx::compile(const std::string & pattern)
 }
 
 bool
-MooseRegEx::search(const std::string & text)
+MooseRegEx::search(const std::string & str) const
 {
-  mooseAssert(_re, "regular expression is NULL");
+  mooseAssert(_re, "Regular expression is NULL");
 
-  return trex_search(_re, text.c_str(), NULL, NULL);
+  return trex_search(_re, str.c_str(), NULL, NULL);
+}
+
+bool
+MooseRegEx::search(const std::string & str, std::vector<std::string> & groups) const
+{
+  mooseAssert(_re, "Regular expression is NULL");
+
+  groups.clear();
+
+  TRexBool result = trex_search(_re, str.c_str(), NULL, NULL);
+
+  if (result)
+  {
+    unsigned int count = trex_getsubexpcount(_re);
+    groups.resize(count);
+    TRexMatch match;
+
+    for (unsigned int i=0; i<count; ++i)
+    {
+      result = trex_getsubexp(_re, i, &match);
+      mooseAssert(result, "Error retrieving subexpression from TRex");
+
+      groups[i] = std::string(match.begin, match.len);
+    }
+  }
+  return result;
+}
+
+bool
+MooseRegEx::findall(const std::string & str, std::vector<std::string> & groups) const
+{
+  mooseAssert(_re, "Regular expression is NULL");
+
+  const TRexChar *in_begin = str.c_str();
+  const TRexChar *in_end = in_begin + str.length();
+
+  const TRexChar *out_begin, *out_end;
+  TRexBool result, first_result=false;
+
+  groups.clear();
+  do
+  {
+    result = trex_search(_re, in_begin, &out_begin, &out_end);
+    if (result)
+      first_result = true;
+
+    groups.push_back(std::string(out_begin, out_end-out_begin));
+
+    in_begin = out_end;
+  }
+  while (result && in_begin < in_end);
+
+  return first_result;
 }
 
 void
