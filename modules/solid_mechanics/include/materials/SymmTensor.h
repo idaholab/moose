@@ -5,6 +5,7 @@
 #include "MaterialProperty.h"
 #include <cmath>
 #include "libmesh.h"
+#include "point.h"
 
 class SymmTensor
 {
@@ -446,6 +447,13 @@ public:
     r_val._yz = _yz * t;
     r_val._zx = _zx * t;
     return r_val;
+  }
+
+  Point operator*(const Point & p) const
+  {
+    return Point(_xx*p(0) + _xy*p(1) + _zx*p(2),
+                 _xy*p(0) + _yy*p(1) + _yz*p(2),
+                 _zx*p(0) + _yz*p(1) + _zz*p(2));
   }
 
   SymmTensor operator-(const SymmTensor & t) const

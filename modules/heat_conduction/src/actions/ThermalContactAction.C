@@ -8,6 +8,7 @@
 
 static unsigned int n = 0;                                  // numbering for gap heat transfer objects (we can have them on multiple interfaces)
 static const std::string GAP_VALUE_VAR_BASE_NAME = "gap_";
+static const std::string GAP_K_VALUE_VAR_BASE_NAME = "gap_k_";
 
 template<>
 InputParameters validParams<ThermalContactAction>()
@@ -20,6 +21,8 @@ InputParameters validParams<ThermalContactAction>()
   params.addParam<std::string>("gap_type", "GapValueAux", "A string representing the Moose object that will be used for computing the gap size");
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
   params.addParam<Real>("gap_conductivity", 1.0, "The thermal conductivity of the gap material");
+  params.addParam<std::string>("conductivity_name", "thermal_conductivity", "The name of the MaterialProperty associated with conductivity "
+                               "(\"thermal_conductivity\" in the case of heat conduction)");
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
   params.addParam<NonlinearVariableName>("disp_x", "The x displacement");
@@ -46,6 +49,12 @@ std::string
 ThermalContactAction::getGapValueName() const
 {
   return GAP_VALUE_VAR_BASE_NAME + getParam<NonlinearVariableName>("variable");
+}
+
+std::string
+ThermalContactAction::getGapConductivityName() const
+{
+  return GAP_K_VALUE_VAR_BASE_NAME + getParam<NonlinearVariableName>("variable");
 }
 
 void
@@ -185,6 +194,22 @@ ThermalContactAction::addAuxVariables()
       penetration_var_name = _qpoint_penetration_var_name;
     }
 
+    if (getParam<std::string>("type") == "GapHeatTransferLWR")
+    {
+      // Need to add gap_k variable to hold the conductivity across the gap
+      InputParameters actionParams(action_params);
+
+      Action * action = ActionFactory::instance()->create("AddVariableAction", "AuxVariables/" + getGapConductivityName(), actionParams);
+      _awh.addActionBlock(action);
+
+      // Now add constant conductivity variable
+      actionParams.set<MooseEnum>("order") = "CONSTANT";
+      actionParams.set<MooseEnum>("family") = "MONOMIAL";
+
+      action = ActionFactory::instance()->create("AddVariableAction", "AuxVariables/conductivity_"+getParam<NonlinearVariableName>("variable"), actionParams);
+      _awh.addActionBlock(action);
+    }
+
     // gap_value
     Action *action = ActionFactory::instance()->create("AddVariableAction", "AuxVariables/" + getGapValueName(), action_params);
     _awh.addActionBlock(action);
@@ -201,6 +226,16 @@ ThermalContactAction::addAuxVariables()
     // penetration
     action = ActionFactory::instance()->create("CopyNodalVarsAction", "AuxVariables/" + penetration_var_name, action_params);
     _awh.addActionBlock(action);
+    if (getParam<std::string>("type") == "GapHeatTransferLWR")
+    {
+      // Need to add gap_k variable
+      action = ActionFactory::instance()->create("CopyNodalVarsAction", "AuxVariables/" + getGapConductivityName(), action_params);
+      _awh.addActionBlock(action);
+
+      action = ActionFactory::instance()->create("CopyNodalVarsAction", "AuxVariables/conductivity_"+getParam<NonlinearVariableName>("variable"), action_params);
+      _awh.addActionBlock(action);
+    }
+
   }
 }
 
@@ -239,8 +274,7 @@ ThermalContactAction::addAuxBcs()
     params.set<std::vector<BoundaryName> >("boundary") = bnds;
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
 
-    std::vector<VariableName> vars(1, getParam<NonlinearVariableName>("variable"));
-    params.set<std::vector<VariableName> >("paired_variable") = vars;
+    params.set<VariableName>("paired_variable") = getParam<NonlinearVariableName>("variable");
 
     params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
     if (isParamValid("tangential_tolerance"))
@@ -250,6 +284,31 @@ ThermalContactAction::addAuxBcs()
     params.set<bool>("warnings") = getParam<bool>("warnings");
     // add it to the warehouse
     _awh.addActionBlock(action);
+
+    if (getParam<bool>("quadrature"))
+    {
+      action_params.set<std::string>("type") = getParam<std::string>("gap_type");
+      Action *action = ActionFactory::instance()->create("AddBCAction", "AuxBCs/gap_value_" + Moose::stringify(n+10000), action_params);
+      MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+      mooseAssert (moose_object_action, "Dynamic Cast failed");
+
+      InputParameters & params = moose_object_action->getObjectParams();
+      params.set<AuxVariableName>("variable") = getGapValueName();
+      std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));
+      params.set<std::vector<BoundaryName> >("boundary") = bnds;
+      params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
+
+      params.set<VariableName>("paired_variable") = getParam<NonlinearVariableName>("variable");
+
+      params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+      if (isParamValid("tangential_tolerance"))
+      {
+        params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+      }
+      params.set<bool>("warnings") = getParam<bool>("warnings");
+      // add it to the warehouse
+      _awh.addActionBlock(action);
+    }
   }
 
   std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
@@ -277,6 +336,95 @@ ThermalContactAction::addAuxBcs()
     _awh.addActionBlock(action);
   }
 
+  if (getParam<std::string>("type") == "GapHeatTransferLWR")
+  {
+    // Need to add gap_k variable
+    action_params.set<std::string>("type") = getParam<std::string>("gap_type");
+    Action *action = ActionFactory::instance()->create("AddBCAction", "AuxBCs/gap_k_" + Moose::stringify(n), action_params);
+    MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+    mooseAssert (moose_object_action, "Dynamic Cast failed");
+
+    InputParameters & params = moose_object_action->getObjectParams();
+    params.set<AuxVariableName>("variable") = getGapConductivityName();
+    params.set<std::vector<BoundaryName> >("boundary") = bnds;
+    params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
+
+    params.set<VariableName>("paired_variable") = "conductivity_"+getParam<NonlinearVariableName>("variable");
+
+    params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+    if (isParamValid("tangential_tolerance"))
+    {
+      params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+    }
+
+    // For efficiency, run this at the beginning of each step...
+    params.set<MooseEnum>("execute_on") = "timestep_begin";
+
+    params.set<bool>("warnings") = getParam<bool>("warnings");
+    // add it to the warehouse
+    _awh.addActionBlock(action);
+
+
+    // Now for the other direction
+    action = ActionFactory::instance()->create("AddBCAction", "AuxBCs/gap_k_" + Moose::stringify(n+10000), action_params);
+    moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+    mooseAssert (moose_object_action, "Dynamic Cast failed");
+
+    {
+      InputParameters & params = moose_object_action->getObjectParams();
+      params.set<AuxVariableName>("variable") = getGapConductivityName();
+      std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));
+      params.set<std::vector<BoundaryName> >("boundary") = bnds;
+      params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
+
+      params.set<VariableName>("paired_variable") = "conductivity_"+getParam<NonlinearVariableName>("variable");
+
+      params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+      if (isParamValid("tangential_tolerance"))
+      {
+        params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+      }
+
+      // For efficiency, run this at the beginning of each step...
+      params.set<MooseEnum>("execute_on") = "timestep_begin";
+
+      params.set<bool>("warnings") = getParam<bool>("warnings");
+      // add it to the warehouse
+      _awh.addActionBlock(action);
+    }
+  }
+}
+
+void
+ThermalContactAction::addAuxKernels()
+{
+  /*
+  [./conductivity]
+    type = MaterialRealAux
+    variable = conductivity
+    property = thermal_conductivity
+  [../]
+  */
+
+  if (getParam<std::string>("type") == "GapHeatTransferLWR")
+  {
+    InputParameters action_params = ActionFactory::instance()->getValidParams("AddKernelAction");
+    action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
+    action_params.set<std::string>("action") = "add_aux_kernel";
+
+    action_params.set<std::string>("type") = "MaterialRealAux";
+    Action * action = ActionFactory::instance()->create("AddKernelAction", "AuxKernels/conductivity", action_params);
+    MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+    mooseAssert (moose_object_action, "Dynamic Cast failed");
+
+    InputParameters & params = moose_object_action->getObjectParams();
+    params.set<AuxVariableName>("variable") = "conductivity_"+getParam<NonlinearVariableName>("variable");
+    params.set<std::string>("property") = getParam<std::string>("conductivity_name");
+    // For efficiency, run this at the end of each step...
+    params.set<MooseEnum>("execute_on") = "timestep";
+    // add it to the warehouse
+    _awh.addActionBlock(action);
+  }
 }
 
 void
@@ -335,6 +483,12 @@ ThermalContactAction::addMaterials()
 
     params.set<std::string>("appended_property_name") = getParam<std::string>("appended_property_name");
 
+    if (getParam<std::string>("type") == "GapHeatTransferLWR")
+    {
+      std::vector<VariableName> v(1, getGapConductivityName());
+      params.set<std::vector<VariableName> >("gap_k") = v;
+    }
+
     // add it to the warehouse
     _awh.addActionBlock(action);
 
@@ -354,8 +508,6 @@ ThermalContactAction::addMaterials()
 
       std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));
       second_params.set<std::vector<BoundaryName> >("boundary") = bnds;
-
-      params.set<std::string>("appended_property_name") = getParam<std::string>("appended_property_name");
 
       // add it to the warehouse
       _awh.addActionBlock(second_action);
@@ -417,6 +569,7 @@ ThermalContactAction::act()
   addBcs();
   addAuxVariables();
   addAuxBcs();
+  addAuxKernels();
   addMaterials();
   if (getParam<std::string>("gap_type") != "NearestNodeValueAux")
   {

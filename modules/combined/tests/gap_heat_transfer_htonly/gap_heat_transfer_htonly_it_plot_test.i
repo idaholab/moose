@@ -51,8 +51,6 @@
 []
 
 [Variables]
-  active = 'temp'
-
   [./temp]
     order = FIRST
     family = LAGRANGE
@@ -61,8 +59,6 @@
 []
 
 [Kernels]
-  active = 'heat'
-
   [./heat]
     type = HeatConduction
     variable = temp
@@ -71,8 +67,6 @@
 
 
 [BCs]
-  active = 'temp_far_left temp_far_right'
-
   [./temp_far_left]
     type = FunctionPresetBC
     boundary = 1

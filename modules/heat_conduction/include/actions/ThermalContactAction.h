@@ -19,9 +19,11 @@ public:
 
 protected:
   std::string getGapValueName() const;
+  std::string getGapConductivityName() const;
   void addBcs();
   void addAuxVariables();
   void addAuxBcs();
+  void addAuxKernels();
   void addMaterials();
   void addDiracKernels();
   void addVectors();
