@@ -38,43 +38,73 @@ AddCoupledEqSpeciesKernelsAction::AddCoupledEqSpeciesKernelsAction(const std::st
 void
 AddCoupledEqSpeciesKernelsAction::act()
 {
-/**
- * New Regex Code to be added
- */
-/* 
-  MooseRegEx re_reaction("\\S+");
-  MooseRegEx re_term("([\\d\\.]*)(\\D.*)");
+/*
+  MooseRegEx re_reaction("\\s[\\d\\.]+(?:\\s|$)");   // A Decimal number with leading and trailing whitespace (or EOL)
+  MooseRegEx re_terms("\\S+");                       // Groups of characters that are not whitespace (terms and operators)
+  MooseRegEx re_coeff("[\\d\\.]*");                  // A Decimal number (used to peel-off a coefficient from a species
+  MooseRegEx re_species("[^\\d\\.].*");              // Not digits or "dots" (the remaining part of the term, minus the coefficent)
 
+  std::string input("H+ + HCO3- = CO2(aq)     1.2 HCO3- - H+ = CO3--  3.4 Ca2+ + HPO4-- - H+ = CaPO4(aq)  21.1 HPO4-- + Na+ = NaHPO4- 1.23 H+ + HPO4-- = PO4--- 3.1 2OH- + Ca2+ = Ca(OH)2(aq) 12.3 0.375Ca2+ + 0.375Cl- = CaCl2(aq) 8.7 5Ca2+ + 3HPO4-- - 4H+ = Ca5(OH)(PO4)3(s) 6.1 3Ca2+ + 2HPO4-- - 2H+ = CaHPO4:2H2O(s)  6.2");
+
+  std::vector<std::string> equal_coeffs;
   std::vector<std::string> reactions;
-  reactions.push_back("H+ + HCO3- = CO2(aq)");
-  reactions.push_back("HCO3- - H+ = CO3--");
-  reactions.push_back("Ca2+ + HPO4-- - H+ = CaPO4(aq)");
-  reactions.push_back("HPO4-- + Na+ = NaHPO4-");
-  reactions.push_back("H+ + HPO4-- = PO4---");
-  reactions.push_back("2OH- + Ca2+ = Ca(OH)2(aq)");
-  reactions.push_back("0.375Ca2+ + 0.375Cl- = CaCl2(aq)");
-  reactions.push_back("5Ca2+ + 3HPO4-- - 4H+ = Ca5(OH)(PO4)3(s)");
-  reactions.push_back("3Ca2+ + 2HPO4-- - 2H+= CaHPO4:2H2O(s)");
 
-  for (unsigned int r=0; r<reactions.size(); ++r)
+  // Save off the equalibrium coefficients
+  re_reaction.findall(input, equal_coeffs);
+
+  // Now save off the reaction equations themselves
+  re_reaction.split(input, reactions);
+
+  mooseAssert (equal_coeffs.size() == reactions.size(), "Parsing Error: Equalibrium coefficients and Reaction Equations are not equal in number");
+
+  // Now parse each reaction seperately
+  for (unsigned int i=0; i<reactions.size(); ++i)
   {
-    std::cout << "Reaction " << r << ":\n";
+    std::cout << "\n\nReaction:    " << reactions[i] << "\n"
+              << "Equalibrium: " << equal_coeffs[i] << "\n";
 
-    std::vector<std::string> groups;
-    re_reaction.findall(reactions[r], groups);
+    std::vector<std::string> terms;
+    // capture all of the terms
+    re_terms.findall(reactions[i], terms);
 
-    for (unsigned int i=0; i<groups.size(); ++i)
+    // operator_next is used to interleave the operands with the operators.
+    bool operator_next=false;
+    for (unsigned int j=0; j<terms.size(); ++j)
     {
-      std::vector<std::string> coefs;
-      re_term.search(groups[i], coefs);
+      // Find the operators
+      if (terms[j] == "+" || terms[j] == "=" || terms[j] == "-")
+      {
+        if (!operator_next)
+          mooseError("Error parsing Reaction Equation: Missing Operand!");
 
-      for (unsigned int j=1; j<coefs.size(); ++j)
-        std::cout << "[" << j << "]:" <<  coefs[j] << "\n";
+        std::cout << "Operator: " << terms[j] << "\n";
+      }
+      else
+      {
+        if (operator_next)
+          mooseError("Error parsing Reaction Equation: Missing Operator!");
+
+        std::vector<std::string> buffer;
+        // The remaining terms are operands
+        re_coeff.search(terms[j], buffer);
+
+        if (buffer.size() >= 1)
+          std::cout << "coeff  : " << buffer[0] << "\n";
+
+        re_species.search(terms[j], buffer);
+
+        if (buffer.size() >= 1)
+          std::cout << "species: " << buffer[0] << "\n";
+      }
+
+      operator_next = !operator_next;
+
       std::cout << "\n";
     }
   }
 */
 
+  
   std::vector<NonlinearVariableName> vars = getParam<std::vector<NonlinearVariableName> >("primary_species");
   std::vector<std::string> reactions = getParam<std::vector<std::string> >("eq_reactions");
   std::vector<Real> keq = getParam<std::vector<Real> >("eq_constants");
