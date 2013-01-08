@@ -20,6 +20,7 @@
 #include <list>
 #include <vector>
 #include <set>
+#include <iterator>
 
 #include "periodic_boundaries.h"
 //Forward Declarations
@@ -103,6 +104,26 @@ protected:
    * the proper global number for a bubble when using multimap mode
    */
   void updateRegionOffsets();
+
+  /**
+   * This method detects whether two sets intersect without building a result set.  It exits as soon as
+   * any intersection is detected.
+   */
+  template<class InputIterator>
+  inline bool setsIntersect(InputIterator first1, InputIterator last1, InputIterator first2, InputIterator last2) const
+  {
+    while (first1 != last1 && first2 != last2)
+    {
+      if (*first1 == *first2)
+        return true;
+
+      if (*first1 < *first2)
+        ++first1;
+      else if (*first1 > *first2)
+        ++first2;  
+    }
+    return false;
+  }
 
   /// The threshold above which neighboring nodes are flooding with adjacent markings
   Real _threshold;

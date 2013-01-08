@@ -341,12 +341,12 @@ NodalFloodCount::mergeSets()
           continue;
         }
 
-        set_union.clear();
-        std::set_union(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end(), set_union_inserter);
-
-        if (set_union.size() < it1->_nodes.size() + it2->_nodes.size())
+        if (setsIntersect(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end()))
         {
           // Merge these two sets and remove the duplicate set
+          set_union.clear();
+          std::set_union(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end(), set_union_inserter);
+          
           it1->_nodes = set_union;
           _bubble_sets[map_num].erase(it2);
 
