@@ -130,4 +130,3 @@ GapValueAux::computeValue()
   }
   return gap_value;
 }
-
