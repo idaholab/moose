@@ -74,10 +74,21 @@ public:
    */
   bool findall(const std::string & str, std::vector<std::string> & groups) const;
 
-protected:
+  /**
+   * This method will split the string using the active regular expression into "groups".
+   * Currently capturing parenthesis do not yield additional information when using this routine.
+   * @param str to apply the pattern against for searching
+   * @param groups A vector that will be overwritten with results
+   *       [0-n] each entry will contain the string between the matches if any are found.
+   * @return Boolean indicating whether or not the pattern was found
+   */
+  bool split(const std::string & str, std::vector<std::string> & groups) const;
 
+protected:
   /// This method clears memory used by the pattern, called from the destructor and compile
   void cleanUp();
+
+  bool findSplit(const std::string & str, std::vector<std::string> & matches, bool use_matches) const;
 
   /// The dynamic RegEx object
   TRex *_re;

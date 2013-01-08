@@ -79,6 +79,18 @@ MooseRegEx::search(const std::string & str, std::vector<std::string> & groups) c
 bool
 MooseRegEx::findall(const std::string & str, std::vector<std::string> & groups) const
 {
+  return findSplit(str, groups, true);
+}
+
+bool
+MooseRegEx::split(const std::string & str, std::vector<std::string> & groups) const
+{
+  return findSplit(str, groups, false);
+}
+
+bool
+MooseRegEx::findSplit(const std::string & str, std::vector<std::string> & groups, bool use_matches) const
+{
   mooseAssert(_re, "Regular expression is NULL");
 
   const TRexChar *in_begin = str.c_str();
@@ -91,10 +103,16 @@ MooseRegEx::findall(const std::string & str, std::vector<std::string> & groups) 
   do
   {
     result = trex_search(_re, in_begin, &out_begin, &out_end);
+
     if (result)
+    {
       first_result = true;
 
-    groups.push_back(std::string(out_begin, out_end-out_begin));
+      if (use_matches)
+        groups.push_back(std::string(out_begin, out_end-out_begin));
+      else if (out_begin-in_begin > 0)
+        groups.push_back(std::string(in_begin, out_begin-in_begin));
+    }
 
     in_begin = out_end;
   }
