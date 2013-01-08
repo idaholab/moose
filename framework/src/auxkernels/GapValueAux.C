@@ -23,11 +23,11 @@
 template<>
 InputParameters validParams<GapValueAux>()
 {
-  MooseEnum orders("FIRST, SECOND, THIRD, FORTH", "FIRST");
+  MooseEnum orders("FIRST, SECOND, THIRD, FOURTH", "FIRST");
 
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary on the other side of a gap.");
-  params.addRequiredCoupledVar("paired_variable", "The variable to get the value of.");
+  params.addRequiredParam<VariableName>("paired_variable", "The variable to get the value of.");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
@@ -35,22 +35,37 @@ InputParameters validParams<GapValueAux>()
   return params;
 }
 
+//
+// Look up the MooseVariable and index directly (not using the Coupleable
+// interface) to avoid an inappropriate error check.
+//
+MooseVariable &
+getVariable(InputParameters & params, const std::string & name)
+{
+  SubProblem & problem = *params.get<SubProblem*>("_subproblem");
+  if (!problem.hasVariable( name ))
+  {
+    mooseError("Unable to find variable " + name);
+  }
+  return problem.getVariable( params.get<THREAD_ID>("_tid"), name );
+}
+
 GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
     _penetration_locator(_nodal ?  getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))) : getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
-    _serialized_solution(_nl_sys.currentSolution()),
-    _dof_map(_nl_sys.dofMap()),
-    _paired_variable(coupled("paired_variable")),
+    _moose_var(_subproblem.getVariable(_tid, getParam<VariableName>("paired_variable"))),
+    _serialized_solution(_moose_var.sys().currentSolution()),
+    _dof_map(_moose_var.dofMap()),
     _warnings(getParam<bool>("warnings"))
 {
-  MooseVariable & pv(*getVar("paired_variable",0));
   if (parameters.isParamValid("tangential_tolerance"))
   {
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
   }
+  MooseVariable & pv(getVariable(parameters, getParam<VariableName>("paired_variable")));
   Order pairedVarOrder(pv.getOrder());
   Order gvaOrder(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
-  if (pairedVarOrder != gvaOrder)
+  if (pairedVarOrder != gvaOrder && pairedVarOrder != CONSTANT)
   {
     mooseError("ERROR: specified order for GapValueAux ("<<Utility::enum_to_string<Order>(gvaOrder)
                <<") does not match order for paired_variable \""<<pv.name()<<"\" ("
@@ -74,20 +89,31 @@ GapValueAux::computeValue()
 
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[current_node->id()];
 
-  Real gap_temp(0.0);
+  Real gap_value(0.0);
 
   if (pinfo)
   {
-    Elem * slave_side = pinfo->_side;
-    std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
-    std::vector<unsigned int> slave_side_dof_indices;
-
-    _dof_map.dof_indices(slave_side, slave_side_dof_indices, _paired_variable);
-
-    for(unsigned int i=0; i<slave_side_dof_indices.size(); ++i)
+    if (_moose_var.feType().order != CONSTANT)
     {
-      //The zero index is because we only have one point that the phis are evaluated at
-      gap_temp += slave_side_phi[i][0] * (*_serialized_solution)(slave_side_dof_indices[i]);
+      Elem * side = pinfo->_side;
+      std::vector<std::vector<Real> > & side_phi = pinfo->_side_phi;
+      std::vector<unsigned int> side_dof_indices;
+
+      _dof_map.dof_indices(side, side_dof_indices, _moose_var.number());
+
+      for (unsigned int i=0; i < side_dof_indices.size(); ++i)
+      {
+        //The zero index is because we only have one point that the phis are evaluated at
+        gap_value += side_phi[i][0] * (*_serialized_solution)(side_dof_indices[i]);
+      }
+    }
+    else
+    {
+      const Elem * elem = pinfo->_elem;
+      std::vector<unsigned int> side_dof_indices;
+      _dof_map.dof_indices(elem, side_dof_indices, _moose_var.number());
+      mooseAssert(side_dof_indices.size() == 1, "Wrong size for dof indices");
+      gap_value = (*_serialized_solution)(side_dof_indices[0]);
     }
   }
   else
@@ -102,5 +128,5 @@ GapValueAux::computeValue()
       mooseWarning( msg.str() );
     }
   }
-  return gap_temp;
+  return gap_value;
 }

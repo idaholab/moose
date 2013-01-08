@@ -37,11 +37,12 @@ protected:
 
   PenetrationLocator & _penetration_locator;
 
+  MooseVariable & _moose_var;
+
   const NumericVector<Number> * & _serialized_solution;
 
-  DofMap & _dof_map;
+  const DofMap & _dof_map;
 
-  unsigned int _paired_variable;
   const bool _warnings;
 };
 
