@@ -126,7 +126,7 @@ void AbaqusCreepMaterial::modifyStrain(const unsigned int qp,
 {
   //Recover "old" state variables
   for(unsigned int i=0; i<_num_state_vars; i++)
-    _STATEV[i]=_state_var_old[_qp][i];
+    _STATEV[i]=_state_var_old[qp][i];
 
   //Initialize DECRA and DESWA arrays
   for(unsigned int i=0; i<5; i++)
@@ -188,7 +188,7 @@ void AbaqusCreepMaterial::modifyStrain(const unsigned int qp,
 
   //Update state variables
   for (unsigned int i=0; i<_num_state_vars; i++)
-    _state_var[_qp][i]=_STATEV[i];
+    _state_var[qp][i]=_STATEV[i];
 
   //Solve for Incremental creep (creep_inc_used) and/or Incremental Swell (swell_inc_used) based on definition
   //NOTE: Below are equations for metal creep and/or time-dependent volumetric swelling materials only

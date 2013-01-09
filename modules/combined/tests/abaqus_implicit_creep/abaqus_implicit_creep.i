@@ -141,7 +141,7 @@
     plugin = ../../plugins/solid_mechanics/creep_usr_creep
     poissons_ratio = 0.3
     integration_flag = 1
-    num_state_vars = 0
+    num_state_vars = 2
     youngs_modulus = 209000
     solve_definition = 5
   [../]
