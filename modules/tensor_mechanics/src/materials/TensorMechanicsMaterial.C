@@ -21,7 +21,6 @@ InputParameters validParams<TensorMechanicsMaterial>()
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addRequiredCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
-  params.addParam<std::vector<Real> >("applied_strain_vector","Applied strain: e11, e22, e33, e23, e13, e12");
 
   return params;
 }
@@ -46,8 +45,7 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
       _Cijkl_vector(getParam<std::vector<Real> >("C_ijkl")),
       _all_21(getParam<bool>("all_21")),
       _Cijkl(),
-      _Euler_angles(_euler_angle_1, _euler_angle_2, _euler_angle_3),
-      _applied_strain_vector(getParam<std::vector<Real> >("applied_strain_vector"))
+      _Euler_angles(_euler_angle_1, _euler_angle_2, _euler_angle_3)
 {
   // fill in the local tensors from the input vector information
   
@@ -57,14 +55,6 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
   RotationTensor R(_Euler_angles);
   
   _Cijkl.rotate(R);
-
-  //Fill applied strain
-  if (_applied_strain_vector.size() == 6)
-  {
-    _applied_strain.fillFromInputVector(_applied_strain_vector); //create homogeneous applied strain tensor
-  }
-  else
-    _applied_strain.zero();
   
 }
 

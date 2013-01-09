@@ -12,7 +12,7 @@ InputParameters validParams<TensorMechanicsAction>()
   params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
   params.addParam<NonlinearVariableName>("disp_r", "", "The r displacement");
-  params.addParam<NonlinearVariableName>("temp", "", "The te mperature");
+  params.addParam<NonlinearVariableName>("temp", "", "The temperature");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
   // changed this from true to false

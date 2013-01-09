@@ -20,8 +20,16 @@ public:
 protected:
   virtual void computeQpStrain();
   virtual void computeQpStress();
+  virtual RankTwoTensor computeStressFreeStrain();
   
 private:
+  bool _has_T;
+  VariableValue * _T; //pointer rather than reference
+
+  Real _thermal_expansion_coeff;
+  const Real _Temp, _T0;
+  std::vector<Real> _applied_strain_vector;
+  RankTwoTensor _applied_strain_tensor;
 
 };
 

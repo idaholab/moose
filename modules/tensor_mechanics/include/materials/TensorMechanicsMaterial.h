@@ -66,8 +66,6 @@ protected:
   RankTwoTensor _strain_increment;
 
   RealVectorValue _Euler_angles;
-  std::vector<Real> _applied_strain_vector;
-  RankTwoTensor _applied_strain;
 
 private:
 
