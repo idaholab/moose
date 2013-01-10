@@ -43,6 +43,17 @@ protected:
   virtual Real computeQpIntegral();
   virtual Real computeIntegral();
 
+  unsigned int _qp;
+  const MooseArray< Point > & _q_point;
+  QBase * & _qrule;
+  const MooseArray<Real> & _JxW;
+  const MooseArray<Real> & _coord;
+
+  /// Holds the solution at current quadrature points
+  VariableValue & _u;
+  /// Holds the solution gradient at the current quadrature points
+  VariableGradient & _grad_u;
+
   Real _integral_value;
 };
 

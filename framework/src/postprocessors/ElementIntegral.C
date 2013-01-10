@@ -23,6 +23,12 @@ InputParameters validParams<ElementIntegral>()
 
 ElementIntegral::ElementIntegral(const std::string & name, InputParameters parameters) :
     ElementPostprocessor(name, parameters),
+    _q_point(_subproblem.points(_tid)),
+    _qrule(_subproblem.qRule(_tid)),
+    _JxW(_subproblem.JxW(_tid)),
+    _coord(_subproblem.coords(_tid)),
+    _u(_var.sln()),
+    _grad_u(_var.gradSln()),
     _integral_value(0)
 {}
 

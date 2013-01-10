@@ -72,19 +72,11 @@ protected:
   /// list of variables when working on more than one
   std::vector<MooseVariable *> _vars;
 
-  unsigned int _qp;
-  const MooseArray< Point > & _q_point;
-  QBase * & _qrule;
-  const MooseArray<Real> & _JxW;
-  const MooseArray<Real> & _coord;
-
+  /// The current element pointer (available during execute())
   const Elem * & _current_elem;
-  const Real & _current_elem_volume;
 
-  /// Holds the solution at current quadrature points
-  VariableValue & _u;
-  /// Holds the solution gradient at the current quadrature points
-  VariableGradient & _grad_u;
+  /// The current element volume (available during execute())
+  const Real & _current_elem_volume;
 
   // Single Instance Variables
   Real & _real_zero;
