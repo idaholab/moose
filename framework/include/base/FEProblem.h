@@ -352,6 +352,13 @@ public:
   bool hasUserObject(const std::string & name);
 
   /**
+   * Check existence of the postprocessor.
+   * @param name The name of the post-processor
+   * @param tid Thread ID
+   * @return true if it exists, otherwise false
+   */
+  bool hasPostprocessor(const std::string & name, THREAD_ID tid = 0);
+  /**
    * Get a reference to the value associated with the postprocessor.
    */
   Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);

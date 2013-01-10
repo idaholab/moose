@@ -1554,6 +1554,12 @@ FEProblem::hasUserObject(const std::string & name)
   return false;
 }
 
+bool
+FEProblem::hasPostprocessor(const std::string & name, THREAD_ID tid)
+{
+  return _pps_data[tid].hasPostprocessor(name);
+}
+
 Real &
 FEProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
 {
