@@ -8,12 +8,20 @@ mtwist-1.1/
   |* License: lgpl v3 (http://www.gnu.org/copyleft/lesser.html)              *|
   /***************************************************************************\
 
-trex/
+pcre/
   /***************************************************************************\
-  |* T-Rex a tine regular expression library                                 *|
+  |* PCRE - Perl Compatible Regular Expressions                              *|
   |*-------------------------------------------------------------------------*|
-  |* Copyright: Alberto Demichelis                                           *|
-  |* License: no specific license (freely alterable and distributable)       *|
+  |* Copyright: Google Inc.                                                  *|
+  |* License: bsd http://www.linfo.org/bsdlicense.html                       *|
+  /***************************************************************************\
+
+nsiqcppstyle/
+  /***************************************************************************\
+  |* nsiqcppstyle - C/C++ Coding Style Checker                               *|
+  |*-------------------------------------------------------------------------*|
+  |* Copyright:                                                              *|
+  |* License: Apache License, Version 2.0                                    *|
   /***************************************************************************\
 
 exodiff/

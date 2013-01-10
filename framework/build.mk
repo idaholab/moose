@@ -58,6 +58,9 @@ endif
 # C++ rules
 #
 
+pcre%.$(obj-suffix) : pcre%.cc
+	@echo "Compiling C++ $(PCH_MODE)(in "$(mode)" mode) "$<"..."
+	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) -DHAVE_CONFIG_H -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
 %.$(obj-suffix) : %.C
 	@echo "Compiling C++ $(PCH_MODE)(in "$(mode)" mode) "$<"..."
 	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
@@ -66,6 +69,9 @@ endif
 # C rules
 #
 
+pcre%.$(obj-suffix) : pcre%.c
+	@echo "Compiling C $(PCH_MODE)(in "$(mode)" mode) "$<"..."
+	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(PCH_FLAGS) -DHAVE_CONFIG_H -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
 %.$(obj-suffix) : %.c
 	@echo "Compiling C $(PCH_MODE)(in "$(mode)" mode) "$<"..."
 	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(PCH_FLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@

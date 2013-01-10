@@ -3,7 +3,16 @@
 #
 moose_SRC_DIRS := $(MOOSE_DIR)/src
 moose_SRC_DIRS += $(MOOSE_DIR)/contrib/mtwist-1.1
-moose_SRC_DIRS += $(MOOSE_DIR)/contrib/trex
+
+#
+# pcre
+#
+pcre_DIR       := $(MOOSE_DIR)/contrib/pcre
+pcre_srcfiles  := $(shell find $(pcre_DIR) -name *.cc)
+pcre_csrcfiles := $(shell find $(pcre_DIR) -name *.c)
+pcre_objects   := $(patsubst %.cc, %.$(obj-suffix), $(pcre_srcfiles))
+pcre_objects   += $(patsubst %.c, %.$(obj-suffix), $(pcre_csrcfiles))
+pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD)$(libext)
 
 moose_INC_DIRS := $(shell find $(MOOSE_DIR)/include -type d -not -path "*/.svn*")
 moose_INC_DIRS += $(shell find $(MOOSE_DIR)/contrib/*/include -type d -not -path "*/.svn*")
@@ -12,7 +21,7 @@ moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
 
 moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(libext)
-LIBS += $(moose_LIB)
+LIBS += $(moose_LIB) $(pcre_LIB)
 
 # source filese
 moose_precompiled_headers := $(MOOSE_DIR)/include/base/Precompiled.h
@@ -29,8 +38,8 @@ moose_precompiled_headers_objects :=
 endif
 moose_objects	:= $(patsubst %.C, %.$(obj-suffix), $(moose_srcfiles))
 moose_objects	+= $(patsubst %.c, %.$(obj-suffix), $(moose_csrcfiles))
-moose_objects += $(patsubst %.f, %.$(obj-suffix), $(moose_fsrcfiles))
-moose_objects += $(patsubst %.f90, %.$(obj-suffix), $(moose_f90srcfiles))
+moose_objects   += $(patsubst %.f, %.$(obj-suffix), $(moose_fsrcfiles))
+moose_objects   += $(patsubst %.f90, %.$(obj-suffix), $(moose_f90srcfiles))
 # dependency files
 moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
               $(patsubst %.c, %.$(obj-suffix).d, $(moose_csrcfiles))
@@ -48,17 +57,29 @@ moose: $(moose_LIB)
 # build rule for MOOSE
 ifeq ($(enable-shared),yes)
 # Build dynamic library
-$(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects)
+$(pcre_LIB): $(pcre_objects)
 	@echo "Linking "$@"..."
-	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(moose_objects) $(libmesh_LDFLAGS)
+	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(pcre_objects) $(libmesh_LDFLAGS)
+
+$(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects) $(pcre_LIB)
+	@echo "Linking "$@"..."
+	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(moose_objects) $(pcre_LIB) $(libmesh_LDFLAGS)
 else
 # Build static library
 ifeq ($(findstring darwin,$(hostos)),darwin)
-$(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects)
+$(pcre_LIB): $(pcre_objects)
+	@echo "Linking "$@"..."
+	@libtool -static -o $@ $(pcre_objects)
+
+$(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects) $(pcre_LIB) $(pcre_LIB)
 	@echo "Linking "$@"..."
 	@libtool -static -o $@ $(moose_objects)
 else
-$(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects)
+$(pcre_LIB): $(pcre_objects)
+	@echo "Linking "$@"..."
+	@$(AR) rv $@ $(pcre_objects)
+
+$(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects) $(pcre_LIB) $(pcre_LIB)
 	@echo "Linking "$@"..."
 	@$(AR) rv $@ $(moose_objects)
 endif
@@ -67,7 +88,7 @@ endif
 # include MOOSE dep files
 -include $(moose_deps)
 -include $(MOOSE_DIR)/contrib/mtwist-1.1/src/*.d
--include $(MOOSE_DIR)/contrib/trex/src/*.d
+-include $(MOOSE_DIR)/contrib/pcre/src/*.d
 ifdef PRECOMPILED
 -include $(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch.d
 endif
@@ -90,11 +111,10 @@ $(exodiff_APP): $(exodiff_objfiles)
 
 -include $(exodiff_DIR)/*.d
 
-
 #
 # Maintenance
 #
-delete_list := $(moose_LIB) $(exodiff_APP)
+delete_list := $(moose_LIB) $(exodiff_APP) $(pcre_LIB)
 
 clean::
 	@rm -fr $(delete_list)
