@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "FP.h"
+#include "print_trace.h"
 #include <stdlib.h>
 #include <signal.h>
 #include <iostream>
@@ -28,8 +29,8 @@
  */
 void handleFPE(int /*signo*/, siginfo_t *info, void * /*context*/)
 {
-  std::cout << std::endl;
-  std::cout << "Floating point exception signaled (";
+  std::cerr << std::endl;
+  std::cerr << "Floating point exception signaled (";
   switch (info->si_code)
   {
     case FPE_INTDIV: std::cerr << "integer divide by zero"; break;
@@ -41,14 +42,19 @@ void handleFPE(int /*signo*/, siginfo_t *info, void * /*context*/)
     case FPE_FLTINV: std::cerr << "invalid floating point operation"; break;
     case FPE_FLTSUB: std::cerr << "subscript out of range"; break;
   }
-  std::cout << ")!" << std::endl;
+  std::cerr << ")!" << std::endl;
 
-  std::cout << std::endl;
-  std::cout << "To track this down, compile debug version, start debugger, set breakpoint for 'handleFPE' and run" << std::endl;
-  std::cout << "In gdb do:" << std::endl;
-  std::cout << "  break handleFPE" << std::endl;
-  std::cout << "  run" << std::endl;
-  std::cout << "  bt" << std::endl;
+#ifdef DEBUG
+  std::cerr<<std::endl<<"Backtrace:"<<std::endl;
+  libMesh::print_trace(std::cerr);
+#endif
+
+  std::cerr << std::endl;
+  std::cerr << "To track this down, compile debug version, start debugger, set breakpoint for 'handleFPE' and run" << std::endl;
+  std::cerr << "In gdb do:" << std::endl;
+  std::cerr << "  break handleFPE" << std::endl;
+  std::cerr << "  run" << std::endl;
+  std::cerr << "  bt" << std::endl;
 
   exit(-2);             // MAGIC NUMBER!
 }
