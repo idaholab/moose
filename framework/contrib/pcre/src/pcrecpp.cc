@@ -66,13 +66,13 @@ Arg RE::no_arg((void*)NULL);
 // inclusive test if we ever needed it.  (Note that not only the
 // __attribute__ syntax, but also __USER_LABEL_PREFIX__, are
 // gnu-specific.)
-#if defined(__GNUC__) && __GNUC__ >= 3 && defined(__ELF__)
-# define ULP_AS_STRING(x)            ULP_AS_STRING_INTERNAL(x)
-# define ULP_AS_STRING_INTERNAL(x)   #x
-# define USER_LABEL_PREFIX_STR       ULP_AS_STRING(__USER_LABEL_PREFIX__)
-extern Arg no_arg
-  __attribute__((alias(USER_LABEL_PREFIX_STR "_ZN7pcrecpp2RE6no_argE")));
-#endif
+//#if defined(__GNUC__) && __GNUC__ >= 3 && defined(__ELF__)
+//# define ULP_AS_STRING(x)            ULP_AS_STRING_INTERNAL(x)
+//# define ULP_AS_STRING_INTERNAL(x)   #x
+//# define USER_LABEL_PREFIX_STR       ULP_AS_STRING(__USER_LABEL_PREFIX__)
+//extern Arg no_arg
+//  __attribute__((alias(USER_LABEL_PREFIX_STR "_ZN7pcrecpp2RE6no_argE")));
+//#endif
 
 // If a regular expression has no error, its error_ field points here
 static const string empty_string;
