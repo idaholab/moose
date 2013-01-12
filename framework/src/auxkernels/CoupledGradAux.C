@@ -33,6 +33,10 @@ CoupledGradAux::CoupledGradAux(const std::string & name, InputParameters paramet
 {
 }
 
+CoupledGradAux::~CoupledGradAux()
+{
+}
+
 Real
 CoupledGradAux::computeValue()
 {

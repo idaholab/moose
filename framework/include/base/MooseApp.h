@@ -23,8 +23,9 @@
 #include "Parser.h"
 #include "MooseSyntax.h"
 #include "ActionWarehouse.h"
-#include "Executioner.h"
 #include "SystemInfo.h"
+
+class Executioner;
 
 /**
  * Base class for MOOSE-based applications

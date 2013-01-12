@@ -318,19 +318,12 @@ PenetrationThread::operator() (const NodeIdRange & range)
         {
           //find the face in the ridge set with the smallest index, assign that one to the interaction
           unsigned int face_index(std::numeric_limits<unsigned int>::max());
-          unsigned int ridge_data_index(0);
           for (unsigned int i(0); i<ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size(); ++i)
           {
             if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index1 < face_index)
-            {
               face_index = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index1;
-              ridge_data_index=i;
-            }
             if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index2 < face_index)
-            {
               face_index = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index2;
-              ridge_data_index=i;
-            }
           }
 
           mooseAssert(face_index < std::numeric_limits<unsigned int>::max(),"face_index invalid");

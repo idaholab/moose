@@ -120,6 +120,10 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
   _has_diag_save_in = _diag_save_in.size() > 0;
 }
 
+Kernel::~Kernel()
+{
+}
+
 void
 Kernel::computeResidual()
 {

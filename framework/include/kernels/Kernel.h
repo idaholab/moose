@@ -55,6 +55,8 @@ class Kernel :
 public:
   Kernel(const std::string & name, InputParameters parameters);
 
+  virtual ~Kernel();
+
   virtual void computeResidual();
   virtual void computeJacobian();
   /**

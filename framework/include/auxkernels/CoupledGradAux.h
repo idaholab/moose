@@ -37,6 +37,8 @@ public:
    */
   CoupledGradAux(const std::string & name, InputParameters parameters);
 
+  virtual ~CoupledGradAux();
+
 protected:
   virtual Real computeValue();
 
