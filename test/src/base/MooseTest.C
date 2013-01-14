@@ -69,7 +69,6 @@
 #include "VarCouplingMaterial.h"
 
 #include "DGMatDiffusion.h"
-#include "EnhancedDGMatDiffusion.h"
 #include "DGMDDBC.h"
 #include "DGFunctionConvectionDirichletBC.h"
 #include "CoupledKernelGradBC.h"
@@ -96,9 +95,6 @@
 
 // meshes
 #include "StripeMesh.h"
-
-// postprocessors
-#include "UserObjectPPS.h"
 
 #include "ExceptionSteady.h"
 #include "SteadyTransientExecutioner.h"
@@ -171,7 +167,6 @@ MooseTestApp::registerObjects()
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);
-  registerDGKernel(EnhancedDGMatDiffusion);
 
   // Boundary Conditions
   registerBoundaryCondition(MTBC);
@@ -224,8 +219,6 @@ MooseTestApp::registerObjects()
   registerObject(StripeMesh);
 
   registerConstraint(EqualValueNodalConstraint);
-
-  registerPostprocessor(UserObjectPPS);
 
   registerUserObject(MTUserObject);
   registerUserObject(RandomHitUserObject);

@@ -176,7 +176,6 @@
 #include "ValueThresholdMarker.h"
 
 // Actions
-#include "AddMeshModifierAction.h"
 #include "AddBCAction.h"
 #include "AddDiracKernelAction.h"
 #include "AddICAction.h"
@@ -550,9 +549,6 @@ registerActions(Syntax & syntax)
   registerAction(CreateProblemAction, "create_problem");
   registerAction(SetupOutputAction, "setup_output");
   registerAction(GlobalParamsAction, "set_global_params");
-
-  /// MooseObjectActions
-  registerAction(AddMeshModifierAction, "add_mesh_modifier");
 
   /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "add_variable");

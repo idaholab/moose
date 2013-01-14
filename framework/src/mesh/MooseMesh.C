@@ -521,20 +521,6 @@ MooseMesh::getBoundaryElementRange()
   return _bnd_elem_range;
 }
 
-// MooseMesh Modifiers /////
-void
-MooseMesh::addMeshModifer(const std::string & mod_name, const std::string & name, InputParameters parameters)
-{
-  _mesh_modifiers.push_back(static_cast<MeshModifier *>(Factory::instance()->create(mod_name, name, parameters)));
-}
-
-void
-MooseMesh::applyMeshModifications()
-{
-  for (std::vector<MeshModifier *>::iterator i = _mesh_modifiers.begin(); i != _mesh_modifiers.end(); ++i)
-    (*i)->modifyMesh(_mesh);
-}
-
 void
 MooseMesh::cacheInfo()
 {

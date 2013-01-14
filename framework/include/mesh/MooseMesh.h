@@ -32,7 +32,6 @@
 #include <map>
 
 //forward declaration
-class MeshModifier;
 class MooseMesh;
 class NonlinearSystem;
 class Assembly;
@@ -178,10 +177,6 @@ public:
   operator libMesh::Mesh &(void) { return _mesh; }
 
   MeshBase & getMesh() { return _mesh; }
-
-  // Mesh Modifiers /////
-  void addMeshModifer(const std::string & mod_name, const std::string & name, InputParameters parameters);
-  void applyMeshModifications();
 
   inline void printInfo(std::ostream &os=libMesh::out) { _mesh.print_info(os); }
 
@@ -403,8 +398,6 @@ protected:
    * it will contain off-processor boundary IDs as well.
    */
   std::set<BoundaryID> _mesh_boundary_ids;
-
-  std::vector<MeshModifier *> _mesh_modifiers;
 
   /// array of boundary nodes
   std::vector<BndNode *> _bnd_nodes;

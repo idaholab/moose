@@ -33,7 +33,6 @@ void associateSyntax(Syntax & syntax)
   syntax.registerActionSyntax("InitialRefinementAction", "Mesh");
   syntax.registerActionSyntax("InitDisplacedProblemAction", "Mesh");
   syntax.registerActionSyntax("AddExtraNodesetAction", "Mesh/ExtraNodesets/*");
-  syntax.registerActionSyntax("AddMeshModifierAction", "Mesh/Modifier/*");
 
   syntax.registerActionSyntax("AddFunctionAction", "Functions/*");
 

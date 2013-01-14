@@ -2317,10 +2317,6 @@ FEProblem::init()
   _mesh.buildRefinementAndCoarseningMaps(_assembly[0]);
   Moose::setup_perf_log.pop("mesh.buildRefinementAndCoarseningMaps()","Setup");
 
-  Moose::setup_perf_log.push("mesh.applyMeshModifications()","Setup");
-  _mesh.applyMeshModifications();
-  Moose::setup_perf_log.pop("mesh.applyMeshModifications()","Setup");
-
   Moose::setup_perf_log.push("FEProblem::init::meshChanged()","Setup");
   _mesh.meshChanged();
   Moose::setup_perf_log.pop("FEProblem::init::meshChanged()","Setup");
