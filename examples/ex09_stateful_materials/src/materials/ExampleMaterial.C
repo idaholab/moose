@@ -34,8 +34,8 @@ ExampleMaterial::ExampleMaterial(const std::string & name,
     _diffusivity(declareProperty<Real>("diffusivity")),
 
     // Declare that we are going to have an old value of diffusivity
-    // Note: this is _expensive_ and currently means that you can't
-    // use adaptivity!  Only do this if you REALLY need it!
+    // Note: this is _expensive_ as we have to store values for each
+    // qp throughout the mesh. Only do this if you REALLY need it!
     _diffusivity_old(declarePropertyOld<Real>("diffusivity"))
 {}
 
