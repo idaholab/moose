@@ -4,4 +4,10 @@
     input = 'output_vars_test.i'
     exodiff = 'out.e'
   [../]
+
+  [./test_hidden]
+    type = 'Exodiff'
+    input = 'output_vars_hidden_test.i'
+    exodiff = 'out_hidden.e'
+  [../]
 []

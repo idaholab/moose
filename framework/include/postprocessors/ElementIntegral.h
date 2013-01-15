@@ -44,6 +44,7 @@ protected:
   virtual Real computeIntegral();
 
   unsigned int _qp;
+
   const MooseArray< Point > & _q_point;
   QBase * & _qrule;
   const MooseArray<Real> & _JxW;

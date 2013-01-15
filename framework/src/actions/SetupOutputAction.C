@@ -54,14 +54,15 @@ InputParameters validParams<SetupOutputAction>()
 
   params.addParam<bool>("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
   params.addParam<bool>("show_setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled in ""perf_log"" is false");
-  params.addParam<std::vector<std::string> >("output_variables", "A list of the variables that should be in the Exodus output file.  If this is not provided then all variables will be in the output.");
+  params.addParam<std::vector<std::string> >("output_variables", "A list of the variables that should be output to the Exodus file.  If this is not provided then all variables will be in the output.");
+  params.addParam<std::vector<std::string> >("hidden_variables", "A list of the variables that should NOT be output to the Exodus file.  If this is not provided then all variables will be in the output.");
   params.addParam<bool>("elemental_as_nodal", false, "Output elemental variables also as nodal");
   params.addParam<bool>("exodus_inputfile_output", true, "Determines whether or not the input file is output to exodus - default (true)");
 
   // restart options
   params.addParam<unsigned int>("num_restart_files", 0, "Number of the restart files to save (0 = no restart files)");
 
-  params.addParamNamesToGroup("interval output_displaced output_solution_history print_linear_residuals iteration_plot_start_time elemental_as_nodal exodus_inputfile_output output_es_info", "Advanced");
+  params.addParamNamesToGroup("interval output_displaced output_solution_history print_linear_residuals iteration_plot_start_time elemental_as_nodal exodus_inputfile_output output_es_info output_variables hidden_variables", "Advanced");
   params.addParamNamesToGroup("nemesis gmv tecplot tecplot_binary xda", "Format");
   params.addParamNamesToGroup("screen_interval postprocessor_screen max_pps_rows_screen postprocessor_csv postprocessor_gnuplot gnuplot_format", "Postprocessor");
   params.addParamNamesToGroup("perf_log show_setup_log_early", "Logging");
@@ -113,16 +114,20 @@ SetupOutputAction::act()
     /// Determines whether we see the perf log early in a run or not
     _problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
 
-    if(_pars.isParamValid("output_variables"))
+    if (_pars.isParamValid("output_variables"))
     {
-      _problem->setOutputVariables(getParam<std::vector<std::string> >("output_variables"));
+      _problem->showVariableInOutput(getParam<std::vector<std::string> >("output_variables"));
+    }
+    else if (_pars.isParamValid("hidden_variables"))
+    {
+      _problem->hideVariableFromOutput(getParam<std::vector<std::string> >("hidden_variables"));
     }
     else
     {
       if (getParam<bool>("elemental_as_nodal"))
       {
         // output all variables in the system
-        _problem->setOutputVariables(_problem->getVariableNames());
+        _problem->showVariableInOutput(_problem->getVariableNames());
       }
     }
 
@@ -132,6 +137,8 @@ SetupOutputAction::act()
   }
   else
     _pars.set<OutFileBase>("file_base") = "out";
+
+  _problem->setOutputVariables();
 
   Output & output = _problem->out();                       // can't use use this with coupled problems on different meshes
   setupOutputObject(output, _pars);

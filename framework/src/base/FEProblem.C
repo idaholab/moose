@@ -2655,11 +2655,75 @@ FEProblem::output(bool force/*= false*/)
 }
 
 void
-FEProblem::setOutputVariables(std::vector<std::string> output_variables)
+FEProblem::setOutputVariables()
 {
-  _out.setOutputVariables(output_variables);
+  // If both the white list and black list are empty, then do nothing
+  if (_variable_white_list.empty() && _variable_black_list.empty())
+    return;
+
+  std::vector<std::string> output_vars;
+  // If the white list is populated then we'll use that as a starting point for variables to output
+  if (!_variable_white_list.empty())
+    output_vars = _variable_white_list;
+  else
+    output_vars = getVariableNames();
+
+  // If the black list is populated then we'll take those variables out of the list
+  if (!_variable_black_list.empty())
+  {
+    std::vector<std::string> temp_output_vars(output_vars);
+    output_vars.clear();
+
+    std::sort(temp_output_vars.begin(), temp_output_vars.end());
+    std::sort(_variable_black_list.begin(), _variable_black_list.end());
+
+    // Make sure that the user didn't specify to both show and hide any particular variable
+    if (!_variable_white_list.empty())
+    {
+      std::set_intersection(temp_output_vars.begin(), temp_output_vars.end(),
+                            _variable_black_list.begin(), _variable_black_list.end(), std::back_inserter(output_vars));
+
+      if (!output_vars.empty())
+      {
+        std::ostringstream oss;
+        oss << "One or more variables was specified to be both shown and hidden:\n";
+        for (std::vector<std::string>::iterator i = output_vars.begin(); i != output_vars.end();  ++i)
+          oss << *i << "\n";
+        mooseError(oss.str());
+      }
+    }
+
+    std::set_difference(temp_output_vars.begin(), temp_output_vars.end(),
+                        _variable_black_list.begin(), _variable_black_list.end(), std::back_inserter(output_vars));
+  }
+
+  _out.setOutputVariables(output_vars);
   if(_displaced_problem)
-    _displaced_problem->setOutputVariables(output_variables);
+    _displaced_problem->setOutputVariables(output_vars);
+}
+
+void
+FEProblem::hideVariableFromOutput(const std::string & var_name)
+{
+  _variable_black_list.push_back(var_name);
+}
+
+void
+FEProblem::hideVariableFromOutput(const std::vector<std::string> & var_names)
+{
+  _variable_black_list.insert(_variable_black_list.end(), var_names.begin(), var_names.end());
+}
+
+void
+FEProblem::showVariableInOutput(const std::string & var_name)
+{
+  _variable_white_list.push_back(var_name);
+}
+
+void
+FEProblem::showVariableInOutput(const std::vector<std::string> & var_names)
+{
+  _variable_white_list.insert(_variable_white_list.end(), var_names.begin(), var_names.end());
 }
 
 OutputProblem &

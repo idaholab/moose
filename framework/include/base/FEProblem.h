@@ -470,7 +470,12 @@ public:
    * Set which variables will be written in ouput files
    * @param output_variables The list of variable names to write in the ouput files
    */
-  virtual void setOutputVariables(std::vector<std::string> output_variables);
+  void setOutputVariables();
+  void hideVariableFromOutput(const std::string & var_name);
+  void hideVariableFromOutput(const std::vector<std::string> & var_names);
+  void showVariableInOutput(const std::string & var_name);
+  void showVariableInOutput(const std::vector<std::string> & var_names);
+
   OutputProblem & getOutputProblem(unsigned int refinements);
   void setMaxPPSRowsScreen(unsigned int n) { _pps_output_table_max_rows = n; }
 
@@ -583,8 +588,6 @@ protected:
 
   void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
 
-  // TODO: PPS output subsystem, and this will go away
-  // postprocessor output
 public:
   bool _postprocessor_screen_output;
   bool _postprocessor_csv_output;
@@ -650,7 +653,8 @@ protected:
   /// Determines if the setup log is printed before the first time step
   bool _output_setup_log_early;
 
-  // DEBUGGING capabilities
+  std::vector<std::string> _variable_white_list;
+  std::vector<std::string> _variable_black_list;
 
   /// Number of top residual to print out
   unsigned int _dbg_top_residuals;
