@@ -4,6 +4,7 @@
     input = 'hermite_converge_periodic.i'
     exodiff = 'hermite_converge_periodic_out.e-s003'
     group = 'periodic'
+    no_valgrind = true
     mesh_mode = 'SERIAL'
   [../]
 
