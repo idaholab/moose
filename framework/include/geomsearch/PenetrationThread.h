@@ -110,6 +110,13 @@ protected:
                                      const Elem* side,
                                      const std::vector<Node*> &edge_nodes);
 
+  bool
+  isFaceReasonableCandidate(const Elem * master_elem,
+                            const Elem * side,
+                            FEBase * fe,
+                            const Point & slave_point,
+                            const Real tangential_tolerance);
+
   void
   computeSlip( FEBase & fe,
                PenetrationLocator::PenetrationInfo & info );

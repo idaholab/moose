@@ -170,41 +170,43 @@ PenetrationThread::operator() (const NodeIdRange & range)
 
           Elem *side = (elem->build_side(side_num,false)).release();
 
-          Point contact_phys;
-          Point contact_ref;
-          Point contact_on_face_ref;
-          Real distance = 0.;
-          Real tangential_distance = 0.;
-          RealGradient normal;
-          bool contact_point_on_side;
-          std::vector<Node*> off_edge_nodes;
-          std::vector<std::vector<Real> > side_phi;
-          std::vector<RealGradient> dxyzdxi;
-          std::vector<RealGradient> dxyzdeta;
-          std::vector<RealGradient> d2xyzdxideta;
+          if (isFaceReasonableCandidate(elem, side, fe, node, _tangential_tolerance))
+          {
+            Point contact_phys;
+            Point contact_ref;
+            Point contact_on_face_ref;
+            Real distance = 0.;
+            Real tangential_distance = 0.;
+            RealGradient normal;
+            bool contact_point_on_side;
+            std::vector<Node*> off_edge_nodes;
+            std::vector<std::vector<Real> > side_phi;
+            std::vector<RealGradient> dxyzdxi;
+            std::vector<RealGradient> dxyzdeta;
+            std::vector<RealGradient> d2xyzdxideta;
 
-          PenetrationLocator::PenetrationInfo * pen_info =
-            new PenetrationLocator::PenetrationInfo(&node,
-                                                    elem,
-                                                    side,
-                                                    side_num,
-                                                    normal,
-                                                    distance,
-                                                    tangential_distance,
-                                                    contact_phys,
-                                                    contact_ref,
-                                                    contact_on_face_ref,
-                                                    off_edge_nodes,
-                                                    side_phi,
-                                                    dxyzdxi,
-                                                    dxyzdeta,
-                                                    d2xyzdxideta);
+            PenetrationLocator::PenetrationInfo * pen_info =
+              new PenetrationLocator::PenetrationInfo(&node,
+                                                      elem,
+                                                      side,
+                                                      side_num,
+                                                      normal,
+                                                      distance,
+                                                      tangential_distance,
+                                                      contact_phys,
+                                                      contact_ref,
+                                                      contact_on_face_ref,
+                                                      off_edge_nodes,
+                                                      side_phi,
+                                                      dxyzdxi,
+                                                      dxyzdeta,
+                                                      d2xyzdxideta);
 
-          Moose::findContactPoint(*pen_info, fe, _fe_type, node,
-                                  true, _tangential_tolerance, contact_point_on_side);
+            Moose::findContactPoint(*pen_info, fe, _fe_type, node,
+                                    true, _tangential_tolerance, contact_point_on_side);
 
-          p_info.push_back( pen_info );
-
+            p_info.push_back( pen_info );
+          }
         }
       }
     }
@@ -914,6 +916,61 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
     }
   }
   return off_of_this_edge;
+}
+
+bool
+PenetrationThread::isFaceReasonableCandidate(const Elem * master_elem,
+                                             const Elem * side,
+                                             FEBase * fe,
+                                             const Point & slave_point,
+                                             const Real tangential_tolerance)
+{
+  unsigned int dim = master_elem->dim();
+
+  const std::vector<Point> & phys_point = fe->get_xyz();
+
+  const std::vector<RealGradient> & dxyz_dxi = fe->get_dxyzdxi();
+  const std::vector<RealGradient> & dxyz_deta = fe->get_dxyzdeta();
+
+  Point ref_point;
+
+  std::vector<Point> points(1); //Default constructor gives us a point at 0,0,0
+
+  fe->reinit(side, &points);
+
+  RealGradient d = slave_point - phys_point[0];
+
+  const Real twosqrt2 = 2.8284; //way more precision than we actually need here
+  Real max_face_length = side->hmax() + twosqrt2*tangential_tolerance;
+
+  RealVectorValue normal;
+  if(dim-1 == 2)
+  {
+    normal = dxyz_dxi[0].cross(dxyz_deta[0]);
+  }
+  else
+  {
+    normal = RealGradient(dxyz_dxi[0](1),-dxyz_dxi[0](0));
+  }
+  normal /= normal.size();
+
+  const Real dot(d * normal);
+
+  const RealGradient normcomp = dot*normal;
+  const RealGradient tangcomp = d - normcomp;
+
+  const Real tangdist = tangcomp.size();
+
+  //Increase the size of the zone that we consider if the vector from the face
+  //to the node has a larger normal component
+  const Real faceExpansionFactor = 2.0 * (1.0 + normcomp.size()/d.size());
+
+  bool isReasonableCandidate = true;
+  if (tangdist > faceExpansionFactor*max_face_length)
+  {
+    isReasonableCandidate = false;
+  }
+  return isReasonableCandidate;
 }
 
 void
