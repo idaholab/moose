@@ -214,44 +214,44 @@ GapHeatTransfer::computeGapTempAndDistance()
     _has_info = true;
     _gap_temp = _gap_temp_value[_qp];
     _gap_distance = _gap_distance_value[_qp];
-    return;
-  }
-
-  Node * qnode = _mesh.getQuadratureNode(_current_elem, _current_side, _qp);
-
-  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator->_penetration_info[qnode->id()];
-
-  _gap_temp = 0.0;
-  _gap_distance = 88888;
-  _has_info = false;
-
-  if (pinfo)
-  {
-    _gap_distance = pinfo->_distance;
-    _has_info = true;
-
-    Elem * slave_side = pinfo->_side;
-    std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
-    std::vector<unsigned int> slave_side_dof_indices;
-
-    _dof_map.dof_indices(slave_side, slave_side_dof_indices, _variable->number());
-
-    for(unsigned int i=0; i<slave_side_dof_indices.size(); ++i)
-    {
-      //The zero index is because we only have one point that the phis are evaluated at
-      _gap_temp += slave_side_phi[i][0] * (*_serialized_solution)(slave_side_dof_indices[i]);
-    }
   }
   else
   {
-    if (_warnings)
+    Node * qnode = _mesh.getQuadratureNode(_current_elem, _current_side, _qp);
+    PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator->_penetration_info[qnode->id()];
+
+    _gap_temp = 0.0;
+    _gap_distance = 88888;
+    _has_info = false;
+
+    if (pinfo)
     {
-      std::stringstream msg;
-      msg << "No gap value information found for node ";
-      msg << qnode->id();
-      msg << " on processor ";
-      msg << libMesh::processor_id();
-      mooseWarning( msg.str() );
+      _gap_distance = pinfo->_distance;
+      _has_info = true;
+
+      Elem * slave_side = pinfo->_side;
+      std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
+      std::vector<unsigned int> slave_side_dof_indices;
+
+      _dof_map.dof_indices(slave_side, slave_side_dof_indices, _variable->number());
+
+      for(unsigned int i=0; i<slave_side_dof_indices.size(); ++i)
+      {
+        //The zero index is because we only have one point that the phis are evaluated at
+        _gap_temp += slave_side_phi[i][0] * (*_serialized_solution)(slave_side_dof_indices[i]);
+      }
+    }
+    else
+    {
+      if (_warnings)
+      {
+        std::stringstream msg;
+        msg << "No gap value information found for node ";
+        msg << qnode->id();
+        msg << " on processor ";
+        msg << libMesh::processor_id();
+        mooseWarning( msg.str() );
+      }
     }
   }
 }

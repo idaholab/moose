@@ -45,8 +45,7 @@ protected:
 
   bool _has_info;
 
-//private:
-  void computeGapTempAndDistance();
+  virtual void computeGapTempAndDistance();
 
   const bool _xdisp_coupled;
   const bool _ydisp_coupled;
