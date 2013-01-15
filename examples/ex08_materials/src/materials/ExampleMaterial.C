@@ -50,7 +50,7 @@ void
 ExampleMaterial::computeQpProperties()
 {
   // We will compute the diffusivity based on the Linear Interpolation of the provided vectors in the z-direction
-  _diffusivity[_qp] = _piecewise_func.sample(_coord[2]);
+  _diffusivity[_qp] = _piecewise_func.sample(_q_point[_qp](2));
 
   _convection_velocity[_qp] = _diffusion_gradient[_qp];
 }
