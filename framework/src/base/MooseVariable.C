@@ -1076,7 +1076,7 @@ MooseVariable::getValue(const Elem * elem, const std::vector<std::vector<Real> >
   _dof_map.dof_indices(elem, dof_indices, _var_num);
 
   Real value = 0;
-  if (feType().order != CONSTANT)
+  if (isNodal())
   {
     for (unsigned int i = 0; i < dof_indices.size(); ++i)
     {
