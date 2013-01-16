@@ -40,7 +40,6 @@
 #include "CoupledGradAux.h"
 #include "PolyConstantAux.h"
 #include "MMSConstantAux.h"
-#include "DoNothingAux.h"
 #include "MultipleUpdateAux.h"
 #include "PeriodicDistanceAux.h"
 
@@ -163,7 +162,6 @@ MooseTestApp::registerObjects()
   registerAux(CoupledGradAux);
   registerAux(PolyConstantAux);
   registerAux(MMSConstantAux);
-  registerAux(DoNothingAux);
   registerAux(MultipleUpdateAux);
   registerAux(PeriodicDistanceAux);
 

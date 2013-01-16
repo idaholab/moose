@@ -46,12 +46,12 @@
 [AuxKernels]
   [./do-no-1]
     variable = ten
-    type = DoNothingAux
+    type = SelfAux
   [../]
 
   [./do-no-2]
     variable = 2k
-    type = DoNothingAux
+    type = SelfAux
   [../]
 
   [./all]
