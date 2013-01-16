@@ -37,6 +37,7 @@
 #include "CoupledKernelValueTest.h"
 
 #include "CoupledAux.h"
+#include "CoupledGradAux.h"
 #include "PolyConstantAux.h"
 #include "MMSConstantAux.h"
 #include "DoNothingAux.h"
@@ -159,6 +160,7 @@ MooseTestApp::registerObjects()
 
   // Aux kernels
   registerAux(CoupledAux);
+  registerAux(CoupledGradAux);
   registerAux(PolyConstantAux);
   registerAux(MMSConstantAux);
   registerAux(DoNothingAux);

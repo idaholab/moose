@@ -21,7 +21,8 @@ InputParameters validParams<CoupledGradAux>()
 
   params.addRequiredCoupledVar("coupled", "Coupled gradient for calculation");
 
-  params.set<RealGradient>("value")=0.0;
+  params.addRequiredParam<RealGradient>("grad", "Gradient to dot it with");
+
   return params;
 }
 
