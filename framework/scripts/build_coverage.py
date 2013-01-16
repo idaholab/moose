@@ -7,22 +7,31 @@ def buildCMD(options):
   # Generate Mode
   if options.mode == 'generate':
     # Build lcov base command
-    tmp_cmd.append([options.lcov_command[0],
+    if len(options.application) > 1:
+      tmp_cmd.append([options.lcov_command[0],
+                      '--base-directory', options.application[0],
+                      '--directory', options.application[0] + '/src',
+                      '--directory', '/src '.join(options.application[1:]) + '/src',
+                      '--capture',
+                      '--ignore-errors', 'gcov,source',
+                      '--output-file', 'raw.info'
+                      ])
+    else:
+      tmp_cmd.append([options.lcov_command[0],
                       '--base-directory', options.application[0],
                       '--directory', options.application[0] + '/src',
                       '--capture',
                       '--ignore-errors', 'gcov,source',
                       '--output-file', 'raw.info'
-                     ])
+                      ])
     # Build lcov filter command
-    for single_filter in options.application:
-      options.lcov_command.extend([ '-e', 'raw.info', '/*' + single_filter + '/src*', '-e', 'raw.info', '/*' + single_filter + '/include*' ])
-    options.lcov_command.extend([ '-o', options.outfile ])
+    options.lcov_command.extend([ '--extract', 'raw.info', '/*' + options.application[0] + '/src*', '--extract', 'raw.info', '/*' + options.application[0] + '/include*' ])
+    options.lcov_command.extend([ '--output-file', options.outfile ])
     tmp_cmd.append(options.lcov_command)
     tmp_cmd.append(['rm', '-f', 'raw.info'])
     # Build genhtml command if --generate-html was used
     if options.generate_html:
-      options.genhtml_command.extend([options.outfile, '-t', options.title + ' Test Coverage', '--num-spaces', '2', '--legend', '--no-branch-coverage', '-o', options.html_location])
+      options.genhtml_command.extend([options.outfile, '--title', options.title + ' Test Coverage', '--num-spaces', '2', '--legend', '--no-branch-coverage', '--output-directory', options.html_location])
       tmp_cmd.append(options.genhtml_command)
 
   # Combine Mode
@@ -34,7 +43,7 @@ def buildCMD(options):
     tmp_cmd.append(options.lcov_command)
     # Build genhtml command if --generate-html was used
     if options.generate_html:
-      options.genhtml_command.extend([options.outfile, '-t', options.title + ' Test Coverage', '--num-spaces', '2', '--legend', '--no-branch-coverage', '-o', options.html_location])
+      options.genhtml_command.extend([options.outfile, '--title', options.title + ' Test Coverage', '--num-spaces', '2', '--legend', '--no-branch-coverage', '--output-directory', options.html_location])
       tmp_cmd.append(options.genhtml_command)
 
   # Sync Mode
