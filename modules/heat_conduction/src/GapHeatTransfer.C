@@ -56,8 +56,6 @@ GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters param
    _penetration_locator(!_quadrature ? NULL : &getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"),
                                                                                getParam<std::vector<BoundaryName> >("boundary")[0],
                                                                                Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
-   _serialized_solution(_sys.currentSolution()),
-   _dof_map(_sys.dofMap()),
    _warnings(getParam<bool>("warnings"))
 {
   if(_quadrature)
@@ -231,15 +229,7 @@ GapHeatTransfer::computeGapTempAndDistance()
 
       Elem * slave_side = pinfo->_side;
       std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
-      std::vector<unsigned int> slave_side_dof_indices;
-
-      _dof_map.dof_indices(slave_side, slave_side_dof_indices, _variable->number());
-
-      for(unsigned int i=0; i<slave_side_dof_indices.size(); ++i)
-      {
-        //The zero index is because we only have one point that the phis are evaluated at
-        _gap_temp += slave_side_phi[i][0] * (*_serialized_solution)(slave_side_dof_indices[i]);
-      }
+      _gap_temp = _variable->getValue(slave_side, slave_side_phi);
     }
     else
     {
