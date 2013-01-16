@@ -333,6 +333,8 @@ void
 Assembly::reinit(const Elem * elem)
 {
   _current_elem = elem;
+  _current_neighbor_elem = NULL;
+
   unsigned int elem_dimension = elem->dim();
 
   _current_qrule_volume = _holder_qrule_volume[elem_dimension];
@@ -374,6 +376,9 @@ Assembly::reinit(const Elem * elem)
 void
 Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physical_points)
 {
+  _current_elem = elem;
+  _current_neighbor_elem = NULL;
+
   std::vector<Point> reference_points;
 
   FEInterface::inverse_map(elem->dim(), FEType(), elem, physical_points, reference_points);
@@ -390,6 +395,7 @@ void
 Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
 {
   _current_elem = elem;
+  _current_neighbor_elem = NULL;
 
   unsigned int elem_dimension = _current_elem->dim();
 
@@ -411,6 +417,7 @@ Assembly::reinit(const Elem * elem, unsigned int side)
 {
   _current_elem = elem;
   _current_side = side;
+  _current_neighbor_elem = NULL;
 
   unsigned int elem_dimension = _current_elem->dim();
 
@@ -456,6 +463,7 @@ void
 Assembly::reinit(const Node * node)
 {
   _current_node = node;
+  _current_neighbor_node = NULL;
 }
 
 void

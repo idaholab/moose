@@ -232,7 +232,7 @@ MooseVariable::reinit_aux_neighbor()
 {
   if(_neighbor)
   {
-    _dof_map.dof_indices (_neighbor, _dof_indices, _var_num);
+    _dof_map.dof_indices (_neighbor, _dof_indices_neighbor, _var_num);
     if (_neighbor->n_dofs(_sys.number(), _var_num) > 0)
     {
       _nodal_dof_index_neighbor = _neighbor->dof_number(_sys.number(), _var_num, 0);
