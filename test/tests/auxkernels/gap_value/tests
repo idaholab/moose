@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'gap_value.i'
+    exodiff = 'gap_value_out.e'
+  [../]
+[]
