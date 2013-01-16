@@ -268,6 +268,14 @@ public:
   Number getNodalValueOlder(const Node & node);
 
   /**
+   * Compute the variable value at a point on an element
+   * @param elem The element we are computing on
+   * @param phi Evaluated shape functions at a point
+   * @return The variable value
+   */
+  Number getValue(const Elem * elem, const std::vector<std::vector<Real> > & phi);
+
+  /**
    * Set the scaling factor for this variable
    */
   void scalingFactor(Real factor) { _scaling_factor = factor; }
@@ -294,6 +302,14 @@ public:
    * Whether or not this variable is actually using the shape function second derivative.
    */
   bool usesSecondPhi() { return _need_second || _need_second_old || _need_second_older; }
+
+protected:
+  /**
+   * Get dof indices for the variable
+   * @param elem[in] Element whose DOFs we are requesting
+   * @param dof_indices[out] DOF indices for the given element
+   */
+  void getDofIndices(const Elem * elem, std::vector<unsigned int> & dof_indices);
 
 protected:
   /// Thread ID
@@ -438,6 +454,9 @@ protected:
 
   /// scaling factor for this variable
   Real _scaling_factor;
+
+  friend class NodeFaceConstraint;
+  friend class ValueThresholdMarker;
 };
 
 #endif /* MOOSEVARIABLE_H */

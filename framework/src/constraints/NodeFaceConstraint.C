@@ -134,7 +134,7 @@ NodeFaceConstraint::computeJacobian()
     unsigned int cur_elem = elems[el];
 
     std::vector<unsigned int> dof_indices;
-    _dof_map.dof_indices(_mesh.elem(cur_elem), dof_indices, _var.number());
+    _var.getDofIndices(_mesh.elem(cur_elem), dof_indices);
 
     for(unsigned int di=0; di < dof_indices.size(); di++)
       unique_dof_indices.insert(dof_indices[di]);

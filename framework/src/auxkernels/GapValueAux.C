@@ -93,28 +93,9 @@ GapValueAux::computeValue()
 
   if (pinfo)
   {
-    if (_moose_var.feType().order != CONSTANT)
-    {
-      Elem * side = pinfo->_side;
-      std::vector<std::vector<Real> > & side_phi = pinfo->_side_phi;
-      std::vector<unsigned int> side_dof_indices;
-
-      _dof_map.dof_indices(side, side_dof_indices, _moose_var.number());
-
-      for (unsigned int i=0; i < side_dof_indices.size(); ++i)
-      {
-        //The zero index is because we only have one point that the phis are evaluated at
-        gap_value += side_phi[i][0] * (*_serialized_solution)(side_dof_indices[i]);
-      }
-    }
-    else
-    {
-      const Elem * elem = pinfo->_elem;
-      std::vector<unsigned int> side_dof_indices;
-      _dof_map.dof_indices(elem, side_dof_indices, _moose_var.number());
-      mooseAssert(side_dof_indices.size() == 1, "Wrong size for dof indices");
-      gap_value = (*_serialized_solution)(side_dof_indices[0]);
-    }
+    Elem * side = pinfo->_side;
+    std::vector<std::vector<Real> > & side_phi = pinfo->_side_phi;
+    gap_value = _moose_var.getValue(side, side_phi);
   }
   else
   {

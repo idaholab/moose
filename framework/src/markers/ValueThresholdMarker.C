@@ -42,8 +42,6 @@ ValueThresholdMarker::ValueThresholdMarker(const std::string & name, InputParame
     _variable(_fe_problem.getVariable(_tid, _variable_name)),
     _variable_sys(_variable.sys()),
     _variable_sys_solution(_variable_sys.currentSolution()),
-    _variable_number(_variable.number()),
-    _variable_dof_map(_variable.dofMap()),
     _variable_fe_type(_variable.feType())
 {
   if(_variable_fe_type.family != LAGRANGE && _variable_fe_type != FEType(CONSTANT, MONOMIAL))
@@ -55,7 +53,7 @@ ValueThresholdMarker::ValueThresholdMarker(const std::string & name, InputParame
 Marker::MarkerValue
 ValueThresholdMarker::computeElementMarker()
 {
-  _variable_dof_map.dof_indices(_current_elem, _variable_dof_indices, _variable_number);
+  _variable.getDofIndices(_current_elem, _variable_dof_indices);
 
   Real max_value = -std::numeric_limits<Real>::max();
 

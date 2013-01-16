@@ -46,8 +46,6 @@ protected:
   MooseVariable & _variable;
   SystemBase & _variable_sys;
   const NumericVector<Number> * & _variable_sys_solution;
-  unsigned int _variable_number;
-  const DofMap & _variable_dof_map;
   FEType _variable_fe_type;
   std::vector<unsigned int> _variable_dof_indices;
 };

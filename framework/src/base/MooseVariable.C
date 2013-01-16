@@ -267,6 +267,12 @@ MooseVariable::reinitNodes(const std::vector<unsigned int> & nodes)
 }
 
 void
+MooseVariable::getDofIndices(const Elem * elem, std::vector<unsigned int> & dof_indices)
+{
+  _dof_map.dof_indices(elem, dof_indices, _var_num);
+}
+
+void
 MooseVariable::insert(NumericVector<Number> & residual)
 {
   if (_has_nodal_value)
@@ -1061,4 +1067,28 @@ MooseVariable::getNodalValueOlder(const Node & node)
 {
   unsigned int dof = node.dof_number(_sys.number(), _var_num, 0);
   return _sys.solutionOlder()(dof);
+}
+
+Real
+MooseVariable::getValue(const Elem * elem, const std::vector<std::vector<Real> > & phi)
+{
+  std::vector<unsigned int> dof_indices;
+  _dof_map.dof_indices(elem, dof_indices, _var_num);
+
+  Real value = 0;
+  if (feType().order != CONSTANT)
+  {
+    for (unsigned int i = 0; i < dof_indices.size(); ++i)
+    {
+      //The zero index is because we only have one point that the phis are evaluated at
+      value += phi[i][0] * (*_sys.currentSolution())(dof_indices[i]);
+    }
+  }
+  else
+  {
+    mooseAssert(dof_indices.size() == 1, "Wrong size for dof indices");
+    value = (*_sys.currentSolution())(dof_indices[0]);
+  }
+
+  return value;
 }
