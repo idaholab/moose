@@ -77,7 +77,7 @@ GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters param
 Real
 GapHeatTransfer::computeQpResidual()
 {
-  computeGapTempAndDistance();
+  computeGapValues();
 
   if(!_has_info)
     return 0;
@@ -104,7 +104,7 @@ GapHeatTransfer::computeSlaveFluxContribution( Real grad_t )
 Real
 GapHeatTransfer::computeQpJacobian()
 {
-  computeGapTempAndDistance();
+  computeGapValues();
 
   if(!_has_info)
     return 0;
@@ -115,7 +115,7 @@ GapHeatTransfer::computeQpJacobian()
 Real
 GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
 {
-  computeGapTempAndDistance();
+  computeGapValues();
 
   if(!_has_info)
     return 0;
@@ -205,7 +205,7 @@ GapHeatTransfer::dgapLength( Real normalComponent ) const
 }
 
 void
-GapHeatTransfer::computeGapTempAndDistance()
+GapHeatTransfer::computeGapValues()
 {
   if(!_quadrature)
   {

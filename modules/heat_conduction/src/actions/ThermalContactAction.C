@@ -35,6 +35,8 @@ InputParameters validParams<ThermalContactAction>()
 
   params.addParam<bool>("quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
 
+  params.addParam<VariableName>("contact_pressure", "The contact pressure variable");
+
   return params;
 }
 
@@ -473,8 +475,9 @@ ThermalContactAction::addMaterials()
       params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
 
       params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
-      params.set<bool>("warnings") = getParam<bool>("warnings");
     }
+
+    params.set<bool>("warnings") = getParam<bool>("warnings");
 
     params.set<Real>("gap_conductivity") = getParam<Real>("gap_conductivity");
 
@@ -487,6 +490,12 @@ ThermalContactAction::addMaterials()
     {
       std::vector<VariableName> v(1, getGapConductivityName());
       params.set<std::vector<VariableName> >("gap_k") = v;
+      if (isParamValid("contact_pressure"))
+      {
+        std::cerr << "JDH DEBUG: in action, found contact_pressure" << std::endl;
+        v[0] = getParam<VariableName>("contact_pressure");
+        params.set<std::vector<VariableName> >("contact_pressure") = v;
+      }
     }
 
     // add it to the warehouse
@@ -508,6 +517,11 @@ ThermalContactAction::addMaterials()
 
       std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));
       second_params.set<std::vector<BoundaryName> >("boundary") = bnds;
+      if (getParam<std::string>("type") == "GapHeatTransferLWR")
+      {
+        std::cerr << "JDH DEBUG: setting slave_side" << std::endl;
+        second_params.set<bool>("slave_side") = false;
+      }
 
       // add it to the warehouse
       _awh.addActionBlock(second_action);

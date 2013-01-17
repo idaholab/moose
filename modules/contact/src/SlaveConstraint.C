@@ -143,6 +143,8 @@ SlaveConstraint::computeQpResidual()
       mooseError("Invalid contact formulation");
     }
 
+    pinfo->_contact_force(_component) = resid;
+
   }
   else if (_model == CM_COULOMB)
   {
@@ -198,6 +200,8 @@ SlaveConstraint::computeQpResidual()
     {
       mooseError("Invalid contact formulation");
     }
+
+    pinfo->_contact_force(_component) = resid;
 
   }
   else

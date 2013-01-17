@@ -8,6 +8,10 @@
 #include "ContactMaster.h"
 #include "ContactPenetrationAuxAction.h"
 #include "ContactPenetrationVarAction.h"
+#include "ContactPressureAux.h"
+#include "ContactPressureAuxAction.h"
+#include "ContactPressureVarAction.h"
+#include "NodalAreaAction.h"
 #include "SlaveConstraint.h"
 #include "OneDContactConstraint.h"
 #include "MultiDContactConstraint.h"
@@ -24,16 +28,29 @@ Elk::Contact::registerObjects()
   registerConstraint(MultiDContactConstraint);
   registerProblem(FrictionalContactProblem);
   registerProblem(ReferenceResidualProblem);
+
+  registerAux(ContactPressureAux);
 }
 
 void
 Elk::Contact::associateSyntax(Syntax & syntax)
 {
   syntax.registerActionSyntax("ContactAction", "Contact/*");
+
   syntax.registerActionSyntax("ContactPenetrationAuxAction", "Contact/*");
   syntax.registerActionSyntax("ContactPenetrationVarAction", "Contact/*");
 
+  syntax.registerActionSyntax("ContactPressureAuxAction", "Contact/*");
+  syntax.registerActionSyntax("ContactPressureVarAction", "Contact/*");
+  syntax.registerActionSyntax("NodalAreaAction", "Contact/*");
+
+
   registerAction(ContactAction, "add_dg_kernel");
+
   registerAction(ContactPenetrationAuxAction, "add_aux_bc");
   registerAction(ContactPenetrationVarAction, "add_aux_variable");
+
+  registerAction(ContactPressureAuxAction, "add_aux_bc");
+  registerAction(ContactPressureVarAction, "add_aux_variable");
+  registerAction(NodalAreaAction, "add_user_object");
 }

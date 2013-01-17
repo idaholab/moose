@@ -31,7 +31,7 @@ protected:
   virtual Real dh_conduction();
   virtual Real gapK();
 
-  void computeGapTempAndDistance();
+  virtual void computeGapValues();
 
   const std::string _appended_property_name;
 

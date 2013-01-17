@@ -30,6 +30,8 @@ protected:
 
   virtual Real computeSlaveFluxContribution(Real grad_t);
 
+  virtual void computeGapValues();
+
   bool _quadrature;
 
   NumericVector<Number> * _slave_flux;
@@ -44,8 +46,6 @@ protected:
   Real _gap_distance;
 
   bool _has_info;
-
-  virtual void computeGapTempAndDistance();
 
   const bool _xdisp_coupled;
   const bool _ydisp_coupled;

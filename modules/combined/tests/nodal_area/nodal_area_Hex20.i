@@ -1,0 +1,187 @@
+[Mesh]
+  file = nodal_area_Hex20.e
+  displacements = 'displ_x displ_y displ_z'
+[]
+
+[Functions]
+
+  [./disp]
+    type = PiecewiseLinear
+    x = '0     1'
+    y = '0  20e-6'
+  [../]
+
+[]
+
+[Variables]
+  [./displ_x]
+    order = SECOND
+    family = LAGRANGE
+  [../]
+
+  [./displ_y]
+    order = SECOND
+    family = LAGRANGE
+  [../]
+
+  [./displ_z]
+    order = SECOND
+    family = LAGRANGE
+  [../]
+[]
+
+[AuxVariables]
+  [./stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./nodal_area]
+    order = SECOND
+    family = LAGRANGE
+  [../]
+  [./react_x]
+    order = SECOND
+    family = LAGRANGE
+  [../]
+  [./react_y]
+    order = SECOND
+    family = LAGRANGE
+  [../]
+  [./react_z]
+    order = SECOND
+    family = LAGRANGE
+  [../]
+[]
+
+[SolidMechanics]
+  [./solid]
+    disp_x = displ_x
+    disp_y = displ_y
+    disp_z = displ_z
+    save_in_disp_x = react_x
+    save_in_disp_y = react_y
+    save_in_disp_z = react_z
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_xx]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_xx
+    index = 0
+  [../]
+  [./nodal_area]
+    type = NodalAreaAux
+    variable = nodal_area
+    nodal_area_object = nodal_area_object_0
+  [../]
+[]
+
+[BCs]
+
+  [./move_right]
+    type = FunctionPresetBC
+    boundary = '1'
+    variable = displ_x
+    function = disp
+  [../]
+
+  [./fixed_x]
+    type = DirichletBC
+    boundary = '3 4'
+    variable = displ_x
+    value = 0
+  [../]
+
+  [./fixed_y]
+    type = DirichletBC
+    boundary = 10
+    variable = displ_y
+    value = 0
+  [../]
+
+  [./fixed_z]
+    type = DirichletBC
+    boundary = 11
+    variable = displ_z
+    value = 0
+  [../]
+
+[]
+
+[Contact]
+  [./dummy_name]
+    master = 3
+    slave = 2
+    disp_x = displ_x
+    disp_y = displ_y
+    disp_z = displ_z
+#    model = experimental
+    penalty = 1e7
+    order = SECOND
+    tangential_tolerance = 1e-5
+  [../]
+[]
+
+
+[Materials]
+
+  [./dummy]
+    type = Elastic
+    block = '1 2'
+
+    disp_x = displ_x
+    disp_y = displ_y
+    disp_z = displ_z
+
+    youngs_modulus = 1e6
+    poissons_ratio = 0
+  [../]
+
+[]
+
+[Executioner]
+  type = Transient
+  petsc_options = '-snes_mf_operator -ksp_monitor'
+#  petsc_options_iname = '-snes_type -snes_ls -ksp_gmres_restart -pc_type'
+#  petsc_options_value = 'ls         basic    201                lu'
+
+  petsc_options_iname = '-snes_type -snes_ls -ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
+  petsc_options_value = 'ls         basic    201                hypre    boomeramg      4'
+
+  nl_abs_tol = 1e-6
+  nl_rel_tol = 1e-5
+
+  l_tol = 1e-4
+  l_max_its = 40
+
+  start_time = 0.0
+  dt = 1.0
+  end_time = 1.0
+  num_steps = 100
+
+  [./Quadrature]
+    order = THIRD
+  [../]
+[]
+
+[Postprocessors]
+  [./react_x]
+    type = NodalSum
+    variable = react_x
+    boundary = 1
+  [../]
+  [./total_area]
+    type = NodalSum
+    variable = nodal_area
+    boundary = 2
+  [../]
+[]
+
+[Output]
+  interval = 1
+  output_initial = true
+  exodus = true
+  perf_log = true
+[]

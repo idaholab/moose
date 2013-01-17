@@ -13,11 +13,15 @@
 #include "CoefTimeDerivative.h"
 #include "GaussContForcing.h"
 #include "SharpInterfaceForcing.h"
+#include "NodalArea.h"
+#include "NodalAreaAux.h"
 
 void
 Elk::Misc::registerObjects()
 {
   // Misc
+  registerAux(NodalAreaAux);
+
   registerBoundaryCondition(RobinBC);
 
   registerKernel(BodyForceVoid);
@@ -31,4 +35,6 @@ Elk::Misc::registerObjects()
 
   registerPostprocessor(InternalVolume);
   registerPostprocessor(SharpInterfaceForcing);
+
+  registerUserObject(NodalArea);
 }

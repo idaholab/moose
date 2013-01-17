@@ -94,7 +94,7 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
 void
 GapConductance::computeQpProperties()
 {
-  computeGapTempAndDistance();
+  computeGapValues();
   computeQpConductance();
 }
 
@@ -141,7 +141,7 @@ GapConductance::gapK()
 }
 
 void
-GapConductance::computeGapTempAndDistance()
+GapConductance::computeGapValues()
 {
   if(!_quadrature)
   {
