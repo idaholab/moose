@@ -4,6 +4,5 @@ test = { INPUT : 'abaqus_implicit_creep.i',
          EXODIFF : ['out.e'],
          ABS_ZERO : 1e-6,
          LIBRARY_MODE : ['DYNAMIC'],
-	 SKIP : 'Convergence issues #1613'
-         }
+       }
 
