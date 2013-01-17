@@ -228,15 +228,16 @@ class ParamTable:
         self.table_widget.insertRow(self.table_widget.rowCount())
         name_item = QtGui.QTableWidgetItem(name)
         value_item = QtGui.QTableWidgetItem(value)
-        comment_item = QtGui.QTableWidgetItem()
+
+        comment_item = None
+        if name in self.param_comments:
+          comment_item = QtGui.QTableWidgetItem(self.param_comments[name])
+        else:
+          comment_item = QtGui.QTableWidgetItem()
+          
         self.table_widget.setItem(self.table_widget.rowCount()-1,0,name_item)
         self.table_widget.setItem(self.table_widget.rowCount()-1,1,value_item)
         self.table_widget.setItem(self.table_widget.rowCount()-1,3,comment_item)
-
-        
-
-      
-        
 
   def tableToDict(self, only_not_in_original = False):
     the_data = {}
