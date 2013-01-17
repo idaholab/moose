@@ -110,7 +110,7 @@
 #include "ElementAverageValue.h"
 #include "ElementH1Error.h"
 #include "ElementH1SemiError.h"
-#include "ElementIntegral.h"
+#include "ElementIntegralVariablePostprocessor.h"
 #include "ElementIntegralMaterialProperty.h"
 #include "ElementL2Error.h"
 #include "EmptyPostprocessor.h"
@@ -127,7 +127,7 @@
 #include "Reporter.h"
 #include "SideAverageValue.h"
 #include "SideFluxIntegral.h"
-#include "SideIntegral.h"
+#include "SideIntegralVariablePostprocessor.h"
 #include "NodalMaxValue.h"
 #include "NodalProxyMaxValue.h"
 #include "PlotFunction.h"
@@ -141,6 +141,7 @@
 // user objects
 #include "LayeredIntegral.h"
 #include "LayeredSideIntegral.h"
+#include "ElementIntegralVariableUserObject.h"
 
 // preconditioners
 #include "PhysicsBasedPreconditioner.h"
@@ -325,7 +326,7 @@ registerObjects()
   registerPostprocessor(ElementAverageValue);
   registerPostprocessor(ElementH1Error);
   registerPostprocessor(ElementH1SemiError);
-  registerPostprocessor(ElementIntegral);
+  registerPostprocessor(ElementIntegralVariablePostprocessor);
   registerPostprocessor(ElementIntegralMaterialProperty);
   registerPostprocessor(ElementL2Error);
   registerPostprocessor(ScalarL2Error);
@@ -344,7 +345,7 @@ registerObjects()
   registerPostprocessor(Reporter);
   registerPostprocessor(SideAverageValue);
   registerPostprocessor(SideFluxIntegral);
-  registerPostprocessor(SideIntegral);
+  registerPostprocessor(SideIntegralVariablePostprocessor);
   registerPostprocessor(NodalMaxValue);
   registerPostprocessor(NodalProxyMaxValue);
   registerPostprocessor(ElementalVariableValue);
@@ -356,6 +357,7 @@ registerObjects()
   // user objects
   registerUserObject(LayeredIntegral);
   registerUserObject(LayeredSideIntegral);
+  registerUserObject(ElementIntegralVariableUserObject);
 
   // preconditioners
   registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");

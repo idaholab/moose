@@ -12,53 +12,52 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AverageElementSize.h"
+#include "SideIntegralUserObject.h"
 
 template<>
-InputParameters validParams<AverageElementSize>()
+InputParameters validParams<SideIntegralUserObject>()
 {
-  InputParameters params = validParams<ElementAverageValue>();
+  InputParameters params = validParams<SideUserObject>();
   return params;
 }
 
-AverageElementSize::AverageElementSize(const std::string & name, InputParameters parameters) :
-    ElementAverageValue(name, parameters)
+SideIntegralUserObject::SideIntegralUserObject(const std::string & name, InputParameters parameters) :
+    SideUserObject(name, parameters),
+    _qp(0),
+    _integral_value(0)
 {}
 
 void
-AverageElementSize::initialize()
+SideIntegralUserObject::initialize()
 {
-  ElementAverageValue::initialize();
-  _elems = 0;
+  _integral_value = 0;
 }
 
 void
-AverageElementSize::execute()
+SideIntegralUserObject::execute()
 {
-  ElementIntegralPostprocessor::execute();
-  _elems ++;
+  _integral_value += computeIntegral();
 }
 
 Real
-AverageElementSize::computeIntegral()
+SideIntegralUserObject::getValue()
 {
-  return _current_elem->hmax();
-}
-
-Real
-AverageElementSize::getValue()
-{
-  Real integral = ElementIntegralPostprocessor::getValue();
-
-  gatherSum(_elems);
-
-  return integral / _elems;
+  gatherSum(_integral_value);
+  return _integral_value;
 }
 
 void
-AverageElementSize::threadJoin(const UserObject & y)
+SideIntegralUserObject::threadJoin(const UserObject & y)
 {
-  ElementAverageValue::threadJoin(y);
-  const AverageElementSize & pps = dynamic_cast<const AverageElementSize &>(y);
-  _elems += pps._elems;
+  const SideIntegralUserObject & pps = dynamic_cast<const SideIntegralUserObject &>(y);
+  _integral_value += pps._integral_value;
+}
+
+Real
+SideIntegralUserObject::computeIntegral()
+{
+  Real sum = 0;
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
+  return sum;
 }

@@ -45,19 +45,19 @@
 
 [Postprocessors]
   [./integral_left]
-    type = ElementIntegral
+    type = ElementIntegralVariablePostprocessor
     variable = u
     block = 1
   [../]
 
   [./integral_right]
-    type = ElementIntegral
+    type = ElementIntegralVariablePostprocessor
     variable = u
     block = 2
   [../]
 
   [./integral_all]
-    type = ElementIntegral
+    type = ElementIntegralVariablePostprocessor
     variable = u
   [../]
 []

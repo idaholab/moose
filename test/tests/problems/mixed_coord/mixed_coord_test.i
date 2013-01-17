@@ -52,7 +52,7 @@
 
 [Postprocessors]
   [./volume]
-    type = ElementIntegral
+    type = ElementIntegralVariablePostprocessor
     variable = one
   [../]
 []

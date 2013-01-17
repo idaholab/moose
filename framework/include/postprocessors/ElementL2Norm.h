@@ -15,7 +15,7 @@
 #ifndef ELEMENTL2NORM_H
 #define ELEMENTL2NORM_H
 
-#include "ElementIntegral.h"
+#include "ElementIntegralVariablePostprocessor.h"
 
 //Forward Declarations
 class ElementL2Norm;
@@ -23,7 +23,7 @@ class ElementL2Norm;
 template<>
 InputParameters validParams<ElementL2Norm>();
 
-class ElementL2Norm : public ElementIntegral
+class ElementL2Norm : public ElementIntegralVariablePostprocessor
 {
 public:
   ElementL2Norm(const std::string & name, InputParameters parameters);

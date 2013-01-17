@@ -15,7 +15,7 @@
 #ifndef SIDEFLUXINTEGRAL_H
 #define SIDEFLUXINTEGRAL_H
 
-#include "SideIntegral.h"
+#include "SideIntegralVariablePostprocessor.h"
 #include "MaterialPropertyInterface.h"
 
 //Forward Declarations
@@ -27,8 +27,7 @@ InputParameters validParams<SideFluxIntegral>();
 /**
  * This postprocessor computes a side integral of the mass flux.
  */
-class SideFluxIntegral :
-  public SideIntegral
+class SideFluxIntegral : public SideIntegralVariablePostprocessor
 {
 public:
   SideFluxIntegral(const std::string & name, InputParameters parameters);

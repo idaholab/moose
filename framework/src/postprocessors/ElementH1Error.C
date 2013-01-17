@@ -18,13 +18,13 @@
 template<>
 InputParameters validParams<ElementH1Error>()
 {
-  InputParameters params = validParams<ElementIntegral>();
+  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   return params;
 }
 
 ElementH1Error::ElementH1Error(const std::string & name, InputParameters parameters) :
-    ElementIntegral(name, parameters),
+    ElementIntegralVariablePostprocessor(name, parameters),
     FunctionInterface(parameters),
     _func(getFunction("function"))
 {
@@ -33,7 +33,7 @@ ElementH1Error::ElementH1Error(const std::string & name, InputParameters paramet
 Real
 ElementH1Error::getValue()
 {
-  return std::sqrt(ElementIntegral::getValue());
+  return std::sqrt(ElementIntegralPostprocessor::getValue());
 }
 
 Real

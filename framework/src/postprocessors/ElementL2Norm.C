@@ -17,19 +17,19 @@
 template<>
 InputParameters validParams<ElementL2Norm>()
 {
-  InputParameters params = validParams<ElementIntegral>();
+  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
   return params;
 }
 
 ElementL2Norm::ElementL2Norm(const std::string & name, InputParameters parameters) :
-    ElementIntegral(name, parameters)
+    ElementIntegralVariablePostprocessor(name, parameters)
 {
 }
 
 Real
 ElementL2Norm::getValue()
 {
-  return std::sqrt(ElementIntegral::getValue());
+  return std::sqrt(ElementIntegralVariablePostprocessor::getValue());
 }
 
 Real

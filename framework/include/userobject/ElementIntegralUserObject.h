@@ -12,37 +12,43 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ELEMENTH1SEMIERROR_H
-#define ELEMENTH1SEMIERROR_H
+#ifndef ELEMENTINTEGRALUSEROBJECT_H
+#define ELEMENTINTEGRALUSEROBJECT_H
 
-#include "ElementIntegralVariablePostprocessor.h"
-#include "FunctionInterface.h"
-
-class Function;
+#include "ElementPostprocessor.h"
 
 //Forward Declarations
-class ElementH1SemiError;
+class ElementIntegralUserObject;
 
 template<>
-InputParameters validParams<ElementH1SemiError>();
+InputParameters validParams<ElementIntegralUserObject>();
 
 /**
- * This postprocessor will print out the h1 seminorm between the computed
- * solution and the passed function.
- * ||u,f||h1 is computed as sqrt( (grad u - grad f) * (grad u - grad f) )
+ * This postprocessor computes a volume integral of the specified variable.
+ *
+ * Note that specializations of this integral are possible by deriving from this
+ * class and overriding computeQpIntegral().
  */
-class ElementH1SemiError :
-  public ElementIntegralVariablePostprocessor,
-  public FunctionInterface
+class ElementIntegralUserObject : public ElementUserObject
 {
 public:
-  ElementH1SemiError(const std::string & name, InputParameters parameters);
+  ElementIntegralUserObject(const std::string & name, InputParameters parameters);
 
+  virtual void initialize();
+  virtual void execute();
+  virtual void threadJoin(const UserObject & y);
   virtual Real getValue();
 
+  virtual void finalize(){}
+  virtual void destroy(){}
+
 protected:
-  virtual Real computeQpIntegral();
-  Function & _func;
+  virtual Real computeQpIntegral() = 0;
+  virtual Real computeIntegral();
+
+  unsigned int _qp;
+
+  Real _integral_value;
 };
 
-#endif //ELEMENTH1SEMIERROR_H
+#endif

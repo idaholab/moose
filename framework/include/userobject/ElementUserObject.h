@@ -15,13 +15,14 @@
 #ifndef ELEMENTUSEROBJECT_H
 #define ELEMENTUSEROBJECT_H
 
-#include "UserObject.h"
 #include "MooseVariable.h"
+#include "UserObject.h"
+#include "UserObjectInterface.h"
+#include "Coupleable.h"
+#include "MooseVariableDependencyInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
-#include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
 // libMesh
 #include "elem.h"
@@ -36,7 +37,8 @@ InputParameters validParams<ElementUserObject>();
 class ElementUserObject :
   public UserObject,
   public UserObjectInterface,
-  public CoupleableMooseVariableDependencyIntermediateInterface,
+  public Coupleable,
+  public MooseVariableDependencyInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
   protected PostprocessorInterface
@@ -66,17 +68,22 @@ protected:
 /// The block ID this postprocessor works on
   std::vector<SubdomainName> _blocks;
 
-  /// Convenience reference for when a derived object uses only one variable (refs to _moose_variable[0])
-  MooseVariable & _var;
-
-  /// list of variables when working on more than one
-  std::vector<MooseVariable *> _vars;
+//  /// Convenience reference for when a derived object uses only one variable (refs to _moose_variable[0])
+//  MooseVariable & _var;
+//
+//  /// list of variables when working on more than one
+//  std::vector<MooseVariable *> _vars;
 
   /// The current element pointer (available during execute())
   const Elem * & _current_elem;
 
   /// The current element volume (available during execute())
   const Real & _current_elem_volume;
+
+  const MooseArray< Point > & _q_point;
+  QBase * & _qrule;
+  const MooseArray<Real> & _JxW;
+  const MooseArray<Real> & _coord;
 
   // Single Instance Variables
   Real & _real_zero;

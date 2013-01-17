@@ -12,7 +12,7 @@
 	nx = 3
 	ny = 3
 	elem_type = QUAD4
-	
+
 	stripes = 3
 []
 
@@ -35,7 +35,7 @@
 		type = Reaction
 		variable = u
 	[../]
-	
+
 	[./fv]
 		type = UserForcingFunction
 		variable = u
@@ -45,7 +45,7 @@
 
 [Postprocessors]
 	[./int_0_1]
-		type = SideIntegral
+		type = SideIntegralVariablePostprocessor
 		variable = u
 		boundary = '0 1'
 	[../]

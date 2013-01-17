@@ -15,7 +15,7 @@
 #ifndef LAYEREDSIDEINTEGRAL_H
 #define LAYEREDSIDEINTEGRAL_H
 
-#include "SideIntegral.h"
+#include "SideIntegralVariableUserObject.h"
 
 // libmesh includes
 #include "mesh_tools.h"
@@ -29,7 +29,7 @@ InputParameters validParams<LayeredSideIntegral>();
 /**
  * This UserObject computes volume integrals of a variable storing partial sums for the specified number of intervals in a direction (x,y,z).c
  */
-class LayeredSideIntegral : public SideIntegral
+class LayeredSideIntegral : public SideIntegralVariableUserObject
 {
 public:
   LayeredSideIntegral(const std::string & name, InputParameters parameters);

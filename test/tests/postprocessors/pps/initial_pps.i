@@ -110,13 +110,13 @@
 
 [Postprocessors]
   [./initial_u]
-    type = ElementIntegral
+    type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = initial
   [../]
 
   [./initial_v]
-    type = ElementIntegral
+    type = ElementIntegralVariablePostprocessor
     variable = v
     execute_on = initial
   [../]

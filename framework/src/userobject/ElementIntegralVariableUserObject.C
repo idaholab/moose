@@ -12,53 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AverageElementSize.h"
+#include "ElementIntegralVariableUserObject.h"
 
 template<>
-InputParameters validParams<AverageElementSize>()
+InputParameters validParams<ElementIntegralVariableUserObject>()
 {
-  InputParameters params = validParams<ElementAverageValue>();
+  InputParameters params = validParams<ElementIntegralUserObject>();
+  params.addRequiredParam<VariableName>("variable", "The name of the variable that this object operates on");
   return params;
 }
 
-AverageElementSize::AverageElementSize(const std::string & name, InputParameters parameters) :
-    ElementAverageValue(name, parameters)
-{}
-
-void
-AverageElementSize::initialize()
+ElementIntegralVariableUserObject::ElementIntegralVariableUserObject(const std::string & name, InputParameters parameters) :
+    ElementIntegralUserObject(name, parameters),
+    MooseVariableInterface(parameters, false),
+    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _u(_var.sln()),
+    _grad_u(_var.gradSln())
 {
-  ElementAverageValue::initialize();
-  _elems = 0;
-}
-
-void
-AverageElementSize::execute()
-{
-  ElementIntegralPostprocessor::execute();
-  _elems ++;
+  addMooseVariableDependency(mooseVariable());
 }
 
 Real
-AverageElementSize::computeIntegral()
+ElementIntegralVariableUserObject::computeQpIntegral()
 {
-  return _current_elem->hmax();
-}
-
-Real
-AverageElementSize::getValue()
-{
-  Real integral = ElementIntegralPostprocessor::getValue();
-
-  gatherSum(_elems);
-
-  return integral / _elems;
-}
-
-void
-AverageElementSize::threadJoin(const UserObject & y)
-{
-  ElementAverageValue::threadJoin(y);
-  const AverageElementSize & pps = dynamic_cast<const AverageElementSize &>(y);
-  _elems += pps._elems;
+  return _u[_qp];
 }

@@ -15,7 +15,7 @@
 #ifndef ELEMENTAVERAGEVALUE_H
 #define ELEMENTAVERAGEVALUE_H
 
-#include "ElementIntegral.h"
+#include "ElementIntegralVariablePostprocessor.h"
 
 //Forward Declarations
 class ElementAverageValue;
@@ -29,7 +29,7 @@ InputParameters validParams<ElementAverageValue>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class ElementAverageValue : public ElementIntegral
+class ElementAverageValue : public ElementIntegralVariablePostprocessor
 {
 public:
   ElementAverageValue(const std::string & name, InputParameters parameters);

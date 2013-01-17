@@ -12,48 +12,53 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SideIntegral.h"
+#include "ElementIntegralUserObject.h"
 
 template<>
-InputParameters validParams<SideIntegral>()
+InputParameters validParams<ElementIntegralUserObject>()
 {
-  InputParameters params = validParams<SidePostprocessor>();
+  InputParameters params = validParams<ElementUserObject>();
   return params;
 }
 
-SideIntegral::SideIntegral(const std::string & name, InputParameters parameters) :
-    SidePostprocessor(name, parameters),
+ElementIntegralUserObject::ElementIntegralUserObject(const std::string & name, InputParameters parameters) :
+    ElementUserObject(name, parameters),
+    _qp(0),
     _integral_value(0)
 {}
 
 void
-SideIntegral::initialize()
+ElementIntegralUserObject::initialize()
 {
   _integral_value = 0;
 }
 
 void
-SideIntegral::execute()
+ElementIntegralUserObject::execute()
 {
   _integral_value += computeIntegral();
 }
 
 Real
-SideIntegral::getValue()
+ElementIntegralUserObject::getValue()
 {
   gatherSum(_integral_value);
   return _integral_value;
 }
 
 void
-SideIntegral::threadJoin(const UserObject & y)
+ElementIntegralUserObject::threadJoin(const UserObject & y)
 {
-  const SideIntegral & pps = dynamic_cast<const SideIntegral &>(y);
+  const ElementIntegralUserObject & pps = dynamic_cast<const ElementIntegralUserObject &>(y);
   _integral_value += pps._integral_value;
 }
 
 Real
-SideIntegral::computeQpIntegral()
+ElementIntegralUserObject::computeIntegral()
 {
-  return _u[_qp];
+  Real sum = 0;
+
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
+  return sum;
 }

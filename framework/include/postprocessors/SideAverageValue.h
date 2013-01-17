@@ -15,7 +15,7 @@
 #ifndef SIDEAVERAGEVALUE_H
 #define SIDEAVERAGEVALUE_H
 
-#include "SideIntegral.h"
+#include "SideIntegralVariablePostprocessor.h"
 
 //Forward Declarations
 class SideAverageValue;
@@ -29,7 +29,7 @@ InputParameters validParams<SideAverageValue>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class SideAverageValue : public SideIntegral
+class SideAverageValue : public SideIntegralVariablePostprocessor
 {
 public:
   SideAverageValue(const std::string & name, InputParameters parameters);

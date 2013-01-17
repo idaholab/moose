@@ -45,7 +45,7 @@
 
 [Postprocessors]
   [./integral]
-    type = ElementIntegral
+    type = ElementIntegralVariablePostprocessor
     variable = u
   [../]
 []

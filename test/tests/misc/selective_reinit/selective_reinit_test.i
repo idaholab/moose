@@ -49,7 +49,7 @@
 
 [Postprocessors]
   [./u_integral]
-    type = ElementIntegral
+    type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = residual
   [../]

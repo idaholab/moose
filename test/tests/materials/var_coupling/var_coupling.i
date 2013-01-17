@@ -1,5 +1,5 @@
 # The purpose of this test is to make sure that MooseVariable dependencies from Materials are properly handled.
-# 
+#
 # It it's not, this test will segfault
 
 [Mesh]
@@ -52,7 +52,7 @@
 
 [Postprocessors]
   [./aux1_integral]
-    type = ElementIntegral
+    type = ElementIntegralVariablePostprocessor
     variable = aux1
   [../]
 []

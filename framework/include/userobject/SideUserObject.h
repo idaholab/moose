@@ -16,7 +16,8 @@
 #define SIDEUSEROBJECT_H
 
 #include "UserObject.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "Coupleable.h"
+#include "MooseVariableDependencyInterface.h"
 #include "MooseVariable.h"
 #include "TransientInterface.h"
 #include "UserObjectInterface.h"
@@ -31,7 +32,8 @@ InputParameters validParams<SideUserObject>();
 
 class SideUserObject :
   public UserObject,
-  public CoupleableMooseVariableDependencyIntermediateInterface,
+  public Coupleable,
+  public MooseVariableDependencyInterface,
   public UserObjectInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
@@ -41,8 +43,6 @@ public:
   SideUserObject(const std::string & name, InputParameters parameters);
 
   const std::vector<BoundaryName> & boundaries() { return _boundaries; }
-
-  virtual Real computeIntegral();
 
   /**
    * This function will get called on each geometric object this postprocessor acts on
@@ -61,27 +61,30 @@ public:
   virtual void threadJoin(const UserObject & uo) = 0;
 
 protected:
-  MooseVariable & _var;
+
+//  MooseVariable & _var;
 
   /// list of variables when working on more than one
-  std::vector<MooseVariable *> _vars;
+//  std::vector<MooseVariable *> _vars;
 
   std::vector<BoundaryName> _boundaries;
 
-  unsigned int _qp;
   const MooseArray< Point > & _q_point;
   QBase * & _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
-  const MooseArray<Point> & _normals;
+//  const MooseArray<Point> & _normals;
 
   const Elem * & _current_elem;
+  /// current side of the current element
+  unsigned int & _current_side;
+
   const Elem * & _current_side_elem;
   const Real & _current_side_volume;
 
   // unknown
-  const VariableValue & _u;
-  const VariableGradient & _grad_u;
+//  const VariableValue & _u;
+//  const VariableGradient & _grad_u;
 
   // Single Instance Variables
   Real & _real_zero;

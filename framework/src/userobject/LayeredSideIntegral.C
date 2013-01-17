@@ -20,8 +20,7 @@
 template<>
 InputParameters validParams<LayeredSideIntegral>()
 {
-  InputParameters params = validParams<SideIntegral>();
-  params.set<std::string>("built_by_action") = "add_user_object";
+  InputParameters params = validParams<SideIntegralVariableUserObject>();
 
   MooseEnum directions("x, y, z");
 
@@ -32,7 +31,7 @@ InputParameters validParams<LayeredSideIntegral>()
 }
 
 LayeredSideIntegral::LayeredSideIntegral(const std::string & name, InputParameters parameters) :
-    SideIntegral(name, parameters),
+    SideIntegralVariableUserObject(name, parameters),
     _direction_enum(parameters.get<MooseEnum>("direction")),
     _direction(_direction_enum),
     _num_layers(parameters.get<unsigned int>("num_layers"))
@@ -55,7 +54,7 @@ LayeredSideIntegral::integralValue(Point p) const
 void
 LayeredSideIntegral::initialize()
 {
-  SideIntegral::initialize();
+  SideIntegralVariableUserObject::initialize();
 
   for(unsigned int i=0; i<_layer_values.size(); i++)
     _layer_values[i] = 0.0;
@@ -80,7 +79,7 @@ LayeredSideIntegral::finalize()
 void
 LayeredSideIntegral::threadJoin(const UserObject & y)
 {
-  SideIntegral::threadJoin(y);
+  SideIntegralVariableUserObject::threadJoin(y);
   const LayeredSideIntegral & li = dynamic_cast<const LayeredSideIntegral &>(y);
   for(unsigned int i=0; i<_layer_values.size(); i++)
     _layer_values[i] += li._layer_values[i];

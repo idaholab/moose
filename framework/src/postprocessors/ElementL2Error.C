@@ -18,13 +18,13 @@
 template<>
 InputParameters validParams<ElementL2Error>()
 {
-  InputParameters params = validParams<ElementIntegral>();
+  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   return params;
 }
 
 ElementL2Error::ElementL2Error(const std::string & name, InputParameters parameters) :
-    ElementIntegral(name, parameters),
+    ElementIntegralVariablePostprocessor(name, parameters),
     FunctionInterface(parameters),
     _func(getFunction("function"))
 {
@@ -33,7 +33,7 @@ ElementL2Error::ElementL2Error(const std::string & name, InputParameters paramet
 Real
 ElementL2Error::getValue()
 {
-  return std::sqrt(ElementIntegral::getValue());
+  return std::sqrt(ElementIntegralPostprocessor::getValue());
 }
 
 Real

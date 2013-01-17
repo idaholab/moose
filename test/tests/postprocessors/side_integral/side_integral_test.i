@@ -52,7 +52,7 @@
 
 [Postprocessors]
   [./integral]
-    type = SideIntegral
+    type = SideIntegralVariablePostprocessor
     boundary = 0
     variable = u
   [../]

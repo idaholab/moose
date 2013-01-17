@@ -15,7 +15,7 @@
 #ifndef VOLUMEPOSTPROCESSOR_H
 #define VOLUMEPOSTPROCESSOR_H
 
-#include "ElementIntegral.h"
+#include "ElementIntegralPostprocessor.h"
 
 //Forward Declarations
 class VolumePostprocessor;
@@ -26,7 +26,7 @@ InputParameters validParams<VolumePostprocessor>();
 /**
  * This postprocessor computes the volume of a specified block.
  */
-class VolumePostprocessor : public ElementIntegral
+class VolumePostprocessor : public ElementIntegralPostprocessor
 {
 public:
   VolumePostprocessor(const std::string & name, InputParameters parameters);

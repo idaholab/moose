@@ -15,7 +15,7 @@
 #ifndef ELEMENTL2ERROR_H
 #define ELEMENTL2ERROR_H
 
-#include "ElementIntegral.h"
+#include "ElementIntegralVariablePostprocessor.h"
 #include "FunctionInterface.h"
 
 class Function;
@@ -27,7 +27,7 @@ template<>
 InputParameters validParams<ElementL2Error>();
 
 class ElementL2Error :
-  public ElementIntegral,
+  public ElementIntegralVariablePostprocessor,
   public FunctionInterface
 {
 public:

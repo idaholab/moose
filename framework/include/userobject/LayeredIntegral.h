@@ -15,7 +15,7 @@
 #ifndef LAYEREDINTEGRAL_H
 #define LAYEREDINTEGRAL_H
 
-#include "ElementIntegral.h"
+#include "ElementIntegralVariableUserObject.h"
 
 // libmesh includes
 #include "mesh_tools.h"
@@ -29,7 +29,7 @@ InputParameters validParams<LayeredIntegral>();
 /**
  * This UserObject computes volume integrals of a variable storing partial sums for the specified number of intervals in a direction (x,y,z).c
  */
-class LayeredIntegral : public ElementIntegral
+class LayeredIntegral : public ElementIntegralVariableUserObject
 {
 public:
   LayeredIntegral(const std::string & name, InputParameters parameters);

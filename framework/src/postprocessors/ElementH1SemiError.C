@@ -18,13 +18,13 @@
 template<>
 InputParameters validParams<ElementH1SemiError>()
 {
-  InputParameters params = validParams<ElementIntegral>();
+  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   return params;
 }
 
 ElementH1SemiError::ElementH1SemiError(const std::string & name, InputParameters parameters) :
-    ElementIntegral(name, parameters),
+    ElementIntegralVariablePostprocessor(name, parameters),
     FunctionInterface(parameters),
     _func(getFunction("function"))
 {
@@ -33,7 +33,7 @@ ElementH1SemiError::ElementH1SemiError(const std::string & name, InputParameters
 Real
 ElementH1SemiError::getValue()
 {
-  return std::sqrt(ElementIntegral::getValue());
+  return std::sqrt(ElementIntegralVariablePostprocessor::getValue());
 }
 
 Real

@@ -20,7 +20,7 @@
 template<>
 InputParameters validParams<LayeredIntegral>()
 {
-  InputParameters params = validParams<ElementIntegral>();
+  InputParameters params = validParams<ElementIntegralVariableUserObject>();
   params.set<std::string>("built_by_action") = "add_user_object";
 
   MooseEnum directions("x, y, z");
@@ -32,7 +32,7 @@ InputParameters validParams<LayeredIntegral>()
 }
 
 LayeredIntegral::LayeredIntegral(const std::string & name, InputParameters parameters) :
-    ElementIntegral(name, parameters),
+    ElementIntegralVariableUserObject(name, parameters),
     _direction_enum(parameters.get<MooseEnum>("direction")),
     _direction(_direction_enum),
     _num_layers(parameters.get<unsigned int>("num_layers"))
@@ -55,7 +55,7 @@ LayeredIntegral::integralValue(Point p) const
 void
 LayeredIntegral::initialize()
 {
-  ElementIntegral::initialize();
+  ElementIntegralVariableUserObject::initialize();
 
   for(unsigned int i=0; i<_layer_values.size(); i++)
     _layer_values[i] = 0.0;
@@ -80,7 +80,7 @@ LayeredIntegral::finalize()
 void
 LayeredIntegral::threadJoin(const UserObject & y)
 {
-  ElementIntegral::threadJoin(y);
+  ElementIntegralVariableUserObject::threadJoin(y);
   const LayeredIntegral & li = dynamic_cast<const LayeredIntegral &>(y);
   for(unsigned int i=0; i<_layer_values.size(); i++)
     _layer_values[i] += li._layer_values[i];

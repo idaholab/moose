@@ -15,14 +15,14 @@
 #ifndef ELEMENTINTEGRALMATERIALPROPERTY_H
 #define ELEMENTINTEGRALMATERIALPROPERTY_H
 
-#include "ElementIntegral.h"
+#include "ElementIntegralPostprocessor.h"
 
 class ElementIntegralMaterialProperty;
 
 template<>
 InputParameters validParams<ElementIntegralMaterialProperty>();
 
-class ElementIntegralMaterialProperty : public ElementIntegral
+class ElementIntegralMaterialProperty : public ElementIntegralPostprocessor
 {
 public:
   ElementIntegralMaterialProperty(const std::string & name, InputParameters parameters);

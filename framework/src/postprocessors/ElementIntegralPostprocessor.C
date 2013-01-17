@@ -12,60 +12,49 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ElementIntegral.h"
+#include "ElementIntegralPostprocessor.h"
 
 template<>
-InputParameters validParams<ElementIntegral>()
+InputParameters validParams<ElementIntegralPostprocessor>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
   return params;
 }
 
-ElementIntegral::ElementIntegral(const std::string & name, InputParameters parameters) :
+ElementIntegralPostprocessor::ElementIntegralPostprocessor(const std::string & name, InputParameters parameters) :
     ElementPostprocessor(name, parameters),
-    _q_point(_subproblem.points(_tid)),
-    _qrule(_subproblem.qRule(_tid)),
-    _JxW(_subproblem.JxW(_tid)),
-    _coord(_subproblem.coords(_tid)),
-    _u(_var.sln()),
-    _grad_u(_var.gradSln()),
+    _qp(0),
     _integral_value(0)
 {}
 
 void
-ElementIntegral::initialize()
+ElementIntegralPostprocessor::initialize()
 {
   _integral_value = 0;
 }
 
 void
-ElementIntegral::execute()
+ElementIntegralPostprocessor::execute()
 {
   _integral_value += computeIntegral();
 }
 
 Real
-ElementIntegral::getValue()
+ElementIntegralPostprocessor::getValue()
 {
   gatherSum(_integral_value);
   return _integral_value;
 }
 
 void
-ElementIntegral::threadJoin(const UserObject & y)
+ElementIntegralPostprocessor::threadJoin(const UserObject & y)
 {
-  const ElementIntegral & pps = dynamic_cast<const ElementIntegral &>(y);
+  const ElementIntegralPostprocessor & pps = dynamic_cast<const ElementIntegralPostprocessor &>(y);
   _integral_value += pps._integral_value;
 }
 
 Real
-ElementIntegral::computeQpIntegral()
-{
-  return _u[_qp];
-}
-
-Real
-ElementIntegral::computeIntegral()
+ElementIntegralPostprocessor::computeIntegral()
 {
   Real sum = 0;
 

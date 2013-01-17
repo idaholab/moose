@@ -17,33 +17,33 @@
 template<>
 InputParameters validParams<SideAverageValue>()
 {
-  InputParameters params = validParams<SideIntegral>();
+  InputParameters params = validParams<SideIntegralVariablePostprocessor>();
   return params;
 }
 
 SideAverageValue::SideAverageValue(const std::string & name, InputParameters parameters) :
-    SideIntegral(name, parameters),
+    SideIntegralVariablePostprocessor(name, parameters),
     _volume(0)
 {}
 
 void
 SideAverageValue::initialize()
 {
-  SideIntegral::initialize();
+  SideIntegralVariablePostprocessor::initialize();
   _volume = 0;
 }
 
 void
 SideAverageValue::execute()
 {
-  SideIntegral::execute();
+  SideIntegralVariablePostprocessor::execute();
   _volume += _current_side_volume;
 }
 
 Real
 SideAverageValue::getValue()
 {
-  Real integral = SideIntegral::getValue();
+  Real integral = SideIntegralVariablePostprocessor::getValue();
 
   gatherSum(_volume);
 
@@ -54,7 +54,7 @@ SideAverageValue::getValue()
 void
 SideAverageValue::threadJoin(const UserObject & y)
 {
-  SideIntegral::threadJoin(y);
+  SideIntegralVariablePostprocessor::threadJoin(y);
   const SideAverageValue & pps = dynamic_cast<const SideAverageValue &>(y);
   _volume += pps._volume;
 }

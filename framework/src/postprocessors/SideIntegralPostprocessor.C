@@ -12,28 +12,52 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "VolumePostprocessor.h"
+#include "SideIntegralPostprocessor.h"
 
 template<>
-InputParameters validParams<VolumePostprocessor>()
+InputParameters validParams<SideIntegralPostprocessor>()
 {
-InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = validParams<SidePostprocessor>();
   return params;
 }
 
-VolumePostprocessor::VolumePostprocessor(const std::string & name, InputParameters parameters) :
-    ElementIntegralPostprocessor(name, parameters)
+SideIntegralPostprocessor::SideIntegralPostprocessor(const std::string & name, InputParameters parameters) :
+    SidePostprocessor(name, parameters),
+    _qp(0),
+    _integral_value(0)
 {}
 
 void
-VolumePostprocessor::threadJoin(const UserObject &y)
+SideIntegralPostprocessor::initialize()
 {
-  const VolumePostprocessor & pps = dynamic_cast<const VolumePostprocessor &>(y);
+  _integral_value = 0;
+}
+
+void
+SideIntegralPostprocessor::execute()
+{
+  _integral_value += computeIntegral();
+}
+
+Real
+SideIntegralPostprocessor::getValue()
+{
+  gatherSum(_integral_value);
+  return _integral_value;
+}
+
+void
+SideIntegralPostprocessor::threadJoin(const UserObject & y)
+{
+  const SideIntegralPostprocessor & pps = dynamic_cast<const SideIntegralPostprocessor &>(y);
   _integral_value += pps._integral_value;
 }
 
 Real
-VolumePostprocessor::computeQpIntegral()
+SideIntegralPostprocessor::computeIntegral()
 {
-  return 1.0;
+  Real sum = 0;
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
+  return sum;
 }

@@ -12,16 +12,16 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ELEMENTINTEGRAL_H
-#define ELEMENTINTEGRAL_H
+#ifndef SIDEINTEGRALUSEROBJECT_H
+#define SIDEINTEGRALUSEROBJECT_H
 
-#include "ElementPostprocessor.h"
+#include "SidePostprocessor.h"
 
 //Forward Declarations
-class ElementIntegral;
+class SideIntegralUserObject;
 
 template<>
-InputParameters validParams<ElementIntegral>();
+InputParameters validParams<SideIntegralUserObject>();
 
 /**
  * This postprocessor computes a volume integral of the specified variable.
@@ -29,31 +29,24 @@ InputParameters validParams<ElementIntegral>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class ElementIntegral : public ElementPostprocessor
+class SideIntegralUserObject : public SideUserObject
 {
 public:
-  ElementIntegral(const std::string & name, InputParameters parameters);
+  SideIntegralUserObject(const std::string & name, InputParameters parameters);
 
   virtual void initialize();
   virtual void execute();
-  virtual void threadJoin(const UserObject & y);
   virtual Real getValue();
+  virtual void threadJoin(const UserObject & y);
+
+  virtual void finalize(){}
+  virtual void destroy(){}
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() = 0;
   virtual Real computeIntegral();
 
   unsigned int _qp;
-
-  const MooseArray< Point > & _q_point;
-  QBase * & _qrule;
-  const MooseArray<Real> & _JxW;
-  const MooseArray<Real> & _coord;
-
-  /// Holds the solution at current quadrature points
-  VariableValue & _u;
-  /// Holds the solution gradient at the current quadrature points
-  VariableGradient & _grad_u;
 
   Real _integral_value;
 };

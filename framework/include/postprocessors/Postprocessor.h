@@ -40,31 +40,6 @@ public:
   virtual PostprocessorValue getValue() = 0;
 
   /**
-   * Gather the parallel sum of the variable passed in. It HAS to take care of values across all threads and CPUs (we DO hybrid parallelism!)
-   *
-   * After calling this, the variable that was passed in will hold the gathered value.
-   */
-  template <typename T>
-  void gatherSum(T & value)
-  {
-    Parallel::sum(value);
-  }
-
-  template <typename T>
-  void gatherMax(T & value)
-  {
-    Parallel::max(value);
-  }
-
-  template <typename T1, typename T2>
-  void gatherProxyValueMax(T1 & value, T2 & proxy)
-  {
-    unsigned int rank;
-    Parallel::maxloc(value, rank);
-    Parallel::broadcast(proxy, rank);
-  }
-
-  /**
    * Get the postprocessor output type
    * @return postprocessor output type
    */

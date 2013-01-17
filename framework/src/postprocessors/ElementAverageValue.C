@@ -17,19 +17,19 @@
 template<>
 InputParameters validParams<ElementAverageValue>()
 {
-  InputParameters params = validParams<ElementIntegral>();
+  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
   return params;
 }
 
 ElementAverageValue::ElementAverageValue(const std::string & name, InputParameters parameters) :
-    ElementIntegral(name, parameters),
+    ElementIntegralVariablePostprocessor(name, parameters),
     _volume(0)
 {}
 
 void
 ElementAverageValue::initialize()
 {
-  ElementIntegral::initialize();
+  ElementIntegralVariablePostprocessor::initialize();
 
   _volume = 0;
 }
@@ -37,7 +37,7 @@ ElementAverageValue::initialize()
 void
 ElementAverageValue::execute()
 {
-  ElementIntegral::execute();
+  ElementIntegralVariablePostprocessor::execute();
 
   _volume += _current_elem_volume;
 }
@@ -45,7 +45,7 @@ ElementAverageValue::execute()
 Real
 ElementAverageValue::getValue()
 {
-  Real integral = ElementIntegral::getValue();
+  Real integral = ElementIntegralVariablePostprocessor::getValue();
 
   gatherSum(_volume);
 
@@ -55,7 +55,7 @@ ElementAverageValue::getValue()
 void
 ElementAverageValue::threadJoin(const UserObject & y)
 {
-  ElementIntegral::threadJoin(y);
+  ElementIntegralVariablePostprocessor::threadJoin(y);
   const ElementAverageValue & pps = dynamic_cast<const ElementAverageValue &>(y);
   _volume += pps._volume;
 }

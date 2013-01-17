@@ -12,16 +12,16 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SIDEINTEGRAL_H
-#define SIDEINTEGRAL_H
+#ifndef SIDEINTEGRALPOSTPROCESSOR_H
+#define SIDEINTEGRALPOSTPROCESSOR_H
 
 #include "SidePostprocessor.h"
 
 //Forward Declarations
-class SideIntegral;
+class SideIntegralPostprocessor;
 
 template<>
-InputParameters validParams<SideIntegral>();
+InputParameters validParams<SideIntegralPostprocessor>();
 
 /**
  * This postprocessor computes a volume integral of the specified variable.
@@ -29,10 +29,10 @@ InputParameters validParams<SideIntegral>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class SideIntegral : public SidePostprocessor
+class SideIntegralPostprocessor : public SidePostprocessor
 {
 public:
-  SideIntegral(const std::string & name, InputParameters parameters);
+  SideIntegralPostprocessor(const std::string & name, InputParameters parameters);
 
   virtual void initialize();
   virtual void execute();
@@ -40,7 +40,10 @@ public:
   virtual void threadJoin(const UserObject & y);
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() = 0;
+  virtual Real computeIntegral();
+
+  unsigned int _qp;
 
   Real _integral_value;
 };

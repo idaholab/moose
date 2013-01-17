@@ -15,7 +15,7 @@
 #ifndef ELEMENTH1ERROR_H
 #define ELEMENTH1ERROR_H
 
-#include "ElementIntegral.h"
+#include "ElementIntegralVariablePostprocessor.h"
 #include "FunctionInterface.h"
 
 class Function;
@@ -32,7 +32,7 @@ InputParameters validParams<ElementH1Error>();
  * ||u,f||h1 is computed as sqrt( (u-f)^2 + (grad u - grad f) * (grad u - grad f) )
  */
 class ElementH1Error :
-  public ElementIntegral,
+  public ElementIntegralVariablePostprocessor,
   public FunctionInterface
 {
 public:

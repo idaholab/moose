@@ -12,37 +12,40 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ELEMENTH1SEMIERROR_H
-#define ELEMENTH1SEMIERROR_H
+#ifndef ELEMENTINTEGRALVARIABLEPOSTPROCESSOR_H
+#define ELEMENTINTEGRALVARIABLEPOSTPROCESSOR_H
 
-#include "ElementIntegralVariablePostprocessor.h"
-#include "FunctionInterface.h"
-
-class Function;
+#include "ElementIntegralPostprocessor.h"
+#include "MooseVariableInterface.h"
 
 //Forward Declarations
-class ElementH1SemiError;
+class ElementIntegralVariablePostprocessor;
 
 template<>
-InputParameters validParams<ElementH1SemiError>();
+InputParameters validParams<ElementIntegralVariablePostprocessor>();
 
 /**
- * This postprocessor will print out the h1 seminorm between the computed
- * solution and the passed function.
- * ||u,f||h1 is computed as sqrt( (grad u - grad f) * (grad u - grad f) )
+ * This postprocessor computes a volume integral of the specified variable.
+ *
+ * Note that specializations of this integral are possible by deriving from this
+ * class and overriding computeQpIntegral().
  */
-class ElementH1SemiError :
-  public ElementIntegralVariablePostprocessor,
-  public FunctionInterface
+class ElementIntegralVariablePostprocessor :
+  public ElementIntegralPostprocessor,
+  public MooseVariableInterface
 {
 public:
-  ElementH1SemiError(const std::string & name, InputParameters parameters);
-
-  virtual Real getValue();
+  ElementIntegralVariablePostprocessor(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpIntegral();
-  Function & _func;
+
+  MooseVariable & _var;
+
+  /// Holds the solution at current quadrature points
+  VariableValue & _u;
+  /// Holds the solution gradient at the current quadrature points
+  VariableGradient & _grad_u;
 };
 
-#endif //ELEMENTH1SEMIERROR_H
+#endif
