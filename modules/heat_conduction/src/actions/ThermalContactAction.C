@@ -518,7 +518,6 @@ ThermalContactAction::addMaterials()
       second_params.set<std::vector<BoundaryName> >("boundary") = bnds;
       if (getParam<std::string>("type") == "GapHeatTransferLWR")
       {
-        std::cerr << "JDH DEBUG: setting slave_side" << std::endl;
         second_params.set<bool>("slave_side") = false;
       }
 
