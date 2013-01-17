@@ -492,7 +492,6 @@ ThermalContactAction::addMaterials()
       params.set<std::vector<VariableName> >("gap_k") = v;
       if (isParamValid("contact_pressure"))
       {
-        std::cerr << "JDH DEBUG: in action, found contact_pressure" << std::endl;
         v[0] = getParam<VariableName>("contact_pressure");
         params.set<std::vector<VariableName> >("contact_pressure") = v;
       }
