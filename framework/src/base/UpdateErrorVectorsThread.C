@@ -35,7 +35,7 @@ UpdateErrorVectorsThread::UpdateErrorVectorsThread(FEProblem & fe_problem, std::
       it != _indicator_field_to_error_vector.end();
       ++it)
   {
-    unsigned int var_num = _aux_sys.getVariable(0, it->first).number();
+    unsigned int var_num = _aux_sys.getVariable(0, it->first).index();
     _indicator_field_number_to_error_vector[var_num] = it->second;
   }
 }

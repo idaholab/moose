@@ -48,7 +48,7 @@ ComputeJacobianThread::computeJacobian()
   for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
   {
     Kernel * kernel = *it;
-    kernel->subProblem().prepareShapes(kernel->variable().number(), _tid);
+    kernel->subProblem().prepareShapes(kernel->variable().index(), _tid);
     kernel->computeJacobian();
   }
 }
@@ -62,7 +62,7 @@ ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
     IntegratedBC * bc = *it;
     if (bc->shouldApply())
     {
-      bc->subProblem().prepareFaceShapes(bc->variable().number(), _tid);
+      bc->subProblem().prepareFaceShapes(bc->variable().index(), _tid);
       bc->computeJacobian();
     }
   }
@@ -75,8 +75,8 @@ ComputeJacobianThread::computeInternalFaceJacobian()
   for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
   {
     DGKernel * dg = *it;
-    dg->subProblem().prepareFaceShapes(dg->variable().number(), _tid);
-    dg->subProblem().prepareNeighborShapes(dg->variable().number(), _tid);
+    dg->subProblem().prepareFaceShapes(dg->variable().index(), _tid);
+    dg->subProblem().prepareNeighborShapes(dg->variable().index(), _tid);
     dg->computeJacobian();
   }
 }

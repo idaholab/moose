@@ -74,10 +74,18 @@ public:
   void reinitNodes(const std::vector<unsigned int> & nodes);
 
   /**
-   * Get the variable number
-   * @return The variable name
+   * Get the variable index.
+   *
+   * Used to index into the vector of residuals, jacobians blocks, etc.
+   * @return The variable index
    */
-  unsigned int number() { return _moose_var_num; }
+  unsigned int index() { return _index; }
+
+  /**
+   * Get variable number coming from libMesh
+   * @return the libmesh variable number
+   */
+  unsigned int number() { return _var_num; }
 
   /**
    * Get the system this variable is part of.
@@ -319,7 +327,7 @@ protected:
   /// The FEType associated with this variable
   FEType _fe_type;
   /// variable number (MOOSE)
-  unsigned int _moose_var_num;
+  unsigned int _index;
   Moose::VarKindType _var_kind;
   /// Problem this variable is part of
   SubProblem & _subproblem;

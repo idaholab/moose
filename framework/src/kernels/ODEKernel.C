@@ -39,7 +39,7 @@ ODEKernel::reinit()
 void
 ODEKernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlockScalar(_var.number());
+  DenseVector<Number> & re = _assembly.residualBlockScalar(_var.index());
   for (_i = 0; _i < _var.order(); _i++)
     re(_i) += computeQpResidual();
 }
@@ -47,7 +47,7 @@ ODEKernel::computeResidual()
 void
 ODEKernel::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlockScalar(_var.number(), _var.number());
+  DenseMatrix<Number> & ke = _assembly.jacobianBlockScalar(_var.index(), _var.index());
 
   for (_i = 0; _i < _var.order(); _i++)
     for (_j = 0; _j < _var.order(); _j++)
@@ -55,25 +55,25 @@ ODEKernel::computeJacobian()
       if (_i == _j)
         ke(_i, _j) += computeQpJacobian();
       else
-        ke(_i, _j) += computeQpOffDiagJacobian(_var.number());
+        ke(_i, _j) += computeQpOffDiagJacobian(_var.index());
     }
 }
 
 void
 ODEKernel::computeOffDiagJacobian(unsigned int jvar)
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlockScalar(_var.number(), jvar);
+  DenseMatrix<Number> & ke = _assembly.jacobianBlockScalar(_var.index(), jvar);
   MooseVariableScalar & var_j = _sys.getScalarVariable(_tid, jvar);
 
   for (_i = 0; _i < _var.order(); _i++)
     for (_j = 0; _j < var_j.order(); _j++)
     {
-      if (jvar == _var.number())
+      if (jvar == _var.index())
       {
         if (_i == _j)
           ke(_i, _j) += computeQpJacobian();
         else
-          ke(_i, _j) += computeQpOffDiagJacobian(_var.number());
+          ke(_i, _j) += computeQpOffDiagJacobian(_var.index());
       }
       else
         ke(_i, _j) += computeQpOffDiagJacobian(jvar);

@@ -107,8 +107,8 @@ NodeFaceConstraint::computeSlaveValue(NumericVector<Number> & current_solution)
 void
 NodeFaceConstraint::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  DenseVector<Number> & neighbor_re = _assembly.residualBlockNeighbor(_var.number());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.index());
+  DenseVector<Number> & neighbor_re = _assembly.residualBlockNeighbor(_var.index());
 
   _qp=0;
 
@@ -144,10 +144,10 @@ NodeFaceConstraint::computeJacobian()
     _connected_dof_indices.push_back(*sit);
 
   //  DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
-  DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
+  DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.index(), _var.index());
 
   //  DenseMatrix<Number> & Kne = _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number());
-  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.index(), _var.index());
 
   _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
   _Kne.resize(_test_master.size(), _connected_dof_indices.size());

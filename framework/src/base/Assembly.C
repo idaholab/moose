@@ -721,7 +721,7 @@ Assembly::prepareVariable(MooseVariable * var)
     unsigned int vi = (*it).first;
     unsigned int vj = (*it).second;
 
-    if(vi == var->number() || vj == var->number())
+    if(vi == var->index() || vj == var->index())
     {
       MooseVariable & ivar = _sys.getVariable(_tid, vi);
       MooseVariable & jvar = _sys.getVariable(_tid, vj);
@@ -730,8 +730,8 @@ Assembly::prepareVariable(MooseVariable * var)
     }
   }
 
-  _sub_Re[var->number()].resize(var->dofIndices().size());
-  _sub_Re[var->number()].zero();
+  _sub_Re[var->index()].resize(var->dofIndices().size());
+  _sub_Re[var->index()].zero();
 }
 
 void

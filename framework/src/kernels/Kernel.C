@@ -127,7 +127,7 @@ Kernel::~Kernel()
 void
 Kernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.index());
   _local_re.resize(re.size());
   _local_re.zero();
 
@@ -149,7 +149,7 @@ Kernel::computeResidual()
 void
 Kernel::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), _var.index());
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
@@ -178,13 +178,13 @@ Kernel::computeOffDiagJacobian(unsigned int jvar)
 {
 //  Moose::perf_log.push("computeOffDiagJacobian()",_name);
 
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), jvar);
 
   for (_i=0; _i<_test.size(); _i++)
     for (_j=0; _j<_phi.size(); _j++)
       for (_qp=0; _qp<_qrule->n_points(); _qp++)
       {
-        if(jvar == _var.number())
+        if(jvar == _var.index())
           ke(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian();
         else
           ke(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(jvar);

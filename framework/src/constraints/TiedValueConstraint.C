@@ -42,7 +42,7 @@ TiedValueConstraint::computeQpResidual(Moose::ConstraintType type)
   case Moose::Slave:
     return (_u_slave[_qp] - _u_master[_qp])*_test_slave[_i][_qp];
   case Moose::Master:
-    double slave_resid = _residual_copy(_current_node->dof_number(0, _var.number(), 0));
+    double slave_resid = _residual_copy(_current_node->dof_number(0, _var.index(), 0));
     return slave_resid*_test_master[_i][_qp];
   }
   return 0;
@@ -59,7 +59,7 @@ TiedValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
   case Moose::SlaveMaster:
     return -_phi_master[_j][_qp]*_test_slave[_i][_qp];
   case Moose::MasterSlave:
-    slave_jac = (*_jacobian)(_current_node->dof_number(0, _var.number(), 0), _connected_dof_indices[_j]);
+    slave_jac = (*_jacobian)(_current_node->dof_number(0, _var.index(), 0), _connected_dof_indices[_j]);
     return slave_jac*_test_master[_i][_qp];
   case Moose::MasterMaster:
     return 0;

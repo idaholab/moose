@@ -43,7 +43,7 @@ ComputeExplicitJacobianThread::computeJacobian()
   for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
   {
     Kernel * kernel = *it;
-     kernel->subProblem().prepareShapes(kernel->variable().number(), _tid);
+     kernel->subProblem().prepareShapes(kernel->variable().index(), _tid);
      kernel->computeJacobian();
   }
 }

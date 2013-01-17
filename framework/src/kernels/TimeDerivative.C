@@ -45,7 +45,7 @@ TimeDerivative::computeJacobian()
 {
   if (_lumping)
   {
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), _var.index());
 
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)

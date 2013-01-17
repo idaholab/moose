@@ -145,7 +145,7 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
 
     std::set<SubdomainID> blk_ids;
     if (!parameters.isParamValid("block"))
-      blk_ids = _var_map[kernel->variable().number()];
+      blk_ids = _var_map[kernel->variable().index()];
     else
     {
       std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
@@ -153,7 +153,7 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
       {
         SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
 
-        if (_var_map[kernel->variable().number()].count(blk_id) > 0 || _var_map[kernel->variable().number()].size() == 0)
+        if (_var_map[kernel->variable().index()].count(blk_id) > 0 || _var_map[kernel->variable().index()].size() == 0)
           blk_ids.insert(blk_id);
         else
           mooseError("AuxKernel (" + kernel->name() + "): block outside of the domain of the variable");

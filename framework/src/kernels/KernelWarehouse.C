@@ -112,7 +112,7 @@ KernelWarehouse::updateActiveKernels(unsigned int subdomain_id)
     {
       _time_kernels.push_back(kernel);
       _active_kernels.push_back(kernel);
-      _active_var_kernels[kernel->variable().number()].push_back(kernel);
+      _active_var_kernels[kernel->variable().index()].push_back(kernel);
     }
   }
   for (std::vector<Kernel *>::const_iterator it = _nontime_global_kernels.begin(); it != _nontime_global_kernels.end(); ++it)
@@ -122,7 +122,7 @@ KernelWarehouse::updateActiveKernels(unsigned int subdomain_id)
     {
       _non_time_kernels.push_back(kernel);
       _active_kernels.push_back(kernel);
-      _active_var_kernels[kernel->variable().number()].push_back(kernel);
+      _active_var_kernels[kernel->variable().index()].push_back(kernel);
     }
   }
   // then kernels that live on a specified block
@@ -133,7 +133,7 @@ KernelWarehouse::updateActiveKernels(unsigned int subdomain_id)
     {
       _time_kernels.push_back(kernel);
       _active_kernels.push_back(kernel);
-      _active_var_kernels[kernel->variable().number()].push_back(kernel);
+      _active_var_kernels[kernel->variable().index()].push_back(kernel);
     }
   }
 
@@ -144,7 +144,7 @@ KernelWarehouse::updateActiveKernels(unsigned int subdomain_id)
     {
       _non_time_kernels.push_back(kernel);
       _active_kernels.push_back(kernel);
-      _active_var_kernels[kernel->variable().number()].push_back(kernel);
+      _active_var_kernels[kernel->variable().index()].push_back(kernel);
     }
   }
 }

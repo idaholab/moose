@@ -52,6 +52,6 @@ NodalScalarKernel::reinit()
 void
 NodalScalarKernel::computeOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _var.number())
+  if (jvar == _var.index())
     computeJacobian();
 }

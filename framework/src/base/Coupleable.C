@@ -100,8 +100,8 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
   MooseVariable * var = getVar(var_name, comp);
   switch (var->kind())
   {
-  case Moose::VAR_NONLINEAR: return getVar(var_name, comp)->number();
-  case Moose::VAR_AUXILIARY: return std::numeric_limits<unsigned int>::max() - getVar(var_name, comp)->number();
+  case Moose::VAR_NONLINEAR: return getVar(var_name, comp)->index();
+  case Moose::VAR_AUXILIARY: return std::numeric_limits<unsigned int>::max() - getVar(var_name, comp)->index();
   }
   mooseError("Unknown variable kind. Corrupted binary?");
 }
@@ -346,7 +346,7 @@ ScalarCoupleable::isCoupledScalar(const std::string & var_name, unsigned int i)
 unsigned int
 ScalarCoupleable::coupledScalar(const std::string & var_name, unsigned int comp)
 {
-  return getScalarVar(var_name, comp)->number();
+  return getScalarVar(var_name, comp)->index();
 }
 
 

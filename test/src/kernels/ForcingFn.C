@@ -19,7 +19,7 @@ ForcingFn::funcValue()
   Point pt = _q_point[_qp];
 
 //  return (pt(0)*pt(0) + pt(1)*pt(1));
-  if (_var.number() == 0)
+  if (_var.index() == 0)
     return (pt(0)*pt(0) + pt(1)*pt(1));
   else
     return -4;

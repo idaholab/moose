@@ -34,15 +34,24 @@ class SystemBase;
 class MooseVariableScalar
 {
 public:
-  MooseVariableScalar(unsigned int var_num, unsigned int mvn, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  MooseVariableScalar(unsigned int var_num, unsigned int index, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
   virtual ~MooseVariableScalar();
 
   void reinit();
 
   /**
-   * Get the variable number
+   * Get the variable index.
+   *
+   * Used to index into the vector of residuals, jacobians blocks, etc.
+   * @return The variable index
    */
-  unsigned int number();
+  unsigned int index();
+
+  /**
+   * Get variable number coming from libMesh
+   * @return the libmesh variable number
+   */
+  unsigned int number() { return _var_num; }
 
   /**
    * Get the variable number
@@ -88,7 +97,7 @@ protected:
   /// variable number (from libMesh)
   unsigned int _var_num;
   /// variable number within MOOSE
-  unsigned int _moose_var_num;
+  unsigned int _index;
   Moose::VarKindType _var_kind;
   /// Problem this variable is part of
   SubProblem & _subproblem;

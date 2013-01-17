@@ -23,10 +23,10 @@
 #include "numeric_vector.h"
 #include "dof_map.h"
 
-MooseVariable::MooseVariable(unsigned int var_num, unsigned int mvn, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
+MooseVariable::MooseVariable(unsigned int var_num, unsigned int index, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
     _var_num(var_num),
     _fe_type(fe_type),
-    _moose_var_num(mvn),
+    _index(index),
     _var_kind(var_kind),
     _subproblem(sys.subproblem()),
     _sys(sys),

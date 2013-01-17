@@ -89,7 +89,7 @@ AdaptivityAction::act()
       std::string name = weight_names[i];
       double value = weight_values[i];
 
-      weights[system.getVariable(0, name).number()] = value;
+      weights[system.getVariable(0, name).index()] = value;
     }
 
     std::vector<FEMNormType> norms(system.nVariables(), H1_SEMINORM);

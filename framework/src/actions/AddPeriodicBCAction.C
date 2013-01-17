@@ -49,7 +49,7 @@ AddPeriodicBCAction::setPeriodicVars(PeriodicBoundaryBase & p, const std::vector
   NonlinearSystem & nl = _problem->getNonlinearSystem();
 
   for (std::vector<std::string>::const_iterator it = var_names.begin(); it != var_names.end(); ++it)
-    p.set_variable(nl.getVariable(0, (*it)).number());
+    p.set_variable(nl.getVariable(0, (*it)).index());
 }
 
 bool

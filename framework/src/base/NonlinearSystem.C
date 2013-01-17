@@ -368,7 +368,7 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
 
     std::set<SubdomainID> blk_ids;
     if (!parameters.isParamValid("block"))
-      blk_ids = _var_map[kernel->variable().number()];
+      blk_ids = _var_map[kernel->variable().index()];
     else
     {
       std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
@@ -376,7 +376,7 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
       {
         SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
 
-        if (_var_map[kernel->variable().number()].count(blk_id) > 0 || _var_map[kernel->variable().number()].size() == 0)
+        if (_var_map[kernel->variable().index()].count(blk_id) > 0 || _var_map[kernel->variable().index()].size() == 0)
           blk_ids.insert(blk_id);
         else
           mooseError("Kernel (" + kernel->name() + "): block outside of the domain of the variable");
@@ -1254,8 +1254,8 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
               {
                 constraints_applied = true;
 
-                nfc->subProblem().prepareShapes(nfc->variable().number(), 0);
-                nfc->subProblem().prepareNeighborShapes(nfc->variable().number(), 0);
+                nfc->subProblem().prepareShapes(nfc->variable().index(), 0);
+                nfc->subProblem().prepareNeighborShapes(nfc->variable().index(), 0);
 
                 nfc->computeJacobian();
 
@@ -1327,7 +1327,7 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
       for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
       {
         ScalarKernel * kernel = *it;
-        if (kernel->variable().number() == ivar)
+        if (kernel->variable().index() == ivar)
         {
           _fe_problem.reinitScalars(0);
           kernel->reinit();
@@ -1571,7 +1571,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
         for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); it++)
         {
           Kernel * kernel = *it;
-          if (kernel->variable().number() == ivar)
+          if (kernel->variable().index() == ivar)
           {
             kernel->subProblem().prepareShapes(jvar, tid);
             kernel->computeOffDiagJacobian(jvar);
@@ -1599,7 +1599,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
                 for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
                 {
                   IntegratedBC * bc = *it;
-                  if(bc->variable().number() == ivar)
+                  if(bc->variable().index() == ivar)
                   {
                     if (bc->shouldApply())
                     {
@@ -1636,7 +1636,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
                 for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
                 {
                   DGKernel * dg = *it;
-                  if(dg->variable().number() == ivar)
+                  if(dg->variable().index() == ivar)
                   {
                     dg->subProblem().prepareFaceShapes(jvar, tid);
                     dg->subProblem().prepareNeighborShapes(jvar, tid);
@@ -1682,7 +1682,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
         for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
         {
           NodalBC * bc = *it;
-          if (bc->variable().number() == ivar && bc->shouldApply())
+          if (bc->variable().index() == ivar && bc->shouldApply())
           {
             //The first zero is for the variable number... there is only one variable in each mini-system
             //The second zero only works with Lagrange elements!

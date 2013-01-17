@@ -55,7 +55,7 @@ ComputeFullJacobianThread::computeJacobian()
       for (std::vector<Kernel *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
       {
         Kernel * kernel = *kt;
-        if (kernel->variable().number() == ivar)
+        if (kernel->variable().index() == ivar)
         {
           kernel->subProblem().prepareShapes(jvar, _tid);
           kernel->computeOffDiagJacobian(jvar);
@@ -82,7 +82,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
       for (std::vector<IntegratedBC *>::iterator jt = bcs.begin(); jt != bcs.end(); ++jt)
       {
         IntegratedBC * bc = *jt;
-        if (bc->shouldApply() && bc->variable().number() == ivar)
+        if (bc->shouldApply() && bc->variable().index() == ivar)
         {
           bc->subProblem().prepareFaceShapes(jvar, _tid);
           bc->computeJacobianBlock(jvar);
@@ -105,7 +105,7 @@ ComputeFullJacobianThread::computeInternalFaceJacobian()
     for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
     {
       DGKernel * dg = *it;
-      if (dg->variable().number() == ivar)
+      if (dg->variable().index() == ivar)
       {
         dg->subProblem().prepareNeighborShapes(jvar, _tid);
         dg->computeOffDiagJacobian(jvar);

@@ -23,9 +23,9 @@
 #include "numeric_vector.h"
 #include "dof_map.h"
 
-MooseVariableScalar::MooseVariableScalar(unsigned int var_num, unsigned int mvn, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
+MooseVariableScalar::MooseVariableScalar(unsigned int var_num, unsigned int index, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
     _var_num(var_num),
-    _moose_var_num(mvn),
+    _index(index),
     _var_kind(var_kind),
     _subproblem(sys.subproblem()),
     _sys(sys),
@@ -104,9 +104,9 @@ MooseVariableScalar::insert(NumericVector<Number> & soln)
 }
 
 unsigned int
-MooseVariableScalar::number()
+MooseVariableScalar::index()
 {
-  return _moose_var_num;
+  return _index;
 }
 
 Moose::VarKindType
