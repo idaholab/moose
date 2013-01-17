@@ -15,31 +15,27 @@ InputParameters validParams<NodalAreaAction>()
   InputParameters params = validParams<Action>();
   params.addParam<BoundaryName>("slave", "The slave surface");
   params.addRequiredParam<NonlinearVariableName>("disp_x", "The x displacement");
+
+  // Set this action to build "NodalArea"
+  params.set<std::string>("type") = "NodalArea";
   return params;
 }
 
 NodalAreaAction::NodalAreaAction(const std::string & name, InputParameters params) :
-  Action(name, params)
+  MooseObjectAction(name, params)
 {
 }
 
 void
 NodalAreaAction::act()
 {
+  _moose_object_pars.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,getParam<BoundaryName>("slave"));
+  _moose_object_pars.set<VariableName>("variable") = getParam<NonlinearVariableName>("disp_x");
 
-  InputParameters params = Factory::instance()->getValidParams("NodalArea");
-
-  // Extract global params
-  const std::string syntax = Moose::app->parser().getSyntaxByAction("NodalArea", "");
-  Moose::app->parser().extractParams(syntax, params);
-
-  params.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,getParam<BoundaryName>("slave"));
-  params.set<VariableName>("variable") = getParam<NonlinearVariableName>("disp_x");
-
-  params.set<MooseEnum>("execute_on") = "timestep_begin";
-  params.set<bool>("use_displaced_mesh") = true;
+  _moose_object_pars.set<MooseEnum>("execute_on") = "timestep_begin";
+  _moose_object_pars.set<bool>("use_displaced_mesh") = true;
 
   _problem->addUserObject("NodalArea",
                           "nodal_area_object_" + Moose::stringify(counter++),
-                          params);
+                          _moose_object_pars);
 }

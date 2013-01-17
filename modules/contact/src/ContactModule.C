@@ -42,8 +42,6 @@ Elk::Contact::associateSyntax(Syntax & syntax)
 
   syntax.registerActionSyntax("ContactPressureAuxAction", "Contact/*");
   syntax.registerActionSyntax("ContactPressureVarAction", "Contact/*");
-  syntax.registerActionSyntax("NodalAreaAction", "Contact/*");
-
 
   registerAction(ContactAction, "add_dg_kernel");
 
@@ -52,5 +50,4 @@ Elk::Contact::associateSyntax(Syntax & syntax)
 
   registerAction(ContactPressureAuxAction, "add_aux_bc");
   registerAction(ContactPressureVarAction, "add_aux_variable");
-  registerAction(NodalAreaAction, "add_user_object");
 }

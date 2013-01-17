@@ -15,6 +15,7 @@
 #include "SharpInterfaceForcing.h"
 #include "NodalArea.h"
 #include "NodalAreaAux.h"
+#include "NodalAreaAction.h"
 
 void
 Elk::Misc::registerObjects()
@@ -37,4 +38,11 @@ Elk::Misc::registerObjects()
   registerPostprocessor(SharpInterfaceForcing);
 
   registerUserObject(NodalArea);
+}
+
+void
+Elk::Misc::associateSyntax(Syntax & syntax)
+{
+  syntax.registerActionSyntax("NodalAreaAction", "Contact/*");
+  registerAction(NodalAreaAction, "add_user_object");
 }
