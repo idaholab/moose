@@ -260,7 +260,7 @@ public:
   libMesh::Mesh _mesh;
 
   /**
-   * This routine builds a multimap of boundary ids to matching boundary ids across all periodic boudnaries
+   * This routine builds a multimap of boundary ids to matching boundary ids across all periodic boundaries
    * in the system.  It does this only for active local elements so the list will not be globally complete when
    * run in parallel!
    */
