@@ -5,7 +5,7 @@
 template<>
 InputParameters validParams<NodalArea>()
 {
-  InputParameters params = validParams<SideUserObject>();
+  InputParameters params = validParams<SideIntegralVariableUserObject>();
 
   params.set<MooseEnum>("execute_on") = "timestep_begin";
   params.set<MooseEnum>("execute_on") = "residual";
@@ -15,7 +15,7 @@ InputParameters validParams<NodalArea>()
 
 
 NodalArea::NodalArea(const std::string & name, InputParameters parameters) :
-    SideUserObject(name, parameters),
+    SideIntegralVariableUserObject(name, parameters),
     _resetCommunication(true),
     _phi( _var.phiFace() )
 {}

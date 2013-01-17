@@ -7,13 +7,13 @@
 template<>
 InputParameters validParams<Mass>()
 {
-  InputParameters params = validParams<ElementIntegral>();
+  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
 Mass::Mass(const std::string & name, InputParameters parameters) :
-    ElementIntegral(name, parameters),
+    ElementIntegralVariablePostprocessor(name, parameters),
     _density(getMaterialProperty<Real>("density"))
     
 {

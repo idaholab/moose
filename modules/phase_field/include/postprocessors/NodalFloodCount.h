@@ -125,6 +125,9 @@ protected:
     return false;
   }
 
+  /// The vector of coupled in variables
+  std::vector<MooseVariable *> _vars;
+
   /// The threshold above which neighboring nodes are flooding with adjacent markings
   Real _threshold;
 

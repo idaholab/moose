@@ -1,9 +1,9 @@
 #ifndef NODALAREA_H
 #define NODALAREA_H
 
-#include "SideUserObject.h"
+#include "SideIntegralVariableUserObject.h"
 
-class NodalArea : public SideUserObject
+class NodalArea : public SideIntegralVariableUserObject
 {
 public:
   NodalArea(const std::string & name, InputParameters parameters);

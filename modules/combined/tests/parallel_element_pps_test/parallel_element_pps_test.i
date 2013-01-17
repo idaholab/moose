@@ -47,25 +47,25 @@
    active = 'p_1 p_2 p_3 p_all'
  
   [./p_1]
-    type = ElementIntegral
+    type = ElementIntegralVariablePostprocessor
     variable = u
     block = '1'
   [../]
 
   [./p_2]
-    type = ElementIntegral
+    type = ElementIntegralVariablePostprocessor
     variable = u
     block = '2'
   [../]
 
   [./p_3]
-    type = ElementIntegral
+    type = ElementIntegralVariablePostprocessor
     variable = u
     block = '3'
   [../]
 
   [./p_all]
-    type = ElementIntegral
+    type = ElementIntegralVariablePostprocessor
     variable = u
     block = '1 2 3'
   [../]

@@ -34,6 +34,7 @@ template<>
 InputParameters validParams<NodalFloodCount>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
+  params.addRequiredCoupledVar("variable", "Ths variable(s) for which to find connected regions of interests, i.e. \"bubbles\".");
   params.addParam<Real>("threshold", 0.5, "The threshold value of the bubble boundary");
   params.addParam<std::string>("elem_avg_value", "If supplied, will be used to find the scaled threshold of the bubble edges");
   params.addParam<bool>("use_single_map", true, "Determine whether information is tracked per coupled variable or consolidated into one (default: true)");
@@ -44,9 +45,10 @@ InputParameters validParams<NodalFloodCount>()
 
 NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters parameters) :
     ElementPostprocessor(name, parameters),
+    _vars(getCoupledMooseVars()),
     _threshold(getParam<Real>("threshold")),
     _mesh(_subproblem.mesh()),
-    _var_number(_var.number()),
+    _var_number(_vars[0]->number()),
     _single_map_mode(getParam<bool>("use_single_map")),
     _global_numbering(getParam<bool>("use_global_numbering")),
     _var_index_mode(getParam<bool>("enable_var_coloring")),

@@ -34,7 +34,7 @@ NodalAreaAction::act()
   Moose::app->parser().extractParams(syntax, params);
 
   params.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,getParam<BoundaryName>("slave"));
-  params.set<std::vector<VariableName> >("variable") = std::vector<VariableName>(1, getParam<NonlinearVariableName>("disp_x"));
+  params.set<VariableName>("variable") = getParam<NonlinearVariableName>("disp_x");
 
   params.set<MooseEnum>("execute_on") = "timestep_begin";
   params.set<bool>("use_displaced_mesh") = true;
