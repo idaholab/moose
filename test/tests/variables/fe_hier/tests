@@ -10,6 +10,7 @@
     input = 'hier-1-1d.i'
     exodiff = 'hier-1-1d_out.e'
     max_parallel = 1
+    deleted = 'Diffs with Petsc-3.3 #1636'
   [../]
 
   [./test_hier_3_2d]
@@ -44,6 +45,7 @@
     type = 'Exodiff'
     input = 'hier-2-3d.i'
     exodiff = 'hier-2-3d_out.e'
+    deleted = 'Diffs with Petsc-3.3 #1637'
   [../]
 
   [./test_hier_3_1d]

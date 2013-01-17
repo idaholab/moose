@@ -12,6 +12,7 @@
     exodiff = 'out_pbp_adapt.e-s004'
     custom_cmp = 'pbp_adapt_test.cmp'
     group = 'adaptive'
+    deleted = 'Fails with Petsc-3.3 #1638'
   [../]
 
   [./check_petsc_options_test]
