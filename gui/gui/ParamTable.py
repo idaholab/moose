@@ -255,10 +255,14 @@ class ParamTable:
           if param_value == '':
             continue
 
+          # If this is a global param and we haven't changed the value of it, don't include it
+          if param_name in self.global_params and self.global_params[param_name] == param_value:
+            continue
+
           # If they put single quotes in... just remove them
           param_value = str(param_value).strip("'")
 
-          if not param_name in self.original_table_data or self.original_table_data[param_name] != param_value: #If we changed it - definitely include it
+          if param_name not in self.original_table_data or self.original_table_data[param_name] != param_value: #If we changed it - definitely include it
             the_data[param_name] = param_value
           else:
             if not only_not_in_original: # If we want stuff other than what we changed
@@ -289,7 +293,7 @@ class ParamTable:
             elif table_widget.item(i,1):
               param_value = str(table_widget.item(i,1).text())
 
-            if param_name in self.global_params:
+            if param_name != 'Name' and param_name in self.global_params:
               param_value = self.global_params[param_name]
 
             if param_value == '':
@@ -532,7 +536,14 @@ class ParamTable:
           
         table_widget.setCellWidget(row, 1, value_item)
       else:
-        value_item = QtGui.QTableWidgetItem(value)
+        if param['name'] != 'Name' and param['name'] in self.global_params and value == param['default']:
+          value_item = QtGui.QTableWidgetItem(self.global_params[param_name])
+          color = QtGui.QColor()
+          color.setRgb(209,242,255)
+          value_item.setBackgroundColor(color)
+        else:
+          value_item = QtGui.QTableWidgetItem(value)
+
         table_widget.setItem(row, 1, value_item)
         
       if 'cpp_type' in param and param['cpp_type'] == 'MeshFileName':
