@@ -362,9 +362,9 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
 //              std::cout<<"Slave node: "<<slave_node_num<<std::endl;
               const Node * node = info._node;
 
-              VectorValue<unsigned int> solution_dofs(node->dof_number(nonlinear_sys.number(), disp_x_var->number(), 0),
-                                                      node->dof_number(nonlinear_sys.number(), disp_y_var->number(), 0),
-                                                      (disp_z_var ? node->dof_number(nonlinear_sys.number(), disp_z_var->number(), 0) : 0));
+              VectorValue<unsigned int> solution_dofs(node->dof_number(nonlinear_sys.number(), disp_x_var->index(), 0),
+                                                      node->dof_number(nonlinear_sys.number(), disp_y_var->index(), 0),
+                                                      (disp_z_var ? node->dof_number(nonlinear_sys.number(), disp_z_var->index(), 0) : 0));
 
               //Get old parametric coords from info
               //get old element from info
@@ -377,7 +377,6 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
 //              Elem *side = (info._starting_elem->build_side(info._starting_side_num,false)).release();
 //              FEBase &fe = *(pen_loc._fe[0]);
 //              fe.reinit(side, &points);
-//              const std::vector<Point> & starting_point = fe.get_xyz();
 //              RealVectorValue correction = starting_point[0] - current_coords;
 
 //              RealVectorValue current_coords = *node;
@@ -504,17 +503,17 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
               _num_contact_nodes++;
               const Node * node = info._node;
 
-              VectorValue<unsigned int> residual_dofs(node->dof_number(aux_sys.number(), residual_x_var->number(), 0),
-                                                      node->dof_number(aux_sys.number(), residual_y_var->number(), 0),
-                                                      (residual_z_var ? node->dof_number(nonlinear_sys.number(), residual_z_var->number(), 0) : 0));
+              VectorValue<unsigned int> residual_dofs(node->dof_number(aux_sys.number(), residual_x_var->index(), 0),
+                                                      node->dof_number(aux_sys.number(), residual_y_var->index(), 0),
+                                                      (residual_z_var ? node->dof_number(nonlinear_sys.number(), residual_z_var->index(), 0) : 0));
 
-              VectorValue<unsigned int> diag_stiff_dofs(node->dof_number(aux_sys.number(), diag_stiff_x_var->number(), 0),
-                                                        node->dof_number(aux_sys.number(), diag_stiff_y_var->number(), 0),
-                                                        (diag_stiff_z_var ? node->dof_number(aux_sys.number(), diag_stiff_z_var->number(), 0) : 0));
+              VectorValue<unsigned int> diag_stiff_dofs(node->dof_number(aux_sys.number(), diag_stiff_x_var->index(), 0),
+                                                        node->dof_number(aux_sys.number(), diag_stiff_y_var->index(), 0),
+                                                        (diag_stiff_z_var ? node->dof_number(aux_sys.number(), diag_stiff_z_var->index(), 0) : 0));
 
-              VectorValue<unsigned int> inc_slip_dofs(node->dof_number(aux_sys.number(), inc_slip_x_var->number(), 0),
-                                                      node->dof_number(aux_sys.number(), inc_slip_y_var->number(), 0),
-                                                      (inc_slip_z_var ? node->dof_number(aux_sys.number(), inc_slip_z_var->number(), 0) : 0));
+              VectorValue<unsigned int> inc_slip_dofs(node->dof_number(aux_sys.number(), inc_slip_x_var->index(), 0),
+                                                      node->dof_number(aux_sys.number(), inc_slip_y_var->index(), 0),
+                                                      (inc_slip_z_var ? node->dof_number(aux_sys.number(), inc_slip_z_var->index(), 0) : 0));
 
               RealVectorValue res_vec;
               RealVectorValue stiff_vec;
@@ -721,8 +720,8 @@ FrictionalContactProblem::applySlip(NumericVector<Number>& vec_solution,
       inc_slip_var = inc_slip_z_var;
     }
 
-    unsigned int solution_dof = node->dof_number(nonlinear_sys.number(), disp_var->number(), 0);
-    unsigned int inc_slip_dof = node->dof_number(aux_sys.number(), inc_slip_var->number(), 0);
+    unsigned int solution_dof = node->dof_number(nonlinear_sys.number(), disp_var->index(), 0);
+    unsigned int inc_slip_dof = node->dof_number(aux_sys.number(), inc_slip_var->index(), 0);
 
     vec_solution.add(solution_dof, slip);
     aux_solution.add(inc_slip_dof, slip);
@@ -963,9 +962,9 @@ FrictionalContactProblem::updateIncrementalSlip()
           if(hpit != has_penetrated.end())
           {
             const Node * node = info._node;
-            VectorValue<unsigned int> inc_slip_dofs(node->dof_number(aux_sys.number(), inc_slip_x_var->number(), 0),
-                                                    node->dof_number(aux_sys.number(), inc_slip_y_var->number(), 0),
-                                                    (inc_slip_z_var ? node->dof_number(aux_sys.number(), inc_slip_z_var->number(), 0) : 0));
+            VectorValue<unsigned int> inc_slip_dofs(node->dof_number(aux_sys.number(), inc_slip_x_var->index(), 0),
+                                                    node->dof_number(aux_sys.number(), inc_slip_y_var->index(), 0),
+                                                    (inc_slip_z_var ? node->dof_number(aux_sys.number(), inc_slip_z_var->index(), 0) : 0));
 
             RealVectorValue inc_slip = info._incremental_slip;
 

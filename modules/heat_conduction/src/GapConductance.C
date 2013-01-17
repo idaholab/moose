@@ -168,7 +168,7 @@ GapConductance::computeGapValues()
       std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
       std::vector<unsigned int> slave_side_dof_indices;
 
-      _dof_map->dof_indices(slave_side, slave_side_dof_indices, _temp_var->number());
+      _dof_map->dof_indices(slave_side, slave_side_dof_indices, _temp_var->index());
 
       for(unsigned int i=0; i<slave_side_dof_indices.size(); ++i)
       {

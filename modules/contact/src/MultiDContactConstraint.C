@@ -243,7 +243,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
     {
     case CM_FRICTIONLESS:
 
-      slave_jac = pinfo->_normal(_component) * pinfo->_normal(_component) * ( _penalty*_phi_slave[_j][_qp] - (*_jacobian)(_current_node->dof_number(0, _var.number(), 0), _connected_dof_indices[_j]) );
+      slave_jac = pinfo->_normal(_component) * pinfo->_normal(_component) * ( _penalty*_phi_slave[_j][_qp] - (*_jacobian)(_current_node->dof_number(0, _var.index(), 0), _connected_dof_indices[_j]) );
       break;
 
     case CM_GLUED:
@@ -283,7 +283,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
     }
     return _test_slave[_i][_qp] * slave_jac;
   case Moose::MasterSlave:
-    slave_jac = (*_jacobian)(_current_node->dof_number(0, _var.number(), 0), _connected_dof_indices[_j]);
+    slave_jac = (*_jacobian)(_current_node->dof_number(0, _var.index(), 0), _connected_dof_indices[_j]);
     return slave_jac*_test_master[_i][_qp];
   case Moose::MasterMaster:
     return 0;
