@@ -35,21 +35,6 @@ InputParameters validParams<GapValueAux>()
   return params;
 }
 
-//
-// Look up the MooseVariable and index directly (not using the Coupleable
-// interface) to avoid an inappropriate error check.
-//
-MooseVariable &
-getVariable(InputParameters & params, const std::string & name)
-{
-  SubProblem & problem = *params.get<SubProblem*>("_subproblem");
-  if (!problem.hasVariable( name ))
-  {
-    mooseError("Unable to find variable " + name);
-  }
-  return problem.getVariable( params.get<THREAD_ID>("_tid"), name );
-}
-
 GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
     _penetration_locator(_nodal ?  getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))) : getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
@@ -62,13 +47,12 @@ GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
   {
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
   }
-  MooseVariable & pv(getVariable(parameters, getParam<VariableName>("paired_variable")));
-  Order pairedVarOrder(pv.getOrder());
+  Order pairedVarOrder(_moose_var.getOrder());
   Order gvaOrder(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
   if (pairedVarOrder != gvaOrder && pairedVarOrder != CONSTANT)
   {
     mooseError("ERROR: specified order for GapValueAux ("<<Utility::enum_to_string<Order>(gvaOrder)
-               <<") does not match order for paired_variable \""<<pv.name()<<"\" ("
+               <<") does not match order for paired_variable \""<< _moose_var.name() << "\" ("
                <<Utility::enum_to_string<Order>(pairedVarOrder)<<")");
   }
 }
