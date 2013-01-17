@@ -362,6 +362,11 @@ Assembly::reinit(const Elem * elem)
       _coord[qp] = 2 * M_PI * _current_q_points[qp](0);
     break;
 
+  case Moose::COORD_RSPHERICAL:
+    for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
+      _coord[qp] = 4 * M_PI * _current_q_points[qp](0) * _current_q_points[qp](0);
+    break;
+
   default:
     mooseError("Unknown coordinate system");
     break;
@@ -446,6 +451,11 @@ Assembly::reinit(const Elem * elem, unsigned int side)
   case Moose::COORD_RZ:
     for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
       _coord[qp] = 2 * M_PI * _current_q_points_face[qp](0);
+    break;
+
+  case Moose::COORD_RSPHERICAL:
+    for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
+      _coord[qp] = 4 * M_PI * _current_q_points_face[qp](0) * _current_q_points_face[qp](0);
     break;
 
   default:
@@ -540,6 +550,11 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
   case Moose::COORD_RZ:
     for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
       coord[qp] = 2 * M_PI * q_points[qp](0);
+    break;
+
+  case Moose::COORD_RSPHERICAL:
+    for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+      coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
     break;
 
   default:

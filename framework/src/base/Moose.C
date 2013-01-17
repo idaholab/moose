@@ -136,6 +136,7 @@
 #include "ElementL2Norm.h"
 #include "NodalL2Norm.h"
 #include "TotalVariableValue.h"
+#include "VolumePostprocessor.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -350,6 +351,7 @@ registerObjects()
   registerPostprocessor(ElementL2Norm);
   registerPostprocessor(NodalL2Norm);
   registerPostprocessor(TotalVariableValue);
+  registerPostprocessor(VolumePostprocessor);
 
   // user objects
   registerUserObject(LayeredIntegral);

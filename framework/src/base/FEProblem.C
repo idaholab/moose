@@ -2931,6 +2931,8 @@ FEProblem::checkCoordinateSystems()
     SubdomainID sid = (*it)->subdomain_id();
     if (_coord_sys[sid] == Moose::COORD_RZ && (*it)->dim() == 3)
       mooseError("An RZ coordinate system was requested for subdomain " + Moose::stringify(sid) + " which contains 3D elements.");
+    if (_coord_sys[sid] == Moose::COORD_RSPHERICAL && (*it)->dim() > 1)
+      mooseError("An RSPHERICAL coordinate system was requested for subdomain " + Moose::stringify(sid) + " which contains 2D or 3D elements.");
   }
 }
 

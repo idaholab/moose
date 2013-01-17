@@ -73,6 +73,7 @@ namespace Moose {
     {
       coordinate_system_type_to_enum["XYZ"] = COORD_XYZ;
       coordinate_system_type_to_enum["RZ"]  = COORD_RZ;
+      coordinate_system_type_to_enum["RSPHERICAL"]  = COORD_RSPHERICAL;
     }
   }
 

@@ -112,7 +112,8 @@ enum ConstraintJacobianType
 enum CoordinateSystemType
 {
   COORD_XYZ,
-  COORD_RZ
+  COORD_RZ,
+  COORD_RSPHERICAL
 };
 
 enum PPSOutputType
