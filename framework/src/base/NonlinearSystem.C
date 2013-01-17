@@ -289,8 +289,11 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
   PetscMatrix<Number>* petsc_mat =
     dynamic_cast<PetscMatrix<Number>*>(_sys.matrix);
 
+#if PETSC_VERSION_LESS_THAN(3,2,0)
+  // This variable is only needed for PETSC < 3.2.0
   PetscVector<Number>* petsc_vec =
     dynamic_cast<PetscVector<Number>*>(_sys.solution.get());
+#endif
 
   Moose::compute_jacobian(*_sys.current_local_solution,
                           *petsc_mat,
@@ -326,10 +329,10 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
                   SNESDefaultComputeJacobianColor,
                   _fdcoloring);
 
+#if PETSC_VERSION_LESS_THAN(3,2,0)
   Mat my_mat = petsc_mat->mat();
   MatStructure my_struct;
 
-#if PETSC_VERSION_LESS_THAN(3,2,0)
   SNESComputeJacobian(petsc_nonlinear_solver.snes(),
                       petsc_vec->vec(),
                       &my_mat,
