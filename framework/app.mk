@@ -71,8 +71,10 @@ endif
 
 # Normal Executable
 $(target): $(fobjects) $(f90objects) $(objects) $(cobjects) $(mesh_library) $(ADDITIONAL_DEPS) $(plugins)
-	@echo "Linking "$@"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(cobjects) $(fobjects) $(f90objects) -o $@ $(LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_LIBS)
+	@echo "MOOSE Linking "$@"..."
+	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) $(objects) $(cobjects) $(fobjects) $(f90objects) -o $@ $(LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(ADDITIONAL_LIBS)
+
 
 delete_list := $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-*
 
@@ -94,14 +96,4 @@ cleanpro::
 
 cleanall::
 	$(MAKE) clean
-
-#
-# Dependencies
-#
-
-# include the dependency list
--include src/*.d
--include src/*/*.d
--include src/*/*/*.d
--include src/*/*/*/*.d
 

@@ -12,7 +12,7 @@ pcre_srcfiles  := $(shell find $(pcre_DIR) -name *.cc)
 pcre_csrcfiles := $(shell find $(pcre_DIR) -name *.c)
 pcre_objects   := $(patsubst %.cc, %.$(obj-suffix), $(pcre_srcfiles))
 pcre_objects   += $(patsubst %.c, %.$(obj-suffix), $(pcre_csrcfiles))
-pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD)$(libext)
+pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD).la
 
 moose_INC_DIRS := $(shell find $(MOOSE_DIR)/include -type d -not -path "*/.svn*")
 moose_INC_DIRS += $(shell find $(MOOSE_DIR)/contrib/*/include -type d -not -path "*/.svn*")
@@ -20,7 +20,9 @@ moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 
 libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
 
-moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(libext)
+# Making a .la object instead.  This is what you make out of .lo objects...
+moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD).la
+
 LIBS += $(moose_LIB) $(pcre_LIB)
 
 # source filese
@@ -34,7 +36,7 @@ moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name *.f90)
 ifdef PRECOMPILED
 moose_precompiled_headers_objects := $(patsubst %.h, %.h.gch/$(METHOD).h.gch, $(moose_precompiled_headers))
 else
-moose_precompiled_headers_objects := 
+moose_precompiled_headers_objects :=
 endif
 moose_objects	:= $(patsubst %.C, %.$(obj-suffix), $(moose_srcfiles))
 moose_objects	+= $(patsubst %.c, %.$(obj-suffix), $(moose_csrcfiles))
@@ -44,6 +46,7 @@ moose_objects   += $(patsubst %.f90, %.$(obj-suffix), $(moose_f90srcfiles))
 moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
               $(patsubst %.c, %.$(obj-suffix).d, $(moose_csrcfiles))
 
+
 # revision header
 revision_header = $(MOOSE_DIR)/include/base/HerdRevision.h
 
@@ -52,40 +55,25 @@ all:: herd_revision moose
 herd_revision:
 	$(shell $(MOOSE_DIR)/scripts/get_repo_revision.py $(MOOSE_DIR))
 
-moose: $(moose_LIB) 
+moose: $(moose_LIB)
 
-# build rule for MOOSE
-ifeq ($(enable-shared),yes)
-# Build dynamic library
+
+# [JWP] With libtool, there is only one link command, it should work whether you are creating
+# shared or static libraries, and it should be portable across Linux and Mac...
 $(pcre_LIB): $(pcre_objects)
 	@echo "Linking "$@"..."
-	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(pcre_objects) $(libmesh_LDFLAGS)
+	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
+	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(pcre_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(pcre_DIR)
+	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(pcre_LIB) $(pcre_DIR)
+
 
 $(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects) $(pcre_LIB)
 	@echo "Linking "$@"..."
-	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(moose_objects) $(pcre_LIB) $(libmesh_LDFLAGS)
-else
-# Build static library
-ifeq ($(findstring darwin,$(hostos)),darwin)
-$(pcre_LIB): $(pcre_objects)
-	@echo "Linking "$@"..."
-	@libtool -static -o $@ $(pcre_objects)
+	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(MOOSE_DIR)
+	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(MOOSE_DIR)
 
-$(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects) $(pcre_LIB) $(pcre_LIB)
-	@echo "Linking "$@"..."
-	@libtool -static -o $@ $(moose_objects)
-else
-$(pcre_LIB): $(pcre_objects)
-	@echo "Linking "$@"..."
-	@$(AR) rv $@ $(pcre_objects)
-
-$(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects) $(pcre_LIB) $(pcre_LIB)
-	@echo "Linking "$@"..."
-	@$(AR) rv $@ $(moose_objects)
-endif
-endif
-
-# include MOOSE dep files
+# include MOOSE dep files. Note: must use -include for deps, since they don't exist for first time builds.
 -include $(moose_deps)
 -include $(MOOSE_DIR)/contrib/mtwist-1.1/src/*.d
 -include $(MOOSE_DIR)/contrib/pcre/src/*.d
@@ -107,29 +95,28 @@ exodiff: $(exodiff_APP)
 
 $(exodiff_APP): $(exodiff_objfiles)
 	@echo "Linking "$@"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(exodiff_objfiles) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
+	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) $(exodiff_objfiles) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS)
 
 -include $(exodiff_DIR)/*.d
 
 #
 # Maintenance
 #
-delete_list := $(moose_LIB) $(exodiff_APP) $(pcre_LIB)
+delete_list := $(moose_LIB) $(exodiff_APP) $(pcre_LIB) libmoose-$(METHOD).* $(pcre_DIR)/libpcre-$(METHOD).*
 
 clean::
 	@rm -fr $(delete_list)
-	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \) -exec rm '{}' \;
+	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" -or -name "*.lo" -or -name "*.la" \) -exec rm '{}' \;
 	@find . \( -name *.gch \) | xargs rm -rf
+	@find . -type d -name .libs | xargs rm -rf # remove hidden directories created by libtool
 
 clobber::
 	@rm -fr $(delete_list)
 	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
-                -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \) -exec rm '{}' \;
+                -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" -or -name "*.lo" -or -name "*.la" \) -exec rm '{}' \;
 	@find . \( -name *.gch \) | xargs rm -rf
+	@find . -type d -name .libs | xargs rm -rf # remove hidden directories created by libtool
 
 cleanall::
 	make -C $(MOOSE_DIR) clean
-
-
-# echo:
-# 	@echo $(MOOSE_DIR)/include/base/Precompiled.h.gch.d

@@ -40,13 +40,17 @@ ifdef PRECOMPILED
 # Precompiled Header Rules
 #
 
+# [JWP] - Libtool does not seem to have support for PCH yet, so for
+# now just use the compiler directly, and depend on the user to
+# disable precompiled header support if it is not available on his
+# system.
 %.h.gch/$(METHOD).h.gch : %.h
 	@echo "Pre-Compiling Header (in "$(mode)" mode) "$<"..."
 	@mkdir -p $(MOOSE_DIR)/include/base/Precompiled.h.gch
-	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
+	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED $(libmesh_INCLUDE) -MMD -MF $@.d -c $< -o $@
 
 #
-# add dependency
+# add dependency - all object files depend on the precompiled header file.
 #
 %.$(obj-suffix) : $(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch
 
@@ -60,10 +64,14 @@ endif
 
 pcre%.$(obj-suffix) : pcre%.cc
 	@echo "Compiling C++ $(PCH_MODE)(in "$(mode)" mode) "$<"..."
-	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) -DHAVE_CONFIG_H -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
+	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
+          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MF $@.d -MT $@ -c $< -o $@
+
 %.$(obj-suffix) : %.C
-	@echo "Compiling C++ $(PCH_MODE)(in "$(mode)" mode) "$<"..."
-	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
+	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(mode)" mode) "$<"..."
+	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -MMD -MF $@.d -MT $@ -c $< -o $@
+
 
 #
 # C rules
@@ -71,24 +79,35 @@ pcre%.$(obj-suffix) : pcre%.cc
 
 pcre%.$(obj-suffix) : pcre%.c
 	@echo "Compiling C $(PCH_MODE)(in "$(mode)" mode) "$<"..."
-	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(PCH_FLAGS) -DHAVE_CONFIG_H -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
+	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
+          $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MF $@.d -MT $@ -c $< -o $@
+
 %.$(obj-suffix) : %.c
-	@echo "Compiling C $(PCH_MODE)(in "$(mode)" mode) "$<"..."
-	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(PCH_FLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
+	@echo "MOOSE Compiling C $(PCH_MODE)(in "$(mode)" mode) "$<"..."
+	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
+	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -MMD -MF $@.d -MT $@ -c $< -o $@
+
+
 
 #
 # Fortran77 rules
 #
 
 %.$(obj-suffix) : %.f
-	@echo "Compiling Fortran (in "$(mode)" mode) "$<"..."
-	@$(libmesh_F77) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< -o $@
+	@echo "MOOSE Compiling Fortan (in "$(mode)" mode) "$<"..."
+	@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=compile --quiet \
+	  $(libmesh_F77) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< -o $@
 
-# preprocessed Fortran
+
+#
+# Fortran77 (with C preprocessor) rules
+#
+
 PreProcessed_FFLAGS := $(libmesh_FFLAGS)
 %.$(obj-suffix) : %.F
-	@echo "Compiling Fortran (in "$(mode)" mode) "$<"..."
-	@$(libmesh_F90) $(PreProcessed_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
+	@echo "MOOSE Compiling Fortran (in "$(mode)" mode) "$<"..."
+	@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=compile --quiet \
+	  $(libmesh_F90) $(PreProcessed_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
 
 #
 # Fortran90 rules
@@ -116,8 +135,9 @@ ifneq (,$(findstring gfortran,$(mpif90_command)))
 endif
 
 %.$(obj-suffix) : %.f90
-	@echo "Compiling Fortran90 (in "$(mode)" mode) "$<"..."
-	@$(libmesh_F90) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
+	@echo "MOOSE Compiling Fortran90 (in "$(mode)" mode) "$<"..."
+	@$(libmesh_LIBTOOL) --tag=FC $(LIBTOOLFLAGS) --mode=compile --quiet \
+	  $(libmesh_F90) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
 
 
 # treat these warnings as errors (This doesn't seem to be necessary for Intel)
@@ -180,14 +200,6 @@ endif
 # Variables
 #
 
-# library type sets different options
-ifeq ($(enable-shared),yes)
-  libext := $(shared_libext)
-	LIBS += -Wl,-rpath,$(MOOSE_DIR)
-else
-  libext := $(static_libext)
-endif
-
 CURRENT_APP ?= $(shell basename `pwd`)
 
 ifeq ($(CURRENT_APP),moose)
@@ -200,18 +212,20 @@ endif
 
 #
 # Plugins
+# TODO[JWP]: These plugins might also be able to use libtool...but it turned
+# out to be more trouble than it was worth to get working.
 #
 %-$(METHOD).plugin : %.C
-	@echo "Compiling C++ (in "$(mode)" mode) "$<"..."
+	@echo "MOOSE Compiling C++ Plugin (in "$(mode)" mode) "$<"..."
 	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.c
-	@echo "Compiling C (in "$(mode)" mode) "$<"..."
+	@echo "MOOSE Compiling C Plugin (in "$(mode)" mode) "$<"..."
 	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f
-	@echo "Compiling Fortan Plugin (in "$(mode)" mode) "$<"..."		
+	@echo "MOOSE Compiling Fortan Plugin (in "$(mode)" mode) "$<"..."
 	@$(libmesh_F77) $(libmesh_FFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f90
-	@echo "Compiling Fortan Plugin (in "$(mode)" mode) "$<"..."		
+	@echo "MOOSE Compiling Fortan Plugin (in "$(mode)" mode) "$<"..."
 	@$(libmesh_F90) $(libmesh_FFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
 
 
