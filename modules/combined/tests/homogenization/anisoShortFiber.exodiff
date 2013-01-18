@@ -1,0 +1,50 @@
+
+#  *****************************************************************
+#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  
+#                                                                   
+#                        Version: 2.18 (2008-01-08)
+#           Authors : Richard Drake, rrdrake@sandia.gov             
+#                     Greg Sjaardema, gdsjaar@sandia.gov            
+#                                                                   
+#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  
+#  *****************************************************************
+
+#  FILE 1: gold/anisoShortFiber_out.e
+#   Title: 
+#          Dim = 2, Blocks = 2, Nodes = 833, Elements = 256, Nodesets = 6, Sidesets = 4
+#          Vars: Global = 5, Nodal = 6, Element = 0, Nodeset = 0, Sideset = 0, Times = 2
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6    # min separation = 0.03125
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:              10 @ t2
+
+GLOBAL VARIABLES relative 1.e-6 floor 0.0
+	E1111  # min:       122.84603 @ t2	max:       207.10007 @ t1
+	E1122  # min:       35.947094 @ t2	max:       48.030524 @ t1
+	E1212  # min:       42.211918 @ t2	max:       79.534776 @ t1
+	E2211  # min:       35.947094 @ t2	max:       48.030524 @ t1
+	E2222  # min:        152.0834 @ t2	max:       207.10007 @ t1
+
+NODAL VARIABLES relative 1.e-5 floor 1e-8
+	dx_xx  # min:               0 @ t1,n1	max:     0.090482541 @ t2,n393
+	dy_xx  # min:               0 @ t1,n1	max:     0.011982907 @ t2,n537
+	dx_yy  # min:               0 @ t1,n1	max:     0.063106712 @ t2,n498
+	dy_yy  # min:               0 @ t1,n1	max:      0.17682245 @ t2,n536
+	dx_xy  # min:               0 @ t1,n1	max:     0.041817405 @ t2,n19
+	dy_xy  # min:               0 @ t1,n1	max:     0.083555876 @ t2,n396
+
+# No ELEMENT VARIABLES
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
+
