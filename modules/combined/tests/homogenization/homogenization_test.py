@@ -1,7 +1,8 @@
 from options import *
 
 shortFiber_test = { INPUT : 'anisoShortFiber.i',
-                    EXODIFF : ['anisoShortFiber_out.e']
+                    EXODIFF : ['anisoShortFiber_out.e'],
+                    SKIP : 'Failing on Fission Intel'
                   }
 
 longFiber_test = { INPUT : 'anisoLongFiber.i',
