@@ -28,10 +28,7 @@ def main():
   for i in f:
     hosts.append(i)
 
-  matcreates = 0
-  bad_hosts = {}
-
-  unique_stack_traces = []
+  unique_stack_traces = {}
   regex = re.compile("^#0", re.M | re.S)
   for host in hosts:
     command = "ssh " + host + " \"ps -e | grep " + application + " | awk '{print \$1}' | xargs -I {} gdb --batch --pid={} -ex bt 2>&1 | grep '^#' \""
@@ -41,17 +38,20 @@ def main():
     # Python FAIL - We have to re-glue the tokens we threw away from our split (Perl 1 : Python 0)
     traces = ["#0" + trace for trace in regex.split(output)]
     for trace in traces:
-      unique = True
+      unique = ''
       for bt in unique_stack_traces:
         if compare_traces(trace, bt):
-          unique = False
+          unique = bt
 
-      if unique:
-        unique_stack_traces.append(trace)
+      if unique == '':
+        unique_stack_traces[trace] = 1
+      else:
+        unique_stack_traces[unique] += 1
+
 
   print "Unique Stack Traces"
-  for bt in unique_stack_traces[1:]:
-    print "**********************************\n" + bt
+  for trace, count in unique_stack_traces.iteritems():
+    print "**********************************\nCount: " + str(count) + "\n" + bt
 
 def compare_traces(trace1, trace2):
   lines1 = trace1.split("\n")
