@@ -92,20 +92,22 @@ def getCompilers(libmesh_dir):
   # Supported compilers are GCC, INTEL or ALL
   compilers = set()
   compilers.add('ALL')
-  f = open(libmesh_dir + '/Make.common')
-  for line in f.readlines():
-    if line.find('GXX-VERSION') != -1:
-      m = re.search(r'=\s*(\S+)', line)
-      if m != None:
-        raw_compiler = m.group(1)
-        if re.search('intel', raw_compiler, re.I) != None:
-          compilers.add("INTEL")
-        elif re.search('gcc', raw_compiler, re.I) != None:
-          compilers.add("GCC")
-        elif re.search('clang', raw_compiler, re.I) != None:
-          compilers.add("CLANG")
-        break
-  f.close()
+
+  # Get the gxx compiler
+  command = libmesh_dir + '/bin/libmesh-config --cxx'
+  p = Popen(command, shell=True, stdout=PIPE)
+  mpicxx_cmd = p.communicate()[0].strip()
+
+  p = Popen(mpicxx_cmd + " --show", shell=True, stdout=PIPE)
+  raw_compiler = p.communicate()[0]
+
+  if re.search('icpc', raw_compiler) != None:
+    compilers.add("INTEL")
+  elif re.search('g\+\+', raw_compiler) != None:
+    compilers.add("GCC")
+  elif re.search('clang\+\+', raw_compiler) != None:
+    compilers.add("CLANG")
+
   return compilers
 
 def getPetscVersion(libmesh_dir):
