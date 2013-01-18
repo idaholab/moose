@@ -42,6 +42,7 @@ endif
 MOOSE_PRECOMPILED ?= true
 PCH_FLAGS=
 PCH_MODE=
+PCH_DEP=
 
 # Check if using precompiled headers is possible 
 # cxx compiler could be used to define which compiler is being used
@@ -55,6 +56,7 @@ endif
 
 # Number of JOBS to run in parallel used in run_tests
 JOBS ?= 1
+
 
 all::
 ifdef PRECOMPILED
@@ -74,9 +76,9 @@ ifdef PRECOMPILED
 #
 # add dependency - all object files depend on the precompiled header file.
 #
-%.$(obj-suffix) : $(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch
+PCH_DEP=$(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch
 
-PCH_FLAGS="-DPRECOMPILED -include Precompiled.h"
+PCH_FLAGS=-DPRECOMPILED -include Precompiled.h
 PCH_MODE="with PCH "
 endif
 
@@ -84,12 +86,12 @@ endif
 # C++ rules
 #
 
-pcre%.$(obj-suffix) : pcre%.cc
+pcre%.$(obj-suffix) : pcre%.cc $(PCH_DEP)
 	@echo "Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MF $@.d -MT $@ -c $< -o $@
 
-%.$(obj-suffix) : %.C
+%.$(obj-suffix) : %.C $(PCH_DEP)
 	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -MMD -MF $@.d -MT $@ -c $< -o $@
@@ -100,14 +102,14 @@ pcre%.$(obj-suffix) : pcre%.cc
 #
 
 pcre%.$(obj-suffix) : pcre%.c
-	@echo "Compiling C $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MF $@.d -MT $@ -c $< -o $@
+          $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.c
-	@echo "MOOSE Compiling C $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
+	@echo "MOOSE Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -MMD -MF $@.d -MT $@ -c $< -o $@
+	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(libmesh_INCLUDE) -MMD -MF $@.d -MT $@ -c $< -o $@
 
 
 

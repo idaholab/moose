@@ -17,8 +17,24 @@
 #include <string>
 #include <vector>
 
+// C and C++
+#include <_structs.h>
+#include <cstddef>
+#include <cstdlib>
+#include <cstdio>
+#include <limits>
+#include <stddef.h>
+#include <utility>
+#include <time.h>
+
 // MPI
 #include "mpi.h"
+
+// Petsc
+#include "petscdmmesh.h"
+
+// TBB
+#include "partitioner.h"
 
 // libmesh
 #include "boundary_info.h"
@@ -35,8 +51,10 @@
 #include "fe_base.h"
 #include "fe_interface.h"
 #include "getpot.h"
+#include "id_types.h"
 #include "implicit_system.h"
 #include "libmesh.h"
+#include "libmesh_base.h"
 #include "libmesh_common.h"
 #include "libmesh_config.h"
 #include "linear_implicit_system.h"
@@ -50,21 +68,26 @@
 #include "nonlinear_solver.h"
 #include "numeric_vector.h"
 #include "o_string_stream.h"
+#include "parameters.h"
+#include "periodic_boundaries.h"
 #include "point.h"
 #include "parallel.h"
 #include "point_locator_base.h"
+#include "quadrature.h"
 #include "quadrature_gauss.h"
 #include "sparse_matrix.h"
+#include "stored_range.h"
 #include "string_to_enum.h"
 #include "system.h"
+#include "system_norm.h"
+#include "tensor_value.h"
 #include "threads.h"
 #include "transient_system.h"
 #include "utility.h"
+#include "variant_filter_iterator.h"
 #include "vector_value.h"
 
 // moose
-#include "Action.h"
-#include "ActionWarehouse.h"
 #include "AuxiliarySystem.h"
 #include "BndNode.h"
 #include "Coupleable.h"
@@ -82,6 +105,7 @@
 #include "MooseObject.h"
 #include "MooseObjectAction.h"
 #include "MooseTypes.h"
+#include "MooseVariable.h"
 #include "MooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
 #include "NonlinearSystem.h"
@@ -89,6 +113,7 @@
 #include "Parser.h"
 #include "PenetrationLocator.h"
 #include "Problem.h"
+#include "Resurrector.h"
 #include "SetupInterface.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
@@ -98,6 +123,11 @@
 #include "TransientInterface.h"
 
 // moose systems
+#include "Action.h"
+#include "ActionFactory.h"
+#include "ActionWarehouse.h"
+#include "AddVariableAction.h"
+
 #include "Kernel.h"
 #include "Material.h"
 #include "AuxKernel.h"
@@ -112,16 +142,21 @@
 #include "Executioner.h"
 #include "Function.h"
 #include "InitialCondition.h"
-#include "Indicator.h"
 #include "Marker.h"
 
+#include "Indicator.h"
+#include "IndicatorWarehouse.h"
+
 #include "Postprocessor.h"
+#include "PostprocessorWarehouse.h"
 #include "ElementPostprocessor.h"
 #include "NodalPostprocessor.h"
 #include "SidePostprocessor.h"
 #include "GeneralPostprocessor.h"
 
 #include "UserObject.h"
+#include "UserObjectInterface.h"
+#include "UserObjectWarehouse.h"
 #include "ElementUserObject.h"
 #include "NodalUserObject.h"
 #include "SideUserObject.h"
