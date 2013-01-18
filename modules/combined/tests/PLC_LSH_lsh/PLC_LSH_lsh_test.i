@@ -161,9 +161,11 @@
 
 [Executioner]
   type = Transient
+
+  # Two sets of linesearch options are for petsc 3.1 and 3.3 respectively
   petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
-  petsc_options_iname = '-snes_type -snes_ls -ksp_gmres_restart'
-  petsc_options_value = 'ls         basic    101'
+  petsc_options_iname = '-snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart'
+  petsc_options_value = 'ls         basic    basic                 101'
 
   l_max_its = 100
   nl_max_its = 100

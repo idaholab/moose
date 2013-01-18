@@ -231,8 +231,8 @@
 
   type = Transient
   petsc_options = '-snes_mf_operator -ksp_monitor -ksp_gmres_modifiedgramschmidt'
-  petsc_options_iname = '-snes_type -snes_ls -ksp_gmres_restart -pc_type  -pc_hypre_type'
-  petsc_options_value = 'ls         basic   201                 hypre     boomeramg     '
+  petsc_options_iname = '-snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart -pc_type  -pc_hypre_type'
+  petsc_options_value = 'ls         basic    basic                   201                 hypre     boomeramg     '
 
   nl_rel_tol = 1e-9
 

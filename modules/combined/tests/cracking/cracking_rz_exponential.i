@@ -179,8 +179,8 @@
 [Executioner]
   type = Transient
   petsc_options = '-snes_mf_operator -ksp_monitor'
-  petsc_options_iname = '-snes_type -snes_ls -ksp_gmres_restart -pc_type'
-  petsc_options_value = 'ls         basic    101                lu'
+  petsc_options_iname = '-snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart -pc_type'
+  petsc_options_value = 'ls         basic    basic                    101                lu'
 
   l_max_its = 100
   l_tol = 1e-6

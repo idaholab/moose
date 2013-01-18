@@ -156,8 +156,8 @@
 [Executioner]
   type = Transient
   petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
-  petsc_options_iname = '-pc_type -snes_type -snes_ls'
-  petsc_options_value = 'lu       ls         basic'
+  petsc_options_iname = '-pc_type -snes_type -snes_ls -snes_linesearch_type'
+  petsc_options_value = 'lu       ls         basic    basic                '
 
   nl_abs_tol = 1e-8
 

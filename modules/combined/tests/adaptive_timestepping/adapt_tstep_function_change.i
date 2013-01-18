@@ -147,9 +147,7 @@
 [Executioner]
   type = AdaptiveTransient
   petsc_options = '-snes_mf_operator'
-  l_tol = 1e-4
-  nl_abs_tol = 1e-5
-  nl_rel_tol = 1e-5
+  nl_abs_tol = 1e-10
   start_time = 0.0
   num_steps = 50000
   dt = 1e6

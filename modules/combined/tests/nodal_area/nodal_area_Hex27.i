@@ -144,11 +144,11 @@
 [Executioner]
   type = Transient
   petsc_options = '-snes_mf_operator -ksp_monitor'
-#  petsc_options_iname = '-snes_type -snes_ls -ksp_gmres_restart -pc_type'
-#  petsc_options_value = 'ls         basic    201                lu'
+#  petsc_options_iname = '-snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart -pc_type'
+#  petsc_options_value = 'ls         basic    basic                    201                lu'
 
-  petsc_options_iname = '-snes_type -snes_ls -ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-  petsc_options_value = 'ls         basic    201                hypre    boomeramg      4'
+  petsc_options_iname = '-snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
+  petsc_options_value = 'ls         basic    basic                    201                hypre    boomeramg      4'
 
   nl_abs_tol = 1e-7
   nl_rel_tol = 1e-6
