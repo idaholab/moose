@@ -18,7 +18,6 @@
 #include <vector>
 
 // C and C++
-#include <_structs.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cstdio>
