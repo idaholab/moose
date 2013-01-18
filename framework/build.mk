@@ -2,17 +2,39 @@
 # Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE and optionally ELK.
 #       This can be overridden by using environment variables (MOOSE_DIR and/or ELK_DIR)
 
-# include the library options determined by configure.  This will
-# set the variables INCLUDE and LIBS that we will need to build and
-# link with the library.
+# If the user has no environment variable
+# called METHOD, he gets optimized mode.
+ifeq (x$(METHOD),x)
+  METHOD := opt
+endif
 
-include $(LIBMESH_DIR)/Make.common
+# Instead of using Make.common, use libmesh-config to get any libmesh
+# make variables we might need.
+libmesh_config   := $(LIBMESH_DIR)/bin/libmesh-config
+libmesh_CXX      := $(shell $(libmesh_config) --cxx)
+libmesh_CC       := $(shell $(libmesh_config) --cc)
+libmesh_F77      := $(shell $(libmesh_config) --fc)
+libmesh_F90      := $(shell $(libmesh_config) --fc)
+libmesh_INCLUDE  := $(shell $(libmesh_config) --include)
+libmesh_CPPFLAGS := $(shell $(libmesh_config) --cppflags)
+libmesh_CXXFLAGS := $(shell $(libmesh_config) --cxxflags)
+libmesh_CFLAGS   := $(shell $(libmesh_config) --cflags)
+libmesh_FFLAGS   := $(shell $(libmesh_config) --fflags)
+libmesh_LIBS     := $(shell $(libmesh_config) --libs)
+libmesh_HOST     := $(shell $(libmesh_config) --host)
 
-#Get which compiler is being used
-cxx_compiler := $(libmesh_CXX) 
+# Make.common used to provide an obj-suffix which was related to the
+# machine in question (from config.guess, i.e. @host@ in
+# contrib/utils/Make.common.in) and the $(METHOD).
+obj-suffix := $(libmesh_HOST).$(METHOD).lo
+
+# The libtool provided by libmesh.
+libmesh_LIBTOOL := $(LIBMESH_DIR)/contrib/bin/libtool
+libmesh_shared  := $(shell $(libmesh_LIBTOOL) --config | grep build_libtool_libs | cut -d'=' -f2)
 
 # If $(libmesh_CXX) is an mpiXXX compiler script, use -show
 # to determine the base compiler
+cxx_compiler := $(libmesh_CXX)
 ifneq (,$(findstring mpi,$(cxx_compiler)))
 	cxx_compiler = $(shell $(libmesh_CXX) -show)
 endif
@@ -45,7 +67,7 @@ ifdef PRECOMPILED
 # disable precompiled header support if it is not available on his
 # system.
 %.h.gch/$(METHOD).h.gch : %.h
-	@echo "Pre-Compiling Header (in "$(mode)" mode) "$<"..."
+	@echo "Pre-Compiling Header (in "$(METHOD)" mode) "$<"..."
 	@mkdir -p $(MOOSE_DIR)/include/base/Precompiled.h.gch
 	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED $(libmesh_INCLUDE) -MMD -MF $@.d -c $< -o $@
 
@@ -63,12 +85,12 @@ endif
 #
 
 pcre%.$(obj-suffix) : pcre%.cc
-	@echo "Compiling C++ $(PCH_MODE)(in "$(mode)" mode) "$<"..."
+	@echo "Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.C
-	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(mode)" mode) "$<"..."
+	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -MMD -MF $@.d -MT $@ -c $< -o $@
 
@@ -78,12 +100,12 @@ pcre%.$(obj-suffix) : pcre%.cc
 #
 
 pcre%.$(obj-suffix) : pcre%.c
-	@echo "Compiling C $(PCH_MODE)(in "$(mode)" mode) "$<"..."
+	@echo "Compiling C $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.c
-	@echo "MOOSE Compiling C $(PCH_MODE)(in "$(mode)" mode) "$<"..."
+	@echo "MOOSE Compiling C $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -MMD -MF $@.d -MT $@ -c $< -o $@
 
@@ -94,7 +116,7 @@ pcre%.$(obj-suffix) : pcre%.c
 #
 
 %.$(obj-suffix) : %.f
-	@echo "MOOSE Compiling Fortan (in "$(mode)" mode) "$<"..."
+	@echo "MOOSE Compiling Fortan (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_F77) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< -o $@
 
@@ -105,7 +127,7 @@ pcre%.$(obj-suffix) : pcre%.c
 
 PreProcessed_FFLAGS := $(libmesh_FFLAGS)
 %.$(obj-suffix) : %.F
-	@echo "MOOSE Compiling Fortran (in "$(mode)" mode) "$<"..."
+	@echo "MOOSE Compiling Fortran (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_F90) $(PreProcessed_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
 
@@ -135,7 +157,7 @@ ifneq (,$(findstring gfortran,$(mpif90_command)))
 endif
 
 %.$(obj-suffix) : %.f90
-	@echo "MOOSE Compiling Fortran90 (in "$(mode)" mode) "$<"..."
+	@echo "MOOSE Compiling Fortran90 (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=FC $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_F90) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
 
@@ -216,16 +238,16 @@ endif
 # out to be more trouble than it was worth to get working.
 #
 %-$(METHOD).plugin : %.C
-	@echo "MOOSE Compiling C++ Plugin (in "$(mode)" mode) "$<"..."
+	@echo "MOOSE Compiling C++ Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.c
-	@echo "MOOSE Compiling C Plugin (in "$(mode)" mode) "$<"..."
+	@echo "MOOSE Compiling C Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f
-	@echo "MOOSE Compiling Fortan Plugin (in "$(mode)" mode) "$<"..."
+	@echo "MOOSE Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_F77) $(libmesh_FFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f90
-	@echo "MOOSE Compiling Fortan Plugin (in "$(mode)" mode) "$<"..."
+	@echo "MOOSE Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_F90) $(libmesh_FFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
 
 
