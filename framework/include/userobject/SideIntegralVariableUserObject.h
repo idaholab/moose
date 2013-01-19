@@ -46,8 +46,6 @@ protected:
   VariableValue & _u;
   /// Holds the solution gradient at the current quadrature points
   VariableGradient & _grad_u;
-
-  const MooseArray<Point> & _normals;
 };
 
 #endif

@@ -38,7 +38,7 @@ SideUserObject::SideUserObject(const std::string & name, InputParameters paramet
     _qrule(_subproblem.qRuleFace(_tid)),
     _JxW(_subproblem.JxWFace(_tid)),
     _coord(_subproblem.coords(_tid)),
-//    _normals(_var.normals()),
+    _normals(_subproblem.assembly(_tid).normals()),
     _current_elem(_subproblem.elem(_tid)),
     _current_side(_subproblem.side(_tid)),
     _current_side_elem(_subproblem.sideElem(_tid)),

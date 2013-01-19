@@ -27,8 +27,7 @@ SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(const std::
     MooseVariableInterface(parameters, false),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),
-    _grad_u(_var.gradSln()),
-    _normals(_var.normals())
+    _grad_u(_var.gradSln())
 {
   addMooseVariableDependency(mooseVariable());
 }

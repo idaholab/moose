@@ -73,7 +73,7 @@ protected:
   QBase * & _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
-//  const MooseArray<Point> & _normals;
+  const MooseArray<Point> & _normals;
 
   const Elem * & _current_elem;
   /// current side of the current element
@@ -91,8 +91,6 @@ protected:
   MooseArray<Real> & _zero;
   MooseArray<RealGradient> & _grad_zero;
   MooseArray<RealTensor> & _second_zero;
-
-  virtual Real computeQpIntegral() = 0;
 };
 
 #endif
