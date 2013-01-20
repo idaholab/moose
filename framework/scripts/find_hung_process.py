@@ -6,6 +6,7 @@
 import sys
 import re
 import subprocess
+from tempfile import TemporaryFile
 
 def main():
   if len(sys.argv) < 3 or len(sys.argv) > 4:
@@ -25,21 +26,33 @@ def main():
   p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   output = p.communicate()[0]
 
+  # The lists of hosts
   hosts = []
+  # The array of jobs
+  jobs = []
 
   # The machine name should go here!
-  f = re.findall("(fission-\d{4})", output)
-  for i in f:
+  host_strs = re.findall("(fission-\d{4})", output)
+  for i in host_strs:
     hosts.append(i)
 
   unique_stack_traces = {}
   trace_regex = re.compile("^#0", re.M | re.S)
   last_lines_regex = re.compile("(?:.*\n){" + str(num_to_keep) + "}\Z", re.M)
 
+  # Launch all the jobs
   for host in hosts:
     command = "ssh " + host + " \"ps -e | grep " + application + " | awk '{print \$1}' | xargs -I {} gdb --batch --pid={} -ex bt 2>&1 | grep '^#' \""
-    p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-    output = p.communicate()[0]
+    f = TemporaryFile()
+    p = subprocess.Popen(command, stdout=f, close_fds=False, shell=True)
+    jobs.append((p, f))
+
+  # Now process the output from each of the jobs
+  for (p, f) in jobs:
+    p.wait()
+    f.seek(0)
+    output = f.read()
+    f.close()
 
     # Python FAIL - We have to re-glue the tokens we threw away from our split (Perl 1 : Python 0)
     traces = ["#0" + trace for trace in trace_regex.split(output)]
@@ -75,7 +88,9 @@ def compare_traces(trace1, trace2):
   if len(lines1) != len(lines2):
     return False
 
-  # Only compare the stack trace part - not the memoery addresses
+  # Only compare the stack trace part - not the memory addresses
+  # Note this subroutine may need tweaking if the stack trace is different
+  # on the current machine
   for i in xrange(len(lines1)):
     line1 = lines1[i].split()[2:]
     line2 = lines2[i].split()[2:]
