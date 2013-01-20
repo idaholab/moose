@@ -8,13 +8,17 @@ import re
 import subprocess
 
 def main():
-  if len(sys.argv) != 3:
-    print "Usage: " + sys.argv[0] + " <PBS Job num> <Application>"
+  if len(sys.argv) < 3 or len(sys.argv) > 4:
+    print "Usage: " + sys.argv[0] + " <PBS Job num> <Application> [num frames to keep]"
     sys.exit(1)
 
   # The PBS job number and the application should be passed on the command line
+  # Additionally, an optional argument of the number of frames to keep (compare) may be passed
   job_num = sys.argv[1]
   application = sys.argv[2]
+  num_to_keep = 0
+  if len(sys.argv) == 4:
+    num_to_keep = int(sys.argv[3])
 
   command = "qstat -n " + job_num
 
@@ -38,9 +42,11 @@ def main():
     # Python FAIL - We have to re-glue the tokens we threw away from our split (Perl 1 : Python 0)
     traces = ["#0" + trace for trace in regex.split(output)]
     for trace in traces:
+      if trace == '#0': # More Python FAIL - why you suck so bad?
+        continue
       unique = ''
       for bt in unique_stack_traces:
-        if compare_traces(trace, bt):
+        if compare_traces(trace, bt, num_to_keep):
           unique = bt
 
       if unique == '':
@@ -51,19 +57,24 @@ def main():
 
   print "Unique Stack Traces"
   for trace, count in unique_stack_traces.iteritems():
-    print "**********************************\nCount: " + str(count) + "\n" + bt
+    print "**********************************\nCount: " + str(count) + "\n" + trace
 
-def compare_traces(trace1, trace2):
+def compare_traces(trace1, trace2, num_keep):
   lines1 = trace1.split("\n")
   lines2 = trace2.split("\n")
 
-  if len(lines1) != len(lines2):
-    return False
+  idx_adj = 0
+  if num_keep == 0:
+    if len(lines1) != len(lines2):
+      return False
+    num_keep = len(lines1)
+  else:
+    idx_adj = len(lines1) - len(lines2)
 
   # Only compare the stack trace part - not the memoery addresses
-  for i in xrange(len(lines1)):
+  for i in xrange(len(lines1) - num_keep, len(lines1)):
     line1 = lines1[i].split()[2:]
-    line2 = lines2[i].split()[2:]
+    line2 = lines2[i - idx_adj].split()[2:]
 
     if line1 != line2:
       return False
