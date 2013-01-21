@@ -10,7 +10,7 @@ InputParameters validParams<PressureAction>()
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
   params.addRequiredParam<NonlinearVariableName>("disp_x", "The x displacement");
-  params.addRequiredParam<NonlinearVariableName>("disp_y", "The y displacement");
+  params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
   params.addParam<Real>("factor", 1.0, "The factor to use in computing the pressure");
   params.addParam<FunctionName>("function", "", "The function that describes the pressure");
@@ -34,7 +34,11 @@ void
 PressureAction::act()
 {
   // Determine number of dimensions
-  unsigned int dim(2);
+  unsigned int dim(1);
+  if (_disp_y != "")
+  {
+    ++dim;
+  }
   if (_disp_z != "")
   {
     ++dim;

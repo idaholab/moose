@@ -1,6 +1,7 @@
 #include "SolidModel.h"
 
 #include "AxisymmetricRZ.h"
+#include "SphericalR.h"
 #include "Linear.h"
 #include "Nonlinear3D.h"
 #include "PlaneStrain.h"
@@ -12,6 +13,8 @@
 template<>
 InputParameters validParams<SolidModel>()
 {
+  MooseEnum formulation("Nonlinear3D, AxisymmetricRZ, SphericalR, Linear, PlaneStrain");
+
   InputParameters params = validParams<Material>();
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
@@ -29,9 +32,9 @@ InputParameters validParams<SolidModel>()
   params.addParam<Real>("cracking_stress", 0.0, "The stress threshold beyond which cracking occurs.  Must be positive.");
   params.addParam<std::vector<unsigned int> >("active_crack_planes", "Planes on which cracks are allowed (0,1,2 -> x,z,theta in RZ)");
   params.addParam<unsigned int>("max_cracks", 3, "The maximum number of cracks allowed at a material point.");
-  params.addParam<std::string>("formulation", "Element formulation.  Choices are \"Nonlinear3D\", \"AxisymmetricRZ\", and \"Linear\".  (Case insensitive.)");
+  params.addParam<MooseEnum>("formulation", formulation, "Element formulation.  Choices are: " + formulation.getRawNames());
   params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen). For use with Nonlinear3D formulation.");
-  params.addParam<bool>("large_strain", false, "Whether to include large strain terms in AxisymmetricRZ and PlaneStrain formulations.");
+  params.addParam<bool>("large_strain", false, "Whether to include large strain terms in AxisymmetricRZ, SphericalR, and PlaneStrain formulations.");
   params.addCoupledVar("disp_r", "The r displacement");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
@@ -903,7 +906,7 @@ SolidModel::createElement( const std::string & name,
 {
   Elk::SolidMechanics::Element * element(NULL);
 
-  std::string formulation = getParam<std::string>("formulation");
+  std::string formulation = getParam<MooseEnum>("formulation");
   std::transform( formulation.begin(), formulation.end(),
                   formulation.begin(), ::tolower );
   if ( formulation == "nonlinear3d" )
@@ -932,6 +935,14 @@ SolidModel::createElement( const std::string & name,
       mooseError("AxisymmetricRZ must define disp_r and disp_z");
     }
     element = new Elk::SolidMechanics::AxisymmetricRZ(name, parameters);
+  }
+  else if ( formulation == "sphericalr" )
+  {
+    if ( !isCoupled("disp_r") )
+    {
+      mooseError("SphericalR must define disp_r");
+    }
+    element = new Elk::SolidMechanics::SphericalR(name, parameters);
   }
   else if ( formulation == "planestrain" )
   {
@@ -968,6 +979,14 @@ SolidModel::createElement( const std::string & name,
     }
     element = new Elk::SolidMechanics::AxisymmetricRZ(name, parameters);
   }
+  else if ( !element && _coord_type == Moose::COORD_RSPHERICAL )
+  {
+    if ( !isCoupled("disp_r") )
+    {
+      mooseError("RSPHERICAL coord sys requires disp_r for SphericalR formulation");
+    }
+    element = new Elk::SolidMechanics::SphericalR(name, parameters);
+  }
 
   if (!element)
   {
@@ -989,6 +1008,14 @@ SolidModel::createElement( const std::string & name,
         mooseError("RZ coord system not specified, but disp_r and disp_z are");
       }
       element = new Elk::SolidMechanics::AxisymmetricRZ( name, parameters );
+    }
+    else if (isCoupled("disp_r"))
+    {
+      if ( _coord_type != Moose::COORD_RSPHERICAL )
+      {
+        mooseError("RSPHERICAL coord system not specified, but disp_r is");
+      }
+      element = new Elk::SolidMechanics::SphericalR( name, parameters );
     }
     else if (isCoupled("disp_x"))
     {

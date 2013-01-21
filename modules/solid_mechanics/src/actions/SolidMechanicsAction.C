@@ -16,7 +16,7 @@ InputParameters validParams<SolidMechanicsAction>()
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that these kernels will be applied to");
-  
+
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_x", "Auxiliary variables to save the x displacement residuals.");
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_y", "Auxiliary variables to save the y displacement residuals.");
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_z", "Auxiliary variables to save the z displacement residuals.");
@@ -44,17 +44,17 @@ SolidMechanicsAction::act()
   // list of subdomains IDs per coordinate system
   std::map<Moose::CoordinateSystemType, std::vector<SubdomainName> > coord_map;
   std::set<SubdomainID> subdomains;
-  
+
   if(isParamValid("block")) // Should it be restricted to certain blocks?
   {
     std::cout<<"Restricting to blocks!"<<std::endl;
     std::vector<SubdomainName> block = getParam<std::vector<SubdomainName> >("block");
     for(unsigned int i=0; i < block.size(); i++)
       subdomains.insert(_problem->mesh().getSubdomainID(block[i]));
-  }  
+  }
   else // Put it everywhere
     subdomains = _problem->mesh().meshSubdomains();
-  
+
   for (std::set<SubdomainID>::const_iterator it = subdomains.begin(); it != subdomains.end(); ++it)
   {
     SubdomainID sid = *it;
@@ -67,15 +67,16 @@ SolidMechanicsAction::act()
 
     coord_map[coord_type].push_back(sname);
   }
-  
+
 
   for (std::map<Moose::CoordinateSystemType, std::vector<SubdomainName> >::iterator it = coord_map.begin(); it != coord_map.end(); ++it)
   {
     Moose::CoordinateSystemType coord_type = (*it).first;
     std::vector<SubdomainName> & blocks = (*it).second;
 
-    // Determine whether RZ
+    // Determine whether RZ or RSPHERICAL
     bool rz(false);
+    bool rspherical(false);
     unsigned int dim(1);
     std::vector<std::string> keys;
     std::vector<std::string> vars;
@@ -85,34 +86,48 @@ SolidMechanicsAction::act()
     if (coord_type == Moose::COORD_RZ)
     {
       rz = true;
+      type = "StressDivergenceRZ";
       dim = 2;
       keys.push_back("disp_r");
       keys.push_back("disp_z");
       vars.push_back(_disp_r);
-      vars.push_back(_disp_z);      
+      vars.push_back(_disp_z);
       save_in.resize(dim);
       if(isParamValid("save_in_disp_r"))
         save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_r");
-      
+
       if(isParamValid("save_in_disp_z"))
         save_in[1] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
 
       diag_save_in.resize(dim);
       if(isParamValid("diag_save_in_disp_r"))
         diag_save_in[0] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_r");
-      
+
       if(isParamValid("diag_save_in_disp_z"))
         diag_save_in[1] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_z");
+    }
+    else if (coord_type == Moose::COORD_RSPHERICAL)
+    {
+      rspherical = true;
+      type = "StressDivergenceRSpherical";
+      dim = 1;
+      keys.push_back("disp_r");
+      vars.push_back(_disp_r);
+      save_in.resize(dim);
+      if(isParamValid("save_in_disp_r"))
+        save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_r");
 
-      type = "StressDivergenceRZ";
+      diag_save_in.resize(dim);
+      if(isParamValid("diag_save_in_disp_r"))
+        diag_save_in[0] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_r");
     }
 
-    if (!rz && _disp_x == "")
+    if (!rz && !rspherical && _disp_x == "")
     {
       mooseError("disp_x must be specified");
     }
 
-    if (!rz)
+    if (!rz && !rspherical)
     {
       keys.push_back("disp_x");
       vars.push_back(_disp_x);
@@ -184,6 +199,7 @@ SolidMechanicsAction::act()
       name << i;
 
       params.set<unsigned int>("component") = i;
+
       params.set<NonlinearVariableName>("variable") = vars[i];
       params.set<std::vector<SubdomainName> >("block") = blocks;
       params.set<std::vector<AuxVariableName> >("save_in") = save_in[i];

@@ -60,8 +60,6 @@
 []
 
 [Functions]
-  active = 'top_pull'
-
   [./top_pull]
     type = PiecewiseLinear
 
@@ -79,8 +77,6 @@
 []
 
 [Kernels]
-  active = 'solid_x_ie solid_y_ie solid_z_ie heat heat_ie'
-
   [./solid_x_ie]
     type = SolidMechImplicitEuler
     variable = disp_x
@@ -109,7 +105,6 @@
 
 
 [AuxKernels]
-  active = 'stress_yy creep_strain_xx creep_strain_yy creep_strain_zz elastic_strain_yy'
 
   [./stress_yy]
     type = MaterialTensorAux

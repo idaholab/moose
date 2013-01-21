@@ -36,6 +36,7 @@
 #include "SolidMechImplicitEuler.h"
 #include "StressDivergence.h"
 #include "StressDivergenceRZ.h"
+#include "StressDivergenceRSpherical.h"
 
 void
 Elk::SolidMechanics::registerObjects()
@@ -71,6 +72,7 @@ Elk::SolidMechanics::registerObjects()
   registerKernel(SolidMechImplicitEuler);
   registerKernel(StressDivergence);
   registerKernel(StressDivergenceRZ);
+  registerKernel(StressDivergenceRSpherical);
 
   registerPostprocessor(HomogenizedElasticConstants);
   registerPostprocessor(Mass);
