@@ -45,7 +45,7 @@ plugins	    += $(patsubst %.f90, %-$(METHOD).plugin, $(f90plugfiles))
 #       If we need to use either of these classes from libMesh directly
 #       in Moose, we will have problems until one of them is renamed or
 #       resolved in some other fashion
-app_DIRS	+= $(shell find $(CURR_DIR)/include -type d | grep -v .svn)
+app_DIRS	+= $(shell find $(CURR_DIR)/include -type d | grep -v "\.svn")
 moose_INCLUDE   := $(foreach i, $(app_DIRS), -I$(i)) $(ADDITIONAL_INCLUDES)
 libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
 
