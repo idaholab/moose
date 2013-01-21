@@ -1021,10 +1021,8 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
       for (int i=0; i < count; i++) {
 #if (defined(__GNUC__) && (__GNUC__ == 2 && __GNUC_MINOR__ == 96)) || (defined(linux) && __PGI) || (defined(linux) && __INTEL_COMPILER)
 	if (__isnan(values[i]))
-#elif defined(interix)
-	  if (values[i] != values[i])
 #else
-	    if (isnan(values[i]))
+    if (values[i] != values[i])
 #endif
 	      {
 		valid = false;
