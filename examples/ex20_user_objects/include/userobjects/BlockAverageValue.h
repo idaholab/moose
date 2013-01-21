@@ -15,7 +15,7 @@
 #ifndef BLOCKAVERAGEVALUE_H
 #define BLOCKAVERAGEVALUE_H
 
-#include "ElementIntegral.h"
+#include "ElementIntegralVariablePostprocessor.h"
 
 // libmesh includes
 #include "mesh_tools.h"
@@ -29,7 +29,7 @@ InputParameters validParams<BlockAverageValue>();
 /**
  * Computes the average value of a variable on each block
  */
-class BlockAverageValue : public ElementIntegral
+class BlockAverageValue : public ElementIntegralVariablePostprocessor
 {
 public:
   BlockAverageValue(const std::string & name, InputParameters parameters);

@@ -20,7 +20,7 @@
 template<>
 InputParameters validParams<BlockAverageValue>()
 {
-  InputParameters params = validParams<ElementIntegral>();
+  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
 
   // Since we are inheriting from a Postprocessor we override this to make sure
   // That MOOSE (and Peacock) know that this object is _actually_ a UserObject
@@ -30,7 +30,7 @@ InputParameters validParams<BlockAverageValue>()
 }
 
 BlockAverageValue::BlockAverageValue(const std::string & name, InputParameters parameters) :
-    ElementIntegral(name, parameters)
+    ElementIntegralVariablePostprocessor(name, parameters)
 {
 }
 
@@ -50,7 +50,7 @@ void
 BlockAverageValue::initialize()
 {
   // Explicitly call the initialization routines for our base class
-  ElementIntegral::initialize();
+  ElementIntegralVariablePostprocessor::initialize();
 
   // Set averages to 0 for each block
   const std::set<SubdomainID> & blocks = _subproblem.mesh().meshSubdomains();
@@ -81,7 +81,7 @@ BlockAverageValue::execute()
 void
 BlockAverageValue::threadJoin(const UserObject & y)
 {
-  ElementIntegral::threadJoin(y);
+  ElementIntegralVariablePostprocessor::threadJoin(y);
 
   // We are joining with another class like this one so do a cast so we can get to it's data
   const BlockAverageValue & bav = dynamic_cast<const BlockAverageValue &>(y);
