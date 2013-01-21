@@ -4,4 +4,10 @@
     input = '1d_neumann.i'
     exodiff = '1d_neumann_out.e'
   [../]
+
+  [./from_cubit]
+    type = 'Exodiff'
+    input = 'from_cubit.i'
+    exodiff = 'from_cubit_out.e'
+  [../]
 []
