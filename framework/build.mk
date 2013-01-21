@@ -165,7 +165,7 @@ endif
 
 
 # treat these warnings as errors (This doesn't seem to be necessary for Intel)
-ifneq (,$(findstring gcc,$(GXX-VERSION)))
+ifneq (,$(findstring gcc,$(cxx_compiler)))
   libmesh_CXXFLAGS     += -Werror=return-type -Werror=reorder
 endif
 
@@ -199,7 +199,7 @@ endif
 
 # compile with gcov support if using the gcc compiler suite
 ifeq ($(coverage),true)
-	ifneq (,$(findstring gcc,$(GXX-VERSION)))
+	ifneq (,$(findstring gcc,$(cxx_compiler)))
 		libmesh_CXXFLAGS += --coverage -fprofile-arcs -ftest-coverage
 		libmesh_LDFLAGS += --coverage
 	endif
@@ -210,7 +210,7 @@ endif
 # the tests in moose_test you would make moose with coverage=true
 # and moose_test with just linkcoverage=true
 ifeq ($(linkcoverage),true)
-	ifneq (,$(findstring gcc,$(GXX-VERSION)))
+	ifneq (,$(findstring gcc,$(cxx_compiler)))
 		libmesh_LDFLAGS += --coverage
 	endif
 endif
