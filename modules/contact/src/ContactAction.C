@@ -15,7 +15,7 @@ InputParameters validParams<ContactAction>()
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
   params.addRequiredParam<NonlinearVariableName>("disp_x", "The x displacement");
-  params.addRequiredParam<NonlinearVariableName>("disp_y", "The y displacement");
+  params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
@@ -52,7 +52,11 @@ ContactAction::act()
   }
 
   // Determine number of dimensions
-  unsigned int dim(2);
+  unsigned int dim(1);
+  if (_disp_y != "")
+  {
+    ++dim;
+  }
   if (_disp_z != "")
   {
     ++dim;
@@ -90,7 +94,10 @@ ContactAction::act()
     params.addCoupledVar("disp_x", "The x displacement");
     params.set<std::vector<std::string> >("disp_x") = std::vector<std::string>(1, _disp_x);
     params.addCoupledVar("disp_y", "The y displacement");
-    params.set<std::vector<std::string> >("disp_y") = std::vector<std::string>(1, _disp_y);
+    if (dim > 1)
+    {
+      params.set<std::vector<std::string> >("disp_y") = std::vector<std::string>(1, _disp_y);
+    }
     params.addCoupledVar("disp_z", "The z displacement");
     if (dim == 3)
     {
@@ -137,7 +144,10 @@ ContactAction::act()
     params.addCoupledVar("disp_x", "The x displacement");
     params.set<std::vector<std::string> >("disp_x") = std::vector<std::string>(1, _disp_x);
     params.addCoupledVar("disp_y", "The y displacement");
-    params.set<std::vector<std::string> >("disp_y") = std::vector<std::string>(1, _disp_y);
+    if (dim > 1)
+    {
+      params.set<std::vector<std::string> >("disp_y") = std::vector<std::string>(1, _disp_y);
+    }
     params.addCoupledVar("disp_z", "The z displacement");
     if (dim == 3)
     {
