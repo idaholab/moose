@@ -7,6 +7,11 @@
 #include "libmesh.h"
 #include <ostream>
 
+extern "C" void dsyev_ ( ... );
+extern "C" void dgeev_ ( ... );
+extern "C" void dgetri_ ( ... );
+extern "C" void dgetrf_ ( ... );
+     
 
 RankFourTensor::RankFourTensor() 
 {
@@ -213,6 +218,128 @@ RankFourTensor::operator - () const
   return result;
 }
 
+//Added
+RankFourTensor
+RankFourTensor::operator*(const RankFourTensor &a) const
+{
+  RankFourTensor result;
+  
+  for(unsigned int i(0); i<N; i++)
+    for(unsigned int j(0); j<N; j++)
+      for(unsigned int k(0); k<N; k++)
+        for(unsigned int l(0); l<N; l++)
+          for(unsigned int p(0); p<N; k++)
+            for(unsigned int q(0); q<N; l++)
+              result(i,j,k,l) = result(i,j,k,l)+_vals[i][j][p][q]*a(p,q,k,l);
+
+  return result;
+}
+
+RankFourTensor
+RankFourTensor::invSymm()
+{
+  int nsize,error;
+  double *mat;
+  
+  RankFourTensor result;
+
+  int ntens=6;
+  int nskip=2;
+  
+  mat=(double*)calloc(ntens*ntens, sizeof(double));
+
+
+  for(unsigned int i = 0; i < 3; i++)
+    for(unsigned int j = 0; j < 3; j++)
+      for (unsigned int k = 0; k < 3; k++)
+        for(unsigned int l = 0; l < 3; l++)
+        {
+
+          if(i==j)
+          {
+            if(k==l)
+            {
+              mat[i*ntens+k]=_vals[i][j][k][l];
+            }
+            else
+            {
+              mat[i*ntens+nskip+k+l]+=_vals[i][j][k][l];
+            }
+            
+          }
+          else
+          {
+            if(k==l)
+            {
+              mat[(nskip+i+j)*ntens+k]=_vals[i][j][k][l];
+            }
+            else
+            {
+              mat[(nskip+i+j)*ntens+nskip+k+l]+=_vals[i][j][k][l];
+            }
+
+            
+          }
+        }
+
+
+  
+  
+  for(unsigned int i = 3; i < ntens; i++)
+    for(unsigned int j = 3; j < ntens; j++)
+      mat[i*ntens+j]=mat[i*ntens+j]/2.0;
+  
+  error=MatrixInversion(mat,ntens);
+
+  if(error != 0)
+    printf("Mat Inversion Error = %d\n",error);
+
+  for(unsigned int i = 0; i < 3; i++)
+    for(unsigned int j = 0; j < 3; j++)
+      for (unsigned int k = 0; k < 3; k++)
+        for(unsigned int l = 0; l < 3; l++)
+        {
+
+          if(i==j)
+          {
+            if(k==l)
+            {
+              result.setValue(mat[i*ntens+k],i+1,j+1,k+1,l+1);
+              
+            }
+            else
+            {
+              result.setValue(mat[i*ntens+2+k+l]/2.0,i+1,j+1,k+1,l+1);
+
+            }
+            
+          }
+          else
+          {
+            if(k==l)
+            {
+              result.setValue(mat[(2+i+j)*ntens+k],i+1,j+1,k+1,l+1);
+
+            }
+            else
+            {
+
+              result.setValue(mat[(2+i+j)*ntens+2+k+l]/2.0,i+1,j+1,k+1,l+1);
+
+            }
+
+            
+          }
+        }
+
+  free(mat);
+  return result;
+  
+  
+}
+
+
+//
 
 void
 RankFourTensor::rotate(RealTensorValue &R)
@@ -242,6 +369,8 @@ RankFourTensor::rotate(RealTensorValue &R)
   
 }
 
+
+
 void
 RankFourTensor::print()
 {
@@ -260,4 +389,40 @@ RankFourTensor::print()
       }
     }
   
+}
+int
+RankFourTensor::MatrixInversion(double* A, int n)
+{
+
+//  mooseAssert(_n_rows == _n_cols, "Cannot solve for inverse of a non-square matrix!");
+//  mooseAssert(_n_rows == invA._n_cols && _n_cols == invA._n_rows, "Matrices must be the same size for matrix inverse!");
+
+  int return_value,buffer_size;
+  int *ipiv,*buffer; 
+  
+  buffer_size=n*64;
+
+  ipiv=(int*)calloc(n, sizeof(int));
+  buffer=(int*)calloc(buffer_size, sizeof(int));  
+  dgetrf_(&n, &n, A, &n, ipiv, &return_value);
+  
+  if (return_value!=0)
+  {
+    
+    free(ipiv);
+    free(buffer);   
+    return return_value;
+  }  
+  dgetri_(&n, A, &n, ipiv, buffer, &buffer_size, &return_value);
+
+
+
+//  if (return_value)
+//    mooseError("error in lapack inverse solve");
+
+  free(ipiv);
+  free(buffer);   
+  return return_value;
+  
+
 }

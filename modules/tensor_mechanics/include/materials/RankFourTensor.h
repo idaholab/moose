@@ -84,12 +84,20 @@ public:
   RankFourTensor operator-(const RankFourTensor &a) const;
 
   RankFourTensor operator - () const;
+  
+  RankFourTensor operator*(const RankFourTensor &a) const;//Added
+
+  RankFourTensor invSymm();//Added
 
   virtual void rotate(RealTensorValue &R);
   /**
    * Print the tensor
    */
   void print();
+  
+//  int MatrixInversion(double *, int, double* );//Added
+
+  int MatrixInversion(double *, int);//Added
   
   
 protected:
