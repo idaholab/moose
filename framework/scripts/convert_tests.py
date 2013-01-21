@@ -23,7 +23,7 @@ def findAndConvert():
       if file[-2:] == 'py' and test_match.search(file): # Legacy file formatted test
         tests = parseLegacyTestFormat(file, test_match)
 
-        f = open('tests', 'w')
+        f = open('tests', 'a')
         f.write("[Tests]")
 
         for test_name, test_opts in tests.items():
