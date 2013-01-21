@@ -49,7 +49,12 @@ InternalVolume::InternalVolume(const std::string & name,
 Real
 InternalVolume::computeQpIntegral()
 {
-  return -_q_point[_qp](_component)*_normals[_qp](_component);
+  Real scale = 1;
+  if (_coord_sys == Moose::COORD_RSPHERICAL)
+  {
+    scale /= 3;
+  }
+  return -scale*_q_point[_qp](_component)*_normals[_qp](_component);
 }
 
 Real

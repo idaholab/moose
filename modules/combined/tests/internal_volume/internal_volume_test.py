@@ -26,3 +26,7 @@ test_rz_cone = { INPUT : 'internal_volume_rz_cone.i',
                  CSVDIFF : ['internal_volume_rz_cone_out.csv'],
                  TYPE : 'CSVDiff' }
 
+test_rspherical = { INPUT : 'internal_volume_rspherical.i',
+                    CSVDIFF : ['internal_volume_rspherical_out.csv'],
+                    TYPE : 'CSVDiff' }
+
