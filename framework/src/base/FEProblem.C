@@ -2573,9 +2573,15 @@ FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector
 
   if (_has_dampers)
   {
+    // Save pointer to the current solution
+    const NumericVector<Number>* _saved_current_solution = _nl.currentSolution();
+
     _nl.set_solution(soln);
     _aux.compute();
     damping = _nl.computeDamping(update);
+
+    // restore saved solution
+    _nl.set_solution(*_saved_current_solution);
   }
 
   Moose::perf_log.pop("compute_dampers()","Solve");
