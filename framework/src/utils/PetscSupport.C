@@ -226,15 +226,18 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
   {
     // cls is a PetscVector wrapper around the Vec in current_local_solution
     PetscVector<Number> cls(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec());
-    // Create new NumericVectors with the right ghosting
+
+    // Create new NumericVectors with the right ghosting - note: these will be destroyed
+    // when this function exits, so nobody better hold pointers to them any more!
     AutoPtr<NumericVector<Number> > ghosted_y_aptr( cls.zero_clone() );
     AutoPtr<NumericVector<Number> > ghosted_w_aptr( cls.zero_clone() );
-    // Create PetscVector wrappers around the Vecs
+
+    // Create PetscVector wrappers around the Vecs.
     PetscVector<Number> ghosted_y( static_cast<PetscVector<Number> *>(ghosted_y_aptr.get())->vec() );
     PetscVector<Number> ghosted_w( static_cast<PetscVector<Number> *>(ghosted_w_aptr.get())->vec() );
 
-    VecCopy(y, ghosted_y.vec());
-    VecCopy(w, ghosted_w.vec());
+    ierr = VecCopy(y, ghosted_y.vec()); CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    ierr = VecCopy(w, ghosted_w.vec()); CHKERRABORT(libMesh::COMM_WORLD,ierr);
 
     ghosted_y.close();
     ghosted_w.close();
@@ -243,16 +246,17 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
     if(damping < 1.0)
     {
       //recalculate w=-damping*y + x
-      VecWAXPY(w, -damping, y, x);
+      ierr = VecWAXPY(w, -damping, y, x); CHKERRABORT(libMesh::COMM_WORLD,ierr);
       *changed_w = PETSC_TRUE;
     }
+
 
     if (problem.shouldUpdateSolution())
     {
       //Update the ghosted copy of w
       if (*changed_w == PETSC_TRUE)
       {
-        VecCopy(w, ghosted_w.vec());
+        ierr = VecCopy(w, ghosted_w.vec()); CHKERRABORT(libMesh::COMM_WORLD,ierr);
         ghosted_w.close();
       }
 
@@ -265,7 +269,7 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
     }
   }
 
-  return(ierr);
+  return ierr;
 }
 
 void petscSetupDampers(NonlinearImplicitSystem& sys)
@@ -281,8 +285,11 @@ void petscSetupDampers(NonlinearImplicitSystem& sys)
 #else
   // PETSc 3.3.0+
   SNESLineSearch linesearch;
-  SNESGetSNESLineSearch(snes, &linesearch);
-  SNESLineSearchSetPostCheck(linesearch, dampedCheck, problem);
+  PetscErrorCode ierr = SNESGetSNESLineSearch(snes, &linesearch);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+
+  ierr = SNESLineSearchSetPostCheck(linesearch, dampedCheck, problem);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
 #endif
 }
 
