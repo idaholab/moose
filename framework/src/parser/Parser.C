@@ -650,6 +650,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractVector(NonlinearVariableName , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(AuxVariableName       , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(FunctionName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(UserObjectName        , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(IndicatorName         , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(MarkerName            , it->second, full_name, it->first, in_global, global_params_block);
     }
