@@ -118,9 +118,7 @@ SlaveConstraint::computeQpResidual()
   RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
   RealVectorValue pen_force(_penalty * distance_vec);
   RealVectorValue tan_residual(0,0,0);
-  Real tan_residual_mag(0);
   RealVectorValue unity(1.0, 1.0, 1.0);
-  ContactState state(STICKING);
   if (_model == CM_FRICTIONLESS || _model == CM_EXPERIMENTAL)
   {
 
@@ -287,7 +285,7 @@ SlaveConstraint::computeQpJacobian()
       invD12 = -D12/detD;
       invD22 =  D11/detD;
     }
-    else
+    else if ( _dim == 2 )
     {
       invD11 = 1 / D11;
     }
