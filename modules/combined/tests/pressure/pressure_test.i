@@ -157,7 +157,6 @@
   file_base = out
   interval = 1
   output_initial = true
-  output_displaced = true
   elemental_as_nodal = true
   exodus = true
   perf_log = true
