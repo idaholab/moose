@@ -349,7 +349,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       global_params = {}
       global_params_item = self.findChildItemWithName(self, 'GlobalParams')
 
-      if global_params_item:
+      # Don't pass in global_params for the GlobalParams block!
+      if global_params_item and 'GlobalParams' not in this_path:
         global_params = global_params_item.table_data
 
       new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, item.param_comments, item.comment, False, self.application.typeOptions(), global_params)
