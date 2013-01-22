@@ -62,6 +62,44 @@ findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
   const std::vector<RealGradient> & d2xyz_deta2 = _fe->get_d2xyzdeta2();
   const std::vector<RealGradient> & d2xyz_detaxi = _fe->get_d2xyzdxideta();
 
+  if (dim == 1)
+  {
+    unsigned left(0);
+    unsigned right(left);
+    Real leftCoor((*master_elem->get_node(0))(0));
+    Real rightCoor(left);
+    for (unsigned i(1); i < master_elem->n_nodes(); ++i)
+    {
+      Real coor = (*master_elem->get_node(i))(0);
+      if (coor < leftCoor)
+      {
+        left = i;
+        leftCoor = coor;
+      }
+      if (coor > rightCoor)
+      {
+        right = i;
+        rightCoor = coor;
+      }
+    }
+    unsigned nearestNode(left);
+    Point nearestPoint(leftCoor, 0, 0);
+    if (side->node(0) == right)
+    {
+      nearestNode = right;
+      nearestPoint(0) = rightCoor;
+    }
+    p_info._closest_point_ref = FEInterface::inverse_map(dim, _fe_type, master_elem, nearestPoint, TOLERANCE, false);
+    p_info._closest_point = nearestPoint;
+    p_info._normal = Point(left == nearestNode ? -1 : 1, 0, 0);
+    p_info._distance = (slave_point - p_info._closest_point) * p_info._normal;
+    p_info._dxyzdxi = dxyz_dxi;
+    p_info._dxyzdeta = dxyz_deta;
+    p_info._d2xyzdxideta = d2xyz_dxieta;
+    contact_point_on_side = true;
+    return;
+  }
+
   Point ref_point;
 
   if(start_with_centroid)

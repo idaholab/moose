@@ -948,9 +948,13 @@ PenetrationThread::isFaceReasonableCandidate(const Elem * master_elem,
   {
     normal = dxyz_dxi[0].cross(dxyz_deta[0]);
   }
-  else
+  else if (dim-1 == 1)
   {
     normal = RealGradient(dxyz_dxi[0](1),-dxyz_dxi[0](0));
+  }
+  else
+  {
+    return true;
   }
   normal /= normal.size();
 
