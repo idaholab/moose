@@ -241,16 +241,16 @@ endif
 #
 %-$(METHOD).plugin : %.C
 	@echo "MOOSE Compiling C++ Plugin (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
+	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -shared -fPIC $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.c
 	@echo "MOOSE Compiling C Plugin (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
+	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -shared -fPIC $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f
 	@echo "MOOSE Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_F77) $(libmesh_FFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
+	@$(libmesh_F77) $(libmesh_FFLAGS) -shared -fPIC $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f90
 	@echo "MOOSE Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_F90) $(libmesh_FFLAGS) -shared $(libmesh_INCLUDE) $< -o $@
+	@$(libmesh_F90) $(libmesh_FFLAGS) -shared -fPIC $(libmesh_INCLUDE) $< -o $@
 
 
 # Build appliations up the tree
