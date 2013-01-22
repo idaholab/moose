@@ -92,10 +92,11 @@ findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
     p_info._closest_point_ref = FEInterface::inverse_map(dim, _fe_type, master_elem, nearestPoint, TOLERANCE, false);
     p_info._closest_point = nearestPoint;
     p_info._normal = Point(left == nearestNode ? -1 : 1, 0, 0);
-    p_info._distance = (slave_point - p_info._closest_point) * p_info._normal;
+    p_info._distance = (p_info._closest_point - slave_point) * p_info._normal;
     p_info._dxyzdxi = dxyz_dxi;
     p_info._dxyzdeta = dxyz_deta;
     p_info._d2xyzdxideta = d2xyz_dxieta;
+    p_info._side_phi = _fe->get_phi();
     contact_point_on_side = true;
     return;
   }
