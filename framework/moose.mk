@@ -70,7 +70,7 @@ $(pcre_LIB): $(pcre_objects)
 $(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects) $(pcre_LIB)
 	@echo "Linking "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(MOOSE_DIR)
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(MOOSE_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(MOOSE_DIR)
 
 # include MOOSE dep files. Note: must use -include for deps, since they don't exist for first time builds.
