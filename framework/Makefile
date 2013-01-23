@@ -2,9 +2,6 @@
 ################### MOOSE Application Standard Makefile #######################
 ###############################################################################
 #
-# Required Environment variables
-# LIBMESH_DIR	- location of the libMesh library
-#
 # Required Make variables
 # APPLICATION_NAME  - the name of this application (all lower case)
 # MOOSE_DIR	- location of the MOOSE framework
@@ -23,9 +20,6 @@ MOOSE_DIR	?= $(shell pwd)
 ROOT_DIR        ?= $(shell scripts/find_dep_apps.py ROOT)
 DEP_APPS	?= $(shell scripts/find_dep_apps.py MOOSE)
 
-#Note: If you are a developer this will not work
-# This line assumes that moose and libmesh are peer dirs
-LIBMESH_DIR     ?= $(ROOT_DIR)/libmesh/installed
 include build.mk
 include moose.mk
 
