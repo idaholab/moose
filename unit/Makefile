@@ -2,9 +2,6 @@
 ################### MOOSE Application Standard Makefile #######################
 ###############################################################################
 #
-# Required Environment variables
-# LIBMESH_DIR	- location of the libMesh library
-#
 # Optional Environment variables
 # CURR_DIR	- current directory (DO NOT MODIFY THIS VARIABLE)
 # MOOSE_DIR	- location of the MOOSE framework
@@ -25,7 +22,6 @@ ifeq ($(MOOSE_DEV),true)
 else
 	MOOSE_DIR ?= $(ROOT_DIR)/moose
 endif
-LIBMESH_DIR ?= $(ROOT_DIR)/libmesh/installed
 
 APPLICATION_NAME := moose_unit
 

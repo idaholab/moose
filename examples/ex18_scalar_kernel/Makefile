@@ -2,9 +2,6 @@
 ################### MOOSE Application Standard Makefile #######################
 ###############################################################################
 #
-# Required Environment variables
-# LIBMESH_DIR	- location of the libMesh library
-#
 # Required Make variables
 # APPLICATION_NAME  - the name of this application (all lower case)
 # MOOSE_DIR	        - location of the MOOSE framework
@@ -23,7 +20,6 @@ ifeq ($(MOOSE_DEV),true)
 else
 	MOOSE_DIR ?= $(ROOT_DIR)/moose
 endif
-LIBMESH_DIR	?= $(ROOT_DIR)/libmesh/installed
 
 APPLICATION_NAME := ex18
 
