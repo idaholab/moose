@@ -232,15 +232,43 @@ def getSharedOption(libmesh_dir):
   # We need to detect this condition
   shared_option = set()
   shared_option.add('ALL')
-  f = open(libmesh_dir + '/Make.common')
-  for line in f.readlines():
-    if line.find('enable-shared') != -1:
-      m = re.search(r'=\s*(\S+)', line)
-      if m != None:
-        if m.group(1) == 'yes':
-          shared_option.add('DYNAMIC')
-        else:
-          shared_option.add('STATIC')
-        break
-  f.close()
+
+  # MOOSE no longer relies on Make.common being present.  This gives us the
+  # potential to work with "uninstalled" libmesh trees, for example.
+
+  # Installed location of libmesh libtool script
+  libmesh_libtool_installed   = libmesh_dir + '/contrib/bin/libtool'
+
+  # Uninstalled location of libmesh libtool script
+  libmesh_libtool_uninstalled = libmesh_dir + '/libtool'
+
+  # The eventual variable we will use to refer to libmesh's libtool script
+  libmesh_libtool = ''
+
+  if os.path.exists(libmesh_libtool_installed):
+    libmesh_libtool = libmesh_libtool_installed
+
+  elif os.path.exists(libmesh_libtool_uninstalled):
+    libmesh_libtool = libmesh_libtool_uninstalled
+
+  else:
+    print "Error! Could not find libmesh's libtool script in any of the usual locations!"
+    exit(1)
+
+  # Now run the libtool script (in the shell) to see if shared libraries were built
+  command = libmesh_libtool + " --config | grep build_libtool_libs | cut -d'=' -f2"
+
+  # Note: the strip() command removes the trailing newline
+  p = Popen(command, shell=True, stdout=PIPE)
+  result = p.communicate()[0].strip()
+
+  if re.search('yes', result) != None:
+    shared_option.add('DYNAMIC')
+  elif re.search('no', result) != None:
+    shared_option.add('STATIC')
+  else:
+    # Neither no nor yes?  Not possible!
+    print "Error! Could not determine whether shared libraries were built."
+    exit(1)
+
   return shared_option
