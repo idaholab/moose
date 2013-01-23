@@ -11,11 +11,10 @@ def buildCMD(options):
       tmp_cmd.append([options.lcov_command[0],
                       '--base-directory', options.application[0],
                       '--directory', options.application[0] + '/src',
-                      '/src '.join(['--directory ' + os.getcwd() + '/' + app for app in options.application[1:]]) + '/src',
                       '--capture',
                       '--ignore-errors', 'gcov,source',
-                      '--output-file', 'raw.info'
-                      ])
+                      '--output-file', 'raw.info'])
+      tmp_cmd[0].extend(str(' '.join(['--directory ' + os.getcwd() + '/' + app + '/src' for app in options.application[1:]])).split())
     else:
       tmp_cmd.append([options.lcov_command[0],
                       '--base-directory', options.application[0],
