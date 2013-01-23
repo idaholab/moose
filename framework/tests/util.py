@@ -93,8 +93,31 @@ def getCompilers(libmesh_dir):
   compilers = set()
   compilers.add('ALL')
 
-  # Get the gxx compiler
-  command = libmesh_dir + '/bin/libmesh-config --cxx'
+  # Get the gxx compiler.  Note that the libmesh-config script
+  # can live in different places depending on whether libmesh is
+  # "installed" or not.
+
+  # Installed location of libmesh-config script
+  libmesh_config_installed   = libmesh_dir + '/bin/libmesh-config'
+
+  # Uninstalled location of libmesh-config script
+  libmesh_config_uninstalled = libmesh_dir + '/contrib/bin/libmesh-config'
+
+  # The eventual variable we will use to refer to libmesh's configure script
+  libmesh_config = ''
+
+  if os.path.exists(libmesh_config_installed):
+    libmesh_config = libmesh_config_installed
+
+  elif os.path.exists(libmesh_config_uninstalled):
+    libmesh_config = libmesh_config_uninstalled
+
+  else:
+    print "Error! Could not find libmesh's config script in any of the usual locations!"
+    exit(1)
+
+  # Pass the --cxx option to the libmesh-config script, and check the result
+  command = libmesh_config + ' --cxx'
   p = Popen(command, shell=True, stdout=PIPE)
   mpicxx_cmd = p.communicate()[0].strip()
 
