@@ -39,7 +39,6 @@ NodalUserObject::NodalUserObject(const std::string & name, InputParameters param
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
     UserObjectInterface(parameters),
     TransientInterface(parameters, name, "nodal_user_objects"),
-    MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),
     _var(_subproblem.getVariable(_tid, parameters.get<std::vector<VariableName> >("variable")[0])),
     _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),

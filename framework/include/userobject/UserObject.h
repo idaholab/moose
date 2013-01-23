@@ -18,6 +18,7 @@
 //MOOSE includes
 #include "MooseObject.h"
 #include "SetupInterface.h"
+#include "MaterialPropertyInterface.h"
 #include "ParallelUniqueId.h"
 
 //libMesh includes
@@ -36,11 +37,16 @@ InputParameters validParams<UserObject>();
  */
 class UserObject :
   public MooseObject,
-  public SetupInterface
+  public SetupInterface,
+  public MaterialPropertyInterface
 {
 public:
   UserObject(const std::string & name, InputParameters params);
   virtual ~UserObject();
+
+  // materials
+  template<typename T>
+  MaterialProperty<T> & getMaterialProperty(const std::string & name);
 
   /**
    * Called before execute() is ever called so that data can be cleared.
@@ -110,5 +116,36 @@ protected:
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;
 };
+
+template<typename T>
+MaterialProperty<T> &
+UserObject::getMaterialProperty(const std::string & name)
+{
+  bool checked = false;
+  if (parameters().isParamValid("block"))
+  {
+    // check blocks where the uo is defined
+    std::vector<SubdomainName> blocks = parameters().get<std::vector<SubdomainName> >("block");
+    if (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") == blocks.end())
+    {
+      for (unsigned int i = 0; i<blocks.size(); ++i)
+        std::cout << blocks[i] << std::endl;
+
+
+      for (std::vector<SubdomainName>::iterator it = blocks.begin(); it != blocks.end(); ++it)
+        _subproblem.delayedCheckMatProp(_subproblem.mesh().getSubdomainID(*it), name);
+      checked = true;
+    }
+  }
+  if (!checked)
+  {
+    // no uo blocks specified, check all blocks that are in the mesh
+    const std::set<SubdomainID> & blocks = _subproblem.mesh().meshSubdomains();
+    for (std::set<SubdomainID>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+      _subproblem.delayedCheckMatProp(*it, name);
+  }
+
+  return MaterialPropertyInterface::getMaterialProperty<T>(name);
+}
 
 #endif /* USEROBJECT_H */

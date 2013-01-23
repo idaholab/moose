@@ -21,7 +21,6 @@
 #include "Coupleable.h"
 #include "MooseVariableDependencyInterface.h"
 #include "TransientInterface.h"
-#include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
 
 // libMesh
@@ -40,7 +39,6 @@ class ElementUserObject :
   public Coupleable,
   public MooseVariableDependencyInterface,
   public TransientInterface,
-  public MaterialPropertyInterface,
   protected PostprocessorInterface
 {
 public:
@@ -67,12 +65,6 @@ public:
 protected:
 /// The block ID this postprocessor works on
   std::vector<SubdomainName> _blocks;
-
-//  /// Convenience reference for when a derived object uses only one variable (refs to _moose_variable[0])
-//  MooseVariable & _var;
-//
-//  /// list of variables when working on more than one
-//  std::vector<MooseVariable *> _vars;
 
   /// The current element pointer (available during execute())
   const Elem * & _current_elem;

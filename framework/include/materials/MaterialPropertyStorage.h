@@ -152,7 +152,7 @@ public:
   std::vector<unsigned int> & statefulProps() { return _stateful_prop_id_to_prop_id; }
   std::map<unsigned int, std::string> statefulPropNames() { return _prop_names; }
 
-  unsigned int getPropertyId (const std::string & prop_name) const;
+  unsigned int getPropertyId (const std::string & prop_name);
 
 protected:
   // indexing: [element][side]->material_properties

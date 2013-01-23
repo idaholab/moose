@@ -182,8 +182,9 @@ public:
   virtual void meshChanged();
 
   virtual void storeMatPropName(SubdomainID block_id, const std::string & name);
-  virtual void checkMatProp(SubdomainID block_id, const std::string & name);
+  virtual void delayedCheckMatProp(SubdomainID block_id, const std::string & name);
 
+  virtual void checkMatProps();
   /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor
    */
@@ -227,6 +228,9 @@ protected:
 
   /// the map of material properties (block_id -> list of properties)
   std::map<unsigned int, std::set<std::string> > _map_material_props;
+
+  /// the map of properties requested (need to be checked)
+  std::map<unsigned int, std::set<std::string> > _map_material_props_check;
 
   /// This is the set of MooseVariables that will actually get reinited by a call to reinit(elem)
   std::vector<std::set<MooseVariable *> > _active_elemental_moose_variables;

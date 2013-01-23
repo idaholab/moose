@@ -84,13 +84,13 @@ public:
 
 
   template <typename T>
-  MaterialProperty<T> & getProperty(const std::string & prop_name) const;
+  MaterialProperty<T> & getProperty(const std::string & prop_name);
 
   template <typename T>
-  MaterialProperty<T> & getPropertyOld(const std::string & prop_name) const;
+  MaterialProperty<T> & getPropertyOld(const std::string & prop_name);
 
   template <typename T>
-  MaterialProperty<T> & getPropertyOlder(const std::string & prop_name) const;
+  MaterialProperty<T> & getPropertyOlder(const std::string & prop_name);
 
 protected:
   MaterialPropertyStorage & _storage;
@@ -213,9 +213,11 @@ MaterialData::declarePropertyOlder(const std::string & prop_name)
 
 template<typename T>
 MaterialProperty<T> &
-MaterialData::getProperty(const std::string & name) const
+MaterialData::getProperty(const std::string & name)
 {
   unsigned int prop_id = _storage.getPropertyId(name);
+  resizeProps<T>(prop_id);
+
   MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_props[prop_id]);
   if (prop != NULL)
     return *prop;
@@ -225,9 +227,11 @@ MaterialData::getProperty(const std::string & name) const
 
 template<typename T>
 MaterialProperty<T> &
-MaterialData::getPropertyOld(const std::string & name) const
+MaterialData::getPropertyOld(const std::string & name)
 {
   unsigned int prop_id = _storage.getPropertyId(name);
+  resizeProps<T>(prop_id);
+
   MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_props_old[prop_id]);
   if (prop != NULL)
     return *prop;
@@ -237,9 +241,11 @@ MaterialData::getPropertyOld(const std::string & name) const
 
 template<typename T>
 MaterialProperty<T> &
-MaterialData::getPropertyOlder(const std::string & name) const
+MaterialData::getPropertyOlder(const std::string & name)
 {
   unsigned int prop_id = _storage.getPropertyId(name);
+  resizeProps<T>(prop_id);
+
   MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_props_older[prop_id]);
   if (prop != NULL)
     return *prop;

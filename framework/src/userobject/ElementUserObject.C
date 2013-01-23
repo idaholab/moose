@@ -32,10 +32,8 @@ ElementUserObject::ElementUserObject(const std::string & name, InputParameters p
     Coupleable(parameters, false),
     MooseVariableDependencyInterface(),
     TransientInterface(parameters, name, "element_user_objects"),
-    MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),
     _blocks(parameters.get<std::vector<SubdomainName> >("block")),
-//    _var(_subproblem.getVariable(_tid, parameters.get<std::vector<VariableName> >("variable")[0])),
     _current_elem(_subproblem.elem(_tid)),
     _current_elem_volume(_subproblem.elemVolume(_tid)),
     _q_point(_subproblem.points(_tid)),
@@ -47,13 +45,6 @@ ElementUserObject::ElementUserObject(const std::string & name, InputParameters p
     _grad_zero(_subproblem._grad_zero[_tid]),
     _second_zero(_subproblem._second_zero[_tid])
 {
-//  std::vector<VariableName> vars = getParam<std::vector<VariableName> >("variable");
-//  _vars.resize(vars.size());
-//
-//  // initialize our vector of variable pointers
-//  for (unsigned int i=0; i<vars.size(); ++i)
-//    _vars[i] = &_subproblem.getVariable(0, vars[i]);
-
   // Keep track of which variables are coupled so we know what we depend on
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
   for(unsigned int i=0; i<coupled_vars.size(); i++)

@@ -42,6 +42,7 @@
 #include "MMSConstantAux.h"
 #include "MultipleUpdateAux.h"
 #include "PeriodicDistanceAux.h"
+#include "MatPropUserObjectAux.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -80,9 +81,11 @@
 #include "ImplicitODEy.h"
 
 #include "EqualValueNodalConstraint.h"
+// user objects
 #include "MTUserObject.h"
 #include "RandomHitUserObject.h"
 #include "RandomHitSolutionModifier.h"
+#include "MaterialPropertyUserObject.h"
 
 #include "TimestepSetupFunction.h"
 #include "PostprocessorFunction.h"
@@ -164,6 +167,7 @@ MooseTestApp::registerObjects()
   registerAux(MMSConstantAux);
   registerAux(MultipleUpdateAux);
   registerAux(PeriodicDistanceAux);
+  registerAux(MatPropUserObjectAux);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);
@@ -223,6 +227,7 @@ MooseTestApp::registerObjects()
   registerUserObject(MTUserObject);
   registerUserObject(RandomHitUserObject);
   registerUserObject(RandomHitSolutionModifier);
+  registerUserObject(MaterialPropertyUserObject);
 
   registerMarker(RandomHitMarker);
 

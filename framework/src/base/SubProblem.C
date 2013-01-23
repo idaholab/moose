@@ -135,18 +135,28 @@ SubProblem::storeMatPropName(SubdomainID block_id, const std::string & name)
 }
 
 void
-SubProblem::checkMatProp(SubdomainID block_id, const std::string & name)
+SubProblem::delayedCheckMatProp(SubdomainID block_id, const std::string & name)
 {
-  std::map<unsigned int, std::set<std::string> >::iterator it;
-  if ((it = _map_material_props.find(block_id)) != _map_material_props.end())
+  _map_material_props_check[block_id].insert(name);
+}
+
+void
+SubProblem::checkMatProps()
+{
+  for (std::map<unsigned int, std::set<std::string> >::iterator check_it = _map_material_props_check.begin();
+       check_it != _map_material_props_check.end();
+       ++check_it)
   {
-    std::set<std::string>::iterator jt;
-    if ((jt = (*it).second.find(name)) == (*it).second.end())
-      mooseError("Material property '" + name + "' is not defined on block " + Moose::stringify(block_id));
-  }
-  else
-  {
-    mooseError("No material defined on block " + Moose::stringify(block_id));
+    SubdomainID block_id = check_it->first;
+    if (_map_material_props.find(block_id) != _map_material_props.end())
+      for (std::set<std::string>::iterator check_jt = check_it->second.begin(); check_jt != check_it->second.end(); ++check_jt)
+      {
+        std::string name = *check_jt;
+        if (check_it->second.find(name) == check_it->second.end())
+          mooseError("Material property '" + name + "' is not defined on block " + Moose::stringify(block_id));
+      }
+    else
+      mooseError("No material defined on block " + Moose::stringify(block_id));
   }
 }
 

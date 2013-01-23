@@ -359,13 +359,14 @@ MaterialPropertyStorage::addPropertyOlder (const std::string & prop_name)
 }
 
 unsigned int
-MaterialPropertyStorage::getPropertyId (const std::string & prop_name) const
+MaterialPropertyStorage::getPropertyId (const std::string & prop_name)
 {
   std::map<std::string, unsigned int>::const_iterator it = _prop_ids.find(prop_name);
   if (it == _prop_ids.end())
-    mooseError("No property name mapping for '" + prop_name + "'");
-
-  return it->second;
+    // The property hasn't been declared yet, so do it now.
+    return addProperty(prop_name);
+  else
+    return it->second;
 }
 
 unsigned int

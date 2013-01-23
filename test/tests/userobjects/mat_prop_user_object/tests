@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'mat_prop_user_object.i'
+    exodiff = 'uo_material.e'
+  [../]
+[]

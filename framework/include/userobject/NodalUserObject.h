@@ -20,7 +20,6 @@
 #include "UserObjectInterface.h"
 #include "MooseVariable.h"
 #include "TransientInterface.h"
-#include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
 // libMesh
 #include "elem.h"
@@ -38,7 +37,6 @@ class NodalUserObject :
   public CoupleableMooseVariableDependencyIntermediateInterface,
   public UserObjectInterface,
   public TransientInterface,
-  public MaterialPropertyInterface,
   protected PostprocessorInterface
 {
 public:

@@ -39,13 +39,13 @@ public:
    * Retrieve the property named "name"
    */
   template<typename T>
-  MaterialProperty<T> & getMaterialProperty(const std::string & name) const;
+  MaterialProperty<T> & getMaterialProperty(const std::string & name);
 
   template<typename T>
-  MaterialProperty<T> & getMaterialPropertyOld(const std::string & name) const;
+  MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
 
   template<typename T>
-  MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name) const;
+  MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
   /**
    * Check if the material property exists
@@ -62,21 +62,21 @@ protected:
 
 template<typename T>
 MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialProperty(const std::string & name) const
+MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 {
   return _material_data.getProperty<T>(name);
 }
 
 template<typename T>
 MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name) const
+MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
 {
   return _material_data.getPropertyOld<T>(name);
 }
 
 template<typename T>
 MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name) const
+MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 {
   return _material_data.getPropertyOlder<T>(name);
 }

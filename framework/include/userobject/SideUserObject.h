@@ -21,7 +21,6 @@
 #include "MooseVariable.h"
 #include "TransientInterface.h"
 #include "UserObjectInterface.h"
-#include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
 
 //Forward Declarations
@@ -36,7 +35,6 @@ class SideUserObject :
   public MooseVariableDependencyInterface,
   public UserObjectInterface,
   public TransientInterface,
-  public MaterialPropertyInterface,
   protected PostprocessorInterface
 {
 public:
@@ -62,11 +60,6 @@ public:
 
 protected:
 
-//  MooseVariable & _var;
-
-  /// list of variables when working on more than one
-//  std::vector<MooseVariable *> _vars;
-
   std::vector<BoundaryName> _boundaries;
 
   const MooseArray< Point > & _q_point;
@@ -81,10 +74,6 @@ protected:
 
   const Elem * & _current_side_elem;
   const Real & _current_side_volume;
-
-  // unknown
-//  const VariableValue & _u;
-//  const VariableGradient & _grad_u;
 
   // Single Instance Variables
   Real & _real_zero;

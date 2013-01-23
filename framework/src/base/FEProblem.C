@@ -2856,6 +2856,9 @@ FEProblem::checkProblemIntegrity()
       mooseError("The following blocks from your input mesh do not contain on active material: " + extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, all blocks must contain a Material object.\n");
     }
 
+    // Check material properties
+    checkMatProps();
+
     // Check that material properties exist when requested by other properties on a given block
     _materials[0].checkMaterialDependSanity();
   }
