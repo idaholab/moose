@@ -11,7 +11,7 @@ def buildCMD(options):
       tmp_cmd.append([options.lcov_command[0],
                       '--base-directory', options.application[0],
                       '--directory', options.application[0] + '/src',
-                      '--directory', '/src '.join(options.application[1:]) + '/src',
+                      '/src '.join(['--directory ' + os.getcwd() + '/' + app for app in options.application[1:]]) + '/src',
                       '--capture',
                       '--ignore-errors', 'gcov,source',
                       '--output-file', 'raw.info'
