@@ -34,9 +34,24 @@ public:
    */
   LinearInterpolation(const std::vector<double> & X,
                       const std::vector<double> & Y);
+  LinearInterpolation() :
+    _x(std::vector<double>()),
+    _y(std::vector<double>()) {}
 
   virtual ~LinearInterpolation()
     {}
+
+  /**
+   * Set the x and y values.
+   */
+  void setData(const std::vector<double> & X, const std::vector<double> & Y)
+  {
+    _x = X;
+    _y = Y;
+    errorCheck();
+  }
+
+  void errorCheck();
 
   /**
    * This function will take an independent variable input and will return the dependent variable

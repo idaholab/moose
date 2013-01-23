@@ -22,12 +22,18 @@ LinearInterpolation::LinearInterpolation(const std::vector<double> & x, const st
     _x(x),
     _y(y)
 {
+  errorCheck();
+}
 
-  mooseAssert( x.size() == y.size(),
+void
+LinearInterpolation::errorCheck()
+{
+
+  mooseAssert( _x.size() == _y.size(),
                "Vectors are not the same length" );
 
   bool error(false);
-  for (unsigned i(0); !error && !x.empty() && i < x.size()-1; ++i)
+  for (unsigned i(0); !error && !_x.empty() && i < _x.size()-1; ++i)
   {
     if ( _x[i] >= _x[i+1] )
     {
@@ -38,7 +44,6 @@ LinearInterpolation::LinearInterpolation(const std::vector<double> & x, const st
   {
     mooseError( "x-values are not strictly increasing" );
   }
-
 }
 
 double
