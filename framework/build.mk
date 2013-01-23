@@ -8,9 +8,15 @@ ifeq (x$(METHOD),x)
   METHOD := opt
 endif
 
+# libmesh-config is in different places depending on whether you are using
+# "installed" or "uninstalled" libmesh.
+libmesh_config := $(LIBMESH_DIR)/bin/libmesh-config           # installed version
+ifeq ($(wildcard $(libmesh_config)),)
+  libmesh_config := $(LIBMESH_DIR)/contrib/bin/libmesh-config # uninstalled version
+endif
+
 # Instead of using Make.common, use libmesh-config to get any libmesh
 # make variables we might need.
-libmesh_config   := $(LIBMESH_DIR)/bin/libmesh-config
 libmesh_CXX      := $(shell $(libmesh_config) --cxx)
 libmesh_CC       := $(shell $(libmesh_config) --cc)
 libmesh_F77      := $(shell $(libmesh_config) --fc)
@@ -28,8 +34,12 @@ libmesh_HOST     := $(shell $(libmesh_config) --host)
 # contrib/utils/Make.common.in) and the $(METHOD).
 obj-suffix := $(libmesh_HOST).$(METHOD).lo
 
-# The libtool provided by libmesh.
-libmesh_LIBTOOL := $(LIBMESH_DIR)/contrib/bin/libtool
+# The libtool script used by libmesh is in different places depending on
+# whether you are using "installed" or "uninstalled" libmesh.
+libmesh_LIBTOOL := $(LIBMESH_DIR)/contrib/bin/libtool # installed version
+ifeq ($(wildcard $(libmesh_LIBTOOL)),)
+  libmesh_LIBTOOL := $(LIBMESH_DIR)/libtool           # uninstalled version
+endif
 libmesh_shared  := $(shell $(libmesh_LIBTOOL) --config | grep build_libtool_libs | cut -d'=' -f2)
 
 # If $(libmesh_CXX) is an mpiXXX compiler script, use -show

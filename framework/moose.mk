@@ -120,3 +120,6 @@ clobber::
 
 cleanall::
 	make -C $(MOOSE_DIR) clean
+
+moose_echo:
+	@echo $(libmesh_INCLUDE)
