@@ -1,11 +1,16 @@
 #!/bin/bash
 
-if [ -e ./moose_unit/moose_unit-opt ]
+# If $METHOD is not set, use opt
+if [ -z $METHOD ]; then
+  export METHOD=opt
+fi
+
+if [ -e ./moose_unit/moose_unit-$METHOD ]
 then
-  ./moose_unit/moose_unit-opt
-elif [ -e ./moose_unit-opt ]
+  ./moose_unit/moose_unit-$METHOD
+elif [ -e ./moose_unit-$METHOD ]
 then
-  ./moose_unit-opt
+  ./moose_unit-$METHOD
 else
   echo "Executable missing!"
   exit 1
