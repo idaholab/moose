@@ -136,9 +136,8 @@ void
 Component::checkEOSConsistency()
 {
   InputParameters & pars = parameters();
-  Model::EModelType model_type = _sim.getParam<Model::EModelType>("model_type");
 
-  switch (model_type)
+  switch (_model_type)
   {
   case Model::EQ_MODEL_2:
   case Model::EQ_MODEL_3:
