@@ -131,6 +131,29 @@ Component::getNextBCId()
   return id;
 }
 
+
+void
+Component::checkEOSConsistency()
+{
+  InputParameters & pars = parameters();
+  Model::EModelType model_type = _sim.getParam<Model::EModelType>("model_type");
+
+  switch (model_type)
+  {
+  case Model::EQ_MODEL_2:
+  case Model::EQ_MODEL_3:
+  case Model::EQ_MODEL_HEM:
+    if (!pars.isParamValid("eos"))
+      mooseError("Inconsistency in EOS detected in component '" << name() << "' - single phase model specified but single phase EOS not.");
+    break;
+
+  case Model::EQ_MODEL_7:
+    if (!pars.isParamValid("eos_liquid") || !pars.isParamValid("eos_liquid"))
+      mooseError("Inconsistency in EOS detected in component '" << name() << "' - two phase model specified but two phase EOS not.");
+    break;
+  }
+}
+
 void
 Component::connectObject(const std::string & rname, const std::string & mooseName)
 {

@@ -149,6 +149,11 @@ protected:
   virtual unsigned int getNextBCId();
 
   /**
+   * Checks the consistency of model and EOS objects
+   */
+  void checkEOSConsistency();
+
+  /**
    * Split the "RAVEN" name into "section name" and "property name"
    * @param rname
    * @return
