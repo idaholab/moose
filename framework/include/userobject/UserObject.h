@@ -20,13 +20,13 @@
 #include "SetupInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "ParallelUniqueId.h"
+#include "SubProblem.h"
 
 //libMesh includes
 #include "libmesh_common.h"
 #include "parallel.h"
 
 class UserObject;
-class SubProblem;
 class FEProblem;
 
 template<>
