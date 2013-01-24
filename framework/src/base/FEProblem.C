@@ -289,9 +289,6 @@ void FEProblem::initialSetup()
   for(unsigned int i=0; i<n_threads; i++)
     _materials[i].initialSetup();
 
-  _aux.initialSetup();
-  _aux.compute(EXEC_INITIAL);
-
   if (_material_props.hasStatefulProperties())
   {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
@@ -299,6 +296,9 @@ void FEProblem::initialSetup()
     Threads::parallel_reduce(elem_range, cmt);
     _has_initialized_stateful = true;
   }
+
+  _aux.initialSetup();
+  _aux.compute(EXEC_INITIAL);
 
   if (isRestarting())
   {
