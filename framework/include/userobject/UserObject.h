@@ -128,10 +128,6 @@ UserObject::getMaterialProperty(const std::string & name)
     std::vector<SubdomainName> blocks = parameters().get<std::vector<SubdomainName> >("block");
     if (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") == blocks.end())
     {
-      for (unsigned int i = 0; i<blocks.size(); ++i)
-        std::cout << blocks[i] << std::endl;
-
-
       for (std::vector<SubdomainName>::iterator it = blocks.begin(); it != blocks.end(); ++it)
         _subproblem.delayedCheckMatProp(_subproblem.mesh().getSubdomainID(*it), name);
       checked = true;
