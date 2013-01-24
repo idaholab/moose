@@ -1,4 +1,3 @@
-
 #include "AdaptiveTransient.h"
 
 //Moose includes
@@ -250,11 +249,14 @@ AdaptiveTransient::takeStep(Real input_dt)
 
   try
   {
+    // Compute Pre-Aux User Objects (Timestep begin)
+    _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::PRE_AUX);
+
     // Compute TimestepBegin AuxKernels
     _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_BEGIN);
 
-    // Compute TimestepBegin Postprocessors
-    _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN);
+    // Compute Post-Aux User Objects (Timestep begin)
+    _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
 
     _problem.solve();
     _converged = _problem.converged();
@@ -267,13 +269,22 @@ AdaptiveTransient::takeStep(Real input_dt)
 
   if (!_caught_exception)
   {
+    // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
+    bool last_solve_converged = lastSolveConverged();
+
+    if (last_solve_converged)
+      _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+
     postSolve();
 
     _problem.onTimestepEnd();
 
     // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
-    if (lastSolveConverged())
+    if (last_solve_converged)
+    {
+      _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
       _problem.computeUserObjects();
+    }
 
     std::cout << std::endl;
   }
