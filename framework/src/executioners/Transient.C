@@ -199,19 +199,22 @@ Transient::takeStep(Real input_dt)
 
   _converged = _problem.converged();
 
-  // Compute Pre-Aux User Objects
-  _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+  // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
+  bool last_solve_converged = lastSolveConverged();
 
+  std::cout << "Converged:" << last_solve_converged << "\n";
+
+  if (last_solve_converged)
+    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+
+  // User definable callback
   postSolve();
 
   _problem.onTimestepEnd();
 
-  // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
-  bool last_solve_converged = lastSolveConverged();
-
-  // If _reset_dt is true, the time step was synced to the user defined value and we dump the solution in an output file
   if (last_solve_converged)
   {
+    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
   }
 }

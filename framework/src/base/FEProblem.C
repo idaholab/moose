@@ -2404,7 +2404,6 @@ FEProblem::onTimestepBegin()
 void
 FEProblem::onTimestepEnd()
 {
-  _aux.compute(EXEC_TIMESTEP);
   _nl.printVarNorms();
 }
 
