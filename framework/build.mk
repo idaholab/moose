@@ -212,10 +212,8 @@ endif
 
 # compile with gcov support if using the gcc compiler suite
 ifeq ($(coverage),true)
-	ifneq (,$(findstring g++,$(cxx_compiler)))
-		libmesh_CXXFLAGS += --coverage -fprofile-arcs -ftest-coverage
-		libmesh_LDFLAGS += --coverage
-	endif
+	libmesh_CXXFLAGS += -fprofile-arcs -ftest-coverage
+	libmesh_LDFLAGS += -lgcov
 endif
 
 # link with gcov support, but do now generate data for this build
@@ -223,9 +221,7 @@ endif
 # the tests in moose_test you would make moose with coverage=true
 # and moose_test with just linkcoverage=true
 ifeq ($(linkcoverage),true)
-	ifneq (,$(findstring g++,$(cxx_compiler)))
-		libmesh_LDFLAGS += --coverage
-	endif
+	libmesh_LDFLAGS += -lgcov
 endif
 
 # graceful error exiting
