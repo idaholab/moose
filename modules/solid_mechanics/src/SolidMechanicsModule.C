@@ -76,6 +76,7 @@ Elk::SolidMechanics::registerObjects()
 
   registerPostprocessor(HomogenizedElasticConstants);
   registerPostprocessor(Mass);
+
 }
 
 void

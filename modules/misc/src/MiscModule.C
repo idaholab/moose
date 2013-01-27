@@ -16,6 +16,8 @@
 #include "NodalArea.h"
 #include "NodalAreaAux.h"
 #include "NodalAreaAction.h"
+#include "RigidBodyModesRZ.h"
+#include "RigidBodyModes3D.h"
 
 void
 Elk::Misc::registerObjects()
@@ -33,6 +35,9 @@ Elk::Misc::registerObjects()
   registerKernel(GaussContForcing);
 
   registerMaterial(Density);
+
+  registerUserObject(RigidBodyModesRZ);
+  registerUserObject(RigidBodyModes3D);
 
   registerPostprocessor(InternalVolume);
   registerPostprocessor(SharpInterfaceForcing);
