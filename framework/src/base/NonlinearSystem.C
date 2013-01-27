@@ -81,6 +81,18 @@ namespace Moose {
     FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
     p->computeBounds(sys, lower, upper);
   }
+
+  void compute_nullspace (std::vector<NumericVector<Number>*>& sp, NonlinearImplicitSystem& sys)
+  {
+    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
+    p->computeNullSpace(sys, sp);
+  }
+
+  void compute_nearnullspace (std::vector<NumericVector<Number>*>& sp, NonlinearImplicitSystem& sys)
+  {
+    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
+    p->computeNearNullSpace(sys, sp);
+  }
 } // namespace Moose
 
 
@@ -118,9 +130,11 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _exception(NULL),
     _time_scheme(new TimeScheme(this))
 {
-  _sys.nonlinear_solver->residual = Moose::compute_residual;
-  _sys.nonlinear_solver->jacobian = Moose::compute_jacobian;
-  _sys.nonlinear_solver->bounds   = Moose::compute_bounds;
+  _sys.nonlinear_solver->residual      = Moose::compute_residual;
+  _sys.nonlinear_solver->jacobian      = Moose::compute_jacobian;
+  _sys.nonlinear_solver->bounds        = Moose::compute_bounds;
+  _sys.nonlinear_solver->nullspace     = Moose::compute_nullspace;
+  _sys.nonlinear_solver->nearnullspace = Moose::compute_nearnullspace;
 
   _time_weight.resize(3);
   timeSteppingScheme(Moose::IMPLICIT_EULER);                   // default time stepping scheme

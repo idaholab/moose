@@ -63,6 +63,8 @@ InputParameters validParams<FEProblem>()
 {
   InputParameters params = validParams<SubProblem>();
   params.addRequiredParam<MooseMesh *>("mesh", "The Mesh");
+  params.addParam<unsigned int>("dimNullSpace", 0, "The dimension of the nullspace");
+  params.addParam<unsigned int>("dimNearNullSpace", 0, "The dimension of the near nullspace");
   return params;
 }
 
@@ -134,6 +136,25 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   for (unsigned int i = 0; i < n_threads; ++i)
     _assembly[i] = new Assembly(_nl, couplingMatrix(), i);
 
+  unsigned int dimNullSpace      = parameters.get<unsigned int>("dimNullSpace");
+  unsigned int dimNearNullSpace  = parameters.get<unsigned int>("dimNearNullSpace");
+  for(unsigned int i = 0; i < dimNullSpace; ++i)
+  {
+    std::ostringstream oss;
+    oss << "_" << i;
+    // do not project, since this will be recomputed, but make it ghosted, since the near nullspace builder might march over all nodes
+    _nl.addVector("NullSpace"+oss.str(),false,GHOSTED,false);
+  }
+  _subspace_dim["NullSpace"] = dimNullSpace;
+  for(unsigned int i = 0; i < dimNearNullSpace; ++i)
+  {
+    std::ostringstream oss;
+    oss << "_" << i;
+    // do not project, since this will be recomputed, but make it ghosted, since the near-nullspace builder might march over all semilocal nodes
+    _nl.addVector("NearNullSpace"+oss.str(),false,GHOSTED,false);
+  }
+  _subspace_dim["NearNullSpace"] = dimNearNullSpace;
+  dimNearNullSpace = _subspace_dim["NearNullSpace"];
   _functions.resize(n_threads);
   _materials.resize(n_threads);
 
@@ -2562,6 +2583,29 @@ FEProblem::computeBounds(NonlinearImplicitSystem & /*sys*/, NumericVector<Number
   }
 }
 
+void
+FEProblem::computeNearNullSpace(NonlinearImplicitSystem & /*sys*/, std::vector<NumericVector<Number>*>& sp)
+{
+  sp.clear();
+  for(unsigned int i = 0; i < subspaceDim("NearNullSpace"); ++i) {
+    std::stringstream postfix;
+    postfix << "_" << i;
+    std::string modename = "NearNullSpace" + postfix.str();
+    sp.push_back(&_nl.getVector(modename));
+  }
+}
+
+void
+FEProblem::computeNullSpace(NonlinearImplicitSystem & /*sys*/, std::vector<NumericVector<Number>*>& sp)
+{
+  sp.clear();
+  for(unsigned int i = 0; i < subspaceDim("NullSpace"); ++i) {
+    std::stringstream postfix;
+    postfix << "_" << i;
+    sp.push_back(&_nl.getVector("NullSpace"+postfix.str()));
+  }
+}
+
 Real
 FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update)
 {
@@ -2761,7 +2805,7 @@ FEProblem::adaptMesh()
 
 void
 FEProblem::meshChanged()
-{
+  {
   if (_material_props.hasStatefulProperties())
     _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material properties
 

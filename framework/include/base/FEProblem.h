@@ -423,6 +423,8 @@ public:
   virtual void predictorCleanup(NumericVector<Number>& ghosted_solution);
 
   virtual void computeBounds(NonlinearImplicitSystem & sys, NumericVector<Number> & lower, NumericVector<Number> & upper);
+  virtual void computeNearNullSpace(NonlinearImplicitSystem & sys, std::vector<NumericVector<Number>*> &sp);
+  virtual void computeNullSpace(NonlinearImplicitSystem & sys, std::vector<NumericVector<Number>*> &sp);
 
   virtual void computeIndicatorsAndMarkers();
 
@@ -549,6 +551,9 @@ protected:
   Moose::CouplingType _coupling;                        ///< Type of variable coupling
   CouplingMatrix * _cm;                                 ///< Coupling matrix for variables. It is diagonal, since we do only block diagonal preconditioning.
 
+  // Dimension of the subspace spanned by the vectors with a given prefix
+  std::map<std::string,unsigned int> _subspace_dim;
+
   // quadrature
   Order _quadrature_order;                              ///< Quadrature order required by all variables to integrated over them.
   std::vector<Assembly *> _assembly;
@@ -589,6 +594,12 @@ protected:
   void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
 
 public:
+  /**
+   * Dimension of the subspace spanned by vectors with a given prefix.
+   * @param prefix Prefix of the vectors spanning the subspace.
+   */
+  unsigned int subspaceDim(const std::string& prefix) const {if(_subspace_dim.count(prefix)) return _subspace_dim.find(prefix)->second; else return 0;}
+
   bool _postprocessor_screen_output;
   bool _postprocessor_csv_output;
   bool _postprocessor_gnuplot_output;
