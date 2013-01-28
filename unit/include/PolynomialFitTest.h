@@ -12,15 +12,15 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef LINEARINTERPOLATIONTEST_H
-#define LINEARINTERPOLATIONTEST_H
+#ifndef POLYNOMIALFITTEST_H
+#define POLYNOMIALFITTEST_H
 
 //CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
-class LinearInterpolationTest : public CppUnit::TestFixture
+class PolynomialFitTest : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( LinearInterpolationTest );
+  CPPUNIT_TEST_SUITE( PolynomialFitTest );
 
   CPPUNIT_TEST( constructor );
   CPPUNIT_TEST( sample );
@@ -43,4 +43,4 @@ private:
   static const Real _tol = 1e-5;
 };
 
-#endif  // LINEARINTERPOLATIONTEST_H
+#endif  // POLYNOMIALFITTEST_H

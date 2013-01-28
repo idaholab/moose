@@ -51,6 +51,10 @@
     prop_name = 'diffusivity'
     independent_vals = '0 0.2 0.4 0.6 0.8 1.0'
     dependent_vals = '16 8 4 2 1 0.5'
+
+    # Note the following line gets enabled by the tester
+    #use_poly_fit = true
+
     block = 0
   [../]
 []

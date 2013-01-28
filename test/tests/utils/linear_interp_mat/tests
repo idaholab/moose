@@ -1,7 +1,17 @@
 [Tests]
-  [./testlinear]
+  [./test_linear]
     type = 'CheckFiles'
     input = 'linear_interp_mat_test.i'
     check_files = 'diffusivity0000.plt diffusivity_pts0000.dat'
+  [../]
+
+  [./test_poly]
+    type = 'CheckFiles'
+    input = 'linear_interp_mat_test.i'
+    check_files = 'diffusivity0000.plt diffusivity_pts0000.dat'
+
+    # Force the test to use a polynomial fit instead of a linear fit
+    cli_args = 'Materials/linear_interp/use_poly_fit=true'
+    prereq = 'test_linear'
   [../]
 []

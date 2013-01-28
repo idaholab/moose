@@ -4,6 +4,7 @@
 #include "Material.h"
 
 #include "LinearInterpolation.h"
+#include "PolynomialFit.h"
 
 class LinearInterpolationMaterial;
 
@@ -14,12 +15,14 @@ class LinearInterpolationMaterial : public Material
 {
 public:
   LinearInterpolationMaterial(const std::string & name,
-                InputParameters parameters);
+                              InputParameters parameters);
 
 protected:
   virtual void computeQpProperties();
 
-  LinearInterpolation _piecewise_func;
+  bool _use_poly_fit;
+  LinearInterpolation *_linear_interp;
+  PolynomialFit *_poly_fit;
   MaterialProperty<Real> & _property;
 };
 
