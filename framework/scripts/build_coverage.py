@@ -4,34 +4,70 @@ from argparse import RawTextHelpFormatter
 
 def buildCMD(options):
   tmp_cmd = []
-  # Generate Mode
-  if options.mode == 'generate':
-    # Build lcov base command
+  # Store any additional directories supplied in a temp list
+  if options.mode != 'combine' and options.mode != 'sync':
+    tmp_additional_directories = str(' '.join(['--directory ' + os.getcwd() + '/' + app + '/src' for app in options.application[1:]])).split()
+
+  # Initialize Mode (run initialize mode before run_tests, or application)
+  if options.mode == 'initialize':
     if len(options.application) > 1:
       tmp_cmd.append([options.lcov_command[0],
-                      '--base-directory', options.application[0],
-                      '--directory', options.application[0] + '/src',
                       '--capture',
-                      '--ignore-errors', 'gcov,source',
-                      '--output-file', 'raw.info'])
-      tmp_cmd[0].extend(str(' '.join(['--directory ' + os.getcwd() + '/' + app + '/src' for app in options.application[1:]])).split())
+                      '--initial',
+                      '--directory', os.getcwd() + '/' + options.application[0],
+                      '--output-file', 'initialize.info'
+                      ])
+      tmp_cmd[0].extend(tmp_additional_directories)
     else:
       tmp_cmd.append([options.lcov_command[0],
-                      '--base-directory', options.application[0],
-                      '--directory', options.application[0] + '/src',
+                      '--capture',
+                      '--initial',
+                      '--directory', os.getcwd() + '/' + options.application[0],
+                      '--output-file', 'initialize.info'
+                      ])
+
+  # Generate Mode (run generate mode only after initialize mode, run_tests/application has ran)
+  if options.mode == 'generate':
+    if len(options.application) > 1:
+      tmp_cmd.append([options.lcov_command[0],
+                      '--directory', os.getcwd() + '/' + options.application[0],
                       '--capture',
                       '--ignore-errors', 'gcov,source',
-                      '--output-file', 'raw.info'
+                      '--output-file', 'covered.info'
                       ])
+      tmp_cmd[0].extend(tmp_additional_directories)
+    else:
+      tmp_cmd.append([options.lcov_command[0],
+                      '--directory', os.getcwd() + '/' + options.application[0],
+                      '--capture',
+                      '--ignore-errors', 'gcov,source',
+                      '--output-file', 'covered.info'
+                      ])
+
+    # Build lcov combine command
+    tmp_cmd.append([options.lcov_command[0],
+                    '--add-tracefile', 'initialize.info',
+                    '--add-tracefile', 'covered.info',
+                    '--output-file', 'combined.info' ])
+
     # Build lcov filter command
-    options.lcov_command.extend([ '--extract', 'raw.info', '/*' + options.application[0] + '/src*', '--extract', 'raw.info', '/*' + options.application[0] + '/include*' ])
-    options.lcov_command.extend([ '--output-file', options.outfile ])
-    tmp_cmd.append(options.lcov_command)
-    tmp_cmd.append(['rm', '-f', 'raw.info'])
+    tmp_cmd.append([options.lcov_command[0],
+                    '--extract', 'combined.info', '*' + options.application[0] + '/src*',
+                    '--extract', 'combined.info', '*' + options.application[0] + '/include*',
+                    '--output-file', 'final.info' ])
+
     # Build genhtml command if --generate-html was used
     if options.generate_html:
-      options.genhtml_command.extend([options.outfile, '--title', options.title + ' Test Coverage', '--num-spaces', '2', '--legend', '--no-branch-coverage', '--output-directory', options.html_location])
-      tmp_cmd.append(options.genhtml_command)
+      tmp_cmd.append([options.genhtml_command[0], 'final.info',
+                      '--title', options.title + ' Test Coverage',
+                      '--num-spaces', '2',
+                      '--legend',
+                      '--no-branch-coverage',
+                      '--output-directory', options.html_location])
+
+    # Clean up old tracefiles if asked
+    if options.cleanup:
+      tmp_cmd.append(['rm', '-f', 'initialize.info', 'covered.info', 'combined.info'])
 
   # Combine Mode
   if options.mode == 'combine':
@@ -42,13 +78,17 @@ def buildCMD(options):
     tmp_cmd.append(options.lcov_command)
     # Build genhtml command if --generate-html was used
     if options.generate_html:
-      options.genhtml_command.extend([options.outfile, '--title', options.title + ' Test Coverage', '--num-spaces', '2', '--legend', '--no-branch-coverage', '--output-directory', options.html_location])
-      tmp_cmd.append(options.genhtml_command)
+      tmp_cmd.append([options.genhtml_command[0], options.outfile,
+                      '--title', options.title + ' Test Coverage',
+                      '--num-spaces', '2',
+                      '--legend',
+                      '--no-branch-coverage',
+                      '--output-directory', options.html_location])
 
   # Sync Mode
   if options.mode == 'sync':
-    options.rsync_command.extend([ '-ro', options.html_location, options.sync_location ])
-    tmp_cmd.append(options.rsync_command)
+    tmp_cmd.append([options.rsync_command[0],
+                    '-ro', options.html_location, options.sync_location ])
 
   # Run all built commands. This is where the magic happens
   for single_command in tmp_cmd:
@@ -149,11 +189,11 @@ def _verifyOptions(options):
     if options.html_location is not None and os.path.exists(options.html_location):
       if options.overwrite is False:
         error_list.append('html location specified already exists. Exiting for safty measures...')
-    if options.outfile is None:
-      error_list.append('you must specifiy an output file: --outfile')
-    if options.outfile is not None and os.path.exists(options.outfile):
-      if options.overwrite is False:
-        error_list.append('output file specified already exists. Exiting for safty measures...')
+
+  # generate specific parsing options
+  if options.mode == 'initialize':
+    if options.application is None:
+      error_list.append('initialize mode requires a list of applications to zero counters: --application <list of directories>')
 
   # generate specific parsing options
   if options.mode == 'generate':
@@ -164,6 +204,11 @@ def _verifyOptions(options):
   if options.mode == 'combine':
     if options.add_tracefile is None:
       error_list.append('combine mode requires a list of tracefiles to combine: --add-tracefile <list of tracefiles>')
+    if options.outfile is None:
+      error_list.append('you must specifiy an output file: --outfile')
+    if options.outfile is not None and os.path.exists(options.outfile):
+      if options.overwrite is False:
+        error_list.append('output file specified already exists. Exiting for safty measures...')
 
   # sync mode parsing options
   if options.mode == 'sync':
@@ -204,7 +249,7 @@ def _parseARGs(args=None):
   parser.add_argument('--dryrun', dest='debug', action='store_const', const=True, default=False, help='Do nothing except print what would happen\n ')
   parser.add_argument('--title', help='Title name of code coverage generated HTML \noutput\n ')
   parser.add_argument('--outfile', help='Output tracefile\n ')
-  parser.add_argument('--mode', choices=['generate','combine','sync'], default='generate', help='Choose an operational mode:\n\nGENERATE: Generate code coverage for each\nspecified --application (Default)\n\nCOMBINE: Combines tracefiles generated by \ndifferent runs of generate mode\n\nSYNC: Optionally rsync the data to a specified\nlocation. Requires --html-location and\n--sync-location\n ')
+  parser.add_argument('--mode', choices=['generate','initialize','combine','sync'], help='Choose an operational mode:\n\nINITIALIZE: Initialize code coverage for each\nspecified --application\n\nGENERATE: Generate code coverage for each\nspecified --application\n\nCOMBINE: Combines tracefiles generated by \ndifferent runs of generate mode\n\nSYNC: Optionally rsync the data to a specified\nlocation. Requires --html-location and\n--sync-location\n ')
   parser.add_argument('--application', metavar='directories', nargs='+', help='A list of Application/s to cover (path to \ndirectories). Used in conjunction with\ngenerate mode.\n ')
   parser.add_argument('--add-tracefile', metavar='tracefiles', nargs='+', help='A list of tracefiles to use in conjunction\nwith combine mode.\n ')
   parser.add_argument('--html-location', help='Location of HTML generated content. Used in\nconjunction with --generate-html or --sync-location\n ')
