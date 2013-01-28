@@ -80,6 +80,8 @@ public:
   const std::set<SubdomainID> & blocks() { return _blocks; }
   const std::set<BoundaryID> & boundaries() { return _boundaries; }
 
+  /// This function displays a list of active materials and the properties they supply
+  void printMaterialMap();
   void checkMaterialDependSanity();
 
 protected:

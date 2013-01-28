@@ -515,6 +515,7 @@ public:
 #endif //LIBMESH_ENABLE_AMR
   virtual void meshChanged();
 
+  void printMaterialMap();
   void checkProblemIntegrity();
 
   void serializeSolution();

@@ -237,6 +237,59 @@ void MaterialWarehouse::addBoundaryMaterial(std::vector<BoundaryID> boundaries, 
 }
 
 void
+MaterialWarehouse::printMaterialMap()
+{
+  unsigned int map_num=0;
+  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+  {
+    switch (map_num)
+    {
+    case 0:
+      std::cout << " Active materials on blocks:" << std::endl;
+      break;
+    case 1:
+      std::cout << " Active face materials on blocks:" << std::endl;
+      break;
+    case 2:
+      std::cout << " Active neighboring materials on blocks:" << std::endl;
+      break;
+    }
+
+    for (std::map<SubdomainID, std::vector<Material *> >::iterator k = (*i)->begin(); k != (*i)->end(); ++k)
+    {
+      std::cout << "  block ID = " << k->first << ":" << std::endl;
+      for (unsigned int l=0; l<k->second.size(); l++)
+      {
+        std::cout << "   material = " << k->second[l]->name() << ":" << std::endl;
+
+        for (std::set<std::string>::const_iterator it=k->second[l]->getSuppliedItems().begin();
+             it!=k->second[l]->getSuppliedItems().end(); it++)
+          std::cout << "    " << *it << std::endl;
+      }
+      std::cout << std::endl;
+    }
+
+    ++map_num;
+  }
+
+  std::cout << " Active materials on side sets:" << std::endl;
+  for (std::map<BoundaryID, std::vector<Material *> >::iterator k = _active_boundary_materials.begin();
+       k != _active_boundary_materials.end(); ++k)
+  {
+    std::cout << "  side set ID = " << k->first << ":" << std::endl;
+    for (unsigned int l=0; l<k->second.size(); l++)
+    {
+      std::cout << "   material = " << k->second[l]->name() << ":" << std::endl;
+
+      for (std::set<std::string>::const_iterator it=k->second[l]->getSuppliedItems().begin();
+           it!=k->second[l]->getSuppliedItems().end(); it++)
+        std::cout << "    " << *it << std::endl;
+    }
+    std::cout << std::endl;
+  }
+}
+
+void
 MaterialWarehouse::checkMaterialDependSanity()
 {
   for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)

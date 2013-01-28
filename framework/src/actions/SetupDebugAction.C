@@ -23,15 +23,15 @@ InputParameters validParams<SetupDebugAction>()
   InputParameters params = validParams<Action>();
   params.addParam<unsigned int>("show_top_residuals", 0, "The number of top residuals to print out (0 = no output)");
   params.addParam<bool>("show_actions", false, "Print out the actions being executed");
+  params.addParam<bool>("show_material_props", false, "Print out the material properties supplied for each block, face, neighbor, and/or sideset");
   return params;
 }
 
 SetupDebugAction::SetupDebugAction(const std::string & name, InputParameters parameters) :
     Action(name, parameters),
-    _top_residuals(getParam<unsigned int>("show_top_residuals")),
-    _show_actions(getParam<bool>("show_actions"))
+    _top_residuals(getParam<unsigned int>("show_top_residuals"))
 {
-  _awh.showActions(_show_actions);
+  _awh.showActions(getParam<bool>("show_actions"));
 }
 
 SetupDebugAction::~SetupDebugAction()
@@ -42,7 +42,11 @@ void
 SetupDebugAction::act()
 {
   if (_problem != NULL)
+  {
     _problem->setDebugTopResiduals(_top_residuals);
+    if (getParam<bool>("show_material_props"))
+      _problem->printMaterialMap();
+  }
 }
 
 
