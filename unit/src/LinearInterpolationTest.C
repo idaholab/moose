@@ -17,6 +17,8 @@
 //Moose includes
 #include "LinearInterpolation.h"
 
+#include <cmath>
+
 CPPUNIT_TEST_SUITE_REGISTRATION( LinearInterpolationTest );
 
 void

@@ -17,6 +17,8 @@
 //Moose includes
 #include "PolynomialFit.h"
 
+#include <cmath>
+
 CPPUNIT_TEST_SUITE_REGISTRATION( PolynomialFitTest );
 
 void
