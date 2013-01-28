@@ -66,7 +66,11 @@ void
 PlenumPressureAction::act()
 {
   // Determine number of dimensions
-  unsigned int dim(2);
+  unsigned int dim(1);
+  if (_disp_y != "")
+  {
+    ++dim;
+  }
   if (_disp_z != "")
   {
     ++dim;
