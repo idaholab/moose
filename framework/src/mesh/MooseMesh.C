@@ -14,7 +14,6 @@
 
 #include "MooseMesh.h"
 #include "Factory.h"
-#include "MeshModifier.h"
 #include "NonlinearSystem.h"
 #include "CacheChangedListsThread.h"
 #include "Assembly.h"
@@ -1377,3 +1376,35 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
     }
   }
 }
+
+void
+MooseMesh::changeBoundaryId(const boundary_id_type old_id, const boundary_id_type new_id, bool delete_prev)
+{
+  // Only level-0 elements store BCs.  Loop over them.
+  MeshBase::element_iterator           el = _mesh.level_elements_begin(0);
+  const MeshBase::element_iterator end_el = _mesh.level_elements_end(0);
+  for (; el != end_el; ++el)
+  {
+    Elem *elem = *el;
+    unsigned int n_sides = elem->n_sides();
+    for (unsigned int s=0; s != n_sides; ++s)
+    {
+      const std::vector<boundary_id_type>& old_ids = _mesh.boundary_info->boundary_ids(elem, s);
+      if (std::find(old_ids.begin(), old_ids.end(), old_id) != old_ids.end())
+      {
+        std::vector<boundary_id_type> new_ids(old_ids);
+        std::replace(new_ids.begin(), new_ids.end(), old_id, new_id);
+        if (delete_prev)
+        {
+          _mesh.boundary_info->remove_side(elem, s);
+          _mesh.boundary_info->add_side(elem, s, new_ids);
+        }
+        else
+        {
+          _mesh.boundary_info->add_side(elem, s, new_ids);
+        }
+      }
+    }
+  }
+}
+

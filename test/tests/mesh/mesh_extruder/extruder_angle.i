@@ -1,15 +1,13 @@
 [Mesh]
   type = MeshExtruder
-  file = ellipse_tri.e
+  file = chimney_quad.e
   num_layers = 20
-  extrusion_vector = '0 0 5'
-  bottom_sideset = '2'
-  top_sideset = '4'
+  extrusion_vector = '1e-2 1e-2 0'
+  bottom_sideset = '10'
+  top_sideset = '20'
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
@@ -17,8 +15,6 @@
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = Diffusion
     variable = u
@@ -29,14 +25,14 @@
   [./bottom]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = 10
     value = 0
   [../]
 
   [./top]
     type = DirichletBC
     variable = u
-    boundary = 4
+    boundary = 20
     value = 1
   [../]
 []
@@ -47,7 +43,7 @@
 []
 
 [Output]
-  file_base = out_tri
+  file_base = out_quad_angle
   output_initial = true
   interval = 1
   exodus = true

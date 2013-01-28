@@ -10,4 +10,10 @@
     input = 'extruder_tri.i'
     exodiff = 'out_tri.e'
   [../]
+
+  [./angle_test]
+    type = 'Exodiff'
+    input = 'extruder_angle.i'
+    exodiff = 'out_quad_angle.e'
+  [../]
 []

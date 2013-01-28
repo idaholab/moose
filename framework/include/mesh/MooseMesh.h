@@ -346,6 +346,8 @@ public:
    */
   const std::vector<std::pair<unsigned int, QpMap> > & getCoarseningMap(const Elem & elem, int input_side);
 
+  void changeBoundaryId(const boundary_id_type old_id, const boundary_id_type new_id, bool delete_prev);
+
 protected:
   /// Convienence enums
   enum {X=0, Y, Z};

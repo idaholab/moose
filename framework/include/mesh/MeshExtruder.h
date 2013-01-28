@@ -16,7 +16,9 @@
 #define MESHEXTRUDER_H
 
 #include "MooseMesh.h"
+
 #include "libmesh.h"
+#include "vector_value.h"
 
 class MeshExtruder;
 
@@ -26,19 +28,12 @@ InputParameters validParams<MeshExtruder>();
 class MeshExtruder : public MooseMesh
 {
 public:
-//  MeshExtruder(const libMesh::MeshBase &source_mesh);
   MeshExtruder(const std::string & name, InputParameters parameters);
-
-  void extrude(libMesh::MeshBase &dest_mesh);
 
 protected:
   const unsigned int _num_layers;
-  const Real _height;
-  const unsigned int _extrusion_axis;
+  const RealVectorValue _extrusion_vector;
   libMesh::Mesh _src_mesh;
-
-  static const unsigned int Quad4_to_Hex8_side_map[4];
-  static const unsigned int Tri3_to_Prism6_side_map[3];
 };
 
 #endif /* MESHEXTRUDER_H */

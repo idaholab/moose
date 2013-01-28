@@ -2,15 +2,12 @@
   type = MeshExtruder
   file = chimney_quad.e
   num_layers = 20
-  height = 1e-2
-  extrusion_axis = 1 # Y
-  bottom_sidesets = '2'
-  top_sidesets = '4'
+  extrusion_vector = '0 1e-2 0'
+  bottom_sideset = '10'
+  top_sideset = '20'
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
@@ -18,8 +15,6 @@
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = Diffusion
     variable = u
@@ -27,19 +22,17 @@
 []
 
 [BCs]
-  active = 'left right'
-
-  [./left]
+  [./bottom]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = 10
     value = 0
   [../]
 
-  [./right]
+  [./top]
     type = DirichletBC
     variable = u
-    boundary = 4
+    boundary = 20
     value = 1
   [../]
 []
