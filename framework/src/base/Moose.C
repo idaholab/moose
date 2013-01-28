@@ -91,6 +91,7 @@
 #include "CoupledTransientExecutioner.h"
 
 // functions
+#include "ConstantFunction.h"
 #include "Composite.h"
 #include "MooseParsedFunction.h"
 #include "MooseParsedGradFunction.h"
@@ -308,6 +309,7 @@ registerObjects()
 #endif
 
   // functions
+  registerFunction(ConstantFunction);
   registerFunction(Composite);
   registerNamedFunction(MooseParsedFunction, "ParsedFunction");
   registerNamedFunction(MooseParsedGradFunction, "ParsedGradFunction");
