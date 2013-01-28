@@ -10,7 +10,7 @@ InputParameters validParams<PlenumPressureAction>()
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
   params.addRequiredParam<NonlinearVariableName>("disp_x", "The x displacement");
-  params.addRequiredParam<NonlinearVariableName>("disp_y", "The y displacement");
+  params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
 
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_x", "The save_in variables for x displacement");
