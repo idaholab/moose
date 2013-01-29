@@ -30,7 +30,6 @@ RandomHitSolutionModifier::RandomHitSolutionModifier(const std::string & name, I
     GeneralUserObject(name, parameters),
     _random_hits(getUserObject<RandomHitUserObject>("random_hits")),
     _mesh(_subproblem.mesh()),
-    _point_locator(_mesh.getMesh().point_locator()),
     _variable(_subproblem.getVariable(0, parameters.get<VariableName>("modify"))),
     _amount(parameters.get<Real>("amount"))
 {}
@@ -38,6 +37,8 @@ RandomHitSolutionModifier::RandomHitSolutionModifier(const std::string & name, I
 void
 RandomHitSolutionModifier::execute()
 {
+  AutoPtr<PointLocatorBase> pl = _mesh.getMesh().sub_point_locator();
+
   const std::vector<Point> & hits = _random_hits.hits();
 
   _nodes_that_were_hit.resize(hits.size());
@@ -46,8 +47,6 @@ RandomHitSolutionModifier::execute()
   for(unsigned int i=0; i<hits.size(); i++)
   {
     const Point & hit = hits[i];
-
-    AutoPtr<PointLocatorBase> pl = PointLocatorBase::build(TREE, _mesh);
 
     // First find the element the hit lands in
     const Elem * elem = (*pl)(hit);

@@ -757,11 +757,13 @@ MooseMesh::setBoundaryName(BoundaryID boundary_id, BoundaryName name)
 void
 MooseMesh::buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & periodic_node_map, unsigned int var_number, PeriodicBoundaries *pbs) const
 {
+  mooseAssert(!Threads::in_threads, "This function should only be called outside of a threaded region due to the use of PointLocator");
+
   periodic_node_map.clear();
 
   MeshBase::const_element_iterator it = _mesh.active_local_elements_begin();
   MeshBase::const_element_iterator it_end = _mesh.active_local_elements_end();
-  const PointLocatorBase &point_locator = _mesh.point_locator();
+  AutoPtr<PointLocatorBase> point_locator = _mesh.sub_point_locator();
 
   for (; it != it_end; ++it)
   {
@@ -778,7 +780,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & peri
         const PeriodicBoundaryBase *periodic = pbs->boundary(boundary_id);
         if (periodic && periodic->is_my_variable(var_number))
         {
-          const Elem* neigh = pbs->neighbor(boundary_id, point_locator, elem, s);
+          const Elem* neigh = pbs->neighbor(boundary_id, *point_locator, elem, s);
           unsigned int s_neigh = _mesh.boundary_info->side_with_boundary_id (neigh, periodic->pairedboundary);
 
           AutoPtr<Elem> elem_side = elem->build_side(s);
