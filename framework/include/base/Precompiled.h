@@ -30,7 +30,11 @@
 #include "mpi.h"
 
 // Petsc
+#if defined(LIBMESH_HAVE_PETSC) && defined(PETSC_VERSION_LE)
+#if !PETSC_VERSION_LE(3,3,0)
 #include "petscdmmesh.h"
+#endif
+#endif
 
 // TBB
 #include "partitioner.h"
