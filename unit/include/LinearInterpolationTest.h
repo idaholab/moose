@@ -40,7 +40,7 @@ private:
   std::vector<double> * _x;
   std::vector<double> * _y;
 
-  static const double _tol = 1e-5;
+  static const double _tol;
 };
 
 #endif  // LINEARINTERPOLATIONTEST_H

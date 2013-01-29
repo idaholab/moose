@@ -21,6 +21,8 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION( PolynomialFitTest );
 
+const double PolynomialFitTest::_tol = 1e-5;
+
 void
 PolynomialFitTest::setUp()
 {

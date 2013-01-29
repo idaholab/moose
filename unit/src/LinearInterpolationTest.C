@@ -21,6 +21,8 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION( LinearInterpolationTest );
 
+const double LinearInterpolationTest::_tol = 1e-5;
+
 void
 LinearInterpolationTest::setUp()
 {
