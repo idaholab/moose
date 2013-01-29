@@ -52,9 +52,6 @@ def buildCMD(options):
 
     # Build lcov filter command
     tmp_cmd.append([options.lcov_command[0],
-                    '--extract', 'combined.info', '*' + options.application[0] + '/src*',
-                    '--extract', 'combined.info', '*' + options.application[0] + '/include*',
-                    '--output-file', 'final.info' ])
                     '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/src*',
                     '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/include*',
                     '--output-file', options.outfile ])
