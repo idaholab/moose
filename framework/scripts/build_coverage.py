@@ -15,7 +15,7 @@ def buildCMD(options):
                       '--capture',
                       '--initial',
                       '--directory', os.getcwd() + '/' + options.application[0],
-                      '--output-file', 'initialize.info'
+                      '--output-file', os.getcwd() + '/initialize.info'
                       ])
       tmp_cmd[0].extend(tmp_additional_directories)
     else:
@@ -23,7 +23,7 @@ def buildCMD(options):
                       '--capture',
                       '--initial',
                       '--directory', os.getcwd() + '/' + options.application[0],
-                      '--output-file', 'initialize.info'
+                      '--output-file', os.getcwd() + '/initialize.info'
                       ])
 
   # Generate Mode (run generate mode only after initialize mode, run_tests/application has ran)
@@ -33,7 +33,7 @@ def buildCMD(options):
                       '--directory', os.getcwd() + '/' + options.application[0],
                       '--capture',
                       '--ignore-errors', 'gcov,source',
-                      '--output-file', 'covered.info'
+                      '--output-file', os.getcwd() + '/covered.info'
                       ])
       tmp_cmd[0].extend(tmp_additional_directories)
     else:
@@ -41,24 +41,30 @@ def buildCMD(options):
                       '--directory', os.getcwd() + '/' + options.application[0],
                       '--capture',
                       '--ignore-errors', 'gcov,source',
-                      '--output-file', 'covered.info'
+                      '--output-file', os.getcwd() + '/covered.info'
                       ])
 
     # Build lcov combine command
     tmp_cmd.append([options.lcov_command[0],
-                    '--add-tracefile', 'initialize.info',
-                    '--add-tracefile', 'covered.info',
-                    '--output-file', 'combined.info' ])
+                    '--add-tracefile', os.getcwd() + '/initialize.info',
+                    '--add-tracefile', os.getcwd() + '/covered.info',
+                    '--output-file', os.getcwd() + '/combined.info' ])
 
     # Build lcov filter command
     tmp_cmd.append([options.lcov_command[0],
+<<<<<<< HEAD
+                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/src*',
+                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/include*',
+                    '--output-file', options.outfile ])
+=======
                     '--extract', 'combined.info', '*' + options.application[0] + '/src*',
                     '--extract', 'combined.info', '*' + options.application[0] + '/include*',
-                    '--output-file', options.outfile ])
+                    '--output-file', 'final.info' ])
+>>>>>>> parent of 7657b0a... We really do need output file specification to make generate mode work correctly. References #1676
 
     # Build genhtml command if --generate-html was used
     if options.generate_html:
-      tmp_cmd.append([options.genhtml_command[0], 'final.info',
+      tmp_cmd.append([options.genhtml_command[0], os.getcwd() + '/final.info',
                       '--title', options.title + ' Test Coverage',
                       '--num-spaces', '2',
                       '--legend',
@@ -67,7 +73,7 @@ def buildCMD(options):
 
     # Clean up old tracefiles if asked
     if options.cleanup:
-      tmp_cmd.append(['rm', '-f', 'initialize.info', 'covered.info', 'combined.info'])
+      tmp_cmd.append(['rm', '-f', os.getcwd() + '/initialize.info', os.getcwd() + '/covered.info', os.getcwd() + '/combined.info'])
 
   # Combine Mode
   if options.mode == 'combine':
@@ -189,11 +195,6 @@ def _verifyOptions(options):
     if options.html_location is not None and os.path.exists(options.html_location):
       if options.overwrite is False:
         error_list.append('html location specified already exists. Exiting for safty measures...')
-    if options.outfile is not None and os.path.exists(options.outfile):
-      if options.overwrite is False:
-        error_list.append('output file specified already exists. Exiting for safty measures...')
-    if options.outfile is None:
-      error_list.append('you must specifiy an output file: --outfile')
 
   # generate specific parsing options
   if options.mode == 'initialize':
