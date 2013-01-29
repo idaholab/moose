@@ -94,12 +94,12 @@ SolutionFunction::SolutionFunction(const std::string & name, InputParameters par
     if (dynamic_cast<ParallelMesh *>(_mesh))
     {
       _mesh->allow_renumbering(true);
-      _mesh->prepare_for_use(false);
+      _mesh->prepare_for_use(/*false*/);
     }
     else
     {
       _mesh->allow_renumbering(false);
-      _mesh->prepare_for_use(true);
+      _mesh->prepare_for_use(/*true*/);
     }
 
     _es = new EquationSystems(*_mesh);

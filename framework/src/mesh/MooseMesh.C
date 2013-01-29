@@ -143,12 +143,12 @@ MooseMesh::prepare()
   if (dynamic_cast<ParallelMesh *>(&_mesh) && !_is_parallel)
   {
     _mesh.allow_renumbering(true);
-    _mesh.prepare_for_use(false);
+    _mesh.prepare_for_use(/*false*/);
   }
   else
   {
     _mesh.allow_renumbering(false);
-    _mesh.prepare_for_use(true);
+    _mesh.prepare_for_use(/*true*/);
   }
 
   // If using ParallelMesh this will delete non-local elements from the current processor
