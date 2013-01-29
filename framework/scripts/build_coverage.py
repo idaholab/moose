@@ -52,15 +52,9 @@ def buildCMD(options):
 
     # Build lcov filter command
     tmp_cmd.append([options.lcov_command[0],
-<<<<<<< HEAD
-                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/src*',
-                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/include*',
-                    '--output-file', options.outfile ])
-=======
                     '--extract', 'combined.info', '*' + options.application[0] + '/src*',
                     '--extract', 'combined.info', '*' + options.application[0] + '/include*',
                     '--output-file', 'final.info' ])
->>>>>>> parent of 7657b0a... We really do need output file specification to make generate mode work correctly. References #1676
 
     # Build genhtml command if --generate-html was used
     if options.generate_html:
