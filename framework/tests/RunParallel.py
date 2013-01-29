@@ -7,6 +7,7 @@ from tempfile import TemporaryFile
 #from Queue import Queue
 from collections import deque
 from Tester import Tester
+from signal import SIGTERM
 
 import os, sys
 
@@ -100,7 +101,8 @@ class RunParallel:
       output = self.readOutput(f)
       output += '\n' + "#"*80 + '\nProcess terminated by test harness\n' + "#"*80 + '\n'
       f.close()
-      p.terminate()
+      os.kill(p.pid, SIGTERM)        # Python 2.4 compatibility
+      #p.terminate()                 # Python 2.6+
 
       if not self.harness.testOutputAndFinish(tester, RunParallel.TIMEOUT, output, time, clock()):
         did_pass = False
