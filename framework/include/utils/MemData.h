@@ -36,16 +36,12 @@ public:
   /**
    * Constructor.
    */
-  MemData()
-      : _mem_in_kB_at_start(0),
-	_mem_in_kB_at_stop(0),
-	_started(false)
-    {}
+  MemData();
 
   /**
    * Destructor.
    */
-  ~MemData() {}
+  virtual ~MemData();
 
   /**
    * Get an initial memory count at the beginning of an operation.

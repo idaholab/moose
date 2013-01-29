@@ -30,6 +30,8 @@ class LineSegment
 
   LineSegment (const Point & p0, const Point & p1);
 
+  virtual ~LineSegment();
+
   /**
    * Returns the closest point on the LineSegment
    * to the passed in point.  Note that the closest point may be

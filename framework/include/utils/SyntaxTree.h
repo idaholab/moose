@@ -69,7 +69,7 @@ protected:
     SyntaxTree &_syntax_tree;
   };
 
-  bool isLongNames() const { return _use_long_names; }
+  bool isLongNames() const;
 
   static bool wildCardMatch(std::string name, std::string search_string);
 

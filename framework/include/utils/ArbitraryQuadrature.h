@@ -31,7 +31,7 @@ class ArbitraryQuadrature : public QBase
 
   virtual ~ArbitraryQuadrature();
 
-  QuadratureType type() const { return INVALID_Q_RULE; }
+  QuadratureType type() const;
 
   void setPoints(const std::vector<Point> & points);
 

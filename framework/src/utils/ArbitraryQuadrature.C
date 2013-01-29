@@ -23,6 +23,13 @@ ArbitraryQuadrature::ArbitraryQuadrature(const unsigned int d, const Order o) :
 ArbitraryQuadrature::~ArbitraryQuadrature()
 {}
 
+
+QuadratureType
+ArbitraryQuadrature::type() const
+{
+  return INVALID_Q_RULE;
+}
+
 void
 ArbitraryQuadrature::setPoints(const std::vector<Point> & points)
 {

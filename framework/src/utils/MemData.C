@@ -15,6 +15,21 @@
 #include "MooseError.h"
 #include "MemData.h"
 
+MemData::MemData() :
+    _mem_in_kB_at_start(0),
+    _mem_in_kB_at_stop(0),
+    _started(false)
+{
+}
+
+
+
+MemData::~MemData()
+{
+}
+
+
+
 void MemData::start()
 {
   if (_started)

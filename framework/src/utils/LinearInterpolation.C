@@ -77,6 +77,18 @@ LinearInterpolation::integrate()
   return answer;
 }
 
+double
+LinearInterpolation::domain(int i) const
+{
+  return _x[i];
+}
+
+double
+LinearInterpolation::range(int i) const
+{
+  return _y[i];
+}
+
 void
 LinearInterpolation::dumpSampleFile(std::string base_name, std::string x_label, std::string y_label, float xmin, float xmax, float ymin, float ymax)
 {

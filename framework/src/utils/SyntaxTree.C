@@ -230,6 +230,12 @@ SyntaxTree::TreeNode::getLongName(const std::string &delim) const
 }
 
 bool
+SyntaxTree::isLongNames() const
+{
+  return _use_long_names;
+}
+
+bool
 SyntaxTree::wildCardMatch(std::string name, std::string search_string)
 {
   // Assume that an empty string matches anything

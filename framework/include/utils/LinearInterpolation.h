@@ -75,8 +75,8 @@ public:
    */
   double integrate();
 
-  double domain(int i) {return _x[i];}
-  double range(int i) {return _y[i];}
+  double domain(int i) const;
+  double range(int i) const;
 
 private:
 
