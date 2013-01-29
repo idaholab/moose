@@ -12,7 +12,7 @@
 	nx = 3
 	ny = 3
 	elem_type = QUAD4
-	
+
 	stripes = 3
 []
 
@@ -20,7 +20,7 @@
 	[./forcing_fn]
 		type = ParsedFunction
 		value = x
-	[../
+	[../]
 []
 
 [Variables]
@@ -35,7 +35,7 @@
 		type = Reaction
 		variable = u
 	[../]
-	
+
 	[./fv]
 		type = UserForcingFunction
 		variable = u
