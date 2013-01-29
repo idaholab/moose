@@ -55,6 +55,9 @@ def buildCMD(options):
                     '--extract', 'combined.info', '*' + options.application[0] + '/src*',
                     '--extract', 'combined.info', '*' + options.application[0] + '/include*',
                     '--output-file', 'final.info' ])
+                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/src*',
+                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/include*',
+                    '--output-file', options.outfile ])
 
     # Build genhtml command if --generate-html was used
     if options.generate_html:
@@ -189,6 +192,11 @@ def _verifyOptions(options):
     if options.html_location is not None and os.path.exists(options.html_location):
       if options.overwrite is False:
         error_list.append('html location specified already exists. Exiting for safty measures...')
+    if options.outfile is not None and os.path.exists(options.outfile):
+      if options.overwrite is False:
+        error_list.append('output file specified already exists. Exiting for safty measures...')
+    if options.outfile is None:
+      error_list.append('you must specifiy an output file: --outfile')
 
   # generate specific parsing options
   if options.mode == 'initialize':
