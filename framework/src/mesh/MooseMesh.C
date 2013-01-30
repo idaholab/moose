@@ -676,6 +676,9 @@ MooseMesh::getQuadratureNode(const Elem * elem, const unsigned short int side, c
 BoundaryID
 MooseMesh::getBoundaryID(const BoundaryName & boundary_name) const
 {
+  if (boundary_name == "ANY_BOUNDARY_ID")
+    mooseError("Please use getBoundaryIDs() when passing \"ANY_BOUNDARY_ID\"");
+
   BoundaryID id;
   std::istringstream ss(boundary_name);
 
@@ -692,6 +695,14 @@ MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name) const
 
   for(unsigned int i=0; i<boundary_name.size(); i++)
   {
+    if (boundary_name[i] == "ANY_BOUNDARY_ID")
+    {
+      ids.assign(_mesh_boundary_ids.begin(), _mesh_boundary_ids.end());
+      if (i)
+        mooseWarning("You passed \"ANY_BOUNDARY_ID\" in addition to other boundary_names.  This may be a logic error.");
+      break;
+    }
+
     BoundaryID id;
     std::istringstream ss(boundary_name[i]);
 
@@ -707,6 +718,9 @@ MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name) const
 SubdomainID
 MooseMesh::getSubdomainID(const SubdomainName & subdomain_name) const
 {
+  if (subdomain_name == "ANY_BLOCK_ID")
+    mooseError("Please use getSubdomainIDs() when passing \"ANY_BLOCK_ID\"");
+
   SubdomainID id;
   std::istringstream ss(subdomain_name);
 
@@ -723,6 +737,14 @@ MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) co
 
   for(unsigned int i=0; i<subdomain_name.size(); i++)
   {
+    if (subdomain_name[i] == "ANY_BLOCK_ID")
+    {
+      ids.assign(_mesh_subdomains.begin(), _mesh_subdomains.end());
+      if (i)
+        mooseWarning("You passed \"ANY_BLOCK_ID\" in addition to other sudomain_names.  This may be a logic error.");
+      break;
+    }
+
     SubdomainID id;
     std::istringstream ss(subdomain_name[i]);
 
