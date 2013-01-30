@@ -58,7 +58,7 @@ def buildCMD(options):
 
     # Build genhtml command if --generate-html was used
     if options.generate_html:
-      tmp_cmd.append([options.genhtml_command[0], os.getcwd() + '/final.info',
+      tmp_cmd.append([options.genhtml_command[0], options.outfile,
                       '--title', options.title + ' Test Coverage',
                       '--num-spaces', '2',
                       '--legend',
