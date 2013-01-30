@@ -6,4 +6,12 @@
     group = 'geometric'
     mesh_mode = 'SERIAL'
   [../]
+
+  [./2d_triangle]
+    type = 'Exodiff'
+    input = '2d_triangle.i'
+    exodiff = '2d_triangle_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
 []
