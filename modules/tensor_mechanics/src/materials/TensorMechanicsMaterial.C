@@ -1,7 +1,6 @@
 // Original class author: A.M. Jokisaari, O. Heinonen, M. R. Tonks
 
 #include "TensorMechanicsMaterial.h"
-#include "RotationTensor.h"
 
 /**
  * TensorMechanicsMaterial handles a fully anisotropic, single-crystal material's elastic

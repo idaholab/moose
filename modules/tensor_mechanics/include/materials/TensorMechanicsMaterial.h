@@ -6,6 +6,7 @@
 #include "Material.h"
 #include "RankTwoTensor.h"
 #include "ElasticityTensorR4.h"
+#include "RotationTensor.h"
 
 /**
  * TensorMechanicsMaterial handles a fully anisotropic, single-crystal material's elastic
