@@ -131,6 +131,8 @@ protected:
   Simulation & _sim;
   /// Global mesh this component works on
   MooseMesh & _mesh;
+  /// Global physical mesh this component works on
+  MooseMesh * & _phys_mesh;
   /// Convenience variable that stores model type
   Model::EModelType _model_type;
 

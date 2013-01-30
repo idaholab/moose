@@ -99,6 +99,7 @@ Component::Component(const std::string & name, InputParameters parameters) :
     _parent(parameters.have_parameter<Component *>("_parent") ? getParam<Component *>("_parent") : NULL),
     _sim(*getParam<Simulation *>("_sim")),
     _mesh(_sim.mesh()),
+    _phys_mesh(_sim.physicalMesh()),
     _model_type(_sim.getParam<Model::EModelType>("model_type")),
 
     _input_file_name(getParam<std::string>("physics_input_file"))
