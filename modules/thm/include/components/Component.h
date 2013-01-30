@@ -3,7 +3,6 @@
 
 #include "RELAP7.h"
 #include "R7Object.h"
-#include "R7Mesh.h"
 #include "ActionWarehouse.h"
 #include "Model.h"
 #include "Simulation.h"
@@ -131,7 +130,7 @@ protected:
   /// Simulation this component is part of
   Simulation & _sim;
   /// Global mesh this component works on
-  R7Mesh & _mesh;
+  MooseMesh & _mesh;
   /// Convenience variable that stores model type
   Model::EModelType _model_type;
 
