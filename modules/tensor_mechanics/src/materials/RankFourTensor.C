@@ -224,13 +224,14 @@ RankFourTensor::operator*(const RankFourTensor &a) const
 {
   RankFourTensor result;
   
+  
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       for(unsigned int k(0); k<N; k++)
         for(unsigned int l(0); l<N; l++)
-          for(unsigned int p(0); p<N; k++)
-            for(unsigned int q(0); q<N; l++)
-              result(i,j,k,l) = result(i,j,k,l)+_vals[i][j][p][q]*a(p,q,k,l);
+          for(unsigned int p(0); p<N; p++)
+            for(unsigned int q(0); q<N; q++)
+              result(i,j,k,l) += _vals[i][j][p][q]*a(p,q,k,l);  
 
   return result;
 }
@@ -304,13 +305,14 @@ RankFourTensor::invSymm()
           {
             if(k==l)
             {
-              result.setValue(mat[i*ntens+k],i+1,j+1,k+1,l+1);
+              result(i,j,k,l)=mat[i*ntens+k];             
               
             }
             else
             {
-              result.setValue(mat[i*ntens+2+k+l]/2.0,i+1,j+1,k+1,l+1);
 
+              result(i,j,k,l)=mat[i*ntens+2+k+l]/2.0;
+              
             }
             
           }
@@ -318,13 +320,13 @@ RankFourTensor::invSymm()
           {
             if(k==l)
             {
-              result.setValue(mat[(2+i+j)*ntens+k],i+1,j+1,k+1,l+1);
-
+              result(i,j,k,l)=mat[(2+i+j)*ntens+k]; 
+              
             }
             else
             {
 
-              result.setValue(mat[(2+i+j)*ntens+2+k+l]/2.0,i+1,j+1,k+1,l+1);
+              result(i,j,k,l)=mat[(2+i+j)*ntens+2+k+l]/2.0;             
 
             }
 
@@ -390,6 +392,27 @@ RankFourTensor::print()
     }
   
 }
+
+RankFourTensor
+RankFourTensor::transposeMajor()
+{
+  RankFourTensor result;
+
+  for(unsigned int i = 0; i < 3; i++)
+    for(unsigned int j = 0; j < 3; j++)
+      for (unsigned int k = 0; k < 3; k++)
+        for(unsigned int l = 0; l < 3; l++)
+          result(i,j,k,l)=_vals[k][l][i][j];
+
+
+  return result;
+  
+}
+
+
+
+
+
 int
 RankFourTensor::MatrixInversion(double* A, int n)
 {
@@ -426,3 +449,6 @@ RankFourTensor::MatrixInversion(double* A, int n)
   
 
 }
+
+
+
