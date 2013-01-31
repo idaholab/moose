@@ -865,7 +865,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     if self.file_name and self.exodus_result:
       for file_name in sorted(glob.glob(self.file_name + '-s*')):
         file_stamp = os.path.getmtime(file_name)
-        if int(file_stamp) >= int(self.base_stamp) and file_name not in self.file_names:
+        if int(file_stamp) >= int(self.base_stamp) and int(file_stamp) <= int(time.time() - 1) and file_name not in self.file_names:
           self.file_names.append(file_name)
           exodus_result = ExodusResult(self, self.plane)
           exodus_result.setFileName(file_name)
