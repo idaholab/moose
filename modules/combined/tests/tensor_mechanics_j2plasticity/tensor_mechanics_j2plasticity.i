@@ -182,7 +182,7 @@
   petsc_options = '-snes_mf_operator'
   petsc_options_iname = -pc_hypre_type
   petsc_options_value = boomerang
-  nl_abs_tol = 1e-6 
+  nl_abs_tol = 1e-10 
 []
 
 
