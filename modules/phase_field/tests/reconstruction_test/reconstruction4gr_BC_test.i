@@ -20,9 +20,7 @@
 []
 
 [Variables]
-  [./ReconstructedVariables]
-    order = FIRST
-    family = LAGRANGE
+  [./ReconstructedVariables]    
     EBSD_file_name = grains_from_edge_fuel2.txt
     x1 = 0.0
     y1 = 0.0
@@ -36,7 +34,8 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  [./grain_num]
+
+  [./grn]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -53,9 +52,10 @@
     variable = bnds
     execute_on = timestep
   [../]
-  [./grain_num]
-    type = GrainOrientation
-    variable = grain_num
+
+  [./grn]
+    type = GrainIndexAux
+    variable = grn
     execute_on = timestep
     output_angles = false
   [../]

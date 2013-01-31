@@ -22,9 +22,7 @@
 
 [Variables]
 
-  [./ReconstructedVariables]
-    order = FIRST
-    family = LAGRANGE
+  [./ReconstructedVariables]    
     EBSD_file_name = al_with_grains.txt
     x1 = 0.0
     y1 = 0.0
@@ -39,6 +37,11 @@
     order = FIRST
     family = LAGRANGE
   [../]
+
+  [./grn]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []	     
 
 [Kernels]
@@ -51,6 +54,13 @@
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
+    execute_on = timestep
+  [../]
+
+  [./grn]
+    type = GrainIndexAux
+    variable = grn
+    execute_on = timestep    
   [../]
 []
 
