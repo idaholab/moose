@@ -161,6 +161,24 @@ Adaptivity::adaptMesh()
 }
 
 void
+Adaptivity::initialAdaptMesh()
+{
+  if(_initial_marker_variable_name != "")
+  {
+    std::string temp = _marker_variable_name;
+    _marker_variable_name = _initial_marker_variable_name;
+
+    std::cout<<"Adapting using "<<_marker_variable_name<<std::endl;
+
+    adaptMesh();
+
+    _marker_variable_name = temp;
+  }
+  else
+    adaptMesh();
+}
+
+void
 Adaptivity::uniformRefine(unsigned int level)
 {
   // NOTE: we are using a separate object here, since adaptivity may not be on, but we need to be able to do refinements
@@ -194,6 +212,12 @@ void
 Adaptivity::setMarkerVariableName(std::string marker_field)
 {
   _marker_variable_name = marker_field;
+}
+
+void
+Adaptivity::setInitialMarkerVariableName(std::string marker_field)
+{
+  _initial_marker_variable_name = marker_field;
 }
 
 MooseVariable &

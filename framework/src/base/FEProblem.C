@@ -340,14 +340,22 @@ void FEProblem::initialSetup()
 //  // RUN initial postprocessors
 //  computePostprocessors(EXEC_INITIAL);
 
+  for(unsigned int i=0; i<n_threads; i++)
+  {
+    _indicators[i].initialSetup();
+    _markers[i].initialSetup();
+  }
+
 #ifdef LIBMESH_ENABLE_AMR
   Moose::setup_perf_log.push("initial adaptivity","Setup");
   for (unsigned int i = 0; i < adaptivity().getInitialSteps(); i++)
   {
-    adaptMesh();
+    computeIndicatorsAndMarkers();
+
+    _adaptivity.initialAdaptMesh();
+    meshChanged();
 
     //reproject the initial condition
-//    _nl.sys().project_solution(Moose::initial_value, Moose::initial_gradient, _eq.parameters);
     _nl.projectSolution();
   }
   Moose::setup_perf_log.pop("initial adaptivity","Setup");
@@ -445,13 +453,6 @@ void FEProblem::initialSetup()
       ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _material_props, _bnd_material_props, _materials, _assembly);
       Threads::parallel_reduce(elem_range, cmt);
     }
-  }
-
-
-  for(unsigned int i=0; i<n_threads; i++)
-  {
-    _indicators[i].initialSetup();
-    _markers[i].initialSetup();
   }
 }
 

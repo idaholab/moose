@@ -104,6 +104,11 @@ public:
   void adaptMesh();
 
   /**
+   * Used during initial adaptivity.
+   */
+  void initialAdaptMesh();
+
+  /**
    * Does 'level' levels of uniform refinements
    */
   void uniformRefine(unsigned int level);
@@ -135,6 +140,15 @@ public:
    * @param marker_field The name of the field to use for refinement / coarsening.
    */
   void setMarkerVariableName(std::string marker_field);
+
+  /**
+   * Sets the name of the field variable to actually use to flag elements for initial refinement / coarsening.
+   * This must be a CONSTANT, MONOMIAL Auxiliary Variable Name that contains values
+   * corresponding to libMesh::Elem::RefinementState.
+   *
+   * @param marker_field The name of the field to use for refinement / coarsening.
+   */
+  void setInitialMarkerVariableName(std::string marker_field);
 
   /**
    * Set the maximum refinement level (for the new Adaptivity system).
@@ -203,6 +217,9 @@ protected:
 
   /// Name of the marker variable if using the new adaptivity system
   std::string _marker_variable_name;
+
+  /// Name of the initial marker variable if using the new adaptivity system
+  std::string _initial_marker_variable_name;
 
   /// The maximum number of refinement levels
   unsigned int _max_h_level;
