@@ -7,4 +7,13 @@
     mesh_mode = 'SERIAL'
     scale_refine = 1
   [../]
+
+  [./3d_tet]
+    type = 'Exodiff'
+    input = '3d_tet.i'
+    exodiff = '3d_tet_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+    scale_refine = 1
+  [../]
 []
