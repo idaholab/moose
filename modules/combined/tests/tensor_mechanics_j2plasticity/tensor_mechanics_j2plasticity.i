@@ -124,6 +124,7 @@
 []
 
 [AuxVariables]
+  active='stress_zz'
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -140,6 +141,7 @@
 
 [AuxKernels]
   # AuxKernels
+  active='stress_zz'
   [./stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
