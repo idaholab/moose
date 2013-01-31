@@ -13,6 +13,5 @@
     exodiff = '2d_triangle_out.e'
     group = 'geometric'
     mesh_mode = 'SERIAL'
-    deleted = 'Missing input file - refs #1694'
   [../]
 []
