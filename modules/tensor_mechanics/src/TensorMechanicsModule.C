@@ -8,6 +8,7 @@
 #include "StressDivergenceTensors.h"
 #include "LinearElasticMaterial.h"
 #include "FiniteStrainElasticMaterial.h"
+#include "FiniteStrainPlasticMaterial.h"
 #include "RankTwoAux.h"
 #include "RealTensorValueAux.h"
 #include "RankFourAux.h"
@@ -21,6 +22,7 @@ Elk::TensorMechanics::registerObjects()
 
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);
+  registerMaterial(FiniteStrainPlasticMaterial);
 
 
   registerAux(RankTwoAux);
