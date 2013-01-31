@@ -139,6 +139,8 @@ public:
   //Add identity times a
   void addIa(const Real &a);
 
+  Real L2norm();
+  
 protected:
   
 private:

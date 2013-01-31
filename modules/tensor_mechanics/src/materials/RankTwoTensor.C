@@ -420,3 +420,21 @@ RankTwoTensor::addIa(const Real &a)
   for(unsigned int i=0; i<N; i++)
     _vals[i][i] += a;
 }
+
+Real
+RankTwoTensor::L2norm()
+{
+
+  Real norm;
+  norm=0.0;
+  
+  
+  for(unsigned int i=0; i<N; i++)
+    for(unsigned int j=0; j<N; j++)
+      norm+=_vals[i][j]*_vals[i][j];
+
+  norm=pow(norm,0.5);
+  
+  return norm;
+  
+}
