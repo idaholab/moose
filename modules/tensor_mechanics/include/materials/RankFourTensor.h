@@ -94,6 +94,9 @@ public:
    * Print the tensor
    */
   void print();
+
+  RankFourTensor transposeMajor();
+  
   
 //  int MatrixInversion(double *, int, double* );//Added
 
