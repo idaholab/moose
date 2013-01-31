@@ -46,7 +46,8 @@ Adaptivity::Adaptivity(FEProblem & subproblem) :
     _start_time(-std::numeric_limits<Real>::max()),
     _stop_time(std::numeric_limits<Real>::max()),
     _cycles_per_step(1),
-    _use_new_system(false)
+    _use_new_system(false),
+    _max_h_level(0)
 {
 }
 
@@ -125,7 +126,7 @@ Adaptivity::adaptMesh()
         _subproblem.getAuxiliarySystem().solution().close();
         _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);
 
-        FlagElementsThread fet(_subproblem, serialized_solution, _displaced_problem);
+        FlagElementsThread fet(_subproblem, serialized_solution, _displaced_problem, _max_h_level);
         ConstElemRange all_elems(_subproblem.mesh().getMesh().active_elements_begin(),
                                  _subproblem.mesh().getMesh().active_elements_end(), 1);
         Threads::parallel_reduce(all_elems, fet);

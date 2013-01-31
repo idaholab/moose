@@ -24,7 +24,8 @@
 
 FlagElementsThread::FlagElementsThread(FEProblem & fe_problem,
                                        std::vector<Number> & serialized_solution,
-                                       DisplacedProblem * displaced_problem) :
+                                       DisplacedProblem * displaced_problem,
+                                       unsigned int max_h_level) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, fe_problem.getAuxiliarySystem()),
     _fe_problem(fe_problem),
     _displaced_problem(displaced_problem),
@@ -33,7 +34,8 @@ FlagElementsThread::FlagElementsThread(FEProblem & fe_problem,
     _adaptivity(_fe_problem.adaptivity()),
     _field_var(_adaptivity.getMarkerVariable()),
     _field_var_number(_field_var.index()),
-    _serialized_solution(serialized_solution)
+    _serialized_solution(serialized_solution),
+    _max_h_level(max_h_level)
 {
 }
 
@@ -47,7 +49,8 @@ FlagElementsThread::FlagElementsThread(FlagElementsThread & x, Threads::split sp
     _adaptivity(x._adaptivity),
     _field_var(x._field_var),
     _field_var_number(x._field_var_number),
-    _serialized_solution(x._serialized_solution)
+    _serialized_solution(x._serialized_solution),
+    _max_h_level(x._max_h_level)
 {
 }
 
@@ -59,6 +62,10 @@ FlagElementsThread::onElement(const Elem *elem)
 
   // If no Markers cared about what happened to this element let's just leave it alone
   if(marker_value == Marker::DONT_MARK)
+    marker_value = Marker::DO_NOTHING;
+
+  // Don't refine past the max level
+  if(_max_h_level && marker_value == Marker::REFINE && elem->level() >= _max_h_level)
     marker_value = Marker::DO_NOTHING;
 
   const_cast<Elem *>(elem)->set_refinement_flag((Elem::RefinementState)marker_value);

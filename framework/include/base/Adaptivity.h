@@ -137,6 +137,11 @@ public:
   void setMarkerVariableName(std::string marker_field);
 
   /**
+   * Set the maximum refinement level (for the new Adaptivity system).
+   */
+  void setMaxHLevel(unsigned int level) { _max_h_level = level; }
+
+  /**
    * Get the MooseVariable corresponding to the Marker Field Name that is actually going to be used
    * to refine / coarsen the mesh.
    *
@@ -198,6 +203,9 @@ protected:
 
   /// Name of the marker variable if using the new adaptivity system
   std::string _marker_variable_name;
+
+  /// The maximum number of refinement levels
+  unsigned int _max_h_level;
 
   /// Stores pointers to ErrorVectors associated with indicator field names
   std::map<std::string, ErrorVector *> _indicator_field_to_error_vector;

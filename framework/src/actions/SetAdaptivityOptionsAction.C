@@ -25,6 +25,7 @@ InputParameters validParams<SetAdaptivityOptionsAction>()
   params.addParam<MarkerName>("marker", "The name of the Marker to use to actually adapt the mesh.");
   params.addParam<unsigned int>("steps", 0, "The number of adaptive steps to use when doing a Steady simulation.");
   params.addParam<unsigned int>("initial_steps", 0, "The number of adaptive steps to do based on the initial condition.");
+  params.addParam<unsigned int> ("max_h_level", 0, "Maximum number of times a single element can be refined. If 0 then infinite.");
   return params;
 }
 
@@ -38,6 +39,8 @@ SetAdaptivityOptionsAction::act()
 {
   if(isParamValid("marker"))
     _problem->adaptivity().setMarkerVariableName(getParam<MarkerName>("marker"));
+
+  _problem->adaptivity().setMaxHLevel(getParam<unsigned int>("max_h_level"));
 
   _problem->adaptivity().init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_steps"));
   _problem->adaptivity().setUseNewSystem();
