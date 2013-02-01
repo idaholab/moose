@@ -12,8 +12,6 @@ public:
 
 protected:
 
-  virtual void initQpStatefulProperties() {}
-
   virtual void createElasticityTensor();
 
   virtual bool updateElasticityTensor(SymmElasticityTensor & tensor);

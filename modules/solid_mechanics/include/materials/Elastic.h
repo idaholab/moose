@@ -12,8 +12,6 @@ public:
 
 protected:
 
-  virtual void initQpStatefulProperties() {}
-
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeStress();
 

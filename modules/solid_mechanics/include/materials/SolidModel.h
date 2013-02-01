@@ -98,8 +98,6 @@ protected:
   MaterialProperty<RealVectorValue> * _crack_strain_old;
   MaterialProperty<RealVectorValue> * _crack_max_strain;
   MaterialProperty<RealVectorValue> * _crack_max_strain_old;
-  MaterialProperty<RealVectorValue> * _crack_strain_zero_stress;
-  MaterialProperty<RealVectorValue> * _crack_strain_zero_stress_old;
   ColumnMajorMatrix _principal_strain;
 
   MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
@@ -114,6 +112,7 @@ protected:
   SymmTensor _total_strain_increment;
   SymmTensor _strain_increment;
 
+  virtual void initQpStatefulProperties();
 
   virtual void initialSetup();
 

@@ -49,6 +49,7 @@ void
 LinearStrainHardening::initQpStatefulProperties()
 {
   _hardening_variable[_qp] = _hardening_variable_old[_qp] = 0;
+  SolidModel::initQpStatefulProperties();
 }
 
 void

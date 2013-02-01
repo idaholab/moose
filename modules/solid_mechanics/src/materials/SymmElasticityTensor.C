@@ -335,40 +335,7 @@ SymmElasticityTensor::rotateFromGlobalToLocal( const ColumnMajorMatrix & R )
 void
 SymmElasticityTensor::adjustForCracking( const RealVectorValue & crack_flags )
 {
-  const RealVectorValue & c( crack_flags );
-  const Real c0(c(0));
-  const Real c1(c(1));
-  const Real c2(c(2));
-  const Real c01( c0 * c1 );
-  const Real c02( c0 * c2 );
-  const Real c12( c1 * c2 );
-  const Real c012( c0 * c12 );
-  _val[ 0] *= c0;
-  _val[ 1] *= c01;
-  _val[ 2] *= c02;
-  _val[ 3] *= c01;
-  _val[ 4] *= c012;
-  _val[ 5] *= c02;
-
-  _val[ 6] *= c1;
-  _val[ 7] *= c12;
-  _val[ 8] *= c01;
-  _val[ 9] *= c12;
-  _val[10] *= c012;
-
-  _val[11] *= c2;
-  _val[12] *= c012;
-  _val[13] *= c12;
-  _val[14] *= c02;
-
-  _val[15] *= c01;
-  _val[16] *= c012;
-  _val[17] *= c012;
-
-  _val[18] *= c12;
-  _val[19] *= c012;
-
-  _val[20] *= c02;
+  mooseError("adjustForCracking method not defined");
 }
 
 void

@@ -22,6 +22,7 @@
   [./disp_x]
     order = FIRST
     family = LAGRANGE
+    scaling = 1e-3
   [../]
 
   [./disp_y]
@@ -140,8 +141,7 @@
 
 [BCs]
   [./pully]
-    #type = FunctionPresetBC
-    type = FunctionDirichletBC
+    type = FunctionPresetBC
     variable = disp_y
     boundary = 4
     function = disply
@@ -156,7 +156,7 @@
   [./sides]
     type = PresetBC
     variable = disp_x
-    boundary = '1 2'
+    boundary = 1
     value = 0.0
   [../]
 
@@ -186,8 +186,8 @@
   l_tol = 1e-6
 
   nl_max_its = 100
-  nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-3
+  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-4
 
   start_time = 0.0
   end_time = 6.0

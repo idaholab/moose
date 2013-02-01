@@ -155,8 +155,8 @@
 
 [BCs]
   [./pullx]
-    #type = FunctionPresetBC
-    type = FunctionDirichletBC
+    type = FunctionPresetBC
+    #type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = displx
@@ -170,24 +170,22 @@
 
   [./fix_y]
     type = PresetBC
-    #type = DirichletBC
     variable = disp_y
-    boundary = 1
+    boundary = '11 12'
     value = 0.0
   [../]
 
   [./move_y]
     type = FunctionPresetBC
     variable = disp_y
-    boundary = 4
+    boundary = '15 16'
     function = disply
   [../]
 
   [./back]
     type = PresetBC
-    #type = DirichletBC
     variable = disp_z
-    boundary = '3 6'
+    boundary = '3'
     value = 0.0
   [../]
 []
@@ -219,7 +217,7 @@
 
   nl_max_its = 100
   nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-3
+  nl_rel_tol = 1e-4
 
   start_time = 0.0
   end_time = 6.0

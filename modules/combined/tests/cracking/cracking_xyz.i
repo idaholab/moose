@@ -1,12 +1,7 @@
 #
 # Test to exercise the exponential stress release
 #
-# Stress vs. strain should show a linear relationship until cracking,
-#   an exponential stress release, a linear relationship back to zero
-#   strain, a linear relationship with the original stiffness in
-#   compression and then back to zero strain, a linear relationship
-#   back to the exponential curve, and finally further exponential
-#   stress release.
+# First x, then y, then z directions crack
 #
 
 [GlobalParams]

@@ -195,3 +195,53 @@ SymmIsotropicElasticityTensor::multiply( const SymmTensor & x, SymmTensor & b ) 
   b.yz() = 2*_val[18]*yz;
   b.zx() = 2*_val[20]*zx;
 }
+
+void
+SymmIsotropicElasticityTensor::adjustForCracking( const RealVectorValue & crack_flags )
+{
+  const RealVectorValue & c( crack_flags );
+  const Real c0(c(0));
+  const Real c0_coupled( c0 < 1 ? 0 : 1 );
+  const Real c1(c(1));
+  const Real c1_coupled( c1 < 1 ? 0 : 1 );
+  const Real c2(c(2));
+  const Real c2_coupled( c2 < 1 ? 0 : 1 );
+
+
+  const Real c01( c0_coupled * c1_coupled );
+  const Real c02( c0_coupled * c2_coupled );
+  const Real c12( c1_coupled * c2_coupled );
+  const Real c012( c0_coupled * c12 );
+
+  const Real ym = _mu*(3*_lambda+2*_mu)/(_lambda+_mu);
+
+  // Assume Poisson's ratio goes to zero for the cracked direction.
+
+  _val[ 0] = (c0 < 1 ? c0*ym : _val[ 0]);
+  _val[ 1] *= c01;
+  _val[ 2] *= c02;
+  _val[ 3] *= c01;
+  _val[ 4] *= c012;
+  _val[ 5] *= c02;
+
+  _val[ 6] = (c1 < 1 ? c1*ym : _val[ 6]);
+  _val[ 7] *= c12;
+  _val[ 8] *= c01;
+  _val[ 9] *= c12;
+  _val[10] *= c012;
+
+  _val[11] = (c2 < 1 ? c2*ym : _val[11]);
+  _val[12] *= c012;
+  _val[13] *= c12;
+  _val[14] *= c02;
+
+  _val[15] *= c01;
+  _val[16] *= c012;
+  _val[17] *= c012;
+
+  _val[18] *= c12;
+  _val[19] *= c012;
+
+  _val[20] *= c02;
+}
+

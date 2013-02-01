@@ -44,6 +44,7 @@ void
 CLSHPlasticMaterial::initQpStatefulProperties()
 {
   _hardening_variable[_qp] = 0;
+  SolidModel::initQpStatefulProperties();
 }
 
 void

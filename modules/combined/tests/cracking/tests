@@ -1,0 +1,44 @@
+[Tests]
+
+  [./cracking]
+    type = Exodiff
+    input = cracking.i
+    exodiff = cracking_out.e
+    abs_zero = 1e-4
+    scale_refine = 4
+  [../]
+
+  [./cracking_rz]
+    type = Exodiff
+    input = cracking_rz.i
+    exodiff = cracking_rz_out.e
+    abs_zero = 1e-4
+    scale_refine = 4
+  [../]
+
+  [./exponential]
+    type = Exodiff
+    input = cracking_exponential.i
+    exodiff = cracking_exponential_out.e
+    abs_zero = 1e-4
+    scale_refine = 0
+  [../]
+
+  [./rz_exponential]
+    type = Exodiff
+    input = cracking_rz_exponential.i
+    exodiff = cracking_rz_exponential_out.e
+    abs_zero = 1e-4
+    scale_refine = 0
+  [../]
+
+  [./xyz]
+    type = Exodiff
+    input = cracking_xyz.i
+    exodiff = cracking_xyz_out.e
+    abs_zero = 1e-4
+    scale_refine = 0
+  [../]
+
+[]
+

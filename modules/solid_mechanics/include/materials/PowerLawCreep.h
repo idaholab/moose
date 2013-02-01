@@ -22,8 +22,6 @@ public:
 
 protected:
 
-  virtual void initQpStatefulProperties() {}
-
   Real _coefficient;
   Real _exponent;
   Real _activation_energy;

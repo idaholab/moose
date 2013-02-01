@@ -70,6 +70,8 @@ public:
 
   virtual void multiply( const SymmTensor & x, SymmTensor & b ) const;
 
+  virtual void adjustForCracking( const RealVectorValue & crack_flags );
+
 protected:
 
   bool _lambda_set, _mu_set, _E_set, _nu_set, _k_set;
