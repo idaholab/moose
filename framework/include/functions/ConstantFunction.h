@@ -32,7 +32,7 @@ public:
   virtual Real value(Real t, const Point & p);
 
 protected:
-  Real _value;
+  const Real & _value;
 };
 
 #endif
