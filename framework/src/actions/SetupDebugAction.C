@@ -22,6 +22,7 @@ InputParameters validParams<SetupDebugAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<unsigned int>("show_top_residuals", 0, "The number of top residuals to print out (0 = no output)");
+  params.addParam<bool>("show_var_residual_norms", false, "Print the residual norms of the individual solution variables at each nonlinear iteration");
   params.addParam<bool>("show_actions", false, "Print out the actions being executed");
   params.addParam<bool>("show_material_props", false, "Print out the material properties supplied for each block, face, neighbor, and/or sideset");
   return params;
@@ -44,6 +45,7 @@ SetupDebugAction::act()
   if (_problem != NULL)
   {
     _problem->setDebugTopResiduals(_top_residuals);
+    _problem->setDebugPrintVarResidNorms(getParam<bool>("show_var_residual_norms"));
     if (getParam<bool>("show_material_props"))
       _problem->printMaterialMap();
   }

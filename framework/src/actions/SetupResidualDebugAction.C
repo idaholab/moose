@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<SetupResidualDebugAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::vector<NonlinearVariableName> >("show_var_residual", "Variables we will display the residual for");
+  params.addParam<std::vector<NonlinearVariableName> >("show_var_residual", "Variables for which residuals will be sent to the output file");
   return params;
 }
 

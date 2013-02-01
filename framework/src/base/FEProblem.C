@@ -113,7 +113,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 //    _solve_only_perf_log("Solve Only"),
     _output_setup_log_early(false),
     // debugging
-    _dbg_top_residuals(0)
+    _dbg_top_residuals(0),
+    _dbg_print_var_rnorms(false)
 {
 #ifdef LIBMESH_HAVE_PETSC
   // put in empty arrays for PETSc options
@@ -3055,9 +3056,30 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
                                      const Real ref_resid,
                                      const Real div_threshold)
 {
+
   NonlinearSystem & system = getNonlinearSystem();
   MooseNonlinearConvergenceReason reason = MOOSE_ITERATING;
   std::stringstream oss;
+
+  if (_dbg_print_var_rnorms)
+  {
+    TransientNonlinearImplicitSystem &s = system.sys();
+    unsigned int max_name_size=0;
+    for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
+    {
+      unsigned int var_name_size = s.variable_name(var_num).size();
+      if (var_name_size > max_name_size)
+        max_name_size = var_name_size;
+    }
+    std::cout<<"    |residual|_2 of individual variables:"<<std::endl;
+    for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
+    {
+      Real varResid = s.calculate_norm(*s.rhs,var_num,DISCRETE_L2);
+      std::cout<<std::setw(27-max_name_size)<<" "<<std::setw(max_name_size+2) //match position of overall NL residual
+               <<std::left<<s.variable_name(var_num)+":"
+               <<varResid<<std::endl;
+    }
+  }
 
   if (!it)
   {

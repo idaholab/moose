@@ -529,6 +529,8 @@ public:
    */
   void setDebugTopResiduals(unsigned int n) { _dbg_top_residuals = n; }
 
+  void setDebugPrintVarResidNorms(bool should_print) { _dbg_print_var_rnorms = should_print; }
+
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
@@ -670,6 +672,9 @@ protected:
 
   /// Number of top residual to print out
   unsigned int _dbg_top_residuals;
+
+  // Should we print out residuals of individaul variables at NL iterations?
+  bool _dbg_print_var_rnorms;
 
 public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)
