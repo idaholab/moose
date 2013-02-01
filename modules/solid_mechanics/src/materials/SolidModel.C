@@ -821,7 +821,6 @@ SolidModel::crackingStressRotation()
           crackFactor = computeCrackFactor( i, sigma(i), (*_crack_flags)[_qp](i) );
           (*_crack_flags)[_qp](i) = crackFactor;
           _crack_flags_local(i) = crackFactor;
-          std::cerr << "JDH DEBUG: crack opening: " << crackFactor << ", " << sigma(i) << std::endl;
         }
       }
     }
