@@ -114,4 +114,5 @@
 
 [Debug]
 	show_var_residual = 'u v'
+        show_var_residual_norms = true
 []
