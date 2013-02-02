@@ -18,7 +18,6 @@ InputParameters validParams<GrainTracker>()
   params.addParam<int>("tracking_step", 1, "The timestep for when we should start tracking grains");
   params.addParam<Real>("convex_hull_buffer", 1.0, "The buffer around the convex hull used to determine when features intersect");
   params.addParam<bool>("remap_grains", true, "Indicates whether remapping should be done or not (default: true)");
-  params.addParam<UserObjectName>("grain_remapper", "The GrainTracker UserObject to couple to for remap information (optional).");
 
   // We are using "addV" to add the variable parameter on the fly
   params.suppressParameter<std::vector<VariableName> >("variable");
@@ -31,8 +30,7 @@ GrainTracker::GrainTracker(const std::string & name, InputParameters parameters)
     _tracking_step(getParam<int>("tracking_step")),
     _hull_buffer(getParam<Real>("convex_hull_buffer")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
-    _remap(getParam<bool>("remap_grains")),
-    _grain_remapper(parameters.isParamValid("grain_remapper") ? &getUserObject<GrainTracker>("grain_remapper") : NULL)
+    _remap(getParam<bool>("remap_grains"))
 {
   // Size the data structures to hold the correct number of maps
   _bounding_spheres.resize(_maps_size);
@@ -191,12 +189,7 @@ GrainTracker::trackGrains()
     if (grain_it->second->status != INACTIVE)
       grain_it->second->status = NOT_MARKED;
   }
-
-  // Get the remapped grains from the coupled object if it exists
-  const std::set<std::pair<unsigned int, unsigned int> > *remapped_info = NULL;
-  if (_grain_remapper)
-    remapped_info = _grain_remapper->getRemappedGrains();
-
+  
   // Loop over all the current regions and match them up to our grain list
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
@@ -241,9 +234,7 @@ GrainTracker::trackGrains()
         for (grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
         { 
           if (grain_it->second->status == NOT_MARKED &&                   // Only consider grains that are unmarked AND
-              (grain_it->second->variable_idx == curr_var ||              // have matching variable indicies OR
-               (remapped_info &&                                          // have corresponding indicies that were part of a remap
-                remapped_info->find(std::make_pair(grain_it->second->variable_idx, curr_var)) != remapped_info->end())))
+              grain_it->second->variable_idx == curr_var)                 // have matching variable indicies 
           {
             Real curr_centroid_diff = minCentroidDiff(sphere_ptrs, grain_it->second->sphere_ptrs);
             if (curr_centroid_diff <= min_centroid_diff)
@@ -301,9 +292,6 @@ GrainTracker::trackGrains()
 void
 GrainTracker::remapGrains()
 {
-  // Clear the remapped grain structures
-  _remapped_grains.clear();
-
   /**
    * Loop over each grain and see if the bounding spheres of the current grain intersect with the spheres of any other grains
    * represented by the same variable.
@@ -427,10 +415,7 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
       }
     }
   }
-
-  // Update the map of remapped grains (source variable to destination variable index)
-  _remapped_grains.insert(std::make_pair(grain_it1->second->variable_idx, new_variable_idx));
-
+  
   // Update the variable index in the unique grain datastructure
   grain_it1->second->variable_idx = new_variable_idx;
 
