@@ -1,19 +1,11 @@
-# [Postprocessors]
-# [./ave_gr_area]
-# type = NodalFloodCount
-# variable = bnds
-# threshold = 0.7
-# [../]
-# []
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 25
   ny = 25
   nz = 0
-  xmax = 500
-  ymax = 500
+  xmax = 1000
+  ymax = 1000
   zmax = 0
   elem_type = QUAD4
 []
@@ -25,10 +17,6 @@
 
 [Variables]
   [./PolycrystalVariables]
-    x1 = 0.0
-    y1 = 0.0
-    x2 = 500.0
-    y2 = 500.0
     periodic = '1 1 0'
     grain_num = 12
     rand_seed = 8675
@@ -40,9 +28,17 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  [./grain_map]
+  [./unique_grains]
     order = FIRST
     family = LAGRANGE
+  [../]
+  [./var_indices]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./centroids]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
@@ -56,11 +52,26 @@
     type = BndsCalcAux
     variable = bnds
   [../]
-  [./mapper]
+  [./unique_grains]
     type = NodalFloodCountAux
-    variable = grain_map
+    variable = unique_grains
     execute_on = timestep
-    bubble_object = grains
+    bubble_object = grain_tracker
+    field_display = UNIQUE_REGION
+  [../]
+  [./var_indices]
+    type = NodalFloodCountAux
+    variable = var_indices
+    execute_on = timestep
+    bubble_object = grain_tracker
+    field_display = VARIABLE_COLORING
+  [../]
+  [./centroids]
+    type = NodalFloodCountAux
+    variable = centroids
+    execute_on = timestep
+    bubble_object = grain_tracker
+    field_display = CENTROID
   [../]
 []
 
@@ -81,15 +92,20 @@
   [../]
 []
 
-[UserObjects]
-  [./grains]
+[Postprocessors]
+  [./grain_tracker]
     type = GrainTracker
-#    type = NodalFloodCount
-    threshold = 0.9
-    tracking_step = 1
+    threshold = 0.5
+    convex_hull_buffer = 5.0
     execute_on = timestep
+    remap_grains = true
+    use_single_map = false
+    enable_var_coloring = true
+    condense_map_info = true
+  [../]
 
-#    variable = 'gr0 gr1 gr2 gr3 gr4 gr5 gr6 gr7 gr8 gr9 gr10 gr11'
+  [./DOFs]
+    type = PrintDOFs
   [../]
 []
 
