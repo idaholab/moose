@@ -45,7 +45,7 @@ protected:
 
     unsigned int member_node_id;
     libMesh::Sphere *b_sphere;
-    RealVectorValue translation_vector;
+//    RealVectorValue translation_vector;
   };
 
   /**
@@ -55,11 +55,11 @@ protected:
   class UniqueGrain
   {
   public:
-    UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, const Point & p_centroid, const std::set<unsigned int> *nodes_pt);
+    UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, /*const Point & p_centroid,*/ const std::set<unsigned int> *nodes_pt);
     ~UniqueGrain();
 
     unsigned int variable_idx;
-    Point centroid;
+//    Point centroid;
     std::vector<BoundingSphereInfo *> sphere_ptrs;
     STATUS status;
     /**
@@ -89,8 +89,9 @@ protected:
   void updateNodeInfo();
 
   Real boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2) const;
-  Point calculateCentroid(const std::vector<BoundingSphereInfo *> & sphere_ptrs) const;
-
+//  Point calculateCentroid(const std::vector<BoundingSphereInfo *> & sphere_ptrs) const;
+  Real minCentroidDiff(const std::vector<BoundingSphereInfo *> & sphere_ptrs1, const std::vector<BoundingSphereInfo *> & sphere_ptrs2) const;
+  
   const int _tracking_step;
   const Real _hull_buffer;
   std::vector<std::list<BoundingSphereInfo *> > _bounding_spheres;
