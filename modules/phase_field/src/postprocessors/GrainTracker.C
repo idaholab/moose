@@ -145,18 +145,6 @@ GrainTracker::buildBoundingSpheres()
   std::map<BoundaryID, std::set<unsigned int> > pb_nodes;
   // Build a list of periodic nodes
   _mesh.buildPeriodicNodeSets(pb_nodes, _var_number, _pbs);
-
-//  // DEBUG
-//  std::cout << "DEBUG!\n";
-//  for (std::map<BoundaryID, std::set<unsigned int> >::iterator nodeset_it = pb_nodes.begin(); nodeset_it != pb_nodes.end(); ++nodeset_it)
-//  {
-//    std::cout << "Set: " << nodeset_it->first << "\n";
-//    for (std::set<unsigned int>::iterator foo = nodeset_it->second.begin(); foo != nodeset_it->second.end(); ++foo)
-//      std::cout << *foo << " ";
-//    std::cout << "\n";
-//  }
-//  // DEBUG
-
   MeshBase & mesh = _mesh._mesh;
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
@@ -177,95 +165,10 @@ GrainTracker::buildBoundingSpheres()
       // Calulate our bounding sphere
       Point center(min + ((max - min) / 2.0));
       Real radius = (max - center).size();
-      
-//    // DEBUG
-//    std::cout << "Working on set: " << counter++ << "\n";
-//    for (std::set<unsigned int>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
-//      std::cout << *it2 << " ";
-//    std::cout << "\n";
-//    // DEBUG
 
-//      RealVectorValue translation_vector;
-//      if (_pbs)
-//      {
-//        for (std::map<BoundaryID, std::set<unsigned int> >::iterator nodeset_it = pb_nodes.begin(); nodeset_it != pb_nodes.end(); ++nodeset_it)
-//        {
-//          std::set<unsigned int> intersection;
-//          std::set_intersection(it1->_nodes.begin(), it1->_nodes.end(), nodeset_it->second.begin(), nodeset_it->second.end(),
-//                                std::inserter(intersection, intersection.end()));
-//          
-//          if (!intersection.empty())
-//          {
-// 
-////            if (map_num == 8)
-////              std::cout << "Nodeset_id: " << nodeset_it->first << " intersects\n";
-//            
-////          // DEBUG
-////          std::cout << "Intersection: ";
-////          for (std::set<unsigned int>::iterator bar = intersection.begin(); bar != intersection.end(); ++bar)
-////            std::cout << *bar << " ";
-////          std::cout << "\n\n";
-////          // DEBUG
-// 
-//            PeriodicBoundaryBase *pb = _pbs->boundary(nodeset_it->first);
-//            mooseAssert(pb != NULL, "Error Periodic Boundary is NULL in GrainTracker");
-// 
-//            bool prefered_direction = false;
-//            if (_prefered_pb_pair.find(pb->myboundary) != _prefered_pb_pair.end())
-//              prefered_direction = true;
-// 
-//            // See if we need to add this after making sure that it's not in the "non-prefered" orientation
-//            if (_nonprefered_pb_pair.find(pb->myboundary) == _nonprefered_pb_pair.end())
-//            {
-//              _prefered_pb_pair[pb->myboundary] = pb->pairedboundary;
-//              _nonprefered_pb_pair[pb->pairedboundary] = pb->myboundary;
-//              prefered_direction = true;
-//            }
-// 
-//            if (prefered_direction)
-//            {
-//              /**
-//               * Assumptions: This call will only work with serial mesh since we may not have this particular point
-//               *              on this particular processor in parallel.
-//               *              Also, we can only use a single translation vector with constant translation PBCs.
-//               */
-// 
-//              /**
-//               * TODO: This is a workaround for not having access to the translation vector.  We can take an arbitrary point,
-//               * get the corresponding point and subtract the two to recover the translation vector.  We need an accessor in
-//               * libMesh.
-//               */
-// 
-////            // DEBUG
-////            std::cout << "Primary: " << pb->myboundary << "\n";
-////            std::cout << "Secondary: " << pb->pairedboundary << "\n";
-////            // DEBUG
-// 
-//              Point boundary_point = mesh.point(*intersection.begin());
-//              Point corresponding_point = pb->get_corresponding_pos(boundary_point);
-// 
-//              translation_vector += boundary_point - corresponding_point;
-//            }
-////            else if (map_num == 8)
-////              std::cout << "##################### Not gonna translatate #################################\n";
-//          }
-//        }
-//      }
-
-      _bounding_spheres[map_num].push_back(new BoundingSphereInfo(some_node_id, /*translation_vector,*/ center, radius));
+      _bounding_spheres[map_num].push_back(new BoundingSphereInfo(some_node_id, center, radius));
     }
   }
-
-//  // DEBUG
-//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//  {
-//    std::cout << "************* Bounding Spheres for variable index: " << map_num << " ****************\n";
-//    for (std::list<BoundingSphereInfo *>::iterator sphere_it = _bounding_spheres[map_num].begin(); sphere_it != _bounding_spheres[map_num].end(); ++sphere_it)
-//      std::cout << (*sphere_it)->b_sphere->center()
-//                << "\nRadius: " << (*sphere_it)->b_sphere->radius()
-//                << "\nTransVector: " << (*sphere_it)->translation_vector << "\n\n";
-//  }
-//  // DEBUG
 }
 
 void
@@ -276,10 +179,7 @@ GrainTracker::trackGrains()
     return;
 
   unsigned int counter=1;
-
-  // TODO: Used to keep track of which bounding sphere indexes have been used by which unique_grains
-  // std::vector<bool> used_idx(_bounding_spheres.size(), false);
-
+  
   // Reset Status on active unique grains
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
   {
@@ -317,18 +217,14 @@ GrainTracker::trackGrains()
         else
           ++it2;
       }
-
-      // Calculate the centroid from the list of bounding spheres taking into account periodic boundary conditions
-//      std::cout << "************* Variable Idx: " << map_num << "\n";
-//      Point curr_centroid = calculateCentroid(sphere_ptrs);
-
+      
       /**
        * If it's the first time through this routine for the simulation, we will generate the unique grain
        * numbers using a simple counter.  These will be the unique grain numbers that we must track for
        * the remainder of the simulation.
        */
       if (_t_step == _tracking_step) // Start tracking when the time_step == the tracking_step
-        _unique_grains[counter] = new UniqueGrain(curr_var, sphere_ptrs, /*curr_centroid,*/ &it1->_nodes);
+        _unique_grains[counter] = new UniqueGrain(curr_var, sphere_ptrs, &it1->_nodes);
       else // See if we can match up new grains with the existing grains
       {
         std::map<unsigned int, UniqueGrain *>::iterator grain_it, closest_match;
@@ -358,7 +254,7 @@ GrainTracker::trackGrains()
                     << " (num spheres: " << sphere_ptrs.size() << ")"
                     << "\nCreating new unique grain: " << _unique_grains.size() + 1 << "\n";
 
-          _unique_grains[_unique_grains.size() + 1] = new UniqueGrain(curr_var, sphere_ptrs, /*curr_centroid,*/ &it1->_nodes);
+          _unique_grains[_unique_grains.size() + 1] = new UniqueGrain(curr_var, sphere_ptrs, &it1->_nodes);
         }
         else
         {
@@ -370,7 +266,7 @@ GrainTracker::trackGrains()
           // Now we want to update the grain information
           delete closest_match->second;
           // add the new grain (Note: The status of a new grain is MARKED)
-          closest_match->second = new UniqueGrain(curr_var, sphere_ptrs, /*curr_centroid,*/ &it1->_nodes);
+          closest_match->second = new UniqueGrain(curr_var, sphere_ptrs, &it1->_nodes);
         }
       }
       ++counter;
@@ -389,21 +285,6 @@ GrainTracker::trackGrains()
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
     if (!_bounding_spheres[map_num].empty())
       mooseError("BoundingSpheres where not completely used by the GrainTracker");
-
-//  //DEBUG
-//   std::cout << "TimeStep: " << _t_step << "\n";
-//   std::cout << "Unique Grain Size: " << _unique_grains.size() << "\n";
-//   for (std::map<unsigned int, UniqueGrain *>::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
-//   {
-//     std::cout << "Unique Number: " << it->first
-//               << "\nStatus: " << it->second->status
-//               << "\nVariable idx: " << it->second->variable_idx
-//               << "\nBounding Spheres:\n";
-//       for (unsigned int i=0; i<it->second->sphere_ptrs.size(); ++i)
-//         std::cout << it->second->sphere_ptrs[i]->b_sphere->center() << it->second->sphere_ptrs[i]->b_sphere->radius() << "\n";
-//       std::cout << "Nodes Ptr: " << it->second->nodes_ptr << std::endl << std::endl;
-//   }
-//  //DEBUG
 }
 
 void
@@ -555,15 +436,6 @@ GrainTracker::updateNodeInfo()
 
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
   {
-    // DEBUG
-//    std::cout << "Unique Number: " << grain_it->first
-//              << "\nVariable idx: " << grain_it->second->variable_idx
-//              << "\nBounding Spheres:\n";
-//    for (unsigned int i=0; i<grain_it->second->sphere_ptrs.size(); ++i)
-//      std::cout << grain_it->second->sphere_ptrs[i]->b_sphere->min() << grain_it->second->sphere_ptrs[i]->b_sphere->max() << "\n";
-//    std::cout << "Nodes Ptr: " << grain_it->second->nodes_ptr << std::endl;
-    //DEBUG
-
     unsigned int curr_var = grain_it->second->variable_idx;
     unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : curr_var;
     
@@ -610,47 +482,6 @@ GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres
   return min_distance;
 }
 
-/*
-Point
-GrainTracker::calculateCentroid(const std::vector<BoundingSphereInfo *> & sphere_ptrs) const
-{
-  Point centroid;
-  for (std::vector<BoundingSphereInfo *>::const_iterator it = sphere_ptrs.begin(); it != sphere_ptrs.end(); ++it)
-  {
-//    // DEBUG
-//    std::cout << "Bounding Sphere: (" << (*it)->b_sphere->center() << ", " << (*it)->b_sphere->radius() << ")\n";
-//    // DEBUG
-    Point curr_adj_centroid = (*it)->b_sphere->center() - (*it)->translation_vector;
-
-    // DEBUG
-    std::cout << "Translation Vector: " << (*it)->translation_vector << "\n";
-    std::cout << "Adj Centroid: " << curr_adj_centroid << "\n";
-    // DEBUG
-
-    centroid += curr_adj_centroid;
-  }
-  std::cout << "Centroid before divide: " << centroid << "\n";
-  std::cout << "Sphere Ptrs Size: " << sphere_ptrs.size() << "\n";
-  centroid /= (Real)sphere_ptrs.size();
-  std::cout << "Centroid after divide: " << centroid << "\n\n";
-  
-  // Make sure that the final centroid is in the domain
-  for (unsigned int i=0; i<LIBMESH_DIM; ++i)
-  {
-    if (centroid(i) < _mesh.getMinInDimension(i))
-      centroid(i) += _mesh.dimensionWidth(i);
-    else if (centroid(i) > _mesh.getMaxInDimension(i))
-      centroid(i) -= _mesh.dimensionWidth(i);
-  }
-
-  // DEBUG
-  std::cout << "Final Combined Centroid: " << centroid << "\n\n";
-  // DEBUG
-
-  return centroid;
-}
-*/
-
 Real
 GrainTracker::minCentroidDiff(const std::vector<BoundingSphereInfo *> & sphere_ptrs1, const std::vector<BoundingSphereInfo *> & sphere_ptrs2) const
 {
@@ -667,16 +498,14 @@ GrainTracker::minCentroidDiff(const std::vector<BoundingSphereInfo *> & sphere_p
 }
 
 // BoundingSphereInfo
-GrainTracker::BoundingSphereInfo::BoundingSphereInfo(unsigned int node_id, /*const RealVectorValue & trans_vector,*/ const Point & center, Real radius) :
+GrainTracker::BoundingSphereInfo::BoundingSphereInfo(unsigned int node_id, const Point & center, Real radius) :
     member_node_id(node_id),
-    b_sphere(new libMesh::Sphere(center, radius))//,
-//    translation_vector(trans_vector)
+    b_sphere(new libMesh::Sphere(center, radius))
 {}
 
 // Unique Grain
-GrainTracker::UniqueGrain::UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, /*const Point & p_centroid,*/ const std::set<unsigned int> *nodes_pt) :
+GrainTracker::UniqueGrain::UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, const std::set<unsigned int> *nodes_pt) :
     variable_idx(var_idx),
-//    centroid(p_centroid),
     sphere_ptrs(b_sphere_ptrs),
     status(MARKED),
     nodes_ptr(nodes_pt)
