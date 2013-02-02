@@ -38,6 +38,7 @@ InputParameters validParams<NodalFloodCount>()
   params.addParam<Real>("threshold", 0.5, "The threshold value of the bubble boundary");
   params.addParam<std::string>("elem_avg_value", "If supplied, will be used to find the scaled threshold of the bubble edges");
   params.addParam<bool>("use_single_map", true, "Determine whether information is tracked per coupled variable or consolidated into one (default: true)");
+  params.addParam<bool>("condense_map_info", false, "Determines whether we condense all the node values when in multimap mode (default: false)");
   params.addParam<bool>("use_global_numbering", false, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: false)");
   params.addParam<bool>("enable_var_coloring", false, "Instruct the UO to populate the variable index map.");
   return params;
@@ -50,6 +51,7 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _mesh(_subproblem.mesh()),
     _var_number(_vars[0]->number()),
     _single_map_mode(getParam<bool>("use_single_map")),
+    _condense_map_info(getParam<bool>("condense_map_info")),
     _global_numbering(getParam<bool>("use_global_numbering")),
     _var_index_mode(getParam<bool>("enable_var_coloring")),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
@@ -142,7 +144,7 @@ NodalFloodCount::getValue()
 }
 
 Real
-NodalFloodCount::getNodeValue(unsigned int node_id, unsigned int var_idx, bool show_var_coloring) const
+NodalFloodCount::getNodalValue(unsigned int node_id, unsigned int var_idx, bool show_var_coloring) const
 {
   mooseAssert(var_idx < _maps_size, "Index out of range");
   mooseAssert(!show_var_coloring || _var_index_mode, "Cannot use \"show_var_coloring\" without \"enable_var_coloring\"");
@@ -165,6 +167,13 @@ NodalFloodCount::getNodeValue(unsigned int node_id, unsigned int var_idx, bool s
     else
       return 0;
   }
+}
+
+Real
+NodalFloodCount::getElementalValue(unsigned int element_id) const
+{
+  mooseDoOnce(mooseWarning("Method not implemented"));
+  return 0;
 }
 
 void

@@ -45,7 +45,8 @@ protected:
   const NodalFloodCount & _flood_counter;
 
   const unsigned int _var_idx;
-  const bool _var_coloring;
+  const MooseEnum _field_display;
+  bool _var_coloring;
 };
 
 #endif // NODALFLOODCOUNTAUX_H

@@ -51,8 +51,9 @@ public:
   virtual void finalize();
   virtual Real getValue();
 
-  // Get the bubble map
-  Real getNodeValue(unsigned int node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
+  // Retrieve field information
+  virtual Real getNodalValue(unsigned int node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
+  virtual Real getElementalValue(unsigned int element_id) const;
 
 protected:
   class BubbleData
@@ -143,6 +144,8 @@ protected:
 
   /// This variable is used to indicate whether or not multiple maps are used during flooding
   const bool _single_map_mode;
+
+  const bool _condense_map_info;
 
   /// This variable is used to indicate whether or not we identify bubbles with unique numbers on multiple maps
   const bool _global_numbering;
