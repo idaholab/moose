@@ -128,6 +128,9 @@ NodalFloodCount::finalize()
 
   mergeSets();
 
+  // Populate _bubble_maps and _var_index_maps
+  updateFieldInfo();
+  
   // Update the region offsets so we can get unique bubble numbers in multimap mode
   updateRegionOffsets();
 }
@@ -142,6 +145,7 @@ NodalFloodCount::getValue()
 
   return count;
 }
+
 
 Real
 NodalFloodCount::getNodalValue(unsigned int node_id, unsigned int var_idx, bool show_var_coloring) const
@@ -335,8 +339,7 @@ NodalFloodCount::mergeSets()
   Moose::perf_log.push("mergeSets()","NodalFloodCount");
   std::set<unsigned int> set_union;
   std::insert_iterator<std::set<unsigned int> > set_union_inserter(set_union, set_union.begin());
-
-  Moose::perf_log.push("mergeSets()::set_unions","NodalFloodCount");
+  
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
     std::list<BubbleData>::iterator end = _bubble_sets[map_num].end();
@@ -368,12 +371,15 @@ NodalFloodCount::mergeSets()
       }
     }
   }
-  Moose::perf_log.pop("mergeSets()::set_unions","NodalFloodCount");
+  Moose::perf_log.pop("mergeSets()","NodalFloodCount");
+}
 
-  // This variable is only relevant in single map mode
+void
+NodalFloodCount::updateFieldInfo()
+{
+   // This variable is only relevant in single map mode
   _region_to_var_idx.resize(_bubble_sets[0].size());
-
-
+  
   // Finally update the original bubble map with field data from the merged sets
   Moose::perf_log.push("mergeSets()::updatemap","NodalFloodCount");
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
@@ -396,9 +402,6 @@ NodalFloodCount::mergeSets()
 
     _region_counts[map_num] = counter-1;
   }
-  Moose::perf_log.pop("mergeSets()::updatemap","NodalFloodCount");
-
-  Moose::perf_log.pop("mergeSets()","NodalFloodCount");
 }
 
 void

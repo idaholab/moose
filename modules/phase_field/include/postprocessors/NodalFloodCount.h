@@ -69,6 +69,13 @@ protected:
   };
 
   /**
+   * This method is used to populate any of the data structures used for storing field data (nodal or elemental).
+   * It is called at the end of finalize and can make use of any of the data structures created during
+   * the execution of this postprocessor.
+   */
+  virtual void updateFieldInfo();
+
+  /**
    * This method will "mark" all nodes on neighboring elements that
    * are above the supplied threshold
    */
@@ -84,7 +91,7 @@ protected:
 
   /**
    * This routine merges the data in _bubble_sets from separate threads/processes to resolve
-   * any bubbles that were counted as unique by multiple processors
+   * any bubbles that were counted as unique by multiple processors.
    */
   void mergeSets();
 
@@ -126,6 +133,10 @@ protected:
     return false;
   }
 
+  /*************************************************
+   *************** Data Structures *****************
+   ************************************************/
+  
   /// The vector of coupled in variables
   std::vector<MooseVariable *> _vars;
 
