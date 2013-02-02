@@ -94,9 +94,7 @@ protected:
   const Real _hull_buffer;
   std::vector<std::list<BoundingSphereInfo *> > _bounding_spheres;
   std::map<unsigned int, UniqueGrain *> _unique_grains;
-
-  std::set<std::pair<unsigned int, unsigned int> > _remapped_grains;
-
+  
   /**
    * Since PBCs always map both directions we will have to pick one and ignore the other
    * for the purpose of calculating a centroid.  We'll stick the first one we encounter
@@ -110,14 +108,6 @@ protected:
 
   /// Inidicates whether remapping should be done or not
   const bool _remap;
-
-  const GrainTracker * _grain_remapper;
-
-public:
-  const std::set<std::pair<unsigned int, unsigned int> > * getRemappedGrains() const
-  {
-    return &_remapped_grains;
-  }
 };
 
 #endif
