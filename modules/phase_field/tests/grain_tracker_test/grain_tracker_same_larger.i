@@ -1,11 +1,3 @@
-# [Postprocessors]
-# [./ave_gr_area]
-# type = NodalFloodCount
-# variable = bnds
-# threshold = 0.7
-# [../]
-# []
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -25,10 +17,6 @@
 
 [Variables]
   [./PolycrystalVariables]
-    x1 = 0.0
-    y1 = 0.0
-    x2 = 500.0
-    y2 = 500.0
     periodic = '1 1 0'
     grain_num = 12
     rand_seed = 8675
@@ -65,21 +53,21 @@
     variable = bnds
   [../]
   [./unique_grains]
-    type = GrainTrackerAux
+    type = NodalFloodCountAux
     variable = unique_grains
     execute_on = timestep
     bubble_object = grain_tracker
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
-    type = GrainTrackerAux
+    type = NodalFloodCountAux
     variable = var_indices
     execute_on = timestep
     bubble_object = grain_tracker
     field_display = VARIABLE_COLORING
   [../]
   [./centroids]
-    type = GrainTrackerAux
+    type = NodalFloodCountAux
     variable = centroids
     execute_on = timestep
     bubble_object = grain_tracker
@@ -105,10 +93,6 @@
 []
 
 [Postprocessors]
-  [./comp_time]
-    type = PrintElapsedTime
-  [../]
-
   [./grain_tracker]
     type = GrainTracker
     threshold = 0.5
@@ -136,7 +120,7 @@
   nl_max_its = 20
   nl_rel_tol = 1.0e-9
   start_time = 0.0
-  num_steps = 200
+  num_steps = 2
   dt = 15.0
 []
 

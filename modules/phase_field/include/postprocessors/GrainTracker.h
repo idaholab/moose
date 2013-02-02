@@ -27,6 +27,8 @@ public:
   virtual Real getElementalValue(unsigned int element_id) const;
 
 protected:
+  virtual void updateFieldInfo();
+  
   enum STATUS
   {
     NOT_MARKED,
@@ -84,7 +86,6 @@ protected:
   void trackGrains();
   void remapGrains();
   void swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator & grain_it1, std::map<unsigned int, UniqueGrain *>::iterator & grain_it2);
-  void updateNodeInfo();
 
   Real boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2) const;
   Real minCentroidDiff(const std::vector<BoundingSphereInfo *> & sphere_ptrs1, const std::vector<BoundingSphereInfo *> & sphere_ptrs2) const;
