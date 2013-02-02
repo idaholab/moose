@@ -12,8 +12,8 @@
   nx = 50
   ny = 50
   nz = 0
-  xmax = 500
-  ymax = 500
+  xmax = 1000
+  ymax = 1000
   zmax = 0
   elem_type = QUAD4
 []
@@ -40,9 +40,17 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  [./grain_map]
+  [./unique_grains]
     order = FIRST
     family = LAGRANGE
+  [../]
+  [./var_indices]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./centroids]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
@@ -56,11 +64,26 @@
     type = BndsCalcAux
     variable = bnds
   [../]
-  [./mapper]
-    type = NodalFloodCountAux
-    variable = grain_map
+  [./unique_grains]
+    type = GrainTrackerAux
+    variable = unique_grains
     execute_on = timestep
-    bubble_object = grains
+    bubble_object = grain_tracker
+    field_display = UNIQUE_REGION
+  [../]
+  [./var_indices]
+    type = GrainTrackerAux
+    variable = var_indices
+    execute_on = timestep
+    bubble_object = grain_tracker
+    field_display = VARIABLE_COLORING
+  [../]
+  [./centroids]
+    type = GrainTrackerAux
+    variable = centroids
+    execute_on = timestep
+    bubble_object = grain_tracker
+    field_display = CENTROID
   [../]
 []
 
@@ -81,11 +104,24 @@
   [../]
 []
 
-[UserObjects]
-  [./grains]
+[Postprocessors]
+  [./comp_time]
+    type = PrintElapsedTime
+  [../]
+
+  [./grain_tracker]
     type = GrainTracker
-    threshold = 0.9
+    threshold = 0.5
+    convex_hull_buffer = 5.0
     execute_on = timestep
+    remap_grains = true
+    use_single_map = false
+    enable_var_coloring = true
+    condense_map_info = true
+  [../]
+
+  [./DOFs]
+    type = PrintDOFs
   [../]
 []
 
