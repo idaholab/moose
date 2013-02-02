@@ -35,16 +35,16 @@ protected:
   };
 
   /**
-   * This class holds the nodesets and bounding boxes for each
+   * This class holds the nodesets and bounding spheres for each
    * flooded region.
    */
-  class BoundingBoxInfo
+  class BoundingSphereInfo
   {
   public:
-    BoundingBoxInfo(unsigned int node_id, const RealVectorValue & trans_vector, const Point & min, const Point & max);
+    BoundingSphereInfo(unsigned int node_id, const RealVectorValue & trans_vector, const Point & center, Real radius);
 
     unsigned int member_node_id;
-    MeshTools::BoundingBox *b_box;
+    libMesh::Sphere *b_sphere;
     RealVectorValue translation_vector;
   };
 
@@ -55,12 +55,12 @@ protected:
   class UniqueGrain
   {
   public:
-    UniqueGrain(unsigned int var_idx, const std::vector<BoundingBoxInfo *> & b_box_ptrs, const Point & p_centroid, const std::set<unsigned int> *nodes_pt);
+    UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, const Point & p_centroid, const std::set<unsigned int> *nodes_pt);
     ~UniqueGrain();
 
     unsigned int variable_idx;
     Point centroid;
-    std::vector<BoundingBoxInfo *> box_ptrs;
+    std::vector<BoundingSphereInfo *> sphere_ptrs;
     STATUS status;
     /**
      * Pointer to the actual nodes ids.  Note: This pointer is not always valid.  It is invalid
@@ -71,16 +71,16 @@ protected:
   };
 
   /**
-   * This routine uses the bubble sets to build bounding boxes around each cluster of nodes.  In this class it will be called before periodic
-   * information has been added so that each bubble piece will have a unique box.  It populates the _bounding_boxes vector.
+   * This routine uses the bubble sets to build bounding spheres around each cluster of nodes.  In this class it will be called before periodic
+   * information has been added so that each bubble piece will have a unique sphere.  It populates the _bounding_spheres vector.
    */
-  void buildBoundingBoxes();
+  void buildBoundingSpheres();
 
   /**
-   * This rountine first finds all of the bounding boxes from the _bounding_boxes vector that belong to the same bubble by using the overlapping
-   * periodic information (if periodic boundary conditions are active).  These boxes are used to caluclate a centroid for the current grain.
+   * This rountine first finds all of the bounding spheres from the _bounding_spheres vector that belong to the same bubble by using the overlapping
+   * periodic information (if periodic boundary conditions are active).  These spheres are used to caluclate a centroid for the current grain.
    *
-   * If this is the first step that we beginning to track grains, each of these sets of boxes and the centroid are used to designate a unique grain
+   * If this is the first step that we beginning to track grains, each of these sets of spheres and the centroid are used to designate a unique grain
    * which is stored in the _unique_grains datastructure.
    */
   void trackGrains();
@@ -88,12 +88,12 @@ protected:
   void swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator & grain_it1, std::map<unsigned int, UniqueGrain *>::iterator & grain_it2);
   void updateNodeInfo();
 
-  Real boundingRegionDistance(std::vector<BoundingBoxInfo *> & boxes1, std::vector<BoundingBoxInfo *> & boxes2) const;
-  Point calculateCentroid(const std::vector<BoundingBoxInfo *> & box_ptrs) const;
+  Real boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2) const;
+  Point calculateCentroid(const std::vector<BoundingSphereInfo *> & sphere_ptrs) const;
 
   const int _tracking_step;
   const Real _hull_buffer;
-  std::vector<std::list<BoundingBoxInfo *> > _bounding_boxes;
+  std::vector<std::list<BoundingSphereInfo *> > _bounding_spheres;
   std::map<unsigned int, UniqueGrain *> _unique_grains;
 
   std::set<std::pair<unsigned int, unsigned int> > _remapped_grains;
