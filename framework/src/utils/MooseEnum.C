@@ -64,6 +64,12 @@ MooseEnum::operator==(const char * name) const
   return _current_name == upper;
 }
 
+bool
+MooseEnum::operator!=(const char * name) const
+{
+  return !(*this == name);
+}
+
 void
 MooseEnum::fillNames(std::string names)
 {

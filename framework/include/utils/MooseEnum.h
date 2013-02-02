@@ -73,11 +73,12 @@ public:
   operator std::string() const { return _current_name_preserved; }
 
   /**
-   * Comparison operator for comparing with strings or character constants
+   * Comparison operators for comparing with strings or character constants
    * @param name - character constant for comparing with this enumeration object
    * @return bool - the truth value for the comparison
    */
   bool operator==(const char * name) const;
+  bool operator!=(const char * name) const;
 
   /**
    * Assignment operators
