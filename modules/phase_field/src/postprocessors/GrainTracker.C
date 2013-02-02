@@ -43,12 +43,29 @@ GrainTracker::~GrainTracker()
 }
 
 Real
-GrainTracker::getNodeValue(unsigned int node_id, unsigned int var_idx, bool show_var_coloring) const
+GrainTracker::getNodalValue(unsigned int node_id, unsigned int var_idx, bool show_var_coloring) const
 {
   if (_t_step < _tracking_step)
     return 0;
 
-  return NodalFloodCount::getNodeValue(node_id, var_idx, show_var_coloring);
+  return NodalFloodCount::getNodalValue(node_id, var_idx, show_var_coloring);
+}
+
+Real
+GrainTracker::getElementalValue(unsigned int element_id) const
+{
+  // If this element contains the centroid of on of the grains, return the unique index
+  const Elem * curr_elem = _mesh.elem(element_id);
+  
+  for (std::map<unsigned int, UniqueGrain *>::const_iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
+  {
+    if (grain_it->second->status == INACTIVE)
+      continue;
+    if (curr_elem->contains_point(grain_it->second->centroid, 1e-7))
+      return grain_it->first;
+  }
+  
+  return 0;
 }
 
 void
@@ -303,12 +320,12 @@ GrainTracker::trackGrains()
         Real min_centroid_diff = std::numeric_limits<Real>::max();
 
         for (grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
-        {
+        { 
           if (grain_it->second->status == NOT_MARKED &&                   // Only consider grains that are unmarked AND
               (grain_it->second->variable_idx == curr_var ||              // have matching variable indicies OR
                (remapped_info &&                                          // have corresponding indicies that were part of a remap
                 remapped_info->find(std::make_pair(grain_it->second->variable_idx, curr_var)) != remapped_info->end())))
-          {
+          {            
             Real curr_centroid_diff = _mesh.minPeriodicDistance(grain_it->second->centroid, curr_centroid);
             if (curr_centroid_diff <= min_centroid_diff)
             {
@@ -331,7 +348,9 @@ GrainTracker::trackGrains()
         {
           if (closest_match->second->variable_idx != curr_var)
             std::cout << "Matching grain has new variable index, old: " << closest_match->second->variable_idx << " new: " << curr_var << std::endl;
-
+          if (min_centroid_diff > 10*_hull_buffer)
+            std::cout << "Warning: Centroid for grain: " << closest_match->first << " has moved by " << min_centroid_diff << " units.\n";
+              
           // Now we want to update the grain information
           delete closest_match->second;
           // add the new grain (Note: The status of a new grain is MARKED)
@@ -346,7 +365,9 @@ GrainTracker::trackGrains()
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
     if (grain_it->second->status == NOT_MARKED)
     {
-      std::cout << "Marking Grain: " << grain_it->first << " as INACTIVE\n";
+      std::cout << "Marking Grain " << grain_it->first << " as INACTIVE (varible index: " << grain_it->second->variable_idx
+                << ")\nCentroid: " << grain_it->second->centroid << "\n";
+                
       grain_it->second->status = INACTIVE;
     }
 
@@ -355,20 +376,21 @@ GrainTracker::trackGrains()
     if (!_bounding_boxes[map_num].empty())
       mooseError("BoundingBoxes where not completely used by the GrainTracker");
 
-//  //DEBUG
-//   std::cout << "TimeStep: " << _t_step << "\n";
-//   std::cout << "Unique Grain Size: " << _unique_grains.size() << "\n";
-//   for (std::map<unsigned int, UniqueGrain *>::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
-//   {
-//     std::cout << "Unique Number: " << it->first
-//               << "\nStatus: " << it->second->status
-//               << "\nVariable idx: " << it->second->variable_idx
-//               << "\nBounding Boxes:\n";
-//       for (unsigned int i=0; i<it->second->box_ptrs.size(); ++i)
-//         std::cout << it->second->box_ptrs[i]->b_box->min() << it->second->box_ptrs[i]->b_box->max() << "\n";
-//       std::cout << "Nodes Ptr: " << it->second->nodes_ptr << std::endl;
-//   }
-//  //DEBUG
+  //DEBUG
+   std::cout << "TimeStep: " << _t_step << "\n";
+   std::cout << "Unique Grain Size: " << _unique_grains.size() << "\n";
+   for (std::map<unsigned int, UniqueGrain *>::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
+   {
+     std::cout << "Unique Number: " << it->first
+               << "\nStatus: " << it->second->status
+               << "\nVariable idx: " << it->second->variable_idx
+               << "\nCentroid: " << it->second->centroid
+               << "\nBounding Boxes:\n";
+       for (unsigned int i=0; i<it->second->box_ptrs.size(); ++i)
+         std::cout << it->second->box_ptrs[i]->b_box->min() << it->second->box_ptrs[i]->b_box->max() << "\n";
+       std::cout << "Nodes Ptr: " << it->second->nodes_ptr << std::endl;
+   }
+  //DEBUG
 }
 
 void
@@ -419,6 +441,7 @@ GrainTracker::remapGrains()
       mooseError("Five passes through the remapping loop and grains are still being remapped, perhaps you need more op variables?");
 
   } while (variables_remapped);
+  std::cout << "Done Remapping\n";
 }
 
 void
@@ -526,6 +549,8 @@ GrainTracker::updateNodeInfo()
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
     _bubble_maps[map_num].clear();
 
+  std::map<unsigned int, Real> tmp_map;
+
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
   {
     // DEBUG
@@ -538,12 +563,20 @@ GrainTracker::updateNodeInfo()
     //DEBUG
 
     unsigned int curr_var = grain_it->second->variable_idx;
+    unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : curr_var;
+    
     if (grain_it->second->status != INACTIVE)
       for (std::set<unsigned int>::const_iterator node_it = grain_it->second->nodes_ptr->begin();
            node_it != grain_it->second->nodes_ptr->end(); ++node_it)
       {
         const Node & curr_node = _mesh.node(*node_it);
-        _bubble_maps[_single_map_mode ? 0 : curr_var][curr_node.id()] = grain_it->first;
+
+        if (_vars[grain_it->second->variable_idx]->getNodalValue(curr_node) > tmp_map[curr_node.id()])
+        {
+          _bubble_maps[map_idx][curr_node.id()] = grain_it->first;
+          if (_var_index_mode)
+            _var_index_maps[map_idx][curr_node.id()] = grain_it->second->variable_idx;
+        }
       }
   }
 }
