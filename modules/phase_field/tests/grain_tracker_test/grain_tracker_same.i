@@ -89,7 +89,7 @@
     tracking_step = 1
     execute_on = timestep
 
-    variable = 'gr0 gr1 gr2 gr3 gr4 gr5 gr6 gr7 gr8 gr9 gr10 gr11'
+#    variable = 'gr0 gr1 gr2 gr3 gr4 gr5 gr6 gr7 gr8 gr9 gr10 gr11'
   [../]
 []
 
