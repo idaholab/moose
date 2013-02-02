@@ -381,7 +381,6 @@ NodalFloodCount::updateFieldInfo()
   _region_to_var_idx.resize(_bubble_sets[0].size());
   
   // Finally update the original bubble map with field data from the merged sets
-  Moose::perf_log.push("mergeSets()::updatemap","NodalFloodCount");
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
     unsigned int counter = 1;
