@@ -22,13 +22,85 @@ public:
   virtual void threadJoin(const UserObject & y);
   virtual void finalize();
 
-  // Retrieve field information
+  /**
+   * Accessor for retrieving nodal field information (unique grains or variable indicies)
+   * @param node_id the node identifier for which to retrieve field data
+   * @param var_idx when using multi-map mode, the map number from which to retrieve data.
+   * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
+   * @return the nodal value
+   */
   virtual Real getNodalValue(unsigned int node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
+
+  /**
+   * Accessor for retrieving elemental field data (grain centroids).
+   * @param element_id the element identifier for which to retrieve field data
+   * @return the elemental value
+   */
   virtual Real getElementalValue(unsigned int element_id) const;
 
 protected:
+  /// This struct holds the nodesets and bounding spheres for each flooded region.
+  struct BoundingSphereInfo;
+
+  /// This struct hold the information necessary to identify and track a unique grain;
+  struct UniqueGrain;
+
+  /// This routine is called at the of finalize to update the field data
   virtual void updateFieldInfo();
-  
+
+  /**
+   * This method uses the bubble sets to build bounding spheres around each cluster of nodes.  In this class it will be called before periodic
+   * information has been added so that each bubble piece will have a unique sphere.  It populates the _bounding_spheres vector.
+   */
+  void buildBoundingSpheres();
+
+  /**
+   * This method first finds all of the bounding spheres from the _bounding_spheres vector that belong to the same bubble by using the
+   * overlapping periodic information (if periodic boundary conditions are active). If this is the first step that we beginning to track
+   * grains, each of these sets of spheres and the centroid are used to designate a unique grain which is stored in the _unique_grains
+   * datastructure.
+   */
+  void trackGrains();
+
+  /**
+   * This method is called after trackGrains to remap grains that are too close to each other.
+   */
+  void remapGrains();
+
+  /**
+   * This method swaps the values at all the nodes in grain_it1, with the values in grain_it2.
+   */
+  void swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator & grain_it1, std::map<unsigned int, UniqueGrain *>::iterator & grain_it2);
+
+  /**
+   * This method returns the periodic distance between two spheres.  If ignore_radii is true, then the distance will be between the two
+   * sphere centers.  If ignore_radii is false, then the distance will be between the edges of the two spheres.
+   */
+  Real boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2, bool ignore_radii) const;
+
+  /*************************************************
+   *************** Data Structures *****************
+   ************************************************/
+
+  /// The timestep to begin tracking grains
+  const int _tracking_step;
+
+  /// The value added to each bounding sphere radius to detect earlier intersection
+  const Real _hull_buffer;
+
+  /// Inidicates whether remapping should be done or not (remapping is independent of tracking)
+  const bool _remap;
+
+  /// A reference to the nonlinear system (used for retrieving solution vectors)
+  NonlinearSystem & _nl;
+
+  /// This data structure holds the raw lists of bounding spheres for each variable index.  It is used during the tracking routine
+  std::vector<std::list<BoundingSphereInfo *> > _bounding_spheres;
+
+  /// This data structure holds the map of unique grains.  The information is updated each timestep to track grains over time.
+  std::map<unsigned int, UniqueGrain *> _unique_grains;
+
+  /// This enumeration is used to indicate status of the grains in the _unique_grains data structure
   enum STATUS
   {
     NOT_MARKED,
@@ -36,26 +108,18 @@ protected:
     INACTIVE
   };
 
-  /**
-   * This class holds the nodesets and bounding spheres for each
-   * flooded region.
-   */
-  class BoundingSphereInfo
+  /// This struct holds the nodesets and bounding spheres for each flooded region.
+  struct BoundingSphereInfo
   {
-  public:
     BoundingSphereInfo(unsigned int node_id, const Point & center, Real radius);
 
     unsigned int member_node_id;
     libMesh::Sphere *b_sphere;
   };
 
-  /**
-   * This class holds all the information we need to identify
-   * a unique grain
-   */
-  class UniqueGrain
+  /// This struct hold the information necessary to identify and track a unique grain;
+  struct UniqueGrain
   {
-  public:
     UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, const std::set<unsigned int> *nodes_pt);
     ~UniqueGrain();
 
@@ -69,45 +133,6 @@ protected:
      */
     const std::set<unsigned int> *nodes_ptr;
   };
-
-  /**
-   * This routine uses the bubble sets to build bounding spheres around each cluster of nodes.  In this class it will be called before periodic
-   * information has been added so that each bubble piece will have a unique sphere.  It populates the _bounding_spheres vector.
-   */
-  void buildBoundingSpheres();
-
-  /**
-   * This rountine first finds all of the bounding spheres from the _bounding_spheres vector that belong to the same bubble by using the overlapping
-   * periodic information (if periodic boundary conditions are active).
-   *
-   * If this is the first step that we beginning to track grains, each of these sets of spheres and the centroid are used to designate a unique grain
-   * which is stored in the _unique_grains datastructure.
-   */
-  void trackGrains();
-  void remapGrains();
-  void swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator & grain_it1, std::map<unsigned int, UniqueGrain *>::iterator & grain_it2);
-
-  Real boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2) const;
-  Real minCentroidDiff(const std::vector<BoundingSphereInfo *> & sphere_ptrs1, const std::vector<BoundingSphereInfo *> & sphere_ptrs2) const;
-  
-  const int _tracking_step;
-  const Real _hull_buffer;
-  std::vector<std::list<BoundingSphereInfo *> > _bounding_spheres;
-  std::map<unsigned int, UniqueGrain *> _unique_grains;
-  
-  /**
-   * Since PBCs always map both directions we will have to pick one and ignore the other
-   * for the purpose of calculating a centroid.  We'll stick the first one we encounter
-   * into this map so we know which direction we prefer.
-   */
-  std::map<unsigned int, unsigned int> _prefered_pb_pair;
-  std::map<unsigned int, unsigned int> _nonprefered_pb_pair;
-
-  /// A reference to the nonlinear system
-  NonlinearSystem & _nl;
-
-  /// Inidicates whether remapping should be done or not
-  const bool _remap;
 };
 
 #endif

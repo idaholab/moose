@@ -29,8 +29,8 @@ GrainTracker::GrainTracker(const std::string & name, InputParameters parameters)
     NodalFloodCount(name, AddV(parameters, "variable")),
     _tracking_step(getParam<int>("tracking_step")),
     _hull_buffer(getParam<Real>("convex_hull_buffer")),
-    _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
-    _remap(getParam<bool>("remap_grains"))
+    _remap(getParam<bool>("remap_grains")),
+    _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem())
 {
   // Size the data structures to hold the correct number of maps
   _bounding_spheres.resize(_maps_size);
@@ -56,19 +56,19 @@ GrainTracker::getElementalValue(unsigned int element_id) const
 {
   // If this element contains the centroid of on of the grains, return the unique index
   const Elem * curr_elem = _mesh.elem(element_id);
-  
+
   for (std::map<unsigned int, UniqueGrain *>::const_iterator grain_it = _unique_grains.begin();
        grain_it != _unique_grains.end(); ++grain_it)
   {
     if (grain_it->second->status == INACTIVE)
       continue;
-    
+
     for (std::vector<BoundingSphereInfo *>::const_iterator it = grain_it->second->sphere_ptrs.begin();
-         it != grain_it->second->sphere_ptrs.end(); ++it)    
+         it != grain_it->second->sphere_ptrs.end(); ++it)
       if (curr_elem->contains_point((*it)->b_sphere->center()))
         return grain_it->first;
   }
-  
+
   return 0;
 }
 
@@ -166,7 +166,9 @@ GrainTracker::buildBoundingSpheres()
 
       // Calulate our bounding sphere
       Point center(min + ((max - min) / 2.0));
-      Real radius = (max - center).size();
+      // The radius is the different between the outer edge of the "bounding box"
+      // and the center plus the "hull buffer" value
+      Real radius = (max - center).size() + _hull_buffer;
 
       _bounding_spheres[map_num].push_back(new BoundingSphereInfo(some_node_id, center, radius));
     }
@@ -181,7 +183,7 @@ GrainTracker::trackGrains()
     return;
 
   unsigned int counter=1;
-  
+
   // Reset Status on active unique grains
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin();
        grain_it != _unique_grains.end(); ++grain_it)
@@ -189,7 +191,7 @@ GrainTracker::trackGrains()
     if (grain_it->second->status != INACTIVE)
       grain_it->second->status = NOT_MARKED;
   }
-  
+
   // Loop over all the current regions and match them up to our grain list
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
@@ -217,7 +219,7 @@ GrainTracker::trackGrains()
         else
           ++it2;
       }
-      
+
       /**
        * If it's the first time through this routine for the simulation, we will generate the unique grain
        * numbers using a simple counter.  These will be the unique grain numbers that we must track for
@@ -225,18 +227,22 @@ GrainTracker::trackGrains()
        */
       if (_t_step == _tracking_step) // Start tracking when the time_step == the tracking_step
         _unique_grains[counter] = new UniqueGrain(curr_var, sphere_ptrs, &it1->_nodes);
-      else // See if we can match up new grains with the existing grains
+      else
       {
+        /**
+         * To track grains across timesteps, we will look for the grain in our unique list that is closest
+         * by distance AND has the same variable index.
+         */
         std::map<unsigned int, UniqueGrain *>::iterator grain_it, closest_match;
         bool found_one = false;
         Real min_centroid_diff = std::numeric_limits<Real>::max();
 
         for (grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
-        { 
+        {
           if (grain_it->second->status == NOT_MARKED &&                   // Only consider grains that are unmarked AND
-              grain_it->second->variable_idx == curr_var)                 // have matching variable indicies 
+              grain_it->second->variable_idx == curr_var)                 // have matching variable indicies
           {
-            Real curr_centroid_diff = minCentroidDiff(sphere_ptrs, grain_it->second->sphere_ptrs);
+            Real curr_centroid_diff = boundingRegionDistance(sphere_ptrs, grain_it->second->sphere_ptrs, true);
             if (curr_centroid_diff <= min_centroid_diff)
             {
               found_one = true;
@@ -262,7 +268,7 @@ GrainTracker::trackGrains()
           if (min_centroid_diff > 10*_hull_buffer)
             std::cout << "Warning: Centroid for grain: " << closest_match->first << " has moved by "
                       << min_centroid_diff << " units.\n";
-              
+
           // Now we want to update the grain information
           delete closest_match->second;
           // add the new grain (Note: The status of a new grain is MARKED)
@@ -317,7 +323,7 @@ GrainTracker::remapGrains()
           continue;
 
         if (grain_it1->second->variable_idx == grain_it2->second->variable_idx &&                  // Are the grains represented by the same variable?
-            boundingRegionDistance(grain_it1->second->sphere_ptrs, grain_it2->second->sphere_ptrs) < 0)  // If so, do their spheres intersect?
+            boundingRegionDistance(grain_it1->second->sphere_ptrs, grain_it2->second->sphere_ptrs, false) < 0)  // If so, do their spheres intersect?
         {
           // If so, remap one of them
           swapSolutionValues(grain_it1, grain_it2);
@@ -358,8 +364,7 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
   {
     unsigned int potential_var_idx = grain_it3->second->variable_idx;
 
-    Real curr_bounding_sphere_diff = boundingRegionDistance(grain_it1->second->sphere_ptrs,
-                                                            grain_it3->second->sphere_ptrs);
+    Real curr_bounding_sphere_diff = boundingRegionDistance(grain_it1->second->sphere_ptrs, grain_it3->second->sphere_ptrs, false);
     if (curr_bounding_sphere_diff < min_distances[potential_var_idx])
       min_distances[potential_var_idx] = curr_bounding_sphere_diff;
   }
@@ -415,7 +420,7 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
       }
     }
   }
-  
+
   // Update the variable index in the unique grain datastructure
   grain_it1->second->variable_idx = new_variable_idx;
 
@@ -439,7 +444,7 @@ GrainTracker::updateFieldInfo()
   {
     unsigned int curr_var = grain_it->second->variable_idx;
     unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : curr_var;
-    
+
     if (grain_it->second->status != INACTIVE)
       for (std::set<unsigned int>::const_iterator node_it = grain_it->second->nodes_ptr->begin();
            node_it != grain_it->second->nodes_ptr->end(); ++node_it)
@@ -457,23 +462,26 @@ GrainTracker::updateFieldInfo()
 }
 
 Real
-GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2) const
+GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2, bool ignore_radii) const
 {
+  /**
+   * The region that each grain covers is represented by a bounding sphere large enough to encompassing all the points
+   * within that grain.  When using periodic boundaries, we may have several discrete "pieces" of a grain each represented
+   * by a bounding sphere.  The distance between any two grains is defined as the minimum distance between any pair of spheres,
+   * one selected from each grain.
+   */
   Real min_distance = std::numeric_limits<Real>::max();
-
   for (std::vector<BoundingSphereInfo *>::iterator sphere_it1 = spheres1.begin(); sphere_it1 != spheres1.end(); ++sphere_it1)
   {
     libMesh::Sphere *sphere1 = (*sphere_it1)->b_sphere;
-    
+
     for (std::vector<BoundingSphereInfo *>::iterator sphere_it2 = spheres2.begin(); sphere_it2 != spheres2.end(); ++sphere_it2)
     {
       libMesh::Sphere *sphere2 = (*sphere_it2)->b_sphere;
-      
-      // We need to see if these two grains are close to each other.  To do that, we need to look
-      // at the minimum periodic distance between the two centroids, as well as the distance between
-      // the outer edge of each grain's bounding sphere.
+
+      // We need to see if these two spheres intersect on the domain.  To do that we need to account for periodicity of the mesh
       Real curr_distance = _mesh.minPeriodicDistance(sphere1->center(), sphere2->center())  // distance between the centroids
-        - (sphere1->radius() + sphere2->radius() + 2*_hull_buffer);                         // minus the sum of the two radii and buffer zones
+        - (ignore_radii ? 0 : (sphere1->radius() + sphere2->radius()));                     // minus the sum of the two radii
 
       if (curr_distance < min_distance)
         min_distance = curr_distance;
@@ -481,21 +489,6 @@ GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres
   }
 
   return min_distance;
-}
-
-Real
-GrainTracker::minCentroidDiff(const std::vector<BoundingSphereInfo *> & sphere_ptrs1, const std::vector<BoundingSphereInfo *> & sphere_ptrs2) const
-{
-  Real diff = std::numeric_limits<Real>::max();
-  for (std::vector<BoundingSphereInfo *>::const_iterator it1 = sphere_ptrs1.begin(); it1 != sphere_ptrs1.end(); ++it1)
-    for (std::vector<BoundingSphereInfo *>::const_iterator it2 = sphere_ptrs2.begin(); it2 != sphere_ptrs2.end(); ++it2)
-    {
-      Real curr_diff = ((*it1)->b_sphere->center() - (*it2)->b_sphere->center()).size();
-      if (curr_diff < diff)
-        diff = curr_diff;
-    }
-
-  return diff;
 }
 
 // BoundingSphereInfo
