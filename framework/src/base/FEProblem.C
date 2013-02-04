@@ -2622,7 +2622,11 @@ FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector
     const NumericVector<Number>* _saved_current_solution = _nl.currentSolution();
 
     _nl.set_solution(soln);
-    _aux.compute();
+    // For now, do not re-compute auxiliary variables.  Doing so allows a wild solution increment
+    //   to get to the material models, which may not be able to cope with drastically different
+    //   values.  Once more complete dependency checking is in place, auxiliary variables (and
+    //   material properties) will be computed as needed by dampers.
+//    _aux.compute();
     damping = _nl.computeDamping(update);
 
     // restore saved solution
