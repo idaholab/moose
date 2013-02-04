@@ -157,8 +157,16 @@ Component::checkEOSConsistency()
 void
 Component::connectObject(const std::string & rname, const std::string & mooseName)
 {
-  _rname_map[rname].push_back(mooseName);
+  _rname_map[rname]._moose_objects.push_back(mooseName);
 }
+
+void
+Component::connectObject(const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name)
+{
+  _rname_map[rname]._par_map[name] = par_name;
+  _rname_map[rname]._moose_objects.push_back(mooseName);
+}
+
 
 void
 Component::createVectorControllableParMapping(const std::string & rname, const std::string & mooseName, unsigned int pos)

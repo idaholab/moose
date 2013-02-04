@@ -99,9 +99,10 @@ public:
    * @param rname The RAVEN name
    * @return the MOOSE object names
    */
-  const std::vector<std::string> & getMooseObjectsByName(const std::string rname) { return _rname_map[rname]; }
+  const std::vector<std::string> & getMooseObjectsByName(const std::string rname) { return _rname_map[rname]._moose_objects; }
 
   void connectObject(const std::string & rname, const std::string & mooseName);
+  void connectObject(const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name);
 
   /**
    * This function creates a mapping between a RAVEN friendly name and a vector variable within a MOOSE object
@@ -139,10 +140,16 @@ protected:
   /// List of subdomain IDs this components owns
   std::vector<unsigned int> _subdomains;
 
+  struct RavenNameEntry
+  {
+    /// Mapping of parameter names
+    std::map<std::string, std::string> _par_map;
+    /// List of MOOSE object names
+    std::vector<std::string> _moose_objects;
+  };
   /// Mapping from a friendly name to MOOSE object name
-  std::map<std::string, std::vector<std::string> > _rname_map;
-
-  /// Mapping from a friendly name to a vector variable within a MOOSE object
+  std::map<std::string, RavenNameEntry> _rname_map;
+  /// Mapping of friendly names
   std::map<std::string, RavenMapContainer> _rvect_map;
 
   virtual unsigned int getNextSubdomainId();
@@ -174,7 +181,8 @@ Component::getRParam(const std::string & param_name)
 {
   std::vector<std::string> s = split(param_name);
 
-  const std::vector<std::string> & names = getMooseObjectsByName(s[0]);
+  RavenNameEntry & rne = _rname_map[s[0]];
+  const std::vector<std::string> & names = rne._moose_objects;
   for (std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
   {
     std::string nm = *it;
@@ -182,8 +190,9 @@ Component::getRParam(const std::string & param_name)
     for (std::vector<MooseObject *>::const_iterator it = objs.begin() ; it != objs.end(); ++it)
     {
       MooseObject * obj = *it;
-      if (obj->parameters().have_parameter<T>(s[1]))
-        return obj->parameters().get<T>(s[1]);
+      std::string par_name = rne._par_map.size() > 0 ? rne._par_map[s[1]] : s[1];
+      if (obj->parameters().have_parameter<T>(par_name))
+        return obj->parameters().get<T>(par_name);
     }
   }
 
@@ -207,7 +216,8 @@ Component::setRParam(const std::string & param_name, const T & value)
   std::vector<std::string> s = split(param_name);
   bool found = false;
 
-  const std::vector<std::string> & names = getMooseObjectsByName(s[0]);
+  RavenNameEntry & rne = _rname_map[s[0]];
+  const std::vector<std::string> & names = rne._moose_objects;
   for (std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
   {
     std::string nm = *it;
@@ -218,9 +228,10 @@ Component::setRParam(const std::string & param_name, const T & value)
       for (std::vector<MooseObject *>::const_iterator it = objs.begin(); it != objs.end(); ++it)
       {
         MooseObject * obj = *it;
-        if (obj->parameters().have_parameter<T>(s[1]))
+        std::string par_name = rne._par_map.size() > 0 ? rne._par_map[s[1]] : s[1];
+        if (obj->parameters().have_parameter<T>(par_name))
         {
-          obj->parameters().set<T>(s[1]) = value;
+          obj->parameters().set<T>(par_name) = value;
           found = true;
         }
       }
