@@ -102,11 +102,12 @@ public:
   const std::vector<std::string> & getMooseObjectsByName(const std::string rname) { return _rname_map[rname]; }
 
   void connectObject(const std::string & rname, const std::string & mooseName);
-  /*
+
+  /**
    * This function creates a mapping between a RAVEN friendly name and a vector variable within a MOOSE object
-   * @ rname, raven friendly name
-   * @ mooseName, vector parameter name within an object
-   * @ pos, position in the vector
+   * @param rname  - RAVEN friendly name
+   * @param mooseName - vector parameter name within an object
+   * @param pos - position in the vector
    */
   void createVectorControllableParMapping(const std::string & rname, const std::string & mooseName, unsigned int pos);
 
