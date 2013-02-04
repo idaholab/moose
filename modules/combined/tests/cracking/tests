@@ -36,6 +36,7 @@
     type = Exodiff
     input = cracking_xyz.i
     exodiff = cracking_xyz_out.e
+    custom_cmp = cracking_xyz.exodiff
     abs_zero = 1e-4
     scale_refine = 0
   [../]
