@@ -111,8 +111,6 @@ public:
    */
   void createVectorControllableParMapping(const std::string & rname, const std::string & mooseName, unsigned int pos);
 
-  //LZou test
-  //virtual void update();
   virtual void onResidual() {}
   virtual void onTimestepBegin() {}
   virtual void onTimestepEnd() {}
@@ -125,7 +123,7 @@ public:
 protected:
   /// Unique ID of this component
   unsigned int _id;
-  /// Pointer to a parent component (used in composed compoennts)
+  /// Pointer to a parent component (used in composed components)
   Component * _parent;
 
   /// Simulation this component is part of
@@ -191,7 +189,6 @@ Component::getRParam(const std::string & param_name)
 
   // Specialization for RAVEN. At this point the variable has not been found.
   // Try to search into the vector parameter mapping.
-  //
   if (_rvect_map.find(param_name) == _rvect_map.end())
     mooseError("Parameter '" + param_name + "' was not found in component '" + name() + "'.");
   else
