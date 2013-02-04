@@ -161,6 +161,7 @@ Component::connectObject(const std::string & rname, const std::string & mooseNam
 }
 
 void
-Component::createVectorControllableParMapping(const std::string & rname, const std::string & mooseName, unsigned int pos){
-  _rvect_map[rname] = RavenMapContainer(mooseName,pos);
+Component::createVectorControllableParMapping(const std::string & rname, const std::string & mooseName, unsigned int pos)
+{
+  _rvect_map[rname] = RavenMapContainer(mooseName, pos);
 }

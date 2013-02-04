@@ -180,25 +180,24 @@ Component::getRParam(const std::string & param_name)
   {
     std::string nm = *it;
     const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(nm, 0);
-    for(std::vector<MooseObject *>::const_iterator it=objs.begin() ; it != objs.end(); it++)
+    for (std::vector<MooseObject *>::const_iterator it = objs.begin() ; it != objs.end(); ++it)
     {
       MooseObject * obj = *it;
       if (obj->parameters().have_parameter<T>(s[1]))
         return obj->parameters().get<T>(s[1]);
     }
   }
-  /*
-   * Specialization for RAVEN. At this point the variable has not been found.
-   * Try to search into the vector parameter mapping.
-   */
-  if(_rvect_map.find(param_name) == _rvect_map.end()){
+
+  // Specialization for RAVEN. At this point the variable has not been found.
+  // Try to search into the vector parameter mapping.
+  //
+  if (_rvect_map.find(param_name) == _rvect_map.end())
     mooseError("Parameter '" + param_name + "' was not found in component '" + name() + "'.");
-  }
-  else{
-    RavenMapContainer name_cont = _rvect_map.find(param_name) -> second;
-    if(parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName())){
-      return parameters().get< std::vector<T> >(name_cont.getControllableParName())[name_cont.getControllableParPosition()];
-    }
+  else
+  {
+    RavenMapContainer name_cont = _rvect_map.find(param_name)->second;
+    if (parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName()))
+      return parameters().get<std::vector<T> >(name_cont.getControllableParName())[name_cont.getControllableParPosition()];
   }
   mooseError("Parameter '" + param_name + "' was not found in component '" + name() + "'.");
 }
@@ -218,7 +217,7 @@ Component::setRParam(const std::string & param_name, const T & value)
     {
       const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(nm, tid);
 
-      for(std::vector<MooseObject *>::const_iterator it=objs.begin() ; it != objs.end(); it++)
+      for (std::vector<MooseObject *>::const_iterator it = objs.begin(); it != objs.end(); ++it)
       {
         MooseObject * obj = *it;
         if (obj->parameters().have_parameter<T>(s[1]))
@@ -228,17 +227,18 @@ Component::setRParam(const std::string & param_name, const T & value)
     }
   }
 
-  /*
-   * Specialization for RAVEN. At this point the variable has not been found.
-   * Try to search into the vector parameter mapping
-   */
-  if(not found){
-    if(_rvect_map.find(param_name) != _rvect_map.end()){
-      RavenMapContainer name_cont = _rvect_map.find(param_name) -> second;
-      if(parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName())){
+  // Specialization for RAVEN. At this point the variable has not been found.
+  // Try to search into the vector parameter mapping
+  if (!found)
+  {
+    if (_rvect_map.find(param_name) != _rvect_map.end())
+    {
+      RavenMapContainer name_cont = _rvect_map.find(param_name)->second;
+      if (parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName()))
+      {
         std::vector<T> tempp = parameters().get< std::vector<T> >(name_cont.getControllableParName());
         tempp[name_cont.getControllableParPosition()] = value;
-        parameters().set< std::vector<T> >(name_cont.getControllableParName())=tempp;
+        parameters().set<std::vector<T> >(name_cont.getControllableParName()) = tempp;
       }
     }
   }
