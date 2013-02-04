@@ -3,11 +3,7 @@ from ExodusIIMeshInfo import ExodusIIMeshInfo
 
 ''' Factory Function '''
 def getMeshInfo(mesh_item_data):
-  if 'file' in mesh_item_data:
-    file_name = mesh_item_data['file']
-    if '.e' in file_name:
-      return ExodusIIMeshInfo(mesh_item_data, file_name)
-  elif 'type' in mesh_item_data and mesh_item_data['type'] == 'GeneratedMesh':
-    return GeneratedMeshInfo(mesh_item_data)
-  else:
-    return None
+  if ( ('type' in mesh_item_data and mesh_item_data['type'] == 'MooseMesh') or 'type' not in mesh_item_data) and 'file' in mesh_item_data and '.e' in mesh_item_data['file']:
+    return ExodusIIMeshInfo(mesh_item_data, mesh_item_data['file'])
+  else: # Everything else is handled by the MeshOnlyRenderer
+    return ExodusIIMeshInfo(mesh_item_data, 'peacock_run_tmp_mesh.e') 

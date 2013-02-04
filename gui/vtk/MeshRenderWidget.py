@@ -225,7 +225,7 @@ class MeshRenderWidget(QtGui.QWidget):
       block_names.append(name)
       
     self.highlight_block_combo.addItem('')
-    for block_actor_name in sorted(block_names):
+    for block_actor_name in sorted(block_names, key=lambda name: int(name.split(' ')[0])):
       self.highlight_block_combo.addItem(str(block_actor_name))
 
     sideset_names = []
@@ -239,7 +239,7 @@ class MeshRenderWidget(QtGui.QWidget):
       sideset_names.append(name)
       
     self.highlight_sideset_combo.addItem('')
-    for sideset_actor_name in sorted(sideset_names):
+    for sideset_actor_name in sorted(sideset_names, key=lambda name: int(name.split(' ')[0])):
       self.highlight_sideset_combo.addItem(sideset_actor_name)
 
     nodeset_names = []
@@ -253,7 +253,7 @@ class MeshRenderWidget(QtGui.QWidget):
       nodeset_names.append(name)
       
     self.highlight_nodeset_combo.addItem('')
-    for nodeset_actor_name in sorted(nodeset_names):
+    for nodeset_actor_name in sorted(nodeset_names, key=lambda name: int(name.split(' ')[0])):
       self.highlight_nodeset_combo.addItem(nodeset_actor_name)
 
 
