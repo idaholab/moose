@@ -93,7 +93,7 @@ public:
   virtual bool hasActiveElementalMooseVariables(THREAD_ID tid);
 
   /**
-   * Clear the active elmental MooseVariable.  If there are no active variables then they will all be reinited.
+   * Clear the active elemental MooseVariable.  If there are no active variables then they will all be reinited.
    * Call this after finishing the computation that was using a restricted set of MooseVariables
    *
    * @param tid The thread id
