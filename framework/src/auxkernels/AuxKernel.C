@@ -142,7 +142,7 @@ AuxKernel::compute()
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
       value += _JxW[_qp]*_coord[_qp]*computeValue();
     value /= (_bnd ? _current_side_volume : _current_elem_volume);
-    _var.setNodalValue(value);                  // update variable data, which is referenced by other kernels, so the value is up-to-date
+    _var.setNodalValue(value); // update the variable data refernced by other kernels.  Note that this will update the values at the quadrature points too (because this is an Elemental variable)
   }
 }
 

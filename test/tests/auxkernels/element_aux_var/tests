@@ -9,6 +9,5 @@
     type = 'Exodiff'
     input = 'elemental_sort_test.i'
     exodiff = 'elemental_sort_test_out.e'
-    deleted = 'Waiting for Elem DOF update - #1200'
   [../]
 []

@@ -1021,6 +1021,12 @@ MooseVariable::setNodalValue(Number value)
 {
   _nodal_u[0] = value;                  // update variable nodal value
   _has_nodal_value = true;
+
+  if(!isNodal()) // If this is an elemental variable, then update the qp values as well
+  {
+    for(unsigned int qp=0; qp<_u.size(); qp++)
+      _u[qp] = value;
+  }
 }
 
 void
@@ -1028,6 +1034,12 @@ MooseVariable::setNodalValueNeighbor(Number value)
 {
   _nodal_u_neighbor[0] = value;                  // update variable nodal value
   _has_nodal_value_neighbor = true;
+
+  if(!isNodal()) // If this is an elemental variable, then update the qp values as well
+  {
+    for(unsigned int qp=0; qp<_u_neighbor.size(); qp++)
+      _u_neighbor[qp] = value;
+  }
 }
 
 void
