@@ -57,8 +57,8 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   _slave(_mesh.getBoundaryID(getParam<BoundaryName>("slave"))),
   _master(_mesh.getBoundaryID(getParam<BoundaryName>("master"))),
 
-  _master_q_point(_subproblem.pointsFace(_tid)),
-  _master_qrule(_subproblem.qRuleFace(_tid)),
+  _master_q_point(_assembly.qPointsFace()),
+  _master_qrule(_assembly.qRuleFace()),
 
   _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("master"), getParam<BoundaryName>("slave"),
                                              Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),

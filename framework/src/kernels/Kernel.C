@@ -62,11 +62,11 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _dim(_mesh.dimension()),
 
     _current_elem(_var.currentElem()),
-    _current_elem_volume(_subproblem.elemVolume(_tid)),
-    _q_point(_subproblem.points(_tid)),
-    _qrule(_subproblem.qRule(_tid)),
-    _JxW(_subproblem.JxW(_tid)),
-    _coord(_subproblem.coords(_tid)),
+    _current_elem_volume(_assembly.elemVolume()),
+    _q_point(_assembly.qPoints()),
+    _qrule(_assembly.qRule()),
+    _JxW(_assembly.JxW()),
+    _coord(_assembly.coordTransformation()),
 
     _phi(_assembly.phi()),
     _grad_phi(_assembly.gradPhi()),

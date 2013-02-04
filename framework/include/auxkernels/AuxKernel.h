@@ -107,6 +107,8 @@ protected:
   AuxiliarySystem & _aux_sys;
   /// Thread ID
   THREAD_ID _tid;
+  /// Assembly class
+  Assembly & _assembly;
   /// Variable this kernel is acting on
   MooseVariable & _var;
   /// true if the kernel is nodal, false if it is elemental

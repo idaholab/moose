@@ -58,11 +58,11 @@ InternalSideIndicator::InternalSideIndicator(const std::string & name, InputPara
     _current_side(_assembly.side()),
     _current_side_elem(_assembly.sideElem()),
 
-    _coord_sys(_subproblem.coordSystem(_tid)),
-    _q_point(_subproblem.pointsFace(_tid)),
-    _qrule(_subproblem.qRuleFace(_tid)),
-    _JxW(_subproblem.JxWFace(_tid)),
-    _coord(_subproblem.coords(_tid)),
+    _coord_sys(_assembly.coordSystem()),
+    _q_point(_assembly.qPointsFace()),
+    _qrule(_assembly.qRuleFace()),
+    _JxW(_assembly.JxWFace()),
+    _coord(_assembly.coordTransformation()),
 
     _boundary_id(parameters.get<BoundaryID>("_boundary_id")),
 

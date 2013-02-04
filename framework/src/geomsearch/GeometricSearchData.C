@@ -163,7 +163,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
 
   _quadrature_boundaries.insert(slave_id);
 
-  const MooseArray<Point> & points_face = _subproblem.pointsFace(0);
+  const MooseArray<Point> & points_face = _subproblem.assembly(0).qPointsFace();
 
   ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
   for (ConstBndElemRange::const_iterator elem_it = range.begin() ; elem_it != range.end(); ++elem_it)
@@ -193,7 +193,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
 void
 GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
 {
-  const MooseArray<Point> & points_face = _subproblem.pointsFace(0);
+  const MooseArray<Point> & points_face = _subproblem.assembly(0).qPointsFace();
 
   ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
   for (ConstBndElemRange::const_iterator elem_it = range.begin() ; elem_it != range.end(); ++elem_it)

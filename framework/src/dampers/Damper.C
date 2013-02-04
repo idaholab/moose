@@ -33,13 +33,14 @@ Damper::Damper(const std::string & name, InputParameters parameters) :
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _coord_sys(_subproblem.coordSystem(_tid)),
+    _assembly(_subproblem.assembly(_tid)),
+    _coord_sys(_assembly.coordSystem()),
     _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
 
     _current_elem(_var.currentElem()),
-    _q_point(_subproblem.points(_tid)),
-    _qrule(_subproblem.qRule(_tid)),
-    _JxW(_subproblem.JxW(_tid)),
+    _q_point(_assembly.qPoints()),
+    _qrule(_assembly.qRule()),
+    _JxW(_assembly.JxW()),
 
     _u_increment(_var.increment()),
 

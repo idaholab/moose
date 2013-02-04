@@ -57,6 +57,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _nl_sys(*parameters.get<SystemBase *>("_nl_sys")),
     _aux_sys(*parameters.get<AuxiliarySystem *>("_aux_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
+    _assembly(_subproblem.assembly(_tid)),
 
     _var(_aux_sys.getVariable(_tid, parameters.get<AuxVariableName>("variable"))),
     _nodal(_var.feType().family == LAGRANGE),
@@ -65,10 +66,10 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
 
-    _q_point(_bnd ? _subproblem.pointsFace(_tid) : _subproblem.points(_tid)),
-    _qrule(_bnd ? _subproblem.qRuleFace(_tid) : _subproblem.qRule(_tid)),
-    _JxW(_bnd ? _subproblem.JxWFace(_tid) : _subproblem.JxW(_tid)),
-    _coord(_subproblem.coords(_tid)),
+    _q_point(_bnd ? _assembly.qPointsFace() : _assembly.qPoints()),
+    _qrule(_bnd ? _assembly.qRuleFace() : _assembly.qRule()),
+    _JxW(_bnd ? _assembly.JxWFace() : _assembly.JxW()),
+    _coord(_assembly.coordTransformation()),
 
     _u(_nodal ? _var.nodalSln() : _var.sln()),
     _u_old(_nodal ? _var.nodalSlnOld() : _var.slnOld()),
@@ -76,8 +77,8 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
 
     _current_elem(_var.currentElem()),
     _current_side(_var.currentSide()),
-    _current_elem_volume(_subproblem.elemVolume(_tid)),
-    _current_side_volume(_subproblem.sideElemVolume(_tid)),
+    _current_elem_volume(_assembly.elemVolume()),
+    _current_side_volume(_assembly.sideElemVolume()),
 
     _current_node(_var.node()),
 

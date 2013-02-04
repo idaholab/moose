@@ -66,6 +66,7 @@ protected:
 
   /// Thread ID
   THREAD_ID _tid;
+  Assembly & _assembly;
 
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;

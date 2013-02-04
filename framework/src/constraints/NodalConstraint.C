@@ -45,9 +45,9 @@ NodalConstraint::NodalConstraint(const std::string & name, InputParameters param
 
   _master_node_id(getParam<unsigned int>("master")),
 
-  _master_node(_subproblem.node(_tid)),
+  _master_node(_assembly.node()),
   _u_master(_var.nodalSln()),
-  _slave_node(_subproblem.nodeNeighbor(_tid)),
+  _slave_node(_assembly.nodeNeighbor()),
   _u_slave(_var.nodalSlnNeighbor())
 {
 }

@@ -119,6 +119,7 @@ protected:
 
   FEProblem & _fe_problem;
   THREAD_ID _tid;
+  Assembly & _assembly;
   bool _bnd;
   MaterialData & _material_data;
 

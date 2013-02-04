@@ -112,6 +112,7 @@ protected:
 
   /// Thread ID of this postprocessor
   THREAD_ID _tid;
+  Assembly & _assembly;
 
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;
