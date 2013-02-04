@@ -509,8 +509,8 @@ addActionTypes(Syntax & syntax)
 "(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
 "(setup_output)"
 "(setup_oversampling)"
-"(check_integrity)"
 "(setup_debug)"
+"(check_integrity)"
 );
 
 }
