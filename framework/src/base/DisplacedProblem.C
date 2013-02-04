@@ -612,48 +612,6 @@ DisplacedProblem::converged()
   return _mproblem.converged();
 }
 
-const Moose::CoordinateSystemType &
-DisplacedProblem::coordSystem(THREAD_ID tid)
-{
-  return _assembly[tid]->coordSystem();
-}
-
-const MooseArray<Point> &
-DisplacedProblem::physicalPoints(THREAD_ID tid)
-{
-  return _assembly[tid]->physicalPoints();
-}
-
-const Elem * &
-DisplacedProblem::elem(THREAD_ID tid)
-{
-  return _assembly[tid]->elem();
-}
-
-unsigned int &
-DisplacedProblem::side(THREAD_ID tid)
-{
-  return _assembly[tid]->side();
-}
-
-const Elem * &
-DisplacedProblem::sideElem(THREAD_ID tid)
-{
-  return _assembly[tid]->sideElem();
-}
-
-const Node * &
-DisplacedProblem::node(THREAD_ID tid)
-{
-  return _assembly[tid]->node();
-}
-
-const Node * &
-DisplacedProblem::nodeNeighbor(THREAD_ID tid)
-{
-  return _assembly[tid]->nodeNeighbor();
-}
-
 bool
 DisplacedProblem::computingInitialResidual()
 {

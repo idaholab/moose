@@ -133,23 +133,6 @@ public:
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid);
 
   virtual Assembly & assembly(THREAD_ID tid) { return *_assembly[tid]; }
-  virtual const Moose::CoordinateSystemType & coordSystem(THREAD_ID tid);
-  virtual QBase * & qRule(THREAD_ID tid) { return _assembly[tid]->qRule(); }
-  virtual const MooseArray<Point> & points(THREAD_ID tid) { return _assembly[tid]->qPoints(); }
-  virtual const MooseArray<Point> & physicalPoints(THREAD_ID tid);
-  virtual const MooseArray<Real> & JxW(THREAD_ID tid) { return _assembly[tid]->JxW(); }
-  virtual const Real & elemVolume(THREAD_ID tid) { return _assembly[tid]->elemVolume(); }
-  virtual const Real & neighborVolume(THREAD_ID tid) { return _assembly[tid]->neighborVolume(); }
-  virtual const MooseArray<Real> & coords(THREAD_ID tid) { return _assembly[tid]->coordTransformation(); } // have to use coord transformation from undisplaced problem
-  virtual QBase * & qRuleFace(THREAD_ID tid) { return _assembly[tid]->qRuleFace(); }
-  virtual const MooseArray<Point> & pointsFace(THREAD_ID tid) { return _assembly[tid]->qPointsFace(); }
-  virtual const MooseArray<Real> & JxWFace(THREAD_ID tid) { return _assembly[tid]->JxWFace(); }
-  virtual const Real & sideElemVolume(THREAD_ID tid) { return _assembly[tid]->sideElemVolume(); }
-  virtual const Elem * & elem(THREAD_ID tid);
-  virtual unsigned int & side(THREAD_ID tid);
-  virtual const Elem * & sideElem(THREAD_ID tid);
-  virtual const Node * & node(THREAD_ID tid);
-  virtual const Node * & nodeNeighbor(THREAD_ID tid);
 
   // Geom Search /////
   virtual void updateGeomSearch();

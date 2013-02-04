@@ -162,24 +162,6 @@ public:
   virtual void createQRules(QuadratureType type, Order order);
   virtual Order getQuadratureOrder() { return _quadrature_order; }
   virtual Assembly & assembly(THREAD_ID tid) { return *_assembly[tid]; }
-  virtual const Moose::CoordinateSystemType & coordSystem(THREAD_ID tid) { return _assembly[tid]->coordSystem(); }
-  virtual QBase * & qRule(THREAD_ID tid) { return _assembly[tid]->qRule(); }
-  virtual const MooseArray<Point> & points(THREAD_ID tid) { return _assembly[tid]->qPoints(); }
-  virtual const MooseArray<Point> & physicalPoints(THREAD_ID tid) { return _assembly[tid]->physicalPoints(); }
-  virtual const MooseArray<Real> & JxW(THREAD_ID tid) { return _assembly[tid]->JxW(); }
-  virtual const Real & elemVolume(THREAD_ID tid) { return _assembly[tid]->elemVolume(); }
-  virtual const Real & neighborVolume(THREAD_ID tid) { return _assembly[tid]->neighborVolume(); }
-  virtual const MooseArray<Real> & coords(THREAD_ID tid) { return _assembly[tid]->coordTransformation(); }
-  virtual QBase * & qRuleFace(THREAD_ID tid) { return _assembly[tid]->qRuleFace(); }
-  virtual const MooseArray<Point> & pointsFace(THREAD_ID tid) { return _assembly[tid]->qPointsFace(); }
-  virtual const MooseArray<Real> & JxWFace(THREAD_ID tid) { return _assembly[tid]->JxWFace(); }
-  virtual const Real & sideElemVolume(THREAD_ID tid) { return _assembly[tid]->sideElemVolume(); }
-
-  virtual const Elem * & elem(THREAD_ID tid) { return _assembly[tid]->elem(); }
-  virtual unsigned int & side(THREAD_ID tid) { return _assembly[tid]->side(); }
-  virtual const Elem * & sideElem(THREAD_ID tid) { return _assembly[tid]->sideElem(); }
-  virtual const Node * & node(THREAD_ID tid) { return _assembly[tid]->node(); }
-  virtual const Node * & nodeNeighbor(THREAD_ID tid) { return _assembly[tid]->nodeNeighbor(); }
 
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
