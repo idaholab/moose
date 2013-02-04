@@ -221,8 +221,10 @@ Component::setRParam(const std::string & param_name, const T & value)
       {
         MooseObject * obj = *it;
         if (obj->parameters().have_parameter<T>(s[1]))
+        {
           obj->parameters().set<T>(s[1]) = value;
           found = true;
+        }
       }
     }
   }
