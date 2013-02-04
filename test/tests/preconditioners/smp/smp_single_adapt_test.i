@@ -10,9 +10,20 @@
 	xmax = 1
 	ymin = 0
 	ymax = 1
-	nx = 3
-	ny = 3
+	nx = 5
+	ny = 5
 	elem_type = QUAD4
+[]
+
+[Functions]
+  [./exact_v]
+    type = ParsedFunction
+    value = sin(pi*x)*sin(pi*y)
+  [../]
+  [./force_fn_v]
+    type = ParsedFunction
+    value = 2*pi*pi*sin(pi*x)*sin(pi*y)
+  [../]
 []
 
 [Variables]
@@ -38,14 +49,10 @@
 []
 
 [Kernels]
-  active = 'diff_u diff_v'
-#  active = 'diff_u conv_u diff_v'
-
   [./diff_u]
     type = Diffusion
     variable = u
   [../]
-
   [./conv_u]
     type = CoupledForce
     variable = u
@@ -56,56 +63,46 @@
     type = Diffusion
     variable = v
   [../]
+  [./ffn_v]
+    type = UserForcingFunction
+    variable = v
+    function = force_fn_v
+  [../]
 []
 
 [BCs]
-  active = 'left_u right_u left_v'
-#  active = 'left_u right_u left_v'
-
   [./left_u]
     type = DirichletBC
     variable = u
     boundary = 1
-    value = 1
+    value = 0
   [../]
 
   [./right_u]
     type = DirichletBC
     variable = u
     boundary = 3
-    value = 9
+    value = 1
   [../]
 
-  [./left_v]
-    type = DirichletBC
+  [./all_v]
+    type = FunctionDirichletBC
     variable = v
-    boundary = 1
-    value = 5
-  [../]
-
-  [./right_v]
-    type = DirichletBC
-    variable = v
-    boundary = 2
-    value = 2
+    boundary = '0 1 2 3'
+    function = exact_v
   [../]
 []
 
 [Executioner]
   type = Steady
 
-#  l_max_its = 1
-#  nl_max_its = 1
-
-#	nl_rel_tol = 1e-10
-
   petsc_options = '-snes_mf_operator'
 
   [./Adaptivity]
     steps = 3
     print_changed_info = true
-    coarsen_fraction = 0.
-    refine_fraction = 0.01
+    coarsen_fraction = 0.1
+    refine_fraction = 0.2
     max_h_level = 5
   []
 []
