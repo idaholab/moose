@@ -20,6 +20,7 @@
 #include <map>
 #include <set>
 #include "getpot.h"
+#include "MooseError.h"
 
 // Forward Declaration
 class Parser;
