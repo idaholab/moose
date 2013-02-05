@@ -41,19 +41,25 @@ CommandLine::addOption(const std::string & name, Option cli_opt)
 }
 
 bool
-CommandLine::search(const std::string &option_name, std::string *argument)
+CommandLine::search(const std::string &option_name)
 {
   std::map<std::string, Option>::iterator pos = _cli_options.find(option_name);
   if (pos != _cli_options.end())
+  {
     for (unsigned int i=0; i<pos->second.cli_switch.size(); ++i)
     {
       if (_get_pot->search(pos->second.cli_switch[i]))
-      {
-        if (pos->second.optional_argument && argument)
-          *argument = _get_pot->next(*argument);
         return true;
-      }
     }
+
+    if (pos->second.required)
+    {
+      std::cout << "Required parameter: " << option_name << " missing\n";
+      printUsage();
+    }
+  }
+  else
+    mooseError("Unrecognized option name");
 
   return false;
 }

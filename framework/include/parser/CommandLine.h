@@ -27,12 +27,15 @@ class Parser;
 class CommandLine
 {
 public:
+  /// Type of argument for a given option
+  enum ARGUMENT { NONE, OPTIONAL, REQUIRED };
+
   struct Option
   {
     std::string description;
     std::vector<std::string> cli_syntax;
     bool required;
-    bool optional_argument;
+    ARGUMENT argument_type;
     /// This gets filled in automagicaly when calling addOption()
     std::vector<std::string> cli_switch;
   };
@@ -54,7 +57,10 @@ public:
    * and returns a boolean indicating whether it was found.  If the given
    * option has an argument it is also filled in.
    */
-  bool search(const std::string & option_name, std::string * argument = NULL);
+  bool search(const std::string & option_name);
+
+  template <typename T>
+  bool search(const std::string & option_name, T & argument);
 
   bool isVariableOnCommandLine(const std::string & name) const;
 
@@ -86,6 +92,34 @@ protected:
   /// This is a set of all "extra" options on the command line
   std::set<std::string> _command_line_vars;
 };
+
+template <typename T>
+bool CommandLine::search(const std::string &option_name, T & argument)
+{
+  std::map<std::string, Option>::iterator pos = _cli_options.find(option_name);
+  if (pos != _cli_options.end())
+  {
+    for (unsigned int i=0; i<pos->second.cli_switch.size(); ++i)
+    {
+      if (_get_pot->search(pos->second.cli_switch[i]))
+      {
+        if (pos->second.argument_type != NONE)
+          argument = _get_pot->next(argument);
+        return true;
+      }
+    }
+
+    if (pos->second.required)
+    {
+      std::cout << "Required parameter: " << option_name << " missing\n";
+      printUsage();
+    }
+  }
+  else
+    mooseError("Unrecognized option name");
+
+  return false;
+}
 
 
 

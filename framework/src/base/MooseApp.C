@@ -62,7 +62,7 @@ MooseApp::initCommandLineOptions()
   syntax.push_back("-i <input file>");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
-  cli_opt.optional_argument = true;
+  cli_opt.argument_type = CommandLine::REQUIRED;
   _command_line.addOption("InputFile", cli_opt);
 
   syntax.clear();
@@ -70,7 +70,7 @@ MooseApp::initCommandLineOptions()
   syntax.push_back("--mesh-only");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
-  cli_opt.optional_argument = true;
+  cli_opt.argument_type = CommandLine::OPTIONAL;
   _command_line.addOption("MeshOnly", cli_opt);
 
   syntax.clear();
@@ -78,7 +78,7 @@ MooseApp::initCommandLineOptions()
   syntax.push_back("--show-input");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
-  cli_opt.optional_argument = false;
+  cli_opt.argument_type = CommandLine::NONE;
   _command_line.addOption("ShowTree", cli_opt);
 
   syntax.clear();
@@ -87,7 +87,7 @@ MooseApp::initCommandLineOptions()
   syntax.push_back("--help");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
-  cli_opt.optional_argument = false;
+  cli_opt.argument_type = CommandLine::NONE;
   _command_line.addOption("Help", cli_opt);
 
   syntax.clear();
@@ -95,7 +95,7 @@ MooseApp::initCommandLineOptions()
   syntax.push_back("--dump");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
-  cli_opt.optional_argument = true;
+  cli_opt.argument_type = CommandLine::NONE;
   _command_line.addOption("Dump", cli_opt);
 
   syntax.clear();
@@ -103,7 +103,7 @@ MooseApp::initCommandLineOptions()
   syntax.push_back("--yaml");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
-  cli_opt.optional_argument = true;
+  cli_opt.argument_type = CommandLine::NONE;
   _command_line.addOption("YAML", cli_opt);
 
   syntax.clear();
@@ -111,7 +111,7 @@ MooseApp::initCommandLineOptions()
   syntax.push_back("--syntax");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
-  cli_opt.optional_argument = false;
+  cli_opt.argument_type = CommandLine::NONE;
   _command_line.addOption("Syntax", cli_opt);
 
   syntax.clear();
@@ -119,7 +119,7 @@ MooseApp::initCommandLineOptions()
   syntax.push_back("--n-threads <threads>");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
-  cli_opt.optional_argument = true;
+  cli_opt.argument_type = CommandLine::REQUIRED;
   _command_line.addOption("Threads", cli_opt);
 
   syntax.clear();
@@ -128,6 +128,7 @@ MooseApp::initCommandLineOptions()
   syntax.push_back("--warn-unused");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
+  cli_opt.argument_type = CommandLine::NONE;
   _command_line.addOption("WarnUnused", cli_opt);
 
   syntax.clear();
@@ -136,6 +137,7 @@ MooseApp::initCommandLineOptions()
   syntax.push_back("--error-unused");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
+  cli_opt.argument_type = CommandLine::NONE;
   _command_line.addOption("ErrorUnused", cli_opt);
 
   syntax.clear();
@@ -144,6 +146,7 @@ MooseApp::initCommandLineOptions()
   syntax.push_back("--error-override");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
+  cli_opt.argument_type = CommandLine::NONE;
   _command_line.addOption("ErrorOverride", cli_opt);
 
   /* This option is used in InitialRefinementAction directly - Do we need a better API? */
@@ -152,7 +155,7 @@ MooseApp::initCommandLineOptions()
   syntax.push_back("-r <refinements>");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
-  cli_opt.optional_argument = true;
+  cli_opt.argument_type = CommandLine::REQUIRED;
   _command_line.addOption("REFINE", cli_opt);
 }
 
@@ -174,12 +177,12 @@ MooseApp::parseCommandLine()
   {
     _command_line.printUsage();
   }
-  else if (_command_line.search("Dump", &argument))
+  else if (_command_line.search("Dump", argument))
   {
     _parser.initSyntaxFormatter(Parser::INPUT_FILE, true);
     _parser.buildFullTree(argument);
   }
-  else if (_command_line.search("YAML", &argument))
+  else if (_command_line.search("YAML", argument))
   {
     _parser.initSyntaxFormatter(Parser::YAML, true);
     _parser.buildFullTree(argument);
@@ -194,14 +197,14 @@ MooseApp::parseCommandLine()
     }
     std::cout << "**END SYNTAX DATA**\n" << std::endl;
   }
-  else if (_command_line.search("InputFile", &input_filename))
+  else if (_command_line.search("InputFile", input_filename))
   {
     _input_filename = input_filename;
     _parser.parse(_input_filename);
     _action_warehouse.build();
 
     std::string mesh_file_name;
-    if (_command_line.search("MeshOnly", &mesh_file_name))
+    if (_command_line.search("MeshOnly", mesh_file_name))
       meshOnly(mesh_file_name);
     else
       runInputFile();

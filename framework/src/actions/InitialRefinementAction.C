@@ -41,14 +41,9 @@ InitialRefinementAction::act()
 
   unsigned int level = getParam<unsigned int>("uniform_refine");
 
-  std::string arg;
-  if (Moose::app->commandLine().search("REFINE", &arg))
-  {
-    unsigned int auto_refine_levels = 0;
-    std::stringstream ss(arg);
-    ss >> auto_refine_levels;
+  unsigned int auto_refine_levels = 0;
+  if (Moose::app->commandLine().search("REFINE", auto_refine_levels))
     level += auto_refine_levels;
-  }
 
   _problem->setUniformRefineLevel(level);
 #endif //LIBMESH_ENABLE_AMR
