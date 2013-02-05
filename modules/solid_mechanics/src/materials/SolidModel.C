@@ -30,6 +30,7 @@ InputParameters validParams<SolidModel>()
   params.addParam<Real>("stress_free_temperature", "The stress-free temperature.  If not specified, the initial temperature is used.");
   params.addParam<std::string>("cracking_release", "abrupt", "The cracking release type.  Choices are abrupt (default) and exponential.");
   params.addParam<Real>("cracking_stress", 0.0, "The stress threshold beyond which cracking occurs.  Must be positive.");
+  params.addParam<Real>("cracking_residual_stress", 0.0, "The fraction of the cracking stress allowed to be maintained following a crack.");
   params.addParam<std::vector<unsigned int> >("active_crack_planes", "Planes on which cracks are allowed (0,1,2 -> x,z,theta in RZ)");
   params.addParam<unsigned int>("max_cracks", 3, "The maximum number of cracks allowed at a material point.");
   params.addParam<MooseEnum>("formulation", formulation, "Element formulation.  Choices are: " + formulation.getRawNames());
@@ -85,7 +86,7 @@ SolidModel::SolidModel( const std::string & name,
    _cracking_release( getCrackingModel( getParam<std::string>("cracking_release"))),
    _cracking_stress( parameters.isParamValid("cracking_stress") ?
                      (getParam<Real>("cracking_stress") > 0 ? getParam<Real>("cracking_stress") : -1) : -1 ),
-   _cracking_residual_stress( 0 ),
+   _cracking_residual_stress( getParam<Real>("cracking_residual_stress") ),
    _cracking_alpha( 0 ),
    _active_crack_planes(3,1),
    _max_cracks( getParam<unsigned int>("max_cracks") ),
@@ -161,6 +162,11 @@ SolidModel::SolidModel( const std::string & name,
         }
         _active_crack_planes[planes[i]] = 1;
       }
+    }
+    if (_cracking_residual_stress < 0 ||
+        _cracking_residual_stress > 1 )
+    {
+      mooseError("cracking_residual_stress must be between 0 and 1");
     }
   }
 
@@ -862,9 +868,17 @@ SolidModel::computeCrackFactor( int i, Real & sigma, Real & flagVal )
   }
   else
   {
-    const Real tiny(1e-16);
-    flagVal = tiny;
-    sigma = tiny * (*_crack_strain)[_qp](i)*_youngs_modulus;
+    if (_cracking_residual_stress == 0)
+    {
+      const Real tiny(1e-16);
+      flagVal = tiny;
+      sigma = tiny * (*_crack_strain)[_qp](i)*_youngs_modulus;
+    }
+    else
+    {
+      flagVal = _cracking_residual_stress/((*_crack_max_strain)[_qp](i)*_youngs_modulus);
+      sigma = _cracking_residual_stress;
+    }
   }
   if (flagVal < 0)
   {
