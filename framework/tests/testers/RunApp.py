@@ -64,7 +64,7 @@ class RunApp(Tester):
     if options.parallel or ncpus > 1 or nthreads > 1:
       command = 'mpiexec -host localhost -n ' + str(ncpus) + ' ' + specs[EXECUTABLE] + ' --n-threads=' + str(nthreads) + ' ' + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' +  ' '.join(specs[CLI_ARGS])
     elif options.enable_valgrind and not specs[NO_VALGRIND]:
-      command = 'valgrind --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs[EXECUTABLE] + ' ' + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
+      command = 'valgrind --suppressions=' + specs[MOOSE_DIR] + 'tests/suppressions/errors.supp --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs[EXECUTABLE] + ' ' + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
     else:
       command = specs[EXECUTABLE] + ' ' + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
 

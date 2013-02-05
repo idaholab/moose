@@ -1,3 +1,7 @@
+# NOTE: THIS FILE HAS BEEN DEPRECATED!!!!
+# Please read your MOOSE manual and update your tests using the new "getpot" syntax.
+# This file and it's options will not be supported in future revisions of MOOSE
+
 # This file holds all the options that tests can use declared as global variables
 # so typos will crash instead of just producing weird output
 
@@ -6,10 +10,13 @@ INPUT         = 'input'          # The input.i file to use
 SKIP	      = 'skip'           # Give a reason to skip the test
 MAX_TIME      = 'max_time'       # Test will fail if it exceeds this time in seconds (accuracy ~1s)
 TEST_NAME     = 'test_name'      # The name of the test as it appears in output, this is
+
                                  # set to module_name.dict_name by default - DO NOT OVERRIDE!
 RELATIVE_PATH = 'relative_path'  # The relative directory where the test resides, this is populated automatically - DO NOT OVERRIDE!
 EXECUTABLE    = 'executable'     # The name of the executable, this is populated automatically - DO NOT OVERRIDE!
 HOSTNAME      = 'hostname'       # The name of machine that the harness is executing on, populated automatically - DO NOT OVERRIDE!
+MOOSE_DIR     = 'moose_dir'      # The location of MOOSE, populated automatically - DO NOT OVERRIDE!
+
 TYPE          = 'type'           # The type of tester to create
 INPUT_SWITCH  = 'input_switch'   # The default switch used for indicating an input to the executable
 DELETED       = 'deleted'        # Tests that only show up when using the "-e" option (Permanently skipped or not implemented)
