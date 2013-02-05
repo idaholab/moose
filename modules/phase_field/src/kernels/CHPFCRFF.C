@@ -1,0 +1,47 @@
+#include "CHPFCRFF.h"
+#include "MathUtils.h"
+using namespace MathUtils;
+
+template<>
+InputParameters validParams<CHPFCRFF>()
+{
+  InputParameters params = validParams<CHBulk>();
+  
+  params.addRequiredCoupledVar("v", "Array of names of the real parts of the L variables");
+
+  return params;
+}
+
+CHPFCRFF::CHPFCRFF(const std::string & name, InputParameters parameters)
+  :CHBulk(name, parameters)
+{
+  _num_L = coupledComponents("v"); //Determine the number of L variables
+  _grad_vals.resize(_num_L); //Resize variable array
+  
+  for (unsigned int i=0; i<_num_L; ++i)
+    _grad_vals[i] = &coupledGradient("v", i);//Loop through grains and load coupled gradients into the arrays
+  
+}
+
+RealGradient
+CHPFCRFF::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
+{
+  //We are actually calculating the term X u because we are pulling the u out of the mobility. The mobiltiy term shouldn't have u in it.
+  RealGradient sum_grad_L;
+  
+  for (unsigned int i=0; i<_num_L; ++i)
+    sum_grad_L += (*_grad_vals[i])[_qp];
+        
+  switch (type)
+  {
+  case Residual:
+    return _grad_u[_qp] - _u[_qp]*sum_grad_L;
+    
+  case Jacobian:
+    return _grad_phi[_j][_qp] + _phi[_j][_qp]*sum_grad_L; 
+  
+    
+  }
+  
+  mooseError("Invalid type passed in");
+}
