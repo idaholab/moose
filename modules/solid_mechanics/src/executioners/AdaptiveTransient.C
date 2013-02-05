@@ -232,14 +232,31 @@ AdaptiveTransient::takeStep(Real input_dt)
 
   std::cout << "Solving time step ";
   {
-    OStringStream out;
-    OSSInt(out,2,_t_step);
-    out << ", old time=";
-    OSSRealzeroleft(out,9,6,_time_old);
-    out << ", time=";
-    OSSRealzeroleft(out,9,6,_time);
-    out << ", dt=";
-    OSSRealzeroleft(out,9,6,_dt);
+    std::ostringstream out;
+
+    out << std::setw(2)
+        << _t_step
+        << ", old time="
+        << std::setw(9)
+        << std::setprecision(6)
+        << std::setfill('0')
+        << std::showpoint
+        << std::left
+        << _time_old
+        << ", time="
+        << std::setw(9)
+        << std::setprecision(6)
+        << std::setfill('0')
+        << std::showpoint
+        << std::left
+        << _time
+        << ", dt="
+        << std::setw(9)
+        << std::setprecision(6)
+        << std::setfill('0')
+        << std::showpoint
+        << std::left
+        << _dt;
     std::cout << out.str() << std::endl;
   }
 
@@ -329,9 +346,14 @@ AdaptiveTransient::computeConstrainedDT()
   {
     dt_cur = _dtmax;
 
-    _diag << "Limiting dt to dtmax: ";
-    OSSRealzeroleft(_diag,9,6,_dtmax);
-    _diag << std::endl;
+    _diag << "Limiting dt to dtmax: "
+          << std::setw(9)
+          << std::setprecision(6)
+          << std::setfill('0')
+          << std::showpoint
+          << std::left
+          << _dtmax
+          << std::endl;
   }
 
   // Limit the timestep to limit change in the function
@@ -340,9 +362,14 @@ AdaptiveTransient::computeConstrainedDT()
   if (function_limited_dt < dt_cur)
   {
     dt_cur = function_limited_dt;
-    _diag << "Limiting dt to limit change in function. dt: ";
-    OSSRealzeroleft(_diag,9,6,dt_cur);
-    _diag << std::endl;
+    _diag << "Limiting dt to limit change in function. dt: "
+          << std::setw(9)
+          << std::setprecision(6)
+          << std::setfill('0')
+          << std::showpoint
+          << std::left
+          << dt_cur
+          << std::endl;
   }
 
   // Don't allow time step size to be smaller than minimum time step size
@@ -350,9 +377,14 @@ AdaptiveTransient::computeConstrainedDT()
   {
     dt_cur = _dtmin;
 
-    _diag << "Increasing dt to dtmin: ";
-    OSSRealzeroleft(_diag,9,6,_dtmin);
-    _diag << std::endl;
+    _diag << "Increasing dt to dtmin: "
+          << std::setw(9)
+          << std::setprecision(6)
+          << std::setfill('0')
+          << std::showpoint
+          << std::left
+          << _dtmin
+          << std::endl;
   }
 
   // Don't let time go beyond simulation end time
@@ -360,11 +392,21 @@ AdaptiveTransient::computeConstrainedDT()
   {
     dt_cur = _end_time - _time_old;
 
-    _diag << "Limiting dt for end time: ";
-    OSSRealzeroleft(_diag,9,6,_end_time);
-    _diag << " dt: ";
-    OSSRealzeroleft(_diag,9,6,dt_cur);
-    _diag << std::endl;
+    _diag << "Limiting dt for end time: "
+          << std::setw(9)
+          << std::setprecision(6)
+          << std::setfill('0')
+          << std::showpoint
+          << std::left
+          << _end_time
+          << " dt: "
+          << std::setw(9)
+          << std::setprecision(6)
+          << std::setfill('0')
+          << std::showpoint
+          << std::left
+          << dt_cur
+          << std::endl;
   }
 
   // Adjust to the next sync time if needed
@@ -379,10 +421,21 @@ AdaptiveTransient::computeConstrainedDT()
       _diag << "Limiting dt for sync time: ";
     else
       _diag << "Limiting dt to sync with dt function time: ";
-    OSSRealzeroleft(_diag,9,6,_curr_sync_time_iter->first);
-    _diag << " dt: ";
-    OSSRealzeroleft(_diag,9,6,dt_cur);
-    _diag << std::endl;
+
+    _diag << std::setw(9)
+          << std::setprecision(6)
+          << std::setfill('0')
+          << std::showpoint
+          << std::left
+          << _curr_sync_time_iter->first
+          << " dt: "
+          << std::setw(9)
+          << std::setprecision(6)
+          << std::setfill('0')
+          << std::showpoint
+          << std::left
+          << dt_cur
+          << std::endl;
 
     if (++_curr_sync_time_iter == _sync_times.end())
       _remaining_sync_time = false;
@@ -425,10 +478,21 @@ AdaptiveTransient::computeDT()
     }
     else
       _diag << "Solve failed with dt: ";
-    OSSRealzeroleft(_diag,9,6,_dt);
-    _diag << "  Retrying with reduced dt: ";
-    OSSRealzeroleft(_diag,9,6,dt);
-    _diag << std::endl;
+
+    _diag << std::setw(9)
+          << std::setprecision(6)
+          << std::setfill('0')
+          << std::showpoint
+          << std::left
+          << _dt
+          << "  Retrying with reduced dt: "
+          << std::setw(9)
+          << std::setprecision(6)
+          << std::setfill('0')
+          << std::showpoint
+          << std::left
+          << dt
+          << std::endl;
   }
 
   else if ( _t_step == 1 ) //First time step, don't change the timestep ...
@@ -445,14 +509,25 @@ AdaptiveTransient::computeDT()
         _diag << "Within n_startup_steps, resetting dt to value used before sync: ";
       else
         _diag << "Within n_startup_steps, resetting dt to value used before syncing with dt function: ";
-      OSSRealzeroleft(_diag,9,6,dt);
-      _diag << std::endl;
+
+      _diag << std::setw(9)
+            << std::setprecision(6)
+            << std::setfill('0')
+            << std::showpoint
+            << std::left
+            << dt
+            << std::endl;
     }
     else
     {
-      _diag << "Within n_startup_steps, maintaining dt : ";
-      OSSRealzeroleft(_diag,9,6,dt);
-      _diag << std::endl;
+      _diag << "Within n_startup_steps, maintaining dt : "
+            << std::setw(9)
+            << std::setprecision(6)
+            << std::setfill('0')
+            << std::showpoint
+            << std::left
+            << dt
+            << std::endl;
     }
   }
 
@@ -480,8 +555,13 @@ AdaptiveTransient::computeDT()
       _diag << "Setting dt to value specified by dt function: ";
     }
 
-    OSSRealzeroleft(_diag,9,6,dt);
-    _diag << std::endl;
+    _diag << std::setw(9)
+          << std::setprecision(6)
+          << std::setfill('0')
+          << std::showpoint
+          << std::left
+          << dt
+          << std::endl;
   }
 
   else
@@ -499,11 +579,21 @@ AdaptiveTransient::computeDT()
         {
           dt = _dt * _growth_factor;
 
-          _diag << "Growing dt to recover from cutback.  old dt: ";
-          OSSRealzeroleft(_diag,9,6,_dt);
-          _diag << " new dt: ";
-          OSSRealzeroleft(_diag,9,6,dt);
-          _diag << std::endl;
+          _diag << "Growing dt to recover from cutback.  old dt: "
+                << std::setw(9)
+                << std::setprecision(6)
+                << std::setfill('0')
+                << std::showpoint
+                << std::left
+                << _dt
+                << " new dt: "
+                << std::setw(9)
+                << std::setprecision(6)
+                << std::setfill('0')
+                << std::showpoint
+                << std::left
+                << dt
+                << std::endl;
         }
       }
       else
@@ -513,11 +603,21 @@ AdaptiveTransient::computeDT()
         {
           dt = _dt * _growth_factor;
 
-          _diag << "Growing dt to recover from cutback.  old dt: ";
-          OSSRealzeroleft(_diag,9,6,_dt);
-          _diag << " new dt: ";
-          OSSRealzeroleft(_diag,9,6,dt);
-          _diag << std::endl;
+          _diag << "Growing dt to recover from cutback.  old dt: "
+                << std::setw(9)
+                << std::setprecision(6)
+                << std::setfill('0')
+                << std::showpoint
+                << std::left
+                << _dt
+                << " new dt: "
+                << std::setw(9)
+                << std::setprecision(6)
+                << std::setfill('0')
+                << std::showpoint
+                << std::left
+                << dt
+                << std::endl;
         }
       }
     }
@@ -550,11 +650,21 @@ AdaptiveTransient::computeAdaptiveDT(Real &dt, bool allowToGrow, bool allowToShr
 
       _diag << "Growing dt: nl its = "<<nl_its<<" < "<<growth_nl_its
             << " && lin its = "<<l_its<<" < "<<growth_l_its;
-      _diag << " old dt: ";
-      OSSRealzeroleft(_diag,9,6,_dt);
-      _diag << " new dt: ";
-      OSSRealzeroleft(_diag,9,6,dt);
-      _diag << std::endl;
+      _diag << " old dt: "
+            << std::setw(9)
+            << std::setprecision(6)
+            << std::setfill('0')
+            << std::showpoint
+            << std::left
+            << _dt
+            << " new dt: "
+            << std::setw(9)
+            << std::setprecision(6)
+            << std::setfill('0')
+            << std::showpoint
+            << std::left
+            << dt
+            << std::endl;
     }
   }
   else if (nl_its > shrink_nl_its || l_its > shrink_l_its)
@@ -564,11 +674,21 @@ AdaptiveTransient::computeAdaptiveDT(Real &dt, bool allowToGrow, bool allowToShr
 
       _diag << "Shrinking dt: nl its = "<<nl_its<<" > "<<shrink_nl_its
             << " || lin its = "<<l_its<<" > "<<shrink_l_its;
-      _diag << " old dt: ";
-      OSSRealzeroleft(_diag,9,6,_dt);
-      _diag << " new dt: ";
-      OSSRealzeroleft(_diag,9,6,dt);
-      _diag << std::endl;
+      _diag << " old dt: "
+            << std::setw(9)
+            << std::setprecision(6)
+            << std::setfill('0')
+            << std::showpoint
+            << std::left
+            << _dt
+            << " new dt: "
+            << std::setw(9)
+            << std::setprecision(6)
+            << std::setfill('0')
+            << std::showpoint
+            << std::left
+            << dt
+            << std::endl;
     }
   }
 }

@@ -12,10 +12,11 @@
 #include <parameters.h>
 #include <point.h>
 #include <vector_value.h>
-#include "o_string_stream.h"
 
 // System includes
 #include <string>
+#include <sstream>
+#include <iomanip>
 
 // Forward Declarations
 class AdaptiveTransient;
@@ -142,7 +143,7 @@ protected:
   Real _cutback_factor;
   bool _cutback_occurred;
 
-  OStringStream _diag;
+  std::ostringstream _diag;
 };
 
 #endif //ADAPTIVETRANSIENT_H
