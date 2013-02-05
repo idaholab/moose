@@ -17,7 +17,10 @@
 
 // libMesh
 #include "gmv_io.h"
-#include "o_string_stream.h"
+
+// C++
+#include <sstream>
+#include <iomanip>
 
 GMVOutput::GMVOutput(EquationSystems & es) :
     Outputter(es),
@@ -32,10 +35,15 @@ GMVOutput::~GMVOutput()
 std::string
 GMVOutput::getFileName(const std::string & file_base)
 {
-  OStringStream stream_file_base;
+  std::ostringstream stream_file_base;
 
-  stream_file_base << file_base << "_";
-  OSSRealzeroright(stream_file_base, 4, 0, _file_num);
+  stream_file_base << file_base
+                   << "_"
+                   << std::setw(4)
+                   << std::setprecision(0)
+                   << std::setfill('0')
+                   << std::right
+                   << _file_num;
 
   return stream_file_base.str() + ".gmv";
 }

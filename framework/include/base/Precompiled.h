@@ -70,7 +70,6 @@
 #include "nonlinear_implicit_system.h"
 #include "nonlinear_solver.h"
 #include "numeric_vector.h"
-#include "o_string_stream.h"
 #include "parameters.h"
 #include "periodic_boundaries.h"
 #include "point.h"

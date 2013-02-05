@@ -15,8 +15,8 @@
 #include "XDAOutput.h"
 #include "Problem.h"
 
-// Libmesh headers
-#include "o_string_stream.h"
+#include <sstream>
+#include <iomanip>
 
 XDAOutput::XDAOutput(EquationSystems & es) :
     Outputter(es),
@@ -31,10 +31,15 @@ XDAOutput::~XDAOutput()
 std::string
 XDAOutput::getFileName(const std::string & file_base)
 {
-  OStringStream stream_file_base;
+  std::ostringstream stream_file_base;
 
-  stream_file_base << file_base << "_";
-  OSSRealzeroright(stream_file_base, 4, 0, _file_num);
+  stream_file_base << file_base
+                   << "_"
+                   << std::setw(4)
+                   << std::setprecision(0)
+                   << std::setfill('0')
+                   << std::right
+                   << _file_num;
 
   return stream_file_base.str();
 }

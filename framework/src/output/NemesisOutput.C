@@ -21,7 +21,10 @@
 
 // libMesh
 #include "nemesis_io.h"
-#include "o_string_stream.h"
+
+// C++
+#include <sstream>
+#include <iomanip>
 
 NemesisOutput::NemesisOutput(EquationSystems & es) :
     Outputter(es),
@@ -46,13 +49,17 @@ NemesisOutput::sequence(bool state)
 std::string
 NemesisOutput::getFileName(const std::string & file_base)
 {
-  OStringStream nemesis_stream_file_base;
+  std::ostringstream nemesis_stream_file_base;
 
   nemesis_stream_file_base << file_base;
   if (_seq)
   {
-    nemesis_stream_file_base << "_";
-    OSSRealzeroright(nemesis_stream_file_base, 4, 0, _file_num);
+    nemesis_stream_file_base << "_"
+                             << std::setw(4)
+                             << std::setprecision(0)
+                             << std::setfill('0')
+                             << std::right
+                             << _file_num;
   }
 
   return nemesis_stream_file_base.str() + ".e";

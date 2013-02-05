@@ -25,8 +25,10 @@
 // libMesh
 #include "exodusII.h"
 #include "exodusII_io.h"
-#include "o_string_stream.h"
 
+// C++
+#include <sstream>
+#include <iomanip>
 
 ExodusOutput::ExodusOutput(EquationSystems & es, bool output_input) :
     Outputter(es),
@@ -46,7 +48,7 @@ ExodusOutput::~ExodusOutput()
 std::string
 ExodusOutput::getFileName(const std::string & file_base)
 {
-  OStringStream exodus_stream_file_base;
+  std::ostringstream exodus_stream_file_base;
 
   exodus_stream_file_base << file_base << ".e";
   if (_seq)
@@ -58,8 +60,12 @@ ExodusOutput::getFileName(const std::string & file_base)
      */
     if (_file_num)
     {
-      exodus_stream_file_base << "-s";
-      OSSRealzeroright(exodus_stream_file_base, 3, 0, _file_num+1);
+      exodus_stream_file_base << "-s"
+                              << std::setw(3)
+                              << std::setprecision(0)
+                              << std::setfill('0')
+                              << std::right
+                              << _file_num+1;
     }
   }
 
