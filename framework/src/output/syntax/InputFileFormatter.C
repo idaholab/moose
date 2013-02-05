@@ -17,6 +17,7 @@
 
 #include <sstream>
 #include <vector>
+#include <iomanip>
 
 InputFileFormatter::InputFileFormatter(bool dump_mode) :
     SyntaxTree(),
