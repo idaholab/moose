@@ -5,6 +5,12 @@
     exodiff = 'out.e'
   [../]
 
+  [./onedtwod_w_matl_test]
+    type = 'Exodiff'
+    input = '1d_2d_w_matl.i'
+    exodiff = '1d_2d_w_matl_out.e'
+  [../]
+
   [./onedthreed_test]
     type = 'Exodiff'
     input = '1d_3d.i'
