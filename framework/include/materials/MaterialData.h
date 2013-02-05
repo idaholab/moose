@@ -38,6 +38,12 @@ public:
   void size(unsigned int n_qpoints);
 
   /**
+   * Get the number of quadrature points
+   * @return The number of quadrature points
+   */
+  unsigned int nQPoints();
+
+  /**
    * Declare the Real valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
@@ -67,7 +73,7 @@ public:
   bool have_property_name_older(const std::string & prop_name) const;
 
   // Reinit material properties for given element (and possible side)
-  void reinit(std::vector<Material *> & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side = 0);
+  void reinit(std::vector<Material *> & mats, const Elem & elem, unsigned int side = 0);
 
   MaterialProperties & props() { return _props; }
   MaterialProperties & propsOld() { return _props_old; }
@@ -94,8 +100,8 @@ public:
 
 protected:
   MaterialPropertyStorage & _storage;
-
-  bool _sized;
+  /// Number of quadrature points
+  unsigned int _n_qpoints;
 
   // holds material properties for currently selected element (and possibly a side), they are being copied from _storage
   MaterialProperties _props;

@@ -17,7 +17,7 @@
 
 MaterialData::MaterialData(MaterialPropertyStorage & storage) :
     _storage(storage),
-    _sized(false)
+    _n_qpoints(0)
 {
 }
 
@@ -54,19 +54,18 @@ MaterialData::size(unsigned int n_qpoints)
         if (*it != NULL)
           (*it)->resize(n_qpoints);
   }
-  _sized = true;
+  _n_qpoints = n_qpoints;
+}
+
+unsigned int
+MaterialData::nQPoints()
+{
+  return _n_qpoints;
 }
 
 void
-MaterialData::reinit(std::vector<Material *> & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side/* = 0*/)
+MaterialData::reinit(std::vector<Material *> & mats, const Elem & elem, unsigned int side/* = 0*/)
 {
-  // FIXME: if there are elements with different number of quadrature points and the one with smaller
-  // number gets hit first, we will fail with out-of-bound error, since we set the resize flag to true,
-  // but we need more space to store the new properties.  Thus, we need to be smarter here with invalidating
-  // the _size flag.
-  if (!_sized)
-    size(n_qpoints);
-
   if (_storage.hasStatefulProperties())
     _storage.swap(*this, elem, side);
 

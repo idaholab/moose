@@ -1363,7 +1363,10 @@ FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid)
   if (_materials[tid].hasMaterials(blk_id))
   {
     const Elem * & elem = _assembly[tid]->elem();
-    _material_data[tid]->reinit(_materials[tid].getMaterials(blk_id), _assembly[tid]->qRule()->n_points(), *elem, 0);
+    unsigned int n_points = _assembly[tid]->qRule()->n_points();
+    if (_material_data[tid]->nQPoints() != n_points)
+      _material_data[tid]->size(n_points);
+    _material_data[tid]->reinit(_materials[tid].getMaterials(blk_id), *elem, 0);
   }
 }
 
@@ -1373,7 +1376,10 @@ FEProblem::reinitMaterialsFace(SubdomainID blk_id, unsigned int side, THREAD_ID 
   if (_materials[tid].hasFaceMaterials(blk_id))
   {
     const Elem * & elem = _assembly[tid]->elem();
-    _bnd_material_data[tid]->reinit(_materials[tid].getFaceMaterials(blk_id), _assembly[tid]->qRuleFace()->n_points(), *elem, side);
+    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    if (_bnd_material_data[tid]->nQPoints() != n_points)
+      _bnd_material_data[tid]->size(n_points);
+    _bnd_material_data[tid]->reinit(_materials[tid].getFaceMaterials(blk_id), *elem, side);
   }
 }
 
@@ -1385,7 +1391,10 @@ FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int /*side*/, TH
     // NOTE: this will not work with h-adaptivity
     const Elem * & neighbor = _assembly[tid]->neighbor();
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
-    _neighbor_material_data[tid]->reinit(_materials[tid].getNeighborMaterials(blk_id), _assembly[tid]->qRuleFace()->n_points(), *neighbor, neighbor_side);
+    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    if (_neighbor_material_data[tid]->nQPoints() != n_points)
+      _neighbor_material_data[tid]->size(n_points);
+    _neighbor_material_data[tid]->reinit(_materials[tid].getNeighborMaterials(blk_id), *neighbor, neighbor_side);
   }
 }
 
@@ -1397,7 +1406,10 @@ FEProblem::reinitMaterialsBoundary(BoundaryID bnd_id, THREAD_ID tid)
     // this works b/c we called reinitElemFace before, so assembly has the right values
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
-    _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(bnd_id), _assembly[tid]->qRuleFace()->n_points(), *elem, side);
+    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    if (_bnd_material_data[tid]->nQPoints() != n_points)
+      _bnd_material_data[tid]->size(n_points);
+    _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(bnd_id), *elem, side);
   }
 }
 
