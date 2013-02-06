@@ -1,5 +1,6 @@
 #include "Component.h"
 #include "Simulation.h"
+#include "MooseApp.h"
 
 unsigned int Component::subdomain_ids = 0;
 unsigned int Component::bc_ids = 0;
