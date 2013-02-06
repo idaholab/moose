@@ -21,6 +21,7 @@ public:
 
   virtual Point getPosition() { return _position; }
   virtual RealVectorValue getDirection() { return _dir; }
+  virtual Real getRotation() { return _rotation; }
 
   virtual Node * getBoundaryNode(RELAP7::EEndType id);
   virtual unsigned int getBoundaryId(RELAP7::EEndType id);
@@ -32,6 +33,8 @@ protected:
   Point _position;
   /// Direction this pipe is going to
   RealVectorValue _dir;
+  /// Rotation of the component around x-axis in non-displaced space
+  Real _rotation;
 
   /// Boundary nodes of this pipe (indexing: local "node id" => Node).
   /// Local node IDs are used by other components for connecting

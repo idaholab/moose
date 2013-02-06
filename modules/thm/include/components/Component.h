@@ -64,11 +64,6 @@ public:
 
   virtual const std::string & getType() = 0;
 
-  // Location
-  virtual Point getPosition() = 0;
-
-  virtual RealVectorValue getDirection() = 0;
-
   virtual const std::vector<unsigned int> & getSubdomainIds() { return _subdomains; }
 
   /**

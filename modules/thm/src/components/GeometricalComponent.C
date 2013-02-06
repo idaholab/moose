@@ -7,13 +7,15 @@ InputParameters validParams<GeometricalComponent>()
 
   params.addRequiredParam<std::vector<Real> >("position", "Origin (start) of the pipe");
   params.addRequiredParam<std::vector<Real> >("orientation", "Orientation vector of the pipe");
+  params.addParam<Real>("rotation", 0., "Rotation of the component (in degrees)");
 
   return params;
 }
 
 GeometricalComponent::GeometricalComponent(const std::string & name, InputParameters parameters) :
     Component(name, parameters),
-    _position(toPoint(getParam<std::vector<Real> >("position")))
+    _position(toPoint(getParam<std::vector<Real> >("position"))),
+    _rotation(getParam<Real>("rotation"))
 {
   const std::vector<Real> & dir = getParam<std::vector<Real> >("orientation");
   _dir = VectorValue<Real>(dir[0], dir[1], dir[2]);
