@@ -33,7 +33,7 @@ PFCRFFKernelAction::act()
 #endif
 
   //Create the two kernels required for the n_variable, starting with the time derivative
-  InputParameters poly_params = Factory::instance()->getValidParams("TimeDerivative");
+  InputParameters poly_params = _factory.getValidParams("TimeDerivative");
   poly_params.set<NonlinearVariableName>("variable") = _n_name;
     
   _problem->addKernel("TimeDerivative", "IE_n", poly_params);
@@ -51,7 +51,7 @@ PFCRFFKernelAction::act()
     real_v[l] = L_name;
   }
   
-  poly_params = Factory::instance()->getValidParams("CHPFCRFF");
+  poly_params = _factory.getValidParams("CHPFCRFF");
   poly_params.set<NonlinearVariableName>("variable") = _n_name;
   poly_params.set<std::vector<std::string> >("v") = real_v;
   poly_params.set<std::string>("mob_name") = getParam<std::string>("mob_name");
@@ -75,7 +75,7 @@ PFCRFFKernelAction::act()
 
     //Create the kernels for the real L variable ***********************************
     //**Create the diffusion kernel for L_real_l
-    InputParameters poly_params = Factory::instance()->getValidParams("Diffusion");
+    InputParameters poly_params = _factory.getValidParams("Diffusion");
     poly_params.set<NonlinearVariableName>("variable") = real_name;
     
     std::string kernel_name = "diff_";
@@ -84,7 +84,7 @@ PFCRFFKernelAction::act()
     _problem->addKernel("Diffusion", kernel_name, poly_params);
 
     //**Create the (alpha^R_m L^R_m) term
-    poly_params = Factory::instance()->getValidParams("HHPFCRFF");
+    poly_params = _factory.getValidParams("HHPFCRFF");
     poly_params.set<NonlinearVariableName>("variable") = real_name;
     poly_params.set<bool>("positive") = true;
 
@@ -101,7 +101,7 @@ PFCRFFKernelAction::act()
     //**Create the -(alpha^I_m L^I_m) term
     if (l > 0)
     {
-      poly_params = Factory::instance()->getValidParams("HHPFCRFF");
+      poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = real_name;
       poly_params.set<bool>("positive") = false;
       namebin[0] = imag_name;
@@ -118,7 +118,7 @@ PFCRFFKernelAction::act()
     }
     
     //**Create the -(A^R_m n) term
-    poly_params = Factory::instance()->getValidParams("HHPFCRFF");
+    poly_params = _factory.getValidParams("HHPFCRFF");
     poly_params.set<NonlinearVariableName>("variable") = real_name;
     poly_params.set<bool>("positive") = false;
     
@@ -137,7 +137,7 @@ PFCRFFKernelAction::act()
     if (l > 0)
     {
       //**Create the diffusion kernel for L_imag_l
-      InputParameters poly_params = Factory::instance()->getValidParams("Diffusion");
+      InputParameters poly_params = _factory.getValidParams("Diffusion");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
     
       kernel_name = "diff_";
@@ -146,7 +146,7 @@ PFCRFFKernelAction::act()
       _problem->addKernel("Diffusion", kernel_name, poly_params);
 
       //**Create the (alpha^R_m L^I_m) term
-      poly_params = Factory::instance()->getValidParams("HHPFCRFF");
+      poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = true;
 
@@ -160,7 +160,7 @@ PFCRFFKernelAction::act()
       _problem->addKernel("HHPFCRFF", kernel_name, poly_params);
 
       //**Create the (alpha^I_m L^R_m) term
-      poly_params = Factory::instance()->getValidParams("HHPFCRFF");
+      poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = true;
       
@@ -177,7 +177,7 @@ PFCRFFKernelAction::act()
       _problem->addKernel("HHPFCRFF", kernel_name, poly_params);
 
       //**Create the -(A^I_m n) term
-      poly_params = Factory::instance()->getValidParams("HHPFCRFF");
+      poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = false;
       
