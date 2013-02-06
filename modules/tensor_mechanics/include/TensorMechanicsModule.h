@@ -1,7 +1,9 @@
 #ifndef TENSORMECHANICSMODULE_H
 #define TENSORMECHANICSMODULE_H
 
+#include "Factory.h"
 #include "Syntax.h"
+#include "ActionFactory.h"
 
 namespace Elk
 {

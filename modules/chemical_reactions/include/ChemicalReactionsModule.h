@@ -1,7 +1,9 @@
 #ifndef CHEMICALREACTIONSMODULE_H
 #define CHEMICALREACTIONSMODULE_H
 
+#include "Factory.h"
 #include "Syntax.h"
+#include "ActionFactory.h"
 
 namespace Elk
 {

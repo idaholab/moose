@@ -1,7 +1,9 @@
 #ifndef MISCMODULE_H
 #define MISCMODULE_H
 
+#include "Factory.h"
 #include "Syntax.h"
+#include "ActionFactory.h"
 
 namespace Elk
 {

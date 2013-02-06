@@ -2,6 +2,8 @@
 #define ELK_H
 
 #include "Syntax.h"
+#include "Factory.h"
+#include "ActionFactory.h"
 
 namespace Elk
 {

@@ -1,7 +1,9 @@
 #ifndef CONTACTMODULE_H
 #define CONTACTMODULE_H
 
+#include "Factory.h"
 #include "Syntax.h"
+#include "ActionFactory.h"
 
 namespace Elk
 {

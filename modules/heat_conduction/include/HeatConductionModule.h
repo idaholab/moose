@@ -1,7 +1,9 @@
 #ifndef HEATCONDUCTIONMODULE_H
 #define HEATCONDUCTIONMODULE_H
 
+#include "Factory.h"
 #include "Syntax.h"
+#include "ActionFactory.h"
 
 namespace Elk
 {
