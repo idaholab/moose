@@ -282,28 +282,24 @@ public:
   Real getMinInDimension(unsigned int component) const;
   Real getMaxInDimension(unsigned int component) const;
 
+  void addPeriodicVariable(unsigned int var_num, BoundaryID primary, BoundaryID secondary);
+
   /**
    * Returns whether this generated mesh is periodic in the given dimension
-   * for the given variable
-   */
-  bool isPeriodic(NonlinearSystem &nl, unsigned int var_num, unsigned int component);
-
-  /**
-   * This function initializes the data structures necessary for calling minPeriodicDistance.
-   * @param nl - A reference to the nonlinear system
-   * @param var_num - The variable inspected for periodicity
+   * for the given variable.
+   * @param nonlinear_var_num - The nonlinear variable number
    * @param component - An integer representing the desired component (dimension)
    */
-  void initPeriodicDistanceForVariable(NonlinearSystem &nl, unsigned int var_num);
+  bool isTranslatedPeriodic(unsigned int nonlinear_var_num, unsigned int component) const;
 
   /**
-   * This function returns the distance between two points taking into account periodicity.  A call
-   * to initPeriodicDistanceForVariable should be made prior to calling this function or it will
-   * not factor in any PBCs.
+   * This function returns the distance between two points on the mesh taking into account periodicity
+   * for the given variable number.
+   * @param nonlinear_var_num - The nonlinear variable number
    * @param p, q - The points for which to compute a minimum distance
    * @return Real - The L2 distance between p and q
    */
-  Real minPeriodicDistance(Point p, Point q) const;
+  Real minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q) const;
 
   /**
    * This function returns the paired boundary ids for the given component.  For example, in a generated
@@ -448,12 +444,14 @@ protected:
 
 private:
   /**
-   * A vector indicating which dimensions are periodic in a regular orthogonal mesh.  This
-   * data structure is populated by initPeriodicDistanceForVariable.
+   * A map of vectors indicating which dimensions are periodic in a regular orthogonal mesh for
+   * the specified variable numbers.  This data structure is populated by addPeriodicVariable.
    */
-  std::vector<bool> _periodic_dim;
+  std::map<unsigned int, std::vector<bool> > _periodic_dim;
 
-  /// A convience vector used to hold values in each dimension representing half of the range
+  /**
+   * A convience vector used to hold values in each dimension representing half of the range.
+   */
   RealVectorValue _half_range;
 
   /// A vector containing the nodes at the corners of a regular orthogonal mesh

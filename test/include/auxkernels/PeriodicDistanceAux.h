@@ -32,13 +32,8 @@ public:
   PeriodicDistanceAux(const std::string & name, InputParameters parameters);
   virtual ~PeriodicDistanceAux();
 
-  virtual void initialSetup();
-
 protected:
   virtual Real computeValue();
-
-  /// A reference to the nonlinear system
-  NonlinearSystem & _nl;
 
   /// A point of interest in the domain
   Point _point;

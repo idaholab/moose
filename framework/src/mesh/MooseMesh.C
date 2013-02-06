@@ -64,8 +64,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     _bnd_elem_range(NULL),
     _node_to_elem_map_built(false),
     _patch_size(40),
-    _regular_orthogonal_mesh(false),
-    _periodic_dim(LIBMESH_DIM, false)
+    _regular_orthogonal_mesh(false)
 {
 }
 
@@ -84,8 +83,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _bnd_elem_range(NULL),
     _node_to_elem_map_built(false),
     _patch_size(40),
-    _regular_orthogonal_mesh(false),
-    _periodic_dim(LIBMESH_DIM, false)
+    _regular_orthogonal_mesh(false)
 {
   (*_mesh.boundary_info) = (*other_mesh._mesh.boundary_info);
 }
@@ -1023,42 +1021,48 @@ MooseMesh::getMaxInDimension(unsigned int component) const
   return _bounds[component][MAX];
 }
 
+void
+MooseMesh::addPeriodicVariable(unsigned int var_num, BoundaryID primary, BoundaryID secondary)
+{
+  if (!_regular_orthogonal_mesh)
+    return;
+
+  _periodic_dim[var_num].resize(LIBMESH_DIM);
+
+  _half_range = Point(dimensionWidth(0)/2.0, dimensionWidth(1)/2.0, dimensionWidth(2)/2.0);
+
+  for (unsigned int component=0; component<LIBMESH_DIM; ++component)
+  {
+    std::pair<BoundaryID, BoundaryID> boundary_ids = getPairedBoundaryMapping(component);
+
+    if ((boundary_ids.first == primary && boundary_ids.second == secondary) ||
+        (boundary_ids.first == secondary && boundary_ids.second == primary))
+      _periodic_dim[var_num][component] = true;
+  }
+}
+
+
 bool
-MooseMesh::isPeriodic(NonlinearSystem &nl, unsigned int var_num, unsigned int component)
+MooseMesh::isTranslatedPeriodic(unsigned int nonlinear_var_num, unsigned int component) const
 {
   mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
   mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
 
-  PeriodicBoundaries *pbs = nl.dofMap().get_periodic_boundaries();
-
-  static const int pb_map[3][3] = {{0, -99, -99},{3, 0, -99},{4, 1, 5}};
-
-  PeriodicBoundaryBase *pb = pbs->boundary(pb_map[_mesh.mesh_dimension()-1][component]);
-
-  if (pb != NULL)
-    return pb->is_my_variable(var_num);
+  if (_periodic_dim.find(nonlinear_var_num) != _periodic_dim.end())
+    return _periodic_dim.at(nonlinear_var_num)[component];
   else
     return false;
 }
 
-void
-MooseMesh::initPeriodicDistanceForVariable(NonlinearSystem &nl, unsigned int var_num)
-{
-  for (unsigned int i=0; i<dimension(); ++i)
-    _periodic_dim[i] = isPeriodic(nl, var_num, i);
-
-  _half_range = Point(dimensionWidth(0)/2.0, dimensionWidth(1)/2.0, dimensionWidth(2)/2.0);
-}
-
 Real
-MooseMesh::minPeriodicDistance(Point p, Point q) const
+MooseMesh::minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q) const
 {
-  mooseAssert(_half_range != RealVectorValue(0, 0, 0), "\"initPeriodicDistanceForVariable\" has not been called!");
+  mooseAssert(_half_range != RealVectorValue(0, 0, 0), "\"addPeriodicVariable\" has not been called - do you have periodic BCs turned on?");
 
   for (unsigned int i=0; i<LIBMESH_DIM; ++i)
   {
     // check to see if we're closer in real or periodic space in x, y, and z
-    if (_periodic_dim[i])
+    if (isTranslatedPeriodic(nonlinear_var_num, i))
     {
       // Need to test order before differencing
       if (p(i) > q(i))

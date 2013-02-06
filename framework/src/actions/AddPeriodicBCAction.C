@@ -18,6 +18,7 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "GeneratedMesh.h"
+#include "MooseMesh.h"
 
 // LibMesh includes
 #include "periodic_boundary.h" // translation PBCs provided by libmesh
@@ -47,9 +48,21 @@ void
 AddPeriodicBCAction::setPeriodicVars(PeriodicBoundaryBase & p, const std::vector<std::string> & var_names)
 {
   NonlinearSystem & nl = _problem->getNonlinearSystem();
+  std::vector<std::string> const * var_names_ptr;
 
-  for (std::vector<std::string>::const_iterator it = var_names.begin(); it != var_names.end(); ++it)
-    p.set_variable(nl.getVariable(0, (*it)).index());
+  // If var_names is empty - then apply this periodic condition to all variables in the system
+  if (var_names.empty())
+    var_names_ptr = &nl.getVariableNames();
+  else
+    var_names_ptr = &var_names;
+
+  for (std::vector<std::string>::const_iterator it = var_names_ptr->begin(); it != var_names_ptr->end(); ++it)
+  {
+    unsigned int var_num = nl.getVariable(0, (*it)).index();
+
+    p.set_variable(var_num);
+    _mesh->addPeriodicVariable(var_num, p.myboundary, p.pairedboundary);
+  }
 }
 
 bool
@@ -57,12 +70,10 @@ AddPeriodicBCAction::autoTranslationBoundaries()
 {
   if (isParamValid("auto_direction"))
   {
-    MooseMesh & mesh = _problem->mesh();
-
     NonlinearSystem & nl = _problem->getNonlinearSystem();
     std::vector<std::string> auto_dirs = getParam<std::vector<std::string> >("auto_direction");
 
-    int dim_offset = mesh.dimension() - 2;
+    int dim_offset = _mesh->dimension() - 2;
     for (unsigned int i=0; i<auto_dirs.size(); ++i)
     {
       int component = -1;
@@ -83,10 +94,9 @@ AddPeriodicBCAction::autoTranslationBoundaries()
 
       if (component >= 0)
       {
-        std::pair<BoundaryID, BoundaryID> boundary_ids = mesh.getPairedBoundaryMapping(component);
-
+        std::pair<BoundaryID, BoundaryID> boundary_ids = _mesh->getPairedBoundaryMapping(component);
         RealVectorValue v;
-        v(component) = mesh.dimensionWidth(component);
+        v(component) = _mesh->dimensionWidth(component);
         PeriodicBoundary p(v);
 
         p.myboundary = boundary_ids.first;
@@ -104,6 +114,7 @@ void
 AddPeriodicBCAction::act()
 {
   NonlinearSystem & nl = _problem->getNonlinearSystem();
+  _mesh = &_problem->mesh();
 
   if (autoTranslationBoundaries())
     return;
@@ -113,8 +124,8 @@ AddPeriodicBCAction::act()
     RealVectorValue translation = getParam<RealVectorValue>("translation");
 
     PeriodicBoundary p(translation);
-    p.myboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("primary"));
-    p.pairedboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("secondary"));
+    p.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary"));
+    p.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));
     setPeriodicVars(p, getParam<std::vector<std::string> >("variable"));
 
     nl.dofMap().add_periodic_boundary(p);
@@ -130,13 +141,13 @@ AddPeriodicBCAction::act()
       mooseError("You must provide an inv_transform_func for FunctionPeriodicBoundary!");
 
     FunctionPeriodicBoundary pb(*_problem, fn_names);
-    pb.myboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("primary"));
-    pb.pairedboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("secondary"));
+    pb.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary"));
+    pb.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));
     setPeriodicVars(pb, getParam<std::vector<std::string> >("variable"));
 
     FunctionPeriodicBoundary ipb(*_problem, inv_fn_names);
-    ipb.myboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("secondary"));   // these are swapped
-    ipb.pairedboundary = _problem->mesh().getBoundaryID(getParam<BoundaryName>("primary")); // these are swapped
+    ipb.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));   // these are swapped
+    ipb.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary")); // these are swapped
     setPeriodicVars(ipb, getParam<std::vector<std::string> >("variable"));
 
     // Add the pair of periodic boundaries to the dof map

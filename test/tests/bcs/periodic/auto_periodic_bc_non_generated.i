@@ -1,5 +1,6 @@
 [Mesh]
   file = square2.e
+  uniform_refine = 3
 []
 
 [Variables]

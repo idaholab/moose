@@ -25,21 +25,8 @@ InputParameters validParams<PeriodicDistanceAux>()
 
 PeriodicDistanceAux::PeriodicDistanceAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
     _point(getParam<Point>("point"))
 {
-}
-
-PeriodicDistanceAux::~PeriodicDistanceAux()
-{
-}
-
-void
-PeriodicDistanceAux::initialSetup()
-{
-  // We aren't going to couple to anything so just use the first nl variable
-  _mesh.initPeriodicDistanceForVariable(_nl, 0);
-
   // Make sure the point is in the domain
   for (unsigned int i=0; i<LIBMESH_DIM; ++i)
     if (_point(i) < _mesh.getMinInDimension(i) || _point(i) > _mesh.getMaxInDimension(i))
@@ -47,12 +34,16 @@ PeriodicDistanceAux::initialSetup()
       std::cout << _mesh.getMinInDimension(i) << "\t" << _mesh.getMaxInDimension(i) << "\n";
       mooseError("\"point\" is outside of the domain.");
     }
+}
 
+PeriodicDistanceAux::~PeriodicDistanceAux()
+{
 }
 
 Real
 PeriodicDistanceAux::computeValue()
 {
   // Compute the periodic distance from a given feature
-  return _mesh.minPeriodicDistance(*_current_node, _point);
+  // Note: For this test kernel we are just going to use the first nonlinear variable (index: 0)
+  return _mesh.minPeriodicDistance(0, *_current_node, _point);
 }

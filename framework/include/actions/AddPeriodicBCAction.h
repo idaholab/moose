@@ -18,6 +18,7 @@
 #include "Action.h"
 
 class AddPeriodicBCAction;
+class MooseMesh;
 namespace libMesh {
 class PeriodicBoundaryBase;
 }
@@ -46,6 +47,8 @@ protected:
   bool autoTranslationBoundaries();
 
   void setPeriodicVars(PeriodicBoundaryBase & p, const std::vector<std::string> & var_names);
+
+  MooseMesh * _mesh;
 };
 
 #endif // ADDPERIODICBCACTION_H
