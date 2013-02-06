@@ -230,11 +230,9 @@ static bool registered = false;
 void
 registerObjects(Factory & factory)
 {
-  if (registered)
-    return;
-
   // mesh
   registerObject(MooseMesh);
+  std::cout<<"Registering Generated Mesh!"<<std::endl;
   registerObject(GeneratedMesh);
   registerObject(MeshExtruder);
 
