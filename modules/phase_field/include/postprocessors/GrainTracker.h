@@ -17,8 +17,7 @@ class GrainTracker : public NodalFloodCount
 public:
   GrainTracker(const std::string & name, InputParameters parameters);
   virtual ~GrainTracker();
-
-  virtual void initialize();
+  
   virtual void threadJoin(const UserObject & y);
   virtual void finalize();
 

@@ -73,14 +73,6 @@ GrainTracker::getElementalValue(unsigned int element_id) const
 }
 
 void
-GrainTracker::initialize()
-{
-  NodalFloodCount::initialize();
-
-  _mesh.initPeriodicDistanceForVariable(_nl, _var_number);
-}
-
-void
 GrainTracker::threadJoin(const UserObject & y)
 {
   // Don't track grains if the current simulation step is before the specified tracking step
@@ -480,8 +472,8 @@ GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres
       libMesh::Sphere *sphere2 = (*sphere_it2)->b_sphere;
 
       // We need to see if these two spheres intersect on the domain.  To do that we need to account for periodicity of the mesh
-      Real curr_distance = _mesh.minPeriodicDistance(sphere1->center(), sphere2->center())  // distance between the centroids
-        - (ignore_radii ? 0 : (sphere1->radius() + sphere2->radius()));                     // minus the sum of the two radii
+      Real curr_distance = _mesh.minPeriodicDistance(_var_number, sphere1->center(), sphere2->center())  // distance between the centroids
+        - (ignore_radii ? 0 : (sphere1->radius() + sphere2->radius()));                                  // minus the sum of the two radii
 
       if (curr_distance < min_distance)
         min_distance = curr_distance;
