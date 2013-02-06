@@ -92,7 +92,7 @@ AddLotsOfAuxVariablesAction::act()
       if (scalar_var)
       {
         // built a ScalarConstantIC object
-        InputParameters params = Factory::instance()->getValidParams("ScalarConstantIC");
+        InputParameters params = _factory.getValidParams("ScalarConstantIC");
         params.set<VariableName>("variable") = var_name;
         params.set<Real>("value") = initial;
         _problem->addInitialCondition("ScalarConstantIC", "ic", params);
@@ -100,7 +100,7 @@ AddLotsOfAuxVariablesAction::act()
       else
       {
         // built a ConstantIC object
-        InputParameters params = Factory::instance()->getValidParams("ConstantIC");
+        InputParameters params = _factory.getValidParams("ConstantIC");
         params.set<VariableName>("variable") = var_name;
         params.set<Real>("value") = initial;
         _problem->addInitialCondition("ConstantIC", "ic", params);

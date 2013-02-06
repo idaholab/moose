@@ -57,18 +57,18 @@ ConvDiffMetaAction::act()
   //*******************************************//
   //**************** Variables ****************//
   //*******************************************//
-  InputParameters variable_params = ActionFactory::instance()->getValidParams("AddVariableAction");
+  InputParameters variable_params = _action_factory.getValidParams("AddVariableAction");
   variable_params.set<ActionWarehouse *>("awh") = &_awh;
 
 //  for (unsigned int i=0; i<variable_params.size(); ++i)
 //  {
 
   // Create and Add First Variable Action
-  action = ActionFactory::instance()->create("AddVariableAction", "Variables/" + variables[0], variable_params);
+  action = _action_factory.create("AddVariableAction", "Variables/" + variables[0], variable_params);
   _awh.addActionBlock(action);
 
   // Create and Add Second Variable Action
-  action = ActionFactory::instance()->create("AddVariableAction", "Variables/" + variables[1], variable_params);
+  action = _action_factory.create("AddVariableAction", "Variables/" + variables[1], variable_params);
   _awh.addActionBlock(action);
 //  }
 
@@ -76,12 +76,12 @@ ConvDiffMetaAction::act()
   //*******************************************//
   //**************** Kernels ******************//
   //*******************************************//
-  InputParameters action_params = ActionFactory::instance()->getValidParams("AddKernelAction");
+  InputParameters action_params = _action_factory.getValidParams("AddKernelAction");
   action_params.set<ActionWarehouse *>("awh") = &_awh;
 
   // Setup our Diffusion Kernel on the "u" variable
   action_params.set<std::string>("type") = "Diffusion";
-  action = ActionFactory::instance()->create("AddKernelAction", "Kernels/diff_u", action_params);
+  action = _action_factory.create("AddKernelAction", "Kernels/diff_u", action_params);
   moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
   {
@@ -92,7 +92,7 @@ ConvDiffMetaAction::act()
   }
 
   // Setup our Diffusion Kernel on the "v" variable
-  action = ActionFactory::instance()->create("AddKernelAction", "Kernels/diff_v", action_params);
+  action = _action_factory.create("AddKernelAction", "Kernels/diff_v", action_params);
 
   moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
@@ -105,7 +105,7 @@ ConvDiffMetaAction::act()
 
   // Setup our Convection Kernel on the "u" variable coupled to the diffusion variable "v"
   action_params.set<std::string>("type") = "Convection";
-  action = ActionFactory::instance()->create("AddKernelAction", "Kernels/conv_u", action_params);
+  action = _action_factory.create("AddKernelAction", "Kernels/conv_u", action_params);
   moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
   {

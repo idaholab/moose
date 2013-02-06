@@ -17,6 +17,7 @@
 
 #include "InputParameters.h"
 
+class MooseApp;
 class MooseObject;
 
 template<>
@@ -62,11 +63,18 @@ public:
 
   inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
 
+  /**
+   * Get the MooseApp this object is associated wth.
+   */
+  MooseApp & getMooseApp() { return _app; }
+
 protected:
   /// The name of this object
   std::string _name;
   /// Parameters of this object
   InputParameters _pars;
+  /// The MooseApp this object is associated with
+  MooseApp & _app;
 };
 
 #endif /* MOOSEOBJECT_H*/

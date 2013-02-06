@@ -37,7 +37,8 @@ CoupledExecutioner::CoupledExecutioner(const std::string & name, InputParameters
     _problem(NULL)
 {
   InputParameters params = emptyInputParameters();
-  _problem = static_cast<CoupledProblem *>(Factory::instance()->create("CoupledProblem", "master_problem", params));
+  params.set<MooseApp *>("_moose_app") = &_app;
+  _problem = static_cast<CoupledProblem *>(_app.getFactory().create("CoupledProblem", "master_problem", params));
 }
 
 CoupledExecutioner::~CoupledExecutioner()
@@ -61,8 +62,8 @@ CoupledExecutioner::problem()
 void
 CoupledExecutioner::addFEProblem(const std::string & name, const FileName & file_name)
 {
-  ActionWarehouse * awh = new ActionWarehouse(Moose::app->syntax());
-  Parser * parser = new Parser(*awh);
+  ActionWarehouse * awh = new ActionWarehouse(_app, _app.syntax(), _app.getActionFactory());
+  Parser * parser = new Parser(_app, *awh);
 
   parser->parse(file_name);
   awh->build();
@@ -96,12 +97,13 @@ CoupledExecutioner::addVariableAction(const std::string & action_name, ActionWar
       {
         // take the action params and change them to create an aux variable
         InputParameters params = action->parameters();
+        params.set<MooseApp *>("_moose_app") = &_app;
         params.set<std::string>("action") = "add_aux_variable";
         std::string dest_name("AuxVariables/" + dest_var_name);
         params.set<Parser *>("parser") = NULL;                    // set parser to NULL, since this action was not create by a parser
         params.set<ActionWarehouse *>("awh") = &dest;             // move the action into destination action warehouse
 
-        Action * dest_action = ActionFactory::instance()->create("AddVariableAction", dest_name, params);
+        Action * dest_action = _app.getActionFactory().create("AddVariableAction", dest_name, params);
         mooseAssert (dest_action != NULL, std::string("Action AddVariableAction not created"));
         dest.addActionBlock(dest_action);
       }

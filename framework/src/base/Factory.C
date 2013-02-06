@@ -13,25 +13,17 @@
 /****************************************************************/
 
 #include "Factory.h"
+#include "MooseApp.h"
 
-Factory * Factory::_instance = NULL;
-
-Factory *Factory::instance()
+Factory::Factory(MooseApp & app):
+    _app(app)
 {
-  if (!_instance)
-    _instance = new Factory;
-
-  return _instance;
 }
+
+
 
 Factory::~Factory()
 {
-}
-
-void
-Factory::release()
-{
-  delete _instance;
 }
 
 InputParameters
@@ -41,6 +33,7 @@ Factory::getValidParams(const std::string & name)
     mooseError(std::string("A '") + name + "' is not a registered object\n\n");
 
   InputParameters params = _name_to_params_pointer[name]();
+  params.set<MooseApp *>("_moose_app") = &_app;
   return params;
 }
 

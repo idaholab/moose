@@ -33,6 +33,9 @@ InputParameters validParams<Action>()
 Action::Action(const std::string & name, InputParameters params) :
     _name(name),
     _pars(params),
+    _app(*getParam<MooseApp *>("_moose_app")),
+    _factory(_app.getFactory()),
+    _action_factory(_app.getActionFactory()),
     _action(getParam<std::string>("action")),
     _awh(*getParam<ActionWarehouse *>("awh")),
     _mesh(_awh.mesh()),

@@ -956,7 +956,7 @@ FEProblem::addFunction(std::string type, const std::string & name, InputParamete
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    Function * func = static_cast<Function *>(Factory::instance()->create(type, name, parameters));
+    Function * func = static_cast<Function *>(_factory.create(type, name, parameters));
     _functions[tid][name] = func;
     _objects_by_name[tid][name].push_back(func);
   }
@@ -1256,7 +1256,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       // volume material
       parameters.set<bool>("_bnd") = false;
       parameters.set<MaterialData *>("_material_data") = _material_data[tid];
-      Material *volume_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+      Material *volume_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
       mooseAssert(volume_material != NULL, "Not a Material object");
       _materials[tid].addMaterial(block_ids, volume_material);
       _objects_by_name[tid][name].push_back(volume_material);
@@ -1264,7 +1264,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       // face material
       parameters.set<bool>("_bnd") = true;
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-      Material *face_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+      Material *face_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
       mooseAssert(face_material != NULL, "Not a Material object");
       _materials[tid].addFaceMaterial(block_ids, face_material);
       _objects_by_name[tid][name].push_back(face_material);
@@ -1272,7 +1272,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       // neighbor material
       parameters.set<bool>("_bnd") = true;
       parameters.set<MaterialData *>("_material_data") = _neighbor_material_data[tid];
-      Material *neighbor_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+      Material *neighbor_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
       mooseAssert(neighbor_material != NULL, "Not a Material object");
       _materials[tid].addNeighborMaterial(block_ids, neighbor_material);
       _objects_by_name[tid][name].push_back(neighbor_material);
@@ -1281,7 +1281,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
     {
       parameters.set<bool>("_bnd") = true;
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-      Material *bnd_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+      Material *bnd_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
       mooseAssert(bnd_material != NULL, "Not a Material object");
       _materials[tid].addBoundaryMaterial(boundary_ids, bnd_material);
       _objects_by_name[tid][name].push_back(bnd_material);
@@ -1473,7 +1473,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
 
-      MooseObject * mo = Factory::instance()->create(pp_name, name, parameters);
+      MooseObject * mo = _factory.create(pp_name, name, parameters);
       if(!mo)
         mooseError("Unable to determine type for Postprocessor: " + mo->name());
 
@@ -1497,7 +1497,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 
       parameters.set<MaterialData *>("_material_data") = _material_data[tid];
 
-      MooseObject * mo = Factory::instance()->create(pp_name, name, parameters);
+      MooseObject * mo = _factory.create(pp_name, name, parameters);
       if(!mo)
         mooseError("Unable to determine type for Postprocessor: " + mo->name());
 
@@ -1552,7 +1552,7 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
 
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
 
-      MooseObject * mo = Factory::instance()->create(user_object_name, name, parameters);
+      MooseObject * mo = _factory.create(user_object_name, name, parameters);
 
       UserObject * user_object = dynamic_cast<UserObject *>(mo);
       if(!user_object)
@@ -1567,7 +1567,7 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
         _reinit_displaced_elem = true;
 
       parameters.set<MaterialData *>("_material_data") = _material_data[tid];
-      MooseObject * mo = Factory::instance()->create(user_object_name, name, parameters);
+      MooseObject * mo = _factory.create(user_object_name, name, parameters);
 
       UserObject * user_object = dynamic_cast<UserObject *>(mo);
       if(!user_object)
@@ -2108,7 +2108,7 @@ FEProblem::addIndicator(std::string indicator_name, const std::string & name, In
       parameters.set<MaterialData *>("_neighbor_material_data") = _neighbor_material_data[tid];
 //    }
 
-    Indicator *indicator = static_cast<Indicator *>(Factory::instance()->create(indicator_name, name, parameters) );
+    Indicator *indicator = static_cast<Indicator *>(_factory.create(indicator_name, name, parameters) );
     mooseAssert(indicator != NULL, "Not a Indicator object");
 
 
@@ -2161,7 +2161,7 @@ FEProblem::addMarker(std::string marker_name, const std::string & name, InputPar
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    Marker *marker = static_cast<Marker *>(Factory::instance()->create(marker_name, name, parameters) );
+    Marker *marker = static_cast<Marker *>(_factory.create(marker_name, name, parameters) );
     mooseAssert(marker != NULL, "Not a Marker object");
 
 
@@ -2799,11 +2799,11 @@ FEProblem::getOutputProblem(unsigned int refinements)
   // TODO: When do we build this?
   if (!_out_problem)
   {
-    InputParameters params = validParams<OutputProblem>();
+    InputParameters params = _app.getFactory().getValidParams("OutputProblem");
     params.set<FEProblem *>("mproblem") = this;
     params.set<unsigned int>("refinements") = refinements;
     params.set<MooseMesh *>("mesh") = &_mesh;
-    _out_problem = static_cast<OutputProblem *>(Factory::instance()->create("OutputProblem", "Output Problem", params));
+    _out_problem = static_cast<OutputProblem *>(_factory.create("OutputProblem", "Output Problem", params));
   }
   return *_out_problem;
 }

@@ -21,22 +21,17 @@
 #include "YAMLFormatter.h"
 #include "MooseMesh.h"
 
-namespace Moose
-{
-  MooseApp * app = NULL;
-}
-
 MooseApp::MooseApp(int argc, char *argv[]) :
     _command_line(argc, argv),
-    _action_warehouse(_syntax),
-    _parser(_action_warehouse),
+    _action_factory(*this),
+    _action_warehouse(*this, _syntax, _action_factory),
+    _parser(*this, _action_warehouse),
     _executioner(NULL),
     _sys_info(argc, argv),
     _enable_unused_check(WARN_UNUSED),
+    _factory(*this),
     _error_overridden(false)
-{
-  Moose::app = this;
-}
+{}
 
 MooseApp::~MooseApp()
 {
@@ -47,8 +42,8 @@ MooseApp::~MooseApp()
 void
 MooseApp::init()
 {
-  Moose::registerObjects();
-  Moose::associateSyntax(_syntax);
+  Moose::registerObjects(_factory);
+  Moose::associateSyntax(_syntax, _action_factory);
 }
 
 void

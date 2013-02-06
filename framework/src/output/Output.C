@@ -66,7 +66,7 @@ Output::add(Output::Type type, bool output_input)
   switch (type)
   {
   case EXODUS:
-    o = new ExodusOutput(_eq, output_input);
+    o = new ExodusOutput(_fe_problem.getMooseApp(), _eq, output_input);
     break;
 
   case NEMESIS:

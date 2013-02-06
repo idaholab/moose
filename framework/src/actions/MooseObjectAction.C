@@ -32,7 +32,7 @@ MooseObjectAction::MooseObjectAction(const std::string & name, InputParameters p
     _moose_object_pars(!params.have_parameter<bool>("skip_param_construction") ||
                        (params.have_parameter<bool>("skip_param_construction") &&
                         !params.get<bool>("skip_param_construction"))
-                       ? Factory::instance()->getValidParams(_type) : validParams<MooseObject>())
+                       ? _factory.getValidParams(_type) : validParams<MooseObject>())
 {
   _moose_object_pars.set<std::string>("long_name") = _name;
 }

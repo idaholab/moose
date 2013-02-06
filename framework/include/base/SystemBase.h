@@ -32,6 +32,8 @@
 #include "quadrature.h"
 #include "point.h"
 
+class Factory;
+class MooseApp;
 class MooseVariable;
 
 /**
@@ -363,6 +365,10 @@ public:
 
 protected:
   SubProblem & _subproblem;
+
+  MooseApp & _app;
+  Factory & _factory;
+
   MooseMesh & _mesh;
   /// The name of this system
   std::string _name;

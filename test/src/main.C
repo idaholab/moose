@@ -1,5 +1,6 @@
 #include "MooseInit.h"
 #include "MooseTest.h"
+#include "MooseTestApp.h"
 #include "Moose.h"
 // libMesh includes
 #include "perf_log.h"

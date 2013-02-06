@@ -30,6 +30,7 @@
 
 class MooseMesh;
 class SubProblem;
+class Factory;
 
 template<>
 InputParameters validParams<SubProblem>();
@@ -204,6 +205,9 @@ public:
   MooseArray<MooseArray<RealTensor> > _second_zero;
 
 protected:
+  /// The Factory for building objects
+  Factory & _factory;
+
   /// Type of coordinate system per subdomain
   std::map<SubdomainID, Moose::CoordinateSystemType> _coord_sys;
 

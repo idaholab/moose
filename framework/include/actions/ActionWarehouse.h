@@ -29,6 +29,7 @@ typedef std::vector<Action *>::iterator ActionIterator;
 class MooseMesh;
 class Executioner;
 class Syntax;
+class ActionFactory;
 
 /**
  * Storage for action instances.
@@ -36,7 +37,7 @@ class Syntax;
 class ActionWarehouse
 {
 public:
-  ActionWarehouse(Syntax & syntax);
+  ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory);
   ~ActionWarehouse();
 
   void build();
@@ -83,12 +84,17 @@ public:
   FEProblem * & problem() { return _problem; }
   ExodusII_IO * & exReader() { return _exreader; }
   Executioner * & executioner() { return _executioner; }
+  MooseApp & mooseApp() { return _app; }
 
 protected:
   void buildBuildableActions(const std::string &action_name);
 
+  /// The MooseApp this Warehouse is associated with
+  MooseApp & _app;
   /// Reference to a "syntax" of actions
   Syntax & _syntax;
+  /// The Factory that builds Actions
+  ActionFactory & _action_factory;
   /// Pointers to the actual parsed input file blocks
   std::map<std::string, std::vector<Action *> > _action_blocks;
   /// The container that holds the sorted action names from the DependencyResolver

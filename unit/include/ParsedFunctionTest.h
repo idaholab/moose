@@ -21,6 +21,7 @@
 // Forward declarations
 class MooseMesh;
 class FEProblem;
+class Factory;
 
 class ParsedFunctionTest : public CppUnit::TestFixture
 {
@@ -44,6 +45,8 @@ public:
   void finalize();
 
 protected:
+  MooseApp * _app;
+  Factory * _factory;
   MooseMesh * _mesh;
   FEProblem * _fe_problem;
 };

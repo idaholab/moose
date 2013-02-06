@@ -52,7 +52,7 @@ CreateProblemAction::act()
       _moose_object_pars.set<unsigned int>("dimNullSpace") =  getParam<unsigned int>("dimNullSpace");
       unsigned int dimNearNullSpace =  getParam<unsigned int>("dimNearNullSpace");
       _moose_object_pars.set<unsigned int>("dimNearNullSpace") =  getParam<unsigned int>("dimNearNullSpace");
-      _problem = dynamic_cast<FEProblem *>(Factory::instance()->create(_type, _problem_name, _moose_object_pars));
+      _problem = dynamic_cast<FEProblem *>(_factory.create(_type, _problem_name, _moose_object_pars));
       if (_problem == NULL)
         mooseError("Problem has to be of a FEProblem type");
     }

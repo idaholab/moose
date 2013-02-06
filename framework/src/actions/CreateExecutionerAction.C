@@ -70,7 +70,7 @@ CreateExecutionerAction::act()
 
   Moose::setup_perf_log.push("Create Executioner","Setup");
   _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem;
-  Executioner * executioner = static_cast<Executioner *>(Factory::instance()->create(_type, "Executioner", _moose_object_pars));
+  Executioner * executioner = static_cast<Executioner *>(_factory.create(_type, "Executioner", _moose_object_pars));
   Moose::setup_perf_log.pop("Create Executioner","Setup");
 
   FEProblem *mproblem = _problem;

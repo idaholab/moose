@@ -112,20 +112,9 @@
 // From MOOSE
 #include "AddVariableAction.h"
 
-
-
-MooseTestApp::MooseTestApp(int argc, char *argv[]) :
-    MooseApp(argc, argv)
-{
-  registerObjects();
-  associateSyntax();
-}
-
 void
-MooseTestApp::registerObjects()
+MooseTest::registerObjects(Factory & factory)
 {
-  Moose::registerObjects();
-
   // Kernels
   registerKernel(CoupledConvection);
   registerKernel(ForcingFn);
@@ -239,15 +228,12 @@ MooseTestApp::registerObjects()
 }
 
 void
-MooseTestApp::associateSyntax()
+MooseTest::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  // add MOOSE basic syntax
-  Moose::associateSyntax(_syntax);
-
   // and add more
   registerAction(ConvDiffMetaAction, "meta_action");
   registerAction(AddLotsOfAuxVariablesAction, "meta_action");
-  _syntax.registerActionSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
-  _syntax.registerActionSyntax("AddVariableAction", "MoreAuxVariables/*", "add_aux_variable");
-  _syntax.registerActionSyntax("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
+  syntax.registerActionSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
+  syntax.registerActionSyntax("AddVariableAction", "MoreAuxVariables/*", "add_aux_variable");
+  syntax.registerActionSyntax("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
 }

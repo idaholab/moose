@@ -47,7 +47,7 @@ ConvectionDiffusionAction::act()
   mooseAssert(variables.size() == 2, "Expected 2 variables, received " + variables.size());
 
   // Setup our Diffusion Kernel on the "u" variable
-  InputParameters conv_diff_params = Factory::instance()->getValidParams("Diffusion");
+  InputParameters conv_diff_params = _factory.getValidParams("Diffusion");
   conv_diff_params.set<NonlinearVariableName>("variable") = variables[0];
   _problem->addKernel("Diffusion", "diff_u", conv_diff_params);
 
@@ -58,7 +58,7 @@ ConvectionDiffusionAction::act()
   _problem->addKernel("Convection", "conv", conv_diff_params);
 
   // Setup out Diffusion Kernel on the "v" variable
-  InputParameters conv_params = Factory::instance()->getValidParams("Convection");
+  InputParameters conv_params = _factory.getValidParams("Convection");
   conv_params.set<NonlinearVariableName>("variable") = variables[1];
   _problem->addKernel("Diffusion", "diff_v", conv_params);
 }

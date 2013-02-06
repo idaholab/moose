@@ -30,8 +30,9 @@
 #include <sstream>
 #include <iomanip>
 
-ExodusOutput::ExodusOutput(EquationSystems & es, bool output_input) :
+ExodusOutput::ExodusOutput(MooseApp & app, EquationSystems & es, bool output_input) :
     Outputter(es),
+    _app(app),
     _out(NULL),
     _seq(false),
     _file_num(-1),
@@ -170,14 +171,14 @@ void
 ExodusOutput::outputInput()
 {
   // parser/action system are not mandatory subsystems to use, thus empty action system -> no input output
-  if (Moose::app->actionWarehouse().empty())
+  if (_app.actionWarehouse().empty())
     return;
 
   if (_out == NULL)
     _out = new ExodusII_IO(_es.get_mesh());
 
   ExodusFormatter syntax_formatter;
-  syntax_formatter.printInputFile(Moose::app->actionWarehouse());
+  syntax_formatter.printInputFile(_app.actionWarehouse());
   syntax_formatter.format();
 
   _out->write_information_records(syntax_formatter.getInputFileRecord());

@@ -25,6 +25,8 @@ class ActionWarehouse;
 class MooseMesh;
 class FEProblem;
 class Executioner;
+class MooseApp;
+class Factory;
 
 template<>
 InputParameters validParams<Action>();
@@ -67,6 +69,15 @@ protected:
   std::string _name;
   /// Input parameters for the action
   InputParameters _pars;
+
+  /// The MOOSE application this is associated with
+  MooseApp & _app;
+
+  /// The Factory associated with the MooseApp
+  Factory & _factory;
+
+  /// Builds Actions
+  ActionFactory & _action_factory;
 
   std::string _action;
   /// Reference to ActionWarehouse where we store object build by actions

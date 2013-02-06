@@ -25,7 +25,7 @@
 class ExodusOutput : public Outputter
 {
 public:
-  ExodusOutput(EquationSystems & es, bool output_input=true);
+  ExodusOutput(MooseApp & app, EquationSystems & es, bool output_input=true);
   virtual ~ExodusOutput();
 
   virtual void output(const std::string & file_base, Real time);
@@ -37,6 +37,8 @@ public:
   virtual void sequence(bool state) { _seq = state; }
 
 protected:
+  MooseApp & _app;
+
   ExodusII_IO * _out;
 
   bool _seq;

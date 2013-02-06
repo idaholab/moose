@@ -380,7 +380,7 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
-    Kernel *kernel = static_cast<Kernel *>(Factory::instance()->create(kernel_name, name, parameters));
+    Kernel *kernel = static_cast<Kernel *>(_factory.create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
 
     std::set<SubdomainID> blk_ids;
@@ -411,7 +411,7 @@ NonlinearSystem::addScalarKernel(const  std::string & kernel_name, const std::st
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    ScalarKernel *kernel = static_cast<ScalarKernel *>(Factory::instance()->create(kernel_name, name, parameters));
+    ScalarKernel *kernel = static_cast<ScalarKernel *>(_factory.create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
 
     _kernels[tid].addScalarKernel(kernel);
@@ -438,7 +438,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
       parameters.set<THREAD_ID>("_tid") = tid;
       parameters.set<MaterialData *>("_material_data") = _fe_problem._bnd_material_data[tid];
 
-      BoundaryCondition * bc = static_cast<BoundaryCondition *>(Factory::instance()->create(bc_name, name, parameters));
+      BoundaryCondition * bc = static_cast<BoundaryCondition *>(_factory.create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a BoundaryCondition object");
       _fe_problem._objects_by_name[tid][name].push_back(bc);
 
@@ -473,7 +473,7 @@ NonlinearSystem::addConstraint(const std::string & c_name, const std::string & n
 {
   parameters.set<THREAD_ID>("_tid") = 0;
 
-  MooseObject * obj = Factory::instance()->create(c_name, name, parameters);
+  MooseObject * obj = _factory.create(c_name, name, parameters);
   _fe_problem._objects_by_name[0][name].push_back(obj);
 
   NodalConstraint    * nc = dynamic_cast<NodalConstraint *>(obj);
@@ -502,7 +502,7 @@ NonlinearSystem::addDiracKernel(const  std::string & kernel_name, const std::str
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
-    DiracKernel *kernel = static_cast<DiracKernel *>(Factory::instance()->create(kernel_name, name, parameters));
+    DiracKernel *kernel = static_cast<DiracKernel *>(_factory.create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Dirac Kernel object");
 
     _dirac_kernels[tid].addDiracKernel(kernel);
@@ -519,7 +519,7 @@ NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & nam
     parameters.set<MaterialData *>("_material_data") = _fe_problem._bnd_material_data[tid];
     parameters.set<MaterialData *>("_neighbor_material_data") = _fe_problem._neighbor_material_data[tid];
 
-    DGKernel *dg_kernel = static_cast<DGKernel *>(Factory::instance()->create(dg_kernel_name, name, parameters));
+    DGKernel *dg_kernel = static_cast<DGKernel *>(_factory.create(dg_kernel_name, name, parameters));
     mooseAssert(dg_kernel != NULL, "Not a DG Kernel object");
 
     _dg_kernels[tid].addDGKernel(dg_kernel);
@@ -537,7 +537,7 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
-    Damper * damper = static_cast<Damper *>(Factory::instance()->create(damper_name, name, parameters));
+    Damper * damper = static_cast<Damper *>(_factory.create(damper_name, name, parameters));
     _dampers[tid].addDamper(damper);
     _fe_problem._objects_by_name[tid][name].push_back(damper);
   }

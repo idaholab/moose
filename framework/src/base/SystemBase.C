@@ -44,6 +44,8 @@ void extraSparsity(SparsityPattern::Graph & sparsity,
 
 SystemBase::SystemBase(SubProblem & subproblem, const std::string & name) :
     _subproblem(subproblem),
+    _app(subproblem.getMooseApp()),
+    _factory(_app.getFactory()),
     _mesh(subproblem.mesh()),
     _name(name),
     _currently_computing_jacobian(false),
@@ -363,10 +365,10 @@ SystemBase::addInitialCondition(const std::string & ic_name, const std::string &
       for (unsigned int i = 0; i < blocks.size(); i++)
       {
         SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
-        _vars[tid].addInitialCondition(var_name, blk_id, static_cast<InitialCondition *>(Factory::instance()->create(ic_name, name, parameters)));
+        _vars[tid].addInitialCondition(var_name, blk_id, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
       }
     else
-      _vars[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID, static_cast<InitialCondition *>(Factory::instance()->create(ic_name, name, parameters)));
+      _vars[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
   }
 }
 
@@ -381,7 +383,7 @@ SystemBase::addScalarInitialCondition(const std::string & ic_name, const std::st
   for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    _vars[tid].addScalarInitialCondition(var_name, static_cast<ScalarInitialCondition *>(Factory::instance()->create(ic_name, name, parameters)));
+    _vars[tid].addScalarInitialCondition(var_name, static_cast<ScalarInitialCondition *>(_factory.create(ic_name, name, parameters)));
   }
 }
 

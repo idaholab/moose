@@ -24,8 +24,8 @@
  * Macros
  */
 #define stringifyName(name) #name
-#define registerObject(name)                        Factory::instance()->reg<name>(stringifyName(name))
-#define registerNamedObject(obj, name)              Factory::instance()->reg<obj>(name)
+#define registerObject(name)                        factory.reg<name>(stringifyName(name))
+#define registerNamedObject(obj, name)              factory.reg<obj>(name)
 
 // for backward compatibility
 #define registerKernel(name)                        registerObject(name)
@@ -98,18 +98,8 @@ MooseObject * buildObject(const std::string & name, InputParameters parameters)
 class Factory
 {
 public:
-  /**
-   * Get the instance of the factory
-   * @return Pointer to the factory instance
-   */
-  static Factory *instance();
-
+  Factory(MooseApp & app);
   virtual ~Factory();
-
-  /**
-   * Release the memory allocated by this factory
-   */
-  static void release();
 
   /**
    * Register a new object
@@ -147,15 +137,10 @@ public:
   registeredMooseObjectIterator registeredObjectsEnd() { return _name_to_params_pointer.end(); }
 
 protected:
+  MooseApp & _app;
+
   std::map<std::string, buildPtr>  _name_to_build_pointer;
   std::map<std::string, paramsPtr> _name_to_params_pointer;
-
-  static Factory *_instance;
-
-private:
-  // Private constructor for singleton pattern
-  Factory() {}
-
 };
 
 #endif /* FACTORY_H */

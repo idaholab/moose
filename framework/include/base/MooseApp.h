@@ -24,6 +24,8 @@
 #include "MooseSyntax.h"
 #include "ActionWarehouse.h"
 #include "SystemInfo.h"
+#include "Factory.h"
+#include "ActionFactory.h"
 
 class Executioner;
 
@@ -109,6 +111,16 @@ public:
    */
   Executioner * getExecutioner() { return _executioner; }
 
+  /**
+   * Retrieve the Factory associated with this App.
+   */
+  Factory & getFactory() { return _factory; }
+
+  /**
+   * Retrieve the ActionFactory associated with this App.
+   */
+  ActionFactory & getActionFactory() { return _action_factory; }
+
 protected:
   virtual void runInputFile();
 
@@ -120,7 +132,9 @@ protected:
   CommandLine _command_line;
   /// Syntax of the input file
   Syntax _syntax;
-  ///
+  /// The Factory responsible for building Actions
+  ActionFactory _action_factory;
+  /// Where built actions are stored
   ActionWarehouse _action_warehouse;
   /// Parser for parsing the input file
   Parser _parser;
@@ -132,15 +146,11 @@ protected:
   /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
   enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
 
+  Factory _factory;
+
 private:
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
 };
-
-
-namespace Moose
-{
-  extern MooseApp * app;
-}
 
 #endif /* MOOSEAPP_H */

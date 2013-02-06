@@ -228,7 +228,7 @@ namespace Moose {
 static bool registered = false;
 
 void
-registerObjects()
+registerObjects(Factory & factory)
 {
   if (registered)
     return;
@@ -543,7 +543,7 @@ addActionTypes(Syntax & syntax)
  *       prematurely)
  */
 void
-registerActions(Syntax & syntax)
+registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
   registerAction(ReadMeshAction, "read_mesh");
   registerAction(SetupMeshAction, "setup_mesh");

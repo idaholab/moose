@@ -19,10 +19,11 @@
 #include <map>
 
 class Syntax;
+class ActionFactory;
 
 namespace Moose
 {
-void associateSyntax(Syntax & syntax);
+void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
 }
 
 #endif // MOOSESYNTAX_H

@@ -140,7 +140,7 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _mproblem._material_data[tid];
 
-    AuxKernel *kernel = static_cast<AuxKernel *>(Factory::instance()->create(kernel_name, name, parameters));
+    AuxKernel *kernel = static_cast<AuxKernel *>(_factory.create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not an AuxKernel object");
 
     std::set<SubdomainID> blk_ids;
@@ -172,7 +172,7 @@ AuxiliarySystem::addScalarKernel(const  std::string & kernel_name, const std::st
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    AuxScalarKernel *kernel = static_cast<AuxScalarKernel *>(Factory::instance()->create(kernel_name, name, parameters));
+    AuxScalarKernel *kernel = static_cast<AuxScalarKernel *>(_factory.create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a AuxScalarKernel object");
 
     _auxs(kernel->execFlag())[tid].addScalarKernel(kernel);
@@ -196,7 +196,7 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
       parameters.set<THREAD_ID>("_tid") = tid;
       parameters.set<MaterialData *>("_material_data") = _mproblem._bnd_material_data[tid];
 
-      AuxKernel * bc = static_cast<AuxKernel *>(Factory::instance()->create(bc_name, name, parameters));
+      AuxKernel * bc = static_cast<AuxKernel *>(_factory.create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a AuxBoundaryCondition object");
 
       _auxs(bc->execFlag())[tid].addActiveBC(boundary, bc);

@@ -70,13 +70,13 @@ ReadMeshAction::act()
   else
   {
     InputParameters pars = getObjectParams();
-    _mesh = dynamic_cast<MooseMesh *>(Factory::instance()->create(mesh_type, "mesh", pars));
+    _mesh = dynamic_cast<MooseMesh *>(_factory.create(mesh_type, "mesh", pars));
 
     if (isParamValid("displacements"))
     {
       // Create the displaced mesh
       Moose::setup_perf_log.push("Create Displaced Mesh","Setup");
-      MooseMesh * displaced_mesh = dynamic_cast<MooseMesh *>(Factory::instance()->create(mesh_type, "displaced_mesh", pars));
+      MooseMesh * displaced_mesh = dynamic_cast<MooseMesh *>(_factory.create(mesh_type, "displaced_mesh", pars));
       Moose::setup_perf_log.pop("Create Displaced Mesh","Setup");
 
       std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");

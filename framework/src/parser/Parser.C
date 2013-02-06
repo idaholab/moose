@@ -44,8 +44,11 @@
 // libMesh
 #include "getpot.h"
 
-Parser::Parser(ActionWarehouse & action_wh) :
+Parser::Parser(MooseApp & app, ActionWarehouse & action_wh) :
+    _app(app),
+    _factory(app.getFactory()),
     _action_wh(action_wh),
+    _action_factory(app.getActionFactory()),
     _syntax(_action_wh.syntax()),
     _syntax_formatter(NULL),
     _getpot_initialized(false),
@@ -164,7 +167,7 @@ Parser::parse(const std::string &input_filename)
     {
       if (!is_parent)
       {
-        params = ActionFactory::instance()->getValidParams(i->second._action);
+        params = _action_factory.getValidParams(i->second._action);
 
         // Before we build any objects we need to make sure that the section they are in is active
         if (isSectionActive(curr_identifier, active_lists))
@@ -177,7 +180,7 @@ Parser::parse(const std::string &input_filename)
           params.set<std::string>("action") = i->second._action_name;
 
           // Create the Action
-          Action * action = ActionFactory::instance()->create(i->second._action, curr_identifier, params);
+          Action * action = _action_factory.create(i->second._action, curr_identifier, params);
           mooseAssert (action != NULL, std::string("Action") + i->second._action + " not created");
 
           // extract the MooseObject params if necessary
@@ -330,7 +333,7 @@ Parser::buildFullTree(const std::string &search_string)
     // goes with this syntax for the purpose of building the Moose Object part of the tree.
     // We will figure this out by asking the ActionFactory for the registration info.
     if (act_info._action_name == "")
-      act_info._action_name = ActionFactory::instance()->getActionName(act_info._action);
+      act_info._action_name = _action_factory.getActionName(act_info._action);
 
     all_names.push_back(std::pair<std::string, Syntax::ActionInfo>(iter->first, act_info));
   }
@@ -340,7 +343,7 @@ Parser::buildFullTree(const std::string &search_string)
 
   for (std::vector<std::pair<std::string, Syntax::ActionInfo> >::iterator act_names = all_names.begin(); act_names != all_names.end(); ++act_names)
   {
-    InputParameters action_obj_params = ActionFactory::instance()->getValidParams(act_names->second._action);
+    InputParameters action_obj_params = _action_factory.getValidParams(act_names->second._action);
     _syntax_formatter->insertNode(act_names->first, act_names->second._action, true, &action_obj_params);
 
     const std::string & action_name = act_names->second._action_name;
@@ -351,8 +354,8 @@ Parser::buildFullTree(const std::string &search_string)
     // if they have matching "built_by_action" tags.
     if (action_obj_params.have_parameter<bool>("isObjectAction") && action_obj_params.get<bool>("isObjectAction"))
     {
-      for (registeredMooseObjectIterator moose_obj = Factory::instance()->registeredObjectsBegin();
-           moose_obj != Factory::instance()->registeredObjectsEnd();
+      for (registeredMooseObjectIterator moose_obj = _factory.registeredObjectsBegin();
+           moose_obj != _factory.registeredObjectsEnd();
            ++moose_obj)
       {
         InputParameters moose_obj_params = (moose_obj->second)();
@@ -559,7 +562,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
     std::string full_name = orig_name;
 
     // Mark parameters appearing in the input file or command line
-    if (_getpot_file.have_variable(full_name.c_str()) || Moose::app->commandLine().haveVariable(full_name.c_str()))
+    if (_getpot_file.have_variable(full_name.c_str()) || _app.commandLine().haveVariable(full_name.c_str()))
     {
       p.set_attributes(it->first, false);
       _extracted_vars.insert(full_name);  // Keep track of all variables extracted from the input file
@@ -664,8 +667,8 @@ void Parser::setScalarParameter(const std::string & full_name, const std::string
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
-    gp = Moose::app->commandLine().getPot();
+  if (_app.commandLine().isVariableOnCommandLine(full_name))
+    gp = _app.commandLine().getPot();
   else
     gp = &_getpot_file;
 
@@ -682,8 +685,8 @@ void Parser::setVectorParameter(const std::string & full_name, const std::string
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
-    gp = Moose::app->commandLine().getPot();
+  if (_app.commandLine().isVariableOnCommandLine(full_name))
+    gp = _app.commandLine().getPot();
   else
     gp = &_getpot_file;
 
@@ -709,8 +712,8 @@ void Parser::setScalarComponentParameter(const std::string & full_name, const st
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
-    gp = Moose::app->commandLine().getPot();
+  if (_app.commandLine().isVariableOnCommandLine(full_name))
+    gp = _app.commandLine().getPot();
   else
     gp = &_getpot_file;
 
@@ -736,8 +739,8 @@ void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const 
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
-    gp = Moose::app->commandLine().getPot();
+  if (_app.commandLine().isVariableOnCommandLine(full_name))
+    gp = _app.commandLine().getPot();
   else
     gp = &_getpot_file;
 
@@ -769,8 +772,8 @@ void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, 
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (Moose::app->commandLine().isVariableOnCommandLine(full_name))
-    gp = Moose::app->commandLine().getPot();
+  if (_app.commandLine().isVariableOnCommandLine(full_name))
+    gp = _app.commandLine().getPot();
   else
     gp = &_getpot_file;
 

@@ -21,6 +21,9 @@
 
 #include <string>
 
+class ActionFactory;
+class Factory;
+
 /**
  * Testing a condition on a local CPU that need to be propagated across all processes.
  *
@@ -52,9 +55,9 @@ extern PerfLog setup_perf_log;
 /**
  * Register objects that are in MOOSE
  */
-void registerObjects();
+void registerObjects(Factory & factory);
 void addActionTypes(Syntax & syntax);
-void registerActions(Syntax & syntax);
+void registerActions(Syntax & syntax, ActionFactory & action_factory);
 
 void setSolverDefaults(FEProblem & problem);
 

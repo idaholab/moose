@@ -3,16 +3,10 @@
 
 #include "MooseApp.h"
 
-class MooseTestApp : public MooseApp
+namespace MooseTest
 {
-public:
-  MooseTestApp(int argc, char *argv[]);
-
-protected:
-  void associateSyntax();
-
-public:
-  static void registerObjects();
-};
+  void registerObjects(Factory & factory);
+  void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
+}
 
 #endif /* MOOSETEST_H */

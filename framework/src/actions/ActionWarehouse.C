@@ -20,8 +20,10 @@
 #include "InputParameters.h"
 #include "MooseMesh.h"
 
-ActionWarehouse::ActionWarehouse(Syntax & syntax) :
+ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory) :
+    _app(app),
     _syntax(syntax),
+    _action_factory(factory),
     _generator_valid(false),
     _show_actions(false),
     _mesh(NULL),
@@ -112,15 +114,15 @@ ActionWarehouse::buildBuildableActions(const std::string &action_name)
   {
     bool ret_value = false;
     std::pair<std::multimap<std::string, std::string>::iterator,
-              std::multimap<std::string, std::string>::iterator> range = ActionFactory::instance()->getA(action_name);
+              std::multimap<std::string, std::string>::iterator> range = _action_factory.getA(action_name);
     for (std::multimap<std::string, std::string>::iterator it = range.first; it != range.second; ++it)
     {
-      InputParameters params = ActionFactory::instance()->getValidParams(it->second);
+      InputParameters params = _action_factory.getValidParams(it->second);
       params.set<ActionWarehouse *>("awh") = this;
 
       if (params.areAllRequiredParamsValid())
       {
-        addActionBlock(ActionFactory::instance()->create(it->second, "", params));
+        addActionBlock(_action_factory.create(it->second, "", params));
         ret_value = true;
       }
     }

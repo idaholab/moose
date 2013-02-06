@@ -51,7 +51,7 @@ SetupPreconditionerAction::act()
 
     // build the preconditioner
     _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem;
-    MoosePreconditioner * pc = dynamic_cast<MoosePreconditioner *>(Factory::instance()->create(_type, getShortName(), _moose_object_pars));
+    MoosePreconditioner * pc = dynamic_cast<MoosePreconditioner *>(_factory.create(_type, getShortName(), _moose_object_pars));
     if (pc == NULL)
       mooseError("Failed to build the preconditioner.");
 

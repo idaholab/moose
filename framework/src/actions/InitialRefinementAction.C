@@ -42,7 +42,7 @@ InitialRefinementAction::act()
   unsigned int level = getParam<unsigned int>("uniform_refine");
 
   unsigned int auto_refine_levels = 0;
-  if (Moose::app->commandLine().search("REFINE", auto_refine_levels))
+  if (_app.commandLine().search("REFINE", auto_refine_levels))
     level += auto_refine_levels;
 
   _problem->setUniformRefineLevel(level);

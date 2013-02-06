@@ -29,6 +29,9 @@
 
 class ActionWarehouse;
 class SyntaxTree;
+class MooseApp;
+class Factory;
+class ActionFactory;
 
 /**
  * Class for parsing input files.
@@ -42,7 +45,7 @@ public:
     YAML
   };
 
-  Parser(ActionWarehouse & action_wh);
+  Parser(MooseApp & app, ActionWarehouse & action_wh);
 
   virtual ~Parser();
 
@@ -149,8 +152,14 @@ public:
   void checkOverriddenParams(bool error_on_warn);
 
 protected:
+  /// The MooseApp this Parser is part of
+  MooseApp & _app;
+  /// The Factory associated with that MooseApp
+  Factory & _factory;
   /// Action warehouse that will be filled by actions
   ActionWarehouse & _action_wh;
+  /// The Factory that builds actions
+  ActionFactory & _action_factory;
   /// Reference to an object that defines input file syntax
   Syntax & _syntax;
 

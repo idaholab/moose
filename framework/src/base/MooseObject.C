@@ -24,6 +24,7 @@ InputParameters validParams<MooseObject>()
 
 MooseObject::MooseObject(const std::string & name, InputParameters parameters) :
     _name(name),
-    _pars(parameters)
+    _pars(parameters),
+    _app(*getParam<MooseApp *>("_moose_app"))
 {
 }

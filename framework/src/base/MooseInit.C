@@ -44,7 +44,4 @@ MooseInit::MooseInit(int argc, char *argv[], MPI_Comm COMM_WORLD_IN) :
 }
 
 MooseInit::~MooseInit()
-{
-  Factory::release();
-  ActionFactory::release();
-}
+{}

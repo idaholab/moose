@@ -20,7 +20,7 @@
 namespace Moose
 {
 
-void associateSyntax(Syntax & syntax)
+void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   /**
    * Note: the optional third parameter is used to differentiate which action_name is
@@ -117,7 +117,7 @@ void associateSyntax(Syntax & syntax)
   syntax.registerActionSyntax("DeprecatedBlockAction", "DeprecatedBlock");
 
   addActionTypes(syntax);
-  registerActions(syntax);
+  registerActions(syntax, action_factory);
 }
 
 

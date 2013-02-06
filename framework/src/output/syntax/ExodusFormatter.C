@@ -36,10 +36,10 @@ ExodusFormatter::printInputFile(ActionWarehouse & wh)
 
   // Grab the command line arguments first
   _ss << "### Command Line Arguments ###\n";
-  Moose::app->commandLine().print("", _ss, 1);
+  wh.mooseApp().commandLine().print("", _ss, 1);
 
   _ss << "### Version Info ###\n"
-      << Moose::app->getSysInfo() << "\n";
+      << wh.mooseApp().getSysInfo() << "\n";
 
   _ss << "### Input File ###" << std::endl;
   wh.printInputFile(_ss);

@@ -14,24 +14,11 @@
 
 #include "ActionFactory.h"
 
-// Static Member initialization
-ActionFactory *ActionFactory::_instance = NULL;
-
 unsigned int ActionFactory::_unique_id = 0;
 
-// Action Factory Members
-ActionFactory *ActionFactory::instance()
+ActionFactory::ActionFactory(MooseApp & app):
+    _app(app)
 {
-  if (!_instance)
-    _instance = new ActionFactory;
-
-  return _instance;
-}
-
-void
-ActionFactory::release()
-{
-  delete _instance;
 }
 
 ActionFactory::~ActionFactory()
@@ -41,6 +28,7 @@ ActionFactory::~ActionFactory()
 Action *
 ActionFactory::create(const std::string & action, const std::string & name, InputParameters params)
 {
+  params.set<MooseApp *>("_moose_app") = &_app;
   std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
   BuildInfo *build_info = NULL;
 
@@ -92,6 +80,7 @@ ActionFactory::getValidParams(const std::string & name)
   InputParameters params = (iter->second._params_pointer)();
 
   params.addPrivateParam<unsigned int>("unique_id", iter->second._unique_id);
+  params.set<MooseApp *>("_moose_app") = &_app;
 
   return params;
 }

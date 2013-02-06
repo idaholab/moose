@@ -28,12 +28,13 @@
  * Macros
  */
 #define stringifyName(name) #name
-#define registerAction(tplt, action)                  ActionFactory::instance()->reg<tplt>(stringifyName(tplt), action)
+#define registerAction(tplt, action)                  action_factory.reg<tplt>(stringifyName(tplt), action)
 #define registerActionName(name, is_required)         syntax.registerName(name, is_required)
 #define addActionNameDependency(action, depends_on)   syntax.addDependency(action, depends_on)
 
 // Forward Declaration
 class ActionFactory;
+class MooseApp;
 
 /**
  * Typedef for function to build objects
@@ -61,9 +62,7 @@ Action * buildAction(const std::string & name, InputParameters parameters)
 class ActionFactory
 {
 public:
-  static ActionFactory *instance();
-
-  static void release();
+  ActionFactory(MooseApp & app);
 
   virtual ~ActionFactory();
 
@@ -116,11 +115,8 @@ public:
   // TODO: I don't think we need this anymore
   static unsigned int _unique_id;        ///< Unique ID for identifying multiple registrations
 
-  static ActionFactory *_instance;       ///< Pointer to the singleton instance
-
-private:
-  // Private constructor for singleton pattern
-  ActionFactory() {}
+protected:
+  MooseApp & _app;
 };
 
 // -----------------------------------------------------------------------------

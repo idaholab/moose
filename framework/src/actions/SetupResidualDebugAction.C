@@ -66,7 +66,7 @@ SetupResidualDebugAction::act()
     kern_ss << "residual_" << var.name() << "_kernel";
     std::string kern_name = kern_ss.str();
 
-    InputParameters params = Factory::instance()->getValidParams("DebugResidualAux");
+    InputParameters params = _factory.getValidParams("DebugResidualAux");
     params.set<AuxVariableName>("variable") = aux_var_name;
     params.set<std::string>("debug_variable") = var.name();
     params.set<MooseEnum>("execute_on") = "residual";
