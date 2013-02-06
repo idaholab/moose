@@ -104,6 +104,11 @@ public:
 
   std::string getSysInfo() { return _sys_info.getInfo(); }
 
+  /**
+   * Retrieve the Executioner for this App.
+   */
+  Executioner * getExecutioner() { return _executioner; }
+
 protected:
   virtual void runInputFile();
 

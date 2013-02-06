@@ -27,8 +27,8 @@
 #include <omp.h>
 #endif
 
-MooseInit::MooseInit(int argc, char *argv[]) :
-	LibMeshInit(argc, argv)
+MooseInit::MooseInit(int argc, char *argv[], MPI_Comm COMM_WORLD_IN) :
+    LibMeshInit(argc, argv, COMM_WORLD_IN)
 {
 #ifdef LIBMESH_HAVE_PETSC
   PetscPopSignalHandler();           // get rid off Petsc error handler
