@@ -94,13 +94,6 @@ public:
   void
   setRParam(const std::string & param_name, const T & value);
 
-  /**
-   * Get the names of MOOSE objects for given RAVEN name
-   * @param rname The RAVEN name
-   * @return the MOOSE object names
-   */
-  const std::vector<std::string> & getMooseObjectsByName(const std::string rname) { return _rname_map[rname]._moose_objects; }
-
   void connectObject(const std::string & rname, const std::string & mooseName);
   void connectObject(const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name);
 
@@ -142,13 +135,19 @@ protected:
 
   struct RavenNameEntry
   {
-    /// Mapping of parameter names
-    std::map<std::string, std::string> _par_map;
-    /// List of MOOSE object names
-    std::vector<std::string> _moose_objects;
+    RavenNameEntry(const std::string & object_name, const std::string par_name) :
+      _object_name(object_name),
+      _par_name(par_name)
+    {
+    }
+
+    /// MOOSE object name
+    std::string _object_name;
+    /// Parameter name
+    std::string _par_name;
   };
   /// Mapping from a friendly name to MOOSE object name
-  std::map<std::string, RavenNameEntry> _rname_map;
+  std::map<std::string, std::map<std::string, std::vector<RavenNameEntry> > > _rname_map;
   /// Mapping of friendly names
   std::map<std::string, RavenMapContainer> _rvect_map;
 
@@ -181,16 +180,16 @@ Component::getRParam(const std::string & param_name)
 {
   std::vector<std::string> s = split(param_name);
 
-  RavenNameEntry & rne = _rname_map[s[0]];
-  const std::vector<std::string> & names = rne._moose_objects;
-  for (std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
+  std::map<std::string, std::vector<RavenNameEntry> > & rmap = _rname_map[s[0]];
+
+  const std::vector<RavenNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
+  for (std::vector<RavenNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
   {
-    std::string nm = *it;
-    const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(nm, 0);
-    for (std::vector<MooseObject *>::const_iterator it = objs.begin() ; it != objs.end(); ++it)
+    const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(it->_object_name, 0);
+    std::string par_name = it->_par_name.empty() ? s[1] : it->_par_name;
+    for (std::vector<MooseObject *>::const_iterator jt = objs.begin() ; jt != objs.end(); ++jt)
     {
-      MooseObject * obj = *it;
-      std::string par_name = rne._par_map.size() > 0 ? rne._par_map[s[1]] : s[1];
+      MooseObject * obj = *jt;
       if (obj->parameters().have_parameter<T>(par_name))
         return obj->parameters().get<T>(par_name);
     }
@@ -216,19 +215,17 @@ Component::setRParam(const std::string & param_name, const T & value)
   std::vector<std::string> s = split(param_name);
   bool found = false;
 
-  RavenNameEntry & rne = _rname_map[s[0]];
-  const std::vector<std::string> & names = rne._moose_objects;
-  for (std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
+  std::map<std::string, std::vector<RavenNameEntry> > & rmap = _rname_map[s[0]];
+  const std::vector<RavenNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
+  for (std::vector<RavenNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
   {
-    std::string nm = *it;
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
-      const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(nm, tid);
-
-      for (std::vector<MooseObject *>::const_iterator it = objs.begin(); it != objs.end(); ++it)
+      const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(it->_object_name, tid);
+      std::string par_name = it->_par_name.empty() ? s[1] : it->_par_name;
+      for (std::vector<MooseObject *>::const_iterator jt = objs.begin(); jt != objs.end(); ++jt)
       {
-        MooseObject * obj = *it;
-        std::string par_name = rne._par_map.size() > 0 ? rne._par_map[s[1]] : s[1];
+        MooseObject * obj = *jt;
         if (obj->parameters().have_parameter<T>(par_name))
         {
           obj->parameters().set<T>(par_name) = value;

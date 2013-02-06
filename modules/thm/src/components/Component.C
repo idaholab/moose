@@ -157,14 +157,15 @@ Component::checkEOSConsistency()
 void
 Component::connectObject(const std::string & rname, const std::string & mooseName)
 {
-  _rname_map[rname]._moose_objects.push_back(mooseName);
+  RavenNameEntry rne(mooseName, "");
+  _rname_map[rname][""].push_back(rne);
 }
 
 void
 Component::connectObject(const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name)
 {
-  _rname_map[rname]._par_map[name] = par_name;
-  _rname_map[rname]._moose_objects.push_back(mooseName);
+  RavenNameEntry rne(mooseName, par_name);
+  _rname_map[rname][name].push_back(rne);
 }
 
 
