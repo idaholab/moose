@@ -22,6 +22,7 @@
 class MooseMesh;
 class FEProblem;
 class Factory;
+class MooseApp;
 
 class ParsedFunctionTest : public CppUnit::TestFixture
 {

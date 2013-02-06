@@ -22,6 +22,7 @@
 
 class Action;
 class ActionWarehouse;
+class ActionFactory;
 class MooseMesh;
 class FEProblem;
 class Executioner;

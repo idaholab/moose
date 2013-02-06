@@ -18,6 +18,7 @@
 #include "InputParameters.h"
 #include "MooseParsedFunction.h"
 #include "FEProblem.h"
+#include "MooseApp.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( ParsedFunctionTest );
 
