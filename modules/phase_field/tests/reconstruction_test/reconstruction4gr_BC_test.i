@@ -17,6 +17,7 @@
 [GlobalParams]
   crys_num = 4
   var_name_base = gr
+  sd = 3
 []
 
 [Variables]
