@@ -19,7 +19,7 @@
 #include "ReferenceResidualProblem.h"
 
 void
-Elk::Contact::registerObjects()
+Elk::Contact::registerObjects(Factory & factory)
 {
   // contact
   registerDiracKernel(ContactMaster);
@@ -33,7 +33,7 @@ Elk::Contact::registerObjects()
 }
 
 void
-Elk::Contact::associateSyntax(Syntax & syntax)
+Elk::Contact::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   syntax.registerActionSyntax("ContactAction", "Contact/*");
 

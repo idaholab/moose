@@ -40,11 +40,11 @@ ContactPressureAuxAction::act()
   short_name.erase(0, 8);
 
   {
-    InputParameters params = Factory::instance()->getValidParams("ContactPressureAux");
+    InputParameters params = _factory.getValidParams("ContactPressureAux");
 
     // Extract global params
-    const std::string syntax = Moose::app->parser().getSyntaxByAction("ContactPressureAux", "");
-    Moose::app->parser().extractParams(syntax, params);
+    const std::string syntax = _app.parser().getSyntaxByAction("ContactPressureAux", "");
+    _app.parser().extractParams(syntax, params);
 
     params.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,_slave);
     params.set<BoundaryName>("paired_boundary") = _master;

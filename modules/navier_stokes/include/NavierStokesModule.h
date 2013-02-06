@@ -5,7 +5,7 @@ namespace Elk
 {
   namespace NavierStokes
   {
-  void registerObjects();
+    void registerObjects(Factory & factory);
   }
 }
 

@@ -23,7 +23,7 @@
 #include "AddCoupledSolidKinSpeciesAuxKernelsAction.h"
 
 void
-Elk::ChemicalReactions::registerObjects()
+Elk::ChemicalReactions::registerObjects(Factory & factory)
 {
   registerKernel(PrimaryImplicitEuler);
   registerKernel(PrimaryConvection);
@@ -39,7 +39,7 @@ Elk::ChemicalReactions::registerObjects()
 }
 
 void
-Elk::ChemicalReactions::associateSyntax(Syntax & syntax)
+Elk::ChemicalReactions::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   syntax.registerActionSyntax("AddPrimarySpeciesAction", "ReactionNetwork");
   syntax.registerActionSyntax("AddSecondarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");

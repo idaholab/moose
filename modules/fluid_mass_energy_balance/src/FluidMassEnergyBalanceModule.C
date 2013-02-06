@@ -29,7 +29,7 @@
 
 
 void
-Elk::FluidMassEnergyBalance::registerObjects()
+Elk::FluidMassEnergyBalance::registerObjects(Factory & factory)
 {
   //energy
   registerKernel(EnthalpyImplicitEuler);

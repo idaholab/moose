@@ -85,7 +85,7 @@ AddCoupledSolidKinSpeciesAuxKernelsAction::act()
 
 //    std::cout << "the " << j+1 << "-th solid kinetic species: " << solid_kin_species[j] << "\n";
 
-    InputParameters params_kin = Factory::instance()->getValidParams("KineticDisPreConcAux");
+    InputParameters params_kin = _factory.getValidParams("KineticDisPreConcAux");
     params_kin.set<AuxVariableName>("variable") = solid_kin_species[j];
     params_kin.set<Real>("log_k") = logk[j];
     params_kin.set<Real>("r_area") = r_area[j];

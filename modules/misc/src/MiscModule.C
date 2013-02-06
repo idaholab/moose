@@ -20,7 +20,7 @@
 #include "RigidBodyModes3D.h"
 
 void
-Elk::Misc::registerObjects()
+Elk::Misc::registerObjects(Factory & factory)
 {
   // Misc
   registerAux(NodalAreaAux);
@@ -46,7 +46,7 @@ Elk::Misc::registerObjects()
 }
 
 void
-Elk::Misc::associateSyntax(Syntax & syntax)
+Elk::Misc::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   syntax.registerActionSyntax("NodalAreaAction", "Contact/*");
   registerAction(NodalAreaAction, "add_user_object");

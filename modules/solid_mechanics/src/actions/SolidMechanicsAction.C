@@ -181,7 +181,7 @@ SolidMechanicsAction::act()
     // Chop off "SolidMechanics/"
     short_name.erase(0, 15);
 
-    InputParameters params = Factory::instance()->getValidParams(type);
+    InputParameters params = _factory.getValidParams(type);
     for (unsigned j(0); j < num_coupled; ++j)
     {
       params.addCoupledVar(keys[j], "");

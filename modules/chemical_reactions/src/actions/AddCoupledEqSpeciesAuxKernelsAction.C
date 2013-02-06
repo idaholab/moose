@@ -83,7 +83,7 @@ AddCoupledEqSpeciesAuxKernelsAction::act()
       // Adding the AqueousEquilibriumRxnAux auxkernel for the list of eq species read in from the input file
       if (aux_species.find(eq_species[j]) != aux_species.end())
       {
-        InputParameters params_eq = Factory::instance()->getValidParams("AqueousEquilibriumRxnAux");
+        InputParameters params_eq = _factory.getValidParams("AqueousEquilibriumRxnAux");
         params_eq.set<AuxVariableName>("variable") = eq_species[j];
         params_eq.set<Real>("log_k") = keq[j];
         params_eq.set<std::vector<Real> >("sto_v") = stos;

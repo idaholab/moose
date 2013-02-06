@@ -59,7 +59,7 @@ PressureAction::act()
     name << "_";
     name << i;
 
-    InputParameters params = Factory::instance()->getValidParams(_kernel_name);
+    InputParameters params = _factory.getValidParams(_kernel_name);
 
     params.set<std::vector<BoundaryName> >("boundary") = _boundary;
     params.set<Real>("factor") = _factor;

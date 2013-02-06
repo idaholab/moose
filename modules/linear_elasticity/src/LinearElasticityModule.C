@@ -11,7 +11,7 @@
 #include "SolidMechTempCoupleZ.h"
 
 void
-Elk::LinearElasticity::registerObjects()
+Elk::LinearElasticity::registerObjects(Factory & factory)
 {
   // linear_elasticity
   registerKernel(SolidMechX);

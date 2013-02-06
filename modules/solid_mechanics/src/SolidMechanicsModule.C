@@ -39,7 +39,7 @@
 #include "StressDivergenceRSpherical.h"
 
 void
-Elk::SolidMechanics::registerObjects()
+Elk::SolidMechanics::registerObjects(Factory & factory)
 {
   registerAux(ElasticEnergyAux);
   registerAux(MaterialSymmElasticityTensorAux);
@@ -80,7 +80,7 @@ Elk::SolidMechanics::registerObjects()
 }
 
 void
-Elk::SolidMechanics::associateSyntax(Syntax & syntax)
+Elk::SolidMechanics::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   syntax.registerActionSyntax("EmptyAction", "BCs/PlenumPressure");
   syntax.registerActionSyntax("PlenumPressureAction", "BCs/PlenumPressure/*");

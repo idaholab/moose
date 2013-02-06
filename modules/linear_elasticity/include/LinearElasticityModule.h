@@ -5,7 +5,7 @@ namespace Elk
 {
   namespace LinearElasticity
   {
-  void registerObjects();
+    void registerObjects(Factory & factory);
   }
 }
 

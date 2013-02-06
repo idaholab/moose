@@ -29,7 +29,7 @@ InputParameters validParams<ReferenceResidualProblem>()
 ReferenceResidualProblem::ReferenceResidualProblem(const std::string & name, InputParameters params) :
     FEProblem(name, params)
 {
-  Moose::app->parser().extractParams("Problem", params);
+  _app.parser().extractParams("Problem", params);
   params.checkParams("Problem");
 
   if (params.isParamValid("solution_variables"))

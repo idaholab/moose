@@ -5,7 +5,7 @@ namespace Elk
 {
   namespace FluidMassEnergyBalance
   {
-  void registerObjects();
+    void registerObjects(Factory & factory);
   }
 }
 

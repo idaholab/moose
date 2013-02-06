@@ -45,7 +45,7 @@
 #include "NSMomentumInviscidNoPressureImplicitFlowBC.h"
 
 void
-Elk::NavierStokes::registerObjects()
+Elk::NavierStokes::registerObjects(Factory & factory)
 {
   // navier_stokes
   registerKernel(NSMassInviscidFlux);

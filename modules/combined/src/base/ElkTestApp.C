@@ -5,8 +5,8 @@ ElkTestApp::ElkTestApp(int argc, char * argv[]) :
     MooseApp(argc, argv)
 {
   init();
-  Elk::registerObjects();
-  Elk::associateSyntax(_syntax);
+  Elk::registerObjects(_factory);
+  Elk::associateSyntax(_syntax, _action_factory);
 }
 
 ElkTestApp::~ElkTestApp()

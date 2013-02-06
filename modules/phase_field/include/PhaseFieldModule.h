@@ -5,7 +5,7 @@ namespace Elk
 {
   namespace PhaseField
   {
-  void registerObjects();
+    void registerObjects(Factory & factory);
   }
 }
 

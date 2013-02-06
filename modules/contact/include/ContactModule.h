@@ -7,9 +7,8 @@ namespace Elk
 {
   namespace Contact
   {
-  void registerObjects();
-
-  void associateSyntax(Syntax & syntax);
+    void registerObjects(Factory & factory);
+    void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
   }
 }
 

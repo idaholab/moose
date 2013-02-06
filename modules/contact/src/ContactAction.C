@@ -72,11 +72,11 @@ ContactAction::act()
   vars.push_back(_disp_z);
 
   {
-    InputParameters params = Factory::instance()->getValidParams("ContactMaster");
+    InputParameters params = _factory.getValidParams("ContactMaster");
 
     // Extract global params
-    const std::string syntax = Moose::app->parser().getSyntaxByAction("ContactMaster", "");
-    Moose::app->parser().extractParams(syntax, params);
+    const std::string syntax = _app.parser().getSyntaxByAction("ContactMaster", "");
+    _app.parser().extractParams(syntax, params);
 
     // Create master objects
     params.set<std::string>("model") = _model;
@@ -123,11 +123,11 @@ ContactAction::act()
   }
 
   {
-    InputParameters params = Factory::instance()->getValidParams("SlaveConstraint");
+    InputParameters params = _factory.getValidParams("SlaveConstraint");
 
     // Extract global params
-    const std::string syntax = Moose::app->parser().getSyntaxByAction("SlaveConstraint", "");
-    Moose::app->parser().extractParams(syntax, params);
+    const std::string syntax = _app.parser().getSyntaxByAction("SlaveConstraint", "");
+    _app.parser().extractParams(syntax, params);
 
     // Create slave objects
     params.set<std::string>("model") = _model;

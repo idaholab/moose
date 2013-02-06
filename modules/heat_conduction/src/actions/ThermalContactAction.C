@@ -77,18 +77,18 @@ ThermalContactAction::addBcs()
 
   bool quadrature = getParam<bool>("quadrature");
 
-  InputParameters action_params = ActionFactory::instance()->getValidParams("AddBCAction");
+  InputParameters action_params = _action_factory.getValidParams("AddBCAction");
   action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
   action_params.set<std::string>("type") = getParam<std::string>("type");
-  Action *action = ActionFactory::instance()->create("AddBCAction", "BCs/gap_bc_" + Moose::stringify(n), action_params);
+  Action *action = _action_factory.create("AddBCAction", "BCs/gap_bc_" + Moose::stringify(n), action_params);
   MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
 
   InputParameters & params = moose_object_action->getObjectParams();
 
   // get valid params for the BC specified in 'type' field
-  InputParameters bc_params = Factory::instance()->getValidParams(getParam<std::string>("type"));
-  Moose::app->parser().extractParams(_name, bc_params);
+  InputParameters bc_params = _factory.getValidParams(getParam<std::string>("type"));
+  _app.parser().extractParams(_name, bc_params);
   params += bc_params;
 
   if(isParamValid("save_in"))
@@ -146,7 +146,7 @@ ThermalContactAction::addBcs()
   // So here we're going to add the other one
   if(quadrature)
   {
-    Action *second_action = ActionFactory::instance()->create("AddBCAction", "BCs/gap_bc_" + Moose::stringify(n+10000), action_params);
+    Action *second_action = _action_factory.create("AddBCAction", "BCs/gap_bc_" + Moose::stringify(n+10000), action_params);
     MooseObjectAction *second_moose_object_action = dynamic_cast<MooseObjectAction *>(second_action);
     mooseAssert (second_moose_object_action, "Dynamic Cast failed");
 
@@ -181,7 +181,7 @@ ThermalContactAction::addAuxVariables()
   // We need to add variables only once per variable name.  However, we don't know how many unique variable
   //   names we will have.  So, we'll always add them.
   {
-    InputParameters action_params = ActionFactory::instance()->getValidParams("AddVariableAction");
+    InputParameters action_params = _action_factory.getValidParams("AddVariableAction");
 
     action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
     action_params.set<std::string>("action") = "add_aux_variable";
@@ -201,40 +201,40 @@ ThermalContactAction::addAuxVariables()
       // Need to add gap_k variable to hold the conductivity across the gap
       InputParameters actionParams(action_params);
 
-      Action * action = ActionFactory::instance()->create("AddVariableAction", "AuxVariables/" + getGapConductivityName(), actionParams);
+      Action * action = _action_factory.create("AddVariableAction", "AuxVariables/" + getGapConductivityName(), actionParams);
       _awh.addActionBlock(action);
 
       // Now add constant conductivity variable
       actionParams.set<MooseEnum>("order") = "CONSTANT";
       actionParams.set<MooseEnum>("family") = "MONOMIAL";
 
-      action = ActionFactory::instance()->create("AddVariableAction", "AuxVariables/conductivity_"+getParam<NonlinearVariableName>("variable"), actionParams);
+      action = _action_factory.create("AddVariableAction", "AuxVariables/conductivity_"+getParam<NonlinearVariableName>("variable"), actionParams);
       _awh.addActionBlock(action);
     }
 
     // gap_value
-    Action *action = ActionFactory::instance()->create("AddVariableAction", "AuxVariables/" + getGapValueName(), action_params);
+    Action *action = _action_factory.create("AddVariableAction", "AuxVariables/" + getGapValueName(), action_params);
     _awh.addActionBlock(action);
     // penetration
-    action = ActionFactory::instance()->create("AddVariableAction", "AuxVariables/" + penetration_var_name, action_params);
+    action = _action_factory.create("AddVariableAction", "AuxVariables/" + penetration_var_name, action_params);
     _awh.addActionBlock(action);
 
-    action_params = ActionFactory::instance()->getValidParams("CopyNodalVarsAction");
+    action_params = _action_factory.getValidParams("CopyNodalVarsAction");
     action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
     action_params.set<std::string>("action") = "copy_nodal_aux_vars";
     // gap_value
-    action = ActionFactory::instance()->create("CopyNodalVarsAction", "AuxVariables/" + getGapValueName(), action_params);
+    action = _action_factory.create("CopyNodalVarsAction", "AuxVariables/" + getGapValueName(), action_params);
     _awh.addActionBlock(action);
     // penetration
-    action = ActionFactory::instance()->create("CopyNodalVarsAction", "AuxVariables/" + penetration_var_name, action_params);
+    action = _action_factory.create("CopyNodalVarsAction", "AuxVariables/" + penetration_var_name, action_params);
     _awh.addActionBlock(action);
     if (getParam<std::string>("type") == "GapHeatTransferLWR")
     {
       // Need to add gap_k variable
-      action = ActionFactory::instance()->create("CopyNodalVarsAction", "AuxVariables/" + getGapConductivityName(), action_params);
+      action = _action_factory.create("CopyNodalVarsAction", "AuxVariables/" + getGapConductivityName(), action_params);
       _awh.addActionBlock(action);
 
-      action = ActionFactory::instance()->create("CopyNodalVarsAction", "AuxVariables/conductivity_"+getParam<NonlinearVariableName>("variable"), action_params);
+      action = _action_factory.create("CopyNodalVarsAction", "AuxVariables/conductivity_"+getParam<NonlinearVariableName>("variable"), action_params);
       _awh.addActionBlock(action);
     }
 
@@ -260,13 +260,13 @@ ThermalContactAction::addAuxBcs()
   [../]
   */
 
-  InputParameters action_params = ActionFactory::instance()->getValidParams("AddBCAction");
+  InputParameters action_params = _action_factory.getValidParams("AddBCAction");
   action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
   action_params.set<std::string>("action") = "add_aux_bc";
 
   {
     action_params.set<std::string>("type") = getParam<std::string>("gap_type");
-    Action *action = ActionFactory::instance()->create("AddBCAction", "AuxBCs/gap_value_" + Moose::stringify(n), action_params);
+    Action *action = _action_factory.create("AddBCAction", "AuxBCs/gap_value_" + Moose::stringify(n), action_params);
     MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
@@ -290,7 +290,7 @@ ThermalContactAction::addAuxBcs()
     if (getParam<bool>("quadrature"))
     {
       action_params.set<std::string>("type") = getParam<std::string>("gap_type");
-      Action *action = ActionFactory::instance()->create("AddBCAction", "AuxBCs/gap_value_" + Moose::stringify(n+10000), action_params);
+      Action *action = _action_factory.create("AddBCAction", "AuxBCs/gap_value_" + Moose::stringify(n+10000), action_params);
       MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
       mooseAssert (moose_object_action, "Dynamic Cast failed");
 
@@ -316,7 +316,7 @@ ThermalContactAction::addAuxBcs()
   std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
   {
     action_params.set<std::string>("type") = "PenetrationAux";
-    Action *action = ActionFactory::instance()->create("AddBCAction", "AuxBCs/penetration_" + Moose::stringify(n), action_params);
+    Action *action = _action_factory.create("AddBCAction", "AuxBCs/penetration_" + Moose::stringify(n), action_params);
     MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
@@ -342,7 +342,7 @@ ThermalContactAction::addAuxBcs()
   {
     // Need to add gap_k variable
     action_params.set<std::string>("type") = getParam<std::string>("gap_type");
-    Action *action = ActionFactory::instance()->create("AddBCAction", "AuxBCs/gap_k_" + Moose::stringify(n), action_params);
+    Action *action = _action_factory.create("AddBCAction", "AuxBCs/gap_k_" + Moose::stringify(n), action_params);
     MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
@@ -368,7 +368,7 @@ ThermalContactAction::addAuxBcs()
 
 
     // Now for the other direction
-    action = ActionFactory::instance()->create("AddBCAction", "AuxBCs/gap_k_" + Moose::stringify(n+10000), action_params);
+    action = _action_factory.create("AddBCAction", "AuxBCs/gap_k_" + Moose::stringify(n+10000), action_params);
     moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
@@ -410,12 +410,12 @@ ThermalContactAction::addAuxKernels()
 
   if (getParam<std::string>("type") == "GapHeatTransferLWR")
   {
-    InputParameters action_params = ActionFactory::instance()->getValidParams("AddKernelAction");
+    InputParameters action_params = _action_factory.getValidParams("AddKernelAction");
     action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
     action_params.set<std::string>("action") = "add_aux_kernel";
 
     action_params.set<std::string>("type") = "MaterialRealAux";
-    Action * action = ActionFactory::instance()->create("AddKernelAction", "AuxKernels/conductivity", action_params);
+    Action * action = _action_factory.create("AddKernelAction", "AuxKernels/conductivity", action_params);
     MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
@@ -434,7 +434,7 @@ ThermalContactAction::addMaterials()
 {
   bool quadrature = getParam<bool>("quadrature");
 
-  InputParameters action_params = ActionFactory::instance()->getValidParams("AddMaterialAction");
+  InputParameters action_params = _action_factory.getValidParams("AddMaterialAction");
   action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
   action_params.set<std::string>("action") = "add_material";
 
@@ -445,15 +445,15 @@ ThermalContactAction::addMaterials()
       type += "LWR";
     }
     action_params.set<std::string>("type") = type;
-    Action *action = ActionFactory::instance()->create("AddMaterialAction", "Materials/gap_value_" + Moose::stringify(n), action_params);
+    Action *action = _action_factory.create("AddMaterialAction", "Materials/gap_value_" + Moose::stringify(n), action_params);
     MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
     InputParameters & params = moose_object_action->getObjectParams();
 
     // get valid params for the Material
-    InputParameters material_params = Factory::instance()->getValidParams(type);
-    Moose::app->parser().extractParams(_name, material_params);
+    InputParameters material_params = _factory.getValidParams(type);
+    _app.parser().extractParams(_name, material_params);
     params += material_params;
 
     params.set<std::vector<VariableName> >("variable") = std::vector<VariableName>(1, getParam<NonlinearVariableName>("variable"));
@@ -503,7 +503,7 @@ ThermalContactAction::addMaterials()
     // Since we have BCs on both sides when we're doing quadrature based transfer we need to add a material to the other side
     if(quadrature)
     {
-      Action * second_action = ActionFactory::instance()->create("AddMaterialAction", "Materials/gap_value_" + Moose::stringify(n+10000), action_params);
+      Action * second_action = _action_factory.create("AddMaterialAction", "Materials/gap_value_" + Moose::stringify(n+10000), action_params);
       MooseObjectAction * second_moose_object_action = dynamic_cast<MooseObjectAction *>(second_action);
       mooseAssert (second_moose_object_action, "Dynamic Cast failed");
 
@@ -540,10 +540,10 @@ ThermalContactAction::addDiracKernels()
   [../]
   */
 
-  InputParameters action_params = ActionFactory::instance()->getValidParams("AddDiracKernelAction");
+  InputParameters action_params = _action_factory.getValidParams("AddDiracKernelAction");
   action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
   action_params.set<std::string>("type") = "GapHeatPointSourceMaster";
-  Action *action = ActionFactory::instance()->create("AddDiracKernelAction", "DiracKernels/thermal_master_" + Moose::stringify(n), action_params);
+  Action *action = _action_factory.create("AddDiracKernelAction", "DiracKernels/thermal_master_" + Moose::stringify(n), action_params);
   MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
 
@@ -567,9 +567,9 @@ ThermalContactAction::addVectors()
   // We need only one instance of flux vector
   if (n == 0)
   {
-    InputParameters action_params = validParams<AddSlaveFluxVectorAction>();
+    InputParameters action_params = _action_factory.getValidParams("AddSlaveFluxVectorAction");
     action_params.set<ActionWarehouse *>("awh") = getParam<ActionWarehouse *>("awh");
-    Action *action = ActionFactory::instance()->create("AddSlaveFluxVectorAction", "add_slave_flux_vector", action_params);
+    Action *action = _action_factory.create("AddSlaveFluxVectorAction", "add_slave_flux_vector", action_params);
     // add it to the warehouse
     _awh.addActionBlock(action);
   }

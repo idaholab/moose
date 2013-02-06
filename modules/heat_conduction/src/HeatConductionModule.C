@@ -20,7 +20,7 @@
 #include "ThermalCond.h"
 
 void
-Elk::HeatConduction::registerObjects()
+Elk::HeatConduction::registerObjects(Factory & factory)
 {
   // heat_conduction
   registerNamedKernel(HeatConductionKernel, "HeatConduction");
@@ -38,7 +38,7 @@ Elk::HeatConduction::registerObjects()
 }
 
 void
-Elk::HeatConduction::associateSyntax(Syntax & syntax)
+Elk::HeatConduction::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   // This registers an action to add the "slave_flux" vector to the system at the right time
   registerActionName("add_slave_flux_vector", false);

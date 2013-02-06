@@ -187,7 +187,7 @@ AddCoupledEqSpeciesKernelsAction::act()
         }
         
         // Building kernels for equilbirium aqueous species
-        InputParameters params_sub = Factory::instance()->getValidParams("CoupledBEEquilibriumSub");
+        InputParameters params_sub = _factory.getValidParams("CoupledBEEquilibriumSub");
         params_sub.set<NonlinearVariableName>("variable") = vars[i];
         params_sub.set<Real>("weight") = weight;
         params_sub.set<Real>("log_k") = keq[j];
@@ -199,7 +199,7 @@ AddCoupledEqSpeciesKernelsAction::act()
         std::cout << vars[i]+"_"+eq_species+"_sub" << "\n";
         params_sub.print();
         
-        InputParameters params_cd = Factory::instance()->getValidParams("CoupledDiffusionReactionSub");
+        InputParameters params_cd = _factory.getValidParams("CoupledDiffusionReactionSub");
         params_cd.set<NonlinearVariableName>("variable") = vars[i];
         params_cd.set<Real>("weight") = weight;
         params_cd.set<Real>("log_k") = keq[j];
@@ -221,7 +221,7 @@ AddCoupledEqSpeciesKernelsAction::act()
           press[0] = p;
           std::cout << "coupled gradient of p" << press[0] << "\n";
           
-          InputParameters params_conv = Factory::instance()->getValidParams("CoupledConvectionReactionSub");
+          InputParameters params_conv = _factory.getValidParams("CoupledConvectionReactionSub");
           params_conv.set<NonlinearVariableName>("variable") = vars[i];
           params_conv.set<Real>("weight") = weight;
           params_conv.set<Real>("log_k") = keq[j];

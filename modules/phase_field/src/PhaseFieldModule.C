@@ -22,7 +22,7 @@
 #include "NodalFloodCountAux.h"
 
 void
-Elk::PhaseField::registerObjects()
+Elk::PhaseField::registerObjects(Factory & factory)
 {
   // phase_field
   registerKernel(MatDiffusion);

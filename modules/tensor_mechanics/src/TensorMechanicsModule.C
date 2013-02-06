@@ -15,7 +15,7 @@
 #include "TensorElasticEnergyAux.h"
 
 void
-Elk::TensorMechanics::registerObjects()
+Elk::TensorMechanics::registerObjects(Factory & factory)
 {
   // tensor_mechanics
   registerKernel(StressDivergenceTensors);
@@ -32,7 +32,7 @@ Elk::TensorMechanics::registerObjects()
 }
 
 void
-Elk::TensorMechanics::associateSyntax(Syntax & syntax)
+Elk::TensorMechanics::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   syntax.registerActionSyntax("TensorMechanicsAction", "TensorMechanics/*");
 
