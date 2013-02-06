@@ -109,34 +109,31 @@ SetupOutputAction::act()
     Moose::setup_perf_log.disable_logging();
   }
 
-  if (_problem != NULL)
+  mooseAssert(_problem, "This should never happen!");
+
+  /// Determines whether we see the perf log early in a run or not
+  _problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
+
+  if (_pars.isParamValid("output_variables"))
   {
-    /// Determines whether we see the perf log early in a run or not
-    _problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
-
-    if (_pars.isParamValid("output_variables"))
-    {
-      _problem->showVariableInOutput(getParam<std::vector<std::string> >("output_variables"));
-    }
-    else if (_pars.isParamValid("hidden_variables"))
-    {
-      _problem->hideVariableFromOutput(getParam<std::vector<std::string> >("hidden_variables"));
-    }
-    else
-    {
-      if (getParam<bool>("elemental_as_nodal"))
-      {
-        // output all variables in the system
-        _problem->showVariableInOutput(_problem->getVariableNames());
-      }
-    }
-
-    // If the user didn't provide a filename - see if the parser has a filename that we can use as a base
-    if (!_pars.isParamValid("file_base"))
-      mooseError("\"file_base\" wasn't populated either by the input file or the parser.");
+    _problem->showVariableInOutput(getParam<std::vector<std::string> >("output_variables"));
+  }
+  else if (_pars.isParamValid("hidden_variables"))
+  {
+    _problem->hideVariableFromOutput(getParam<std::vector<std::string> >("hidden_variables"));
   }
   else
-    _pars.set<OutFileBase>("file_base") = "out";
+  {
+    if (getParam<bool>("elemental_as_nodal"))
+    {
+      // output all variables in the system
+      _problem->showVariableInOutput(_problem->getVariableNames());
+    }
+  }
+
+  // If the user didn't provide a filename - see if the parser has a filename that we can use as a base
+  if (!_pars.isParamValid("file_base"))
+    mooseError("\"file_base\" wasn't populated either by the input file or the parser.");
 
   _problem->setOutputVariables();
 
@@ -146,49 +143,46 @@ SetupOutputAction::act()
   const bool output_initial = getParam<bool>("output_initial");
   _problem->outputInitial(output_initial);
 
-  if (_problem != NULL)
-  {
-    // TODO: handle this thru Problem interface
-    _problem->_postprocessor_screen_output = getParam<bool>("postprocessor_screen");
-    _problem->_postprocessor_csv_output = getParam<bool>("postprocessor_csv");
-    _problem->_postprocessor_gnuplot_output = getParam<bool>("postprocessor_gnuplot");
-    _problem->_gnuplot_format = getParam<std::string>("gnuplot_format");
-    _problem->setMaxPPSRowsScreen(getParam<unsigned int>("max_pps_rows_screen"));
+  // TODO: handle this thru Problem interface
+  _problem->_postprocessor_screen_output = getParam<bool>("postprocessor_screen");
+  _problem->_postprocessor_csv_output = getParam<bool>("postprocessor_csv");
+  _problem->_postprocessor_gnuplot_output = getParam<bool>("postprocessor_gnuplot");
+  _problem->_gnuplot_format = getParam<std::string>("gnuplot_format");
+  _problem->setMaxPPSRowsScreen(getParam<unsigned int>("max_pps_rows_screen"));
 
-    _problem->outputDisplaced(getParam<bool>("output_displaced"));
-    _problem->outputSolutionHistory(getParam<bool>("output_solution_history"));
-    _problem->outputESInfo(getParam<bool>("output_es_info"));
+  _problem->outputDisplaced(getParam<bool>("output_displaced"));
+  _problem->outputSolutionHistory(getParam<bool>("output_solution_history"));
+  _problem->outputESInfo(getParam<bool>("output_es_info"));
 
-    _problem->setNumRestartFiles(getParam<unsigned int>("num_restart_files"));
+  _problem->setNumRestartFiles(getParam<unsigned int>("num_restart_files"));
 
 
 #ifdef LIBMESH_ENABLE_AMR
-    Adaptivity & adapt = _problem->adaptivity();
-    if (adapt.isOn())
-      output.sequence(true);
+  Adaptivity & adapt = _problem->adaptivity();
+  if (adapt.isOn())
+    output.sequence(true);
 #endif //LIBMESH_ENABLE_AMR
 
-    const unsigned int interval = getParam<unsigned int>("interval");
-    const unsigned int screen_interval = getParam<unsigned int>("screen_interval");
+  const unsigned int interval = getParam<unsigned int>("interval");
+  const unsigned int screen_interval = getParam<unsigned int>("screen_interval");
 
-    // Error checks
-    if (interval < screen_interval)
+  // Error checks
+  if (interval < screen_interval)
+    mooseError("\"screen_interval (" + Moose::stringify(screen_interval) +
+               ")\" must be less than or equal to \"interval (" + Moose::stringify(interval) + ")\"");
+  else if (interval > screen_interval)
+  {
+    if (interval % screen_interval)
       mooseError("\"screen_interval (" + Moose::stringify(screen_interval) +
-                 ")\" must be less than or equal to \"interval (" + Moose::stringify(interval) + ")\"");
-    else if (interval > screen_interval)
-    {
-      if (interval % screen_interval)
-        mooseError("\"screen_interval (" + Moose::stringify(screen_interval) +
-                   ")\" must evenly divide \"interval (" + Moose::stringify(interval) + ")\"");
-      else if (!output_initial)
-        mooseError("\"interval (" + Moose::stringify(interval) + ") is set greater than \"screen_interval (" +
-                   Moose::stringify(screen_interval) + ")\" and \"output_initial\" is set to false.");
-    }
-
-    output.interval(getParam<unsigned int>("interval"));
-    output.screen_interval(getParam<unsigned int>("screen_interval"));
-    output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
+                 ")\" must evenly divide \"interval (" + Moose::stringify(interval) + ")\"");
+    else if (!output_initial)
+      mooseError("\"interval (" + Moose::stringify(interval) + ") is set greater than \"screen_interval (" +
+                 Moose::stringify(screen_interval) + ")\" and \"output_initial\" is set to false.");
   }
+
+  output.interval(getParam<unsigned int>("interval"));
+  output.screen_interval(getParam<unsigned int>("screen_interval"));
+  output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
 
 #ifdef LIBMESH_HAVE_PETSC
 //  if (getParam<bool>("print_linear_residuals"))

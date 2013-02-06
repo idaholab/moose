@@ -313,13 +313,10 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
                           *petsc_mat,
                           _sys);
 
-  petsc_mat->close();
-
   if (!petsc_mat)
-  {
-    std::cerr << "Could not convert to Petsc matrix." << std::endl;
-    libmesh_error();
-  }
+    mooseError("Could not convert to Petsc matrix.");
+
+  petsc_mat->close();
 
   PetscErrorCode ierr=0;
   ISColoring iscoloring;

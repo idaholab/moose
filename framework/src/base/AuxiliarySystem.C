@@ -335,7 +335,7 @@ AuxiliarySystem::computeScalarVars(std::vector<AuxWarehouse> & auxs)
       kernel->compute();
     }
 
-    for (std::map<std::string, MooseVariableScalar *>::iterator it = _scalar_vars[tid].begin(); it != _scalar_vars[0].end(); ++it)
+    for (std::map<std::string, MooseVariableScalar *>::iterator it = _scalar_vars[tid].begin(); it != _scalar_vars[tid].end(); ++it)
     {
       MooseVariableScalar * var = it->second;
       var->insert(solution());

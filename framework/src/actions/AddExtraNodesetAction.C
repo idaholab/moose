@@ -61,8 +61,7 @@ AddExtraNodesetAction::act()
   const std::vector<unsigned int> & nodes = getParam<std::vector<unsigned int> >("nodes");
   for(unsigned int i=0; i<nodes.size(); i++)
   {
-    if(_mesh)
-      _mesh->getMesh().boundary_info->add_node(nodes[i], id);
+    _mesh->getMesh().boundary_info->add_node(nodes[i], id);
     if(_displaced_mesh)
       _displaced_mesh->getMesh().boundary_info->add_node(nodes[i], id);
   }
