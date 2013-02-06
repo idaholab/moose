@@ -28,7 +28,7 @@
    fun:ompi_mpi_init
    fun:PMPI_Init
    fun:_ZN7libMesh5_initERiRPPcP19ompi_communicator_t
-   fun:_ZN9MooseInitC1EiPPc
+   fun:_ZN9MooseInitC1EiPPcP19ompi_communicator_t
    fun:main
 }
 
