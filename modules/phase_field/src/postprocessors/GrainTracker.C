@@ -13,7 +13,7 @@ template<>
 InputParameters validParams<GrainTracker>()
 {
   InputParameters params = validParams<NodalFloodCount>();
-  params.addRequiredParam<int>("crys_num","number of grains");
+  params.addRequiredParam<unsigned int>("crys_num","number of grains");
   params.addRequiredParam<std::string>("var_name_base","base for variable names");
   params.addParam<int>("tracking_step", 1, "The timestep for when we should start tracking grains");
   params.addParam<Real>("convex_hull_buffer", 1.0, "The buffer around the convex hull used to determine when features intersect");
