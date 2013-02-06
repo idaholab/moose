@@ -17,6 +17,7 @@
 #include "MooseMesh.h"
 #include "Conversion.h"
 #include "Function.h"
+#include "MooseApp.h"
 
 template<>
 InputParameters validParams<SubProblem>()

@@ -17,6 +17,7 @@
 
 #include "Outputter.h"
 #include "FormattedTable.h"
+#include "MooseApp.h"
 
 // libMesh
 #include "libmesh_common.h"

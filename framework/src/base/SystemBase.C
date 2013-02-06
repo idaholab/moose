@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "MooseApp.h"
 #include "SystemBase.h"
 #include "Factory.h"
 #include "SubProblem.h"
