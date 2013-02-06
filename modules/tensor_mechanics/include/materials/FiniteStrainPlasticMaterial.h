@@ -19,20 +19,21 @@ protected:
   virtual void computeQpStress();
   virtual void initQpStatefulProperties();
 
-  Real _yield_stress;
+  std::vector<Real> _yield_stress_vector;
   MaterialProperty<RankTwoTensor> & _plastic_strain;
   MaterialProperty<RankTwoTensor> & _plastic_strain_old;
+  MaterialProperty<Real> & _eqv_plastic_strain;
 
 
-  RankTwoTensor solveStressResid(RankTwoTensor,RankTwoTensor,RankFourTensor);
 
-  unsigned int isPlastic(RankTwoTensor);
-  
+  RankTwoTensor solveStressResid(RankTwoTensor,RankTwoTensor,RankFourTensor,RankTwoTensor*);
+  unsigned int isPlastic(RankTwoTensor,Real);
   RankTwoTensor getFlowTensor(RankTwoTensor);
   Real getSigEqv(RankTwoTensor);
   RankTwoTensor getSigDev(RankTwoTensor);
   RankFourTensor getJac(RankTwoTensor,RankFourTensor,Real);
   Real deltaFunc(int,int);
+  Real getYieldStress(Real);
   
   
 private:

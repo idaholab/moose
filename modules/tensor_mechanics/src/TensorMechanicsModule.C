@@ -13,6 +13,7 @@
 #include "RealTensorValueAux.h"
 #include "RankFourAux.h"
 #include "TensorElasticEnergyAux.h"
+#include "FiniteStrainPlasticAux.h"
 
 void
 Elk::TensorMechanics::registerObjects(Factory & factory)
@@ -29,6 +30,7 @@ Elk::TensorMechanics::registerObjects(Factory & factory)
   registerAux(RealTensorValueAux);
   registerAux(RankFourAux);
   registerAux(TensorElasticEnergyAux);
+  registerAux(FiniteStrainPlasticAux);
 }
 
 void

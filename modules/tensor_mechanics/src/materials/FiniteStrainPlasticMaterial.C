@@ -1,19 +1,19 @@
-// Original class author: A.M. Jokisaari, O. Heinonen
-
 #include "FiniteStrainPlasticMaterial.h"
 
 /**
- * FiniteStrainElasticMaterial handles a fully anisotropic, single-crystal material's elastic
- * constants.  It takes all 21 independent stiffness tensor inputs.  This can be extended or
- * simplified to specify HCP, monoclinic, cubic, etc as needed.
- */
+FiniteStrainPlasticMaterial integrates the rate independent J2 plasticity model in a
+finite strain framework using return mapping algorithm.
+Integration is performed in an incremental manner using Newton Raphson.
+Isotropic hardening has been incorporated where yield stress as a function of equivalent
+plastic strain has to be specified by the user.
+*/
 
 template<>
 InputParameters validParams<FiniteStrainPlasticMaterial>()
 {
   InputParameters params = validParams<FiniteStrainMaterial>();
 
-  params.addRequiredParam<Real>("yield_stress", "Yield stress for perfectly plastic material");
+  params.addRequiredParam< std::vector<Real> >("yield_stress", "Input data as pairs of equivalent plastic strain and yield stress: Should start with equivalent plastic strain 0");
 
   return params;
 }
@@ -21,143 +21,192 @@ InputParameters validParams<FiniteStrainPlasticMaterial>()
 FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const std::string & name, 
                                              InputParameters parameters)
     : FiniteStrainMaterial(name, parameters),
-      _yield_stress(parameters.get<Real>("yield_stress")),
+      _yield_stress_vector(getParam< std::vector<Real> >("yield_stress")),//Read from input file
       _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
-      _plastic_strain_old(declareProperty<RankTwoTensor>("plastic_strain"))
+      _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
+      _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain"))
+
 {
 }
 
-
 void FiniteStrainPlasticMaterial::initQpStatefulProperties()
 {
+  _elastic_strain[_qp].zero();
+  _stress[_qp].zero();
   _plastic_strain[_qp].zero();
+  _plastic_strain_old[_qp].zero();
+  _eqv_plastic_strain[_qp]=0.0;
 
+  
 }
 
 void FiniteStrainPlasticMaterial::computeQpStress()
 {
 
-  RankTwoTensor sig_old, sig_new, delta_d;
-  RankFourTensor E_ijkl;
-  
+  RankTwoTensor dp;
+
   
   //In elastic problem, all the strain is elastic
   _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
-  _plastic_strain[_qp]=_plastic_strain_old[_qp];
   
+  //Obtain previous plastic rate of deformation tensor
+  dp=_plastic_strain_old[_qp];
 
-  
-  sig_old=_stress_old[_qp];
-  delta_d=_strain_increment[_qp];
-  E_ijkl=_elasticity_tensor[_qp];
-  
+  //Solve J2 plastic constitutive equations based on current strain increment
+  //Returns current  stress and plastic rate of deformation tensor
+  _stress[_qp]=solveStressResid(_stress_old[_qp],_strain_increment[_qp],_elasticity_tensor[_qp],&dp);
 
-  sig_new=solveStressResid(sig_old,delta_d,E_ijkl);
-  _stress[_qp] =sig_new;
+  //Updates current plastic rate of deformation tensor
+  _plastic_strain[_qp]=dp;
+
+  //Evaluate and update current equivalent plastic strain
+  _eqv_plastic_strain[_qp]=pow(2.0/3.0,0.5)*dp.L2norm();
   
   
   //Rotate the stress to the current configuration
   _stress[_qp] = _rotation_increment[_qp]*_stress[_qp]*_rotation_increment[_qp].transpose();
 
+  //Rotate to plastic rate of deformation tensor the current configuration
+  _plastic_strain[_qp]=_rotation_increment[_qp]*_plastic_strain[_qp]*_rotation_increment[_qp].transpose();
+
 
 }
 
 
+/*
+ *Solves for incremental plastic rate of deformation tensor and stress in unrotated frame.
+ *Input: Strain incrment, 4th order elasticity tensor, stress tensor in previous incrmenent and
+ *plastic rate of deformation tensor gradient. 
+ */ 
 RankTwoTensor
-FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTensor delta_d,RankFourTensor E_ijkl)
+FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTensor delta_d,RankFourTensor E_ijkl, RankTwoTensor *dp)
 {
 
-  RankTwoTensor sig_new,delta_dp;
+  RankTwoTensor sig_new,delta_dp,dpn;
   RankTwoTensor flow_tensor, flow_dirn;
   RankTwoTensor resid,ddsig;
   RankFourTensor dr_dsig,dr_dsig_inv;
   Real sig_eqv,flow_incr,f,dflow_incr;
-  Real err1,err2,tol;
+  Real err1,err2,err3,tol1,tol2,tol3;
   unsigned int plastic_flag;
-  unsigned int maxiter=20;
-  int iter=0;
+  unsigned int iterisohard,iter,maxiterisohard=20,maxiter=20;
   Real flow_incr_tmp;
+  Real eqvpstrain;
+  Real yield_stress,yield_stress_prev;
   
   
-//  printf("Mat Point\n");
-
-  tol=1e-6;
-
-  dflow_incr=0.0;
-  flow_incr=0.0;
-  sig_new=sig_old+E_ijkl*delta_d;  
-  plastic_flag=isPlastic(sig_new);
+  
+  
+  tol1=1e-10;
+  tol2=1e-10;
+  tol3=1e-6;
+  
+  sig_new=sig_old+E_ijkl*delta_d;
+  eqvpstrain=pow(2.0/3.0,0.5)*dp->L2norm();
+  yield_stress=getYieldStress(eqvpstrain);
+  plastic_flag=isPlastic(sig_new,yield_stress);//Check of plasticity for elastic predictor
+  
   
   if(plastic_flag==1)
   {
 
-    flow_tensor=getFlowTensor(sig_new);
-    flow_dirn=flow_tensor;
-    
+    iterisohard=0;
+    eqvpstrain=pow(2.0/3.0,0.5)*dp->L2norm();
+    yield_stress=getYieldStress(eqvpstrain);
 
-    resid=flow_dirn*flow_incr-delta_dp;
-    f=getSigEqv(sig_new)-_yield_stress;
-
-    err1=resid.L2norm();
-    err2=fabs(f);
-    
-
-    while((err1 > tol*_yield_stress || err2 > tol*_yield_stress) && iter < maxiter )
+    err3=1.1*tol3;
+        
+    while(err3 > tol3 && iterisohard < maxiterisohard)//Hardness update iteration
     {
 
+      iterisohard++;
 
-      iter=iter+1;
-      
-      dr_dsig=getJac(sig_new,E_ijkl,flow_incr);
-      dr_dsig_inv=dr_dsig.invSymm();
-      
-      ddsig=dr_dsig_inv*(-resid-flow_dirn*dflow_incr);
-      dflow_incr=(f-flow_tensor.doubleContraction(dr_dsig_inv*resid))/(flow_tensor.doubleContraction(dr_dsig_inv*flow_dirn));
 
-      flow_incr_tmp=flow_incr;
-      flow_incr_tmp+=dflow_incr;
-      if(flow_incr_tmp < 0.0)
-        dflow_incr=0.0;
+      iter=0;
       
-
-      
-      flow_incr+=dflow_incr;
-      delta_dp-=E_ijkl.invSymm()*ddsig;
-      sig_new+=ddsig;
-
+      dflow_incr=0.0;
+      flow_incr=0.0;
+      delta_dp.zero();
+      sig_new=sig_old+E_ijkl*delta_d;
+            
       flow_tensor=getFlowTensor(sig_new);
       flow_dirn=flow_tensor;
+    
 
-      resid=flow_dirn*flow_incr-delta_dp;
-      f=getSigEqv(sig_new)-_yield_stress;
-      
+      resid=flow_dirn*flow_incr-delta_dp;//Residual 1 - refer Hughes Simo
+      f=getSigEqv(sig_new)-yield_stress;//Residual 2 - f=0
+
       err1=resid.L2norm();
       err2=fabs(f);
-    }      
+    
+
+      while((err1 > tol1 || err2 > tol2) && iter < maxiter )//Stress update iteration (hardness fixed)
+      {
+
+
+        iter++;
+        
+        dr_dsig=getJac(sig_new,E_ijkl,flow_incr);//Jacobian
+        dr_dsig_inv=dr_dsig.invSymm();
+      
+        ddsig=dr_dsig_inv*(-resid-flow_dirn*dflow_incr);
+        dflow_incr=(f-flow_tensor.doubleContraction(dr_dsig_inv*resid))/(flow_tensor.doubleContraction(dr_dsig_inv*flow_dirn));
+
+        flow_incr_tmp=flow_incr;
+        flow_incr_tmp+=dflow_incr;
+        if(flow_incr_tmp < 0.0)//negative flow increment not allowed
+          dflow_incr=0.0;
+      
+        flow_incr+=dflow_incr;
+        delta_dp-=E_ijkl.invSymm()*ddsig;
+        sig_new+=ddsig;
+
+        flow_tensor=getFlowTensor(sig_new);
+        flow_dirn=flow_tensor;
+
+        resid=flow_dirn*flow_incr-delta_dp;
+        f=getSigEqv(sig_new)-yield_stress;
+      
+        err1=resid.L2norm();
+        err2=fabs(f);
+      }
+
+      if(iter>=maxiter)
+        printf("Constitutive Error: Too many iterations\n");//Convergence failure
+      
+      dpn=*dp+delta_dp;
+      eqvpstrain=pow(2.0/3.0,0.5)*dpn.L2norm();
+
+      yield_stress_prev=yield_stress;
+      yield_stress=getYieldStress(eqvpstrain);
+
+      err3=fabs(yield_stress-yield_stress_prev);
+      
+    }
+
+    if(iterisohard>=maxiterisohard)
+      printf("Constitutive Error: Too many iterations in Hardness Update\n");//Convergence failure
+    
+      
   }
 
-  
-
-
-  if(iter>=maxiter)
-    printf("Constitutive Error: Too many iterations\n");
-  
+  *dp=dpn;//Plastic rate of deformation tensor in unrotated configuration
   
   return sig_new;
 }
 
 
 
-
+//Check for yield condition
 unsigned int
-FiniteStrainPlasticMaterial::isPlastic(RankTwoTensor sig)
+FiniteStrainPlasticMaterial::isPlastic(RankTwoTensor sig,Real yield_stress)
 {
   Real sig_eqv;
-  Real toly=1e-6;
+  Real toly=1e-8;
   
   sig_eqv=getSigEqv(sig);
   
-  if(sig_eqv-_yield_stress>toly*_yield_stress)
+  if(sig_eqv-yield_stress>toly)
   {
     return 1; 
   }
@@ -169,6 +218,7 @@ FiniteStrainPlasticMaterial::isPlastic(RankTwoTensor sig)
 
 
 
+//Obtain derivative of yield surface w.r.t. stress (plastic flow direction)
 RankTwoTensor
 FiniteStrainPlasticMaterial::getFlowTensor(RankTwoTensor sig)
 {
@@ -187,12 +237,12 @@ FiniteStrainPlasticMaterial::getFlowTensor(RankTwoTensor sig)
   
 }
 
+//Obtain equivalent stress (scalar)
 Real
 FiniteStrainPlasticMaterial::getSigEqv(RankTwoTensor sig)
 {
 
   Real sig_eqv,sij;
-  RankTwoTensor identity;
   RankTwoTensor sig_dev;
   
   sig_dev=getSigDev(sig);
@@ -212,6 +262,7 @@ FiniteStrainPlasticMaterial::getSigEqv(RankTwoTensor sig)
   return sig_eqv;
 }
 
+//Obtain deviatoric stress tensor
 RankTwoTensor
 FiniteStrainPlasticMaterial::getSigDev(RankTwoTensor sig)
 {
@@ -229,6 +280,7 @@ FiniteStrainPlasticMaterial::getSigDev(RankTwoTensor sig)
   
 }
 
+//Jacobian for stress update algorithm
 RankFourTensor
 FiniteStrainPlasticMaterial::getJac(RankTwoTensor sig, RankFourTensor E_ijkl, Real flow_incr)
 {
@@ -267,7 +319,7 @@ FiniteStrainPlasticMaterial::getJac(RankTwoTensor sig, RankFourTensor E_ijkl, Re
 
 
 
-
+//Delta Function
 Real
 FiniteStrainPlasticMaterial::deltaFunc(int i, int j)
 {
@@ -278,3 +330,53 @@ FiniteStrainPlasticMaterial::deltaFunc(int i, int j)
 }
 
 
+//Obtain yield stress for a given equivalent plastic strain (input)
+Real
+FiniteStrainPlasticMaterial::getYieldStress(Real eqpe)
+{
+
+  int nsize;
+  Real *data;
+  
+  nsize=_yield_stress_vector.size();
+  data=_yield_stress_vector.data();
+
+  if(data[0] > 0.0 || nsize%2 >0 )//Error check for input inconsitency
+  {
+    printf("Error in yield stress input: Should be a vector with eqv plastic strain and yield stress pair values.\n");
+
+  }
+
+  int ind=0;
+  Real tol=1e-8;
+  
+  
+  while(ind<nsize)
+  {
+    
+    if(fabs(eqpe-data[ind])<tol)
+      return data[ind+1];
+
+    if(ind+2<nsize)
+    {
+      if(eqpe > data[ind] && eqpe < data[ind+2])
+      {
+        return data[ind+1]+(eqpe-data[ind])/(data[ind+2]-data[ind])*(data[ind+3]-data[ind+1]);
+        
+      }
+      
+    }
+    else
+    {
+      return data[nsize-1];     
+      
+    }
+
+    ind+=2;;
+  }
+  
+
+  return 0.0;
+  
+
+}
