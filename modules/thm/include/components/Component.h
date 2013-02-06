@@ -117,6 +117,10 @@ protected:
 
   /// Simulation this component is part of
   Simulation & _sim;
+
+  /// The Factory associated with the MooseApp
+  Factory & _factory;
+
   /// Global mesh this component works on
   MooseMesh & _mesh;
   /// Global physical mesh this component works on

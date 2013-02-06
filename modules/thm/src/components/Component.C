@@ -98,6 +98,7 @@ Component::Component(const std::string & name, InputParameters parameters) :
     _id(comp_id++),
     _parent(parameters.have_parameter<Component *>("_parent") ? getParam<Component *>("_parent") : NULL),
     _sim(*getParam<Simulation *>("_sim")),
+    _factory(_app.getFactory()),
     _mesh(_sim.mesh()),
     _phys_mesh(_sim.physicalMesh()),
     _model_type(_sim.getParam<Model::EModelType>("model_type")),
