@@ -232,7 +232,6 @@ registerObjects(Factory & factory)
 {
   // mesh
   registerObject(MooseMesh);
-  std::cout<<"Registering Generated Mesh!"<<std::endl;
   registerObject(GeneratedMesh);
   registerObject(MeshExtruder);
 
