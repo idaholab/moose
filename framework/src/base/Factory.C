@@ -33,7 +33,7 @@ Factory::getValidParams(const std::string & name)
     mooseError(std::string("A '") + name + "' is not a registered object\n\n");
 
   InputParameters params = _name_to_params_pointer[name]();
-  params.set<MooseApp *>("_moose_app") = &_app;
+  params.addPrivateParam("_moose_app", &_app);
   return params;
 }
 

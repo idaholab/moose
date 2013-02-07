@@ -37,7 +37,7 @@ CoupledExecutioner::CoupledExecutioner(const std::string & name, InputParameters
     _problem(NULL)
 {
   InputParameters params = emptyInputParameters();
-  params.set<MooseApp *>("_moose_app") = &_app;
+  params.addPrivateParam("_moose_app", &_app);
   _problem = static_cast<CoupledProblem *>(_app.getFactory().create("CoupledProblem", "master_problem", params));
 }
 
@@ -97,7 +97,7 @@ CoupledExecutioner::addVariableAction(const std::string & action_name, ActionWar
       {
         // take the action params and change them to create an aux variable
         InputParameters params = action->parameters();
-        params.set<MooseApp *>("_moose_app") = &_app;
+        params.addPrivateParam("_moose_app", &_app);
         params.set<std::string>("action") = "add_aux_variable";
         std::string dest_name("AuxVariables/" + dest_var_name);
         params.set<Parser *>("parser") = NULL;                    // set parser to NULL, since this action was not create by a parser
