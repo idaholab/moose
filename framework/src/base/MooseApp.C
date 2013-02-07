@@ -152,6 +152,8 @@ MooseApp::parseCommandLine()
   std::string input_filename;
   std::string argument;
 
+  _command_line.buildVarsSet();
+
   if (_command_line.search("ErrorUnused"))
     setCheckUnusedFlag(true);
   else if (_command_line.search("WarnUnused"))
@@ -184,25 +186,32 @@ MooseApp::parseCommandLine()
     }
     std::cout << "**END SYNTAX DATA**\n" << std::endl;
   }
-  else if (_command_line.search("InputFile", input_filename))
+  else if (_input_filename == "" && _command_line.search("InputFile", input_filename))
   {
     _input_filename = input_filename;
     _parser.parse(_input_filename);
     _action_warehouse.build();
-
-    std::string mesh_file_name;
-    if (_command_line.search("MeshOnly", mesh_file_name))
-      meshOnly(mesh_file_name);
-    else
-      runInputFile();
   }
   else
     _command_line.printUsage();
 }
 
 void
+MooseApp::setInputFileName(std::string input_filename)
+{
+  _input_filename = input_filename;
+}
+
+void
 MooseApp::runInputFile()
 {
+  std::string mesh_file_name;
+  if (_command_line.search("MeshOnly", mesh_file_name))
+  {
+    meshOnly(mesh_file_name);
+    return;
+  }
+
   // Print the input file syntax if requested
   if (_command_line.search("ShowTree"))
   {
@@ -228,7 +237,11 @@ MooseApp::runInputFile()
     _parser.checkOverriddenParams(true);
   else
     _parser.checkOverriddenParams(false);
+}
 
+void
+MooseApp::executeExecutioner()
+{
   // run the simulation
   if (_executioner)
     _executioner->execute();
@@ -292,8 +305,9 @@ MooseApp::run()
   std::cout << _sys_info.getInfo();
 
   initCommandLineOptions();
-  _command_line.buildVarsSet();
   parseCommandLine();
+  runInputFile();
+  executeExecutioner();
 }
 
 std::string

@@ -74,6 +74,11 @@ public:
   Syntax & syntax() { return _syntax; }
 
   /**
+   * Set the input file name.  This should be done _before_ parseCommandLine()
+   */
+  void setInputFileName(std::string input_file_name);
+
+  /**
    * Return the filename that was parsed
    */
   std::string getFileName(bool stripLeadingPath = true) const;
@@ -117,8 +122,17 @@ public:
    */
   ActionFactory & getActionFactory() { return _action_factory; }
 
-protected:
+  /**
+   * Actually build everything in the input file.
+   */
   virtual void runInputFile();
+
+  /**
+   * Execute the Executioner that was built.
+   */
+  virtual void executeExecutioner();
+
+protected:
 
   virtual void meshOnly(std::string mesh_file_name);
 
