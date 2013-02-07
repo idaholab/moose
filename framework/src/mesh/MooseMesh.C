@@ -86,6 +86,29 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _regular_orthogonal_mesh(false)
 {
   (*_mesh.boundary_info) = (*other_mesh._mesh.boundary_info);
+
+  const std::set<SubdomainID> & subdomains = other_mesh.meshSubdomains();
+  for (std::set<SubdomainID>::const_iterator it = subdomains.begin(); it != subdomains.end(); ++it)
+  {
+    SubdomainID sid = *it;
+    setSubdomainName(sid, other_mesh._mesh.subdomain_name(sid));
+  }
+
+  std::vector<BoundaryID> side_boundaries;
+  other_mesh._mesh.boundary_info->build_side_boundary_ids(side_boundaries);
+  for (std::vector<BoundaryID>::const_iterator it = side_boundaries.begin(); it != side_boundaries.end(); ++it)
+  {
+    BoundaryID bid = *it;
+    _mesh.boundary_info->sideset_name(bid) = other_mesh._mesh.boundary_info->sideset_name(bid);
+  }
+
+  std::vector<BoundaryID> node_boundaries;
+  other_mesh._mesh.boundary_info->build_node_boundary_ids(node_boundaries);
+  for (std::vector<BoundaryID>::const_iterator it = node_boundaries.begin(); it != node_boundaries.end(); ++it)
+  {
+    BoundaryID bid = *it;
+    _mesh.boundary_info->nodeset_name(bid) = other_mesh._mesh.boundary_info->nodeset_name(bid);
+  }
 }
 
 MooseMesh::~MooseMesh()

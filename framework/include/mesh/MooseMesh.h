@@ -148,8 +148,8 @@ public:
   ConstBndNodeRange * getBoundaryNodeRange();
   ConstBndElemRange * getBoundaryElementRange();
 
-  const std::set<SubdomainID> & meshSubdomains() { return _mesh_subdomains; }
-  const std::set<BoundaryID> & meshBoundaryIds() { return _mesh_boundary_ids; }
+  const std::set<SubdomainID> & meshSubdomains() const { return _mesh_subdomains; }
+  const std::set<BoundaryID> & meshBoundaryIds() const { return _mesh_boundary_ids; }
 
   void read(const std::string file_name);
 
