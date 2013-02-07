@@ -68,7 +68,7 @@ public:
   MooseMesh(const MooseMesh & other_mesh);
   virtual ~MooseMesh();
 
-  virtual unsigned int dimension() { return _mesh.mesh_dimension(); }
+  virtual unsigned int dimension() const { return _mesh.mesh_dimension(); }
 
   std::vector<BoundaryID> boundary_ids (const Elem *const elem, const unsigned short int side) const { return _mesh.boundary_info->boundary_ids(elem, side); }
   const std::set<BoundaryID> & get_boundary_ids () const { return _mesh.boundary_info->get_boundary_ids(); }

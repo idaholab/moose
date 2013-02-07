@@ -1027,11 +1027,11 @@ MooseMesh::addPeriodicVariable(unsigned int var_num, BoundaryID primary, Boundar
   if (!_regular_orthogonal_mesh)
     return;
 
-  _periodic_dim[var_num].resize(LIBMESH_DIM);
+  _periodic_dim[var_num].resize(dimension());
 
   _half_range = Point(dimensionWidth(0)/2.0, dimensionWidth(1)/2.0, dimensionWidth(2)/2.0);
 
-  for (unsigned int component=0; component<LIBMESH_DIM; ++component)
+  for (unsigned int component=0; component<dimension(); ++component)
   {
     std::pair<BoundaryID, BoundaryID> boundary_ids = getPairedBoundaryMapping(component);
 
@@ -1046,7 +1046,7 @@ bool
 MooseMesh::isTranslatedPeriodic(unsigned int nonlinear_var_num, unsigned int component) const
 {
   mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
-  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
+  mooseAssert(component < dimension(), "Requested dimension out of bounds");
 
   if (_periodic_dim.find(nonlinear_var_num) != _periodic_dim.end())
     return _periodic_dim.at(nonlinear_var_num)[component];
@@ -1059,7 +1059,7 @@ MooseMesh::minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q)
 {
   mooseAssert(_half_range != RealVectorValue(0, 0, 0), "\"addPeriodicVariable\" has not been called - do you have periodic BCs turned on?");
 
-  for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+  for (unsigned int i=0; i<dimension(); ++i)
   {
     // check to see if we're closer in real or periodic space in x, y, and z
     if (isTranslatedPeriodic(nonlinear_var_num, i))
@@ -1085,7 +1085,7 @@ std::pair<BoundaryID, BoundaryID>
 MooseMesh::getPairedBoundaryMapping(unsigned int component)
 {
   mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
-  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
+  mooseAssert(component < dimension(), "Requested dimension out of bounds");
 
   if (_paired_boundary.empty())
   {
