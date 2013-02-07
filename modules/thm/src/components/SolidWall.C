@@ -8,44 +8,18 @@ template<>
 InputParameters validParams<SolidWall>()
 {
   InputParameters params = validParams<BoundaryBase>();
-  params.addRequiredParam<std::string>("input", "Pipe name");
-
   params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
   return params;
 }
 
 
 SolidWall::SolidWall(const std::string & name, InputParameters params) :
-    BoundaryBase(name, params),
-    _input(getParam<std::string>("input"))
+    BoundaryBase(name, params)
 {
 }
 
 SolidWall::~SolidWall()
 {
-}
-
-void
-SolidWall::buildMesh()
-{
-  // NOTE: we are not building any mesh here, we just extract some mesh related info
-
-  // extract boundary id so we can set up our BCs
-  std::string comp_name;
-  RELAP7::EEndType end_type;
-  RELAP7::getConnectionInfo(_input, comp_name, end_type);
-
-  Component * comp = _sim.getComponentByName(comp_name);
-  if (dynamic_cast<GeometricalComponent *>(comp) != NULL)
-  {
-    GeometricalComponent * gc = dynamic_cast<GeometricalComponent *>(comp);
-    _boundary_id = gc->getBoundaryId(end_type);
-    _mesh.setBoundaryName(_boundary_id, name());
-  }
-  else
-  {
-    mooseError("Component " << comp->name() << " is not of a pipe type");
-  }
 }
 
 void
@@ -61,7 +35,7 @@ SolidWall::addMooseObjects()
   std::vector<std::string> cv_rho(1, Model::RHO);
   std::vector<std::string> cv_rhoE(1, Model::RHOE);
   // boundary id
-  std::vector<unsigned int> bnd_id(1, _boundary_id);
+  std::vector<unsigned int> bnd_id(1, getBoundaryId());
   {
     InputParameters params = _factory.getValidParams("OneDMassSolidWallBC");
     params.set<NonlinearVariableName>("variable") = Model::RHO;
