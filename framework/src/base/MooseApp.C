@@ -153,6 +153,7 @@ MooseApp::parseCommandLine()
   std::string argument;
 
   _command_line.buildVarsSet();
+  std::cout<<"Here 1"<<std::endl;
 
   if (_command_line.search("ErrorUnused"))
     setCheckUnusedFlag(true);
@@ -186,7 +187,13 @@ MooseApp::parseCommandLine()
     }
     std::cout << "**END SYNTAX DATA**\n" << std::endl;
   }
-  else if (_input_filename == "" && _command_line.search("InputFile", input_filename))
+  else if(_input_filename != "") // They already specified an input filename
+  {
+    _parser.parse(_input_filename);
+    _action_warehouse.build();
+    return;
+  }
+  else if (_command_line.search("InputFile", input_filename))
   {
     _input_filename = input_filename;
     _parser.parse(_input_filename);
