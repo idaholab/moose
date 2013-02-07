@@ -1,8 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'block_ic_test.i'
-    exodiff = 'block_ic_test_out.e'
-    scale_refine = 5
-  [../]
-[]
