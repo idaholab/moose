@@ -16,17 +16,14 @@
 #define CONSTANTIC_H
 
 #include "InitialCondition.h"
-
-// LibMesh includes
-#include <parameters.h>
-#include <point.h>
-#include <vector_value.h>
+#include "InputParameters.h"
 
 // System includes
 #include <string>
 
 // Forward Declarations
 class ConstantIC;
+namespace libMesh { class Point; }
 
 template<>
 InputParameters validParams<ConstantIC>();

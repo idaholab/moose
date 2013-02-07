@@ -17,14 +17,12 @@
 
 #include "MooseObject.h"
 #include "ParallelUniqueId.h"
+#include "InputParameters.h"
+
+#include "dense_vector.h"
 
 // System includes
 #include <string>
-
-// libMesh
-#include "point.h"
-#include "vector_value.h"
-#include "dense_vector.h"
 
 //forward declarations
 class ScalarInitialCondition;
@@ -32,7 +30,6 @@ class SubProblem;
 class SystemBase;
 class Assembly;
 class MooseVariableScalar;
-
 
 template<>
 InputParameters validParams<ScalarInitialCondition>();

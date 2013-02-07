@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "ConstantIC.h"
+#include "point.h"
 
 template<>
 InputParameters validParams<ConstantIC>()

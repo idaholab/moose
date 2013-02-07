@@ -14,8 +14,10 @@
 
 #include "Steady.h"
 
-#include "equation_systems.h"
+#include "FEProblem.h"
 #include "Factory.h"
+
+#include "equation_systems.h"
 
 template<>
 InputParameters validParams<Steady>()

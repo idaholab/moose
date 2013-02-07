@@ -16,15 +16,7 @@
 #define TRANSIENTADAPTIVE_H
 
 #include "Executioner.h"
-#include "LinearInterpolation.h"
-#include "FEProblem.h"
-
-#include "mesh_function.h"
-
-// LibMesh includes
-#include <parameters.h>
-#include <point.h>
-#include <vector_value.h>
+#include "InputParameters.h"
 
 // System includes
 #include <string>
@@ -32,6 +24,7 @@
 // Forward Declarations
 class TransientAdaptive;
 class TimeStepper;
+class FEProblem;
 
 enum TimeStepperStatus {
   STATUS_ITERATING                = 0,

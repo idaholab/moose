@@ -15,6 +15,8 @@
 #include "RandomIC.h"
 #include "MooseRandom.h"
 
+#include "point.h"
+
 template<>
 InputParameters validParams<RandomIC>()
 {

@@ -16,12 +16,14 @@
 #define BOUNDINGBOXIC_H
 
 #include "InitialCondition.h"
+#include "InputParameters.h"
 
 // System includes
 #include <string>
 
 // Forward Declarations
 class BoundingBoxIC;
+namespace libMesh { class Point; }
 
 template<>
 InputParameters validParams<BoundingBoxIC>();

@@ -19,6 +19,7 @@
 #include "Factory.h"
 #include "SubProblem.h"
 #include "Conversion.h"
+#include "FEProblem.h"
 
 //libMesh includes
 #include "implicit_system.h"

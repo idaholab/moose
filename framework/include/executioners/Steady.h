@@ -16,17 +16,13 @@
 #define STEADY_H
 
 #include "Executioner.h"
-#include "FEProblem.h"
-
-// LibMesh includes
-#include <parameters.h>
-#include <point.h>
-#include <vector_value.h>
+#include "InputParameters.h"
 
 // System includes
 #include <string>
 
 class Steady;
+class FEProblem;
 
 template<>
 InputParameters validParams<Steady>();

@@ -14,16 +14,13 @@
 
 #include "AdaptiveErrorEstimateTransient.h"
 #include "Problem.h"
-#include <iostream>
-#include <fstream>
+#include "TimeScheme.h"
 
 //libMesh includes
 #include "implicit_system.h"
 #include "nonlinear_implicit_system.h"
 #include "nonlinear_solver.h"
 #include "transient_system.h"
-#include "numeric_vector.h"
-#include "TimeScheme.h"
 
 // C++ Includes
 #include <iomanip>

@@ -16,11 +16,10 @@
 #define DT2TRANSIENT_H
 
 #include "Transient.h"
+#include "InputParameters.h"
 
 // LibMesh includes
-#include <parameters.h>
-#include <point.h>
-#include <vector_value.h>
+#include "numeric_vector.h"
 
 // System includes
 #include <string>

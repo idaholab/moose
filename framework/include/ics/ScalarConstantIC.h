@@ -18,9 +18,7 @@
 #include "ScalarInitialCondition.h"
 
 // LibMesh includes
-#include <parameters.h>
-#include <point.h>
-#include <vector_value.h>
+#include "parameters.h"
 
 // System includes
 #include <string>

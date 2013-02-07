@@ -16,15 +16,14 @@
 #define AdaptiveErrorEstimateTRANSIENT_H
 
 #include "Transient.h"
-#include <iostream>
-#include <fstream>
+#include "InputParameters.h"
+
 // LibMesh includes
-#include <parameters.h>
-#include <point.h>
-#include <vector_value.h>
+#include "numeric_vector.h"
 
 // System includes
 #include <string>
+#include <fstream>
 
 // Forward Declarations
 class AdaptiveErrorEstimateTransient;

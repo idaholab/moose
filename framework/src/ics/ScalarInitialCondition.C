@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "ScalarInitialCondition.h"
+#include "MooseVariableScalar.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 

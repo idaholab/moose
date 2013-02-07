@@ -16,6 +16,9 @@
 #define FUNCTIONIC_H
 
 #include "InitialCondition.h"
+#include "InputParameters.h"
+
+#include <string>
 
 //Forward Declarations
 class FunctionIC;
