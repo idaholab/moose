@@ -40,6 +40,7 @@ SolidWall::buildMesh()
   {
     GeometricalComponent * gc = dynamic_cast<GeometricalComponent *>(comp);
     _boundary_id = gc->getBoundaryId(end_type);
+    _mesh.setBoundaryName(_boundary_id, name());
   }
   else
   {
