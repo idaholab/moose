@@ -40,13 +40,6 @@ MooseApp::~MooseApp()
 }
 
 void
-MooseApp::init()
-{
-  Moose::registerObjects(_factory);
-  Moose::associateSyntax(_syntax, _action_factory);
-}
-
-void
 MooseApp::initCommandLineOptions()
 {
   CommandLine::Option cli_opt;

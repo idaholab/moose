@@ -7,9 +7,10 @@ MooseTestApp::MooseTestApp(int argc, char * argv[]) :
 {
   srand(libMesh::processor_id());
 
-  init();
-
+  Moose::registerObjects(_factory);
   MooseTest::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
   MooseTest::associateSyntax(_syntax, _action_factory);
 }
 

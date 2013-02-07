@@ -46,11 +46,6 @@ public:
   virtual ~MooseApp();
 
   /**
-   * Register objects and associate syntax
-   */
-  virtual void init();
-
-  /**
    * Run the application
    */
   virtual void run();
