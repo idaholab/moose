@@ -83,7 +83,7 @@
   [./testlevel1]
     type = 'Exodiff'
     input = 'periodic_level_1_test.i'
-    exodiff = 'level1.e level1.e-s010 level1.e-s020'
+    exodiff = 'level1.e level1.e-s005 level1.e-s010'
     max_threads = 1
     max_parallel = 1
     group = 'periodic'

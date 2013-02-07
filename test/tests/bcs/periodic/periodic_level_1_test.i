@@ -73,8 +73,8 @@
 
 [Executioner]
   type = Transient
-  dt = 1
-  num_steps = 20
+  dt = 2
+  num_steps = 10
   nl_rel_tol = 1e-10
 
   [./Adaptivity]
