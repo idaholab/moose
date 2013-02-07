@@ -153,7 +153,6 @@ MooseApp::parseCommandLine()
   std::string argument;
 
   _command_line.buildVarsSet();
-  std::cout<<"Here 1"<<std::endl;
 
   if (_command_line.search("ErrorUnused"))
     setCheckUnusedFlag(true);
@@ -171,11 +170,13 @@ MooseApp::parseCommandLine()
   {
     _parser.initSyntaxFormatter(Parser::INPUT_FILE, true);
     _parser.buildFullTree(argument);
+    exit(0);
   }
   else if (_command_line.search("YAML", argument))
   {
     _parser.initSyntaxFormatter(Parser::YAML, true);
     _parser.buildFullTree(argument);
+    exit(0);
   }
   else if (_command_line.search("Syntax"))
   {
