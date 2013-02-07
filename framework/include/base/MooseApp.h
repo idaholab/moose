@@ -20,6 +20,7 @@
 #include <map>
 #include <set>
 
+#include "Moose.h"
 #include "Parser.h"
 #include "MooseSyntax.h"
 #include "ActionWarehouse.h"
