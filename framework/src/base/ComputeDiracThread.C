@@ -22,7 +22,7 @@
 #include "MooseVariable.h"
 
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 ComputeDiracThread::ComputeDiracThread(FEProblem & feproblem,
                                        NonlinearSystem & system,

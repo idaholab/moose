@@ -19,7 +19,7 @@
 #include "IntegratedBC.h"
 #include "DGKernel.h"
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
     ComputeJacobianThread(fe_problem, sys, jacobian)

@@ -15,7 +15,7 @@
 #include "TecplotOutput.h"
 #include "Problem.h"
 // libMesh
-#include "tecplot_io.h"
+#include "libmesh/tecplot_io.h"
 
 // C++
 #include <sstream>

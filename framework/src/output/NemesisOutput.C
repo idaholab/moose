@@ -20,7 +20,7 @@
 #include "MooseObjectAction.h"
 
 // libMesh
-#include "nemesis_io.h"
+#include "libmesh/nemesis_io.h"
 
 // C++
 #include <sstream>

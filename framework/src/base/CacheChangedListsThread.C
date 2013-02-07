@@ -13,7 +13,7 @@
 /****************************************************************/
 #include "CacheChangedListsThread.h"
 
-#include "elem.h"
+#include "libmesh/elem.h"
 
 CacheChangedListsThread::CacheChangedListsThread(MooseMesh & mesh) :
     ThreadedElementLoopBase<ConstElemRange>(mesh)

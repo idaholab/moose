@@ -33,8 +33,8 @@
 #include "Function.h"
 
 // libMesh includes
-#include "quadrature_gauss.h"
-#include "elem.h"
+#include "libmesh/quadrature_gauss.h"
+#include "libmesh/elem.h"
 
 // forward declarations
 class Material;

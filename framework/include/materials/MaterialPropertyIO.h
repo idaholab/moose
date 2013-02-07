@@ -21,9 +21,9 @@
 #include <fstream>
 
 #include "ColumnMajorMatrix.h"
-#include "dense_matrix.h"
-#include "vector_value.h"
-#include "tensor_value.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/tensor_value.h"
 
 class MaterialPropertyStorage;
 

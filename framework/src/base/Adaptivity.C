@@ -22,11 +22,11 @@
 #include "UpdateErrorVectorsThread.h"
 
 // libMesh
-#include "equation_systems.h"
-#include "kelly_error_estimator.h"
-#include "patch_recovery_error_estimator.h"
-#include "fourth_error_estimators.h"
-#include "parallel.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/kelly_error_estimator.h"
+#include "libmesh/patch_recovery_error_estimator.h"
+#include "libmesh/fourth_error_estimators.h"
+#include "libmesh/parallel.h"
 
 #ifdef LIBMESH_ENABLE_AMR
 

@@ -17,9 +17,9 @@
 
 #include "MooseError.h"
 // libmesh includes
-#include "type_tensor.h"
-#include "dense_matrix.h"
-#include "dense_vector.h"
+#include "libmesh/type_tensor.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/dense_vector.h"
 // system includes
 #include <vector>
 #include <iomanip>

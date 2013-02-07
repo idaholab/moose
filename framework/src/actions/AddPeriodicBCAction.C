@@ -21,7 +21,7 @@
 #include "MooseMesh.h"
 
 // LibMesh includes
-#include "periodic_boundary.h" // translation PBCs provided by libmesh
+#include "libmesh/periodic_boundary.h" // translation PBCs provided by libmesh
 
 template<>
 InputParameters validParams<AddPeriodicBCAction>()

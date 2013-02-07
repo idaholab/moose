@@ -17,10 +17,10 @@
 
 // Moose
 #include "MooseMesh.h"
-#include "vector_value.h"
+#include "libmesh/vector_value.h"
 
 // libMesh
-#include "libmesh_common.h"
+#include "libmesh/libmesh_common.h"
 
 // System
 #include <vector>

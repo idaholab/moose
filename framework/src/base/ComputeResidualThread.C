@@ -20,7 +20,7 @@
 #include "DGKernel.h"
 #include "Material.h"
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem,
                                              NonlinearSystem & sys,

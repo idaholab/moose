@@ -16,8 +16,8 @@
 #define MOOSE_H
 
 // libMesh includes
-#include "perf_log.h"
-#include "parallel.h"
+#include "libmesh/perf_log.h"
+#include "libmesh/parallel.h"
 
 #include <string>
 

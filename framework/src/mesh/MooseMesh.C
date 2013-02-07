@@ -19,14 +19,14 @@
 #include "Assembly.h"
 
 // libMesh
-#include "boundary_info.h"
-#include "mesh_tools.h"
-#include "parallel.h"
-#include "mesh_communication.h"
-#include "parallel_mesh.h"
-#include "periodic_boundary_base.h"
-#include "fe_interface.h"
-#include "serial_mesh.h"
+#include "libmesh/boundary_info.h"
+#include "libmesh/mesh_tools.h"
+#include "libmesh/parallel.h"
+#include "libmesh/mesh_communication.h"
+#include "libmesh/parallel_mesh.h"
+#include "libmesh/periodic_boundary_base.h"
+#include "libmesh/fe_interface.h"
+#include "libmesh/serial_mesh.h"
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 

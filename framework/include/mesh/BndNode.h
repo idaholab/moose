@@ -15,10 +15,10 @@
 #ifndef BNDNODE_H
 #define BNDNODE_H
 
-#include "node.h"
-#include "mesh_base.h"
-#include "stored_range.h"
-#include "variant_filter_iterator.h"
+#include "libmesh/node.h"
+#include "libmesh/mesh_base.h"
+#include "libmesh/stored_range.h"
+#include "libmesh/variant_filter_iterator.h"
 
 struct BndNode
 {

@@ -15,7 +15,7 @@
 #ifndef MOOSEINIT_H
 #define MOOSEINIT_H
 
-#include "libmesh.h"
+#include "libmesh/libmesh.h"
 
 /**
  * Initialization object for any MOOSE-based application

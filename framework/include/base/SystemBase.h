@@ -25,12 +25,12 @@
 #include "MooseVariableScalar.h"
 #include "ComputeInitialConditionThread.h"
 // libMesh
-#include "equation_systems.h"
-#include "dof_map.h"
-#include "exodusII_io.h"
-#include "nonlinear_implicit_system.h"
-#include "quadrature.h"
-#include "point.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/dof_map.h"
+#include "libmesh/exodusII_io.h"
+#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/quadrature.h"
+#include "libmesh/point.h"
 
 class Factory;
 class MooseApp;

@@ -24,9 +24,9 @@
 #include "FEProblem.h"
 
 // libMesh
-#include "equation_systems.h"
-#include "explicit_system.h"
-#include "numeric_vector.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/explicit_system.h"
+#include "libmesh/numeric_vector.h"
 
 class SubProblem;
 class MooseVariable;

@@ -18,7 +18,7 @@
 #include "Damper.h"
 
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 ComputeDampingThread::ComputeDampingThread(FEProblem & feproblem,
                                            NonlinearSystem & sys) :

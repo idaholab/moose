@@ -17,7 +17,7 @@
 
 #include "GeneralPostprocessor.h"
 // libMesh
-#include "node.h"
+#include "libmesh/node.h"
 
 class MooseMesh;
 

@@ -43,7 +43,7 @@
 
 #include "smart_assert.h"
 #include "exo_entity.h"
-#include "exodusII.h"
+#include "libmesh/exodusII.h"
 #include "util.h"
 
 using namespace std;

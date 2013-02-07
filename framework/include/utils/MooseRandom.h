@@ -17,7 +17,7 @@
 
 #include "mtwist.h"
 
-#include "libmesh_config.h"
+#include "libmesh/libmesh_config.h"
 #include LIBMESH_INCLUDE_UNORDERED_MAP
 
 /**

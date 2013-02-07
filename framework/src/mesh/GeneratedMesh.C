@@ -16,11 +16,11 @@
 #include "NonlinearSystem.h"
 
 // libMesh includes
-#include "getpot.h"
-#include "mesh_generation.h"
-#include "string_to_enum.h"
-#include "periodic_boundaries.h"
-#include "periodic_boundary_base.h"
+#include "libmesh/getpot.h"
+#include "libmesh/mesh_generation.h"
+#include "libmesh/string_to_enum.h"
+#include "libmesh/periodic_boundaries.h"
+#include "libmesh/periodic_boundary_base.h"
 
 template<>
 InputParameters validParams<GeneratedMesh>()

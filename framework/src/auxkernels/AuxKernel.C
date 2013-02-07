@@ -20,8 +20,8 @@
 #include "MooseTypes.h"
 
 //libmesh includes
-#include "numeric_vector.h"
-#include "dof_map.h"
+#include "libmesh/numeric_vector.h"
+#include "libmesh/dof_map.h"
 
 template<>
 InputParameters validParams<AuxKernel>()

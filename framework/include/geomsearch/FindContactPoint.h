@@ -16,8 +16,8 @@
 #include "PenetrationLocator.h"
 
 // libMesh
-#include "elem.h"
-#include "vector_value.h"
+#include "libmesh/elem.h"
+#include "libmesh/vector_value.h"
 
 namespace Moose
 {

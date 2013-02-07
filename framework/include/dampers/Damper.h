@@ -22,9 +22,9 @@
 #include "MooseVariable.h"
 #include "MaterialPropertyInterface.h"
 // libMesh
-#include "elem.h"
-#include "quadrature.h"
-#include "point.h"
+#include "libmesh/elem.h"
+#include "libmesh/quadrature.h"
+#include "libmesh/point.h"
 
 //Forward Declarations
 class Damper;

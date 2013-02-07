@@ -30,10 +30,10 @@
 #include "MooseMesh.h"
 
 //libMesh includes
-#include "libmesh_common.h"
-#include "elem.h"
-#include "point.h"
-#include "sparse_matrix.h"
+#include "libmesh/libmesh_common.h"
+#include "libmesh/elem.h"
+#include "libmesh/point.h"
+#include "libmesh/sparse_matrix.h"
 //#include "ValidParams.h"
 
 //Forward Declarations

@@ -21,8 +21,8 @@
 #include "MaterialPropertyInterface.h"
 
 // libMesh
-#include "fe.h"
-#include "quadrature.h"
+#include "libmesh/fe.h"
+#include "libmesh/quadrature.h"
 
 class IntegratedBC;
 

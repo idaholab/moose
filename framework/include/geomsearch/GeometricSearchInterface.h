@@ -17,7 +17,7 @@
 
 #include "InputParameters.h"
 
-#include "enum_order.h"
+#include "libmesh/enum_order.h"
 
 // Forward Declarations
 class GeometricSearchData;

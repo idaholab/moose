@@ -20,7 +20,7 @@
 #include "DisplacedProblem.h"
 
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 FlagElementsThread::FlagElementsThread(FEProblem & fe_problem,
                                        std::vector<Number> & serialized_solution,

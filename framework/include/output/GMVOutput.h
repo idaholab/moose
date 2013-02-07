@@ -19,8 +19,8 @@
 #include "FormattedTable.h"
 
 // libMesh
-#include "libmesh_common.h"
-#include "gmv_io.h"
+#include "libmesh/libmesh_common.h"
+#include "libmesh/gmv_io.h"
 
 class GMVOutput : public Outputter
 {

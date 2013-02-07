@@ -16,7 +16,7 @@
 #define SOLUTIONFUNCTION_H
 
 #include "Function.h"
-#include "exodusII_io.h"
+#include "libmesh/exodusII_io.h"
 
 // Forward Declarations
 namespace libMesh

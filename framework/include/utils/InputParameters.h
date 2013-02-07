@@ -20,7 +20,7 @@
 #include <map>
 
 // libMesh
-#include "parameters.h"
+#include "libmesh/parameters.h"
 
 #include "MooseError.h"
 #include "MooseTypes.h"

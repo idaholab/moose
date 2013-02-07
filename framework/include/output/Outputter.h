@@ -17,7 +17,7 @@
 
 #include "FormattedTable.h"
 // libMesh
-#include "equation_systems.h"
+#include "libmesh/equation_systems.h"
 
 #include <string>
 

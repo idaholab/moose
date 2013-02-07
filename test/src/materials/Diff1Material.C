@@ -1,5 +1,5 @@
 #include "Diff1Material.h"
-#include "dense_matrix.h"
+#include "libmesh/dense_matrix.h"
 
 template<>
 InputParameters validParams<Diff1Material>()

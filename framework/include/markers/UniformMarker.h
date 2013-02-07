@@ -18,7 +18,7 @@
 #include "Marker.h"
 
 // libmesh includes
-#include "mesh_tools.h"
+#include "libmesh/mesh_tools.h"
 
 class UniformMarker;
 

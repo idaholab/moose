@@ -19,8 +19,8 @@
 #include "FormattedTable.h"
 
 // libMesh
-#include "libmesh_common.h"
-#include "nemesis_io.h"
+#include "libmesh/libmesh_common.h"
+#include "libmesh/nemesis_io.h"
 
 class NemesisOutput : public Outputter
 {

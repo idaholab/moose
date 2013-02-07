@@ -21,11 +21,11 @@
 #include "AuxWarehouse.h"
 
 // libMesh include
-#include "equation_systems.h"
-#include "explicit_system.h"
-#include "transient_system.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/explicit_system.h"
+#include "libmesh/transient_system.h"
 
-#include "numeric_vector.h"
+#include "libmesh/numeric_vector.h"
 
 class AuxKernel;
 class FEProblem;

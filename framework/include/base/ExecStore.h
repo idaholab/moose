@@ -17,7 +17,7 @@
 
 #include <vector>
 
-#include "libmesh_common.h"
+#include "libmesh/libmesh_common.h"
 
 /// Execution flags - when is the oject executed/evaluated
 enum ExecFlagType {

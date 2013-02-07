@@ -22,8 +22,8 @@
 #include "UserObjectInterface.h"
 
 // libMesh
-#include "vector_value.h"
-#include "point.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/point.h"
 
 class Function;
 

@@ -3,7 +3,7 @@
 #include "MooseTestApp.h"
 #include "Moose.h"
 // libMesh includes
-#include "perf_log.h"
+#include "libmesh/perf_log.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("Moose Test");

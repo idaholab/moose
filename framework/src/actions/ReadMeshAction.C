@@ -21,9 +21,9 @@
 #include "MooseTypes.h"
 
 // libMesh includes
-#include "exodusII_io.h"
-#include "nemesis_io.h"
-#include "parallel_mesh.h"
+#include "libmesh/exodusII_io.h"
+#include "libmesh/nemesis_io.h"
+#include "libmesh/parallel_mesh.h"
 
 template<>
 InputParameters validParams<ReadMeshAction>()

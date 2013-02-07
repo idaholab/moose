@@ -14,7 +14,7 @@
 
 #include "PolynomialFit.h"
 #include "MooseError.h"
-#include "libmesh_common.h"
+#include "libmesh/libmesh_common.h"
 
 extern "C" void dgels_ ( ... );
 

@@ -18,8 +18,8 @@
 #include "ParallelUniqueId.h"
 
 // libMesh includes
-#include "node_range.h"
-#include "system.h"
+#include "libmesh/node_range.h"
+#include "libmesh/system.h"
 
 class FEProblem;
 

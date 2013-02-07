@@ -19,10 +19,10 @@
 #include <vector>
 #include "FormattedTable.h"
 // libMesh
-#include "libmesh_common.h"
+#include "libmesh/libmesh_common.h"
 
 //PETSc includes
-#include "petsc_nonlinear_solver.h"
+#include "libmesh/petsc_nonlinear_solver.h"
 
 class FEProblem;
 class Outputter;

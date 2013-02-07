@@ -1,7 +1,5 @@
 #include "TEJumpBC.h"
 
-#include "numeric_vector.h"
-
 template<>
 InputParameters validParams<TEJumpBC>()
 {

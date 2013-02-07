@@ -16,8 +16,8 @@
 #include "SystemBase.h"
 #include "InitialCondition.h"
 // libmesh includes
-#include "threads.h"
-#include "fe_interface.h"
+#include "libmesh/threads.h"
+#include "libmesh/fe_interface.h"
 
 ComputeInitialConditionThread::ComputeInitialConditionThread(SubProblem & subproblem, SystemBase & sys, NumericVector<Number> & solution) :
     _subproblem(subproblem),

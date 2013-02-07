@@ -19,12 +19,12 @@
 #include "GeometricSearchInterface.h"
 
 // libmesh includes
-#include "libmesh_common.h"
+#include "libmesh/libmesh_common.h"
 #include "MooseMesh.h"
-#include "vector_value.h"
-#include "point.h"
-#include "fe_type.h"
-#include "fe.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/point.h"
+#include "libmesh/fe_type.h"
+#include "libmesh/fe.h"
 
 #include <vector>
 #include <map>

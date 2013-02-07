@@ -19,7 +19,7 @@
 #include "NodalUserObject.h"
 
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(SubProblem & problem, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group) :
     _sub_problem(problem),

@@ -17,13 +17,13 @@
 #include "LineSegment.h"
 
 // libMesh
-#include "boundary_info.h"
-#include "elem.h"
-#include "plane.h"
-#include "fe_interface.h"
-#include "dense_matrix.h"
-#include "dense_vector.h"
-#include "fe_base.h"
+#include "libmesh/boundary_info.h"
+#include "libmesh/elem.h"
+#include "libmesh/plane.h"
+#include "libmesh/fe_interface.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/dense_vector.h"
+#include "libmesh/fe_base.h"
 
 namespace Moose
 {

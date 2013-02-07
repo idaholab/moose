@@ -22,10 +22,10 @@
 #include "Syntax.h"
 
 // libMesh
-#include "getpot.h"
-#include "exodusII_io.h"
-#include "vector_value.h"
-#include "tensor_value.h"
+#include "libmesh/getpot.h"
+#include "libmesh/exodusII_io.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/tensor_value.h"
 
 class ActionWarehouse;
 class SyntaxTree;

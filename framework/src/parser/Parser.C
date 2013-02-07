@@ -42,7 +42,7 @@
 #include "MooseTypes.h"
 
 // libMesh
-#include "getpot.h"
+#include "libmesh/getpot.h"
 
 Parser::Parser(MooseApp & app, ActionWarehouse & action_wh) :
     _app(app),

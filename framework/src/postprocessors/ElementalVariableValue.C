@@ -17,7 +17,7 @@
 #include "SubProblem.h"
 
 // libMesh
-#include "boundary_info.h"
+#include "libmesh/boundary_info.h"
 
 template<>
 InputParameters validParams<ElementalVariableValue>()

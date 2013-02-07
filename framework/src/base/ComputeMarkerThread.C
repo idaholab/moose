@@ -19,7 +19,7 @@
 #include "Marker.h"
 
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 ComputeMarkerThread::ComputeMarkerThread(FEProblem & fe_problem,
                                                AuxiliarySystem & sys,

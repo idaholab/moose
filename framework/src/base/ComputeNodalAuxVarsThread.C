@@ -18,7 +18,7 @@
 #include "AuxKernel.h"
 
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(FEProblem & fe_problem,
                                                      AuxiliarySystem & sys,

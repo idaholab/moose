@@ -22,11 +22,11 @@
 #include "ParallelUniqueId.h"
 
 // libMesh includes
-#include "dof_map.h"
-#include "dense_vector.h"
-#include "numeric_vector.h"
-#include "dense_subvector.h"
-#include "libmesh_common.h"
+#include "libmesh/dof_map.h"
+#include "libmesh/dense_vector.h"
+#include "libmesh/numeric_vector.h"
+#include "libmesh/dense_subvector.h"
+#include "libmesh/libmesh_common.h"
 
 const BoundaryID DGKernel::InternalBndId = 12345;
 

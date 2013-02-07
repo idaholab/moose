@@ -15,8 +15,8 @@
 #ifndef PARALLELUNIQUEID_H
 #define PARALLELUNIQUEID_H
 
-#include "libmesh_common.h"
-#include "threads.h"
+#include "libmesh/libmesh_common.h"
+#include "libmesh/threads.h"
 
 #ifdef LIBMESH_HAVE_TBB_API
 #include "tbb/concurrent_queue.h"

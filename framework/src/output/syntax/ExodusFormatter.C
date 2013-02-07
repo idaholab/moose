@@ -16,7 +16,7 @@
 #include "Parser.h"
 #include "MooseApp.h"
 // libMesh
-#include "exodusII.h"
+#include "libmesh/exodusII.h"
 //
 #include <sstream>
 #include <vector>

@@ -24,7 +24,7 @@
 #include "PostprocessorInterface.h"
 
 // libMesh
-#include "elem.h"
+#include "libmesh/elem.h"
 #include "MooseTypes.h"
 
 //Forward Declarations

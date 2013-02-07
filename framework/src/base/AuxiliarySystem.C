@@ -26,8 +26,8 @@
 #include "ComputeElemAuxBcsThread.h"
 #include "Parser.h"
 
-#include "quadrature_gauss.h"
-#include "node_range.h"
+#include "libmesh/quadrature_gauss.h"
+#include "libmesh/node_range.h"
 
 // AuxiliarySystem ////////
 

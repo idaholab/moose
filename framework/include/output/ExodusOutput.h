@@ -20,8 +20,8 @@
 #include "MooseApp.h"
 
 // libMesh
-#include "libmesh_common.h"
-#include "exodusII_io.h"
+#include "libmesh/libmesh_common.h"
+#include "libmesh/exodusII_io.h"
 
 class ExodusOutput : public Outputter
 {

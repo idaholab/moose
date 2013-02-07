@@ -19,7 +19,7 @@
 #include "FEProblem.h"
 #include "OutputProblem.h"
 
-#include "exodusII_io.h"
+#include "libmesh/exodusII_io.h"
 #include "MooseMesh.h"
 
 template<>

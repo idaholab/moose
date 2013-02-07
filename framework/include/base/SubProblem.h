@@ -22,11 +22,11 @@
 #include "GeometricSearchData.h"
 
 // libMesh include
-#include "equation_systems.h"
-#include "transient_system.h"
-#include "nonlinear_implicit_system.h"
-#include "numeric_vector.h"
-#include "sparse_matrix.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/transient_system.h"
+#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/numeric_vector.h"
+#include "libmesh/sparse_matrix.h"
 
 class MooseMesh;
 class SubProblem;

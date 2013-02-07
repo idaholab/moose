@@ -15,7 +15,7 @@
 #ifndef MOOSEENUM_H
 #define MOOSEENUM_H
 
-#include "parameters.h"
+#include "libmesh/parameters.h"
 
 #include <string>
 #include <vector>

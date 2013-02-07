@@ -17,7 +17,7 @@
 #include "MaterialData.h"
 #include "MooseMesh.h"
 
-#include "fe_interface.h"
+#include "libmesh/fe_interface.h"
 
 std::map<std::string, unsigned int> MaterialPropertyStorage::_prop_ids;
 

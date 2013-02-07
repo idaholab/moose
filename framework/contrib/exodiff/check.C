@@ -43,7 +43,7 @@
 #include "exo_block.h"
 #include "node_set.h"
 #include "side_set.h"
-#include "exodusII.h"
+#include "libmesh/exodusII.h"
 #include "stringx.h"
 #include "Specifications.h"
 

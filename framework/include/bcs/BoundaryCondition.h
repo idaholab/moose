@@ -26,10 +26,12 @@
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
 #include "Assembly.h"
+
 // libMesh
-#include "elem.h"
-#include "vector_value.h"
-#include "tensor_value.h"
+#include "libmesh/elem.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/tensor_value.h"
+#include "libmesh/numeric_vector.h"
 
 class MooseVariable;
 class MooseMesh;

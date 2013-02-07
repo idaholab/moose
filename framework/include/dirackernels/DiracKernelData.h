@@ -17,9 +17,9 @@
 
 #include "MooseArray.h"
 // libMesh
-#include "point.h"
-#include "elem.h"
-#include "numeric_vector.h"
+#include "libmesh/point.h"
+#include "libmesh/elem.h"
+#include "libmesh/numeric_vector.h"
 
 namespace libMesh
 {

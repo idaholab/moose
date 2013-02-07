@@ -18,7 +18,7 @@
 #include <vector>
 #include "MaterialProperty.h"
 #include "MaterialPropertyStorage.h"
-#include "elem.h"
+#include "libmesh/elem.h"
 
 class Material;
 

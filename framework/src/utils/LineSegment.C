@@ -13,8 +13,8 @@
 /****************************************************************/
 
 // libMesh includes
-#include "plane.h"
-#include "vector_value.h"
+#include "libmesh/plane.h"
+#include "libmesh/vector_value.h"
 
 #include "LineSegment.h"
 

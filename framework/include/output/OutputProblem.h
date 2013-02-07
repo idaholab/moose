@@ -18,9 +18,9 @@
 #include "FEProblem.h"
 #include "Output.h"
 // libMesh
-#include "equation_systems.h"
-#include "vector_value.h"
-#include "mesh_function.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/mesh_function.h"
 
 class MooseMesh;
 class OutputProblem;

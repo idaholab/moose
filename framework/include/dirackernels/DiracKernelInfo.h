@@ -20,8 +20,8 @@
 
 #include "MooseArray.h"
 // libMesh
-#include "elem.h"
-#include "point.h"
+#include "libmesh/elem.h"
+#include "libmesh/point.h"
 
 namespace libMesh
 {

@@ -19,8 +19,8 @@
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
 // libMesh
-#include "numeric_vector.h"
-#include "sparse_matrix.h"
+#include "libmesh/numeric_vector.h"
+#include "libmesh/sparse_matrix.h"
 
 class NodalBC;
 

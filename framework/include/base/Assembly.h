@@ -20,14 +20,14 @@
 #include "MooseVariable.h"
 #include "MooseVariableScalar.h"
 // libMesh
-#include "dof_map.h"
-#include "dense_matrix.h"
-#include "dense_vector.h"
-#include "coupling_matrix.h"
-#include "fe.h"
-#include "quadrature.h"
-#include "elem.h"
-#include "node.h"
+#include "libmesh/dof_map.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/dense_vector.h"
+#include "libmesh/coupling_matrix.h"
+#include "libmesh/fe.h"
+#include "libmesh/quadrature.h"
+#include "libmesh/elem.h"
+#include "libmesh/node.h"
 
 // MOOSE Forward Declares
 class MooseMesh;

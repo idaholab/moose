@@ -21,7 +21,7 @@
 #include <ostream>
 
 #include "Action.h"
-#include "exodusII_io.h"
+#include "libmesh/exodusII_io.h"
 
 /// Typedef to hide implementation details
 typedef std::vector<Action *>::iterator ActionIterator;

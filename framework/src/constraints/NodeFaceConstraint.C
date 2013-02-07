@@ -18,7 +18,7 @@
 #include "MooseEnum.h"
 
 // libMesh includes
-#include "string_to_enum.h"
+#include "libmesh/string_to_enum.h"
 
 template<>
 InputParameters validParams<NodeFaceConstraint>()

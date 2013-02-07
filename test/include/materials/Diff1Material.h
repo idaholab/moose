@@ -3,7 +3,7 @@
 
 #include "Material.h"
 // libMesh
-#include "dense_matrix.h"
+#include "libmesh/dense_matrix.h"
 
 //Forward Declarations
 class Diff1Material;
@@ -26,7 +26,7 @@ protected:
   MaterialProperty<Real> & _diffusivity;
   MaterialProperty<std::vector<Real> > & _vprop;
 
-  MaterialProperty<DenseMatrix<Real> > & _matrix_mat;   // to ensure that we abel able to use Matrix-valued material properties
+  MaterialProperty<DenseMatrix<Real> > & _matrix_mat;   // to ensure that we are able to use Matrix-valued material properties
 };
 
 #endif //DIFF1MATERIAL_H

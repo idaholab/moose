@@ -17,7 +17,7 @@
 
 #include "MooseObject.h"
 // libMesh include
-#include "numeric_vector.h"
+#include "libmesh/numeric_vector.h"
 
 //Forward declarations
 namespace libMesh

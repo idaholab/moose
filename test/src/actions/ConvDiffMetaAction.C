@@ -19,7 +19,7 @@
 #include "MooseApp.h"
 #include "FEProblem.h"
 
-#include "vector_value.h"
+#include "libmesh/vector_value.h"
 
 template<>
 InputParameters validParams<ConvDiffMetaAction>()

@@ -22,13 +22,13 @@
 #include <stdexcept>
 
 // libMesh includes
-#include "libmesh.h"
-#include "exodusII_io.h"
-#include "equation_systems.h"
-#include "nonlinear_implicit_system.h"
-#include "explicit_system.h"
-#include "string_to_enum.h"
-#include "fe.h"
+#include "libmesh/libmesh.h"
+#include "libmesh/exodusII_io.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/explicit_system.h"
+#include "libmesh/string_to_enum.h"
+#include "libmesh/fe.h"
 
 // class static initialization
 const Real AddLotsOfAuxVariablesAction::_abs_zero_tol = 1e-12;

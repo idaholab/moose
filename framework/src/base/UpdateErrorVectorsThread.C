@@ -19,7 +19,7 @@
 #include "Marker.h"
 
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 UpdateErrorVectorsThread::UpdateErrorVectorsThread(FEProblem & fe_problem, std::map<std::string, ErrorVector *> indicator_field_to_error_vector) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, fe_problem.getAuxiliarySystem()),

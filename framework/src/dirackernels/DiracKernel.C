@@ -19,9 +19,9 @@
 #include "Problem.h"
 
 // libMesh includes
-#include "parallel.h"
-#include "point_locator_base.h"
-#include "libmesh_common.h"
+#include "libmesh/parallel.h"
+#include "libmesh/point_locator_base.h"
+#include "libmesh/libmesh_common.h"
 
 template<>
 InputParameters validParams<DiracKernel>()

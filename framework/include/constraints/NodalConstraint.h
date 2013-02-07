@@ -29,9 +29,9 @@
 #include "MooseMesh.h"
 
 //libMesh includes
-#include "libmesh_common.h"
-#include "elem.h"
-#include "point.h"
+#include "libmesh/libmesh_common.h"
+#include "libmesh/elem.h"
+#include "libmesh/point.h"
 
 //Forward Declarations
 class Assembly;

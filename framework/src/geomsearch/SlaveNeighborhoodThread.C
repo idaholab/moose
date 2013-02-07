@@ -19,7 +19,7 @@
 #include "FEProblem.h"
 
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 // System includes
 #include <queue>

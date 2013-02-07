@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "FP.h"
-#include "print_trace.h"
+#include "libmesh/print_trace.h"
 #include <stdlib.h>
 #include <signal.h>
 #include <iostream>

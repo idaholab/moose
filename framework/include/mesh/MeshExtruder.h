@@ -17,8 +17,8 @@
 
 #include "MooseMesh.h"
 
-#include "libmesh.h"
-#include "vector_value.h"
+#include "libmesh/libmesh.h"
+#include "libmesh/vector_value.h"
 
 class MeshExtruder;
 

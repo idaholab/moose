@@ -19,15 +19,15 @@
 #include "Conversion.h"
 
 // libMesh includes
-#include "transient_system.h"
-#include "nonlinear_implicit_system.h"
-#include "numeric_vector.h"
-#include "sparse_matrix.h"
-#include "petsc_matrix.h"
-#include "coupling_matrix.h"
-#include "petsc_matrix.h"
-#include "petsc_vector.h"
-#include "petsc_nonlinear_solver.h"
+#include "libmesh/transient_system.h"
+#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/numeric_vector.h"
+#include "libmesh/sparse_matrix.h"
+#include "libmesh/petsc_matrix.h"
+#include "libmesh/coupling_matrix.h"
+#include "libmesh/petsc_matrix.h"
+#include "libmesh/petsc_vector.h"
+#include "libmesh/petsc_nonlinear_solver.h"
 
 class NonlinearSystem;
 

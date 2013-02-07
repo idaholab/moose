@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "BoundingBoxIC.h"
-#include "point.h"
+#include "libmesh/point.h"
 
 template<>
 InputParameters validParams<BoundingBoxIC>()

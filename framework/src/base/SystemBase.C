@@ -24,7 +24,7 @@
 #include "InitialCondition.h"
 #include "ScalarInitialCondition.h"
 // libMesh
-#include "quadrature_gauss.h"
+#include "libmesh/quadrature_gauss.h"
 
 /// Free function used for a libMesh callback
 void extraSendList(std::vector<unsigned int> & send_list, void * context)

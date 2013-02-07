@@ -28,7 +28,7 @@
  */
 
 #include "BilinearInterpolation.h"
-#include "libmesh_common.h"
+#include "libmesh/libmesh_common.h"
 
 int BilinearInterpolation::_file_number = 0;
 

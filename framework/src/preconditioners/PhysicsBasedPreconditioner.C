@@ -19,14 +19,14 @@
 #include "MooseEnum.h"
 
 //libMesh Includes
-#include "libmesh_common.h"
-#include "equation_systems.h"
-#include "nonlinear_implicit_system.h"
-#include "linear_implicit_system.h"
-#include "transient_system.h"
-#include "numeric_vector.h"
-#include "sparse_matrix.h"
-#include "string_to_enum.h"
+#include "libmesh/libmesh_common.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/linear_implicit_system.h"
+#include "libmesh/transient_system.h"
+#include "libmesh/numeric_vector.h"
+#include "libmesh/sparse_matrix.h"
+#include "libmesh/string_to_enum.h"
 
 template<>
 InputParameters validParams<PhysicsBasedPreconditioner>()

@@ -24,9 +24,9 @@
 #include <string>
 
 // libMesh
-#include "point.h"
-#include "vector_value.h"
-#include "elem.h"
+#include "libmesh/point.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/elem.h"
 
 //forward declarations
 class InitialCondition;

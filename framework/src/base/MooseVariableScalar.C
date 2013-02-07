@@ -20,8 +20,8 @@
 #include "NonlinearSystem.h"
 
 // libMesh
-#include "numeric_vector.h"
-#include "dof_map.h"
+#include "libmesh/numeric_vector.h"
+#include "libmesh/dof_map.h"
 
 MooseVariableScalar::MooseVariableScalar(unsigned int var_num, unsigned int index, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
     _var_num(var_num),

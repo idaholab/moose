@@ -15,13 +15,13 @@
 #ifndef PETSCSUPPORT_H
 #define PETSCSUPPORT_H
 
-#include "libmesh.h"
+#include "libmesh/libmesh.h"
 
 #ifdef LIBMESH_HAVE_PETSC
 
 #include "Problem.h"
 // libMesh
-#include "petsc_nonlinear_solver.h"
+#include "libmesh/petsc_nonlinear_solver.h"
 
 class FEProblem;
 

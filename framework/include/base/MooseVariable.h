@@ -20,16 +20,16 @@
 #include "MooseTypes.h"
 
 // libMesh
-#include "quadrature.h"
-#include "dense_vector.h"
-#include "dense_matrix.h"
-#include "numeric_vector.h"
-#include "sparse_matrix.h"
-#include "elem.h"
-#include "node.h"
-#include "variable.h"
-#include "tensor_value.h"
-#include "vector_value.h"
+#include "libmesh/quadrature.h"
+#include "libmesh/dense_vector.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/numeric_vector.h"
+#include "libmesh/sparse_matrix.h"
+#include "libmesh/elem.h"
+#include "libmesh/node.h"
+#include "libmesh/variable.h"
+#include "libmesh/tensor_value.h"
+#include "libmesh/vector_value.h"
 
 typedef MooseArray<Real>               VariableValue;
 typedef MooseArray<RealGradient>       VariableGradient;

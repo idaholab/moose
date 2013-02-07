@@ -23,10 +23,10 @@
 #include <string>
 
 // libMesh
-#include "system_norm.h"
-#include "mesh_refinement.h"
-#include "error_vector.h"
-#include "error_estimator.h"
+#include "libmesh/system_norm.h"
+#include "libmesh/mesh_refinement.h"
+#include "libmesh/error_vector.h"
+#include "libmesh/error_estimator.h"
 
 class FEProblem;
 class MooseMesh;

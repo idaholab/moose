@@ -22,12 +22,12 @@
 #include "MooseTypes.h"
 
 // libMesh
-#include "mesh.h"
-#include "boundary_info.h"
-#include "elem_range.h"
-#include "node_range.h"
-#include "periodic_boundaries.h"
-#include "quadrature.h"
+#include "libmesh/mesh.h"
+#include "libmesh/boundary_info.h"
+#include "libmesh/elem_range.h"
+#include "libmesh/node_range.h"
+#include "libmesh/periodic_boundaries.h"
+#include "libmesh/quadrature.h"
 
 #include <map>
 

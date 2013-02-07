@@ -15,7 +15,7 @@
 #include "DGFunctionDiffusionDirichletBC.h"
 #include "Function.h"
 
-#include "numeric_vector.h"
+#include "libmesh/numeric_vector.h"
 
 template<>
 InputParameters validParams<DGFunctionDiffusionDirichletBC>()

@@ -18,7 +18,7 @@
 #include "ScalarInitialCondition.h"
 
 // LibMesh includes
-#include "parameters.h"
+#include "libmesh/parameters.h"
 
 // System includes
 #include <string>

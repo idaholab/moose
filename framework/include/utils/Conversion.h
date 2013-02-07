@@ -18,9 +18,9 @@
 #include "ExecStore.h"
 #include "MooseTypes.h"
 // libMesh
-#include "enum_order.h"
-#include "enum_quadrature_type.h"
-#include "point.h"
+#include "libmesh/enum_order.h"
+#include "libmesh/enum_quadrature_type.h"
+#include "libmesh/point.h"
 
 namespace Moose {
 

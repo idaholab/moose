@@ -23,7 +23,7 @@
 #include "AuxKernel.h"
 
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(FEProblem & fe_problem, NonlinearSystem & sys, std::vector<MaterialData *> & material_data,
                                                            std::vector<MaterialData *> & bnd_material_data, MaterialPropertyStorage & material_props,

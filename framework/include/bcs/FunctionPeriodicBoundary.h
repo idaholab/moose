@@ -17,8 +17,8 @@
 
 #include <vector>
 
-#include "point.h"
-#include "periodic_boundary_base.h"
+#include "libmesh/point.h"
+#include "libmesh/periodic_boundary_base.h"
 
 class FEProblem;
 class Function;

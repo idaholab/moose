@@ -17,8 +17,8 @@
 
 #include "SystemBase.h"
 // libMesh include
-#include "explicit_system.h"
-#include "transient_system.h"
+#include "libmesh/explicit_system.h"
+#include "libmesh/transient_system.h"
 
 class DisplacedProblem;
 

@@ -19,7 +19,7 @@
 #include "ParallelUniqueId.h"
 #include "InputParameters.h"
 
-#include "dense_vector.h"
+#include "libmesh/dense_vector.h"
 
 // System includes
 #include <string>

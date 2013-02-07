@@ -23,8 +23,8 @@
 #include "AuxKernel.h"
 
 // libmesh includes
-#include "threads.h"
-#include "elem.h"
+#include "libmesh/threads.h"
+#include "libmesh/elem.h"
 
 ProjectMaterialProperties::ProjectMaterialProperties(bool refine,
                                                      FEProblem & fe_problem, NonlinearSystem & sys, std::vector<MaterialData *> & material_data,

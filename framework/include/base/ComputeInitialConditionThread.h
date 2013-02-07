@@ -16,8 +16,8 @@
 #define COMPUTEREINITIALCONDITIONTHREAD_H
 
 #include "ParallelUniqueId.h"
-#include "elem_range.h"
-#include "numeric_vector.h"
+#include "libmesh/elem_range.h"
+#include "libmesh/numeric_vector.h"
 
 class SubProblem;
 class SystemBase;

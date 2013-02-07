@@ -16,7 +16,7 @@
 #include "FEProblem.h"
 
 // libmesh includes
-#include "fe.h"
+#include "libmesh/fe.h"
 
 template<>
 InputParameters validParams<AddElementalFieldAction>()

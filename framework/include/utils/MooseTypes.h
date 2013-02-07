@@ -19,9 +19,9 @@
 #include <vector>
 
 // libMesh includes
-#include "id_types.h"
-#include "stored_range.h"
-#include "elem.h"
+#include "libmesh/id_types.h"
+#include "libmesh/stored_range.h"
+#include "libmesh/elem.h"
 
 /**
  * MOOSE typedefs

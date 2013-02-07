@@ -16,7 +16,7 @@
 #define LINESEGMENT_H
 
 // libMesh includes
-#include "point.h"
+#include "libmesh/point.h"
 
 // forward declares
 namespace libMesh {

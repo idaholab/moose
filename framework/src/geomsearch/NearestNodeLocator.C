@@ -19,10 +19,10 @@
 #include "NearestNodeThread.h"
 #include "Moose.h"
 // libMesh
-#include "boundary_info.h"
-#include "elem.h"
-#include "plane.h"
-#include "mesh_tools.h"
+#include "libmesh/boundary_info.h"
+#include "libmesh/elem.h"
+#include "libmesh/plane.h"
+#include "libmesh/mesh_tools.h"
 
 
 NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh, BoundaryID boundary1, BoundaryID boundary2) :

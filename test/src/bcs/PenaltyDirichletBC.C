@@ -1,6 +1,5 @@
 #include "PenaltyDirichletBC.h"
 #include "Function.h"
-#include "numeric_vector.h"
 
 template<>
 InputParameters validParams<PenaltyDirichletBC>()
@@ -9,7 +8,7 @@ InputParameters validParams<PenaltyDirichletBC>()
   params.addParam<Real>("penalty",1e5,"Penalty scalar");
   params.addParam<Real>("value", 0.0, "Boundary value of the variable");
   params.addRequiredParam<FunctionName>("function", "Forcing function");
-  
+
   return params;
 }
 

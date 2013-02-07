@@ -19,7 +19,7 @@
 #include "FormattedTable.h"
 
 // libMesh
-#include "libmesh_common.h"
+#include "libmesh/libmesh_common.h"
 
 class XDAOutput : public Outputter
 {

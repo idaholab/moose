@@ -16,7 +16,7 @@
 #include "Problem.h"
 
 // libMesh
-#include "gmv_io.h"
+#include "libmesh/gmv_io.h"
 
 // C++
 #include <sstream>

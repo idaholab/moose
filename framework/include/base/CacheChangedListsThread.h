@@ -18,7 +18,7 @@
 #include "ThreadedElementLoop.h"
 
 // libMesh includes
-#include "stored_range.h"
+#include "libmesh/stored_range.h"
 
 class CacheChangedListsThread : public ThreadedElementLoopBase<ConstElemRange>
 {

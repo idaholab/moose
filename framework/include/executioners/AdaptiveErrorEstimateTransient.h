@@ -19,7 +19,7 @@
 #include "InputParameters.h"
 
 // LibMesh includes
-#include "numeric_vector.h"
+#include "libmesh/numeric_vector.h"
 
 // System includes
 #include <string>

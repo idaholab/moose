@@ -15,7 +15,7 @@
 #include "PenetrationAux.h"
 #include "MooseEnum.h"
 
-#include "string_to_enum.h"
+#include "libmesh/string_to_enum.h"
 
 template<>
 InputParameters validParams<PenetrationAux>()

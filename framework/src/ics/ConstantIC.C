@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "ConstantIC.h"
-#include "point.h"
+#include "libmesh/point.h"
 
 template<>
 InputParameters validParams<ConstantIC>()

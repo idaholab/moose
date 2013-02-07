@@ -17,8 +17,8 @@
 
 #include "Action.h"
 // libMesh
-#include "enum_order.h"
-#include "enum_quadrature_type.h"
+#include "libmesh/enum_order.h"
+#include "libmesh/enum_quadrature_type.h"
 
 class SetupQuadratureAction;
 

@@ -20,9 +20,9 @@
 // MOOSE includes
 #include "MoosePreconditioner.h"
 //libMesh includes
-#include "preconditioner.h"
-#include "system.h"
-#include "linear_implicit_system.h"
+#include "libmesh/preconditioner.h"
+#include "libmesh/system.h"
+#include "libmesh/linear_implicit_system.h"
 
 
 class FEProblem;

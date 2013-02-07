@@ -20,8 +20,8 @@
 #include "Factory.h"
 
 // libmesh includes
-#include "linear_partitioner.h"
-#include "centroid_partitioner.h"
+#include "libmesh/linear_partitioner.h"
+#include "libmesh/centroid_partitioner.h"
 #include "MooseEnum.h"
 
 template<>

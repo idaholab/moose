@@ -21,7 +21,7 @@
 #include <string>
 #include <map>
 
-#include "parsed_function.h"
+#include "libmesh/parsed_function.h"
 
 class MooseParsedFunction;
 

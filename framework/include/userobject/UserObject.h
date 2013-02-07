@@ -23,8 +23,8 @@
 #include "SubProblem.h"
 
 //libMesh includes
-#include "libmesh_common.h"
-#include "parallel.h"
+#include "libmesh/libmesh_common.h"
+#include "libmesh/parallel.h"
 
 class UserObject;
 class FEProblem;

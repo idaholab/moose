@@ -1,8 +1,6 @@
 #include "DGFunctionConvectionDirichletBC.h"
 #include "Function.h"
 
-#include "numeric_vector.h"
-
 template<>
 InputParameters validParams<DGFunctionConvectionDirichletBC>()
 {

@@ -18,7 +18,7 @@
 #include "ThreadedElementLoop.h"
 #include "AuxWarehouse.h"
 // libMesh includes
-#include "elem_range.h"
+#include "libmesh/elem_range.h"
 
 class FEProblem;
 class AuxiliarySystem;

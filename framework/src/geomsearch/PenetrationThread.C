@@ -19,7 +19,7 @@
 #include "NearestNodeLocator.h"
 
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 #include <algorithm>
 

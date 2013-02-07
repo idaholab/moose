@@ -17,7 +17,7 @@
 #include "FEProblem.h"
 
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 #include LIBMESH_INCLUDE_UNORDERED_SET
 LIBMESH_DEFINE_HASH_POINTERS
 

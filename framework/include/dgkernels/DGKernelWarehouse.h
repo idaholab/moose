@@ -18,7 +18,7 @@
 #include <vector>
 #include <map>
 #include <set>
-#include "libmesh_common.h"
+#include "libmesh/libmesh_common.h"
 
 
 class DGKernel;

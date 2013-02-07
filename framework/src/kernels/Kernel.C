@@ -20,7 +20,7 @@
 #include "SystemBase.h"
 
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 template<>
 InputParameters validParams<Kernel>()

@@ -17,9 +17,9 @@
 #include "InputParameters.h"
 
 // libMesh includes
-#include "mesh_generation.h"
-#include "mesh.h"
-#include "boundary_info.h"
+#include "libmesh/mesh_generation.h"
+#include "libmesh/mesh.h"
+#include "libmesh/boundary_info.h"
 
 template<>
 InputParameters validParams<MeshExtruder>()

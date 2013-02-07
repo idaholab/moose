@@ -16,7 +16,7 @@
 #include "ExecutablePath.h"
 #include "HerdRevision.h"  ///< This file is auto-generated and contains the revisions
 
-#include "libmesh_config.h"
+#include "libmesh/libmesh_config.h"
 
 #include <ctime>
 #include <sstream>

@@ -15,9 +15,9 @@
 #include "OutputProblem.h"
 #include "MooseMesh.h"
 
-#include "equation_systems.h"
-#include "explicit_system.h"
-#include "mesh_function.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/explicit_system.h"
+#include "libmesh/mesh_function.h"
 
 template<>
 InputParameters validParams<OutputProblem>()

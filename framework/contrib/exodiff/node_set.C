@@ -36,7 +36,7 @@
 
 #include "smart_assert.h"
 #include "node_set.h"
-#include "exodusII.h"
+#include "libmesh/exodusII.h"
 #include "iqsort.h"
 #include "Specifications.h"
 

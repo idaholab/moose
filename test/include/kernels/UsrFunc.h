@@ -1,10 +1,10 @@
 #ifndef USRFUNC_H
 #define USRFUNC_H
 
-#include "libmesh_common.h"
-#include "vector_value.h"
-#include "point.h"
-#include "parameters.h"
+#include "libmesh/libmesh_common.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/point.h"
+#include "libmesh/parameters.h"
 
 /**
  *   Manufactured solution for advection-diffusion problem-1.

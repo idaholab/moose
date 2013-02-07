@@ -19,7 +19,7 @@
 #include <string>
 #include <map>
 #include <set>
-#include "getpot.h"
+#include "libmesh/getpot.h"
 #include "MooseError.h"
 
 // Forward Declaration

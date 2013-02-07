@@ -19,7 +19,7 @@
 #include "Indicator.h"
 
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 ComputeIndicatorThread::ComputeIndicatorThread(FEProblem & fe_problem,
                                                AuxiliarySystem & sys,

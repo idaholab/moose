@@ -23,8 +23,8 @@
 #include "ExodusFormatter.h"
 
 // libMesh
-#include "exodusII.h"
-#include "exodusII_io.h"
+#include "libmesh/exodusII.h"
+#include "libmesh/exodusII_io.h"
 
 // C++
 #include <sstream>

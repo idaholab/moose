@@ -15,8 +15,6 @@
 #include "DGMDDBC.h"
 #include "Function.h"
 
-#include "numeric_vector.h"
-
 template<>
 InputParameters validParams<DGMDDBC>()
 {

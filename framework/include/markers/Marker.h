@@ -24,8 +24,8 @@
 #include "UserObjectInterface.h"
 
 // libmesh Includes
-#include "threads.h"
-#include "error_vector.h"
+#include "libmesh/threads.h"
+#include "libmesh/error_vector.h"
 
 class MooseMesh;
 class SubProblem;

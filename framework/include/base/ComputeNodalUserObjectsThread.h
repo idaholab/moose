@@ -18,7 +18,7 @@
 #include "ParallelUniqueId.h"
 #include "UserObjectWarehouse.h"
 // libMesh includes
-#include "node_range.h"
+#include "libmesh/node_range.h"
 
 class Problem;
 class SubProblem;

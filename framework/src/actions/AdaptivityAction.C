@@ -23,7 +23,7 @@
 #include "MooseEnum.h"
 
 // libMesh includes
-#include "transient_system.h"
+#include "libmesh/transient_system.h"
 
 template<>
 InputParameters validParams<AdaptivityAction>()

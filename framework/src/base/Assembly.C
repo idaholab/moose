@@ -21,8 +21,8 @@
 #include "MooseTypes.h"
 
 // libMesh
-#include "quadrature_gauss.h"
-#include "fe_interface.h"
+#include "libmesh/quadrature_gauss.h"
+#include "libmesh/fe_interface.h"
 
 
 Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :

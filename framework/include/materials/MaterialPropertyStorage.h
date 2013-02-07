@@ -17,9 +17,9 @@
 
 #include "MaterialProperty.h"
 
-#include "elem.h"
+#include "libmesh/elem.h"
 #include "HashMap.h"
-#include "quadrature.h"
+#include "libmesh/quadrature.h"
 
 class Material;
 class MaterialData;

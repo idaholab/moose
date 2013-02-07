@@ -22,12 +22,12 @@
 #include "MooseArray.h"
 
 // libMesh
-#include "libmesh_common.h"
-#include "equation_systems.h"
-#include "quadrature.h"
-#include "elem.h"
-#include "node.h"
-#include "nonlinear_implicit_system.h"
+#include "libmesh/libmesh_common.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/quadrature.h"
+#include "libmesh/elem.h"
+#include "libmesh/node.h"
+#include "libmesh/nonlinear_implicit_system.h"
 
 class MooseVariable;
 class MooseVariableScalar;

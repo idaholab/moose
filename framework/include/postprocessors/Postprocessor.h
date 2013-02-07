@@ -19,7 +19,7 @@
 // MOOSE includes
 #include "InputParameters.h"
 // libMesh
-#include "parallel.h"
+#include "libmesh/parallel.h"
 
 class Postprocessor;
 

@@ -20,7 +20,7 @@
 #include "MooseVariable.h"
 
 // libMesh
-#include "dof_map.h"
+#include "libmesh/dof_map.h"
 
 class Assembly;
 class SubProblem;

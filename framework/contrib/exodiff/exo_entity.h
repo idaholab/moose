@@ -37,7 +37,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <exodusII.h>
+#include "libmesh/exodusII.h"
 
 #if defined(EX_API_VERS_NODOT)
 #if EX_API_VERS_NODOT > 467

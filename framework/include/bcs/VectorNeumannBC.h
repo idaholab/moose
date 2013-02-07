@@ -18,7 +18,7 @@
 #include "IntegratedBC.h"
 
 //libMesh includes
-#include "vector_value.h"
+#include "libmesh/vector_value.h"
 
 
 //Forward Declarations

@@ -20,8 +20,8 @@
 #include "FEProblem.h"
 
 // LibMesh includes
-#include "mesh_function.h"
-#include "parameters.h"
+#include "libmesh/mesh_function.h"
+#include "libmesh/parameters.h"
 
 // System includes
 #include <string>

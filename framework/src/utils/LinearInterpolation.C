@@ -14,7 +14,7 @@
 
 #include "LinearInterpolation.h"
 #include "MooseError.h"
-#include "libmesh_common.h"
+#include "libmesh/libmesh_common.h"
 
 int LinearInterpolation::_file_number = 0;
 

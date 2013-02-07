@@ -16,7 +16,7 @@
 #define ARBITRARYQUADRATURE_H
 
 // Local includes
-#include "quadrature.h"
+#include "libmesh/quadrature.h"
 
 /**
  * Implements a fake quadrature rule where you can specify the points

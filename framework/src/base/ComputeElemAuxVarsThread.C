@@ -17,7 +17,7 @@
 #include "AuxKernel.h"
 #include "FEProblem.h"
 // libmesh includes
-#include "threads.h"
+#include "libmesh/threads.h"
 
 
 ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs) :
