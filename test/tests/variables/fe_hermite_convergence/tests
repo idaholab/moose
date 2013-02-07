@@ -12,5 +12,6 @@
     type = 'Exodiff'
     input = 'hermite_converge_neumann.i'
     exodiff = 'hermite_converge_neumann_out.e-s003'
+    no_valgrind = true
   [../]
 []
