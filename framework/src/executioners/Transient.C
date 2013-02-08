@@ -106,7 +106,6 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
   _problem.transient(true);
   if (parameters.isParamValid("predictor_scale"))
   {
-
     Real predscale(getParam<Real>("predictor_scale"));
     if (predscale >= 0.0 and predscale <= 1.0)
     {
@@ -364,7 +363,6 @@ Transient::keepGoing()
     Real ss_relerr_norm = fabs(new_time_solution_norm - _old_time_solution_norm)/new_time_solution_norm;
 
     // Check current solution relative error norm against steady-state tolerance
-    std::cout<<ss_relerr_norm<<std::endl;
     if(ss_relerr_norm < _ss_check_tol)
     {
       std::cout<<"Steady-State Solution Achieved at time: "<<_time<<std::endl;

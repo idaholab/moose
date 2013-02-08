@@ -19,10 +19,15 @@
 #include "Conversion.h"
 
 // libMesh includes
-#include "transient_system.h"
-#include "nonlinear_implicit_system.h"
+#include "libmesh/transient_system.h"
+#include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/numeric_vector.h"
+#include "libmesh/sparse_matrix.h"
+#include "libmesh/petsc_matrix.h"
+#include "libmesh/coupling_matrix.h"
+#include "libmesh/petsc_matrix.h"
 #include "libmesh/petsc_vector.h"
+#include "libmesh/petsc_nonlinear_solver.h"
 
 class NonlinearSystem;
 
@@ -38,12 +43,12 @@ class TimeScheme
     _t_step(t_step),
     _dt(0.0)
     {
-      if (workvecs.empty()) _solution = &_nl->addVector(Moose::stringify(time), true, GHOSTED);
+      if (workvecs.empty()) _solution = &_nl->_sys.add_vector(Moose::stringify(time), true, GHOSTED);
       else {
         _solution = workvecs.back();
         workvecs.pop_back();
       }
-      if (workvecs.empty()) _time_derivitive = &_nl->addVector(Moose::stringify(time)+"dt", true, GHOSTED);
+      if (workvecs.empty()) _time_derivitive = &_nl->_sys.add_vector(Moose::stringify(time)+"dt", true, GHOSTED);
       else {
         _time_derivitive = workvecs.back();
         workvecs.pop_back();
@@ -53,8 +58,8 @@ class TimeScheme
     _nl(nl),
     _time(0.0),
     _t_step(0),
-    _solution(&_nl->addVector("dt2check", true, GHOSTED)),
-    _time_derivitive(&_nl->addVector("dt2check_dt", true, GHOSTED)),
+    _solution(&_nl->_sys.add_vector("dt2check", true, GHOSTED)),
+    _time_derivitive(&_nl->_sys.add_vector("dt2check_dt", true, GHOSTED)),
     _dt(0.0)
     {
     }
@@ -110,11 +115,11 @@ class TimeScheme
     {
       _dt=dt;
     }
+
     NumericVector<Number> & getTimeDerivitive()
     {
       return *_time_derivitive;
     }
-
   protected:
     NonlinearSystem * _nl;
     Real _time;
@@ -122,11 +127,9 @@ class TimeScheme
     NumericVector<Number> * _solution;
     NumericVector<Number> * _time_derivitive; //This is necessary currently, is storing this better or worse than
     //otherwise?
-  protected:
     Real _dt;
   };
 
-public:
   TimeScheme(NonlinearSystem * c);
 
   virtual ~TimeScheme();
@@ -189,24 +192,22 @@ public:
   }
 
   void computeLittlef(const NumericVector<Number> & bigF, NumericVector<Number> & littlef, Real time = -1, bool mass = true);
+
+  void setSolutionDuDotDu(Real value);
+
+  bool _use_AB2;
+  bool _use_littlef;
+protected:
   /**
    * Computes the time derivative vector
    */
   void computeTimeDerivatives();
-  void setSolutionDuDotDu(Real value);
 
   /**
    * Completes the assembly of residual
    * @param residual[out] Residual is formed here
    */
   NumericVector<Number> &  finishResidual(NumericVector<Number> & residual);
-
-  bool _use_AB2;
-  bool _use_littlef;
-protected:
-
-
-
 
   NonlinearSystem * _nl;
 
@@ -220,10 +221,9 @@ protected:
   NumericVector<Number> & _residual_old;
   NumericVector<Number> & _predicted_solution;
 
-  NumericVector<Number> & _tmp_previous_solution;
-  NumericVector<Number> & _tmp_residual_old;
-  NumericVector<Number> & _tmp_solution_u_dot;
-  NumericVector<Number> & _scaled_update;
+  NumericVector<Number> & _trash1;
+  NumericVector<Number> & _trash2;
+  NumericVector<Number> & _trash3;
   NumericVector<Number> & _mmatrix;
   /// time
   /// size of the time step
@@ -235,7 +235,6 @@ protected:
   /// Time stepping scheme used for time discretization
   Moose::TimeSteppingScheme _time_stepping_scheme;
   int & _t_step;
-  Real & _t;
   /// true if predictor is active
   bool _use_predictor;
   /// Scale factor to use with predictor
@@ -258,5 +257,7 @@ protected:
   TimeStep *_dt2_check;
   bool _dt2_bool;
   int _time_stack_size;
+
+  friend class NonlinearSystem;
 };
 #endif /* TIMESCHEME_H */

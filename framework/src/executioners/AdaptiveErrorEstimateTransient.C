@@ -137,7 +137,6 @@ AdaptiveErrorEstimateTransient::lastSolveConverged()
   {
     std::cout << "AEETransient: Marking last solve not converged " << _error<<" "<<_e_max<< std::endl;
     _dt_steps_taken =0;
-    _converged = false;
     return false;
   }
 }
@@ -155,7 +154,6 @@ AdaptiveErrorEstimateTransient::computeDT()
     if(_dt_steps_taken >= _steps_between_increase)
     {
       Real new_dt = _dt_full * _scaling_parameter * std::pow(_infnorm * _e_tol / _error, 1.0 / 3.0);
-      std::cout<<new_dt<<std::endl;
       if (new_dt/_dt_full > _max_increase)
       {
         _dt = _dt_full*_max_increase;
