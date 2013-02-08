@@ -1080,8 +1080,6 @@ MooseMesh::isTranslatedPeriodic(unsigned int nonlinear_var_num, unsigned int com
 Real
 MooseMesh::minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q) const
 {
-  mooseAssert(_half_range != RealVectorValue(0, 0, 0), "\"addPeriodicVariable\" has not been called - do you have periodic BCs turned on?");
-
   for (unsigned int i=0; i<dimension(); ++i)
   {
     // check to see if we're closer in real or periodic space in x, y, and z
