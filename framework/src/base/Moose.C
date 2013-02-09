@@ -144,6 +144,8 @@
 // user objects
 #include "LayeredIntegral.h"
 #include "LayeredSideIntegral.h"
+#include "LayeredSideAverage.h"
+#include "LayeredSideFluxAverage.h"
 #include "ElementIntegralVariableUserObject.h"
 
 // preconditioners
@@ -360,6 +362,8 @@ registerObjects(Factory & factory)
   // user objects
   registerUserObject(LayeredIntegral);
   registerUserObject(LayeredSideIntegral);
+  registerUserObject(LayeredSideAverage);
+  registerUserObject(LayeredSideFluxAverage);
   registerUserObject(ElementIntegralVariableUserObject);
 
   // preconditioners
