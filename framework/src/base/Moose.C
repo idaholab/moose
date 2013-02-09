@@ -24,6 +24,7 @@
 #include "MooseMesh.h"
 #include "GeneratedMesh.h"
 #include "MeshExtruder.h"
+#include "TiledMesh.h"
 // problems
 #include "FEProblem.h"
 #include "OutputProblem.h"
@@ -234,6 +235,7 @@ registerObjects(Factory & factory)
   registerObject(MooseMesh);
   registerObject(GeneratedMesh);
   registerObject(MeshExtruder);
+  registerObject(TiledMesh);
 
   // problems
   registerProblem(FEProblem);
