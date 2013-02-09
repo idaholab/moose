@@ -129,6 +129,7 @@
 #include "Reporter.h"
 #include "SideAverageValue.h"
 #include "SideFluxIntegral.h"
+#include "SideFluxAverage.h"
 #include "SideIntegralVariablePostprocessor.h"
 #include "NodalMaxValue.h"
 #include "NodalProxyMaxValue.h"
@@ -346,6 +347,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(Reporter);
   registerPostprocessor(SideAverageValue);
   registerPostprocessor(SideFluxIntegral);
+  registerPostprocessor(SideFluxAverage);
   registerPostprocessor(SideIntegralVariablePostprocessor);
   registerPostprocessor(NodalMaxValue);
   registerPostprocessor(NodalProxyMaxValue);

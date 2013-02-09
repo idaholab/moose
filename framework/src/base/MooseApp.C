@@ -217,7 +217,7 @@ MooseApp::runInputFile()
   if (_command_line.search("MeshOnly", mesh_file_name))
   {
     meshOnly(mesh_file_name);
-    return;
+    exit(0);
   }
 
   // Print the input file syntax if requested

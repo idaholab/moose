@@ -17,6 +17,7 @@
 
 #include "MooseObject.h"
 #include "UserObjectInterface.h"
+#include "PostprocessorInterface.h"
 
 // System includes
 #include <string>
@@ -39,7 +40,8 @@ InputParameters validParams<Executioner>();
  */
 class Executioner :
   public MooseObject,
-  public UserObjectInterface
+  public UserObjectInterface,
+  public PostprocessorInterface
 {
 public:
   /**
