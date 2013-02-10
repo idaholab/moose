@@ -4,5 +4,6 @@
     input = 'tiled_mesh_test.i'
     cli_args = '--mesh-only'
     exodiff = 'tiled_mesh_test_in.e'
+    mesh_mode = 'SERIAL'
   [../]
 []
