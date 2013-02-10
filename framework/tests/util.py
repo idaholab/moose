@@ -23,7 +23,39 @@ def printResult(test_name, result, timing, start, end, options, color=True):
 
   cnt = (TERM_COLS-2) - len(test_name + result)
   if color:
-    f_result = test_name + '.'*cnt + ' ' + colorify(result, options)
+    any_match = False
+
+    # Color the Caveats CYAN
+    m = re.search(r'(\[.*?\])', result)
+    if m:
+      any_match = True
+      f_result += colorText(m.group(1), options, 'CYAN') + " "
+    # Color Exodiff or CVSdiff tests YELLOW
+    m = re.search('(FAILED \((?:EXODIFF|CVSDIFF)\))', result)
+    if m:
+      any_match = True
+      f_result += colorText(m.group(1), options, 'YELLOW')
+    else:
+      # Color remaining FAILED tests RED
+      m = re.search('(FAILED \(.*\))', result)
+      if m:
+        any_match = True
+        f_result += colorText(m.group(1), options, 'RED')
+    # Color deleted tests RED
+    m = re.search('(deleted) (\(.*\))', result)
+    if m:
+      any_match = True
+      f_result += colorText(m.group(1), options, 'RED') + ' ' + m.group(2)
+    # Color Passed tests GREEN
+    m = re.search('(OK)', result)
+    if m:
+      any_match = True
+      f_result += colorText(m.group(1), options, 'GREEN')
+
+    if not any_match:
+      f_result = result
+
+    f_result = test_name + '.'*cnt + ' ' + f_result
   else:
     f_result = test_name + '.'*cnt + ' ' + result
 
@@ -37,38 +69,27 @@ def printResult(test_name, result, timing, start, end, options, color=True):
 ## Color the error messages if the options permit, also do not color in bitten scripts because
 # it messes up the trac output.
 # supports weirded html for more advanced coloring schemes. <r>,<g>,<y>,<b> All colors are bolded.
-def colorify(str, options, html=False):
+
+def colorText(str, options, color, html=False):
   # ANSI color codes for colored terminal output
-  RESET  = '\033[0m'
-  BOLD   = '\033[1m'
-  RED    = '\033[31m'
-  GREEN  = '\033[32m'
-  CYAN   = '\033[36m'
-  YELLOW = '\033[33m'
+  color_codes = {'RESET':'\033[0m','BOLD':'\033[1m','RED':'\033[31m',
+                 'GREEN':'\033[32m' if options.code else '\033[35m',
+                 'CYAN':'\033[36m' if options.code else '\033[34m',
+                 'YELLOW':'\033[33m'}
 
   if options.colored and not (os.environ.has_key('BITTEN_NOCOLOR') and os.environ['BITTEN_NOCOLOR'] == 'true'):
     if html:
-      str = str.replace('<r>', BOLD+RED)
-      str = str.replace('<g>', BOLD+GREEN)
-      str = str.replace('<y>', BOLD+YELLOW)
-      str = str.replace('<b>', BOLD)
-      str = re.sub(r'</[rgyb]>', RESET, str)
+      str = str.replace('<r>', color_codes['BOLD']+color_codes['RED'])
+      str = str.replace('<g>', color_codes['BOLD']+color_codes['GREEN'])
+      str = str.replace('<y>', color_codes['BOLD']+color_codes['YELLOW'])
+      str = str.replace('<b>', color_codes['BOLD'])
+      str = re.sub(r'</[rgyb]>', color_codes['RESET'], str)
     else:
-      str = str.replace('OK', BOLD+GREEN+'OK'+RESET)
-      str = re.sub(r'(\[.*?\])', BOLD+CYAN+'\\1'+RESET, str)
-      str = str.replace('skipped', BOLD+'skipped'+RESET)
-      str = str.replace('deleted', BOLD+RED+'deleted'+RESET)
-      if str.find('FAILED (EXODIFF)') != -1:
-        str = str.replace('FAILED (EXODIFF)', BOLD+YELLOW+'FAILED (EXODIFF)'+RESET)
-      elif str.find('FAILED (CSVDIFF') != -1:
-        str = str.replace('FAILED (CSVDIFF)', BOLD+YELLOW+'FAILED (CSVDIFF)'+RESET)
-      else:
-        str = re.sub(r'(FAILED \([A-Za-z ]*\))', BOLD+RED+'\\1'+RESET, str)
+      str = color_codes[color] + str + color_codes['RESET']
   elif html:
     str = re.sub(r'</?[rgyb]>', '', str)    # strip all "html" tags
 
   return str
-
 
 def getPlatforms():
   # We'll use uname to figure this out

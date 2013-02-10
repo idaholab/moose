@@ -9,7 +9,7 @@ from CSVDiffer import CSVDiffer
 from Tester import Tester
 from InputParameters import InputParameters
 
-from optparse import OptionParser, OptionGroup
+from optparse import OptionParser, OptionGroup, Values
 #from optparse import OptionG
 from timeit import default_timer as clock
 
@@ -23,6 +23,7 @@ class TestHarness:
     self.num_skipped = 0
     self.host_name = gethostname()
     self.moose_dir = os.path.abspath(moose_dir) + '/'
+    self.code = '2d2d6769726c2d6d6f6465'
     # Assume libmesh is a peer directory to MOOSE if not defined
     if os.environ.has_key("LIBMESH_DIR"):
       self.libmesh_dir = os.environ['LIBMESH_DIR']
@@ -421,6 +422,14 @@ class TestHarness:
       self.num_failed += 1
 
     if self.options.verbose or ('FAILED' in result and not self.options.quiet):
+      lines = output.split('\n');
+      color = ''
+      if 'EXODIFF' in result or 'CSVDIFF' in result:
+        color = 'YELLOW'
+      else:
+        color = 'RED'
+      test_name = colorText(specs[TEST_NAME]  + ": ", self.options, color)
+      output = ("\n" + test_name).join(lines)
       print output
 
     if not 'skipped' in result:
@@ -472,7 +481,7 @@ class TestHarness:
       summary += '<r>%d FAILED</r>'
     else:
       summary += '<b>%d failed</b>'
-    print colorify( summary % (self.num_passed, self.num_skipped, self.num_failed), self.options, html=True )
+    print colorText( summary % (self.num_passed, self.num_skipped, self.num_failed), self.options, "", html=True )
 
     if self.file:
       self.file.close()
@@ -568,8 +577,12 @@ class TestHarness:
     outputgroup.add_option("--dump", action="store_true", dest="dump", default=False, help="Dump the parameters for the testers in GetPot Format")
 
     parser.add_option_group(outputgroup)
-
+    code = True
+    if self.code.decode('hex') in argv:
+      del argv[argv.index(self.code.decode('hex'))]
+      code = False
     (self.options, self.tests) = parser.parse_args(argv[1:])
+    self.options.ensure_value('code', code)
     self.checkAndUpdateCLArgs()
 
   ## Called after options are parsed from the command line
