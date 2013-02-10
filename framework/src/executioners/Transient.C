@@ -209,7 +209,10 @@ Transient::takeStep(Real input_dt)
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
   bool last_solve_converged = lastSolveConverged();
 
-  std::cout << "Converged:" << last_solve_converged << "\n";
+  if(last_solve_converged)
+    std::cout<<"Solve Converged!"<<std::endl;
+  else
+    std::cout<<"Solve Did NOT Converge!"<<std::endl;
 
   if (last_solve_converged)
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
