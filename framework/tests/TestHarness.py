@@ -432,6 +432,13 @@ class TestHarness:
       output = ("\n" + test_name).join(lines)
       print output
 
+      # Print result line again at the bottom of the output for failed tests
+      if self.options.show_directory:
+        print printResult(specs[RELATIVE_PATH] + '/' + specs[TEST_NAME].split('/')[-1], result, timing, start, end, self.options), "(duplicate)"
+      else:
+        print printResult(specs[TEST_NAME], result, timing, start, end, self.options), "(duplicate)"
+
+
     if not 'skipped' in result:
       if self.options.file:
         if self.options.show_directory:
