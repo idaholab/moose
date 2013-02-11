@@ -9,11 +9,13 @@
 #include "LinearElasticMaterial.h"
 #include "FiniteStrainElasticMaterial.h"
 #include "FiniteStrainPlasticMaterial.h"
+#include "FiniteStrainRatePlasticMaterial.h"
 #include "RankTwoAux.h"
 #include "RealTensorValueAux.h"
 #include "RankFourAux.h"
 #include "TensorElasticEnergyAux.h"
 #include "FiniteStrainPlasticAux.h"
+
 
 void
 Elk::TensorMechanics::registerObjects(Factory & factory)
@@ -24,6 +26,7 @@ Elk::TensorMechanics::registerObjects(Factory & factory)
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);
   registerMaterial(FiniteStrainPlasticMaterial);
+  registerMaterial(FiniteStrainRatePlasticMaterial);
 
 
   registerAux(RankTwoAux);

@@ -293,7 +293,7 @@ RankFourTensor::invSymm()
   error=MatrixInversion(mat,ntens);
 
   if(error != 0)
-    printf("Mat Inversion Error = %d\n",error);
+    mooseError("Error in Matrix  Inversion in RankFourTensor\n");
 
   for(unsigned int i = 0; i < 3; i++)
     for(unsigned int j = 0; j < 3; j++)
@@ -416,10 +416,6 @@ RankFourTensor::transposeMajor()
 int
 RankFourTensor::MatrixInversion(double* A, int n)
 {
-
-//  mooseAssert(_n_rows == _n_cols, "Cannot solve for inverse of a non-square matrix!");
-//  mooseAssert(_n_rows == invA._n_cols && _n_cols == invA._n_rows, "Matrices must be the same size for matrix inverse!");
-
   int return_value,buffer_size;
   int *ipiv,*buffer; 
   
@@ -437,12 +433,7 @@ RankFourTensor::MatrixInversion(double* A, int n)
     return return_value;
   }  
   dgetri_(&n, A, &n, ipiv, buffer, &buffer_size, &return_value);
-
-
-
-//  if (return_value)
-//    mooseError("error in lapack inverse solve");
-
+  
   free(ipiv);
   free(buffer);   
   return return_value;

@@ -24,14 +24,16 @@ protected:
   MaterialProperty<RankTwoTensor> & _plastic_strain_old;
   MaterialProperty<Real> & _eqv_plastic_strain;
 
+  virtual void solveStressResid(RankTwoTensor,RankTwoTensor,RankFourTensor,RankTwoTensor*,RankTwoTensor*);
+  virtual void getJac(RankTwoTensor,RankFourTensor,Real,RankFourTensor*);
+  virtual void getFlowTensor(RankTwoTensor,RankTwoTensor*);
 
-
-  RankTwoTensor solveStressResid(RankTwoTensor,RankTwoTensor,RankFourTensor,RankTwoTensor*);
+  
   unsigned int isPlastic(RankTwoTensor,Real);
-  RankTwoTensor getFlowTensor(RankTwoTensor);
+  
   Real getSigEqv(RankTwoTensor);
   RankTwoTensor getSigDev(RankTwoTensor);
-  RankFourTensor getJac(RankTwoTensor,RankFourTensor,Real);
+  
   Real deltaFunc(int,int);
   Real getYieldStress(Real);
   

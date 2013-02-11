@@ -43,7 +43,7 @@ void FiniteStrainPlasticMaterial::initQpStatefulProperties()
 void FiniteStrainPlasticMaterial::computeQpStress()
 {
 
-  RankTwoTensor dp;
+  RankTwoTensor dp,sig;
 
   
   //In elastic problem, all the strain is elastic
@@ -54,8 +54,10 @@ void FiniteStrainPlasticMaterial::computeQpStress()
 
   //Solve J2 plastic constitutive equations based on current strain increment
   //Returns current  stress and plastic rate of deformation tensor
-  _stress[_qp]=solveStressResid(_stress_old[_qp],_strain_increment[_qp],_elasticity_tensor[_qp],&dp);
-
+  
+  solveStressResid(_stress_old[_qp],_strain_increment[_qp],_elasticity_tensor[_qp],&dp,&sig);
+  _stress[_qp]=sig;
+  
   //Updates current plastic rate of deformation tensor
   _plastic_strain[_qp]=dp;
 
@@ -78,8 +80,8 @@ void FiniteStrainPlasticMaterial::computeQpStress()
  *Input: Strain incrment, 4th order elasticity tensor, stress tensor in previous incrmenent and
  *plastic rate of deformation tensor gradient. 
  */ 
-RankTwoTensor
-FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTensor delta_d,RankFourTensor E_ijkl, RankTwoTensor *dp)
+void
+FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTensor delta_d,RankFourTensor E_ijkl, RankTwoTensor *dp, RankTwoTensor *sig)
 {
 
   RankTwoTensor sig_new,delta_dp,dpn;
@@ -129,7 +131,7 @@ FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTenso
       delta_dp.zero();
       sig_new=sig_old+E_ijkl*delta_d;
             
-      flow_tensor=getFlowTensor(sig_new);
+      getFlowTensor(sig_new,&flow_tensor);
       flow_dirn=flow_tensor;
     
 
@@ -146,7 +148,7 @@ FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTenso
 
         iter++;
         
-        dr_dsig=getJac(sig_new,E_ijkl,flow_incr);//Jacobian
+        getJac(sig_new,E_ijkl,flow_incr,&dr_dsig);//Jacobian
         dr_dsig_inv=dr_dsig.invSymm();
       
         ddsig=dr_dsig_inv*(-resid-flow_dirn*dflow_incr);
@@ -161,7 +163,7 @@ FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTenso
         delta_dp-=E_ijkl.invSymm()*ddsig;
         sig_new+=ddsig;
 
-        flow_tensor=getFlowTensor(sig_new);
+        getFlowTensor(sig_new,&flow_tensor);
         flow_dirn=flow_tensor;
 
         resid=flow_dirn*flow_incr-delta_dp;
@@ -191,8 +193,8 @@ FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTenso
   }
 
   *dp=dpn;//Plastic rate of deformation tensor in unrotated configuration
-  
-  return sig_new;
+
+  *sig=sig_new;
 }
 
 
@@ -219,22 +221,18 @@ FiniteStrainPlasticMaterial::isPlastic(RankTwoTensor sig,Real yield_stress)
 
 
 //Obtain derivative of yield surface w.r.t. stress (plastic flow direction)
-RankTwoTensor
-FiniteStrainPlasticMaterial::getFlowTensor(RankTwoTensor sig)
+void
+FiniteStrainPlasticMaterial::getFlowTensor(RankTwoTensor sig,RankTwoTensor* flow_tensor)
 {
 
-  RankTwoTensor flow_tensor,sig_dev;
+  RankTwoTensor sig_dev;
   Real sig_eqv,val;
   
   sig_eqv=getSigEqv(sig);
   sig_dev=getSigDev(sig);
 
   val=3.0/(2.0*sig_eqv);
-  flow_tensor=sig_dev*val;
-  
-  
-  return flow_tensor;
-  
+  *flow_tensor=sig_dev*val;  
 }
 
 //Obtain equivalent stress (scalar)
@@ -281,14 +279,13 @@ FiniteStrainPlasticMaterial::getSigDev(RankTwoTensor sig)
 }
 
 //Jacobian for stress update algorithm
-RankFourTensor
-FiniteStrainPlasticMaterial::getJac(RankTwoTensor sig, RankFourTensor E_ijkl, Real flow_incr)
+void
+FiniteStrainPlasticMaterial::getJac(RankTwoTensor sig, RankFourTensor E_ijkl, Real flow_incr, RankFourTensor* dresid_dsig)
 {
 
   RankTwoTensor sig_dev, flow_tensor, flow_dirn;
   RankTwoTensor dfi_dft,dfi_dsig;
   RankFourTensor dft_dsig,dfd_dft,dfd_dsig;
-  RankFourTensor dresid_dsig;
   Real sig_eqv,val;
   Real f1,f2,f3;
   RankFourTensor temp;
@@ -296,7 +293,7 @@ FiniteStrainPlasticMaterial::getJac(RankTwoTensor sig, RankFourTensor E_ijkl, Re
   
   sig_dev=getSigDev(sig);
   sig_eqv=getSigEqv(sig);
-  flow_tensor=getFlowTensor(sig);
+  getFlowTensor(sig,&flow_tensor);
   flow_dirn=flow_tensor;
 
 
@@ -311,8 +308,7 @@ FiniteStrainPlasticMaterial::getJac(RankTwoTensor sig, RankFourTensor E_ijkl, Re
           dft_dsig(i,j,k,l)=f1*deltaFunc(i,k)*deltaFunc(j,l)-f2*deltaFunc(i,j)*deltaFunc(k,l)-f3*sig_dev(i,j)*sig_dev(k,l);
   
   dfd_dsig=dft_dsig;
-  dresid_dsig=E_ijkl.invSymm()+dfd_dsig*flow_incr;  
-  return dresid_dsig;
+  *dresid_dsig=E_ijkl.invSymm()+dfd_dsig*flow_incr;
   
   
 }
