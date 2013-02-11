@@ -67,7 +67,7 @@ TiledMesh::TiledMesh(const std::string & name, InputParameters parameters):
     // Build X Tiles
     for (unsigned int i=1; i<getParam<unsigned int>("x_tiles"); ++i)
     {
-      MeshTools::Modification::translate(*clone, _x_width * i, 0, 0);
+      MeshTools::Modification::translate(*clone, _x_width, 0, 0);
       _mesh.stitch_meshes(dynamic_cast<SerialMesh &>(*clone), right, left, TOLERANCE, true);
     }
   }
@@ -77,7 +77,7 @@ TiledMesh::TiledMesh(const std::string & name, InputParameters parameters):
     // Build Y Tiles
     for (unsigned int i=1; i<getParam<unsigned int>("y_tiles"); ++i)
     {
-      MeshTools::Modification::translate(*clone, 0, _y_width * i, 0);
+      MeshTools::Modification::translate(*clone, 0, _y_width, 0);
       _mesh.stitch_meshes(dynamic_cast<SerialMesh &>(*clone), top, bottom, TOLERANCE, true);
     }
   }
@@ -87,7 +87,7 @@ TiledMesh::TiledMesh(const std::string & name, InputParameters parameters):
     // Build Y Tiles
     for (unsigned int i=1; i<getParam<unsigned int>("z_tiles"); ++i)
     {
-      MeshTools::Modification::translate(*clone, 0, 0, _z_width * i);
+      MeshTools::Modification::translate(*clone, 0, 0, _z_width);
       _mesh.stitch_meshes(dynamic_cast<SerialMesh &>(*clone), front, back, TOLERANCE, true);
     }
   }
