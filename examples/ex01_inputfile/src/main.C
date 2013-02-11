@@ -21,7 +21,7 @@
 //Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
-#include "MooseApp.h"
+#include "ExampleApp.h"
 
 // libMesh includes
 #include "perf_log.h"
@@ -35,8 +35,7 @@ int main (int argc, char** argv)
   // Create a MooseInit Object
   MooseInit init (argc, argv);
   // Create MOOSE app that will take care of registering object, syntax, etc.
-  MooseApp app(argc, argv);
-  app.init();
+  ExampleApp app(argc, argv);
   app.run();
 
   return 0;

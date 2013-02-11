@@ -21,26 +21,18 @@
 // Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
-#include "MooseApp.h"
-#include "Factory.h"
-
-// Example 10 Includes
-#include "ExampleAux.h"
+#include "ExampleApp.h"
 
 // libMesh includes
-#include "perf_log.h"
+#include "libmesh/perf_log.h"
 
 PerfLog Moose::perf_log("Example 10: Auxiliary Calculations");
 
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-  MooseApp app(argc, argv);
-  app.init();
 
-  // Register our Example AuxKernel with the AuxFactory
-  registerAux(ExampleAux);
-
+  ExampleApp app(argc, argv);
   app.run();
 
   return 0;

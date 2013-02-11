@@ -23,14 +23,10 @@
 // Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
-#include "MooseApp.h"
-
-// Example 3 Includes
-#include "Factory.h"
-#include "Convection.h"
+#include "ExampleApp.h"
 
 // libMesh includes
-#include "perf_log.h"
+#include "libmesh/perf_log.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("Example 3: Coupling");
@@ -39,11 +35,8 @@ PerfLog Moose::perf_log("Example 3: Coupling");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-  MooseApp app(argc, argv);
-  app.init();
 
-  registerKernel(Convection);
-
+  ExampleApp app(argc, argv);
   app.run();
 
   return 0;

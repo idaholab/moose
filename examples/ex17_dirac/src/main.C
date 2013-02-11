@@ -19,15 +19,10 @@
 //Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
-#include "MooseApp.h"
-#include "Factory.h"
-
-// Example 17 Includes
-#include "Convection.h"
-#include "ExampleDirac.h"         // <- New include for our custom DiracKernel
+#include "ExampleApp.h"
 
 // libMesh includes
-#include "perf_log.h"
+#include "libmesh/perf_log.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("Example 17: DiracKernel");
@@ -36,13 +31,8 @@ PerfLog Moose::perf_log("Example 17: DiracKernel");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-  MooseApp app(argc, argv);
-  app.init();
 
-  // Register any custom objects you have built on the MOOSE Framework
-  registerKernel(Convection);
-  registerDiracKernel(ExampleDirac);  // <- registration
-
+  ExampleApp app(argc, argv);
   app.run();
 
   return 0;

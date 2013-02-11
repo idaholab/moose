@@ -23,34 +23,18 @@
 //Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
-#include "MooseApp.h"
-#include "Factory.h"
-
-// Example 16 Includes
-#include "TransientHalf.h"
-#include "ExampleDiffusion.h"
-#include "Convection.h"
-#include "ExampleImplicitEuler.h"
-#include "ExampleMaterial.h"
+#include "ExampleApp.h"
 
 // libMesh includes
-#include "perf_log.h"
+#include "libmesh/perf_log.h"
 
 PerfLog Moose::perf_log("Example 16: Custom Executioner");
 
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-  MooseApp app(argc, argv);
-  app.init();
 
-  // Register our new executioner
-  registerExecutioner(TransientHalf);
-  registerKernel(ExampleDiffusion);
-  registerKernel(Convection);
-  registerKernel(ExampleImplicitEuler);
-  registerMaterial(ExampleMaterial);
-
+  ExampleApp app(argc, argv);
   app.run();
 
   return 0;

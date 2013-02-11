@@ -21,14 +21,10 @@
 //Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
-#include "MooseApp.h"
-#include "Factory.h"
-
-// Example 7 Includes
-#include "ExampleIC.h"
+#include "ExampleApp.h"
 
 // libMesh includes
-#include "perf_log.h"
+#include "libmesh/perf_log.h"
 
 // Initialize default Performance Logging
 PerfLog Moose::perf_log("Example 7: Initial Condition");
@@ -36,12 +32,8 @@ PerfLog Moose::perf_log("Example 7: Initial Condition");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-  MooseApp app(argc, argv);
-  app.init();
 
-  // Register our custom Initial Condition with the Factory
-  registerInitialCondition(ExampleIC);
-
+  ExampleApp app(argc, argv);
   app.run();
 
   return 0;

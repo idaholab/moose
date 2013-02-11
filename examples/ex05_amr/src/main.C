@@ -22,27 +22,18 @@
 //Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
-#include "MooseApp.h"
-#include "Factory.h"
-
-// Example 5 Registration
-#include "Convection.h"
-#include "ExampleCoefDiffusion.h"
+#include "ExampleApp.h"
 
 // libMesh includes
-#include "perf_log.h"
+#include "libmesh/perf_log.h"
 
 PerfLog Moose::perf_log("Example 5: Adaptive Mesh Refinement");
 
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-  MooseApp app(argc, argv);
-  app.init();
 
-  registerKernel(Convection);
-  registerKernel(ExampleCoefDiffusion);
-
+  ExampleApp app(argc, argv);
   app.run();
 
   return 0;

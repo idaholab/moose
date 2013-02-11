@@ -22,17 +22,10 @@
 // Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
-#include "MooseApp.h"
-#include "Factory.h"
-
-// Example 4 Includes
-#include "Convection.h"
-#include "GaussContForcing.h"
-#include "CoupledDirichletBC.h"
-#include "CoupledNeumannBC.h"
+#include "ExampleApp.h"
 
 // libMesh includes
-#include "perf_log.h"
+#include "libmesh/perf_log.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("Example 4: Boundary Conditions");
@@ -41,14 +34,8 @@ PerfLog Moose::perf_log("Example 4: Boundary Conditions");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-  MooseApp app(argc, argv);
-  app.init();
 
-  registerKernel(Convection);
-  registerKernel(GaussContForcing);                 // Extra forcing term
-  registerBoundaryCondition(CoupledDirichletBC);    // Register our Boundary Conditions
-  registerBoundaryCondition(CoupledNeumannBC);
-
+  ExampleApp app(argc, argv);
   app.run();
 
   return 0;

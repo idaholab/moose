@@ -21,19 +21,18 @@
 //Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
-#include "MooseApp.h"
+#include "ExampleApp.h"
 
 // libMesh includes
-#include "perf_log.h"
+#include "libmesh/perf_log.h"
 
 PerfLog Moose::perf_log("Example12: Physics Based Preconditioning");
 
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-  MooseApp app(argc, argv);
-  app.init();
 
+  ExampleApp app(argc, argv);
   app.run();
 
   return 0;

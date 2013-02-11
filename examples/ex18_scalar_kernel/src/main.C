@@ -20,15 +20,9 @@
 #include "MooseInit.h"
 #include "Moose.h"
 #include "MooseApp.h"
-#include "Factory.h"
-
-// Example 18 Includes
-#include "ScalarDirichletBC.h"
-#include "ImplicitODEx.h"
-#include "ImplicitODEy.h"
 
 // libMesh includes
-#include "perf_log.h"
+#include "libmesh/perf_log.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("Example 18: ScalarKernel");
@@ -37,14 +31,8 @@ PerfLog Moose::perf_log("Example 18: ScalarKernel");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
+
   MooseApp app(argc, argv);
-  app.init();
-
-  // Register any custom objects you have built on the MOOSE Framework
-  registerBoundaryCondition(ScalarDirichletBC);
-  registerScalarKernel(ImplicitODEx);
-  registerScalarKernel(ImplicitODEy);
-
   app.run();
 
   return 0;
