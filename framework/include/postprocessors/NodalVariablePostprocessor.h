@@ -12,31 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef NODALL2NORM_H
-#define NODALL2NORM_H
+#ifndef NODALVARIABLEPOSTPROCESSOR_H
+#define NODALVARIABLEPOSTPROCESSOR_H
 
-#include "NodalVariablePostprocessor.h"
+#include "NodalPostprocessor.h"
 
 class MooseVariable;
 
 //Forward Declarations
-class NodalL2Norm;
+class NodalVariablePostprocessor;
 
 template<>
-InputParameters validParams<NodalL2Norm>();
+InputParameters validParams<NodalVariablePostprocessor>();
 
-class NodalL2Norm : public NodalVariablePostprocessor
+class NodalVariablePostprocessor :
+  public NodalPostprocessor
 {
 public:
-  NodalL2Norm(const std::string & name, InputParameters parameters);
-
-  virtual void initialize();
-  virtual void execute();
-  virtual Real getValue();
-  virtual void threadJoin(const UserObject & y);
+  NodalVariablePostprocessor(const std::string & name, InputParameters parameters);
 
 protected:
-  Real _sum_of_squares;
+  MooseVariable & _var;
+
+  /// Holds the solution at current quadrature points
+  VariableValue & _u;
 };
 
 #endif

@@ -15,7 +15,7 @@
 #ifndef NODALPROXYMAXVALUE_H
 #define NODALPROXYMAXVALUE_H
 
-#include "NodalPostprocessor.h"
+#include "NodalVariablePostprocessor.h"
 
 //Forward Declarations
 class NodalProxyMaxValue;
@@ -24,7 +24,7 @@ class MooseMesh;
 template<>
 InputParameters validParams<NodalProxyMaxValue>();
 
-class NodalProxyMaxValue : public NodalPostprocessor
+class NodalProxyMaxValue : public NodalVariablePostprocessor
 {
 public:
   NodalProxyMaxValue(const std::string & name, InputParameters parameters);

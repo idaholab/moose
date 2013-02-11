@@ -21,8 +21,6 @@
 #include "MooseVariable.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
-// libMesh
-#include "libmesh/elem.h"
 
 class MooseVariable;
 
@@ -62,19 +60,11 @@ public:
   virtual void threadJoin(const UserObject & uo) = 0;
 
 protected:
-  MooseVariable & _var;
-
-  /// list of variables when working on more than one
-  std::vector<MooseVariable *> _vars;
-
   std::vector<BoundaryName> _boundaries;
   std::vector<SubdomainName> _blocks;
 
   const unsigned int _qp;
   const Node * & _current_node;
-
-  /// Holds the solution at current quadrature points
-  VariableValue & _u;
 
   // Single Instance Variables
   Real & _real_zero;

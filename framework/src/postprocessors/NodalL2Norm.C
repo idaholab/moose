@@ -20,12 +20,12 @@
 template<>
 InputParameters validParams<NodalL2Norm>()
 {
-  InputParameters params = validParams<NodalPostprocessor>();
+  InputParameters params = validParams<NodalVariablePostprocessor>();
   return params;
 }
 
 NodalL2Norm::NodalL2Norm(const std::string & name, InputParameters parameters) :
-  NodalPostprocessor(name, parameters),
+  NodalVariablePostprocessor(name, parameters),
   _sum_of_squares(0.0)
 {}
 

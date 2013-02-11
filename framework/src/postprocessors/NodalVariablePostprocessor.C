@@ -12,31 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef NODALL2NORM_H
-#define NODALL2NORM_H
-
 #include "NodalVariablePostprocessor.h"
-
-class MooseVariable;
-
-//Forward Declarations
-class NodalL2Norm;
+#include "MooseVariable.h"
+#include "SubProblem.h"
+#include "MooseTypes.h"
 
 template<>
-InputParameters validParams<NodalL2Norm>();
-
-class NodalL2Norm : public NodalVariablePostprocessor
+InputParameters validParams<NodalVariablePostprocessor>()
 {
-public:
-  NodalL2Norm(const std::string & name, InputParameters parameters);
+  InputParameters params = validParams<NodalPostprocessor>();
+  params.addRequiredParam<VariableName>("variable", "The name of the variable that this postprocessor operates on");
+  return params;
+}
 
-  virtual void initialize();
-  virtual void execute();
-  virtual Real getValue();
-  virtual void threadJoin(const UserObject & y);
-
-protected:
-  Real _sum_of_squares;
-};
-
-#endif
+NodalVariablePostprocessor::NodalVariablePostprocessor(const std::string & name, InputParameters parameters) :
+    NodalPostprocessor(name, parameters),
+    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _u(_var.nodalSln())
+{
+}

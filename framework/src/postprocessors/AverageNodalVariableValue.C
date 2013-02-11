@@ -21,12 +21,12 @@
 template<>
 InputParameters validParams<AverageNodalVariableValue>()
 {
-  InputParameters params = validParams<NodalPostprocessor>();
+  InputParameters params = validParams<NodalVariablePostprocessor>();
   return params;
 }
 
 AverageNodalVariableValue::AverageNodalVariableValue(const std::string & name, InputParameters parameters) :
-    NodalPostprocessor(name, parameters),
+    NodalVariablePostprocessor(name, parameters),
     _avg(0),
     _n(0)
 {

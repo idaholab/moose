@@ -21,12 +21,12 @@
 template<>
 InputParameters validParams<NodalProxyMaxValue>()
 {
-  InputParameters params = validParams<NodalPostprocessor>();
+  InputParameters params = validParams<NodalVariablePostprocessor>();
   return params;
 }
 
 NodalProxyMaxValue::NodalProxyMaxValue(const std::string & name, InputParameters parameters) :
-    NodalPostprocessor(name, parameters),
+    NodalVariablePostprocessor(name, parameters),
     _value(-std::numeric_limits<Real>::max())
 {
 }

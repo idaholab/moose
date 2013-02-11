@@ -15,7 +15,7 @@
 #ifndef AVERAGENODALVARIABLEVALUE_H
 #define AVERAGENODALVARIABLEVALUE_H
 
-#include "NodalPostprocessor.h"
+#include "NodalVariablePostprocessor.h"
 
 //Forward Declarations
 class AverageNodalVariableValue;
@@ -24,7 +24,7 @@ class MooseMesh;
 template<>
 InputParameters validParams<AverageNodalVariableValue>();
 
-class AverageNodalVariableValue : public NodalPostprocessor
+class AverageNodalVariableValue : public NodalVariablePostprocessor
 {
 public:
   AverageNodalVariableValue(const std::string & name, InputParameters parameters);

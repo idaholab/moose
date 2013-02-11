@@ -15,7 +15,7 @@
 #ifndef NODALMAXVALUE_H
 #define NODALMAXVALUE_H
 
-#include "NodalPostprocessor.h"
+#include "NodalVariablePostprocessor.h"
 
 class MooseVariable;
 
@@ -25,7 +25,7 @@ class NodalMaxValue;
 template<>
 InputParameters validParams<NodalMaxValue>();
 
-class NodalMaxValue : public NodalPostprocessor
+class NodalMaxValue : public NodalVariablePostprocessor
 {
 public:
   NodalMaxValue(const std::string & name, InputParameters parameters);

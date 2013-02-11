@@ -16,12 +16,12 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<NodalUserObject>()
 {
   InputParameters params = validParams<UserObject>();
-  params.addRequiredParam<std::vector<VariableName> >("variable", "The name of the variable that this postprocessor operates on");
 
   // NodalUserObjects can be restricted to either Nodesets or Domains
   std::vector<BoundaryName> everywhere(1);
@@ -40,20 +40,11 @@ NodalUserObject::NodalUserObject(const std::string & name, InputParameters param
     UserObjectInterface(parameters),
     TransientInterface(parameters, name, "nodal_user_objects"),
     PostprocessorInterface(parameters),
-    _var(_subproblem.getVariable(_tid, parameters.get<std::vector<VariableName> >("variable")[0])),
     _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),
     _blocks(parameters.get<std::vector<SubdomainName> >("block")),
     _qp(0),
-    _current_node(_var.node()),
-    _u(_var.nodalSln()),
-
+    _current_node(_assembly.node()),
     _real_zero(_subproblem._real_zero[_tid]),
     _zero(_subproblem._zero[_tid])
 {
-  std::vector<VariableName> vars = getParam<std::vector<VariableName> >("variable");
-  _vars.resize(vars.size());
-
-  // initialize our vector of variable pointers
-  for (unsigned int i=0; i<vars.size(); ++i)
-    _vars[i] = &_subproblem.getVariable(0, vars[i]);
 }

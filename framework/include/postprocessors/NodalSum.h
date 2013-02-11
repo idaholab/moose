@@ -15,7 +15,7 @@
 #ifndef NODALSUM_H
 #define NODALSUM_H
 
-#include "NodalPostprocessor.h"
+#include "NodalVariablePostprocessor.h"
 
 //Forward Declarations
 class NodalSum;
@@ -24,7 +24,7 @@ class MooseMesh;
 template<>
 InputParameters validParams<NodalSum>();
 
-class NodalSum : public NodalPostprocessor
+class NodalSum : public NodalVariablePostprocessor
 {
 public:
   NodalSum(const std::string & name, InputParameters parameters);
