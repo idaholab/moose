@@ -2,5 +2,5 @@ Title: Custom Initial Conditions
 transient.i
 include/ics/ExampleIC.h
 src/ics/ExampleIC.C
-src/main.C
+src/base/ExampleApp.C
 

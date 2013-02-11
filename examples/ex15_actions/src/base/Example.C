@@ -1,6 +1,7 @@
 #include "Moose.h"
 #include "Factory.h"
 #include "ActionFactory.h"  // <- Actions are special (they have their own factory)
+#include "Syntax.h"
 
 // Example 15 Includes
 #include "Convection.h"

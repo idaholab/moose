@@ -6,4 +6,4 @@ include/scalarkernels/ImplicitODEy.h
 src/scalarkernels/ImplicitODEy.C
 include/bcs/ScalarDirichletBC.h
 src/bcs/ScalarDirichletBC.C
-src/main.C
+src/base/ExampleApp.C

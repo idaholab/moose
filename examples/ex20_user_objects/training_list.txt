@@ -6,4 +6,4 @@ include/materials/BlockAverageDiffusionMaterial.h
 src/materials/BlockAverageDiffusionMaterial.C
 include/kernels/ExampleDiffusion.h
 src/kernels/ExampleDiffusion.C
-src/main.C
+src/base/ExampleApp.C
