@@ -3,20 +3,17 @@
     type = 'Exodiff'
     input = 'extruder_quad.i'
     exodiff = 'out_quad.e'
-    deleted = 'ticket #1688'
   [../]
 
   [./tri_test]
     type = 'Exodiff'
     input = 'extruder_tri.i'
     exodiff = 'out_tri.e'
-    deleted = 'ticket #1688'
   [../]
 
   [./angle_test]
     type = 'Exodiff'
     input = 'extruder_angle.i'
     exodiff = 'out_quad_angle.e'
-    deleted = 'ticket #1688'
   [../]
 []
