@@ -1,7 +1,7 @@
 #ifndef MATHUTILS_H
 #define MATHUTILS_H
 
-#include "libmesh.h"
+#include "libmesh/libmesh.h"
 
 namespace MathUtils 
 {
