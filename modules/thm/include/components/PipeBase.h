@@ -1,8 +1,8 @@
 #ifndef PIPEBASE_H
 #define PIPEBASE_H
 
-#include "point.h"
-#include "vector_value.h"
+#include "libmesh/point.h"
+#include "libmesh/vector_value.h"
 
 #include "RELAP7.h"
 #include "GeometricalComponent.h"
