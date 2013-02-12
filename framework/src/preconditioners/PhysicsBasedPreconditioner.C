@@ -170,6 +170,9 @@ PhysicsBasedPreconditioner::init ()
 {
   Moose::perf_log.push("init()","PhysicsBasedPreconditioner");
 
+  // Tell libMesh that this is initialized!
+  _is_initialized = true;
+
   const unsigned int num_systems = _systems.size();
 
   //If no order was specified, just solve them in increasing order
@@ -194,6 +197,20 @@ PhysicsBasedPreconditioner::init ()
     preconditioner->set_type(_pre_type[system_var]);
 
     preconditioner->init();
+  }
+
+  Moose::perf_log.pop("init()","PhysicsBasedPreconditioner");
+}
+
+void
+PhysicsBasedPreconditioner::setup()
+{
+  const unsigned int num_systems = _systems.size();
+
+  //Loop over variables
+  for(unsigned int system_var=0; system_var<num_systems; system_var++)
+  {
+    LinearImplicitSystem & u_system = *_systems[system_var];
 
     //Compute the diagonal block... storing the result in the system matrix
     _fe_problem.computeJacobianBlock(*u_system.matrix, u_system, system_var, system_var);
@@ -205,8 +222,6 @@ PhysicsBasedPreconditioner::init ()
       _fe_problem.computeJacobianBlock(*_off_diag_mats[system_var][diag], u_system, system_var, coupled_var);
     }
   }
-
-  Moose::perf_log.pop("init()","PhysicsBasedPreconditioner");
 }
 
 void

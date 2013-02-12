@@ -72,6 +72,12 @@ public:
    */
   virtual void init ();
 
+  /**
+   * This is called every time the "operator might have changed".
+   *
+   * This is essentially where you need to fill in your preconditioning matrix.
+   */
+  virtual void setup ();
 
 protected:
   /// The nonlinear system this PBP is associated with (convenience reference)
