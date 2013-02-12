@@ -876,8 +876,8 @@ SolidModel::computeCrackFactor( int i, Real & sigma, Real & flagVal )
     }
     else
     {
-      flagVal = _cracking_residual_stress/((*_crack_max_strain)[_qp](i)*_youngs_modulus);
-      sigma = _cracking_residual_stress;
+      sigma = _cracking_residual_stress*_cracking_stress;
+      flagVal = sigma/((*_crack_max_strain)[_qp](i)*_youngs_modulus);
     }
   }
   if (flagVal < 0)
