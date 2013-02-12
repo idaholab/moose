@@ -121,7 +121,7 @@ public:
   /**
    * Get the type of finite element object
    */
-  const FEType feType() { return _fe_type; }
+  const FEType feType() const { return _fe_type; }
 
   /**
    * Get the order of this variable
@@ -132,7 +132,7 @@ public:
    * Is this variable nodal
    * @return true if it nodal, otherwise false
    */
-  bool isNodal();
+  bool isNodal() const;
 
   /**
    * Current element this variable is evaluated at
@@ -281,7 +281,14 @@ public:
    * @param phi Evaluated shape functions at a point
    * @return The variable value
    */
-  Number getValue(const Elem * elem, const std::vector<std::vector<Real> > & phi);
+  Number getValue(const Elem * elem, const std::vector<std::vector<Real> > & phi) const;
+
+  /**
+   * Retrieve the Elemental DOF
+   * @param elem The element we are computing on
+   * @return The variable value
+   */
+  Number getElementalValue(const Elem * elem) const;
 
   /**
    * Set the scaling factor for this variable

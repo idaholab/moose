@@ -145,7 +145,7 @@ MooseVariable::activeOnSubdomain(SubdomainID subdomain) const
 }
 
 bool
-MooseVariable::isNodal()
+MooseVariable::isNodal() const
 {
   // FIXME: improve this fix (currently we use only monomials as elemental variables)
   return feType().family != MONOMIAL;
@@ -1082,7 +1082,7 @@ MooseVariable::getNodalValueOlder(const Node & node)
 }
 
 Real
-MooseVariable::getValue(const Elem * elem, const std::vector<std::vector<Real> > & phi)
+MooseVariable::getValue(const Elem * elem, const std::vector<std::vector<Real> > & phi) const
 {
   std::vector<unsigned int> dof_indices;
   _dof_map.dof_indices(elem, dof_indices, _var_num);
@@ -1104,3 +1104,14 @@ MooseVariable::getValue(const Elem * elem, const std::vector<std::vector<Real> >
 
   return value;
 }
+
+Real
+MooseVariable::getElementalValue(const Elem * elem) const
+{
+  std::vector<unsigned int> dof_indices;
+  _dof_map.dof_indices(elem, dof_indices, _var_num);
+
+  mooseAssert(dof_indices.size() == 1, "Wrong size for dof indices");
+  return (*_sys.currentSolution())(dof_indices[0]);
+}
+
