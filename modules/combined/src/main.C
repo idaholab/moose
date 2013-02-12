@@ -7,8 +7,6 @@
 #include "MooseInit.h"
 #include "Moose.h"
 #include "ElkTestApp.h"
-// libMesh includes
-#include "perf_log.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("Elk");
