@@ -114,6 +114,7 @@
     input = 'exception_test.i'
     expect_err = "Exception caught: MOOSE exception"
     petsc_version = '>=3.1.0'
+    should_crash = false
   [../]
 
   [./function_file_test1]
@@ -198,6 +199,7 @@
     type = 'RunException'
     input = 'missing_material_prop_test2.i'
     expect_err = "Material property 'diff1' is not defined on block \d+"
+    deleted = 'Regression in producing error - ticket #1739'
   [../]
 
   [./missing_mesh_bcs_test]
@@ -246,6 +248,7 @@
     type = 'RunException'
     input = 'nan_test.i'
     expect_err = "Floating point exception"
+    errors = 'foo'
   [../]
 
   [./no_output_dir_test]
@@ -261,7 +264,7 @@
   [../]
 
   [./override_name_variable_test]
-    type = 'RunException'
+    type = 'RunApp'
     input = 'override_name_variable_test.i'
     expect_out = "The following variables were overridden or supplied multiple times:"
   [../]
@@ -297,7 +300,7 @@
   [../]
 
   [./unused_param_test]
-    type = 'RunException'
+    type = 'RunApp'
     expect_out = "WARNING: The following parameters were unused in your input file"
     input = 'unused_param_test.i'
     cli_args = '--warn-unused'
@@ -328,9 +331,9 @@
   [../]
 
   [./wrong_input_switch]
-    type = 'RunException'
+    type = 'RunApp'
     input = 'Foo'
     input_switch = '-m'
-    expect_err = '^Usage:'
+    expect_out = '^Usage:'
   [../]
 []

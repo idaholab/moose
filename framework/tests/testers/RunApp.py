@@ -86,16 +86,16 @@ class RunApp(Tester):
     elif (options.enable_valgrind and retcode == 0) and not specs[NO_VALGRIND]:
       if 'ERROR SUMMARY: 0 errors' not in output:
         reason = 'MEMORY ERROR'
-    else:
+    if reason == '':
       # Check the general error message and program crash possibilities
       if len( filter( lambda x: x in output, specs[ERRORS] ) ) > 0:
         reason = 'ERRMSG'
       elif retcode == RunParallel.TIMEOUT:
         reason = 'TIMEOUT'
-      elif retcode != 0 and not specs[SHOULD_CRASH]:
-        reason = 'CRASH'
-      elif retcode > 0 and specs[SHOULD_CRASH]:
+      elif retcode == 0 and specs[SHOULD_CRASH] == True:
         reason = 'NO CRASH'
+      elif retcode != 0 and specs[SHOULD_CRASH] == False:
+        reason = 'CRASH'
 
     return (reason, output)
 

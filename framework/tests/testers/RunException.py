@@ -30,12 +30,8 @@ class RunException(RunApp):
       if options.method == 'dbg':  # Only check asserts in debug mode
         if not self.checkOutputForPattern(output, specs[EXPECT_ASSERT]):
           reason = 'NO EXPECTED ASSERT'
-#    else:
-#      # Check the general error message and program crash possibilities
-#      if specs[EXPECT_ERR] != None and specs[EXPECT_ERR] not in output:
-#        reason = 'NO EXPECTED ERR'
 
-    if reason != '':
+    if reason == '':
       (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
 
     return (reason, output)

@@ -15,8 +15,8 @@
   [../]
 
   [./check_petsc_options_test]
-    type = 'RunException'
+    type = 'RunApp'
     input = 'pbp_test_options.i'
-    expect_err = 'KSP Residual'
+    expect_out = 'KSP Residual'
   [../]
 []
