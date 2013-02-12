@@ -1,7 +1,7 @@
 #ifndef NUMERICS_H
 #define NUMERICS_H
 
-#include "libmesh_common.h"
+#include "libmesh/libmesh_common.h"
 
 namespace Numerics {
   extern void* auxpt;
