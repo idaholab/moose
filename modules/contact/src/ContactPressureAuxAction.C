@@ -43,8 +43,7 @@ ContactPressureAuxAction::act()
     InputParameters params = _factory.getValidParams("ContactPressureAux");
 
     // Extract global params
-    const std::string syntax = _app.parser().getSyntaxByAction("ContactPressureAux", "");
-    _app.parser().extractParams(syntax, params);
+    _app.parser().extractParams(_name, params);
 
     params.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,_slave);
     params.set<BoundaryName>("paired_boundary") = _master;

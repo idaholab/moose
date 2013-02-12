@@ -2,6 +2,8 @@
 #include "Parser.h"
 #include "FEProblem.h"
 
+static unsigned int n = 0;
+
 template<>
 InputParameters validParams<AddSlaveFluxVectorAction>()
 {
@@ -16,5 +18,9 @@ AddSlaveFluxVectorAction::AddSlaveFluxVectorAction(const std::string & name, Inp
 void
 AddSlaveFluxVectorAction::act()
 {
-  _problem->getNonlinearSystem().addVector("slave_flux", false, GHOSTED, true);
+  if (n == 0)
+  {
+    _problem->getNonlinearSystem().addVector("slave_flux", false, GHOSTED, true);
+    ++n;
+  }
 }

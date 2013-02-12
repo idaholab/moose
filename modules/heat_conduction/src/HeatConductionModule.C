@@ -13,7 +13,12 @@
 #include "HeatConductionImplicitEuler.h"
 #include "HeatConductionMaterial.h"
 #include "BulkCoolantBC.h"
-#include "ThermalContactAction.h"
+#include "ThermalContactAuxBCsAction.h"
+#include "ThermalContactAuxKernelsAction.h"
+#include "ThermalContactAuxVarsAction.h"
+#include "ThermalContactBCsAction.h"
+#include "ThermalContactDiracKernelsAction.h"
+#include "ThermalContactMaterialsAction.h"
 #include "HeatSource.h"
 #include "HomogenizationHeatConduction.h"
 #include "HomogenizedThermalConductivity.h"
@@ -45,8 +50,20 @@ Elk::HeatConduction::associateSyntax(Syntax & syntax, ActionFactory & action_fac
   addActionNameDependency("add_slave_flux_vector", "ready_to_init");
   addActionNameDependency("init_problem", "add_slave_flux_vector");
   registerAction(AddSlaveFluxVectorAction, "add_slave_flux_vector");
+  syntax.registerActionSyntax("AddSlaveFluxVectorAction", "ThermalContact/*");
 
-  // thermal contact
-  syntax.registerActionSyntax("ThermalContactAction", "ThermalContact/*");
-  registerAction(ThermalContactAction, "meta_action");
+
+  syntax.registerActionSyntax("ThermalContactAuxBCsAction",       "ThermalContact/*", "add_aux_kernel");
+  syntax.registerActionSyntax("ThermalContactAuxKernelsAction",   "ThermalContact/*", "add_aux_kernel");
+  syntax.registerActionSyntax("ThermalContactAuxVarsAction",      "ThermalContact/*", "add_aux_variable");
+  syntax.registerActionSyntax("ThermalContactBCsAction",          "ThermalContact/*", "add_bc");
+  syntax.registerActionSyntax("ThermalContactDiracKernelsAction", "ThermalContact/*", "add_dirac_kernel");
+  syntax.registerActionSyntax("ThermalContactMaterialsAction",    "ThermalContact/*", "add_material");
+
+  registerAction(ThermalContactAuxBCsAction,       "add_aux_kernel");
+  registerAction(ThermalContactAuxKernelsAction,   "add_aux_kernel");
+  registerAction(ThermalContactAuxVarsAction,      "add_aux_variablekernel");
+  registerAction(ThermalContactBCsAction,          "add_bc");
+  registerAction(ThermalContactDiracKernelsAction, "add_dirac_kernel");
+  registerAction(ThermalContactMaterialsAction,    "add_material");
 }
