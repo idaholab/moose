@@ -215,6 +215,7 @@ class TestHarness:
           sys.exit(1)
 	if (test[EXPECT_ERR] != None or test[EXPECT_ASSERT] != None or test[SHOULD_CRASH] == True) and not TYPE in test:
 	  test[TYPE] = 'RunException'
+	  test[SHOULD_CRASH] = True
 
         test.update( { TEST_NAME : testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path, EXECUTABLE : self.executable, HOSTNAME : self.host_name, MOOSE_DIR : self.moose_dir} )
 
