@@ -25,9 +25,6 @@
 #include "Moose.h"
 #include "ExampleApp.h"
 
-// libMesh includes
-#include "libmesh/perf_log.h"
-
 // Create a performance log
 PerfLog Moose::perf_log("Example 3: Coupling");
 

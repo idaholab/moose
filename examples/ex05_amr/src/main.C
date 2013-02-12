@@ -24,9 +24,6 @@
 #include "Moose.h"
 #include "ExampleApp.h"
 
-// libMesh includes
-#include "libmesh/perf_log.h"
-
 PerfLog Moose::perf_log("Example 5: Adaptive Mesh Refinement");
 
 int main (int argc, char** argv)

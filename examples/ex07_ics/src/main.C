@@ -23,9 +23,6 @@
 #include "Moose.h"
 #include "ExampleApp.h"
 
-// libMesh includes
-#include "libmesh/perf_log.h"
-
 // Initialize default Performance Logging
 PerfLog Moose::perf_log("Example 7: Initial Condition");
 

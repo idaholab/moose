@@ -25,9 +25,6 @@
 #include "Moose.h"
 #include "ExampleApp.h"
 
-// libMesh includes
-#include "libmesh/perf_log.h"
-
 PerfLog Moose::perf_log("Example 9: Stateful Material Properties");
 
 int main (int argc, char** argv)

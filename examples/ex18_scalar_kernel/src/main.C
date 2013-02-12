@@ -21,9 +21,6 @@
 #include "Moose.h"
 #include "MooseApp.h"
 
-// libMesh includes
-#include "libmesh/perf_log.h"
-
 // Create a performance log
 PerfLog Moose::perf_log("Example 18: ScalarKernel");
 

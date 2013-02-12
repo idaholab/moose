@@ -22,9 +22,6 @@
 #include "Moose.h"
 #include "MooseInit.h"
 
-//libMesh includes
-#include "perf_log.h"
-
 #include <fstream>
 #include <string>
 
