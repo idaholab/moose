@@ -4,8 +4,8 @@
 #include "NodalFloodCount.h"
 
 // libMesh includes
-#include "mesh_tools.h"
-#include "auto_ptr.h"
+#include "libmesh/mesh_tools.h"
+#include "libmesh/auto_ptr.h"
 
 class GrainTracker;
 

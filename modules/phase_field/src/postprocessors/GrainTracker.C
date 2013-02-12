@@ -4,8 +4,8 @@
 #include "GeneratedMesh.h"
 
 // LibMesh includes
-#include "periodic_boundary_base.h"
-#include "sphere.h"
+#include "libmesh/periodic_boundary_base.h"
+#include "libmesh/sphere.h"
 
 #include <limits>
 
