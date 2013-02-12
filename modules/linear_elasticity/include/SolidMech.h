@@ -5,8 +5,8 @@
 #include "Material.h"
 
 //libMesh includes
-#include "tensor_value.h"
-#include "vector_value.h"
+#include "libmesh/tensor_value.h"
+#include "libmesh/vector_value.h"
 
 //Forward Declarations
 class SolidMech;

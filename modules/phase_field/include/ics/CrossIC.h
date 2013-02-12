@@ -23,11 +23,6 @@
 #include "InitialCondition.h"
 #include "C1ICBase.h"
 
-// LibMesh includes
-#include <parameters.h>
-#include <point.h>
-#include <vector_value.h>
-
 // System includes
 #include <string>
 

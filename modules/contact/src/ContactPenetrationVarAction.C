@@ -4,7 +4,7 @@
 #include "FEProblem.h"
 #include "Parser.h"
 #include "MooseApp.h"
-#include "string_to_enum.h"
+#include "libmesh/string_to_enum.h"
 
 template<>
 InputParameters validParams<ContactPenetrationVarAction>()

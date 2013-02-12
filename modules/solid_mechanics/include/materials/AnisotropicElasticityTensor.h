@@ -2,10 +2,10 @@
 #define ANISOTROPICELASTICITYTENSOR_H
 
 #include "ElasticityTensor.h"
-#include "libmesh.h"
-#include "vector_value.h"
-#include "dense_matrix.h"
-#include "mesh.h"
+#include "libmesh/libmesh.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/mesh.h"
 
 /**
  * Defines an Isotropic Elasticity Tensor.

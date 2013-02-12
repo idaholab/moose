@@ -3,7 +3,7 @@
 #include "NodalArea.h"
 #include "PenetrationLocator.h"
 
-#include "string_to_enum.h"
+#include "libmesh/string_to_enum.h"
 
 template<>
 InputParameters validParams<ContactPressureAux>()

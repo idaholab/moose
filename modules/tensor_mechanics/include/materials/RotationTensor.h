@@ -7,8 +7,8 @@
 #define ROTATIONTENSOR_H
 
 // Any requisite includes here
-#include "tensor_value.h"
-#include "vector_value.h"
+#include "libmesh/tensor_value.h"
+#include "libmesh/vector_value.h"
 
 class RotationTensor : public RealTensorValue
 {

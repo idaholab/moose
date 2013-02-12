@@ -3,8 +3,8 @@
 #include "SystemBase.h"
 
 // libmesh includes
-#include "sparse_matrix.h"
-#include "string_to_enum.h"
+#include "libmesh/sparse_matrix.h"
+#include "libmesh/string_to_enum.h"
 
 template<>
 InputParameters validParams<ContactMaster>()

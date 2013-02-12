@@ -22,7 +22,7 @@
 #include <set>
 #include <iterator>
 
-#include "periodic_boundaries.h"
+#include "libmesh/periodic_boundaries.h"
 //Forward Declarations
 class NodalFloodCount;
 class MooseMesh;

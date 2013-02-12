@@ -6,12 +6,7 @@
 #include "LinearInterpolation.h"
 #include "FEProblem.h"
 
-#include "mesh_function.h"
-
-// LibMesh includes
-#include <parameters.h>
-#include <point.h>
-#include <vector_value.h>
+#include "libmesh/mesh_function.h"
 
 // System includes
 #include <string>

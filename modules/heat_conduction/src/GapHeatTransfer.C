@@ -5,7 +5,7 @@
 #include "SystemBase.h"
 
 // libmesh
-#include "string_to_enum.h"
+#include "libmesh/string_to_enum.h"
 
 Threads::spin_mutex slave_flux_mutex;
 

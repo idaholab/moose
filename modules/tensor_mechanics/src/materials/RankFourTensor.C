@@ -2,9 +2,9 @@
 
 // Any other includes here
 #include <vector>
-#include "tensor_value.h"
+#include "libmesh/tensor_value.h"
 #include "MaterialProperty.h"
-#include "libmesh.h"
+#include "libmesh/libmesh.h"
 #include <ostream>
 
 extern "C" void dsyev_ ( ... );

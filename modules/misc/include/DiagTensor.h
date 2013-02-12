@@ -4,7 +4,7 @@
 #include "ColumnMajorMatrix.h"
 #include "MaterialProperty.h"
 #include <cmath>
-#include "libmesh.h"
+#include "libmesh/libmesh.h"
 
 class DiagTensor
 {

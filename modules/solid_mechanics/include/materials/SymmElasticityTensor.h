@@ -5,7 +5,7 @@
 
 #include "MaterialProperty.h"
 
-#include "vector_value.h"
+#include "libmesh/vector_value.h"
 
 #include <vector>
 

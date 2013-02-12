@@ -4,8 +4,8 @@
 #include "ColumnMajorMatrix.h"
 #include "MaterialProperty.h"
 #include <cmath>
-#include "libmesh.h"
-#include "point.h"
+#include "libmesh/libmesh.h"
+#include "libmesh/point.h"
 
 class SymmTensor
 {

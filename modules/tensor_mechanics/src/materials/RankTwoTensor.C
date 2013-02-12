@@ -2,8 +2,8 @@
 
 // Any other includes here
 #include <vector>
-#include "libmesh.h"
-#include "tensor_value.h"
+#include "libmesh/libmesh.h"
+#include "libmesh/tensor_value.h"
 #include "MaterialProperty.h"
 #include <ostream>
 

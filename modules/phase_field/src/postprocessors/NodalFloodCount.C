@@ -22,10 +22,10 @@
 
 
 //libMesh includes
-#include "dof_map.h"
-#include "mesh_tools.h"
-#include "periodic_boundaries.h"
-#include "point_locator_base.h"
+#include "libmesh/dof_map.h"
+#include "libmesh/mesh_tools.h"
+#include "libmesh/periodic_boundaries.h"
+#include "libmesh/point_locator_base.h"
 
 #include <algorithm>
 #include <limits>

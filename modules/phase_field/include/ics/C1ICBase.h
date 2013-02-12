@@ -22,11 +22,6 @@
 #include "Kernel.h"
 #include "InitialCondition.h"
 
-// LibMesh includes
-#include <parameters.h>
-#include <point.h>
-#include <vector_value.h>
-
 // System includes
 #include <string>
 

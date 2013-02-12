@@ -1,5 +1,5 @@
 #include "RotationTensor.h"
-#include "libmesh.h"
+#include "libmesh/libmesh.h"
 
 RotationTensor::RotationTensor(const RealVectorValue & Euler_angles)
 {

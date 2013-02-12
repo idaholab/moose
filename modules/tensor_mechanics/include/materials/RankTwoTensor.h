@@ -13,9 +13,9 @@
 
 // Any requisite includes here
 #include <vector>
-#include "libmesh.h"
-#include "vector_value.h"
-#include "tensor_value.h"
+#include "libmesh/libmesh.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/tensor_value.h"
 
 class RankTwoTensor
 {

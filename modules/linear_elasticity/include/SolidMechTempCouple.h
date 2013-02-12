@@ -4,7 +4,7 @@
 #include "SolidMech.h"
 
 //libMesh includes
-#include "tensor_value.h"
+#include "libmesh/tensor_value.h"
 
 //Forward Declarations
 class SolidMechTempCouple;
