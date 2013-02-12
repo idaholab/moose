@@ -18,7 +18,7 @@
 #include "ElementIntegralVariablePostprocessor.h"
 
 // libmesh includes
-#include "mesh_tools.h"
+#include "libmesh/mesh_tools.h"
 
 //Forward Declarations
 class BlockAverageValue;

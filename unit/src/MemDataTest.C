@@ -17,7 +17,7 @@
 // Moose includes
 #include "MemData.h"
 // libMesh
-#include "libmesh_common.h"
+#include "libmesh/libmesh_common.h"
 
 // This macro declares a static variable whose construction
 // causes a test suite factory to be inserted in a global registry

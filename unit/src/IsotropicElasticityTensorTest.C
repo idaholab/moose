@@ -14,7 +14,7 @@
 
 #ifdef ELK_TEST
 
-#include "math.h"
+#include <math.h>
 #include "IsotropicElasticityTensorTest.h"
 
 //Moose includes

@@ -15,7 +15,7 @@
 #include "LineSegmentTest.h"
 
 // libMesh includes
-#include "plane.h"
+#include "libmesh/plane.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( LineSegmentTest );
 

@@ -18,8 +18,8 @@
 #include "ColumnMajorMatrix.h"
 
 //libMesh include
-#include "vector_value.h"
-#include "tensor_value.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/tensor_value.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( ColumnMajorMatrixTest );
 
