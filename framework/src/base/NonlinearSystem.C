@@ -1199,7 +1199,7 @@ NonlinearSystem::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jaco
 void
 NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced)
 {
-  std::vector<int> zero_rows;
+  std::vector<numeric_index_type> zero_rows;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = NULL;
 
   if(!displaced)
@@ -1449,7 +1449,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
     jacobian.close();
 
     // do nodal BC
-    std::vector<int> zero_rows;
+    std::vector<numeric_index_type> zero_rows;
 
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
     for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
@@ -1677,7 +1677,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
   jacobian.close();
 
   //Dirichlet BCs
-  std::vector<int> zero_rows;
+  std::vector<numeric_index_type> zero_rows;
 
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
   for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
