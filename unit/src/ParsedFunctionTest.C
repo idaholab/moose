@@ -18,7 +18,7 @@
 #include "InputParameters.h"
 #include "MooseParsedFunction.h"
 #include "FEProblem.h"
-#include "MooseApp.h"
+#include "MooseUnitApp.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( ParsedFunctionTest );
 
@@ -30,12 +30,10 @@ ParsedFunctionTest::init()
   argv[0]="foo";
   argv[1]="\0";
 
-  _app = new MooseApp(1, (char **)argv);
+  _app = new MooseUnitApp(1, (char **)argv);
   _factory = &_app->getFactory();
 
   _factory->reg<MooseParsedFunction>("MooseParsedFunction");
-  _factory->reg<MooseMesh>("MooseMesh");
-  _factory->reg<FEProblem>("FEProblem");
 
   InputParameters mesh_params = _factory->getValidParams("MooseMesh");
   _mesh = new MooseMesh("mesh", mesh_params);
