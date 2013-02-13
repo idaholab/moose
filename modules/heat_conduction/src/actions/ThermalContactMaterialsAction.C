@@ -45,8 +45,6 @@ ThermalContactMaterialsAction::act()
   // Extract global params
   _app.parser().extractParams(_name, params);
 
-  params.print();
-
   params.set<std::vector<VariableName> >("variable") = std::vector<VariableName>(1, getParam<NonlinearVariableName>("variable"));
 
   if(!quadrature)
