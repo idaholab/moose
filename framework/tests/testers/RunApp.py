@@ -77,28 +77,29 @@ class RunApp(Tester):
     reason = ''
     specs = self.specs
 
-    if specs.isValid(EXPECT_OUT):
-      out_ok = self.checkOutputForPattern(output, specs[EXPECT_OUT])
-      if (out_ok and retcode != 0):
-        reason = 'OUT FOUND BUT CRASH'
-      elif (not out_ok):
-        reason = 'NO EXPECTED OUT'
-    elif (options.enable_valgrind and retcode == 0) and not specs[NO_VALGRIND]:
-      if 'ERROR SUMMARY: 0 errors' not in output:
+    # Valgrind runs
+    if options.enable_valgrind:
+      if retcode == 0 and not specs[NO_VALGRIND] and 'ERROR SUMMARY: 0 errors' not in output:
         reason = 'MEMORY ERROR'
-    if reason == '':
-      # Check the general error message and program crash possibilities
-      if len( filter( lambda x: x in output, specs[ERRORS] ) ) > 0:
-        reason = 'ERRMSG'
-      elif retcode == RunParallel.TIMEOUT:
-        reason = 'TIMEOUT'
-      elif retcode == 0 and specs[SHOULD_CRASH] == True:
-        reason = 'NO CRASH'
-      elif retcode != 0 and specs[SHOULD_CRASH] == False:
-        reason = 'CRASH'
+    # Everything else
+    else:
+      if specs.isValid(EXPECT_OUT):
+        out_ok = self.checkOutputForPattern(output, specs[EXPECT_OUT])
+        if (out_ok and retcode != 0):
+          reason = 'OUT FOUND BUT CRASH'
+        elif (not out_ok):
+          reason = 'NO EXPECTED OUT'
+      if reason == '':
+        if len( filter( lambda x: x in output, specs[ERRORS] ) ) > 0:
+          reason = 'ERRMSG'
+        elif retcode == RunParallel.TIMEOUT:
+          reason = 'TIMEOUT'
+        elif retcode == 0 and specs[SHOULD_CRASH] == True:
+          reason = 'NO CRASH'
+        elif retcode != 0 and specs[SHOULD_CRASH] == False:
+          reason = 'CRASH'
 
     return (reason, output)
-
 
   def checkOutputForPattern(self, output, re_pattern):
     if re.search(re_pattern, output, re.MULTILINE | re.DOTALL) == None:
