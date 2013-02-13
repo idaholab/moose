@@ -962,6 +962,12 @@ FEProblem::addFunction(std::string type, const std::string & name, InputParamete
   }
 }
 
+bool
+FEProblem::hasFunction(const std::string & name, THREAD_ID tid)
+{
+  return (_functions[tid].find(name) != _functions[tid].end());
+}
+
 Function &
 FEProblem::getFunction(const std::string & name, THREAD_ID tid)
 {

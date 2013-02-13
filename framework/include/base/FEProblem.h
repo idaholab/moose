@@ -240,6 +240,7 @@ public:
 
   // Function /////
   virtual void addFunction(std::string type, const std::string & name, InputParameters parameters);
+  virtual bool hasFunction(const std::string & name, THREAD_ID tid = 0);
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
 
   // NL /////
