@@ -1,5 +1,4 @@
 #include "ThermalContactAuxKernelsAction.h"
-
 #include "Factory.h"
 #include "FEProblem.h"
 

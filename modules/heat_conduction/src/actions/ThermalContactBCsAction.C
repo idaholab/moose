@@ -1,5 +1,4 @@
 #include "ThermalContactBCsAction.h"
-
 #include "ThermalContactAuxVarsAction.h"
 
 #include "Factory.h"
