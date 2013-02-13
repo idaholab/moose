@@ -1,7 +1,10 @@
 #include "ThermalContactBCsAction.h"
 
 #include "ThermalContactAuxVarsAction.h"
+
 #include "Factory.h"
+#include "FEProblem.h"
+#include "MooseApp.h"
 
 static unsigned int n = 0;
 
