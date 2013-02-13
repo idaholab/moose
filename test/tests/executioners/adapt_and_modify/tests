@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'adapt_and_modify.i'
     exodiff = 'adapt_and_modify_out.e-s005'
-    compiler = 'GCC CLANG'
+    compiler = 'GCC'
     #deleted = 'Ticket #1647'
     rel_err = 5.e-5
   [../]

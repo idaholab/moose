@@ -145,11 +145,11 @@ def getCompilers(libmesh_dir):
   p = Popen(mpicxx_cmd + " --show", shell=True, stdout=PIPE)
   raw_compiler = p.communicate()[0]
 
-  if re.search('icpc', raw_compiler) != None:
+  if re.match('icpc', raw_compiler) != None:
     compilers.add("INTEL")
-  elif re.search('g\+\+', raw_compiler) != None:
+  elif re.match('g\+\+', raw_compiler) != None:
     compilers.add("GCC")
-  elif re.search('clang\+\+', raw_compiler) != None:
+  elif re.match('clang\+\+', raw_compiler) != None:
     compilers.add("CLANG")
 
   return compilers

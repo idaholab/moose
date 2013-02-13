@@ -43,7 +43,6 @@ class Executioner;
 class MooseApp
 {
 public:
-  MooseApp(int argc, char *argv[]);
   virtual ~MooseApp();
 
   /**
@@ -133,6 +132,7 @@ public:
   virtual void executeExecutioner();
 
 protected:
+  MooseApp(int argc, char *argv[]);
 
   virtual void meshOnly(std::string mesh_file_name);
 
