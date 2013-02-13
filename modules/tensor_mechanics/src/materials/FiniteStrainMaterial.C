@@ -102,7 +102,7 @@ void FiniteStrainMaterial::computeQpStrain(RankTwoTensor Fhat)
   Real q = (a[0]*a[0] + a[1]*a[1] + a[2]*a[2])/4.0;
   Real trFhatinv_1 = invFhat.trace() - 1.0;
   Real p = trFhatinv_1*trFhatinv_1/4.0;  
-  Real y = 1.0/((q + p)*(q + p)*(q + p));
+//  Real y = 1.0/((q + p)*(q + p)*(q + p));
 
   /*Real C1 = std::sqrt(p * (1 + (p*(q+q+(q+p))) * (1-(q+p)) * y));
   Real C2 = 0.125 + q * 0.03125 * (p*p - 12*(p-1)) / (p*p);

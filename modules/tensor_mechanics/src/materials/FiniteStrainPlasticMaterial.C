@@ -88,7 +88,7 @@ FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTenso
   RankTwoTensor flow_tensor, flow_dirn;
   RankTwoTensor resid,ddsig;
   RankFourTensor dr_dsig,dr_dsig_inv;
-  Real sig_eqv,flow_incr,f,dflow_incr;
+  Real /*sig_eqv,*/flow_incr,f,dflow_incr;
   Real err1,err2,err3,tol1,tol2,tol3;
   unsigned int plastic_flag;
   unsigned int iterisohard,iter,maxiterisohard=20,maxiter=20;
@@ -265,7 +265,7 @@ RankTwoTensor
 FiniteStrainPlasticMaterial::getSigDev(RankTwoTensor sig)
 {
 
-  Real sig_eqv,sij;
+//  Real sig_eqv,sij;
   RankTwoTensor identity;
   RankTwoTensor sig_dev;
 
@@ -286,7 +286,7 @@ FiniteStrainPlasticMaterial::getJac(RankTwoTensor sig, RankFourTensor E_ijkl, Re
   RankTwoTensor sig_dev, flow_tensor, flow_dirn;
   RankTwoTensor dfi_dft,dfi_dsig;
   RankFourTensor dft_dsig,dfd_dft,dfd_dsig;
-  Real sig_eqv,val;
+  Real sig_eqv/*,val*/;
   Real f1,f2,f3;
   RankFourTensor temp;
   

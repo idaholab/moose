@@ -333,7 +333,7 @@ SymmElasticityTensor::rotateFromGlobalToLocal( const ColumnMajorMatrix & R )
 }
 
 void
-SymmElasticityTensor::adjustForCracking( const RealVectorValue & crack_flags )
+SymmElasticityTensor::adjustForCracking( const RealVectorValue & /*crack_flags*/)
 {
   mooseError("adjustForCracking method not defined");
 }

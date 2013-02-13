@@ -733,15 +733,15 @@ Real WaterSteamEOS::steamEquationOfStatePT (Real press_in, Real temp, Real& enth
 Real WaterSteamEOS::waterAndSteamEquationOfStatePropertiesPH (Real enth_in, Real press_in, Real& phase, Real& temp_out, Real& temp_sat, Real& sat_fraction_out, Real& dens_out, Real& dens_water_out, Real& dens_steam_out, Real& enth_water_out, Real& enth_steam_out, Real& visc_water_out, Real& visc_steam_out, Real& del_press, Real& del_enth) const
 {
   /////VARIABLES:
-  Real visc1, visc2, visc3;                   //output - viscosity, 1 = comp. water, 2 = steam, 3 = sat. mix.
-  Real dens1, dens2, dens3;                   //output - density, 1 = comp. water, 2 = steam, 3 = sat. mix.
-  Real enth1, enth2, enth3;                   //output - enthalpy, 1 = comp. water, 2 = steam, 3 = sat. mix
+  Real visc1, visc2/*, visc3*/;                   //output - viscosity, 1 = comp. water, 2 = steam, 3 = sat. mix.
+  Real dens1, dens2/*, dens3*/;                   //output - density, 1 = comp. water, 2 = steam, 3 = sat. mix.
+  Real enth1, enth2/*, enth3*/;                   //output - enthalpy, 1 = comp. water, 2 = steam, 3 = sat. mix
   Real temp1, temp2;                          //*formerly T
   Real enth_water;                            //*formerly hw
   Real enth_steam;                            //*formerly hg
   Real dens_water;                            //*formerly dw
   Real dens_steam;                            //*formerly dg
-  Real visc_out; 
+//  Real visc_out;
   Real visc_water; 
   Real visc_steam;
   //int phase;                                  //output of phase_determ func tion - denotes phase of water *formerly iphase
@@ -782,7 +782,7 @@ Real WaterSteamEOS::waterAndSteamEquationOfStatePropertiesPH (Real enth_in, Real
     dens_out = dens1;                                              //*Den
     visc_water_out = visc1;                                                    
     visc_steam_out = 1e-15;                                                   
-    visc_out = visc1;                                              //*visc
+//    visc_out = visc1;                                              //*visc
     del_press = 0.1;
     del_enth = -0.1;
   }
@@ -809,7 +809,7 @@ Real WaterSteamEOS::waterAndSteamEquationOfStatePropertiesPH (Real enth_in, Real
     dens_out = dens2;                                              //*Den
     visc_water_out = 1e-15;                                                   
     visc_steam_out = visc2;                                                    
-    visc_out = visc2;                                              //*visc
+//    visc_out = visc2;                                              //*visc
     del_press = -0.1;
     del_enth = 0.1;
   }
@@ -833,7 +833,7 @@ Real WaterSteamEOS::waterAndSteamEquationOfStatePropertiesPH (Real enth_in, Real
     dens_out = sat_fraction_out * dens_water + (1.e0 - sat_fraction_out) * dens_steam;  //*Den
     visc_water_out = visc_water;                                               
     visc_steam_out = visc_steam;                                                   
-    visc_out = sat_fraction_out * visc_water + (1.e0 - sat_fraction_out) * visc_steam;  //*visc
+//    visc_out = sat_fraction_out * visc_water + (1.e0 - sat_fraction_out) * visc_steam;  //*visc
     del_press = 0.1;
     del_enth = 0.1;
   }
@@ -875,8 +875,8 @@ Real WaterSteamEOS::waterAndSteamEquationOfStatePropertiesWithDerivativesPH (Rea
   Real enth_water_1h;                          //*formerly hw1 - final value of water enthalpy after enthalpy shift
   Real enth_steam_1h;                          //*formerly hg1 - final value of steam enthalpy after enthalpy shift
   Real dens_1h;                                //*formerly d1 - final value of density after enthalpy shift
-  Real dens_water_1h;                          //*formerly dw1 - final value of water density after enthalpy shift
-  Real dens_steam_1h;                          //*formerly dg1 - final value of steam density after enthalpy figt
+//  Real dens_water_1h;                          //*formerly dw1 - final value of water density after enthalpy shift
+//  Real dens_steam_1h;                          //*formerly dg1 - final value of steam density after enthalpy figt
   Real sat_fraction_1h;                        //*formerly sw1 - final value of saturation fraction after enthalpy shift
   Real phase;                                  //current phase of fluid (water, steam, saturated mix)
   Real del_press, del_enth;                    //delta increments added to enthalpy and pressure to determine derivatives

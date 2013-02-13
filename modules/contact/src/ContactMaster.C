@@ -218,7 +218,7 @@ ContactMaster::computeQpResidual()
   RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
   RealVectorValue pen_force(_penalty * distance_vec);
   RealVectorValue tan_residual(0,0,0);
-  Real tan_residual_mag(0);
+//  Real tan_residual_mag(0);
   RealVectorValue unity(1.0, 1.0, 1.0);
   if (_model == CM_FRICTIONLESS ||
       _model == CM_EXPERIMENTAL)

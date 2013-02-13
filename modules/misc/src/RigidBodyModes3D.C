@@ -90,7 +90,7 @@ RigidBodyModes3D::RigidBodyModes3D(const std::string & name, InputParameters par
   for(unsigned int i = 0; i < _subspace_indices.size(); ++i)
   {
     unsigned int subspace_dim = _fe_problem.subspaceDim(_subspace_name);
-    if(_subspace_indices[i] >= _fe_problem.subspaceDim(_subspace_name))
+    if(_subspace_indices[i] >= subspace_dim)
     {
       std::stringstream err;
       err << "Invalid " << i << "-th " << _subspace_name << " index " << _subspace_indices[i] << "; must be < " << _fe_problem.subspaceDim(_subspace_name) << "\n";

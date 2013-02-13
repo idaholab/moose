@@ -122,7 +122,7 @@ void AbaqusCreepMaterial::initQpStatefulProperties()
 
 void AbaqusCreepMaterial::modifyStrain(const unsigned int qp,
                                        SymmTensor & strain_increment,
-                                       SymmTensor & dstrain_increment_dT)
+                                       SymmTensor & /*dstrain_increment_dT*/)
 {
   //Recover "old" state variables
   for(unsigned int i=0; i<_num_state_vars; i++)

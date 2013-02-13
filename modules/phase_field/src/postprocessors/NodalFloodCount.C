@@ -174,7 +174,7 @@ NodalFloodCount::getNodalValue(unsigned int node_id, unsigned int var_idx, bool 
 }
 
 Real
-NodalFloodCount::getElementalValue(unsigned int element_id) const
+NodalFloodCount::getElementalValue(unsigned int /*element_id*/) const
 {
   mooseDoOnce(mooseWarning("Method not implemented"));
   return 0;

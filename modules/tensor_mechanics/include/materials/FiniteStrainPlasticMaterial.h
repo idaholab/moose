@@ -25,8 +25,8 @@ protected:
   MaterialProperty<Real> & _eqv_plastic_strain;
 
   virtual void solveStressResid(RankTwoTensor,RankTwoTensor,RankFourTensor,RankTwoTensor*,RankTwoTensor*);
-  virtual void getJac(RankTwoTensor,RankFourTensor,Real,RankFourTensor*);
-  virtual void getFlowTensor(RankTwoTensor,RankTwoTensor*);
+  void getJac(RankTwoTensor,RankFourTensor,Real,RankFourTensor*);
+  void getFlowTensor(RankTwoTensor,RankTwoTensor*);
 
   
   unsigned int isPlastic(RankTwoTensor,Real);

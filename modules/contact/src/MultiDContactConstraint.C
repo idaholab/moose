@@ -103,18 +103,18 @@ MultiDContactConstraint::updateContactSet()
       res_vec(i) = _residual_copy(dof_number);
     }
 
-    Real resid = 0;
+//    Real resid = 0;
     switch(_model)
     {
     case CM_FRICTIONLESS:
 
-      resid = pinfo->_normal * res_vec;
+//      resid = pinfo->_normal * res_vec;
       break;
 
     case CM_GLUED:
     case CM_TIED:
 
-      resid = pinfo->_normal * res_vec;
+//      resid = pinfo->_normal * res_vec;
       break;
 
     default:

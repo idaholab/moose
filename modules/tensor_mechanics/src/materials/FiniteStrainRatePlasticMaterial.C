@@ -88,7 +88,7 @@ FiniteStrainRatePlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoT
   RankTwoTensor flow_tensor, flow_dirn;
   RankTwoTensor resid,ddsig;
   RankFourTensor dr_dsig,dr_dsig_inv;
-  Real sig_eqv,flow_incr,flow_incr_tmp;
+  Real /*sig_eqv,*/flow_incr,flow_incr_tmp;
   Real err1,err3,tol1,tol3;
   unsigned int iterisohard,iter,maxiterisohard=20,maxiter=50;
   Real eqvpstrain;
@@ -189,7 +189,7 @@ FiniteStrainRatePlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoT
 
 //Obtain derivative of flow potential w.r.t. stress (plastic flow direction)
 void
-FiniteStrainRatePlasticMaterial::getFlowTensor(RankTwoTensor sig,Real yield_stress,RankTwoTensor* flow_tensor)
+FiniteStrainRatePlasticMaterial::getFlowTensor(RankTwoTensor sig,Real /*yield_stress*/,RankTwoTensor* flow_tensor)
 {
 
   RankTwoTensor sig_dev;
@@ -214,7 +214,7 @@ FiniteStrainRatePlasticMaterial::getJac(RankTwoTensor sig, RankFourTensor E_ijkl
   RankTwoTensor sig_dev, flow_tensor, flow_dirn,fij;
   RankTwoTensor dfi_dft;
   RankFourTensor dft_dsig,dfd_dft,dfd_dsig,dfi_dsig;
-  Real sig_eqv,val;
+  Real sig_eqv/*,val*/;
   Real f1,f2,f3;
   Real dfi_dseqv;
   

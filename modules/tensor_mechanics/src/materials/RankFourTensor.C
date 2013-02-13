@@ -239,12 +239,12 @@ RankFourTensor::operator*(const RankFourTensor &a) const
 RankFourTensor
 RankFourTensor::invSymm()
 {
-  int nsize,error;
+  int error;
   double *mat;
   
   RankFourTensor result;
 
-  int ntens=6;
+  unsigned int ntens=6;
   int nskip=2;
   
   mat=(double*)calloc(ntens*ntens, sizeof(double));

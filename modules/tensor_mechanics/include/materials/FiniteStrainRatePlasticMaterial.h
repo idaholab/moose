@@ -20,8 +20,8 @@ protected:
   virtual void initQpStatefulProperties();
 
   virtual void solveStressResid(RankTwoTensor,RankTwoTensor,RankFourTensor,RankTwoTensor*,RankTwoTensor*);
-  virtual void getJac(RankTwoTensor,RankFourTensor,Real,Real,RankFourTensor*);
-  virtual void getFlowTensor(RankTwoTensor,Real,RankTwoTensor*);
+  void getJac(RankTwoTensor,RankFourTensor,Real,Real,RankFourTensor*);
+  void getFlowTensor(RankTwoTensor,Real,RankTwoTensor*);
 
   Real _ref_pe_rate;
   Real _exponent;
