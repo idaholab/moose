@@ -21,7 +21,7 @@
 //Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
-#include "MooseApp.h"
+#include "ExampleApp.h"
 
 PerfLog Moose::perf_log("Example12: Physics Based Preconditioning");
 
@@ -29,7 +29,7 @@ int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
 
-  MooseApp app(argc, argv);
+  ExampleApp app(argc, argv);
   app.run();
 
   return 0;
