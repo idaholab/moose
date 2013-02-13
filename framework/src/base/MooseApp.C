@@ -29,7 +29,8 @@ MooseApp::MooseApp(int argc, char *argv[]) :
     _sys_info(argc, argv),
     _enable_unused_check(WARN_UNUSED),
     _factory(*this),
-    _error_overridden(false)
+    _error_overridden(false),
+    _ready_to_exit(false)
 {}
 
 MooseApp::~MooseApp()
@@ -165,18 +166,19 @@ MooseApp::parseCommandLine()
   if (_command_line.search("Help"))
   {
     _command_line.printUsage();
+    _ready_to_exit = true;
   }
   else if (_command_line.search("Dump", argument))
   {
     _parser.initSyntaxFormatter(Parser::INPUT_FILE, true);
     _parser.buildFullTree(argument);
-    exit(0);
+    _ready_to_exit = true;
   }
   else if (_command_line.search("YAML", argument))
   {
     _parser.initSyntaxFormatter(Parser::YAML, true);
     _parser.buildFullTree(argument);
-    exit(0);
+    _ready_to_exit = true;
   }
   else if (_command_line.search("Syntax"))
   {
@@ -201,7 +203,10 @@ MooseApp::parseCommandLine()
     _action_warehouse.build();
   }
   else
+  {
     _command_line.printUsage();
+    _ready_to_exit = true;
+  }
 }
 
 void
@@ -217,8 +222,12 @@ MooseApp::runInputFile()
   if (_command_line.search("MeshOnly", mesh_file_name))
   {
     meshOnly(mesh_file_name);
-    exit(0);
+    _ready_to_exit = true;
   }
+
+  // If ready to exit has been set, then just return
+  if (_ready_to_exit)
+    return;
 
   // Print the input file syntax if requested
   if (_command_line.search("ShowTree"))
@@ -250,6 +259,10 @@ MooseApp::runInputFile()
 void
 MooseApp::executeExecutioner()
 {
+  // If ready to exit has been set, then just return
+  if (_ready_to_exit)
+    return;
+
   // run the simulation
   if (_executioner)
     _executioner->execute();

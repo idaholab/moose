@@ -54,8 +54,8 @@ CommandLine::search(const std::string &option_name)
 
     if (pos->second.required)
     {
-      std::cout << "Required parameter: " << option_name << " missing\n";
       printUsage();
+      mooseError("Required parameter: " << option_name << " missing");
     }
   }
   else
@@ -87,7 +87,6 @@ CommandLine::printUsage() const
 
   std::cout << "\nSolver Options:\n"
             << "  See solver manual for details (Petsc or Trilinos)\n";
-  exit(0);
 }
 
 void

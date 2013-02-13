@@ -161,6 +161,7 @@ protected:
 private:
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
+  bool _ready_to_exit;
 };
 
 #endif /* MOOSEAPP_H */
