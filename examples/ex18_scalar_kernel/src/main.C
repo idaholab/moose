@@ -19,7 +19,7 @@
 //Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
-#include "MooseApp.h"
+#include "ExampleApp.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("Example 18: ScalarKernel");
@@ -29,7 +29,7 @@ int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
 
-  MooseApp app(argc, argv);
+  ExampleApp app(argc, argv);
   app.run();
 
   return 0;
