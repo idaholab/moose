@@ -52,7 +52,16 @@ TiledMesh::TiledMesh(const std::string & name, InputParameters parameters):
 // This class only works with SerialMesh
 #ifndef LIBMESH_ENABLE_PARMESH
 
-  _mesh.read(getParam<MeshFileName>("file"));
+  std::string mesh_file(getParam<MeshFileName>("file"));
+
+  if (mesh_file.rfind(".exd") < mesh_file.size() ||
+      mesh_file.rfind(".e") < mesh_file.size())
+  {
+    ExodusII_IO ex(*this);
+    ex.read(mesh_file);
+  }
+  else
+    read(mesh_file);
 
   BoundaryID left = getBoundaryID(getParam<BoundaryName>("left_boundary"));
   BoundaryID right = getBoundaryID(getParam<BoundaryName>("right_boundary"));
