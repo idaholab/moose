@@ -28,6 +28,11 @@ include $(MOOSE_DIR)/moose.mk
 include $(MOOSE_DIR)/app.mk
 include ../test.mk
 
+# Include dependency files for this example
+ex_srcfiles := $(shell find $(CURR_DIR) -name *.C)
+ex_deps     := $(patsubst %.C, %.$(obj-suffix).d, $(ex_srcfiles))
+-include $(ex_deps)
+
 ###############################################################################
 # Additional special case targets should be added here
 
