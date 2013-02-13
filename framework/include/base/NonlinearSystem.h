@@ -373,6 +373,8 @@ protected:
    */
   void finishResidual(NumericVector<Number> & residual, Moose::KernelType type);
 
+  void computeJacobianInternal(SparseMatrix<Number> &  jacobian);
+
   void computeDiracContributions(NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
 
   void computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian);
@@ -467,10 +469,7 @@ protected:
 
   bool _computing_initial_residual;
 
-  /**
-   * If this is non-NULL, it holds an exception that we will re-throw
-   */
- MooseException * _exception;
+  MooseException _exception;
 public:
   /// Time stepping scheme class where the actual work is done
   TimeScheme * _time_scheme;

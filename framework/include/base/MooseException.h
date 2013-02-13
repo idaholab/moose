@@ -16,27 +16,18 @@
 #define MOOSEEXCEPTION_H
 
 /**
- * Base class for any MOOSE-exception.
+ * MooseException is typedef'd as int so we can do simple sync'ing over the MPI.
  *
- * Inherit from this class and adjust to your likings.
+ * To use it in MOOSE (framework, not applications!), you have two macros available:
+ * - PARALLEL_TRY
+ * - PARALLEL_CATCH
+ *
+ * To use these right, one has to include a critical part of the code inside it. There cannot
+ * be any MPI communications inside this block, since it would mess up the MPI comm pattern and
+ * the code would end up out of sync (i.e. hang inside MPI).
+ *
+ * NOTE: These macros can be used only inside Nonlinear system (right now).
  */
-class MooseException
-{
-public:
-  MooseException() throw();
-  virtual ~MooseException() throw();
-
-  /**
-   * Clone this exception.
-   * @return The cloned instance of this exception
-   */
-  virtual MooseException * clone();
-
-  /**
-   * Get the description of this exception
-   * @return The description of this exception
-   */
-  virtual const char * what() const throw();
-};
+typedef int MooseException;
 
 #endif /* MOOSEEXCEPTION_H */

@@ -1,10 +1,8 @@
 [Mesh]
-  file = square.e
+  file = 2squares.e
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
@@ -15,6 +13,13 @@
   [./exception]
     type = ExceptionKernel
     variable = u
+    block = 1
+    when = initial_condition
+  [../]
+  [./diff]
+    type = Diffusion
+    variable = u
+    block = 2
   [../]
 []
 
@@ -25,16 +30,12 @@
     boundary = 2
     value = 1
   [../]
-[]
-
-[Preconditioning]
-  active = ' '
-  [./PBP]
-    type = PBP
-    solve_order = 'u'
-    preconditioner  = 'LU'
-    petsc_options = '-ksp_monitor'  # Test petsc options in PBP block
-  []
+  [./right2]
+    type = DirichletBC
+    variable = u
+    boundary = 1
+    value = 0
+  [../]
 []
 
 [Executioner]
@@ -43,7 +44,6 @@
 []
 
 [Output]
-  file_base = out
   output_initial = true
   interval = 1
   exodus = true

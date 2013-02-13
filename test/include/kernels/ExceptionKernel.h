@@ -20,6 +20,14 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+
+  enum WhenType {
+    RESIDUAL = 0,
+    JACOBIAN,
+    INITIAL_CONDITION
+  } _when;
+  /// Counter for the number of calls
+  unsigned int _call_no;
 };
 
 #endif /* EXCEPTIONKERNEL_H */

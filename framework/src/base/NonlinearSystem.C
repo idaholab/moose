@@ -63,6 +63,19 @@
 #include "petscsnes.h"
 #endif
 
+#define PARALLEL_TRY        try
+#define PARALLEL_CATCH                                                                  \
+  catch (MooseException & e)                                                            \
+  {                                                                                     \
+    _exception = e;                                                                     \
+  }                                                                                     \
+  {                                                                                     \
+    Parallel::max<MooseException>(_exception);                                          \
+    if (_exception > 0)                                                                 \
+      throw _exception;                                                                 \
+  }
+
+
 namespace Moose {
   void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys)
   {
@@ -127,7 +140,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _final_residual(0.),
     _use_predictor(false),
     _predictor_scale(0.0),
-    _exception(NULL),
+    _exception(0),
     _time_scheme(new TimeScheme(this))
 {
   _sys.nonlinear_solver->residual      = Moose::compute_residual;
@@ -184,7 +197,6 @@ NonlinearSystem::solve()
 {
   try
   {
-
     //Calculate the initial residual for use in the convergence criterion.  The initial
     //residual
     _computing_initial_residual = true;
@@ -232,14 +244,8 @@ NonlinearSystem::solve()
 #endif
 
   // we are back from the libMesh solve, so re-throw the exception if we got one;
-  if (_exception != NULL)
-  {
-    // clone the exception, delete it and re-throw it
-    MooseException * e = _exception->clone();
-    delete _exception;
-    _exception = NULL;
-    throw *e;
-  }
+  if (_exception > 0)
+    throw _exception;
 }
 
 void
@@ -566,22 +572,17 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
 
   try
   {
-    if(type == Moose::KT_ALL)
-    {
+    if (type == Moose::KT_ALL)
       computeTimeDerivatives();
-    }
     computeResidualInternal(residual, type);
-    if(type != Moose::KT_TIME)
+    if (type != Moose::KT_TIME)
       finishResidual(residual, type);
   }
   catch (MooseException & e)
   {
-    if (_computing_initial_residual)
-      throw;                            // re-throw the exception if we are computing initial residual
-    else
+    residual.close();
+    if (!_computing_initial_residual)
     {
-      // save the exception so we can re-throw it again
-      _exception = e.clone();
       // tell solver to stop
 #ifdef LIBMESH_HAVE_PETSC
 #if PETSC_VERSION_LESS_THAN(3,0,0)
@@ -591,6 +592,7 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
 #endif
 #endif
     }
+    throw;
   }
 
   Moose::enableFPE(false);
@@ -960,45 +962,54 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
     _fe_problem.reinitScalars(tid);
 
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  if(type != Moose::KT_ALL || (type == Moose::KT_ALL && _time_stepping_scheme != Moose::CRANK_NICOLSON))
-  {
-    ComputeResidualThread cr(_fe_problem, *this, residual, type);
-    Threads::parallel_reduce(elem_range, cr);
-  }
- else
-  {
-    ComputeResidualThread cr(_fe_problem, *this, residual, Moose::KT_TIME);
-    Threads::parallel_reduce(elem_range, cr);
-    residual.close();
-    if(_time_stepping_scheme == Moose::CRANK_NICOLSON)
+  PARALLEL_TRY {
+    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    if(type != Moose::KT_ALL || (type == Moose::KT_ALL && _time_stepping_scheme != Moose::CRANK_NICOLSON))
     {
-      residual *= 2;
+      ComputeResidualThread cr(_fe_problem, *this, residual, type);
+      Threads::parallel_reduce(elem_range, cr);
     }
-    ComputeResidualThread crnt(_fe_problem, *this, residual, Moose::KT_NONTIME);
-    Threads::parallel_reduce(elem_range, crnt);
+    else
+    {
+      ComputeResidualThread cr(_fe_problem, *this, residual, Moose::KT_TIME);
+      Threads::parallel_reduce(elem_range, cr);
+      residual.close();
+      if(_time_stepping_scheme == Moose::CRANK_NICOLSON)
+      {
+        residual *= 2;
+      }
+      ComputeResidualThread crnt(_fe_problem, *this, residual, Moose::KT_NONTIME);
+      Threads::parallel_reduce(elem_range, crnt);
+    }
   }
+  PARALLEL_CATCH;
 
   if(type == Moose::KT_TIME)
   {
     residual.close();
     return;
   }
-  // do scalar kernels (not sure how to thread this)
-  const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
-  if (scalars.size() > 0)
-  {
-    for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
-    {
-            if (dynamic_cast<TimeKernel *>(*it) == NULL){
-                    ScalarKernel * kernel = *it;
 
-                    _fe_problem.reinitScalars(0);
-                    kernel->reinit();
-                    kernel->computeResidual();
-                    _fe_problem.addResidualScalar(residual);}
+  PARALLEL_TRY {
+    // do scalar kernels (not sure how to thread this)
+    const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
+    if (scalars.size() > 0)
+    {
+      for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
+      {
+        if (dynamic_cast<TimeKernel *>(*it) == NULL)
+        {
+          ScalarKernel * kernel = *it;
+
+          _fe_problem.reinitScalars(0);
+          kernel->reinit();
+          kernel->computeResidual();
+          _fe_problem.addResidualScalar(residual);
+        }
+      }
     }
   }
+  PARALLEL_CATCH;
 
   if(_need_residual_copy)
   {
@@ -1017,7 +1028,10 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose
     _residual_ghosted.close();
   }
 
-  computeDiracContributions(&residual);
+  PARALLEL_TRY {
+    computeDiracContributions(&residual);
+  }
+  PARALLEL_CATCH;
 
   Moose::perf_log.push("residual.close3()","Solve");
   residual.close();
@@ -1025,19 +1039,25 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose
 
   if(_fe_problem._has_constraints)
   {
-    enforceNodalConstraintsResidual(residual);
+    PARALLEL_TRY {
+      enforceNodalConstraintsResidual(residual);
+    }
+    PARALLEL_CATCH;
   }
   residual.close();
 
   // Add in Residual contributions from Constraints
   if(_fe_problem._has_constraints)
   {
-    // Undisplaced Constraints
-    constraintResiduals(residual, false);
+    PARALLEL_TRY {
+      // Undisplaced Constraints
+      constraintResiduals(residual, false);
 
-    // Displaced Constraints
-    if(_fe_problem.getDisplacedProblem())
-      constraintResiduals(residual, true);
+      // Displaced Constraints
+      if(_fe_problem.getDisplacedProblem())
+        constraintResiduals(residual, true);
+    }
+    PARALLEL_CATCH;
   }
 }
 
@@ -1050,28 +1070,31 @@ NonlinearSystem::finishResidual(NumericVector<Number> & residual, Moose::KernelT
     residual = _time_scheme->finishResidual(residual);
   }
 
-  // last thing to do are nodal BCs
-  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-  for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
-  {
-    const BndNode * bnode = *nd;
-    BoundaryID boundary_id = bnode->_bnd_id;
-    Node * node = bnode->_node;
-
-    if(node->processor_id() == libMesh::processor_id())
+  PARALLEL_TRY {
+    // last thing to do are nodal BCs
+    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
     {
-      // reinit variables in nodes
-      _fe_problem.reinitNodeFace(node, boundary_id, 0);
+      const BndNode * bnode = *nd;
+      BoundaryID boundary_id = bnode->_bnd_id;
+      Node * node = bnode->_node;
 
-      std::vector<NodalBC *> bcs = _bcs[0].activeNodal(boundary_id);
-      for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
+      if(node->processor_id() == libMesh::processor_id())
       {
-        NodalBC * bc = *it;
-        if (bc->shouldApply())
-          bc->computeResidual(residual);
+        // reinit variables in nodes
+        _fe_problem.reinitNodeFace(node, boundary_id, 0);
+
+        std::vector<NodalBC *> bcs = _bcs[0].activeNodal(boundary_id);
+        for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
+        {
+          NodalBC * bc = *it;
+          if (bc->shouldApply())
+            bc->computeResidual(residual);
+        }
       }
     }
   }
+  PARALLEL_CATCH;
 
   Moose::perf_log.push("residual.close4()","Solve");
   residual.close();
@@ -1357,53 +1380,48 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
 }
 
 void
-NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
+NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
 {
-  Moose::perf_log.push("compute_jacobian()","Solve");
-
-  Moose::enableFPE();
-
-  try
-  {
-    _currently_computing_jacobian = true;
+  _currently_computing_jacobian = true;
 
 #ifdef LIBMESH_HAVE_PETSC
-    //Necessary for speed
+  //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3,1,0)
-    // In Petsc 3.0.0, MatSetOption has three args...the third arg
-    // determines whether the option is set (true) or unset (false)
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-      MAT_KEEP_ZEROED_ROWS,
-      PETSC_TRUE);
+  // In Petsc 3.0.0, MatSetOption has three args...the third arg
+  // determines whether the option is set (true) or unset (false)
+  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+    MAT_KEEP_ZEROED_ROWS,
+    PETSC_TRUE);
 #else
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-      MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
-      PETSC_TRUE);
+  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+    MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
+    PETSC_TRUE);
 #endif
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 #else
-    // PETSc 3.3.0
-    MatSetOption(static_cast<PetscMatrix<Number> &>(*sys().matrix).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+  // PETSc 3.3.0
+  MatSetOption(static_cast<PetscMatrix<Number> &>(*sys().matrix).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 #endif
 
 #endif
 
-    // jacobianSetup /////
-    for(unsigned int i=0; i<libMesh::n_threads(); i++)
-    {
-      _kernels[i].jacobianSetup();
-      _bcs[i].jacobianSetup();
-      _dirac_kernels[i].jacobianSetup();
-      _constraints[i].jacobianSetup();
-      if (_doing_dg) _dg_kernels[i].jacobianSetup();
-    }
+  // jacobianSetup /////
+  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  {
+    _kernels[i].jacobianSetup();
+    _bcs[i].jacobianSetup();
+    _dirac_kernels[i].jacobianSetup();
+    _constraints[i].jacobianSetup();
+    if (_doing_dg) _dg_kernels[i].jacobianSetup();
+  }
 
-    // reinit scalar variables
-    for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
-      _fe_problem.reinitScalars(tid);
+  // reinit scalar variables
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+    _fe_problem.reinitScalars(tid);
 
+  PARALLEL_TRY {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     if (_time_stepping_scheme != Moose::EXPLICIT_EULER)
     {
@@ -1445,9 +1463,12 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
       if(_fe_problem.getDisplacedProblem())
         addImplicitGeometricCouplingEntries(jacobian, _fe_problem.getDisplacedProblem()->geomSearchData());
     }
+  }
+  PARALLEL_CATCH;
 
-    jacobian.close();
+  jacobian.close();
 
+  PARALLEL_TRY {
     // do nodal BC
     std::vector<numeric_index_type> zero_rows;
 
@@ -1472,9 +1493,11 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
     }
 
     jacobian.zero_rows(zero_rows, 1.0);
+  }
+  PARALLEL_CATCH;
+  jacobian.close();
 
-    jacobian.close();
-
+  PARALLEL_TRY {
     // Add in Jacobian contributions from Constraints
     if(_fe_problem._has_constraints)
     {
@@ -1488,19 +1511,25 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
       if(_fe_problem.getDisplacedProblem())
         constraintJacobians(jacobian, true);
     }
+  }
+  PARALLEL_CATCH;
 
-    _currently_computing_jacobian = false;
+  _currently_computing_jacobian = false;
+}
+
+void
+NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
+{
+  Moose::perf_log.push("compute_jacobian()","Solve");
+
+  Moose::enableFPE();
+
+  try {
+    computeJacobianInternal(jacobian);
   }
   catch (MooseException & e)
   {
-    // The matrix is in a wrong state (since there was an exception), so we need to force it into a proper state. We can
-    // do it by putting zeroes on the diagonal
-    for (unsigned int i = jacobian.row_start(); i < jacobian.row_stop(); i++)
-      jacobian.set(i, i, 0.);
     jacobian.close();
-
-    // save the exception so we can re-throw it again
-    _exception = e.clone();
     // tell solver to stop
 #ifdef LIBMESH_HAVE_PETSC
 #if PETSC_VERSION_LESS_THAN(3,0,0)
@@ -1509,6 +1538,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
     SNESSetFunctionDomainError(solver.snes());
 #endif
 #endif
+    throw;
   }
 
   Moose::enableFPE(false);

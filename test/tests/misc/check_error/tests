@@ -109,14 +109,6 @@
     expect_err = "The following dynamic boundary name is not unique: \w+"
   [../]
 
-  [./exception_test]
-    type = 'RunException'
-    input = 'exception_test.i'
-    expect_err = "Exception caught: MOOSE exception"
-    petsc_version = '>=3.1.0'
-    should_crash = false
-  [../]
-
   [./function_file_test1]
     type = 'RunException'
     input = 'function_file_test1.i'

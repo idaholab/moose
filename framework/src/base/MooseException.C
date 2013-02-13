@@ -14,23 +14,3 @@
 
 #include "MooseException.h"
 
-MooseException::MooseException() throw()
-{
-}
-
-MooseException::~MooseException() throw()
-{
-}
-
-MooseException *
-MooseException::clone()
-{
-  return new MooseException();
-}
-
-const char *
-MooseException::what() const throw()
-{
-  return "MOOSE exception";
-}
-
