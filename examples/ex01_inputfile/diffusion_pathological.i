@@ -3,7 +3,7 @@
   uniform_refine = 4
 []
 
-# Note: This output block is out of it's normal place (should be at the bottom)
+# Note: This output block is out of its normal place (should be at the bottom)
 [Output]
   file_base = out
   interval = 1
@@ -11,19 +11,10 @@
   perf_log = true
 []
 
-# Note: The executioner is out of it's normal place (should be just about the output block)
+# Note: The executioner is out of its normal place (should be just about the output block)
 [Executioner]
   type = Steady
   petsc_options = '-snes_mf_operator'
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
 []
 
 [Variables]
@@ -36,7 +27,7 @@
 
 # This variable is not active in the list above
 # therefore it is not used in the simulation
-  [./diffused]
+  [./convected]
     order = FIRST
     family = LAGRANGE
   [../]
