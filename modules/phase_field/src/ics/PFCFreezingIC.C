@@ -37,7 +37,7 @@ PFCFreezingIC::PFCFreezingIC(const std::string & name,
    _range(_top_right - _bottom_left)
 {
   for(unsigned int i=0; i<LIBMESH_DIM; i++)
-    mooseAssert(_range(i) > 0.0, "x1, y1 or z1 is not less than x2, y2 or z2");
+    mooseAssert(_range(i) >= 0.0, "x1, y1 or z1 is not less than x2, y2 or z2");
   
   MooseRandom::seed(getParam<unsigned int>("seed"));
 
