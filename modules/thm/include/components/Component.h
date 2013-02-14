@@ -100,10 +100,6 @@ public:
    */
   void createVectorControllableParMapping(const std::string & rname, const std::string & mooseName, unsigned int pos);
 
-  virtual void onResidual() {}
-  virtual void onTimestepBegin() {}
-  virtual void onTimestepEnd() {}
-
 public:
   static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
   static std::string genName(const std::string & prefix, const std::string & suffix);
