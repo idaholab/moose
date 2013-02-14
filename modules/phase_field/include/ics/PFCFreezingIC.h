@@ -42,11 +42,13 @@ private:
   Real _y2; 
   Real _z2; 
   Real _lc;
-  std::string _crystal_structure;
+  MooseEnum _crystal_structure;
 
   Point _bottom_left;
   Point _top_right;
   Point _range;
+
+  Real _min, _max, _val_range;
 
   unsigned int _icdim;
   
