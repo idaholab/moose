@@ -47,7 +47,7 @@ LinearInterpolation::errorCheck()
 }
 
 double
-LinearInterpolation::sample(double x)
+LinearInterpolation::sample(double x) const
 {
   // endpoint cases
   if (x <= _x[0])
