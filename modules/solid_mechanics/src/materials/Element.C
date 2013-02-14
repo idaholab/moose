@@ -75,8 +75,8 @@ Element::invertMatrix( const ColumnMajorMatrix & A,
 
 void
 Element::rotateSymmetricTensor( const ColumnMajorMatrix & R,
-                                    const RealTensorValue & T,
-                                    RealTensorValue & result )
+                                const RealTensorValue & T,
+                                RealTensorValue & result )
 {
 
   //     R           T         Rt
