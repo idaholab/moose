@@ -45,7 +45,7 @@ PFCFreezingIC::PFCFreezingIC(const std::string & name,
   
   if (_range(1) == 0.0)
     _icdim = 1;
-  else if (_range(2) = 0.0)
+  else if (_range(2) == 0.0)
     _icdim = 2;
   else
     _icdim = 3;
