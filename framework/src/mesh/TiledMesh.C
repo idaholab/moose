@@ -59,6 +59,7 @@ TiledMesh::TiledMesh(const std::string & name, InputParameters parameters):
   {
     ExodusII_IO ex(*this);
     ex.read(mesh_file);
+    _mesh.prepare_for_use();
   }
   else
     read(mesh_file);
