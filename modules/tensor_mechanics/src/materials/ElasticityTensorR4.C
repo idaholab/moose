@@ -79,3 +79,15 @@ ElasticityTensorR4::elasticJacobian( const unsigned int i, const unsigned int k,
 
   return a;
 }
+
+ElasticityTensorR4&
+ElasticityTensorR4::operator=(const ElasticityTensorR4 &a)
+{
+  for (unsigned int i(0); i<N; i++)
+    for(unsigned int j(0); j<N; j++)
+      for(unsigned int k(0); k<N; k++)
+        for(unsigned int l(0); l<N; l++)
+          _vals[i][j][k][l] = a._vals[i][j][k][l];
+  
+  return *this;
+}

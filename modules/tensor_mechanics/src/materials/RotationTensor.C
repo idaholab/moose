@@ -3,6 +3,12 @@
 
 RotationTensor::RotationTensor(const RealVectorValue & Euler_angles)
 {
+  update(Euler_angles);
+}
+
+void
+RotationTensor::update(const RealVectorValue & Euler_angles)
+{
   Real phi_1 = Euler_angles(0)*(libMesh::pi/180.0);
   Real Phi = Euler_angles(1)*(libMesh::pi/180.0);
   Real phi_2 = Euler_angles(2)*(libMesh::pi/180.0);
@@ -29,6 +35,4 @@ RotationTensor::RotationTensor(const RealVectorValue & Euler_angles)
   _coords[2] = s2*s3; //R31
   _coords[5] = c3*s2; //R32
   _coords[8] = c2; //R33
-  
 }
-

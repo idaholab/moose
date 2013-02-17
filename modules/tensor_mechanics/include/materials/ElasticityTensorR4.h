@@ -35,8 +35,9 @@ public:
   virtual Real elasticJacobian( const unsigned int i, const unsigned int k,
                                 const RealGradient & grad_test,
                                 const RealGradient & grad_phi);
-  
-  
+
+  ElasticityTensorR4 & operator=(const ElasticityTensorR4 &a);
+
 protected:
 
 private:

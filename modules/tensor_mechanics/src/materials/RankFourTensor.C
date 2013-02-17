@@ -365,10 +365,6 @@ RankFourTensor::rotate(RealTensorValue &R)
           _vals[i][j][k][l] = temp;
         }
   
-                
-  std::cout << std::endl;
-  
-  
 }
 
 

@@ -51,9 +51,9 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
   _Cijkl.fillFromInputVector(_Cijkl_vector, _all_21);
   //_Cijkl.print();
   //rotate the C_ijkl matrix original data
-  RotationTensor R(_Euler_angles);
+//  RotationTensor R(_Euler_angles);
   
-  _Cijkl.rotate(R);
+//  _Cijkl.rotate(R);
   
 }
 

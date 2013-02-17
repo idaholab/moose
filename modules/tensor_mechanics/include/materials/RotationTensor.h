@@ -19,6 +19,8 @@ public:
   */
   RotationTensor(const RealVectorValue & Euler_angles);
 
+ void update(const RealVectorValue & Euler_angles);
+
 protected:
   
 private:
