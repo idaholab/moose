@@ -75,7 +75,7 @@ std::vector<std::string>
 Component::split(const std::string & rname)
 {
   std::vector<std::string> splitted;
-  Parser::tokenize(rname, splitted, 1, ":");
+  MooseUtils::tokenize(rname, splitted, 1, ":");
 
   std::string section_name("");
   for (unsigned int i = 0; i < splitted.size() - 1; i++)
