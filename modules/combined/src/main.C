@@ -6,22 +6,29 @@
 //Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
-#include "ElkTestApp.h"
+#include "MooseApp.h"
+#include "AppFactory.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("Elk");
 
  // Begin the main program.
-int main (int argc, char** argv)
+int main(int argc, char *argv[])
 {
-  MooseInit init (argc, argv);
-  ElkTestApp app(argc, argv);
+  // Initialize MPI, solvers and MOOSE
+  MooseInit init(argc, argv);
 
-  app.setCheckUnusedFlag(true);
-  app.setErrorOverridden();
-  app.setSortAlpha( true );
+  // Register this application's MooseApp and any it depends on
+  Elk::registerApps();
 
-  app.run();
+  // This creates dynamic memory that we're responsible for deleting
+  MooseApp * app = AppFactory::createApp("ElkApp", argc, argv);
+
+  // Execute the application
+  app->run();
+
+  // Free up the memory we created earlier
+  delete app;
 
   return 0;
 }

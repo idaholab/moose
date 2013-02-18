@@ -1,6 +1,8 @@
 #include "Elk.h"
+#include "ElkApp.h"
 #include "Factory.h"
 #include "ActionFactory.h"
+#include "AppFactory.h"
 
 #include "SolidMechanicsModule.h"
 #include "TensorMechanicsModule.h"
@@ -12,6 +14,12 @@
 #include "FluidMassEnergyBalanceModule.h"
 #include "ChemicalReactionsModule.h"
 #include "MiscModule.h"
+
+void
+Elk::registerApps()
+{
+  registerApp(ElkApp);
+}
 
 void
 Elk::registerObjects(Factory & factory)

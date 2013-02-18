@@ -1,5 +1,5 @@
 #include "AddSecondarySpeciesAction.h"
-#include "Parser.h"
+#include "MooseUtils.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseEnum.h"
@@ -62,12 +62,12 @@ AddSecondarySpeciesAction::act()
         std::string kin_species;
     
         // Parsing each reaction
-        Parser::tokenize(reactions[j], tokens, 1, "+=");
+        MooseUtils::tokenize(reactions[j], tokens, 1, "+=");
     
         for (unsigned int k=0; k < tokens.size(); k++)
         {
           std::vector<std::string> stos_vars;
-          Parser::tokenize(tokens[k], stos_vars, 1, "()");
+          MooseUtils::tokenize(tokens[k], stos_vars, 1, "()");
           if(stos_vars.size() == 1)
           {
             kin_species = stos_vars[0];

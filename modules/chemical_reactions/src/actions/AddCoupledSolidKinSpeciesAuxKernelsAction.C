@@ -1,5 +1,5 @@
 #include "AddCoupledSolidKinSpeciesAuxKernelsAction.h"
-#include "Parser.h"
+#include "MooseUtils.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseEnum.h"
@@ -59,7 +59,7 @@ AddCoupledSolidKinSpeciesAuxKernelsAction::act()
     std::vector<std::string> solid_kin_species(reactions.size());
     
     // Parsing each reaction
-    Parser::tokenize(reactions[j], tokens, 1, "+=");
+    MooseUtils::tokenize(reactions[j], tokens, 1, "+=");
     
     std::vector<Real> stos(tokens.size()-1);
     std::vector<std::string> rxn_vars(tokens.size()-1);
@@ -68,7 +68,7 @@ AddCoupledSolidKinSpeciesAuxKernelsAction::act()
     {
       std::cout << tokens[k] << "\t";
       std::vector<std::string> stos_vars;
-      Parser::tokenize(tokens[k], stos_vars, 1, "()");
+      MooseUtils::tokenize(tokens[k], stos_vars, 1, "()");
       if(stos_vars.size() == 2)
       {
         Real coef;
