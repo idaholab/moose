@@ -32,3 +32,7 @@ include $(MOOSE_DIR)/build.mk
 include $(MOOSE_DIR)/moose.mk
 include $(MOOSE_DIR)/app.mk
 
+# Include dependency files for moose_test
+moose_test_srcfiles := $(shell find $(CURR_DIR) -name *.C)
+moose_test_deps     := $(patsubst %.C, %.$(obj-suffix).d, $(moose_test_srcfiles))
+-include $(moose_test_deps)
