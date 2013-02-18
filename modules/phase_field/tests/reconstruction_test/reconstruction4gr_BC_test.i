@@ -35,11 +35,6 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
-  [./grn]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [Kernels]
@@ -48,6 +43,7 @@
 []
 
 [AuxKernels]
+active = 'BndsCalc'
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
