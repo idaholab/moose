@@ -81,7 +81,12 @@ SetupOutputAction::SetupOutputAction(const std::string & name, InputParameters p
 void
 SetupOutputAction::setupOutputObject(Output &output, InputParameters & params)
 {
-  output.fileBase(params.get<OutFileBase>("file_base"));
+  // Has the filebase been overriden at the application level?
+  if(_app.getOutputFileBase() != "")
+    output.fileBase(_app.getOutputFileBase());
+  else
+    output.fileBase(params.get<OutFileBase>("file_base"));
+
 
   mooseAssert(params.have_parameter<std::vector<std::string> >("output_variables"), "Output Variables are required");
 

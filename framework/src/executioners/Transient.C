@@ -170,6 +170,8 @@ Transient::takeStep(Real input_dt)
   // Increment time
   _time = _time_old + _dt;
 
+  _problem.execMultiApps(EXEC_TIMESTEP_BEGIN);
+
   std::cout<<"DT: "<<_dt<<std::endl;
 
   std::cout << " Solving time step ";
@@ -226,6 +228,7 @@ Transient::takeStep(Real input_dt)
   {
     _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
+    _problem.execMultiApps(EXEC_TIMESTEP);
   }
 }
 
@@ -313,6 +316,11 @@ Transient::computeConstrainedDT()
       _reset_dt = false;
     }
   }
+
+  // Constrain by what the multi apps are doing
+  Real multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP_BEGIN);
+  if(multi_app_dt < dt_cur)
+    dt_cur = multi_app_dt;
 
   return dt_cur;
 

@@ -252,7 +252,7 @@ SyntaxTree::wildCardMatch(std::string name, std::string search_string)
 
   // wildcard
   std::vector<std::string> tokens;
-  Parser::tokenize(search_string, tokens, 1, "*");
+  MooseUtils::tokenize(search_string, tokens, 1, "*");
 
   size_t pos = 0;
   for (unsigned int i=0; i<tokens.size() && pos != std::string::npos; ++i)

@@ -14,7 +14,7 @@
 
 #include "Resurrector.h"
 #include "FEProblem.h"
-#include "Parser.h"
+#include "MooseUtils.h"
 #include <stdio.h>
 
 const std::string Resurrector::MAT_PROP_EXT(".msmp");
@@ -45,7 +45,7 @@ void
 Resurrector::restartFromFile()
 {
   std::string file_name(_restart_file_base + ".xda");
-  Parser::checkFileReadable(file_name);
+  MooseUtils::checkFileReadable(file_name);
   _fe_problem._eq.read(file_name, libMeshEnums::READ, EquationSystems::READ_DATA);
   _fe_problem._nl.update();
 }
@@ -55,7 +55,7 @@ Resurrector::restartStatefulMaterialProps()
 {
   // read material properties from a file
   std::string file_name(_restart_file_base + MAT_PROP_EXT);
-  Parser::checkFileReadable(file_name);
+  MooseUtils::checkFileReadable(file_name);
   _mat.read(file_name);
 }
 
@@ -64,7 +64,7 @@ Resurrector::restartUserData()
 {
   // read material properties from a file
   std::string file_name(_restart_file_base + USER_DATA_EXT);
-  Parser::checkFileReadable(file_name);
+  MooseUtils::checkFileReadable(file_name);
 //  _user_object.read(file_name);
 }
 

@@ -15,12 +15,15 @@
 #ifndef COMMANDLINE_H
 #define COMMANDLINE_H
 
+// Moose Includes
+#include "InputParameters.h"
+#include "MooseError.h"
+
 #include <vector>
 #include <string>
 #include <map>
 #include <set>
 #include "libmesh/getpot.h"
-#include "MooseError.h"
 
 // Forward Declaration
 class Parser;
@@ -44,6 +47,12 @@ public:
 
   CommandLine(int argc, char * argv[]);
   virtual ~CommandLine();
+
+  void parseInputParams(const InputParameters & params);
+
+  void addCommandLineOptionsFromParams(InputParameters & params);
+
+  void populateInputParams(InputParameters & params);
 
   void addOption(const std::string & name, Option cli_opt);
 

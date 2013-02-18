@@ -14,7 +14,7 @@
 
 #include "InputParameters.h"
 #include "MooseTypes.h"
-#include "Parser.h"
+#include "MooseUtils.h"
 
 InputParameters emptyInputParameters()
 {
@@ -43,6 +43,7 @@ InputParameters::clear()
   _valid_params.clear();
   _private_params.clear();
   _coupled_vars.clear();
+  _syntax.clear();
 }
 
 void
@@ -81,6 +82,7 @@ InputParameters::operator=(const InputParameters &rhs)
   this->_private_params = rhs._private_params;
   this->_valid_params = rhs._valid_params;
   this->_coupled_vars = rhs._coupled_vars;
+  this->_syntax = rhs._syntax;
 
   return *this;
 }
@@ -97,6 +99,7 @@ InputParameters::operator+=(const InputParameters &rhs)
   _private_params.insert(rhs._private_params.begin(), rhs._private_params.end());
   _valid_params.insert(rhs._valid_params.begin(), rhs._valid_params.end());
   _coupled_vars.insert(rhs._coupled_vars.begin(), rhs._coupled_vars.end());
+  _syntax.insert(rhs._syntax.begin(), rhs._syntax.end());
 
   return *this;
 }
@@ -244,11 +247,18 @@ void
 InputParameters::addParamNamesToGroup(const std::string &space_delim_names, const std::string group_name)
 {
   std::vector<std::string> elements;
-  Parser::tokenize(space_delim_names, elements, 1, " \t\n\v\f\r");  // tokenize on whitespace
+  MooseUtils::tokenize(space_delim_names, elements, 1, " \t\n\v\f\r");  // tokenize on whitespace
 
   for (std::vector<std::string>::const_iterator it = elements.begin(); it != elements.end(); ++it)
     _group[*it] = group_name;
 
+}
+
+
+std::vector<std::string>
+InputParameters::getSyntax(const std::string &name)
+{
+  return _syntax[name];
 }
 
 std::string

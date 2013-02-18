@@ -13,12 +13,15 @@
 /****************************************************************/
 
 #include "MooseEnum.h"
-#include "Parser.h"
+#include "MooseUtils.h"
+#include "MooseError.h"
 
 #include <sstream>
 #include <algorithm>
 #include <iterator>
 #include <limits>
+#include <string>
+#include <iostream>
 
 MooseEnum::MooseEnum(std::string names) :
     _current_id(-std::numeric_limits<int>::max())
@@ -47,7 +50,7 @@ MooseEnum::operator=(const std::string & name)
   std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
   if (std::find(_names.begin(), _names.end(), upper) == _names.end())
-    mooseError(std::string("Invalid option \"") + upper + "\" in MooseEnum.  Valid options are \"" + _raw_names << "\".");
+    mooseError(std::string("Invalid option \"") + upper + "\" in MooseEnum.  Valid options are \"" + _raw_names + "\".");
 
   _current_name = upper;
   _current_name_preserved = name;
@@ -75,7 +78,7 @@ MooseEnum::fillNames(std::string names)
 {
   std::vector<std::string> elements;
   // split on commas
-  Parser::tokenize(names, elements, 1, ",");
+  MooseUtils::tokenize(names, elements, 1, ",");
 
   _names.resize(elements.size());
   int value=0;
@@ -83,7 +86,7 @@ MooseEnum::fillNames(std::string names)
   {
     std::vector<std::string> name_value;
     // split on equals sign
-    Parser::tokenize(Parser::trim(elements[i]), name_value, 1, "=");
+    MooseUtils::tokenize(MooseUtils::trim(elements[i]), name_value, 1, "=");
 
     // See if there is a value supplied for this option
     mooseAssert(name_value.size() <= 2, "Invalid option supplied in MooseEnum");
@@ -93,7 +96,7 @@ MooseEnum::fillNames(std::string names)
       iss >> value;
     }
 
-    name_value[0] = Parser::trim(name_value[0]);
+    name_value[0] = MooseUtils::trim(name_value[0]);
 
     // preserve case for raw options, append to list
     if (i)

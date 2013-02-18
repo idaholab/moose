@@ -182,6 +182,9 @@
 #include "ComboMarker.h"
 #include "ValueThresholdMarker.h"
 
+// MultiApps
+#include "TransientMultiApp.h"
+
 // Actions
 #include "AddBCAction.h"
 #include "AddDiracKernelAction.h"
@@ -226,6 +229,7 @@
 #include "SetAdaptivityOptionsAction.h"
 #include "AddFEProblemAction.h"
 #include "AddCoupledVariableAction.h"
+#include "AddMultiAppAction.h"
 
 namespace Moose {
 
@@ -397,6 +401,9 @@ registerObjects(Factory & factory)
   registerMarker(ComboMarker);
   registerMarker(ValueThresholdMarker);
 
+  // MultiApps
+  registerMultiApp(TransientMultiApp);
+
   registered = true;
 }
 
@@ -459,6 +466,7 @@ addActionTypes(Syntax & syntax)
   registerActionName("set_adaptivity_options", false);
   registerActionName("add_feproblem", false);
   registerActionName("add_coupled_variable", false);
+  registerActionName("add_multi_app", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_mesh_complete", false);
@@ -517,6 +525,7 @@ addActionTypes(Syntax & syntax)
 "(setup_oversampling)"
 "(setup_debug)"
 "(check_integrity)"
+"(add_multi_app)"
 );
 
 }
@@ -614,6 +623,8 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   // coupling
   registerAction(AddFEProblemAction, "add_feproblem");
   registerAction(AddCoupledVariableAction, "add_coupled_variable");
+
+  registerAction(AddMultiAppAction, "add_multi_app");
 
   // TODO: Why is this here?
   registerActionName("finish_input_file_output", false);

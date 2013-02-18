@@ -41,6 +41,9 @@
 #include "Indicator.h"
 #include "Marker.h"
 
+#include "MultiApp.h"
+#include "TransientMultiApp.h"
+
 #include "ElementUserObject.h"
 #include "NodalUserObject.h"
 #include "SideUserObject.h"
@@ -417,6 +420,10 @@ void FEProblem::initialSetup()
   }
 
   _aux.compute(EXEC_TIMESTEP_BEGIN);
+
+  Moose::setup_perf_log.push("Initial execMultiApps()","Setup");
+  execMultiApps(EXEC_INITIAL);
+  Moose::setup_perf_log.pop("Initial execMultiApps()","Setup");
 
   Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
   computeUserObjects();
@@ -2194,6 +2201,66 @@ FEProblem::addMarker(std::string marker_name, const std::string & name, InputPar
   }
 }
 
+void
+FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<FEProblem *>("_fe_problem") = this;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    _reinit_displaced_elem = true;
+  }
+  else
+  {
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = &_aux;
+  }
+
+  ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<MooseEnum>("execute_on"));
+
+  parameters.set<THREAD_ID>("_tid") = 0;
+
+  parameters.set<MPI_Comm>("_mpi_comm") = libMesh::COMM_WORLD;
+
+  MooseObject * mo = _factory.create(multi_app_name, name, parameters);
+
+  MultiApp * multi_app = dynamic_cast<MultiApp *>(mo);
+  if(!multi_app)
+    mooseError("Unknown MultiApp type: " << multi_app_name);
+
+  _multi_apps(type)[0].addMultiApp(multi_app);
+}
+
+void
+FEProblem::execMultiApps(ExecFlagType type)
+{
+  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+
+  if(multi_apps.size())
+  {
+    std::cout<<"--Executing MultiApps--"<<std::endl;
+
+    for(unsigned int i=0; i<multi_apps.size(); i++)
+      multi_apps[i]->solveStep();
+
+    std::cout<<"--Finished Executing MultiApps--"<<std::endl;
+  }
+}
+
+Real
+FEProblem::computeMultiAppsDT(ExecFlagType type)
+{
+  std::vector<TransientMultiApp *> multi_apps = _multi_apps(type)[0].transient();
+
+  Real smallest_dt = std::numeric_limits<Real>::max();
+
+  for(unsigned int i=0; i<multi_apps.size(); i++)
+    smallest_dt = std::min(smallest_dt, multi_apps[i]->computeDT());
+
+  return smallest_dt;
+}
+
 bool
 FEProblem::hasVariable(const std::string & var_name)
 {
@@ -2490,6 +2557,8 @@ FEProblem::computeResidualType( const NumericVector<Number>& soln, NumericVector
   _nl.zeroVariablesForResidual();
   _aux.zeroVariablesForResidual();
 
+  execMultiApps(EXEC_RESIDUAL);
+
   computeUserObjects(EXEC_RESIDUAL);
 
   if (_displaced_problem != NULL)
@@ -2526,6 +2595,8 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
 
   _nl.zeroVariablesForJacobian();
   _aux.zeroVariablesForJacobian();
+
+  execMultiApps(EXEC_INITIAL);
 
   computeUserObjects(EXEC_JACOBIAN);
 

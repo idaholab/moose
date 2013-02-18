@@ -78,39 +78,6 @@ public:
                        const std::map<std::string, std::vector<std::string> > & active_lists);
 
   /**
-   * This function will split the passed in string on a set of delimiters appending the substrings
-   * to the passed in vector.  The delimiters default to "/" but may be supplied as well.  In addition
-   * if min_len is supplied, the minimum token length will be greater than the supplied value.
-   */
-  static void tokenize(const std::string &str,
-                       std::vector<std::string> & elements,
-                       unsigned int min_len = 1,
-                       const std::string &delims = "/");
-
-  /**
-   * This function will escape all of the standard C++ escape character so they can be printed.  The
-   * passed in parameter is modified in place
-   */
-  static void escape(std::string &str);
-
-  /**
-   * Standard scripting language trim function
-   */
-  static std::string trim(std::string str,
-                          const std::string &white_space = " \t\n\v\f\r");
-
-  /**
-   * This function tokenizes a path and checks to see if it contains the string to look for
-   */
-  static bool pathContains(const std::string &expression,
-                           const std::string &string_to_find,
-                           const std::string &delims = "/");
-
-  static void checkFileReadable(const std::string & filename, bool check_line_endings = false);
-
-  static void checkFileWritable(const std::string & filename);
-
-  /**
    * Return a reference to the getpot object to extract options from the input file
    */
   const GetPot * getPotHandle() const;

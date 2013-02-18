@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "InputFileFormatter.h"
-#include "Parser.h"
+#include "MooseUtils.h"
 
 #include <sstream>
 #include <vector>
@@ -78,7 +78,7 @@ InputFileFormatter::printParams(const std::string &prefix, InputParameters &para
       // Print the parameter's value to a stringstream.
       std::ostringstream toss;
       iter->second->print(toss);
-      value = Parser::trim(toss.str());
+      value = MooseUtils::trim(toss.str());
     }
 
     // See if we match the search string
@@ -133,12 +133,12 @@ InputFileFormatter::printParams(const std::string &prefix, InputParameters &para
       {
         std::vector<std::string> elements;
         std::string doc = params.getDocString(iter->first);
-        if (Parser::trim(doc) != "")
+        if (MooseUtils::trim(doc) != "")
         {
-          Parser::tokenize(doc, elements, 68, " \t");
+          MooseUtils::tokenize(doc, elements, 68, " \t");
 
           for (unsigned int i=0; i<elements.size(); ++i)
-            Parser::escape(elements[i]);
+            MooseUtils::escape(elements[i]);
 
           oss << std::right << std::setw(l_offset) << "# " << elements[0];
           for (unsigned int i=1; i<elements.size(); ++i)

@@ -19,6 +19,7 @@
 #include "MooseParsedFunction.h"
 #include "FEProblem.h"
 #include "MooseUnitApp.h"
+#include "AppFactory.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( ParsedFunctionTest );
 
@@ -27,7 +28,7 @@ ParsedFunctionTest::init()
 {
   const char *argv[2] = { "foo", "\0" };
 
-  _app = new MooseUnitApp(1, (char **)argv);
+  _app = AppFactory::createApp("MooseUnitApp", 1, (char**)argv);
   _factory = &_app->getFactory();
 
   InputParameters mesh_params = _factory->getValidParams("MooseMesh");

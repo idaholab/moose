@@ -116,6 +116,9 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   // Deprecated Block
   syntax.registerActionSyntax("DeprecatedBlockAction", "DeprecatedBlock");
 
+  // Multi Apps
+  syntax.registerActionSyntax("AddMultiAppAction", "MultiApps/*", "add_multi_app");
+
   addActionTypes(syntax);
   registerActions(syntax, action_factory);
 }

@@ -17,7 +17,7 @@
 #include <fstream>
 #include <iomanip>
 
-#include "Parser.h"
+#include "MooseUtils.h"
 #include "MooseInit.h"
 #include "InputParameters.h"
 
@@ -135,7 +135,7 @@ Parser::parse(const std::string &input_filename)
   std::vector<std::string> all(1);
   all[0] = "__all__";
 
-  checkFileReadable(input_filename, true);
+  MooseUtils::checkFileReadable(input_filename, true);
 
   // GetPot object
   _getpot_file.parse_input_file(input_filename);
@@ -390,102 +390,12 @@ Parser::buildFullTree(const std::string &search_string)
   std::cout << _syntax_formatter->print(search_string);
 }
 
-void
-Parser::tokenize(const std::string &str, std::vector<std::string> &elements, unsigned int min_len, const std::string &delims)
-{
-  elements.clear();
-
-  std::string::size_type last_pos = str.find_first_not_of(delims, 0);
-  std::string::size_type pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
-
-  while (pos != std::string::npos || last_pos != std::string::npos)
-  {
-    elements.push_back(str.substr(last_pos, pos - last_pos));
-    // skip delims between tokens
-    last_pos = str.find_first_not_of(delims, pos);
-    if (last_pos == std::string::npos) break;
-    pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
-  }
-}
-
-void
-Parser::escape(std::string &str)
-{
-  std::map<char, std::string> escapes;
-  escapes['\a'] = "\\a";
-  escapes['\b'] = "\\b";
-  escapes['\f'] = "\\f";
-  escapes['\n'] = "\\n";
-  escapes['\t'] = "\\t";
-  escapes['\v'] = "\\v";
-  escapes['\r'] = "\\r";
-
-  for (std::map<char, std::string>::iterator it = escapes.begin(); it != escapes.end(); ++it)
-    for (size_t pos=0; (pos=str.find(it->first, pos)) != std::string::npos; pos+=it->second.size())
-      str.replace(pos, 1, it->second);
-}
-
-
-std::string
-Parser::trim(std::string str, const std::string &white_space)
-{
-  std::string r = str.erase(str.find_last_not_of(white_space)+1);
-  return r.erase(0,r.find_first_not_of(white_space));
-}
-
-bool Parser::pathContains(const std::string &expression,
-                          const std::string &string_to_find,
-                          const std::string &delims)
-{
-  std::vector<std::string> elements;
-
-  tokenize(expression, elements, 0, delims);
-
-  std::vector<std::string>::iterator found_it = std::find(elements.begin(), elements.end(), string_to_find);
-  if (found_it != elements.end())
-    return true;
-  else
-    return false;
-}
 
 const GetPot *
 Parser::getPotHandle() const
 {
   return _getpot_initialized ? &_getpot_file : NULL;
 }
-
-void
-Parser::checkFileReadable(const std::string & filename, bool check_line_endings)
-{
-  std::ifstream in(filename.c_str(), std::ifstream::in);
-  if (in.fail())
-    mooseError((std::string("Unable to open file \"") + filename
-                + std::string("\". Check to make sure that it exists and that you have read permission.")).c_str());
-
-  if (check_line_endings)
-  {
-    std::istream_iterator<char> iter(in);
-    std::istream_iterator<char> eos;
-    in >> std::noskipws;
-    while (iter != eos)
-      if (*iter++ == '\r')
-        mooseError(filename + " contains Windows(DOS) line endings which are not supported.");
-  }
-
-  in.close();
-}
-
-void
-Parser::checkFileWritable(const std::string & filename)
-{
-  std::ofstream out(filename.c_str(), std::ofstream::out);
-  if (out.fail())
-    mooseError((std::string("Unable to open file \"") + filename
-                + std::string("\". Check to make sure that it exists and that you have write permission.")).c_str());
-
-  out.close();
-}
-
 
 void
 Parser::setSortAlpha(bool sort_alpha_flag)
@@ -562,7 +472,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
     std::string full_name = orig_name;
 
     // Mark parameters appearing in the input file or command line
-    if (_getpot_file.have_variable(full_name.c_str()) || _app.commandLine().haveVariable(full_name.c_str()))
+    if (_getpot_file.have_variable(full_name.c_str()) || (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str())))
     {
       p.set_attributes(it->first, false);
       _extracted_vars.insert(full_name);  // Keep track of all variables extracted from the input file
@@ -667,8 +577,8 @@ void Parser::setScalarParameter(const std::string & full_name, const std::string
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.commandLine().isVariableOnCommandLine(full_name))
-    gp = _app.commandLine().getPot();
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+    gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
 
@@ -685,8 +595,8 @@ void Parser::setVectorParameter(const std::string & full_name, const std::string
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.commandLine().isVariableOnCommandLine(full_name))
-    gp = _app.commandLine().getPot();
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+    gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
 
@@ -712,8 +622,8 @@ void Parser::setScalarComponentParameter(const std::string & full_name, const st
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.commandLine().isVariableOnCommandLine(full_name))
-    gp = _app.commandLine().getPot();
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+    gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
 
@@ -739,8 +649,8 @@ void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const 
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.commandLine().isVariableOnCommandLine(full_name))
-    gp = _app.commandLine().getPot();
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+    gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
 
@@ -772,8 +682,8 @@ void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, 
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.commandLine().isVariableOnCommandLine(full_name))
-    gp = _app.commandLine().getPot();
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+    gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
 
@@ -824,10 +734,10 @@ Parser::InputFileSort::operator() (Action *a, Action *b) const
 {
   std::vector<std::string> elements;
   std::string short_a, short_b;
-  Parser::tokenize(a->name(), elements);
+  MooseUtils::tokenize(a->name(), elements);
   short_a = elements[0];
   elements.clear();
-  Parser::tokenize(b->name(), elements);
+  MooseUtils::tokenize(b->name(), elements);
   short_b = elements[0];
 
   return sorter(short_a, short_b) >= 0 ? false : true;
@@ -838,10 +748,10 @@ Parser::InputFileSort::operator() (const std::pair<std::string, Syntax::ActionIn
 {
   std::vector<std::string> elements;
   std::string short_a, short_b;
-  Parser::tokenize(a.first, elements);
+  MooseUtils::tokenize(a.first, elements);
   short_a = elements[0];
   elements.clear();
-  Parser::tokenize(b.first, elements);
+  MooseUtils::tokenize(b.first, elements);
   short_b = elements[0];
 
   int ret = sorter(short_a, short_b);

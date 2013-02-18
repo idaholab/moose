@@ -12,6 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "MooseUnitApp.h"
+
 //CPPUnit includes
 #include "cppunit/XmlOutputter.h"
 #include "cppunit/CompilerOutputter.h"
@@ -21,6 +23,7 @@
 //Moose includes
 #include "Moose.h"
 #include "MooseInit.h"
+#include "AppFactory.h"
 
 #include <fstream>
 #include <string>
@@ -30,6 +33,9 @@ PerfLog Moose::perf_log("CppUnit");
 int main(int argc, char **argv)
 {
   MooseInit init(argc, argv);
+
+  registerApp(MooseUnitApp);
+
   CppUnit::Test *suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
 
   CppUnit::TextTestRunner runner;

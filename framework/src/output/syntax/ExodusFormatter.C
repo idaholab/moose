@@ -36,7 +36,8 @@ ExodusFormatter::printInputFile(ActionWarehouse & wh)
 
   // Grab the command line arguments first
   _ss << "### Command Line Arguments ###\n";
-  wh.mooseApp().commandLine().print("", _ss, 1);
+  if(wh.mooseApp().commandLine())
+    wh.mooseApp().commandLine()->print("", _ss, 1);
 
   _ss << "### Version Info ###\n"
       << wh.mooseApp().getSysInfo() << "\n";

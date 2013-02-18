@@ -2,6 +2,9 @@
 #include "Moose.h"
 #include "Factory.h"
 #include "ActionFactory.h"
+#include "AppFactory.h"
+
+#include "MooseTestApp.h"
 
 #include "CoupledConvection.h"
 #include "ForcingFn.h"
@@ -111,6 +114,12 @@
 
 // From MOOSE
 #include "AddVariableAction.h"
+
+void
+MooseTest::registerApps()
+{
+  registerApp(MooseTestApp);
+}
 
 void
 MooseTest::registerObjects(Factory & factory)

@@ -1,0 +1,13 @@
+[Tests]
+  [./dt_from_multi]
+    type = 'Exodiff'
+    input = 'dt_from_multi.i'
+    exodiff = 'dt_from_multi_out.e dt_from_multi_sub_out0.e dt_from_multi_sub_out1.e dt_from_multi_sub_out2.e dt_from_multi_sub_out3.e'
+  [../]
+
+  [./dt_from_master]
+    type = 'Exodiff'
+    input = 'dt_from_master.i'
+    exodiff = 'dt_from_master_out.e dt_from_master_sub_out0.e dt_from_master_sub_out1.e dt_from_master_sub_out2.e dt_from_master_sub_out3.e'
+  [../]
+[]

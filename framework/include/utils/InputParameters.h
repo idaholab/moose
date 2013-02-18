@@ -25,12 +25,14 @@
 #include "MooseError.h"
 #include "MooseTypes.h"
 #include "MooseEnum.h"
+#include "MooseUtils.h"
 
 class MooseObject;
 class GlobalParamsAction;
 class Action;
 class Parser;
 class Problem;
+class MooseApp;
 
 class InputParameters;
 
@@ -117,6 +119,27 @@ public:
   void addPrivateParam(const std::string &name);
 
   /**
+   * Add parameters for retrieval from the commandline.
+   *
+   * NOTE: This ONLY works for App objects!  This is not valid for normal MOOSE objects!
+   *
+   * @param name The name of the parameter
+   * @param syntax Space separated list of command-line switch syntax that can set this option
+   * @param doc_string Documentation.  This will be shown for --help
+   */
+  template <typename T>
+  void addRequiredCommandLineParam(const std::string &name, const std::string &syntax, const std::string &doc_string);
+  template <typename T>
+  void addCommandLineParam(const std::string &name, const std::string &syntax, const std::string &doc_string);
+  template <typename T>
+  void addCommandLineParam(const std::string &name, const std::string &syntax, const T &value, const std::string &doc_string);
+
+  /**
+   * Get the syntax for a command-line parameter
+   */
+  std::vector<std::string> getSyntax(const std::string &name);
+
+  /**
    * This method takes a space delimited list of parameter names and adds them to the specified group name.
    * This information is used in the GUI to group parameters into logical sections.
    */
@@ -128,6 +151,7 @@ public:
    * empty string is returned.
    */
   std::string getGroupName(const std::string &param_name) const;
+
 
   /**
    * This method supresses an inherited parameter so that it isn't required or valid
@@ -226,6 +250,7 @@ public:
   friend InputParameters validParams<Action>();
   friend InputParameters validParams<Problem>();
   friend InputParameters emptyInputParameters();
+  friend InputParameters validParams<MooseApp>();
 
 private:
   // Private constructor so that InputParameters can only be created in certain places.
@@ -237,6 +262,9 @@ private:
 
   /// The custom type that will be printed in the YAML dump for a parameter if supplied
   std::map<std::string, std::string> _custom_type;
+
+  /// Syntax for command-line parameters
+  std::map<std::string, std::vector<std::string> > _syntax;
 
   /// The names of the parameters organized into groups
   std::map<std::string, std::string> _group;
@@ -321,6 +349,28 @@ void InputParameters::addPrivateParam(const std::string &name, const T &value)
   Parameters::set<T>(name) = value;
   _private_params.insert(name);
 }
+
+template <typename T>
+void InputParameters::addRequiredCommandLineParam(const std::string &name, const std::string &syntax, const std::string &doc_string)
+{
+  addRequiredParam<T>(name, doc_string);
+  MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
+}
+
+template <typename T>
+void InputParameters::addCommandLineParam(const std::string &name, const std::string &syntax, const std::string &doc_string)
+{
+  addParam<T>(name, doc_string);
+  MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
+}
+
+template <typename T>
+void InputParameters::addCommandLineParam(const std::string &name, const std::string &syntax, const T &value, const std::string &doc_string)
+{
+  addParam<T>(name, value, doc_string);
+  MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
+}
+
 
 template <typename T>
 void InputParameters::suppressParameter(const std::string &name)

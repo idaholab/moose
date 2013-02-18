@@ -1,0 +1,46 @@
+#ifndef MOOSEUTILS_H
+#define MOOSEUTILS_H
+
+#include <string>
+#include <vector>
+
+namespace MooseUtils
+{
+  /**
+   * This function will split the passed in string on a set of delimiters appending the substrings
+   * to the passed in vector.  The delimiters default to "/" but may be supplied as well.  In addition
+   * if min_len is supplied, the minimum token length will be greater than the supplied value.
+   */
+  void tokenize(const std::string &str, std::vector<std::string> & elements, unsigned int min_len = 1, const std::string &delims = "/");
+
+  /**
+   * This function will escape all of the standard C++ escape character so they can be printed.  The
+   * passed in parameter is modified in place
+   */
+  void escape(std::string &str);
+
+  /**
+   * Standard scripting language trim function
+   */
+  std::string trim(std::string str, const std::string &white_space = " \t\n\v\f\r");
+
+  /**
+   * This function tokenizes a path and checks to see if it contains the string to look for
+   */
+  bool pathContains(const std::string &expression, const std::string &string_to_find, const std::string &delims = "/");
+
+  /**
+   * Checks to see if a file is readable (exists and permissions)
+   * @param filename The filename to check
+   * @param check_line_endings Whether or not to see if the file contains DOS line endings.
+   */
+  void checkFileReadable(const std::string & filename, bool check_line_endings = false);
+
+  /**
+   * Check if the file is writable (path exists and permissions)
+   * @param filename The filename you want to see if you can write to.
+   */
+  void checkFileWriteable(const std::string & filename);
+}
+
+#endif //MOOSEUTILS_H

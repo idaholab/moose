@@ -84,7 +84,7 @@ YAMLFormatter::printParams(const std::string &prefix, InputParameters &params, s
     }
 
     std::string doc = params.getDocString(iter->first);
-    Parser::escape(doc);
+    MooseUtils::escape(doc);
     // Print the type
     oss << "\n" << indent << "    cpp_type: " << params.type(iter->first)
         << "\n" << indent << "    group_name: " << params.getGroupName(iter->first);

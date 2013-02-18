@@ -14,7 +14,7 @@
 
 #include "AddCoupledVariableAction.h"
 #include "CoupledExecutioner.h"
-#include "Parser.h"
+#include "MooseUtils.h"
 
 
 template<>
@@ -44,7 +44,7 @@ AddCoupledVariableAction::act()
   if (master_executioner != NULL)
   {
     std::vector<std::string> parts;
-    Parser::tokenize(name(), parts, 0, "/");
+    MooseUtils::tokenize(name(), parts, 0, "/");
     if (parts.size() > 2)
       // parts[size - 2] is the one before last, i.e. the name of the destination problem
       master_executioner->addCoupledVariable(parts[parts.size() - 2], getShortName(), _from, _var_name);

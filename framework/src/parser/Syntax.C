@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "Syntax.h"
-#include "Parser.h"
+#include "MooseUtils.h"
 
 
 Syntax::Syntax()
@@ -40,12 +40,12 @@ void
 Syntax::addDependencySets(const std::string & action_sets)
 {
   std::vector<std::string> sets, prev_names, action_names;
-  Parser::tokenize(action_sets, sets, 1, "()");
+  MooseUtils::tokenize(action_sets, sets, 1, "()");
 
   for (unsigned int i=0; i<sets.size(); ++i)
   {
     action_names.clear();
-    Parser::tokenize(sets[i], action_names, 0, ", ");
+    MooseUtils::tokenize(sets[i], action_names, 0, ", ");
     for (unsigned int j=0; j<action_names.size(); ++j)
     {
       // Each line should depend on each item in the previous line
@@ -134,7 +134,7 @@ Syntax::isAssociated(const std::string & real_id, bool * is_parent)
   std::vector<std::string> real_elements, reg_elements;
   std::string return_value;
 
-  Parser::tokenize(real_id, real_elements);
+  MooseUtils::tokenize(real_id, real_elements);
 
   *is_parent = false;
   for (it=_associated_actions.rbegin(); it != _associated_actions.rend(); ++it)
@@ -146,7 +146,7 @@ Syntax::isAssociated(const std::string & real_id, bool * is_parent)
       return reg_id;
     }
     reg_elements.clear();
-    Parser::tokenize(reg_id, reg_elements);
+    MooseUtils::tokenize(reg_id, reg_elements);
     if (real_elements.size() <= reg_elements.size())
     {
       bool keep_going = true;

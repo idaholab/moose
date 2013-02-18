@@ -3,10 +3,15 @@
 
 #include "MooseApp.h"
 
+class ExampleApp;
+
+template<>
+InputParameters validParams<ExampleApp>();
+
 class ExampleApp : public MooseApp
 {
 public:
-  ExampleApp(int argc, char * argv[]);
+  ExampleApp(const std::string & name, InputParameters parameters);
   virtual ~ExampleApp();
 };
 

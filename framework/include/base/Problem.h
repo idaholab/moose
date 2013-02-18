@@ -20,6 +20,7 @@
 #include "ExecStore.h"
 #include "MooseMesh.h"
 #include "MooseArray.h"
+#include "MultiAppWarehouse.h"
 
 // libMesh
 #include "libmesh/libmesh_common.h"

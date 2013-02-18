@@ -2,11 +2,18 @@
 #include "Example.h"
 #include "Moose.h"
 
-ExampleApp::ExampleApp(int argc, char * argv[]) :
-    MooseApp(argc, argv)
+template<>
+InputParameters validParams<ExampleApp>()
+{
+  InputParameters params = validParams<MooseApp>();
+  return params;
+}
+
+ExampleApp::ExampleApp(const std::string & name, InputParameters parameters) :
+    MooseApp(name, parameters)
 {
   srand(libMesh::processor_id());
-  
+
   Moose::registerObjects(_factory);
   Example::registerObjects(_factory);
 

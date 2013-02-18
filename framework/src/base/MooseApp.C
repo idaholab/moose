@@ -20,167 +20,98 @@
 #include "YAMLFormatter.h"
 #include "MooseMesh.h"
 
-MooseApp::MooseApp(int argc, char *argv[]) :
-    _command_line(argc, argv),
+template<>
+InputParameters validParams<MooseApp>()
+{
+  InputParameters params;
+
+  params.addCommandLineParam<std::string>("input_file", "-i", "Specify an input file");
+  params.addCommandLineParam<std::string>("mesh_only", "--mesh-only", "Setup and Output the input mesh only.");
+
+  params.addCommandLineParam<bool>("show_input", "--show-input", "Shows the parsed input file before running the simulation.");
+
+  params.addCommandLineParam<bool>("help", "-h --help", "Displays CLI usage statement.");
+
+  params.addCommandLineParam<bool>("dump", "--dump", "Shows a dump of available input file syntax.");
+  params.addCommandLineParam<bool>("yaml", "--yaml", "Dumps input file syntax in YAML format.");
+  params.addCommandLineParam<bool>("syntax", "--syntax", "Dumps the associated Action syntax paths ONLY");
+
+  params.addCommandLineParam<unsigned int>("n_threads", "--n-threads", 1, "Runs the specified number of threads (Intel TBB) per process");
+
+  params.addCommandLineParam<bool>("warn_unused", "-w --warn-unused", "Warn about unused input file options");
+  params.addCommandLineParam<bool>("error_unused", "-e --error-unused", "Error when encounting unused input file options");
+  params.addCommandLineParam<bool>("error_override", "-o --error-override", "Error when encountering overriden or parameters supplied multipled times");
+
+  params.addCommandLineParam<unsigned int>("refinements", "-r", 0, "Specify additional initial uniform refinements for automatic scaling");
+
+  params.addPrivateParam<int>("_argc");
+  params.addPrivateParam<char**>("_argv");
+
+  return params;
+}
+
+MooseApp::MooseApp(const std::string & name, InputParameters parameters):
+    _name(name),
+    _pars(parameters),
+    _command_line(NULL),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
     _executioner(NULL),
-    _sys_info(argc, argv),
+    _sys_info(NULL),
     _enable_unused_check(WARN_UNUSED),
     _factory(*this),
     _error_overridden(false),
     _ready_to_exit(false)
-{}
+{
+  if(isParamValid("_argc") && isParamValid("_argv"))
+  {
+    int argc = getParam<int>("_argc");
+    char ** argv = getParam<char**>("_argv");
+
+    _sys_info = new SystemInfo(argc, argv);
+    _command_line = new CommandLine(argc, argv);
+    _command_line->addCommandLineOptionsFromParams(_pars);
+  }
+}
 
 MooseApp::~MooseApp()
 {
+  delete _command_line;
+  delete _sys_info;
   delete _executioner;
   _action_warehouse.clear();
 }
 
 void
-MooseApp::initCommandLineOptions()
+MooseApp::setupOptions()
 {
-  CommandLine::Option cli_opt;
-  std::vector<std::string> syntax;
-
-  syntax.clear();
-  cli_opt.description = "Specify an input file";
-  syntax.push_back("-i <input file>");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  cli_opt.argument_type = CommandLine::REQUIRED;
-  _command_line.addOption("InputFile", cli_opt);
-
-  syntax.clear();
-  cli_opt.description = "Setup and Output the input mesh only, can optionally supply a filename to write";
-  syntax.push_back("--mesh-only");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  cli_opt.argument_type = CommandLine::OPTIONAL;
-  _command_line.addOption("MeshOnly", cli_opt);
-
-  syntax.clear();
-  cli_opt.description = "Shows the parsed input file before running the simulation";
-  syntax.push_back("--show-input");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  cli_opt.argument_type = CommandLine::NONE;
-  _command_line.addOption("ShowTree", cli_opt);
-
-  syntax.clear();
-  cli_opt.description = "Displays CLI usage statement";
-  syntax.push_back("-h");
-  syntax.push_back("--help");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  cli_opt.argument_type = CommandLine::NONE;
-  _command_line.addOption("Help", cli_opt);
-
-  syntax.clear();
-  cli_opt.description = "Shows a dump of available input file syntax, can be filtered based on [search string]";
-  syntax.push_back("--dump");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  cli_opt.argument_type = CommandLine::NONE;
-  _command_line.addOption("Dump", cli_opt);
-
-  syntax.clear();
-  cli_opt.description = "Dumps input file syntax in YAML format, can be filtered based on [search string]";
-  syntax.push_back("--yaml");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  cli_opt.argument_type = CommandLine::NONE;
-  _command_line.addOption("YAML", cli_opt);
-
-  syntax.clear();
-  cli_opt.description = "Dumps the associated Action syntax paths ONLY";
-  syntax.push_back("--syntax");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  cli_opt.argument_type = CommandLine::NONE;
-  _command_line.addOption("Syntax", cli_opt);
-
-  syntax.clear();
-  cli_opt.description = "Runs the specified number of threads (Intel TBB) per process";
-  syntax.push_back("--n-threads <threads>");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  cli_opt.argument_type = CommandLine::REQUIRED;
-  _command_line.addOption("Threads", cli_opt);
-
-  syntax.clear();
-  cli_opt.description = "Warn about unused input file options";
-  syntax.push_back("-w");
-  syntax.push_back("--warn-unused");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  cli_opt.argument_type = CommandLine::NONE;
-  _command_line.addOption("WarnUnused", cli_opt);
-
-  syntax.clear();
-  cli_opt.description = "Error when encounting unused input file options";
-  syntax.push_back("-e");
-  syntax.push_back("--error-unused");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  cli_opt.argument_type = CommandLine::NONE;
-  _command_line.addOption("ErrorUnused", cli_opt);
-
-  syntax.clear();
-  cli_opt.description = "Error when encountering overriden or parameters supplied multipled times";
-  syntax.push_back("-o");
-  syntax.push_back("--error-override");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  cli_opt.argument_type = CommandLine::NONE;
-  _command_line.addOption("ErrorOverride", cli_opt);
-
-  /* This option is used in InitialRefinementAction directly - Do we need a better API? */
-  syntax.clear();
-  cli_opt.description = "Specify additional initial uniform refinements for automatic scaling";
-  syntax.push_back("-r <refinements>");
-  cli_opt.cli_syntax = syntax;
-  cli_opt.required = false;
-  cli_opt.argument_type = CommandLine::REQUIRED;
-  _command_line.addOption("REFINE", cli_opt);
-}
-
-void
-MooseApp::parseCommandLine()
-{
-  std::string input_filename;
-  std::string argument;
-
-  _command_line.buildVarsSet();
-
-  if (_command_line.search("ErrorUnused"))
+  if (isParamValid("error_unused"))
     setCheckUnusedFlag(true);
-  else if (_command_line.search("WarnUnused"))
+  else if (isParamValid("warn_unused"))
     setCheckUnusedFlag(false);
 
-  if (_command_line.search("ErrorOverride"))
+  if (isParamValid("error_override"))
     setErrorOverridden();
 
-  if (_command_line.search("Help"))
+  if (isParamValid("help"))
   {
-    _command_line.printUsage();
+    _command_line->printUsage();
     _ready_to_exit = true;
   }
-  else if (_command_line.search("Dump", argument))
+  else if (isParamValid("dump"))
   {
     _parser.initSyntaxFormatter(Parser::INPUT_FILE, true);
-    _parser.buildFullTree(argument);
+    _parser.buildFullTree("");
     _ready_to_exit = true;
   }
-  else if (_command_line.search("YAML", argument))
+  else if (isParamValid("yaml"))
   {
     _parser.initSyntaxFormatter(Parser::YAML, true);
-    _parser.buildFullTree(argument);
+    _parser.buildFullTree("");
     _ready_to_exit = true;
   }
-  else if (_command_line.search("Syntax"))
+  else if (isParamValid("syntax"))
   {
     std::multimap<std::string, Syntax::ActionInfo> syntax = _syntax.getAssociatedActions();
     std::cout << "**START SYNTAX DATA**\n";
@@ -196,15 +127,15 @@ MooseApp::parseCommandLine()
     _action_warehouse.build();
     return;
   }
-  else if (_command_line.search("InputFile", input_filename))
+  else if (isParamValid("input_file"))
   {
-    _input_filename = input_filename;
+    _input_filename = getParam<std::string>("input_file");
     _parser.parse(_input_filename);
     _action_warehouse.build();
   }
   else
   {
-    _command_line.printUsage();
+    _command_line->printUsage();
     _ready_to_exit = true;
   }
 }
@@ -219,9 +150,9 @@ void
 MooseApp::runInputFile()
 {
   std::string mesh_file_name;
-  if (_command_line.search("MeshOnly", mesh_file_name))
+  if (isParamValid("mesh_only"))
   {
-    meshOnly(mesh_file_name);
+    meshOnly(getParam<std::string>("mesh_only"));
     _ready_to_exit = true;
   }
 
@@ -230,7 +161,7 @@ MooseApp::runInputFile()
     return;
 
   // Print the input file syntax if requested
-  if (_command_line.search("ShowTree"))
+  if (isParamValid("show_input"))
   {
     _action_warehouse.printInputFile(std::cout);
   }
@@ -239,18 +170,18 @@ MooseApp::runInputFile()
   _executioner = _action_warehouse.executioner();
 
   // If requested, see if there are unidentified name/value pairs in the input file
-  if (_command_line.search("ErrorUnused") || _enable_unused_check == ERROR_UNUSED)
+  if (isParamValid("error_unused") || _enable_unused_check == ERROR_UNUSED)
   {
     std::vector<std::string> all_vars = _parser.getPotHandle()->get_variable_names();
     _parser.checkUnidentifiedParams(all_vars, true);
   }
-  else if (_command_line.search("WarnUnused") || _enable_unused_check == WARN_UNUSED)
+  else if (isParamValid("warn_unused") || _enable_unused_check == WARN_UNUSED)
   {
     std::vector<std::string> all_vars = _parser.getPotHandle()->get_variable_names();
     _parser.checkUnidentifiedParams(all_vars, _enable_unused_check == ERROR_UNUSED);
   }
 
-  if (_command_line.search("ErrorOverride") || _error_overridden)
+  if (isParamValid("error_override") || _error_overridden)
     _parser.checkOverriddenParams(true);
   else
     _parser.checkOverriddenParams(false);
@@ -314,6 +245,15 @@ MooseApp::disableCheckUnusedFlag()
   _enable_unused_check = OFF;
 }
 
+std::string
+MooseApp::getSysInfo()
+{
+  if(_sys_info)
+    return _sys_info->getInfo();
+  else
+    return "";
+}
+
 void
 MooseApp::setErrorOverridden()
 {
@@ -323,10 +263,7 @@ MooseApp::setErrorOverridden()
 void
 MooseApp::run()
 {
-  std::cout << _sys_info.getInfo();
-
-  initCommandLineOptions();
-  parseCommandLine();
+  setupOptions();
   runInputFile();
   executeExecutioner();
 }

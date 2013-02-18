@@ -19,6 +19,7 @@
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 #include "MooseTypes.h"
+#include "MooseUtils.h"
 
 // libMesh includes
 #include "libmesh/exodusII_io.h"
@@ -128,7 +129,7 @@ void ReadMeshAction::readMesh(const std::string & mesh_file)
   }
   else // not reading Nemesis files
   {
-    Parser::checkFileReadable(mesh_file);
+    MooseUtils::checkFileReadable(mesh_file);
 
     // if reading ExodusII, read it through a reader and save it off, since it will be used in possible "copy nodal vars" action
     // NOTE: the other reader that can do copy nodal values is GMVIO, but GMV is _pretty_ old right now (May 2011)

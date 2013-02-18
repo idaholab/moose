@@ -274,6 +274,7 @@ public:
 
   // Materials /////
   void addMaterial(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+
   /**
    * Get list of materials with specified name
    * @param name The name of the material
@@ -371,6 +372,21 @@ public:
 
   // Markers //////
   void addMarker(std::string marker_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Add a MultiApp to the problem.
+   */
+  void addMultiApp(const std::string & multi_app_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Execute the MultiApps associated with the ExecFlagType
+   */
+  void execMultiApps(ExecFlagType type);
+
+  /**
+   * Find the smallest timestep over all MultiApps
+   */
+  Real computeMultiAppsDT(ExecFlagType type);
 
   /// Evaluates transient residual G in canonical semidiscrete form G(t,U,Udot) = F(t,U)
   void computeTransientImplicitResidual(Real time, const NumericVector<Number>& u, const NumericVector<Number>& udot, NumericVector<Number>& residual);
@@ -570,6 +586,8 @@ protected:
 
   // user objects
   ExecStore<UserObjectWarehouse> _user_objects;
+
+  ExecStore<MultiAppWarehouse> _multi_apps;
 
   /// Table with postprocessors that will go into files
   FormattedTable _pps_output_table_file;

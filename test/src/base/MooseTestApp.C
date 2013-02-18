@@ -2,8 +2,16 @@
 #include "MooseTest.h"
 #include "Moose.h"
 
-MooseTestApp::MooseTestApp(int argc, char * argv[]) :
-    MooseApp(argc, argv)
+template<>
+InputParameters validParams<MooseTestApp>()
+{
+  InputParameters params = validParams<MooseApp>();
+  return params;
+}
+
+
+MooseTestApp::MooseTestApp(const std::string & name, InputParameters parameters):
+    MooseApp(name, parameters)
 {
   srand(libMesh::processor_id());
 

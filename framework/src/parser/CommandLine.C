@@ -16,7 +16,8 @@
 
 #include "CommandLine.h"
 #include "MooseInit.h"
-#include "Parser.h"
+#include "MooseUtils.h"
+#include "InputParameters.h"
 
 CommandLine::CommandLine(int argc, char *argv[]) :
     _get_pot(new GetPot(argc, argv))
@@ -26,6 +27,79 @@ CommandLine::CommandLine(int argc, char *argv[]) :
 CommandLine::~CommandLine()
 {
   delete _get_pot;
+}
+
+void
+CommandLine::addCommandLineOptionsFromParams(InputParameters & params)
+{
+  for (InputParameters::iterator it = params.begin(); it != params.end(); ++it)
+  {
+    Option cli_opt;
+    std::vector<std::string> syntax;
+    std::string orig_name = it->first;
+
+    cli_opt.description = params.getDocString(orig_name);
+    syntax = params.getSyntax(orig_name);
+    cli_opt.cli_syntax = syntax;
+    cli_opt.required = false;
+    InputParameters::Parameter<bool> * bool_type = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
+    if (bool_type)
+      cli_opt.argument_type = CommandLine::NONE;
+    else
+      cli_opt.argument_type = CommandLine::REQUIRED;
+
+    addOption(orig_name, cli_opt);
+  }
+}
+
+void
+CommandLine::populateInputParams(InputParameters & params)
+{
+  for (InputParameters::iterator it = params.begin(); it != params.end(); ++it)
+  {
+    std::string orig_name = it->first;
+    if (search(orig_name))
+    {
+      {
+        InputParameters::Parameter<std::string> * string_type = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
+        if (string_type)
+        {
+          search(orig_name, params.set<std::string>(orig_name));
+          continue;
+        }
+
+        InputParameters::Parameter<Real> * real_type = dynamic_cast<InputParameters::Parameter<Real>*>(it->second);
+        if (real_type)
+        {
+          search(orig_name, params.set<Real>(orig_name));
+          continue;
+        }
+
+        InputParameters::Parameter<unsigned int> * uint_type = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it->second);
+        if (uint_type)
+        {
+          search(orig_name, params.set<unsigned int>(orig_name));
+          continue;
+        }
+
+        InputParameters::Parameter<int> * int_type = dynamic_cast<InputParameters::Parameter<int>*>(it->second);
+        if (int_type)
+        {
+          search(orig_name, params.set<int>(orig_name));
+          continue;
+        }
+
+        InputParameters::Parameter<bool> * bool_type = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
+        if (bool_type)
+        {
+          search(orig_name, params.set<bool>(orig_name));
+          continue;
+        }
+      }
+    }
+    else if(params.isParamRequired(orig_name))
+      mooseError("Missing required command-line parameter: " << orig_name << std::endl << "Doc String: " << params.getDocString(orig_name));
+  }
 }
 
 void
@@ -95,7 +169,7 @@ CommandLine::buildVarsSet()
   for(const char* var; (var = _get_pot->next_nominus()) != NULL; )
   {
     std::vector<std::string> name_value_pairs;
-    Parser::tokenize(var, name_value_pairs, 0, "=");
+    MooseUtils::tokenize(var, name_value_pairs, 0, "=");
     _command_line_vars.insert(name_value_pairs[0]);
   }
 }

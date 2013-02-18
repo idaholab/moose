@@ -15,7 +15,7 @@
 #include "AddICAction.h"
 #include "FEProblem.h"
 #include "MooseTypes.h"
-#include "Parser.h"
+#include "MooseUtils.h"
 
 template<>
 InputParameters validParams<AddICAction>()
@@ -34,7 +34,7 @@ void
 AddICAction::act()
 {
   std::vector<std::string> elements;
-  Parser::tokenize(_name, elements);
+  MooseUtils::tokenize(_name, elements);
 
   // The variable name will be the second to last element in the path name
   std::string & var_name = elements[elements.size()-2];

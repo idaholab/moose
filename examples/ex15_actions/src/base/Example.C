@@ -1,5 +1,8 @@
+#include "Example.h"
+#include "ExampleApp.h"
 #include "Moose.h"
 #include "Factory.h"
+#include "AppFactory.h"
 #include "ActionFactory.h"  // <- Actions are special (they have their own factory)
 #include "Syntax.h"
 
@@ -9,6 +12,11 @@
 
 namespace Example
 {
+  void registerApps()
+  {
+    registerApp(ExampleApp);
+  }
+
   void registerObjects(Factory & factory)
   {
     registerKernel(Convection);
