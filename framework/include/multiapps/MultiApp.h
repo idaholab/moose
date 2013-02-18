@@ -4,7 +4,7 @@
 #include "MooseApp.h"
 
 // libMesh includes
-#include "mesh_tools.h"
+#include "libmesh/mesh_tools.h"
 
 class MultiApp;
 
