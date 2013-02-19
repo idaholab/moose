@@ -31,7 +31,7 @@ private:
   MaterialProperty<Real> & _alpha_R_2;
   MaterialProperty<Real> & _alpha_I_2;
   MaterialProperty<Real> & _A_R_2;
-  MaterialProperty<Real> & _A_I_2;;
+  MaterialProperty<Real> & _A_I_2;
   
 };
 
