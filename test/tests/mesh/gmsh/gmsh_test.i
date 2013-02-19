@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   file = sample.msh
   dim = 3
   [./ExtraNodesets]

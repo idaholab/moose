@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   file = rz_xyz.e
 []
 

@@ -29,14 +29,12 @@ ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory 
     _mesh(NULL),
     _displaced_mesh(NULL),
     _problem(NULL),
-    _exreader(NULL),
     _executioner(NULL)
 {
 }
 
 ActionWarehouse::~ActionWarehouse()
 {
-  delete _exreader;
 }
 
 void

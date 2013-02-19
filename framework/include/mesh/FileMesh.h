@@ -12,38 +12,41 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef GENERATEDMESH_H
-#define GENERATEDMESH_H
+#ifndef FILEMESH_H
+#define FILEMESH_H
 
 #include "MooseMesh.h"
+#include "libmesh/exodusII_io.h"
 
-#include "MooseEnum.h"
-
-class GeneratedMesh;
-class NonlinearSystem;
+//forward declaration
+class FileMesh;
 
 template<>
-InputParameters validParams<GeneratedMesh>();
+InputParameters validParams<FileMesh>();
 
-/**
- * Mesh generated from parameters
- */
-class GeneratedMesh : public MooseMesh
+class FileMesh : public MooseMesh
 {
 public:
-  GeneratedMesh(const std::string & name, InputParameters parameters);
-  GeneratedMesh(const GeneratedMesh & other_mesh);
-  virtual ~GeneratedMesh();
+  FileMesh(const std::string & name, InputParameters parameters);
+  FileMesh(const FileMesh & other_mesh);
+  virtual ~FileMesh();
 
   virtual MooseMesh & clone() const;
 
   virtual void init();
 
+  void read(const std::string & file_name);
+  virtual ExodusII_IO * exReader() const { return _exreader; }
+
+  // Get/Set Filename (for meshes read from a file)
+  void setFileName(const std::string & file_name) { _file_name = file_name; }
+  const std::string & getFileName() const { return _file_name; }
+
 protected:
-  /// The dimension of the mesh
-  MooseEnum _dim;
-  /// Number of elements in x, y, z direction
-  int _nx, _ny, _nz;
+  /// the file_name from whence this mesh came
+  std::string _file_name;
+  /// Auxiliary object for restart
+  ExodusII_IO * _exreader;
 };
 
-#endif /* GENERATEDMESH_H */
+#endif // FILEMESH_H

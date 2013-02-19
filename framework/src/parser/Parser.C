@@ -710,7 +710,7 @@ void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, 
 Parser::InputFileSort::InputFileSort(bool sort_alpha):
     _sort_alpha(sort_alpha)
 {
-  _o.reserve(16);
+  _o.reserve(20);
   _o.push_back("GlobalParams");
   _o.push_back("MultiApps");
   _o.push_back("Problem");

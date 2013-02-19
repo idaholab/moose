@@ -21,7 +21,7 @@
 #include "Syntax.h"
 
 // objects that can be created by MOOSE
-#include "MooseMesh.h"
+#include "FileMesh.h"
 #include "GeneratedMesh.h"
 #include "MeshExtruder.h"
 #include "TiledMesh.h"
@@ -247,7 +247,7 @@ void
 registerObjects(Factory & factory)
 {
   // mesh
-  registerObject(MooseMesh);
+  registerObject(FileMesh);
   registerObject(GeneratedMesh);
   registerObject(MeshExtruder);
   registerObject(TiledMesh);

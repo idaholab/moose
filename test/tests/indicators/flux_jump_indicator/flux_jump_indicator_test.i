@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   file = two_block_square.e
 []
 

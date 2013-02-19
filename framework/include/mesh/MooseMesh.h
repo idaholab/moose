@@ -35,7 +35,7 @@
 class MooseMesh;
 class NonlinearSystem;
 class Assembly;
-
+namespace libMesh { class ExodusII_IO; }
 typedef StoredRange<std::set<Node *>::iterator, Node*> SemiLocalNodeRange;
 
 template<>
@@ -67,6 +67,10 @@ public:
   MooseMesh(const std::string & name, InputParameters parameters);
   MooseMesh(const MooseMesh & other_mesh);
   virtual ~MooseMesh();
+
+  virtual MooseMesh & clone() const = 0;
+
+  virtual void init() = 0;
 
   virtual unsigned int dimension() const { return _mesh.mesh_dimension(); }
 
@@ -151,7 +155,7 @@ public:
   const std::set<SubdomainID> & meshSubdomains() const { return _mesh_subdomains; }
   const std::set<BoundaryID> & meshBoundaryIds() const { return _mesh_boundary_ids; }
 
-  void read(const std::string file_name);
+//  void read(const std::string file_name);
 
   void prepare();
   void update();
@@ -178,15 +182,13 @@ public:
 
   MeshBase & getMesh() { return _mesh; }
 
+  virtual ExodusII_IO * exReader() const { return NULL; }
+
   inline void printInfo(std::ostream &os=libMesh::out) { _mesh.print_info(os); }
 
   std::set<SubdomainID> & getNodeBlockIds(const Node & node);
 
   std::vector<unsigned int> & getNodeList(short int nodeset_id) { return _node_set_nodes[nodeset_id]; }
-
-  // Get/Set Filename (for meshes read from a file)
-  void setFileName(const std::string & file_name) { _file_name = file_name; }
-  const std::string & getFileName() const { return _file_name; }
 
   /**
    * Add a new node to the mesh.  If there is already a node located at the point passed

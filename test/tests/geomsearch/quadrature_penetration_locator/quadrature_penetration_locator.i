@@ -1,6 +1,4 @@
 [Mesh]
-  # uniform_refine = 1
-  type = MooseMesh
   file = 2dcontact_collide.e
 []
 

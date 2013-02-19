@@ -1,6 +1,5 @@
 [Mesh]
   file = square.e
-  type = MooseMesh
 []
 
 [Variables]

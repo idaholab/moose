@@ -20,6 +20,7 @@
 #include "FEProblem.h"
 #include "MooseUnitApp.h"
 #include "AppFactory.h"
+#include "GeneratedMesh.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( ParsedFunctionTest );
 
@@ -31,8 +32,9 @@ ParsedFunctionTest::init()
   _app = AppFactory::createApp("MooseUnitApp", 1, (char**)argv);
   _factory = &_app->getFactory();
 
-  InputParameters mesh_params = _factory->getValidParams("MooseMesh");
-  _mesh = new MooseMesh("mesh", mesh_params);
+  InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
+  mesh_params.set<MooseEnum>("dim") = "3";
+  _mesh = new GeneratedMesh("mesh", mesh_params);
 
   InputParameters problem_params = _factory->getValidParams("FEProblem");
   problem_params.set<MooseMesh *>("mesh") = _mesh;

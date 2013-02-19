@@ -1,6 +1,5 @@
 [Mesh]
   file = curvi.e
-  type = MooseMesh
 []
 
 [Variables]

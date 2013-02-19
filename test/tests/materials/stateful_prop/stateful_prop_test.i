@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   dim = 3
   file = cube.e
 []

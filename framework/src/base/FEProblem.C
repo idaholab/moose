@@ -54,6 +54,9 @@
 #include "Transfer.h"
 #include "MultiAppTransfer.h"
 
+//libmesh Includes
+#include "libmesh/exodusII_io.h"
+
 unsigned int FEProblem::_n = 0;
 
 static
@@ -96,7 +99,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _postprocessor_csv_output(false),
     _postprocessor_gnuplot_output(false),
     _gnuplot_format("ps"),
-    _ex_reader(NULL),
     _out(*this, _eq),
     _out_problem(NULL),
 #ifdef LIBMESH_ENABLE_AMR
@@ -287,10 +289,12 @@ void FEProblem::initialSetup()
     _resurrector->restartFromFile();
   else
   {
-    if (_ex_reader != NULL)
+    ExodusII_IO * reader = _mesh.exReader();
+
+    if (reader != NULL)
     {
-      _nl.copyVars(*_ex_reader);
-      _aux.copyVars(*_ex_reader);
+      _nl.copyVars(*reader);
+      _aux.copyVars(*reader);
     }
   }
 

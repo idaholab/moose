@@ -81,8 +81,6 @@ CreateExecutionerAction::act()
                                 getParam<std::vector<std::string> >("petsc_options_iname"), getParam<std::vector<std::string> >("petsc_options_value"));
 #endif //LIBMESH_HAVE_PETSC
 
-    mproblem->_ex_reader = _awh.exReader();               // FIXME: do not access members directly
-
     // solver params
     EquationSystems & es = mproblem->es();
     es.parameters.set<Real> ("linear solver tolerance")

@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   file = two_squares.e
   dim = 2
 []

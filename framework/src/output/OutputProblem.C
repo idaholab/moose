@@ -32,7 +32,7 @@ InputParameters validParams<OutputProblem>()
 OutputProblem::OutputProblem(const std::string & name, InputParameters parameters):
     Problem(name, parameters),
     _mproblem(*parameters.get<FEProblem *>("mproblem")),
-    _mesh(_mproblem.mesh()),
+    _mesh(_mproblem.mesh().clone()),
     _eq(_mesh),
     _out(_mproblem, _eq)
 {
@@ -91,6 +91,7 @@ OutputProblem::~OutputProblem()
       delete _mesh_functions[sys_num][var_num];
 
   delete _serialized_solution;
+  delete &_mesh;
 }
 
 void

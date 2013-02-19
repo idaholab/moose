@@ -29,9 +29,6 @@ public:
   ReadMeshAction(const std::string & name, InputParameters params);
 
   virtual void act();
-
-private:
-  void readMesh(const std::string & mesh_file);
 };
 
 #endif // READMESHACTION_H

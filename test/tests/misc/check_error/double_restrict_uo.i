@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   file = sq-2blk.e
 []
 

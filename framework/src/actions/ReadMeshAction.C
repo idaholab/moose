@@ -35,17 +35,17 @@ InputParameters validParams<ReadMeshAction>()
    * "type" is a required parameter of MooseObjectAction but we'll provide a default to support
    * backwards compatible syntax for just reading file-based meshes
    */
-  params.set<std::string>("type") = "MooseMesh";
+  params.set<std::string>("type") = "FileMesh";
 
   params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
   params.addParam<std::vector<unsigned int> >("ghosted_boundaries", "Boundaries to be ghosted if using Nemesis");
   params.addParam<std::vector<Real> >("ghosted_boundaries_inflation", "If you are using ghosted boundaries you will want to set this value to a vector of amounts to inflate the bounding boxes by.  ie if you are running a 3D problem you might set it to '0.2 0.1 0.4'");
-  params.addParam<bool>("skip_partitioning", false, "If true the mesh won't be partitioned.  Probably not a good idea to use it with a serial mesh!");
+
   params.addParam<unsigned int>("patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
 
   // groups
   params.addParamNamesToGroup("displacements ghosted_boundaries ghosted_boundaries_inflation patch_size", "Advanced");
-  params.addParamNamesToGroup("skip_partitioning", "Partitioning");
+
 
   return params;
 }
@@ -58,37 +58,29 @@ ReadMeshAction::ReadMeshAction(const std::string & name, InputParameters params)
 void
 ReadMeshAction::act()
 {
-  std::string mesh_type = getParam<std::string>("type");
-
-  if (mesh_type == std::string("MooseMesh"))
+  if (_type == "MooseMesh")
   {
-    if(_moose_object_pars.isParamValid("file"))
-    {
-      std::string mesh_file = _moose_object_pars.get<MeshFileName>("file");
-      readMesh(mesh_file);
-    }
+    std::cout << "Warning: MooseMesh is gone!";
+    _type = "FileMesh";
   }
-  else
-  {
-    InputParameters pars = getObjectParams();
-    _mesh = dynamic_cast<MooseMesh *>(_factory.create(mesh_type, "mesh", pars));
 
-    if (isParamValid("displacements"))
-    {
-      // Create the displaced mesh
-      Moose::setup_perf_log.push("Create Displaced Mesh","Setup");
-      MooseMesh * displaced_mesh = dynamic_cast<MooseMesh *>(_factory.create(mesh_type, "displaced_mesh", pars));
-      Moose::setup_perf_log.pop("Create Displaced Mesh","Setup");
-
-      std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
-      if (displacements.size() != displaced_mesh->dimension())
-        mooseError("Number of displacements and dimension of mesh MUST be the same!");
-
-      _displaced_mesh = displaced_mesh;
-    }
-  }
+  _mesh = dynamic_cast<MooseMesh *>(_factory.create(_type, "mesh", _moose_object_pars));
+  _mesh->init();
+  _mesh->setPatchSize(getParam<unsigned int>("patch_size"));
 
   mooseAssert(_mesh != NULL, "Mesh hasn't been created");
+
+  if (isParamValid("displacements"))
+  {
+    // Create the displaced mesh
+    _displaced_mesh = dynamic_cast<MooseMesh *>(_factory.create(_type, "displaced_mesh", _moose_object_pars));
+    _displaced_mesh->init();
+    _displaced_mesh->setPatchSize(getParam<unsigned int>("patch_size"));
+
+    std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
+    if (displacements.size() != _displaced_mesh->dimension())
+      mooseError("Number of displacements and dimension of mesh MUST be the same!");
+  }
 
   std::vector<unsigned int> ghosted_boundaries = getParam<std::vector<unsigned int > >("ghosted_boundaries");
   for(unsigned int i=0; i<ghosted_boundaries.size(); i++)
@@ -108,8 +100,9 @@ ReadMeshAction::act()
 }
 
 
-void ReadMeshAction::readMesh(const std::string & mesh_file)
-{
+//void ReadMeshAction::readMesh(const std::string & mesh_file)
+//{
+  /*
   mooseAssert(_mesh == NULL, "Mesh already exists, and you are trying to read another");
 
   // Create the mesh and save it off
@@ -143,9 +136,9 @@ void ReadMeshAction::readMesh(const std::string & mesh_file)
       mesh->read(mesh_file);
   }
   Moose::setup_perf_log.pop("Read Mesh","Setup");
-
-  mesh->_mesh.skip_partitioning(getParam<bool>("skip_partitioning"));
-
+  */
+//  mesh->_mesh.skip_partitioning(getParam<bool>("skip_partitioning"));
+/*
   if (isParamValid("displacements"))
   {
     // Create the displaced mesh
@@ -178,4 +171,5 @@ void ReadMeshAction::readMesh(const std::string & mesh_file)
   }
 
   _mesh = mesh;
-}
+*/
+//}

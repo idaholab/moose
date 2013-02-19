@@ -31,7 +31,12 @@ class StripeMesh : public GeneratedMesh
 {
 public:
   StripeMesh(const std::string & name, InputParameters parameters);
+  StripeMesh(const StripeMesh & other_mesh);
   virtual ~StripeMesh();
+
+  virtual MooseMesh & clone() const;
+
+  virtual void init();
 
 protected:
   unsigned int _n_stripes;                      ///< number of stripes

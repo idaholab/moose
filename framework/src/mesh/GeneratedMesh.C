@@ -28,9 +28,10 @@ InputParameters validParams<GeneratedMesh>()
   InputParameters params = validParams<MooseMesh>();
 
   MooseEnum elem_types("EDGE, EDGE2, EDGE3, EDGE4, QUAD, QUAD4, QUAD8, QUAD9, TRI3, TRI6, HEX, HEX8, HEX20, HEX27, TET4, TET10"); // no default
-  MooseEnum dims("1 = 1, 2, 3");
 
-  params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");
+  MooseEnum dims("1 = 1, 2, 3");
+  params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated"); // Make this parameter required
+
   params.addParam<int>("nx", 1, "Number of elements in the X direction");
   params.addParam<int>("ny", 1, "Number of elements in the Y direction");
   params.addParam<int>("nz", 1, "Number of elements in the Z direction");
@@ -54,6 +55,30 @@ GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameter
     _nx(getParam<int>("nx")),
     _ny(getParam<int>("ny")),
     _nz(getParam<int>("nz"))
+{
+}
+
+GeneratedMesh::GeneratedMesh(const GeneratedMesh & other_mesh) :
+    MooseMesh(other_mesh),
+    _dim(other_mesh._dim),
+    _nx(other_mesh._nx),
+    _ny(other_mesh._ny),
+    _nz(other_mesh._nz)
+{
+}
+
+GeneratedMesh::~GeneratedMesh()
+{
+}
+
+MooseMesh &
+GeneratedMesh::clone() const
+{
+  return *(new GeneratedMesh(*this));
+}
+
+void
+GeneratedMesh::init()
 {
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
 
@@ -83,8 +108,4 @@ GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameter
     MeshTools::Generation::build_cube(_mesh, _nx, _ny, _nz, getParam<Real>("xmin"), getParam<Real>("xmax"), getParam<Real>("ymin"), getParam<Real>("ymax"), getParam<Real>("zmin"), getParam<Real>("zmax"), elem_type);
     break;
   }
-}
-
-GeneratedMesh::~GeneratedMesh()
-{
 }

@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   file = rect-2blk.e
 []
 

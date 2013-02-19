@@ -35,15 +35,12 @@ InputParameters validParams<MooseMesh>()
 {
   InputParameters params = validParams<MooseObject>();
 
-  params.addParam<MeshFileName>("file", "The name of the mesh file to read (required unless using dynamic generation)");
-  params.addParam<bool>("nemesis", false, "If nemesis=true and file=foo.e, actually reads foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, where N = # CPUs, with NemesisIO.");
-  params.addPrivateParam<std::string>("built_by_action", "read_mesh");
-
   MooseEnum dims("1 = 1, 2, 3", "3");
   params.addParam<MooseEnum>("dim", dims, "This is only required for certain mesh formats where the dimension of the mesh cannot be autodetected.  In particular you must supply this for GMSH meshes.  Note: This is completely ignored for ExodusII meshes!");
 
+  params.addPrivateParam<std::string>("built_by_action", "read_mesh");
   // groups
-  params.addParamNamesToGroup("nemesis dim", "Advanced");
+  params.addParamNamesToGroup("dim", "Advanced");
 
   return params;
 }
@@ -53,7 +50,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     _mesh(getParam<MooseEnum>("dim")),
     _is_changed(false),
-    _is_parallel(getParam<bool>("nemesis")),
+    _is_parallel(false),
     _refined_elements(NULL),
     _coarsened_elements(NULL),
     _active_local_elem_range(NULL),
@@ -72,7 +69,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     MooseObject(other_mesh._name, other_mesh._pars),
     _mesh(other_mesh._mesh),
     _is_changed(false),
-    _is_parallel(getParam<bool>("nemesis")),
+    _is_parallel(false),
     _refined_elements(NULL),
     _coarsened_elements(NULL),
     _active_local_elem_range(NULL),
@@ -142,15 +139,6 @@ MooseMesh::freeBndElems()
   // free memory
   for (std::vector<BndElement *>::iterator it = _bnd_elems.begin(); it != _bnd_elems.end(); ++it)
     delete (*it);
-}
-
-void
-MooseMesh::read(const std::string file_name)
-{
-  if (dynamic_cast<ParallelMesh *>(&_mesh) && !_is_parallel)
-    _mesh.read(file_name, NULL, false);
-  else
-    _mesh.read(file_name, NULL, true);
 }
 
 void

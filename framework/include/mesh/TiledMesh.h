@@ -29,12 +29,16 @@ class TiledMesh : public MooseMesh
 {
 public:
   TiledMesh(const std::string & name, InputParameters parameters);
+  TiledMesh(const TiledMesh & other_mesh);
+
+  virtual MooseMesh & clone() const;
+
+  virtual void init();
 
 protected:
-
-  Real _x_width;
-  Real _y_width;
-  Real _z_width;
+  const Real _x_width;
+  const Real _y_width;
+  const Real _z_width;
 };
 
 #endif /* TILEDMESH_H */

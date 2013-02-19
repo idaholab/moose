@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   file = 1d_line.e
   construct_side_list_from_node_list = true
 []

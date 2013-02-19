@@ -28,7 +28,31 @@ StripeMesh::StripeMesh(const std::string & name, InputParameters parameters) :
     GeneratedMesh(name, parameters),
     _n_stripes(getParam<unsigned int>("stripes"))
 {
+}
+
+StripeMesh::StripeMesh(const StripeMesh & other_mesh) :
+    GeneratedMesh(other_mesh),
+    _n_stripes(other_mesh._n_stripes)
+{
+}
+
+StripeMesh::~StripeMesh()
+{
+}
+
+MooseMesh &
+StripeMesh::clone() const
+{
+  return *(new StripeMesh(*this));
+}
+
+void
+StripeMesh::init()
+{
+  GeneratedMesh::init();
+
   Real h = (getParam<Real>("xmax") - getParam<Real>("xmin")) / _n_stripes;  // width of the stripe
+
   for (unsigned int en = 0; en < n_elem(); en++)
   {
     Elem * e = elem(en);                                        // get an element
@@ -38,6 +62,3 @@ StripeMesh::StripeMesh(const std::string & name, InputParameters parameters) :
   }
 }
 
-StripeMesh::~StripeMesh()
-{
-}

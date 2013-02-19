@@ -17,9 +17,6 @@
 
 #include "MooseMesh.h"
 
-#include "libmesh/libmesh.h"
-#include "libmesh/vector_value.h"
-
 class MeshExtruder;
 
 template<>
@@ -29,11 +26,16 @@ class MeshExtruder : public MooseMesh
 {
 public:
   MeshExtruder(const std::string & name, InputParameters parameters);
+  MeshExtruder(const MeshExtruder & other_mesh);
+  virtual ~MeshExtruder();
+
+  virtual MooseMesh & clone() const;
+
+  virtual void init();
 
 protected:
   const unsigned int _num_layers;
   const RealVectorValue _extrusion_vector;
-  libMesh::Mesh _src_mesh;
 };
 
 #endif /* MESHEXTRUDER_H */

@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   file = 3d_thermal_contact_tet.e
   dim = 2
   construct_side_list_from_node_list = true

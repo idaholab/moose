@@ -50,7 +50,7 @@ public:
 
 protected:
   FEProblem & _mproblem;
-  MooseMesh _mesh;
+  MooseMesh & _mesh;
   EquationSystems _eq;
   Output _out;
   std::vector<std::vector<MeshFunction *> > _mesh_functions;

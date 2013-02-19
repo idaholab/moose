@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   file = nonmatching_tri.e
   dim = 2
   construct_side_list_from_node_list = true

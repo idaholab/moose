@@ -23,6 +23,7 @@ template<>
 InputParameters validParams<TiledMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
+  params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read");
 
   params.addParam<Real>("x_width", 0, "The tile width in the x direction");
   params.addParam<Real>("y_width", 0, "The tile width in the y direction");
@@ -48,7 +49,25 @@ TiledMesh::TiledMesh(const std::string & name, InputParameters parameters):
     _y_width(getParam<Real>("y_width")),
     _z_width(getParam<Real>("z_width"))
 {
+}
 
+TiledMesh::TiledMesh(const TiledMesh & other_mesh) :
+    MooseMesh(other_mesh),
+    _x_width(other_mesh._x_width),
+    _y_width(other_mesh._y_width),
+    _z_width(other_mesh._z_width)
+{
+}
+
+MooseMesh &
+TiledMesh::clone() const
+{
+  return *(new TiledMesh(*this));
+}
+
+void
+TiledMesh::init()
+{
 // This class only works with SerialMesh
 #ifndef LIBMESH_ENABLE_PARMESH
 
@@ -62,7 +81,7 @@ TiledMesh::TiledMesh(const std::string & name, InputParameters parameters):
     _mesh.prepare_for_use();
   }
   else
-    read(mesh_file);
+    _mesh.read(mesh_file);
 
   BoundaryID left = getBoundaryID(getParam<BoundaryName>("left_boundary"));
   BoundaryID right = getBoundaryID(getParam<BoundaryName>("right_boundary"));

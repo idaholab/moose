@@ -21,7 +21,6 @@
 #include <ostream>
 
 #include "Action.h"
-#include "libmesh/exodusII_io.h"
 
 /// Typedef to hide implementation details
 typedef std::vector<Action *>::iterator ActionIterator;
@@ -82,7 +81,6 @@ public:
   MooseMesh * & mesh() { return _mesh; }
   MooseMesh * & displacedMesh() { return _displaced_mesh; }
   FEProblem * & problem() { return _problem; }
-  ExodusII_IO * & exReader() { return _exreader; }
   Executioner * & executioner() { return _executioner; }
   MooseApp & mooseApp() { return _app; }
 
@@ -123,11 +121,8 @@ protected:
   MooseMesh * _displaced_mesh;
   /// Problem class
   FEProblem * _problem;
-  /// Auxiliary object for restart
-  ExodusII_IO * _exreader;
   /// Executioner for the simulation (top-level class, is stored in MooseApp, where it is freed)
   Executioner * _executioner;
-
 };
 
 #endif // ACTIONWAREHOUSE_H

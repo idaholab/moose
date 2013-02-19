@@ -25,7 +25,7 @@ template<>
 InputParameters validParams<MeshExtruder>()
 {
   InputParameters params = validParams<MooseMesh>();
-
+  params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read");
   params.addRequiredParam<unsigned int>("num_layers", "The number of layers in the extruded mesh");
   params.addRequiredParam<RealVectorValue>("extrusion_vector", "The direction and length of the extrusion");
   params.addParam<boundary_id_type>("bottom_sideset", "The boundary id that will be applied to the bottom of the extruded mesh");
@@ -38,11 +38,35 @@ MeshExtruder::MeshExtruder(const std::string & name, InputParameters parameters)
     _num_layers(getParam<unsigned int>("num_layers")),
     _extrusion_vector(getParam<RealVectorValue>("extrusion_vector"))
 {
+}
+
+MeshExtruder::MeshExtruder(const MeshExtruder & other_mesh) :
+    MooseMesh(other_mesh),
+    _num_layers(other_mesh._num_layers),
+    _extrusion_vector(other_mesh._extrusion_vector)
+{
+}
+
+MeshExtruder::~MeshExtruder()
+{
+}
+
+MooseMesh &
+MeshExtruder::clone() const
+{
+  return *(new MeshExtruder(*this));
+}
+
+void
+MeshExtruder::init()
+{
+  libMesh::Mesh src_mesh;
+
   // Read in the 2D Mesh
-  _src_mesh.read(getParam<MeshFileName>("file"));
+  src_mesh.read(getParam<MeshFileName>("file"));
 
   // Let libMesh do the heavy lifting ;)
-  MeshTools::Generation::build_extrusion(_mesh, _src_mesh, _num_layers, _extrusion_vector);
+  MeshTools::Generation::build_extrusion(_mesh, src_mesh, _num_layers, _extrusion_vector);
 
   // See if the user has requested specific sides for the top and bottom
   const std::set<boundary_id_type> &side_ids =

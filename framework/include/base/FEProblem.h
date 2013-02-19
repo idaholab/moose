@@ -655,9 +655,6 @@ public:
   bool _postprocessor_gnuplot_output;
   std::string _gnuplot_format;
 
-  /// indirect ptr to ex_reader used for copying nodal values
-  ExodusII_IO * _ex_reader;
-
 protected:
   void checkUserObjects();
 

@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   file = nonmatching.e
   dim = 2
 []
