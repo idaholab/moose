@@ -41,8 +41,6 @@ InitialRefinementAction::act()
 
   unsigned int level = getParam<unsigned int>("uniform_refine");
 
-  unsigned int auto_refine_levels = 0;
-
   // Did they specify extra refinement levels on the command-line?
   level += _app.getParam<unsigned int>("refinements");
 

@@ -712,8 +712,10 @@ Parser::InputFileSort::InputFileSort(bool sort_alpha):
 {
   _o.reserve(16);
   _o.push_back("GlobalParams");
+  _o.push_back("MultiApps");
   _o.push_back("Problem");
   _o.push_back("Mesh");
+  _o.push_back("Transfers");
   _o.push_back("Functions");
   _o.push_back("Preconditioning");
   _o.push_back("Variables");
