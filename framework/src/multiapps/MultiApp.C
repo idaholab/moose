@@ -4,6 +4,8 @@
 #include "AppFactory.h"
 #include "SetupInterface.h"
 #include "Executioner.h"
+#include "UserObject.h"
+#include "FEProblem.h"
 
 // libMesh
 #include "libmesh/mesh_tools.h"

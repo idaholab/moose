@@ -15,11 +15,16 @@
 #ifndef TRANSFER_H
 #define TRANSFER_H
 
+#include "ParallelUniqueId.h"
 #include "MooseObject.h"
 #include "InputParameters.h"
 #include "SetupInterface.h"
+#include "MooseEnum.h"
 
 class Transfer;
+class SubProblem;
+class FEProblem;
+class SystemBase;
 
 template<>
 InputParameters validParams<Transfer>();

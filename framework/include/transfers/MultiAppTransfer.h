@@ -17,6 +17,7 @@
 
 #include "Transfer.h"
 #include "MultiApp.h"
+#include "MooseEnum.h"
 
 class MultiAppTransfer;
 

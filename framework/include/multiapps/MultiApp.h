@@ -2,11 +2,16 @@
 #define MULTIAPP_H
 
 #include "MooseApp.h"
+#include "MooseEnum.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
 
 class MultiApp;
+class UserObject;
+class FEProblem;
+class Executioner;
+namespace libMesh { namespace MeshTools { class BoundingBox; } }
 
 template<>
 InputParameters validParams<MultiApp>();

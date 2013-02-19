@@ -16,7 +16,7 @@
 
 #include "Transfer.h"
 #include "MooseTypes.h"
-
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<MultiAppTransfer>()
