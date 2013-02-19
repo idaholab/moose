@@ -541,6 +541,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractScalar(PostprocessorName     , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(IndicatorName         , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(MarkerName            , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(MultiAppName          , it->second, full_name, it->first, in_global, global_params_block);
 
       /**
        * Vector types
@@ -566,6 +567,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractVector(UserObjectName        , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(IndicatorName         , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(MarkerName            , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(MultiAppName          , it->second, full_name, it->first, in_global, global_params_block);
     }
   }
 }

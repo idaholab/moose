@@ -51,6 +51,20 @@ public:
    */
   void addMultiApp(MultiApp * multi_app);
 
+  /**
+   * Whether or not this warehouse has a MultiApp named multi_app_name
+   * @param multi_app_name The name of the MultiApp we're looking for
+   * @return True if that MultiApp exists False otherwise
+   */
+  bool hasMultiApp(const std::string & multi_app_name);
+
+  /**
+   * Get a MultiApp by name.  Will error if the MultiApp doesn't exist in this Warehouse.
+   * @param multi_app_name The name of the MultiApp to get.
+   * @return A pointer to the MultiApp
+   */
+  MultiApp * getMultiApp(const std::string & multi_app_name);
+
 protected:
   std::vector<MultiApp *> _all_multi_apps;
   std::vector<TransientMultiApp *> _transient_multi_apps;

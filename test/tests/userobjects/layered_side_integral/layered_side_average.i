@@ -49,10 +49,10 @@
 
 [AuxBCs]
   [./lsia]
-    type = LayeredSideIntegralAux
+    type = SpatialUserObjectAux
     variable = layered_side_average
     boundary = right
-    layered_integral = layered_side_average
+    user_object = layered_side_average
   [../]
 []
 

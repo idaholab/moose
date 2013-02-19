@@ -49,10 +49,10 @@
 
 [AuxBCs]
   [./liaux]
-    type = LayeredSideIntegralAux
+    type = SpatialUserObjectAux
     variable = layered_integral
     boundary = right
-    layered_integral = layered_integral
+    user_object = layered_integral
   [../]
 []
 

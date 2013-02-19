@@ -33,6 +33,9 @@
 #include "IndicatorWarehouse.h"
 #include "MarkerWarehouse.h"
 #include "TimeScheme.h"
+#include "MultiAppWarehouse.h"
+#include "TransferWarehouse.h"
+
 class DisplacedProblem;
 class OutputProblem;
 class TimeScheme;
@@ -326,6 +329,22 @@ public:
 
     mooseError("Unable to find user object with name '" + name + "'");
   }
+  /**
+   * Get the user object by its name
+   * @param name The name of the user object being retrieved
+   * @param tid The thread ID
+   * @return Const reference to the user object
+   */
+
+  const UserObject & getUserObjectBase(const std::string & name)
+  {
+    ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
+    for (unsigned int i = 0; i < LENGTHOF(types); i++)
+      if (_user_objects(types[i])[0].hasUserObject(name))
+        return *_user_objects(types[i])[0].getUserObjectByName(name);
+
+    mooseError("Unable to find user object with name '" + name + "'");
+  }
 
   /**
    * Check if there if a user object of given name
@@ -379,6 +398,11 @@ public:
   void addMultiApp(const std::string & multi_app_name, const std::string & name, InputParameters parameters);
 
   /**
+   * Get a MultiApp object by name.
+   */
+  MultiApp * getMultiApp(const std::string & multi_app_name);
+
+  /**
    * Execute the MultiApps associated with the ExecFlagType
    */
   void execMultiApps(ExecFlagType type);
@@ -387,6 +411,19 @@ public:
    * Find the smallest timestep over all MultiApps
    */
   Real computeMultiAppsDT(ExecFlagType type);
+
+  /**
+   * Add a Transfer to the problem.
+   */
+  void addTransfer(const std::string & transfer_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Execute the Transfers associated with the ExecFlagType
+   *
+   * Note: This does _not_ execute MultiApp Transfers!
+   * Those are executed automatically when MultiApps are executed.
+   */
+  void execTransfers(ExecFlagType type);
 
   /// Evaluates transient residual G in canonical semidiscrete form G(t,U,Udot) = F(t,U)
   void computeTransientImplicitResidual(Real time, const NumericVector<Number>& u, const NumericVector<Number>& udot, NumericVector<Number>& residual);
@@ -588,6 +625,15 @@ protected:
   ExecStore<UserObjectWarehouse> _user_objects;
 
   ExecStore<MultiAppWarehouse> _multi_apps;
+
+  /// Normal Transfers
+  ExecStore<TransferWarehouse> _transfers;
+
+  /// Transfers executed just before MultiApps to transfer data to them
+  ExecStore<TransferWarehouse> _to_multi_app_transfers;
+
+  /// Transfers executed just after MultiApps to transfer data from them
+  ExecStore<TransferWarehouse> _from_multi_app_transfers;
 
   /// Table with postprocessors that will go into files
   FormattedTable _pps_output_table_file;

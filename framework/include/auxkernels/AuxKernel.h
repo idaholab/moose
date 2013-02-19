@@ -96,6 +96,8 @@ public:
   template<typename T>
   const T & getUserObject(const std::string & name);
 
+  const UserObject & getUserObjectBase(const std::string & name);
+
 protected:
   virtual Real computeValue() = 0;
 

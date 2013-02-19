@@ -49,10 +49,10 @@
 
 [AuxBCs]
   [./lsfa]
-    type = LayeredSideIntegralAux
+    type = SpatialUserObjectAux
     variable = layered_side_flux_average
     boundary = top
-    layered_integral = layered_side_flux_average
+    user_object = layered_side_flux_average
   [../]
 []
 

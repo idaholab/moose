@@ -50,6 +50,20 @@ public:
   template<class T>
   const T & getUserObjectByName(const std::string & name);
 
+  /**
+   * Get an user object with a given parameter name
+   * @param name The name of the parameter key of the user object to retrieve
+   * @return The user object with name associated with the parameter 'name'
+   */
+  const UserObject & getUserObjectBase(const std::string & name);
+
+  /**
+   * Get an user object with a given name
+   * @param name The name of the user object to retrieve
+   * @return The user object with the name
+   */
+  const UserObject & getUserObjectBaseByName(const std::string & name);
+
 private:
   FEProblem & _uoi_feproblem;
   /// Thread ID

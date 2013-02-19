@@ -12,37 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef LAYEREDSIDEINTEGRALAUX_H
-#define LAYEREDSIDEINTEGRALAUX_H
-
-#include "AuxKernel.h"
-
-//Forward Declarations
-class LayeredSideIntegralAux;
-class LayeredSideIntegral;
+#include "SpatialUserObjectAux.h"
+#include "UserObject.h"
 
 template<>
-InputParameters validParams<LayeredSideIntegralAux>();
-
-/**
- * Function auxiliary value
- */
-class LayeredSideIntegralAux : public AuxKernel
+InputParameters validParams<SpatialUserObjectAux>()
 {
-public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
-  LayeredSideIntegralAux(const std::string & name, InputParameters parameters);
+  InputParameters params = validParams<AuxKernel>();
+  params.addRequiredParam<UserObjectName>("user_object", "The UserObject UserObject to get values from.  Note that the UserObject _must_ implement the spatialValue() virtual function!");
+  return params;
+}
 
-  virtual ~LayeredSideIntegralAux() {}
+SpatialUserObjectAux::SpatialUserObjectAux(const std::string & name, InputParameters parameters) :
+    AuxKernel(name, parameters),
+    _user_object(getUserObjectBase("user_object"))
+{
+}
 
-protected:
-  virtual Real computeValue();
-
-  /// Function being used to compute the value of this kernel
-  const LayeredSideIntegral & _layered_integral;
-};
-
-#endif // LAYEREDSIDEINTEGRALAUX_H
+Real
+SpatialUserObjectAux::computeValue()
+{
+  return _user_object.spatialValue(_current_elem->centroid());
+}

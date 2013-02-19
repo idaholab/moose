@@ -12,25 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "LayeredSideIntegralAux.h"
-#include "LayeredSideIntegral.h"
+#include "MultiAppTransfer.h"
+
+#include "Transfer.h"
+#include "MooseTypes.h"
+
 
 template<>
-InputParameters validParams<LayeredSideIntegralAux>()
+InputParameters validParams<MultiAppTransfer>()
 {
-  InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<UserObjectName>("layered_integral", "The LayeredSideIntegral UserObject to get values from.");
+  InputParameters params = validParams<Transfer>();
+  params.addRequiredParam<MultiAppName>("multi_app", "The name of the MultiApp to use.");
+
+  params.addRequiredParam<MooseEnum>("direction", MultiAppTransfer::directions(), "Whether this Transfer will be 'to' or 'from' a MultiApp.");
+
   return params;
 }
 
-LayeredSideIntegralAux::LayeredSideIntegralAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
-    _layered_integral(getUserObject<LayeredSideIntegral>("layered_integral"))
+MultiAppTransfer::MultiAppTransfer(const std::string & name, InputParameters parameters) :
+    Transfer(name, parameters),
+    _multi_app(_fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"))),
+    _direction(getParam<MooseEnum>("direction"))
 {
-}
-
-Real
-LayeredSideIntegralAux::computeValue()
-{
-  return _layered_integral.integralValue(_current_elem->centroid());
 }

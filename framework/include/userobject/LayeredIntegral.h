@@ -41,6 +41,13 @@ public:
    */
   Real integralValue(Point p) const;
 
+  /**
+   * Given a Point return the integral value associated with the layer that point falls in.
+   *
+   * @param p The point to look for in the layers.
+   */
+  virtual Real spatialValue(const Point & p) const { return integralValue(p); }
+
   virtual void initialize();
   virtual void execute();
   virtual void finalize();

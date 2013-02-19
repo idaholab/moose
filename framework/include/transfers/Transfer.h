@@ -12,25 +12,50 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "LayeredIntegralAux.h"
-#include "LayeredIntegral.h"
+#ifndef TRANSFER_H
+#define TRANSFER_H
+
+#include "MooseObject.h"
+#include "InputParameters.h"
+#include "SetupInterface.h"
+
+class Transfer;
 
 template<>
-InputParameters validParams<LayeredIntegralAux>()
-{
-  InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<UserObjectName>("layered_integral", "The LayeredIntegral UserObject to get values from.");
-  return params;
-}
+InputParameters validParams<Transfer>();
 
-LayeredIntegralAux::LayeredIntegralAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
-    _layered_integral(getUserObject<LayeredIntegral>("layered_integral"))
+/**
+ * Base class for all Transfer objects.
+ *
+ * Transfers are objects that take values from one Application
+ * or System and put them in another Application or System.
+ */
+class Transfer :
+  public MooseObject,
+  public SetupInterface
 {
-}
+public:
+  Transfer(const std::string & name, InputParameters parameters);
+  virtual ~Transfer() {}
 
-Real
-LayeredIntegralAux::computeValue()
-{
-  return _layered_integral.integralValue(_current_elem->centroid());
-}
+  /**
+   * Execute the transfer.
+   */
+  virtual void execute() = 0;
+
+  /**
+   * @return When this Transfer will be executed.
+   */
+  virtual int executeOn() { return _execute_on; }
+
+protected:
+  SubProblem & _subproblem;
+  FEProblem & _fe_problem;
+  SystemBase & _sys;
+
+  THREAD_ID _tid;
+
+  MooseEnum _execute_on;
+};
+
+#endif /* TRANSFER_H */

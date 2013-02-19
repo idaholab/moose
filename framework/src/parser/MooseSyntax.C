@@ -119,6 +119,9 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   // Multi Apps
   syntax.registerActionSyntax("AddMultiAppAction", "MultiApps/*", "add_multi_app");
 
+  // Transfers
+  syntax.registerActionSyntax("AddTransferAction", "Transfers/*", "add_transfer");
+
   addActionTypes(syntax);
   registerActions(syntax, action_factory);
 }

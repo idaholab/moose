@@ -66,8 +66,7 @@
 #include "MaterialRealAux.h"
 #include "DebugResidualAux.h"
 #include "BoundsAux.h"
-#include "LayeredIntegralAux.h"
-#include "LayeredSideIntegralAux.h"
+#include "SpatialUserObjectAux.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
@@ -143,6 +142,7 @@
 
 // user objects
 #include "LayeredIntegral.h"
+#include "LayeredAverage.h"
 #include "LayeredSideIntegral.h"
 #include "LayeredSideAverage.h"
 #include "LayeredSideFluxAverage.h"
@@ -184,6 +184,12 @@
 
 // MultiApps
 #include "TransientMultiApp.h"
+
+// Transfers
+#ifdef LIBMESH_HAVE_DTK
+  #include "MultiAppDTKUserObjectTransfer.h"
+#endif
+
 
 // Actions
 #include "AddBCAction.h"
@@ -230,6 +236,8 @@
 #include "AddFEProblemAction.h"
 #include "AddCoupledVariableAction.h"
 #include "AddMultiAppAction.h"
+#include "AddTransferAction.h"
+
 
 namespace Moose {
 
@@ -291,8 +299,7 @@ registerObjects(Factory & factory)
   registerAux(MaterialRealAux);
   registerAux(DebugResidualAux);
   registerAux(BoundsAux);
-  registerAux(LayeredIntegralAux);
-  registerAux(LayeredSideIntegralAux);
+  registerAux(SpatialUserObjectAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
@@ -365,6 +372,7 @@ registerObjects(Factory & factory)
 
   // user objects
   registerUserObject(LayeredIntegral);
+  registerUserObject(LayeredAverage);
   registerUserObject(LayeredSideIntegral);
   registerUserObject(LayeredSideAverage);
   registerUserObject(LayeredSideFluxAverage);
@@ -403,6 +411,11 @@ registerObjects(Factory & factory)
 
   // MultiApps
   registerMultiApp(TransientMultiApp);
+
+  // Transfers
+#ifdef LIBMESH_HAVE_DTK
+  registerTransfer(MultiAppDTKUserObjectTransfer);
+#endif
 
   registered = true;
 }
@@ -467,6 +480,7 @@ addActionTypes(Syntax & syntax)
   registerActionName("add_feproblem", false);
   registerActionName("add_coupled_variable", false);
   registerActionName("add_multi_app", false);
+  registerActionName("add_transfer", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_mesh_complete", false);
@@ -524,8 +538,9 @@ addActionTypes(Syntax & syntax)
 "(setup_output)"
 "(setup_oversampling)"
 "(setup_debug)"
-"(check_integrity)"
 "(add_multi_app)"
+"(add_transfer)"
+"(check_integrity)"
 );
 
 }
@@ -625,6 +640,8 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddCoupledVariableAction, "add_coupled_variable");
 
   registerAction(AddMultiAppAction, "add_multi_app");
+
+  registerAction(AddTransferAction, "add_transfer");
 
   // TODO: Why is this here?
   registerActionName("finish_input_file_output", false);

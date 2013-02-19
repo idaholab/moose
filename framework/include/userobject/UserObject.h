@@ -82,6 +82,13 @@ public:
   SubProblem & getSubProblem() const { return _subproblem; }
 
   /**
+   * Optional interface function for "evaluating" a UserObject at a spatial position.
+   * If a UserObject overrides this function that UserObject can then be used in a
+   * Transfer to transfer information from one domain to another.
+   */
+  virtual Real spatialValue(const Point & p) const { mooseError(_name << " does not satisfy the Spatial UserObject interface!"); }
+
+  /**
    * Gather the parallel sum of the variable passed in. It HAS to take care of values across all threads and CPUs (we DO hybrid parallelism!)
    *
    * After calling this, the variable that was passed in will hold the gathered value.

@@ -12,37 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef LAYEREDINTEGRALAUX_H
-#define LAYEREDINTEGRALAUX_H
+#ifndef ADDTRANSFERACTION_H
+#define ADDTRANSFERACTION_H
 
-#include "AuxKernel.h"
+#include "MooseObjectAction.h"
 
-//Forward Declarations
-class LayeredIntegralAux;
-class LayeredIntegral;
+class AddTransferAction;
 
 template<>
-InputParameters validParams<LayeredIntegralAux>();
+InputParameters validParams<AddTransferAction>();
 
-/**
- * Function auxiliary value
- */
-class LayeredIntegralAux : public AuxKernel
+
+class AddTransferAction : public MooseObjectAction
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
-  LayeredIntegralAux(const std::string & name, InputParameters parameters);
+  AddTransferAction(const std::string & name, InputParameters params);
 
-  virtual ~LayeredIntegralAux() {}
-
-protected:
-  virtual Real computeValue();
-
-  /// Function being used to compute the value of this kernel
-  const LayeredIntegral & _layered_integral;
+  virtual void act();
 };
 
-#endif // LAYEREDINTEGRALAUX_H
+#endif // ADDTRANSFERACTION_H

@@ -36,11 +36,13 @@ InputParameters validParams<MultiApp>()
 
 MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     MooseObject(name, parameters),
+    _fe_problem(getParam<FEProblem *>("_fe_problem")),
     _app_type(getParam<std::string>("app_type")),
     _positions_vec(getParam<std::vector<Real> >("positions")),
     _input_files(getParam<std::vector<std::string> >("input_files")),
     _output_base(getParam<std::string>("output_base")),
-    _orig_comm(getParam<MPI_Comm>("_mpi_comm"))
+    _orig_comm(getParam<MPI_Comm>("_mpi_comm")),
+    _execute_on(getParam<MooseEnum>("execute_on"))
 {
   { // Read the positions out of the vector
     unsigned int num_vec_entries = _positions_vec.size();
@@ -112,35 +114,42 @@ MultiApp::~MultiApp()
 Executioner *
 MultiApp::getExecutioner(unsigned int app)
 {
-  if(app >= _first_local_app && app <= _first_local_app + (_my_num_apps-1))
-    return _apps[app-_first_local_app]->getExecutioner();
-
-  mooseError("Invalid app!");
+  return _apps[globalAppToLocal(app)]->getExecutioner();
 }
 
 MeshTools::BoundingBox
 MultiApp::getBoundingBox(unsigned int app)
 {
-  if(app >= _first_local_app && app <= _first_local_app + (_my_num_apps-1))
-  {
-    unsigned int local_app = app-_first_local_app;
+  unsigned int local_app = globalAppToLocal(app);
 
-    FEProblem * problem = dynamic_cast<FEProblem *>(&_apps[local_app]->getExecutioner()->problem());
-    mooseAssert(problem, "Not an FEProblem!");
+  FEProblem * problem = appProblem(app);
 
-    MPI_Comm swapped = swapLibMeshComm(_my_comm);
+  MPI_Comm swapped = swapLibMeshComm(_my_comm);
 
-    MooseMesh & mesh = problem->mesh();
-    MeshTools::BoundingBox bbox = MeshTools::bounding_box(mesh);
+  MooseMesh & mesh = problem->mesh();
+  MeshTools::BoundingBox bbox = MeshTools::bounding_box(mesh);
 
-    swapLibMeshComm(swapped);
+  swapLibMeshComm(swapped);
 
-    return bbox;
-  }
-
-  mooseError("Invalid app!");
+  return bbox;
 }
 
+FEProblem *
+MultiApp::appProblem(unsigned int app)
+{
+  unsigned int local_app = globalAppToLocal(app);
+
+  FEProblem * problem = dynamic_cast<FEProblem *>(&_apps[local_app]->getExecutioner()->problem());
+  mooseAssert(problem, "Not an FEProblem!");
+
+  return problem;
+}
+
+const UserObject &
+MultiApp::appUserObjectBase(unsigned int app, const std::string & name)
+{
+  return appProblem(app)->getUserObjectBase(name);
+}
 
 void
 MultiApp::buildComm()
@@ -221,3 +230,14 @@ MultiApp::swapLibMeshComm(MPI_Comm new_comm)
 
   return old_comm;
 }
+
+unsigned int
+MultiApp::globalAppToLocal(unsigned int global_app)
+{
+  if(global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps-1))
+    return global_app-_first_local_app;
+
+  std::cout<<_first_local_app<<" "<<global_app<<std::endl;
+  mooseError("Invalid global_app!");
+}
+

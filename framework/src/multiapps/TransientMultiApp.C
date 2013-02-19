@@ -28,7 +28,9 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
     if(!ex)
       mooseError("MultiApp " << name << " is not using a Transient Executioner!");
+    appProblem(_first_local_app + i)->initialSetup();
     ex->preExecute();
+    appProblem(_first_local_app + i)->copyOldSolutions();
     _transient_executioners[i] = ex;
   }
 

@@ -181,4 +181,7 @@ DerivativeStringClass(IndicatorName);
 /// This type is used for objects that expect an Marker object name
 DerivativeStringClass(MarkerName);
 
+/// This type is used for objects that expect an MultiApp object name
+DerivativeStringClass(MultiAppName);
+
 #endif // MOOSETYPES_H

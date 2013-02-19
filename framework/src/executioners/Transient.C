@@ -170,6 +170,8 @@ Transient::takeStep(Real input_dt)
   // Increment time
   _time = _time_old + _dt;
 
+  _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
+
   _problem.execMultiApps(EXEC_TIMESTEP_BEGIN);
 
   std::cout<<"DT: "<<_dt<<std::endl;
@@ -228,6 +230,7 @@ Transient::takeStep(Real input_dt)
   {
     _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
+    _problem.execTransfers(EXEC_TIMESTEP);
     _problem.execMultiApps(EXEC_TIMESTEP);
   }
 }

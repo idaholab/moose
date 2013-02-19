@@ -34,10 +34,10 @@
 
 [AuxKernels]
   [./liaux]
-    type = LayeredIntegralAux
+    type = SpatialUserObjectAux
     variable = layered_integral
     execute_on = timestep
-    layered_integral = layered_integral
+    user_object = layered_integral
   [../]
 []
 

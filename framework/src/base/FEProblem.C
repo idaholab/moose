@@ -51,6 +51,9 @@
 
 #include "InternalSideIndicator.h"
 
+#include "Transfer.h"
+#include "MultiAppTransfer.h"
+
 unsigned int FEProblem::_n = 0;
 
 static
@@ -420,6 +423,10 @@ void FEProblem::initialSetup()
   }
 
   _aux.compute(EXEC_TIMESTEP_BEGIN);
+
+  Moose::setup_perf_log.push("Initial execTransfers()","Setup");
+  execTransfers(EXEC_INITIAL);
+  Moose::setup_perf_log.pop("Initial execTransfers()","Setup");
 
   Moose::setup_perf_log.push("Initial execMultiApps()","Setup");
   execMultiApps(EXEC_INITIAL);
@@ -2232,9 +2239,29 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
   _multi_apps(type)[0].addMultiApp(multi_app);
 }
 
+MultiApp *
+FEProblem::getMultiApp(const std::string & multi_app_name)
+{
+  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
+  for (unsigned int i = 0; i < LENGTHOF(types); i++)
+    if (_multi_apps(types[i])[0].hasMultiApp(multi_app_name))
+      return _multi_apps(types[i])[0].getMultiApp(multi_app_name);
+
+  mooseError("MultiApp "<<multi_app_name<<" not found!");
+}
+
 void
 FEProblem::execMultiApps(ExecFlagType type)
 {
+  // Execute Transfers _to_ MultiApps
+  {
+    std::vector<Transfer *> transfers = _to_multi_app_transfers(type)[0].all();
+    if(transfers.size())
+      for(unsigned int i=0; i<transfers.size(); i++)
+        transfers[i]->execute();
+  }
+
+
   std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
 
   if(multi_apps.size())
@@ -2245,6 +2272,15 @@ FEProblem::execMultiApps(ExecFlagType type)
       multi_apps[i]->solveStep();
 
     std::cout<<"--Finished Executing MultiApps--"<<std::endl;
+  }
+
+
+  // Execute Transfers _from_ MultiApps
+  {
+    std::vector<Transfer *> transfers = _from_multi_app_transfers(type)[0].all();
+    if(transfers.size())
+      for(unsigned int i=0; i<transfers.size(); i++)
+        transfers[i]->execute();
   }
 }
 
@@ -2260,6 +2296,66 @@ FEProblem::computeMultiAppsDT(ExecFlagType type)
 
   return smallest_dt;
 }
+
+
+void
+FEProblem::execTransfers(ExecFlagType type)
+{
+  std::vector<Transfer *> transfers = _transfers(type)[0].all();
+
+  if(transfers.size())
+    for(unsigned int i=0; i<transfers.size(); i++)
+      transfers[i]->execute();
+}
+
+
+
+void
+FEProblem::addTransfer(const std::string & transfer_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<FEProblem *>("_fe_problem") = this;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    _reinit_displaced_elem = true;
+  }
+  else
+  {
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = &_aux;
+  }
+
+  ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<MooseEnum>("execute_on"));
+
+  parameters.set<THREAD_ID>("_tid") = 0;
+
+  MooseObject * mo = _factory.create(transfer_name, name, parameters);
+
+  Transfer * transfer = dynamic_cast<Transfer *>(mo);
+  if(!transfer)
+    mooseError("Unknown Transfer type: " << transfer_name);
+
+  MultiAppTransfer * multi_app_transfer = dynamic_cast<MultiAppTransfer *>(transfer);
+
+  if(multi_app_transfer)
+  {
+    int direction = multi_app_transfer->direction();
+
+    if(direction == MultiAppTransfer::TO_MULTIAPP)
+      _to_multi_app_transfers(type)[0].addTransfer(multi_app_transfer);
+    else
+      _from_multi_app_transfers(type)[0].addTransfer(multi_app_transfer);
+  }
+  else
+    _transfers(type)[0].addTransfer(transfer);
+}
+
+
+
+
+
+
 
 bool
 FEProblem::hasVariable(const std::string & var_name)
@@ -2557,6 +2653,8 @@ FEProblem::computeResidualType( const NumericVector<Number>& soln, NumericVector
   _nl.zeroVariablesForResidual();
   _aux.zeroVariablesForResidual();
 
+  execTransfers(EXEC_RESIDUAL);
+
   execMultiApps(EXEC_RESIDUAL);
 
   computeUserObjects(EXEC_RESIDUAL);
@@ -2595,6 +2693,8 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
 
   _nl.zeroVariablesForJacobian();
   _aux.zeroVariablesForJacobian();
+
+  execTransfers(EXEC_INITIAL);
 
   execMultiApps(EXEC_INITIAL);
 

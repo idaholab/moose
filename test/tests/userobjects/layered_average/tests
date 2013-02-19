@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'layered_average.i'
+    exodiff = 'layered_average_out.e'
+  [../]
+[]

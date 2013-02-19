@@ -113,6 +113,14 @@ AuxKernel::getSuppliedItems()
   return _supplied_vars;
 }
 
+const UserObject &
+AuxKernel::getUserObjectBase(const std::string & name)
+{
+  _depend_uo.insert(_pars.get<UserObjectName>(name));
+  return UserObjectInterface::getUserObjectBase(name);
+}
+
+
 void
 AuxKernel::coupledCallback(const std::string & var_name, bool is_old)
 {
