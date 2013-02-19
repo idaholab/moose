@@ -2,6 +2,7 @@
 #define SOLIDMATERIAL_H
 
 #include "Material.h"
+#include "SolidMaterialProperties.h"
 
 // Forward Declarations
 class SolidMaterial;
@@ -27,10 +28,8 @@ protected:
 
   /// Temperature in the solid structure
   VariableValue & _temp;
-  /// Functions
-  Function & _k;
-  Function & _Cp;
-  Function & _rho;
+  /// User object with material properties
+  const SolidMaterialProperties & _props;
 };
 
 #endif // R7MATERIAL_H

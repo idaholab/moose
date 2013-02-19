@@ -6,9 +6,7 @@ InputParameters validParams<SolidMaterial>()
   InputParameters params = validParams<Material>();
   // Coupled variables
   params.addRequiredCoupledVar("temperature", "Temperature in the solid");
-  params.addRequiredParam<FunctionName>("k", "Function of temperature describing thermal conductivity");
-  params.addRequiredParam<FunctionName>("Cp", "Function of temperature describing specific heat");
-  params.addRequiredParam<FunctionName>("rho", "Function of temperature describing density");
+  params.addRequiredParam<UserObjectName>("properties", "The name of an user object describing material conductivity");
   return params;
 }
 
@@ -18,16 +16,13 @@ SolidMaterial::SolidMaterial(const std::string & name, InputParameters parameter
     _specific_heat(declareProperty<Real>("specific_heat")),
     _density(declareProperty<Real>("density")),
     _temp(coupledValue("temperature")),
-    _k(getFunction("k")),
-    _Cp(getFunction("Cp")),
-    _rho(getFunction("rho"))
+    _props(getUserObject<SolidMaterialProperties>("properties"))
 {
 }
 
 void SolidMaterial::computeQpProperties()
 {
-  Point pt;
-  _thermal_conductivity[_qp] = _k.value(_temp[_qp], pt);
-  _specific_heat[_qp] = _Cp.value(_temp[_qp], pt);
-  _density[_qp] = _rho.value(_temp[_qp], pt);
+  _thermal_conductivity[_qp] = _props.k(_temp[_qp]);
+  _specific_heat[_qp] = _props.Cp(_temp[_qp]);
+  _density[_qp] = _props.rho(_temp[_qp]);
 }
