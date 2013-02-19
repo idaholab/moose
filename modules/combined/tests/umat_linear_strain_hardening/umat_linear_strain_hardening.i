@@ -2,7 +2,6 @@
 # Note that this isn't a thermal or irradiation creep model.
 
 [Mesh]
-  type = MooseMesh
   file = 1x1x1cube.e
 []
 

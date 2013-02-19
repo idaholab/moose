@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   file = sliding_elastic_blocks_2d.e
   displacements = 'disp_x disp_y'
 []

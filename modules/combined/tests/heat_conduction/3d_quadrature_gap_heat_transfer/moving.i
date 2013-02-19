@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   file = nonmatching.e
   displacements = 'disp_x disp_y disp_z'
 []

@@ -21,7 +21,6 @@
 [Mesh]
   # Comment
   # Mesh
-  type = MooseMesh
   file = patch_mesh.e
   displacements = 'disp_x disp_y disp_z'
 []

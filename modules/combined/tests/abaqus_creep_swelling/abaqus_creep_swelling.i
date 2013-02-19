@@ -1,7 +1,6 @@
 # Swelling test using CREEP subroutine interface
 
 [Mesh]
-  # type = MooseMesh
   # file = cantilever.e
   type = GeneratedMesh
   dim = 3

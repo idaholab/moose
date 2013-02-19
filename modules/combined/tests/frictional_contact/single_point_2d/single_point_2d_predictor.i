@@ -1,5 +1,4 @@
 [Mesh]
-  type = MooseMesh
   file = single_point_2d.e
   displacements = 'disp_x disp_y'
 []
