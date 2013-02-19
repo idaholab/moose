@@ -44,28 +44,23 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
   const Real a = (std::sqrt (3)) / 2;
 
   // Preallocate and zero variables
-  int i = 0;
-  int j =0;
-  int k = 0;
-  int index = 0;
-  int nsym = 1;
-  int RGBint = 0;
+  unsigned int index = 0;
+  unsigned int nsym = 1;
+  unsigned int RGBint = 0;
 
   Real blue = 0.0;
   Real chi = 0.0;
   Real chi_min = 0.0;
   Real chi_max = 0.0;
   Real chi_max2 = 0.0;
-  Real color = 0.0;
   Real eta = 0.0;
   Real eta_min = 0.0;
   Real eta_max = 0.0;
   Real green = 0.0;
   Real maxRGB = 0.0;
   Real red = 0.0;
-  Real sum = 0.0;
 
-  int ref_dir[3] = {0, 0, 0};
+  unsigned int ref_dir[3] = {0, 0, 0};
   Real g[3][3] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
   Real hkl[3] = {0.0, 0.0, 0.0};
   Real S[3][3] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
@@ -302,12 +297,12 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
     while ((exit_flag == false) && (index < nsym))
     {
       // Form orientation matrix
-      for (int i = 0; i < 3; i++)
+      for (unsigned int i = 0; i < 3; i++)
       {
-        for (int j = 0; j < 3; j++)
+        for (unsigned int j = 0; j < 3; j++)
         {
           S[i][j] = 0.0;
-          for (int k = 0; k < 3; k++)
+          for (unsigned int k = 0; k < 3; k++)
           {
             S[i][j] += SymOps[index][i][k] * g[k][j];
           }
@@ -315,10 +310,10 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
       }
 
       // Multiple orientation matrix by reference sample direction
-      for (int i = 0; i < 3; i++)
+      for (unsigned int i = 0; i < 3; i++)
       {
         hkl[i] = 0;
-        for (int j = 0; j < 3; j++)
+        for (unsigned int j = 0; j < 3; j++)
         {
           hkl[i] += S[i][j] * ref_dir[j];
         }
@@ -365,7 +360,7 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
 
     // Find maximum value of red, green, or blue
     maxRGB = RGB[0];
-    for (int i = 0; i < 2; i++)
+    for (unsigned int i = 0; i < 2; i++)
     {
       if (RGB[i + 1] > maxRGB)
       {
@@ -374,7 +369,7 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
     }
 
     //  Adjust RGB values to enforce white center point instead of black
-    for (int i = 0; i < 3; i++)
+    for (unsigned int i = 0; i < 3; i++)
     {
       RGB[i] = RGB[i] / maxRGB;
     }
