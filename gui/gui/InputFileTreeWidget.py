@@ -221,7 +221,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     if new_child.text(0) == 'Mesh':
       if 'type' not in new_child.table_data:
-        new_child.table_data['type'] = 'MooseMesh'
+        new_child.table_data['type'] = 'FileMesh'
       self.mesh_item_changed.emit(new_child)
 
     for child, child_node in node.children.items():
