@@ -32,6 +32,16 @@ private:
   MaterialProperty<Real> & _alpha_I_2;
   MaterialProperty<Real> & _A_R_2;
   MaterialProperty<Real> & _A_I_2;
+  MaterialProperty<Real> & _alpha_R_3;
+  MaterialProperty<Real> & _alpha_I_3;
+  MaterialProperty<Real> & _A_R_3;
+  MaterialProperty<Real> & _A_I_3;
+  MaterialProperty<Real> & _alpha_R_4;
+  MaterialProperty<Real> & _alpha_I_4;
+  MaterialProperty<Real> & _A_R_4;
+  MaterialProperty<Real> & _A_I_4;
+
+  unsigned int _num_L;
   
 };
 
