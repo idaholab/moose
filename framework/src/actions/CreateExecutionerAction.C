@@ -24,8 +24,6 @@
 template<>
 InputParameters validParams<CreateExecutionerAction>()
 {
-  MooseEnum schemes("backward-euler, implicit-euler, explicit-euler, crank-nicolson, bdf2, petsc", "backward-euler");
-
   InputParameters params = validParams<MooseObjectAction>();
   params.addParam<Real>        ("l_tol",           1.0e-5,   "Linear Tolerance");
   params.addParam<Real>        ("l_abs_step_tol",  -1,       "Linear Absolute Step Tolerance");
@@ -37,7 +35,6 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<Real>        ("nl_abs_step_tol", 1.0e-50,  "Nonlinear Absolute step Tolerance");
   params.addParam<Real>        ("nl_rel_step_tol", 1.0e-50,  "Nonlinear Relative step Tolerance");
   params.addParam<bool>        ("no_fe_reinit",    false,    "Specifies whether or not to reinitialize FEs");
-  params.addParam<MooseEnum>   ("scheme",          schemes,  "Time integration scheme used.");
 //  params.addParam<bool>        ("auto_scaling",    false,    "Turns on automatic variable scaling");
 
 
@@ -114,8 +111,8 @@ CreateExecutionerAction::act()
     mproblem->getNonlinearSystem()._l_abs_step_tol = getParam<Real>("l_abs_step_tol");
 #endif
 
-    NonlinearSystem & nl = mproblem->getNonlinearSystem();
-    nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<MooseEnum>("scheme")));
+//    NonlinearSystem & nl = mproblem->getNonlinearSystem();
+//    nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<MooseEnum>("scheme")));
 
 #ifdef LIBMESH_HAVE_PETSC
     Moose::PetscSupport::petscSetOptions(*_problem);

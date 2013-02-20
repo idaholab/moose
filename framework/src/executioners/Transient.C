@@ -39,6 +39,7 @@ InputParameters validParams<Transient>()
   InputParameters params = validParams<Executioner>();
   std::vector<Real> sync_times(1);
   sync_times[0] = -std::numeric_limits<Real>::max();
+  MooseEnum schemes("backward-euler, implicit-euler, explicit-euler, crank-nicolson, bdf2, petsc", "backward-euler");
 
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
   params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
@@ -62,6 +63,7 @@ InputParameters validParams<Transient>()
   params.addParam<bool>("use_AB2", false, "Whether to use the Adams-Bashforth 2 predictor");
   params.addParam<bool>("use_littlef", false, "if a function evaluation should be used or time deriv's in predictors");
   params.addParam<bool>("abort_on_solve_fail", false, "abort if solve not converged rather than cut timestep");
+  params.addParam<MooseEnum>("scheme",          schemes,  "Time integration scheme used.");
 
   params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol ss_tmin sync_times time_t time_dt growth_factor predictor_scale use_AB2 use_littlef abort_on_solve_fail", "Advanced");
 
@@ -121,6 +123,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
   _problem.getTimeScheme()->_use_littlef = getParam<bool>("use_littlef");
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
+
+  _problem.getNonlinearSystem().timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<MooseEnum>("scheme")));
 }
 
 Transient::~Transient()
