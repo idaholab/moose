@@ -74,8 +74,8 @@ $(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects) $(pcre_LIB)
 
 # include MOOSE dep files. Note: must use -include for deps, since they don't exist for first time builds.
 -include $(moose_deps)
--include $(MOOSE_DIR)/contrib/mtwist-1.1/src/*.d
--include $(MOOSE_DIR)/contrib/pcre/src/*.d
+-include $(wildcard $(MOOSE_DIR)/contrib/mtwist-1.1/src/*.d)
+-include $(wildcard $(MOOSE_DIR)/contrib/pcre/src/*.d)
 ifdef PRECOMPILED
 -include $(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch.d
 endif
@@ -97,7 +97,7 @@ $(exodiff_APP): $(exodiff_objfiles)
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) $(exodiff_objfiles) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS)
 
--include $(exodiff_DIR)/*.d
+-include $(wildcard $(exodiff_DIR)/*.d)
 
 #
 # Maintenance
