@@ -24,11 +24,13 @@ CoupledDiffusionReactionSub::CoupledDiffusionReactionSub(const std::string & nam
    _sto_v(getParam<std::vector<Real> >("sto_v"))
 {
   int n = coupledComponents("v");
+  _vars.resize(n);
   _vals.resize(n);
   _grad_vals.resize(n);
 
   for (unsigned int i=0; i<_vals.size(); ++i)
   {
+    _vars[i] = coupled("v", i);
     _vals[i] = &coupledValue("v", i);
     _grad_vals[i] = &coupledGradient("v", i);
   }    
@@ -37,18 +39,18 @@ CoupledDiffusionReactionSub::CoupledDiffusionReactionSub(const std::string & nam
 
 Real CoupledDiffusionReactionSub::computeQpResidual()
 {
-  RealGradient _diff1 = _sto_u*std::pow(_u[_qp],_sto_u-1.0)*_grad_u[_qp];
+  RealGradient diff1 = _sto_u*std::pow(_u[_qp],_sto_u-1.0)*_grad_u[_qp];
   if (_vals.size())
   {
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
-      _diff1 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
+      diff1 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
     }
   }
   
-  RealGradient _diff2_sum(0.0,0.0,0.0);
+  RealGradient diff2_sum(0.0,0.0,0.0);
 
-  Real _d_val = std::pow(_u[_qp],_sto_u);
+  Real d_val = std::pow(_u[_qp],_sto_u);
   
   if (_vals.size()) 
   {
@@ -56,41 +58,41 @@ Real CoupledDiffusionReactionSub::computeQpResidual()
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
 
-      RealGradient _diff2 = _d_val*_sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*(*_grad_vals[i])[_qp];
+      RealGradient diff2 = d_val*_sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*(*_grad_vals[i])[_qp];
       
       for (unsigned int j=0; j<_vals.size(); ++j)
       {
         if (j != i)
-          _diff2 *= std::pow((*_vals[j])[_qp],_sto_v[j]);
+          diff2 *= std::pow((*_vals[j])[_qp],_sto_v[j]);
       }
-      _diff2_sum += _diff2;
+      diff2_sum += diff2;
       
     }
   }
   
-    return  _weight*std::pow(10.0,_log_k)*_diffusivity[_qp]*_grad_test[_i][_qp]*(_diff1+_diff2_sum);
+    return  _weight*std::pow(10.0,_log_k)*_diffusivity[_qp]*_grad_test[_i][_qp]*(diff1+diff2_sum);
   
 }
 
 Real CoupledDiffusionReactionSub::computeQpJacobian()
 {
-  RealGradient _diff1_1 = _sto_u*std::pow(_u[_qp],_sto_u-1.0)*_grad_phi[_j][_qp];
-  RealGradient _diff1_2 = _phi[_j][_qp]*_sto_u*(_sto_u-1.0)*std::pow(_u[_qp],_sto_u-2.0)*_grad_u[_qp];
+  RealGradient diff1_1 = _sto_u*std::pow(_u[_qp],_sto_u-1.0)*_grad_phi[_j][_qp];
+  RealGradient diff1_2 = _phi[_j][_qp]*_sto_u*(_sto_u-1.0)*std::pow(_u[_qp],_sto_u-2.0)*_grad_u[_qp];
   if (_vals.size())
   {
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
-      _diff1_1 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
-      _diff1_2 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
+      diff1_1 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
+      diff1_2 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
     }
   }
 
-  RealGradient _diff1 = _diff1_1+_diff1_2;
+  RealGradient diff1 = diff1_1+diff1_2;
   
-  Real _d_val = _sto_u*std::pow(_u[_qp],_sto_u-1.0)*_phi[_j][_qp];
+  Real d_val = _sto_u*std::pow(_u[_qp],_sto_u-1.0)*_phi[_j][_qp];
   
 
-  RealGradient _diff2_sum(0.0,0.0,0.0);
+  RealGradient diff2_sum(0.0,0.0,0.0);
   
   if (_vals.size()) 
   {
@@ -98,51 +100,100 @@ Real CoupledDiffusionReactionSub::computeQpJacobian()
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
 
-      RealGradient _diff2 = _d_val*_sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*(*_grad_vals[i])[_qp];
+      RealGradient diff2 = d_val*_sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*(*_grad_vals[i])[_qp];
       
       for (unsigned int j=0; j<_vals.size(); ++j)
       {
         if (j != i)
-          _diff2 *= std::pow((*_vals[j])[_qp],_sto_v[j]);
+          diff2 *= std::pow((*_vals[j])[_qp],_sto_v[j]);
       }
-      _diff2_sum += _diff2;
+      diff2_sum += diff2;
       
     }
   }
 
-  return  _weight*std::pow(10.0,_log_k)*_diffusivity[_qp]*_grad_test[_i][_qp]*(_diff1+_diff2_sum);
+  return  _weight*std::pow(10.0,_log_k)*_diffusivity[_qp]*_grad_test[_i][_qp]*(diff1+diff2_sum);
 
 }
 
-/*
+
 Real CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (_vals.size())
   {
-    if(jvar == _v_var1)
+    RealGradient diff1 = _sto_u*std::pow(_u[_qp],_sto_u-1.0)*_grad_u[_qp];
+
+    for (unsigned int i=0; i<_vals.size(); ++i)
     {
-        RealGradient _diff1 = _sto_v0*std::pow(_u[_qp],_sto_v0-1.0)*_grad_u[_qp]*_sto_v1*std::pow(_v[_qp],_sto_v1-1.0)*std::pow(_w[_qp],_sto_v2)*_phi[_j][_qp];
-  
-        RealGradient _diff2_1 = std::pow(_u[_qp],_sto_v0)*_sto_v1*(_sto_v1-1.0)*std::pow(_v[_qp],_sto_v1-2.0)*_grad_v[_qp]*std::pow(_w[_qp],_sto_v2)*_phi[_j][_qp];
-        RealGradient _diff2_2 = std::pow(_u[_qp],_sto_v0)*_sto_v1*std::pow(_v[_qp],_sto_v1-1.0)*_dphi[_j][_qp]*std::pow(_w[_qp],_sto_v2);
-        RealGradient _diff2   = _diff2_1+_diff2_2;
-
-        RealGradient _diff3= std::pow(_u[_qp],_sto_v0)*_sto_v1*std::pow(_v[_qp],_sto_v1-1.0)*_sto_v2*std::pow(_w[_qp],_sto_v2-1.0)*_grad_w[_qp]*_phi[_j][_qp];  
-
-        return  _weight*std::pow(10.0,_log_k)*(*_diffusivity)[_qp]*_dtest[_i][_qp]*(_diff1+_diff2+_diff3);
-        
+      if(jvar == _vars[i])
+      {
+        diff1 *= _sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*_phi[_j][_qp];
+      }
+      else
+      {
+        diff1 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
+      }
     }
-    else if(jvar == _v_var2)
+    
+    Real val_u = std::pow(_u[_qp],_sto_u);
+
+
+    RealGradient diff2_1(1.0, 1.0, 1.0);
+    RealGradient diff2_2(1.0, 1.0, 1.0);
+
+    for (unsigned int i=0; i<_vals.size(); ++i)
     {
-        RealGradient _diff1 = _sto_v0*std::pow(_u[_qp],_sto_v0-1.0)*_grad_u[_qp]*std::pow(_v[_qp],_sto_v1)*_sto_v2*std::pow(_w[_qp],_sto_v2-1.0)*_phi[_j][_qp];
-  
-        RealGradient _diff2 = std::pow(_u[_qp],_sto_v0)*_sto_v1*std::pow(_v[_qp],_sto_v1-1.0)*_grad_v[_qp]*_sto_v2*std::pow(_w[_qp],_sto_v2-1.0)*_phi[_j][_qp];
-
-        RealGradient _diff3_1 = std::pow(_u[_qp],_sto_v0)*std::pow(_v[_qp],_sto_v1)*_sto_v2*(_sto_v2-1.0)*std::pow(_w[_qp],_sto_v2-2.0)*_grad_w[_qp]*_phi[_j][_qp];
-        RealGradient _diff3_2 = std::pow(_u[_qp],_sto_v0)*std::pow(_v[_qp],_sto_v1)*_sto_v2*std::pow(_w[_qp],_sto_v2-1.0)*_dphi[_j][_qp];
-        RealGradient _diff3 = _diff3_1 + _diff3_2;
-        
-        return  _weight*std::pow(10.0,_log_k)*(*_diffusivity)[_qp]*_dtest[_i][_qp]*(_diff1+_diff2+_diff3);
+      if(jvar == _vars[i])
+      {
+        diff2_1 = _sto_v[i]*(_sto_v[i]-1.0)*std::pow((*_vals[i])[_qp],_sto_v[i]-2.0)*_phi[_j][_qp]*(*_grad_vals[i])[_qp];
+        diff2_2 = _sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*_grad_phi[_j][_qp];
+      }
     }
-    else
-      return 0.0;
+
+    RealGradient diff2 = val_u * (diff2_1 + diff2_2);
+    
+    for (unsigned int i=0; i<_vals.size(); ++i)
+    {
+      if(jvar != _vars[i])
+      {
+        diff2 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
+      }
+    }
+    
+    RealGradient diff3;
+  
+    RealGradient diff3_sum(0.0,0.0,0.0);
+
+    Real val_jvar;
+    
+    unsigned int var;
+    
+    for (unsigned int i=0; i<_vals.size(); ++i)
+    {
+      if(jvar == _vars[i])
+      {
+        var = i;
+        val_jvar = val_u*_sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*_phi[_j][_qp];
+      }
+    }
+    
+    for (unsigned int i=0; i<_vals.size(); ++i)
+    {
+      if(i != var)
+      {
+        diff3 = val_jvar*_sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*(*_grad_vals[i])[_qp];
+
+        for (unsigned int j=0; j<_vals.size(); ++j)
+        {
+          if (j != var && j != i)
+            diff3 *= std::pow((*_vals[j])[_qp],_sto_v[j]);
+        }
+        diff3_sum += diff3;
+      }
+    }
+    
+    return  _weight*std::pow(10.0,_log_k)*_diffusivity[_qp]*_grad_test[_i][_qp]*(diff1 + diff2 + diff3_sum);
   }
-*/
+  else
+    return 0.0;
+}

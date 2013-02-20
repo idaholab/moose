@@ -32,13 +32,13 @@ CoupledBEEquilibriumSub::CoupledBEEquilibriumSub(const std::string & name, Input
    _u_old(valueOld())
 {
   int n = coupledComponents("v");
-//  _vars.resize(n));
+  _vars.resize(n);
   _v_vals.resize(n);
   _v_vals_old.resize(n);
 
   for (unsigned int i=0; i < _v_vals.size(); ++i)
   {
-//    _vars[i] = coupled("v", i);
+    _vars[i] = coupled("v", i);
     _v_vals[i] = &coupledValue("v", i);
     _v_vals_old[i] = & coupledValueOld("v", i);
   }    
@@ -81,31 +81,34 @@ Real CoupledBEEquilibriumSub::computeQpJacobian()
   return _porosity[_qp]*_test[_i][_qp]*_weight*_val_new/_dt;
 }
 
-/*
+
 Real CoupledBEEquilibriumSub::computeQpOffDiagJacobian(unsigned int jvar)
 {
   Real _val_new = std::pow(10.0,_log_k)*std::pow(_u[_qp],_sto_u);
-
+  
   if (_vars.size()) 
+  {
+    
+    for (unsigned int i=0; i<_vars.size(); ++i)
     {
-
-      for (unsigned int i=0; i<_vars.size(); ++i)
+      
+      if(jvar == _vars[i])
       {
-        
-        if(jvar == (*_vars[i]))
-        {
-          _val_new *= _sto_v[i]*std::pow((*_v_vals[i])[_qp],_sto_v[i]-1.0)*_phi[_j][_qp];
-        }
-        
-        else
-        {
-          _val_new *= std::pow((*_v_vals[i])[_qp],_sto_v[i]);
-        }
-        
+        _val_new *= _sto_v[i]*std::pow((*_v_vals[i])[_qp],_sto_v[i]-1.0)*_phi[_j][_qp];
       }
-
-      return _porosity[_qp]*_test[_i][_qp]*_weight*_val_new/_dt;
+        
+      else
+      {
+        _val_new *= std::pow((*_v_vals[i])[_qp],_sto_v[i]);
+      }
       
     }
+    
+    return _porosity[_qp]*_test[_i][_qp]*_weight*_val_new/_dt;
+    
+  }
+  else
+    return 0.0;
+  
 }
-*/
+

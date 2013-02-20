@@ -55,7 +55,7 @@ protected:
    * @return The diagonal jacobian of mass accumulation of the coupled equilibrium species concentration.
    */
   virtual Real computeQpJacobian();
-//  virtual Real computeQpOffDiagJacobian(unsigned int jvar);  
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);  
 
 private:
   /// Weight of the equilibrium species concentration in the total primary species concentration.
@@ -70,7 +70,7 @@ private:
   /// Material property of porosity.
   MaterialProperty<Real> & _porosity;
 
-//  std::vector<unsigned int> _vars;
+  std::vector<unsigned int> _vars;
   /// Coupled primary species concentrations.
   std::vector<VariableValue *> _v_vals;
   /// Coupled old values of primary species concentrations.

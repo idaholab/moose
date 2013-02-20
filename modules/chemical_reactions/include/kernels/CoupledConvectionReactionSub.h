@@ -58,6 +58,7 @@ protected:
    * @return The diagonal jacobian of convection of the coupled equilibrium species.
    */
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   
 private:
   /**
@@ -80,7 +81,7 @@ private:
   /// Coupled gradient of hydraulic head.
   VariableGradient & _grad_p;
 
-//  std::vector<unsigned int> _vars;
+  std::vector<unsigned int> _vars;
   /// Coupled primary species concentrations.
   std::vector<VariableValue *> _vals;
   /// Coupled gradients of primary species concentrations.

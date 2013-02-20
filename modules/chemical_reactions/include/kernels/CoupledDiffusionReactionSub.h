@@ -50,7 +50,7 @@ protected:
    */
   virtual Real computeQpJacobian();
 
-//  virtual Real computeQpOffDiagJacobian(unsigned int jvar);  
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);  
 
 private:
   /**
@@ -71,6 +71,7 @@ private:
   /// Stochiometric coefficiets of the coupled primary species.
   std::vector<Real> _sto_v;
 
+  std::vector<unsigned int> _vars;
   /// Coupled primary species concentrations.
   std::vector<VariableValue *> _vals;
   /// Coupled gradients of primary species concentrations.

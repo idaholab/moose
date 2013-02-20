@@ -1,5 +1,5 @@
 #include "AddCoupledEqSpeciesAuxKernelsAction.h"
-#include "MooseUtils.h"
+#include "Parser.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseEnum.h"
@@ -16,13 +16,16 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
 
+// Regular expression includes
+#include "pcrecpp.h"
 
 template<>
 InputParameters validParams<AddCoupledEqSpeciesAuxKernelsAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<std::vector<std::string> >("eq_reactions", "The list of aqueous equilibrium reactions");
-  params.addRequiredParam<std::vector<Real> >("eq_constants", "The list of equilibrium constants for aqueous equilibrium reactions");
+//  params.addRequiredParam<std::vector<std::string> >("eq_reactions", "The list of aqueous equilibrium reactions");
+//  params.addRequiredParam<std::vector<Real> >("eq_constants", "The list of equilibrium constants for aqueous equilibrium reactions");
+  params.addParam<std::string>("reactions", "The list of aqueous equilibrium reactions");
   params.addParam<std::vector<std::string> >("secondary_species", "The list of aqueous equilibrium species to be output as aux variables");
 
   return params;
@@ -37,8 +40,7 @@ AddCoupledEqSpeciesAuxKernelsAction::AddCoupledEqSpeciesAuxKernelsAction(const s
 void
 AddCoupledEqSpeciesAuxKernelsAction::act()
 {
-  std::vector<std::string> reactions = getParam<std::vector<std::string> >("eq_reactions");
-  std::vector<Real> keq = getParam<std::vector<Real> >("eq_constants");
+  std::string reactions = getParam<std::string>("reactions");
   
   if (_pars.isParamValid("secondary_species"))
   {
@@ -50,44 +52,117 @@ AddCoupledEqSpeciesAuxKernelsAction::act()
       aux_species.insert(secondary_species[k]);
     }
     
-    for (unsigned int j=0; j < reactions.size(); j++)
+    // Getting ready for the parsing system
+    pcrecpp::RE re_reactions("(.*?)"                     // the reaction network (any character until the equalibrium coefficient appears)
+                             "\\s"                       // word boundary
+                               "("                       // start capture
+                                 "-?"                    // optional minus sign
+                                   "\\d+(?:\\.\\d*)?"    // digits followed by optional decimal and more 0 or more digits
+                               ")"
+                             "\\b"                       // word boundary
+                             "(?:\\s+|$)"                // eat the whitespace
+                             , pcrecpp::RE_Options().set_extended(true));
+    
+    pcrecpp::RE re_terms("(\\S+)");
+    pcrecpp::RE re_coeff_and_species("(?: \\(? (.*?) \\)? )"  // match the leading coefficent
+                                     "([A-Za-z].*)"           // match the species
+                                     , pcrecpp::RE_Options().set_extended(true));
+    
+    
+    pcrecpp::StringPiece input(reactions);
+    pcrecpp::StringPiece single_reaction, term;
+    Real equal_coeff;
+    
+    std::vector<string> eq_species;
+    std::vector<Real> eq_const;
+    std::vector<std::vector<Real> > stos;
+    std::vector<std::vector<std::string> > primary_species_involved;
+    
+    
+    unsigned int n_reactions = 0;
+    
+    // Start parsing
+    // Going into every single reaction
+    while (re_reactions.FindAndConsume(&input, &single_reaction, &equal_coeff))
     {
-      std::vector<std::string> tokens;
+      n_reactions += 1;
       
-      // Parsing each reaction
-      MooseUtils::tokenize(reactions[j], tokens, 1, "+=");
+      eq_const.push_back(equal_coeff);
       
-      std::vector<Real> stos(tokens.size()-1); 
-      std::vector<std::string> rxn_vars(tokens.size()-1);
-      std::vector<std::string> eq_species(reactions.size());
+      // capture all of the terms
+      std::string species, coeff_str;
+      Real coeff;
+      int sign = 1;
+      bool secondary = false;
       
-      for (unsigned int k=0; k < tokens.size(); k++)
+      std::vector<Real> local_stos;
+      std::vector<std::string> local_species_list;
+      
+      // Going to find every single term in this reaction, sto_species combos and operators
+      while (re_terms.FindAndConsume(&single_reaction, &term))
       {
-        std::vector<std::string> stos_vars;
-        MooseUtils::tokenize(tokens[k], stos_vars, 1, "()");
-        if (stos_vars.size() == 2)
+        
+        // Separating the sto from species
+        if (re_coeff_and_species.PartialMatch(term, &coeff_str, &species))
         {
-          Real coef;
-          std::istringstream iss(stos_vars[0]);
-          iss >> coef;
-          stos[k] = coef;
-          rxn_vars[k] = stos_vars[1];
+          if (coeff_str.length())
+          {
+            std::istringstream iss(coeff_str);
+            iss >> coeff;
+          }
+          else
+            coeff = 1.0;
+          
+          coeff *= sign;
+          
+          if (secondary)
+          {
+            eq_species.push_back(species);
+          }
+          else
+          {
+            local_stos.push_back(coeff);
+            local_species_list.push_back(species);
+          }
+          
+        }
+        // Finding the operators and assign value of -1.0 to "-" sign
+        else if (term == "+" || term == "=" || term == "-")
+        {
+          if (term == "-")
+          {
+            sign = -1;
+            term = "+";
+          }
+          else
+            sign = 1;
+          
+          if (term == "=")
+            secondary = true;
         }
         else
-        {
-          eq_species[j] = stos_vars[0];
-        }
+          mooseError("Error parsing term: " << term);
       }
-      // Done parsing, recorded stochiometric and variables into separate arrays
+      
+      stos.push_back(local_stos);
+      primary_species_involved.push_back(local_species_list);
+      
+    }
+    
+    if (n_reactions == 0) mooseError("No equilibrium reaction provided!");
+    // End parsing
+
+    for (unsigned int j=0; j < n_reactions; j++)
+    {
       
       // Adding the AqueousEquilibriumRxnAux auxkernel for the list of eq species read in from the input file
       if (aux_species.find(eq_species[j]) != aux_species.end())
       {
         InputParameters params_eq = _factory.getValidParams("AqueousEquilibriumRxnAux");
         params_eq.set<AuxVariableName>("variable") = eq_species[j];
-        params_eq.set<Real>("log_k") = keq[j];
-        params_eq.set<std::vector<Real> >("sto_v") = stos;
-        params_eq.set<std::vector<std::string> >("v") = rxn_vars;
+        params_eq.set<Real>("log_k") = eq_const[j];
+        params_eq.set<std::vector<Real> >("sto_v") = stos[j];
+        params_eq.set<std::vector<std::string> >("v") = primary_species_involved[j];
         _problem->addAuxKernel("AqueousEquilibriumRxnAux", "aux_"+eq_species[j], params_eq);
         
         std::cout << "aux_"+eq_species[j] << "\n";

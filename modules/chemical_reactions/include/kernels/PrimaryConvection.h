@@ -48,6 +48,7 @@ protected:
    * @return The diagonal jacobian of the convection of primary species.
    */
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   
   /// Material property of hydraulic conductivity
   MaterialProperty<Real> & _cond;

@@ -47,6 +47,7 @@ protected:
    * @return The diagonal jacobian of mass accumulation of primary species concentration.
    */
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// Material property of porosity
   MaterialProperty<Real> & _porosity;

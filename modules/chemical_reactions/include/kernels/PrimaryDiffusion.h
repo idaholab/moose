@@ -46,6 +46,7 @@ protected:
    * @return The diagonal jacobian of dispersion-diffusion of primary species.
    */
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// Material property of dispersion-diffusion coefficient.
   MaterialProperty<Real> & _diffusivity;
