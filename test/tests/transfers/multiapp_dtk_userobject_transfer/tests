@@ -10,5 +10,6 @@
     type = 'RunException'
     input = 'master.i'
     expect_err = "A '\w+' is not a registered object"
+    dtk = False
   [../]
 []
