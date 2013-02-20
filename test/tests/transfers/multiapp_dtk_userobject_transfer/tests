@@ -3,6 +3,12 @@
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out.e sub_out0.e sub_out1.e'
-    skip = 'Need DTK snooping in test harness'
+    dtk = True
+  [../]
+
+  [./check_error]
+    type = 'RunException'
+    input = 'master.i'
+    expect_err = "A '\w+' is not a registered object"
   [../]
 []

@@ -4,6 +4,25 @@ from time import strftime, gmtime, ctime, localtime, asctime
 
 TERM_COLS = 110
 
+LIBMESH_OPTIONS = {
+   'mesh_mode' :    { 're_option' : r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)',
+                      'default'   : 'SERIAL',
+		      'options'   :
+		      {
+   	                'PARALLEL' : '1',
+		        'SERIAL'   : '0'
+		      }
+		    },
+   'dtk' :          { 're_option' : r'#define\s+LIBMESH_HAVE_DTK\s+(\d+)',
+                      'default'   : 'False',
+		      'options'   :
+		      {
+   	                'True'  : '1',
+		        'False' : '0'
+		      }
+		    }
+                  }
+
 ## Run a command and return the output, or ERROR: + output if retcode != 0
 def runCommand(cmd):
   p = Popen([cmd],stdout=PIPE,stderr=STDOUT, close_fds=True, shell=True)
@@ -218,58 +237,47 @@ def getPetscVersion(libmesh_dir):
 
 
 
-def getParmeshOption(libmesh_dir):
+def getLibMeshConfigOption(libmesh_dir, option):
   # Some tests work differently with parallel mesh enabled
   # We need to detect this condition
-  parmesh = set()
+  option_set = set()
+  option_set.add('ALL')
 
-  # We check libmesh_config.h for LIBMESH_ENABLE_PARMESH
   filenames = [
     libmesh_dir + '/include/base/libmesh_config.h',   # Old location
     libmesh_dir + '/include/libmesh/libmesh_config.h' # New location
     ];
 
   success = 0
-
   for filename in filenames:
     if success == 1:
       break
 
     try:
       f = open(filename)
-
-      for line in f.readlines():
-        m = re.search(r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)', line)
-        if m != None:
-          if m.group(1) == '1':
-            parmesh.add('PARALLEL')
-          else:
-            parmesh.add('SERIAL')
-          break
-
+      contents = f.read()
       f.close()
+
+      info = LIBMESH_OPTIONS[option]
+      m = re.search(info['re_option'], contents)
+      if m != None:
+	for value, option in info['options'].iteritems():
+	  if m.group(1) == option:
+	    option_set.add(value)
+      else:
+        option_set.add(info['default'])
+
       success = 1
 
     except IOError, e:
       # print "Warning: I/O Error trying to read", filename, ":", e.strerror, "... Will try other locations."
       pass
 
-
   if success == 0:
     print "Error! Could not find libmesh_config.h in any of the usual locations!"
     exit(1)
 
-
-  # If we didn't find the #define indicated by having no entries in our set, then parmesh is off
-  if not len(parmesh):
-    parmesh.add('SERIAL')
-  parmesh.add('ALL')
-
-  return parmesh
-
-
-
-
+  return option_set
 
 def getSharedOption(libmesh_dir):
   # Some tests may only run properly with shared libraries on/off

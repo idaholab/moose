@@ -38,7 +38,8 @@ class TestHarness:
     self.checks[PLATFORM] = getPlatforms()
     self.checks[COMPILER] = getCompilers(self.libmesh_dir)
     self.checks[PETSC_VERSION] = getPetscVersion(self.libmesh_dir)
-    self.checks[MESH_MODE] = getParmeshOption(self.libmesh_dir)
+    self.checks[MESH_MODE] = getLibMeshConfigOption(self.libmesh_dir, MESH_MODE)
+    self.checks[DTK] =  getLibMeshConfigOption(self.libmesh_dir, DTK)
     self.checks[LIBRARY_MODE] = getSharedOption(self.libmesh_dir)
 
     method = set()
@@ -300,7 +301,7 @@ class TestHarness:
       return False
 
     # PETSc is being explicitly checked above
-    checks = [PLATFORM, COMPILER, MESH_MODE, METHOD, LIBRARY_MODE]
+    checks = [PLATFORM, COMPILER, MESH_MODE, METHOD, LIBRARY_MODE, DTK]
     for check in checks:
       test_platforms = set()
       for x in test[check]:
@@ -364,7 +365,7 @@ class TestHarness:
     if reason == '':
       # It ran OK but is this test set to be skipped on any platform, compiler, so other reason?
       if self.options.extra_info:
-        checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE, METHOD, LIBRARY_MODE]
+        checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE, METHOD, LIBRARY_MODE, DTK]
         for check in checks:
           if not 'ALL' in test[check]:
             caveats.append(', '.join(test[check]))
@@ -663,7 +664,8 @@ class TestHarness:
       print "  [./" + name + "]"
 
       params = self.getValidParams(name)
-      for key in params.valid:
+
+      for key in params.desc:
         required = 'No'
         if params.isRequired(key):
           required = 'Yes'

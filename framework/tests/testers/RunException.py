@@ -1,12 +1,11 @@
-from options import *
 from RunApp import RunApp
+from options import *
 
 class RunException(RunApp):
 
   def getValidParams():
     params = RunApp.getValidParams()
 
-    # Valgrind
     params.addParam('expect_err', "A regular expression that must occur in the ouput. (Test may terminiate unexpectedly and be considered passing)")
     params.addParam('expect_assert', "DEBUG MODE ONLY: A regular expression that must occur in the ouput. (Test may terminiate unexpectedly and be considered passing)")
     params.addParam('should_crash', True, "Inidicates that the test is expected to crash or otherwise terminate early")
