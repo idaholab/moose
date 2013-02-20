@@ -8,8 +8,8 @@ moose_SRC_DIRS += $(MOOSE_DIR)/contrib/mtwist-1.1
 # pcre
 #
 pcre_DIR       := $(MOOSE_DIR)/contrib/pcre
-pcre_srcfiles  := $(shell find $(pcre_DIR) -name *.cc)
-pcre_csrcfiles := $(shell find $(pcre_DIR) -name *.c)
+pcre_srcfiles  := $(shell find $(pcre_DIR) -name "*.cc")
+pcre_csrcfiles := $(shell find $(pcre_DIR) -name "*.c")
 pcre_objects   := $(patsubst %.cc, %.$(obj-suffix), $(pcre_srcfiles))
 pcre_objects   += $(patsubst %.c, %.$(obj-suffix), $(pcre_csrcfiles))
 pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD).la
@@ -25,13 +25,12 @@ moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD).la
 
 LIBS += $(moose_LIB) $(pcre_LIB)
 
-# source filese
+# source files
 moose_precompiled_headers := $(MOOSE_DIR)/include/base/Precompiled.h
-#$(shell find $(MOOSE_DIR)/include/base -name *.h)
-moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -name *.C)
-moose_csrcfiles   := $(shell find $(moose_SRC_DIRS) -name *.c)
-moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name *.f)
-moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name *.f90)
+moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -name "*.C")
+moose_csrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.c")
+moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.f")
+moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name "*.f90")
 # object files
 ifdef PRECOMPILED
 moose_precompiled_headers_objects := $(patsubst %.h, %.h.gch/$(METHOD).h.gch, $(moose_precompiled_headers))
@@ -86,7 +85,7 @@ endif
 #
 exodiff_DIR := $(MOOSE_DIR)/contrib/exodiff
 exodiff_APP := $(exodiff_DIR)/exodiff
-exodiff_srcfiles := $(shell find $(exodiff_DIR) -name *.C)
+exodiff_srcfiles := $(shell find $(exodiff_DIR) -name "*.C")
 exodiff_objfiles := $(patsubst %.C, %.$(obj-suffix), $(exodiff_srcfiles))
 
 all:: exodiff
@@ -107,16 +106,16 @@ delete_list := $(moose_LIB) $(exodiff_APP) $(pcre_LIB) libmoose-$(METHOD).* $(pc
 
 clean::
 	@rm -fr $(delete_list)
-	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" -or -name "*.lo" -or -name "*.la" \) -exec rm '{}' \;
-	@find . \( -name *.gch \) | xargs rm -rf
-	@find . -type d -name .libs | xargs rm -rf # remove hidden directories created by libtool
+	@$(shell find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" -or -name "*.lo" -or -name "*.la" \) -exec rm '{}' \;)
+	@$(shell find . \( -name *.gch \) | xargs rm -rf)
+	@$(shell find . -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
 
 clobber::
 	@rm -fr $(delete_list)
-	@find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
-                -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" -or -name "*.lo" -or -name "*.la" \) -exec rm '{}' \;
-	@find . \( -name *.gch \) | xargs rm -rf
-	@find . -type d -name .libs | xargs rm -rf # remove hidden directories created by libtool
+	@$(shell find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
+                           -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" -or -name "*.lo" -or -name "*.la" \) -exec rm '{}' \;)
+	@$(shell find . \( -name *.gch \) | xargs rm -rf)
+	@$(shell find . -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
 
 cleanall::
 	make -C $(MOOSE_DIR) clean

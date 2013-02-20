@@ -13,10 +13,10 @@
 # source files
 SRC_DIRS    := $(CURR_DIR)/src
 
-srcfiles    := $(shell find $(SRC_DIRS) -name *.C)
-csrcfiles   := $(shell find $(SRC_DIRS) -name *.c)
-fsrcfiles   := $(shell find $(SRC_DIRS) -name *.f)
-f90srcfiles := $(shell find $(SRC_DIRS) -name *.f90)
+srcfiles    := $(shell find $(SRC_DIRS) -name "*.C")
+csrcfiles   := $(shell find $(SRC_DIRS) -name "*.c")
+fsrcfiles   := $(shell find $(SRC_DIRS) -name "*.f")
+f90srcfiles := $(shell find $(SRC_DIRS) -name "*.f90")
 
 #
 # object files
@@ -26,10 +26,10 @@ fobjects    := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
 f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
 
 # plugin files
-plugfiles   := $(shell find $(CURR_DIR)/plugins -name *.C 2>/dev/null)
-cplugfiles  := $(shell find $(CURR_DIR)/plugins -name *.c 2>/dev/null)
-fplugfiles  := $(shell find $(CURR_DIR)/plugins -name *.f 2>/dev/null)
-f90plugfiles:= $(shell find $(CURR_DIR)/plugins -name *.f90 2>/dev/null)
+plugfiles   := $(shell find $(CURR_DIR)/plugins -name "*.C" 2>/dev/null)
+cplugfiles  := $(shell find $(CURR_DIR)/plugins -name "*.c" 2>/dev/null)
+fplugfiles  := $(shell find $(CURR_DIR)/plugins -name "*.f" 2>/dev/null)
+f90plugfiles:= $(shell find $(CURR_DIR)/plugins -name "*.f90" 2>/dev/null)
 
 # plugins
 plugins	    := $(patsubst %.C, %-$(METHOD).plugin, $(plugfiles))
@@ -81,17 +81,17 @@ delete_list := $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-*
 # Clean only the opt intermediate files
 cleanopt::
 	@rm -fr $(APPLICATION_NAME)-opt* lib$(APPLICATION_NAME)-opt*
-	@find . \( -name "*opt.o" -or -name "*opt.d" \) -exec rm '{}' \;
+	@$(shell find . \( -name "*opt.o" -or -name "*opt.d" \) -exec rm '{}' \;)
 
 # Clean only the dbg intermediate files
 cleandbg::
 	@rm -fr $(APPLICATION_NAME)-dbg* lib$(APPLICATION_NAME)-dbg*
-	@find . \( -name "*dbg.o" -or -name "*dbg.d" \) -exec rm '{}' \;
+	@$(shell find . \( -name "*dbg.o" -or -name "*dbg.d" \) -exec rm '{}' \;)
 
 # Clean only the prof intermediate files
 cleanpro::
 	@rm -fr $(APPLICATION_NAME)-pro* lib$(APPLICATION_NAME)-pro*
-	@find . \( -name "*pro.o" -or -name "*pro.d" \) -exec rm '{}' \;
+	@$(shell find . \( -name "*pro.o" -or -name "*pro.d" \) -exec rm '{}' \;)
 
 
 cleanall::
