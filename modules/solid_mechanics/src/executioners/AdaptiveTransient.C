@@ -28,6 +28,7 @@ InputParameters validParams<AdaptiveTransient>()
   std::vector<Real> sync_times(1);
   sync_times[0] = -std::numeric_limits<Real>::max();
 
+  MooseEnum schemes("backward-euler, implicit-euler, explicit-euler, crank-nicolson, bdf2, petsc", "backward-euler");
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
   params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
   params.addRequiredParam<Real>("dt", "The timestep size between solves");
@@ -49,7 +50,8 @@ InputParameters validParams<AdaptiveTransient>()
   params.addParam<int> ("linear_iteration_ratio", "The ratio of linear to nonlinear iterations to determine target linear iterations and window for adaptive timestepping (default = 25)");
   params.addParam<std::string> ("timestep_limiting_function", "A function used to control the timestep by limiting the change in the function over a timestep");
   params.addParam<Real> ("max_function_change", "The absolute value of the maximum change in timestep_limiting_function over a timestep");
-
+  params.addParam<MooseEnum>("scheme",     schemes,  "Time integration scheme used.");
+  
   return params;
 }
 
@@ -173,6 +175,8 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
 
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
+
+  _problem.getNonlinearSystem().timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<MooseEnum>("scheme")));
 }
 
 AdaptiveTransient::~AdaptiveTransient()
