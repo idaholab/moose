@@ -150,28 +150,29 @@ Parser::parse(const std::string &input_filename)
   {
     curr_identifier = i->erase(i->size()-1);  // Chop off the last character (the trailing slash)
 
-    // Extract the block parameters before constructing the action
-    // There may be more than one Action registered for a given section in which case we need to
-    // build them all
-    bool is_parent;
-    std::string registered_identifier = _syntax.isAssociated(*i, &is_parent);
-
-    // We need to retrieve a list of Actions associated with the current identifier
-    std::pair<std::multimap<std::string, Syntax::ActionInfo>::iterator,
-              std::multimap<std::string, Syntax::ActionInfo>::iterator> iters = _syntax.getActions(registered_identifier);
-
-    if (iters.first == iters.second)
-      mooseError(std::string("A '") + curr_identifier + "' does not have an associated \"Action\".\nDid you leave off a leading \"./\" in one of your nested blocks?\n");
-
-    for (std::multimap<std::string, Syntax::ActionInfo>::iterator i = iters.first; i != iters.second; ++i)
+    // Before we retrieve any actions or build any objects, make sure that the section they are in is active
+    if (isSectionActive(curr_identifier, active_lists))
     {
-      if (!is_parent)
-      {
-        params = _action_factory.getValidParams(i->second._action);
+      // Extract the block parameters before constructing the action
+      // There may be more than one Action registered for a given section in which case we need to
+      // build them all
+      bool is_parent;
+      std::string registered_identifier = _syntax.isAssociated(*i, &is_parent);
 
-        // Before we build any objects we need to make sure that the section they are in is active
-        if (isSectionActive(curr_identifier, active_lists))
+      // We need to retrieve a list of Actions associated with the current identifier
+      std::pair<std::multimap<std::string, Syntax::ActionInfo>::iterator,
+        std::multimap<std::string, Syntax::ActionInfo>::iterator> iters = _syntax.getActions(registered_identifier);
+
+      if (iters.first == iters.second)
+        mooseError(std::string("A '") + curr_identifier + "' does not have an associated \"Action\".\nDid you leave off a leading \"./\" in one of your nested blocks?\n");
+
+      for (std::multimap<std::string, Syntax::ActionInfo>::iterator i = iters.first; i != iters.second; ++i)
+      {
+        if (!is_parent)
         {
+          params = _action_factory.getValidParams(i->second._action);
+
+
           params.set<ActionWarehouse *>("awh") = &_action_wh;
 
           extractParams(curr_identifier, params);

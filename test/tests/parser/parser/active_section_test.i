@@ -1,6 +1,11 @@
 [Mesh]
+  active = ''
   file = square.e
   uniform_refine = 3
+
+  [./inactive]
+    type = NonexistentAction
+  [../]
 []
 
 [Variables]
@@ -79,6 +84,10 @@
     variable = u
     boundary = 2
     value = 1
+  [../]
+
+  [./inactive]
+    type = NonexistentBC
   [../]
 []
 
