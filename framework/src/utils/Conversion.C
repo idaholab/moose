@@ -98,7 +98,7 @@ namespace Moose {
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     if (!timesteppingscheme_type_to_enum.count(upper))
-      mooseError("Unknown time stepping scheme");
+      mooseError("Unknown time stepping scheme: " << upper);
 
     return timesteppingscheme_type_to_enum[upper];
   }
@@ -112,7 +112,7 @@ namespace Moose {
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     if (!execstore_type_to_enum.count(upper))
-      mooseError("Unknown execution flag");
+      mooseError("Unknown execution flag: " << upper);
 
     return execstore_type_to_enum[upper];
   }
@@ -126,7 +126,7 @@ namespace Moose {
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     if (!quadrature_type_to_enum.count(upper))
-      mooseError("Unknown quadrature type");
+      mooseError("Unknown quadrature type: " << upper);
 
     return quadrature_type_to_enum[upper];
 
@@ -153,7 +153,7 @@ namespace Moose {
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     if (!coordinate_system_type_to_enum.count(upper))
-      mooseError("Unknown coordinate system type");
+      mooseError("Unknown coordinate system type: " << upper);
 
     return coordinate_system_type_to_enum[upper];
   }
@@ -167,7 +167,7 @@ namespace Moose {
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     if (!pps_output_type_to_enum.count(upper))
-      mooseError("Unknown PPS output type");
+      mooseError("Unknown PPS output type: " << upper);
 
     return pps_output_type_to_enum[upper];
   }

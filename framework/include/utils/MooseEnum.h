@@ -37,14 +37,14 @@ public:
    * Constructor that takes a list of enumeration values but doesn't set a default for this instance
    * @param names - a list of names for this enumeration
    */
-  MooseEnum(std::string names);
+//  MooseEnum(std::string names, bool error_checking=true);
 
   /**
    * Constructor that takes a list of enumeration values, and a seperate string to set a default for this instance
    * @param names - a list of names for this enumeration
    * @default_name - the default value for this enumeration instance
    */
-  MooseEnum(std::string names, std::string default_name);
+  MooseEnum(std::string names, std::string default_name="", bool error_checking=true);
 
   /**
    * Method for returning a vector of all valid enumeration names for this instance
@@ -92,7 +92,7 @@ public:
    * IsValid
    * @return - a Boolean indicating whether this Enumeration has been set
    */
-  bool isValid() const { return _current_id > -std::numeric_limits<int>::max(); }
+  bool isValid() const { return _current_id > INVALID_ID; }
 
   // InputParameters is allowed to create an empty enum but is responsible for
   // filling it in after the fact
@@ -129,9 +129,16 @@ private:
   /// The current id
   int _current_id;
 
+  /// Whether or not error checking is turned on
+  bool _error_checking;
+
   /// The corresponding name
   std::string _current_name;
   std::string _current_name_preserved;
+
+  /// Constants
+  const static int INVALID_ID;
+  const static int OUT_OF_RANGE_ID;
 };
 
 #endif //MOOSEENUM_H

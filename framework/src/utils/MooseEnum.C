@@ -23,16 +23,18 @@
 #include <string>
 #include <iostream>
 
-MooseEnum::MooseEnum(std::string names) :
-    _current_id(-std::numeric_limits<int>::max())
-{
-  fillNames(names);
-}
+const int MooseEnum::INVALID_ID = std::numeric_limits<int>::min();
+const int MooseEnum::OUT_OF_RANGE_ID = std::numeric_limits<int>::min()+1;
 
-MooseEnum::MooseEnum(std::string names, std::string default_name)
+MooseEnum::MooseEnum(std::string names, std::string default_name, bool error_checking) :
+    _error_checking(error_checking)
 {
   fillNames(names);
-  *this = default_name;
+
+  if (default_name == "")
+    _current_id = INVALID_ID;
+  else
+    *this = default_name;
 }
 
 /**
@@ -49,12 +51,20 @@ MooseEnum::operator=(const std::string & name)
   std::string upper(name);
   std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
-  if (std::find(_names.begin(), _names.end(), upper) == _names.end())
-    mooseError(std::string("Invalid option \"") + upper + "\" in MooseEnum.  Valid options are \"" + _raw_names + "\".");
-
   _current_name = upper;
   _current_name_preserved = name;
-  _current_id = _name_to_id[upper];
+
+  if (std::find(_names.begin(), _names.end(), upper) == _names.end())
+  {
+    if (_error_checking)
+      mooseError(std::string("Invalid option \"") + upper + "\" in MooseEnum.  Valid options are \"" + _raw_names + "\".");
+    else
+      // If error checking is disabled, we will allow values assigned outside of the enumeration range
+      _current_id = OUT_OF_RANGE_ID;
+  }
+  else
+    _current_id = _name_to_id[upper];
+
   return *this;
 }
 
