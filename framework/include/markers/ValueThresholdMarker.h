@@ -40,7 +40,7 @@ protected:
   Real _refine;
 
   bool _invert;
-  bool _dont_mark;
+  MarkerValue _third_state;
 
   VariableName _variable_name;
   MooseVariable & _variable;

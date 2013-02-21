@@ -14,18 +14,19 @@
 
 #include "ValueThresholdMarker.h"
 #include "FEProblem.h"
+#include "MooseEnum.h"
 
 template<>
 InputParameters validParams<ValueThresholdMarker>()
 {
   InputParameters params = validParams<Marker>();
 
+  MooseEnum third_state("DONT_MARK = -1, COARSEN, DO_NOTHING, REFINE", "DONT_MARK");
+  params.addParam<MooseEnum>("third_state", third_state, "The Marker state to apply to values falling in-between the coarsen and refine thresholds.");
   params.addParam<Real>("coarsen", "The threshold value for coarsening.  Elements with variable values beyond this will be marked for coarsening.");
   params.addParam<Real>("refine", "The threshold value for refinement.  Elements with variable values beyond this will be marked for refinement.");
   params.addParam<bool>("invert", false, "If this is true then values _below_ 'refine' will be refined and _above_ 'coarsen' will be coarsened.");
   params.addRequiredParam<VariableName>("variable", "The values of this variable will be compared to 'refine' and 'coarsen' to see what should be done with the element");
-  params.addParam<bool>("dont_mark", true, "If this is true than any element not marked for refinement or coarsening will _not_ be marked for anything.  If it is false then elements not marked for refinement or coarsening will be marked to 'do_nothing'");
-
   return params;
 }
 
@@ -36,8 +37,10 @@ ValueThresholdMarker::ValueThresholdMarker(const std::string & name, InputParame
     _coarsen(parameters.get<Real>("coarsen")),
     _refine_set(parameters.isParamValid("refine")),
     _refine(parameters.get<Real>("refine")),
+
     _invert(parameters.get<bool>("invert")),
-    _dont_mark(parameters.get<bool>("dont_mark")),
+    _third_state((MarkerValue)(int)getParam<MooseEnum>("third_state")),
+
     _variable_name(parameters.get<VariableName>("variable")),
     _variable(_fe_problem.getVariable(_tid, _variable_name)),
     _variable_sys(_variable.sys()),
@@ -46,6 +49,13 @@ ValueThresholdMarker::ValueThresholdMarker(const std::string & name, InputParame
 {
   if(_variable_fe_type.family != LAGRANGE && _variable_fe_type != FEType(CONSTANT, MONOMIAL))
     mooseError("ValueThresholdMarker can only be used with variables of type Lagrange or Constant Monomial!");
+
+  if (_refine_set && _coarsen_set)
+  {
+    Real diff = _refine - _coarsen;
+    if ((diff > 0 && _invert) || (diff < 0 && !_invert))
+      mooseError("Invalid combination of refine, coarsen, and invert values specified");
+  }
 
   addMooseVariableDependency(&_variable);
 }
@@ -80,10 +90,7 @@ ValueThresholdMarker::computeElementMarker()
       return COARSEN;
   }
 
-  if(_dont_mark)
-    return DONT_MARK;
-  else
-    return DO_NOTHING;
+  return _third_state;
 }
 
 

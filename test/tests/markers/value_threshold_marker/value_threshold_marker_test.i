@@ -56,7 +56,7 @@
       coarsen = 0.7
       refine = 0.3
       variable = u
-      dont_mark = false
+      third_state = DO_NOTHING
     [../]
   [../]
 []
