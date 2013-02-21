@@ -428,17 +428,19 @@ class TestHarness:
       color = ''
       if 'EXODIFF' in result or 'CSVDIFF' in result:
         color = 'YELLOW'
-      else:
+      elif 'FAILED' in result:
         color = 'RED'
+      else:
+        color = 'GREEN'
       test_name = colorText(specs[TEST_NAME]  + ": ", self.options, color)
       output = ("\n" + test_name).join(lines)
       print output
 
       # Print result line again at the bottom of the output for failed tests
       if self.options.show_directory:
-        print printResult(specs[RELATIVE_PATH] + '/' + specs[TEST_NAME].split('/')[-1], result, timing, start, end, self.options), "(duplicate)"
+        print printResult(specs[RELATIVE_PATH] + '/' + specs[TEST_NAME].split('/')[-1], result, timing, start, end, self.options), "(reprint)"
       else:
-        print printResult(specs[TEST_NAME], result, timing, start, end, self.options), "(duplicate)"
+        print printResult(specs[TEST_NAME], result, timing, start, end, self.options), "(reprint)"
 
 
     if not 'skipped' in result:
