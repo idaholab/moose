@@ -97,15 +97,13 @@ PFCRFFKernelAction::act()
     
     _problem->addKernel("HHPFCRFF", kernel_name, poly_params);
     
-    std::vector<std::string> namebin(1);
     //**Create the -(alpha^I_m L^I_m) term
     if (l > 0)
     {
       poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = real_name;
       poly_params.set<bool>("positive") = false;
-      namebin[0] = imag_name;
-      poly_params.set<std::vector<std::string> >("coupled_var") = namebin;
+      poly_params.set<std::vector<std::string> >("coupled_var").push_back(imag_name);
 
       pname = "alpha_I_";
       pname.append(out.str());
@@ -121,9 +119,7 @@ PFCRFFKernelAction::act()
     poly_params = _factory.getValidParams("HHPFCRFF");
     poly_params.set<NonlinearVariableName>("variable") = real_name;
     poly_params.set<bool>("positive") = false;
-    
-    namebin[0] = _n_name;
-    poly_params.set<std::vector<std::string> >("coupled_var") = namebin;
+    poly_params.set<std::vector<std::string> >("coupled_var").push_back(_n_name);
 
     pname = "A_R_";
     pname.append(out.str());
@@ -163,9 +159,7 @@ PFCRFFKernelAction::act()
       poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = true;
-      
-      namebin[0] = real_name;
-      poly_params.set<std::vector<std::string> >("coupled_var") = namebin;
+      poly_params.set<std::vector<std::string> >("coupled_var").push_back(real_name);
 
       pname = "alpha_I_";
       pname.append(out.str());
@@ -180,9 +174,7 @@ PFCRFFKernelAction::act()
       poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = false;
-      
-      namebin[0] = _n_name;
-      poly_params.set<std::vector<std::string> >("coupled_var") = namebin;
+      poly_params.set<std::vector<std::string> >("coupled_var").push_back(_n_name);
 
       pname = "A_I_";
       pname.append(out.str());

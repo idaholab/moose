@@ -17,9 +17,13 @@ CHPFCRFF::CHPFCRFF(const std::string & name, InputParameters parameters)
 {
   _num_L = coupledComponents("v"); //Determine the number of L variables
   _grad_vals.resize(_num_L); //Resize variable array
+  _vals_var.resize(_num_L);
   
   for (unsigned int i=0; i<_num_L; ++i)
+  {
+    _vals_var[i] = coupled("v",i);
     _grad_vals[i] = &coupledGradient("v", i);//Loop through grains and load coupled gradients into the arrays
+  }
   
 }
 
@@ -45,3 +49,21 @@ CHPFCRFF::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
   
   mooseError("Invalid type passed in");
 }
+
+Real
+CHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  for (unsigned int i=0; i<_num_L; ++i)
+    if (jvar == _vals_var[i])
+    {
+      RealGradient dsum_grad_L = _grad_phi[_j][_qp];
+      
+      RealGradient dGradDFDCons = - _u[_qp]*dsum_grad_L;
+      
+      return _M[_qp]*dGradDFDCons*_grad_test[_i][_qp];
+      }
+
+  return 0.0;
+}
+
+      

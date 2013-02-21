@@ -22,9 +22,11 @@ public:
 protected:
 
   virtual RealGradient computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c);
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  
+
+  std::vector<unsigned int> _vals_var;
   std::vector<VariableGradient *> _grad_vals;
   unsigned int _num_L;
   

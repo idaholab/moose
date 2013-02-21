@@ -17,7 +17,8 @@ HHPFCRFF::HHPFCRFF(const std::string & name, InputParameters parameters)
    _prop_name(getParam<std::string>("prop_name")),
    _prop(getMaterialProperty<Real>(_prop_name)),
    _has_coupled_var(isCoupled("coupled_var")),
-   _coupled_var(_has_coupled_var ? &coupledValue("coupled_var") : NULL)
+   _coupled_var(_has_coupled_var ? &coupledValue("coupled_var") : NULL),
+   _coupled_var_var(_has_coupled_var ? coupled("coupled_var") : 0)
 {
   //Set the sign of the kernel
   if (_positive)
@@ -50,4 +51,13 @@ HHPFCRFF::precomputeQpJacobian()
     Dvar = _phi[_j][_qp];
   
   return _kernel_sign*_prop[_qp]*Dvar;
+}
+
+Real
+HHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (_has_coupled_var && jvar == _coupled_var_var)
+    return _kernel_sign*_prop[_qp]*_phi[_j][_qp]*_test[_j][_qp];
+
+  return 0.0;
 }
