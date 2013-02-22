@@ -23,9 +23,6 @@ class PointValue;
 template<>
 InputParameters validParams<PointValue>();
 
-/**
- * Plot function of time (i.e. f = f(t))
- */
 class PointValue : public GeneralPostprocessor
 {
 public:
@@ -41,6 +38,7 @@ protected:
   MooseMesh & _mesh;
   Point _point;
   std::vector<Point> _point_vec;
+  Real _value;
 };
 
 
