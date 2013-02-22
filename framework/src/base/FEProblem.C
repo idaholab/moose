@@ -749,6 +749,24 @@ FEProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 }
 
 void
+FEProblem::reinitElemPhys(const Elem * elem, std::vector<Point> phys_points_in_elem, THREAD_ID tid)
+{
+  std::vector<Point> points(phys_points_in_elem.size());
+  std::copy(phys_points_in_elem.begin(), phys_points_in_elem.end(), points.begin());
+
+  _assembly[tid]->reinitAtPhysical(elem, points);
+
+  _nl.prepare(tid);
+  _aux.prepare(tid);
+
+  reinitElem(elem, tid);
+  _assembly[tid]->prepare();
+
+  if (_displaced_problem != NULL && (_reinit_displaced_elem))
+    _displaced_problem->reinitElemPhys(_displaced_mesh->elem(elem->id()), phys_points_in_elem, tid);
+}
+
+void
 FEProblem::reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid)
 {
   _assembly[tid]->reinit(elem, side);
