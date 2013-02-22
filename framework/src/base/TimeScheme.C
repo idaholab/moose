@@ -18,18 +18,8 @@
 #include "FEProblem.h"
 
 // libMesh
-#include "libmesh/nonlinear_solver.h"
-#include "libmesh/quadrature_gauss.h"
-#include "libmesh/dense_vector.h"
-#include "libmesh/boundary_info.h"
-#include "libmesh/petsc_matrix.h"
 #include "libmesh/petsc_vector.h"
-#include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/numeric_vector.h"
-#include "libmesh/mesh.h"
-#include "libmesh/dense_subvector.h"
-#include "libmesh/dense_submatrix.h"
-#include "libmesh/dof_map.h"
 // PETSc
 #ifdef LIBMESH_HAVE_PETSC
 #include "petscsnes.h"
@@ -42,27 +32,29 @@
 TimeScheme::TimeScheme(NonlinearSystem * c) :
 _use_AB2(false),
 _use_littlef(false),
+_apply_predictor(false),
 _nl(c),
-_solution_u_dot(c->_sys.add_vector("u_dot", false, GHOSTED)),
-_solution_du_dot_du(c->_sys.add_vector("du_dot_du", false, GHOSTED)),
-_residual_old( c->_sys.add_vector("residual_old", false, GHOSTED)),
-_predicted_solution(c->_sys.add_vector("predicted_solution", false, GHOSTED)),
-_trash1(c->_sys.add_vector("trash1", false, GHOSTED)),
-_trash2(c->_sys.add_vector("trash2", false, GHOSTED)),
-_trash3(c->_sys.add_vector("trash3", false, GHOSTED)),
-_mmatrix(c->_sys.add_vector("mmatrix", false, GHOSTED)),
-_dt(c->_dt),
-_dt_old( c->_dt_old),
-_time_weight( c->_time_weight),
+_solution_u_dot(c->addVector("u_dot", true, GHOSTED)),
+_solution_du_dot_du(c->addVector("du_dot_du", true, GHOSTED)),
+_residual_old( c->addVector("residual_old", true, GHOSTED)),
+_predicted_solution(c->addVector("predicted_solution", true, GHOSTED)),
+_tmp_previous_solution(c->addVector("tmp_previous_solution", true, GHOSTED)),
+_tmp_residual_old(c->addVector("tmp_residual_old", true, GHOSTED)),
+_tmp_solution_u_dot(c->addVector("tmp_solution_u_dot", true, GHOSTED)),
+_scaled_update(c->addVector("scaled_update", false, GHOSTED)),
+_mmatrix(c->addVector("mmatrix", false, GHOSTED)),
+_dt(c->_fe_problem.dt()),
+_dt_old( c->_fe_problem.dtOld() ),
+_time_weight( c->_fe_problem.timeWeights()),
 _time_stepping_scheme( c->_time_stepping_scheme),
-_t_step(c->_t_step),
+_t_step(c->_fe_problem.timeStep()),
+_t(c->_fe_problem.time()),
 _time_stack(std::deque<TimeStep>()),
 _workvecs(std::vector<NumericVector<Number> *>()),
-_apply_predictor(false),
 _dt2_check(NULL),
 _dt2_bool(false)
 {
-
+  _time_weight.resize(3);
 }
 
 TimeScheme::~TimeScheme(){
@@ -81,7 +73,7 @@ TimeScheme::onTimestepBegin()
 {
   if (_time_stack.empty())
   {
-    _time_stack.push_back(TimeStep((_nl->_t - _dt), 0, _nl, _workvecs));
+    _time_stack.push_back(TimeStep((_t - _dt), 0, _nl, _workvecs));
     _time_stack.back().setDt(_dt_old);
   }
 
@@ -129,7 +121,7 @@ TimeScheme::onTimestepBegin()
       _time_stack.pop_front();
     }
   }
-  _dt_old = _time_stack.back().getDt();
+
   ///Set solution to right values
   _nl->_solution.localize( _time_stack.back().getSolution());
   _nl->_solution_old.localize(_time_stack.back().getSolution());
@@ -137,9 +129,14 @@ TimeScheme::onTimestepBegin()
   {
     _nl->_solution_older = _time_stack[_time_stack.size()-2].getSolution();
   }
+  ///get the old residual
+  //computeLittlef(_time_stack.back().getSolution(), _residual_old, -1, false);
+  //_residual_old.close();
+  _dt_old = _time_stack.back().getDt();
   ///push back the current time step
-  _time_stack.push_back(TimeStep(_nl->_t, _t_step, _nl, _workvecs));
+  _time_stack.push_back(TimeStep(_t, _t_step, _nl, _workvecs));
   _time_stack.back().setDt(_dt);
+
   Real sum;
   if(_t_step > 1)
   {
@@ -148,9 +145,9 @@ TimeScheme::onTimestepBegin()
   switch (_time_stepping_scheme)
   {
   case Moose::CRANK_NICOLSON:
-    {
-      computeLittlef(_time_stack[_time_stack.size()-2].getSolution(), _residual_old, -1, false);
-      _residual_old.close();
+     {
+        computeLittlef(_time_stack[_time_stack.size()-2].getSolution(), _residual_old, -1, false);
+        _residual_old.close();
     }
     break;
 
@@ -175,29 +172,30 @@ void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
       return;
     }
     initial_solution.localize(_predicted_solution);
-    NumericVector<Number> & my_old_solution_u_dot = _trash1; //change to trash1
+    NumericVector<Number> & my_old_solution_u_dot = _tmp_previous_solution; //change to tmp_previous_solution
     _time_stack[_time_stack.size()-3].getTimeDerivitive().localize(my_old_solution_u_dot);
     my_old_solution_u_dot *= -1.0;
     my_old_solution_u_dot += _time_stack[_time_stack.size()-2].getTimeDerivitive();
-    my_old_solution_u_dot *= (.5*_dt*_dt)/ _time_stack[_time_stack.size()-2].getDt();
-    NumericVector<Number> & _old_solution_u_dot = _trash2;
+    my_old_solution_u_dot *= (.5*_dt)/ _time_stack[_time_stack.size()-2].getDt();
+    NumericVector<Number> & _old_solution_u_dot = _tmp_residual_old;
     _time_stack[_time_stack.size()-2].getTimeDerivitive().localize(_old_solution_u_dot);
+    _old_solution_u_dot += my_old_solution_u_dot;
+   // _old_solution_u_dot.localize(_scaled_update);
     _old_solution_u_dot *= _dt;
-    _predicted_solution += my_old_solution_u_dot;
     _predicted_solution += _old_solution_u_dot;
     if(_apply_predictor)
     {
-      my_old_solution_u_dot *= _nl->_predictor_scale;
-      _old_solution_u_dot *= _nl->_predictor_scale;
-      initial_solution += my_old_solution_u_dot;
+     // my_old_solution_u_dot *= _predictor_scale;
+      _old_solution_u_dot *= _predictor_scale;
+     // initial_solution += my_old_solution_u_dot;
       initial_solution += _old_solution_u_dot;
     }
     return;
   }
   else
   {
-    NumericVector<Number> & residual_older = _trash1;
-    NumericVector<Number> & residual_old = _trash2;
+    NumericVector<Number> & residual_older = _tmp_previous_solution;
+    NumericVector<Number> & residual_old = _tmp_residual_old;
     initial_solution.localize(_predicted_solution);
     computeLittlef(_time_stack[_time_stack.size()-3].getSolution(), residual_older, _time_stack[_time_stack.size()-2].getTime());
     computeLittlef(_time_stack[_time_stack.size() -2].getSolution(), residual_old, _time_stack[_time_stack.size()-1].getTime());
@@ -226,8 +224,11 @@ TimeScheme::estimateTimeError(NumericVector<Number> & solution)
       {
         case Moose::CRANK_NICOLSON:
         {
-          _predicted_solution -= solution;
-          _predicted_solution *= (_dt)/(3.0 * (_dt +_dt_old));
+          _predicted_solution *= -1;
+          _predicted_solution += solution;
+          _predicted_solution *= 1/_dt; //So that now it is Vn from Gresho
+          //_predicted_solution -= _scaled_update;
+          _predicted_solution *= (_dt)/(3.0 * (1 +_dt_old/_dt));
           ret = _predicted_solution.l2_norm();
           return ret;
         }
@@ -235,6 +236,7 @@ TimeScheme::estimateTimeError(NumericVector<Number> & solution)
         {
           _predicted_solution *= -1.0;
           _predicted_solution += solution;
+         // _predicted_solution -= _scaled_update;
           Real topcalc = 2.0*(_dt + _dt_old)*(_dt +_dt_old);
           Real bottomcalc = 6.0*_dt*_dt + 12.0*_dt*_dt_old + 5.0*_dt_old*_dt_old;
           _predicted_solution *= topcalc/bottomcalc;
@@ -308,10 +310,10 @@ TimeScheme::applyPredictor(NumericVector<Number> & initial_solution)
     if (_dt_old > 0)
     {
       std::streamsize cur_precision(std::cout.precision());
-      std::cout << "  Applying predictor with scale factor = "<<std::fixed<<std::setprecision(2)<<_nl->_predictor_scale<<"\n";
+      std::cout << "  Applying predictor with scale factor = "<<std::fixed<<std::setprecision(2)<<_predictor_scale<<"\n";
       std::cout << std::scientific << std::setprecision(cur_precision);
-      Real dt_adjusted_scale_factor = _nl->_predictor_scale*_dt;
-      NumericVector<Number> & previous_solution = _trash1;
+      Real dt_adjusted_scale_factor = _predictor_scale*_dt;
+      NumericVector<Number> & previous_solution = _tmp_previous_solution;
       _time_stack[_time_stack.size()-2].getTimeDerivitive().localize(previous_solution);
       if (dt_adjusted_scale_factor != 0.0)
       {
@@ -324,10 +326,10 @@ TimeScheme::applyPredictor(NumericVector<Number> & initial_solution)
   else
   {
      std::streamsize cur_precision(std::cout.precision());
-     std::cout << "  Applying predictor with scale factor = "<<std::fixed<<std::setprecision(2)<<_nl->_predictor_scale<<"\n";
+     std::cout << "  Applying predictor with scale factor = "<<std::fixed<<std::setprecision(2)<<_predictor_scale<<"\n";
      std::cout << std::scientific << std::setprecision(cur_precision);
-     Real dt_adjusted_scale_factor = _nl->_predictor_scale *_dt;
-     NumericVector<Number> & previous_solution = _trash1;
+     Real dt_adjusted_scale_factor = _predictor_scale *_dt;
+     NumericVector<Number> & previous_solution = _tmp_previous_solution;
      if(dt_adjusted_scale_factor != 0.0)
      {
        computeLittlef(initial_solution, previous_solution);
@@ -337,22 +339,26 @@ TimeScheme::applyPredictor(NumericVector<Number> & initial_solution)
      }
    }
 }
-
+//Since computeLittef should only be called once per old time step then time will also be used to set dt, dt_old
 void TimeScheme::computeLittlef(const NumericVector<Number> & bigF, NumericVector<Number> & littlef, Real time, bool mass)
 {
 
-  NumericVector<Number> & my_solution_u_dot = _trash3;
+  NumericVector<Number> & my_solution_u_dot = _tmp_solution_u_dot;
 
    if(mass)
    {
      _solution_u_dot.localize(my_solution_u_dot);
      _solution_u_dot = 1.0;
    }
-  Real currenttime = _nl->_t;
+  Real currenttime = _t;
+  Real currentdt = _dt;
   const NumericVector<Real> *current_solution = _nl->currentSolution();
   if(time != -1)
   {
-    _nl->_t = time;
+    _t = time;
+    Real dtold = _dt_old;
+    _dt = dtold;
+    _dt_old = _time_stack.back().getDt();
   }
   _nl->set_solution(bigF);// use old_solution for computing with correct solution vector
   littlef.close();
@@ -373,12 +379,18 @@ void TimeScheme::computeLittlef(const NumericVector<Number> & bigF, NumericVecto
 #endif
   }
   _nl->set_solution(*current_solution);
-  _nl->_t = currenttime;
+  _t = currenttime;
+  if(time != -1)
+  {
+    _dt =currentdt;
+  }
   if(mass)
   {
     my_solution_u_dot.localize(_solution_u_dot);
   }
 }
+
+
 
 NumericVector<Number> & TimeScheme::finishResidual(NumericVector<Number> & residual){
   switch (_time_stepping_scheme)
@@ -411,6 +423,7 @@ TimeScheme::computeTimeDerivatives()
   {
     return;
   }
+
   switch (_time_stepping_scheme)
   {
   case Moose::IMPLICIT_EULER:

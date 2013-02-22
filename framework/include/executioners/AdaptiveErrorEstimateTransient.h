@@ -79,8 +79,6 @@ protected:
   /// dt of the big step
   Real _dt_full;
 
-  /// global relative time discretization error estimate
-  Real _error;
   /// error tolerance
   Real _e_tol;
   /// maximal error
@@ -97,7 +95,6 @@ protected:
   Real _infnorm;
   /// scaling_parameter for time step selection, default is 0.8
   Real _scaling_parameter;
-  std::ofstream myfile;
 
 };
 

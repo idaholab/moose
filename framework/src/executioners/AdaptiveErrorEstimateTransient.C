@@ -24,6 +24,9 @@
 
 // C++ Includes
 #include <iomanip>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 template<>
 InputParameters validParams<AdaptiveErrorEstimateTransient>()
@@ -58,14 +61,15 @@ AdaptiveErrorEstimateTransient::AdaptiveErrorEstimateTransient(const std::string
     _infnorm(0),
     _scaling_parameter(getParam<Real>("scaling_parameter"))
 {
+  _estimate_error=true;
   _error=0;
   _problem.getNonlinearSystem()._time_scheme->useAB2Predictor();
+  _cumulative_error = 0;
 
 }
 
 AdaptiveErrorEstimateTransient::~AdaptiveErrorEstimateTransient()
 {
-
 }
 
 void
@@ -105,11 +109,9 @@ AdaptiveErrorEstimateTransient::postSolve()
     _aux1->close();
     if(_t_step >= _start_adapting)
     {
-    	// Calculate error if past the first solve
-    	_error = _problem.getNonlinearSystem()._time_scheme->estimateTimeError(*_u1);
     	_infnorm = _u1->linfty_norm();
     	_e_max = 1.1* _e_tol*_infnorm;
-    	std::cout<<"Time Error Estimate: "<<_error<<std::endl;
+    	_cumulative_error += _error;
     }
     else
     {
@@ -137,6 +139,7 @@ AdaptiveErrorEstimateTransient::lastSolveConverged()
   {
     std::cout << "AEETransient: Marking last solve not converged " << _error<<" "<<_e_max<< std::endl;
     _dt_steps_taken =0;
+    _converged = false;
     return false;
   }
 }

@@ -25,6 +25,7 @@
 
 // System includes
 #include <string>
+#include <fstream>
 
 // Forward Declarations
 class Transient;
@@ -66,7 +67,7 @@ public:
    * @return The fully constrained dt for this timestep
    */
   virtual Real computeConstrainedDT();
-
+  virtual void estimateTimeError();
   /**
    * Optional override.
    *
@@ -134,6 +135,12 @@ protected:
   Real _growth_factor;
   bool _cutback_occurred;
   bool _abort;
+  bool _estimate_error;
+  bool _time_error_out_to_file;
+  Real _error;
+  Real _cumulative_error;
+  std::string _time_errors_filename;
+  std::ofstream _time_error_file;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

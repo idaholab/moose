@@ -139,7 +139,7 @@ public:
    * @param zero_for_residual Whether or not to zero this vector at the beginning of computeResidual.  Useful when
    *                          you are going to accumulate something into this vector during computeResidual
    */
-  void addVector(const std::string & vector_name, const bool project, const ParallelType type, bool zero_for_residual);
+  NumericVector<Number>& addVector(const std::string & vector_name, const bool project, const ParallelType type, bool zero_for_residual = false);
 
   void setInitialSolution();
 
@@ -339,11 +339,7 @@ public:
 
   void debuggingResiduals(bool state) { _debugging_residuals = state; }
 
-  void setPredictorScale(Real scale)
-  {
-    _use_predictor = true;
-    _predictor_scale = scale;
-  }
+  void setPredictorScale(Real scale);
 
 public:
   FEProblem & _fe_problem;
@@ -397,16 +393,7 @@ protected:
   /// Copy of the residual vector
   NumericVector<Number> & _residual_copy;
 
-  /// time
-  Real & _t;
-  /// size of the time step
-  Real & _dt;
-  /// previous time step size
-  Real & _dt_old;
-  /// time step (number)
-  int & _t_step;
-  /// Coefficients (weights) for the time discretization
-  std::vector<Real> & _time_weight;
+
   /// Time stepping scheme used for time discretization
   Moose::TimeSteppingScheme _time_stepping_scheme;
 
@@ -464,9 +451,6 @@ protected:
 
   /// true if predictor is active
   bool _use_predictor;
-  /// Scale factor to use with predictor
-  Real _predictor_scale;
-
   bool _computing_initial_residual;
 
   MooseException _exception;

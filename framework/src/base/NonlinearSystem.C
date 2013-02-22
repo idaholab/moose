@@ -121,11 +121,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _residual_ghosted(_sys.add_vector("residual_ghosted", false, GHOSTED)),
     _serialized_solution(*NumericVector<Number>::build().release()),
     _residual_copy(*NumericVector<Number>::build().release()),
-    _t(fe_problem.time()),
-    _dt(fe_problem.dt()),
-    _dt_old(fe_problem.dtOld()),
-    _t_step(fe_problem.timeStep()),
-    _time_weight(fe_problem.timeWeights()),
     _increment_vec(NULL),
     _preconditioner(NULL),
     _use_finite_differenced_preconditioner(false),
@@ -139,7 +134,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _n_linear_iters(0),
     _final_residual(0.),
     _use_predictor(false),
-    _predictor_scale(0.0),
     _exception(0),
     _time_scheme(new TimeScheme(this))
 {
@@ -149,7 +143,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
   _sys.nonlinear_solver->nullspace     = Moose::compute_nullspace;
   _sys.nonlinear_solver->nearnullspace = Moose::compute_nearnullspace;
 
-  _time_weight.resize(3);
+
   timeSteppingScheme(Moose::IMPLICIT_EULER);                   // default time stepping scheme
   unsigned int n_threads = libMesh::n_threads();
   _kernels.resize(n_threads);
@@ -546,13 +540,14 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
   }
 }
 
-void
+NumericVector<Number>&
 NonlinearSystem::addVector(const std::string & vector_name, const bool project, const ParallelType type, bool zero_for_residual)
 {
   NumericVector<Number> * vec = &_sys.add_vector(vector_name, project, type);
 
   if(zero_for_residual)
     _vecs_to_zero_for_residual.push_back(vec);
+  return *vec;
 }
 
 void
@@ -667,6 +662,11 @@ NonlinearSystem::setInitialSolution()
 
   if(_fe_problem.getDisplacedProblem())
     setConstraintSlaveValues(initial_solution, true);
+}
+void NonlinearSystem::setPredictorScale(Real scale)
+{
+  _use_predictor = true;
+  _time_scheme->setPredictorScale(scale);
 }
 
 void

@@ -63,7 +63,10 @@ InputParameters validParams<Transient>()
   params.addParam<bool>("use_AB2", false, "Whether to use the Adams-Bashforth 2 predictor");
   params.addParam<bool>("use_littlef", false, "if a function evaluation should be used or time deriv's in predictors");
   params.addParam<bool>("abort_on_solve_fail", false, "abort if solve not converged rather than cut timestep");
-  params.addParam<MooseEnum>("scheme",          schemes,  "Time integration scheme used.");
+   params.addParam<MooseEnum>("scheme",          schemes,  "Time integration scheme used."); params.addParam<bool>("estimate_time_error", false, "make a time error estimate");
+  params.addParam<bool>("output_to_file",false,"If time error estimates should be output to file");
+  params.addParam<std::string>("file_name", "out.csv","which file should errors be output to");
+    params.addParam<bool>("estimate_time_error", false, "make a time error estimate");
 
   params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol ss_tmin sync_times time_t time_dt growth_factor predictor_scale use_AB2 use_littlef abort_on_solve_fail", "Advanced");
 
@@ -100,7 +103,10 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _use_time_ipol(_time_ipol.getSampleSize() > 0),
     _growth_factor(getParam<Real>("growth_factor")),
     _cutback_occurred(false),
-    _abort(getParam<bool>("abort_on_solve_fail"))
+    _abort(getParam<bool>("abort_on_solve_fail")),
+    _estimate_error(getParam<bool>("estimate_time_error")),
+    _time_error_out_to_file(getParam<bool>("output_to_file")),
+    _time_errors_filename(getParam<std::string>("file_name"))
 {
   _t_step = 0;
   _dt = 0;
@@ -108,6 +114,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
   _problem.transient(true);
   if (parameters.isParamValid("predictor_scale"))
   {
+
     Real predscale(getParam<Real>("predictor_scale"));
     if (predscale >= 0.0 and predscale <= 1.0)
     {
@@ -119,8 +126,26 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     }
   }
 
-  _problem.getTimeScheme()->_use_AB2 = getParam<bool>("use_AB2");
+  if(getParam<bool>("use_AB2"))
+  {
+    _problem.getTimeScheme()->useAB2Predictor();
+  }
   _problem.getTimeScheme()->_use_littlef = getParam<bool>("use_littlef");
+  if(_estimate_error)
+  {
+    _problem.getTimeScheme()->_use_AB2=true;
+    if(~parameters.isParamValid("predictor_scale"))
+    {
+      _problem.getNonlinearSystem().setPredictorScale(0.0);
+      _problem.getTimeScheme()->_apply_predictor = false;
+    }
+    if(_time_error_out_to_file)
+    {
+      _time_error_file.open(_time_errors_filename.c_str());
+      _time_error_file << "timestep, time, error, cumulative error \n";
+    }
+  }
+  _cumulative_error =0;
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
 
@@ -129,6 +154,10 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 
 Transient::~Transient()
 {
+  if(_time_error_out_to_file)
+  {
+    _time_error_file.close();
+  }
   // This problem was built by the Factory and needs to be released by this destructor
   delete &_problem;
 }
@@ -214,6 +243,7 @@ Transient::takeStep(Real input_dt)
 
   _converged = _problem.converged();
 
+
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
   bool last_solve_converged = lastSolveConverged();
 
@@ -226,6 +256,10 @@ Transient::takeStep(Real input_dt)
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
 
   // User definable callback
+  if(_estimate_error)
+  {
+    estimateTimeError();
+  }
   postSolve();
 
   _problem.onTimestepEnd();
@@ -384,6 +418,12 @@ Transient::keepGoing()
     if(ss_relerr_norm < _ss_check_tol)
     {
       std::cout<<"Steady-State Solution Achieved at time: "<<_time<<std::endl;
+      //Output last solve if not output previously by forcing it
+      if(_t_step%_problem.out().interval() != 0)
+      {
+        _problem.output(true);
+        _problem.outputPostprocessors(true);
+      }
       return false;
     }
     else // Keep going
@@ -411,6 +451,17 @@ Transient::keepGoing()
   return true;
 }
 
+void
+Transient::estimateTimeError()
+{
+    _error = _problem.getTimeScheme()->estimateTimeError(*_problem.getNonlinearSystem().sys().current_local_solution);
+    std::cout<<"Time Error Estimate: "<<_error<<std::endl;
+    _cumulative_error += _error;
+    if(_time_error_out_to_file)
+    {
+     _time_error_file << _t_step<<", "<<_dt<<", "<<_error<<", "<<_cumulative_error<<" \n";
+    }
+}
 
 bool
 Transient::lastSolveConverged()
@@ -438,6 +489,7 @@ Transient::preExecute()
     if (++_curr_sync_time_iter == _sync_times.end())
       _remaining_sync_time = false;
 }
+
 
 Problem &
 Transient::problem()
