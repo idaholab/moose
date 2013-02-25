@@ -126,7 +126,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 {
 #ifdef LIBMESH_HAVE_PETSC
   // put in empty arrays for PETSc options
-  this->parameters().set<std::vector<std::string> >("petsc_options") = std::vector<std::string>();
+  this->parameters().set<std::vector<MooseEnum> >("petsc_options") = std::vector<MooseEnum>();
   this->parameters().set<std::vector<std::string> >("petsc_inames") = std::vector<std::string>();
   this->parameters().set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
 #endif
