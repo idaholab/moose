@@ -42,7 +42,7 @@ CHPFCRFF::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
     return _grad_u[_qp] - _u[_qp]*sum_grad_L;
     
   case Jacobian:
-    return _grad_phi[_j][_qp] + _phi[_j][_qp]*sum_grad_L; 
+    return _grad_phi[_j][_qp] - _phi[_j][_qp]*sum_grad_L; 
   
     
   }
