@@ -410,11 +410,11 @@ Parser::getSortFlag() const
   return _sort_alpha;
 }
 
-/*****************************************
- *****************************************
- *     Parameter Extraction Routines     *
- *****************************************
- ****************************************/
+/**************************************************************************************************************************
+ **************************************************************************************************************************
+ *                                            Parameter Extraction Routines                                               *
+ **************************************************************************************************************************
+ **************************************************************************************************************************/
 using std::string;
 
 // Template Specializations for retrieving special types from the input file
@@ -433,6 +433,11 @@ void Parser::setScalarParameter<Point>(const std::string & full_name, const std:
 template<>
 void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, const std::string & short_name,
                                                  InputParameters::Parameter<RealTensorValue> * param, bool in_global, GlobalParamsAction * global_block);
+
+template<>
+void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const std::string & short_name,
+                                           InputParameters::Parameter<std::vector<MooseEnum> > * param, bool in_global, GlobalParamsAction * global_block);
+
 
 // Macros for parameter extraction
 #define dynamicCastAndExtractScalar(type, param, full_name, short_name, in_global, global_block)                                        \
@@ -556,6 +561,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       // Moose Vectors
       dynamicCastAndExtractVector(SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(BoundaryID            , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(MooseEnum             , it->second, full_name, it->first, in_global, global_params_block);
 
       // Moose String-derived vectors
       dynamicCastAndExtractVector(/*std::*/string       , it->second, full_name, it->first, in_global, global_params_block);
@@ -703,6 +709,38 @@ void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, 
   param->set() = value;
   if (in_global)
     global_block->setScalarParam<RealTensorValue>(short_name) = value;
+}
+
+template<>
+void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<MooseEnum> > * param, bool in_global, GlobalParamsAction * global_block)
+{
+  GetPot *gp;
+
+  // See if this variable was passed on the command line
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+    gp = _app.commandLine()->getPot();
+  else
+    gp = &_getpot_file;
+
+  std::vector<MooseEnum> enum_values = param->get();
+  std::vector<std::string> values(enum_values.size());
+  for (unsigned int i=0; i<values.size(); ++i)
+    values[i] = (std::string)enum_values[i];
+
+  int vec_size = gp->vector_variable_size(full_name.c_str());
+  if (gp->have_variable(full_name.c_str()))
+    param->set().resize(vec_size, enum_values[0]);
+
+  for (int i = 0; i < vec_size; ++i)
+    param->set()[i] = gp->get_value_no_default(full_name.c_str(), values[i], i);
+
+  if (in_global)
+  {
+    global_block->setVectorParam<MooseEnum>(short_name).resize(vec_size, enum_values[0]);
+    for (int i = 0; i < vec_size; ++i)
+      global_block->setVectorParam<MooseEnum>(short_name)[i] = values[i];
+  }
 }
 
 //--------------------------------------------------------------------------

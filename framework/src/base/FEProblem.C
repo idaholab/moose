@@ -3351,11 +3351,11 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
 
 #ifdef LIBMESH_HAVE_PETSC
 void
-FEProblem::storePetscOptions(const std::vector<std::string> & petsc_options,
+FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
                              const std::vector<std::string> & petsc_options_inames,
                              const std::vector<std::string> & petsc_options_values)
 {
-  std::vector<std::string> & po = parameters().set<std::vector<std::string> >("petsc_options");         // set because we need a writable reference
+  std::vector<MooseEnum> & po = parameters().set<std::vector<MooseEnum> >("petsc_options");         // set because we need a writable reference
   for (unsigned int i = 0; i < petsc_options.size(); i++)
     if (find(po.begin(), po.end(), petsc_options[i]) == po.end())
       po.push_back(petsc_options[i]);

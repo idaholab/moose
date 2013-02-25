@@ -34,17 +34,19 @@ class MooseEnum
 {
 public:
   /**
-   * Constructor that takes a list of enumeration values but doesn't set a default for this instance
-   * @param names - a list of names for this enumeration
-   */
-//  MooseEnum(std::string names, bool error_checking=true);
-
-  /**
    * Constructor that takes a list of enumeration values, and a seperate string to set a default for this instance
    * @param names - a list of names for this enumeration
    * @default_name - the default value for this enumeration instance
+   * @allow_out_of_range - detemines whether this enumeration will accept values outside of it's range of
+   *                       defined values.
    */
-  MooseEnum(std::string names, std::string default_name="", bool error_checking=true);
+  MooseEnum(std::string names, std::string default_name="", bool allow_out_of_range=false);
+
+  /**
+   * Copy Constructor for use when creating vectors of MooseEnums
+   * @param other_enum - The other enumeration to copy state from
+   */
+  MooseEnum(const MooseEnum & other_enum);
 
   /**
    * Method for returning a vector of all valid enumeration names for this instance
@@ -73,12 +75,19 @@ public:
   operator std::string() const { return _current_name_preserved; }
 
   /**
-   * Comparison operators for comparing with strings or character constants
-   * @param name - character constant for comparing with this enumeration object
+   * Comparison operators for comparing with character constants, MooseEnums
+   * or integer values
+   * @param value - RHS value to compare against
    * @return bool - the truth value for the comparison
    */
-  bool operator==(const char * name) const;
-  bool operator!=(const char * name) const;
+  bool operator==(const char * value) const;
+  bool operator!=(const char * value) const;
+
+  bool operator==(int value) const;
+  bool operator!=(int value) const;
+
+  bool operator==(const MooseEnum & value) const;
+  bool operator!=(const MooseEnum & value) const;
 
   /**
    * Assignment operators
@@ -129,16 +138,19 @@ private:
   /// The current id
   int _current_id;
 
-  /// Whether or not error checking is turned on
-  bool _error_checking;
-
   /// The corresponding name
   std::string _current_name;
   std::string _current_name_preserved;
 
+  /**
+   * The index of values asssigned that are NOT values in this enum.  If this index is 0 (false) then
+   * out of range values are not allowed.
+   */
+  int _out_of_range_index;
+
   /// Constants
   const static int INVALID_ID;
-  const static int OUT_OF_RANGE_ID;
+
 };
 
 #endif //MOOSEENUM_H

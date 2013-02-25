@@ -57,7 +57,7 @@ namespace PetscSupport
 
 void petscSetOptions(Problem & problem)
 {
-  const std::vector<std::string> & petsc_options = problem.parameters().get<std::vector<std::string> >("petsc_options");
+  const std::vector<MooseEnum>   & petsc_options = problem.parameters().get<std::vector<MooseEnum> >("petsc_options");
   const std::vector<std::string> & petsc_options_inames = problem.parameters().get<std::vector<std::string> >("petsc_inames");
   const std::vector<std::string> & petsc_options_values = problem.parameters().get<std::vector<std::string> >("petsc_values");
 
@@ -65,7 +65,7 @@ void petscSetOptions(Problem & problem)
     mooseError("Petsc names and options are not the same length");
 
   for (unsigned int i=0; i<petsc_options.size(); ++i)
-    PetscOptionsSetValue(petsc_options[i].c_str(), PETSC_NULL);
+    PetscOptionsSetValue(std::string(petsc_options[i]).c_str(), PETSC_NULL);
 
   for (unsigned int i=0; i<petsc_options_inames.size(); ++i)
     PetscOptionsSetValue(petsc_options_inames[i].c_str(), petsc_options_values[i].c_str());

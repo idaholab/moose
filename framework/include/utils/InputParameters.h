@@ -389,6 +389,29 @@ void InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const
   _doc_string[name] = doc_string;
 }
 
+template <>
+inline
+void InputParameters::addRequiredParam<std::vector<MooseEnum> >(const std::string &name, const std::vector<MooseEnum> &moose_enums, const std::string &doc_string)
+{
+  Parameters::set<std::vector<MooseEnum> >(name) = moose_enums;    // valid parameter is set by set_attributes
+  _required_params.insert(name);
+  _doc_string[name] = doc_string;
+}
+
+template <>
+inline
+void InputParameters::addParam<MooseEnum>(const std::string &name, const std::string &doc_string)
+{
+  mooseError("You must supply a MooseEnum object when using addParam, even if the parameter is not required!");
+}
+
+template <>
+inline
+void InputParameters::addParam<std::vector<MooseEnum> >(const std::string &name, const std::string &doc_string)
+{
+  mooseError("You must supply a vector of MooseEnum object(s) when using addParam, even if the parameter is not required!");
+}
+
 InputParameters emptyInputParameters();
 
 #endif /* INPUTPARAMETERS_H */

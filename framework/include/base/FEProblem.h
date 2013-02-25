@@ -122,7 +122,7 @@ public:
                                                                     const Real div_threshold);
 
 #ifdef LIBMESH_HAVE_PETSC
-  void storePetscOptions(const std::vector<std::string> & petsc_options,
+  void storePetscOptions(const std::vector<MooseEnum> & petsc_options,
                          const std::vector<std::string> & petsc_options_inames,
                          const std::vector<std::string> & petsc_options_values);
 #endif

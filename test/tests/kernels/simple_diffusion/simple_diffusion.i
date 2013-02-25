@@ -34,7 +34,7 @@
 
 [Executioner]
   type = Steady
-  petsc_options = -snes_mf_operator
+  petsc_options = '-snes_mf_operator -ksp_monitor'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

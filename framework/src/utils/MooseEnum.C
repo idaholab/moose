@@ -24,10 +24,9 @@
 #include <iostream>
 
 const int MooseEnum::INVALID_ID = std::numeric_limits<int>::min();
-const int MooseEnum::OUT_OF_RANGE_ID = std::numeric_limits<int>::min()+1;
 
-MooseEnum::MooseEnum(std::string names, std::string default_name, bool error_checking) :
-    _error_checking(error_checking)
+MooseEnum::MooseEnum(std::string names, std::string default_name, bool allow_out_of_range) :
+    _out_of_range_index(allow_out_of_range ? INVALID_ID + 1 : 0)
 {
   fillNames(names);
 
@@ -37,11 +36,23 @@ MooseEnum::MooseEnum(std::string names, std::string default_name, bool error_che
     *this = default_name;
 }
 
+MooseEnum::MooseEnum(const MooseEnum & other_enum) :
+    _names(other_enum._names),
+    _raw_names(other_enum._raw_names),
+    _raw_names_no_commas(other_enum._raw_names_no_commas),
+    _name_to_id(other_enum._name_to_id),
+    _current_id(other_enum._current_id),
+    _current_name(other_enum._current_name),
+    _current_name_preserved(other_enum._current_name_preserved),
+    _out_of_range_index(other_enum._out_of_range_index)
+{
+}
+
 /**
  * Private constuctor for use by libmesh::Parameters
  */
 MooseEnum::MooseEnum() :
-    _current_id(-2)
+    _current_id(INVALID_ID)
 {
 }
 
@@ -56,11 +67,16 @@ MooseEnum::operator=(const std::string & name)
 
   if (std::find(_names.begin(), _names.end(), upper) == _names.end())
   {
-    if (_error_checking)
+    if (_out_of_range_index == 0)     // Are out of range values allowed?
       mooseError(std::string("Invalid option \"") + upper + "\" in MooseEnum.  Valid options are \"" + _raw_names + "\".");
     else
-      // If error checking is disabled, we will allow values assigned outside of the enumeration range
-      _current_id = OUT_OF_RANGE_ID;
+    {
+      // Allow values assigned outside of the enumeration range
+      _names.push_back(upper);
+
+      _current_id = _out_of_range_index++;
+      _name_to_id[upper] = _current_id;
+    }
   }
   else
     _current_id = _name_to_id[upper];
@@ -81,6 +97,27 @@ bool
 MooseEnum::operator!=(const char * name) const
 {
   return !(*this == name);
+}
+
+bool
+MooseEnum::operator==(int value) const
+{
+  return value == _current_id;
+}
+
+bool MooseEnum::operator!=(int value) const
+{
+  return value != _current_id;
+}
+
+bool MooseEnum::operator==(const MooseEnum & value) const
+{
+  return value._current_name == _current_name;
+}
+
+bool MooseEnum::operator!=(const MooseEnum & value) const
+{
+  return value._current_name != _current_name;
 }
 
 void

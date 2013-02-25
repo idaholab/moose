@@ -20,6 +20,7 @@
 #include "Executioner.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
+#include "MooseEnum.h"
 
 template<>
 InputParameters validParams<CreateExecutionerAction>()
@@ -42,7 +43,10 @@ InputParameters validParams<CreateExecutionerAction>()
                                                      // in the adaptivity block later but needs to be here now
 
 #ifdef LIBMESH_HAVE_PETSC
-  params.addParam<std::vector<std::string> >("petsc_options", "Singleton Petsc options");
+  MooseEnum common_petsc_options("-ksp_monitor, -snes_mf_operator", "", true);
+  std::vector<MooseEnum> common_petsc_options_vec(1, common_petsc_options);
+
+  params.addParam<std::vector<MooseEnum> >("petsc_options", common_petsc_options_vec, "Singleton Petsc options");
   params.addParam<std::vector<std::string> >("petsc_options_iname", "Names of Petsc name/value pairs");
   params.addParam<std::vector<std::string> >("petsc_options_value", "Values of Petsc name/value pairs (must correspond with \"petsc_options_iname\"");
 #endif //LIBMESH_HAVE_PETSC
@@ -74,7 +78,7 @@ CreateExecutionerAction::act()
   if (mproblem != NULL)
   {
 #ifdef LIBMESH_HAVE_PETSC
-    mproblem->storePetscOptions(getParam<std::vector<std::string> >("petsc_options"),
+    mproblem->storePetscOptions(getParam<std::vector<MooseEnum> >("petsc_options"),
                                 getParam<std::vector<std::string> >("petsc_options_iname"), getParam<std::vector<std::string> >("petsc_options_value"));
 #endif //LIBMESH_HAVE_PETSC
 

@@ -26,7 +26,10 @@ InputParameters validParams<SetupPreconditionerAction>()
   InputParameters params = validParams<MooseObjectAction>();
 
 #ifdef LIBMESH_HAVE_PETSC
-  params.addParam<std::vector<std::string> >("petsc_options", "Singleton Petsc options");
+  MooseEnum common_petsc_options("-ksp_monitor, -snes_mf_operator", "", true);
+  std::vector<MooseEnum> common_petsc_options_vec(1, common_petsc_options);
+
+  params.addParam<std::vector<MooseEnum> >("petsc_options", common_petsc_options_vec, "Singleton Petsc options");
   params.addParam<std::vector<std::string> >("petsc_options_iname", "Names of Petsc name/value pairs");
   params.addParam<std::vector<std::string> >("petsc_options_value", "Values of Petsc name/value pairs (must correspond with \"petsc_options_iname\"");
 #endif //LIBMESH_HAVE_PETSC
@@ -62,7 +65,7 @@ SetupPreconditionerAction::act()
      * through the action warehouse
      */
 #ifdef LIBMESH_HAVE_PETSC
-    _problem->storePetscOptions(getParam<std::vector<std::string> >("petsc_options"),
+    _problem->storePetscOptions(getParam<std::vector<MooseEnum> >("petsc_options"),
                                 getParam<std::vector<std::string> >("petsc_options_iname"), getParam<std::vector<std::string> >("petsc_options_value"));
     Moose::PetscSupport::petscSetOptions(*_problem);
 #endif //LIBMESH_HAVE_PETSC
