@@ -153,7 +153,7 @@ CommandLine::printUsage() const
     std::stringstream oss;
     for (unsigned int j = 0; j < i->second.cli_syntax.size(); ++j)
     {
-      if (j) oss << " | ";
+      if (j) oss << " ";
       oss << i->second.cli_syntax[j];
     }
     std::cout << "  " << std::setw(50) << oss.str() << i->second.description << "\n";

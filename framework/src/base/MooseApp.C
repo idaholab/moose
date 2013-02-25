@@ -25,24 +25,24 @@ InputParameters validParams<MooseApp>()
 {
   InputParameters params;
 
-  params.addCommandLineParam<std::string>("input_file", "-i", "Specify an input file");
+  params.addCommandLineParam<std::string>("input_file", "-i <input_file>", "Specify an input file");
   params.addCommandLineParam<std::string>("mesh_only", "--mesh-only", "Setup and Output the input mesh only.");
 
   params.addCommandLineParam<bool>("show_input", "--show-input", "Shows the parsed input file before running the simulation.");
 
   params.addCommandLineParam<bool>("help", "-h --help", "Displays CLI usage statement.");
 
-  params.addCommandLineParam<bool>("dump", "--dump", "Shows a dump of available input file syntax.");
-  params.addCommandLineParam<bool>("yaml", "--yaml", "Dumps input file syntax in YAML format.");
+  params.addCommandLineParam<std::string>("dump", "--dump [search_string]", "Shows a dump of available input file syntax.");
+  params.addCommandLineParam<std::string>("yaml", "--yaml", "Dumps input file syntax in YAML format.");
   params.addCommandLineParam<bool>("syntax", "--syntax", "Dumps the associated Action syntax paths ONLY");
 
-  params.addCommandLineParam<unsigned int>("n_threads", "--n-threads", 1, "Runs the specified number of threads (Intel TBB) per process");
+  params.addCommandLineParam<unsigned int>("n_threads", "--n-threads <n>", 1, "Runs the specified number of threads (Intel TBB) per process");
 
   params.addCommandLineParam<bool>("warn_unused", "-w --warn-unused", "Warn about unused input file options");
   params.addCommandLineParam<bool>("error_unused", "-e --error-unused", "Error when encounting unused input file options");
   params.addCommandLineParam<bool>("error_override", "-o --error-override", "Error when encountering overriden or parameters supplied multipled times");
 
-  params.addCommandLineParam<unsigned int>("refinements", "-r", 0, "Specify additional initial uniform refinements for automatic scaling");
+  params.addCommandLineParam<unsigned int>("refinements", "-r <n>", 0, "Specify additional initial uniform refinements for automatic scaling");
 
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char**>("_argv");
@@ -102,13 +102,13 @@ MooseApp::setupOptions()
   else if (isParamValid("dump"))
   {
     _parser.initSyntaxFormatter(Parser::INPUT_FILE, true);
-    _parser.buildFullTree("");
+    _parser.buildFullTree(getParam<std::string>("dump"));
     _ready_to_exit = true;
   }
   else if (isParamValid("yaml"))
   {
     _parser.initSyntaxFormatter(Parser::YAML, true);
-    _parser.buildFullTree("");
+    _parser.buildFullTree(getParam<std::string>("yaml"));
     _ready_to_exit = true;
   }
   else if (isParamValid("syntax"))
@@ -120,6 +120,7 @@ MooseApp::setupOptions()
       std::cout << it->first << "\n";
     }
     std::cout << "**END SYNTAX DATA**\n" << std::endl;
+    _ready_to_exit = true;
   }
   else if(_input_filename != "") // They already specified an input filename
   {
