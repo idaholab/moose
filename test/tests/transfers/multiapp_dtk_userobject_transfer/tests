@@ -4,6 +4,7 @@
     input = 'master.i'
     exodiff = 'master_out.e sub_out0.e sub_out1.e'
     dtk = True
+    method = OPT
   [../]
 
   [./check_error]
