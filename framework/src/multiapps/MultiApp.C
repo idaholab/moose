@@ -67,14 +67,6 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
 
   _apps.resize(_my_num_apps);
 
-  // Fake argv
-  char *argv[4];
-
-  argv[0]=(char*)"foo";
-  argv[1]=(char*)"-i";
-  argv[2]=(char*)"foo.i";
-  argv[3]=(char*)"\0";
-
   for(unsigned int i=0; i<_my_num_apps; i++)
   {
     InputParameters app_params = AppFactory::instance()->getValidParams(_app_type);
@@ -122,8 +114,6 @@ MultiApp::getExecutioner(unsigned int app)
 MeshTools::BoundingBox
 MultiApp::getBoundingBox(unsigned int app)
 {
-  unsigned int local_app = globalAppToLocal(app);
-
   FEProblem * problem = appProblem(app);
 
   MPI_Comm swapped = swapLibMeshComm(_my_comm);
@@ -175,7 +165,7 @@ MultiApp::buildComm()
   }
 
   // In this case we need to divide up the processors that are going to work on each app
-  int rank, new_rank;
+  int rank;
   MPI_Comm_rank(_orig_comm, &rank);
 //  sleep(rank);
 
@@ -183,7 +173,7 @@ MultiApp::buildComm()
   int my_app = rank / procs_per_app;
   int procs_for_my_app = procs_per_app;
 
-  if(my_app >= _total_num_apps-1) // The last app will gain any left-over procs
+  if((unsigned int) my_app >= _total_num_apps-1) // The last app will gain any left-over procs
   {
     my_app = _total_num_apps - 1;
     procs_for_my_app += _orig_num_procs % _total_num_apps;
@@ -196,7 +186,7 @@ MultiApp::buildComm()
   std::vector<int> ranks_in_my_group(procs_for_my_app);
 
   // Add all the processors in that are in my group
-  for(unsigned int i=0; i<procs_for_my_app; i++)
+  for(int i=0; i<procs_for_my_app; i++)
     ranks_in_my_group[i] = (my_app * procs_per_app) + i;
 
   MPI_Group orig_group, new_group;
