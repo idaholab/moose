@@ -128,7 +128,7 @@ protected:
       if (*first1 < *first2)
         ++first1;
       else if (*first1 > *first2)
-        ++first2;  
+        ++first2;
     }
     return false;
   }
@@ -136,12 +136,17 @@ protected:
   /*************************************************
    *************** Data Structures *****************
    ************************************************/
-  
+
   /// The vector of coupled in variables
   std::vector<MooseVariable *> _vars;
 
-  /// The threshold above which neighboring nodes are flooding with adjacent markings
-  Real _threshold;
+  /// The threshold above where a node may begin a new region (bubble)
+  const Real _threshold;
+  Real _step_threshold;
+
+  /// The threshold above which neighboring nodes are flooded (where regions can be extended but not started)
+  const Real _connecting_threshold;
+  Real _step_connecting_threshold;
 
   /// A reference to the mesh
   MooseMesh & _mesh;

@@ -35,7 +35,8 @@ InputParameters validParams<NodalFloodCount>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
   params.addRequiredCoupledVar("variable", "Ths variable(s) for which to find connected regions of interests, i.e. \"bubbles\".");
-  params.addParam<Real>("threshold", 0.5, "The threshold value of the bubble boundary");
+  params.addParam<Real>("threshold", 0.5, "The threshold value for which a new bubble may be started");
+  params.addParam<Real>("connecting_threshold", "The threshold for which an existing bubble may be extended (defaults to \"threshold\")");
   params.addParam<std::string>("elem_avg_value", "If supplied, will be used to find the scaled threshold of the bubble edges");
   params.addParam<bool>("use_single_map", true, "Determine whether information is tracked per coupled variable or consolidated into one (default: true)");
   params.addParam<bool>("condense_map_info", false, "Determines whether we condense all the node values when in multimap mode (default: false)");
@@ -48,6 +49,7 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     ElementPostprocessor(name, parameters),
     _vars(getCoupledMooseVars()),
     _threshold(getParam<Real>("threshold")),
+    _connecting_threshold(isParamValid("connecting_threshold") ? getParam<Real>("connecting_threshold") : getParam<Real>("threshold")),
     _mesh(_subproblem.mesh()),
     _var_number(_vars[0]->number()),
     _single_map_mode(getParam<bool>("use_single_map")),
@@ -103,11 +105,15 @@ NodalFloodCount::initialize()
 
   // TODO: We might only need to build this once if adaptivity is turned off
   _mesh.buildPeriodicNodeMap(_periodic_node_map, _var_number, _pbs);
+
+  // Calculate the thresholds for this iteration
+  _step_threshold = _element_average_value + _threshold;
+  _step_connecting_threshold = _element_average_value + _connecting_threshold;
 }
 
 void
 NodalFloodCount::execute()
-{  
+{
   unsigned int n_nodes = _current_elem->n_vertices();
   for (unsigned int i=0; i < n_nodes; ++i)
   {
@@ -130,7 +136,7 @@ NodalFloodCount::finalize()
 
   // Populate _bubble_maps and _var_index_maps
   updateFieldInfo();
-  
+
   // Update the region offsets so we can get unique bubble numbers in multimap mode
   updateRegionOffsets();
 }
@@ -339,7 +345,7 @@ NodalFloodCount::mergeSets()
   Moose::perf_log.push("mergeSets()","NodalFloodCount");
   std::set<unsigned int> set_union;
   std::insert_iterator<std::set<unsigned int> > set_union_inserter(set_union, set_union.begin());
-  
+
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
     std::list<BubbleData>::iterator end = _bubble_sets[map_num].end();
@@ -360,7 +366,7 @@ NodalFloodCount::mergeSets()
           // Merge these two sets and remove the duplicate set
           set_union.clear();
           std::set_union(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end(), set_union_inserter);
-          
+
           it1->_nodes = set_union;
           _bubble_sets[map_num].erase(it2);
 
@@ -379,7 +385,7 @@ NodalFloodCount::updateFieldInfo()
 {
    // This variable is only relevant in single map mode
   _region_to_var_idx.resize(_bubble_sets[0].size());
-  
+
   // Finally update the original bubble map with field data from the merged sets
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
@@ -417,8 +423,11 @@ NodalFloodCount::flood(const Node *node, int current_idx, unsigned int live_regi
   // Mark this node as visited
   _nodes_visited[current_idx][node_id] = true;
 
+  // Determing which threshold to use based on whether this is an established region
+  Real threshold = (live_region ? _step_connecting_threshold : _threshold);
+
   // This node hasn't been marked, is it in a bubble?
-  if (_vars[current_idx]->getNodalValue(*node) < _element_average_value + _threshold)
+  if (_vars[current_idx]->getNodalValue(*node) < threshold)
     return;
 
   // Yay! A bubble -> Mark it!
