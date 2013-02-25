@@ -728,18 +728,22 @@ void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const 
   for (unsigned int i=0; i<values.size(); ++i)
     values[i] = (std::string)enum_values[i];
 
+  /**
+   * With MOOSE Enums we need a default object so it should have been passed in the param
+   * pointer.  We are only going to use the first item in the vector (values[0]) and ignore the rest.
+   */
   int vec_size = gp->vector_variable_size(full_name.c_str());
   if (gp->have_variable(full_name.c_str()))
     param->set().resize(vec_size, enum_values[0]);
 
   for (int i = 0; i < vec_size; ++i)
-    param->set()[i] = gp->get_value_no_default(full_name.c_str(), values[i], i);
+    param->set()[i] = gp->get_value_no_default(full_name.c_str(), values[0], i);
 
   if (in_global)
   {
     global_block->setVectorParam<MooseEnum>(short_name).resize(vec_size, enum_values[0]);
     for (int i = 0; i < vec_size; ++i)
-      global_block->setVectorParam<MooseEnum>(short_name)[i] = values[i];
+      global_block->setVectorParam<MooseEnum>(short_name)[i] = values[0];
   }
 }
 
