@@ -141,6 +141,7 @@ protected:
   Real _cumulative_error;
   std::string _time_errors_filename;
   std::ofstream _time_error_file;
+  bool _time_interval;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

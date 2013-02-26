@@ -52,6 +52,7 @@ InputParameters validParams<Transient>()
   params.addParam<Real>("ss_check_tol",    1.0e-08,"Whenever the relative residual changes by less than this the solution will be considered to be at steady state.");
   params.addParam<Real>("ss_tmin",         0.0,    "Minimum number of timesteps to take before checking for steady state conditions.");
   params.addParam<std::vector<Real> >("sync_times", sync_times, "A list of times that will be solved for provided they are within the simulation time");
+  params.addParam<Real>("time_interval", "simulation time at which to solve and output");
   params.addParam<std::vector<Real> >("time_t", "The values of t");
   params.addParam<std::vector<Real> >("time_dt", "The values of dt");
   params.addParam<Real>("growth_factor", 2, "Maximum ratio of new to previous timestep sizes following a step that required the time step to be cut due to a failed solve.  For use with 'time_t' and 'time_dt'.");
@@ -106,12 +107,28 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _abort(getParam<bool>("abort_on_solve_fail")),
     _estimate_error(getParam<bool>("estimate_time_error")),
     _time_error_out_to_file(getParam<bool>("output_to_file")),
-    _time_errors_filename(getParam<std::string>("file_name"))
+    _time_errors_filename(getParam<std::string>("file_name")),
+    _time_interval(false)
 {
   _t_step = 0;
   _dt = 0;
   _time = _time_old = getParam<Real>("start_time");
   _problem.transient(true);
+  if(parameters.isParamValid("time_interval"))
+  {
+    _time_interval=true;
+    Real t_interval = getParam<Real>("time_interval");
+    if(t_interval<=0)
+    {
+      mooseError("time interval must be positive");
+    }
+    Real timecalc = _time + t_interval;
+    while(timecalc < _end_time)
+    {
+      timecalc = timecalc + t_interval;
+      _sync_times.insert(_sync_times.end(),timecalc);
+    }
+  }
   if (parameters.isParamValid("predictor_scale"))
   {
 
@@ -280,11 +297,21 @@ Transient::endStep()
   {
     // Compute the Error Indicators and Markers
     _problem.computeIndicatorsAndMarkers();
-
+    //output
+    if(_time_interval)
+    {
+      if(_curr_sync_time_iter != _sync_times.begin() &&  _time == *(_curr_sync_time_iter-1))
+      {
+         _problem.output(true);
+         _problem.outputPostprocessors(true);
+      }
+    }
+    else
+    {
     // if _reset_dt is true, force the output no matter what
     _problem.output(_reset_dt);
     _problem.outputPostprocessors(_reset_dt);
-
+    }
 #ifdef LIBMESH_ENABLE_AMR
     if (_problem.adaptivity().isOn())
     {
@@ -405,6 +432,7 @@ Transient::computeDT()
 bool
 Transient::keepGoing()
 {
+  bool keep_going = true;
   // Check for stop condition based upon steady-state check flag:
   if(_converged && _trans_ss_check == true && _time > _ss_tmin)
   {
@@ -419,12 +447,7 @@ Transient::keepGoing()
     {
       std::cout<<"Steady-State Solution Achieved at time: "<<_time<<std::endl;
       //Output last solve if not output previously by forcing it
-      if(_t_step%_problem.out().interval() != 0)
-      {
-        _problem.output(true);
-        _problem.outputPostprocessors(true);
-      }
-      return false;
+      keep_going = false;
     }
     else // Keep going
     {
@@ -435,20 +458,24 @@ Transient::keepGoing()
     }
   }
 
+  // Check for stop condition based upon number of simulation steps and/or solution end time:
+  if(_t_step>_num_steps)
+    keep_going = false;
+
+  if((_time>_end_time) || (fabs(_time-_end_time)<1.e-14))
+    keep_going = false;
+
+  if(!keep_going && ((_t_step%_problem.out().interval() != 0 && _problem.out().interval() <=1) || _time_interval))
+  {
+    _problem.output(true);
+    _problem.outputPostprocessors(true);
+  }
   if(!_converged && _abort)
   {
     std::cout<<"Aborting as solve did not converge and input selected to abort"<<std::endl;
-    return false;
+    keep_going = false;
   }
-
-  // Check for stop condition based upon number of simulation steps and/or solution end time:
-  if(_t_step>_num_steps)
-    return false;
-
-  if((_time>_end_time) || (fabs(_time-_end_time)<1.e-14))
-    return false;
-
-  return true;
+  return keep_going;
 }
 
 void
