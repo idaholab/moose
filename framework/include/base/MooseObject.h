@@ -37,7 +37,7 @@ public:
    * Get the name of the object
    * @return The name of the object
    */
-  const std::string & name() { return _name; }
+  const std::string & name() const { return _name; }
 
   /**
    * Get the parameters of the object
