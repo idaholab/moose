@@ -35,6 +35,8 @@ protected:
 
   const std::string _appended_property_name;
 
+  const VariableValue & _temp;
+
   bool _quadrature;
 
   Real _gap_temp;
@@ -48,6 +50,7 @@ protected:
   MaterialProperty<Real> & _gap_conductance_dT;
 
   const Real _gap_conductivity;
+  Function * const _gap_conductivity_function;
 
   Real _min_gap;
   Real _max_gap;

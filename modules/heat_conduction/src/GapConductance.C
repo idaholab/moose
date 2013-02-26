@@ -14,13 +14,15 @@ InputParameters validParams<GapConductance>()
   InputParameters params = validParams<Material>();
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
+  params.addRequiredCoupledVar("variable", "Temperature variable");
+
   // Node based
   params.addCoupledVar("gap_distance", "Distance across the gap");
   params.addCoupledVar("gap_temp", "Temperature on the other side of the gap");
   params.addParam<Real>("gap_conductivity", 1.0, "The thermal conductivity of the gap material");
+  params.addParam<FunctionName>("gap_conductivity_function", "Thermal conductivity of the gap material as a function of temperature.  Multiplied by gap_conductivity.");
 
   // Quadrature based
-  params.addCoupledVar("temp", "The temperature variable");
   params.addParam<bool>("quadrature", false, "Whether or not to do Quadrature point based gap heat transfer.  If this is true then gap_distance and gap_temp should NOT be provided (and will be ignored) however paired_boundary IS then required and so is 'temp'.");
   params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
@@ -35,6 +37,7 @@ InputParameters validParams<GapConductance>()
 GapConductance::GapConductance(const std::string & name, InputParameters parameters)
   :Material(name, parameters),
    _appended_property_name( getParam<std::string>("appended_property_name") ),
+   _temp(coupledValue("variable")),
    _quadrature(getParam<bool>("quadrature")),
    _gap_temp(0),
    _gap_distance(88888),
@@ -44,9 +47,10 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
    _gap_conductance(declareProperty<Real>("gap_conductance"+_appended_property_name)),
    _gap_conductance_dT(declareProperty<Real>("gap_conductance"+_appended_property_name+"_dT")),
    _gap_conductivity(getParam<Real>("gap_conductivity")),
+   _gap_conductivity_function(isParamValid("gap_conductivity_function") ? &getFunction("gap_conductivity_function") : NULL),
    _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap")),
-   _temp_var(_quadrature ? getVar("temp",0) : NULL),
+   _temp_var(_quadrature ? getVar("variable",0) : NULL),
    _penetration_locator(NULL),
    _current_mesh(NULL),
    _serialized_solution(_quadrature ? &_temp_var->sys().currentSolution() : NULL),
@@ -57,9 +61,6 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
   {
     if(!parameters.isParamValid("paired_boundary"))
       mooseError(std::string("No 'paired_boundary' provided for ") + _name);
-
-    if(!isCoupled("temp"))
-      mooseError(std::string("No 'temp' provided for ") + _name);
   }
   else
   {
@@ -137,7 +138,13 @@ GapConductance::gapLength(Real distance, Real min_gap, Real max_gap)
 Real
 GapConductance::gapK()
 {
-  return _gap_conductivity;
+  Real gap_conductivity = _gap_conductivity;
+  if (_gap_conductivity_function)
+  {
+    gap_conductivity *= _gap_conductivity_function->value( _t, _q_point[_qp] );
+  }
+
+  return gap_conductivity;
 }
 
 void
