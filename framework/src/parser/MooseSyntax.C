@@ -28,8 +28,8 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
    * to satisfy more than one action_name
    */
   syntax.registerActionSyntax("CreateProblemAction", "Problem");
-  syntax.registerActionSyntax("ReadMeshAction", "Mesh");
   syntax.registerActionSyntax("SetupMeshAction", "Mesh");
+  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh");
   syntax.registerActionSyntax("InitialRefinementAction", "Mesh");
   syntax.registerActionSyntax("InitDisplacedProblemAction", "Mesh");
   syntax.registerActionSyntax("AddExtraNodesetAction", "Mesh/ExtraNodesets/*");

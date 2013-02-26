@@ -12,23 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef READMESHACTION_H
-#define READMESHACTION_H
+#ifndef SETUPMESHCOMPLETEACTION_H
+#define SETUPMESHCOMPLETEACTION_H
 
-#include "MooseObjectAction.h"
+#include "Action.h"
 
-class ReadMeshAction;
+class SetupMeshCompleteAction;
 
 template<>
-InputParameters validParams<ReadMeshAction>();
+InputParameters validParams<SetupMeshCompleteAction>();
 
 
-class ReadMeshAction : public MooseObjectAction
+class SetupMeshCompleteAction : public Action
 {
 public:
-  ReadMeshAction(const std::string & name, InputParameters params);
+  SetupMeshCompleteAction(const std::string & name, InputParameters params);
+
+  void completeSetup(MooseMesh *mesh);
 
   virtual void act();
 };
 
-#endif // READMESHACTION_H
+#endif // SETUPMESHCOMPLETEACTION_H

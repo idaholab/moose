@@ -38,7 +38,7 @@ InputParameters validParams<MooseMesh>()
   MooseEnum dims("1 = 1, 2, 3", "3");
   params.addParam<MooseEnum>("dim", dims, "This is only required for certain mesh formats where the dimension of the mesh cannot be autodetected.  In particular you must supply this for GMSH meshes.  Note: This is completely ignored for ExodusII meshes!");
 
-  params.addPrivateParam<std::string>("built_by_action", "read_mesh");
+  params.addPrivateParam<std::string>("built_by_action", "setup_mesh");
   // groups
   params.addParamNamesToGroup("dim", "Advanced");
 

@@ -15,7 +15,7 @@
 #ifndef SETUPMESHACTION_H
 #define SETUPMESHACTION_H
 
-#include "Action.h"
+#include "MooseObjectAction.h"
 
 //Forward Declaration
 class SetupMeshAction;
@@ -25,7 +25,7 @@ template<>
 InputParameters validParams<SetupMeshAction>();
 
 
-class SetupMeshAction : public Action
+class SetupMeshAction : public MooseObjectAction
 {
 public:
   SetupMeshAction(const std::string & name, InputParameters params);

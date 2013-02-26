@@ -207,11 +207,11 @@
 #include "AddFunctionAction.h"
 #include "CreateExecutionerAction.h"
 #include "SetupTimePeriodsAction.h"
-#include "ReadMeshAction.h"
 #include "EmptyAction.h"
 #include "InitProblemAction.h"
 #include "CopyNodalVarsAction.h"
 #include "SetupMeshAction.h"
+#include "SetupMeshCompleteAction.h"
 #include "AddExtraNodesetAction.h"
 #include "SetupOutputAction.h"
 #include "AddMaterialAction.h"
@@ -430,6 +430,7 @@ addActionTypes(Syntax & syntax)
   /**************************/
   /// Minimal Problem
   registerActionName("setup_mesh", false);
+  registerActionName("setup_mesh_complete", false);  // calls prepare
   registerActionName("add_variable", false);
   registerActionName("add_kernel", false);
   registerActionName("setup_executioner", true);
@@ -447,9 +448,7 @@ addActionTypes(Syntax & syntax)
   /// Additional Actions
   registerActionName("no_action", false);  // Used for Empty Action placeholders
   registerActionName("set_global_params", false);
-  registerActionName("read_mesh", false);
   registerActionName("add_mesh_modifier", false);
-  registerActionName("add_extra_nodeset", false);
   registerActionName("setup_time_periods", true);
   registerActionName("add_material", false);
   registerActionName("add_function", false);
@@ -485,7 +484,6 @@ addActionTypes(Syntax & syntax)
   registerActionName("add_transfer", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
-  registerActionName("setup_mesh_complete", false);
   registerActionName("setup_function_complete", false);
   registerActionName("setup_variable_complete", false);
   registerActionName("ready_to_init", true);
@@ -505,10 +503,9 @@ addActionTypes(Syntax & syntax)
   syntax.addDependencySets(
 "(meta_action)"
 "(set_global_params)"
-"(read_mesh)"
-"(add_extra_nodeset)"
 "(setup_mesh)"
-"(add_mesh_modifier, setup_mesh_complete)"
+"(add_mesh_modifier)"
+"(setup_mesh_complete)"
 "(create_problem)"
 "(setup_executioner)"
 "(add_feproblem)"
@@ -552,11 +549,11 @@ addActionTypes(Syntax & syntax)
  * will be created and "acted" on when the associated input file section is seen.
  *
  * Example:
- * "setup_mesh" <---> SetupMeshAction <-
- *                                       \
- *                                        [Mesh]
- *                                       /
- * "read_mesh"  <---> ReadMeshAction  <-
+ *  "setup_mesh" <---------------> SetupMeshAction <-----------------------
+ *                                                                          \
+ *                                                                            [Mesh]
+ *                                                                          /
+ * "initial_mesh_refinement" <---> InitialRefinementActionReadMeshAction <-
  *
  *
  * Action classes can also be registered to act on more than one input file section for a different action_name
@@ -577,9 +574,9 @@ addActionTypes(Syntax & syntax)
 void
 registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
-  registerAction(ReadMeshAction, "read_mesh");
   registerAction(SetupMeshAction, "setup_mesh");
-  registerAction(AddExtraNodesetAction, "add_extra_nodeset");
+  registerAction(AddExtraNodesetAction, "add_mesh_modifier");
+  registerAction(SetupMeshCompleteAction, "setup_mesh_complete");
 
   registerAction(AddFunctionAction, "add_function");
   registerAction(CreateExecutionerAction, "setup_executioner");

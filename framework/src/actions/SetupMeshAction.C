@@ -27,7 +27,8 @@
 template<>
 InputParameters validParams<SetupMeshAction>()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = validParams<MooseObjectAction>();
+  params.set<std::string>("type") = "FileMesh";
 
   params.addParam<bool>("second_order", false, "Converts a first order mesh to a second order mesh.  Note: This is NOT needed if you are reading an actual first order mesh.");
 
@@ -36,7 +37,6 @@ InputParameters validParams<SetupMeshAction>()
 
   MooseEnum direction("x, y, z, radial");
   params.addParam<MooseEnum>("centroid_partitioner_direction", direction, "Specifies the sort direction if using the centroid partitioner. Available options: x, y, z, radial");
-  params.addParam<bool>("construct_side_list_from_node_list", false, "If true, construct side lists from the nodesets in the mesh (i.e. if every node on a give side is in a nodeset then add that side to a sideset");
 
   params.addParam<std::vector<SubdomainID> >("block_id", "IDs of the block id/name pairs");
   params.addParam<std::vector<SubdomainName> >("block_name", "Names of the block id/name pairs (must correspond with \"block_id\"");
@@ -44,6 +44,16 @@ InputParameters validParams<SetupMeshAction>()
   params.addParam<std::vector<BoundaryID> >("boundary_id", "IDs of the boundary id/name pairs");
   params.addParam<std::vector<BoundaryName> >("boundary_name", "Names of the boundary id/name pairs (must correspond with \"boundary_id\"");
 
+  params.addParam<bool>("construct_side_list_from_node_list", false, "If true, construct side lists from the nodesets in the mesh (i.e. if every node on a give side is in a nodeset then add that side to a sideset");
+
+  params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
+  params.addParam<std::vector<unsigned int> >("ghosted_boundaries", "Boundaries to be ghosted if using Nemesis");
+  params.addParam<std::vector<Real> >("ghosted_boundaries_inflation", "If you are using ghosted boundaries you will want to set this value to a vector of amounts to inflate the bounding boxes by.  ie if you are running a 3D problem you might set it to '0.2 0.1 0.4'");
+  params.addParam<unsigned int>("patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
+
+
+  // groups
+  params.addParamNamesToGroup("displacements ghosted_boundaries ghosted_boundaries_inflation patch_size", "Advanced");
   params.addParamNamesToGroup("second_order construct_side_list_from_node_list", "Advanced");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
   params.addParamNamesToGroup("block_id block_name boundary_id boundary_name", "Add Names");
@@ -52,13 +62,25 @@ InputParameters validParams<SetupMeshAction>()
 }
 
 SetupMeshAction::SetupMeshAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+    MooseObjectAction(name, params)
 {
 }
 
 void
 SetupMeshAction::setupMesh(MooseMesh *mesh)
 {
+  std::vector<unsigned int> ghosted_boundaries = getParam<std::vector<unsigned int > >("ghosted_boundaries");
+  for(unsigned int i=0; i<ghosted_boundaries.size(); i++)
+    mesh->addGhostedBoundary(ghosted_boundaries[i]);
+
+  mesh->setPatchSize(getParam<unsigned int>("patch_size"));
+
+  if(isParamValid("ghosted_boundaries_inflation"))
+  {
+    std::vector<Real> ghosted_boundaries_inflation = getParam<std::vector<Real> >("ghosted_boundaries_inflation");
+    mesh->setGhostedBoundaryInflation(ghosted_boundaries_inflation);
+  }
+
   if (getParam<bool>("second_order"))
     mesh->_mesh.all_second_order(true);
 
@@ -84,18 +106,7 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
       mooseError("Invalid centroid_partitioner_direction!");
   }
 
-  Moose::setup_perf_log.push("Prepare Mesh","Setup");
-  mesh->prepare();
-  Moose::setup_perf_log.pop("Prepare Mesh","Setup");
-
-  if (getParam<bool>("construct_side_list_from_node_list"))
-    mesh->_mesh.boundary_info->build_side_list_from_node_list();
-
-  Moose::setup_perf_log.push("Initial meshChanged()","Setup");
-  mesh->meshChanged();
-  Moose::setup_perf_log.pop("Initial meshChanged()","Setup");
-
-  // Add names to the mesh
+  // Add entity names to the mesh
   if (_pars.isParamValid("block_id") && _pars.isParamValid("block_name"))
   {
     std::vector<SubdomainID> ids = getParam<std::vector<SubdomainID> >("block_id");
@@ -132,27 +143,40 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
     }
   }
 
-  mesh->printInfo();
+  if (getParam<bool>("construct_side_list_from_node_list"))
+    mesh->_mesh.boundary_info->build_side_list_from_node_list();
+
 }
 
 void
 SetupMeshAction::act()
 {
-  if (_mesh)
-    setupMesh(_mesh);
-  else
-    mooseError("No mesh file was supplied and no generation block was provided");
+  if (_type == "MooseMesh")
+  {
+    mooseDeprecated();
+    std::cout << "Warning: MooseMesh is gone - please use FileMesh instead!";
+    _type = "FileMesh";
+  }
+
+  // Create the mesh object and tell it to build itself
+  _mesh = dynamic_cast<MooseMesh *>(_factory.create(_type, "mesh", _moose_object_pars));
+  _mesh->init();
+
+  mooseAssert(_mesh != NULL, "Mesh hasn't been created");
+
+  if (isParamValid("displacements"))
+  {
+    // Create the displaced mesh
+    _displaced_mesh = dynamic_cast<MooseMesh *>(_factory.create(_type, "displaced_mesh", _moose_object_pars));
+    _displaced_mesh->init();
+
+    std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
+    if (displacements.size() != _displaced_mesh->dimension())
+      mooseError("Number of displacements and dimension of mesh MUST be the same!");
+  }
+
+  setupMesh(_mesh);
 
   if (_displaced_mesh)
     setupMesh(_displaced_mesh);
-
-//  // There is no setup execution action satisfied, create the MProblem class by ourselves
-//  if (_awh.actionBlocksWithActionBegin("setup_executioner") ==
-//      _awh.actionBlocksWithActionEnd("setup_executioner"))
-//  {
-//    Moose::setup_perf_log.push("Create FEProblem","Setup");
-//    // Use the Factory to build a normal MOOSE problem
-//    _problem = ProblemFactory::instance()->createFEProblem(_mesh);
-//    Moose::setup_perf_log.pop("Create FEProblem","Setup");
-//  }
 }
