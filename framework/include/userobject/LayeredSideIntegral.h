@@ -48,6 +48,13 @@ public:
    */
   virtual Real spatialValue(const Point & p) const { return integralValue(p); }
 
+  /**
+   * Get the value for a given layer
+   * @param layer The layer index
+   * @return The value for the given layer
+   */
+  virtual Real getLayerValue(unsigned int layer) const;
+
   virtual void initialize();
   virtual void execute();
   virtual void finalize();

@@ -51,6 +51,14 @@ LayeredSideIntegral::integralValue(Point p) const
   return _layer_values[layer];
 }
 
+Real
+LayeredSideIntegral::getLayerValue(unsigned int layer) const
+{
+  if (layer >= _layer_values.size())
+    mooseError("Layer '" << layer << "' not found in '" << name() << "'.");
+  return _layer_values[layer];
+}
+
 void
 LayeredSideIntegral::initialize()
 {

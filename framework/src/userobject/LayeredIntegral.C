@@ -48,7 +48,14 @@ Real
 LayeredIntegral::integralValue(Point p) const
 {
   unsigned int layer = getLayer(p);
+  return _layer_values[layer];
+}
 
+Real
+LayeredIntegral::getLayerValue(unsigned int layer) const
+{
+  if (layer >= _layer_values.size())
+    mooseError("Layer '" << layer << "' not found in '" << name() << "'.");
   return _layer_values[layer];
 }
 
