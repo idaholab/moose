@@ -70,7 +70,6 @@ FileMesh::init()
 {
 //  mooseAssert(_mesh == NULL, "Mesh already exists, and you are trying to read another");
   std::string _file_name = getParam<MeshFileName>("file");
-  MooseUtils::checkFileReadable(_file_name);
 
   Moose::setup_perf_log.push("Read Mesh","Setup");
   if (getParam<bool>("nemesis"))
@@ -78,10 +77,11 @@ FileMesh::init()
     // Nemesis_IO only takes a reference to ParallelMesh, so we can't be quite so short here.
     ParallelMesh& pmesh = libmesh_cast_ref<ParallelMesh&>(getMesh());
     Nemesis_IO(pmesh).read(_file_name);
-    //mesh->parallel(true); // This is redundant because we have Mesh::is_serial()
   }
   else // not reading Nemesis files
   {
+    MooseUtils::checkFileReadable(_file_name);
+
     // if reading ExodusII, read it through a reader and save it off, since it will be used in possible "copy nodal vars" action
     // NOTE: the other reader that can do copy nodal values is GMVIO, but GMV is _pretty_ old right now (May 2011)
     // NOTE: Actually we have two dependencies on the raw exodus reader now - we also need it for named sideset support
@@ -91,9 +91,6 @@ FileMesh::init()
     {
       _exreader = new ExodusII_IO(_mesh);
       _exreader->read(_file_name);
-
-//      _awh.exReader() = new ExodusII_IO(*mesh);
-//      _awh.exReader()->read(mesh_file);
     }
     else
       _mesh.read(_file_name);
