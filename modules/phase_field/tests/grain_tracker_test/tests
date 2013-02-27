@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'grain_tracker_same.i'
+    exodiff = 'grain_tracker_same_out.e'
+  [../]
+
+  [./test2]
+    type = 'Exodiff'
+    input = 'grain_tracker_same_larger.i'
+    exodiff = 'grain_tracker_same_larger_out.e'
+  [../]
+[]
