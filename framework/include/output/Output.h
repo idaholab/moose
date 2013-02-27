@@ -86,6 +86,16 @@ public:
   void setOutputVariables(std::vector<std::string> output_variables) { _output_variables = output_variables; }
 
   bool PpsFileOutputEnabled();
+  /// sets the time interval at which the solution should be output
+  void setTimeIntervalOutput(Real time_interval);
+  /// if outputing at a set time interval is set
+  bool useTimeInterval();
+  /// the set time interval at which output occurs, in useTimeInterval returns true
+  Real timeinterval();
+  ///if output occured at this time step
+  bool wasOutput();
+  ///sets if output has occured at time step
+  void setOutput(bool b);
 
 protected:
   std::string _file_base;
@@ -105,6 +115,11 @@ protected:
   std::vector<std::string> _output_variables;
 
   Real _last_iteration_output_time;
+  ///if to use time interval output
+  bool _time_interval;
+  ///the output interval to use
+  Real _time_interval_output_interval;
+  bool _output;
 };
 
 #endif /* OUTPUTTER_H */

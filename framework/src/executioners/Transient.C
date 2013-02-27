@@ -52,7 +52,6 @@ InputParameters validParams<Transient>()
   params.addParam<Real>("ss_check_tol",    1.0e-08,"Whenever the relative residual changes by less than this the solution will be considered to be at steady state.");
   params.addParam<Real>("ss_tmin",         0.0,    "Minimum number of timesteps to take before checking for steady state conditions.");
   params.addParam<std::vector<Real> >("sync_times", sync_times, "A list of times that will be solved for provided they are within the simulation time");
-  params.addParam<Real>("time_interval", "simulation time at which to solve and output");
   params.addParam<std::vector<Real> >("time_t", "The values of t");
   params.addParam<std::vector<Real> >("time_dt", "The values of dt");
   params.addParam<Real>("growth_factor", 2, "Maximum ratio of new to previous timestep sizes following a step that required the time step to be cut due to a failed solve.  For use with 'time_t' and 'time_dt'.");
@@ -97,7 +96,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _ss_tmin(getParam<Real>("ss_tmin")),
     _old_time_solution_norm(0.0),
     _converged(true),
-    _sync_times(getParam<std::vector<Real> >("sync_times")),
+    _sync_times(getParam<std::vector<Real> >("sync_times").begin(),getParam<std::vector<Real> >("sync_times").end()),
     _remaining_sync_time(true),
     _time_ipol(getParam<std::vector<Real> >("time_t"),
                getParam<std::vector<Real> >("time_dt")),
@@ -113,22 +112,9 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
   _t_step = 0;
   _dt = 0;
   _time = _time_old = getParam<Real>("start_time");
+  start_time = _time;
   _problem.transient(true);
-  if(parameters.isParamValid("time_interval"))
-  {
-    _time_interval=true;
-    Real t_interval = getParam<Real>("time_interval");
-    if(t_interval<=0)
-    {
-      mooseError("time interval must be positive");
-    }
-    Real timecalc = _time + t_interval;
-    while(timecalc < _end_time)
-    {
-      timecalc = timecalc + t_interval;
-      _sync_times.insert(_sync_times.end(),timecalc);
-    }
-  }
+
   if (parameters.isParamValid("predictor_scale"))
   {
 
@@ -204,6 +190,7 @@ Transient::execute()
 void
 Transient::takeStep(Real input_dt)
 {
+  _problem.out().setOutput(false);
   _dt_old = _dt;
   if (input_dt == -1.0)
     _dt = computeConstrainedDT();
@@ -300,7 +287,7 @@ Transient::endStep()
     //output
     if(_time_interval)
     {
-      if(_curr_sync_time_iter != _sync_times.begin() &&  _time == *(_curr_sync_time_iter-1))
+      if(std::abs(_time-(_prev_sync_time))<=_dtmin || (_t_step % _problem.out().interval() == 0 && _problem.out().interval() > 1))
       {
          _problem.output(true);
          _problem.outputPostprocessors(true);
@@ -363,16 +350,30 @@ Transient::computeConstrainedDT()
     dt_cur = _end_time - _time;
 
   // Adjust to a sync time if supplied and skipped over
-  if (_remaining_sync_time && _time + dt_cur >= *_curr_sync_time_iter)
+  if (_remaining_sync_time && _time + dt_cur+_dtmin >= (*_sync_times.begin()))
   {
-    dt_cur = *_curr_sync_time_iter - _time;
-    if (++_curr_sync_time_iter == _sync_times.end())
+    if(abs(*_sync_times.begin() - _time)>=_dtmin)
+    {
+      dt_cur = *_sync_times.begin() - _time;
+    }
+    _prev_sync_time = *_sync_times.begin();
+    _sync_times.erase(_sync_times.begin());
+    if(_time_interval)
+    {
+      Real d = (_time+dt_cur-start_time)/_time_interval_output_interval;
+      if(d-std::floor(d) <= _dtmin || std::ceil(d)-d <=_dtmin)
+      {
+          _sync_times.insert((_time +dt_cur + _time_interval_output_interval));
+      }
+    }
+    if (_sync_times.begin() == _sync_times.end())
       _remaining_sync_time = false;
 
     _prev_dt = _dt;
 
     _reset_dt = true;
   }
+
   else
   {
     if (_reset_dt)
@@ -465,7 +466,7 @@ Transient::keepGoing()
   if((_time>_end_time) || (fabs(_time-_end_time)<1.e-14))
     keep_going = false;
 
-  if(!keep_going && ((_t_step%_problem.out().interval() != 0 && _problem.out().interval() <=1) || _time_interval))
+  if(!keep_going && !_problem.out().wasOutput())
   {
     _problem.output(true);
     _problem.outputPostprocessors(true);
@@ -499,22 +500,33 @@ Transient::lastSolveConverged()
 void
 Transient::preExecute()
 {
+  if(_problem.out().useTimeInterval())
+  {
+    _time_interval=true;
+    _time_interval_output_interval = _problem.out().timeinterval();
+    _sync_times.insert((_time + _time_interval_output_interval));
+  }
   // process time periods
   const std::vector<TimePeriod *> _time_periods = _problem.getTimePeriods();
   for (unsigned int i = 0; i < _time_periods.size(); ++i)
-    _sync_times.push_back(_time_periods[i]->start());
+    _sync_times.insert(_time_periods[i]->start());
 
   const std::vector<Real> & time = getParam<std::vector<Real> >("time_t");
   if (_use_time_ipol)
-    _sync_times.insert(_sync_times.end(), time.begin()+1, time.end());          // insert times as sync points except the very first one
-  sort(_sync_times.begin(), _sync_times.end());
-  _sync_times.erase(std::unique(_sync_times.begin(), _sync_times.end()), _sync_times.end());    // remove duplicates (needs sorted array)
+    _sync_times.insert(time.begin()+1, time.end());          // insert times as sync points except the very first one
+ // sort(_sync_times.begin(), _sync_times.end());
+  //_sync_times.erase(std::unique(_sync_times.begin(), _sync_times.end()), _sync_times.end());    // remove duplicates (needs sorted array)
 
   // Advance to the first sync time if one is provided in sim time range
-  _curr_sync_time_iter = _sync_times.begin();
-  while (_remaining_sync_time && *_curr_sync_time_iter <= _time)
-    if (++_curr_sync_time_iter == _sync_times.end())
+
+  while (_remaining_sync_time && *_sync_times.begin() <= _time)
+  {
+    _sync_times.erase(_sync_times.begin());
+    if (_sync_times.begin() == _sync_times.end())
       _remaining_sync_time = false;
+  }
+  //_curr_sync_time_iter = _sync_times.begin();
+  _prev_sync_time = *_sync_times.begin();
 }
 
 

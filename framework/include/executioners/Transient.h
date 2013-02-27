@@ -124,8 +124,8 @@ protected:
   /// Whether or not the previous solve converged.
   bool _converged;
 
-  std::vector<Real> _sync_times;
-  std::vector<Real>::iterator _curr_sync_time_iter;
+  std::set<Real> _sync_times;
+  Real _prev_sync_time;
   bool _remaining_sync_time;
 
   /// Piecewise linear definition of time stepping
@@ -141,7 +141,11 @@ protected:
   Real _cumulative_error;
   std::string _time_errors_filename;
   std::ofstream _time_error_file;
+  ///if to use time interval output
   bool _time_interval;
+  ///the output interval to use
+  Real _time_interval_output_interval;
+  Real start_time;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

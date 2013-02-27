@@ -45,6 +45,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("output_displaced", false, "Requests that displaced mesh files are written at each solve");
   params.addParam<bool>("output_solution_history", false, "Requests that the 'solution history' is output, the solution history is the number of nonlinear / linear solves that are done for each step.");
   params.addParam<bool>("output_es_info", true, "Requests that we output Equation Systems info during calls to initialSetup (normallly at the beginning of a simulation.)");
+  params.addParam<Real>("time_interval", "simulation time at which to solve and output");
 
 #ifdef LIBMESH_HAVE_PETSC
   params.addParam<bool>("print_linear_residuals", false, "Specifies whether the linear residuals are printed during the solve");
@@ -62,7 +63,7 @@ InputParameters validParams<SetupOutputAction>()
   // restart options
   params.addParam<unsigned int>("num_restart_files", 0, "Number of the restart files to save (0 = no restart files)");
 
-  params.addParamNamesToGroup("interval output_displaced output_solution_history print_linear_residuals iteration_plot_start_time elemental_as_nodal exodus_inputfile_output output_es_info output_variables hidden_variables", "Advanced");
+  params.addParamNamesToGroup("interval time_interval output_displaced output_solution_history print_linear_residuals iteration_plot_start_time elemental_as_nodal exodus_inputfile_output output_es_info output_variables hidden_variables", "Advanced");
   params.addParamNamesToGroup("nemesis gmv tecplot tecplot_binary xda", "Format");
   params.addParamNamesToGroup("screen_interval postprocessor_screen max_pps_rows_screen postprocessor_csv postprocessor_gnuplot gnuplot_format", "Postprocessor");
   params.addParamNamesToGroup("perf_log show_setup_log_early", "Logging");
@@ -188,6 +189,15 @@ SetupOutputAction::act()
   output.interval(getParam<unsigned int>("interval"));
   output.screen_interval(getParam<unsigned int>("screen_interval"));
   output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
+  if(isParamValid("time_interval"))
+   {
+     Real time_interval_out = getParam<Real>("time_interval");
+     output.setTimeIntervalOutput(time_interval_out);
+     if(time_interval_out<=0)
+     {
+       mooseError("time interval must be positive");
+     }
+   }
 
 #ifdef LIBMESH_HAVE_PETSC
 //  if (getParam<bool>("print_linear_residuals"))

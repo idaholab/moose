@@ -2892,6 +2892,7 @@ FEProblem::output(bool force/*= false*/)
 {
   if ((_t_step % out().interval() == 0) || force)
   {
+    _out.setOutput(true);
     _out.output();
 
     // if the OverSample problem is setup, output it's solution

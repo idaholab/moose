@@ -32,7 +32,10 @@ Output::Output(FEProblem & fe_problem, EquationSystems & eq) :
     _interval(1),
     _screen_interval(1),
     _iteration_plot_start_time(std::numeric_limits<Real>::max()),
-    _last_iteration_output_time(0.0)
+    _last_iteration_output_time(0.0),
+    _time_interval(false),
+    _time_interval_output_interval(0.0),
+    _output(false)
 {
 }
 
@@ -255,4 +258,29 @@ Real
 Output::iterationPlotStartTime()
 {
   return _iteration_plot_start_time;
+}
+
+void
+Output::setTimeIntervalOutput(Real time_interval)
+{
+  _time_interval=true;
+  _time_interval_output_interval = time_interval;
+}
+
+bool Output::useTimeInterval()
+{
+  return _time_interval;
+}
+Real Output::timeinterval()
+{
+  return _time_interval_output_interval;
+}
+//Was the time step output?
+bool Output::wasOutput()
+{
+  return _output;
+}
+void Output::setOutput(bool b)
+{
+  _output = b;
 }

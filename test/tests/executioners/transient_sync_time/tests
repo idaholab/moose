@@ -5,4 +5,10 @@
     exodiff = 'out.e'
     max_parallel = 1
   [../]
+  [./test_time_out_interval]
+    type = 'Exodiff'
+    input = 'transient_time_interval_output_test.i'
+    exodiff = 'out_tio.e'
+    max_parallel = 1
+  [../]
 []
