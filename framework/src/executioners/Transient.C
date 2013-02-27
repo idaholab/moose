@@ -370,7 +370,6 @@ Transient::computeConstrainedDT()
       _remaining_sync_time = false;
 
     _prev_dt = _dt;
-
     _reset_dt = true;
   }
 
@@ -514,9 +513,6 @@ Transient::preExecute()
   const std::vector<Real> & time = getParam<std::vector<Real> >("time_t");
   if (_use_time_ipol)
     _sync_times.insert(time.begin()+1, time.end());          // insert times as sync points except the very first one
- // sort(_sync_times.begin(), _sync_times.end());
-  //_sync_times.erase(std::unique(_sync_times.begin(), _sync_times.end()), _sync_times.end());    // remove duplicates (needs sorted array)
-
   // Advance to the first sync time if one is provided in sim time range
 
   while (_remaining_sync_time && *_sync_times.begin() <= _time)
@@ -525,7 +521,6 @@ Transient::preExecute()
     if (_sync_times.begin() == _sync_times.end())
       _remaining_sync_time = false;
   }
-  //_curr_sync_time_iter = _sync_times.begin();
   _prev_sync_time = *_sync_times.begin();
 }
 
