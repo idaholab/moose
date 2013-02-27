@@ -51,6 +51,7 @@ protected:
 
   const Real _gap_conductivity;
   Function * const _gap_conductivity_function;
+  const VariableValue * _gap_conductivity_function_variable;
 
   Real _min_gap;
   Real _max_gap;

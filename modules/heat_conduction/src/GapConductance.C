@@ -20,7 +20,9 @@ InputParameters validParams<GapConductance>()
   params.addCoupledVar("gap_distance", "Distance across the gap");
   params.addCoupledVar("gap_temp", "Temperature on the other side of the gap");
   params.addParam<Real>("gap_conductivity", 1.0, "The thermal conductivity of the gap material");
-  params.addParam<FunctionName>("gap_conductivity_function", "Thermal conductivity of the gap material as a function of temperature.  Multiplied by gap_conductivity.");
+  params.addParam<FunctionName>("gap_conductivity_function", "Thermal conductivity of the gap material as a function.  Multiplied by gap_conductivity.");
+  params.addCoupledVar("gap_conductivity_function_variable", "Variable to be used in the gap_conductivity_function in place of time");
+
 
   // Quadrature based
   params.addParam<bool>("quadrature", false, "Whether or not to do Quadrature point based gap heat transfer.  If this is true then gap_distance and gap_temp should NOT be provided (and will be ignored) however paired_boundary IS then required and so is 'temp'.");
@@ -48,6 +50,7 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
    _gap_conductance_dT(declareProperty<Real>("gap_conductance"+_appended_property_name+"_dT")),
    _gap_conductivity(getParam<Real>("gap_conductivity")),
    _gap_conductivity_function(isParamValid("gap_conductivity_function") ? &getFunction("gap_conductivity_function") : NULL),
+   _gap_conductivity_function_variable(isCoupled("gap_conductivity_function_variable") ? &coupledValue("gap_conductivity_function_variable") : NULL),
    _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap")),
    _temp_var(_quadrature ? getVar("variable",0) : NULL),
@@ -141,7 +144,14 @@ GapConductance::gapK()
   Real gap_conductivity = _gap_conductivity;
   if (_gap_conductivity_function)
   {
-    gap_conductivity *= _gap_conductivity_function->value( _t, _q_point[_qp] );
+    if (_gap_conductivity_function_variable)
+    {
+      gap_conductivity *= _gap_conductivity_function->value( (*_gap_conductivity_function_variable)[_qp], _q_point[_qp] );
+    }
+    else
+    {
+      gap_conductivity *= _gap_conductivity_function->value( _t, _q_point[_qp] );
+    }
   }
 
   return gap_conductivity;

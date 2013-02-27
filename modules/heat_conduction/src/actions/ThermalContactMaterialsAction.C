@@ -18,7 +18,8 @@ InputParameters validParams<ThermalContactMaterialsAction>()
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
   params.addParam<Real>("gap_conductivity", 1.0, "The thermal conductivity of the gap material");
-  params.addParam<FunctionName>("gap_conductivity_function", "Thermal conductivity of the gap material as a function of temperature.  Multiplied by gap_conductivity.");
+  params.addParam<FunctionName>("gap_conductivity_function", "Thermal conductivity of the gap material as a function.  Multiplied by gap_conductivity.");
+  params.addParam<VariableName>("gap_conductivity_function_variable", "Variable to be used in gap_conductivity_function in place of time");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
   params.addParam<bool>("quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
@@ -70,6 +71,10 @@ ThermalContactMaterialsAction::act()
   if (isParamValid("gap_conductivity_function"))
   {
     params.set<FunctionName>("gap_conductivity_function") = getParam<FunctionName>("gap_conductivity_function");
+  }
+  if (isParamValid("gap_conductivity_function_variable"))
+  {
+    params.set<std::vector<VariableName> >("gap_conductivity_function_variable") = std::vector<VariableName>(1, getParam<VariableName>("gap_conductivity_function_variable"));
   }
 
   std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
