@@ -5,7 +5,7 @@
 template<>
 InputParameters validParams<MaterialTensorAux>()
 {
-  MooseEnum quantities("VonMises=1, PlasticStrainMag, Hydrostatic, Hoop, FirstInvariant, SecondInvariant, ThirdInvariant, TriAxiality");
+  MooseEnum quantities("VonMises=1, PlasticStrainMag, Hydrostatic, Hoop, Radial, Axial, FirstInvariant, SecondInvariant, ThirdInvariant, TriAxiality");
 
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<std::string>("tensor", "The material tensor name.");
@@ -76,57 +76,86 @@ MaterialTensorAux::computeValue()
   }
   else if ( _quantity == MTA_HOOP )
   {
-    if (LIBMESH_DIM == 2)
-    {
-      value = tensor.zz();
-    }
-    else
-    {
-      // This is the location of the stress.  A vector from the cylindrical axis to this point will define the x' axis.
-      Point p0( _q_point[_qp] );
+    // This is the location of the stress.  A vector from the cylindrical axis to this point will define the x' axis.
+    Point p0( _q_point[_qp] );
 
-      // The vector _p1 + t*(_p2-_p1) defines the cylindrical axis.  The point along this
-      // axis closest to p0 is found by the following for t:
-      const Point p2p1( _p2 - _p1 );
-      const Point p2p0( _p2 - p0 );
-      const Point p1p0( _p1 - p0 );
-      const Real t( -(p1p0*p2p1)/p2p1.size_sq() );
-      // The nearest point on the cylindrical axis to p0 is p.
-      const Point p( _p1 + t * p2p1 );
-      Point xp( p0 - p );
-      xp /= xp.size();
-      Point yp( p2p1/p2p1.size() );
-      Point zp( xp.cross( yp ));
-      //
-      // The following works but does more than we need
-      //
-//      // Rotation matrix R
-//      ColumnMajorMatrix R(3,3);
-//      // Fill with direction cosines
-//      R(0,0) = xp(0);
-//      R(1,0) = xp(1);
-//      R(2,0) = xp(2);
-//      R(0,1) = yp(0);
-//      R(1,1) = yp(1);
-//      R(2,1) = yp(2);
-//      R(0,2) = zp(0);
-//      R(1,2) = zp(1);
-//      R(2,2) = zp(2);
-//      // Rotate
-//      ColumnMajorMatrix tensor( _tensor[_qp].columnMajorMatrix() );
-//      ColumnMajorMatrix tensorp( R.transpose() * ( tensor * R ));
-//      // Hoop stress is the zz stress
-//      value = tensorp(2,2);
-      //
-      // Instead, tensorp(2,2) = R^T(2,:)*tensor*R(:,2)
-      //
-      const Real zp0( zp(0) );
-      const Real zp1( zp(1) );
-      const Real zp2( zp(2) );
-      value = (zp0*tensor(0,0)+zp1*tensor(1,0)+zp2*tensor(2,0))*zp0 +
-              (zp0*tensor(0,1)+zp1*tensor(1,1)+zp2*tensor(2,1))*zp1 +
-              (zp0*tensor(0,2)+zp1*tensor(1,2)+zp2*tensor(2,2))*zp2;
-    }
+    // The vector _p1 + t*(_p2-_p1) defines the cylindrical axis.  The point along this
+    // axis closest to p0 is found by the following for t:
+    const Point p2p1( _p2 - _p1 );
+    const Point p2p0( _p2 - p0 );
+    const Point p1p0( _p1 - p0 );
+    const Real t( -(p1p0*p2p1)/p2p1.size_sq() );
+    // The nearest point on the cylindrical axis to p0 is p.
+    const Point p( _p1 + t * p2p1 );
+    Point xp( p0 - p );
+    xp /= xp.size();
+    Point yp( p2p1/p2p1.size() );
+    Point zp( xp.cross( yp ));
+    //
+    // The following works but does more than we need
+    //
+//    // Rotation matrix R
+//    ColumnMajorMatrix R(3,3);
+//    // Fill with direction cosines
+//    R(0,0) = xp(0);
+//    R(1,0) = xp(1);
+//    R(2,0) = xp(2);
+//    R(0,1) = yp(0);
+//    R(1,1) = yp(1);
+//    R(2,1) = yp(2);
+//    R(0,2) = zp(0);
+//    R(1,2) = zp(1);
+//    R(2,2) = zp(2);
+//    // Rotate
+//    ColumnMajorMatrix tensor( _tensor[_qp].columnMajorMatrix() );
+//    ColumnMajorMatrix tensorp( R.transpose() * ( tensor * R ));
+//    // Hoop stress is the zz stress
+//    value = tensorp(2,2);
+    //
+    // Instead, tensorp(2,2) = R^T(2,:)*tensor*R(:,2)
+    //
+    const Real zp0( zp(0) );
+    const Real zp1( zp(1) );
+    const Real zp2( zp(2) );
+    value = (zp0*tensor(0,0)+zp1*tensor(1,0)+zp2*tensor(2,0))*zp0 +
+            (zp0*tensor(0,1)+zp1*tensor(1,1)+zp2*tensor(2,1))*zp1 +
+            (zp0*tensor(0,2)+zp1*tensor(1,2)+zp2*tensor(2,2))*zp2;
+  }
+  else if ( _quantity == MTA_RADIAL )
+  {
+    // This is the location of the stress.  A vector from the cylindrical axis to this point will define the x' axis
+    // which is the radial direction in which we want the stress.
+    Point p0( _q_point[_qp] );
+
+    // The vector _p1 + t*(_p2-_p1) defines the cylindrical axis.  The point along this
+    // axis closest to p0 is found by the following for t:
+    const Point p2p1( _p2 - _p1 );
+    const Point p2p0( _p2 - p0 );
+    const Point p1p0( _p1 - p0 );
+    const Real t( -(p1p0*p2p1)/p2p1.size_sq() );
+    // The nearest point on the cylindrical axis to p0 is p.
+    const Point p( _p1 + t * p2p1 );
+    Point xp( p0 - p );
+    xp /= xp.size();
+    const Real xp0( xp(0) );
+    const Real xp1( xp(1) );
+    const Real xp2( xp(2) );
+    value = (xp0*tensor(0,0)+xp1*tensor(1,0)+xp2*tensor(2,0))*xp0 +
+            (xp0*tensor(0,1)+xp1*tensor(1,1)+xp2*tensor(2,1))*xp1 +
+            (xp0*tensor(0,2)+xp1*tensor(1,2)+xp2*tensor(2,2))*xp2;
+  }
+  else if ( _quantity == MTA_AXIAL )
+  {
+    // The vector p2p1=(_p2-_p1) defines the axis, which is the direction in which we want the stress.
+    Point p2p1( _p2 - _p1 );
+    p2p1 /= p2p1.size();
+
+    const Real axis0( p2p1(0) );
+    const Real axis1( p2p1(1) );
+    const Real axis2( p2p1(2) );
+    value = (axis0*tensor(0,0)+axis1*tensor(1,0)+axis2*tensor(2,0))*axis0 +
+            (axis0*tensor(0,1)+axis1*tensor(1,1)+axis2*tensor(2,1))*axis1 +
+            (axis0*tensor(0,2)+axis1*tensor(1,2)+axis2*tensor(2,2))*axis2;
   }
   else if ( _quantity == MTA_FIRSTINVARIANT )
   {
