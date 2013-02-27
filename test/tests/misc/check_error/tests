@@ -313,7 +313,7 @@
   [./wrong_object_test]
     type = 'RunException'
     input = 'wrong_moose_object_test.i'
-    expect_err = "Inconsistent Action Name detected!"
+    expect_err = "Inconsistent Action Name detected"
   [../]
 
   [./wrong_object_test2]
