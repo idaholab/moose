@@ -29,8 +29,11 @@ void
 LinearInterpolation::errorCheck()
 {
 
-  mooseAssert( _x.size() == _y.size(),
-               "Vectors are not the same length" );
+  if ( _x.size() != _y.size() )
+  {
+    mooseError("LinearInterpolation: Vectors are not the same length");
+  }
+
 
   bool error(false);
   for (unsigned i(0); !error && !_x.empty() && i < _x.size()-1; ++i)
