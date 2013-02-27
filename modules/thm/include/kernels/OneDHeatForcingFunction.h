@@ -22,7 +22,6 @@ protected:
   virtual Real computeQpResidual();
 
   std::string _fuel_type;
-  Real _axial_offset;
 
   Real _power_fraction;
   VariableValue & _total_power;

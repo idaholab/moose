@@ -5,7 +5,6 @@ InputParameters validParams<OneDHeatForcingFunction>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<std::string>("fuel_type", "The type of the fuel (plate | cylinder)");
-  params.addParam<Real>("axial_offset", 0, "The axial offset (valid only for cylindrical fuel)");
   params.addRequiredParam<Real>("power_fraction", "The fraction of power used");
   params.addRequiredCoupledVar("total_power", "Total reactor power");
   params.addParam<PostprocessorName>("fuel_volume", "The name of the postprocessor that computes fuel volume");
@@ -17,7 +16,6 @@ InputParameters validParams<OneDHeatForcingFunction>()
 OneDHeatForcingFunction::OneDHeatForcingFunction(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
     _fuel_type(getParam<std::string>("fuel_type")),
-    _axial_offset(getParam<Real>("axial_offset")),
     _power_fraction(getParam<Real>("power_fraction")),
     _total_power(coupledScalarValue("total_power")),
     _fuel_volume(getPostprocessorValue(getParam<PostprocessorName>("fuel_volume"))),
@@ -34,8 +32,6 @@ OneDHeatForcingFunction::computeQpResidual()
 {
   Real power_density = _power_fraction * _total_power[0] / _fuel_volume;
   Real local_power = power_density * _power_shape_function.value(_t, _q_point[_qp]);
-  if (_fuel_type == "cylinder")
-    local_power *= _q_point[_qp](1) + _axial_offset;     // RZ transformation
   return -local_power * _test[_i][_qp];
 }
 
