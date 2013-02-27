@@ -3,6 +3,7 @@
 #include "ActionFactory.h"
 
 // linear_elasticity
+#include "LinearElasticityMaterial.h"
 #include "SolidMechX.h"
 #include "SolidMechY.h"
 #include "SolidMechZ.h"
@@ -14,6 +15,7 @@ void
 Elk::LinearElasticity::registerObjects(Factory & factory)
 {
   // linear_elasticity
+  registerMaterial(LinearElasticityMaterial);
   registerKernel(SolidMechX);
   registerKernel(SolidMechY);
   registerKernel(SolidMechZ);
