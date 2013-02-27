@@ -80,7 +80,7 @@ ActionWarehouse::addActionBlock(Action * blk)
           ((action_name == "add_aux_bc" && moose_action_name == "add_aux_kernel") ||
            (action_name == "add_postprocessor" && moose_action_name == "add_user_object") ||
            (action_name == "add_user_object" && moose_action_name == "add_postprocessor")))
-        mooseError("Inconsistent Action Name detected! Action that satisfies " + action_name + " is building a MOOSE Object that normally satisfies " + moose_action_name);
+        mooseError("Inconsistent Action Name detected (" + blk->name() + ")! Action that satisfies " + action_name + " is building a MOOSE Object that normally satisfies " + moose_action_name);
     }
   }
 
