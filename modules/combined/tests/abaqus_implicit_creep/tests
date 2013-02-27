@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'abaqus_implicit_creep.i'
+    exodiff = 'out.e'
+    abs_zero = 1e-06
+  [../]
+[]

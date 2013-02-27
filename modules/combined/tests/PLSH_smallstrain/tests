@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'PLSH_smallstrain_test.i'
+    exodiff = 'out.e'
+    abs_zero = 1e-09
+  [../]
+[]

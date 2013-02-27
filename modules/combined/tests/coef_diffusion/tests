@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'coef_diffusion_test.i'
+    exodiff = 'out.e'
+    scale_refine = 5
+  [../]
+[]

@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'thermal_conductivity_temperature_function_test.i'
+    exodiff = 'out.e'
+  [../]
+[]

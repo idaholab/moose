@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'abaqus_creep_swelling.i'
+    exodiff = 'out.e'
+    abs_zero = 1e-06
+  [../]
+[]

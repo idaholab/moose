@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'tensor_mechanics_j2plasticity.i'
+    exodiff = 'out.e'
+  [../]
+[]
