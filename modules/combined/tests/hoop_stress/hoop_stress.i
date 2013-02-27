@@ -93,6 +93,36 @@
     family = MONOMIAL
     block = 3
   [../]
+  [./radial1]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 1
+  [../]
+  [./radial2]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 2
+  [../]
+  [./radial3]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 3
+  [../]
+  [./axial1]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 1
+  [../]
+  [./axial2]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 2
+  [../]
+  [./axial3]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 3
+  [../]
 
 [] # AuxVariables
 
@@ -178,6 +208,66 @@
     point2 = '16 -20 20'
     execute_on = timestep
   [../]
+  [./radial1]
+    type = MaterialTensorAux
+    tensor = stress
+    quantity = radial
+    variable = radial1
+    block = 1
+    point1 = '20 20 -4'
+    point2 = '20 20 47'
+    execute_on = timestep
+  [../]
+  [./radial2]
+    type = MaterialTensorAux
+    tensor = stress
+    quantity = radial
+    variable = radial2
+    block = 2
+    point1 = '-25 12 20'
+    point2 = '-25 10 20'
+    execute_on = timestep
+  [../]
+  [./radial3]
+    type = MaterialTensorAux
+    tensor = stress
+    quantity = radial
+    variable = radial3
+    block = 3
+    point1 = '0 -20 20'
+    point2 = '16 -20 20'
+    execute_on = timestep
+  [../]
+  [./axial1]
+    type = MaterialTensorAux
+    tensor = stress
+    quantity = axial
+    variable = axial1
+    block = 1
+    point1 = '20 20 -4'
+    point2 = '20 20 47'
+    execute_on = timestep
+  [../]
+  [./axial2]
+    type = MaterialTensorAux
+    tensor = stress
+    quantity = axial
+    variable = axial2
+    block = 2
+    point1 = '-25 12 20'
+    point2 = '-25 10 20'
+    execute_on = timestep
+  [../]
+  [./axial3]
+    type = MaterialTensorAux
+    tensor = stress
+    quantity = axial
+    variable = axial3
+    block = 3
+    point1 = '0 -20 20'
+    point2 = '16 -20 20'
+    execute_on = timestep
+  [../]
 
 [] # AuxKernels
 
@@ -234,7 +324,8 @@
   petsc_options_iname = '-snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart -pc_type  -pc_hypre_type'
   petsc_options_value = 'ls         basic    basic                   201                 hypre     boomeramg     '
 
-  nl_rel_tol = 1e-9
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-7
 
   l_max_its = 20
 

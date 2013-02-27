@@ -81,6 +81,16 @@
     family = MONOMIAL
     block = 2
   [../]
+  [./radial2]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 2
+  [../]
+  [./axial2]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 2
+  [../]
 
 [] # AuxVariables
 
@@ -144,6 +154,22 @@
     block = 2
     execute_on = timestep
   [../]
+  [./radial2]
+    type = MaterialTensorAux
+    tensor = stress
+    quantity = radial
+    variable = radial2
+    block = 2
+    execute_on = timestep
+  [../]
+  [./axial2]
+    type = MaterialTensorAux
+    tensor = stress
+    quantity = axial
+    variable = axial2
+    block = 2
+    execute_on = timestep
+  [../]
 
 [] # AuxKernels
 
@@ -200,7 +226,8 @@
   petsc_options_iname = '-snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart -pc_type  -pc_hypre_type'
   petsc_options_value = 'ls         basic    basic                   201                 hypre     boomeramg     '
 
-  nl_rel_tol = 1e-9
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-7
 
   l_max_its = 20
 
