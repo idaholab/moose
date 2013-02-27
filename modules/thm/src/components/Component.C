@@ -102,7 +102,6 @@ Component::Component(const std::string & name, InputParameters parameters) :
     _factory(_app.getFactory()),
     _mesh(_sim.mesh()),
     _phys_mesh(_sim.physicalMesh()),
-    _model_type(_sim.getParam<Model::EModelType>("model_type")),
 
     _input_file_name(getParam<std::string>("physics_input_file"))
 {
@@ -132,28 +131,6 @@ Component::getNextBCId()
 {
   unsigned int id = bc_ids++;
   return id;
-}
-
-
-void
-Component::checkEOSConsistency()
-{
-  InputParameters & pars = parameters();
-
-  switch (_model_type)
-  {
-  case Model::EQ_MODEL_2:
-  case Model::EQ_MODEL_3:
-  case Model::EQ_MODEL_HEM:
-    if (!pars.isParamValid("eos"))
-      mooseError("Inconsistency in EOS detected in component '" << name() << "' - single phase model specified but single phase EOS not.");
-    break;
-
-  case Model::EQ_MODEL_7:
-    if (!pars.isParamValid("eos_liquid") || !pars.isParamValid("eos_liquid"))
-      mooseError("Inconsistency in EOS detected in component '" << name() << "' - two phase model specified but two phase EOS not.");
-    break;
-  }
 }
 
 void

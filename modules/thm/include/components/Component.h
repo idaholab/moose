@@ -121,8 +121,6 @@ protected:
   MooseMesh & _mesh;
   /// Global physical mesh this component works on
   MooseMesh * & _phys_mesh;
-  /// Convenience variable that stores model type
-  Model::EModelType _model_type;
 
   std::string _input_file_name;
   /// List of subdomain IDs this components owns
@@ -148,11 +146,6 @@ protected:
 
   virtual unsigned int getNextSubdomainId();
   virtual unsigned int getNextBCId();
-
-  /**
-   * Checks the consistency of model and EOS objects
-   */
-  void checkEOSConsistency();
 
   /**
    * Split the "RAVEN" name into "section name" and "property name"
