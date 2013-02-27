@@ -462,7 +462,7 @@ Transient::keepGoing()
   if(_t_step>_num_steps)
     keep_going = false;
 
-  if((_time>_end_time) || (fabs(_time-_end_time)<1.e-14))
+  if((_time>_end_time) || (fabs(_time-_end_time)<2.0e-14))
     keep_going = false;
 
   if(!keep_going && !_problem.out().wasOutput())
