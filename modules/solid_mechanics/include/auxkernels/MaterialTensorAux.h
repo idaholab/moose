@@ -27,6 +27,9 @@ protected:
     MTA_HOOP,
     MTA_RADIAL,
     MTA_AXIAL,
+    MTA_MAXPRINCIPAL,
+    MTA_MEDPRINCIPAL,
+    MTA_MINPRINCIPAL,
     MTA_FIRSTINVARIANT,
     MTA_SECONDINVARIANT,
     MTA_THIRDINVARIANT,
@@ -35,6 +38,8 @@ protected:
 
 
   virtual Real computeValue();
+
+  Real principalValue( const SymmTensor & tensor, unsigned int index );
 
   MaterialProperty<SymmTensor> & _tensor;
   const int _index;

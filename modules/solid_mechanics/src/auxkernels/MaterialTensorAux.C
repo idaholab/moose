@@ -5,7 +5,7 @@
 template<>
 InputParameters validParams<MaterialTensorAux>()
 {
-  MooseEnum quantities("VonMises=1, PlasticStrainMag, Hydrostatic, Hoop, Radial, Axial, FirstInvariant, SecondInvariant, ThirdInvariant, TriAxiality");
+  MooseEnum quantities("VonMises=1, PlasticStrainMag, Hydrostatic, Hoop, Radial, Axial, MaxPrincipal, MedPrincipal, MinPrincipal, FirstInvariant, SecondInvariant, ThirdInvariant, TriAxiality");
 
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<std::string>("tensor", "The material tensor name.");
@@ -44,7 +44,7 @@ MaterialTensorAux::MaterialTensorAux( const std::string & name, InputParameters 
   {
     mooseError("MaterialTensorAux requires the index to be >= 0 and <= 5 OR < 0 (off).");
   }
-  
+
 }
 
 Real
@@ -157,6 +157,18 @@ MaterialTensorAux::computeValue()
             (axis0*tensor(0,1)+axis1*tensor(1,1)+axis2*tensor(2,1))*axis1 +
             (axis0*tensor(0,2)+axis1*tensor(1,2)+axis2*tensor(2,2))*axis2;
   }
+  else if ( _quantity == MTA_MAXPRINCIPAL )
+  {
+    value = principalValue( tensor, 0 );
+  }
+  else if ( _quantity == MTA_MEDPRINCIPAL )
+  {
+    value = principalValue( tensor, 1 );
+  }
+  else if ( _quantity == MTA_MINPRINCIPAL )
+  {
+    value = principalValue( tensor, 2 );
+  }
   else if ( _quantity == MTA_FIRSTINVARIANT )
   {
     value = tensor.trace();
@@ -196,9 +208,18 @@ MaterialTensorAux::computeValue()
   }
   else
   {
-    mooseError("Internal logic error from " + name());
+    mooseError("Internal logic error from " + name() + ", quantity: " + _quantity_moose_enum.operator std::string());
   }
   return value;
 }
 
-
+Real
+MaterialTensorAux::principalValue( const SymmTensor & tensor, unsigned int index )
+{
+  ColumnMajorMatrix eval(3,1);
+  ColumnMajorMatrix evec(3,3);
+  tensor.columnMajorMatrix().eigen(eval, evec);
+  // Eigen computes low to high.  We want high first.
+  int i = -index + 2;
+  return eval(i);
+}

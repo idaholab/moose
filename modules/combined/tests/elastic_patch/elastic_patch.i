@@ -129,6 +129,18 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./maxprincipal]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./medprincipal]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./minprincipal]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 
 [] # AuxVariables
 
@@ -212,6 +224,25 @@
     variable = thirdinv
     quantity = thirdinvariant
   [../]
+  [./maxprincipal]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = maxprincipal
+    quantity = MaxPRiNCIpAl
+  [../]
+  [./medprincipal]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = medprincipal
+    quantity = MEdPRiNCIpAl
+  [../]
+  [./minprincipal]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = minprincipal
+    quantity = MiNPRiNCIpAl
+  [../]
+
 
 [] # AuxKernels
 
@@ -472,7 +503,6 @@
 [Output]
   interval = 1
   output_initial = true
-  elemental_as_nodal = true
   exodus = true
   perf_log = true
 [] # Output
