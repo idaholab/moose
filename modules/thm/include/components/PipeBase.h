@@ -6,7 +6,7 @@
 
 #include "RELAP7.h"
 #include "GeometricalComponent.h"
-#include "Model.h"
+#include "FlowModel.h"
 
 class PipeBase;
 
@@ -21,7 +21,7 @@ InputParameters validParams<PipeBase>();
  * subdivided into _n_elems elements (of type EDGE2).
  */
 class PipeBase : public GeometricalComponent,
-    public Model
+    public FlowModel
 {
 public:
   PipeBase(const std::string & name, InputParameters params);

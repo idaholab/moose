@@ -4,7 +4,7 @@
 #include "RELAP7.h"
 #include "R7Object.h"
 #include "ActionWarehouse.h"
-#include "Model.h"
+#include "FlowModel.h"
 #include "Simulation.h"
 
 class Component;
