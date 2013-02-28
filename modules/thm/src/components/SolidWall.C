@@ -31,35 +31,35 @@ void
 SolidWall::addMooseObjects()
 {
   // coupling "vectors"
-  std::vector<std::string> cv_p(1, Model::PRESSURE);
-  std::vector<std::string> cv_rho(1, Model::RHO);
-  std::vector<std::string> cv_rhoE(1, Model::RHOE);
+  std::vector<std::string> cv_p(1, FlowModel::PRESSURE);
+  std::vector<std::string> cv_rho(1, FlowModel::RHO);
+  std::vector<std::string> cv_rhoE(1, FlowModel::RHOE);
   // boundary id
   std::vector<unsigned int> bnd_id(1, getBoundaryId());
   {
     InputParameters params = _factory.getValidParams("OneDMassSolidWallBC");
-    params.set<NonlinearVariableName>("variable") = Model::RHO;
+    params.set<NonlinearVariableName>("variable") = FlowModel::RHO;
     params.set<std::vector<unsigned int> >("boundary") = bnd_id;
     _sim.addBoundaryCondition("OneDMassSolidWallBC", genName("bc", _id, "rho"), params);
   }
   {
     InputParameters params = _factory.getValidParams("OneDMomentumSolidWallBC");
-    params.set<NonlinearVariableName>("variable") = Model::RHOU;
+    params.set<NonlinearVariableName>("variable") = FlowModel::RHOU;
     params.set<std::vector<unsigned int> >("boundary") = bnd_id;
     params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
 
     // coupling
     params.set<std::vector<std::string> >("p") = cv_p;
     params.set<std::vector<std::string> >("rho") = cv_rho;
-    if (_model_type == Model::EQ_MODEL_3)
+    if (_model_type == FlowModel::EQ_MODEL_3)
       params.set<std::vector<std::string> >("rhoE") = cv_rhoE;
     _sim.addBoundaryCondition("OneDMomentumSolidWallBC", genName("bc", _id, "rhou"), params);
   }
 
-  if (_model_type == Model::EQ_MODEL_3)
+  if (_model_type == FlowModel::EQ_MODEL_3)
   {
     InputParameters params = _factory.getValidParams("OneDEnergySolidWallBC");
-    params.set<NonlinearVariableName>("variable") = Model::RHOE;
+    params.set<NonlinearVariableName>("variable") = FlowModel::RHOE;
     params.set<std::vector<unsigned int> >("boundary") = bnd_id;
     params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
 
