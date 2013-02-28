@@ -20,6 +20,8 @@
 #include "YAMLFormatter.h"
 #include "MooseMesh.h"
 
+#include "libmesh/mesh_refinement.h"
+
 template<>
 InputParameters validParams<MooseApp>()
 {
@@ -210,11 +212,15 @@ MooseApp::meshOnly(std::string mesh_file_name)
    * a Mesh.
    */
   _action_warehouse.executeActionsWithAction("set_global_params");
-  _action_warehouse.executeActionsWithAction("read_mesh");
   _action_warehouse.executeActionsWithAction("add_extra_nodeset");
   _action_warehouse.executeActionsWithAction("setup_mesh");
   _action_warehouse.executeActionsWithAction("add_mesh_modifier");
   _action_warehouse.executeActionsWithAction("setup_mesh_complete");
+
+  // uniform refinement
+  MooseMesh * mesh = _action_warehouse.mesh();
+  MeshRefinement mesh_refinement(mesh->getMesh());
+  mesh_refinement.uniformly_refine(mesh->uniformRefineLevel());
 
   if (mesh_file_name == "")
   {
@@ -225,11 +231,11 @@ MooseApp::meshOnly(std::string mesh_file_name)
     mesh_file_name = mesh_file_name.substr(0,pos) + "_in.e";
   }
 
-  _action_warehouse.mesh()->getMesh().write(mesh_file_name);
+  mesh->getMesh().write(mesh_file_name);
 
   // Since we are not going to create a problem the mesh
   // will not get cleaned up, so we'll do it here
-  delete _action_warehouse.mesh();
+  delete mesh;
   delete _action_warehouse.displacedMesh();
 
 }

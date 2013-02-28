@@ -50,7 +50,7 @@ InputParameters validParams<SetupMeshAction>()
   params.addParam<std::vector<unsigned int> >("ghosted_boundaries", "Boundaries to be ghosted if using Nemesis");
   params.addParam<std::vector<Real> >("ghosted_boundaries_inflation", "If you are using ghosted boundaries you will want to set this value to a vector of amounts to inflate the bounding boxes by.  ie if you are running a 3D problem you might set it to '0.2 0.1 0.4'");
   params.addParam<unsigned int>("patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
-
+  params.addParam<unsigned int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
 
   // groups
   params.addParamNamesToGroup("displacements ghosted_boundaries ghosted_boundaries_inflation patch_size", "Advanced");
@@ -105,6 +105,15 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
     else
       mooseError("Invalid centroid_partitioner_direction!");
   }
+
+#ifdef LIBMESH_ENABLE_AMR
+  unsigned int level = getParam<unsigned int>("uniform_refine");
+
+  // Did they specify extra refinement levels on the command-line?
+  level += _app.getParam<unsigned int>("refinements");
+
+  mesh->uniformRefineLevel() = level;
+#endif //LIBMESH_ENABLE_AMR
 
   // Add entity names to the mesh
   if (_pars.isParamValid("block_id") && _pars.isParamValid("block_name"))

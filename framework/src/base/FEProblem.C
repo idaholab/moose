@@ -103,7 +103,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _out_problem(NULL),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
-    _uniform_refine_level(0),
 #endif
     _displaced_mesh(NULL),
     _displaced_problem(NULL),
@@ -299,10 +298,10 @@ void FEProblem::initialSetup()
   }
 
   // uniform refine
-  if (_uniform_refine_level > 0)
+  if (_mesh.uniformRefineLevel() > 0)
   {
     Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
-    adaptivity().uniformRefine(_uniform_refine_level);
+    adaptivity().uniformRefine(_mesh.uniformRefineLevel());
     Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
   }
 

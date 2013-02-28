@@ -49,6 +49,7 @@ InputParameters validParams<MooseMesh>()
 MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     _mesh(getParam<MooseEnum>("dim")),
+    _uniform_refine_level(0),
     _is_changed(false),
     _is_parallel(false),
     _refined_elements(NULL),
@@ -68,6 +69,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     MooseObject(other_mesh._name, other_mesh._pars),
     _mesh(other_mesh._mesh),
+    _uniform_refine_level(0),
     _is_changed(false),
     _is_parallel(false),
     _refined_elements(NULL),

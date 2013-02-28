@@ -5,6 +5,7 @@
   extrusion_vector = '0 1e-2 0'
   bottom_sideset = '2'
   top_sideset = '4'
+  uniform_refine = 1
 []
 
 # This input file is intended to be run with the "--mesh-only" option so

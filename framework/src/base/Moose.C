@@ -223,7 +223,6 @@
 #include "SetupPreconditionerAction.h"
 #include "SetupDebugAction.h"
 #include "SetupResidualDebugAction.h"
-#include "InitialRefinementAction.h"
 #include "SetupOverSamplingAction.h"
 #include "DeprecatedBlockAction.h"
 #include "AddConstraintAction.h"
@@ -549,11 +548,11 @@ addActionTypes(Syntax & syntax)
  * will be created and "acted" on when the associated input file section is seen.
  *
  * Example:
- *  "setup_mesh" <---------------> SetupMeshAction <-----------------------
- *                                                                          \
- *                                                                            [Mesh]
- *                                                                          /
- * "initial_mesh_refinement" <---> InitialRefinementActionReadMeshAction <-
+ *  "setup_mesh" <-----------> SetupMeshAction <---------
+ *                                                        \
+ *                                                         [Mesh]
+ *                                                        /
+ * "setup_mesh_complete" <---> SetupMeshCompleteAction <-
  *
  *
  * Action classes can also be registered to act on more than one input file section for a different action_name
@@ -619,7 +618,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
 #ifdef LIBMESH_ENABLE_AMR
   registerAction(AdaptivityAction, "setup_adaptivity");
-  registerAction(InitialRefinementAction, "initial_mesh_refinement");
 #endif
 
   registerAction(AddDiracKernelAction, "add_dirac_kernel");

@@ -155,10 +155,12 @@ public:
   const std::set<SubdomainID> & meshSubdomains() const { return _mesh_subdomains; }
   const std::set<BoundaryID> & meshBoundaryIds() const { return _mesh_boundary_ids; }
 
-//  void read(const std::string file_name);
-
   void prepare();
   void update();
+
+#ifdef LIBMESH_ENABLE_AMR
+  unsigned int & uniformRefineLevel() { return _uniform_refine_level; }
+#endif //LIBMESH_ENABLE_AMR
 
   /**
    * This will add the boundary ids to be ghosted to this processor
@@ -350,6 +352,9 @@ protected:
   /// Convienence enums
   enum {X=0, Y, Z};
   enum {MIN=0, MAX};
+
+  /// The level of uniform refinement requested (set to zero if AMR is disabled)
+  unsigned int _uniform_refine_level;
 
   /// true if mesh is changed (i.e. after adaptivity step)
   bool _is_changed;
