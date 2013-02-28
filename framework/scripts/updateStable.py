@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import os, sys, string, subprocess, re, socket, getopt
 
 # If hostname equals head_node, this script will run

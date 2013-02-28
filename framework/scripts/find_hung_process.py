@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # This script can be used to figure out if a job on a cluster is hung.  If all goes well, it'll print the unique
 # stack traces out.

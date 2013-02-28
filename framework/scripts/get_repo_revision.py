@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # This script finds the current repository revision base on the log file
 # It currently understands both local git-svn and svn repositories

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # This script finds a file in the herd trunk containing all the possible applications
 # thay may be built with an "up" target.  If passed the value ROOT it will simply

@@ -91,10 +91,10 @@ def printResult(test_name, result, timing, start, end, options, color=True):
 
 def colorText(str, options, color, html=False):
   # ANSI color codes for colored terminal output
-  color_codes = {'RESET':'\033[0m','BOLD':'\033[1m','RED':'\033[31m',
-                 'GREEN':'\033[32m' if options.code else '\033[35m',
-                 'CYAN':'\033[36m' if options.code else '\033[34m',
-                 'YELLOW':'\033[33m'}
+  color_codes = {'RESET':'\033[0m','BOLD':'\033[1m','RED':'\033[31m','GREEN':'\033[35m','CYAN':'\033[34m','YELLOW':'\033[33m'}
+  if options.code:
+    color_codes['GREEN'] = '\033[32m'
+    color_codes['CYAN']  = '\033[36m'
 
   if options.colored and not (os.environ.has_key('BITTEN_NOCOLOR') and os.environ['BITTEN_NOCOLOR'] == 'true'):
     if html:
@@ -161,12 +161,12 @@ def getCompilers(libmesh_dir):
   p = Popen(command, shell=True, stdout=PIPE)
   mpicxx_cmd = p.communicate()[0].strip()
 
-  p = Popen(mpicxx_cmd + " --show", shell=True, stdout=PIPE)
+  p = Popen(mpicxx_cmd + " -show", shell=True, stdout=PIPE)
   raw_compiler = p.communicate()[0]
 
   if re.match('icpc', raw_compiler) != None:
     compilers.add("INTEL")
-  elif re.match('g\+\+', raw_compiler) != None:
+  elif re.match('[cg]\+\+', raw_compiler) != None:
     compilers.add("GCC")
   elif re.match('clang\+\+', raw_compiler) != None:
     compilers.add("CLANG")
