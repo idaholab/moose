@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'umat_linear_strain_hardening.i'
     exodiff = 'out.e'
+    library_mode = 'DYNAMIC'
     compiler = 'GCC INTEL'
   [../]
 []

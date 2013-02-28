@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'abaqus_creep_swelling.i'
     exodiff = 'out.e'
+    library_mode = 'DYNAMIC'
     abs_zero = 1e-06
   [../]
 []
