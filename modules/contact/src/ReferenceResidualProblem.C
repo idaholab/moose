@@ -155,7 +155,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
                                                     const int nfuncs,
                                                     const int max_funcs,
                                                     const Real ref_resid,
-                                                    const Real div_threshold)
+                                                    const Real /*div_threshold*/)
 {
   updateReferenceResidual();
 
@@ -201,13 +201,6 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
   {
     oss << "Exceeded maximum number of function evaluations: " << nfuncs << " > " << max_funcs << std::endl;
     reason = MOOSE_DIVERGED_FUNCTION_COUNT;
-  }
-  else if(it &&
-          fnorm > system._last_nl_rnorm &&
-          fnorm >= div_threshold)
-  {
-    oss << "Nonlinear solve was blowing up!" << std::endl;
-    reason = MOOSE_DIVERGED_LINE_SEARCH;
   }
 
   if (it && !reason)
