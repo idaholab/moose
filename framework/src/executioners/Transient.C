@@ -44,7 +44,7 @@ InputParameters validParams<Transient>()
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
   params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
   params.addRequiredParam<Real>("dt", "The timestep size between solves");
-  params.addParam<Real>("dtmin",           0.0,    "The minimum timestep size in an adaptive run");
+  params.addParam<Real>("dtmin",           2.0e-14,    "The minimum timestep size in an adaptive run");
   params.addParam<Real>("dtmax",           1.0e30, "The maximum timestep size in an adaptive run");
   params.addParam<Real>("num_steps",       std::numeric_limits<Real>::max(),     "The number of timesteps in a transient run");
   params.addParam<int> ("n_startup_steps", 0,      "The number of timesteps during startup");
@@ -63,12 +63,14 @@ InputParameters validParams<Transient>()
   params.addParam<bool>("use_AB2", false, "Whether to use the Adams-Bashforth 2 predictor");
   params.addParam<bool>("use_littlef", false, "if a function evaluation should be used or time deriv's in predictors");
   params.addParam<bool>("abort_on_solve_fail", false, "abort if solve not converged rather than cut timestep");
-   params.addParam<MooseEnum>("scheme",          schemes,  "Time integration scheme used."); params.addParam<bool>("estimate_time_error", false, "make a time error estimate");
+   params.addParam<MooseEnum>("scheme",          schemes,  "Time integration scheme used.");
+   params.addParam<bool>("estimate_time_error", false, "make a time error estimate");
   params.addParam<bool>("output_to_file",false,"If time error estimates should be output to file");
   params.addParam<std::string>("file_name", "out.csv","which file should errors be output to");
-    params.addParam<bool>("estimate_time_error", false, "make a time error estimate");
+  params.addParam<bool>("estimate_time_error", false, "make a time error estimate");
+  params.addParam<Real>("timestep_tolerance", 2.0e-14, "the tolerance setting for final timestep size and sync times");
 
-  params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol ss_tmin sync_times time_t time_dt growth_factor predictor_scale use_AB2 use_littlef abort_on_solve_fail", "Advanced");
+  params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol ss_tmin sync_times time_t time_dt growth_factor predictor_scale use_AB2 use_littlef abort_on_solve_fail output_to_file file_name estimate_time_error timestep_tolerance", "Advanced");
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
 
@@ -107,7 +109,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _estimate_error(getParam<bool>("estimate_time_error")),
     _time_error_out_to_file(getParam<bool>("output_to_file")),
     _time_errors_filename(getParam<std::string>("file_name")),
-    _time_interval(false)
+    _time_interval(false),
+    _timestep_tolerance(getParam<Real>("timestep_tolerance"))
 {
   _t_step = 0;
   _dt = 0;
@@ -350,9 +353,9 @@ Transient::computeConstrainedDT()
     dt_cur = _end_time - _time;
 
   // Adjust to a sync time if supplied and skipped over
-  if (_remaining_sync_time && _time + dt_cur+_dtmin >= (*_sync_times.begin()))
+  if (_remaining_sync_time && _time + dt_cur+_timestep_tolerance >= (*_sync_times.begin()))
   {
-    if(abs(*_sync_times.begin() - _time)>=_dtmin)
+    if(fabs(*_sync_times.begin() - _time)>=_timestep_tolerance)
     {
       dt_cur = *_sync_times.begin() - _time;
     }
@@ -361,7 +364,7 @@ Transient::computeConstrainedDT()
     if(_time_interval)
     {
       Real d = (_time+dt_cur-start_time)/_time_interval_output_interval;
-      if(d-std::floor(d) <= _dtmin || std::ceil(d)-d <=_dtmin)
+      if(d-std::floor(d) <= _timestep_tolerance || std::ceil(d)-d <=_timestep_tolerance)
       {
           _sync_times.insert((_time +dt_cur + _time_interval_output_interval));
       }
@@ -462,7 +465,7 @@ Transient::keepGoing()
   if(_t_step>_num_steps)
     keep_going = false;
 
-  if((_time>_end_time) || (fabs(_time-_end_time)<2.0e-14))
+  if((_time>_end_time) || (fabs(_time-_end_time)<_timestep_tolerance))
     keep_going = false;
 
   if(!keep_going && !_problem.out().wasOutput())
@@ -521,7 +524,10 @@ Transient::preExecute()
     if (_sync_times.begin() == _sync_times.end())
       _remaining_sync_time = false;
   }
-  _prev_sync_time = *_sync_times.begin();
+  if(_remaining_sync_time)
+ {
+    _prev_sync_time = *_sync_times.begin();
+  }
 }
 
 

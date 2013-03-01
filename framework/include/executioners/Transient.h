@@ -146,6 +146,7 @@ protected:
   ///the output interval to use
   Real _time_interval_output_interval;
   Real start_time;
+  Real _timestep_tolerance;
 };
 
 #endif //TRANSIENTEXECUTIONER_H
