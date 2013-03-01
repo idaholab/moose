@@ -1374,9 +1374,6 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
       }
     }
   }
-
-  _fe_problem.addJacobianScalar(jacobian);
-
 }
 
 void
