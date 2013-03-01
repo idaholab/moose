@@ -185,7 +185,7 @@ GrainTracker::trackGrains()
     {
       grain_it->second->status = NOT_MARKED;
       map_sizes[grain_it->second->variable_idx]++;
-    }    
+    }
   }
 
   // Print out info on the number of unique grains per variable vs the incoming bubble set sizes
@@ -199,7 +199,7 @@ GrainTracker::trackGrains()
     }
     std::cout << std::endl;
   }
-  
+
   // Loop over all the current regions and match them up to our grain list
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
@@ -263,10 +263,35 @@ GrainTracker::trackGrains()
         if (!found_one)
         {
           std::cout << "*****************************************************************************\n"
-                    << "Couldn't find a matching grain while working on variable index: " << curr_var
+                    << "Warning: Couldn't find a matching grain while working on variable index: " << curr_var
                     << " (num spheres: " << sphere_ptrs.size() << ")"
                     << "\nCreating new unique grain: " << _unique_grains.size() + 1
-                    << "\n*****************************************************************************\n";
+                    << "\nDEBUG INFO:\n";
+
+          for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[map_num].begin();
+               it1 != _bubble_sets[map_num].end(); ++it1)
+          {
+            unsigned local_counter = 0;
+            if (it1->_nodes.size() <= 30)
+            {
+              std::cout << "Set: " << local_counter++ << "\n";
+              for (std::set<unsigned int>::iterator node_it = it1->_nodes.begin(); node_it != it1->_nodes.end(); ++node_it)
+              {
+                std::cout << *node_it << " ";
+                std::pair<std::multimap<unsigned int, unsigned int>::const_iterator, std::multimap<unsigned int, unsigned int>::const_iterator> iters =
+                  _periodic_node_map.equal_range(*node_it);
+                if (iters.first != iters.second)
+                {
+                  std::cout << "~";
+                  for (std::multimap<unsigned int, unsigned int>::const_iterator node_it2 = iters.first; node_it2 != iters.second; ++node_it2)
+                    std::cout << node_it2->second << " ";
+                  std::cout << "~ ";
+                }
+              }
+              std::cout << "\n";
+            }
+          }
+          std::cout << "\n*****************************************************************************\n";
 
           _unique_grains[_unique_grains.size() + 1] = new UniqueGrain(curr_var, sphere_ptrs, &it1->_nodes);
         }
@@ -309,7 +334,7 @@ GrainTracker::remapGrains()
   // Don't remap grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
-  
+
   /**
    * Loop over each grain and see if the bounding spheres of the current grain intersect with the spheres of any other grains
    * represented by the same variable.
@@ -398,7 +423,7 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
               << "\nYour initial condition may not be good, or perhaps you don't have enough"
               << "\norder parameters.  No guarantees as to whether the grain tracker will work!"
               << "\n*****************************************************************************\n";
-  
+
   std::cout << "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first
             << " (variable index: " << grain_it1->second->variable_idx << ")\n"
             << "Remapping to: " << new_variable_idx << " whose closest grain is at a distance of " << min_distances[new_variable_idx] << std::endl;
@@ -504,7 +529,7 @@ GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres
       // We need to see if these two spheres intersect on the domain.  To do that we need to account for periodicity of the mesh
       Real curr_distance = _mesh.minPeriodicDistance(_var_number, sphere1->center(), sphere2->center())  // distance between the centroids
         - (ignore_radii ? 0 : (sphere1->radius() + sphere2->radius()));                                  // minus the sum of the two radii
-      
+
       if (curr_distance < min_distance)
         min_distance = curr_distance;
     }
