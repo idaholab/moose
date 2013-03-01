@@ -105,7 +105,7 @@ protected:
    * This routine adds the periodic node information to our data structure prior to packing the data
    * this makes those periodic neighbors appear much like ghosted nodes in a multiprocessor setting
    */
-  unsigned int appendPeriodicNeighborNodes(std::vector<std::set<unsigned int> > & data) const;
+  unsigned int appendPeriodicNeighborNodes(std::set<unsigned int> & data) const;
 
   /**
    * This routine updates the _region_offsets variable which is useful for quickly determining

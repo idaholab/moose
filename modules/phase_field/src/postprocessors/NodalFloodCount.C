@@ -233,7 +233,8 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
 
       // Append our periodic neighbor nodes to the data structure before packing
       if (merge_periodic_info)
-	n_periodic_nodes = appendPeriodicNeighborNodes(data[map_num]);
+        for (std::vector<std::set<unsigned int> >::iterator it = data[map_num].begin(); it != data[map_num].end(); ++it)
+          n_periodic_nodes += appendPeriodicNeighborNodes(*it);
 
       mooseAssert(_region_counts[map_num]+1 == data[map_num].size(), "Error in packing data");
     }
@@ -464,9 +465,9 @@ NodalFloodCount::isNodeValueValid(unsigned int node_id) const
 }
 
 unsigned int
-NodalFloodCount::appendPeriodicNeighborNodes(std::vector<std::set<unsigned int> > & data) const
+NodalFloodCount::appendPeriodicNeighborNodes(std::set<unsigned int> & data) const
 {
-  unsigned int inserted_counts = 0;
+  unsigned int orig_size = data.size();
 
   /**
    * Now we will append our periodic neighbor information.  We treat the periodic neighbor nodes
@@ -474,28 +475,20 @@ NodalFloodCount::appendPeriodicNeighborNodes(std::vector<std::set<unsigned int> 
    * periodic boundary we will simply add those periodic neighbors to the appropriate bubble
    * before packing up the data
    */
-  for (unsigned int i = 0; i < data.size(); ++i)
+  std::set<unsigned int> periodic_neighbors;
+
+  for (std::set<unsigned int>::iterator s_it = data.begin(); s_it != data.end(); ++s_it)
   {
-    std::set<unsigned int> periodic_neighbors;
-    std::set<unsigned int> merged_sets;
-
-    for (std::set<unsigned int>::iterator s_it = data[i].begin(); s_it != data[i].end(); ++s_it)
-    {
-      std::pair<std::multimap<unsigned int, unsigned int>::const_iterator, std::multimap<unsigned int, unsigned int>::const_iterator> iters =
-	_periodic_node_map.equal_range(*s_it);
-      for (std::multimap<unsigned int, unsigned int>::const_iterator it = iters.first; it != iters.second; ++it)
-	periodic_neighbors.insert(it->second);
-    }
-
-    // Now that we have all of the periodic_neighbors in our temporary set we need to union it together with the original set
-    // for the current bubble
-    std::set_union(data[i].begin(), data[i].end(), periodic_neighbors.begin(), periodic_neighbors.end(), std::inserter(merged_sets, merged_sets.end()));
-
-    inserted_counts += merged_sets.size() - data[i].size();
-    // save the updated set back into our datastructure
-    data[i] = merged_sets;
+    std::pair<std::multimap<unsigned int, unsigned int>::const_iterator, std::multimap<unsigned int, unsigned int>::const_iterator> iters =
+      _periodic_node_map.equal_range(*s_it);
+    for (std::multimap<unsigned int, unsigned int>::const_iterator it = iters.first; it != iters.second; ++it)
+      periodic_neighbors.insert(it->second);
   }
-  return inserted_counts;
+
+  // Now that we have all of the periodic_neighbors in our temporary set we need to add them to our input set
+  data.insert(periodic_neighbors.begin(), periodic_neighbors.end());
+
+  return data.size() - orig_size;
 }
 
 void
