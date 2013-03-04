@@ -64,30 +64,35 @@ findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
 
   if (dim == 1)
   {
-    unsigned left(0);
-    unsigned right(left);
-    Real leftCoor((*master_elem->get_node(0))(0));
-    Real rightCoor(left);
+    Node * left(master_elem->get_node(0));
+    Node * right(left);
+    Real leftCoor((*left)(0));
+    Real rightCoor(leftCoor);
     for (unsigned i(1); i < master_elem->n_nodes(); ++i)
     {
-      Real coor = (*master_elem->get_node(i))(0);
+      Node * curr = master_elem->get_node(i);
+      Real coor = (*curr)(0);
       if (coor < leftCoor)
       {
-        left = i;
+        left = curr;
         leftCoor = coor;
       }
       if (coor > rightCoor)
       {
-        right = i;
+        right = curr;
         rightCoor = coor;
       }
     }
-    unsigned nearestNode(left);
+    Node * nearestNode(left);
     Point nearestPoint(leftCoor, 0, 0);
-    if (side->node(0) == right)
+    if (side->node(0) == right->id())
     {
       nearestNode = right;
       nearestPoint(0) = rightCoor;
+    }
+    else if (side->node(0) != left->id())
+    {
+      mooseError("Error findContactPoint.  Logic error in 1D");
     }
     p_info._closest_point_ref = FEInterface::inverse_map(dim, _fe_type, master_elem, nearestPoint, TOLERANCE, false);
     p_info._closest_point = nearestPoint;
