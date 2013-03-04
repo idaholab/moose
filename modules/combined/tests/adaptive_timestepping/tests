@@ -22,6 +22,7 @@
     type = 'Exodiff'
     input = 'exception_creep_iterations.i'
     exodiff = 'out_except_creep.e'
+    skip = 'Needs a review'
   [../]
 
   [./test_shrink_init_dt]
