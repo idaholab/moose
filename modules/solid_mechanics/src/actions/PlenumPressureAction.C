@@ -82,7 +82,7 @@ PlenumPressureAction::act()
   vars.push_back(_disp_z);
   std::string short_name(_name);
   // Chop off "BCs/PlenumPressure/"
-  short_name.erase(0, 4+_kernel_name.size());
+  short_name.erase(0, 5+_kernel_name.size());
   for (unsigned int i(0); i < dim; ++i)
   {
     std::stringstream name;

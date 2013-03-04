@@ -10,6 +10,7 @@ InputParameters validParams<ThermalContactDiracKernelsAction>()
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
+  params.addParam<bool>("quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
   return params;
 }
 
@@ -21,16 +22,19 @@ ThermalContactDiracKernelsAction::ThermalContactDiracKernelsAction(const std::st
 void
 ThermalContactDiracKernelsAction::act()
 {
-  InputParameters params = _factory.getValidParams("GapHeatPointSourceMaster");
-  params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("variable");
-  params.set<BoundaryName>("boundary") = getParam<BoundaryName>("master");
-  params.set<BoundaryName>("slave") = getParam<BoundaryName>("slave");
-  if (isParamValid("tangential_tolerance"))
+  if (!getParam<bool>("quadrature"))
   {
-    params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
-  }
+    InputParameters params = _factory.getValidParams("GapHeatPointSourceMaster");
+    params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("variable");
+    params.set<BoundaryName>("boundary") = getParam<BoundaryName>("master");
+    params.set<BoundaryName>("slave") = getParam<BoundaryName>("slave");
+    if (isParamValid("tangential_tolerance"))
+    {
+      params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+    }
 
-  _problem->addDiracKernel("GapHeatPointSourceMaster",
-                           "GapHeatPointSourceMaster_"+_name,
-                           params);
+    _problem->addDiracKernel("GapHeatPointSourceMaster",
+                             "GapHeatPointSourceMaster_"+_name,
+                             params);
+  }
 }
