@@ -38,10 +38,14 @@ public:
 protected:
   /// The total value of the variable
   Real _value;
+  /// My old value
+  PostprocessorValue & _value_old;
+
   /// The current post-processor value
   PostprocessorValue & _pps_value;
   /// The old post-processor value
   PostprocessorValue & _pps_value_old;
+
 };
 
 #endif /* TOTALVARIABLEVALUE_H */

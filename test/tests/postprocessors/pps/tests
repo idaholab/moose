@@ -30,6 +30,13 @@
     exodiff = 'pps_old_value_out.e'
   [../]
 
+  [./pps_old_residual_test]
+    type = 'Exodiff'
+    input = 'pps_old_value.i'
+    exodiff = 'pps_old_value_out.e'
+    prereq = pps_old_test
+  [../]
+
   [./test_nodal_aux_var_value]
     type = 'Exodiff'
     input = 'nodal_aux_var_value.i'

@@ -25,6 +25,7 @@ InputParameters validParams<TotalVariableValue>()
 TotalVariableValue::TotalVariableValue(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     _value(0),
+    _value_old(getPostprocessorValueOld(_name)),
     _pps_value(getPostprocessorValue(getParam<std::string>("value"))),
     _pps_value_old(getPostprocessorValueOld(getParam<std::string>("value")))
 {
@@ -42,7 +43,7 @@ TotalVariableValue::initialize()
 void
 TotalVariableValue::execute()
 {
-  _value += 0.5 * (_pps_value + _pps_value_old) * _dt;
+  _value = _value_old  + 0.5 * (_pps_value + _pps_value_old) * _dt;
 }
 
 Real
