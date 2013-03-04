@@ -22,7 +22,6 @@
 #include "DGKernelWarehouse.h"
 #include "DamperWarehouse.h"
 #include "ConstraintWarehouse.h"
-#include "MooseException.h"
 #include "MoosePreconditioner.h"
 
 // libMesh includes
@@ -453,7 +452,6 @@ protected:
   bool _use_predictor;
   bool _computing_initial_residual;
 
-  MooseException _exception;
 public:
   /// Time stepping scheme class where the actual work is done
   TimeScheme * _time_scheme;

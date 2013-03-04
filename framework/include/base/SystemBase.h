@@ -24,6 +24,7 @@
 #include "SubProblem.h"
 #include "MooseVariableScalar.h"
 #include "ComputeInitialConditionThread.h"
+#include "MooseException.h"
 // libMesh
 #include "libmesh/equation_systems.h"
 #include "libmesh/dof_map.h"
@@ -414,7 +415,8 @@ public:
       _solution(*_sys.solution),
       _solution_old(*_sys.old_local_solution),
       _solution_older(*_sys.older_local_solution),
-      _dummy_sln(NULL)
+      _dummy_sln(NULL),
+      _exception(0)
   {
   }
 
@@ -586,6 +588,24 @@ protected:
   NumericVector<Number> * _dummy_sln;                     // to satisfy the interface
 
   std::vector<VarCopyInfo> _var_to_copy;
+
+  MooseException _exception;
 };
+
+
+// Parallel exception hadling
+
+#define PARALLEL_TRY        try
+#define PARALLEL_CATCH                                                                  \
+  catch (MooseException & e)                                                            \
+  {                                                                                     \
+    _exception = e;                                                                     \
+  }                                                                                     \
+  {                                                                                     \
+    Parallel::max<MooseException>(_exception);                                          \
+    if (_exception > 0)                                                                 \
+      throw _exception;                                                                 \
+  }
+
 
 #endif /* SYSTEMBASE_H */

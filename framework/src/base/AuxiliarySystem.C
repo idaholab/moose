@@ -321,26 +321,29 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
 void
 AuxiliarySystem::computeScalarVars(std::vector<AuxWarehouse> & auxs)
 {
-  // FIXME: run multi-threaded
-  THREAD_ID tid = 0;
   Moose::perf_log.push("update_aux_vars_scalar()","Solve");
-  if (auxs[tid].scalars().size() > 0)
-  {
-    _mproblem.reinitScalars(tid);
-
-    const std::vector<AuxScalarKernel *> & scalars = auxs[tid].scalars();
-    for (std::vector<AuxScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
+  PARALLEL_TRY {
+    // FIXME: run multi-threaded
+    THREAD_ID tid = 0;
+    if (auxs[tid].scalars().size() > 0)
     {
-      AuxScalarKernel * kernel = *it;
-      kernel->compute();
-    }
+      _mproblem.reinitScalars(tid);
 
-    for (std::map<std::string, MooseVariableScalar *>::iterator it = _scalar_vars[tid].begin(); it != _scalar_vars[tid].end(); ++it)
-    {
-      MooseVariableScalar * var = it->second;
-      var->insert(solution());
+      const std::vector<AuxScalarKernel *> & scalars = auxs[tid].scalars();
+      for (std::vector<AuxScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
+      {
+        AuxScalarKernel * kernel = *it;
+        kernel->compute();
+      }
+
+      for (std::map<std::string, MooseVariableScalar *>::iterator it = _scalar_vars[tid].begin(); it != _scalar_vars[tid].end(); ++it)
+      {
+        MooseVariableScalar * var = it->second;
+        var->insert(solution());
+      }
     }
   }
+  PARALLEL_CATCH;
   Moose::perf_log.pop("update_aux_vars_scalar()","Solve");
 }
 
@@ -357,20 +360,26 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
   }
 
   Moose::perf_log.push("update_aux_vars_nodal()","Solve");
-  if (auxs[0].activeNodalKernels().size() > 0 || have_block_kernels)
-  {
-    ConstNodeRange & range = *_mesh.getLocalNodeRange();
-    ComputeNodalAuxVarsThread navt(_mproblem, *this, auxs);
-    Threads::parallel_reduce(range, navt);
+  PARALLEL_TRY {
+    if (auxs[0].activeNodalKernels().size() > 0 || have_block_kernels)
+    {
+      ConstNodeRange & range = *_mesh.getLocalNodeRange();
+      ComputeNodalAuxVarsThread navt(_mproblem, *this, auxs);
+      Threads::parallel_reduce(range, navt);
+    }
   }
+  PARALLEL_CATCH;
   Moose::perf_log.pop("update_aux_vars_nodal()","Solve");
 
   //Boundary AuxKernels
   Moose::perf_log.push("update_aux_vars_nodal_bcs()","Solve");
-  // after converting this into NodeRange, we can run it in parallel
-  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-  ComputeNodalAuxBcsThread nabt(_mproblem, *this, auxs);
-  Threads::parallel_reduce(bnd_nodes, nabt);
+  PARALLEL_TRY {
+    // after converting this into NodeRange, we can run it in parallel
+    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+    ComputeNodalAuxBcsThread nabt(_mproblem, *this, auxs);
+    Threads::parallel_reduce(bnd_nodes, nabt);
+  }
+  PARALLEL_CATCH;
   Moose::perf_log.pop("update_aux_vars_nodal_bcs()","Solve");
 }
 
@@ -378,28 +387,31 @@ void
 AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
 {
   Moose::perf_log.push("update_aux_vars_elemental()","Solve");
-  bool element_auxs_to_compute = false;
+  PARALLEL_TRY {
+    bool element_auxs_to_compute = false;
 
-  for(unsigned int i=0; i<auxs.size(); i++)
-    element_auxs_to_compute |= auxs[i].allElementKernels().size();
+    for(unsigned int i=0; i<auxs.size(); i++)
+      element_auxs_to_compute |= auxs[i].allElementKernels().size();
 
-  if(element_auxs_to_compute)
-  {
-    ConstElemRange & range = *_mesh.getActiveLocalElementRange();
-    ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs);
-    Threads::parallel_reduce(range, eavt);
+    if(element_auxs_to_compute)
+    {
+      ConstElemRange & range = *_mesh.getActiveLocalElementRange();
+      ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs);
+      Threads::parallel_reduce(range, eavt);
+    }
+
+    bool bnd_auxs_to_compute = false;
+    for(unsigned int i=0; i<auxs.size(); i++)
+      bnd_auxs_to_compute |= auxs[i].allElementalBCs().size();
+    if(bnd_auxs_to_compute)
+    {
+      ConstBndElemRange & bnd_elems = *_mesh.getBoundaryElementRange();
+      ComputeElemAuxBcsThread eabt(_mproblem, *this, auxs);
+      Threads::parallel_reduce(bnd_elems, eabt);
+    }
+
   }
-
-  bool bnd_auxs_to_compute = false;
-  for(unsigned int i=0; i<auxs.size(); i++)
-    bnd_auxs_to_compute |= auxs[i].allElementalBCs().size();
-  if(bnd_auxs_to_compute)
-  {
-    ConstBndElemRange & bnd_elems = *_mesh.getBoundaryElementRange();
-    ComputeElemAuxBcsThread eabt(_mproblem, *this, auxs);
-    Threads::parallel_reduce(bnd_elems, eabt);
-  }
-
+  PARALLEL_CATCH;
   Moose::perf_log.pop("update_aux_vars_elemental()","Solve");
 }
 

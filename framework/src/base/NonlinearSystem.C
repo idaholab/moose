@@ -63,18 +63,6 @@
 #include "petscsnes.h"
 #endif
 
-#define PARALLEL_TRY        try
-#define PARALLEL_CATCH                                                                  \
-  catch (MooseException & e)                                                            \
-  {                                                                                     \
-    _exception = e;                                                                     \
-  }                                                                                     \
-  {                                                                                     \
-    Parallel::max<MooseException>(_exception);                                          \
-    if (_exception > 0)                                                                 \
-      throw _exception;                                                                 \
-  }
-
 
 namespace Moose {
   void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys)
@@ -134,7 +122,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _n_linear_iters(0),
     _final_residual(0.),
     _use_predictor(false),
-    _exception(0),
     _time_scheme(new TimeScheme(this))
 {
   _sys.nonlinear_solver->residual      = Moose::compute_residual;
