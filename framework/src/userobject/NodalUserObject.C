@@ -36,8 +36,10 @@ InputParameters validParams<NodalUserObject>()
 
 NodalUserObject::NodalUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
     UserObjectInterface(parameters),
+    Coupleable(parameters, true),
+    ScalarCoupleable(parameters),
+    MooseVariableDependencyInterface(),
     TransientInterface(parameters, name, "nodal_user_objects"),
     PostprocessorInterface(parameters),
     _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),

@@ -32,8 +32,10 @@ InputParameters validParams<NodalUserObject>();
 
 class NodalUserObject :
   public UserObject,
-  public CoupleableMooseVariableDependencyIntermediateInterface,
   public UserObjectInterface,
+  public Coupleable,
+  public ScalarCoupleable,
+  public MooseVariableDependencyInterface,
   public TransientInterface,
   protected PostprocessorInterface
 {

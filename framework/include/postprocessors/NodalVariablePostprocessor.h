@@ -26,7 +26,8 @@ template<>
 InputParameters validParams<NodalVariablePostprocessor>();
 
 class NodalVariablePostprocessor :
-  public NodalPostprocessor
+  public NodalPostprocessor,
+  public MooseVariableInterface
 {
 public:
   NodalVariablePostprocessor(const std::string & name, InputParameters parameters);

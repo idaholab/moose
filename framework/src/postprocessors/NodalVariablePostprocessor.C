@@ -27,6 +27,7 @@ InputParameters validParams<NodalVariablePostprocessor>()
 
 NodalVariablePostprocessor::NodalVariablePostprocessor(const std::string & name, InputParameters parameters) :
     NodalPostprocessor(name, parameters),
+    MooseVariableInterface(parameters, true),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.nodalSln())
 {
