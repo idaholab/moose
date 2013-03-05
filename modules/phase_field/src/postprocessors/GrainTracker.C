@@ -105,11 +105,12 @@ GrainTracker::finalize()
   unpack(_packed_data);
   mergeSets();
 
-  _packed_data.clear();
-
   Moose::perf_log.push("buildspheres()","GrainTracker");
   buildBoundingSpheres();                    // Build bounding sphere information
   Moose::perf_log.pop("buildspheres()","GrainTracker");
+
+  NodalFloodCount::updateFieldInfo();
+  _packed_data.clear();
   pack(_packed_data, true);                  // Pack the data again but this time add periodic neighbor information
   Parallel::allgather(_packed_data, false);
   unpack(_packed_data);
