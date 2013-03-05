@@ -177,7 +177,7 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
     const std::vector<BoundaryName> & bnds = nodal_pp->boundaries();
     const std::vector<SubdomainName> & blocks = nodal_pp->blocks();
 
-    if (blocks[0] == "ANY_BLOCK_ID")
+    if (blocks.size() == 0 || blocks[0] == "ANY_BLOCK_ID")
       for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
       {
         BoundaryID boundary_id;
