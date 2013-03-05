@@ -180,7 +180,7 @@ protected:
   std::vector<std::map<unsigned int, bool> > _nodes_visited;
 
   /**
-   * The bubble maps contain the raw flooded node information and eventually the unique grain numvers.  We have a vector
+   * The bubble maps contain the raw flooded node information and eventually the unique grain numbers.  We have a vector
    * of them so we can create one per variable if that level of detail is desired.
    */
   std::vector<std::map<unsigned int, int> > _bubble_maps;
