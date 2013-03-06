@@ -3357,8 +3357,17 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
 {
   std::vector<MooseEnum> & po = parameters().set<std::vector<MooseEnum> >("petsc_options");         // set because we need a writable reference
   for (unsigned int i = 0; i < petsc_options.size(); i++)
+  {
+    /**
+     * "-log_summary" cannot be used in the input file. This option needs to be set when PETSc is initialized
+     * which happens before the parser is even created.  We'll throw an error if somebody attempts to add this option later.
+     */
+    if (petsc_options[i] == "-log_summary")
+      mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
+
     if (find(po.begin(), po.end(), petsc_options[i]) == po.end())
       po.push_back(petsc_options[i]);
+  }
 
   std::vector<std::string> & pn = parameters().set<std::vector<std::string> >("petsc_inames");         // set because we need a writable reference
   std::vector<std::string> & pv = parameters().set<std::vector<std::string> >("petsc_values");         // set because we need a writable reference
