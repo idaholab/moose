@@ -170,6 +170,7 @@ AddCoupledEqSpeciesKernelsAction::act()
     coupled_v[i].resize(n_reactions);
     weight.resize(n_reactions);
 
+    primary_participation[i].resize(n_reactions, false);
     for (unsigned int j=0; j < n_reactions; j++)
     {
       for (unsigned int k=0; k < primary_species_involved[j].size(); k++)
