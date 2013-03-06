@@ -269,14 +269,14 @@ GrainTracker::trackGrains()
                     << "\nCreating new unique grain: " << _unique_grains.size() + 1
                     << "\nDEBUG INFO:\n";
 
-          for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[map_num].begin();
-               it1 != _bubble_sets[map_num].end(); ++it1)
+          for (std::list<BubbleData>::const_iterator debug_it1 = _bubble_sets[map_num].begin();
+               debug_it1 != _bubble_sets[map_num].end(); ++debug_it1)
           {
             unsigned local_counter = 0;
-            if (it1->_nodes.size() <= 30)
+            if (debug_it1->_nodes.size() <= 30)
             {
               std::cout << "Set: " << local_counter++ << "\n";
-              for (std::set<unsigned int>::iterator node_it = it1->_nodes.begin(); node_it != it1->_nodes.end(); ++node_it)
+              for (std::set<unsigned int>::iterator node_it = debug_it1->_nodes.begin(); node_it != debug_it1->_nodes.end(); ++node_it)
               {
                 std::cout << *node_it << " ";
                 std::pair<std::multimap<unsigned int, unsigned int>::const_iterator, std::multimap<unsigned int, unsigned int>::const_iterator> iters =
@@ -293,7 +293,6 @@ GrainTracker::trackGrains()
             }
           }
           std::cout << "\n*****************************************************************************\n";
-
           _unique_grains[_unique_grains.size() + 1] = new UniqueGrain(curr_var, sphere_ptrs, &it1->_nodes);
         }
         else
