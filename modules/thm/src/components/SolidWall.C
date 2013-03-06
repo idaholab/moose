@@ -39,13 +39,13 @@ SolidWall::addMooseObjects()
   {
     InputParameters params = _factory.getValidParams("OneDMassSolidWallBC");
     params.set<NonlinearVariableName>("variable") = FlowModel::RHO;
-    params.set<std::vector<unsigned int> >("boundary") = bnd_id;
+    params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
     _sim.addBoundaryCondition("OneDMassSolidWallBC", genName("bc", _id, "rho"), params);
   }
   {
     InputParameters params = _factory.getValidParams("OneDMomentumSolidWallBC");
     params.set<NonlinearVariableName>("variable") = FlowModel::RHOU;
-    params.set<std::vector<unsigned int> >("boundary") = bnd_id;
+    params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
     params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
 
     // coupling
@@ -60,7 +60,7 @@ SolidWall::addMooseObjects()
   {
     InputParameters params = _factory.getValidParams("OneDEnergySolidWallBC");
     params.set<NonlinearVariableName>("variable") = FlowModel::RHOE;
-    params.set<std::vector<unsigned int> >("boundary") = bnd_id;
+    params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
     params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
 
     // There is no coupling for the energy equation solid wall BC.
