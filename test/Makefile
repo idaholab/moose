@@ -22,17 +22,19 @@ else
 	MOOSE_DIR ?= $(ROOT_DIR)/moose
 endif
 
+MOOSE_TEST_DIR   ?= $(ROOT_DIR)/moose_test
+
 APPLICATION_NAME := moose_test
 
 # Note: There are no applications that depend on moose_test so the test_up and up
 # targets are not very useful here.  Instead we will test up like this is MOOSE
 DEP_APPS    ?= $(shell $(MOOSE_DIR)/scripts/find_dep_apps.py MOOSE~$(APPLICATION_NAME))
 
+###############################################################################
 include $(MOOSE_DIR)/build.mk
 include $(MOOSE_DIR)/moose.mk
-include $(MOOSE_DIR)/app.mk
+include $(MOOSE_TEST_DIR)/moose_test.mk
 
-# Include dependency files for moose_test
-moose_test_srcfiles := $(shell find $(CURR_DIR) -name "*.C")
-moose_test_deps     := $(patsubst %.C, %.$(obj-suffix).d, $(moose_test_srcfiles))
--include $(moose_test_deps)
+###############################################################################
+# Additional special case targets should be added here
+
