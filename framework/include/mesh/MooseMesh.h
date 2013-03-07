@@ -348,6 +348,14 @@ public:
 
   void changeBoundaryId(const boundary_id_type old_id, const boundary_id_type new_id, bool delete_prev);
 
+  /**
+   * Get the list of boundary ids associated with the given subdomain id.
+   *
+   * @param subdomain_id The subdomain ID you want to get the boundary ids for.
+   * @return All boundary IDs connected to elements in the give
+   */
+  const std::set<unsigned int> & getSubdomainBoundaryIds(unsigned int subdomain_id) { return _subdomain_boundary_ids[subdomain_id]; }
+
 protected:
   /// Convienence enums
   enum {X=0, Y, Z};
@@ -548,6 +556,9 @@ private:
 
   /// Holds mappings for volume to volume and parent side to child side
   std::map<std::pair<int, ElemType>, std::vector<std::pair<unsigned int, QpMap> > > _elem_type_to_coarsening_map;
+
+  /// Holds a map from subomdain ids to the boundary ids that are attached to it
+  std::map<unsigned int, std::set<unsigned int> > _subdomain_boundary_ids;
 };
 
 #endif /* MOOSEMESH_H */

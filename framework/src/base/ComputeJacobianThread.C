@@ -97,6 +97,37 @@ ComputeJacobianThread::subdomainChanged()
     needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
   }
 
+  // Boundary Condition Dependencies
+  const std::set<unsigned int> & subdomain_boundary_ids = _mesh.getSubdomainBoundaryIds(_subdomain);
+  for(std::set<unsigned int>::const_iterator id_it = subdomain_boundary_ids.begin();
+      id_it != subdomain_boundary_ids.end();
+      ++id_it)
+  {
+    std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(*id_it);
+    if (bcs.size() > 0)
+    {
+      for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
+      {
+        IntegratedBC * bc = (*it);
+        if (bc->shouldApply())
+        {
+          const std::set<MooseVariable *> & mv_deps = bc->getMooseVariableDependencies();
+          needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+        }
+      }
+    }
+  }
+
+  // DG Kernel dependencies
+  {
+    std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
+    for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
+    {
+      const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
+  }
+
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
 }
@@ -119,7 +150,6 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
   std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {
-    _fe_problem.prepareFace(elem, _tid);
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
     if (_subdomain != _old_subdomain)
@@ -147,7 +177,6 @@ ComputeJacobianThread::onInternalSide(const Elem *elem, unsigned int side)
     std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
     if (dgks.size() > 0)
     {
-      _fe_problem.prepareFace(elem, _tid);
       _fe_problem.reinitNeighbor(elem, side, _tid);
 
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);

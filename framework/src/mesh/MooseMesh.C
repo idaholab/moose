@@ -537,6 +537,17 @@ MooseMesh::cacheInfo()
   for (MeshBase::element_iterator el = _mesh.elements_begin(); el != _mesh.elements_end(); ++el)
   {
     Elem * elem = *el;
+
+    unsigned int subdomain_id = elem->subdomain_id();
+
+    for(unsigned int side=0; side<elem->n_sides(); side++)
+    {
+      std::vector<BoundaryID> boundaryids = boundary_ids(elem, side);
+
+      for(unsigned int i=0; i<boundaryids.size(); i++)
+        _subdomain_boundary_ids[subdomain_id].insert(boundaryids[i]);
+    }
+
     for(unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
     {
       Node & node = *elem->get_node(nd);

@@ -62,6 +62,21 @@ ComputeUserObjectsThread::subdomainChanged()
     needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
   }
 
+  // Boundary UserObject Dependencies
+  const std::set<unsigned int> & subdomain_boundary_ids = _mesh.getSubdomainBoundaryIds(_subdomain);
+  for(std::set<unsigned int>::const_iterator id_it = subdomain_boundary_ids.begin();
+      id_it != subdomain_boundary_ids.end();
+      ++id_it)
+  {
+    for (std::vector<SideUserObject *>::const_iterator side_UserObject_it = _user_objects[_tid].sideUserObjects(*id_it, _group).begin();
+         side_UserObject_it != _user_objects[_tid].sideUserObjects(*id_it, _group).end();
+         ++side_UserObject_it)
+    {
+      const std::set<MooseVariable *> & mv_deps = (*side_UserObject_it)->getMooseVariableDependencies();
+      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
+  }
+
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
 }
@@ -90,7 +105,6 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
 {
   if (_user_objects[_tid].sideUserObjects(bnd_id).size() > 0)
   {
-    _fe_problem.prepareFace(elem, _tid);
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
     _fe_problem.reinitMaterialsFace(_subdomain, side, _tid);
 
