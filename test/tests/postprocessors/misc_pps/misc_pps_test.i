@@ -11,12 +11,9 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = SECOND
     family = LAGRANGE
-
     [./InitialCondition]
       type = ConstantIC
       value = 0
@@ -29,7 +26,6 @@
     type = ParsedFunction
     value = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
   [../]
-
   [./exact_fn]
     type = ParsedFunction
     value = t*t*t*((x*x)+(y*y))
@@ -37,18 +33,14 @@
 []
 
 [Kernels]
-  active = 'diff ie ffn'
-
   [./ie]
     type = TimeDerivative
     variable = u
   [../]
-
   [./diff]
     type = Diffusion
     variable = u
   [../]
-
   [./ffn]
     type = UserForcingFunction
     variable = u
@@ -58,21 +50,18 @@
 
 [BCs]
   active = 'all'
-
   [./all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
   [../]
-
   [./left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
-
   [./right]
     type = DirichletBC
     variable = u
@@ -82,44 +71,39 @@
 []
 
 [Postprocessors]
+  # Should be zero since we aren't setting this inside any MooseObject
+  # This PPS will also always report zero in this test
   [./elapsed_time]
-    type = PrintElapsedTime
+    type = PrintRunTime
+    time_type = active
   [../]
-
   [./num_nonlinear_its]
     type = PrintNumNonlinearIters
   [../]
-
   [./num_linear_its]
     type = PrintNumLinearIters
   [../]
-  
   [./residual]
     type = PrintResidual
   [../]
-
-  # Should be zero since we aren't setting this inside any MooseObject
   [./reporter]
     type = Reporter
   [../]
-
-  # This PPS will also always report zero in this test
   [./empty]
     type = EmptyPostprocessor
   [../]
-
   [./side_flux_integral]
     type = SideFluxIntegral
     diffusivity = diffusivity
     variable = u
-    boundary = 2 #top
+    boundary = 2 # top
   [../]
 []
 
 [Materials]
   [./constant]
     type = GenericConstantMaterial
-    prop_names = 'diffusivity'
+    prop_names = diffusivity
     prop_values = 1
     block = 0
   [../]
@@ -127,9 +111,8 @@
 
 [Executioner]
   type = Transient
-  scheme = 'implicit-euler'
-  petsc_options = '-snes_mf_operator'
-
+  scheme = implicit-euler
+  petsc_options = -snes_mf_operator
   start_time = 0.0
   num_steps = 10
   dt = 0.25
@@ -142,3 +125,4 @@
   exodus = true
   perf_log = true
 []
+

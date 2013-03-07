@@ -12,21 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PRINTELAPSEDTIME_H
-#define PRINTELAPSEDTIME_H
+#ifndef PRINTRUNTIME_H
+#define PRINTRUNTIME_H
 
 #include "GeneralPostprocessor.h"
 
 //Forward Declarations
-class PrintElapsedTime;
+class PrintRunTime;
 
 template<>
-InputParameters validParams<PrintElapsedTime>();
+InputParameters validParams<PrintRunTime>();
 
-class PrintElapsedTime : public GeneralPostprocessor
+class PrintRunTime : public GeneralPostprocessor
 {
 public:
-  PrintElapsedTime(const std::string & name, InputParameters parameters);
+  PrintRunTime(const std::string & name, InputParameters parameters);
 
   virtual void initialize() {}
   virtual void execute() {}
@@ -35,6 +35,9 @@ public:
    * This will return the elapsed wall time.
    */
   virtual Real getValue();
+
+protected:
+  MooseEnum _time_type;
 };
 
-#endif //PRINTELAPSEDTIME_H
+#endif //PRINTRUNTIME_H

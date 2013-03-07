@@ -118,13 +118,15 @@
 #include "NodalVariableValue.h"
 #include "PrintDOFs.h"
 #include "PrintDT.h"
-#include "PrintElapsedTime.h"
+#include "PrintRunTime.h"
+#include "PrintPerfData.h"
 #include "PrintNumElems.h"
 #include "PrintNumNodes.h"
 #include "PrintNumNonlinearIters.h"
 #include "PrintNumLinearIters.h"
 #include "PrintResidual.h"
 #include "PrintScalarVariable.h"
+#include "PrintNumVars.h"
 #include "Reporter.h"
 #include "SideAverageValue.h"
 #include "SideFluxIntegral.h"
@@ -349,13 +351,15 @@ registerObjects(Factory & factory)
   registerPostprocessor(NodalVariableValue);
   registerPostprocessor(PrintDOFs);
   registerPostprocessor(PrintDT);
-  registerPostprocessor(PrintElapsedTime);
+  registerPostprocessor(PrintRunTime);
+  registerPostprocessor(PrintPerfData);
   registerPostprocessor(PrintNumElems);
   registerPostprocessor(PrintNumNodes);
   registerPostprocessor(PrintNumNonlinearIters);
   registerPostprocessor(PrintNumLinearIters);
   registerPostprocessor(PrintResidual);
   registerPostprocessor(PrintScalarVariable);
+  registerPostprocessor(PrintNumVars);
   registerPostprocessor(PlotFunction);
   registerPostprocessor(Reporter);
   registerPostprocessor(SideAverageValue);

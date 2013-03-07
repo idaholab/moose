@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = CheckFiles
+    input = print_perf_data.i
+    check_files = print_perf_data_out.csv
+  [../]
+[]
