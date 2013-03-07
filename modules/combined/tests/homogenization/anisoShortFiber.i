@@ -14,6 +14,9 @@
 
 [Mesh]
   file = anisoShortFiber.e
+  # To calculate matching values, refine the mesh one time.
+  # We use a coarse mesh for speed in this test.
+  # uniform_refine = 1
 []
 
 [Variables]
