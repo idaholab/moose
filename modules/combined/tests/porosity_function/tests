@@ -1,0 +1,12 @@
+[Tests]
+  [./test_function]
+    type = 'Exodiff'
+    input = 'porosity_function_test.i'
+    exodiff = 'function.e'
+  [../]
+  [./test_constant]
+    type = 'Exodiff'
+    input = 'porosity_constant_test.i'
+    exodiff = 'constant.e'
+  [../]
+[]
