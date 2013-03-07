@@ -12,7 +12,6 @@
 #include "HeatConduction.h"
 #include "HeatConductionImplicitEuler.h"
 #include "HeatConductionMaterial.h"
-#include "Porosity.h"
 #include "BulkCoolantBC.h"
 #include "ThermalContactAuxBCsAction.h"
 #include "ThermalContactAuxKernelsAction.h"
@@ -37,7 +36,6 @@ Elk::HeatConduction::registerObjects(Factory & factory)
   registerBoundaryCondition(BulkCoolantBC);
   registerMaterial(GapConductance);
   registerMaterial(HeatConductionMaterial);
-  registerMaterial(Porosity);
   registerDiracKernel(GapHeatPointSourceMaster);
   registerKernel(HomogenizationHeatConduction);
   registerPostprocessor(HomogenizedThermalConductivity);
