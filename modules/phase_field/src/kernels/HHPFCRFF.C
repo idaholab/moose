@@ -43,14 +43,10 @@ HHPFCRFF::precomputeQpResidual()
 Real
 HHPFCRFF::precomputeQpJacobian()
 {
-  //Assign the value of the derivative of the variable, whether coupled or not
-  Real Dvar;
   if (_has_coupled_var)
-    Dvar = 0.0;
-  else
-    Dvar = _phi[_j][_qp];
-  
-  return _kernel_sign*_prop[_qp]*Dvar;
+    return 0.0;
+
+  return _kernel_sign*_prop[_qp]*_phi[_j][_qp];
 }
 
 Real

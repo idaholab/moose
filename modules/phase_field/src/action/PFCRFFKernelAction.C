@@ -49,8 +49,9 @@ PFCRFFKernelAction::act()
     L_name.append(out.str());
     L_name.append("_real");
     real_v[l] = L_name;
+    //std::cout << "real_v[" << l << "] = " << L_name << std::endl;
   }
-  
+
   poly_params = _factory.getValidParams("CHPFCRFF");
   poly_params.set<NonlinearVariableName>("variable") = _n_name;
   poly_params.set<std::vector<std::string> >("v") = real_v;
