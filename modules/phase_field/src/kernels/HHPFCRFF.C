@@ -53,7 +53,7 @@ Real
 HHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (_has_coupled_var && jvar == _coupled_var_var)
-    return _kernel_sign*_prop[_qp]*_phi[_j][_qp]*_test[_j][_qp];
+    return _kernel_sign*_prop[_qp]*_phi[_j][_qp]*_test[_i][_qp];
 
   return 0.0;
 }
