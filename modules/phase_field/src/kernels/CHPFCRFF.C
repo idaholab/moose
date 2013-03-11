@@ -35,16 +35,29 @@ CHPFCRFF::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
   
   for (unsigned int i=0; i<_num_L; ++i)
     sum_grad_L += (*_grad_vals[i])[_qp];
-        
+
+  /* Real frac, dfrac;
+  if (_u[_qp] < -1.0 + 1e-9)
+  {
+    frac = 1.0/1.0e-9;
+    dfrac = -1.0/(1.0e-9*1.0e-9);
+  }
+  else
+  {
+    frac = 1.0/(1.0 + _u[_qp]);
+    dfrac = -1.0/((1.0 + _u[_qp])*(1.0 + _u[_qp]));
+    }*/
+  
   switch (type)
   {
   case Residual:
-    return _grad_u[_qp] - _u[_qp]*sum_grad_L;
+    
+    return _grad_u[_qp] - (1.0 + _u[_qp])*sum_grad_L;
+    //return _grad_u[_qp]*frac - sum_grad_L;
     
   case Jacobian:
-    return _grad_phi[_j][_qp] - _phi[_j][_qp]*sum_grad_L; 
-  
-    
+    return _grad_phi[_j][_qp] - _phi[_j][_qp]*sum_grad_L;
+    //return _grad_phi[_j][_qp]*frac + _phi[_j][_qp]*_grad_u[_qp]*dfrac;
   }
   
   mooseError("Invalid type passed in");
@@ -57,11 +70,11 @@ CHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
     if (jvar == _vals_var[i])
     {
       RealGradient dsum_grad_L = _grad_phi[_j][_qp];
-      
-      RealGradient dGradDFDCons = - _u[_qp]*dsum_grad_L;
+      RealGradient dGradDFDCons = - (1.0 + _u[_qp])*dsum_grad_L;
+      //RealGradient dGradDFDCons = - dsum_grad_L;
       
       return _M[_qp]*dGradDFDCons*_grad_test[_i][_qp];
-      }
+    }
 
   return 0.0;
 }
