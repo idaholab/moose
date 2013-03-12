@@ -26,6 +26,8 @@ protected:
 
 private:
 
+  MooseEnum _log_approach;
+  Real _tol;
   std::vector<unsigned int> _vals_var;
   std::vector<VariableGradient *> _grad_vals;
   unsigned int _num_L;

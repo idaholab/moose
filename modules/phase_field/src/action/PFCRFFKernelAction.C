@@ -12,6 +12,8 @@ InputParameters validParams<PFCRFFKernelAction>()
   params.addRequiredParam<std::string>("n_name","Variable name used for the n variable");
   params.addRequiredParam<std::string>("L_name_base","Base name for the complex L variables");
   params.addParam<std::string>("mob_name","M","The mobility used for n in this model");
+  MooseEnum log_options("tolerance, cancelation, expansion");
+  params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
   
   return params;
 }
@@ -56,6 +58,7 @@ PFCRFFKernelAction::act()
   poly_params.set<NonlinearVariableName>("variable") = _n_name;
   poly_params.set<std::vector<std::string> >("v") = real_v;
   poly_params.set<std::string>("mob_name") = getParam<std::string>("mob_name");
+  poly_params.set<MooseEnum>("log_approach") = getParam<MooseEnum>("log_approach");
     
   _problem->addKernel("CHPFCRFF", "CH_bulk_n", poly_params);
 
