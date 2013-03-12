@@ -30,7 +30,7 @@ COMPILER      = 'compiler'       # A test that runs only on a given compiler set
 MESH_MODE     = 'mesh_mode'      # A test that only runs on a given set of mesh modes 'ALL', 'SERIAL', and/or 'PARALLEL'
 PETSC_VERSION = 'petsc_version'  # A test that runs only on the matching PETSC version
 DTK           = 'dtk'            # A test that runs only if DTK is detected 'TRUE', 'FALSE'
-METHOD        = 'method'         # A test that only runs under an executable built by the specified method 'ALL', 'OPT', 'DBG', 'DEV'
+METHOD        = 'method'         # A test that only runs under an executable built by the specified method 'ALL', 'OPT', 'DBG', 'DEVEL', 'OPROF', 'PRO'
 LIBRARY_MODE  = 'library_mode'   # A test that only runs when libraries are built in a certain mode 'ALL', 'STATIC', 'DYNAMIC'
 
 EXODIFF       = 'exodiff'        # A list of files to exodiff

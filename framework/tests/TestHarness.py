@@ -540,7 +540,9 @@ class TestHarness:
     parser = OptionParser()
     parser.add_option('--opt', action='store_const', dest='method', const='opt', help='test the app_name-opt binary')
     parser.add_option('--dbg', action='store_const', dest='method', const='dbg', help='test the app_name-dbg binary')
-    parser.add_option('--dev', action='store_const', dest='method', const='dev', help='test the app_name-dev binary')
+    parser.add_option('--devel', action='store_const', dest='method', const='dev', help='test the app_name-devel binary')
+    parser.add_option('--oprof', action='store_const', dest='method', const='oprof', help='test the app_name-oprof binary')
+    parser.add_option('--pro', action='store_const', dest='method', const='pro', help='test the app_name-pro binary')
     parser.add_option('-j', '--jobs', action='store', type='int', dest='jobs', default=1,
                       help='run test binaries in parallel')
     parser.add_option('-e', action="store_true", dest="extra_info", default=False,
