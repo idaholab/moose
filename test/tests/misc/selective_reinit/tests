@@ -6,7 +6,7 @@
     max_parallel = 1
     max_time = 20
     compiler = 'GCC CLANG'
-    method = 'OPT'
+    method = 'OPT OPROF'
     no_valgrind = true
   [../]
 []

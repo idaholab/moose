@@ -58,7 +58,7 @@
     input = 'dt2_adapt.i'
     exodiff = 'out_dt2_adapt.e-s038'
     group = 'adaptive'
-    method = 'OPT'
+    method = 'OPT OPROF'
     no_valgrind = true
   [../]
 

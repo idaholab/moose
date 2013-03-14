@@ -18,7 +18,7 @@
     type = 'Exodiff'
     input = '2d_diffusion_test2.i'
     exodiff = 'out2.e'
-    method = 'OPT'
+    method = 'OPT OPROF'
     prereq = 'test_petsc_check'
   [../]
 
