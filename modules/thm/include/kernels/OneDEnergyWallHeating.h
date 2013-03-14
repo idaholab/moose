@@ -35,7 +35,7 @@ protected:
 
   // Parameters
   /// heat transfer area density, m^2 / m^3
-  Real _aw;
+  const Real & _aw;
   /// Wall temperature, K
   Real _Tw;
 
