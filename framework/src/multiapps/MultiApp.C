@@ -156,6 +156,12 @@ MultiApp::appUserObjectBase(unsigned int app, const std::string & name)
   return appProblem(app)->getUserObjectBase(name);
 }
 
+Real
+MultiApp::appPostprocessorValue(unsigned int app, const std::string & name)
+{
+  return appProblem(app)->getPostprocessorValue(name);
+}
+
 bool
 MultiApp::hasLocalApp(unsigned int global_app)
 {
@@ -243,6 +249,7 @@ MultiApp::buildComms()
         found_first = true;
         _first_local_app = app;
         _my_comm = app_comm; // All apps on this processor use the same comm
+        MPI_Comm_rank(_my_comm, (int*)&_my_rank);
       }
 
       _my_num_apps++;

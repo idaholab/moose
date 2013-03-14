@@ -81,6 +81,13 @@ public:
   const UserObject & appUserObjectBase(unsigned int app, const std::string & name);
 
   /**
+   * Get a Postprocessor value for a specified global app
+   * @param app The global app number you want to get a Postprocessor from.
+   * @param name The name of the Postprocessor.
+   */
+  Real appPostprocessorValue(unsigned int app, const std::string & name);
+
+  /**
    * @return Number of Global Apps in this MultiApp
    */
   unsigned int numGlobalApps() { return _total_num_apps; }
@@ -114,6 +121,12 @@ public:
    * @return The MPI comm for this MultiApp
    */
   MPI_Comm & comm() { return _my_comm; }
+
+  /**
+   * Whether or not this processor is the "root" processor for the sub communicator.
+   * The "root" processor has rank 0 in the sub communicator
+   */
+  bool isRootProcessor() { return _my_rank == 0; }
 
 protected:
   /**
@@ -173,6 +186,9 @@ protected:
 
   /// The mpi "rank" of this processor in the original communicator
   unsigned int _orig_rank;
+
+  /// The mpi "rank" of this processor in the sub communicator
+  unsigned int _my_rank;
 
   /// Pointers to each of the Apps
   std::vector<MooseApp *> _apps;

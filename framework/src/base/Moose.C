@@ -194,6 +194,7 @@
   #include "MultiAppDTKInterpolationTransfer.h"
   #include "MoabTransfer.h"
 #endif
+#include "MultiAppPostprocessorInterpolationTransfer.h"
 
 
 // Actions
@@ -425,6 +426,7 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppDTKInterpolationTransfer);
   registerTransfer(MoabTransfer);
 #endif
+  registerTransfer(MultiAppPostprocessorInterpolationTransfer);
 
   registered = true;
 }
