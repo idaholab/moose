@@ -11,6 +11,7 @@ InputParameters validParams<CHPFCRFF>()
   MooseEnum log_options("tolerance, cancelation, expansion");
   params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
   params.addParam<Real>("tol",1.0e-9,"Tolerance used when the tolerance approach is chosen");
+  params.addParam<Real>("n_exp_terms",4,"Number of terms used in the Taylor expansion of the natural log term");
 
   return params;
 }
@@ -18,7 +19,8 @@ InputParameters validParams<CHPFCRFF>()
 CHPFCRFF::CHPFCRFF(const std::string & name, InputParameters parameters)
     :CHBulk(name, parameters),
      _log_approach(getParam<MooseEnum>("log_approach")),
-     _tol(getParam<Real>("tol"))
+     _tol(getParam<Real>("tol")),
+     _n_exp_terms(getParam<Real>("n_exp_terms"))
 {
   _num_L = coupledComponents("v"); //Determine the number of L variables
   _grad_vals.resize(_num_L); //Resize variable array
@@ -29,18 +31,19 @@ CHPFCRFF::CHPFCRFF(const std::string & name, InputParameters parameters)
     _vals_var[i] = coupled("v",i);
     _grad_vals[i] = &coupledGradient("v", i);//Loop through grains and load coupled gradients into the arrays
   }
-  
 }
 
 RealGradient
 CHPFCRFF::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
 {
+
   RealGradient sum_grad_L;
   
   for (unsigned int i=0; i<_num_L; ++i)
     sum_grad_L += (*_grad_vals[i])[_qp];
   
   Real frac, dfrac;
+  Real ln_expansion = 0.0;
 
   switch(_log_approach)
   {
@@ -55,6 +58,9 @@ CHPFCRFF::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
       frac = 1.0/(1.0 + c);
       dfrac = -1.0/((1.0 + c)*(1.0 + c));
     }
+  case 2: //Approach using substitution
+    for (unsigned int i=1; i<_n_exp_terms; ++i)
+      ln_expansion += std::pow(-1,i+1)*std::pow(_u[_qp],i - 1);
   }
   
   switch (type)
@@ -68,7 +74,7 @@ CHPFCRFF::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
     case 1: //approach using cancelation from the mobility
       return grad_c - (1.0 + c)*sum_grad_L;
     case 2: //appraoch using substitution
-      return (1.0 - c + c*c)*grad_c - sum_grad_L;
+      return ln_expansion*grad_c - sum_grad_L;
     }
 
   case Jacobian:switch(_log_approach)
@@ -78,7 +84,10 @@ CHPFCRFF::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
     case 1: //approach using cancelation from the mobility
       return _grad_phi[_j][_qp] - _phi[_j][_qp]*sum_grad_L;
     case 2: //appraoch using substitution
-      return (1.0 - c + c*c)*_grad_phi[_j][_qp] + _phi[_j][_qp]*(-1.0 + 2.0*c)*grad_c;
+      Real Dln_expansion = 0.0;
+      for (unsigned int i=2; i<_n_exp_terms; ++i)
+        Dln_expansion += std::pow(-1,i+1)*(_n_exp_terms - 2.0)*std::pow(_u[_qp],static_cast<Real>(i - 2));
+      return ln_expansion*_grad_phi[_j][_qp] + _phi[_j][_qp]*Dln_expansion*grad_c;
     }
   }
   

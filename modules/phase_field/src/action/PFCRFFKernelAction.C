@@ -14,6 +14,8 @@ InputParameters validParams<PFCRFFKernelAction>()
   params.addParam<std::string>("mob_name","M","The mobility used for n in this model");
   MooseEnum log_options("tolerance, cancelation, expansion");
   params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
+  params.addParam<Real>("tol",1.0e-9,"Tolerance used when the tolerance approach is chosen");
+  params.addParam<Real>("n_exp_terms",4,"Number of terms used in the Taylor expansion of the natural log term");
   
   return params;
 }
@@ -59,6 +61,8 @@ PFCRFFKernelAction::act()
   poly_params.set<std::vector<std::string> >("v") = real_v;
   poly_params.set<std::string>("mob_name") = getParam<std::string>("mob_name");
   poly_params.set<MooseEnum>("log_approach") = getParam<MooseEnum>("log_approach");
+  poly_params.set<Real>("tol") = getParam<Real>("tol");
+  poly_params.set<Real>("n_exp_terms") = getParam<Real>("n_exp_terms");
     
   _problem->addKernel("CHPFCRFF", "CH_bulk_n", poly_params);
 
