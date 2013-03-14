@@ -196,6 +196,7 @@
 #endif
 #include "MultiAppPostprocessorInterpolationTransfer.h"
 #include "MultiAppVariableValueSampleTransfer.h"
+#include "MultiAppVariableValueSamplePostprocessorTransfer.h"
 
 
 // Actions
@@ -429,6 +430,7 @@ registerObjects(Factory & factory)
 #endif
   registerTransfer(MultiAppPostprocessorInterpolationTransfer);
   registerTransfer(MultiAppVariableValueSampleTransfer);
+  registerTransfer(MultiAppVariableValueSamplePostprocessorTransfer);
 
   registered = true;
 }

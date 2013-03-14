@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MultiAppVariableValueSampleTransfer.h"
+#include "MultiAppVariableValueSamplePostprocessorTransfer.h"
 
 // Moose
 #include "MooseTypes.h"
@@ -23,23 +23,23 @@
 #include "libmesh/system.h"
 
 template<>
-InputParameters validParams<MultiAppVariableValueSampleTransfer>()
+InputParameters validParams<MultiAppVariableValueSamplePostprocessorTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
-  params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
+  params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor in the MultiApp to transfer the value to.  This should most likely be a Reporter Postprocessor.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
   return params;
 }
 
-MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(const std::string & name, InputParameters parameters) :
+MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePostprocessorTransfer(const std::string & name, InputParameters parameters) :
     MultiAppTransfer(name, parameters),
-    _to_var_name(getParam<AuxVariableName>("variable")),
+    _postprocessor_name(getParam<PostprocessorName>("postprocessor")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
 }
 
 void
-MultiAppVariableValueSampleTransfer::execute()
+MultiAppVariableValueSamplePostprocessorTransfer::execute()
 {
   switch(_direction)
   {
@@ -79,73 +79,15 @@ MultiAppVariableValueSampleTransfer::execute()
         }
 
         if(_multi_app->hasLocalApp(i))
-        {
-          MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-
-          // Loop over the master nodes and set the value of the variable
-          System * to_sys = find_sys(_multi_app->appProblem(i)->es(), _to_var_name);
-
-          unsigned int sys_num = to_sys->number();
-          unsigned int var_num = to_sys->variable_number(_to_var_name);
-
-          NumericVector<Real> & solution = *to_sys->solution;
-
-          MooseMesh & mesh = _multi_app->appProblem(i)->mesh();
-
-          MeshBase::const_node_iterator node_it = mesh.local_nodes_begin();
-          MeshBase::const_node_iterator node_end = mesh.local_nodes_end();
-
-          for(; node_it != node_end; ++node_it)
-          {
-            Node * node = *node_it;
-
-            if(node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
-            {
-              // The zero only works for LAGRANGE!
-              unsigned int dof = node->dof_number(sys_num, var_num, 0);
-
-              solution.set(dof, value);
-            }
-          }
-          solution.close();
-          _multi_app->appProblem(i)->es().update();
-
-          // Swap back
-          Moose::swapLibMeshComm(swapped);
-        }
+          _multi_app->appProblem(i)->getPostprocessorValue(_postprocessor_name) = value;
       }
 
       break;
     }
     case FROM_MULTIAPP:
     {
-      mooseError("Doesn't make sense to transfer a sampled variable's value from a MultiApp!!");
+      mooseError("Can't transfer a variable value from a MultiApp to a Postprocessor in the Master.");
       break;
     }
   }
-}
-
-/**
- * Small helper function for finding the system containing the variable.
- *
- * Note that this implies that variable names are unique across all systems!
- */
-System *
-MultiAppVariableValueSampleTransfer::find_sys(EquationSystems & es, std::string & var_name)
-{
-  System * sys = NULL;
-
-  // Find the system this variable is from
-  for(unsigned int i=0; i<es.n_systems(); i++)
-  {
-    if(es.get_system(i).has_variable(var_name))
-    {
-      sys = &es.get_system(i);
-      break;
-    }
-  }
-
-  mooseAssert(sys, "Unable to find variable " + var_name);
-
-  return sys;
 }

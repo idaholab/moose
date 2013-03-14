@@ -48,6 +48,9 @@ protected:
 
   PostprocessorName _postprocessor;
   AuxVariableName _to_var_name;
+
+  unsigned int _num_points;
+  unsigned int _power;
 };
 
 #endif /* MULTIAPPPOSTPROCESSORINTERPOLATIONTRANSFER_H */

@@ -30,6 +30,9 @@ template<>
 InputParameters validParams<MultiApp>()
 {
   InputParameters params = validParams<MooseObject>();
+
+  params.addPrivateParam<bool>("use_displaced_mesh", false);
+
   params.addRequiredParam<std::string>("app_type", "The type of application to build.");
   params.addRequiredParam<std::vector<Real> >("positions", "The positions of the App locations.  Each set of 3 values will represent a Point.");
   params.addRequiredParam<std::vector<std::string> >("input_files", "The input file for each App.  If this parameter only contains one input file it will be used for all of the Apps.");
