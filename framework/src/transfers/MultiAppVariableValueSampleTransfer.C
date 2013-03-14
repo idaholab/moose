@@ -71,7 +71,7 @@ MultiAppVariableValueSampleTransfer::execute()
           {
             from_sub_problem.reinitElemPhys(elem, point_vec, 0);
 
-            mooseAssert(_u.size() == 1, "No values in u!");
+            mooseAssert(from_var.sln().size() == 1, "No values in u!");
             value = from_var.sln()[0];
           }
 
