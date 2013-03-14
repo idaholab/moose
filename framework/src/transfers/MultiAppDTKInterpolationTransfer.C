@@ -12,12 +12,15 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "libmesh/libmesh_config.h"
+
 #ifdef LIBMESH_HAVE_DTK
 
 #include "MultiAppDTKInterpolationTransfer.h"
 
 // Moose
 #include "MooseTypes.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<MultiAppDTKInterpolationTransfer>()

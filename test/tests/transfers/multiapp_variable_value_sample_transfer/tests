@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'master.i'
+    exodiff = 'multi_out0.e multi_out1.e'
+  [../]
+[]

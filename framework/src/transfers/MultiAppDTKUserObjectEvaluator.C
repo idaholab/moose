@@ -11,9 +11,17 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+#include "libmesh/libmesh_config.h"
+
 #ifdef LIBMESH_HAVE_DTK
 
 #include "MultiAppDTKUserObjectEvaluator.h"
+
+// Moose
+#include "UserObject.h"
+#include "Executioner.h"
+#include "FEProblem.h"
 
 #include <Teuchos_DefaultComm.hpp>
 

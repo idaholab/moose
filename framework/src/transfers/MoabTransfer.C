@@ -12,9 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "libmesh/libmesh_config.h"
+
 #ifdef LIBMESH_HAVE_DTK
 
 #include "MoabTransfer.h"
+
+#include "FEProblem.h"
 
 #include "libmesh/dtk_adapter.h"
 

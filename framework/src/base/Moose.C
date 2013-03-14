@@ -195,6 +195,7 @@
   #include "MoabTransfer.h"
 #endif
 #include "MultiAppPostprocessorInterpolationTransfer.h"
+#include "MultiAppVariableValueSampleTransfer.h"
 
 
 // Actions
@@ -427,6 +428,7 @@ registerObjects(Factory & factory)
   registerTransfer(MoabTransfer);
 #endif
   registerTransfer(MultiAppPostprocessorInterpolationTransfer);
+  registerTransfer(MultiAppVariableValueSampleTransfer);
 
   registered = true;
 }

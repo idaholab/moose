@@ -21,6 +21,9 @@
 
 #ifdef LIBMESH_HAVE_DTK
 
+// Moose Includes
+#include "MooseError.h"
+
 #include "DTKInterpolationHelper.h"
 
 #include "libmesh/system.h"

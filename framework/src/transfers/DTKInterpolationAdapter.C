@@ -21,6 +21,8 @@
 
 #ifdef LIBMESH_HAVE_DTK
 
+#include "Moose.h"
+
 #include "DTKInterpolationEvaluator.h"
 #include "DTKInterpolationAdapter.h"
 
