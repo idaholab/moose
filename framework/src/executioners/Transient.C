@@ -393,6 +393,10 @@ Transient::computeConstrainedDT()
   if(multi_app_dt < dt_cur)
     dt_cur = multi_app_dt;
 
+  multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP);
+  if(multi_app_dt < dt_cur)
+    dt_cur = multi_app_dt;
+
   return dt_cur;
 
 }

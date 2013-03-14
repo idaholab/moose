@@ -191,6 +191,8 @@
 // Transfers
 #ifdef LIBMESH_HAVE_DTK
   #include "MultiAppDTKUserObjectTransfer.h"
+  #include "MultiAppDTKInterpolationTransfer.h"
+  #include "MoabTransfer.h"
 #endif
 
 
@@ -420,6 +422,8 @@ registerObjects(Factory & factory)
   // Transfers
 #ifdef LIBMESH_HAVE_DTK
   registerTransfer(MultiAppDTKUserObjectTransfer);
+  registerTransfer(MultiAppDTKInterpolationTransfer);
+  registerTransfer(MoabTransfer);
 #endif
 
   registered = true;
@@ -655,6 +659,28 @@ setSolverDefaults(FEProblem & problem)
 #ifdef LIBMESH_HAVE_PETSC
   Moose::PetscSupport::petscSetDefaults(problem);
 #endif //LIBMESH_HAVE_PETSC
+}
+
+MPI_Comm
+swapLibMeshComm(MPI_Comm new_comm)
+{
+  MPI_Comm old_comm = libMesh::COMM_WORLD;
+  libMesh::COMM_WORLD = new_comm;
+
+  int pid;
+  MPI_Comm_rank(new_comm, &pid);
+
+  int n_procs;
+  MPI_Comm_size(new_comm, &n_procs);
+
+  libMesh::libMeshPrivateData::_processor_id = pid;
+  libMesh::libMeshPrivateData::_n_processors = n_procs;
+
+  Parallel::Communicator communicator(new_comm);
+
+  libMesh::CommWorld = communicator;
+
+  return old_comm;
 }
 
 

@@ -20,6 +20,7 @@
 #include "ExodusOutput.h"
 #include "NemesisOutput.h"
 #include "GMVOutput.h"
+#include "VTKOutput.h"
 #include "XDAOutput.h"
 #include "TecplotOutput.h"
 
@@ -78,6 +79,10 @@ Output::add(Output::Type type, bool output_input)
 
   case GMV:
     o = new GMVOutput(_eq);
+    break;
+
+  case VTK:
+    o = new VTKOutput(_eq);
     break;
 
   case TECPLOT:

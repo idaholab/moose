@@ -82,6 +82,10 @@ MultiAppDTKUserObjectEvaluator::createSourceGeometry( const Teuchos::RCP<const T
     Point min = bbox.min();
     Point max = bbox.max();
 
+    std::cout<<"min: "<<min<<std::endl;
+    std::cout<<"max: "<<max<<std::endl;
+
+
     Point inflation_amount = (max-min)*inflation;
 
     Point inflated_min = min - inflation_amount;
@@ -90,8 +94,8 @@ MultiAppDTKUserObjectEvaluator::createSourceGeometry( const Teuchos::RCP<const T
     // This is where the app is located.  We need to shift by this amount.
     Point p = _multi_app.position(global_app);
 
-    Point shifted_min;
-    Point shifted_max;
+    Point shifted_min = inflated_min;
+    Point shifted_max = inflated_max;
 
     // If the problem is RZ then we're going to invent a box that would cover the whole "3D" app
     // FIXME: Assuming all subdomains are the same coordinate system type!
@@ -109,6 +113,8 @@ MultiAppDTKUserObjectEvaluator::createSourceGeometry( const Teuchos::RCP<const T
     // Shift them to the position they're supposed to be
     shifted_min += p;
     shifted_max += p;
+
+    std::cout<<shifted_min<<"  "<<shifted_max<<std::endl;
 
     _boxes[app] = DataTransferKit::Box(shifted_min(0), shifted_min(1), shifted_min(2),
                                        shifted_max(0), shifted_max(1), shifted_max(2));

@@ -3,6 +3,7 @@
 #
 moose_SRC_DIRS := $(MOOSE_DIR)/src
 moose_SRC_DIRS += $(MOOSE_DIR)/contrib/mtwist-1.1
+moose_SRC_DIRS += $(MOOSE_DIR)/contrib/dtk_moab
 
 #
 # pcre
@@ -74,8 +75,11 @@ $(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects) $(pcre_LIB)
 
 # include MOOSE dep files. Note: must use -include for deps, since they don't exist for first time builds.
 -include $(moose_deps)
+
 -include $(wildcard $(MOOSE_DIR)/contrib/mtwist-1.1/src/*.d)
+-include $(wildcard $(MOOSE_DIR)/contrib/dtk_moab/src/*.d)
 -include $(wildcard $(MOOSE_DIR)/contrib/pcre/src/*.d)
+
 ifdef PRECOMPILED
 -include $(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch.d
 endif

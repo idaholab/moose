@@ -81,6 +81,11 @@ public:
   const UserObject & appUserObjectBase(unsigned int app, const std::string & name);
 
   /**
+   * @return Number of Global Apps in this MultiApp
+   */
+  unsigned int numGlobalApps() { return _total_num_apps; }
+
+  /**
    * @return Number of Apps on local processor.
    */
   unsigned int numLocalApps() { return _my_num_apps; }
@@ -91,22 +96,32 @@ public:
   unsigned int firstLocalApp() { return _first_local_app; }
 
   /**
+   * Whether or not the given global app number is on this processor.
+   * @param app The global app number in question
+   * @return True if the global app is on this processor
+   */
+  bool hasLocalApp(unsigned int global_app);
+
+  /**
    * The physical position of a global App number
    * @param app The global app number you want the position for.
    * @return the position
    */
   Point position(unsigned int app) { return _positions[app]; }
 
+  /**
+   * Get the MPI communicator this MultiApp is operating on.
+   * @return The MPI comm for this MultiApp
+   */
+  MPI_Comm & comm() { return _my_comm; }
+
 protected:
   /**
-   * Create an MPI communicator suitable for all of these apps.
+   * Create an MPI communicator suitable for each app.
+   *
+   * Also find out which communicator we are using and what our first local app is.
    */
-  void buildComm();
-
-  /**
-   * Swap the libMesh MPI communicator out for ours.
-   */
-  MPI_Comm swapLibMeshComm(MPI_Comm new_comm);
+  void buildComms();
 
   /**
    * Map a global App number to the local number.
@@ -144,6 +159,9 @@ protected:
   /// The number of the first app on this processor
   unsigned int _first_local_app;
 
+  /// MPI communicators for each global app
+  std::vector<MPI_Comm> _app_comms;
+
   /// The comm that was passed to us specifying our pool of processors
   MPI_Comm _orig_comm;
 
@@ -154,7 +172,7 @@ protected:
   unsigned int _orig_num_procs;
 
   /// The mpi "rank" of this processor in the original communicator
-  unsigned int _orig_pid;
+  unsigned int _orig_rank;
 
   /// Pointers to each of the Apps
   std::vector<MooseApp *> _apps;

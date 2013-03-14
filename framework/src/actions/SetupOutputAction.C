@@ -33,6 +33,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("exodus", false, "Specifies that you would like Exodus output solution file(s)");
   params.addParam<bool>("nemesis", false, "Specifies that you would like Nemesis output solution file(s)");
   params.addParam<bool>("gmv", false, "Specifies that you would like GMV output solution file(s)");
+  params.addParam<bool>("vtk", false, "Specifies that you would like VTK output solution file(s)");
   params.addParam<bool>("tecplot", false, "Specifies that you would like Tecplot output solution files(s)");
   params.addParam<bool>("tecplot_binary", false, "Specifies that you would like Tecplot binary output solution files(s)");
   params.addParam<bool>("xda", false, "Specifies that you would like xda output solution files(s)");
@@ -64,7 +65,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<unsigned int>("num_restart_files", 0, "Number of the restart files to save (0 = no restart files)");
 
   params.addParamNamesToGroup("interval time_interval output_displaced output_solution_history print_linear_residuals iteration_plot_start_time elemental_as_nodal exodus_inputfile_output output_es_info output_variables hidden_variables", "Advanced");
-  params.addParamNamesToGroup("nemesis gmv tecplot tecplot_binary xda", "Format");
+  params.addParamNamesToGroup("nemesis gmv vtk tecplot tecplot_binary xda", "Format");
   params.addParamNamesToGroup("screen_interval postprocessor_screen max_pps_rows_screen postprocessor_csv postprocessor_gnuplot gnuplot_format", "Postprocessor");
   params.addParamNamesToGroup("perf_log show_setup_log_early", "Logging");
   params.addParamNamesToGroup("num_restart_files", "Restart");
@@ -100,6 +101,7 @@ SetupOutputAction::setupOutputObject(Output &output, InputParameters & params)
   }
   if (params.get<bool>("nemesis")) output.add(Output::NEMESIS);
   if (params.get<bool>("gmv")) output.add(Output::GMV);
+  if (params.get<bool>("vtk")) output.add(Output::VTK);
   if (params.get<bool>("tecplot")) output.add(Output::TECPLOT);
   if (params.get<bool>("tecplot_binary")) output.add(Output::TECPLOT_BIN);
   if (params.get<bool>("xda")) output.add(Output::XDA);

@@ -31,3 +31,11 @@ exodiff/
   |* Copyright: Sandia Corportation                                          *|
   |* License: bsd http://www.linfo.org/bsdlicense.html                       *|
   /***************************************************************************\
+
+dtk_moab/
+  /***************************************************************************\
+  |* MOAB DTK Adapters from DataTransferKit                                  *|
+  |*-------------------------------------------------------------------------*|
+  |* Copyright (c) 2012, Stuart R. Slattery                                  *|
+  |* License: bsd style http://www.linfo.org/bsdlicense.html                 *|
+  /***************************************************************************\

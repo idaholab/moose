@@ -34,6 +34,7 @@ public:
     EXODUS,
     NEMESIS,
     GMV,
+    VTK,
     TECPLOT,
     TECPLOT_BIN,
     XDA

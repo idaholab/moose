@@ -61,6 +61,11 @@ void registerActions(Syntax & syntax, ActionFactory & action_factory);
 
 void setSolverDefaults(FEProblem & problem);
 
+/**
+ * Swap the libMesh MPI communicator out for ours.
+ */
+MPI_Comm swapLibMeshComm(MPI_Comm new_comm);
+
 } // namespace Moose
 
 

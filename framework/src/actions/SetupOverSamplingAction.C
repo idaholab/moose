@@ -36,6 +36,7 @@ InputParameters validParams<SetupOverSamplingAction>()
   params.addParam<bool>("exodus", false, "Specifies that you would like Exodus output solution file(s)");
   params.addParam<bool>("nemesis", false, "Specifies that you would like Nemesis output solution file(s)");
   params.addParam<bool>("gmv", false, "Specifies that you would like GMV output solution file(s)");
+  params.addParam<bool>("vtk", false, "Specifies that you would like VTK output solution file(s)");
   params.addParam<bool>("tecplot", false, "Specifies that you would like Tecplot output solution files(s)");
   params.addParam<bool>("tecplot_binary", false, "Specifies that you would like Tecplot binary output solution files(s)");
   params.addParam<bool>("xda", false, "Specifies that you would like xda output solution files(s)");

@@ -31,7 +31,7 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     MultiApp(name, parameters),
     TransientInterface(parameters, name, "multiapps")
 {
-  MPI_Comm swapped = swapLibMeshComm(_my_comm);
+  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   _transient_executioners.resize(_my_num_apps);
   // Grab Transient Executioners from each app
@@ -48,12 +48,12 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
   }
 
   // Swap back
-  swapLibMeshComm(swapped);
+  Moose::swapLibMeshComm(swapped);
 }
 
 TransientMultiApp::~TransientMultiApp()
 {
-  MPI_Comm swapped = swapLibMeshComm(_my_comm);
+  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   for(unsigned int i=0; i<_my_num_apps; i++)
   {
@@ -62,13 +62,13 @@ TransientMultiApp::~TransientMultiApp()
   }
 
   // Swap back
-  swapLibMeshComm(swapped);
+  Moose::swapLibMeshComm(swapped);
 }
 
 void
 TransientMultiApp::solveStep()
 {
-  MPI_Comm swapped = swapLibMeshComm(_my_comm);
+  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   int rank;
   MPI_Comm_rank(_orig_comm, &rank);
@@ -81,13 +81,13 @@ TransientMultiApp::solveStep()
   }
 
   // Swap back
-  swapLibMeshComm(swapped);
+  Moose::swapLibMeshComm(swapped);
 }
 
 Real
 TransientMultiApp::computeDT()
 {
-  MPI_Comm swapped = swapLibMeshComm(_my_comm);
+  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   Real smallest_dt = std::numeric_limits<Real>::max();
 
@@ -100,7 +100,7 @@ TransientMultiApp::computeDT()
   }
 
   // Swap back
-  swapLibMeshComm(swapped);
+  Moose::swapLibMeshComm(swapped);
 
   Parallel::min(smallest_dt);
 
