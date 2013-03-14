@@ -210,7 +210,7 @@ protected:
 
   Factory _factory;
 
-private:
+protected:
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
   bool _ready_to_exit;
