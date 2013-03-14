@@ -16,6 +16,7 @@
 
 // Moose
 #include "MooseTypes.h"
+#include "FEProblem.h"
 
 // libMesh
 #include "libmesh/meshfree_interpolation.h"
@@ -95,7 +96,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
         {
           Node * node = *node_it;
 
-          if(node->n_dofs(sys_num, var_num) > 0); // If this variable has dofs at this node
+          if(node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
           {
             std::vector<Point> pts;
             std::vector<Number> vals;
