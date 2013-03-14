@@ -39,16 +39,7 @@ public:
   virtual void reinit();
   virtual void computeOffDiagJacobian(unsigned int jvar);
 
-  /**
-   * The variable this kernel is constraining.
-   */
-  MooseVariable & cedVariable() { return _ced_var; }
-
 protected:
-  /// Constrained variable (i.e. variable which the LM is constraining)
-  MooseVariable & _ced_var;
-  /// Holds the solution of CED variable
-  VariableValue & _u_ced;
   /// List of node IDs
   std::vector<unsigned int> _node_ids;
 };

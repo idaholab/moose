@@ -19,7 +19,6 @@ template<>
 InputParameters validParams<NodalScalarKernel>()
 {
   InputParameters params = validParams<ScalarKernel>();
-  params.addRequiredParam<NonlinearVariableName>("ced_variable", "The name of the variable this kernel is constraining");
   params.addRequiredParam<std::vector<unsigned int> >("nodes", "Node ids");
   return params;
 }
@@ -28,8 +27,6 @@ NodalScalarKernel::NodalScalarKernel(const std::string & name, InputParameters p
     ScalarKernel(name, parameters),
     Coupleable(parameters, true),
     MooseVariableDependencyInterface(),
-    _ced_var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("ced_variable"))),
-    _u_ced(_ced_var.nodalSln()),
     _node_ids(getParam<std::vector<unsigned int> >("nodes"))
 {
   // Fill in the MooseVariable dependencies
