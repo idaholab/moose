@@ -23,7 +23,7 @@ protected:
 
   std::string _fuel_type;
 
-  Real _power_fraction;
+  const Real & _power_fraction;
   VariableValue & _total_power;
   PostprocessorValue & _fuel_volume;
   Function & _power_shape_function;
