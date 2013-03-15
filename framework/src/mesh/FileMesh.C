@@ -49,7 +49,7 @@ FileMesh::FileMesh(const std::string & name, InputParameters parameters) :
 }
 
 FileMesh::FileMesh(const FileMesh & other_mesh) :
-    MooseMesh(*this),
+    MooseMesh(other_mesh),
     _file_name(other_mesh._file_name)
 {
 }
