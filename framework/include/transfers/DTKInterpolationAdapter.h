@@ -36,6 +36,7 @@
 
 #include <Teuchos_RCP.hpp>
 #include <Teuchos_ArrayRCP.hpp>
+#include <Teuchos_DefaultMpiComm.hpp>
 
 namespace libMesh {
 
