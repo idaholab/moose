@@ -124,15 +124,15 @@ DTKInterpolationHelper::transferWithOffset(unsigned int from, unsigned int to, c
 
     // The tolerance here is for the "contains_point()" implementation in DTK.  Set a larger value for a looser tolerance...
     if(from_mpi_comm && to_mpi_comm)
-      map->setup(from_adapter->get_mesh_manager(), to_adapter->get_target_coords(), 50*Teuchos::ScalarTraits<double>::eps());
+      map->setup(from_adapter->get_mesh_manager(), to_adapter->get_target_coords(), 200*Teuchos::ScalarTraits<double>::eps());
     else if(from_mpi_comm)
       map->setup(from_adapter->get_mesh_manager(),
                  Teuchos::RCP<DataTransferKit::FieldManager<DTKInterpolationAdapter::MeshContainerType> >(),
-                 50*Teuchos::ScalarTraits<double>::eps());
+                 200*Teuchos::ScalarTraits<double>::eps());
     else if(to_mpi_comm)
       map->setup(Teuchos::RCP<DataTransferKit::MeshManager<DTKInterpolationAdapter::MeshContainerType> >(),
                  to_adapter->get_target_coords(),
-                 50*Teuchos::ScalarTraits<double>::eps());
+                 200*Teuchos::ScalarTraits<double>::eps());
   }
 
   DTKInterpolationAdapter::RCP_Evaluator from_evaluator;
