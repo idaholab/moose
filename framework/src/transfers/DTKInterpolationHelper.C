@@ -88,13 +88,25 @@ DTKInterpolationHelper::transferWithOffset(unsigned int from, unsigned int to, c
   if(to_mpi_comm)
     to_es = &to_var->system()->get_equation_systems();
 
+  unsigned int dim = 3;
+
+  if(from_es && to_es && (from_es->get_mesh().mesh_dimension() < to_es->get_mesh().mesh_dimension()))
+    mooseError("Receiving system dimension should be less than or equal to the sending system dimension!");
+
+  if(from_es && to_es)
+    dim = std::max(from_es->get_mesh().mesh_dimension(), to_es->get_mesh().mesh_dimension());
+  else if(from_es)
+    dim = from_es->get_mesh().mesh_dimension();
+  else
+    dim = to_es->get_mesh().mesh_dimension();
+
   // Possibly make an Adapter for from_es
   if(from_mpi_comm && adapters.find(from_es) == adapters.end())
-    adapters[from_es] = new DTKInterpolationAdapter(from_comm, *from_es, from_offset);
+    adapters[from_es] = new DTKInterpolationAdapter(from_comm, *from_es, from_offset, dim);
 
   // Possibly make an Adapter for to_es
   if(to_mpi_comm && adapters.find(to_es) == adapters.end())
-    adapters[to_es] = new DTKInterpolationAdapter(to_comm, *to_es, to_offset);
+    adapters[to_es] = new DTKInterpolationAdapter(to_comm, *to_es, to_offset, dim);
 
   DTKInterpolationAdapter * from_adapter = NULL;
   DTKInterpolationAdapter * to_adapter = NULL;
@@ -110,9 +122,6 @@ DTKInterpolationHelper::transferWithOffset(unsigned int from, unsigned int to, c
   // If we haven't created a map for this pair of EquationSystems yet, do it now
   if(dtk_maps.find(from_to) == dtk_maps.end())
   {
-    // This check is kind of weird because we can only do the check in the instance that this processor knows something about both domains
-    mooseAssert(!from_mpi_comm || !to_mpi_comm || (from_es->get_mesh().mesh_dimension() == to_es->get_mesh().mesh_dimension()), "Dimension of meshes in both systems must be the same!");
-
     shared_domain_map_type * map = NULL;
 
     if(from_mpi_comm)

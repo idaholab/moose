@@ -38,7 +38,7 @@
 namespace libMesh
 {
 
-DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::MpiComm<int> > in_comm, EquationSystems & in_es, const Point & offset):
+DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::MpiComm<int> > in_comm, EquationSystems & in_es, const Point & offset, unsigned int from_dim):
     comm(in_comm),
     es(in_es),
     _offset(offset),
@@ -55,6 +55,8 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   vertices.resize(num_local_nodes);
   Teuchos::ArrayRCP<double> coordinates(num_local_nodes * dim);
 
+  Teuchos::ArrayRCP<double> target_coordinates(num_local_nodes * from_dim);
+
   // Fill in the vertices and coordinates
   {
     unsigned int i = 0;
@@ -69,6 +71,9 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
 
       for(unsigned int j=0; j<dim; j++)
         coordinates[(j*num_local_nodes) + i] = node(j) + offset(j);
+
+      for(unsigned int j=0; j<from_dim; j++)
+        target_coordinates[(j*num_local_nodes) + i] = node(j) + offset(j);
 
       i++;
     }
@@ -168,7 +173,20 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   mesh_manager = Teuchos::rcp(new DataTransferKit::MeshManager<MeshContainerType>(mesh_blocks, comm, dim) );
 
   // Pack the coordinates into a field, this will be the positions we'll ask for other systems fields at
-  target_coords = Teuchos::rcp(new DataTransferKit::FieldManager<MeshContainerType>(mesh_container, comm));
+  if(from_dim == dim)
+    target_coords = Teuchos::rcp(new DataTransferKit::FieldManager<MeshContainerType>(mesh_container, comm));
+  else
+  {
+    Teuchos::ArrayRCP<int> empty_elements(0);
+    Teuchos::ArrayRCP<int> empty_connectivity(0);
+
+    Teuchos::RCP<MeshContainerType> coords_only_mesh_container = Teuchos::rcp(
+      new MeshContainerType(from_dim, vertices, target_coordinates,
+                            element_topology, n_nodes_per_elem,
+                            empty_elements, empty_connectivity, permutation_list) );
+
+    target_coords = Teuchos::rcp(new DataTransferKit::FieldManager<MeshContainerType>(coords_only_mesh_container, comm));
+  }
 
   // Swap back
   Moose::swapLibMeshComm(old_comm);

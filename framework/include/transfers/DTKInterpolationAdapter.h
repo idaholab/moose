@@ -43,7 +43,7 @@ namespace libMesh {
 class DTKInterpolationAdapter
 {
 public:
-  DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::MpiComm<int> > in_comm, EquationSystems & in_es, const Point & offset);
+  DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::MpiComm<int> > in_comm, EquationSystems & in_es, const Point & offset, unsigned int from_dim);
 
   typedef DataTransferKit::MeshContainer<int>                                  MeshContainerType;
   typedef DataTransferKit::FieldContainer<double>                              FieldContainerType;
