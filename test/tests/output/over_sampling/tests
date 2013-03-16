@@ -5,9 +5,9 @@
     exodiff = 'out_gen.e out_gen_oversample.e'
   [../]
 
-#  [./test_file]
-#    type = 'Exodiff'
-#    input = 'over_sampling_test_file.i'
-#    exodiff = 'out_file.e out_file_oversample.e'
-#  [../]
+  [./test_file]
+    type = 'Exodiff'
+    input = 'over_sampling_test_file.i'
+    exodiff = 'out_file.e out_file_oversample.e'
+  [../]
 []
