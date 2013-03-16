@@ -184,6 +184,7 @@
 #include "BoxMarker.h"
 #include "ComboMarker.h"
 #include "ValueThresholdMarker.h"
+#include "ValueRangeMarker.h"
 
 // MultiApps
 #include "TransientMultiApp.h"
@@ -418,6 +419,7 @@ registerObjects(Factory & factory)
   registerMarker(BoxMarker);
   registerMarker(ComboMarker);
   registerMarker(ValueThresholdMarker);
+  registerMarker(ValueRangeMarker);
 
   // MultiApps
   registerMultiApp(TransientMultiApp);

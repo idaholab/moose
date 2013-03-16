@@ -472,6 +472,7 @@ protected:
 
   friend class NodeFaceConstraint;
   friend class ValueThresholdMarker;
+  friend class ValueRangeMarker;
 };
 
 #endif /* MOOSEVARIABLE_H */
