@@ -230,3 +230,24 @@
   print_linear_residuals = true
   perf_log = true
 []
+
+[MultiApps]
+  [./*]
+    type = TransientMultiApp
+    app_type = MooseTestApp
+    execute_on = timestep
+    positions = '0.5 0.5 0 0.7 0.7 0'
+    input_files = sub.i
+  [../]
+[]
+
+[Transfers]
+  [./*]
+    type = MultiAppVariableValueSampleTransfer
+    direction = to_multiapp
+    execute_on = timestep
+    multi_app = sub
+    source_variable = u
+    variable = from_master
+  [../]
+[]

@@ -19,6 +19,7 @@
 #include "Executioner.h"
 #include "UserObject.h"
 #include "FEProblem.h"
+#include "Output.h"
 
 // libMesh
 #include "libmesh/mesh_tools.h"
@@ -36,7 +37,6 @@ InputParameters validParams<MultiApp>()
   params.addRequiredParam<std::string>("app_type", "The type of application to build.");
   params.addRequiredParam<std::vector<Real> >("positions", "The positions of the App locations.  Each set of 3 values will represent a Point.");
   params.addRequiredParam<std::vector<std::string> >("input_files", "The input file for each App.  If this parameter only contains one input file it will be used for all of the Apps.");
-  params.addParam<std::string>("output_base", "multi_out", "This basename will have a number appended to it and will be used as the output file basename for the multiapps");
 
   params.addPrivateParam<MPI_Comm>("_mpi_comm");
 
@@ -58,7 +58,6 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     _app_type(getParam<std::string>("app_type")),
     _positions_vec(getParam<std::vector<Real> >("positions")),
     _input_files(getParam<std::vector<std::string> >("input_files")),
-    _output_base(getParam<std::string>("output_base")),
     _orig_comm(getParam<MPI_Comm>("_mpi_comm")),
     _execute_on(getParam<MooseEnum>("execute_on"))
 {
@@ -90,7 +89,10 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
 
     std::ostringstream output_base;
 
-    output_base << _output_base
+    // Create an output base by taking the output base of the master problem and appending
+    // the name of the multiapp + a number to it
+    output_base << _fe_problem->out().fileBase()
+                << "_" << _name
                 << std::setw(_total_num_apps/10)
                 << std::setprecision(0)
                 << std::setfill('0')

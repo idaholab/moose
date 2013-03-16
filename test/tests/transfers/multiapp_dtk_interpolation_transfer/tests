@@ -9,7 +9,7 @@
   [./tosub]
     type = 'Exodiff'
     input = 'tosub_master.i'
-    exodiff = 'tosub_multi_out0.e tosub_multi_out1.e tosub_multi_out2.e'
+    exodiff = 'tosub_master_out_sub0.e tosub_master_out_sub1.e tosub_master_out_sub2.e'
     dtk = True
   [../]
 []

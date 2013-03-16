@@ -2,7 +2,7 @@
   [./test]
     type = 'Exodiff'
     input = 'master.i'
-    exodiff = 'multi_out0.e multi_out1.e'
+    exodiff = 'master_out_sub0.e master_out_sub1.e'
   [../]
 
   [./pp_test]
