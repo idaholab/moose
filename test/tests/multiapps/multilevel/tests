@@ -4,4 +4,9 @@
     input = 'dt_from_master_master.i'
     exodiff = 'dt_from_master_master_out.e dt_from_master_master_out_sub0.e dt_from_master_master_out_sub0_sub0.e dt_from_master_master_out_sub0_sub1.e dt_from_master_master_out_sub1.e dt_from_master_master_out_sub1_sub0.e dt_from_master_master_out_sub1_sub1.e'
   [../]
+  [./dt_from_sub]
+    type = 'Exodiff'
+    input = 'dt_from_sub_master.i'
+    exodiff = 'dt_from_sub_master_out.e dt_from_sub_master_out_sub0.e dt_from_sub_master_out_sub0_sub0.e dt_from_sub_master_out_sub0_sub1.e dt_from_sub_master_out_sub1.e dt_from_sub_master_out_sub1_sub0.e dt_from_sub_master_out_sub1_sub1.e'
+  [../]
 []
