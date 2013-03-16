@@ -4,4 +4,10 @@
     input = 'master.i'
     exodiff = 'multi_out0.e multi_out1.e'
   [../]
+
+  [./pp_test]
+    type = 'Exodiff'
+    input = 'pp_master.i'
+    exodiff = 'pp_master_out_pp_sub0.e pp_master_out_pp_sub1.e'
+  [../]
 []
