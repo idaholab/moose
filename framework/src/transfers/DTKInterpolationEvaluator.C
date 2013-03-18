@@ -29,7 +29,7 @@ DTKInterpolationEvaluator::DTKInterpolationEvaluator(System & in_sys, std::strin
 DTKInterpolationEvaluator::FieldContainerType
 DTKInterpolationEvaluator::evaluate(const Teuchos::ArrayRCP<int>& elements, const Teuchos::ArrayRCP<double>& coords)
 {
-  int num_values = elements.size();
+  unsigned int num_values = elements.size();
 
   Teuchos::ArrayRCP<Number> values(num_values);
   DataTransferKit::FieldContainer<Number> evaluations(values, 1);

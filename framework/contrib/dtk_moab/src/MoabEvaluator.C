@@ -18,7 +18,7 @@
 
 ArrayField MoabEvaluator::evaluate(
     const Teuchos::ArrayRCP<global_ordinal_type>& elements,
-    const Teuchos::ArrayRCP<double>& coords )
+    const Teuchos::ArrayRCP<double>& /*coords*/ )
 {
     ArrayField evaluations( elements.size(), 1 );
 

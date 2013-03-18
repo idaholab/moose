@@ -108,7 +108,7 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   }
 
   Teuchos::ArrayRCP<int> permutation_list(n_nodes_per_elem);
-  for ( int i = 0; i < n_nodes_per_elem; ++i )
+  for (unsigned int i = 0; i < n_nodes_per_elem; ++i )
     permutation_list[i] = i;
 
   /*
