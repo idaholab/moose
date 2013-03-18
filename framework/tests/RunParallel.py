@@ -99,7 +99,7 @@ class RunParallel:
 
     if p.poll() == None: # process has not completed, it timed out
       output = self.readOutput(f)
-      output += '\n' + "#"*80 + '\nProcess terminated by test harness\n' + "#"*80 + '\n'
+      output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs[MAX_TIME]) + ' seconds)\n' + "#"*80 + '\n'
       f.close()
       os.kill(p.pid, SIGTERM)        # Python 2.4 compatibility
       #p.terminate()                 # Python 2.6+
