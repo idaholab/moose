@@ -150,6 +150,12 @@ public:
   unsigned int & side() { return _current_side; }
 
   /**
+   * Returns the current neighboring side
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  unsigned int & neighborSide() { return _current_neighbor_side; }
+
+  /**
    * Returns the side element
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -255,7 +261,7 @@ public:
    * @param side Side of the element
    * @param neighbor Neighbor facing the element on the side 'side'
    */
-  void reinitElemAndNeighbor(const Elem * elem, unsigned int side, const Elem * neighbor);
+  void reinitElemAndNeighbor(const Elem * elem, unsigned int side, const Elem * neighbor, unsigned int neighbor_side);
 
   /**
    * Reinitializes the neighbor at the reference coordinates given.
@@ -521,6 +527,8 @@ protected:
   Real _current_side_volume;
   /// The current neighbor "element"
   const Elem * _current_neighbor_elem;
+  /// The current side of the selected neighboring element (valid only when working with sides)
+  unsigned int _current_neighbor_side;
   /// Volume of the current neighbor
   Real _current_neighbor_volume;
   /// The current node we are working with

@@ -43,6 +43,7 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _current_side(0),
     _current_side_elem(NULL),
     _current_neighbor_elem(NULL),
+    _current_neighbor_side(0),
     _current_node(NULL),
     _current_neighbor_node(NULL),
 
@@ -483,8 +484,10 @@ Assembly::reinitNodeNeighbor(const Node * node)
 }
 
 void
-Assembly::reinitElemAndNeighbor(const Elem * elem, unsigned int side, const Elem * neighbor)
+Assembly::reinitElemAndNeighbor(const Elem * elem, unsigned int side, const Elem * neighbor, unsigned int neighbor_side)
 {
+  _current_neighbor_side = neighbor_side;
+
   reinit(elem, side);
 
   unsigned int neighbor_dim = neighbor->dim();

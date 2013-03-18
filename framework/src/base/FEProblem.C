@@ -868,7 +868,7 @@ FEProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
   const Elem * neighbor = elem->neighbor(side);
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
 
-  _assembly[tid]->reinitElemAndNeighbor(elem, side, neighbor);
+  _assembly[tid]->reinitElemAndNeighbor(elem, side, neighbor, neighbor_side);
 
   _nl.prepareNeighbor(tid);
   _aux.prepareNeighbor(tid);
@@ -1296,6 +1296,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
     {
       // volume material
       parameters.set<bool>("_bnd") = false;
+      parameters.set<bool>("_neighbor") = false;
       parameters.set<MaterialData *>("_material_data") = _material_data[tid];
       Material *volume_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
       mooseAssert(volume_material != NULL, "Not a Material object");
@@ -1304,6 +1305,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
 
       // face material
       parameters.set<bool>("_bnd") = true;
+      parameters.set<bool>("_neighbor") = false;
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
       Material *face_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
       mooseAssert(face_material != NULL, "Not a Material object");
@@ -1312,6 +1314,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
 
       // neighbor material
       parameters.set<bool>("_bnd") = true;
+      parameters.set<bool>("_neighbor") = true;
       parameters.set<MaterialData *>("_material_data") = _neighbor_material_data[tid];
       Material *neighbor_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
       mooseAssert(neighbor_material != NULL, "Not a Material object");
@@ -1321,6 +1324,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
     else if (boundaries.size() > 0)
     {
       parameters.set<bool>("_bnd") = true;
+      parameters.set<bool>("_neighbor") = false;
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
       Material *bnd_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
       mooseAssert(bnd_material != NULL, "Not a Material object");
