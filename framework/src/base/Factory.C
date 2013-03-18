@@ -20,8 +20,6 @@ Factory::Factory(MooseApp & app):
 {
 }
 
-
-
 Factory::~Factory()
 {
 }
@@ -31,6 +29,10 @@ Factory::getValidParams(const std::string & name)
 {
   if (_name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
     mooseError(std::string("A '") + name + "' is not a registered object\n\n");
+
+  // Print out deprecated message if it exists
+  if (_name_to_deprecated_message.find(name) != _name_to_deprecated_message.end() )
+    mooseDoOnce(mooseWarning(std::string("*** Deprecated Object: ") + _name_to_deprecated_message[name] + " ***"));
 
   InputParameters params = _name_to_params_pointer[name]();
   params.addPrivateParam("_moose_app", &_app);
@@ -42,6 +44,10 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
 {
   if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
     mooseError("Object '" + obj_name + "' was not registered.");
+
+  // Print out deprecated message if it exists
+  if (_name_to_deprecated_message.find(name) != _name_to_deprecated_message.end() )
+    mooseDoOnce(mooseWarning(std::string("*** Deprecated Object: ") + _name_to_deprecated_message[name] + " ***"));
 
   // Check to make sure that all required parameters are supplied
   parameters.checkParams(name);

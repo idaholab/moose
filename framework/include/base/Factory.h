@@ -69,6 +69,9 @@
 #define registerNamedMarker(obj, name)              registerNamedObject(obj, name)
 #define registerNamedTransfer(obj, name)            registerNamedObject(obj, name)
 
+// Macro for registering depracated objects
+#define registerDeprecatedObject(name, message)     factory.reg<name>(stringifyName(name), message)
+
 
 /**
  * Typedef for function to build objects
@@ -109,12 +112,14 @@ public:
    * @param name Name of the object to register
    */
   template<typename T>
-  void reg(const std::string & name)
+  void reg(const std::string & name, const std::string & deprecated_message="")
   {
     if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
     {
       _name_to_build_pointer[name] = &buildObject<T>;
       _name_to_params_pointer[name] = &validParams<T>;
+      if (deprecated_message != "")
+        _name_to_deprecated_message[name] = deprecated_message;
     }
     else
       mooseError("Object '" + name + "' already registered.");
@@ -142,8 +147,9 @@ public:
 protected:
   MooseApp & _app;
 
-  std::map<std::string, buildPtr>  _name_to_build_pointer;
-  std::map<std::string, paramsPtr> _name_to_params_pointer;
+  std::map<std::string, buildPtr>    _name_to_build_pointer;
+  std::map<std::string, paramsPtr>   _name_to_params_pointer;
+  std::map<std::string, std::string> _name_to_deprecated_message;
 };
 
 #endif /* FACTORY_H */
