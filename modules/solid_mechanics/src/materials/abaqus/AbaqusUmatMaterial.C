@@ -1,6 +1,9 @@
 #include "AbaqusUmatMaterial.h"
 
+#include "Factory.h"
+
 #include <dlfcn.h>
+#define QUOTE(macro) stringifyName(macro)
 
 template<>
 InputParameters validParams<AbaqusUmatMaterial>()
@@ -34,10 +37,8 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const std::string  & name,
     _plastic_dissipation(declareProperty<Real>("plastic_dissipation")),
     _creep_dissipation(declareProperty<Real>("creep_dissipation"))
 {
-#ifdef DEBUG
-  _plugin += "-dbg.plugin";
-#else
-  _plugin += "-opt.plugin";
+#if defined(METHOD)
+  _plugin += std::string("-") + QUOTE(METHOD) + ".plugin";
 #endif
 
   //Size and create full (mechanical+thermal) material property array

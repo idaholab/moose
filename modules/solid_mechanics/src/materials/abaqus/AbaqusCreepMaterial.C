@@ -1,8 +1,10 @@
 #include "AbaqusCreepMaterial.h"
 
 #include "SymmTensor.h"
+#include "Factory.h"
 
 #include <dlfcn.h>
+#define QUOTE(macro) stringifyName(macro)
 
 template<>
 InputParameters validParams<AbaqusCreepMaterial>()
@@ -47,10 +49,8 @@ AbaqusCreepMaterial::AbaqusCreepMaterial(const std::string  & name,
     _total_swell(declareProperty<Real>("total_swell")),
     _total_swell_old(declarePropertyOld<Real>("total_swell"))
 {
-#ifdef DEBUG
-  _plugin += "-dbg.plugin";
-#else
-  _plugin += "-opt.plugin";
+#if defined(METHOD)
+  _plugin += std::string("-") + QUOTE(METHOD) + ".plugin";
 #endif
 
   _STATEV = new Real[_num_state_vars];
