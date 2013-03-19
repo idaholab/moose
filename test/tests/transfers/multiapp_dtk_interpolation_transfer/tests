@@ -4,6 +4,7 @@
     input = 'master.i'
     exodiff = 'master_out.e'
     dtk = True
+    method = 'OPT OPROF'
   [../]
 
   [./tosub]
@@ -11,6 +12,7 @@
     input = 'tosub_master.i'
     exodiff = 'tosub_master_out_sub0.e tosub_master_out_sub1.e tosub_master_out_sub2.e'
     dtk = True
+    method = 'OPT OPROF'
   [../]
 
   [./multilevel]
@@ -18,5 +20,6 @@
     input = 'multilevel_master.i'
     exodiff = 'multilevel_master_out.e multilevel_master_out_sub0.e multilevel_master_out_sub0_sub0.e multilevel_master_out_sub0_sub1.e multilevel_master_out_sub1.e multilevel_master_out_sub1_sub0.e multilevel_master_out_sub1_sub1.e'
     dtk = True
+    method = 'OPT OPROF'
   [../]
 []
