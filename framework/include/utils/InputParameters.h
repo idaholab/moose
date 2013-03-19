@@ -135,6 +135,16 @@ public:
   void addCommandLineParam(const std::string &name, const std::string &syntax, const T &value, const std::string &doc_string);
 
   /**
+   * This method checks to make sure that we aren't adding a parameter with the same name but a different type.  It
+   * throws a MooseError if an inconsistent type is detected. While this state is supported by libMesh it brings
+   * nothing but blood and tears for those who try ;)
+   *
+   * @param name the name of the paramater
+   */
+  template <typename T>
+  void checkConsistentType(const std::string &name) const;
+
+  /**
    * Get the syntax for a command-line parameter
    */
   std::vector<std::string> getSyntax(const std::string &name);
@@ -290,6 +300,8 @@ private:
 template <typename T>
 void InputParameters::addRequiredParam(const std::string &name, const std::string &doc_string)
 {
+  checkConsistentType<T>(name);
+
   Parameters::insert<T>(name);
   _required_params.insert(name);
   _doc_string[name] = doc_string;
@@ -304,6 +316,8 @@ void InputParameters::addRequiredParam(const std::string & /*name*/, const T & /
 template <typename T>
 void InputParameters::addParam(const std::string &name, const T &value, const std::string &doc_string)
 {
+  checkConsistentType<T>(name);
+
   Parameters::set<T>(name) = value;                    // valid parameter is set by set_attributes
   _doc_string[name] = doc_string;
 }
@@ -311,6 +325,8 @@ void InputParameters::addParam(const std::string &name, const T &value, const st
 template <typename T>
 void InputParameters::addParam(const std::string &name, const std::string &doc_string)
 {
+  checkConsistentType<T>(name);
+
   Parameters::insert<T>(name);
   _doc_string[name] = doc_string;
 }
@@ -339,6 +355,8 @@ void InputParameters::addCustomTypeParam(const std::string &name, const std::str
 template <typename T>
 void InputParameters::addPrivateParam(const std::string &name)
 {
+  checkConsistentType<T>(name);
+
   Parameters::insert<T>(name);
   _private_params.insert(name);
 }
@@ -346,6 +364,8 @@ void InputParameters::addPrivateParam(const std::string &name)
 template <typename T>
 void InputParameters::addPrivateParam(const std::string &name, const T &value)
 {
+  checkConsistentType<T>(name);
+
   Parameters::set<T>(name) = value;
   _private_params.insert(name);
 }
@@ -371,6 +391,15 @@ void InputParameters::addCommandLineParam(const std::string &name, const std::st
   MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
 }
 
+
+template <typename T>
+void InputParameters::checkConsistentType(const std::string &name) const
+{
+  // Do we have a paremeter with the same name but a different type?
+  Parameters::const_iterator it = _values.find(name);
+  if (it != _values.end() && dynamic_cast<const Parameter<T>*>(it->second) == NULL)
+    mooseError("Parameter: " << name << " already exists but with a different type");
+}
 
 template <typename T>
 void InputParameters::suppressParameter(const std::string &name)
