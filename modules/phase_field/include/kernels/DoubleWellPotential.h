@@ -1,6 +1,8 @@
 #ifndef DoubleWellPotential_H
 #define DoubleWellPotential_H
 
+// Algebraic double well potential.
+
 #include "ACBulk.h"
 
 //Forward Declarations

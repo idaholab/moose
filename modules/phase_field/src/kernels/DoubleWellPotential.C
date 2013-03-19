@@ -1,5 +1,7 @@
 #include "DoubleWellPotential.h"
 
+// Algebraic double well potential.
+
 template<>
 InputParameters validParams<DoubleWellPotential>()
 {
