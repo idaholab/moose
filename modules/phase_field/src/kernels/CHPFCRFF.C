@@ -60,7 +60,7 @@ CHPFCRFF::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
     }
   case 2: //Approach using substitution
     for (unsigned int i=1; i<_n_exp_terms; ++i)
-      ln_expansion += std::pow(-1,i+1)*std::pow(_u[_qp],i - 1);
+      ln_expansion += std::pow(double(-1),int(i+1))*std::pow(_u[_qp],int(i-1));
   }
   
   switch (type)
@@ -86,7 +86,7 @@ CHPFCRFF::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
     case 2: //appraoch using substitution
       Real Dln_expansion = 0.0;
       for (unsigned int i=2; i<_n_exp_terms; ++i)
-        Dln_expansion += std::pow(-1,i+1)*(_n_exp_terms - 2.0)*std::pow(_u[_qp],static_cast<Real>(i - 2));
+        Dln_expansion += std::pow(double(-1),int(i+1))*(_n_exp_terms - 2.0)*std::pow(_u[_qp],int(i - 2));
       return ln_expansion*_grad_phi[_j][_qp] + _phi[_j][_qp]*Dln_expansion*grad_c;
     }
   }
