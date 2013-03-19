@@ -46,7 +46,7 @@ MultiAppDTKUserObjectTransfer::execute()
   {
     _setup = true;
 
-    _comm_default = Teuchos::DefaultComm<int>::getComm();
+    _comm_default = Teuchos::rcp(new Teuchos::MpiComm<int>(Teuchos::rcp(new Teuchos::OpaqueWrapper<MPI_Comm>(libMesh::COMM_WORLD))));
 
     _multi_app_user_object_evaluator = Teuchos::rcp(new MultiAppDTKUserObjectEvaluator(*_multi_app, _user_object_name));
 
@@ -54,12 +54,16 @@ MultiAppDTKUserObjectTransfer::execute()
 
     _multi_app_geom = _multi_app_user_object_evaluator->createSourceGeometry(_comm_default);
 
-    _to_adapter = new DTKAdapter(_comm_default, _multi_app->problem()->es());
+    _to_adapter = new DTKInterpolationAdapter(_comm_default, _multi_app->problem()->es(), Point(), 3);
 
-    _src_to_tgt_map = new DataTransferKit::VolumeSourceMap<DataTransferKit::Box, int, DataTransferKit::MeshContainer<int> >(_comm_default, 3, false);
+    _src_to_tgt_map = new DataTransferKit::VolumeSourceMap<DataTransferKit::Box, int, DataTransferKit::MeshContainer<int> >(_comm_default, 3, true);
 
     std::cout<<"--Setting Up Transfer--"<<std::endl;
-    _src_to_tgt_map->setup(_multi_app_geom, _to_adapter->get_target_coords());
+    if(_variable->isNodal())
+      _src_to_tgt_map->setup(_multi_app_geom, _to_adapter->get_target_coords());
+    else
+      _src_to_tgt_map->setup(_multi_app_geom, _to_adapter->get_elem_target_coords());
+
     std::cout<<"--Transfer Setup Complete--"<<std::endl;
 
     _to_values = _to_adapter->get_values_to_fill(_variable->name());
@@ -70,7 +74,7 @@ MultiAppDTKUserObjectTransfer::execute()
   _src_to_tgt_map->apply(_field_evaluator, _to_values);
   std::cout<<"--Finished Mapping--"<<std::endl;
 
-  _to_adapter->update_variable_values(_variable->name());
+  _to_adapter->update_variable_values(_variable->name(), _src_to_tgt_map->getMissedTargetPoints());
   _multi_app->problem()->es().update();
 }
 

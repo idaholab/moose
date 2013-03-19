@@ -14,6 +14,10 @@
 [AuxVariables]
   [./multi_layered_average]
   [../]
+  [./element_multi_layered_average]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -72,6 +76,14 @@
     direction = from_multiapp
     user_object = layered_average
     variable = multi_layered_average
+    type = MultiAppDTKUserObjectTransfer
+    multi_app = sub_app
+  [../]
+
+  [./element_layered_transfer]
+    direction = from_multiapp
+    user_object = layered_average
+    variable = element_multi_layered_average
     type = MultiAppDTKUserObjectTransfer
     multi_app = sub_app
   [../]

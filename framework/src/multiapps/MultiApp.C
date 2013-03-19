@@ -20,6 +20,7 @@
 #include "UserObject.h"
 #include "FEProblem.h"
 #include "Output.h"
+#include "AppFactory.h"
 
 // libMesh
 #include "libmesh/mesh_tools.h"
@@ -34,7 +35,20 @@ InputParameters validParams<MultiApp>()
 
   params.addPrivateParam<bool>("use_displaced_mesh", false);
 
-  params.addRequiredParam<std::string>("app_type", "The type of application to build.");
+  std::ostringstream app_types_strings;
+
+  registeredMooseAppIterator it = AppFactory::instance()->registeredObjectsBegin();
+  while(it != AppFactory::instance()->registeredObjectsEnd())
+  {
+    app_types_strings << it->first;
+    ++it;
+    if(it != AppFactory::instance()->registeredObjectsEnd())
+      app_types_strings<< ", ";
+  }
+
+  MooseEnum app_types_options(app_types_strings.str());
+
+  params.addRequiredParam<MooseEnum>("app_type", app_types_options, "The type of application to build.");
   params.addRequiredParam<std::vector<Real> >("positions", "The positions of the App locations.  Each set of 3 values will represent a Point.");
   params.addRequiredParam<std::vector<std::string> >("input_files", "The input file for each App.  If this parameter only contains one input file it will be used for all of the Apps.");
 
@@ -55,7 +69,7 @@ InputParameters validParams<MultiApp>()
 MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     MooseObject(name, parameters),
     _fe_problem(getParam<FEProblem *>("_fe_problem")),
-    _app_type(getParam<std::string>("app_type")),
+    _app_type(getParam<MooseEnum>("app_type")),
     _positions_vec(getParam<std::vector<Real> >("positions")),
     _input_files(getParam<std::vector<std::string> >("input_files")),
     _orig_comm(getParam<MPI_Comm>("_mpi_comm")),

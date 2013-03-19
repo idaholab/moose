@@ -35,9 +35,6 @@
 
 #include <vector>
 
-namespace libMesh
-{
-
 DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::MpiComm<int> > in_comm, EquationSystems & in_es, const Point & offset, unsigned int from_dim):
     comm(in_comm),
     es(in_es),
@@ -85,8 +82,10 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
 
   unsigned int n_local_elem = mesh.n_local_elem();
 
-  Teuchos::ArrayRCP<int> elements(n_local_elem);
+  elements.resize(n_local_elem);
   Teuchos::ArrayRCP<int> connectivity(n_nodes_per_elem*n_local_elem);
+
+  Teuchos::ArrayRCP<double> elem_centroid_coordinates(n_local_elem*from_dim);
 
   // Fill in the elements and connectivity
   {
@@ -102,6 +101,12 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
 
       for(unsigned int j=0; j<n_nodes_per_elem; j++)
         connectivity[(j*n_local_elem)+i] = elem.node(j);
+
+      {
+        Point centroid = elem.centroid();
+        for(unsigned int j=0; j<from_dim; j++)
+          elem_centroid_coordinates[(j*n_local_elem) + i] = centroid(j) + offset(j);
+      }
 
       i++;
     }
@@ -188,6 +193,18 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
     target_coords = Teuchos::rcp(new DataTransferKit::FieldManager<MeshContainerType>(coords_only_mesh_container, comm));
   }
 
+  {
+    Teuchos::ArrayRCP<int> empty_elements(0);
+    Teuchos::ArrayRCP<int> empty_connectivity(0);
+
+    Teuchos::RCP<MeshContainerType> centroid_coords_only_mesh_container = Teuchos::rcp(
+      new MeshContainerType(from_dim, elements, elem_centroid_coordinates,
+                            element_topology, n_nodes_per_elem,
+                            empty_elements, empty_connectivity, permutation_list) );
+
+    elem_centroid_coords = Teuchos::rcp(new DataTransferKit::FieldManager<MeshContainerType>(centroid_coords_only_mesh_container, comm));
+  }
+
   // Swap back
   Moose::swapLibMeshComm(old_comm);
 }
@@ -211,7 +228,17 @@ DTKInterpolationAdapter::get_values_to_fill(std::string var_name)
 {
   if(values_to_fill.find(var_name) == values_to_fill.end())
   {
-    Teuchos::ArrayRCP<double> data_space(num_local_nodes);
+    System * sys = find_sys(var_name);
+    unsigned int var_num = sys->variable_number(var_name);
+    bool is_nodal = sys->variable_type(var_num) == FEType();
+
+    Teuchos::ArrayRCP<double> data_space;
+
+    if(is_nodal)
+      data_space = Teuchos::ArrayRCP<double>(vertices.size());
+    else
+      data_space = Teuchos::ArrayRCP<double>(elements.size());
+
     Teuchos::RCP<FieldContainerType> field_container = Teuchos::rcp(new FieldContainerType(data_space, 1));
     values_to_fill[var_name] = Teuchos::rcp(new DataTransferKit::FieldManager<FieldContainerType>(field_container, comm));
   }
@@ -226,6 +253,8 @@ DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::A
 
   System * sys = find_sys(var_name);
   unsigned int var_num = sys->variable_number(var_name);
+
+  bool is_nodal = sys->variable_type(var_num) == FEType();
 
   Teuchos::RCP<FieldContainerType> values = values_to_fill[var_name]->field();
 
@@ -249,13 +278,17 @@ DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::A
       continue;
     }
 
-    unsigned int node_num = vertices[i];
-    const Node & node = mesh.node(node_num);
+    const DofObject * dof_object = NULL;
 
-    if(node.processor_id() == libMesh::processor_id())
+    if(is_nodal)
+      dof_object = mesh.node_ptr(vertices[i]);
+    else
+      dof_object = mesh.elem(elements[i]);
+
+    if(dof_object->processor_id() == libMesh::processor_id())
     {
       // The 0 is for the component... this only works for LAGRANGE!
-      dof_id_type dof = node.dof_number(sys->number(), var_num, 0);
+      dof_id_type dof = dof_object->dof_number(sys->number(), var_num, 0);
       sys->solution->set(dof, *it);
     }
 
@@ -330,7 +363,5 @@ DTKInterpolationAdapter::get_semi_local_nodes(std::set<unsigned int> & semi_loca
       semi_local_nodes.insert(elem.node(j));
   }
 }
-
-} // namespace libMesh
 
 #endif // #ifdef LIBMESH_HAVE_DTK

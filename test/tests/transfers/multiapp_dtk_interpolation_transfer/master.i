@@ -13,6 +13,10 @@
 [AuxVariables]
   [./transferred_u]
   [../]
+  [./elemental_transferred_u]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -66,6 +70,13 @@
     source_variable = sub_u
     direction = from_multiapp
     variable = transferred_u
+    type = MultiAppDTKInterpolationTransfer
+    multi_app = sub
+  [../]
+  [./elemental_from_sub]
+    source_variable = sub_u
+    direction = from_multiapp
+    variable = elemental_transferred_u
     type = MultiAppDTKInterpolationTransfer
     multi_app = sub
   [../]

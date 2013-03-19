@@ -38,8 +38,6 @@
 #include <Teuchos_ArrayRCP.hpp>
 #include <Teuchos_DefaultMpiComm.hpp>
 
-namespace libMesh {
-
 class DTKInterpolationAdapter
 {
 public:
@@ -55,6 +53,12 @@ public:
   Teuchos::RCP<DataTransferKit::MeshManager<MeshContainerType> > get_mesh_manager() { return mesh_manager; }
   RCP_Evaluator get_variable_evaluator(std::string var_name);
   Teuchos::RCP<DataTransferKit::FieldManager<MeshContainerType> > get_target_coords() { return target_coords; }
+
+  /**
+   * Used to get the centroids for the receiving elements.
+   */
+  Teuchos::RCP<DataTransferKit::FieldManager<MeshContainerType> > get_elem_target_coords() { return elem_centroid_coords; }
+
   Teuchos::RCP<DataTransferKit::FieldManager<FieldContainerType> > get_values_to_fill(std::string var_name);
 
   /**
@@ -90,10 +94,12 @@ protected:
 
   unsigned int num_local_nodes;
   Teuchos::ArrayRCP<int> vertices;
+  Teuchos::ArrayRCP<int> elements;
 
   Teuchos::RCP<DataTransferKit::MeshManager<MeshContainerType> > mesh_manager;
   RCP_Evaluator field_evaluator;
   Teuchos::RCP<DataTransferKit::FieldManager<MeshContainerType> > target_coords;
+  Teuchos::RCP<DataTransferKit::FieldManager<MeshContainerType> > elem_centroid_coords;
 
   /// Map of variable names to arrays to be filled by a transfer
   std::map<std::string, Teuchos::RCP<DataTransferKit::FieldManager<FieldContainerType> > > values_to_fill;
@@ -101,8 +107,6 @@ protected:
   /// Map of variable names to RCP_Evaluator objects
   std::map<std::string, RCP_Evaluator> evaluators;
 };
-
-} // namespace libMesh
 
 #endif // #ifdef LIBMESH_HAVE_DTK
 

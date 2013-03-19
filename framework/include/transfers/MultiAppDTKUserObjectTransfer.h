@@ -20,6 +20,7 @@
 #include "MultiAppTransfer.h"
 #include "MooseVariableInterface.h"
 #include "MultiAppDTKUserObjectEvaluator.h"
+#include "DTKInterpolationAdapter.h"
 
 // DTK Includes
 #include <DTK_VolumeSourceMap.hpp>
@@ -69,7 +70,7 @@ protected:
 
   bool _setup;
 
-  Teuchos::RCP<const Teuchos::Comm<int> > _comm_default;
+  Teuchos::RCP<const Teuchos::MpiComm<int> > _comm_default;
 
   Teuchos::RCP<MultiAppDTKUserObjectEvaluator> _multi_app_user_object_evaluator;
 
@@ -77,7 +78,7 @@ protected:
 
   Teuchos::RCP<DataTransferKit::GeometryManager<DataTransferKit::Box,int> > _multi_app_geom;
 
-  DTKAdapter * _to_adapter;
+  DTKInterpolationAdapter * _to_adapter;
 
   DataTransferKit::VolumeSourceMap<DataTransferKit::Box, int, DataTransferKit::MeshContainer<int> > * _src_to_tgt_map;
 
