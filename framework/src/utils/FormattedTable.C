@@ -112,6 +112,10 @@ FormattedTable::printNoDataRow(char intersect_char, char fill_char,
 void
 FormattedTable::printTable(const std::string & file_name)
 {
+  // We only want to do file I/O on processor zero
+  if (libMesh::processor_id() != 0)
+    return;
+
   if (!_stream_open)
   {
     _output_file.open(file_name.c_str(), std::ios::trunc);
@@ -175,6 +179,10 @@ FormattedTable::printCSV(const std::string & file_name, int interval)
 {
   std::map<Real, std::map<std::string, Real> >::iterator i;
   std::set<std::string>::iterator header;
+
+  // We only want to do file I/O on processor zero
+  if (libMesh::processor_id() != 0)
+    return;
 
   if (!_stream_open)
   {
