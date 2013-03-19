@@ -29,7 +29,7 @@ InputParameters validParams<MultiAppPostprocessorInterpolationTransfer>()
   params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<PostprocessorName>("postprocessor", "The Postprocessor to interpolate.");
   params.addParam<unsigned int>("num_points", 3, "The number of nearest points to use for interpolation.");
-  params.addParam<unsigned int>("power", 2, "The polynomial power to use for calculation of the decay in the interpolation.");
+  params.addParam<Real>("power", 2, "The polynomial power to use for calculation of the decay in the interpolation.");
 
   return params;
 }
@@ -39,7 +39,7 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
     _postprocessor(getParam<PostprocessorName>("postprocessor")),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _num_points(getParam<unsigned int>("num_points")),
-    _power(getParam<unsigned int>("power"))
+    _power(getParam<Real>("power"))
 {
 }
 

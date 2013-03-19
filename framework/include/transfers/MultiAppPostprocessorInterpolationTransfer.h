@@ -50,7 +50,7 @@ protected:
   AuxVariableName _to_var_name;
 
   unsigned int _num_points;
-  unsigned int _power;
+  Real _power;
 };
 
 #endif /* MULTIAPPPOSTPROCESSORINTERPOLATIONTRANSFER_H */
