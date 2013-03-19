@@ -432,7 +432,7 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
   for (std::set<unsigned int>::const_iterator node_it = grain_it1->second->nodes_ptr->begin();
        node_it != grain_it1->second->nodes_ptr->end(); ++node_it)
   {
-    Node * curr_node = _mesh.node_ptr(*node_it);
+    Node * curr_node = _mesh.nodePtr(*node_it);
 
     if (curr_node->processor_id() == libMesh::processor_id())
     {
