@@ -59,7 +59,7 @@ PenetrationLocator::detectPenetration()
   std::vector< short int > id_list;
 
   // Retrieve the Element Boundary data structures from the mesh
-  _mesh.build_side_list(elem_list, side_list, id_list);
+  _mesh.buildSideList(elem_list, side_list, id_list);
 
   // Grab the slave nodes we need to worry about from the NearestNodeLocator
   NodeIdRange & slave_node_range = _nearest_node.slaveNodeRange();

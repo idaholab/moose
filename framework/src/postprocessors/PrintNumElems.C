@@ -29,5 +29,5 @@ PrintNumElems::PrintNumElems(const std::string & name, InputParameters parameter
 Real
 PrintNumElems::getValue()
 {
-  return _subproblem.mesh().n_elem();
+  return _subproblem.mesh().nElem();
 }

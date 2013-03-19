@@ -74,36 +74,36 @@ public:
 
   virtual unsigned int dimension() const { return _mesh.mesh_dimension(); }
 
-  std::vector<BoundaryID> boundary_ids (const Elem *const elem, const unsigned short int side) const { return _mesh.boundary_info->boundary_ids(elem, side); }
-  const std::set<BoundaryID> & get_boundary_ids () const { return _mesh.boundary_info->get_boundary_ids(); }
+  std::vector<BoundaryID> boundaryIDs(const Elem *const elem, const unsigned short int side) const { return _mesh.boundary_info->boundary_ids(elem, side); }
+  const std::set<BoundaryID> & getBoundaryIDs() const { return _mesh.boundary_info->get_boundary_ids(); }
 
-  void buildNodeList ();
+  void buildNodeList();
   void buildBndElemList();
   std::map<unsigned int, std::vector<unsigned int> > & nodeToElemMap();
 
-  virtual bnd_node_iterator bnd_nodes_begin ();
-  virtual bnd_node_iterator bnd_nodes_end ();
+  virtual bnd_node_iterator bndNodesBegin();
+  virtual bnd_node_iterator bndNodesEnd();
 
-  virtual bnd_elem_iterator bnd_elems_begin ();
-  virtual bnd_elem_iterator bnd_elems_end ();
+  virtual bnd_elem_iterator bndElemsBegin();
+  virtual bnd_elem_iterator bndElemsEnd();
 
-  void build_node_list_from_side_list() { _mesh.boundary_info->build_node_list_from_side_list(); }
-  void build_side_list(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<short int> & il) { _mesh.boundary_info->build_side_list(el, sl, il); }
-  unsigned int side_with_boundary_id(const Elem * const elem, const BoundaryID boundary_id) const { return _mesh.boundary_info->side_with_boundary_id(elem, boundary_id); }
+  void buildNodeListFromSideList() { _mesh.boundary_info->build_node_list_from_side_list(); }
+  void buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<short int> & il) { _mesh.boundary_info->build_side_list(el, sl, il); }
+  unsigned int sideWithBoundaryID(const Elem * const elem, const BoundaryID boundary_id) const { return _mesh.boundary_info->side_with_boundary_id(elem, boundary_id); }
 
-  MeshBase::const_node_iterator local_nodes_begin() { return _mesh.local_nodes_begin(); }
-  MeshBase::const_node_iterator local_nodes_end() { return _mesh.local_nodes_end(); }
+  MeshBase::const_node_iterator localNodesBegin() { return _mesh.local_nodes_begin(); }
+  MeshBase::const_node_iterator localNodesEnd() { return _mesh.local_nodes_end(); }
 
-  MeshBase::const_element_iterator active_local_elements_begin() { return _mesh.active_local_elements_begin(); }
-  const MeshBase::const_element_iterator active_local_elements_end() { return _mesh.active_local_elements_end(); }
+  MeshBase::const_element_iterator activeLocalElementsBegin() { return _mesh.active_local_elements_begin(); }
+  const MeshBase::const_element_iterator activeLocalElementsEnd() { return _mesh.active_local_elements_end(); }
 
-  virtual unsigned int n_nodes () const { return _mesh.n_nodes(); }
-  virtual unsigned int n_elem () const { return _mesh.n_elem(); }
+  virtual unsigned int nNodes() const { return _mesh.n_nodes(); }
+  virtual unsigned int nElem() const { return _mesh.n_elem(); }
 
   virtual const Node & node (const unsigned int i) const;
   virtual Node & node (const unsigned int i);
-  virtual const Node* node_ptr (const unsigned int i) const;
-  virtual Node* node_ptr (const unsigned int i);
+  virtual const Node* nodePtr(const unsigned int i) const;
+  virtual Node* nodePtr(const unsigned int i);
 
   virtual Elem * elem(const unsigned int i) { return _mesh.elem(i); }
   virtual const Elem * elem(const unsigned int i) const { return _mesh.elem(i); }
@@ -387,7 +387,8 @@ protected:
    * to get rebuilt all the time (which takes time).
    */
   ConstElemRange * _active_local_elem_range;
-  SemiLocalNodeRange * _active_semilocal_node_range;  ///< active local + active ghosted
+  /// active local + active ghosted
+  SemiLocalNodeRange * _active_semilocal_node_range;
   NodeRange * _active_node_range;
   ConstNodeRange * _local_node_range;
   ConstBndNodeRange * _bnd_node_range;

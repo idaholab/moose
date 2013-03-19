@@ -1562,8 +1562,8 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
   {
     unsigned int tid = 0;
 
-    MeshBase::const_element_iterator el = _mesh.active_local_elements_begin();
-    const MeshBase::const_element_iterator end_el = _mesh.active_local_elements_end();
+    MeshBase::const_element_iterator el = _mesh.activeLocalElementsBegin();
+    const MeshBase::const_element_iterator end_el = _mesh.activeLocalElementsEnd();
 
     unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
@@ -1608,7 +1608,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
 
         for (unsigned int side=0; side<elem->n_sides(); side++)
         {
-          std::vector<BoundaryID> boundary_ids = _mesh.boundary_ids(elem, side);
+          std::vector<BoundaryID> boundary_ids = _mesh.boundaryIDs(elem, side);
 
           if (boundary_ids.size() > 0)
           {

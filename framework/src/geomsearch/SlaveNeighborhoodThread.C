@@ -70,7 +70,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
   {
     unsigned int node_id = *nd;
 
-    const Node & node = *_mesh.node_ptr(node_id);
+    const Node & node = *_mesh.nodePtr(node_id);
 
     std::priority_queue<std::pair<unsigned int, Real>, std::vector<std::pair<unsigned int, Real> >, ComparePair> neighbors;
 

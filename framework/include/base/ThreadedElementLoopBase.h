@@ -136,7 +136,7 @@ ThreadedElementLoopBase<RangeType>::operator () (const RangeType & range)
 
     for (unsigned int side=0; side<elem->n_sides(); side++)
     {
-      std::vector<BoundaryID> boundary_ids = _mesh.boundary_ids (elem, side);
+      std::vector<BoundaryID> boundary_ids = _mesh.boundaryIDs(elem, side);
 
       if (boundary_ids.size() > 0)
         for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)

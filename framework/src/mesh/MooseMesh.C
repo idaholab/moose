@@ -240,7 +240,7 @@ void
 MooseMesh::update()
 {
   // Rebuild the boundary conditions
-  build_node_list_from_side_list();
+  buildNodeListFromSideList();
 
   //Update the node to elem map
   _node_to_elem_map.clear();
@@ -270,7 +270,7 @@ MooseMesh::node(const unsigned int i)
 }
 
 const Node*
-MooseMesh::node_ptr(const unsigned int i) const
+MooseMesh::nodePtr(const unsigned int i) const
 {
   if(i > _mesh.max_node_id())
     return (*_quadrature_nodes.find(i)).second;
@@ -279,7 +279,7 @@ MooseMesh::node_ptr(const unsigned int i) const
 }
 
 Node*
-MooseMesh::node_ptr(const unsigned int i)
+MooseMesh::nodePtr(const unsigned int i)
 {
   if(i > _mesh.max_node_id())
     return _quadrature_nodes[i];
@@ -512,8 +512,8 @@ MooseMesh::getBoundaryNodeRange()
 {
   if (!_bnd_node_range)
   {
-    _bnd_node_range = new ConstBndNodeRange(bnd_nodes_begin(),
-                                            bnd_nodes_end(), GRAIN_SIZE);
+    _bnd_node_range = new ConstBndNodeRange(bndNodesBegin(),
+                                            bndNodesEnd(), GRAIN_SIZE);
   }
 
   return _bnd_node_range;
@@ -524,8 +524,8 @@ MooseMesh::getBoundaryElementRange()
 {
   if (!_bnd_elem_range)
   {
-    _bnd_elem_range = new ConstBndElemRange(bnd_elems_begin(),
-                                            bnd_elems_end(), GRAIN_SIZE);
+    _bnd_elem_range = new ConstBndElemRange(bndElemsBegin(),
+                                            bndElemsEnd(), GRAIN_SIZE);
   }
 
   return _bnd_elem_range;
@@ -542,7 +542,7 @@ MooseMesh::cacheInfo()
 
     for(unsigned int side=0; side<elem->n_sides(); side++)
     {
-      std::vector<BoundaryID> boundaryids = boundary_ids(elem, side);
+      std::vector<BoundaryID> boundaryids = boundaryIDs(elem, side);
 
       for(unsigned int i=0; i<boundaryids.size(); i++)
         _subdomain_boundary_ids[subdomain_id].insert(boundaryids[i]);
@@ -565,7 +565,7 @@ MooseMesh::getNodeBlockIds(const Node & node)
 
 // default begin() accessor
 bnd_node_iterator
-MooseMesh::bnd_nodes_begin ()
+MooseMesh::bndNodesBegin ()
 {
   Predicates::NotNull<bnd_node_iterator_imp> p;
   return bnd_node_iterator(_bnd_nodes.begin(), _bnd_nodes.end(), p);
@@ -573,7 +573,7 @@ MooseMesh::bnd_nodes_begin ()
 
 // default end() accessor
 bnd_node_iterator
-MooseMesh::bnd_nodes_end ()
+MooseMesh::bndNodesEnd ()
 {
   Predicates::NotNull<bnd_node_iterator_imp> p;
   return bnd_node_iterator(_bnd_nodes.end(), _bnd_nodes.end(), p);
@@ -581,7 +581,7 @@ MooseMesh::bnd_nodes_end ()
 
 // default begin() accessor
 bnd_elem_iterator
-MooseMesh::bnd_elems_begin ()
+MooseMesh::bndElemsBegin ()
 {
   Predicates::NotNull<bnd_elem_iterator_imp> p;
   return bnd_elem_iterator(_bnd_elems.begin(), _bnd_elems.end(), p);
@@ -589,7 +589,7 @@ MooseMesh::bnd_elems_begin ()
 
 // default end() accessor
 bnd_elem_iterator
-MooseMesh::bnd_elems_end ()
+MooseMesh::bndElemsEnd ()
 {
   Predicates::NotNull<bnd_elem_iterator_imp> p;
   return bnd_elem_iterator(_bnd_elems.end(), _bnd_elems.end(), p);

@@ -123,8 +123,8 @@ OutputProblem::init()
       }
 
 
-      MeshBase::const_node_iterator nd     = _mesh.local_nodes_begin();
-      MeshBase::const_node_iterator nd_end = _mesh.local_nodes_end();
+      MeshBase::const_node_iterator nd     = _mesh.localNodesBegin();
+      MeshBase::const_node_iterator nd_end = _mesh.localNodesEnd();
 
       // Now loop over the nodes of the 'To' mesh setting values for each variable.
       for(;nd != nd_end; ++nd)

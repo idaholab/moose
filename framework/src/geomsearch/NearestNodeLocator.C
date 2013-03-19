@@ -35,7 +35,7 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh
 {
   /*
   //sanity check on boundary ids
-  const std::set<BoundaryID>& bids=_mesh.get_boundary_ids();
+  const std::set<BoundaryID>& bids=_mesh.getBoundaryIDs();
   std::set<BoundaryID>::const_iterator sit;
   sit=bids.find(_boundary1);
   if (sit == bids.end())

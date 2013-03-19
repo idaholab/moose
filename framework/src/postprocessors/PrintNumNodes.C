@@ -29,5 +29,5 @@ PrintNumNodes::PrintNumNodes(const std::string & name, InputParameters parameter
 Real
 PrintNumNodes::getValue()
 {
-  return _subproblem.mesh().n_nodes();
+  return _subproblem.mesh().nNodes();
 }

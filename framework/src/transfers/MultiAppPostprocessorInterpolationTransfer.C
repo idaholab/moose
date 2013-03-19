@@ -94,8 +94,8 @@ MultiAppPostprocessorInterpolationTransfer::execute()
 
         vars.push_back(_to_var_name);
 
-        MeshBase::const_node_iterator node_it = mesh.local_nodes_begin();
-        MeshBase::const_node_iterator node_end = mesh.local_nodes_end();
+        MeshBase::const_node_iterator node_it = mesh.localNodesBegin();
+        MeshBase::const_node_iterator node_end = mesh.localNodesEnd();
 
         for(; node_it != node_end; ++node_it)
         {

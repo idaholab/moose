@@ -53,7 +53,7 @@ StripeMesh::init()
 
   Real h = (getParam<Real>("xmax") - getParam<Real>("xmin")) / _n_stripes;  // width of the stripe
 
-  for (unsigned int en = 0; en < n_elem(); en++)
+  for (unsigned int en = 0; en < nElem(); en++)
   {
     Elem * e = elem(en);                                        // get an element
     Point centroid = e->centroid();                             // get its centroid
