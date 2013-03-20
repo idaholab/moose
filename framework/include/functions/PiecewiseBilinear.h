@@ -51,6 +51,7 @@ private:
   const bool _yaxisValid;
   const bool _xaxisValid;
   const Real _scale_factor;
+  const bool _radial;
 
 
   void parse( std::vector<Real> & x,

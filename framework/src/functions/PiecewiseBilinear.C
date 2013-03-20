@@ -49,6 +49,7 @@ InputParameters validParams<PiecewiseBilinear>()
   params.addParam<int>("xaxis", -1, "The coordinate used for x-axis data (0, 1, or 2 for x, y, or z).");
   params.addParam<int>("yaxis", -1, "The coordinate used for y-axis data (0, 1, or 2 for x, y, or z).");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the axis, yaxis, or xaxis values");
+  params.addParam<bool>("radial", false, "Set to true if you want to interpolate along a radius rather that along a specific axis, and note that you have to define xaxis and yaxis in the input file");
   return params;
 }
 
@@ -62,7 +63,8 @@ PiecewiseBilinear::PiecewiseBilinear(const std::string & name, InputParameters p
   _axisValid( _axis > -1 && _axis < 3 ),
   _yaxisValid( _yaxis > -1 && _yaxis < 3 ),
   _xaxisValid( _xaxis > -1 && _xaxis < 3 ),
-  _scale_factor( getParam<Real>("scale_factor") )
+  _scale_factor( getParam<Real>("scale_factor") ),
+  _radial(getParam<bool>("radial"))
 {
   if (!_axisValid && !_yaxisValid && !_xaxisValid)
   {
@@ -71,6 +73,10 @@ PiecewiseBilinear::PiecewiseBilinear(const std::string & name, InputParameters p
   if (_axisValid && (_yaxisValid || _xaxisValid))
   {
     mooseError("Error in " << _name << ". Cannot define axis with either yaxis or xaxis");
+  }
+  if (_radial && (!_yaxisValid || !_xaxisValid))
+  {
+    mooseError("Error in " << _name << ". yaxis and xaxis must be defined when radial = true");
   }
 
   std::vector<Real> x;
@@ -92,11 +98,18 @@ Real
 PiecewiseBilinear::value( Real t, const Point & p)
 {
   Real retVal(0);
-  if (_axisValid)
+  if (_yaxisValid && _xaxisValid && _radial)
+    {
+      Real rx = p(_xaxis)*p(_xaxis);
+      Real ry = p(_yaxis)*p(_yaxis);
+      Real r = std::sqrt(rx + ry);
+      retVal = _bilinear_interp->sample( r, t );
+    }
+  else if (_axisValid)
   {
     retVal = _bilinear_interp->sample( p(_axis), t );
   }
-  else if (_yaxisValid)
+  else if (_yaxisValid && !_radial)
   {
     if (_xaxisValid)
     {
@@ -111,7 +124,6 @@ PiecewiseBilinear::value( Real t, const Point & p)
   {
     retVal = _bilinear_interp->sample( p(_xaxis), t );
   }
-
   return retVal * _scale_factor;
 }
 
