@@ -100,8 +100,10 @@ public:
 
   /**
    * Adapts the mesh based on the error estimator used
+   *
+   * @return a boolean that indicates whether the mesh was changed
    */
-  void adaptMesh();
+  bool adaptMesh();
 
   /**
    * Used during initial adaptivity.

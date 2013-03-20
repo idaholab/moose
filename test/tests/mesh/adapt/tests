@@ -10,7 +10,7 @@
   [./test_time]
     type = 'Exodiff'
     input = 'adapt_time_test.i'
-    exodiff = 'out_time.e-s007'
+    exodiff = 'out_time.e-s002'
     group = 'adaptive'
   [../]
 

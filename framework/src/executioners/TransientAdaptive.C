@@ -314,7 +314,6 @@ TransientAdaptive::execute()
     if (_fe_problem.adaptivity().isOn())
     {
       _fe_problem.adaptMesh();
-      _fe_problem.out().meshChanged();
     }
 #endif
   }

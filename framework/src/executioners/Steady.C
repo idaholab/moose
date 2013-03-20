@@ -91,7 +91,6 @@ Steady::execute()
     if(r_step != steps)
     {
       _problem.adaptMesh();
-      _problem.out().meshChanged();
     }
 
     _time_step++;

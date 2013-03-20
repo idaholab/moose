@@ -2,6 +2,6 @@
   [./test]
     type = 'Exodiff'
     input = 'max_h_level.i'
-    exodiff = 'max_h_level_out.e-s004'
+    exodiff = 'max_h_level_out.e-s003'
   [../]
 []

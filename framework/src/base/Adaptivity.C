@@ -111,9 +111,10 @@ Adaptivity::setErrorNorm(SystemNorm & sys_norm)
   _error_estimator->error_norm = sys_norm;
 }
 
-void
+bool
 Adaptivity::adaptMesh()
 {
+  bool meshChanged = false;
   if (_mesh_refinement_on && (_start_time <= _t && _t < _stop_time))
   {
     if(_use_new_system)
@@ -147,17 +148,23 @@ Adaptivity::adaptMesh()
     }
 
     // Perform refinement and coarsening
-    _mesh_refinement->refine_and_coarsen_elements();
+    meshChanged = _mesh_refinement->refine_and_coarsen_elements();
 
     if (_displaced_problem)
-      _displaced_mesh_refinement->refine_and_coarsen_elements();
+    {
+      bool dispMeshChanged = _displaced_mesh_refinement->refine_and_coarsen_elements();
+      if ((meshChanged && !dispMeshChanged) ||
+          (!meshChanged && dispMeshChanged))
+        mooseError("If either undisplaced mesh or displaced mesh changes due to adaptivity, both must change");
+    }
 
-    if (_print_mesh_changed)
+    if (meshChanged && _print_mesh_changed)
     {
       std::cout << "\nMesh Changed:\n";
       _mesh.printInfo();
     }
   }
+  return meshChanged;
 }
 
 void

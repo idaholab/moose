@@ -3018,15 +3018,15 @@ FEProblem::adaptMesh()
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
   for (unsigned int i=0; i < cycles_per_step; ++i)
   {
-    _adaptivity.adaptMesh();
-    meshChanged();
+    if (_adaptivity.adaptMesh())
+      meshChanged();
   }
 }
 #endif //LIBMESH_ENABLE_AMR
 
 void
 FEProblem::meshChanged()
-  {
+{
   if (_material_props.hasStatefulProperties())
     _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material properties
 
@@ -3062,6 +3062,7 @@ FEProblem::meshChanged()
     }
 
   }
+  _out.meshChanged();
 }
 
 void
