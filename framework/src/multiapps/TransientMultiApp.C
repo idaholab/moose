@@ -87,6 +87,8 @@ TransientMultiApp::solveStep()
 Real
 TransientMultiApp::computeDT()
 {
+  std::cout<<"computeDT!!!"<<std::endl;
+
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   Real smallest_dt = std::numeric_limits<Real>::max();
@@ -96,6 +98,8 @@ TransientMultiApp::computeDT()
     Transient * ex = _transient_executioners[i];
     Real dt = ex->computeConstrainedDT();
 
+    std::cout<<"dt! "<<dt<<std::endl;
+
     smallest_dt = std::min(dt, smallest_dt);
   }
 
@@ -104,6 +108,7 @@ TransientMultiApp::computeDT()
 
   Parallel::min(smallest_dt);
 
+  std::cout<<"Smallest dt: "<<smallest_dt<<std::endl;
   return smallest_dt;
 }
 
