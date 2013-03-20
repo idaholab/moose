@@ -180,6 +180,22 @@ AuxKernel::getMaterialProperty(const std::string & name)
 {
   if (isNodal())
     mooseError(std::string("Nodal AuxKernel '") + _name + "' attempted to reference material property '" + name + "'");
+
+  if (parameters().isParamValid("block"))
+  {
+    // check blocks where the kernel is defined
+    std::vector<SubdomainName> blocks = parameters().get<std::vector<SubdomainName> >("block");
+    for (std::vector<SubdomainName>::iterator it = blocks.begin(); it != blocks.end(); ++it)
+      _subproblem.delayedCheckMatProp(_subproblem.mesh().getSubdomainID(*it), name);
+  }
+  else if (!parameters().isParamValid("boundary"))  // TODO: For now we ain't gonna check boundary materials...
+  {
+    // no kernel blocks specified, check all blocks that are in the mesh
+    const std::set<SubdomainID> & blocks = _mesh.meshSubdomains();
+    for (std::set<SubdomainID>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+      _subproblem.delayedCheckMatProp(*it, name);
+  }
+
   return MaterialPropertyInterface::getMaterialProperty<T>(name);
 }
 

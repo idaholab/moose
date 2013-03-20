@@ -191,7 +191,6 @@
     type = 'RunException'
     input = 'missing_material_prop_test2.i'
     expect_err = "Material property 'diff1' is not defined on block \d+"
-    deleted = 'Regression in producing error - ticket #1739'
   [../]
 
   [./missing_mesh_bcs_test]

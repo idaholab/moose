@@ -150,11 +150,12 @@ SubProblem::checkMatProps()
        ++check_it)
   {
     SubdomainID block_id = check_it->first;
+
     if (_map_material_props.find(block_id) != _map_material_props.end())
       for (std::set<std::string>::iterator check_jt = check_it->second.begin(); check_jt != check_it->second.end(); ++check_jt)
       {
         std::string name = *check_jt;
-        if (check_it->second.find(name) == check_it->second.end())
+        if (_map_material_props[block_id].find(name) == _map_material_props[block_id].end())
           mooseError("Material property '" + name + "' is not defined on block " + Moose::stringify(block_id));
       }
     else
