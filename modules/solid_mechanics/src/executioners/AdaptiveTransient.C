@@ -322,7 +322,6 @@ AdaptiveTransient::endStep()
   if (_problem.adaptivity().isOn())
   {
     _problem.adaptMesh();
-    _problem.out().meshChanged();
   }
 #endif
 
