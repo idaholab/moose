@@ -65,6 +65,7 @@
 # axis = 0, 1, or 2
 # xaxis = 0, 1, or 2
 # yaxis = 0, 1, or 2
+# radial = true or false (false is default)
 #
 # where 0, 1, or 2 refer to the x, y, or z axis.
 #
@@ -83,8 +84,17 @@
 # xaxis = 1
 # results in an error.  So, if you use the parameter axis, don't use xaxis or yaxis.
 #
-# If parameters xaxis and yaxis are defined, then the first row of fred are spacial positions corresponding to xaxis value,
+# If parameters xaxis and yaxis are defined (and radial is false), then the first row of fred are spacial positions corresponding to xaxis value,
 # and the first column are spacial positions corresponding to the yaxis value.
+#
+# If xaxis and yaxis are defined and radial is true, the first row of fred contains values
+# corresponding to the radius calculated from the coordinates of each point.  Note that
+# the definition of xaxis and yaxis define the "plane" of the radius.  For example,
+# xaxis = 0 and yaxis = 1 means that x and y components of the point are use to
+# calculate the radius.  xaxis = 1 and yaxis = 2 means that x and z components are used.
+# The first column is for time in this case.  xaxis and yaxis have to be specified and 
+# radial = true for this to work, otherwise a MOOSE error will result.
+# This was developed so that an axisymmetric function could be defined for a 3D mesh.
 #
 [Mesh]
   file = cube.e
@@ -109,6 +119,10 @@
     family = LAGRANGE
   [../]
   [./scaled_u]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./R]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -197,7 +211,7 @@
 # For nodal coordinates with x=1, y=1 A = 1
 #                            x=2, y=1 A = 2
 #                            x=1, y=2 A = 3
-#                            x=14 y=2 A = 4
+#                            x=2, y=2 A = 4
 #
 # You can use this 2D linear interpolation function for anything (BC, Kernel, AuxKernel, Material) that has
 # a function as one of its parameters.  For example, this can be used to describe the fission peaking factors
@@ -214,7 +228,36 @@
 #
 # Example 5 - variable scaled_u.  This is just a scaled version of Example 1 to see if the scale_factor works
 #
-[]
+#
+#
+  [./R]
+    type = PiecewiseBilinear
+    yourFileName = fred.csv
+    xaxis = 0
+    yaxis = 1
+    radial = true
+  [../]
+#
+# Example 6 - variable R
+#
+# In this example, the variable is R and the parameters xaxis and yaxis are defined and 
+# given the values 0 and 1 respectivley.  The parameter radial is also defined and given 
+# the value true.  In this case, the x and y components of each point are used to 
+# calculate a radius.  This radius is used in the call to BilinearInterpolation.  
+# In fred.csv, the first row are the radius values.  The first column is time.
+#
+# At time = 1, the value of R at nodes with coordinates (x = 1, y = 1, or r = 1.414) is 1.414.
+#            , the value of R at nodes with coordinates (x = 1, y = 2, or r = 2.236) is 2.236.
+#            , the value of R at nodes with coordinates (x = 2, y = 2, or r = 2.828) is 2.828.
+#
+# At time = 2, the value of R at nodes with coordinates (x = 1, y = 1, or r = 1.414) is 3.414.
+#            , the value of R at nodes with coordinates (x = 1, y = 2, or r = 2.236) is 4.236.
+#            , the value of R at nodes with coordinates (x = 2, y = 2, or r = 2.828) is 4.828.
+# 
+# Note that the case of x = 2, y = 1 gives the same result as x = 1, y=2.
+#
+#
+[] # End Functions
 
 [Kernels]
 
@@ -237,6 +280,10 @@
   [./diff_scaled_u]
     type = Diffusion
     variable = scaled_u
+  [../]
+  [./diffR]
+    type = Diffusion
+    variable = R
   [../]
 []
 
@@ -271,6 +318,12 @@
     variable = scaled_u
     boundary = '1'
     function = scaled_u
+  [../]
+  [./R]
+    type = FunctionDirichletBC
+    variable = R
+    boundary = '1'
+    function = R
   [../]
 []
 
