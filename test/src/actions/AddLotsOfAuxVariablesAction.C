@@ -36,8 +36,8 @@ const Real AddLotsOfAuxVariablesAction::_abs_zero_tol = 1e-12;
 template<>
 InputParameters validParams<AddLotsOfAuxVariablesAction>()
 {
-  MooseEnum families("LAGRANGE, MONOMIAL, HERMITE, SCALAR, HIERARCHIC, CLOUGH, XYZ, SZABAB, BERNSTEIN", "LAGRANGE");
-  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FORTH", "FIRST");
+  MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
+  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
 
   InputParameters params = validParams<Action>();
   params.addRequiredParam<unsigned int>("number", "The number of variables to add");

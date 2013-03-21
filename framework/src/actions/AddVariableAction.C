@@ -35,8 +35,8 @@ const Real AddVariableAction::_abs_zero_tol = 1e-12;
 template<>
 InputParameters validParams<AddVariableAction>()
 {
-  MooseEnum families("LAGRANGE, MONOMIAL, HERMITE, SCALAR, HIERARCHIC, CLOUGH, XYZ, SZABAB, BERNSTEIN, L2_LAGRANGE, L2_HIERARCHIC", "LAGRANGE");
-  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST", true);
+  MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
+  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
 
   InputParameters params = validParams<Action>();
   params.addParam<MooseEnum>("family", families, "Specifies the family of FE shape functions to use for this variable");
@@ -50,10 +50,21 @@ InputParameters validParams<AddVariableAction>()
   return params;
 }
 
-
 AddVariableAction::AddVariableAction(const std::string & name, InputParameters params) :
     Action(name, params)
 {
+}
+
+MooseEnum
+AddVariableAction::getNonlinearVariableFamilies()
+{
+  return MooseEnum("LAGRANGE, MONOMIAL, HERMITE, SCALAR, HIERARCHIC, CLOUGH, XYZ, SZABAB, BERNSTEIN, L2_LAGRANGE, L2_HIERARCHIC", "LAGRANGE");
+}
+
+MooseEnum
+AddVariableAction::getNonlinearVariableOrders()
+{
+  return MooseEnum("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST", true);
 }
 
 void
@@ -63,7 +74,7 @@ AddVariableAction::act()
   FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                  Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
 
-  bool is_variables_block = getAction() == "add_variable";
+  bool is_nl_variables_action = getAction() == "add_variable";
 
   std::set<SubdomainID> blocks;
   std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName> >("block");
@@ -73,10 +84,10 @@ AddVariableAction::act()
     blocks.insert(blk_id);
   }
 
-  Real scale_factor = getParam<Real>("scaling");
+  Real scale_factor = isParamValid("scaling") ? getParam<Real>("scaling") : 1;
   bool scalar_var = false;                              // true if adding scalar variable
 
-  if (is_variables_block)
+  if (is_nl_variables_action)
   {
     if (fe_type.family == SCALAR)
     {
@@ -93,9 +104,6 @@ AddVariableAction::act()
   }
   else
   {
-    if (scale_factor != 1.0)
-      mooseWarning("Currently the Auxiliary System ignores scaling factors - please contact the MOOSE team");
-
     if (fe_type.family == SCALAR)
     {
       _problem->addAuxScalarVariable(var_name, fe_type.order);

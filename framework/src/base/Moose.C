@@ -210,6 +210,7 @@
 #include "AddDGKernelAction.h"
 #include "AddPeriodicBCAction.h"
 #include "AddVariableAction.h"
+#include "AddAuxVariableAction.h"
 #include "AddPostprocessorAction.h"
 #include "AddDamperAction.h"
 #include "AddFunctionAction.h"
@@ -577,7 +578,7 @@ addActionTypes(Syntax & syntax)
  * Example:
  * "add_variable" <-----                       -> [Variables/ *]
  *                       \                   /
- *                         AddVariableAction
+ *                        CopyNodalVarsAction
  *                       /                   \
  * "add_aux_variable" <-                       -> [AuxVariables/ *]
  *
@@ -604,7 +605,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "add_variable");
   registerAction(CopyNodalVarsAction, "copy_nodal_vars");
-  registerAction(AddVariableAction, "add_aux_variable");
+  registerAction(AddAuxVariableAction, "add_aux_variable");
   registerAction(CopyNodalVarsAction, "copy_nodal_aux_vars");
 
   registerAction(AddICAction, "add_ic");

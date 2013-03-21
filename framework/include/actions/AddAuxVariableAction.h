@@ -12,29 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADDVARIABLEACTION_H
-#define ADDVARIABLEACTION_H
+#ifndef ADDAUXVARIABLEACTION_H
+#define ADDAUXVARIABLEACTION_H
 
-#include "Action.h"
+#include "AddVariableAction.h"
 
-class AddVariableAction;
+class AddAuxVariableAction;
 
 template<>
-InputParameters validParams<AddVariableAction>();
+InputParameters validParams<AddAuxVariableAction>();
 
-class AddVariableAction : public Action
+class AddAuxVariableAction : public AddVariableAction
 {
 public:
-  AddVariableAction(const std::string & name, InputParameters params);
+  AddAuxVariableAction(const std::string & name, InputParameters params);
 
-  virtual void act();
-
-  static MooseEnum getNonlinearVariableFamilies();
-  static MooseEnum getNonlinearVariableOrders();
-
-protected:
-  static const Real _abs_zero_tol;
-  std::string _variable_to_read;
+  static MooseEnum getAuxVariableFamilies();
+  static MooseEnum getAuxVariableOrders();
 };
 
-#endif // ADDVARIABLEACTION_H
+#endif // ADDAUXVARIABLEACTION_H

@@ -41,11 +41,11 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("SetupResidualDebugAction", "Debug");
 
   /// Variable/AuxVariable Actions
-  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_variable");
+  syntax.registerActionSyntax("AddVariableAction", "Variables/*");
   syntax.registerActionSyntax("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
   syntax.registerActionSyntax("AddICAction", "Variables/*/InitialCondition");
 
-  syntax.registerActionSyntax("AddVariableAction", "AuxVariables/*", "add_aux_variable");
+  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*");
   syntax.registerActionSyntax("CopyNodalVarsAction", "AuxVariables/*", "copy_nodal_aux_vars");
   syntax.registerActionSyntax("AddICAction", "AuxVariables/*/InitialCondition");
 
