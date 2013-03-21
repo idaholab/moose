@@ -63,6 +63,7 @@ public:
   virtual void timestepSetup();
 
   void setupFiniteDifferencedPreconditioner();
+  void setupFieldSplitPreconditioner();
 
   /**
    * Returns the convergence state
@@ -286,6 +287,11 @@ public:
   void useFiniteDifferencedPreconditioner(bool use=true) { _use_finite_differenced_preconditioner = use; }
 
   /**
+   * If called with true this system will use FieldSplitPreconditioner, whenever it is supported by the solver.
+   */
+  void useFieldSplitPreconditioner(bool use=true) { _use_field_split_preconditioner = use; }
+
+  /**
    * If called with true this will add entries into the jacobian to link together degrees of freedom that are found to
    * be related through the geometric search system.
    *
@@ -424,6 +430,8 @@ protected:
 #ifdef LIBMESH_HAVE_PETSC
   MatFDColoring _fdcoloring;
 #endif
+  /// Whether or not to use a field split preconditioner
+  bool _use_field_split_preconditioner;
 
   /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
   bool _add_implicit_geometric_coupling_entries_to_jacobian;

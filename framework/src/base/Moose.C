@@ -155,6 +155,7 @@
 #include "PhysicsBasedPreconditioner.h"
 #include "FiniteDifferencePreconditioner.h"
 #include "SingleMatrixPreconditioner.h"
+#include "FieldSplitPreconditioner.h"
 
 // dampers
 #include "ConstantDamper.h"
@@ -394,6 +395,7 @@ registerObjects(Factory & factory)
   registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");
   registerNamedPreconditioner(FiniteDifferencePreconditioner, "FDP");
   registerNamedPreconditioner(SingleMatrixPreconditioner, "SMP");
+  registerNamedPreconditioner(FieldSplitPreconditioner, "FSP");
   // dampers
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);
@@ -666,6 +668,7 @@ void
 setSolverDefaults(FEProblem & problem)
 {
 #ifdef LIBMESH_HAVE_PETSC
+  // May be a touch expensive to create a new DM every time, but probably safer to do it this way
   Moose::PetscSupport::petscSetDefaults(problem);
 #endif //LIBMESH_HAVE_PETSC
 }

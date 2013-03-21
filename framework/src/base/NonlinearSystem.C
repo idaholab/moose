@@ -43,7 +43,7 @@
 #include "ScalarKernel.h"
 #include "Parser.h"
 #include "TimeScheme.h"
-
+#include "FieldSplitPreconditioner.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -112,6 +112,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _increment_vec(NULL),
     _preconditioner(NULL),
     _use_finite_differenced_preconditioner(false),
+    _use_field_split_preconditioner(false),
     _add_implicit_geometric_coupling_entries_to_jacobian(false),
     _need_serialized_solution(false),
     _need_residual_copy(false),
@@ -205,6 +206,9 @@ NonlinearSystem::solve()
   if(_use_finite_differenced_preconditioner)
     setupFiniteDifferencedPreconditioner();
 
+  if(_use_field_split_preconditioner)
+    setupFieldSplitPreconditioner();
+
   _sys.solve();
 
   // store info about the solve
@@ -276,6 +280,7 @@ NonlinearSystem::timestepSetup()
   }
 }
 
+
 void
 NonlinearSystem::setupFiniteDifferencedPreconditioner()
 {
@@ -346,6 +351,18 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
 #endif
 
 //  std::cout<<*_sys.matrix<<std::endl;
+#endif
+}
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
+#include "petscdmmoose.h"
+#endif
+
+void
+NonlinearSystem::setupFieldSplitPreconditioner()
+{
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
+  FieldSplitPreconditioner* fsp = dynamic_cast<FieldSplitPreconditioner*>(_preconditioner);
+  fsp->setup();
 #endif
 }
 
