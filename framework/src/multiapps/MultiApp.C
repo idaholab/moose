@@ -138,7 +138,7 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     // the name of the multiapp + a number to it
     output_base << _fe_problem->out().fileBase()
                 << "_" << _name
-                << std::setw(_total_num_apps/10)
+                << std::setw(std::ceil(std::log10(_total_num_apps)))
                 << std::setprecision(0)
                 << std::setfill('0')
                 << std::right
