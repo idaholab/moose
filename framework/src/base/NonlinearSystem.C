@@ -547,6 +547,9 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
 NumericVector<Number>&
 NonlinearSystem::addVector(const std::string & vector_name, const bool project, const ParallelType type, bool zero_for_residual)
 {
+  if(_sys.have_vector(vector_name))
+    return _sys.get_vector(vector_name);
+
   NumericVector<Number> * vec = &_sys.add_vector(vector_name, project, type);
 
   if(zero_for_residual)
