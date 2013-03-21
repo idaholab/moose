@@ -165,9 +165,12 @@ Kernel::getMaterialProperty(const std::string & name)
   }
   else
   {
-    // no kernel blocks specified, check all blocks that are in the mesh
-    const std::set<SubdomainID> & blocks = _mesh.meshSubdomains();
-    for (std::set<SubdomainID>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+    // Is this variable already block restricted?
+    const std::set<SubdomainID> * blocks = &_sys.getSubdomainsForVar(_var.index());
+    if (blocks->empty())
+      // no kernel blocks specified, check all blocks that are in the mesh
+      blocks = &_mesh.meshSubdomains();
+    for (std::set<SubdomainID>::const_iterator it = blocks->begin(); it != blocks->end(); ++it)
       _subproblem.delayedCheckMatProp(*it, name);
   }
 
