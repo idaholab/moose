@@ -43,7 +43,7 @@ class SystemBase;
 class MooseVariableBase
 {
 public:
-  MooseVariableBase(unsigned int var_num, unsigned int index, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  MooseVariableBase(unsigned int var_num, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
   virtual ~MooseVariableBase();
 
   /**
@@ -101,7 +101,7 @@ public:
    * Is this variable nodal
    * @return true if it nodal, otherwise false
    */
-  virtual bool isNodal() const;
+  virtual bool isNodal() const = 0;
 
 protected:
   /// variable number (from libMesh)

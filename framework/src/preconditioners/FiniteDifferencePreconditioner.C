@@ -38,16 +38,15 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const std::string
 
   NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
   unsigned int n_vars = nl.nVariables();
-  unsigned int n_scalar_vars = nl.nScalarVariables();
 
-  CouplingMatrix * cm = new CouplingMatrix(n_vars + n_scalar_vars);
+  CouplingMatrix * cm = new CouplingMatrix(n_vars);
 
   bool full = getParam<bool>("full");
 
   if (!full)
   {
     // put 1s on diagonal
-    for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
+    for (unsigned int i = 0; i < n_vars; i++)
       (*cm)(i, i) = 1;
 
     // off-diagonal entries
@@ -63,8 +62,8 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const std::string
   }
   else
   {
-    for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
-      for (unsigned int j = 0; j < n_vars + n_scalar_vars; j++)
+    for (unsigned int i = 0; i < n_vars; i++)
+      for (unsigned int j = 0; j < n_vars; j++)
         (*cm)(i,j) = 1;
   }
 

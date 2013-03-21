@@ -1340,22 +1340,27 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 void
 NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
 {
-  std::vector<MooseVariableScalar *> scalar_vars = _vars[0].scalars();
+  const std::vector<MooseVariableScalar *> & scalar_vars = getScalarVariables(0);
 
   const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
   // do full jacobian for ODEs
-  for (unsigned int ivar = 0; ivar < scalar_vars.size(); ivar++)
+  for (std::vector<MooseVariableScalar *>::const_iterator it = scalar_vars.begin(); it != scalar_vars.end(); ++it)
   {
-    for (unsigned int jvar = 0; jvar < scalar_vars.size(); jvar++)
+    MooseVariableScalar & ivar = *(*it);
+    for (std::vector<MooseVariableScalar *>::const_iterator jt = scalar_vars.begin(); jt != scalar_vars.end(); ++jt)
     {
-      for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
+      MooseVariableScalar & jvar = *(*jt);
+      for (std::vector<ScalarKernel *>::const_iterator kt = scalars.begin(); kt != scalars.end(); ++kt)
       {
-        ScalarKernel * kernel = *it;
-        if (kernel->variable().index() == ivar)
+        ScalarKernel * kernel = *kt;
+        if (kernel->variable().index() == ivar.index())
         {
           _fe_problem.reinitScalars(0);
           kernel->reinit();
-          kernel->computeOffDiagJacobian(jvar);
+          if (jvar.index() == ivar.index())
+            kernel->computeJacobian();
+          else
+            kernel->computeOffDiagJacobian(jvar.index());
           _fe_problem.addJacobianScalar(jacobian);
         }
       }
@@ -1958,7 +1963,8 @@ void
 NonlinearSystem::reinitDampers(THREAD_ID tid)
 {
   // FIXME: be smart here and compute only variables with dampers (need to add some book keeping)
-  for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+  const std::vector<MooseVariable *> & vars = _vars[tid].variables();
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable *var = *it;
     var->computeDamping(*_increment_vec);

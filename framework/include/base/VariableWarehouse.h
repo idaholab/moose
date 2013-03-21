@@ -21,6 +21,7 @@
 #include <map>
 #include <set>
 
+class MooseVariableBase;
 class MooseVariable;
 class MooseVariableScalar;
 class InitialCondition;
@@ -40,14 +41,7 @@ public:
    * @param var_name The name of the variable
    * @param var Variable
    */
-  void add(const std::string & var_name, MooseVariable *var);
-
-  /**
-   * Add a scalar variable
-   * @param var_num The number of the variable
-   * @param var Scalar variable
-   */
-  void add(const std::string & var_name, MooseVariableScalar * var);
+  void add(const std::string & var_name, MooseVariableBase * var);
 
   /**
    * Add a boundary variable
@@ -63,32 +57,39 @@ public:
    * @param var_name The name of the variable to retrieve
    * @return The retrieved variable
    */
-  MooseVariable * getVariable(const std::string & var_name);
+  MooseVariableBase * getVariable(const std::string & var_name);
 
   /**
-   * Get a scalar variable from the warehouse
-   * @param var_num The number of the scalar variable to retrieve
+   * Get a variable from the warehouse
+   * @param var_num The number of the variable to retrieve
    * @return The retrieved variable
    */
-  MooseVariableScalar * getScalarVariable(const std::string & var_name);
+  MooseVariableBase * getVariable(unsigned int var_number);
 
   /**
    * Get the list of all variables
    * @return The list of variables
    */
-  std::vector<MooseVariable *> & all();
+  const std::vector<MooseVariableBase *> & all();
+
+  /**
+   * Get the list of variables
+   * @return The list of variables
+   */
+  const std::vector<MooseVariable *> & variables();
+
   /**
    * Get the list of variables that needs to be reinitialized on a given boundary
    * @param bnd The boundary ID
    * @return The list of variables
    */
-  std::set<MooseVariable *> & boundaryVars(BoundaryID bnd);
+  const std::set<MooseVariable *> & boundaryVars(BoundaryID bnd);
 
   /**
    * Get the list of scalar variables
    * @return The list of scalar variables
    */
-  std::vector<MooseVariableScalar *> & scalars();
+  const std::vector<MooseVariableScalar *> & scalars();
 
   /**
    * Add an initial condition for field variable
@@ -121,16 +122,16 @@ public:
 
 protected:
   /// list of all variables
+  std::vector<MooseVariableBase *> _all;
+  /// list of "normal" variables
   std::vector<MooseVariable *> _vars;
   /// Initial conditions: [name] -> [block_id] -> initial condition (only 1 IC per sub-block)
   std::map<std::string, std::map<SubdomainID, InitialCondition *> > _ics;
   /// Name to variable mapping
-  std::map<std::string, MooseVariable *> _var_name;
+  std::map<std::string, MooseVariableBase *> _var_name;
   /// Map to variables that need to be evaluated on a boundary
   std::map<BoundaryID, std::set<MooseVariable *> > _boundary_vars;
 
-  /// variable number to variable mapping
-  std::map<std::string, MooseVariableScalar *> _scalar_var_map;
   /// list of all variables
   std::vector<MooseVariableScalar *> _scalar_vars;
   /// Initial conditions: [name] -> initial condition

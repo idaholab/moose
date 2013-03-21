@@ -44,8 +44,6 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
   // initial condition system directly.
   // ------------
 
-  // The number of variables in this system
-  const unsigned int n_variables = _sys.nVariables();
   // The dimensionality of the current mesh
   const unsigned int dim = _sys.mesh().dimension();
 
@@ -73,9 +71,10 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
     std::vector<unsigned int> side_dofs;
 
     // Loop over all the variables in the system
-    for (unsigned int vn=0; vn<n_variables; vn++)
+    const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
     {
-      MooseVariable & var = *_sys._vars[_tid].all()[vn];
+      MooseVariable & var = *(*it);
 
       // Per-subdomain variables don't need to be projected on
       // elements where they're not active

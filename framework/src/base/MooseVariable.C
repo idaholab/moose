@@ -23,8 +23,8 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
 
-MooseVariable::MooseVariable(unsigned int var_num, unsigned int index, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
-    MooseVariableBase(var_num, index, sys, assembly, var_kind),
+MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
+    MooseVariableBase(var_num, sys, assembly, var_kind),
     _fe_type(fe_type),
 
     _qrule(_assembly.qRule()),

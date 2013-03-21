@@ -358,13 +358,9 @@ public:
 
   DenseVector<Number> & residualBlock(unsigned int var_num) { return _sub_Re[var_num]; }
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num) { return _sub_Rn[var_num]; }
-  DenseVector<Number> & residualBlockScalar(unsigned int var_num) { return _scalar_Re[var_num]; }
 
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar);
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar);
-  DenseMatrix<Number> & jacobianBlockScalar(unsigned int ivar, unsigned int jvar) { return _scalar_Kee[ivar][jvar]; }
-  DenseMatrix<Number> & jacobianBlockScalarLM(unsigned int ivar, unsigned int jvar) { return _scalar_Ken[ivar][jvar]; }
-  DenseMatrix<Number> & jacobianBlockScalarCED(unsigned int ivar, unsigned int jvar) { return _scalar_Kne[ivar][jvar]; }
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<unsigned int> & idof_indices, std::vector<unsigned int> & jdof_indices, Real scaling_factor);
 
   std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries() { return _cm_entry; }
@@ -427,7 +423,7 @@ protected:
   SystemBase & _sys;
   /// Reference to coupling matrix
   CouplingMatrix * & _cm;
-  /// Entries in the coupling matrix
+  /// Entries in the coupling matrix (only for element variables)
   std::vector<std::pair<unsigned int, unsigned int> > _cm_entry;
   /// DOF map
   const DofMap & _dof_map;
@@ -543,8 +539,6 @@ protected:
   std::vector<DenseVector<Number> > _sub_Re;
   /// residual contributions for each variable from the neighbor
   std::vector<DenseVector<Number> > _sub_Rn;
-  /// residual for scalar variable
-  std::vector<DenseVector<Number> > _scalar_Re;
   /// auxiliary vector for scaling residuals (optimization to avoid expensive construction/destruction)
   DenseVector<Number> _tmp_Re;
 
@@ -558,12 +552,6 @@ protected:
   /// jacobian contributions from the neighbor
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Knn;
 
-  /// jacobian contributions for scalar variable
-  std::vector<std::vector<DenseMatrix<Number> > > _scalar_Kee;
-  /// jacobian contributions
-  std::vector<std::vector<DenseMatrix<Number> > > _scalar_Ken;
-  /// jacobian contributions
-  std::vector<std::vector<DenseMatrix<Number> > > _scalar_Kne;
   bool _scalar_has_off_diag_contributions;
 
   /// auxiliary matrix for scaling jacobians (optimization to avoid expensive construction/destruction)

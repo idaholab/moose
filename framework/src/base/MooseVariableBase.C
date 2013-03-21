@@ -19,9 +19,8 @@
 #include "SystemBase.h"
 
 
-MooseVariableBase::MooseVariableBase(unsigned int var_num, unsigned int index, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
+MooseVariableBase::MooseVariableBase(unsigned int var_num, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
     _var_num(var_num),
-    _index(index),
     _var_kind(var_kind),
     _subproblem(sys.subproblem()),
     _sys(sys),
@@ -40,7 +39,7 @@ MooseVariableBase::~MooseVariableBase()
 unsigned int
 MooseVariableBase::index() const
 {
-  return _index;
+  return _var_num;
 }
 
 unsigned int

@@ -627,26 +627,31 @@ Assembly::init()
 
   // I want the blocks to go by columns first to reduce copying of shape function in assembling "full" Jacobian
   _cm_entry.clear();
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariable *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
+  {
+    unsigned int j = (*jt)->index();
+    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+    {
+      unsigned int i = (*it)->index();
+      if ((*_cm)(i, j) != 0)
+        _cm_entry.push_back(std::pair<unsigned int, unsigned int>(i, j));
+    }
+  }
 
   unsigned int max_rows_per_column = 0;  // If this is 1 then we are using a block-diagonal preconditioner and we can save a bunch of memory.
-
-  for (unsigned int j = 0; j < n_vars; ++j)
+  for (unsigned int i = 0; i < n_vars; i++)
   {
     unsigned int max_rows_per_this_column = 0;
-
-    for (unsigned int i = 0; i < n_vars; ++i)
+    for (unsigned int j = 0; j < n_vars; j++)
     {
       if ((*_cm)(i, j) != 0)
-      {
         max_rows_per_this_column++;
-        _cm_entry.push_back(std::pair<unsigned int, unsigned int>(i, j));
-      }
     }
-
     max_rows_per_column = std::max(max_rows_per_column, max_rows_per_this_column);
   }
 
-  if(max_rows_per_column == 1)
+  if(max_rows_per_column == 1 && _sys.getScalarVariables(_tid).size() == 0)
     _block_diagonal_matrix = true;
 
   _sub_Re.resize(n_vars);
@@ -674,22 +679,6 @@ Assembly::init()
       _sub_Knn[i].resize(1);
     }
   }
-
-  unsigned int n_scalar_vars = _sys.nScalarVariables();
-  _scalar_Re.resize(n_scalar_vars);
-
-  _scalar_Kee.resize(n_scalar_vars);
-  _scalar_Ken.resize(n_scalar_vars);
-  _scalar_Kne.resize(n_vars);
-
-  for (unsigned int i = 0; i < n_scalar_vars; ++i)
-  {
-    _scalar_Kee[i].resize(n_scalar_vars);
-    _scalar_Ken[i].resize(n_vars);
-  }
-
-  for (unsigned int i = 0; i < n_vars; ++i)
-    _scalar_Kne[i].resize(n_scalar_vars);
 }
 
 void
@@ -703,16 +692,16 @@ Assembly::prepare()
     MooseVariable & ivar = _sys.getVariable(_tid, vi);
     MooseVariable & jvar = _sys.getVariable(_tid, vj);
 
-    jacobianBlock(vi,vj).resize(ivar.dofIndices().size(), jvar.dofIndices().size());
-    jacobianBlock(vi,vj).zero();
+    jacobianBlock(vi, vj).resize(ivar.dofIndices().size(), jvar.dofIndices().size());
+    jacobianBlock(vi, vj).zero();
   }
 
-  unsigned int n_vars = _sys.nVariables();
-  for (unsigned int vi = 0; vi < n_vars; vi++)
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    MooseVariable & ivar = _sys.getVariable(_tid, vi);
-    _sub_Re[vi].resize(ivar.dofIndices().size());
-    _sub_Re[vi].zero();
+    MooseVariable & ivar = *(*it);
+    _sub_Re[ivar.index()].resize(ivar.dofIndices().size());
+    _sub_Re[ivar.index()].zero();
   }
 }
 
@@ -758,12 +747,12 @@ Assembly::prepareNeighbor()
     jacobianBlockNeighbor(Moose::NeighborNeighbor, vi, vj).zero();
   }
 
-  unsigned int n_vars = _sys.nVariables();
-  for (unsigned int vi = 0; vi < n_vars; vi++)
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    MooseVariable & ivar = _sys.getVariable(_tid, vi);
-    _sub_Rn[vi].resize(ivar.dofIndicesNeighbor().size());
-    _sub_Rn[vi].zero();
+    MooseVariable & ivar = *(*it);
+    _sub_Rn[ivar.index()].resize(ivar.dofIndicesNeighbor().size());
+    _sub_Rn[ivar.index()].zero();
   }
 }
 
@@ -782,24 +771,22 @@ Assembly::prepareScalar()
 {
   _scalar_has_off_diag_contributions = false;
 
-  unsigned int n_scalar_vars = _sys.nScalarVariables();
-
-  for (unsigned int vi = 0; vi < n_scalar_vars; vi++)
+  const std::vector<MooseVariableScalar *> & vars = _sys.getScalarVariables(_tid);
+  for (std::vector<MooseVariableScalar *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    MooseVariableScalar & ivar = _sys.getScalarVariable(_tid, vi);
-    unsigned int lm_dofs = ivar.dofIndices().size();
+    MooseVariableScalar & ivar = *(*it);
+    unsigned int idofs = ivar.dofIndices().size();
 
-    // LM residual/jacobian blocks
-    _scalar_Re[vi].resize(lm_dofs);
-    _scalar_Re[vi].zero();
+    _sub_Re[ivar.index()].resize(idofs);
+    _sub_Re[ivar.index()].zero();
 
-    for (unsigned int vj = 0; vj < n_scalar_vars; vj++)
+    for (std::vector<MooseVariableScalar *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
     {
-      MooseVariableScalar & jvar = _sys.getScalarVariable(_tid, vj);
-      unsigned int jlm_dofs = jvar.dofIndices().size();
+      MooseVariableScalar & jvar = *(*jt);
+      unsigned int jdofs = jvar.dofIndices().size();
 
-      _scalar_Kee[vi][vj].resize(lm_dofs, jlm_dofs);
-      _scalar_Kee[vi][vj].zero();
+      jacobianBlock(ivar.index(), jvar.index()).resize(idofs, jdofs);
+      jacobianBlock(ivar.index(), jvar.index()).zero();
     }
   }
 }
@@ -809,33 +796,33 @@ Assembly::prepareOffDiagScalar()
 {
   _scalar_has_off_diag_contributions = true;
 
-  unsigned int n_vars = _sys.nVariables();
-  unsigned int n_scalar_vars = _sys.nScalarVariables();
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+  const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
 
-  for (unsigned int vj = 0; vj < n_vars; vj++)
+  for (std::vector<MooseVariable *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
   {
-    MooseVariable & jvar = _sys.getVariable(_tid, vj);
+    MooseVariable & jvar = *(*jt);
     unsigned int ced_dofs = jvar.dofIndices().size();
 
-    _sub_Re[vj].resize(ced_dofs);
-    _sub_Re[vj].zero();
+    _sub_Re[jvar.index()].resize(ced_dofs);
+    _sub_Re[jvar.index()].zero();
   }
 
-  for (unsigned int vi = 0; vi < n_scalar_vars; vi++)
+  for (std::vector<MooseVariableScalar *>::const_iterator it = scalar_vars.begin(); it != scalar_vars.end(); ++it)
   {
-    MooseVariableScalar & ivar = _sys.getScalarVariable(_tid, vi);
-    unsigned int lm_dofs = ivar.dofIndices().size();
+    MooseVariableScalar & ivar = *(*it);
+    unsigned int idofs = ivar.dofIndices().size();
 
-    for (unsigned int vj = 0; vj < n_vars; vj++)
+    for (std::vector<MooseVariable *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
     {
-      MooseVariable & jvar = _sys.getVariable(_tid, vj);
-      unsigned int ced_dofs = jvar.dofIndices().size();
+      MooseVariable & jvar = *(*jt);
+      unsigned int jdofs = jvar.dofIndices().size();
 
-      _scalar_Ken[vi][vj].resize(lm_dofs, ced_dofs);
-      _scalar_Ken[vi][vj].zero();
+      _sub_Kee[ivar.index()][jvar.index()].resize(idofs, jdofs);
+      _sub_Kee[ivar.index()][jvar.index()].zero();
 
-      _scalar_Kne[vj][vi].resize(ced_dofs, lm_dofs);
-      _scalar_Kne[vj][vi].zero();
+      _sub_Kee[jvar.index()][ivar.index()].resize(jdofs, idofs);
+      _sub_Kee[jvar.index()][ivar.index()].zero();
     }
   }
 }
@@ -933,20 +920,22 @@ Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsign
 void
 Assembly::addResidual(NumericVector<Number> & residual)
 {
-  for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
+  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    MooseVariable & var = _sys.getVariable(_tid, vn);
-    addResidualBlock(residual, _sub_Re[vn], var.dofIndices(), var.scalingFactor());
+    MooseVariable & var = *(*it);
+    addResidualBlock(residual, _sub_Re[var.index()], var.dofIndices(), var.scalingFactor());
   }
 }
 
 void
 Assembly::addResidualNeighbor(NumericVector<Number> & residual)
 {
-  for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
+  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    MooseVariable & var = _sys.getVariable(_tid, vn);
-    addResidualBlock(residual, _sub_Rn[vn], var.dofIndicesNeighbor(), var.scalingFactor());
+    MooseVariable & var = *(*it);
+    addResidualBlock(residual, _sub_Rn[var.index()], var.dofIndicesNeighbor(), var.scalingFactor());
   }
 }
 
@@ -954,18 +943,20 @@ void
 Assembly::addResidualScalar(NumericVector<Number> & residual)
 {
   // add the scalar variables residuals
-  for (unsigned int vn = 0; vn < _sys.nScalarVariables(); ++vn)
+  const std::vector<MooseVariableScalar *> vars = _sys.getScalarVariables(_tid);
+  for (std::vector<MooseVariableScalar *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    MooseVariableScalar & var = _sys.getScalarVariable(_tid, vn);
-    addResidualBlock(residual, _scalar_Re[vn], var.dofIndices(), var.scalingFactor());
+    MooseVariableScalar & var = *(*it);
+    addResidualBlock(residual, _sub_Re[var.index()], var.dofIndices(), var.scalingFactor());
   }
+
   if (_scalar_has_off_diag_contributions)
   {
-    // add the other variables residuals
-    for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
+    const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
     {
-      MooseVariable & var = _sys.getVariable(_tid, vn);
-      addResidualBlock(residual, _sub_Re[vn], var.dofIndices(), var.scalingFactor());
+      MooseVariable & var = *(*it);
+      addResidualBlock(residual, _sub_Re[var.index()], var.dofIndices(), var.scalingFactor());
     }
   }
 }
@@ -974,21 +965,22 @@ Assembly::addResidualScalar(NumericVector<Number> & residual)
 void
 Assembly::cacheResidual()
 {
-  for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
+  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    MooseVariable & var = _sys.getVariable(_tid, vn);
-    cacheResidualBlock(_sub_Re[vn], var.dofIndices(), var.scalingFactor());
+    MooseVariable & var = *(*it);
+    cacheResidualBlock(_sub_Re[var.index()], var.dofIndices(), var.scalingFactor());
   }
 }
 
 void
 Assembly::cacheResidualNeighbor()
 {
-  for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
+  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    MooseVariable & var = _sys.getVariable(_tid, vn);
-
-    cacheResidualBlock(_sub_Rn[vn], var.dofIndicesNeighbor(), var.scalingFactor());
+    MooseVariable & var = *(*it);
+    cacheResidualBlock(_sub_Rn[var.index()], var.dofIndicesNeighbor(), var.scalingFactor());
   }
 }
 
@@ -1040,20 +1032,22 @@ Assembly::setResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
 void
 Assembly::setResidual(NumericVector<Number> & residual)
 {
-  for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
+  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    MooseVariable & var = _sys.getVariable(_tid, vn);
-    setResidualBlock(residual, _sub_Re[vn], var.dofIndices(), var.scalingFactor());
+    MooseVariable & var = *(*it);
+    setResidualBlock(residual, _sub_Re[var.index()], var.dofIndices(), var.scalingFactor());
   }
 }
 
 void
 Assembly::setResidualNeighbor(NumericVector<Number> & residual)
 {
-  for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
+  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    MooseVariable & var = _sys.getVariable(_tid, vn);
-    setResidualBlock(residual, _sub_Rn[vn], var.dofIndicesNeighbor(), var.scalingFactor());
+    MooseVariable & var = *(*it);
+    setResidualBlock(residual, _sub_Rn[var.index()], var.dofIndicesNeighbor(), var.scalingFactor());
   }
 }
 
@@ -1143,17 +1137,15 @@ Assembly::addCachedJacobian(SparseMatrix<Number> & jacobian)
 void
 Assembly::addJacobian(SparseMatrix<Number> & jacobian)
 {
-  for (unsigned int vi = 0; vi < _sys.nVariables(); ++vi)
+  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    for (unsigned int vj = 0; vj < _sys.nVariables(); ++vj)
+    MooseVariable & ivar = *(*it);
+    for (std::vector<MooseVariable *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
     {
-      if ((*_cm)(vi, vj) != 0)
-      {
-        MooseVariable & ivar = _sys.getVariable(_tid, vi);
-        MooseVariable & jvar = _sys.getVariable(_tid, vj);
-
-        addJacobianBlock(jacobian, jacobianBlock(vi,vj), ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
-      }
+      MooseVariable & jvar = *(*jt);
+      if ((*_cm)(ivar.index(), jvar.index()) != 0)
+        addJacobianBlock(jacobian, jacobianBlock(ivar.index(), jvar.index()), ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
     }
   }
 }
@@ -1161,18 +1153,18 @@ Assembly::addJacobian(SparseMatrix<Number> & jacobian)
 void
 Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian)
 {
-  for (unsigned int vi = 0; vi < _sys.nVariables(); ++vi)
+  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    for (unsigned int vj = 0; vj < _sys.nVariables(); ++vj)
+    MooseVariable & ivar = *(*it);
+    for (std::vector<MooseVariable *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
     {
-      if ((*_cm)(vi, vj) != 0)
+      MooseVariable & jvar = *(*jt);
+      if ((*_cm)(ivar.index(), jvar.index()) != 0)
       {
-        MooseVariable & ivar = _sys.getVariable(_tid, vi);
-        MooseVariable & jvar = _sys.getVariable(_tid, vj);
-
-        addJacobianBlock(jacobian, jacobianBlockNeighbor(Moose::ElementNeighbor, vi, vj), ivar.dofIndices(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
-        addJacobianBlock(jacobian, jacobianBlockNeighbor(Moose::NeighborElement, vi, vj), ivar.dofIndicesNeighbor(), jvar.dofIndices(), ivar.scalingFactor());
-        addJacobianBlock(jacobian, jacobianBlockNeighbor(Moose::NeighborNeighbor, vi, vj), ivar.dofIndicesNeighbor(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
+        addJacobianBlock(jacobian, jacobianBlockNeighbor(Moose::ElementNeighbor, ivar.index(), jvar.index()), ivar.dofIndices(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
+        addJacobianBlock(jacobian, jacobianBlockNeighbor(Moose::NeighborElement, ivar.index(), jvar.index()), ivar.dofIndicesNeighbor(), jvar.dofIndices(), ivar.scalingFactor());
+        addJacobianBlock(jacobian, jacobianBlockNeighbor(Moose::NeighborNeighbor, ivar.index(), jvar.index()), ivar.dofIndicesNeighbor(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
       }
     }
   }
@@ -1181,17 +1173,15 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian)
 void
 Assembly::cacheJacobian()
 {
-  for (unsigned int vi = 0; vi < _sys.nVariables(); ++vi)
+  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    for (unsigned int vj = 0; vj < _sys.nVariables(); ++vj)
+    MooseVariable & ivar = *(*it);
+    for (std::vector<MooseVariable *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
     {
-      if ((*_cm)(vi, vj) != 0)
-      {
-        MooseVariable & ivar = _sys.getVariable(_tid, vi);
-        MooseVariable & jvar = _sys.getVariable(_tid, vj);
-
-        cacheJacobianBlock(jacobianBlock(vi,vj), ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
-      }
+      MooseVariable & jvar = *(*jt);
+      if ((*_cm)(ivar.index(), jvar.index()) != 0)
+        cacheJacobianBlock(jacobianBlock(ivar.index(), jvar.index()), ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
     }
   }
 }
@@ -1199,18 +1189,18 @@ Assembly::cacheJacobian()
 void
 Assembly::cacheJacobianNeighbor()
 {
-  for (unsigned int vi = 0; vi < _sys.nVariables(); ++vi)
+  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    for (unsigned int vj = 0; vj < _sys.nVariables(); ++vj)
+    MooseVariable & ivar = *(*it);
+    for (std::vector<MooseVariable *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
     {
-      if ((*_cm)(vi, vj) != 0)
+      MooseVariable & jvar = *(*jt);
+      if ((*_cm)(ivar.index(), jvar.index()) != 0)
       {
-        MooseVariable & ivar = _sys.getVariable(_tid, vi);
-        MooseVariable & jvar = _sys.getVariable(_tid, vj);
-
-        cacheJacobianBlock(jacobianBlockNeighbor(Moose::ElementNeighbor, vi, vj), ivar.dofIndices(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
-        cacheJacobianBlock(jacobianBlockNeighbor(Moose::NeighborElement, vi, vj), ivar.dofIndicesNeighbor(), jvar.dofIndices(), ivar.scalingFactor());
-        cacheJacobianBlock(jacobianBlockNeighbor(Moose::NeighborNeighbor, vi, vj), ivar.dofIndicesNeighbor(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
+        cacheJacobianBlock(jacobianBlockNeighbor(Moose::ElementNeighbor, ivar.index(), jvar.index()), ivar.dofIndices(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
+        cacheJacobianBlock(jacobianBlockNeighbor(Moose::NeighborElement, ivar.index(), jvar.index()), ivar.dofIndicesNeighbor(), jvar.dofIndices(), ivar.scalingFactor());
+        cacheJacobianBlock(jacobianBlockNeighbor(Moose::NeighborNeighbor, ivar.index(), jvar.index()), ivar.dofIndicesNeighbor(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
       }
     }
   }
@@ -1278,23 +1268,24 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar
 void
 Assembly::addJacobianScalar(SparseMatrix<Number> & jacobian)
 {
-  for (unsigned int vi = 0; vi < _sys.nScalarVariables(); ++vi)
+  const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+  for (std::vector<MooseVariableScalar *>::const_iterator it = scalar_vars.begin(); it != scalar_vars.end(); ++it)
   {
-    MooseVariableScalar & ivar = _sys.getScalarVariable(_tid, vi);
-    for (unsigned int vj = 0; vj < _sys.nScalarVariables(); ++vj)
+    MooseVariableScalar & ivar = *(*it);
+    for (std::vector<MooseVariableScalar *>::const_iterator jt = scalar_vars.begin(); jt != scalar_vars.end(); ++jt)
     {
-      MooseVariableScalar & jvar = _sys.getScalarVariable(_tid, vj);
-      addJacobianBlock(jacobian, _scalar_Kee[vi][vj], ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
+      MooseVariableScalar & jvar = *(*jt);
+      addJacobianBlock(jacobian, jacobianBlock(ivar.index(), jvar.index()), ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
     }
 
     if (_scalar_has_off_diag_contributions)
     {
-      for (unsigned int vj = 0; vj < _sys.nVariables(); ++vj)
+      for (std::vector<MooseVariable *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
       {
-        MooseVariable & jvar = _sys.getVariable(_tid, vj);
-
-        addJacobianBlock(jacobian, _scalar_Ken[vi][vj], ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
-        addJacobianBlock(jacobian, _scalar_Kne[vj][vi], jvar.dofIndices(), ivar.dofIndices(), jvar.scalingFactor());
+        MooseVariable & jvar = *(*jt);
+        addJacobianBlock(jacobian, jacobianBlock(ivar.index(), jvar.index()), ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
+        addJacobianBlock(jacobian, jacobianBlock(jvar.index(), ivar.index()), jvar.dofIndices(), ivar.dofIndices(), jvar.scalingFactor());
       }
     }
   }

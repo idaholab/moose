@@ -31,7 +31,7 @@
 class MooseVariableScalar : public MooseVariableBase
 {
 public:
-  MooseVariableScalar(unsigned int var_num, unsigned int index, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  MooseVariableScalar(unsigned int var_num, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
   virtual ~MooseVariableScalar();
 
   void reinit();

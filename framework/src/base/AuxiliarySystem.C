@@ -97,10 +97,9 @@ void
 AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
   unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
-  unsigned int mvn = nVariables();                                      // MOOSE variable number
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseVariable * var = new MooseVariable(var_num, mvn, type, *this, _subproblem.assembly(tid), _var_kind);
+    MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
     if (var->feType().family == LAGRANGE)
@@ -109,10 +108,10 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
       _elem_vars[tid][var_name] = var;
   }
   if (active_subdomains == NULL)
-    _var_map[mvn] = std::set<SubdomainID>();
+    _var_map[var_num] = std::set<SubdomainID>();
   else
     for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
-      _var_map[mvn].insert(*it);
+      _var_map[var_num].insert(*it);
   _var_names.push_back(var_name);
 }
 
@@ -121,10 +120,9 @@ AuxiliarySystem::addScalarVariable(const std::string & var_name, Order order, Re
 {
   FEType type(order, SCALAR);
   unsigned int var_num = _sys.add_variable(var_name, type);
-  unsigned int msvn = nScalarVariables();                                      // MOOSE scalar variable number
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseVariableScalar * var = new MooseVariableScalar(var_num, msvn, *this, _subproblem.assembly(tid), _var_kind);
+    MooseVariableScalar * var = new MooseVariableScalar(var_num, *this, _subproblem.assembly(tid), _var_kind);
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
     _scalar_vars[tid][var_name] = var;
@@ -281,14 +279,14 @@ AuxiliarySystem::augmentSendList(std::vector<unsigned int> & send_list)
 void
 AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
 {
-  if (nScalarVariables() > 0)
+  if (_vars[0].scalars().size() > 0)
   {
     computeScalarVars(_auxs(type));
     solution().close();
     _sys.update();
   }
 
-  if (nVariables() > 0)
+  if (_vars[0].variables().size() > 0)
   {
     computeNodalVars(_auxs(type));
     solution().close();

@@ -25,9 +25,7 @@ VariableWarehouse::VariableWarehouse()
 
 VariableWarehouse::~VariableWarehouse()
 {
-  for (std::vector<MooseVariable *>::iterator it = _vars.begin(); it != _vars.end(); ++it)
-    delete *it;
-  for (std::vector<MooseVariableScalar *>::iterator it = _scalar_vars.begin(); it != _scalar_vars.end(); ++it)
+  for (std::vector<MooseVariableBase *>::iterator it = _all.begin(); it != _all.end(); ++it)
     delete *it;
 
   for (std::map<std::string, std::map<SubdomainID, InitialCondition *> >::iterator it = _ics.begin(); it != _ics.end(); ++it)
@@ -38,19 +36,22 @@ VariableWarehouse::~VariableWarehouse()
 }
 
 void
-VariableWarehouse::add(const std::string & var_name, MooseVariable *var)
+VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
 {
   _var_name[var_name] = var;
-  _vars.push_back(var);
-}
+  _all.push_back(var);
 
-void
-VariableWarehouse::add(const std::string & var_name, MooseVariableScalar * var)
-{
-  _scalar_var_map[var_name] = var;
-  _scalar_vars.push_back(var);
+  if (dynamic_cast<MooseVariable *>(var) != NULL)
+  {
+    _vars.push_back(dynamic_cast<MooseVariable *>(var));
+  }
+  else if (dynamic_cast<MooseVariableScalar *>(var) != NULL)
+  {
+    _scalar_vars.push_back(dynamic_cast<MooseVariableScalar *>(var));
+  }
+  else
+    mooseError("Unknown variable class passed into VariableWarehouse. Attempt to hack us?");
 }
-
 
 void
 VariableWarehouse::addBoundaryVar(BoundaryID bnd, MooseVariable *var)
@@ -66,31 +67,37 @@ VariableWarehouse::addBoundaryVars(BoundaryID bnd, const std::map<std::string, s
       addBoundaryVar(bnd, *jt);
 }
 
-MooseVariable *
+MooseVariableBase *
 VariableWarehouse::getVariable(const std::string & var_name)
 {
   return _var_name[var_name];
 }
 
-MooseVariableScalar *
-VariableWarehouse::getScalarVariable(const std::string & var_name)
+MooseVariableBase *
+VariableWarehouse::getVariable(unsigned int var_number)
 {
-  return _scalar_var_map[var_name];
+  return _all[var_number];
 }
 
-std::vector<MooseVariable *> &
+const std::vector<MooseVariableBase *> &
 VariableWarehouse::all()
+{
+  return _all;
+}
+
+const std::vector<MooseVariable *> &
+VariableWarehouse::variables()
 {
   return _vars;
 }
 
-std::vector<MooseVariableScalar *> &
+const std::vector<MooseVariableScalar *> &
 VariableWarehouse::scalars()
 {
   return _scalar_vars;
 }
 
-std::set<MooseVariable *> &
+const std::set<MooseVariable *> &
 VariableWarehouse::boundaryVars(BoundaryID bnd)
 {
   return _boundary_vars[bnd];

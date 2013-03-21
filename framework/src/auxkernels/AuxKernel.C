@@ -44,7 +44,7 @@ InputParameters validParams<AuxKernel>()
 AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).feType().family == LAGRANGE),
+    CoupleableMooseVariableDependencyIntermediateInterface(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     TransientInterface(parameters, name, "aux_kernels"),
@@ -60,7 +60,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _assembly(_subproblem.assembly(_tid)),
 
     _var(_aux_sys.getVariable(_tid, parameters.get<AuxVariableName>("variable"))),
-    _nodal(_var.feType().family == LAGRANGE),
+    _nodal(_var.isNodal()),
     _bnd(parameters.have_parameter<unsigned int>("_boundary_id")),
 
     _mesh(_subproblem.mesh()),

@@ -2509,21 +2509,20 @@ FEProblem::init()
     return;
 
   unsigned int n_vars = _nl.nVariables();
-  unsigned int n_scalar_vars = _nl.nScalarVariables();
   switch (_coupling)
   {
   case Moose::COUPLING_DIAG:
-    _cm = new CouplingMatrix(n_vars + n_scalar_vars);
-    for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
-      for (unsigned int j = 0; j < n_vars + n_scalar_vars; j++)
+    _cm = new CouplingMatrix(n_vars);
+    for (unsigned int i = 0; i < n_vars; i++)
+      for (unsigned int j = 0; j < n_vars; j++)
         (*_cm)(i, j) = (i == j ? 1 : 0);
     break;
 
   // for full jacobian
   case Moose::COUPLING_FULL:
-    _cm = new CouplingMatrix(n_vars + n_scalar_vars);
-    for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
-      for (unsigned int j = 0; j < n_vars + n_scalar_vars; j++)
+    _cm = new CouplingMatrix(n_vars);
+    for (unsigned int i = 0; i < n_vars; i++)
+      for (unsigned int j = 0; j < n_vars; j++)
         (*_cm)(i, j) = 1;
     break;
 
@@ -2535,7 +2534,7 @@ FEProblem::init()
   _nl.dofMap()._dof_coupling = _cm;
   _nl.dofMap().attach_extra_sparsity_function(&extraSparsity, &_nl);
 
-  if (n_vars + n_scalar_vars == 0)
+  if (n_vars == 0)
     mooseError("No variables specified in the FEProblem '" << name() << "'.");
 
   Moose::setup_perf_log.push("eq.init()","Setup");

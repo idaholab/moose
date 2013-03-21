@@ -14,7 +14,7 @@
   [./bad_bc_var_test]
     type = 'RunException'
     input = 'bad_bc_var_test.i'
-    expect_err = "variable foo does not exist in this system"
+    expect_err = "Variable 'foo' does not exist in this system"
   [../]
 
   [./bad_enum_test]

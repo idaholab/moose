@@ -22,8 +22,8 @@
 // libMesh
 #include "libmesh/numeric_vector.h"
 
-MooseVariableScalar::MooseVariableScalar(unsigned int var_num, unsigned int index, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
-    MooseVariableBase(var_num, index, sys, assembly, var_kind)
+MooseVariableScalar::MooseVariableScalar(unsigned int var_num, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
+    MooseVariableBase(var_num, sys, assembly, var_kind)
 {
 }
 

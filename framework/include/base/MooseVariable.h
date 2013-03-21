@@ -39,7 +39,7 @@ class SystemBase;
 class MooseVariable : public MooseVariableBase
 {
 public:
-  MooseVariable(unsigned int var_num, unsigned int mvn, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
   virtual ~MooseVariable();
 
   /**

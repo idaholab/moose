@@ -58,16 +58,15 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const std::string & name
   { // Setup the Coupling Matrix so MOOSE knows what we're doing
     NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
     unsigned int n_vars = nl.nVariables();
-    unsigned int n_scalar_vars = nl.nScalarVariables();
 
-    CouplingMatrix * cm = new CouplingMatrix(n_vars + n_scalar_vars);
+    CouplingMatrix * cm = new CouplingMatrix(n_vars);
 
     bool full = false; //getParam<bool>("full"); // TODO: add a FULL option for PBP
 
     if (!full)
     {
       // put 1s on diagonal
-      for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
+      for (unsigned int i = 0; i < n_vars; i++)
         (*cm)(i, i) = 1;
 
       // off-diagonal entries
@@ -83,8 +82,8 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const std::string & name
     }
     else
     {
-      for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
-        for (unsigned int j = 0; j < n_vars + n_scalar_vars; j++)
+      for (unsigned int i = 0; i < n_vars; i++)
+        for (unsigned int j = 0; j < n_vars; j++)
           (*cm)(i,j) = 1;
     }
 
