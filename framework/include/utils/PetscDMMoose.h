@@ -1,5 +1,5 @@
-#ifndef _petscdmmoose
-#define _petscdmmoose
+#ifndef _PETSCDMMOOSE
+#define _PETSCDMMOOSE
 
 #include "libmesh/petsc_macro.h"
 // This only works with petsc-3.3 and above.

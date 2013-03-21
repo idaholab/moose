@@ -353,9 +353,6 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
 //  std::cout<<*_sys.matrix<<std::endl;
 #endif
 }
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-#include "petscdmmoose.h"
-#endif
 
 void
 NonlinearSystem::setupFieldSplitPreconditioner()

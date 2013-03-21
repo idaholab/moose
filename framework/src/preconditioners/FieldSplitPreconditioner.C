@@ -22,7 +22,7 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_nonlinear_solver.h"
 
-#include <petscdmmoose.h>
+#include <PetscDMMoose.h>
 #include <petscsnes.h>
 EXTERN_C_BEGIN
 extern PetscErrorCode DMCreate_Moose(DM);
@@ -51,13 +51,12 @@ FieldSplitPreconditioner::FieldSplitPreconditioner (const std::string & name, In
     _schur_preconditioner(getSchurPreconditioner(getParam<std::string>("schur_preconditioner")))
 {
   unsigned int n_vars        = _nl.nVariables();
-  unsigned int n_scalar_vars = _nl.nScalarVariables();
   bool full = getParam<bool>("full");
-  CouplingMatrix *cm = new CouplingMatrix(n_vars+n_scalar_vars);
+  CouplingMatrix *cm = new CouplingMatrix(n_vars);
   if (!full)
   {
     // put 1s on diagonal
-    for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
+    for (unsigned int i = 0; i < n_vars; i++)
       (*cm)(i, i) = 1;
 
     // off-diagonal entries
@@ -71,8 +70,8 @@ FieldSplitPreconditioner::FieldSplitPreconditioner (const std::string & name, In
   }
   else
   {
-    for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
-      for (unsigned int j = 0; j < n_vars + n_scalar_vars; j++)
+    for (unsigned int i = 0; i < n_vars; i++)
+      for (unsigned int j = 0; j < n_vars; j++)
         (*cm)(i,j) = 1;
   }
   _fe_problem.setCouplingMatrix(cm);

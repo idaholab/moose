@@ -3,7 +3,7 @@
 
 #if !PETSC_VERSION_LESS_THAN(3,3,0)
 
-#include "petscdmmoose.h"
+#include "PetscDMMoose.h"
 
 // PETSc includes
 #include <petscerror.h>

@@ -51,14 +51,6 @@
 #include <petscdm.h>
 #endif
 
-#if !PETSC_VERSION_LESS_THAN(3,3,0)
-#include <petscdmmoose.h>
-EXTERN_C_BEGIN
-PetscErrorCode DMCreate_Moose(DM);
-EXTERN_C_END
-#endif
-
-
 
 namespace Moose
 {
