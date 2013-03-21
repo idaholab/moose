@@ -11,6 +11,8 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+#include "libmesh/petsc_macro.h"
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 #include "FieldSplitPreconditioner.h"
 #include "FEProblem.h"
@@ -227,6 +229,6 @@ FieldSplitPreconditioner::getSchurPreconditioner(const std::string& str)
   else  mooseError(std::string("Invalid FieldSplitPreconditioner SchurPreconditioner: ") + str);
   return SchurPreconditionerD;
 }
-
 #endif
+
 

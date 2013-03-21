@@ -14,7 +14,10 @@
 
 #ifndef FIELDSPLITPRECONDITIONER_H
 #define FIELDSPLITPRECONDITIONER_H
+
+#include "libmesh/petsc_macro.h"
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
+
 //Global includes
 #include <vector>
 // MOOSE includes
@@ -101,5 +104,5 @@ protected:
   getSchurPreconditioner(const std::string& str);
   SchurPreconditioner _schur_preconditioner;
 };
-#endif //LIBMESH_HAVE_PETSC && !PETSC_VERSOION_LESS_THAN(3,3,0)
+#endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSOION_LESS_THAN(3,3,0)
 #endif //FIELDSPLITPRECONDITIONER_H
