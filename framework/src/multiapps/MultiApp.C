@@ -200,6 +200,7 @@ MultiApp::buildComm()
   if(_total_num_apps >= _orig_num_procs)
   {
     _my_comm = MPI_COMM_SELF;
+    _my_rank = 0;
 
     _my_num_apps = _total_num_apps/_orig_num_procs;
     _first_local_app = _my_num_apps * _orig_rank;
@@ -246,6 +247,7 @@ MultiApp::buildComm()
 
   // Create new communicator
   MPI_Comm_create(_orig_comm, new_group, &_my_comm);
+  MPI_Comm_rank(_my_comm, (int*)&_my_rank);
 }
 
 unsigned int
