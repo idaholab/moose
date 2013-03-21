@@ -134,7 +134,7 @@ protected:
    *
    * Also find out which communicator we are using and what our first local app is.
    */
-  void buildComms();
+  void buildComm();
 
   /**
    * Map a global App number to the local number.
@@ -171,9 +171,6 @@ protected:
 
   /// The number of the first app on this processor
   unsigned int _first_local_app;
-
-  /// MPI communicators for each global app
-  std::vector<MPI_Comm> _app_comms;
 
   /// The comm that was passed to us specifying our pool of processors
   MPI_Comm _orig_comm;

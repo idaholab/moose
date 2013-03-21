@@ -90,7 +90,7 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
   mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(), "Number of positions and input files are not the same!");
 
   /// Set up our Comm and set the number of apps we're going to be working on
-  buildComms();
+  buildComm();
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
@@ -191,89 +191,61 @@ MultiApp::hasLocalApp(unsigned int global_app)
 }
 
 void
-MultiApp::buildComms()
+MultiApp::buildComm()
 {
-  // Whether or not we've found the first app that will be on this processor
-  bool found_first = false;
-
-  // Start with zero apps
-  _my_num_apps = 0;
-
-  _app_comms.resize(_total_num_apps);
-
   MPI_Comm_size(_orig_comm, (int*)&_orig_num_procs);
+  MPI_Comm_rank(_orig_comm, (int*)&_orig_rank);
 
-  MPI_Group orig_group;
+  // If we have more apps than processors then we're just going to divide up the work
+  if(_total_num_apps >= _orig_num_procs)
+  {
+    _my_comm = MPI_COMM_SELF;
+
+    _my_num_apps = _total_num_apps/_orig_num_procs;
+    _first_local_app = _my_num_apps * _orig_rank;
+
+    // The last processor will pick up any extra apps
+    if(_orig_rank == _orig_num_procs - 1)
+      _my_num_apps += _total_num_apps % _orig_num_procs;
+
+    return;
+  }
+
+  // In this case we need to divide up the processors that are going to work on each app
+  int rank;
+  MPI_Comm_rank(_orig_comm, &rank);
+//  sleep(rank);
+
+  int procs_per_app = _orig_num_procs / _total_num_apps;
+  int my_app = rank / procs_per_app;
+  int procs_for_my_app = procs_per_app;
+
+  if((unsigned int) my_app >= _total_num_apps-1) // The last app will gain any left-over procs
+  {
+    my_app = _total_num_apps - 1;
+    procs_for_my_app += _orig_num_procs % _total_num_apps;
+  }
+
+  // Only one app here
+  _first_local_app = my_app;
+  _my_num_apps = 1;
+
+  std::vector<int> ranks_in_my_group(procs_for_my_app);
+
+  // Add all the processors in that are in my group
+  for(int i=0; i<procs_for_my_app; i++)
+    ranks_in_my_group[i] = (my_app * procs_per_app) + i;
+
+  MPI_Group orig_group, new_group;
 
   // Extract the original group handle
   MPI_Comm_group(_orig_comm, &orig_group);
 
-  // Extract the original rank for the process
-  MPI_Comm_rank(_orig_comm, (int*)&_orig_rank);
+  // Create a group
+  MPI_Group_incl(orig_group, procs_for_my_app, &ranks_in_my_group[0], &new_group);
 
-  // Loop over all the global apps and build a communicator for each one
-  // It might not be obvious now, but there will be times when this is needed
-  // such as in volumetric transfers
-  for(unsigned int app=0; app < _total_num_apps; app++)
-  {
-    int num_procs_for_app;
-    std::vector<int> ranks_for_app;
-
-    // If we have more apps than processors then we're just going to divide up the work
-    if(_total_num_apps >= _orig_num_procs)
-    {
-      num_procs_for_app = 1;
-
-      unsigned int num_apps_per_proc = _total_num_apps/_orig_num_procs;
-      unsigned int proc_for_app = app/num_apps_per_proc;
-
-      // The last few apps all get assigned to the last processor
-      if(proc_for_app >=_orig_num_procs)
-        proc_for_app = _orig_num_procs - 1;
-
-      ranks_for_app.resize(num_procs_for_app, proc_for_app);
-    }
-    else
-    {
-      // In this case we need to divide up the processors that are going to work on each app
-      unsigned int procs_per_app = _orig_num_procs / _total_num_apps;
-      unsigned int first_proc_for_app = app * procs_per_app;
-
-      num_procs_for_app = procs_per_app;
-
-      // The last app will snag any extra procs
-      if(app == _total_num_apps-1)
-        num_procs_for_app += _orig_num_procs % _total_num_apps;
-
-      ranks_for_app.resize(num_procs_for_app);
-
-      // Add all the processors in that are in this group
-      for(int i=0; i<num_procs_for_app; i++)
-        ranks_for_app[i] = first_proc_for_app + i;
-    }
-
-    MPI_Group app_group;
-    MPI_Group_incl(orig_group, num_procs_for_app, &ranks_for_app[0], &app_group);
-
-    MPI_Comm app_comm;
-    MPI_Comm_create(_orig_comm, app_group, &app_comm);
-
-    _app_comms[app] = app_comm;
-
-    // If this processor was assigned to this app then hold onto it
-    if(std::find(ranks_for_app.begin(), ranks_for_app.end(), _orig_rank) != ranks_for_app.end())
-    {
-      if(!found_first)
-      {
-        found_first = true;
-        _first_local_app = app;
-        _my_comm = app_comm; // All apps on this processor use the same comm
-        MPI_Comm_rank(_my_comm, (int*)&_my_rank);
-      }
-
-      _my_num_apps++;
-    }
-  }
+  // Create new communicator
+  MPI_Comm_create(_orig_comm, new_group, &_my_comm);
 }
 
 unsigned int
