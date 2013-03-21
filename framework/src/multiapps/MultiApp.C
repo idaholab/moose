@@ -27,6 +27,10 @@
 
 #include <iostream>
 #include <iomanip>
+#include <iterator>
+#include <fstream>
+#include <vector>
+#include <algorithm>
 
 template<>
 InputParameters validParams<MultiApp>()
@@ -49,7 +53,9 @@ InputParameters validParams<MultiApp>()
   MooseEnum app_types_options(app_types_strings.str());
 
   params.addRequiredParam<MooseEnum>("app_type", app_types_options, "The type of application to build.");
-  params.addRequiredParam<std::vector<Real> >("positions", "The positions of the App locations.  Each set of 3 values will represent a Point.");
+  params.addParam<std::vector<Real> >("positions", "The positions of the App locations.  Each set of 3 values will represent a Point.  Either this must be supplied or 'positions_file'");
+  params.addParam<FileName>("positions_file", "A filename that should be looked in for positions. Each set of 3 values in that file will represent a Point.  Either this must be supplied or 'positions'");
+
   params.addRequiredParam<std::vector<std::string> >("input_files", "The input file for each App.  If this parameter only contains one input file it will be used for all of the Apps.");
 
   params.addPrivateParam<MPI_Comm>("_mpi_comm");
@@ -70,11 +76,33 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     MooseObject(name, parameters),
     _fe_problem(getParam<FEProblem *>("_fe_problem")),
     _app_type(getParam<MooseEnum>("app_type")),
-    _positions_vec(getParam<std::vector<Real> >("positions")),
     _input_files(getParam<std::vector<std::string> >("input_files")),
     _orig_comm(getParam<MPI_Comm>("_mpi_comm")),
     _execute_on(getParam<MooseEnum>("execute_on"))
 {
+  if(isParamValid("positions"))
+    _positions_vec = getParam<std::vector<Real> >("positions");
+  else if(isParamValid("positions_file"))
+  {
+    // Read the file on the root processor then broadcast it
+    if(libMesh::processor_id() == 0)
+    {
+      std::ifstream is(getParam<FileName>("positions_file").c_str());
+      std::istream_iterator<Real> begin(is), end;
+      _positions_vec.insert(_positions_vec.begin(), begin, end);
+    }
+    unsigned int num_values = _positions_vec.size();
+
+    Parallel::broadcast(num_values);
+
+    _positions_vec.resize(num_values);
+
+    Parallel::broadcast(_positions_vec);
+    std::cerr<<_positions_vec.size()<<std::endl;
+  }
+  else
+    mooseError("Must supply either 'positions' or 'positions_file' for MultiApp "<<_name);
+
   { // Read the positions out of the vector
     unsigned int num_vec_entries = _positions_vec.size();
 
