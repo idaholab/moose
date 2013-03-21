@@ -21,6 +21,7 @@
 #include "FEProblem.h"
 #include "Output.h"
 #include "AppFactory.h"
+#include "MooseUtils.h"
 
 // libMesh
 #include "libmesh/mesh_tools.h"
@@ -87,7 +88,10 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     // Read the file on the root processor then broadcast it
     if(libMesh::processor_id() == 0)
     {
-      std::ifstream is(getParam<FileName>("positions_file").c_str());
+      std::string positions_file = getParam<FileName>("positions_file");
+      MooseUtils::checkFileReadable(positions_file);
+
+      std::ifstream is(positions_file.c_str());
       std::istream_iterator<Real> begin(is), end;
       _positions_vec.insert(_positions_vec.begin(), begin, end);
     }
@@ -98,7 +102,6 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     _positions_vec.resize(num_values);
 
     Parallel::broadcast(_positions_vec);
-    std::cerr<<_positions_vec.size()<<std::endl;
   }
   else
     mooseError("Must supply either 'positions' or 'positions_file' for MultiApp "<<_name);
