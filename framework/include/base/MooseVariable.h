@@ -15,9 +15,8 @@
 #ifndef MOOSEVARIABLE_H
 #define MOOSEVARIABLE_H
 
-#include "MooseArray.h"
+#include "MooseVariableBase.h"
 #include "ParallelUniqueId.h"
-#include "MooseTypes.h"
 
 // libMesh
 #include "libmesh/quadrature.h"
@@ -27,21 +26,6 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/elem.h"
 #include "libmesh/node.h"
-#include "libmesh/variable.h"
-#include "libmesh/tensor_value.h"
-#include "libmesh/vector_value.h"
-
-typedef MooseArray<Real>               VariableValue;
-typedef MooseArray<RealGradient>       VariableGradient;
-typedef MooseArray<RealTensor>         VariableSecond;
-
-typedef MooseArray<std::vector<Real> >         VariableTestValue;
-typedef MooseArray<std::vector<RealGradient> > VariableTestGradient;
-typedef MooseArray<std::vector<RealTensor> >   VariableTestSecond;
-
-typedef MooseArray<std::vector<Real> >         VariablePhiValue;
-typedef MooseArray<std::vector<RealGradient> > VariablePhiGradient;
-typedef MooseArray<std::vector<RealTensor> >   VariablePhiSecond;
 
 class Assembly;
 class SubProblem;
@@ -52,7 +36,7 @@ class SystemBase;
  *
  * Each variable can compute nodal or elemental (at QPs) values.
  */
-class MooseVariable
+class MooseVariable : public MooseVariableBase
 {
 public:
   MooseVariable(unsigned int var_num, unsigned int mvn, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
@@ -64,6 +48,7 @@ public:
   void clearDofIndices();
 
   void prepare();
+
   void prepareNeighbor();
   void prepare_aux();
   void reinit_node();
@@ -72,42 +57,6 @@ public:
   void reinit_aux_neighbor();
 
   void reinitNodes(const std::vector<unsigned int> & nodes);
-
-  /**
-   * Get the variable index.
-   *
-   * Used to index into the vector of residuals, jacobians blocks, etc.
-   * @return The variable index
-   */
-  unsigned int index() { return _index; }
-
-  /**
-   * Get variable number coming from libMesh
-   * @return the libmesh variable number
-   */
-  unsigned int number() { return _var_num; }
-
-  /**
-   * Get the system this variable is part of.
-   */
-  SystemBase & sys() { return _sys; }
-
-  /**
-   * The DofMap associated with the system this variable is in.
-   */
-  const DofMap & dofMap() { return _dof_map; }
-
-  /**
-   * Get the variable number
-   * @return The variable number
-   */
-  const std::string & name();
-
-  /**
-   * Get the kind of the variable (Nonlinear, Auxiliary, ...)
-   * @return The kind of the variable
-   */
-  Moose::VarKindType kind() { return _var_kind; }
 
   const std::set<SubdomainID> & activeSubdomains();
 
@@ -132,7 +81,7 @@ public:
    * Is this variable nodal
    * @return true if it nodal, otherwise false
    */
-  bool isNodal() const;
+  virtual bool isNodal() const;
 
   /**
    * Current element this variable is evaluated at
@@ -251,10 +200,6 @@ public:
 
   /**
    * Get DOF indices for currently selected element
-   */
-  std::vector<unsigned int> & dofIndices() { return _dof_indices; }
-  /**
-   * Get DOF indices for currently selected element
    * @return
    */
   std::vector<unsigned int> & dofIndicesNeighbor() { return _dof_indices_neighbor; }
@@ -291,15 +236,6 @@ public:
   Number getElementalValue(const Elem * elem) const;
 
   /**
-   * Set the scaling factor for this variable
-   */
-  void scalingFactor(Real factor) { _scaling_factor = factor; }
-  /**
-   * Get the scaling factor for this variable
-   */
-  Real scalingFactor() { return _scaling_factor; }
-
-  /**
    * Whether or not this variable is actually using the shape function value.
    *
    * Currently hardcoded to true because we always compute the value.
@@ -329,25 +265,8 @@ protected:
 protected:
   /// Thread ID
   THREAD_ID _tid;
-  /// variable number (from libMesh)
-  unsigned int _var_num;
   /// The FEType associated with this variable
   FEType _fe_type;
-  /// variable number (MOOSE)
-  unsigned int _index;
-  Moose::VarKindType _var_kind;
-  /// Problem this variable is part of
-  SubProblem & _subproblem;
-  /// System this variable is part of
-  SystemBase & _sys;
-
-  /// libMesh variable object for this variable
-  const Variable & _variable;
-
-  /// DOF map
-  const DofMap & _dof_map;
-  /// Assembly data
-  Assembly & _assembly;
 
   /// Quadrature rule for interior
   QBase * & _qrule;
@@ -364,13 +283,8 @@ protected:
   /// neighboring element
   const Elem * & _neighbor;
 
-  /// DOF indices
-  std::vector<unsigned int> _dof_indices;
   /// DOF indices (neighbor)
   std::vector<unsigned int> _dof_indices_neighbor;
-
-  /// true if this varaible is non-linear
-  bool _is_nl;
 
 
   bool _need_u_old;

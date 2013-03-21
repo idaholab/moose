@@ -24,23 +24,15 @@
 #include "libmesh/dof_map.h"
 
 MooseVariable::MooseVariable(unsigned int var_num, unsigned int index, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
-    _var_num(var_num),
+    MooseVariableBase(var_num, index, sys, assembly, var_kind),
     _fe_type(fe_type),
-    _index(index),
-    _var_kind(var_kind),
-    _subproblem(sys.subproblem()),
-    _sys(sys),
-    _variable(sys.system().variable(_var_num)),
-    _dof_map(sys.dofMap()),
-    _assembly(assembly),
+
     _qrule(_assembly.qRule()),
     _qrule_face(_assembly.qRuleFace()),
     _qrule_neighbor(_assembly.qRuleNeighbor()),
     _elem(_assembly.elem()),
     _current_side(_assembly.side()),
     _neighbor(_assembly.neighbor()),
-
-    _is_nl(var_kind == Moose::VAR_NONLINEAR),
 
     _need_u_old(false),
     _need_u_older(false),
@@ -80,8 +72,7 @@ MooseVariable::MooseVariable(unsigned int var_num, unsigned int index, const FET
 
     _node(_assembly.node()),
     _is_defined_neighbor(false),
-    _node_neighbor(_assembly.nodeNeighbor()),
-    _scaling_factor(1.0)
+    _node_neighbor(_assembly.nodeNeighbor())
 {}
 
 MooseVariable::~MooseVariable()
@@ -126,11 +117,6 @@ MooseVariable::~MooseVariable()
   _second_u_older_neighbor.release();
 }
 
-const std::string &
-MooseVariable::name()
-{
-  return _sys.system().variable(_var_num).name();
-}
 
 const std::set<SubdomainID> &
 MooseVariable::activeSubdomains()

@@ -21,18 +21,9 @@
 
 // libMesh
 #include "libmesh/numeric_vector.h"
-#include "libmesh/dof_map.h"
 
 MooseVariableScalar::MooseVariableScalar(unsigned int var_num, unsigned int index, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
-    _var_num(var_num),
-    _index(index),
-    _var_kind(var_kind),
-    _subproblem(sys.subproblem()),
-    _sys(sys),
-    _assembly(assembly),
-    _dof_map(sys.dofMap()),
-    _scaling_factor(1.0),
-    _is_nl(dynamic_cast<NonlinearSystem *>(&sys) != NULL)
+    MooseVariableBase(var_num, index, sys, assembly, var_kind)
 {
 }
 
@@ -43,18 +34,6 @@ MooseVariableScalar::~MooseVariableScalar()
 
   _u_dot.release();
   _du_dot_du.release();
-}
-
-const std::string &
-MooseVariableScalar::name()
-{
-  return _sys.system().variable(_var_num).name();
-}
-
-unsigned int
-MooseVariableScalar::order() const
-{
-  return static_cast<unsigned int>(_sys.system().variable_type(_var_num).order);
 }
 
 void
@@ -90,6 +69,13 @@ MooseVariableScalar::reinit()
   }
 }
 
+bool
+MooseVariableScalar::isNodal() const
+{
+  // scalar variables are never nodal ;-)
+  return false;
+}
+
 void
 MooseVariableScalar::setValue(unsigned int i, Number value)
 {
@@ -101,28 +87,4 @@ MooseVariableScalar::insert(NumericVector<Number> & soln)
 {
   for (unsigned int i = 0; i < _dof_indices.size(); i++)
     soln.set(_dof_indices[i], _u[i]);
-}
-
-unsigned int
-MooseVariableScalar::index()
-{
-  return _index;
-}
-
-Moose::VarKindType
-MooseVariableScalar::kind()
-{
-  return _var_kind;
-}
-
-void
-MooseVariableScalar::scalingFactor(Real factor)
-{
-  _scaling_factor = factor;
-}
-
-Real
-MooseVariableScalar::scalingFactor()
-{
-  return _scaling_factor;
 }
