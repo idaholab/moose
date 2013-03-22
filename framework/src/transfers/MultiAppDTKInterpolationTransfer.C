@@ -86,29 +86,4 @@ MultiAppDTKInterpolationTransfer::execute()
   }
 }
 
-/**
- * Small helper function for finding the system containing the variable.
- *
- * Note that this implies that variable names are unique across all systems!
- */
-System *
-MultiAppDTKInterpolationTransfer::find_sys(EquationSystems & es, std::string & var_name)
-{
-  System * sys = NULL;
-
-  // Find the system this variable is from
-  for(unsigned int i=0; i<es.n_systems(); i++)
-  {
-    if(es.get_system(i).has_variable(var_name))
-    {
-      sys = &es.get_system(i);
-      break;
-    }
-  }
-
-  mooseAssert(sys, "Unable to find variable " + var_name);
-
-  return sys;
-}
-
 #endif //LIBMESH_HAVE_DTK

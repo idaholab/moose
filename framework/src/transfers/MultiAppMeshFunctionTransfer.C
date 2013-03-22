@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MultiAppVariableValueSampleTransfer.h"
+#include "MultiAppMeshFunctionTransfer.h"
 
 // Moose
 #include "MooseTypes.h"
@@ -23,7 +23,7 @@
 #include "libmesh/system.h"
 
 template<>
-InputParameters validParams<MultiAppVariableValueSampleTransfer>()
+InputParameters validParams<MultiAppMeshFunctionTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
@@ -31,7 +31,7 @@ InputParameters validParams<MultiAppVariableValueSampleTransfer>()
   return params;
 }
 
-MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(const std::string & name, InputParameters parameters) :
+MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const std::string & name, InputParameters parameters) :
     MultiAppTransfer(name, parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable"))
@@ -39,7 +39,7 @@ MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(const s
 }
 
 void
-MultiAppVariableValueSampleTransfer::execute()
+MultiAppMeshFunctionTransfer::execute()
 {
   switch(_direction)
   {
@@ -48,36 +48,29 @@ MultiAppVariableValueSampleTransfer::execute()
       FEProblem & from_problem = *_multi_app->problem();
       MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
       SystemBase & from_system_base = from_var.sys();
-      SubProblem & from_sub_problem = from_system_base.subproblem();
 
-      MooseMesh & from_mesh = from_problem.mesh();
+      System & from_sys = from_system_base.system();
 
-      AutoPtr<PointLocatorBase> pl = from_mesh.getMesh().sub_point_locator();
+      // Only works with a serialized mesh to transfer from!
+      mooseAssert(from_sys.get_mesh().is_serial(), "MultiAppMeshFunctionTransfer only works with SerialMesh!");
+
+      unsigned int from_var_num = from_sys.variable_number(from_var.name());
+
+      EquationSystems & from_es = from_sys.get_equation_systems();
+
+      //Create a serialized version of the solution vector
+      NumericVector<Number> * serialized_solution = NumericVector<Number>::build().release();
+      serialized_solution->init(from_sys.n_dofs(), false, SERIAL);
+
+      // Need to pull down a full copy of this vector on every processor so we can get values in parallel
+      from_sys.solution->localize(*serialized_solution);
+
+      MeshFunction from_func(from_es, *serialized_solution, from_sys.get_dof_map(), from_var_num);
+      from_func.init();
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
-        Real value = -std::numeric_limits<Real>::max();
-
-        { // Get the value of the variable at the point where this multiapp is in the master domain
-
-          Point multi_app_position = _multi_app->position(i);
-
-          std::vector<Point> point_vec(1, multi_app_position);
-
-          // First find the element the hit lands in
-          const Elem * elem = (*pl)(multi_app_position);
-
-          if(elem && elem->processor_id() == libMesh::processor_id())
-          {
-            from_sub_problem.reinitElemPhys(elem, point_vec, 0);
-
-            mooseAssert(from_var.sln().size() == 1, "No values in u!");
-            value = from_var.sln()[0];
-          }
-
-          libMesh::Parallel::max(value);
-        }
-
+        std::cout<<"MeshFunction Transfer To: "<<_multi_app->name()<<i<<std::endl;
         if(_multi_app->hasLocalApp(i))
         {
           MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
@@ -104,7 +97,13 @@ MultiAppVariableValueSampleTransfer::execute()
               // The zero only works for LAGRANGE!
               unsigned int dof = node->dof_number(sys_num, var_num, 0);
 
-              solution.set(dof, value);
+              // Swap back
+              Moose::swapLibMeshComm(swapped);
+              Real from_value = from_func(*node+_multi_app->position(i));
+              // Swap again
+              swapped = Moose::swapLibMeshComm(_multi_app->comm());
+
+              solution.set(dof, from_value);
             }
           }
           solution.close();
@@ -119,7 +118,7 @@ MultiAppVariableValueSampleTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      mooseError("Doesn't make sense to transfer a sampled variable's value from a MultiApp!!");
+      mooseError("Not Implemented!");
       break;
     }
   }

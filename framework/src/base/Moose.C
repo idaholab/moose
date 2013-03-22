@@ -199,6 +199,7 @@
 #include "MultiAppPostprocessorInterpolationTransfer.h"
 #include "MultiAppVariableValueSampleTransfer.h"
 #include "MultiAppVariableValueSamplePostprocessorTransfer.h"
+#include "MultiAppMeshFunctionTransfer.h"
 
 
 // Actions
@@ -436,6 +437,7 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppPostprocessorInterpolationTransfer);
   registerTransfer(MultiAppVariableValueSampleTransfer);
   registerTransfer(MultiAppVariableValueSamplePostprocessorTransfer);
+  registerTransfer(MultiAppMeshFunctionTransfer);
 
   registered = true;
 }

@@ -12,41 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifdef LIBMESH_HAVE_DTK
-
-#ifndef MULTIAPPDTKINTERPOLATIONTRANSFER_H
-#define MULTIAPPDTKINTERPOLATIONTRANSFER_H
+#ifndef MULTIAPPMESHFUNCTIONTRANSFER_H
+#define MULTIAPPMESHFUNCTIONTRANSFER_H
 
 #include "MultiAppTransfer.h"
-#include "MooseVariableInterface.h"
-#include "DTKInterpolationHelper.h"
 
 class MooseVariable;
-class MultiAppDTKInterpolationTransfer;
+class MultiAppMeshFunctionTransfer;
 
 template<>
-InputParameters validParams<MultiAppDTKInterpolationTransfer>();
+InputParameters validParams<MultiAppMeshFunctionTransfer>();
 
 /**
- * Transfers from spatially varying Interpolations in a MultiApp to the "master" system.
+ * Samples a variable's value in the Master domain at the point where the MultiApp is.
+ * Copies that value into a postprocessor in the MultiApp.
  */
-class MultiAppDTKInterpolationTransfer :
+class MultiAppMeshFunctionTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppDTKInterpolationTransfer(const std::string & name, InputParameters parameters);
-  virtual ~MultiAppDTKInterpolationTransfer() {}
+  MultiAppMeshFunctionTransfer(const std::string & name, InputParameters parameters);
+  virtual ~MultiAppMeshFunctionTransfer() {}
 
   virtual void execute();
 
 protected:
-  VariableName _from_var_name;
   AuxVariableName _to_var_name;
-
-  DTKInterpolationHelper _helper;
-  Point _master_position;
+  VariableName _from_var_name;
 };
 
-#endif /* MULTIAPPDTKINTERPOLATIONTRANSFER_H */
-
-#endif //LIBMESH_HAVE_DTK
+#endif /* MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H */
