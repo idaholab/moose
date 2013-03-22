@@ -21,6 +21,7 @@
 // libMesh
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
+#include "libmesh/mesh_function.h"
 
 template<>
 InputParameters validParams<MultiAppMeshFunctionTransfer>()

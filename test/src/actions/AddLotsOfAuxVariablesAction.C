@@ -17,6 +17,7 @@
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseEnum.h"
+#include "AddVariableAction.h"
 
 #include <sstream>
 #include <stdexcept>
