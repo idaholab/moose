@@ -36,16 +36,6 @@ public:
   virtual void execute();
 
 protected:
-  /**
-   * Small helper function for finding the system containing the variable.
-   *
-   * Note that this implies that variable names are unique across all systems!
-   *
-   * @param es The EquationSystems object to be searched.
-   * @param var_name The name of the variable you are looking for.
-   */
-  System * find_sys(EquationSystems & es, std::string & var_name);
-
   PostprocessorName _postprocessor;
   AuxVariableName _to_var_name;
 

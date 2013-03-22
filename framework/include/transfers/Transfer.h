@@ -15,11 +15,15 @@
 #ifndef TRANSFER_H
 #define TRANSFER_H
 
+// Moose
 #include "ParallelUniqueId.h"
 #include "MooseObject.h"
 #include "InputParameters.h"
 #include "SetupInterface.h"
 #include "MooseEnum.h"
+
+// libMesh
+#include "libmesh/system.h"
 
 class Transfer;
 class SubProblem;
