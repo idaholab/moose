@@ -71,7 +71,6 @@ MultiAppMeshFunctionTransfer::execute()
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
-        std::cout<<"MeshFunction Transfer To: "<<_multi_app->name()<<i<<std::endl;
         if(_multi_app->hasLocalApp(i))
         {
           MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
