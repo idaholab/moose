@@ -234,11 +234,28 @@ MultiApp::buildComm()
     _my_rank = 0;
 
     _my_num_apps = _total_num_apps/_orig_num_procs;
-    _first_local_app = _my_num_apps * _orig_rank;
+    unsigned int jobs_left = _total_num_apps - (_my_num_apps * _orig_num_procs);
 
-    // The last processor will pick up any extra apps
-    if(_orig_rank == _orig_num_procs - 1)
-      _my_num_apps += _total_num_apps % _orig_num_procs;
+    if(jobs_left != 0)
+    {
+      // Spread the remaining jobs out over the first set of processors
+      if(_orig_rank < jobs_left)  // (these are the "jobs_left_pids" ie the pids that are snatching up extra jobs)
+      {
+        _my_num_apps += 1;
+        _first_local_app = _my_num_apps * _orig_rank;
+      }
+      else
+      {
+        unsigned int num_apps_in_jobs_left_pids = (_my_num_apps + 1) * jobs_left;
+        unsigned int distance_to_jobs_left_pids = _orig_rank - jobs_left;
+
+        _first_local_app = num_apps_in_jobs_left_pids + (_my_num_apps * distance_to_jobs_left_pids);
+      }
+    }
+    else
+      _first_local_app = _my_num_apps * _orig_rank;
+
+    sleep(_orig_rank);
 
     return;
   }
