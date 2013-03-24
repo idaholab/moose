@@ -83,52 +83,12 @@ MultiAppDTKUserObjectEvaluator::createSourceGeometry( const Teuchos::RCP<const T
   {
     unsigned int global_app = _multi_app.firstLocalApp() + app;
 
-    FEProblem * problem = dynamic_cast<FEProblem *>(&_multi_app.getExecutioner(global_app)->problem());
-
     MeshTools::BoundingBox bbox = _multi_app.getBoundingBox(global_app);
 
-    Point min = bbox.min();
-    Point max = bbox.max();
-
-    std::cout<<"min: "<<min<<std::endl;
-    std::cout<<"max: "<<max<<std::endl;
-
-
-    Point inflation_amount = (max-min)*inflation;
-
-    Point inflated_min = min - inflation_amount;
-    Point inflated_max = max + inflation_amount;
-
-    // This is where the app is located.  We need to shift by this amount.
-    Point p = _multi_app.position(global_app);
-
-    Point shifted_min = inflated_min;
-    Point shifted_max = inflated_max;
-
-    // If the problem is RZ then we're going to invent a box that would cover the whole "3D" app
-    // FIXME: Assuming all subdomains are the same coordinate system type!
-    if(problem->getCoordSystem(*(problem->mesh().meshSubdomains().begin())) == Moose::COORD_RZ)
-    {
-      shifted_min(0) = -inflated_max(0);
-      shifted_min(1) = inflated_min(1);
-      shifted_min(2) = -inflated_max(0);
-
-      shifted_max(0) = inflated_max(0);
-      shifted_max(1) = inflated_max(1);
-      shifted_max(2) = inflated_max(0);
-    }
-
-    // Shift them to the position they're supposed to be
-    shifted_min += p;
-    shifted_max += p;
-
-    std::cout<<shifted_min<<"  "<<shifted_max<<std::endl;
-
-    _boxes[app] = DataTransferKit::Box(shifted_min(0), shifted_min(1), shifted_min(2),
-                                       shifted_max(0), shifted_max(1), shifted_max(2));
+    _boxes[app] = DataTransferKit::Box(bbox.min()(0), bbox.min()(1), bbox.min()(2),
+                                       bbox.max()(0), bbox.max()(1), bbox.max()(2));
 
     _box_ids[app] = global_app;
-
   }
 
   return Teuchos::rcp( new DataTransferKit::GeometryManager<DataTransferKit::Box,int>(_boxes, _box_ids, comm, 3));

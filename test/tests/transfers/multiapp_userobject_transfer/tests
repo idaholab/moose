@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'master.i'
+    exodiff = 'master_out.e master_out_sub_app0.e master_out_sub_app1.e'
+  [../]
+
+  [./tosub]
+    type = 'Exodiff'
+    input = 'tosub_master.i'
+    exodiff = 'tosub_master_out.e tosub_master_out_sub_app0.e tosub_master_out_sub_app1.e'
+  [../]
+[]

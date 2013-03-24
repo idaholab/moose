@@ -200,6 +200,7 @@
 #include "MultiAppVariableValueSampleTransfer.h"
 #include "MultiAppVariableValueSamplePostprocessorTransfer.h"
 #include "MultiAppMeshFunctionTransfer.h"
+#include "MultiAppUserObjectTransfer.h"
 
 
 // Actions
@@ -438,6 +439,7 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppVariableValueSampleTransfer);
   registerTransfer(MultiAppVariableValueSamplePostprocessorTransfer);
   registerTransfer(MultiAppMeshFunctionTransfer);
+  registerTransfer(MultiAppUserObjectTransfer);
 
   registered = true;
 }

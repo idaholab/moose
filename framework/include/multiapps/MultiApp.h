@@ -54,6 +54,11 @@ public:
 
   /**
    * Get the BoundingBox for the mesh associated with app
+   * The bounding box will be shifted to be in the correct position
+   * within the master domain.
+   * If the MultiApp is in an RZ coordinate system the box will be
+   * the size it would be if the geometry were 3D (ie if you were to revolve
+   * the geometry around the axis to create the 3D geometry).
    * @param app The global app number you want to get the bounding box for
    */
   virtual MeshTools::BoundingBox getBoundingBox(unsigned int app);
@@ -192,6 +197,9 @@ protected:
 
   /// When this MultiApp will be executed
   MooseEnum _execute_on;
+
+  /// Relative bounding box inflation
+  Real _inflation;
 };
 
 #endif // MULTIAPP_H

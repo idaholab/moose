@@ -12,9 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#define NOTFOUND -999999
-
-#include "MultiAppMeshFunctionTransfer.h"
+#include "MultiAppUserObjectTransfer.h"
 
 // Moose
 #include "MooseTypes.h"
@@ -27,51 +25,28 @@
 #include "libmesh/mesh_tools.h"
 
 template<>
-InputParameters validParams<MultiAppMeshFunctionTransfer>()
+InputParameters validParams<MultiAppUserObjectTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
-  params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
+  params.addRequiredParam<UserObjectName>("user_object", "The UserObject you want to transfer values from.  Note: This might be a UserObject from your MultiApp's input file!");
   return params;
 }
 
-MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const std::string & name, InputParameters parameters) :
+MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const std::string & name, InputParameters parameters) :
     MultiAppTransfer(name, parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
-    _from_var_name(getParam<VariableName>("source_variable"))
+    _user_object_name(getParam<UserObjectName>("user_object"))
 {
 }
 
 void
-MultiAppMeshFunctionTransfer::execute()
+MultiAppUserObjectTransfer::execute()
 {
   switch(_direction)
   {
     case TO_MULTIAPP:
     {
-      FEProblem & from_problem = *_multi_app->problem();
-      MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
-      SystemBase & from_system_base = from_var.sys();
-
-      System & from_sys = from_system_base.system();
-
-      // Only works with a serialized mesh to transfer from!
-      mooseAssert(from_sys.get_mesh().is_serial(), "MultiAppMeshFunctionTransfer only works with SerialMesh!");
-
-      unsigned int from_var_num = from_sys.variable_number(from_var.name());
-
-      EquationSystems & from_es = from_sys.get_equation_systems();
-
-      //Create a serialized version of the solution vector
-      NumericVector<Number> * serialized_solution = NumericVector<Number>::build().release();
-      serialized_solution->init(from_sys.n_dofs(), false, SERIAL);
-
-      // Need to pull down a full copy of this vector on every processor so we can get values in parallel
-      from_sys.solution->localize(*serialized_solution);
-
-      MeshFunction from_func(from_es, *serialized_solution, from_sys.get_dof_map(), from_var_num);
-      from_func.init();
-
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
         if(_multi_app->hasLocalApp(i))
@@ -86,10 +61,14 @@ MultiAppMeshFunctionTransfer::execute()
 
           unsigned int sys_num = to_sys->number();
           unsigned int var_num = to_sys->variable_number(_to_var_name);
+
           NumericVector<Real> & solution = *to_sys->solution;
 
           MeshBase & mesh = _multi_app->appProblem(i)->mesh().getMesh();
+
           bool is_nodal = to_sys->variable_type(var_num) == FEType();
+
+          const UserObject & user_object = _multi_app->problem()->getUserObjectBase(_user_object_name);
 
           if(is_nodal)
           {
@@ -107,7 +86,7 @@ MultiAppMeshFunctionTransfer::execute()
 
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
-                Real from_value = from_func(*node+_multi_app->position(i));
+                Real from_value = user_object.spatialValue(*node+_multi_app->position(i));
                 // Swap again
                 swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
@@ -133,7 +112,7 @@ MultiAppMeshFunctionTransfer::execute()
 
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
-                Real from_value = from_func(centroid+_multi_app->position(i));
+                Real from_value = user_object.spatialValue(centroid+_multi_app->position(i));
                 // Swap again
                 swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
@@ -163,7 +142,7 @@ MultiAppMeshFunctionTransfer::execute()
       unsigned int to_sys_num = to_sys.number();
 
       // Only works with a serialized mesh to transfer to!
-      mooseAssert(to_sys.get_mesh().is_serial(), "MultiAppMeshFunctionTransfer only works with SerialMesh!");
+      mooseAssert(to_sys.get_mesh().is_serial(), "MultiAppUserObjectTransfer only works with SerialMesh!");
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 
@@ -176,37 +155,14 @@ MultiAppMeshFunctionTransfer::execute()
 
       bool is_nodal = to_sys.variable_type(to_var_num) == FEType();
 
-
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
         if(!_multi_app->hasLocalApp(i))
           continue;
 
-        MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-        FEProblem & from_problem = *_multi_app->appProblem(i);
-        MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
-        SystemBase & from_system_base = from_var.sys();
-
-        System & from_sys = from_system_base.system();
-
-        // Only works with a serialized mesh to transfer from!
-        mooseAssert(from_sys.get_mesh().is_serial(), "MultiAppMeshFunctionTransfer only works with SerialMesh!");
-
-        unsigned int from_var_num = from_sys.variable_number(from_var.name());
-
-        EquationSystems & from_es = from_sys.get_equation_systems();
-
-        //Create a serialized version of the solution vector
-        NumericVector<Number> * from_solution = from_sys.solution.get();
-
-        MeshBase & from_mesh = from_es.get_mesh();
-        MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(from_mesh, libMesh::processor_id());
         Point app_position = _multi_app->position(i);
-
-        MeshFunction from_func(from_es, *from_solution, from_sys.get_dof_map(), from_var_num);
-        from_func.init();
-        from_func.enable_out_of_mesh_mode(NOTFOUND);
-        Moose::swapLibMeshComm(swapped);
+        MeshTools::BoundingBox app_box = _multi_app->getBoundingBox(i);
+        const UserObject & user_object = _multi_app->appUserObjectBase(i, _user_object_name);
 
         if(is_nodal)
         {
@@ -220,17 +176,15 @@ MultiAppMeshFunctionTransfer::execute()
             if(node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
             {
               // See if this node falls in this bounding box
-              if(app_box.contains_point(*node-app_position))
+              if(app_box.contains_point(*node))
               {
-                // The zero only works for LAGRANGE!
                 unsigned int dof = node->dof_number(to_sys_num, to_var_num, 0);
 
                 MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-                Real from_value = from_func(*node-app_position);
+                Real from_value = user_object.spatialValue(*node-app_position);
                 Moose::swapLibMeshComm(swapped);
 
-                if(from_value != NOTFOUND)
-                  to_solution->set(dof, from_value);
+                to_solution->set(dof, from_value);
               }
             }
           }
@@ -249,17 +203,15 @@ MultiAppMeshFunctionTransfer::execute()
               Point centroid = elem->centroid();
 
               // See if this elem falls in this bounding box
-              if(app_box.contains_point(centroid-app_position))
+              if(app_box.contains_point(centroid))
               {
-                // The zero only works for LAGRANGE!
                 unsigned int dof = elem->dof_number(to_sys_num, to_var_num, 0);
 
                 MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-                Real from_value = from_func(centroid-app_position);
+                Real from_value = user_object.spatialValue(centroid-app_position);
                 Moose::swapLibMeshComm(swapped);
 
-                if(from_value != NOTFOUND)
-                  to_solution->set(dof, from_value);
+                to_solution->set(dof, from_value);
               }
             }
           }

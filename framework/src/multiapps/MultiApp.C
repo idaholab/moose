@@ -58,6 +58,7 @@ InputParameters validParams<MultiApp>()
   params.addParam<FileName>("positions_file", "A filename that should be looked in for positions. Each set of 3 values in that file will represent a Point.  Either this must be supplied or 'positions'");
 
   params.addRequiredParam<std::vector<std::string> >("input_files", "The input file for each App.  If this parameter only contains one input file it will be used for all of the Apps.");
+  params.addParam<Real>("bounding_box_inflation", 0.01, "Relative amount to 'inflate' the bounding box of this MultiApp.");
 
   params.addPrivateParam<MPI_Comm>("_mpi_comm");
 
@@ -79,7 +80,8 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     _app_type(getParam<MooseEnum>("app_type")),
     _input_files(getParam<std::vector<std::string> >("input_files")),
     _orig_comm(getParam<MPI_Comm>("_mpi_comm")),
-    _execute_on(getParam<MooseEnum>("execute_on"))
+    _execute_on(getParam<MooseEnum>("execute_on")),
+    _inflation(getParam<Real>("bounding_box_inflation"))
 {
   if(isParamValid("positions"))
     _positions_vec = getParam<std::vector<Real> >("positions");
@@ -186,7 +188,38 @@ MultiApp::getBoundingBox(unsigned int app)
 
   Moose::swapLibMeshComm(swapped);
 
-  return bbox;
+  Point min = bbox.min();
+  Point max = bbox.max();
+
+  Point inflation_amount = (max-min)*_inflation;
+
+  Point inflated_min = min - inflation_amount;
+  Point inflated_max = max + inflation_amount;
+
+  // This is where the app is located.  We need to shift by this amount.
+  Point p = position(app);
+
+  Point shifted_min = inflated_min;
+  Point shifted_max = inflated_max;
+
+  // If the problem is RZ then we're going to invent a box that would cover the whole "3D" app
+  // FIXME: Assuming all subdomains are the same coordinate system type!
+  if(problem->getCoordSystem(*(problem->mesh().meshSubdomains().begin())) == Moose::COORD_RZ)
+  {
+    shifted_min(0) = -inflated_max(0);
+    shifted_min(1) = inflated_min(1);
+    shifted_min(2) = -inflated_max(0);
+
+    shifted_max(0) = inflated_max(0);
+    shifted_max(1) = inflated_max(1);
+    shifted_max(2) = inflated_max(0);
+  }
+
+  // Shift them to the position they're supposed to be
+  shifted_min += p;
+  shifted_max += p;
+
+  return MeshTools::BoundingBox(shifted_min, shifted_max);
 }
 
 FEProblem *
