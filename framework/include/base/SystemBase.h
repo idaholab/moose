@@ -572,14 +572,18 @@ public:
 
   void copyVars(ExodusII_IO & io)
   {
+    bool did_copy = false;
     for (std::vector<VarCopyInfo>::iterator it = _var_to_copy.begin();
         it != _var_to_copy.end();
         ++it)
     {
+      did_copy = true;
       VarCopyInfo & vci = *it;
       io.copy_nodal_solution(_sys, vci._name, vci._timestep);
     }
-    _solution.close();
+
+    if(did_copy)
+      _solution.close();
   }
 
 protected:

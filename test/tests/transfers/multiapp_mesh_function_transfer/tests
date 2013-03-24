@@ -3,7 +3,12 @@
     type = 'Exodiff'
     input = 'tosub_master.i'
     exodiff = 'tosub_master_out_sub0.e tosub_master_out_sub1.e tosub_master_out_sub2.e'
-    dtk = True
-    method = 'OPT OPROF'
+  [../]
+
+
+  [./fromsub]
+    type = 'Exodiff'
+    input = 'master.i'
+    exodiff = 'master_out_sub0.e master_out_sub1.e master_out_sub2.e'
   [../]
 []

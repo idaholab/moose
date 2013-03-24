@@ -10,6 +10,15 @@
   [../]
 []
 
+[AuxVariables]
+  [./transferred_u]
+  [../]
+  [./elemental_transferred_u]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
 [Kernels]
   [./diff]
     type = Diffusion
@@ -49,31 +58,26 @@
 
 [MultiApps]
   [./sub]
-    positions = '.1 .1 0 0.6 0.6 0 0.6 0.1 0'
+    positions = '.099 .099 0 .599 .599 0 0.599 0.099 0'
     type = TransientMultiApp
     app_type = MooseTestApp
-    input_files = tosub_sub.i
-    output_base = tosub_multi_out
-    execute_on = timestep
+    input_files = sub.i
   [../]
 []
 
 [Transfers]
-  [./to_sub]
-    source_variable = u
-    direction = to_multiapp
+  [./from_sub]
+    source_variable = sub_u
+    direction = from_multiapp
     variable = transferred_u
-    execute_on = timestep
     type = MultiAppMeshFunctionTransfer
     multi_app = sub
   [../]
-
-  [./elemental_to_sub]
-    source_variable = u
-    direction = to_multiapp
+  [./elemental_from_sub]
+    source_variable = sub_u
+    direction = from_multiapp
     variable = elemental_transferred_u
-    execute_on = timestep
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppDTKInterpolationTransfer
     multi_app = sub
   [../]
 []

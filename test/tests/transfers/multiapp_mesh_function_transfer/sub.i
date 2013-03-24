@@ -3,21 +3,14 @@
   dim = 2
   nx = 10
   ny = 10
-  xmax = 0.2
-  ymax = 0.2
+  xmin = -.01
+  xmax = 0.21
+  ymin = -.01
+  ymax = 0.21
 []
 
 [Variables]
   [./sub_u]
-  [../]
-[]
-
-[AuxVariables]
-  [./transferred_u]
-  [../]
-  [./elemental_transferred_u]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
 []
 
