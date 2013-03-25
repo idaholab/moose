@@ -15,6 +15,7 @@
 #include "MemDataTest.h"
 
 // Moose includes
+#include "Moose.h"
 #include "MemData.h"
 // libMesh
 #include "libmesh/libmesh_common.h"
