@@ -15,10 +15,13 @@
 #ifndef FUNCTIONPERIODICBOUNDARY_H
 #define FUNCTIONPERIODICBOUNDARY_H
 
-#include <vector>
+#include "Moose.h"
 
+//libMesh
 #include "libmesh/point.h"
 #include "libmesh/periodic_boundary_base.h"
+
+#include <vector>
 
 class FEProblem;
 class Function;

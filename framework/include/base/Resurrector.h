@@ -15,11 +15,13 @@
 #ifndef RESURRECTOR_H
 #define RESURRECTOR_H
 
-#include <string>
-#include <list>
+#include "Moose.h"
 #include "XDAOutput.h"
 #include "MaterialPropertyIO.h"
 #include "UserObjectIO.h"
+
+#include <string>
+#include <list>
 
 class FEProblem;
 

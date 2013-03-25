@@ -15,12 +15,14 @@
 #ifndef COLUMNMAJORMATRIX_H
 #define COLUMNMAJORMATRIX_H
 
+#include "Moose.h"
 #include "MooseError.h"
-// libmesh includes
+
+//libMesh
 #include "libmesh/type_tensor.h"
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
-// system includes
+
 #include <vector>
 #include <iomanip>
 

@@ -17,8 +17,6 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/preconditioner.h"
 
-using namespace libMesh;
-
 struct DM_Moose
 {
   NonlinearSystem*                      nl;

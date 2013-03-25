@@ -15,6 +15,9 @@
 #ifndef DEPENDENCYRESOLVER_H
 #define DEPENDENCYRESOLVER_H
 
+#include "Moose.h"
+#include "MooseError.h"
+
 #include <map>
 #include <set>
 #include <string>
@@ -22,7 +25,6 @@
 #include <algorithm>
 #include <sstream>
 #include <exception>
-#include "MooseError.h"
 
 template <typename T>
 class DependencyResolver

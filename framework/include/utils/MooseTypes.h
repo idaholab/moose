@@ -15,13 +15,15 @@
 #ifndef MOOSETYPES_H
 #define MOOSETYPES_H
 
-#include <string>
-#include <vector>
+#include "Moose.h"
 
 // libMesh includes
 #include "libmesh/id_types.h"
 #include "libmesh/stored_range.h"
 #include "libmesh/elem.h"
+
+#include <string>
+#include <vector>
 
 /**
  * MOOSE typedefs

@@ -15,13 +15,15 @@
 #ifndef DIRACKERNELINFO_H
 #define DIRACKERNELINFO_H
 
-#include <set>
-#include <map>
-
+#include "Moose.h"
 #include "MooseArray.h"
+
 // libMesh
 #include "libmesh/elem.h"
 #include "libmesh/point.h"
+
+#include <set>
+#include <map>
 
 namespace libMesh
 {

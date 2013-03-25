@@ -15,6 +15,7 @@
 #ifndef ADAPTIVITY_H
 #define ADAPTIVITY_H
 
+#include "Moose.h"
 #include "MooseError.h"
 #include "MooseEnum.h"
 

@@ -15,7 +15,10 @@
 #ifndef COMPUTEREINITIALCONDITIONTHREAD_H
 #define COMPUTEREINITIALCONDITIONTHREAD_H
 
+#include "Moose.h"
 #include "ParallelUniqueId.h"
+
+// libmesh
 #include "libmesh/elem_range.h"
 #include "libmesh/numeric_vector.h"
 

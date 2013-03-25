@@ -15,7 +15,6 @@
 #include "Output.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
-
 #include "Outputter.h"
 #include "ExodusOutput.h"
 #include "NemesisOutput.h"

@@ -14,6 +14,7 @@
 
 #include "ExodusOutput.h"
 
+#include "Moose.h"
 #include "MooseApp.h"
 #include "ActionWarehouse.h"
 #include "Problem.h"
@@ -26,7 +27,6 @@
 #include "libmesh/exodusII.h"
 #include "libmesh/exodusII_io.h"
 
-// C++
 #include <sstream>
 #include <iomanip>
 

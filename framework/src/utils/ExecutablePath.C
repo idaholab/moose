@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "Moose.h"
 #include "ExecutablePath.h"
 #include "MooseError.h"
 

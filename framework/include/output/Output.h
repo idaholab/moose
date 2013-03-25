@@ -15,14 +15,15 @@
 #ifndef OUTPUT_H
 #define OUTPUT_H
 
-#include <string>
-#include <vector>
+#include "Moose.h"
 #include "FormattedTable.h"
+
 // libMesh
 #include "libmesh/libmesh_common.h"
-
-//PETSc includes
 #include "libmesh/petsc_nonlinear_solver.h"
+
+#include <string>
+#include <vector>
 
 class FEProblem;
 class Outputter;

@@ -21,6 +21,8 @@
 
 #include <string>
 
+using namespace libMesh;
+
 class ActionFactory;
 class Factory;
 

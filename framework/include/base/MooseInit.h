@@ -15,6 +15,9 @@
 #ifndef MOOSEINIT_H
 #define MOOSEINIT_H
 
+#include "Moose.h"
+
+//libMesh
 #include "libmesh/libmesh.h"
 
 /**

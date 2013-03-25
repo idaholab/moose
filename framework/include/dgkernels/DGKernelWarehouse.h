@@ -15,11 +15,14 @@
 #ifndef DGKERNELWAREHOUSE_H
 #define DGKERNELWAREHOUSE_H
 
+#include "Moose.h"
+
+//libMesh
+#include "libmesh/libmesh_common.h"
+
 #include <vector>
 #include <map>
 #include <set>
-#include "libmesh/libmesh_common.h"
-
 
 class DGKernel;
 

@@ -15,6 +15,8 @@
 #ifndef FORMATTEDTABLE_H
 #define FORMATTEDTABLE_H
 
+#include "Moose.h"
+
 #include "libmesh/libmesh_common.h"
 #include "libmesh/exodusII_io.h"
 

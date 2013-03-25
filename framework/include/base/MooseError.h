@@ -15,12 +15,11 @@
 #ifndef MOOSEERROR_H
 #define MOOSEERROR_H
 
+#include "Moose.h"
+
 // libMesh includes
-//#include "libmesh/libmesh_config.h"
 #include "libmesh/print_trace.h"
 #include "libmesh/libmesh_common.h"
-//#include "libmesh/perf_log.h"
-//#include "libmesh/parallel.h"
 
 #include <string>
 

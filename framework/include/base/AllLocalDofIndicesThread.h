@@ -15,6 +15,7 @@
 #ifndef ALLLOCALDOFINDICESTHREAD_H
 #define ALLLOCALDOFINDICESTHREAD_H
 
+#include "Moose.h"
 #include "ParallelUniqueId.h"
 
 // libMesh includes

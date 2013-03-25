@@ -12,10 +12,14 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "Moose.h"
+
+//libMesh
+#include "libmesh/libmesh_common.h"
+
 #include <map>
 #include <string>
 #include <vector>
-#include "libmesh/libmesh_common.h"
 
 /**
  * Class to hold information about executioner time periods

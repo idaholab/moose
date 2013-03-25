@@ -1,6 +1,8 @@
 #ifndef USRFUNC_H
 #define USRFUNC_H
 
+#include "Moose.h"
+
 #include "libmesh/libmesh_common.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/point.h"

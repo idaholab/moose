@@ -15,10 +15,13 @@
 #ifndef OUTPUTTER_H
 #define OUTPUTTER_H
 
+#include "Moose.h"
 #include "FormattedTable.h"
+
 // libMesh
 #include "libmesh/equation_systems.h"
 
+#include <vector>
 #include <string>
 
 class Problem;

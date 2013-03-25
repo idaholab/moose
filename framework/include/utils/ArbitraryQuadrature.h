@@ -15,7 +15,9 @@
 #ifndef ARBITRARYQUADRATURE_H
 #define ARBITRARYQUADRATURE_H
 
-// Local includes
+#include "Moose.h"
+
+//libMesh
 #include "libmesh/quadrature.h"
 
 /**

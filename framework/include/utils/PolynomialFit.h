@@ -15,11 +15,15 @@
 #ifndef POLYNOMIALFIT_H
 #define POLYNOMIALFIT_H
 
+#include "Moose.h"
+
+//libMesh
+#include "libmesh/libmesh_common.h"
+
 #include <vector>
 #include <fstream>
 #include <sstream>
 #include <string>
-#include "libmesh/libmesh_common.h"
 
 /**
  * This class applies the Least Squares algorithm to a set of points to provide a smooth curve for

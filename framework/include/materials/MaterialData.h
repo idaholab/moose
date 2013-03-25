@@ -15,10 +15,14 @@
 #ifndef MATERIALDATA_H
 #define MATERIALDATA_H
 
-#include <vector>
+#include "Moose.h"
 #include "MaterialProperty.h"
 #include "MaterialPropertyStorage.h"
+
+//libMesh
 #include "libmesh/elem.h"
+
+#include <vector>
 
 class Material;
 

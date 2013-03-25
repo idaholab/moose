@@ -23,6 +23,8 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/exodusII_io.h"
 
+#include <string>
+
 class ExodusOutput : public Outputter
 {
 public:

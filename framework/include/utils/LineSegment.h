@@ -15,6 +15,8 @@
 #ifndef LINESEGMENT_H
 #define LINESEGMENT_H
 
+#include "Moose.h"
+
 // libMesh includes
 #include "libmesh/point.h"
 
