@@ -1,6 +1,8 @@
+#include "Moose.h"
 #include "Numerics.h"
-#include <sstream>
 #include "MooseError.h"
+
+#include <sstream>
 
 namespace Numerics {
 
