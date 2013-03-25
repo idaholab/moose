@@ -77,7 +77,7 @@
     source_variable = sub_u
     direction = from_multiapp
     variable = elemental_transferred_u
-    type = MultiAppDTKInterpolationTransfer
+    type = MultiAppMeshFunctionTransfer
     multi_app = sub
   [../]
 []
