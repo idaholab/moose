@@ -42,6 +42,10 @@ class RunApp(Tester):
     else:
       default_ncpus = options.parallel
 
+    timing_string = ''
+    if options.timing:
+      timing_string = ' Output/perf_log=true '
+
     # Raise the floor
     ncpus = max(default_ncpus, int(specs[MIN_PARALLEL]))
     # Lower the ceiling
@@ -66,7 +70,7 @@ class RunApp(Tester):
     elif options.enable_valgrind and not specs[NO_VALGRIND]:
       command = 'valgrind --suppressions=' + specs[MOOSE_DIR] + 'tests/suppressions/errors.supp --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs[EXECUTABLE] + ' ' + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
     else:
-      command = specs[EXECUTABLE] + ' ' + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
+      command = specs[EXECUTABLE] + timing_string + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
 
     if options.scaling and specs[SCALE_REFINE] > 0:
       command += ' -r ' + str(specs[SCALE_REFINE])
