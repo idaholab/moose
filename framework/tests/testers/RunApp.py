@@ -42,7 +42,7 @@ class RunApp(Tester):
     else:
       default_ncpus = options.parallel
 
-    timing_string = ''
+    timing_string = ' '
     if options.timing:
       timing_string = ' Output/perf_log=true '
 
