@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 import os, sys, shutil, subprocess
 
-MOOSE_DIR = '../'
 #### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
+else:
+  MOOSE_DIR = os.path.abspath(os.path.dirname(sys.argv[0])) + '/..'
 sys.path.append(MOOSE_DIR + '/tests')
 import ParseGetPot
 
