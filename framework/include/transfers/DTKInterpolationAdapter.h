@@ -20,6 +20,8 @@
 #ifndef DTKINTERPOLATIONADAPTER_H
 #define DTKINTERPOLATIONADAPTER_H
 
+#include "Moose.h"
+
 #include "libmesh/libmesh_config.h"
 
 #ifdef LIBMESH_HAVE_DTK
