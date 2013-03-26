@@ -1394,6 +1394,25 @@ FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
       needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
 
+    const std::set<unsigned int> & subdomain_boundary_ids = _mesh.getSubdomainBoundaryIds(blk_id);
+    for(std::set<unsigned int>::const_iterator id_it = subdomain_boundary_ids.begin();
+        id_it != subdomain_boundary_ids.end();
+        ++id_it)
+    {
+      if(_materials[tid].hasBoundaryMaterials(*id_it))
+      {
+        std::vector<Material *> & materials = _materials[tid].getBoundaryMaterials(*id_it);
+
+        for(std::vector<Material *>::iterator it = materials.begin();
+            it != materials.end();
+            ++it)
+        {
+          const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+          needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+        }
+      }
+    }
+
     const std::set<MooseVariable *> & current_active_elemental_moose_variables = getActiveElementalMooseVariables(tid);
 
     needed_moose_vars.insert(current_active_elemental_moose_variables.begin(), current_active_elemental_moose_variables.end());
