@@ -338,6 +338,7 @@ public:
   void addJacobianNeighbor(SparseMatrix<Number> & jacobian);
   void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices);
   void addJacobianScalar(SparseMatrix<Number> & jacobian);
+  void addJacobianOffDiagScalar(SparseMatrix<Number> & jacobian);
 
   /**
    * Takes the values that are currently in _sub_Kee and appends them to the cached values.

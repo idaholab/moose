@@ -632,6 +632,12 @@ FEProblem::addJacobianScalar(SparseMatrix<Number> & jacobian, THREAD_ID tid/* = 
 }
 
 void
+FEProblem::addJacobianOffDiagScalar(SparseMatrix<Number> & jacobian, THREAD_ID tid/* = 0*/)
+{
+  _assembly[tid]->addJacobianOffDiagScalar(jacobian);
+}
+
+void
 FEProblem::cacheJacobian(THREAD_ID tid)
 {
   _assembly[tid]->cacheJacobian();

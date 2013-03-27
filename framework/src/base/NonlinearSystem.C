@@ -1370,6 +1370,7 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
 
       kernel->reinit();
       kernel->computeJacobian();
+      _fe_problem.addJacobianOffDiagScalar(jacobian);
     }
     _fe_problem.addJacobianScalar(jacobian);
   }

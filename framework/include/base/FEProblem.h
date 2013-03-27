@@ -482,6 +482,7 @@ public:
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid);
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid);
   virtual void addJacobianScalar(SparseMatrix<Number> & jacobian, THREAD_ID tid = 0);
+  virtual void addJacobianOffDiagScalar(SparseMatrix<Number> & jacobian, THREAD_ID tid = 0);
 
   virtual void cacheJacobian(THREAD_ID tid);
   virtual void cacheJacobianNeighbor(THREAD_ID tid);
