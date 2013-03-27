@@ -63,6 +63,25 @@ ComputeFullJacobianThread::computeJacobian()
       }
     }
   }
+
+  const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
+  for (std::vector<MooseVariableScalar *>::const_iterator jt = scalar_vars.begin(); jt != scalar_vars.end(); jt++)
+  {
+    // Do: dvar / dscalar_var
+    MooseVariableScalar & jvar = *(*jt);
+
+    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
+    for (std::vector<Kernel *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
+    {
+      Kernel * kernel = *kt;
+      MooseVariable & ivar = kernel->variable();
+      if (ivar.dofIndices().size() > 0)
+      {
+        kernel->subProblem().prepareShapes(ivar.index(), _tid);
+        kernel->computeOffDiagJacobianScalar(jvar.index());
+      }
+    }
+  }
 }
 
 void
@@ -86,6 +105,28 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
         {
           bc->subProblem().prepareFaceShapes(jvar, _tid);
           bc->computeJacobianBlock(jvar);
+        }
+      }
+    }
+  }
+
+  const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
+  for (std::vector<MooseVariableScalar *>::const_iterator jt = scalar_vars.begin(); jt != scalar_vars.end(); jt++)
+  {
+    // Do: dvar / dscalar_var
+    MooseVariableScalar & jvar = *(*jt);
+
+    std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
+    for (std::vector<IntegratedBC *>::iterator kt = bcs.begin(); kt != bcs.end(); ++kt)
+    {
+      IntegratedBC * bc = *kt;
+      if (bc->shouldApply())
+      {
+        MooseVariable & ivar = bc->variable();
+        if (ivar.dofIndices().size() > 0)
+        {
+          bc->subProblem().prepareFaceShapes(ivar.index(), _tid);
+          bc->computeJacobianBlockScalar(jvar.index());
         }
       }
     }

@@ -861,6 +861,12 @@ FEProblem::reinitScalars(THREAD_ID tid)
   _assembly[tid]->prepareScalar();
 }
 
+void
+FEProblem::reinitOffDiagScalars(THREAD_ID tid)
+{
+  _assembly[tid]->prepareOffDiagScalar();
+}
+
 
 void
 FEProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)

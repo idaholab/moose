@@ -1005,12 +1005,11 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose
         {
           ScalarKernel * kernel = *it;
 
-          _fe_problem.reinitScalars(0);
           kernel->reinit();
           kernel->computeResidual();
-          _fe_problem.addResidualScalar(residual);
         }
       }
+      _fe_problem.addResidualScalar(residual);
     }
   }
   PARALLEL_CATCH;
@@ -1357,31 +1356,22 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 void
 NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
 {
-  const std::vector<MooseVariableScalar *> & scalar_vars = getScalarVariables(0);
-
-  const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
-  // do full jacobian for ODEs
-  for (std::vector<MooseVariableScalar *>::const_iterator it = scalar_vars.begin(); it != scalar_vars.end(); ++it)
+  // Compute the diagonal block for scalar variables
+  THREAD_ID tid = 0;
+  const std::vector<MooseVariableScalar *> & scalar_vars = getScalarVariables(tid);
+  if (scalar_vars.size() > 0)
   {
-    MooseVariableScalar & ivar = *(*it);
-    for (std::vector<MooseVariableScalar *>::const_iterator jt = scalar_vars.begin(); jt != scalar_vars.end(); ++jt)
+    const std::vector<ScalarKernel *> & scalars = _kernels[tid].scalars();
+
+    _fe_problem.reinitScalars(tid);
+    for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
     {
-      MooseVariableScalar & jvar = *(*jt);
-      for (std::vector<ScalarKernel *>::const_iterator kt = scalars.begin(); kt != scalars.end(); ++kt)
-      {
-        ScalarKernel * kernel = *kt;
-        if (kernel->variable().index() == ivar.index())
-        {
-          _fe_problem.reinitScalars(0);
-          kernel->reinit();
-          if (jvar.index() == ivar.index())
-            kernel->computeJacobian();
-          else
-            kernel->computeOffDiagJacobian(jvar.index());
-          _fe_problem.addJacobianScalar(jacobian);
-        }
-      }
+      ScalarKernel * kernel = *it;
+
+      kernel->reinit();
+      kernel->computeJacobian();
     }
+    _fe_problem.addJacobianScalar(jacobian);
   }
 }
 

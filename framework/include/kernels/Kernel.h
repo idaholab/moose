@@ -63,6 +63,11 @@ public:
    * Computes d-residual / d-jvar... storing the result in Ke.
    */
   virtual void computeOffDiagJacobian(unsigned int jvar);
+  /**
+   * Computes jacobian block with respect to a scalar variable
+   * @param jvar The number of the scalar variable
+   */
+  virtual void computeOffDiagJacobianScalar(unsigned int jvar);
 
   /**
    * The variable number that this kernel operates on.

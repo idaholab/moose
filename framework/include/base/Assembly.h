@@ -552,8 +552,6 @@ protected:
   /// jacobian contributions from the neighbor
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Knn;
 
-  bool _scalar_has_off_diag_contributions;
-
   /// auxiliary matrix for scaling jacobians (optimization to avoid expensive construction/destruction)
   DenseMatrix<Number> _tmp_Ke;
 

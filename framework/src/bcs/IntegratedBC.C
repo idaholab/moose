@@ -163,6 +163,18 @@ IntegratedBC::computeJacobianBlock(unsigned int jvar)
 //  Moose::perf_log.pop("computeJacobianBlock()","IntegratedBC");
 }
 
+void
+IntegratedBC::computeJacobianBlockScalar(unsigned int jvar)
+{
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), jvar);
+
+  MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_j = 0; _j < jv.order(); _j++)
+        ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+}
+
 Real
 IntegratedBC::computeQpJacobian()
 {

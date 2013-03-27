@@ -56,6 +56,7 @@
 #include "OnOffDirichletBC.h"
 #include "OnOffNeumannBC.h"
 #include "DivergenceBC.h"
+#include "ScalarVarBC.h"
 
 #include "TEIC.h"
 
@@ -82,6 +83,7 @@
 #include "ExplicitODE.h"
 #include "ImplicitODEx.h"
 #include "ImplicitODEy.h"
+#include "AlphaCED.h"
 
 #include "EqualValueNodalConstraint.h"
 // user objects
@@ -179,6 +181,7 @@ MooseTest::registerObjects(Factory & factory)
   registerBoundaryCondition(TEJumpBC);
   registerBoundaryCondition(OnOffDirichletBC);
   registerBoundaryCondition(OnOffNeumannBC);
+  registerBoundaryCondition(ScalarVarBC);
 
   registerBoundaryCondition(DGMDDBC);
   registerBoundaryCondition(DGFunctionConvectionDirichletBC);
@@ -209,6 +212,7 @@ MooseTest::registerObjects(Factory & factory)
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);
   registerScalarKernel(ImplicitODEy);
+  registerScalarKernel(AlphaCED);
 
   // Functions
   registerFunction(TimestepSetupFunction);

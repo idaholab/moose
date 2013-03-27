@@ -140,6 +140,8 @@ ComputeJacobianThread::onElement(const Elem *elem)
   _fe_problem.reinitElem(elem, _tid);
 
   _fe_problem.reinitMaterials(_subdomain, _tid);
+  if (_sys.getScalarVariables(_tid).size() > 0)
+    _fe_problem.reinitOffDiagScalars(_tid);
 
   computeJacobian();
 }

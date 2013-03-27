@@ -48,6 +48,11 @@ public:
    * Computes d-ivar-residual / d-jvar...
    */
   void computeJacobianBlock(unsigned int jvar);
+  /**
+   * Computes jacobian block with respect to a scalar variable
+   * @param jvar The number of the scalar variable
+   */
+  void computeJacobianBlockScalar(unsigned int jvar);
 
 protected:
   /// current element

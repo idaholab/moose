@@ -195,6 +195,7 @@ public:
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid);
   virtual void reinitScalars(THREAD_ID tid);
+  virtual void reinitOffDiagScalars(THREAD_ID tid);
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & elems);

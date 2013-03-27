@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'scalar_constraint.i'
+    exodiff = 'scalar_constraint_out.e'
+    max_parallel = 1
+  [../]
+[]
