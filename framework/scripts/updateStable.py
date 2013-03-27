@@ -46,9 +46,16 @@ def getCoverage():
   # A list of stuff we don't want to include in code coverage. Add more here if needed (wild cards accepted).
   filter_out = [ 'contrib/mtwist*',
                  '/usr/include*',
-                 '*/openmpi/*',
-                 '*/libmesh/*'
+                 '*/mpich*/*',
+                 '*/libmesh/*',
+                 '*/gcc_4.7.2/*',
+                 '*/moab/*',
+                 '*/tbb/*',
+                 '*/petsc*/*',
+                 '*/dtk_opt/*',
+                 '*/dtk_moab/*'
                  ]
+
   # Use the same commands from the coverage_html script to generate the raw.info file
   coverage_cmd = [ os.getenv('LCOV_BIN'),
                    '--base-directory', 'moose',
