@@ -29,34 +29,39 @@ def generateTraces(job_num, application_name):
 
   # Launch all the jobs
   for host in hosts:
-    command = "ssh " + host + " \"ps -e | grep " + application_name + " | awk '{print \$1}' | xargs -I {} gdb --batch --pid={} -ex bt 2>&1 | grep '^#' \""
+    #command = "ssh " + host + " \"ps -e | grep " + application_name + " | awk '{print \$1}' | xargs -I {} gdb --batch --pid={} -ex bt 2>&1 | grep '^#' \""
+    command = "ssh " + host + " \"ps -e | grep " + application_name + " | awk '{print \$1}' | xargs -I '{}' sh -c 'echo Host: " + host + " PID: {}; pstack {}; printf '*%.0s' {1..80}; echo' \""
     f = TemporaryFile()
     p = subprocess.Popen(command, stdout=f, close_fds=False, shell=True)
     jobs.append((p, f))
 
   # Now process the output from each of the jobs
   traces = []
-  trace_regex = re.compile("^#0", re.M | re.S)
   for (p, f) in jobs:
     p.wait()
     f.seek(0)
     output = f.read()
     f.close()
 
-    # Python FAIL - We have to re-glue the tokens we threw away from our split (Perl 1 : Python 0)
-    traces.extend(["#0" + trace for trace in trace_regex.split(output) if len(trace)])
+    # strip blank lines
+    output = os.linesep.join([s for s in output.splitlines() if s])
+
+    traces.extend(splitTraces(output))
 
   return traces
 
 def readTracesFromFile(filename):
-  trace_regex = re.compile("^\**", re.M)
   f = open(filename)
   data = f.read()
-  traces = trace_regex.split(data)
+  return splitTraces(data)
 
-  # Only keep lines beginning with a #
-  throw_away = re.compile("^[^#].*", re.M)
-  traces = [throw_away.sub("", trace) for trace in traces]
+def splitTraces(trace_string):
+  trace_regex = re.compile("^\**\n", re.M)
+  traces = trace_regex.split(trace_string)
+
+#  # Only keep lines beginning with a #
+#  throw_away = re.compile("^[^#].*", re.M)
+#  traces = [throw_away.sub("", trace) for trace in traces]
 
   return traces
 
@@ -64,10 +69,16 @@ def readTracesFromFile(filename):
 def processTraces(traces, num_lines_to_keep):
   unique_stack_traces = {}
   last_lines_regex = re.compile("(?:.*\n){" + str(num_lines_to_keep) + "}\Z", re.M)
+  host_regex = re.compile("^(Host.*)", re.M)
 
   for trace in traces:
     if len(trace) == 0:
       continue
+
+    # Grab the host and PID
+    m = host_regex.search(trace)
+    if m:
+      host_pid = m.group(1)
 
     # If the user requested to save only the last few lines, do that here
     if num_lines_to_keep:
@@ -81,9 +92,9 @@ def processTraces(traces, num_lines_to_keep):
         unique = bt
 
     if unique == '':
-      unique_stack_traces[trace] = 1
+      unique_stack_traces[trace] = [host_pid]
     else:
-      unique_stack_traces[unique] += 1
+      unique_stack_traces[unique].append(host_pid)
 
   return unique_stack_traces
 
@@ -128,23 +139,26 @@ def main():
   cache_filename = application + '.' + job_num + '.cache'
 
   traces = []
-  if os.path.exists(cache_filename):
-    traces = readTracesFromFile(cache_filename)
-  else:
+  if not os.path.exists(cache_filename):
     traces = generateTraces(job_num, application)
 
     # Cache the restuls to a file
     cache_file = open(cache_filename, 'w')
     for trace in traces:
-      cache_file.write("**********************************\n" + trace)
+      cache_file.write(trace + "*"*80 + "\n")
+    cache_file.write("\n")
     cache_file.close()
 
   # Process the traces to collapse them into unique stacks
+  traces = readTracesFromFile(cache_filename)
   unique_stack_traces = processTraces(traces, num_to_keep)
 
   print "Unique Stack Traces"
   for trace, count in unique_stack_traces.iteritems():
-    print "**********************************\nCount: " + str(count) + "\n" + trace
+    print "*"*80 + "\nCount: " + str(len(count)) + "\n"
+    if len(count) < 10:
+      print "\n".join(count)
+    print "\n" + trace
 
 
 if __name__ == '__main__':
