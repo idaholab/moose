@@ -11,11 +11,14 @@
 #ifndef RANKTWOTENSOR_H
 #define RANKTWOTENSOR_H
 
+#include "Moose.h"
+
 // Any requisite includes here
-#include <vector>
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
+
+#include <vector>
 
 class RankTwoTensor
 {

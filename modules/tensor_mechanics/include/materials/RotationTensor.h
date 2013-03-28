@@ -6,6 +6,8 @@
 #ifndef ROTATIONTENSOR_H
 #define ROTATIONTENSOR_H
 
+#include "Moose.h"
+
 // Any requisite includes here
 #include "libmesh/tensor_value.h"
 #include "libmesh/vector_value.h"
