@@ -265,14 +265,16 @@ FlowJunction::addMooseObjects()
   {
     InputParameters params = _factory.getValidParams("PrintScalarVariable");
     params.set<VariableName>("variable") = _p_name;
+    params.set<MooseEnum>("output") = "file";
     params.set<MooseEnum>("execute_on") = execute_options;
-    _sim.addPostprocessor("PrintScalarVariable", "p_junction", params);
+    _sim.addPostprocessor("PrintScalarVariable", genName(name(), "p"), params);
   }
   {
     InputParameters params = _factory.getValidParams("PrintScalarVariable");
     params.set<VariableName>("variable") = _T_name;
     params.set<MooseEnum>("execute_on") = execute_options;
-    _sim.addPostprocessor("PrintScalarVariable", "T_junction", params);
+    params.set<MooseEnum>("output") = "file";
+    _sim.addPostprocessor("PrintScalarVariable", genName(name(), "T"), params);
   }
 }
 
