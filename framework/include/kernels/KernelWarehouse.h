@@ -120,7 +120,7 @@ protected:
   std::vector<Kernel *> _non_time_kernels;
 
   /// Kernels active on a block and in specified time per variable
-  std::map<SubdomainID, std::vector<Kernel *> > _active_var_kernels;
+  std::map<unsigned int, std::vector<Kernel *> > _active_var_kernels;
   /// All instances of kernels
   std::vector<Kernel *> _all_kernels;
   /// Kernels that live everywhere (on the whole domain)

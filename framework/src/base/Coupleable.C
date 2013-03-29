@@ -319,7 +319,11 @@ ScalarCoupleable::ScalarCoupleable(InputParameters & parameters)
       {
         std::string coupled_var_name = vars[i];
         if (problem.hasScalarVariable(coupled_var_name))
-          _coupled_scalar_vars[name].push_back(&problem.getScalarVariable(tid, coupled_var_name));
+        {
+          MooseVariableScalar * scalar_var = &problem.getScalarVariable(tid, coupled_var_name);
+          _coupled_scalar_vars[name].push_back(scalar_var);
+          _coupled_moose_scalar_vars.push_back(scalar_var);
+        }
         else if (problem.hasVariable(coupled_var_name))
           ; // ignore normal variables
         else

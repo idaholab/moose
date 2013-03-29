@@ -129,6 +129,12 @@ public:
   ScalarCoupleable(InputParameters & parameters);
   virtual ~ScalarCoupleable();
 
+  /**
+   * Get the list of coupled scalar variables
+   * @return The list of coupled variables
+   */
+  const std::vector<MooseVariableScalar *> & getCoupledMooseScalarVars() { return _coupled_moose_scalar_vars; }
+
 protected:
   /**
    * Returns true if a variables has been coupled_as name.
@@ -148,6 +154,7 @@ protected:
 protected:
   /// Coupled vars whose values we provide
   std::map<std::string, std::vector<MooseVariableScalar *> > _coupled_scalar_vars;
+  std::vector<MooseVariableScalar *> _coupled_moose_scalar_vars;
 
   MooseVariableScalar *getScalarVar(const std::string & var_name, unsigned int comp);
 };

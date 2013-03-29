@@ -65,20 +65,30 @@ ComputeFullJacobianThread::computeJacobian()
   }
 
   const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
-  for (std::vector<MooseVariableScalar *>::const_iterator jt = scalar_vars.begin(); jt != scalar_vars.end(); jt++)
+  if (scalar_vars.size() > 0)
   {
-    // Do: dvar / dscalar_var
-    MooseVariableScalar & jvar = *(*jt);
-
-    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
-    for (std::vector<Kernel *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
+    // go over nl-variables (non-scalar)
+    const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); it++)
     {
-      Kernel * kernel = *kt;
-      MooseVariable & ivar = kernel->variable();
+      MooseVariable & ivar = *(*it);
       if (ivar.dofIndices().size() > 0)
       {
-        kernel->subProblem().prepareShapes(ivar.index(), _tid);
-        kernel->computeOffDiagJacobianScalar(jvar.index());
+        // for each variable get the list of active kernels
+        const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeVar(ivar.index());
+        for (std::vector<Kernel *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
+        {
+          Kernel * kernel = *kt;
+          // now, get the list of coupled scalar vars and compute their off-diag jacobians
+          const std::vector<MooseVariableScalar *> coupled_scalar_vars = kernel->getCoupledMooseScalarVars();
+          for (std::vector<MooseVariableScalar *>::const_iterator jt = coupled_scalar_vars.begin(); jt != coupled_scalar_vars.end(); jt++)
+          {
+            MooseVariableScalar & jvar = *(*jt);
+            // Do: dvar / dscalar_var
+            if (_sys.hasScalarVariable(jvar.name()))              // want to process only nl-variables (not aux ones)
+              kernel->computeOffDiagJacobianScalar(jvar.index());
+          }
+        }
       }
     }
   }
@@ -111,22 +121,32 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
   }
 
   const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
-  for (std::vector<MooseVariableScalar *>::const_iterator jt = scalar_vars.begin(); jt != scalar_vars.end(); jt++)
+  if (scalar_vars.size() > 0)
   {
-    // Do: dvar / dscalar_var
-    MooseVariableScalar & jvar = *(*jt);
-
-    std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
-    for (std::vector<IntegratedBC *>::iterator kt = bcs.begin(); kt != bcs.end(); ++kt)
+    // go over nl-variables (non-scalar)
+    const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); it++)
     {
-      IntegratedBC * bc = *kt;
-      if (bc->shouldApply())
+      MooseVariable & ivar = *(*it);
+      if (ivar.dofIndices().size() > 0)
       {
-        MooseVariable & ivar = bc->variable();
-        if (ivar.dofIndices().size() > 0)
+        // for each variable get the list of active kernels
+        std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
+        for (std::vector<IntegratedBC *>::iterator kt = bcs.begin(); kt != bcs.end(); ++kt)
         {
-          bc->subProblem().prepareFaceShapes(ivar.index(), _tid);
-          bc->computeJacobianBlockScalar(jvar.index());
+          IntegratedBC * bc = *kt;
+          if (bc->variable().index() == ivar.index())
+          {
+            // now, get the list of coupled scalar vars and compute their off-diag jacobians
+            const std::vector<MooseVariableScalar *> coupled_scalar_vars = bc->getCoupledMooseScalarVars();
+            for (std::vector<MooseVariableScalar *>::const_iterator jt = coupled_scalar_vars.begin(); jt != coupled_scalar_vars.end(); jt++)
+            {
+              MooseVariableScalar & jvar = *(*jt);
+              // Do: dvar / dscalar_var
+              if (_sys.hasScalarVariable(jvar.name()))              // want to process only nl-variables (not aux ones)
+                bc->computeJacobianBlockScalar(jvar.index());
+            }
+          }
         }
       }
     }
