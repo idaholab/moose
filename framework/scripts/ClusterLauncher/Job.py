@@ -10,7 +10,7 @@ class Job(object):
   def getValidParams():
     params = InputParameters()
     params.addRequiredParam('type', "The type of test of Tester to create for this test.")
-    params.addParam('template_script', MOOSE_DIR + '/scripts/cluster_launcher/pbs_submit.sh', "The template job script to use.")
+    params.addParam('template_script', MOOSE_DIR + '/scripts/ClusterLauncher/pbs_submit.sh', "The template job script to use.")
     return params
   getValidParams = staticmethod(getValidParams)
 

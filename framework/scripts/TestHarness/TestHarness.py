@@ -656,29 +656,7 @@ class TestHarness:
 
   ### Parameter Dump ###
   def printDump(self):
-    print "[Tests]"
-
-    for name, tester in self.testers.iteritems():
-      print "  [./" + name + "]"
-
-      params = self.factory.getValidParams(name)
-
-      for key in params.desc:
-        required = 'No'
-        if params.isRequired(key):
-          required = 'Yes'
-        default = ''
-        if params.isValid(key):
-	  the_param = params[key]
-	  if type(the_param) == list:
-            default = "'" + " ".join(the_param) + "'"
-	  else:
-	    default = str(the_param)
-
-        print "%4s%-30s = %-30s # %s" % ('', key, default, params.getDescription(key))
-      print "  [../]\n"
-    print "[]"
-
+    self.factory.printDump("Tests")
     sys.exit(0)
 
   def printYaml(self):

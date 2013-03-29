@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os, sys, re, shutil
+from optparse import OptionParser, OptionGroup, Values
 
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
@@ -14,15 +15,14 @@ from Factory import Factory
 from PBSJob import PBSJob
 
 class ClusterLauncher:
-  def __init__(self, template_dir):
+  def __init__(self):
     self.factory = Factory()
     self.job_list = 'job_list'
-    self.template_dir = template_dir
 
-  def parseJobsFile(self):
+  def parseJobsFile(self, template_dir):
     jobs = []
     # We expect the job list to be named "job_list"
-    filename = self.template_dir + self.job_list
+    filename = template_dir + self.job_list
 
     try:
       data = ParseGetPot.readInputFile(filename)
@@ -71,15 +71,15 @@ class ClusterLauncher:
         jobs.append(params)
     return jobs
 
-  def createAndLaunchJob(self, specs):
-    if os.path.exists(self.template_dir + specs['job_name']):
-      print "Error: Job directory", self.template_dir + specs['job_name'], "already exists"
+  def createAndLaunchJob(self, template_dir, specs):
+    if os.path.exists(template_dir + specs['job_name']):
+      print "Error: Job directory", template_dir + specs['job_name'], "already exists"
       sys.exit(1)
 
     # Make directory
-    os.mkdir(self.template_dir + specs['job_name'])
+    os.mkdir(template_dir + specs['job_name'])
     saved_cwd = os.getcwd()
-    os.chdir(self.template_dir + specs['job_name'])
+    os.chdir(template_dir + specs['job_name'])
 
     # Copy files
     for file in os.listdir('../'):
@@ -100,25 +100,36 @@ class ClusterLauncher:
   def registerJobType(self, type, name):
     self.factory.register(type, name)
 
-  def run(self):
-    jobs = self.parseJobsFile()
+  ### Parameter Dump ###
+  def printDump(self):
+    self.factory.printDump("Jobs")
+    sys.exit(0)
+
+  def run(self, template_dir):
+    jobs = self.parseJobsFile(template_dir)
 
     for job in jobs:
-      self.createAndLaunchJob(job)
+      self.createAndLaunchJob(template_dir, job)
 
 
 ########################################################
 def main():
-  if len(sys.argv) != 2:
-    print "Usage:", sys.argv[0], " <template directory>"
+  parser = OptionParser(usage='Usage: %prog [options] <template directory>')
+  parser.add_option("--dump", action="store_true", dest="dump", default=False, help="Dump the parameters for the testers in GetPot Format")
+  (options, dir) = parser.parse_args()
+
+  cluster_launcher = ClusterLauncher()
+  cluster_launcher.registerJobType(PBSJob, 'PBSJob')
+
+  if options.dump:
+    cluster_launcher.printDump()
+
+  if not dir:
+    parser.print_help()
     sys.exit(1)
 
-  template_dir = os.path.abspath(sys.argv[1]) + '/'
-
-  cluster_launcher = ClusterLauncher(template_dir)
-  cluster_launcher.registerJobType(PBSJob, 'PBSJob')
-  cluster_launcher.run()
-
+  template_dir = os.path.abspath(dir[0]) + '/'
+  cluster_launcher.run(template_dir)
 
 if __name__ == '__main__':
   main()
