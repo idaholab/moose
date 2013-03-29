@@ -22,7 +22,7 @@ if os.environ.has_key("MOOSE_DIR"):
 elif os.environ.has_key("MOOSE_DEV"):
   MOOSE_DIR = pathname + '/../devel/moose'
 
-sys.path.append(MOOSE_DIR + '/tests')
+sys.path.append(MOOSE_DIR + '/scripts/common')
 
 from optparse import OptionParser
 

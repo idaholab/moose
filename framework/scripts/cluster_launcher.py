@@ -1,100 +1,124 @@
 #!/usr/bin/env python
-import os, sys, shutil, subprocess
+import os, sys, re, shutil
 
-#### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
 else:
   MOOSE_DIR = os.path.abspath(os.path.dirname(sys.argv[0])) + '/..'
-sys.path.append(MOOSE_DIR + '/tests')
+sys.path.append(MOOSE_DIR + '/scripts/common')
+sys.path.append(MOOSE_DIR + '/scripts/cluster_launcher')
+
 import ParseGetPot
+from InputParameters import InputParameters
+from Factory import Factory
+from PBSJob import PBSJob
 
-JOB_LIST = 'job_list'
+class ClusterLauncher:
+  def __init__(self, template_dir):
+    self.factory = Factory()
+    self.job_list = 'job_list'
+    self.template_dir = template_dir
 
-def parseJobsFile(template_dir):
-  jobs = []
-  # We expect the job list to be named "job_list"
-  filename = template_dir + JOB_LIST
+  def parseJobsFile(self):
+    jobs = []
+    # We expect the job list to be named "job_list"
+    filename = self.template_dir + self.job_list
 
-  try:
-    data = ParseGetPot.readInputFile(filename)
-  except:        # ParseGetPot class
-    print "Parse Error: " + filename
+    try:
+      data = ParseGetPot.readInputFile(filename)
+    except:        # ParseGetPot class
+      print "Parse Error: " + filename
+      return jobs
+
+    # We expect our root node to be called "Jobs"
+    if 'Jobs' in data.children:
+      jobs_node = data.children['Jobs']
+
+      for jobname, job_node in jobs_node.children.iteritems():
+        # First retrieve the type so we can get the valid params
+        if 'type' not in job_node.params:
+          print "Type missing in " + filename
+          sys.exit(1)
+
+        params = self.factory.getValidParams(job_node.params['type'])
+
+        params['job_name'] = jobname
+
+        # Now update all the base level keys
+        params_parsed = set()
+        params_ignored = set()
+        for key, value in job_node.params.iteritems():
+          params_parsed.add(key)
+          if key in params:
+            if params.type(key) == list:
+              params[key] = value.split(' ')
+            else:
+              if re.match('".*"', value):  # Strip quotes
+                params[key] = value[1:-1]
+              else:
+                params[key] = value
+          else:
+            params_ignored.add(key)
+
+        # Make sure that all required parameters are supplied
+        required_params_missing = params.required_keys() - params_parsed
+        if len(required_params_missing):
+          print 'Required Missing Parameter(s): ', required_params_missing
+          sys.exit(1)
+        if len(params_ignored):
+          print 'Ignored Parameter(s): ', params_ignored
+
+        jobs.append(params)
     return jobs
 
-  # We expect our root node to be called "Jobs"
-  if 'Jobs' in data.children:
-    jobs_node = data.children['Jobs']
+  def createAndLaunchJob(self, specs):
+    if os.path.exists(self.template_dir + specs['job_name']):
+      print "Error: Job directory", self.template_dir + specs['job_name'], "already exists"
+      sys.exit(1)
 
-    for jobname, job_node in jobs_node.children.iteritems():
-      job = {}
-      job['job_name'] = jobname
-      for key, value in job_node.params.iteritems():
-        job[key] = value
+    # Make directory
+    os.mkdir(self.template_dir + specs['job_name'])
+    saved_cwd = os.getcwd()
+    os.chdir(self.template_dir + specs['job_name'])
 
-      jobs.append(job)
-  return jobs
+    # Copy files
+    for file in os.listdir('../'):
+      if os.path.isfile('../' + file) and file != self.job_list:
+        shutil.copy('../' + file, '.')
 
-def createAndLaunchJob(template_dir, specs):
-  if os.path.exists(template_dir + specs['job_name']):
-    print "Error: Job directory", template_dir + specs['job_name'], "already exists"
-    sys.exit(1)
+    # Files have been copied so turn the remaining work over to the Job instance
+    job_instance = self.factory.create(specs['type'], specs)
 
-  # Make directory
-  os.mkdir(template_dir + specs['job_name'])
-  saved_cwd = os.getcwd()
-  os.chdir(template_dir + specs['job_name'])
+    # Prepare the Job Script
+    job_instance.prepareJobScript()
 
-  # Copy files
-  for file in os.listdir('../'):
-    if os.path.isfile('../' + file) and file != JOB_LIST:
-      shutil.copy('../' + file, '.')
+    # Launch it!
+    job_instance.launch()
 
-  # Populate variable replacements
-  job_name = specs['job_name']
-  nodes = specs['nodes']
-  mpi_procs = specs['mpi_procs']
-  threads = specs['threads']
+    os.chdir(saved_cwd)
 
-  cpus_per_node = str(int(mpi_procs) * int(threads))
-  total_cpus = str(int(cpus_per_node) * int(nodes))
+  def registerJobType(self, type, name):
+    self.factory.register(type, name)
 
-  # Look for the shell script and modify appropriately
-  for file in os.listdir('.'):
-    if os.path.isfile(file) and file[-3:] == '.sh':
-      f = open(file, 'r+')
+  def run(self):
+    jobs = self.parseJobsFile()
 
-      # Replace variables in the shell file
-      content = f.read()
-      content = content.replace('<NODES>', nodes)
-      content = content.replace('<MPI_PROCS>', mpi_procs)
-      content = content.replace('<THREADS>', threads)
-      content = content.replace('<CPUS_PER_NODE>', cpus_per_node)
-      content = content.replace('<TOTAL_CPUS>', total_cpus)
-      content = content.replace('<JOB_NAME>', job_name)
-
-      # Write the contents back to the file
-      f.seek(0)
-      f.write(content)
-      f.truncate()
-      f.close()
-
-      # Finally launch the job
-      subprocess.Popen('qsub ' + file, shell=True)
-
-  os.chdir(saved_cwd)
+    for job in jobs:
+      self.createAndLaunchJob(job)
 
 
+########################################################
 def main():
   if len(sys.argv) != 2:
     print "Usage:", sys.argv[0], " <template directory>"
     sys.exit(1)
 
   template_dir = os.path.abspath(sys.argv[1]) + '/'
-  jobs = parseJobsFile(template_dir)
 
-  for job in jobs:
-    createAndLaunchJob(template_dir, job)
+  cluster_launcher = ClusterLauncher(template_dir)
+  cluster_launcher.registerJobType(PBSJob, 'PBSJob')
+  cluster_launcher.run()
+
 
 if __name__ == '__main__':
   main()

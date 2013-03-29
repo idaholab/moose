@@ -8,6 +8,7 @@ from RunParallel import RunParallel
 from CSVDiffer import CSVDiffer
 from Tester import Tester
 from InputParameters import InputParameters
+from Factory import Factory
 
 from optparse import OptionParser, OptionGroup, Values
 #from optparse import OptionG
@@ -15,7 +16,7 @@ from timeit import default_timer as clock
 
 class TestHarness:
   def __init__(self, argv, app_name, moose_dir):
-    self.testers = {}   # The registered 'Tester' types
+    self.factory = Factory()
     self.input_file_name = 'tests'  # This is the file we look for, when looking for test specifications.
     self.test_table = []
     self.num_passed = 0
@@ -72,7 +73,7 @@ class TestHarness:
               if self.checkIfRunTest(test):
 
                 # Build the requested Tester object and run
-                tester = self.create(test.valid[TYPE], test)
+                tester = self.factory.create(test[TYPE], test)
 
                 command = tester.getCommand(self.options)
 
@@ -81,7 +82,7 @@ class TestHarness:
                 # This method will block when the maximum allowed parallel processes are running
                 self.runner.run(tester, command)
               else: # This job is skipped - notify the runner
-                self.runner.jobSkipped(test.valid[TEST_NAME])
+                self.runner.jobSkipped(test[TEST_NAME])
 
             os.chdir(saved_cwd)
             sys.path.pop()
@@ -125,7 +126,7 @@ class TestHarness:
           print "Type missing in " + test_dir + filename
           sys.exit(1)
 
-        params = self.getValidParams(test_node.params[TYPE])
+        params = self.factory.getValidParams(test_node.params[TYPE])
 
         # Now update all the base level keys
         params_parsed = set()
@@ -648,17 +649,8 @@ class TestHarness:
     params.valid = test
     return params
 
-
-  #### Factory Methods
   def registerTester(self, type, name):
-    self.testers[name] = type
-
-  def getValidParams(self, type):
-    return self.testers[type].getValidParams()
-
-  def create(self, type, specs):
-    return self.testers[type]('exodiff', specs)
-  ###
+    self.factory.register(type, name)
 
   ### Parameter Dump ###
   def printDump(self):
@@ -667,7 +659,7 @@ class TestHarness:
     for name, tester in self.testers.iteritems():
       print "  [./" + name + "]"
 
-      params = self.getValidParams(name)
+      params = self.factory.getValidParams(name)
 
       for key in params.desc:
         required = 'No'
@@ -701,7 +693,7 @@ class TestHarness:
       print "    type:"
       print "    parameters:"
 
-      params = self.getValidParams(name)
+      params = self.factory.getValidParams(name)
       for key in params.valid:
         required = 'No'
         if params.isRequired(key):

@@ -2,18 +2,21 @@ class InputParameters:
   def __init__(self):
     self.valid = {}
     self.desc = {}
+    self.substitute = {}
     self.required = set()
 
   def addRequiredParam(self, name, *args):
-    if len(args) == 2:
-      self.valid[name] = args[0]
-    self.desc[name] = args[-1]
     self.required.add(name)
+    self.addParam(name, *args)
 
   def addParam(self, name, *args):
     if len(args) == 2:
       self.valid[name] = args[0]
     self.desc[name] = args[-1]
+
+  def addStringSubParam(self, name, substitution, *args):
+    self.substitute[name] = substitution
+    self.addParam(name, *args)
 
   def isValid(self, name):
     if name in self.valid and self.valid[name] != None and self.valid[name] != []:
@@ -41,6 +44,12 @@ class InputParameters:
 
   def required_keys(self):
     return self.required
+
+  def valid_keys(self):
+    return self.valid
+
+  def substitute_keys(self):
+    return self.substitute
 
   def isRequired(self, key):
     return key in self.required

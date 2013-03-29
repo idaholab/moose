@@ -5,6 +5,12 @@ module_path = os.path.dirname(__file__)
 for subdir in subdirs:
   sys.path.append(module_path + '/' + subdir)
 
+if os.environ.has_key("MOOSE_DIR"):
+  MOOSE_DIR = os.environ['MOOSE_DIR']
+else:
+  MOOSE_DIR = os.path.abspath(module_path) + '/..'
+sys.path.append(MOOSE_DIR + '/scripts/common')
+
 from TestTimer import TestTimer
 from TestHarness import TestHarness
 
