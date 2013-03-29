@@ -301,7 +301,7 @@ TransientAdaptive::execute()
   {
     status = _time_stepper->step(&ftime);
     _fe_problem.getNonlinearSystem().update();
-    _fe_problem.getNonlinearSystem().set_solution(*_fe_problem.getNonlinearSystem().sys().current_local_solution);
+    _fe_problem.getNonlinearSystem().setSolution(*_fe_problem.getNonlinearSystem().sys().current_local_solution);
     postSolve();
     _fe_problem.onTimestepEnd();
     _fe_problem.computeUserObjects();

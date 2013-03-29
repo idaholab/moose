@@ -50,11 +50,11 @@ public:
   void prepare();
 
   void prepareNeighbor();
-  void prepare_aux();
-  void reinit_node();
-  void reinit_nodeNeighbor();
-  void reinit_aux();
-  void reinit_aux_neighbor();
+  void prepareAux();
+  void reinitNode();
+  void reinitNodeNeighbor();
+  void reinitAux();
+  void reinitAuxNeighbor();
 
   void reinitNodes(const std::vector<unsigned int> & nodes);
 

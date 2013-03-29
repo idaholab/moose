@@ -46,7 +46,7 @@ ComputeElemAuxVarsThread::subdomainChanged()
   for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
   {
     MooseVariable * var = it->second;
-    var->prepare_aux();
+    var->prepareAux();
   }
 
   // TODO: No subdomain setup for block elemental aux-kernels?

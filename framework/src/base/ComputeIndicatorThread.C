@@ -85,7 +85,7 @@ ComputeIndicatorThread::onElement(const Elem *elem)
   for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
   {
     MooseVariable * var = it->second;
-    var->prepare_aux();
+    var->prepareAux();
   }
 
   _fe_problem.prepare(elem, _tid);
@@ -145,7 +145,7 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
     for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
     {
       MooseVariable * var = it->second;
-      var->prepare_aux();
+      var->prepareAux();
     }
 
     const std::vector<Indicator *> & indicators = _indicator_whs[_tid].activeInternalSideIndicators();

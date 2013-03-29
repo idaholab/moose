@@ -57,7 +57,7 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
       for (std::map<std::string, MooseVariable *>::iterator it = _sys._elem_vars[_tid].begin(); it != _sys._elem_vars[_tid].end(); ++it)
       {
         MooseVariable * var = it->second;
-        var->prepare_aux();
+        var->prepareAux();
       }
 
       if (_auxs[_tid].elementalBCs(boundary_id).size() > 0)

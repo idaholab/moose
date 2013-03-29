@@ -1905,7 +1905,7 @@ NonlinearSystem::serializeSolution()
  }
 
 void
-NonlinearSystem::set_solution(const NumericVector<Number> & soln)
+NonlinearSystem::setSolution(const NumericVector<Number> & soln)
 {
   _current_solution = &soln;
 
@@ -1986,7 +1986,7 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
   std::set<SubdomainID> input_subdomains;
   std::set<std::string> kernel_variables;
 
-  bool global_kernels_exist = _kernels[0].subdomains_covered(input_subdomains, kernel_variables);
+  bool global_kernels_exist = _kernels[0].subdomainsCovered(input_subdomains, kernel_variables);
   if (!global_kernels_exist)
   {
     std::set<SubdomainID> difference;

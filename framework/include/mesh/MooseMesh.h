@@ -358,8 +358,15 @@ public:
 
 protected:
   /// Convienence enums
-  enum {X=0, Y, Z};
-  enum {MIN=0, MAX};
+  enum {
+    X = 0,
+    Y,
+    Z
+  };
+  enum {
+    MIN = 0,
+    MAX
+  };
 
   /// The level of uniform refinement requested (set to zero if AMR is disabled)
   unsigned int _uniform_refine_level;

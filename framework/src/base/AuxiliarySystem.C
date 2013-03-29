@@ -217,7 +217,7 @@ AuxiliarySystem::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
   for (std::map<std::string, MooseVariable *>::iterator it = _elem_vars[tid].begin(); it != _elem_vars[tid].end(); ++it)
   {
     MooseVariable *var = it->second;
-    var->reinit_aux();
+    var->reinitAux();
     var->computeElemValues();
   }
 }
@@ -234,8 +234,8 @@ AuxiliarySystem::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, Bo
   for (std::map<std::string, MooseVariable *>::iterator it = _elem_vars[tid].begin(); it != _elem_vars[tid].end(); ++it)
   {
     MooseVariable *var = it->second;
-    var->reinit_aux();
-    var->reinit_aux_neighbor();
+    var->reinitAux();
+    var->reinitAuxNeighbor();
     var->computeElemValuesFace();
   }
 }

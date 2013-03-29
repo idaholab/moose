@@ -65,7 +65,7 @@ ComputeMarkerThread::subdomainChanged()
   for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
   {
     MooseVariable * var = it->second;
-    var->prepare_aux();
+    var->prepareAux();
   }
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);

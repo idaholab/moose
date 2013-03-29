@@ -145,7 +145,10 @@ protected:
   std::set<std::string> _depend_props;
   std::set<std::string> _supplied_props;
 
-  enum QP_Data_Type { CURR, PREV };
+  enum QP_Data_Type {
+    CURR,
+    PREV
+  };
 
   /**
    * Initialize stateful properties at quadrature points.  Note when using this function you only need to address

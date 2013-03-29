@@ -299,7 +299,7 @@ SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
     MooseVariable *var = *it;
     if (var->isNodal())
     {
-      var->reinit_node();
+      var->reinitNode();
       var->computeNodalValues();
     }
   }
@@ -314,7 +314,7 @@ SystemBase::reinitNodeFace(const Node * /*node*/, BoundaryID /*bnd_id*/, THREAD_
     MooseVariable *var = *it;
     if (var->isNodal())
     {
-      var->reinit_node();
+      var->reinitNode();
       var->computeNodalValues();
     }
   }
@@ -329,7 +329,7 @@ SystemBase::reinitNodeNeighbor(const Node * /*node*/, THREAD_ID tid)
     MooseVariable *var = *it;
     if (var->isNodal())
     {
-      var->reinit_nodeNeighbor();
+      var->reinitNodeNeighbor();
       var->computeNodalNeighborValues();
     }
   }

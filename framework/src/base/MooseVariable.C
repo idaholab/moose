@@ -160,14 +160,14 @@ MooseVariable::prepareNeighbor()
 }
 
 void
-MooseVariable::prepare_aux()
+MooseVariable::prepareAux()
 {
   _has_nodal_value = false;
   _has_nodal_value_neighbor = false;
 }
 
 void
-MooseVariable::reinit_node()
+MooseVariable::reinitNode()
 {
   if (_node->n_dofs(_sys.number(), _var_num) > 0)
   {
@@ -181,7 +181,7 @@ MooseVariable::reinit_node()
 }
 
 void
-MooseVariable::reinit_nodeNeighbor()
+MooseVariable::reinitNodeNeighbor()
 {
   if (_node_neighbor->n_dofs(_sys.number(), _var_num) > 0)
   {
@@ -196,7 +196,7 @@ MooseVariable::reinit_nodeNeighbor()
 
 
 void
-MooseVariable::reinit_aux()
+MooseVariable::reinitAux()
 {
   _dof_map.dof_indices (_elem, _dof_indices, _var_num);
   if (_elem->n_dofs(_sys.number(), _var_num) > 0)
@@ -214,7 +214,7 @@ MooseVariable::reinit_aux()
 }
 
 void
-MooseVariable::reinit_aux_neighbor()
+MooseVariable::reinitAuxNeighbor()
 {
   if(_neighbor)
   {

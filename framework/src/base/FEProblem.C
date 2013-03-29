@@ -371,7 +371,7 @@ void FEProblem::initialSetup()
   Moose::setup_perf_log.pop("initial adaptivity","Setup");
 #endif //LIBMESH_ENABLE_AMR
 
-  _nl.set_solution(*(_nl.sys().current_local_solution.get()));
+  _nl.setSolution(*(_nl.sys().current_local_solution.get()));
 
   Moose::setup_perf_log.push("Initial updateGeomSearch()","Setup");
   //Update the geometric searches (has to be called after the problem is all set up)
@@ -2703,7 +2703,7 @@ FEProblem::computeTransientImplicitJacobian(Real time, const NumericVector<Numbe
 void
 FEProblem::computeResidualType( const NumericVector<Number>& soln, NumericVector<Number>& residual, Moose::KernelType type)
 {
-  _nl.set_solution(soln);
+  _nl.setSolution(soln);
 
   _nl.zeroVariablesForResidual();
   _aux.zeroVariablesForResidual();
@@ -2744,7 +2744,7 @@ FEProblem::computeResidualType( const NumericVector<Number>& soln, NumericVector
 void
 FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
 {
-  _nl.set_solution(soln);
+  _nl.setSolution(soln);
 
   _nl.zeroVariablesForJacobian();
   _aux.zeroVariablesForJacobian();
@@ -2865,7 +2865,7 @@ FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector
     // Save pointer to the current solution
     const NumericVector<Number>* _saved_current_solution = _nl.currentSolution();
 
-    _nl.set_solution(soln);
+    _nl.setSolution(soln);
     // For now, do not re-compute auxiliary variables.  Doing so allows a wild solution increment
     //   to get to the material models, which may not be able to cope with drastically different
     //   values.  Once more complete dependency checking is in place, auxiliary variables (and
@@ -2874,7 +2874,7 @@ FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector
     damping = _nl.computeDamping(update);
 
     // restore saved solution
-    _nl.set_solution(*_saved_current_solution);
+    _nl.setSolution(*_saved_current_solution);
   }
 
   Moose::perf_log.pop("compute_dampers()","Solve");

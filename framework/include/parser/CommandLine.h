@@ -32,7 +32,11 @@ class CommandLine
 {
 public:
   /// Type of argument for a given option
-  enum ARGUMENT { NONE, OPTIONAL, REQUIRED };
+  enum ARGUMENT {
+    NONE,
+    OPTIONAL,
+    REQUIRED
+  };
 
   struct Option
   {

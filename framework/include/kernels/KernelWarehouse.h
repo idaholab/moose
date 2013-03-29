@@ -108,7 +108,7 @@ public:
    * @param unique_variable_count A writeable reference to a count of variables containing one or kernels
    * @return bool A Boolean indicating whether all subdomains are covered by kernels
    */
-  bool subdomains_covered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variable_count) const;
+  bool subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variable_count) const;
 
 protected:
   /// Kernels active on a block and in specified time

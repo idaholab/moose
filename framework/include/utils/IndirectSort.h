@@ -29,7 +29,7 @@ namespace Moose
 // the beginning of the container whose values are to be indirectly
 // sorted.  This class is not to be used directly by the user.
 template <class RandomAccessIterator,
-	  class UserComparisonFunctor>
+          class UserComparisonFunctor>
 struct indirect_comparator
 {
   // ctor
@@ -57,8 +57,8 @@ private:
 // Should not be called directly by users...
 template <class RandomAccessIterator>
 void initialize_indirect_sort(RandomAccessIterator beg,
-			      RandomAccessIterator end,
-			      std::vector<size_t>& b)
+                              RandomAccessIterator end,
+                              std::vector<size_t>& b)
 {
   // enough storage for all the indices
   b.resize(std::distance(beg,end));
@@ -76,8 +76,8 @@ void initialize_indirect_sort(RandomAccessIterator beg,
 // std::less<T> for the comparisons.
 template <class RandomAccessIterator>
 void indirectSort(RandomAccessIterator beg,
-		  RandomAccessIterator end,
-		  std::vector<size_t>& b)
+                  RandomAccessIterator end,
+                  std::vector<size_t>& b)
 {
   // Space in b
   initialize_indirect_sort(beg, end, b);

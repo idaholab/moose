@@ -360,7 +360,7 @@ void TimeScheme::computeLittlef(const NumericVector<Number> & bigF, NumericVecto
     _dt = dtold;
     _dt_old = _time_stack.back().getDt();
   }
-  _nl->set_solution(bigF);// use old_solution for computing with correct solution vector
+  _nl->setSolution(bigF);// use old_solution for computing with correct solution vector
   littlef.close();
 
   _nl->_fe_problem.computeResidualType( bigF, littlef, Moose::KT_NONTIME);
@@ -378,7 +378,7 @@ void TimeScheme::computeLittlef(const NumericVector<Number> & bigF, NumericVecto
     mooseError("Reciprocal not available");
 #endif
   }
-  _nl->set_solution(*current_solution);
+  _nl->setSolution(*current_solution);
   _t = currenttime;
   if(time != -1)
   {

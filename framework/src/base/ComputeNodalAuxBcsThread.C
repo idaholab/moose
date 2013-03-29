@@ -54,7 +54,7 @@ ComputeNodalAuxBcsThread::operator() (const ConstBndNodeRange & range)
     for (std::map<std::string, MooseVariable *>::iterator it = _sys._nodal_vars[_tid].begin(); it != _sys._nodal_vars[_tid].end(); ++it)
     {
       MooseVariable * var = it->second;
-      var->prepare_aux();
+      var->prepareAux();
     }
 
     if(_auxs[_tid].activeBCs(boundary_id).size() > 0)

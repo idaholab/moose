@@ -240,7 +240,7 @@ public:
    */
   virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
 
-  virtual void set_solution(const NumericVector<Number> & soln);
+  virtual void setSolution(const NumericVector<Number> & soln);
 
   /**
    * Set transient term used by residual and Jacobian evaluation.
