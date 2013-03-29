@@ -44,6 +44,13 @@
 #include "NSPenalizedNormalFlowBC.h"
 #include "NSMomentumInviscidNoPressureImplicitFlowBC.h"
 
+// Incompressible
+#include "INSMass.h"
+#include "INSMomentumTimeDerivative.h"
+#include "INSMomentum.h"
+#include "INSTemperatureTimeDerivative.h"
+#include "INSTemperature.h"
+
 void
 Elk::NavierStokes::registerObjects(Factory & factory)
 {
@@ -88,4 +95,11 @@ Elk::NavierStokes::registerObjects(Factory & factory)
   registerBoundaryCondition(NSEnergyWeakStagnationBC);
   registerBoundaryCondition(NSPenalizedNormalFlowBC);
   registerBoundaryCondition(NSMomentumInviscidNoPressureImplicitFlowBC);
+
+  // Incompressible
+  registerKernel(INSMass);
+  registerKernel(INSMomentumTimeDerivative);
+  registerKernel(INSMomentum);
+  registerKernel(INSTemperatureTimeDerivative);
+  registerKernel(INSTemperature);
 }
