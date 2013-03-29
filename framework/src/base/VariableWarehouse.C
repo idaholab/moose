@@ -76,7 +76,7 @@ VariableWarehouse::getVariable(const std::string & var_name)
 MooseVariableBase *
 VariableWarehouse::getVariable(unsigned int var_number)
 {
-  if (var_number >= 0 && var_number < _all.size())
+  if (var_number < _all.size())
     return _all[var_number];
   else
     return NULL;
