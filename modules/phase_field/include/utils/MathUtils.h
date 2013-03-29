@@ -1,6 +1,8 @@
 #ifndef MATHUTILS_H
 #define MATHUTILS_H
 
+#include "Moose.h"
+
 #include "libmesh/libmesh.h"
 
 namespace MathUtils 
