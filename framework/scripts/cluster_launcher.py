@@ -6,7 +6,7 @@ if os.environ.has_key("MOOSE_DIR"):
 else:
   MOOSE_DIR = os.path.abspath(os.path.dirname(sys.argv[0])) + '/..'
 sys.path.append(MOOSE_DIR + '/scripts/common')
-sys.path.append(MOOSE_DIR + '/scripts/cluster_launcher')
+sys.path.append(MOOSE_DIR + '/scripts/ClusterLauncher')
 
 import ParseGetPot
 from InputParameters import InputParameters

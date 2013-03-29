@@ -14,7 +14,8 @@ elif os.environ.has_key("MOOSE_DEV"):
   MOOSE_DIR = '../devel/moose'
 
 # Import the TestHarness and Helper functions from the MOOSE toolkit
-sys.path.append(MOOSE_DIR + '/tests')
+sys.path.append(MOOSE_DIR + '/scripts/common')
+sys.path.append(MOOSE_DIR + '/scripts/TestHarness')
 import tools
 
 # create an instance of the test harness passing in the main arg vector
