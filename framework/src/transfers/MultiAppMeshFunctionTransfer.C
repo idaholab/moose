@@ -32,19 +32,23 @@ InputParameters validParams<MultiAppMeshFunctionTransfer>()
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
+  params.addParam<bool>("error_on_miss", false, "Whether or not to error in the case that a target point is not found in the source domain.");
   return params;
 }
 
 MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const std::string & name, InputParameters parameters) :
     MultiAppTransfer(name, parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
-    _from_var_name(getParam<VariableName>("source_variable"))
+    _from_var_name(getParam<VariableName>("source_variable")),
+    _error_on_miss(getParam<bool>("error_on_miss"))
 {
 }
 
 void
 MultiAppMeshFunctionTransfer::execute()
 {
+  std::cout<<"Beginning MeshFunctionTransfer!"<<std::endl;
+
   switch(_direction)
   {
     case TO_MULTIAPP:
@@ -70,7 +74,8 @@ MultiAppMeshFunctionTransfer::execute()
       from_sys.solution->localize(*serialized_solution);
 
       MeshFunction from_func(from_es, *serialized_solution, from_sys.get_dof_map(), from_var_num);
-      from_func.init();
+      from_func.init(Trees::ELEMENTS);
+      from_func.enable_out_of_mesh_mode(NOTFOUND);
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
@@ -111,7 +116,10 @@ MultiAppMeshFunctionTransfer::execute()
                 // Swap again
                 swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
-                solution.set(dof, from_value);
+                if(from_value != NOTFOUND)
+                  solution.set(dof, from_value);
+                else if(_error_on_miss)
+                  mooseError("Point not found! " << *node+_multi_app->position(i) << std::endl);
               }
             }
           }
@@ -137,7 +145,10 @@ MultiAppMeshFunctionTransfer::execute()
                 // Swap again
                 swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
-                solution.set(dof, from_value);
+                if(from_value != NOTFOUND)
+                  solution.set(dof, from_value);
+                else if(_error_on_miss)
+                  mooseError("Point not found! " << centroid+_multi_app->position(i) << std::endl);
               }
             }
           }
@@ -204,7 +215,7 @@ MultiAppMeshFunctionTransfer::execute()
         Point app_position = _multi_app->position(i);
 
         MeshFunction from_func(from_es, *from_solution, from_sys.get_dof_map(), from_var_num);
-        from_func.init();
+        from_func.init(Trees::ELEMENTS);
         from_func.enable_out_of_mesh_mode(NOTFOUND);
         Moose::swapLibMeshComm(swapped);
 
@@ -231,6 +242,8 @@ MultiAppMeshFunctionTransfer::execute()
 
                 if(from_value != NOTFOUND)
                   to_solution->set(dof, from_value);
+                else if(_error_on_miss)
+                  mooseError("Point not found! " << *node-app_position <<std::endl);
               }
             }
           }
@@ -260,6 +273,8 @@ MultiAppMeshFunctionTransfer::execute()
 
                 if(from_value != NOTFOUND)
                   to_solution->set(dof, from_value);
+                else if(_error_on_miss)
+                  mooseError("Point not found! " << centroid-app_position << std::endl);
               }
             }
           }
@@ -272,4 +287,7 @@ MultiAppMeshFunctionTransfer::execute()
       break;
     }
   }
+
+  std::cout<<"Finished MeshFunctionTransfer!"<<std::endl;
 }
+

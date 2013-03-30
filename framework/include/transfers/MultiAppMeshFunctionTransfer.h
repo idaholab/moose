@@ -39,6 +39,7 @@ public:
 protected:
   AuxVariableName _to_var_name;
   VariableName _from_var_name;
+  bool _error_on_miss;
 };
 
 #endif /* MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H */

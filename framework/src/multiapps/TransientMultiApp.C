@@ -77,6 +77,8 @@ TransientMultiApp::solveStep()
   {
     Transient * ex = _transient_executioners[i];
     ex->takeStep(_dt);
+    if(!ex->lastSolveConverged())
+      mooseWarning(_name<<_first_local_app+i<<" failed to converge!"<<std::endl);
     ex->endStep();
   }
 

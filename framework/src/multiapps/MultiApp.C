@@ -288,8 +288,6 @@ MultiApp::buildComm()
     else
       _first_local_app = _my_num_apps * _orig_rank;
 
-    sleep(_orig_rank);
-
     return;
   }
 

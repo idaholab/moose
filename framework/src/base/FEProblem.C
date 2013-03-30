@@ -2327,6 +2327,10 @@ FEProblem::execMultiApps(ExecFlagType type)
     for(unsigned int i=0; i<multi_apps.size(); i++)
       multi_apps[i]->solveStep();
 
+    std::cout<<"--Waiting For Other Processors To Finish--"<<std::endl;
+
+    Parallel::barrier();
+
     std::cout<<"--Finished Executing MultiApps--"<<std::endl;
   }
 
@@ -2335,8 +2339,15 @@ FEProblem::execMultiApps(ExecFlagType type)
   {
     std::vector<Transfer *> transfers = _from_multi_app_transfers(type)[0].all();
     if(transfers.size())
+    {
+      std::cout<<"--Starting Transfers From MultiApps--"<<std::endl;
       for(unsigned int i=0; i<transfers.size(); i++)
         transfers[i]->execute();
+      std::cout<<"--Waiting For Transfers To Finish--"<<std::endl;
+      Parallel::barrier();
+
+      std::cout<<"--Transfers To Finished--"<<std::endl;
+    }
   }
 }
 
