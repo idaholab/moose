@@ -201,6 +201,7 @@
 #include "MultiAppVariableValueSamplePostprocessorTransfer.h"
 #include "MultiAppMeshFunctionTransfer.h"
 #include "MultiAppUserObjectTransfer.h"
+#include "MultiAppNearestNodeTransfer.h"
 
 
 // Actions
@@ -440,6 +441,7 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppVariableValueSamplePostprocessorTransfer);
   registerTransfer(MultiAppMeshFunctionTransfer);
   registerTransfer(MultiAppUserObjectTransfer);
+  registerTransfer(MultiAppNearestNodeTransfer);
 
   registered = true;
 }
