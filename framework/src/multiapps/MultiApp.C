@@ -167,7 +167,11 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
 MultiApp::~MultiApp()
 {
   for(unsigned int i=0; i<_my_num_apps; i++)
+  {
+    MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
     delete _apps[i];
+    Moose::swapLibMeshComm(swapped);
+  }
 }
 
 Executioner *
