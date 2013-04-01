@@ -67,10 +67,8 @@ AlphaCED::computeQpJacobian()
 }
 
 void
-AlphaCED::computeOffDiagJacobian(unsigned int jvar)
+AlphaCED::computeOffDiagJacobian(unsigned int /*jvar*/)
 {
-  DenseMatrix<Number> & kne = _assembly.jacobianBlock(_var.index(), jvar);
-
 }
 
 Real
