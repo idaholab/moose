@@ -9,4 +9,14 @@
     input = 'fromsub_master.i'
     exodiff = 'fromsub_master_out.e'
   [../]
+  [./fromsub_displaced]
+    type = 'Exodiff'
+    input = 'fromsub_displaced_master.i'
+    exodiff = 'fromsub_displaced_master_out.e'
+  [../]
+  [./tosub_displaced]
+    type = 'Exodiff'
+    input = 'tosub_displaced_master.i'
+    exodiff = 'tosub_displaced_master_out_sub0.e'
+  [../]
 []

@@ -19,6 +19,7 @@
 // Moose
 #include "MooseTypes.h"
 #include "FEProblem.h"
+#include "DisplacedProblem.h"
 
 // libMesh
 #include "libmesh/system.h"
@@ -30,13 +31,17 @@ InputParameters validParams<MultiAppNearestNodeTransfer>()
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
+  params.addParam<bool>("displaced_source_mesh", false, "Whether or not to use the displaced mesh for the source mesh.");
+  params.addParam<bool>("displaced_target_mesh", false, "Whether or not to use the displaced mesh for the target mesh.");
   return params;
 }
 
 MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const std::string & name, InputParameters parameters) :
     MultiAppTransfer(name, parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
-    _from_var_name(getParam<VariableName>("source_variable"))
+    _from_var_name(getParam<VariableName>("source_variable")),
+    _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
+    _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
 {
 }
 
@@ -51,7 +56,14 @@ MultiAppNearestNodeTransfer::execute()
     {
       FEProblem & from_problem = *_multi_app->problem();
       MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
-      MeshBase & from_mesh = from_problem.mesh().getMesh();
+
+      MeshBase * from_mesh = NULL;
+
+      if(_displaced_source_mesh && from_problem.getDisplacedProblem())
+        from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
+      else
+        from_mesh = &from_problem.mesh().getMesh();
+
       SystemBase & from_system_base = from_var.sys();
 
       System & from_sys = from_system_base.system();
@@ -87,13 +99,19 @@ MultiAppNearestNodeTransfer::execute()
           unsigned int var_num = to_sys->variable_number(_to_var_name);
           NumericVector<Real> & solution = *to_sys->solution;
 
-          MeshBase & mesh = _multi_app->appProblem(i)->mesh().getMesh();
+          MeshBase * mesh = NULL;
+
+          if(_displaced_target_mesh && _multi_app->appProblem(i)->getDisplacedProblem())
+            mesh = &_multi_app->appProblem(i)->getDisplacedProblem()->mesh().getMesh();
+          else
+            mesh = &_multi_app->appProblem(i)->mesh().getMesh();
+
           bool is_nodal = to_sys->variable_type(var_num) == FEType();
 
           if(is_nodal)
           {
-            MeshBase::const_node_iterator node_it = mesh.local_nodes_begin();
-            MeshBase::const_node_iterator node_end = mesh.local_nodes_end();
+            MeshBase::const_node_iterator node_it = mesh->local_nodes_begin();
+            MeshBase::const_node_iterator node_end = mesh->local_nodes_end();
 
             for(; node_it != node_end; ++node_it)
             {
@@ -111,7 +129,7 @@ MultiAppNearestNodeTransfer::execute()
 
                 Real distance = 0; // Just to satisfy the last argument
 
-                Node * nearest_node = getNearestNode(from_mesh, actual_position, distance);
+                Node * nearest_node = getNearestNode(*from_mesh, actual_position, distance);
 
                 // Assuming LAGRANGE!
                 unsigned int from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
@@ -126,8 +144,8 @@ MultiAppNearestNodeTransfer::execute()
           }
           else // Elemental
           {
-            MeshBase::const_element_iterator elem_it = mesh.local_elements_begin();
-            MeshBase::const_element_iterator elem_end = mesh.local_elements_end();
+            MeshBase::const_element_iterator elem_it = mesh->local_elements_begin();
+            MeshBase::const_element_iterator elem_end = mesh->local_elements_end();
 
             for(; elem_it != elem_end; ++elem_it)
             {
@@ -146,7 +164,7 @@ MultiAppNearestNodeTransfer::execute()
 
                 Real distance = 0; // Just to satisfy the last argument
 
-                Node * nearest_node = getNearestNode(from_mesh, actual_position, distance);
+                Node * nearest_node = getNearestNode(*from_mesh, actual_position, distance);
 
                 // Assuming LAGRANGE!
                 unsigned int from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
@@ -189,12 +207,17 @@ MultiAppNearestNodeTransfer::execute()
 
       EquationSystems & to_es = to_sys.get_equation_systems();
 
-      MeshBase & to_mesh = to_es.get_mesh();
+      MeshBase * to_mesh = NULL;
+
+      if(_displaced_source_mesh && to_problem.getDisplacedProblem())
+        to_mesh = &to_problem.getDisplacedProblem()->mesh().getMesh();
+      else
+        to_mesh = &to_problem.mesh().getMesh();
 
       bool is_nodal = to_sys.variable_type(to_var_num) == FEType();
 
-      unsigned int n_nodes = to_mesh.n_nodes();
-      unsigned int n_elems = to_mesh.n_elem();
+      unsigned int n_nodes = to_mesh->n_nodes();
+      unsigned int n_elems = to_mesh->n_elem();
 
       ///// All of the following are indexed off to_node->id() or to_elem->id() /////
 
@@ -247,16 +270,22 @@ MultiAppNearestNodeTransfer::execute()
 
         EquationSystems & from_es = from_sys.get_equation_systems();
 
-        MeshBase & from_mesh = from_es.get_mesh();
-        MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(from_mesh, libMesh::processor_id());
+        MeshBase * from_mesh = NULL;
+
+        if(_displaced_source_mesh && from_problem.getDisplacedProblem())
+          from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
+        else
+          from_mesh = &from_problem.mesh().getMesh();
+
+        MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(*from_mesh, libMesh::processor_id());
         Point app_position = _multi_app->position(i);
 
         Moose::swapLibMeshComm(swapped);
 
         if(is_nodal)
         {
-          MeshBase::const_node_iterator to_node_it = to_mesh.nodes_begin();
-          MeshBase::const_node_iterator to_node_end = to_mesh.nodes_end();
+          MeshBase::const_node_iterator to_node_it = to_mesh->nodes_begin();
+          MeshBase::const_node_iterator to_node_end = to_mesh->nodes_end();
 
           for(; to_node_it != to_node_end; ++to_node_it)
           {
@@ -266,7 +295,7 @@ MultiAppNearestNodeTransfer::execute()
             Real current_distance;
 
             MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-            Node * nearest_node = getNearestNode(from_mesh, *to_node-app_position, current_distance);
+            Node * nearest_node = getNearestNode(*from_mesh, *to_node-app_position, current_distance);
             Moose::swapLibMeshComm(swapped);
 
             if(current_distance < min_distances[to_node->id()])
@@ -279,8 +308,8 @@ MultiAppNearestNodeTransfer::execute()
         }
         else // Elemental
         {
-          MeshBase::const_element_iterator to_elem_it = to_mesh.elements_begin();
-          MeshBase::const_element_iterator to_elem_end = to_mesh.elements_end();
+          MeshBase::const_element_iterator to_elem_it = to_mesh->elements_begin();
+          MeshBase::const_element_iterator to_elem_end = to_mesh->elements_end();
 
           for(; to_elem_it != to_elem_end; ++to_elem_it)
           {
@@ -292,7 +321,7 @@ MultiAppNearestNodeTransfer::execute()
             Real current_distance;
 
             MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-            Node * nearest_node = getNearestNode(from_mesh, actual_position, current_distance);
+            Node * nearest_node = getNearestNode(*from_mesh, actual_position, current_distance);
             Moose::swapLibMeshComm(swapped);
 
             if(current_distance < min_distances[to_elem->id()])
@@ -352,12 +381,12 @@ MultiAppNearestNodeTransfer::execute()
 
           if(is_nodal)
           {
-            Node & to_node = to_mesh.node(j);
+            Node & to_node = to_mesh->node(j);
             to_dof = to_node.dof_number(to_sys_num, to_var_num, 0);
           }
           else
           {
-            Elem & to_elem = *to_mesh.elem(j);
+            Elem & to_elem = *to_mesh->elem(j);
             to_dof = to_elem.dof_number(to_sys_num, to_var_num, 0);
           }
 
@@ -380,9 +409,14 @@ MultiAppNearestNodeTransfer::execute()
 
           EquationSystems & from_es = from_sys.get_equation_systems();
 
-          MeshBase & from_mesh = from_es.get_mesh();
+          MeshBase * from_mesh = NULL;
 
-          Node & from_node = from_mesh.node(min_nodes[j]);
+          if(_displaced_source_mesh && from_problem.getDisplacedProblem())
+            from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
+          else
+            from_mesh = &from_problem.mesh().getMesh();
+
+          Node & from_node = from_mesh->node(min_nodes[j]);
 
           // Assuming LAGRANGE!
           unsigned int from_dof = from_node.dof_number(from_sys_num, from_var_num, 0);
