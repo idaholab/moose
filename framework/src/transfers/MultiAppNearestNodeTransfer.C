@@ -109,7 +109,9 @@ MultiAppNearestNodeTransfer::execute()
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
 
-                Node * nearest_node = getNearestNode(from_mesh, actual_position);
+                Real distance = 0; // Just to satisfy the last argument
+
+                Node * nearest_node = getNearestNode(from_mesh, actual_position, distance);
 
                 // Assuming LAGRANGE!
                 unsigned int from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
@@ -142,7 +144,9 @@ MultiAppNearestNodeTransfer::execute()
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
 
-                Node * nearest_node = getNearestNode(from_mesh, actual_position);
+                Real distance = 0; // Just to satisfy the last argument
+
+                Node * nearest_node = getNearestNode(from_mesh, actual_position, distance);
 
                 // Assuming LAGRANGE!
                 unsigned int from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
@@ -166,7 +170,6 @@ MultiAppNearestNodeTransfer::execute()
 
       break;
     }
-    /*
     case FROM_MULTIAPP:
     {
       FEProblem & to_problem = *_multi_app->problem();
@@ -174,6 +177,8 @@ MultiAppNearestNodeTransfer::execute()
       SystemBase & to_system_base = to_var.sys();
 
       System & to_sys = to_system_base.system();
+
+      NumericVector<Real> & to_solution = *to_sys.solution;
 
       unsigned int to_sys_num = to_sys.number();
 
@@ -184,12 +189,42 @@ MultiAppNearestNodeTransfer::execute()
 
       EquationSystems & to_es = to_sys.get_equation_systems();
 
-      //Create a serialized version of the solution vector
-      NumericVector<Number> * to_solution = to_sys.solution.get();
-
       MeshBase & to_mesh = to_es.get_mesh();
 
       bool is_nodal = to_sys.variable_type(to_var_num) == FEType();
+
+      unsigned int n_nodes = to_mesh.n_nodes();
+      unsigned int n_elems = to_mesh.n_elem();
+
+      ///// All of the following are indexed off to_node->id() or to_elem->id() /////
+
+      // Minimum distances from each node in the "to" mesh to a node in
+      std::vector<Real> min_distances;
+
+      // The node ids in the "from" mesh that this processor has found to be the minimum distances to the "to" nodes
+      std::vector<unsigned int> min_nodes;
+
+      // After the call to maxloc() this will tell us which processor actually has the minimum
+      std::vector<unsigned int> min_procs;
+
+      // The global multiapp ID that this processor found had the minimum distance node in it.
+      std::vector<unsigned int> min_apps;
+
+
+      if(is_nodal)
+      {
+        min_distances.resize(n_nodes, std::numeric_limits<Real>::max());
+        min_nodes.resize(n_nodes);
+        min_procs.resize(n_nodes);
+        min_apps.resize(n_nodes);
+      }
+      else
+      {
+        min_distances.resize(n_elems, std::numeric_limits<Real>::max());
+        min_nodes.resize(n_elems);
+        min_procs.resize(n_elems);
+        min_apps.resize(n_elems);
+      }
 
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
@@ -198,6 +233,7 @@ MultiAppNearestNodeTransfer::execute()
           continue;
 
         MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
+
         FEProblem & from_problem = *_multi_app->appProblem(i);
         MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
         SystemBase & from_system_base = from_var.sys();
@@ -211,96 +247,170 @@ MultiAppNearestNodeTransfer::execute()
 
         EquationSystems & from_es = from_sys.get_equation_systems();
 
-        //Create a serialized version of the solution vector
-        NumericVector<Number> * from_solution = from_sys.solution.get();
-
         MeshBase & from_mesh = from_es.get_mesh();
         MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(from_mesh, libMesh::processor_id());
         Point app_position = _multi_app->position(i);
 
-        NearestNode from_func(from_es, *from_solution, from_sys.get_dof_map(), from_var_num);
-        from_func.init(Trees::ELEMENTS);
-        from_func.enable_out_of_mesh_mode(NOTFOUND);
         Moose::swapLibMeshComm(swapped);
 
         if(is_nodal)
         {
-          MeshBase::const_node_iterator node_it = to_mesh.nodes_begin();
-          MeshBase::const_node_iterator node_end = to_mesh.nodes_end();
+          MeshBase::const_node_iterator to_node_it = to_mesh.nodes_begin();
+          MeshBase::const_node_iterator to_node_end = to_mesh.nodes_end();
 
-          for(; node_it != node_end; ++node_it)
+          for(; to_node_it != to_node_end; ++to_node_it)
           {
-            Node * node = *node_it;
+            Node * to_node = *to_node_it;
+            unsigned int to_node_id = to_node->id();
 
-            if(node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
+            Real current_distance;
+
+            MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
+            Node * nearest_node = getNearestNode(from_mesh, *to_node-app_position, current_distance);
+            Moose::swapLibMeshComm(swapped);
+
+            if(current_distance < min_distances[to_node->id()])
             {
-              // See if this node falls in this bounding box
-              if(app_box.contains_point(*node-app_position))
-              {
-                // The zero only works for LAGRANGE!
-                unsigned int dof = node->dof_number(to_sys_num, to_var_num, 0);
-
-                MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-                Real from_value = from_func(*node-app_position);
-                Moose::swapLibMeshComm(swapped);
-
-                if(from_value != NOTFOUND)
-                  to_solution->set(dof, from_value);
-                else if(_error_on_miss)
-                  mooseError("Point not found! " << *node-app_position <<std::endl);
-              }
+              min_distances[to_node_id] = current_distance;
+              min_nodes[to_node_id] = nearest_node->id();
+              min_apps[to_node_id] = i;
             }
           }
         }
         else // Elemental
         {
-          MeshBase::const_element_iterator elem_it = to_mesh.elements_begin();
-          MeshBase::const_element_iterator elem_end = to_mesh.elements_end();
+          MeshBase::const_element_iterator to_elem_it = to_mesh.elements_begin();
+          MeshBase::const_element_iterator to_elem_end = to_mesh.elements_end();
 
-          for(; elem_it != elem_end; ++elem_it)
+          for(; to_elem_it != to_elem_end; ++to_elem_it)
           {
-            Elem * elem = *elem_it;
+            Elem * to_elem = *to_elem_it;
+            unsigned int to_elem_id = to_elem->id();
 
-            if(elem->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this elem
+            Point actual_position = to_elem->centroid()-app_position;
+
+            Real current_distance;
+
+            MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
+            Node * nearest_node = getNearestNode(from_mesh, actual_position, current_distance);
+            Moose::swapLibMeshComm(swapped);
+
+            if(current_distance < min_distances[to_elem->id()])
             {
-              Point centroid = elem->centroid();
-
-              // See if this elem falls in this bounding box
-              if(app_box.contains_point(centroid-app_position))
-              {
-                // The zero only works for LAGRANGE!
-                unsigned int dof = elem->dof_number(to_sys_num, to_var_num, 0);
-
-                MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-                Real from_value = from_func(centroid-app_position);
-                Moose::swapLibMeshComm(swapped);
-
-                if(from_value != NOTFOUND)
-                  to_solution->set(dof, from_value);
-                else if(_error_on_miss)
-                  mooseError("Point not found! " << centroid-app_position << std::endl);
-              }
+              min_distances[to_elem_id] = current_distance;
+              min_nodes[to_elem_id] = nearest_node->id();
+              min_apps[to_elem_id] = i;
             }
           }
         }
       }
 
-      to_solution->close();
+
+      // We're going to need serialized solution vectors for each app
+      // We could try to only do it for the apps that have mins in them...
+      // but it's tough because this is a collective operation... so that would have to be coordinated
+      std::vector<NumericVector<Number> *> serialized_from_solutions(_multi_app->numGlobalApps());
+
+      // Swap
+      MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
+
+      for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      {
+        if(!_multi_app->hasLocalApp(i))
+          continue;
+
+        FEProblem & from_problem = *_multi_app->appProblem(i);
+        MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
+        SystemBase & from_system_base = from_var.sys();
+
+        System & from_sys = from_system_base.system();
+
+        //Create a serialized version of the solution vector
+        serialized_from_solutions[i] = NumericVector<Number>::build().release();
+        serialized_from_solutions[i]->init(from_sys.n_dofs(), false, SERIAL);
+
+        // Need to pull down a full copy of this vector on every processor so we can get values in parallel
+        from_sys.solution->localize(*serialized_from_solutions[i]);
+      }
+
+      // Swap back
+      Moose::swapLibMeshComm(swapped);
+
+      // We've found the nearest nodes for this processor.  We need to see which processor _actually_ found the nearest though
+      Parallel::minloc(min_distances, min_procs);
+
+      // Now loop through min_procs and see if _this_ processor had the actual minimum for any nodes.
+      // If it did then we're going to go get the value from that nearest node and transfer its value
+      unsigned int proc_id = libMesh::processor_id();
+
+      for(unsigned int j=0; j<min_procs.size(); j++)
+      {
+        if(min_procs[j] == proc_id) // This means that this processor really did find the minumum so we need to transfer the value
+        {
+          // The zero only works for LAGRANGE!
+          unsigned int to_dof = 0;
+
+          if(is_nodal)
+          {
+            Node & to_node = to_mesh.node(j);
+            to_dof = to_node.dof_number(to_sys_num, to_var_num, 0);
+          }
+          else
+          {
+            Elem & to_elem = *to_mesh.elem(j);
+            to_dof = to_elem.dof_number(to_sys_num, to_var_num, 0);
+          }
+
+          // The app that has the nearest node in it
+          unsigned int from_app_num = min_apps[j];
+
+          mooseAssert(_multi_app->hasLocalApp(from_app_num), "Something went very wrong!");
+
+          // Swap
+          swapped = Moose::swapLibMeshComm(_multi_app->comm());
+
+          FEProblem & from_problem = *_multi_app->appProblem(from_app_num);
+          MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
+          SystemBase & from_system_base = from_var.sys();
+
+          System & from_sys = from_system_base.system();
+          unsigned int from_sys_num = from_sys.number();
+
+          unsigned int from_var_num = from_sys.variable_number(from_var.name());
+
+          EquationSystems & from_es = from_sys.get_equation_systems();
+
+          MeshBase & from_mesh = from_es.get_mesh();
+
+          Node & from_node = from_mesh.node(min_nodes[j]);
+
+          // Assuming LAGRANGE!
+          unsigned int from_dof = from_node.dof_number(from_sys_num, from_var_num, 0);
+          Real from_value = (*serialized_from_solutions[from_app_num])(from_dof);
+
+          // Swap back
+          Moose::swapLibMeshComm(swapped);
+
+          to_solution.set(to_dof, from_value);
+        }
+      }
+
+      to_solution.close();
       to_sys.update();
 
       break;
-      }*/
+      }
   }
 
   std::cout<<"Finished NearestNodeTransfer!"<<std::endl;
 }
 
-Node * MultiAppNearestNodeTransfer::getNearestNode(MeshBase & mesh, const Point & p)
+Node * MultiAppNearestNodeTransfer::getNearestNode(MeshBase & mesh, const Point & p, Real & distance)
 {
   MeshBase::const_node_iterator node_it = mesh.nodes_begin();
   MeshBase::const_node_iterator node_end = mesh.nodes_end();
 
-  Real distance = std::numeric_limits<Real>::max();
+  distance = std::numeric_limits<Real>::max();
   Node * nearest = NULL;
 
   for(; node_it != node_end; ++node_it)

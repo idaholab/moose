@@ -40,9 +40,10 @@ protected:
    * Return the nearest node to the point p.
    * @param mesh The mesh you want to search.
    * @param p The point you want to find the nearest node to.
+   * @param distance This will hold the distance between the returned node and p
    * @return The Node closest to point p.
    */
-  Node * getNearestNode(MeshBase & mesh, const Point & p);
+  Node * getNearestNode(MeshBase & mesh, const Point & p, Real & distance);
 
   AuxVariableName _to_var_name;
   VariableName _from_var_name;
