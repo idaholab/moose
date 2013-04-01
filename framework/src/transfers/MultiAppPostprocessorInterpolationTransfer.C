@@ -21,6 +21,7 @@
 // libMesh
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
+#include "libmesh/radial_basis_interpolation.h"
 
 template<>
 InputParameters validParams<MultiAppPostprocessorInterpolationTransfer>()
@@ -31,6 +32,12 @@ InputParameters validParams<MultiAppPostprocessorInterpolationTransfer>()
   params.addParam<unsigned int>("num_points", 3, "The number of nearest points to use for interpolation.");
   params.addParam<Real>("power", 2, "The polynomial power to use for calculation of the decay in the interpolation.");
 
+  MooseEnum interp_type("inverse_distance, radial_basis", "inverse_distance");
+
+  params.addParam<MooseEnum>("interp_type", interp_type, "The algorithm to use for interpolation.");
+
+  params.addParam<Real>("radius", -1, "Radius to use for radial_basis interpolation.  If negative then the radius is taken as the max distance between points.");
+
   return params;
 }
 
@@ -39,7 +46,9 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
     _postprocessor(getParam<PostprocessorName>("postprocessor")),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _num_points(getParam<unsigned int>("num_points")),
-    _power(getParam<Real>("power"))
+    _power(getParam<Real>("power")),
+    _interp_type(getParam<MooseEnum>("interp_type")),
+    _radius(getParam<Real>("radius"))
 {
 }
 
@@ -55,14 +64,26 @@ MultiAppPostprocessorInterpolationTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      InverseDistanceInterpolation<LIBMESH_DIM> idi (_num_points, _power);
+      InverseDistanceInterpolation<LIBMESH_DIM> * idi;
 
-      std::vector<Point>  &src_pts  (idi.get_source_points());
-      std::vector<Number> &src_vals (idi.get_source_vals());
+      switch(_interp_type)
+      {
+        case 0:
+          idi = new InverseDistanceInterpolation<LIBMESH_DIM>(_num_points, _power);
+          break;
+        case 1:
+          idi = new RadialBasisInterpolation<LIBMESH_DIM>(_radius);
+          break;
+        default:
+          mooseError("Unknown interpolation type!");
+      }
+
+      std::vector<Point>  &src_pts  (idi->get_source_points());
+      std::vector<Number> &src_vals (idi->get_source_vals());
 
       std::vector<std::string> field_vars;
       field_vars.push_back(_to_var_name);
-      idi.set_field_variables(field_vars);
+      idi->set_field_variables(field_vars);
 
       {
         for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
@@ -76,7 +97,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       }
 
       // We have only set local values - prepare for use by gathering remote gata
-      idi.prepare_for_use();
+      idi->prepare_for_use();
 
 
       // Loop over the master nodes and set the value of the variable
@@ -109,7 +130,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
             pts.push_back(*node);
             vals.resize(1);
 
-            idi.interpolate_field_data(vars, pts, vals);
+            idi->interpolate_field_data(vars, pts, vals);
 
             Real value = vals.front();
 
@@ -124,6 +145,8 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       }
 
       _multi_app->problem()->es().update();
+
+      delete idi;
 
       break;
     }

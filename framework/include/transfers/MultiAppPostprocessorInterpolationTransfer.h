@@ -41,6 +41,8 @@ protected:
 
   unsigned int _num_points;
   Real _power;
+  MooseEnum _interp_type;
+  Real _radius;
 };
 
 #endif /* MULTIAPPPOSTPROCESSORINTERPOLATIONTRANSFER_H */

@@ -5,6 +5,12 @@
     exodiff = 'master_out.e'
   [../]
 
+  [./radial_basis]
+    type = 'Exodiff'
+    input = 'radial_master.i'
+    exodiff = 'radial_master_out.e'
+  [../]
+
   [./multilevel]
     type = 'Exodiff'
     input = 'multilevel_master.i'
