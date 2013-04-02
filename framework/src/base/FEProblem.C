@@ -33,6 +33,7 @@
 #include "ElementH1Error.h"
 #include "Function.h"
 #include "Material.h"
+#include "PetscSupport.h"
 
 #include "ElementPostprocessor.h"
 #include "NodalPostprocessor.h"
@@ -2619,6 +2620,10 @@ FEProblem::init2()
 void
 FEProblem::solve()
 {
+#ifdef LIBMESH_HAVE_PETSC
+  Moose::PetscSupport::petscSetOptions(*this); // Make sure the PETSc options are setup for this app
+#endif
+
   Moose::setSolverDefaults(*this);
   Moose::perf_log.push("solve()","Solve");
 //  _solve_only_perf_log.push("solve");
