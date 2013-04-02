@@ -23,6 +23,7 @@
     custom_cmp = cracking_exponential.exodiff
     abs_zero = 1e-4
     scale_refine = 0
+    max_parallel = 1
   [../]
 
   [./rz_exponential]
@@ -31,6 +32,7 @@
     exodiff = cracking_rz_exponential_out.e
     abs_zero = 1e-4
     scale_refine = 0
+    max_parallel = 1
   [../]
 
   [./xyz]
@@ -40,6 +42,7 @@
     custom_cmp = cracking_xyz.exodiff
     abs_zero = 1e-4
     scale_refine = 0
+    max_parallel = 1
   [../]
 
 []

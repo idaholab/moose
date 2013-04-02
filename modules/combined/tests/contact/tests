@@ -5,6 +5,7 @@
     exodiff = 'pressureAugLag_out.e'
     custom_cmp = 'pressure.exodiff'
     petsc_version = '>=3.1'
+    max_parallel = 1
   [../]
 
   [./pressurePenalty_test]
@@ -12,5 +13,6 @@
     input = 'pressurePenalty.i'
     exodiff = 'pressurePenalty_out.e'
     custom_cmp = 'pressure.exodiff'
+    max_parallel = 1
   [../]
 []

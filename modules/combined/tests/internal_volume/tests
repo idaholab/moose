@@ -16,6 +16,7 @@
     input = 'internal_volume_hex20.i'
     csvdiff = 'out.csv'
     prereq = 'test'
+    max_parallel = 1
   [../]
 
   [./test_quad8_rz]

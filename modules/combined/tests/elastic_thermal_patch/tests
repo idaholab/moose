@@ -13,6 +13,7 @@
     exodiff = 'out_jac_rz_smp.e'
     custom_cmp = 'elastic_thermal_patch.cmp'
     use_old_floor = True
+    max_parallel = 1
   [../]
 
   [./test_rz]
@@ -20,6 +21,7 @@
     input = 'elastic_thermal_patch_rz_test.i'
     exodiff = 'out_rz.e'
     use_old_floor = True
+    max_parallel = 1
   [../]
 
   [./test_rz_smp]
@@ -28,5 +30,6 @@
     exodiff = 'out_rz_smp.e'
     custom_cmp = 'elastic_thermal_patch.cmp'
     use_old_floor = True
+    max_parallel = 1
   [../]
 []

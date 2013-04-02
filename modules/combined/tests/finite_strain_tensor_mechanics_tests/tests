@@ -10,5 +10,6 @@
     input = 'finite_strain_elasticity_test.i'
     exodiff = 'out.e'
     scale_refine = 1
+    max_parallel = 1
   [../]
 []

@@ -11,11 +11,13 @@
     exodiff = 'out_rz.e'
     abs_zero = 1e-7
     scale_refine = 1
+    max_parallel = 1
   [../]
   [./RSpherical]
     type = Exodiff
     input = 'simple_contact_rspherical.i'
     exodiff = 'simple_contact_rspherical_out.e'
+    max_parallel = 1
   [../]
 
 []

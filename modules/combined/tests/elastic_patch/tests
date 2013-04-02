@@ -26,6 +26,7 @@
     input = 'elastic_patch_plane_strain.i'
     exodiff = 'elastic_patch_plane_strain_out.e'
     scale_refine = 1
+    max_parallel = 1
   [../]
 
   [./test_plane_strain_large_strain]
@@ -33,6 +34,7 @@
     input = 'elastic_patch_plane_strain_large_strain.i'
     exodiff = 'elastic_patch_plane_strain_large_strain_out.e'
     scale_refine = 3
+    max_parallel = 1
   [../]
 
   [./test_rz]
@@ -40,6 +42,7 @@
     input = 'elastic_patch_rz.i'
     exodiff = 'elastic_patch_rz_out.e'
     scale_refine = 1
+    max_parallel = 1
   [../]
 
   [./test_rz_large_strain]
@@ -47,12 +50,14 @@
     input = 'elastic_patch_rz_large_strain.i'
     exodiff = 'elastic_patch_rz_large_strain_out.e'
     scale_refine = 3
+    max_parallel = 1
   [../]
 
   [./test_rspherical]
     type = Exodiff
     input = 'elastic_patch_rspherical.i'
     exodiff = 'elastic_patch_rspherical_out.e'
+    max_parallel = 1
   [../]
 
 []

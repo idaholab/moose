@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'heat_conduction_ortho.i'
     exodiff = 'heat_conduction_ortho_out.e'
+    max_parallel = 1
   [../]
 []

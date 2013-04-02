@@ -9,6 +9,7 @@
     type = 'Exodiff'
     input = 'heatConduction2D.i'
     exodiff = 'heatConduction2D_out.e'
+    max_parallel = 1
   [../]
 
   [./shortFiber_test]

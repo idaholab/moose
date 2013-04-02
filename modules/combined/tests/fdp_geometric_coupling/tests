@@ -4,5 +4,6 @@
     input = 'fdp_geometric_coupling_test.i'
     exodiff = 'out.e'
     abs_zero = 1e-10
+    max_parallel = 1
   [../]
 []

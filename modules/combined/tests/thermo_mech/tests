@@ -11,5 +11,6 @@
     input = 'thermo_mech_smp_test.i'
     exodiff = 'out_smp.e'
     custom_cmp = 'thermo_mech_test.cmp'
+    max_parallel = 1
   [../]
 []
