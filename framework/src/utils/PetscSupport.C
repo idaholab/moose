@@ -67,6 +67,17 @@ void petscSetOptions(Problem & problem)
   if (petsc_options_inames.size() != petsc_options_values.size())
     mooseError("Petsc names and options are not the same length");
 
+  PetscOptionsClear();
+
+  { // Get any options specified on the command-line
+    int argc;
+    char ** args;
+
+    PetscGetArgs(&argc, &args);
+    PetscOptionsInsert(&argc, &args, NULL);
+  }
+
+  // Add any options specified in the input file
   for (unsigned int i=0; i<petsc_options.size(); ++i)
     PetscOptionsSetValue(std::string(petsc_options[i]).c_str(), PETSC_NULL);
 
