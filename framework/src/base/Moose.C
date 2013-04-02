@@ -139,6 +139,7 @@
 #include "ElementalVariableValue.h"
 #include "ElementL2Norm.h"
 #include "NodalL2Norm.h"
+#include "NodalL2Error.h"
 #include "TotalVariableValue.h"
 #include "VolumePostprocessor.h"
 #include "PointValue.h"
@@ -150,6 +151,8 @@
 #include "LayeredSideAverage.h"
 #include "LayeredSideFluxAverage.h"
 #include "ElementIntegralVariableUserObject.h"
+#include "NodalNormalsEvaluator.h"
+#include "NodalNormalsPreprocessor.h"
 
 // preconditioners
 #include "PhysicsBasedPreconditioner.h"
@@ -250,6 +253,7 @@
 #include "AddCoupledVariableAction.h"
 #include "AddMultiAppAction.h"
 #include "AddTransferAction.h"
+#include "AddNodalNormalsAction.h"
 
 
 namespace Moose {
@@ -382,6 +386,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(ElementalVariableValue);
   registerPostprocessor(ElementL2Norm);
   registerPostprocessor(NodalL2Norm);
+  registerPostprocessor(NodalL2Error);
   registerPostprocessor(TotalVariableValue);
   registerPostprocessor(VolumePostprocessor);
   registerPostprocessor(PointValue);
@@ -393,6 +398,8 @@ registerObjects(Factory & factory)
   registerUserObject(LayeredSideAverage);
   registerUserObject(LayeredSideFluxAverage);
   registerUserObject(ElementIntegralVariableUserObject);
+  registerUserObject(NodalNormalsPreprocessor);
+  registerUserObject(NodalNormalsEvaluator);
 
   // preconditioners
   registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");
@@ -506,6 +513,7 @@ addActionTypes(Syntax & syntax)
   registerActionName("add_coupled_variable", false);
   registerActionName("add_multi_app", false);
   registerActionName("add_transfer", false);
+  registerActionName("add_nodal_normals", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_function_complete", false);
@@ -546,6 +554,7 @@ addActionTypes(Syntax & syntax)
 "(set_adaptivity_options)"
 "(add_ic)"
 "(add_preconditioning, add_constraint)"
+"(add_nodal_normals)"
 "(ready_to_init)"
 "(setup_quadrature)"
 "(setup_dampers)"
@@ -650,6 +659,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupResidualDebugAction, "setup_residual_debug");
 
   registerAction(AddBoundsVectorsAction, "add_bounds_vectors");
+  registerAction(AddNodalNormalsAction, "add_nodal_normals");
 
   // NonParsedActions
   registerAction(SetupDampersAction, "setup_dampers");

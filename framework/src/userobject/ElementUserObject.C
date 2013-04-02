@@ -34,6 +34,7 @@ ElementUserObject::ElementUserObject(const std::string & name, InputParameters p
     TransientInterface(parameters, name, "element_user_objects"),
     PostprocessorInterface(parameters),
     _blocks(parameters.get<std::vector<SubdomainName> >("block")),
+    _mesh(_subproblem.mesh()),
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),
     _q_point(_assembly.qPoints()),

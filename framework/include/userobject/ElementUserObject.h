@@ -66,6 +66,8 @@ protected:
 /// The block ID this postprocessor works on
   std::vector<SubdomainName> _blocks;
 
+  MooseMesh & _mesh;
+
   /// The current element pointer (available during execute())
   const Elem * & _current_elem;
 

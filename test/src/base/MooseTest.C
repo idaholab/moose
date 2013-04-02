@@ -46,6 +46,7 @@
 #include "MultipleUpdateAux.h"
 #include "PeriodicDistanceAux.h"
 #include "MatPropUserObjectAux.h"
+#include "NodalNormalComponentAux.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -168,6 +169,7 @@ MooseTest::registerObjects(Factory & factory)
   registerAux(MultipleUpdateAux);
   registerAux(PeriodicDistanceAux);
   registerAux(MatPropUserObjectAux);
+  registerAux(NodalNormalComponentAux);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);

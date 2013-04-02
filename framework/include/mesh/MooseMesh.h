@@ -356,6 +356,8 @@ public:
    */
   const std::set<unsigned int> & getSubdomainBoundaryIds(unsigned int subdomain_id) { return _subdomain_boundary_ids[subdomain_id]; }
 
+  bool isBoundaryNode(unsigned int node_id) { return _bnd_node_ids.find(node_id) != _bnd_node_ids.end(); }
+
 protected:
   /// Convienence enums
   enum {
@@ -424,6 +426,8 @@ protected:
   std::vector<BndNode *> _bnd_nodes;
   typedef std::vector<BndNode *>::iterator             bnd_node_iterator_imp;
   typedef std::vector<BndNode *>::const_iterator const_bnd_node_iterator_imp;
+  /// Set of node IDs that are boundary nodes
+  std::set<unsigned int> _bnd_node_ids;
 
   /// array of boundary elems
   std::vector<BndElement *> _bnd_elems;

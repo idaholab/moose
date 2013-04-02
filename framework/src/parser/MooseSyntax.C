@@ -93,6 +93,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("AddUserObjectAction", "UserObjects/*", "add_user_object");
 
   syntax.registerActionSyntax("AddBoundsVectorsAction", "Bounds", "add_bounds_vectors");
+  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_nodal_normals");
 
   // This works because the AddKernelAction will build AuxKernels if the path doesn't contain Kernels!
   syntax.registerActionSyntax("AddKernelAction", "Bounds/*", "add_aux_kernel");

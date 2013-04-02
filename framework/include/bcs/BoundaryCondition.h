@@ -81,6 +81,7 @@ public:
 
 protected:
   SubProblem & _subproblem;
+  FEProblem & _fe_problem;
   SystemBase & _sys;
   /// thread id
   THREAD_ID _tid;

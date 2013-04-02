@@ -1,0 +1,13 @@
+[Tests]
+  [./circle_tris]
+    type = 'Exodiff'
+    input = 'circle_tris.i'
+    exodiff = 'circle_tris_out.e'
+  [../]
+
+  [./circle_quads]
+    type = 'Exodiff'
+    input = 'circle_quads.i'
+    exodiff = 'circle_quads_out.e'
+  [../]
+[]

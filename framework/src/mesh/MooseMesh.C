@@ -133,6 +133,7 @@ MooseMesh::freeBndNodes()
   for (std::map<short int, std::vector<unsigned int> >::iterator it = _node_set_nodes.begin(); it != _node_set_nodes.end(); ++it)
     it->second.clear();
   _node_set_nodes.clear();
+  _bnd_node_ids.clear();
 }
 
 void
@@ -408,6 +409,7 @@ MooseMesh::buildNodeList()
   {
     _bnd_nodes[i] = new BndNode(&_mesh.node(nodes[i]), ids[i]);
     _node_set_nodes[ids[i]].push_back(nodes[i]);
+    _bnd_node_ids.insert(nodes[i]);
   }
 
   _bnd_nodes.reserve(_bnd_nodes.size() + _extra_bnd_nodes.size());
@@ -415,6 +417,7 @@ MooseMesh::buildNodeList()
   {
     BndNode * bnode = new BndNode(_extra_bnd_nodes[i]._node, _extra_bnd_nodes[i]._bnd_id);
     _bnd_nodes.push_back(bnode);
+    _bnd_node_ids.insert(_extra_bnd_nodes[i]._node->id());
   }
 }
 
@@ -675,6 +678,7 @@ MooseMesh::addQuadratureNode(const Elem * elem, const unsigned short int side, c
 
   BndNode * bnode = new BndNode(qnode, bid);
   _bnd_nodes.push_back(bnode);
+  _bnd_node_ids.insert(qnode->id());
 
   _extra_bnd_nodes.push_back(*bnode);
 

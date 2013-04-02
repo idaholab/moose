@@ -106,6 +106,18 @@ public:
    */
   std::set<std::string> getDependObjects(ExecFlagType type);
 
+  /**
+   * Adds a solution length vector to the system.
+   *
+   * @param vector_name The name of the vector.
+   * @param project Whether or not to project this vector when doing mesh refinement.
+   *                If the vector is just going to be recomputed then there is no need to project it.
+   * @param type What type of parallel vector.  This is usually either PARALLEL or GHOSTED.
+   *             GHOSTED is needed if you are going to be accessing off-processor entries.
+   *             The ghosting pattern is the same as the solution vector.
+   */
+  NumericVector<Number> & addVector(const std::string & vector_name, const bool project, const ParallelType type);
+
 protected:
   void computeScalarVars(std::vector<AuxWarehouse> & auxs);
   void computeNodalVars(std::vector<AuxWarehouse> & auxs);
