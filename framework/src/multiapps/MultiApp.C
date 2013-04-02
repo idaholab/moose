@@ -68,6 +68,7 @@ InputParameters validParams<MultiApp>()
 
   params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin|custom) to execute only at that moment");
 
+  params.addParam<unsigned int>("max_procs_per_app", std::numeric_limits<unsigned int>::max(), "Maximum number of processors to give to each App in this MultiApp.  Useful for restricting small solves to just a few procs so they don't get spread out");
 
   params.addPrivateParam<std::string>("built_by_action", "add_multi_app");
 
@@ -81,7 +82,9 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     _input_files(getParam<std::vector<std::string> >("input_files")),
     _orig_comm(getParam<MPI_Comm>("_mpi_comm")),
     _execute_on(getParam<MooseEnum>("execute_on")),
-    _inflation(getParam<Real>("bounding_box_inflation"))
+    _inflation(getParam<Real>("bounding_box_inflation")),
+    _max_procs_per_app(getParam<unsigned int>("max_procs_per_app")),
+    _has_an_app(true)
 {
   if(isParamValid("positions"))
     _positions_vec = getParam<std::vector<Real> >("positions");
@@ -125,6 +128,9 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
   /// Set up our Comm and set the number of apps we're going to be working on
   buildComm();
 
+  if(!_has_an_app)
+    return;
+
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   _apps.resize(_my_num_apps);
@@ -166,6 +172,9 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
 
 MultiApp::~MultiApp()
 {
+  if(!_has_an_app)
+    return;
+
   for(unsigned int i=0; i<_my_num_apps; i++)
   {
     MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
@@ -177,12 +186,18 @@ MultiApp::~MultiApp()
 Executioner *
 MultiApp::getExecutioner(unsigned int app)
 {
+  if(!_has_an_app)
+    mooseError("No app for " << _name << " on processor " << _orig_rank);
+
   return _apps[globalAppToLocal(app)]->getExecutioner();
 }
 
 MeshTools::BoundingBox
 MultiApp::getBoundingBox(unsigned int app)
 {
+  if(!_has_an_app)
+    mooseError("No app for " << _name << " on processor " << _orig_rank);
+
   FEProblem * problem = appProblem(app);
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
@@ -229,6 +244,9 @@ MultiApp::getBoundingBox(unsigned int app)
 FEProblem *
 MultiApp::appProblem(unsigned int app)
 {
+  if(!_has_an_app)
+    mooseError("No app for " << _name << " on processor " << _orig_rank);
+
   unsigned int local_app = globalAppToLocal(app);
 
   FEProblem * problem = dynamic_cast<FEProblem *>(&_apps[local_app]->getExecutioner()->problem());
@@ -240,19 +258,25 @@ MultiApp::appProblem(unsigned int app)
 const UserObject &
 MultiApp::appUserObjectBase(unsigned int app, const std::string & name)
 {
+  if(!_has_an_app)
+    mooseError("No app for " << _name << " on processor " << _orig_rank);
+
   return appProblem(app)->getUserObjectBase(name);
 }
 
 Real
 MultiApp::appPostprocessorValue(unsigned int app, const std::string & name)
 {
+  if(!_has_an_app)
+    mooseError("No app for " << _name << " on processor " << _orig_rank);
+
   return appProblem(app)->getPostprocessorValue(name);
 }
 
 bool
 MultiApp::hasLocalApp(unsigned int global_app)
 {
-  if(global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps-1))
+  if(_has_an_app && global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps-1))
     return true;
 
   return false;
@@ -301,10 +325,24 @@ MultiApp::buildComm()
 //  sleep(rank);
 
   int procs_per_app = _orig_num_procs / _total_num_apps;
+
+  if(_max_procs_per_app < procs_per_app)
+    procs_per_app = _max_procs_per_app;
+
   int my_app = rank / procs_per_app;
   int procs_for_my_app = procs_per_app;
 
-  if((unsigned int) my_app >= _total_num_apps-1) // The last app will gain any left-over procs
+  if((unsigned int) my_app > _total_num_apps-1 && procs_for_my_app == _max_procs_per_app)
+  {
+    // If we've already hit the max number of procs per app then this processor
+    // won't have an app at all
+    std::cerr<<rank<<" No app!"<<std::endl;
+    _has_an_app = false;
+    _my_comm = MPI_COMM_SELF;
+    procs_for_my_app = 1;
+    my_app = 0;
+  }
+  else if((unsigned int) my_app >= _total_num_apps-1) // The last app will gain any left-over procs
   {
     my_app = _total_num_apps - 1;
     procs_for_my_app += _orig_num_procs % _total_num_apps;
@@ -319,6 +357,9 @@ MultiApp::buildComm()
   // Add all the processors in that are in my group
   for(int i=0; i<procs_for_my_app; i++)
     ranks_in_my_group[i] = (my_app * procs_per_app) + i;
+
+  if(!_has_an_app)
+    ranks_in_my_group[0] = rank;
 
   MPI_Group orig_group, new_group;
 

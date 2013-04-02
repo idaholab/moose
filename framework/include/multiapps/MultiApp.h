@@ -200,6 +200,12 @@ protected:
 
   /// Relative bounding box inflation
   Real _inflation;
+
+  /// Maximum number of processors to give to each app
+  unsigned int _max_procs_per_app;
+
+  /// Whether or not this processor as an App _at all_
+  bool _has_an_app;
 };
 
 #endif // MULTIAPP_H

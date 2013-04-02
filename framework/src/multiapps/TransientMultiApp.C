@@ -33,6 +33,9 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
 {
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
+  if(_has_an_app)
+  {
+
   _transient_executioners.resize(_my_num_apps);
   // Grab Transient Executioners from each app
   for(unsigned int i=0; i<_my_num_apps; i++)
@@ -46,6 +49,8 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     appProblem(_first_local_app + i)->copyOldSolutions();
     _transient_executioners[i] = ex;
   }
+  }
+
 
   // Swap back
   Moose::swapLibMeshComm(swapped);
@@ -53,6 +58,9 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
 
 TransientMultiApp::~TransientMultiApp()
 {
+  if(!_has_an_app)
+    return;
+
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   for(unsigned int i=0; i<_my_num_apps; i++)
@@ -68,6 +76,9 @@ TransientMultiApp::~TransientMultiApp()
 void
 TransientMultiApp::solveStep()
 {
+  if(!_has_an_app)
+    return;
+
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   int rank;
@@ -89,28 +100,25 @@ TransientMultiApp::solveStep()
 Real
 TransientMultiApp::computeDT()
 {
-  std::cout<<"computeDT!!!"<<std::endl;
-
-  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
-
   Real smallest_dt = std::numeric_limits<Real>::max();
 
-  for(unsigned int i=0; i<_my_num_apps; i++)
+  if(_has_an_app)
   {
-    Transient * ex = _transient_executioners[i];
-    Real dt = ex->computeConstrainedDT();
+    MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
-    std::cout<<"dt! "<<dt<<std::endl;
+    for(unsigned int i=0; i<_my_num_apps; i++)
+    {
+      Transient * ex = _transient_executioners[i];
+      Real dt = ex->computeConstrainedDT();
 
-    smallest_dt = std::min(dt, smallest_dt);
+      smallest_dt = std::min(dt, smallest_dt);
+    }
+
+    // Swap back
+    Moose::swapLibMeshComm(swapped);
   }
 
-  // Swap back
-  Moose::swapLibMeshComm(swapped);
-
   Parallel::min(smallest_dt);
-
-  std::cout<<"Smallest dt: "<<smallest_dt<<std::endl;
   return smallest_dt;
 }
 
