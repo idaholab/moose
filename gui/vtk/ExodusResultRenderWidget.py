@@ -883,9 +883,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       for file_name in output_file_names:
         if '.e' in file_name and os.path.exists(file_name):
           file_stamp = os.path.getmtime(file_name)          
-          file_stamp = os.path.getmtime(file_name)
 
-          if(int(file_stamp) >= int(self.base_stamp)):
+          if int(file_stamp) >= int(self.base_stamp) and int(file_stamp) <= int(time.time() - 1) and file_name not in self.file_names:
             self.file_name = file_name
             self.exodus_result = ExodusResult(self, self.plane)
             self.exodus_result.setFileName(file_name)
