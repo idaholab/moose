@@ -43,7 +43,7 @@ class NodalFloodCount : public ElementPostprocessor
 {
 public:
   NodalFloodCount(const std::string & name, InputParameters parameters);
-  virtual ~NodalFloodCount() {}
+  ~NodalFloodCount();
 
   virtual void initialize();
   virtual void execute();
@@ -112,6 +112,12 @@ protected:
    * the proper global number for a bubble when using multimap mode
    */
   void updateRegionOffsets();
+
+  /**
+   * This routine uses the bubble_sets data structure to calculate the volume of each stored bubble.
+   * You must supply a valid filename to use this routine.
+   */
+  void calculateBubbleVolumes(const std::string & file_name);
 
   /**
    * This method detects whether two sets intersect without building a result set.  It exits as soon as
@@ -224,6 +230,12 @@ protected:
    * based on the imposed periodic boundary conditions.
    */
   std::multimap<unsigned int, unsigned int> _periodic_node_map;
+
+  /**
+   * The filename and filehandle used if bubble volumes are being recorded to a file.
+   */
+  std::string _bubble_volume_file_name;
+  std::ofstream _bubble_volume_file_handle;
 };
 
 #endif

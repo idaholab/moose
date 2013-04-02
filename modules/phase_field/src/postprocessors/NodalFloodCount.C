@@ -16,6 +16,7 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"
+#include "MooseUtils.h"
 
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
@@ -42,6 +43,7 @@ InputParameters validParams<NodalFloodCount>()
   params.addParam<bool>("condense_map_info", false, "Determines whether we condense all the node values when in multimap mode (default: false)");
   params.addParam<bool>("use_global_numbering", false, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: false)");
   params.addParam<bool>("enable_var_coloring", false, "Instruct the UO to populate the variable index map.");
+  params.addParam<FileName>("bubble_volume_file", "An optional file name where bubble volumes can be output.");
   return params;
 }
 
@@ -58,7 +60,8 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _var_index_mode(getParam<bool>("enable_var_coloring")),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
     _pbs(NULL),
-    _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero)
+    _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
+    _bubble_volume_file_name(parameters.isParamValid("bubble_volume_file") ? getParam<FileName>("bubble_volume_file") : "")
 {
   // Size the data structures to hold the correct number of maps
   _bubble_maps.resize(_maps_size);
@@ -71,6 +74,12 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
 
   // This map is always size to the number of variables
   _nodes_visited.resize(_vars.size());
+}
+
+NodalFloodCount::~NodalFloodCount()
+{
+  if (_bubble_volume_file_handle.is_open())
+    _bubble_volume_file_handle.close();
 }
 
 void
@@ -139,6 +148,10 @@ NodalFloodCount::finalize()
 
   // Update the region offsets so we can get unique bubble numbers in multimap mode
   updateRegionOffsets();
+
+  // Calculate and out output bubble volume data
+  if (_bubble_volume_file_name != "")
+    calculateBubbleVolumes(_bubble_volume_file_name);
 }
 
 Real
@@ -498,4 +511,86 @@ NodalFloodCount::updateRegionOffsets()
     // Note: We never need to touch offset zero - it should *always* be zero
     for (unsigned int map_num=1; map_num < _maps_size; ++map_num)
       _region_offsets[map_num] = _region_offsets[map_num -1] + _region_counts[map_num - 1];
+}
+
+void
+NodalFloodCount::calculateBubbleVolumes(const std::string & file_name)
+{
+  Moose::perf_log.push("calculateBubbleVolume()","NodalFloodCount");
+
+  // Size our temporary data structure
+  std::vector<std::vector<Real> > bubble_volumes(_maps_size);
+  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+  {
+    bubble_volumes[map_num].resize(_bubble_sets[map_num].size());
+  }
+
+  std::vector<unsigned int> flood_nodes(_maps_size);
+  const MeshBase::const_element_iterator el_end = _mesh._mesh.active_local_elements_end();
+  for (MeshBase::const_element_iterator el = _mesh._mesh.active_local_elements_begin(); el != el_end; ++el)
+  {
+    Elem *elem = *el;
+    unsigned int elem_n_nodes = elem->n_nodes();
+    Real curr_volume = elem->volume();
+
+    for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+    {
+      unsigned int bubble_counter = 0;
+      std::list<BubbleData>::const_iterator end = _bubble_sets[map_num].end();
+      for (std::list<BubbleData>::const_iterator bubble_it1 = _bubble_sets[map_num].begin(); bubble_it1 != end; ++bubble_it1)
+      {
+        unsigned int flooded_nodes = 0;
+        for (unsigned int node = 0; node<elem_n_nodes; ++node)
+        {
+          unsigned int node_id = elem->node(node);
+          if (bubble_it1->_nodes.find(node_id) != bubble_it1->_nodes.end())
+            ++flooded_nodes;
+        }
+
+        // Are a majority of the nodes flooded for this element?
+        if (flooded_nodes >= elem_n_nodes / 2)
+          bubble_volumes[map_num][bubble_counter] += curr_volume;
+
+        ++bubble_counter;
+      }
+    }
+  }
+
+  // Stick all the partial bubble volumes in one long single vector to be gathered on the root processor
+  std::vector<Real> all_bubble_volumes;
+  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+    all_bubble_volumes.insert(all_bubble_volumes.end(), bubble_volumes[map_num].begin(), bubble_volumes[map_num].end());
+
+  // Gather
+  const unsigned int length = all_bubble_volumes.size();
+  Parallel::gather(0, all_bubble_volumes);
+
+  if (libMesh::processor_id() == 0)
+  {
+    if (all_bubble_volumes.size() != length * libMesh::n_processors())
+      mooseError("Error in gathering bubble volumes");
+
+    // Sum up the values in the vector
+    for (unsigned int i=0; i<length; ++i)
+      for (unsigned int j=1; j<libMesh::n_processors(); ++j)
+        all_bubble_volumes[i] += all_bubble_volumes[i + j*length];
+
+    // Truncate the remaining values;
+    all_bubble_volumes.resize(length);
+
+    std::sort(all_bubble_volumes.begin(), all_bubble_volumes.end(), std::greater<Real>());
+
+    if (!_bubble_volume_file_handle.is_open())
+    {
+      MooseUtils::checkFileWriteable(file_name);
+      _bubble_volume_file_handle.open(file_name.c_str());
+    }
+
+    _bubble_volume_file_handle << _fe_problem.timeStep() << "\t" << std::scientific << std::setprecision(6) << _fe_problem.time();
+    for (std::vector<Real>::const_iterator it = all_bubble_volumes.begin(); it != all_bubble_volumes.end(); ++it)
+      _bubble_volume_file_handle << "\t" << std::scientific << std::setprecision(6) << *it;
+    _bubble_volume_file_handle << std::endl;
+  }
+
+  Moose::perf_log.pop("calculateBubbleVolume()","NodalFloodCount");
 }
