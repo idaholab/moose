@@ -102,6 +102,7 @@
     use_single_map = false
     enable_var_coloring = true
     condense_map_info = true
+    bubble_volume_file = 'bubble_volumes.txt'
   [../]
 
   [./DOFs]

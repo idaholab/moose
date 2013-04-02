@@ -127,6 +127,10 @@ GrainTracker::finalize()
 
   updateFieldInfo();
   Moose::perf_log.pop("finalize()","GrainTracker");
+
+  // Calculate and out output bubble volume data
+  if (_bubble_volume_file_name != "")
+    calculateBubbleVolumes(_bubble_volume_file_name);
 }
 
 void
