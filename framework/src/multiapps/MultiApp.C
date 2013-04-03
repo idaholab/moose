@@ -324,13 +324,13 @@ MultiApp::buildComm()
   MPI_Comm_rank(_orig_comm, &rank);
 //  sleep(rank);
 
-  int procs_per_app = _orig_num_procs / _total_num_apps;
+  unsigned int procs_per_app = _orig_num_procs / _total_num_apps;
 
   if(_max_procs_per_app < procs_per_app)
     procs_per_app = _max_procs_per_app;
 
   int my_app = rank / procs_per_app;
-  int procs_for_my_app = procs_per_app;
+  unsigned int procs_for_my_app = procs_per_app;
 
   if((unsigned int) my_app > _total_num_apps-1 && procs_for_my_app == _max_procs_per_app)
   {
@@ -355,7 +355,7 @@ MultiApp::buildComm()
   std::vector<int> ranks_in_my_group(procs_for_my_app);
 
   // Add all the processors in that are in my group
-  for(int i=0; i<procs_for_my_app; i++)
+  for(unsigned int i=0; i<procs_for_my_app; i++)
     ranks_in_my_group[i] = (my_app * procs_per_app) + i;
 
   if(!_has_an_app)
