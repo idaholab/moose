@@ -336,42 +336,24 @@ MultiApp::buildComm()
   {
     // If we've already hit the max number of procs per app then this processor
     // won't have an app at all
-    std::cerr<<rank<<" No app!"<<std::endl;
+//    std::cerr<<rank<<" No app!"<<std::endl;
     _has_an_app = false;
-    _my_comm = MPI_COMM_SELF;
-    procs_for_my_app = 1;
-    my_app = 0;
   }
   else if((unsigned int) my_app >= _total_num_apps-1) // The last app will gain any left-over procs
   {
     my_app = _total_num_apps - 1;
     procs_for_my_app += _orig_num_procs % _total_num_apps;
+    _first_local_app = my_app;
+    _my_num_apps = 1;
   }
 
-  // Only one app here
-  _first_local_app = my_app;
-  _my_num_apps = 1;
-
-  std::vector<int> ranks_in_my_group(procs_for_my_app);
-
-  // Add all the processors in that are in my group
-  for(unsigned int i=0; i<procs_for_my_app; i++)
-    ranks_in_my_group[i] = (my_app * procs_per_app) + i;
-
-  if(!_has_an_app)
-    ranks_in_my_group[0] = rank;
-
-  MPI_Group orig_group, new_group;
-
-  // Extract the original group handle
-  MPI_Comm_group(_orig_comm, &orig_group);
-
-  // Create a group
-  MPI_Group_incl(orig_group, procs_for_my_app, &ranks_in_my_group[0], &new_group);
-
-  // Create new communicator
-  MPI_Comm_create(_orig_comm, new_group, &_my_comm);
-  MPI_Comm_rank(_my_comm, (int*)&_my_rank);
+  if(_has_an_app)
+    MPI_Comm_split(_orig_comm, _first_local_app, rank, &_my_comm);
+  else
+  {
+    MPI_Comm_split(_orig_comm, MPI_UNDEFINED, rank, &_my_comm);
+    _my_comm = MPI_COMM_SELF;
+  }
 }
 
 unsigned int
