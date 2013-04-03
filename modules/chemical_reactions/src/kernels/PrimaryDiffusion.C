@@ -44,7 +44,7 @@ PrimaryDiffusion::computeQpJacobian()
   return _diffusivity[_qp]*Diffusion::computeQpJacobian();
 }
 
-Real PrimaryDiffusion::computeQpOffDiagJacobian(unsigned int jvar)
+Real PrimaryDiffusion::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0.0;
 }

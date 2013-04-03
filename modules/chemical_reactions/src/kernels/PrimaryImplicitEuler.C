@@ -25,7 +25,7 @@ PrimaryImplicitEuler::computeQpJacobian()
   return _porosity[_qp]*ImplicitEuler::computeQpJacobian();
 }
 
-Real PrimaryImplicitEuler::computeQpOffDiagJacobian(unsigned int jvar)
+Real PrimaryImplicitEuler::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0.0;
 }
