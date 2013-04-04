@@ -1,0 +1,12 @@
+[Tests]
+  [./element_time_derivative_test]
+    type = 'CSVDiff'
+    input = 'element_time_derivative_test.i'
+    csvdiff = 'out_elm_time_deriv.csv'
+  [../]
+  [./el_time_deriv_1d_test]
+    type = 'CSVDiff'
+    input = 'el_time_deriv_1d_test.i'
+    csvdiff = 'out_el_time_deriv_1d.csv'
+  [../]
+[]

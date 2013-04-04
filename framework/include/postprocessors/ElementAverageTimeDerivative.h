@@ -12,29 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ElementIntegralVariablePostprocessor.h"
+#ifndef ELEMENTAVERAGETIMEDERIVATIVE_H
+#define ELEMENTAVERAGETIMEDERIVATIVE_H
+
+#include "ElementAverageValue.h"
+
+//Forward Declarations
+class ElementAverageTimeDerivative;
 
 template<>
-InputParameters validParams<ElementIntegralVariablePostprocessor>()
-{
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable that this object operates on");
-  return params;
-}
+InputParameters validParams<ElementAverageTimeDerivative>();
 
-ElementIntegralVariablePostprocessor::ElementIntegralVariablePostprocessor(const std::string & name, InputParameters parameters) :
-    ElementIntegralPostprocessor(name, parameters),
-    MooseVariableInterface(parameters, false),
-    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
-    _u(_var.sln()),
-    _grad_u(_var.gradSln()),
-    _u_dot(_var.uDot())
+/**
+ * This postprocessor computes a volume integral of the time derivative of a given variable.
+ */
+class ElementAverageTimeDerivative : public ElementAverageValue
 {
-  addMooseVariableDependency(mooseVariable());
-}
+public:
+  ElementAverageTimeDerivative(const std::string & name, InputParameters parameters);
 
-Real
-ElementIntegralVariablePostprocessor::computeQpIntegral()
-{
-  return _u[_qp];
-}
+  virtual Real computeQpIntegral();
+};
+
+#endif

@@ -12,29 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ElementIntegralVariablePostprocessor.h"
+#include "ElementAverageTimeDerivative.h"
 
 template<>
-InputParameters validParams<ElementIntegralVariablePostprocessor>()
+InputParameters validParams<ElementAverageTimeDerivative>()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable that this object operates on");
+  InputParameters params = validParams<ElementAverageValue>();
   return params;
 }
 
-ElementIntegralVariablePostprocessor::ElementIntegralVariablePostprocessor(const std::string & name, InputParameters parameters) :
-    ElementIntegralPostprocessor(name, parameters),
-    MooseVariableInterface(parameters, false),
-    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
-    _u(_var.sln()),
-    _grad_u(_var.gradSln()),
-    _u_dot(_var.uDot())
-{
-  addMooseVariableDependency(mooseVariable());
-}
+
+
+ElementAverageTimeDerivative::ElementAverageTimeDerivative(const std::string & name, InputParameters parameters) :
+    ElementAverageValue(name, parameters)
+{}
+
+
 
 Real
-ElementIntegralVariablePostprocessor::computeQpIntegral()
+ElementAverageTimeDerivative::computeQpIntegral()
 {
-  return _u[_qp];
+  return _u_dot[_qp];
 }
