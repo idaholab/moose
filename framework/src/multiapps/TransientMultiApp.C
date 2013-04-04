@@ -31,6 +31,9 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     MultiApp(name, parameters),
     TransientInterface(parameters, name, "multiapps")
 {
+  if(!_has_an_app)
+    return;
+
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   if(_has_an_app)
@@ -50,7 +53,6 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     _transient_executioners[i] = ex;
   }
   }
-
 
   // Swap back
   Moose::swapLibMeshComm(swapped);

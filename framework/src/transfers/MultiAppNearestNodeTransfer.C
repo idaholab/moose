@@ -340,30 +340,33 @@ MultiAppNearestNodeTransfer::execute()
       // but it's tough because this is a collective operation... so that would have to be coordinated
       std::vector<NumericVector<Number> *> serialized_from_solutions(_multi_app->numGlobalApps());
 
-      // Swap
-      MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-
-      for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      if(_multi_app->hasApp())
       {
-        if(!_multi_app->hasLocalApp(i))
-          continue;
+        // Swap
+        MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
-        FEProblem & from_problem = *_multi_app->appProblem(i);
-        MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
-        SystemBase & from_system_base = from_var.sys();
+        for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+        {
+          if(!_multi_app->hasLocalApp(i))
+            continue;
 
-        System & from_sys = from_system_base.system();
+          FEProblem & from_problem = *_multi_app->appProblem(i);
+          MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
+          SystemBase & from_system_base = from_var.sys();
 
-        //Create a serialized version of the solution vector
-        serialized_from_solutions[i] = NumericVector<Number>::build().release();
-        serialized_from_solutions[i]->init(from_sys.n_dofs(), false, SERIAL);
+          System & from_sys = from_system_base.system();
 
-        // Need to pull down a full copy of this vector on every processor so we can get values in parallel
-        from_sys.solution->localize(*serialized_from_solutions[i]);
+          //Create a serialized version of the solution vector
+          serialized_from_solutions[i] = NumericVector<Number>::build().release();
+          serialized_from_solutions[i]->init(from_sys.n_dofs(), false, SERIAL);
+
+          // Need to pull down a full copy of this vector on every processor so we can get values in parallel
+          from_sys.solution->localize(*serialized_from_solutions[i]);
+        }
+
+        // Swap back
+        Moose::swapLibMeshComm(swapped);
       }
-
-      // Swap back
-      Moose::swapLibMeshComm(swapped);
 
       // We've found the nearest nodes for this processor.  We need to see which processor _actually_ found the nearest though
       Parallel::minloc(min_distances, min_procs);
@@ -396,7 +399,7 @@ MultiAppNearestNodeTransfer::execute()
           mooseAssert(_multi_app->hasLocalApp(from_app_num), "Something went very wrong!");
 
           // Swap
-          swapped = Moose::swapLibMeshComm(_multi_app->comm());
+          MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
           FEProblem & from_problem = *_multi_app->appProblem(from_app_num);
           MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
@@ -433,7 +436,7 @@ MultiAppNearestNodeTransfer::execute()
       to_sys.update();
 
       break;
-      }
+    }
   }
 
   std::cout<<"Finished NearestNodeTransfer!"<<std::endl;

@@ -696,6 +696,8 @@ swapLibMeshComm(MPI_Comm new_comm)
 {
   MPI_Comm old_comm = libMesh::COMM_WORLD;
   libMesh::COMM_WORLD = new_comm;
+  libMesh::CommWorld = new_comm;
+  PETSC_COMM_WORLD = new_comm;
 
   int pid;
   MPI_Comm_rank(new_comm, &pid);
@@ -705,10 +707,6 @@ swapLibMeshComm(MPI_Comm new_comm)
 
   libMesh::libMeshPrivateData::_processor_id = pid;
   libMesh::libMeshPrivateData::_n_processors = n_procs;
-
-  Parallel::Communicator communicator(new_comm);
-
-  libMesh::CommWorld = communicator;
 
   return old_comm;
 }

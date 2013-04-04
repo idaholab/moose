@@ -336,7 +336,7 @@ MultiApp::buildComm()
   {
     // If we've already hit the max number of procs per app then this processor
     // won't have an app at all
-//    std::cerr<<rank<<" No app!"<<std::endl;
+    _my_num_apps = 0;
     _has_an_app = false;
   }
   else if((unsigned int) my_app >= _total_num_apps-1) // The last app will gain any left-over procs
@@ -350,10 +350,7 @@ MultiApp::buildComm()
   if(_has_an_app)
     MPI_Comm_split(_orig_comm, _first_local_app, rank, &_my_comm);
   else
-  {
     MPI_Comm_split(_orig_comm, MPI_UNDEFINED, rank, &_my_comm);
-    _my_comm = MPI_COMM_SELF;
-  }
 }
 
 unsigned int

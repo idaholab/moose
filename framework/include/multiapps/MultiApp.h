@@ -108,6 +108,11 @@ public:
   unsigned int firstLocalApp() { return _first_local_app; }
 
   /**
+   * Whether or not this MultiApp has an app on this processor.
+   */
+  bool hasApp() { return _has_an_app; }
+
+  /**
    * Whether or not the given global app number is on this processor.
    * @param app The global app number in question
    * @return True if the global app is on this processor
