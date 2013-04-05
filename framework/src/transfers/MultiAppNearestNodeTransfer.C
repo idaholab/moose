@@ -60,7 +60,10 @@ MultiAppNearestNodeTransfer::execute()
       MeshBase * from_mesh = NULL;
 
       if(_displaced_source_mesh && from_problem.getDisplacedProblem())
+      {
+        mooseError("Cannot use a NearestNode transfer from a displaced mesh to a MultiApp!");
         from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
+      }
       else
         from_mesh = &from_problem.mesh().getMesh();
 
@@ -102,10 +105,7 @@ MultiAppNearestNodeTransfer::execute()
           MeshBase * mesh = NULL;
 
           if(_displaced_target_mesh && _multi_app->appProblem(i)->getDisplacedProblem())
-          {
-            mooseError("Cannot use a NearestNode transfer from a displaced mesh to a MultiApp!");
             mesh = &_multi_app->appProblem(i)->getDisplacedProblem()->mesh().getMesh();
-          }
           else
             mesh = &_multi_app->appProblem(i)->mesh().getMesh();
 
@@ -218,7 +218,7 @@ MultiAppNearestNodeTransfer::execute()
 
       MeshBase * to_mesh = NULL;
 
-      if(_displaced_source_mesh && to_problem.getDisplacedProblem())
+      if(_displaced_target_mesh && to_problem.getDisplacedProblem())
         to_mesh = &to_problem.getDisplacedProblem()->mesh().getMesh();
       else
         to_mesh = &to_problem.mesh().getMesh();

@@ -10,4 +10,10 @@
     input = 'tosub_master.i'
     exodiff = 'tosub_master_out.e tosub_master_out_sub_app0.e tosub_master_out_sub_app1.e'
   [../]
+
+  [./tosub_displaced]
+    type = 'Exodiff'
+    input = 'tosub_displaced_master.i'
+    exodiff = 'tosub_displaced_master_out.e tosub_displaced_master_out_sub_app0.e tosub_displaced_master_out_sub_app1.e'
+  [../]
 []

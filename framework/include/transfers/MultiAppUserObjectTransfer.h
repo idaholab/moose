@@ -39,6 +39,8 @@ public:
 protected:
   AuxVariableName _to_var_name;
   std::string _user_object_name;
+
+  bool _displaced_target_mesh;
 };
 
 #endif /* MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H */
