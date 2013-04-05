@@ -346,11 +346,22 @@ MultiApp::buildComm()
     _first_local_app = my_app;
     _my_num_apps = 1;
   }
+  else
+  {
+    _first_local_app = my_app;
+    _my_num_apps = 1;
+  }
 
   if(_has_an_app)
+  {
     MPI_Comm_split(_orig_comm, _first_local_app, rank, &_my_comm);
+    MPI_Comm_rank(_my_comm, (int*)&_my_rank);
+  }
   else
+  {
     MPI_Comm_split(_orig_comm, MPI_UNDEFINED, rank, &_my_comm);
+    _my_rank = 0;
+  }
 }
 
 unsigned int

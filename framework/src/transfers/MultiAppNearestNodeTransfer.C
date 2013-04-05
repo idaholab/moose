@@ -102,7 +102,10 @@ MultiAppNearestNodeTransfer::execute()
           MeshBase * mesh = NULL;
 
           if(_displaced_target_mesh && _multi_app->appProblem(i)->getDisplacedProblem())
+          {
+            mooseError("Cannot use a NearestNode transfer from a displaced mesh to a MultiApp!");
             mesh = &_multi_app->appProblem(i)->getDisplacedProblem()->mesh().getMesh();
+          }
           else
             mesh = &_multi_app->appProblem(i)->mesh().getMesh();
 
@@ -129,7 +132,10 @@ MultiAppNearestNodeTransfer::execute()
 
                 Real distance = 0; // Just to satisfy the last argument
 
-                Node * nearest_node = getNearestNode(*from_mesh, actual_position, distance);
+                MeshBase::const_node_iterator from_nodes_begin = from_mesh->nodes_begin();
+                MeshBase::const_node_iterator from_nodes_end   = from_mesh->nodes_end();
+
+                Node * nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
 
                 // Assuming LAGRANGE!
                 unsigned int from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
@@ -164,7 +170,10 @@ MultiAppNearestNodeTransfer::execute()
 
                 Real distance = 0; // Just to satisfy the last argument
 
-                Node * nearest_node = getNearestNode(*from_mesh, actual_position, distance);
+                MeshBase::const_node_iterator from_nodes_begin = from_mesh->nodes_begin();
+                MeshBase::const_node_iterator from_nodes_end   = from_mesh->nodes_end();
+
+                Node * nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
 
                 // Assuming LAGRANGE!
                 unsigned int from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
@@ -249,6 +258,7 @@ MultiAppNearestNodeTransfer::execute()
         min_apps.resize(n_elems);
       }
 
+      sleep(libMesh::processor_id() + 1);
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
@@ -295,7 +305,11 @@ MultiAppNearestNodeTransfer::execute()
             Real current_distance;
 
             MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-            Node * nearest_node = getNearestNode(*from_mesh, *to_node-app_position, current_distance);
+
+            MeshBase::const_node_iterator from_nodes_begin = from_mesh->local_nodes_begin();
+            MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
+
+            Node * nearest_node = getNearestNode(*to_node-app_position, current_distance, from_nodes_begin, from_nodes_end);
             Moose::swapLibMeshComm(swapped);
 
             if(current_distance < min_distances[to_node->id()])
@@ -321,7 +335,11 @@ MultiAppNearestNodeTransfer::execute()
             Real current_distance;
 
             MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-            Node * nearest_node = getNearestNode(*from_mesh, actual_position, current_distance);
+
+            MeshBase::const_node_iterator from_nodes_begin = from_mesh->local_nodes_begin();
+            MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
+
+            Node * nearest_node = getNearestNode(actual_position, current_distance, from_nodes_begin, from_nodes_end);
             Moose::swapLibMeshComm(swapped);
 
             if(current_distance < min_distances[to_elem->id()])
@@ -334,7 +352,7 @@ MultiAppNearestNodeTransfer::execute()
         }
       }
 
-
+/*
       // We're going to need serialized solution vectors for each app
       // We could try to only do it for the apps that have mins in them...
       // but it's tough because this is a collective operation... so that would have to be coordinated
@@ -367,6 +385,7 @@ MultiAppNearestNodeTransfer::execute()
         // Swap back
         Moose::swapLibMeshComm(swapped);
       }
+*/
 
       // We've found the nearest nodes for this processor.  We need to see which processor _actually_ found the nearest though
       Parallel::minloc(min_distances, min_procs);
@@ -423,7 +442,7 @@ MultiAppNearestNodeTransfer::execute()
 
           // Assuming LAGRANGE!
           unsigned int from_dof = from_node.dof_number(from_sys_num, from_var_num, 0);
-          Real from_value = (*serialized_from_solutions[from_app_num])(from_dof);
+          Real from_value = (*from_sys.solution)(from_dof);
 
           // Swap back
           Moose::swapLibMeshComm(swapped);
@@ -442,15 +461,12 @@ MultiAppNearestNodeTransfer::execute()
   std::cout<<"Finished NearestNodeTransfer!"<<std::endl;
 }
 
-Node * MultiAppNearestNodeTransfer::getNearestNode(MeshBase & mesh, const Point & p, Real & distance)
+Node * MultiAppNearestNodeTransfer::getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end)
 {
-  MeshBase::const_node_iterator node_it = mesh.nodes_begin();
-  MeshBase::const_node_iterator node_end = mesh.nodes_end();
-
   distance = std::numeric_limits<Real>::max();
   Node * nearest = NULL;
 
-  for(; node_it != node_end; ++node_it)
+  for(MeshBase::const_node_iterator node_it = nodes_begin; node_it != nodes_end; ++node_it)
   {
     Node & node = *(*node_it);
     Real current_distance = (p-node).size();

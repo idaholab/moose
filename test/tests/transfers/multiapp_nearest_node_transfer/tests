@@ -18,5 +18,6 @@
     type = 'Exodiff'
     input = 'tosub_displaced_master.i'
     exodiff = 'tosub_displaced_master_out_sub0.e'
+    deleted = 'Not yet implemented properly!'
   [../]
 []

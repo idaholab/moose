@@ -53,6 +53,8 @@
   petsc_options = -snes_mf_operator
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  l_tol = 1e-8
+  nl_rel_tol = 1e-10
 []
 
 [Output]

@@ -43,7 +43,7 @@ protected:
    * @param distance This will hold the distance between the returned node and p
    * @return The Node closest to point p.
    */
-  Node * getNearestNode(MeshBase & mesh, const Point & p, Real & distance);
+  Node * getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end);
 
   AuxVariableName _to_var_name;
   VariableName _from_var_name;
