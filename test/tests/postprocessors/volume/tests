@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'sphere1D.i'
     exodiff = 'sphere1D_out.e'
+    max_parallel = 1
   [../]
 []
