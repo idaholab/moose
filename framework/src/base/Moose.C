@@ -151,6 +151,7 @@
 #include "LayeredSideIntegral.h"
 #include "LayeredSideAverage.h"
 #include "LayeredSideFluxAverage.h"
+#include "NearestPointLayeredAverage.h"
 #include "ElementIntegralVariableUserObject.h"
 #include "NodalNormalsEvaluator.h"
 #include "NodalNormalsPreprocessor.h"
@@ -399,6 +400,7 @@ registerObjects(Factory & factory)
   registerUserObject(LayeredSideIntegral);
   registerUserObject(LayeredSideAverage);
   registerUserObject(LayeredSideFluxAverage);
+  registerUserObject(NearestPointLayeredAverage);
   registerUserObject(ElementIntegralVariableUserObject);
   registerUserObject(NodalNormalsPreprocessor);
   registerUserObject(NodalNormalsEvaluator);

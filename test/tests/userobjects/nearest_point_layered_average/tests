@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'nearest_point_layered_average.i'
+    exodiff = 'nearest_point_layered_average_out.e'
+  [../]
+[]
