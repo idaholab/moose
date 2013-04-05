@@ -244,32 +244,6 @@ class TestHarness:
     test[EXECUTABLE] = self.executable
     test[HOSTNAME] = self.host_name
 
-  # Break down petsc version logic in a new define
-  # TODO: find a way to eval() logic instead
-  def checkPetscVersion(self, test):
-    # If any version of petsc works, return true immediately
-    if 'ALL' in set(test[PETSC_VERSION]):
-      return (True, None, None)
-    # Iterate through petsc versions in test[PETSC_VERSION] and match it against check[PETSC_VERSION]
-    for petsc_version in test[PETSC_VERSION]:
-      logic, version = re.search(r'(.*?)(\d\S+)', petsc_version).groups()
-      # Exact match
-      if logic == '' or logic == '=':
-        if version == self.checks[PETSC_VERSION]:
-          return (True, None, version)
-        else:
-          return (False, '!=', version)
-      # Logical match
-      if logic == '>' and self.checks[PETSC_VERSION][0:3] > version[0:3]:
-        return (True, None, version)
-      elif logic == '>=' and self.checks[PETSC_VERSION][0:3] >= version[0:3]:
-        return (True, None, version)
-      elif logic == '<' and self.checks[PETSC_VERSION][0:3] < version[0:3]:
-        return (True, None, version)
-      elif logic == '<=' and self.checks[PETSC_VERSION][0:3] <= version[0:3]:
-        return (True, None, version)
-    return (False, logic, version)
-
   ## Finish the test by inspecting the raw output
   def testOutputAndFinish(self, tester, retcode, output, start=0, end=0):
     caveats = []
