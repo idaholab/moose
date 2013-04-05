@@ -68,13 +68,12 @@ class TestHarness:
 
             # Go through the list of test specs and run them
             for test in tests:
+              # Build the requested Tester object and run
+              tester = self.factory.create(test[TYPE], test)
 
-	      # TODO: Refactor all this - these should be methods on the Tester not part of the TestHarness
-              if self.checkIfRunTest(test):
+              (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
 
-                # Build the requested Tester object and run
-                tester = self.factory.create(test[TYPE], test)
-
+              if should_run:
                 command = tester.getCommand(self.options)
 
                 # This method spawns another process and allows this loop to continue looking for tests
@@ -82,6 +81,8 @@ class TestHarness:
                 # This method will block when the maximum allowed parallel processes are running
                 self.runner.run(tester, command)
               else: # This job is skipped - notify the runner
+                if (reason != ''):
+                  self.handleTestResult(test, '', reason)
                 self.runner.jobSkipped(test[TEST_NAME])
 
             os.chdir(saved_cwd)
@@ -242,88 +243,6 @@ class TestHarness:
   def augmentTestSpecs(self, test):
     test[EXECUTABLE] = self.executable
     test[HOSTNAME] = self.host_name
-
-  # If the test is not to be run for any reason, print skipped as the result and return False,
-  # otherwise return True
-  def checkIfRunTest(self, test):
-    # Are we running only tests in a specific group?
-    if self.options.group <> 'ALL' and self.options.group not in test[GROUP]:
-      return False
-    if self.options.not_group <> '' and self.options.not_group in test[GROUP]:
-      return False
-
-    # Store regexp for matching tests if --re is used
-    if self.options.reg_exp:
-      match_regexp = re.compile(self.options.reg_exp)
-
-    # If --re then only test matching regexp. Needs to run before other SKIP methods
-    if self.options.reg_exp and not match_regexp.search(test[TEST_NAME]):
-      return False
-
-    # Check for deleted tests
-    if test.isValid(DELETED):
-      if self.options.extra_info:
-        # We might want to trim the string so it formats nicely
-        if len(test[DELETED]) >= TERM_COLS - (len(test[TEST_NAME])+21):
-          test_reason = (test[DELETED])[:(TERM_COLS - (len(test[TEST_NAME])+24))] + '...'
-        else:
-          test_reason = test[DELETED]
-        self.handleTestResult(test, '', 'deleted (' + test_reason + ')')
-      return False
-
-    # Check for skipped tests
-    if test.type(SKIP) is bool and test[SKIP]:
-      # Backwards compatible (no reason)
-      self.handleTestResult(test, '', 'skipped')
-      return False
-    elif test.type(SKIP) is not bool and test.isValid(SKIP):
-      skip_message = test[SKIP]
-      # We might want to trim the string so it formats nicely
-      if len(skip_message) >= TERM_COLS - (len(test[TEST_NAME])+21):
-        test_reason = (skip_message)[:(TERM_COLS - (len(test[TEST_NAME])+24))] + '...'
-      else:
-        test_reason = skip_message
-      self.handleTestResult(test, '', 'skipped (' + test_reason + ')')
-      return False
-    # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
-    elif self.options.store_time and test[SCALE_REFINE] == 0:
-      return False
-    # If we're testing with valgrind, then skip tests that require parallel or threads
-    elif self.options.enable_valgrind and (test[MIN_PARALLEL] > 1 or test[MIN_THREADS] > 1):
-      self.handleTestResult(test, '', 'skipped (Valgrind requires serial)')
-      return False
-    elif self.options.enable_valgrind and test[NO_VALGRIND]:
-      self.handleTestResult(test, '', 'skipped (NO VALGRIND)')
-      return False
-
-    # Check for PETSc versions
-    (petsc_status, logic_reason, petsc_version) = self.checkPetscVersion(test)
-    if not petsc_status:
-      self.handleTestResult(test, '', 'skipped (PETSc version ' + \
-                              str(self.checks[PETSC_VERSION]) + ' ' + logic_reason + ' ' + petsc_version + ')')
-      return False
-
-    # PETSc is being explicitly checked above
-    checks = [PLATFORM, COMPILER, MESH_MODE, METHOD, LIBRARY_MODE, DTK]
-    for check in checks:
-      test_platforms = set()
-      for x in test[check]:
-        test_platforms.add(x)
-      if not len(test_platforms.intersection(self.checks[check])):
-        self.handleTestResult(test, '', 'skipped (' + \
-          re.sub(r'\[|\]', '', check).upper() + '!=' + ', '.join(test[check]) + ')')
-        return False
-
-    # Check for heavy tests
-    if test[HEAVY] and not self.options.heavy_tests:
-      self.handleTestResult(test, '', 'skipped (HEAVY)')
-      return False
-
-    # Check for positive scale refine values when using store timing options
-    if test[SCALE_REFINE] == 0 and self.options.store_time:
-      return False
-
-    return True
 
   # Break down petsc version logic in a new define
   # TODO: find a way to eval() logic instead

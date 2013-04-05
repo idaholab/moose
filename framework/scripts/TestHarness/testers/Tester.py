@@ -1,4 +1,5 @@
 from options import *
+from util import *
 from InputParameters import InputParameters
 
 class Tester(object):
@@ -31,12 +32,110 @@ class Tester(object):
   def __init__(self, name, params):
     self.specs = params
 
+
+  # Override this method to tell the harness whether or not this test should run.
+  # This function should return a tuple (Boolean, reason)
+  # If a reason is provided it'll be printed and counted as skipped.  If the reason
+  # is left blank, the test will not be printed at all nor counted in the test totals.
+  def checkRunnable(self, options):
+    return (True, '')
+
+
+  # This method is called prior to running the test.  It can be used to cleanup files
+  # or do other preparations before the tester is run
   def prepare(self):
     return
 
+
+  # This method should return the executable command that will be executed by the tester
   def getCommand(self, options):
     return
 
+
+  # This method will be called to process the results of running the test.  Any post-test
+  # processing should happen in this method
   def processResults(self, moose_dir, retcode, options, output):
     return
 
+
+  # This is the base level runnable check common to all Testers.  DO NOT override
+  # this method in any of your derived classes.  Instead see "checkRunnable"
+  def checkRunnableBase(self, options, checks):
+    reason = ''
+
+    # Are we running only tests in a specific group?
+    if options.group <> 'ALL' and options.group not in self.specs[GROUP]:
+      return (False, reason)
+    if options.not_group <> '' and options.not_group in self.specs[GROUP]:
+      return (False, reason)
+
+    # Store regexp for matching tests if --re is used
+    if options.reg_exp:
+      match_regexp = re.compile(options.reg_exp)
+
+    # If --re then only test matching regexp. Needs to run before other SKIP methods
+    if options.reg_exp and not match_regexp.search(self.specs[TEST_NAME]):
+      return (False, reason)
+
+    # Check for deleted tests
+    if self.specs.isValid(DELETED):
+      if options.extra_info:
+        # We might want to trim the string so it formats nicely
+        if len(self.specs[DELETED]) >= TERM_COLS - (len(self.specs[TEST_NAME])+21):
+          test_reason = (self.specs[DELETED])[:(TERM_COLS - (len(self.specs[TEST_NAME])+24))] + '...'
+        else:
+          test_reason = self.specs[DELETED]
+        reason = 'deleted (' + test_reason + ')'
+      return (False, reason)
+
+    # Check for skipped tests
+    if self.specs.type(SKIP) is bool and self.specs[SKIP]:
+      # Backwards compatible (no reason)
+      return (False, 'skipped')
+    elif self.specs.type(SKIP) is not bool and self.specs.isValid(SKIP):
+      skip_message = self.specs[SKIP]
+      # We might want to trim the string so it formats nicely
+      if len(skip_message) >= TERM_COLS - (len(self.specs[TEST_NAME])+21):
+        test_reason = (skip_message)[:(TERM_COLS - (len(self.specs[TEST_NAME])+24))] + '...'
+      else:
+        test_reason = skip_message
+      reason = 'skipped (' + test_reason + ')'
+      return (False, reason)
+    # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
+    elif options.store_time and self.specs[SCALE_REFINE] == 0:
+      return (False, reason)
+    # If we're testing with valgrind, then skip tests that require parallel or threads
+    elif options.enable_valgrind and (self.specs[MIN_PARALLEL] > 1 or self.specs[MIN_THREADS] > 1):
+      reason = 'skipped (Valgrind requires serial)'
+      return (False, reason)
+    elif options.enable_valgrind and self.specs[NO_VALGRIND]:
+      reason = 'skipped (NO VALGRIND)'
+      return (False, reason)
+
+    # Check for PETSc versions
+    (petsc_status, logic_reason, petsc_version) = checkPetscVersion(checks, self.specs)
+    if not petsc_status:
+      reason = 'skipped (PETSc version ' + str(checks[PETSC_VERSION]) + ' ' + logic_reason + ' ' + petsc_version + ')'
+      return (False, reason)
+
+    # PETSc is being explicitly checked above
+    local_checks = [PLATFORM, COMPILER, MESH_MODE, METHOD, LIBRARY_MODE, DTK]
+    for check in local_checks:
+      test_platforms = set()
+      for x in self.specs[check]:
+        test_platforms.add(x)
+      if not len(test_platforms.intersection(checks[check])):
+        reason = 'skipped (' + re.sub(r'\[|\]', '', check).upper() + '!=' + ', '.join(self.specs[check]) + ')'
+        return (False, reason)
+
+    # Check for heavy tests
+    if self.specs[HEAVY] and not options.heavy_tests:
+      reason = 'skipped (HEAVY)'
+      return (False, reason)
+
+    # Check for positive scale refine values when using store timing options
+    if self.specs[SCALE_REFINE] == 0 and options.store_time:
+      return (False, reason)
+
+    # Check the return values of the derived classes
+    return self.checkRunnable(options)
