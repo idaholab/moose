@@ -23,6 +23,7 @@
 #include "HomogenizationHeatConduction.h"
 #include "HomogenizedThermalConductivity.h"
 #include "ThermalCond.h"
+#include "CoupledConvectiveFlux.h"
 
 void
 Elk::HeatConduction::registerObjects(Factory & factory)
@@ -34,6 +35,7 @@ Elk::HeatConduction::registerObjects(Factory & factory)
   registerBoundaryCondition(ConvectiveFluxFunction);
   registerBoundaryCondition(GapHeatTransfer);
   registerBoundaryCondition(BulkCoolantBC);
+  registerBoundaryCondition(CoupledConvectiveFlux);
   registerMaterial(GapConductance);
   registerMaterial(HeatConductionMaterial);
   registerDiracKernel(GapHeatPointSourceMaster);
