@@ -81,6 +81,8 @@ TransientMultiApp::solveStep()
   if(!_has_an_app)
     return;
 
+  std::cout<<"Solving MultiApp "<<_name<<std::endl;
+
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   int rank;
@@ -97,6 +99,8 @@ TransientMultiApp::solveStep()
 
   // Swap back
   Moose::swapLibMeshComm(swapped);
+
+  std::cout<<"Finished Solving MultiApp "<<_name<<std::endl;
 }
 
 Real

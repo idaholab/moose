@@ -48,6 +48,8 @@ MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const std::string & name,
 void
 MultiAppUserObjectTransfer::execute()
 {
+  std::cout<<"Beginning MultiAppUserObjectTransfer "<<_name<<std::endl;
+
   switch(_direction)
   {
     case TO_MULTIAPP:
@@ -158,6 +160,8 @@ MultiAppUserObjectTransfer::execute()
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 
+      std::cout<<"Transferring to: "<<to_var.name()<<std::endl;
+
       EquationSystems & to_es = to_sys.get_equation_systems();
 
       //Create a serialized version of the solution vector
@@ -241,4 +245,6 @@ MultiAppUserObjectTransfer::execute()
       break;
     }
   }
+
+  std::cout<<"Finished MultiAppUserObjectTransfer "<<_name<<std::endl;
 }
