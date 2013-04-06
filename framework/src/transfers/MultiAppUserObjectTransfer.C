@@ -73,7 +73,6 @@ MultiAppUserObjectTransfer::execute()
 
           if(_displaced_target_mesh && _multi_app->appProblem(i)->getDisplacedProblem())
           {
-            std::cout<<"Displaced!"<<std::endl;
             mesh = &_multi_app->appProblem(i)->getDisplacedProblem()->mesh().getMesh();
           }
           else
@@ -94,7 +93,6 @@ MultiAppUserObjectTransfer::execute()
 
               if(node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
               {
-                std::cout<<*node<<std::endl;
                 // The zero only works for LAGRANGE!
                 unsigned int dof = node->dof_number(sys_num, var_num, 0);
 
