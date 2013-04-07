@@ -23,13 +23,17 @@ InputParameters validParams<TransientMultiApp>()
 {
   InputParameters params = validParams<MultiApp>();
   params += validParams<TransientInterface>();
+
+  params.addParam<bool>("sub_cycling", false, "Set to true to allow this MultiApp to take smaller timesteps than the rest of the simulation.  More than one timestep will be performed for each 'master' timestep");
+
   return params;
 }
 
 
 TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters parameters):
     MultiApp(name, parameters),
-    TransientInterface(parameters, name, "multiapps")
+    TransientInterface(parameters, name, "multiapps"),
+    _sub_cycling(getParam<bool>("sub_cycling"))
 {
   if(!_has_an_app)
     return;
@@ -91,10 +95,44 @@ TransientMultiApp::solveStep()
   for(unsigned int i=0; i<_my_num_apps; i++)
   {
     Transient * ex = _transient_executioners[i];
-    ex->takeStep(_dt);
-    if(!ex->lastSolveConverged())
-      mooseWarning(_name<<_first_local_app+i<<" failed to converge!"<<std::endl);
-    ex->endStep();
+
+    if(_sub_cycling)
+    {
+      // Get the dt this app wants to take
+      Real dt = ex->computeConstrainedDT();
+
+      // Divide the "master" dt by that
+      Real partial_steps = _dt / dt;
+
+      unsigned int num_steps = 0;
+
+      if(partial_steps-std::floor(partial_steps) <= 2.0e-14)
+        num_steps = std::floor(partial_steps);
+      else
+        num_steps = std::ceil(partial_steps);
+
+      // Split the master dt up into the number of steps (so we can hit the time perfectly)
+      dt = _dt / (Real)num_steps;
+
+      // Now do all of the solves we need
+      for(unsigned int i=0; i<num_steps; i++)
+      {
+        ex->takeStep(dt);
+
+        if(!ex->lastSolveConverged())
+          mooseWarning("While sub_cycling "<<_name<<_first_local_app+i<<" failed to converge!"<<std::endl);
+
+        ex->endStep();
+      }
+    }
+    else
+    {
+      ex->takeStep(_dt);
+
+      if(!ex->lastSolveConverged())
+        mooseWarning(_name<<_first_local_app+i<<" failed to converge!"<<std::endl);
+      ex->endStep();
+    }
   }
 
   // Swap back
@@ -106,6 +144,9 @@ TransientMultiApp::solveStep()
 Real
 TransientMultiApp::computeDT()
 {
+  if(_sub_cycling) // Bow out of the timestep selection dance
+    return std::numeric_limits<Real>::max();
+
   Real smallest_dt = std::numeric_limits<Real>::max();
 
   if(_has_an_app)

@@ -50,6 +50,8 @@ public:
 
 private:
   std::vector<Transient *> _transient_executioners;
+
+  bool _sub_cycling;
 };
 
 #endif // TRANSIENTMULTIAPP_H
