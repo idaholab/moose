@@ -52,6 +52,8 @@ private:
   std::vector<Transient *> _transient_executioners;
 
   bool _sub_cycling;
+  unsigned int _max_failures;
+  unsigned int _failures;
 };
 
 #endif // TRANSIENTMULTIAPP_H

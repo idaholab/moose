@@ -89,6 +89,17 @@ public:
 
   virtual void endStep();
 
+  /**
+   * Can be used to set the next "target time" which is a time to nail perfectly.
+   * Useful for driving MultiApps.
+   */
+  virtual void setTargetTime(Real target_time);
+
+  /**
+   * Get the current time.
+   */
+  virtual Real getTime() { return _time; };
+
 protected:
   FEProblem & _problem;
 
@@ -147,6 +158,7 @@ protected:
   Real _time_interval_output_interval;
   Real start_time;
   Real _timestep_tolerance;
+  Real _target_time;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

@@ -26,6 +26,8 @@ InputParameters validParams<TransientMultiApp>()
 
   params.addParam<bool>("sub_cycling", false, "Set to true to allow this MultiApp to take smaller timesteps than the rest of the simulation.  More than one timestep will be performed for each 'master' timestep");
 
+  params.addParam<unsigned int>("max_failures", 0, "Maximum number of solve failures tolerated while sub_cycling.");
+
   return params;
 }
 
@@ -33,7 +35,9 @@ InputParameters validParams<TransientMultiApp>()
 TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters parameters):
     MultiApp(name, parameters),
     TransientInterface(parameters, name, "multiapps"),
-    _sub_cycling(getParam<bool>("sub_cycling"))
+    _sub_cycling(getParam<bool>("sub_cycling")),
+    _max_failures(getParam<unsigned int>("max_failures")),
+    _failures(0)
 {
   if(!_has_an_app)
     return;
@@ -98,29 +102,23 @@ TransientMultiApp::solveStep()
 
     if(_sub_cycling)
     {
-      // Get the dt this app wants to take
-      Real dt = ex->computeConstrainedDT();
+      ex->setTargetTime(_t);
 
-      // Divide the "master" dt by that
-      Real partial_steps = _dt / dt;
-
-      unsigned int num_steps = 0;
-
-      if(partial_steps-std::floor(partial_steps) <= 2.0e-14)
-        num_steps = std::floor(partial_steps);
-      else
-        num_steps = std::ceil(partial_steps);
-
-      // Split the master dt up into the number of steps (so we can hit the time perfectly)
-      dt = _dt / (Real)num_steps;
+      unsigned int failures = 0;
 
       // Now do all of the solves we need
-      for(unsigned int i=0; i<num_steps; i++)
+      while(ex->getTime() + 2e-14 < _t)
       {
-        ex->takeStep(dt);
+        ex->takeStep();
 
         if(!ex->lastSolveConverged())
+        {
           mooseWarning("While sub_cycling "<<_name<<_first_local_app+i<<" failed to converge!"<<std::endl);
+          _failures++;
+        }
+
+        if(_failures > _max_failures)
+          mooseError("While sub_cycling "<<_name<<_first_local_app+i<<" REALLY failed!"<<std::endl);
 
         ex->endStep();
       }

@@ -110,7 +110,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _time_error_out_to_file(getParam<bool>("output_to_file")),
     _time_errors_filename(getParam<std::string>("file_name")),
     _time_interval(false),
-    _timestep_tolerance(getParam<Real>("timestep_tolerance"))
+    _timestep_tolerance(getParam<Real>("timestep_tolerance")),
+    _target_time(-1)
 {
   _t_step = 0;
   _dt = 0;
@@ -396,6 +397,15 @@ Transient::computeConstrainedDT()
   if(multi_app_dt < dt_cur)
     dt_cur = multi_app_dt;
 
+  // Adjust to a target time if set
+  if(_target_time > 0 && _time + dt_cur+_timestep_tolerance >= _target_time)
+  {
+    dt_cur = _target_time - _time;
+
+    _prev_dt = _dt;
+    _reset_dt = true;
+  }
+
   return dt_cur;
 
 }
@@ -539,3 +549,10 @@ Transient::problem()
 {
   return _problem;
 }
+
+void
+Transient::setTargetTime(Real target_time)
+{
+  _target_time = target_time;
+}
+
