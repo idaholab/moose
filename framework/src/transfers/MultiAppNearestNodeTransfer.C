@@ -195,6 +195,8 @@ MultiAppNearestNodeTransfer::execute()
         }
       }
 
+      delete serialized_solution;
+
       break;
     }
     case FROM_MULTIAPP:
@@ -257,8 +259,6 @@ MultiAppNearestNodeTransfer::execute()
         min_procs.resize(n_elems);
         min_apps.resize(n_elems);
       }
-
-      sleep(libMesh::processor_id() + 1);
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
