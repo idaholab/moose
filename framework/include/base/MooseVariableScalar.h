@@ -41,6 +41,7 @@ public:
   //
   VariableValue & sln() { return _u; }
   VariableValue & slnOld() { return _u_old; }
+  VariableValue & slnOlder() { return _u_older; }
 
   VariableValue & uDot() { return _u_dot; }
   VariableValue & duDotDu() { return _du_dot_du; }
@@ -58,6 +59,8 @@ protected:
   VariableValue _u;
   /// The old value of scalar variable
   VariableValue _u_old;
+  /// The older value of scalar variable
+  VariableValue _u_older;
 
   VariableValue _u_dot;
   VariableValue _du_dot_du;

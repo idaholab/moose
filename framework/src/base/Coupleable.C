@@ -17,7 +17,8 @@
 #include "SubProblem.h"
 
 Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
-    _nodal(nodal)
+    _nodal(nodal),
+    _c_is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true)
 {
   SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
 
@@ -111,9 +112,9 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 {
   coupledCallback(var_name, false);
   if (_nodal)
-    return getVar(var_name, comp)->nodalSln();
+    return _c_is_implicit ? getVar(var_name, comp)->nodalSln() : getVar(var_name, comp)->nodalSlnOld();
   else
-    return getVar(var_name, comp)->sln();
+    return _c_is_implicit ? getVar(var_name, comp)->sln() : getVar(var_name, comp)->slnOld();
 }
 
 VariableValue &
@@ -121,9 +122,9 @@ Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 {
   coupledCallback(var_name, true);
   if (_nodal)
-    return getVar(var_name, comp)->nodalSlnOld();
+    return _c_is_implicit ? getVar(var_name, comp)->nodalSlnOld() : getVar(var_name, comp)->nodalSlnOlder();
   else
-    return getVar(var_name, comp)->slnOld();
+    return _c_is_implicit ? getVar(var_name, comp)->slnOld() : getVar(var_name, comp)->slnOlder();
 }
 
 VariableValue &
@@ -131,9 +132,19 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 {
   coupledCallback(var_name, true);
   if (_nodal)
-    return getVar(var_name, comp)->nodalSlnOlder();
+  {
+    if (_c_is_implicit)
+      return getVar(var_name, comp)->nodalSlnOlder();
+    else
+      mooseError("Older values not available for explicit schemes");
+  }
   else
-    return getVar(var_name, comp)->slnOlder();
+  {
+    if (_c_is_implicit)
+      return getVar(var_name, comp)->slnOlder();
+    else
+      mooseError("Older values not available for explicit schemes");
+  }
 }
 
 VariableValue &
@@ -168,7 +179,7 @@ Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  return getVar(var_name, comp)->gradSln();
+  return _c_is_implicit ? getVar(var_name, comp)->gradSln() : getVar(var_name, comp)->gradSlnOld();
 }
 
 VariableGradient &
@@ -178,7 +189,7 @@ Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp)
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  return getVar(var_name, comp)->gradSlnOld();
+  return _c_is_implicit ? getVar(var_name, comp)->gradSlnOld() : getVar(var_name, comp)->gradSlnOlder();
 }
 
 VariableGradient &
@@ -188,7 +199,10 @@ Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  return getVar(var_name, comp)->gradSlnOlder();
+  if (_c_is_implicit)
+    return getVar(var_name, comp)->gradSlnOlder();
+  else
+    mooseError("Older values not available for explicit schemes");
 }
 
 VariableSecond &
@@ -198,7 +212,7 @@ Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return getVar(var_name, comp)->secondSln();
+  return _c_is_implicit ? getVar(var_name, comp)->secondSln() : getVar(var_name, comp)->secondSlnOlder();
 }
 
 VariableSecond &
@@ -208,7 +222,7 @@ Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return getVar(var_name, comp)->secondSlnOld();
+  return _c_is_implicit ? getVar(var_name, comp)->secondSlnOld() : getVar(var_name, comp)->secondSlnOlder();
 }
 
 VariableSecond &
@@ -218,7 +232,10 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return getVar(var_name, comp)->secondSlnOlder();
+  if (_c_is_implicit)
+    return getVar(var_name, comp)->secondSlnOlder();
+  else
+    mooseError("Older values not available for explicit schemes");
 }
 
 
@@ -238,27 +255,37 @@ VariableValue &
 NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned int comp)
 {
   if (_nodal)
-    return getVar(var_name, comp)->nodalSlnNeighbor();
+    return _c_is_implicit ? getVar(var_name, comp)->nodalSlnNeighbor() : getVar(var_name, comp)->nodalSlnOldNeighbor();
   else
-    return getVar(var_name, comp)->slnNeighbor();
+    return _c_is_implicit ? getVar(var_name, comp)->slnNeighbor() : getVar(var_name, comp)->slnOldNeighbor();
 }
 
 VariableValue &
 NeighborCoupleable::coupledNeighborValueOld(const std::string & var_name, unsigned int comp)
 {
   if (_nodal)
-    return getVar(var_name, comp)->nodalSlnOldNeighbor();
+    return _c_is_implicit ? getVar(var_name, comp)->nodalSlnOldNeighbor() : getVar(var_name, comp)->nodalSlnOlderNeighbor();
   else
-    return getVar(var_name, comp)->slnOldNeighbor();
+    return _c_is_implicit ? getVar(var_name, comp)->slnOldNeighbor() : getVar(var_name, comp)->slnOlderNeighbor();
 }
 
 VariableValue &
 NeighborCoupleable::coupledNeighborValueOlder(const std::string & var_name, unsigned int comp)
 {
   if (_nodal)
-    return getVar(var_name, comp)->nodalSlnOlderNeighbor();
+  {
+    if (_c_is_implicit)
+      return getVar(var_name, comp)->nodalSlnOlderNeighbor();
+    else
+      mooseError("Older values not available for explicit schemes");
+  }
   else
-    return getVar(var_name, comp)->slnOlderNeighbor();
+  {
+    if (_c_is_implicit)
+      return getVar(var_name, comp)->slnOlderNeighbor();
+    else
+      mooseError("Older values not available for explicit schemes");
+  }
 }
 
 VariableGradient &
@@ -267,7 +294,7 @@ NeighborCoupleable::coupledNeighborGradient(const std::string & var_name, unsign
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  return getVar(var_name, comp)->gradSlnNeighbor();
+  return _c_is_implicit ? getVar(var_name, comp)->gradSlnNeighbor() : getVar(var_name, comp)->gradSlnOldNeighbor();
 }
 
 VariableGradient &
@@ -276,7 +303,7 @@ NeighborCoupleable::coupledNeighborGradientOld(const std::string & var_name, uns
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  return getVar(var_name, comp)->gradSlnOldNeighbor();
+  return _c_is_implicit ? getVar(var_name, comp)->gradSlnOldNeighbor() : getVar(var_name, comp)->gradSlnOlderNeighbor();
 }
 
 VariableGradient &
@@ -285,7 +312,10 @@ NeighborCoupleable::coupledNeighborGradientOlder(const std::string & var_name, u
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  return getVar(var_name, comp)->gradSlnOlderNeighbor();
+  if (_c_is_implicit)
+    return getVar(var_name, comp)->gradSlnOlderNeighbor();
+  else
+    mooseError("Older values not available for explicit schemes");
 }
 
 VariableSecond &
@@ -294,13 +324,14 @@ NeighborCoupleable::coupledNeighborSecond(const std::string & var_name, unsigned
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return getVar(var_name, comp)->secondSlnNeighbor();
+  return _c_is_implicit ? getVar(var_name, comp)->secondSlnNeighbor() : getVar(var_name, comp)->secondSlnOldNeighbor();
 }
 
 
 // Scalar
 
-ScalarCoupleable::ScalarCoupleable(InputParameters & parameters)
+ScalarCoupleable::ScalarCoupleable(InputParameters & parameters) :
+    _sc_is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true)
 {
   SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
 
@@ -357,13 +388,13 @@ ScalarCoupleable::coupledScalar(const std::string & var_name, unsigned int comp)
 VariableValue &
 ScalarCoupleable::coupledScalarValue(const std::string & var_name, unsigned int comp)
 {
-  return getScalarVar(var_name, comp)->sln();
+  return _sc_is_implicit ? getScalarVar(var_name, comp)->sln() : getScalarVar(var_name, comp)->slnOld();
 }
 
 VariableValue &
 ScalarCoupleable::coupledScalarValueOld(const std::string & var_name, unsigned int comp)
 {
-  return getScalarVar(var_name, comp)->slnOld();
+  return _sc_is_implicit ? getScalarVar(var_name, comp)->slnOld() : getScalarVar(var_name, comp)->slnOlder();
 }
 
 VariableValue &

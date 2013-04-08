@@ -31,6 +31,7 @@ MooseVariableScalar::~MooseVariableScalar()
 {
   _u.release();
   _u_old.release();
+  _u_older.release();
 
   _u_dot.release();
   _du_dot_du.release();
@@ -41,6 +42,7 @@ MooseVariableScalar::reinit()
 {
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
+  const NumericVector<Real> & solution_older   = _sys.solutionOlder();
   const NumericVector<Real> & u_dot            = _sys.solutionUDot();
   const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
 
@@ -49,6 +51,7 @@ MooseVariableScalar::reinit()
   unsigned int n = _dof_indices.size();
   _u.resize(n);
   _u_old.resize(n);
+  _u_older.resize(n);
   if (_is_nl)
   {
     _u_dot.resize(n);
@@ -60,6 +63,7 @@ MooseVariableScalar::reinit()
     unsigned int idx = _dof_indices[i];
     _u[i] = current_solution(idx);
     _u_old[i] = solution_old(idx);
+    _u_older[i] = solution_older(idx);
 
     if (_is_nl)
     {

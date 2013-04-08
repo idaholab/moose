@@ -85,9 +85,13 @@ protected:
   std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;   ///< Coupled vars whose values we provide
   std::vector<MooseVariable *> _coupled_moose_vars;
 
-  bool _nodal;                                                          ///< true if we provide coupling to nodal values
+  /// true if we provide coupling to nodal values
+  bool _nodal;
+  /// True if implicit value is required
+  bool _c_is_implicit;
 
   MooseVariable *getVar(const std::string & var_name, unsigned int comp);
+
 };
 
 
@@ -155,6 +159,8 @@ protected:
   /// Coupled vars whose values we provide
   std::map<std::string, std::vector<MooseVariableScalar *> > _coupled_scalar_vars;
   std::vector<MooseVariableScalar *> _coupled_moose_scalar_vars;
+  /// True if implicit value is required
+  bool _sc_is_implicit;
 
   MooseVariableScalar *getScalarVar(const std::string & var_name, unsigned int comp);
 };
