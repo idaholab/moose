@@ -159,6 +159,7 @@ protected:
   Real start_time;
   Real _timestep_tolerance;
   Real _target_time;
+  bool _use_multiapp_dt;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

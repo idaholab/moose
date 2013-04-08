@@ -70,7 +70,9 @@ InputParameters validParams<Transient>()
   params.addParam<bool>("estimate_time_error", false, "make a time error estimate");
   params.addParam<Real>("timestep_tolerance", 2.0e-14, "the tolerance setting for final timestep size and sync times");
 
-  params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol ss_tmin sync_times time_t time_dt growth_factor predictor_scale use_AB2 use_littlef abort_on_solve_fail output_to_file file_name estimate_time_error timestep_tolerance", "Advanced");
+  params.addParam<bool>("use_multiapp_dt", false, "If true then the dt for the simulation will be chosen by the MultiApps.  If false (the default) then the minimum over the master dt and the MultiApps is used");
+
+  params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol ss_tmin sync_times time_t time_dt growth_factor predictor_scale use_AB2 use_littlef abort_on_solve_fail output_to_file file_name estimate_time_error timestep_tolerance use_multiapp_dt", "Advanced");
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
 
@@ -111,7 +113,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _time_errors_filename(getParam<std::string>("file_name")),
     _time_interval(false),
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
-    _target_time(-1)
+    _target_time(-1),
+    _use_multiapp_dt(getParam<bool>("use_multiapp_dt"))
 {
   _t_step = 0;
   _dt = 0;
@@ -390,7 +393,7 @@ Transient::computeConstrainedDT()
 
   // Constrain by what the multi apps are doing
   Real multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP_BEGIN);
-  if(multi_app_dt < dt_cur)
+  if(_use_multiapp_dt || multi_app_dt < dt_cur)
     dt_cur = multi_app_dt;
 
   multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP);
