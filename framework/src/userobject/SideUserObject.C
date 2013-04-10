@@ -32,6 +32,7 @@ SideUserObject::SideUserObject(const std::string & name, InputParameters paramet
     TransientInterface(parameters, name, "side_user_objects"),
     PostprocessorInterface(parameters),
     _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),
+    _mesh(_subproblem.mesh()),
     _q_point(_assembly.qPointsFace()),
     _qrule(_assembly.qRuleFace()),
     _JxW(_assembly.JxWFace()),

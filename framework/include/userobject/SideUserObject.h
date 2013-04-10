@@ -62,6 +62,8 @@ protected:
 
   std::vector<BoundaryName> _boundaries;
 
+  MooseMesh & _mesh;
+
   const MooseArray< Point > & _q_point;
   QBase * & _qrule;
   const MooseArray<Real> & _JxW;
