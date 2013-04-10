@@ -66,6 +66,15 @@
     mesh_mode = 'SERIAL'
   [../]
 
+  [./pl_test4qns]
+    type = 'Exodiff'
+    input = 'pl_test4qns.i'
+    exodiff = 'pl_test4qns_out.e'
+    abs_zero = 1e-09
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
   [./pl_test1]
     type = 'Exodiff'
     input = 'pl_test1.i'
@@ -90,6 +99,14 @@
     mesh_mode = 'SERIAL'
   [../]
 
+  [./pl_test3ns]
+    type = 'Exodiff'
+    input = 'pl_test3ns.i'
+    exodiff = 'pl_test3ns_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
   [./pl_test2]
     type = 'Exodiff'
     input = 'pl_test2.i'
@@ -106,10 +123,26 @@
     mesh_mode = 'SERIAL'
   [../]
 
+  [./pl_test4ns]
+    type = 'Exodiff'
+    input = 'pl_test4ns.i'
+    exodiff = 'pl_test4ns_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
   [./pl_test3q]
     type = 'Exodiff'
     input = 'pl_test3q.i'
     exodiff = 'pl_test3q_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+
+  [./pl_test3qns]
+    type = 'Exodiff'
+    input = 'pl_test3qns.i'
+    exodiff = 'pl_test3qns_out.e'
     group = 'geometric'
     mesh_mode = 'SERIAL'
   [../]

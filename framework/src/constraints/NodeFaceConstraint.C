@@ -32,6 +32,7 @@ InputParameters validParams<NodeFaceConstraint>()
   params.addRequiredParam<BoundaryName>("slave", "The boundary ID associated with the slave side");
   params.addRequiredParam<BoundaryName>("master", "The boundary ID associated with the master side");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
+  params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_constraint");
@@ -91,6 +92,10 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   if (parameters.isParamValid("tangential_tolerance"))
   {
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
+  }
+  if (parameters.isParamValid("normal_smoothing_distance"))
+  {
+    _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
   }
   // Put a "1" into test_slave
   // will always only have one entry that is 1

@@ -30,7 +30,9 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
     _fe_type(order),
     _nearest_node(nearest_node),
     _update_location(true),
-    _tangential_tolerance(0.0)
+    _tangential_tolerance(0.0),
+    _do_normal_smoothing(false),
+    _normal_smoothing_distance(0.0)
 {
   // Preconstruct an FE object for each thread we're going to use
   // This is a time savings so that the thread objects don't do this themselves multiple times
@@ -70,6 +72,8 @@ PenetrationLocator::detectPenetration()
                        _penetration_info,
                        _update_location,
                        _tangential_tolerance,
+                       _do_normal_smoothing,
+                       _normal_smoothing_distance,
                        _fe,
                        _fe_type,
                        _nearest_node,
@@ -116,6 +120,14 @@ void
 PenetrationLocator::setTangentialTolerance(Real tangential_tolerance)
 {
   _tangential_tolerance = tangential_tolerance;
+}
+
+void
+PenetrationLocator::setNormalSmoothingDistance(Real normal_smoothing_distance)
+{
+  _normal_smoothing_distance = normal_smoothing_distance;
+  if (_normal_smoothing_distance > 0.0)
+    _do_normal_smoothing = true;
 }
 
 void

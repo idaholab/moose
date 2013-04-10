@@ -27,6 +27,8 @@ public:
                     std::map<unsigned int, PenetrationLocator::PenetrationInfo *> & penetration_info,
                     bool update_location,
                     Real tangential_tolerance,
+                    bool do_normal_smoothing,
+                    Real normal_smoothing_distance,
                     std::vector<FEBase * > & fes,
                     FEType & fe_type,
                     NearestNodeLocator & nearest_node,
@@ -53,6 +55,8 @@ protected:
 
   bool _update_location;
   Real _tangential_tolerance;
+  bool _do_normal_smoothing;
+  Real _normal_smoothing_distance;
 
   std::vector<FEBase * > & _fes;
 
@@ -116,6 +120,28 @@ protected:
                             FEBase * fe,
                             const Point & slave_point,
                             const Real tangential_tolerance);
+
+  void
+  smoothNormal(PenetrationLocator::PenetrationInfo* info,
+               std::vector<PenetrationLocator::PenetrationInfo*> & p_info);
+
+
+  void
+  getSmoothingEdgesAndWeights(const Point& p,
+                              const Elem* side,
+                              std::vector<std::vector<Node*> > &edge_nodes,
+                              std::vector<Real> &edge_face_weights);
+
+  void
+  findNeighborsInInfoVector(std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
+                            std::vector<std::vector<Node*> > &edge_nodes,
+                            std::vector<PenetrationLocator::PenetrationInfo*> &neighbor_info);
+
+  void
+  findNeighborsFromNodeElemMap(PenetrationLocator::PenetrationInfo* info,
+                               std::vector<std::vector<Node*> > &edge_nodes,
+                               std::vector<PenetrationLocator::PenetrationInfo*> &neighbor_info,
+                               std::vector<PenetrationLocator::PenetrationInfo*> & p_info);
 
   void
   computeSlip( FEBase & fe,
