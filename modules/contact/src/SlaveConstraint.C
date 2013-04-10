@@ -27,6 +27,7 @@ InputParameters validParams<SlaveConstraint>()
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
+  params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<std::string>("formulation", "default", "The contact formulation");
   return params;
@@ -49,6 +50,10 @@ SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters param
   if (parameters.isParamValid("tangential_tolerance"))
   {
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
+  }
+  if (parameters.isParamValid("normal_smoothing_distance"))
+  {
+    _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
   }
 }
 

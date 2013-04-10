@@ -22,6 +22,7 @@ InputParameters validParams<ContactAction>()
   params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  Must be positive.");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
+  params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<MooseEnum>("order", orders, "The finite element order: FIRST, SECOND, etc.");
   params.addParam<MooseEnum>("formulation", formulation, "The contact formulation: default, penalty, augmented_lagrange");
   return params;
@@ -90,6 +91,10 @@ ContactAction::act()
     {
       params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
     }
+    if (isParamValid("normal_smoothing_distance"))
+    {
+      params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
+    }
     params.addCoupledVar("disp_x", "The x displacement");
     params.set<std::vector<std::string> >("disp_x") = std::vector<std::string>(1, _disp_x);
     params.addCoupledVar("disp_y", "The y displacement");
@@ -138,6 +143,10 @@ ContactAction::act()
     if (isParamValid("tangential_tolerance"))
     {
       params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+    }
+    if (isParamValid("normal_smoothing_distance"))
+    {
+      params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
     }
     params.addCoupledVar("disp_x", "The x displacement");
     params.set<std::vector<std::string> >("disp_x") = std::vector<std::string>(1, _disp_x);

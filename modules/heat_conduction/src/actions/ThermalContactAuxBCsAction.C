@@ -17,6 +17,7 @@ InputParameters validParams<ThermalContactAuxBCsAction>()
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
+  params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
   params.addParam<bool>("quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
@@ -49,6 +50,10 @@ ThermalContactAuxBCsAction::act()
   {
     params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
   }
+  if (isParamValid("normal_smoothing_distance"))
+  {
+    params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
+  }
   params.set<bool>("warnings") = getParam<bool>("warnings");
   _problem->addAuxBoundaryCondition(getParam<std::string>("gap_type"),
       "gap_value_" + Moose::stringify(n),
@@ -77,6 +82,10 @@ ThermalContactAuxBCsAction::act()
   {
     params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
   }
+  if (isParamValid("normal_smoothing_distance"))
+  {
+    params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
+  }
   _problem->addAuxBoundaryCondition("PenetrationAux",
       "penetration_" + Moose::stringify(n),
       params);
@@ -95,6 +104,10 @@ ThermalContactAuxBCsAction::act()
     if (isParamValid("tangential_tolerance"))
     {
       params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+    }
+    if (isParamValid("normal_smoothing_distance"))
+    {
+      params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
     }
 
     // For efficiency, run this at the beginning of each step...

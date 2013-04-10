@@ -14,6 +14,7 @@ InputParameters validParams<GapHeatPointSourceMaster>()
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
+  params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
 
   return params;
 }
@@ -26,6 +27,10 @@ GapHeatPointSourceMaster::GapHeatPointSourceMaster(const std::string & name, Inp
   if (parameters.isParamValid("tangential_tolerance"))
   {
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
+  }
+  if (parameters.isParamValid("normal_smoothing_distance"))
+  {
+    _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
   }
 }
 
