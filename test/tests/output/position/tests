@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'position.i'
+    exodiff = 'position_out_oversample.e'
+  [../]
+[]

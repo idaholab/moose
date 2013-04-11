@@ -47,6 +47,8 @@ InputParameters validParams<SetupOverSamplingAction>()
   params.addParam<Real>("iteration_plot_start_time", std::numeric_limits<Real>::max(), "Specifies a time after which the solution will be written following each nonlinear iteration");
   params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file");
 
+  params.addParam<Point>("position", "Set a positional offset.  This vector will get added to the nodal cooardinates to move the domain.");
+
   return params;
 }
 
@@ -70,6 +72,9 @@ SetupOverSamplingAction::act()
   {
     _pars.set<std::vector<std::string> >("output_variables") = _problem->getVariableNames();
   }
+
+  if(_pars.isParamValid("position"))
+    out_problem.setPosition(_pars.get<Point>("position"));
 
   _pars.set<OutFileBase>("file_base") = _problem->out().fileBase() + "_oversample";
 

@@ -25,6 +25,7 @@ InputParameters validParams<OutputProblem>()
   InputParameters params = validParams<Problem>();
   params.addRequiredParam<FEProblem *>("mproblem", "The FE problem containing this OutputProblem");
   params.addRequiredParam<unsigned int>("refinements", "The number of refinements to use in the oversampled mesh");
+  params.addParam<Point>("position", "Set a positional offset.  This vector will get added to the nodal cooardinates to move the domain.");
   return params;
 }
 
@@ -39,6 +40,12 @@ OutputProblem::OutputProblem(const std::string & name, InputParameters parameter
   // The mesh in this system will be finer than the nonlinear system mesh
   MeshRefinement mesh_refinement(_mesh);
   mesh_refinement.uniformly_refine(parameters.get<unsigned int>("refinements"));
+
+  if(isParamValid("position"))
+  {
+    _position = getParam<Point>("position");
+    moveMesh();
+  }
 
   EquationSystems & source_es = _mproblem.es();
 
@@ -130,7 +137,7 @@ OutputProblem::init()
       for(;nd != nd_end; ++nd)
         for(unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
           // 0 is for the value component
-          dest_sys.solution->set((*nd)->dof_number(sys_num, var_num, 0), (*_mesh_functions[sys_num][var_num])(**nd));
+          dest_sys.solution->set((*nd)->dof_number(sys_num, var_num, 0), (*_mesh_functions[sys_num][var_num])(**nd - _position));
     }
   }
 }
@@ -151,4 +158,24 @@ void
 OutputProblem::outputInput()
 {
   _out.outputInput();
+}
+
+void
+OutputProblem::setPosition(const Point & p)
+{
+  _position = p;
+  moveMesh();
+}
+
+void
+OutputProblem::moveMesh()
+{
+  MeshBase::node_iterator nd     = _mesh.getMesh().nodes_begin();
+  MeshBase::node_iterator nd_end = _mesh.getMesh().nodes_end();
+
+  for(;nd != nd_end; ++nd)
+  {
+    Node & node = *(*nd);
+    node += _position;
+  }
 }

@@ -48,13 +48,25 @@ public:
   virtual void outputPps(const FormattedTable & table);
   virtual void outputInput();
 
+  /**
+   * Set a position offset for the output.
+   */
+  virtual void setPosition(const Point & p);
+
 protected:
+  /**
+   * Move the mesh into position based on _position.
+   */
+  void moveMesh();
+
   FEProblem & _mproblem;
   MooseMesh & _mesh;
   EquationSystems _eq;
   Output _out;
   std::vector<std::vector<MeshFunction *> > _mesh_functions;
   NumericVector<Number> * _serialized_solution;
+
+  Point _position;
 };
 
 #endif
