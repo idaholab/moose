@@ -112,7 +112,7 @@ OutputProblem::OutputProblem(const std::string & name, InputParameters parameter
         for(unsigned int var_num=0; var_num<num_vars; var_num++)
         {
           // Create a variable in the dest_sys to match...
-          dest_sys.add_variable(source_sys.variable_name(var_num), source_sys.variable_type(var_num));
+          dest_sys.add_variable(source_sys.variable_name(var_num), source_sys.variable_type(var_num), &source_sys.variable(var_num).active_subdomains());
         }
       }
     }
