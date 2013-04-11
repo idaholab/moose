@@ -161,6 +161,8 @@ MultiAppMeshFunctionTransfer::execute()
         }
       }
 
+      delete serialized_solution;
+
       break;
     }
     case FROM_MULTIAPP:
@@ -282,6 +284,7 @@ MultiAppMeshFunctionTransfer::execute()
             }
           }
         }
+        delete serialized_from_solution;
       }
 
       to_solution->close();
