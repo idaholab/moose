@@ -67,6 +67,8 @@ protected:
   NumericVector<Number> * _serialized_solution;
 
   Point _position;
+
+  bool _mesh_might_change;
 };
 
 #endif

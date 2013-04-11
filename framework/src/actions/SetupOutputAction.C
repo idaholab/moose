@@ -18,6 +18,7 @@
 #include "Output.h"
 #include "FEProblem.h"
 #include "Conversion.h"
+#include "OutputProblem.h"
 
 #include "libmesh/exodusII_io.h"
 #include "MooseMesh.h"
@@ -83,14 +84,9 @@ SetupOutputAction::SetupOutputAction(const std::string & name, InputParameters p
 void
 SetupOutputAction::setupOutputObject(Output &output, InputParameters & params)
 {
-  // Has the filebase been overriden at the application level?
-  if(_app.getOutputFileBase() != "")
-    output.fileBase(_app.getOutputFileBase());
-  else
-    output.fileBase(params.get<OutFileBase>("file_base"));
-
-
   mooseAssert(params.have_parameter<std::vector<std::string> >("output_variables"), "Output Variables are required");
+
+  output.fileBase(params.get<OutFileBase>("file_base"));
 
   if (params.get<bool>("exodus"))
   {
@@ -146,6 +142,11 @@ SetupOutputAction::act()
   _problem->setOutputVariables();
 
   Output & output = _problem->out();                       // can't use use this with coupled problems on different meshes
+
+  // Has the filebase been overriden at the application level?
+  if(_app.getOutputFileBase() != "")
+    _pars.set<OutFileBase>("file_base") = _app.getOutputFileBase();
+
   setupOutputObject(output, _pars);
 
   const bool output_initial = getParam<bool>("output_initial");
@@ -214,4 +215,41 @@ SetupOutputAction::act()
   // use that instead of creating another one here
   if (access(base.c_str(), W_OK) == -1)
     mooseError("Can not write to directory: " + base + " for file base: " + getParam<OutFileBase>("file_base"));
+
+
+  if(_app.hasOutputPosition())
+  {
+    OutputProblem & out_problem = _problem->getOutputProblem(0);
+
+    Output & output = out_problem.out();  // can't use use this with coupled problems on different meshes
+
+    if(!_pars.isParamValid("output_variables"))
+    {
+      _pars.set<std::vector<std::string> >("output_variables") = _problem->getVariableNames();
+    }
+
+    out_problem.setPosition(_app.getOutputPosition());
+
+    _pars.set<OutFileBase>("file_base") = _problem->out().fileBase() + "_in_position";
+
+    setupOutputObject(output, _pars);
+
+    out_problem.outputInitial(getParam<bool>("output_initial"));
+
+#ifdef LIBMESH_ENABLE_AMR
+    Adaptivity & adapt = _problem->adaptivity();
+    if (adapt.isOn())
+      output.sequence(true);
+#endif //LIBMESH_ENABLE_AMR
+
+    // TODO: Need to set these values on the OutputProblem
+    output.interval(getParam<unsigned int>("interval"));
+    output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
+
+// Test to make sure that the user can write to the directory specified in file_base
+    std::string base = "./" + getParam<OutFileBase>("file_base");
+    base = base.substr(0, base.find_last_of('/'));
+    if (access(base.c_str(), W_OK) == -1)
+      mooseError("Can not write to directory: " + base + " for file base: " + getParam<OutFileBase>("file_base"));
+  }
 }

@@ -209,6 +209,9 @@ protected:
   /// Maximum number of processors to give to each app
   unsigned int _max_procs_per_app;
 
+  /// Whether or not to move the output of the MultiApp into position
+  bool _output_in_position;
+
   /// Whether or not this processor as an App _at all_
   bool _has_an_app;
 };

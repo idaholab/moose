@@ -70,6 +70,8 @@ InputParameters validParams<MultiApp>()
 
   params.addParam<unsigned int>("max_procs_per_app", std::numeric_limits<unsigned int>::max(), "Maximum number of processors to give to each App in this MultiApp.  Useful for restricting small solves to just a few procs so they don't get spread out");
 
+  params.addParam<bool>("output_in_position", false, "If true this will cause the output from the MultiApp to be 'moved' by its position vector");
+
   params.addPrivateParam<std::string>("built_by_action", "add_multi_app");
 
   return params;
@@ -84,6 +86,7 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     _execute_on(getParam<MooseEnum>("execute_on")),
     _inflation(getParam<Real>("bounding_box_inflation")),
     _max_procs_per_app(getParam<unsigned int>("max_procs_per_app")),
+    _output_in_position(getParam<bool>("output_in_position")),
     _has_an_app(true)
 {
   if(isParamValid("positions"))
@@ -162,6 +165,12 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
 
     app->setInputFileName(input_file);
     app->setOutputFileBase(output_base.str());
+
+    if(isParamValid("output_in_position"))
+    {
+      app->setOutputPosition(_positions[_first_local_app + i]);
+    }
+
     app->setupOptions();
     app->runInputFile();
   }

@@ -111,6 +111,23 @@ public:
   std::string getOutputFileBase() { return _output_file_base; }
 
   /**
+   * Tell the app to output in a specific position.
+   */
+  void setOutputPosition(Point p) { _output_position_set = true; _output_position = p; }
+
+  /**
+   * Whether or not an output position has been set.
+   * @return True if it has
+   */
+  bool hasOutputPosition() { return _output_position_set; }
+
+  /**
+   * Get the output position.
+   * @return The position offset for the output.
+   */
+  Point getOutputPosition() { return _output_position; }
+
+  /**
    * Return the filename that was parsed
    */
   std::string getFileName(bool stripLeadingPath = true) const;
@@ -188,6 +205,12 @@ protected:
 
   /// The output file basename
   std::string _output_file_base;
+
+  /// Whether or not an output position has been set for this app
+  bool _output_position_set;
+
+  /// The output position
+  Point _output_position;
 
   /// Command line object
   CommandLine * _command_line;
