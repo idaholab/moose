@@ -4,4 +4,10 @@
     input = 'nodal_flood_periodic.i'
     exodiff = 'out.e out.e-s005'
   [../]
+
+  [./particle_distribution_test]
+   type = CSVDiff
+   input = 'nodal_flood_particle_distribution.i'
+   csvdiff = 'nodal_flood_particle_distribution.csv'
+  [../]
 []

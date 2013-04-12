@@ -236,6 +236,8 @@ protected:
    */
   std::string _bubble_volume_file_name;
   std::ofstream _bubble_volume_file_handle;
+
+  std::vector<Real> _all_bubble_volumes;
 };
 
 #endif

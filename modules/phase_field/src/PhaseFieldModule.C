@@ -20,6 +20,7 @@
 #include "PFMobility.h"
 #include "NodalFloodCount.h"
 #include "NodalFloodCountAux.h"
+#include "NodalVolumeFraction.h"
 
 void
 Elk::PhaseField::registerObjects(Factory & factory)
@@ -42,4 +43,5 @@ Elk::PhaseField::registerObjects(Factory & factory)
   registerMaterial(PFMobility);
   registerUserObject(NodalFloodCount);
   registerAux(NodalFloodCountAux);
+  registerUserObject(NodalVolumeFraction);
 }

@@ -118,6 +118,8 @@ NodalFloodCount::initialize()
   // Calculate the thresholds for this iteration
   _step_threshold = _element_average_value + _threshold;
   _step_connecting_threshold = _element_average_value + _connecting_threshold;
+
+  _all_bubble_volumes.clear();
 }
 
 void
@@ -557,40 +559,43 @@ NodalFloodCount::calculateBubbleVolumes(const std::string & file_name)
   }
 
   // Stick all the partial bubble volumes in one long single vector to be gathered on the root processor
-  std::vector<Real> all_bubble_volumes;
+  //std::vector<Real> all_bubble_volumes;
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
-    all_bubble_volumes.insert(all_bubble_volumes.end(), bubble_volumes[map_num].begin(), bubble_volumes[map_num].end());
-
+    _all_bubble_volumes.insert(_all_bubble_volumes.end(), bubble_volumes[map_num].begin(), bubble_volumes[map_num].end());
+  
   // Gather
-  const unsigned int length = all_bubble_volumes.size();
-  Parallel::gather(0, all_bubble_volumes);
-
-  if (libMesh::processor_id() == 0)
-  {
-    if (all_bubble_volumes.size() != length * libMesh::n_processors())
-      mooseError("Error in gathering bubble volumes");
-
-    // Sum up the values in the vector
-    for (unsigned int i=0; i<length; ++i)
-      for (unsigned int j=1; j<libMesh::n_processors(); ++j)
-        all_bubble_volumes[i] += all_bubble_volumes[i + j*length];
-
-    // Truncate the remaining values;
-    all_bubble_volumes.resize(length);
-
-    std::sort(all_bubble_volumes.begin(), all_bubble_volumes.end(), std::greater<Real>());
-
+  // const unsigned int length = all_bubble_volumes.size();
+  //Parallel::allgather(0, all_bubble_volumes);
+  
+  //if (libMesh::processor_id() == 0)
+  //{
+  //if (all_bubble_volumes.size() != length * libMesh::n_processors())
+  //  mooseError("Error in gathering bubble volumes");
+  
+  // Sum up the values in the vector
+  //for (unsigned int i=0; i<length; ++i)
+  //for (unsigned int j=1; j<libMesh::n_processors(); ++j)
+  //  all_bubble_volumes[i] += all_bubble_volumes[i + j*length];
+  Parallel::sum(_all_bubble_volumes); //do all the sums!
+  
+  // Truncate the remaining values;
+  //all_bubble_volumes.resize(length);
+  
+  std::sort(_all_bubble_volumes.begin(), _all_bubble_volumes.end(), std::greater<Real>());
+  
+  if (libMesh::processor_id() == 0 && _bubble_volume_file_name != "")
+  {  
     if (!_bubble_volume_file_handle.is_open())
     {
       MooseUtils::checkFileWriteable(file_name);
       _bubble_volume_file_handle.open(file_name.c_str());
     }
-
-    _bubble_volume_file_handle << _fe_problem.timeStep() << "\t" << std::scientific << std::setprecision(6) << _fe_problem.time();
-    for (std::vector<Real>::const_iterator it = all_bubble_volumes.begin(); it != all_bubble_volumes.end(); ++it)
-      _bubble_volume_file_handle << "\t" << std::scientific << std::setprecision(6) << *it;
+    
+    _bubble_volume_file_handle << _fe_problem.timeStep() << ", " << std::scientific << std::setprecision(6) << _fe_problem.time();
+    for (std::vector<Real>::const_iterator it = _all_bubble_volumes.begin(); it != _all_bubble_volumes.end(); ++it)
+      _bubble_volume_file_handle << ", " << std::scientific << std::setprecision(6) << *it;
     _bubble_volume_file_handle << std::endl;
   }
-
+  
   Moose::perf_log.pop("calculateBubbleVolume()","NodalFloodCount");
 }
