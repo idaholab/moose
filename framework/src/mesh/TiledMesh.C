@@ -29,16 +29,24 @@ InputParameters validParams<TiledMesh>()
   params.addParam<Real>("y_width", 0, "The tile width in the y direction");
   params.addParam<Real>("z_width", 0, "The tile width in the z direction");
 
-  params.addParam<BoundaryName>("left_boundary", "TODO");
-  params.addParam<BoundaryName>("right_boundary", "TODO");
-  params.addParam<BoundaryName>("top_boundary", "TODO");
-  params.addParam<BoundaryName>("bottom_boundary", "TODO");
-  params.addParam<BoundaryName>("front_boundary", "TODO");
-  params.addParam<BoundaryName>("back_boundary", "TODO");
+  // x boundary names
+  params.addParam<BoundaryName>("left_boundary", "left_boundary", "name of the left (x) boundary");
+  params.addParam<BoundaryName>("right_boundary", "right_boundary", "name of the right (x) boundary");
 
-  params.addParam<unsigned int>("x_tiles", 1, "TODO");
-  params.addParam<unsigned int>("y_tiles", 1, "TODO");
-  params.addParam<unsigned int>("z_tiles", 1, "TODO");
+  // y boundary names
+  params.addParam<BoundaryName>("top_boundary", "top_boundary", "name of the top (y) boundary");
+  params.addParam<BoundaryName>("bottom_boundary", "bottom_boundary", "name of the bottom (y) boundary");
+
+  // z boundary names
+  params.addParam<BoundaryName>("front_boundary", "front_boundary", "name of the front (z) boundary");
+  params.addParam<BoundaryName>("back_boundary", "back_boundary", "name of the back (z) boundary");
+
+  // The number of tiles is 1 in each direction unless otherwise specified.
+  // An x_tiles value of 1 means do not stitch any extra meshes together in
+  // the x-direction.
+  params.addParam<unsigned int>("x_tiles", 1, "Number of tiles to stitch together (left to right) in the x-direction");
+  params.addParam<unsigned int>("y_tiles", 1, "Number of tiles to stitch together (top to bottom) in the y-direction");
+  params.addParam<unsigned int>("z_tiles", 1, "Number of tiles to stitch together (front to back) in the z-direction");
 
   return params;
 }
@@ -97,7 +105,7 @@ TiledMesh::init()
     for (unsigned int i=1; i<getParam<unsigned int>("x_tiles"); ++i)
     {
       MeshTools::Modification::translate(*clone, _x_width, 0, 0);
-      _mesh.stitch_meshes(dynamic_cast<SerialMesh &>(*clone), right, left, TOLERANCE, true);
+      _mesh.stitch_meshes(dynamic_cast<SerialMesh &>(*clone), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
     }
   }
   {
@@ -107,17 +115,17 @@ TiledMesh::init()
     for (unsigned int i=1; i<getParam<unsigned int>("y_tiles"); ++i)
     {
       MeshTools::Modification::translate(*clone, 0, _y_width, 0);
-      _mesh.stitch_meshes(dynamic_cast<SerialMesh &>(*clone), top, bottom, TOLERANCE, true);
+      _mesh.stitch_meshes(dynamic_cast<SerialMesh &>(*clone), top, bottom, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
     }
   }
   {
     AutoPtr<MeshBase> clone = _mesh.clone();
 
-    // Build Y Tiles
+    // Build Z Tiles
     for (unsigned int i=1; i<getParam<unsigned int>("z_tiles"); ++i)
     {
       MeshTools::Modification::translate(*clone, 0, 0, _z_width);
-      _mesh.stitch_meshes(dynamic_cast<SerialMesh &>(*clone), front, back, TOLERANCE, true);
+      _mesh.stitch_meshes(dynamic_cast<SerialMesh &>(*clone), front, back, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
     }
   }
 
