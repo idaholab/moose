@@ -304,3 +304,7 @@ syntax:
 
 doc:
 	doxygen doc/doxygen/Doxyfile
+
+cleandep:
+	@echo === Cleaning outdated dependencies ===
+	$(MOOSE_DIR)/scripts/rm_outdated_deps.sh
