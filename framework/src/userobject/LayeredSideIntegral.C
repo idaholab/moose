@@ -98,10 +98,13 @@ LayeredSideIntegral::getLayer(Point p) const
 {
   Real direction_x = p(_direction);
 
+  if(direction_x < _direction_min)
+    return 0;
+
   unsigned int layer = std::floor(((direction_x - _direction_min) / (_direction_max - _direction_min)) * (Real)_num_layers);
 
-  if(layer == _num_layers)
-    layer -= 1;
+  if(layer >= _num_layers)
+    layer = _num_layers-1;
 
   return layer;
 }
