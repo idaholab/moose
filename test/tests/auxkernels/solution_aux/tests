@@ -1,0 +1,37 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'solution_aux.i'
+    exodiff = 'solution_aux_out.e'
+  [../]
+
+  [./direct]
+    type = 'Exodiff'
+    input = 'solution_aux_direct.i'
+    exodiff = 'solution_aux_direct_out.e'
+  [../]
+
+  [./exodus]
+    type = 'Exodiff'
+    input = 'solution_aux_exodus.i'
+    exodiff = 'solution_aux_exodus_out.e'
+  [../]
+
+  [./exodus_direct]
+    type = 'Exodiff'
+    input = 'solution_aux_exodus_direct.i'
+    exodiff = 'solution_aux_exodus_direct_out.e'
+  [../]
+
+  [./exodus_interp]
+    type = 'Exodiff'
+    input = 'solution_aux_exodus_interp.i'
+    exodiff = 'solution_aux_exodus_interp_out.e'
+  [../]
+
+  [./exodus_interp_direct]
+    type = 'Exodiff'
+    input = 'solution_aux_exodus_interp_direct.i'
+    exodiff = 'solution_aux_exodus_interp_direct_out.e'
+  [../]
+[]

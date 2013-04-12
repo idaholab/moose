@@ -67,6 +67,7 @@
 #include "DebugResidualAux.h"
 #include "BoundsAux.h"
 #include "SpatialUserObjectAux.h"
+#include "SolutionAux.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
@@ -320,6 +321,7 @@ registerObjects(Factory & factory)
   registerAux(DebugResidualAux);
   registerAux(BoundsAux);
   registerAux(SpatialUserObjectAux);
+  registerAux(SolutionAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
