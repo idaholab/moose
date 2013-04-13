@@ -35,12 +35,13 @@ InputParameters validParams<FieldSplitPreconditioner>()
 {
   InputParameters params = validParams<MoosePreconditioner>();
 
-  params.addParam<std::string>("style", "additive", "Style of FieldSplit preconditioner to use: additive|multiplicative|symmetric_multiplicative|schur");
-  params.addParam<std::string>("schur_style", "full", "Style of FieldSplit Schur factorization to use: upper|lower|full");
+  params.addParam<std::string>("split_type", "additive", "Type of FieldSplit preconditioner to use: additive|multiplicative|symmetric_multiplicative|schur");
+  params.addParam<std::string>("schur_type", "full", "Style of FieldSplit Schur factorization to use: upper|lower|full");
   params.addParam<std::string>("schur_preconditioner", "diag", "Preconditioning matrix to use with Schur: self|diag");
   params.addParam<std::vector<std::string> >("off_diag_row", "The off diagonal row you want to add into the matrix, it will be associated with an off diagonal column from the same position in off_diag_colum.");
   params.addParam<std::vector<std::string> >("off_diag_column", "The off diagonal column you want to add into the matrix, it will be associated with an off diagonal row from the same position in off_diag_row.");
   params.addParam<bool>("full", false, "Set to true if you want the full set of couplings.  Simply for convenience so you don't have to set every off_diag_row and off_diag_column combination.");
+  params.addParam<std::vector<std::string> >("split_names", "The names of the splits");
 
   return params;
 }
@@ -48,8 +49,8 @@ InputParameters validParams<FieldSplitPreconditioner>()
 FieldSplitPreconditioner::FieldSplitPreconditioner (const std::string & name, InputParameters params) :
     MoosePreconditioner(name, params),
     _nl(_fe_problem.getNonlinearSystem()),
-    _style(getStyle(getParam<std::string>("style"))),
-    _schur_style(getSchurStyle(getParam<std::string>("schur_style"))),
+    _split_type(getSplitType(getParam<std::string>("split_type"))),
+    _schur_type(getSchurType(getParam<std::string>("schur_type"))),
     _schur_preconditioner(getSchurPreconditioner(getParam<std::string>("schur_preconditioner")))
 {
   unsigned int n_vars        = _nl.nVariables();
@@ -78,19 +79,8 @@ FieldSplitPreconditioner::FieldSplitPreconditioner (const std::string & name, In
   }
   _fe_problem.setCouplingMatrix(cm);
 
-  for (unsigned int var = 0; var < n_vars; var++)
-    addSplit(var);
   _nl.setPreconditioner(this);
   _nl.useFieldSplitPreconditioner(true);
-}
-
-void
-FieldSplitPreconditioner::addSplit(unsigned int var)
-{
-  std::string var_name = _nl.sys().variable_name(var);
-  std::set<std::string> split;
-  split.insert(var_name);
-  _splits[var_name] = split;
 }
 
 void
@@ -110,8 +100,45 @@ FieldSplitPreconditioner::setup()
   DM dm;
   ierr = DMCreateMoose(libMesh::COMM_WORLD, _nl, &dm);
   CHKERRABORT(libMesh::COMM_WORLD,ierr);
-  ierr = DMMooseSetFieldDecomposition(dm,_splits);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  // const std::vector<std::string>& splitvec =  getParam<std::vector<std::string> >("split_names");
+  // std::set<std::string> splitset;
+  // for (unsigned int i = 0; i < splitvec.size(); ++i) splitset.insert(splitvec[i]);
+  // ierr = DMMooseSetSplitNames(dm,splitset);
+  // CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  // for (std::set<std::string>::const_iterator spit = splitset.begin(); spit != splitset.end(); ++spit) {
+  //   std::string spname = *spit;
+  //   {
+  //     std::string pname = spname+"_vars";
+  //     //parameters().addParam<std::vector<std::string> >(pname,std::vector<std::string>,"Split variables");
+  //     const std::vector<std::string>& varvec = getParam<std::vector<std::string> >(pname);
+  //     std::set<std::string> varset;
+  //     for (unsigned int i = 0; i < varvec.size(); ++i) varset.insert(varvec[i]);
+  //     if (varset.size()) {
+  // 	ierr = DMMooseSetSplitVars(dm,spname,varset);
+  // 	CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  //     }
+  //   }
+  //   {
+  //     std::string pname = spname+"_blocks";
+  //     const std::vector<std::string>& blockvec = getParam<std::vector<std::string> >(pname);
+  //     std::set<std::string> blockset;
+  //     for (unsigned int i = 0; i < blockvec.size(); ++i) blockset.insert(blockvec[i]);
+  //     if(blockset.size()) {
+  // 	ierr = DMMooseSetSplitBlocks(dm,spname,blockset);
+  // 	CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  //     }
+  //   }
+  //   {
+  //     std::string pname = spname+"_sides";
+  //     const std::vector<std::string>& sidevec = getParam<std::vector<std::string> >(pname);
+  //     std::set<std::string> sideset;
+  //     for (unsigned int i = 0; i < sidevec.size(); ++i) sideset.insert(sidevec[i]);
+  //     if(sideset.size()) {
+  // 	ierr = DMMooseSetSplitSides(dm,spname,sideset);
+  // 	CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  //     }
+  //   }
+  // }
   ierr = DMSetFromOptions(dm);
   CHKERRABORT(libMesh::COMM_WORLD,ierr);
   ierr = DMSetUp(dm);
@@ -131,22 +158,22 @@ FieldSplitPreconditioner::setup()
   CHKERRABORT(libMesh::COMM_WORLD,ierr);
   /* PCFieldSplit type. */
   PCCompositeType fstype;
-  switch(_style) {
-  case StyleAdditive:
+  switch(_split_type) {
+  case SplitTypeAdditive:
     fstype = PC_COMPOSITE_ADDITIVE;
     break;
-  case StyleMultiplicative:
+  case SplitTypeMultiplicative:
     fstype = PC_COMPOSITE_MULTIPLICATIVE;
     break;
-  case StyleSymmetricMultiplicative:
+  case SplitTypeSymmetricMultiplicative:
     fstype = PC_COMPOSITE_SYMMETRIC_MULTIPLICATIVE;
     break;
-  case StyleSchur:
+  case SplitTypeSchur:
     fstype = PC_COMPOSITE_SCHUR;
     break;
   default:
     std::ostringstream err;
-    err << "Unknown FieldSplitPreconditioner style: " << _style;
+    err << "Unknown FieldSplitPreconditioner split type: " << _split_type;
     mooseError(err.str());
     break;
   }
@@ -154,22 +181,22 @@ FieldSplitPreconditioner::setup()
   CHKERRABORT(libMesh::COMM_WORLD,ierr);
   /* PCFieldSplitSchurFactType. */
   PCFieldSplitSchurFactType sftype;
-  switch(_schur_style) {
-  case SchurStyleDiag:
+  switch(_schur_type) {
+  case SchurTypeDiag:
     sftype = PC_FIELDSPLIT_SCHUR_FACT_DIAG;
     break;
-  case SchurStyleUpper:
+  case SchurTypeUpper:
     sftype = PC_FIELDSPLIT_SCHUR_FACT_UPPER;
     break;
-  case SchurStyleLower:
+  case SchurTypeLower:
     sftype = PC_FIELDSPLIT_SCHUR_FACT_LOWER;
     break;
-  case SchurStyleFull:
+  case SchurTypeFull:
     sftype = PC_FIELDSPLIT_SCHUR_FACT_FULL;
     break;
   default:
     std::ostringstream err;
-    err << "Unknown FieldSplitPreconditioner Schur style: " << _schur_style;
+    err << "Unknown FieldSplitPreconditioner Schur type: " << _schur_type;
     mooseError(err.str());
     break;
   }
@@ -199,26 +226,26 @@ FieldSplitPreconditioner::setup()
 
 FieldSplitPreconditioner::~FieldSplitPreconditioner () {}
 
-FieldSplitPreconditioner::Style
-FieldSplitPreconditioner::getStyle(const std::string& str)
+FieldSplitPreconditioner::SplitType
+FieldSplitPreconditioner::getSplitType(const std::string& str)
 {
-  if(str=="additive")                      return StyleAdditive;
-  else if(str=="multiplicative")           return StyleMultiplicative;
-  else if(str=="symmetric_multiplicative") return StyleSymmetricMultiplicative;
-  else if(str=="schur")                    return StyleSchur;
+  if(str=="additive")                      return SplitTypeAdditive;
+  else if(str=="multiplicative")           return SplitTypeMultiplicative;
+  else if(str=="symmetric_multiplicative") return SplitTypeSymmetricMultiplicative;
+  else if(str=="schur")                    return SplitTypeSchur;
   else  mooseError(std::string("Invalid FieldSplitPreconditioner style: ") + str);
-  return StyleAdditive;
+  return SplitTypeAdditive;
 }
 
-FieldSplitPreconditioner::SchurStyle
-FieldSplitPreconditioner::getSchurStyle(const std::string& str)
+FieldSplitPreconditioner::SchurType
+FieldSplitPreconditioner::getSchurType(const std::string& str)
 {
-  if(str=="diagonal")            return SchurStyleDiag;
-  else if(str=="upper")          return SchurStyleUpper;
-  else if(str=="lower")          return SchurStyleLower;
-  else if(str=="full")           return SchurStyleFull;
+  if(str=="diagonal")            return SchurTypeDiag;
+  else if(str=="upper")          return SchurTypeUpper;
+  else if(str=="lower")          return SchurTypeLower;
+  else if(str=="full")           return SchurTypeFull;
   else  mooseError(std::string("Invalid FieldSplitPreconditioner Schur style: ") + str);
-  return SchurStyleDiag;
+  return SchurTypeDiag;
 }
 
 FieldSplitPreconditioner::SchurPreconditioner

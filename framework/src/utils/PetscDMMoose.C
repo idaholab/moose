@@ -26,12 +26,41 @@ struct DM_Moose
   std::set<std::string>                *blocks;
   std::map<std::string, unsigned int>  *blockids;
   std::map<unsigned int, std::string>  *blocknames;
-  std::map<std::string,std::set<std::string> > *splits;
-  std::map<std::string,std::set<unsigned int> > *field_decomposition;
+  std::set<std::string>                *sides;
+  std::map<BoundaryID, std::string>    *sidenames;
+  std::map<std::string, BoundaryID>    *sideids;
+  struct SplitNames {
+    std::set<std::string> varnames;
+    std::set<std::string> blocknames;
+    std::set<std::string> sidenames;
+  };
+  std::map<std::string, SplitNames > *splits;
+  struct SplitIDs {
+    std::set<unsigned int> varids;
+    std::set<unsigned int> blockids;
+    std::set<BoundaryID>   sideids;
+  };
+  std::map<std::string, SplitIDs > *field_decomposition;
   std::map<std::string,std::set<std::string> > *subdomains;
   std::map<std::string,std::set<unsigned int> > *domain_decomposition;
   IS                                    embedding;
 };
+
+#undef  __FUNCT__
+#define __FUNCT__ "DMMooseGetSides"
+PetscErrorCode DMMooseGetSides(DM dm, std::vector<std::string>& sidenames)
+{
+  PetscErrorCode ierr;
+  PetscBool ismoose;
+
+  PetscFunctionBegin;
+  PetscValidHeaderSpecific(dm,DM_CLASSID,1);
+  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
+  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  DM_Moose *dmm = (DM_Moose *)dm->data;
+  for (std::map<std::string, BoundaryID>::const_iterator it = dmm->sideids->begin(); it != dmm->sideids->end(); ++it) sidenames.push_back(it->first);
+  PetscFunctionReturn(0);
+}
 
 #undef  __FUNCT__
 #define __FUNCT__ "DMMooseGetBlocks"
@@ -120,6 +149,24 @@ PetscErrorCode DMMooseSetBlocks(DM dm, const std::set<std::string>& blocks)
   PetscFunctionReturn(0);
 }
 
+#undef  __FUNCT__
+#define __FUNCT__ "DMMooseSetSides"
+PetscErrorCode DMMooseSetSides(DM dm, const std::set<std::string>& sides)
+{
+  PetscErrorCode ierr;
+  DM_Moose       *dmm = (DM_Moose*)dm->data;
+  PetscBool      ismoose;
+
+  PetscFunctionBegin;
+  PetscValidHeaderSpecific(dm,DM_CLASSID,1);
+  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose); CHKERRQ(ierr);
+  if(!ismoose) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if(dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
+  if (dmm->sides) delete dmm->sides;
+  dmm->sides = new std::set<std::string>(sides);
+  PetscFunctionReturn(0);
+}
+
 
 #undef  __FUNCT__
 #define __FUNCT__ "DMMooseGetNonlinearSystem"
@@ -139,8 +186,8 @@ PetscErrorCode DMMooseGetNonlinearSystem(DM dm, NonlinearSystem*& nl)
 
 
 #undef  __FUNCT__
-#define __FUNCT__ "DMMooseSetFieldDecomposition"
-PetscErrorCode DMMooseSetFieldDecomposition(DM dm, const std::map<std::string, std::set<std::string> >& splits)
+#define __FUNCT__ "DMMooseSetSplitNames"
+PetscErrorCode DMMooseSetSplitNames(DM dm, const std::set<std::string>& splitnames)
 {
   PetscErrorCode ierr;
 
@@ -155,13 +202,20 @@ PetscErrorCode DMMooseSetFieldDecomposition(DM dm, const std::map<std::string, s
     delete dmm->field_decomposition;
     dmm->field_decomposition = PETSC_NULL;
   }
-  dmm->splits = new std::map<std::string, std::set<std::string> >(splits);
+  if (dmm->splits) {
+    delete dmm->splits;
+    dmm->splits = PETSC_NULL;
+  }
+  dmm->splits = new std::map<std::string, DM_Moose::SplitNames >();
+  for (std::set<std::string>::const_iterator it = splitnames.begin(); it != splitnames.end(); ++it) {
+    (*dmm->splits)[*it] = DM_Moose::SplitNames();
+  }
   PetscFunctionReturn(0);
 }
 
 #undef  __FUNCT__
-#define __FUNCT__ "DMMooseGetFieldDecomposition"
-PetscErrorCode DMMooseGetFieldDecomposition(DM dm, std::map<std::string, std::set<std::string> >& splits)
+#define __FUNCT__ "DMMooseGetSplitNames"
+PetscErrorCode DMMooseGetSplitNames(DM dm, std::set<std::string>& splitnames)
 {
   PetscErrorCode ierr;
 
@@ -171,18 +225,147 @@ PetscErrorCode DMMooseGetFieldDecomposition(DM dm, std::map<std::string, std::se
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
   if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)(dm->data);
-
-  splits.clear();
-  if (!dmm->field_decomposition || !dmm->field_decomposition->size()) PetscFunctionReturn(0);
-  for (std::map<std::string, std::set<unsigned int> >::const_iterator sit = dmm->field_decomposition->begin(); sit != dmm->field_decomposition->end(); ++sit) {
-    std::string sname = sit->first;
-    splits[sname] = std::set<std::string>();
-    for (std::set<unsigned int>::const_iterator it = (*dmm->field_decomposition)[sname].begin(); it != (*dmm->field_decomposition)[sname].end(); ++it) {
-      splits[sname].insert((*dmm->varnames)[*it]);
+  if (!dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "DM not set up");
+  splitnames.clear();
+  if (dmm->field_decomposition && dmm->field_decomposition->size()) {
+    for (std::map<std::string, DM_Moose::SplitIDs >::const_iterator sit = dmm->field_decomposition->begin(); sit != dmm->field_decomposition->end(); ++sit) {
+      std::string sname = sit->first;
+      splitnames.insert(sname);
     }
   }
   PetscFunctionReturn(0);
+}
 
+#undef  __FUNCT__
+#define __FUNCT__ "DMMooseSetSplitVars"
+PetscErrorCode DMMooseSetSplitVars(DM dm, const std::string& splitname, const std::set<std::string>& splitvars)
+{
+  PetscErrorCode ierr;
+
+  PetscFunctionBegin;
+  PetscValidHeaderSpecific(dm,DM_CLASSID,1);
+  PetscBool ismoose;
+  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
+  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  DM_Moose *dmm = (DM_Moose *)(dm->data);
+  if (dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "DM already set up");
+  if (!dmm->splits->count(splitname)) SETERRQ1(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Unknown split name %s", splitname.c_str());
+  (*dmm->splits)[splitname].varnames = splitvars;
+  PetscFunctionReturn(0);
+}
+
+#undef  __FUNCT__
+#define __FUNCT__ "DMMooseGetSplitVars"
+PetscErrorCode DMMooseGetSplitVars(DM dm, const std::string& splitname, std::set<std::string>& splitvars)
+{
+  PetscErrorCode ierr;
+
+  PetscFunctionBegin;
+  PetscValidHeaderSpecific(dm,DM_CLASSID,1);
+  PetscBool ismoose;
+  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
+  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  DM_Moose *dmm = (DM_Moose *)(dm->data);
+  if (!dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "DM not set up");
+  if (!dmm->field_decomposition || !dmm->field_decomposition->size() || !dmm->field_decomposition->count(splitname)) {
+    SETERRQ1(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Unknown split name %s", splitname.c_str());
+  }
+  DM_Moose::SplitIDs& splitids = (*dmm->field_decomposition)[splitname];
+  splitvars.clear();
+  for (std::set<unsigned int>::const_iterator idit = splitids.varids.begin(); idit != splitids.varids.end(); ++idit) {
+    std::map<unsigned int, std::string>::const_iterator nameit = dmm->varnames->find(*idit);
+    if (nameit == dmm->varnames->end()) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Unknown varid %D in split %s", *idit, splitname.c_str());
+    splitvars.insert(nameit->second);
+  }
+  PetscFunctionReturn(0);
+}
+
+#undef  __FUNCT__
+#define __FUNCT__ "DMMooseSetSplitBlocks"
+PetscErrorCode DMMooseSetSplitBlocks(DM dm, const std::string& splitname, const std::set<std::string>& splitblocks)
+{
+  PetscErrorCode ierr;
+
+  PetscFunctionBegin;
+  PetscValidHeaderSpecific(dm,DM_CLASSID,1);
+  PetscBool ismoose;
+  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
+  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  DM_Moose *dmm = (DM_Moose *)(dm->data);
+  if (dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "DM already set up");
+  if (!dmm->splits->count(splitname)) SETERRQ1(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Unknown split name %s", splitname.c_str());
+  (*dmm->splits)[splitname].blocknames = splitblocks;
+  PetscFunctionReturn(0);
+}
+
+#undef  __FUNCT__
+#define __FUNCT__ "DMMooseGetSplitBlocks"
+PetscErrorCode DMMooseGetSplitBlocks(DM dm, const std::string& splitname, std::set<std::string>& splitblocks)
+{
+  PetscErrorCode ierr;
+
+  PetscFunctionBegin;
+  PetscValidHeaderSpecific(dm,DM_CLASSID,1);
+  PetscBool ismoose;
+  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
+  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  DM_Moose *dmm = (DM_Moose *)(dm->data);
+  if (!dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "DM not set up");
+  if (!dmm->field_decomposition || !dmm->field_decomposition->size() || !dmm->field_decomposition->count(splitname)) {
+    SETERRQ1(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Unknown split name %s", splitname.c_str());
+  }
+  DM_Moose::SplitIDs& splitids = (*dmm->field_decomposition)[splitname];
+  splitblocks.clear();
+  for (std::set<unsigned int>::const_iterator idit = splitids.blockids.begin(); idit != splitids.blockids.end(); ++idit) {
+    std::map<unsigned int, std::string>::const_iterator nameit = dmm->blocknames->find(*idit);
+    if (nameit == dmm->blocknames->end()) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Unknown blockid %D in split %s", *idit, splitname.c_str());
+    splitblocks.insert(nameit->second);
+  }
+  PetscFunctionReturn(0);
+}
+
+#undef  __FUNCT__
+#define __FUNCT__ "DMMooseSetSplitSides"
+PetscErrorCode DMMooseSetSplitSides(DM dm, const std::string& splitname, const std::set<std::string>& splitsides)
+{
+  PetscErrorCode ierr;
+
+  PetscFunctionBegin;
+  PetscValidHeaderSpecific(dm,DM_CLASSID,1);
+  PetscBool ismoose;
+  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
+  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  DM_Moose *dmm = (DM_Moose *)(dm->data);
+  if (dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "DM already set up");
+  if (!dmm->splits->count(splitname)) SETERRQ1(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Unknown split name %s", splitname.c_str());
+  (*dmm->splits)[splitname].sidenames = splitsides;
+  PetscFunctionReturn(0);
+}
+
+#undef  __FUNCT__
+#define __FUNCT__ "DMMooseGetSplitSides"
+PetscErrorCode DMMooseGetSplitSides(DM dm, const std::string& splitname, std::set<std::string>& splitsides)
+{
+  PetscErrorCode ierr;
+
+  PetscFunctionBegin;
+  PetscValidHeaderSpecific(dm,DM_CLASSID,1);
+  PetscBool ismoose;
+  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
+  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  DM_Moose *dmm = (DM_Moose *)(dm->data);
+  if (!dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "DM not set up");
+  if (!dmm->field_decomposition || !dmm->field_decomposition->size() || !dmm->field_decomposition->count(splitname)) {
+    SETERRQ1(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Unknown split name %s", splitname.c_str());
+  }
+  DM_Moose::SplitIDs& splitids = (*dmm->field_decomposition)[splitname];
+  splitsides.clear();
+  for (std::set<BoundaryID>::const_iterator idit = splitids.sideids.begin(); idit != splitids.sideids.end(); ++idit) {
+    std::map<BoundaryID, std::string>::const_iterator nameit = dmm->sidenames->find(*idit);
+    if (nameit == dmm->sidenames->end()) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Unknown sideid %D in split %s", *idit, splitname.c_str());
+    splitsides.insert(nameit->second);
+  }
+  PetscFunctionReturn(0);
 }
 
 
@@ -245,7 +428,7 @@ static PetscErrorCode DMMooseSetEmbedding_Private(DM dm, IS embedding, const std
   ierr = PetscObjectReference((PetscObject)embedding);CHKERRQ(ierr);
   ddmm->embedding = embedding;
   ierr = PetscObjectSetOptionsPrefix((PetscObject)ddm,((PetscObject)dm)->prefix);CHKERRQ(ierr);
-  std::string suffix = subname+"_";
+  std::string suffix = std::string("fieldsplit_")+subname+"_";
   ierr = PetscObjectAppendOptionsPrefix((PetscObject)ddm,suffix.c_str());CHKERRQ(ierr);
   PetscFunctionReturn(0);
 
@@ -268,20 +451,22 @@ static PetscErrorCode  DMCreateFieldDecomposition_Moose(DM dm, PetscInt *len, ch
   if(dmlist)   {ierr = PetscMalloc(*len*sizeof(DM),dmlist);CHKERRQ(ierr);}
   DofMap& dofmap = dmm->nl->sys().get_dof_map();
   unsigned int d = 0;
-  for (std::map<std::string, std::set<unsigned int> >::const_iterator dit = dmm->field_decomposition->begin(); dit != dmm->field_decomposition->end(); ++dit,++d) {
+  for (std::map<std::string, DM_Moose::SplitIDs >::const_iterator dit = dmm->field_decomposition->begin(); dit != dmm->field_decomposition->end(); ++dit,++d) {
     std::string                          dname = dit->first;
     std::set<std::string>                dvars;
     std::set<std::string>                dblocks;
+    std::set<std::string>                dsides;
     std::set<unsigned int>               dindices;
-    for(std::set<unsigned int>::const_iterator dvit = dit->second.begin(); dvit != dit->second.end(); ++dvit){
+    for(std::set<unsigned int>::const_iterator dvit = dit->second.varids.begin(); dvit != dit->second.varids.end(); ++dvit){
       unsigned int v = *dvit;
       std::string vname = (*dmm->varnames)[v];
       dvars.insert(vname);
       if(!islist) continue;
-      /* Iterate only over this DM's blocks. */
-      for(std::map<std::string, unsigned int>::const_iterator bit = dmm->blockids->begin(); bit != dmm->blockids->end(); ++bit) {
-	unsigned int b = bit->second;
-	dblocks.insert(bit->first);
+      /* Iterate only over this split's blocks. */
+      for(std::set<unsigned int>::const_iterator bit = dit->second.blockids.begin(); bit != dit->second.blockids.end(); ++bit) {
+	unsigned int b = *bit;
+	std::string bname = (*dmm->blocknames)[b];
+	dblocks.insert(bname);
 	MeshBase::const_element_iterator el     = dmm->nl->sys().get_mesh().active_local_subdomain_elements_begin(b);
 	MeshBase::const_element_iterator end_el = dmm->nl->sys().get_mesh().active_local_subdomain_elements_end(b);
 	for ( ; el != end_el; ++el) {
@@ -297,8 +482,27 @@ static PetscErrorCode  DMCreateFieldDecomposition_Moose(DM dm, PetscInt *len, ch
 	  }
 	}
       }
+      /* Iterate over all sides and pick out only the ones that belong to this split. */
+      if (dit->second.sideids.size()) {
+	std::vector<unsigned int> snodes;
+	std::vector<boundary_id_type> sides;
+	dmm->nl->sys().get_mesh().boundary_info->build_node_list(snodes, sides);
+	// FIXME: make an array of (snode,side) pairs, sort on side and use std::lower_bound from <algorithm>
+	for (unsigned int i = 0; i < sides.size(); ++i) {
+	  boundary_id_type s = sides[i];
+	  if (!dit->second.sideids.count(s)) continue;
+	  // Get the degree of freedom indices for all of this split's variables off the current node.
+	  for (std::set<unsigned int>::const_iterator vit = dit->second.varids.begin(); vit != dit->second.varids.end(); ++vit) {
+	    const Node& node = dmm->nl->sys().get_mesh().node(snodes[i]);
+	    dof_id_type dof = node.dof_number(dmm->nl->sys().number(),*vit,0);
+	    if(dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
+	      dindices.insert(dof);
+	    }
+	  }
+	}
+      }
     }
-    if(namelist) {
+   if(namelist) {
       ierr = PetscStrallocpy(dname.c_str(),(*namelist)+d);CHKERRQ(ierr);
     }
     if(islist) {
@@ -331,10 +535,17 @@ static PetscErrorCode  DMCreateFieldDecomposition_Moose(DM dm, PetscInt *len, ch
       (*islist)[d] = dis;
     }
     if (dmlist) {
+      /* Translate side ids to side names. */
+      for (std::set<boundary_id_type>::const_iterator sit = dit->second.sideids.begin(); sit != dit->second.sideids.end(); ++sit) {
+	boundary_id_type s = *sit;
+	std::string sname = (*dmm->sidenames)[s];
+	dsides.insert(sname);
+      }
       DM ddm;
       ierr = DMCreateMoose(((PetscObject)dm)->comm, *dmm->nl, &ddm);CHKERRQ(ierr);
       ierr = DMMooseSetVariables(ddm,dvars);CHKERRQ(ierr);
       ierr = DMMooseSetBlocks(ddm,dblocks);CHKERRQ(ierr);
+      ierr = DMMooseSetSides(ddm,dsides);CHKERRQ(ierr);
       ierr = DMMooseSetEmbedding_Private(dm,emb,dname,ddm);CHKERRQ(ierr);
       ierr = DMSetFromOptions(ddm);CHKERRQ(ierr);
       ierr = DMSetUp(ddm);CHKERRQ(ierr);
@@ -342,7 +553,6 @@ static PetscErrorCode  DMCreateFieldDecomposition_Moose(DM dm, PetscInt *len, ch
     }
   }
   PetscFunctionReturn(0);
-
 }
 
 #undef __FUNCT__
@@ -738,13 +948,6 @@ static PetscErrorCode  DMView_Moose(DM dm, PetscViewer viewer)
     ierr = PetscObjectGetName((PetscObject)dm, &name);     CHKERRQ(ierr);
     ierr = PetscObjectGetOptionsPrefix((PetscObject)dm, &prefix); CHKERRQ(ierr);
     ierr = PetscViewerASCIIPrintf(viewer, "DM Moose with name %s and prefix %s\n", name, prefix); CHKERRQ(ierr);
-    ierr = PetscViewerASCIIPrintf(viewer, "blocks:", name, prefix); CHKERRQ(ierr);
-    std::map<std::string,unsigned int>::iterator bit = dmm->blockids->begin();
-    std::map<std::string,unsigned int>::const_iterator bend = dmm->blockids->end();
-    for(; bit != bend; ++bit) {
-      ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", bit->first.c_str(), bit->second); CHKERRQ(ierr);
-    }
-    ierr = PetscViewerASCIIPrintf(viewer, "\n"); CHKERRQ(ierr);
     ierr = PetscViewerASCIIPrintf(viewer, "variables:", name, prefix); CHKERRQ(ierr);
     std::map<std::string,unsigned int>::iterator vit = dmm->varids->begin();
     std::map<std::string,unsigned int>::const_iterator vend = dmm->varids->end();
@@ -752,32 +955,90 @@ static PetscErrorCode  DMView_Moose(DM dm, PetscViewer viewer)
       ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", vit->first.c_str(), vit->second); CHKERRQ(ierr);
     }
     ierr = PetscViewerASCIIPrintf(viewer, "\n"); CHKERRQ(ierr);
-    for (unsigned int i = 0; i < 2; ++i) {
-      std::map<std::string, std::set<unsigned int> >  *decomposition = NULL;
-      std::map<unsigned int, std::string>             *names = NULL;
-      if (!i && dmm->field_decomposition) {
-	ierr = PetscViewerASCIIPrintf(viewer, "Field decomposition by variable: ");CHKERRQ(ierr);
-	decomposition = dmm->field_decomposition;
-	names = dmm->varnames;
-      } else if(dmm->domain_decomposition) {
-	ierr = PetscViewerASCIIPrintf(viewer, "Domain decomposition by block: ");CHKERRQ(ierr);
-	decomposition = dmm->domain_decomposition;
-	names = dmm->blocknames;
-      }
-      /* FIX: decompositions might have different sizes and components on different ranks. */
-      for (std::map<std::string, std::set<unsigned int> >::const_iterator dit = decomposition->begin(); dit != decomposition->end(); ++dit) {
-	ierr = PetscViewerASCIIPrintf(viewer, "%s: ", dit->first.c_str()); CHKERRQ(ierr);
-	for(std::set<unsigned int>::const_iterator it = dit->second.begin(); it != dit->second.end(); ++it) {
-	  if(it != dit->second.begin()) {
-	    ierr = PetscViewerASCIIPrintf(viewer, ",");CHKERRQ(ierr);
-	  }
-	  ierr = PetscViewerASCIIPrintf(viewer,"(%D,%s)",*it,(*names)[*it].c_str()); CHKERRQ(ierr);
-	}
-	ierr = PetscViewerASCIIPrintf(viewer, ";");CHKERRQ(ierr);
-      }
-      ierr = PetscViewerASCIIPrintf(viewer, "\n"); CHKERRQ(ierr);
+    ierr = PetscViewerASCIIPrintf(viewer, "blocks:", name, prefix); CHKERRQ(ierr);
+    std::map<std::string,unsigned int>::iterator bit = dmm->blockids->begin();
+    std::map<std::string,unsigned int>::const_iterator bend = dmm->blockids->end();
+    for(; bit != bend; ++bit) {
+      ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", bit->first.c_str(), bit->second); CHKERRQ(ierr);
     }
+    ierr = PetscViewerASCIIPrintf(viewer, "\n"); CHKERRQ(ierr);
+    ierr = PetscViewerASCIIPrintf(viewer, "sides:", name, prefix); CHKERRQ(ierr);
+    std::map<std::string,BoundaryID>::iterator sit = dmm->sideids->begin();
+    std::map<std::string,BoundaryID>::const_iterator send = dmm->sideids->end();
+    for (; sit != send; ++sit) {
+      ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", sit->first.c_str(), sit->second);CHKERRQ(ierr);
+    }
+    ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
+    ierr = PetscViewerASCIIPrintf(viewer, "Domain decomposition: blocks: ");CHKERRQ(ierr);
+    /* FIX: decompositions might have different sizes and components on different ranks. */
+    for (std::map<std::string, std::set<unsigned int> >::const_iterator dit = dmm->domain_decomposition->begin(); dit != dmm->domain_decomposition->end(); ++dit) {
+      ierr = PetscViewerASCIIPrintf(viewer, "%s: ", dit->first.c_str());CHKERRQ(ierr);
+      for(std::set<unsigned int>::const_iterator it = dit->second.begin(); it != dit->second.end(); ++it) {
+	if(it != dit->second.begin()) {
+	  ierr = PetscViewerASCIIPrintf(viewer, ",");CHKERRQ(ierr);
+	}
+	ierr = PetscViewerASCIIPrintf(viewer,"(%D,%s)",*it,(*dmm->blocknames)[*it].c_str());CHKERRQ(ierr);
+      }
+      ierr = PetscViewerASCIIPrintf(viewer, ";");CHKERRQ(ierr);
+    }
+    ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
+    ierr = PetscViewerASCIIPrintf(viewer, "Field decomposition:");CHKERRQ(ierr);
+    /* FIX: decompositions might have different sizes and components on different ranks. */
+    for (std::map<std::string, DM_Moose::SplitIDs>::const_iterator dit = dmm->field_decomposition->begin(); dit != dmm->field_decomposition->end(); ++dit) {
+      ierr = PetscViewerASCIIPrintf(viewer, " %s:[", dit->first.c_str());CHKERRQ(ierr);
+      ierr = PetscViewerASCIIPrintf(viewer, "vars:");CHKERRQ(ierr);
+      for (std::set<unsigned int>::const_iterator vit = dit->second.varids.begin(); vit != dit->second.varids.end(); ++vit) {
+	if (vit != dit->second.varids.begin()) {
+	  ierr = PetscViewerASCIIPrintf(viewer, ",");CHKERRQ(ierr);
+	}
+	ierr = PetscViewerASCIIPrintf(viewer,"%s",(*dmm->varnames)[*vit].c_str());CHKERRQ(ierr);
+      }
+      ierr = PetscViewerASCIIPrintf(viewer, "; blocks:");CHKERRQ(ierr);
+      for (std::set<unsigned int>::const_iterator bit = dit->second.blockids.begin(); bit != dit->second.blockids.end(); ++bit) {
+	if (bit != dit->second.blockids.begin()) {
+	  ierr = PetscViewerASCIIPrintf(viewer, ",");CHKERRQ(ierr);
+	}
+	ierr = PetscViewerASCIIPrintf(viewer,"%s",(*dmm->blocknames)[*bit].c_str());CHKERRQ(ierr);
+      }
+      ierr = PetscViewerASCIIPrintf(viewer, "; sides:");CHKERRQ(ierr);
+      for (std::set<BoundaryID>::const_iterator sit = dit->second.sideids.begin(); sit != dit->second.sideids.end(); ++sit) {
+	if (sit != dit->second.sideids.begin()) {
+	  ierr = PetscViewerASCIIPrintf(viewer, ",");CHKERRQ(ierr);
+	}
+	ierr = PetscViewerASCIIPrintf(viewer,"%s",(*dmm->sidenames)[*sit].c_str());CHKERRQ(ierr);
+      }
+      ierr = PetscViewerASCIIPrintf(viewer, " ]");CHKERRQ(ierr);
+    }
+    ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
+  } else {
+    SETERRQ(PETSC_COMM_SELF, PETSC_ERR_SUP, "Non-ASCII viewers are not supported");
   }
+  PetscFunctionReturn(0);
+}
+
+#undef __FUNCT__
+#define __FUNCT__ "DMMooseGetMeshBlocks_Private"
+static PetscErrorCode  DMMooseGetMeshBlocks_Private(DM dm, std::set<subdomain_id_type>& blocks)
+{
+  PetscErrorCode ierr;
+  DM_Moose       *dmm = (DM_Moose *)(dm->data);
+  PetscBool      ismoose;
+
+  PetscFunctionBegin;
+  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose); CHKERRQ(ierr);
+  if (!ismoose)  SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "DM of type %s, not of type %s", ((PetscObject)dm)->type, DMMOOSE);
+  if (!dmm->nl) SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
+
+  const MeshBase& mesh = dmm->nl->sys().get_mesh();
+  /* The following effectively is a verbatim copy of MeshBase::n_subdomains(). */
+  // This requires an inspection on every processor
+  parallel_only();
+  MeshBase::const_element_iterator       el  = mesh.active_elements_begin();
+  const MeshBase::const_element_iterator end = mesh.active_elements_end();
+  for (; el!=end; ++el)
+    blocks.insert((*el)->subdomain_id());
+  // Some subdomains may only live on other processors
+  CommWorld.set_union(blocks);
   PetscFunctionReturn(0);
 }
 
@@ -796,17 +1057,7 @@ static PetscErrorCode  DMSetUp_Moose(DM dm)
   if (!dmm->nl) SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 
 
-  std::string name = dmm->nl->sys().name();
-  name += "_v";
-  for (std::map<unsigned int, std::string>::const_iterator vit = dmm->varnames->begin(); vit != dmm->varnames->end(); ++vit) {
-    name += "_"+vit->second;
-  }
-  name += "_b";
-  for (std::map<unsigned int, std::string>::const_iterator bit = dmm->blocknames->begin(); bit != dmm->blocknames->end(); ++bit) {
-    name += "_"+bit->second;
-  }
-
-  /* Set up variables and blocks. */
+  /* Set up variables, blocks and sides. */
   DofMap& dofmap = dmm->nl->sys().get_dof_map();
   dmm->varids->clear();
   dmm->varnames->clear();
@@ -819,24 +1070,19 @@ static PetscErrorCode  DMSetUp_Moose(DM dm)
     dmm->varids->insert(std::pair<std::string,unsigned int>(vname,v));
     dmm->varnames->insert(std::pair<unsigned int,std::string>(v,vname));
   }
+  if (dmm->vars) {
+    delete dmm->vars;
+    dmm->vars = PETSC_NULL;
+  }
+
   const MeshBase& mesh = dmm->nl->sys().get_mesh();
   dmm->blockids->clear();
   dmm->blocknames->clear();
   std::set<subdomain_id_type> blocks;
-  /* The following effectively is a verbatim copy of MeshBase::n_subdomains(). */
-  // This requires an inspection on every processor
-  parallel_only();
-  MeshBase::const_element_iterator       el  = mesh.active_elements_begin();
-  const MeshBase::const_element_iterator end = mesh.active_elements_end();
-  for (; el!=end; ++el)
-    blocks.insert((*el)->subdomain_id());
-  // Some subdomains may only live on other processors
-  CommWorld.set_union(blocks);
-
+  ierr = DMMooseGetMeshBlocks_Private(dm,blocks);CHKERRQ(ierr);
   std::set<subdomain_id_type>::iterator bit = blocks.begin();
   std::set<subdomain_id_type>::iterator bend = blocks.end();
   if(bit == bend) SETERRQ(((PetscObject)dm)->comm, PETSC_ERR_PLIB, "No mesh blocks found.");
-
   for(; bit != bend; ++bit) {
     subdomain_id_type bid = *bit;
     std::string bname = mesh.subdomain_name(bid);
@@ -853,26 +1099,83 @@ static PetscErrorCode  DMSetUp_Moose(DM dm)
     dmm->blockids->insert(std::pair<std::string,unsigned int>(bname,bid));
     dmm->blocknames->insert(std::pair<unsigned int,std::string>(bid,bname));
   }
+  if (dmm->blocks) {
+    delete dmm->blocks;
+    dmm->blocks = PETSC_NULL;
+  }
+
+  if (dmm->sides) {
+    const std::set<boundary_id_type>& sides = mesh.boundary_info->get_boundary_ids();
+    for (std::set<boundary_id_type>::const_iterator sit = sides.begin(); sit != sides.end(); ++sit) {
+      boundary_id_type sid = *sit;
+      std::string sname = mesh.boundary_info->sideset_name(sid);
+      if (dmm->sides->count(sname)) {
+	dmm->sidenames->insert(std::pair<boundary_id_type,std::string>(sid,sname));
+	dmm->sideids->insert(std::pair<std::string,boundary_id_type>(sname,sid));
+      }
+    }
+    delete dmm->sides;
+    dmm->sides = PETSC_NULL;
+  }
+
+
+  std::string name = dmm->nl->sys().name();
+  name += "_v";
+  for (std::map<unsigned int, std::string>::const_iterator vit = dmm->varnames->begin(); vit != dmm->varnames->end(); ++vit) {
+    name += "_"+vit->second;
+  }
+  name += "_b";
+  for (std::map<unsigned int, std::string>::const_iterator bit = dmm->blocknames->begin(); bit != dmm->blocknames->end(); ++bit) {
+    name += "_"+bit->second;
+  }
+  name += "_s";
+  for (std::map<BoundaryID, std::string>::const_iterator sit = dmm->sidenames->begin(); sit != dmm->sidenames->end(); ++sit) {
+    name += "_"+sit->second;
+  }
 
   /*
      Set up decompositions.
    */
   if (dmm->splits) {
-    dmm->field_decomposition = new std::map<std::string, std::set<unsigned int> >();
+    delete dmm->field_decomposition;
+    dmm->field_decomposition = new std::map<std::string, DM_Moose::SplitIDs >();
     unsigned int i = 0;
-    for (std::map<std::string, std::set<std::string> >::const_iterator sit = dmm->splits->begin(); sit != dmm->splits->end(); ++sit, ++i) {
-      unsigned int j = 0;
-      for (std::set<std::string>::const_iterator it = sit->second.begin(); it != sit->second.end(); ++it, ++j) {
-	std::string sname = sit->first;
-	if (dmm->field_decomposition->count(sname)) {
-	  SETERRQ1(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Duplicate split name: %s", sname.c_str());
-	}
-	(*dmm->field_decomposition)[sname] = std::set<unsigned int>();
+    for (std::map<std::string, DM_Moose::SplitNames >::const_iterator spit = dmm->splits->begin(); spit != dmm->splits->end(); ++spit, ++i) {
+      std::string spname = spit->first;
+      if (dmm->field_decomposition->count(spname)) {
+	SETERRQ1(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Duplicate split name: %s", spname.c_str());
+      }
+      (*dmm->field_decomposition)[spname] = DM_Moose::SplitIDs();
+      unsigned int j;
+      j = 0;
+      for (std::set<std::string>::const_iterator it = spit->second.varnames.begin(); it != spit->second.varnames.end(); ++it, ++j) {
 	std::map<std::string, unsigned int>::const_iterator vit = dmm->varids->find(*it);
 	if (vit == dmm->varids->end()) {
-	  SETERRQ3(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Unknown %D-th variable %s in split %D", i, it->c_str(), j);
+	  SETERRQ4(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Unknown %D-th variable %s in %D-th split %s", i, it->c_str(), j, spname.c_str());
 	} else {
-	  (*dmm->field_decomposition)[sname].insert(vit->second);
+	  (*dmm->field_decomposition)[spname].varids.insert(vit->second);
+	}
+      }
+      // Default behavior: empty spit->second.blocknames implies using ALL of DM's blocks.
+      // Validate the split blocks first.
+      j = 0;
+      for (std::set<std::string>::const_iterator it = spit->second.blocknames.begin(); it != spit->second.blocknames.end(); ++it, ++j) {
+	std::map<std::string, unsigned int>::const_iterator bit = dmm->blockids->find(*it);
+	if (bit == dmm->blockids->end()) {
+	  SETERRQ4(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Unknown %D-th block %s in %D-th split %s", i, it->c_str(), j, spname.c_str());
+	}
+      }
+      for (std::map<std::string, unsigned int>::const_iterator bit = dmm->blockids->begin(); bit != dmm->blockids->end(); ++bit) {
+	if (spit->second.blocknames.size() && !spit->second.blocknames.count(bit->first)) continue;
+	(*dmm->field_decomposition)[spname].blockids.insert(bit->second);
+      }
+      j = 0;
+      for (std::set<std::string>::const_iterator it = spit->second.sidenames.begin(); it != spit->second.sidenames.end(); ++it, ++j) {
+	std::map<std::string, BoundaryID>::const_iterator sit = dmm->sideids->find(*it);
+	if (sit == dmm->sideids->end()) {
+	  SETERRQ4(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Unknown %D-th block %s in %D-th split %s", i, it->c_str(), j, spname.c_str());
+	} else {
+	  (*dmm->field_decomposition)[spname].sideids.insert(sit->second);
 	}
       }
     }
@@ -941,18 +1244,19 @@ PetscErrorCode  DMSetFromOptions_Moose(DM dm)
   if (!dmm->nl) SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
   ierr = PetscOptionsBegin(((PetscObject)dm)->comm, ((PetscObject)dm)->prefix, "DMMoose options", "DM");CHKERRQ(ierr);
   PetscInt nsplits = 0;
-  /* Insert the usage of -dm_moose_split_names and -dm_moose_split_<splitname> into this help message, since the following if-clause might never fire, if -help is requested. */
-  const char* fdhelp = "Number of named field splits defined by the DM.\n\
-                \tNames of splits are defined by -dm_moose_split_names <splitname1> <splitname2> ...\n\
-                \tEach split defined by the variables that belong to it as follows: -dm_moose_split_<splitname> <var1> <var2> ...\n\
-                \tIf no -dm_moose_split_names is given, <splitname> is 0, 1, ...";
-  ierr = PetscOptionsInt("-dm_moose_nsplits", fdhelp, "DMMooseSetFieldDecomposition", nsplits, &nsplits, NULL);CHKERRQ(ierr);
+  /* Insert the usage of -dm_moose_fieldsplit_names and -dm_moose_fieldsplit_<splitname> into this help message, since the following if-clause might never fire, if -help is requested. */
+  const char* fdhelp = "Number of named fieldsplits defined by the DM.\n\
+                \tNames of fieldsplits are defined by -dm_moose_fieldsplit_names <splitname1> <splitname2> ...\n\
+                \tEach split defined by the variables, blocks and sides that belong to it as follows: -dm_moose_fieldsplit_<splitname>_vars <var1> <var2> ...\n\
+                \tLikewise for blocks and sides.  Empty block list implies 'all blocks', while an empty side list implies 'no sides'\n\
+                \tIf no -dm_moose_fieldsplit_names is given, <splitname> is 0, 1, ...";
+  ierr = PetscOptionsInt("-dm_moose_nfieldsplits", fdhelp, "DMMooseSetSplitNames", nsplits, &nsplits, NULL);CHKERRQ(ierr);
   if (nsplits) {
     PetscInt nnsplits = nsplits;
     std::set<std::string> split_names;
     char** splitnames;
     ierr = PetscMalloc(nsplits*sizeof(char*),&splitnames);CHKERRQ(ierr);
-    ierr = PetscOptionsStringArray("-dm_moose_splits_names", "Names of splits defined by the DM", "DMMooseSetFieldDecomposition", splitnames, &nnsplits, NULL);CHKERRQ(ierr);
+    ierr = PetscOptionsStringArray("-dm_moose_fieldsplit_names", "Names of fieldsplits defined by the DM", "DMMooseSetSplitNames", splitnames, &nnsplits, NULL);CHKERRQ(ierr);
     if (!nnsplits) {
       for (PetscInt i = 0; i < nsplits; ++i) {
 	std::ostringstream s;
@@ -960,29 +1264,66 @@ PetscErrorCode  DMSetFromOptions_Moose(DM dm)
 	split_names.insert(s.str());
       }
     } else if (nsplits != nnsplits) {
-      SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_SIZ, "Expected %D split names, got %D instead", nsplits, nnsplits);
+      SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_SIZ, "Expected %D fieldsplit names, got %D instead", nsplits, nnsplits);
     } else {
       for (PetscInt i = 0; i < nsplits; ++i) {
 	split_names.insert(std::string(splitnames[i]));
       }
     }
     ierr = PetscFree(splitnames);CHKERRQ(ierr);
-    PetscInt maxvars = dmm->nl->sys().get_dof_map().n_variables();
-    char** splitvars;
-    std::map<std::string, std::set<std::string> > field_decomposition;
-    ierr = PetscMalloc(maxvars*sizeof(char*),&splitvars);CHKERRQ(ierr);
+    ierr = DMMooseSetSplitNames(dm, split_names);CHKERRQ(ierr);
     for (std::set<std::string>::const_iterator sit = split_names.begin(); sit != split_names.end(); ++sit) {
-      field_decomposition[*sit] = std::set<std::string>();
-      PetscInt nvars = maxvars;
-      std::string opt = "-dm_moose_split_"+*sit;
-      std::string help = "Variables in split "+*sit;
-      ierr = PetscOptionsStringArray(opt.c_str(),help.c_str(),"DMMooseSetFieldDecomposition",splitvars,&nvars,PETSC_NULL);CHKERRQ(ierr);
-      for (PetscInt i = 0; i < nvars; ++i) {
-	field_decomposition[*sit].insert(std::string(splitvars[i]));
+      std::string spname = *sit;
+      {
+	PetscInt maxvars = dmm->nl->sys().get_dof_map().n_variables();
+	char** splitvars;
+	std::set<std::string> split_vars;
+	PetscInt nvars = maxvars;
+	ierr = PetscMalloc(maxvars*sizeof(char*),&splitvars);CHKERRQ(ierr);
+	std::string opt = "-dm_moose_fieldsplit_"+*sit+"_vars";
+	std::string help = "Variables in fieldsplit "+*sit;
+	ierr = PetscOptionsStringArray(opt.c_str(),help.c_str(),"DMMooseSetSplitVars",splitvars,&nvars,PETSC_NULL);CHKERRQ(ierr);
+	for (PetscInt i = 0; i < nvars; ++i) {
+	  split_vars.insert(std::string(splitvars[i]));
+	}
+	ierr = PetscFree(splitvars);CHKERRQ(ierr);
+	ierr = DMMooseSetSplitVars(dm,spname,split_vars);CHKERRQ(ierr);
+      }
+      {
+	std::set<subdomain_id_type> blocks;
+	ierr = DMMooseGetMeshBlocks_Private(dm,blocks);CHKERRQ(ierr);
+	PetscInt maxblocks = blocks.size();
+	char** splitblocks;
+	ierr = PetscMalloc(maxblocks*sizeof(char*),&splitblocks);CHKERRQ(ierr);
+	std::set<std::string> split_blocks;
+	PetscInt nblocks = maxblocks;
+	std::string opt = "-dm_moose_fieldsplit_"+*sit+"_blocks";
+	std::string help = "Blocks in fieldsplit "+*sit;
+	ierr = PetscOptionsStringArray(opt.c_str(),help.c_str(),"DMMooseSetSplitBlocks",splitblocks,&nblocks,PETSC_NULL);CHKERRQ(ierr);
+	for (PetscInt i = 0; i < nblocks; ++i) {
+	  split_blocks.insert(std::string(splitblocks[i]));
+	}
+	ierr = PetscFree(splitblocks);CHKERRQ(ierr);
+	if (split_blocks.size()) {
+	  ierr = DMMooseSetSplitBlocks(dm,spname,split_blocks);CHKERRQ(ierr);
+	}
+      }
+      {
+	PetscInt maxsides = dmm->nl->sys().get_mesh().boundary_info->get_boundary_ids().size();
+	char** splitsides;
+	ierr = PetscMalloc(maxsides*sizeof(char*),&splitsides);CHKERRQ(ierr);
+	std::set<std::string> split_sides;
+	PetscInt nsides = maxsides;
+	std::string opt = "-dm_moose_fieldsplit_"+*sit+"_sides";
+	std::string help = "Sides in fieldsplitsplit "+*sit;
+	ierr = PetscOptionsStringArray(opt.c_str(),help.c_str(),"DMMooseSetSplitSides",splitsides,&nsides,PETSC_NULL);CHKERRQ(ierr);
+	for (PetscInt i = 0; i < nsides; ++i) {
+	  split_sides.insert(std::string(splitsides[i]));
+	}
+	ierr = PetscFree(splitsides);CHKERRQ(ierr);
+	ierr = DMMooseSetSplitSides(dm,spname,split_sides);CHKERRQ(ierr);
       }
     }
-    ierr = PetscFree(splitvars);CHKERRQ(ierr);
-    ierr = DMMooseSetFieldDecomposition(dm,field_decomposition);CHKERRQ(ierr);
   }
   PetscInt nsubdomains = 0;
   /* Insert the usage of -dm_moose_subdomain_names and -dm_moose_subdomain_<subdomainname> into this help message, since the following if-clause might never fire, if -help is requested. */
@@ -1043,10 +1384,17 @@ static PetscErrorCode  DMDestroy_Moose(DM dm)
   PetscErrorCode ierr;
 
   PetscFunctionBegin;
+  /* CONTINUE: guard for any null pointers here? */
+  if (dmm->vars) delete dmm->vars;
   delete dmm->varids;
   delete dmm->varnames;
+  if (dmm->blocks) delete dmm->blocks;
   delete dmm->blockids;
   delete dmm->blocknames;
+  if (dmm->sides) delete dmm->sides;
+  delete dmm->sideids;
+  delete dmm->sidenames;
+  if(dmm->splits) delete dmm->splits;
   if(dmm->field_decomposition)  delete dmm->field_decomposition;
   if(dmm->domain_decomposition) delete dmm->domain_decomposition;
   ierr = ISDestroy(&dmm->embedding); CHKERRQ(ierr);
@@ -1087,6 +1435,8 @@ PetscErrorCode  DMCreate_Moose(DM dm)
   dmm->blockids   = new(std::map<std::string, unsigned int>);
   dmm->varnames   = new(std::map<unsigned int, std::string>);
   dmm->blocknames = new(std::map<unsigned int, std::string>);
+  dmm->sideids     = new(std::map<std::string, BoundaryID>);
+  dmm->sidenames   = new(std::map<BoundaryID,std::string>);
 
   dm->ops->createglobalvector = DMCreateGlobalVector_Moose;
   dm->ops->createlocalvector  = 0; // DMCreateLocalVector_Moose;

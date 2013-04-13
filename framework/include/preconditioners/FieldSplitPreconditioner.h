@@ -66,31 +66,27 @@ public:
 protected:
   /// The nonlinear system this FSP is associated with (convenience reference)
   NonlinearSystem & _nl;
-  // FIXME: Need to add split definitions in terms of groups of variables,
-  //        mesh blocks and sides defining each split.
-  std::map<std::string, std::set<std::string> > _splits;
-
-  /// Which FieldSplit style to use
-  enum Style {
-    StyleAdditive,
-    StyleMultiplicative,
-    StyleSymmetricMultiplicative,
-    StyleSchur
+  /// Which FieldSplit type to use
+  enum SplitType {
+    SplitTypeAdditive,
+    SplitTypeMultiplicative,
+    SplitTypeSymmetricMultiplicative,
+    SplitTypeSchur
   };
-  Style
-  getStyle(const std::string& str);
-  Style _style;
+  SplitType
+  getSplitType(const std::string& str);
+  SplitType _split_type;
 
   /// Which FieldSplit Schur factorization style to use.
-  enum SchurStyle {
-    SchurStyleDiag,
-    SchurStyleUpper,
-    SchurStyleLower,
-    SchurStyleFull
+  enum SchurType {
+    SchurTypeDiag,
+    SchurTypeUpper,
+    SchurTypeLower,
+    SchurTypeFull
   };
-  SchurStyle
-  getSchurStyle(const std::string& str);
-  SchurStyle _schur_style;
+  SchurType
+  getSchurType(const std::string& str);
+  SchurType _schur_type;
 
   /// Which preconditioning matrix to use with S = D - CA^{-1}B
   /// 'Self' means use S to build the preconditioner.

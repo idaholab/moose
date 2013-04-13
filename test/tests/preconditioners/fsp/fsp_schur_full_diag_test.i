@@ -22,12 +22,9 @@
   [./FSP]
     type = FSP
     full = true
-    #off_diag_row    = 'v'
-    #off_diag_column = 'u'
-    splits = u v
-    style  = schur
-    schur_style = full
-    schur_preconditioner = diag
+    off_diag_row    = 'v'
+    off_diag_column = 'u'
+    split_type  = additive
   [../]
 []
 
@@ -86,8 +83,9 @@
 [Executioner]
   type = Steady
 
-  petsc_options = '-snes_mf_operator -snes_view -snes_monitor -snes_converged_reason -ksp_monitor -ksp_converged_reason -fieldsplit_u_ksp_monitor -fieldsplit_v_ksp_monitor'
-
+  petsc_options       = '-snes_mf_operator -snes_view -snes_monitor -snes_converged_reason -ksp_monitor -ksp_converged_reason'
+  petsc_options_iname = '-dm_moose_nfieldsplits -dm_moose_fieldsplit_0_vars -dm_moose_fieldsplit_1_vars    -pc_type  -pc_fieldsplit_type -pc_fieldsplit_schur_precondition' 
+  petsc_options_value = '                     2                           u                           v  fieldsplit                schur                              diag'                     
 []
 
 [Output]
