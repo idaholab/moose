@@ -260,7 +260,7 @@ SolutionAux::timestepSetup()
 }
 
 Real
-SolutionAux::value(Real t, const Point & p)
+SolutionAux::pointValue(Real t, const Point & p)
 {
   Real val = (*_mesh_function)(p);
   if (_file_type==EXODUSII && _interpolate_times)
@@ -278,7 +278,6 @@ SolutionAux::directValue(unsigned int dof_index)
   Real val = (*_serialized_solution)(dof_index);
   if (_file_type==EXODUSII && _interpolate_times)
   {
-    mooseAssert(t == _interpolation_time,"Time passed into value() must match time at last call to timestepSetup()");
     Real val2 = (*_serialized_solution2)(dof_index);
     val = val + (val2 - val)*_interpolation_factor;
   }
@@ -306,8 +305,8 @@ SolutionAux::computeValue()
   else
   {
     if (isNodal())
-      return value(_t, *_current_node);
+      return pointValue(_t, *_current_node);
     else
-      return value(_t, _current_elem->centroid());
+      return pointValue(_t, _current_elem->centroid());
   }
 }

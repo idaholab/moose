@@ -41,7 +41,7 @@ public:
   virtual ~SolutionAux();
 
   virtual void timestepSetup();
-  virtual Real value(Real t, const Point & p);
+  virtual Real pointValue(Real t, const Point & p);
 
 protected:
   virtual Real computeValue();
