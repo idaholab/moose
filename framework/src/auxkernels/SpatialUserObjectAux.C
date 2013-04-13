@@ -32,5 +32,8 @@ SpatialUserObjectAux::SpatialUserObjectAux(const std::string & name, InputParame
 Real
 SpatialUserObjectAux::computeValue()
 {
-  return _user_object.spatialValue(_current_elem->centroid());
+  if(isNodal())
+    return _user_object.spatialValue(*_current_node);
+  else
+    return _user_object.spatialValue(_current_elem->centroid());
 }

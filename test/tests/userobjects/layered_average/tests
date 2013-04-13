@@ -4,4 +4,10 @@
     input = 'layered_average.i'
     exodiff = 'layered_average_out.e'
   [../]
+
+  [./interpolate]
+    type = 'Exodiff'
+    input = 'layered_average_interpolate.i'
+    exodiff = 'layered_average_interpolate_out.e'
+  [../]
 []

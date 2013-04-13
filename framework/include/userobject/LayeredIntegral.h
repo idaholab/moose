@@ -17,6 +17,8 @@
 
 #include "ElementIntegralVariableUserObject.h"
 
+#include "LayeredBase.h"
+
 // libmesh includes
 #include "libmesh/mesh_tools.h"
 
@@ -29,7 +31,7 @@ InputParameters validParams<LayeredIntegral>();
 /**
  * This UserObject computes volume integrals of a variable storing partial sums for the specified number of intervals in a direction (x,y,z).c
  */
-class LayeredIntegral : public ElementIntegralVariableUserObject
+class LayeredIntegral : public ElementIntegralVariableUserObject, public LayeredBase
 {
 public:
   LayeredIntegral(const std::string & name, InputParameters parameters);
@@ -39,49 +41,12 @@ public:
    *
    * @param p The point to look for in the layers.
    */
-  Real integralValue(Point p) const;
-
-  /**
-   * Given a Point return the integral value associated with the layer that point falls in.
-   *
-   * @param p The point to look for in the layers.
-   */
   virtual Real spatialValue(const Point & p) const { return integralValue(p); }
-
-  /**
-   * Get the value for a given layer
-   * @param layer The layer index
-   * @return The value for the given layer
-   */
-  virtual Real getLayerValue(unsigned int layer) const;
 
   virtual void initialize();
   virtual void execute();
   virtual void finalize();
   virtual void threadJoin(const UserObject & y);
-
-protected:
-  /**
-   * Helper function to return the layer the point lies in.
-   * @param p The point.
-   * @return The layer the Point is found in.
-   */
-  unsigned int getLayer(Point p) const;
-
-  /// The MooseEnum direction the layers are going in
-  MooseEnum _direction_enum;
-
-  /// The component direction the layers are going in.  We cache this for speed (so we're not always going through the MooseEnum)
-  unsigned int _direction;
-
-  /// Number of layers to split the mesh into
-  unsigned int _num_layers;
-
-  /// Value of the integral for each layer
-  std::vector<Real> _layer_values;
-
-  Real _direction_min;
-  Real _direction_max;
 };
 
 #endif

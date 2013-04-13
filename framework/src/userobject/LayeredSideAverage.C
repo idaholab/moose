@@ -58,14 +58,16 @@ LayeredSideAverage::finalize()
 
   // Compute the average for each layer
   for(unsigned int i=0; i<_layer_volumes.size(); i++)
-    _layer_values[i] = _layer_values[i] / _layer_volumes[i];
+    if(layerHasValue(i))
+      setLayerValue(i, getLayerValue(i) / _layer_volumes[i]);
 }
 
 void
 LayeredSideAverage::threadJoin(const UserObject & y)
 {
-  SideIntegralVariableUserObject::threadJoin(y);
+  LayeredSideIntegral::threadJoin(y);
   const LayeredSideAverage & lsa = dynamic_cast<const LayeredSideAverage &>(y);
   for(unsigned int i=0; i<_layer_volumes.size(); i++)
-    _layer_volumes[i] += lsa._layer_volumes[i];
+    if(lsa.layerHasValue(i))
+      _layer_volumes[i] += lsa._layer_volumes[i];
 }
