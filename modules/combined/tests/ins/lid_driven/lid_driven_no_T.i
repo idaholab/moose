@@ -58,17 +58,6 @@
     [../]
   [../]
 
- # Temperature
- [./T]
-   order = SECOND
-   family = LAGRANGE
-
-   [./InitialCondition]
-     type = ConstantIC
-     value = 1.0
-   [../]
- [../]
-
   # Pressure
   [./p]
     order = FIRST
@@ -128,22 +117,6 @@
     p = p
     component = 1
   [../]
-
-
-
- # temperature
- [./temperature_time]
-   type = INSTemperatureTimeDerivative
-   variable = T
- [../]
-
- [./temperature_space]
-   type = INSTemperature
-   variable = T
-   u = u
-   v = v
-   p = p
- [../]
 []
 
 
@@ -180,22 +153,6 @@
     boundary = '99'
     value = 0
   [../]
-
- [./T_hot]
-   type = DirichletBC
-   variable = T
-   #boundary = '0'
-   boundary = 'bottom'
-   value = 1
- [../]
-
- [./T_cold]
-   type = DirichletBC
-   variable = T
-   #boundary = '2'
-   boundary = 'top'
-   value = 0
- [../]
 []
 
 
@@ -209,18 +166,18 @@
 #   #petsc_options_value = '1.e-10'
 # [../]
 
-# Run FSP with the following options
-# '-snes_monitor -ksp_monitor -dm_moose_nfieldsplits 2 -dm_moose_fieldsplit_0_vars u,v,T -dm_moose_fieldsplit_1_vars p  -pc_type fieldsplit -pc_fieldsplit_type schur'
-# [./FSP]
-#   type = FSP
-#   full = true
-# [../]
-
-[./SMP_PJFNK]
-  type = SMP
+# Run FSP with the following options:
+# '-snes_monitor -ksp_monitor -dm_moose_nfieldsplits 2 -dm_moose_fieldsplit_0_vars u,v -dm_moose_fieldsplit_1_vars p  -pc_type fieldsplit -pc_fieldsplit_type schur'
+[./FSP]
+  type = FSP
   full = true
-  petsc_options = '-snes_mf_operator'
 [../]
+
+#[./SMP_PJFNK]
+#  type = SMP
+#  full = true
+#  petsc_options = '-snes_mf_operator'
+#[../]
 []
 
 
