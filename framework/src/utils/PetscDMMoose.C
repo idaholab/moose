@@ -962,54 +962,62 @@ static PetscErrorCode  DMView_Moose(DM dm, PetscViewer viewer)
       ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", bit->first.c_str(), bit->second); CHKERRQ(ierr);
     }
     ierr = PetscViewerASCIIPrintf(viewer, "\n"); CHKERRQ(ierr);
-    ierr = PetscViewerASCIIPrintf(viewer, "sides:", name, prefix); CHKERRQ(ierr);
-    std::map<std::string,BoundaryID>::iterator sit = dmm->sideids->begin();
-    std::map<std::string,BoundaryID>::const_iterator send = dmm->sideids->end();
-    for (; sit != send; ++sit) {
-      ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", sit->first.c_str(), sit->second);CHKERRQ(ierr);
+    if (dmm->sideids->size()) {
+      ierr = PetscViewerASCIIPrintf(viewer, "sides:", name, prefix); CHKERRQ(ierr);
+      std::map<std::string,BoundaryID>::iterator sit = dmm->sideids->begin();
+      std::map<std::string,BoundaryID>::const_iterator send = dmm->sideids->end();
+      for (; sit != send; ++sit) {
+	ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", sit->first.c_str(), sit->second);CHKERRQ(ierr);
+      }
+      ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
     }
-    ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
-    ierr = PetscViewerASCIIPrintf(viewer, "Domain decomposition: blocks: ");CHKERRQ(ierr);
-    /* FIX: decompositions might have different sizes and components on different ranks. */
-    for (std::map<std::string, std::set<unsigned int> >::const_iterator dit = dmm->domain_decomposition->begin(); dit != dmm->domain_decomposition->end(); ++dit) {
-      ierr = PetscViewerASCIIPrintf(viewer, "%s: ", dit->first.c_str());CHKERRQ(ierr);
-      for(std::set<unsigned int>::const_iterator it = dit->second.begin(); it != dit->second.end(); ++it) {
-	if(it != dit->second.begin()) {
-	  ierr = PetscViewerASCIIPrintf(viewer, ",");CHKERRQ(ierr);
+    if (dmm->domain_decomposition && dmm->domain_decomposition->size()) {
+      ierr = PetscViewerASCIIPrintf(viewer, "Domain decomposition: blocks: ");CHKERRQ(ierr);
+      /* FIX: decompositions might have different sizes and components on different ranks. */
+      for (std::map<std::string, std::set<unsigned int> >::const_iterator dit = dmm->domain_decomposition->begin(); dit != dmm->domain_decomposition->end(); ++dit) {
+	ierr = PetscViewerASCIIPrintf(viewer, "%s: ", dit->first.c_str());CHKERRQ(ierr);
+	for(std::set<unsigned int>::const_iterator it = dit->second.begin(); it != dit->second.end(); ++it) {
+	  if(it != dit->second.begin()) {
+	    ierr = PetscViewerASCIIPrintf(viewer, ",");CHKERRQ(ierr);
+	  }
+	  ierr = PetscViewerASCIIPrintf(viewer,"(%D,%s)",*it,(*dmm->blocknames)[*it].c_str());CHKERRQ(ierr);
 	}
-	ierr = PetscViewerASCIIPrintf(viewer,"(%D,%s)",*it,(*dmm->blocknames)[*it].c_str());CHKERRQ(ierr);
+	ierr = PetscViewerASCIIPrintf(viewer, ";");CHKERRQ(ierr);
       }
-      ierr = PetscViewerASCIIPrintf(viewer, ";");CHKERRQ(ierr);
+      ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
     }
-    ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
-    ierr = PetscViewerASCIIPrintf(viewer, "Field decomposition:");CHKERRQ(ierr);
-    /* FIX: decompositions might have different sizes and components on different ranks. */
-    for (std::map<std::string, DM_Moose::SplitIDs>::const_iterator dit = dmm->field_decomposition->begin(); dit != dmm->field_decomposition->end(); ++dit) {
-      ierr = PetscViewerASCIIPrintf(viewer, " %s:[", dit->first.c_str());CHKERRQ(ierr);
-      ierr = PetscViewerASCIIPrintf(viewer, "vars:");CHKERRQ(ierr);
-      for (std::set<unsigned int>::const_iterator vit = dit->second.varids.begin(); vit != dit->second.varids.end(); ++vit) {
-	if (vit != dit->second.varids.begin()) {
-	  ierr = PetscViewerASCIIPrintf(viewer, ",");CHKERRQ(ierr);
+    if (dmm->field_decomposition && dmm->field_decomposition->size()) {
+      ierr = PetscViewerASCIIPrintf(viewer, "Field decomposition:");CHKERRQ(ierr);
+      /* FIX: decompositions might have different sizes and components on different ranks. */
+      for (std::map<std::string, DM_Moose::SplitIDs>::const_iterator dit = dmm->field_decomposition->begin(); dit != dmm->field_decomposition->end(); ++dit) {
+	ierr = PetscViewerASCIIPrintf(viewer, " %s:[", dit->first.c_str());CHKERRQ(ierr);
+	ierr = PetscViewerASCIIPrintf(viewer, "vars:");CHKERRQ(ierr);
+	for (std::set<unsigned int>::const_iterator vit = dit->second.varids.begin(); vit != dit->second.varids.end(); ++vit) {
+	  if (vit != dit->second.varids.begin()) {
+	    ierr = PetscViewerASCIIPrintf(viewer, ",");CHKERRQ(ierr);
+	  }
+	  ierr = PetscViewerASCIIPrintf(viewer,"%s",(*dmm->varnames)[*vit].c_str());CHKERRQ(ierr);
 	}
-	ierr = PetscViewerASCIIPrintf(viewer,"%s",(*dmm->varnames)[*vit].c_str());CHKERRQ(ierr);
-      }
-      ierr = PetscViewerASCIIPrintf(viewer, "; blocks:");CHKERRQ(ierr);
-      for (std::set<unsigned int>::const_iterator bit = dit->second.blockids.begin(); bit != dit->second.blockids.end(); ++bit) {
-	if (bit != dit->second.blockids.begin()) {
-	  ierr = PetscViewerASCIIPrintf(viewer, ",");CHKERRQ(ierr);
+	ierr = PetscViewerASCIIPrintf(viewer, "; blocks:");CHKERRQ(ierr);
+	for (std::set<unsigned int>::const_iterator bit = dit->second.blockids.begin(); bit != dit->second.blockids.end(); ++bit) {
+	  if (bit != dit->second.blockids.begin()) {
+	    ierr = PetscViewerASCIIPrintf(viewer, ",");CHKERRQ(ierr);
+	  }
+	  ierr = PetscViewerASCIIPrintf(viewer,"%s",(*dmm->blocknames)[*bit].c_str());CHKERRQ(ierr);
 	}
-	ierr = PetscViewerASCIIPrintf(viewer,"%s",(*dmm->blocknames)[*bit].c_str());CHKERRQ(ierr);
-      }
-      ierr = PetscViewerASCIIPrintf(viewer, "; sides:");CHKERRQ(ierr);
-      for (std::set<BoundaryID>::const_iterator sit = dit->second.sideids.begin(); sit != dit->second.sideids.end(); ++sit) {
-	if (sit != dit->second.sideids.begin()) {
-	  ierr = PetscViewerASCIIPrintf(viewer, ",");CHKERRQ(ierr);
+	if (dit->second.sideids.size() ) {
+	  ierr = PetscViewerASCIIPrintf(viewer, "; sides:");CHKERRQ(ierr);
+	  for (std::set<BoundaryID>::const_iterator sit = dit->second.sideids.begin(); sit != dit->second.sideids.end(); ++sit) {
+	    if (sit != dit->second.sideids.begin()) {
+	      ierr = PetscViewerASCIIPrintf(viewer, ",");CHKERRQ(ierr);
+	    }
+	    ierr = PetscViewerASCIIPrintf(viewer,"%s",(*dmm->sidenames)[*sit].c_str());CHKERRQ(ierr);
+	  }
 	}
-	ierr = PetscViewerASCIIPrintf(viewer,"%s",(*dmm->sidenames)[*sit].c_str());CHKERRQ(ierr);
+	ierr = PetscViewerASCIIPrintf(viewer, " ]");CHKERRQ(ierr);
       }
-      ierr = PetscViewerASCIIPrintf(viewer, " ]");CHKERRQ(ierr);
+      ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
     }
-    ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
   } else {
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_SUP, "Non-ASCII viewers are not supported");
   }
@@ -1044,8 +1052,8 @@ static PetscErrorCode  DMMooseGetMeshBlocks_Private(DM dm, std::set<subdomain_id
 
 
 #undef __FUNCT__
-#define __FUNCT__ "DMSetUp_Moose"
-static PetscErrorCode  DMSetUp_Moose(DM dm)
+#define __FUNCT__ "DMSetUp_Moose_Private"
+static PetscErrorCode  DMSetUp_Moose_Private(DM dm)
 {
   PetscErrorCode ierr;
   DM_Moose       *dmm = (DM_Moose *)(dm->data);
@@ -1120,19 +1128,36 @@ static PetscErrorCode  DMSetUp_Moose(DM dm)
 
 
   std::string name = dmm->nl->sys().name();
-  name += "_v";
+  name += "_vars";
   for (std::map<unsigned int, std::string>::const_iterator vit = dmm->varnames->begin(); vit != dmm->varnames->end(); ++vit) {
     name += "_"+vit->second;
   }
-  name += "_b";
+  name += "_blocks";
   for (std::map<unsigned int, std::string>::const_iterator bit = dmm->blocknames->begin(); bit != dmm->blocknames->end(); ++bit) {
     name += "_"+bit->second;
   }
-  name += "_s";
-  for (std::map<BoundaryID, std::string>::const_iterator sit = dmm->sidenames->begin(); sit != dmm->sidenames->end(); ++sit) {
-    name += "_"+sit->second;
+  if (dmm->sidenames && dmm->sidenames->size()) {
+    name += "_sides";
+    for (std::map<BoundaryID, std::string>::const_iterator sit = dmm->sidenames->begin(); sit != dmm->sidenames->end(); ++sit) {
+      name += "_"+sit->second;
+    }
   }
+  ierr = PetscObjectSetName((PetscObject)dm,name.c_str());CHKERRQ(ierr);
+  PetscFunctionReturn(0);
+}
 
+#undef __FUNCT__
+#define __FUNCT__ "DMSetUp_Moose"
+static PetscErrorCode  DMSetUp_Moose(DM dm)
+{
+  PetscErrorCode ierr;
+  DM_Moose       *dmm = (DM_Moose *)(dm->data);
+  PetscBool      ismoose;
+
+  PetscFunctionBegin;
+  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose); CHKERRQ(ierr);
+  if (!ismoose)  SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "DM of type %s, not of type %s", ((PetscObject)dm)->type, DMMOOSE);
+  if (!dmm->nl) SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
   /*
      Set up decompositions.
    */
@@ -1370,6 +1395,7 @@ PetscErrorCode  DMSetFromOptions_Moose(DM dm)
     ierr = DMMooseSetDomainDecomposition(dm,domain_decomposition);CHKERRQ(ierr);
   }
   ierr = PetscOptionsEnd();CHKERRQ(ierr);
+  ierr = DMSetUp_Moose_Private(dm);CHKERRQ(ierr); /* Because, strangely enough, DMView() is called in DMSetFromOptions(). */
   PetscFunctionReturn(0);
 
 }
