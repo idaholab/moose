@@ -114,7 +114,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _time_interval(false),
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(-1),
-    _use_multiapp_dt(getParam<bool>("use_multiapp_dt"))
+    _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
+    _allow_output(true)
 {
   _t_step = 0;
   _dt = 0;
@@ -296,15 +297,21 @@ Transient::endStep()
     {
       if(std::abs(_time-(_prev_sync_time))<=_dtmin || (_t_step % _problem.out().interval() == 0 && _problem.out().interval() > 1))
       {
-         _problem.output(true);
-         _problem.outputPostprocessors(true);
+        if(_allow_output)
+        {
+          _problem.output(true);
+          _problem.outputPostprocessors(true);
+        }
       }
     }
     else
     {
     // if _reset_dt is true, force the output no matter what
-    _problem.output(_reset_dt);
-    _problem.outputPostprocessors(_reset_dt);
+      if(_allow_output)
+      {
+        _problem.output(_reset_dt);
+        _problem.outputPostprocessors(_reset_dt);
+      }
     }
 #ifdef LIBMESH_ENABLE_AMR
     if (_problem.adaptivity().isOn())
@@ -487,7 +494,8 @@ Transient::keepGoing()
   if(!keep_going && !_problem.out().wasOutput())
   {
     _problem.output(true);
-    _problem.outputPostprocessors(true);
+    if(_allow_output)
+      _problem.outputPostprocessors(true);
   }
   if(!_converged && _abort)
   {
@@ -557,5 +565,32 @@ void
 Transient::setTargetTime(Real target_time)
 {
   _target_time = target_time;
+}
+
+void
+Transient::forceOutput()
+{
+  _problem.output(true);
+  _problem.outputPostprocessors(true);
+}
+
+Real
+Transient::solutionChangeNorm()
+{
+  NumericVector<Number> & current_solution  = (*_problem.getNonlinearSystem().sys().current_local_solution);
+  NumericVector<Number> & old_solution = (*_problem.getNonlinearSystem().sys().old_local_solution);
+
+  NumericVector<Number> & difference = *NumericVector<Number>::build().release();
+  difference.init(current_solution, true);
+
+  difference = current_solution;
+
+  difference -= old_solution;
+
+  Real abs_change = difference.l2_norm();
+
+  delete &difference;
+
+  return abs_change / current_solution.l2_norm();
 }
 

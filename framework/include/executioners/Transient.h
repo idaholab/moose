@@ -96,9 +96,30 @@ public:
   virtual void setTargetTime(Real target_time);
 
   /**
+   * Tell this executioner whether or not it should be doing its own output.
+   * @param allow If false then this Executioner should _not_ do its own output
+   */
+  virtual void allowOutput(bool allow) { _allow_output = allow; }
+
+  /**
    * Get the current time.
    */
   virtual Real getTime() { return _time; };
+
+  /**
+   * Set the current time.
+   */
+  virtual void setTime(Real t) { _time = t; };
+
+  /**
+   * Forces the problem to output right now.
+   */
+  virtual void forceOutput();
+
+  /**
+   * Get the Relative L2 norm of the change in the solution.
+   */
+  Real solutionChangeNorm();
 
 protected:
   FEProblem & _problem;
@@ -160,6 +181,8 @@ protected:
   Real _timestep_tolerance;
   Real _target_time;
   bool _use_multiapp_dt;
+
+  bool _allow_output;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

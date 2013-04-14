@@ -52,6 +52,8 @@ private:
   std::vector<Transient *> _transient_executioners;
 
   bool _sub_cycling;
+  bool _detect_steady_state;
+  Real _steady_state_tol;
   unsigned int _max_failures;
   unsigned int _failures;
 };
