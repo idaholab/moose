@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'vector_magnitude.i'
+    exodiff = 'vector_magnitude_out.e'
+  [../]
+[]

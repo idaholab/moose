@@ -68,6 +68,7 @@
 #include "BoundsAux.h"
 #include "SpatialUserObjectAux.h"
 #include "SolutionAux.h"
+#include "VectorMagnitudeAux.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
@@ -322,6 +323,7 @@ registerObjects(Factory & factory)
   registerAux(BoundsAux);
   registerAux(SpatialUserObjectAux);
   registerAux(SolutionAux);
+  registerAux(VectorMagnitudeAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
