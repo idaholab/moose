@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'aux_nodal_scalar_kernel.i'
+    exodiff = 'aux_nodal_scalar_kernel_out.e'
+  [../]
+[]

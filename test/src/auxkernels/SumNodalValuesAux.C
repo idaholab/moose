@@ -1,0 +1,44 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "SumNodalValuesAux.h"
+
+template<>
+InputParameters validParams<SumNodalValuesAux>()
+{
+  InputParameters params = validParams<AuxNodalScalarKernel>();
+  params.addRequiredCoupledVar("sum_var", "Variable to be summed");
+
+  return params;
+}
+
+SumNodalValuesAux::SumNodalValuesAux(const std::string & name, InputParameters parameters) :
+    AuxNodalScalarKernel(name, parameters),
+    _sum_var(coupledValue("sum_var"))
+{
+}
+
+SumNodalValuesAux::~SumNodalValuesAux()
+{
+}
+
+
+Real
+SumNodalValuesAux::computeValue()
+{
+  Real sum = 0;
+  for (unsigned int i = 0; i < _node_ids.size(); i++)
+    sum += _sum_var[i];
+  return sum;
+}
