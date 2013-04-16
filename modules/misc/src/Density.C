@@ -10,7 +10,7 @@ InputParameters validParams<Density>()
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
 
-  params.addParam<Real>("density", "Density");
+  params.addRequiredParam<Real>("density", "Density");
 
   return params;
 }
