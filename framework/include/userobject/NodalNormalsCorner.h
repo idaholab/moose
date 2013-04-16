@@ -12,25 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef NODALNORMALSPREPROCESSOR_H
-#define NODALNORMALSPREPROCESSOR_H
+#ifndef NODALNORMALSCORNER_H
+#define NODALNORMALSCORNER_H
 
-#include "ElementUserObject.h"
+#include "SideUserObject.h"
 
-
-class NodalNormalsPreprocessor;
+class NodalNormalsCorner;
 
 template<>
-InputParameters validParams<NodalNormalsPreprocessor>();
+InputParameters validParams<NodalNormalsCorner>();
 
 /**
  *
  */
-class NodalNormalsPreprocessor : public ElementUserObject
+class NodalNormalsCorner : public SideUserObject
 {
 public:
-  NodalNormalsPreprocessor(const std::string & name, InputParameters parameters);
-  virtual ~NodalNormalsPreprocessor();
+  NodalNormalsCorner(const std::string & name, InputParameters parameters);
+  virtual ~NodalNormalsCorner();
 
   virtual void initialize();
   virtual void destroy();
@@ -39,14 +38,12 @@ public:
   virtual void threadJoin(const UserObject & uo);
 
 protected:
-  bool _has_corners;
   BoundaryID _corner_boundary_id;
+
   NumericVector<Number> & _nx;
   NumericVector<Number> & _ny;
   NumericVector<Number> & _nz;
-
-  const VariablePhiGradient & _grad_phi;
 };
 
 
-#endif /* NODALNORMALSPREPROCESSOR_H */
+#endif /* NODALNORMALSCORNER_H */

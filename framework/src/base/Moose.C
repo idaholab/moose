@@ -156,6 +156,7 @@
 #include "NearestPointLayeredAverage.h"
 #include "ElementIntegralVariableUserObject.h"
 #include "NodalNormalsEvaluator.h"
+#include "NodalNormalsCorner.h"
 #include "NodalNormalsPreprocessor.h"
 
 // preconditioners
@@ -408,6 +409,7 @@ registerObjects(Factory & factory)
   registerUserObject(NearestPointLayeredAverage);
   registerUserObject(ElementIntegralVariableUserObject);
   registerUserObject(NodalNormalsPreprocessor);
+  registerUserObject(NodalNormalsCorner);
   registerUserObject(NodalNormalsEvaluator);
 
   // preconditioners

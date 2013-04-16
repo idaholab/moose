@@ -10,4 +10,10 @@
     input = 'circle_quads.i'
     exodiff = 'circle_quads_out.e'
   [../]
+
+  [./cylinder_hexes]
+    type = 'Exodiff'
+    input = 'cylinder_hexes.i'
+    exodiff = 'cylinder_hexes_out.e'
+  [../]
 []

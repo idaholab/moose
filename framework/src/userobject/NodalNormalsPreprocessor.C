@@ -20,12 +20,15 @@ template<>
 InputParameters validParams<NodalNormalsPreprocessor>()
 {
   InputParameters params = validParams<ElementUserObject>();
+  params.addParam<BoundaryName>("corner_boundary", "Node set ID which contains the nodes that are in 'corners'.");
 
   return params;
 }
 
 NodalNormalsPreprocessor::NodalNormalsPreprocessor(const std::string & name, InputParameters parameters) :
     ElementUserObject(name, parameters),
+    _has_corners(isParamValid("corner_boundary")),
+    _corner_boundary_id(_has_corners ? _mesh.getBoundaryID(getParam<BoundaryName>("corner_boundary")) : static_cast<BoundaryID>(-1)),
     _nx(_fe_problem.getAuxiliarySystem().getVector("nx")),
     _ny(_fe_problem.getAuxiliarySystem().getVector("ny")),
     _nz(_fe_problem.getAuxiliarySystem().getVector("nz")),
@@ -53,14 +56,19 @@ NodalNormalsPreprocessor::execute()
     const Node * node = _current_elem->get_node(i);
     if (_mesh.isBoundaryNode(node->id()))
     {
-      dof_id_type dof = node->id();
-      for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+      // it is a boundary node
+      if (_has_corners || !_mesh._mesh.boundary_info->has_boundary_id(node, _corner_boundary_id))
       {
-        Threads::spin_mutex::scoped_lock lock(nodal_normals_preprocessor_mutex);
+        // but it is not a corner node, they will be treated differently later on
+        dof_id_type dof = node->id();
+        for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+        {
+          Threads::spin_mutex::scoped_lock lock(nodal_normals_preprocessor_mutex);
 
-        _nx.add(dof, _JxW[qp] * _grad_phi[i][qp](0));
-        _ny.add(dof, _JxW[qp] * _grad_phi[i][qp](1));
-        _nz.add(dof, _JxW[qp] * _grad_phi[i][qp](2));
+          _nx.add(dof, _JxW[qp] * _grad_phi[i][qp](0));
+          _ny.add(dof, _JxW[qp] * _grad_phi[i][qp](1));
+          _nz.add(dof, _JxW[qp] * _grad_phi[i][qp](2));
+        }
       }
     }
   }

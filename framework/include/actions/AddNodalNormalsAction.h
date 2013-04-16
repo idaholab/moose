@@ -43,6 +43,7 @@ public:
 
 protected:
   std::vector<BoundaryName> _boundary;
+  BoundaryName _corner_boundary;
 };
 
 #endif /* ADDNODALNORMALSACTION_H */
