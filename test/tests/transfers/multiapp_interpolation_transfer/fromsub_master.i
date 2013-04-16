@@ -33,6 +33,12 @@
   [../]
   [./displaced_source_from_sub]
   [../]
+  [./nodal_from_sub_elemental]
+  [../]
+  [./elemental_from_sub_elemental]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -83,7 +89,7 @@
 
 [Transfers]
   [./fromsub]
-    type = MultiAppNodalInterpolationTransfer
+    type = MultiAppInterpolationTransfer
     direction = from_multiapp
     execute_on = timestep_begin
     multi_app = sub
@@ -91,7 +97,7 @@
     variable = from_sub
   [../]
   [./elemental_fromsub]
-    type = MultiAppNodalInterpolationTransfer
+    type = MultiAppInterpolationTransfer
     direction = from_multiapp
     execute_on = timestep_begin
     multi_app = sub
@@ -99,7 +105,7 @@
     variable = elemental_from_sub
   [../]
   [./radial_fromsub]
-    type = MultiAppNodalInterpolationTransfer
+    type = MultiAppInterpolationTransfer
     direction = from_multiapp
     execute_on = timestep_begin
     multi_app = sub
@@ -108,7 +114,7 @@
     interp_type = radial_basis
   [../]
   [./radial_elemental_fromsub]
-    type = MultiAppNodalInterpolationTransfer
+    type = MultiAppInterpolationTransfer
     direction = from_multiapp
     execute_on = timestep_begin
     multi_app = sub
@@ -117,7 +123,7 @@
     interp_type = radial_basis
   [../]
   [./displaced_target_fromsub]
-    type = MultiAppNodalInterpolationTransfer
+    type = MultiAppInterpolationTransfer
     direction = from_multiapp
     execute_on = timestep_begin
     multi_app = sub
@@ -126,13 +132,27 @@
     displaced_target_mesh = true
   [../]
   [./displaced_source_fromsub]
-    type = MultiAppNodalInterpolationTransfer
+    type = MultiAppInterpolationTransfer
     direction = from_multiapp
     execute_on = timestep_begin
     multi_app = sub
     source_variable = u
     variable = displaced_source_from_sub
     displaced_source_mesh = true
+  [../]
+  [./elemental_from_sub_elemental]
+    type = MultiAppInterpolationTransfer
+    direction = from_multiapp
+    multi_app = sub
+    source_variable = elemental
+    variable = elemental_from_sub_elemental
+  [../]
+  [./nodal_from_sub_elemental]
+    type = MultiAppInterpolationTransfer
+    direction = from_multiapp
+    multi_app = sub
+    source_variable = elemental
+    variable = nodal_from_sub_elemental
   [../]
 []
 

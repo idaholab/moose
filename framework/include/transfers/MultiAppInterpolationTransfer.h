@@ -12,26 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MULTIAPPNODALINTERPOLATIONTRANSFER_H
-#define MULTIAPPNODALINTERPOLATIONTRANSFER_H
+#ifndef MULTIAPPINTERPOLATIONTRANSFER_H
+#define MULTIAPPINTERPOLATIONTRANSFER_H
 
 #include "MultiAppTransfer.h"
 
 class MooseVariable;
-class MultiAppNodalInterpolationTransfer;
+class MultiAppInterpolationTransfer;
 
 template<>
-InputParameters validParams<MultiAppNodalInterpolationTransfer>();
+InputParameters validParams<MultiAppInterpolationTransfer>();
 
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
  */
-class MultiAppNodalInterpolationTransfer :
+class MultiAppInterpolationTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppNodalInterpolationTransfer(const std::string & name, InputParameters parameters);
-  virtual ~MultiAppNodalInterpolationTransfer() {}
+  MultiAppInterpolationTransfer(const std::string & name, InputParameters parameters);
+  virtual ~MultiAppInterpolationTransfer() {}
 
   virtual void execute();
 

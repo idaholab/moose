@@ -14,7 +14,7 @@
 
 #define NOTFOUND -999999
 
-#include "MultiAppNodalInterpolationTransfer.h"
+#include "MultiAppInterpolationTransfer.h"
 
 // Moose
 #include "MooseTypes.h"
@@ -27,7 +27,7 @@
 #include "libmesh/radial_basis_interpolation.h"
 
 template<>
-InputParameters validParams<MultiAppNodalInterpolationTransfer>()
+InputParameters validParams<MultiAppInterpolationTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
 
@@ -47,7 +47,7 @@ InputParameters validParams<MultiAppNodalInterpolationTransfer>()
   return params;
 }
 
-MultiAppNodalInterpolationTransfer::MultiAppNodalInterpolationTransfer(const std::string & name, InputParameters parameters) :
+MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const std::string & name, InputParameters parameters) :
     MultiAppTransfer(name, parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable")),
@@ -61,9 +61,9 @@ MultiAppNodalInterpolationTransfer::MultiAppNodalInterpolationTransfer(const std
 }
 
 void
-MultiAppNodalInterpolationTransfer::execute()
+MultiAppInterpolationTransfer::execute()
 {
-  std::cout<<"Beginning NodalInterpolationTransfer "<<_name<<std::endl;
+  std::cout<<"Beginning InterpolationTransfer "<<_name<<std::endl;
 
   switch(_direction)
   {
@@ -84,6 +84,8 @@ MultiAppNodalInterpolationTransfer::execute()
 
       unsigned int from_sys_num = from_sys.number();
       unsigned int from_var_num = from_sys.variable_number(from_var.name());
+
+      bool from_is_nodal = from_sys.variable_type(from_var_num) == FEType();
 
       EquationSystems & from_es = from_sys.get_equation_systems();
 
@@ -113,18 +115,37 @@ MultiAppNodalInterpolationTransfer::execute()
       std::vector<std::string> vars;
       vars.push_back(_to_var_name);
 
-      MeshBase::const_node_iterator from_nodes_it    = from_mesh->local_nodes_begin();
-      MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
-
-      for(; from_nodes_it != from_nodes_end; ++from_nodes_it)
+      if(from_is_nodal)
       {
-        Node * from_node = *from_nodes_it;
+        MeshBase::const_node_iterator from_nodes_it    = from_mesh->local_nodes_begin();
+        MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
 
-        // Assuming LAGRANGE!
-        unsigned int from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
+        for(; from_nodes_it != from_nodes_end; ++from_nodes_it)
+        {
+          Node * from_node = *from_nodes_it;
 
-        src_pts.push_back(*from_node);
-        src_vals.push_back(from_solution(from_dof));
+          // Assuming LAGRANGE!
+          unsigned int from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
+
+          src_pts.push_back(*from_node);
+          src_vals.push_back(from_solution(from_dof));
+        }
+      }
+      else
+      {
+        MeshBase::const_element_iterator from_elements_it    = from_mesh->local_elements_begin();
+        MeshBase::const_element_iterator from_elements_end   = from_mesh->local_elements_end();
+
+        for(; from_elements_it != from_elements_end; ++from_elements_it)
+        {
+          Elem * from_elem = *from_elements_it;
+
+          // Assuming CONSTANT MONOMIAL
+          unsigned int from_dof = from_elem->dof_number(from_sys_num, from_var_num, 0);
+
+          src_pts.push_back(from_elem->centroid());
+          src_vals.push_back(from_solution(from_dof));
+        }
       }
 
       // We have only set local values - prepare for use by gathering remote gata
@@ -239,7 +260,7 @@ MultiAppNodalInterpolationTransfer::execute()
       unsigned int to_sys_num = to_sys.number();
 
       // Only works with a serialized mesh to transfer to!
-      mooseAssert(to_sys.get_mesh().is_serial(), "MultiAppNodalInterpolationTransfer only works with SerialMesh!");
+      mooseAssert(to_sys.get_mesh().is_serial(), "MultiAppInterpolationTransfer only works with SerialMesh!");
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 
@@ -295,6 +316,8 @@ MultiAppNodalInterpolationTransfer::execute()
 
         unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
+        bool from_is_nodal = from_sys.variable_type(from_var_num) == FEType();
+
         EquationSystems & from_es = from_sys.get_equation_systems();
 
         NumericVector<Number> & from_solution = *from_sys.solution;
@@ -308,18 +331,37 @@ MultiAppNodalInterpolationTransfer::execute()
 
         Point app_position = _multi_app->position(i);
 
-        MeshBase::const_node_iterator from_nodes_it    = from_mesh->local_nodes_begin();
-        MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
-
-        for(; from_nodes_it != from_nodes_end; ++from_nodes_it)
+        if(from_is_nodal)
         {
-          Node * from_node = *from_nodes_it;
+          MeshBase::const_node_iterator from_nodes_it    = from_mesh->local_nodes_begin();
+          MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
 
-          // Assuming LAGRANGE!
-          unsigned int from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
+          for(; from_nodes_it != from_nodes_end; ++from_nodes_it)
+          {
+            Node * from_node = *from_nodes_it;
 
-          src_pts.push_back(*from_node+app_position);
-          src_vals.push_back(from_solution(from_dof));
+            // Assuming LAGRANGE!
+            unsigned int from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
+
+            src_pts.push_back(*from_node+app_position);
+            src_vals.push_back(from_solution(from_dof));
+          }
+        }
+        else
+        {
+          MeshBase::const_element_iterator from_elements_it    = from_mesh->local_elements_begin();
+          MeshBase::const_element_iterator from_elements_end   = from_mesh->local_elements_end();
+
+          for(; from_elements_it != from_elements_end; ++from_elements_it)
+          {
+            Elem * from_element = *from_elements_it;
+
+            // Assuming LAGRANGE!
+            unsigned int from_dof = from_element->dof_number(from_sys_num, from_var_num, 0);
+
+            src_pts.push_back(from_element->centroid()+app_position);
+            src_vals.push_back(from_solution(from_dof));
+          }
         }
 
         Moose::swapLibMeshComm(swapped);
@@ -394,10 +436,10 @@ MultiAppNodalInterpolationTransfer::execute()
     }
   }
 
-  std::cout<<"Finished NodalInterpolationTransfer "<<_name<<std::endl;
+  std::cout<<"Finished InterpolationTransfer "<<_name<<std::endl;
 }
 
-Node * MultiAppNodalInterpolationTransfer::getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end)
+Node * MultiAppInterpolationTransfer::getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end)
 {
   distance = std::numeric_limits<Real>::max();
   Node * nearest = NULL;

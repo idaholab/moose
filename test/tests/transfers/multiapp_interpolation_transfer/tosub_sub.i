@@ -3,8 +3,6 @@
   dim = 2
   nx = 10
   ny = 10
-  xmin = .21
-  xmax = .79
   displacements = 'disp_x disp_y'
 []
 
@@ -14,10 +12,32 @@
 []
 
 [AuxVariables]
+  [./from_master]
+  [../]
+  [./elemental_from_master]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./radial_from_master]
+  [../]
+  [./radial_elemental_from_master]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./disp_x]
-    initial_condition = -0.4
+    initial_condition = -0.2
   [../]
   [./disp_y]
+  [../]
+  [./displaced_target_from_master]
+  [../]
+  [./displaced_source_from_master]
+  [../]
+  [./elemental_from_master_elemental]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./nodal_from_master_elemental]
   [../]
 []
 

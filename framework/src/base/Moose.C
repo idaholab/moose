@@ -210,7 +210,7 @@
 #include "MultiAppMeshFunctionTransfer.h"
 #include "MultiAppUserObjectTransfer.h"
 #include "MultiAppNearestNodeTransfer.h"
-#include "MultiAppNodalInterpolationTransfer.h"
+#include "MultiAppInterpolationTransfer.h"
 
 
 // Actions
@@ -460,7 +460,7 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppMeshFunctionTransfer);
   registerTransfer(MultiAppUserObjectTransfer);
   registerTransfer(MultiAppNearestNodeTransfer);
-  registerTransfer(MultiAppNodalInterpolationTransfer);
+  registerTransfer(MultiAppInterpolationTransfer);
 
   registered = true;
 }

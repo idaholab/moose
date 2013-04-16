@@ -3,6 +3,8 @@
   dim = 2
   nx = 10
   ny = 10
+  xmin = .21
+  xmax = .79
   displacements = 'disp_x disp_y'
 []
 
@@ -12,26 +14,21 @@
 []
 
 [AuxVariables]
-  [./from_master]
-  [../]
-  [./elemental_from_master]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./radial_from_master]
-  [../]
-  [./radial_elemental_from_master]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./disp_x]
-    initial_condition = -0.2
+    initial_condition = -0.4
   [../]
   [./disp_y]
   [../]
-  [./displaced_target_from_master]
+  [./elemental]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
-  [./displaced_source_from_master]
+[]
+
+[Functions]
+  [./x_func]
+    type = ParsedFunction
+    value = x
   [../]
 []
 
@@ -39,6 +36,15 @@
   [./diff]
     type = Diffusion
     variable = u
+  [../]
+[]
+
+[AuxKernels]
+  [./x_func_aux]
+    type = FunctionAux
+    variable = elemental
+    function = x_func
+    execute_on = initial
   [../]
 []
 
