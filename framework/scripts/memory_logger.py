@@ -205,10 +205,10 @@ def parseARGs(args=None):
   parser = argparse.ArgumentParser(description='Track memory usage')
   parser.add_argument('--track', nargs="?", type=int, help='Track a single specific PID already running\n ')
   parser.add_argument('--read', nargs="?", help='Read a specified memory log file\n ')
-  parser.add_argument('--export', nargs="?", help='Export specified log file to a comma delimitted format\n ')
+  parser.add_argument('--export', nargs="?", help='Export specified log file to a comma delimited format\n ')
   parser.add_argument('--run', nargs="+", help='Run specified command. You must encapsulate the command in quotes\n ')
   parser.add_argument('--mpi', dest='mpi', action='store_const', const=True, default=False, help='Instruct memory logger to tally all launches\n ')
-  parser.add_argument('--outfile', nargs="?", default=os.getcwd() + '/usage.log' ,help='Save log to specified file\n ')
+  parser.add_argument('--outfile', nargs="?", default=os.getcwd() + '/usage.log' ,help='Save log to specified file. (Defaults to usage.log)\n ')
   parser.add_argument('--repeat-rate', nargs="?", type=float, default=0.25, help='Indicate the sleep delay in float seconds to check memory usage (default 0.25 seconds)\n ')
   return _verifyARGs(parser.parse_args(args))
 
