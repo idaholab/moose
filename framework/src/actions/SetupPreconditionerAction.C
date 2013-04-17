@@ -47,11 +47,6 @@ SetupPreconditionerAction::act()
 {
   if (_problem != NULL)
   {
-    // We are only allowed to have one instance of a preconditioner active at a time
-    // TODO: We may need to reset this parameter to zero for loosely coupled systems
-    if (++_count > 1)
-      mooseError(std::string("More than one active Preconditioner Action detected while building _") + _type + "_");
-
     // build the preconditioner
     _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem;
     MoosePreconditioner * pc = dynamic_cast<MoosePreconditioner *>(_factory.create(_type, getShortName(), _moose_object_pars));
