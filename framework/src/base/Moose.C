@@ -145,6 +145,7 @@
 #include "NodalL2Error.h"
 #include "TotalVariableValue.h"
 #include "VolumePostprocessor.h"
+#include "AreaPostprocessor.h"
 #include "PointValue.h"
 
 // user objects
@@ -398,6 +399,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NodalL2Error);
   registerPostprocessor(TotalVariableValue);
   registerPostprocessor(VolumePostprocessor);
+  registerPostprocessor(AreaPostprocessor);
   registerPostprocessor(PointValue);
 
   // user objects

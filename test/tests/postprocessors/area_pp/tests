@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'area_pp.i'
+    exodiff = 'area_pp_out.e'
+  [../]
+[]
