@@ -139,7 +139,7 @@ TransientMultiApp::solveStep()
         if(_detect_steady_state)
           std::cout<<"Solution change norm: "<<solution_change_norm<<std::endl;
 
-        if(_detect_steady_state && solution_change_norm < _steady_state_tol)
+        if(converged && _detect_steady_state && solution_change_norm < _steady_state_tol)
         {
           std::cout<<"Detected Steady State!  Fast-forwarding to "<<_t<<std::endl;
 
