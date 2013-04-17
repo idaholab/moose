@@ -14,11 +14,14 @@
 
 #include "AddBCAction.h"
 #include "FEProblem.h"
+#include "BoundaryCondition.h"
 
 template<>
 InputParameters validParams<AddBCAction>()
 {
-  return validParams<MooseObjectAction>();
+  InputParameters params = validParams<MooseObjectAction>();
+  params += validParams<BoundaryCondition>();
+  return params;
 }
 
 AddBCAction::AddBCAction(const std::string & name, InputParameters params) :
