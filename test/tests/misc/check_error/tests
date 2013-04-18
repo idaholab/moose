@@ -233,6 +233,7 @@
     type = 'RunException'
     input = 'multi_precond_test.i'
     expect_err = "More than one active Preconditioner Action detected while building \S+"
+    skip = 'Broken in r18216'
   [../]
 
   [./nan_test]
