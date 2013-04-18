@@ -44,7 +44,7 @@ class PBSJob(Job):
     if params.isValid('mpi_procs'):
       params['mpi_procs_per_chunk'] = params['mpi_procs']
     elif params.isValid('total_mpi_procs'):
-      params['mpi_procs_per_chunk'] = params['total_mpi_procs'] / params['chunks']  # Need some more error checking here
+      params['mpi_procs_per_chunk'] = str(int(params['total_mpi_procs']) / int(params['chunks']))  # Need some more error checking here
     else:
       print "ERROR: You must specify either 'mpi_procs' or 'total_mpi_procs'"
       sys.exit(1)
