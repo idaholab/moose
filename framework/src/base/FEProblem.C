@@ -3052,6 +3052,8 @@ FEProblem::getOutputProblem(unsigned int refinements, MeshFileName file)
     params.set<FEProblem *>("mproblem") = this;
     params.set<unsigned int>("refinements") = refinements;
     params.set<MooseMesh *>("mesh") = &_mesh;
+    params.set<bool>("nemesis") = false;
+    params.set<bool>("skip_partitioning") = false;
     if (file != "")
       params.set<MeshFileName>("file") = file;
     _out_problem = static_cast<OutputProblem *>(_factory.create("OutputProblem", "Output Problem", params));

@@ -191,6 +191,8 @@ OutputProblem::meshInitHelper(FEProblem & fe_problem, InputParameters & params)
   {
     InputParameters mesh_params = fe_problem.mesh().parameters();
     mesh_params.set<MeshFileName>("file") = params.get<MeshFileName>("file");
+    mesh_params.set<bool>("nemesis") = false;
+    mesh_params.set<bool>("skip_partitioning") = false;
     mesh = new FileMesh("output_problem_mesh", mesh_params);
     mesh->init();
     mesh->prepare();
