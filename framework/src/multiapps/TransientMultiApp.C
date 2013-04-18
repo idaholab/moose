@@ -191,7 +191,7 @@ TransientMultiApp::solveStep()
 Real
 TransientMultiApp::computeDT()
 {
-  if(_sub_cycling || _tolerate_failure) // Bow out of the timestep selection dance
+  if(_sub_cycling) // Bow out of the timestep selection dance
     return std::numeric_limits<Real>::max();
 
   Real smallest_dt = std::numeric_limits<Real>::max();
@@ -211,6 +211,10 @@ TransientMultiApp::computeDT()
     // Swap back
     Moose::swapLibMeshComm(swapped);
   }
+
+  if(_tolerate_failure) // Bow out of the timestep selection dance, we do this down here because we need to call computeConstrainedDT at least once for these executioners...
+    return std::numeric_limits<Real>::max();
+
 
   Parallel::min(smallest_dt);
   return smallest_dt;
