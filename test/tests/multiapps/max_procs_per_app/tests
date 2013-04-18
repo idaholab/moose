@@ -4,6 +4,6 @@
     input = 'master.i'
     exodiff = 'master_out.e master_out_sub0.e'
     min_parallel = 3
-    skip = 'still hosed'
+    deleted = 'still hosed #1873'
   [../]
 []

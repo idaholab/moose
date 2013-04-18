@@ -1953,6 +1953,9 @@ NonlinearSystem::printVarNorms()
 void
 NonlinearSystem::setPreconditioner(MoosePreconditioner *pc)
 {
+  if (_preconditioner != NULL)
+    mooseError("More than one active Preconditioner detected");
+
   _preconditioner = pc;
 }
 

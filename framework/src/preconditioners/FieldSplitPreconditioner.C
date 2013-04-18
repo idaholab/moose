@@ -79,7 +79,6 @@ FieldSplitPreconditioner::FieldSplitPreconditioner (const std::string & name, In
   }
   _fe_problem.setCouplingMatrix(cm);
 
-  _nl.setPreconditioner(this);
   _nl.useFieldSplitPreconditioner(true);
 }
 
