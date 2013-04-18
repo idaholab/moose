@@ -55,6 +55,8 @@ private:
   bool _detect_steady_state;
   Real _steady_state_tol;
   unsigned int _max_failures;
+  bool _tolerate_failure;
+
   unsigned int _failures;
 };
 

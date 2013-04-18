@@ -32,6 +32,8 @@ InputParameters validParams<TransientMultiApp>()
 
   params.addParam<unsigned int>("max_failures", 0, "Maximum number of solve failures tolerated while sub_cycling.");
 
+  params.addParam<bool>("tolerate_failure", false, "If true this MultiApp won't participate in dt decisions and will always be fast-forwarded to the current time.");
+
 
   return params;
 }
@@ -44,6 +46,7 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     _detect_steady_state(getParam<bool>("detect_steady_state")),
     _steady_state_tol(getParam<Real>("steady_state_tol")),
     _max_failures(getParam<unsigned int>("max_failures")),
+    _tolerate_failure(getParam<bool>("tolerate_failure")),
     _failures(0)
 {
   if(!_has_an_app)
@@ -66,7 +69,7 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
       appProblem(_first_local_app + i)->copyOldSolutions();
       _transient_executioners[i] = ex;
 
-      if(_detect_steady_state)
+      if(_detect_steady_state || _tolerate_failure)
         ex->allowOutput(false);
     }
   }
@@ -162,6 +165,13 @@ TransientMultiApp::solveStep()
       if(_detect_steady_state && !at_steady)
         ex->forceOutput();
     }
+    else if(_tolerate_failure)
+    {
+      ex->takeStep(_dt);
+      ex->setTime(_t);
+      ex->forceOutput();
+      ex->endStep();
+    }
     else
     {
       ex->takeStep(_dt);
@@ -181,7 +191,7 @@ TransientMultiApp::solveStep()
 Real
 TransientMultiApp::computeDT()
 {
-  if(_sub_cycling) // Bow out of the timestep selection dance
+  if(_sub_cycling || _tolerate_failure) // Bow out of the timestep selection dance
     return std::numeric_limits<Real>::max();
 
   Real smallest_dt = std::numeric_limits<Real>::max();
