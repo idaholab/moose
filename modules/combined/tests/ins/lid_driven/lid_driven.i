@@ -21,8 +21,8 @@
   xmax = 1.0
   ymin = 0
   ymax = 1.0
-  nx = 20
-  ny = 20
+  nx = 160
+  ny = 160
   elem_type = QUAD9
 
   [./ExtraNodesets]
@@ -217,16 +217,16 @@
 
 # Options to use "LSC" for the Schur complement solve:
 # -pc_type fieldsplit -dm_moose_nfieldsplits 2 -dm_moose_fieldsplit_0_vars u,v,p -dm_moose_fieldsplit_1_vars T -pc_fieldsplit_type additive -fieldsplit_0_pc_type fieldsplit -fieldsplit_0_dm_moose_nfieldsplits 2 -fieldsplit_0_dm_moose_fieldsplit_0_vars u,v -fieldsplit_0_dm_moose_fieldsplit_1_vars p -fieldsplit_0_pc_fieldsplit_type schur -fieldsplit_0_fieldsplit_0_pc_type lu -fieldsplit_0_pc_schur_precondition self -fieldsplit_0_fieldsplit_1_pc_type lsc
-[./FSP]
-  type = FSP
-  full = true
-[../]
-
-# [./SMP_PJFNK]
-#   type = SMP
+# [./FSP]
+#   type = FSP
 #   full = true
-#   petsc_options = '-snes_mf_operator'
 # [../]
+
+[./SMP_PJFNK]
+  type = SMP
+  full = true
+  petsc_options = '-snes_mf_operator'
+[../]
 []
 
 
@@ -244,15 +244,19 @@
   # you want to guarantee you are getting pilut!  Also, even though there are pilut defaults,
   # i'm not sure that petsc actually passes them through, so always specify them!.
   #
+  # PILUT options:
   # -pc_type hypre -pc_hypre_type pilut -pc_hypre_pilut_factorrowsize 20 -pc_hypre_pilut_tol 1.e-4
   #
-  # petsc_options_iname = '-ksp_gmres_restart -snes_linesearch_type -pc_type -pc_type_hypre -pc_hypre_pilut_factorrowsize -pc_hypre_pilut_tol'
-  # petsc_options_value = '300                basic                 hypre    pilut          200                           1.e-4'
+  # PETSc ILU options (parallel):
+  # -sub_pc_type ilu -sub_pc_factor_levels 2
+  #
+  # ASM options (to be used in conjunction with ILU sub_pc)
+  # -pc_type asm -pc_asm_overlap 2
 
   nl_rel_tol = 1e-5
   nl_max_its = 6
   l_tol = 1e-6
-  l_max_its = 250
+  l_max_its = 500
   start_time = 0.0
   num_steps = 40
 []
