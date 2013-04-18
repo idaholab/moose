@@ -48,6 +48,7 @@ InputParameters validParams<SetupOverSamplingAction>()
   params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file");
 
   params.addParam<Point>("position", "Set a positional offset.  This vector will get added to the nodal cooardinates to move the domain.");
+  params.addParam<MeshFileName>("file", "The name of the mesh file to read");
 
   return params;
 }
@@ -64,7 +65,7 @@ SetupOverSamplingAction::act()
   if (_problem == NULL)
     return;
 
-  OutputProblem & out_problem = _problem->getOutputProblem(getParam<unsigned int>("refinements"));
+  OutputProblem & out_problem = _problem->getOutputProblem(getParam<unsigned int>("refinements"), getParam<MeshFileName>("file"));
 
   Output & output = out_problem.out();  // can't use use this with coupled problems on different meshes
 

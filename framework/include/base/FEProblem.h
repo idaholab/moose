@@ -517,7 +517,7 @@ public:
   void showVariableInOutput(const std::string & var_name);
   void showVariableInOutput(const std::vector<std::string> & var_names);
 
-  OutputProblem & getOutputProblem(unsigned int refinements);
+  OutputProblem & getOutputProblem(unsigned int refinements, MeshFileName file = "");
   void setMaxPPSRowsScreen(unsigned int n) { _pps_output_table_max_rows = n; }
 
   // Restart //////

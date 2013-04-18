@@ -3043,7 +3043,7 @@ FEProblem::showVariableInOutput(const std::vector<std::string> & var_names)
 }
 
 OutputProblem &
-FEProblem::getOutputProblem(unsigned int refinements)
+FEProblem::getOutputProblem(unsigned int refinements, MeshFileName file)
 {
   // TODO: When do we build this?
   if (!_out_problem)
@@ -3052,6 +3052,8 @@ FEProblem::getOutputProblem(unsigned int refinements)
     params.set<FEProblem *>("mproblem") = this;
     params.set<unsigned int>("refinements") = refinements;
     params.set<MooseMesh *>("mesh") = &_mesh;
+    if (file != "")
+      params.set<MeshFileName>("file") = file;
     _out_problem = static_cast<OutputProblem *>(_factory.create("OutputProblem", "Output Problem", params));
   }
   return *_out_problem;

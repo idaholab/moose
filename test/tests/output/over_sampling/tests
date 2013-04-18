@@ -10,4 +10,10 @@
     input = 'over_sampling_test_file.i'
     exodiff = 'out_file.e out_file_oversample.e'
   [../]
+
+  [./test_first_order]
+    type = 'Exodiff'
+    input = 'over_sampling_second_file.i'
+    exodiff = 'out_wedge_oversample.e'
+  [../]
 []

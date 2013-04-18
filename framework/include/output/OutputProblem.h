@@ -68,7 +68,10 @@ protected:
 
   Point _position;
 
-  bool _mesh_might_change;
+//  bool _mesh_might_change;
+
+private:
+  static MooseMesh * meshInitHelper(FEProblem & fe_problem, InputParameters & params);
 };
 
 #endif
