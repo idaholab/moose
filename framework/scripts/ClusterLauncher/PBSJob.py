@@ -9,7 +9,7 @@ class PBSJob(Job):
 
     params.addRequiredParam('chunks', "The number of PBS chunks.")
     # Only one of either of the next two paramteres can be specified
-    params.addParam('mpi_procs', 1, "The number of MPI processes per chunk.")
+    params.addParam('mpi_procs', "The number of MPI processes per chunk.")
     params.addParam('total_mpi_procs', "The total number of MPI processes to use divided evenly among chunks.")
 
     params.addParam('place', 'scatter:excl', "The PBS job placement scheme to use.")
