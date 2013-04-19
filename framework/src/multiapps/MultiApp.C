@@ -42,12 +42,12 @@ InputParameters validParams<MultiApp>()
 
   std::ostringstream app_types_strings;
 
-  registeredMooseAppIterator it = AppFactory::instance()->registeredObjectsBegin();
-  while(it != AppFactory::instance()->registeredObjectsEnd())
+  registeredMooseAppIterator it = AppFactory::instance().registeredObjectsBegin();
+  while(it != AppFactory::instance().registeredObjectsEnd())
   {
     app_types_strings << it->first;
     ++it;
-    if(it != AppFactory::instance()->registeredObjectsEnd())
+    if(it != AppFactory::instance().registeredObjectsEnd())
       app_types_strings<< ", ";
   }
 
@@ -140,8 +140,8 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
 
   for(unsigned int i=0; i<_my_num_apps; i++)
   {
-    InputParameters app_params = AppFactory::instance()->getValidParams(_app_type);
-    MooseApp * app = AppFactory::instance()->create(_app_type, "multi_app", app_params);
+    InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
+    MooseApp * app = AppFactory::instance().create(_app_type, "multi_app", app_params);
 
     std::ostringstream output_base;
 

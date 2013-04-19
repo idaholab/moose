@@ -15,13 +15,10 @@
 #include "AppFactory.h"
 #include "CommandLine.h"
 
-AppFactory * AppFactory::_instance = NULL;
+AppFactory AppFactory::_instance = AppFactory();
 
-AppFactory *AppFactory::instance()
+AppFactory &AppFactory::instance()
 {
-  if (!_instance)
-    _instance = new AppFactory;
-
   return _instance;
 }
 
@@ -34,7 +31,7 @@ AppFactory::createApp(std::string app_type, int argc, char ** argv)
 {
   CommandLine command_line(argc, argv);
 
-  InputParameters app_params = AppFactory::instance()->getValidParams(app_type);
+  InputParameters app_params = AppFactory::instance().getValidParams(app_type);
 
   command_line.addCommandLineOptionsFromParams(app_params);
   command_line.populateInputParams(app_params);
@@ -42,18 +39,12 @@ AppFactory::createApp(std::string app_type, int argc, char ** argv)
   app_params.set<int>("_argc") = argc;
   app_params.set<char**>("_argv") = argv;
 
-  MooseApp * app = AppFactory::instance()->create(app_type, "main", app_params);
+  MooseApp * app = AppFactory::instance().create(app_type, "main", app_params);
 
   // print out the System Info here!
   std::cout << app->getSysInfo();
 
   return app;
-}
-
-void
-AppFactory::release()
-{
-  delete _instance;
 }
 
 InputParameters

@@ -23,8 +23,7 @@
 /**
  * Macros
  */
-#define registerApp(name)                        AppFactory::instance()->reg<name>(#name)
-
+#define registerApp(name)                        AppFactory::instance().reg<name>(#name)
 
 /**
  * Typedef for function to build objects
@@ -61,7 +60,7 @@ public:
    * Get the instance of the AppFactory
    * @return Pointer to the AppFactory instance
    */
-  static AppFactory *instance();
+  static AppFactory & instance();
 
   virtual ~AppFactory();
 
@@ -69,11 +68,6 @@ public:
    * Helper function for creating a MooseApp from command-line arguments.
    */
   static MooseApp * createApp(std::string app_type, int argc, char ** argv);
-
-  /**
-   * Release the memory allocated by this AppFactory
-   */
-  static void release();
 
   /**
    * Register a new object
@@ -87,8 +81,8 @@ public:
       _name_to_build_pointer[name] = &buildApp<T>;
       _name_to_params_pointer[name] = &validParams<T>;
     }
-//    else
-//      mooseError("Object '" + name + "' already registered.");
+    else
+      mooseError("Object '" + name + "' already registered.");
   }
 
   /**
@@ -114,7 +108,7 @@ protected:
   std::map<std::string, appBuildPtr>  _name_to_build_pointer;
   std::map<std::string, paramsPtr> _name_to_params_pointer;
 
-  static AppFactory *_instance;
+  static AppFactory _instance;
 
 private:
   // Private constructor for singleton pattern
