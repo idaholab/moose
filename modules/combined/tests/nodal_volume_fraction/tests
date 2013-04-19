@@ -3,7 +3,7 @@
    type = Exodiff
    input = 'nodal_volume_fraction.i'
    exodiff = 'nodal_volume_fraction.e'
-   rel_err = 5.0e-04
+   rel_err = 5.0e-02
   [../]
 
   [./Avrami_test]
