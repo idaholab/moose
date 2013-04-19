@@ -129,8 +129,15 @@ GrainTracker::finalize()
   Moose::perf_log.pop("finalize()","GrainTracker");
 
   // Calculate and out output bubble volume data
-  if (_bubble_volume_file_name != "")
-    calculateBubbleVolumes(_bubble_volume_file_name);
+  if (_pars.isParamValid("bubble_volume_file"))
+  {
+    calculateBubbleVolumes();
+    std::vector<Real> data; data.reserve(_all_bubble_volumes.size() + 2);
+    data.push_back(_fe_problem.timeStep());
+    data.push_back(_fe_problem.time());
+    data.insert(data.end(), _all_bubble_volumes.begin(), _all_bubble_volumes.end());
+    writeCSVFile(getParam<FileName>("bubble_volume_file"), data);
+  }
 }
 
 void
