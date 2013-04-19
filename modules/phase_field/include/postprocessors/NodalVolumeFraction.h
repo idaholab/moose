@@ -35,24 +35,13 @@ public:
   
   void calculateBubbleFraction();
 
-  void calculateAvramiInformation(const std::string & file_name);
+  Real calculateAvramiValue();
   
 protected:
   
-private:
-
   Real & _mesh_volume;
   Real _volume_fraction;
   Real _equil_fraction;
-
-/**
-   * The filename and filehandle used if bubble volumes are being recorded to a file.
-   */
-//  std::string _bubble_fraction_file_name;
-  // std::ofstream _bubble_fraction_file_handle;
-
-  std::string _Avrami_file_name;
-  std::ofstream _Avrami_file_handle;
 };
 
 #endif //NODALVOLUMEFRACTION_H

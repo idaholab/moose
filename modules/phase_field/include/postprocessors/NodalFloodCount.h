@@ -115,9 +115,14 @@ protected:
 
   /**
    * This routine uses the bubble_sets data structure to calculate the volume of each stored bubble.
-   * You must supply a valid filename to use this routine.
    */
-  void calculateBubbleVolumes(const std::string & file_name);
+  void calculateBubbleVolumes();
+
+  /**
+   * This routine writes out data to a CSV file.  It is designed to be extended to derived classes
+   * but is used to write out bubble volumes for this class.
+   */
+  void writeCSVFile(const std::string file_name, const std::vector<Real> data);
 
   /**
    * This method detects whether two sets intersect without building a result set.  It exits as soon as
@@ -230,13 +235,14 @@ protected:
    * based on the imposed periodic boundary conditions.
    */
   std::multimap<unsigned int, unsigned int> _periodic_node_map;
+  
+  /// The filename and filehandle used if bubble volumes are being recorded to a file.
+  std::map<std::string, std::ofstream *> _file_handles;
 
   /**
-   * The filename and filehandle used if bubble volumes are being recorded to a file.
+   * The vector hold the volume of each flooded bubble.  Note: this vector is only populated
+   * when requested by passing a file name to write this information to.
    */
-  std::string _bubble_volume_file_name;
-  std::ofstream _bubble_volume_file_handle;
-
   std::vector<Real> _all_bubble_volumes;
 };
 
