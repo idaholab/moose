@@ -31,6 +31,8 @@ public:
   SumNodalValuesAux(const std::string & name, InputParameters parameters);
   virtual ~SumNodalValuesAux();
 
+  virtual void compute();
+
 protected:
   virtual Real computeValue();
 
