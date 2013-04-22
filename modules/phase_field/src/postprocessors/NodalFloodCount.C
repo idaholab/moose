@@ -593,7 +593,7 @@ NodalFloodCount::writeCSVFile(const std::string file_name, const std::vector<Rea
       *_file_handles[file_name] << std::scientific << std::setprecision(6);
     }
     
-    mooseAssert(!_file_handles[file_name]->is_open(), "File handle is not open");
+    mooseAssert(_file_handles[file_name]->is_open(), "File handle is not open");
     
     std::copy(data.begin(), data.end(), infix_ostream_iterator<Real>(*_file_handles[file_name], ", "));
     *_file_handles[file_name] << std::endl;
