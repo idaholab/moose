@@ -2982,20 +2982,34 @@ FEProblem::setOutputVariables()
   if (!_variable_white_list.empty())
   {
     //Make sure that all of the variables in the whitelist actually exist
+    //Get list of variable names
+    std::vector<std::string> available_vars = getVariableNames();
 
-    //Get names of scalar variables
-    std::vector<std::string> scalar_var_names;
+    //Get names of scalar variables, add to list
     std::vector<MooseVariableScalar*> scalar_vars = _nl.getScalarVariables(0);
     for (std::vector<MooseVariableScalar*>::iterator i = scalar_vars.begin(); i != scalar_vars.end();  ++i)
-      scalar_var_names.push_back((*i)->name());
+      available_vars.push_back((*i)->name());
     scalar_vars = _aux.getScalarVariables(0);
     for (std::vector<MooseVariableScalar*>::iterator i = scalar_vars.begin(); i != scalar_vars.end();  ++i)
-      scalar_var_names.push_back((*i)->name());
+      available_vars.push_back((*i)->name());
 
-    std::vector<std::string> available_vars = getVariableNames();
-    available_vars.insert(available_vars.end(),scalar_var_names.begin(),scalar_var_names.end());
+    //Get names of postprocessors, add to list
+    ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
+    for (unsigned int i = 0; i < LENGTHOF(types); i++)
+    {
+      for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps(types[i])[0].all().begin();
+           postprocessor_it != _pps(types[i])[0].all().end();
+           ++postprocessor_it)
+      {
+        Postprocessor *pps = *postprocessor_it;
+
+        Moose::PPSOutputType out_type = pps->getOutput();
+        if (out_type != Moose::PPS_OUTPUT_NONE)
+          available_vars.push_back(pps->PPName());
+      }
+    }
+
     std::sort(available_vars.begin(), available_vars.end());
-
     std::sort(_variable_white_list.begin(), _variable_white_list.end());
 
     std::vector<std::string> nonexistent_whitelist_vars;
