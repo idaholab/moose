@@ -168,16 +168,16 @@
 
 # Run FSP with the following options:
 # '-snes_monitor -ksp_monitor -dm_moose_nfieldsplits 2 -dm_moose_fieldsplit_0_vars u,v -dm_moose_fieldsplit_1_vars p  -pc_type fieldsplit -pc_fieldsplit_type schur'
-[./FSP]
-  type = FSP
-  full = true
-[../]
+# [./FSP]
+#   type = FSP
+#   full = true
+# [../]
 
-#[./SMP_PJFNK]
-#  type = SMP
-#  full = true
-#  petsc_options = '-snes_mf_operator'
-#[../]
+[./SMP_PJFNK]
+  type = SMP
+  full = true
+  petsc_options = '-snes_mf_operator'
+[../]
 []
 
 
@@ -200,7 +200,7 @@
 
 
 [Output]
-  file_base = lid_driven_out
+  file_base = lid_driven_no_T_out
   interval = 1
   output_initial = true
   exodus = true
