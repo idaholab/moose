@@ -33,6 +33,7 @@ MaterialPropertyUserObject::initialize()
 {
   ElementIntegralUserObject::initialize();
 
+  _elem_integrals.clear();
   _elem_integrals.resize(_subproblem.mesh().getMesh().max_elem_id());
 }
 

@@ -18,5 +18,6 @@
     type = 'RunApp'
     input = 'pbp_test_options.i'
     expect_out = 'KSP Residual'
+    max_parallel = 1
   [../]
 []

@@ -233,6 +233,7 @@
     type = 'RunException'
     input = 'multi_precond_test.i'
     expect_err = "More than one active Preconditioner detected"
+    max_parallel = 1
   [../]
 
   [./nan_test]
