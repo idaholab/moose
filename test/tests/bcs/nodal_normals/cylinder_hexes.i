@@ -19,39 +19,6 @@
   corner_boundary = 100
 []
 
-[AuxVariables]
-  [./normal_x]
-    family = LAGRANGE
-    order = FIRST
-  [../]
-  [./normal_y]
-    family = LAGRANGE
-    order = FIRST
-  [../]
-  [./normal_z]
-    family = LAGRANGE
-    order = FIRST
-  [../]
-[]
-
-[AuxKernels]
-  [./nx]
-    type = NodalNormalComponentAux
-    variable = normal_x
-    component = 0
-  [../]
-  [./ny]
-    type = NodalNormalComponentAux
-    variable = normal_y
-    component = 1
-  [../]
-  [./nz]
-    type = NodalNormalComponentAux
-    variable = normal_z
-    component = 2
-  [../]
-[]
-
 [Variables]
   [./u]
   [../]

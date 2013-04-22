@@ -26,9 +26,7 @@ InputParameters validParams<NodalNormalsEvaluator>()
 
 NodalNormalsEvaluator::NodalNormalsEvaluator(const std::string & name, InputParameters parameters) :
     NodalUserObject(name, parameters),
-    _nx(_fe_problem.getAuxiliarySystem().getVector("nx")),
-    _ny(_fe_problem.getAuxiliarySystem().getVector("ny")),
-    _nz(_fe_problem.getAuxiliarySystem().getVector("nz"))
+    _aux(_fe_problem.getAuxiliarySystem())
 {
 }
 
@@ -39,16 +37,27 @@ NodalNormalsEvaluator::~NodalNormalsEvaluator()
 void
 NodalNormalsEvaluator::execute()
 {
-  Threads::spin_mutex::scoped_lock lock(nodal_normals_evaluator_mutex);
-
-  dof_id_type dof = _current_node->id();
-  Real n = std::sqrt((_nx(dof) * _nx(dof)) + (_ny(dof) * _ny(dof)) + (_nz(dof) * _nz(dof)));
-  if (std::abs(n) >= 1e-13)
+  if (_current_node->processor_id() == libMesh::processor_id())
   {
-    // divide by n only if it is not close to zero to avoid NaNs
-    _nx.set(dof, _nx(dof) / n);
-    _ny.set(dof, _ny(dof) / n);
-    _nz.set(dof, _nz(dof) / n);
+    Threads::spin_mutex::scoped_lock lock(nodal_normals_evaluator_mutex);
+
+    dof_id_type dof_x = _current_node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number(), 0);
+    dof_id_type dof_y = _current_node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_y").number(), 0);
+    dof_id_type dof_z = _current_node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_z").number(), 0);
+
+    NumericVector<Number> & sln = _aux.solution();
+    Real nx = sln(dof_x);
+    Real ny = sln(dof_y);
+    Real nz = sln(dof_z);
+
+    Real n = std::sqrt((nx * nx) + (ny * ny) + (nz * nz));
+    if (std::abs(n) >= 1e-13)
+    {
+      // divide by n only if it is not close to zero to avoid NaNs
+      sln.set(dof_x, nx / n);
+      sln.set(dof_y, ny / n);
+      sln.set(dof_z, nz / n);
+    }
   }
 }
 
@@ -65,9 +74,7 @@ NodalNormalsEvaluator::destroy()
 void
 NodalNormalsEvaluator::finalize()
 {
-  _nx.close();
-  _ny.close();
-  _nz.close();
+  _aux.solution().close();
 }
 
 void

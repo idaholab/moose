@@ -26,10 +26,8 @@ InputParameters validParams<NodalNormalsCorner>()
 
 NodalNormalsCorner::NodalNormalsCorner(const std::string & name, InputParameters parameters) :
     SideUserObject(name, parameters),
-    _corner_boundary_id(_mesh.getBoundaryID(getParam<BoundaryName>("corner_boundary"))),
-    _nx(_fe_problem.getAuxiliarySystem().getVector("nx")),
-    _ny(_fe_problem.getAuxiliarySystem().getVector("ny")),
-    _nz(_fe_problem.getAuxiliarySystem().getVector("nz"))
+    _aux(_fe_problem.getAuxiliarySystem()),
+    _corner_boundary_id(_mesh.getBoundaryID(getParam<BoundaryName>("corner_boundary")))
 {
 }
 
@@ -47,11 +45,15 @@ NodalNormalsCorner::execute()
     const Node * node = _current_side_elem->get_node(nd);
     if (_mesh._mesh.boundary_info->has_boundary_id(node, _corner_boundary_id))
     {
-      dof_id_type dof = node->id();
+      dof_id_type dof_x = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number(), 0);
+      dof_id_type dof_y = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_y").number(), 0);
+      dof_id_type dof_z = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_z").number(), 0);
+
+      NumericVector<Number> & sln = _aux.solution();
       // substitute the normal form the face, we are going to have at least one normal every time
-      _nx.add(dof, _normals[0](0));
-      _ny.add(dof, _normals[0](1));
-      _nz.add(dof, _normals[0](2));
+      sln.add(dof_x, _normals[0](0));
+      sln.add(dof_y, _normals[0](1));
+      sln.add(dof_z, _normals[0](2));
     }
   }
 }
@@ -69,9 +71,7 @@ NodalNormalsCorner::destroy()
 void
 NodalNormalsCorner::finalize()
 {
-  _nx.close();
-  _ny.close();
-  _nz.close();
+  _aux.solution().close();
 }
 
 void

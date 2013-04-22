@@ -43,19 +43,14 @@ void
 AddNodalNormalsAction::act()
 {
   AuxiliarySystem & aux_sys = _problem->getAuxiliarySystem();
-  // if there is not variable in aux system, we have to add one dummy variable, so our vectors have non-zero length
-  if (aux_sys.nVariables() == 0)
-    aux_sys.addVariable("dummy", FEType(FIRST, LAGRANGE), 1.);
 
-  if (LIBMESH_DIM >= 1)
-    aux_sys.addVector("nx", false, GHOSTED);
-  if (LIBMESH_DIM >= 2)
-    aux_sys.addVector("ny", false, GHOSTED);
-  if (LIBMESH_DIM >= 3)
-    aux_sys.addVector("nz", false, GHOSTED);
+  // add 3 aux variables for each component of the normal
+  aux_sys.addVariable("nodal_normal_x", FEType(FIRST, LAGRANGE), 1.);
+  aux_sys.addVariable("nodal_normal_y", FEType(FIRST, LAGRANGE), 1.);
+  aux_sys.addVariable("nodal_normal_z", FEType(FIRST, LAGRANGE), 1.);
 
   MooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "timestep";
+  execute_options = "timestep_begin";
 
   bool has_corners = isParamValid("corner_boundary");
   if (has_corners)
@@ -71,6 +66,7 @@ AddNodalNormalsAction::act()
   if (has_corners)
   {
     InputParameters pars = _factory.getValidParams("NodalNormalsCorner");
+    pars.set<MooseEnum>("execute_on") = execute_options;
     pars.set<std::vector<BoundaryName> >("boundary") = _boundary;
     pars.set<BoundaryName>("corner_boundary") = _corner_boundary;
     _problem->addUserObject("NodalNormalsCorner", "nodal_normals_corner", pars);

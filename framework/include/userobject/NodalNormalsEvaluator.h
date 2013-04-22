@@ -17,8 +17,8 @@
 
 #include "NodalUserObject.h"
 
-
 class NodalNormalsEvaluator;
+class AuxiliarySystem;
 
 template<>
 InputParameters validParams<NodalNormalsEvaluator>();
@@ -39,9 +39,7 @@ public:
   virtual void threadJoin(const UserObject & uo);
 
 protected:
-  NumericVector<Number> & _nx;
-  NumericVector<Number> & _ny;
-  NumericVector<Number> & _nz;
+  AuxiliarySystem & _aux;
 };
 
 

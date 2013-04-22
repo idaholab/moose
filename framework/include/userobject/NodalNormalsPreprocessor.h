@@ -17,8 +17,8 @@
 
 #include "ElementUserObject.h"
 
-
 class NodalNormalsPreprocessor;
+class AuxiliarySystem;
 
 template<>
 InputParameters validParams<NodalNormalsPreprocessor>();
@@ -39,11 +39,9 @@ public:
   virtual void threadJoin(const UserObject & uo);
 
 protected:
+  AuxiliarySystem & _aux;
   bool _has_corners;
   BoundaryID _corner_boundary_id;
-  NumericVector<Number> & _nx;
-  NumericVector<Number> & _ny;
-  NumericVector<Number> & _nz;
 
   const VariablePhiGradient & _grad_phi;
 };

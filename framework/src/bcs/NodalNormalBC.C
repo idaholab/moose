@@ -18,15 +18,22 @@ template<>
 InputParameters validParams<NodalNormalBC>()
 {
   InputParameters params = validParams<NodalBC>();
+  params.addCoupledVar("nx", "x-component of the normal");
+  params.addCoupledVar("ny", "y-component of the normal");
+  params.addCoupledVar("nz", "z-component of the normal");
+
+  params.set<std::vector<std::string> >("nx") = std::vector<std::string>(1, "nodal_normal_x");
+  params.set<std::vector<std::string> >("ny") = std::vector<std::string>(1, "nodal_normal_y");
+  params.set<std::vector<std::string> >("nz") = std::vector<std::string>(1, "nodal_normal_z");
 
   return params;
 }
 
 NodalNormalBC::NodalNormalBC(const std::string & name, InputParameters parameters) :
     NodalBC(name, parameters),
-    _nx(_fe_problem.getAuxiliarySystem().getVector("nx")),
-    _ny(_fe_problem.getAuxiliarySystem().getVector("ny")),
-    _nz(_fe_problem.getAuxiliarySystem().getVector("nz"))
+    _nx(coupledValue("nx")),
+    _ny(coupledValue("ny")),
+    _nz(coupledValue("nz"))
 {
 }
 
@@ -37,9 +44,6 @@ NodalNormalBC::~NodalNormalBC()
 void
 NodalNormalBC::computeResidual(NumericVector<Number> & residual)
 {
-  // compute the normal
-  dof_id_type dof = _current_node->id();
-  _normal = Point(_nx(dof), _ny(dof), _nz(dof));
-
+  _normal = Point(_nx[_qp], _ny[_qp], _nz[_qp]);
   NodalBC::computeResidual(residual);
 }

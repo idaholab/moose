@@ -18,6 +18,7 @@
 #include "SideUserObject.h"
 
 class NodalNormalsCorner;
+class AuxiliarySystem;
 
 template<>
 InputParameters validParams<NodalNormalsCorner>();
@@ -38,11 +39,8 @@ public:
   virtual void threadJoin(const UserObject & uo);
 
 protected:
+  AuxiliarySystem & _aux;
   BoundaryID _corner_boundary_id;
-
-  NumericVector<Number> & _nx;
-  NumericVector<Number> & _ny;
-  NumericVector<Number> & _nz;
 };
 
 

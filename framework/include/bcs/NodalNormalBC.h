@@ -36,10 +36,9 @@ public:
   virtual void computeResidual(NumericVector<Number> & residual);
 
 protected:
-  NumericVector<Real> & _nx;
-  NumericVector<Real> & _ny;
-  NumericVector<Real> & _nz;
-
+  VariableValue & _nx;
+  VariableValue & _ny;
+  VariableValue & _nz;
   /// Normal at the node (it is pre-computed by user object subsystem)
   Point _normal;
 };

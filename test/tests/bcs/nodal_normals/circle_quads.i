@@ -26,30 +26,6 @@
 [NodalNormals]
 []
 
-[AuxVariables]
-  [./normal_x]
-    family = LAGRANGE
-    order = FIRST
-  [../]
-  [./normal_y]
-    family = LAGRANGE
-    order = FIRST
-  [../]
-[]
-
-[AuxKernels]
-  [./nx]
-    type = NodalNormalComponentAux
-    variable = normal_x
-    component = 0
-  [../]
-  [./ny]
-    type = NodalNormalComponentAux
-    variable = normal_y
-    component = 1
-  [../]
-[]
-
 [Variables]
   [./u]
   [../]
@@ -79,13 +55,13 @@
 [Postprocessors]
   [./nx_pps]
     type = NodalL2Error
-    variable = normal_x
+    variable = nodal_normal_x
     boundary = '1'
     function = analytical_normal_x
   [../]
   [./ny_pps]
     type = NodalL2Error
-    variable = normal_y
+    variable = nodal_normal_y
     boundary = '1'
     function = analytical_normal_y
   [../]
