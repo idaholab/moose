@@ -706,16 +706,18 @@ setSolverDefaults(FEProblem & problem)
 MPI_Comm
 swapLibMeshComm(MPI_Comm new_comm)
 {
+  int ierr;
+
   MPI_Comm old_comm = libMesh::COMM_WORLD;
   libMesh::COMM_WORLD = new_comm;
   libMesh::CommWorld = new_comm;
   PETSC_COMM_WORLD = new_comm;
 
   int pid;
-  MPI_Comm_rank(new_comm, &pid);
+  ierr = MPI_Comm_rank(new_comm, &pid); mooseCheckMPIErr(ierr);
 
   int n_procs;
-  MPI_Comm_size(new_comm, &n_procs);
+  ierr = MPI_Comm_size(new_comm, &n_procs); mooseCheckMPIErr(ierr);
 
   libMesh::libMeshPrivateData::_processor_id = pid;
   libMesh::libMeshPrivateData::_n_processors = n_procs;

@@ -107,7 +107,8 @@ TransientMultiApp::solveStep()
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   int rank;
-  MPI_Comm_rank(_orig_comm, &rank);
+  int ierr;
+  ierr = MPI_Comm_rank(_orig_comm, &rank); mooseCheckMPIErr(ierr);
 
   for(unsigned int i=0; i<_my_num_apps; i++)
   {

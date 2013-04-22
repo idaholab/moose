@@ -294,8 +294,10 @@ MultiApp::hasLocalApp(unsigned int global_app)
 void
 MultiApp::buildComm()
 {
-  MPI_Comm_size(_orig_comm, (int*)&_orig_num_procs);
-  MPI_Comm_rank(_orig_comm, (int*)&_orig_rank);
+  int ierr;
+
+  ierr = MPI_Comm_size(_orig_comm, &_orig_num_procs); mooseCheckMPIErr(ierr);
+  ierr = MPI_Comm_rank(_orig_comm, &_orig_rank); mooseCheckMPIErr(ierr);
 
   // If we have more apps than processors then we're just going to divide up the work
   if(_total_num_apps >= _orig_num_procs)
@@ -330,7 +332,7 @@ MultiApp::buildComm()
 
   // In this case we need to divide up the processors that are going to work on each app
   int rank;
-  MPI_Comm_rank(_orig_comm, &rank);
+  ierr = MPI_Comm_rank(_orig_comm, &rank); mooseCheckMPIErr(ierr);
 //  sleep(rank);
 
   unsigned int procs_per_app = _orig_num_procs / _total_num_apps;
@@ -363,12 +365,12 @@ MultiApp::buildComm()
 
   if(_has_an_app)
   {
-    MPI_Comm_split(_orig_comm, _first_local_app, rank, &_my_comm);
-    MPI_Comm_rank(_my_comm, (int*)&_my_rank);
+    ierr = MPI_Comm_split(_orig_comm, _first_local_app, rank, &_my_comm); mooseCheckMPIErr(ierr);
+    ierr = MPI_Comm_rank(_my_comm, &_my_rank); mooseCheckMPIErr(ierr);
   }
   else
   {
-    MPI_Comm_split(_orig_comm, MPI_UNDEFINED, rank, &_my_comm);
+    ierr = MPI_Comm_split(_orig_comm, MPI_UNDEFINED, rank, &_my_comm); mooseCheckMPIErr(ierr);
     _my_rank = 0;
   }
 }

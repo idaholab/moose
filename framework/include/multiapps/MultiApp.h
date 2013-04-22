@@ -189,13 +189,13 @@ protected:
   MPI_Comm _my_comm;
 
   /// The number of processors in the origal comm
-  unsigned int _orig_num_procs;
+  int _orig_num_procs;
 
   /// The mpi "rank" of this processor in the original communicator
-  unsigned int _orig_rank;
+  int _orig_rank;
 
   /// The mpi "rank" of this processor in the sub communicator
-  unsigned int _my_rank;
+  int _my_rank;
 
   /// Pointers to each of the Apps
   std::vector<MooseApp *> _apps;

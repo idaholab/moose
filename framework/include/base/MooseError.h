@@ -40,5 +40,6 @@
 
 #define mooseDeprecated() mooseDoOnce(std::cout << "*** Warning, This code is deprecated, and likely to be removed in future library versions! " << __FILE__ << ", line " << __LINE__ << ", compiled " << __DATE__ << " at " << __TIME__ << " ***" << std::endl;)
 
+#define mooseCheckMPIErr(err) do { if (err != MPI_SUCCESS) { if (libMesh::n_processors() == 1) print_trace(); libmesh_here(); MPI_Abort(libMesh::COMM_WORLD,1); exit(1); } } while(0)
 
 #endif /* MOOSEERRORS_H */
