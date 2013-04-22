@@ -239,14 +239,18 @@ MooseVariable::reinitAuxNeighbor()
 void
 MooseVariable::reinitNodes(const std::vector<unsigned int> & nodes)
 {
-  _dof_indices.resize(nodes.size());
+  // Store only DOFs that are on this processor and have the variable defined here
+  _dof_indices.clear();
   for (unsigned int i = 0; i < nodes.size(); i++)
   {
     Node & nd = _subproblem.mesh().node(nodes[i]);
-    if (nd.n_dofs(_sys.number(), _var_num) > 0)
+    if (nd.processor_id() == libMesh::processor_id())
     {
-      unsigned int dof = nd.dof_number(_sys.number(), _var_num, 0);
-      _dof_indices[i] = dof;
+      if (nd.n_dofs(_sys.number(), _var_num) > 0)
+      {
+        unsigned int dof = nd.dof_number(_sys.number(), _var_num, 0);
+        _dof_indices.push_back(dof);
+      }
     }
   }
   _is_defined = true;
