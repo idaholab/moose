@@ -10,4 +10,10 @@
     input = 'output_vars_hidden_test.i'
     exodiff = 'out_hidden.e'
   [../]
+
+  [./test_nonexistent]
+    type = 'RunException'
+    input = 'output_vars_nonexistent.i'
+    expect_err = 'Requested output for the following variables which do not exist:'
+  [../]
 []
