@@ -118,13 +118,14 @@ SetupOutputAction::act()
   /// Determines whether we see the perf log early in a run or not
   _problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
 
+  if (_pars.isParamValid("hidden_variables"))
+  {
+    _problem->hideVariableFromOutput(getParam<std::vector<std::string> >("hidden_variables"));
+  }
+
   if (_pars.isParamValid("output_variables"))
   {
     _problem->showVariableInOutput(getParam<std::vector<std::string> >("output_variables"));
-  }
-  else if (_pars.isParamValid("hidden_variables"))
-  {
-    _problem->hideVariableFromOutput(getParam<std::vector<std::string> >("hidden_variables"));
   }
   else
   {
