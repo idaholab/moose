@@ -40,7 +40,7 @@ public:
    *
    * @param p The point to look for in the layers.
    */
-  Real integralValue(Point p) const;
+  virtual Real integralValue(Point p) const;
 
   /**
    * Get the value for a given layer
@@ -49,17 +49,18 @@ public:
    */
   virtual Real getLayerValue(unsigned int layer) const;
 
-  virtual void initialize();
-  virtual void finalize();
-  virtual void threadJoin(const UserObject & y);
-
-protected:
   /**
    * Helper function to return the layer the point lies in.
    * @param p The point.
    * @return The layer the Point is found in.
    */
-  unsigned int getLayer(Point p) const;
+  virtual unsigned int getLayer(Point p) const;
+
+  virtual void initialize();
+  virtual void finalize();
+  virtual void threadJoin(const UserObject & y);
+
+protected:
 
   /**
    * Set the value for a particular layer
