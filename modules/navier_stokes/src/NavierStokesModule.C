@@ -50,6 +50,10 @@
 #include "INSMomentum.h"
 #include "INSTemperatureTimeDerivative.h"
 #include "INSTemperature.h"
+#include "INSSplitMomentum.h"
+#include "INSProjection.h"
+#include "INSPressurePoisson.h"
+
 #include "INSMomentumNoBCBC.h"
 #include "INSTemperatureNoBCBC.h"
 
@@ -104,6 +108,10 @@ Elk::NavierStokes::registerObjects(Factory & factory)
   registerKernel(INSMomentum);
   registerKernel(INSTemperatureTimeDerivative);
   registerKernel(INSTemperature);
+  registerKernel(INSSplitMomentum);
+  registerKernel(INSProjection);
+  registerKernel(INSPressurePoisson);
+
   registerBoundaryCondition(INSMomentumNoBCBC);
   registerBoundaryCondition(INSTemperatureNoBCBC);
 }
