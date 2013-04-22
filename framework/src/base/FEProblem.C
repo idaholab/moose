@@ -2980,7 +2980,41 @@ FEProblem::setOutputVariables()
   std::vector<std::string> output_vars;
   // If the white list is populated then we'll use that as a starting point for variables to output
   if (!_variable_white_list.empty())
-    output_vars = _variable_white_list;
+  {
+    //Make sure that all of the variables in the whitelist actually exist
+
+    //Get names of scalar variables
+    std::vector<std::string> scalar_var_names;
+    std::vector<MooseVariableScalar*> scalar_vars = _nl.getScalarVariables(0);
+    for (std::vector<MooseVariableScalar*>::iterator i = scalar_vars.begin(); i != scalar_vars.end();  ++i)
+      scalar_var_names.push_back((*i)->name());
+    scalar_vars = _aux.getScalarVariables(0);
+    for (std::vector<MooseVariableScalar*>::iterator i = scalar_vars.begin(); i != scalar_vars.end();  ++i)
+      scalar_var_names.push_back((*i)->name());
+
+    std::vector<std::string> available_vars = getVariableNames();
+    available_vars.insert(available_vars.end(),scalar_var_names.begin(),scalar_var_names.end());
+    std::sort(available_vars.begin(), available_vars.end());
+
+    std::sort(_variable_white_list.begin(), _variable_white_list.end());
+
+    std::vector<std::string> nonexistent_whitelist_vars;
+    std::set_difference(_variable_white_list.begin(), _variable_white_list.end(),
+                        available_vars.begin(), available_vars.end(),
+                        std::back_inserter(nonexistent_whitelist_vars));
+    if (!nonexistent_whitelist_vars.empty())
+    {
+      std::ostringstream oss;
+      oss << "Requested output for the following variables which do not exist:\n";
+      for (std::vector<std::string>::iterator i = nonexistent_whitelist_vars.begin(); i != nonexistent_whitelist_vars.end();  ++i)
+        oss << *i << "\n";
+      mooseError(oss.str());
+    }
+    else
+    {
+      output_vars = _variable_white_list;
+    }
+  }
   else
     output_vars = getVariableNames();
 
