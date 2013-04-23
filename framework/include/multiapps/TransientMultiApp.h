@@ -30,8 +30,7 @@ InputParameters validParams<TransientMultiApp>();
  * will be taken into account in the time step selection process.
  */
 class TransientMultiApp :
-  public MultiApp,
-  public TransientInterface
+  public MultiApp
 {
 public:
   TransientMultiApp(const std::string & name, InputParameters parameters);
@@ -41,7 +40,7 @@ public:
   /**
    * Advance all of the apps one timestep.
    */
-  void solveStep();
+  void solveStep(Real dt, Real target_time);
 
   /**
    * Finds the smallest dt from among any of the apps.

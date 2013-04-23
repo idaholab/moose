@@ -2350,7 +2350,7 @@ FEProblem::execMultiApps(ExecFlagType type)
     std::cout<<"--Executing MultiApps--"<<std::endl;
 
     for(unsigned int i=0; i<multi_apps.size(); i++)
-      multi_apps[i]->solveStep();
+      multi_apps[i]->solveStep(_dt, _time);
 
     std::cout<<"--Waiting For Other Processors To Finish--"<<std::endl;
     MooseUtils::parallelBarrierNotify();

@@ -147,8 +147,10 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
 
     // Create an output base by taking the output base of the master problem and appending
     // the name of the multiapp + a number to it
-    output_base << _fe_problem->out().fileBase()
-                << "_" << _name
+    if(_fe_problem)
+      output_base << _fe_problem->out().fileBase() << "_" ;
+
+    output_base << _name
                 << std::setw(std::ceil(std::log10(_total_num_apps)))
                 << std::setprecision(0)
                 << std::setfill('0')

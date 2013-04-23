@@ -41,7 +41,6 @@ InputParameters validParams<TransientMultiApp>()
 
 TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters parameters):
     MultiApp(name, parameters),
-    TransientInterface(parameters, name, "multiapps"),
     _sub_cycling(getParam<bool>("sub_cycling")),
     _detect_steady_state(getParam<bool>("detect_steady_state")),
     _steady_state_tol(getParam<Real>("steady_state_tol")),
@@ -97,7 +96,7 @@ TransientMultiApp::~TransientMultiApp()
 }
 
 void
-TransientMultiApp::solveStep()
+TransientMultiApp::solveStep(Real dt, Real target_time)
 {
   if(!_has_an_app)
     return;
@@ -116,14 +115,14 @@ TransientMultiApp::solveStep()
 
     if(_sub_cycling)
     {
-      ex->setTargetTime(_t);
+      ex->setTargetTime(target_time);
 
       unsigned int failures = 0;
 
       bool at_steady = false;
 
       // Now do all of the solves we need
-      while(!at_steady && ex->getTime() + 2e-14 < _t)
+      while(!at_steady && ex->getTime() + 2e-14 < target_time)
       {
         ex->takeStep();
 
@@ -145,12 +144,12 @@ TransientMultiApp::solveStep()
 
         if(converged && _detect_steady_state && solution_change_norm < _steady_state_tol)
         {
-          std::cout<<"Detected Steady State!  Fast-forwarding to "<<_t<<std::endl;
+          std::cout<<"Detected Steady State!  Fast-forwarding to "<<target_time<<std::endl;
 
           at_steady = true;
 
           // Set the time for the problem to the target time we were looking for
-          ex->setTime(_t);
+          ex->setTime(target_time);
 
           // Force it to output right now
           ex->forceOutput();
@@ -168,14 +167,14 @@ TransientMultiApp::solveStep()
     }
     else if(_tolerate_failure)
     {
-      ex->takeStep(_dt);
-      ex->setTime(_t);
+      ex->takeStep(dt);
+      ex->setTime(target_time);
       ex->forceOutput();
       ex->endStep();
     }
     else
     {
-      ex->takeStep(_dt);
+      ex->takeStep(dt);
 
       if(!ex->lastSolveConverged())
         mooseWarning(_name<<_first_local_app+i<<" failed to converge!"<<std::endl);

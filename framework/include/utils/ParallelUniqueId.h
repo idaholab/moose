@@ -23,8 +23,7 @@
 #include "tbb/tbb_thread.h"
 #endif
 
-typedef
-  unsigned int THREAD_ID;
+typedef unsigned int THREAD_ID;
 
 class ParallelUniqueId
 {

@@ -44,7 +44,7 @@ public:
   /**
    * Re-solve all of the Apps.
    */
-  virtual void solveStep() = 0;
+  virtual void solveStep(Real dt, Real target_time) = 0;
 
   /**
    * @param app The global app number to get the Executioner for
