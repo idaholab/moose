@@ -24,6 +24,7 @@
 class ElementUserObject;
 class NodalUserObject;
 class SideUserObject;
+class InternalSideUserObject;
 class GeneralUserObject;
 
 /**
@@ -78,6 +79,12 @@ public:
    * @return The list of side user_objects
    */
   const std::vector<SideUserObject *> & sideUserObjects(BoundaryID boundary_id, GROUP group = ALL);
+
+  /**
+   * Get the list of internal side user objects
+   * @return The list of internal side user objects
+   */
+  const std::vector<InternalSideUserObject *> & internalSideUserObjects(GROUP group = ALL);
 
   /**
    * Get the list of nodal user_objects
@@ -146,6 +153,7 @@ protected:
 
   std::map<SubdomainID, std::vector<ElementUserObject *> > _element_user_objects;
   std::map<BoundaryID, std::vector<SideUserObject *> > _side_user_objects;
+  std::vector<InternalSideUserObject *> _internal_side_user_objects;
   std::map<BoundaryID, std::vector<NodalUserObject *> > _nodal_user_objects;
   // Block restricted nodal user objects
   std::map<SubdomainID, std::vector<NodalUserObject *> > _block_nodal_user_objects;
@@ -154,6 +162,7 @@ protected:
   // PreAux UO
   std::map<SubdomainID, std::vector<ElementUserObject *> > _pre_element_user_objects;
   std::map<BoundaryID, std::vector<SideUserObject *> > _pre_side_user_objects;
+  std::vector<InternalSideUserObject *> _pre_internal_side_user_objects;
   std::map<BoundaryID, std::vector<NodalUserObject *> > _pre_nodal_user_objects;
   std::map<SubdomainID, std::vector<NodalUserObject *> > _pre_block_nodal_user_objects;
   std::vector<GeneralUserObject *> _pre_generic_user_objects;
@@ -161,6 +170,7 @@ protected:
   // PostAux UO
   std::map<SubdomainID, std::vector<ElementUserObject *> > _post_element_user_objects;
   std::map<BoundaryID, std::vector<SideUserObject *> > _post_side_user_objects;
+  std::vector<InternalSideUserObject *> _post_internal_side_user_objects;
   std::map<BoundaryID, std::vector<NodalUserObject *> > _post_nodal_user_objects;
   std::map<SubdomainID, std::vector<NodalUserObject *> > _post_block_nodal_user_objects;
   std::vector<GeneralUserObject *> _post_generic_user_objects;

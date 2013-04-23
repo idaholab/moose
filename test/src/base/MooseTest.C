@@ -92,6 +92,8 @@
 #include "RandomHitUserObject.h"
 #include "RandomHitSolutionModifier.h"
 #include "MaterialPropertyUserObject.h"
+#include "InsideUserObject.h"
+#include "InsideValuePPS.h"
 
 #include "TimestepSetupFunction.h"
 #include "PostprocessorFunction.h"
@@ -232,6 +234,9 @@ MooseTest::registerObjects(Factory & factory)
   registerUserObject(RandomHitUserObject);
   registerUserObject(RandomHitSolutionModifier);
   registerUserObject(MaterialPropertyUserObject);
+  registerUserObject(InsideUserObject);
+
+  registerPostprocessor(InsideValuePPS);
 
   registerMarker(RandomHitMarker);
 

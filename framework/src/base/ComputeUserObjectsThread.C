@@ -19,6 +19,8 @@
 
 #include "ElementUserObject.h"
 #include "SideUserObject.h"
+#include "InternalSideUserObject.h"
+
 
 ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group) :
     ThreadedElementLoop<ConstElemRange>(problem, sys),
@@ -112,6 +114,36 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
          side_UserObject_it != _user_objects[_tid].sideUserObjects(bnd_id, _group).end();
          ++side_UserObject_it)
       (*side_UserObject_it)->execute();
+  }
+}
+
+void
+ComputeUserObjectsThread::onInternalSide(const Elem *elem, unsigned int side)
+{
+  const std::vector<InternalSideUserObject *> & isuo = _user_objects[_tid].internalSideUserObjects();
+  if (isuo.size() > 0)
+  {
+    // Pointer to the neighbor we are currently working on.
+    const Elem * neighbor = elem->neighbor(side);
+
+    // Get the global id of the element and the neighbor
+    const unsigned int elem_id = elem->id();
+    const unsigned int neighbor_id = neighbor->id();
+
+    if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+    {
+      _fe_problem.prepareFace(elem, _tid);
+
+      _fe_problem.reinitNeighbor(elem, side, _tid);
+      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
+      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
+
+      for (std::vector<InternalSideUserObject *>::const_iterator it = isuo.begin(); it != isuo.end(); ++it)
+      {
+        InternalSideUserObject * uo = *it;
+        uo->execute();
+      }
+    }
   }
 }
 

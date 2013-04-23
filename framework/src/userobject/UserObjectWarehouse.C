@@ -15,6 +15,7 @@
 #include "UserObjectWarehouse.h"
 #include "ElementUserObject.h"
 #include "SideUserObject.h"
+#include "InternalSideUserObject.h"
 #include "NodalUserObject.h"
 #include "GeneralUserObject.h"
 #include "MooseMesh.h"
@@ -59,6 +60,16 @@ UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo
       else
         _post_side_user_objects[it1->first].push_back(*it2);
     }
+  }
+
+  _pre_internal_side_user_objects.clear();
+  _post_internal_side_user_objects.clear();
+  for (std::vector<InternalSideUserObject *>::iterator it1 = _internal_side_user_objects.begin(); it1 != _internal_side_user_objects.end(); ++it1)
+  {
+    if (depend_uo.find((*it1)->name()) != depend_uo.end())
+      _pre_internal_side_user_objects.push_back(*it1);
+    else
+      _post_internal_side_user_objects.push_back(*it1);
   }
 
   for (std::map<BoundaryID, std::vector<NodalUserObject *> >::iterator it1 = _nodal_user_objects.begin(); it1 != _nodal_user_objects.end(); ++it1)
@@ -116,6 +127,11 @@ UserObjectWarehouse::initialSetup()
       ++i)
     (*i)->initialSetup();
 
+  for(std::vector<InternalSideUserObject *>::const_iterator i=_internal_side_user_objects.begin();
+      i!=_internal_side_user_objects.end();
+      ++i)
+    (*i)->initialSetup();
+
   for(std::vector<GeneralUserObject *>::const_iterator i=_all_generic_user_objects.begin();
       i!=_all_generic_user_objects.end();
       ++i)
@@ -137,6 +153,11 @@ UserObjectWarehouse::timestepSetup()
 
   for(std::vector<SideUserObject *>::const_iterator i=_all_side_user_objects.begin();
       i!=_all_side_user_objects.end();
+      ++i)
+    (*i)->timestepSetup();
+
+  for(std::vector<InternalSideUserObject *>::const_iterator i=_internal_side_user_objects.begin();
+      i!=_internal_side_user_objects.end();
       ++i)
     (*i)->timestepSetup();
 
@@ -164,6 +185,11 @@ UserObjectWarehouse::residualSetup()
       ++i)
     (*i)->residualSetup();
 
+  for(std::vector<InternalSideUserObject *>::const_iterator i=_internal_side_user_objects.begin();
+      i!=_internal_side_user_objects.end();
+      ++i)
+    (*i)->residualSetup();
+
   for(std::vector<GeneralUserObject *>::const_iterator i=_all_generic_user_objects.begin();
       i!=_all_generic_user_objects.end();
       ++i)
@@ -185,6 +211,11 @@ UserObjectWarehouse::jacobianSetup()
 
   for(std::vector<SideUserObject *>::const_iterator i=_all_side_user_objects.begin();
       i!=_all_side_user_objects.end();
+      ++i)
+    (*i)->jacobianSetup();
+
+  for(std::vector<InternalSideUserObject *>::const_iterator i=_internal_side_user_objects.begin();
+      i!=_internal_side_user_objects.end();
       ++i)
     (*i)->jacobianSetup();
 
@@ -233,6 +264,11 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
       _all_side_user_objects.push_back(side_pp);
       _boundary_ids_with_user_objects.insert(boundary_id);
     }
+  }
+  else if(dynamic_cast<InternalSideUserObject*>(user_object))
+  {
+    InternalSideUserObject * int_side_uo = dynamic_cast<InternalSideUserObject*>(user_object);
+    _internal_side_user_objects.push_back(int_side_uo);
   }
   else if(dynamic_cast<NodalUserObject*>(user_object))
   {
@@ -307,6 +343,22 @@ UserObjectWarehouse::sideUserObjects(BoundaryID boundary_id, GROUP group)
     return _pre_side_user_objects[boundary_id];
   case POST_AUX:
     return _post_side_user_objects[boundary_id];
+  default:
+    mooseError("Bad Enum");
+  }
+}
+
+const std::vector<InternalSideUserObject *> &
+UserObjectWarehouse::internalSideUserObjects(GROUP group)
+{
+  switch (group)
+  {
+  case ALL:
+    return _internal_side_user_objects;
+  case PRE_AUX:
+    return _pre_internal_side_user_objects;
+  case POST_AUX:
+    return _post_internal_side_user_objects;
   default:
     mooseError("Bad Enum");
   }

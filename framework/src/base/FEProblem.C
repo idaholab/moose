@@ -49,6 +49,7 @@
 #include "ElementUserObject.h"
 #include "NodalUserObject.h"
 #include "SideUserObject.h"
+#include "InternalSideUserObject.h"
 #include "GeneralUserObject.h"
 
 #include "InternalSideIndicator.h"
@@ -1752,7 +1753,7 @@ FEProblem::computeIndicatorsAndMarkers()
 
 void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)
 {
-  if (pps[0].blocks().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0 || pps[0].blockNodalIds().size() > 0)
+  if (pps[0].blocks().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0 || pps[0].blockNodalIds().size() > 0 || pps[0].internalSideUserObjects(group).size() > 0)
   {
 
     /* Note: The fact that we compute the aux system when we compute the user_objects
@@ -1774,6 +1775,7 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
     // init
     bool have_elemental_uo = false;
     bool have_side_uo = false;
+    bool have_internal_uo = false;
     bool have_nodal_uo = false;
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
@@ -1805,6 +1807,13 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
           (*side_user_object_it)->initialize();
           have_side_uo = true;
         }
+      }
+
+      const std::vector<InternalSideUserObject *> & isuos = pps[0].internalSideUserObjects(group);
+      for (std::vector<InternalSideUserObject *>::const_iterator it = isuos.begin(); it != isuos.end(); ++it)
+      {
+        (*it)->initialize();
+        have_internal_uo = true;
       }
 
       for (std::set<BoundaryID>::const_iterator boundary_it = pps[tid].nodesetIds().begin();
@@ -1839,7 +1848,7 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
     std::set<UserObject *> already_gathered;
 
     // compute
-    if (have_elemental_uo || have_side_uo)
+    if (have_elemental_uo || have_side_uo || have_internal_uo)
     {
       ComputeUserObjectsThread cppt(*this, getNonlinearSystem(), *getNonlinearSystem().currentSolution(), pps, group);
       Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
@@ -1917,6 +1926,21 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
             already_gathered.insert(ps);
           }
         }
+      }
+
+      already_gathered.clear();
+      const std::vector<InternalSideUserObject *> & isuos = pps[0].internalSideUserObjects(group);
+      for (unsigned int i = 0; i < isuos.size(); ++i)
+      {
+        InternalSideUserObject *ps = isuos[i];
+        // join across the threads (gather the value in thread #0)
+        if (already_gathered.find(ps) == already_gathered.end())
+        {
+          for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
+            ps->threadJoin(*pps[tid].internalSideUserObjects(group)[i]);
+          ps->finalize();
+        }
+        already_gathered.insert(ps);
       }
     }
 
