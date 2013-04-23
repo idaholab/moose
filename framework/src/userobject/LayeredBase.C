@@ -25,6 +25,7 @@ InputParameters validParams<LayeredBase>()
 
   params.addRequiredParam<MooseEnum>("direction", directions, "The direction of the layers.");
   params.addRequiredParam<unsigned int>("num_layers", "The number of layers.");
+  params.addParam<bool>("interpolate", false, "Whether to interpolate (true) between layers or to use constant values (false).");
 
   return params;
 }
@@ -35,6 +36,7 @@ LayeredBase::LayeredBase(const std::string & name, InputParameters parameters) :
     _direction_enum(parameters.get<MooseEnum>("direction")),
     _direction(_direction_enum),
     _num_layers(parameters.get<unsigned int>("num_layers")),
+    _interpolate(parameters.get<bool>("interpolate")),
     _layered_base_subproblem(*parameters.get<SubProblem *>("_subproblem"))
 {
   MeshTools::BoundingBox bounding_box = MeshTools::bounding_box(_layered_base_subproblem.mesh());
@@ -50,49 +52,64 @@ LayeredBase::integralValue(Point p) const
 {
   unsigned int layer = getLayer(p);
 
-  // If we didn't get any value in this layer we're going to interpolate the layers around it.
-  if(!_layer_has_value[layer])
+  int higher_layer = -1;
+  int lower_layer = -1;
+
+  for(int i=layer; i<_layer_values.size(); i++)
   {
-    int higher_layer = -1;
-    int lower_layer = -1;
-
-    for(int i=layer+1; i<_layer_values.size(); i++)
+    if(_layer_has_value[i])
     {
-      if(_layer_has_value[i])
-      {
-        higher_layer = i;
-        break;
-      }
+      higher_layer = i;
+      break;
     }
+  }
 
-    for(int i=layer-1; i>=0; i--)
+  for(int i=layer-1; i>=0; i--)
+  {
+    if(_layer_has_value[i])
     {
-      if(_layer_has_value[i])
-      {
-        lower_layer = i;
-        break;
-      }
+      lower_layer = i;
+      break;
     }
+  }
 
-    if(higher_layer == -1 && lower_layer == -1)
-      return 0; // TODO: We could error here but there are startup dependency problems
+  if(higher_layer == -1 && lower_layer == -1)
+    return 0; // TODO: We could error here but there are startup dependency problems
 
-    if(higher_layer == -1) // Didn't find a higher layer
-      return _layer_values[lower_layer];
+  if(higher_layer == -1) // Didn't find a higher layer
+    return _layer_values[lower_layer];
+
+  if (!_interpolate) // constant within a layer
+  {
+
+    if (higher_layer == layer) // constant in a layer
+      return _layer_values[higher_layer];
 
     if(lower_layer == -1) // Didn't find a lower layer
       return _layer_values[higher_layer];
 
-    // Interpolate between the two points
-    Real higher_value = _layer_values[higher_layer];
-    Real lower_value = _layer_values[lower_layer];
+    return (_layer_values[higher_layer] + _layer_values[lower_layer]) / 2;
 
-    // Linear interpolation
-    return lower_value + ( (higher_value - lower_value) * ( ( (Real)layer - (Real)lower_layer ) / ( (Real)higher_layer - (Real)lower_layer ) ) );
   }
 
-  return _layer_values[layer];
+  // Interpolate values
+
+  Real layer_length = (_direction_max-_direction_min)/_num_layers;
+  Real lower_coor = _direction_min;
+  Real lower_value = 0;
+  if (lower_layer != -1)
+  {
+    lower_coor += (lower_layer+1) * layer_length;
+    lower_value = _layer_values[lower_layer];
+  }
+
+  // Interpolate between the two points
+  Real higher_value = _layer_values[higher_layer];
+
+  // Linear interpolation
+  return lower_value + (higher_value - lower_value) * ( p(_direction) - lower_coor ) / layer_length;
 }
+
 
 Real
 LayeredBase::getLayerValue(unsigned int layer) const

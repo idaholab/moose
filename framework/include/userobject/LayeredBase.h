@@ -89,6 +89,9 @@ protected:
   /// Number of layers to split the mesh into
   unsigned int _num_layers;
 
+  /// Whether to interpolate between layers
+  const bool _interpolate;
+
   Real _direction_min;
   Real _direction_max;
 
