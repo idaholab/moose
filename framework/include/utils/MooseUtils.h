@@ -54,6 +54,12 @@ namespace MooseUtils
    * @param filename The filename you want to see if you can write to.
    */
   void checkFileWriteable(const std::string & filename);
+
+  /**
+   * This function implements a parallel barrier function but writes progress
+   * to stdout.
+   */
+  void parallelBarrierNotify();
 }
 
 #endif //MOOSEUTILS_H

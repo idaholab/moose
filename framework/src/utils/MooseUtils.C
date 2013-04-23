@@ -115,4 +115,30 @@ checkFileWriteable(const std::string & filename)
   out.close();
 }
 
+void parallelBarrierNotify()
+{
+  /*  TODO: Waiting for libMesh update
+  int slave_processor_id;
+
+  if (libMesh::processor_id() == 0)
+  {
+    // The master process is already through, so report it
+    std::cout << "Jobs complete: 1/" << libMesh::n_processors() << "\r" << std::flush;
+    for (unsigned int i=2; i<=libMesh::n_processors(); ++i)
+    {
+      Parallel::receive(MPI_ANY_SOURCE, slave_processor_id);
+      std::cout << "Jobs complete: " << i << "/" << libMesh::n_processors() << (i == libMesh::n_processors() ? "\n" : "\r") << std::flush;
+    }
+  }
+  else
+  {
+    slave_processor_id = libMesh::processor_id();
+    Parallel::send(0, slave_processor_id);
+  }
+
+  */
+
+  Parallel::barrier();
+}
+
 }

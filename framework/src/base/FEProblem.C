@@ -15,6 +15,7 @@
 #include "FEProblem.h"
 //#include "SystemBase.h"
 #include "Factory.h"
+#include "MooseUtils.h"
 #include "DisplacedProblem.h"
 #include "OutputProblem.h"
 #include "MaterialData.h"
@@ -2318,7 +2319,6 @@ FEProblem::execMultiApps(ExecFlagType type)
         transfers[i]->execute();
   }
 
-
   std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
 
   if(multi_apps.size())
@@ -2329,12 +2329,10 @@ FEProblem::execMultiApps(ExecFlagType type)
       multi_apps[i]->solveStep();
 
     std::cout<<"--Waiting For Other Processors To Finish--"<<std::endl;
-
-    Parallel::barrier();
+    MooseUtils::parallelBarrierNotify();
 
     std::cout<<"--Finished Executing MultiApps--"<<std::endl;
   }
-
 
   // Execute Transfers _from_ MultiApps
   {
@@ -2344,8 +2342,9 @@ FEProblem::execMultiApps(ExecFlagType type)
       std::cout<<"--Starting Transfers From MultiApps--"<<std::endl;
       for(unsigned int i=0; i<transfers.size(); i++)
         transfers[i]->execute();
+
       std::cout<<"--Waiting For Transfers To Finish--"<<std::endl;
-      Parallel::barrier();
+      MooseUtils::parallelBarrierNotify();
 
       std::cout<<"--Transfers To Finished--"<<std::endl;
     }
