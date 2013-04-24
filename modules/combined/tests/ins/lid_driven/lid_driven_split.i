@@ -186,6 +186,8 @@
   # Acceleration boundary conditions.  What should these
   # be on the lid?  What should they be in general?  I tried pinning
   # values of acceleration at one node but that didn't seem to work.
+  # I also tried setting non-zero acceleration values on the lid but
+  # that didn't converge.
   [./x_no_accel]
     type = DirichletBC
     variable = a1
@@ -234,7 +236,7 @@
 
 [Executioner]
   type = Transient
-  dt = 1.e-2
+  dt = 1.e-4
   dtmin = 1.e-6
   perf_log = true
   petsc_options_iname = '-ksp_gmres_restart -snes_linesearch_type'
