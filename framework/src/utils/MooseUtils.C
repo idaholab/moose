@@ -115,9 +115,9 @@ checkFileWriteable(const std::string & filename)
   out.close();
 }
 
-void parallelBarrierNotify()
+void
+parallelBarrierNotify()
 {
-  /*  TODO: Waiting for libMesh update
   int slave_processor_id;
 
   if (libMesh::processor_id() == 0)
@@ -135,8 +135,6 @@ void parallelBarrierNotify()
     slave_processor_id = libMesh::processor_id();
     Parallel::send(0, slave_processor_id);
   }
-
-  */
 
   Parallel::barrier();
 }
