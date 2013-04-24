@@ -197,7 +197,7 @@ public:
    * Completes the assembly of residual
    * @param residual[out] Residual is formed here
    */
-  NumericVector<Number> &  finishResidual(NumericVector<Number> & residual);
+  void finishResidual(NumericVector<Number> & residual);
 
   bool _use_AB2;
   bool _use_littlef;

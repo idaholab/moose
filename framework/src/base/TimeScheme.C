@@ -392,18 +392,18 @@ void TimeScheme::computeLittlef(const NumericVector<Number> & bigF, NumericVecto
 
 
 
-NumericVector<Number> & TimeScheme::finishResidual(NumericVector<Number> & residual){
-  switch (_time_stepping_scheme)
-  {
-  case Moose::CRANK_NICOLSON:
-    residual.add(_residual_old);
-    residual.close();
-    break;
+void TimeScheme::finishResidual(NumericVector<Number> & residual)
+{
+ switch (_time_stepping_scheme)
+ {
+ case Moose::CRANK_NICOLSON:
+   residual.add(_residual_old);
+   residual.close();
+   break;
 
-  default:
-    break;
-  }
-  return residual;
+ default:
+   break;
+ }
 }
 
 void

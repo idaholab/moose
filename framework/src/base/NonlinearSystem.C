@@ -1070,7 +1070,7 @@ NonlinearSystem::finishResidual(NumericVector<Number> & residual, Moose::KernelT
   if(type == Moose::KT_ALL )
   {
     residual.close();
-    residual = _time_scheme->finishResidual(residual);
+    _time_scheme->finishResidual(residual);
   }
 
   PARALLEL_TRY {
