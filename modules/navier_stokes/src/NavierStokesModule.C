@@ -53,6 +53,9 @@
 #include "INSSplitMomentum.h"
 #include "INSProjection.h"
 #include "INSPressurePoisson.h"
+#include "INSChorinPredictor.h"
+#include "INSChorinCorrector.h"
+#include "INSChorinPressurePoisson.h"
 
 #include "INSMomentumNoBCBC.h"
 #include "INSTemperatureNoBCBC.h"
@@ -111,6 +114,9 @@ Elk::NavierStokes::registerObjects(Factory & factory)
   registerKernel(INSSplitMomentum);
   registerKernel(INSProjection);
   registerKernel(INSPressurePoisson);
+  registerKernel(INSChorinPredictor);
+  registerKernel(INSChorinCorrector);
+  registerKernel(INSChorinPressurePoisson);
 
   registerBoundaryCondition(INSMomentumNoBCBC);
   registerBoundaryCondition(INSTemperatureNoBCBC);
