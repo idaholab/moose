@@ -41,9 +41,9 @@ class TimeScheme
         _solution = workvecs.back();
         workvecs.pop_back();
       }
-      if (workvecs.empty()) _time_derivitive = &_nl->addVector(Moose::stringify(time)+"dt", true, GHOSTED);
+      if (workvecs.empty()) _time_derivative = &_nl->addVector(Moose::stringify(time)+"dt", true, GHOSTED);
       else {
-        _time_derivitive = workvecs.back();
+        _time_derivative = workvecs.back();
         workvecs.pop_back();
       }
     }
@@ -52,7 +52,7 @@ class TimeScheme
     _time(0.0),
     _t_step(0),
     _solution(&_nl->addVector("dt2check", true, GHOSTED)),
-    _time_derivitive(&_nl->addVector("dt2check_dt", true, GHOSTED)),
+    _time_derivative(&_nl->addVector("dt2check_dt", true, GHOSTED)),
     _dt(0.0)
     {
     }
@@ -62,7 +62,7 @@ class TimeScheme
      _time(p._time),
      _t_step(p._t_step),
      _solution(p._solution),
-     _time_derivitive(p._time_derivitive),
+     _time_derivative(p._time_derivative),
      _dt(p._dt)
     {
 
@@ -90,9 +90,9 @@ class TimeScheme
     {
       num.localize(*_solution);
     }
-    void setTimeDerivitive(NumericVector<Number> & num)
+    void setTimeDerivative(NumericVector<Number> & num)
     {
-      num.localize(*_time_derivitive);
+      num.localize(*_time_derivative);
     }
 
     NumericVector<Number> & getSolution()
@@ -108,9 +108,9 @@ class TimeScheme
     {
       _dt=dt;
     }
-    NumericVector<Number> & getTimeDerivitive()
+    NumericVector<Number> & getTimeDerivative()
     {
-      return *_time_derivitive;
+      return *_time_derivative;
     }
 
   protected:
@@ -118,7 +118,7 @@ class TimeScheme
     Real _time;
     int _t_step;
     NumericVector<Number> * _solution;
-    NumericVector<Number> * _time_derivitive; //This is necessary currently, is storing this better or worse than
+    NumericVector<Number> * _time_derivative; //This is necessary currently, is storing this better or worse than
     //otherwise?
   protected:
     Real _dt;
@@ -136,12 +136,12 @@ public:
   void applyPredictor(NumericVector<Number> & initial_solution);
 
   /**
-   * Called at the beginning of th time step
+   * Called at the beginning of the time step
    */
   void onTimestepBegin();
 
   /**
-   * Second Order Adams_Bashforth Predictor, takes as arguement the initial solution
+   * Second Order Adams_Bashforth Predictor, takes as argument the initial solution
    * Currently needed for getting the errors using estimate error.
    * Used by calling Predictor after calling useAB2Preditor,
    * This should change if Time Schemes get registered or

@@ -66,7 +66,7 @@ TimeScheme::~TimeScheme(){
 void TimeScheme::reclaimTimeStep(TimeStep &timestep)
 {
   // time derivative first because it is not zeroed
-  _workvecs.push_back(&timestep.getTimeDerivitive());
+  _workvecs.push_back(&timestep.getTimeDerivative());
   _workvecs.push_back(&timestep.getSolution());
 }
 
@@ -142,7 +142,7 @@ TimeScheme::onTimestepBegin()
   Real sum;
   if(_t_step > 1)
   {
-    _time_stack[_time_stack.size()-2].setTimeDerivitive(_solution_u_dot);
+    _time_stack[_time_stack.size()-2].setTimeDerivative(_solution_u_dot);
   }
   switch (_time_stepping_scheme)
   {
@@ -175,12 +175,12 @@ void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)
     }
     initial_solution.localize(_predicted_solution);
     NumericVector<Number> & my_old_solution_u_dot = _tmp_previous_solution; //change to tmp_previous_solution
-    _time_stack[_time_stack.size()-3].getTimeDerivitive().localize(my_old_solution_u_dot);
+    _time_stack[_time_stack.size()-3].getTimeDerivative().localize(my_old_solution_u_dot);
     my_old_solution_u_dot *= -1.0;
-    my_old_solution_u_dot += _time_stack[_time_stack.size()-2].getTimeDerivitive();
+    my_old_solution_u_dot += _time_stack[_time_stack.size()-2].getTimeDerivative();
     my_old_solution_u_dot *= (.5*_dt)/ _time_stack[_time_stack.size()-2].getDt();
     NumericVector<Number> & _old_solution_u_dot = _tmp_residual_old;
-    _time_stack[_time_stack.size()-2].getTimeDerivitive().localize(_old_solution_u_dot);
+    _time_stack[_time_stack.size()-2].getTimeDerivative().localize(_old_solution_u_dot);
     _old_solution_u_dot += my_old_solution_u_dot;
    // _old_solution_u_dot.localize(_scaled_update);
     _old_solution_u_dot *= _dt;
@@ -316,7 +316,7 @@ TimeScheme::applyPredictor(NumericVector<Number> & initial_solution)
       std::cout << std::scientific << std::setprecision(cur_precision);
       Real dt_adjusted_scale_factor = _predictor_scale*_dt;
       NumericVector<Number> & previous_solution = _tmp_previous_solution;
-      _time_stack[_time_stack.size()-2].getTimeDerivitive().localize(previous_solution);
+      _time_stack[_time_stack.size()-2].getTimeDerivative().localize(previous_solution);
       if (dt_adjusted_scale_factor != 0.0)
       {
         previous_solution *= dt_adjusted_scale_factor;
