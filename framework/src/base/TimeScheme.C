@@ -28,33 +28,32 @@
 #include <iostream>
 
 
-
 TimeScheme::TimeScheme(NonlinearSystem * c) :
-_use_AB2(false),
-_use_littlef(false),
-_apply_predictor(false),
-_nl(c),
-_solution_u_dot(c->addVector("u_dot", true, GHOSTED)),
-_solution_du_dot_du(c->addVector("du_dot_du", true, GHOSTED)),
-_residual_old( c->addVector("residual_old", true, GHOSTED)),
-_predicted_solution(c->addVector("predicted_solution", true, GHOSTED)),
-_tmp_previous_solution(c->addVector("tmp_previous_solution", true, GHOSTED)),
-_tmp_residual_old(c->addVector("tmp_residual_old", true, GHOSTED)),
-_tmp_solution_u_dot(c->addVector("tmp_solution_u_dot", true, GHOSTED)),
-_scaled_update(c->addVector("scaled_update", false, GHOSTED)),
-_mmatrix(c->addVector("mmatrix", false, GHOSTED)),
-_dt(c->_fe_problem.dt()),
-_dt_old( c->_fe_problem.dtOld() ),
-_time_weight( c->_fe_problem.timeWeights()),
-_time_stepping_scheme( c->_time_stepping_scheme),
-_t_step(c->_fe_problem.timeStep()),
-_t(c->_fe_problem.time()),
+  _use_AB2(false),
+  _use_littlef(false),
+  _apply_predictor(false),
+  _nl(c),
+  _solution_u_dot(c->addVector("u_dot", true, GHOSTED)),
+  _solution_du_dot_du(c->addVector("du_dot_du", true, GHOSTED)),
+  _residual_old( c->addVector("residual_old", true, GHOSTED)),
+  _predicted_solution(c->addVector("predicted_solution", true, GHOSTED)),
+  _tmp_previous_solution(c->addVector("tmp_previous_solution", true, GHOSTED)),
+  _tmp_residual_old(c->addVector("tmp_residual_old", true, GHOSTED)),
+  _tmp_solution_u_dot(c->addVector("tmp_solution_u_dot", true, GHOSTED)),
+  _scaled_update(c->addVector("scaled_update", false, GHOSTED)),
+  _mmatrix(c->addVector("mmatrix", false, GHOSTED)),
+  _dt(c->_fe_problem.dt()),
+  _dt_old( c->_fe_problem.dtOld() ),
+  _time_weight( c->_fe_problem.timeWeights()),
+  _time_stepping_scheme( c->_time_stepping_scheme),
+  _t_step(c->_fe_problem.timeStep()),
+  _t(c->_fe_problem.time()),
   _use_predictor(false),
   _predictor_scale(0.0),
-_time_stack(std::deque<TimeStep>()),
-_workvecs(std::vector<NumericVector<Number> *>()),
-_dt2_check(NULL),
-_dt2_bool(false)
+  _time_stack(std::deque<TimeStep>()),
+  _workvecs(std::vector<NumericVector<Number> *>()),
+  _dt2_check(NULL),
+  _dt2_bool(false)
 {
   _time_weight.resize(3);
 }
@@ -457,3 +456,50 @@ TimeScheme::computeTimeDerivatives()
   _solution_u_dot.close();
   _solution_du_dot_du.close();
 }
+
+
+TimeScheme::TimeStep::TimeStep(Real time, int t_step, NonlinearSystem * nl, std::vector<NumericVector<Number> *> workvecs) :
+  _nl(nl),
+  _time(time),
+  _t_step(t_step),
+  _dt(0.0)
+{
+  if (workvecs.empty())
+    _solution = &_nl->addVector(Moose::stringify(time), true, GHOSTED);
+  else
+  {
+    _solution = workvecs.back();
+    workvecs.pop_back();
+  }
+
+  if (workvecs.empty())
+    _time_derivative = &_nl->addVector(Moose::stringify(time)+"dt", true, GHOSTED);
+  else
+  {
+    _time_derivative = workvecs.back();
+    workvecs.pop_back();
+  }
+}
+
+
+TimeScheme::TimeStep::TimeStep(NonlinearSystem * nl ) :
+  _nl(nl),
+  _time(0.0),
+  _t_step(0),
+  _solution(&_nl->addVector("dt2check", true, GHOSTED)),
+  _time_derivative(&_nl->addVector("dt2check_dt", true, GHOSTED)),
+  _dt(0.0)
+{}
+
+
+TimeScheme::TimeStep::TimeStep(const TimeStep & p) :
+  _nl(p._nl),
+  _time(p._time),
+  _t_step(p._t_step),
+  _solution(p._solution),
+  _time_derivative(p._time_derivative),
+  _dt(p._dt)
+{}
+
+
+

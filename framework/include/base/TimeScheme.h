@@ -26,103 +26,11 @@ class NonlinearSystem;
 
 class TimeScheme
 {
-  class TimeStep
-  {
-  public:
-
-    TimeStep(Real time, int t_step, NonlinearSystem * nl, std::vector<NumericVector<Number> *> workvecs) :
-    _nl(nl),
-    _time(time),
-    _t_step(t_step),
-    _dt(0.0)
-    {
-      if (workvecs.empty()) _solution = &_nl->addVector(Moose::stringify(time), true, GHOSTED);
-      else {
-        _solution = workvecs.back();
-        workvecs.pop_back();
-      }
-      if (workvecs.empty()) _time_derivative = &_nl->addVector(Moose::stringify(time)+"dt", true, GHOSTED);
-      else {
-        _time_derivative = workvecs.back();
-        workvecs.pop_back();
-      }
-    }
-    TimeStep(NonlinearSystem * nl ) :
-    _nl(nl),
-    _time(0.0),
-    _t_step(0),
-    _solution(&_nl->addVector("dt2check", true, GHOSTED)),
-    _time_derivative(&_nl->addVector("dt2check_dt", true, GHOSTED)),
-    _dt(0.0)
-    {
-    }
-
-    TimeStep(const TimeStep & p) :
-     _nl(p._nl),
-     _time(p._time),
-     _t_step(p._t_step),
-     _solution(p._solution),
-     _time_derivative(p._time_derivative),
-     _dt(p._dt)
-    {
-
-    }
-    ~TimeStep()
-    {
-    }
-
-    int getTimeStep()
-    {
-      return _t_step;
-    }
-
-     void setTime(Real & t)
-    {
-      _time = t;
-    }
-
-    Real getTime()
-    {
-      return _time;
-    }
-
-    void setSolution(NumericVector<Number> & num)
-    {
-      num.localize(*_solution);
-    }
-    void setTimeDerivative(NumericVector<Number> & num)
-    {
-      num.localize(*_time_derivative);
-    }
-
-    NumericVector<Number> & getSolution()
-    {
-      return *_solution;
-    }
-
-    Real getDt()
-    {
-      return _dt;
-    }
-    void setDt(Real & dt)
-    {
-      _dt=dt;
-    }
-    NumericVector<Number> & getTimeDerivative()
-    {
-      return *_time_derivative;
-    }
-
-  protected:
-    NonlinearSystem * _nl;
-    Real _time;
-    int _t_step;
-    NumericVector<Number> * _solution;
-    NumericVector<Number> * _time_derivative; //This is necessary currently, is storing this better or worse than
-    //otherwise?
-  protected:
-    Real _dt;
-  };
+  /**
+   * Forward declaration of TimeStep helper class.
+   * Full declaration is below.
+   */
+  class TimeStep;
 
 public:
   TimeScheme(NonlinearSystem * c);
@@ -258,4 +166,44 @@ protected:
   bool _dt2_bool;
   int _time_stack_size;
 };
+
+
+
+/**
+ * Full declaration of the TimeStep helper class.
+ */
+class TimeScheme::TimeStep
+{
+public:
+  TimeStep(Real time, int t_step, NonlinearSystem * nl, std::vector<NumericVector<Number> *> workvecs);
+  TimeStep(NonlinearSystem * nl );
+  TimeStep(const TimeStep & p);
+
+  ~TimeStep() {}
+
+  int getTimeStep() { return _t_step; }
+
+  void setTime(Real & t) { _time = t; }
+
+  Real getTime() { return _time; }
+
+  void setSolution(NumericVector<Number> & num) { num.localize(*_solution); }
+  void setTimeDerivative(NumericVector<Number> & num) { num.localize(*_time_derivative); }
+
+  NumericVector<Number> & getSolution() { return *_solution; }
+
+  Real getDt() { return _dt; }
+  void setDt(Real & dt) { _dt=dt; }
+  NumericVector<Number> & getTimeDerivative() { return *_time_derivative; }
+
+protected:
+  NonlinearSystem * _nl;
+  Real _time;
+  int _t_step;
+  NumericVector<Number> * _solution;
+  /// This is necessary currently, is storing this better or worse than otherwise?
+  NumericVector<Number> * _time_derivative;
+  Real _dt;
+};
+
 #endif /* TIMESCHEME_H */
