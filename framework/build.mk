@@ -264,7 +264,6 @@ endif
 	@echo "MOOSE Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_F90) $(libmesh_FFLAGS) -shared -fPIC $(libmesh_INCLUDE) $< -o $@
 
-
 # Build appliations up the tree
 up: all
 	@echo ====== Building the following applications: $(CURRENT_APP) $(DEP_APPS) ======

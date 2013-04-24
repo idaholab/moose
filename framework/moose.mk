@@ -124,5 +124,8 @@ clobber::
 cleanall::
 	make -C $(MOOSE_DIR) clean
 
-moose_echo:
+echo_include:
 	@echo $(libmesh_INCLUDE)
+
+echo_library:
+	@echo $(app_libraries)

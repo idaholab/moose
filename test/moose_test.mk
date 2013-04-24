@@ -47,6 +47,8 @@ else
   moose_test_plugin_deps :=
 endif
 
+app_libraries := $(moose_test_LIB) $(moose_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_LIBS)
+
 all:: $(moose_test_LIB)
 
 $(moose_test_LIB): $(moose_test_objects) $(moose_test_plugin_deps)
@@ -67,7 +69,7 @@ moose_test: $(moose_test_APP)
 $(moose_test_APP): $(moose_LIB) $(elk_MODULES) $(moose_test_LIB) $(moose_test_app_objects)
 	@echo "Linking "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-          $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_test_app_objects) $(moose_test_LIB) $(elk_MODULES) $(moose_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_LIBS)
+          $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_test_app_objects) $(moose_test_LIB) $(moose_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_LIBS)
 
 endif
 
