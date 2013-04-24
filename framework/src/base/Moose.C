@@ -418,7 +418,11 @@ registerObjects(Factory & factory)
   registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");
   registerNamedPreconditioner(FiniteDifferencePreconditioner, "FDP");
   registerNamedPreconditioner(SingleMatrixPreconditioner, "SMP");
+#if defined(LIBMESH_HAVE_PETSC) && defined(PETSC_VERSION_LE)
+#if !PETSC_VERSION_LE(3,3,0)
   registerNamedPreconditioner(FieldSplitPreconditioner, "FSP");
+#endif
+#endif
   // dampers
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);
