@@ -147,11 +147,6 @@ MooseMesh::freeBndElems()
 void
 MooseMesh::prepare()
 {
-  // This is now done in Nemesis_IO::read()
-  // If we are using a truly Parallel mesh (like Nemesis) then we might not even have neighbors!
-//  if(parallel())
-//    MeshCommunication().gather_neighboring_elements(libmesh_cast_ref<ParallelMesh&>(getMesh()));
-//
   if (dynamic_cast<ParallelMesh *>(&_mesh) && !_is_parallel)
   {
     _mesh.allow_renumbering(true);
@@ -163,26 +158,8 @@ MooseMesh::prepare()
     _mesh.prepare_for_use(/*true*/);
   }
 
-  // If using ParallelMesh this will delete non-local elements from the current processor
-  // If using SerialMesh, this function is a no-op.
-  _mesh.delete_remote_elements();
-
-//  if(!_mesh.is_serial())
-//    Moose::gatherNearbyElements(*this, _ghosted_boundaries, _ghosted_boundaries_inflation);
-
   // Collect (local) subdomain IDs
   const MeshBase::element_iterator el_end = _mesh.elements_end();
-/*
-  unsigned int num_elems = 0;
-  for (MeshBase::element_iterator el = _mesh.elements_begin(); el != el_end; ++el)
-    num_elems++;
-
-//  std::cerr<<libMesh::processor_id()<<": num_elems: "<<num_elems<<std::endl;
-
-  Parallel::sum(num_elems);
-
-  std::cout<<"Total elems: "<<num_elems<<std::endl;
-*/
 
   for (MeshBase::element_iterator el = _mesh.elements_begin(); el != el_end; ++el)
     _mesh_subdomains.insert((*el)->subdomain_id());
@@ -194,9 +171,6 @@ MooseMesh::prepare()
   // Communicate subdomain and boundary IDs if this is a parallel mesh
   if (!_mesh.is_serial())
   {
-    // Subdomain size before
-    // std::cout << "(before) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
-
     // Pack our subdomain IDs into a vector
     std::vector<SubdomainID> mesh_subdomains_vector(_mesh_subdomains.begin(),
                                                     _mesh_subdomains.end());
@@ -208,15 +182,6 @@ MooseMesh::prepare()
     _mesh_subdomains.insert(mesh_subdomains_vector.begin(),
                             mesh_subdomains_vector.end());
 
-    // Subdomain size after
-    // std::cout << "(after) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
-
-
-
-
-    // Boundary ID size before
-    // std::cout << "(before) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
-
     // Pack our boundary IDs into a vector for communication
     std::vector<BoundaryID> mesh_boundary_ids_vector(_mesh_boundary_ids.begin(),
                                                      _mesh_boundary_ids.end());
@@ -227,9 +192,6 @@ MooseMesh::prepare()
     // Attempt to insert any new IDs into the set (any existing ones will be skipped)
     _mesh_boundary_ids.insert(mesh_boundary_ids_vector.begin(),
                               mesh_boundary_ids_vector.end());
-
-    // Boundary ID size after
-    // std::cout << "(after) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
   }
 
   detectOrthogonalDimRanges();

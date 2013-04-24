@@ -64,7 +64,8 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters):
     _enable_unused_check(WARN_UNUSED),
     _factory(*this),
     _error_overridden(false),
-    _ready_to_exit(false)
+    _ready_to_exit(false),
+    _initial_from_file(false)
 {
   if(isParamValid("_argc") && isParamValid("_argv"))
   {

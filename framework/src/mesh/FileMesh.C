@@ -16,6 +16,7 @@
 #include "Parser.h"
 #include "MooseUtils.h"
 #include "Moose.h"
+#include "MooseApp.h"
 
 // libMesh includes
 #include "libmesh/exodusII_io.h"
@@ -83,12 +84,11 @@ FileMesh::init()
   {
     MooseUtils::checkFileReadable(_file_name);
 
-    // if reading ExodusII, read it through a reader and save it off, since it will be used in possible "copy nodal vars" action
-    // NOTE: the other reader that can do copy nodal values is GMVIO, but GMV is _pretty_ old right now (May 2011)
-    // NOTE: Actually we have two dependencies on the raw exodus reader now - we also need it for named sideset support
-    // when distributing the mesh in parallel (Feb 2013)
-    if (_file_name.rfind(".exd") < _file_name.size() ||
-        _file_name.rfind(".e") < _file_name.size())
+    // See if the user has requested reading a solution from the file.  If so, we'll need to read
+    // the mesh with the exodus reader instead of using mesh.read().  This will read the mesh on
+    // every processor
+
+    if (_app.setFileRestart() && (_file_name.rfind(".exd") < _file_name.size() || _file_name.rfind(".e") < _file_name.size()))
     {
       _exreader = new ExodusII_IO(_mesh);
       _exreader->read(_file_name);

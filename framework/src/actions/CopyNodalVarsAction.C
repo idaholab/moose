@@ -15,6 +15,7 @@
 #include "CopyNodalVarsAction.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
+#include "MooseApp.h"
 
 #include <map>
 
@@ -39,17 +40,22 @@ CopyNodalVarsAction::CopyNodalVarsAction(const std::string & name, InputParamete
 void
 CopyNodalVarsAction::act()
 {
-
   if (isParamValid("initial_from_file_var"))
   {
     SystemBase * system;
-    // Is this a NonlinearSystem variable or an AuxiliarySystem variable?
-    if (getAction() == "copy_nodal_vars")
-      system = &_problem->getNonlinearSystem();
-    else
-      system = &_problem->getAuxiliarySystem();
 
-    system->addVariableToCopy(getParam<std::string>("initial_from_file_var"),
-                              getParam<int>("initial_from_file_timestep"));
+    if (getAction() == "check_copy_nodal_vars")
+      _app.setFileRestart() = true;
+    else
+    {
+      // Is this a NonlinearSystem variable or an AuxiliarySystem variable?
+      if (getAction() == "copy_nodal_vars")
+        system = &_problem->getNonlinearSystem();
+      else
+        system = &_problem->getAuxiliarySystem();
+
+      system->addVariableToCopy(getParam<std::string>("initial_from_file_var"),
+                                getParam<int>("initial_from_file_timestep"));
+    }
   }
 }

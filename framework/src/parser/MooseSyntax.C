@@ -42,6 +42,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   /// Variable/AuxVariable Actions
   syntax.registerActionSyntax("AddVariableAction", "Variables/*");
+  syntax.registerActionSyntax("CopyNodalVarsAction", "Variables/*", "check_copy_nodal_vars");
   syntax.registerActionSyntax("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
   syntax.registerActionSyntax("AddICAction", "Variables/*/InitialCondition");
 

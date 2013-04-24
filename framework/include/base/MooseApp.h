@@ -178,6 +178,11 @@ public:
    */
   CommandLine * commandLine() { return _command_line; }
 
+  /**
+   * This method is here so we can determine whether or not we need to
+   * use a separate reader to read the mesh BEFORE we create the mesh.
+   */
+  bool & setFileRestart() { return _initial_from_file; }
 
   /**
    * Actually build everything in the input file.
@@ -233,10 +238,12 @@ protected:
 
   Factory _factory;
 
-protected:
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
   bool _ready_to_exit;
+
+  /// This variable indicates when a request has been made to restart from an Exodus file
+  bool _initial_from_file;
 };
 
 #endif /* MOOSEAPP_H */

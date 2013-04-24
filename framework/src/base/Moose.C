@@ -483,6 +483,7 @@ addActionTypes(Syntax & syntax)
   registerActionName("create_problem", true);
   registerActionName("setup_output", false);
   registerActionName("init_problem", true);
+  registerActionName("check_copy_nodal_vars", true);
   registerActionName("copy_nodal_vars", true);
   registerActionName("copy_nodal_aux_vars", true);
   registerActionName("add_bc", false);  // Does this need to be true?  Not if you have periodic boundaries...
@@ -549,6 +550,7 @@ addActionTypes(Syntax & syntax)
   syntax.addDependencySets(
 "(meta_action)"
 "(set_global_params)"
+"(check_copy_nodal_vars)"
 "(setup_mesh)"
 "(add_mesh_modifier)"
 "(setup_mesh_complete)"
