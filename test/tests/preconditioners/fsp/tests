@@ -4,29 +4,34 @@
     input = 'fsp_additive_test.i'
     exodiff = 'fsp_additive_out.e'
     max_parallel = 1
+    petsc_version = '>=3.3'
   [../]
   [./multiplicative]
     type = 'Exodiff'
     input = 'fsp_multiplicative_test.i'
     exodiff = 'fsp_multiplicative_out.e'
     max_parallel = 1
+    petsc_version = '>=3.3'
   [../]
   [./symmetric_multiplicative]
     type = 'Exodiff'
     input = 'fsp_symmetric_multiplicative_test.i'
     exodiff = 'fsp_symmetric_multiplicative_out.e'
     max_parallel = 1
+    petsc_version = '>=3.3'
   [../]
   [./schur_full_diag]
     type = 'Exodiff'
     input = 'fsp_schur_full_diag_test.i'
     exodiff = 'fsp_schur_full_diag_out.e'
     max_parallel = 1
+    petsc_version = '>=3.3'
   [../]
   [./schur_full_self]
     type = 'Exodiff'
     input = 'fsp_schur_full_self_test.i'
     exodiff = 'fsp_schur_full_self_out.e'
     max_parallel = 1
+    petsc_version = '>=3.3'
   [../]
 []
