@@ -368,7 +368,7 @@ void TimeScheme::computeLittlef(const NumericVector<Number> & bigF, NumericVecto
   {
 #ifdef LIBMESH_HAVE_PETSC
     _nl->computeResidualInternal( _mmatrix, Moose::KT_TIME);
-    PetscVector<Number> cls((static_cast<PetscVector<Number> & > (_mmatrix)).vec());
+    PetscVector<Number> cls((static_cast<PetscVector<Number> & > (_mmatrix)).vec(), libMesh::CommWorld);
     if( VecReciprocal(cls.vec()) != 0)
       mooseError("VecReciprocal");
     cls.close();

@@ -704,7 +704,7 @@ static PetscErrorCode DMMooseFunction(DM dm, Vec x, Vec r)
   ierr = DMMooseGetNonlinearSystem(dm, nl); CHKERRQ(ierr);
   PetscVector<Number>& X_sys = *libmesh_cast_ptr<PetscVector<Number>* >(nl->sys().solution.get());
   PetscVector<Number>& R_sys = *libmesh_cast_ptr<PetscVector<Number>* >(nl->sys().rhs);
-  PetscVector<Number> X_global(x), R(r);
+  PetscVector<Number> X_global(x, libMesh::CommWorld), R(r, libMesh::CommWorld);
 
   // Use the systems update() to get a good local version of the parallel solution
   X_global.swap(X_sys);
@@ -782,7 +782,7 @@ static PetscErrorCode DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc, MatStructur
   PetscMatrix<Number>  Jac(jac);
   PetscVector<Number>& X_sys = *libmesh_cast_ptr<PetscVector<Number>*>(nl->sys().solution.get());
   PetscMatrix<Number>& Jac_sys = *libmesh_cast_ptr<PetscMatrix<Number>*>(nl->sys().matrix);
-  PetscVector<Number>  X_global(x);
+  PetscVector<Number>  X_global(x, libMesh::CommWorld);
 
   // Set the dof maps
   the_pc.attach_dof_map(nl->sys().get_dof_map());
@@ -857,8 +857,8 @@ static PetscErrorCode DMVariableBounds_Moose(DM dm, Vec xl, Vec xu)
 {
   PetscErrorCode ierr;
   NonlinearSystem* nl;
-  PetscVector<Number> XL(xl);
-  PetscVector<Number> XU(xu);
+  PetscVector<Number> XL(xl, libMesh::CommWorld);
+  PetscVector<Number> XU(xu, libMesh::CommWorld);
 
   PetscFunctionBegin;
   ierr = DMMooseGetNonlinearSystem(dm, nl);CHKERRQ(ierr);

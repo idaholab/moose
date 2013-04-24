@@ -239,7 +239,7 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
 
   {
     // cls is a PetscVector wrapper around the Vec in current_local_solution
-    PetscVector<Number> cls(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec());
+    PetscVector<Number> cls(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec(), libMesh::CommWorld);
 
     // Create new NumericVectors with the right ghosting - note: these will be destroyed
     // when this function exits, so nobody better hold pointers to them any more!
@@ -247,8 +247,8 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
     AutoPtr<NumericVector<Number> > ghosted_w_aptr( cls.zero_clone() );
 
     // Create PetscVector wrappers around the Vecs.
-    PetscVector<Number> ghosted_y( static_cast<PetscVector<Number> *>(ghosted_y_aptr.get())->vec() );
-    PetscVector<Number> ghosted_w( static_cast<PetscVector<Number> *>(ghosted_w_aptr.get())->vec() );
+    PetscVector<Number> ghosted_y( static_cast<PetscVector<Number> *>(ghosted_y_aptr.get())->vec(), libMesh::CommWorld);
+    PetscVector<Number> ghosted_w( static_cast<PetscVector<Number> *>(ghosted_w_aptr.get())->vec(), libMesh::CommWorld);
 
     ierr = VecCopy(y, ghosted_y.vec()); CHKERRABORT(libMesh::COMM_WORLD,ierr);
     ierr = VecCopy(w, ghosted_w.vec()); CHKERRABORT(libMesh::COMM_WORLD,ierr);
@@ -275,7 +275,7 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
       }
 
       //Create vector to directly modify w
-      PetscVector<Number> vec_w(w);
+      PetscVector<Number> vec_w(w, libMesh::CommWorld);
 
       bool updatedSolution = problem.updateSolution(vec_w, ghosted_w);
       if (updatedSolution)
