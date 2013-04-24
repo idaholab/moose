@@ -63,11 +63,10 @@ InputParameters validParams<Transient>()
   params.addParam<bool>("use_AB2", false, "Whether to use the Adams-Bashforth 2 predictor");
   params.addParam<bool>("use_littlef", false, "if a function evaluation should be used or time deriv's in predictors");
   params.addParam<bool>("abort_on_solve_fail", false, "abort if solve not converged rather than cut timestep");
-   params.addParam<MooseEnum>("scheme",          schemes,  "Time integration scheme used.");
-   params.addParam<bool>("estimate_time_error", false, "make a time error estimate");
+  params.addParam<MooseEnum>("scheme",          schemes,  "Time integration scheme used.");
+  params.addParam<bool>("estimate_time_error", false, "make a time error estimate");
   params.addParam<bool>("output_to_file",false,"If time error estimates should be output to file");
   params.addParam<std::string>("file_name", "out.csv","which file should errors be output to");
-  params.addParam<bool>("estimate_time_error", false, "make a time error estimate");
   params.addParam<Real>("timestep_tolerance", 2.0e-14, "the tolerance setting for final timestep size and sync times");
 
   params.addParam<bool>("use_multiapp_dt", false, "If true then the dt for the simulation will be chosen by the MultiApps.  If false (the default) then the minimum over the master dt and the MultiApps is used");
@@ -145,9 +144,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
   if(_estimate_error)
   {
     _problem.getTimeScheme()->_use_AB2=true;
-    if(~parameters.isParamValid("predictor_scale"))
+    if(!parameters.isParamValid("predictor_scale"))
     {
-      _problem.getNonlinearSystem().setPredictorScale(0.0);
       _problem.getTimeScheme()->_apply_predictor = false;
     }
     if(_time_error_out_to_file)
