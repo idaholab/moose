@@ -5,7 +5,6 @@
     exodiff = 'fsp_additive_out.e'
     max_parallel = 1
     petsc_version = '>=3.3'
-    deleted = 'Broken'
   [../]
   [./multiplicative]
     type = 'Exodiff'
@@ -13,7 +12,6 @@
     exodiff = 'fsp_multiplicative_out.e'
     max_parallel = 1
     petsc_version = '>=3.3'
-    deleted = 'Broken'
   [../]
   [./symmetric_multiplicative]
     type = 'Exodiff'
@@ -21,7 +19,6 @@
     exodiff = 'fsp_symmetric_multiplicative_out.e'
     max_parallel = 1
     petsc_version = '>=3.3'
-    deleted = 'Broken'
   [../]
   [./schur_full_diag]
     type = 'Exodiff'
@@ -29,7 +26,6 @@
     exodiff = 'fsp_schur_full_diag_out.e'
     max_parallel = 1
     petsc_version = '>=3.3'
-    deleted = 'Broken'
   [../]
   [./schur_full_self]
     type = 'Exodiff'
@@ -37,6 +33,5 @@
     exodiff = 'fsp_schur_full_self_out.e'
     max_parallel = 1
     petsc_version = '>=3.3'
-    deleted = 'Broken'
   [../]
 []
