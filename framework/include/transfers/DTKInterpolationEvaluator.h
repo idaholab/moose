@@ -40,16 +40,15 @@
 
 namespace libMesh {
 
-  class DTKInterpolationEvaluator : public DataTransferKit::FieldEvaluator<long unsigned int,DataTransferKit::FieldContainer<double> >
+class DTKInterpolationEvaluator : public DataTransferKit::FieldEvaluator<int,DataTransferKit::FieldContainer<double> >
 {
 public:
-  typedef DataTransferKit::MeshContainer<long unsigned int>	      MeshContainerType;
+  typedef DataTransferKit::MeshContainer<int>	      MeshContainerType;
   typedef DataTransferKit::FieldContainer<Number>     FieldContainerType;
-  typedef DataTransferKit::MeshTraits<MeshContainerType>::global_ordinal_type  GlobalOrdinal;
 
   DTKInterpolationEvaluator(System & in_sys, std::string var_name, const Point & offset);
 
-  FieldContainerType evaluate( const Teuchos::ArrayRCP<GlobalOrdinal>& elements,
+  FieldContainerType evaluate( const Teuchos::ArrayRCP<int>& elements,
                                const Teuchos::ArrayRCP<double>& coords );
 
 protected:

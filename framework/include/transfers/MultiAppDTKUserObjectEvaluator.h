@@ -24,18 +24,16 @@
 #include <DTK_Box.hpp>
 
 class MultiAppDTKUserObjectEvaluator: public DataTransferKit::FieldEvaluator<
-  long unsigned int, DataTransferKit::FieldContainer<double> >
+  int, DataTransferKit::FieldContainer<double> >
 {
 public:
   MultiAppDTKUserObjectEvaluator(MultiApp & multi_app, const std::string & user_object_name);
 
   ~MultiAppDTKUserObjectEvaluator();
 
-  typedef long unsigned int GlobalOrdinal;
+  DataTransferKit::FieldContainer<double> evaluate(const Teuchos::ArrayRCP<int>& bids, const Teuchos::ArrayRCP<double>& coords);
 
-  DataTransferKit::FieldContainer<double> evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>& bids, const Teuchos::ArrayRCP<double>& coords);
-
-  Teuchos::RCP<DataTransferKit::GeometryManager<DataTransferKit::Box,GlobalOrdinal> > createSourceGeometry(const Teuchos::RCP<const Teuchos::Comm<int> >& comm);
+  Teuchos::RCP<DataTransferKit::GeometryManager<DataTransferKit::Box,int> > createSourceGeometry(const Teuchos::RCP<const Teuchos::Comm<int> >& comm);
 
 private:
   /// The MultiAppUserObject object this object will be evaluating
@@ -45,7 +43,7 @@ private:
   std::string _user_object_name;
 
   Teuchos::ArrayRCP<DataTransferKit::Box> _boxes;
-  Teuchos::ArrayRCP<GlobalOrdinal> _box_ids;
+  Teuchos::ArrayRCP<int> _box_ids;
 };
 
 

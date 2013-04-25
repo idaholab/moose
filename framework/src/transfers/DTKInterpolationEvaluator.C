@@ -27,14 +27,14 @@ DTKInterpolationEvaluator::DTKInterpolationEvaluator(System & in_sys, std::strin
 {}
 
 DTKInterpolationEvaluator::FieldContainerType
-DTKInterpolationEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>& elements, const Teuchos::ArrayRCP<double>& coords)
+DTKInterpolationEvaluator::evaluate(const Teuchos::ArrayRCP<int>& elements, const Teuchos::ArrayRCP<double>& coords)
 {
-  GlobalOrdinal num_values = elements.size();
+  unsigned int num_values = elements.size();
 
   Teuchos::ArrayRCP<Number> values(num_values);
   DataTransferKit::FieldContainer<Number> evaluations(values, 1);
 
-  for(GlobalOrdinal i=0; i<num_values; i++)
+  for(unsigned int i=0; i<num_values; i++)
   {
     Elem * elem = mesh.elem(elements[i]);
 

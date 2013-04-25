@@ -63,8 +63,6 @@ public:
   MultiAppDTKUserObjectTransfer(const std::string & name, InputParameters parameters);
   virtual ~MultiAppDTKUserObjectTransfer() {}
 
-  typedef long unsigned int GlobalOrdinal;
-
   virtual void execute();
 
 protected:
@@ -76,13 +74,13 @@ protected:
 
   Teuchos::RCP<MultiAppDTKUserObjectEvaluator> _multi_app_user_object_evaluator;
 
-  Teuchos::RCP<DataTransferKit::FieldEvaluator<GlobalOrdinal, DataTransferKit::FieldContainer<double> > > _field_evaluator;
+  Teuchos::RCP<DataTransferKit::FieldEvaluator<int, DataTransferKit::FieldContainer<double> > > _field_evaluator;
 
-  Teuchos::RCP<DataTransferKit::GeometryManager<DataTransferKit::Box,GlobalOrdinal> > _multi_app_geom;
+  Teuchos::RCP<DataTransferKit::GeometryManager<DataTransferKit::Box,int> > _multi_app_geom;
 
   DTKInterpolationAdapter * _to_adapter;
 
-  DataTransferKit::VolumeSourceMap<DataTransferKit::Box, GlobalOrdinal, DataTransferKit::MeshContainer<GlobalOrdinal> > * _src_to_tgt_map;
+  DataTransferKit::VolumeSourceMap<DataTransferKit::Box, int, DataTransferKit::MeshContainer<int> > * _src_to_tgt_map;
 
   Teuchos::RCP<DataTransferKit::FieldManager<DTKAdapter::FieldContainerType> > _to_values;
 };

@@ -56,7 +56,7 @@ MultiAppDTKUserObjectTransfer::execute()
 
     _to_adapter = new DTKInterpolationAdapter(_comm_default, _multi_app->problem()->es(), Point(), 3);
 
-    _src_to_tgt_map = new DataTransferKit::VolumeSourceMap<DataTransferKit::Box, GlobalOrdinal, DataTransferKit::MeshContainer<GlobalOrdinal> >(_comm_default, 3, true);
+    _src_to_tgt_map = new DataTransferKit::VolumeSourceMap<DataTransferKit::Box, int, DataTransferKit::MeshContainer<int> >(_comm_default, 3, true);
 
     std::cout<<"--Setting Up Transfer--"<<std::endl;
     if(_variable->isNodal())
