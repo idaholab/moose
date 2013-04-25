@@ -11,6 +11,7 @@ class Job(object):
     params = InputParameters()
     params.addRequiredParam('type', "The type of test of Tester to create for this test.")
     params.addParam('template_script', MOOSE_DIR + '/scripts/ClusterLauncher/pbs_submit.sh', "The template job script to use.")
+    params.addParam('allow_multiple', False, "If set and the job directory already exists, another job will be launched in the same directory.")
     return params
   getValidParams = staticmethod(getValidParams)
 

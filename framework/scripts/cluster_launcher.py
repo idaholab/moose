@@ -34,7 +34,16 @@ class ClusterLauncher:
     if 'Jobs' in data.children:
       jobs_node = data.children['Jobs']
 
+      # Get the active line
+      active_jobs = None
+      if 'active' in jobs_node.params:
+        active_jobs = jobs_node.params['active'].split(' ')
+
       for jobname, job_node in jobs_node.children.iteritems():
+        # Make sure this job is active
+        if active_jobs != None and not jobname in active_jobs:
+          continue
+
         # First retrieve the type so we can get the valid params
         if 'type' not in job_node.params:
           print "Type missing in " + filename
@@ -72,12 +81,13 @@ class ClusterLauncher:
     return jobs
 
   def createAndLaunchJob(self, template_dir, specs):
-    if os.path.exists(template_dir + specs['job_name']):
+    if not os.path.exists(template_dir + specs['job_name']):
+      # Make directory
+      os.mkdir(template_dir + specs['job_name'])
+    elif not specs['allow_multiple']:
       print "Error: Job directory", template_dir + specs['job_name'], "already exists"
-      sys.exit(1)
+      return
 
-    # Make directory
-    os.mkdir(template_dir + specs['job_name'])
     saved_cwd = os.getcwd()
     os.chdir(template_dir + specs['job_name'])
 
@@ -110,7 +120,6 @@ class ClusterLauncher:
 
     for job in jobs:
       self.createAndLaunchJob(template_dir, job)
-
 
 ########################################################
 def main():
