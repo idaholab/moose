@@ -44,7 +44,7 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
 {
   MPI_Comm old_comm = Moose::swapLibMeshComm(*comm->getRawMpiComm());
 
-  std::set<unsigned int> semi_local_nodes;
+  std::set<GlobalOrdinal> semi_local_nodes;
   get_semi_local_nodes(semi_local_nodes);
 
   num_local_nodes = semi_local_nodes.size();
@@ -56,9 +56,9 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
 
   // Fill in the vertices and coordinates
   {
-    unsigned int i = 0;
+    GlobalOrdinal i = 0;
 
-    for(std::set<unsigned int>::iterator it = semi_local_nodes.begin();
+    for(std::set<GlobalOrdinal>::iterator it = semi_local_nodes.begin();
         it != semi_local_nodes.end();
         ++it)
     {
@@ -66,10 +66,10 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
 
       vertices[i] = node.id();
 
-      for(unsigned int j=0; j<dim; j++)
+      for(GlobalOrdinal j=0; j<dim; j++)
         coordinates[(j*num_local_nodes) + i] = node(j) + offset(j);
 
-      for(unsigned int j=0; j<from_dim; j++)
+      for(GlobalOrdinal j=0; j<from_dim; j++)
         target_coordinates[(j*num_local_nodes) + i] = node(j) + offset(j);
 
       i++;
@@ -78,18 +78,18 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
 
   // Currently assuming all elements are the same!
   DataTransferKit::DTK_ElementTopology element_topology = get_element_topology(mesh.elem(0));
-  unsigned int n_nodes_per_elem = mesh.elem(0)->n_nodes();
+  GlobalOrdinal n_nodes_per_elem = mesh.elem(0)->n_nodes();
 
-  unsigned int n_local_elem = mesh.n_local_elem();
+  GlobalOrdinal n_local_elem = mesh.n_local_elem();
 
   elements.resize(n_local_elem);
-  Teuchos::ArrayRCP<int> connectivity(n_nodes_per_elem*n_local_elem);
+  Teuchos::ArrayRCP<GlobalOrdinal> connectivity(n_nodes_per_elem*n_local_elem);
 
   Teuchos::ArrayRCP<double> elem_centroid_coordinates(n_local_elem*from_dim);
 
   // Fill in the elements and connectivity
   {
-    unsigned int i = 0;
+    GlobalOrdinal i = 0;
 
     MeshBase::const_element_iterator end = mesh.local_elements_end();
     for(MeshBase::const_element_iterator it = mesh.local_elements_begin();
@@ -99,12 +99,12 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
       const Elem & elem = *(*it);
       elements[i] = elem.id();
 
-      for(unsigned int j=0; j<n_nodes_per_elem; j++)
+      for(GlobalOrdinal j=0; j<n_nodes_per_elem; j++)
         connectivity[(j*n_local_elem)+i] = elem.node(j);
 
       {
         Point centroid = elem.centroid();
-        for(unsigned int j=0; j<from_dim; j++)
+        for(GlobalOrdinal j=0; j<from_dim; j++)
           elem_centroid_coordinates[(j*n_local_elem) + i] = centroid(j) + offset(j);
       }
 
@@ -113,7 +113,7 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   }
 
   Teuchos::ArrayRCP<int> permutation_list(n_nodes_per_elem);
-  for (unsigned int i = 0; i < n_nodes_per_elem; ++i )
+  for (GlobalOrdinal i = 0; i < n_nodes_per_elem; ++i )
     permutation_list[i] = i;
 
   /*
@@ -182,8 +182,8 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
     target_coords = Teuchos::rcp(new DataTransferKit::FieldManager<MeshContainerType>(mesh_container, comm));
   else
   {
-    Teuchos::ArrayRCP<int> empty_elements(0);
-    Teuchos::ArrayRCP<int> empty_connectivity(0);
+    Teuchos::ArrayRCP<GlobalOrdinal> empty_elements(0);
+    Teuchos::ArrayRCP<GlobalOrdinal> empty_connectivity(0);
 
     Teuchos::RCP<MeshContainerType> coords_only_mesh_container = Teuchos::rcp(
       new MeshContainerType(from_dim, vertices, target_coordinates,
@@ -194,8 +194,8 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   }
 
   {
-    Teuchos::ArrayRCP<int> empty_elements(0);
-    Teuchos::ArrayRCP<int> empty_connectivity(0);
+    Teuchos::ArrayRCP<GlobalOrdinal> empty_elements(0);
+    Teuchos::ArrayRCP<GlobalOrdinal> empty_connectivity(0);
 
     Teuchos::RCP<MeshContainerType> centroid_coords_only_mesh_container = Teuchos::rcp(
       new MeshContainerType(from_dim, elements, elem_centroid_coordinates,
@@ -247,7 +247,7 @@ DTKInterpolationAdapter::get_values_to_fill(std::string var_name)
 }
 
 void
-DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::ArrayView<int> missed_points)
+DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::ArrayView<GlobalOrdinal> missed_points)
 {
   MPI_Comm old_comm = Moose::swapLibMeshComm(*comm->getRawMpiComm());
 
@@ -262,7 +262,7 @@ DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::A
   // We're only going to update values for points that were not missed
   std::vector<bool> missed(values->size(), false);
 
-  for(Teuchos::ArrayView<const int>::const_iterator i=missed_points.begin();
+  for(Teuchos::ArrayView<const GlobalOrdinal>::const_iterator i=missed_points.begin();
       i != missed_points.end();
       ++i)
     missed[*i] = true;
@@ -350,7 +350,7 @@ DTKInterpolationAdapter::get_element_topology(const Elem * elem)
 }
 
 void
-DTKInterpolationAdapter::get_semi_local_nodes(std::set<unsigned int> & semi_local_nodes)
+DTKInterpolationAdapter::get_semi_local_nodes(std::set<GlobalOrdinal> & semi_local_nodes)
 {
   MeshBase::const_element_iterator end = mesh.local_elements_end();
   for(MeshBase::const_element_iterator it = mesh.local_elements_begin();
