@@ -34,6 +34,9 @@ public:
    */
   Coupleable(InputParameters & parameters, bool nodal);
 
+  /**
+   * Destructor for object
+   */
   virtual ~Coupleable();
 
   /**
@@ -50,9 +53,9 @@ public:
 
 protected:
   /**
-   * Returns true if a variables has been coupled_as name.
-   *
-   * @param name The name the kernel wants to refer to the variable as.
+   * Returns true if a variables has been coupled as name.
+   * @param var_name The name the kernel wants to refer to the variable as.
+   * @return True if a coupled variable has the supplied name
    */
   virtual bool isCoupled(const std::string & var_name, unsigned int i = 0);
 
@@ -65,35 +68,128 @@ protected:
 
   virtual void coupledCallback(const std::string & var_name, bool is_old);
 
+  /**
+   * Returns the index for a coupled variable by name
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Index of coupled variable
+   */
   virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns value of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   * @see Kernel::value
+   */
   virtual VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns an old value from previous time step  of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue containing the old value of the coupled variable
+   * @see Kernel::valueOld
+   */
   virtual VariableValue & coupledValueOld(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns an old value from two time steps previous of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue containing the older value of the coupled variable
+   * @see Kernel::valueOlder
+   */
   virtual VariableValue & coupledValueOlder(const std::string & var_name, unsigned int comp = 0);
 
+  /**
+   * Returns gradient of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableGradient containing the gradient of the coupled variable
+   * @see Kernel::gradient
+   */
   virtual VariableGradient & coupledGradient(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns an old gradient from previous time step of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableGradient containing the old gradient of the coupled variable
+   * @see Kernel::gradientOld
+   */
   virtual VariableGradient & coupledGradientOld(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns an old gradient from two time steps previous of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableGradient containing the older gradient of the coupled variable
+   * @see Kernel::gradientOlder
+   */
   virtual VariableGradient & coupledGradientOlder(const std::string & var_name, unsigned int comp = 0);
 
-  virtual VariableSecond & coupledSecond(const std::string & var_name, unsigned int i = 0);
-  virtual VariableSecond & coupledSecondOld(const std::string & var_name, unsigned int i = 0);
-  virtual VariableSecond & coupledSecondOlder(const std::string & var_name, unsigned int i = 0);
+  /**
+   * Returns second derivative of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableSecond containing the second derivative of the coupled variable
+   * @see Kernel::second
+   */
+  virtual VariableSecond & coupledSecond(const std::string & var_name, unsigned int comp = 0);
 
+  /**
+   * Returns an old second derivative from previous time step of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableSecond containing the old second derivative of the coupled variable
+   * @see Kernel::secondOld
+   */
+  virtual VariableSecond & coupledSecondOld(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns an old second derivative from two time steps previous of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableSecond containing the older second derivative of the coupled variable
+   * @see Kernel::secondOlder
+   */
+  virtual VariableSecond & coupledSecondOlder(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Time derivative of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue containing the time derivative of the coupled variable
+   * @see Kernel::dot
+   */
   virtual VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Time derivative of a coupled variable with respect to the coefficients
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue containing the time derivative of the coupled variable with respect to the coefficients
+   * @see Kernel:dotDu
+   */
   virtual VariableValue & coupledDotDu(const std::string & var_name, unsigned int comp = 0);
 
 protected:
-  std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;   ///< Coupled vars whose values we provide
-  std::vector<MooseVariable *> _coupled_moose_vars;
+  std::map<std::string, std::vector<MooseVariable *> > _coupled_vars; ///< Coupled vars whose values we provide
+  std::vector<MooseVariable *> _coupled_moose_vars; ///< Vector of coupled variables
+  bool _nodal; ///< True if we provide coupling to nodal values
+  bool _c_is_implicit; ///< True if implicit value is required
 
-  /// true if we provide coupling to nodal values
-  bool _nodal;
-  /// True if implicit value is required
-  bool _c_is_implicit;
-
+  /**
+   * Extract pointer to a coupled variable
+   * @param var_name Name of parameter desired
+   * @param comp Component number of multiple coupled variables
+   * @return Pointer to the desired variable
+   */
   MooseVariable *getVar(const std::string & var_name, unsigned int comp);
 
 };
-
 
 /**
  * Enhances Coupleable interface to also couple the values from neighbor elements
