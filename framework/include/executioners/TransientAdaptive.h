@@ -15,6 +15,10 @@
 #ifndef TRANSIENTADAPTIVE_H
 #define TRANSIENTADAPTIVE_H
 
+#include "libmesh/petsc_macro.h"
+#if defined(LIBMESH_HAVE_PETSC) && defined(PETSC_VERSION_LE)
+#if !PETSC_VERSION_LE(3,3,0)
+
 #include "Executioner.h"
 #include "InputParameters.h"
 
@@ -63,5 +67,8 @@ protected:
   TimeStepper *_time_stepper;
   bool keepGoing(TimeStepperStatus status, Real time) const;
 };
+
+#endif
+#endif
 
 #endif // TRANSIENTADAPTIVE_H

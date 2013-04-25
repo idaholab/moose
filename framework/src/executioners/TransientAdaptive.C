@@ -14,6 +14,10 @@
 
 #include "TransientAdaptive.h"
 
+#include "libmesh/petsc_macro.h"
+#if defined(LIBMESH_HAVE_PETSC) && defined(PETSC_VERSION_LE)
+#if !PETSC_VERSION_LE(3,3,0)
+
 //Moose includes
 #include "Kernel.h"
 #include "Factory.h"
@@ -31,9 +35,6 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
-
-#if defined(LIBMESH_HAVE_PETSC) && defined(PETSC_VERSION_LE)
-#if !PETSC_VERSION_LE(3,3,0)
 
 template<>
 InputParameters validParams<TransientAdaptive>()
