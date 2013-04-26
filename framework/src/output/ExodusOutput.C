@@ -88,6 +88,9 @@ ExodusOutput::output(const std::string & file_base, Real time)
     if (_es.get_mesh().mesh_dimension() != 1)
       _out->use_mesh_dimension_instead_of_spatial_dimension(true);
 
+    if(_app.hasOutputPosition())
+      _out->set_coordinate_offset(_app.getOutputPosition());
+
     _file_num++;
   }
 

@@ -64,8 +64,9 @@ InputParameters validParams<SetupOutputAction>()
 
   // restart options
   params.addParam<unsigned int>("num_restart_files", 0, "Number of the restart files to save (0 = no restart files)");
+  params.addParam<Point>("position", "Set a positional offset.  This vector will get added to the nodal cooardinates to move the domain.");
 
-  params.addParamNamesToGroup("interval time_interval output_displaced output_solution_history print_linear_residuals iteration_plot_start_time elemental_as_nodal exodus_inputfile_output output_es_info output_variables hidden_variables", "Advanced");
+  params.addParamNamesToGroup("position interval time_interval output_displaced output_solution_history print_linear_residuals iteration_plot_start_time elemental_as_nodal exodus_inputfile_output output_es_info output_variables hidden_variables", "Advanced");
   params.addParamNamesToGroup("nemesis gmv vtk tecplot tecplot_binary xda", "Format");
   params.addParamNamesToGroup("screen_interval postprocessor_screen max_pps_rows_screen postprocessor_csv postprocessor_gnuplot gnuplot_format", "Postprocessor");
   params.addParamNamesToGroup("perf_log show_setup_log_early", "Logging");
@@ -135,6 +136,9 @@ SetupOutputAction::act()
       _problem->showVariableInOutput(_problem->getVariableNames());
     }
   }
+
+  if(_pars.isParamValid("position"))
+    _app.setOutputPosition(_pars.get<Point>("position"));
 
   // If the user didn't provide a filename - see if the parser has a filename that we can use as a base
   if (!_pars.isParamValid("file_base"))
@@ -216,41 +220,4 @@ SetupOutputAction::act()
   // use that instead of creating another one here
   if (access(base.c_str(), W_OK) == -1)
     mooseError("Can not write to directory: " + base + " for file base: " + getParam<OutFileBase>("file_base"));
-
-
-  if(_app.hasOutputPosition())
-  {
-    OutputProblem & out_problem = _problem->getOutputProblem(0);
-
-    Output & output = out_problem.out();  // can't use use this with coupled problems on different meshes
-
-    if(!_pars.isParamValid("output_variables"))
-    {
-      _pars.set<std::vector<std::string> >("output_variables") = _problem->getVariableNames();
-    }
-
-    out_problem.setPosition(_app.getOutputPosition());
-
-    _pars.set<OutFileBase>("file_base") = _problem->out().fileBase() + "_in_position";
-
-    setupOutputObject(output, _pars);
-
-    out_problem.outputInitial(getParam<bool>("output_initial"));
-
-#ifdef LIBMESH_ENABLE_AMR
-    Adaptivity & adapt = _problem->adaptivity();
-    if (adapt.isOn())
-      output.sequence(true);
-#endif //LIBMESH_ENABLE_AMR
-
-    // TODO: Need to set these values on the OutputProblem
-    output.interval(getParam<unsigned int>("interval"));
-    output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
-
-// Test to make sure that the user can write to the directory specified in file_base
-    std::string base = "./" + getParam<OutFileBase>("file_base");
-    base = base.substr(0, base.find_last_of('/'));
-    if (access(base.c_str(), W_OK) == -1)
-      mooseError("Can not write to directory: " + base + " for file base: " + getParam<OutFileBase>("file_base"));
-  }
 }

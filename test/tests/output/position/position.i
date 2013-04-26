@@ -43,9 +43,6 @@
   output_initial = true
   exodus = true
   perf_log = true
-  [./OverSampling]
-    exodus = true
-    position = '1 1 0'
-  [../]
+  position = '1 1 0'
 []
 

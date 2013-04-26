@@ -168,7 +168,7 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     app->setInputFileName(input_file);
     app->setOutputFileBase(output_base.str());
 
-    if(isParamValid("output_in_position"))
+    if(getParam<bool>("output_in_position"))
     {
       app->setOutputPosition(_positions[_first_local_app + i]);
     }

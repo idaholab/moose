@@ -2,6 +2,6 @@
   [./test]
     type = 'Exodiff'
     input = 'position.i'
-    exodiff = 'position_out_oversample.e'
+    exodiff = 'position_out.e'
   [../]
 []
