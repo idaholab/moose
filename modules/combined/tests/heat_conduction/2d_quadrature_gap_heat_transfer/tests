@@ -5,6 +5,18 @@
     exodiff = 'perfect_out.e'
   [../]
 
+  [./perfectQ8]
+    type = 'Exodiff'
+    input = 'perfectQ8.i'
+    exodiff = 'perfectQ8_out.e'
+  [../]
+
+  [./perfectQ9]
+    type = 'Exodiff'
+    input = 'perfectQ9.i'
+    exodiff = 'perfectQ9_out.e'
+  [../]
+
   [./nonmatching]
     type = 'Exodiff'
     input = 'nonmatching.i'
