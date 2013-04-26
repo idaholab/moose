@@ -167,6 +167,7 @@
 #include "FiniteDifferencePreconditioner.h"
 #include "SingleMatrixPreconditioner.h"
 #include "FieldSplitPreconditioner.h"
+#include "AddFieldSplitAction.h"
 
 // dampers
 #include "ConstantDamper.h"
@@ -659,6 +660,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddMaterialAction, "add_material");
   registerAction(AddPostprocessorAction, "add_postprocessor");
   registerAction(AddDamperAction, "add_damper");
+  registerAction(AddFieldSplitAction, "add_preconditioning");
   registerAction(SetupPreconditionerAction, "add_preconditioning");
   registerAction(SetupQuadratureAction, "setup_quadrature");
   registerAction(SetupOverSamplingAction, "setup_oversampling");

@@ -290,6 +290,25 @@ public:
    * If called with true this system will use FieldSplitPreconditioner, whenever it is supported by the solver.
    */
   void useFieldSplitPreconditioner(bool use=true) { _use_field_split_preconditioner = use; }
+  struct FieldSplitInfo {
+    std::string name;
+    std::vector<std::string> vars;
+    std::vector<std::string> blocks;
+    std::vector<std::string> sides;
+    std::vector<std::string> splits;
+    std::string fieldsplit_type;
+    std::string schur_type;
+    std::string schur_pre;
+    std::vector<std::string> petsc_options;
+    std::vector<std::string> petsc_options_iname;
+    std::vector<std::string> petsc_options_value;
+
+  };
+ protected:
+  std::map<std::string, FieldSplitInfo> _field_split_info;
+ public:
+  void addFieldSplit(const std::string& name, const FieldSplitInfo& info);
+  const FieldSplitInfo& getFieldSplit(const std::string& name) {return _field_split_info[name];};
 
   /**
    * If called with true this will add entries into the jacobian to link together degrees of freedom that are found to

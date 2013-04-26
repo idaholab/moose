@@ -52,10 +52,6 @@ public:
    */
   virtual ~FieldSplitPreconditioner();
 
-  /**
-   * Add a diagonal system + type of preconditioning
-   */
-  void addSplit(unsigned int var);
 
   /**
    * Sets up DMMoose internal data structures that define the splits.
@@ -66,6 +62,10 @@ public:
 protected:
   /// The nonlinear system this FSP is associated with (convenience reference)
   NonlinearSystem & _nl;
+
+  /// Set up a split
+  void setupSplit(const std::string& split, const std::string& prefix="-");
+
   /// Which FieldSplit type to use
   enum SplitType {
     SplitTypeAdditive,
@@ -75,7 +75,6 @@ protected:
   };
   SplitType
   getSplitType(const std::string& str);
-  SplitType _split_type;
 
   /// Which FieldSplit Schur factorization style to use.
   enum SchurType {
@@ -86,7 +85,6 @@ protected:
   };
   SchurType
   getSchurType(const std::string& str);
-  SchurType _schur_type;
 
   /// Which preconditioning matrix to use with S = D - CA^{-1}B
   /// 'Self' means use S to build the preconditioner.
@@ -98,7 +96,6 @@ protected:
   };
   SchurPreconditioner
   getSchurPreconditioner(const std::string& str);
-  SchurPreconditioner _schur_preconditioner;
 };
-#endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSOION_LESS_THAN(3,3,0)
+#endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 #endif //FIELDSPLITPRECONDITIONER_H

@@ -16,15 +16,31 @@
   [../]
 []
 
+[FieldSplits]
+  [./u]
+    name = u
+    vars = 'u'
+    petsc_options = '-dm_view'
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = '     asm'
+  [../]
+  [./v]
+    name = v
+    vars = 'v'
+    petsc_options = '-dm_view'
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = '     asm'
+  [../]
+[]
 [Preconditioning]
-  active = 'FSP'
-
   [./FSP]
     type = FSP
     full = true
     off_diag_row    = 'v'
     off_diag_column = 'u'
-    split_type  = additive
+    splits = 'u v'
+    fieldsplit_type  = symmetric_multiplicative
+    petsc_options = '-dm_view'
   [../]
 []
 
@@ -82,10 +98,7 @@
 
 [Executioner]
   type = Steady
-
   petsc_options       = '-snes_mf_operator -snes_view -snes_monitor -snes_converged_reason -ksp_monitor -ksp_converged_reason'
-  petsc_options_iname = '-dm_moose_nfieldsplits -dm_moose_fieldsplit_0_vars -dm_moose_fieldsplit_1_vars    -pc_type       -pc_fieldsplit_type'
-  petsc_options_value = '                     2                           u                           v  fieldsplit  symmetric_multiplicative'
 []
 
 [Output]

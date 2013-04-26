@@ -355,6 +355,31 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
 }
 
 void
+NonlinearSystem::addFieldSplit(const std::string& name, const NonlinearSystem::FieldSplitInfo& info)
+{
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
+  if (_field_split_info.count(name)) {
+    std::ostringstream err;
+    err << "FieldSplit " << name << " already exists";
+    mooseError(err.str());
+  }
+  if (name != info.name) {
+    std::ostringstream err;
+    err << "FieldSplit name " << name << " doesn't match what's in the info: " << info.name;
+    mooseError(err.str());
+  }
+  if (info.petsc_options_iname.size() != info.petsc_options_value.size()) {
+    std::ostringstream err;
+    err << "FieldSplit " << name << " petsc_options_iname size = " << info.petsc_options_iname.size() << " doesn't match petsc_options_value size = " << info.petsc_options_value.size();
+    mooseError(err.str());
+  }
+  std::pair<std::string, FieldSplitInfo> pair(name, info);
+  _field_split_info.insert(pair);
+#endif
+}
+
+
+void
 NonlinearSystem::setupFieldSplitPreconditioner()
 {
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
