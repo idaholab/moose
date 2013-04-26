@@ -45,7 +45,7 @@ class DTKInterpolationAdapter
 public:
   DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::MpiComm<int> > in_comm, EquationSystems & in_es, const Point & offset, unsigned int from_dim);
 
-  typedef DataTransferKit::MeshContainer<int>                                  MeshContainerType;
+  typedef DataTransferKit::MeshContainer<long unsigned int>                                  MeshContainerType;
   typedef DataTransferKit::FieldContainer<double>                              FieldContainerType;
   typedef DataTransferKit::MeshTraits<MeshContainerType>::global_ordinal_type  GlobalOrdinal;
   typedef DataTransferKit::FieldEvaluator<GlobalOrdinal,FieldContainerType>    EvaluatorType;
@@ -67,7 +67,7 @@ public:
    * After computing values for a variable in this EquationSystems
    * we need to take those values and put them in the actual solution vector.
    */
-  void update_variable_values(std::string var_name, Teuchos::ArrayView<int> missed_points);
+  void update_variable_values(std::string var_name, Teuchos::ArrayView<GlobalOrdinal> missed_points);
 
 protected:
   /**
@@ -86,7 +86,7 @@ protected:
    * Helper function that fills the std::set with all of the node numbers of
    * nodes connected to local elements.
    */
-  void get_semi_local_nodes(std::set<unsigned int> & semi_local_nodes);
+  void get_semi_local_nodes(std::set<GlobalOrdinal> & semi_local_nodes);
 
   Teuchos::RCP<const Teuchos::MpiComm<int> > comm;
   EquationSystems & es;
@@ -95,8 +95,8 @@ protected:
   unsigned int dim;
 
   unsigned int num_local_nodes;
-  Teuchos::ArrayRCP<int> vertices;
-  Teuchos::ArrayRCP<int> elements;
+  Teuchos::ArrayRCP<GlobalOrdinal> vertices;
+  Teuchos::ArrayRCP<GlobalOrdinal> elements;
 
   Teuchos::RCP<DataTransferKit::MeshManager<MeshContainerType> > mesh_manager;
   RCP_Evaluator field_evaluator;
