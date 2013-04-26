@@ -34,6 +34,8 @@ InputParameters validParams<TransientMultiApp>()
 
   params.addParam<bool>("tolerate_failure", false, "If true this MultiApp won't participate in dt decisions and will always be fast-forwarded to the current time.");
 
+  params.addParam<bool>("catch_up", false, "If true this will allow failed solves to attempt to 'catch up' using smaller timesteps.");
+
 
   return params;
 }
@@ -46,7 +48,8 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     _steady_state_tol(getParam<Real>("steady_state_tol")),
     _max_failures(getParam<unsigned int>("max_failures")),
     _tolerate_failure(getParam<bool>("tolerate_failure")),
-    _failures(0)
+    _failures(0),
+    _catch_up(false)
 {
   if(!_has_an_app)
     return;
@@ -175,10 +178,31 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
     else
     {
       ex->takeStep(dt);
+      ex->endStep();
 
       if(!ex->lastSolveConverged())
+      {
         mooseWarning(_name<<_first_local_app+i<<" failed to converge!"<<std::endl);
-      ex->endStep();
+
+        if(_catch_up)
+        {
+          ex->allowOutput(false); // Don't output while catching up
+
+          ex->takeStep(dt / 2.0); // Cut the timestep in half to try two half-step solves
+          ex->endStep();
+
+          if(!ex->lastSolveConverged())
+            mooseError(_name<<_first_local_app+i<<" failed to converge during first catch up!"<<std::endl);
+
+          ex->allowOutput(true);
+
+          ex->takeStep(dt / 2.0);
+          ex->endStep();
+
+          if(!ex->lastSolveConverged())
+            mooseError(_name<<_first_local_app+i<<" failed to converge during second catch up!"<<std::endl);
+        }
+      }
     }
   }
 

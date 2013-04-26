@@ -57,6 +57,8 @@ private:
   bool _tolerate_failure;
 
   unsigned int _failures;
+
+  bool _catch_up;
 };
 
 #endif // TRANSIENTMULTIAPP_H
