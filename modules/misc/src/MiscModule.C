@@ -18,12 +18,14 @@
 #include "NodalAreaAction.h"
 #include "RigidBodyModesRZ.h"
 #include "RigidBodyModes3D.h"
+#include "CoupledDirectionalMeshHeightInterpolation.h"
 
 void
 Elk::Misc::registerObjects(Factory & factory)
 {
   // Misc
   registerAux(NodalAreaAux);
+  registerAux(CoupledDirectionalMeshHeightInterpolation);
 
   registerBoundaryCondition(RobinBC);
 
