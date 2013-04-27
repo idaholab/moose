@@ -34,7 +34,8 @@ InputParameters validParams<NodeFaceConstraint>()
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
-  params.addPrivateParam<bool>("use_displaced_mesh", false);
+  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
+  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addPrivateParam<std::string>("built_by_action", "add_constraint");
   return params;
 }

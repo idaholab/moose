@@ -32,7 +32,11 @@ InputParameters validParams<AuxKernel>()
   params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin|custom) to execute only at that moment");
 
   params.addRequiredParam<AuxVariableName>("variable", "The name of the variable that this object applies to");
-  params.addPrivateParam<bool>("use_displaced_mesh", false);
+
+  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
+  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
+
+
   // For use on the boundary only
   params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this AuxBC applies");
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids or names of the blocks (subdomain) that this aux kernel will be applied to");

@@ -24,7 +24,8 @@ InputParameters validParams<BoundaryCondition>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
   params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this boundary condition applies to");
-  params.addPrivateParam<bool>("use_displaced_mesh", false);
+  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
+  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
 
   params.addPrivateParam<std::string>("built_by_action", "add_bc");
