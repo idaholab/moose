@@ -81,8 +81,6 @@ public:
       _name_to_build_pointer[name] = &buildApp<T>;
       _name_to_params_pointer[name] = &validParams<T>;
     }
-    else
-      mooseError("Object '" + name + "' already registered.");
   }
 
   /**
