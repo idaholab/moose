@@ -60,6 +60,8 @@
 #include "INSMomentumNoBCBC.h"
 #include "INSTemperatureNoBCBC.h"
 
+#include "INSCourant.h"
+
 void
 Elk::NavierStokes::registerObjects(Factory & factory)
 {
@@ -120,4 +122,6 @@ Elk::NavierStokes::registerObjects(Factory & factory)
 
   registerBoundaryCondition(INSMomentumNoBCBC);
   registerBoundaryCondition(INSTemperatureNoBCBC);
+
+  registerAux(INSCourant);
 }
