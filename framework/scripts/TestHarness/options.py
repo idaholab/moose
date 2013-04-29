@@ -37,6 +37,7 @@ EXODIFF       = 'exodiff'        # A list of files to exodiff
 EXODIFF_OPTS  = 'exodiff_opts'   # A place where the user can put in what ever else needs to be sent out.
 CSVDIFF       = 'csvdiff'        # A list of files to CSV diff
 CHECK_FILES   = 'check_files'    # A list of files to check for existence
+CHECK_NOT_EXISTS = 'check_not_exists'  # A list of files that should not exist
 
 CLI_ARGS      = 'cli_args'       # Additional argument vector to pass to test
 
@@ -83,6 +84,7 @@ DEFAULTS = { EXODIFF : [],
              EXODIFF_OPTS : [],
              CSVDIFF : [],
              CHECK_FILES : [],
+             CHECK_NOT_EXISTS : [],
              CLI_ARGS : [],
              INPUT_SWITCH : '-i',
              ERRORS : ['ERROR', 'command not found', 'erminate called after throwing an instance of'],
