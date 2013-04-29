@@ -223,9 +223,9 @@ DT2Transient::computeDT()
     Real new_dt = _dt_full * std::pow(_e_tol / _error, 1.0 / _problem.getNonlinearSystem().getTimeSteppingOrder());
 
     if (new_dt/_dt_full > _max_increase)
-      _dt = _dt_full*_max_increase;
+      _unconstrained_dt_old = _dt_full*_max_increase;
     else
-      _dt = new_dt;
+      _unconstrained_dt_old = new_dt;
 
     *nl_sys.current_local_solution= *_u1;
     *nl_sys.old_local_solution = *_u1;

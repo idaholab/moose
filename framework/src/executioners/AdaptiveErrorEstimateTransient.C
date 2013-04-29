@@ -159,11 +159,11 @@ AdaptiveErrorEstimateTransient::computeDT()
       Real new_dt = _dt_full * _scaling_parameter * std::pow(_infnorm * _e_tol / _error, 1.0 / 3.0);
       if (new_dt/_dt_full > _max_increase)
       {
-        _dt = _dt_full*_max_increase;
+        _unconstrained_dt_old = _dt_full*_max_increase;
       }
       else
       {
-        _dt = new_dt;
+        _unconstrained_dt_old = new_dt;
       }
 
       _dt_steps_taken =0;

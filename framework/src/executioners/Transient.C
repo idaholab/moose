@@ -87,6 +87,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _input_dt(getParam<Real>("dt")),
     _dt(_problem.dt()),
     _dt_old(_problem.dtOld()),
+    _unconstrained_dt(getParam<Real>("dt")),
+    _unconstrained_dt_old(getParam<Real>("dt")),
     _prev_dt(-1),
     _reset_dt(false),
     _end_time(getParam<Real>("end_time")),
@@ -197,7 +199,10 @@ void
 Transient::takeStep(Real input_dt)
 {
   _problem.out().setOutput(false);
+
   _dt_old = _dt;
+  _unconstrained_dt_old = _unconstrained_dt;
+
   if (input_dt == -1.0)
     _dt = computeConstrainedDT();
   else
@@ -346,7 +351,10 @@ Transient::computeConstrainedDT()
   Real dt_cur = _dt;
   //After startup steps, compute new dt
   if (_t_step > _n_startup_steps)
-    dt_cur = computeDT();
+  {
+    _unconstrained_dt = computeDT();
+    dt_cur = _unconstrained_dt;
+  }
 
   // Don't let the time step size exceed maximum time step size
   if (dt_cur > _dtmax)
@@ -415,7 +423,6 @@ Transient::computeConstrainedDT()
   }
 
   return dt_cur;
-
 }
 
 Real
@@ -438,7 +445,7 @@ Transient::computeDT()
       return _dtmin;
   }
 
-  Real dt = _dt;
+  Real dt = _unconstrained_dt_old;
   if (_use_time_ipol)
   {
     dt = _time_ipol.sample(_time);

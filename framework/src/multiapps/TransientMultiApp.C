@@ -187,7 +187,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
         if(_catch_up)
         {
           ex->allowOutput(false); // Don't output while catching up
-
+          ex->computeConstrainedDT(); // Have to call this even though we're not using the dt it computes
           ex->takeStep(dt / 2.0); // Cut the timestep in half to try two half-step solves
           ex->endStep();
 
@@ -196,6 +196,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
           ex->allowOutput(true);
 
+          ex->computeConstrainedDT();
           ex->takeStep(dt / 2.0);
           ex->endStep();
 
