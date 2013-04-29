@@ -44,7 +44,11 @@
 #include "NSPenalizedNormalFlowBC.h"
 #include "NSMomentumInviscidNoPressureImplicitFlowBC.h"
 
+//
 // Incompressible
+//
+
+// Kernels
 #include "INSMass.h"
 #include "INSMomentumTimeDerivative.h"
 #include "INSMomentum.h"
@@ -57,10 +61,18 @@
 #include "INSChorinCorrector.h"
 #include "INSChorinPressurePoisson.h"
 
+// BCs
 #include "INSMomentumNoBCBC.h"
 #include "INSTemperatureNoBCBC.h"
 
+// AuxKernels
 #include "INSCourant.h"
+
+// Postprocessors
+#include "INSExplicitTimestepSelector.h"
+
+// Executioners
+#include "INSExplicitExecutioner.h"
 
 void
 Elk::NavierStokes::registerObjects(Factory & factory)
@@ -107,7 +119,11 @@ Elk::NavierStokes::registerObjects(Factory & factory)
   registerBoundaryCondition(NSPenalizedNormalFlowBC);
   registerBoundaryCondition(NSMomentumInviscidNoPressureImplicitFlowBC);
 
+  //
   // Incompressible
+  //
+
+  // Kernels
   registerKernel(INSMass);
   registerKernel(INSMomentumTimeDerivative);
   registerKernel(INSMomentum);
@@ -120,8 +136,16 @@ Elk::NavierStokes::registerObjects(Factory & factory)
   registerKernel(INSChorinCorrector);
   registerKernel(INSChorinPressurePoisson);
 
+  // BCs
   registerBoundaryCondition(INSMomentumNoBCBC);
   registerBoundaryCondition(INSTemperatureNoBCBC);
 
+  // AuxKernels
   registerAux(INSCourant);
+
+  // Postprocessors
+  registerPostprocessor(INSExplicitTimestepSelector);
+
+  // Executioners
+  registerExecutioner(INSExplicitExecutioner);
 }
