@@ -25,6 +25,7 @@ class TestHarness:
     self.host_name = gethostname()
     self.moose_dir = os.path.abspath(moose_dir) + '/'
     self.code = '2d2d6769726c2d6d6f6465'
+    self.MAX_VALGRIND_FAILS = 5
     # Assume libmesh is a peer directory to MOOSE if not defined
     if os.environ.has_key("LIBMESH_DIR"):
       self.libmesh_dir = os.environ['LIBMESH_DIR']
@@ -71,7 +72,12 @@ class TestHarness:
               # Build the requested Tester object and run
               tester = self.factory.create(test[TYPE], test)
 
-              (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
+              # When running in valgrind mode, we end up with a ton of output for each failed
+              # test.  Therefore, we limit the number of fails...
+              if self.options.enable_valgrind and self.num_failed > self.MAX_VALGRIND_FAILS:
+                (should_run, reason) = (False, 'Max Fails Exceeded')
+              else:
+                (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
 
               if should_run:
                 command = tester.getCommand(self.options)
