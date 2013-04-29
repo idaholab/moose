@@ -61,6 +61,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<std::vector<std::string> >("hidden_variables", "A list of the variables that should NOT be output to the Exodus file.  If this is not provided then all variables will be in the output.");
   params.addParam<bool>("elemental_as_nodal", false, "Output elemental variables also as nodal");
   params.addParam<bool>("exodus_inputfile_output", true, "Determines whether or not the input file is output to exodus - default (true)");
+  params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputing only a subset of outputs when using MultiApps.");
 
   // restart options
   params.addParam<unsigned int>("num_restart_files", 0, "Number of the restart files to save (0 = no restart files)");
@@ -87,7 +88,21 @@ SetupOutputAction::setupOutputObject(Output &output, InputParameters & params)
 {
   mooseAssert(params.have_parameter<std::vector<std::string> >("output_variables"), "Output Variables are required");
 
-  output.fileBase(params.get<OutFileBase>("file_base"));
+  OutFileBase base = params.get<OutFileBase>("file_base");
+
+  if(params.isParamValid("output_if_base_contains"))
+  {
+    const std::vector<std::string> & strings = params.get<std::vector<std::string> >("output_if_base_contains");
+
+    bool found_it = false;
+    for(unsigned int i=0; i<strings.size(); i++)
+      found_it = found_it || ( base.find(strings[i]) != std::string::npos);
+
+    if(!found_it) // Didn't find a match so no output should be done
+      return;
+  }
+
+  output.fileBase(base);
 
   if (params.get<bool>("exodus"))
   {
