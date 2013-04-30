@@ -116,8 +116,12 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
   {
     Transient * ex = _transient_executioners[i];
 
+    if(ex->getTime() + 2e-14 >= target_time) // Maybe this MultiApp was already solved
+      continue;
+
     if(_sub_cycling)
     {
+      ex->allowOutput(false); // Don't Output
       ex->setTargetTime(target_time);
 
       unsigned int failures = 0;
@@ -165,7 +169,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
       }
 
       // If we were looking for a steady state, but didn't reach one, we still need to output one more time
-      if(_detect_steady_state && !at_steady)
+      if(!at_steady)
         ex->forceOutput();
     }
     else if(_tolerate_failure)
