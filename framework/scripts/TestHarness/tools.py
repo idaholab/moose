@@ -19,7 +19,8 @@ from Tester import Tester
 # New Testers can be created and automatically registered with the
 # TestHarness if you follow these two steps:
 # 1. Create a class inheriting from "Tester" or any of its descendents
-# 2. Place your new class in the "plugin" directory under your application
+# 2. Place your new class in the plugin_dir directory (see def above)
+#    under your application
 
 def runTests(argv, app_name, moose_dir):
   if '--store-timing' in argv:

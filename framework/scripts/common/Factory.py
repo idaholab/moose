@@ -1,5 +1,4 @@
 import os, sys, types
-from Tester import Tester
 
 class Factory:
   def __init__(self):

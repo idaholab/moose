@@ -14,15 +14,17 @@ from InputParameters import InputParameters
 from Factory import Factory
 from PBSJob import PBSJob
 
+# Default file to read if only a directory is supplied
+job_list = 'job_list'
+
 class ClusterLauncher:
   def __init__(self):
     self.factory = Factory()
-    self.job_list = 'job_list'
 
-  def parseJobsFile(self, template_dir):
+  def parseJobsFile(self, template_dir, job_file):
     jobs = []
     # We expect the job list to be named "job_list"
-    filename = template_dir + self.job_list
+    filename = template_dir + job_file
 
     try:
       data = ParseGetPot.readInputFile(filename)
@@ -80,7 +82,7 @@ class ClusterLauncher:
         jobs.append(params)
     return jobs
 
-  def createAndLaunchJob(self, template_dir, specs):
+  def createAndLaunchJob(self, template_dir, job_file, specs):
     if not os.path.exists(template_dir + specs['job_name']):
       # Make directory
       os.mkdir(template_dir + specs['job_name'])
@@ -93,7 +95,7 @@ class ClusterLauncher:
 
     # Copy files
     for file in os.listdir('../'):
-      if os.path.isfile('../' + file) and file != self.job_list:
+      if os.path.isfile('../' + file) and file != job_file:
         shutil.copy('../' + file, '.')
 
     # Files have been copied so turn the remaining work over to the Job instance
@@ -115,17 +117,17 @@ class ClusterLauncher:
     self.factory.printDump("Jobs")
     sys.exit(0)
 
-  def run(self, template_dir):
-    jobs = self.parseJobsFile(template_dir)
+  def run(self, template_dir, job_file):
+    jobs = self.parseJobsFile(template_dir, job_file)
 
     for job in jobs:
-      self.createAndLaunchJob(template_dir, job)
+      self.createAndLaunchJob(template_dir, job_file, job)
 
 ########################################################
 def main():
   parser = OptionParser(usage='Usage: %prog [options] <template directory>')
   parser.add_option("--dump", action="store_true", dest="dump", default=False, help="Dump the parameters for the testers in GetPot Format")
-  (options, dir) = parser.parse_args()
+  (options, location) = parser.parse_args()
 
   cluster_launcher = ClusterLauncher()
   cluster_launcher.registerJobType(PBSJob, 'PBSJob')
@@ -133,12 +135,21 @@ def main():
   if options.dump:
     cluster_launcher.printDump()
 
-  if not dir:
+  if not location:
     parser.print_help()
     sys.exit(1)
 
-  template_dir = os.path.abspath(dir[0]) + '/'
-  cluster_launcher.run(template_dir)
+  # See if the user passed a file or a directory
+  abs_location = os.path.abspath(location[0])
+
+  if os.path.isdir(abs_location):
+    dir = abs_location
+    file = job_list
+  elif os.path.isfile(abs_location):
+    (dir, file) = os.path.split(abs_location)
+  dir = dir + '/'
+
+  cluster_launcher.run(dir, file)
 
 if __name__ == '__main__':
   main()
