@@ -77,7 +77,7 @@ class ReadMemoryLog():
     for timestamp in self.memory_list:
       to = GetTime(eval(timestamp)[0])
       self.mem_list.append(eval(timestamp)[1])
-      self.sorted_list.append([str(to.day) + ' ' + str(to.monthname) + ' ' + str(to.hour) + ':' + str(to.minute) + ':' + str(to.second) + '.' + '{:06.0f}'.format(to.microsecond), eval(timestamp)[1]])
+      self.sorted_list.append([str(to.day) + ' ' + str(to.monthname) + ' ' + str(to.hour) + ':' + str(to.minute) + ':' + '{:02.0f}'.format(to.second) + '.' + '{:06.0f}'.format(to.microsecond), eval(timestamp)[1]])
     largest_memory = decimal.Decimal(max(self.mem_list))
     percentage_length = decimal.Decimal(self.getTerminalSize()[0]) - decimal.Decimal(len(str(self.sorted_list[0][0]) + ' using: ' + '{:20,.0f}'.format(self.sorted_list[0][1]) + 'K |'))
     print 'Date Stamp' + ' '*int(24) + 'Memory Usage | Percent of MAX memory used: ( ' + str('{:0,.0f}'.format(largest_memory)) + ' K )'
