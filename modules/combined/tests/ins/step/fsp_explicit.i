@@ -277,7 +277,7 @@
 []
 
 [Output]
-  file_base = step_chorin_out
+  file_base = fsp_explicit_out
   output_initial = true
   exodus = true
   perf_log = true
