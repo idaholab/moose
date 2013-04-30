@@ -17,6 +17,15 @@ from PBSJob import PBSJob
 # Default file to read if only a directory is supplied
 job_list = 'job_list'
 
+def getNextDirName(file_name, files):
+  largest_serial_num = 0
+
+  for name in files:
+    m = re.search(file_name + '_(\d{3})', name)
+    if m != None and int(m.group(1)) > largest_serial_num:
+      largest_serial_num = int(m.group(1))
+  return file_name + "_" +  str(largest_serial_num+1).zfill(3)
+
 class ClusterLauncher:
   def __init__(self):
     self.factory = Factory()
@@ -83,15 +92,11 @@ class ClusterLauncher:
     return jobs
 
   def createAndLaunchJob(self, template_dir, job_file, specs):
-    if not os.path.exists(template_dir + specs['job_name']):
-      # Make directory
-      os.mkdir(template_dir + specs['job_name'])
-    elif not specs['allow_multiple']:
-      print "Error: Job directory", template_dir + specs['job_name'], "already exists"
-      return
+    next_dir = getNextDirName(specs['job_name'], os.listdir('.'))
+    os.mkdir(template_dir + next_dir)
 
     saved_cwd = os.getcwd()
-    os.chdir(template_dir + specs['job_name'])
+    os.chdir(template_dir + next_dir)
 
     # Copy files
     for file in os.listdir('../'):
