@@ -93,6 +93,9 @@ protected:
 
   // Single Instance Variables
   Real & _real_zero;
+  MooseArray<Real> & _zero;
+  MooseArray<RealGradient> & _grad_zero;
+  MooseArray<RealTensor> & _second_zero;
 
   /**
    * Compute the value of this kernel.

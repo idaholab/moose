@@ -51,7 +51,10 @@ AuxScalarKernel::AuxScalarKernel(const std::string & name, InputParameters param
     _u(_var.sln()),
     _u_old(_var.slnOld()),
 
-    _real_zero(_subproblem._real_zero[_tid])
+    _real_zero(_subproblem._real_zero[_tid]),
+    _zero(_subproblem._zero[_tid]),
+    _grad_zero(_subproblem._grad_zero[_tid]),
+    _second_zero(_subproblem._second_zero[_tid])
 {
 }
 
