@@ -55,6 +55,7 @@ InputParameters validParams<MooseApp>()
 MooseApp::MooseApp(const std::string & name, InputParameters parameters):
     _name(name),
     _pars(parameters),
+    _output_position_set(false),
     _command_line(NULL),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
