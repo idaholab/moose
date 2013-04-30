@@ -154,11 +154,17 @@ ContactMaster::updateContactSet()
     }
     else
     {
-      if (pinfo->_distance >= 0)
+      if (_formulation == CF_PENALTY)
       {
-        //unsigned int slave_node_num = it->first;
-        //has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
-        has_penetrated[slave_node_num] = true;
+        if (pinfo->_distance >= 0)
+          has_penetrated[slave_node_num] = true;
+        else
+          has_penetrated[slave_node_num] = false;
+      }
+      else
+      {
+        if (pinfo->_distance >= 0)
+          has_penetrated[slave_node_num] = true;
       }
     }
     if (_formulation == CF_AUGMENTED_LAGRANGE && has_penetrated[slave_node_num])
