@@ -54,6 +54,7 @@ class TestHarness:
   def findAndRunTests(self):
     self.preRun()
     self.start_time = clock()
+
     for dirpath, dirnames, filenames in os.walk(os.getcwd()):
       if (self.test_match.search(dirpath)):
         for file in filenames:
@@ -537,9 +538,11 @@ class TestHarness:
 
   def preRun(self):
     if self.options.yaml:
-      self.printYaml()
+      self.factory.printYaml("Tests")
+      sys.exit(0)
     elif self.options.dump:
-      self.printDump()
+      self.factory.printDump("Tests")
+      sys.exit(0)
 
   def populateParams(self, params, test):
     # TODO: Print errors or warnings about unused parameters
@@ -550,45 +553,8 @@ class TestHarness:
     params.valid = test
     return params
 
-  def registerTester(self, type, name):
-    self.factory.register(type, name)
-
-  ### Parameter Dump ###
-  def printDump(self):
-    self.factory.printDump("Tests")
-    sys.exit(0)
-
-  def printYaml(self):
-    print "**START YAML DATA**"
-    print "- name: /Tests"
-    print "  description: !!str"
-    print "  type:"
-    print "  parameters:"
-    print "  subblocks:"
-
-    for name, tester in self.testers.iteritems():
-      print "  - name: /Tests/" + name
-      print "    description:"
-      print "    type:"
-      print "    parameters:"
-
-      params = self.factory.getValidParams(name)
-      for key in params.valid:
-        required = 'No'
-        if params.isRequired(key):
-          required = 'Yes'
-        default = ''
-        if params.isValid(key):
-          default = str(params[key])
-
-        print "    - name: " + key
-        print "      required: " + required
-        print "      default: !!str " + default
-        print "      description: |"
-        print "        " + params.getDescription(key)
-
-    print "**END YAML DATA**"
-    sys.exit(0)
+  def getFactory(self):
+    return self.factory
 
 # Notes:
 # SHOULD_CRASH returns > 0, cuz < 0 means process interrupted

@@ -1,35 +1,25 @@
 import sys, os
 
-subdirs = ['testers']
-module_path = os.path.dirname(__file__)
-for subdir in subdirs:
-  sys.path.append(module_path + '/' + subdir)
+plugin_dir = '/scripts/TestHarness/testers'
 
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
 else:
   MOOSE_DIR = os.path.abspath(module_path) + '/..'
 sys.path.append(MOOSE_DIR + '/scripts/common')
+sys.path.append(MOOSE_DIR + plugin_dir)
 
+# Import the Two Harness classes
 from TestTimer import TestTimer
 from TestHarness import TestHarness
 
-# Testers
-from RunApp import RunApp
-from Exodiff import Exodiff
-from CSVDiff import CSVDiff
-from RunException import RunException
-from CheckFiles import CheckFiles
+# Tester Base Class
+from Tester import Tester
+# New Testers can be created and automatically registered with the
+# TestHarness if you follow these two steps:
+# 1. Create a class inheriting from "Tester" or any of its descendents
+# 2. Place your new class in the "plugin" directory under your application
 
-# Basic flow of control:
-# initialize() - parse command line options, etc
-# findTests() - find test.py files and import them
-# prepareTest() - delete old output files, etc.
-# createCommand() - create the command line to run
-# run() - run the command line (since Popen spawns another process, it would be easy to run tests in parallel)
-# testOutputAndFinish() - examine the output of the test to see if it passed or failed
-
-## Called by ./run_tests in an application directory
 def runTests(argv, app_name, moose_dir):
   if '--store-timing' in argv:
     # Pass control to TestTimer class for Test Timing
@@ -37,11 +27,16 @@ def runTests(argv, app_name, moose_dir):
   else:
     harness = TestHarness(argv, app_name, moose_dir)
 
-  # Registration
-  harness.registerTester(RunApp, 'RunApp')
-  harness.registerTester(Exodiff, 'Exodiff')
-  harness.registerTester(CSVDiff, 'CSVDiff')
-  harness.registerTester(RunException, 'RunException')
-  harness.registerTester(CheckFiles, 'CheckFiles')
+  # Get a reference to the factory out of the TestHarness
+  factory = harness.getFactory()
 
+  # TODO: We need to cascade the testers so that each app can use any
+  # tester available in each parent application
+  dirs = [os.path.abspath(os.path.dirname(sys.argv[0])), MOOSE_DIR]
+
+  # Load the tester plugins into the factory reference
+  factory.loadPlugins(dirs, plugin_dir, Tester, factory)
+
+  # Finally find and run the tests
   harness.findAndRunTests()
+
