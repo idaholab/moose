@@ -170,6 +170,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
     }
     else if(_tolerate_failure)
     {
+      ex->computeConstrainedDT();
       ex->takeStep(dt);
       ex->setTime(target_time);
       ex->forceOutput();
