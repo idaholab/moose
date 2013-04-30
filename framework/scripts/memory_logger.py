@@ -75,8 +75,9 @@ class ReadMemoryLog():
     YELLOW = '\033[33m'
     last_memory = 0.0
     for timestamp in self.memory_list:
+      to = GetTime(eval(timestamp)[0])
       self.mem_list.append(eval(timestamp)[1])
-      self.sorted_list.append([time.ctime(eval(timestamp)[0]), eval(timestamp)[1]])
+      self.sorted_list.append([str(to.day) + ' ' + str(to.monthname) + ' ' + str(to.hour) + ':' + str(to.minute) + ':' + str(to.second) + '.' + '{:06.0f}'.format(to.microsecond), eval(timestamp)[1]])
     largest_memory = decimal.Decimal(max(self.mem_list))
     percentage_length = decimal.Decimal(self.getTerminalSize()[0]) - decimal.Decimal(len(str(self.sorted_list[0][0]) + ' using: ' + '{:20,.0f}'.format(self.sorted_list[0][1]) + 'K |'))
     print 'Date Stamp' + ' '*int(24) + 'Memory Usage | Percent of MAX memory used: ( ' + str('{:0,.0f}'.format(largest_memory)) + ' K )'
@@ -122,6 +123,23 @@ class ReadMemoryLog():
         cr = (25, 80)
     return int(cr[1]), int(cr[0])
 
+class GetTime():
+  def __init__(self, posix_time=None):
+    if posix_time == None:
+      self.posix_time = datetime.datetime.now()
+    else:
+      self.posix_time = datetime.datetime.fromtimestamp(posix_time)
+    self.now = float(datetime.datetime.now().strftime('%s.%f'))
+    self.microsecond = self.posix_time.microsecond
+    self.second = self.posix_time.second
+    self.minute = self.posix_time.minute
+    self.hour = self.posix_time.hour
+    self.day = self.posix_time.day
+    self.month = self.posix_time.month
+    self.year = self.posix_time.year
+    self.dayname = self.posix_time.strftime('%a')
+    self.monthname = self.posix_time.strftime('%b')
+
 class ExportMemoryUsage():
   def __init__(self, args):
     history_file = open(args.export, 'r')
@@ -135,9 +153,9 @@ class ExportMemoryUsage():
   def exportFile(self):
     output_file = open(args.export + '.comma_delimited', 'w')
     for timestamp in self.memory_list:
-      time_object = datetime.datetime.strptime(time.ctime(eval(timestamp)[0]), "%a %b %d %H:%M:%S %Y")
+      time_object = GetTime(eval(timestamp)[0])
       self.mem_list.append(eval(timestamp)[1])
-      self.sorted_list.append([str(time_object.year) + '-' + str(time_object.month) + '-' + str(time_object.day) + ' ' + str(time_object.hour) + ':' + str(time_object.minute) + ':' + str(time_object.second), eval(timestamp)[1]])
+      self.sorted_list.append([str(time_object.year) + '-' + str(time_object.month) + '-' + str(time_object.day) + ' ' + str(time_object.hour) + ':' + str(time_object.minute) + ':' + str(time_object.second) + '.' + str(time_object.microsecond), eval(timestamp)[1]])
     for item in self.sorted_list:
       output_file.write(str(item[0]) + ',' + str(item[1]) + '\n')
     output_file.close()
@@ -147,7 +165,8 @@ def writeMemoryUsage(process):
   file_object = open(process.args.outfile, 'w')
   last_memory = 0
   def _usage(last_memory):
-    current_usage = [float(time.time()), int(process.GetMemory()['TOTAL'])]
+    time_object = GetTime()
+    current_usage = [time_object.now, int(process.GetMemory()['TOTAL'])]
     if int(current_usage[1]) != int(last_memory):
       last_memory = int(current_usage[1])
       file_object.write(str(current_usage) + '\n')
@@ -155,7 +174,8 @@ def writeMemoryUsage(process):
     return int(last_memory)
   def _zero():
     try:
-      current_usage = [float(time.time()), 0]
+      time_object = GetTime()
+      current_usage = [time_object.now, 0]
       file_object.write(str(current_usage) + '\n')
       file_object.close()
     except:
