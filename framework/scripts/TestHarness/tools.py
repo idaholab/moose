@@ -2,6 +2,7 @@ import sys, os
 
 plugin_dir = '/scripts/TestHarness/testers'
 
+module_path = os.path.dirname(__file__)
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
 else:
