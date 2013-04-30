@@ -5,13 +5,14 @@
 
 import sys, os, re, subprocess
 from tempfile import TemporaryFile
+from optparse import OptionParser, OptionGroup, Values
 
 ##################################################################
 # Modify the following variable for your cluster
 node_name_pattern = re.compile("(fission-\d{4})")
 ##################################################################
 
-def generateTraces(job_num, application_name):
+def generateTraces(job_num, application_name, num_hosts):
   command = "qstat -n " + job_num
 
   p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
@@ -28,9 +29,15 @@ def generateTraces(job_num, application_name):
     hosts.append(i)
 
   # Launch all the jobs
-  for host in hosts:
+  if num_hosts == 0:
+    num_hosts = len(hosts)
+
+  for i in range(len(hosts)):
+    if i >= num_hosts:
+      continue
+
     #command = "ssh " + host + " \"ps -e | grep " + application_name + " | awk '{print \$1}' | xargs -I {} gdb --batch --pid={} -ex bt 2>&1 | grep '^#' \""
-    command = "ssh " + host + " \"ps -e | grep " + application_name + " | awk '{print \$1}' | xargs -I '{}' sh -c 'echo Host: " + host + " PID: {}; pstack {}; printf '*%.0s' {1..80}; echo' \""
+    command = "ssh " + hosts[i] + " \"ps -e | grep " + application_name + " | awk '{print \$1}' | xargs -I '{}' sh -c 'echo Host: " + hosts[i] + " PID: {}; pstack {}; printf '*%.0s' {1..80}; echo' \""
     f = TemporaryFile()
     p = subprocess.Popen(command, stdout=f, close_fds=False, shell=True)
     jobs.append((p, f))
@@ -123,24 +130,29 @@ def compareTraces(trace1, trace2):
   return True
 
 def main():
-  if len(sys.argv) < 3 or len(sys.argv) > 4:
-    print "Usage: " + sys.argv[0] + " <PBS Job num> <Application> [num frames to keep]"
+  parser = OptionParser(usage='Usage: %prog [options] <PBS Job num> <Application>')
+  parser.add_option('-s', '--stacks', action='store', dest='stacks', type='int', default=0, help="The number of stack frames to keep and compare for uniqueness (Default: ALL)")
+  parser.add_option('-n', '--hosts', action='store', dest='hosts', type='int', default=0, help="The number of hosts to visit (Default: ALL)")
+  parser.add_option('-f', '--force', action='store_true', dest='force', default=False, help="Whether or not to force a regen if a cache file exists")
+  (options, args) = parser.parse_args()
+
+  if len(args) != 2:
+    parser.print_help()
     sys.exit(1)
 
   # The PBS job number and the application should be passed on the command line
   # Additionally, an optional argument of the number of frames to keep (compare) may be passed
-  job_num = sys.argv[1]
-  application = sys.argv[2]
-  num_to_keep = 0
-  if len(sys.argv) == 4:
-    num_to_keep = int(sys.argv[3])
+  job_num = args[0]
+  application = args[1]
+  num_to_keep = options.stacks
+  num_hosts = options.hosts
 
   # first see if there is a cache file available
   cache_filename = application + '.' + job_num + '.cache'
 
   traces = []
-  if not os.path.exists(cache_filename):
-    traces = generateTraces(job_num, application)
+  if not os.path.exists(cache_filename) or options.force:
+    traces = generateTraces(job_num, application, options.hosts)
 
     # Cache the restuls to a file
     cache_file = open(cache_filename, 'w')
