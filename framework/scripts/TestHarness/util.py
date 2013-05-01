@@ -51,7 +51,7 @@ def printResult(test_name, result, timing, start, end, options, color=True):
       any_match = True
       f_result += colorText(m.group(1), options, 'CYAN') + " "
     # Color Exodiff or CVSdiff tests YELLOW
-    m = re.search('(FAILED \((?:EXODIFF|CVSDIFF)\))', result)
+    m = re.search('(FAILED \((?:EXODIFF|CSVDIFF)\))', result)
     if m:
       any_match = True
       f_result += colorText(m.group(1), options, 'YELLOW')

@@ -327,6 +327,7 @@ class TestHarness:
       self.num_failed += 1
 
     if self.options.verbose or ('FAILED' in result and not self.options.quiet):
+      output = output.replace('\r', '\n')  # replace the carriage returns with newlines
       lines = output.split('\n');
       color = ''
       if 'EXODIFF' in result or 'CSVDIFF' in result:
