@@ -84,6 +84,11 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+
+  [./div_u_star]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 
@@ -163,6 +168,19 @@
 []
 
 
+[AuxKernels]
+  [./div_u_star_aux]
+    type = INSDivergenceAux
+    variable = div_u_star
+    u = u_star
+    v = v_star
+  [../]
+[]
+
+
+
+
+
 
 [BCs]
   [./u_no_slip]
@@ -208,7 +226,14 @@
     value = 0.0
   [../]
 
-  # dp/dn=0 on solid walls.
+  # dp/dn=0 on solid walls in the classical Chorin method.
+  # We seem to get better results using dp/dn "implicit" on solid walls.
+  [./pressure_implicit]
+    type = ImplicitNeumannBC
+    variable = p
+    boundary = 'left bottom top fins fins_vertical'
+  [../]
+
 
   # On the outlet, A Dirichlet value for pressure is specified.
   [./pressure_outlet]
