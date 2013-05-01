@@ -64,6 +64,7 @@
 // BCs
 #include "INSMomentumNoBCBC.h"
 #include "INSTemperatureNoBCBC.h"
+#include "ImplicitNeumannBC.h"
 
 // AuxKernels
 #include "INSCourant.h"
@@ -140,6 +141,7 @@ Elk::NavierStokes::registerObjects(Factory & factory)
   // BCs
   registerBoundaryCondition(INSMomentumNoBCBC);
   registerBoundaryCondition(INSTemperatureNoBCBC);
+  registerBoundaryCondition(ImplicitNeumannBC);
 
   // AuxKernels
   registerAux(INSCourant);
