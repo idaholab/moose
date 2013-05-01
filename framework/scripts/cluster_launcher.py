@@ -104,6 +104,8 @@ class ClusterLauncher:
         shutil.copy('../' + file, '.')
 
     # Files have been copied so turn the remaining work over to the Job instance
+    # To keep everything consistent we'll also append our serial number to our job name
+    specs['job_name'] = next_dir
     job_instance = self.factory.create(specs['type'], specs)
 
     # Prepare the Job Script
