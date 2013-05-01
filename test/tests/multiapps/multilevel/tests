@@ -8,6 +8,7 @@
     type = 'Exodiff'
     input = 'time_dt_from_master_master.i'
     exodiff = 'time_dt_from_master_master_out.e time_dt_from_master_master_out_sub0.e time_dt_from_master_master_out_sub0_sub0.e time_dt_from_master_master_out_sub0_sub1.e time_dt_from_master_master_out_sub1.e time_dt_from_master_master_out_sub1_sub0.e time_dt_from_master_master_out_sub1_sub1.e'
+    abs_zero = 5e-7
   [../]
   [./dt_from_sub]
     type = 'Exodiff'
