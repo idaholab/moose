@@ -1,8 +1,0 @@
-[Tests]
-  [./step_chorin]
-    type = 'Exodiff'
-    input = 'step_chorin.i'
-    exodiff = 'step_chorin_out.e'
-    skip = 'under development'
-  [../]
-[]
