@@ -49,7 +49,7 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     _max_failures(getParam<unsigned int>("max_failures")),
     _tolerate_failure(getParam<bool>("tolerate_failure")),
     _failures(0),
-    _catch_up(false)
+    _catch_up(getParam<bool>("catch_up"))
 {
   if(!_has_an_app)
     return;
@@ -182,6 +182,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
     }
     else
     {
+      std::cout<<"Solving Normal Step!"<<std::endl;
+
       ex->takeStep(dt);
       ex->endStep();
 
@@ -191,6 +193,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
         if(_catch_up)
         {
+          std::cout<<"Starting Catch Up!"<<std::endl;
           ex->allowOutput(false); // Don't output while catching up
           ex->computeConstrainedDT(); // Have to call this even though we're not using the dt it computes
           ex->takeStep(dt / 2.0); // Cut the timestep in half to try two half-step solves
@@ -201,6 +204,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
           ex->allowOutput(true);
 
+          std::cout<<"Solving Second Catch Up!"<<std::endl;
           ex->computeConstrainedDT();
           ex->takeStep(dt / 2.0);
           ex->endStep();

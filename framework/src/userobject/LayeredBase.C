@@ -79,17 +79,15 @@ LayeredBase::integralValue(Point p) const
   if(higher_layer == -1) // Didn't find a higher layer
     return _layer_values[lower_layer];
 
+  if(lower_layer == -1) // Didn't find a lower layer
+    return _layer_values[higher_layer];
+
   if (!_interpolate) // constant within a layer
   {
-
     if (higher_layer == layer) // constant in a layer
       return _layer_values[higher_layer];
 
-    if(lower_layer == -1) // Didn't find a lower layer
-      return _layer_values[higher_layer];
-
     return (_layer_values[higher_layer] + _layer_values[lower_layer]) / 2;
-
   }
 
   // Interpolate values
