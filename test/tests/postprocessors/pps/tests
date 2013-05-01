@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'nodal_max_value_test.i'
     exodiff = 'out_nodal_max.e'
-    max_parallel = 11
+    abs_zero = 1e-8
   [../]
 
   [./test_side_multi_bnd]
