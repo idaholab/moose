@@ -67,6 +67,7 @@
 
 // AuxKernels
 #include "INSCourant.h"
+#include "INSDivergenceAux.h"
 
 // Postprocessors
 #include "INSExplicitTimestepSelector.h"
@@ -142,6 +143,7 @@ Elk::NavierStokes::registerObjects(Factory & factory)
 
   // AuxKernels
   registerAux(INSCourant);
+  registerAux(INSDivergenceAux);
 
   // Postprocessors
   registerPostprocessor(INSExplicitTimestepSelector);

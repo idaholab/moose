@@ -79,6 +79,14 @@
 []
 
 
+[AuxVariables]
+  [./div_u]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+
 
 [Functions]
   # Note1: if you change the height of the domain or translate it
@@ -142,6 +150,17 @@
   [../]
 []
 
+
+
+
+[AuxKernels]
+  [./div_u_aux]
+    type = INSDivergenceAux
+    variable = div_u
+    u = u
+    v = v
+  [../]
+[]
 
 
 
