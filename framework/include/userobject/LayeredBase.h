@@ -89,8 +89,8 @@ protected:
   /// Number of layers to split the mesh into
   unsigned int _num_layers;
 
-  /// Whether to interpolate between layers
-  const bool _interpolate;
+  /// How to sample the values
+  unsigned int _sample_type;
 
   Real _direction_min;
   Real _direction_max;

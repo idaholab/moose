@@ -25,7 +25,9 @@ InputParameters validParams<LayeredBase>()
 
   params.addRequiredParam<MooseEnum>("direction", directions, "The direction of the layers.");
   params.addRequiredParam<unsigned int>("num_layers", "The number of layers.");
-  params.addParam<bool>("interpolate", false, "Whether to interpolate (true) between layers or to use constant values (false).");
+
+  MooseEnum sample_options("direct, interpolate, average", "direct");
+  params.addParam<MooseEnum>("sample_type", sample_options, "How to sample the layers.  'direct' means get the value of the layer the point falls in directly (or average if that layer has no value).  'interpolate' does a linear interpolation between the two closest layers.  'average' averages the two closest layers.");
 
   return params;
 }
@@ -36,7 +38,7 @@ LayeredBase::LayeredBase(const std::string & name, InputParameters parameters) :
     _direction_enum(parameters.get<MooseEnum>("direction")),
     _direction(_direction_enum),
     _num_layers(parameters.get<unsigned int>("num_layers")),
-    _interpolate(parameters.get<bool>("interpolate")),
+    _sample_type(parameters.get<MooseEnum>("sample_type")),
     _layered_base_subproblem(*parameters.get<SubProblem *>("_subproblem"))
 {
   MeshTools::BoundingBox bounding_box = MeshTools::bounding_box(_layered_base_subproblem.mesh());
@@ -76,36 +78,54 @@ LayeredBase::integralValue(Point p) const
   if(higher_layer == -1 && lower_layer == -1)
     return 0; // TODO: We could error here but there are startup dependency problems
 
-  if(higher_layer == -1) // Didn't find a higher layer
-    return _layer_values[lower_layer];
-
-  if(lower_layer == -1) // Didn't find a lower layer
-    return _layer_values[higher_layer];
-
-  if (!_interpolate) // constant within a layer
+  switch(_sample_type)
   {
-    if (higher_layer == layer) // constant in a layer
-      return _layer_values[higher_layer];
+    case 0: //direct
+    {
+      if(higher_layer == -1) // Didn't find a higher layer
+        return _layer_values[lower_layer];
 
-    return (_layer_values[higher_layer] + _layer_values[lower_layer]) / 2;
+      if (higher_layer == layer) // constant in a layer
+        return _layer_values[higher_layer];
+
+      if(lower_layer == -1) // Didn't find a lower layer
+        return _layer_values[higher_layer];
+
+      return (_layer_values[higher_layer] + _layer_values[lower_layer]) / 2;
+    }
+    case 1: // interpolate
+    {
+      if(higher_layer == -1) // Didn't find a higher layer
+        return _layer_values[lower_layer];
+
+      Real layer_length = (_direction_max-_direction_min)/_num_layers;
+      Real lower_coor = _direction_min;
+      Real lower_value = 0;
+      if (lower_layer != -1)
+      {
+        lower_coor += (lower_layer+1) * layer_length;
+        lower_value = _layer_values[lower_layer];
+      }
+
+      // Interpolate between the two points
+      Real higher_value = _layer_values[higher_layer];
+
+      // Linear interpolation
+      return lower_value + (higher_value - lower_value) * ( p(_direction) - lower_coor ) / layer_length;
+    }
+    case 2: // average
+    {
+      if(higher_layer == -1) // Didn't find a higher layer
+        return _layer_values[lower_layer];
+
+      if(lower_layer == -1) // Didn't find a lower layer
+        return _layer_values[higher_layer];
+
+      return (_layer_values[higher_layer] + _layer_values[lower_layer]) / 2;
+    }
+    default:
+      mooseError("Unknown sample type!");
   }
-
-  // Interpolate values
-
-  Real layer_length = (_direction_max-_direction_min)/_num_layers;
-  Real lower_coor = _direction_min;
-  Real lower_value = 0;
-  if (lower_layer != -1)
-  {
-    lower_coor += (lower_layer+1) * layer_length;
-    lower_value = _layer_values[lower_layer];
-  }
-
-  // Interpolate between the two points
-  Real higher_value = _layer_values[higher_layer];
-
-  // Linear interpolation
-  return lower_value + (higher_value - lower_value) * ( p(_direction) - lower_coor ) / layer_length;
 }
 
 
