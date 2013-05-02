@@ -92,6 +92,9 @@ protected:
   /// How to sample the values
   unsigned int _sample_type;
 
+  /// How many layers both above and below the found layer will be used in the average
+  unsigned int _average_radius;
+
   Real _direction_min;
   Real _direction_max;
 
