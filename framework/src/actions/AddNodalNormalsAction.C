@@ -42,12 +42,10 @@ AddNodalNormalsAction::~AddNodalNormalsAction()
 void
 AddNodalNormalsAction::act()
 {
-  AuxiliarySystem & aux_sys = _problem->getAuxiliarySystem();
-
   // add 3 aux variables for each component of the normal
-  aux_sys.addVariable("nodal_normal_x", FEType(FIRST, LAGRANGE), 1.);
-  aux_sys.addVariable("nodal_normal_y", FEType(FIRST, LAGRANGE), 1.);
-  aux_sys.addVariable("nodal_normal_z", FEType(FIRST, LAGRANGE), 1.);
+  _problem->addAuxVariable("nodal_normal_x", FEType(FIRST, LAGRANGE));
+  _problem->addAuxVariable("nodal_normal_y", FEType(FIRST, LAGRANGE));
+  _problem->addAuxVariable("nodal_normal_z", FEType(FIRST, LAGRANGE));
 
   MooseEnum execute_options(SetupInterface::getExecuteOptions());
   execute_options = "timestep_begin";
