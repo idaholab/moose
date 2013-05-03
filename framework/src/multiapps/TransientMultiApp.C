@@ -36,6 +36,7 @@ InputParameters validParams<TransientMultiApp>()
 
   params.addParam<bool>("catch_up", false, "If true this will allow failed solves to attempt to 'catch up' using smaller timesteps.");
 
+  params.addParam<Real>("max_catch_up_steps", 2, "Maximum number of steps to allow an app to take when trying to catch back up after a failed solve.");
 
   return params;
 }
@@ -49,7 +50,8 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     _max_failures(getParam<unsigned int>("max_failures")),
     _tolerate_failure(getParam<bool>("tolerate_failure")),
     _failures(0),
-    _catch_up(getParam<bool>("catch_up"))
+    _catch_up(getParam<bool>("catch_up")),
+    _max_catch_up_steps(getParam<Real>("max_catch_up_steps"))
 {
   if(!_has_an_app)
     return;
@@ -194,23 +196,42 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
         if(_catch_up)
         {
           std::cout<<"Starting Catch Up!"<<std::endl;
-          ex->allowOutput(false); // Don't output while catching up
-          ex->computeConstrainedDT(); // Have to call this even though we're not using the dt it computes
-          ex->takeStep(dt / 2.0); // Cut the timestep in half to try two half-step solves
-          ex->endStep();
 
-          if(!ex->lastSolveConverged())
-            mooseError(_name<<_first_local_app+i<<" failed to converge during first catch up!"<<std::endl);
+          bool caught_up = false;
+
+          unsigned int catch_up_step = 0;
+
+          Real catch_up_dt = dt/2;
+
+          ex->allowOutput(false); // Don't output while catching up
+
+          while(!caught_up && catch_up_step < _max_catch_up_steps)
+          {
+            std::cerr<<"Solving " << _name << "catch up step " << catch_up_step <<std::endl;
+
+            ex->computeConstrainedDT(); // Have to call this even though we're not using the dt it computes
+            ex->takeStep(catch_up_dt); // Cut the timestep in half to try two half-step solves
+
+            if(ex->lastSolveConverged())
+            {
+              if(ex->getTime() + 2e-14 >= target_time)
+              {
+                ex->forceOutput(); // This is here so that it is called before endStep()
+                caught_up = true;
+              }
+            }
+            else
+              catch_up_dt /= 2.0;
+
+            ex->endStep(); // This is here so it is called after forceOutput()
+
+            catch_up_step++;
+          }
+
+          if(!caught_up)
+            mooseError(_name << " Failed to catch up!" << std::endl);
 
           ex->allowOutput(true);
-
-          std::cout<<"Solving Second Catch Up!"<<std::endl;
-          ex->computeConstrainedDT();
-          ex->takeStep(dt / 2.0);
-          ex->endStep();
-
-          if(!ex->lastSolveConverged())
-            mooseError(_name<<_first_local_app+i<<" failed to converge during second catch up!"<<std::endl);
         }
       }
     }

@@ -59,6 +59,7 @@ private:
   unsigned int _failures;
 
   bool _catch_up;
+  Real _max_catch_up_steps;
 };
 
 #endif // TRANSIENTMULTIAPP_H
