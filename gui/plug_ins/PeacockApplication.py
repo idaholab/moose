@@ -41,14 +41,22 @@ class PeacockApplication(object):
 
     # Variables
     variable_names = tree_widget.getChildNamesOfPath('Variables')
-    if len(variable_names):
-      type_options['std::vector<NonlinearVariableName, std::allocator<NonlinearVariableName> >'] = set(variable_names)
-      type_options['std::vector<NonlinearVariableName>'] = set(variable_names)
-      type_options['NonlinearVariableName'] = set(variable_names)
+    type_options['std::vector<NonlinearVariableName, std::allocator<NonlinearVariableName> >'] = set()
+    type_options['std::vector<NonlinearVariableName>'] = set()
+    type_options['NonlinearVariableName'] = set()
 
-      type_options['std::vector<VariableName, std::allocator<VariableName> >'] = set(variable_names)
-      type_options['std::vector<VariableName>'] = set(variable_names)
-      type_options['VariableName'] = set(variable_names)
+    type_options['std::vector<VariableName, std::allocator<VariableName> >'] = set()
+    type_options['std::vector<VariableName>'] = set()
+    type_options['VariableName'] = set()
+
+    if len(variable_names):
+      type_options['std::vector<NonlinearVariableName, std::allocator<NonlinearVariableName> >'] |= set(variable_names)
+      type_options['std::vector<NonlinearVariableName>'] |= set(variable_names)
+      type_options['NonlinearVariableName'] |= set(variable_names)
+
+      type_options['std::vector<VariableName, std::allocator<VariableName> >'] |= set(variable_names)
+      type_options['std::vector<VariableName>'] |= set(variable_names)
+      type_options['VariableName'] |= set(variable_names)
 
     # Aux Vars
     aux_variable_names = tree_widget.getChildNamesOfPath('AuxVariables')
