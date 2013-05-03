@@ -10,12 +10,16 @@ InputParameters validParams<INSChorinPredictor>()
   params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D
   params.addCoupledVar("w", "z-velocity"); // only required in 3D
 
+  // Make star also be required, even though we might not use it?
+  params.addRequiredCoupledVar("u_star", "star x-velocity");
+  params.addCoupledVar("v_star", "star y-velocity"); // only required in 2D and 3D
+  params.addCoupledVar("w_star", "star z-velocity"); // only required in 3D
+
   // Required parameters
   params.addRequiredParam<Real>("mu", "dynamic viscosity");
   params.addRequiredParam<Real>("rho", "density");
   params.addRequiredParam<unsigned>("component", "0,1,2 depending on if we are solving the x,y,z component of the Predictor equation");
-  params.addRequiredParam<bool>("chorin_implicit", "Flag which controls the time level the convection and diffusion terms are evaluated at.");
-
+  params.addRequiredParam<std::string>("predictor_type", "One of: OLD, NEW, STAR.  Indicates which velocity to use in the predictor.");
   return params;
 }
 
@@ -34,26 +38,42 @@ INSChorinPredictor::INSChorinPredictor(const std::string & name, InputParameters
   _v_vel_old(_dim >= 2 ? coupledValueOld("v") : _zero),
   _w_vel_old(_dim == 3 ? coupledValueOld("w") : _zero),
 
-  // Current Gradients
+  // Star velocities
+  _u_vel_star(coupledValue("u_star")),
+  _v_vel_star(_dim >= 2 ? coupledValue("v_star") : _zero),
+  _w_vel_star(_dim == 3 ? coupledValue("w_star") : _zero),
+
+  // Velocity Gradients
   _grad_u_vel(coupledGradient("u")),
   _grad_v_vel(_dim >= 2 ? coupledGradient("v") : _grad_zero),
   _grad_w_vel(_dim == 3 ? coupledGradient("w") : _grad_zero),
 
-  // Old Gradients
+  // Old Velocity Gradients
   _grad_u_vel_old(coupledGradientOld("u")),
   _grad_v_vel_old(_dim >= 2 ? coupledGradientOld("v") : _grad_zero),
   _grad_w_vel_old(_dim == 3 ? coupledGradientOld("w") : _grad_zero),
+
+  // Star Velocity Gradients
+  _grad_u_vel_star(coupledGradient("u_star")),
+  _grad_v_vel_star(_dim >= 2 ? coupledGradient("v_star") : _grad_zero),
+  _grad_w_vel_star(_dim == 3 ? coupledGradient("w_star") : _grad_zero),
 
   // Variable numberings
   _u_vel_var_number(coupled("u")),
   _v_vel_var_number(_dim >= 2 ? coupled("v") : libMesh::invalid_uint),
   _w_vel_var_number(_dim == 3 ? coupled("w") : libMesh::invalid_uint),
 
+  // Star velocity numberings
+  _u_vel_star_var_number(coupled("u_star")),
+  _v_vel_star_var_number(_dim >= 2 ? coupled("v_star") : libMesh::invalid_uint),
+  _w_vel_star_var_number(_dim == 3 ? coupled("w_star") : libMesh::invalid_uint),
+
   // Required parameters
   _mu(getParam<Real>("mu")),
   _rho(getParam<Real>("rho")),
   _component(getParam<unsigned>("component")),
-  _chorin_implicit(getParam<bool>("chorin_implicit"))
+  _predictor_type(getParam<std::string>("predictor_type")),
+  _predictor_enum("OLD, NEW, STAR, INVALID", _predictor_type)
 {
 }
 
@@ -61,22 +81,6 @@ INSChorinPredictor::INSChorinPredictor(const std::string & name, InputParameters
 
 Real INSChorinPredictor::computeQpResidual()
 {
-  // Vector object for U_old
-  RealVectorValue U_old(_u_vel_old[_qp], _v_vel_old[_qp], _w_vel_old[_qp]);
-
-  // Vector object for U
-  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-
-  // Tensor object for "grad U" = d(u_i)/d(x_j)
-  RealTensorValue grad_U(_grad_u_vel[_qp],
-                         _grad_v_vel[_qp],
-                         _grad_w_vel[_qp]);
-
-  // Tensor object for "grad U_old"
-  RealTensorValue grad_U_old(_grad_u_vel_old[_qp],
-                             _grad_v_vel_old[_qp],
-                             _grad_w_vel_old[_qp]);
-
   // Vector object for test function
   RealVectorValue test;
   test(_component) = _test[_i][_qp];
@@ -86,19 +90,50 @@ Real INSChorinPredictor::computeQpResidual()
   for (unsigned k=0; k<3; ++k)
     grad_test(_component, k) = _grad_test[_i][_qp](k);
 
+  // Decide what velocity vector, gradient to use:
+  RealVectorValue U;
+  RealTensorValue grad_U;
+
+  switch (_predictor_enum)
+  {
+  case OLD:
+  {
+    U = RealVectorValue(_u_vel_old[_qp], _v_vel_old[_qp], _w_vel_old[_qp]);
+    grad_U = RealTensorValue(_grad_u_vel_old[_qp], _grad_v_vel_old[_qp], _grad_w_vel_old[_qp]);
+    break;
+  }
+  case NEW:
+  {
+    U = RealVectorValue(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+    grad_U = RealTensorValue(_grad_u_vel[_qp], _grad_v_vel[_qp], _grad_w_vel[_qp]);
+    break;
+  }
+  case STAR:
+  {
+    // Note: Donea and Huerta's book says you are supposed to use "star" velocity to make Chorin implicit, not U^{n+1}.
+    U = RealVectorValue(_u_vel_star[_qp], _v_vel_star[_qp], _w_vel_star[_qp]);
+    grad_U = RealTensorValue(_grad_u_vel_star[_qp], _grad_v_vel_star[_qp], _grad_w_vel_star[_qp]);
+    break;
+  }
+  default:
+    mooseError("Unrecognized Chorin predictor type requested.");
+  }
+
+
   //
   // Compute the different parts
   //
 
-  // Note: _u is the component'th entry of "u_star" in Chorin's method
+  // Note: _u is the component'th entry of "u_star" in Chorin's method.
+  RealVectorValue U_old(_u_vel_old[_qp], _v_vel_old[_qp], _w_vel_old[_qp]);
   Real symmetric_part = (_u[_qp] - U_old(_component)) * _test[_i][_qp];
 
-  // Convective part - may be evaluated at old or new time.  Remember to multiply by _dt!
-  Real convective_part = _chorin_implicit ? (_dt * (grad_U * U) * test) : (_dt * (grad_U_old * U_old) * test);
+  // Convective part.  Remember to multiply by _dt!
+  Real convective_part = _dt * (grad_U * U) * test;
 
-  // Viscous part - we are using the Laplacian form here for simplicity... this
-  // can also be evaluated at old or new time.  Remember to multiply by _dt!
-  Real viscous_part = _chorin_implicit ? (_dt * (_mu/_rho) * grad_U.contract(grad_test)) : (_dt * (_mu/_rho) * grad_U_old.contract(grad_test));
+  // Viscous part - we are using the Laplacian form here for simplicity.
+  // Remember to multiply by _dt!
+  Real viscous_part = _dt * (_mu/_rho) * grad_U.contract(grad_test);
 
   return symmetric_part + convective_part + viscous_part;
 }
@@ -108,8 +143,30 @@ Real INSChorinPredictor::computeQpResidual()
 
 Real INSChorinPredictor::computeQpJacobian()
 {
-  // The on-diagonal Jacobian contribution is just the mass matrix entry.
-  return _phi[_j][_qp] * _test[_i][_qp];
+  // The mass matrix part is always there.
+  Real mass_part = _phi[_j][_qp] * _test[_i][_qp];
+
+  // The on-diagonal Jacobian contribution depends on whether the predictor uses the
+  // 'new' or 'star' velocity.
+  Real other_part = 0.;
+  switch (_predictor_enum)
+  {
+  case OLD:
+  case NEW:
+    break;
+  case STAR:
+  {
+    RealVectorValue U_star(_u_vel_star[_qp], _v_vel_star[_qp], _w_vel_star[_qp]);
+    Real convective_part = _dt * ((U_star*_grad_phi[_j][_qp]) + _phi[_j][_qp]*_grad_u[_qp](_component)) * _test[_i][_qp];
+    Real viscous_part = _dt * ((_mu/_rho) * (_grad_phi[_j][_qp] * _grad_test[_i][_qp]));
+    other_part = convective_part + viscous_part;
+    break;
+  }
+  default:
+    mooseError("Unrecognized Chorin predictor type requested.");
+  }
+
+  return mass_part + other_part;
 }
 
 
@@ -117,8 +174,14 @@ Real INSChorinPredictor::computeQpJacobian()
 
 Real INSChorinPredictor::computeQpOffDiagJacobian(unsigned jvar)
 {
-  // Implicit case
-  if (_chorin_implicit)
+  switch (_predictor_enum)
+  {
+  case OLD:
+  {
+    return 0.;
+  }
+
+  case NEW:
   {
     if ((jvar == _u_vel_var_number) || (jvar == _v_vel_var_number) || (jvar == _w_vel_var_number))
     {
@@ -176,12 +239,28 @@ Real INSChorinPredictor::computeQpOffDiagJacobian(unsigned jvar)
       return 0;
   }
 
-
-  // Explicit case
-  else
+  case STAR:
   {
-    // If we're using "old" values on the right hand side, the off-diagonal
-    // Jacobians are zero.
-    return 0;
+    if (jvar == _u_vel_star_var_number)
+    {
+      return _dt * _phi[_j][_qp] * _grad_u[_qp](0) * _test[_i][_qp];
+    }
+
+    else if (jvar == _v_vel_star_var_number)
+    {
+      return _dt * _phi[_j][_qp] * _grad_u[_qp](1) * _test[_i][_qp];
+    }
+
+    else if (jvar == _w_vel_star_var_number)
+    {
+      return _dt * _phi[_j][_qp] * _grad_u[_qp](2) * _test[_i][_qp];
+    }
+
+    else
+      return 0;
+  }
+
+  default:
+    mooseError("Unrecognized Chorin predictor type requested.");
   }
 }
