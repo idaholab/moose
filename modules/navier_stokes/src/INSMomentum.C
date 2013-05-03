@@ -116,7 +116,7 @@ Real INSMomentum::computeQpJacobian()
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // Convective part
-  Real convective_part = _rho * ((U*_grad_phi[_j][_qp]) + _phi[_j][_qp]*_grad_u[_qp](_component));
+  Real convective_part = _rho * ((U*_grad_phi[_j][_qp]) + _phi[_j][_qp]*_grad_u[_qp](_component)) * _test[_i][_qp];
 
   // Viscous part, Stokes/Laplacian version
   // Real viscous_part = _mu * (_grad_phi[_j][_qp] * _grad_test[_i][_qp]);
