@@ -100,8 +100,10 @@
     variable = u_star
     u = u
     v = v
+    u_star = u_star
+    v_star = v_star
     component = 0
-    chorin_implicit = true
+    predictor_type = 'new'
   [../]
 
   [./y_chorin_predictor]
@@ -109,8 +111,10 @@
     variable = v_star
     u = u
     v = v
+    u_star = u_star
+    v_star = v_star
     component = 1
-    chorin_implicit = true
+    predictor_type = 'new'
   [../]
 
   [./x_chorin_corrector]
