@@ -9,7 +9,6 @@ InputParameters validParams<INSTemperature>()
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D
   params.addCoupledVar("w", "z-velocity"); // only required in 3D
-  params.addRequiredCoupledVar("p", "pressure");
 
   // Required parameters
   params.addRequiredParam<Real>("rho", "density");
@@ -33,7 +32,6 @@ INSTemperature::INSTemperature(const std::string & name, InputParameters paramet
   _u_vel_var_number(coupled("u")),
   _v_vel_var_number(_dim >= 2 ? coupled("v") : libMesh::invalid_uint),
   _w_vel_var_number(_dim == 3 ? coupled("w") : libMesh::invalid_uint),
-  _p_var_number(coupled("p")),
 
   // Required parameters
   _rho(getParam<Real>("rho")),
