@@ -202,6 +202,7 @@
 
 // MultiApps
 #include "TransientMultiApp.h"
+#include "FullSolveMultiApp.h"
 
 // Transfers
 #ifdef LIBMESH_HAVE_DTK
@@ -456,6 +457,7 @@ registerObjects(Factory & factory)
 
   // MultiApps
   registerMultiApp(TransientMultiApp);
+  registerMultiApp(FullSolveMultiApp);
 
   // Transfers
 #ifdef LIBMESH_HAVE_DTK

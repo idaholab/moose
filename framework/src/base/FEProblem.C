@@ -2788,9 +2788,8 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
   _nl.zeroVariablesForJacobian();
   _aux.zeroVariablesForJacobian();
 
-  execTransfers(EXEC_INITIAL);
-
-  execMultiApps(EXEC_INITIAL);
+  execTransfers(EXEC_JACOBIAN);
+  execMultiApps(EXEC_JACOBIAN);
 
   computeUserObjects(EXEC_JACOBIAN);
 

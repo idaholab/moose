@@ -11,55 +11,42 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef TRANSIENTMULTIAPP_H
-#define TRANSIENTMULTIAPP_H
+#ifndef FULLSOLVEMULTIAPP_H
+#define FULLSOLVEMULTIAPP_H
 
 #include "MultiApp.h"
 #include "MooseApp.h"
 #include "Transient.h"
 #include "TransientInterface.h"
 
-class TransientMultiApp;
+class FullSolveMultiApp;
 
 template<>
-InputParameters validParams<TransientMultiApp>();
+InputParameters validParams<FullSolveMultiApp>();
 
 /**
- * MultiApp Implementation for Transient Apps.
- * In particular, this is important because TransientMultiApps
- * will be taken into account in the time step selection process.
+ * This type of MultiApp will completely solve itself the first time it is asked to take a step.
+ *
+ * Each "step" after that it will do nothing.
  */
-class TransientMultiApp :
+class FullSolveMultiApp :
   public MultiApp
 {
 public:
-  TransientMultiApp(const std::string & name, InputParameters parameters);
+  FullSolveMultiApp(const std::string & name, InputParameters parameters);
 
-  virtual ~TransientMultiApp();
-
-  /**
-   * Advance all of the apps one timestep.
-   */
-  void solveStep(Real dt, Real target_time);
+  virtual ~FullSolveMultiApp();
 
   /**
-   * Finds the smallest dt from among any of the apps.
+   * Completely solve all of the Apps
    */
-  Real computeDT();
+  virtual void solveStep(Real dt, Real target_time);
 
 private:
-  std::vector<Transient *> _transient_executioners;
+  std::vector<Executioner *> _executioners;
 
-  bool _sub_cycling;
-  bool _detect_steady_state;
-  Real _steady_state_tol;
-  unsigned int _max_failures;
-  bool _tolerate_failure;
-
-  unsigned int _failures;
-
-  bool _catch_up;
-  Real _max_catch_up_steps;
+  /// Whether or not this MultiApp has already been solved.
+  bool _solved;
 };
 
-#endif // TRANSIENTMULTIAPP_H
+#endif // FULLSOLVEMULTIAPP_H
