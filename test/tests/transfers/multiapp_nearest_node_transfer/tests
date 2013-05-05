@@ -24,5 +24,6 @@
     type = 'Exodiff'
     input = 'fromsub_fixed_meshes_master.i'
     exodiff = 'fromsub_fixed_meshes_master_out.e'
+    mesh_mode = 'SERIAL'
   [../]
 []
