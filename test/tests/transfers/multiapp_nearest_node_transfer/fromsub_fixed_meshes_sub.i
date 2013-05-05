@@ -1,10 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 20
-  xmax = 10
-  ymax = 10
+  nx = 10
+  ny = 10
 []
 
 [Variables]
@@ -40,8 +38,8 @@
 
 [Executioner]
   type = Transient
-  num_steps = 3
-  dt = 1
+  num_steps = 4
+  dt = 0.01
   petsc_options = '-snes_mf_operator -ksp_monitor'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -51,17 +49,5 @@
   output_initial = true
   exodus = true
   perf_log = true
-[]
-
-[MultiApps]
-  [./sub]
-    type = TransientMultiApp
-    app_type = MooseTestApp
-    positions = '0 0 0'
-    input_files = sub.i
-    sub_cycling = true
-    steady_state_tol = 1e-5
-    detect_steady_state = true
-  [../]
 []
 

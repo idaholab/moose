@@ -596,6 +596,6 @@ Transient::solutionChangeNorm()
 
   delete &difference;
 
-  return abs_change / current_solution.l2_norm();
+  return (abs_change / current_solution.l2_norm()) / _dt;
 }
 

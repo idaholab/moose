@@ -20,4 +20,9 @@
     exodiff = 'tosub_displaced_master_out_sub0.e'
     deleted = 'Not yet implemented properly!'
   [../]
+  [./fromsub_fixed_meshes]
+    type = 'Exodiff'
+    input = 'fromsub_fixed_meshes_master.i'
+    exodiff = 'fromsub_fixed_meshes_master_out.e'
+  [../]
 []

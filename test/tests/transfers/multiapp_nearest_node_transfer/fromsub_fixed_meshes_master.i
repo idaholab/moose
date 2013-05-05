@@ -1,14 +1,21 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 20
-  xmax = 10
-  ymax = 10
+  nx = 10
+  ny = 10
 []
 
 [Variables]
   [./u]
+  [../]
+[]
+
+[AuxVariables]
+  [./from_sub]
+  [../]
+  [./elemental_from_sub]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
@@ -40,8 +47,8 @@
 
 [Executioner]
   type = Transient
-  num_steps = 3
-  dt = 1
+  num_steps = 4
+  dt = 0.01
   petsc_options = '-snes_mf_operator -ksp_monitor'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -58,10 +65,26 @@
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0 0 0'
-    input_files = sub.i
-    sub_cycling = true
-    steady_state_tol = 1e-5
-    detect_steady_state = true
+    input_files = fromsub_fixed_meshes_sub.i
+  [../]
+[]
+
+[Transfers]
+  [./from_sub]
+    type = MultiAppNearestNodeTransfer
+    direction = from_multiapp
+    multi_app = sub
+    source_variable = u
+    variable = from_sub
+    fixed_meshes = true
+  [../]
+  [./elemental_from_sub]
+    type = MultiAppNearestNodeTransfer
+    direction = from_multiapp
+    multi_app = sub
+    source_variable = u
+    variable = elemental_from_sub
+    fixed_meshes = true
   [../]
 []
 

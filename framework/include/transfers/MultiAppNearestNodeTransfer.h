@@ -50,6 +50,12 @@ protected:
 
   bool _displaced_source_mesh;
   bool _displaced_target_mesh;
+
+  /// If true then node connections will be cached
+  bool _fixed_meshes;
+
+  /// Used to cache nodes
+  std::map<unsigned int, Node *> _node_map;
 };
 
 #endif /* MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H */

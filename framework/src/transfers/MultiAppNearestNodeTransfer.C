@@ -33,6 +33,8 @@ InputParameters validParams<MultiAppNearestNodeTransfer>()
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
   params.addParam<bool>("displaced_source_mesh", false, "Whether or not to use the displaced mesh for the source mesh.");
   params.addParam<bool>("displaced_target_mesh", false, "Whether or not to use the displaced mesh for the target mesh.");
+  params.addParam<bool>("fixed_meshes", false, "Set to true when the meshes are not changing (ie, no moviement or adaptivity).  This will cache nearest node neighbors to greatly speed up the transfer.");
+
   return params;
 }
 
@@ -41,7 +43,8 @@ MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const std::string & nam
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable")),
     _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
-    _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
+    _displaced_target_mesh(getParam<bool>("displaced_target_mesh")),
+    _fixed_meshes(getParam<bool>("fixed_meshes"))
 {
 }
 
@@ -135,7 +138,20 @@ MultiAppNearestNodeTransfer::execute()
                 MeshBase::const_node_iterator from_nodes_begin = from_mesh->nodes_begin();
                 MeshBase::const_node_iterator from_nodes_end   = from_mesh->nodes_end();
 
-                Node * nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
+                Node * nearest_node = NULL;
+
+                if(_fixed_meshes)
+                {
+                  nearest_node = _node_map[node->id()];
+
+                  if(!nearest_node) // Haven't cached it yet
+                  {
+                    nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
+                    _node_map[node->id()] = nearest_node;
+                  }
+                }
+                else
+                  nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
 
                 // Assuming LAGRANGE!
                 unsigned int from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
@@ -173,7 +189,20 @@ MultiAppNearestNodeTransfer::execute()
                 MeshBase::const_node_iterator from_nodes_begin = from_mesh->nodes_begin();
                 MeshBase::const_node_iterator from_nodes_end   = from_mesh->nodes_end();
 
-                Node * nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
+                Node * nearest_node = NULL;
+
+                if(_fixed_meshes)
+                {
+                  nearest_node = _node_map[elem->id()];
+
+                  if(!nearest_node) // Haven't cached it yet
+                  {
+                    nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
+                    _node_map[elem->id()] = nearest_node;
+                  }
+                }
+                else
+                  nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
 
                 // Assuming LAGRANGE!
                 unsigned int from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
@@ -309,7 +338,21 @@ MultiAppNearestNodeTransfer::execute()
             MeshBase::const_node_iterator from_nodes_begin = from_mesh->local_nodes_begin();
             MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
 
-            Node * nearest_node = getNearestNode(*to_node-app_position, current_distance, from_nodes_begin, from_nodes_end);
+            Node * nearest_node = NULL;
+
+            if(_fixed_meshes)
+            {
+              nearest_node = _node_map[to_node->id()];
+
+              if(!nearest_node) // Haven't cached it yet
+              {
+                nearest_node = getNearestNode(*to_node-app_position, current_distance, from_nodes_begin, from_nodes_end);
+                _node_map[to_node->id()] = nearest_node;
+              }
+            }
+            else
+              nearest_node = getNearestNode(*to_node-app_position, current_distance, from_nodes_begin, from_nodes_end);
+
             Moose::swapLibMeshComm(swapped);
 
             if(current_distance < min_distances[to_node->id()])
@@ -339,7 +382,21 @@ MultiAppNearestNodeTransfer::execute()
             MeshBase::const_node_iterator from_nodes_begin = from_mesh->local_nodes_begin();
             MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
 
-            Node * nearest_node = getNearestNode(actual_position, current_distance, from_nodes_begin, from_nodes_end);
+            Node * nearest_node = NULL;
+
+            if(_fixed_meshes)
+            {
+              nearest_node = _node_map[to_elem->id()];
+
+              if(!nearest_node) // Haven't cached it yet
+              {
+                nearest_node = getNearestNode(actual_position, current_distance, from_nodes_begin, from_nodes_end);
+                _node_map[to_elem->id()] = nearest_node;
+              }
+            }
+            else
+              nearest_node = getNearestNode(actual_position, current_distance, from_nodes_begin, from_nodes_end);
+
             Moose::swapLibMeshComm(swapped);
 
             if(current_distance < min_distances[to_elem->id()])
