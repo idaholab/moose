@@ -53,8 +53,41 @@ class mpiPID():
     tmp_mem = 0
     for keyitem in pid_dict:
       tmp_mem += pid_dict[keyitem]
-    pid_dict['TOTAL'] = tmp_mem
-    return pid_dict
+    return { 'TOTAL' : tmp_mem }
+
+class pbsPID():
+  def __init__(self, process):
+    self.args = process
+    self.process = subprocess.Popen(''.join(self.args.run).split())
+    node_file = open(os.getenv('PBS_NODEFILE'), 'r')
+    self.node_list = node_file.read().split()
+    node_file.close()
+    self.pid = self.process.pid
+    self.pid_dict = {}
+
+  def _discover_name(self):
+    locations = ''.join(self.args.run).split()
+    for item in locations:
+      if os.path.exists(item):
+        return item
+
+  def GetMemory(self):
+    for single_node in self.node_list:
+      self.pid_dict[single_node] = {}
+      command = ['/usr/bin/ssh', single_node, 'ps', '-u', str(os.getenv('USER')), '-o', 'pid,comm,rss=']
+      tmp_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      pid_list = tmp_proc.communicate()[0].split('\n')
+      for item in pid_list:
+        tmp_suffix = item.split('/').pop()
+        tmp_item = re.findall(r'(\d+) .*' + str(self._discover_name().split('/').pop()) +' .* (\d+)', item)
+        if len(tmp_item) > 0:
+          self.pid_dict[single_node][tmp_item[0][0]] = int(tmp_item[0][1])
+
+    tmp_mem = 0
+    for single_node in self.pid_dict:
+      for keyitem in self.pid_dict[single_node]:
+        tmp_mem += self.pid_dict[single_node][keyitem]
+    return { 'TOTAL' : tmp_mem }
 
 class ReadMemoryLog():
   def __init__(self, args):
@@ -174,10 +207,11 @@ def writeMemoryUsage(process):
     return int(last_memory)
   def _zero():
     try:
-      time_object = GetTime()
-      current_usage = [time_object.now, 0]
-      file_object.write(str(current_usage) + '\n')
-      file_object.close()
+      if last_memory != 0:
+        time_object = GetTime()
+        current_usage = [time_object.now, 0]
+        file_object.write(str(current_usage) + '\n')
+        file_object.close()
     except:
       pass
   try:
@@ -219,6 +253,11 @@ def _verifyARGs(args):
   if option_count != 1:
     print 'You must use one of the following: track, read, or run'
     sys.exit(1)
+  if args.pbs:
+    # There is a limit to how many times we can ssh somewhere (And for good reason)
+    # So set the repeat to something that won't flood the network
+    if args.repeat_rate <= 5.0:
+      args.repeat_rate = 5.0
   return args
 
 def parseARGs(args=None):
@@ -228,6 +267,7 @@ def parseARGs(args=None):
   parser.add_argument('--export', nargs="?", help='Export specified log file to a comma delimited format\n ')
   parser.add_argument('--run', nargs="+", help='Run specified command. You must encapsulate the command in quotes\n ')
   parser.add_argument('--mpi', dest='mpi', action='store_const', const=True, default=False, help='Instruct memory logger to tally all launches\n ')
+  parser.add_argument('--pbs', dest='pbs', action='store_const', const=True, default=False, help='Instruct memory logger to tally all launches on all nodes\n ')
   parser.add_argument('--outfile', nargs="?", default=os.getcwd() + '/usage.log' ,help='Save log to specified file. (Defaults to usage.log)\n ')
   parser.add_argument('--repeat-rate', nargs="?", type=float, default=0.25, help='Indicate the sleep delay in float seconds to check memory usage (default 0.25 seconds)\n ')
   return _verifyARGs(parser.parse_args(args))
@@ -239,7 +279,10 @@ if __name__ == '__main__':
     sys.exit(0)
   if args.run:
     if args.mpi:
-      results = mpiPID(args)
+      if args.pbs:
+        results = pbsPID(args)
+      else:
+        results = mpiPID(args)
     else:
       results = sglPID(args)
   if args.track:
