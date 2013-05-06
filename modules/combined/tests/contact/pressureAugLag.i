@@ -42,13 +42,14 @@
 []
 
 [Contact]
-  [./dummy_name]
+  [./m20_s10]
     master = 20
     slave = 10
     penalty = 1e7
     formulation = augmented_lagrange
 #    model = glued
     tangential_tolerance = 1e-3
+    output_area = true
   [../]
 []
 
