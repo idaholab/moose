@@ -13,6 +13,8 @@ InputParameters validParams<INSProjection>();
  * This class computes the "projection" part of the "split" method for
  * solving incompressible Navier-Stokes.  This is a time-varying equation
  * for u that is coupled to both the acceleration "a" and the pressue.
+ *
+ * Do not use, USE INSChorinCorrector and related classes instead.
  */
 class INSProjection : public Kernel
 {

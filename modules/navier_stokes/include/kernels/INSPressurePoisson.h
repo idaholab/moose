@@ -13,6 +13,8 @@ InputParameters validParams<INSPressurePoisson>();
  * This class computes the pressure Poisson solve which is part of
  * the "split" scheme used for solving the incompressible Navier-Stokes
  * equations.
+ *
+ * Do not use, USE INSChorinPressurePoisson and related classes instead.
  */
 class INSPressurePoisson : public Kernel
 {

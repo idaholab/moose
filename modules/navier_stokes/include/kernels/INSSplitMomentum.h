@@ -16,6 +16,8 @@ InputParameters validParams<INSSplitMomentum>();
  * directly to momentum in the split method.  Note: this equation is
  * divided through by the density, so "nu" appears rather than "mu", for
  * instance.
+ *
+ * Do not use, USE INSChorinPredictor and related classes instead.
  */
 class INSSplitMomentum : public Kernel
 {

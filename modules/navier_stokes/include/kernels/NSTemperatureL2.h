@@ -10,6 +10,11 @@ class NSTemperatureL2;
 template<>
 InputParameters validParams<NSTemperatureL2>();
 
+/**
+ * This class was originally used to solve for the temperature
+ * using an L2-projection.  I'm not sure if anything is still
+ * using this.  If not, it could probably be removed.
+ */
 class NSTemperatureL2 : public Kernel
 {
 public:
