@@ -99,7 +99,7 @@ ContactMaster::timestepSetup()
     _updateContactSet = false;
     if (_t > _time_last_called)
     {
-      _penetration_locator.saveContactForce();
+      _penetration_locator.saveContactStateVars();
     }
     _time_last_called = _t;
   }
@@ -164,6 +164,7 @@ ContactMaster::updateContactSet()
         else
         {
           has_penetrated[slave_node_num] = false;
+          pinfo->_contact_force.zero();
           pinfo->_mech_status=PenetrationLocator::MS_NO_CONTACT;
         }
       }
