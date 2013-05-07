@@ -81,6 +81,10 @@ public:
     unsigned int _starting_side_num;
     Point _starting_closest_point_ref;
     Point _incremental_slip;
+    Real _accumulated_slip;
+    Real _accumulated_slip_old;
+    Real _frictional_energy;
+    Real _frictional_energy_old;
     RealVectorValue _contact_force;
     RealVectorValue _contact_force_old;
     bool _update;
@@ -118,7 +122,7 @@ public:
   void setTangentialTolerance(Real tangential_tolerance);
   void setNormalSmoothingDistance(Real normal_smoothing_distance);
   void setStartingContactPoint();
-  void saveContactForce();
+  void saveContactStateVars();
 
 protected:
   bool _update_location; // Update the penetration location for nodes found last time

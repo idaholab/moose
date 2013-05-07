@@ -28,7 +28,7 @@ InputParameters validParams<PenetrationAux>()
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.set<bool>("use_displaced_mesh") = true;
-  params.addParam<std::string>("quantity","distance","The quantity to recover from the available penetration information: distance(default), tangential_distance, normal_x, normal_y, normal_z, closest_point_x, closest_point_y, closest_point_z, element_id, incremental_slip_x, incremental_slip_y, incremental_slip_z");
+  params.addParam<std::string>("quantity","distance","The quantity to recover from the available penetration information: distance(default), tangential_distance, normal_x, normal_y, normal_z, closest_point_x, closest_point_y, closest_point_z, element_id, side, incremental_slip_x, incremental_slip_y, incremental_slip_z, incremental_slip_magnitude, accumulated_slip, force_x, force_y, force_z, normal_force_magnitude, normal_force_x, normal_force_y, normal_force_z, tangential_force_magnitude, tangential_force_x, tangential_force_y, tangential_force_z, frictional_energy, mechanical_status");
   return params;
 }
 
@@ -75,6 +75,8 @@ PenetrationAux::PenetrationAux(const std::string & name, InputParameters paramet
     _quantity = PA_INCREMENTAL_SLIP_Y;
   else if ( _quantity_string == "incremental_slip_z" )
     _quantity = PA_INCREMENTAL_SLIP_Z;
+  else if ( _quantity_string == "accumulated_slip" )
+    _quantity = PA_ACCUMULATED_SLIP;
   else if ( _quantity_string == "force_x" )
     _quantity = PA_FORCE_X;
   else if ( _quantity_string == "force_y" )
@@ -145,13 +147,35 @@ PenetrationAux::computeValue()
     else if (_quantity == PA_SIDE)
       retVal = (Real) (pinfo->_side_num);
     else if (_quantity == PA_INCREMENTAL_SLIP_MAG)
-      retVal = pinfo->_incremental_slip.size();
+    {
+      if (pinfo->_mech_status == PenetrationLocator::MS_NO_CONTACT)
+        retVal = 0.0;
+      else
+        retVal = pinfo->_incremental_slip.size();
+    }
     else if (_quantity == PA_INCREMENTAL_SLIP_X)
-      retVal = pinfo->_incremental_slip(0);
+    {
+      if (pinfo->_mech_status == PenetrationLocator::MS_NO_CONTACT)
+        retVal = 0.0;
+      else
+        retVal = pinfo->_incremental_slip(0);
+    }
     else if (_quantity == PA_INCREMENTAL_SLIP_Y)
-      retVal = pinfo->_incremental_slip(1);
+    {
+      if (pinfo->_mech_status == PenetrationLocator::MS_NO_CONTACT)
+        retVal = 0.0;
+      else
+        retVal = pinfo->_incremental_slip(1);
+    }
     else if (_quantity == PA_INCREMENTAL_SLIP_Z)
-      retVal = pinfo->_incremental_slip(2);
+    {
+      if (pinfo->_mech_status == PenetrationLocator::MS_NO_CONTACT)
+        retVal = 0.0;
+      else
+        retVal = pinfo->_incremental_slip(2);
+    }
+    else if (_quantity == PA_ACCUMULATED_SLIP)
+      retVal = pinfo->_accumulated_slip;
     else if (_quantity == PA_FORCE_X)
       retVal = pinfo->_contact_force(0);
     else if (_quantity == PA_FORCE_Y)
@@ -159,7 +183,7 @@ PenetrationAux::computeValue()
     else if (_quantity == PA_FORCE_Z)
       retVal = pinfo->_contact_force(2);
     else if (_quantity == PA_NORMAL_FORCE_MAG)
-      retVal = pinfo->_contact_force*pinfo->_normal;
+      retVal = -pinfo->_contact_force*pinfo->_normal;
     else if (_quantity == PA_NORMAL_FORCE_X)
       retVal = (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(0);
     else if (_quantity == PA_NORMAL_FORCE_Y)
@@ -179,7 +203,7 @@ PenetrationAux::computeValue()
     else if (_quantity == PA_TANGENTIAL_FORCE_Z)
       retVal = pinfo->_contact_force(2) - (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(2);
     else if (_quantity == PA_FRICTIONAL_ENERGY)
-      retVal = pinfo->_contact_force*pinfo->_incremental_slip;
+      retVal = pinfo->_frictional_energy;
     else if (_quantity == PA_MECH_STATUS)
       retVal = pinfo->_mech_status;
   }

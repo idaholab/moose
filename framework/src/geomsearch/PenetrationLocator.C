@@ -147,7 +147,7 @@ PenetrationLocator::setStartingContactPoint()
 }
 
 void
-PenetrationLocator::saveContactForce()
+PenetrationLocator::saveContactStateVars()
 {
   std::map<unsigned int, PenetrationInfo *>::iterator it( _penetration_info.begin() );
   const std::map<unsigned int, PenetrationInfo *>::iterator it_end( _penetration_info.end() );
@@ -156,6 +156,8 @@ PenetrationLocator::saveContactForce()
     if (it->second != NULL)
     {
       it->second->_contact_force_old = it->second->_contact_force;
+      it->second->_accumulated_slip_old = it->second->_accumulated_slip;
+      it->second->_frictional_energy_old = it->second->_frictional_energy;
     }
   }
 }
@@ -178,6 +180,10 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const Node * node, const El
    _dxyzdxi(dxyzdxi),
    _dxyzdeta(dxyzdeta),
    _d2xyzdxideta(d2xyzdxideta),
+   _accumulated_slip(0.0),
+   _accumulated_slip_old(0.0),
+   _frictional_energy(0.0),
+   _frictional_energy_old(0.0),
    _update(true),
    _penetrated_at_beginning_of_step(false),
    _mech_status(MS_NO_CONTACT)
@@ -204,6 +210,11 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p) 
     _starting_elem(p._starting_elem),
     _starting_side_num(p._starting_side_num),
     _starting_closest_point_ref(p._starting_closest_point_ref),
+    _incremental_slip(p._incremental_slip),
+    _accumulated_slip(p._accumulated_slip),
+    _accumulated_slip_old(p._accumulated_slip_old),
+    _frictional_energy(p._frictional_energy),
+    _frictional_energy_old(p._frictional_energy_old),
     _contact_force(p._contact_force),
     _contact_force_old(p._contact_force_old),
     _update(p._update),
