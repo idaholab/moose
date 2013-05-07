@@ -178,7 +178,9 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const Node * node, const El
    _dxyzdxi(dxyzdxi),
    _dxyzdeta(dxyzdeta),
    _d2xyzdxideta(d2xyzdxideta),
-   _update(true)
+   _update(true),
+   _penetrated_at_beginning_of_step(false),
+   _mech_status(MS_NO_CONTACT)
 {}
 
 
@@ -204,7 +206,9 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p) 
     _starting_closest_point_ref(p._starting_closest_point_ref),
     _contact_force(p._contact_force),
     _contact_force_old(p._contact_force_old),
-    _update(p._update)
+    _update(p._update),
+    _penetrated_at_beginning_of_step(p._penetrated_at_beginning_of_step),
+    _mech_status(p._mech_status)
 {}
 
 PenetrationLocator::PenetrationInfo::~PenetrationInfo()

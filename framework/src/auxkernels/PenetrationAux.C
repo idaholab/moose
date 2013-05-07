@@ -67,12 +67,40 @@ PenetrationAux::PenetrationAux(const std::string & name, InputParameters paramet
     _quantity = PA_ELEM_ID;
   else if ( _quantity_string == "side" )
     _quantity = PA_SIDE;
+  else if ( _quantity_string == "incremental_slip_magnitude" )
+    _quantity = PA_INCREMENTAL_SLIP_MAG;
   else if ( _quantity_string == "incremental_slip_x" )
     _quantity = PA_INCREMENTAL_SLIP_X;
   else if ( _quantity_string == "incremental_slip_y" )
     _quantity = PA_INCREMENTAL_SLIP_Y;
   else if ( _quantity_string == "incremental_slip_z" )
     _quantity = PA_INCREMENTAL_SLIP_Z;
+  else if ( _quantity_string == "force_x" )
+    _quantity = PA_FORCE_X;
+  else if ( _quantity_string == "force_y" )
+    _quantity = PA_FORCE_Y;
+  else if ( _quantity_string == "force_z" )
+    _quantity = PA_FORCE_Z;
+  else if ( _quantity_string == "normal_force_magnitude" )
+    _quantity = PA_NORMAL_FORCE_MAG;
+  else if ( _quantity_string == "normal_force_x" )
+    _quantity = PA_NORMAL_FORCE_X;
+  else if ( _quantity_string == "normal_force_y" )
+    _quantity = PA_NORMAL_FORCE_Y;
+  else if ( _quantity_string == "normal_force_z" )
+    _quantity = PA_NORMAL_FORCE_Z;
+  else if ( _quantity_string == "tangential_force_magnitude" )
+    _quantity = PA_TANGENTIAL_FORCE_MAG;
+  else if ( _quantity_string == "tangential_force_x" )
+    _quantity = PA_TANGENTIAL_FORCE_X;
+  else if ( _quantity_string == "tangential_force_y" )
+    _quantity = PA_TANGENTIAL_FORCE_Y;
+  else if ( _quantity_string == "tangential_force_z" )
+    _quantity = PA_TANGENTIAL_FORCE_Z;
+  else if ( _quantity_string == "frictional_energy" )
+    _quantity = PA_FRICTIONAL_ENERGY;
+  else if ( _quantity_string == "mechanical_status" )
+    _quantity = PA_MECH_STATUS;
   else
     mooseError("Invalid quantity type in PenetrationAux: "<<_quantity_string);
 }
@@ -116,12 +144,44 @@ PenetrationAux::computeValue()
       retVal = (Real) (pinfo->_elem->id()+1);
     else if (_quantity == PA_SIDE)
       retVal = (Real) (pinfo->_side_num);
+    else if (_quantity == PA_INCREMENTAL_SLIP_MAG)
+      retVal = pinfo->_incremental_slip.size();
     else if (_quantity == PA_INCREMENTAL_SLIP_X)
       retVal = pinfo->_incremental_slip(0);
     else if (_quantity == PA_INCREMENTAL_SLIP_Y)
       retVal = pinfo->_incremental_slip(1);
     else if (_quantity == PA_INCREMENTAL_SLIP_Z)
       retVal = pinfo->_incremental_slip(2);
+    else if (_quantity == PA_FORCE_X)
+      retVal = pinfo->_contact_force(0);
+    else if (_quantity == PA_FORCE_Y)
+      retVal = pinfo->_contact_force(1);
+    else if (_quantity == PA_FORCE_Z)
+      retVal = pinfo->_contact_force(2);
+    else if (_quantity == PA_NORMAL_FORCE_MAG)
+      retVal = pinfo->_contact_force*pinfo->_normal;
+    else if (_quantity == PA_NORMAL_FORCE_X)
+      retVal = (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(0);
+    else if (_quantity == PA_NORMAL_FORCE_Y)
+      retVal = (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(1);
+    else if (_quantity == PA_NORMAL_FORCE_Z)
+      retVal = (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(2);
+    else if (_quantity == PA_TANGENTIAL_FORCE_MAG)
+    {
+      RealVectorValue contact_force_normal( (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal );
+      RealVectorValue contact_force_tangential( pinfo->_contact_force - contact_force_normal );
+      retVal = contact_force_tangential.size();
+    }
+    else if (_quantity == PA_TANGENTIAL_FORCE_X)
+      retVal = pinfo->_contact_force(0) - (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(0);
+    else if (_quantity == PA_TANGENTIAL_FORCE_Y)
+      retVal = pinfo->_contact_force(1) - (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(1);
+    else if (_quantity == PA_TANGENTIAL_FORCE_Z)
+      retVal = pinfo->_contact_force(2) - (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(2);
+    else if (_quantity == PA_FRICTIONAL_ENERGY)
+      retVal = pinfo->_contact_force*pinfo->_incremental_slip;
+    else if (_quantity == PA_MECH_STATUS)
+      retVal = pinfo->_mech_status;
   }
 
   return retVal;

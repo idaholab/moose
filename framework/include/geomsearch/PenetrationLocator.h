@@ -44,6 +44,13 @@ public:
   Real penetrationDistance(unsigned int node_id);
   RealVectorValue penetrationNormal(unsigned int node_id);
 
+  enum MECH_STATUS_ENUM
+  {
+    MS_NO_CONTACT=0,
+    MS_STICKING,
+    MS_SLIPPING
+  };
+
   /**
    * Data structure used to hold penetation information
    */
@@ -77,6 +84,8 @@ public:
     RealVectorValue _contact_force;
     RealVectorValue _contact_force_old;
     bool _update;
+    bool _penetrated_at_beginning_of_step;
+    MECH_STATUS_ENUM _mech_status;
   };
 
   SubProblem & _subproblem;
