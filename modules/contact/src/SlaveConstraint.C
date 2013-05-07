@@ -147,6 +147,7 @@ SlaveConstraint::computeQpResidual()
     }
 
     pinfo->_contact_force(_component) = resid;
+    pinfo->_mech_status=PenetrationLocator::MS_SLIPPING;
 
   }
   else if (_model == CM_COULOMB)
@@ -179,6 +180,11 @@ SlaveConstraint::computeQpResidual()
     if ( tan_mag > capacity )
     {
       pinfo->_contact_force = contact_force_normal + capacity * contact_force_tangential / tan_mag;
+      pinfo->_mech_status=PenetrationLocator::MS_SLIPPING;
+    }
+    else
+    {
+      pinfo->_mech_status=PenetrationLocator::MS_STICKING;
     }
 
     resid = pinfo->_contact_force(_component);
@@ -205,6 +211,7 @@ SlaveConstraint::computeQpResidual()
     }
 
     pinfo->_contact_force(_component) = resid;
+    pinfo->_mech_status=PenetrationLocator::MS_STICKING;
 
   }
   else

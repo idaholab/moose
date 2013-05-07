@@ -140,6 +140,7 @@ ContactMaster::updateContactSet()
         std::cout << "Releasing node " << node->id() << " " << resid << " < " << -_tension_release << std::endl;
         has_penetrated[slave_node_num] = false;
         pinfo->_contact_force.zero();
+        pinfo->_mech_status=PenetrationLocator::MS_NO_CONTACT;
         ++unlocked_this_step[slave_node_num];
       }
       else if (distance > 0)
@@ -157,9 +158,14 @@ ContactMaster::updateContactSet()
       if (_formulation == CF_PENALTY)
       {
         if (pinfo->_distance >= 0)
+        {
           has_penetrated[slave_node_num] = true;
+        }
         else
+        {
           has_penetrated[slave_node_num] = false;
+          pinfo->_mech_status=PenetrationLocator::MS_NO_CONTACT;
+        }
       }
       else
       {
@@ -253,6 +259,7 @@ ContactMaster::computeQpResidual()
       break;
     }
     pinfo->_contact_force(_component) = -resid;
+    pinfo->_mech_status=PenetrationLocator::MS_SLIPPING;
   }
   else if (_model == CM_COULOMB)
   {
@@ -284,6 +291,11 @@ ContactMaster::computeQpResidual()
     if ( tan_mag > capacity )
     {
       pinfo->_contact_force = contact_force_normal + capacity * contact_force_tangential / tan_mag;
+      pinfo->_mech_status=PenetrationLocator::MS_SLIPPING;
+    }
+    else
+    {
+      pinfo->_mech_status=PenetrationLocator::MS_STICKING;
     }
 
     // Change the sign since master force is equal and opposite slave force
@@ -310,6 +322,7 @@ ContactMaster::computeQpResidual()
       break;
     }
     pinfo->_contact_force(_component) = -resid;
+    pinfo->_mech_status=PenetrationLocator::MS_STICKING;
   }
   else
   {
