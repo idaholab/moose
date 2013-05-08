@@ -1008,7 +1008,7 @@ PenetrationThread::computeSlip(FEBase & fe,
   fe.reinit(side.get(), &points);
   const std::vector<Point> & starting_point = fe.get_xyz();
   info._incremental_slip = info._closest_point - starting_point[0];
-  if (!info._mech_status != PenetrationLocator::MS_NO_CONTACT)
+  if (info._mech_status != PenetrationLocator::MS_NO_CONTACT)
   {
     info._frictional_energy = info._frictional_energy_old + info._contact_force*info._incremental_slip;
     info._accumulated_slip = info._accumulated_slip_old + info._incremental_slip.size();
