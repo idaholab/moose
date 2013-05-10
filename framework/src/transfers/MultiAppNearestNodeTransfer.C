@@ -142,13 +142,13 @@ MultiAppNearestNodeTransfer::execute()
 
                 if(_fixed_meshes)
                 {
-                  nearest_node = _node_map[node->id()];
-
-                  if(!nearest_node) // Haven't cached it yet
+                  if (_node_map.find(node->id()) == _node_map.end())  // Haven't cached it yet
                   {
                     nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
                     _node_map[node->id()] = nearest_node;
                   }
+                  else
+                    nearest_node = _node_map[node->id()];
                 }
                 else
                   nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
@@ -193,13 +193,13 @@ MultiAppNearestNodeTransfer::execute()
 
                 if(_fixed_meshes)
                 {
-                  nearest_node = _node_map[elem->id()];
-
-                  if(!nearest_node) // Haven't cached it yet
+                  if (_node_map.find(elem->id()) == _node_map.end())  // Haven't cached it yet
                   {
                     nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
                     _node_map[elem->id()] = nearest_node;
                   }
+                  else
+                    nearest_node = _node_map[elem->id()];
                 }
                 else
                   nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
@@ -331,7 +331,7 @@ MultiAppNearestNodeTransfer::execute()
             Node * to_node = *to_node_it;
             unsigned int to_node_id = to_node->id();
 
-            Real current_distance;
+            Real current_distance = 0;
 
             MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
@@ -342,19 +342,21 @@ MultiAppNearestNodeTransfer::execute()
 
             if(_fixed_meshes)
             {
-              nearest_node = _node_map[to_node->id()];
-
-              if(!nearest_node) // Haven't cached it yet
+              if (_node_map.find(to_node->id()) == _node_map.end())  // Haven't cached it yet
               {
                 nearest_node = getNearestNode(*to_node-app_position, current_distance, from_nodes_begin, from_nodes_end);
                 _node_map[to_node->id()] = nearest_node;
               }
+              else
+                nearest_node = _node_map[to_node->id()];
             }
             else
               nearest_node = getNearestNode(*to_node-app_position, current_distance, from_nodes_begin, from_nodes_end);
 
             Moose::swapLibMeshComm(swapped);
 
+            // TODO: Logic bug when we are using caching.  "current_distance" is set by a call to getNearestNode which is
+            // skipped in that case.  We shouldn't be relying on it or stuffing it in another data structure
             if(current_distance < min_distances[to_node->id()])
             {
               min_distances[to_node_id] = current_distance;
@@ -375,7 +377,7 @@ MultiAppNearestNodeTransfer::execute()
 
             Point actual_position = to_elem->centroid()-app_position;
 
-            Real current_distance;
+            Real current_distance = 0;
 
             MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
@@ -386,19 +388,21 @@ MultiAppNearestNodeTransfer::execute()
 
             if(_fixed_meshes)
             {
-              nearest_node = _node_map[to_elem->id()];
-
-              if(!nearest_node) // Haven't cached it yet
+              if (_node_map.find(to_elem->id()) == _node_map.end())  // Haven't cached it yet
               {
                 nearest_node = getNearestNode(actual_position, current_distance, from_nodes_begin, from_nodes_end);
                 _node_map[to_elem->id()] = nearest_node;
               }
+              else
+                nearest_node = _node_map[to_elem->id()];
             }
             else
               nearest_node = getNearestNode(actual_position, current_distance, from_nodes_begin, from_nodes_end);
 
             Moose::swapLibMeshComm(swapped);
 
+            // TODO: Logic bug when we are using caching.  "current_distance" is set by a call to getNearestNode which is
+            // skipped in that case.  We shouldn't be relying on it or stuffing it in another data structure
             if(current_distance < min_distances[to_elem->id()])
             {
               min_distances[to_elem_id] = current_distance;
@@ -537,4 +541,3 @@ Node * MultiAppNearestNodeTransfer::getNearestNode(const Point & p, Real & dista
 
   return nearest;
 }
-
