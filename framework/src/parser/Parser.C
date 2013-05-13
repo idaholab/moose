@@ -419,10 +419,6 @@ using std::string;
 
 // Template Specializations for retrieving special types from the input file
 template<>
-void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name,
-                                           InputParameters::Parameter<MooseEnum>* param, bool in_global, GlobalParamsAction *global_block);
-
-template<>
 void Parser::setScalarParameter<RealVectorValue>(const std::string & full_name, const std::string & short_name,
                                                  InputParameters::Parameter<RealVectorValue> * param, bool in_global, GlobalParamsAction * global_block);
 
@@ -431,8 +427,21 @@ void Parser::setScalarParameter<Point>(const std::string & full_name, const std:
                                        InputParameters::Parameter<Point> * param, bool in_global, GlobalParamsAction * global_block);
 
 template<>
+void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name,
+                                           InputParameters::Parameter<MooseEnum>* param, bool in_global, GlobalParamsAction *global_block);
+
+template<>
 void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, const std::string & short_name,
                                                  InputParameters::Parameter<RealTensorValue> * param, bool in_global, GlobalParamsAction * global_block);
+
+// Vectors
+template<>
+void Parser::setVectorParameter<RealVectorValue>(const std::string & full_name, const std::string & short_name,
+                                                 InputParameters::Parameter<std::vector<RealVectorValue> > * param, bool in_global, GlobalParamsAction * global_block);
+
+template<>
+void Parser::setVectorParameter<Point>(const std::string & full_name, const std::string & short_name,
+                                       InputParameters::Parameter<std::vector<Point> > * param, bool in_global, GlobalParamsAction * global_block);
 
 template<>
 void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const std::string & short_name,
@@ -529,8 +538,8 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractScalar(BoundaryID            , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(RealVectorValue       , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(Point                 , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar(RealTensorValue       , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(MooseEnum             , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(RealTensorValue       , it->second, full_name, it->first, in_global, global_params_block);
 
       // Moose String-derived scalars
       dynamicCastAndExtractScalar(/*std::*/string       , it->second, full_name, it->first, in_global, global_params_block);
@@ -561,7 +570,10 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       // Moose Vectors
       dynamicCastAndExtractVector(SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(BoundaryID            , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(RealVectorValue       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(Point                 , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(MooseEnum             , it->second, full_name, it->first, in_global, global_params_block);
+      /* We won't try to do vectors of tensors ;) */
 
       // Moose String-derived vectors
       dynamicCastAndExtractVector(/*std::*/string       , it->second, full_name, it->first, in_global, global_params_block);
@@ -651,6 +663,55 @@ void Parser::setScalarComponentParameter(const std::string & full_name, const st
     global_block->setScalarParam<T>(short_name) = value;
 }
 
+template<typename T>
+void Parser::setVectorComponentParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> > * param, bool in_global, GlobalParamsAction * global_block)
+{
+  GetPot *gp;
+
+  // See if this variable was passed on the command line
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+    gp = _app.commandLine()->getPot();
+  else
+    gp = &_getpot_file;
+
+  int vec_size = gp->vector_variable_size(full_name.c_str());
+
+  if (vec_size % LIBMESH_DIM)
+    mooseError(std::string("Error in Scalar Component parameter ") + full_name + ": size is " << vec_size
+               << ", should be a multiple of " << LIBMESH_DIM);
+
+  std::vector<T> values;
+  for (int i = 0; i < vec_size / LIBMESH_DIM; ++i)
+  {
+    T value;
+    for (int j=0; j < LIBMESH_DIM; ++j)
+      value(j) = Real(gp->get_value_no_default(full_name.c_str(), (Real) 0.0, i*LIBMESH_DIM+j));
+    values.push_back(value);
+  }
+
+  param->set() = values;
+
+  if (in_global)
+  {
+    global_block->setVectorParam<T>(short_name).resize(vec_size, values[0]);
+    for (int i = 0; i < vec_size / LIBMESH_DIM; ++i)
+      global_block->setVectorParam<T>(short_name)[i] = values[0];
+  }
+}
+
+template<>
+void Parser::setScalarParameter<RealVectorValue>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<RealVectorValue> * param, bool in_global, GlobalParamsAction * global_block)
+{
+  setScalarComponentParameter(full_name, short_name, param, in_global, global_block);
+}
+
+template<>
+void Parser::setScalarParameter<Point>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<Point> * param, bool in_global, GlobalParamsAction * global_block)
+{
+  setScalarComponentParameter(full_name, short_name, param, in_global, global_block);
+}
+
 template<>
 void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<MooseEnum> * param, bool in_global, GlobalParamsAction * global_block)
 {
@@ -670,18 +731,6 @@ void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const 
   param->set() = value;
   if (in_global)
     global_block->setScalarParam<MooseEnum>(short_name) = current_param;
-}
-
-template<>
-void Parser::setScalarParameter<RealVectorValue>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<RealVectorValue> * param, bool in_global, GlobalParamsAction * global_block)
-{
-  setScalarComponentParameter(full_name, short_name, param, in_global, global_block);
-}
-
-template<>
-void Parser::setScalarParameter<Point>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<Point> * param, bool in_global, GlobalParamsAction * global_block)
-{
-  setScalarComponentParameter(full_name, short_name, param, in_global, global_block);
 }
 
 template<>
@@ -709,6 +758,18 @@ void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, 
   param->set() = value;
   if (in_global)
     global_block->setScalarParam<RealTensorValue>(short_name) = value;
+}
+
+template<>
+void Parser::setVectorParameter<RealVectorValue>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<RealVectorValue> > * param, bool in_global, GlobalParamsAction * global_block)
+{
+  setVectorComponentParameter(full_name, short_name, param, in_global, global_block);
+}
+
+template<>
+void Parser::setVectorParameter<Point>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<Point> > * param, bool in_global, GlobalParamsAction * global_block)
+{
+  setVectorComponentParameter(full_name, short_name, param, in_global, global_block);
 }
 
 template<>

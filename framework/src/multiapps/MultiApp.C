@@ -55,7 +55,7 @@ InputParameters validParams<MultiApp>()
   MooseEnum app_types_options(app_types_strings.str());
 
   params.addRequiredParam<MooseEnum>("app_type", app_types_options, "The type of application to build.");
-  params.addParam<std::vector<Real> >("positions", "The positions of the App locations.  Each set of 3 values will represent a Point.  Either this must be supplied or 'positions_file'");
+  params.addParam<std::vector<Point> >("positions", "The positions of the App locations.  Each set of 3 values will represent a Point.  Either this must be supplied or 'positions_file'");
   params.addParam<FileName>("positions_file", "A filename that should be looked in for positions. Each set of 3 values in that file will represent a Point.  Either this must be supplied or 'positions'");
 
   params.addRequiredParam<std::vector<std::string> >("input_files", "The input file for each App.  If this parameter only contains one input file it will be used for all of the Apps.");
@@ -91,7 +91,7 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     _has_an_app(true)
 {
   if(isParamValid("positions"))
-    _positions_vec = getParam<std::vector<Real> >("positions");
+    _positions = getParam<std::vector<Point> >("positions");
   else if(isParamValid("positions_file"))
   {
     // Read the file on the root processor then broadcast it
@@ -111,20 +111,17 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     _positions_vec.resize(num_values);
 
     Parallel::broadcast(_positions_vec);
+
+    mooseAssert(num_values % LIBMESH_DIM == 0, "Wrong number of entries in 'positions'");
+
+    _positions.reserve(num_values / LIBMESH_DIM);
+
+    for(unsigned int i=0; i<num_values; i+=3)
+      _positions.push_back(Point(_positions_vec[i], _positions_vec[i+1], _positions_vec[i+2]));
   }
   else
     mooseError("Must supply either 'positions' or 'positions_file' for MultiApp "<<_name);
 
-  { // Read the positions out of the vector
-    unsigned int num_vec_entries = _positions_vec.size();
-
-    mooseAssert(num_vec_entries % LIBMESH_DIM == 0, "Wrong number of entries in 'positions'");
-
-    _positions.reserve(num_vec_entries / LIBMESH_DIM);
-
-    for(unsigned int i=0; i<num_vec_entries; i+=3)
-      _positions.push_back(Point(_positions_vec[i], _positions_vec[i+1], _positions_vec[i+2]));
-  }
 
   _total_num_apps = _positions.size();
   mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(), "Number of positions and input files are not the same!");
