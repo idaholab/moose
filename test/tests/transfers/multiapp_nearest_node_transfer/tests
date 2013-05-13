@@ -25,5 +25,6 @@
     input = 'fromsub_fixed_meshes_master.i'
     exodiff = 'fromsub_fixed_meshes_master_out.e'
     mesh_mode = 'SERIAL'
+    max_parallel = 1  # BUG - See ticket #1947
   [../]
 []
