@@ -16,9 +16,10 @@ public:
           InputParameters parameters);
   
 protected:
-  virtual void computeProperties();
+  virtual void computeQpProperties();
 
 private:  
+  MaterialProperty<Real> & _M;
   MaterialProperty<Real> & _a;
   MaterialProperty<Real> & _b;
   MaterialProperty<Real> & _C0;

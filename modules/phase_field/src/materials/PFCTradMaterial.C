@@ -11,6 +11,7 @@ InputParameters validParams<PFCTradMaterial>()
 PFCTradMaterial::PFCTradMaterial(const std::string & name,
                  InputParameters parameters)
   :Material(name, parameters),
+   _M(declareProperty<Real>("M")),
    _a(declareProperty<Real>("a")),
    _b(declareProperty<Real>("b")),
    _C0(declareProperty<Real>("C0")),
@@ -20,11 +21,12 @@ PFCTradMaterial::PFCTradMaterial(const std::string & name,
 }
 
 void
-PFCTradMaterial::computeProperties()
+PFCTradMaterial::computeQpProperties()
 {
   Real invSkm = 0.332;
   Real u_s = 0.72;
 
+  _M[_qp] = 1.0;
   _a[_qp] = 3.0/(2.0*u_s)*invSkm;
   _b[_qp] = 4.0/(30.0*u_s*u_s)*invSkm;
   _C0[_qp] = -10.9153;

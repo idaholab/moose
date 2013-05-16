@@ -1,7 +1,7 @@
 #ifndef CHPFCRFF_H
 #define CHPFCRFF_H
 
-#include "CHBulk.h"
+#include "Kernel.h"
 
 
 //Forward Declarations
@@ -13,7 +13,7 @@ InputParameters validParams<CHPFCRFF>();
 /**
  *This kernel calculates the main portion of the cahn-hilliard residual for the RFF form of the phase field crystal model
  **/
-class CHPFCRFF : public CHBulk
+class CHPFCRFF : public Kernel
 {
 public:
 
@@ -21,11 +21,17 @@ public:
   
 protected:
 
-  virtual RealGradient computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c);
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  std::string _mob_name;
+  std::string _Dmob_name;
 
 private:
-
+ 
+  MaterialProperty<Real> & _M;
+  bool _has_MJac;
+  MaterialProperty<Real> * _DM;
   MooseEnum _log_approach;
   Real _tol;
   std::vector<unsigned int> _vals_var;
