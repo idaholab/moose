@@ -31,13 +31,16 @@ SetupMeshCompleteAction::SetupMeshCompleteAction(const std::string & name, Input
 void
 SetupMeshCompleteAction::completeSetup(MooseMesh *mesh)
 {
-  Moose::setup_perf_log.push("Prepare Mesh","Setup");
-  mesh->prepare();
-  Moose::setup_perf_log.pop("Prepare Mesh","Setup");
+  if (!mesh->prepared())
+  {
+    Moose::setup_perf_log.push("Prepare Mesh","Setup");
+    mesh->prepare();
+    Moose::setup_perf_log.pop("Prepare Mesh","Setup");
 
-  Moose::setup_perf_log.push("Initial meshChanged()","Setup");
-  mesh->meshChanged();
-  Moose::setup_perf_log.pop("Initial meshChanged()","Setup");
+    Moose::setup_perf_log.push("Initial meshChanged()","Setup");
+    mesh->meshChanged();
+    Moose::setup_perf_log.pop("Initial meshChanged()","Setup");
+  }
 }
 
 

@@ -97,5 +97,7 @@ AddExtraNodesetAction::act()
     if (!on_node)
       mooseError("Point can not be located!");
   }
+
+  _mesh->prepared(false);
 }
 

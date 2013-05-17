@@ -108,8 +108,11 @@ public:
   virtual Elem * elem(const unsigned int i) { return _mesh.elem(i); }
   virtual const Elem * elem(const unsigned int i) const { return _mesh.elem(i); }
 
-  bool changed() { return _is_changed; }
+  bool changed() const { return _is_changed; }
   void changed(bool state) { _is_changed = state; }
+
+  bool prepared() const { return _is_prepared; }
+  void prepared(bool state) { _is_prepared = state; }
 
   bool parallel() { return _is_parallel; }
 
@@ -233,7 +236,7 @@ public:
    * @return param boundary_name The names of the boundaries.
    * @return the boundary ids from the passed boundary names.
    */
-  std::vector<BoundaryID> getBoundaryIDs(const std::vector<BoundaryName> & boundary_name) const;
+  std::vector<BoundaryID> getBoundaryIDs(const std::vector<BoundaryName> & boundary_name, bool generate_unknown=false) const;
 
   /**
    * Get the associated subdomain ID for the subdomain name.
@@ -378,6 +381,9 @@ protected:
 
   /// True if using a TRUE parallel mesh (ie Nemesis)
   bool _is_parallel;
+
+  /// True if prepare has been called on the mesh
+  bool _is_prepared;
 
   /// The elements that were just refined.
   ConstElemPointerRange * _refined_elements;

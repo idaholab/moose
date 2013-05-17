@@ -16,6 +16,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 namespace MooseUtils
 {
@@ -27,7 +28,7 @@ namespace MooseUtils
   void tokenize(const std::string &str, std::vector<std::string> & elements, unsigned int min_len = 1, const std::string &delims = "/");
 
   /**
-   * This function will escape all of the standard C++ escape character so they can be printed.  The
+   * This function will escape all of the standard C++ escape characters so that they can be printed.  The
    * passed in parameter is modified in place
    */
   void escape(std::string &str);
@@ -60,6 +61,18 @@ namespace MooseUtils
    * to stdout.
    */
   void parallelBarrierNotify();
+
+  /**
+   * This routine is a simple helper function for searching a map by values instead of keys
+   */
+  template<typename T1, typename T2>
+  bool doesMapContainValue(const std::map<T1, T2> & the_map, const T2 & value)
+  {
+    for (typename std::map<T1, T2>::const_iterator iter = the_map.begin(); iter != the_map.end(); ++iter)
+      if (iter->second == value)
+        return true;
+    return false;
+  }
 }
 
 #endif //MOOSEUTILS_H

@@ -678,7 +678,7 @@ void Parser::setVectorComponentParameter(const std::string & full_name, const st
   int vec_size = gp->vector_variable_size(full_name.c_str());
 
   if (vec_size % LIBMESH_DIM)
-    mooseError(std::string("Error in Scalar Component parameter ") + full_name + ": size is " << vec_size
+    mooseError(std::string("Error in Vector Component parameter ") + full_name + ": size is " << vec_size
                << ", should be a multiple of " << LIBMESH_DIM);
 
   std::vector<T> values;

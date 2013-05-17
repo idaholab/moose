@@ -17,6 +17,7 @@
 #include "NonlinearSystem.h"
 #include "CacheChangedListsThread.h"
 #include "Assembly.h"
+#include "MooseUtils.h"
 
 // libMesh
 #include "libmesh/boundary_info.h"
@@ -52,6 +53,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     _uniform_refine_level(0),
     _is_changed(false),
     _is_parallel(false),
+    _is_prepared(false),
     _refined_elements(NULL),
     _coarsened_elements(NULL),
     _active_local_elem_range(NULL),
@@ -72,6 +74,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _uniform_refine_level(0),
     _is_changed(false),
     _is_parallel(false),
+    _is_prepared(false),
     _refined_elements(NULL),
     _coarsened_elements(NULL),
     _active_local_elem_range(NULL),
@@ -197,6 +200,9 @@ MooseMesh::prepare()
   detectOrthogonalDimRanges();
 
   update();
+
+  // Prepared has been called
+  _is_prepared = true;
 }
 
 void
@@ -677,9 +683,13 @@ MooseMesh::getBoundaryID(const BoundaryName & boundary_name) const
 }
 
 std::vector<BoundaryID>
-MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name) const
+MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name, bool generate_unknown) const
 {
   std::vector<BoundaryID> ids(boundary_name.size());
+  std::map<BoundaryID, std::string> & sideset_map = _mesh.boundary_info->set_sideset_name_map();
+  std::map<BoundaryID, std::string> & nodeset_map = _mesh.boundary_info->set_nodeset_name_map();
+  std::set<BoundaryID> boundary_ids = _mesh.boundary_info->get_boundary_ids();
+  BoundaryID max_boundary_id = boundary_ids.empty() ? 0 : *(_mesh.boundary_info->get_boundary_ids().rbegin());
 
   for(unsigned int i=0; i<boundary_name.size(); i++)
   {
@@ -695,7 +705,19 @@ MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name) const
     std::istringstream ss(boundary_name[i]);
 
     if (!(ss >> id))
-      id = _mesh.boundary_info->get_id_by_name(boundary_name[i]);
+    {
+      /**
+       * If the converstion from a name to a number fails, that means that this must be a named
+       * boundary.  We will look in the complete map for this sideset and create a new name/ID pair
+       * if requested.
+       */
+      if (generate_unknown
+          && !MooseUtils::doesMapContainValue(sideset_map, std::string(boundary_name[i]))
+          && !MooseUtils::doesMapContainValue(nodeset_map, std::string(boundary_name[i])))
+        id = ++max_boundary_id;
+      else
+        id = _mesh.boundary_info->get_id_by_name(boundary_name[i]);
+    }
 
     ids[i] = id;
   }

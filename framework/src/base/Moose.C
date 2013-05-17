@@ -23,10 +23,14 @@
 #include "Syntax.h"
 
 // objects that can be created by MOOSE
+// Mesh
 #include "FileMesh.h"
 #include "GeneratedMesh.h"
 #include "MeshExtruder.h"
 #include "TiledMesh.h"
+// MeshModifiers
+#include "SideSetsFromPoints.h"
+#include "SideSetsFromNormals.h"
 // problems
 #include "FEProblem.h"
 #include "OutputProblem.h"
@@ -239,6 +243,7 @@
 #include "InitProblemAction.h"
 #include "CopyNodalVarsAction.h"
 #include "SetupMeshAction.h"
+#include "AddMeshModifierAction.h"
 #include "SetupMeshCompleteAction.h"
 #include "AddExtraNodesetAction.h"
 #include "SetupOutputAction.h"
@@ -276,10 +281,14 @@ void
 registerObjects(Factory & factory)
 {
   // mesh
-  registerObject(FileMesh);
-  registerObject(GeneratedMesh);
-  registerObject(MeshExtruder);
-  registerObject(TiledMesh);
+  registerMesh(FileMesh);
+  registerMesh(GeneratedMesh);
+  registerMesh(MeshExtruder);
+  registerMesh(TiledMesh);
+
+  // mesh modifiers
+  registerMeshModifier(SideSetsFromPoints);
+  registerMeshModifier(SideSetsFromNormals);
 
   // problems
   registerProblem(FEProblem);
@@ -479,11 +488,22 @@ registerObjects(Factory & factory)
 void
 addActionTypes(Syntax & syntax)
 {
+  /**
+   * The second param here indicates whether the action_name must be satisfied or not for a successful run.
+   * If set to true, then the ActionWarehouse will attempt to create "Action"s automatically if they have
+   * not been explicitly created by the parser or some other mechanism.
+   *
+   * Note: Many of the actions in the "Mimimal Problem" section are marked as false.  However, we can generally
+   * force creation of these "Action"s as needed by registering them to syntax that we expect to see even
+   * if those "Action"s  don't normally pick up parameters from the input file.
+   */
+
   /**************************/
   /**** Register Actions ****/
   /**************************/
   /// Minimal Problem
   registerActionName("setup_mesh", false);
+  registerActionName("prepare_mesh", false);
   registerActionName("setup_mesh_complete", false);  // calls prepare
   registerActionName("add_variable", false);
   registerActionName("add_kernel", false);
@@ -561,6 +581,7 @@ addActionTypes(Syntax & syntax)
 "(set_global_params)"
 "(check_copy_nodal_vars)"
 "(setup_mesh)"
+"(prepare_mesh)"
 "(add_mesh_modifier)"
 "(setup_mesh_complete)"
 "(create_problem)"
@@ -633,6 +654,8 @@ void
 registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
   registerAction(SetupMeshAction, "setup_mesh");
+  registerAction(SetupMeshCompleteAction, "prepare_mesh");
+  registerAction(AddMeshModifierAction, "add_mesh_modifier");
   registerAction(AddExtraNodesetAction, "add_mesh_modifier");
   registerAction(SetupMeshCompleteAction, "setup_mesh_complete");
 
