@@ -11,19 +11,19 @@
   ymax=1.0
   zmin=0.0
   zmax=1.0
-  
-  [./ExtraNodesets]
-    [./cnode]
-      coord = '0.0 0.0 0.0'
-      id = 6
-    [../]
+[]
+
+[MeshModifiers]
+  [./cnode]
+    type = AddExtraNodeset
+    coord = '0.0 0.0 0.0'
+    boundary = 6
   [../]
 
-  [./ExtraNodesets]
-    [./snode]
-      coord = '1.0 0.0 0.0'
-      id = 7
-    [../]
+  [./snode]
+    type = AddExtraNodeset
+    coord = '1.0 0.0 0.0'
+    boundary = 7
   [../]
 []
 

@@ -21,16 +21,15 @@
   nx = 60
   ny = 20
   elem_type = QUAD9
-
-  [./ExtraNodesets]
-    [./corner_node]
-      id = 99
-      nodes = '0'
-    [../]
-  [../]
 []
 
-
+[MeshModifiers]
+  [./corner_node]
+    type = AddExtraNodeset
+    boundary = 99
+    nodes = '0'
+  [../]
+[]
 
 [Variables]
   # x-velocity
