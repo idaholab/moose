@@ -12,18 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AddExtraNodesetAction.h"
+#include "AddExtraNodeset.h"
 #include "MooseApp.h"
 #include "MooseMesh.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 
 template<>
-InputParameters validParams<AddExtraNodesetAction>()
+InputParameters validParams<AddExtraNodeset>()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = validParams<MeshModifier>();
 
-  params.addRequiredParam<unsigned int >("id", "The nodeset number you want to use.");
+  params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The boundary you want to use.");
   params.addParam<std::vector<unsigned int> >("nodes", "The nodes you want to be in the nodeset (Either this parameter or \"coord\" must be supplied).");
   params.addParam<std::vector<Real> >("coord","The nodes with coordinates you want to be in the nodeset (Either this parameter or \"nodes\" must be supplied).");
   params.addParam<Real>("tolerance", TOLERANCE, "The tolerance in which two nodes are considered identical");
@@ -31,13 +31,13 @@ InputParameters validParams<AddExtraNodesetAction>()
   return params;
 }
 
-AddExtraNodesetAction::AddExtraNodesetAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+AddExtraNodeset::AddExtraNodeset(const std::string & name, InputParameters params) :
+    MeshModifier(name, params)
 {
 }
 
 void
-AddExtraNodesetAction::act()
+AddExtraNodeset::modify()
 {
   // make sure the input is not empty
   bool data_valid = false;
@@ -47,7 +47,7 @@ AddExtraNodesetAction::act()
   if (_pars.isParamValid("coord"))
   {
     unsigned int n_coord = getParam<std::vector<Real> >("coord").size();
-    if (n_coord % _mesh->dimension() != 0)
+    if (n_coord % _mesh_ptr->dimension() != 0)
       mooseError("Size of node coordinates does not match the mesh dimension");
     if (n_coord !=0)
       data_valid = true;
@@ -55,20 +55,19 @@ AddExtraNodesetAction::act()
   if (!data_valid)
     mooseError("Node set can not be empty!");
 
-  unsigned int id = getParam<unsigned int>("id");
+  // Get the BoundaryIDs from the mesh
+  std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName> >("boundary");
+  std::vector<BoundaryID> boundary_ids = _mesh_ptr->getBoundaryIDs(boundary_names, true);
 
   // add nodes with their ids
   const std::vector<unsigned int> & nodes = getParam<std::vector<unsigned int> >("nodes");
   for(unsigned int i=0; i<nodes.size(); i++)
-  {
-    _mesh->getMesh().boundary_info->add_node(nodes[i], id);
-    if(_displaced_mesh)
-      _displaced_mesh->getMesh().boundary_info->add_node(nodes[i], id);
-  }
+    for(unsigned int j=0; j<boundary_ids.size(); ++j)
+      _mesh_ptr->getMesh().boundary_info->add_node(nodes[i], boundary_ids[j]);
 
   // add nodes with their coordinates
   const std::vector<Real> & coord = getParam<std::vector<Real> >("coord");
-  unsigned int dim = _mesh->dimension();
+  unsigned int dim = _mesh_ptr->dimension();
   unsigned int n_nodes = coord.size() / dim;
 
   for (unsigned int i=0; i<n_nodes; i++)
@@ -77,7 +76,7 @@ AddExtraNodesetAction::act()
     for (unsigned int j=0; j<dim; j++)
       p(j) = coord[i*dim+j];
 
-    const Elem* elem = _mesh->getMesh().point_locator() (p);
+    const Elem* elem = _mesh_ptr->getMesh().point_locator() (p);
 
     bool on_node = false;
     for (unsigned int j=0; j<elem->n_nodes(); j++)
@@ -88,8 +87,10 @@ AddExtraNodesetAction::act()
       for (unsigned int k=0; k<dim; k++)
         q(k) = (*node)(k);
 
-      if (p.absolute_fuzzy_equals(q, getParam<Real>("tolerance"))) {
-        _mesh->getMesh().boundary_info->add_node(node, id);
+      if (p.absolute_fuzzy_equals(q, getParam<Real>("tolerance")))
+      {
+        for(unsigned int j=0; j<boundary_ids.size(); ++j)
+          _mesh_ptr->getMesh().boundary_info->add_node(node, boundary_ids[j]);
         on_node = true;
         break;
       }
@@ -98,6 +99,7 @@ AddExtraNodesetAction::act()
       mooseError("Point can not be located!");
   }
 
-  _mesh->prepared(false);
+  for (unsigned int i=0; i<boundary_ids.size(); ++i)
+    _mesh_ptr->_mesh.boundary_info->sideset_name(boundary_ids[i]) = boundary_names[i];
 }
 

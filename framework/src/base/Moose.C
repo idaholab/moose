@@ -31,6 +31,7 @@
 // MeshModifiers
 #include "SideSetsFromPoints.h"
 #include "SideSetsFromNormals.h"
+#include "AddExtraNodeset.h"
 // problems
 #include "FEProblem.h"
 #include "OutputProblem.h"
@@ -245,7 +246,6 @@
 #include "SetupMeshAction.h"
 #include "AddMeshModifierAction.h"
 #include "SetupMeshCompleteAction.h"
-#include "AddExtraNodesetAction.h"
 #include "SetupOutputAction.h"
 #include "AddMaterialAction.h"
 #include "GlobalParamsAction.h"
@@ -289,6 +289,7 @@ registerObjects(Factory & factory)
   // mesh modifiers
   registerMeshModifier(SideSetsFromPoints);
   registerMeshModifier(SideSetsFromNormals);
+  registerMeshModifier(AddExtraNodeset);
 
   // problems
   registerProblem(FEProblem);
@@ -656,7 +657,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupMeshAction, "setup_mesh");
   registerAction(SetupMeshCompleteAction, "prepare_mesh");
   registerAction(AddMeshModifierAction, "add_mesh_modifier");
-  registerAction(AddExtraNodesetAction, "add_mesh_modifier");
   registerAction(SetupMeshCompleteAction, "setup_mesh_complete");
 
   registerAction(AddFunctionAction, "add_function");

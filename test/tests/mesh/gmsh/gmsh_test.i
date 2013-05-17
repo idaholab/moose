@@ -1,15 +1,18 @@
 [Mesh]
   file = sample.msh
   dim = 3
-  [./ExtraNodesets]
-    [./left]
-      nodes = 4
-      id = 0
-    [../]
-    [./right]
-      nodes = 9
-      id = 1
-    [../]
+[]
+
+[MeshModifiers]
+  [./left]
+    type = AddExtraNodeset
+    nodes = 4
+    boundary = 0
+  [../]
+  [./right]
+    type = AddExtraNodeset
+    nodes = 9
+    boundary = 1
   [../]
 []
 

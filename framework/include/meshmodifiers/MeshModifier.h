@@ -17,6 +17,7 @@
 
 #include "MooseObject.h"
 #include "MooseMesh.h"
+#include "InputParameters.h"
 
 // System includes
 #include <string>

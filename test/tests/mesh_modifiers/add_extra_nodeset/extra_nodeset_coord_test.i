@@ -1,11 +1,12 @@
 [Mesh]
   file = square.e
+[]
 
-  [./ExtraNodesets]
-    [./middle_node]
-      id = 12
-      coord = '0.5 0.5'
-    [../]
+[MeshModifiers]
+  [./middle_node]
+    type = AddExtraNodeset
+    boundary = 'middle_node'
+    coord = '0.5 0.5'
   [../]
 []
 
@@ -47,7 +48,7 @@
   [./middle]
     type = DirichletBC
     variable = u
-    boundary = 12
+    boundary = 'middle_node'
     value = -1
   [../]
 []

@@ -12,26 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADDEXTRANODESETACTION_H
-#define ADDEXTRANODESETACTION_H
+#ifndef ADDEXTRANODESET_H
+#define ADDEXTRANODESET_H
 
-#include "Action.h"
+#include "MeshModifier.h"
 
 //Forward Declaration
 class MooseMesh;
 
-class AddExtraNodesetAction;
+class AddExtraNodeset;
 
 template<>
-InputParameters validParams<AddExtraNodesetAction>();
+InputParameters validParams<AddExtraNodeset>();
 
-
-class AddExtraNodesetAction : public Action
+class AddExtraNodeset : public MeshModifier
 {
 public:
-  AddExtraNodesetAction(const std::string & name, InputParameters params);
+  AddExtraNodeset(const std::string & name, InputParameters params);
 
-  virtual void act();
+  virtual void modify();
 };
 
-#endif // ADDEXTRANODESETACTION_H
+#endif // ADDEXTRANODESET_H
