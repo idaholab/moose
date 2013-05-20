@@ -44,9 +44,6 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
   // initial condition system directly.
   // ------------
 
-  // The dimensionality of the current mesh
-  const unsigned int dim = _sys.mesh().dimension();
-
   // The element matrix and RHS for projections.
   // Note that Ke is always real-valued, whereas Fe may be complex valued if complex number support is enabled
   DenseMatrix<Real> Ke;
@@ -86,6 +83,9 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
         continue;               // no initial condition -> skip this variable
 
       const FEType & fe_type = var.feType();
+
+      // The dimension of the current element
+      const unsigned int dim = elem->dim();
 
       // Get FE objects of the appropriate type
       // We cannot use the FE object in Assembly, since the following code is messing with the quadrature rules
