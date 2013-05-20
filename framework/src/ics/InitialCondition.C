@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "InitialCondition.h"
-#include "SubProblem.h"
+#include "FEProblem.h"
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "MooseVariable.h"
@@ -33,10 +33,11 @@ InitialCondition::InitialCondition(const std::string & name, InputParameters par
     MooseObject(name, parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    _subproblem(*getParam<SubProblem *>("_subproblem")),
+    _fe_problem(*getParam<FEProblem *>("_fe_problem")),
     _sys(*getParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
+    _assembly(_fe_problem.assembly(_tid)),
+    _t(_fe_problem.time()),
     _coord_sys(_assembly.coordSystem()),
     _var(_sys.getVariable(_tid, parameters.get<VariableName>("variable"))),
 

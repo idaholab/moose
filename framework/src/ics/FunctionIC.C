@@ -31,5 +31,5 @@ FunctionIC::FunctionIC(const std::string & name, InputParameters parameters) :
 Real
 FunctionIC::value(const Point & p)
 {
-  return _func.value(0, p);
+  return _func.value(_t, p);
 }

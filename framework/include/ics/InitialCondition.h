@@ -30,7 +30,7 @@
 
 //forward declarations
 class InitialCondition;
-class SubProblem;
+class FEProblem;
 class SystemBase;
 class Assembly;
 class MooseVariable;
@@ -73,11 +73,14 @@ public:
   virtual RealGradient gradient(const Point & /*p*/) { return RealGradient(); };
 
 protected:
-  SubProblem & _subproblem;
+  FEProblem & _fe_problem;
   SystemBase & _sys;
   THREAD_ID _tid;
 
   Assembly & _assembly;
+
+  /// Time
+  Real & _t;
 
   const Moose::CoordinateSystemType & _coord_sys;
   MooseVariable & _var;
