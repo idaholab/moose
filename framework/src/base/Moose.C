@@ -32,6 +32,7 @@
 #include "SideSetsFromPoints.h"
 #include "SideSetsFromNormals.h"
 #include "AddExtraNodeset.h"
+#include "Transform.h"
 // problems
 #include "FEProblem.h"
 #include "OutputProblem.h"
@@ -290,6 +291,7 @@ registerObjects(Factory & factory)
   registerMeshModifier(SideSetsFromPoints);
   registerMeshModifier(SideSetsFromNormals);
   registerMeshModifier(AddExtraNodeset);
+  registerMeshModifier(Transform);
 
   // problems
   registerProblem(FEProblem);
