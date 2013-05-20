@@ -15,23 +15,21 @@
 #ifndef MESHEXTRUDER_H
 #define MESHEXTRUDER_H
 
-#include "MooseMesh.h"
+#include "MeshModifier.h"
 
 class MeshExtruder;
 
 template<>
 InputParameters validParams<MeshExtruder>();
 
-class MeshExtruder : public MooseMesh
+class MeshExtruder : public MeshModifier
 {
 public:
   MeshExtruder(const std::string & name, InputParameters parameters);
-  MeshExtruder(const MeshExtruder & other_mesh);
+
   virtual ~MeshExtruder();
 
-  virtual MooseMesh & clone() const;
-
-  virtual void init();
+  virtual void modify();
 
 protected:
   const unsigned int _num_layers;

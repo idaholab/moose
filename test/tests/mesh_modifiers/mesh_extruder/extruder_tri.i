@@ -1,10 +1,16 @@
 [Mesh]
-  type = MeshExtruder
+  type = FileMesh
   file = ellipse_tri.e
-  num_layers = 20
-  extrusion_vector = '0 0 5'
-  bottom_sideset = '2'
-  top_sideset = '4'
+[]
+
+[MeshModifiers]
+  [./extrude]
+    type = MeshExtruder
+    num_layers = 20
+    extrusion_vector = '0 0 5'
+    bottom_sideset = '2'
+    top_sideset = '4'
+  [../]
 []
 
 [Variables]

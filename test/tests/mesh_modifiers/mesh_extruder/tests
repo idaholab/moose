@@ -16,4 +16,10 @@
     input = 'extruder_angle.i'
     exodiff = 'out_quad_angle.e'
   [../]
+
+  [./gen_extrude]
+    type = 'Exodiff'
+    input = 'gen_extrude.i'
+    exodiff = 'out_gen.e'
+  [../]
 []

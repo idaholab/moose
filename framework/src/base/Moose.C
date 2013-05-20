@@ -26,9 +26,9 @@
 // Mesh
 #include "FileMesh.h"
 #include "GeneratedMesh.h"
-#include "MeshExtruder.h"
 #include "TiledMesh.h"
 // MeshModifiers
+#include "MeshExtruder.h"
 #include "SideSetsFromPoints.h"
 #include "SideSetsFromNormals.h"
 #include "AddExtraNodeset.h"
@@ -284,10 +284,10 @@ registerObjects(Factory & factory)
   // mesh
   registerMesh(FileMesh);
   registerMesh(GeneratedMesh);
-  registerMesh(MeshExtruder);
   registerMesh(TiledMesh);
 
   // mesh modifiers
+  registerMeshModifier(MeshExtruder);
   registerMeshModifier(SideSetsFromPoints);
   registerMeshModifier(SideSetsFromNormals);
   registerMeshModifier(AddExtraNodeset);

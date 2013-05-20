@@ -1,10 +1,16 @@
 [Mesh]
-  type = MeshExtruder
+  type = FileMesh
   file = chimney_quad.e
-  num_layers = 20
-  extrusion_vector = '0 1e-2 0'
-  bottom_sideset = '10'
-  top_sideset = '20'
+[]
+
+[MeshModifiers]
+  [./extrude]
+    type = MeshExtruder
+    num_layers = 20
+    extrusion_vector = '1e-2 1e-2 0'
+    bottom_sideset = '10'
+    top_sideset = '20'
+  [../]
 []
 
 [Variables]
@@ -43,7 +49,7 @@
 []
 
 [Output]
-  file_base = out_quad
+  file_base = out_quad_angle
   output_initial = true
   interval = 1
   exodus = true

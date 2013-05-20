@@ -1,10 +1,22 @@
 [Mesh]
-  type = MeshExtruder
-  file = chimney_quad.e
-  num_layers = 20
-  extrusion_vector = '1e-2 1e-2 0'
-  bottom_sideset = '10'
-  top_sideset = '20'
+  type = GeneratedMesh
+  dim = 2
+  nx = 6
+  ny = 6
+  nz = 0
+  zmin = 0
+  zmax = 0
+  elem_type = QUAD4
+[]
+
+[MeshModifiers]
+  [./extrude]
+    type = MeshExtruder
+    num_layers = 6
+    extrusion_vector = '1 0 1'
+    bottom_sideset = '10'
+    top_sideset = '20'
+  [../]
 []
 
 [Variables]
@@ -43,7 +55,7 @@
 []
 
 [Output]
-  file_base = out_quad_angle
+  file_base = out_gen
   output_initial = true
   interval = 1
   exodus = true
