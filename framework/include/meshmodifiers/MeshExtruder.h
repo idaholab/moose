@@ -34,6 +34,9 @@ public:
 protected:
   const unsigned int _num_layers;
   const RealVectorValue _extrusion_vector;
+
+private:
+  void changeID(const std::vector<BoundaryName> & names, BoundaryID old_id);
 };
 
 #endif /* MESHEXTRUDER_H */

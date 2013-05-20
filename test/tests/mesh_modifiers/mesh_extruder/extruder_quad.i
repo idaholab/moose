@@ -8,8 +8,8 @@
     type = MeshExtruder
     num_layers = 20
     extrusion_vector = '0 1e-2 0'
-    bottom_sideset = '10'
-    top_sideset = '20'
+    bottom_sideset = 'new_bottom'
+    top_sideset = 'new_top'
   [../]
 []
 
@@ -31,14 +31,14 @@
   [./bottom]
     type = DirichletBC
     variable = u
-    boundary = 10
+    boundary = 'new_bottom'
     value = 0
   [../]
 
   [./top]
     type = DirichletBC
     variable = u
-    boundary = 20
+    boundary = 'new_top'
     value = 1
   [../]
 []

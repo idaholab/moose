@@ -26,8 +26,8 @@ InputParameters validParams<MeshExtruder>()
   InputParameters params = validParams<MeshModifier>();
   params.addRequiredParam<unsigned int>("num_layers", "The number of layers in the extruded mesh");
   params.addRequiredParam<RealVectorValue>("extrusion_vector", "The direction and length of the extrusion");
-  params.addParam<boundary_id_type>("bottom_sideset", "The boundary id that will be applied to the bottom of the extruded mesh");
-  params.addParam<boundary_id_type>("top_sideset", "The boundary id that will be to the top of the extruded mesh");
+  params.addParam<std::vector<BoundaryName> >("bottom_sideset", "The boundary that will be applied to the bottom of the extruded mesh");
+  params.addParam<std::vector<BoundaryName> >("top_sideset", "The boundary that will be to the top of the extruded mesh");
   return params;
 }
 
@@ -61,19 +61,27 @@ MeshExtruder::modify()
   mooseAssert(last_side_it != side_ids.rend(), "Error in generating sidesets for extruded mesh");
   const boundary_id_type old_bottom = *++last_side_it;
 
+  // Update the IDs
   if (isParamValid("bottom_sideset"))
-  {
-    boundary_id_type bottom_sideset = getParam<boundary_id_type>("bottom_sideset");
-    if (bottom_sideset != old_bottom)
-      _mesh_ptr->changeBoundaryId(old_bottom, bottom_sideset, true);
-  }
+    changeID(getParam<std::vector<BoundaryName> >("bottom_sideset"), old_bottom);
   if (isParamValid("top_sideset"))
-  {
-    boundary_id_type top_sideset = getParam<boundary_id_type>("top_sideset");
-    if (top_sideset != old_top)
-      _mesh_ptr->changeBoundaryId(old_top, top_sideset, true);
-  }
+    changeID(getParam<std::vector<BoundaryName> >("top_sideset"), old_top);
 
   // Update the dimension
   _mesh_ptr->_mesh.set_mesh_dimension(source_mesh.mesh_dimension() + 1);
 }
+
+
+void
+MeshExtruder::changeID(const std::vector<BoundaryName> & names, BoundaryID old_id)
+{
+  std::vector<BoundaryID> boundary_ids = _mesh_ptr->getBoundaryIDs(names, true);
+
+  if (std::find(boundary_ids.begin(), boundary_ids.end(), old_id) == boundary_ids.end())
+    _mesh_ptr->changeBoundaryId(old_id, boundary_ids[0], true);
+
+  for (unsigned int i=0; i<boundary_ids.size(); ++i)
+    _mesh_ptr->_mesh.boundary_info->sideset_name(boundary_ids[i]) = names[i];
+}
+
+
