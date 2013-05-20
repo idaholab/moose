@@ -94,19 +94,20 @@ ContactMaster::timestepSetup()
   {
     _penetration_locator._unlocked_this_step.clear();
     _penetration_locator._locked_this_step.clear();
-    _penetration_locator.setStartingContactPoint();
-    updateContactSet();
-    _updateContactSet = false;
+    bool beginning_of_step = false;
     if (_t > _time_last_called)
     {
+      beginning_of_step = true;
       _penetration_locator.saveContactStateVars();
     }
+    updateContactSet(beginning_of_step);
+    _updateContactSet = false;
     _time_last_called = _t;
   }
 }
 
 void
-ContactMaster::updateContactSet()
+ContactMaster::updateContactSet(bool beginning_of_step)
 {
   std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
   std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
@@ -124,8 +125,21 @@ ContactMaster::updateContactSet()
     {
       continue;
     }
+
     const unsigned int slave_node_num = it->first;
     std::set<unsigned int>::iterator hpit = has_penetrated.find(slave_node_num);
+
+    if (beginning_of_step)
+    {
+      if (hpit != has_penetrated.end())
+        pinfo->_penetrated_at_beginning_of_step = true;
+      else
+        pinfo->_penetrated_at_beginning_of_step = false;
+
+      pinfo->_starting_elem = it->second->_elem;
+      pinfo->_starting_side_num = it->second->_side_num;
+      pinfo->_starting_closest_point_ref = it->second->_closest_point_ref;
+    }
 
     if (_model == CM_EXPERIMENTAL)
     {

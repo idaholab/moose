@@ -41,7 +41,7 @@ public:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  virtual void updateContactSet();
+  virtual void updateContactSet(bool beginning_of_step = false);
 
 protected:
   const unsigned int _component;
