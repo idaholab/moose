@@ -17,21 +17,46 @@ class trackPID():
 class sglPID():
   def __init__(self, process):
     self.args = process
-    self.process = subprocess.Popen(''.join(self.args.run).split())
+    self.logging_file = TemporaryFile()
+    self.process = subprocess.Popen(''.join(self.args.run).split(), stdout=self.logging_file, stderr=self.logging_file)
     self.pid = self.process.pid
+    self.last_position = 0
+
+  def read_output(self):
+    # Setup our cursor position
+    cursor_seek = self.logging_file.tell() - 500
+    if cursor_seek - 500 <= 0:
+      cursor_seek = 0
+    # If cursor overlaps previous position, set it to previous position
+    if cursor_seek < self.last_position:
+      cursor_seek = self.last_position
+
+    # Read log from cursor position
+    self.logging_file.seek(cursor_seek)
+    output = self.logging_file.read()
+    if output != '':
+      sys.stdout.write(output)
+    self.last_position = self.logging_file.tell()
+    return output
 
   def GetMemory(self):
+    return_string = {}
+    return_string['LOG'] = self.read_output()
+
     try:
       tmp_proc = subprocess.Popen(['/bin/ps', '-p', str(self.pid), '-o', 'rss='], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      return { 'TOTAL' : int(re.findall(r'(\d+)', str(tmp_proc.communicate()[0]))[0]) }
+      return_string['TOTAL'] = int(re.findall(r'(\d+)', str(tmp_proc.communicate()[0]))[0])
+      return return_string
     except:
       return
 
 class mpiPID():
   def __init__(self, process):
     self.args = process
-    self.process = subprocess.Popen(''.join(self.args.run).split())
+    self.logging_file = TemporaryFile()
+    self.process = subprocess.Popen(''.join(self.args.run).split(), stdout=self.logging_file, stderr=self.logging_file)
     self.pid = self.process.pid
+    self.last_position = 0
 
   def _discover_name(self):
     locations = ''.join(self.args.run).split()
@@ -39,7 +64,27 @@ class mpiPID():
       if os.path.exists(item):
         return item
 
+  def read_output(self):
+    # Setup our cursor position
+    cursor_seek = self.logging_file.tell() - 500
+    if cursor_seek - 500 <= 0:
+      cursor_seek = 0
+    # If cursor overlaps previous position, set it to previous position
+    if cursor_seek < self.last_position:
+      cursor_seek = self.last_position
+
+    # Read log from cursor position
+    self.logging_file.seek(cursor_seek)
+    output = self.logging_file.read()
+    if output != '':
+      sys.stdout.write(output)
+    self.last_position = self.logging_file.tell()
+    return output
+
   def GetMemory(self):
+    return_string = {}
+    return_string['LOG'] = self.read_output()
+
     command = ['/bin/ps', '-u', str(os.getenv('USER')), '-eo', 'pid,comm']
     pid_dict = {}
     tmp_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -53,17 +98,20 @@ class mpiPID():
     tmp_mem = 0
     for keyitem in pid_dict:
       tmp_mem += pid_dict[keyitem]
-    return { 'TOTAL' : tmp_mem }
+    return_string['TOTAL'] = tmp_mem
+    return return_string
 
 class pbsPID():
   def __init__(self, process):
     self.args = process
-    self.process = subprocess.Popen(''.join(self.args.run).split())
+    self.logging_file = TemporaryFile()
+    self.process = subprocess.Popen(''.join(self.args.run).split(), stdout=self.logging_file, stderr=self.logging_file)
     node_file = open(os.getenv('PBS_NODEFILE'), 'r')
     self.node_list = node_file.read().split()
     node_file.close()
     self.pid = self.process.pid
     self.pid_dict = {}
+    self.last_position = 0
 
   def _discover_name(self):
     locations = ''.join(self.args.run).split()
@@ -71,7 +119,26 @@ class pbsPID():
       if os.path.exists(item):
         return item
 
+  def read_output(self):
+    # Setup our cursor position
+    cursor_seek = self.logging_file.tell() - 500
+    if cursor_seek - 500 <= 0:
+      cursor_seek = 0
+    # If cursor overlaps previous position, set it to previous position
+    if cursor_seek < self.last_position:
+      cursor_seek = self.last_position
+
+    # Read log from cursor position
+    self.logging_file.seek(cursor_seek)
+    output = self.logging_file.read()
+    if output != '':
+      sys.stdout.write(output)
+    self.last_position = self.logging_file.tell()
+    return output
+
   def GetMemory(self):
+    return_string = {}
+    return_string['LOG'] = self.read_output()
     for single_node in self.node_list:
       self.pid_dict[single_node] = {}
       command = ['/usr/bin/ssh', single_node, 'ps', '-u', str(os.getenv('USER')), '-o', 'pid,comm,rss=']
@@ -87,7 +154,8 @@ class pbsPID():
     for single_node in self.pid_dict:
       for keyitem in self.pid_dict[single_node]:
         tmp_mem += self.pid_dict[single_node][keyitem]
-    return { 'TOTAL' : tmp_mem }
+    return_string['TOTAL'] = tmp_mem
+    return return_string
 
 class ReadMemoryLog():
   def __init__(self, args):
@@ -109,8 +177,9 @@ class ReadMemoryLog():
     last_memory = 0.0
     for timestamp in self.memory_list:
       to = GetTime(eval(timestamp)[0])
+      log = eval(timestamp)[2].split('\n')
       self.mem_list.append(eval(timestamp)[1])
-      self.sorted_list.append([str(to.day) + ' ' + str(to.monthname) + ' ' + str(to.hour) + ':' + str(to.minute) + ':' + '{:02.0f}'.format(to.second) + '.' + '{:06.0f}'.format(to.microsecond), eval(timestamp)[1]])
+      self.sorted_list.append([str(to.day) + ' ' + str(to.monthname) + ' ' + str(to.hour) + ':' + str(to.minute) + ':' + '{:02.0f}'.format(to.second) + '.' + '{:06.0f}'.format(to.microsecond), eval(timestamp)[1], log])
     largest_memory = decimal.Decimal(max(self.mem_list))
     percentage_length = decimal.Decimal(self.getTerminalSize()[0]) - decimal.Decimal(len(str(self.sorted_list[0][0]) + ' using: ' + '{:20,.0f}'.format(self.sorted_list[0][1]) + 'K |'))
     print 'Date Stamp' + ' '*int(24) + 'Memory Usage | Percent of MAX memory used: ( ' + str('{:0,.0f}'.format(largest_memory)) + ' K )'
@@ -121,14 +190,21 @@ class ReadMemoryLog():
         percent = '0'
       else:
         percent = str(decimal.Decimal(item[1]) / largest_memory)[2:4] + '.' + str(decimal.Decimal(item[1]) / largest_memory)[4:6]
+
+      tmp_log = ''
+      for single_log in item[2]:
+        if single_log != '':
+          tmp_log += ' '*43 + ' | ' + single_log + '\n'
+
       if decimal.Decimal(item[1]) == largest_memory:
-        tmp_str = item[0] + '{:20,.0f}'.format(item[1]) + ' K |' + '-'*int(percentage_length * (decimal.Decimal(item[1]) / largest_memory)) + RESET + '-| ' + percent + '%'
+        tmp_str = item[0] + '{:20,.0f}'.format(item[1]) + ' K |' + '-'*int(percentage_length * (decimal.Decimal(item[1]) / largest_memory)) + RESET + '-| ' + percent + '%\n' + tmp_log
       elif item[1] > last_memory:
-        tmp_str = item[0] + '{:20,.0f}'.format(item[1]) + ' K |' + RED + '-'*int(percentage_length * (decimal.Decimal(item[1]) / largest_memory)) + RESET + '| ' + percent + '%'
+        tmp_str = item[0] + '{:20,.0f}'.format(item[1]) + ' K |' + RED + '-'*int(percentage_length * (decimal.Decimal(item[1]) / largest_memory)) + RESET + '| ' + percent + '%\n' + tmp_log
       else:
-        tmp_str = item[0] + '{:20,.0f}'.format(item[1]) + ' K |' + GREEN + '-'*int(percentage_length * (decimal.Decimal(item[1]) / largest_memory)) + RESET + '| ' + percent + '%'
+        tmp_str = item[0] + '{:20,.0f}'.format(item[1]) + ' K |' + GREEN + '-'*int(percentage_length * (decimal.Decimal(item[1]) / largest_memory)) + RESET + '| ' + percent + '%\n' + tmp_log
       last_memory = item[1]
-      print tmp_str
+      sys.stdout.write(tmp_str)
+
     print 'Date Stamp' + ' '*int(24) + 'Memory Usage | Percent of MAX memory used: ( ' + str('{:0,.0f}'.format(largest_memory)) + ' K )'
 
   def getTerminalSize(self):
@@ -199,7 +275,8 @@ def writeMemoryUsage(process):
   last_memory = 0
   def _usage(last_memory):
     time_object = GetTime()
-    current_usage = [time_object.now, int(process.GetMemory()['TOTAL'])]
+    report = process.GetMemory()
+    current_usage = [time_object.now, int(report['TOTAL']), report['LOG']]
     if int(current_usage[1]) != int(last_memory):
       last_memory = int(current_usage[1])
       file_object.write(str(current_usage) + '\n')
@@ -208,8 +285,10 @@ def writeMemoryUsage(process):
   def _zero():
     try:
       if last_memory != 0:
+        log = process.read_output()
+        process.logging_file.close()
         time_object = GetTime()
-        current_usage = [time_object.now, 0]
+        current_usage = [time_object.now, 0, log]
         file_object.write(str(current_usage) + '\n')
         file_object.close()
     except:
@@ -222,12 +301,14 @@ def writeMemoryUsage(process):
             last_memory = _usage(last_memory)
           else:
             _zero()
+            time.sleep(1)
             print '\nApplication terminated. Wrote file:', process.args.outfile
             return
         else:
           last_memory = _usage(last_memory)
       else:
         _zero()
+        time.sleep(1)
         print '\nApplication terminated. Wrote file:', process.args.outfile
         return
       time.sleep(float(process.args.repeat_rate))
@@ -237,8 +318,11 @@ def writeMemoryUsage(process):
     return
   except:
     _zero()
+    time.sleep(1)
     print '\nApplication terminated. Wrote file:', process.args.outfile
     return
+#  except:
+#    raise
 
 def _verifyARGs(args):
   option_count = 0
