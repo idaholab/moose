@@ -108,7 +108,7 @@ ContactMaster::timestepSetup()
 void
 ContactMaster::updateContactSet()
 {
-  std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
+  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
   std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
   std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._locked_this_step;
   std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
@@ -125,6 +125,7 @@ ContactMaster::updateContactSet()
       continue;
     }
     const unsigned int slave_node_num = it->first;
+    std::set<unsigned int>::iterator hpit = has_penetrated.find(slave_node_num);
 
     if (_model == CM_EXPERIMENTAL)
     {
@@ -135,22 +136,22 @@ ContactMaster::updateContactSet()
       // std::cout << locked_this_step[slave_node_num] << " " << pinfo->_distance << std::endl;
       const Real distance( pinfo->_normal * (pinfo->_closest_point - _mesh.node(node->id())));
 
-      if (has_penetrated[slave_node_num] && resid < -_tension_release && locked_this_step[slave_node_num] < 2)
+      if (hpit != has_penetrated.end() && resid < -_tension_release && locked_this_step[slave_node_num] < 2)
       {
         std::cout << "Releasing node " << node->id() << " " << resid << " < " << -_tension_release << std::endl;
-        has_penetrated[slave_node_num] = false;
+        has_penetrated.erase(hpit);
         pinfo->_contact_force.zero();
         pinfo->_mech_status=PenetrationLocator::MS_NO_CONTACT;
         ++unlocked_this_step[slave_node_num];
       }
       else if (distance > 0)
       {
-        if (!has_penetrated[slave_node_num])
+        if (hpit == has_penetrated.end())
         {
           std::cout << "Capturing node " << node->id() << " " << distance << " " << unlocked_this_step[slave_node_num] <<  std::endl;
           ++locked_this_step[slave_node_num];
+          has_penetrated.insert(slave_node_num);
         }
-        has_penetrated[slave_node_num] = true;
       }
     }
     else
@@ -159,11 +160,17 @@ ContactMaster::updateContactSet()
       {
         if (pinfo->_distance >= 0)
         {
-          has_penetrated[slave_node_num] = true;
+          if (hpit == has_penetrated.end())
+          {
+            has_penetrated.insert(slave_node_num);
+          }
         }
         else
         {
-          has_penetrated[slave_node_num] = false;
+          if (hpit != has_penetrated.end())
+          {
+            has_penetrated.erase(hpit);
+          }
           pinfo->_contact_force.zero();
           pinfo->_mech_status=PenetrationLocator::MS_NO_CONTACT;
         }
@@ -171,10 +178,15 @@ ContactMaster::updateContactSet()
       else
       {
         if (pinfo->_distance >= 0)
-          has_penetrated[slave_node_num] = true;
+        {
+          if (hpit == has_penetrated.end())
+          {
+            has_penetrated.insert(slave_node_num);
+          }
+        }
       }
     }
-    if (_formulation == CF_AUGMENTED_LAGRANGE && has_penetrated[slave_node_num])
+    if (_formulation == CF_AUGMENTED_LAGRANGE && hpit != has_penetrated.end())
     {
       const RealVectorValue distance_vec(_mesh.node(slave_node_num) - pinfo->_closest_point);
       lagrange_multiplier[slave_node_num] += _penalty * pinfo->_normal * distance_vec;
@@ -187,10 +199,11 @@ ContactMaster::addPoints()
 {
   _point_to_info.clear();
 
-  std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
+  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+
   for (; it!=end; ++it)
   {
     PenetrationLocator::PenetrationInfo * pinfo = it->second;
@@ -202,9 +215,9 @@ ContactMaster::addPoints()
 
     unsigned int slave_node_num = it->first;
 
+    std::set<unsigned int>::iterator hpit = has_penetrated.find(slave_node_num);
 
-    std::map<unsigned int, bool>::iterator it( has_penetrated.find( slave_node_num ) );
-    if ( it != has_penetrated.end() && it->second == true )
+    if ( hpit != has_penetrated.end() )
     {
       addPoint(pinfo->_elem, pinfo->_closest_point);
       _point_to_info[pinfo->_closest_point] = pinfo;

@@ -332,7 +332,7 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
         ++plit)
     {
       PenetrationLocator & pen_loc = *plit->second;
-      std::map<unsigned int, bool> & has_penetrated = pen_loc._has_penetrated;
+      std::set<unsigned int> & has_penetrated = pen_loc._has_penetrated;
 
       bool frictional_contact_this_interaction = false;
 
@@ -355,7 +355,7 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
           {
             PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
-            std::map<unsigned int, bool>::iterator hpit( has_penetrated.find( slave_node_num ) );
+            std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
 
             if(hpit != has_penetrated.end())
             {
@@ -465,7 +465,7 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
       ++plit)
     {
       PenetrationLocator & pen_loc = *plit->second;
-      std::map<unsigned int, bool> & has_penetrated = pen_loc._has_penetrated;
+      std::set<unsigned int> & has_penetrated = pen_loc._has_penetrated;
 
       bool frictional_contact_this_interaction = false;
 
@@ -495,7 +495,7 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
             PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
 
-            std::map<unsigned int, bool>::iterator hpit( has_penetrated.find( slave_node_num ) );
+            std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
 
             if(hpit != has_penetrated.end())
             {
@@ -764,7 +764,7 @@ FrictionalContactProblem::numLocalFrictionalConstraints()
 
     if(frictional_contact_this_interaction)
     {
-      std::map<unsigned int, bool> & has_penetrated = pen_loc._has_penetrated;
+      std::set<unsigned int> & has_penetrated = pen_loc._has_penetrated;
 
       std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
 
@@ -774,7 +774,7 @@ FrictionalContactProblem::numLocalFrictionalConstraints()
 
         if(pen_loc._penetration_info[slave_node_num])
         {
-          std::map<unsigned int, bool>::iterator hpit( has_penetrated.find( slave_node_num ) );
+          std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
 
           if(hpit != has_penetrated.end())
           {
@@ -945,7 +945,7 @@ FrictionalContactProblem::updateIncrementalSlip()
 
     if(frictional_contact_this_interaction)
     {
-      std::map<unsigned int, bool> & has_penetrated = pen_loc._has_penetrated;
+      std::set<unsigned int> & has_penetrated = pen_loc._has_penetrated;
 
       std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
 
@@ -957,7 +957,7 @@ FrictionalContactProblem::updateIncrementalSlip()
         {
           PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
-          std::map<unsigned int, bool>::iterator hpit( has_penetrated.find( slave_node_num ) );
+          std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
 
           if(hpit != has_penetrated.end())
           {

@@ -50,7 +50,7 @@ OneDContactConstraint::jacobianSetup()
 void
 OneDContactConstraint::updateContactSet()
 {
-  std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
+  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
@@ -67,7 +67,7 @@ OneDContactConstraint::updateContactSet()
     if (pinfo->_distance > 0)
     {
       unsigned int slave_node_num = it->first;
-      has_penetrated[slave_node_num] = true;
+      has_penetrated.insert(slave_node_num);
     }
   }
 }
@@ -75,7 +75,8 @@ OneDContactConstraint::updateContactSet()
 bool
 OneDContactConstraint::shouldApply()
 {
-  return _penetration_locator._has_penetrated[_current_node->id()];
+  std::set<unsigned int>::iterator hpit = _penetration_locator._has_penetrated.find(_current_node->id());
+  return (hpit != _penetration_locator._has_penetrated.end());
 }
 
 Real

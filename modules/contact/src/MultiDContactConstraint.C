@@ -75,7 +75,7 @@ MultiDContactConstraint::jacobianSetup()
 void
 MultiDContactConstraint::updateContactSet()
 {
-  std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
+  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
 //  std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
   std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._unlocked_this_step;
 
@@ -94,6 +94,7 @@ MultiDContactConstraint::updateContactSet()
     const Node * node = pinfo->_node;
 
     unsigned int slave_node_num = it->first;
+    std::set<unsigned int>::iterator hpit = has_penetrated.find(slave_node_num);
 
     RealVectorValue res_vec;
     // Build up residual vector
@@ -122,23 +123,23 @@ MultiDContactConstraint::updateContactSet()
       break;
     }
 
-//    if(has_penetrated[slave_node_num] && resid < 0)
+//    if(hpit != has_penetrated.end() && resid < 0)
 //      std::cerr<<resid<<std::endl;
 /*
-    if(has_penetrated[slave_node_num] == true && resid < -.15)
+    if(hpit != has_penetrated.end() && resid < -.15)
     {
       std::cerr<<std::endl<<"Unlocking node "<<node->id()<<" because resid: "<<resid<<std::endl<<std::endl;
 
-      has_penetrated[slave_node_num] = false;
+      has_penetrated.erase(hpit);
       unlocked_this_step[slave_node_num] = true;
     }
     else*/
-    if (pinfo->_distance > 0 && !has_penetrated[slave_node_num])// && !unlocked_this_step[slave_node_num])
+    if (pinfo->_distance > 0 && hpit == has_penetrated.end())// && !unlocked_this_step[slave_node_num])
     {
 //      std::cerr<<std::endl<<"Locking node "<<node->id()<<" because distance: "<<pinfo->_distance<<std::endl<<std::endl;
 //      libMesh::print_trace();
 
-      has_penetrated[slave_node_num] = true;
+      has_penetrated.insert(slave_node_num);
       locked_this_step[slave_node_num] = true;
     }
   }
@@ -147,7 +148,8 @@ MultiDContactConstraint::updateContactSet()
 bool
 MultiDContactConstraint::shouldApply()
 {
-  return _penetration_locator._has_penetrated[_current_node->id()];
+  std::set<unsigned int>::iterator hpit = _penetration_locator._has_penetrated.find(_current_node->id());
+  return (hpit != _penetration_locator._has_penetrated.end());
 }
 
 Real

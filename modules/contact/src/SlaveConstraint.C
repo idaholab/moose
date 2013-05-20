@@ -62,7 +62,7 @@ SlaveConstraint::addPoints()
 {
   _point_to_info.clear();
 
-  std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
+  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
@@ -79,8 +79,8 @@ SlaveConstraint::addPoints()
 
     const Node * node = pinfo->_node;
 
-    std::map<unsigned int, bool>::iterator it( has_penetrated.find( slave_node_num ) );
-    if(it != has_penetrated.end() && it->second == true && node->processor_id() == libMesh::processor_id())
+    std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
+    if(hpit != has_penetrated.end() && node->processor_id() == libMesh::processor_id())
     {
       // Find an element that is connected to this node that and that is also on this processor
 
