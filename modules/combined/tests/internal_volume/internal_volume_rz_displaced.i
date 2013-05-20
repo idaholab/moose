@@ -128,7 +128,6 @@
   [./internalVolume]
     type = InternalVolume
     boundary = 2
-    variable = disp_x
   [../]
 []
 

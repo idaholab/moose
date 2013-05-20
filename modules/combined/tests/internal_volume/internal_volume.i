@@ -131,7 +131,6 @@
   [./internalVolume]
     type = InternalVolume
     boundary = 100
-    variable = disp_x
     scale_factor = 2
     addition = -7
   [../]

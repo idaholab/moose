@@ -1,7 +1,7 @@
 #ifndef INTERNALVOLUME_H
 #define INTERNALVOLUME_H
 
-#include "SideIntegralVariablePostprocessor.h"
+#include "SideIntegralPostprocessor.h"
 
 class InternalVolume;
 
@@ -19,7 +19,7 @@ InputParameters validParams<InternalVolume>();
  * interior volume by including an interior and an exterior surface
  * in the same sideset.
  */
-class InternalVolume : public SideIntegralVariablePostprocessor
+class InternalVolume : public SideIntegralPostprocessor
 {
 public:
 

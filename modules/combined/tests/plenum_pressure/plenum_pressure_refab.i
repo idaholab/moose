@@ -313,7 +313,6 @@
   [./internalVolume]
     type = InternalVolume
     boundary = 100
-    variable = disp_x
     execute_on = residual
   [../]
 
