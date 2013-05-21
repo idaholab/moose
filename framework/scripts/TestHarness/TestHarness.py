@@ -17,7 +17,7 @@ from timeit import default_timer as clock
 class TestHarness:
   def __init__(self, argv, app_name, moose_dir):
     self.factory = Factory()
-    self.input_file_name = 'tests'  # This is the file we look for, when looking for test specifications.
+
     self.test_table = []
     self.num_passed = 0
     self.num_failed = 0
@@ -59,11 +59,11 @@ class TestHarness:
       if (self.test_match.search(dirpath)):
         for file in filenames:
           # See if there were other arguments (test names) passed on the command line
-          if file == self.input_file_name or file[-2:] == 'py' and self.test_match.search(file):
+          if file == self.options.input_file_name or file[-2:] == 'py' and self.test_match.search(file):
             saved_cwd = os.getcwd()
             sys.path.append(os.path.abspath(dirpath))
             os.chdir(dirpath)
-            if file == self.input_file_name:  # New GetPot file formatted test
+            if file == self.options.input_file_name:  # New GetPot file formatted test
               tests = self.parseGetPotTestFormat(file)
             elif file[-2:] == 'py' and self.test_match.search(file): # Legacy file formatted test
               tests = self.parseLegacyTestFormat(file)
@@ -469,6 +469,8 @@ class TestHarness:
                       help="Report Timing information for passing tests")
     parser.add_option('-s', '--scale', action='store_true', dest='scaling', default=False,
                       help="Scale problems that have SCALE_REFINE set")
+    parser.add_option('-i', action='store', type='string', dest='input_file_name', default='tests',
+                      help='The default test specification file to look for (default="tests").')
     parser.add_option('--libmesh_dir', action="store", type='string', dest="libmesh_dir", default='',
                       help="Currently only needed for bitten code coverage")
     parser.add_option('--parallel', '-p', action="store", type='int', dest="parallel",
