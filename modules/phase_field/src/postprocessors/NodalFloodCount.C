@@ -376,32 +376,34 @@ NodalFloodCount::mergeSets()
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
     std::list<BubbleData>::iterator end = _bubble_sets[map_num].end();
-    for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != end; ++it1)
+    for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != end; /* No increment */)
     {
-      std::list<BubbleData>::iterator it2 = it1;
-      while (it2 != end)
-      {
-        if (it1 == it2 ||                       // Don't compare this set with itself
-            it1->_var_idx != it2->_var_idx)     // and don't try to merge bubbles with different variable indices.
-        {
-          ++it2;
-          continue;
-        }
+      bool need_it1_increment = true;
 
-        if (setsIntersect(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end()))
+      for (std::list<BubbleData>::iterator it2 = it1; it2 != end; ++it2)
+      {
+        if (it1 != it2 &&                       // Make sure that these iterators aren't pointing at the same set
+            it1->_var_idx == it2->_var_idx &&   // and that the sets have matching variable indices...
+                                                // then See if they overlap
+            setsIntersect(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end()))
         {
           // Merge these two sets and remove the duplicate set
           set_union.clear();
           std::set_union(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end(), set_union_inserter);
 
-          it1->_nodes = set_union;
-          _bubble_sets[map_num].erase(it2);
+          // Put the merged set in the latter iterator so that we'll compare earlier sets to it again
+          it2->_nodes = set_union;
+          _bubble_sets[map_num].erase(it1++);
 
-          it2 = _bubble_sets[map_num].begin();  // We have to loop over the earlier sets now that the current set has changed!
+          // don't increment the outer loop since we just deleted it incremented
+          need_it1_increment = false;
+          // break out of the inner loop and move on
+          break;
         }
-        else
-          ++it2;
       }
+
+      if (need_it1_increment)
+        ++it1;
     }
   }
   Moose::perf_log.pop("mergeSets()","NodalFloodCount");
@@ -572,11 +574,11 @@ NodalFloodCount::calculateBubbleVolumes()
   // Stick all the partial bubble volumes in one long single vector to be gathered on the root processor
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
     _all_bubble_volumes.insert(_all_bubble_volumes.end(), bubble_volumes[map_num].begin(), bubble_volumes[map_num].end());
-  
+
   Parallel::sum(_all_bubble_volumes); //do all the sums!
-  
+
   std::sort(_all_bubble_volumes.begin(), _all_bubble_volumes.end(), std::greater<Real>());
-  
+
   Moose::perf_log.pop("calculateBubbleVolume()","NodalFloodCount");
 }
 
@@ -592,9 +594,9 @@ NodalFloodCount::writeCSVFile(const std::string file_name, const std::vector<Rea
       _file_handles[file_name] = new std::ofstream(file_name.c_str());
       *_file_handles[file_name] << std::scientific << std::setprecision(6);
     }
-    
+
     mooseAssert(_file_handles[file_name]->is_open(), "File handle is not open");
-    
+
     std::copy(data.begin(), data.end(), infix_ostream_iterator<Real>(*_file_handles[file_name], ", "));
     *_file_handles[file_name] << std::endl;
   }
