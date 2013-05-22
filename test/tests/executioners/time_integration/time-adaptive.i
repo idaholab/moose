@@ -66,7 +66,11 @@
 []
 
 [Executioner]
-  type = SolutionTimeAdaptive
+  type = Transient
+  [./TimeStepper]
+    type = SolutionTimeAdaptiveDT
+    dt = 0.15
+  [../]
 
   petsc_options = '-snes_mf_operator'
 
@@ -77,7 +81,6 @@
   end_time = 5
   num_steps = 500000
 
-  dt = 0.15
   dtmax = 0.1
   dtmax = 0.25
 []
