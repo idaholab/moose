@@ -88,6 +88,7 @@ public:
 protected:
   FEProblem & _problem;
 
+  MooseEnum _time_scheme;
   int & _t_step;                        ///< Current timestep.
   Real & _time;                         ///< Current time
   Real _time_old;
@@ -139,6 +140,8 @@ protected:
   bool _cutback_occurred;
 
   std::ostringstream _diag;
+
+  void setupTimeIntegrator();
 };
 
 #endif //ADAPTIVETRANSIENT_H

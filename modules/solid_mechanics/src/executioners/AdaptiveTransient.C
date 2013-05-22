@@ -5,6 +5,7 @@
 #include "Factory.h"
 #include "SubProblem.h"
 #include "Function.h"
+#include "MooseApp.h"
 
 //libMesh includes
 #include "libmesh/implicit_system.h"
@@ -28,7 +29,7 @@ InputParameters validParams<AdaptiveTransient>()
   std::vector<Real> sync_times(1);
   sync_times[0] = -std::numeric_limits<Real>::max();
 
-  MooseEnum schemes("backward-euler, implicit-euler, explicit-euler, crank-nicolson, bdf2, petsc", "backward-euler");
+  MooseEnum schemes("implicit-euler, explicit-euler, crank-nicolson, bdf2", "implicit-euler");
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
   params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
   params.addRequiredParam<Real>("dt", "The timestep size between solves");
@@ -58,6 +59,7 @@ InputParameters validParams<AdaptiveTransient>()
 AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
     _problem(*getParam<FEProblem *>("_fe_problem")),
+    _time_scheme(getParam<MooseEnum>("scheme")),
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
     _time_old(_time),
@@ -750,4 +752,26 @@ void
 AdaptiveTransient::preExecute()
 {
   Executioner::preExecute();
+}
+
+
+void
+AdaptiveTransient::setupTimeIntegrator()
+{
+  // backwards compatibility
+  std::string ti_str;
+
+  switch (_time_scheme)
+  {
+  case 0: ti_str = "ImplicitEuler"; break;
+  case 1: ti_str = "ExplicitEuler"; break;
+  case 2: ti_str = "CrankNicolson"; break;
+  case 3: ti_str = "BDF2"; break;
+  default: mooseError("Unknown scheme"); break;
+  }
+
+  {
+    InputParameters params = _app.getFactory().getValidParams(ti_str);
+    _problem.addTimeIntegrator(ti_str, "ti", params);
+  }
 }
