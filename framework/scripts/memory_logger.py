@@ -8,20 +8,10 @@ class Logger():
     self.last_position = 0
 
   def read(self):
-    # Setup our cursor position
-    cursor_seek = self.log.tell() - 500
-    if cursor_seek - 500 <= 0:
-      cursor_seek = 0
-    # If cursor overlaps previous position, set it to previous position
-    if cursor_seek < self.last_position:
-      cursor_seek = self.last_position
-
-    # Read log from cursor position
-    self.log.seek(cursor_seek)
+    self.log.seek(self.last_position)
     output = self.log.read()
-    if output != '':
-      sys.stdout.write(output)
     self.last_position = self.log.tell()
+    sys.stdout.write(output)
     return output
 
   def pstack(self, process_id):
@@ -155,6 +145,7 @@ class ReadMemoryLog():
   def printHistory(self):
     RESET  = '\033[0m'
     BOLD   = '\033[1m'
+    BLACK  = '\033[30m'
     RED    = '\033[31m'
     GREEN  = '\033[32m'
     CYAN   = '\033[36m'
@@ -191,8 +182,11 @@ class ReadMemoryLog():
         tmp_str = item[0] + '{:20,.0f}'.format(item[1]) + ' K |' + '-'*int(percentage_length * (decimal.Decimal(item[1]) / largest_memory)) + RESET + '-| ' + percent + '%\n' + tmp_log
       elif item[1] > last_memory:
         tmp_str = item[0] + '{:20,.0f}'.format(item[1]) + ' K |' + RED + '-'*int(percentage_length * (decimal.Decimal(item[1]) / largest_memory)) + RESET + '| ' + percent + '%\n' + tmp_log
+      elif item[1] == last_memory:
+        tmp_str = item[0] + '{:20,.0f}'.format(item[1]) + ' K |' + CYAN + '-'*int(percentage_length * (decimal.Decimal(item[1]) / largest_memory)) + RESET + '| ' + percent + '%\n' + tmp_log
       else:
         tmp_str = item[0] + '{:20,.0f}'.format(item[1]) + ' K |' + GREEN + '-'*int(percentage_length * (decimal.Decimal(item[1]) / largest_memory)) + RESET + '| ' + percent + '%\n' + tmp_log
+
       last_memory = item[1]
       sys.stdout.write(tmp_str)
 
@@ -262,20 +256,17 @@ class ExportMemoryUsage():
     print 'Comma delimited file saved to: ' + os.getcwd() + '/' + str(args.export) + '.comma_delimited'
 
 def writeMemoryUsage(process):
-  file_object = open(process.args.outfile, 'w')
   last_memory = 0
+  file_object = open(process.args.outfile, 'w')
   def _usage(last_memory):
     time_object = GetTime()
     report = process.GetMemory()
     current_usage = [time_object.now, int(report['TOTAL']), report['LOG'], report['PSTACK']]
-    if int(current_usage[1]) != int(last_memory):
-      last_memory = int(current_usage[1])
+    if int(current_usage[1]) != last_memory or report['LOG'] != '' or report['PSTACK'] != '':
       file_object.write(str(current_usage) + '\n')
+      last_memory = int(current_usage[1])
       file_object.flush()
-    # Reset cursor position because the memory has not changed
-    else:
-      process.logger.last_position = (process.logger.last_position - len(report['LOG']))
-    return int(last_memory)
+    return last_memory
   def _zero():
     log = process.logger.read()
     pstack = ''
@@ -289,29 +280,46 @@ def writeMemoryUsage(process):
       if not os.kill(int(process.pid), 0):
         if process.args.track is None:
           if process.process.poll() != 0:
+            # Process still running: get data
             last_memory = _usage(last_memory)
           else:
+            # Process has finished: zero out the data
             _zero()
-            time.sleep(1)
-            print '\nApplication terminated. Wrote file:', process.args.outfile
-            return
+            break
         else:
+          # Process still running: get data
           last_memory = _usage(last_memory)
       else:
+        # Process has finished: zero out the data
         _zero()
-        print '\nApplication terminated. Wrote file:', process.args.outfile
-        return
+        break
       time.sleep(float(process.args.repeat_rate))
   except KeyboardInterrupt:
+    # User used ctrl-c
     _zero()
     print '\nCanceled by user. Wrote file:', process.args.outfile
     return
-  except:
+  except OSError:
+    # os.kill pid no longer exists (crash, what ever else)
     _zero()
     print '\nApplication terminated. Wrote file:', process.args.outfile
     return
-#  except:
-#    raise
+  except:
+    raise
+
+def which(program):
+  def is_exe(fpath):
+    return os.path.exists(fpath) and os.access(fpath, os.X_OK)
+  fpath, fname = os.path.split(program)
+  if fpath:
+    if is_exe(program):
+      return program
+  else:
+    for path in os.environ["PATH"].split(os.pathsep):
+      exe_file = os.path.join(path, program)
+      if is_exe(exe_file):
+        return exe_file
+  return None
 
 def _verifyARGs(args):
   option_count = 0
@@ -330,8 +338,8 @@ def _verifyARGs(args):
     print 'Gathering a stack trace across nodes is not supported.'
     sys.exit(1)
   if args.pstack:
-    if not os.path.exists('/usr/bin/pstack'):
-      print 'pstack binary not found. You must remove the --debug switch'
+    if which('pstack') == None:
+      print '\npstack binary not found. Add it to your PATH and try again.'
       sys.exit(1)
   if args.pbs:
     # There is a limit to how many times we can ssh somewhere (And for good reason)
