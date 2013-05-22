@@ -125,7 +125,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _n_iters(0),
     _n_linear_iters(0),
     _final_residual(0.),
-    _use_predictor(false)
+    _predictor(NULL)
 {
   _sys.nonlinear_solver->residual      = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian      = Moose::compute_jacobian;
@@ -659,8 +659,12 @@ void
 NonlinearSystem::setInitialSolution()
 {
   NumericVector<Number> & initial_solution(solution());
-  if (_use_predictor)
-    applyPredictor(initial_solution);
+  if (_predictor != NULL)
+  {
+    _predictor->apply(initial_solution);
+    _fe_problem.predictorCleanup(initial_solution);
+  }
+
   // do nodal BC
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
   for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
@@ -690,15 +694,9 @@ NonlinearSystem::setInitialSolution()
     setConstraintSlaveValues(initial_solution, true);
 }
 
-void NonlinearSystem::setPredictorScale(Real scale)
+void NonlinearSystem::setPredictor(Predictor * predictor)
 {
-  _use_predictor = true;
-}
-
-void
-NonlinearSystem::applyPredictor(NumericVector<Number> & initial_solution)
-{
-  _fe_problem.predictorCleanup(initial_solution);
+  _predictor = predictor;
 }
 
 void

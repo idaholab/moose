@@ -24,6 +24,7 @@
 #include "ConstraintWarehouse.h"
 #include "MoosePreconditioner.h"
 #include "TimeIntegrator.h"
+#include "Predictor.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
@@ -155,12 +156,6 @@ public:
    * Sets the value of constrained variables in the solution vector.
    */
   void setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced);
-
-  /**
-   * Modify the initial solution vector to apply a predictor
-   * @param initial_solution The initial solution vector
-   */
-  void applyPredictor(NumericVector<Number> & initial_solution);
 
   /**
    * Add residual contributions from Constraints
@@ -355,7 +350,7 @@ public:
 
   void debuggingResiduals(bool state) { _debugging_residuals = state; }
 
-  void setPredictorScale(Real scale);
+  void setPredictor(Predictor * predictor);
 
   TimeIntegrator * & getTimeIntegrator() { return _time_integrator; }
 
@@ -478,8 +473,9 @@ protected:
   unsigned int _n_linear_iters;
   Real _final_residual;
 
-  /// true if predictor is active
-  bool _use_predictor;
+  /// If predictor is active, this is non-NULL
+  Predictor * _predictor;
+
   bool _computing_initial_residual;
 
 
@@ -487,7 +483,6 @@ public:
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;
   friend class ComputeFullJacobianThread;
-  friend class ComputeExplicitJacobianThread;
   friend class ComputeDiracThread;
   friend class ComputeDampingThread;
 };

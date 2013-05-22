@@ -2731,6 +2731,15 @@ FEProblem::addTimeIntegrator(const std::string & type, const std::string & name,
 }
 
 void
+FEProblem::addPredictor(const std::string & type, const std::string & name, InputParameters parameters)
+{
+  parameters.set<FEProblem *>("_fe_problem") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
+  Predictor * predictor = static_cast<Predictor *>(_factory.create(type, name, parameters));
+  _nl.setPredictor(predictor);
+}
+
+void
 FEProblem::computeResidual(NonlinearImplicitSystem &/*sys*/, const NumericVector<Number> & soln, NumericVector<Number> & residual)
 {
   computeResidualType(soln, residual, Moose::KT_ALL);
@@ -2954,7 +2963,8 @@ FEProblem::updateSolution(NumericVector<Number>& /*vec_solution*/, NumericVector
 
 void
 FEProblem::predictorCleanup(NumericVector<Number>& /*ghosted_solution*/)
-{}
+{
+}
 
 void
 FEProblem::initDisplacedProblem(MooseMesh * displaced_mesh, InputParameters params)

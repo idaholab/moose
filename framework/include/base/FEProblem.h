@@ -232,6 +232,7 @@ public:
   virtual bool isTransient() { return _transient; }
 
   virtual void addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
+  virtual void addPredictor(const std::string & type, const std::string & name, InputParameters parameters);
 
   virtual void copySolutionsBackwards();
   // Update backward time solution vectors

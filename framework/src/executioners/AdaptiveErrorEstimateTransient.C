@@ -79,7 +79,7 @@ AdaptiveErrorEstimateTransient::preExecute()
   TransientExplicitSystem & aux_sys = _problem.getAuxiliarySystem().sys();
   _aux1 = &aux_sys.add_vector("aux1", true, GHOSTED);
 
-  _problem.getNonlinearSystem().setPredictorScale(1.0);
+//  _problem.getNonlinearSystem().setPredictorScale(1.0);
   Transient::preExecute();
 }
 

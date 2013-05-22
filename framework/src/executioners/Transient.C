@@ -112,11 +112,12 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 
   if (parameters.isParamValid("predictor_scale"))
   {
-
-    Real predscale(getParam<Real>("predictor_scale"));
+    Real predscale = getParam<Real>("predictor_scale");
     if (predscale >= 0.0 and predscale <= 1.0)
     {
-      _problem.getNonlinearSystem().setPredictorScale(getParam<Real>("predictor_scale"));
+      InputParameters params = _app.getFactory().getValidParams("Predictor");
+      params.set<Real>("scale") = predscale;
+      _problem.addPredictor("Predictor", "predictor", params);
     }
     else
     {

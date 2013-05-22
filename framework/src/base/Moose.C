@@ -214,6 +214,8 @@
 #include "BDF2.h"
 #include "CrankNicolson.h"
 #include "ExplicitEuler.h"
+//
+#include "Predictor.h"
 
 // MultiApps
 #include "TransientMultiApp.h"
@@ -489,6 +491,8 @@ registerObjects(Factory & factory)
   registerObject(BDF2);
   registerObject(CrankNicolson);
   registerObject(ExplicitEuler);
+  // predictors
+  registerObject(Predictor);
 
   // Transfers
 #ifdef LIBMESH_HAVE_DTK
