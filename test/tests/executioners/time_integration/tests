@@ -30,6 +30,7 @@
     input = 'AEEtest.i'
     exodiff = 'out_AEE.e'
     rel_err = 0.003
+    deleted = true
   [../]
 
   [./test_cranic_adapt]
@@ -60,6 +61,7 @@
     group = 'adaptive'
     method = 'OPT OPROF'
     no_valgrind = true
+    deleted = true
   [../]
 
   [./testcranic]

@@ -201,7 +201,10 @@ MooseApp::executeExecutioner()
 
   // run the simulation
   if (_executioner)
+  {
+    _executioner->init();
     _executioner->execute();
+  }
   else
     mooseError("No executioner was specified (go fix your input file)");
 }

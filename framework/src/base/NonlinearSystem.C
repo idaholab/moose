@@ -661,7 +661,7 @@ NonlinearSystem::onTimestepBegin()
 void
 NonlinearSystem::setInitialSolution()
 {
-  NumericVector<Number> & initial_solution( solution() );
+  NumericVector<Number> & initial_solution(solution());
   if (_use_predictor)
     applyPredictor(initial_solution);
   // do nodal BC
@@ -672,12 +672,12 @@ NonlinearSystem::setInitialSolution()
     BoundaryID boundary_id = bnode->_bnd_id;
     Node * node = bnode->_node;
 
-    if(node->processor_id() == libMesh::processor_id())
+    if (node->processor_id() == libMesh::processor_id())
     {
       // reinit variables in nodes
       _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-      std::vector<PresetNodalBC*> p( _bcs[0].activePresetNodal(boundary_id) );
+      std::vector<PresetNodalBC*> p(_bcs[0].activePresetNodal(boundary_id));
       for (std::vector<PresetNodalBC *>::iterator it = p.begin(); it != p.end(); ++it)
         (*it)->computeValue(initial_solution);
     }
@@ -692,6 +692,7 @@ NonlinearSystem::setInitialSolution()
   if(_fe_problem.getDisplacedProblem())
     setConstraintSlaveValues(initial_solution, true);
 }
+
 void NonlinearSystem::setPredictorScale(Real scale)
 {
   _use_predictor = true;

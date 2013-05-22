@@ -16,7 +16,6 @@
 #define TRANSIENT_H
 
 #include "Executioner.h"
-#include "LinearInterpolation.h"
 #include "FEProblem.h"
 
 // LibMesh includes
@@ -29,6 +28,7 @@
 
 // Forward Declarations
 class Transient;
+class TimeStepper;
 
 template<>
 InputParameters validParams<Transient>();
@@ -48,10 +48,14 @@ public:
    * @return Whether or not the solve was successful.
    */
   Transient(const std::string & name, InputParameters parameters);
-
   virtual ~Transient();
 
   virtual Problem & problem();
+
+  /**
+   * Initialize executioner
+   */
+  virtual void init();
 
   /**
    * This will call solve() on the NonlinearSystem.
@@ -119,10 +123,32 @@ public:
   /**
    * Get the Relative L2 norm of the change in the solution.
    */
-  Real solutionChangeNorm();
+  Real getSolutionChangeNorm();
+
+  void setTimeStepper(TimeStepper * ts) { _time_stepper = ts; }
+
+  /**
+   * Get the set of sync times
+   * @return The reference to the set of sync times
+   */
+  std::set<Real> & syncTimes() { return _sync_times; }
+
+  /**
+   * Get the maximum dt
+   * @return The maximum dt
+   */
+  Real & dtMax() { return _dtmax; }
+
+  /**
+   * Get the minimal dt
+   * @return The minimal dt
+   */
+  Real & dtMin() { return _dtmin; }
 
 protected:
   FEProblem & _problem;
+
+  TimeStepper * _time_stepper;
 
   /// Current timestep.
   int & _t_step;
@@ -130,8 +156,6 @@ protected:
   Real & _time;
   /// Previous time
   Real & _time_old;
-  /// The dt from the input file.
-  Real _input_dt;
   /// Current delta t... or timestep size.
   Real & _dt;
   Real & _dt_old;
@@ -156,19 +180,10 @@ protected:
   Real _ss_tmin;
   Real _old_time_solution_norm;
 
-  /// Whether or not the previous solve converged.
-  bool _converged;
-
   std::set<Real> _sync_times;
   Real _prev_sync_time;
   bool _remaining_sync_time;
 
-  /// Piecewise linear definition of time stepping
-  LinearInterpolation _time_ipol;
-  /// true if we want to use piecewise-defined time stepping
-  bool _use_time_ipol;
-  Real _growth_factor;
-  bool _cutback_occurred;
   bool _abort;
   bool _estimate_error;
   bool _time_error_out_to_file;
@@ -180,12 +195,16 @@ protected:
   bool _time_interval;
   ///the output interval to use
   Real _time_interval_output_interval;
-  Real start_time;
+  Real _start_time;
   Real _timestep_tolerance;
   Real _target_time;
   bool _use_multiapp_dt;
 
   bool _allow_output;
+
+  Real _solution_change_norm;
+
+  void computeSolutionChangeNorm();
 };
 
 #endif //TRANSIENTEXECUTIONER_H

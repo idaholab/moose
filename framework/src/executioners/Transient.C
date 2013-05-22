@@ -20,6 +20,8 @@
 #include "SubProblem.h"
 #include "TimePeriod.h"
 #include "TimeScheme.h"
+#include "TimeStepper.h"
+#include "MooseApp.h"
 //libMesh includes
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -43,7 +45,7 @@ InputParameters validParams<Transient>()
 
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
   params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
-  params.addRequiredParam<Real>("dt", "The timestep size between solves");
+  params.addParam<Real>("dt",              1.,     "The timestep size between solves");
   params.addParam<Real>("dtmin",           2.0e-14,    "The minimum timestep size in an adaptive run");
   params.addParam<Real>("dtmax",           1.0e30, "The maximum timestep size in an adaptive run");
   params.addParam<Real>("num_steps",       std::numeric_limits<Real>::max(),     "The number of timesteps in a transient run");
@@ -52,9 +54,6 @@ InputParameters validParams<Transient>()
   params.addParam<Real>("ss_check_tol",    1.0e-08,"Whenever the relative residual changes by less than this the solution will be considered to be at steady state.");
   params.addParam<Real>("ss_tmin",         0.0,    "Minimum number of timesteps to take before checking for steady state conditions.");
   params.addParam<std::vector<Real> >("sync_times", sync_times, "A list of times that will be solved for provided they are within the simulation time");
-  params.addParam<std::vector<Real> >("time_t", "The values of t");
-  params.addParam<std::vector<Real> >("time_dt", "The values of dt");
-  params.addParam<Real>("growth_factor", 2, "Maximum ratio of new to previous timestep sizes following a step that required the time step to be cut due to a failed solve.  For use with 'time_t' and 'time_dt'.");
   params.addParam<Real>("predictor_scale", "The scale factor for the predictor (can range from 0 to 1)");
 
   params.addParam<std::vector<std::string> >("time_periods", "The names of periods");
@@ -81,14 +80,14 @@ InputParameters validParams<Transient>()
 Transient::Transient(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
     _problem(*getParam<FEProblem *>("_fe_problem")),
+    _time_stepper(NULL),
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
     _time_old(_problem.timeOld()),
-    _input_dt(getParam<Real>("dt")),
     _dt(_problem.dt()),
     _dt_old(_problem.dtOld()),
-    _unconstrained_dt(getParam<Real>("dt")),
-    _unconstrained_dt_old(getParam<Real>("dt")),
+    _unconstrained_dt(0),
+    _unconstrained_dt_old(0),
     _prev_dt(-1),
     _reset_dt(false),
     _end_time(getParam<Real>("end_time")),
@@ -100,19 +99,14 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _ss_check_tol(getParam<Real>("ss_check_tol")),
     _ss_tmin(getParam<Real>("ss_tmin")),
     _old_time_solution_norm(0.0),
-    _converged(true),
     _sync_times(getParam<std::vector<Real> >("sync_times").begin(),getParam<std::vector<Real> >("sync_times").end()),
     _remaining_sync_time(true),
-    _time_ipol(getParam<std::vector<Real> >("time_t"),
-               getParam<std::vector<Real> >("time_dt")),
-    _use_time_ipol(_time_ipol.getSampleSize() > 0),
-    _growth_factor(getParam<Real>("growth_factor")),
-    _cutback_occurred(false),
     _abort(getParam<bool>("abort_on_solve_fail")),
     _estimate_error(getParam<bool>("estimate_time_error")),
     _time_error_out_to_file(getParam<bool>("output_to_file")),
     _time_errors_filename(getParam<std::string>("file_name")),
     _time_interval(false),
+    _start_time(getParam<Real>("start_time")),
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(-1),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
@@ -120,8 +114,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 {
   _t_step = 0;
   _dt = 0;
-  _time = _time_old = getParam<Real>("start_time");
-  start_time = _time;
+  _time = _time_old = _start_time;
   _problem.transient(true);
 
   if (parameters.isParamValid("predictor_scale"))
@@ -138,6 +131,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     }
   }
 
+#if 0
   if(getParam<bool>("use_AB2"))
   {
     _problem.getTimeScheme()->useAB2Predictor();
@@ -157,28 +151,48 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     }
   }
   _cumulative_error =0;
+#endif
+
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
-
   _problem.getNonlinearSystem().timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<MooseEnum>("scheme")));
 }
 
 Transient::~Transient()
 {
+  delete _time_stepper;
+#if 0
   if(_time_error_out_to_file)
   {
     _time_error_file.close();
   }
+#endif
   // This problem was built by the Factory and needs to be released by this destructor
   delete &_problem;
 }
 
 void
+Transient::init()
+{
+  if (_time_stepper == NULL)
+  {
+    mooseWarning("Time stepper not set, defaulting in constant time stepping...");
+    InputParameters pars = _app.getFactory().getValidParams("ConstantDT");
+    pars.set<FEProblem *>("_fe_problem") = &_problem;
+    pars.set<Transient *>("_executioner") = this;
+    pars.set<Real>("dt") = getParam<Real>("dt");
+    _time_stepper = static_cast<TimeStepper *>(_app.getFactory().create("ConstantDT", "TimeStepper", pars));
+  }
+
+  _problem.initialSetup();
+  _time_stepper->init();
+}
+
+void
 Transient::execute()
 {
-  _problem.initialSetup();
-
   preExecute();
+  _time_stepper->preExecute();
 
   // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have a wrong answer and might need to be regolded.
   // The reason is that we actually move the solution back in time before we actually start solving (which I think is wrong).  So this call here
@@ -187,12 +201,14 @@ Transient::execute()
   _problem.copyOldSolutions();
 
   // Start time loop...
-  while(keepGoing())
+  while (keepGoing())
   {
     takeStep();
     endStep();
   }
+
   postExecute();
+  _time_stepper->postExecute();
 }
 
 void
@@ -209,17 +225,13 @@ Transient::takeStep(Real input_dt)
     _dt = input_dt;
 
   _problem.onTimestepBegin();
-  if (_converged)
-  {
-    // Update backward material data structures
-    _problem.updateMaterials();
-  }
+  if (lastSolveConverged())
+    _problem.updateMaterials();             // Update backward material data structures
 
   // Increment time
   _time = _time_old + _dt;
 
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
-
   _problem.execMultiApps(EXEC_TIMESTEP_BEGIN);
 
   std::cout<<"DT: "<<_dt<<std::endl;
@@ -242,6 +254,7 @@ Transient::takeStep(Real input_dt)
   }
 
   preSolve();
+  _time_stepper->preSolve();
 
   _problem.timestepSetup();
 
@@ -254,38 +267,36 @@ Transient::takeStep(Real input_dt)
   // Compute Post-Aux User Objects (Timestep begin)
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
 
-  _problem.solve();
-
-  _converged = _problem.converged();
-
+  _time_stepper->step();
 
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
-  bool last_solve_converged = lastSolveConverged();
-
-  if(last_solve_converged)
+  if (lastSolveConverged())
+  {
     std::cout<<"Solve Converged!"<<std::endl;
-  else
-    std::cout<<"Solve Did NOT Converge!"<<std::endl;
 
-  if (last_solve_converged)
+    computeSolutionChangeNorm();
+
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+#if 0
+    // User definable callback
+    if(_estimate_error)
+    {
+      estimateTimeError();
+    }
+#endif
 
-  // User definable callback
-  if(_estimate_error)
-  {
-    estimateTimeError();
-  }
-  postSolve();
+    _problem.onTimestepEnd();
 
-  _problem.onTimestepEnd();
-
-  if (last_solve_converged)
-  {
     _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
     _problem.execTransfers(EXEC_TIMESTEP);
     _problem.execMultiApps(EXEC_TIMESTEP);
   }
+  else
+    std::cout<<"Solve Did NOT Converge!"<<std::endl;
+
+  postSolve();
+  _time_stepper->postSolve();
 }
 
 void
@@ -295,6 +306,7 @@ Transient::endStep()
   {
     // Compute the Error Indicators and Markers
     _problem.computeIndicatorsAndMarkers();
+
     //output
     if(_time_interval)
     {
@@ -309,7 +321,7 @@ Transient::endStep()
     }
     else
     {
-    // if _reset_dt is true, force the output no matter what
+      // if _reset_dt is true, force the output no matter what
       if(_allow_output)
       {
         _problem.output(_reset_dt);
@@ -329,7 +341,10 @@ Transient::endStep()
     _problem.copyOldSolutions();
   }
   else
-    _problem.restoreSolutions();
+  {
+    _time_stepper->rejectStep();
+    _problem.getNonlinearSystem()._time_scheme->rejectStep();
+  }
 }
 
 Real
@@ -339,7 +354,7 @@ Transient::computeConstrainedDT()
   if (_t_step == 0)
   {
     _t_step = 1;
-    _dt = _input_dt;
+    _dt = computeDT();
   }
 
 //  // If start up steps are needed
@@ -349,6 +364,7 @@ Transient::computeConstrainedDT()
 //    _dt = _input_dt;
 
   Real dt_cur = _dt;
+
   //After startup steps, compute new dt
   if (_t_step > _n_startup_steps)
   {
@@ -369,9 +385,9 @@ Transient::computeConstrainedDT()
     dt_cur = _end_time - _time;
 
   // Adjust to a sync time if supplied and skipped over
-  if (_remaining_sync_time && _time + dt_cur+_timestep_tolerance >= (*_sync_times.begin()))
+  if (_remaining_sync_time && _time + dt_cur + _timestep_tolerance >= (*_sync_times.begin()))
   {
-    if(fabs(*_sync_times.begin() - _time)>=_timestep_tolerance)
+    if (fabs(*_sync_times.begin() - _time) >= _timestep_tolerance)
     {
       dt_cur = *_sync_times.begin() - _time;
     }
@@ -379,27 +395,23 @@ Transient::computeConstrainedDT()
     _sync_times.erase(_sync_times.begin());
     if(_time_interval)
     {
-      Real d = (_time+dt_cur-start_time)/_time_interval_output_interval;
-      if(d-std::floor(d) <= _timestep_tolerance || std::ceil(d)-d <=_timestep_tolerance)
+      Real d = (_time + dt_cur - _start_time) / _time_interval_output_interval;
+      if (d-std::floor(d) <= _timestep_tolerance || std::ceil(d)-d <= _timestep_tolerance)
       {
-          _sync_times.insert((_time +dt_cur + _time_interval_output_interval));
+        _sync_times.insert((_time + dt_cur + _time_interval_output_interval));
       }
     }
     if (_sync_times.begin() == _sync_times.end())
       _remaining_sync_time = false;
 
-    _prev_dt = _dt;
+    _prev_dt = dt_cur;
     _reset_dt = true;
   }
-
   else
   {
     if (_reset_dt)
     {
-      if (_use_time_ipol)
-        dt_cur = _time_ipol.sample(_time);
-      else
-        dt_cur = _prev_dt;
+      dt_cur = computeDT();
       _reset_dt = false;
     }
   }
@@ -408,13 +420,12 @@ Transient::computeConstrainedDT()
   Real multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP_BEGIN);
   if(_use_multiapp_dt || multi_app_dt < dt_cur)
     dt_cur = multi_app_dt;
-
   multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP);
   if(multi_app_dt < dt_cur)
     dt_cur = multi_app_dt;
 
   // Adjust to a target time if set
-  if(_target_time > 0 && _time + dt_cur+_timestep_tolerance >= _target_time)
+  if (_target_time > 0 && _time + dt_cur + _timestep_tolerance >= _target_time)
   {
     dt_cur = _target_time - _time;
 
@@ -428,36 +439,7 @@ Transient::computeConstrainedDT()
 Real
 Transient::computeDT()
 {
-  if (!lastSolveConverged())
-  {
-    _cutback_occurred = true;
-    //std::cout<<"Solve failed... cutting timestep"<<std::endl;
-    //return _dt / 2.0;
-
-    // Instead of blindly cutting timestep, respect dtmin.
-    if (_dt <= _dtmin)
-      mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
-
-    if (0.5 * _dt >= _dtmin)
-      return 0.5 * _dt;
-
-    else // (0.5 * _dt < _dtmin)
-      return _dtmin;
-  }
-
-  Real dt = _unconstrained_dt_old;
-  if (_use_time_ipol)
-  {
-    dt = _time_ipol.sample(_time);
-    if (_cutback_occurred &&
-        dt > _dt * _growth_factor)
-    {
-      dt = _dt * _growth_factor;
-    }
-  }
-
-  _cutback_occurred = false;
-  return dt;
+  return _time_stepper->computeDT();
 }
 
 bool
@@ -465,7 +447,7 @@ Transient::keepGoing()
 {
   bool keep_going = true;
   // Check for stop condition based upon steady-state check flag:
-  if(_converged && _trans_ss_check == true && _time > _ss_tmin)
+  if(lastSolveConverged() && _trans_ss_check == true && _time > _ss_tmin)
   {
     // Compute new time solution l2_norm
     Real new_time_solution_norm = _problem.getNonlinearSystem().currentSolution()->l2_norm();
@@ -502,7 +484,8 @@ Transient::keepGoing()
     if(_allow_output)
       _problem.outputPostprocessors(true);
   }
-  if(!_converged && _abort)
+
+  if(!lastSolveConverged() && _abort)
   {
     std::cout<<"Aborting as solve did not converge and input selected to abort"<<std::endl;
     keep_going = false;
@@ -513,6 +496,7 @@ Transient::keepGoing()
 void
 Transient::estimateTimeError()
 {
+#if 0
     _error = _problem.getTimeScheme()->estimateTimeError(*_problem.getNonlinearSystem().sys().current_local_solution);
     std::cout<<"Time Error Estimate: "<<_error<<std::endl;
     _cumulative_error += _error;
@@ -520,12 +504,13 @@ Transient::estimateTimeError()
     {
      _time_error_file << _t_step<<", "<<_dt<<", "<<_error<<", "<<_cumulative_error<<" \n";
     }
+#endif
 }
 
 bool
 Transient::lastSolveConverged()
 {
-  return _converged;
+  return _time_stepper->converged();
 }
 
 void
@@ -533,20 +518,16 @@ Transient::preExecute()
 {
   if(_problem.out().useTimeInterval())
   {
-    _time_interval=true;
+    _time_interval = true;
     _time_interval_output_interval = _problem.out().timeinterval();
     _sync_times.insert((_time + _time_interval_output_interval));
   }
   // process time periods
-  const std::vector<TimePeriod *> _time_periods = _problem.getTimePeriods();
-  for (unsigned int i = 0; i < _time_periods.size(); ++i)
-    _sync_times.insert(_time_periods[i]->start());
+  const std::vector<TimePeriod *> time_periods = _problem.getTimePeriods();
+  for (unsigned int i = 0; i < time_periods.size(); ++i)
+    _sync_times.insert(time_periods[i]->start());
 
-  const std::vector<Real> & time = getParam<std::vector<Real> >("time_t");
-  if (_use_time_ipol)
-    _sync_times.insert(time.begin()+1, time.end());          // insert times as sync points except the very first one
   // Advance to the first sync time if one is provided in sim time range
-
   while (_remaining_sync_time && *_sync_times.begin() <= _time)
   {
     _sync_times.erase(_sync_times.begin());
@@ -554,11 +535,10 @@ Transient::preExecute()
       _remaining_sync_time = false;
   }
   if(_remaining_sync_time)
- {
+  {
     _prev_sync_time = *_sync_times.begin();
   }
 }
-
 
 Problem &
 Transient::problem()
@@ -579,8 +559,8 @@ Transient::forceOutput()
   _problem.outputPostprocessors(true);
 }
 
-Real
-Transient::solutionChangeNorm()
+void
+Transient::computeSolutionChangeNorm()
 {
   NumericVector<Number> & current_solution  = (*_problem.getNonlinearSystem().sys().current_local_solution);
   NumericVector<Number> & old_solution = (*_problem.getNonlinearSystem().sys().old_local_solution);
@@ -596,6 +576,12 @@ Transient::solutionChangeNorm()
 
   delete &difference;
 
-  return (abs_change / current_solution.l2_norm()) / _dt;
+  _solution_change_norm = (abs_change / current_solution.l2_norm()) / _dt;
+}
+
+Real
+Transient::getSolutionChangeNorm()
+{
+  return _solution_change_norm;
 }
 

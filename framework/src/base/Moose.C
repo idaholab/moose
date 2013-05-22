@@ -206,6 +206,10 @@
 #include "ValueThresholdMarker.h"
 #include "ValueRangeMarker.h"
 
+// time steppers
+#include "ConstantDT.h"
+#include "FunctionDT.h"
+
 // MultiApps
 #include "TransientMultiApp.h"
 #include "FullSolveMultiApp.h"
@@ -272,6 +276,7 @@
 #include "AddMultiAppAction.h"
 #include "AddTransferAction.h"
 #include "AddNodalNormalsAction.h"
+#include "SetupTimeStepperAction.h"
 
 
 namespace Moose {
@@ -471,6 +476,10 @@ registerObjects(Factory & factory)
   registerMultiApp(TransientMultiApp);
   registerMultiApp(FullSolveMultiApp);
 
+  // time steppers
+  registerObject(ConstantDT);
+  registerObject(FunctionDT);
+
   // Transfers
 #ifdef LIBMESH_HAVE_DTK
   registerTransfer(MultiAppDTKUserObjectTransfer);
@@ -511,6 +520,7 @@ addActionTypes(Syntax & syntax)
   registerActionName("add_variable", false);
   registerActionName("add_kernel", false);
   registerActionName("setup_executioner", true);
+  registerActionName("setup_time_stepper", false);
   registerActionName("init_displaced_problem", false);
   registerActionName("create_problem", true);
   registerActionName("setup_output", false);
@@ -589,6 +599,7 @@ addActionTypes(Syntax & syntax)
 "(setup_mesh_complete)"
 "(create_problem)"
 "(setup_executioner)"
+"(setup_time_stepper)"
 "(add_feproblem)"
 "(setup_time_periods)"
 "(init_displaced_problem)"
@@ -663,6 +674,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(AddFunctionAction, "add_function");
   registerAction(CreateExecutionerAction, "setup_executioner");
+  registerAction(SetupTimeStepperAction, "setup_time_stepper");
   registerAction(SetupTimePeriodsAction, "setup_time_periods");
   registerAction(InitDisplacedProblemAction, "init_displaced_problem");
   registerAction(CreateProblemAction, "create_problem");

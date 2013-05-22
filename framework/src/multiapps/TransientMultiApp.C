@@ -68,7 +68,7 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
       Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
       if(!ex)
         mooseError("MultiApp " << name << " is not using a Transient Executioner!");
-      appProblem(_first_local_app + i)->initialSetup();
+      ex->init();
       ex->preExecute();
       appProblem(_first_local_app + i)->copyOldSolutions();
       _transient_executioners[i] = ex;
@@ -146,7 +146,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
             mooseError("While sub_cycling "<<_name<<_first_local_app+i<<" REALLY failed!"<<std::endl);
         }
 
-        Real solution_change_norm = ex->solutionChangeNorm();
+        Real solution_change_norm = ex->getSolutionChangeNorm();
 
         if(_detect_steady_state)
           std::cout<<"Solution change norm: "<<solution_change_norm<<std::endl;

@@ -43,12 +43,12 @@ CoupledTransientExecutioner::execute()
     mooseError("The number of executioners of different that the number of problems.");
 
   unsigned int n_problems = _executioners.size();
-  // initial setup
-  for (unsigned int i = 0; i < n_problems; i++)
-    _fe_problems[i]->initialSetup();
   // preExecute
   for (unsigned int i = 0; i < n_problems; i++)
+  {
+    _executioners[i]->init();
     _executioners[i]->preExecute();
+  }
 
   std::vector<Transient *> trans(n_problems);
   for (unsigned int i = 0; i < n_problems; i++)

@@ -80,6 +80,7 @@ FullSolveMultiApp::solveStep(Real dt, Real target_time)
   for(unsigned int i=0; i<_my_num_apps; i++)
   {
     Executioner * ex = _executioners[i];
+    ex->init();
     ex->execute();
   }
 

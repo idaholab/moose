@@ -105,7 +105,9 @@ DT2Transient::postSolve()
   NonlinearSystem & nl = _problem.getNonlinearSystem(); // returned reference is not used for anything?
   TransientNonlinearImplicitSystem & nl_sys = _problem.getNonlinearSystem().sys();
   TransientExplicitSystem & aux_sys = _problem.getAuxiliarySystem().sys();
-  if (_converged)
+
+  bool converged = nl.converged();
+  if (converged)
   {
     // save the solution (for time step with dt)
     *_u1 = *nl_sys.current_local_solution;
@@ -158,8 +160,8 @@ DT2Transient::postSolve()
 
     nl.solve();
 
-    _converged = nl_sys.nonlinear_solver->converged;
-    if (!_converged) return;
+    converged = nl.converged();
+    if (!converged) return;
     nl_sys.update();
 
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
@@ -174,8 +176,8 @@ DT2Transient::postSolve()
     Moose::setSolverDefaults(_problem);
     nl.solve();
 
-    _converged = nl_sys.nonlinear_solver->converged;
-    if (!_converged) return;
+    converged = nl_sys.nonlinear_solver->converged;
+    if (!converged) return;
     nl_sys.update();
 
     *_u2 = *nl_sys.current_local_solution;
@@ -196,7 +198,7 @@ DT2Transient::postSolve()
 bool
 DT2Transient::lastSolveConverged()
 {
-  if (!_converged)
+  if (!_problem.getNonlinearSystem().converged())
     return false;
 
   if (_error < _e_max)

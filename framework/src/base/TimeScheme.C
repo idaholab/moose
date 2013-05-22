@@ -96,22 +96,6 @@ TimeScheme::onTimestepBegin()
   _dt_old = _time_stack.back().getDt();
   if(_time_stack.size()!=0 && _time_stack.back().getTimeStep() == _t_step)
   {
-    if(_dt != _dt_old)
-    {
-     //Solve Fail
-      if (_dt2_check)
-      {
-        reclaimTimeStep(*_dt2_check);
-        delete _dt2_check;
-      }
-      _dt2_check = new TimeStep(_time_stack.back());
-      _time_stack.pop_back();
-    }
-    else
-    {
-      //DT2Transient
-      _dt2_bool = true;
-    }
   }
   else
   {
@@ -162,7 +146,13 @@ TimeScheme::onTimestepBegin()
   default:
     break;
   }
+}
 
+void
+TimeScheme::rejectStep()
+{
+  //Solve Fail
+  _time_stack.pop_back();
 }
 
 void TimeScheme::Adams_Bashforth2P(NumericVector<Number> & initial_solution)

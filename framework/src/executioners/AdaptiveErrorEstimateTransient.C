@@ -96,12 +96,11 @@ AdaptiveErrorEstimateTransient::preSolve()
 void
 AdaptiveErrorEstimateTransient::postSolve()
 {
-  /*NonlinearSystem & nl =*/ _problem.getNonlinearSystem(); // returned reference is not used for anything?
+  NonlinearSystem & nl = _problem.getNonlinearSystem(); // returned reference is not used for anything?
   TransientNonlinearImplicitSystem & nl_sys = _problem.getNonlinearSystem().sys();
   TransientExplicitSystem & aux_sys = _problem.getAuxiliarySystem().sys();
-  if (_converged)
+  if (nl.converged())
   {
-
     *_u1 = *nl_sys.current_local_solution;
     _u1->close();
 
@@ -126,9 +125,9 @@ AdaptiveErrorEstimateTransient::postSolve()
 bool
 AdaptiveErrorEstimateTransient::lastSolveConverged()
 {
-  if (!_converged)
+  if (!_problem.getNonlinearSystem().converged())
   {
-	_dt_steps_taken =0;
+	_dt_steps_taken = 0;
     return false;
   }
   if (_error < _e_max)
@@ -138,8 +137,7 @@ AdaptiveErrorEstimateTransient::lastSolveConverged()
   else
   {
     std::cout << "AEETransient: Marking last solve not converged " << _error<<" "<<_e_max<< std::endl;
-    _dt_steps_taken =0;
-    _converged = false;
+    _dt_steps_taken = 0;
     return false;
   }
 }

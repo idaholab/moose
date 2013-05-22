@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "AdaptAndModify.h"
+#include "TimeStepper.h"
 
 //Moose includes
 
@@ -60,5 +61,8 @@ AdaptAndModify::endStep()
     _problem.copyOldSolutions();
   }
   else
-    _problem.restoreSolutions();
+  {
+    _time_stepper->rejectStep();
+    _problem.getNonlinearSystem()._time_scheme->rejectStep();
+  }
 }

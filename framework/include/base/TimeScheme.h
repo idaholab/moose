@@ -48,6 +48,8 @@ public:
    */
   void onTimestepBegin();
 
+  void rejectStep();
+
   /**
    * Second Order Adams_Bashforth Predictor, takes as argument the initial solution
    * Currently needed for getting the errors using estimate error.

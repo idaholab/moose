@@ -56,6 +56,11 @@ public:
   virtual ~Executioner();
 
   /**
+   * Initialize the executioner
+   */
+  virtual void init();
+
+  /**
    * Pure virtual execute function MUST be overriden by children classes.
    * This is where the Executioner actually does it's work.
    */

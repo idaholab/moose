@@ -12,65 +12,62 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Executioner.h"
-
-// Moose includes
-#include "MooseMesh.h"
+#include "TimeStepper.h"
 #include "FEProblem.h"
-
-// C++ includes
-#include <vector>
-#include <limits>
-
+#include "Transient.h"
 
 template<>
-InputParameters validParams<Executioner>()
+InputParameters validParams<TimeStepper>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<std::string>("restart_file_base", "File base name used for restart");
-
-  params.addPrivateParam<std::string>("built_by_action", "setup_executioner");
-
-  params.addParamNamesToGroup("restart_file_base", "Restart");
 
   return params;
 }
 
-Executioner::Executioner(const std::string & name, InputParameters parameters) :
+TimeStepper::TimeStepper(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    UserObjectInterface(parameters),
-    PostprocessorInterface(parameters),
-    _initial_residual_norm(std::numeric_limits<Real>::max()),
-    _old_initial_residual_norm(std::numeric_limits<Real>::max()),
-    _restart_file_base(getParam<std::string>("restart_file_base"))
+    _fe_problem(*getParam<FEProblem *>("_fe_problem")),
+    _executioner(*getParam<Transient *>("_executioner")),
+    _time(_fe_problem.time()),
+    _time_old(_fe_problem.timeOld()),
+    _t_step(_fe_problem.timeStep()),
+    _dt(_fe_problem.dt()),
+    _dt_min(_executioner.dtMin()),
+    _dt_max(_executioner.dtMax()),
+    _converged(true),
+    _current_dt(1.0)
 {
 }
 
-Executioner::~Executioner()
-{
-}
-
-void
-Executioner::init()
-{
-}
-
-void
-Executioner::preExecute()
+TimeStepper::~TimeStepper()
 {
 }
 
 void
-Executioner::postExecute()
+TimeStepper::init()
 {
 }
 
 void
-Executioner::preSolve()
+TimeStepper::step()
 {
+  _fe_problem.solve();
+  _converged = _fe_problem.converged();
 }
 
 void
-Executioner::postSolve()
+TimeStepper::rejectStep()
 {
+}
+
+bool
+TimeStepper::converged()
+{
+  return _converged;
+}
+
+void
+TimeStepper::forceTimeStep(Real dt)
+{
+  _current_dt = dt;
 }
