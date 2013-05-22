@@ -12,11 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-
-#include "ImplicitEuler.h"
-
 #ifndef ENTHALPYIMPLICITEULER
 #define ENTHALPYIMPLICITEULER
+
+#include "TimeDerivative.h"
 
 //Forward Declarations
 class EnthalpyImplicitEuler;
@@ -24,7 +23,7 @@ class EnthalpyImplicitEuler;
 template<>
 InputParameters validParams<EnthalpyImplicitEuler>();
 
-class EnthalpyImplicitEuler : public ImplicitEuler
+class EnthalpyImplicitEuler : public TimeDerivative
 {
 public:
 

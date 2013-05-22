@@ -18,13 +18,13 @@
 template<>
 InputParameters validParams<EnthalpyImplicitEuler>()
 {
-  InputParameters params = validParams<ImplicitEuler>();
+  InputParameters params = validParams<TimeDerivative>();
   params.addCoupledVar("temperature", "TODO: add description");
   return params;
 }
 
 EnthalpyImplicitEuler::EnthalpyImplicitEuler(const std::string & name, InputParameters parameters)
-  :ImplicitEuler(name, parameters),
+  :TimeDerivative(name, parameters),
    
    _temperature(coupledValue("temperature")),
    _temperature_old(coupledValue("temperature_old")),
@@ -52,6 +52,6 @@ Real
 EnthalpyImplicitEuler::computeQpJacobian()
 {
 
-   return (_porosity[_qp]* _density[_qp]*ImplicitEuler::computeQpJacobian());
+   return (_porosity[_qp]* _density[_qp]*TimeDerivative::computeQpJacobian());
   
 }
