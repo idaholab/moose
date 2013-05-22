@@ -4,6 +4,7 @@
 #include "Factory.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
+#include "Conversion.h"
 
 static unsigned int n = 0;
 

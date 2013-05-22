@@ -2,6 +2,7 @@
 #include "ThermalContactAuxVarsAction.h"
 #include "Factory.h"
 #include "FEProblem.h"
+#include "Conversion.h"
 
 static unsigned int n = 0;
 

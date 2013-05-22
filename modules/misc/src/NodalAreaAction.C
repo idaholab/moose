@@ -4,6 +4,7 @@
 #include "FEProblem.h"
 #include "Parser.h"
 #include "MooseApp.h"
+#include "Conversion.h"
 
 static unsigned int counter = 0;
 
