@@ -19,6 +19,7 @@
 #include "MooseArray.h"
 #include "MooseObject.h"
 #include "SetupInterface.h"
+#include "TransientInterface.h"
 #include "UserObjectInterface.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "FunctionInterface.h"
@@ -44,6 +45,7 @@ InputParameters validParams<DGKernel>();
 class DGKernel :
   public MooseObject,
   public SetupInterface,
+  public TransientInterface,
   public FunctionInterface,
   public UserObjectInterface,
   public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
