@@ -5,16 +5,21 @@
 template<>
 InputParameters validParams<MaterialTensorAux>()
 {
+  InputParameters params = validParams<AuxKernel>();
+  addMaterialTensorParams(params);
+  return params;
+}
+
+void addMaterialTensorParams(InputParameters& params)
+{
   MooseEnum quantities("VonMises=1, PlasticStrainMag, Hydrostatic, Hoop, Radial, Axial, MaxPrincipal, MedPrincipal, MinPrincipal, FirstInvariant, SecondInvariant, ThirdInvariant, TriAxiality");
 
-  InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<std::string>("tensor", "The material tensor name.");
   params.addParam<int>("index", -1, "The index into the tensor, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
   params.addParam<MooseEnum>("quantity", quantities, "A scalar quantity to compute: " + quantities.getRawNames());
 
   params.addParam<RealVectorValue>("point1", RealVectorValue(0, 0, 0), "Point one for defining an axis");
   params.addParam<RealVectorValue>("point2", RealVectorValue(0, 1, 0), "Point two for defining an axis");
-  return params;
 }
 
 MaterialTensorAux::MaterialTensorAux( const std::string & name, InputParameters parameters ) :
@@ -25,26 +30,35 @@ MaterialTensorAux::MaterialTensorAux( const std::string & name, InputParameters 
     _p1( getParam<RealVectorValue>("point1") ),
     _p2( getParam<RealVectorValue>("point2") )
 {
-  if (_quantity_moose_enum.isValid())
+  checkMaterialTensorParams(_quantity, _quantity_moose_enum, _index, _name);
+
+}
+
+void
+MaterialTensorAux::checkMaterialTensorParams(MTA_ENUM &quantity,
+                                             const MooseEnum &quantity_moose_enum,
+                                             const int index,
+                                             const std::string &name)
+{
+  if (quantity_moose_enum.isValid())
   {
-    if ( _index > 0 )
-      mooseError("Cannot define an index and a quantity in " + _name);
+    if ( index > 0 )
+      mooseError("Cannot define an index and a quantity in " + name);
     else
-      _quantity = MTA_ENUM(int(_quantity_moose_enum));
+      quantity = MTA_ENUM(int(quantity_moose_enum));
   }
   else
   {
-    if ( _index < 0 )
-      mooseError("Neither an index nor a quantity listed for " + _name);
+    if ( index < 0 )
+      mooseError("Neither an index nor a quantity listed for " + name);
     else
-      _quantity = MTA_COMPONENT; // default
+      quantity = MTA_COMPONENT; // default
   }
 
-  if (_index > -1 && _index > 5)
+  if (index > -1 && index > 5)
   {
     mooseError("MaterialTensorAux requires the index to be >= 0 and <= 5 OR < 0 (off).");
   }
-
 }
 
 Real
@@ -63,7 +77,7 @@ MaterialTensorAux::computeValue()
 Real
 MaterialTensorAux::getTensorQuantity(const SymmTensor & tensor,
                                      const MTA_ENUM quantity,
-                                     MooseEnum & quantity_moose_enum,
+                                     const MooseEnum & quantity_moose_enum,
                                      const int index,
                                      const Point * curr_point,
                                      const Point * p1,

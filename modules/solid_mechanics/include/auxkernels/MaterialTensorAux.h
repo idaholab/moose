@@ -6,9 +6,27 @@
 class MaterialTensorAux;
 class SymmTensor;
 
+enum MTA_ENUM
+{
+  MTA_COMPONENT,
+  MTA_VONMISES,
+  MTA_PLASTICSTRAINMAG,
+  MTA_HYDROSTATIC,
+  MTA_HOOP,
+  MTA_RADIAL,
+  MTA_AXIAL,
+  MTA_MAXPRINCIPAL,
+  MTA_MEDPRINCIPAL,
+  MTA_MINPRINCIPAL,
+  MTA_FIRSTINVARIANT,
+  MTA_SECONDINVARIANT,
+  MTA_THIRDINVARIANT,
+  MTA_TRIAXIALITY
+};
+
 template<>
 InputParameters validParams<MaterialTensorAux>();
-
+void addMaterialTensorParams(InputParameters& params);
 
 class MaterialTensorAux : public AuxKernel
 {
@@ -18,30 +36,16 @@ public:
   virtual ~MaterialTensorAux() {}
 
 protected:
-  enum MTA_ENUM
-  {
-    MTA_COMPONENT,
-    MTA_VONMISES,
-    MTA_PLASTICSTRAINMAG,
-    MTA_HYDROSTATIC,
-    MTA_HOOP,
-    MTA_RADIAL,
-    MTA_AXIAL,
-    MTA_MAXPRINCIPAL,
-    MTA_MEDPRINCIPAL,
-    MTA_MINPRINCIPAL,
-    MTA_FIRSTINVARIANT,
-    MTA_SECONDINVARIANT,
-    MTA_THIRDINVARIANT,
-    MTA_TRIAXIALITY
-  };
 
+  static void checkMaterialTensorParams(MTA_ENUM & quantity,
+                                        const MooseEnum & quantity_moose_enum,
+                                        const int index,
+                                        const std::string & name);
 
-  virtual Real computeValueOld();
   virtual Real computeValue();
   static Real getTensorQuantity(const SymmTensor & tensor,
                                 const MTA_ENUM quantity,
-                                MooseEnum & quantity_moose_enum,
+                                const MooseEnum & quantity_moose_enum,
                                 const int index,
                                 const Point * curr_point,
                                 const Point * p1,
