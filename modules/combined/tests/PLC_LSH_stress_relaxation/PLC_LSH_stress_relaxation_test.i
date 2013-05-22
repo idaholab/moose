@@ -89,7 +89,7 @@
     variable = temp
   [../]
   [./heat_ie]
-    type = HeatConductionImplicitEuler
+    type = HeatConductionTimeDerivative
     variable = temp
   [../]
 []

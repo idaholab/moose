@@ -20,7 +20,7 @@
   [../]
 
   [./ie]
-    type = HeatConductionImplicitEuler
+    type = HeatConductionTimeDerivative
     variable = u
   [../]
 []

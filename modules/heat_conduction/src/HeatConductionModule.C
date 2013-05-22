@@ -10,7 +10,7 @@
 #include "GapHeatPointSourceMaster.h"
 #include "GapHeatTransfer.h"
 #include "HeatConduction.h"
-#include "HeatConductionImplicitEuler.h"
+#include "HeatConductionTimeDerivative.h"
 #include "HeatConductionMaterial.h"
 #include "BulkCoolantBC.h"
 #include "ThermalContactAuxBCsAction.h"
@@ -30,7 +30,7 @@ Elk::HeatConduction::registerObjects(Factory & factory)
 {
   // heat_conduction
   registerNamedKernel(HeatConductionKernel, "HeatConduction");
-  registerKernel(HeatConductionImplicitEuler);
+  registerKernel(HeatConductionTimeDerivative);
   registerKernel(HeatSource);
   registerBoundaryCondition(ConvectiveFluxFunction);
   registerBoundaryCondition(GapHeatTransfer);

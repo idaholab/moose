@@ -81,8 +81,8 @@
   [../]
 
   [./heat_ie]
-#	type = HeatConductionImplicitEulerRZ
-	type = HeatConductionImplicitEuler
+#	type = HeatConductionTimeDerivativeRZ
+	type = HeatConductionTimeDerivative
 	variable = temp
   [../]
 
