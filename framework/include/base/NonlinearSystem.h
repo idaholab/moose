@@ -380,7 +380,7 @@ protected:
    * Enforces nodal boundary conditions
    * @param residual[in/out] Residual where nodal BCs are enforced
    */
-  void computeNodalBCs(NumericVector<Number> & residual, Moose::KernelType type);
+  void computeNodalBCs(NumericVector<Number> & residual);
 
   void computeJacobianInternal(SparseMatrix<Number> &  jacobian);
 

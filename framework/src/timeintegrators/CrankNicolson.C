@@ -39,10 +39,10 @@ CrankNicolson::computeTimeDerivatives()
 {
   _u_dot  = *_nl.currentSolution();
   _u_dot -= _nl.solutionOld();
-  _u_dot *= 1 / _dt;
+  _u_dot *= 2. / _dt;
   _u_dot.close();
 
-  _du_dot_du = 1.0 / _dt;
+  _du_dot_du = 2. / _dt;
   _du_dot_du.close();
 }
 
@@ -51,8 +51,15 @@ CrankNicolson::preSolve()
 {
   if (_t_step == 1)
   {
+    // make sure that time derivative contribution is zero in the first pre-solve step
+    _u_dot.zero();
+    _u_dot.close();
+
+    _du_dot_du.zero();
+    _du_dot_du.close();
+
     // for the first time step, compute residual for the old time step
-    _fe_problem.computeResidualType(_nl.solutionOlder(), *_nl.sys().rhs, Moose::KT_ALL);
+    _fe_problem.computeResidualType(_nl.solutionOld(), *_nl.sys().rhs, Moose::KT_NONTIME);
     _residual_old = *_nl.sys().rhs;
     _residual_old.close();
   }
@@ -62,7 +69,6 @@ void
 CrankNicolson::postStep(NumericVector<Number> & residual)
 {
   residual += _Re_time;
-  residual.scale(2.);
   residual += _Re_non_time;
   residual += _residual_old;
 }

@@ -23,7 +23,12 @@ template<>
 InputParameters validParams<CrankNicolson>();
 
 /**
- * Crank-Nicolson time integrator
+ * Crank-Nicolson time integrator.
+ *
+ * The scheme is defined as:
+ *   \du\over\dt = 1/2 * (F(U^{n+1}) + F(U^{n})),
+ * but the form we are using it in is:
+ *   2 * \du\over\dt = (F(U^{n+1}) + F(U^{n})).
  */
 class CrankNicolson : public TimeIntegrator
 {

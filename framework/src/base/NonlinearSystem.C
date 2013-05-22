@@ -617,7 +617,8 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
     residualVector(Moose::KT_NONTIME).close();
     _time_integrator->postStep(residual);
     residual.close();
-    computeNodalBCs(residual, type);
+
+    computeNodalBCs(residual);
 
     // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
     if (_need_residual_ghosted && _debugging_residuals)
@@ -1068,7 +1069,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
 }
 
 void
-NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual, Moose::KernelType type)
+NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
 {
   PARALLEL_TRY {
     // last thing to do are nodal BCs
