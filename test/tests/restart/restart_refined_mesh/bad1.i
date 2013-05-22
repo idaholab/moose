@@ -141,7 +141,7 @@
 
 # tracer
   [./tracer_ie]
-    type =  PrimaryImplicitEuler
+    type =  PrimaryTimeDerivative
     variable =  tracer
   [../]
 
@@ -158,7 +158,7 @@
 
 # ca2+
   [./ca2+_ie]
-    type =  PrimaryImplicitEuler
+    type =  PrimaryTimeDerivative
     variable =  ca2+
   [../]
 
@@ -279,7 +279,7 @@
 
 # h+
   [./h+_ie]
-    type =  PrimaryImplicitEuler
+    type =  PrimaryTimeDerivative
     variable =  h+
   [../]
 
@@ -459,7 +459,7 @@
 
 # hco3-
   [./hco3-_ie]
-    type =  PrimaryImplicitEuler
+    type =  PrimaryTimeDerivative
     variable =  hco3-
   [../]
 
