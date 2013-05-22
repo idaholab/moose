@@ -5,6 +5,7 @@
     exodiff = 'box.e-s002'
     group = 'adaptive'
     scale_refine = 1
+    skip = 'skipped'
   [../]
 
   [./crossIC_test]
