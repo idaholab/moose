@@ -12,46 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SOLUTIONTIMEADAPTIVE_H
-#define SOLUTIONTIMEADAPTIVE_H
+#ifndef SOLUTIONTIMEADAPTIVEDT_H
+#define SOLUTIONTIMEADAPTIVEDT_H
 
-#include "Transient.h"
-#include "InputParameters.h"
+#include "TimeStepper.h"
 
-// System includes
-#include <string>
-
-// Forward Declarations
-class SolutionTimeAdaptive;
+class SolutionTimeAdaptiveDT;
 
 template<>
-InputParameters validParams<SolutionTimeAdaptive>();
+InputParameters validParams<SolutionTimeAdaptiveDT>();
 
 /**
- * SolutionTimeAdaptive executioners usually loop through a number of timesteps... calling solve()
- * for each timestep.
+ *
  */
-class SolutionTimeAdaptive : public Transient
+class SolutionTimeAdaptiveDT : public TimeStepper
 {
 public:
-
-  /**
-   * Constructor
-   *
-   * @param name The name given to the Executioner in the input file.
-   * @param parameters The parameters object holding data for the class to use.
-   * @return Whether or not the solve was successful.
-   */
-  SolutionTimeAdaptive(const std::string & name, InputParameters parameters);
-  virtual ~SolutionTimeAdaptive();
-
-protected:
+  SolutionTimeAdaptiveDT(const std::string & name, InputParameters parameters);
+  virtual ~SolutionTimeAdaptiveDT();
 
   virtual void preSolve();
   virtual void postSolve();
-
   virtual Real computeDT();
+  virtual void rejectStep();
 
+protected:
   /**
    * Multiplier specifying the direction the timestep is currently going.
    * Positive for up.  Negative for down.
@@ -71,4 +56,4 @@ protected:
 
 };
 
-#endif //SOLUTIONTIMEADAPTIVE_H
+#endif /* SOLUTIONTIMEADAPTIVEDT_H */

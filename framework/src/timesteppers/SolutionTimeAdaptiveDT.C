@@ -12,60 +12,54 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SolutionTimeAdaptive.h"
-
-//Moose includes
-#include "Kernel.h"
-#include "Factory.h"
-
-//libMesh includes
-#include "libmesh/implicit_system.h"
-#include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/transient_system.h"
-#include "libmesh/numeric_vector.h"
-
-// C++ Includes
-#include <iomanip>
-#include <limits>
+#include "SolutionTimeAdaptiveDT.h"
+#include "FEProblem.h"
+#include "Transient.h"
 
 template<>
-InputParameters validParams<SolutionTimeAdaptive>()
+InputParameters validParams<SolutionTimeAdaptiveDT>()
 {
-  InputParameters params = validParams<Transient>();
-
+  InputParameters params = validParams<TimeStepper>();
   params.addParam<Real>("percent_change", 0.1, "Percentage to change the timestep by.  Should be between 0 and 1");
   params.addParam<int>("initial_direction", 1, "Direction for the first step.  1 for up... -1 for down. ");
   params.addParam<bool>("adapt_log", false,    "Output adaptive time step log");
+  params.addRequiredParam<Real>("dt", "The timestep size between solves");
+
   return params;
 }
 
-SolutionTimeAdaptive::SolutionTimeAdaptive(const std::string & name, InputParameters parameters)
-  :Transient(name, parameters),
-   _direction(getParam<int>("initial_direction")),
-   _percent_change(getParam<Real>("percent_change")),
-   _older_sol_time_vs_dt(std::numeric_limits<Real>::max()),
-   _old_sol_time_vs_dt(std::numeric_limits<Real>::max()),
-   _sol_time_vs_dt(std::numeric_limits<Real>::max()),
-   _adapt_log(getParam<bool>("adapt_log"))
+SolutionTimeAdaptiveDT::SolutionTimeAdaptiveDT(const std::string & name, InputParameters parameters) :
+    TimeStepper(name, parameters),
+    _direction(getParam<int>("initial_direction")),
+    _percent_change(getParam<Real>("percent_change")),
+    _older_sol_time_vs_dt(std::numeric_limits<Real>::max()),
+    _old_sol_time_vs_dt(std::numeric_limits<Real>::max()),
+    _sol_time_vs_dt(std::numeric_limits<Real>::max()),
+    _adapt_log(getParam<bool>("adapt_log"))
 {
+  _current_dt = getParam<Real>("dt");
   if((_adapt_log) && (libMesh::processor_id() == 0))
   {
     _adaptive_log.open("adaptive_log");
     _adaptive_log<<"Adaptive Times Step Log"<<std::endl;
   }
+}
 
+SolutionTimeAdaptiveDT::~SolutionTimeAdaptiveDT()
+{
+  _adaptive_log.close();
 }
 
 void
-SolutionTimeAdaptive::preSolve()
+SolutionTimeAdaptiveDT::preSolve()
 {
-  gettimeofday (&_solve_start, NULL);
+  gettimeofday(&_solve_start, NULL);
 }
 
 void
-SolutionTimeAdaptive::postSolve()
+SolutionTimeAdaptiveDT::postSolve()
 {
-  if(lastSolveConverged())
+  if (converged())
   {
     gettimeofday (&_solve_end, NULL);
     double elapsed_time = (static_cast<double>(_solve_end.tv_sec  - _solve_start.tv_sec) +
@@ -78,21 +72,10 @@ SolutionTimeAdaptive::postSolve()
 }
 
 Real
-SolutionTimeAdaptive::computeDT()
+SolutionTimeAdaptiveDT::computeDT()
 {
-  Real new_dt = _dt;
-
-  if(!lastSolveConverged())
-  {
-    std::cout<<"Solve failed... cutting timestep"<<std::endl;
-    if(_adapt_log)
-      _adaptive_log<<"Solve failed... cutting timestep"<<std::endl;
-
-    return _dt / 2.0;
-  }
-
   //Ratio grew so switch direction
-  if(_sol_time_vs_dt > _old_sol_time_vs_dt && _sol_time_vs_dt > _older_sol_time_vs_dt)
+  if (_sol_time_vs_dt > _old_sol_time_vs_dt && _sol_time_vs_dt > _older_sol_time_vs_dt)
   {
     _direction *= -1;
 
@@ -101,14 +84,14 @@ SolutionTimeAdaptive::computeDT()
     _older_sol_time_vs_dt = std::numeric_limits<Real>::max();
   }
 
-  if(_t_step > 1)
-    new_dt =  _dt + _dt * _percent_change*_direction;
+  if (_t_step > 1)
+    _current_dt =  _dt + _dt * _percent_change*_direction;
 
-  if((_adapt_log) && (libMesh::processor_id() == 0))
+  if ((_adapt_log) && (libMesh::processor_id() == 0))
   {
-    Real out_dt = new_dt;
-    if(out_dt > _dtmax)
-      out_dt = _dtmax;
+    Real out_dt = _current_dt;
+    if (out_dt > _dt_max)
+      out_dt = _dt_max;
 
     _adaptive_log<<"***Time step: "<<_t_step<<", time = "<<_time+out_dt<<std::endl;
     _adaptive_log<<"Cur DT: "<<out_dt<<std::endl;
@@ -117,10 +100,17 @@ SolutionTimeAdaptive::computeDT()
     _adaptive_log<<"New Ratio: "<<_sol_time_vs_dt<<std::endl;
   }
 
-  return new_dt;
+  return _current_dt;
 }
 
-SolutionTimeAdaptive::~SolutionTimeAdaptive()
+void
+SolutionTimeAdaptiveDT::rejectStep()
 {
-  _adaptive_log.close();
+  std::cout<<"Solve failed... cutting timestep"<<std::endl;
+  if (_adapt_log)
+    _adaptive_log<<"Solve failed... cutting timestep"<<std::endl;
+
+  _current_dt = _current_dt / 2;
+
+  _fe_problem.restoreSolutions();
 }

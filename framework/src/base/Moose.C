@@ -95,7 +95,6 @@
 // executioners
 #include "Steady.h"
 #include "Transient.h"
-#include "SolutionTimeAdaptive.h"
 #include "DT2Transient.h"
 #include "AdaptiveErrorEstimateTransient.h"
 #include "TransientAdaptive.h"
@@ -209,6 +208,7 @@
 // time steppers
 #include "ConstantDT.h"
 #include "FunctionDT.h"
+#include "SolutionTimeAdaptiveDT.h"
 
 // MultiApps
 #include "TransientMultiApp.h"
@@ -360,7 +360,6 @@ registerObjects(Factory & factory)
   // executioners
   registerExecutioner(Steady);
   registerExecutioner(Transient);
-  registerExecutioner(SolutionTimeAdaptive);
   registerExecutioner(DT2Transient);
   registerExecutioner(AdaptiveErrorEstimateTransient);
   registerExecutioner(CoupledTransientExecutioner);
@@ -479,6 +478,7 @@ registerObjects(Factory & factory)
   // time steppers
   registerObject(ConstantDT);
   registerObject(FunctionDT);
+  registerObject(SolutionTimeAdaptiveDT);
 
   // Transfers
 #ifdef LIBMESH_HAVE_DTK
