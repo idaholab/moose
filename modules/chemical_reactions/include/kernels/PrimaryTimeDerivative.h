@@ -1,17 +1,17 @@
-#include "ImplicitEuler.h"
+#ifndef PRIMARYTIMEDERIVATIVE
+#define PRIMARYTIMEDERIVATIVE
 
-#ifndef PRIMARYIMPLICITEULER
-#define PRIMARYIMPLICITEULER
+#include "TimeDerivative.h"
 
 // Forward Declaration
-class PrimaryImplicitEuler;
+class PrimaryTimeDerivative;
 
 /**
  * validParams returns the parameters that this Kernel accepts / needs
  * The actual body of the function MUST be in the .C file.
  */
 template<>
-InputParameters validParams<PrimaryImplicitEuler>();
+InputParameters validParams<PrimaryTimeDerivative>();
 
 /**
  * Define the Kernel for a CoupledConvectionReactionSub operator that looks like:
@@ -20,11 +20,11 @@ InputParameters validParams<PrimaryImplicitEuler>();
  * 
  * This first line is defining the name and inheriting from Kernel.
  */
-class PrimaryImplicitEuler : public ImplicitEuler
+class PrimaryTimeDerivative : public TimeDerivative
 {
 public:
 
-  PrimaryImplicitEuler(const std::string & name, InputParameters parameters);
+  PrimaryTimeDerivative(const std::string & name, InputParameters parameters);
   
 protected:
   /**
@@ -52,4 +52,5 @@ protected:
   /// Material property of porosity
   MaterialProperty<Real> & _porosity;
 };
-#endif //PRIMARYIMPLICITEULER
+
+#endif // PRIMARYTIMEDERIVATIVE

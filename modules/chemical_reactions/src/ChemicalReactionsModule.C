@@ -3,7 +3,7 @@
 #include "ActionFactory.h"
 #include "Parser.h"
 
-#include "PrimaryImplicitEuler.h"
+#include "PrimaryTimeDerivative.h"
 #include "PrimaryConvection.h"
 #include "PrimaryDiffusion.h"
 #include "CoupledBEEquilibriumSub.h"
@@ -25,7 +25,7 @@
 void
 Elk::ChemicalReactions::registerObjects(Factory & factory)
 {
-  registerKernel(PrimaryImplicitEuler);
+  registerKernel(PrimaryTimeDerivative);
   registerKernel(PrimaryConvection);
   registerKernel(PrimaryDiffusion);
   registerKernel(CoupledBEEquilibriumSub);
