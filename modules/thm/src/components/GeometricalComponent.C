@@ -1,4 +1,5 @@
 #include "GeometricalComponent.h"
+#include "Conversion.h"
 
 template<>
 InputParameters validParams<GeometricalComponent>()
