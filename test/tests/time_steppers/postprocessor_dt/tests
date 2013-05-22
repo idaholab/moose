@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'postprocessor_dt.i'
+    exodiff = 'postprocessor_dt_out.e'
+  [../]
+[]

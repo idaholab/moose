@@ -208,6 +208,7 @@
 #include "FunctionDT.h"
 #include "SolutionTimeAdaptiveDT.h"
 #include "DT2.h"
+#include "PostprocessorDT.h"
 // time integrators
 #include "SteadyState.h"
 #include "ImplicitEuler.h"
@@ -485,6 +486,7 @@ registerObjects(Factory & factory)
   registerObject(FunctionDT);
   registerObject(SolutionTimeAdaptiveDT);
   registerObject(DT2);
+  registerObject(PostprocessorDT);
   // time integrators
   registerObject(SteadyState);
   registerObject(ImplicitEuler);
