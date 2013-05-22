@@ -70,4 +70,36 @@
     exodiff = 'out_cranic.e'
     max_parallel = 1
   [../]
+
+  [./ee-1d-linear]
+    type = 'Exodiff'
+    input = 'ee-1d-linear.i'
+    exodiff = 'ee-1d-linear_out.e'
+  [../]
+  
+  [./ee-1d-quadratic]
+    type = 'Exodiff'
+    input = 'ee-1d-quadratic.i'
+    exodiff = 'ee-1d-quadratic_out.e'
+  [../]
+
+  [./ee-1d-quadratic-neumann]
+    type = 'Exodiff'
+    input = 'ee-1d-quadratic-neumann.i'
+    exodiff = 'ee-1d-quadratic-neumann_out.e'
+  [../]
+
+  [./ee-2d-linear]
+    type = 'Exodiff'
+    input = 'ee-2d-linear.i'
+    exodiff = 'ee-2d-linear_out.e'
+  [../]
+
+  [./ee-2d-quadratic]
+    type = 'Exodiff'
+    input = 'ee-2d-quadratic.i'
+    exodiff = 'ee-2d-quadratic_out.e'
+  [../]
+  
+ 
 []

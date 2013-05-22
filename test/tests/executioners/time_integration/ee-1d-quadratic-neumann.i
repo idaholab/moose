@@ -1,9 +1,13 @@
+[GlobalParams]
+  implicit = false
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
   xmin = -1
   xmax = 1
-  nx = 2
+  nx = 10
   elem_type = EDGE3
 []
 
@@ -46,10 +50,24 @@
 []
 
 [Kernels]
-  active = 'expl'
+  [./td]
+    type = TimeDerivative
+    variable = u
+    implicit = true
+  [../]
+  
+  [./diff]
+    type = Diffusion
+    variable = u
+  [../]
+  
+  [./abs]
+    type = Reaction
+    variable = u
+  [../]
 
-  [./expl]
-    type = ExplicitEqn
+  [./ffn]
+    type = UserForcingFunction
     variable = u
     function = forcing_fn
   [../]
@@ -85,8 +103,8 @@
   petsc_options = '-snes_mf_operator'
 
   start_time = 0.0
-  num_steps = 3
-  dt = 0.01
+  num_steps = 10
+  dt = 0.001
 []
 
 [Output]
