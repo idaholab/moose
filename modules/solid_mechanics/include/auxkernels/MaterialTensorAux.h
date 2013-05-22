@@ -37,9 +37,17 @@ protected:
   };
 
 
+  virtual Real computeValueOld();
   virtual Real computeValue();
+  static Real getTensorQuantity(const SymmTensor & tensor,
+                                const MTA_ENUM quantity,
+                                MooseEnum & quantity_moose_enum,
+                                const int index,
+                                const Point * curr_point,
+                                const Point * p1,
+                                const Point * p2);
 
-  Real principalValue( const SymmTensor & tensor, unsigned int index );
+  static Real principalValue( const SymmTensor & tensor, unsigned int index );
 
   MaterialProperty<SymmTensor> & _tensor;
   const int _index;

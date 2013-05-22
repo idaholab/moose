@@ -50,13 +50,31 @@ MaterialTensorAux::MaterialTensorAux( const std::string & name, InputParameters 
 Real
 MaterialTensorAux::computeValue()
 {
+  Real value = getTensorQuantity(_tensor[_qp],
+                                 _quantity,
+                                 _quantity_moose_enum,
+                                 _index,
+                                 &_q_point[_qp],
+                                 &_p1,
+                                 &_p2);
+  return value;
+}
+
+Real
+MaterialTensorAux::getTensorQuantity(const SymmTensor & tensor,
+                                     const MTA_ENUM quantity,
+                                     MooseEnum & quantity_moose_enum,
+                                     const int index,
+                                     const Point * curr_point,
+                                     const Point * p1,
+                                     const Point * p2)
+{
   Real value(0);
-  const SymmTensor & tensor( _tensor[_qp] );
-  if (_quantity == MTA_COMPONENT)
+  if (quantity == MTA_COMPONENT)
   {
-    value = tensor.component(_index);
+    value = tensor.component(index);
   }
-  else if ( _quantity == MTA_VONMISES )
+  else if ( quantity == MTA_VONMISES )
   {
     value = std::sqrt(0.5*(
                            std::pow(tensor.xx() - tensor.yy(), 2) +
@@ -66,27 +84,27 @@ MaterialTensorAux::computeValue()
                            std::pow(tensor.yz(), 2) +
                            std::pow(tensor.zx(), 2))));
   }
-  else if ( _quantity == MTA_PLASTICSTRAINMAG )
+  else if ( quantity == MTA_PLASTICSTRAINMAG )
   {
     value = std::sqrt(2.0/3.0 * tensor.doubleContraction(tensor));
   }
-  else if ( _quantity == MTA_HYDROSTATIC )
+  else if ( quantity == MTA_HYDROSTATIC )
   {
     value = tensor.trace()/3.0;
   }
-  else if ( _quantity == MTA_HOOP )
+  else if ( quantity == MTA_HOOP )
   {
     // This is the location of the stress.  A vector from the cylindrical axis to this point will define the x' axis.
-    Point p0( _q_point[_qp] );
+    Point p0( *curr_point );
 
-    // The vector _p1 + t*(_p2-_p1) defines the cylindrical axis.  The point along this
+    // The vector p1 + t*(p2-p1) defines the cylindrical axis.  The point along this
     // axis closest to p0 is found by the following for t:
-    const Point p2p1( _p2 - _p1 );
-    const Point p2p0( _p2 - p0 );
-    const Point p1p0( _p1 - p0 );
+    const Point p2p1( *p2 - *p1 );
+    const Point p2p0( *p2 - p0 );
+    const Point p1p0( *p1 - p0 );
     const Real t( -(p1p0*p2p1)/p2p1.size_sq() );
     // The nearest point on the cylindrical axis to p0 is p.
-    const Point p( _p1 + t * p2p1 );
+    const Point p( *p1 + t * p2p1 );
     Point xp( p0 - p );
     xp /= xp.size();
     Point yp( p2p1/p2p1.size() );
@@ -121,20 +139,20 @@ MaterialTensorAux::computeValue()
             (zp0*tensor(0,1)+zp1*tensor(1,1)+zp2*tensor(2,1))*zp1 +
             (zp0*tensor(0,2)+zp1*tensor(1,2)+zp2*tensor(2,2))*zp2;
   }
-  else if ( _quantity == MTA_RADIAL )
+  else if ( quantity == MTA_RADIAL )
   {
     // This is the location of the stress.  A vector from the cylindrical axis to this point will define the x' axis
     // which is the radial direction in which we want the stress.
-    Point p0( _q_point[_qp] );
+    Point p0( *curr_point );
 
-    // The vector _p1 + t*(_p2-_p1) defines the cylindrical axis.  The point along this
+    // The vector p1 + t*(p2-p1) defines the cylindrical axis.  The point along this
     // axis closest to p0 is found by the following for t:
-    const Point p2p1( _p2 - _p1 );
-    const Point p2p0( _p2 - p0 );
-    const Point p1p0( _p1 - p0 );
+    const Point p2p1( *p2 - *p1 );
+    const Point p2p0( *p2 - p0 );
+    const Point p1p0( *p1 - p0 );
     const Real t( -(p1p0*p2p1)/p2p1.size_sq() );
     // The nearest point on the cylindrical axis to p0 is p.
-    const Point p( _p1 + t * p2p1 );
+    const Point p( *p1 + t * p2p1 );
     Point xp( p0 - p );
     xp /= xp.size();
     const Real xp0( xp(0) );
@@ -144,10 +162,10 @@ MaterialTensorAux::computeValue()
             (xp0*tensor(0,1)+xp1*tensor(1,1)+xp2*tensor(2,1))*xp1 +
             (xp0*tensor(0,2)+xp1*tensor(1,2)+xp2*tensor(2,2))*xp2;
   }
-  else if ( _quantity == MTA_AXIAL )
+  else if ( quantity == MTA_AXIAL )
   {
-    // The vector p2p1=(_p2-_p1) defines the axis, which is the direction in which we want the stress.
-    Point p2p1( _p2 - _p1 );
+    // The vector p2p1=(p2-p1) defines the axis, which is the direction in which we want the stress.
+    Point p2p1( *p2 - *p1 );
     p2p1 /= p2p1.size();
 
     const Real axis0( p2p1(0) );
@@ -157,23 +175,23 @@ MaterialTensorAux::computeValue()
             (axis0*tensor(0,1)+axis1*tensor(1,1)+axis2*tensor(2,1))*axis1 +
             (axis0*tensor(0,2)+axis1*tensor(1,2)+axis2*tensor(2,2))*axis2;
   }
-  else if ( _quantity == MTA_MAXPRINCIPAL )
+  else if ( quantity == MTA_MAXPRINCIPAL )
   {
     value = principalValue( tensor, 0 );
   }
-  else if ( _quantity == MTA_MEDPRINCIPAL )
+  else if ( quantity == MTA_MEDPRINCIPAL )
   {
     value = principalValue( tensor, 1 );
   }
-  else if ( _quantity == MTA_MINPRINCIPAL )
+  else if ( quantity == MTA_MINPRINCIPAL )
   {
     value = principalValue( tensor, 2 );
   }
-  else if ( _quantity == MTA_FIRSTINVARIANT )
+  else if ( quantity == MTA_FIRSTINVARIANT )
   {
     value = tensor.trace();
   }
-  else if ( _quantity == MTA_SECONDINVARIANT )
+  else if ( quantity == MTA_SECONDINVARIANT )
   {
     value =
       tensor.xx()*tensor.yy() +
@@ -183,7 +201,7 @@ MaterialTensorAux::computeValue()
       tensor.yz()*tensor.yz() -
       tensor.zx()*tensor.zx();
   }
-  else if ( _quantity == MTA_THIRDINVARIANT )
+  else if ( quantity == MTA_THIRDINVARIANT )
   {
     value =
       tensor.xx()*tensor.yy()*tensor.zz() -
@@ -193,7 +211,7 @@ MaterialTensorAux::computeValue()
       tensor.zx()*tensor.xy()*tensor.yz() -
       tensor.zx()*tensor.zx()*tensor.yy();
   }
-  else if ( _quantity == MTA_TRIAXIALITY )
+  else if ( quantity == MTA_TRIAXIALITY )
   {
     Real hydrostatic = tensor.trace()/3.0;
     Real von_mises = std::sqrt(0.5*(
@@ -208,7 +226,7 @@ MaterialTensorAux::computeValue()
   }
   else
   {
-    mooseError("Internal logic error from " + name() + ", quantity: " + _quantity_moose_enum.operator std::string());
+    mooseError("Unknown quantity in MaterialTensorAux: " + quantity_moose_enum.operator std::string());
   }
   return value;
 }
