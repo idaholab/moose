@@ -25,12 +25,8 @@ class Logger():
     return output
 
   def pstack(self, process_id):
-    tmp_proc = subprocess.Popen(['/usr/bin/pstack', process_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    try:
-      pstack_output = tmp_proc.communicate()[0]
-    except:
-      pstack_output = ''
-    return pstack_output
+    tmp_proc = subprocess.Popen(['/usr/bin/pstack', str(process_id)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return tmp_proc.communicate()[0]
 
 class trackPID():
   def __init__(self, process):
@@ -38,10 +34,11 @@ class trackPID():
     self.pid = process.track
 
   def GetMemory(self):
-    try:
-      tmp_proc = subprocess.Popen(['/bin/ps', '-p', str(self.args.track), '-o', 'rss='], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      return { 'TOTAL' : int(re.findall(r'(\d+)', str(tmp_proc.communicate()[0]))[0]) }
-    except:
+    tmp_proc = subprocess.Popen(['/bin/ps', '-p', str(self.args.track), '-o', 'rss='], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output = tmp_proc.communicate()[0]
+    if output != '':
+      return { 'TOTAL' : int(re.findall(r'(\d+)', str(output))[0]) }
+    else:
       return
 
 class sglPID():
@@ -55,15 +52,16 @@ class sglPID():
     return_string = {}
     return_string['LOG'] = self.logger.read()
     return_string['PSTACK'] = ''
+    if self.args.pstack:
+      return_string['PSTACK'] = self.logger.pstack(self.pid)
+    tmp_proc = subprocess.Popen(['/bin/ps', '-p', str(self.pid), '-o', 'rss='], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output = tmp_proc.communicate()[0]
+    if output != '':
+      return_string['TOTAL'] = int(re.findall(r'(\d+)', str(output))[0])
+    else:
+      return_string['TOTAL'] = 0
+    return return_string
 
-    try:
-      if self.args.debug:
-        return_string['PSTACK'] = self.logger.pstack(self.pid)
-      tmp_proc = subprocess.Popen(['/bin/ps', '-p', str(self.pid), '-o', 'rss='], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      return_string['TOTAL'] = int(re.findall(r'(\d+)', str(tmp_proc.communicate()[0]))[0])
-      return return_string
-    except:
-      return
 
 class mpiPID():
   def __init__(self, process):
@@ -81,26 +79,24 @@ class mpiPID():
   def GetMemory(self):
     one_time = True
     return_string = {}
+    pid_dict = {}
     return_string['LOG'] = self.logger.read()
     return_string['PSTACK'] = ''
 
     command = ['/bin/ps', '-u', str(os.getenv('USER')), '-eo', 'pid,comm']
-    pid_dict = {}
     tmp_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     pid_list = tmp_proc.communicate()[0].split('\n')
     for item in pid_list:
       tmp_suffix = item.split('/').pop()
       tmp_item = re.findall(r'(\d+).*' + str(self._discover_name().split('/').pop()), item)
       if len(tmp_item) > 0:
-        try:
-          tmp_proc = subprocess.Popen(['/bin/ps', '-p', str(tmp_item[0]), '-o', 'rss='], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-          pid_dict[tmp_item[0]] = int(re.findall(r'(\d+)', str(tmp_proc.communicate()[0]))[0])
-          # Get Stack Trace only once from the first discovered PID
-          if one_time and self.args.debug:
+        tmp_proc = subprocess.Popen(['/bin/ps', '-p', str(tmp_item[0]), '-o', 'rss='], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output = tmp_proc.communicate()[0]
+        if output != '':
+          pid_dict[tmp_item[0]] = int(re.findall(r'(\d+)', str(output))[0])
+          if one_time and self.args.pstack:
             return_string['PSTACK'] = self.logger.pstack(str(tmp_item[0]))
             one_time = False
-        except:
-          pid_dict[tmp_item[0]] = 0
     tmp_mem = 0
     for keyitem in pid_dict:
       tmp_mem += pid_dict[keyitem]
@@ -186,6 +182,7 @@ class ReadMemoryLog():
         for single_log in item[2]:
           if single_log != '':
             tmp_log += ' '*44 + ' | stdout: ' + single_log + '\n'
+      if args.pstack:
         for single_pstack in item[3]:
           if single_pstack != '':
             tmp_log += ' '*44 + ' | pstack: ' + single_pstack + '\n'
@@ -275,19 +272,18 @@ def writeMemoryUsage(process):
       last_memory = int(current_usage[1])
       file_object.write(str(current_usage) + '\n')
       file_object.flush()
+    # Reset cursor position because the memory has not changed
+    else:
+      process.logger.last_position = (process.logger.last_position - len(report['LOG']))
     return int(last_memory)
   def _zero():
-    try:
-      if last_memory != 0:
-        log = process.logger.read()
-        pstack = ''
-        process.log.close()
-        time_object = GetTime()
-        current_usage = [time_object.now, 0, log, pstack]
-        file_object.write(str(current_usage) + '\n')
-        file_object.close()
-    except:
-      pass
+    log = process.logger.read()
+    pstack = ''
+    process.logger.log.close()
+    time_object = GetTime()
+    current_usage = [time_object.now, 0, log, pstack]
+    file_object.write(str(current_usage) + '\n')
+    file_object.close()
   try:
     while True:
       if not os.kill(int(process.pid), 0):
@@ -303,21 +299,19 @@ def writeMemoryUsage(process):
           last_memory = _usage(last_memory)
       else:
         _zero()
-        time.sleep(1)
         print '\nApplication terminated. Wrote file:', process.args.outfile
         return
       time.sleep(float(process.args.repeat_rate))
-#   except KeyboardInterrupt:
-#     _zero()
-#     print '\nCanceled by user. Wrote file:', process.args.outfile
-#     return
-#   except:
-#     _zero()
-#     time.sleep(1)
-#     print '\nApplication terminated. Wrote file:', process.args.outfile
-#     return
+  except KeyboardInterrupt:
+    _zero()
+    print '\nCanceled by user. Wrote file:', process.args.outfile
+    return
   except:
-    raise
+    _zero()
+    print '\nApplication terminated. Wrote file:', process.args.outfile
+    return
+#  except:
+#    raise
 
 def _verifyARGs(args):
   option_count = 0
@@ -335,21 +329,30 @@ def _verifyARGs(args):
   if args.pbs and args.debug:
     print 'Gathering a stack trace across nodes is not supported.'
     sys.exit(1)
+  if args.pstack:
+    if not os.path.exists('/usr/bin/pstack'):
+      print 'pstack binary not found. You must remove the --debug switch'
+      sys.exit(1)
   if args.pbs:
     # There is a limit to how many times we can ssh somewhere (And for good reason)
     # So set the repeat to something that won't flood the network
     if args.repeat_rate <= 5.0:
       args.repeat_rate = 5.0
+  if args.run:
+    if args.run[0].split(' ')[0] == 'mpiexec' or args.run[0].split(' ')[0] == 'mpirun':
+      args.mpi = True
+    else:
+      args.mpi = False
   return args
 
 def parseARGs(args=None):
   parser = argparse.ArgumentParser(description='Track memory usage')
   parser.add_argument('--track', nargs="?", type=int, help='Track a single specific PID already running\n ')
   parser.add_argument('--read', nargs="?", help='Read a specified memory log file\n ')
-  parser.add_argument('--debug', dest='debug', action='store_const', const=True, default=False, help='Save/Display pstack information in output\n ')
+  parser.add_argument('--debug', dest='debug', action='store_const', const=True, default=False, help='Display stdout information in output file\n ')
+  parser.add_argument('--pstack', dest='pstack', action='store_const', const=True, default=False, help='Save / Display pstack information in output file\n ')
   parser.add_argument('--export', nargs="?", help='Export specified log file to a comma delimited format\n ')
   parser.add_argument('--run', nargs="+", help='Run specified command. You must encapsulate the command in quotes\n ')
-  parser.add_argument('--mpi', dest='mpi', action='store_const', const=True, default=False, help='Instruct memory logger to tally all launches\n ')
   parser.add_argument('--pbs', dest='pbs', action='store_const', const=True, default=False, help='Instruct memory logger to tally all launches on all nodes\n ')
   parser.add_argument('--outfile', nargs="?", default=os.getcwd() + '/usage.log' ,help='Save log to specified file. (Defaults to usage.log)\n ')
   parser.add_argument('--repeat-rate', nargs="?", type=float, default=0.25, help='Indicate the sleep delay in float seconds to check memory usage (default 0.25 seconds)\n ')
