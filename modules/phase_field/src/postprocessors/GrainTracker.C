@@ -151,11 +151,15 @@ GrainTracker::buildBoundingSpheres()
   // Build a list of periodic nodes
   _mesh.buildPeriodicNodeSets(pb_nodes, _var_number, _pbs);
   MeshBase & mesh = _mesh._mesh;
+
+  unsigned long total_node_count = 0;
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
     for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[map_num].begin();
          it1 != _bubble_sets[map_num].end(); ++it1)
     {
+      total_node_count += it1->_nodes.size();
+
       Point min( 1.e30,  1.e30,  1.e30);
       Point max(-1.e30, -1.e30, -1.e30);
       unsigned int some_node_id = *(it1->_nodes.begin());
@@ -177,6 +181,8 @@ GrainTracker::buildBoundingSpheres()
       _bounding_spheres[map_num].push_back(new BoundingSphereInfo(some_node_id, center, radius));
     }
   }
+
+  std::cout << "\nTotal Node Count: " << total_node_count << "\n";
 }
 
 void
