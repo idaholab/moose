@@ -36,11 +36,13 @@ BDF2::~BDF2()
 void
 BDF2::preStep()
 {
-  Real sum = _dt + _dt_old;
-  _weight[0] =  1. + _dt / sum;
-  _weight[1] = -sum / _dt_old;
-  _weight[2] = _dt * _dt / _dt_old / sum;
-
+  if (_t_step > 1)
+  {
+    Real sum = _dt + _dt_old;
+    _weight[0] =  1. + _dt / sum;
+    _weight[1] = -sum / _dt_old;
+    _weight[2] = _dt * _dt / _dt_old / sum;
+  }
 }
 
 void
