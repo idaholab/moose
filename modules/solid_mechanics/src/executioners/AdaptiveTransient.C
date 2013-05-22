@@ -94,13 +94,20 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
   _dt = 0;
   _time = _time_old = getParam<Real>("start_time");
   _problem.transient(true);
-  if (isParamValid("predictor_scale"))
+
+  if (parameters.isParamValid("predictor_scale"))
   {
-    Real predscale(getParam<Real>("predictor_scale"));
+    Real predscale = getParam<Real>("predictor_scale");
     if (predscale >= 0.0 and predscale <= 1.0)
-      _problem.getNonlinearSystem().setPredictorScale(predscale);
+    {
+      InputParameters params = _app.getFactory().getValidParams("Predictor");
+      params.set<Real>("scale") = predscale;
+      _problem.addPredictor("Predictor", "predictor", params);
+    }
     else
+    {
       mooseError("Input value for predictor_scale = "<< predscale << ", outside of permissible range (0 to 1)");
+    }
   }
 
   if (isParamValid("optimal_iterations"))
