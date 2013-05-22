@@ -2,6 +2,36 @@
 import argparse, re, os, sys, subprocess, time, decimal, datetime
 from tempfile import TemporaryFile
 
+class Logger():
+  def __init__(self):
+    self.log = TemporaryFile()
+    self.last_position = 0
+
+  def read(self):
+    # Setup our cursor position
+    cursor_seek = self.log.tell() - 500
+    if cursor_seek - 500 <= 0:
+      cursor_seek = 0
+    # If cursor overlaps previous position, set it to previous position
+    if cursor_seek < self.last_position:
+      cursor_seek = self.last_position
+
+    # Read log from cursor position
+    self.log.seek(cursor_seek)
+    output = self.log.read()
+    if output != '':
+      sys.stdout.write(output)
+    self.last_position = self.log.tell()
+    return output
+
+  def pstack(self, process_id):
+    tmp_proc = subprocess.Popen(['/usr/bin/pstack', process_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+      pstack_output = tmp_proc.communicate()[0]
+    except:
+      pstack_output = ''
+    return pstack_output
+
 class trackPID():
   def __init__(self, process):
     self.args = process
@@ -17,33 +47,18 @@ class trackPID():
 class sglPID():
   def __init__(self, process):
     self.args = process
-    self.logging_file = TemporaryFile()
-    self.process = subprocess.Popen(''.join(self.args.run).split(), stdout=self.logging_file, stderr=self.logging_file)
+    self.logger = Logger()
+    self.process = subprocess.Popen(''.join(self.args.run).split(), stdout=self.logger.log, stderr=self.logger.log)
     self.pid = self.process.pid
-    self.last_position = 0
-
-  def read_output(self):
-    # Setup our cursor position
-    cursor_seek = self.logging_file.tell() - 500
-    if cursor_seek - 500 <= 0:
-      cursor_seek = 0
-    # If cursor overlaps previous position, set it to previous position
-    if cursor_seek < self.last_position:
-      cursor_seek = self.last_position
-
-    # Read log from cursor position
-    self.logging_file.seek(cursor_seek)
-    output = self.logging_file.read()
-    if output != '':
-      sys.stdout.write(output)
-    self.last_position = self.logging_file.tell()
-    return output
 
   def GetMemory(self):
     return_string = {}
-    return_string['LOG'] = self.read_output()
+    return_string['LOG'] = self.logger.read()
+    return_string['PSTACK'] = ''
 
     try:
+      if self.args.debug:
+        return_string['PSTACK'] = self.logger.pstack(self.pid)
       tmp_proc = subprocess.Popen(['/bin/ps', '-p', str(self.pid), '-o', 'rss='], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       return_string['TOTAL'] = int(re.findall(r'(\d+)', str(tmp_proc.communicate()[0]))[0])
       return return_string
@@ -53,10 +68,9 @@ class sglPID():
 class mpiPID():
   def __init__(self, process):
     self.args = process
-    self.logging_file = TemporaryFile()
-    self.process = subprocess.Popen(''.join(self.args.run).split(), stdout=self.logging_file, stderr=self.logging_file)
+    self.logger = Logger()
+    self.process = subprocess.Popen(''.join(self.args.run).split(), stdout=self.logger.log, stderr=self.logger.log)
     self.pid = self.process.pid
-    self.last_position = 0
 
   def _discover_name(self):
     locations = ''.join(self.args.run).split()
@@ -64,26 +78,11 @@ class mpiPID():
       if os.path.exists(item):
         return item
 
-  def read_output(self):
-    # Setup our cursor position
-    cursor_seek = self.logging_file.tell() - 500
-    if cursor_seek - 500 <= 0:
-      cursor_seek = 0
-    # If cursor overlaps previous position, set it to previous position
-    if cursor_seek < self.last_position:
-      cursor_seek = self.last_position
-
-    # Read log from cursor position
-    self.logging_file.seek(cursor_seek)
-    output = self.logging_file.read()
-    if output != '':
-      sys.stdout.write(output)
-    self.last_position = self.logging_file.tell()
-    return output
-
   def GetMemory(self):
+    one_time = True
     return_string = {}
-    return_string['LOG'] = self.read_output()
+    return_string['LOG'] = self.logger.read()
+    return_string['PSTACK'] = ''
 
     command = ['/bin/ps', '-u', str(os.getenv('USER')), '-eo', 'pid,comm']
     pid_dict = {}
@@ -93,8 +92,15 @@ class mpiPID():
       tmp_suffix = item.split('/').pop()
       tmp_item = re.findall(r'(\d+).*' + str(self._discover_name().split('/').pop()), item)
       if len(tmp_item) > 0:
-        tmp_proc = subprocess.Popen(['/bin/ps', '-p', str(tmp_item[0]), '-o', 'rss='], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        pid_dict[tmp_item[0]] = int(re.findall(r'(\d+)', str(tmp_proc.communicate()[0]))[0])
+        try:
+          tmp_proc = subprocess.Popen(['/bin/ps', '-p', str(tmp_item[0]), '-o', 'rss='], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+          pid_dict[tmp_item[0]] = int(re.findall(r'(\d+)', str(tmp_proc.communicate()[0]))[0])
+          # Get Stack Trace only once from the first discovered PID
+          if one_time and self.args.debug:
+            return_string['PSTACK'] = self.logger.pstack(str(tmp_item[0]))
+            one_time = False
+        except:
+          pid_dict[tmp_item[0]] = 0
     tmp_mem = 0
     for keyitem in pid_dict:
       tmp_mem += pid_dict[keyitem]
@@ -104,14 +110,13 @@ class mpiPID():
 class pbsPID():
   def __init__(self, process):
     self.args = process
-    self.logging_file = TemporaryFile()
-    self.process = subprocess.Popen(''.join(self.args.run).split(), stdout=self.logging_file, stderr=self.logging_file)
+    self.logfile = Logger()
+    self.process = subprocess.Popen(''.join(self.args.run).split(), stdout=self.logger.log, stderr=self.logger.log)
     node_file = open(os.getenv('PBS_NODEFILE'), 'r')
     self.node_list = node_file.read().split()
     node_file.close()
     self.pid = self.process.pid
     self.pid_dict = {}
-    self.last_position = 0
 
   def _discover_name(self):
     locations = ''.join(self.args.run).split()
@@ -119,26 +124,10 @@ class pbsPID():
       if os.path.exists(item):
         return item
 
-  def read_output(self):
-    # Setup our cursor position
-    cursor_seek = self.logging_file.tell() - 500
-    if cursor_seek - 500 <= 0:
-      cursor_seek = 0
-    # If cursor overlaps previous position, set it to previous position
-    if cursor_seek < self.last_position:
-      cursor_seek = self.last_position
-
-    # Read log from cursor position
-    self.logging_file.seek(cursor_seek)
-    output = self.logging_file.read()
-    if output != '':
-      sys.stdout.write(output)
-    self.last_position = self.logging_file.tell()
-    return output
-
   def GetMemory(self):
     return_string = {}
-    return_string['LOG'] = self.read_output()
+    return_string['LOG'] = self.logger.read()
+
     for single_node in self.node_list:
       self.pid_dict[single_node] = {}
       command = ['/usr/bin/ssh', single_node, 'ps', '-u', str(os.getenv('USER')), '-o', 'pid,comm,rss=']
@@ -178,8 +167,9 @@ class ReadMemoryLog():
     for timestamp in self.memory_list:
       to = GetTime(eval(timestamp)[0])
       log = eval(timestamp)[2].split('\n')
+      pstack = eval(timestamp)[3].split('\n')
       self.mem_list.append(eval(timestamp)[1])
-      self.sorted_list.append([str(to.day) + ' ' + str(to.monthname) + ' ' + str(to.hour) + ':' + str(to.minute) + ':' + '{:02.0f}'.format(to.second) + '.' + '{:06.0f}'.format(to.microsecond), eval(timestamp)[1], log])
+      self.sorted_list.append([str(to.day) + ' ' + str(to.monthname) + ' ' + str(to.hour) + ':' + str(to.minute) + ':' + '{:02.0f}'.format(to.second) + '.' + '{:06.0f}'.format(to.microsecond), eval(timestamp)[1], log, pstack])
     largest_memory = decimal.Decimal(max(self.mem_list))
     percentage_length = decimal.Decimal(self.getTerminalSize()[0]) - decimal.Decimal(len(str(self.sorted_list[0][0]) + ' using: ' + '{:20,.0f}'.format(self.sorted_list[0][1]) + 'K |'))
     print 'Date Stamp' + ' '*int(24) + 'Memory Usage | Percent of MAX memory used: ( ' + str('{:0,.0f}'.format(largest_memory)) + ' K )'
@@ -192,9 +182,13 @@ class ReadMemoryLog():
         percent = str(decimal.Decimal(item[1]) / largest_memory)[2:4] + '.' + str(decimal.Decimal(item[1]) / largest_memory)[4:6]
 
       tmp_log = ''
-      for single_log in item[2]:
-        if single_log != '':
-          tmp_log += ' '*43 + ' | ' + single_log + '\n'
+      if args.debug:
+        for single_log in item[2]:
+          if single_log != '':
+            tmp_log += ' '*44 + ' | stdout: ' + single_log + '\n'
+        for single_pstack in item[3]:
+          if single_pstack != '':
+            tmp_log += ' '*44 + ' | pstack: ' + single_pstack + '\n'
 
       if decimal.Decimal(item[1]) == largest_memory:
         tmp_str = item[0] + '{:20,.0f}'.format(item[1]) + ' K |' + '-'*int(percentage_length * (decimal.Decimal(item[1]) / largest_memory)) + RESET + '-| ' + percent + '%\n' + tmp_log
@@ -205,7 +199,7 @@ class ReadMemoryLog():
       last_memory = item[1]
       sys.stdout.write(tmp_str)
 
-    print 'Date Stamp' + ' '*int(24) + 'Memory Usage | Percent of MAX memory used: ( ' + str('{:0,.0f}'.format(largest_memory)) + ' K )'
+    print 'Date Stamp' + ' '*int(22) + 'Memory Usage | Percent of MAX memory used: ( ' + str('{:0,.0f}'.format(largest_memory)) + ' K )'
 
   def getTerminalSize(self):
     """Quicky to get terminal window size"""
@@ -241,10 +235,10 @@ class GetTime():
     self.now = float(datetime.datetime.now().strftime('%s.%f'))
     self.microsecond = self.posix_time.microsecond
     self.second = self.posix_time.second
-    self.minute = self.posix_time.minute
-    self.hour = self.posix_time.hour
-    self.day = self.posix_time.day
-    self.month = self.posix_time.month
+    self.minute = self.posix_time.strftime('%M')
+    self.hour = self.posix_time.strftime('%H')
+    self.day = self.posix_time.strftime('%d')
+    self.month = self.posix_time.strftime('%m')
     self.year = self.posix_time.year
     self.dayname = self.posix_time.strftime('%a')
     self.monthname = self.posix_time.strftime('%b')
@@ -276,7 +270,7 @@ def writeMemoryUsage(process):
   def _usage(last_memory):
     time_object = GetTime()
     report = process.GetMemory()
-    current_usage = [time_object.now, int(report['TOTAL']), report['LOG']]
+    current_usage = [time_object.now, int(report['TOTAL']), report['LOG'], report['PSTACK']]
     if int(current_usage[1]) != int(last_memory):
       last_memory = int(current_usage[1])
       file_object.write(str(current_usage) + '\n')
@@ -285,10 +279,11 @@ def writeMemoryUsage(process):
   def _zero():
     try:
       if last_memory != 0:
-        log = process.read_output()
-        process.logging_file.close()
+        log = process.logger.read()
+        pstack = ''
+        process.log.close()
         time_object = GetTime()
-        current_usage = [time_object.now, 0, log]
+        current_usage = [time_object.now, 0, log, pstack]
         file_object.write(str(current_usage) + '\n')
         file_object.close()
     except:
@@ -312,17 +307,17 @@ def writeMemoryUsage(process):
         print '\nApplication terminated. Wrote file:', process.args.outfile
         return
       time.sleep(float(process.args.repeat_rate))
-  except KeyboardInterrupt:
-    _zero()
-    print '\nCanceled by user. Wrote file:', process.args.outfile
-    return
+#   except KeyboardInterrupt:
+#     _zero()
+#     print '\nCanceled by user. Wrote file:', process.args.outfile
+#     return
+#   except:
+#     _zero()
+#     time.sleep(1)
+#     print '\nApplication terminated. Wrote file:', process.args.outfile
+#     return
   except:
-    _zero()
-    time.sleep(1)
-    print '\nApplication terminated. Wrote file:', process.args.outfile
-    return
-#  except:
-#    raise
+    raise
 
 def _verifyARGs(args):
   option_count = 0
@@ -337,6 +332,9 @@ def _verifyARGs(args):
   if option_count != 1:
     print 'You must use one of the following: track, read, or run'
     sys.exit(1)
+  if args.pbs and args.debug:
+    print 'Gathering a stack trace across nodes is not supported.'
+    sys.exit(1)
   if args.pbs:
     # There is a limit to how many times we can ssh somewhere (And for good reason)
     # So set the repeat to something that won't flood the network
@@ -348,6 +346,7 @@ def parseARGs(args=None):
   parser = argparse.ArgumentParser(description='Track memory usage')
   parser.add_argument('--track', nargs="?", type=int, help='Track a single specific PID already running\n ')
   parser.add_argument('--read', nargs="?", help='Read a specified memory log file\n ')
+  parser.add_argument('--debug', dest='debug', action='store_const', const=True, default=False, help='Save/Display pstack information in output\n ')
   parser.add_argument('--export', nargs="?", help='Export specified log file to a comma delimited format\n ')
   parser.add_argument('--run', nargs="+", help='Run specified command. You must encapsulate the command in quotes\n ')
   parser.add_argument('--mpi', dest='mpi', action='store_const', const=True, default=False, help='Instruct memory logger to tally all launches\n ')
