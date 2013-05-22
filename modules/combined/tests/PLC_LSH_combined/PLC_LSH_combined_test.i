@@ -272,10 +272,14 @@
   l_tol = 1e-5
   start_time = 0.0
   end_time = 1.4999999999
+  
   dt = 0.001
-  time_t  = '0        0.5    1.0    1.5'
-  time_dt = '0.015  0.015  0.005  0.005'
- []
+  [./TimeStepper]
+    type = FunctionDT
+    time_t  = '0        0.5    1.0    1.5'
+    time_dt = '0.015  0.015  0.005  0.005'
+  [../]    
+[]
 
 [Postprocessors]
   [./timestep]

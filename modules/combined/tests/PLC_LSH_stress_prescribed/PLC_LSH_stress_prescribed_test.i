@@ -215,8 +215,11 @@
   start_time = 0.0
   end_time = 32400
   dt = 1e-2
-  time_dt = '1e-2 1e-1 1e0 1e1 1e2'
-  time_t  = '0    7e-1 7e0 7e1 1e2'
+  [./TimeStepper]
+    type = FunctionDT
+    time_dt = '1e-2 1e-1 1e0 1e1 1e2'
+    time_t  = '0    7e-1 7e0 7e1 1e2'
+  [../]
 []
 
 [Postprocessors]
