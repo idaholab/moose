@@ -19,7 +19,7 @@
 
   # Time kernel in a steady state simulation
   [./ie]
-    type = ImplicitEuler
+    type = TimeDerivative
     variable = u
   [../]
 []

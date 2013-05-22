@@ -44,7 +44,6 @@
 #include "CoupledForce.h"
 #include "UserForcingFunction.h"
 #include "BodyForce.h"
-#include "ImplicitEuler.h"
 #include "Reaction.h"
 #include "RealPropertyOutput.h"
 
@@ -310,7 +309,6 @@ registerObjects(Factory & factory)
   registerKernel(CoupledForce);
   registerKernel(UserForcingFunction);
   registerKernel(BodyForce);
-  registerKernel(ImplicitEuler);
   registerKernel(Reaction);
   registerKernel(RealPropertyOutput);
 

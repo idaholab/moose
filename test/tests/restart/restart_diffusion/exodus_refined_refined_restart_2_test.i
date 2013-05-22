@@ -24,7 +24,7 @@
   [../]
 
   [./ie]
-    type = ImplicitEuler
+    type = TimeDerivative
     variable = u
   [../]
 []

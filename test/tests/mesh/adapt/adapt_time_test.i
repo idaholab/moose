@@ -35,7 +35,7 @@
   [../]
 
   [./uie]
-    type = ImplicitEuler
+    type = TimeDerivative
     variable = u
   [../]
 
@@ -51,7 +51,7 @@
   [../]
 
   [./vie]
-    type = ImplicitEuler
+    type = TimeDerivative
     variable = v
   [../]
 []

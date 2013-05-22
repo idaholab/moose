@@ -43,7 +43,7 @@
   [../]
 
   [./implicit] #We got from MOOSE kernels
-    type = ImplicitEuler
+    type = TimeDerivative
     variable = u
   [../]
 
