@@ -95,7 +95,6 @@
 // executioners
 #include "Steady.h"
 #include "Transient.h"
-#include "DT2Transient.h"
 #include "AdaptiveErrorEstimateTransient.h"
 #include "TransientAdaptive.h"
 #include "CoupledTransientExecutioner.h"
@@ -209,6 +208,7 @@
 #include "ConstantDT.h"
 #include "FunctionDT.h"
 #include "SolutionTimeAdaptiveDT.h"
+#include "DT2.h"
 
 // MultiApps
 #include "TransientMultiApp.h"
@@ -360,7 +360,6 @@ registerObjects(Factory & factory)
   // executioners
   registerExecutioner(Steady);
   registerExecutioner(Transient);
-  registerExecutioner(DT2Transient);
   registerExecutioner(AdaptiveErrorEstimateTransient);
   registerExecutioner(CoupledTransientExecutioner);
 #if defined(LIBMESH_HAVE_PETSC) && defined(PETSC_VERSION_LE)
@@ -479,6 +478,7 @@ registerObjects(Factory & factory)
   registerObject(ConstantDT);
   registerObject(FunctionDT);
   registerObject(SolutionTimeAdaptiveDT);
+  registerObject(DT2);
 
   // Transfers
 #ifdef LIBMESH_HAVE_DTK

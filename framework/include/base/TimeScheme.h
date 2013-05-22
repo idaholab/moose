@@ -163,9 +163,6 @@ protected:
 
 
 
-  ///default to false, used to determine if AB2 predictor should be used
-  TimeStep *_dt2_check;
-  bool _dt2_bool;
   int _time_stack_size;
 };
 

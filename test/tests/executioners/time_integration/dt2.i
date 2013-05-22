@@ -82,7 +82,7 @@
 []
 
 [Executioner]
-  type = DT2Transient
+  type = Transient
 
   petsc_options = '-snes_mf_operator'
 
@@ -92,12 +92,14 @@
   start_time = 0.0
   end_time = 5
   num_steps = 500000
-
-  dt = 0.1
   dtmax = 0.25
 
-  e_max = 3e-1
-  e_tol = 1e-1
+  [./TimeStepper]
+    type = DT2
+    dt = 0.1
+    e_max = 3e-1
+    e_tol = 1e-1
+  [../]
 []
 
 [Output]

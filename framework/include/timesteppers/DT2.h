@@ -12,71 +12,39 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DT2TRANSIENT_H
-#define DT2TRANSIENT_H
+#ifndef DT2_H_
+#define DT2_H_
 
-#include "Transient.h"
-#include "InputParameters.h"
-
-// LibMesh includes
+#include "TimeStepper.h"
 #include "libmesh/numeric_vector.h"
 
-// System includes
-#include <string>
-
-// Forward Declarations
-class DT2Transient;
+class DT2;
 
 template<>
-InputParameters validParams<DT2Transient>();
+InputParameters validParams<DT2>();
 
 /**
- * TransientExecutioner executioners usually loop through a number of timesteps... calling solve()
- * for each timestep.
+ *
  */
-class DT2Transient : public Transient
+class DT2 : public TimeStepper
 {
 public:
-
-  /**
-   * Constructor
-   *
-   * @param name The name given to the Executioner in the input file.
-   * @param parameters The parameters object holding data for the class to use.
-   * @return Whether or not the solve was successful.
-   */
-  DT2Transient(const std::string & name, InputParameters parameters);
-
-  virtual ~DT2Transient();
-
-  /**
-   * Optional override.
-   *
-   * @return The dt to use for this timestep.
-   */
-  virtual Real computeDT();
-
-  /**
-   * Whether or not the last solve converged.
-   */
-  virtual bool lastSolveConverged();
+  DT2(const std::string & name, InputParameters parameters);
+  virtual ~DT2();
 
   virtual void preExecute();
+  virtual void preSolve();
+  virtual void step();
+
+  virtual Real computeDT();
+  virtual void rejectStep();
+  virtual bool converged();
 
 protected:
-
-  virtual void preSolve();
-
-  virtual void postSolve();
-
   ///
   NumericVector<Number> * _u_diff, * _u1, * _u2;
-
   NumericVector<Number> * _u_saved, * _u_older_saved;
   NumericVector<Number> * _aux1, * _aux_saved, * _aux_older_saved;
-
-  /// dt of the big step
-  Real _dt_full;
 
   /// global relative time discretization error estimate
   Real _error;
@@ -86,7 +54,7 @@ protected:
   Real _e_max;
   /// maximum increase ratio
   Real _max_increase;
-
 };
 
-#endif //DT2TRANSIENT_H
+
+#endif /* DT2_H_ */

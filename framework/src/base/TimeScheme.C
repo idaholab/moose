@@ -43,7 +43,7 @@ TimeScheme::TimeScheme(NonlinearSystem * c) :
   _scaled_update(c->addVector("scaled_update", false, GHOSTED)),
   _mmatrix(c->addVector("mmatrix", false, GHOSTED)),
   _dt(c->_fe_problem.dt()),
-  _dt_old( c->_fe_problem.dtOld() ),
+  _dt_old(c->_fe_problem.dtOld()),
   _time_weight( c->_fe_problem.timeWeights()),
   _time_stepping_scheme( c->_time_stepping_scheme),
   _t_step(c->_fe_problem.timeStep()),
@@ -51,15 +51,13 @@ TimeScheme::TimeScheme(NonlinearSystem * c) :
   _use_predictor(false),
   _predictor_scale(0.0),
   _time_stack(std::deque<TimeStep>()),
-  _workvecs(std::vector<NumericVector<Number> *>()),
-  _dt2_check(NULL),
-  _dt2_bool(false)
+  _workvecs(std::vector<NumericVector<Number> *>())
 {
   _time_weight.resize(3);
 }
 
-TimeScheme::~TimeScheme(){
-  delete _dt2_check;
+TimeScheme::~TimeScheme()
+{
 }
 
 void TimeScheme::reclaimTimeStep(TimeStep &timestep)
@@ -78,18 +76,6 @@ TimeScheme::onTimestepBegin()
     _time_stack.back().setDt(_dt_old);
   }
 
-  if(_dt2_bool)
-  {
-    //fix stack if DT2Transient
-    for (int i=0; i<2; i++)
-    { // reject last two short steps
-      reclaimTimeStep(_time_stack.back());
-      _time_stack.pop_back();
-    }
-    _time_stack.push_back(*_dt2_check);
-    _dt2_check = NULL;
-    _dt2_bool = false;
-  }
   _time_stepping_scheme = _nl->_time_stepping_scheme;
   //set Solution to previous solve
   _time_stack.back().setSolution(_nl->solutionOld());
@@ -123,21 +109,19 @@ TimeScheme::onTimestepBegin()
   _time_stack.back().setDt(_dt);
 
   Real sum;
-  if(_t_step > 1)
+  if (_t_step > 1)
   {
     _time_stack[_time_stack.size()-2].setTimeDerivative(_solution_u_dot);
   }
   switch (_time_stepping_scheme)
   {
   case Moose::CRANK_NICOLSON:
-     {
-        computeLittlef(_time_stack[_time_stack.size()-2].getSolution(), _residual_old, -1, false);
-        _residual_old.close();
-    }
+    computeLittlef(_time_stack[_time_stack.size()-2].getSolution(), _residual_old, -1, false);
+    _residual_old.close();
     break;
 
   case Moose::BDF2:
-    sum = _dt+ _dt_old;
+    sum = _dt + _dt_old;
     _time_weight[0] = 1.+_dt/sum;
     _time_weight[1] =-sum/ _dt_old;
     _time_weight[2] =_dt*_dt/_dt_old/sum;
