@@ -6,6 +6,7 @@
 // libMesh includes
 #include "libmesh/mesh_tools.h"
 #include "libmesh/auto_ptr.h"
+#include "libmesh/sphere.h"
 
 class GrainTracker;
 
@@ -113,7 +114,7 @@ protected:
     BoundingSphereInfo(unsigned int node_id, const Point & center, Real radius);
 
     unsigned int member_node_id;
-    libMesh::Sphere *b_sphere;
+    libMesh::Sphere b_sphere;
   };
 
   /// This struct hold the information necessary to identify and track a unique grain;
