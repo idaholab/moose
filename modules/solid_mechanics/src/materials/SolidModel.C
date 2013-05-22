@@ -980,7 +980,9 @@ SolidModel::createElement( const std::string & name,
     if ( !isCoupled("disp_r") ||
          !isCoupled("disp_z") )
     {
-      mooseError("RZ coord sys requires disp_r and disp_z for AxisymmetricRZ formulation");
+      std::string err(_name);
+      err += ": RZ coord sys requires disp_r and disp_z for AxisymmetricRZ formulation";
+      mooseError(err);
     }
     element = new Elk::SolidMechanics::AxisymmetricRZ(name, parameters);
   }
@@ -988,7 +990,9 @@ SolidModel::createElement( const std::string & name,
   {
     if ( !isCoupled("disp_r") )
     {
-      mooseError("RSPHERICAL coord sys requires disp_r for SphericalR formulation");
+      std::string err(_name);
+      err += ": RSPHERICAL coord sys requires disp_r for SphericalR formulation";
+      mooseError(err);
     }
     element = new Elk::SolidMechanics::SphericalR(name, parameters);
   }
@@ -1037,4 +1041,3 @@ SolidModel::createElement( const std::string & name,
 
   return element;
 }
-
