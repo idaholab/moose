@@ -65,7 +65,7 @@ GrainTracker::getElementalValue(unsigned int element_id) const
 
     for (std::vector<BoundingSphereInfo *>::const_iterator it = grain_it->second->sphere_ptrs.begin();
          it != grain_it->second->sphere_ptrs.end(); ++it)
-      if (curr_elem->contains_point((*it)->b_sphere->center()))
+      if (curr_elem->contains_point((*it)->b_sphere.center()))
         return grain_it->first;
   }
 
@@ -531,15 +531,15 @@ GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres
   Real min_distance = std::numeric_limits<Real>::max();
   for (std::vector<BoundingSphereInfo *>::iterator sphere_it1 = spheres1.begin(); sphere_it1 != spheres1.end(); ++sphere_it1)
   {
-    libMesh::Sphere *sphere1 = (*sphere_it1)->b_sphere;
+    libMesh::Sphere &sphere1 = (*sphere_it1)->b_sphere;
 
     for (std::vector<BoundingSphereInfo *>::iterator sphere_it2 = spheres2.begin(); sphere_it2 != spheres2.end(); ++sphere_it2)
     {
-      libMesh::Sphere *sphere2 = (*sphere_it2)->b_sphere;
+      libMesh::Sphere &sphere2 = (*sphere_it2)->b_sphere;
 
       // We need to see if these two spheres intersect on the domain.  To do that we need to account for periodicity of the mesh
-      Real curr_distance = _mesh.minPeriodicDistance(_var_number, sphere1->center(), sphere2->center())  // distance between the centroids
-        - (ignore_radii ? 0 : (sphere1->radius() + sphere2->radius()));                                  // minus the sum of the two radii
+      Real curr_distance = _mesh.minPeriodicDistance(_var_number, sphere1.center(), sphere2.center())    // distance between the centroids
+        - (ignore_radii ? 0 : (sphere1.radius() + sphere2.radius()));                                    // minus the sum of the two radii
 
       if (curr_distance < min_distance)
         min_distance = curr_distance;
@@ -552,7 +552,7 @@ GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres
 // BoundingSphereInfo
 GrainTracker::BoundingSphereInfo::BoundingSphereInfo(unsigned int node_id, const Point & center, Real radius) :
     member_node_id(node_id),
-    b_sphere(new libMesh::Sphere(center, radius))
+    b_sphere(center, radius)
 {}
 
 // Unique Grain
@@ -567,8 +567,5 @@ GrainTracker::UniqueGrain::UniqueGrain(unsigned int var_idx, const std::vector<B
 GrainTracker::UniqueGrain::~UniqueGrain()
 {
   for (unsigned int i=0; i<sphere_ptrs.size(); ++i)
-  {
-    delete sphere_ptrs[i]->b_sphere;
     delete sphere_ptrs[i];
-  }
 }
