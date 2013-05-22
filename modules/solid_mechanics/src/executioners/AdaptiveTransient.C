@@ -176,7 +176,7 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
 
-  _problem.getNonlinearSystem().timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<MooseEnum>("scheme")));
+  setupTimeIntegrator();
 }
 
 AdaptiveTransient::~AdaptiveTransient()
