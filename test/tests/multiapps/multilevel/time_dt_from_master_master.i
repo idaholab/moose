@@ -45,8 +45,11 @@
   petsc_options_value = 'hypre boomeramg'
 
   dt = 0.25
-  time_t  = '0     1'
-  time_dt = '0.25  1'
+  [./TimeStepper]
+    type = FunctionDT
+    time_t  = '0     1'
+    time_dt = '0.25  1'
+  [../]
 []
 
 [Output]
