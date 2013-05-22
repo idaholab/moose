@@ -55,7 +55,7 @@ ComputeFullJacobianThread::computeJacobian()
       for (std::vector<Kernel *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
       {
         Kernel * kernel = *kt;
-        if (kernel->variable().index() == ivar)
+        if ((kernel->variable().index() == ivar) && kernel->isImplicit())
         {
           kernel->subProblem().prepareShapes(jvar, _tid);
           kernel->computeOffDiagJacobian(jvar);
@@ -79,14 +79,17 @@ ComputeFullJacobianThread::computeJacobian()
         for (std::vector<Kernel *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
         {
           Kernel * kernel = *kt;
-          // now, get the list of coupled scalar vars and compute their off-diag jacobians
-          const std::vector<MooseVariableScalar *> coupled_scalar_vars = kernel->getCoupledMooseScalarVars();
-          for (std::vector<MooseVariableScalar *>::const_iterator jt = coupled_scalar_vars.begin(); jt != coupled_scalar_vars.end(); jt++)
+          if (kernel->isImplicit())
           {
-            MooseVariableScalar & jvar = *(*jt);
-            // Do: dvar / dscalar_var
-            if (_sys.hasScalarVariable(jvar.name()))              // want to process only nl-variables (not aux ones)
-              kernel->computeOffDiagJacobianScalar(jvar.index());
+            // now, get the list of coupled scalar vars and compute their off-diag jacobians
+            const std::vector<MooseVariableScalar *> coupled_scalar_vars = kernel->getCoupledMooseScalarVars();
+            for (std::vector<MooseVariableScalar *>::const_iterator jt = coupled_scalar_vars.begin(); jt != coupled_scalar_vars.end(); jt++)
+            {
+              MooseVariableScalar & jvar = *(*jt);
+              // Do: dvar / dscalar_var
+              if (_sys.hasScalarVariable(jvar.name()))              // want to process only nl-variables (not aux ones)
+                kernel->computeOffDiagJacobianScalar(jvar.index());
+            }
           }
         }
       }
@@ -111,7 +114,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
       for (std::vector<IntegratedBC *>::iterator jt = bcs.begin(); jt != bcs.end(); ++jt)
       {
         IntegratedBC * bc = *jt;
-        if (bc->shouldApply() && bc->variable().index() == ivar)
+        if (bc->shouldApply() && bc->variable().index() == ivar && bc->isImplicit())
         {
           bc->subProblem().prepareFaceShapes(jvar, _tid);
           bc->computeJacobianBlock(jvar);
@@ -135,7 +138,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
         for (std::vector<IntegratedBC *>::iterator kt = bcs.begin(); kt != bcs.end(); ++kt)
         {
           IntegratedBC * bc = *kt;
-          if (bc->variable().index() == ivar.index())
+          if (bc->variable().index() == ivar.index() && bc->isImplicit())
           {
             // now, get the list of coupled scalar vars and compute their off-diag jacobians
             const std::vector<MooseVariableScalar *> coupled_scalar_vars = bc->getCoupledMooseScalarVars();
@@ -166,7 +169,7 @@ ComputeFullJacobianThread::computeInternalFaceJacobian()
     for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
     {
       DGKernel * dg = *it;
-      if (dg->variable().index() == ivar)
+      if (dg->variable().index() == ivar && dg->isImplicit())
       {
         dg->subProblem().prepareNeighborShapes(jvar, _tid);
         dg->computeOffDiagJacobian(jvar);

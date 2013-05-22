@@ -654,8 +654,14 @@ Assembly::init()
   if(max_rows_per_column == 1 && _sys.getScalarVariables(_tid).size() == 0)
     _block_diagonal_matrix = true;
 
-  _sub_Re.resize(n_vars);
-  _sub_Rn.resize(n_vars);
+  // two vectors: one for time residual contributions and one for non-time residual contributions
+  _sub_Re.resize(2);
+  _sub_Rn.resize(2);
+  for (unsigned int i = 0; i < _sub_Re.size(); i++)
+  {
+    _sub_Re[i].resize(n_vars);
+    _sub_Rn[i].resize(n_vars);
+  }
 
   _sub_Kee.resize(n_vars);
   _sub_Ken.resize(n_vars);
@@ -700,8 +706,11 @@ Assembly::prepare()
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & ivar = *(*it);
-    _sub_Re[ivar.index()].resize(ivar.dofIndices().size());
-    _sub_Re[ivar.index()].zero();
+    for (unsigned int i = 0; i < _sub_Re.size(); i++)
+    {
+      _sub_Re[i][ivar.index()].resize(ivar.dofIndices().size());
+      _sub_Re[i][ivar.index()].zero();
+    }
   }
 }
 
@@ -722,8 +731,11 @@ Assembly::prepareVariable(MooseVariable * var)
     }
   }
 
-  _sub_Re[var->index()].resize(var->dofIndices().size());
-  _sub_Re[var->index()].zero();
+  for (unsigned int i = 0; i < _sub_Re.size(); i++)
+  {
+    _sub_Re[i][var->index()].resize(var->dofIndices().size());
+    _sub_Re[i][var->index()].zero();
+  }
 }
 
 void
@@ -751,8 +763,11 @@ Assembly::prepareNeighbor()
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & ivar = *(*it);
-    _sub_Rn[ivar.index()].resize(ivar.dofIndicesNeighbor().size());
-    _sub_Rn[ivar.index()].zero();
+    for (unsigned int i = 0; i < _sub_Rn.size(); i++)
+    {
+      _sub_Rn[i][ivar.index()].resize(ivar.dofIndicesNeighbor().size());
+      _sub_Rn[i][ivar.index()].zero();
+    }
   }
 }
 
@@ -762,8 +777,11 @@ Assembly::prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsig
   jacobianBlock(ivar,jvar).resize(dof_indices.size(), dof_indices.size());
   jacobianBlock(ivar,jvar).zero();
 
-  _sub_Re[ivar].resize(dof_indices.size());
-  _sub_Re[ivar].zero();
+  for (unsigned int i = 0; i < _sub_Re.size(); i++)
+  {
+    _sub_Re[i][ivar].resize(dof_indices.size());
+    _sub_Re[i][ivar].zero();
+  }
 }
 
 void
@@ -775,8 +793,11 @@ Assembly::prepareScalar()
     MooseVariableScalar & ivar = *(*it);
     unsigned int idofs = ivar.dofIndices().size();
 
-    _sub_Re[ivar.index()].resize(idofs);
-    _sub_Re[ivar.index()].zero();
+    for (unsigned int i = 0; i < _sub_Re.size(); i++)
+    {
+      _sub_Re[i][ivar.index()].resize(idofs);
+      _sub_Re[i][ivar.index()].zero();
+    }
 
     for (std::vector<MooseVariableScalar *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
     {
@@ -905,36 +926,36 @@ Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsign
 }
 
 void
-Assembly::addResidual(NumericVector<Number> & residual)
+Assembly::addResidual(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
 {
   const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
-    addResidualBlock(residual, _sub_Re[var.index()], var.dofIndices(), var.scalingFactor());
+    addResidualBlock(residual, _sub_Re[type][var.index()], var.dofIndices(), var.scalingFactor());
   }
 }
 
 void
-Assembly::addResidualNeighbor(NumericVector<Number> & residual)
+Assembly::addResidualNeighbor(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
 {
   const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
-    addResidualBlock(residual, _sub_Rn[var.index()], var.dofIndicesNeighbor(), var.scalingFactor());
+    addResidualBlock(residual, _sub_Rn[type][var.index()], var.dofIndicesNeighbor(), var.scalingFactor());
   }
 }
 
 void
-Assembly::addResidualScalar(NumericVector<Number> & residual)
+Assembly::addResidualScalar(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
 {
   // add the scalar variables residuals
   const std::vector<MooseVariableScalar *> vars = _sys.getScalarVariables(_tid);
   for (std::vector<MooseVariableScalar *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariableScalar & var = *(*it);
-    addResidualBlock(residual, _sub_Re[var.index()], var.dofIndices(), var.scalingFactor());
+    addResidualBlock(residual, _sub_Re[type][var.index()], var.dofIndices(), var.scalingFactor());
   }
 }
 
@@ -946,7 +967,8 @@ Assembly::cacheResidual()
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
-    cacheResidualBlock(_sub_Re[var.index()], var.dofIndices(), var.scalingFactor());
+    for (unsigned int i = 0; i < _sub_Re.size(); i++)
+      cacheResidualBlock(_sub_Re[i][var.index()], var.dofIndices(), var.scalingFactor());
   }
 }
 
@@ -957,7 +979,8 @@ Assembly::cacheResidualNeighbor()
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
-    cacheResidualBlock(_sub_Rn[var.index()], var.dofIndicesNeighbor(), var.scalingFactor());
+    for (unsigned int i = 0; i < _sub_Re.size(); i++)
+      cacheResidualBlock(_sub_Rn[i][var.index()], var.dofIndicesNeighbor(), var.scalingFactor());
   }
 }
 
@@ -1007,24 +1030,24 @@ Assembly::setResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
 }
 
 void
-Assembly::setResidual(NumericVector<Number> & residual)
+Assembly::setResidual(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
 {
   const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
-    setResidualBlock(residual, _sub_Re[var.index()], var.dofIndices(), var.scalingFactor());
+    setResidualBlock(residual, _sub_Re[type][var.index()], var.dofIndices(), var.scalingFactor());
   }
 }
 
 void
-Assembly::setResidualNeighbor(NumericVector<Number> & residual)
+Assembly::setResidualNeighbor(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
 {
   const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
-    setResidualBlock(residual, _sub_Rn[var.index()], var.dofIndicesNeighbor(), var.scalingFactor());
+    setResidualBlock(residual, _sub_Rn[type][var.index()], var.dofIndicesNeighbor(), var.scalingFactor());
   }
 }
 

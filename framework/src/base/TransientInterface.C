@@ -32,7 +32,6 @@ TransientInterface::TransientInterface(InputParameters & parameters, const std::
     _t_step(_ti_feproblem.timeStep()),
     _dt(_ti_feproblem.dt()),
     _dt_old(_ti_feproblem.dtOld()),
-    _time_weight(_ti_feproblem.timeWeights()),
     _is_transient(_ti_feproblem.isTransient()),
     _object_type(object_type),
     _time_periods(_ti_feproblem.getTimePeriods()),

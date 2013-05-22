@@ -12,29 +12,38 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef TIMEKERNEL_H
-#define TIMEKERNEL_H
-
-#include "Kernel.h"
-
-// Forward Declaration
-class TimeKernel;
+#include "TimeIntegrator.h"
+#include "FEProblem.h"
+#include "NonlinearSystem.h"
 
 template<>
-InputParameters validParams<TimeKernel>();
-
-/**
- * All time kernels should inherit from this class
- *
- */
-class TimeKernel : public Kernel
+InputParameters validParams<TimeIntegrator>()
 {
-public:
-  TimeKernel(const std::string & name, InputParameters parameters);
-  virtual ~TimeKernel();
+  InputParameters params = validParams<MooseObject>();
 
-  virtual void computeResidual();
+  return params;
+}
 
-};
+TimeIntegrator::TimeIntegrator(const std::string & name, InputParameters parameters) :
+    MooseObject(name, parameters),
+    _fe_problem(*getParam<FEProblem *>("_fe_problem")),
+    _nl(_fe_problem.getNonlinearSystem()),
+    _u_dot(_nl.solutionUDot()),
+    _du_dot_du(_nl.solutionDuDotDu()),
+    _t_step(_fe_problem.timeStep()),
+    _dt(_fe_problem.dt()),
+    _dt_old(_fe_problem.dtOld()),
+    _Re_time(_nl.residualVector(Moose::KT_TIME)),
+    _Re_non_time(_nl.residualVector(Moose::KT_NONTIME))
+{
+}
 
-#endif //TIMEKERNEL_H
+TimeIntegrator::~TimeIntegrator()
+{
+}
+
+void
+TimeIntegrator::solve()
+{
+  _nl.sys().solve();
+}

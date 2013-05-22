@@ -112,8 +112,8 @@ public:
   virtual unsigned int nNonlinearIterations();
   virtual unsigned int nLinearIterations();
 
-  virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
-  virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;
+  virtual void addResidual(THREAD_ID tid) = 0;
+  virtual void addResidualNeighbor(THREAD_ID tid) = 0;
 
   virtual void cacheResidual(THREAD_ID tid) = 0;
   virtual void cacheResidualNeighbor(THREAD_ID tid) = 0;

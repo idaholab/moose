@@ -19,6 +19,7 @@
 #include "ParallelUniqueId.h"
 #include "MooseVariable.h"
 #include "MooseVariableScalar.h"
+#include "MooseTypes.h"
 // libMesh
 #include "libmesh/dof_map.h"
 #include "libmesh/dense_matrix.h"
@@ -309,9 +310,9 @@ public:
   void copyFaceShapes(unsigned int var);
   void copyNeighborShapes(unsigned int var);
 
-  void addResidual(NumericVector<Number> & residual);
-  void addResidualNeighbor(NumericVector<Number> & residual);
-  void addResidualScalar(NumericVector<Number> & residual);
+  void addResidual(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);
+  void addResidualNeighbor(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);
+  void addResidualScalar(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);
 
   /**
    * Takes the values that are currently in _sub_Re and appends them to the cached values.
@@ -330,8 +331,8 @@ public:
    */
   void addCachedResidual(NumericVector<Number> & residual);
 
-  void setResidual(NumericVector<Number> & residual);
-  void setResidualNeighbor(NumericVector<Number> & residual);
+  void setResidual(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);
+  void setResidualNeighbor(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);
 
   void addJacobian(SparseMatrix<Number> & jacobian);
   void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices);
@@ -357,8 +358,8 @@ public:
    */
   void addCachedJacobian(SparseMatrix<Number> & jacobian);
 
-  DenseVector<Number> & residualBlock(unsigned int var_num) { return _sub_Re[var_num]; }
-  DenseVector<Number> & residualBlockNeighbor(unsigned int var_num) { return _sub_Rn[var_num]; }
+  DenseVector<Number> & residualBlock(unsigned int var_num, Moose::KernelType type = Moose::KT_NONTIME) { return _sub_Re[static_cast<unsigned int>(type)][var_num]; }
+  DenseVector<Number> & residualBlockNeighbor(unsigned int var_num, Moose::KernelType type = Moose::KT_NONTIME) { return _sub_Rn[static_cast<unsigned int>(type)][var_num]; }
 
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar);
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar);
@@ -537,9 +538,9 @@ protected:
   MooseArray<Point> _current_physical_points;
 
   /// residual contributions for each variable from the element
-  std::vector<DenseVector<Number> > _sub_Re;
+  std::vector<std::vector<DenseVector<Number> > > _sub_Re;
   /// residual contributions for each variable from the neighbor
-  std::vector<DenseVector<Number> > _sub_Rn;
+  std::vector<std::vector<DenseVector<Number> > > _sub_Rn;
   /// auxiliary vector for scaling residuals (optimization to avoid expensive construction/destruction)
   DenseVector<Number> _tmp_Re;
 

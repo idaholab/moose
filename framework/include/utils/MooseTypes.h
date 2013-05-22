@@ -51,19 +51,10 @@ enum VarKindType
   VAR_AUXILIARY
 };
 
-enum TimeSteppingScheme
-{
-  IMPLICIT_EULER,
-  EXPLICIT_EULER,
-  BDF2,
-  CRANK_NICOLSON,
-  PETSC_TS
-};
-
 enum KernelType
 {
-  KT_TIME,
-  KT_NONTIME,
+  KT_TIME = 0,
+  KT_NONTIME = 1,
   KT_ALL
 };
 

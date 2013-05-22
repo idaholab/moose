@@ -96,6 +96,9 @@ protected:
   /// scaling_parameter for time step selection, default is 0.8
   Real _scaling_parameter;
 
+  bool _estimate_error;
+  Real _error;
+  Real _cumulative_error;
 };
 
 #endif //DT2TRANSIENT_H

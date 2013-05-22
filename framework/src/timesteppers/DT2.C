@@ -203,7 +203,7 @@ DT2::computeDT()
   if (_t_step < 2)
     return _current_dt;
 
-  Real new_dt = _current_dt * std::pow(_e_tol / _error, 1.0 / _fe_problem.getNonlinearSystem().getTimeSteppingOrder());
+  Real new_dt = _current_dt * std::pow(_e_tol / _error, 1.0 / _fe_problem.getNonlinearSystem().getTimeIntegrator()->order());
   if (new_dt / _current_dt > _max_increase)
     new_dt = _current_dt * _max_increase;
 

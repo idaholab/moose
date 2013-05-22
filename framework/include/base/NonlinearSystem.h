@@ -23,6 +23,7 @@
 #include "DamperWarehouse.h"
 #include "ConstraintWarehouse.h"
 #include "MoosePreconditioner.h"
+#include "TimeIntegrator.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
@@ -33,7 +34,6 @@
 #include "libmesh/coupling_matrix.h"
 
 class FEProblem;
-class TimeScheme;
 
 /**
  * Nonlinear system to be solved
@@ -70,6 +70,14 @@ public:
    * @return true if converged, otherwise false
    */
   virtual bool converged();
+
+  /**
+   * Add a time integrator
+   * @param type Type of the integrator
+   * @param name The name of the integrator
+   * @param parameters Integrator params
+   */
+  void addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a kernel
@@ -212,24 +220,7 @@ public:
   void printVarNorms();
 
   /**
-   * Sets the time-stepping scheme
-   * @param scheme Time-stepping scheme to be set
-   */
-  void timeSteppingScheme(Moose::TimeSteppingScheme scheme);
-
-  /**
-   * Gets the time-stepping scheme
-   * @return Time-stepping scheme being used
-   */
-  Moose::TimeSteppingScheme timeSteppingScheme() { return _time_stepping_scheme; }
-
-  /**
-   * Get the order of used time integration scheme
-   */
-  int getTimeSteppingOrder() const;
-
-  /**
-   * Called at the beginning of th time step
+   * Called at the beginning of the time step
    */
   void onTimestepBegin();
 
@@ -259,6 +250,7 @@ public:
 
   virtual NumericVector<Number> & solutionUDot();
   virtual NumericVector<Number> & solutionDuDotDu();
+  virtual NumericVector<Number> & residualVector(Moose::KernelType type);
 
   virtual const NumericVector<Number> * & currentSolution() { return _current_solution; }
 
@@ -284,13 +276,15 @@ public:
    * If called with true this system will use a finite differenced form of
    * the Jacobian as the preconditioner
    */
-  void useFiniteDifferencedPreconditioner(bool use=true) { _use_finite_differenced_preconditioner = use; }
+  void useFiniteDifferencedPreconditioner(bool use = true) { _use_finite_differenced_preconditioner = use; }
 
   /**
    * If called with true this system will use FieldSplitPreconditioner, whenever it is supported by the solver.
    */
-  void useFieldSplitPreconditioner(bool use=true) { _use_field_split_preconditioner = use; }
-  struct FieldSplitInfo {
+  void useFieldSplitPreconditioner(bool use = true) { _use_field_split_preconditioner = use; }
+
+  struct FieldSplitInfo
+  {
     std::string name;
     std::vector<std::string> vars;
     std::vector<std::string> blocks;
@@ -302,13 +296,11 @@ public:
     std::vector<std::string> petsc_options;
     std::vector<std::string> petsc_options_iname;
     std::vector<std::string> petsc_options_value;
-
   };
- protected:
-  std::map<std::string, FieldSplitInfo> _field_split_info;
- public:
-  void addFieldSplit(const std::string& name, const FieldSplitInfo& info);
-  const FieldSplitInfo& getFieldSplit(const std::string& name) {return _field_split_info[name];};
+
+  void addFieldSplit(const std::string & name, const FieldSplitInfo & info);
+
+  const FieldSplitInfo & getFieldSplit(const std::string& name) { return _field_split_info[name]; }
 
   /**
    * If called with true this will add entries into the jacobian to link together degrees of freedom that are found to
@@ -365,6 +357,8 @@ public:
 
   void setPredictorScale(Real scale);
 
+  TimeIntegrator * & getTimeIntegrator() { return _time_integrator; }
+
 public:
   FEProblem & _fe_problem;
   // FIXME: make these protected and create getters/setters
@@ -385,17 +379,17 @@ protected:
    * Compute the residual
    * @param residual[out] Residual is formed here
    */
-  void computeResidualInternal(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL  );
+  void computeResidualInternal(Moose::KernelType type = Moose::KT_ALL);
 
   /**
-   * Completes the assembly of residual
-   * @param residual[out] Residual is formed here
+   * Enforces nodal boundary conditions
+   * @param residual[in/out] Residual where nodal BCs are enforced
    */
-  void finishResidual(NumericVector<Number> & residual, Moose::KernelType type);
+  void computeNodalBCs(NumericVector<Number> & residual, Moose::KernelType type);
 
   void computeJacobianInternal(SparseMatrix<Number> &  jacobian);
 
-  void computeDiracContributions(NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
+  void computeDiracContributions(SparseMatrix<Number> * jacobian = NULL);
 
   void computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian);
 
@@ -417,9 +411,16 @@ protected:
   /// Copy of the residual vector
   NumericVector<Number> & _residual_copy;
 
-
-  /// Time stepping scheme used for time discretization
-  Moose::TimeSteppingScheme _time_stepping_scheme;
+  /// Time integrator
+  TimeIntegrator * _time_integrator;
+  /// solution vector for u^dot
+  NumericVector<Number> & _u_dot;
+  /// solution vector for {du^dot}\over{du}
+  NumericVector<Number> & _du_dot_du;
+  /// residual vector for time contributions
+  NumericVector<Number> & _Re_time;
+  /// residual vector for non-time contributions
+  NumericVector<Number> & _Re_non_time;
 
   // holders
   /// Kernel storage for each thread
@@ -452,6 +453,8 @@ protected:
   /// Whether or not to use a field split preconditioner
   bool _use_field_split_preconditioner;
 
+  std::map<std::string, FieldSplitInfo> _field_split_info;
+
   /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
   bool _add_implicit_geometric_coupling_entries_to_jacobian;
 
@@ -479,17 +482,14 @@ protected:
   bool _use_predictor;
   bool _computing_initial_residual;
 
+
 public:
-  /// Time stepping scheme class where the actual work is done
-  TimeScheme * _time_scheme;
-  TimeScheme * getTimeScheme(){ return _time_scheme;}
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;
   friend class ComputeFullJacobianThread;
   friend class ComputeExplicitJacobianThread;
   friend class ComputeDiracThread;
   friend class ComputeDampingThread;
-  friend class TimeScheme;
 };
 
 #endif /* NONLINEARSYSTEM_H */

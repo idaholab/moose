@@ -14,7 +14,6 @@
 
 #include "AdaptiveErrorEstimateTransient.h"
 #include "Problem.h"
-#include "TimeScheme.h"
 
 //libMesh includes
 #include "libmesh/implicit_system.h"
@@ -61,9 +60,8 @@ AdaptiveErrorEstimateTransient::AdaptiveErrorEstimateTransient(const std::string
     _infnorm(0),
     _scaling_parameter(getParam<Real>("scaling_parameter"))
 {
-  _estimate_error=true;
-  _error=0;
-  _problem.getNonlinearSystem()._time_scheme->useAB2Predictor();
+  _estimate_error = true;
+  _error = 0;
   _cumulative_error = 0;
 
 }

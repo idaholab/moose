@@ -24,7 +24,6 @@
 #include "ComputeResidualThread.h"
 #include "ComputeJacobianThread.h"
 #include "ComputeFullJacobianThread.h"
-#include "ComputeExplicitJacobianThread.h"
 #include "ComputeDiracThread.h"
 #include "ComputeDampingThread.h"
 #include "TimeKernel.h"
@@ -42,7 +41,6 @@
 #include "NodeFaceConstraint.h"
 #include "ScalarKernel.h"
 #include "Parser.h"
-#include "TimeScheme.h"
 #include "FieldSplitPreconditioner.h"
 
 // libMesh
@@ -106,9 +104,14 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _initial_residual(0.),
     _current_nl_its(0),
     _current_solution(NULL),
-    _residual_ghosted(_sys.add_vector("residual_ghosted", false, GHOSTED)),
+    _residual_ghosted(addVector("residual_ghosted", false, GHOSTED)),
     _serialized_solution(*NumericVector<Number>::build().release()),
     _residual_copy(*NumericVector<Number>::build().release()),
+    _time_integrator(NULL),
+    _u_dot(addVector("u_dot", true, GHOSTED)),
+    _du_dot_du(addVector("du_dot_du", true, GHOSTED)),
+    _Re_time(addVector("Re_time", true, GHOSTED)),
+    _Re_non_time(addVector("Re_non_time", true, GHOSTED)),
     _increment_vec(NULL),
     _preconditioner(NULL),
     _use_finite_differenced_preconditioner(false),
@@ -122,8 +125,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _n_iters(0),
     _n_linear_iters(0),
     _final_residual(0.),
-    _use_predictor(false),
-    _time_scheme(new TimeScheme(this))
+    _use_predictor(false)
 {
   _sys.nonlinear_solver->residual      = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian      = Moose::compute_jacobian;
@@ -132,7 +134,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
   _sys.nonlinear_solver->nearnullspace = Moose::compute_nearnullspace;
 
 
-  timeSteppingScheme(Moose::IMPLICIT_EULER);                   // default time stepping scheme
   unsigned int n_threads = libMesh::n_threads();
   _kernels.resize(n_threads);
   _bcs.resize(n_threads);
@@ -144,10 +145,10 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
 
 NonlinearSystem::~NonlinearSystem()
 {
+  delete _time_integrator;
   delete _preconditioner;
   delete &_serialized_solution;
   delete &_residual_copy;
-  delete _time_scheme;
 }
 
 void
@@ -209,7 +210,8 @@ NonlinearSystem::solve()
   if(_use_field_split_preconditioner)
     setupFieldSplitPreconditioner();
 
-  _sys.solve();
+  _time_integrator->solve();
+  _time_integrator->postSolve();
 
   // store info about the solve
   _n_iters = _sys.n_nonlinear_iterations();
@@ -393,6 +395,15 @@ bool
 NonlinearSystem::converged()
 {
   return _sys.nonlinear_solver->converged;
+}
+
+void
+NonlinearSystem::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
+{
+  TimeIntegrator * ti = static_cast<TimeIntegrator *>(_factory.create(type, name, parameters));
+  if (ti == NULL)
+    mooseError("Not an time integrator object.");
+  _time_integrator = ti;
 }
 
 void
@@ -596,11 +607,24 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
 
   try
   {
-    if (type == Moose::KT_ALL)
-      computeTimeDerivatives();
-    computeResidualInternal(residual, type);
-    if (type != Moose::KT_TIME)
-      finishResidual(residual, type);
+    residual.zero();
+    residualVector(Moose::KT_TIME).zero();
+    residualVector(Moose::KT_NONTIME).zero();
+    _time_integrator->preStep();
+    computeTimeDerivatives();
+    computeResidualInternal(type);
+    residualVector(Moose::KT_TIME).close();
+    residualVector(Moose::KT_NONTIME).close();
+    _time_integrator->postStep(residual);
+    residual.close();
+    computeNodalBCs(residual, type);
+
+    // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
+    if (_need_residual_ghosted && _debugging_residuals)
+    {
+      _residual_ghosted = residual;
+      _residual_ghosted.close();
+    }
   }
   catch (MooseException & e)
   {
@@ -626,36 +650,9 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
 
 
 void
-NonlinearSystem::timeSteppingScheme(Moose::TimeSteppingScheme scheme)
-{
-  _time_stepping_scheme = scheme;
-  _time_scheme->timeSteppingScheme(scheme);
-}
-
-int
-NonlinearSystem::getTimeSteppingOrder() const
-{
-  switch (_time_stepping_scheme)
-  {
-  case Moose::EXPLICIT_EULER:
-  case Moose::IMPLICIT_EULER:
-    return 1;
-    break;
-  case Moose::CRANK_NICOLSON:
-  case Moose::BDF2:
-    return 2;
-    break;
-  case Moose::PETSC_TS:
-    mooseError("The side-effect expected by this query is not provided by PETSc TS");
-    break;
-  }
-  return 0;
-}
-
-void
 NonlinearSystem::onTimestepBegin()
 {
-  _time_scheme->onTimestepBegin();
+  _time_integrator->preSolve();
 }
 
 void
@@ -696,13 +693,11 @@ NonlinearSystem::setInitialSolution()
 void NonlinearSystem::setPredictorScale(Real scale)
 {
   _use_predictor = true;
-  _time_scheme->setPredictorScale(scale);
 }
 
 void
 NonlinearSystem::applyPredictor(NumericVector<Number> & initial_solution)
 {
-  _time_scheme->applyPredictor(initial_solution);
   _fe_problem.predictorCleanup(initial_solution);
 }
 
@@ -715,18 +710,32 @@ NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
 }
 
 NumericVector<Number> &
-NonlinearSystem::solutionUDot() { return _time_scheme->solutionUDot(); }
+NonlinearSystem::solutionUDot()
+{
+  return _u_dot;
+}
 
 NumericVector<Number> &
-NonlinearSystem::solutionDuDotDu() { return _time_scheme->solutionDuDotDu(); }
+NonlinearSystem::solutionDuDotDu()
+{
+  return _du_dot_du;
+}
+
+NumericVector<Number> &
+NonlinearSystem::residualVector(Moose::KernelType type)
+{
+  switch (type)
+  {
+  case Moose::KT_TIME: return _Re_time;
+  case Moose::KT_NONTIME: return _Re_non_time;
+  default: mooseError("Trying to get residual vector that is not available");
+  }
+}
 
 void
 NonlinearSystem::computeTimeDerivatives()
 {
-  if (!_fe_problem.isTransient())
-    return;
-
-  _time_scheme->computeTimeDerivatives();
+  _time_integrator->computeTimeDerivatives();
 }
 
 void
@@ -971,55 +980,31 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
 
 void
-NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose::KernelType type)
+NonlinearSystem::computeResidualInternal(Moose::KernelType type)
 {
-  residual.zero();
-
   // residualSetup() /////
   for(unsigned int i=0; i<libMesh::n_threads(); i++)
   {
     _kernels[i].residualSetup();
-    if(type != Moose::KT_TIME )
-    {
-      _bcs[i].residualSetup();
-      _dirac_kernels[i].residualSetup();
-      if (_doing_dg) _dg_kernels[i].residualSetup();
-      _constraints[i].residualSetup();
-    }
+    _bcs[i].residualSetup();
+    _dirac_kernels[i].residualSetup();
+    if (_doing_dg) _dg_kernels[i].residualSetup();
+    _constraints[i].residualSetup();
   }
 
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
     _fe_problem.reinitScalars(tid);
 
+  // residual contributions from the domain
   PARALLEL_TRY {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    if(type != Moose::KT_ALL || (type == Moose::KT_ALL && _time_stepping_scheme != Moose::CRANK_NICOLSON))
-    {
-      ComputeResidualThread cr(_fe_problem, *this, residual, type);
-      Threads::parallel_reduce(elem_range, cr);
-    }
-    else
-    {
-      ComputeResidualThread cr(_fe_problem, *this, residual, Moose::KT_TIME);
-      Threads::parallel_reduce(elem_range, cr);
-      residual.close();
-      if(_time_stepping_scheme == Moose::CRANK_NICOLSON)
-      {
-        residual *= 2;
-      }
-      ComputeResidualThread crnt(_fe_problem, *this, residual, Moose::KT_NONTIME);
-      Threads::parallel_reduce(elem_range, crnt);
-    }
+    ComputeResidualThread cr(_fe_problem, *this);
+    Threads::parallel_reduce(elem_range, cr);
   }
   PARALLEL_CATCH;
 
-  if(type == Moose::KT_TIME)
-  {
-    residual.close();
-    return;
-  }
-
+  // residual contributions from the scalar kernels
   PARALLEL_TRY {
     // do scalar kernels (not sure how to thread this)
     const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
@@ -1027,15 +1012,12 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose
     {
       for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
       {
-        if (dynamic_cast<TimeKernel *>(*it) == NULL)
-        {
-          ScalarKernel * kernel = *it;
+        ScalarKernel * kernel = *it;
 
-          kernel->reinit();
-          kernel->computeResidual();
-        }
+        kernel->reinit();
+        kernel->computeResidual();
       }
-      _fe_problem.addResidualScalar(residual);
+      _fe_problem.addResidualScalar();
     }
   }
   PARALLEL_CATCH;
@@ -1043,62 +1025,53 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose
   if(_need_residual_copy)
   {
     Moose::perf_log.push("residual.close1()","Solve");
-    residual.close();
+    residualVector(Moose::KT_NONTIME).close();
     Moose::perf_log.pop("residual.close1()","Solve");
-    residual.localize(_residual_copy);
+    residualVector(Moose::KT_NONTIME).localize(_residual_copy);
   }
 
   if(_need_residual_ghosted)
   {
     Moose::perf_log.push("residual.close2()","Solve");
-    residual.close();
+    residualVector(Moose::KT_NONTIME).close();
     Moose::perf_log.pop("residual.close2()","Solve");
-    _residual_ghosted = residual;
+    _residual_ghosted = residualVector(Moose::KT_NONTIME);
     _residual_ghosted.close();
   }
 
   PARALLEL_TRY {
-    computeDiracContributions(&residual);
+    computeDiracContributions();
   }
   PARALLEL_CATCH;
 
-  Moose::perf_log.push("residual.close3()","Solve");
-  residual.close();
-  Moose::perf_log.pop("residual.close3()","Solve");
-
   if(_fe_problem._has_constraints)
   {
     PARALLEL_TRY {
-      enforceNodalConstraintsResidual(residual);
+      enforceNodalConstraintsResidual(residualVector(Moose::KT_NONTIME));
     }
     PARALLEL_CATCH;
+    residualVector(Moose::KT_NONTIME).close();
   }
-  residual.close();
 
   // Add in Residual contributions from Constraints
-  if(_fe_problem._has_constraints)
+  if (_fe_problem._has_constraints)
   {
     PARALLEL_TRY {
       // Undisplaced Constraints
-      constraintResiduals(residual, false);
+      constraintResiduals(residualVector(Moose::KT_NONTIME), false);
 
       // Displaced Constraints
       if(_fe_problem.getDisplacedProblem())
-        constraintResiduals(residual, true);
+        constraintResiduals(residualVector(Moose::KT_NONTIME), true);
     }
     PARALLEL_CATCH;
+    residualVector(Moose::KT_NONTIME).close();
   }
 }
 
 void
-NonlinearSystem::finishResidual(NumericVector<Number> & residual, Moose::KernelType type )
+NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual, Moose::KernelType type)
 {
-  if(type == Moose::KT_ALL )
-  {
-    residual.close();
-    _time_scheme->finishResidual(residual);
-  }
-
   PARALLEL_TRY {
     // last thing to do are nodal BCs
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
@@ -1128,17 +1101,6 @@ NonlinearSystem::finishResidual(NumericVector<Number> & residual, Moose::KernelT
   Moose::perf_log.push("residual.close4()","Solve");
   residual.close();
   Moose::perf_log.pop("residual.close4()","Solve");
-
-
-  // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
-  if(_need_residual_ghosted && _debugging_residuals)
-  {
-    Moose::perf_log.push("residual.close5()","Solve");
-    residual.close();
-    Moose::perf_log.pop("residual.close5()","Solve");
-    _residual_ghosted = residual;
-    _residual_ghosted.close();
-  }
 }
 
 
@@ -1446,33 +1408,25 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
 
   PARALLEL_TRY {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    if (_time_stepping_scheme != Moose::EXPLICIT_EULER)
+    switch (_fe_problem.coupling())
     {
-      switch (_fe_problem.coupling())
+    case Moose::COUPLING_DIAG:
       {
-      case Moose::COUPLING_DIAG:
-        {
-          ComputeJacobianThread cj(_fe_problem, *this, jacobian);
-          Threads::parallel_reduce(elem_range, cj);
-        }
-        break;
-
-      default:
-      case Moose::COUPLING_CUSTOM:
-        {
-          ComputeFullJacobianThread cj(_fe_problem, *this, jacobian);
-          Threads::parallel_reduce(elem_range, cj);
-        }
-        break;
+        ComputeJacobianThread cj(_fe_problem, *this, jacobian);
+        Threads::parallel_reduce(elem_range, cj);
       }
-    }
-    else
-    {
-      ComputeExplicitJacobianThread cj(_fe_problem, *this, jacobian);
-      Threads::parallel_reduce(elem_range, cj);
+      break;
+
+    default:
+    case Moose::COUPLING_CUSTOM:
+      {
+        ComputeFullJacobianThread cj(_fe_problem, *this, jacobian);
+        Threads::parallel_reduce(elem_range, cj);
+      }
+      break;
     }
 
-    computeDiracContributions(NULL, &jacobian);
+    computeDiracContributions(&jacobian);
     computeScalarKernelsJacobians(jacobian);
 
     static bool first = true;
@@ -1799,8 +1753,7 @@ NonlinearSystem::computeDamping(const NumericVector<Number>& update)
 }
 
 void
-NonlinearSystem::computeDiracContributions(NumericVector<Number> * residual,
-                                           SparseMatrix<Number> * jacobian)
+NonlinearSystem::computeDiracContributions(SparseMatrix<Number> * jacobian)
 {
   Moose::perf_log.push("computeDiracContributions()","Solve");
 
@@ -1819,7 +1772,7 @@ NonlinearSystem::computeDiracContributions(NumericVector<Number> * residual,
 
   if (_dirac_kernels[0].all().size() > 0)
   {
-    ComputeDiracThread cd(_fe_problem, *this, residual, jacobian);
+    ComputeDiracThread cd(_fe_problem, *this, jacobian);
 
     _fe_problem.getDiracElements(dirac_elements);
 
@@ -1833,6 +1786,13 @@ NonlinearSystem::computeDiracContributions(NumericVector<Number> * residual,
   }
 
   Moose::perf_log.pop("computeDiracContributions()","Solve");
+
+  if (jacobian == NULL)
+  {
+    Moose::perf_log.push("residual.close3()","Solve");
+    residualVector(Moose::KT_NONTIME).close();
+    Moose::perf_log.pop("residual.close3()","Solve");
+  }
 }
 
 NumericVector<Number> &
@@ -1942,15 +1902,13 @@ NonlinearSystem::setSolution(const NumericVector<Number> & soln)
 void
 NonlinearSystem::setSolutionUDot(const NumericVector<Number> & udot)
 {
-  // This is nasty, but the vector is currently stored in _time_scheme and the routine below returns that reference.
-  solutionUDot() = udot;
+  _u_dot = udot;
 }
 
 void
 NonlinearSystem::setSolutionDuDotDu(Real value)
 {
-  // This is nasty, but the vector is currently stored in _time_scheme and the routine below returns that reference.
-  solutionDuDotDu() = value;
+  _du_dot_du = value;
 }
 
 NumericVector<Number> &

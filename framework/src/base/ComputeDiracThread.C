@@ -26,10 +26,8 @@
 
 ComputeDiracThread::ComputeDiracThread(FEProblem & feproblem,
                                        NonlinearSystem & system,
-                                       NumericVector<Number> * residual,
                                        SparseMatrix<Number> * jacobian) :
     ThreadedElementLoop<DistElemRange>(feproblem, system),
-    _residual(residual),
     _jacobian(jacobian),
     _sys(system)
 {}
@@ -37,7 +35,6 @@ ComputeDiracThread::ComputeDiracThread(FEProblem & feproblem,
 // Splitting Constructor
 ComputeDiracThread::ComputeDiracThread(ComputeDiracThread & x, Threads::split split) :
     ThreadedElementLoop<DistElemRange>(x, split),
-    _residual(x._residual),
     _jacobian(x._jacobian),
     _sys(x._sys)
 {}
@@ -69,7 +66,7 @@ ComputeDiracThread::onElement(const Elem * elem)
 
       if(dirac->hasPointsOnElem(elem))
       {
-        if(_residual)
+        if(_jacobian == NULL)
           dirac->computeResidual();
         else
         {
@@ -85,8 +82,8 @@ void
 ComputeDiracThread::postElement(const Elem * /*elem*/)
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-  if (_residual)
-    _fe_problem.addResidual(*_residual, _tid);
+  if (_jacobian == NULL)
+    _fe_problem.addResidual(_tid);
   else
     _fe_problem.addJacobian(*_jacobian, _tid);
 }

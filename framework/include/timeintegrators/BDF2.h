@@ -12,29 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef TIMEKERNEL_H
-#define TIMEKERNEL_H
+#ifndef BDF2_H
+#define BDF2_H
 
-#include "Kernel.h"
+#include "TimeIntegrator.h"
 
-// Forward Declaration
-class TimeKernel;
+class BDF2;
 
 template<>
-InputParameters validParams<TimeKernel>();
+InputParameters validParams<BDF2>();
 
 /**
- * All time kernels should inherit from this class
- *
+ * BDF2 time integrator
  */
-class TimeKernel : public Kernel
+class BDF2 : public TimeIntegrator
 {
 public:
-  TimeKernel(const std::string & name, InputParameters parameters);
-  virtual ~TimeKernel();
+  BDF2(const std::string & name, InputParameters parameters);
+  virtual ~BDF2();
 
-  virtual void computeResidual();
+  virtual int order() { return 2; }
+  virtual void preStep();
+  virtual void computeTimeDerivatives();
+  virtual void postStep(NumericVector<Number> & residual);
 
+protected:
+  std::vector<Real> _weight;
 };
 
-#endif //TIMEKERNEL_H
+
+#endif /* BDF2_H_ */

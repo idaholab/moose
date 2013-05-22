@@ -28,9 +28,6 @@ namespace Moose {
   T stringToEnum(const std::string & s);
 
   template<>
-  TimeSteppingScheme stringToEnum<TimeSteppingScheme>(const std::string & s);
-
-  template<>
   ExecFlagType stringToEnum<ExecFlagType>(const std::string & s);
 
   template<>

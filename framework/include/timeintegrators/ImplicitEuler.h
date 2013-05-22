@@ -12,31 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPUTEEXPLICITJACOBIANTHREAD_H
-#define COMPUTEEXPLICITJACOBIANTHREAD_H
+#ifndef IMPLICITEULER_H
+#define IMPLICITEULER_H
 
-#include "ComputeJacobianThread.h"
-// libMesh includes
-#include "libmesh/elem_range.h"
+#include "TimeIntegrator.h"
 
-class NonlinearSystem;
+class ImplicitEuler;
 
-class ComputeExplicitJacobianThread : public ComputeJacobianThread
+template<>
+InputParameters validParams<ImplicitEuler>();
+
+/**
+ * Implicit Euler's method
+ */
+class ImplicitEuler : public TimeIntegrator
 {
 public:
-  ComputeExplicitJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian);
+  ImplicitEuler(const std::string & name, InputParameters parameters);
+  virtual ~ImplicitEuler();
 
-  // Splitting Constructor
-  ComputeExplicitJacobianThread(ComputeExplicitJacobianThread & x, Threads::split split);
-
-  virtual ~ComputeExplicitJacobianThread();
-
-  void join(const ComputeJacobianThread & /*y*/)
-  {}
-
+  virtual int order() { return 1; }
+  virtual void computeTimeDerivatives();
+  virtual void postStep(NumericVector<Number> & residual);
 
 protected:
-  virtual void computeJacobian();
+
 };
 
-#endif //COMPUTEEXPLICITJACOBIANTHREAD_H
+
+#endif /* IMPLICITEULER_H */

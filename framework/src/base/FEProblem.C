@@ -550,26 +550,37 @@ FEProblem::prepareAssembly(THREAD_ID tid)
     _displaced_problem->prepareAssembly(tid);
 }
 
-void
-FEProblem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
+NumericVector<Number> &
+FEProblem::residualVector(Moose::KernelType type)
 {
-  _assembly[tid]->addResidual(residual);
+  return _nl.residualVector(type);
+}
+
+
+void
+FEProblem::addResidual(THREAD_ID tid)
+{
+  _assembly[tid]->addResidual(residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  _assembly[tid]->addResidual(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+
   if(_displaced_problem)
-    _displaced_problem->addResidual(residual, tid);
+    _displaced_problem->addResidual(tid);
 }
 
 void
-FEProblem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
+FEProblem::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid]->addResidualNeighbor(residual);
+  _assembly[tid]->addResidualNeighbor(residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  _assembly[tid]->addResidualNeighbor(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
   if(_displaced_problem)
-    _displaced_problem->addResidualNeighbor(residual, tid);
+    _displaced_problem->addResidualNeighbor(tid);
 }
 
 void
-FEProblem::addResidualScalar(NumericVector<Number> & residual, THREAD_ID tid/* = 0*/)
+FEProblem::addResidualScalar(THREAD_ID tid/* = 0*/)
 {
-  _assembly[tid]->addResidualScalar(residual);
+  _assembly[tid]->addResidualScalar(residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  _assembly[tid]->addResidualScalar(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
 }
 
 void
@@ -2712,35 +2723,30 @@ FEProblem::computeAuxiliaryKernels(ExecFlagType type)
 }
 
 void
+FEProblem::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
+{
+  parameters.set<FEProblem *>("_fe_problem") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
+  _nl.addTimeIntegrator(type, name, parameters);
+}
+
+void
 FEProblem::computeResidual(NonlinearImplicitSystem &/*sys*/, const NumericVector<Number> & soln, NumericVector<Number> & residual)
 {
   computeResidualType(soln, residual, Moose::KT_ALL);
 }
 
 void
-FEProblem::computeTransientImplicitResidual(Real time, const NumericVector<Number>& u, const NumericVector<Number>& udot, NumericVector<Number>& residual)
+FEProblem::computeTransientImplicitResidual(Real time, const NumericVector<Number> & u, const NumericVector<Number> & udot, NumericVector<Number> & residual)
 {
   _nl.setSolutionUDot(udot);
   NonlinearImplicitSystem &sys = _nl.sys();
   _time = time;
-  computeResidual(sys,u,residual);
+  computeResidual(sys, u, residual);
 }
 
 void
-FEProblem::computeTransientImplicitJacobian(Real time, const NumericVector<Number>& u, const NumericVector<Number>& udot, Real shift, SparseMatrix<Number> &jacobian)
-{
-  if (0)
-  { // The current interface guarantees that the residual is called before Jacobian, thus udot has already been set
-    _nl.setSolutionUDot(udot);
-  }
-  _nl.setSolutionDuDotDu(shift);
-  NonlinearImplicitSystem &sys = _nl.sys();
-  _time = time;
-  computeJacobian(sys,u,jacobian);
-}
-
-void
-FEProblem::computeResidualType( const NumericVector<Number>& soln, NumericVector<Number>& residual, Moose::KernelType type)
+FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<Number>& residual, Moose::KernelType type)
 {
   _nl.setSolution(soln);
 
@@ -2823,6 +2829,20 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
   computeResidual(sys, soln, *sys.rhs);
   sys.rhs->close();
 }
+
+void
+FEProblem::computeTransientImplicitJacobian(Real time, const NumericVector<Number> & u, const NumericVector<Number> & udot, Real shift, SparseMatrix<Number> & jacobian)
+{
+  if (0)
+  { // The current interface guarantees that the residual is called before Jacobian, thus udot has already been set
+    _nl.setSolutionUDot(udot);
+  }
+  _nl.setSolutionDuDotDu(shift);
+  NonlinearImplicitSystem &sys = _nl.sys();
+  _time = time;
+  computeJacobian(sys,u,jacobian);
+}
+
 
 void
 FEProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)

@@ -32,13 +32,11 @@
 #include "Resurrector.h"
 #include "IndicatorWarehouse.h"
 #include "MarkerWarehouse.h"
-#include "TimeScheme.h"
 #include "MultiAppWarehouse.h"
 #include "TransferWarehouse.h"
 
 class DisplacedProblem;
 class OutputProblem;
-class TimeScheme;
 
 class FEProblem;
 
@@ -155,7 +153,7 @@ public:
   virtual bool hasActiveElementalMooseVariables(THREAD_ID tid);
 
   /**
-   * Clear the active elmental MooseVariable.  If there are no active variables then they will all be reinited.
+   * Clear the active elemental MooseVariable.  If there are no active variables then they will all be reinited.
    * Call this after finishing the computation that was using a restricted set of MooseVariables
    *
    * @param tid The thread id
@@ -229,12 +227,11 @@ public:
   virtual int & timeStep() { return _t_step; }
   virtual Real & dt() { return _dt; }
   virtual Real & dtOld() { return _dt_old; }
-  virtual TimeScheme * getTimeScheme(){ return _nl.getTimeScheme();}
 
   virtual void transient(bool trans) { _transient = trans; }
   virtual bool isTransient() { return _transient; }
 
-  virtual std::vector<Real> & timeWeights() { return _time_weights; }
+  virtual void addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
 
   virtual void copySolutionsBackwards();
   // Update backward time solution vectors
@@ -435,7 +432,7 @@ public:
 
   ////
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual );
-  virtual void computeResidualType(const NumericVector<Number> & soln, NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL );
+  virtual void computeResidualType(const NumericVector<Number> & soln, NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);
   virtual void computeJacobianBlock(SparseMatrix<Number> &  jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
   virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
@@ -466,9 +463,11 @@ public:
 
   virtual void computeIndicatorsAndMarkers();
 
-  virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
-  virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
-  virtual void addResidualScalar(NumericVector<Number> & residual, THREAD_ID tid = 0);
+  virtual NumericVector<Number> & residualVector(Moose::KernelType type);
+
+  virtual void addResidual(THREAD_ID tid);
+  virtual void addResidualNeighbor(THREAD_ID tid);
+  virtual void addResidualScalar(THREAD_ID tid = 0);
 
   virtual void cacheResidual(THREAD_ID tid);
   virtual void cacheResidualNeighbor(THREAD_ID tid);
@@ -580,8 +579,6 @@ protected:
   int & _t_step;
   Real & _dt;
   Real _dt_old;
-
-  std::vector<Real> _time_weights;
 
   /// Objects by names, indexing: [thread][name]->array of moose objects with name 'name'
   std::vector<std::map<std::string, std::vector<MooseObject *> > > _objects_by_name;

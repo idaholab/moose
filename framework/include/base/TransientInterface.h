@@ -41,6 +41,8 @@ public:
    */
   virtual bool isActive();
 
+  bool isImplicit() { return _is_implicit; }
+
 private:
   FEProblem & _ti_feproblem;
 
@@ -56,8 +58,6 @@ protected:
   Real & _dt;
   /// Size of the old time step
   Real & _dt_old;
-  /// Time weights for time-stepping schemes (like BDF2, ...)
-  std::vector<Real> & _time_weight;
 
   // NOTE: dunno if it is set properly in time of instantiation (might be a source of bugs)
   bool _is_transient;

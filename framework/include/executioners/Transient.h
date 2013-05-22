@@ -148,6 +148,7 @@ public:
 protected:
   FEProblem & _problem;
 
+  MooseEnum _time_scheme;
   TimeStepper * _time_stepper;
 
   /// Current timestep.
@@ -185,12 +186,6 @@ protected:
   bool _remaining_sync_time;
 
   bool _abort;
-  bool _estimate_error;
-  bool _time_error_out_to_file;
-  Real _error;
-  Real _cumulative_error;
-  std::string _time_errors_filename;
-  std::ofstream _time_error_file;
   ///if to use time interval output
   bool _time_interval;
   ///the output interval to use
@@ -205,6 +200,8 @@ protected:
   Real _solution_change_norm;
 
   void computeSolutionChangeNorm();
+
+  void setupTimeIntegrator();
 };
 
 #endif //TRANSIENTEXECUTIONER_H

@@ -115,9 +115,6 @@ CreateExecutionerAction::act()
     mproblem->getNonlinearSystem()._l_abs_step_tol = getParam<Real>("l_abs_step_tol");
 #endif
 
-//    NonlinearSystem & nl = mproblem->getNonlinearSystem();
-//    nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<MooseEnum>("scheme")));
-
 #ifdef LIBMESH_HAVE_PETSC
     Moose::PetscSupport::petscSetOptions(*_problem);
 #endif //LIBMESH_HAVE_PETSC

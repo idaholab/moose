@@ -19,9 +19,9 @@
 #include "Factory.h"
 #include "SubProblem.h"
 #include "TimePeriod.h"
-#include "TimeScheme.h"
 #include "TimeStepper.h"
 #include "MooseApp.h"
+#include "Conversion.h"
 //libMesh includes
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -41,7 +41,7 @@ InputParameters validParams<Transient>()
   InputParameters params = validParams<Executioner>();
   std::vector<Real> sync_times(1);
   sync_times[0] = -std::numeric_limits<Real>::max();
-  MooseEnum schemes("backward-euler, implicit-euler, explicit-euler, crank-nicolson, bdf2, petsc", "backward-euler");
+  MooseEnum schemes("implicit-euler, explicit-euler, crank-nicolson, bdf2", "implicit-euler");
 
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
   params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
@@ -59,13 +59,8 @@ InputParameters validParams<Transient>()
   params.addParam<std::vector<std::string> >("time_periods", "The names of periods");
   params.addParam<std::vector<Real> >("time_period_starts", "The start times of time periods");
   params.addParam<std::vector<Real> >("time_period_ends", "The end times of time periods");
-  params.addParam<bool>("use_AB2", false, "Whether to use the Adams-Bashforth 2 predictor");
-  params.addParam<bool>("use_littlef", false, "if a function evaluation should be used or time deriv's in predictors");
   params.addParam<bool>("abort_on_solve_fail", false, "abort if solve not converged rather than cut timestep");
   params.addParam<MooseEnum>("scheme",          schemes,  "Time integration scheme used.");
-  params.addParam<bool>("estimate_time_error", false, "make a time error estimate");
-  params.addParam<bool>("output_to_file",false,"If time error estimates should be output to file");
-  params.addParam<std::string>("file_name", "out.csv","which file should errors be output to");
   params.addParam<Real>("timestep_tolerance", 2.0e-14, "the tolerance setting for final timestep size and sync times");
 
   params.addParam<bool>("use_multiapp_dt", false, "If true then the dt for the simulation will be chosen by the MultiApps.  If false (the default) then the minimum over the master dt and the MultiApps is used");
@@ -80,6 +75,7 @@ InputParameters validParams<Transient>()
 Transient::Transient(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
     _problem(*getParam<FEProblem *>("_fe_problem")),
+    _time_scheme(getParam<MooseEnum>("scheme")),
     _time_stepper(NULL),
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
@@ -102,9 +98,6 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _sync_times(getParam<std::vector<Real> >("sync_times").begin(),getParam<std::vector<Real> >("sync_times").end()),
     _remaining_sync_time(true),
     _abort(getParam<bool>("abort_on_solve_fail")),
-    _estimate_error(getParam<bool>("estimate_time_error")),
-    _time_error_out_to_file(getParam<bool>("output_to_file")),
-    _time_errors_filename(getParam<std::string>("file_name")),
     _time_interval(false),
     _start_time(getParam<Real>("start_time")),
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
@@ -131,42 +124,15 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     }
   }
 
-#if 0
-  if(getParam<bool>("use_AB2"))
-  {
-    _problem.getTimeScheme()->useAB2Predictor();
-  }
-  _problem.getTimeScheme()->_use_littlef = getParam<bool>("use_littlef");
-  if(_estimate_error)
-  {
-    _problem.getTimeScheme()->_use_AB2=true;
-    if(!parameters.isParamValid("predictor_scale"))
-    {
-      _problem.getTimeScheme()->_apply_predictor = false;
-    }
-    if(_time_error_out_to_file)
-    {
-      _time_error_file.open(_time_errors_filename.c_str());
-      _time_error_file << "timestep, time, error, cumulative error \n";
-    }
-  }
-  _cumulative_error =0;
-#endif
-
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
-  _problem.getNonlinearSystem().timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<MooseEnum>("scheme")));
+
+  setupTimeIntegrator();
 }
 
 Transient::~Transient()
 {
   delete _time_stepper;
-#if 0
-  if(_time_error_out_to_file)
-  {
-    _time_error_file.close();
-  }
-#endif
   // This problem was built by the Factory and needs to be released by this destructor
   delete &_problem;
 }
@@ -343,7 +309,6 @@ Transient::endStep()
   else
   {
     _time_stepper->rejectStep();
-    _problem.getNonlinearSystem()._time_scheme->rejectStep();
   }
 }
 
@@ -496,15 +461,6 @@ Transient::keepGoing()
 void
 Transient::estimateTimeError()
 {
-#if 0
-    _error = _problem.getTimeScheme()->estimateTimeError(*_problem.getNonlinearSystem().sys().current_local_solution);
-    std::cout<<"Time Error Estimate: "<<_error<<std::endl;
-    _cumulative_error += _error;
-    if(_time_error_out_to_file)
-    {
-     _time_error_file << _t_step<<", "<<_dt<<", "<<_error<<", "<<_cumulative_error<<" \n";
-    }
-#endif
 }
 
 bool
@@ -585,3 +541,23 @@ Transient::getSolutionChangeNorm()
   return _solution_change_norm;
 }
 
+void
+Transient::setupTimeIntegrator()
+{
+  // backwards compatibility
+  std::string ti_str;
+
+  switch (_time_scheme)
+  {
+  case 0: ti_str = "ImplicitEuler"; break;
+  case 1: ti_str = "ExplicitEuler"; break;
+  case 2: ti_str = "CrankNicolson"; break;
+  case 3: ti_str = "BDF2"; break;
+  default: mooseError("Unknown scheme"); break;
+  }
+
+  {
+    InputParameters params = _app.getFactory().getValidParams(ti_str);
+    _problem.addTimeIntegrator(ti_str, "ti", params);
+  }
+}

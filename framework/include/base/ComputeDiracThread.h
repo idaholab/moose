@@ -32,7 +32,7 @@ typedef StoredRange<std::set<const Elem *>::const_iterator, const Elem *> DistEl
 class ComputeDiracThread : public ThreadedElementLoop<DistElemRange>
 {
 public:
-  ComputeDiracThread(FEProblem & feproblem, NonlinearSystem & system, NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
+  ComputeDiracThread(FEProblem & feproblem, NonlinearSystem & system, SparseMatrix<Number> * jacobian = NULL);
 
   // Splitting Constructor
   ComputeDiracThread(ComputeDiracThread & x, Threads::split);
@@ -46,7 +46,6 @@ public:
   void join(const ComputeDiracThread & /*y*/);
 
 protected:
-  NumericVector<Number> * _residual;
   SparseMatrix<Number> * _jacobian;
   NonlinearSystem & _sys;
 };

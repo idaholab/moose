@@ -12,29 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef TIMEKERNEL_H
-#define TIMEKERNEL_H
+#ifndef CRANKNICOLSON_H
+#define CRANKNICOLSON_H
 
-#include "Kernel.h"
+#include "TimeIntegrator.h"
 
-// Forward Declaration
-class TimeKernel;
+class CrankNicolson;
 
 template<>
-InputParameters validParams<TimeKernel>();
+InputParameters validParams<CrankNicolson>();
 
 /**
- * All time kernels should inherit from this class
- *
+ * Crank-Nicolson time integrator
  */
-class TimeKernel : public Kernel
+class CrankNicolson : public TimeIntegrator
 {
 public:
-  TimeKernel(const std::string & name, InputParameters parameters);
-  virtual ~TimeKernel();
+  CrankNicolson(const std::string & name, InputParameters parameters);
+  virtual ~CrankNicolson();
 
-  virtual void computeResidual();
+  virtual int order() { return 2; }
+  virtual void computeTimeDerivatives();
+  virtual void preSolve();
+  virtual void postStep(NumericVector<Number> & residual);
+  virtual void postSolve();
 
+protected:
+  NumericVector<Number> & _residual_old;
 };
 
-#endif //TIMEKERNEL_H
+#endif /* CRANKNICOLSON_H_ */

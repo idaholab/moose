@@ -12,29 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef TIMEKERNEL_H
-#define TIMEKERNEL_H
+#ifndef EXPLICITEULER_H
+#define EXPLICITEULER_H
 
-#include "Kernel.h"
+#include "TimeIntegrator.h"
 
-// Forward Declaration
-class TimeKernel;
+class ExplicitEuler;
 
 template<>
-InputParameters validParams<TimeKernel>();
+InputParameters validParams<ExplicitEuler>();
 
 /**
- * All time kernels should inherit from this class
- *
+ * Explicit Euler time integrator
  */
-class TimeKernel : public Kernel
+class ExplicitEuler : public TimeIntegrator
 {
 public:
-  TimeKernel(const std::string & name, InputParameters parameters);
-  virtual ~TimeKernel();
+  ExplicitEuler(const std::string & name, InputParameters parameters);
+  virtual ~ExplicitEuler();
 
-  virtual void computeResidual();
+  virtual int order() { return 1; }
+  virtual void computeTimeDerivatives();
+  virtual void postStep(NumericVector<Number> & residual);
+
+protected:
 
 };
 
-#endif //TIMEKERNEL_H
+
+#endif /* EXPLICITEULER_H */

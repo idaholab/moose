@@ -27,7 +27,7 @@ class NonlinearSystem;
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys, NumericVector<Number> & residual, Moose::KernelType selector=Moose::KT_ALL);
+  ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys);
   // Splitting Constructor
   ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
 
@@ -43,10 +43,7 @@ public:
   void join(const ComputeResidualThread & /*y*/);
 
 protected:
-  NumericVector<Number> & _residual;
   NonlinearSystem & _sys;
-  // selector tells to use all kernels, time kernels, or non time kernels as 0,1,2 respectively.
-  Moose::KernelType _selector;
 };
 
 #endif //COMPUTERESIDUALTHREAD_H

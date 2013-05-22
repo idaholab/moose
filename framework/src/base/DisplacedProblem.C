@@ -449,7 +449,7 @@ DisplacedProblem::reinitScalars(THREAD_ID tid)
 void
 DisplacedProblem::getDiracElements(std::set<const Elem *> & elems)
 {
-  elems =_dirac_kernel_info._elements;
+  elems = _dirac_kernel_info._elements;
 }
 
 void
@@ -459,15 +459,17 @@ DisplacedProblem::clearDiracInfo()
 }
 
 void
-DisplacedProblem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
+DisplacedProblem::addResidual(THREAD_ID tid)
 {
-  _assembly[tid]->addResidual(residual);
+  _assembly[tid]->addResidual(_mproblem.residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  _assembly[tid]->addResidual(_mproblem.residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
 }
 
 void
-DisplacedProblem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
+DisplacedProblem::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid]->addResidualNeighbor(residual);
+  _assembly[tid]->addResidualNeighbor(_mproblem.residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  _assembly[tid]->addResidualNeighbor(_mproblem.residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
 }
 
 void

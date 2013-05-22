@@ -22,22 +22,16 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem,
-                                             NonlinearSystem & sys,
-                                             NumericVector<Number> & residual, Moose::KernelType selector) :
+ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
-    _residual(residual),
-    _sys(sys),
-    _selector(selector)
+    _sys(sys)
 {
 }
 
 // Splitting Constructor
 ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
-    _residual(x._residual),
-    _sys(x._sys),
-    _selector(x._selector)
+    _sys(x._sys)
 {
 }
 
@@ -53,42 +47,12 @@ ComputeResidualThread::subdomainChanged()
   if (_sys._doing_dg)
     _sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
 
-
   std::set<MooseVariable *> needed_moose_vars;
-
-  // Kernel dependencies
-  switch( _selector)
+  const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
+  for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
   {
-  case Moose::KT_TIME:
-  {
-    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeTime();
-    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-    {
-      const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
-      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-    }
-    break;
-  }
-  case Moose::KT_NONTIME:
-  {
-    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeNonTime();
-    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-    {
-      const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
-      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-    }
-    break;
-  }
-  case Moose::KT_ALL:
-  {
-    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
-    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-    {
-      const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
-      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-    }
-    break;
-  }
+    const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
   }
 
   // Boundary Condition Dependencies
@@ -133,48 +97,16 @@ ComputeResidualThread::onElement(const Elem *elem)
   _fe_problem.reinitElem(elem, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
-  switch( _selector)
+  const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
+  for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
   {
-  case Moose::KT_TIME:
-  {
-    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeTime();
-    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-    {
-       (*it)->computeResidual();
-    }
-    break;
+    (*it)->computeResidual();
   }
-  case Moose::KT_NONTIME:
-  {
-    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeNonTime();
-    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-    {
-      (*it)->computeResidual();
-    }
-    break;
-  }
-  case Moose::KT_ALL:
-  {
-    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
-    for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-    {
-      (*it)->computeResidual();
-    }
-    break;
-  }
-  }
-
-
-
 }
 
 void
 ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
-  if(_selector == Moose::KT_TIME)
-  {
-    return;
-  }
   std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {
@@ -199,10 +131,6 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 void
 ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 {
-  if(_selector == Moose::KT_TIME)
-  {
-    return;
-  }
   // Pointer to the neighbor we are currently working on.
   const Elem * neighbor = elem->neighbor(side);
 
@@ -227,7 +155,7 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.addResidualNeighbor(_residual, _tid);
+        _fe_problem.addResidualNeighbor(_tid);
       }
     }
   }
@@ -237,7 +165,7 @@ void
 ComputeResidualThread::postElement(const Elem * /*elem*/)
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-  _fe_problem.addResidual(_residual, _tid);
+  _fe_problem.addResidual(_tid);
 }
 
 void

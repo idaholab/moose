@@ -12,29 +12,42 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef TIMEKERNEL_H
-#define TIMEKERNEL_H
-
-#include "Kernel.h"
-
-// Forward Declaration
-class TimeKernel;
+#include "ImplicitEuler.h"
+#include "NonlinearSystem.h"
 
 template<>
-InputParameters validParams<TimeKernel>();
-
-/**
- * All time kernels should inherit from this class
- *
- */
-class TimeKernel : public Kernel
+InputParameters validParams<ImplicitEuler>()
 {
-public:
-  TimeKernel(const std::string & name, InputParameters parameters);
-  virtual ~TimeKernel();
+  InputParameters params = validParams<TimeIntegrator>();
 
-  virtual void computeResidual();
+  return params;
+}
 
-};
+ImplicitEuler::ImplicitEuler(const std::string & name, InputParameters parameters) :
+    TimeIntegrator(name, parameters)
+{
+}
 
-#endif //TIMEKERNEL_H
+ImplicitEuler::~ImplicitEuler()
+{
+}
+
+void
+ImplicitEuler::computeTimeDerivatives()
+{
+  _u_dot  = *_nl.currentSolution();
+  _u_dot -= _nl.solutionOld();
+  _u_dot *= 1 / _dt;
+  _u_dot.close();
+
+  _du_dot_du = 1.0 / _dt;
+  _du_dot_du.close();
+}
+
+void
+ImplicitEuler::postStep(NumericVector<Number> & residual)
+{
+  residual += _Re_time;
+  residual += _Re_non_time;
+  residual.close();
+}

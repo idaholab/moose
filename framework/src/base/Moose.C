@@ -208,6 +208,12 @@
 #include "FunctionDT.h"
 #include "SolutionTimeAdaptiveDT.h"
 #include "DT2.h"
+// time integrators
+#include "SteadyState.h"
+#include "ImplicitEuler.h"
+#include "BDF2.h"
+#include "CrankNicolson.h"
+#include "ExplicitEuler.h"
 
 // MultiApps
 #include "TransientMultiApp.h"
@@ -477,6 +483,12 @@ registerObjects(Factory & factory)
   registerObject(FunctionDT);
   registerObject(SolutionTimeAdaptiveDT);
   registerObject(DT2);
+  // time integrators
+  registerObject(SteadyState);
+  registerObject(ImplicitEuler);
+  registerObject(BDF2);
+  registerObject(CrankNicolson);
+  registerObject(ExplicitEuler);
 
   // Transfers
 #ifdef LIBMESH_HAVE_DTK

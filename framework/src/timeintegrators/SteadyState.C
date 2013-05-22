@@ -12,29 +12,38 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef TIMEKERNEL_H
-#define TIMEKERNEL_H
-
-#include "Kernel.h"
-
-// Forward Declaration
-class TimeKernel;
+#include "SteadyState.h"
 
 template<>
-InputParameters validParams<TimeKernel>();
-
-/**
- * All time kernels should inherit from this class
- *
- */
-class TimeKernel : public Kernel
+InputParameters validParams<SteadyState>()
 {
-public:
-  TimeKernel(const std::string & name, InputParameters parameters);
-  virtual ~TimeKernel();
+  InputParameters params = validParams<TimeIntegrator>();
 
-  virtual void computeResidual();
+  return params;
+}
 
-};
+SteadyState::SteadyState(const std::string & name, InputParameters parameters) :
+    TimeIntegrator(name, parameters)
+{
+}
 
-#endif //TIMEKERNEL_H
+SteadyState::~SteadyState()
+{
+}
+
+void
+SteadyState::computeTimeDerivatives()
+{
+  _u_dot.zero();
+  _u_dot.close();
+
+  _du_dot_du.zero();
+  _du_dot_du.close();
+}
+
+void
+SteadyState::postStep(NumericVector<Number> & residual)
+{
+  residual += _Re_non_time;
+  residual.close();
+}
