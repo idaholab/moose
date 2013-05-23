@@ -19,24 +19,24 @@
 template<>
 InputParameters validParams<ExampleImplicitEuler>()
 {
-  InputParameters params = validParams<ImplicitEuler>();
+  InputParameters params = validParams<TimeDerivative>();
   return params;
 }
 
 ExampleImplicitEuler::ExampleImplicitEuler(const std::string & name,
                                            InputParameters parameters) :
-    ImplicitEuler(name,parameters),
+    TimeDerivative(name,parameters),
     _time_coefficient(getMaterialProperty<Real>("time_coefficient"))
 {}
 
 Real
 ExampleImplicitEuler::computeQpResidual()
 {
-  return _time_coefficient[_qp]*ImplicitEuler::computeQpResidual();
+  return _time_coefficient[_qp]*TimeDerivative::computeQpResidual();
 }
 
 Real
 ExampleImplicitEuler::computeQpJacobian()
 {
-  return _time_coefficient[_qp]*ImplicitEuler::computeQpJacobian();
+  return _time_coefficient[_qp]*TimeDerivative::computeQpJacobian();
 }

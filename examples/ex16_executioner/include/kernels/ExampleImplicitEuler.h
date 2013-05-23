@@ -15,14 +15,14 @@
 #ifndef EXAMPLEIMPLICITEULER
 #define EXAMPLEIMPLICITEULER
 
-#include "ImplicitEuler.h"
+#include "TimeDerivative.h"
 
 class ExampleImplicitEuler;
 
 template<>
 InputParameters validParams<ExampleImplicitEuler>();
 
-class ExampleImplicitEuler : public ImplicitEuler
+class ExampleImplicitEuler : public TimeDerivative
 {
 public:
 
