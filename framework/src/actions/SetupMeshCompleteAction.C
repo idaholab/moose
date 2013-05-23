@@ -28,32 +28,29 @@ SetupMeshCompleteAction::SetupMeshCompleteAction(const std::string & name, Input
 {
 }
 
-void
+bool
 SetupMeshCompleteAction::completeSetup(MooseMesh *mesh)
 {
-  if (!mesh->prepared())
+  bool prepared = mesh->prepared();
+
+  if (!prepared)
   {
     Moose::setup_perf_log.push("Prepare Mesh","Setup");
     mesh->prepare();
     Moose::setup_perf_log.pop("Prepare Mesh","Setup");
-
-    Moose::setup_perf_log.push("Initial meshChanged()","Setup");
-    mesh->meshChanged();
-    Moose::setup_perf_log.pop("Initial meshChanged()","Setup");
   }
-}
 
+  return prepared;
+}
 
 void
 SetupMeshCompleteAction::act()
 {
-  if (_mesh)
-  {
-    completeSetup(_mesh);
-    _mesh->printInfo();
-  }
-  else
+  if (!_mesh)
     mooseError("No mesh file was supplied and no generation block was provided");
+
+  if (completeSetup(_mesh))
+    _mesh->printInfo();
 
   if (_displaced_mesh)
     completeSetup(_displaced_mesh);

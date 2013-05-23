@@ -28,7 +28,7 @@ class SetupMeshCompleteAction : public Action
 public:
   SetupMeshCompleteAction(const std::string & name, InputParameters params);
 
-  void completeSetup(MooseMesh *mesh);
+  bool completeSetup(MooseMesh *mesh);
 
   virtual void act();
 };
