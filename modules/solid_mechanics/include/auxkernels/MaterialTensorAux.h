@@ -35,14 +35,11 @@ public:
 
   virtual ~MaterialTensorAux() {}
 
-protected:
-
   static void checkMaterialTensorParams(MTA_ENUM & quantity,
                                         const MooseEnum & quantity_moose_enum,
                                         const int index,
                                         const std::string & name);
 
-  virtual Real computeValue();
   static Real getTensorQuantity(const SymmTensor & tensor,
                                 const MTA_ENUM quantity,
                                 const MooseEnum & quantity_moose_enum,
@@ -50,6 +47,10 @@ protected:
                                 const Point * curr_point,
                                 const Point * p1,
                                 const Point * p2);
+
+protected:
+
+  virtual Real computeValue();
 
   static Real principalValue( const SymmTensor & tensor, unsigned int index );
 

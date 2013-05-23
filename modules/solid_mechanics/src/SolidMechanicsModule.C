@@ -11,6 +11,7 @@
 #include "DashpotBC.h"
 #include "Elastic.h"
 #include "ElasticEnergyAux.h"
+#include "ElementsOnLineAux.h"
 #include "Gravity.h"
 #include "HomogenizationKernel.h"
 #include "HomogenizedElasticConstants.h"
@@ -22,6 +23,7 @@
 #include "Mass.h"
 #include "MaterialSymmElasticityTensorAux.h"
 #include "MaterialTensorAux.h"
+#include "MaterialTensorOnLine.h"
 #include "MaterialVectorAux.h"
 #include "AccumulateAux.h"
 #include "PLC_LSH.h"
@@ -46,7 +48,8 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerAux(MaterialTensorAux);
   registerAux(MaterialVectorAux);
   registerAux(AccumulateAux);
-
+  registerAux(ElementsOnLineAux);
+  
   registerExecutioner(AdaptiveTransient);
 
   registerMaterial(AbaqusCreepMaterial);
@@ -77,6 +80,8 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerPostprocessor(HomogenizedElasticConstants);
   registerPostprocessor(Mass);
 
+  registerUserObject(MaterialTensorOnLine);
+  
 }
 
 void
