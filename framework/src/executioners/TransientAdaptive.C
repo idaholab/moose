@@ -293,6 +293,13 @@ TransientAdaptive::execute()
   TimeStepperStatus status = STATUS_ITERATING;
   Real ftime = -1e100;
   _fe_problem.initialSetup();
+  Moose::setup_perf_log.push("Output Initial Condition","Setup");
+  if (_output_initial)
+  {
+    _fe_problem.output();
+    _fe_problem.outputPostprocessors();
+  }
+  Moose::setup_perf_log.pop("Output Initial Condition","Setup");
   _time_stepper->setup(*_fe_problem.getNonlinearSystem().sys().solution);
 
   preExecute();

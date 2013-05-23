@@ -40,6 +40,7 @@ Executioner::Executioner(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
+    _output_initial(false),
     _initial_residual_norm(std::numeric_limits<Real>::max()),
     _old_initial_residual_norm(std::numeric_limits<Real>::max()),
     _restart_file_base(getParam<std::string>("restart_file_base"))
@@ -73,4 +74,10 @@ Executioner::preSolve()
 void
 Executioner::postSolve()
 {
+}
+
+void
+Executioner::outputInitial(bool out_init)
+{
+  _output_initial = out_init;
 }

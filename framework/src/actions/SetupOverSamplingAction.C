@@ -81,8 +81,6 @@ SetupOverSamplingAction::act()
 
   setupOutputObject(output, _pars);
 
-  out_problem.outputInitial(getParam<bool>("output_initial"));
-
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity & adapt = _problem->adaptivity();
   if (adapt.isOn())

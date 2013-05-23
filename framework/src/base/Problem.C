@@ -25,8 +25,7 @@ InputParameters validParams<Problem>()
 }
 
 Problem::Problem(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
-    _output_initial(false)
+    MooseObject(name, parameters)
 {
 }
 
@@ -64,10 +63,4 @@ const std::string &
 Problem::name()
 {
   return _name;
-}
-
-void
-Problem::outputInitial(bool out_init)
-{
-  _output_initial = out_init;
 }

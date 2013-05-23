@@ -64,7 +64,6 @@ public:
 
   // Output system /////
   virtual void output(bool force = false) = 0;
-  void outputInitial(bool out_init);
 
   // Time periods //////
 
@@ -86,9 +85,6 @@ public:
   const std::vector<TimePeriod *> & getTimePeriods() const;
 
 protected:
-  /// output initial condition if true
-  bool _output_initial;
-
   /// Time periods
   std::vector<TimePeriod *> _time_periods;
 };

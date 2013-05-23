@@ -19,9 +19,9 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 #include "OutputProblem.h"
-
-#include "libmesh/exodusII_io.h"
+#include "Executioner.h"
 #include "MooseMesh.h"
+#include "libmesh/exodusII_io.h"
 
 template<>
 InputParameters validParams<SetupOutputAction>()
@@ -170,7 +170,8 @@ SetupOutputAction::act()
   setupOutputObject(output, _pars);
 
   const bool output_initial = getParam<bool>("output_initial");
-  _problem->outputInitial(output_initial);
+  if (_executioner != NULL)
+    _executioner->outputInitial(output_initial);
 
   // TODO: handle this thru Problem interface
   _problem->_postprocessor_screen_output = getParam<bool>("postprocessor_screen");

@@ -45,6 +45,8 @@ public:
 
   virtual ~Steady();
 
+  virtual void init();
+
   /**
    * This will call solve() on the NonlinearSystem.
    */

@@ -54,12 +54,23 @@ Steady::problem()
 }
 
 void
-Steady::execute()
+Steady::init()
 {
   checkIntegrity();
 
   _problem.initialSetup();
+  Moose::setup_perf_log.push("Output Initial Condition","Setup");
+  if (_output_initial)
+  {
+    _problem.output();
+    _problem.outputPostprocessors();
+  }
+  Moose::setup_perf_log.pop("Output Initial Condition","Setup");
+}
 
+void
+Steady::execute()
+{
   std::cout << "Time: " << _time_step << "\n";
   preExecute();
 

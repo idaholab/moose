@@ -445,15 +445,6 @@ void FEProblem::initialSetup()
   computeUserObjects(EXEC_RESIDUAL);
   Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
 
-
-  Moose::setup_perf_log.push("Output Initial Condition","Setup");
-  if (_output_initial)
-  {
-    output();
-    outputPostprocessors();
-  }
-  Moose::setup_perf_log.pop("Output Initial Condition","Setup");
-
   _nl.initialSetupBCs();
   _nl.initialSetupKernels();
 

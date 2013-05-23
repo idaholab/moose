@@ -153,6 +153,14 @@ Transient::init()
 
   _problem.initialSetup();
   _time_stepper->init();
+
+  Moose::setup_perf_log.push("Output Initial Condition","Setup");
+  if (_output_initial)
+  {
+    _problem.output();
+    _problem.outputPostprocessors();
+  }
+  Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 }
 
 void
