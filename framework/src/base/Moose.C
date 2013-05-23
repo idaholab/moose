@@ -33,6 +33,9 @@
 #include "SideSetsFromNormals.h"
 #include "AddExtraNodeset.h"
 #include "Transform.h"
+#include "SideSetsAroundSubdomain.h"
+#include "SideSetsBetweenSubdomains.h"
+
 // problems
 #include "FEProblem.h"
 #include "OutputProblem.h"
@@ -305,6 +308,8 @@ registerObjects(Factory & factory)
   registerMeshModifier(SideSetsFromNormals);
   registerMeshModifier(AddExtraNodeset);
   registerMeshModifier(Transform);
+  registerMeshModifier(SideSetsAroundSubdomain);
+  registerMeshModifier(SideSetsBetweenSubdomains);
 
   // problems
   registerProblem(FEProblem);
