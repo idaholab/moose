@@ -50,6 +50,9 @@
 #define registerProblem(name)                       registerObject(name)
 #define registerMultiApp(name)                      registerObject(name)
 #define registerTransfer(name)                      registerObject(name)
+#define registerTimeStepper(name)                   registerObject(name)
+#define registerTimeIntegrator(name)                registerObject(name)
+#define registerPredictor(name)                     registerObject(name)
 
 #define registerNamedKernel(obj, name)              registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)   registerNamedObject(obj, name)
@@ -70,6 +73,9 @@
 #define registerNamedIndicator(obj, name)           registerNamedObject(obj, name)
 #define registerNamedMarker(obj, name)              registerNamedObject(obj, name)
 #define registerNamedTransfer(obj, name)            registerNamedObject(obj, name)
+#define registerNamedTimeStepper(obj, name)         registerNamedObject(obj, name)
+#define registerNamedTimeIntegrator(obj, name)      registerNamedObject(obj, name)
+#define registerNamedPredictor(obj, name)           registerNamedObject(obj, name)
 
 // Macro for registering depracated objects
 #define registerDeprecatedObject(name, message)     factory.reg<name>(stringifyName(name), message)

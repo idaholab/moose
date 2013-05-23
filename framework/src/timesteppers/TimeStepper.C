@@ -21,6 +21,7 @@ InputParameters validParams<TimeStepper>()
 {
   InputParameters params = validParams<MooseObject>();
 
+  params.addPrivateParam<std::string>("built_by_action", "setup_time_stepper");
   return params;
 }
 

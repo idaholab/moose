@@ -487,19 +487,19 @@ registerObjects(Factory & factory)
   registerMultiApp(FullSolveMultiApp);
 
   // time steppers
-  registerObject(ConstantDT);
-  registerObject(FunctionDT);
-  registerObject(SolutionTimeAdaptiveDT);
-  registerObject(DT2);
-  registerObject(PostprocessorDT);
+  registerTimeStepper(ConstantDT);
+  registerTimeStepper(FunctionDT);
+  registerTimeStepper(SolutionTimeAdaptiveDT);
+  registerTimeStepper(DT2);
+  registerTimeStepper(PostprocessorDT);
   // time integrators
-  registerObject(SteadyState);
-  registerObject(ImplicitEuler);
-  registerObject(BDF2);
-  registerObject(CrankNicolson);
-  registerObject(ExplicitEuler);
+  registerTimeIntegrator(SteadyState);
+  registerTimeIntegrator(ImplicitEuler);
+  registerTimeIntegrator(BDF2);
+  registerTimeIntegrator(CrankNicolson);
+  registerTimeIntegrator(ExplicitEuler);
   // predictors
-  registerObject(Predictor);
+  registerPredictor(Predictor);
 
   // Transfers
 #ifdef LIBMESH_HAVE_DTK
