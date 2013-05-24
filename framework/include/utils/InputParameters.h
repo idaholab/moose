@@ -135,6 +135,31 @@ public:
   void addCommandLineParam(const std::string &name, const std::string &syntax, const T &value, const std::string &doc_string);
 
   /**
+   * Add and mark a parameter for deprecation.  This will allow us to assist users as API changes are made.  If the user
+   * supplies a value or even uses the default, a warning will be printed.
+   *
+   * @param name The name of the parameter
+   * @param value [Optional] The default value of this parameter if it requires one
+   * @param doc_string Documentation.  This will be shown for --help
+   * @param deprecation_message The message that will will print about why this param was deprecated.  It might mention the "new way".
+   */
+  template <typename T>
+  void addRequiredDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message);
+  template <typename T>
+  void addDeprecatedParam(const std::string &name, const T &value, const std::string &doc_string, const std::string &deprecation_message);
+  template <typename T>
+  void addDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message);
+
+  /**
+   * Add and mark a parameter as removed.  If the user supplies this parameter then an error will be thrown.
+   *
+   * @param name The name of the parameter
+   * @param removed_message The message that will will print about why this param was removed.
+   */
+  template <typename T>
+  void addRemovedParam(const std::string &name, const std::string &removed_message);
+
+  /**
    * This method checks to make sure that we aren't adding a parameter with the same name but a different type.  It
    * throws a MooseError if an inconsistent type is detected. While this state is supported by libMesh it brings
    * nothing but blood and tears for those who try ;)
@@ -406,6 +431,36 @@ void InputParameters::suppressParameter(const std::string &name)
 {
   _required_params.erase(name);
   _valid_params.erase(name);
+}
+
+template <typename T>
+void InputParameters::addRequiredDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
+{
+  mooseWarning("The parameter " << name << " is deprecated.\n" << deprecation_message);
+
+  addRequiredParam<T>(name, doc_string);
+}
+
+template <typename T>
+void InputParameters::addDeprecatedParam(const std::string &name, const T &value, const std::string &doc_string, const std::string &deprecation_message)
+{
+  mooseWarning("The parameter " << name << " is deprecated.\n" << deprecation_message);
+
+  addParam<T>(name, value, doc_string);
+}
+
+template <typename T>
+void InputParameters::addDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
+{
+  mooseWarning("The parameter " << name << " is deprecated.\n" << deprecation_message);
+
+  addParam<T>(name, doc_string);
+}
+
+template <typename T>
+void InputParameters::addRemovedParam(const std::string &name, const std::string &removed_message)
+{
+  mooseError("The parameter " << name << " has been removed.\n" << removed_message);
 }
 
 // Specializations for MooseEnum
