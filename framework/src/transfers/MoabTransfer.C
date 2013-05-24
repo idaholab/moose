@@ -34,13 +34,12 @@
 #include "MoabEvaluator.h"
 
 #include <Teuchos_GlobalMPISession.hpp>
-#include <Teuchos_DefaultComm.hpp>
-#include <Teuchos_DefaultMpiComm.hpp>
 #include <Teuchos_CommHelpers.hpp>
 #include <Teuchos_RCP.hpp>
 #include <Teuchos_ArrayRCP.hpp>
 #include <Teuchos_OpaqueWrapper.hpp>
 #include <Teuchos_TypeTraits.hpp>
+#include <Teuchos_DefaultComm.hpp>
 
 template<>
 InputParameters validParams<MoabTransfer>()

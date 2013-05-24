@@ -31,7 +31,6 @@
 #include "libmesh/elem.h"
 
 #include <DTK_MeshTypes.hpp>
-#include <Teuchos_DefaultMpiComm.hpp>
 
 #include <vector>
 

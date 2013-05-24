@@ -32,7 +32,6 @@
 #include <Teuchos_RCP.hpp>
 #include <Teuchos_GlobalMPISession.hpp>
 #include <Teuchos_Ptr.hpp>
-#include <Teuchos_DefaultMpiComm.hpp>
 #include <Teuchos_OpaqueWrapper.hpp>
 
 // DTK Includes

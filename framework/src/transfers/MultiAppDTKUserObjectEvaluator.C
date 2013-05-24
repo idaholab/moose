@@ -23,8 +23,6 @@
 #include "Executioner.h"
 #include "FEProblem.h"
 
-#include <Teuchos_DefaultComm.hpp>
-
 #include "MooseTypes.h"
 
 MultiAppDTKUserObjectEvaluator::MultiAppDTKUserObjectEvaluator(MultiApp & multi_app, const std::string & user_object_name):
@@ -40,7 +38,7 @@ MultiAppDTKUserObjectEvaluator::~MultiAppDTKUserObjectEvaluator()
 DataTransferKit::FieldContainer<double>
 MultiAppDTKUserObjectEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>& bids, const Teuchos::ArrayRCP<double>& coords)
 {
-  Teuchos::RCP<const Teuchos::Comm<int> > comm = Teuchos::DefaultComm<int>::getComm();
+  Teuchos::RCP<const Teuchos::Comm<int> > comm = Teuchos::rcp(new Teuchos::MpiComm<int>(Teuchos::rcp(new Teuchos::OpaqueWrapper<MPI_Comm>(libMesh::COMM_WORLD))));
 
   int num_values = bids.size();
 
