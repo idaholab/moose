@@ -19,9 +19,11 @@ InputParameters validParams<FlowJunction>()
   params.addRequiredParam<Real>("junction_loss", "Loss in the junction");
   params.addRequiredParam<Real>("junction_area", "Area of the junction");
 
-  params.addRequiredParam<Real>("initial_rho_junction", "Initial density in the junction");
-  params.addRequiredParam<Real>("initial_rhou_junction", "Initial momentum in the junction");
-  params.addRequiredParam<Real>("initial_rhoE_junction", "Initial total energy in the junction");
+  // These params are not required, the junction will use global initial pressure, velocity,
+  // and temperature values if these values are not specified.
+  params.addParam<Real>("initial_P", "Initial pressure in the pipe");
+  params.addParam<Real>("initial_V", "Initial velocity in the pipe");
+  params.addParam<Real>("initial_T", "Initial temperature in the pipe");
 
   return params;
 }
@@ -38,9 +40,12 @@ FlowJunction::FlowJunction(const std::string & name, InputParameters params) :
     _junction_gravity(getParam<Real>("junction_gravity")),
     _junction_loss(getParam<Real>("junction_loss")),
     _junction_area(getParam<Real>("junction_area")),
-    _initial_rho_junction(getParam<Real>("initial_rho_junction")),
-    _initial_rhou_junction(getParam<Real>("initial_rhou_junction")),
-    _initial_rhoE_junction(getParam<Real>("initial_rhoE_junction"))
+    _has_initial_P(params.isParamValid("initial_P")),
+    _has_initial_V(params.isParamValid("initial_V")),
+    _has_initial_T(params.isParamValid("initial_T")),
+    _initial_P(_has_initial_P ? getParam<Real>("initial_P") : _sim.getParam<Real>("global_init_P")),
+    _initial_V(_has_initial_V ? getParam<Real>("initial_V") : _sim.getParam<Real>("global_init_V")),
+    _initial_T(_has_initial_T ? getParam<Real>("initial_T") : _sim.getParam<Real>("global_init_T"))
 {
 }
 
@@ -57,27 +62,39 @@ FlowJunction::addVariables()
   {
   case FlowModel::EQ_MODEL_3:
   {
-    // Set initial conditions for the junction variables. Should somehow agree with
-    // the initial conditions in the pipes...
+    // Set initial conditions for the junction variables.
 
     // Add three separate SCALAR junction variables with individual scaling factors
     _sim.addVariable(true, _junction_rho_name, FEType(FIRST,  SCALAR), 0, /*scale_factor=*/1.0);
-    _sim.addScalarInitialCondition(_junction_rho_name, _initial_rho_junction);
-
     _sim.addVariable(true, _junction_rhou_name, FEType(FIRST,  SCALAR), 0, /*scale_factor=*/1.e-4);
-    _sim.addScalarInitialCondition(_junction_rhou_name, _initial_rhou_junction);
-
     _sim.addVariable(true, _junction_rhoE_name, FEType(FIRST,  SCALAR), 0, /*scale_factor=*/1.e-6);
-    _sim.addScalarInitialCondition(_junction_rhoE_name, _initial_rhoE_junction);
 
+    // Compute initial (rho, rho*u, rho*E) in the FlowJunction using the initial (P,V,T) values
+    // and the Simulation's EquationOfState object.
+    Real
+      initial_rho = 0.,
+      initial_rhou = 0.,
+      initial_rhoE = 0.;
 
-    // Add the SCALAR pressure aux variable and an initial condition.
+    const EquationOfState & eos = _sim.getEquationOfState(getParam<UserObjectName>("eos"));
+
+    initial_rho = eos.rho_from_p_T(_initial_P, _initial_T);
+    initial_rhou = initial_rho * _initial_V;
+    initial_rhoE = initial_rho * (eos.e_from_p_rho(_initial_P, initial_rho) + 0.5 * _initial_V * _initial_V);
+
+    // Add initial conditions for these scalar values based on either the global initial (p,V,T)
+    // values or the (p,V,T) values specified in the FlowJunction.
+    _sim.addScalarInitialCondition(_junction_rho_name, initial_rho);
+    _sim.addScalarInitialCondition(_junction_rhou_name, initial_rhou);
+    _sim.addScalarInitialCondition(_junction_rhoE_name, initial_rhoE);
+
+    // Add the SCALAR variables for temperature and pressure in the junction.
     _sim.addVariable(false, _p_name, FEType(FIRST,  SCALAR), /*subdomain_id=*/0, /*scale_factor=*/1.);
-    _sim.addScalarInitialCondition(_p_name, _sim.getParam<Real>("global_init_P"));
-
-    // Add the SCALAR temperature aux variable and an initial condition.
     _sim.addVariable(false, _T_name, FEType(FIRST,  SCALAR), /*subdomain_id=*/0, /*scale_factor=*/1.);
-    _sim.addScalarInitialCondition(_T_name, _sim.getParam<Real>("global_init_T"));
+
+    // Add initial conditions for the SCALAR aux variables.
+    _sim.addScalarInitialCondition(_p_name, _initial_P);
+    _sim.addScalarInitialCondition(_T_name, _initial_T);
 
     break;
   }

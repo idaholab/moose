@@ -53,14 +53,23 @@ protected:
   /// Area of the junction
   Real _junction_area;
 
-  /// Initial density in the junction
-  Real _initial_rho_junction;
+  /// True if initial pressure is provided in FlowJunction block
+  bool _has_initial_P;
 
-  /// Initial momentum in the junction
-  Real _initial_rhou_junction;
+  /// True if initial velocity is provided in FlowJunction block
+  bool _has_initial_V;
 
-  /// Initial total energy in the junction
-  Real _initial_rhoE_junction;
+  /// True if initial temperature is provided in FlowJunction block
+  bool _has_initial_T;
+
+  /// Initial pressure from user input (if provided)
+  Real _initial_P;
+
+  /// Initial velocity from user input (if provided)
+  Real _initial_V;
+
+  /// Initial temperature from user input (if provided)
+  Real _initial_T;
 };
 
 #endif /* FLOWJUNCTION_H */
