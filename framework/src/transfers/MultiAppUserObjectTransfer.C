@@ -69,7 +69,7 @@ MultiAppUserObjectTransfer::execute()
           unsigned int sys_num = to_sys->number();
           unsigned int var_num = to_sys->variable_number(_to_var_name);
 
-          NumericVector<Real> & solution = *to_sys->solution;
+          NumericVector<Real> & solution = _multi_app->appTransferVector(i, _to_var_name);
 
           MeshBase * mesh = NULL;
 

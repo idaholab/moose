@@ -19,12 +19,13 @@
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
+#include "libmesh/numeric_vector.h"
 
 class MultiApp;
 class UserObject;
 class FEProblem;
 class Executioner;
-namespace libMesh { namespace MeshTools { class BoundingBox; } }
+namespace libMesh{ namespace MeshTools { class BoundingBox; } }
 
 template<>
 InputParameters validParams<MultiApp>();
@@ -91,6 +92,16 @@ public:
    * @param name The name of the Postprocessor.
    */
   Real appPostprocessorValue(unsigned int app, const std::string & name);
+
+  /**
+   * Get the vector to transfer to for this MultiApp.
+   * In general this is the Auxiliary system solution vector.
+   *
+   * @param app The global app number you want the transfer vector for.
+   * @param The name of the variable you are going to be transferring to.
+   * @return The vector to fill.
+   */
+  virtual NumericVector<Number> & appTransferVector(unsigned int app, std::string var_name);
 
   /**
    * @return Number of Global Apps in this MultiApp

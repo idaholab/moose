@@ -53,12 +53,20 @@ AllLocalDofIndicesThread::operator() (const ConstElemRange & range)
 
     std::vector<unsigned int> dof_indices;
 
+    unsigned int local_dof_begin = _dof_map.first_dof();
+    unsigned int local_dof_end = _dof_map.end_dof();
+
     // prepare variables
     for (unsigned int i=0; i<_var_numbers.size(); i++)
     {
       _dof_map.dof_indices(elem, dof_indices, _var_numbers[i]);
       for(unsigned int j=0; j<dof_indices.size(); j++)
-        _all_dof_indices.insert(dof_indices[j]);
+      {
+        unsigned int dof = dof_indices[j];
+
+        if(dof >= local_dof_begin && dof < local_dof_end)
+          _all_dof_indices.insert(dof_indices[j]);
+      }
     }
   }
 }

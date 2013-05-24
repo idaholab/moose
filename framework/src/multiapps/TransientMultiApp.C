@@ -14,6 +14,7 @@
 #include "TransientMultiApp.h"
 
 #include "LayeredSideFluxAverage.h"
+#include "AllLocalDofIndicesThread.h"
 
 // libMesh
 #include "libmesh/mesh_tools.h"
@@ -26,9 +27,13 @@ InputParameters validParams<TransientMultiApp>()
 
   params.addParam<bool>("sub_cycling", false, "Set to true to allow this MultiApp to take smaller timesteps than the rest of the simulation.  More than one timestep will be performed for each 'master' timestep");
 
+  params.addParam<bool>("interpolate_transfers", false, "Only valid when sub_cycling.  This allows transferred values to be interpolated over the time frame the MultiApp is executing over when sub_cycling");
+
   params.addParam<bool>("detect_steady_state", false, "If true then while sub_cycling a steady state check will be done.  In this mode output will only be done once the MultiApp reaches the target time or steady state is reached");
 
   params.addParam<Real>("steady_state_tol", 1e-8, "The relative difference between the new solution and the old solution that will be considered to be at steady state");
+
+  params.addParam<bool>("output_sub_cycles", false, "If true when sub_cycling every sub-cycle will be output.");
 
   params.addParam<unsigned int>("max_failures", 0, "Maximum number of solve failures tolerated while sub_cycling.");
 
@@ -45,14 +50,20 @@ InputParameters validParams<TransientMultiApp>()
 TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters parameters):
     MultiApp(name, parameters),
     _sub_cycling(getParam<bool>("sub_cycling")),
+    _interpolate_transfers(getParam<bool>("interpolate_transfers")),
     _detect_steady_state(getParam<bool>("detect_steady_state")),
     _steady_state_tol(getParam<Real>("steady_state_tol")),
+    _output_sub_cycles(getParam<bool>("output_sub_cycles")),
     _max_failures(getParam<unsigned int>("max_failures")),
     _tolerate_failure(getParam<bool>("tolerate_failure")),
     _failures(0),
     _catch_up(getParam<bool>("catch_up")),
     _max_catch_up_steps(getParam<Real>("max_catch_up_steps"))
 {
+  // Transfer interpolation only makes sense for sub-cycling solves
+  if(_interpolate_transfers && !_sub_cycling)
+    mooseError("MultiApp " << _name << " is set to interpolate_transfers but is not sub_cycling!  That is not valid!");
+
   if(!_has_an_app)
     return;
 
@@ -68,9 +79,26 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
       Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
       if(!ex)
         mooseError("MultiApp " << name << " is not using a Transient Executioner!");
+
       ex->init();
+
+      FEProblem * problem = appProblem(_first_local_app + i);
+
+      if(_interpolate_transfers)
+      {
+        AuxiliarySystem & aux_system = problem->getAuxiliarySystem();
+        System & libmesh_aux_system = aux_system.system();
+
+        // We'll store a copy of the auxiliary system's solution at the old time in here
+        libmesh_aux_system.add_vector("transfer_old", false);
+
+        // This will be where we'll transfer the value to for the "target" time
+        libmesh_aux_system.add_vector("transfer", false);
+      }
+
+      problem->initialSetup();
       ex->preExecute();
-      appProblem(_first_local_app + i)->copyOldSolutions();
+      problem->copyOldSolutions();
       _transient_executioners[i] = ex;
 
       if(_detect_steady_state || _tolerate_failure)
@@ -100,6 +128,18 @@ TransientMultiApp::~TransientMultiApp()
   Moose::swapLibMeshComm(swapped);
 }
 
+NumericVector<Number> &
+TransientMultiApp::appTransferVector(unsigned int app, std::string var_name)
+{
+  if(std::find(_transferred_vars.begin(), _transferred_vars.end(), var_name) == _transferred_vars.end())
+    _transferred_vars.push_back(var_name);
+
+  if(_interpolate_transfers)
+    return appProblem(app)->getAuxiliarySystem().system().get_vector("transfer");
+
+  return appProblem(app)->getAuxiliarySystem().solution();
+}
+
 void
 TransientMultiApp::solveStep(Real dt, Real target_time)
 {
@@ -123,7 +163,37 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
     if(_sub_cycling)
     {
-      ex->allowOutput(false); // Don't Output
+      Real time_old = ex->getTime();
+
+      if(_interpolate_transfers)
+      {
+        FEProblem * problem = appProblem(_first_local_app + i);
+        AuxiliarySystem & aux_system = problem->getAuxiliarySystem();
+        System & libmesh_aux_system = aux_system.system();
+
+        NumericVector<Number> & solution = *libmesh_aux_system.solution;
+        NumericVector<Number> & transfer_old = libmesh_aux_system.get_vector("transfer_old");
+
+        solution.close();
+
+        // Save off the current auxiliary solution
+        transfer_old = solution;
+
+        transfer_old.close();
+
+        // Snag all of the local dof indices for all of these variables
+        AllLocalDofIndicesThread aldit(libmesh_aux_system, _transferred_vars);
+        ConstElemRange & elem_range = *problem->mesh().getActiveLocalElementRange();
+        Threads::parallel_reduce(elem_range, aldit);
+
+        _transferred_dofs = aldit._all_dof_indices;
+      }
+
+      if(_output_sub_cycles)
+        ex->allowOutput(true);
+      else
+        ex->allowOutput(false);
+
       ex->setTargetTime(target_time);
 
       unsigned int failures = 0;
@@ -133,6 +203,44 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
       // Now do all of the solves we need
       while(!at_steady && ex->getTime() + 2e-14 < target_time)
       {
+        if(_interpolate_transfers)
+        {
+          // See what time this executioner is going to go to.
+          Real future_time = ex->getTime() + ex->computeConstrainedDT();
+
+          // How far along we are towards the target time:
+          Real step_percent = (future_time - time_old) / (target_time - time_old);
+
+          Real one_minus_step_percent = 1.0 - step_percent;
+
+          // Do the interpolation for each variable that was transferred to
+          FEProblem * problem = appProblem(_first_local_app + i);
+          AuxiliarySystem & aux_system = problem->getAuxiliarySystem();
+          System & libmesh_aux_system = aux_system.system();
+
+          NumericVector<Number> & solution = *libmesh_aux_system.solution;
+          NumericVector<Number> & transfer = libmesh_aux_system.get_vector("transfer");
+          NumericVector<Number> & transfer_old = libmesh_aux_system.get_vector("transfer_old");
+
+          solution.close(); // Just to be sure
+          transfer.close();
+          transfer_old.close();
+
+          std::set<unsigned int>::iterator it  = _transferred_dofs.begin();
+          std::set<unsigned int>::iterator end = _transferred_dofs.end();
+
+          for(; it != end; ++it)
+          {
+            unsigned int dof = *it;
+            solution.set(dof, (transfer_old(dof) * one_minus_step_percent) + (transfer(dof) * step_percent));
+//            solution.set(dof, transfer_old(dof));
+//            solution.set(dof, transfer(dof));
+//            solution.set(dof, 1);
+          }
+
+          solution.close();
+        }
+
         ex->takeStep();
 
         bool converged = ex->lastSolveConverged();
@@ -239,6 +347,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
   // Swap back
   Moose::swapLibMeshComm(swapped);
+
+  _transferred_vars.clear();
 
   std::cout<<"Finished Solving MultiApp "<<_name<<std::endl;
 }

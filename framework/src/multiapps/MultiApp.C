@@ -282,6 +282,12 @@ MultiApp::appPostprocessorValue(unsigned int app, const std::string & name)
   return appProblem(app)->getPostprocessorValue(name);
 }
 
+NumericVector<Number> &
+MultiApp::appTransferVector(unsigned int app, std::string var_name)
+{
+  return appProblem(app)->getAuxiliarySystem().solution();
+}
+
 bool
 MultiApp::hasLocalApp(unsigned int global_app)
 {
