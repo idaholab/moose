@@ -136,6 +136,8 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
 
   _apps.resize(_my_num_apps);
 
+  Point parent_position = _app.getOutputPosition();
+
   for(unsigned int i=0; i<_my_num_apps; i++)
   {
     InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
@@ -168,7 +170,7 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
 
     if(getParam<bool>("output_in_position"))
     {
-      app->setOutputPosition(_positions[_first_local_app + i]);
+      app->setOutputPosition(parent_position + _positions[_first_local_app + i]);
     }
 
     app->setupOptions();
