@@ -520,6 +520,11 @@ public:
   OutputProblem & getOutputProblem(unsigned int refinements, MeshFileName file = "");
   void setMaxPPSRowsScreen(unsigned int n) { _pps_output_table_max_rows = n; }
 
+  /**
+   * Set (or reset) the output position of the problem.
+   */
+  void setOutputPosition(Point p);
+
   // Restart //////
 
   /**

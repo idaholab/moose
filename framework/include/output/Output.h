@@ -99,6 +99,9 @@ public:
   ///sets if output has occured at time step
   void setOutput(bool b);
 
+  /// Set (or reset) the output position
+  void setOutputPosition(Point p);
+
 protected:
   std::string _file_base;
 

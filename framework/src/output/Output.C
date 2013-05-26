@@ -288,3 +288,12 @@ void Output::setOutput(bool b)
 {
   _output = b;
 }
+
+void
+Output::setOutputPosition(Point p)
+{
+  for (unsigned int i = 0; i < _outputters.size(); i++)
+    _outputters[i]->setOutputPosition(p);
+}
+
+

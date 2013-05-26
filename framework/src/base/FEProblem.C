@@ -3369,6 +3369,17 @@ FEProblem::serializeSolution()
 }
 
 void
+FEProblem::setOutputPosition(Point p)
+{
+  _out.setOutputPosition(p);
+
+  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
+  for (unsigned int i = 0; i < LENGTHOF(types); i++)
+    _multi_apps(types[i])[0].parentOutputPositionChanged();
+}
+
+
+void
 FEProblem::setRestartFile(const std::string & file_name)
 {
   _resurrector->setRestartFile(file_name);

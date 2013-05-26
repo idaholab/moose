@@ -17,7 +17,6 @@
 
 #include "SubProblem.h"
 #include "MooseMesh.h"
-#include "ExodusOutput.h"
 #include "DisplacedSystem.h"
 #include "Assembly.h"
 #include "GeometricSearchData.h"
@@ -32,6 +31,7 @@ class SubProblem;
 class MooseVariable;
 class AssemblyData;
 class DisplacedProblem;
+class ExodusOutput;
 
 template<>
 InputParameters validParams<DisplacedProblem>();
@@ -183,7 +183,7 @@ protected:
 
   GeometricSearchData _geometric_search_data;
 
-  ExodusOutput _ex;
+  ExodusOutput * _ex;
   bool _seq;
 
 

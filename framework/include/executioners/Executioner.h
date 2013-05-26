@@ -90,6 +90,11 @@ public:
 
   void outputInitial(bool out_init);
 
+  /**
+   * Set (or reset) the output position of the application.
+   */
+  virtual void setOutputPosition(Point p) {}
+
 protected:
   /// output initial condition if true
   bool _output_initial;

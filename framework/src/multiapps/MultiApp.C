@@ -77,6 +77,12 @@ InputParameters validParams<MultiApp>()
 
   params.addParam<std::vector<unsigned int> >("reset_apps", "The Apps that will be reset when 'reset_time' is hit.  These are the App 'numbers' starting with 0 corresponding to the order of the App positions.  Reseting an App means that it is destroyed and recreated, possibly modeling the insertion of 'new' material for that app.");
 
+  params.addParam<Real>("move_time", std::numeric_limits<Real>::max(), "The time at which Apps designated by move_apps are moved to move_positions.");
+
+  params.addParam<std::vector<unsigned int> >("move_apps", "Apps, designated by their 'numbers' starting with 0 corresponding to the order of the App positions, to be moved at move_time to move_positions");
+
+  params.addParam<std::vector<Point> >("move_positions", "The positions corresponding to each move_app.");
+
   params.addPrivateParam<std::string>("built_by_action", "add_multi_app");
 
   return params;
@@ -95,6 +101,10 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     _reset_time(getParam<Real>("reset_time")),
     _reset_apps(getParam<std::vector<unsigned int> >("reset_apps")),
     _reset_happened(false),
+    _move_time(getParam<Real>("move_time")),
+    _move_apps(getParam<std::vector<unsigned int> >("move_apps")),
+    _move_positions(getParam<std::vector<Point> >("move_positions")),
+    _move_happened(false),
     _has_an_app(true)
 {
   if(isParamValid("positions"))
@@ -129,6 +139,8 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
   else
     mooseError("Must supply either 'positions' or 'positions_file' for MultiApp "<<_name);
 
+  if(_move_apps.size() != _move_positions.size())
+    mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp "<<_name);
 
   _total_num_apps = _positions.size();
   mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(), "Number of positions and input files are not the same!");
@@ -172,6 +184,14 @@ MultiApp::preTransfer(Real dt, Real target_time)
     _reset_happened = true;
     for(unsigned int i=0; i<_reset_apps.size(); i++)
       resetApp(_reset_apps[i]);
+  }
+
+  // Now move any apps that should be moved
+  if(!_move_happened && target_time + 1e-14 >= _move_time)
+  {
+    _move_happened = true;
+    for(unsigned int i=0; i<_move_apps.size(); i++)
+      moveApp(_move_apps[i], _move_positions[i]);
   }
 }
 
@@ -294,6 +314,33 @@ MultiApp::resetApp(unsigned int global_app)
 
   // Swap back
   Moose::swapLibMeshComm(swapped);
+}
+
+void
+MultiApp::moveApp(unsigned int global_app, Point p)
+{
+  _positions[global_app] = p;
+
+  if(hasLocalApp(global_app))
+  {
+    unsigned int local_app = globalAppToLocal(global_app);
+    _apps[local_app]->setOutputPosition(p);
+  }
+}
+
+void
+MultiApp::parentOutputPositionChanged()
+{
+  if(getParam<bool>("output_in_position"))
+  {
+    Point parent_position = _app.getOutputPosition();
+
+    for(unsigned int i=0; i<_apps.size(); i++)
+    {
+      MooseApp * app = _apps[i];
+      app->setOutputPosition(parent_position + _positions[_first_local_app + i]);
+    }
+  }
 }
 
 void

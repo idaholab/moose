@@ -39,6 +39,9 @@ public:
   virtual void meshChanged();
   virtual void sequence(bool state) { _seq = state; }
 
+  /// Set (or reset) the output position
+  virtual void setOutputPosition(Point p);
+
 protected:
   MooseApp & _app;
 

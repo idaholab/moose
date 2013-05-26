@@ -156,6 +156,19 @@ public:
   virtual void resetApp(unsigned int global_app);
 
   /**
+   * Move the global_app to Point p.
+   *
+   * @param p The new position of the App.
+   */
+  virtual void moveApp(unsigned int global_app, Point p);
+
+  /**
+   * For apps outputting in position we need to change their output positions
+   * if their parent app moves.
+   */
+  virtual void parentOutputPositionChanged();
+
+  /**
    * Get the MPI communicator this MultiApp is operating on.
    * @return The MPI comm for this MultiApp
    */
@@ -256,6 +269,18 @@ protected:
 
   /// Whether or not apps have been reset
   bool _reset_happened;
+
+  /// The time at which to move apps
+  Real _move_time;
+
+  /// The apps to be moved
+  std::vector<unsigned int> _move_apps;
+
+  /// The new positions for the apps to be moved
+  std::vector<Point> _move_positions;
+
+  /// Whether or not the move has happened
+  bool _move_happened;
 
   /// Whether or not this processor as an App _at all_
   bool _has_an_app;

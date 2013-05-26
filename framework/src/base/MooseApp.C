@@ -279,6 +279,16 @@ MooseApp::run()
   executeExecutioner();
 }
 
+void
+MooseApp::setOutputPosition(Point p)
+{
+  _output_position_set = true;
+  _output_position = p;
+
+  if(_executioner)
+    _executioner->setOutputPosition(p);
+}
+
 std::string
 MooseApp::getFileName(bool stripLeadingPath) const
 {

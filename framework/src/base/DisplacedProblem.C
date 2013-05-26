@@ -15,7 +15,7 @@
 #include "DisplacedProblem.h"
 #include "Problem.h"
 #include "SubProblem.h"
-
+#include "ExodusOutput.h"
 
 template<>
 InputParameters validParams<DisplacedProblem>()
@@ -114,10 +114,10 @@ DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_m
     _displaced_nl(*this, _mproblem.getNonlinearSystem(), _mproblem.getNonlinearSystem().name() + "_displaced", Moose::VAR_NONLINEAR),
     _displaced_aux(*this, _mproblem.getAuxiliarySystem(), _mproblem.getAuxiliarySystem().name() + "_displaced", Moose::VAR_AUXILIARY),
     _geometric_search_data(_mproblem, _mesh),
-    _ex(_app, _eq),
+    _ex(new ExodusOutput(_app, _eq)),
     _seq(params.get<bool>("sequence"))
 {
-  _ex.sequence(_seq);
+  _ex->sequence(_seq);
 
   unsigned int n_threads = libMesh::n_threads();
   _assembly.resize(n_threads);
@@ -129,6 +129,8 @@ DisplacedProblem::~DisplacedProblem()
 {
   for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
     delete _assembly[i];
+
+  delete _ex;
 }
 
 void
@@ -166,7 +168,7 @@ DisplacedProblem::init()
   _mesh.meshChanged();
   Moose::setup_perf_log.pop("DisplacedProblem::init::meshChanged()","Setup");
 
-  _ex.setOutputVariables(_mproblem.getVariableNames());
+  _ex->setOutputVariables(_mproblem.getVariableNames());
 }
 
 void
@@ -174,7 +176,7 @@ DisplacedProblem::initAdaptivity()
 {
   // with adaptivity, each time step must go into a separate file
   _seq = true;
-  _ex.sequence(_seq);
+  _ex->sequence(_seq);
 }
 
 void
@@ -571,9 +573,9 @@ DisplacedProblem::updateGeomSearch()
 void
 DisplacedProblem::output(bool /*force*/)
 {
-  _ex.output(_mproblem.out().fileBase() + "_displaced", _mproblem.time());
+  _ex->output(_mproblem.out().fileBase() + "_displaced", _mproblem.time());
   if (_seq)
-    _ex.meshChanged();
+    _ex->meshChanged();
 }
 
 void
@@ -592,13 +594,13 @@ DisplacedProblem::meshChanged()
 void
 DisplacedProblem::outputPps(const FormattedTable & table)
 {
-  _ex.outputPps(_mproblem.out().fileBase() + "_displaced", table, _mproblem.time());
+  _ex->outputPps(_mproblem.out().fileBase() + "_displaced", table, _mproblem.time());
 }
 
 void
 DisplacedProblem::setOutputVariables(std::vector<std::string> output_variables)
 {
-  _ex.setOutputVariables(output_variables);
+  _ex->setOutputVariables(output_variables);
 }
 
 void

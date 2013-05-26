@@ -65,6 +65,13 @@ public:
    */
   MultiApp * getMultiApp(const std::string & multi_app_name);
 
+  /**
+   * Gets called when the output position has changed for the parent app.
+   * This will cause all MultiApps that are being output in position to change their output
+   * positions as well.
+   */
+  void parentOutputPositionChanged();
+
 protected:
   std::vector<MultiApp *> _all_multi_apps;
   std::vector<TransientMultiApp *> _transient_multi_apps;

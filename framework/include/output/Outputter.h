@@ -47,6 +47,9 @@ public:
 
   void setOutputVariables(std::vector<std::string> output_variables) { _output_variables = output_variables; }
 
+  /// Set (or reset) the output position
+  virtual void setOutputPosition(Point p) {}
+
 protected:
   EquationSystems & _es;
 

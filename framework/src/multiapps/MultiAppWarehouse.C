@@ -60,3 +60,11 @@ MultiAppWarehouse::getMultiApp(const std::string & multi_app_name)
   mooseError("Unknown MultiApp: " << multi_app_name);
 }
 
+void
+MultiAppWarehouse::parentOutputPositionChanged()
+{
+  for(unsigned int i=0; i<_all_multi_apps.size(); i++)
+    _all_multi_apps[i]->parentOutputPositionChanged();
+}
+
+

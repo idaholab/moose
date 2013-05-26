@@ -186,3 +186,11 @@ ExodusOutput::outputInput()
 
   _out->write_information_records(syntax_formatter.getInputFileRecord());
 }
+
+void
+ExodusOutput::setOutputPosition(Point p)
+{
+  sequence(true);
+  meshChanged();
+}
+

@@ -113,7 +113,7 @@ public:
   /**
    * Tell the app to output in a specific position.
    */
-  void setOutputPosition(Point p) { _output_position_set = true; _output_position = p; }
+  void setOutputPosition(Point p);
 
   /**
    * Whether or not an output position has been set.
