@@ -116,6 +116,11 @@ public:
   virtual void setTime(Real t) { _time = t; };
 
   /**
+   * Set the old time.
+   */
+  virtual void setTimeOld(Real t){ _time_old = t; };
+
+  /**
    * Forces the problem to output right now.
    */
   virtual void forceOutput();

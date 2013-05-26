@@ -58,7 +58,28 @@ public:
    */
   Real computeDT();
 
+  /**
+   * "Reset" the App corresponding to the global App number
+   * passed in.  "Reset" means that the App will be deleted
+   * and recreated.  The time for the new App will be set
+   * to the current simulation time.  This might be handy
+   * if some sub-app in your simulation needs to get replaced
+   * by a "new" piece of material.
+   *
+   * @param global_app The global app number to reset.
+   */
+  virtual void resetApp(unsigned int global_app);
+
 private:
+  /**
+   * Setup the executioner for the local app.
+   *
+   * @param i The local app number for the app that needs to be setup.
+   * @param time The time to set as the current time for the App
+   * @param output_initial Whether or not the app should be allowed to output its initial condition
+   */
+  void setupApp(unsigned int i, Real time = 0.0, bool output_initial = true);
+
   std::vector<Transient *> _transient_executioners;
 
   bool _sub_cycling;

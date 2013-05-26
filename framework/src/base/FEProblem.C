@@ -2337,6 +2337,12 @@ FEProblem::getMultiApp(const std::string & multi_app_name)
 void
 FEProblem::execMultiApps(ExecFlagType type)
 {
+  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+
+  // Do anything that needs to be done to Apps before transfers
+  for(unsigned int i=0; i<multi_apps.size(); i++)
+    multi_apps[i]->preTransfer(_dt, _time);
+
   // Execute Transfers _to_ MultiApps
   {
     std::vector<Transfer *> transfers = _to_multi_app_transfers(type)[0].all();
@@ -2344,8 +2350,6 @@ FEProblem::execMultiApps(ExecFlagType type)
       for(unsigned int i=0; i<transfers.size(); i++)
         transfers[i]->execute();
   }
-
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
 
   if(multi_apps.size())
   {

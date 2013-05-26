@@ -43,6 +43,12 @@ public:
   virtual ~MultiApp();
 
   /**
+   * Gets called just before transfers are done _to_ the MultiApp
+   * (Which is just before the MultiApp is solved)
+   */
+  virtual void preTransfer(Real dt, Real target_time);
+
+  /**
    * Re-solve all of the Apps.
    */
   virtual void solveStep(Real dt, Real target_time) = 0;
@@ -138,6 +144,18 @@ public:
   Point position(unsigned int app) { return _positions[app]; }
 
   /**
+   * "Reset" the App corresponding to the global App number
+   * passed in.  "Reset" means that the App will be deleted
+   * and recreated.  The time for the new App will be set
+   * to the current simulation time.  This might be handy
+   * if some sub-app in your simulation needs to get replaced
+   * by a "new" piece of material.
+   *
+   * @param global_app The global app number to reset.
+   */
+  virtual void resetApp(unsigned int global_app);
+
+  /**
    * Get the MPI communicator this MultiApp is operating on.
    * @return The MPI comm for this MultiApp
    */
@@ -150,6 +168,13 @@ public:
   bool isRootProcessor() { return _my_rank == 0; }
 
 protected:
+  /**
+   * Helper function for creating an App instance.
+   *
+   * @param i The local app number to create.
+   */
+  void createApp(unsigned int i, unsigned int output_sequence = 0);
+
   /**
    * Create an MPI communicator suitable for each app.
    *
@@ -222,6 +247,15 @@ protected:
 
   /// Whether or not to move the output of the MultiApp into position
   bool _output_in_position;
+
+  /// The time at which to reset apps
+  Real _reset_time;
+
+  /// The apps to be reset
+  std::vector<unsigned int> _reset_apps;
+
+  /// Whether or not apps have been reset
+  bool _reset_happened;
 
   /// Whether or not this processor as an App _at all_
   bool _has_an_app;

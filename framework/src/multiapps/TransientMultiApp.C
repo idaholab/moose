@@ -74,36 +74,7 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     _transient_executioners.resize(_my_num_apps);
     // Grab Transient Executioners from each app
     for(unsigned int i=0; i<_my_num_apps; i++)
-    {
-      MooseApp * app = _apps[i];
-      Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
-      if(!ex)
-        mooseError("MultiApp " << name << " is not using a Transient Executioner!");
-
-      ex->init();
-
-      FEProblem * problem = appProblem(_first_local_app + i);
-
-      if(_interpolate_transfers)
-      {
-        AuxiliarySystem & aux_system = problem->getAuxiliarySystem();
-        System & libmesh_aux_system = aux_system.system();
-
-        // We'll store a copy of the auxiliary system's solution at the old time in here
-        libmesh_aux_system.add_vector("transfer_old", false);
-
-        // This will be where we'll transfer the value to for the "target" time
-        libmesh_aux_system.add_vector("transfer", false);
-      }
-
-      problem->initialSetup();
-      ex->preExecute();
-      problem->copyOldSolutions();
-      _transient_executioners[i] = ex;
-
-      if(_detect_steady_state || _tolerate_failure)
-        ex->allowOutput(false);
-    }
+      setupApp(i);
   }
 
   // Swap back
@@ -383,5 +354,65 @@ TransientMultiApp::computeDT()
 
   Parallel::min(smallest_dt);
   return smallest_dt;
+}
+
+void
+TransientMultiApp::resetApp(unsigned int global_app)
+{
+  if(hasLocalApp(global_app))
+  {
+    unsigned int local_app = globalAppToLocal(global_app);
+
+    // Grab the current time the App is at so we can start the new one at the same place
+    Real time = _transient_executioners[local_app]->getTime();
+
+    MultiApp::resetApp(global_app);
+
+    MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+
+    setupApp(local_app, time, false);
+
+    // Swap back
+    Moose::swapLibMeshComm(swapped);
+  }
+}
+
+void
+TransientMultiApp::setupApp(unsigned int i, Real time, bool output_initial)
+{
+  MooseApp * app = _apps[i];
+  Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
+  if(!ex)
+    mooseError("MultiApp " << _name << " is not using a Transient Executioner!");
+
+  if(!output_initial)
+    ex->outputInitial(false);
+
+  ex->setTime(time);
+  ex->setTimeOld(time);
+
+  ex->init();
+
+  FEProblem * problem = appProblem(_first_local_app + i);
+
+  if(_interpolate_transfers)
+  {
+    AuxiliarySystem & aux_system = problem->getAuxiliarySystem();
+    System & libmesh_aux_system = aux_system.system();
+
+    // We'll store a copy of the auxiliary system's solution at the old time in here
+    libmesh_aux_system.add_vector("transfer_old", false);
+
+    // This will be where we'll transfer the value to for the "target" time
+    libmesh_aux_system.add_vector("transfer", false);
+  }
+
+  problem->initialSetup();
+  ex->preExecute();
+  problem->copyOldSolutions();
+  _transient_executioners[i] = ex;
+
+  if(_detect_steady_state || _tolerate_failure)
+    ex->allowOutput(false);
 }
 

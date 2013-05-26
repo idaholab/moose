@@ -73,6 +73,10 @@ InputParameters validParams<MultiApp>()
 
   params.addParam<bool>("output_in_position", false, "If true this will cause the output from the MultiApp to be 'moved' by its position vector");
 
+  params.addParam<Real>("reset_time", std::numeric_limits<Real>::max(), "The time at which to reset Apps given by the 'reset_apps' parameter.  Reseting an App means that it is destroyed and recreated, possibly modeling the insertion of 'new' material for that app.");
+
+  params.addParam<std::vector<unsigned int> >("reset_apps", "The Apps that will be reset when 'reset_time' is hit.  These are the App 'numbers' starting with 0 corresponding to the order of the App positions.  Reseting an App means that it is destroyed and recreated, possibly modeling the insertion of 'new' material for that app.");
+
   params.addPrivateParam<std::string>("built_by_action", "add_multi_app");
 
   return params;
@@ -88,6 +92,9 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     _inflation(getParam<Real>("bounding_box_inflation")),
     _max_procs_per_app(getParam<unsigned int>("max_procs_per_app")),
     _output_in_position(getParam<bool>("output_in_position")),
+    _reset_time(getParam<Real>("reset_time")),
+    _reset_apps(getParam<std::vector<unsigned int> >("reset_apps")),
+    _reset_happened(false),
     _has_an_app(true)
 {
   if(isParamValid("positions"))
@@ -136,46 +143,8 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
 
   _apps.resize(_my_num_apps);
 
-  Point parent_position = _app.getOutputPosition();
-
   for(unsigned int i=0; i<_my_num_apps; i++)
-  {
-    InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
-    MooseApp * app = AppFactory::instance().create(_app_type, "multi_app", app_params);
-
-    std::ostringstream output_base;
-
-    // Create an output base by taking the output base of the master problem and appending
-    // the name of the multiapp + a number to it
-    if(_fe_problem)
-      output_base << _fe_problem->out().fileBase() << "_" ;
-
-    output_base << _name
-                << std::setw(std::ceil(std::log10(_total_num_apps)))
-                << std::setprecision(0)
-                << std::setfill('0')
-                << std::right
-                << _first_local_app + i;
-
-    _apps[i] = app;
-
-    std::string input_file = "";
-    if(_input_files.size() == 1) // If only one input file was provide, use it for all the solves
-      input_file = _input_files[0];
-    else
-      input_file = _input_files[_first_local_app+i];
-
-    app->setInputFileName(input_file);
-    app->setOutputFileBase(output_base.str());
-
-    if(getParam<bool>("output_in_position"))
-    {
-      app->setOutputPosition(parent_position + _positions[_first_local_app + i]);
-    }
-
-    app->setupOptions();
-    app->runInputFile();
-  }
+    createApp(i);
 
   // Swap back
   Moose::swapLibMeshComm(swapped);
@@ -191,6 +160,18 @@ MultiApp::~MultiApp()
     MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
     delete _apps[i];
     Moose::swapLibMeshComm(swapped);
+  }
+}
+
+void
+MultiApp::preTransfer(Real dt, Real target_time)
+{
+  // First, see if any Apps need to be Reset
+  if(!_reset_happened && target_time + 1e-14 >= _reset_time)
+  {
+    _reset_happened = true;
+    for(unsigned int i=0; i<_reset_apps.size(); i++)
+      resetApp(_reset_apps[i]);
   }
 }
 
@@ -298,6 +279,67 @@ MultiApp::hasLocalApp(unsigned int global_app)
 
   return false;
 }
+
+void
+MultiApp::resetApp(unsigned int global_app)
+{
+  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+
+  if(hasLocalApp(global_app))
+  {
+    unsigned int local_app = globalAppToLocal(global_app);
+    delete _apps[local_app];
+    createApp(local_app, 1); // The 1 is for the output file name
+  }
+
+  // Swap back
+  Moose::swapLibMeshComm(swapped);
+}
+
+void
+MultiApp::createApp(unsigned int i, unsigned int output_sequence)
+{
+  InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
+  MooseApp * app = AppFactory::instance().create(_app_type, "multi_app", app_params);
+
+  std::ostringstream output_base;
+
+  // Create an output base by taking the output base of the master problem and appending
+  // the name of the multiapp + a number to it
+  if(_fe_problem)
+    output_base << _fe_problem->out().fileBase() << "_" ;
+
+  output_base << _name
+              << std::setw(std::ceil(std::log10(_total_num_apps)))
+              << std::setprecision(0)
+              << std::setfill('0')
+              << std::right
+              << _first_local_app + i;
+
+  if(output_sequence)
+    output_base << "_" << output_sequence;
+
+  _apps[i] = app;
+
+  std::string input_file = "";
+  if(_input_files.size() == 1) // If only one input file was provided, use it for all the solves
+    input_file = _input_files[0];
+  else
+    input_file = _input_files[_first_local_app+i];
+
+  app->setInputFileName(input_file);
+  app->setOutputFileBase(output_base.str());
+
+  if(getParam<bool>("output_in_position"))
+  {
+    Point parent_position = _app.getOutputPosition();
+    app->setOutputPosition(parent_position + _positions[_first_local_app + i]);
+  }
+
+  app->setupOptions();
+  app->runInputFile();
+}
+
 
 void
 MultiApp::buildComm()
