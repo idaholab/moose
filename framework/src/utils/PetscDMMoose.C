@@ -29,6 +29,7 @@ struct DM_Moose
   std::map<std::string, unsigned int>      *blockids;
   std::map<unsigned int, std::string>      *blocknames;
   std::set<std::string>                    *sides;
+  bool                                     nosides;
   std::map<BoundaryID, std::string>        *sidenames;
   std::map<std::string, BoundaryID>        *sideids;
   // to locate splits without having to search, however,
@@ -373,10 +374,68 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
 
   PetscFunctionBegin;
   if (!embedding) PetscFunctionReturn(0);
-  *embedding = dmm->embedding;
-  if (*embedding) {
-    ierr = PetscObjectReference((PetscObject)(dmm->embedding));CHKERRQ(ierr);
+  if (!dmm->embedding) {
+    if (!dmm->allvars || !dmm->allblocks || !dmm->nosides) {
+      DofMap& dofmap = dmm->nl->sys().get_dof_map();
+      std::set<unsigned int>               dindices;
+      for(std::map<std::string, unsigned int>::const_iterator vit = dmm->varids->begin(); vit != dmm->varids->end(); ++vit){
+	unsigned int v = vit->second;
+	/* Iterate only over this DM's blocks. */
+	for(std::map<std::string, unsigned int>::const_iterator bit = dmm->blockids->begin(); bit != dmm->blockids->end(); ++bit) {
+	  unsigned int b = bit->second;
+	  MeshBase::const_element_iterator el     = dmm->nl->sys().get_mesh().active_local_subdomain_elements_begin(b);
+	  MeshBase::const_element_iterator end_el = dmm->nl->sys().get_mesh().active_local_subdomain_elements_end(b);
+	  for ( ; el != end_el; ++el) {
+	    const Elem* elem = *el;
+	    std::vector<unsigned int> evindices;
+	    // Get the degree of freedom indices for the given variable off the current element.
+	    dofmap.dof_indices(elem, evindices, v);
+	    for(unsigned int i = 0; i < evindices.size(); ++i) {
+	      unsigned int dof = evindices[i];
+	      if(dof >= dofmap.first_dof() && dof < dofmap.end_dof()) /* might want to use variable_first/last_local_dof instead */
+		dindices.insert(dof);
+	    }
+	  }
+	  /* Iterate over all sides and pick out only the ones that belong to this split. */
+	  if (dmm->sideids->size()) {
+	    std::vector<unsigned int> snodes;
+	    std::vector<boundary_id_type> sides;
+	    dmm->nl->sys().get_mesh().boundary_info->build_node_list(snodes, sides);
+	    // FIXME: make an array of (snode,side) pairs, sort on side and use std::lower_bound from <algorithm>
+	    for (unsigned int i = 0; i < sides.size(); ++i) {
+	      boundary_id_type s = sides[i];
+	      if (!dmm->sidenames->count(s)) continue;
+	      const Node& node = dmm->nl->sys().get_mesh().node(snodes[i]);
+	      dof_id_type dof = node.dof_number(dmm->nl->sys().number(),v,0);
+	      if(dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
+		dindices.insert(dof);
+	      }
+	    }
+	  }
+	}
+      }
+      PetscInt *darray;
+      ierr = PetscMalloc(sizeof(PetscInt)*dindices.size(),&darray);CHKERRQ(ierr);
+      unsigned int i = 0;
+      for(std::set<unsigned int>::const_iterator it = dindices.begin(); it != dindices.end(); ++it) {
+	darray[i] = *it;
+	++i;
+      }
+      ierr = ISCreateGeneral(((PetscObject)dm)->comm, dindices.size(),darray, PETSC_OWN_POINTER, &dmm->embedding); CHKERRQ(ierr);
+    }
+    else {
+      /* (allblocks && allvars && nosides) implies DMCreateGlobalVector is defined() */
+      Vec v;
+      PetscInt low, high;
+
+      ierr = DMCreateGlobalVector(dm,&v);CHKERRQ(ierr);
+      ierr = VecGetOwnershipRange(v,&low,&high);CHKERRQ(ierr);
+      ierr = ISCreateStride(((PetscObject)dm)->comm,(high-low),low,1,&dmm->embedding);CHKERRQ(ierr);
+    }
   }
+  ierr = PetscObjectReference((PetscObject)(dmm->embedding));CHKERRQ(ierr);
+  *embedding = dmm->embedding;
+
   PetscFunctionReturn(0);
 }
 
@@ -924,6 +983,7 @@ static PetscErrorCode  DMSetUp_Moose_Pre(DM dm)
   }
 
   if (dmm->sides) {
+    dmm->nosides = PETSC_FALSE;
     const std::set<boundary_id_type>& sides = mesh.boundary_info->get_boundary_ids();
     for (std::set<boundary_id_type>::const_iterator sit = sides.begin(); sit != sides.end(); ++sit) {
       boundary_id_type sid = *sit;
@@ -935,6 +995,8 @@ static PetscErrorCode  DMSetUp_Moose_Pre(DM dm)
     }
     delete dmm->sides;
     dmm->sides = PETSC_NULL;
+  } else {
+    dmm->nosides = PETSC_TRUE;
   }
   std::string name = dmm->nl->sys().name();
   name += "_vars";
@@ -967,72 +1029,27 @@ static PetscErrorCode  DMSetUp_Moose(DM dm)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose); CHKERRQ(ierr);
   if (!ismoose)  SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "DM of type %s, not of type %s", ((PetscObject)dm)->type, DMMOOSE);
   if (!dmm->nl) SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
-  /* Compute the dof indices of this DM's support. */
-  ierr = ISDestroy(&dmm->embedding);CHKERRQ(ierr);
-  if (!dmm->allvars || !dmm->allblocks) {
-    DofMap& dofmap = dmm->nl->sys().get_dof_map();
-    std::set<unsigned int>               dindices;
-    for(std::map<std::string, unsigned int>::const_iterator vit = dmm->varids->begin(); vit != dmm->varids->end(); ++vit){
-      unsigned int v = vit->second;
-      /* Iterate only over this DM's blocks. */
-      for(std::map<std::string, unsigned int>::const_iterator bit = dmm->blockids->begin(); bit != dmm->blockids->end(); ++bit) {
-	unsigned int b = bit->second;
-	MeshBase::const_element_iterator el     = dmm->nl->sys().get_mesh().active_local_subdomain_elements_begin(b);
-	MeshBase::const_element_iterator end_el = dmm->nl->sys().get_mesh().active_local_subdomain_elements_end(b);
-	for ( ; el != end_el; ++el) {
-	  const Elem* elem = *el;
-	  std::vector<unsigned int> evindices;
-	  // Get the degree of freedom indices for the given variable off the current element.
-	  dofmap.dof_indices(elem, evindices, v);
-	  for(unsigned int i = 0; i < evindices.size(); ++i) {
-	    unsigned int dof = evindices[i];
-	    if(dof >= dofmap.first_dof() && dof < dofmap.end_dof()) /* might want to use variable_first/last_local_dof instead */
-	      dindices.insert(dof);
-	  }
-	}
-	/* Iterate over all sides and pick out only the ones that belong to this split. */
-	if (dmm->sideids->size()) {
-	  std::vector<unsigned int> snodes;
-	  std::vector<boundary_id_type> sides;
-	  dmm->nl->sys().get_mesh().boundary_info->build_node_list(snodes, sides);
-	  // FIXME: make an array of (snode,side) pairs, sort on side and use std::lower_bound from <algorithm>
-	  for (unsigned int i = 0; i < sides.size(); ++i) {
-	    boundary_id_type s = sides[i];
-	    if (!dmm->sidenames->count(s)) continue;
-	    const Node& node = dmm->nl->sys().get_mesh().node(snodes[i]);
-	    dof_id_type dof = node.dof_number(dmm->nl->sys().number(),v,0);
-	    if(dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
-	      dindices.insert(dof);
-	    }
-	  }
-	}
-      }
-    }
-    PetscInt *darray;
-    ierr = PetscMalloc(sizeof(PetscInt)*dindices.size(),&darray);CHKERRQ(ierr);
-    unsigned int i = 0;
-    for(std::set<unsigned int>::const_iterator it = dindices.begin(); it != dindices.end(); ++it) {
-      darray[i] = *it;
-      ++i;
-    }
-    ierr = ISCreateGeneral(((PetscObject)dm)->comm, dindices.size(),darray, PETSC_OWN_POINTER, &dmm->embedding); CHKERRQ(ierr);
-  }
+  ierr = ISDestroy(&dmm->embedding);CHKERRQ(ierr); /* In case there was an old embedding and now we are resetting.  Is this a valid use case? */
   if (dmm->print_embedding) {
     const char *name, *prefix;
+    IS embedding;
+
     ierr = PetscObjectGetName((PetscObject)dm, &name);     CHKERRQ(ierr);
     ierr = PetscObjectGetOptionsPrefix((PetscObject)dm, &prefix); CHKERRQ(ierr);
     ierr = PetscViewerASCIIPrintf(PETSC_VIEWER_STDOUT_(((PetscObject)dm)->comm), "DM Moose with name %s and prefix %s\n", name, prefix); CHKERRQ(ierr);
-    if (!dmm->embedding) {
+    if (dmm->allvars && dmm->allblocks && dmm->nosides) {
       ierr = PetscViewerASCIIPrintf(PETSC_VIEWER_STDOUT_(((PetscObject)dm)->comm), "With trivial embedding\n");CHKERRQ(ierr);
     } else {
+      ierr = DMMooseGetEmbedding_Private(dm,&embedding);CHKERRQ(ierr);
       ierr = PetscViewerASCIIPrintf(PETSC_VIEWER_STDOUT_(((PetscObject)dm)->comm), "With embedding defined by IS:\n");CHKERRQ(ierr);
-      ierr = ISView(dmm->embedding, PETSC_VIEWER_STDOUT_(((PetscObject)dm)->comm));CHKERRQ(ierr);
+      ierr = ISView(embedding, PETSC_VIEWER_STDOUT_(((PetscObject)dm)->comm));CHKERRQ(ierr);
+      ierr = ISDestroy(&embedding);CHKERRQ(ierr);
     }
   }
   /*
      Do not evaluate function, Jacobian or bounds for an embedded DM -- the subproblem might not have enough information for that.
   */
-  if(!dmm->embedding) {
+  if (dmm->allvars && dmm->allblocks && dmm->nosides)  {
 #if PETSC_VERSION_LE(3,3,0) && PETSC_VERSION_RELEASE
     ierr = DMSetFunction(dm, DMMooseFunction); CHKERRQ(ierr);
     ierr = DMSetJacobian(dm, DMMooseJacobian); CHKERRQ(ierr);
