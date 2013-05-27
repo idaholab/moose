@@ -309,7 +309,10 @@ MultiApp::resetApp(unsigned int global_app)
   {
     unsigned int local_app = globalAppToLocal(global_app);
     delete _apps[local_app];
-    createApp(local_app, 1); // The 1 is for the output file name
+    createApp(local_app);
+
+    // We do this to force it to write a new output file
+    _apps[local_app]->setOutputPosition(_positions[global_app]);
   }
 
   // Swap back
@@ -344,7 +347,7 @@ MultiApp::parentOutputPositionChanged()
 }
 
 void
-MultiApp::createApp(unsigned int i, unsigned int output_sequence)
+MultiApp::createApp(unsigned int i)
 {
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   MooseApp * app = AppFactory::instance().create(_app_type, "multi_app", app_params);
@@ -362,9 +365,6 @@ MultiApp::createApp(unsigned int i, unsigned int output_sequence)
               << std::setfill('0')
               << std::right
               << _first_local_app + i;
-
-  if(output_sequence)
-    output_base << "_" << output_sequence;
 
   _apps[i] = app;
 

@@ -190,6 +190,9 @@ ExodusOutput::outputInput()
 void
 ExodusOutput::setOutputPosition(Point p)
 {
+  if(_file_num == -1) // This might happen in the case of a MultiApp reset
+    _file_num = 0;
+
   sequence(true);
   meshChanged();
 }

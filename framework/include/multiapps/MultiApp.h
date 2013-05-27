@@ -186,7 +186,7 @@ protected:
    *
    * @param i The local app number to create.
    */
-  void createApp(unsigned int i, unsigned int output_sequence = 0);
+  void createApp(unsigned int i);
 
   /**
    * Create an MPI communicator suitable for each app.

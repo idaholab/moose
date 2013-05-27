@@ -2,6 +2,6 @@
   [./test]
     type = 'Exodiff'
     input = 'master.i'
-    exodiff = 'master_out_sub0_1.e'
+    exodiff = 'master_out_sub0.e-s002'
   [../]
 []
