@@ -156,7 +156,7 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
   _apps.resize(_my_num_apps);
 
   for(unsigned int i=0; i<_my_num_apps; i++)
-    createApp(i);
+    createApp(i, _app.getStartTime());
 
   // Swap back
   Moose::swapLibMeshComm(swapped);
@@ -301,7 +301,7 @@ MultiApp::hasLocalApp(unsigned int global_app)
 }
 
 void
-MultiApp::resetApp(unsigned int global_app)
+MultiApp::resetApp(unsigned int global_app, Real time)
 {
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
@@ -309,7 +309,7 @@ MultiApp::resetApp(unsigned int global_app)
   {
     unsigned int local_app = globalAppToLocal(global_app);
     delete _apps[local_app];
-    createApp(local_app);
+    createApp(local_app, time);
 
     // We do this to force it to write a new output file
     _apps[local_app]->setOutputPosition(_positions[global_app]);
@@ -347,7 +347,7 @@ MultiApp::parentOutputPositionChanged()
 }
 
 void
-MultiApp::createApp(unsigned int i)
+MultiApp::createApp(unsigned int i, Real start_time)
 {
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   MooseApp * app = AppFactory::instance().create(_app_type, "multi_app", app_params);
@@ -373,6 +373,8 @@ MultiApp::createApp(unsigned int i)
     input_file = _input_files[0];
   else
     input_file = _input_files[_first_local_app+i];
+
+  app->setStartTime(start_time);
 
   app->setInputFileName(input_file);
   app->setOutputFileBase(output_base.str());

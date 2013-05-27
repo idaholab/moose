@@ -152,8 +152,9 @@ public:
    * by a "new" piece of material.
    *
    * @param global_app The global app number to reset.
+   * @param time The time to set as the the time for the new app, this should really be the time the old app was at.
    */
-  virtual void resetApp(unsigned int global_app);
+  virtual void resetApp(unsigned int global_app, Real time = 0.0);
 
   /**
    * Move the global_app to Point p.
@@ -185,8 +186,9 @@ protected:
    * Helper function for creating an App instance.
    *
    * @param i The local app number to create.
+   * @param start_time The initial time for the App
    */
-  void createApp(unsigned int i);
+  void createApp(unsigned int i, Real start_time);
 
   /**
    * Create an MPI communicator suitable for each app.

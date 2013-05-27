@@ -4,4 +4,10 @@
     input = 'master.i'
     exodiff = 'master_out_sub0.e-s002'
   [../]
+
+  [./multilevel]
+    type = 'Exodiff'
+    input = 'multilevel_master.i'
+    exodiff = 'multilevel_master_out.e multilevel_master_out_sub0.e multilevel_master_out_sub0.e-s002 multilevel_master_out_sub0_sub0.e multilevel_master_out_sub0_sub0.e-s002'
+  [../]
 []

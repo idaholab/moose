@@ -68,7 +68,7 @@ public:
    *
    * @param global_app The global app number to reset.
    */
-  virtual void resetApp(unsigned int global_app);
+  virtual void resetApp(unsigned int global_app, Real time);
 
 private:
   /**

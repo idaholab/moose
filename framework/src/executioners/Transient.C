@@ -107,6 +107,13 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 {
   _t_step = 0;
   _dt = 0;
+
+  // Either a start_time has been forced on us, or we want to tell the App about what our start time is (in case anyone else is interested.
+  if(_app.hasStartTime())
+    _start_time = _app.getStartTime();
+  else
+    _app.setStartTime(_start_time);
+
   _time = _time_old = _start_time;
   _problem.transient(true);
 

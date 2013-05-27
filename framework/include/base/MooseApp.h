@@ -128,6 +128,24 @@ public:
   Point getOutputPosition() { return _output_position; }
 
   /**
+   * Set the starting time for the simulation.  This will override any choice
+   * made in the input file.
+   *
+   * @param time The start time for the simulation.
+   */
+  void setStartTime(const Real time) { _start_time_set = true; _start_time = time; }
+
+  /**
+   * @return Whether or not a start time has been programmatically set using setStartTime()
+   */
+  bool hasStartTime() { return _start_time_set; }
+
+  /**
+   * @return The start time
+   */
+  Real getStartTime() { return _start_time; }
+
+  /**
    * Return the filename that was parsed
    */
   std::string getFileName(bool stripLeadingPath = true) const;
@@ -216,6 +234,12 @@ protected:
 
   /// The output position
   Point _output_position;
+
+  /// Whether or not an start time has been set
+  bool _start_time_set;
+
+  /// The time at which to start the simulation
+  Real _start_time;
 
   /// Command line object
   CommandLine * _command_line;

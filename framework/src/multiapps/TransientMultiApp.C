@@ -357,7 +357,7 @@ TransientMultiApp::computeDT()
 }
 
 void
-TransientMultiApp::resetApp(unsigned int global_app)
+TransientMultiApp::resetApp(unsigned int global_app, Real time)
 {
   if(hasLocalApp(global_app))
   {
@@ -366,7 +366,7 @@ TransientMultiApp::resetApp(unsigned int global_app)
     // Grab the current time the App is at so we can start the new one at the same place
     Real time = _transient_executioners[local_app]->getTime();
 
-    MultiApp::resetApp(global_app);
+    MultiApp::resetApp(global_app, time);
 
     MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
@@ -387,9 +387,6 @@ TransientMultiApp::setupApp(unsigned int i, Real time, bool output_initial)
 
   if(!output_initial)
     ex->outputInitial(false);
-
-  ex->setTime(time);
-  ex->setTimeOld(time);
 
   ex->init();
 
