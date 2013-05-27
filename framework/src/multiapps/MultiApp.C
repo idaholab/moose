@@ -327,7 +327,9 @@ MultiApp::moveApp(unsigned int global_app, Point p)
   if(hasLocalApp(global_app))
   {
     unsigned int local_app = globalAppToLocal(global_app);
-    _apps[local_app]->setOutputPosition(p);
+
+    if(_output_in_position)
+      _apps[local_app]->setOutputPosition(p);
   }
 }
 
