@@ -25,14 +25,14 @@ InputParameters validParams<GapConductance>()
 
 
   // Quadrature based
-  params.addParam<bool>("quadrature", false, "Whether or not to do Quadrature point based gap heat transfer.  If this is true then gap_distance and gap_temp should NOT be provided (and will be ignored) however paired_boundary IS then required and so is 'temp'.");
+  params.addParam<bool>("quadrature", false, "Whether or not to do quadrature point based gap heat transfer.  If this is true then gap_distance and gap_temp should NOT be provided (and will be ignored); however, paired_boundary and variable are then required.");
   params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
 
   // Common
-  params.addParam<Real>("min_gap", 1.0e-6, "A minimum gap size");
-  params.addParam<Real>("max_gap", 1.0e6, "A maximum gap size");
+  params.addParam<Real>("min_gap", 1e-6, "A minimum gap size");
+  params.addParam<Real>("max_gap", 1e6, "A maximum gap size");
   return params;
 }
 
