@@ -219,6 +219,12 @@ public:
 
   virtual bool computingInitialResidual() { return _nl.computingInitialResidual(); }
 
+  /**
+   * The relative (both to solution size and dt) change in the L2 norm of the solution vector.
+   * Call just after a converged solve.
+   */
+  virtual Real solutionChangeNorm();
+
   virtual void onTimestepBegin();
   virtual void onTimestepEnd();
 
@@ -578,6 +584,9 @@ protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;
+
+  /// Whether or not to actually solve the nonlinear system
+  bool _solve;
 
   bool _transient;
   Real & _time;

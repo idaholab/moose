@@ -167,6 +167,10 @@
   [../]
 []
 
+[Problem]
+  type = FEProblem
+[]
+
 [Executioner]
   type = Steady
 

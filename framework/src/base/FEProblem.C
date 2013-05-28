@@ -74,9 +74,10 @@ template<>
 InputParameters validParams<FEProblem>()
 {
   InputParameters params = validParams<SubProblem>();
-  params.addRequiredParam<MooseMesh *>("mesh", "The Mesh");
+  params.addPrivateParam<MooseMesh *>("mesh");
   params.addParam<unsigned int>("dimNullSpace", 0, "The dimension of the nullspace");
   params.addParam<unsigned int>("dimNearNullSpace", 0, "The dimension of the near nullspace");
+  params.addParam<bool>("solve", true, "Whether or not to actually solve the Nonlinear system.  This is handy in the case that all you want to do is execute AuxKernels, Transfers, etc. without actually solving anything");
   return params;
 }
 
@@ -85,6 +86,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _mesh(*parameters.get<MooseMesh *>("mesh")),
     _eq(_mesh),
     _initialized(false),
+    _solve(getParam<bool>("solve")),
 
     _transient(false),
     _time(_eq.parameters.set<Real>("time")),
@@ -2606,7 +2608,7 @@ FEProblem::init()
   _nl.dofMap()._dof_coupling = _cm;
   _nl.dofMap().attach_extra_sparsity_function(&extraSparsity, &_nl);
 
-  if (n_vars == 0)
+  if (_solve && n_vars == 0)
     mooseError("No variables specified in the FEProblem '" << name() << "'.");
 
   Moose::setup_perf_log.push("eq.init()","Setup");
@@ -2656,11 +2658,15 @@ FEProblem::solve()
   Moose::setSolverDefaults(*this);
   Moose::perf_log.push("solve()","Solve");
 //  _solve_only_perf_log.push("solve");
-  _nl.solve();
+
+  if(_solve)
+    _nl.solve();
 
 //  _solve_only_perf_log.pop("solve");
   Moose::perf_log.pop("solve()","Solve");
-  _nl.update();
+
+  if(_solve)
+    _nl.update();
 
   // sync solutions in displaced problem
   if (_displaced_problem)
@@ -2670,7 +2676,10 @@ FEProblem::solve()
 bool
 FEProblem::converged()
 {
-  return _nl.converged();
+  if(_solve)
+    return _nl.converged();
+  else
+    return true;
 }
 
 void
@@ -2694,6 +2703,29 @@ void FEProblem::restoreSolutions()
 
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
+}
+
+Real
+FEProblem::solutionChangeNorm()
+{
+  if(!_solve)
+    return 0;
+
+  NumericVector<Number> & current_solution  = (*_nl.sys().current_local_solution);
+  NumericVector<Number> & old_solution = (*_nl.sys().old_local_solution);
+
+  NumericVector<Number> & difference = *NumericVector<Number>::build().release();
+  difference.init(current_solution, true);
+
+  difference = current_solution;
+
+  difference -= old_solution;
+
+  Real abs_change = difference.l2_norm();
+
+  delete &difference;
+
+  return (abs_change / current_solution.l2_norm()) / _dt;
 }
 
 void
@@ -3222,7 +3254,8 @@ FEProblem::checkProblemIntegrity()
   // Check for unsatisfied actions
   const std::set<SubdomainID> & mesh_subdomains = _mesh.meshSubdomains();
   // Check kernel coverage of subdomains (blocks) in the mesh
-  _nl.checkKernelCoverage(mesh_subdomains);
+  if(_solve)
+    _nl.checkKernelCoverage(mesh_subdomains);
 
   // Check materials
   {

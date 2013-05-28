@@ -209,8 +209,6 @@ protected:
 
   Real _solution_change_norm;
 
-  void computeSolutionChangeNorm();
-
   void setupTimeIntegrator();
 };
 

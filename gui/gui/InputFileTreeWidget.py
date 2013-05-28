@@ -224,6 +224,10 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         new_child.table_data['type'] = 'FileMesh'
       self.mesh_item_changed.emit(new_child)
 
+    if new_child.text(0) == 'Problem':
+      if 'type' not in new_child.table_data:
+        new_child.table_data['type'] = 'FEProblem'
+
     for child, child_node in node.children.items():
       self._addDataRecursively(new_child, child_node)      
 

@@ -256,7 +256,7 @@ Transient::takeStep(Real input_dt)
   {
     std::cout<<"Solve Converged!"<<std::endl;
 
-    computeSolutionChangeNorm();
+    _solution_change_norm = _problem.solutionChangeNorm();
 
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
 #if 0
@@ -529,26 +529,6 @@ Transient::forceOutput()
 {
   _problem.output(true);
   _problem.outputPostprocessors(true);
-}
-
-void
-Transient::computeSolutionChangeNorm()
-{
-  NumericVector<Number> & current_solution  = (*_problem.getNonlinearSystem().sys().current_local_solution);
-  NumericVector<Number> & old_solution = (*_problem.getNonlinearSystem().sys().old_local_solution);
-
-  NumericVector<Number> & difference = *NumericVector<Number>::build().release();
-  difference.init(current_solution, true);
-
-  difference = current_solution;
-
-  difference -= old_solution;
-
-  Real abs_change = difference.l2_norm();
-
-  delete &difference;
-
-  _solution_change_norm = (abs_change / current_solution.l2_norm()) / _dt;
 }
 
 Real

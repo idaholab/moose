@@ -404,7 +404,6 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial) 
     libmesh_aux_system.add_vector("transfer", false);
   }
 
-  problem->initialSetup();
   ex->preExecute();
   problem->copyOldSolutions();
   _transient_executioners[i] = ex;
