@@ -55,7 +55,7 @@ class TestHarness:
     self.preRun()
     self.start_time = clock()
 
-    for dirpath, dirnames, filenames in os.walk(os.getcwd()):
+    for dirpath, dirnames, filenames in os.walk(os.getcwd(), followlinks=True):
       if (self.test_match.search(dirpath)):
         for file in filenames:
           # See if there were other arguments (test names) passed on the command line
