@@ -97,7 +97,6 @@
 // executioners
 #include "Steady.h"
 #include "Transient.h"
-#include "AdaptiveErrorEstimateTransient.h"
 #include "TransientAdaptive.h"
 #include "CoupledTransientExecutioner.h"
 
@@ -372,7 +371,6 @@ registerObjects(Factory & factory)
   // executioners
   registerExecutioner(Steady);
   registerExecutioner(Transient);
-  registerExecutioner(AdaptiveErrorEstimateTransient);
   registerExecutioner(CoupledTransientExecutioner);
 #if defined(LIBMESH_HAVE_PETSC) && defined(PETSC_VERSION_LE)
 #if !PETSC_VERSION_LE(3,3,0)
