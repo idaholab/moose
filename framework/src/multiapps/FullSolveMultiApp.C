@@ -61,7 +61,7 @@ FullSolveMultiApp::~FullSolveMultiApp()
 }
 
 void
-FullSolveMultiApp::solveStep(Real dt, Real target_time)
+FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/)
 {
   if(!_has_an_app)
     return;

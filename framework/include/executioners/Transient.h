@@ -153,7 +153,7 @@ public:
   /**
    * Set (or reset) the output position of the application.
    */
-  virtual void setOutputPosition(Point p) { _problem.setOutputPosition(p); }
+  virtual void setOutputPosition(const Point & p) { _problem.setOutputPosition(p); }
 
 protected:
   FEProblem & _problem;

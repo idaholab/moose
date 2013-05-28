@@ -40,7 +40,7 @@ public:
   virtual void sequence(bool state) { _seq = state; }
 
   /// Set (or reset) the output position
-  virtual void setOutputPosition(Point p);
+  virtual void setOutputPosition(const Point & p);
 
 protected:
   MooseApp & _app;

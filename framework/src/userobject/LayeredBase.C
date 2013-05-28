@@ -60,7 +60,7 @@ LayeredBase::integralValue(Point p) const
   int higher_layer = -1;
   int lower_layer = -1;
 
-  for(int i=layer; i<_layer_values.size(); i++)
+  for(unsigned int i=layer; i<_layer_values.size(); i++)
   {
     if(_layer_has_value[i])
     {
@@ -88,7 +88,7 @@ LayeredBase::integralValue(Point p) const
       if(higher_layer == -1) // Didn't find a higher layer
         return _layer_values[lower_layer];
 
-      if (higher_layer == layer) // constant in a layer
+      if (unsigned(higher_layer) == layer) // constant in a layer
         return _layer_values[higher_layer];
 
       if(lower_layer == -1) // Didn't find a lower layer
@@ -127,7 +127,7 @@ LayeredBase::integralValue(Point p) const
         {
           int current_layer = higher_layer + i;
 
-          if(current_layer >= _layer_values.size())
+          if((size_t)current_layer >= _layer_values.size())
             break;
 
           if(_layer_has_value[current_layer])

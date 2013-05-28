@@ -176,7 +176,7 @@ MultiApp::~MultiApp()
 }
 
 void
-MultiApp::preTransfer(Real dt, Real target_time)
+MultiApp::preTransfer(Real /*dt*/, Real target_time)
 {
   // First, see if any Apps need to be Reset
   if(!_reset_happened && target_time + 1e-14 >= _reset_time)
@@ -286,7 +286,7 @@ MultiApp::appPostprocessorValue(unsigned int app, const std::string & name)
 }
 
 NumericVector<Number> &
-MultiApp::appTransferVector(unsigned int app, std::string var_name)
+MultiApp::appTransferVector(unsigned int app, std::string /*var_name*/)
 {
   return appProblem(app)->getAuxiliarySystem().solution();
 }
@@ -401,7 +401,7 @@ MultiApp::buildComm()
   ierr = MPI_Comm_rank(_orig_comm, &_orig_rank); mooseCheckMPIErr(ierr);
 
   // If we have more apps than processors then we're just going to divide up the work
-  if(_total_num_apps >= _orig_num_procs)
+  if(_total_num_apps >= (unsigned)_orig_num_procs)
   {
     _my_comm = MPI_COMM_SELF;
     _my_rank = 0;
@@ -412,7 +412,7 @@ MultiApp::buildComm()
     if(jobs_left != 0)
     {
       // Spread the remaining jobs out over the first set of processors
-      if(_orig_rank < jobs_left)  // (these are the "jobs_left_pids" ie the pids that are snatching up extra jobs)
+      if((unsigned)_orig_rank < jobs_left)  // (these are the "jobs_left_pids" ie the pids that are snatching up extra jobs)
       {
         _my_num_apps += 1;
         _first_local_app = _my_num_apps * _orig_rank;

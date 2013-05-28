@@ -979,7 +979,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
 
 void
-NonlinearSystem::computeResidualInternal(Moose::KernelType type)
+NonlinearSystem::computeResidualInternal(Moose::KernelType /*type*/)
 {
   // residualSetup() /////
   for(unsigned int i=0; i<libMesh::n_threads(); i++)

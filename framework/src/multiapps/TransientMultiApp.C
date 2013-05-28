@@ -167,7 +167,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
       ex->setTargetTime(target_time);
 
-      unsigned int failures = 0;
+//      unsigned int failures = 0;
 
       bool at_steady = false;
 
@@ -357,7 +357,7 @@ TransientMultiApp::computeDT()
 }
 
 void
-TransientMultiApp::resetApp(unsigned int global_app, Real time)
+TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: Note that we are passing in time but also grabbing it below
 {
   if(hasLocalApp(global_app))
   {
@@ -378,7 +378,7 @@ TransientMultiApp::resetApp(unsigned int global_app, Real time)
 }
 
 void
-TransientMultiApp::setupApp(unsigned int i, Real time, bool output_initial)
+TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial)  // FIXME: Should we be passing time?
 {
   MooseApp * app = _apps[i];
   Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
