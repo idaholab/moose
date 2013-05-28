@@ -2,12 +2,12 @@
   [./reconstruction4gr_test]
     type = 'Exodiff'
     input = 'reconstruction4gr_test.i'
-    exodiff = '4gr.e-s003'
+    exodiff = '4gr.e-s002'
   [../]
 
   [./reconstruction4gr_BC_test]
     type = 'Exodiff'
     input = 'reconstruction4gr_BC_test.i'
-    exodiff = '4grBC.e-s003'
+    exodiff = '4grBC.e-s002'
   [../]
 []
