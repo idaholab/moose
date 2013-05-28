@@ -57,8 +57,6 @@
     variable = convected
     boundary = 'right'
     value = 1
-
-    some_var = diffused
   [../]
 
   [./left_diffused]
@@ -89,16 +87,19 @@
 []
 
 [Executioner]
-  # Each simulation has a single executioner so we don't specify them
-  # in subblocks.  Instead we just change the type inside the Executioner.
+  type = Transient
 
-  type = TransientHalf   # Here we use our custom Executioner
   petsc_options = '-snes_mf_operator'
 
   num_steps = 40
-  dt = 1
-  ratio = 0.5
-  min_dt = 0.01
+
+  # Use our custom TimeStepper
+  [./TimeStepper]
+    type = TransientHalf
+    ratio = 0.5
+    min_dt = 0.01
+    dt = 1
+  [../]
 []
 
 [Output]

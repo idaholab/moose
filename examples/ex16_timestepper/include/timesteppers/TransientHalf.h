@@ -15,7 +15,7 @@
 #ifndef TRANSIENTHALF_H
 #define TRANSIENTHALF_H
 
-#include "Transient.h"
+#include "TimeStepper.h"
 
 // Forward Declarations
 class TransientHalf;
@@ -23,7 +23,11 @@ class TransientHalf;
 template<>
 InputParameters validParams<TransientHalf>();
 
-class TransientHalf: public Transient
+/**
+ * This class cuts the timestep in half at every iteration
+ * until it reaches a user-specified minimum value.
+ */
+class TransientHalf : public TimeStepper
 {
 public:
 
