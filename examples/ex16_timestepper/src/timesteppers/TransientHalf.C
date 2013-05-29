@@ -31,24 +31,22 @@ TransientHalf::TransientHalf(const std::string & name, InputParameters parameter
     _ratio(getParam<Real>("ratio")),
     _min_dt(getParam<Real>("min_dt"))
 {
+}
+
+void
+TransientHalf::computeInitialDT()
+{
   _current_dt = getParam<Real>("dt");
 }
 
-Real
+void
 TransientHalf::computeDT()
 {
   /**
    * We won't grow timesteps with this example so if the ratio > 1.0 we'll just
-   * return the current dt
+   * leave current_dt alone.
    */
-  if (_ratio > 1.0)
-    return _current_dt;
-
-  /**
-   * Shrink our timestep by the specified ratio or return the min if it's too small
-   */
-  if (_time != 0.0)
+  if (_ratio < 1.0)
+    // Shrink our timestep by the specified ratio or return the min if it's too small
     _current_dt = std::max(_current_dt*_ratio, _min_dt);
-
-  return _current_dt;
 }

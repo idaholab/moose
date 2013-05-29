@@ -53,7 +53,10 @@ void
 TimeStepper::preStep()
 {
   if(_t_step < 2)
+  {
     computeInitialDT();
+    return;
+  }
 
   if(converged())
     computeDT();
@@ -91,4 +94,10 @@ TimeStepper::computeFailedDT()
     _current_dt = 0.5 * _current_dt;
   else // (0.5 * _current_dt < _dt_min)
     _current_dt = _dt_min;
+}
+
+void
+TimeStepper::forceTimeStep(Real dt)
+{
+  _current_dt = dt;
 }

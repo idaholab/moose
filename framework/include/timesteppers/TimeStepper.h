@@ -74,6 +74,8 @@ public:
    */
   Real getCurrentDT() { return _current_dt; }
 
+  virtual void forceTimeStep(Real dt);
+
 protected:
   /**
    * Called to compute _current_dt for the first timestep.
