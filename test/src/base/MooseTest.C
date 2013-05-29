@@ -113,6 +113,7 @@
 
 // problems
 #include "MooseTestProblem.h"
+#include "FailingProblem.h"
 
 #include "ConvDiffMetaAction.h"
 #include "AddLotsOfAuxVariablesAction.h"
@@ -245,6 +246,7 @@ MooseTest::registerObjects(Factory & factory)
   registerExecutioner(AdaptAndModify);
 
   registerProblem(MooseTestProblem);
+  registerProblem(FailingProblem);
 }
 
 void

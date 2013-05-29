@@ -23,17 +23,15 @@ class FunctionDT;
 template<>
 InputParameters validParams<FunctionDT>();
 
-/**
- *
- */
 class FunctionDT : public TimeStepper
 {
 public:
   FunctionDT(const std::string & name, InputParameters parameters);
-  virtual ~FunctionDT();
 
   virtual void init();
-  virtual Real computeDT();
+
+  virtual void computeInitialDT();
+  virtual void computeDT();
   virtual void rejectStep();
 
 protected:

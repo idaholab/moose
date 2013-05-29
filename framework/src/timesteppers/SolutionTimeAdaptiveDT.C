@@ -37,7 +37,6 @@ SolutionTimeAdaptiveDT::SolutionTimeAdaptiveDT(const std::string & name, InputPa
     _sol_time_vs_dt(std::numeric_limits<Real>::max()),
     _adapt_log(getParam<bool>("adapt_log"))
 {
-  _current_dt = getParam<Real>("dt");
   if((_adapt_log) && (libMesh::processor_id() == 0))
   {
     _adaptive_log.open("adaptive_log");
@@ -71,7 +70,13 @@ SolutionTimeAdaptiveDT::postSolve()
   }
 }
 
-Real
+void
+SolutionTimeAdaptiveDT::computeInitialDT()
+{
+  _current_dt = getParam<Real>("dt");
+}
+
+void
 SolutionTimeAdaptiveDT::computeDT()
 {
   //Ratio grew so switch direction
@@ -99,8 +104,6 @@ SolutionTimeAdaptiveDT::computeDT()
     _adaptive_log<<"Old Ratio: "<<_old_sol_time_vs_dt<<std::endl;
     _adaptive_log<<"New Ratio: "<<_sol_time_vs_dt<<std::endl;
   }
-
-  return _current_dt;
 }
 
 void
@@ -110,7 +113,5 @@ SolutionTimeAdaptiveDT::rejectStep()
   if (_adapt_log)
     _adaptive_log<<"Solve failed... cutting timestep"<<std::endl;
 
-  _current_dt = _current_dt / 2;
-
-  _fe_problem.restoreSolutions();
+  TimeStepper::rejectStep();
 }

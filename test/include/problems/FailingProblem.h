@@ -12,24 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONSTANTDT_H
-#define CONSTANTDT_H
+#ifndef FAILINGPROBLEM_H
+#define FAILINGPROBLEM_H
 
-#include "TimeStepper.h"
+#include "FEProblem.h"
 
-class ConstantDT;
+class FailingProblem;
 
 template<>
-InputParameters validParams<ConstantDT>();
+InputParameters validParams<FailingProblem>();
 
-class ConstantDT : public TimeStepper
+/**
+ * FEProblem derived class that will fail a prescribed timestep for testing
+ * timestepping algorithms
+ */
+class FailingProblem : public FEProblem
 {
 public:
-  ConstantDT(const std::string & name, InputParameters parameters);
-
-  virtual void computeInitialDT();
-  virtual void computeDT();
+  FailingProblem(const std::string & name, InputParameters params);
+  virtual bool converged();
+  
+protected:
+  bool _failed;
+  unsigned int _fail_step;
 };
 
-
-#endif /* CONSTANTDT_H */
+#endif /* FAILINGPROBLEM_H */

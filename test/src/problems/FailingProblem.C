@@ -12,24 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONSTANTDT_H
-#define CONSTANTDT_H
+#include "FailingProblem.h"
 
-#include "TimeStepper.h"
-
-class ConstantDT;
+#include "MooseApp.h"
 
 template<>
-InputParameters validParams<ConstantDT>();
-
-class ConstantDT : public TimeStepper
+InputParameters validParams<FailingProblem>()
 {
-public:
-  ConstantDT(const std::string & name, InputParameters parameters);
+  InputParameters params = validParams<FEProblem>();
+  params.addRequiredParam<unsigned int>("fail_step", "The timestep to fail");
+  return params;
+}
 
-  virtual void computeInitialDT();
-  virtual void computeDT();
-};
+FailingProblem::FailingProblem(const std::string & name, InputParameters params) :
+    FEProblem(name, params),
+    _failed(false),
+    _fail_step(getParam<unsigned int>("fail_step"))
+{}
 
+bool
+FailingProblem::converged()
+{
+  if(!_failed && _t_step == _fail_step)
+  {
+    _failed = true;
+    return false;
+  }
 
-#endif /* CONSTANTDT_H */
+  return FEProblem::converged();
+}

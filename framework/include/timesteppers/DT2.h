@@ -30,13 +30,14 @@ class DT2 : public TimeStepper
 {
 public:
   DT2(const std::string & name, InputParameters parameters);
-  virtual ~DT2();
 
   virtual void preExecute();
   virtual void preSolve();
   virtual void step();
 
-  virtual Real computeDT();
+  virtual void computeInitialDT();
+  virtual void computeDT();
+
   virtual void rejectStep();
   virtual bool converged();
 

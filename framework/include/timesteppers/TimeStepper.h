@@ -44,6 +44,16 @@ public:
   virtual void postExecute() { }
 
   /**
+   * Called before a new step is started.
+   * This is when the actual computation of the current DT will be done.
+   * Because of that this MUST be called only once per step!
+   *
+   * After calling this function use getCurrentDT() to get the DT
+   * that was computed.
+   */
+  void preStep();
+
+  /**
    * Take a time step
    */
   virtual void step();
@@ -60,14 +70,32 @@ public:
   virtual bool converged();
 
   /**
-   * This returns suggested dt. It may not be the one finally used (Transient executioner has the final word on that)
-   * @return The suggested dt to take
+   * Get the current_dt
    */
-  virtual Real computeDT() = 0;
-
-  virtual void forceTimeStep(Real dt);
+  Real getCurrentDT() { return _current_dt; }
 
 protected:
+  /**
+   * Called to compute _current_dt for the first timestep.
+   * Note that this does not return.
+   * The TimeStepper's job here is to fill in _current_dt.
+   */
+  virtual void computeInitialDT() = 0;
+
+  /**
+   * Called to compute _current_dt for a normal step.
+   * Note that this does not return.
+   * The TimeStepper's job here is to fill in _current_dt.
+   */
+  virtual void computeDT() = 0;
+
+  /**
+   * Called to compute _current_dt after a solve has failed.
+   * Note that this does not return.
+   * The TimeStepper's job here is to fill in _current_dt.
+   */
+  virtual void computeFailedDT();
+
   FEProblem & _fe_problem;
   /// Reference to transient executioner
   Transient & _executioner;
@@ -82,7 +110,8 @@ protected:
 
   /// Whether or not the previous solve converged.
   bool _converged;
-  /// Size of the current time step
+
+  /// Size of the current time step as computed by the Stepper.  Note that the actual dt that was taken might be smaller if the Executioner constrained it.
   Real _current_dt;
 };
 

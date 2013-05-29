@@ -185,6 +185,7 @@ Transient::execute()
   // Start time loop...
   while (keepGoing())
   {
+    _time_stepper->preStep(); // This is actually when DT gets computed
     takeStep();
     endStep();
   }
@@ -420,7 +421,7 @@ Transient::computeConstrainedDT()
 Real
 Transient::computeDT()
 {
-  return _time_stepper->computeDT();
+  return _time_stepper->getCurrentDT();
 }
 
 bool

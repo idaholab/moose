@@ -49,13 +49,7 @@ DT2::DT2(const std::string & name, InputParameters parameters) :
     _e_tol(getParam<Real>("e_tol")),
     _e_max(getParam<Real>("e_max")),
     _max_increase(getParam<Real>("max_increase"))
-{
-  _current_dt = getParam<Real>("dt");
-}
-
-DT2::~DT2()
-{
-}
+{}
 
 void
 DT2::preExecute()
@@ -197,17 +191,20 @@ DT2::step()
   }
 }
 
-Real
+void
+DT2::computeInitialDT()
+{
+  _current_dt = getParam<Real>("dt");
+}
+
+void
 DT2::computeDT()
 {
-  if (_t_step < 2)
-    return _current_dt;
-
   Real new_dt = _current_dt * std::pow(_e_tol / _error, 1.0 / _fe_problem.getNonlinearSystem().getTimeIntegrator()->order());
   if (new_dt / _current_dt > _max_increase)
     new_dt = _current_dt * _max_increase;
 
-  return new_dt;
+  _current_dt = new_dt;
 }
 
 void
@@ -235,9 +232,6 @@ DT2::rejectStep()
   aux_sys.solution->close();
   aux_sys.old_local_solution->close();
   aux_sys.older_local_solution->close();
-
-  // and cut the time step in a half
-  _current_dt = _current_dt / 2.;
 }
 
 bool

@@ -14,6 +14,7 @@
 #include "CoupledTransientExecutioner.h"
 #include "CoupledProblem.h"
 #include "Transient.h"
+#include "TimeStepper.h"
 
 template<>
 InputParameters validParams<CoupledTransientExecutioner>()
@@ -61,6 +62,9 @@ CoupledTransientExecutioner::execute()
 
   for (_t_step = 0; _t_step < _n_steps; _t_step++)
   {
+    for (unsigned int i = 0; i < n_problems; i++)
+      trans[i]->getTimeStepper()->preStep();
+
     _dt = trans[0]->computeConstrainedDT();
     for (unsigned int i = 1; i < n_problems; i++)
       trans[i]->computeConstrainedDT();

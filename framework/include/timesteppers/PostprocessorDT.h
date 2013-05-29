@@ -32,9 +32,9 @@ class PostprocessorDT :
 {
 public:
   PostprocessorDT(const std::string & name, InputParameters parameters);
-  virtual ~PostprocessorDT();
 
-  virtual Real computeDT();
+  virtual void computeInitialDT();
+  virtual void computeDT();
 
 protected:
   PostprocessorValue & _pps_value;

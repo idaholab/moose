@@ -1,0 +1,7 @@
+[Tests]
+  [./constant]
+    type = 'Exodiff'
+    input = 'constant_failure.i'
+    exodiff = 'constant_failure_out.e'
+  [../]
+[]

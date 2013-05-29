@@ -18,23 +18,25 @@ template<>
 InputParameters validParams<PostprocessorDT>()
 {
   InputParameters params = validParams<TimeStepper>();
-  params.addRequiredParam<PostprocessorName>("value", "The name of the postprocessor that computes the dt");
+  params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor that computes the dt");
   return params;
 }
 
 PostprocessorDT::PostprocessorDT(const std::string & name, InputParameters parameters) :
     TimeStepper(name, parameters),
     PostprocessorInterface(parameters),
-    _pps_value(getPostprocessorValue(getParam<PostprocessorName>("value")))
+    _pps_value(getPostprocessorValue(getParam<PostprocessorName>("postprocessor")))
 {
 }
 
-PostprocessorDT::~PostprocessorDT()
+void
+PostprocessorDT::computeInitialDT()
 {
+  computeDT();
 }
 
-Real
+void
 PostprocessorDT::computeDT()
 {
-  return _pps_value;
+  _current_dt = _pps_value;
 }

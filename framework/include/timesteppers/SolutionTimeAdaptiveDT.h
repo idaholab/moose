@@ -33,7 +33,10 @@ public:
 
   virtual void preSolve();
   virtual void postSolve();
-  virtual Real computeDT();
+
+  virtual void computeInitialDT();
+  virtual void computeDT();
+
   virtual void rejectStep();
 
 protected:

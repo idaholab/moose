@@ -130,7 +130,19 @@ public:
    */
   Real getSolutionChangeNorm();
 
+  /**
+   * Set the timestepper to use.
+   *
+   * @param ts The TimeStepper to use
+   */
   void setTimeStepper(TimeStepper * ts) { _time_stepper = ts; }
+
+  /**
+   * Get the current timestepper in use.
+   *
+   * @param The current TimeStepper.
+   */
+  TimeStepper * getTimeStepper() { return _time_stepper; }
 
   /**
    * Get the set of sync times

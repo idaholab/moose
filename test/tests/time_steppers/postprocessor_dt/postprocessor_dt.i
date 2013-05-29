@@ -15,7 +15,7 @@
     type = ParsedFunction
     value = t*t*(x*x+y*y)
   [../]
-  
+
   [./forcing_fn]
     type = ParsedFunction
     value = 2*t*(x*x+y*y)-4*t*t
@@ -42,12 +42,12 @@
     type = TimeDerivative
     variable = u
   [../]
-  
+
   [./diff]
     type = Diffusion
     variable = u
   [../]
-  
+
   [./ffn]
     type = UserForcingFunction
     variable = u
@@ -70,7 +70,7 @@
     variable = u
     function = exact_fn
   [../]
-  
+
   # Just use some postprocessor that gives values good enough for time stepping ;-)
   [./dt]
     type = ElementAverageValue
@@ -82,12 +82,12 @@
 [Executioner]
   type = Transient
   scheme = 'crank-nicolson'
-  
+
   start_time = 1.0
   num_steps = 2
   [./TimeStepper]
     type = PostprocessorDT
-    value = dt
+    postprocessor = dt
   [../]
 []
 

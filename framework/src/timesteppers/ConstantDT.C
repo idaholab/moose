@@ -26,30 +26,16 @@ InputParameters validParams<ConstantDT>()
 
 ConstantDT::ConstantDT(const std::string & name, InputParameters parameters) :
     TimeStepper(name, parameters)
+{}
+
+void
+ConstantDT::computeInitialDT()
 {
   _current_dt = getParam<Real>("dt");
 }
 
-ConstantDT::~ConstantDT()
-{
-}
-
-Real
+void
 ConstantDT::computeDT()
 {
-  return _current_dt;
-}
-
-void
-ConstantDT::rejectStep()
-{
-  if (_current_dt <= _dt_min)
-    mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
-  // cut the time step in a half
-  if (0.5 * _current_dt >= _dt_min)
-    _current_dt = 0.5 * _current_dt;
-  else // (0.5 * _current_dt < _dt_min)
-    _current_dt = _dt_min;
-
-  _fe_problem.restoreSolutions();
+  // Nothing to do because _current_dt should just be left alone
 }

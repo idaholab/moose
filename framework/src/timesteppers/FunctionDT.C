@@ -36,10 +36,6 @@ FunctionDT::FunctionDT(const std::string & name, InputParameters parameters) :
 {
 }
 
-FunctionDT::~FunctionDT()
-{
-}
-
 void
 FunctionDT::init()
 {
@@ -47,20 +43,25 @@ FunctionDT::init()
   _executioner.syncTimes().insert(_time_t.begin() + 1, _time_t.end());
 }
 
-Real
+void
+FunctionDT::computeInitialDT()
+{
+  computeDT();
+}
+
+void
 FunctionDT::computeDT()
 {
   _current_dt = _time_ipol.sample(_time);
+
   if (_cutback_occurred && (_current_dt > _dt * _growth_factor))
     _current_dt = _dt * _growth_factor;
   _cutback_occurred = false;
-
-  return _current_dt;
 }
 
 void
 FunctionDT::rejectStep()
 {
   _cutback_occurred = true;
-  _fe_problem.restoreSolutions();
+  TimeStepper::rejectStep();
 }

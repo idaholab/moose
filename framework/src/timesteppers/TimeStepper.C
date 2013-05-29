@@ -50,6 +50,18 @@ TimeStepper::init()
 }
 
 void
+TimeStepper::preStep()
+{
+  if(_t_step < 2)
+    computeInitialDT();
+
+  if(converged())
+    computeDT();
+  else
+    computeFailedDT();
+}
+
+void
 TimeStepper::step()
 {
   _fe_problem.solve();
@@ -59,6 +71,7 @@ TimeStepper::step()
 void
 TimeStepper::rejectStep()
 {
+  _fe_problem.restoreSolutions();
 }
 
 bool
@@ -68,7 +81,14 @@ TimeStepper::converged()
 }
 
 void
-TimeStepper::forceTimeStep(Real dt)
+TimeStepper::computeFailedDT()
 {
-  _current_dt = dt;
+  if (_current_dt <= _dt_min)
+    mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
+
+  // cut the time step in a half
+  if (0.5 * _current_dt >= _dt_min)
+    _current_dt = 0.5 * _current_dt;
+  else // (0.5 * _current_dt < _dt_min)
+    _current_dt = _dt_min;
 }
