@@ -29,10 +29,12 @@ CHBulkPFCTrad::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad
     
   case Residual:
     return d2fdc2*grad_c;
+    break;
     
   case Jacobian:
     Real d3fdc3 = - _a[_qp] + 2.0*_b[_qp]*c;
     return d2fdc2*_grad_phi[_j][_qp] + d3fdc3*grad_c*_phi[_j][_qp];
+    break;
     
   }
   
