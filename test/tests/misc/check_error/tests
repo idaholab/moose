@@ -62,9 +62,8 @@
   [./bad_second_order_test]
     type = 'RunException'
     input = 'bad_second_order_test.i'
-    deleted = 'Inconsistent Error - Ticket 1521'
-    expect_err = 'Error in libMesh internal logic'
-    should_crash = True
+    expect_err = 'Finite element LAGRANGE on geometric element QUAD4'
+    method = 'DBG'
   [../]
 
   [./coupled_dot_aux_var_test]

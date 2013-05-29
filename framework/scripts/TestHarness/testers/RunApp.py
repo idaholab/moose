@@ -94,7 +94,10 @@ class RunApp(Tester):
         elif (not out_ok):
           reason = 'NO EXPECTED OUT'
       if reason == '':
-        if len( filter( lambda x: x in output, specs[ERRORS] ) ) > 0:
+        # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
+        # since a message to standard error might actually be a real error.  This case should be handled
+        # in the derived class.
+        if not specs.isValid(EXPECT_ERR) and len( filter( lambda x: x in output, specs[ERRORS] ) ) > 0:
           reason = 'ERRMSG'
         elif retcode == RunParallel.TIMEOUT:
           reason = 'TIMEOUT'
