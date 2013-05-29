@@ -8,7 +8,7 @@ InputParameters validParams<CHPFCRFF>()
   InputParameters params = validParams<Kernel>();
   
   params.addRequiredCoupledVar("v", "Array of names of the real parts of the L variables");
-  MooseEnum log_options("tolerance, cancelation, expansion");
+  MooseEnum log_options("tolerance, cancelation, expansion, nothing");
   params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
   params.addParam<Real>("tol",1.0e-9,"Tolerance used when the tolerance approach is chosen");
   params.addParam<Real>("n_exp_terms",4,"Number of terms used in the Taylor expansion of the natural log term");
@@ -59,19 +59,16 @@ CHPFCRFF::computeQpResidual()
   {
   case 0: //approach using tolerance
     if (1.0 + c < _tol)
-    {
       frac = 1.0/_tol;
-      dfrac = -1.0/(_tol*_tol);
-      //std::cout << "below tolerance, c = " << c << ", frac = " << frac << ", dfrac = " << dfrac << std::endl;
-    }
     else
-    {
       frac = 1.0/(1.0 + c);
-      dfrac = -1.0/((1.0 + c)*(1.0 + c));
-    }
+    break;
+    
   case 2: //Approach using substitution
     for (unsigned int i=1; i<_n_exp_terms; ++i)
       ln_expansion += std::pow(double(-1),int(i+1))*std::pow(_u[_qp],int(i-1));
+    break;
+    
   }
   
   RealGradient GradDFDCons;
@@ -80,15 +77,23 @@ CHPFCRFF::computeQpResidual()
   {
   case 0: //approach using tolerance
     GradDFDCons = grad_c*frac - sum_grad_L;
+    break;
+    
   case 1: //approach using cancelation from the mobility
     GradDFDCons = grad_c - (1.0 + c)*sum_grad_L;
+    break;
+    
   case 2: //appraoch using substitution
     GradDFDCons = ln_expansion*grad_c - sum_grad_L;
+    break;
+    
+  case 3: //Just using the log
+    GradDFDCons = grad_c/(1.0 + c) - sum_grad_L;
+    break;
+    
   }
 
   Real residual = _M[_qp]*GradDFDCons*_grad_test[_i][_qp];
-  //if (1.0 + c < _tol)
-  // std::cout << "Residual = " << residual << std::endl;
   
   return residual;
   
@@ -120,24 +125,39 @@ CHPFCRFF::computeQpJacobian()
       frac = 1.0/(1.0 + c);
       dfrac = -1.0/((1.0 + c)*(1.0 + c));
     }
+    break;
+    
   case 2: //Approach using substitution
     for (unsigned int i=1; i<_n_exp_terms; ++i)
       ln_expansion += std::pow(double(-1),int(i+1))*std::pow(_u[_qp],int(i-1));
+    break;
+    
   }
   
   RealGradient dGradDFDConsdC;
+  
+  Real Dln_expansion = 0.0;
   
   switch(_log_approach)
   {
   case 0: //approach using tolerance
     dGradDFDConsdC = _grad_phi[_j][_qp]*frac + _phi[_j][_qp]*grad_c*dfrac;
+    break;
+    
   case 1: //approach using cancelation from the mobility
     dGradDFDConsdC = _grad_phi[_j][_qp] - _phi[_j][_qp]*sum_grad_L;
+    break;
+    
   case 2: //appraoch using substitution
-    Real Dln_expansion = 0.0;
     for (unsigned int i=2; i<_n_exp_terms; ++i)
       Dln_expansion += std::pow(double(-1),int(i+1))*(i - 1.0)*std::pow(_u[_qp],int(i - 2));
     dGradDFDConsdC = ln_expansion*_grad_phi[_j][_qp] + _phi[_j][_qp]*Dln_expansion*grad_c;
+    break;
+    
+  case 3: //Nothing special
+    dGradDFDConsdC = _grad_phi[_j][_qp]/(1.0 + c) - grad_c/((1.0 + c)*(1.0 + c))*_phi[_j][_qp];
+    break;
+  
   }
   
   return _M[_qp]*dGradDFDConsdC*_grad_test[_i][_qp];
@@ -157,10 +177,20 @@ CHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
       {
       case 0: //approach using tolerance
         dGradDFDConsdL = -dsum_grad_L;
+        break;
+        
       case 1:  //approach using cancelation from the mobility
         dGradDFDConsdL = -(1.0 + c)*dsum_grad_L;
+        break;
+        
       case 2: //appraoch using substitution
         dGradDFDConsdL = -dsum_grad_L;
+        break;
+
+      case 3: //nothing special
+        dGradDFDConsdL = -dsum_grad_L;
+        break;
+        
       }
 
       return _M[_qp]*dGradDFDConsdL*_grad_test[_i][_qp];
