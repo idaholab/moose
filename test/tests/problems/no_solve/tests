@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'no_solve.i'
     exodiff = 'no_solve_out.e'
+    deleted = 'In progress - #1978'
   [../]
 []
