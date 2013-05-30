@@ -150,7 +150,7 @@ Transient::init()
 {
   if (_time_stepper == NULL)
   {
-    mooseWarning("Time stepper not set, defaulting in constant time stepping...");
+    std::cout << "\nInfo, Time stepper not set, defaulting to constant time stepping...\n";
     InputParameters pars = _app.getFactory().getValidParams("ConstantDT");
     pars.set<FEProblem *>("_fe_problem") = &_problem;
     pars.set<Transient *>("_executioner") = this;
