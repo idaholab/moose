@@ -29,6 +29,7 @@
     exodiff = 'patch_out.e-s002'
     group = 'adaptive'
     max_parallel = 1
+    max_threads = 1
   [../]
 
   [./adapt_cycles_test]

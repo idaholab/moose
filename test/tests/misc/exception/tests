@@ -5,6 +5,7 @@
     expect_err = "Caught exception 3"
     petsc_version = '>=3.1.0'
     should_crash = false
+    max_threads = 1
   [../]
 
   [./parallel_exception_residual]
@@ -15,6 +16,7 @@
     min_parallel = 2
     should_crash = false
     compiler = 'GCC INTEL'
+    max_threads = 1
   [../]
 
   [./parallel_exception_initial_condition]
@@ -25,6 +27,7 @@
     min_parallel = 2
     should_crash = false
     compiler = 'GCC INTEL'
+    max_threads = 1
   [../]
 
   [./parallel_exception_jacobian]
@@ -35,5 +38,6 @@
     min_parallel = 2
     should_crash = false
     compiler = 'GCC INTEL'
+    max_threads = 1
   [../]
 []

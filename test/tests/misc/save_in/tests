@@ -1,8 +1,10 @@
 [Tests]
+  # Save in doesn't work with threads
   [./test]
     type = 'Exodiff'
     input = 'save_in_test.i'
     exodiff = 'out.e'
     scale_refine = 4
+    max_threads = 1
   [../]
 []
