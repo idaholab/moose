@@ -149,9 +149,9 @@ Element::rotateSymmetricTensor( const ColumnMajorMatrix & R,
 
 void
 Element::fillMatrix( const VariableGradient & grad_x,
-                         const VariableGradient & grad_y,
-                         const VariableGradient & grad_z,
-                         ColumnMajorMatrix & A )
+                     const VariableGradient & grad_y,
+                     const VariableGradient & grad_z,
+                     ColumnMajorMatrix & A )
 {
   A(0,0) = grad_x[_qp](0); A(0,1) = grad_x[_qp](1); A(0,2) = grad_x[_qp](2);
   A(1,0) = grad_y[_qp](0); A(1,1) = grad_y[_qp](1); A(1,2) = grad_y[_qp](2);
