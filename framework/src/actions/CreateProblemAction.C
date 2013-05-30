@@ -19,11 +19,14 @@
 template<>
 InputParameters validParams<CreateProblemAction>()
 {
+  MooseEnum coord_types("XYZ, RZ, RSPHERICAL", "XYZ");
+  std::vector<MooseEnum> coord_types_vec(1, coord_types);
+
   InputParameters params = validParams<MooseObjectAction>();
   params.set<std::string>("type") = "FEProblem";
   params.addParam<std::string>("name", "MOOSE Problem", "The name the problem");
   params.addParam<std::vector<SubdomainName> >("block", "Block IDs for the coordinate systems");
-  params.addParam<std::vector<std::string> >("coord_type", "Type of the coordinate system per block param");
+  params.addParam<std::vector<MooseEnum> >("coord_type", coord_types_vec, "Type of the coordinate system per block param");
 
   params.addParam<bool>("fe_cache", false, "Whether or not to turn on the finite element shape function caching system.  This can increase speed with an associated memory cost.");
   return params;
@@ -34,7 +37,7 @@ CreateProblemAction::CreateProblemAction(const std::string & name, InputParamete
     MooseObjectAction(name, parameters),
     _problem_name(getParam<std::string>("name")),
     _blocks(getParam<std::vector<SubdomainName> >("block")),
-    _coord_sys(getParam<std::vector<std::string> >("coord_type")),
+    _coord_sys(getParam<std::vector<MooseEnum> >("coord_type")),
     _fe_cache(getParam<bool>("fe_cache"))
 {
 }

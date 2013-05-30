@@ -249,7 +249,7 @@ FEProblem::getCoordSystem(SubdomainID sid)
 }
 
 void
-FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const std::vector<std::string> & coord_sys)
+FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const std::vector<MooseEnum> & coord_sys)
 {
   const std::set<SubdomainID> & subdomains = _mesh.meshSubdomains();
   if (blocks.size() == 0)

@@ -89,9 +89,16 @@ YAMLFormatter::printParams(const std::string &prefix, InputParameters &params, s
     oss << "\n" << indent << "    cpp_type: " << params.type(iter->first)
         << "\n" << indent << "    group_name: " << params.getGroupName(iter->first);
 
-    InputParameters::Parameter<MooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(iter->second);
-    if (enum_type)
-      oss << "\n" << indent << "    options: " << enum_type->get().getRawNamesNoCommas();
+    {
+      InputParameters::Parameter<MooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(iter->second);
+      if (enum_type)
+        oss << "\n" << indent << "    options: " << enum_type->get().getRawNamesNoCommas();
+    }
+    {
+      InputParameters::Parameter<std::vector<MooseEnum> > * enum_type = dynamic_cast<InputParameters::Parameter<std::vector<MooseEnum> >*>(iter->second);
+      if (enum_type)
+        oss << "\n" << indent << "    options: " << (enum_type->get())[0].getRawNamesNoCommas();
+    }
 
     oss << "\n" << indent << "    description: |\n      " << indent
          << doc << "\n";

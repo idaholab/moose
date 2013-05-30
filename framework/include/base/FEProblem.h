@@ -69,7 +69,7 @@ public:
   virtual MooseMesh & mesh() { return _mesh; }
 
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid);
-  virtual void setCoordSystem(const std::vector<SubdomainName> & blocks, const std::vector<std::string> & coord_sys);
+  virtual void setCoordSystem(const std::vector<SubdomainName> & blocks, const std::vector<MooseEnum> & coord_sys);
 
   /**
    * Set the coupling between variables
