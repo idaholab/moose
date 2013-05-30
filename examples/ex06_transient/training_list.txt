@@ -4,4 +4,4 @@ ex06.i
 ../../moose/src/kernels/Diffusion.C
 include/kernels/ExampleTimeDerivative.h
 src/kernels/ExampleTimeDerivative.C
-src/base/ExampleApp.C
+src/base/Example.C

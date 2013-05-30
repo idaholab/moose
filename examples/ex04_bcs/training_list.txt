@@ -5,6 +5,6 @@ src/bcs/CoupledDirichletBC.C
 neumann_bc.i
 include/bcs/CoupledNeumannBC.h
 src/bcs/CoupledNeumannBC.C
-src/base/ExampleApp.C
+src/base/Example.C
 periodic_bc.i
 trapezoid.i

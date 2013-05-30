@@ -2,4 +2,4 @@ Title: Auxiliary Variables
 ex10.i
 include/auxkernels/ExampleAux.h
 src/auxkernels/ExampleAux.C
-src/base/ExampleApp.C
+src/base/Example.C
