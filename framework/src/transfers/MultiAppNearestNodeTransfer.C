@@ -147,9 +147,13 @@ MultiAppNearestNodeTransfer::execute()
                   {
                     nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
                     _node_map[node->id()] = nearest_node;
+                    _distance_map[node->id()] = distance;
                   }
                   else
+                  {
                     nearest_node = _node_map[node->id()];
+                    distance = _distance_map[node->id()];
+                  }
                 }
                 else
                   nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
@@ -198,9 +202,13 @@ MultiAppNearestNodeTransfer::execute()
                   {
                     nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
                     _node_map[elem->id()] = nearest_node;
+                    _distance_map[elem->id()] = distance;
                   }
                   else
+                  {
                     nearest_node = _node_map[elem->id()];
+                    distance = _distance_map[elem->id()];
+                  }
                 }
                 else
                   nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
@@ -347,9 +355,13 @@ MultiAppNearestNodeTransfer::execute()
               {
                 nearest_node = getNearestNode(*to_node-app_position, current_distance, from_nodes_begin, from_nodes_end);
                 _node_map[to_node->id()] = nearest_node;
+                _distance_map[to_node->id()] = current_distance;
               }
               else
+              {
                 nearest_node = _node_map[to_node->id()];
+                current_distance = _distance_map[to_node->id()];
+              }
             }
             else
               nearest_node = getNearestNode(*to_node-app_position, current_distance, from_nodes_begin, from_nodes_end);
@@ -393,9 +405,13 @@ MultiAppNearestNodeTransfer::execute()
               {
                 nearest_node = getNearestNode(actual_position, current_distance, from_nodes_begin, from_nodes_end);
                 _node_map[to_elem->id()] = nearest_node;
+                _distance_map[to_elem->id()] = current_distance;
               }
               else
+              {
                 nearest_node = _node_map[to_elem->id()];
+                current_distance = _distance_map[to_elem->id()];
+              }
             }
             else
               nearest_node = getNearestNode(actual_position, current_distance, from_nodes_begin, from_nodes_end);

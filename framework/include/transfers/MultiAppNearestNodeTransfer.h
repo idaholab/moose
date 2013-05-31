@@ -56,6 +56,9 @@ protected:
 
   /// Used to cache nodes
   std::map<unsigned int, Node *> _node_map;
+
+  /// Used to cache distances
+  std::map<unsigned int, Real> _distance_map;
 };
 
 #endif /* MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H */
