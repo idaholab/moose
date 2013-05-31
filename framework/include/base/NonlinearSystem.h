@@ -22,6 +22,7 @@
 #include "DGKernelWarehouse.h"
 #include "DamperWarehouse.h"
 #include "ConstraintWarehouse.h"
+#include "SplitWarehouse.h"
 #include "MoosePreconditioner.h"
 #include "TimeIntegrator.h"
 #include "Predictor.h"
@@ -64,7 +65,7 @@ public:
   virtual void timestepSetup();
 
   void setupFiniteDifferencedPreconditioner();
-  void setupFieldSplitPreconditioner();
+  void setupDecomposition();
 
   /**
    * Returns the convergence state
@@ -135,6 +136,21 @@ public:
    * @param parameters Damper parameters
    */
   void addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Adds a split
+   * @param split_name The type of the split
+   * @param name The name of the split
+   * @param parameters Split parameters
+   */
+  void addSplit(const std::string & split_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Retrieves a split by name
+   * @param name The name of the split
+   */
+  Split* getSplit(const std::string & name);
+
 
   /**
    * Adds a solution length vector to the system.
@@ -274,28 +290,16 @@ public:
   void useFiniteDifferencedPreconditioner(bool use = true) { _use_finite_differenced_preconditioner = use; }
 
   /**
-   * If called with true this system will use FieldSplitPreconditioner, whenever it is supported by the solver.
+   * If called with a single string, it is used as the name of a the top-level decomposition split.
+   * If the array is empty, no decomposition is used.
+   * In all other cases an error occurs.
    */
-  void useFieldSplitPreconditioner(bool use = true) { _use_field_split_preconditioner = use; }
+  void setDecomposition(const std::vector<std::string>& decomposition);
 
-  struct FieldSplitInfo
-  {
-    std::string name;
-    std::vector<std::string> vars;
-    std::vector<std::string> blocks;
-    std::vector<std::string> sides;
-    std::vector<std::string> splits;
-    std::string fieldsplit_type;
-    std::string schur_type;
-    std::string schur_pre;
-    std::vector<std::string> petsc_options;
-    std::vector<std::string> petsc_options_iname;
-    std::vector<std::string> petsc_options_value;
-  };
-
-  void addFieldSplit(const std::string & name, const FieldSplitInfo & info);
-
-  const FieldSplitInfo & getFieldSplit(const std::string& name) { return _field_split_info[name]; }
+  /**
+   * If called with true this system will use a split-based preconditioner matrix.
+   */
+  void useSplitPreconditioner(bool use = true) { _use_split_preconditioner = use; }
 
   /**
    * If called with true this will add entries into the jacobian to link together degrees of freedom that are found to
@@ -429,6 +433,9 @@ protected:
   /// Dampers for each thread
   std::vector<DamperWarehouse> _dampers;
 
+  /// Decomposition splits
+  SplitWarehouse _splits;
+
 public:
   /// Constraints for each thread
   std::vector<ConstraintWarehouse> _constraints;
@@ -445,10 +452,12 @@ protected:
 #ifdef LIBMESH_HAVE_PETSC
   MatFDColoring _fdcoloring;
 #endif
-  /// Whether or not to use a field split preconditioner
-  bool _use_field_split_preconditioner;
-
-  std::map<std::string, FieldSplitInfo> _field_split_info;
+  /// Whether or not the system can be decomposed into splits
+  bool _have_decomposition;
+  /// Name of the top-level split of the decomposition
+  std::string _decomposition_split;
+  /// Whether or not to use a FieldSplitPreconditioner matrix based on the decomposition
+  bool _use_split_preconditioner;
 
   /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
   bool _add_implicit_geometric_coupling_entries_to_jacobian;

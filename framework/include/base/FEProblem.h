@@ -261,6 +261,7 @@ public:
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
   void addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
 
+
   // Aux /////
   void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains = NULL);
   void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);

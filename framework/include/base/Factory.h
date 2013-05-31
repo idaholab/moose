@@ -53,6 +53,7 @@
 #define registerTimeStepper(name)                   registerObject(name)
 #define registerTimeIntegrator(name)                registerObject(name)
 #define registerPredictor(name)                     registerObject(name)
+#define registerSplit(name)                         registerObject(name)
 
 #define registerNamedKernel(obj, name)              registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)   registerNamedObject(obj, name)

@@ -1,0 +1,37 @@
+[Tests]
+  [./additive]
+    type = 'Exodiff'
+    input = 'sbp_additive_test.i'
+    exodiff = 'sbp_additive_out.e'
+    max_parallel = 3
+    petsc_version = '>=3.3'
+  [../]
+  [./multiplicative]
+    type = 'Exodiff'
+    input = 'sbp_multiplicative_test.i'
+    exodiff = 'sbp_multiplicative_out.e'
+    max_parallel = 3
+    petsc_version = '>=3.3'
+  [../]
+  [./symmetric_multiplicative]
+    type = 'Exodiff'
+    input = 'sbp_symmetric_multiplicative_test.i'
+    exodiff = 'sbp_symmetric_multiplicative_out.e'
+    max_parallel = 3
+    petsc_version = '>=3.3'
+  [../]
+  [./schur_full_diag]
+    type = 'Exodiff'
+    input = 'sbp_schur_full_diag_test.i'
+    exodiff = 'sbp_schur_full_diag_out.e'
+    max_parallel = 3
+    petsc_version = '>=3.3'
+  [../]
+  [./schur_full_self]
+    type = 'Exodiff'
+    input = 'sbp_schur_full_self_test.i'
+    exodiff = 'sbp_schur_full_self_out.e'
+    max_parallel = 3
+    petsc_version = '>=3.3'
+  [../]
+[]

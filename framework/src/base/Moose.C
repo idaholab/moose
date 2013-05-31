@@ -172,8 +172,9 @@
 #include "PhysicsBasedPreconditioner.h"
 #include "FiniteDifferencePreconditioner.h"
 #include "SingleMatrixPreconditioner.h"
-#include "FieldSplitPreconditioner.h"
-#include "AddFieldSplitAction.h"
+#include "SplitBasedPreconditioner.h"
+#include "Split.h"
+#include "AddSplitAction.h"
 
 // dampers
 #include "ConstantDamper.h"
@@ -450,7 +451,7 @@ registerObjects(Factory & factory)
   registerNamedPreconditioner(FiniteDifferencePreconditioner, "FDP");
   registerNamedPreconditioner(SingleMatrixPreconditioner, "SMP");
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-  registerNamedPreconditioner(FieldSplitPreconditioner, "FSP");
+  registerNamedPreconditioner(SplitBasedPreconditioner, "SBP");
 #endif
   // dampers
   registerDamper(ConstantDamper);
@@ -479,6 +480,9 @@ registerObjects(Factory & factory)
   registerMarker(ComboMarker);
   registerMarker(ValueThresholdMarker);
   registerMarker(ValueRangeMarker);
+
+  // splits
+  registerSplit(Split);
 
   // MultiApps
   registerMultiApp(TransientMultiApp);
@@ -720,7 +724,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddMaterialAction, "add_material");
   registerAction(AddPostprocessorAction, "add_postprocessor");
   registerAction(AddDamperAction, "add_damper");
-  registerAction(AddFieldSplitAction, "add_preconditioning");
+  registerAction(AddSplitAction, "add_preconditioning"); // FIXME: a hack -- need to introduce a real add_split action
   registerAction(SetupPreconditionerAction, "add_preconditioning");
   registerAction(SetupQuadratureAction, "setup_quadrature");
   registerAction(SetupOverSamplingAction, "setup_oversampling");

@@ -41,7 +41,8 @@
 #include "NodeFaceConstraint.h"
 #include "ScalarKernel.h"
 #include "Parser.h"
-#include "FieldSplitPreconditioner.h"
+#include "Split.h"
+#include "SplitBasedPreconditioner.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -59,6 +60,12 @@
 // PETSc
 #ifdef LIBMESH_HAVE_PETSC
 #include "petscsnes.h"
+#if !PETSC_VERSION_LESS_THAN(3,3,0)
+#include <PetscDMMoose.h>
+EXTERN_C_BEGIN
+extern PetscErrorCode DMCreate_Moose(DM);
+EXTERN_C_END
+#endif
 #endif
 
 
@@ -115,7 +122,8 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _increment_vec(NULL),
     _preconditioner(NULL),
     _use_finite_differenced_preconditioner(false),
-    _use_field_split_preconditioner(false),
+    _have_decomposition(false),
+    _use_split_preconditioner(false),
     _add_implicit_geometric_coupling_entries_to_jacobian(false),
     _need_serialized_solution(false),
     _need_residual_copy(false),
@@ -207,8 +215,8 @@ NonlinearSystem::solve()
   if(_use_finite_differenced_preconditioner)
     setupFiniteDifferencedPreconditioner();
 
-  if(_use_field_split_preconditioner)
-    setupFieldSplitPreconditioner();
+  if(_have_decomposition)
+    setupDecomposition();
 
   _time_integrator->solve();
   _time_integrator->postSolve();
@@ -357,37 +365,62 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
 }
 
 void
-NonlinearSystem::addFieldSplit(const std::string& name, const NonlinearSystem::FieldSplitInfo& info)
+NonlinearSystem::setDecomposition(const std::vector<std::string>& splits)
 {
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-  if (_field_split_info.count(name)) {
+  /// Although a single top-level split is allowed in Problem, treat it as a list of splits for conformity with the Split input syntax.
+ if (splits.size() && splits.size() != 1)
+  {
     std::ostringstream err;
-    err << "FieldSplit " << name << " already exists";
+    err << "Only a single top-level split is allowed in a Problem's decomposition.";
     mooseError(err.str());
   }
-  if (name != info.name) {
-    std::ostringstream err;
-    err << "FieldSplit name " << name << " doesn't match what's in the info: " << info.name;
-    mooseError(err.str());
+  if (splits.size())
+  {
+    _decomposition_split = splits[0];
+    _have_decomposition = true;
+  }  else {
+    _have_decomposition = false;
   }
-  if (info.petsc_options_iname.size() != info.petsc_options_value.size()) {
-    std::ostringstream err;
-    err << "FieldSplit " << name << " petsc_options_iname size = " << info.petsc_options_iname.size() << " doesn't match petsc_options_value size = " << info.petsc_options_value.size();
-    mooseError(err.str());
-  }
-  std::pair<std::string, FieldSplitInfo> pair(name, info);
-  _field_split_info.insert(pair);
-#endif
+
 }
 
 
 void
-NonlinearSystem::setupFieldSplitPreconditioner()
+NonlinearSystem::setupDecomposition()
 {
+  Split* top_split = getSplit(_decomposition_split);
+  top_split->setup();
+
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-  FieldSplitPreconditioner* fsp = dynamic_cast<FieldSplitPreconditioner*>(_preconditioner);
-  fsp->setup();
+  static bool     DMMooseRegistered = false;
+  PetscErrorCode  ierr;
+
+  // Create and set up the DM that will consume the split options set above.
+  if (!DMMooseRegistered) {
+    ierr = DMRegister(DMMOOSE, PETSC_NULL, "DMCreate_Moose", DMCreate_Moose);
+    CHKERRABORT(libMesh::COMM_WORLD, ierr);
+    DMMooseRegistered = true;
+  }
+
+  PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(sys().nonlinear_solver.get());
+  SNES snes = petsc_solver->snes();
+  DM dm;
+  ierr = DMCreateMoose(libMesh::COMM_WORLD, *this, &dm);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = DMSetFromOptions(dm);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = DMSetUp(dm);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = SNESSetDM(snes,dm);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = DMDestroy(&dm);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
 #endif
+
+  if (_use_split_preconditioner) {
+    SplitBasedPreconditioner* sbp = dynamic_cast<SplitBasedPreconditioner*>(_preconditioner);
+    sbp->setup();
+  }
 }
 
 
@@ -575,6 +608,22 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
     _dampers[tid].addDamper(damper);
     _fe_problem._objects_by_name[tid][name].push_back(damper);
   }
+}
+
+void
+NonlinearSystem::addSplit(const  std::string & split_name, const std::string & name, InputParameters parameters)
+{
+  Split *split = static_cast<Split *>(_factory.create(split_name, name, parameters));
+  mooseAssert(split != NULL, "Not a Split object");
+  _splits.addSplit(name, split);
+}
+
+Split*
+NonlinearSystem::getSplit(const std::string & name)
+{
+
+  Split *split = _splits.getSplit(name);
+  return split;
 }
 
 NumericVector<Number> &
