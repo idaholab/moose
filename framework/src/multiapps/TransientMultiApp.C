@@ -120,6 +120,9 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
   std::cout<<"Solving MultiApp "<<_name<<std::endl;
 
+  // "target_time" must always be in global time
+  target_time += _app.getGlobalTimeOffset();
+
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   int rank;
@@ -130,12 +133,15 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
   {
     Transient * ex = _transient_executioners[i];
 
-    if(ex->getTime() + 2e-14 >= target_time) // Maybe this MultiApp was already solved
+    // The App might have a different local time from the rest of the problem
+    Real app_time_offset = _apps[i]->getGlobalTimeOffset();
+
+    if((ex->getTime() + app_time_offset) + 2e-14 >= target_time) // Maybe this MultiApp was already solved
       continue;
 
     if(_sub_cycling)
     {
-      Real time_old = ex->getTime();
+      Real time_old = ex->getTime() + app_time_offset;
 
       if(_interpolate_transfers)
       {
@@ -166,21 +172,21 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
       else
         ex->allowOutput(false);
 
-      ex->setTargetTime(target_time);
+      ex->setTargetTime(target_time-app_time_offset);
 
 //      unsigned int failures = 0;
 
       bool at_steady = false;
 
       // Now do all of the solves we need
-      while(!at_steady && ex->getTime() + 2e-14 < target_time)
+      while(!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time)
       {
         ex->getTimeStepper()->preStep();
 
         if(_interpolate_transfers)
         {
           // See what time this executioner is going to go to.
-          Real future_time = ex->getTime() + ex->computeConstrainedDT();
+          Real future_time = ex->getTime() + app_time_offset + ex->computeConstrainedDT();
 
           // How far along we are towards the target time:
           Real step_percent = (future_time - time_old) / (target_time - time_old);
@@ -240,7 +246,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
           at_steady = true;
 
           // Set the time for the problem to the target time we were looking for
-          ex->setTime(target_time);
+          ex->setTime(target_time-app_time_offset);
 
           // Force it to output right now
           ex->forceOutput();
@@ -260,7 +266,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
     {
       ex->computeConstrainedDT();
       ex->takeStep(dt);
-      ex->setTime(target_time);
+      ex->setTime(target_time-app_time_offset);
       ex->forceOutput();
       ex->endStep();
     }
@@ -298,7 +304,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
             if(ex->lastSolveConverged())
             {
-              if(ex->getTime() + 2e-14 >= target_time)
+              if(ex->getTime() + app_time_offset + 2e-14 >= target_time)
               {
                 ex->forceOutput(); // This is here so that it is called before endStep()
                 caught_up = true;
@@ -370,7 +376,7 @@ TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: N
     unsigned int local_app = globalAppToLocal(global_app);
 
     // Grab the current time the App is at so we can start the new one at the same place
-    Real time = _transient_executioners[local_app]->getTime();
+    Real time = _transient_executioners[local_app]->getTime() + _apps[local_app]->getGlobalTimeOffset();
 
     MultiApp::resetApp(global_app, time);
 

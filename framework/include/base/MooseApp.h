@@ -146,6 +146,18 @@ public:
   Real getStartTime() { return _start_time; }
 
   /**
+   * Each App has it's own local time.  The "global" time of the whole problem might be
+   * different.  This offset is how far off the local App time is from the global time.
+   */
+  void setGlobalTimeOffset(const Real offset) { _global_time_offset = offset; }
+
+  /**
+   * Each App has it's own local time.  The "global" time of the whole problem might be
+   * different.  This offset is how far off the local App time is from the global time.
+   */
+  Real getGlobalTimeOffset() { return _global_time_offset; }
+
+  /**
    * Return the filename that was parsed
    */
   std::string getFileName(bool stripLeadingPath = true) const;
@@ -240,6 +252,9 @@ protected:
 
   /// The time at which to start the simulation
   Real _start_time;
+
+  /// Offset of the local App time to the "global" problem time
+  Real _global_time_offset;
 
   /// Command line object
   CommandLine * _command_line;

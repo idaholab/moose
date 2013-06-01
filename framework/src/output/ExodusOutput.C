@@ -95,7 +95,7 @@ ExodusOutput::output(const std::string & file_base, Real time)
   }
 
   _num++;
-  _out->write_timestep(getFileName(file_base), _es, _num, time);
+  _out->write_timestep(getFileName(file_base), _es, _num, time + _app.getGlobalTimeOffset());
   _out->write_element_data(_es);
 }
 

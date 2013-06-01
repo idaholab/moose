@@ -156,7 +156,7 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
   _apps.resize(_my_num_apps);
 
   for(unsigned int i=0; i<_my_num_apps; i++)
-    createApp(i, _app.getStartTime());
+    createApp(i, _app.getGlobalTimeOffset());
 
   // Swap back
   Moose::swapLibMeshComm(swapped);
@@ -376,7 +376,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   else
     input_file = _input_files[_first_local_app+i];
 
-  app->setStartTime(start_time);
+  app->setGlobalTimeOffset(start_time);
 
   app->setInputFileName(input_file);
   app->setOutputFileBase(output_base.str());
