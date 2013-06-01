@@ -384,6 +384,9 @@ TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: N
 
     setupApp(local_app, time, false);
 
+    // Need to do this so that it is called once before solve
+    _transient_executioners[local_app]->computeConstrainedDT();
+
     // Swap back
     Moose::swapLibMeshComm(swapped);
   }
