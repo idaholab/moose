@@ -195,11 +195,13 @@ AdaptiveTransient::~AdaptiveTransient()
 }
 
 void
-AdaptiveTransient::execute()
+AdaptiveTransient::init()
 {
   if (_timestep_limiting_function_name != "")
     _timestep_limiting_function = &_problem.getFunction(_timestep_limiting_function_name);
+
   _problem.initialSetup();
+
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
   if (_output_initial)
   {
@@ -208,6 +210,17 @@ AdaptiveTransient::execute()
   }
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 
+  // If this is the first step
+  if (_t_step == 0)
+  {
+    _t_step = 1;
+    _dt = _input_dt;
+  }
+}
+
+void
+AdaptiveTransient::execute()
+{
   preExecute();
 
   // Start time loop...
@@ -350,13 +363,6 @@ AdaptiveTransient::computeConstrainedDT()
 {
   _diag.str("");
   _diag.clear();
-
-  // If this is the first step
-  if (_t_step == 0)
-  {
-    _t_step = 1;
-    _dt = _input_dt;
-  }
 
   Real dt_cur = computeDT();
 
