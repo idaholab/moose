@@ -264,7 +264,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
     }
     else if(_tolerate_failure)
     {
-      ex->computeConstrainedDT();
       ex->takeStep(dt);
       ex->setTime(target_time-app_time_offset);
       ex->forceOutput();
@@ -299,7 +298,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
             std::cerr<<"Solving " << _name << "catch up step " << catch_up_step <<std::endl;
 
             ex->getTimeStepper()->preStep();
-            ex->computeConstrainedDT(); // Have to call this even though we're not using the dt it computes
             ex->takeStep(catch_up_dt); // Cut the timestep in half to try two half-step solves
 
             if(ex->lastSolveConverged())
@@ -383,9 +381,6 @@ TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: N
     MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
     setupApp(local_app, time, false);
-
-    // Need to do this so that it is called once before solve
-    _transient_executioners[local_app]->computeConstrainedDT();
 
     // Swap back
     Moose::swapLibMeshComm(swapped);

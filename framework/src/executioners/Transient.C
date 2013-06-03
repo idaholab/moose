@@ -168,6 +168,10 @@ Transient::init()
     _problem.outputPostprocessors();
   }
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
+
+  // If this is the first step
+  if (_t_step == 0)
+    _t_step = 1;
 }
 
 void
@@ -332,13 +336,6 @@ Transient::endStep()
 Real
 Transient::computeConstrainedDT()
 {
-  // If this is the first step
-  if (_t_step == 0)
-  {
-    _t_step = 1;
-    _dt = computeDT();
-  }
-
 //  // If start up steps are needed
 //  if(_t_step == 1 && _n_startup_steps > 1)
 //    _dt = _input_dt/(double)(_n_startup_steps);

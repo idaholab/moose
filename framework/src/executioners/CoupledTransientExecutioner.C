@@ -66,8 +66,6 @@ CoupledTransientExecutioner::execute()
       trans[i]->getTimeStepper()->preStep();
 
     _dt = trans[0]->computeConstrainedDT();
-    for (unsigned int i = 1; i < n_problems; i++)
-      trans[i]->computeConstrainedDT();
     _time += _dt;
 
     for (unsigned int i = 0; i < n_problems; i++)
