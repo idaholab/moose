@@ -373,7 +373,15 @@ unsigned int
 FormattedTable::getTermWidth() const
 {
   struct winsize w;
-  ioctl(0, TIOCGWINSZ, &w);
+
+  try
+  {
+    ioctl(0, TIOCGWINSZ, &w);
+  }
+  catch(...)
+  {
+    return std::numeric_limits<unsigned int>::max();
+  }
 
   return w.ws_col;
 }
