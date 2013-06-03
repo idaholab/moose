@@ -114,7 +114,7 @@ DT2::step()
     nl_sys.current_local_solution->close();
     aux_sys.current_local_solution->close();
 
-    _dt = _current_dt / 2;                 // cut the time step in half
+    _dt = getCurrentDT() / 2;                 // cut the time step in half
     _time = _time_old + _dt;
 
     // 1. step
@@ -154,10 +154,10 @@ DT2::step()
         *_u_diff -= *_u1;
         _u_diff->close();
 
-        _error = (_u_diff->l2_norm() / std::max(_u1->l2_norm(), _u2->l2_norm())) / _current_dt;
+        _error = (_u_diff->l2_norm() / std::max(_u1->l2_norm(), _u2->l2_norm())) / getCurrentDT();
 
         // restore _dt to its original value
-        _dt = _current_dt;
+        _dt = getCurrentDT();
       }
       else
       {
@@ -191,20 +191,21 @@ DT2::step()
   }
 }
 
-void
+Real
 DT2::computeInitialDT()
 {
-  _current_dt = getParam<Real>("dt");
+  return getParam<Real>("dt");
 }
 
-void
+Real
 DT2::computeDT()
 {
-  Real new_dt = _current_dt * std::pow(_e_tol / _error, 1.0 / _fe_problem.getNonlinearSystem().getTimeIntegrator()->order());
-  if (new_dt / _current_dt > _max_increase)
-    new_dt = _current_dt * _max_increase;
+  Real curr_dt = getCurrentDT();
+  Real new_dt = curr_dt * std::pow(_e_tol / _error, 1.0 / _fe_problem.getNonlinearSystem().getTimeIntegrator()->order());
+  if (new_dt / curr_dt > _max_increase)
+    new_dt = curr_dt * _max_increase;
 
-  _current_dt = new_dt;
+  return new_dt;
 }
 
 void

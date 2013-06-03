@@ -72,12 +72,11 @@ public:
    */
   virtual Real computeConstrainedDT();
   virtual void estimateTimeError();
+
   /**
-   * Optional override.
-   *
-   * @return The dt to use for this timestep.
+   * @return The the computed dt to use for this timestep.
    */
-  virtual Real computeDT();
+  virtual Real getDT();
 
   /**
    * Transient loop will continue as long as this keeps returning true.
@@ -91,6 +90,7 @@ public:
 
   virtual void preExecute();
 
+  virtual void computeDT();
   virtual void endStep();
 
   /**
@@ -136,13 +136,6 @@ public:
    * @param ts The TimeStepper to use
    */
   void setTimeStepper(TimeStepper * ts) { _time_stepper = ts; }
-
-  /**
-   * Get the current timestepper in use.
-   *
-   * @param The current TimeStepper.
-   */
-  TimeStepper * getTimeStepper() { return _time_stepper; }
 
   /**
    * Get the set of sync times

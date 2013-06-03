@@ -35,13 +35,13 @@ public:
   virtual void preSolve();
   virtual void step();
 
-  virtual void computeInitialDT();
-  virtual void computeDT();
-
   virtual void rejectStep();
   virtual bool converged();
 
 protected:
+  virtual Real computeInitialDT();
+  virtual Real computeDT();
+
   ///
   NumericVector<Number> * _u_diff, * _u1, * _u2;
   NumericVector<Number> * _u_saved, * _u_older_saved;

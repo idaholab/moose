@@ -34,9 +34,9 @@ public:
   TransientHalf(const std::string & name, InputParameters parameters);
 
 protected:
-  virtual void computeInitialDT();
+  virtual Real computeInitialDT();
 
-  virtual void computeDT();
+  virtual Real computeDT();
 
 private:
   Real _ratio;

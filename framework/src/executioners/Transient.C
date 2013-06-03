@@ -189,13 +189,19 @@ Transient::execute()
   // Start time loop...
   while (keepGoing())
   {
-    _time_stepper->preStep(); // This is actually when DT gets computed
+    computeDT();
     takeStep();
     endStep();
   }
 
   postExecute();
   _time_stepper->postExecute();
+}
+
+void
+Transient::computeDT()
+{
+  _time_stepper->computeStep(); // This is actually when DT gets computed
 }
 
 void
@@ -347,7 +353,7 @@ Transient::computeConstrainedDT()
   //After startup steps, compute new dt
   if (_t_step > _n_startup_steps)
   {
-    _unconstrained_dt = computeDT();
+    _unconstrained_dt = getDT();
     dt_cur = _unconstrained_dt;
   }
 
@@ -390,7 +396,7 @@ Transient::computeConstrainedDT()
   {
     if (_reset_dt)
     {
-      dt_cur = computeDT();
+      dt_cur = getDT();
       _reset_dt = false;
     }
   }
@@ -416,7 +422,7 @@ Transient::computeConstrainedDT()
 }
 
 Real
-Transient::computeDT()
+Transient::getDT()
 {
   return _time_stepper->getCurrentDT();
 }

@@ -28,14 +28,14 @@ ConstantDT::ConstantDT(const std::string & name, InputParameters parameters) :
     TimeStepper(name, parameters)
 {}
 
-void
+Real
 ConstantDT::computeInitialDT()
 {
-  _current_dt = getParam<Real>("dt");
+  return getParam<Real>("dt");
 }
 
-void
+Real
 ConstantDT::computeDT()
 {
-  // Nothing to do because _current_dt should just be left alone
+  return getCurrentDT();
 }

@@ -43,20 +43,22 @@ FunctionDT::init()
   _executioner.syncTimes().insert(_time_t.begin() + 1, _time_t.end());
 }
 
-void
+Real
 FunctionDT::computeInitialDT()
 {
-  computeDT();
+  return computeDT();
 }
 
-void
+Real
 FunctionDT::computeDT()
 {
-  _current_dt = _time_ipol.sample(_time);
+  Real local_dt = _time_ipol.sample(_time);
 
-  if (_cutback_occurred && (_current_dt > _dt * _growth_factor))
-    _current_dt = _dt * _growth_factor;
+  if (_cutback_occurred && (local_dt > _dt * _growth_factor))
+    local_dt = _dt * _growth_factor;
   _cutback_occurred = false;
+
+  return local_dt;
 }
 
 void

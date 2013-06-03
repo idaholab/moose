@@ -70,13 +70,13 @@ SolutionTimeAdaptiveDT::postSolve()
   }
 }
 
-void
+Real
 SolutionTimeAdaptiveDT::computeInitialDT()
 {
-  _current_dt = getParam<Real>("dt");
+  return getParam<Real>("dt");
 }
 
-void
+Real
 SolutionTimeAdaptiveDT::computeDT()
 {
   //Ratio grew so switch direction
@@ -89,12 +89,12 @@ SolutionTimeAdaptiveDT::computeDT()
     _older_sol_time_vs_dt = std::numeric_limits<Real>::max();
   }
 
-  if (_t_step > 1)
-    _current_dt =  _dt + _dt * _percent_change*_direction;
+//  if (_t_step > 1)
+  Real local_dt =  _dt + _dt * _percent_change*_direction;
 
   if ((_adapt_log) && (libMesh::processor_id() == 0))
   {
-    Real out_dt = _current_dt;
+    Real out_dt = getCurrentDT();
     if (out_dt > _dt_max)
       out_dt = _dt_max;
 
@@ -104,6 +104,8 @@ SolutionTimeAdaptiveDT::computeDT()
     _adaptive_log<<"Old Ratio: "<<_old_sol_time_vs_dt<<std::endl;
     _adaptive_log<<"New Ratio: "<<_sol_time_vs_dt<<std::endl;
   }
+
+  return local_dt;
 }
 
 void

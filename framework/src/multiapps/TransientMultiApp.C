@@ -181,7 +181,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
       // Now do all of the solves we need
       while(!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time)
       {
-        ex->getTimeStepper()->preStep();
+        ex->computeDT();
 
         if(_interpolate_transfers)
         {
@@ -273,7 +273,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
     {
       std::cout<<"Solving Normal Step!"<<std::endl;
 
-      // ex->getTimeStepper()->preStep() was already called by computeDT()!
       ex->takeStep(dt);
       ex->endStep();
 
@@ -297,7 +296,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
           {
             std::cerr<<"Solving " << _name << "catch up step " << catch_up_step <<std::endl;
 
-            ex->getTimeStepper()->preStep();
+            ex->computeDT();
             ex->takeStep(catch_up_dt); // Cut the timestep in half to try two half-step solves
 
             if(ex->lastSolveConverged())
@@ -348,7 +347,7 @@ TransientMultiApp::computeDT()
     for(unsigned int i=0; i<_my_num_apps; i++)
     {
       Transient * ex = _transient_executioners[i];
-      ex->getTimeStepper()->preStep();
+      ex->computeDT();
       Real dt = ex->computeConstrainedDT();
 
       smallest_dt = std::min(dt, smallest_dt);

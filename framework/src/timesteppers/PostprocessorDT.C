@@ -29,14 +29,14 @@ PostprocessorDT::PostprocessorDT(const std::string & name, InputParameters param
 {
 }
 
-void
+Real
 PostprocessorDT::computeInitialDT()
 {
-  computeDT();
+  return computeDT();
 }
 
-void
+Real
 PostprocessorDT::computeDT()
 {
-  _current_dt = _pps_value;
+  return _pps_value;
 }

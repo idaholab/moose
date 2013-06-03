@@ -34,12 +34,12 @@ public:
   virtual void preSolve();
   virtual void postSolve();
 
-  virtual void computeInitialDT();
-  virtual void computeDT();
-
   virtual void rejectStep();
 
 protected:
+  virtual Real computeInitialDT();
+  virtual Real computeDT();
+
   /**
    * Multiplier specifying the direction the timestep is currently going.
    * Positive for up.  Negative for down.

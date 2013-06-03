@@ -30,11 +30,12 @@ public:
 
   virtual void init();
 
-  virtual void computeInitialDT();
-  virtual void computeDT();
   virtual void rejectStep();
 
 protected:
+  virtual Real computeInitialDT();
+  virtual Real computeDT();
+
   const std::vector<Real> & _time_t;
   /// Piecewise linear definition of time stepping
   LinearInterpolation _time_ipol;

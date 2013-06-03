@@ -50,18 +50,18 @@ TimeStepper::init()
 }
 
 void
-TimeStepper::preStep()
+TimeStepper::computeStep()
 {
   if(_t_step < 2)
   {
-    computeInitialDT();
+    _current_dt = computeInitialDT();
     return;
   }
 
   if(converged())
-    computeDT();
+    _current_dt = computeDT();
   else
-    computeFailedDT();
+    _current_dt = computeFailedDT();
 }
 
 void
@@ -83,7 +83,7 @@ TimeStepper::converged()
   return _converged;
 }
 
-void
+Real
 TimeStepper::computeFailedDT()
 {
   if (_current_dt <= _dt_min)
@@ -91,9 +91,9 @@ TimeStepper::computeFailedDT()
 
   // cut the time step in a half
   if (0.5 * _current_dt >= _dt_min)
-    _current_dt = 0.5 * _current_dt;
+    return 0.5 * _current_dt;
   else // (0.5 * _current_dt < _dt_min)
-    _current_dt = _dt_min;
+    return _dt_min;
 }
 
 void
