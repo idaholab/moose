@@ -18,9 +18,6 @@
 #include <iomanip>
 #include <iterator>
 
-// Used for terminal width
-#include <sys/ioctl.h>
-
 const unsigned short FormattedTable::_column_width = 15;
 
 FormattedTable::FormattedTable() :
@@ -79,28 +76,31 @@ FormattedTable::getLastData(const std::string & name)
 }
 
 void
-FormattedTable::printOmittedRow(std::ostream & out, std::map<std::string, unsigned short> & col_widths,
-                                std::set<std::string>::iterator & col_begin, std::set<std::string>::iterator & col_end) const
+FormattedTable::printOmittedRow(std::ostream & out, std::map<std::string, unsigned short> & col_widths) const
 {
-  printNoDataRow(':', ' ', out, col_widths, col_begin, col_end);
+  printNoDataRow(':', ' ', out, col_widths);
 }
 
 void
-FormattedTable::printRowDivider(std::ostream & out, std::map<std::string, unsigned short> & col_widths,
-                                std::set<std::string>::iterator & col_begin, std::set<std::string>::iterator & col_end) const
+FormattedTable::printRowDivider(std::ostream & out, std::map<std::string, unsigned short> & col_widths) const
 {
-  printNoDataRow('+', '-', out, col_widths, col_begin, col_end);
+  printNoDataRow('+', '-', out, col_widths);
 }
 
 void
 FormattedTable::printNoDataRow(char intersect_char, char fill_char,
-                               std::ostream & out, std::map<std::string, unsigned short> & col_widths,
-                               std::set<std::string>::iterator & col_begin, std::set<std::string>::iterator & col_end) const
+                               std::ostream & out, std::map<std::string, unsigned short> & col_widths) const
 {
+  bool needs_init = col_widths.empty();
+
   out.fill(fill_char);
   out << std::right << intersect_char << std::setw(_column_width+2) << intersect_char;
-  for (std::set<std::string>::iterator header = col_begin; header != col_end; ++header)
+  for (std::set<std::string>::iterator header = _column_names.begin(); header != _column_names.end(); ++header)
   {
+    // If the actual column header is longer than the default column width
+    // we can grow the column here
+    if (needs_init)
+      col_widths[*header] = header->length() > _column_width ? header->length()+1 : _column_width;
     out << std::setw(col_widths[*header]+2) << intersect_char;
   }
   out << "\n";
@@ -124,70 +124,25 @@ FormattedTable::printTable(const std::string & file_name)
   printTable(_output_file);
 }
 
+
 void
 FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries)
 {
-  printTable(out, last_n_entries, false);
-}
-
-void
-FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries, bool fit_to_term_width)
-{
-  unsigned int term_width;
-  if (fit_to_term_width)
-    term_width = getTermWidth();
-  else
-    term_width = std::numeric_limits<unsigned int>::max();
-
-  std::set<std::string>::iterator col_it = _column_names.begin();
-  std::set<std::string>::iterator col_end = _column_names.end();
-
-  std::set<std::string>::iterator curr_begin = col_it;
-  std::set<std::string>::iterator curr_end;
-  while (col_it != col_end)
-  {
-    std::map<std::string, unsigned short> col_widths;
-    unsigned int curr_width = _column_width + 4;
-    unsigned int cols_in_group = 0;
-    while (curr_width < term_width && col_it != col_end)
-    {
-      curr_end = col_it;
-      col_widths[*col_it] = col_it->length() > _column_width ? col_it->length()+1 : _column_width;
-
-      curr_width += col_widths[*col_it] + 3;
-      ++col_it;
-      ++cols_in_group;
-    }
-    if (col_it != col_end && cols_in_group >= 2)
-    {
-      curr_width -= col_widths[*curr_end];
-      col_widths.erase(*curr_end);
-      col_it = curr_end;
-    }
-
-    printTablePiece(out, last_n_entries, col_widths, curr_begin, curr_end);
-    curr_begin = curr_end;
-  }
-}
-
-void
-FormattedTable::printTablePiece(std::ostream & out, unsigned int last_n_entries, std::map<std::string, unsigned short> & col_widths,
-                                std::set<std::string>::iterator & col_begin, std::set<std::string>::iterator & col_end)
-{
   std::map<Real, std::map<std::string, Real> >::iterator i;
   std::set<std::string>::iterator header;
+  std::map<std::string, unsigned short> col_widths;
 
   /**
    * Print out the header row
    */
-  printRowDivider(out, col_widths, col_begin, col_end);
+  printRowDivider(out, col_widths);
   out << "|" << std::setw(_column_width) << std::left << " time" << " |";
-  for (header = col_begin; header != col_end; ++header)
+  for (header = _column_names.begin(); header != _column_names.end(); ++header)
   {
     out << " " << std::setw(col_widths[*header])  <<  *header << "|";
   }
   out << "\n";
-  printRowDivider(out, col_widths, col_begin, col_end);
+  printRowDivider(out, col_widths);
 
   /**
    * Skip over values that we don't want to see.
@@ -199,7 +154,7 @@ FormattedTable::printTablePiece(std::ostream & out, unsigned int last_n_entries,
   {
     if (_data.size() > last_n_entries)
       // Print a blank row to indicate that values have been ommited
-      printOmittedRow(out, col_widths, col_begin, col_end);
+      printOmittedRow(out, col_widths);
 
     for (int counter=0; counter < static_cast<int>(_data.size() - last_n_entries); ++counter)
       ++i;
@@ -208,7 +163,7 @@ FormattedTable::printTablePiece(std::ostream & out, unsigned int last_n_entries,
   for ( ; i != _data.end(); ++i)
   {
     out << "|" << std::right << std::setw(_column_width) << i->first << " |";
-    for (header = col_begin; header != col_end; ++header)
+    for (header = _column_names.begin(); header != _column_names.end(); ++header)
     {
       std::map<std::string, Real> &tmp = i->second;
       out << std::setw(col_widths[*header]) << tmp[*header] << " |";
@@ -216,7 +171,7 @@ FormattedTable::printTablePiece(std::ostream & out, unsigned int last_n_entries,
     out << "\n";
   }
 
-  printRowDivider(out, col_widths, col_begin, col_end);
+  printRowDivider(out, col_widths);
 }
 
 void
@@ -367,13 +322,4 @@ void
 FormattedTable::clear()
 {
   _data.clear();
-}
-
-unsigned int
-FormattedTable::getTermWidth() const
-{
-  struct winsize w;
-  ioctl(0, TIOCGWINSZ, &w);
-
-  return w.ws_col;
 }

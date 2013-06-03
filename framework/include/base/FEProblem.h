@@ -526,7 +526,6 @@ public:
 
   OutputProblem & getOutputProblem(unsigned int refinements, MeshFileName file = "");
   void setMaxPPSRowsScreen(unsigned int n) { _pps_output_table_max_rows = n; }
-  void setPPSFitScreen(bool b) { _pps_fit_to_screen = b; }
 
   /**
    * Set (or reset) the output position of the problem.
@@ -656,7 +655,6 @@ protected:
   /// Table with postprocessors that will go on screen
   FormattedTable _pps_output_table_screen;
   unsigned int _pps_output_table_max_rows;
-  bool _pps_fit_to_screen;
 
   void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
 
