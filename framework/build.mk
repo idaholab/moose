@@ -103,12 +103,12 @@ endif
 pcre%.$(obj-suffix) : pcre%.cc $(PCH_DEP)
 	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MF $@.d -MT $@ -c $< -o $@
+          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.C $(PCH_DEP)
 	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -MMD -MF $@.d -MT $@ -c $< -o $@
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 
 #
@@ -118,12 +118,12 @@ pcre%.$(obj-suffix) : pcre%.cc $(PCH_DEP)
 pcre%.$(obj-suffix) : pcre%.c
 	@echo "MOOSE Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MF $@.d -MT $@ -c $< -o $@
+          $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.c
 	@echo "MOOSE Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(libmesh_INCLUDE) -MMD -MF $@.d -MT $@ -c $< -o $@
+	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 
 
