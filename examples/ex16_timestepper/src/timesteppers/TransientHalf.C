@@ -49,4 +49,6 @@ TransientHalf::computeDT()
   if (_ratio < 1.0)
     // Shrink our timestep by the specified ratio or return the min if it's too small
     return std::max(getCurrentDT() * _ratio, _min_dt);
+  else
+    return getCurrentDT();
 }
