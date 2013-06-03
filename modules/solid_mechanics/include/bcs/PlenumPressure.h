@@ -41,6 +41,7 @@ protected:
 
   const Real & _volume;
 
+  Real _start_time;
   const Real _startup_time;
 
   PostprocessorValue * const _initial_moles;

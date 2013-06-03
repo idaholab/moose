@@ -33,6 +33,7 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
    _R(getParam<Real>("R")),
    _temperature( getPostprocessorValue(getParam<std::string>("temperature"))),
    _volume( getPostprocessorValue(getParam<std::string>("volume"))),
+   _start_time(0),
    _startup_time( getParam<Real>("startup_time")),
    _initial_moles( getParam<std::string>("output_initial_moles") != "" ? &getPostprocessorValue(getParam<std::string>("output_initial_moles")) : NULL ),
    _output( getParam<std::string>("output") != "" ? &getPostprocessorValue(getParam<std::string>("output")) : NULL ),
@@ -111,7 +112,8 @@ PlenumPressure::initialSetup()
   {
     *_initial_moles = _n0;
   }
-  const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
+  _start_time = _t - _dt;
+  const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t-_start_time) / _startup_time;
   _my_value = factor * _initial_pressure;
   if (_output)
   {
@@ -136,7 +138,7 @@ PlenumPressure::timestepSetup()
     {
       *_initial_moles = _n0;
     }
-    const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
+    const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t-_start_time) / _startup_time;
     _my_value = factor * _refab_pressure[_refab_counter];
     if (_output)
     {
@@ -167,7 +169,7 @@ PlenumPressure::residualSetup()
     pressure = _refab_pressure[_refab_counter-1];
   }
 
-  const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
+  const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t-_start_time) / _startup_time;
   _my_value = factor * pressure;
   if (_output)
   {
