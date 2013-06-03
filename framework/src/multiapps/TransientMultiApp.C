@@ -186,7 +186,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
         if(_interpolate_transfers)
         {
           // See what time this executioner is going to go to.
-          Real future_time = ex->getTime() + app_time_offset + ex->computeConstrainedDT();
+          Real future_time = ex->getTime() + app_time_offset + ex->getDT();
 
           // How far along we are towards the target time:
           Real step_percent = (future_time - time_old) / (target_time - time_old);
@@ -348,7 +348,7 @@ TransientMultiApp::computeDT()
     {
       Transient * ex = _transient_executioners[i];
       ex->computeDT();
-      Real dt = ex->computeConstrainedDT();
+      Real dt = ex->getDT();
 
       smallest_dt = std::min(dt, smallest_dt);
     }
