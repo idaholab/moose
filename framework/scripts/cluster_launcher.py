@@ -91,9 +91,15 @@ class ClusterLauncher:
         jobs.append(params)
     return jobs
 
-  def createAndLaunchJob(self, template_dir, job_file, specs):
+  def createAndLaunchJob(self, template_dir, job_file, specs, options):
     next_dir = getNextDirName(specs['job_name'], os.listdir('.'))
     os.mkdir(template_dir + next_dir)
+
+    # Log it
+    if options.message:
+      f = open(template_dir + 'jobs.log', 'a')
+      f.write(next_dir.ljust(20) + ': ' + options.message + '\n')
+      f.close()
 
     saved_cwd = os.getcwd()
     os.chdir(template_dir + next_dir)
@@ -124,16 +130,17 @@ class ClusterLauncher:
     self.factory.printDump("Jobs")
     sys.exit(0)
 
-  def run(self, template_dir, job_file):
+  def run(self, template_dir, job_file, options):
     jobs = self.parseJobsFile(template_dir, job_file)
 
     for job in jobs:
-      self.createAndLaunchJob(template_dir, job_file, job)
+      self.createAndLaunchJob(template_dir, job_file, job, options)
 
 ########################################################
 def main():
   parser = OptionParser(usage='Usage: %prog [options] <template directory>')
   parser.add_option("--dump", action="store_true", dest="dump", default=False, help="Dump the parameters for the testers in GetPot Format")
+  parser.add_option("-m", action="store", dest="message", help="A message that will be stored in a local log file that describes the job")
   (options, location) = parser.parse_args()
 
   cluster_launcher = ClusterLauncher()
@@ -156,7 +163,8 @@ def main():
     (dir, file) = os.path.split(abs_location)
   dir = dir + '/'
 
-  cluster_launcher.run(dir, file)
+  # Launch it
+  cluster_launcher.run(dir, file, options)
 
 if __name__ == '__main__':
   main()

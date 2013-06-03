@@ -19,6 +19,11 @@ class PBSJob(Job):
     params.addStringSubParam('queue', '#PBS -q QUEUE', "Which queue to submit this job to.")
     params.addStringSubParam('module', 'module load MODULE', 'moose-dev-gcc', "The module to load.")
     params.addStringSubParam('cli_args', 'CLI_ARGS', "Any extra command line arguments to tack on.")
+    params.addStringSubParam('notifications', '#PBS -m NOTIFICATIONS', "The PBS notifications to enable: 'b' for begin, 'e' for end, 'a' for abort.")
+    params.addStringSubParam('notify_address', '#PBS -M NOTIFY_ADDRESS', "The email address to use for PBS notifications")
+
+    # Soft linked output during run
+    params.addParam('soft_link_output', False, "Create links to your STDOUT and STDERR files in your working directory during the run.")
 
     params.addRequiredParam('moose_application', "The full path to the application to run.")
     params.addRequiredParam('input_file', "The input file name.")
@@ -53,6 +58,19 @@ class PBSJob(Job):
     else:
       threads = 1
     params['ncpus_per_chunk'] = str(int(params['mpi_procs_per_chunk']) * threads)
+
+    # Soft Link output requires several substitutions in the template file
+    soft_link1 = ''
+    soft_link2 = ''
+    soft_link3 = ''
+    if params['soft_link_output'] == 'True':
+      soft_link1 = '#PBS -koe'
+      soft_link2 = 'ln -s $HOME/$PBS_JOBNAME.o$JOB_NUM $PBS_JOBNAME.o$JOB_NUM\nln -s $HOME/$PBS_JOBNAME.e$JOB_NUM $PBS_JOBNAME.e$JOB_NUM'
+      soft_link3 = 'rm $PBS_JOBNAME.o$JOB_NUM\nmv $HOME/$PBS_JOBNAME.o$JOB_NUM $PBS_JOBNAME.o$JOB_NUM\nmv $HOME/$PBS_JOBNAME.e$JOB_NUM $PBS_JOBNAME.e$JOB_NUM'
+    # Add substitutions on the fly
+    params.addStringSubParam('soft_link1', 'SOFT_LINK1', soft_link1, 'private')
+    params.addStringSubParam('soft_link2', 'SOFT_LINK2', soft_link2, 'private')
+    params.addStringSubParam('soft_link3', 'SOFT_LINK3', soft_link3, 'private')
 
     f = open(os.path.split(params['template_script'])[1], 'w')
 

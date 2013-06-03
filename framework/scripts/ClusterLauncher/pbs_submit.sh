@@ -3,7 +3,9 @@
 #PBS -l select=<CHUNKS>:ncpus=<NCPUS_PER_CHUNK>:mpiprocs=<MPI_PROCS_PER_CHUNK>
 #PBS -l place=<PLACE>
 #PBS -l walltime=<WALLTIME>
-#PBS -koe
+<NOTIFICATIONS>
+<NOTIFY_ADDRESS>
+<SOFT_LINK1>
 <QUEUE>
 
 source /etc/profile.d/modules.sh
@@ -12,8 +14,7 @@ source /etc/profile.d/modules.sh
 cd $PBS_O_WORKDIR
 
 JOB_NUM=${PBS_JOBID%\.*}
-ln -s $HOME/$PBS_JOBNAME.o$JOB_NUM $PBS_JOBNAME.o$JOB_NUM
-ln -s $HOME/$PBS_JOBNAME.e$JOB_NUM $PBS_JOBNAME.e$JOB_NUM
+<SOFT_LINK2>
 
 export MV2_ENABLE_AFFINITY=0
 
@@ -21,6 +22,4 @@ date
 mpiexec <MOOSE_APPLICATION> -i <INPUT_FILE> <THREADS> <CLI_ARGS>
 date
 
-rm $PBS_JOBNAME.o$JOB_NUM
-mv $HOME/$PBS_JOBNAME.o$JOB_NUM $PBS_JOBNAME.o$JOB_NUM
-mv $HOME/$PBS_JOBNAME.e$JOB_NUM $PBS_JOBNAME.e$JOB_NUM
+<SOFT_LINK3>
