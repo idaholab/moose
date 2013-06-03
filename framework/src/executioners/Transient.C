@@ -172,6 +172,9 @@ Transient::init()
   // If this is the first step
   if (_t_step == 0)
     _t_step = 1;
+
+  computeDT();
+  _dt = getDT();
 }
 
 void
