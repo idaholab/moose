@@ -73,9 +73,6 @@
 // Postprocessors
 #include "INSExplicitTimestepSelector.h"
 
-// Executioners
-#include "INSExplicitExecutioner.h"
-
 void
 Elk::NavierStokes::registerObjects(Factory & factory)
 {
@@ -149,7 +146,4 @@ Elk::NavierStokes::registerObjects(Factory & factory)
 
   // Postprocessors
   registerPostprocessor(INSExplicitTimestepSelector);
-
-  // Executioners
-  registerExecutioner(INSExplicitExecutioner);
 }
