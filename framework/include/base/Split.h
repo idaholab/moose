@@ -61,6 +61,7 @@ class Split : public MooseObject {
   std::vector<std::string> _vars;
   std::vector<std::string> _blocks;
   std::vector<std::string> _sides;
+  std::vector<std::string> _unsides;
   std::vector<std::string> _decomposition;
   std::string              _decomposition_type;
   std::string              _schur_type;

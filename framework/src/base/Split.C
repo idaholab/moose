@@ -22,6 +22,7 @@ InputParameters validParams<Split>()
   params.addParam<std::vector<std::string> >("vars",   "Variables Split operates on (omitting this implies \"all variables\"");
   params.addParam<std::vector<std::string> >("blocks", "Mesh blocks Split operates on (omitting this implies \"all blocks\"");
   params.addParam<std::vector<std::string> >("sides",  "Sidesets Split operates on (omitting this implies \"no sidesets\"");
+  params.addParam<std::vector<std::string> >("unsides",  "Sidesets Split excludes (omitting this implies \"do not exclude any sidesets\"");
   params.addParam<std::vector<std::string> >("decomposition", "The names of the splits (subsystems) in the decomposition of this split");
   params.addParam<std::string>("decomposition_type", "additive", "Split decomposition type: additive|multiplicative|symmetric_multiplicative|schur");
   params.addParam<std::string>("schur_type", "full", "Type of Schur complement: full|upper|lower");
@@ -39,6 +40,7 @@ Split::Split (const std::string & name, InputParameters params) :
   _vars(getParam<std::vector<std::string> >("vars")),
   _blocks(getParam<std::vector<std::string> >("blocks")),
   _sides(getParam<std::vector<std::string> >("sides")),
+  _unsides(getParam<std::vector<std::string> >("unsides")),
   _decomposition(getParam<std::vector<std::string> >("decomposition")),
   _decomposition_type(getParam<std::string>("decomposition_type")),
   _schur_type(getParam<std::string>("schur_type")),
@@ -80,9 +82,20 @@ Split::setup(const std::string& prefix)
   if (_sides.size()) {
     opt = dmprefix+"sides";
     val="";
-    for (unsigned int j = 0; j < _blocks.size(); ++j) {
+    for (unsigned int j = 0; j < _sides.size(); ++j) {
       if(j) val += ",";
       val += _sides[j];
+    }
+    ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
+    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  }
+  // unside options
+  if (_unsides.size()) {
+    opt = dmprefix+"unsides";
+    val="";
+    for (unsigned int j = 0; j < _unsides.size(); ++j) {
+      if(j) val += ",";
+      val += _unsides[j];
     }
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
