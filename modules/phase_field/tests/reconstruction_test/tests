@@ -1,13 +1,13 @@
 [Tests]
-  [./reconstruction4gr_test]
+  [./1phase_reconstruction_test]
     type = 'Exodiff'
-    input = 'reconstruction4gr_test.i'
-    exodiff = '4gr.e-s002'
+    input = '1phase_reconstruction_test.i'
+    exodiff = '1phase_reconstruction_test.e-s003'
   [../]
 
-  [./reconstruction4gr_BC_test]
+  [./2phase_reconstruction_test]
     type = 'Exodiff'
-    input = 'reconstruction4gr_BC_test.i'
-    exodiff = '4grBC.e-s002'
+    input = '2phase_reconstruction_test.i'
+    exodiff = '2phase_reconstruction_test.e-s003'
   [../]
 []
