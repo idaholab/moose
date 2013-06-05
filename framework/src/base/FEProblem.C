@@ -101,6 +101,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _cm(NULL),
     _quadrature_order(CONSTANT),
     _pps_output_table_max_rows(0),
+    _pps_fit_to_screen(true),
     _postprocessor_screen_output(true),
     _postprocessor_csv_output(false),
     _postprocessor_gnuplot_output(false),
@@ -2146,7 +2147,7 @@ FEProblem::outputPostprocessors(bool force/* = false*/)
     if (force || (_postprocessor_screen_output && (_t_step % out().screen_interval() == 0)))
     {
       std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
-      _pps_output_table_screen.printTable(std::cout, _pps_output_table_max_rows);
+      _pps_output_table_screen.printTable(std::cout, _pps_output_table_max_rows, _pps_fit_to_screen);
       std::cout<<std::endl;
     }
   }

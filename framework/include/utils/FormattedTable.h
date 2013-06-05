@@ -63,6 +63,7 @@ public:
    * "n" entries.  A value of zero means don't skip any rows
    */
   void printTable(std::ostream & out, unsigned int last_n_entries=0);
+  void printTable(std::ostream & out, unsigned int last_n_entries, bool fit_to_term_width);
   void printTable(const std::string & file_name);
 
   /**
@@ -75,12 +76,23 @@ public:
   void makeGnuplot(const std::string & base_file, const std::string & format);
 
 protected:
+  void printTablePiece(std::ostream & out, unsigned int last_n_entries, std::map<std::string, unsigned short> & col_widths,
+                       std::set<std::string>::iterator & col_begin, std::set<std::string>::iterator & col_end);
 
-  void printOmittedRow(std::ostream & out, std::map<std::string, unsigned short> & col_widths) const;
-  void printRowDivider(std::ostream & out, std::map<std::string, unsigned short> & col_widths) const;
+  void printOmittedRow(std::ostream & out, std::map<std::string, unsigned short> & col_widths,
+                       std::set<std::string>::iterator & col_begin, std::set<std::string>::iterator & col_end) const;
+  void printRowDivider(std::ostream & out, std::map<std::string, unsigned short> & col_widths,
+                       std::set<std::string>::iterator & col_begin, std::set<std::string>::iterator & col_end) const;
 
   void printNoDataRow(char intersect_char, char fill_char,
-                      std::ostream & out, std::map<std::string, unsigned short> & col_widths) const;
+                      std::ostream & out, std::map<std::string, unsigned short> & col_widths,
+                      std::set<std::string>::iterator & col_begin, std::set<std::string>::iterator & col_end) const;
+
+
+  /**
+   * Returns the width of the terminal using sys/ioctl
+   */
+  unsigned int getTermWidth() const;
 
   /**
    * Data structure for the console table
@@ -94,6 +106,9 @@ protected:
 
   /// The single cell width used for all columns in the table
   static const unsigned short _column_width;
+
+  /// The absolute minimum PPS table width
+  static const unsigned short _min_pps_width;
 
   /// The optional output file stream
   std::ofstream _output_file;
