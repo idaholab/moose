@@ -72,11 +72,16 @@
 [Executioner]
   type = Steady
   petsc_options = '-snes_mf_operator'
+[]
 
-  [./Adaptivity]
-    steps = 5
-    refine_fraction = 1.0
-    max_h_level = 10
+[Adaptivity]
+  marker = uniform
+
+  # Uniformly refine the mesh
+  # for the convergence study
+  [./Markers]
+    type = UniformMarker
+    mark = REFINE
   [../]
 []
 
