@@ -43,7 +43,7 @@ public:
 protected:
   MooseMesh & _mesh;
   std::string _var_name;
-  Node & _node;
+  Node * _node_ptr;
 };
 
 #endif //NODALVARIABLEVALUE_H

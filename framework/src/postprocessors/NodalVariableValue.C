@@ -32,30 +32,10 @@ NodalVariableValue::NodalVariableValue(const std::string & name, InputParameters
     GeneralPostprocessor(name, parameters),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
-    _node(_mesh.node(parameters.get<unsigned int>("nodeid")))
+    _node_ptr(_mesh._mesh.node_ptr(getParam<unsigned int>("nodeid")))
 {
-/*
-  std::vector<unsigned int> nodes;
-  std::vector<short int> ids;
-  _mesh.boundary_info->build_node_list(nodes, ids);
-
-  bool found = false;
-  int i;
-  for (i = 0; i < nodes.size(); i++)
-  {
-//    if (nodes[i] == _nodeid)
-//    {
-//      found = true;
-//      break;
-//    }
-    std::cout << "n=" << nodes[i] << ", " << ids[i] << std::endl;
-  }
-
-  if (!found)
-    mooseError("Specified nodeid was not found in any nodeset");
-
-//  Node & node = _mesh.node(id);
-*/
+  if (_node_ptr == NULL)
+    mooseError("Node ID: " << getParam<unsigned int>("nodeid") << " not found in the mesh!");
 }
 
 Real
@@ -63,8 +43,8 @@ NodalVariableValue::getValue()
 {
   Real value = 0;
 
-  if(_node.processor_id() == libMesh::processor_id())
-    value = _subproblem.getVariable(_tid, _var_name).getNodalValue(_node);
+  if(_node_ptr->processor_id() == libMesh::processor_id())
+    value = _subproblem.getVariable(_tid, _var_name).getNodalValue(*_node_ptr);
 
   gatherSum(value);
 
