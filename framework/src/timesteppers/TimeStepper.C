@@ -52,16 +52,20 @@ TimeStepper::init()
 void
 TimeStepper::computeStep()
 {
-  if(_t_step < 2)
+  if (_t_step < 2)
   {
-    _current_dt = computeInitialDT();
-    return;
+    if (converged())
+      _current_dt = computeInitialDT();
+    else
+      _current_dt = computeFailedDT();
   }
-
-  if(converged())
-    _current_dt = computeDT();
   else
-    _current_dt = computeFailedDT();
+  {
+    if (converged())
+      _current_dt = computeDT();
+    else
+      _current_dt = computeFailedDT();
+  }
 }
 
 void
