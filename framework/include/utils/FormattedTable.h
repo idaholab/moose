@@ -92,7 +92,7 @@ protected:
   /**
    * Returns the width of the terminal using sys/ioctl
    */
-  unsigned int getTermWidth() const;
+  unsigned short getTermWidth() const;
 
   /**
    * Data structure for the console table

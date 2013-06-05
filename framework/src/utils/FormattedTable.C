@@ -135,11 +135,11 @@ FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries)
 void
 FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries, bool fit_to_term_width)
 {
-  unsigned int term_width;
+  unsigned short term_width;
   if (fit_to_term_width)
     term_width = getTermWidth();
   else
-    term_width = std::numeric_limits<unsigned int>::max();
+    term_width = std::numeric_limits<unsigned short>::max();
 
   std::set<std::string>::iterator col_it = _column_names.begin();
   std::set<std::string>::iterator col_end = _column_names.end();
@@ -373,10 +373,16 @@ FormattedTable::clear()
   _data.clear();
 }
 
-unsigned int
+unsigned short
 FormattedTable::getTermWidth() const
 {
   struct winsize w;
+
+  /**
+   * Initialize the value we intend to populate just in case
+   * the system call fails
+   */
+  w.ws_col = std::numeric_limits<unsigned short>::max();
 
   try
   {
@@ -384,7 +390,8 @@ FormattedTable::getTermWidth() const
   }
   catch(...)
   {
-    return std::numeric_limits<unsigned int>::max();
+    // Something bad happened, make sure we have a sane value
+    w.ws_col = std::numeric_limits<unsigned short>::max();
   }
 
   return std::max(_min_pps_width, w.ws_col);
