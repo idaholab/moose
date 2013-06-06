@@ -358,6 +358,10 @@ public:
 
   TimeIntegrator * & getTimeIntegrator() { return _time_integrator; }
 
+  void setPCSide(MooseEnum pcs);
+
+  Moose::PCSideType getPCSide() { return _pc_side; }
+
 public:
   FEProblem & _fe_problem;
   // FIXME: make these protected and create getters/setters
@@ -446,6 +450,8 @@ protected:
   NumericVector<Number> * _increment_vec;
   /// Preconditioner
   MoosePreconditioner * _preconditioner;
+  /// Preconditioning side
+  Moose::PCSideType _pc_side;
 
   /// Whether or not to use a finite differenced preconditioner
   bool _use_finite_differenced_preconditioner;

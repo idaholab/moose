@@ -118,6 +118,16 @@ enum PPSOutputType
   PPS_OUTPUT_BOTH
 };
 
+/**
+ * Preconditioning side
+ */
+enum PCSideType
+{
+  PCS_LEFT,
+  PCS_RIGHT,
+  PCS_SYMMETRIC
+};
+
 }
 
 /**

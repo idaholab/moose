@@ -22,6 +22,7 @@
 #include "DisplacedProblem.h"
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
+#include "MooseTypes.h"
 
 //libMesh Includes
 #include "libmesh/libmesh_common.h"
@@ -307,6 +308,18 @@ void petscSetupDampers(NonlinearImplicitSystem& sys)
 #endif
 }
 
+PCSide
+getPetscPCSide(Moose::PCSideType pcs)
+{
+  switch (pcs)
+  {
+  case Moose::PCS_LEFT: return PC_LEFT;
+  case Moose::PCS_RIGHT: return PC_RIGHT;
+  case Moose::PCS_SYMMETRIC: return PC_SYMMETRIC;
+  default: mooseError("Unknown PC side requested."); break;
+  }
+}
+
 void petscSetDefaults(FEProblem & problem)
 {
   // dig out Petsc solver
@@ -315,12 +328,13 @@ void petscSetDefaults(FEProblem & problem)
   SNES snes = petsc_solver->snes();
   KSP ksp;
   SNESGetKSP(snes, &ksp);
+  PCSide pcside = getPetscPCSide(nl.getPCSide());
 #if PETSC_VERSION_LESS_THAN(3,2,0)
   // PETSc 3.1.x-
-  KSPSetPreconditionerSide(ksp, PC_RIGHT);
+  KSPSetPreconditionerSide(ksp, pcside);
 #else
   // PETSc 3.2.x+
-  KSPSetPCSide(ksp, PC_RIGHT);
+  KSPSetPCSide(ksp, pcside);
 #endif
   SNESSetMaxLinearSolveFailures(snes, 1000000);
 

@@ -121,6 +121,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _Re_non_time(addVector("Re_non_time", true, GHOSTED)),
     _increment_vec(NULL),
     _preconditioner(NULL),
+    _pc_side(Moose::PCS_RIGHT),
     _use_finite_differenced_preconditioner(false),
     _have_decomposition(false),
     _use_split_preconditioner(false),
@@ -2152,4 +2153,17 @@ NonlinearSystem::printTopResiduals(const NumericVector<Number> & residual, unsig
   {
     fprintf(stderr, "[DBG][%d]  % .15e '%s' at node %d\n", libMesh::processor_id(), vec[i]._residual, _sys.variable_name(vec[i]._var).c_str(), vec[i]._nd);
   }
+}
+
+void
+NonlinearSystem::setPCSide(MooseEnum pcs)
+{
+  if (pcs == "left")
+    _pc_side = Moose::PCS_LEFT;
+  else if (pcs == "right")
+    _pc_side = Moose::PCS_RIGHT;
+  else if (pcs == "symmetric")
+    _pc_side = Moose::PCS_SYMMETRIC;
+  else
+    mooseError("Unknown PC side specified.");
 }
