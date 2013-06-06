@@ -87,6 +87,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _mesh(*parameters.get<MooseMesh *>("mesh")),
     _eq(_mesh),
     _initialized(false),
+    _kernel_type(Moose::KT_ALL),
     _solve(getParam<bool>("solve")),
 
     _transient(false),
@@ -2776,7 +2777,7 @@ FEProblem::addPredictor(const std::string & type, const std::string & name, Inpu
 void
 FEProblem::computeResidual(NonlinearImplicitSystem &/*sys*/, const NumericVector<Number> & soln, NumericVector<Number> & residual)
 {
-  computeResidualType(soln, residual, Moose::KT_ALL);
+  computeResidualType(soln, residual, _kernel_type);
 }
 
 void

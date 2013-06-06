@@ -27,7 +27,7 @@ class NonlinearSystem;
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys);
+  ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys, Moose::KernelType type);
   // Splitting Constructor
   ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
 
@@ -44,6 +44,7 @@ public:
 
 protected:
   NonlinearSystem & _sys;
+  Moose::KernelType _kernel_type;
 };
 
 #endif //COMPUTERESIDUALTHREAD_H

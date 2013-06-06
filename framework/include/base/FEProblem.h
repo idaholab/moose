@@ -582,10 +582,13 @@ public:
 
   void setDebugPrintVarResidNorms(bool should_print) { _dbg_print_var_rnorms = should_print; }
 
+  void setKernelTypeResidual(Moose::KernelType kt) { _kernel_type = kt; }
+
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;
+  Moose::KernelType _kernel_type;
 
   /// Whether or not to actually solve the nonlinear system
   bool _solve;

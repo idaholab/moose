@@ -22,16 +22,18 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys) :
+ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys, Moose::KernelType type) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
-    _sys(sys)
+    _sys(sys),
+    _kernel_type(type)
 {
 }
 
 // Splitting Constructor
 ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
-    _sys(x._sys)
+    _sys(x._sys),
+    _kernel_type(x._kernel_type)
 {
 }
 
@@ -97,8 +99,14 @@ ComputeResidualThread::onElement(const Elem *elem)
   _fe_problem.reinitElem(elem, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
-  const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
-  for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+  const std::vector<Kernel *> * kernels = NULL;
+  switch (_kernel_type)
+  {
+  case Moose::KT_ALL: kernels = & _sys._kernels[_tid].active(); break;
+  case Moose::KT_TIME: kernels = & _sys._kernels[_tid].activeTime(); break;
+  case Moose::KT_NONTIME: kernels = & _sys._kernels[_tid].activeNonTime(); break;
+  }
+  for (std::vector<Kernel *>::const_iterator it = kernels->begin(); it != kernels->end(); ++it)
   {
     (*it)->computeResidual();
   }

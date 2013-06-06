@@ -1029,7 +1029,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
 
 void
-NonlinearSystem::computeResidualInternal(Moose::KernelType /*type*/)
+NonlinearSystem::computeResidualInternal(Moose::KernelType type)
 {
   // residualSetup() /////
   for(unsigned int i=0; i<libMesh::n_threads(); i++)
@@ -1048,7 +1048,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType /*type*/)
   // residual contributions from the domain
   PARALLEL_TRY {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeResidualThread cr(_fe_problem, *this);
+    ComputeResidualThread cr(_fe_problem, *this, type);
     Threads::parallel_reduce(elem_range, cr);
   }
   PARALLEL_CATCH;

@@ -32,11 +32,14 @@ public:
   virtual ~ExplicitEuler();
 
   virtual int order() { return 1; }
+  virtual void preSolve();
   virtual void computeTimeDerivatives();
+  virtual void solve();
   virtual void postStep(NumericVector<Number> & residual);
 
 protected:
-
+  /// Residual of non-time kernels from the old time
+  NumericVector<Number> & _Re_old;
 };
 
 
