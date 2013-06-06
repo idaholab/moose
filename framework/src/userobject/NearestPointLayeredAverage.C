@@ -82,7 +82,7 @@ NearestPointLayeredAverage::finalize()
 void
 NearestPointLayeredAverage::threadJoin(const UserObject & y)
 {
-  const NearestPointLayeredAverage & npla = dynamic_cast<const NearestPointLayeredAverage &>(y);
+  const NearestPointLayeredAverage & npla = static_cast<const NearestPointLayeredAverage &>(y);
 
   for(unsigned int i=0; i<_layered_averages.size(); i++)
     _layered_averages[i]->threadJoin(*npla._layered_averages[i]);
@@ -109,4 +109,3 @@ NearestPointLayeredAverage::nearestLayeredAverage(const Point & p) const
 
   return _layered_averages[closest];
 }
-

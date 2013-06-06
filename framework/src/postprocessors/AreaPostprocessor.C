@@ -28,7 +28,7 @@ AreaPostprocessor::AreaPostprocessor(const std::string & name, InputParameters p
 void
 AreaPostprocessor::threadJoin(const UserObject &y)
 {
-  const AreaPostprocessor & pps = dynamic_cast<const AreaPostprocessor &>(y);
+  const AreaPostprocessor & pps = static_cast<const AreaPostprocessor &>(y);
   _integral_value += pps._integral_value;
 }
 

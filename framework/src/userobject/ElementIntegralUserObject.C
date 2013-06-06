@@ -49,7 +49,7 @@ ElementIntegralUserObject::getValue()
 void
 ElementIntegralUserObject::threadJoin(const UserObject & y)
 {
-  const ElementIntegralUserObject & pps = dynamic_cast<const ElementIntegralUserObject &>(y);
+  const ElementIntegralUserObject & pps = static_cast<const ElementIntegralUserObject &>(y);
   _integral_value += pps._integral_value;
 }
 

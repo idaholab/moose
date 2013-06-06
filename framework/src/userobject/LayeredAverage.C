@@ -66,7 +66,7 @@ void
 LayeredAverage::threadJoin(const UserObject & y)
 {
   LayeredIntegral::threadJoin(y);
-  const LayeredAverage & la = dynamic_cast<const LayeredAverage &>(y);
+  const LayeredAverage & la = static_cast<const LayeredAverage &>(y);
   for(unsigned int i=0; i<_layer_volumes.size(); i++)
     _layer_volumes[i] += la._layer_volumes[i];
 }

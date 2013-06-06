@@ -58,7 +58,7 @@ AverageNodalVariableValue::getValue()
 void
 AverageNodalVariableValue::threadJoin(const UserObject & y)
 {
-  const AverageNodalVariableValue & pps = dynamic_cast<const AverageNodalVariableValue &>(y);
+  const AverageNodalVariableValue & pps = static_cast<const AverageNodalVariableValue &>(y);
   _avg += pps._avg;
   _n += pps._n;
 }

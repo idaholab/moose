@@ -49,7 +49,7 @@ SideIntegralUserObject::getValue()
 void
 SideIntegralUserObject::threadJoin(const UserObject & y)
 {
-  const SideIntegralUserObject & pps = dynamic_cast<const SideIntegralUserObject &>(y);
+  const SideIntegralUserObject & pps = static_cast<const SideIntegralUserObject &>(y);
   _integral_value += pps._integral_value;
 }
 

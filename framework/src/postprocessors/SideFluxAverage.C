@@ -54,6 +54,6 @@ void
 SideFluxAverage::threadJoin(const UserObject & y)
 {
   SideIntegralVariablePostprocessor::threadJoin(y);
-  const SideFluxAverage & pps = dynamic_cast<const SideFluxAverage &>(y);
+  const SideFluxAverage & pps = static_cast<const SideFluxAverage &>(y);
   _volume += pps._volume;
 }

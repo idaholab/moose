@@ -28,7 +28,7 @@ VolumePostprocessor::VolumePostprocessor(const std::string & name, InputParamete
 void
 VolumePostprocessor::threadJoin(const UserObject &y)
 {
-  const VolumePostprocessor & pps = dynamic_cast<const VolumePostprocessor &>(y);
+  const VolumePostprocessor & pps = static_cast<const VolumePostprocessor &>(y);
   _integral_value += pps._integral_value;
 }
 
