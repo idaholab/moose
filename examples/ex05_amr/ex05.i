@@ -67,7 +67,7 @@
 []
 
 [Adaptivity]
-  marker = ef
+  marker = errorfrac
   steps = 2
   [./Indicators]
     [./error]
@@ -76,7 +76,7 @@
     [../]
   [../]
   [./Markers]
-    [./ef]
+    [./errorfrac]
       type = ErrorFractionMarker
       refine = 0.5
       coarsen = 0
@@ -91,4 +91,3 @@
   exodus = true
   perf_log = true
 []
-

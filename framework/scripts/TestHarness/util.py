@@ -88,7 +88,7 @@ def printResult(test_name, result, timing, start, end, options, color=True):
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because
 # it messes up the trac output.
-# supports weirded html for more advanced coloring schemes. <r>,<g>,<y>,<b> All colors are bolded.
+# supports weirded html for more advanced coloring schemes. \verbatim<r>,<g>,<y>,<b>\endverbatim All colors are bolded.
 
 def colorText(str, options, color, html=False):
   # ANSI color codes for colored terminal output
