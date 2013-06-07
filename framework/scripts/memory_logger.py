@@ -215,6 +215,7 @@ class ReadLog:
     history_file.close()
     self.sorted_list = []
     self.mem_list = []
+    self.use_nodes = False
     self.printHistory()
 
   def printHistory(self):
@@ -226,6 +227,7 @@ class ReadLog:
     CYAN   = '\033[36m'
     YELLOW = '\033[33m'
     last_memory = 0.0
+    (terminal_width, terminal_height) = self.getTerminalSize()
     for timestamp in self.memory_list:
       to = GetTime(eval(timestamp)[0])
       log = eval(timestamp)[2].split('\n')
@@ -233,54 +235,63 @@ class ReadLog:
       node = eval(timestamp)[4].split('\n')
       self.mem_list.append(eval(timestamp)[1])
       self.sorted_list.append([str(to.day) + ' ' + str(to.monthname) + ' ' + str(to.hour) + ':' + str(to.minute) + ':' + '{:02.0f}'.format(to.second) + '.' + '{:06.0f}'.format(to.microsecond), eval(timestamp)[1], log, pstack, node[0], eval(timestamp)[5]])
+
     largest_memory = decimal.Decimal(max(self.mem_list))
-    percentage_length = decimal.Decimal(self.getTerminalSize()[0]) - decimal.Decimal(len(str(self.sorted_list[0][0]) + ' using: ' + '{:17,.0f}'.format(self.sorted_list[0][1]) + 'K |'))
+    if len(set([x[4] for x in self.sorted_list])) > 1:
+      self.use_nodes = True
+
     print 'Date Stamp' + ' '*int(17) + 'Memory Usage | Percent of MAX memory used: ( ' + str('{:0,.0f}'.format(largest_memory)) + ' K )'
     for item in self.sorted_list:
+      tmp_str = ''
       if decimal.Decimal(item[1]) == largest_memory:
-        percent = '100'
-      elif (decimal.Decimal(item[1]) / largest_memory) ==  0:
-        percent = '0'
+        tmp_str = self.formatText(largest_memory, item[0], item[1], item[5], item[2], item[3], item[4], RESET, terminal_width)
+      elif item[1] > last_memory:
+        tmp_str = self.formatText(largest_memory, item[0], item[1], item[5], item[2], item[3], item[4], RED, terminal_width)
+      elif item[1] == last_memory:
+        tmp_str = self.formatText(largest_memory, item[0], item[1], item[5], item[2], item[3], item[4], CYAN, terminal_width)
       else:
-        percent = str(decimal.Decimal(item[1]) / largest_memory)[2:4] + '.' + str(decimal.Decimal(item[1]) / largest_memory)[4:6]
-      tmp_log = ''
-      if self.arguments.stdout:
-        for single_log in item[2]:
-          if single_log != '':
-            tmp_log += ' '*39 + ' | stdout: ' + single_log + '\n'
-      if self.arguments.pstack:
-        for single_pstack in item[3]:
-          if single_pstack != '':
-            tmp_log += ' '*39 + ' | pstack: ' + single_pstack + '\n'
-      if self.arguments.separate:
-        if decimal.Decimal(item[1]) == largest_memory:
-          tmp_str = item[0] + '{:15,.0f}'.format(item[1]) + ' K | ' + self.format_text(RESET, [ item[4], '{:12,.0f}'.format(item[5]) + ' K' ], item[1], largest_memory, percentage_length) + RESET + '| ' + percent + '%\n' + tmp_log
-        elif item[1] > last_memory:
-          tmp_str = item[0] + '{:15,.0f}'.format(item[1]) + ' K | ' + self.format_text(RED, [ item[4], '{:12,.0f}'.format(item[5]) + ' K' ], item[1], largest_memory, percentage_length) + RESET + '| ' + percent + '%\n' + tmp_log
-        elif item[1] == last_memory:
-          tmp_str = item[0] + '{:15,.0f}'.format(item[1]) + ' K | ' + self.format_text(CYAN, [ item[4], '{:12,.0f}'.format(item[5]) + ' K' ], item[1], largest_memory, percentage_length) + RESET + '| ' + percent + '%\n' + tmp_log
-        else:
-          tmp_str = item[0] + '{:15,.0f}'.format(item[1]) + ' K | ' + self.format_text(GREEN, [ item[4], '{:12,.0f}'.format(item[5]) + ' K' ], item[1], largest_memory, percentage_length) + RESET + '| ' + percent + '%\n' + tmp_log
-      else:
-        if decimal.Decimal(item[1]) == largest_memory:
-          tmp_str = item[0] + '{:15,.0f}'.format(item[1]) + ' K |' + self.format_text(RESET, [], item[1], largest_memory, percentage_length) + RESET + '| ' + percent + '%\n' + tmp_log
-        elif item[1] > last_memory:
-          tmp_str = item[0] + '{:15,.0f}'.format(item[1]) + ' K |' + self.format_text(RED, [], item[1], largest_memory, percentage_length) + RESET + '| ' + percent + '%\n' + tmp_log
-        elif item[1] == last_memory:
-          tmp_str = item[0] + '{:15,.0f}'.format(item[1]) + ' K |' + self.format_text(CYAN, [], item[1], largest_memory, percentage_length) + RESET + '| ' + percent + '%\n' + tmp_log
-        else:
-          tmp_str = item[0] + '{:15,.0f}'.format(item[1]) + ' K |' + self.format_text(GREEN, [], item[1], largest_memory, percentage_length) + RESET + '| ' + percent + '%\n' + tmp_log
+        tmp_str = self.formatText(largest_memory, item[0], item[1], item[5], item[2], item[3], item[4], GREEN, terminal_width)
       last_memory = item[1]
       sys.stdout.write(tmp_str)
     print 'Date Stamp' + ' '*int(17) + 'Memory Usage | Percent of MAX memory used: ( ' + str('{:0,.0f}'.format(largest_memory)) + ' K )'
 
-  def format_text(self, color, items_list, memory_usage, largest_memory, percentage_length):
-    how_many = 0
-    input_text = ''
-    for item in items_list:
-      # +2 to account for extra space between the item text
-      how_many += len(item) + 2
-    return ' @'.join(items_list) + ' ' + color + '-'*int((percentage_length * (decimal.Decimal(memory_usage) / largest_memory)) - how_many )
+
+  def formatText(self, largest_memory, date, total_memory, node_memory, log, pstack, reporting_host, color_code, terminal_width):
+    RESET  = '\033[0m'
+    if decimal.Decimal(total_memory) == largest_memory:
+      percent = '100'
+    elif (decimal.Decimal(total_memory) / largest_memory) ==  0:
+      percent = '0'
+    else:
+      percent = str(decimal.Decimal(total_memory) / largest_memory)[2:4] + '.' + str(decimal.Decimal(total_memory) / largest_memory)[4:6]
+
+    header = len(date) + 18
+    footer = len(percent) + 6
+    additional_correction = 0
+    max_length = decimal.Decimal(terminal_width - header) / largest_memory
+    total_position = total_memory * decimal.Decimal(max_length)
+    node_position = node_memory * decimal.Decimal(max_length)
+    tmp_log = ''
+    if self.arguments.stdout:
+      for single_log in log:
+        if single_log != '':
+          tmp_log += ' '*(header - len(' stdout |')) + '  stdout | ' + single_log + '\n'
+    if self.arguments.pstack:
+      for single_pstack in pstack:
+        if single_pstack != '':
+          tmp_log += ' '*(header - len(' pstack |')) + '  pstack | ' + single_pstack + '\n'
+
+    if self.arguments.separate and self.use_nodes != False:
+      message = '< ' + RESET + reporting_host + ' - ' + '{:10,.0f}'.format(node_memory) + ' K' + color_code + ' >'
+      additional_correction = len(RESET) + len(color_code)
+    elif self.use_nodes:
+      message = '< >'
+    else:
+      node_position = 0
+      message = ''
+    return date + '{:15,.0f}'.format(total_memory) + ' K | ' + color_code + '-'*int(node_position) + message + '-'*(int(total_position) - (int(node_position) + ((len(message) - additional_correction) + footer))) + RESET + '| ' + percent + '%\n' + tmp_log
+
+
 
   def getTerminalSize(self):
     """Quicky to get terminal window size"""
@@ -606,7 +617,7 @@ def _verifyARGs(args):
       print 'You must use one of the following: track, read, or run'
       sys.exit(1)
   if args.pstack:
-    if which('pstack') == None:
+    if which('pstack') == None and args.read == None:
       print '\npstack binary not found. Add it to your PATH and try again.'
       sys.exit(1)
   if args.run:
