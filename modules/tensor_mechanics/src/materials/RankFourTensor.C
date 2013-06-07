@@ -73,7 +73,7 @@ RankFourTensor::operator= (const RankFourTensor &a)
   return *this; 
 }
 
-RealTensorValue
+RankTwoTensor
 RankFourTensor::operator*(const RankTwoTensor &a)
 {
   RealTensorValue result;
@@ -86,6 +86,20 @@ RankFourTensor::operator*(const RankTwoTensor &a)
   
   return result;
 }
+
+// RealTensorValue
+// RankFourTensor::operator*(const RankTwoTensor &a)
+// {
+//   RealTensorValue result;
+  
+//   for(unsigned int i(0); i<N; i++)
+//     for(unsigned int j(0); j<N; j++)
+//       for(unsigned int k(0); k<N; k++)
+//         for(unsigned int l(0); l<N; l++)
+//           result(i,j) += _vals[i][j][k][l]*a(k,l);
+  
+//   return result;
+// }
 
 RealTensorValue
 RankFourTensor::operator*(const RealTensorValue &a)

@@ -40,7 +40,7 @@ SplitCHCRes::computeDFDC(PFFunctionType type)
 Real
 SplitCHCRes::computeQpResidual()
 {
-  Real residual = SplitCHBase::computeQpResidual(); //f_prime_zero*_test[_j][_qp] from SplitCHBase
+  Real residual = SplitCHBase::computeQpResidual(); //(f_prime_zero+e_prime)*_test[_i][_qp] from SplitCHBase
 
   residual += -_w[_qp]*_test[_i][_qp];
   
@@ -53,7 +53,7 @@ SplitCHCRes::computeQpResidual()
 Real
 SplitCHCRes::computeQpJacobian()
 {
-  Real jacobian = SplitCHBase::computeQpJacobian(); //df_prime_zero_dc*_test[_i][_qp]; from SplitCHBase
+  Real jacobian = SplitCHBase::computeQpJacobian(); //(df_prime_zero_dc+de_prime_dc)*_test[_i][_qp]; from SplitCHBase
   
   jacobian += _kappa[_qp]*_grad_phi[_j][_qp]*_grad_test[_i][_qp];
 

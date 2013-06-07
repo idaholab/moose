@@ -25,7 +25,8 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  virtual Real computeDFDC(PFFunctionType type) = 0;
+  virtual Real computeDFDC(PFFunctionType type);
+  virtual Real computeDEDC(PFFunctionType type);
 
 private:
   

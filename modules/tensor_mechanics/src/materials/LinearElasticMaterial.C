@@ -24,6 +24,11 @@ InputParameters validParams<LinearElasticMaterial>()
 LinearElasticMaterial::LinearElasticMaterial(const std::string & name, 
                                              InputParameters parameters)
     : TensorMechanicsMaterial(name, parameters),
+      _eigenstrain(declareProperty<RankTwoTensor>("eigenstrain")),
+      _delasticity_tensor_dc(declareProperty<ElasticityTensorR4>("delasticity_tensor_dc")),
+      _d2elasticity_tensor_dc2(declareProperty<ElasticityTensorR4>("d2elasticity_tensor_dc2")),
+      _deigenstrain_dc(declareProperty<RankTwoTensor>("deigenstrain_dc")),
+      _d2eigenstrain_dc2(declareProperty<RankTwoTensor>("d2eigenstrain_dc2")),
       _has_T(isCoupled("T")),
       _T(_has_T ? &coupledValue("T") : NULL),
       _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),

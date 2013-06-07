@@ -33,8 +33,9 @@ Real
 SplitCHBase::computeQpResidual()
 {
   Real f_prime_zero = computeDFDC(Residual);
+  Real e_prime = computeDEDC(Residual);
 
-  Real residual = f_prime_zero*_test[_i][_qp];
+  Real residual = (f_prime_zero + e_prime) *_test[_i][_qp];
 
   return residual;
 
@@ -44,8 +45,9 @@ Real
 SplitCHBase::computeQpJacobian()
 {
   Real df_prime_zero_dc = computeDFDC(Jacobian);
+  Real de_prime_dc = computeDEDC(Jacobian);
 
-  Real jacobian = df_prime_zero_dc*_test[_i][_qp];
+  Real jacobian = (df_prime_zero_dc + de_prime_dc) *_test[_i][_qp];
 
   return jacobian;
 
@@ -55,6 +57,18 @@ Real
 SplitCHBase::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
 
+  return 0.0;
+}
+
+Real
+SplitCHBase::computeDFDC(PFFunctionType type)
+{
+  return 0.0;
+}
+
+Real
+SplitCHBase::computeDEDC(PFFunctionType type)
+{
   return 0.0;
 }
 

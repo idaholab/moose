@@ -22,6 +22,12 @@ protected:
   virtual void computeQpStress();
   virtual RankTwoTensor computeStressFreeStrain();
   
+  MaterialProperty<RankTwoTensor> & _eigenstrain;
+  MaterialProperty<ElasticityTensorR4> & _delasticity_tensor_dc;
+  MaterialProperty<ElasticityTensorR4> & _d2elasticity_tensor_dc2;
+  MaterialProperty<RankTwoTensor> & _deigenstrain_dc;
+  MaterialProperty<RankTwoTensor> & _d2eigenstrain_dc2;
+
 private:
   bool _has_T;
   VariableValue * _T; //pointer rather than reference
@@ -30,6 +36,7 @@ private:
   const Real _Temp, _T0;
   std::vector<Real> _applied_strain_vector;
   RankTwoTensor _applied_strain_tensor;
+
 
 };
 
