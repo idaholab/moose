@@ -14,6 +14,7 @@
 #include "FluidMassEnergyBalanceModule.h"
 #include "ChemicalReactionsModule.h"
 #include "MiscModule.h"
+#include "VpscModule.h"
 
 void
 Elk::registerApps()
@@ -34,6 +35,7 @@ Elk::registerObjects(Factory & factory)
   FluidMassEnergyBalance::registerObjects(factory);
   ChemicalReactions::registerObjects(factory);
   Misc::registerObjects(factory);
+  Vpsc::registerObjects(factory);
 }
 
 void
@@ -45,4 +47,5 @@ Elk::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   HeatConduction::associateSyntax(syntax, action_factory);
   ChemicalReactions::associateSyntax(syntax, action_factory);
   Misc::associateSyntax(syntax, action_factory);
+  Vpsc::associateSyntax(syntax, action_factory);
 }
