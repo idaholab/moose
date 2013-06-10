@@ -410,13 +410,17 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
   unsigned int curr_var_idx = grain_it1->second->variable_idx;
   /**
    * We have two grains that are getting close represented by the same order parameter.
-   * We need to map to the variable whose closest grain to this one is furthest away (by centroids).
+   * We need to map to the variable whose closest grain to this one is furthest away by sphere to sphere distance.
    */
   std::vector<Real> min_distances(_vars.size(), std::numeric_limits<Real>::max());
+
+  // Make sure that we don't attempt to remap to the same variable
+  min_distances[curr_var_idx] = std::numeric_limits<Real>::min();
+
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it3 = _unique_grains.begin();
        grain_it3 != _unique_grains.end(); ++grain_it3)
   {
-    if (grain_it3->second->status == INACTIVE)
+    if (grain_it3->second->status == INACTIVE || grain_it3->second->variable_idx == curr_var_idx)
       continue;
 
     unsigned int potential_var_idx = grain_it3->second->variable_idx;
@@ -429,17 +433,17 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
   /**
    * We have a vector of the distances to the closest grains represented by each of our variables.  We just need to pick
    * the maximum of this this list: (max of the mins).  Note: We don't have an explicit check here to avoid remapping a
-   * variable to itself.  This is unecessary since the min_distance of a variable to itself will always be zero thus making
-   * it's selection impossible when looking for a max distance.
+   * variable to itself.  This is unecessary since the min_distance of a variable is explicitly set up above.
    */
   unsigned int new_variable_idx = std::distance(min_distances.begin(), std::max_element(min_distances.begin(), min_distances.end()));
 
   if (min_distances[new_variable_idx] < 0)
+  {
     std::cout << "*****************************************************************************\n"
-              << "Warning: This can't be good - remapping a grain a negative distance!"
-              << "\nYour initial condition may not be good, or perhaps you don't have enough"
-              << "\norder parameters.  No guarantees as to whether the grain tracker will work!"
+              << "Warning: No suitable variable found for remapping. Skipping..."
               << "\n*****************************************************************************\n";
+    return;
+  }
 
   std::cout << "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first
             << " (variable index: " << grain_it1->second->variable_idx << ")\n"
