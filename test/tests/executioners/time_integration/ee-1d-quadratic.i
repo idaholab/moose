@@ -81,7 +81,6 @@
 [Executioner]
   type = Transient
   scheme = 'explicit-euler'
-  petsc_options = '-snes_mf_operator'
 
   start_time = 0.0
   num_steps = 20
