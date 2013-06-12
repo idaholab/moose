@@ -218,6 +218,7 @@
 #include "BDF2.h"
 #include "CrankNicolson.h"
 #include "ExplicitEuler.h"
+#include "RungeKutta2.h"
 //
 #include "Predictor.h"
 
@@ -500,6 +501,7 @@ registerObjects(Factory & factory)
   registerTimeIntegrator(BDF2);
   registerTimeIntegrator(CrankNicolson);
   registerTimeIntegrator(ExplicitEuler);
+  registerTimeIntegrator(RungeKutta2);
   // predictors
   registerPredictor(Predictor);
 

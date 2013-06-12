@@ -101,5 +101,10 @@
     exodiff = 'ee-2d-quadratic_out.e'
   [../]
   
- 
+  # RK-2
+  [./rk2-2d-quadratic]
+    type = 'Exodiff'
+    input = 'rk-2d-quadratic.i'
+    exodiff = 'rk-2d-quadratic_out.e'
+  [../]
 []
