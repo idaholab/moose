@@ -28,7 +28,7 @@ InputParameters validParams<TransientInterface>()
 TransientInterface::TransientInterface(InputParameters & parameters, const std::string & name, const std::string & object_type) :
     _ti_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
     _is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true),
-    _t(_is_implicit ? _ti_feproblem.time() : _ti_feproblem.timeOld()),
+    _t(_ti_feproblem.time()),
     _t_step(_ti_feproblem.timeStep()),
     _dt(_ti_feproblem.dt()),
     _dt_old(_ti_feproblem.dtOld()),
