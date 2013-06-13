@@ -34,15 +34,48 @@ InputParameters validParams<MooseParsedGradFunction>();
 class MooseParsedGradFunction : public MooseParsedFunction
 {
 public:
+  /**
+   * Class constructor
+   * @param name The name of the function
+   * @param parameters The input parameters
+   */
   MooseParsedGradFunction(const std::string & name, InputParameters parameters);
 
-  virtual ~MooseParsedGradFunction() {}
+  /**ar
+   * Class destructor, it removes the libMesh::ParsedFunction
+   */
+  virtual ~MooseParsedGradFunction();
 
+  /**
+   * Compute the gradient of the function
+   * @param t The current time
+   * @param pt The current point (x,y,z)
+   * @return Gradient of the function
+   */
   virtual RealGradient gradient(Real t, const Point & pt);
 
+  /**
+   * Establishes a libMesh::ParsedFunction for the gradient
+   */
+  virtual void initialSetup();
+
 protected:
-    ParsedFunction<Real> _grad_function;
+
+  /**
+   * A method for updating the Postprocessor values of the libMesh::ParsedFunction from the values in the
+   * Postprocessors
+   */
+  virtual void updatePostprocessorValues();
+
+  /// Storage for gradient input function(s), i.e., grad_x, grad_y, and grad_z, in format ready for libMesh
+  std::string _grad_value;
+
+  /// Pointer to the libMesh::ParsedFunction for the gradient
+  ParsedFunction<Real> * _grad_function;
+
+  /// Vector of pointers to the variables in libMesh::ParseFunctio
+  std::vector<Real *> _grad_var_addr;
+
 };
 
 #endif //PARSEDGRADFUNCTION_H
-

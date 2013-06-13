@@ -23,17 +23,44 @@ class Reporter;
 template<>
 InputParameters validParams<Reporter>();
 
+/**
+ * A class for storing data, it allows the user to change the value of the
+ * postprocessor by altering the _my_value reference
+ */
 class Reporter : public GeneralPostprocessor
 {
 public:
+  /**
+   * Class constructor
+   * @param name The name of the Reporter postprocessor
+   * @param parameters The input parameters
+   */
   Reporter(const std::string & name, InputParameters parameters);
 
+  /**
+   * No action taken
+   */
   virtual void initialize() {}
+
+  /**
+   * No action taken
+   */
   virtual void execute() {}
 
+  /**
+   * Set the _my_value to the supplied default value
+   */
+  virtual void initialSetup();
+
+  /**
+   * Returns the value stored in _my_value
+   * @return The value of the postprocessor
+   */
   virtual Real getValue();
 
 protected:
+
+  /// Reference to the value being stored in the associated PostprocessorData class
   PostprocessorValue & _my_value;
 };
 

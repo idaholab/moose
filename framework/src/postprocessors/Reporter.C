@@ -26,11 +26,18 @@ Reporter::Reporter(const std::string & name, InputParameters params) :
     GeneralPostprocessor(name, params),
     _my_value(getPostprocessorValue(name))
 {
+}
+
+void
+Reporter::initialSetup()
+{
+  // Set the default value
   _my_value = getParam<Real>("default");
 }
 
 Real
 Reporter::getValue()
 {
+  // Return the stored value (references stored value in getPostprocessorData)
   return _my_value;
 }

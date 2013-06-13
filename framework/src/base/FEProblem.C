@@ -318,13 +318,24 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
   }
 
+  unsigned int n_threads = libMesh::n_threads();
+
+  // Call the initialSetup methods for functions
+  for(unsigned int i=0; i<n_threads; i++)
+  {
+    for(std::map<std::string, Function *>::iterator vit = _functions[i].begin();
+        vit != _functions[i].end();
+        ++vit)
+    {
+      vit->second->initialSetup();
+    }
+  }
+
   if (!isRestarting())
     projectSolution();
 
   if (_output_es_info)
     _eq.print_info();
-
-  unsigned int n_threads = libMesh::n_threads();
 
   Moose::setup_perf_log.push("copySolutionsBackwards()","Setup");
   copySolutionsBackwards();
@@ -439,11 +450,6 @@ void FEProblem::initialSetup()
     _user_objects(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
     _user_objects(EXEC_INITIAL)[i].initialSetup();
     _user_objects(EXEC_CUSTOM)[i].initialSetup();
-
-    for(std::map<std::string, Function *>::iterator vit = _functions[i].begin();
-        vit != _functions[i].end();
-        ++vit)
-      vit->second->initialSetup();
   }
 
   _aux.compute(EXEC_TIMESTEP_BEGIN);
@@ -462,6 +468,14 @@ void FEProblem::initialSetup()
   computeUserObjects(EXEC_TIMESTEP_BEGIN);
   computeUserObjects(EXEC_RESIDUAL);
   Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
+
+  // Moose::setup_perf_log.push("Output Initial Condition","Setup");
+  // if (_output_initial)
+  // {
+  //   output();
+  //   outputPostprocessors();
+  // }
+  // Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 
   _nl.initialSetupBCs();
   _nl.initialSetupKernels();
@@ -1579,6 +1593,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 
       Postprocessor * pp = getPostprocessorPointer(mo);
       _pps(type)[tid].addPostprocessor(pp);
+      _pps_data[tid].init(name);
       _objects_by_name[tid][name].push_back(mo);
 
       // Add it to the user object warehouse as well...
@@ -1603,6 +1618,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 
       Postprocessor * pp = getPostprocessorPointer(mo);
       _pps(type)[tid].addPostprocessor(pp);
+      _pps_data[tid].init(name);
       _objects_by_name[tid][name].push_back(mo);
 
       // Add it to the user object warehouse as well...
@@ -1615,6 +1631,12 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
       }
     }
   }
+}
+
+ExecStore<PostprocessorWarehouse> &
+FEProblem::getPostprocessorWarehouse()
+{
+  return _pps;
 }
 
 void
@@ -2824,7 +2846,7 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
     for(std::map<std::string, Function *>::iterator vit = _functions[i].begin();
         vit != _functions[i].end();
         ++vit)
-      vit->second->initialSetup();
+      vit->second->residualSetup();
   }
   _aux.residualSetup();
 

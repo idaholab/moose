@@ -380,6 +380,11 @@ public:
    */
   Real & getPostprocessorValueOld(const std::string & name, THREAD_ID tid = 0);
 
+  /**
+   * Get a reference to the PostprocessorWarehouse ExecStore object
+   */
+  ExecStore<PostprocessorWarehouse> & getPostprocessorWarehouse();
+
   virtual void computeUserObjects(ExecFlagType type = EXEC_TIMESTEP, UserObjectWarehouse::GROUP group = UserObjectWarehouse::ALL);
   virtual void computeAuxiliaryKernels(ExecFlagType type = EXEC_RESIDUAL);
   virtual void outputPostprocessors(bool force = false);
@@ -749,4 +754,3 @@ public:
 };
 
 #endif /* FEPROBLEM_H */
-

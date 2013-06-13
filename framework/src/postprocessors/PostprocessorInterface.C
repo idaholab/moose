@@ -13,8 +13,8 @@
 /****************************************************************/
 
 #include "PostprocessorInterface.h"
-#include "PostprocessorData.h"
 #include "FEProblem.h"
+#include "Postprocessor.h"
 
 PostprocessorInterface::PostprocessorInterface(InputParameters & params) :
     _pi_feproblem(*params.get<FEProblem *>("_fe_problem")),
@@ -39,4 +39,10 @@ PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
 {
   return _pi_feproblem.getPostprocessorValueOld(name, _pi_tid);
+}
+
+bool
+PostprocessorInterface::hasPostprocessor(const std::string & name)
+{
+  return _pi_feproblem.hasPostprocessor(name, _pi_tid);
 }

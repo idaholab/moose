@@ -22,12 +22,25 @@
 class PostprocessorData
 {
 public:
+  /**
+   * Class constructor
+   */
   PostprocessorData();
 
+  /**
+   * Initialization method, sets the current and old value to 0.0 for this
+   * postprocessor
+   */
   void init(const std::string & name);
 
+  /**
+   * Returns a true value if the postprocessor exists
+   */
   bool hasPostprocessor(const std::string & name);
 
+  /**
+   * Return the value for the post processor
+   */
   PostprocessorValue & getPostprocessorValue(const std::string & name);
 
   /**
@@ -50,7 +63,9 @@ public:
   void copyValuesBack();
 
 protected:
+  /// Values of the post-processor at the current time
   std::map<std::string, PostprocessorValue> _values;
+
   /// Values of the post-processors at the time t-1
   std::map<std::string, PostprocessorValue> _values_old;
 };

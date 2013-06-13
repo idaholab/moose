@@ -27,7 +27,7 @@ InputParameters validParams<Composite>();
  * Base class for function objects.  Functions override value to supply a
  * value at a point.
  */
-class Composite : public Function, FunctionInterface
+class Composite : public Function, protected FunctionInterface
 {
 public:
   Composite(const std::string & name, InputParameters parameters);

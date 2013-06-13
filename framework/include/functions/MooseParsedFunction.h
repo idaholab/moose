@@ -45,10 +45,15 @@ class MooseParsedFunction : public Function
 public:
   /**
    * Created from MooseSystem via the FunctionFactory.
+   * @param name The name of the function
+   * @param parameters The input parameters
    */
   MooseParsedFunction(const std::string & name, InputParameters parameters);
 
-  virtual ~MooseParsedFunction() {};
+  /**
+   * Destructor, it cleans up the libMesh::ParsedFunction object
+   */
+  virtual ~MooseParsedFunction();
 
   /**
    * Get the address to stick the value of the specified variable in. When you
@@ -62,14 +67,41 @@ public:
    *
    * @param var the name of the variable passed in the constructor.
    */
-
-  inline Real & getVarAddr(const std::string & var) { return _function.getVarAddress(var); }
+  inline Real & getVarAddr(const std::string & var) { return _function->getVarAddress(var); }
 
   /**
    * Evaluate the equation at the given location. For 1-D and 2-D equations
    * x and y are optional.
+   * @param t The evaluation time
+   * @param pt The current point (x,y,z)
+   * @return The result of evaluating the function
    */
   virtual Real value(Real t, const Point & pt);
+
+  /**
+   * Method for defining the libMesh::ParsedFunction
+   */
+  virtual void initialSetup();
+
+  /**
+   * Updates the Postprocessor data for the libMesh::ParsedFunction on timestep
+   */
+  virtual void timestepSetup();
+
+   /**
+   * Updates the Postprocessor data for the libMesh::ParsedFunction with Jacobian calculatin
+   */
+  virtual void jacobianSetup();
+
+  /**
+   * Updates the Postprocessor data for the libMesh::ParsedFunction with residual calculation
+   */
+  virtual void residualSetup();
+
+  /**
+   * Updates the Postprocessor data for the libMesh::ParsedFunction with subdomains
+   */
+  virtual void subdomainSetup();
 
 protected:
   /**
@@ -83,21 +115,53 @@ protected:
 
   /**
    * This method just checks to see if the function value contains quotes
+   * @param name The name of the ParsedFunction
+   * @param value The function given as a std::string
+   * @return The vector of strings, if the input function is valid
    */
-  static bool verifyInput(const std::string & name, const std::string & value);
+  const std::string verifyInput(const std::string & name, const std::string & value);
 
   /**
    * This method verifies that none of the implied variables are being re-declared as
    * variables in the parsed function.
+   * @param name The name of the ParsedFunction
+   * @param vars A vector of variables (std::strings) that are given in the function
+   * @return The variables (i.e., vars)
+   * TODO: The syntax between verifyInput and verifyVars should be consistent, which will effect MooseParsedGradFunction
    */
-  static const std::vector<std::string> * verifyVars(const std::vector<std::string> * vars);
+  const std::vector<std::string> verifyVars(const std::string & name, const std::vector<std::string> & vars);
 
+  /**
+   * A method for updating the Postprocessor values of the libMesh::ParsedFunction from the values in the
+   * Postprocessors
+   */
+  virtual void updatePostprocessorValues();
+
+  /// The function defined by the user
+  std::string _value;
+
+  /// Variables passed to libMesh::ParsedFunction, see initialSetup()
+  const std::vector<std::string> _vars;
+
+  /// Values passed by the user, they may be Reals for Postprocessors
+  const std::vector<std::string> _input_vals;
+
+  /// Initial values of variables passed to libMesh::ParsedFunction
   std::vector<Real> _vals;
 
-  ParsedFunction<Real> _function;
+  /// Vector of pointers to PP values
+  std::vector<Real *> _pp_vals;
 
-private:
-  std::map<std::string, Real*> _var_map;
+  /// Vector of pointers to the variables in libMesh::ParseFunction
+  std::vector<Real *> _var_addr;
+
+  /// Pointer to libMesh::ParsedFunction
+  ParsedFunction<Real> * _function;
+
+  /// Stores the relative location of variables (in _vars) that are connected to Postprocessors
+  std::vector<unsigned int> _pp_index;
+
+  /// Initialization flag
+  bool _initialized;
 };
-
 #endif //MOOSEPARSEDFUNCTION_H

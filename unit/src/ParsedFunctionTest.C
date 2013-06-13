@@ -34,7 +34,7 @@ ParsedFunctionTest::init()
 
   InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
   mesh_params.set<MooseEnum>("dim") = "3";
-  _mesh = new GeneratedMesh("mesh", mesh_params);
+  _mesh = new GeneratedMesh("mesh", mesh_params); // deleted by ~FEProblem
 
   InputParameters problem_params = _factory->getValidParams("FEProblem");
   problem_params.set<MooseMesh *>("mesh") = _mesh;
@@ -59,6 +59,7 @@ ParsedFunctionTest::basicConstructor()
   params.set<SubProblem *>("_subproblem") = _fe_problem;
   params.set<std::string>("value") = std::string("x + 1.5*y + 2 * z + t/4");
   MooseParsedFunction f("test", params);
+  f.initialSetup();
   CPPUNIT_ASSERT(f.value(4, Point(1,2,3)) == 11);
 
   finalize();
@@ -81,6 +82,7 @@ ParsedFunctionTest::advancedConstructor()
   params.set<std::vector<std::string> >("vars") = one_var;
 
   MooseParsedFunction f("test", params);
+  f.initialSetup();
   f.getVarAddr("q") = 4;
   CPPUNIT_ASSERT( f.value(0, Point(1,2)) == 7 );
 
@@ -97,38 +99,41 @@ ParsedFunctionTest::advancedConstructor()
   params2.set<std::vector<std::string> >("vars") = three_vars;
 
   MooseParsedFunction f2("test", params2);
+  f2.initialSetup();
   f2.getVarAddr("q") = 4;
   f2.getVarAddr("w") = 2;
   f2.getVarAddr("r") = 1.5;
   CPPUNIT_ASSERT( f2.value(0, Point(2,4)) == 9 );
 
   //test the constructor with one variable that's set
-  std::vector<Real> one_val(1);
-  one_val[0] = 2.5;
+  std::vector<std::string> one_val(1);
+  one_val[0] = "2.5";
 
   InputParameters params3 = _factory->getValidParams("ParsedFunction");
   params3.set<FEProblem *>("_fe_problem") = _fe_problem;
   params3.set<SubProblem *>("_subproblem") = _fe_problem;
   params3.set<std::string>("value") = "q*x";
   params3.set<std::vector<std::string> >("vars") = one_var;
-  params3.set<std::vector<Real> >("vals") = one_val;
+  params3.set<std::vector<std::string> >("vals") = one_val;
 
   MooseParsedFunction f3("test", params3);
+  f3.initialSetup();
   CPPUNIT_ASSERT( f3.value(0,2) == 5 );
 
   //test the constructor with three variables, two that are set
-  std::vector<Real> two_vals(2);
-  two_vals[0] = 1.5;
-  two_vals[1] = 1;
+  std::vector<std::string> two_vals(2);
+  two_vals[0] = "1.5";
+  two_vals[1] = "1";
 
   InputParameters params4 = _factory->getValidParams("ParsedFunction");
   params4.set<FEProblem *>("_fe_problem") = _fe_problem;
   params4.set<SubProblem *>("_subproblem") = _fe_problem;
   params4.set<std::string>("value") = "q*x + y/r + w";
   params4.set<std::vector<std::string> >("vars") = three_vars;
-  params4.set<std::vector<Real> >("vals") = two_vals;
+  params4.set<std::vector<std::string> >("vals") = two_vals;
 
   MooseParsedFunction f4("test", params4);
+  f4.initialSetup();
   f4.getVarAddr("r") = 2;
   CPPUNIT_ASSERT( f4.value(0, Point(2, 4)) == 6 );
   f4.getVarAddr("r") = 4;
@@ -154,6 +159,7 @@ ParsedFunctionTest::testVariables()
   params.set<std::vector<std::string> >("vars") = one_var;
 
   MooseParsedFunction f("test", params);
+  f.initialSetup();
   Real & q = f.getVarAddr("q");
   q = 4;
   CPPUNIT_ASSERT( f.value(0, Point(1, 2)) == 7 );
@@ -175,6 +181,7 @@ ParsedFunctionTest::testVariables()
   params2.set<std::vector<std::string> >("vars") = three_vars;
 
   MooseParsedFunction f2("test", params2);
+  f2.initialSetup();
   Real & q2 = f2.getVarAddr("q");
   Real & w2 = f2.getVarAddr("w");
   Real & r2 = f2.getVarAddr("r");
@@ -203,6 +210,7 @@ ParsedFunctionTest::testConstants()
   params.set<std::string>("value") = "log(e) + x";
 
   MooseParsedFunction f("test", params);
+  f.initialSetup();
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 2, f.value(0,1), 0.0000001 );
 
   InputParameters params2 = _factory->getValidParams("ParsedFunction");
@@ -211,6 +219,7 @@ ParsedFunctionTest::testConstants()
   params2.set<std::string>("value") = "sin(pi*x)";
 
   MooseParsedFunction f2("test", params2);
+  f2.initialSetup();
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 0, f2.value(0,1), 0.0000001 );
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 1, f2.value(0,0.5), 0.0000001 );
   CPPUNIT_ASSERT_DOUBLES_EQUAL( -1, f2.value(0,1.5), 0.0000001 );

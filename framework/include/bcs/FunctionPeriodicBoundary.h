@@ -61,9 +61,19 @@ protected:
   /// The dimension of the problem (says which _tr_XYZ member variables are active)
   unsigned int _dim;
 
+  /// Pointer to Function for x-component of the boundary
   Function * _tr_x;
+
+  /// Pointer to Function for y-component of the boundary
   Function * _tr_y;
+
+  /// Pointer to Function for z-component of the boundary
   Function * _tr_z;
+
+  /**
+   * An initialization method to make certain that intialSetup() of a function prior to value()
+   */
+  void init();
 };
 
 #endif //FUNCTIONPERIODICBOUNDARY_H

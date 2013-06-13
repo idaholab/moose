@@ -26,7 +26,9 @@ InputParameters validParams<FunctionIC>()
 FunctionIC::FunctionIC(const std::string & name, InputParameters parameters) :
     InitialCondition(name, parameters),
     _func(getFunction("function"))
-{}
+{
+  _func.initialSetup();
+}
 
 Real
 FunctionIC::value(const Point & p)

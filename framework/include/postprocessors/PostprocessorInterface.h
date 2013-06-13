@@ -20,6 +20,7 @@
 
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
+#include "PostprocessorData.h"
 
 // Forward Declarations
 class FEProblem;
@@ -40,6 +41,13 @@ public:
    * @return The value of the post-processor
    */
   PostprocessorValue & getPostprocessorValueOld(const std::string & name);
+
+  /**
+   * Determine if the postprocessor exists
+   * @param name The name of the postprocessor
+   * @return True if the postprocessor exists
+   */
+  bool hasPostprocessor(const std::string & name);
 
 private:
   FEProblem & _pi_feproblem;
