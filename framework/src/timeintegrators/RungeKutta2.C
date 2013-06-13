@@ -27,7 +27,8 @@ InputParameters validParams<RungeKutta2>()
 RungeKutta2::RungeKutta2(const std::string & name, InputParameters parameters) :
     TimeIntegrator(name, parameters),
     _sln_half(_nl.addVector("sln_half", true, GHOSTED)),
-    _Re_half(_nl.addVector("Re_half", true, GHOSTED))
+    _Re_half(_nl.addVector("Re_half", true, GHOSTED)),
+    _stage(0)
 {
 }
 
