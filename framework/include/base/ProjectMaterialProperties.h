@@ -50,8 +50,8 @@ protected:
   bool _refine;
   FEProblem & _fe_problem;
   NonlinearSystem & _sys;
-  std::vector<MaterialData *> _material_data;
-  std::vector<MaterialData *> _bnd_material_data;
+  std::vector<MaterialData *> & _material_data;
+  std::vector<MaterialData *> & _bnd_material_data;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
   std::vector<MaterialWarehouse> & _materials;

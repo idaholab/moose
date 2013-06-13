@@ -55,4 +55,5 @@ CacheChangedListsThread::join(const CacheChangedListsThread & y)
 {
   _refined_elements.insert(_refined_elements.end(), y._refined_elements.begin(), y._refined_elements.end());
   _coarsened_elements.insert(_coarsened_elements.end(), y._coarsened_elements.begin(), y._coarsened_elements.end());
+  _coarsened_element_children.insert(y._coarsened_element_children.begin(), y._coarsened_element_children.end());
 }

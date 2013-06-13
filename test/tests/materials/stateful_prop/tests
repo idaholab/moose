@@ -1,73 +1,65 @@
 [Tests]
-  # Doesn't work with threads
   [./test_csv]
     type = 'CSVDiff'
     input = 'stateful_prop_test.i'
     csvdiff = 'out.csv'
     prereq = 'test'
-    max_parallel = 1
-    max_threads = 1
+#    max_parallel = 1
+#    max_threads = 1
   [../]
 
-  # Doesn't work with threads
   [./computing_initial_residual_test]
     type = 'Exodiff'
     input = 'computing_initial_residual_test.i'
     exodiff = 'computing_initial_residual_test_out.e'
-    max_parallel = 1
-    max_threads = 1
+ #   max_parallel = 1
+ #   max_threads = 1
   [../]
 
-  # Doesn't work with threads
   [./test_older]
     type = 'Exodiff'
     input = 'stateful_prop_test_older.i'
     exodiff = 'out_older.e'
-    max_parallel = 1
-    max_threads = 1
+ #   max_parallel = 1
+ #   max_threads = 1
   [../]
 
-  # Doesn't work with threads
   [./spatial_test]
     type = 'Exodiff'
     input = 'stateful_prop_spatial_test.i'
     exodiff = 'out_spatial.e'
-    max_parallel = 1
-    max_threads = 1
+ #   max_parallel = 1
+ #   max_threads = 1
   [../]
 
-  # Doesn't work with threads
   [./test_older_csv]
     type = 'CSVDiff'
     input = 'stateful_prop_test_older.i'
     csvdiff = 'out_older.csv'
     max_parallel = 1
     prereq = 'test_older'
-    max_threads = 1
+ #   max_threads = 1
   [../]
 
-  # Doesn't work with threads
   [./test]
     type = 'Exodiff'
     input = 'stateful_prop_test.i'
     exodiff = 'out.e'
-    max_parallel = 1
-    max_threads = 1
+ #   max_parallel = 1
+ #   max_threads = 1
   [../]
 
-  # Doesn't work with threads
   [./adaptivity]
     type = 'Exodiff'
     input = 'stateful_prop_adaptivity_test.i'
     exodiff = 'stateful_prop_adaptivity_test_out.e-s003'
-    max_threads = 1
+ #   max_threads = 1
   [../]
 
-  # Doesn't work with threads
   [./spatial_adaptivity]
     type = 'Exodiff'
     input = 'spatial_adaptivity_test.i'
     exodiff = 'spatial_adaptivity_test_out.e-s003'
-    max_threads = 1
+ #   max_threads = 1
   [../]
 []

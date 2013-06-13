@@ -32,7 +32,7 @@ public:
 
   virtual ~ThreadedElementLoopBase();
 
-  void operator() (const RangeType & range);
+  void operator() (const RangeType & range, bool bypass_threading=false);
 
   /**
    * Called before the element range loop
@@ -112,10 +112,10 @@ ThreadedElementLoopBase<RangeType>::~ThreadedElementLoopBase()
 
 template<typename RangeType>
 void
-ThreadedElementLoopBase<RangeType>::operator () (const RangeType & range)
+ThreadedElementLoopBase<RangeType>::operator () (const RangeType & range, bool bypass_threading)
 {
   ParallelUniqueId puid;
-  _tid = puid.id;
+  _tid = bypass_threading ? 0 : puid.id;
 
   pre();
 
