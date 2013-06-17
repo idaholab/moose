@@ -27,6 +27,7 @@ template<>
 InputParameters validParams<SetupOutputAction>()
 {
   InputParameters params = validParams<Action>();
+  MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   params.addParam<OutFileBase>("file_base", "The desired solution output name without an extension (Defaults to the mesh file name + '_out' or 'out' if generating the mesh by some other means)");
   params.addParam<unsigned int>("interval", 1, "The interval at which timesteps are output to the solution file");
@@ -40,7 +41,8 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("xda", false, "Specifies that you would like xda output solution files(s)");
   params.addParam<bool>("postprocessor_screen", true, "Specifies that you would like PostProcessor output to the screen (stdout)");
   params.addParam<unsigned int>("max_pps_rows_screen", 15, "The maximum number of postprocessor values displayed on screen during a timestep (set to 0 for unlimited)");
-  params.addParam<bool>("pps_fit_to_screen", true, "Whether or not to fit the PPS table to the terminal width");
+  params.addParam<MooseEnum>("pps_fit_to_screen", pps_fit_mode, "Specifies the wrapping mode for post-processor tables that are printed to the screen "
+                             "(ENVIRONMENT: Read \"PPS_WIDTH\" for desired width, AUTO: Attempt to determine width automatically (serial only), <n>: Desired width");
   params.addParam<bool>("postprocessor_csv", false, "Specifies that you would like a PostProcessor comma separated values file");
   params.addParam<bool>("postprocessor_gnuplot", false, "Specifies that you would like plots of the postprocessor output");
   params.addParam<std::string>("gnuplot_format", "ps", "Specifies which output format gnuplot will produce. Currently supported: ps, gif, and png");
@@ -180,7 +182,7 @@ SetupOutputAction::act()
   _problem->_postprocessor_gnuplot_output = getParam<bool>("postprocessor_gnuplot");
   _problem->_gnuplot_format = getParam<std::string>("gnuplot_format");
   _problem->setMaxPPSRowsScreen(getParam<unsigned int>("max_pps_rows_screen"));
-  _problem->setPPSFitScreen(getParam<bool>("pps_fit_to_screen"));
+  _problem->setPPSFitScreen(getParam<MooseEnum>("pps_fit_to_screen"));
 
   _problem->outputDisplaced(getParam<bool>("output_displaced"));
   _problem->outputSolutionHistory(getParam<bool>("output_solution_history"));

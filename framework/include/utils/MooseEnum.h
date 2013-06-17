@@ -86,6 +86,9 @@ public:
   bool operator==(int value) const;
   bool operator!=(int value) const;
 
+  bool operator==(unsigned short value) const;
+  bool operator!=(unsigned short value) const;
+
   bool operator==(const MooseEnum & value) const;
   bool operator!=(const MooseEnum & value) const;
 

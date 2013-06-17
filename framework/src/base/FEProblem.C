@@ -35,6 +35,7 @@
 #include "Function.h"
 #include "Material.h"
 #include "PetscSupport.h"
+#include "SetupOutputAction.h"
 
 #include "ElementPostprocessor.h"
 #include "NodalPostprocessor.h"
@@ -102,7 +103,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _cm(NULL),
     _quadrature_order(CONSTANT),
     _pps_output_table_max_rows(0),
-    _pps_fit_to_screen(true),
+    _pps_fit_to_screen(FormattedTable::getWidthModes()),
     _postprocessor_screen_output(true),
     _postprocessor_csv_output(false),
     _postprocessor_gnuplot_output(false),

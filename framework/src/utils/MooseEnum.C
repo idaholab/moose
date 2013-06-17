@@ -110,6 +110,17 @@ bool MooseEnum::operator!=(int value) const
   return value != _current_id;
 }
 
+bool
+MooseEnum::operator==(unsigned short value) const
+{
+  return value == _current_id;
+}
+
+bool MooseEnum::operator!=(unsigned short value) const
+{
+  return value != _current_id;
+}
+
 bool MooseEnum::operator==(const MooseEnum & value) const
 {
   return value._current_name == _current_name;

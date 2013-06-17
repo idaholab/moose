@@ -20,6 +20,7 @@
 
 // Used for terminal width
 #include <sys/ioctl.h>
+#include <cstdlib>
 
 const unsigned short FormattedTable::_column_width = 15;
 const unsigned short FormattedTable::_min_pps_width = 40;
@@ -129,17 +130,23 @@ FormattedTable::printTable(const std::string & file_name)
 void
 FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries)
 {
-  printTable(out, last_n_entries, false);
+  printTable(out, last_n_entries, MooseEnum("ENVIRONMENT=-1", "ENVIRONMENT"));
 }
 
 void
-FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries, bool fit_to_term_width)
+FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries, const MooseEnum & suggested_term_width)
 {
   unsigned short term_width;
-  if (fit_to_term_width)
-    term_width = getTermWidth();
+
+  if (suggested_term_width == "ENVIRONMENT")
+    term_width = getTermWidth(true);
+  else if (suggested_term_width == "AUTO")
+    term_width = getTermWidth(false);
   else
-    term_width = std::numeric_limits<unsigned short>::max();
+    term_width = suggested_term_width;
+
+  if (term_width < _min_pps_width)
+    term_width = _min_pps_width;
 
   std::set<std::string>::iterator col_it = _column_names.begin();
   std::set<std::string>::iterator col_end = _column_names.end();
@@ -374,25 +381,42 @@ FormattedTable::clear()
 }
 
 unsigned short
-FormattedTable::getTermWidth() const
+FormattedTable::getTermWidth(bool use_environment) const
 {
   struct winsize w;
-
   /**
    * Initialize the value we intend to populate just in case
    * the system call fails
    */
   w.ws_col = std::numeric_limits<unsigned short>::max();
 
-  try
+  if (use_environment)
   {
-    ioctl(0, TIOCGWINSZ, &w);
+    char *pps_width = std::getenv("PPS_WIDTH");
+    if (pps_width != NULL)
+    {
+      std::stringstream ss(pps_width);
+      ss >> w.ws_col;
+    }
   }
-  catch(...)
+  else
   {
-    // Something bad happened, make sure we have a sane value
-    w.ws_col = std::numeric_limits<unsigned short>::max();
+    try
+    {
+      ioctl(0, TIOCGWINSZ, &w);
+    }
+    catch(...)
+    {
+      // Something bad happened, make sure we have a sane value
+      w.ws_col = std::numeric_limits<unsigned short>::max();
+    }
   }
 
-  return std::max(_min_pps_width, w.ws_col);
+  return w.ws_col;
+}
+
+MooseEnum
+FormattedTable::getWidthModes()
+{
+  return MooseEnum("ENVIRONMENT=-1, AUTO=0, 80=80, 120=120, 160=160", "ENVIRONMENT", true);
 }

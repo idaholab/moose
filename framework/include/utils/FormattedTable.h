@@ -16,6 +16,7 @@
 #define FORMATTEDTABLE_H
 
 #include "Moose.h"
+#include "MooseEnum.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/exodusII_io.h"
@@ -63,7 +64,7 @@ public:
    * "n" entries.  A value of zero means don't skip any rows
    */
   void printTable(std::ostream & out, unsigned int last_n_entries=0);
-  void printTable(std::ostream & out, unsigned int last_n_entries, bool fit_to_term_width);
+  void printTable(std::ostream & out, unsigned int last_n_entries, const MooseEnum & suggested_term_width);
   void printTable(const std::string & file_name);
 
   /**
@@ -74,6 +75,8 @@ public:
   void printEnsight(const std::string & file_name);
   void writeExodus(ExodusII_IO * ex_out, Real time);
   void makeGnuplot(const std::string & base_file, const std::string & format);
+
+  static MooseEnum getWidthModes();
 
 protected:
   void printTablePiece(std::ostream & out, unsigned int last_n_entries, std::map<std::string, unsigned short> & col_widths,
@@ -92,7 +95,7 @@ protected:
   /**
    * Returns the width of the terminal using sys/ioctl
    */
-  unsigned short getTermWidth() const;
+  unsigned short getTermWidth(bool use_environment) const;
 
   /**
    * Data structure for the console table
