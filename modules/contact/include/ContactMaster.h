@@ -6,10 +6,7 @@
 #include "PenetrationLocator.h"
 
 //Forward Declarations
-class ContactMaster;
-
-template<>
-InputParameters validParams<ContactMaster>();
+class NodalArea;
 
 enum ContactModel
 {
@@ -44,6 +41,7 @@ public:
   virtual void updateContactSet(bool beginning_of_step = false);
 
 protected:
+  const NodalArea & _nodal_area;
   const unsigned int _component;
   const ContactModel _model;
   const ContactFormulation _formulation;
@@ -68,5 +66,8 @@ protected:
 
 ContactModel contactModel(const std::string & the_name);
 ContactFormulation contactFormulation(const std::string & the_name);
+
+template<>
+InputParameters validParams<ContactMaster>();
 
 #endif //CONTACTMASTER_H

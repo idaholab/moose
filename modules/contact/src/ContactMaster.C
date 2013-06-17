@@ -1,5 +1,7 @@
 #include "ContactMaster.h"
+
 #include "FrictionalContactProblem.h"
+#include "NodalArea.h"
 #include "SystemBase.h"
 
 // libmesh includes
@@ -15,6 +17,7 @@ InputParameters validParams<ContactMaster>()
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
+  params.addRequiredParam<UserObjectName>("nodal_area_object", "The NodalArea UserObject to get values from");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
@@ -37,6 +40,7 @@ InputParameters validParams<ContactMaster>()
 
 ContactMaster::ContactMaster(const std::string & name, InputParameters parameters) :
   DiracKernel(name, parameters),
+  _nodal_area(getUserObject<NodalArea>("nodal_area_object")),
   _component(getParam<unsigned int>("component")),
   _model(contactModel(getParam<std::string>("model"))),
   _formulation(contactFormulation(getParam<std::string>("formulation"))),
@@ -145,7 +149,10 @@ ContactMaster::updateContactSet(bool beginning_of_step)
     {
       const Node * node = pinfo->_node;
 
-      Real resid( pinfo->_normal * -pinfo->_contact_force );
+      Real area = _nodal_area.nodalArea(node->id());
+      area = area != 0 ? area : 1;
+
+      Real resid( -(pinfo->_normal * pinfo->_contact_force) / area );
 
       // std::cout << locked_this_step[slave_node_num] << " " << pinfo->_distance << std::endl;
       const Real distance( pinfo->_normal * (pinfo->_closest_point - _mesh.node(node->id())));
@@ -172,12 +179,18 @@ ContactMaster::updateContactSet(bool beginning_of_step)
     {
       if (_formulation == CF_PENALTY)
       {
+        Real area = _nodal_area.nodalArea(pinfo->_node->id());
+        area = area != 0 ? area : 1;
         if (pinfo->_distance >= 0)
         {
           if (hpit == has_penetrated.end())
           {
             has_penetrated.insert(slave_node_num);
           }
+        }
+        else if ((pinfo->_contact_force * pinfo->_normal) / area < 0)
+        {
+          // Do nothing.  This node is in contact and in compression.
         }
         else
         {

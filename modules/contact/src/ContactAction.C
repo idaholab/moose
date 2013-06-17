@@ -4,6 +4,9 @@
 #include "FEProblem.h"
 #include "Parser.h"
 #include "MooseApp.h"
+#include "Conversion.h"
+
+static unsigned int counter = 0;
 
 template<>
 InputParameters validParams<ContactAction>()
@@ -87,6 +90,7 @@ ContactAction::act()
     params.set<Real>("penalty") = _penalty;
     params.set<Real>("friction_coefficient") = _friction_coefficient;
     params.set<Real>("tension_release") = _tension_release;
+    params.set<UserObjectName>("nodal_area_object") = "nodal_area_object_" + Moose::stringify(counter);
     if (isParamValid("tangential_tolerance"))
     {
       params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
@@ -140,6 +144,7 @@ ContactAction::act()
     params.set<BoundaryName>("master") = _master;
     params.set<Real>("penalty") = _penalty;
     params.set<Real>("friction_coefficient") = _friction_coefficient;
+    params.set<UserObjectName>("nodal_area_object") = "nodal_area_object_" + Moose::stringify(counter);
     if (isParamValid("tangential_tolerance"))
     {
       params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
@@ -178,5 +183,5 @@ ContactAction::act()
                                params);
     }
   }
-
+  ++counter;
 }
