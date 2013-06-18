@@ -26,6 +26,7 @@
     exodiff = 'sbp_schur_full_a11_out.e'
     max_parallel = 3
     petsc_version = '>=3.3'
+		deleted = "PETSC Error"
   [../]
   [./schur_full_self]
     type = 'Exodiff'
