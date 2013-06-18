@@ -69,9 +69,11 @@ YAMLFormatter::printParams(const std::string &prefix, InputParameters &params, s
       //prints the value, which is the default value when dumping the tree
       //because it hasn't been changed
 
-      // remove additional '\n' possibly generated in output (breaks YAML parsing)
+      // Output stream, performing special operations for writing objects such as Points and RealVectorValues
       std::ostringstream toss;
-      iter->second->print(toss);
+      buildOutputString(toss, iter);
+
+      // remove additional '\n' possibly generated in output (breaks YAML parsing)
       std::string tmp_str = toss.str();
       for(std::string::iterator it=tmp_str.begin(); it!=tmp_str.end(); ++it)
       {
@@ -134,4 +136,34 @@ std::string
 YAMLFormatter::printBlockClose(const std::string &/*name*/, short /*depth*/) const
 {
   return std::string();
+}
+
+void
+YAMLFormatter::buildOutputString(std::ostringstream & output, const InputParameters::iterator iter)
+{
+
+  // Account for Point
+  InputParameters::Parameter<Point> * ptr0 = dynamic_cast<InputParameters::Parameter<Point>*>(iter->second);
+
+  // Account for RealVectorValues
+  InputParameters::Parameter<RealVectorValue> * ptr1  = dynamic_cast<InputParameters::Parameter<RealVectorValue>*>(iter->second);
+
+  // Output the Point components
+  if (ptr0)
+  {
+    output << ptr0->get().operator()(0) << " " << ptr0->get().operator()(1) << " " << ptr0->get().operator()(2);
+  }
+
+  // Output the RealVectorValue components
+  else if (ptr1)
+  {
+    output << ptr1->get().operator()(0) << " " << ptr1->get().operator()(1) << " " << ptr1->get().operator()(2);
+  }
+
+  // General case, call the print operator
+  else
+  {
+    iter->second->print(output);
+  }
+
 }

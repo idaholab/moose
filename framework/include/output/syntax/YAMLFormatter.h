@@ -16,6 +16,7 @@
 #define YAMLFORMATTER_H
 
 #include "SyntaxTree.h"
+#include <sstream>
 
 /**
  * This class produces produces a yaml dump of the InputFileParameters that is machine parsable by any YAML formatter.
@@ -35,6 +36,13 @@ public:
 
 protected:
   bool _dump_mode;
+
+  /**
+   * Method for building an output string that accounts for specific types (e.g., Point)
+   * @param output Reference to the output string
+   * @param current InputParameters iterator that is being output
+   */
+  void buildOutputString(std::ostringstream & output, const InputParameters::iterator iter);
 };
 
 #endif /* YAMLFORMATTER_H */
