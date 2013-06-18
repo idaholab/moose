@@ -30,7 +30,7 @@
   [../]
 
   [./forcing_func]
-    type = Composite
+    type = CompositeFunction
     functions = 'ff_1 ff_2'
   [../]
 

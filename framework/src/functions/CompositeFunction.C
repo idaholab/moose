@@ -12,10 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Composite.h"
+#include "CompositeFunction.h"
 
 template<>
-InputParameters validParams<Composite>()
+InputParameters validParams<CompositeFunction>()
 {
   InputParameters params = validParams<Function>();
   params.addParam<std::vector<std::string> >("functions", "The functions to be multiplied together.");
@@ -23,7 +23,7 @@ InputParameters validParams<Composite>()
   return params;
 }
 
-Composite::Composite(const std::string & name, InputParameters parameters) :
+CompositeFunction::CompositeFunction(const std::string & name, InputParameters parameters) :
   Function(name, parameters),
   FunctionInterface( parameters ),
   _scale_factor( getParam<Real>("scale_factor") )
@@ -57,12 +57,12 @@ Composite::Composite(const std::string & name, InputParameters parameters) :
 
 }
 
-Composite::~Composite()
+CompositeFunction::~CompositeFunction()
 {
 }
 
 Real
-Composite::value(Real t, const Point & p)
+CompositeFunction::value(Real t, const Point & p)
 {
   Real val(_scale_factor);
   for (unsigned i(0); i < _f.size(); ++i)

@@ -12,26 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPOSITE_H
-#define COMPOSITE_H
+#ifndef COMPOSITEFUNCTION_H
+#define COMPOSITEFUNCTION_H
 
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class Composite;
+class CompositeFunction;
 
 template<>
-InputParameters validParams<Composite>();
+InputParameters validParams<CompositeFunction>();
 
 /**
  * Base class for function objects.  Functions override value to supply a
  * value at a point.
  */
-class Composite : public Function, protected FunctionInterface
+class CompositeFunction : public Function, protected FunctionInterface
 {
 public:
-  Composite(const std::string & name, InputParameters parameters);
-  virtual ~Composite();
+  CompositeFunction(const std::string & name, InputParameters parameters);
+  virtual ~CompositeFunction();
 
   virtual Real value(Real t, const Point & pt);
 

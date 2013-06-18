@@ -102,7 +102,7 @@
 
 // functions
 #include "ConstantFunction.h"
-#include "Composite.h"
+#include "CompositeFunction.h"
 #include "MooseParsedFunction.h"
 #include "MooseParsedGradFunction.h"
 #include "PiecewiseLinear.h"
@@ -382,7 +382,7 @@ registerObjects(Factory & factory)
 
   // functions
   registerFunction(ConstantFunction);
-  registerFunction(Composite);
+  registerFunction(CompositeFunction);
   registerNamedFunction(MooseParsedFunction, "ParsedFunction");
   registerNamedFunction(MooseParsedGradFunction, "ParsedGradFunction");
   registerFunction(PiecewiseLinear);
