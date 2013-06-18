@@ -3,7 +3,6 @@
     type = 'Exodiff'
     input = 'all_periodic_trans.i'
     exodiff = 'all_periodic_trans_out.e'
-    max_threads = 1
     max_parallel = 1
     group = 'periodic'
     mesh_mode = 'SERIAL'
@@ -13,7 +12,6 @@
     type = 'Exodiff'
     input =  'auto_periodic_bc_test.i'
     exodiff = 'out_auto.e'
-    max_threads = 1
     max_parallel = 1
     group = 'periodic'
     mesh_mode = 'SERIAL'
@@ -23,7 +21,6 @@
     type = 'Exodiff'
     input =  'auto_periodic_bc_non_generated.i'
     exodiff = 'out_auto_non_generated.e'
-    max_threads = 1
     max_parallel = 1
     group = 'periodic'
     mesh_mode = 'SERIAL'
@@ -42,7 +39,6 @@
     type = 'Exodiff'
     input = ' auto_periodic_bc_test_3d.i '
     exodiff = 'out_auto_3d.e'
-    max_threads = 1
     max_parallel = 1
     group = 'periodic'
     mesh_mode = 'SERIAL'
@@ -53,7 +49,6 @@
     type = 'Exodiff'
     input = 'orthogonal_pbc_on_square.i'
     exodiff = 'orthogonal_pbc_on_square_out.e'
-    max_threads = 1
     max_parallel = 1
     group = 'periodic'
     mesh_mode = 'SERIAL'
@@ -63,7 +58,6 @@
     type = 'Exodiff'
     input = ' parallel_pbc_using_trans.i '
     exodiff = 'parallel_pbc_using_trans_out.e'
-    max_threads = 1
     max_parallel = 1
     group = 'periodic'
     mesh_mode = 'SERIAL'
@@ -73,7 +67,6 @@
     type = 'Exodiff'
     input = 'periodic_subdomain_restricted_test.i'
     exodiff = 'out_restrict.e'
-    max_threads = 1
     max_parallel = 1
     group = 'periodic'
     mesh_mode = 'SERIAL'
@@ -84,7 +77,6 @@
     type = 'Exodiff'
     input = 'periodic_level_1_test.i'
     exodiff = 'level1.e level1.e-s005 level1.e-s010'
-    max_threads = 1
     max_parallel = 1
     group = 'periodic'
     mesh_mode = 'SERIAL'
@@ -96,7 +88,6 @@
     type = 'Exodiff'
     input = 'periodic_bc_test.i'
     exodiff = 'out.e'
-    max_threads = 1
     max_parallel = 1
     group = 'periodic'
     mesh_mode = 'SERIAL'
@@ -106,7 +97,6 @@
     type = 'Exodiff'
     input = 'trapezoid.i'
     exodiff = 'out_trapezoid.e'
-    max_threads = 1
     max_parallel = 1
     group = 'periodic'
     mesh_mode = 'SERIAL'
@@ -116,7 +106,6 @@
     type = 'Exodiff'
     input = 'wedge.i'
     exodiff = 'out_wedge.e'
-    max_threads = 1
     max_parallel = 1
     group = 'periodic'
     mesh_mode = 'SERIAL'
@@ -126,7 +115,6 @@
     type = 'Exodiff'
     input = ' wedge_sys.i '
     exodiff = 'out_wedge_sys.e'
-    max_threads = 1
     max_parallel = 1
     group = 'periodic'
     mesh_mode = 'SERIAL'

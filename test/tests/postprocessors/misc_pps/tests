@@ -4,6 +4,6 @@
     input = 'misc_pps_test.i'
     exodiff = 'pps_out.e'
     custom_cmp = 'misc_pps_test.cmp'
-    max_parallel = 1
+    max_parallel = 1   # This test has PPS for Linear and Non-linear Iteration counts
   [../]
 []

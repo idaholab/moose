@@ -18,7 +18,6 @@
     input = 'material_test_dg.i'
     exodiff = 'out_dg.e'
     scale_refine = 3
-    max_threads = 1
   [../]
 
   [./bnd_material_test]

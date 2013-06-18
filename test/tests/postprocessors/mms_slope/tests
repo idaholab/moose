@@ -4,6 +4,6 @@
     input = 'mms_slope_test.i'
     exodiff = 'out.e-s002 out.e-s007'
     group = 'adaptive'
-    max_parallel = 1
+    abs_zero = 1e-8
   [../]
 []
