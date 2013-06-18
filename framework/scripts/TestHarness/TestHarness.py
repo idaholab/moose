@@ -475,7 +475,7 @@ class TestHarness:
                       help="Currently only needed for bitten code coverage")
     parser.add_option('--parallel', '-p', action="store", type='int', dest="parallel",
                       help="Number of processors to use when running mpiexec")
-    parser.add_option('--threads', action="store", type='int', dest="nthreads",default=1,
+    parser.add_option('--n-threads', action="store", type='int', dest="nthreads",default=1,
                       help="Number of threads to use when running mpiexec")
     parser.add_option('-d', action='store_true', dest='debug_harness', default=False, help='Turn on Test Harness debugging')
     parser.add_option('--valgrind', action='store_true', dest='enable_valgrind', default=False, help='Enable Valgrind')

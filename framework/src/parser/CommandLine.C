@@ -108,7 +108,7 @@ CommandLine::addOption(const std::string & name, Option cli_opt)
   for (unsigned int i = 0; i < cli_opt.cli_syntax.size(); i++)
   {
     std::string stx = cli_opt.cli_syntax[i];
-    cli_opt.cli_switch.push_back(stx.substr(0, stx.find_first_of(" ")));
+    cli_opt.cli_switch.push_back(stx.substr(0, stx.find_first_of(" =")));
   }
 
   _cli_options[name] = cli_opt;
