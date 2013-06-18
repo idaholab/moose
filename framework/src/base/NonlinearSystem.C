@@ -337,12 +337,19 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
   MatFDColoringSetFunction(_fdcoloring,
                            (PetscErrorCode (*)(void))&libMesh::__libmesh_petsc_snes_residual,
                            &petsc_nonlinear_solver);
+#if PETSC_VERSION_LESS_THAN(3,4,0)
   SNESSetJacobian(petsc_nonlinear_solver.snes(),
                   petsc_mat->mat(),
                   petsc_mat->mat(),
                   SNESDefaultComputeJacobianColor,
                   _fdcoloring);
-
+#else
+  SNESSetJacobian(petsc_nonlinear_solver.snes(),
+                  petsc_mat->mat(),
+                  petsc_mat->mat(),
+                  SNESComputeJacobianDefaultColor,
+                  _fdcoloring);
+#endif
 #if PETSC_VERSION_LESS_THAN(3,2,0)
   Mat my_mat = petsc_mat->mat();
   MatStructure my_struct;
@@ -398,8 +405,13 @@ NonlinearSystem::setupDecomposition()
 
   // Create and set up the DM that will consume the split options set above.
   if (!DMMooseRegistered) {
+#if PETSC_VERSION_LESS_THAN(3,4,0)
     ierr = DMRegister(DMMOOSE, PETSC_NULL, "DMCreate_Moose", DMCreate_Moose);
     CHKERRABORT(libMesh::COMM_WORLD, ierr);
+#else
+    ierr = DMRegister(DMMOOSE, DMCreate_Moose);
+    CHKERRABORT(libMesh::COMM_WORLD, ierr);
+#endif
     DMMooseRegistered = true;
   }
 

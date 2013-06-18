@@ -51,7 +51,7 @@ class Split : public MooseObject {
   /// 'D' means the lower-right block in decomposition J = [A B; C D]
   enum SchurPreconditioner {
     SchurPreconditionerSelf,
-    SchurPreconditionerD
+    SchurPreconditionerA11
   };
   SchurPreconditioner
   getSchurPreconditioner(const std::string& str);

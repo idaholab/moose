@@ -374,8 +374,8 @@ registerObjects(Factory & factory)
   registerExecutioner(Steady);
   registerExecutioner(Transient);
   registerExecutioner(CoupledTransientExecutioner);
-#if defined(LIBMESH_HAVE_PETSC) && defined(PETSC_VERSION_LE)
-#if !PETSC_VERSION_LE(3,3,0)
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,4,0)
+#if 0 // This seems to be broken right now -- doesn't work wiith petsc >= 3.4 either
   registerExecutioner(TransientAdaptive);
 #endif
 #endif

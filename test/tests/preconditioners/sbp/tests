@@ -20,10 +20,10 @@
     max_parallel = 3
     petsc_version = '>=3.3'
   [../]
-  [./schur_full_diag]
+  [./schur_full_a11]
     type = 'Exodiff'
-    input = 'sbp_schur_full_diag_test.i'
-    exodiff = 'sbp_schur_full_diag_out.e'
+    input = 'sbp_schur_full_a11_test.i'
+    exodiff = 'sbp_schur_full_a11_out.e'
     max_parallel = 3
     petsc_version = '>=3.3'
   [../]

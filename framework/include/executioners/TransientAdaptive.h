@@ -16,8 +16,8 @@
 #define TRANSIENTADAPTIVE_H
 
 #include "libmesh/petsc_macro.h"
-#if defined(LIBMESH_HAVE_PETSC) && defined(PETSC_VERSION_LE)
-#if !PETSC_VERSION_LE(3,3,0)
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,4,0)
+#if 0 // This seems to be broken right now -- Moose::TimeSteppingScheme undefined
 
 #include "Executioner.h"
 #include "InputParameters.h"
@@ -29,6 +29,8 @@
 class TransientAdaptive;
 class TimeStepper;
 class FEProblem;
+
+
 
 enum TimeStepperStatus {
   STATUS_ITERATING                = 0,
@@ -67,8 +69,6 @@ protected:
   TimeStepper *_time_stepper;
   bool keepGoing(TimeStepperStatus status, Real time) const;
 };
-
+#endif // This seems to be broken right now -- Moose::TimeSteppingScheme undefined
 #endif
-#endif
-
 #endif // TRANSIENTADAPTIVE_H
