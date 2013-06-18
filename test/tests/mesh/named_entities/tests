@@ -11,8 +11,8 @@
     input = 'periodic_bc_names_test.i'
     exodiff = 'periodic_bc_names_test_out.e'
     group = 'periodic'
-    max_parallel = 1
     mesh_mode = 'SERIAL'
+    abs_zero = 1e-6
   [../]
 
   [./on_the_fly_test]
