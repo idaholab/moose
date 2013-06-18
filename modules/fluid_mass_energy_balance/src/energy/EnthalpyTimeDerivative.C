@@ -39,7 +39,7 @@ _ddensitydp_H(getMaterialProperty<Real>("ddensitydp_H")),
 
 _p_var(coupled("pressure")),
 
-_porosity (getMaterialProperty<Real>("material_porosity")),
+_porosity(getMaterialProperty<Real>("porosity")),
 _specific_heat_rock(getMaterialProperty<Real>("specific_heat_rock")),
 _density_rock(getMaterialProperty<Real>("density_rock")),
 _u_old(valueOld())

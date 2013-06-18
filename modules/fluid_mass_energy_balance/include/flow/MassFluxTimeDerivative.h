@@ -43,8 +43,6 @@ protected:
   unsigned int _h_var;
     
   MaterialProperty<Real> & _porosity;  
-//  VariableValue  & _porosity;
-//  VariableValue  & _porosity_old;
 
   VariableValue & _u_old;
 };

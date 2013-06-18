@@ -17,7 +17,7 @@
 ///  UNITS:
 ///  pressure - [Pa]
 ///  enthalpy - [J/kg]
-///  tempurature - [C]
+///  tempurature - [K]
 ///  density - [kg/m3]
 ///  viscosity - [Pa.s]
 
@@ -46,11 +46,9 @@ Real WaterSteamEOS::phaseDetermine (Real enth_in, Real press_in, Real& phase, Re
   ///////////or saturated mixture) using the gibbs free energy equations and the 'IAPWS Industrial Formulation 1997 for the 
   ///////////Thermodynamic Properties of Water and Steam'.
   ///////////This function is only valid for regions 1, 2, and 4 (compressed water, steam, and the saturation curve) and is
-  ///////////only acurate for temperatures bellow 350 C, pressures bellow 100 MPa, and enthalpies bellow 2.6 MJ/kg
+  ///////////only acurate for temperatures bellow 623.15 K (350 C), pressures bellow 100 MPa, and enthalpies bellow 2.6 MJ/kg
     
   //VARIABLES:
-  Real C_to_K = 273.15e0;                                            //Convertion factor from Celcius to Kelvin *formerly tc_k
-  Real temp_kelvin;                                                  //temperature in C converted to kelvin *formerly tk
   Real rconst= 0.461526e3;                                           //Gas constant
   Real press_sat_350C = 16.529e6;                                    //saturated pressure at 350C
   Real enth_water_350C = 1670.9e3;                                   //enthalpy of water at 350C
@@ -149,19 +147,17 @@ Real WaterSteamEOS::phaseDetermine (Real enth_in, Real press_in, Real& phase, Re
   r = nr[1] * beta2 + nr[4] * beta + nr[7];
   m = 2.0e0 * r / (-q - sqrt(q * q - 4.e0 * n * r));
   x = nr[9] + m;
-  temp_sat = 0.5e0 * (nr[9] + m - sqrt(x * x - 4.e0 * (nr[8] + nr[9] * m))) - C_to_K;
-  temp_kelvin = temp_sat + C_to_K;
-    
+  temp_sat = 0.5e0 * (nr[9] + m - sqrt(x * x - 4.e0 * (nr[8] + nr[9] * m)));    
     
   ////////PART II:
   //Determine the density and enthapy of cold water
   //using region 1 gibbs free energy equation (formerly cowat function):
   //input - temp_sat, press_in
   //output - enth_water
-  if ((temp_sat <= 350.0e0 + ttol) && (press_in <= 100.e6))
+  if ((temp_sat <= 623.15 + ttol) && (press_in <= 100.e6))
   {
     pie1 = press_in / pstar1;
-    tau1 = tstar1 / temp_kelvin;
+    tau1 = tstar1 / temp_sat;
         
     //gibbs free energy terms for region 1
     for (int i=0; i<34; i++)
@@ -170,7 +166,7 @@ Real WaterSteamEOS::phaseDetermine (Real enth_in, Real press_in, Real& phase, Re
       gamma_tau1 = gamma_tau1 + n1[i] * J1[i] * pow((7.1 - pie1),(I1[i])) * pow((tau1 - 1.222),(J1[i] - 1));
     }
         
-    rt1 = rconst * temp_kelvin;
+    rt1 = rconst * temp_sat;
     dens_water_sat = pstar1 / (rt1 * gamma_pie1);
     intern_energy_water = rt1 * (tau1 * gamma_tau1 - pie1 * gamma_pie1);
     enth_water_sat = intern_energy_water + press_in / dens_water_sat;
@@ -180,10 +176,10 @@ Real WaterSteamEOS::phaseDetermine (Real enth_in, Real press_in, Real& phase, Re
     //using region 2 gibbs free energy equation (formerly supst function):
     //input - temp_sat, press_in
     //output - enth_steam
-    if ((temp_sat <= 1000.0) && (press_in <= 100.0e6))
+    if ((temp_sat <= 1273.15) && (press_in <= 100.0e6))
     {
       pie2 = press_in / pstar2;
-      tau2 = tstar2 / temp_kelvin;
+      tau2 = tstar2 / temp_sat;
         
       //gibbs ideal gas terms for region 2
       gamma_pie2_0 = pow(pie2 , -1);
@@ -204,14 +200,14 @@ Real WaterSteamEOS::phaseDetermine (Real enth_in, Real press_in, Real& phase, Re
       gamma_pie2 = gamma_pie2_0 + gamma_pie2_r;
       gamma_tau2 = gamma_tau2_0 + gamma_tau2_r;
         
-      rt2 = rconst * temp_kelvin;
+      rt2 = rconst * temp_sat;
       dens_steam_sat = pstar2 / (rt2 * gamma_pie2);
       intern_energy_steam = rt2 * (tau2 * gamma_tau2 - pie2 * gamma_pie2);
       enth_steam_sat = intern_energy_steam + press_in / dens_steam_sat;
     }
     else
     {
-      mooseError("Either Saturation Temp. > 1000 C, or Pressure > 100 MPa, at the moment FALCON cannot handle such EXTREMES!!!");
+      mooseError("Either Saturation Temp. > 1273.15 K, or Pressure > 100 MPa, at the moment FALCON cannot handle such EXTREMES!!!");
     }
   }
   else
@@ -247,8 +243,6 @@ Real WaterSteamEOS::phaseDetermine (Real enth_in, Real press_in, Real& phase, Re
 Real WaterSteamEOS::waterEquationOfStatePH (Real enth_in, Real press_in, Real temp_sat, Real& temp1, Real& dens1, Real& enth1) const
 {   
   //Variables:
-  Real C_to_K = 273.15e0;                                     //Convertion factor from Celcius to Kelvin *formerly tc_k
-  Real init_temp_guess;                                       //initial guess at final temp1 value
   Real rconst= 0.461526e3;                                    //Gas constant
   int itr = 0.0;                                              //Newton iteration counter, will stop iterations if more that 150
   Real itr_temp1, itr_temp2;                                  //intermediate itteration temperature variables 
@@ -283,8 +277,7 @@ Real WaterSteamEOS::waterEquationOfStatePH (Real enth_in, Real press_in, Real te
   Real dif;
     
   //Obtain an better initial guess for the output temp.
-  init_temp_guess = temp_sat - 1.e-6;
-  itr_temp1 = init_temp_guess + C_to_K;
+  itr_temp1 = temp_sat - 1.e-6;
     
   //Newton iterations of cold water density and enthalpy calculations for region 1
   //(formerly cowat iterations)
@@ -360,15 +353,14 @@ Real WaterSteamEOS::waterEquationOfStatePH (Real enth_in, Real press_in, Real te
     }
   }
     
-  temp1 = itr_temp1 - C_to_K;
+  temp1 = itr_temp1;
     
   return (0);
 }
 
 Real WaterSteamEOS::steamEquationOfStatePH (Real enth_in, Real press_in, Real temp_sat, Real& temp2, Real& dens2, Real& enth2) const
-{   //Variables:
-  Real C_to_K = 273.15e0;                                     //Convertion factor from Celcius to Kelvin *formerly tc_k
-  Real init_temp_guess;                                       //initial guess at final temp2 value
+{
+  //Variables:
   int itr = 0.0;                                              //Newton iteration counter, will stop iterations if more that 150
   Real dt = 1.0e-7;                                           //temperature incrementation for each itteration
   Real itr_temp1, itr_temp2;                                  //intermediate itteration temperature variables 
@@ -419,9 +411,7 @@ Real WaterSteamEOS::steamEquationOfStatePH (Real enth_in, Real press_in, Real te
     
     
   //Obtain an better initial guess for the output temp.
-  init_temp_guess = temp_sat + 1.0e-6;
-  itr_temp1 = init_temp_guess + C_to_K;
-    
+  itr_temp1 = temp_sat + 1.0e-6;    
     
   //Newton iterations of steam density and enthalpy calculations for region 2
   //(formerly supst function)
@@ -533,7 +523,7 @@ Real WaterSteamEOS::steamEquationOfStatePH (Real enth_in, Real press_in, Real te
     }
   }
     
-  temp2 = itr_temp1 - C_to_K;
+  temp2 = itr_temp1;
     
   return (0);
     
@@ -546,8 +536,6 @@ Real WaterSteamEOS::viscosity (Real density, Real temp, Real& viscosity) const
   //Critical enhancement of viscosity near the critical point is not
   //included.
     
-  Real C_to_K = 273.15e0;                                         //convertion factor from Celcius to Kelvin *formerly tc_k
-  Real temp_kelvin;                                               //temperature converted to kelvin
   Real del;                                                       //shifted value of density, =d/d* 
   Real tau;                                                       //shifted value of temperature, =T/T*
   Real dstar = 322.0e0;                                           //density shifting term, d*
@@ -566,8 +554,7 @@ Real WaterSteamEOS::viscosity (Real density, Real temp, Real& viscosity) const
                  2.57399e-1, -3.25372e-2, 6.98452e-2, 8.72102e-3, -4.35673e-3,
                  -5.93264e-4};                                               //H coefficients for viscosity and summation 1 term
     
-  temp_kelvin = temp + C_to_K;
-  tau = temp_kelvin / tstar;
+  tau = temp / tstar;
   del = density / dstar;
     
   //Viscosity in dilute-gas limit:
@@ -595,8 +582,6 @@ Real WaterSteamEOS::viscosity (Real density, Real temp, Real& viscosity) const
 Real WaterSteamEOS::waterEquationOfStatePT (Real press_in, Real temp, Real& enth_water, Real& dens_water) const
 {
   //Variables:
-  Real C_to_K = 273.15e0;                                         //Convertion factor from Celcius to Kelvin *formerly tc_k
-  Real temp_kelvin;                                               //temperature converted to kelvin
   Real rconst= 0.461526e3;                                        //Gas constant
   Real gamma_pie = 0.0;                                           //partial derivative w.r.t. pressure term for gibbs eq.
   Real gamma_tau = 0.0;                                           //partial derivative w.r.t. temperature term for gibbs. eq.
@@ -626,9 +611,8 @@ Real WaterSteamEOS::waterEquationOfStatePT (Real press_in, Real temp, Real& enth
                  -31, -38, -39, -40, -41 };                                  //J coefficients of region 1 gibbs eq.
     
   //Obtain initial conditions:
-  temp_kelvin = temp + C_to_K;
   pie = press_in / pstar;
-  tau = tstar / temp_kelvin;
+  tau = tstar / temp;
     
   //gibbs free energy terms for resion 1
   for (int i=0; i<34; i++)
@@ -637,7 +621,7 @@ Real WaterSteamEOS::waterEquationOfStatePT (Real press_in, Real temp, Real& enth
     gamma_tau = gamma_tau + n[i] * J[i] * pow((7.1 - pie),(I[i])) * pow((tau - 1.222),(J[i] - 1));
   }
     
-  rt = rconst * temp_kelvin;
+  rt = rconst * temp;
   dens_water = pstar / (rt * gamma_pie);
   intern_energy_water = rt * (tau * gamma_tau - pie * gamma_pie);
   enth_water = intern_energy_water + press_in / dens_water;
@@ -648,8 +632,6 @@ Real WaterSteamEOS::waterEquationOfStatePT (Real press_in, Real temp, Real& enth
 Real WaterSteamEOS::steamEquationOfStatePT (Real press_in, Real temp, Real& enth_steam, Real& dens_steam) const
 { 
   //Variables:
-  Real C_to_K = 273.15e0;                                         //Convertion factor from Celcius to Kelvin *formerly tc_k
-  Real temp_kelvin;                                               //temperature converted to kelvin
   Real rconst = 0.461526e3;                                       //Gass constant
   Real gamma_pie = 0.0;                                           //total partial derivative w.r.t. pressure term
   // = gamma_pie_0 + gamma_pie_r
@@ -692,9 +674,8 @@ Real WaterSteamEOS::steamEquationOfStatePT (Real press_in, Real temp, Real& enth
                    24, 24, 24 };                                               //I coefficients of region 2 gibbs residual term
     
   //Obtain initial conditions:
-  temp_kelvin = temp + C_to_K;
   pie = press_in / pstar;
-  tau = tstar / temp_kelvin;
+  tau = tstar / temp;
     
   //gibbs ideal gas terms for region 2
   gamma_pie_0 = pow(pie, -1);
@@ -715,7 +696,7 @@ Real WaterSteamEOS::steamEquationOfStatePT (Real press_in, Real temp, Real& enth
   gamma_pie = gamma_pie_0 + gamma_pie_r;
   gamma_tau = gamma_tau_0 + gamma_tau_r;
     
-  rt = rconst * temp_kelvin;
+  rt = rconst * temp;
   dens_steam = pstar / (rt * gamma_pie);
   intern_energy_steam = rt * (tau * gamma_tau - pie * gamma_pie);
   enth_steam = intern_energy_steam + press_in / dens_steam;
