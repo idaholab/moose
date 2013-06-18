@@ -309,12 +309,12 @@ public:
   Real minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q) const;
 
   /**
-   * This function returns the paired boundary ids for the given component.  For example, in a generated
-   * 2D mesh, passing 0 for the "x" component will return (3, 1).
+   * This function attempts to return the paired boundary ids for the given component.  For example,
+   * in a generated 2D mesh, passing 0 for the "x" component will return (3, 1).
    * @param component - An integer representing the desired component (dimension)
-   * @return std::pair - The matching boundary pairs for the passed component
+   * @return std::pair pointer - The matching boundary pairs for the passed component
    */
-  std::pair<BoundaryID, BoundaryID> getPairedBoundaryMapping(unsigned int component);
+  std::pair<BoundaryID, BoundaryID> * getPairedBoundaryMapping(unsigned int component);
 
   /**
    * Create the refinement and coarsening maps necessary for projection of stateful material properties

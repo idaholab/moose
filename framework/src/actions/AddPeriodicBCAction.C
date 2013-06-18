@@ -94,13 +94,16 @@ AddPeriodicBCAction::autoTranslationBoundaries()
 
       if (component >= 0)
       {
-        std::pair<BoundaryID, BoundaryID> boundary_ids = _mesh->getPairedBoundaryMapping(component);
+        std::pair<BoundaryID, BoundaryID> *boundary_ids = _mesh->getPairedBoundaryMapping(component);
         RealVectorValue v;
         v(component) = _mesh->dimensionWidth(component);
         PeriodicBoundary p(v);
 
-        p.myboundary = boundary_ids.first;
-        p.pairedboundary = boundary_ids.second;
+        if (boundary_ids == NULL)
+          mooseError("Couldn't auto-detect a paired boundary for use with periodic boundary conditions");
+
+        p.myboundary = boundary_ids->first;
+        p.pairedboundary = boundary_ids->second;
         setPeriodicVars(p, getParam<std::vector<std::string> >("variable"));
         nl.dofMap().add_periodic_boundary(p);
       }

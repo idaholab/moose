@@ -994,8 +994,10 @@ MooseMesh::detectPairedSidesets()
         }
       }
 
+      // If this test fails, it means that the autodetection failed.  We'll just exit gracefully from this routine.
+      // Note, this means that the _paired_boundary datastructure will not be populated
       if (max_count < std::pow(2.0, (int)dim - 1))
-        mooseError("Couldn't auto-detect a paired boundary for use with periodic boundary conditions");
+        return;
 
       if (i==0)
         paired_boundary.first = common_boundary;
@@ -1045,10 +1047,11 @@ MooseMesh::addPeriodicVariable(unsigned int var_num, BoundaryID primary, Boundar
 
   for (unsigned int component=0; component<dimension(); ++component)
   {
-    std::pair<BoundaryID, BoundaryID> boundary_ids = getPairedBoundaryMapping(component);
+    std::pair<BoundaryID, BoundaryID> *boundary_ids = getPairedBoundaryMapping(component);
 
-    if ((boundary_ids.first == primary && boundary_ids.second == secondary) ||
-        (boundary_ids.first == secondary && boundary_ids.second == primary))
+    if (boundary_ids != NULL &&
+        ((boundary_ids->first == primary && boundary_ids->second == secondary) ||
+         (boundary_ids->first == secondary && boundary_ids->second == primary)))
       _periodic_dim[var_num][component] = true;
   }
 }
@@ -1091,7 +1094,7 @@ MooseMesh::minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q)
   return (p-q).size();
 }
 
-std::pair<BoundaryID, BoundaryID>
+std::pair<BoundaryID, BoundaryID> *
 MooseMesh::getPairedBoundaryMapping(unsigned int component)
 {
   mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
@@ -1105,7 +1108,10 @@ MooseMesh::getPairedBoundaryMapping(unsigned int component)
       mooseError("Trying to retrieve automatic paired mapping for a mesh that is not regular and orthogonal");
   }
 
-  return _paired_boundary[component];
+  if (component < _paired_boundary.size())
+    return &_paired_boundary[component];
+  else
+    return NULL;
 }
 
 void
