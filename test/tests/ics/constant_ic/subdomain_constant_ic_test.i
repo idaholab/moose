@@ -12,8 +12,8 @@
 
 [AuxVariables]
   [./u_aux]
-    order = FIRST
-    family = LAGRANGE
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
@@ -22,14 +22,9 @@
     type = ConstantIC
     variable = u
     value = 42
-    block = '1'
+    block = '1 2'
   [../]
-  [./ic_u_2]
-    type = ConstantIC
-    variable = u
-    value = 24
-    block = '2'
-  [../]
+
   [./ic_u_aux_1]
     type = ConstantIC
     variable = u_aux

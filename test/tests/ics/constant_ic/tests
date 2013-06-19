@@ -10,8 +10,6 @@
     type = 'Exodiff'
     input = 'subdomain_constant_ic_test.i'
     exodiff = 'subdomain_constant_ic_test_out.e'
-    max_parallel = 1
-    max_threads = 1
     scale_refine = 5
   [../]
 []
