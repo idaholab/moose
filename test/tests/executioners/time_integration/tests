@@ -38,7 +38,6 @@
     input = 'cranic_adapt.i'
     exodiff = 'out_cranic_adapt.e-s005'
     group = 'adaptive'
-    deleted = 'Incorrect implementation - #1522'
   [../]
 
   [./testabort]

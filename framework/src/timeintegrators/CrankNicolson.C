@@ -26,7 +26,7 @@ InputParameters validParams<CrankNicolson>()
 
 CrankNicolson::CrankNicolson(const std::string & name, InputParameters parameters) :
     TimeIntegrator(name, parameters),
-    _residual_old(_nl.addVector("residual_old", true, GHOSTED))
+    _residual_old(_nl.addVector("residual_old", false, GHOSTED))
 {
 }
 
