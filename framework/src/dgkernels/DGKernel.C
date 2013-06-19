@@ -105,7 +105,7 @@ DGKernel::~DGKernel()
 void
 DGKernel::computeResidual()
 {
-  Moose::perf_log.push("computeResidual()","DGKernel");
+//  Moose::perf_log.push("computeResidual()","DGKernel");
 
   DenseVector<Number> & re = _assembly.residualBlock(_var.index());
   DenseVector<Number> & neighbor_re = _assembly.residualBlockNeighbor(_var.index());
@@ -119,13 +119,13 @@ DGKernel::computeResidual()
       neighbor_re(_i) += _JxW[_qp]*_coord[_qp]*computeQpResidual(Moose::Neighbor);
   }
 
-  Moose::perf_log.pop("computeResidual()","DGKernel");
+//  Moose::perf_log.pop("computeResidual()","DGKernel");
 }
 
 void
 DGKernel::computeJacobian()
 {
-  Moose::perf_log.push("computeJacobian()","DGKernel");
+//  Moose::perf_log.push("computeJacobian()","DGKernel");
 
   DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.index(), _var.index());
   DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.index(), _var.index());
@@ -152,13 +152,13 @@ DGKernel::computeJacobian()
         Knn(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian(Moose::NeighborNeighbor);
   }
 
-  Moose::perf_log.pop("computeJacobian()","DGKernel");
+//  Moose::perf_log.pop("computeJacobian()","DGKernel");
 }
 
 void
 DGKernel::computeOffDiagJacobian(unsigned int jvar)
 {
-  Moose::perf_log.push("computeOffDiagJacobian()","DGKernel");
+//  Moose::perf_log.push("computeOffDiagJacobian()","DGKernel");
 
   DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.index(), jvar);
   DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.index(), jvar);
@@ -205,7 +205,7 @@ DGKernel::computeOffDiagJacobian(unsigned int jvar)
       }
   }
 
-  Moose::perf_log.pop("computeOffDiagJacobian()","DGKernel");
+//  Moose::perf_log.pop("computeOffDiagJacobian()","DGKernel");
 }
 
 Real

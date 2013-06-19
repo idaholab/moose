@@ -85,14 +85,12 @@
 
   [./mat_1]
     type = MTMaterial
-    diff = 1
     block = 1
     value = 1
   [../]
 
   [./mat_2]
     type = MTMaterial
-    diff = 2
     block = 2
     value = 2
   [../]
