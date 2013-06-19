@@ -407,7 +407,8 @@ SystemBase::projectSolution()
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   ComputeInitialConditionThread cic(_subproblem, *this, solution());
-  Threads::parallel_reduce(elem_range, cic);
+  //Threads::parallel_reduce(elem_range, cic);
+  cic(elem_range);  // Disabled - Ticket #2012
 
   // Also, load values into the SCALAR dofs
   // Note: We assume that all SCALAR dofs are on the
