@@ -296,6 +296,7 @@ public:
   virtual const std::vector<Material*> & getMaterials(SubdomainID block_id, THREAD_ID tid);
   virtual const std::vector<Material*> & getFaceMaterials(SubdomainID block_id, THREAD_ID tid);
   virtual const std::vector<Material*> & getBndMaterials(BoundaryID block_id, THREAD_ID tid);
+  virtual const std::vector<Material*> & getNeighborMaterials(SubdomainID block_id, THREAD_ID tid);
   virtual void updateMaterials();
 
   /**

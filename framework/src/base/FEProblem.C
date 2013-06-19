@@ -1406,6 +1406,13 @@ FEProblem::getBndMaterials(BoundaryID boundary_id, THREAD_ID tid)
   return _materials[tid].getBoundaryMaterials(boundary_id);
 }
 
+const std::vector<Material*> &
+FEProblem::getNeighborMaterials(SubdomainID block_id, THREAD_ID tid)
+{
+  mooseAssert(tid < _materials.size(), "Requesting a material warehouse that does not exist");
+  return _materials[tid].getNeighborMaterials(block_id);
+}
+
 void
 FEProblem::updateMaterials()
 {
