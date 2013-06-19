@@ -127,7 +127,7 @@ Split::setup(const std::string& prefix)
       val = _schur_pre;
 #if PETSC_VERSION_LESS_THAN(3,4,0)
       if (_schur_pre == "a11")
-	_schur_pre = "diag";
+	val = "diag";
 #endif
       ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
       CHKERRABORT(libMesh::COMM_WORLD,ierr);
