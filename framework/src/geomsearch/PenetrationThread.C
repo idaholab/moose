@@ -17,6 +17,7 @@
 #include "ParallelUniqueId.h"
 #include "FindContactPoint.h"
 #include "NearestNodeLocator.h"
+#include "SubProblem.h"
 
 // libmesh includes
 #include "libmesh/threads.h"

@@ -17,6 +17,7 @@
 
 #include "PenetrationLocator.h"
 #include "ParallelUniqueId.h"
+#include "MooseVariable.h"
 
 class PenetrationThread
 {
