@@ -19,6 +19,7 @@ InputParameters validParams<ThermalContactAuxBCsAction>()
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
+  params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
   params.addParam<bool>("quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
@@ -55,6 +56,10 @@ ThermalContactAuxBCsAction::act()
   {
     params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
   }
+  if (isParamValid("normal_smoothing_method"))
+  {
+    params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
+  }
   params.set<bool>("warnings") = getParam<bool>("warnings");
   _problem->addAuxBoundaryCondition(getParam<std::string>("gap_type"),
       "gap_value_" + Moose::stringify(n),
@@ -87,6 +92,10 @@ ThermalContactAuxBCsAction::act()
   {
     params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
   }
+  if (isParamValid("normal_smoothing_method"))
+  {
+    params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
+  }
   _problem->addAuxBoundaryCondition("PenetrationAux",
       "penetration_" + Moose::stringify(n),
       params);
@@ -109,6 +118,10 @@ ThermalContactAuxBCsAction::act()
     if (isParamValid("normal_smoothing_distance"))
     {
       params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
+    }
+    if (isParamValid("normal_smoothing_method"))
+    {
+      params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
     }
 
     // For efficiency, run this at the beginning of each step...

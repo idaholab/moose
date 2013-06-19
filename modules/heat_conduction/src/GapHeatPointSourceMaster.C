@@ -15,6 +15,7 @@ InputParameters validParams<GapHeatPointSourceMaster>()
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
+  params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
 
   return params;
 }
@@ -31,6 +32,10 @@ GapHeatPointSourceMaster::GapHeatPointSourceMaster(const std::string & name, Inp
   if (parameters.isParamValid("normal_smoothing_distance"))
   {
     _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
+  }
+  if (parameters.isParamValid("normal_smoothing_method"))
+  {
+    _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
   }
 }
 

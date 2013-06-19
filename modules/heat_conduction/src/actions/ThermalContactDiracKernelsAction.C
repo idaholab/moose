@@ -11,6 +11,7 @@ InputParameters validParams<ThermalContactDiracKernelsAction>()
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
+  params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<bool>("quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
   return params;
 }
@@ -36,6 +37,10 @@ ThermalContactDiracKernelsAction::act()
     if (isParamValid("normal_smoothing_distance"))
     {
       params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
+    }
+    if (isParamValid("normal_smoothing_method"))
+    {
+      params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
     }
 
     _problem->addDiracKernel("GapHeatPointSourceMaster",

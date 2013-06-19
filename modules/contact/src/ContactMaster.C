@@ -28,6 +28,7 @@ InputParameters validParams<ContactMaster>()
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
+  params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
 
   params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  Must be positive.");
@@ -63,6 +64,10 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   if (parameters.isParamValid("normal_smoothing_distance"))
   {
     _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
+  }
+  if (parameters.isParamValid("normal_smoothing_method"))
+  {
+    _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
   }
   if (_model == CM_GLUED)
   {
