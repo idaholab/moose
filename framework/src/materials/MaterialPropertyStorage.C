@@ -259,23 +259,15 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data, std::ve
     (*it)->initStatefulProperties(n_qpoints);
   swapBack(material_data, elem, side);
 
+  // Copy the properties to Old and Older as needed
   if (hasStatefulProperties())
-  {
-    shift(); // Old
-    swap(material_data, elem, side);
-    for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
-      (*it)->initStatefulProperties(n_qpoints);
-    swapBack(material_data, elem, side);
-
-    if (_has_older_prop)
-    {
-      shift(); // Older
-      swap(material_data, elem, side);
-      for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
-        (*it)->initStatefulProperties(n_qpoints);
-      swapBack(material_data, elem, side);
-    }
-  }
+    for (unsigned int i=0; i < _stateful_prop_id_to_prop_id.size(); ++i)
+      for (unsigned int qp=0; qp < n_qpoints; ++qp)
+      {
+        propsOld()[&elem][side][i]->qpCopy(qp, props()[&elem][side][i], qp);
+        if (hasOlderProperties())
+          propsOlder()[&elem][side][i]->qpCopy(qp, props()[&elem][side][i], qp);
+      }
 }
 
 void

@@ -349,15 +349,7 @@ void FEProblem::initialSetup()
   {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _material_props, _bnd_material_props, _materials, _assembly);
-    /**
-     * We are going to skip threading here for now.  The issue is that we cannot safely "shift" the material properties back while we are
-     * initializing them.  At the very least we'd need barriers which would erase some of the benefit of having threading in the first place.
-     * Alternatively, we could refactor this object to compute one set of properties at a time at the expense of reiniting elements....
-     * It seems that "un-threading" is the best option for now.
-     * CJP - 6/12/13
-     */
-    //Threads::parallel_reduce(elem_range, cmt);
-    cmt(elem_range, true);  // Bypass threading
+    Threads::parallel_reduce(elem_range, cmt);
     _has_initialized_stateful = true;
   }
 
@@ -496,8 +488,7 @@ void FEProblem::initialSetup()
     {
       ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
       ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _material_props, _bnd_material_props, _materials, _assembly);
-      //Threads::parallel_reduce(elem_range, cmt);
-      cmt(elem_range, true);  // Bypass threading (see note near top of this method)
+      Threads::parallel_reduce(elem_range, cmt);
     }
   }
 }
