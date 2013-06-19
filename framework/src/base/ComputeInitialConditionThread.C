@@ -37,8 +37,7 @@ void
 ComputeInitialConditionThread::operator() (const ConstElemRange & range)
 {
   ParallelUniqueId puid;
-  _tid = 0; //puid.id;  // Disabling threads until this routine can be made thread-safe - CJP: 6/19/2013
-
+  _tid = puid.id;
 
   // -- NOTE ----
   // The following code is a copy from libMesh project_vector.C except, the loops over elements and variables are swapped. Also we do not call any callbacks, but use our
