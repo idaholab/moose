@@ -88,7 +88,7 @@ SubProblem::getMaterialPropertyBlocks(const std::string prop_name)
   std::set<SubdomainID> blocks;
   std::vector<SubdomainID> blocks_vec;
 
-  for(std::map<SubdomainID, std::set<std::string> >::iterator it = _map_material_props.begin();
+  for(std::map<unsigned int, std::set<std::string> >::iterator it = _map_material_props.begin();
       it != _map_material_props.end();
       ++it)
   {
@@ -137,49 +137,29 @@ SubProblem::storeMatPropName(SubdomainID block_id, const std::string & name)
 }
 
 void
-SubProblem::storeMatPropNameBnd(BoundaryID boundary_id, const std::string & name)
-{
-  _map_material_props_bnd[boundary_id].insert(name);
-}
-
-void
 SubProblem::delayedCheckMatProp(SubdomainID block_id, const std::string & name)
 {
   _map_material_props_check[block_id].insert(name);
 }
 
 void
-SubProblem::delayedCheckMatPropBoundary(BoundaryID boundary_id, const std::string & name)
+SubProblem::checkMatProps()
 {
-  _map_material_props_bnd_check[boundary_id].insert(name);
-}
-
-void
-SubProblem::checkMatProps() const
-{
-  // Check block material coverage
-  checkMatProps(_map_material_props_check, _map_material_props, "block");
-  // Check boundary material coverage
-  checkMatProps(_map_material_props_bnd_check, _map_material_props_bnd, "boundary");
-}
-
-template<typename T>
-void
-SubProblem::checkMatProps(std::map<T, std::set<std::string> > map1, std::map<T, std::set<std::string> > map2, std::string type_name) const
-{
-  for (typename std::map<T, std::set<std::string> >::iterator check_it = map1.begin(); check_it != map1.end(); ++check_it)
+  for (std::map<unsigned int, std::set<std::string> >::iterator check_it = _map_material_props_check.begin();
+       check_it != _map_material_props_check.end();
+       ++check_it)
   {
-    T block_id = check_it->first;
+    SubdomainID block_id = check_it->first;
 
-    if (map2.find(block_id) != map2.end())
+    if (_map_material_props.find(block_id) != _map_material_props.end())
       for (std::set<std::string>::iterator check_jt = check_it->second.begin(); check_jt != check_it->second.end(); ++check_jt)
       {
         std::string name = *check_jt;
-        if (map2[block_id].find(name) == map2[block_id].end())
-          mooseError("Material property '" + name + "' is not defined on " + type_name + " " + Moose::stringify(block_id));
+        if (_map_material_props[block_id].find(name) == _map_material_props[block_id].end())
+          mooseError("Material property '" + name + "' is not defined on block " + Moose::stringify(block_id));
       }
     else
-      mooseError("No material defined on " + type_name + " " + Moose::stringify(block_id));
+      mooseError("No material defined on block " + Moose::stringify(block_id));
   }
 }
 

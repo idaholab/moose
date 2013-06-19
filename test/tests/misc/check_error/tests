@@ -192,18 +192,6 @@
     expect_err = "Material property 'diff1' is not defined on block \d+"
   [../]
 
-  [./missing_bnd_material_prop_test]
-    type = 'RunException'
-    input = 'missing_bnd_material_test.i'
-    expect_err = "No material defined on boundary \d+"
-  [../]
-
-  [./missing_bnd_material_prop_test2]
-    type = 'RunException'
-    input = 'missing_bnd_material_test2.i'
-    expect_err = "Material property 'diff2' is not defined on boundary \d+"
-  [../]
-
   [./missing_mesh_bcs_test]
     type = 'RunException'
     input = 'missing_mesh_bcs_test.i'
