@@ -121,6 +121,7 @@ protected:
   THREAD_ID _tid;
   Assembly & _assembly;
   bool _bnd;
+  bool _neighbor;
   MaterialData & _material_data;
 
   unsigned int _qp;
