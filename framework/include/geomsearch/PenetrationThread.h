@@ -21,7 +21,9 @@
 class PenetrationThread
 {
 public:
-  PenetrationThread(const MooseMesh & mesh,
+
+  PenetrationThread(SubProblem & subproblem,
+                    const MooseMesh & mesh,
                     BoundaryID master_boundary,
                     BoundaryID slave_boundary,
                     std::map<unsigned int, PenetrationLocator::PenetrationInfo *> & penetration_info,
@@ -29,6 +31,7 @@ public:
                     Real tangential_tolerance,
                     bool do_normal_smoothing,
                     Real normal_smoothing_distance,
+                    PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
                     std::vector<FEBase * > & fes,
                     FEType & fe_type,
                     NearestNodeLocator & nearest_node,
@@ -45,6 +48,7 @@ public:
   void join(const PenetrationThread & other);
 
 protected:
+  SubProblem & _subproblem;
   // The Mesh
   const MooseMesh & _mesh;
   BoundaryID _master_boundary;
@@ -57,6 +61,10 @@ protected:
   Real _tangential_tolerance;
   bool _do_normal_smoothing;
   Real _normal_smoothing_distance;
+  PenetrationLocator::NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
+  MooseVariable * _nodal_normal_x;
+  MooseVariable * _nodal_normal_y;
+  MooseVariable * _nodal_normal_z;
 
   std::vector<FEBase * > & _fes;
 

@@ -26,7 +26,8 @@
 // Mutex to use when accessing _penetration_info;
 Threads::spin_mutex pinfo_mutex;
 
-PenetrationThread::PenetrationThread(const MooseMesh & mesh,
+PenetrationThread::PenetrationThread(SubProblem & subproblem,
+                                     const MooseMesh & mesh,
                                      BoundaryID master_boundary,
                                      BoundaryID slave_boundary,
                                      std::map<unsigned int, PenetrationLocator::PenetrationInfo *> & penetration_info,
@@ -34,6 +35,7 @@ PenetrationThread::PenetrationThread(const MooseMesh & mesh,
                                      Real tangential_tolerance,
                                      bool do_normal_smoothing,
                                      Real normal_smoothing_distance,
+                                     PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
                                      std::vector<FEBase * > & fes,
                                      FEType & fe_type,
                                      NearestNodeLocator & nearest_node,
@@ -41,6 +43,7 @@ PenetrationThread::PenetrationThread(const MooseMesh & mesh,
                                      std::vector< unsigned int > & elem_list,
                                      std::vector< unsigned short int > & side_list,
                                      std::vector< short int > & id_list) :
+  _subproblem(subproblem),
   _mesh(mesh),
   _master_boundary(master_boundary),
   _slave_boundary(slave_boundary),
@@ -49,6 +52,7 @@ PenetrationThread::PenetrationThread(const MooseMesh & mesh,
   _tangential_tolerance(tangential_tolerance),
   _do_normal_smoothing(do_normal_smoothing),
   _normal_smoothing_distance(normal_smoothing_distance),
+  _normal_smoothing_method(normal_smoothing_method),
   _fes(fes),
   _fe_type(fe_type),
   _nearest_node(nearest_node),
@@ -62,6 +66,7 @@ PenetrationThread::PenetrationThread(const MooseMesh & mesh,
 
 // Splitting Constructor
 PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*split*/) :
+  _subproblem(x._subproblem),
   _mesh(x._mesh),
   _master_boundary(x._master_boundary),
   _slave_boundary(x._slave_boundary),
@@ -70,6 +75,7 @@ PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*spl
   _tangential_tolerance(x._tangential_tolerance),
   _do_normal_smoothing(x._do_normal_smoothing),
   _normal_smoothing_distance(x._normal_smoothing_distance),
+  _normal_smoothing_method(x._normal_smoothing_method),
   _fes(x._fes),
   _fe_type(x._fe_type),
   _nearest_node(x._nearest_node),
@@ -1021,92 +1027,111 @@ PenetrationThread::smoothNormal(PenetrationLocator::PenetrationInfo* info,
 {
   if (_do_normal_smoothing)
   {
-    //If we are within the smoothing distance of any edges or corners, find the
-    //corner nodes for those edges/corners, and weights from distance to edge/corner
-    std::vector<std::vector<Node*> > edge_nodes;
-    std::vector<Real> edge_face_weights;
-
-    getSmoothingEdgesAndWeights(info->_closest_point_ref,
-                                info->_side,
-                                edge_nodes,
-                                edge_face_weights);
-
-    mooseAssert(edge_nodes.size() == edge_face_weights.size(),"edge_nodes.size() != edge_face_weights.size()");
-
-    if (edge_nodes.size() > 0)
+    if (_normal_smoothing_method == PenetrationLocator::NSM_EDGE_BASED)
     {
-      //Find neighbors that are already in the p_info vector
-      unsigned int num_smoothing_edges = edge_nodes.size();
-      std::vector<PenetrationLocator::PenetrationInfo*> neighbor_info(num_smoothing_edges,NULL);
+      //If we are within the smoothing distance of any edges or corners, find the
+      //corner nodes for those edges/corners, and weights from distance to edge/corner
+      std::vector<std::vector<Node*> > edge_nodes;
+      std::vector<Real> edge_face_weights;
 
-      findNeighborsInInfoVector(p_info,
-                                edge_nodes,
-                                neighbor_info);
+      getSmoothingEdgesAndWeights(info->_closest_point_ref,
+                                  info->_side,
+                                  edge_nodes,
+                                  edge_face_weights);
 
-      bool found_all_neighbors = true;
-      for (unsigned int nii=0; nii<neighbor_info.size(); ++nii)
+      mooseAssert(edge_nodes.size() == edge_face_weights.size(),"edge_nodes.size() != edge_face_weights.size()");
+
+      if (edge_nodes.size() > 0)
       {
-        if (!neighbor_info[nii])
+        //Find neighbors that are already in the p_info vector
+        unsigned int num_smoothing_edges = edge_nodes.size();
+        std::vector<PenetrationLocator::PenetrationInfo*> neighbor_info(num_smoothing_edges,NULL);
+
+        findNeighborsInInfoVector(p_info,
+                                  edge_nodes,
+                                  neighbor_info);
+
+        bool found_all_neighbors = true;
+        for (unsigned int nii=0; nii<neighbor_info.size(); ++nii)
         {
-          found_all_neighbors = false;
-          break;
+          if (!neighbor_info[nii])
+          {
+            found_all_neighbors = false;
+            break;
+          }
         }
-      }
 
-      //If we don't have all of the neighbors, find them, create info for them, perform projection, and add to
-      //neighbor_info. Also add to p_info so they can be deleted with others in a loop through p_info.
-      if (!found_all_neighbors)
-      {
-        findNeighborsFromNodeElemMap(info,
-                                     edge_nodes,
-                                     neighbor_info,
-                                     p_info);
-      }
-
-      //Smooth the normal using the weighting functions for all participating faces.
-      RealVectorValue new_normal;
-//      bool did_smoothing = false;
-      Real this_face_weight = 1.0;
-
-      for (unsigned int efwi = 0; efwi<edge_face_weights.size(); ++efwi)
-      {
-        PenetrationLocator::PenetrationInfo *npi = neighbor_info[efwi];
-        if (npi)
+        //If we don't have all of the neighbors, find them, create info for them, perform projection, and add to
+        //neighbor_info. Also add to p_info so they can be deleted with others in a loop through p_info.
+        if (!found_all_neighbors)
         {
-//          did_smoothing = true;
-          new_normal += npi->_normal * edge_face_weights[efwi];
+          findNeighborsFromNodeElemMap(info,
+                                       edge_nodes,
+                                       neighbor_info,
+                                       p_info);
         }
-        this_face_weight -= edge_face_weights[efwi];
-      }
-      mooseAssert(this_face_weight >= (0.25-1e-8),"Sum of weights of other faces shouldn't exceed 0.75");
-      new_normal += info->_normal * this_face_weight;
 
-      const Real len(new_normal.size());
+        //Smooth the normal using the weighting functions for all participating faces.
+        RealVectorValue new_normal;
+        //      bool did_smoothing = false;
+        Real this_face_weight = 1.0;
+
+        for (unsigned int efwi = 0; efwi<edge_face_weights.size(); ++efwi)
+        {
+          PenetrationLocator::PenetrationInfo *npi = neighbor_info[efwi];
+          if (npi)
+          {
+            //          did_smoothing = true;
+            new_normal += npi->_normal * edge_face_weights[efwi];
+          }
+          this_face_weight -= edge_face_weights[efwi];
+        }
+        mooseAssert(this_face_weight >= (0.25-1e-8),"Sum of weights of other faces shouldn't exceed 0.75");
+        new_normal += info->_normal * this_face_weight;
+
+        const Real len(new_normal.size());
+        if (len > 0)
+        {
+          new_normal /= len;
+        }
+
+//      if (did_smoothing)
+//      {
+//        std::cout<<"Smoothed normal node: "<<info->_node->id()<<" elem: "<<info->_elem->id()<<std::endl;
+//        std::cout<<"    with elems: ";
+//        for (unsigned int efwi = 0; efwi<edge_face_weights.size(); ++efwi)
+//        {
+//          PenetrationLocator::PenetrationInfo *npi = neighbor_info[efwi];
+//          if (npi)
+//            std::cout<<npi->_elem->id()<<" ";
+//        }
+//        std::cout<<std::endl;
+//        std::cout<<"    original normal: "<<info->_normal<<" new normal: "<<new_normal<<std::endl;
+//
+//      }
+//      else if (edge_face_weights.size() > 0)
+//      {
+//        std::cout<<"Near edge but couldn't find neighboring face for smoothing: "<<info->_node->id()<<" elem: "<<info->_elem->id()<<std::endl;
+//      }
+
+        info->_normal = new_normal;
+      }
+    }
+    else if (_normal_smoothing_method == PenetrationLocator::NSM_NODAL_NORMAL_BASED)
+    {
+      //params.addParam<VariableName>("var_name","description");
+      //getParam<VariableName>("var_name")
+      MooseVariable & nodal_normal_x = _subproblem.getVariable(_tid,"nodal_normal_x");
+      MooseVariable & nodal_normal_y = _subproblem.getVariable(_tid,"nodal_normal_y");
+      MooseVariable & nodal_normal_z = _subproblem.getVariable(_tid,"nodal_normal_z");
+      info->_normal(0) = nodal_normal_x.getValue(info->_side,info->_side_phi);
+      info->_normal(1) = nodal_normal_y.getValue(info->_side,info->_side_phi);
+      info->_normal(2) = nodal_normal_z.getValue(info->_side,info->_side_phi);
+      const Real len(info->_normal.size());
       if (len > 0)
       {
-        new_normal /= len;
+        info->_normal /= len;
       }
-
-//    if (did_smoothing)
-//    {
-//      std::cout<<"Smoothed normal node: "<<info->_node->id()<<" elem: "<<info->_elem->id()<<std::endl;
-//      std::cout<<"    with elems: ";
-//      for (unsigned int efwi = 0; efwi<edge_face_weights.size(); ++efwi)
-//      {
-//        PenetrationLocator::PenetrationInfo *npi = neighbor_info[efwi];
-//        if (npi)
-//          std::cout<<npi->_elem->id()<<" ";
-//      }
-//      std::cout<<std::endl;
-//      std::cout<<"    original normal: "<<info->_normal<<" new normal: "<<new_normal<<std::endl;
-//
-//    }
-//    else if (edge_face_weights.size() > 0)
-//    {
-//      std::cout<<"Near edge but couldn't find neighboring face for smoothing: "<<info->_node->id()<<" elem: "<<info->_elem->id()<<std::endl;
-//    }
-
-      info->_normal = new_normal;
     }
   }
 }

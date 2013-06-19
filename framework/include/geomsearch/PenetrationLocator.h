@@ -51,6 +51,12 @@ public:
     MS_SLIPPING
   };
 
+  enum NORMAL_SMOOTHING_METHOD
+  {
+    NSM_EDGE_BASED,
+    NSM_NODAL_NORMAL_BASED
+  };
+
   /**
    * Data structure used to hold penetation information
    */
@@ -121,6 +127,7 @@ public:
   void setUpdate(bool update);
   void setTangentialTolerance(Real tangential_tolerance);
   void setNormalSmoothingDistance(Real normal_smoothing_distance);
+  void setNormalSmoothingMethod(std::string nsmString);
   void setStartingContactPoint();
   void saveContactStateVars();
 
@@ -129,6 +136,7 @@ protected:
   Real _tangential_tolerance; // Tangential distance a node can be from a face and still be in contact
   bool _do_normal_smoothing;  // Should we do contact normal smoothing?
   Real _normal_smoothing_distance; // Distance from edge (in parametric coords) within which to perform normal smoothing
+  NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
 };
 
 #endif //PENETRATIONLOCATOR_H

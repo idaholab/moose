@@ -31,6 +31,7 @@ InputParameters validParams<GapValueAux>()
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
+  params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
   return params;
@@ -51,6 +52,10 @@ GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
   if (parameters.isParamValid("normal_smoothing_distance"))
   {
     _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
+  }
+  if (parameters.isParamValid("normal_smoothing_method"))
+  {
+    _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
   }
   Order pairedVarOrder(_moose_var.getOrder());
   Order gvaOrder(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));

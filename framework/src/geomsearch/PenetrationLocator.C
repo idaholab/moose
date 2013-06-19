@@ -32,13 +32,24 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
     _update_location(true),
     _tangential_tolerance(0.0),
     _do_normal_smoothing(false),
-    _normal_smoothing_distance(0.0)
+    _normal_smoothing_distance(0.0),
+    _normal_smoothing_method(NSM_EDGE_BASED)
 {
   // Preconstruct an FE object for each thread we're going to use
   // This is a time savings so that the thread objects don't do this themselves multiple times
   _fe.resize(libMesh::n_threads());
   for(unsigned int i=0; i < libMesh::n_threads(); i++)
     _fe[i] = FEBase::build(_mesh.dimension()-1, _fe_type).release();
+
+  if (_normal_smoothing_method == NSM_NODAL_NORMAL_BASED)
+  {
+    if (!((_subproblem.hasVariable("nodal_normal_x")) &&
+          (_subproblem.hasVariable("nodal_normal_y")) &&
+          (_subproblem.hasVariable("nodal_normal_z"))))
+    {
+      mooseError("To use nodal-normal-based smoothing, the nodal_normal_x, nodal_normal_y, and nodal_normal_z variables must exist.  Are you missing the [NodalNormals] block?");
+    }
+  }
 }
 
 PenetrationLocator::~PenetrationLocator()
@@ -66,7 +77,8 @@ PenetrationLocator::detectPenetration()
   // Grab the slave nodes we need to worry about from the NearestNodeLocator
   NodeIdRange & slave_node_range = _nearest_node.slaveNodeRange();
 
-  PenetrationThread pt(_mesh,
+  PenetrationThread pt(_subproblem,
+                       _mesh,
                        _master_boundary,
                        _slave_boundary,
                        _penetration_info,
@@ -74,6 +86,7 @@ PenetrationLocator::detectPenetration()
                        _tangential_tolerance,
                        _do_normal_smoothing,
                        _normal_smoothing_distance,
+                       _normal_smoothing_method,
                        _fe,
                        _fe_type,
                        _nearest_node,
@@ -128,6 +141,18 @@ PenetrationLocator::setNormalSmoothingDistance(Real normal_smoothing_distance)
   _normal_smoothing_distance = normal_smoothing_distance;
   if (_normal_smoothing_distance > 0.0)
     _do_normal_smoothing = true;
+}
+
+void
+PenetrationLocator::setNormalSmoothingMethod(std::string nsmString)
+{
+  if (nsmString == "edge_based")
+    _normal_smoothing_method = NSM_EDGE_BASED;
+  else if (nsmString == "nodal_normal_based")
+    _normal_smoothing_method = NSM_NODAL_NORMAL_BASED;
+  else
+    mooseError("Invalid normal_smoothing_method: "<<nsmString);
+  _do_normal_smoothing = true;
 }
 
 void

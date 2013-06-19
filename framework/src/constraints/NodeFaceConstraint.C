@@ -33,6 +33,7 @@ InputParameters validParams<NodeFaceConstraint>()
   params.addRequiredParam<BoundaryName>("master", "The boundary ID associated with the master side");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
+  params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
@@ -97,6 +98,10 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   if (parameters.isParamValid("normal_smoothing_distance"))
   {
     _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
+  }
+  if (parameters.isParamValid("normal_smoothing_method"))
+  {
+    _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
   }
   // Put a "1" into test_slave
   // will always only have one entry that is 1

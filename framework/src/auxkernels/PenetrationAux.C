@@ -26,6 +26,7 @@ InputParameters validParams<PenetrationAux>()
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
+  params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<std::string>("quantity","distance","The quantity to recover from the available penetration information: distance(default), tangential_distance, normal_x, normal_y, normal_z, closest_point_x, closest_point_y, closest_point_z, element_id, side, incremental_slip_x, incremental_slip_y, incremental_slip_z, incremental_slip_magnitude, accumulated_slip, force_x, force_y, force_z, normal_force_magnitude, normal_force_x, normal_force_y, normal_force_z, tangential_force_magnitude, tangential_force_x, tangential_force_y, tangential_force_z, frictional_energy, mechanical_status");
@@ -45,6 +46,10 @@ PenetrationAux::PenetrationAux(const std::string & name, InputParameters paramet
   if (parameters.isParamValid("normal_smoothing_distance"))
   {
     _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
+  }
+  if (parameters.isParamValid("normal_smoothing_method"))
+  {
+    _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
   }
 
   if ( _quantity_string == "distance" )
