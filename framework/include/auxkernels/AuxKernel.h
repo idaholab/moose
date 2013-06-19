@@ -188,7 +188,14 @@ AuxKernel::getMaterialProperty(const std::string & name)
     for (std::vector<SubdomainName>::iterator it = blocks.begin(); it != blocks.end(); ++it)
       _subproblem.delayedCheckMatProp(_subproblem.mesh().getSubdomainID(*it), name);
   }
-  else if (!parameters().isParamValid("boundary"))  // TODO: For now we ain't gonna check boundary materials...
+  else if (parameters().isParamValid("boundary"))
+  {
+    // check boundary where this kernel is defined
+    std::vector<BoundaryName> boundary = parameters().get<std::vector<BoundaryName> >("boundary");
+    for (std::vector<BoundaryName>::iterator it = boundary.begin(); it != boundary.end(); ++it)
+      _subproblem.delayedCheckMatPropBoundary(_subproblem.mesh().getBoundaryID(*it), name);
+  }
+  else
   {
     // Is this variable already block restricted?
     const std::set<SubdomainID> * blocks = &_sys.getSubdomainsForVar(_var.index());

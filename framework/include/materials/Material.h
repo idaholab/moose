@@ -235,14 +235,21 @@ private:
    */
   void registerPropName(std::string prop_name, bool is_get)
   {
+    // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
+    if (!is_get)
+      _supplied_props.insert(prop_name);
+
     for(unsigned int i=0; i<_block_id.size(); i++)
     {
-      // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
-      if (!is_get)
-        _supplied_props.insert(prop_name);
       _subproblem.storeMatPropName(_block_id[i], prop_name);
       if (_displaced_subproblem != NULL)
         _displaced_subproblem->storeMatPropName(_block_id[i], prop_name);
+    }
+    for(unsigned int i=0; i<_boundary_id.size(); i++)
+    {
+      _subproblem.storeMatPropNameBnd(_boundary_id[i], prop_name);
+      if (_displaced_subproblem != NULL)
+        _displaced_subproblem->storeMatPropNameBnd(_boundary_id[i], prop_name);
     }
   }
 

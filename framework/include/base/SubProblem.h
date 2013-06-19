@@ -167,9 +167,11 @@ public:
   virtual void meshChanged();
 
   virtual void storeMatPropName(SubdomainID block_id, const std::string & name);
+  virtual void storeMatPropNameBnd(BoundaryID boundary_id, const std::string & name);
   virtual void delayedCheckMatProp(SubdomainID block_id, const std::string & name);
+  virtual void delayedCheckMatPropBoundary(BoundaryID boundary_id, const std::string & name);
 
-  virtual void checkMatProps();
+  virtual void checkMatProps() const;
   /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor
    */
@@ -215,10 +217,14 @@ protected:
   DiracKernelInfo _dirac_kernel_info;
 
   /// the map of material properties (block_id -> list of properties)
-  std::map<unsigned int, std::set<std::string> > _map_material_props;
+  std::map<SubdomainID, std::set<std::string> > _map_material_props;
+
+  /// the map of material properties (boundary_id -> list of properties)
+  std::map<BoundaryID, std::set<std::string> > _map_material_props_bnd;
 
   /// the map of properties requested (need to be checked)
-  std::map<unsigned int, std::set<std::string> > _map_material_props_check;
+  std::map<SubdomainID, std::set<std::string> > _map_material_props_check;
+  std::map<BoundaryID, std::set<std::string> > _map_material_props_bnd_check;
 
   /// This is the set of MooseVariables that will actually get reinited by a call to reinit(elem)
   std::vector<std::set<MooseVariable *> > _active_elemental_moose_variables;
@@ -226,6 +232,10 @@ protected:
   /// Whether or not there is currently a list of active elemental moose variables
   std::vector<bool> _has_active_elemental_moose_variables;
 
+private:
+  /// Helper function for dealing with different types (SubdomainID vs BoundaryID) during property checks
+  template<typename T>
+  void checkMatProps(std::map<T, std::set<std::string> > map1, std::map<T, std::set<std::string> > map2, std::string type_name) const;
 };
 
 
