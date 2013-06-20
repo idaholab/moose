@@ -124,7 +124,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _pc_side(Moose::PCS_RIGHT),
     _use_finite_differenced_preconditioner(false),
     _have_decomposition(false),
-    _use_split_based_preconditioner(false),
+    _use_split_preconditioner(false),
     _add_implicit_geometric_coupling_entries_to_jacobian(false),
     _need_serialized_solution(false),
     _need_residual_copy(false),
@@ -218,9 +218,6 @@ NonlinearSystem::solve()
 
   if(_have_decomposition)
     setupDecomposition();
-
-  if(_use_split_based_preconditioner)
-    setupSplitBasedPreconditioner();
 
   _time_integrator->solve();
   _time_integrator->postSolve();
@@ -432,35 +429,13 @@ NonlinearSystem::setupDecomposition()
   ierr = DMDestroy(&dm);
   CHKERRABORT(libMesh::COMM_WORLD,ierr);
 #endif
+
+  if (_use_split_preconditioner) {
+    SplitBasedPreconditioner* sbp = dynamic_cast<SplitBasedPreconditioner*>(_preconditioner);
+    sbp->setup();
+  }
 }
 
-void
-NonlinearSystem::setupSplitBasedPreconditioner()
-{
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,4,0)
-   SplitBasedPreconditioner* sbp = dynamic_cast<SplitBasedPreconditioner*>(_preconditioner);
-  sbp->setup();
-
-#if defined(LIBMESH_ENABLE_BLOCKED_STORAGE)
-  // HACK: Use DMCreateMatrix, which we control through DMMoose
-  // It would be A LOT better if libMesh would use some kind of 'CreateMatrix' callback that we could hook up to DMCreateMatrix.
-  // TODO: override the Jacobian computation routine to enable DM-based submatrix computation
-  NonlinearSolver<Number> *nonlinear_solver = sys().nonlinear_solver.get();
-  PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nonlinear_solver);
-  SNES snes = petsc_solver->snes();
-  PetscErrorCode ierr;
-  DM dm;
-  ierr = SNESGetDM(snes,&dm);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
-  Mat J;
-  ierr = DMCreateMatrix(dm,MATAIJ,&J);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
-  PetscMatrix<Number> petscJ(J);
-  PetscMatrix<Number>* petsc_matrix = dynamic_cast<PetscMatrix<Number>*>(sys().matrix);
-  petsc_matrix->swap(petscJ);
-#endif
-#endif
-}
 
 bool
 NonlinearSystem::converged()

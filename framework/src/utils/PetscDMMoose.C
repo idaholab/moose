@@ -739,7 +739,7 @@ static PetscErrorCode DMCreateGlobalVector_Moose(DM dm, Vec *x)
 
 #undef __FUNCT__
 #define __FUNCT__ "DMCreateMatrix_Moose"
-static PetscErrorCode DMCreateMatrix_Moose(DM dm, const MatType type, Mat *A)
+static PetscErrorCode DMCreateMatrix_Moose(DM dm, const MatType, Mat *A)
 {
   PetscErrorCode ierr;
   DM_Moose       *dmm = (DM_Moose *)(dm->data);
@@ -749,29 +749,8 @@ static PetscErrorCode DMCreateMatrix_Moose(DM dm, const MatType type, Mat *A)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);CHKERRQ(ierr);
   if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "DM of type %s, not of type %s", ((PetscObject)dm)->type, DMMOOSE);
   if (!dmm->nl) SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
-  /*
-    The simplest thing for now: compute the sparsity_pattern using dof_map and init the matrix using that info.
-    TODO: compute sparsity restricted to this DM's blocks, variables and sides.
-    Even fancier: compute the sparsity of the coupling of a contact slave to the contact master.
-    In any event, here we are in control of the matrix type and structure.
-  */
-  DofMap& dof_map = dmm->nl->sys().get_dof_map();
-  PetscInt M,N,m,n;
-  M = dof_map.n_dofs();
-  N = M;
-  m = dof_map.n_dofs_on_processor(dmm->nl->sys().processor_id());
-  n = m;
-  ierr = MatCreate(PetscObjectComm((PetscObject)dm), A);CHKERRQ(ierr);
-  ierr = MatSetSizes(*A,m,n,M,N);CHKERRQ(ierr);
-  ierr = MatSetType(*A,type);CHKERRQ(ierr);
-  /* Set preallocation for the basic sparse matrix types (applies only if *A has the right type. */
-  /* For now we ignore blocksize issues, since BAIJ doesn't play well with field decomposition by variable. */
-  const std::vector<numeric_index_type>& n_nz = dof_map.get_n_nz();
-  const std::vector<numeric_index_type>& n_oz = dof_map.get_n_oz();
-  ierr = MatSeqAIJSetPreallocation(*A, 0, (PetscInt*)(n_nz.empty()?NULL:&n_nz[0]));CHKERRQ(ierr);
-  ierr = MatMPIAIJSetPreallocation(*A, 0, (PetscInt*)(n_nz.empty()?NULL:&n_nz[0]),0, (PetscInt*)(n_oz.empty()?NULL:&n_oz[0]));CHKERRQ(ierr);
-  /* TODO: set the prefix for *A and MatSetFromOptions(*A)? Might override the type and other settings made here. */
-  ierr = MatSetUp(*A);CHKERRQ(ierr);
+  *A = (dynamic_cast<PetscMatrix<Number>*>(dmm->nl->sys().matrix))->mat();
+  ierr = PetscObjectReference((PetscObject)(*A));CHKERRQ(ierr);
   PetscFunctionReturn(0);
 
 }

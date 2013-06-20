@@ -66,7 +66,6 @@ public:
 
   void setupFiniteDifferencedPreconditioner();
   void setupDecomposition();
-  void setupSplitBasedPreconditioner();
 
   /**
    * Returns the convergence state
@@ -300,7 +299,7 @@ public:
   /**
    * If called with true this system will use a split-based preconditioner matrix.
    */
-  void useSplitBasedPreconditioner(bool use = true) { _use_split_based_preconditioner = use; }
+  void useSplitPreconditioner(bool use = true) { _use_split_preconditioner = use; }
 
   /**
    * If called with true this will add entries into the jacobian to link together degrees of freedom that are found to
@@ -464,7 +463,7 @@ protected:
   /// Name of the top-level split of the decomposition
   std::string _decomposition_split;
   /// Whether or not to use a FieldSplitPreconditioner matrix based on the decomposition
-  bool _use_split_based_preconditioner;
+  bool _use_split_preconditioner;
 
   /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
   bool _add_implicit_geometric_coupling_entries_to_jacobian;
