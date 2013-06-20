@@ -29,12 +29,25 @@
     exodiff = 'nodal_area_Hex20_out.e'
     custom_cmp = 'nodal_area_Hex20.exodiff'
   [../]
+  [./Hex20_2]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex20_2.i'
+    exodiff = 'nodal_area_Hex20_out.e'
+    custom_cmp = 'nodal_area_Hex20.exodiff'
+    prereq = Hex20
+  [../]
+  [./Hex20_3]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex20_3.i'
+    exodiff = 'nodal_area_Hex20_3_out.e'
+    custom_cmp = 'nodal_area_Hex20_3.exodiff'
+  [../]
   [./Hex202Proc]
     type = 'Exodiff'
     input = 'nodal_area_Hex20.i'
     exodiff = 'nodal_area_Hex20_out.e'
     custom_cmp = 'nodal_area_Hex20.exodiff'
-    prereq = Hex20
+    prereq = Hex20_2
     min_parallel = 2
   [../]
   [./Hex27]
