@@ -41,7 +41,7 @@ NODAL VARIABLES relative 1.e-6 floor 1e-5
 	react_y           # min:               0 @ t1,n1	max:   4.1620072e-05 @ t2,n350
 	react_z           # min:               0 @ t1,n1	max:   4.1620062e-05 @ t2,n372
 	penetration       # min:               0 @ t1,n1	max:           1e-05 @ t1,n336
-	contact_pressure  # min:               0 @ t1,n1	max:       9.9985806 @ t2,n366
+	contact_pressure relative 5e-5 # min:               0 @ t1,n1	max:       9.9985806 @ t2,n366
 
 ELEMENT VARIABLES relative 1.e-6 floor 1e-4
 	stress_xx  # min:               0 @ t1,b1,e1	max:       9.9997349 @ t2,b1,e49
