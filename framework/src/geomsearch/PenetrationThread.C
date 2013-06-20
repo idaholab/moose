@@ -244,21 +244,27 @@ PenetrationThread::operator() (const NodeIdRange & range)
             Point closest_coor;
             Real tangential_distance(0.0);
             Node* closest_node(NULL);
-            bool found_ridge_contact_point = findRidgeContactPoint(closest_coor,p_info[i],p_info[j],
-                                                                   tangential_distance, closest_node);
+            unsigned int index=0;
+            Point closest_coor_ref;
+            bool found_ridge_contact_point = findRidgeContactPoint(closest_coor,
+                                                                   tangential_distance,
+                                                                   closest_node,
+                                                                   index,
+                                                                   closest_coor_ref,
+                                                                   p_info, i, j);
             if (found_ridge_contact_point)
             {
               RidgeData rpd;
-              rpd._index1=i;
-              rpd._index2=j;
               rpd._closest_coor=closest_coor;
               rpd._tangential_distance=tangential_distance;
               rpd._closest_node=closest_node;
+              rpd._index = index;
+              rpd._closest_coor_ref=closest_coor_ref;
               ridgeDataVec.push_back(rpd);
             }
           }
         }
-        if (ridgeDataVec.size() > 0) //find the ridge pair that is the best or find a peak
+        if (ridgeDataVec.size() > 0) //Either find the ridge pair that is the best or find a peak
         {
           //Group together ridges for which we are off the edge of a common node.
           //Those are peaks.
@@ -288,7 +294,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
           //Compute distance to each set of ridges
           for (unsigned int i(0); i<ridgeSetDataVec.size(); ++i)
           {
-            if (ridgeSetDataVec[i]._closest_node != NULL) //peak or off edge of single ridge
+            if (ridgeSetDataVec[i]._closest_node != NULL) //Either a peak or off the edge of single ridge
             {
               if (ridgeSetDataVec[i]._ridge_data_vec.size() == 1) //off edge of single ridge
               {
@@ -333,10 +339,8 @@ PenetrationThread::operator() (const NodeIdRange & range)
             unsigned int face_index(std::numeric_limits<unsigned int>::max());
             for (unsigned int i(0); i<ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size(); ++i)
             {
-              if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index1 < face_index)
-                face_index = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index1;
-              if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index2 < face_index)
-                face_index = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index2;
+              if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index < face_index)
+                face_index = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index;
             }
 
             mooseAssert(face_index < std::numeric_limits<unsigned int>::max(),"face_index invalid");
@@ -362,9 +366,21 @@ PenetrationThread::operator() (const NodeIdRange & range)
             }
             p_info[face_index]->_tangential_distance = 0.0;
 
+            Point closest_point_ref;
             if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size()==1) //contact with a single ridge rather than a peak
             {
               p_info[face_index]->_tangential_distance = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[0]._tangential_distance;
+              p_info[face_index]->_closest_point_ref = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[0]._closest_coor_ref;
+            }
+            else
+            { //peak
+              Node* closest_node;
+              bool restricted = restrictPointToFace(p_info[face_index]->_closest_point_ref, closest_node, p_info[face_index]->_side);
+              if (restricted)
+              {
+                if (closest_node != ridgeSetDataVec[closest_ridge_set_index]._closest_node)
+                  mooseError("Closest node when restricting point to face != closest node from RidgeSetData");
+              }
             }
 
             std::vector<Point> points(1);
@@ -653,13 +669,18 @@ PenetrationThread::interactionsOffCommonEdge(PenetrationLocator::PenetrationInfo
 
 bool
 PenetrationThread::findRidgeContactPoint(Point &contact_point,
-                                         PenetrationLocator::PenetrationInfo * pi1,
-                                         PenetrationLocator::PenetrationInfo * pi2,
                                          Real & tangential_distance,
-                                         Node* &closest_node)
+                                         Node* &closest_node,
+                                         unsigned int &index,
+                                         Point &contact_point_ref,
+                                         std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
+                                         const unsigned int index1,
+                                         const unsigned int index2)
 {
   tangential_distance = 0.0;
   closest_node = NULL;
+  PenetrationLocator::PenetrationInfo* pi1 = p_info[index1];
+  PenetrationLocator::PenetrationInfo* pi2 = p_info[index2];
   const unsigned sidedim(pi1->_side->dim());
   mooseAssert(sidedim == pi2->_side->dim(), "Incompatible dimensionalities");
 
@@ -704,8 +725,24 @@ PenetrationThread::findRidgeContactPoint(Point &contact_point,
 
   FEBase * fe = _fes[_tid];
   std::vector<Point> points(1);
-  points[0] = closest_coor_ref1;
-  fe->reinit(pi1->_side, &points);
+
+  //We have to pick one of the two faces to own the contact point.  It doesn't really matter
+  //which one we pick.  For repeatibility, pick the face with the lowest index.
+  if (index1<index2)
+  {
+    contact_point_ref = closest_coor_ref1;
+    points[0] = closest_coor_ref1;
+    fe->reinit(pi1->_side, &points);
+    index = index1;
+  }
+  else
+  {
+    contact_point_ref = closest_coor_ref2;
+    points[0] = closest_coor_ref2;
+    fe->reinit(pi2->_side, &points);
+    index = index2;
+  }
+
   contact_point = fe->get_xyz()[0];
 
   if (sidedim == 2)
@@ -826,9 +863,9 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
       if ((local_node_indices[0] == 0) &&
           (local_node_indices[1] == 1))
       {
-        if (eta <= -1.0)
+        if (eta <= 0.0)
         {
-          eta = -1.0;
+          eta = 0.0;
           off_of_this_edge=true;
           if (xi<0.0)
             closest_node = side->get_node(0);
@@ -854,9 +891,9 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
       else if ((local_node_indices[0] == 0) &&
                (local_node_indices[1] == 2))
       {
-        if (xi <= -1.0)
+        if (xi <= 0.0)
         {
-          xi = -1.0;
+          xi = 0.0;
           off_of_this_edge=true;
           if (eta>1.0)
             closest_node = side->get_node(2);
@@ -942,6 +979,170 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
     }
   }
   return off_of_this_edge;
+}
+
+bool
+PenetrationThread::restrictPointToFace(Point& p,
+                                       Node* &closest_node,
+                                       const Elem* side)
+{
+  const ElemType t(side->type());
+  Real &xi   = p(0);
+  Real &eta  = p(1);
+  closest_node = NULL;
+
+  bool off_of_this_face(false);
+
+  switch (t)
+  {
+    case EDGE2:
+    case EDGE3:
+    case EDGE4:
+    {
+      if (xi <= -1.0)
+      {
+        xi = -1.0;
+        off_of_this_face=true;
+        closest_node = side->get_node(0);
+      }
+      else if (xi >= 1.0)
+      {
+        xi = 1.0;
+        off_of_this_face=true;
+        closest_node = side->get_node(1);
+      }
+      break;
+    }
+
+    case TRI3:
+    case TRI6:
+    {
+      if (eta <= 0.0)
+      {
+        eta = 0.0;
+        off_of_this_face=true;
+        if (xi<0.0)
+        {
+          xi = 0.0;
+          closest_node = side->get_node(0);
+        }
+        else if (xi>1.0)
+        {
+          xi = 1.0;
+          closest_node = side->get_node(1);
+        }
+      }
+      if ((xi + eta) > 1.0)
+      {
+        Real delta = (xi+eta-1.0)/2.0;
+        xi -= delta;
+        eta -= delta;
+        off_of_this_face=true;
+        if (xi>1.0)
+        {
+          xi = 1.0;
+          eta = 0.0;
+          closest_node = side->get_node(1);
+        }
+        else if (xi<0.0)
+        {
+          xi = 0.0;
+          eta = 1.0;
+          closest_node = side->get_node(2);
+        }
+      }
+      if (xi <= 0.0)
+      {
+        xi = 0.0;
+        off_of_this_face=true;
+        if (eta>1.0)
+        {
+          eta = 1.0;
+          closest_node = side->get_node(2);
+        }
+        else if (eta<0.0)
+        {
+          eta = 0.0;
+          closest_node = side->get_node(0);
+        }
+      }
+      break;
+    }
+
+    case QUAD4:
+    case QUAD8:
+    case QUAD9:
+    {
+      if (eta <= -1.0)
+      {
+        eta = -1.0;
+        off_of_this_face=true;
+        if (xi<-1.0)
+        {
+          xi = -1.0;
+          closest_node = side->get_node(0);
+        }
+        else if (xi>1.0)
+        {
+          xi = 1.0;
+          closest_node = side->get_node(1);
+        }
+      }
+      else if (xi >= 1.0)
+      {
+        xi = 1.0;
+        off_of_this_face=true;
+        if (eta<-1.0)
+        {
+          eta = -1.0;
+          closest_node = side->get_node(1);
+        }
+        else if (eta>1.0)
+        {
+          eta = 1.0;
+          closest_node = side->get_node(2);
+        }
+      }
+      else if (eta >= 1.0)
+      {
+        eta = 1.0;
+        off_of_this_face=true;
+        if (xi<-1.0)
+        {
+          xi = -1.0;
+          closest_node = side->get_node(3);
+        }
+        else if (xi>1.0)
+        {
+          xi = 1.0;
+          closest_node = side->get_node(2);
+        }
+      }
+      if (xi <= -1.0)
+      {
+        xi = -1.0;
+        off_of_this_face=true;
+        if (eta<-1.0)
+        {
+          eta = -1.0;
+          closest_node = side->get_node(0);
+        }
+        else if (eta>1.0)
+        {
+          eta = 1.0;
+          closest_node = side->get_node(3);
+        }
+      }
+      break;
+    }
+
+    default:
+    {
+      mooseError("Unsupported face type: "<<t);
+      break;
+    }
+  }
+  return off_of_this_face;
 }
 
 bool

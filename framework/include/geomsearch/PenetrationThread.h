@@ -108,10 +108,13 @@ protected:
 
   bool
   findRidgeContactPoint(Point &contact_point,
-                       PenetrationLocator::PenetrationInfo * pi1,
-                       PenetrationLocator::PenetrationInfo * pi2,
-                       Real & tangential_distance,
-                       Node* &closest_node);
+                        Real & tangential_distance,
+                        Node* &closest_node,
+                        unsigned int &index,
+                        Point &contact_point_ref,
+                        std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
+                        const unsigned int index1,
+                        const unsigned int index2);
 
   void
   getSideCornerNodes(Elem* side,
@@ -122,6 +125,10 @@ protected:
                                      Node* &closest_node,
                                      const Elem* side,
                                      const std::vector<Node*> &edge_nodes);
+  bool
+  restrictPointToFace(Point& p,
+                      Node* &closest_node,
+                      const Elem* side);
 
   bool
   isFaceReasonableCandidate(const Elem * master_elem,
@@ -162,9 +169,9 @@ protected:
 
   struct RidgeData
   {
-    unsigned int _index1;
-    unsigned int _index2;
+    unsigned int _index;
     Point _closest_coor;
+    Point _closest_coor_ref;
     Real _tangential_distance;
     Node* _closest_node;
   };

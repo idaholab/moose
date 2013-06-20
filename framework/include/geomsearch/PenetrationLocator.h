@@ -128,7 +128,6 @@ public:
   void setTangentialTolerance(Real tangential_tolerance);
   void setNormalSmoothingDistance(Real normal_smoothing_distance);
   void setNormalSmoothingMethod(std::string nsmString);
-  void setStartingContactPoint();
   void saveContactStateVars();
 
 protected:

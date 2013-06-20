@@ -156,22 +156,6 @@ PenetrationLocator::setNormalSmoothingMethod(std::string nsmString)
 }
 
 void
-PenetrationLocator::setStartingContactPoint()
-{
-  std::map<unsigned int, PenetrationInfo *>::iterator it( _penetration_info.begin() );
-  const std::map<unsigned int, PenetrationInfo *>::iterator it_end( _penetration_info.end() );
-  for ( ; it != it_end; ++it )
-  {
-    if (it->second != NULL)
-    {
-      it->second->_starting_elem = it->second->_elem;
-      it->second->_starting_side_num = it->second->_side_num;
-      it->second->_starting_closest_point_ref = it->second->_closest_point_ref;
-    }
-  }
-}
-
-void
 PenetrationLocator::saveContactStateVars()
 {
   std::map<unsigned int, PenetrationInfo *>::iterator it( _penetration_info.begin() );
