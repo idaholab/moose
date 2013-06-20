@@ -16,6 +16,7 @@
 #define NODALNORMALSPREPROCESSOR_H
 
 #include "ElementUserObject.h"
+#include "libmesh/fe.h"
 
 class NodalNormalsPreprocessor;
 class AuxiliarySystem;
@@ -40,6 +41,7 @@ public:
 
 protected:
   AuxiliarySystem & _aux;
+  FEType _fe_type;
   bool _has_corners;
   BoundaryID _corner_boundary_id;
 

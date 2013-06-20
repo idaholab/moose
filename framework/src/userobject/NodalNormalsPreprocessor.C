@@ -21,6 +21,8 @@ InputParameters validParams<NodalNormalsPreprocessor>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params.addParam<BoundaryName>("corner_boundary", "Node set ID which contains the nodes that are in 'corners'.");
+  params.addPrivateParam<FEFamily>("fe_family", LAGRANGE);
+  params.addPrivateParam<Order>("fe_order", FIRST);
 
   return params;
 }
@@ -28,9 +30,10 @@ InputParameters validParams<NodalNormalsPreprocessor>()
 NodalNormalsPreprocessor::NodalNormalsPreprocessor(const std::string & name, InputParameters parameters) :
     ElementUserObject(name, parameters),
     _aux(_fe_problem.getAuxiliarySystem()),
+    _fe_type(getParam<Order>("fe_order"), getParam<FEFamily>("fe_family")),
     _has_corners(isParamValid("corner_boundary")),
     _corner_boundary_id(_has_corners ? _mesh.getBoundaryID(getParam<BoundaryName>("corner_boundary")) : static_cast<BoundaryID>(-1)),
-    _grad_phi(_assembly.feGradPhi(FEType(FIRST, LAGRANGE)))
+    _grad_phi(_assembly.feGradPhi(_fe_type))
 {
 }
 

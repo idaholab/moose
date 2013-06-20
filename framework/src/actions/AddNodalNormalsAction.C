@@ -16,6 +16,9 @@
 #include "FEProblem.h"
 #include "Factory.h"
 
+#include "libmesh/fe.h"
+#include "libmesh/string_to_enum.h"
+
 
 template<>
 InputParameters validParams<AddNodalNormalsAction>()
@@ -25,6 +28,8 @@ InputParameters validParams<AddNodalNormalsAction>()
   everywhere[0] = "ANY_BOUNDARY_ID";
   params.addParam<std::vector<BoundaryName> >("boundary", everywhere, "boundary ID or name where the normals will be computed");
   params.addParam<BoundaryName>("corner_boundary", "boundary ID or name with nodes at 'corners'");
+  MooseEnum orders("FIRST, SECOND", "FIRST");
+  params.addParam<MooseEnum>("order", orders,  "Specifies the order of variables that hold the nodal normals. Needs to match the order of the mesh");
 
   return params;
 }
@@ -42,10 +47,14 @@ AddNodalNormalsAction::~AddNodalNormalsAction()
 void
 AddNodalNormalsAction::act()
 {
+  Order order = Utility::string_to_enum<Order>(getParam<MooseEnum>("order"));
+  FEFamily family = LAGRANGE;
+  FEType fe_type(order, family);
+
   // add 3 aux variables for each component of the normal
-  _problem->addAuxVariable("nodal_normal_x", FEType(FIRST, LAGRANGE));
-  _problem->addAuxVariable("nodal_normal_y", FEType(FIRST, LAGRANGE));
-  _problem->addAuxVariable("nodal_normal_z", FEType(FIRST, LAGRANGE));
+  _problem->addAuxVariable("nodal_normal_x", fe_type);
+  _problem->addAuxVariable("nodal_normal_y", fe_type);
+  _problem->addAuxVariable("nodal_normal_z", fe_type);
 
   MooseEnum execute_options(SetupInterface::getExecuteOptions());
   execute_options = "timestep_begin";
@@ -56,6 +65,8 @@ AddNodalNormalsAction::act()
 
   {
     InputParameters pars = _factory.getValidParams("NodalNormalsPreprocessor");
+    pars.set<Order>("fe_order") = order;
+    pars.set<FEFamily>("fe_family") = family;
     pars.set<MooseEnum>("execute_on") = execute_options;
     if (has_corners)
       pars.set<BoundaryName>("corner_boundary") = _corner_boundary;
