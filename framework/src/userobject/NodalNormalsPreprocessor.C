@@ -63,18 +63,21 @@ NodalNormalsPreprocessor::execute()
       // it is a boundary node and not a part of 'corner boundary id'
       if (!_has_corners || !_mesh._mesh.boundary_info->has_boundary_id(node, _corner_boundary_id))
       {
-        // but it is not a corner node, they will be treated differently later on
-        dof_id_type dof_x = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number(), 0);
-        dof_id_type dof_y = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_y").number(), 0);
-        dof_id_type dof_z = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_z").number(), 0);
-
-        for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+        if (node->n_dofs(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number()) > 0)
         {
-          Threads::spin_mutex::scoped_lock lock(nodal_normals_preprocessor_mutex);
+          // but it is not a corner node, they will be treated differently later on
+          dof_id_type dof_x = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number(), 0);
+          dof_id_type dof_y = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_y").number(), 0);
+          dof_id_type dof_z = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_z").number(), 0);
 
-          sln.add(dof_x, _JxW[qp] * _grad_phi[i][qp](0));
-          sln.add(dof_y, _JxW[qp] * _grad_phi[i][qp](1));
-          sln.add(dof_z, _JxW[qp] * _grad_phi[i][qp](2));
+          for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+          {
+            Threads::spin_mutex::scoped_lock lock(nodal_normals_preprocessor_mutex);
+
+            sln.add(dof_x, _JxW[qp] * _grad_phi[i][qp](0));
+            sln.add(dof_y, _JxW[qp] * _grad_phi[i][qp](1));
+            sln.add(dof_z, _JxW[qp] * _grad_phi[i][qp](2));
+          }
         }
       }
     }

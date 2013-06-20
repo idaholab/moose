@@ -45,15 +45,18 @@ NodalNormalsCorner::execute()
     const Node * node = _current_side_elem->get_node(nd);
     if (_mesh._mesh.boundary_info->has_boundary_id(node, _corner_boundary_id))
     {
-      dof_id_type dof_x = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number(), 0);
-      dof_id_type dof_y = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_y").number(), 0);
-      dof_id_type dof_z = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_z").number(), 0);
+      if (node->n_dofs(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number()) > 0)
+      {
+        dof_id_type dof_x = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number(), 0);
+        dof_id_type dof_y = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_y").number(), 0);
+        dof_id_type dof_z = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_z").number(), 0);
 
-      NumericVector<Number> & sln = _aux.solution();
-      // substitute the normal form the face, we are going to have at least one normal every time
-      sln.add(dof_x, _normals[0](0));
-      sln.add(dof_y, _normals[0](1));
-      sln.add(dof_z, _normals[0](2));
+        NumericVector<Number> & sln = _aux.solution();
+        // substitute the normal form the face, we are going to have at least one normal every time
+        sln.add(dof_x, _normals[0](0));
+        sln.add(dof_y, _normals[0](1));
+        sln.add(dof_z, _normals[0](2));
+      }
     }
   }
 }

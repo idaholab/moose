@@ -22,4 +22,10 @@
     input = 'cylinder_hexes_2nd.i'
     exodiff = 'cylinder_hexes_2nd_out.e'
   [../]
+
+  [./cylinder_hexes_1st_2nd]
+    type = 'Exodiff'
+    input = 'cylinder_hexes_1st_2nd.i'
+    exodiff = 'cylinder_hexes_1st_2nd_out.e'
+  [../]
 []
