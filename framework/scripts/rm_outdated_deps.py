@@ -82,7 +82,7 @@ def cleanDepDirs(cur_dir):
     for line in dep_file_lines:
 
       # Search line for header file name, ignore leading and trailing whitespace
-      hdr = re.search('\s(.*\.h)\s', line)
+      hdr = re.search('\s*(.*\.h)', line)
 
       # If the dep. file is a header and does not exist the dep. file is outdated
       if hdr and not os.path.isfile(hdr.group(1)):
