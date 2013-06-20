@@ -304,10 +304,10 @@ syntax:
 doc:
 	doxygen doc/doxygen/Doxyfile
 
-depclean: _cleandep
-cleandep: _cleandep
-cleandeps: _cleandep
+depclean: cleandep
+cleandep: cleandep
+cleandeps: cleandep
 
-_cleandep:
+cleandep:
 #	@echo @python $(MOOSE_DIR)/scripts/rm_outdated_deps.py $(ROOT_DIR)
 	@python $(MOOSE_DIR)/scripts/rm_outdated_deps.py $(ROOT_DIR)
