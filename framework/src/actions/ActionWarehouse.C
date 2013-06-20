@@ -19,6 +19,8 @@
 #include "InputFileFormatter.h"
 #include "InputParameters.h"
 #include "MooseMesh.h"
+#include "AddVariableAction.h"
+#include "AddAuxVariableAction.h"
 
 ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory) :
     _app(app),
@@ -173,7 +175,21 @@ ActionWarehouse::printActionDependencySets()
     for (std::set<std::string>::const_iterator j = i->begin(); j != i->end(); ++j)
     {
       for (std::vector<Action *>::const_iterator k = _action_blocks[*j].begin(); k != _action_blocks[*j].end(); ++k)
-        std::cerr << "[DBG][ACT]" << "\t" << (*k)->getAction() << "\n";
+      {
+        Action * act = *k;
+        std::cerr << "[DBG][ACT]" << "\t" << act->getAction();
+        if (dynamic_cast<MooseObjectAction *>(act) != NULL ||
+            dynamic_cast<AddVariableAction *>(act) != NULL ||
+            dynamic_cast<AddAuxVariableAction *>(act) != NULL)
+        {
+          // print out short name only for MooseObjectActions
+          std::stringstream ss;
+          ss << ": " << (*k)->getShortName();
+          if (ss.str().size() > 2)
+            std::cerr << ss.str();
+        }
+        std::cerr << "\n";
+      }
     }
   }
 }
