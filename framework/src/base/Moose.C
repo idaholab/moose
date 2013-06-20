@@ -80,6 +80,7 @@
 #include "SolutionAux.h"
 #include "VectorMagnitudeAux.h"
 #include "ConstantScalarAux.h"
+#include "QuotientAux.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
@@ -362,6 +363,7 @@ registerObjects(Factory & factory)
   registerAux(SolutionAux);
   registerAux(VectorMagnitudeAux);
   registerAux(ConstantScalarAux);
+  registerAux(QuotientAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);

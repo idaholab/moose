@@ -1,0 +1,7 @@
+[Tests]
+  [./quotient_aux]
+    type = 'Exodiff'
+    input = 'quotient_aux.i'
+    exodiff = 'quotient_aux_out.e'
+  [../]
+[]
