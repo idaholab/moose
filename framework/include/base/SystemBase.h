@@ -604,9 +604,27 @@ protected:
 };
 
 
-// Parallel exception hadling
+// Parallel exception handling
 
 #define PARALLEL_TRY        try
+#ifdef LIBMESH_HAVE_TBB_API
+// with TBB, our exceptions got turned into tbb::captured_exception thus we need to reconvert them
+// however we loose the number thrown by user code
+#define PARALLEL_CATCH                                                                  \
+  catch (tbb::captured_exception & ex)                                                  \
+  {                                                                                     \
+    _exception = MooseException(1);                                                     \
+  }                                                                                     \
+  catch (MooseException & e)                                                            \
+  {                                                                                     \
+    _exception = e;                                                                     \
+  }                                                                                     \
+  {                                                                                     \
+    Parallel::max<MooseException>(_exception);                                          \
+    if (_exception > 0)                                                                 \
+      throw _exception;                                                                 \
+  }
+#else
 #define PARALLEL_CATCH                                                                  \
   catch (MooseException & e)                                                            \
   {                                                                                     \
@@ -617,6 +635,6 @@ protected:
     if (_exception > 0)                                                                 \
       throw _exception;                                                                 \
   }
-
+#endif
 
 #endif /* SYSTEMBASE_H */
