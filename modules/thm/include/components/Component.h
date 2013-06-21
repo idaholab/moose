@@ -42,6 +42,20 @@ protected:
 class Component : public R7Object
 {
 public:
+  struct RavenNameEntry
+  {
+    RavenNameEntry(const std::string & object_name, const std::string par_name) :
+      _object_name(object_name),
+      _par_name(par_name)
+    {
+    }
+
+    /// MOOSE object name
+    std::string _object_name;
+    /// Parameter name
+    std::string _par_name;
+  };
+
   Component(const std::string & name, InputParameters parameters);
   virtual ~Component();
 
@@ -89,7 +103,7 @@ public:
   void
   setRParam(const std::string & param_name, const T & value);
 
-  void connectObject(const std::string & rname, const std::string & mooseName);
+  void connectObject(const std::string & rname, const std::string & mooseName, const std::string & name);
   void connectObject(const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name);
 
   /**
@@ -126,19 +140,6 @@ protected:
   /// List of subdomain IDs this components owns
   std::vector<unsigned int> _subdomains;
 
-  struct RavenNameEntry
-  {
-    RavenNameEntry(const std::string & object_name, const std::string par_name) :
-      _object_name(object_name),
-      _par_name(par_name)
-    {
-    }
-
-    /// MOOSE object name
-    std::string _object_name;
-    /// Parameter name
-    std::string _par_name;
-  };
   /// Mapping from a friendly name to MOOSE object name
   std::map<std::string, std::map<std::string, std::vector<RavenNameEntry> > > _rname_map;
   /// Mapping of friendly names

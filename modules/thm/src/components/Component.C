@@ -134,10 +134,10 @@ Component::getNextBCId()
 }
 
 void
-Component::connectObject(const std::string & rname, const std::string & mooseName)
+Component::connectObject(const std::string & rname, const std::string & mooseName, const std::string & name)
 {
-  RavenNameEntry rne(mooseName, "");
-  _rname_map[rname][""].push_back(rne);
+  RavenNameEntry rne(mooseName, name);
+  _rname_map[rname][name].push_back(rne);
 }
 
 void
