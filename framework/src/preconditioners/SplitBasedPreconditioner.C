@@ -64,7 +64,7 @@ SplitBasedPreconditioner::SplitBasedPreconditioner (const std::string & name, In
         (*cm)(i,j) = 1;
   }
   _fe_problem.setCouplingMatrix(cm);
-  _nl.useSplitPreconditioner(true);
+  _nl.useSplitBasedPreconditioner(true);
 }
 
 void
