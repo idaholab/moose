@@ -395,6 +395,37 @@ NonlinearSystem::setDecomposition(const std::vector<std::string>& splits)
 
 }
 
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
+#undef __FUNCT__
+#define __FUNCT__ "SNESUpdateMoose"
+static PetscErrorCode  SNESUpdateMoose(SNES snes, PetscInt iteration)
+{
+  PetscErrorCode ierr;
+  DM dm;
+  KSP ksp;
+  const char* prefix;
+  MPI_Comm comm;
+  PC pc;
+
+  PetscFunctionBegin;
+  if (iteration) {
+    /* TODO: limit this only to situations when displaced (un)contact splits are present, as is DisplacedProblem(). */
+    ierr = SNESGetDM(snes,&dm);CHKERRQ(ierr);
+    ierr = DMMooseReset(dm);CHKERRQ(ierr);
+    ierr = DMSetUp(dm);CHKERRQ(ierr);
+    ierr = SNESGetKSP(snes,&ksp);CHKERRQ(ierr);
+    /* Should we rebuild the whole KSP? */
+    ierr = PetscObjectGetOptionsPrefix((PetscObject)ksp,&prefix);CHKERRQ(ierr);
+    ierr = PetscObjectGetComm((PetscObject)ksp,&comm);CHKERRQ(ierr);
+    ierr = PCCreate(comm,&pc);CHKERRQ(ierr);
+    ierr = PCSetDM(pc,dm);CHKERRQ(ierr);
+    ierr = PCSetOptionsPrefix(pc,prefix);CHKERRQ(ierr);
+    ierr = PCSetFromOptions(pc);CHKERRQ(ierr);
+    ierr = KSPSetPC(ksp,pc);CHKERRQ(ierr);
+  }
+  PetscFunctionReturn(0);
+}
+#endif
 
 void
 NonlinearSystem::setupDecomposition()
@@ -420,7 +451,8 @@ NonlinearSystem::setupDecomposition()
 
   PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(sys().nonlinear_solver.get());
   SNES snes = petsc_solver->snes();
-  DM dm;
+  /* FIXME: reset the DM, do not recreate it anew every time? */
+  DM dm = PETSC_NULL;
   ierr = DMCreateMoose(libMesh::COMM_WORLD, *this, &dm);
   CHKERRABORT(libMesh::COMM_WORLD,ierr);
   ierr = DMSetFromOptions(dm);
@@ -430,6 +462,8 @@ NonlinearSystem::setupDecomposition()
   ierr = SNESSetDM(snes,dm);
   CHKERRABORT(libMesh::COMM_WORLD,ierr);
   ierr = DMDestroy(&dm);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = SNESSetUpdate(snes,SNESUpdateMoose);
   CHKERRABORT(libMesh::COMM_WORLD,ierr);
 #endif
 }
@@ -1063,12 +1097,11 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 }
 
 
-
-
 void
 NonlinearSystem::computeResidualInternal(Moose::KernelType type)
 {
-  // residualSetup() /////
+
+   // residualSetup() /////
   for(unsigned int i=0; i<libMesh::n_threads(); i++)
   {
     _kernels[i].residualSetup();

@@ -21,7 +21,7 @@
 class Split : public MooseObject {
  public:
   Split(const std::string& name, InputParameters params);
-  void setup(const std::string& prefix = "-");
+  virtual void setup(const std::string& prefix = "-");
 
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
  protected:

@@ -175,6 +175,7 @@
 #include "SingleMatrixPreconditioner.h"
 #include "SplitBasedPreconditioner.h"
 #include "Split.h"
+#include "ContactSplit.h"
 #include "AddSplitAction.h"
 
 // dampers
@@ -486,6 +487,7 @@ registerObjects(Factory & factory)
 
   // splits
   registerSplit(Split);
+  registerSplit(ContactSplit);
 
   // MultiApps
   registerMultiApp(TransientMultiApp);

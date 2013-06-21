@@ -116,13 +116,13 @@ Split::setup(const std::string& prefix)
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
 
     if (dtype == DecompositionTypeSchur) {
-      SchurType stype = getSchurType(_schur_type); // validation
+      getSchurType(_schur_type); // validation
       opt = prefix+"pc_fieldsplit_schur_fact_type";
       val = _schur_type;
       ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
       CHKERRABORT(libMesh::COMM_WORLD,ierr);
 
-      SchurPreconditioner sptype = getSchurPreconditioner(_schur_pre); // validation
+      getSchurPreconditioner(_schur_pre); // validation
       opt = prefix+"pc_fieldsplit_schur_precondition";
       val = _schur_pre;
 #if PETSC_VERSION_LESS_THAN(3,4,0)
