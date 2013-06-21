@@ -16,6 +16,6 @@ AddComponentAction::AddComponentAction(const std::string & name, InputParameters
 void
 AddComponentAction::act()
 {
-  std::cerr << "AddComponent: " << _type << " " << getShortName() << std::endl;
+  std::cout << "AddComponent: " << _type << " " << getShortName() << std::endl;
   _simulation.addComponent(_type, getShortName(), getObjectParams());
 }
