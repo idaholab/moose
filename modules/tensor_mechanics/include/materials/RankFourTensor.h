@@ -63,9 +63,7 @@ public:
 
   RankFourTensor & operator=(const RankFourTensor &a);
   
-  RankTwoTensor operator*(const RankTwoTensor &a);
-  
-//  RealTensorValue operator*(const RankTwoTensor &a);
+  RealTensorValue operator*(const RankTwoTensor &a);
   
   RealTensorValue operator*(const RealTensorValue &a);
 
@@ -103,7 +101,7 @@ public:
 //  int MatrixInversion(double *, int, double* );//Added
 
   int MatrixInversion(double *, int);//Added
-  
+virtual void surfaceFillFromInputVector(const std::vector<Real> input);    
   
 protected:
 
