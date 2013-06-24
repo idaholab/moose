@@ -44,6 +44,7 @@ NodalNormalBC::~NodalNormalBC()
 void
 NodalNormalBC::computeResidual(NumericVector<Number> & residual)
 {
+  _qp = 0;
   _normal = Point(_nx[_qp], _ny[_qp], _nz[_qp]);
   NodalBC::computeResidual(residual);
 }
