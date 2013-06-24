@@ -437,23 +437,3 @@ RankTwoTensor::L2norm()
   return norm;
   
 }
-void
-RankTwoTensor::surfaceFillFromInputVector(const std::vector<Real> input)
-  {
-    if(input.size() == 4)
-{
-    // initialize with zeros
-    this->zero();
-    _vals[0][0] = input[0];
-    _vals[0][1] = input[1];
-    _vals[1][0] = input[2];
-    _vals[1][1] = input[3];
- /*   // pad the rest of the entries with zeros
-    _vals[2][0]=_vals[0][2]=0.;
-    _vals[2][1]=_vals[1][2]=0.;
-    _vals[2][2]=0.;
-*/
-  }
-  else
-   mooseError("please provide correct number of values for surface RankTwoTensor initialization.");
-  }

@@ -143,7 +143,6 @@ public:
   void addIa(const Real &a);
 
   Real L2norm();
-  void surfaceFillFromInputVector(const std::vector<Real> input);
   
 protected:
   

@@ -73,7 +73,7 @@ RankFourTensor::operator= (const RankFourTensor &a)
   return *this; 
 }
 
-RealTensorValue
+RankTwoTensor
 RankFourTensor::operator*(const RankTwoTensor &a)
 {
   RealTensorValue result;
@@ -86,6 +86,20 @@ RankFourTensor::operator*(const RankTwoTensor &a)
   
   return result;
 }
+
+// RealTensorValue
+// RankFourTensor::operator*(const RankTwoTensor &a)
+// {
+//   RealTensorValue result;
+  
+//   for(unsigned int i(0); i<N; i++)
+//     for(unsigned int j(0); j<N; j++)
+//       for(unsigned int k(0); k<N; k++)
+//         for(unsigned int l(0); l<N; l++)
+//           result(i,j) += _vals[i][j][k][l]*a(k,l);
+  
+//   return result;
+// }
 
 RealTensorValue
 RankFourTensor::operator*(const RealTensorValue &a)
@@ -433,59 +447,6 @@ RankFourTensor::MatrixInversion(double* A, int n)
   free(ipiv);
   free(buffer);   
   return return_value;
-}
-void
-RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> input)
-{
-  if(input.size() == 9)
-{ 
-
- //first set to zero
-/*  for (unsigned int i=0;i<3;i++)
-    for (unsigned int j=0;j<3;j++)
-      for (unsigned int k=0;k<3;k++)
-        for (unsigned int l=0;l<3,l++)
-          _vals[i][j][k][l]=0;
-*/
-//should just be able to do:
-  this->zero();
-
-  //then fill from vector C_1111, C_1112, C_1122, C_1212, C_1222, C_1211, C_2211, C_2212, C_2222
-  _vals[0][0][0][0]=input[0];
-  _vals[0][0][0][1]=input[1];
-  _vals[0][0][1][1]=input[2];
-  _vals[0][1][0][1]=input[3];
-  _vals[0][1][1][1]=input[4];
-  _vals[0][1][0][0]=input[5];
-  _vals[1][1][0][0]=input[6];
-  _vals[1][1][0][1]=input[7];
-  _vals[1][1][1][1]=input[8]; 
-
-// any other symmetry to fill in?  just double-checking... e.g., C_1121?
-  _vals[0][0][1][0]=_vals[0][0][0][1];
-  _vals[0][1][1][0]=_vals[0][1][0][1];
-  _vals[1][0][0][1]=_vals[0][1][0][1];
-  _vals[1][0][1][1]=_vals[0][1][1][1];
-  _vals[1][0][0][0]=_vals[0][1][0][0];
-  _vals[1][1][1][0]=_vals[1][1][0][1];
-}
-  else
-    if (input.size() == 2)
-      {
-        this ->zero();
-        // only two independent constants, C_1111 and C_1122
-        _vals[0][0][0][0]=input[0];
-        _vals[0][0][1][1]=input[1];
-	//use symmetries
-        _vals[1][1][1][1]=_vals[0][0][0][0];
-        _vals[1][1][0][0]=_vals[0][0][1][1];
-        _vals[0][1][0][1]=0.5*(_vals[0][0][0][0]-_vals[0][0][1][1]);
-        _vals[1][0][0][1]=_vals[0][1][0][1];
-	_vals[0][1][1][0]=_vals[0][1][0][1];
-        _vals[1][0][1][0]=_vals[0][1][0][1];
-      }
-else
-  mooseError("Please provide correct number of inputs for surface RankFourTensor initialization.");
   
 
 }
