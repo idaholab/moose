@@ -18,7 +18,7 @@ OneDHeatForcingFunction::OneDHeatForcingFunction(const std::string & name, Input
     _fuel_type(getParam<std::string>("fuel_type")),
     _power_fraction(getParam<Real>("power_fraction")),
     _total_power(coupledScalarValue("total_power")),
-    _fuel_volume(getPostprocessorValue(getParam<PostprocessorName>("fuel_volume"))),
+    _fuel_volume(getPostprocessorValue("fuel_volume")),
     _power_shape_function(getFunction("power_shape_function"))
 {
 }
