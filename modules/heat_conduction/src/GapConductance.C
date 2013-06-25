@@ -33,6 +33,10 @@ InputParameters validParams<GapConductance>()
   // Common
   params.addParam<Real>("min_gap", 1e-6, "A minimum gap size");
   params.addParam<Real>("max_gap", 1e6, "A maximum gap size");
+
+  params.addParam<Real>("stefan_boltzmann", 5.669e-8, "The Stefan-Boltzmann constant");
+  params.addParam<Real>("emissivity_1", 0.0, "The emissivity of the fuel surface");
+  params.addParam<Real>("emissivity_2", 0.0, "The emissivity of the cladding surface");
   return params;
 }
 
@@ -51,6 +55,9 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
    _gap_conductivity(getParam<Real>("gap_conductivity")),
    _gap_conductivity_function(isParamValid("gap_conductivity_function") ? &getFunction("gap_conductivity_function") : NULL),
    _gap_conductivity_function_variable(isCoupled("gap_conductivity_function_variable") ? &coupledValue("gap_conductivity_function_variable") : NULL),
+   _stefan_boltzmann(getParam<Real>("stefan_boltzmann")),
+   _emissivity( getParam<Real>("emissivity_1") != 0 && getParam<Real>("emissivity_2") != 0 ?
+                1/getParam<Real>("emissivity_1") + 1/getParam<Real>("emissivity_2") - 1 : 0 ),
    _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap")),
    _temp_var(_quadrature ? getVar("variable",0) : NULL),
@@ -105,7 +112,7 @@ GapConductance::computeQpProperties()
 void
 GapConductance::computeQpConductance()
 {
-  _gap_conductance[_qp] = h_conduction();
+  _gap_conductance[_qp] = h_conduction() + h_radiation();
   _gap_conductance_dT[_qp] = dh_conduction();
 }
 
@@ -120,6 +127,48 @@ Real
 GapConductance::dh_conduction()
 {
   return 0;
+}
+
+
+Real
+GapConductance::h_radiation()
+{
+  /*
+   Gap conductance due to radiation is based on the diffusion approximation:
+
+      qr = sigma*Fe*(Tf^4 - Tc^4) ~ hr(Tf - Tc)
+         where sigma is the Stefan-Boltztmann constant, Fe is an emissivity function, Tf and Tc
+         are the fuel and clad absolute temperatures, respectively, and hr is the radiant gap
+         conductance. Solving for hr,
+
+      hr = sigma*Fe*(Tf^4 - Tc^4) / (Tf - Tc)
+         which can be factored to give:
+
+      hr = sigma*Fe*(Tf^2 + Tc^2) * (Tf + Tc)
+
+   Approximating the fuel-clad gap as infinite parallel planes, the emissivity function is given by:
+
+      Fe = 1 / (1/ef + 1/ec - 1)
+  */
+
+  if (_emissivity == 0)
+  {
+    return 0.0;
+  }
+
+  const Real temp_func = (_temp[_qp]*_temp[_qp] + _gap_temp*_gap_temp) * (_temp[_qp] + _gap_temp);
+  return _stefan_boltzmann*temp_func/_emissivity;
+}
+
+Real
+GapConductance::dh_radiation()
+{
+  if (_emissivity == 0)
+  {
+    return 0.0;
+  }
+  const Real temp_func = 3*_temp[_qp]*_temp[_qp] + _gap_temp * ( 2*_temp[_qp] + _gap_temp );
+  return _stefan_boltzmann*temp_func/_emissivity;
 }
 
 Real

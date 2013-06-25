@@ -28,7 +28,9 @@ protected:
 
 
   virtual Real h_conduction();
+  virtual Real h_radiation();
   virtual Real dh_conduction();
+  virtual Real dh_radiation();
   virtual Real gapK();
 
   virtual void computeGapValues();
@@ -52,6 +54,9 @@ protected:
   const Real _gap_conductivity;
   Function * const _gap_conductivity_function;
   const VariableValue * _gap_conductivity_function_variable;
+
+  const Real _stefan_boltzmann;
+  Real _emissivity;
 
   Real _min_gap;
   Real _max_gap;
