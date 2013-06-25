@@ -5,7 +5,7 @@
  *
  * RankFourTensor holds the 81 separate C_ijkl entries; the entries are accessed by index, with
  * i, j, k, and l equal to 0, 1, 2
- * 
+ *
  */
 
 #ifndef RANKFOURTENSOR_H
@@ -33,7 +33,7 @@ public:
   RankFourTensor(const RankFourTensor &a);
 
   ~RankFourTensor() {}
-  
+
   /**
    * Gets the value for the index specified.  Takes index = 0,1,2
    */
@@ -62,11 +62,9 @@ public:
   void zero();
 
   RankFourTensor & operator=(const RankFourTensor &a);
-  
+
   RankTwoTensor operator*(const RankTwoTensor &a);
-  
-//  RealTensorValue operator*(const RankTwoTensor &a);
-  
+
   RealTensorValue operator*(const RealTensorValue &a);
 
   RankFourTensor operator*(const Real &a);
@@ -78,15 +76,15 @@ public:
   RankFourTensor & operator/=(const Real &a);
 
   RankFourTensor & operator+=(const RankFourTensor &a);
-  
+
   RankFourTensor operator+(const RankFourTensor &a) const;
-  
+
   RankFourTensor & operator-=(const RankFourTensor &a);
-  
+
   RankFourTensor operator-(const RankFourTensor &a) const;
 
   RankFourTensor operator - () const;
-  
+
   RankFourTensor operator*(const RankFourTensor &a) const;//Added
 
   RankFourTensor invSymm();//Added
@@ -98,20 +96,20 @@ public:
   void print();
 
   RankFourTensor transposeMajor();
-  
-  
+
+
 //  int MatrixInversion(double *, int, double* );//Added
 
   int MatrixInversion(double *, int);//Added
-  
-  
+virtual void surfaceFillFromInputVector(const std::vector<Real> input);
+
 protected:
 
 /**
- * Contains the actual data for the Rank Four tensor. 
+ * Contains the actual data for the Rank Four tensor.
  */
   static const unsigned int N = 3;
-  
+
   Real _vals[N][N][N][N];
 
 private:
