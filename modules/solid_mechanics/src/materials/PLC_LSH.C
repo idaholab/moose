@@ -23,7 +23,7 @@ InputParameters validParams<PLC_LSH>()
    params.addParam<bool>("output_iteration_info", false, "Set true to output sub-newton iteration information");
    params.addParam<Real>("relative_tolerance", 1e-5, "Relative convergence tolerance for sub-newtion iteration");
    params.addParam<Real>("absolute_tolerance", 1e-20, "Absolute convergence tolerance for sub-newtion iteration");
-   params.addParam<std::string>("output", "", "The reporting postprocessor to use for the max_iterations value.");
+   params.addParam<PostprocessorName>("output", "", "The reporting postprocessor to use for the max_iterations value.");
 
    // Control of combined plasticity-creep iterarion
    params.addParam<Real>("absolute_stress_tolerance", 1e-5, "Convergence tolerance for combined plasticity-creep stress iteration");
@@ -62,7 +62,7 @@ PLC_LSH::PLC_LSH( const std::string & name,
 
    _del_p(declareProperty<Real>("del_p")),
 
-   _output( getParam<std::string>("output") != "" ? &getPostprocessorValue(getParam<std::string>("output")) : NULL )
+   _output( getParam<PostprocessorName>("output") != "" ? &getPostprocessorValue("output") : NULL )
 
 {
 }

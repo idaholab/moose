@@ -18,13 +18,13 @@ InputParameters validParams<PlenumPressureAction>()
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_z", "The save_in variables for z displacement");
 
   params.addParam<Real>("initial_pressure", 0, "The initial pressure in the plenum.  If not given, a zero initial pressure will be used.");
-  params.addParam<std::vector<std::string> >("material_input", "The name of the postprocessor(s) that holds the amount of material injected into the plenum.");
+  params.addParam<std::vector<PostprocessorName> >("material_input", "The name of the postprocessor(s) that holds the amount of material injected into the plenum.");
   params.addRequiredParam<Real>("R", "The universal gas constant for the units used.");
-  params.addRequiredParam<std::string>("temperature", "The name of the average temperature postprocessor value.");
-  params.addRequiredParam<std::string>("volume", "The name of the internal volume postprocessor value.");
+  params.addRequiredParam<PostprocessorName>("temperature", "The name of the average temperature postprocessor value.");
+  params.addRequiredParam<PostprocessorName>("volume", "The name of the internal volume postprocessor value.");
   params.addParam<Real>("startup_time", 0, "The amount of time during which the pressure will ramp from zero to its true value.");
-  params.addParam<std::string>("output_initial_moles", "", "The reporting postprocessor to use for the initial moles of gas.");
-  params.addParam<std::string>("output", "", "The reporting postprocessor to use for the plenum pressure value.");
+  params.addParam<PostprocessorName>("output_initial_moles", "", "The reporting postprocessor to use for the initial moles of gas.");
+  params.addParam<PostprocessorName>("output", "", "The reporting postprocessor to use for the plenum pressure value.");
 
   params.addParam<std::vector<Real> >("refab_time", "The time at which the plenum pressure must be reinitialized due to fuel rod refabrication.");
   params.addParam<std::vector<Real> >("refab_pressure", "The pressure of fill gas at refabrication.");
@@ -42,13 +42,13 @@ PlenumPressureAction::PlenumPressureAction(const std::string & name, InputParame
   _disp_y(getParam<NonlinearVariableName>("disp_y")),
   _disp_z(getParam<NonlinearVariableName>("disp_z")),
   _initial_pressure(getParam<Real>("initial_pressure")),
-  _material_input(getParam<std::vector<std::string> >("material_input")),
+  _material_input(getParam<std::vector<PostprocessorName> >("material_input")),
   _R(getParam<Real>("R")),
-  _temperature(getParam<std::string>("temperature")),
-  _volume(getParam<std::string>("volume")),
+  _temperature(getParam<PostprocessorName>("temperature")),
+  _volume(getParam<PostprocessorName>("volume")),
   _startup_time(getParam<Real>("startup_time")),
-  _output_initial_moles(getParam<std::string>("output_initial_moles")),
-  _output(getParam<std::string>("output")),
+  _output_initial_moles(getParam<PostprocessorName>("output_initial_moles")),
+  _output(getParam<PostprocessorName>("output")),
 
   _kernel_name("PlenumPressure"),
   _use_displaced_mesh(true)
@@ -96,13 +96,13 @@ PlenumPressureAction::act()
     params.set<std::vector<BoundaryName> >("boundary") = _boundary;
 
     params.set<Real>("initial_pressure") = _initial_pressure;
-    params.set<std::vector<std::string> >("material_input") = _material_input;
+    params.set<std::vector<PostprocessorName> >("material_input") = _material_input;
     params.set<Real>("R") = _R;
-    params.set<std::string>("temperature") = _temperature;
-    params.set<std::string>("volume") = _volume;
+    params.set<PostprocessorName>("temperature") = _temperature;
+    params.set<PostprocessorName>("volume") = _volume;
     params.set<Real>("startup_time") = _startup_time;
-    params.set<std::string>("output_initial_moles") = _output_initial_moles;
-    params.set<std::string>("output") = _output;
+    params.set<PostprocessorName>("output_initial_moles") = _output_initial_moles;
+    params.set<PostprocessorName>("output") = _output;
     if (isParamValid("refab_time"))
     {
       params.set<std::vector<Real> >("refab_time") = getParam<std::vector<Real> >("refab_time");

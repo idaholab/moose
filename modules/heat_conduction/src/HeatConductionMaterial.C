@@ -25,9 +25,9 @@ HeatConductionMaterial::HeatConductionMaterial(const std::string & name, InputPa
     _has_temp(isCoupled("temp")),
     _temperature(_has_temp ? coupledValue("temp") : _zero),
     _my_thermal_conductivity(isParamValid("thermal_conductivity") ? getParam<Real>("thermal_conductivity") : 0),
-    _my_thermal_conductivity_x(isParamValid("thermal_conductivity_x") ? &getPostprocessorValue(getParam<PostprocessorName>("thermal_conductivity_x")) : NULL),
-    _my_thermal_conductivity_y(isParamValid("thermal_conductivity_y") ? &getPostprocessorValue(getParam<PostprocessorName>("thermal_conductivity_y")) : NULL),
-    _my_thermal_conductivity_z(isParamValid("thermal_conductivity_z") ? &getPostprocessorValue(getParam<PostprocessorName>("thermal_conductivity_z")) : NULL),
+    _my_thermal_conductivity_x(isParamValid("thermal_conductivity_x") ? &getPostprocessorValue("thermal_conductivity_x") : NULL),
+    _my_thermal_conductivity_y(isParamValid("thermal_conductivity_y") ? &getPostprocessorValue("thermal_conductivity_y") : NULL),
+    _my_thermal_conductivity_z(isParamValid("thermal_conductivity_z") ? &getPostprocessorValue("thermal_conductivity_z") : NULL),
     _my_specific_heat(isParamValid("specific_heat") ? getParam<Real>("specific_heat") : 0),
     _isotropic_thcond(isParamValid("thermal_conductivity") || getParam<FunctionName>("thermal_conductivity_temperature_function") != ""),
 

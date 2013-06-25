@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<NodalVolumeFraction>()
 {
   InputParameters params = validParams<NodalFloodCount>();
-  params.addRequiredParam<std::string>("mesh_volume", "Postprocessor from which to get mesh volume");
+  params.addRequiredParam<PostprocessorName>("mesh_volume", "Postprocessor from which to get mesh volume");
   params.addParam<FileName>("Avrami_file", "filename for Avrami analysis info (ln time and Avrami)");
   params.addParam<Real>("equil_fraction", -1.0, "Equilibrium volume fraction of 2nd phase for Avrami analysis");
     
@@ -28,7 +28,7 @@ InputParameters validParams<NodalVolumeFraction>()
 
 NodalVolumeFraction::NodalVolumeFraction(const std::string & name, InputParameters parameters) :
     NodalFloodCount(name, parameters),
-    _mesh_volume(getPostprocessorValue(getParam<std::string>("mesh_volume"))),
+    _mesh_volume(getPostprocessorValue("mesh_volume")),
     _equil_fraction(getParam<Real>("equil_fraction"))
 {
   if (parameters.isParamValid("Avrami_file") && _equil_fraction < 0.0)

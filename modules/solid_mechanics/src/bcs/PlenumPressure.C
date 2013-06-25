@@ -6,14 +6,13 @@ InputParameters validParams<PlenumPressure>()
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<int>("component", "The component for the PlenumPressure");
   params.addParam<Real>("initial_pressure", 0, "The initial pressure in the plenum.  If not given, a zero initial pressure will be used.");
-  params.addParam<std::vector<std::string> >("material_input", "The name of the postprocessor(s) that holds the amount of material injected into the plenum.");
+  params.addParam<std::vector<PostprocessorName> >("material_input", "The name of the postprocessor(s) that holds the amount of material injected into the plenum.");
   params.addRequiredParam<Real>("R", "The universal gas constant for the units used.");
-  params.addRequiredParam<std::string>("temperature", "The name of the average temperature postprocessor value.");
-  params.addRequiredParam<std::string>("volume", "The name of the internal volume postprocessor value.");
+  params.addRequiredParam<PostprocessorName>("temperature", "The name of the average temperature postprocessor value.");
+  params.addRequiredParam<PostprocessorName>("volume", "The name of the internal volume postprocessor value.");
   params.addParam<Real>("startup_time", 0, "The amount of time during which the pressure will ramp from zero to its true value.");
-  params.addParam<std::string>("output_initial_moles", "", "The reporting postprocessor to use for the initial moles of gas.");
-  params.addParam<std::string>("output", "", "The reporting postprocessor to use for the plenum pressure value.");
-
+  params.addParam<PostprocessorName>("output_initial_moles", "", "The reporting postprocessor to use for the initial moles of gas.");
+  params.addParam<PostprocessorName>("output", "", "The reporting postprocessor to use for the plenum pressure value.");
   params.addParam<std::vector<Real> >("refab_time", "The time at which the plenum pressure must be reinitialized due to fuel rod refabrication.");
   params.addParam<std::vector<Real> >("refab_pressure", "The pressure of fill gas at refabrication.");
   params.addParam<std::vector<Real> >("refab_temperature", "The temperature at refabrication.");
@@ -31,12 +30,12 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
    _initial_pressure(getParam<Real>("initial_pressure")),
    _material_input(),
    _R(getParam<Real>("R")),
-   _temperature( getPostprocessorValue(getParam<std::string>("temperature"))),
-   _volume( getPostprocessorValue(getParam<std::string>("volume"))),
+   _temperature( getPostprocessorValue("temperature")),
+   _volume( getPostprocessorValue("volume")),
    _start_time(0),
    _startup_time( getParam<Real>("startup_time")),
-   _initial_moles( getParam<std::string>("output_initial_moles") != "" ? &getPostprocessorValue(getParam<std::string>("output_initial_moles")) : NULL ),
-   _output( getParam<std::string>("output") != "" ? &getPostprocessorValue(getParam<std::string>("output")) : NULL ),
+   _initial_moles( getParam<PostprocessorName>("output_initial_moles") != "" ? &getPostprocessorValue("output_initial_moles") : NULL ),
+   _output( getParam<PostprocessorName>("output") != "" ? &getPostprocessorValue("output") : NULL ),
    _refab_needed(isParamValid("refab_time") ? getParam<std::vector<Real> >("refab_time").size() : 0),
    _refab_gas_released(0),
    _refab_time( isParamValid("refab_time") ?
@@ -60,11 +59,11 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
 
   if (isParamValid("material_input"))
   {
-    std::vector<std::string> ppn = params.get<std::vector<std::string> >("material_input");
+    std::vector<PostprocessorName> ppn = params.get<std::vector<PostprocessorName> >("material_input");
     const unsigned len = ppn.size();
     for (unsigned i(0); i < len; ++i)
     {
-      _material_input.push_back( &getPostprocessorValue(ppn[i]) );
+      _material_input.push_back( &getPostprocessorValueByName(ppn[i]) );
     }
   }
 

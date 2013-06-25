@@ -22,15 +22,15 @@ InputParameters validParams<MacroElastic>()
 MacroElastic::MacroElastic( const std::string & name,
                   InputParameters parameters )
   :Elastic( name, parameters ),
-   _C1111(getPostprocessorValue(getParam<PostprocessorName>("C1111"))),
-   _C1122(getPostprocessorValue(getParam<PostprocessorName>("C1122"))),
-   _C1133(getPostprocessorValue(getParam<PostprocessorName>("C1133"))),
-   _C2222(getPostprocessorValue(getParam<PostprocessorName>("C2222"))),
-   _C2233(getPostprocessorValue(getParam<PostprocessorName>("C2233"))),
-   _C3333(getPostprocessorValue(getParam<PostprocessorName>("C3333"))),
-   _C1212(getPostprocessorValue(getParam<PostprocessorName>("C1212"))),
-   _C2323(getPostprocessorValue(getParam<PostprocessorName>("C2323"))),
-   _C3131(getPostprocessorValue(getParam<PostprocessorName>("C3131")))
+   _C1111(getPostprocessorValue("C1111")),
+   _C1122(getPostprocessorValue("C1122")),
+   _C1133(getPostprocessorValue("C1133")),
+   _C2222(getPostprocessorValue("C2222")),
+   _C2233(getPostprocessorValue("C2233")),
+   _C3333(getPostprocessorValue("C3333")),
+   _C1212(getPostprocessorValue("C1212")),
+   _C2323(getPostprocessorValue("C2323")),
+   _C3131(getPostprocessorValue("C3131"))
 {
 }
 
