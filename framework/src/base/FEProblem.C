@@ -1717,7 +1717,7 @@ FEProblem::hasPostprocessor(const std::string & name, THREAD_ID tid)
 }
 
 Real &
-FEProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
+FEProblem::getPostprocessorValue(const PostprocessorName & name, THREAD_ID tid)
 {
   return _pps_data[tid].getPostprocessorValue(name);
 }

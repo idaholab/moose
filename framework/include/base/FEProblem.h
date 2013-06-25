@@ -370,10 +370,12 @@ public:
    * @return true if it exists, otherwise false
    */
   bool hasPostprocessor(const std::string & name, THREAD_ID tid = 0);
+
   /**
    * Get a reference to the value associated with the postprocessor.
    */
-  Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
+  Real & getPostprocessorValue(const PostprocessorName & name, THREAD_ID tid = 0);
+
   /**
    * Get the reference to the old value of a post-processor
    * @param name The name of the post-processor

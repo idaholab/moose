@@ -65,9 +65,12 @@ public:
   const UserObject & getUserObjectBaseByName(const std::string & name);
 
 private:
+  /// Reference to the FEProblem instance
   FEProblem & _uoi_feproblem;
+
   /// Thread ID
   THREAD_ID _uoi_tid;
+
   /// Parameters of the object with this interface
   InputParameters _uoi_params;
 };

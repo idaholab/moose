@@ -18,8 +18,6 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-
-  std::string _pps_name;
   PostprocessorValue & _pps_value;
 };
 

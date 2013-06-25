@@ -31,7 +31,7 @@ FunctionInterface::getFunction(const std::string & name)
 }
 
 Function &
-FunctionInterface::getFunctionByName(const std::string & name)
+FunctionInterface::getFunctionByName(const FunctionName & name)
 {
   return _fni_feproblem.getFunction(name, _fni_tid);
 }

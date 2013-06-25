@@ -25,9 +25,8 @@ InputParameters validParams<PostprocessorFunction>()
 
 PostprocessorFunction::PostprocessorFunction(const std::string & name, InputParameters parameters) :
     Function(name, parameters),
-    _pp(getPostprocessorValue(getParam<PostprocessorName>("pp")))
+    _pp(getPostprocessorValue("pp"))
 {
-  std::cout<<"Stuff!"<<std::endl;
 }
 
 Real

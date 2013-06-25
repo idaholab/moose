@@ -31,27 +31,68 @@ public:
   PostprocessorInterface(InputParameters & params);
 
   /**
-   * Retrieve the value named "name"
+   * Retrieve the value of a Postprocessor
+   * @param name The name of the Postprocessor (see below)
+   * @return A reference to the desired value
+   *
+   * The name required by this method is the name that is hard-coded into
+   * your source code. For example, if you have a Kernel that requires
+   * a Postprocessure you may have an input file with "pp = my_pp", this function
+   * requires the "pp" name as input (see .../moose_test/functions/PostprocessorFunction.C)
+   *
+   * see getPostprocessorValueOld getPostprocessorValueByName getPostprocessorValueOldByName
    */
   PostprocessorValue & getPostprocessorValue(const std::string & name);
 
   /**
-   * Retrieve the old value of a post-processor
-   * @param name The name of the post-processor
-   * @return The value of the post-processor
+   * Retrieve the value of the Postprocessor
+   * @param name Postprocessor name (see below)
+   * @return A reference to the desired value
+   *
+   * The name required by this method is the name defined in the input file. For example,
+   * if you have a Kernel that requires a Postprocesser you may have an input file with
+   * "pp = my_pp", this method requires the "my_pp" name as input
+   * (see .../moose_test/functions/PostprocessorFunction.C)
+   *
+   * see getPostprocessorValue getPostprocessorValueOldByName getPostprocessorValueByName
+   */
+  PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
+
+  /**
+   * Retrieve the old value of a Postprocessor
+   * @param name The name of the Postprocessor
+   * @return The value of the Postprocessor
+   *
+   * see getPostprocessorValue
    */
   PostprocessorValue & getPostprocessorValueOld(const std::string & name);
 
   /**
+   * Retrieve the old value of a Postprocessor
+   * @param name The name of the Postprocessor
+   * @return The value of the Postprocessor
+   *
+   * see getPostprocessorValueByName
+   */
+  PostprocessorValue & getPostprocessorValueOldByName(const PostprocessorName & name);
+
+  /**
    * Determine if the postprocessor exists
-   * @param name The name of the postprocessor
-   * @return True if the postprocessor exists
+   * @param name The name of the Postprocessor
+   * @return True if the Postprocessor exists
    */
   bool hasPostprocessor(const std::string & name);
 
 private:
+
+  /// Reference the the FEProblem class
   FEProblem & _pi_feproblem;
+
+  /// Thread ID
   THREAD_ID _pi_tid;
+
+  /// PostprocessorInterface Parameters
+  InputParameters  _ppi_params;
 };
 
 #endif //POSTPROCESSORINTERFACE_H

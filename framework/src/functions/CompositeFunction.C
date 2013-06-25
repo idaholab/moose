@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<CompositeFunction>()
 {
   InputParameters params = validParams<Function>();
-  params.addParam<std::vector<std::string> >("functions", "The functions to be multiplied together.");
+  params.addParam<std::vector<FunctionName> >("functions", "The functions to be multiplied together.");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
   return params;
 }
@@ -29,7 +29,7 @@ CompositeFunction::CompositeFunction(const std::string & name, InputParameters p
   _scale_factor( getParam<Real>("scale_factor") )
 {
 
-  const std::vector<std::string> & names( getParam<std::vector<std::string> >("functions") );
+  const std::vector<FunctionName> & names( getParam<std::vector<FunctionName> >("functions") );
   const unsigned len( names.size() );
   if (len == 0)
   {
@@ -54,7 +54,6 @@ CompositeFunction::CompositeFunction(const std::string & name, InputParameters p
     }
     _f[i] = f;
   }
-
 }
 
 CompositeFunction::~CompositeFunction()

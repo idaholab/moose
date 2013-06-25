@@ -94,10 +94,10 @@ MooseParsedFunction::initialSetup()
     if (hasPostprocessor(_input_vals[i]))
     {
       // Store a pointer to the Postprocessor value
-      _pp_vals.push_back(&getPostprocessorValue(_input_vals[i]));
+      _pp_vals.push_back(&getPostprocessorValueByName(_input_vals[i]));
 
       // Store the value for passing to the the libMesh::ParsedFunction
-      _vals.push_back(getPostprocessorValue(_input_vals[i]));
+      _vals.push_back(getPostprocessorValueByName(_input_vals[i]));
 
       // Store the location of this variable
       _pp_index.push_back(i);

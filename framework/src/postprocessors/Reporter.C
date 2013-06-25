@@ -24,7 +24,7 @@ InputParameters validParams<Reporter>()
 
 Reporter::Reporter(const std::string & name, InputParameters params) :
     GeneralPostprocessor(name, params),
-    _my_value(getPostprocessorValue(name))
+    _my_value(getPostprocessorValueByName(name))
 {
 }
 

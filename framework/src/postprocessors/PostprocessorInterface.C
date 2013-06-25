@@ -15,28 +15,35 @@
 #include "PostprocessorInterface.h"
 #include "FEProblem.h"
 #include "Postprocessor.h"
+#include "MooseTypes.h"
 
 PostprocessorInterface::PostprocessorInterface(InputParameters & params) :
     _pi_feproblem(*params.get<FEProblem *>("_fe_problem")),
-    _pi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0)
-{}
+    _pi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
+    _ppi_params(params)
+{
+}
 
 PostprocessorValue &
 PostprocessorInterface::getPostprocessorValue(const std::string & name)
 {
+  return _pi_feproblem.getPostprocessorValue(_ppi_params.get<PostprocessorName>(name), _pi_tid);
+}
+
+PostprocessorValue &
+PostprocessorInterface::getPostprocessorValueByName(const PostprocessorName & name)
+{
   return _pi_feproblem.getPostprocessorValue(name, _pi_tid);
-
-
-  // std::map<std::string, Real>::iterator it = _postprocessor_data._values.find(name);
-
-//   if (it != _postprocessor_data._values.end())
-//     return it->second;
-
-  //mooseError("No Postprocessor named: " + name);
 }
 
 PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
+{
+  return _pi_feproblem.getPostprocessorValueOld(_ppi_params.get<PostprocessorName>(name), _pi_tid);
+}
+
+PostprocessorValue &
+PostprocessorInterface::getPostprocessorValueOldByName(const PostprocessorName & name)
 {
   return _pi_feproblem.getPostprocessorValueOld(name, _pi_tid);
 }

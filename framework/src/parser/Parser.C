@@ -587,6 +587,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractVector(IndicatorName         , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(MarkerName            , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(MultiAppName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(PostprocessorName     , it->second, full_name, it->first, in_global, global_params_block);
     }
   }
 }

@@ -24,7 +24,7 @@ PostprocessorData::hasPostprocessor(const std::string & name)
 }
 
 PostprocessorValue &
-PostprocessorData::getPostprocessorValue(const std::string & name)
+PostprocessorData::getPostprocessorValue(const PostprocessorName & name)
 {
   // TODO: do something smarter so we can have lazy binding like this... but still have good errors.
   /*

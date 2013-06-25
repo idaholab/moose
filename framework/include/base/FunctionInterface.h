@@ -50,12 +50,16 @@ public:
    * @param name The name of the function to retrieve
    * @return The function with name 'name'
    */
-  Function & getFunctionByName(const std::string & name);
+  Function & getFunctionByName(const FunctionName & name);
 
 private:
+
+  /// Reference to FEProblem instance
   FEProblem & _fni_feproblem;
+
   /// Thread ID
   THREAD_ID _fni_tid;
+
   /// Parameters of the object with this interface
   InputParameters _fni_params;
 };

@@ -25,7 +25,7 @@ InputParameters validParams<PostprocessorDT>()
 PostprocessorDT::PostprocessorDT(const std::string & name, InputParameters parameters) :
     TimeStepper(name, parameters),
     PostprocessorInterface(parameters),
-    _pps_value(getPostprocessorValue(getParam<PostprocessorName>("postprocessor")))
+    _pps_value(getPostprocessorValue("postprocessor"))
 {
 }
 

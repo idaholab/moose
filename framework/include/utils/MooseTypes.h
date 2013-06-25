@@ -152,20 +152,25 @@ enum PCSideType
 
 /// This type is for expected filenames, it can be used to trigger open file dialogs in the GUI
 DerivativeStringClass(FileName);
+
 /// This type is similar to "FileName", but is used to further filter file dialogs on known file mesh types
 DerivativeStringClass(MeshFileName);
+
 /// This type is for output file base
 DerivativeStringClass(OutFileBase);
 
 /// This type is used for objects that expect nonlinear variable names (i.e. Kernels, BCs)
 DerivativeStringClass(NonlinearVariableName);
+
 /// This type is used for objects that expect Auxiliary variable names (i.e. AuxKernels, AuxBCs)
 DerivativeStringClass(AuxVariableName);
+
 /// This type is used for objects that expect either Nonlinear or Auxiliary Variables such as postprocessors
 DerivativeStringClass(VariableName);
 
 /// This type is used for objects that expect Boundary Names/Ids read from or generated on the current mesh
 DerivativeStringClass(BoundaryName);
+
 /// This type is similar to BoundaryName but is used for "blocks" or subdomains in the current mesh
 DerivativeStringClass(SubdomainName);
 

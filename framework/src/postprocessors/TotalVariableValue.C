@@ -18,16 +18,16 @@ template<>
 InputParameters validParams<TotalVariableValue>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addParam<std::string>("value", "The name of the postprocessor");
+  params.addParam<PostprocessorName>("value", "The name of the postprocessor");
   return params;
 }
 
 TotalVariableValue::TotalVariableValue(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     _value(0),
-    _value_old(getPostprocessorValueOld(_name)),
-    _pps_value(getPostprocessorValue(getParam<std::string>("value"))),
-    _pps_value_old(getPostprocessorValueOld(getParam<std::string>("value")))
+    _value_old(getPostprocessorValueOldByName(_name)),
+    _pps_value(getPostprocessorValue("value")),
+    _pps_value_old(getPostprocessorValueOld("value"))
 {
 }
 

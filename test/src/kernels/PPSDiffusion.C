@@ -4,15 +4,14 @@ template<>
 InputParameters validParams<PPSDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<std::string>("pps_name", "the name of the postprocessor we are going to use");
+  params.addRequiredParam<PostprocessorName>("pps_name", "the name of the postprocessor we are going to use");
   return params;
 }
 
 
 PPSDiffusion::PPSDiffusion(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
-    _pps_name(getParam<std::string>("pps_name")),
-    _pps_value(getPostprocessorValue(_pps_name))
+    _pps_value(getPostprocessorValue("pps_name"))
 {
 }
 

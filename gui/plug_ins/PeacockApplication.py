@@ -76,6 +76,13 @@ class PeacockApplication(object):
       type_options['std::vector<FunctionName>'] = set(function_names)
       type_options['FunctionName'] = set(function_names)
 
+    # Postprocessors
+    postprocessor_names = tree_widget.getChildNamesOfPath('Postprocessors')
+    if len(postprocessor_names):
+      type_options['std::vector<PostprocessorName, std::allocator<PostprocessorName> >'] = set(postprocessor_names)
+      type_options['std::vector<PostprocessorName>'] = set(postprocessor_names)
+      type_options['PostprocessorName'] = set(postprocessor_names)
+      
     # UserObjects
     user_object_names = tree_widget.getChildNamesOfPath('UserObjects')
     if len(user_object_names):

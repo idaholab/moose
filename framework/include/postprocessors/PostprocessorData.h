@@ -41,7 +41,7 @@ public:
   /**
    * Return the value for the post processor
    */
-  PostprocessorValue & getPostprocessorValue(const std::string & name);
+  PostprocessorValue & getPostprocessorValue(const PostprocessorName & name);
 
   /**
    * The the old value of an post-processor
