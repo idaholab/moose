@@ -1219,6 +1219,8 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
 
   Moose::perf_log.push("residual.close4()","Solve");
   residual.close();
+  residualVector(Moose::KT_TIME).close();
+  residualVector(Moose::KT_NONTIME).close();
   Moose::perf_log.pop("residual.close4()","Solve");
 }
 
