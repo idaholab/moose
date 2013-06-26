@@ -36,5 +36,10 @@ include $(MOOSE_DIR)/build.mk
 include $(MOOSE_DIR)/moose.mk
 include $(MOOSE_DIR)/app.mk
 
+# Find all the MOOSE unit test source files and include their dependencies.
+moose_unit_srcfiles := $(shell find $(ROOT_DIR)/moose_unit -name "*.C")
+moose_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_unit_srcfiles))
+-include $(moose_unit_deps)
+
 ###############################################################################
 # Additional special case targets should be added here
