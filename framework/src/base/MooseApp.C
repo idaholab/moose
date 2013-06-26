@@ -277,9 +277,15 @@ MooseApp::setErrorOverridden()
 void
 MooseApp::run()
 {
-  setupOptions();
-  runInputFile();
-  executeExecutioner();
+  // It appears that leaving uncaught exceptions on MVAPICH can be a bad thing.
+  // This empty try/catch block seems to mitigate this problem.
+  try
+  {
+    setupOptions();
+    runInputFile();
+    executeExecutioner();
+  }
+  catch(...) {}
 }
 
 void
