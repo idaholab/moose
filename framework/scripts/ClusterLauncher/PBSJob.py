@@ -14,7 +14,10 @@ class PBSJob(Job):
 
     params.addParam('place', 'scatter:excl', "The PBS job placement scheme to use.")
     params.addParam('walltime', '4:00:00', "The requested walltime for this job.")
+    params.addParam('no_copy', "A list of files specifically not to copy")
+    params.addParam('copy_files', "A list of files specifically to copy")
 
+    params.addStringSubParam('combine_streams', '#PBS -j oe', "Combine stdout and stderror into one file (needed for NO EXPECTED ERR)")
     params.addStringSubParam('threads', '--n-threads=THREADS', "The number of threads to run per MPI process.")
     params.addStringSubParam('queue', '#PBS -q QUEUE', "Which queue to submit this job to.")
     params.addStringSubParam('module', 'module load MODULE', 'moose-dev-gcc', "The module to load.")
@@ -90,4 +93,5 @@ class PBSJob(Job):
 
   def launch(self):
     # Finally launch the job
-    subprocess.Popen('qsub ' + os.path.split(self.specs['template_script'])[1], shell=True)
+    my_process = subprocess.Popen('qsub ' + os.path.split(self.specs['template_script'])[1], stdout=subprocess.PIPE, shell=True)
+    print 'JOB_ID:', my_process.communicate()[0].split('.')[0]

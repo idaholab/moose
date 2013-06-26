@@ -7,6 +7,7 @@
 <NOTIFY_ADDRESS>
 <SOFT_LINK1>
 <QUEUE>
+<COMBINE_STREAMS>
 
 source /etc/profile.d/modules.sh
 <MODULE>

@@ -66,6 +66,11 @@ def printResult(test_name, result, timing, start, end, options, color=True):
     if m:
       any_match = True
       f_result += colorText(m.group(1), options, 'RED') + ' ' + m.group(2)
+    # Color PBS status CYAN
+    m = re.search('((?:LAUNCHED|RUNNING|EXITING|QUEUED))', result)
+    if m:
+      any_match = True
+      f_result += colorText(m.group(1), options, 'CYAN')
     # Color Passed tests GREEN
     m = re.search('(OK)', result)
     if m:
@@ -100,14 +105,15 @@ def colorText(str, options, color, html=False):
   if options.colored and not (os.environ.has_key('BITTEN_NOCOLOR') and os.environ['BITTEN_NOCOLOR'] == 'true'):
     if html:
       str = str.replace('<r>', color_codes['BOLD']+color_codes['RED'])
+      str = str.replace('<c>', color_codes['BOLD']+color_codes['CYAN'])
       str = str.replace('<g>', color_codes['BOLD']+color_codes['GREEN'])
       str = str.replace('<y>', color_codes['BOLD']+color_codes['YELLOW'])
       str = str.replace('<b>', color_codes['BOLD'])
-      str = re.sub(r'</[rgyb]>', color_codes['RESET'], str)
+      str = re.sub(r'</[rcgyb]>', color_codes['RESET'], str)
     else:
       str = color_codes[color] + str + color_codes['RESET']
   elif html:
-    str = re.sub(r'</?[rgyb]>', '', str)    # strip all "html" tags
+    str = re.sub(r'</?[rcgyb]>', '', str)    # strip all "html" tags
 
   return str
 

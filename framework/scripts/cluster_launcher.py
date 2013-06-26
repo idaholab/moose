@@ -107,7 +107,13 @@ class ClusterLauncher:
     # Copy files
     for file in os.listdir('../'):
       if os.path.isfile('../' + file) and file != job_file:
+        if file not in specs['no_copy']:
+          shutil.copy('../' + file, '.')
+    for file in specs['copy_files'].split():
+      if os.path.isfile('../' + file):
         shutil.copy('../' + file, '.')
+      elif os.path.isdir('../' + file):
+        shutil.copytree('../' + file, file)
 
     # Files have been copied so turn the remaining work over to the Job instance
     # To keep everything consistent we'll also append our serial number to our job name

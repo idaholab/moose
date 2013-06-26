@@ -15,6 +15,9 @@ class RunApp(Tester):
     params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
     params.addParam('should_crash',False, "Inidicates that the test is expected to crash or otherwise terminate early")
 
+    params.addParam('walltime',           "The max time as pbs understands it")
+    params.addParam('job_name',           "The test name as pbs understands it")
+
     # Parallel/Thread testing
     params.addParam('max_parallel', 1000, "Maximum number of MPI processes this test can be run with      (Default: 1000)")
     params.addParam('min_parallel',    1, "Minimum number of MPI processes that this test can be run with (Default: 1)")
@@ -31,7 +34,7 @@ class RunApp(Tester):
   def __init__(self, name, params):
     Tester.__init__(self, name, params)
 
-  def getCommand(self, options):
+  def getCommand(self, options, cluster_handle):
     # Create the command line string to run
     command = ''
 
@@ -75,7 +78,54 @@ class RunApp(Tester):
     if options.scaling and specs[SCALE_REFINE] > 0:
       command += ' -r ' + str(specs[SCALE_REFINE])
 
+    if options.pbs != '':
+      extra_args = ''
+      if options.parallel or ncpus > 1 or nthreads > 1:
+        extra_args = ' --n-threads=' + str(nthreads) + ' ' + ' '.join(specs[CLI_ARGS])
+      else:
+        extra_args = ' ' + ' '.join(specs[CLI_ARGS])
+
+      if options.scaling and specs[SCALE_REFINE] > 0:
+        extra_args += ' -r ' + str(specs[SCALE_REFINE])
+      command = self.buildPBSJOB(specs, cluster_handle, extra_args)
+
     return command
+
+  def buildPBSJOB(self, specs, cluster_handle, extra_args):
+    # Append any extra args to through at the cluster_launcher
+    if extra_args != '':
+      specs[CLI_ARGS] = extra_args + ' ' + ' '.join(specs[CLI_ARGS])
+    else:
+      specs[CLI_ARGS] = ' '.join(specs[CLI_ARGS])
+    specs[CLI_ARGS] = specs[CLI_ARGS].strip()
+
+    # Open our template
+    template_script = open(specs[MOOSE_DIR] + 'scripts/TestHarness/pbs_template.i', 'r')
+    content = template_script.read()
+    template_script.close()
+
+    # Convert MAX_TIME to hours:minutes for walltime use
+    hours = int(int(specs[MAX_TIME]) / 3600)
+    minutes = int(int(specs[MAX_TIME]) / 60) % 60
+    specs['walltime'] = '{:02,.0f}'.format(hours) + ':' + '{:02,.0f}'.format(minutes) + ':00'
+
+    # Truncate JOB_NAME, as PBS can only except 8 character names
+    specs['job_name'] = specs[INPUT][:3] + '_TEST'
+
+    # Do all of the replacements for the valid parameters
+    for spec in specs.valid_keys():
+      if spec in specs.substitute:
+        specs[spec] = specs.substitute[spec].replace(spec.upper(), specs[spec])
+      content = content.replace('<' + spec.upper() + '>', str(specs[spec]))
+
+    # Make sure we strip out any string substitution parameters that were not supplied
+    for spec in specs.substitute_keys():
+      if not specs.isValid(spec):
+        content = content.replace('<' + param.upper() + '>', '')
+
+    cluster_handle.write(content + '\n')
+
+    return specs[MOOSE_DIR] + 'scripts/cluster_launcher.py tests.cluster'
 
   def processResults(self, moose_dir, retcode, options, output):
     reason = ''
@@ -85,6 +135,9 @@ class RunApp(Tester):
     if options.enable_valgrind:
       if retcode == 0 and not specs[NO_VALGRIND] and 'ERROR SUMMARY: 0 errors' not in output:
         reason = 'MEMORY ERROR'
+    elif options.pbs != '':
+      if retcode == 0 and 'command not found' in output:
+        reason = 'QSUB NOT FOUND'
     # Everything else
     else:
       if specs.isValid(EXPECT_OUT):
@@ -113,4 +166,3 @@ class RunApp(Tester):
       return False
     else:
       return True
-
