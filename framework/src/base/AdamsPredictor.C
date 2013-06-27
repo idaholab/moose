@@ -13,12 +13,13 @@
 /****************************************************************/
 
 #include "AdamsPredictor.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<AdamsPredictor>()
 {
   InputParameters params = validParams<Predictor>();
-  params.addParam<int>("order",2, "The maximum reachable order of the Adams-Bashforth Predictor");
+  params.addParam<int>("order", 2, "The maximum reachable order of the Adams-Bashforth Predictor");
   return params;
 }
 

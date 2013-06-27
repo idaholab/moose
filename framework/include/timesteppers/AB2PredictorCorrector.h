@@ -12,13 +12,14 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef AB2PredictorCorrector_H
-#define AB2PredictorCorrector_H
+#ifndef AB2PREDICTORCORRECTOR_H
+#define AB2PREDICTORCORRECTOR_H
 
 #include "TimeStepper.h"
 #include <iostream>
 #include <fstream>
 #include "libmesh/numeric_vector.h"
+
 // System includes
 #include <string>
 
@@ -92,4 +93,4 @@ protected:
 
 };
 
-#endif //DT2TRANSIENT_H
+#endif // AB2PREDICTORCORRECTOR_H

@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADAMSPREDICTOR_H_
-#define ADAMSPREDICTOR_H_
+#ifndef ADAMSPREDICTOR_H
+#define ADAMSPREDICTOR_H
 
 
 #include "Predictor.h"
@@ -77,4 +77,4 @@ protected:
 };
 
 
-#endif /* ADAMSPREDICTOR_H_ */
+#endif /* ADAMSPREDICTOR_H */

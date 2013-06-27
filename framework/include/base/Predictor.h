@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PREDICTOR_H_
-#define PREDICTOR_H_
+#ifndef PREDICTOR_H
+#define PREDICTOR_H
 
 #include "TimeIntegrator.h"
 #include "libmesh/numeric_vector.h"
@@ -68,4 +68,4 @@ protected:
   Real _scale;
 };
 
-#endif /* PREDICTOR_H_ */
+#endif /* PREDICTOR_H */
