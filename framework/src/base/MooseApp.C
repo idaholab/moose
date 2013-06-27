@@ -278,14 +278,17 @@ void
 MooseApp::run()
 {
   // It appears that leaving uncaught exceptions on MVAPICH can be a bad thing.
-  // This empty try/catch block seems to mitigate this problem.
+  // Here we will catch any exception and exit properly.
   try
   {
     setupOptions();
     runInputFile();
     executeExecutioner();
   }
-  catch(...) {}
+  catch(...)
+  {
+    MPI_Abort(libMesh::COMM_WORLD,1);
+  }
 }
 
 void
