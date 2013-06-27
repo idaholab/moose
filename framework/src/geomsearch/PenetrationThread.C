@@ -66,13 +66,6 @@ PenetrationThread::PenetrationThread(SubProblem & subproblem,
   _id_list(id_list),
   _n_elems(elem_list.size())
 {
-  if (_do_normal_smoothing &&
-      _normal_smoothing_method == PenetrationLocator::NSM_NODAL_NORMAL_BASED)
-  {
-    _nodal_normal_x = &_subproblem.getVariable(_tid,"nodal_normal_x");
-    _nodal_normal_y = &_subproblem.getVariable(_tid,"nodal_normal_y");
-    _nodal_normal_z = &_subproblem.getVariable(_tid,"nodal_normal_z");
-  }
 }
 
 // Splitting Constructor
@@ -105,6 +98,15 @@ PenetrationThread::operator() (const NodeIdRange & range)
   _tid = puid.id;
 
   FEBase * fe = _fes[_tid];
+
+  //Must get the variables every time this is run because _tid can change
+  if (_do_normal_smoothing &&
+      _normal_smoothing_method == PenetrationLocator::NSM_NODAL_NORMAL_BASED)
+  {
+    _nodal_normal_x = &_subproblem.getVariable(_tid,"nodal_normal_x");
+    _nodal_normal_y = &_subproblem.getVariable(_tid,"nodal_normal_y");
+    _nodal_normal_z = &_subproblem.getVariable(_tid,"nodal_normal_z");
+  }
 
   for (NodeIdRange::const_iterator nd = range.begin() ; nd != range.end(); ++nd)
   {
