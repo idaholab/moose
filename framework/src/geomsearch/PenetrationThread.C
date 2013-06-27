@@ -54,6 +54,9 @@ PenetrationThread::PenetrationThread(SubProblem & subproblem,
   _do_normal_smoothing(do_normal_smoothing),
   _normal_smoothing_distance(normal_smoothing_distance),
   _normal_smoothing_method(normal_smoothing_method),
+  _nodal_normal_x(NULL),
+  _nodal_normal_y(NULL),
+  _nodal_normal_z(NULL),
   _fes(fes),
   _fe_type(fe_type),
   _nearest_node(nearest_node),
@@ -63,6 +66,13 @@ PenetrationThread::PenetrationThread(SubProblem & subproblem,
   _id_list(id_list),
   _n_elems(elem_list.size())
 {
+  if (_do_normal_smoothing &&
+      _normal_smoothing_method == PenetrationLocator::NSM_NODAL_NORMAL_BASED)
+  {
+    _nodal_normal_x = &_subproblem.getVariable(_tid,"nodal_normal_x");
+    _nodal_normal_y = &_subproblem.getVariable(_tid,"nodal_normal_y");
+    _nodal_normal_z = &_subproblem.getVariable(_tid,"nodal_normal_z");
+  }
 }
 
 // Splitting Constructor
@@ -1323,12 +1333,9 @@ PenetrationThread::smoothNormal(PenetrationLocator::PenetrationInfo* info,
     {
       //params.addParam<VariableName>("var_name","description");
       //getParam<VariableName>("var_name")
-      MooseVariable & nodal_normal_x = _subproblem.getVariable(_tid,"nodal_normal_x");
-      MooseVariable & nodal_normal_y = _subproblem.getVariable(_tid,"nodal_normal_y");
-      MooseVariable & nodal_normal_z = _subproblem.getVariable(_tid,"nodal_normal_z");
-      info->_normal(0) = nodal_normal_x.getValue(info->_side,info->_side_phi);
-      info->_normal(1) = nodal_normal_y.getValue(info->_side,info->_side_phi);
-      info->_normal(2) = nodal_normal_z.getValue(info->_side,info->_side_phi);
+      info->_normal(0) = _nodal_normal_x->getValue(info->_side,info->_side_phi);
+      info->_normal(1) = _nodal_normal_y->getValue(info->_side,info->_side_phi);
+      info->_normal(2) = _nodal_normal_z->getValue(info->_side,info->_side_phi);
       const Real len(info->_normal.size());
       if (len > 0)
       {
