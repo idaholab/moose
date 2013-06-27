@@ -56,22 +56,22 @@
 []
 
 [Executioner]
-  type = AdaptiveErrorEstimateTransient
+  type = Transient
   scheme = 'BDF2'
   #scheme = 'crank-nicolson'
   start_time = 0
   num_steps = 4
-  e_max = 10
-  e_tol = 1
-  dt = .01
-  predictor_scale= 1
-  use_littlef = true
-  use_AB2 = true
   ss_check_tol = .00000000000000001
   trans_ss_check = true
   nl_abs_tol = 1e-15
   petsc_options = '-snes_converged_reason'
   abort_on_solve_fail = true
+ [./TimeStepper]
+    type = AB2PredictorCorrector
+    dt = .01
+    e_max = 10
+    e_tol = 1
+  [../]
 []
 
 [Output]

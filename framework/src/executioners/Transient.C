@@ -562,6 +562,6 @@ Transient::setupTimeIntegrator()
 
   {
     InputParameters params = _app.getFactory().getValidParams(ti_str);
-    _problem.addTimeIntegrator(ti_str, "ti", params);
+    _problem.addTimeIntegrator(ti_str, ti_str, params);
   }
 }

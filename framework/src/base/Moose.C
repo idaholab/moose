@@ -214,6 +214,7 @@
 #include "SolutionTimeAdaptiveDT.h"
 #include "DT2.h"
 #include "PostprocessorDT.h"
+#include "AB2PredictorCorrector.h"
 // time integrators
 #include "SteadyState.h"
 #include "ImplicitEuler.h"
@@ -223,6 +224,7 @@
 #include "RungeKutta2.h"
 //
 #include "Predictor.h"
+#include "AdamsPredictor.h"
 
 // MultiApps
 #include "TransientMultiApp.h"
@@ -499,6 +501,7 @@ registerObjects(Factory & factory)
   registerTimeStepper(SolutionTimeAdaptiveDT);
   registerTimeStepper(DT2);
   registerTimeStepper(PostprocessorDT);
+  registerTimeStepper(AB2PredictorCorrector);
   // time integrators
   registerTimeIntegrator(SteadyState);
   registerTimeIntegrator(ImplicitEuler);
@@ -508,6 +511,7 @@ registerObjects(Factory & factory)
   registerTimeIntegrator(RungeKutta2);
   // predictors
   registerPredictor(Predictor);
+  registerPredictor(AdamsPredictor);
 
   // Transfers
 #ifdef LIBMESH_HAVE_DTK
