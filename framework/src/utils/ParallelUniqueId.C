@@ -16,5 +16,11 @@
 
 #ifdef LIBMESH_HAVE_TBB_API
 tbb::concurrent_bounded_queue<unsigned int> ParallelUniqueId::ids;
-bool ParallelUniqueId::initialized = false;
+#else
+#ifdef LIBMESH_HAVE_PTHREAD
+std::vector<unsigned int> ParallelUniqueId::ids;
+Threads::spin_mutex ParallelUniqueId::mutex;
 #endif
+#endif
+
+bool ParallelUniqueId::initialized = false;

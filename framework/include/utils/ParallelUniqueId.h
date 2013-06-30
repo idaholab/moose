@@ -34,7 +34,14 @@ public:
 #ifdef LIBMESH_HAVE_TBB_API
     ids.pop(id);
 #else
+#ifdef LIBMESH_HAVE_PTHREAD
+    mutex.lock();
+    id = ids.back();
+    ids.pop_back();
+    mutex.unlock();
+#else
     id = 0;
+#endif
 #endif
   }
 
@@ -42,6 +49,12 @@ public:
   {
 #ifdef LIBMESH_HAVE_TBB_API
     ids.push(id);
+#else
+#ifdef LIBMESH_HAVE_PTHREAD
+    mutex.lock();
+    ids.push_back(id);
+    mutex.unlock();
+#endif
 #endif
   }
 
@@ -51,19 +64,25 @@ public:
    */
   static void initialize()
   {
-#ifdef LIBMESH_HAVE_TBB_API
+#if defined(LIBMESH_HAVE_TBB_API) || defined(LIBMESH_HAVE_PTHREAD)
     if(!initialized)
     {
       initialized = true;
       for(unsigned int i=0; i<libMesh::n_threads(); ++i)
+#ifdef LIBMESH_HAVE_TBB_API
         ids.push(i);
+#else
+#ifdef LIBMESH_HAVE_PTHREAD
+        ids.push_back(i);
+#endif
+#endif
     }
 #endif
   }
 
   static void reinitialize()
   {
-#ifdef LIBMESH_HAVE_TBB_API
+#if defined(LIBMESH_HAVE_TBB_API) || defined(LIBMESH_HAVE_PTHREAD)
     initialized = false;
     ids.clear();
     initialize();
@@ -75,8 +94,14 @@ public:
 protected:
 #ifdef LIBMESH_HAVE_TBB_API
   static tbb::concurrent_bounded_queue<unsigned int> ids;
-  static bool initialized;
+#else
+#ifdef LIBMESH_HAVE_PTHREAD
+  static std::vector<unsigned int> ids;
+  static Threads::spin_mutex mutex;
 #endif
+#endif
+
+  static bool initialized;
 };
 
 #endif // PARALLELUNIQUEID_H
