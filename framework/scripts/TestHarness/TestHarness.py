@@ -628,12 +628,12 @@ class TestHarness:
       code = False
     self.options.code = code
 
-    self.checkAndUpdateCLArgs()
-
     for key, value in vars(self.options).items():
       if type(value) == list and len(value) == 1:
         tmp_str = getattr(self.options, key)
         setattr(self.options, key, value[0])
+
+    self.checkAndUpdateCLArgs()
 
   ## Called after options are parsed from the command line
   # Exit if options don't make any sense, print warnings if they are merely weird
