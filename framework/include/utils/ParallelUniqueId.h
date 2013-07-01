@@ -15,6 +15,8 @@
 #ifndef PARALLELUNIQUEID_H
 #define PARALLELUNIQUEID_H
 
+#include "Moose.h"  // included for namespace usage
+
 #include "libmesh/libmesh_common.h"
 #include "libmesh/threads.h"
 
