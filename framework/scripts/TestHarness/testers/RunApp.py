@@ -78,7 +78,7 @@ class RunApp(Tester):
     if options.scaling and specs[SCALE_REFINE] > 0:
       command += ' -r ' + str(specs[SCALE_REFINE])
 
-    if options.pbs != '':
+    if options.pbs:
       extra_args = ''
       if options.parallel or ncpus > 1 or nthreads > 1:
         extra_args = ' --n-threads=' + str(nthreads) + ' ' + ' '.join(specs[CLI_ARGS])
@@ -87,11 +87,11 @@ class RunApp(Tester):
 
       if options.scaling and specs[SCALE_REFINE] > 0:
         extra_args += ' -r ' + str(specs[SCALE_REFINE])
-      command = self.buildPBSJOB(specs, cluster_handle, extra_args)
+      command = self.buildPBSJOB(options, specs, cluster_handle, extra_args)
 
     return command
 
-  def buildPBSJOB(self, specs, cluster_handle, extra_args):
+  def buildPBSJOB(self, options, specs, cluster_handle, extra_args):
     # Append any extra args to through at the cluster_launcher
     if extra_args != '':
       specs[CLI_ARGS] = extra_args + ' ' + ' '.join(specs[CLI_ARGS])

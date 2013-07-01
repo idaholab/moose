@@ -1,4 +1,3 @@
-[Jobs]
   [./<JOB_NAME>]
     type = PBSJob
     chunks = 1
@@ -7,9 +6,8 @@
     moose_application = <EXECUTABLE>
     input_file = <INPUT>
     walltime = <WALLTIME>
-    no_copy = tests
+    no_copy = <TEST_NAME>
     copy_files = gold
     combine_streams = True
     cli_args = <CLI_ARGS>
   [../]
-[]

@@ -10,8 +10,8 @@ from Tester import Tester
 from InputParameters import InputParameters
 from Factory import Factory
 
+import argparse
 from optparse import OptionParser, OptionGroup, Values
-#from optparse import OptionG
 from timeit import default_timer as clock
 
 class TestHarness:
@@ -58,10 +58,9 @@ class TestHarness:
     self.start_time = clock()
 
     # PBS STUFF
-    if os.path.exists(self.options.pbs):
+    if self.options.pbs and os.path.exists(self.options.pbs):
       self.processingPBS = True
       self.processPBSResults()
-    #
     else:
       for dirpath, dirnames, filenames in os.walk(os.getcwd(), followlinks=True):
         if (self.test_match.search(dirpath)):
@@ -94,8 +93,9 @@ class TestHarness:
 
                 if should_run:
                   # Create the cluster launcher input file
-                  if self.options.pbs != '' and cluster_handle == None:
+                  if self.options.pbs and cluster_handle == None:
                     cluster_handle = open(dirpath + '/tests.cluster', 'a')
+                    cluster_handle.write('[Jobs]\n')
                   command = tester.getCommand(self.options, cluster_handle)
                   # This method spawns another process and allows this loop to continue looking for tests
                   # RunParallel will call self.testOutputAndFinish when the test has completed running
@@ -107,6 +107,7 @@ class TestHarness:
                   self.runner.jobSkipped(test[TEST_NAME])
 
                 if cluster_handle != None:
+                  cluster_handle.write('[]\n')
                   cluster_handle.close()
                   cluster_handle = None
 
@@ -115,7 +116,7 @@ class TestHarness:
 
     self.runner.join()
     # Wait for all tests to finish
-    if self.options.pbs != '' and self.processingPBS == False:
+    if self.options.pbs and self.processingPBS == False:
       print '\n< checking batch status >\n'
       self.processingPBS = True
       self.processPBSResults()
@@ -283,7 +284,7 @@ class TestHarness:
     if test.isValid('CAVEATS'):
       caveats = test['CAVEATS']
 
-    if self.options.pbs != '' and self.processingPBS == False:
+    if self.options.pbs and self.processingPBS == False:
       (reason, output) = self.buildPBSBatch(output, tester)
     else:
       (reason, output) = tester.processResults(self.moose_dir, retcode, self.options, output)
@@ -301,7 +302,7 @@ class TestHarness:
             caveats.append(', '.join(test[check]))
       if len(caveats):
         result = '[' + ', '.join(caveats) + '] OK'
-      elif self.options.pbs != '' and self.processingPBS == False:
+      elif self.options.pbs and self.processingPBS == False:
         result = 'LAUNCHED'
       else:
         result = 'OK'
@@ -380,6 +381,8 @@ class TestHarness:
             elif output_value == 'Q':
               # Job is currently queued
               self.handleTestResult(tester.specs, '', 'QUEUED', 0, 0)
+    else:
+      return ('BATCH FILE NOT FOUND', '')
 
   def buildPBSBatch(self, output, tester):
     # Create/Update the batch file
@@ -425,7 +428,7 @@ class TestHarness:
     if self.processingPBS:
       self.test_table.append( (specs, output, result, timing, start, end) )
     # Normal operation
-    elif self.options.pbs == '':
+    elif self.options.pbs == None:
       self.test_table.append( (specs, output, result, timing, start, end) )
 
     self.postRun(specs, timing)
@@ -444,7 +447,7 @@ class TestHarness:
         self.num_pending += 1
       else:
         self.num_failed += 1
-    elif self.options.pbs == '':
+    elif self.options.pbs == None:
       if result.find('OK') != -1:
         self.num_passed += 1
       elif result.find('skipped') != -1:
@@ -530,7 +533,8 @@ class TestHarness:
       summary += '<b>%d failed</b>'
 
     print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed), self.options, "", html=True )
-
+    if self.options.pbs:
+      print '\nYour PBS batch file:', self.options.pbs
     if self.file:
       self.file.close()
 
@@ -573,70 +577,62 @@ class TestHarness:
       self.options.quiet = True
 
   ## Parse command line options and assign them to self.options
-  def parseCLArgs(self, argv):
-    parser = OptionParser()
-    parser.add_option('--opt', action='store_const', dest='method', const='opt', help='test the app_name-opt binary')
-    parser.add_option('--dbg', action='store_const', dest='method', const='dbg', help='test the app_name-dbg binary')
-    parser.add_option('--devel', action='store_const', dest='method', const='dev', help='test the app_name-devel binary')
-    parser.add_option('--oprof', action='store_const', dest='method', const='oprof', help='test the app_name-oprof binary')
-    parser.add_option('--pro', action='store_const', dest='method', const='pro', help='test the app_name-pro binary')
-    parser.add_option('-j', '--jobs', action='store', type='int', dest='jobs', default=1,
-                      help='run test binaries in parallel')
-    parser.add_option('-e', action="store_true", dest="extra_info", default=False,
-                      help='Display "extra" information including all caveats and deleted tests')
-    parser.add_option("-c", "--no-color", action="store_false", dest="colored", default=True,
-                      help="Do not show colored output")
-    parser.add_option('--heavy', action='store_true', dest='heavy_tests', default=False,
-                      help='Run normal tests and tests marked with HEAVY : True')
-    parser.add_option('-g', '--group', action='store', type='string', dest='group', default='ALL',
-                      help='Run only tests in the named group')
-    parser.add_option('--not_group', action='store', type='string', dest='not_group', default='',
-                      help='Run only tests NOT in the named group')
-    parser.add_option('--dofs', action='store', dest='dofs', default=0,
-                      help='This option is for automatic scaling which is not currently implemented in MOOSE 2.0')
-    parser.add_option('--dbfile', action='store', dest='dbFile', default=0,
-                      help='Location to timings data base file. If not set, assumes $HOME/timingDB/timing.sqlite')
-    parser.add_option('-l', '--load-average', action='store', type='float', dest='load', default=64.0,
-                      help='Do not run additional tests if the load average is at least LOAD')
-    parser.add_option('-t', '--timing', action='store_true', dest='timing', default=False,
-                      help="Report Timing information for passing tests")
-    parser.add_option('-s', '--scale', action='store_true', dest='scaling', default=False,
-                      help="Scale problems that have SCALE_REFINE set")
-    parser.add_option('-i', action='store', type='string', dest='input_file_name', default='tests',
-                      help='The default test specification file to look for (default="tests").')
-    parser.add_option('--libmesh_dir', action="store", type='string', dest="libmesh_dir", default='',
-                      help="Currently only needed for bitten code coverage")
-    parser.add_option('--parallel', '-p', action="store", type='int', dest="parallel",
-                      help="Number of processors to use when running mpiexec")
-    parser.add_option('--n-threads', action="store", type='int', dest="nthreads",default=1,
-                      help="Number of threads to use when running mpiexec")
-    parser.add_option('-d', action='store_true', dest='debug_harness', default=False, help='Turn on Test Harness debugging')
-    parser.add_option('--valgrind', action='store_true', dest='enable_valgrind', default=False, help='Enable Valgrind')
-    parser.add_option('--pbs', action='store', type='string', dest='pbs', default='', help='Enable launching tests via PBS. Specify a batch file to read or create.')
-    parser.add_option('--re', action='store', type='string', dest='reg_exp', default='', help='Run tests that match --re=regular_expression')
+  def parseCLArgs(self, argv=sys.argv[1:]):
+    parser = argparse.ArgumentParser(description='A tool used to test MOOSE based applications')
+    parser.add_argument('test_name', nargs=argparse.REMAINDER)
+    parser.add_argument('--opt', action='store_const', dest='method', const='opt', help='test the app_name-opt binary')
+    parser.add_argument('--dbg', action='store_const', dest='method', const='dbg', help='test the app_name-dbg binary')
+    parser.add_argument('--devel', action='store_const', dest='method', const='dev', help='test the app_name-devel binary')
+    parser.add_argument('--oprof', action='store_const', dest='method', const='oprof', help='test the app_name-oprof binary')
+    parser.add_argument('--pro', action='store_const', dest='method', const='pro', help='test the app_name-pro binary')
+    parser.add_argument('-j', '--jobs', nargs=1, metavar='int', action='store', type=int, dest='jobs', default=1, help='run test binaries in parallel')
+    parser.add_argument('-e', action='store_true', dest='extra_info', help='Display "extra" information including all caveats and deleted tests')
+    parser.add_argument('-c', '--no-color', action='store_false', dest='colored', help='Do not show colored output')
+    parser.add_argument('--heavy', action='store_true', dest='heavy_tests', help='Run normal tests and tests marked with HEAVY : True')
+    parser.add_argument('-g', '--group', action='store', type=str, dest='group', default='ALL', help='Run only tests in the named group')
+    parser.add_argument('--not_group', action='store', type=str, dest='not_group', help='Run only tests NOT in the named group')
+#    parser.add_argument('--dofs', action='store', dest='dofs', help='This option is for automatic scaling which is not currently implemented in MOOSE 2.0')
+    parser.add_argument('--dbfile', nargs='?', action='store', dest='dbFile', help='Location to timings data base file. If not set, assumes $HOME/timingDB/timing.sqlite')
+    parser.add_argument('-l', '--load-average', action='store', type=float, dest='load', default=64.0, help='Do not run additional tests if the load average is at least LOAD')
+    parser.add_argument('-t', '--timing', action='store_true', dest='timing', help='Report Timing information for passing tests')
+    parser.add_argument('-s', '--scale', action='store_true', dest='scaling', help='Scale problems that have SCALE_REFINE set')
+    parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', default='tests', help='The default test specification file to look for (default="tests").')
+    parser.add_argument('--libmesh_dir', nargs=1, action='store', type=str, dest='libmesh_dir', help='Currently only needed for bitten code coverage')
+    parser.add_argument('--parallel', '-p', nargs=1, action='store', type=int, dest='parallel', default=1, help='Number of processors to use when running mpiexec')
+    parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
+    parser.add_argument('-d', action='store_true', dest='debug_harness', help='Turn on Test Harness debugging')
+    parser.add_argument('--valgrind', action='store_true', dest='enable_valgrind', help='Enable Valgrind')
+    parser.add_argument('--pbs', nargs='?', metavar='batch_file', dest='pbs', const='generate', help='Enable launching tests via PBS. If no batch file is specified one will be created for you')
+    parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
 
-    outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
-    outputgroup.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show the output of every test that fails')
-    outputgroup.add_option('-q', '--quiet', action='store_true', dest='quiet', default=False, help='only show the result of every test, don\'t show test output even if it fails')
-    outputgroup.add_option('--show-directory', action='store_true', dest='show_directory', default=False, help='Print test directory path in out messages')
-    outputgroup.add_option('-o', '--output-dir', action='store', dest='output_dir', default='', metavar='DIR', help='Save all output files in the directory, and create it if necessary')
-    outputgroup.add_option('-f', '--file', action='store', dest='file', default=None, metavar='FILE', help='Write verbose output of each test to FILE and quiet output to terminal')
-    outputgroup.add_option('-x', '--sep-files', action='store_true', dest='sep_files', default=False, metavar='FILE', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
-    outputgroup.add_option('--sep-files-ok', action='store_true', dest='ok_files', default=False, metavar='FILE', help='Write the output of each passed test to a separate file')
-    outputgroup.add_option('-a', '--sep-files-fail', action='store_true', dest='fail_files', default=False, metavar='FILE', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
-    outputgroup.add_option("--store-timing", action="store_true", dest="store_time", default=False, help="Store timing in the SQL database: $HOME/timingDB/timing.sqlite A parent directory (timingDB) must exist.")
-    outputgroup.add_option("--revision", action="store", dest="revision", help="The current revision being tested. Required when using --store-timing.")
-    outputgroup.add_option("--yaml", action="store_true", dest="yaml", default=False, help="Dump the parameters for the testers in Yaml Format")
-    outputgroup.add_option("--dump", action="store_true", dest="dump", default=False, help="Dump the parameters for the testers in GetPot Format")
+    outputgroup = parser.add_argument_group('Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
+    outputgroup.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='show the output of every test that fails')
+    outputgroup.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='only show the result of every test, don\'t show test output even if it fails')
+    outputgroup.add_argument('--show-directory', action='store_true', dest='show_directory', help='Print test directory path in out messages')
+    outputgroup.add_argument('-o', '--output-dir', nargs=1, metavar='directory', dest='output_dir', default='', help='Save all output files in the directory, and create it if necessary')
+    outputgroup.add_argument('-f', '--file', nargs=1, action='store', dest='file', help='Write verbose output of each test to FILE and quiet output to terminal')
+    outputgroup.add_argument('-x', '--sep-files', action='store_true', dest='sep_files', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
+    outputgroup.add_argument('--sep-files-ok', action='store_true', dest='ok_files', help='Write the output of each passed test to a separate file')
+    outputgroup.add_argument('-a', '--sep-files-fail', action='store_true', dest='fail_files', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
+    outputgroup.add_argument("--store-timing", action="store_true", dest="store_time", help="Store timing in the SQL database: $HOME/timingDB/timing.sqlite A parent directory (timingDB) must exist.")
+    outputgroup.add_argument("--revision", nargs=1, action="store", type=int, dest="revision", help="The current revision being tested. Required when using --store-timing.")
+    outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
+    outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
+    self.options = parser.parse_args()
+    self.tests = self.options.test_name
 
-    parser.add_option_group(outputgroup)
     code = True
     if self.code.decode('hex') in argv:
       del argv[argv.index(self.code.decode('hex'))]
       code = False
-    (self.options, self.tests) = parser.parse_args(argv[1:])
-    self.options.ensure_value('code', code)
+    self.options.code = code
+
     self.checkAndUpdateCLArgs()
+
+    for key, value in vars(self.options).items():
+      if type(value) == list and len(value) == 1:
+        tmp_str = getattr(self.options, key)
+        setattr(self.options, key, value[0])
 
   ## Called after options are parsed from the command line
   # Exit if options don't make any sense, print warnings if they are merely weird
@@ -667,8 +663,17 @@ class TestHarness:
         self.options.method = 'opt'
 
     # Update libmesh_dir to reflect arguments
-    if opts.libmesh_dir != '':
+    if opts.libmesh_dir:
       self.libmesh_dir = opts.libmesh_dir
+
+    # Generate a batch file if PBS argument supplied with out a file
+    if opts.pbs == 'generate':
+      largest_serial_num = 0
+      for name in os.listdir('.'):
+        m = re.search('pbs_(\d{3})', name)
+        if m != None and int(m.group(1)) > largest_serial_num:
+          largest_serial_num = int(m.group(1))
+      opts.pbs = "pbs_" +  str(largest_serial_num+1).zfill(3)
 
   def postRun(self, specs, timing):
     return
