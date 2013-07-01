@@ -1,4 +1,4 @@
-import os, sys, re, inspect, types, errno, pprint, subprocess, io
+import os, sys, re, inspect, types, errno, pprint, subprocess, io, shutil
 import ParseGetPot
 from socket import gethostname
 from options import *
@@ -413,6 +413,27 @@ class TestHarness:
       # Return to TestHarness and inform we have launched the job
       return ('', 'LAUNCHED')
 
+  def cleanPBSBatch(self):
+    # Open the PBS batch file and assign it to a list
+    if os.path.exists(self.options.pbs_cleanup):
+      batch_file = open(self.options.pbs_cleanup, 'r')
+      batch_list = [y.split(':') for y in [x for x in batch_file.read().split('\n')]]
+      batch_file.close()
+      del batch_list[-1:]
+    else:
+      print 'PBS batch file not found:', self.options.pbs_cleanup
+      sys.exit(1)
+
+    # Loop through launched jobs and delete whats found.
+    for job in batch_list:
+      if os.path.exists(job[2]):
+        batch_dir = os.path.abspath(os.path.join(job[2], os.pardir)).split('/')
+        if os.path.exists('/'.join(batch_dir)):
+          shutil.rmtree('/'.join(batch_dir))
+        if os.path.exists('/'.join(batch_dir[:-1]) + '/' + job[3] + '.cluster'):
+          os.remove('/'.join(batch_dir[:-1]) + '/' + job[3] + '.cluster')
+    os.remove(self.options.pbs_cleanup)
+
 # END PBS Defs
 
   ## Update global variables and print output based on the test result
@@ -604,6 +625,7 @@ class TestHarness:
     parser.add_argument('-d', action='store_true', dest='debug_harness', help='Turn on Test Harness debugging')
     parser.add_argument('--valgrind', action='store_true', dest='enable_valgrind', help='Enable Valgrind')
     parser.add_argument('--pbs', nargs='?', metavar='batch_file', dest='pbs', const='generate', help='Enable launching tests via PBS. If no batch file is specified one will be created for you')
+    parser.add_argument('--pbs-cleanup', nargs=1, metavar='batch_file', help='Clean up the directories/files created by PBS. You must supply the same batch_file used to launch PBS.')
     parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
 
     outputgroup = parser.add_argument_group('Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
@@ -685,6 +707,9 @@ class TestHarness:
       sys.exit(0)
     elif self.options.dump:
       self.factory.printDump("Tests")
+      sys.exit(0)
+    if self.options.pbs_cleanup:
+      self.cleanPBSBatch()
       sys.exit(0)
 
   def populateParams(self, params, test):

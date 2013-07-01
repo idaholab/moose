@@ -17,6 +17,7 @@ class RunApp(Tester):
 
     params.addParam('walltime',           "The max time as pbs understands it")
     params.addParam('job_name',           "The test name as pbs understands it")
+    params.addParam('no_copy',            "The tests file as pbs understands it")
 
     # Parallel/Thread testing
     params.addParam('max_parallel', 1000, "Maximum number of MPI processes this test can be run with      (Default: 1000)")
@@ -123,6 +124,9 @@ class RunApp(Tester):
     self.specs['job_name'] = self.specs[INPUT][:6] + '_TH'
     self.specs['job_name'] = self.specs['job_name'].replace('.', '')
     self.specs['job_name'] = self.specs['job_name'].replace('-', '')
+
+    # Convert TEST_NAME to input tests file name (normally just 'tests')
+    self.specs['no_copy'] = options.input_file_name
 
     # Do all of the replacements for the valid parameters
     for spec in self.specs.valid_keys():

@@ -6,7 +6,7 @@
     moose_application = <EXECUTABLE>
     input_file = <INPUT>
     walltime = <WALLTIME>
-    no_copy = <TEST_NAME>
+    no_copy = <NO_COPY>
     copy_files = gold
     combine_streams = True
     cli_args = <CLI_ARGS>
