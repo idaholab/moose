@@ -599,7 +599,7 @@ class TestHarness:
     parser.add_argument('-s', '--scale', action='store_true', dest='scaling', help='Scale problems that have SCALE_REFINE set')
     parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', default='tests', help='The default test specification file to look for (default="tests").')
     parser.add_argument('--libmesh_dir', nargs=1, action='store', type=str, dest='libmesh_dir', help='Currently only needed for bitten code coverage')
-    parser.add_argument('--parallel', '-p', nargs=1, action='store', type=int, dest='parallel', default=1, help='Number of processors to use when running mpiexec')
+    parser.add_argument('--parallel', '-p', nargs='?', action='store', type=int, dest='parallel', const=1, help='Number of processors to use when running mpiexec')
     parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
     parser.add_argument('-d', action='store_true', dest='debug_harness', help='Turn on Test Harness debugging')
     parser.add_argument('--valgrind', action='store_true', dest='enable_valgrind', help='Enable Valgrind')
