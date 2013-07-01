@@ -5,6 +5,14 @@
     exodiff = 'nodal_nodeset_pps_test_out.e'
   [../]
 
+	[./nodal_extreme]
+    type = 'Exodiff'
+    input = 'nodal_extreme_pps_test.i'
+    exodiff = 'nodal_extreme_pps_test_out.e'
+    group = 'periodic'
+    mesh_mode = 'SERIAL'
+  [../]
+
   [./testnodalpps]
     type = 'Exodiff'
     input = 'nodal_max_pps_test.i'

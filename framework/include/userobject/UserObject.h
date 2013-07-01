@@ -105,6 +105,12 @@ public:
     Parallel::max(value);
   }
 
+  template <typename T>
+  void gatherMin(T & value)
+  {
+    Parallel::min(value);
+  }
+
   template <typename T1, typename T2>
   void gatherProxyValueMax(T1 & value, T2 & proxy)
   {

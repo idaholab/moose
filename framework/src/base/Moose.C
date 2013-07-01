@@ -156,6 +156,7 @@
 #include "VolumePostprocessor.h"
 #include "AreaPostprocessor.h"
 #include "PointValue.h"
+#include "NodalExtremeValue.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -439,6 +440,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(VolumePostprocessor);
   registerPostprocessor(AreaPostprocessor);
   registerPostprocessor(PointValue);
+  registerPostprocessor(NodalExtremeValue);
 
   // user objects
   registerUserObject(LayeredIntegral);
