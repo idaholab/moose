@@ -143,19 +143,35 @@ protected:
 
 
   void
-  getSmoothingEdgesAndWeights(const Point& p,
-                              const Elem* side,
-                              std::vector<std::vector<Node*> > &edge_nodes,
-                              std::vector<Real> &edge_face_weights);
+  getSmoothingFacesAndWeights(PenetrationLocator::PenetrationInfo* info,
+                              std::vector<PenetrationLocator::PenetrationInfo*> &edge_face_info,
+                              std::vector<Real> &edge_face_weights,
+                              std::vector<PenetrationLocator::PenetrationInfo*> & p_info);
+  void
+  getSmoothingEdgeNodesAndWeights(const Point& p,
+                                  const Elem* side,
+                                  std::vector<std::vector<Node*> > &edge_nodes,
+                                  std::vector<Real> &edge_face_weights);
 
   void
-  findNeighborsInInfoVector(std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
-                            std::vector<std::vector<Node*> > &edge_nodes,
-                            std::vector<PenetrationLocator::PenetrationInfo*> &neighbor_info);
+  getInfoForFacesWithCommonNodes(const Node* slave_node,
+                                 const std::set<unsigned int> &elems_to_exclude,
+                                 const std::vector<Node*> edge_nodes,
+                                 std::vector<PenetrationLocator::PenetrationInfo*> &face_info_comm_edge,
+                                 std::vector<PenetrationLocator::PenetrationInfo*> & p_info);
+
+  PenetrationLocator::PenetrationInfo*
+  getInfoForElem(std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
+                 const Elem* elem);
+
+  PenetrationLocator::PenetrationInfo*
+  createInfoForElem(std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
+                    const Node* slave_node,
+                    const Elem* elem);
 
   void
   findNeighborsFromNodeElemMap(PenetrationLocator::PenetrationInfo* info,
-                               std::vector<std::vector<Node*> > &edge_nodes,
+                               std::vector<Elem*> &edge_neighbor_elems,
                                std::vector<PenetrationLocator::PenetrationInfo*> &neighbor_info,
                                std::vector<PenetrationLocator::PenetrationInfo*> & p_info);
 
