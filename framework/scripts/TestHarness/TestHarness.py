@@ -65,8 +65,8 @@ class TestHarness:
       for dirpath, dirnames, filenames in os.walk(os.getcwd(), followlinks=True):
         if (self.test_match.search(dirpath)):
           for file in filenames:
-            # Create cluster_handle
-            cluster_handle = None
+            # set cluster_handle to be None initially (happens for each test)
+            self.options.cluster_handle = None
             # See if there were other arguments (test names) passed on the command line
             if file == self.options.input_file_name or file[-2:] == 'py' and self.test_match.search(file):
               saved_cwd = os.getcwd()
@@ -93,10 +93,11 @@ class TestHarness:
 
                 if should_run:
                   # Create the cluster launcher input file
-                  if self.options.pbs and cluster_handle == None:
-                    cluster_handle = open(dirpath + '/tests.cluster', 'a')
-                    cluster_handle.write('[Jobs]\n')
-                  command = tester.getCommand(self.options, cluster_handle)
+                  if self.options.pbs and self.options.cluster_handle == None:
+                    self.options.cluster_handle = open(dirpath + '/tests.cluster', 'a')
+                    self.options.cluster_handle.write('[Jobs]\n')
+
+                  command = tester.getCommand(self.options)
                   # This method spawns another process and allows this loop to continue looking for tests
                   # RunParallel will call self.testOutputAndFinish when the test has completed running
                   # This method will block when the maximum allowed parallel processes are running
@@ -106,10 +107,10 @@ class TestHarness:
                     self.handleTestResult(test, '', reason)
                   self.runner.jobSkipped(test[TEST_NAME])
 
-                if cluster_handle != None:
-                  cluster_handle.write('[]\n')
-                  cluster_handle.close()
-                  cluster_handle = None
+                if self.options.cluster_handle != None:
+                  self.options.cluster_handle.write('[]\n')
+                  self.options.cluster_handle.close()
+                  self.options.cluster_handle = None
 
               os.chdir(saved_cwd)
               sys.path.pop()
@@ -145,7 +146,7 @@ class TestHarness:
 
     try:
       data = ParseGetPot.readInputFile(filename)
-    except e:        # ParseGetPot class
+    except:        # ParseGetPot class
       print "Parse Error: " + test_dir + "/" + filename
       return tests
 
@@ -343,7 +344,7 @@ class TestHarness:
 
       # Loop through launched jobs and match the TEST_NAME to determin correct stdout (Output_Path)
       for job in batch_list:
-        file = '/'.join(job[2].split('/')[:-2]) + '/tests'
+        file = '/'.join(job[2].split('/')[:-2]) + '/' + job[3]
         tests = self.parseGetPotTestFormat(file)
         for test in tests:
           # Build the requested Tester object
@@ -390,7 +391,7 @@ class TestHarness:
       return('QSUB NOT FOUND', '')
     else:
       # Get the PBS Job ID using qstat
-      # TODO: Build an error handler. If there was any issue launching the cluster launcher due to spaces in tests, input names or other issue, why die here.
+      # TODO: Build an error handler. If there was any issue launching the cluster launcher due to <any thing>, why die here.
       job_id = re.findall(r'.*JOB_ID: (\d+)', output)[0]
       qstat = ['qstat', '-f', '-x', str(job_id)]
       qstat_command = subprocess.Popen(qstat, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -406,7 +407,7 @@ class TestHarness:
       # Write job_id, test[TEST_NAME], and Ouput_Path to the batch file
       file_name = self.options.pbs
       job_list = open(os.path.abspath(os.path.join(tester.specs[EXECUTABLE], os.pardir)) + '/' + file_name, 'a')
-      job_list.write(str(job_id) + ':' + tester.specs[TEST_NAME] + ':' + output_value + '\n')
+      job_list.write(str(job_id) + ':' + tester.specs[TEST_NAME] + ':' + output_value + ':' + self.options.input_file_name  + '\n')
       job_list.close()
 
       # Return to TestHarness and inform we have launched the job
