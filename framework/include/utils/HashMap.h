@@ -16,6 +16,7 @@
 #define HASHMAP_H
 
 /// HashMap is an abstraction for dictionary data type, we are using thread-safe version when we have TBB and std::map if not
+#include "libmesh/threads.h"
 
 #ifdef LIBMESH_HAVE_TBB_API
 
@@ -42,15 +43,32 @@ public:
     }
 
 };
+
 #else
 
-// STL container
-#include <map>
-#include <functional>
+// Use a hash table
+#include "libmesh/libmesh_common.h"
+#include LIBMESH_INCLUDE_UNORDERED_MAP
 
-template<typename Key, typename T, typename Compare = std::less<Key>, typename Allocator = std::allocator<std::pair<const Key,T> > >
-class HashMap : public std::map< Key, T, Compare, Allocator >
+template<typename Key, typename T> /*, typename Hash = std::tr1::hash<Key>, class Pred = std::equal_to<Key>, typename Allocator = std::allocator<std::pair<const Key,T> > >*/
+class HashMap : public LIBMESH_BEST_UNORDERED_MAP< Key, T > /*, Hash, Pred, Allocator >*/
 {
+
+#ifdef LIBMESH_HAVE_PTHREAD
+
+public:
+  inline T & operator[](const Key & k)
+  {
+    Threads::spin_mutex::scoped_lock lock(spin_mutex);
+
+    return LIBMESH_BEST_UNORDERED_MAP< Key, T > /*, Hash, Pred, Allocator >*/::operator[](k);
+  }
+
+private:
+  Threads::spin_mutex spin_mutex;
+
+#endif
+
 };
 
 #endif
