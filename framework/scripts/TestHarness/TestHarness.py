@@ -641,15 +641,16 @@ class TestHarness:
     outputgroup.add_argument("--revision", nargs=1, action="store", type=int, dest="revision", help="The current revision being tested. Required when using --store-timing.")
     outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
     outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
-    self.options = parser.parse_args()
-    self.tests = self.options.test_name
 
     code = True
     if self.code.decode('hex') in argv:
       del argv[argv.index(self.code.decode('hex'))]
       code = False
+    self.options = parser.parse_args()
+    self.tests = self.options.test_name
     self.options.code = code
 
+    # Convert all list based options of length one to scalars
     for key, value in vars(self.options).items():
       if type(value) == list and len(value) == 1:
         tmp_str = getattr(self.options, key)
