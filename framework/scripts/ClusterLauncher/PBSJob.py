@@ -1,7 +1,7 @@
 from InputParameters import InputParameters
 from Job import Job
 
-import os, sys, subprocess
+import os, sys, subprocess, shutil
 
 class PBSJob(Job):
   def getValidParams():
@@ -36,6 +36,24 @@ class PBSJob(Job):
 
   def __init__(self, name, params):
     Job.__init__(self, name, params)
+
+  # Called from the current directory to copy files (usually from the parent)
+  def copyFiles(self, job_file):
+    params = self.specs
+
+    # Copy files (unless they are listed in "no_copy"
+    for file in os.listdir('../'):
+      if os.path.isfile('../' + file) and file != job_file and (not params.isValid('no_copy') or file not in params['no_copy']):
+         shutil.copy('../' + file, '.')
+
+    # Copy directories
+    if params.isValid('copy_files'):
+      for file in params['copy_files'].split():
+        print file
+        if os.path.isfile('../' + file):
+          shutil.copy('../' + file, '.')
+        elif os.path.isdir('../' + file):
+          shutil.copytree('../' + file, file)
 
   def prepareJobScript(self):
     f = open(self.specs['template_script'], 'r')

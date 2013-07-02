@@ -1,5 +1,5 @@
 from InputParameters import InputParameters
-import os, sys
+import os, sys, shutil
 
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
@@ -17,8 +17,16 @@ class Job(object):
   def __init__(self, name, params):
     self.specs = params
 
+  # Called from the current directory to copy files (usually from the parent)
+  def copyFiles(self, job_file):
+    for file in os.listdir('../'):
+      if os.path.isfile('../' + file) and file != job_file:
+        shutil.copy('../' + file, '.')
+
+  # Called to prepare a job script if necessary
   def prepareJobScript(self):
     return
 
+  # Called to launch the job
   def launch(self):
     return
