@@ -1276,7 +1276,6 @@ PenetrationThread::smoothNormal(PenetrationLocator::PenetrationInfo* info,
       {
         //Smooth the normal using the weighting functions for all participating faces.
         RealVectorValue new_normal;
-        bool did_smoothing = false;
         Real this_face_weight = 1.0;
 
         for (unsigned int efwi = 0; efwi<edge_face_weights.size(); ++efwi)
@@ -1284,7 +1283,6 @@ PenetrationThread::smoothNormal(PenetrationLocator::PenetrationInfo* info,
           PenetrationLocator::PenetrationInfo *npi = edge_face_info[efwi];
           if (npi)
           {
-            did_smoothing = true;
             new_normal += npi->_normal * edge_face_weights[efwi];
           }
           this_face_weight -= edge_face_weights[efwi];
@@ -1296,28 +1294,6 @@ PenetrationThread::smoothNormal(PenetrationLocator::PenetrationInfo* info,
         if (len > 0)
         {
           new_normal /= len;
-        }
-
-        if (did_smoothing)
-        {
-          if (info->_node->id() == 18 || info->_node->id() == 22)
-          {
-            std::cout<<"Smoothed normal node: "<<info->_node->id()<<" elem: "<<info->_elem->id()<<std::endl;
-            std::cout<<"    with elems: ";
-            for (unsigned int efwi = 0; efwi<edge_face_weights.size(); ++efwi)
-            {
-              PenetrationLocator::PenetrationInfo *npi = edge_face_info[efwi];
-              if (npi)
-                std::cout<<npi->_elem->id()<<" ";
-            }
-            std::cout<<std::endl;
-            std::cout<<"    original normal: "<<info->_normal<<" new normal: "<<new_normal<<std::endl;
-          }
-
-        }
-        else if (edge_face_weights.size() > 0)
-        {
-          std::cout<<"Near edge but couldn't find neighboring face for smoothing: "<<info->_node->id()<<" elem: "<<info->_elem->id()<<std::endl;
         }
 
         info->_normal = new_normal;
