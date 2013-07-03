@@ -134,7 +134,7 @@ protected:
   isFaceReasonableCandidate(const Elem * master_elem,
                             const Elem * side,
                             FEBase * fe,
-                            const Point & slave_point,
+                            const Point * slave_point,
                             const Real tangential_tolerance);
 
   void
@@ -150,30 +150,32 @@ protected:
   void
   getSmoothingEdgeNodesAndWeights(const Point& p,
                                   const Elem* side,
-                                  std::vector<std::vector<Node*> > &edge_nodes,
+                                  std::vector<std::vector<const Node*> > &edge_nodes,
                                   std::vector<Real> &edge_face_weights);
 
   void
   getInfoForFacesWithCommonNodes(const Node* slave_node,
                                  const std::set<unsigned int> &elems_to_exclude,
-                                 const std::vector<Node*> edge_nodes,
+                                 const std::vector<const Node*> edge_nodes,
                                  std::vector<PenetrationLocator::PenetrationInfo*> &face_info_comm_edge,
                                  std::vector<PenetrationLocator::PenetrationInfo*> & p_info);
 
-  PenetrationLocator::PenetrationInfo*
-  getInfoForElem(std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
+  void
+  getInfoForElem(std::vector<PenetrationLocator::PenetrationInfo*> &thisElemInfo,
+                 std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
                  const Elem* elem);
 
-  PenetrationLocator::PenetrationInfo*
-  createInfoForElem(std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
+  void
+  createInfoForElem(std::vector<PenetrationLocator::PenetrationInfo*> &thisElemInfo,
+                    std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
                     const Node* slave_node,
-                    const Elem* elem);
+                    const Elem* elem,
+                    const std::vector<const Node*> &nodes_on_side,
+                    const bool check_whether_reasonable = false);
 
   void
-  findNeighborsFromNodeElemMap(PenetrationLocator::PenetrationInfo* info,
-                               std::vector<Elem*> &edge_neighbor_elems,
-                               std::vector<PenetrationLocator::PenetrationInfo*> &neighbor_info,
-                               std::vector<PenetrationLocator::PenetrationInfo*> & p_info);
+  getSidesOnMasterBoundary(std::vector<unsigned int> &sides,
+                           const Elem *const elem);
 
   void
   computeSlip( FEBase & fe,
