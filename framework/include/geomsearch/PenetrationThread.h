@@ -170,7 +170,7 @@ protected:
                     std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
                     const Node* slave_node,
                     const Elem* elem,
-                    const std::vector<const Node*> &nodes_on_side,
+                    const std::vector<const Node*> &nodes_that_must_be_on_side,
                     const bool check_whether_reasonable = false);
 
   void

@@ -1529,6 +1529,7 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
         nodevec.push_back(elem->get_node(ni));
       }
     }
+    common_nodes.clear();
     std::sort(nodevec.begin(),nodevec.end());
     std::set_intersection(edge_nodes.begin(), edge_nodes.end(),
                           nodevec.begin(), nodevec.end(),
@@ -1611,7 +1612,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationLocator::Penetration
                                      std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
                                      const Node* slave_node,
                                      const Elem* elem,
-                                     const std::vector<const Node*> &nodes_on_side,
+                                     const std::vector<const Node*> &nodes_that_must_be_on_side,
                                      const bool check_whether_reasonable)
 {
   std::vector<unsigned int> sides;
@@ -1641,7 +1642,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationLocator::Penetration
 
 
     //Only continue with creating info for this side if the side contains
-    //all of the nodes in nodes_on_side
+    //all of the nodes in nodes_that_must_be_on_side
     std::vector<const Node*> nodevec;
     for (unsigned int ni=0; ni<side->n_nodes(); ++ni)
     {
@@ -1649,10 +1650,10 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationLocator::Penetration
     }
     std::sort(nodevec.begin(),nodevec.end());
     std::vector<const Node*> common_nodes;
-    std::set_intersection(nodes_on_side.begin(), nodes_on_side.end(),
+    std::set_intersection(nodes_that_must_be_on_side.begin(), nodes_that_must_be_on_side.end(),
                           nodevec.begin(), nodevec.end(),
                           std::inserter(common_nodes, common_nodes.end()));
-    if (common_nodes.size() != nodes_on_side.size())
+    if (common_nodes.size() != nodes_that_must_be_on_side.size())
     {
       break;
     }
