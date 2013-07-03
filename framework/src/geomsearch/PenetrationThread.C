@@ -1513,7 +1513,6 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
   std::vector<unsigned int> & elems_connected_to_node = _node_to_elem_map[edge_nodes[0]->id()]; //just need one of the nodes
 
   std::vector<const Elem*> elems_connected_to_edge;
-  std::vector<const Node*> common_nodes;
 
   for (unsigned int ecni=0; ecni<elems_connected_to_node.size(); ecni++)
   {
@@ -1529,7 +1528,7 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
         nodevec.push_back(elem->get_node(ni));
       }
     }
-    common_nodes.clear();
+    std::vector<const Node*> common_nodes;
     std::sort(nodevec.begin(),nodevec.end());
     std::set_intersection(edge_nodes.begin(), edge_nodes.end(),
                           nodevec.begin(), nodevec.end(),
@@ -1572,7 +1571,7 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
         face_info_comm_edge.push_back(thisElemInfo[0]);
         break;
       }
-      createInfoForElem(thisElemInfo, p_info, slave_node, elems_connected_to_edge[i], common_nodes);
+      createInfoForElem(thisElemInfo, p_info, slave_node, elems_connected_to_edge[i], edge_nodes);
       if (thisElemInfo.size() > 0 && !allowMultipleNeighbors)
       {
         if (thisElemInfo.size() > 1)
