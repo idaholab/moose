@@ -31,6 +31,6 @@ PFCTradMaterial::computeQpProperties()
   _b[_qp] = 4.0/(30.0*u_s*u_s)*invSkm;
   _C0[_qp] = -10.9153;
   _C2[_qp] = 2.6; //Angstrom^2
-  _C4[_qp] = -0.1459; //Angstrom^4
+  _C4[_qp] = 0.1459; //Angstrom^4, would be negative but coefficient term is negative
 }
 
