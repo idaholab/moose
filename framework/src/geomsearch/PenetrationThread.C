@@ -1352,10 +1352,11 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationLocator::PenetrationIn
       edge_face_info[i] = face_info_comm_edge[0];
   }
 
-  //Remove edges without neighbors from the vector
-  for (unsigned int i=0; i<edges_without_neighbors.size(); ++i)
+  //Remove edges without neighbors from the vector, starting from end
+  std::vector<unsigned int>::reverse_iterator rit;
+  for (rit = edges_without_neighbors.rbegin(); rit != edges_without_neighbors.rend(); ++rit)
   {
-    unsigned int index=edges_without_neighbors[i];
+    unsigned int index = *rit;
     edge_nodes.erase(edge_nodes.begin()+index);
     edge_face_weights.erase(edge_face_weights.begin()+index);
     edge_face_info.erase(edge_face_info.begin()+index);
