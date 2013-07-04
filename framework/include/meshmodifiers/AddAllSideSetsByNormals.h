@@ -12,31 +12,40 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SIDESETSFROMNORMALS_H
-#define SIDESETSFROMNORMALS_H
+#ifndef ADDALLSIDESETS_H
+#define ADDALLSIDESETS_H
 
 #include "AddSideSetsBase.h"
-#include "libmesh/fe.h"
+#include "MooseTypes.h"
 
-class SideSetsFromNormals;
+class AddAllSideSetsByNormals;
 
 template<>
-InputParameters validParams<SideSetsFromNormals>();
+InputParameters validParams<AddAllSideSetsByNormals>();
 
-class SideSetsFromNormals : public AddSideSetsBase
+/**
+ * This class will add sidesets to the entire mesh based on unique normals.  This
+ * information will be made available through the MooseMesh interface.
+ * Note: This algorithm will not work well with meshes containing curved faces.
+ * Several sidesets will be created in that case.  Use sensibly!
+ */
+class AddAllSideSetsByNormals : public AddSideSetsBase
 {
 public:
-  SideSetsFromNormals(const std::string & name, InputParameters parameters);
+  AddAllSideSetsByNormals(const std::string & name, InputParameters parameters);
 
-  virtual ~SideSetsFromNormals();
+  virtual ~AddAllSideSetsByNormals();
 
   virtual void modify();
 
 protected:
-  std::vector<Point> _normals;
+  BoundaryID getNextBoundaryID();
 
-  std::vector<BoundaryID> _boundary_ids;
-  std::vector<BoundaryName> _boundary_names;
+  /**
+   * A pointer to the Mesh's boundary set, this datastructure will be modified
+   * through this modifier.
+   */
+  std::set<BoundaryID> *_mesh_boundary_ids;
 };
 
-#endif /* SIDESETSFROMNORMALS_H */
+#endif /* ADDALLSIDESETS_H */

@@ -53,9 +53,6 @@ protected:
 
   BoundaryID getNextBoundaryID() const;
 
-
-  std::vector<BoundaryID> _boundary_ids;
-  std::vector<BoundaryName> _boundary_names;
   Real _variance;
   bool _fixed_normal;
 

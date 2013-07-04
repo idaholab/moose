@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SideSetsFromNormals.h"
+#include "AddAllSideSetsByNormals.h"
 #include "Parser.h"
 #include "InputParameters.h"
 
@@ -24,41 +24,32 @@
 #include "libmesh/point_locator_base.h"
 
 template<>
-InputParameters validParams<SideSetsFromNormals>()
+InputParameters validParams<AddAllSideSetsByNormals>()
 {
   InputParameters params = validParams<AddSideSetsBase>();
-  params.addRequiredParam<std::vector<BoundaryName> >("boundary", "A list of boundary names to associate with the painted sidesets");
-  params.addRequiredParam<std::vector<Point> >("normals", "A list of normals for which to start painting sidesets");
   return params;
 }
 
-SideSetsFromNormals::SideSetsFromNormals(const std::string & name, InputParameters parameters):
-    AddSideSetsBase(name, parameters),
-    _normals(getParam<std::vector<Point> >("normals")),
-    _boundary_names(getParam<std::vector<BoundaryName> >("boundary"))
+AddAllSideSetsByNormals::AddAllSideSetsByNormals(const std::string & name, InputParameters parameters):
+    AddSideSetsBase(name, parameters)
 {
-  if (_normals.size() != _boundary_names.size())
-    mooseError("normal list and boundary list are not the same length");
-
-  // Make sure that the normals are normalized
-  for (std::vector<Point>::iterator normal_it = _normals.begin(); normal_it != _normals.end(); ++normal_it)
-  {
-    mooseAssert(normal_it->size() >= 1e-5, "Normal is zero");
-    *normal_it /= normal_it->size();
-  }
 }
 
-SideSetsFromNormals::~SideSetsFromNormals()
+AddAllSideSetsByNormals::~AddAllSideSetsByNormals()
 {
 }
 
 void
-SideSetsFromNormals::modify()
+AddAllSideSetsByNormals::modify()
 {
-  // Get the BoundaryIDs from the mesh
-  _boundary_ids = _mesh_ptr->getBoundaryIDs(_boundary_names, true);
-
   setup();
+
+  // Get the current list of boundaries so we can generate new ones that won't conflict
+  _mesh_boundary_ids = &_mesh_ptr->_mesh_boundary_ids;
+
+  // Create the map object that will be owned by MooseMesh
+  std::map<BoundaryID, RealVectorValue> * _boundary_map
+    = new std::map<BoundaryID, RealVectorValue>();
 
   _visited.clear();
 
@@ -78,17 +69,44 @@ SideSetsFromNormals::modify()
       _fe_face->reinit(elem, side);
       const std::vector<Point> & normals = _fe_face->get_normals();
 
-      for (unsigned int i=0; i<_boundary_ids.size(); ++i)
       {
-        if (std::abs(1.0 - _normals[i]*normals[0]) < 1e-5)
-          flood(*el, _normals[i], _boundary_ids[i]);
+        // See if we've seen this normal before (linear search)
+        std::map<BoundaryID, RealVectorValue>::iterator it = _boundary_map->begin();
+        while (it != _boundary_map->end())
+        {
+          if (std::abs(1.0 - it->second*normals[0]) < 1e-5)
+            break;
+          ++it;
+        }
+
+        if (it != _boundary_map->end())  // Found it!
+          flood(*el, normals[0], it->first);
+        else
+        {
+          BoundaryID id = getNextBoundaryID();
+          (*_boundary_map)[id] = normals[0];
+          flood(*el, normals[0], id);
+        }
       }
     }
   }
 
   finalize();
 
-  for (unsigned int i=0; i<_boundary_ids.size(); ++i)
-    _mesh_ptr->_mesh.boundary_info->sideset_name(_boundary_ids[i]) = _boundary_names[i];
+  // Transfer owndership of the boundary map.  MooseMesh will cleanup
+  _mesh_ptr->_boundary_to_normal_map = AutoPtr<std::map<BoundaryID, RealVectorValue> >(_boundary_map);
+}
 
+BoundaryID
+AddAllSideSetsByNormals::getNextBoundaryID()
+{
+  std::set<BoundaryID>::iterator it;
+  BoundaryID next_id = 1;
+
+  while ((it = _mesh_boundary_ids->find(next_id)) != _mesh_boundary_ids->end())
+    ++next_id;
+
+  _mesh_boundary_ids->insert(next_id);
+
+  return next_id;
 }

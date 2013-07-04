@@ -34,6 +34,9 @@ public:
 
 protected:
   std::vector<Point> _points;
+
+  std::vector<BoundaryID> _boundary_ids;
+  std::vector<BoundaryName> _boundary_names;
 };
 
 #endif /* SIDESETSFROMPOINTS_H */

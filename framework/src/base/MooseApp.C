@@ -221,6 +221,7 @@ MooseApp::meshOnly(std::string mesh_file_name)
    */
   _action_warehouse.executeActionsWithAction("set_global_params");
   _action_warehouse.executeActionsWithAction("setup_mesh");
+  _action_warehouse.executeActionsWithAction("prepare_mesh");
   _action_warehouse.executeActionsWithAction("add_mesh_modifier");
   _action_warehouse.executeActionsWithAction("setup_mesh_complete");
 

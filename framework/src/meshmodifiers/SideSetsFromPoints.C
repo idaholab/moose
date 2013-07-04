@@ -27,13 +27,15 @@ template<>
 InputParameters validParams<SideSetsFromPoints>()
 {
   InputParameters params = validParams<AddSideSetsBase>();
+  params.addRequiredParam<std::vector<BoundaryName> >("boundary", "A list of boundary names to associate with the painted sidesets");
   params.addRequiredParam<std::vector<Point> >("points", "A list of points from which to start painting sidesets");
   return params;
 }
 
 SideSetsFromPoints::SideSetsFromPoints(const std::string & name, InputParameters parameters):
     AddSideSetsBase(name, parameters),
-    _points(getParam<std::vector<Point> >("points"))
+    _points(getParam<std::vector<Point> >("points")),
+    _boundary_names(getParam<std::vector<BoundaryName> >("boundary"))
 {
   if (_points.size() != _boundary_names.size())
     mooseError("point list and boundary list are not the same length");
@@ -46,6 +48,9 @@ SideSetsFromPoints::~SideSetsFromPoints()
 void
 SideSetsFromPoints::modify()
 {
+  // Get the BoundaryIDs from the mesh
+  _boundary_ids = _mesh_ptr->getBoundaryIDs(_boundary_names, true);
+
   setup();
 
   _visited.clear();
@@ -77,14 +82,7 @@ SideSetsFromPoints::modify()
   }
 
   finalize();
+
+  for (unsigned int i=0; i<_boundary_ids.size(); ++i)
+    _mesh_ptr->_mesh.boundary_info->sideset_name(_boundary_ids[i]) = _boundary_names[i];
 }
-
-/*
-  _mesh.boundary_info->sideset_name(1) = "right";
-  _mesh.boundary_info->sideset_name(2) = "left";
-  _mesh.boundary_info->sideset_name(3) = "top";
-  _mesh.boundary_info->sideset_name(4) = "bottom";
-  _mesh.boundary_info->sideset_name(5) = "inside";
-  _mesh.boundary_info->sideset_name(6) = "outside";
-*/
-

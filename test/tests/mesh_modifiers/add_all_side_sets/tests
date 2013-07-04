@@ -1,0 +1,15 @@
+[Tests]
+  [./simple]
+    type = 'Exodiff'
+    input = 'simple.i'
+    exodiff = 'simple_in.e'
+    cli_args = '--mesh-only'
+  [../]
+
+  [./less_simple]
+    type = 'Exodiff'
+    input = 'less_simple.i'
+    exodiff = 'less_simple_in.e'
+    cli_args = '--mesh-only'
+  [../]
+[]

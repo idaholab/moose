@@ -27,7 +27,6 @@ template<>
 InputParameters validParams<AddSideSetsBase>()
 {
   InputParameters params = validParams<MeshModifier>();
-  params.addRequiredParam<std::vector<BoundaryName> >("boundary", "A list of boundary names to associate with the painted sidesets");
   params.addParam<Real>("variance", 0.10, "The variance [0.0 - 1.0] allowed when comparing normals");
   params.addParam<bool>("fixed_normal", false, "This Boolean determines whether we fix our normal or allow it to vary to \"paint\" around curves");
 
@@ -36,7 +35,6 @@ InputParameters validParams<AddSideSetsBase>()
 
 AddSideSetsBase::AddSideSetsBase(const std::string & name, InputParameters parameters):
     MeshModifier(name, parameters),
-    _boundary_names(getParam<std::vector<BoundaryName> >("boundary")),
     _variance(getParam<Real>("variance")),
     _fixed_normal(getParam<bool>("fixed_normal")),
     _fe_face(NULL),
@@ -66,17 +64,11 @@ AddSideSetsBase::setup()
   _fe_face = (FEBase::build(dim, fe_type)).release();
   _qface = new QGauss(dim-1, FIRST);
   _fe_face->attach_quadrature_rule(_qface);
-
-  // Get the BoundaryIDs from the mesh
-  _boundary_ids = _mesh_ptr->getBoundaryIDs(_boundary_names, true);
 }
 
 void
 AddSideSetsBase::finalize()
 {
-  for (unsigned int i=0; i<_boundary_ids.size(); ++i)
-    _mesh_ptr->_mesh.boundary_info->sideset_name(_boundary_ids[i]) = _boundary_names[i];
-
   delete _qface;
   delete _fe_face;
 
@@ -112,4 +104,3 @@ AddSideSetsBase::flood(const Elem *elem, Point normal, BoundaryID side_id)
     }
   }
 }
-

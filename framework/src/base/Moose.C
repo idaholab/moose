@@ -35,6 +35,7 @@
 #include "Transform.h"
 #include "SideSetsAroundSubdomain.h"
 #include "SideSetsBetweenSubdomains.h"
+#include "AddAllSideSetsByNormals.h"
 
 // problems
 #include "FEProblem.h"
@@ -316,6 +317,7 @@ registerObjects(Factory & factory)
   registerMeshModifier(Transform);
   registerMeshModifier(SideSetsAroundSubdomain);
   registerMeshModifier(SideSetsBetweenSubdomains);
+  registerMeshModifier(AddAllSideSetsByNormals);
 
   // problems
   registerProblem(FEProblem);
