@@ -48,8 +48,7 @@ AddAllSideSetsByNormals::modify()
   _mesh_boundary_ids = &_mesh_ptr->_mesh_boundary_ids;
 
   // Create the map object that will be owned by MooseMesh
-  std::map<BoundaryID, RealVectorValue> * _boundary_map
-    = new std::map<BoundaryID, RealVectorValue>();
+  AutoPtr<std::map<BoundaryID, RealVectorValue> > boundary_map(new std::map<BoundaryID, RealVectorValue>());
 
   _visited.clear();
 
@@ -71,20 +70,20 @@ AddAllSideSetsByNormals::modify()
 
       {
         // See if we've seen this normal before (linear search)
-        std::map<BoundaryID, RealVectorValue>::iterator it = _boundary_map->begin();
-        while (it != _boundary_map->end())
+        std::map<BoundaryID, RealVectorValue>::iterator it = boundary_map->begin();
+        while (it != boundary_map->end())
         {
           if (std::abs(1.0 - it->second*normals[0]) < 1e-5)
             break;
           ++it;
         }
 
-        if (it != _boundary_map->end())  // Found it!
+        if (it != boundary_map->end())  // Found it!
           flood(*el, normals[0], it->first);
         else
         {
           BoundaryID id = getNextBoundaryID();
-          (*_boundary_map)[id] = normals[0];
+          (*boundary_map)[id] = normals[0];
           flood(*el, normals[0], id);
         }
       }
@@ -93,8 +92,8 @@ AddAllSideSetsByNormals::modify()
 
   finalize();
 
-  // Transfer owndership of the boundary map.  MooseMesh will cleanup
-  _mesh_ptr->_boundary_to_normal_map = AutoPtr<std::map<BoundaryID, RealVectorValue> >(_boundary_map);
+  // Transfer owndership of the boundary map.
+  _mesh_ptr->_boundary_to_normal_map = boundary_map;
 }
 
 BoundaryID

@@ -1455,6 +1455,6 @@ MooseMesh::changeBoundaryId(const boundary_id_type old_id, const boundary_id_typ
 const RealVectorValue &
 MooseMesh::getNormalByBoundaryID(BoundaryID id) const
 {
-  mooseAssert(_boundary_to_normal_map, "Boundary To Normal Map not built!");
+  mooseAssert(_boundary_to_normal_map.get() == NULL, "Boundary To Normal Map not built!");
   return _boundary_to_normal_map->at(id);
 }
