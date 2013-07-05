@@ -34,8 +34,8 @@
   [../]
   [./closest_point_z]
   [../]
-  [./element_id]
-  [../]
+#  [./element_id]
+#  [../]
   [./side]
   [../]
 []
@@ -186,21 +186,21 @@
     quantity = closest_point_z
   [../]
 
-  [./penetrate17]
-    type = PenetrationAux
-    variable = element_id
-    boundary = 11
-    paired_boundary = 12
-    quantity = element_id
-  [../]
-
-  [./penetrate18]
-    type = PenetrationAux
-    variable = element_id
-    boundary = 12
-    paired_boundary = 11
-    quantity = element_id
-  [../]
+#  [./penetrate17]
+#    type = PenetrationAux
+#    variable = element_id
+#    boundary = 11
+#    paired_boundary = 12
+#    quantity = element_id
+#  [../]
+#
+#  [./penetrate18]
+#    type = PenetrationAux
+#    variable = element_id
+#    boundary = 12
+#    paired_boundary = 11
+#    quantity = element_id
+#  [../]
 
   [./penetrate19]
     type = PenetrationAux
