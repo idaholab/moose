@@ -415,7 +415,7 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
   std::vector<Real> min_distances(_vars.size(), std::numeric_limits<Real>::max());
 
   // Make sure that we don't attempt to remap to the same variable
-  min_distances[curr_var_idx] = std::numeric_limits<Real>::min();
+  min_distances[curr_var_idx] = -std::numeric_limits<Real>::max();
 
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it3 = _unique_grains.begin();
        grain_it3 != _unique_grains.end(); ++grain_it3)
@@ -436,18 +436,19 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
    * variable to itself.  This is unecessary since the min_distance of a variable is explicitly set up above.
    */
   unsigned int new_variable_idx = std::distance(min_distances.begin(), std::max_element(min_distances.begin(), min_distances.end()));
+  
+  std::cout << "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first
+            << " (variable index: " << grain_it1->second->variable_idx << ")\n";
 
   if (min_distances[new_variable_idx] < 0)
   {
-    std::cout << "*****************************************************************************\n"
-              << "Warning: No suitable variable found for remapping. Skipping..."
-              << "\n*****************************************************************************\n";
+    std::cout << "******************************************************************************************************\n"
+              << "Warning: No suitable variable found for remapping. Will attempt to remap in next loop if necessary..."
+              << "\n****************************************************************************************************\n";
     return;
   }
 
-  std::cout << "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first
-            << " (variable index: " << grain_it1->second->variable_idx << ")\n"
-            << "Remapping to: " << new_variable_idx << " whose closest grain is at a distance of " << min_distances[new_variable_idx] << std::endl;
+  std::cout << "Remapping to: " << new_variable_idx << " whose closest grain is at a distance of " << min_distances[new_variable_idx] << "\n";
 
   // Remap the grain
   for (std::set<unsigned int>::const_iterator node_it = grain_it1->second->nodes_ptr->begin();
@@ -555,7 +556,7 @@ GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres
         min_distance = curr_distance;
     }
   }
-
+  
   return min_distance;
 }
 
