@@ -311,6 +311,12 @@ public:
   void addImplicitGeometricCouplingEntriesToJacobian(bool add=true) { _add_implicit_geometric_coupling_entries_to_jacobian = add; }
 
   /**
+   * Indicates whether to assemble residual and Jacobian after each constraint application.
+   * When true, enables "transitive" constraint appication: subsequent constraints can use prior constraints' results.
+   */
+  void assembleConstraintsSeparately(bool separately=true) {_assemble_constraints_separately = separately;}
+
+  /**
    * Setup damping stuff (called before we actually start)
    */
   void setupDampers();
@@ -468,6 +474,9 @@ protected:
 
   /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
   bool _add_implicit_geometric_coupling_entries_to_jacobian;
+
+  /// Whether or not to assemble the residual and Jacobian after the application of each constraint.
+  bool _assemble_constraints_separately;
 
   /// Whether or not a copy of the residual needs to be made
   bool _need_serialized_solution;

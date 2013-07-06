@@ -118,7 +118,15 @@ public:
    * When this returns true the slave's residual as computed by the constraint will _replace_
    * the residual previously at that node for that variable.
    */
-  bool overwriteSlaveResidual();
+  virtual bool overwriteSlaveResidual();
+
+  /**
+   * Whether or not the slave's Jacobian row should be overwritten.
+   *
+   * When this returns true the slave's Jacobian row as computed by the constraint will _replace_
+   * the residual previously at that node for that variable.
+   */
+  virtual bool overwriteSlaveJacobian(){return overwriteSlaveResidual();};
 
   SparseMatrix<Number> * _jacobian;
 

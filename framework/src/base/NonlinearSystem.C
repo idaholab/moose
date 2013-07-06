@@ -126,6 +126,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _have_decomposition(false),
     _use_split_based_preconditioner(false),
     _add_implicit_geometric_coupling_entries_to_jacobian(false),
+    _assemble_constraints_separately(false),
     _need_serialized_solution(false),
     _need_residual_copy(false),
     _need_residual_ghosted(false),
@@ -1018,12 +1019,17 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
     penetration_locators = &displaced_geom_search_data._penetration_locators;
   }
 
-  bool constraints_applied = false;
-
+  bool constraints_applied;
+  if (!_assemble_constraints_separately) constraints_applied = false;
   for(std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
       it != penetration_locators->end();
       ++it)
   {
+
+    if (_assemble_constraints_separately) {
+      // Reset the constraint_applied flag before each new constraint, as they need to be assembled separately
+      constraints_applied = false;
+    }
     PenetrationLocator & pen_loc = *it->second;
 
     std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
@@ -1078,21 +1084,46 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
                 else
                   _fe_problem.cacheResidual(0);
                 _fe_problem.cacheResidualNeighbor(0);
-              }
+             }
             }
           }
         }
       }
     }
+    if (_assemble_constraints_separately)
+    {
+      // Make sure that slave contribution to master are assembled, and ghosts have been exchanged,
+      // as current masters might become slaves on next iteration
+      // and will need to contribute their former slaves' contributions
+      // to the future masters.
+      // See if constraints were applied anywhere
+      Parallel::max(constraints_applied);
+
+      if(constraints_applied)
+      {
+	residual.close();
+	_fe_problem.addCachedResidual(residual, 0);
+	residual.close();
+	if (_need_residual_ghosted) {
+	  _residual_ghosted = residual;
+	  _residual_ghosted.close();  // somewhat redundant since the assignment above should also close
+	}
+      }
+    }
   }
+  if (!_assemble_constraints_separately) {
+    Parallel::max(constraints_applied);
 
-  // See if constraints were applied anywhere
-  Parallel::max(constraints_applied);
-
-  if(constraints_applied)
-  {
-    residual.close();
-    _fe_problem.addCachedResidual(residual, 0);
+    if(constraints_applied)
+      {
+	residual.close();
+	_fe_problem.addCachedResidual(residual, 0);
+	residual.close();
+	if (_need_residual_ghosted) {
+	  _residual_ghosted = residual;
+	  _residual_ghosted.close();  // somewhat redundant since the assignment above should also close
+	}
+      }
   }
 }
 
@@ -1348,12 +1379,16 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
     penetration_locators = &displaced_geom_search_data._penetration_locators;
   }
 
-  bool constraints_applied = false;
-
+  bool constraints_applied;
+  if (!_assemble_constraints_separately) constraints_applied = false;
   for(std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
       it != penetration_locators->end();
       ++it)
   {
+    if (_assemble_constraints_separately) {
+      // Reset the constraint_applied flag before each new constraint, as they need to be assembled separately
+      constraints_applied = false;
+    }
     PenetrationLocator & pen_loc = *it->second;
 
     std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
@@ -1367,6 +1402,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
     else
       constraints = _constraints[0].getDisplacedNodeFaceConstraints(slave_boundary);
 
+    zero_rows.clear();
     if(constraints.size())
     {
       for(unsigned int i=0; i<slave_nodes.size(); i++)
@@ -1408,7 +1444,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
                 nfc->computeJacobian();
 
-                if(nfc->overwriteSlaveResidual())
+                if(nfc->overwriteSlaveJacobian())
                 {
                   // Add this variable's dof's row to be zeroed
                   zero_rows.push_back(nfc->variable().nodalDofIndex());
@@ -1416,7 +1452,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
                 std::vector<unsigned int> slave_dofs(1,nfc->variable().nodalDofIndex());
 
-                // Cache the jacobian block for the slave size
+                // Cache the jacobian block for the slave side
                 _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kee, slave_dofs, nfc->_connected_dof_indices, nfc->variable().scalingFactor());
 
                 // Cache the jacobian block for the master side
@@ -1430,37 +1466,71 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
         }
       }
     }
-  }
+    if (_assemble_constraints_separately)
+    {
+      // See if constraints were applied anywhere
+      Parallel::max(constraints_applied);
 
-  // See if constraints were applied anywhere
-  Parallel::max(constraints_applied);
-
-  if(constraints_applied)
-  {
+      if(constraints_applied)
+      {
 #ifdef LIBMESH_HAVE_PETSC
-    //Necessary for speed
+	//Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+	MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3,1,0)
-    // In Petsc 3.0.0, MatSetOption has three args...the third arg
-    // determines whether the option is set (true) or unset (false)
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                 MAT_KEEP_ZEROED_ROWS,
-                 PETSC_TRUE);
+	// In Petsc 3.0.0, MatSetOption has three args...the third arg
+	// determines whether the option is set (true) or unset (false)
+	MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+		     MAT_KEEP_ZEROED_ROWS,
+		     PETSC_TRUE);
 #else
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                 MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
-                 PETSC_TRUE);
+	MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+		     MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
+		     PETSC_TRUE);
 #endif
 #endif
 
-    jacobian.close();
-    jacobian.zero_rows(zero_rows, 0.0);
-    jacobian.close();
-    _fe_problem.addCachedJacobian(jacobian, 0);
-    jacobian.close();
+	jacobian.close();
+	jacobian.zero_rows(zero_rows, 0.0);
+	jacobian.close();
+	_fe_problem.addCachedJacobian(jacobian, 0);
+	jacobian.close();
+      }
+    }
+  }
+  if(!_assemble_constraints_separately)
+  {
+    // See if constraints were applied anywhere
+    Parallel::max(constraints_applied);
+
+    if (constraints_applied)
+    {
+#ifdef LIBMESH_HAVE_PETSC
+      //Necessary for speed
+#if PETSC_VERSION_LESS_THAN(3,0,0)
+      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+#elif PETSC_VERSION_LESS_THAN(3,1,0)
+      // In Petsc 3.0.0, MatSetOption has three args...the third arg
+      // determines whether the option is set (true) or unset (false)
+      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+		   MAT_KEEP_ZEROED_ROWS,
+		   PETSC_TRUE);
+#else
+      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+		   MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
+		   PETSC_TRUE);
+#endif
+#endif
+
+      jacobian.close();
+      jacobian.zero_rows(zero_rows, 0.0);
+      jacobian.close();
+      _fe_problem.addCachedJacobian(jacobian, 0);
+      jacobian.close();
+    }
   }
 }
+
 
 void
 NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
