@@ -306,7 +306,7 @@ public:
    * If called with true this will add entries into the jacobian to link together degrees of freedom that are found to
    * be related through the geometric search system.
    *
-   * These entries are really only used by the Finite Difference Preconditioner right now.
+   * These entries are really only used by the Finite Difference Preconditioner and the constraint system right now.
    */
   void addImplicitGeometricCouplingEntriesToJacobian(bool add=true) { _add_implicit_geometric_coupling_entries_to_jacobian = add; }
 

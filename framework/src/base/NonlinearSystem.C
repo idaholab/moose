@@ -632,6 +632,7 @@ NonlinearSystem::addConstraint(const std::string & c_name, const std::string & n
   {
     mooseError("Unknown type of Constraint object");
   }
+  addImplicitGeometricCouplingEntriesToJacobian(true);
 }
 
 void
@@ -1623,7 +1624,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     static bool first = true;
 
     // This adds zeroes into geometric coupling entries to ensure they stay in the matrix
-    if(first && (_add_implicit_geometric_coupling_entries_to_jacobian || _fe_problem._has_constraints))
+    if(first && (_add_implicit_geometric_coupling_entries_to_jacobian))
     {
       first = false;
       addImplicitGeometricCouplingEntries(jacobian, _fe_problem.geomSearchData());
@@ -2028,7 +2029,7 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
                                  std::vector<unsigned int> & n_oz)
 {
 
-  if(_add_implicit_geometric_coupling_entries_to_jacobian || _fe_problem._has_constraints)
+  if(_add_implicit_geometric_coupling_entries_to_jacobian)
   {
     _fe_problem.updateGeomSearch();
 
