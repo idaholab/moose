@@ -472,7 +472,7 @@ NonlinearSystem::setupDecomposition()
 void
 NonlinearSystem::setupSplitBasedPreconditioner()
 {
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,4,0)
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
    SplitBasedPreconditioner* sbp = dynamic_cast<SplitBasedPreconditioner*>(_preconditioner);
   sbp->setup();
 
