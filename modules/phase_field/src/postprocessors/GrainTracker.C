@@ -192,8 +192,6 @@ GrainTracker::trackGrains()
   if (_t_step < _tracking_step)
     return;
 
-  unsigned int counter=1;
-
   // Reset Status on active unique grains
   std::vector<unsigned int> map_sizes(_maps_size);
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin();
@@ -218,7 +216,9 @@ GrainTracker::trackGrains()
     std::cout << std::endl;
   }
 
-  // Loop over all the current regions and match them up to our grain list
+  std::vector<UniqueGrain *> new_grains; new_grains.reserve(_unique_grains.size());
+
+  // Loop over all the current regions and build our unique grain structures
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
     for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[map_num].begin();
@@ -246,100 +246,142 @@ GrainTracker::trackGrains()
           ++it2;
       }
 
-      /**
-       * If it's the first time through this routine for the simulation, we will generate the unique grain
-       * numbers using a simple counter.  These will be the unique grain numbers that we must track for
-       * the remainder of the simulation.
-       */
-      if (_t_step == _tracking_step) // Start tracking when the time_step == the tracking_step
-        _unique_grains[counter] = new UniqueGrain(curr_var, sphere_ptrs, &it1->_nodes);
-      else
-      {
-        /**
-         * To track grains across timesteps, we will look for the grain in our unique list that is closest
-         * by distance AND has the same variable index.
-         */
-        std::map<unsigned int, UniqueGrain *>::iterator grain_it, closest_match;
-        bool found_one = false;
-        Real min_centroid_diff = std::numeric_limits<Real>::max();
-
-        for (grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
-        {
-          if (grain_it->second->status == NOT_MARKED &&                   // Only consider grains that are unmarked AND
-              grain_it->second->variable_idx == curr_var)                 // have matching variable indicies
-          {
-            Real curr_centroid_diff = boundingRegionDistance(sphere_ptrs, grain_it->second->sphere_ptrs, true);
-            if (curr_centroid_diff <= min_centroid_diff)
-            {
-              found_one = true;
-              closest_match = grain_it;
-              min_centroid_diff = curr_centroid_diff;
-            }
-          }
-        }
-
-        if (!found_one)
-        {
-          std::cout << "*****************************************************************************\n"
-                    << "Warning: Couldn't find a matching grain while working on variable index: " << curr_var
-                    << " (num spheres: " << sphere_ptrs.size() << ")"
-                    << "\nCreating new unique grain: " << _unique_grains.size() + 1
-                    << "\nDEBUG INFO:\n";
-
-          for (std::list<BubbleData>::const_iterator debug_it1 = _bubble_sets[map_num].begin();
-               debug_it1 != _bubble_sets[map_num].end(); ++debug_it1)
-          {
-            unsigned local_counter = 0;
-            if (debug_it1->_nodes.size() <= 30)
-            {
-              std::cout << "Set: " << local_counter++ << "\n";
-              for (std::set<unsigned int>::iterator node_it = debug_it1->_nodes.begin(); node_it != debug_it1->_nodes.end(); ++node_it)
-              {
-                std::cout << *node_it << " ";
-                std::pair<std::multimap<unsigned int, unsigned int>::const_iterator, std::multimap<unsigned int, unsigned int>::const_iterator> iters =
-                  _periodic_node_map.equal_range(*node_it);
-                if (iters.first != iters.second)
-                {
-                  std::cout << "~";
-                  for (std::multimap<unsigned int, unsigned int>::const_iterator node_it2 = iters.first; node_it2 != iters.second; ++node_it2)
-                    std::cout << node_it2->second << " ";
-                  std::cout << "~ ";
-                }
-              }
-              std::cout << "\n";
-            }
-          }
-          std::cout << "\n*****************************************************************************\n";
-          _unique_grains[_unique_grains.size() + 1] = new UniqueGrain(curr_var, sphere_ptrs, &it1->_nodes);
-        }
-        else
-        {
-          if (min_centroid_diff > 10*_hull_buffer)
-            std::cout << "Warning: Centroid for grain: " << closest_match->first << " (variable index: "
-                      << closest_match->second->variable_idx << ") has moved by "
-                      << min_centroid_diff << " units.\n";
-
-          // Now we want to update the grain information
-          delete closest_match->second;
-          // add the new grain (Note: The status of a new grain is MARKED)
-          closest_match->second = new UniqueGrain(curr_var, sphere_ptrs, &it1->_nodes);
-        }
-      }
-      ++counter;
+      // Create our new grains from this timestep that we will use to match up against the existing grains
+      new_grains.push_back(new UniqueGrain(curr_var, sphere_ptrs, &it1->_nodes, NOT_MARKED));
     }
   }
 
-  // Any grain that we didn't match will now be inactive
-  for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin();
-       grain_it != _unique_grains.end(); ++grain_it)
-    if (grain_it->second->status == NOT_MARKED)
+  /**
+   * If it's the first time through this routine for the simulation, we will generate the unique grain
+   * numbers using a simple counter.  These will be the unique grain numbers that we must track for
+   * the remainder of the simulation.
+   */
+  if (_t_step == _tracking_step)   // Start tracking when the time_step == the tracking_step
+  {
+    for (unsigned int i=1; i <= new_grains.size(); ++i)
     {
-      std::cout << "Marking Grain " << grain_it->first << " as INACTIVE (varible index: "
-                << grain_it->second->variable_idx <<  ")\n";
-      grain_it->second->status = INACTIVE;
+      new_grains[i-1]->status = MARKED;
+      _unique_grains[i] = new_grains[i-1];                   // Transfer ownership of the memory
+    }
+    return;  // Return early - no matching or tracking to do
+  }
+
+  /**
+   * To track grains across timesteps, we will loop over our unique grains and link each one up with one of our new
+   * unique grains.  The criteria for doing this will be to find the unique grain in the new list with a matching variable
+   * index whose centroid is closest to this unique grain.
+   */
+  std::map<unsigned int, std::vector<unsigned int> > new_grain_idx_to_existing_grain_idx;
+
+  for (std::map<unsigned int, UniqueGrain *>::iterator curr_it = _unique_grains.begin(); curr_it != _unique_grains.end(); ++curr_it)
+  {
+    if (curr_it->second->status == INACTIVE)                         // Don't try to find matches for inactive grains
+      continue;
+
+    unsigned int closest_match_idx;
+    bool found_one = false;
+    Real min_centroid_diff = std::numeric_limits<Real>::max();
+
+    for (unsigned int new_grain_idx=0; new_grain_idx<new_grains.size(); ++new_grain_idx)
+    {
+      if (curr_it->second->variable_idx == new_grains[new_grain_idx]->variable_idx)  // Do the variables indicies match?
+      {
+        Real curr_centroid_diff = boundingRegionDistance(curr_it->second->sphere_ptrs, new_grains[new_grain_idx]->sphere_ptrs, true);
+        if (curr_centroid_diff <= min_centroid_diff)
+        {
+          found_one = true;
+          closest_match_idx = new_grain_idx;
+          min_centroid_diff = curr_centroid_diff;
+        }
+      }
     }
 
-  // Check to make sure that we consumed all of the bounding sphere datastructures
+    // Keep track of which new grains the existing ones want to map to
+    new_grain_idx_to_existing_grain_idx[closest_match_idx].push_back(curr_it->first);
+  }
+
+  /**
+   * It's possible that multiple existing grains will map to a single new grain.  This will happen any time a grain disappears during this timestep.
+   * We need to figure out the rightful owner in this case and inactivate the old grain.
+   */
+  for (std::map<unsigned int, std::vector<unsigned int> >::iterator it = new_grain_idx_to_existing_grain_idx.begin();
+       it != new_grain_idx_to_existing_grain_idx.end(); ++it)
+  {
+    // If there is only a single mapping - we've found the correct grain
+    if (it->second.size() == 1)
+    {
+      unsigned int curr_idx = (it->second)[0];
+      delete _unique_grains[curr_idx];                      // clean-up old grain
+      new_grains[it->first]->status = MARKED;               // Mark it
+      _unique_grains[curr_idx] = new_grains[it->first];     // transfer ownership of new grain
+    }
+
+    // More than one existing grain is mapping to a new one
+    else
+    {
+      Real min_centroid_diff = std::numeric_limits<Real>::max();
+      unsigned int min_idx;
+      for (unsigned int i=0; i < it->second.size(); ++i)
+      {
+        Real curr_centroid_diff = boundingRegionDistance(new_grains[it->first]->sphere_ptrs, _unique_grains[(it->second)[i]]->sphere_ptrs, true);
+        if (curr_centroid_diff <= min_centroid_diff)
+        {
+          min_idx = i;
+          min_centroid_diff = curr_centroid_diff;
+        }
+      }
+
+      // One more time over the competing indicies.  We will mark the non-winners as inactive and transfer ownership to the winner (the closest centroid).
+      for (unsigned int i=0; i < it->second.size(); ++i)
+      {
+        unsigned int curr_idx = (it->second)[i];
+        if (i == min_idx)
+        {
+          delete _unique_grains[curr_idx];                      // clean-up old grain
+          new_grains[it->first]->status = MARKED;               // Mark it
+          _unique_grains[curr_idx] = new_grains[it->first];     // transfer ownership of new grain
+        }
+        else
+        {
+          std::cout << "Marking Grain " << curr_idx << " as INACTIVE (varible index: "
+                    << _unique_grains[curr_idx]->variable_idx <<  ")\n";
+          _unique_grains[curr_idx]->status = INACTIVE;
+        }
+      }
+    }
+  }
+
+
+  /**
+   * Next we need to look at our new list and see which grains weren't matched up.  These are new grains.
+   */
+  for (unsigned int i=0; i<new_grains.size(); ++i)
+    if (new_grains[i]->status == NOT_MARKED)
+    {
+      std::cout << "*****************************************************************************\n"
+                << "Couldn't find a matching grain while working on variable index: " << new_grains[i]->variable_idx
+                << "\nCreating new unique grain: " << _unique_grains.size() + 1
+                << "*****************************************************************************\n";
+      new_grains[i]->status = MARKED;
+      _unique_grains[_unique_grains.size() + 1] = new_grains[i];   // transfer ownership
+    }
+
+
+  /**
+   * Finally we need to mark any grains in the unique list that aren't marked as inactive.  These are the variables that
+   * unique grains that didn't match up to any bounding sphere.  Should only happen if it's the last active grain for
+   * this particular variable.
+   */
+  for (std::map<unsigned int, UniqueGrain *>::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
+    if (it->second->status == NOT_MARKED)
+    {
+      std::cout << "Marking Grain " << it->first << " as INACTIVE (varible index: "
+                    << it->second->variable_idx <<  ")\n";
+      it->second->status = INACTIVE;
+    }
+
+
+  // Sanity check to make sure that we consumed all of the bounding sphere datastructures
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
     if (!_bounding_spheres[map_num].empty())
       mooseError("BoundingSpheres where not completely used by the GrainTracker");
@@ -436,7 +478,7 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
    * variable to itself.  This is unecessary since the min_distance of a variable is explicitly set up above.
    */
   unsigned int new_variable_idx = std::distance(min_distances.begin(), std::max_element(min_distances.begin(), min_distances.end()));
-  
+
   std::cout << "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first
             << " (variable index: " << grain_it1->second->variable_idx << ")\n";
 
@@ -556,7 +598,7 @@ GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres
         min_distance = curr_distance;
     }
   }
-  
+
   return min_distance;
 }
 
@@ -568,10 +610,10 @@ GrainTracker::BoundingSphereInfo::BoundingSphereInfo(unsigned int node_id, const
 
 // Unique Grain
 GrainTracker::UniqueGrain::UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs,
-                                       const std::set<unsigned int> *nodes_pt) :
+                                       const std::set<unsigned int> *nodes_pt, STATUS status) :
     variable_idx(var_idx),
     sphere_ptrs(b_sphere_ptrs),
-    status(MARKED),
+    status(status),
     nodes_ptr(nodes_pt)
 {}
 
