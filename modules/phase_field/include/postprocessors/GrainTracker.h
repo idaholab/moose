@@ -120,7 +120,7 @@ protected:
   /// This struct hold the information necessary to identify and track a unique grain;
   struct UniqueGrain
   {
-    UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, const std::set<unsigned int> *nodes_pt);
+    UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, const std::set<unsigned int> *nodes_pt, STATUS status);
     ~UniqueGrain();
 
     unsigned int variable_idx;
