@@ -159,6 +159,9 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 void
 ComputeFullJacobianThread::computeInternalFaceJacobian()
 {
+  if(_sys._dg_kernels[_tid].active().empty())
+    return;
+
   std::vector<std::pair<unsigned int, unsigned int> > & ce = _fe_problem.couplingEntries(_tid);
   for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = ce.begin(); it != ce.end(); ++it)
   {

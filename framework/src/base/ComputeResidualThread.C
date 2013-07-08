@@ -139,6 +139,9 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 void
 ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 {
+  if(_sys._dg_kernels[_tid].active().empty())
+    return;
+
   // Pointer to the neighbor we are currently working on.
   const Elem * neighbor = elem->neighbor(side);
 
