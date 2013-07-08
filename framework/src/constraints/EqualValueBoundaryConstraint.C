@@ -1,0 +1,90 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "EqualValueBoundaryConstraint.h"
+//#include "libmesh/boundary_info.h"
+
+template<>
+InputParameters validParams<EqualValueBoundaryConstraint>()
+{
+  InputParameters params = validParams<NodalConstraint>();
+  params.addRequiredParam<BoundaryName>("slave", "The boundary ID associated with the slave side");
+  params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
+  return params;
+}
+
+EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const std::string & name, InputParameters parameters) :
+    NodalConstraint(name, parameters),
+    _slave_boundary_id(_mesh.getBoundaryID(getParam<BoundaryName>("slave"))),
+    _penalty(getParam<Real>("penalty"))
+{
+
+  std::vector<unsigned int> nodelist;
+  std::vector<boundary_id_type> boundary_id_list;
+  _mesh._mesh.boundary_info->build_node_list(nodelist,boundary_id_list);
+  
+  std::vector<unsigned int>::iterator in;
+  std::vector<boundary_id_type>::iterator ib;
+  
+  for (in = nodelist.begin(), ib = boundary_id_list.begin();
+       in != nodelist.end() && ib != boundary_id_list.end();
+       ++in, ++ib)
+  {
+    if (*ib == _slave_boundary_id && *in != _master_node_id) 
+    {
+      _connected_nodes.push_back(*in);
+    }
+  }
+
+}
+
+EqualValueBoundaryConstraint::~EqualValueBoundaryConstraint()
+{
+}
+
+Real
+EqualValueBoundaryConstraint::computeQpResidual(Moose::ConstraintType type)
+{
+  switch (type)
+  {
+  case Moose::Master:
+    return (_u_master[_qp] - _u_slave[_qp]) * _penalty;
+
+  case Moose::Slave:
+    return (_u_slave[_qp] - _u_master[_qp]) * _penalty;
+  }
+
+  return 0.;
+}
+
+Real
+EqualValueBoundaryConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
+{
+  switch (type)
+  {
+  case Moose::MasterMaster:
+    return _penalty;
+
+  case Moose::MasterSlave:
+    return -_penalty;
+
+  case Moose::SlaveSlave:
+    return _penalty;
+
+  case Moose::SlaveMaster:
+    return -_penalty;
+  }
+
+  return 0.;
+}
