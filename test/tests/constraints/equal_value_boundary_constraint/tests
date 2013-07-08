@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'equal_value_boundary_constraint_test.i'
+    exodiff = 'out.e'
+  [../]
+[]
