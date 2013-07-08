@@ -62,10 +62,14 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
   for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
   {
     _holder_fe_helper[dim] = &_fe[dim][FEType(FIRST, LAGRANGE)];
+    (*_holder_fe_helper[dim])->get_phi();
+    (*_holder_fe_helper[dim])->get_dphi();
     (*_holder_fe_helper[dim])->get_xyz();
     (*_holder_fe_helper[dim])->get_JxW();
 
     _holder_fe_face_helper[dim] = &_fe_face[dim][FEType(FIRST, LAGRANGE)];
+    (*_holder_fe_face_helper[dim])->get_phi();
+    (*_holder_fe_face_helper[dim])->get_dphi();
     (*_holder_fe_face_helper[dim])->get_xyz();
     (*_holder_fe_face_helper[dim])->get_JxW();
     (*_holder_fe_face_helper[dim])->get_normals();
