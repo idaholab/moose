@@ -632,6 +632,9 @@ protected:
 
   /// Will be true if our preconditioning matrix is a block-diagonal matrix.  Which means that we can take some shortcuts.
   unsigned int _block_diagonal_matrix;
+
+  /// Temporary work vector to keep from reallocating it
+  std::vector<unsigned int> _temp_dof_indices;
 };
 
 #endif /* ASSEMBLY_H */

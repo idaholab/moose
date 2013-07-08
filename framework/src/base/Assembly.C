@@ -881,18 +881,18 @@ Assembly::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
 {
   if (dof_indices.size() > 0 && res_block.size())
   {
-    std::vector<unsigned int> di(dof_indices);
-    _dof_map.constrain_element_vector(res_block, di, false);
+    _temp_dof_indices = dof_indices;
+    _dof_map.constrain_element_vector(res_block, _temp_dof_indices, false);
 
     if (scaling_factor != 1.0)
     {
       _tmp_Re = res_block;
       _tmp_Re *= scaling_factor;
-      residual.add_vector(_tmp_Re, di);
+      residual.add_vector(_tmp_Re, _temp_dof_indices);
     }
     else
     {
-      residual.add_vector(res_block, di);
+      residual.add_vector(res_block, _temp_dof_indices);
     }
   }
 }
@@ -902,8 +902,8 @@ Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsign
 {
   if (dof_indices.size() > 0 && res_block.size())
   {
-    std::vector<unsigned int> di(dof_indices);
-    _dof_map.constrain_element_vector(res_block, di, false);
+    _temp_dof_indices = dof_indices;
+    _dof_map.constrain_element_vector(res_block, _temp_dof_indices, false);
 
     if (scaling_factor != 1.0)
     {
@@ -913,7 +913,7 @@ Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsign
       for(unsigned int i=0; i<_tmp_Re.size(); i++)
       {
         _cached_residual_values.push_back(_tmp_Re(i));
-        _cached_residual_rows.push_back(di[i]);
+        _cached_residual_rows.push_back(_temp_dof_indices[i]);
       }
     }
     else
@@ -921,7 +921,7 @@ Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsign
       for(unsigned int i=0; i<res_block.size(); i++)
       {
         _cached_residual_values.push_back(res_block(i));
-        _cached_residual_rows.push_back(di[i]);
+        _cached_residual_rows.push_back(_temp_dof_indices[i]);
       }
     }
   }
@@ -932,7 +932,7 @@ Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsign
 void
 Assembly::addResidual(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
 {
-  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
@@ -943,7 +943,7 @@ Assembly::addResidual(NumericVector<Number> & residual, Moose::KernelType type/*
 void
 Assembly::addResidualNeighbor(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
 {
-  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
@@ -955,7 +955,7 @@ void
 Assembly::addResidualScalar(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
 {
   // add the scalar variables residuals
-  const std::vector<MooseVariableScalar *> vars = _sys.getScalarVariables(_tid);
+  const std::vector<MooseVariableScalar *> & vars = _sys.getScalarVariables(_tid);
   for (std::vector<MooseVariableScalar *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariableScalar & var = *(*it);
@@ -967,7 +967,7 @@ Assembly::addResidualScalar(NumericVector<Number> & residual, Moose::KernelType 
 void
 Assembly::cacheResidual()
 {
-  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
@@ -979,7 +979,7 @@ Assembly::cacheResidual()
 void
 Assembly::cacheResidualNeighbor()
 {
-  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
