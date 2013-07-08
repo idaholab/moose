@@ -361,7 +361,7 @@ GrainTracker::trackGrains()
       std::cout << "*****************************************************************************\n"
                 << "Couldn't find a matching grain while working on variable index: " << new_grains[i]->variable_idx
                 << "\nCreating new unique grain: " << _unique_grains.size() + 1
-                << "*****************************************************************************\n";
+                << "\n*****************************************************************************\n";
       new_grains[i]->status = MARKED;
       _unique_grains[_unique_grains.size() + 1] = new_grains[i];   // transfer ownership
     }
