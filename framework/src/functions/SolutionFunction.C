@@ -27,7 +27,7 @@ InputParameters validParams<SolutionFunction>()
   params.addParam<std::string>("from_variable", "The name of the variable in the file that is too be extracted");
 
   // Add optional paramters
-  params.addParam<Real>("scale_factor", 1.0, "Scale factor (a)  to be applied to the solution (x): ax+b, where b is the 'add_factor'");
+  params.addParam<Real>("scale_factor", 1.0, "Scale factor (a) to be applied to the solution (x): ax+b, where b is the 'add_factor'");
   params.addParam<Real>("add_factor", 0.0, "Add this value (b) to the solution (x): ax+b, where a is the 'scale_factor'");
 
   // Return the parameters object
