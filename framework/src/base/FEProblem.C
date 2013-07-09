@@ -409,21 +409,10 @@ void FEProblem::initialSetup()
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
   Moose::setup_perf_log.pop("Initial updateActiveSemiLocalNodeRange()","Setup");
 
-  // Need to see if _any_ processor has ghosted elems
-  unsigned int ghosted = _ghosted_elems.size();
-  Parallel::sum(ghosted);
-
-  if(ghosted)
-  {
-    Moose::setup_perf_log.push("reinit() after updateGeomSearch()","Setup");
-    // Call reinit to get the ghosted vectors correct now that some geometric search has been done
-    _eq.reinit();
-
-    if(_displaced_mesh)
-      _displaced_problem->es().reinit();
-
-    Moose::setup_perf_log.pop("reinit() after updateGeomSearch()","Setup");
-  }
+  Moose::setup_perf_log.push("reinit() after updateGeomSearch()","Setup");
+  // Possibly reinit one more time to get ghosting correct
+  reinitBecauseOfGhosting();
+  Moose::setup_perf_log.pop("reinit() after updateGeomSearch()","Setup");
 
   if(_displaced_mesh)
     _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
@@ -2167,6 +2156,23 @@ FEProblem::addPPSValuesToTable(ExecFlagType type)
 }
 
 void
+FEProblem::reinitBecauseOfGhosting()
+{
+  // Need to see if _any_ processor has ghosted elems
+  unsigned int ghosted = _ghosted_elems.size();
+  Parallel::sum(ghosted);
+
+  if(ghosted)
+  {
+    // Call reinit to get the ghosted vectors correct now that some geometric search has been done
+    _eq.reinit();
+
+    if(_displaced_mesh)
+      _displaced_problem->es().reinit();
+  }
+}
+
+void
 FEProblem::outputPostprocessors(bool force/* = false*/)
 {
   ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
@@ -2645,6 +2651,10 @@ FEProblem::init()
 
   _nl.dofMap()._dof_coupling = _cm;
   _nl.dofMap().attach_extra_sparsity_function(&extraSparsity, &_nl);
+  _nl.dofMap().attach_extra_send_list_function(&extraSendList, &_nl);
+  _aux.dofMap().attach_extra_send_list_function(&extraSendList, &_aux);
+  _aux.dofMap().attach_extra_send_list_function(&extraSendList, &_aux);
+
 
   if (_solve && n_vars == 0)
     mooseError("No variables specified in the FEProblem '" << name() << "'.");
@@ -3254,14 +3264,19 @@ FEProblem::meshChanged()
   for (unsigned int i = 0; i < n_threads; ++i)
     _assembly[i]->invalidateCache();
 
-  _geometric_search_data.update();
-  _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
+  // Need to redo ghosting
+  _ghosted_elems.clear();
+  _geometric_search_data.reinit();
 
   if(_displaced_problem != NULL)
   {
     _displaced_problem->meshChanged();
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
   }
+
+  _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
+
+  reinitBecauseOfGhosting();
 
   // We need to create new storage for the new elements and copy stateful properties from the old elements.
   if (_has_initialized_stateful && _material_props.hasStatefulProperties())

@@ -43,10 +43,13 @@ public:
 
   /**
    * Update all of the search objects.
-   *
-   * This is probably getting called because the mesh changed in some way.
    */
   void update();
+
+  /**
+   * Completely redo all geometric search objects.  This should be called when the mesh is adapted.
+   */
+  void reinit();
 
 //protected:
   SubProblem & _subproblem;

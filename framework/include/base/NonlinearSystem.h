@@ -272,8 +272,6 @@ public:
   virtual NumericVector<Number> & residualCopy();
   virtual NumericVector<Number> & residualGhosted();
 
-  virtual void augmentSendList(std::vector<unsigned int> & send_list);
-
   virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
                                std::vector<unsigned int> & n_nz,
                                std::vector<unsigned int> & n_oz);

@@ -196,6 +196,11 @@ public:
    */
   virtual bool computingInitialResidual() = 0;
 
+  /**
+   * Return the list of elements that should have their DoFs ghosted to this processor.
+   * @return The list
+   */
+  virtual std::set<unsigned int> & ghostedElems() { return _ghosted_elems; }
 public:
   /**
    * Convenience zeros
@@ -226,6 +231,8 @@ protected:
   /// Whether or not there is currently a list of active elemental moose variables
   std::vector<bool> _has_active_elemental_moose_variables;
 
+  /// Elements that should have Dofs ghosted to the local processor
+  std::set<unsigned int> _ghosted_elems;
 };
 
 

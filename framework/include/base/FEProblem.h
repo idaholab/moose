@@ -696,6 +696,11 @@ protected:
    */
   void addPPSValuesToTable(ExecFlagType type);
 
+  /**
+   * Call when it is possible that the needs for ghosted elements has changed.
+   */
+  void reinitBecauseOfGhosting();
+
   // Output system
   Output _out;
   OutputProblem * _out_problem;
@@ -731,9 +736,6 @@ protected:
 
   /// Object responsible for restart (read/write)
   Resurrector * _resurrector;
-
-  /// Elements that should have Dofs ghosted to the local processor
-  std::set<unsigned int> _ghosted_elems;
 
 //  PerfLog _solve_only_perf_log;                         ///< Only times the solve
   /// Determines if the setup log is printed before the first time step

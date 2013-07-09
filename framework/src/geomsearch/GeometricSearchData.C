@@ -71,6 +71,36 @@ GeometricSearchData::update()
   }
 }
 
+void
+GeometricSearchData::reinit()
+{
+  // Update the position of quadrature nodes first
+  for(std::set<unsigned int>::iterator qbnd_it = _quadrature_boundaries.begin();
+      qbnd_it != _quadrature_boundaries.end();
+      ++qbnd_it)
+    updateQuadratureNodes(*qbnd_it);
+
+  std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_it = _nearest_node_locators.begin();
+  const std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_end = _nearest_node_locators.end();
+
+  for(; nnl_it != nnl_end; ++nnl_it)
+  {
+    NearestNodeLocator * nnl = nnl_it->second;
+
+    nnl->findNodes();
+  }
+
+  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_it = _penetration_locators.begin();
+  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_end = _penetration_locators.end();
+
+  for(; pl_it != pl_end; ++pl_it)
+  {
+    PenetrationLocator * pl = pl_it->second;
+
+    pl->detectPenetration();
+  }
+}
+
 PenetrationLocator &
 GeometricSearchData::getPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order)
 {

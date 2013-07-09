@@ -358,6 +358,27 @@ SystemBase::reinitScalars(THREAD_ID tid)
   }
 }
 
+void
+SystemBase::augmentSendList(std::vector<unsigned int> & send_list)
+{
+  std::set<unsigned int> & ghosted_elems = _subproblem.ghostedElems();
+
+  DofMap & dof_map = dofMap();
+
+  std::vector<unsigned int> dof_indices;
+
+  for(std::set<unsigned int>::iterator elem_id = ghosted_elems.begin();
+      elem_id != ghosted_elems.end();
+      ++elem_id)
+  {
+    dof_map.dof_indices(_mesh.elem(*elem_id), dof_indices);
+
+    for(unsigned int i=0; i<dof_indices.size(); i++)
+      // Only need to ghost it if it's actually not on this processor
+      if(dof_indices[i] < dof_map.first_dof() || dof_indices[i] >= dof_map.end_dof())
+        send_list.push_back(dof_indices[i]);
+  }
+}
 
 void
 SystemBase::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters)

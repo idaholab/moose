@@ -134,7 +134,7 @@ public:
   /**
    * Will modify the send_list to add all of the extra ghosted dofs for this system
    */
-  virtual void augmentSendList(std::vector<unsigned int> & send_list) = 0;
+  virtual void augmentSendList(std::vector<unsigned int> & send_list);
 
   /**
    * Will modify the sparsity pattern to add logical geometric connections

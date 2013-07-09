@@ -144,6 +144,12 @@ public:
   virtual void onTimestepBegin();
   virtual void onTimestepEnd();
 
+  /**
+   * Return the list of elements that should have their DoFs ghosted to this processor.
+   * @return The list
+   */
+  virtual std::set<unsigned int> & ghostedElems() { return _mproblem.ghostedElems(); }
+
   virtual Order getQuadratureOrder();
 
   // Postprocessors /////

@@ -155,6 +155,9 @@ DisplacedProblem::init()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     _assembly[tid]->init();
 
+  _displaced_nl.dofMap().attach_extra_send_list_function(&extraSendList, &_displaced_nl);
+  _displaced_aux.dofMap().attach_extra_send_list_function(&extraSendList, &_displaced_aux);
+
   _displaced_nl.init();
   _displaced_aux.init();
 

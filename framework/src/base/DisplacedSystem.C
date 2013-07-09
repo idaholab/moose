@@ -28,7 +28,6 @@ DisplacedSystem::~DisplacedSystem()
 void
 DisplacedSystem::init()
 {
-  dofMap().attach_extra_send_list_function(&extraSendList, this);
 }
 
 NumericVector<Number> &
