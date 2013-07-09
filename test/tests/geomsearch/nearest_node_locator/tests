@@ -1,0 +1,16 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'nearest_node_locator.i'
+    exodiff = 'nearest_node_locator_out.e'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+  [./adapt]
+    type = 'Exodiff'
+    input = 'adapt.i'
+    exodiff = 'adapt_out.e-s003'
+    group = 'geometric'
+    mesh_mode = 'SERIAL'
+  [../]
+[]

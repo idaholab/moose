@@ -3255,6 +3255,9 @@ FEProblem::meshChanged()
   if (_material_props.hasStatefulProperties())
     _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material properties
 
+  // Clear these out because they corresponded to the old mesh
+  _ghosted_elems.clear();
+
   // mesh changed
   _eq.reinit();
   _mesh.meshChanged();
@@ -3265,7 +3268,6 @@ FEProblem::meshChanged()
     _assembly[i]->invalidateCache();
 
   // Need to redo ghosting
-  _ghosted_elems.clear();
   _geometric_search_data.reinit();
 
   if(_displaced_problem != NULL)

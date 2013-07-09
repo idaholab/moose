@@ -224,6 +224,12 @@ public:
   Node * getQuadratureNode(const Elem * elem, const unsigned short int side, const unsigned int qp);
 
   /**
+   * Clear out any existing quadrature nodes.
+   * Most likely called before re-adding them.
+   */
+  void clearQuadratureNodes();
+
+  /**
    * Get the associated BoundaryID for the boundary name.
    *
    * @return param boundary_name The name of the boundary.

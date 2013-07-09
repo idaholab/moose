@@ -100,6 +100,18 @@ PenetrationLocator::detectPenetration()
   Moose::perf_log.pop("detectPenetration()","Solve");
 }
 
+void
+PenetrationLocator::reinit()
+{
+  _penetration_info.clear();
+  _has_penetrated.clear();
+  _locked_this_step.clear();
+  _unlocked_this_step.clear();
+  _lagrange_multiplier.clear();
+
+  detectPenetration();
+}
+
 Real
 PenetrationLocator::penetrationDistance(unsigned int node_id)
 {

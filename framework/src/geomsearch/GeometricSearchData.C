@@ -78,7 +78,7 @@ GeometricSearchData::reinit()
   for(std::set<unsigned int>::iterator qbnd_it = _quadrature_boundaries.begin();
       qbnd_it != _quadrature_boundaries.end();
       ++qbnd_it)
-    updateQuadratureNodes(*qbnd_it);
+    reinitQuadratureNodes(*qbnd_it);
 
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_it = _nearest_node_locators.begin();
   const std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_end = _nearest_node_locators.end();
@@ -87,7 +87,7 @@ GeometricSearchData::reinit()
   {
     NearestNodeLocator * nnl = nnl_it->second;
 
-    nnl->findNodes();
+    nnl->reinit();
   }
 
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_it = _penetration_locators.begin();
@@ -97,7 +97,7 @@ GeometricSearchData::reinit()
   {
     PenetrationLocator * pl = pl_it->second;
 
-    pl->detectPenetration();
+    pl->reinit();
   }
 }
 
@@ -128,6 +128,8 @@ GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & master
   // TODO: Make this better!
   unsigned int base_id = 1e6;
   unsigned int qslave_id = slave_id + base_id;
+
+  _slave_to_qslave[slave_id] = qslave_id;
 
   PenetrationLocator * pl = _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, qslave_id)];
 
@@ -178,6 +180,8 @@ GeometricSearchData::getQuadratureNearestNodeLocator(const unsigned int master_i
   // TODO: Make this better!
   unsigned int base_id = 1e6;
   unsigned int qslave_id = slave_id + base_id;
+
+  _slave_to_qslave[slave_id] = qslave_id;
 
   generateQuadratureNodes(slave_id, qslave_id);
 
@@ -246,6 +250,19 @@ GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
       }
     }
   }
+}
+
+void
+GeometricSearchData::reinitQuadratureNodes(unsigned int slave_id)
+{
+  _quadrature_boundaries.clear();
+  _mesh.clearQuadratureNodes();
+
+  // Regenerate the quadrature nodes
+  for(std::map<unsigned int, unsigned int>::iterator it = _slave_to_qslave.begin();
+      it != _slave_to_qslave.end();
+      ++it)
+    generateQuadratureNodes(it->first, it->second);
 }
 
 

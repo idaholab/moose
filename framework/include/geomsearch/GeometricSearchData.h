@@ -62,6 +62,9 @@ protected:
   /// These are _real_ boundaries that have quadrature nodes on them.
   std::set<unsigned int> _quadrature_boundaries;
 
+  /// A mapping of the real boundary id to the slave boundary ids
+  std::map<unsigned int, unsigned int> _slave_to_qslave;
+
 private:
   /**
    * Add Quadrature Nodes to the Mesh in support of Quadrature based penetration location and nearest node searching.
@@ -75,6 +78,11 @@ private:
    * Update the positions of the quadrature nodes.
    */
   void updateQuadratureNodes(unsigned int slave_id);
+
+  /**
+   * Completely redo quadrature nodes
+   */
+  void reinitQuadratureNodes(unsigned int slave_id);
 };
 
 #endif //GEOMETRICSEARCHDATA_H

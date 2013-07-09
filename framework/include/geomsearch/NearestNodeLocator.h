@@ -46,6 +46,12 @@ public:
   void findNodes();
 
   /**
+   * Completely redo the search from scratch.
+   * Most likely called because of mesh adaptivity.
+   */
+  void reinit();
+
+  /**
    * Valid to call this after findNodes() has been called to get the distance to the nearest node.
    */
   Real distance(unsigned int node_id);

@@ -41,6 +41,12 @@ public:
   ~PenetrationLocator();
   void detectPenetration();
 
+  /**
+   * Completely redo the search from scratch.
+   * This is probably getting called because of mesh adaptivity.
+   */
+  void reinit();
+
   Real penetrationDistance(unsigned int node_id);
   RealVectorValue penetrationNormal(unsigned int node_id);
 

@@ -154,6 +154,23 @@ NearestNodeLocator::findNodes()
   Moose::perf_log.pop("NearestNodeLocator::findNodes()","Solve");
 }
 
+void
+NearestNodeLocator::reinit()
+{
+  // Reset all data
+  delete _slave_node_range;
+  _slave_node_range = NULL;
+  _nearest_node_info.clear();
+
+  _first = true;
+
+  _slave_nodes.clear();
+  _neighbor_nodes.clear();
+
+  // Redo the search
+  findNodes();
+}
+
 Real
 NearestNodeLocator::distance(unsigned int node_id)
 {

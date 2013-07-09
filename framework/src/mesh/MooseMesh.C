@@ -667,6 +667,14 @@ MooseMesh::getQuadratureNode(const Elem * elem, const unsigned short int side, c
   return _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side][qp];
 }
 
+void
+MooseMesh::clearQuadratureNodes()
+{
+  _quadrature_nodes.clear();
+  _elem_to_side_to_qp_to_quadrature_nodes.clear();
+  _extra_bnd_nodes.clear();
+}
+
 BoundaryID
 MooseMesh::getBoundaryID(const BoundaryName & boundary_name) const
 {
