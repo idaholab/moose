@@ -22,6 +22,7 @@
 // libmesh includes
 #include "libmesh/linear_partitioner.h"
 #include "libmesh/centroid_partitioner.h"
+#include "libmesh/parmetis_partitioner.h"
 #include "MooseEnum.h"
 
 template<>
@@ -32,7 +33,7 @@ InputParameters validParams<SetupMeshAction>()
 
   params.addParam<bool>("second_order", false, "Converts a first order mesh to a second order mesh.  Note: This is NOT needed if you are reading an actual first order mesh.");
 
-  MooseEnum partitioning("linear, centroid");
+  MooseEnum partitioning("metis, linear, centroid, parmetis", "metis");
   params.addParam<MooseEnum>("partitioner", partitioning, "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation.");
 
   MooseEnum direction("x, y, z, radial");
@@ -84,10 +85,12 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   if (getParam<bool>("second_order"))
     mesh->_mesh.all_second_order(true);
 
-  if (isParamValid("partitioner") && getParam<MooseEnum>("partitioner") == "linear")
+  // Note: Metis is the default partitioner so we don't even test for that case
+  if (getParam<MooseEnum>("partitioner") == "parmetis")
+    mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new ParmetisPartitioner);
+  else if (getParam<MooseEnum>("partitioner") == "linear")
     mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
-
-  if (isParamValid("partitioner") && getParam<MooseEnum>("partitioner") == "centroid")
+  else if (getParam<MooseEnum>("partitioner") == "centroid")
   {
     if(!isParamValid("centroid_partitioner_direction"))
       mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
