@@ -1320,9 +1320,11 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
     elem->set_node(i) = mesh.node_ptr(i);
 
   AutoPtr<FEBase> fe (FEBase::build(dim, FEType()));
+  fe->get_phi();
   const std::vector<Point>& q_points_volume = fe->get_xyz();
 
   AutoPtr<FEBase> fe_face (FEBase::build(dim, FEType()));
+  fe_face->get_phi();
   const std::vector<Point>& q_points_face = fe_face->get_xyz();
 
   fe->attach_quadrature_rule (&qrule);
