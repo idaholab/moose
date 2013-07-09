@@ -22,18 +22,24 @@
     type = Diffusion
     variable = u
   [../]
-[]
 
 [AuxKernels]
   [./initial_cond_aux]
     type = SolutionAux
+    solution = soln
+    variable = u_aux
+    execute_on = initial
+    direct = true
+  [../]
+[]
+
+[UserObjects]
+  [./soln]
+    type = SolutionUserObject
     mesh = out_0001_mesh.xda
     es = out_0001.xda
     system = AuxiliarySystem
-    variable = u_aux
-    execute_on = initial
-    from_variable = u_aux
-    direct = true
+    variables = u_aux
   [../]
 []
 
@@ -63,4 +69,3 @@
   exodus = true
   perf_log = true
 []
-

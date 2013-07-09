@@ -139,4 +139,12 @@ parallelBarrierNotify()
   Parallel::barrier();
 }
 
+bool
+hasExtension(const std::string & filename, std::string ext)
+{
+  if (filename.substr(filename.find_last_of(".") + 1) == ext)
+    return true;
+  else
+    return false;
 }
+} // MooseUtils namespace

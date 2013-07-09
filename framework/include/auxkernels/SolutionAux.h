@@ -16,82 +16,58 @@
 #define SOLUTIONAUX_H
 
 #include "AuxKernel.h"
-#include "libmesh/exodusII_io.h"
+#include "SolutionUserObject.h"
 
-// Forward Declarations
-namespace libMesh
-{
-  class Mesh;
-  class EquationSystems;
-  class System;
-  class MeshFunction;
-  template<class T> class NumericVector;
-}
-
+// Forward decleartion
 class SolutionAux;
 
 template<>
 InputParameters validParams<SolutionAux>();
 
+/** AuxKernal for reading a solution from file
+ * Creates a function that extracts values from a solution read from a file,
+ * via a SolutionUserObject. It is possible to scale and add a constant to the
+ * solution read.
+ */
 class SolutionAux : public AuxKernel
 {
 public:
+
+  /** Constructor
+   * @param name The name of the SolutionAux kernel
+   * @param parameter The input parameters for the kernel
+   */
   SolutionAux(const std::string & name, InputParameters parameters);
 
+  /** Empy destructor
+   */
   virtual ~SolutionAux();
 
-  virtual void timestepSetup();
-  virtual Real pointValue(Real t, const Point & p);
 
 protected:
+
+  /** Compute the value for the kernel
+   * Computes a value for a node or element depending on the type of kernel,
+   * it also uses the 'direct' flag to extract values based on the dof if the
+   * flag is set to true.
+   * @ return The desired value of the solution for the current node or element
+   */
   virtual Real computeValue();
 
-  /**
-   * Pass in a dof_index... get the value back.
-   */
-  virtual Real directValue(unsigned int dof_index);
+  /// Reference to the SolutionUserObject storing the solution
+  const SolutionUserObject & _solution_object;
 
-  enum SolutionFileType
-  {
-    UNDEFINED,
-    XDA,
-    EXODUSII
-  };
-  static SolutionFileType getSolutionFileType(const std::string filetype);
-  void updateExodusTimeInterpolation(Real time);
-  bool updateExodusBracketingTimeIndices(Real time);
-
-  std::string _mesh_file;
-  SolutionFileType _file_type;
-  std::string _es_file;
-  std::string _system_name;
+  /// The variable name of interest
   std::string _var_name;
-  int _exodus_time_index;
-  bool _direct;
-  bool _interpolate_times;
 
-  Mesh * _mesh;
-  EquationSystems * _es;
-  System * _system;
-  MeshFunction * _mesh_function;
+  /// Flag for directly grabing the data based on the dof
+  const bool _direct;
 
-
-  ExodusII_IO *_exodusII_io;
-
-  NumericVector<Number> * _serialized_solution;
-
-  //These are only used for interpolation between two exodusII times
-  EquationSystems * _es2;
-  System * _system2;
-  MeshFunction * _mesh_function2;
-  NumericVector<Number> * _serialized_solution2;
-  Real _interpolation_time;
-  Real _interpolation_factor;
-  const std::vector<Real> * _exodus_times;
-  int _exodus_index1;
-  int _exodus_index2;
+  /// Multiplier for the solution, the a of ax+b
   const Real _scale_factor;
 
+  /// Additional factor added to the solution, the b of ax+b
+  const Real _add_factor;
 };
 
 #endif //SOLUTIONAUX_H

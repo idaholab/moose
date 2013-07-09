@@ -1,5 +1,5 @@
 [Mesh]
-    file = cubesource.e 
+    file = cubesource.e
 []
 
 [Variables]
@@ -32,14 +32,12 @@
 [Functions]
   [./sourcen]
     type = SolutionFunction
-    file_type = exodusII 
-    mesh = cubesource.e 
-    variable = source_nodal
+    solution = cube_soln
   [../]
 #  [./sourcee]
 #    type = SolutionFunction
-#    file_type = exodusII 
-#    mesh = cubesource.e 
+#    file_type = exodusII
+#    mesh = cubesource.e
 #    variable = source_element
 #  [../]
 []
@@ -81,7 +79,14 @@
     boundary = '1 2'
     value = 0.0
   [../]
+[]
 
+[UserObjects]
+  [./cube_soln]
+    type = SolutionUserObject
+		mesh = cubesource.e
+		variables = source_nodal
+  [../]
 []
 
 #[Executioner]

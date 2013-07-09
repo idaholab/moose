@@ -170,6 +170,7 @@
 #include "NodalNormalsEvaluator.h"
 #include "NodalNormalsCorner.h"
 #include "NodalNormalsPreprocessor.h"
+#include "SolutionUserObject.h"
 
 // preconditioners
 #include "PhysicsBasedPreconditioner.h"
@@ -455,6 +456,7 @@ registerObjects(Factory & factory)
   registerUserObject(NodalNormalsPreprocessor);
   registerUserObject(NodalNormalsCorner);
   registerUserObject(NodalNormalsEvaluator);
+  registerUserObject(SolutionUserObject);
 
   // preconditioners
   registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");

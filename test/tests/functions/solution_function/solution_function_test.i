@@ -1,14 +1,12 @@
 [Mesh]
+  type = FileMesh
   file = square.e
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
-
     [./InitialCondition]
       type = FunctionIC
       function = initial_cond_func
@@ -17,12 +15,9 @@
 []
 
 [AuxVariables]
-  active = 'u_aux'
-
   [./u_aux]
     order = FIRST
     family = LAGRANGE
-
     [./InitialCondition]
       type = FunctionIC
       function = initial_cond_func
@@ -33,16 +28,11 @@
 [Functions]
   [./initial_cond_func]
     type = SolutionFunction
-    mesh = out_0001_mesh.xda
-    es = out_0001.xda
-    system = AuxiliarySystem
-    variable = u_aux
+    solution = ex_soln
   [../]
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = Diffusion
     variable = u
@@ -50,15 +40,12 @@
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
   [../]
-
   [./right]
     type = DirichletBC
     variable = u
@@ -67,9 +54,19 @@
   [../]
 []
 
+[UserObjects]
+  [./ex_soln]
+    type = SolutionUserObject
+    variables = u_aux
+    system = AuxiliarySystem
+    mesh = out_0001_mesh.xda
+    es = out_0001.xda
+  [../]
+[]
+
 [Executioner]
   type = Steady
-  petsc_options = '-snes_mf_operator'
+  petsc_options = -snes_mf_operator
   nl_rel_tol = 1e-10
 []
 
@@ -80,5 +77,3 @@
   exodus = true
   perf_log = true
 []
-
-

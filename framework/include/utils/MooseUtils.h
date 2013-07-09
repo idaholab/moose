@@ -63,6 +63,14 @@ namespace MooseUtils
   void parallelBarrierNotify();
 
   /**
+   * Function tests if the supplied filename as the desired extension
+   * @param filename The filename to test the extension
+   * @param ext The extension to test for (do not include the .)
+   * @return True if the filename has the supplied extension
+   */
+  bool hasExtension(const std::string & filename, std::string ext);
+
+  /**
    * This routine is a simple helper function for searching a map by values instead of keys
    */
   template<typename T1, typename T2>

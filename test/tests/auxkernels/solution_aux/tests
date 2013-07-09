@@ -34,4 +34,16 @@
     input = 'solution_aux_exodus_interp_direct.i'
     exodiff = 'solution_aux_exodus_interp_direct_out.e'
   [../]
+
+  [./multiple_input]
+    type = 'Exodiff'
+    input = 'solution_aux_multi_var.i'
+    exodiff = 'solution_aux_multi_var_out.e'
+  [../]
+
+  [./multiple_input_error]
+    type = 'RunException'
+    input = 'solution_aux_multi_err.i'
+    expect_err = 'The SolutionUserObject contains multiple variables, \w+'
+  [../]
 []

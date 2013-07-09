@@ -28,13 +28,19 @@
 [AuxKernels]
   [./nn]
     type = SolutionAux
+		solution = soln
     variable = nn
-    file_type = exodusII
-    mesh = cubesource.e
-    from_variable = source_nodal
-    timestep = 2
     scale_factor = 2.0
     direct = true
+  [../]
+[]
+
+[UserObjects]
+  [./soln]
+    type = SolutionUserObject
+    mesh = cubesource.e
+    variables = source_nodal
+    timestep = 2
   [../]
 []
 
@@ -61,4 +67,3 @@
   exodus = true
   perf_log = true
 []
-

@@ -34,20 +34,23 @@
 		solution = soln
     variable = nn
     scale_factor = 2.0
+		#from_variable = source_nodal
+		#add_factor = -10
   [../]
   [./en]
     type = SolutionAux
     solution = soln
 		variable = en
     scale_factor = 2.0
+		#from_variable = source_nodal
   [../]
 []
 
 [UserObjects]
   [./soln]
     type = SolutionUserObject
-    mesh = cubesource.e
-    variables = source_nodal
+    mesh = cubesource_added.e
+    variables = 'source_nodal nodal_10'
     timestep = 2
   [../]
 []

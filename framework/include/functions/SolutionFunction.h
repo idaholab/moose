@@ -16,73 +16,62 @@
 #define SOLUTIONFUNCTION_H
 
 #include "Function.h"
-#include "libmesh/exodusII_io.h"
+#include "SolutionUserObject.h"
 
-// Forward Declarations
-namespace libMesh
-{
-  class Mesh;
-  class EquationSystems;
-  class System;
-  class MeshFunction;
-  template<class T> class NumericVector;
-}
-
+// Forward decleration
 class SolutionFunction;
 
 template<>
 InputParameters validParams<SolutionFunction>();
 
+/** Function for reading a solution form file
+ * Creates a function that extracts values from a solution read from a file,
+ * via a SolutionUserObject. It is possible to scale and add a constant to the
+ * solution read.
+ */
 class SolutionFunction : public Function
 {
 public:
+
+  /** Constructor
+   * @param name The name of the function
+   * @param parameters The input parameters for the function
+   */
   SolutionFunction(const std::string & name, InputParameters parameters);
 
+  /** Empty destructor
+   */
   virtual ~SolutionFunction();
 
-  virtual void timestepSetup();
+  /** Extract a value from the solution
+   * @param t Time at which to extract
+   * @param p Spatial locatoin of desired data
+   * @return The value at t and p
+   */
   virtual Real value(Real t, const Point & p);
 
+  // virtual RealGradient gradient(Real t, const Point & p);
+
+  /** Setup the function for use
+   * Gathers a pointer to the SolutionUserObject containing the solution that
+   * was read. A pointer is requred because Functions are created prior to UserObjects,
+   * see Moose.C.
+   */
+  virtual void initialSetup();
+
 protected:
-  enum SolutionFileType
-  {
-    UNDEFINED,
-    XDA,
-    EXODUSII
-  };
-  static SolutionFileType getSolutionFileType(const std::string filetype);
-  void updateExodusTimeInterpolation(Real time);
-  bool updateExodusBracketingTimeIndices(Real time);
 
-  std::string _mesh_file;
-  SolutionFileType _file_type;
-  std::string _es_file;
-  std::string _system_name;
+  /// Pointer to SolutionUserObject containing the solution of interest
+  const  SolutionUserObject * _solution_object_ptr;
+
+  /// The variable name to extract from the file
   std::string _var_name;
-  int _exodus_time_index;
-  bool _interpolate_times;
 
-  Mesh * _mesh;
-  EquationSystems * _es;
-  System * _system;
-  MeshFunction * _mesh_function;
-
-
-  ExodusII_IO *_exodusII_io;
-
-  NumericVector<Number> * _serialized_solution;
-
-  //These are only used for interpolation between two exodusII times
-  EquationSystems * _es2;
-  System * _system2;
-  MeshFunction * _mesh_function2;
-  NumericVector<Number> * _serialized_solution2;
-  Real _interpolation_time;
-  Real _interpolation_factor;
-  const std::vector<Real> * _exodus_times;
-  int _exodus_index1;
-  int _exodus_index2;
+  /// Factor to scale the solution by (default = 1)
   const Real _scale_factor;
+
+  /// Factor to add to the solution (default = 0)
+  const Real _add_factor;
 
 };
 

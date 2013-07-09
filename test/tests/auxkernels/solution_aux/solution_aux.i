@@ -27,12 +27,19 @@
 [AuxKernels]
   [./initial_cond_aux]
     type = SolutionAux
-    mesh = out_0001_mesh.xda
+    solution = xda_soln
+		execute_on = initial
+    variable = u_aux
+  [../]
+[]
+
+[UserObjects]
+  [./xda_soln]
+	  type = SolutionUserObject
+		mesh = out_0001_mesh.xda
     es = out_0001.xda
     system = AuxiliarySystem
-    variable = u_aux
-    execute_on = initial
-    from_variable = u_aux
+    variables = u_aux
   [../]
 []
 
@@ -62,4 +69,3 @@
   exodus = true
   perf_log = true
 []
-

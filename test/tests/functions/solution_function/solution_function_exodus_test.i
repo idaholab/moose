@@ -1,5 +1,13 @@
+# [Executioner]
+# type = Steady
+# petsc_options = '-snes'
+# l_max_its = 800
+# nl_rel_tol = 1e-10
+# []
+
 [Mesh]
-    file = cubesource.e 
+  type = FileMesh
+  file = cubesource.e
 []
 
 [Variables]
@@ -11,39 +19,36 @@
 []
 
 [AuxVariables]
+  # [./ne]
+  # order = FIRST
+  # family = LAGRANGE
+  # [../]
+  # [./ee]
+  # order = CONSTANT
+  # family = MONOMIAL
+  # [../]
   [./nn]
     order = FIRST
     family = LAGRANGE
   [../]
-#  [./ne]
-#    order = FIRST
-#    family = LAGRANGE
-#  [../]
   [./en]
     order = CONSTANT
     family = MONOMIAL
   [../]
-#  [./ee]
-#    order = CONSTANT
-#    family = MONOMIAL
-#  [../]
 []
 
 [Functions]
+  # [./sourcee]
+  # type = SolutionFunction
+  # file_type = exodusII
+  # mesh = cubesource.e
+  # variable = source_element
+  # [../]
   [./sourcen]
     type = SolutionFunction
-    file_type = exodusII 
-    mesh = cubesource.e 
-    variable = source_nodal
-    timestep = 2
     scale_factor = 2.0
+    solution = cube_soln
   [../]
-#  [./sourcee]
-#    type = SolutionFunction
-#    file_type = exodusII 
-#    mesh = cubesource.e 
-#    variable = source_element
-#  [../]
 []
 
 [Kernels]
@@ -54,26 +59,26 @@
 []
 
 [AuxKernels]
+  # [./ne]
+  # type = FunctionAux
+  # variable = ne
+  # function = sourcee
+  # [../]
+  # [./ee]
+  # type = FunctionAux
+  # variable = ee
+  # function = sourcee
+  # [../]
   [./nn]
-     type = FunctionAux
-     variable = nn
-     function = sourcen
+    type = FunctionAux
+    variable = nn
+    function = sourcen
   [../]
-#  [./ne]
-#     type = FunctionAux
-#     variable = ne
-#     function = sourcee
-#  [../]
   [./en]
-     type = FunctionAux
-     variable = en
-     function = sourcen
+    type = FunctionAux
+    variable = en
+    function = sourcen
   [../]
-#  [./ee]
-#     type = FunctionAux
-#     variable = ee
-#     function = sourcee
-#  [../]
 []
 
 [BCs]
@@ -83,19 +88,20 @@
     boundary = '1 2'
     value = 0.0
   [../]
-
 []
 
-#[Executioner]
-#  type = Steady
-#  petsc_options = '-snes'
-#  l_max_its = 800
-#  nl_rel_tol = 1e-10
-#[]
+[UserObjects]
+  [./cube_soln]
+    type = SolutionUserObject
+    timestep = 2
+    variables = source_nodal
+    mesh = cubesource.e
+  [../]
+[]
 
 [Executioner]
   type = Transient
-  petsc_options = '-snes'
+  petsc_options = -snes
   l_max_its = 800
   nl_rel_tol = 1e-10
   num_steps = 50
