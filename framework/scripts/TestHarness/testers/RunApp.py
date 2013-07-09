@@ -154,7 +154,7 @@ class RunApp(Tester):
       if retcode == 0 and not specs[NO_VALGRIND] and 'ERROR SUMMARY: 0 errors' not in output:
         reason = 'MEMORY ERROR'
     # PBS runs
-    elif options.pbs != '':
+    elif options.pbs != None:
       if retcode == 0 and 'command not found' in output:
         reason = 'QSUB NOT FOUND'
     # Everything else
