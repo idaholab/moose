@@ -360,6 +360,7 @@ public:
   void debuggingResiduals(bool state) { _debugging_residuals = state; }
 
   void setPredictor(Predictor * predictor);
+  Predictor * getPredictor() { return _predictor; }
 
   TimeIntegrator * & getTimeIntegrator() { return _time_integrator; }
 
@@ -495,10 +496,10 @@ protected:
   unsigned int _n_iters;
   unsigned int _n_linear_iters;
   Real _final_residual;
-public:
+
   /// If predictor is active, this is non-NULL
   Predictor * _predictor;
-protected:
+
   bool _computing_initial_residual;
 
 

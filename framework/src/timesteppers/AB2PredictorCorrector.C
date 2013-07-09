@@ -17,12 +17,10 @@
 #include "Problem.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
-
+#include "NonlinearSystem.h"
+#include "AuxiliarySystem.h"
 //libMesh includes
-#include "libmesh/implicit_system.h"
-#include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/nonlinear_solver.h"
-#include "libmesh/transient_system.h"
 
 // C++ Includes
 #include <iomanip>
@@ -45,14 +43,8 @@ InputParameters validParams<AB2PredictorCorrector>()
 
 AB2PredictorCorrector::AB2PredictorCorrector(const std::string & name, InputParameters parameters) :
     TimeStepper(name, parameters),
-    _u_diff(NULL),
-    _u1(NULL),
-    _u2(NULL),
-    _u_saved(NULL),
-    _u_older_saved(NULL),
-    _aux1(NULL),
-    _aux_saved(NULL),
-    _aux_older_saved(NULL),
+    _u1(_fe_problem.getNonlinearSystem().addVector("u1", true, GHOSTED)),
+    _aux1(_fe_problem.getAuxiliarySystem().addVector("aux1", true, GHOSTED)),
     _e_tol(getParam<Real>("e_tol")),
     _e_max(getParam<Real>("e_max")),
     _max_increase(getParam<Real>("max_increase")),
@@ -63,32 +55,22 @@ AB2PredictorCorrector::AB2PredictorCorrector(const std::string & name, InputPara
     _infnorm(0),
     _scaling_parameter(getParam<Real>("scaling_parameter"))
 {
-  _error=0;
-  Real predscale =1.;
+  _error = 0;
+  Real predscale = 1.;
   InputParameters params = _app.getFactory().getValidParams("AdamsPredictor");
   params.set<Real>("scale") = predscale;
   _fe_problem.addPredictor("AdamsPredictor", "adamspredictor", params);
-  //_problem.getNonlinearSystem()._time_scheme->useAB2Predictor();
 
 }
 
 AB2PredictorCorrector::~AB2PredictorCorrector()
 {
-
 }
 
 void
 AB2PredictorCorrector::preExecute()
 {
-  TransientNonlinearImplicitSystem & nl_sys = _fe_problem.getNonlinearSystem().sys();
-  _u1 = &nl_sys.add_vector("u1", true, GHOSTED);
-
-  TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
-  _aux1 = &aux_sys.add_vector("aux1", true, GHOSTED);
-
-  //_fe_problem.getNonlinearSystem().setPredictorScale(1.0);
 }
-
 
 void
 AB2PredictorCorrector::preSolve()
@@ -100,32 +82,30 @@ AB2PredictorCorrector::preSolve()
 void
 AB2PredictorCorrector::step()
 {
-  TransientNonlinearImplicitSystem & nl_sys = _fe_problem.getNonlinearSystem().sys();
-  TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
+  NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
+  AuxiliarySystem & aux = _fe_problem.getAuxiliarySystem();
 
   _fe_problem.solve();
   _converged = _fe_problem.converged();
   if (_converged)
   {
+    _u1 = *nl.currentSolution();
+    _u1.close();
 
-    *_u1 = *nl_sys.current_local_solution;
-    _u1->close();
-
-    *_aux1 = *aux_sys.current_local_solution;
-    _aux1->close();
-    if(_t_step >= _start_adapting)
+    _aux1 = *aux.currentSolution();
+    _aux1.close();
+    if (_t_step >= _start_adapting)
     {
       // Calculate error if past the first solve
-      _error = estimateTimeError(*_u1);
-      _infnorm = _u1->linfty_norm();
-      _e_max = 1.1* _e_tol*_infnorm;
-      std::cout<<"Time Error Estimate: "<<_error<<std::endl;
+      _error = estimateTimeError(_u1);
+      _infnorm = _u1.linfty_norm();
+      _e_max = 1.1 * _e_tol * _infnorm;
+      std::cout << "Time Error Estimate: " << _error << std::endl;
     }
     else
     {
       //First time step is problematic, sure we converged but what does that mean? We don't know.
       //Nor can we calculate the error on the first time step.
-
     }
   }
 }
@@ -135,7 +115,7 @@ AB2PredictorCorrector::converged()
 {
   if (!_converged)
   {
-  _dt_steps_taken =0;
+    _dt_steps_taken = 0;
     return false;
   }
   if (_error < _e_max)
@@ -144,8 +124,8 @@ AB2PredictorCorrector::converged()
   }
   else
   {
-    std::cout << "Marking last solve not converged " << _error<<" "<<_e_max<< std::endl;
-    _dt_steps_taken =0;
+    std::cout << "Marking last solve not converged " << _error << " " << _e_max << std::endl;
+    _dt_steps_taken = 0;
     return false;
   }
 }
@@ -153,7 +133,7 @@ AB2PredictorCorrector::converged()
 Real
 AB2PredictorCorrector::computeDT()
 {
-  if(_t_step <= _start_adapting)
+  if (_t_step <= _start_adapting)
     return _dt;
 
   _my_dt_old = _dt;
@@ -161,17 +141,13 @@ AB2PredictorCorrector::computeDT()
   if(_dt_steps_taken >= _steps_between_increase)
   {
     Real new_dt = _dt_full * _scaling_parameter * std::pow(_infnorm * _e_tol / _error, 1.0 / 3.0);
-    if (new_dt/_dt_full > _max_increase)
-    {
+    if (new_dt / _dt_full > _max_increase)
       _dt = _dt_full*_max_increase;
-    }
     else
-    {
       _dt = new_dt;
-    }
-   _dt_steps_taken =0;
- }
- return _dt;
+    _dt_steps_taken = 0;
+  }
+  return _dt;
 }
 
 Real
@@ -180,18 +156,15 @@ AB2PredictorCorrector::computeInitialDT()
   return getParam<Real>("dt");
 }
 
-int AB2PredictorCorrector::stringtoint(std::string string)
+int
+AB2PredictorCorrector::stringtoint(std::string string)
 {
-  if(string == "ImplicitEuler")
-  {
+  if (string == "ImplicitEuler")
     return 0;
-  }else if(string == "CrankNicolson")
-  {
+  else if (string == "CrankNicolson")
     return 2;
-  }else if(string=="BDF2")
-  {
+  else if (string == "BDF2")
     return 3;
-  }
   return 4;
 }
 
@@ -199,43 +172,41 @@ Real
 AB2PredictorCorrector::estimateTimeError(NumericVector<Number> & solution)
 {
   Real ret = -1;
-  NumericVector<Number> & _predicted_solution = (static_cast<AdamsPredictor*> (_fe_problem.getNonlinearSystem()._predictor))->predictedsolution();
+  NumericVector<Number> & predicted_solution = (static_cast<AdamsPredictor*> (_fe_problem.getNonlinearSystem().getPredictor()))->predictedSolution();
   TimeIntegrator * ti = _fe_problem.getNonlinearSystem().getTimeIntegrator();
   std::string scheme = ti->name();
-  Real _dt_old = _fe_problem.dtOld();
+  Real dt_old = _fe_problem.dtOld();
   switch (stringtoint(scheme))
   {
-     case 2:
-     {
-       //Crank Nicolson
-       _predicted_solution -= solution;
-       _predicted_solution *= (_dt)/(3.0 * (_dt +_dt_old));
-       ret = _predicted_solution.l2_norm();
-       return ret;
-     }
-     case 3:
-     {
-       //BDF2
-        _predicted_solution *= -1.0;
-        _predicted_solution += solution;
-        Real topcalc = 2.0*(_dt + _dt_old)*(_dt +_dt_old);
-        Real bottomcalc = 6.0*_dt*_dt + 12.0*_dt*_dt_old + 5.0*_dt_old*_dt_old;
-        _predicted_solution *= topcalc/bottomcalc;
-        ret = _predicted_solution.l2_norm();
-        return ret;
-     }
-     case 1:
-     {
-        //I am not sure this is actually correct.
-        _predicted_solution *= -1;
-        _predicted_solution += solution;
-        Real calc = _dt*_dt*.5;
-        _predicted_solution *= calc;
-        ret = _predicted_solution.l2_norm();
-        return ret;
-     }
-     default:
-      break;
-    }
-  return ret;
+  case 1:
+  {
+    // NOTE: this is never called, since stringtoint does not return 1 - EVER!
+    //I am not sure this is actually correct.
+    predicted_solution *= -1;
+    predicted_solution += solution;
+    Real calc = _dt * _dt * .5;
+    predicted_solution *= calc;
+    return predicted_solution.l2_norm();
+  }
+  case 2:
+  {
+    // Crank Nicolson
+    predicted_solution -= solution;
+    predicted_solution *= (_dt) / (3.0 * (_dt + dt_old));
+    return predicted_solution.l2_norm();
+  }
+  case 3:
+  {
+    // BDF2
+    predicted_solution *= -1.0;
+    predicted_solution += solution;
+    Real topcalc = 2.0 * (_dt + dt_old) * (_dt + dt_old);
+    Real bottomcalc = 6.0 * _dt * _dt + 12.0 * _dt * dt_old + 5.0 * dt_old * dt_old;
+    predicted_solution *= topcalc / bottomcalc;
+    return predicted_solution.l2_norm();
+  }
+  default:
+    break;
+  }
+  return -1;
 }

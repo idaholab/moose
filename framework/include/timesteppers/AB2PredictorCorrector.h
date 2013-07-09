@@ -30,24 +30,13 @@ template<>
 InputParameters validParams<AB2PredictorCorrector>();
 
 /**
- * TransientExecutioner executioners usually loop through a number of timesteps... calling solve()
- * for each timestep.
+ *
  */
 class AB2PredictorCorrector : public TimeStepper
 {
 public:
-
-  /**
-   * Constructor
-   *
-   * @param name The name given to the Executioner in the input file.
-   * @param parameters The parameters object holding data for the class to use.
-   * @return Whether or not the solve was successful.
-   */
   AB2PredictorCorrector(const std::string & name, InputParameters parameters);
-
   virtual ~AB2PredictorCorrector();
-
 
   virtual Real computeDT();
   virtual Real computeInitialDT();
@@ -56,17 +45,13 @@ public:
   virtual void preSolve();
   virtual bool converged();
 
-
 protected:
-
   virtual Real estimateTimeError(NumericVector<Number> & sol);
 
   virtual int stringtoint(std::string string);
   ///
-  NumericVector<Number> * _u_diff, * _u1, * _u2;
-
-  NumericVector<Number> * _u_saved, * _u_older_saved;
-  NumericVector<Number> * _aux1, * _aux_saved, * _aux_older_saved;
+  NumericVector<Number> & _u1;
+  NumericVector<Number> & _aux1;
 
   /// dt of the big step
   Real _dt_full;
@@ -90,7 +75,6 @@ protected:
   /// scaling_parameter for time step selection, default is 0.8
   Real _scaling_parameter;
   std::ofstream myfile;
-
 };
 
 #endif // AB2PREDICTORCORRECTOR_H
