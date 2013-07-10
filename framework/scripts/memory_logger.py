@@ -84,7 +84,7 @@ the methods to retrieve memory usage and stack traces.
       all_pids = tmp_proc.communicate()[0].split('\n')
       search_for = self._discover_name()
       for single_pid in all_pids:
-        if single_pid.find(search_for) > -1 and single_pid.find(os.getenv('USER')):
+        if single_pid.find(search_for) > -1 and single_pid.find(os.getenv('USER')) > -1:
           pid_list[single_pid.split()[0]] = []
           pid_list[single_pid.split()[0]].append(single_pid.split()[1])
     else:
