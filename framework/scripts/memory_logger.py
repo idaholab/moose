@@ -79,16 +79,16 @@ the methods to retrieve memory usage and stack traces.
   def get_pids(self):
     pid_list = {}
     if self.arguments.track == None:
-      command = ['ps', '-e', '-o', 'pid,rss,comm']
+      command = ['ps', '-e', '-o', 'pid,rss,user,comm']
       tmp_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       all_pids = tmp_proc.communicate()[0].split('\n')
       search_for = self._discover_name()
       for single_pid in all_pids:
-        if single_pid.find(search_for) > -1:
+        if single_pid.find(search_for) > -1 and single_pid.find(os.getenv('USER')):
           pid_list[single_pid.split()[0]] = []
           pid_list[single_pid.split()[0]].append(single_pid.split()[1])
     else:
-      command = ['ps', str(self.arguments.track), '-e', '-o', 'pid,rss,comm']
+      command = ['ps', str(self.arguments.track), '-e', '-o', 'pid,rss,user,comm']
       tmp_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       all_pids = tmp_proc.communicate()[0].split('\n')
       for single_pid in all_pids:
