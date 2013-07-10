@@ -19,14 +19,13 @@ template<>
 InputParameters validParams<DebugResidualAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<std::string>("debug_variable", "The variable that is being debugged.");
-
+  params.addRequiredParam<NonlinearVariableName>("debug_variable", "The variable that is being debugged.");
   return params;
 }
 
 DebugResidualAux::DebugResidualAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _debug_var(_nl_sys.getVariable(_tid, parameters.get<std::string>("debug_variable"))),
+    _debug_var(_nl_sys.getVariable(_tid, getParam<std::string>("debug_variable"))),
     _residual_copy(_nl_sys.residualGhosted())
 {
   mooseAssert(_nodal == true, "Cannot use DebugResidualAux on elemental variables");
