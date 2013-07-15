@@ -177,21 +177,19 @@ Kernel::computeJacobian()
 void
 Kernel::computeOffDiagJacobian(unsigned int jvar)
 {
-//  Moose::perf_log.push("computeOffDiagJacobian()",_name);
+  if (jvar == _var.index())
+    computeJacobian();
+  else
+  {
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), jvar);
 
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), jvar);
-
-  for (_i=0; _i<_test.size(); _i++)
-    for (_j=0; _j<_phi.size(); _j++)
-      for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      {
-        if(jvar == _var.index())
-          ke(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian();
-        else
+    for (_i=0; _i<_test.size(); _i++)
+      for (_j=0; _j<_phi.size(); _j++)
+        for (_qp=0; _qp<_qrule->n_points(); _qp++)
+        {
           ke(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(jvar);
-      }
-
-//  Moose::perf_log.pop("computeOffDiagJacobian()",_name);
+        }
+  }
 }
 
 void
