@@ -458,7 +458,7 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
     std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = &displaced_geom_search_data._penetration_locators;
 
     AuxiliarySystem & aux_sys = getAuxiliarySystem();
-    NumericVector<Number> & aux_solution = aux_sys.solution();
+    const NumericVector<Number> & aux_solution = *aux_sys.currentSolution();
 
     for(std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator plit = penetration_locators->begin();
       plit != penetration_locators->end();
