@@ -32,7 +32,7 @@ Real ImplicitNeumannBC::computeQpJacobian()
 
 
 
-Real ImplicitNeumannBC::computeQpOffDiagJacobian(unsigned jvar)
+Real ImplicitNeumannBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 {
   // off-diagonal derivatives are all zero.
   return 0.;

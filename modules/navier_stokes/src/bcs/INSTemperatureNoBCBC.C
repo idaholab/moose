@@ -39,7 +39,7 @@ Real INSTemperatureNoBCBC::computeQpJacobian()
 
 
 
-Real INSTemperatureNoBCBC::computeQpOffDiagJacobian(unsigned jvar)
+Real INSTemperatureNoBCBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 {
   // off-diagonal derivatives are all zero.
   return 0.;

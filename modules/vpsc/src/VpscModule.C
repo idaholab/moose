@@ -3,12 +3,12 @@
 // Vpsc
 
 void
-Elk::Vpsc::registerObjects(Factory & factory)
+Elk::Vpsc::registerObjects(Factory & /*factory*/)
 {
   // Vpsc
 }
 
 void
-Elk::Vpsc::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+Elk::Vpsc::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }
