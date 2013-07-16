@@ -68,7 +68,7 @@ void
 MaterialTensorOnLine::execute()
 {
   unsigned int qp(0); // all integration points have the same _elem_line_id, just use qp=0
-  unsigned int id = _elem_line_id[qp] + .5;
+  int id = _elem_line_id[qp] + .5;
   
   
   if (id == _line_id)
