@@ -80,7 +80,7 @@ MultiAppNearestNodeTransfer::execute()
 
       unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-      EquationSystems & from_es = from_sys.get_equation_systems();
+      // EquationSystems & from_es = from_sys.get_equation_systems();
 
       //Create a serialized version of the solution vector
       NumericVector<Number> * serialized_solution = NumericVector<Number>::build().release();
@@ -254,7 +254,7 @@ MultiAppNearestNodeTransfer::execute()
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 
-      EquationSystems & to_es = to_sys.get_equation_systems();
+      // EquationSystems & to_es = to_sys.get_equation_systems();
 
       MeshBase * to_mesh = NULL;
 
@@ -314,9 +314,9 @@ MultiAppNearestNodeTransfer::execute()
         // Only works with a serialized mesh to transfer from!
         mooseAssert(from_sys.get_mesh().is_serial(), "MultiAppNearestNodeTransfer only works with SerialMesh!");
 
-        unsigned int from_var_num = from_sys.variable_number(from_var.name());
+        // unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-        EquationSystems & from_es = from_sys.get_equation_systems();
+        // EquationSystems & from_es = from_sys.get_equation_systems();
 
         MeshBase * from_mesh = NULL;
 
@@ -507,7 +507,7 @@ MultiAppNearestNodeTransfer::execute()
 
           unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-          EquationSystems & from_es = from_sys.get_equation_systems();
+          // EquationSystems & from_es = from_sys.get_equation_systems();
 
           MeshBase * from_mesh = NULL;
 

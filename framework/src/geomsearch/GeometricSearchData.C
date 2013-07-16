@@ -253,7 +253,7 @@ GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
 }
 
 void
-GeometricSearchData::reinitQuadratureNodes(unsigned int slave_id)
+GeometricSearchData::reinitQuadratureNodes(unsigned int /*slave_id*/)
 {
   _quadrature_boundaries.clear();
   _mesh.clearQuadratureNodes();

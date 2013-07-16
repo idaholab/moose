@@ -162,7 +162,7 @@ MultiAppUserObjectTransfer::execute()
 
       std::cout<<"Transferring to: "<<to_var.name()<<std::endl;
 
-      EquationSystems & to_es = to_sys.get_equation_systems();
+      // EquationSystems & to_es = to_sys.get_equation_systems();
 
       //Create a serialized version of the solution vector
       NumericVector<Number> * to_solution = to_sys.solution.get();

@@ -87,7 +87,7 @@ MultiAppInterpolationTransfer::execute()
 
       bool from_is_nodal = from_sys.variable_type(from_var_num) == FEType();
 
-      EquationSystems & from_es = from_sys.get_equation_systems();
+      // EquationSystems & from_es = from_sys.get_equation_systems();
 
       NumericVector<Number> & from_solution = *from_sys.solution;
 
@@ -264,7 +264,7 @@ MultiAppInterpolationTransfer::execute()
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 
-      EquationSystems & to_es = to_sys.get_equation_systems();
+      // EquationSystems & to_es = to_sys.get_equation_systems();
 
       MeshBase * to_mesh = NULL;
 
@@ -318,7 +318,7 @@ MultiAppInterpolationTransfer::execute()
 
         bool from_is_nodal = from_sys.variable_type(from_var_num) == FEType();
 
-        EquationSystems & from_es = from_sys.get_equation_systems();
+        // EquationSystems & from_es = from_sys.get_equation_systems();
 
         NumericVector<Number> & from_solution = *from_sys.solution;
 

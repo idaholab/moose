@@ -80,7 +80,7 @@ AdamsPredictor::apply(NumericVector<Number> & sln)
 
   // localize current solution to working vec
   sln.localize(_predicted_solution);
-  NumericVector<Number> & vector1 = _tmp_previous_solution;
+  // NumericVector<Number> & vector1 = _tmp_previous_solution;
   NumericVector<Number> & vector2 = _tmp_residual_old;
   NumericVector<Number> & vector3 = _tmp_third_vector;
 
