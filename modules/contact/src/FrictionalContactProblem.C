@@ -729,7 +729,9 @@ FrictionalContactProblem::applySlip(NumericVector<Number>& vec_solution,
 
   aux_solution.close();
   vec_solution.close();
-  if (iterative_slip.size() > 0)
+  unsigned int num_slipping_nodes = iterative_slip.size();
+  Parallel::sum(num_slipping_nodes);
+  if (num_slipping_nodes > 0)
   {
     ghosted_solution = vec_solution;
     ghosted_solution.close();
