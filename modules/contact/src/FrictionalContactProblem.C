@@ -493,67 +493,67 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
           if(pen_loc._penetration_info[slave_node_num])
           {
             PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
+            const Node * node = info._node;
 
-
-            std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
-
-            if(hpit != has_penetrated.end())
+            if (node->processor_id() == libMesh::processor_id())
             {
-//              std::cout<<"Slave node: "<<slave_node_num<<std::endl;
-              _num_contact_nodes++;
-              const Node * node = info._node;
 
-              VectorValue<unsigned int> residual_dofs(node->dof_number(aux_sys.number(), residual_x_var->index(), 0),
-                                                      node->dof_number(aux_sys.number(), residual_y_var->index(), 0),
-                                                      (residual_z_var ? node->dof_number(nonlinear_sys.number(), residual_z_var->index(), 0) : 0));
+              std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
 
-              VectorValue<unsigned int> diag_stiff_dofs(node->dof_number(aux_sys.number(), diag_stiff_x_var->index(), 0),
-                                                        node->dof_number(aux_sys.number(), diag_stiff_y_var->index(), 0),
-                                                        (diag_stiff_z_var ? node->dof_number(aux_sys.number(), diag_stiff_z_var->index(), 0) : 0));
-
-              VectorValue<unsigned int> inc_slip_dofs(node->dof_number(aux_sys.number(), inc_slip_x_var->index(), 0),
-                                                      node->dof_number(aux_sys.number(), inc_slip_y_var->index(), 0),
-                                                      (inc_slip_z_var ? node->dof_number(aux_sys.number(), inc_slip_z_var->index(), 0) : 0));
-
-              RealVectorValue res_vec;
-              RealVectorValue stiff_vec;
-              RealVectorValue slip_inc_vec;
-
-              for(unsigned int i=0; i<dim; ++i)
+              if(hpit != has_penetrated.end())
               {
-                res_vec(i) = aux_solution(residual_dofs(i));
-                stiff_vec(i) = aux_solution(diag_stiff_dofs(i));
-                slip_inc_vec(i) = aux_solution(inc_slip_dofs(i));
-              }
+                _num_contact_nodes++;
 
-              RealVectorValue slip_iterative(0.0,0.0,0.0);
-              Real interaction_slip_residual = 0.0;
-//              std::cout<<"inc  slip: "<<slip_inc_vec<<std::endl;
-//              std::cout<<"info slip: "<<info._incremental_slip<<std::endl;
-//              ContactState state = calculateInteractionSlip(slip_iterative, interaction_slip_residual, info._normal, res_vec, info._incremental_slip, stiff_vec, friction_coefficient, slip_factor, slip_too_far_factor, dim);
-              ContactState state = calculateInteractionSlip(slip_iterative, interaction_slip_residual, info._normal, res_vec, slip_inc_vec, stiff_vec, friction_coefficient, slip_factor, slip_too_far_factor, dim);
-//              std::cout<<"iter slip: "<<slip_iterative<<std::endl;
-              _slip_residual += interaction_slip_residual*interaction_slip_residual;
+                VectorValue<unsigned int> residual_dofs(node->dof_number(aux_sys.number(), residual_x_var->index(), 0),
+                                                        node->dof_number(aux_sys.number(), residual_y_var->index(), 0),
+                                                        (residual_z_var ? node->dof_number(nonlinear_sys.number(), residual_z_var->index(), 0) : 0));
 
-              if (state == SLIPPING || state == SLIPPED_TOO_FAR)
-              {
-                _num_slipping++;
-                if (state == SLIPPED_TOO_FAR)
-                  _num_slipped_too_far++;
+                VectorValue<unsigned int> diag_stiff_dofs(node->dof_number(aux_sys.number(), diag_stiff_x_var->index(), 0),
+                                                          node->dof_number(aux_sys.number(), diag_stiff_y_var->index(), 0),
+                                                          (diag_stiff_z_var ? node->dof_number(aux_sys.number(), diag_stiff_z_var->index(), 0) : 0));
+
+                VectorValue<unsigned int> inc_slip_dofs(node->dof_number(aux_sys.number(), inc_slip_x_var->index(), 0),
+                                                        node->dof_number(aux_sys.number(), inc_slip_y_var->index(), 0),
+                                                        (inc_slip_z_var ? node->dof_number(aux_sys.number(), inc_slip_z_var->index(), 0) : 0));
+
+                RealVectorValue res_vec;
+                RealVectorValue stiff_vec;
+                RealVectorValue slip_inc_vec;
+
                 for(unsigned int i=0; i<dim; ++i)
                 {
-                  SlipData sd(node,i,slip_iterative(i));
-                  if (iterative_slip)
-                    iterative_slip->push_back(sd);
-                  _it_slip_norm += slip_iterative(i)*slip_iterative(i);
-                  _inc_slip_norm += (slip_inc_vec(i)+slip_iterative(i))*(slip_inc_vec(i)+slip_iterative(i));
+                  res_vec(i) = aux_solution(residual_dofs(i));
+                  stiff_vec(i) = aux_solution(diag_stiff_dofs(i));
+                  slip_inc_vec(i) = aux_solution(inc_slip_dofs(i));
+                }
+
+                RealVectorValue slip_iterative(0.0,0.0,0.0);
+                Real interaction_slip_residual = 0.0;
+//                std::cout<<"inc  slip: "<<slip_inc_vec<<std::endl;
+//                std::cout<<"info slip: "<<info._incremental_slip<<std::endl;
+//                ContactState state = calculateInteractionSlip(slip_iterative, interaction_slip_residual, info._normal, res_vec, info._incremental_slip, stiff_vec, friction_coefficient, slip_factor, slip_too_far_factor, dim);
+                ContactState state = calculateInteractionSlip(slip_iterative, interaction_slip_residual, info._normal, res_vec, slip_inc_vec, stiff_vec, friction_coefficient, slip_factor, slip_too_far_factor, dim);
+//                std::cout<<"iter slip: "<<slip_iterative<<std::endl;
+                _slip_residual += interaction_slip_residual*interaction_slip_residual;
+
+                if (state == SLIPPING || state == SLIPPED_TOO_FAR)
+                {
+                  _num_slipping++;
+                  if (state == SLIPPED_TOO_FAR)
+                    _num_slipped_too_far++;
+                  for(unsigned int i=0; i<dim; ++i)
+                  {
+                    SlipData sd(node,i,slip_iterative(i));
+                    if (iterative_slip)
+                      iterative_slip->push_back(sd);
+                    _it_slip_norm += slip_iterative(i)*slip_iterative(i);
+                    _inc_slip_norm += (slip_inc_vec(i)+slip_iterative(i))*(slip_inc_vec(i)+slip_iterative(i));
+                  }
                 }
               }
-
             }
           }
         }
-
       }
     }
 
