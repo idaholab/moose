@@ -55,6 +55,13 @@ SystemBase::SystemBase(SubProblem & subproblem, const std::string & name) :
 {
 }
 
+void
+SystemBase::initialICSetup()
+{
+  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+    _vars[i].initialSetup();
+}
+
 MooseVariable &
 SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
 {

@@ -333,7 +333,11 @@ void FEProblem::initialSetup()
   }
 
   if (!isRestarting())
+  {
+    _aux.initialICSetup();
+    _nl.initialICSetup();
     projectSolution();
+  }
 
   if (_output_es_info)
     _eq.print_info();

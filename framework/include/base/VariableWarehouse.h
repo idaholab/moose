@@ -36,6 +36,9 @@ public:
   VariableWarehouse();
   virtual ~VariableWarehouse();
 
+  // Setup /////
+  void initialSetup();
+
   /**
    * Add a variable
    * @param var_name The name of the variable

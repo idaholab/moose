@@ -36,6 +36,14 @@ VariableWarehouse::~VariableWarehouse()
 }
 
 void
+VariableWarehouse::initialSetup()
+{
+  for (std::map<std::string, std::map<SubdomainID, InitialCondition *> >::iterator it1 = _ics.begin(); it1 != _ics.end(); ++it1)
+    for (std::map<SubdomainID, InitialCondition *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
+      it2->second->initialSetup();
+}
+
+void
 VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
 {
   _var_name[var_name] = var;

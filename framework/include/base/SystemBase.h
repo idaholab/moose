@@ -60,6 +60,9 @@ public:
   SystemBase(SubProblem & subproblem, const std::string & name);
   virtual ~SystemBase() {}
 
+  // Setup Functions ////
+  void initialICSetup();
+
   virtual unsigned int number() = 0;
   virtual const std::string & name() = 0;
   virtual MooseMesh & mesh() { return _mesh; }
