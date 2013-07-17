@@ -113,9 +113,9 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
   coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);
   if (_nodal)
-    return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->nodalSln() : var->nodalSlnOld();
+    return (_c_is_implicit) ? var->nodalSln() : var->nodalSlnOld();
   else
-    return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->sln() : var->slnOld();
+    return (_c_is_implicit) ? var->sln() : var->slnOld();
 }
 
 VariableValue &
@@ -124,9 +124,9 @@ Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
   coupledCallback(var_name, true);
   MooseVariable * var = getVar(var_name, comp);
   if (_nodal)
-    return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->nodalSlnOld() : var->nodalSlnOlder();
+    return (_c_is_implicit) ? var->nodalSlnOld() : var->nodalSlnOlder();
   else
-    return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->slnOld() : var->slnOlder();
+    return (_c_is_implicit) ? var->slnOld() : var->slnOlder();
 }
 
 VariableValue &
@@ -136,14 +136,14 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
   MooseVariable * var = getVar(var_name, comp);
   if (_nodal)
   {
-    if (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY)
+    if (_c_is_implicit)
       return var->nodalSlnOlder();
     else
       mooseError("Older values not available for explicit schemes");
   }
   else
   {
-    if (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY)
+    if (_c_is_implicit)
       return var->slnOlder();
     else
       mooseError("Older values not available for explicit schemes");
@@ -185,7 +185,7 @@ Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
     mooseError("Nodal variables do not have gradients");
 
   MooseVariable * var = getVar(var_name, comp);
-  return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->gradSln() : var->gradSlnOld();
+  return (_c_is_implicit) ? var->gradSln() : var->gradSlnOld();
 }
 
 VariableGradient &
@@ -196,7 +196,7 @@ Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp)
     mooseError("Nodal variables do not have gradients");
 
   MooseVariable * var = getVar(var_name, comp);
-  return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->gradSlnOld() : var->gradSlnOlder();
+  return (_c_is_implicit) ? var->gradSlnOld() : var->gradSlnOlder();
 }
 
 VariableGradient &
@@ -207,7 +207,7 @@ Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp
     mooseError("Nodal variables do not have gradients");
 
   MooseVariable * var = getVar(var_name, comp);
-  if (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY)
+  if (_c_is_implicit)
     return var->gradSlnOlder();
   else
     mooseError("Older values not available for explicit schemes");
@@ -221,7 +221,7 @@ Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
     mooseError("Nodal variables do not have second derivatives");
 
   MooseVariable * var = getVar(var_name, comp);
-  return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->secondSln() : var->secondSlnOlder();
+  return (_c_is_implicit) ? var->secondSln() : var->secondSlnOlder();
 }
 
 VariableSecond &
@@ -232,7 +232,7 @@ Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
     mooseError("Nodal variables do not have second derivatives");
 
   MooseVariable * var = getVar(var_name, comp);
-  return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->secondSlnOld() : var->secondSlnOlder();
+  return (_c_is_implicit) ? var->secondSlnOld() : var->secondSlnOlder();
 }
 
 VariableSecond &
@@ -243,7 +243,7 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
     mooseError("Nodal variables do not have second derivatives");
 
   MooseVariable * var = getVar(var_name, comp);
-  if (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY)
+  if (_c_is_implicit)
     return var->secondSlnOlder();
   else
     mooseError("Older values not available for explicit schemes");
@@ -267,9 +267,9 @@ NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned 
 {
   MooseVariable * var = getVar(var_name, comp);
   if (_nodal)
-    return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->nodalSlnNeighbor() : var->nodalSlnOldNeighbor();
+    return (_c_is_implicit) ? var->nodalSlnNeighbor() : var->nodalSlnOldNeighbor();
   else
-    return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->slnNeighbor() : var->slnOldNeighbor();
+    return (_c_is_implicit) ? var->slnNeighbor() : var->slnOldNeighbor();
 }
 
 VariableValue &
@@ -277,9 +277,9 @@ NeighborCoupleable::coupledNeighborValueOld(const std::string & var_name, unsign
 {
   MooseVariable * var = getVar(var_name, comp);
   if (_nodal)
-    return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->nodalSlnOldNeighbor() : var->nodalSlnOlderNeighbor();
+    return (_c_is_implicit) ? var->nodalSlnOldNeighbor() : var->nodalSlnOlderNeighbor();
   else
-    return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->slnOldNeighbor() : var->slnOlderNeighbor();
+    return (_c_is_implicit) ? var->slnOldNeighbor() : var->slnOlderNeighbor();
 }
 
 VariableValue &
@@ -288,14 +288,14 @@ NeighborCoupleable::coupledNeighborValueOlder(const std::string & var_name, unsi
   MooseVariable * var = getVar(var_name, comp);
   if (_nodal)
   {
-    if (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY)
+    if (_c_is_implicit)
       return var->nodalSlnOlderNeighbor();
     else
       mooseError("Older values not available for explicit schemes");
   }
   else
   {
-    if (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY)
+    if (_c_is_implicit)
       return var->slnOlderNeighbor();
     else
       mooseError("Older values not available for explicit schemes");
@@ -309,7 +309,7 @@ NeighborCoupleable::coupledNeighborGradient(const std::string & var_name, unsign
     mooseError("Nodal variables do not have gradients");
 
   MooseVariable * var = getVar(var_name, comp);
-  return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
+  return (_c_is_implicit) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
 }
 
 VariableGradient &
@@ -319,7 +319,7 @@ NeighborCoupleable::coupledNeighborGradientOld(const std::string & var_name, uns
     mooseError("Nodal variables do not have gradients");
 
   MooseVariable * var = getVar(var_name, comp);
-  return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->gradSlnOldNeighbor() : var->gradSlnOlderNeighbor();
+  return (_c_is_implicit) ? var->gradSlnOldNeighbor() : var->gradSlnOlderNeighbor();
 }
 
 VariableGradient &
@@ -329,7 +329,7 @@ NeighborCoupleable::coupledNeighborGradientOlder(const std::string & var_name, u
     mooseError("Nodal variables do not have gradients");
 
   MooseVariable * var = getVar(var_name, comp);
-  if (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY)
+  if (_c_is_implicit)
     return var->gradSlnOlderNeighbor();
   else
     mooseError("Older values not available for explicit schemes");
@@ -342,7 +342,7 @@ NeighborCoupleable::coupledNeighborSecond(const std::string & var_name, unsigned
     mooseError("Nodal variables do not have second derivatives");
 
   MooseVariable * var = getVar(var_name, comp);
-  return (_c_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->secondSlnNeighbor() : var->secondSlnOldNeighbor();
+  return (_c_is_implicit) ? var->secondSlnNeighbor() : var->secondSlnOldNeighbor();
 }
 
 
@@ -407,14 +407,14 @@ VariableValue &
 ScalarCoupleable::coupledScalarValue(const std::string & var_name, unsigned int comp)
 {
   MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return (_sc_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->sln() : var->slnOld();
+  return (_sc_is_implicit) ? var->sln() : var->slnOld();
 }
 
 VariableValue &
 ScalarCoupleable::coupledScalarValueOld(const std::string & var_name, unsigned int comp)
 {
   MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return (_sc_is_implicit || var->kind() == Moose::VAR_AUXILIARY) ? var->slnOld() : var->slnOlder();
+  return (_sc_is_implicit) ? var->slnOld() : var->slnOlder();
 }
 
 VariableValue &
