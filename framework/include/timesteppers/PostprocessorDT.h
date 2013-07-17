@@ -38,6 +38,8 @@ protected:
   virtual Real computeDT();
 
   PostprocessorValue & _pps_value;
+  bool _has_initial_dt;
+  Real _initial_dt;
 };
 
 
