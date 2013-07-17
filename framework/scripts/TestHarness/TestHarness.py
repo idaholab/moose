@@ -211,8 +211,6 @@ class TestHarness:
     return tests
 
   def parseLegacyTestFormat(self, filename):
-    print colorText("WARNING: The python test specification format has been deprecated.  Please migrate your test files to the new getpot format", self.options, "RED")
-
     # dynamically load the module
     module_name = filename[:-3]   # Always a python file (*.py)
     module = __import__(module_name)
@@ -271,6 +269,8 @@ class TestHarness:
 
         # Build a list of test specs (dicts) to return
         tests.append(params)
+    if len(tests) > 0:
+      print colorText("WARNING: The python test specification format has been deprecated.  Please migrate your test files to the new getpot format", self.options, "RED")
     return tests
 
   def augmentTestSpecs(self, test):
