@@ -33,6 +33,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <sys/utsname.h>
+
 template<>
 InputParameters validParams<MultiApp>()
 {
@@ -399,6 +401,11 @@ MultiApp::buildComm()
 
   ierr = MPI_Comm_size(_orig_comm, &_orig_num_procs); mooseCheckMPIErr(ierr);
   ierr = MPI_Comm_rank(_orig_comm, &_orig_rank); mooseCheckMPIErr(ierr);
+
+  struct utsname sysInfo;
+  uname(&sysInfo);
+
+  _node_name = sysInfo.nodename;
 
   // If we have more apps than processors then we're just going to divide up the work
   if(_total_num_apps >= (unsigned)_orig_num_procs)

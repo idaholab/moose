@@ -245,6 +245,9 @@ protected:
   /// The mpi "rank" of this processor in the original communicator
   int _orig_rank;
 
+  /// Node Name
+  std::string _node_name;
+
   /// The mpi "rank" of this processor in the sub communicator
   int _my_rank;
 
