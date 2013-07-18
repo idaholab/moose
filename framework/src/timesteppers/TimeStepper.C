@@ -90,12 +90,12 @@ TimeStepper::converged()
 Real
 TimeStepper::computeFailedDT()
 {
-  if (_current_dt <= _dt_min)
+  if (_dt <= _dt_min)
     mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
 
   // cut the time step in a half
-  if (0.5 * _current_dt >= _dt_min)
-    return 0.5 * _current_dt;
+  if (0.5 * _dt >= _dt_min)
+    return 0.5 * _dt;
   else // (0.5 * _current_dt < _dt_min)
     return _dt_min;
 }
