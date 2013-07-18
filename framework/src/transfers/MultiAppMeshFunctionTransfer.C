@@ -94,7 +94,7 @@ MultiAppMeshFunctionTransfer::execute()
           NumericVector<Real> & solution = _multi_app->appTransferVector(i, _to_var_name);
 
           MeshBase & mesh = _multi_app->appProblem(i)->mesh().getMesh();
-          bool is_nodal = to_sys->variable_type(var_num) == FEType();
+          bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
 
           if(is_nodal)
           {
@@ -186,8 +186,7 @@ MultiAppMeshFunctionTransfer::execute()
 
       MeshBase & to_mesh = to_es.get_mesh();
 
-      bool is_nodal = to_sys.variable_type(to_var_num) == FEType();
-
+      bool is_nodal = to_sys.variable_type(to_var_num).family == LAGRANGE;
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {

@@ -113,7 +113,7 @@ MultiAppNearestNodeTransfer::execute()
           else
             mesh = &_multi_app->appProblem(i)->mesh().getMesh();
 
-          bool is_nodal = to_sys->variable_type(var_num) == FEType();
+          bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
 
           if(is_nodal)
           {

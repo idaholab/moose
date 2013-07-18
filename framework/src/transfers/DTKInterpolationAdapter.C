@@ -229,7 +229,7 @@ DTKInterpolationAdapter::get_values_to_fill(std::string var_name)
   {
     System * sys = find_sys(var_name);
     unsigned int var_num = sys->variable_number(var_name);
-    bool is_nodal = sys->variable_type(var_num) == FEType();
+    bool is_nodal = sys->variable_type(var_num).family == LAGRANGE;
 
     Teuchos::ArrayRCP<double> data_space;
 
@@ -253,7 +253,7 @@ DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::A
   System * sys = find_sys(var_name);
   unsigned int var_num = sys->variable_number(var_name);
 
-  bool is_nodal = sys->variable_type(var_num) == FEType();
+  bool is_nodal = sys->variable_type(var_num).family == LAGRANGE;
 
   Teuchos::RCP<FieldContainerType> values = values_to_fill[var_name]->field();
 

@@ -85,7 +85,7 @@ MultiAppInterpolationTransfer::execute()
       unsigned int from_sys_num = from_sys.number();
       unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-      bool from_is_nodal = from_sys.variable_type(from_var_num) == FEType();
+      bool from_is_nodal = from_sys.variable_type(from_var_num).family == LAGRANGE;
 
       // EquationSystems & from_es = from_sys.get_equation_systems();
 
@@ -174,7 +174,7 @@ MultiAppInterpolationTransfer::execute()
           else
             mesh = &_multi_app->appProblem(i)->mesh().getMesh();
 
-          bool is_nodal = to_sys->variable_type(var_num) == FEType();
+          bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
 
           if(is_nodal)
           {
@@ -273,8 +273,7 @@ MultiAppInterpolationTransfer::execute()
       else
         to_mesh = &to_problem.mesh().getMesh();
 
-      bool is_nodal = to_sys.variable_type(to_var_num) == FEType();
-
+      bool is_nodal = to_sys.variable_type(to_var_num).family == LAGRANGE;
 
       InverseDistanceInterpolation<LIBMESH_DIM> * idi;
 
@@ -316,7 +315,7 @@ MultiAppInterpolationTransfer::execute()
 
         unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-        bool from_is_nodal = from_sys.variable_type(from_var_num) == FEType();
+        bool from_is_nodal = from_sys.variable_type(from_var_num).family == LAGRANGE;
 
         // EquationSystems & from_es = from_sys.get_equation_systems();
 
