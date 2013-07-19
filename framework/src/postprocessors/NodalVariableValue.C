@@ -32,10 +32,10 @@ NodalVariableValue::NodalVariableValue(const std::string & name, InputParameters
     GeneralPostprocessor(name, parameters),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
-    _node_ptr(_mesh._mesh.node_ptr(getParam<unsigned int>("nodeid")))
+    _node_ptr(_mesh._mesh.query_node_ptr(getParam<unsigned int>("nodeid")))
 {
   if (_node_ptr == NULL)
-    mooseError("Node ID: " << getParam<unsigned int>("nodeid") << " not found in the mesh!");
+    mooseError("Node #" << getParam<unsigned int>("nodeid") << " specified in '" << name << "' not found in the mesh!");
 }
 
 Real
