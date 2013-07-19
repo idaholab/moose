@@ -75,12 +75,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.vtkwidget = vtk.QVTKWidget2()
 #    self.vtkwidget.setMinimumHeight(300)
 
+    # Create background, default to the gradient look
     self.renderer = vtk.vtkRenderer()
-    self.renderer.SetBackground(0.2,0.2,0.2)
-    self.renderer.SetBackground2(1,1,1)
-    self.renderer.SetGradientBackground(1)
-    self.renderer.ResetCamera()
-    
+    self._showBlackBackgroundChanged(0)
+    self.renderer.ResetCamera()    
+
     self.right_layout.addWidget(self.vtkwidget)
     self.right_layout.setStretchFactor(self.vtkwidget, 100)
 
@@ -163,12 +162,30 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.automatically_update = True
     self.automatic_update_checkbox.stateChanged[int].connect(self._automaticUpdateChanged)
 #    self.left_controls_layout.addWidget(self.automatic_update_checkbox)
-
-    self.reset_layout = QtGui.QVBoxLayout()
+    
+    # Create the View Mesh toggle
+    self.toggle_layout = QtGui.QHBoxLayout()
     self.draw_edges_checkbox = QtGui.QCheckBox("View Mesh")
     self.draw_edges_checkbox.setToolTip('Show mesh elements')
     self.draw_edges_checkbox.stateChanged[int].connect(self._drawEdgesChanged)
-    self.reset_layout.addWidget(self.draw_edges_checkbox, alignment=QtCore.Qt.AlignHCenter)
+    self.toggle_layout.addWidget(self.draw_edges_checkbox, alignment=QtCore.Qt.AlignHCenter)
+
+    # Add a button for toggling the scalebar legend
+    self.hide_scalebar_checkbox = QtGui.QCheckBox("Scalebar")
+    self.hide_scalebar_checkbox.setToolTip('Toggle visibility of colorbar')
+    self.hide_scalebar_checkbox.setCheckState(QtCore.Qt.Checked)
+    self.hide_scalebar_checkbox.stateChanged[int].connect(self._hideScalebarChanged)
+    self.toggle_layout.addWidget(self.hide_scalebar_checkbox, alignment=QtCore.Qt.AlignHCenter)
+
+    # Add a button for toggling background to black
+    self.show_black_background_checkbox = QtGui.QCheckBox("Black")
+    self.show_black_background_checkbox.setToolTip('Toggle a black/gradient background')
+    self.show_black_background_checkbox.stateChanged[int].connect(self._showBlackBackgroundChanged)
+    self.toggle_layout.addWidget(self.show_black_background_checkbox, alignment=QtCore.Qt.AlignHCenter)
+    
+    # Create a vertical layout and add the toggles
+    self.reset_layout = QtGui.QVBoxLayout()
+    self.reset_layout.addLayout(self.toggle_layout)
 
     self.displace_groupbox = QtGui.QGroupBox("Displace")
     self.displace_groupbox.setCheckable(True)
@@ -190,7 +207,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.displace_layout.addWidget(self.displace_magnitude_text, alignment=QtCore.Qt.AlignLeft)
 
     self.reset_layout.addWidget(self.displace_groupbox)
-
 
     self.scale_groupbox = QtGui.QGroupBox("Scale")
     self.scale_groupbox.setCheckable(True)
@@ -547,6 +563,46 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     else:
       self.exodus_result.actor.GetProperty().EdgeVisibilityOff()
       self.exodus_result.clip_actor.GetProperty().EdgeVisibilityOff()
+    self.vtkwidget.updateGL()
+
+  ##
+  # A method for toggling visiability of the scale bar legend, it is controlled
+  # by the 'Hide Scalebar' toggle on the Visualize tab
+  # @param value The interger value from the checkbox (1=checked)
+  def _hideScalebarChanged(self, value):
+  
+    # Show when checked
+    if value == QtCore.Qt.Checked:
+      self.exodus_result.scalar_bar.VisibilityOn()
+ 
+    # Hide when unchecked 
+    else:
+      self.exodus_result.scalar_bar.VisibilityOff() 
+    
+    # Update the GUI
+    self.vtkwidget.updateGL()
+
+  ##
+  # A method for toggling black background or gradient background, it is controlled
+  # by the 'Black Background' toggle on the Visualize tab
+  # @param value The interger value from the checkbox (1=checked)
+  def _showBlackBackgroundChanged(self, value):
+  
+    # Black when checked
+    if value == QtCore.Qt.Checked:
+      self.renderer.SetBackground(0,0,0)
+      self.renderer.SetGradientBackground(0)
+      #self.renderer.ResetCamera()
+      
+    # Gradient when unchecked 
+    else:
+      self.renderer.SetBackground(0,0,0)
+      self.renderer.SetBackground(0.2,0.2,0.2)
+      self.renderer.SetBackground2(1,1,1)
+      self.renderer.SetGradientBackground(1)
+      #self.renderer.ResetCamera()
+    
+    # Update thew GUI
     self.vtkwidget.updateGL()
 
   def _fillComponentCombo(self, variable_name, components):
