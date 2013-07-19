@@ -2248,43 +2248,17 @@ FEProblem::addIndicator(std::string indicator_name, const std::string & name, In
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
 
-//    std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
-//    std::vector<SubdomainID> block_ids(blocks.size());
-
-//  this->addAuxVariable(parameters.get<std::string>("field_name"), FEType(CONSTANT, MONOMIAL) );
-
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _material_data[tid];
 
-    //if(dynamic_cast<InternalSideIndicator*>(indicator))
-//    {
-      parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-      parameters.set<MaterialData *>("_neighbor_material_data") = _neighbor_material_data[tid];
-//    }
+    parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
+    parameters.set<MaterialData *>("_neighbor_material_data") = _neighbor_material_data[tid];
 
-    Indicator *indicator = static_cast<Indicator *>(_factory.create(indicator_name, name, parameters) );
+    Indicator *indicator = static_cast<Indicator *>(_factory.create(indicator_name, name, parameters));
     mooseAssert(indicator != NULL, "Not a Indicator object");
 
-
-
-    /*    std::set<SubdomainID> blk_ids;
-          if (!parameters.isParamValid("block"))
-          blk_ids = _var_map[indicator->variable().number()];
-          else
-          {
-          std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
-          for (unsigned int i=0; i<blocks.size(); ++i)
-          {
-          SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
-
-          if (_var_map[indicator->variable().number()].count(blk_id) > 0 || _var_map[indicator->variable().number()].size() == 0)
-          blk_ids.insert(blk_id);
-          else
-          mooseError("indicator (" + indicator->name() + "): block outside of the domain of the variable");
-          }
-          }*/
     std::vector<SubdomainID> block_ids;
     _indicators[tid].addIndicator(indicator, block_ids);
 
@@ -2308,35 +2282,13 @@ FEProblem::addMarker(std::string marker_name, const std::string & name, InputPar
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
 
-//    std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
-//    std::vector<SubdomainID> block_ids(blocks.size());
-
-//  this->addAuxVariable(parameters.get<std::string>("field_name"), FEType(CONSTANT, MONOMIAL) );
-
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    Marker *marker = static_cast<Marker *>(_factory.create(marker_name, name, parameters) );
+    Marker *marker = static_cast<Marker *>(_factory.create(marker_name, name, parameters));
     mooseAssert(marker != NULL, "Not a Marker object");
 
-
-    /*    std::set<SubdomainID> blk_ids;
-          if (!parameters.isParamValid("block"))
-          blk_ids = _var_map[indicator->variable().number()];
-          else
-          {
-          std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
-          for (unsigned int i=0; i<blocks.size(); ++i)
-          {
-          SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
-
-          if (_var_map[indicator->variable().number()].count(blk_id) > 0 || _var_map[indicator->variable().number()].size() == 0)
-          blk_ids.insert(blk_id);
-          else
-          mooseError("indicator (" + indicator->name() + "): block outside of the domain of the variable");
-          }
-          }*/
     std::vector<SubdomainID> block_ids;
     _markers[tid].addMarker(marker, block_ids);
 
