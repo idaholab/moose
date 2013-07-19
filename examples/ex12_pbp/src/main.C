@@ -18,8 +18,7 @@
  * with the optional Kernel::computeQpOffDiagJacobian method and input PBP block
  */
 
-#include "Example.h"
-//Moose Includes
+#include "ExampleApp.h"
 #include "MooseInit.h"
 #include "Moose.h"
 #include "MooseApp.h"
@@ -35,7 +34,7 @@ int main(int argc, char *argv[])
   MooseInit init(argc, argv);
 
   // Register this application's MooseApp and any it depends on
-  Example::registerApps();
+  ExampleApp::registerApps();
 
   // This creates dynamic memory that we're responsible for deleting
   MooseApp * app = AppFactory::createApp("ExampleApp", argc, argv);
