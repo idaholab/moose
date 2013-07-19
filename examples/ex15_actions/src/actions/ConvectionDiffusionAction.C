@@ -47,19 +47,27 @@ ConvectionDiffusionAction::act()
   mooseAssert(variables.size() == 2, "Expected 2 variables, received " + variables.size());
 
   // Setup our Diffusion Kernel on the "u" variable
-  InputParameters conv_diff_params = _factory.getValidParams("Diffusion");
-  conv_diff_params.set<NonlinearVariableName>("variable") = variables[0];
-  _problem->addKernel("Diffusion", "diff_u", conv_diff_params);
+  {
+    InputParameters params = _factory.getValidParams("Diffusion");
+    params.set<NonlinearVariableName>("variable") = variables[0];
+    _problem->addKernel("Diffusion", "diff_u", params);
+  }
 
   // Setup our Convection Kernel on the "u" variable coupled to the diffusion variable "v"
-  conv_diff_params.addCoupledVar("some_variable", "The gradient of this var");
-  vel_vec_variable.push_back(variables[1]);
-  conv_diff_params.set<std::vector<NonlinearVariableName> >("some_variable") = vel_vec_variable;
-  _problem->addKernel("Convection", "conv", conv_diff_params);
+  {
+    InputParameters params = _factory.getValidParams("Convection");
+    params.set<NonlinearVariableName>("variable") = variables[0];
+    params.addCoupledVar("some_variable", "The gradient of this var");
+    vel_vec_variable.push_back(variables[1]);
+    params.set<std::vector<NonlinearVariableName> >("some_variable") = vel_vec_variable;
+    _problem->addKernel("Convection", "conv", params);
+  }
 
   // Setup out Diffusion Kernel on the "v" variable
-  InputParameters conv_params = _factory.getValidParams("Convection");
-  conv_params.set<NonlinearVariableName>("variable") = variables[1];
-  _problem->addKernel("Diffusion", "diff_v", conv_params);
+  {
+    InputParameters params = _factory.getValidParams("Diffusion");
+    params.set<NonlinearVariableName>("variable") = variables[1];
+    _problem->addKernel("Diffusion", "diff_v", params);
+  }
 }
 
