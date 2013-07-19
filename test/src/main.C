@@ -1,5 +1,4 @@
 #include "MooseInit.h"
-#include "MooseTest.h"
 #include "MooseTestApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
@@ -13,7 +12,7 @@ int main(int argc, char *argv[])
   MooseInit init(argc, argv);
 
   // Register this application's MooseApp and any it depends on
-  MooseTest::registerApps();
+  MooseTestApp::registerApps();
 
   // This creates dynamic memory that we're responsible for deleting
   MooseApp * app = AppFactory::createApp("MooseTestApp", argc, argv);
