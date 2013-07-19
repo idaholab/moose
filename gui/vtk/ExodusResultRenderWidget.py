@@ -163,7 +163,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.automatic_update_checkbox.stateChanged[int].connect(self._automaticUpdateChanged)
 #    self.left_controls_layout.addWidget(self.automatic_update_checkbox)
     
+    # Create Group for viewer controls 
+
     # Create the View Mesh toggle
+    self.toggle_groupbox = QtGui.QGroupBox("View")
     self.toggle_layout = QtGui.QHBoxLayout()
     self.draw_edges_checkbox = QtGui.QCheckBox("View Mesh")
     self.draw_edges_checkbox.setToolTip('Show mesh elements')
@@ -184,8 +187,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.toggle_layout.addWidget(self.show_black_background_checkbox, alignment=QtCore.Qt.AlignHCenter)
     
     # Create a vertical layout and add the toggles
+    self.toggle_groupbox.setLayout(self.toggle_layout)
     self.reset_layout = QtGui.QVBoxLayout()
-    self.reset_layout.addLayout(self.toggle_layout)
+    self.reset_layout.addWidget(self.toggle_groupbox)
 
     self.displace_groupbox = QtGui.QGroupBox("Displace")
     self.displace_groupbox.setCheckable(True)
