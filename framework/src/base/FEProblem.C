@@ -1027,6 +1027,8 @@ FEProblem::addFunction(std::string type, const std::string & name, InputParamete
   {
     parameters.set<THREAD_ID>("_tid") = tid;
     Function * func = static_cast<Function *>(_factory.create(type, name, parameters));
+    if (_functions[tid].find(name) != _functions[tid].end())
+      mooseError("Duplicate function name added to FEProblem: " << name);
     _functions[tid][name] = func;
     _objects_by_name[tid][name].push_back(func);
   }
