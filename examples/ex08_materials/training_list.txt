@@ -6,4 +6,4 @@ include/kernels/ExampleDiffusion.h
 src/kernels/ExampleDiffusion.C
 include/kernels/Convection.h
 src/kernels/Convection.C
-src/base/Example.C
+src/base/ExampleApp.C

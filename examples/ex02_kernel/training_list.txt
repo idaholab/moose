@@ -2,5 +2,5 @@ Title: Adding a Custom Kernel
 ex02.i
 include/kernels/Convection.h
 src/kernels/Convection.C
-src/base/Example.C
+src/base/ExampleApp.C
 ex02_oversample.i

@@ -19,7 +19,7 @@
  * conditions selectable by changing the input file
  */
 
-#include "Example.h"
+#include "ExampleApp.h"
 //Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
   MooseInit init(argc, argv);
 
   // Register this application's MooseApp and any it depends on
-  Example::registerApps();
+  ExampleApp::registerApps();
 
   // This creates dynamic memory that we're responsible for deleting
   MooseApp * app = AppFactory::createApp("ExampleApp", argc, argv);
