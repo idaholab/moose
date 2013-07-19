@@ -2,7 +2,7 @@
  * Elk Application
  */
 
-#include "Elk.h"
+#include "ElkApp.h"
 //Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
   MooseInit init(argc, argv);
 
   // Register this application's MooseApp and any it depends on
-  Elk::registerApps();
+  ElkApp::registerApps();
 
   // This creates dynamic memory that we're responsible for deleting
   MooseApp * app = AppFactory::createApp("ElkApp", argc, argv);
