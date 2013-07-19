@@ -2,7 +2,7 @@
 #define GEOMETRICALCOMPONENT_H
 
 #include "Component.h"
-#include "RELAP7.h"
+#include "Relap7App.h"
 #include <map>
 
 class GeometricalComponent;
