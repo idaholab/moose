@@ -32,12 +32,14 @@ ExampleApp::~ExampleApp()
 {
 }
 
-void ExampleApp::registerApps()
+void
+ExampleApp::registerApps()
 {
   registerApp(ExampleApp);
 }
 
-void ExampleApp::registerObjects(Factory & factory)
+void
+ExampleApp::registerObjects(Factory & factory)
 {
   // Register our new executioner
   registerExecutioner(TransientHalf);
@@ -47,6 +49,7 @@ void ExampleApp::registerObjects(Factory & factory)
   registerMaterial(ExampleMaterial);
 }
 
-void ExampleApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+void
+ExampleApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
 }

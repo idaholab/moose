@@ -30,19 +30,20 @@ ExampleApp::~ExampleApp()
 {
 }
 
-
-
-void ExampleApp::registerApps()
+void
+ExampleApp::registerApps()
 {
   registerApp(ExampleApp);
 }
 
-void ExampleApp::registerObjects(Factory & factory)
+void
+ExampleApp::registerObjects(Factory & factory)
 {
   registerKernel(Convection);
   registerDiracKernel(ExampleDirac);  // <- registration
 }
 
-void ExampleApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+void
+ExampleApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
 }
