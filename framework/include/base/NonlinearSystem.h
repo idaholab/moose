@@ -346,6 +346,11 @@ public:
   unsigned int nLinearIterations() { return _n_linear_iters; }
 
   /**
+   * Return the total number of residual evaluations done so far in this calculation
+   */
+  unsigned int nResidualEvaluations() { return _n_residual_evaluations; }
+
+  /**
    * Return the final nonlinear residual
    */
   Real finalNonlinearResidual() { return _final_residual; }
@@ -358,6 +363,8 @@ public:
   void printTopResiduals(const NumericVector<Number> & residual, unsigned int n);
 
   void debuggingResiduals(bool state) { _debugging_residuals = state; }
+
+  unsigned int _num_residual_evaluations;
 
   void setPredictor(Predictor * predictor);
   Predictor * getPredictor() { return _predictor; }
@@ -495,6 +502,10 @@ protected:
 
   unsigned int _n_iters;
   unsigned int _n_linear_iters;
+
+  /// Total number of residual evaluations that have been performed
+  unsigned int _n_residual_evaluations;
+
   Real _final_residual;
 
   /// If predictor is active, this is non-NULL

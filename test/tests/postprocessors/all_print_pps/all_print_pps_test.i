@@ -67,6 +67,11 @@
     type = PrintDOFs
     variable = u
   [../]
+
+  [./residuals]
+    type = NumResidualEvaluations
+    variable = u
+  [../]
 []
 
 [Output]

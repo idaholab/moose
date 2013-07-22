@@ -130,6 +130,7 @@
 #include "ElementL2Error.h"
 #include "EmptyPostprocessor.h"
 #include "NodalVariableValue.h"
+
 #include "PrintDOFs.h"
 #include "PrintDT.h"
 #include "PrintRunTime.h"
@@ -141,6 +142,8 @@
 #include "PrintResidual.h"
 #include "PrintScalarVariable.h"
 #include "PrintNumVars.h"
+#include "NumResidualEvaluations.h"
+
 #include "Reporter.h"
 #include "SideAverageValue.h"
 #include "SideFluxIntegral.h"
@@ -429,6 +432,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(PrintResidual);
   registerPostprocessor(PrintScalarVariable);
   registerPostprocessor(PrintNumVars);
+  registerPostprocessor(NumResidualEvaluations);
   registerPostprocessor(PlotFunction);
   registerPostprocessor(Reporter);
   registerPostprocessor(SideAverageValue);

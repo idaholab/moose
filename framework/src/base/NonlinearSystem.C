@@ -134,8 +134,10 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _doing_dg(false),
     _n_iters(0),
     _n_linear_iters(0),
+    _n_residual_evaluations(0),
     _final_residual(0.),
-    _predictor(NULL)
+    _predictor(NULL),
+    _computing_initial_residual(false)
 {
   _sys.nonlinear_solver->residual      = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian      = Moose::compute_jacobian;
@@ -715,6 +717,8 @@ void
 NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::KernelType type)
 {
   Moose::perf_log.push("compute_residual()","Solve");
+
+  _n_residual_evaluations++;
 
   Moose::enableFPE();
 
