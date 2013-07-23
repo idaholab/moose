@@ -1,47 +1,132 @@
 #!/usr/bin/env python
-import sys, os, subprocess, socket, pickle, argparse, time, decimal
+import sys, os, subprocess, socket, pickle, argparse, time, decimal, csv
 from tempfile import TemporaryFile
+
+class MemoryPlotter:
+  def __init__(self, arguments):
+    self.arguments = arguments
+    self.buildGraph()
+
+  def buildPlots(self):
+    plot_dictionary = {}
+    for log in self.arguments.plot:
+      memory_list = []
+      if os.path.exists(log):
+        log_file = open(log, 'r')
+        reader = csv.reader(log_file, delimiter=',', quotechar='|', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
+        for row in reader:
+          memory_list.append(row)
+        log_file.close()
+        plot_dictionary[log.split('/')[-1:][0]] = memory_list
+      else:
+        print 'log not found:', log
+        sys.exit(1)
+    return plot_dictionary
+
+  def buildGraph(self):
+    try:
+      import matplotlib.pyplot as plt
+    except ImportError:
+      print 'Error importing matplotlib. Matplotlib not available on this system?'
+      sys.exit(1)
+    plot_dictionary = self.buildPlots()
+    fig = plt.figure()
+    plot_list = []
+    for plot_name, value_list in plot_dictionary.iteritems():
+      plot_list.append(fig.add_subplot(111))
+      tmp_memory = []
+      tmp_time = []
+      # Get the start time, and make this 0
+      try:
+        tmp_zero = decimal.Decimal(value_list[0][0])
+      except:
+        print 'Could not parse log file:', plot_name, 'is this a valid memory_logger file?'
+        sys.exit(1)
+      for records in value_list:
+        tmp_memory.append(decimal.Decimal(records[1]) / 1000000)
+        tmp_time.append(str(decimal.Decimal(records[0]) - tmp_zero))
+        if len(records[2]) > 0 and self.arguments.stdout:
+          plot_list[-1].annotate(str(records[2].split('\n')[0][:self.arguments.trim_text[-1]]),
+                                 xy=(tmp_time[-1], tmp_memory[-1]),
+                                 rotation=self.arguments.rotate_text[-1],
+                                 xytext=(decimal.Decimal(tmp_time[-1]) + decimal.Decimal(self.arguments.move_text[0]), decimal.Decimal(tmp_memory[-1]) + decimal.Decimal(self.arguments.move_text[1])),
+                                 textcoords='data',
+                                 horizontalalignment='center', verticalalignment='bottom',
+                                 arrowprops=dict(arrowstyle="->",
+                                                 connectionstyle="arc3" ,
+                                                 facecolor='black'
+                                                 )
+                                 )
+        if len(records[3]) > 0 and self.arguments.pstack:
+          plot_list[-1].annotate(str(records[3].split('\n')[0][:self.arguments.trim_text[-1]]),
+                                 xy=(tmp_time[-1], tmp_memory[-1]),
+                                 rotation=self.arguments.rotate_text[-1],
+                                 xytext=(decimal.Decimal(tmp_time[-1]) + decimal.Decimal(self.arguments.move_text[0]), decimal.Decimal(tmp_memory[-1]) + decimal.Decimal(self.arguments.move_text[1])),
+                                 textcoords='data',
+                                 horizontalalignment='center', verticalalignment='bottom',
+                                 arrowprops=dict(arrowstyle="->",
+                                                 connectionstyle="arc3" ,
+                                                 facecolor='black'
+                                                 )
+                                 )
+
+      # Do the actual plotting:
+      plot_list[-1].plot(tmp_time, tmp_memory)
+      plot_list[-1].grid(True)
+      plot_list[-1].set_ylabel('Memory Usage in GB')
+      plot_list[-1].set_xlabel('Time in Seconds')
+
+    # 1 = top right
+    # 2 = top left
+    # 3 = bottom left
+    # 4 = bottom right
+    plt.legend([label[0] for label in plot_dictionary.iteritems()], loc = 2)
+    plt.show()
 
 class ExportMemoryUsage:
   """Converts a log file to a comma delimited format (for Matlab)
 """
   def __init__(self, arguments):
     self.arguments = arguments
-    if os.path.exists(self.arguments.export):
-      history_file = open(self.arguments.export, 'r')
+    if os.path.exists(self.arguments.export[-1]):
+      history_file = open(self.arguments.export[-1], 'r')
     else:
-      print 'Input file not found:', self.arguments.export
+      print 'Input file not found:', self.arguments.export[-1]
       sys.exit(1)
-    self.memory_list = history_file.read().split('\n')
-    self.memory_list.pop()
+
+    reader = csv.reader(history_file, delimiter=',', quotechar='|', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
+    self.memory_list = []
+    for row in reader:
+      self.memory_list.append(row)
     history_file.close()
+
     self.sorted_list = []
     self.mem_list = []
     self.exportFile()
 
   def exportFile(self):
-    output_file = open(self.arguments.export + '.comma_delimited', 'w')
+    output_file = open(self.arguments.export[-1] + '.comma_delimited', 'w')
     for timestamp in self.memory_list:
-      time_object = GetTime(eval(timestamp)[0])
-      self.mem_list.append(eval(timestamp)[1])
-      self.sorted_list.append([str(time_object.year) + '-' + str(time_object.month) + '-' + str(time_object.day) + ' ' + str(time_object.hour) + ':' + str(time_object.minute) + ':' + str(time_object.second) + '.' + str(time_object.microsecond), eval(timestamp)[1]])
+      time_object = GetTime(float(timestamp[0]))
+      self.mem_list.append(timestamp[1])
+      self.sorted_list.append([str(time_object.year) + '-' + str(time_object.month) + '-' + str(time_object.day) + ' ' + str(time_object.hour) + ':' + str(time_object.minute) + ':' + str(time_object.second) + '.' + str(time_object.microsecond), timestamp[1]])
     for item in self.sorted_list:
       output_file.write(str(item[0]) + ',' + str(item[1]) + '\n')
     output_file.close()
-    print 'Comma delimited file saved to: ' + os.getcwd() + '/' + str(self.arguments.export) + '.comma_delimited'
+    print 'Comma delimited file saved to: ' + os.getcwd() + '/' + str(self.arguments.export[-1]) + '.comma_delimited'
 
 class WriteLog:
   """The logfile object
 """
   def __init__(self, log_file):
-    self.log_file = open(log_file, 'w')
+    self.file_object = open(log_file, 'w')
+    self.log_file = csv.writer(self.file_object, delimiter=',', quotechar='|', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
 
   def write_file(self, data):
-    self.log_file.write(data)
-    self.log_file.flush()
+    self.log_file.writerow(data)
 
   def close(self):
-    self.log_file.close()
+    self.file_object.close()
 
 class SamplerUtils:
   """This class contains the logging facilities as well as
@@ -60,8 +145,7 @@ the methods to retrieve memory usage and stack traces.
 
   def _discover_name(self):
     if self.arguments.run:
-      locations = ''.join(self.arguments.run).split()
-      for item in locations:
+      for item in self.arguments.run[-1].split():
         if os.path.exists(item):
           return item.split('/').pop()
     elif self.arguments.call_back_host:
@@ -88,11 +172,11 @@ the methods to retrieve memory usage and stack traces.
           pid_list[single_pid.split()[0]] = []
           pid_list[single_pid.split()[0]].append(single_pid.split()[1])
     else:
-      command = ['ps', str(self.arguments.track), '-e', '-o', 'pid,rss,user,comm']
+      command = ['ps', str(self.arguments.track[-1]), '-e', '-o', 'pid,rss,user,comm']
       tmp_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       all_pids = tmp_proc.communicate()[0].split('\n')
       for single_pid in all_pids:
-        if single_pid.find(self.arguments.track) > -1:
+        if single_pid.find(self.arguments.track[-1]) > -1:
           pid_list[single_pid.split()[0]] = []
           pid_list[single_pid.split()[0]].append(single_pid.split()[1])
     if pid_list == {}:
@@ -132,7 +216,7 @@ class Report:
     self.args = arguments
     self.changes = False
     self.sampler = SamplerUtils(self.args)
-    self.writer = WriteLog(self.args.outfile)
+    self.writer = WriteLog(self.args.outfile[-1])
     if self.args.node_list == None:
       self.args.node_list = [ self.args.my_hostname ]
     self.current_results = { 'HOST' : {},
@@ -202,16 +286,18 @@ class Report:
              self.last_results['REPORTING_HOST'],
              self.last_results['HOST'][self.current_results['REPORTING_HOST']]['TOTAL']
              ]
-    self.writer.write_file(str(data) + '\n')
+    self.writer.write_file(data)
 
 class ReadLog:
   """Read a memory_logger log file, and display the results to stdout in an easy to read form.
 """
   def __init__(self, arguments):
     self.arguments = arguments
-    history_file = open(self.arguments.read, 'r')
-    self.memory_list = history_file.read().split('\n')
-    self.memory_list.pop()
+    history_file = open(self.arguments.read[-1], 'r')
+    reader = csv.reader(history_file, delimiter=',', quotechar='|', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
+    self.memory_list = []
+    for row in reader:
+      self.memory_list.append(row)
     history_file.close()
     self.sorted_list = []
     self.mem_list = []
@@ -229,12 +315,15 @@ class ReadLog:
     last_memory = 0.0
     (terminal_width, terminal_height) = self.getTerminalSize()
     for timestamp in self.memory_list:
-      to = GetTime(eval(timestamp)[0])
-      log = eval(timestamp)[2].split('\n')
-      pstack = eval(timestamp)[3].split('\n')
-      node = eval(timestamp)[4].split('\n')
-      self.mem_list.append(eval(timestamp)[1])
-      self.sorted_list.append([str(to.day) + ' ' + str(to.monthname) + ' ' + str(to.hour) + ':' + str(to.minute) + ':' + '{:02.0f}'.format(to.second) + '.' + '{:06.0f}'.format(to.microsecond), eval(timestamp)[1], log, pstack, node[0], eval(timestamp)[5]])
+      to = GetTime(float(timestamp[0]))
+      total_memory = int(timestamp[1])
+      log = timestamp[2].split('\n')
+      pstack = timestamp[3].split('\n')
+      node_name = str(timestamp[4])
+      node_memory = int(timestamp[5])
+
+      self.mem_list.append(total_memory)
+      self.sorted_list.append([str(to.day) + ' ' + str(to.monthname) + ' ' + str(to.hour) + ':' + str(to.minute) + ':' + '{:02.0f}'.format(to.second) + '.' + '{:06.0f}'.format(to.microsecond), total_memory, log, pstack, node_name, node_memory])
 
     largest_memory = decimal.Decimal(max(self.mem_list))
     if len(set([x[4] for x in self.sorted_list])) > 1:
@@ -357,7 +446,7 @@ class GetTime:
       self.posix_time = datetime.datetime.now()
     else:
       self.posix_time = datetime.datetime.fromtimestamp(posix_time)
-    self.now = float(datetime.datetime.now().strftime('%s.%f'))
+    self.now = str(datetime.datetime.now().strftime('%s.%f'))
     self.microsecond = self.posix_time.microsecond
     self.second = self.posix_time.second
     self.minute = self.posix_time.strftime('%M')
@@ -418,7 +507,7 @@ class ClientParser:
     # Right now, we only support the request for arguments
     for request in message['REQ_DATA'].keys():
       for request_type in dir(self.r.args):
-        if request == request_type:
+        if str(request) == str(request_type):
           message['REQ_DATA'][request] = getattr(self.r.args, request)
     message['REQ'] = False
     client[0].sendall(self._pickle_message(message))
@@ -435,7 +524,7 @@ ServerAgent also creates the reporter instance and launches all reporter agents.
     (self.host, self.port) = self.server.getsockname()
     self.report = Report(self.args)
     self.cp = ClientParser(self.report)
-    print 'Memory Logger running on:', self.host, self.port, '\nNodes:', ', '.join(self.args.node_list), '\nSample rate (including stdout):', self.args.repeat_rate, 's\nDelaying', self.args.pbs_delay, 'seconds before agents attempt tracking\n'
+    print 'Memory Logger running on:', self.host, self.port, '\nNodes:', ', '.join(self.args.node_list), '\nSample rate (including stdout):', self.args.repeat_rate[-1], 's\nDelaying', self.args.pbs_delay[-1], 'seconds before agents attempt tracking\n'
 
   def start_server(self):
     self.launch_agents()
@@ -446,36 +535,38 @@ ServerAgent also creates the reporter instance and launches all reporter agents.
     except KeyboardInterrupt:
       print 'Canceled by user'
       sys.exit(0)
-    if self.args.pbs_delay < 1:
+    if self.args.pbs_delay[-1] < 1:
       print 'Application terminated. If termination was unexpected, try increasing the --pbs-delay value.'
       sys.exit(0)
-    print 'Application terminated. Wrote to file:', self.args.outfile
+    print 'Application terminated. Wrote to file:', self.args.outfile[-1]
 
   def launch_agents(self):
-    self.args.process = subprocess.Popen(''.join(self.args.run).split(), stdout=self.report.sampler.log, stderr=self.report.sampler.log)
     self.args.agent_run = self.report.sampler._discover_name()
+    if self.args.agent_run == None:
+      print 'No binary detected. Exiting...'
+      sys.exit(1)
+    else:
+      print '\nInstructing agents to track:', self.args.agent_run
+
+    self.args.process = subprocess.Popen(self.args.run[-1].split(), stdout=self.report.sampler.log, stderr=self.report.sampler.log)
     for node in self.args.node_list:
       if self.args.pstack:
         command = [  'ssh',
                      node,
                      'bash --login -c "source /etc/profile && ' \
-                     + 'sleep ' + str(self.args.pbs_delay) + ' && ' \
+                     + 'sleep ' + str(self.args.pbs_delay[-1]) + ' && ' \
                      + os.path.abspath(__file__) \
                      + ' --pstack --call-back-host ' \
-                     + self.host \
-                     + ' --call-back-port ' \
-                     + str(self.port) \
+                     + self.host + ' ' + str(self.port) \
                      + '"']
       else:
         command = [  'ssh',
                      node,
                      'bash --login -c "source /etc/profile && ' \
-                     + 'sleep ' + str(self.args.pbs_delay) + ' && ' \
+                     + 'sleep ' + str(self.args.pbs_delay[-1]) + ' && ' \
                      + os.path.abspath(__file__) \
                      + ' --call-back-host ' \
-                     + self.host \
-                     + ' --call-back-port ' \
-                     + str(self.port) \
+                     + self.host + ' ' + str(self.port) \
                      + '"']
       subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -553,12 +644,14 @@ def trackMemory(args):
     args.node_list = node_list
     ServerAgent(args).start_server()
   elif args.call_back_host:
-    agent = ClientConnection((args.call_back_host, int(args.call_back_port)))
+    agent = ClientConnection((args.call_back_host[0], int(args.call_back_host[1])))
     args.node_list = None
     report = Report(args)
     for initialize_item in report.initialize.keys():
       report.current_results[initialize_item] = report.initialize[initialize_item]
+    print report.current_results
     report.current_results = agent.receive(report.current_results)
+    print report.current_results
     agent.close()
     args.repeat_rate = report.current_results['REQ_DATA']['repeat_rate']
     args.pstack = report.current_results['REQ_DATA']['pstack']
@@ -566,27 +659,27 @@ def trackMemory(args):
     while report.current_results['RUN']:
       report.getReport()
       if report.changes:
-        agent = ClientConnection((args.call_back_host, int(args.call_back_port)))
+        agent = ClientConnection((args.call_back_host[0], int(args.call_back_host[1])))
         agent.send(report.current_results)
         agent.close()
-      time.sleep(args.repeat_rate)
+      time.sleep(args.repeat_rate[-1])
   else:
     args.node_list = None
     report = Report(args)
-    args.process = subprocess.Popen(''.join(args.run).split(), stdout=report.sampler.log, stderr=report.sampler.log)
+    args.process = subprocess.Popen(args.run[-1].split(), stdout=report.sampler.log, stderr=report.sampler.log)
     time.sleep(.5)
     try:
       while report.current_results['RUN']:
         report.getReport()
         if report.changes:
           report.writeResults()
-        time.sleep(args.repeat_rate)
+        time.sleep(args.repeat_rate[-1])
     except KeyboardInterrupt:
       print 'Canceled by user'
       sys.exit(0)
     except:
       raise
-    print 'Application terminated. Wrote to file:', args.outfile
+    print 'Application terminated. Wrote to file:', args.outfile[-1]
 
 def which(program):
   def is_exe(fpath):
@@ -612,12 +705,14 @@ def _verifyARGs(args):
     option_count += 1
   if args.export:
     option_count += 1
+  if args.plot:
+    option_count += 1
   if option_count != 1 and args.pbs != True:
     if args.call_back_host == None:
-      print 'You must use one of the following: track, read, or run'
+      print 'You must use one of the following: track, read, run, or plot'
       sys.exit(1)
   if args.pstack:
-    if which('pstack') == None and args.read == None:
+    if which('pstack') == None and args.read == None and args.plot == None:
       print '\npstack binary not found. Add it to your PATH and try again.'
       sys.exit(1)
   if args.run:
@@ -632,20 +727,34 @@ def _verifyARGs(args):
   return args
 
 def parseArguments(args=None):
-  parser = argparse.ArgumentParser(description='Track memory usage')
-  parser.add_argument('--run', nargs="+", help='Run specified command. You must encapsulate the command in quotes\n ')
-  parser.add_argument('--track', nargs="?", type=int, help='Track a single specific PID already running\n ')
-  parser.add_argument('--read', nargs="?", help='Read a specified memory log file\n ')
-  parser.add_argument('--export', nargs="?", help='Export specified log file to a comma delimited format\n ')
-  parser.add_argument('--outfile', nargs="?", default=os.getcwd() + '/usage.log' ,help='Save log to specified file. (Defaults to usage.log)\n ')
-  parser.add_argument('--repeat-rate', nargs="?", type=float, default=0.25, help='Indicate the sleep delay in float seconds to check memory usage (default 0.25 seconds)\n ')
-  parser.add_argument('--stdout', dest='stdout', action='store_const', const=True, default=False, help='Display stdout information in output file\n ')
-  parser.add_argument('--pstack', dest='pstack', action='store_const', const=True, default=False, help='Save / Display pstack information in output file\n ')
-  parser.add_argument('--separate', dest='separate', action='store_const', const=True, default=False, help='Display individual node memory usage\n ')
-  parser.add_argument('--pbs', dest='pbs', action='store_const', const=True, default=False, help='Instruct memory logger to tally all launches on all nodes\n ')
-  parser.add_argument('--pbs-delay', dest='pbs_delay', nargs="?", type=float, default=1.0, help='For larger jobs, you may need to increase the delay as to when the memory_logger will launch tracking agents\n ')
-  parser.add_argument('--call-back-host', nargs="?", help='Host to connect back to when using PBS (automatically set)\n ')
-  parser.add_argument('--call-back-port', nargs="?", help='Port to connect back to when using PBS (automatically set)\n ')
+  parser = argparse.ArgumentParser(description='Track and Display memory usage')
+
+  rungroup = parser.add_argument_group('Tracking', 'The following options control how the memory logger tracks memory usage')
+  rungroup.add_argument('--run', nargs=1, metavar='command', help='Run specified command. You must encapsulate the command in quotes\n ')
+  rungroup.add_argument('--pbs', dest='pbs', metavar='', action='store_const', const=True, default=False, help='Instruct memory logger to tally all launches on all nodes\n ')
+  rungroup.add_argument('--pbs-delay', dest='pbs_delay', metavar='float', nargs=1, type=float, default=[1.0], help='For larger jobs, you may need to increase the delay as to when the memory_logger will launch the tracking agents\n ')
+  rungroup.add_argument('--track', nargs=1, metavar='int', type=int, help='Track a single specific PID already running\n ')
+  rungroup.add_argument('--repeat-rate', nargs=1,  metavar='float', type=float, default=[0.25], help='Indicate the sleep delay in float seconds to check memory usage (default 0.25 seconds)\n ')
+  rungroup.add_argument('--outfile', nargs=1, metavar='file', default=[os.getcwd() + '/usage.log'], help='Save log to specified file. (Defaults to usage.log)\n ')
+
+  readgroup = parser.add_argument_group('Read / Display', 'Options to manipulate or read log files created by the memory_logger')
+  readgroup.add_argument('--read', nargs=1, metavar='file', help='Read a specified memory log file to stdout\n ')
+  readgroup.add_argument('--plot', nargs="+", metavar='file', help='Display a graphical representation of memory usage (Requires Matplotlib). Specify a single file or a list of files to plot\n ')
+  readgroup.add_argument('--separate', dest='separate', action='store_const', const=True, default=False, help='Display individual node memory usage\n ')
+  readgroup.add_argument('--export', nargs=1, metavar='file', help='Export specified log file to a comma delimited format\n ')
+
+  commongroup = parser.add_argument_group('Common Options', 'The following options can be used when tracking or displaying the results')
+  commongroup.add_argument('--pstack', dest='pstack', action='store_const', const=True, default=False, help='Save or Display stack trace information\n ')
+  commongroup.add_argument('--stdout', dest='stdout', action='store_const', const=True, default=False, help='Display stdout information (memory logger always saves stdout)\n ')
+
+  plotgroup = parser.add_argument_group('Plot Options', 'Additional options when using --plot')
+  plotgroup.add_argument('--rotate-text', nargs=1, metavar='int', type=int, default=[90], help='Rotate stdout/pstack text by this ammount (default 90)\n ')
+  plotgroup.add_argument('--move-text', nargs=2, metavar='int', default=['0', '0'], help='Move text X and Y by this ammount (default 0 0)\n ')
+  plotgroup.add_argument('--trim-text', nargs=1, metavar='int', type=int, default=[15], help='Display this many characters in stdout/pstack (default 15)\n ')
+
+  internalgroup = parser.add_argument_group('Internal PBS Options', 'The following options are used to control how memory_logger as a tracking agent connects back to the caller. These are set automatically when using PBS and can be ignored.')
+  internalgroup.add_argument('--call-back-host', nargs=2, help='Server hostname and port that launched memory_logger\n ')
+
   return _verifyARGs(parser.parse_args(args))
 
 if __name__ == '__main__':
@@ -655,5 +764,8 @@ if __name__ == '__main__':
     sys.exit(0)
   if args.export:
     ExportMemoryUsage(args)
+    sys.exit(0)
+  if args.plot:
+    MemoryPlotter(args)
     sys.exit(0)
   trackMemory(args)
