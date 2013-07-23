@@ -83,7 +83,7 @@ GapValueAux::computeValue()
 
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[current_node->id()];
 
-  Real gap_value(0.0);
+  Real gap_value = 0.0;
 
   if (pinfo)
   {
