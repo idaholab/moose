@@ -45,16 +45,29 @@ class MemoryPlotter:
       for records in value_list:
         tmp_memory.append(decimal.Decimal(records[1]) / 1000000)
         tmp_time.append(str(decimal.Decimal(records[0]) - tmp_zero))
+
+      # Do the actual plotting:
+      tmp_plot, = plot_list[-1].plot(tmp_time, tmp_memory)
+      plot_list[-1].grid(True)
+      plot_list[-1].set_ylabel('Memory Usage in GB')
+      plot_list[-1].set_xlabel('Time in Seconds')
+
+      # Do the annotations, if any
+      tmp_memory = []
+      tmp_time = []
+      for records in value_list:
+        tmp_memory.append(decimal.Decimal(records[1]) / 1000000)
+        tmp_time.append(str(decimal.Decimal(records[0]) - tmp_zero))
         if len(records[2]) > 0 and self.arguments.stdout:
           plot_list[-1].annotate(str(records[2].split('\n')[0][:self.arguments.trim_text[-1]]),
                                  xy=(tmp_time[-1], tmp_memory[-1]),
                                  rotation=self.arguments.rotate_text[-1],
                                  xytext=(decimal.Decimal(tmp_time[-1]) + decimal.Decimal(self.arguments.move_text[0]), decimal.Decimal(tmp_memory[-1]) + decimal.Decimal(self.arguments.move_text[1])),
-                                 textcoords='data',
+                                 color=tmp_plot.get_color(),
                                  horizontalalignment='center', verticalalignment='bottom',
                                  arrowprops=dict(arrowstyle="->",
                                                  connectionstyle="arc3,rad=0.5",
-                                                 facecolor='black'
+                                                 color=tmp_plot.get_color()
                                                  )
                                  )
         if len(records[3]) > 0 and self.arguments.pstack:
@@ -66,15 +79,10 @@ class MemoryPlotter:
                                  horizontalalignment='center', verticalalignment='bottom',
                                  arrowprops=dict(arrowstyle="->",
                                                  connectionstyle="arc3,rad=0.5" ,
-                                                 facecolor='black'
+                                                 color=tmp_plot.get_color()
                                                  )
                                  )
 
-      # Do the actual plotting:
-      plot_list[-1].plot(tmp_time, tmp_memory)
-      plot_list[-1].grid(True)
-      plot_list[-1].set_ylabel('Memory Usage in GB')
-      plot_list[-1].set_xlabel('Time in Seconds')
 
     # 1 = top right
     # 2 = top left
