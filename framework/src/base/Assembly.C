@@ -109,6 +109,8 @@ Assembly::~Assembly()
 
   delete _current_side_elem;
 
+  _current_physical_points.release();
+
   _coord.release();
 }
 
