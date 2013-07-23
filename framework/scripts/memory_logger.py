@@ -77,10 +77,8 @@ class MemoryPlotter:
         self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, self.stdout_msg, tmp_plot.get_color())
 
       if self.arguments.pstack:
-        self.pstack_line, = plot_list[-1].plot(tmp_pstack_x, tmp_pstack_y, 'o', picker=5, color=tmp_plot.get_color())
+        self.pstack_line, = plot_list[-1].plot(tmp_pstack_x, tmp_pstack_y, 'o', picker=10, color=tmp_plot.get_color())
         #self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, self.stdout_msg, tmp_plot.get_color())
-
-
 
     # Make points clickable
     fig.canvas.mpl_connect('pick_event', self)
@@ -90,6 +88,16 @@ class MemoryPlotter:
     # 3 = bottom left
     # 4 = bottom right
     plt.legend([label[0] for label in plot_dictionary.iteritems()], loc = 2)
+
+    # Clickable Annotations
+    for fig in plot_list:
+      if self.arguments.stdout:
+        self.stdout_line, = fig.plot(tmp_stdout_x, tmp_stdout_y, 'x', picker=10, color=tmp_plot.get_color())
+        self.buildAnnotation(fig, tmp_stdout_x, tmp_stdout_y, self.stdout_msg, tmp_plot.get_color())
+
+      if self.arguments.pstack:
+        self.pstack_line, = fig.plot(tmp_pstack_x, tmp_pstack_y, 'o', picker=5, color=tmp_plot.get_color())
+
     plt.show()
 
 
@@ -97,12 +105,12 @@ class MemoryPlotter:
     line = event.artist
     x,y = line.get_data()
     ind = event.ind
-    if event.artist == self.stdout_line:
+    if self.arguments.stdout and event.artist == self.stdout_line:
       print " "
       print "stdout -----------------------------------------------------\n"
       print self.stdout_msg[ind]
 
-    if event.artist == self.pstack_line:
+    if self.arguments.pstack and event.artist == self.pstack_line:
       print " "
       print "pstack -----------------------------------------------------\n"
       print self.pstack_msg[ind]
