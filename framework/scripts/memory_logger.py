@@ -53,7 +53,7 @@ class MemoryPlotter:
                                  textcoords='data',
                                  horizontalalignment='center', verticalalignment='bottom',
                                  arrowprops=dict(arrowstyle="->",
-                                                 connectionstyle="arc3" ,
+                                                 connectionstyle="arc3,rad=0.5",
                                                  facecolor='black'
                                                  )
                                  )
@@ -65,7 +65,7 @@ class MemoryPlotter:
                                  textcoords='data',
                                  horizontalalignment='center', verticalalignment='bottom',
                                  arrowprops=dict(arrowstyle="->",
-                                                 connectionstyle="arc3" ,
+                                                 connectionstyle="arc3,rad=0.5" ,
                                                  facecolor='black'
                                                  )
                                  )
@@ -748,8 +748,8 @@ def parseArguments(args=None):
   commongroup.add_argument('--stdout', dest='stdout', action='store_const', const=True, default=False, help='Display stdout information (memory logger always saves stdout)\n ')
 
   plotgroup = parser.add_argument_group('Plot Options', 'Additional options when using --plot')
-  plotgroup.add_argument('--rotate-text', nargs=1, metavar='int', type=int, default=[90], help='Rotate stdout/pstack text by this ammount (default 90)\n ')
-  plotgroup.add_argument('--move-text', nargs=2, metavar='int', default=['0', '0'], help='Move text X and Y by this ammount (default 0 0)\n ')
+  plotgroup.add_argument('--rotate-text', nargs=1, metavar='int', type=int, default=[30], help='Rotate stdout/pstack text by this ammount (default 30)\n ')
+  plotgroup.add_argument('--move-text', nargs=2, metavar='int', default=['3', '3'], help='Move text X and Y by this ammount (default 3 3)\n ')
   plotgroup.add_argument('--trim-text', nargs=1, metavar='int', type=int, default=[15], help='Display this many characters in stdout/pstack (default 15)\n ')
 
   internalgroup = parser.add_argument_group('Internal PBS Options', 'The following options are used to control how memory_logger as a tracking agent connects back to the caller. These are set automatically when using PBS and can be ignored.')
