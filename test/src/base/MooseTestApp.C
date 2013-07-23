@@ -44,6 +44,7 @@
 #include "PolyConstantAux.h"
 #include "MMSConstantAux.h"
 #include "MultipleUpdateAux.h"
+#include "MultipleUpdateElemAux.h"
 #include "PeriodicDistanceAux.h"
 #include "MatPropUserObjectAux.h"
 #include "SumNodalValuesAux.h"
@@ -197,6 +198,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(PolyConstantAux);
   registerAux(MMSConstantAux);
   registerAux(MultipleUpdateAux);
+  registerAux(MultipleUpdateElemAux);
   registerAux(PeriodicDistanceAux);
   registerAux(MatPropUserObjectAux);
   registerAux(SumNodalValuesAux);
