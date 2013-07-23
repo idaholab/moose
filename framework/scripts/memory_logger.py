@@ -36,6 +36,15 @@ class MemoryPlotter:
       plot_list.append(fig.add_subplot(111))
       tmp_memory = []
       tmp_time = []
+
+      tmp_stdout_x = []
+      tmp_stdout_y = []
+      self.stdout_msg = []
+
+      tmp_pstack_x = []
+      tmp_pstack_y = []
+      self.pstack_msg = []
+
       # Get the start time, and make this 0
       try:
         tmp_zero = decimal.Decimal(value_list[0][0])
@@ -46,43 +55,35 @@ class MemoryPlotter:
         tmp_memory.append(decimal.Decimal(records[1]) / 1000000)
         tmp_time.append(str(decimal.Decimal(records[0]) - tmp_zero))
 
+        if len(records[2]) > 0 and self.arguments.stdout:
+          tmp_stdout_x.append(tmp_time[-1])
+          tmp_stdout_y.append(tmp_memory[-1])
+          self.stdout_msg.append(records[2])
+
+        if len(records[3]) > 0 and self.arguments.pstack:
+          tmp_pstack_x.append(tmp_time[-1])
+          tmp_pstack_y.append(tmp_memory[-1])
+          self.pstack_msg.append(records[3])
+
       # Do the actual plotting:
       tmp_plot, = plot_list[-1].plot(tmp_time, tmp_memory)
       plot_list[-1].grid(True)
       plot_list[-1].set_ylabel('Memory Usage in GB')
       plot_list[-1].set_xlabel('Time in Seconds')
 
-      # Do the annotations, if any
-      tmp_memory = []
-      tmp_time = []
-      for records in value_list:
-        tmp_memory.append(decimal.Decimal(records[1]) / 1000000)
-        tmp_time.append(str(decimal.Decimal(records[0]) - tmp_zero))
-        if len(records[2]) > 0 and self.arguments.stdout:
-          plot_list[-1].annotate(str(records[2].split('\n')[0][:self.arguments.trim_text[-1]]),
-                                 xy=(tmp_time[-1], tmp_memory[-1]),
-                                 rotation=self.arguments.rotate_text[-1],
-                                 xytext=(decimal.Decimal(tmp_time[-1]) + decimal.Decimal(self.arguments.move_text[0]), decimal.Decimal(tmp_memory[-1]) + decimal.Decimal(self.arguments.move_text[1])),
-                                 color=tmp_plot.get_color(),
-                                 horizontalalignment='center', verticalalignment='bottom',
-                                 arrowprops=dict(arrowstyle="->",
-                                                 connectionstyle="arc3,rad=0.5",
-                                                 color=tmp_plot.get_color()
-                                                 )
-                                 )
-        if len(records[3]) > 0 and self.arguments.pstack:
-          plot_list[-1].annotate(str(records[3].split('\n')[0][:self.arguments.trim_text[-1]]),
-                                 xy=(tmp_time[-1], tmp_memory[-1]),
-                                 rotation=self.arguments.rotate_text[-1],
-                                 xytext=(decimal.Decimal(tmp_time[-1]) + decimal.Decimal(self.arguments.move_text[0]), decimal.Decimal(tmp_memory[-1]) + decimal.Decimal(self.arguments.move_text[1])),
-                                 textcoords='data',
-                                 horizontalalignment='center', verticalalignment='bottom',
-                                 arrowprops=dict(arrowstyle="->",
-                                                 connectionstyle="arc3,rad=0.5" ,
-                                                 color=tmp_plot.get_color()
-                                                 )
-                                 )
+      # Plot annotations
+      if self.arguments.stdout:
+        self.stdout_line, = plot_list[-1].plot(tmp_stdout_x, tmp_stdout_y, 'x', picker=10, color=tmp_plot.get_color())
+        self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, self.stdout_msg, tmp_plot.get_color())
 
+      if self.arguments.pstack:
+        self.pstack_line, = plot_list[-1].plot(tmp_pstack_x, tmp_pstack_y, 'o', picker=5, color=tmp_plot.get_color())
+        #self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, self.stdout_msg, tmp_plot.get_color())
+
+
+
+    # Make points clickable
+    fig.canvas.mpl_connect('pick_event', self)
 
     # 1 = top right
     # 2 = top left
@@ -90,6 +91,36 @@ class MemoryPlotter:
     # 4 = bottom right
     plt.legend([label[0] for label in plot_dictionary.iteritems()], loc = 2)
     plt.show()
+
+
+  def __call__(self, event):
+    line = event.artist
+    x,y = line.get_data()
+    ind = event.ind
+    if event.artist == self.stdout_line:
+      print " "
+      print "stdout -----------------------------------------------------\n"
+      print self.stdout_msg[ind]
+
+    if event.artist == self.pstack_line:
+      print " "
+      print "pstack -----------------------------------------------------\n"
+      print self.pstack_msg[ind]
+
+
+  def buildAnnotation(self,fig,x,y,msg,c):
+    for i in range(len(x)):
+      fig.annotate(str(msg[i].split('\n')[0][:self.arguments.trim_text[-1]]),
+                   xy=(x[i], y[i]),
+                   rotation=self.arguments.rotate_text[-1],
+                   xytext=(decimal.Decimal(x[i]) + decimal.Decimal(self.arguments.move_text[0]), decimal.Decimal(y[i]) + decimal.Decimal(self.arguments.move_text[1])),
+                   color=c, horizontalalignment='center', verticalalignment='bottom',
+                   arrowprops=dict(arrowstyle="->",
+                                   connectionstyle="arc3,rad=0.5",
+                                   color=c
+                                 )
+                 )
+
 
 class ExportMemoryUsage:
   """Converts a log file to a comma delimited format (for Matlab)
