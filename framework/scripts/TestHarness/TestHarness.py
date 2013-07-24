@@ -27,7 +27,6 @@ class TestHarness:
     self.moose_dir = os.path.abspath(moose_dir) + '/'
     self.code = '2d2d6769726c2d6d6f6465'
     self.processingPBS = False
-    self.MAX_VALGRIND_FAILS = 5
     # Assume libmesh is a peer directory to MOOSE if not defined
     if os.environ.has_key("LIBMESH_DIR"):
       self.libmesh_dir = os.environ['LIBMESH_DIR']
@@ -86,7 +85,7 @@ class TestHarness:
 
                 # When running in valgrind mode, we end up with a ton of output for each failed
                 # test.  Therefore, we limit the number of fails...
-                if self.options.enable_valgrind and self.num_failed > self.MAX_VALGRIND_FAILS:
+                if self.options.enable_valgrind and self.num_failed > self.options.valgrind_max_fails:
                   (should_run, reason) = (False, 'Max Fails Exceeded')
                 else:
                   (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
@@ -624,6 +623,7 @@ class TestHarness:
     parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
     parser.add_argument('-d', action='store_true', dest='debug_harness', help='Turn on Test Harness debugging')
     parser.add_argument('--valgrind', action='store_true', dest='enable_valgrind', help='Enable Valgrind')
+    parser.add_argument('--valgrind-max-fails', nargs=1, type=int, dest='valgrind_max_fails', default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
     parser.add_argument('--pbs', nargs='?', metavar='batch_file', dest='pbs', const='generate', help='Enable launching tests via PBS. If no batch file is specified one will be created for you')
     parser.add_argument('--pbs-cleanup', nargs=1, metavar='batch_file', help='Clean up the directories/files created by PBS. You must supply the same batch_file used to launch PBS.')
     parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
