@@ -3472,7 +3472,6 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
                                      const Real xnorm,
                                      const Real snorm,
                                      const Real fnorm,
-                                     Real &ttol,
                                      const Real rtol,
                                      const Real stol,
                                      const Real abstol,
@@ -3506,11 +3505,6 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
     }
   }
 
-  if (!it)
-  {
-    // set parameter for default relative tolerance convergence test
-    ttol = ref_resid*rtol;
-  }
   if (fnorm != fnorm)
   {
     oss << "Failed to converge, function norm is NaN\n";

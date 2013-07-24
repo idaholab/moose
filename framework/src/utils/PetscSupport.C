@@ -47,7 +47,6 @@
 #include <private/snesimpl.h>
 #else
 // PETSc 3.3.0+
-#include <petsc-private/snesimpl.h>
 #include <petscdm.h>
 #endif
 
@@ -197,7 +196,6 @@ PetscErrorCode petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, 
                                                                                    xnorm,
                                                                                    snorm,
                                                                                    fnorm,
-                                                                                   snes->ttol, // We still need <petsc-private/snesimpl.h> for this...
                                                                                    rtol,
                                                                                    stol,
                                                                                    atol,

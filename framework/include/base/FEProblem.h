@@ -97,7 +97,6 @@ public:
    * @param xnorm          Norm of the solution vector
    * @param snorm          Norm of the change in the solution vector
    * @param fnorm          Norm of the residual vector
-   * @param ttol           Residual at relative convergence target
    * @param rtol           Relative residual convergence tolerance
    * @param stol           Solution change convergence tolerance
    * @param abstol         Absolute residual convergence tolerance
@@ -111,7 +110,6 @@ public:
                                                                     const Real xnorm,
                                                                     const Real snorm,
                                                                     const Real fnorm,
-                                                                    Real &ttol,
                                                                     const Real rtol,
                                                                     const Real stol,
                                                                     const Real abstol,
