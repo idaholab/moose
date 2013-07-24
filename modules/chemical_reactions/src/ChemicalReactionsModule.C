@@ -22,6 +22,8 @@
 #include "AddCoupledSolidKinSpeciesKernelsAction.h"
 #include "AddCoupledSolidKinSpeciesAuxKernelsAction.h"
 
+#include "ChemicalOutFlowBC.h"
+
 void
 Elk::ChemicalReactions::registerObjects(Factory & factory)
 {
@@ -36,6 +38,8 @@ Elk::ChemicalReactions::registerObjects(Factory & factory)
   registerAux(AqueousEquilibriumRxnAux);
   registerAux(KineticDisPreConcAux);
   registerAux(KineticDisPreRateAux);
+    
+  registerBoundaryCondition(ChemicalOutFlowBC);
 }
 
 void
