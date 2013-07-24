@@ -85,7 +85,6 @@ public:
                                                                     const Real xnorm,
                                                                     const Real snorm,
                                                                     const Real fnorm,
-                                                                    Real &ttol,
                                                                     const Real rtol,
                                                                     const Real stol,
                                                                     const Real abstol,
