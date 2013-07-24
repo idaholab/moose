@@ -47,7 +47,6 @@
 #include <private/snesimpl.h>
 #else
 // PETSc 3.3.0+
-#include <petsc-private/kspimpl.h>
 #include <petsc-private/snesimpl.h>
 #include <petscdm.h>
 #endif
@@ -125,8 +124,12 @@ PetscErrorCode  petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedRe
   // to default PETSc error handling behavior.
   PetscPopErrorHandler();
 
-  // If we hit max its then we consider that converged
-  if (n >= ksp->max_it) *reason = KSP_CONVERGED_ITS;
+  // If we hit max its, then we consider that converged (rather than
+  // KSP_DIVERGED_ITS).  Note: ksp->max_it is a private parameter of
+  // KSP, so using it would require us to include the
+  // petsc-private/kspimpl.h header file, which we'd rather avoid.
+  if (*reason == KSP_DIVERGED_ITS) // (n >= ksp->max_it)
+    *reason = KSP_CONVERGED_ITS;
 
   if(*reason == KSP_CONVERGED_ITS || *reason == KSP_CONVERGED_RTOL)
     system._current_l_its.push_back(n);
@@ -143,27 +146,48 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
   FEProblem & problem = *static_cast<FEProblem *>(dummy);
   NonlinearSystem & system = problem.getNonlinearSystem();
 
-#if PETSC_VERSION_LESS_THAN(3,3,0)
-  PetscInt stol = snes->xtol;
-#else
-  PetscInt stol = snes->stol;
-#endif
+  // Let's be nice and always check PETSc error codes.
+  PetscErrorCode ierr = 0;
+
+  // Temporary variables to store SNES tolerances.  Usual C-style would be to declare
+  // but not initialize these... but it bothers me to leave anything uninitialized.
+  PetscReal atol = 0.; // absolute convergence tolerance
+  PetscReal rtol = 0.; // relative convergence tolerance
+  PetscReal stol = 0.; // convergence (step) tolerance in terms of the norm of the change in the solution between steps
+  PetscInt maxit = 0;  // maximum number of iterations
+  PetscInt maxf = 0;   // maximum number of function evaluations
+
+  // Ask the SNES object about its tolerances.
+  ierr = SNESGetTolerances(snes,
+                           &atol,
+                           &rtol,
+                           &stol,
+                           &maxit,
+                           &maxf);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+
+  // Get current number of function evaluations done by SNES.
+  PetscInt nfuncs = 0;
+  ierr = SNESGetNumberFunctionEvals(snes, &nfuncs);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+
+  // Error message that will be set by the FEProblem.
   std::string msg;
 
   const Real ref_resid = system._initial_residual;
-  const Real div_threshold = system._initial_residual*(1.0/snes->rtol);
+  const Real div_threshold = system._initial_residual*(1.0/rtol);
 
   MooseNonlinearConvergenceReason moose_reason = problem.checkNonlinearConvergence(msg,
                                                                                    it,
                                                                                    xnorm,
                                                                                    snorm,
                                                                                    fnorm,
-                                                                                   snes->ttol,
-                                                                                   snes->rtol,
+                                                                                   snes->ttol, // We still need <petsc-private/snesimpl.h> for this...
+                                                                                   rtol,
                                                                                    stol,
-                                                                                   snes->abstol,
-                                                                                   snes->nfuncs,
-                                                                                   snes->max_funcs,
+                                                                                   atol,
+                                                                                   nfuncs,
+                                                                                   maxf,
                                                                                    ref_resid,
                                                                                    div_threshold);
 
