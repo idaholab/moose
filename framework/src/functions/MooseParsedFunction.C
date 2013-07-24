@@ -84,6 +84,9 @@ void MooseParsedFunction::updatePostprocessorValues()
 void
 MooseParsedFunction::initialSetup()
 {
+  if(_initialized)
+    return;
+
   // Loop through all the input values supplied by the users.
   for (unsigned int i=0; i < _input_vals.size(); ++i)
   {

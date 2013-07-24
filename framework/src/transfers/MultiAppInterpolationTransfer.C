@@ -245,6 +245,8 @@ MultiAppInterpolationTransfer::execute()
         }
       }
 
+      delete idi;
+
       break;
     }
     case FROM_MULTIAPP:
@@ -430,6 +432,8 @@ MultiAppInterpolationTransfer::execute()
 
       to_solution.close();
       to_sys.update();
+
+      delete idi;
 
       break;
     }

@@ -53,6 +53,12 @@ Adaptivity::Adaptivity(FEProblem & subproblem) :
 
 Adaptivity::~Adaptivity()
 {
+  std::map<std::string, ErrorVector *>::iterator it = _indicator_field_to_error_vector.begin();
+  std::map<std::string, ErrorVector *>::iterator end = _indicator_field_to_error_vector.end();
+
+  for(; it != end; ++it)
+    delete it->second;
+
   delete _mesh_refinement;
   delete _error;
   delete _error_estimator;

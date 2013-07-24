@@ -25,7 +25,7 @@ InputParameters validParams<DebugResidualAux>()
 
 DebugResidualAux::DebugResidualAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _debug_var(_nl_sys.getVariable(_tid, getParam<std::string>("debug_variable"))),
+    _debug_var(_nl_sys.getVariable(_tid, getParam<NonlinearVariableName>("debug_variable"))),
     _residual_copy(_nl_sys.residualGhosted())
 {
   mooseAssert(_nodal == true, "Cannot use DebugResidualAux on elemental variables");

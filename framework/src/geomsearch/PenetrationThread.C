@@ -1658,6 +1658,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationLocator::Penetration
                           std::inserter(common_nodes, common_nodes.end()));
     if (common_nodes.size() != nodes_that_must_be_on_side.size())
     {
+      delete side;
       break;
     }
 
@@ -1669,6 +1670,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationLocator::Penetration
     {
       if (!isFaceReasonableCandidate(elem, side, fe, slave_node, _tangential_tolerance))
       {
+        delete side;
         break;
       }
     }

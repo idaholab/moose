@@ -63,7 +63,7 @@ class NodeFaceConstraint :
 {
 public:
   NodeFaceConstraint(const std::string & name, InputParameters parameters);
-  virtual ~NodeFaceConstraint(){}
+  virtual ~NodeFaceConstraint();
 
   /**
    * Compute the value the slave node should have at the beginning of a timestep.

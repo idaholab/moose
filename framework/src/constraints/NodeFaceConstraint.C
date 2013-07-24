@@ -107,6 +107,13 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   // will always only have one entry that is 1
   _test_slave[0].push_back(1);
 }
+
+NodeFaceConstraint::~NodeFaceConstraint()
+{
+  _phi_slave.release();
+  _test_slave.release();
+}
+
 void
 NodeFaceConstraint::computeSlaveValue(NumericVector<Number> & current_solution)
 {

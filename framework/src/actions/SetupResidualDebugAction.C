@@ -68,7 +68,7 @@ SetupResidualDebugAction::act()
 
     InputParameters params = _factory.getValidParams("DebugResidualAux");
     params.set<AuxVariableName>("variable") = aux_var_name;
-    params.set<std::string>("debug_variable") = var.name();
+    params.set<NonlinearVariableName>("debug_variable") = var.name();
     params.set<MooseEnum>("execute_on") = "residual";
     _problem->addAuxKernel("DebugResidualAux", kern_name, params);
     params.set<MooseEnum>("execute_on") = "timestep";

@@ -159,6 +159,7 @@ NonlinearSystem::~NonlinearSystem()
 {
   delete _time_integrator;
   delete _preconditioner;
+  delete _predictor;
   delete &_serialized_solution;
   delete &_residual_copy;
 }

@@ -117,6 +117,7 @@ MooseMesh::~MooseMesh()
 {
   freeBndNodes();
   freeBndElems();
+  clearQuadratureNodes();
 
   delete _active_local_elem_range;
   delete _active_node_range;
@@ -670,6 +671,14 @@ MooseMesh::getQuadratureNode(const Elem * elem, const unsigned short int side, c
 void
 MooseMesh::clearQuadratureNodes()
 {
+  { // Delete all the quadrature nodes
+    std::map<unsigned int, Node *>::iterator it = _quadrature_nodes.begin();
+    std::map<unsigned int, Node *>::iterator end = _quadrature_nodes.end();
+
+    for(; it != end; ++it)
+      delete it->second;
+  }
+
   _quadrature_nodes.clear();
   _elem_to_side_to_qp_to_quadrature_nodes.clear();
   _extra_bnd_nodes.clear();

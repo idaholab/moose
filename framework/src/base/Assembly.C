@@ -574,6 +574,8 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
   _current_neighbor_volume = 0.;
   for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
     _current_neighbor_volume += JxW[qp] * coord[qp];
+
+  coord.release();
 }
 
 void
