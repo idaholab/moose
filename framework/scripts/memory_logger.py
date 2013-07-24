@@ -32,6 +32,9 @@ class MemoryPlotter:
     plot_dictionary = self.buildPlots()
     fig = plt.figure()
     plot_list = []
+    tmp_plot = []
+    tmp_legend = []
+
     for plot_name, value_list in plot_dictionary.iteritems():
       plot_list.append(fig.add_subplot(111))
       tmp_memory = []
@@ -66,55 +69,52 @@ class MemoryPlotter:
           self.pstack_msg.append(records[3])
 
       # Do the actual plotting:
-      tmp_plot, = plot_list[-1].plot(tmp_time, tmp_memory)
+      f, = plot_list[-1].plot(tmp_time, tmp_memory)
+      tmp_plot.append(f)
+      tmp_legend.append(plot_name)
       plot_list[-1].grid(True)
       plot_list[-1].set_ylabel('Memory Usage in GB')
       plot_list[-1].set_xlabel('Time in Seconds')
 
       # Plot annotations
       if self.arguments.stdout:
-        self.stdout_line, = plot_list[-1].plot(tmp_stdout_x, tmp_stdout_y, 'x', picker=10, color=tmp_plot.get_color())
-        self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, self.stdout_msg, tmp_plot.get_color())
+        stdout_line, = plot_list[-1].plot(tmp_stdout_x, tmp_stdout_y, 'x', picker=10, color=f.get_color())
+        stdout_line.set_gid('stdout')
+        self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, self.stdout_msg, f.get_color())
 
       if self.arguments.pstack:
-        self.pstack_line, = plot_list[-1].plot(tmp_pstack_x, tmp_pstack_y, 'o', picker=10, color=tmp_plot.get_color())
-        #self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, self.stdout_msg, tmp_plot.get_color())
+        pstack_line, = plot_list[-1].plot(tmp_pstack_x, tmp_pstack_y, 'o', picker=10, color=f.get_color())
+        pstack_line.set_gid('pstack')
 
     # Make points clickable
     fig.canvas.mpl_connect('pick_event', self)
 
-    # 1 = top right
-    # 2 = top left
-    # 3 = bottom left
-    # 4 = bottom right
-    plt.legend([label[0] for label in plot_dictionary.iteritems()], loc = 2)
-
-    # Clickable Annotations
-    for fig in plot_list:
-      if self.arguments.stdout:
-        self.stdout_line, = fig.plot(tmp_stdout_x, tmp_stdout_y, 'x', picker=10, color=tmp_plot.get_color())
-        self.buildAnnotation(fig, tmp_stdout_x, tmp_stdout_y, self.stdout_msg, tmp_plot.get_color())
-
-      if self.arguments.pstack:
-        self.pstack_line, = fig.plot(tmp_pstack_x, tmp_pstack_y, 'o', picker=5, color=tmp_plot.get_color())
+    # Create legend
+    plt.legend(tmp_plot, tmp_legend, loc = 2)
 
     plt.show()
 
-
   def __call__(self, event):
+    color_codes = {'RESET':'\033[0m', 'r':'\033[31m','g':'\033[32m','c':'\033[36m','y':'\033[33m', 'b':'\033[34m', 'm':'\033[35m', 'k':'\033[0m', 'w':'\033[0m' }
     line = event.artist
-    x,y = line.get_data()
     ind = event.ind
-    if self.arguments.stdout and event.artist == self.stdout_line:
-      print " "
+    if self.arguments.stdout and line.get_gid() == 'stdout':
+      if self.arguments.no_color != False:
+        print color_codes[line.get_color()]
       print "stdout -----------------------------------------------------\n"
-      print self.stdout_msg[ind]
+      for id in ind:
+        print self.stdout_msg[id]
+      if self.arguments.no_color != False:
+        print color_codes['RESET']
 
-    if self.arguments.pstack and event.artist == self.pstack_line:
-      print " "
+    if self.arguments.pstack and line.get_gid() == 'pstack':
+      if self.arguments.no_color != False:
+        print color_codes[line.get_color()]
       print "pstack -----------------------------------------------------\n"
-      print self.pstack_msg[ind]
-
+      for id in ind:
+        print self.pstack_msg[id]
+      if self.arguments.no_color != False:
+        print color_codes['RESET']
 
   def buildAnnotation(self,fig,x,y,msg,c):
     for i in range(len(x)):
@@ -798,6 +798,7 @@ def parseArguments(args=None):
   plotgroup.add_argument('--rotate-text', nargs=1, metavar='int', type=int, default=[30], help='Rotate stdout/pstack text by this ammount (default 30)\n ')
   plotgroup.add_argument('--move-text', nargs=2, metavar='int', default=['3', '3'], help='Move text X and Y by this ammount (default 3 3)\n ')
   plotgroup.add_argument('--trim-text', nargs=1, metavar='int', type=int, default=[15], help='Display this many characters in stdout/pstack (default 15)\n ')
+  plotgroup.add_argument('--no-color', dest='no_color', metavar='', action='store_const', const=False, help='When printing output to stdout do not use color codes\n ')
 
   internalgroup = parser.add_argument_group('Internal PBS Options', 'The following options are used to control how memory_logger as a tracking agent connects back to the caller. These are set automatically when using PBS and can be ignored.')
   internalgroup.add_argument('--call-back-host', nargs=2, help='Server hostname and port that launched memory_logger\n ')
