@@ -85,40 +85,53 @@ void petscSetOptions(Problem & problem)
     PetscOptionsSetValue(petsc_options_inames[i].c_str(), petsc_options_values[i].c_str());
 }
 
-PetscErrorCode  petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedReason *reason,void *dummy)
+PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason, void * ctx)
 {
-  FEProblem & problem = *static_cast<FEProblem *>(dummy);
+  // Cast the context pointer coming from PETSc to an FEProblem& and
+  // get a reference to the System from it.
+  FEProblem & problem = *static_cast<FEProblem *>(ctx);
   NonlinearSystem & system = problem.getNonlinearSystem();
 
   *reason = KSP_CONVERGED_ITERATING;
 
-  //If it's the beginning of a new set of iterations, reset last_rnorm
-  if (!n)
+  // If it's the beginning of a new set of iterations, reset last_rnorm
+  if (n == 0)
     system._last_rnorm = 1e99;
 
-  PetscReal norm_diff = std::fabs(rnorm - system._last_rnorm);
-
-  if(norm_diff < system._l_abs_step_tol)
+  // If the linear residual norm is less than the System's linear absolute
+  // step tolerance, we consider it to be converged and set the reason as
+  // KSP_CONVERGED_RTOL.
+  if (std::fabs(rnorm - system._last_rnorm) < system._l_abs_step_tol)
   {
     *reason = KSP_CONVERGED_RTOL;
-    return(0);
+    return 0;
   }
 
+  // Record the most recent linear residual norm in the NonlinearSystem
   system._last_rnorm = rnorm;
 
   // From here, we want the default behavior of the KSPDefaultConverged
   // test, but we don't want PETSc to die in that function with a
   // CHKERRQ call... therefore we Push/Pop a different error handler
   // and then call KSPDefaultConverged().  Finally, if we hit the
-  // max iteration count, we want to set KSP_CONVERGED_ITS.
-  PetscPushErrorHandler(PetscReturnErrorHandler,/* void* ctx= */PETSC_NULL);
+  // max iteration count, we want to set KSP_CONVERGED_ITS rather than
+  // KSP_DIVERGED_ITS.
+  PetscPushErrorHandler(PetscReturnErrorHandler, /*void* ctx=*/ PETSC_NULL);
 
+#if PETSC_VERSION_LESS_THAN(3,0,0)
+  // Prior to PETSc 3.0.0, you could call KSPDefaultConverged with a NULL context
+  // pointer, as it was unused.
+  KSPDefaultConverged(ksp, n, rnorm, reason, PETSC_NULL);
+#else
   // As of PETSc 3.0.0, you must call KSPDefaultConverged with a
   // non-NULL context pointer which must be created with
   // KSPDefaultConvergedCreate(), and destroyed with
   // KSPDefaultConvergedDestroy().
-  /*PetscErrorCode ierr = */
-  KSPDefaultConverged(ksp, n, rnorm, reason, dummy);
+  void* default_ctx = NULL;
+  KSPDefaultConvergedCreate(&default_ctx);
+  KSPDefaultConverged(ksp, n, rnorm, reason, default_ctx);
+  KSPDefaultConvergedDestroy(default_ctx);
+#endif
 
   // Pop the Error handler we pushed on the stack to go back
   // to default PETSc error handling behavior.
@@ -131,19 +144,17 @@ PetscErrorCode  petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedRe
   if (*reason == KSP_DIVERGED_ITS) // (n >= ksp->max_it)
     *reason = KSP_CONVERGED_ITS;
 
-  if(*reason == KSP_CONVERGED_ITS || *reason == KSP_CONVERGED_RTOL)
+  // If either of our convergence criteria is met, store the number of linear
+  // iterations in the System.
+  if (*reason == KSP_CONVERGED_ITS || *reason == KSP_CONVERGED_RTOL)
     system._current_l_its.push_back(n);
 
   return 0;
 }
 
-PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal snorm,PetscReal fnorm,SNESConvergedReason *reason,void * dummy)
+PetscErrorCode petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, PetscReal snorm, PetscReal fnorm, SNESConvergedReason * reason, void * ctx)
 {
-
-  // xnorm: norm of current iterate
-  // pnorm (snorm): norm of
-  // fnorm: norm of function
-  FEProblem & problem = *static_cast<FEProblem *>(dummy);
+  FEProblem & problem = *static_cast<FEProblem *>(ctx);
   NonlinearSystem & system = problem.getNonlinearSystem();
 
   // Let's be nice and always check PETSc error codes.
@@ -174,9 +185,13 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
   // Error message that will be set by the FEProblem.
   std::string msg;
 
+  // MOOSE-specific parameters
   const Real ref_resid = system._initial_residual;
   const Real div_threshold = system._initial_residual*(1.0/rtol);
 
+  // xnorm: 2-norm of current iterate
+  // snorm: 2-norm of current step
+  // fnorm: 2-norm of function at current iterate
   MooseNonlinearConvergenceReason moose_reason = problem.checkNonlinearConvergence(msg,
                                                                                    it,
                                                                                    xnorm,
@@ -192,7 +207,7 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
                                                                                    div_threshold);
 
   if (msg.length() > 0)
-    PetscInfo(snes,msg.c_str());
+    PetscInfo(snes, msg.c_str());
 
   switch (moose_reason)
   {
@@ -232,7 +247,8 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 #endif
       break;
   }
-  return (0);
+
+  return 0;
 }
 
 #if PETSC_VERSION_LESS_THAN(3,3,0)
