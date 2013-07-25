@@ -178,7 +178,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
   }
 
   NonlinearSystem & system = getNonlinearSystem();
-  MooseNonlinearConvergenceReason reason = MOOSE_ITERATING;
+  MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
   std::stringstream oss;
 
   if (fnorm != fnorm)

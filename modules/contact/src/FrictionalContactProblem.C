@@ -826,14 +826,14 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
   ++_num_nl_its_since_contact_update;
 
   if ((reason > 0) || //converged
-      (reason == MOOSE_ITERATING && //iterating and converged within factor
+      (reason == MOOSE_NONLINEAR_ITERATING && //iterating and converged within factor
        (fnorm < abstol*_contact_slip_tol_factor ||
         checkRelativeConvergence(fnorm, rtol*_contact_slip_tol_factor, ref_resid))))
   {
     std::cout<<"Slip iteration "<<_num_slip_iterations<<" ";
     if (_num_slip_iterations < _min_slip_iters)
     { //force another iteration, and do a slip update
-      reason = MOOSE_ITERATING;
+      reason = MOOSE_NONLINEAR_ITERATING;
       _do_slip_update = true;
       std::cout<<"Force slip update < min slip iterations"<<std::endl;
     }
@@ -852,7 +852,7 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
         if (_slip_residual > _target_contact_residual &&
             _slip_residual > _target_relative_contact_residual*_refResidContact)
         { //force it to keep iterating
-          reason = MOOSE_ITERATING;
+          reason = MOOSE_NONLINEAR_ITERATING;
           std::cout<<"Force slip update slip_resid > target: "<<_slip_residual<<std::endl;
         }
         else
@@ -866,7 +866,7 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
         if (_slip_residual > _target_contact_residual &&
             _slip_residual > _target_relative_contact_residual*_refResidContact)
         { //force it to keep iterating
-          reason = MOOSE_ITERATING;
+          reason = MOOSE_NONLINEAR_ITERATING;
           std::cout<<"Forcing another nonlinear iteration before slip iteration: " <<_num_nl_its_since_contact_update <<std::endl;
         }
       }
