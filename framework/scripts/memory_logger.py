@@ -820,7 +820,7 @@ def parseArguments(args=None):
 
   plotgroup = parser.add_argument_group('Plot Options', 'Additional options when using --plot')
   plotgroup.add_argument('--rotate-text', nargs=1, metavar='int', type=int, default=[30], help='Rotate stdout/pstack text by this ammount (default 30)\n ')
-  plotgroup.add_argument('--move-text', nargs=2, metavar='int', default=['0', '0'], help='Move text X and Y by this ammount (default 2 2)\n ')
+  plotgroup.add_argument('--move-text', nargs=2, metavar='int', default=['0', '0'], help='Move text X and Y by this ammount (default 0 0)\n ')
   plotgroup.add_argument('--trim-text', nargs=1, metavar='int', type=int, default=[15], help='Display this many characters in stdout/pstack (default 15)\n ')
   plotgroup.add_argument('--no-color', dest='no_color', metavar='', action='store_const', const=False, help='When printing output to stdout do not use color codes\n ')
 
