@@ -34,7 +34,32 @@ class MemoryPlotter:
     plot_list = []
     tmp_plot = []
     tmp_legend = []
+    self.stdout_msg = []
+    self.pstack_msg = []
+    self.multiples = 1
+    self.memory_label = 'Memory in Bytes'
 
+    # Try and calculate memory sizes, so we can move annotations around a bit more accurately
+    largest_memory = []
+    for plot_name, value_list in plot_dictionary.iteritems():
+      for records in value_list:
+        largest_memory.append(int(records[1]))
+    largest_memory.sort()
+    # TODO: Better way to round and determin the following? It looks stupid.
+    if largest_memory[-1] < 1000000000:
+      self.multiples = 1000000
+      self.memory_label = 'Memory in Gigabytes'
+    if largest_memory[-1] < 1000000:
+      self.multiples = 1000
+      self.memory_label = 'Memory in Megabytes'
+    if largest_memory[-1] < 10000:
+      self.multiples = 10
+      self.memory_label = 'Memory in Kilobytes'
+    if largest_memory[-1] < 1000:
+      self.multiples = 1
+      self.memory_label = 'Memory in Bytes'
+
+    # Loop through each log file
     for plot_name, value_list in plot_dictionary.iteritems():
       plot_list.append(fig.add_subplot(111))
       tmp_memory = []
@@ -42,11 +67,9 @@ class MemoryPlotter:
 
       tmp_stdout_x = []
       tmp_stdout_y = []
-      self.stdout_msg = []
 
       tmp_pstack_x = []
       tmp_pstack_y = []
-      self.pstack_msg = []
 
       # Get the start time, and make this 0
       try:
@@ -54,8 +77,10 @@ class MemoryPlotter:
       except:
         print 'Could not parse log file:', plot_name, 'is this a valid memory_logger file?'
         sys.exit(1)
+
+      # Populate the graph
       for records in value_list:
-        tmp_memory.append(decimal.Decimal(records[1]) / 1000000)
+        tmp_memory.append(decimal.Decimal(records[1]) / self.multiples)
         tmp_time.append(str(decimal.Decimal(records[0]) - tmp_zero))
 
         if len(records[2]) > 0 and self.arguments.stdout:
@@ -73,7 +98,7 @@ class MemoryPlotter:
       tmp_plot.append(f)
       tmp_legend.append(plot_name)
       plot_list[-1].grid(True)
-      plot_list[-1].set_ylabel('Memory Usage in GB')
+      plot_list[-1].set_ylabel(self.memory_label)
       plot_list[-1].set_xlabel('Time in Seconds')
 
       # Plot annotations
@@ -128,7 +153,6 @@ class MemoryPlotter:
                                    color=c
                                  )
                  )
-
 
 class ExportMemoryUsage:
   """Converts a log file to a comma delimited format (for Matlab)
@@ -796,7 +820,7 @@ def parseArguments(args=None):
 
   plotgroup = parser.add_argument_group('Plot Options', 'Additional options when using --plot')
   plotgroup.add_argument('--rotate-text', nargs=1, metavar='int', type=int, default=[30], help='Rotate stdout/pstack text by this ammount (default 30)\n ')
-  plotgroup.add_argument('--move-text', nargs=2, metavar='int', default=['3', '3'], help='Move text X and Y by this ammount (default 3 3)\n ')
+  plotgroup.add_argument('--move-text', nargs=2, metavar='int', default=['0', '0'], help='Move text X and Y by this ammount (default 2 2)\n ')
   plotgroup.add_argument('--trim-text', nargs=1, metavar='int', type=int, default=[15], help='Display this many characters in stdout/pstack (default 15)\n ')
   plotgroup.add_argument('--no-color', dest='no_color', metavar='', action='store_const', const=False, help='When printing output to stdout do not use color codes\n ')
 
