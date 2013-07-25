@@ -3482,7 +3482,7 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
 {
 
   NonlinearSystem & system = getNonlinearSystem();
-  MooseNonlinearConvergenceReason reason = MOOSE_ITERATING;
+  MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
   std::stringstream oss;
 
   if (_dbg_print_var_rnorms)
@@ -3549,6 +3549,54 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
 
   return(reason);
 }
+
+
+
+MooseLinearConvergenceReason
+FEProblem::checkLinearConvergence(std::string & /*msg*/,
+                                  const int n,
+                                  const Real rnorm,
+                                  const Real rtol,
+                                  const Real atol,
+                                  const Real dtol,
+                                  const int maxits)
+{
+  // We initialize the reason to something that basically means MOOSE
+  // has not made a decision on convergence yet.
+  MooseLinearConvergenceReason reason = MOOSE_LINEAR_ITERATING;
+
+  // Get a reference to our Nonlinear System
+  NonlinearSystem & system = getNonlinearSystem();
+
+  // If it's the beginning of a new set of iterations, reset
+  // last_rnorm, otherwise record the most recent linear residual norm
+  // in the NonlinearSystem.
+  if (n == 0)
+    system._last_rnorm = 1e99;
+  else
+    system._last_rnorm = rnorm;
+
+  // If the linear residual norm is less than the System's linear absolute
+  // step tolerance, we consider it to be converged and set the reason as
+  // MOOSE_CONVERGED_RTOL.
+  if (std::abs(rnorm - system._last_rnorm) < system._l_abs_step_tol)
+    reason = MOOSE_CONVERGED_RTOL;
+
+  // If we hit max its, then we consider that converged (rather than
+  // KSP_DIVERGED_ITS).
+  if (n >= maxits)
+    reason = MOOSE_CONVERGED_ITS;
+
+  // If either of our convergence criteria is met, store the number of linear
+  // iterations in the System.
+  if (reason == MOOSE_CONVERGED_ITS || reason == MOOSE_CONVERGED_RTOL)
+    system._current_l_its.push_back(n);
+
+  return reason;
+}
+
+
+
 
 #ifdef LIBMESH_HAVE_PETSC
 void

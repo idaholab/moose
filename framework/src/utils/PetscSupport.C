@@ -86,36 +86,16 @@ void petscSetOptions(Problem & problem)
 
 PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason, void * ctx)
 {
-  // Cast the context pointer coming from PETSc to an FEProblem& and
-  // get a reference to the System from it.
-  FEProblem & problem = *static_cast<FEProblem *>(ctx);
-  NonlinearSystem & system = problem.getNonlinearSystem();
+  // Let's be nice and always check PETSc error codes.
+  PetscErrorCode ierr = 0;
 
-  *reason = KSP_CONVERGED_ITERATING;
-
-  // If it's the beginning of a new set of iterations, reset last_rnorm
-  if (n == 0)
-    system._last_rnorm = 1e99;
-
-  // If the linear residual norm is less than the System's linear absolute
-  // step tolerance, we consider it to be converged and set the reason as
-  // KSP_CONVERGED_RTOL.
-  if (std::fabs(rnorm - system._last_rnorm) < system._l_abs_step_tol)
-  {
-    *reason = KSP_CONVERGED_RTOL;
-    return 0;
-  }
-
-  // Record the most recent linear residual norm in the NonlinearSystem
-  system._last_rnorm = rnorm;
-
-  // From here, we want the default behavior of the KSPDefaultConverged
-  // test, but we don't want PETSc to die in that function with a
-  // CHKERRQ call... therefore we Push/Pop a different error handler
-  // and then call KSPDefaultConverged().  Finally, if we hit the
-  // max iteration count, we want to set KSP_CONVERGED_ITS rather than
-  // KSP_DIVERGED_ITS.
-  PetscPushErrorHandler(PetscReturnErrorHandler, /*void* ctx=*/ PETSC_NULL);
+  // We want the default behavior of the KSPDefaultConverged test, but
+  // we don't want PETSc to die in that function with a CHKERRQ
+  // call... that is probably extremely unlikely/impossible, but just
+  // to be on the safe side, we push a different error handler before
+  // calling KSPDefaultConverged().
+  ierr = PetscPushErrorHandler(PetscReturnErrorHandler, /*void* ctx=*/ PETSC_NULL);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
 
 #if PETSC_VERSION_LESS_THAN(3,0,0)
   // Prior to PETSc 3.0.0, you could call KSPDefaultConverged with a NULL context
@@ -134,19 +114,42 @@ PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConverged
 
   // Pop the Error handler we pushed on the stack to go back
   // to default PETSc error handling behavior.
-  PetscPopErrorHandler();
+  ierr = PetscPopErrorHandler();
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
 
-  // If we hit max its, then we consider that converged (rather than
-  // KSP_DIVERGED_ITS).  Note: ksp->max_it is a private parameter of
-  // KSP, so using it would require us to include the
-  // petsc-private/kspimpl.h header file, which we'd rather avoid.
-  if (*reason == KSP_DIVERGED_ITS) // (n >= ksp->max_it)
+  // Get tolerances from the KSP object
+  PetscReal rtol = 0.;
+  PetscReal atol = 0.;
+  PetscReal dtol = 0.;
+  PetscInt maxits = 0;
+  ierr = KSPGetTolerances(ksp, &rtol, &atol, &dtol, &maxits);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+
+  // Cast the context pointer coming from PETSc to an FEProblem& and
+  // get a reference to the System from it.
+  FEProblem & problem = *static_cast<FEProblem *>(ctx);
+
+  // Now do some additional MOOSE-specific tests...
+  std::string msg;
+  MooseLinearConvergenceReason moose_reason = problem.checkLinearConvergence(msg, n, rnorm, rtol, atol, dtol, maxits);
+
+  switch (moose_reason)
+  {
+  case MOOSE_CONVERGED_RTOL:
+    *reason = KSP_CONVERGED_RTOL;
+    break;
+
+  case MOOSE_CONVERGED_ITS:
     *reason = KSP_CONVERGED_ITS;
+    break;
 
-  // If either of our convergence criteria is met, store the number of linear
-  // iterations in the System.
-  if (*reason == KSP_CONVERGED_ITS || *reason == KSP_CONVERGED_RTOL)
-    system._current_l_its.push_back(n);
+  default:
+  {
+    // If it's not either of the two specific cases we handle, just go
+    // with whatever PETSc decided in KSPDefaultConverged.
+    break;
+  }
+  }
 
   return 0;
 }
@@ -209,7 +212,7 @@ PetscErrorCode petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, 
 
   switch (moose_reason)
   {
-    case MOOSE_ITERATING:
+    case MOOSE_NONLINEAR_ITERATING:
       *reason = SNES_CONVERGED_ITERATING;
       break;
 

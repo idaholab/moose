@@ -46,13 +46,42 @@ InputParameters validParams<FEProblem>();
 
 enum MooseNonlinearConvergenceReason
 {
-  MOOSE_ITERATING                = 0,
+  MOOSE_NONLINEAR_ITERATING      = 0,
   MOOSE_CONVERGED_FNORM_ABS      = 2,
   MOOSE_CONVERGED_FNORM_RELATIVE = 3,
   MOOSE_CONVERGED_SNORM_RELATIVE = 4,
   MOOSE_DIVERGED_FUNCTION_COUNT  = -2,
   MOOSE_DIVERGED_FNORM_NAN       = -4,
   MOOSE_DIVERGED_LINE_SEARCH     = -6
+};
+
+// The idea with these enums is to abstract the reasons for
+// convergence/divergence, i.e. they could be used with linear algebra
+// packages other than PETSc.  They were directly inspired by PETSc,
+// though.  This enum could also be combined with the
+// MooseNonlinearConvergenceReason enum but there might be some
+// confusion (?)
+enum MooseLinearConvergenceReason
+{
+  MOOSE_LINEAR_ITERATING                =  0,
+  // MOOSE_CONVERGED_RTOL_NORMAL        =  1,
+  // MOOSE_CONVERGED_ATOL_NORMAL        =  9,
+  MOOSE_CONVERGED_RTOL                  =  2,
+  MOOSE_CONVERGED_ATOL                  =  3,
+  MOOSE_CONVERGED_ITS                   =  4,
+  // MOOSE_CONVERGED_CG_NEG_CURVE       =  5,
+  // MOOSE_CONVERGED_CG_CONSTRAINED     =  6,
+  // MOOSE_CONVERGED_STEP_LENGTH        =  7,
+  // MOOSE_CONVERGED_HAPPY_BREAKDOWN    =  8,
+  // MOOSE_DIVERGED_NULL                = -2,
+  // MOOSE_DIVERGED_ITS                 = -3,
+  // MOOSE_DIVERGED_DTOL                = -4,
+  // MOOSE_DIVERGED_BREAKDOWN           = -5,
+  // MOOSE_DIVERGED_BREAKDOWN_BICG      = -6,
+  // MOOSE_DIVERGED_NONSYMMETRIC        = -7,
+  // MOOSE_DIVERGED_INDEFINITE_PC       = -8,
+  // MOOSE_DIVERGED_NANORINF            = -9,
+  // MOOSE_DIVERGED_INDEFINITE_MAT      = -10
 };
 
 /**
@@ -117,6 +146,24 @@ public:
                                                                     const int max_funcs,
                                                                     const Real ref_resid,
                                                                     const Real div_threshold);
+
+  /**
+   * Check for converence of the linear solution
+   * @param msg            Error message that gets sent back to the solver
+   * @param n              Iteration counter
+   * @param rnorm          Norm of the residual vector
+   * @param rtol           Relative residual convergence tolerance
+   * @param atol           Absolute residual convergence tolerance
+   * @param dtol           Divergence tolerance
+   * @param maxits         Maximum number of linear iterations allowed
+   */
+  virtual MooseLinearConvergenceReason checkLinearConvergence(std::string &msg,
+                                                              const int n,
+                                                              const Real rnorm,
+                                                              const Real rtol,
+                                                              const Real atol,
+                                                              const Real dtol,
+                                                              const int maxits);
 
 #ifdef LIBMESH_HAVE_PETSC
   void storePetscOptions(const std::vector<MooseEnum> & petsc_options,
