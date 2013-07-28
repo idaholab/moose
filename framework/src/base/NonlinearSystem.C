@@ -424,6 +424,7 @@ static PetscErrorCode  SNESUpdateMoose(SNES snes, PetscInt iteration)
     ierr = PCSetOptionsPrefix(pc,prefix);CHKERRQ(ierr);
     ierr = PCSetFromOptions(pc);CHKERRQ(ierr);
     ierr = KSPSetPC(ksp,pc);CHKERRQ(ierr);
+    ierr = PCDestroy(&pc);CHKERRQ(ierr);
   }
   PetscFunctionReturn(0);
 }

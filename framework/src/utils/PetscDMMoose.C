@@ -1511,7 +1511,6 @@ PetscErrorCode  DMSetFromOptions_Moose(DM dm)
 }
 
 
-
 #undef __FUNCT__
 #define __FUNCT__ "DMDestroy_Moose"
 static PetscErrorCode  DMDestroy_Moose(DM dm)
