@@ -106,7 +106,7 @@
   [../]
 
   [./DOFs]
-    type = PrintDOFs
+    type = NumDOFs
   [../]
 []
 
