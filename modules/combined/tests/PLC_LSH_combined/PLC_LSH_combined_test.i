@@ -283,7 +283,7 @@
 
 [Postprocessors]
   [./timestep]
-    type = PrintDT
+    type = TimestepSize
   [../]
 []
 
