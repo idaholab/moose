@@ -68,7 +68,7 @@ enum MooseLinearConvergenceReason
   // MOOSE_CONVERGED_ATOL_NORMAL        =  9,
   MOOSE_CONVERGED_RTOL                  =  2,
   MOOSE_CONVERGED_ATOL                  =  3,
-  MOOSE_CONVERGED_ITS                   =  4,
+  MOOSE_CONVERGED_ITS                   =  4
   // MOOSE_CONVERGED_CG_NEG_CURVE       =  5,
   // MOOSE_CONVERGED_CG_CONSTRAINED     =  6,
   // MOOSE_CONVERGED_STEP_LENGTH        =  7,
