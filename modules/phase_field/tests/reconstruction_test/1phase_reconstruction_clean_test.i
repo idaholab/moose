@@ -178,7 +178,7 @@
 #  [../]
 
   [./DOFs]
-    type = PrintDOFs
+    type = NumDOFs
   [../]
 
   [./n_nodes]
