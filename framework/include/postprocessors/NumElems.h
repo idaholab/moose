@@ -12,21 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PRINTELEMS_H
-#define PRINTELEMS_H
+#ifndef NUMELEMS_H
+#define NUMELEMS_H
 
 #include "GeneralPostprocessor.h"
 
 //Forward Declarations
-class PrintNumElems;
+class NumElems;
 
 template<>
-InputParameters validParams<PrintNumElems>();
+InputParameters validParams<NumElems>();
 
-class PrintNumElems : public GeneralPostprocessor
+class NumElems : public GeneralPostprocessor
 {
 public:
-  PrintNumElems(const std::string & name, InputParameters parameters);
+  NumElems(const std::string & name, InputParameters parameters);
 
   virtual void initialize() {}
 
@@ -38,4 +38,4 @@ public:
   virtual Real getValue();
 };
 
-#endif //PRINTELEMS_H
+#endif // NUMELEMS_H

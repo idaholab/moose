@@ -12,22 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PrintNumElems.h"
+#include "NumElems.h"
 #include "SubProblem.h"
 
 template<>
-InputParameters validParams<PrintNumElems>()
+InputParameters validParams<NumElems>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-PrintNumElems::PrintNumElems(const std::string & name, InputParameters parameters) :
+NumElems::NumElems(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters)
 {}
 
 Real
-PrintNumElems::getValue()
+NumElems::getValue()
 {
   return _subproblem.mesh().nElem();
 }

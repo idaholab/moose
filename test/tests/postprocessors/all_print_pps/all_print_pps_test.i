@@ -59,7 +59,7 @@
   [../]
 
   [./elements]
-    type = PrintNumElems
+    type = NumElems
     variable = u
   [../]
 

@@ -135,7 +135,7 @@
 #include "PrintDT.h"
 #include "PrintRunTime.h"
 #include "PrintPerfData.h"
-#include "PrintNumElems.h"
+#include "NumElems.h"
 #include "PrintNumNodes.h"
 #include "PrintNumNonlinearIters.h"
 #include "PrintNumLinearIters.h"
@@ -425,7 +425,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(PrintDT);
   registerPostprocessor(PrintRunTime);
   registerPostprocessor(PrintPerfData);
-  registerPostprocessor(PrintNumElems);
+  registerPostprocessor(NumElems);
   registerPostprocessor(PrintNumNodes);
   registerPostprocessor(PrintNumNonlinearIters);
   registerPostprocessor(PrintNumLinearIters);
