@@ -70,13 +70,15 @@ NodalVolumeFraction::getValue()
 void
 NodalVolumeFraction::calculateBubbleFraction()
 {
-  Real volume;
+  Real volume(0.0);
   
   //sum the values in the vector to get total volume
   for (std::vector<Real>::const_iterator it = _all_bubble_volumes.begin(); it != _all_bubble_volumes.end(); ++it)
+  {
     volume += *it;
-  
-  _volume_fraction = volume/_mesh_volume; 
+  }
+
+  _volume_fraction = volume/_mesh_volume;
 }
 
 Real
