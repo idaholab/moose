@@ -131,7 +131,7 @@
 #include "EmptyPostprocessor.h"
 #include "NodalVariableValue.h"
 
-#include "PrintDOFs.h"
+#include "NumDOFs.h"
 #include "PrintDT.h"
 #include "PrintRunTime.h"
 #include "PrintPerfData.h"
@@ -421,7 +421,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(ScalarL2Error);
   registerPostprocessor(EmptyPostprocessor);
   registerPostprocessor(NodalVariableValue);
-  registerPostprocessor(PrintDOFs);
+  registerPostprocessor(NumDOFs);
   registerPostprocessor(PrintDT);
   registerPostprocessor(PrintRunTime);
   registerPostprocessor(PrintPerfData);

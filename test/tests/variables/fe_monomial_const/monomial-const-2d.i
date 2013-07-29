@@ -109,7 +109,7 @@
 
 [Postprocessors]
   [./dofs]
-    type = PrintDOFs
+    type = NumDOFs
   [../]
 
   [./h]

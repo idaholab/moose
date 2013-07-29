@@ -7,9 +7,9 @@
   ymax = 1
   zmin = -1
   zmax = 1
-  nx = 5 
-  ny = 5 
-  zy = 5 
+  nx = 5
+  ny = 5
+  zy = 5
   elem_type = HEX8
 []
 
@@ -119,7 +119,7 @@
 
 [Postprocessors]
   [./dofs]
-    type = PrintDOFs
+    type = NumDOFs
   [../]
 
   [./h]

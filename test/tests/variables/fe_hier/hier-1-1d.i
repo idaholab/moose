@@ -3,8 +3,8 @@
   dim = 1
   xmin = -1
   xmax = 1
-  nx = 5 
-  elem_type = EDGE3 
+  nx = 5
+  elem_type = EDGE3
 []
 
 [Functions]
@@ -71,7 +71,7 @@
 
 [Postprocessors]
   [./dofs]
-    type = PrintDOFs
+    type = NumDOFs
   [../]
 
   [./h]

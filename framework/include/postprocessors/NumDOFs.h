@@ -12,21 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PRINTDOFS_H
-#define PRINTDOFS_H
+#ifndef NUMDOFS_H
+#define NUMDOFS_H
 
 #include "GeneralPostprocessor.h"
 
 //Forward Declarations
-class PrintDOFs;
+class NumDOFs;
 
 template<>
-InputParameters validParams<PrintDOFs>();
+InputParameters validParams<NumDOFs>();
 
-class PrintDOFs : public GeneralPostprocessor
+class NumDOFs : public GeneralPostprocessor
 {
 public:
-  PrintDOFs(const std::string & name, InputParameters parameters);
+  NumDOFs(const std::string & name, InputParameters parameters);
 
   virtual void initialize() {}
   virtual void execute() {}
@@ -37,4 +37,4 @@ public:
   virtual Real getValue();
 };
 
-#endif //PRINTDOFS_H
+#endif //NUMDOFS_H

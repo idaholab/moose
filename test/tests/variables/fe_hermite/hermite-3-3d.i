@@ -7,9 +7,9 @@
   ymax = 1
   zmin = -1
   zmax = 1
-  nx = 1 
-  ny = 1 
-  nz = 1 
+  nx = 1
+  ny = 1
+  nz = 1
   elem_type = HEX27
 []
 
@@ -54,7 +54,7 @@
 
 [Variables]
   [./u]
-    order = THIRD 
+    order = THIRD
     family = HERMITE
   [../]
 []
@@ -119,7 +119,7 @@
 
 [Postprocessors]
   [./dofs]
-    type = PrintDOFs
+    type = NumDOFs
   [../]
 
   [./h]

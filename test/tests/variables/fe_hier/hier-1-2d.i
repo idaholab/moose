@@ -5,8 +5,8 @@
   xmax = 1
   ymin = -1
   ymax = 1
-  nx = 5 
-  ny = 5 
+  nx = 5
+  ny = 5
   elem_type = QUAD9
 []
 
@@ -95,7 +95,7 @@
 
 [Postprocessors]
   [./dofs]
-    type = PrintDOFs
+    type = NumDOFs
   [../]
 
   [./h]

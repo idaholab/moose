@@ -69,7 +69,7 @@
 
 [Postprocessors]
   [./ud]
-    type = PrintDOFs
+    type = NumDOFs
     variable = u
   []
 []

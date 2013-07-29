@@ -139,7 +139,7 @@
   [../]
 
   [./dofs]
-    type = PrintDOFs
+    type = NumDOFs
     variable = u
   [../]
 

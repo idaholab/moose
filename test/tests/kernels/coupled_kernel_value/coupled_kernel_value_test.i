@@ -146,7 +146,7 @@
 [Postprocessors]
   active='L2u L2v'
   [./dofs]
-    type = PrintDOFs
+    type = NumDOFs
   [../]
 
   [./h]

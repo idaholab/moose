@@ -113,7 +113,7 @@
   [../]
 
   [./dofs]
-    type = PrintDOFs
+    type = NumDOFs
     varaible = u
   [../]
 []

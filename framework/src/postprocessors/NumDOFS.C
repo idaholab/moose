@@ -12,22 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PrintDOFs.h"
+#include "NumDOFs.h"
 #include "SubProblem.h"
 
 template<>
-InputParameters validParams<PrintDOFs>()
+InputParameters validParams<NumDOFs>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-PrintDOFs::PrintDOFs(const std::string & name, InputParameters parameters) :
+NumDOFs::NumDOFs(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters)
 {}
 
 Real
-PrintDOFs::getValue()
+NumDOFs::getValue()
 {
   return _subproblem.es().n_dofs();
 }
