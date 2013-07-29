@@ -37,7 +37,7 @@ public:
   virtual void initialize(){};
   virtual void threadJoin(const UserObject&){};
   virtual void finalize();
-  virtual void destroy(){};
+
 protected:
   std::string               _subspace_name;
   std::vector<unsigned int> _subspace_indices;

@@ -14,7 +14,6 @@ public:
   virtual void initialize();
   virtual void execute();
   virtual void finalize();
-  virtual void destroy() {}
 
   Real nodalArea( unsigned id ) const;
   void resetCommunication()

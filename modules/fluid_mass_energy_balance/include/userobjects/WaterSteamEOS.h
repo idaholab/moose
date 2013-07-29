@@ -33,9 +33,7 @@ public:
     
     virtual void execute(){}
     virtual void finalize(){}
-    
-    virtual void destroy();
-
+  
     Real phaseDetermine (Real enth_in, Real press_in, Real& phase, Real& temp_sat, Real& enth_water_sat, Real& enth_steam_sat, Real& dens_water_sat, Real& dens_steam_sat) const;
     
     Real waterEquationOfStatePH (Real enth_in, Real press_in, Real temp_sat, Real& temp1, Real& dens1, Real& enth1) const;

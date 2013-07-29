@@ -24,7 +24,6 @@ public:
   virtual void execute();
   virtual void threadJoin(const UserObject & u );
   virtual void finalize();
-  virtual void destroy(){}
   
 protected:
 

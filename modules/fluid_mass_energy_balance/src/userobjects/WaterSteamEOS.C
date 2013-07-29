@@ -35,10 +35,6 @@ WaterSteamEOS::WaterSteamEOS(const std::string & name, InputParameters params) :
 WaterSteamEOS::~WaterSteamEOS()
 { }
 
-void
-WaterSteamEOS::destroy()
-{ }
-
 //Suplimentary functions used within the two main functions bellow (Equations_of_State_Properties and Equations_of_State_Derivative_Properties):
 Real WaterSteamEOS::phaseDetermine (Real enth_in, Real press_in, Real& phase, Real& temp_sat, Real& enth_water_sat, Real& enth_steam_sat, Real& dens_water_sat, Real& dens_steam_sat) const
 {
