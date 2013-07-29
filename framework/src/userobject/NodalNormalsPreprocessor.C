@@ -85,11 +85,6 @@ NodalNormalsPreprocessor::execute()
 }
 
 void
-NodalNormalsPreprocessor::destroy()
-{
-}
-
-void
 NodalNormalsPreprocessor::finalize()
 {
   _aux.solution().close();

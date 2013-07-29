@@ -40,7 +40,6 @@ public:
   virtual Real getValue();
 
   virtual void finalize(){}
-  virtual void destroy(){}
 
 protected:
   virtual Real computeQpIntegral() = 0;

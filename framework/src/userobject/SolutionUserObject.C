@@ -289,11 +289,6 @@ SolutionUserObject::initialize()
 }
 
 void
-SolutionUserObject::destroy()
-{
-}
-
-void
 SolutionUserObject::finalize()
 {
 }

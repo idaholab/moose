@@ -40,7 +40,6 @@ public:
   virtual void threadJoin(const UserObject & y);
 
   virtual void finalize(){}
-  virtual void destroy(){}
 
 protected:
   virtual Real computeQpIntegral() = 0;

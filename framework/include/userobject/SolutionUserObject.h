@@ -64,9 +64,6 @@ public:
   virtual void initialize();
 
   // Required pure virtual function (not used)
-  virtual void destroy();
-
-  // Required pure virtual function (not used)
   virtual void finalize();
 
   // Required pure virtual function (not used)

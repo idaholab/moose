@@ -33,7 +33,6 @@ public:
   virtual ~NodalNormalsEvaluator();
 
   virtual void initialize();
-  virtual void destroy();
   virtual void finalize();
   virtual void execute();
   virtual void threadJoin(const UserObject & uo);

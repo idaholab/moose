@@ -49,11 +49,6 @@ InsideUserObject::execute()
 }
 
 void
-InsideUserObject::destroy()
-{
-}
-
-void
 InsideUserObject::finalize()
 {
   gatherSum(_value);

@@ -70,11 +70,6 @@ NodalNormalsEvaluator::initialize()
 }
 
 void
-NodalNormalsEvaluator::destroy()
-{
-}
-
-void
 NodalNormalsEvaluator::finalize()
 {
   _aux.solution().close();

@@ -67,11 +67,6 @@ NodalNormalsCorner::initialize()
 }
 
 void
-NodalNormalsCorner::destroy()
-{
-}
-
-void
 NodalNormalsCorner::finalize()
 {
   _aux.solution().close();

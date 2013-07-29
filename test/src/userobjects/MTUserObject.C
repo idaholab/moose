@@ -36,12 +36,6 @@ MTUserObject::MTUserObject(const std::string & name, InputParameters params) :
 
 MTUserObject::~MTUserObject()
 {
-}
-
-void
-MTUserObject::destroy()
-{
-  // release the Kraken (eeee... I mean memory)
   delete [] _dyn_memory;
 }
 

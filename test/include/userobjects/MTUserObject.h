@@ -44,8 +44,6 @@ public:
 
   virtual void finalize() {}
 
-  virtual void destroy();
-
   /**
    * A function that does something
    */

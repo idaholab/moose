@@ -30,7 +30,6 @@ UserObjectWarehouse::~UserObjectWarehouse()
 {
   for (std::vector<UserObject *>::iterator i=_all_user_objects.begin(); i!=_all_user_objects.end(); ++i)
   {
-    (*i)->destroy();
     delete *i;
   }
 }
@@ -414,4 +413,3 @@ UserObjectWarehouse::genericUserObjects(GROUP group)
     mooseError("Bad Enum");
   }
 }
-
