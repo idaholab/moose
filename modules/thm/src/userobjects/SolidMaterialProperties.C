@@ -67,11 +67,6 @@ SolidMaterialProperties::finalize()
 {
 }
 
-void
-SolidMaterialProperties::destroy()
-{
-}
-
 Real
 SolidMaterialProperties::k(Real temp) const
 {

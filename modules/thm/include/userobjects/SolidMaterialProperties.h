@@ -20,7 +20,6 @@ public:
 
   virtual void initialize();
   virtual void finalize();
-  virtual void destroy();
   virtual void execute();
 
   Real k(Real temp) const;
