@@ -7,7 +7,7 @@
 	ymax = 1
 	nx = 2
 	ny = 2
-	elem_type = QUAD4 
+	elem_type = QUAD4
 
   uniform_refine = 3
 []
@@ -98,7 +98,7 @@
 
 [Postprocessors]
   [./dt]
-  	type = PrintDT
+  	type = TimestepSize
   [../]
 []
 

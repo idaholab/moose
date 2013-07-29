@@ -12,23 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PrintDT.h"
+#include "TimestepSize.h"
 #include "FEProblem.h"
 
 template<>
-InputParameters validParams<PrintDT>()
+InputParameters validParams<TimestepSize>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-PrintDT::PrintDT(const std::string & name, InputParameters parameters) :
+TimestepSize::TimestepSize(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     _feproblem(dynamic_cast<FEProblem &>(_subproblem))
 {}
 
 Real
-PrintDT::getValue()
+TimestepSize::getValue()
 {
   return _feproblem.dt();
 }

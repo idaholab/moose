@@ -61,7 +61,7 @@
   active = ''
 
   [./dt]
-    type = PrintDT
+    type = TimestepSize
   [../]
 []
 
@@ -93,4 +93,3 @@
   exodus = true
   perf_log = true
 []
-

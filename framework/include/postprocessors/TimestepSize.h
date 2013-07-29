@@ -12,21 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PRINTDT_H
-#define PRINTDT_H
+#ifndef TIMESTEPSIZE_H
+#define TIMESTEPSIZE_H
 
 #include "GeneralPostprocessor.h"
 
 //Forward Declarations
-class PrintDT;
+class TimestepSize;
 
 template<>
-InputParameters validParams<PrintDT>();
+InputParameters validParams<TimestepSize>();
 
-class PrintDT : public GeneralPostprocessor
+class TimestepSize : public GeneralPostprocessor
 {
 public:
-  PrintDT(const std::string & name, InputParameters parameters);
+  TimestepSize(const std::string & name, InputParameters parameters);
 
   virtual void initialize() {}
   virtual void execute() {}
@@ -40,4 +40,4 @@ protected:
   FEProblem & _feproblem;
 };
 
-#endif //PRINTDT_H
+#endif // TIMESTEPSIZE_H

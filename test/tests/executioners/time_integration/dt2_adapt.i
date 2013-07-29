@@ -61,7 +61,7 @@
   active = 'dt'
 
   [./dt]
-    type = PrintDT
+    type = TimestepSize
   [../]
 []
 
