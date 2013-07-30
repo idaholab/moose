@@ -136,7 +136,7 @@
 #include "RunTime.h"
 #include "PerformanceData.h"
 #include "NumElems.h"
-#include "PrintNumNodes.h"
+#include "NumNodes.h"
 #include "PrintNumNonlinearIters.h"
 #include "PrintNumLinearIters.h"
 #include "PrintResidual.h"
@@ -426,7 +426,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(RunTime);
   registerPostprocessor(PerformanceData);
   registerPostprocessor(NumElems);
-  registerPostprocessor(PrintNumNodes);
+  registerPostprocessor(NumNodes);
   registerPostprocessor(PrintNumNonlinearIters);
   registerPostprocessor(PrintNumLinearIters);
   registerPostprocessor(PrintResidual);

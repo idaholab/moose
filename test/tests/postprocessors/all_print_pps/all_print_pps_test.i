@@ -54,7 +54,7 @@
 
 [Postprocessors]
   [./nodes]
-    type = PrintNumNodes
+    type = NumNodes
     variable = u
   [../]
 

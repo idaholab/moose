@@ -12,22 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PrintNumNodes.h"
+#include "NumNodes.h"
 #include "SubProblem.h"
 
 template<>
-InputParameters validParams<PrintNumNodes>()
+InputParameters validParams<NumNodes>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-PrintNumNodes::PrintNumNodes(const std::string & name, InputParameters parameters) :
+NumNodes::NumNodes(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters)
 {}
 
 Real
-PrintNumNodes::getValue()
+NumNodes::getValue()
 {
   return _subproblem.mesh().nNodes();
 }

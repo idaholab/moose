@@ -12,21 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PRINTNODES_H
-#define PRINTNODES_H
+#ifndef NUMNODES_H
+#define NUMNODES_H
 
 #include "GeneralPostprocessor.h"
 
 //Forward Declarations
-class PrintNumNodes;
+class NumNodes;
 
 template<>
-InputParameters validParams<PrintNumNodes>();
+InputParameters validParams<NumNodes>();
 
-class PrintNumNodes : public GeneralPostprocessor
+class NumNodes : public GeneralPostprocessor
 {
 public:
-  PrintNumNodes(const std::string & name, InputParameters parameters);
+  NumNodes(const std::string & name, InputParameters parameters);
 
   virtual void initialize() {}
   virtual void execute() {}
@@ -37,4 +37,4 @@ public:
   virtual Real getValue();
 };
 
-#endif //PRINTNODES_H
+#endif // NUMNODES_H
