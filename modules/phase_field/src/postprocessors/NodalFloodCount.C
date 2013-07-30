@@ -212,6 +212,15 @@ NodalFloodCount::getElementalValue(unsigned int /*element_id*/) const
   return 0;
 }
 
+std::vector<std::pair<unsigned int, unsigned int> >
+NodalFloodCount::getNodalValues(unsigned int node_id) const
+{
+  std::vector<std::pair<unsigned int, unsigned int> > empty;
+
+  mooseDoOnce(mooseWarning("Method not implemented"));
+  return empty;
+}
+
 void
 NodalFloodCount::threadJoin(const UserObject &y)
 {

@@ -19,7 +19,7 @@
 template<>
 InputParameters validParams<NodalFloodCountAux>()
 {
-  MooseEnum field_display("UNIQUE_REGION, VARIABLE_COLORING, CENTROID", "UNIQUE_REGION");
+  MooseEnum field_display("UNIQUE_REGION, VARIABLE_COLORING, ACTIVE_BOUNDS, CENTROID", "UNIQUE_REGION");
   
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<UserObjectName>("bubble_object", "The NodalFloodCount UserObject to get values from.");
@@ -43,14 +43,25 @@ NodalFloodCountAux::NodalFloodCountAux(const std::string & name, InputParameters
       _var_coloring = true;
   }
   else if (_field_display != "CENTROID")
-    mooseError("UNIQUE_REGION and VARIABLE_COLORING is only avaialble for nodal aux variables");
+    mooseError("UNIQUE_REGION, VARIABLE_COLORING, and ACTIVE_BOUNDS are only avaialble for nodal aux variables");
 }
 
 Real
 NodalFloodCountAux::computeValue()
 {
-  if (isNodal())
+  switch(_field_display)
+  {
+  case 0:  // UNIQUE_REGION
+  case 1:  // VARIABLE_COLORING
     return _flood_counter.getNodalValue(_current_node->id(), _var_idx, _var_coloring);
-  else
+    break;
+  case 2:  // ACTIVE_BOUNDS
+    return _flood_counter.getNodalValues(_current_node->id()).size();
+    break;
+  case 3:  // CENTROID
     return _flood_counter.getElementalValue(_current_elem->id());
+    break;
+  }
+
+  return 0;
 }

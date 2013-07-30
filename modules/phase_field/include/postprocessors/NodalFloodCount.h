@@ -55,6 +55,8 @@ public:
   virtual Real getNodalValue(unsigned int node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
   virtual Real getElementalValue(unsigned int element_id) const;
 
+  virtual std::vector<std::pair<unsigned int, unsigned int> > getNodalValues(unsigned int node_id) const;
+
 protected:
   class BubbleData
   {
@@ -235,7 +237,7 @@ protected:
    * based on the imposed periodic boundary conditions.
    */
   std::multimap<unsigned int, unsigned int> _periodic_node_map;
-  
+
   /// The filename and filehandle used if bubble volumes are being recorded to a file.
   std::map<std::string, std::ofstream *> _file_handles;
 
