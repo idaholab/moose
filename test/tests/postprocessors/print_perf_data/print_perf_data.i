@@ -34,42 +34,42 @@
 
 [Postprocessors]
   [./res_calls]
-    type = PrintPerfData
+    type = PerformanceData
     column = n_calls
     event = compute_residual()
   [../]
   [./jac_calls]
-    type = PrintPerfData
+    type = PerformanceData
     column = n_calls
     event = compute_jacobian()
   [../]
   [./jac_total_time]
-    type = PrintPerfData
+    type = PerformanceData
     column = total_time
     event = compute_jacobian()
   [../]
   [./jac_average_time]
-    type = PrintPerfData
+    type = PerformanceData
     column = average_time
     event = compute_jacobian()
   [../]
   [./jac_total_time_with_sub]
-    type = PrintPerfData
+    type = PerformanceData
     column = total_time_with_sub
     event = compute_jacobian()
   [../]
   [./jac_average_time_with_sub]
-    type = PrintPerfData
+    type = PerformanceData
     column = average_time_with_sub
     event = compute_jacobian()
   [../]
   [./jac_percent_of_active_time]
-    type = PrintPerfData
+    type = PerformanceData
     column = percent_of_active_time
     event = compute_jacobian()
   [../]
   [./jac_percent_of_active_time_with_sub]
-    type = PrintPerfData
+    type = PerformanceData
     column = percent_of_active_time_with_sub
     event = compute_jacobian()
   [../]
@@ -88,4 +88,3 @@
   perf_log = true
   postprocessor_csv = true
 []
-

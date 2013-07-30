@@ -12,13 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PrintPerfData.h"
+#include "PerformanceData.h"
 
 #include "FEProblem.h"
 #include "SubProblem.h"
 
 template<>
-InputParameters validParams<PrintPerfData>()
+InputParameters validParams<PerformanceData>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
 
@@ -30,14 +30,14 @@ InputParameters validParams<PrintPerfData>()
   return params;
 }
 
-PrintPerfData::PrintPerfData(const std::string & name, InputParameters parameters) :
+PerformanceData::PerformanceData(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     _column(getParam<MooseEnum>("column")),
     _event(getParam<std::string>("event"))
 {}
 
 Real
-PrintPerfData::getValue()
+PerformanceData::getValue()
 {
   PerfData perf_data = Moose::perf_log.get_perf_data(_event, "Solve");
   double total_time = Moose::perf_log.get_active_time();

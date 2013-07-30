@@ -12,21 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PRINTPERFDATA_H
-#define PRINTPERFDATA_H
+#ifndef PERFORMANCEDATA_H
+#define PERFORMANCEDATA_H
 
 #include "GeneralPostprocessor.h"
 
 //Forward Declarations
-class PrintPerfData;
+class PerformanceData;
 
 template<>
-InputParameters validParams<PrintPerfData>();
+InputParameters validParams<PerformanceData>();
 
-class PrintPerfData : public GeneralPostprocessor
+class PerformanceData : public GeneralPostprocessor
 {
 public:
-  PrintPerfData(const std::string & name, InputParameters parameters);
+  PerformanceData(const std::string & name, InputParameters parameters);
 
   virtual void initialize() {}
   virtual void execute() {}
@@ -42,4 +42,4 @@ protected:
   std::string _event;
 };
 
-#endif //PRINTPERFDATA_H
+#endif // PERFORMANCEDATA_H

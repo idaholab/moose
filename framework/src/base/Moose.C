@@ -134,7 +134,7 @@
 #include "NumDOFs.h"
 #include "TimestepSize.h"
 #include "RunTime.h"
-#include "PrintPerfData.h"
+#include "PerformanceData.h"
 #include "NumElems.h"
 #include "PrintNumNodes.h"
 #include "PrintNumNonlinearIters.h"
@@ -424,7 +424,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NumDOFs);
   registerPostprocessor(TimestepSize);
   registerPostprocessor(RunTime);
-  registerPostprocessor(PrintPerfData);
+  registerPostprocessor(PerformanceData);
   registerPostprocessor(NumElems);
   registerPostprocessor(PrintNumNodes);
   registerPostprocessor(PrintNumNonlinearIters);
