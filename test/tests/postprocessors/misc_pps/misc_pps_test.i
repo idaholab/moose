@@ -78,7 +78,7 @@
     time_type = active
   [../]
   [./num_nonlinear_its]
-    type = PrintNumNonlinearIters
+    type = NumNonlinearIterations
   [../]
   [./num_linear_its]
     type = NumLinearIterations

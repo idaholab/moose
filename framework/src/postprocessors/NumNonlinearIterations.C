@@ -12,24 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PrintNumNonlinearIters.h"
+#include "NumNonlinearIterations.h"
 
 #include "FEProblem.h"
 #include "SubProblem.h"
 
 template<>
-InputParameters validParams<PrintNumNonlinearIters>()
+InputParameters validParams<NumNonlinearIterations>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-PrintNumNonlinearIters::PrintNumNonlinearIters(const std::string & name, InputParameters parameters) :
+NumNonlinearIterations::NumNonlinearIterations(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters)
 {}
 
 Real
-PrintNumNonlinearIters::getValue()
+NumNonlinearIterations::getValue()
 {
   return _subproblem.nNonlinearIterations();
 }

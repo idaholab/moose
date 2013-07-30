@@ -12,21 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PRINTNUMNONLINEARITERS_H
-#define PRINTNUMNONLINEARITERS_H
+#ifndef NUMNONLINEARITERATIONS_H
+#define NUMNONLINEARITERATIONS_H
 
 #include "GeneralPostprocessor.h"
 
 //Forward Declarations
-class PrintNumNonlinearIters;
+class NumNonlinearIterations;
 
 template<>
-InputParameters validParams<PrintNumNonlinearIters>();
+InputParameters validParams<NumNonlinearIterations>();
 
-class PrintNumNonlinearIters : public GeneralPostprocessor
+class NumNonlinearIterations : public GeneralPostprocessor
 {
 public:
-  PrintNumNonlinearIters(const std::string & name, InputParameters parameters);
+  NumNonlinearIterations(const std::string & name, InputParameters parameters);
 
   virtual void initialize() {}
   virtual void execute() {}
@@ -37,4 +37,4 @@ public:
   virtual Real getValue();
 };
 
-#endif //PRINTNUMNONLINEARITERS_H
+#endif // NUMNONLINEARITERATIONS_H
