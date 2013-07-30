@@ -161,7 +161,7 @@
 
 [Postprocessors]
   [./comp_time]
-    type = PrintRunTime
+    type = RunTime
     time_type = active
   [../]
 
