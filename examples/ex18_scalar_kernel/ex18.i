@@ -10,7 +10,7 @@
   elem_type = QUAD4
 []
 
-[Functions] 
+[Functions]
   # ODEs
   [./exact_x_fn]
     type = ParsedFunction
@@ -42,7 +42,7 @@
   [./td]
     type = TimeDerivative
     variable = diffused
-  [../]  
+  [../]
   [./diff]
     type = Diffusion
     variable = diffused
@@ -59,7 +59,7 @@
     variable = x
     y = y
   [../]
-  
+
   [./td2]
     type = ODETimeDerivative
     variable = y
@@ -91,12 +91,12 @@
 [Postprocessors]
   # to print the values of x, y into a file so we can plot it
   [./x]
-    type = PrintScalarVariable
+    type = ScalarVariable
     variable = x
     execute_on = timestep
   [../]
   [./y]
-    type = PrintScalarVariable
+    type = ScalarVariable
     variable = y
     execute_on = timestep
   [../]
@@ -106,7 +106,7 @@
     function = exact_x_fn
     execute_on = timestep
   [../]
-  # measure the error from exact solution in L2 norm 
+  # measure the error from exact solution in L2 norm
   [./l2err_x]
     type = ScalarL2Error
     variable = x

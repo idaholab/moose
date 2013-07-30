@@ -34,7 +34,7 @@
   [./td]
     type = TimeDerivative
     variable = u
-  [../]  
+  [../]
   [./diff]
     type = Diffusion
     variable = u
@@ -75,7 +75,7 @@
 
 [Postprocessors]
   [./y]
-    type = PrintScalarVariable
+    type = ScalarVariable
     variable = y
   [../]
 []

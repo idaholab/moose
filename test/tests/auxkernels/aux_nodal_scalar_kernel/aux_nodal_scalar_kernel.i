@@ -25,7 +25,7 @@
     boundary = 0
     value = 1
   [../]
-  
+
   [./right]
     type = DirichletBC
     variable = u
@@ -52,7 +52,7 @@
 
 [Postprocessors]
   [./sum]
-    type = PrintScalarVariable
+    type = ScalarVariable
     variable = bc_sum
   [../]
 []

@@ -14,7 +14,7 @@
   elem_type = QUAD9
 []
 
-[AuxVariables] 
+[AuxVariables]
   [./x]
     family = SCALAR
     order = FIRST
@@ -86,9 +86,9 @@
     variable = u
     function = exact_fn
   [../]
-  
+
   [./x]
-    type = PrintScalarVariable
+    type = ScalarVariable
     variable = x
   [../]
 []

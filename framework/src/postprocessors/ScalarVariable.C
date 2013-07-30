@@ -12,35 +12,42 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PRINTSCALARVARIABLE_H
-#define PRINTSCALARVARIABLE_H
-
-#include "GeneralPostprocessor.h"
-
-//Forward Declarations
-class PrintScalarVariable;
+#include "ScalarVariable.h"
+#include "SubProblem.h"
 
 template<>
-InputParameters validParams<PrintScalarVariable>();
-
-/**
- *
- */
-class PrintScalarVariable : public GeneralPostprocessor
+InputParameters validParams<ScalarVariable>()
 {
-public:
-  PrintScalarVariable(const std::string & name, InputParameters parameters);
-  virtual ~PrintScalarVariable();
+  InputParameters params = validParams<GeneralPostprocessor>();
+  params.addRequiredParam<VariableName>("variable", "Name of the variable");
+  params.addParam<unsigned int>("idx", 0, "Index for this variable");
+  return params;
+}
 
-  virtual void initialize();
-  virtual void execute();
-  virtual Real getValue();
+ScalarVariable::ScalarVariable(const std::string & name, InputParameters parameters) :
+    GeneralPostprocessor(name, parameters),
+    _var(_subproblem.getScalarVariable(_tid, getParam<VariableName>("variable"))),
+    _idx(getParam<unsigned int>("idx"))
+{
+}
 
-protected:
-  MooseVariableScalar & _var;
-  unsigned int _idx;
-};
+ScalarVariable::~ScalarVariable()
+{
+}
 
+void
+ScalarVariable::initialize()
+{
+}
 
+void
+ScalarVariable::execute()
+{
+}
 
-#endif /* PRINTSCALARVARIABLE_H */
+Real
+ScalarVariable::getValue()
+{
+  _var.reinit();
+  return _var.sln()[_idx];
+}

@@ -99,12 +99,12 @@
   active = 'exact_x l2err_x x y'
 
   [./x]
-    type = PrintScalarVariable
+    type = ScalarVariable
     variable = x
     execute_on = timestep
   [../]
   [./y]
-    type = PrintScalarVariable
+    type = ScalarVariable
     variable = y
     execute_on = timestep
   [../]

@@ -34,7 +34,7 @@
     variable = 'v'
     values = '1 2'
   [../]
-  
+
   [./a_ic]
     type = ScalarComponentIC
     variable = 'a'
@@ -75,23 +75,23 @@
 
 [Postprocessors]
   [./v1]
-    type = PrintScalarVariable
+    type = ScalarVariable
     variable = v
     idx = 0
   [../]
   [./v2]
-    type = PrintScalarVariable
+    type = ScalarVariable
     variable = v
     idx = 1
   [../]
 
   [./a1]
-    type = PrintScalarVariable
+    type = ScalarVariable
     variable = a
     idx = 0
   [../]
   [./a2]
-    type = PrintScalarVariable
+    type = ScalarVariable
     variable = a
     idx = 1
   [../]
@@ -108,5 +108,3 @@
   exodus = true
   perf_log = true
 []
-
-
