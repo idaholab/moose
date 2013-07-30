@@ -49,9 +49,13 @@
 [Executioner]
   type = Steady
   petsc_options = '-snes_mf_operator'
+  petsc_options_iname = '-snes_linesearch_type'
+  petsc_options_value = 'basic'
 []
 
 [Postprocessors]
+  active = ' '
+
   [./residual]
     type = PrintResidual
   [../]
