@@ -139,7 +139,7 @@
 #include "NumNodes.h"
 #include "NumNonlinearIterations.h"
 #include "NumLinearIterations.h"
-#include "PrintResidual.h"
+#include "Residual.h"
 #include "PrintScalarVariable.h"
 #include "PrintNumVars.h"
 #include "NumResidualEvaluations.h"
@@ -429,7 +429,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NumNodes);
   registerPostprocessor(NumNonlinearIterations);
   registerPostprocessor(NumLinearIterations);
-  registerPostprocessor(PrintResidual);
+  registerPostprocessor(Residual);
   registerPostprocessor(PrintScalarVariable);
   registerPostprocessor(PrintNumVars);
   registerPostprocessor(NumResidualEvaluations);

@@ -12,29 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PRINTRESIDUAL_H
-#define PRINTRESIDUAL_H
+#include "Residual.h"
 
-#include "GeneralPostprocessor.h"
-
-//Forward Declarations
-class PrintResidual;
+#include "FEProblem.h"
+#include "SubProblem.h"
 
 template<>
-InputParameters validParams<PrintResidual>();
-
-class PrintResidual : public GeneralPostprocessor
+InputParameters validParams<Residual>()
 {
-public:
-  PrintResidual(const std::string & name, InputParameters parameters);
+  InputParameters params = validParams<GeneralPostprocessor>();
+  return params;
+}
 
-  virtual void initialize() {}
-  virtual void execute() {}
+Residual::Residual(const std::string & name, InputParameters parameters) :
+    GeneralPostprocessor(name, parameters)
+{}
 
-  /**
-   * This will return the final nonlinear residual.
-   */
-  virtual Real getValue();
-};
-
-#endif //PRINTRESIDUAL_H
+Real
+Residual::getValue()
+{
+  return _subproblem.finalNonlinearResidual();
+}

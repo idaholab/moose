@@ -84,7 +84,7 @@
     type = NumLinearIterations
   [../]
   [./residual]
-    type = PrintResidual
+    type = Residual
   [../]
   [./reporter]
     type = Reporter
