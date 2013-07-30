@@ -61,7 +61,7 @@
   [../]
 
   [./nl_its]
-    type = PrintNumNonlinearIters
+    type = NumNonlinearIterations
   [../]
 
   [./lin_its]
