@@ -136,7 +136,7 @@
 [Postprocessors]
   active = ''
   [./resid]
-    type = PrintResidual
+    type = Residual
   [../]
   [./iters]
     type = NumNonlinearIterations
