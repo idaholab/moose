@@ -38,6 +38,9 @@ public:
    */
   virtual Real getElementalValue(unsigned int element_id) const;
 
+  
+  virtual std::vector<std::pair<unsigned int, unsigned int> > getNodalValues(unsigned int node_id) const;
+
 protected:
   /// This struct holds the nodesets and bounding spheres for each flooded region.
   struct BoundingSphereInfo;
