@@ -65,7 +65,7 @@
   [../]
 
   [./lin_its]
-    type = PrintNumLinearIters
+    type = NumLinearIterations
   [../]
 []
 
