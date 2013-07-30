@@ -102,7 +102,7 @@
 
 [Postprocessors]
   [./n_nodes]
-    type = PrintNumNodes
+    type = NumNodes
     execute_on = timestep
   [../]
 []
