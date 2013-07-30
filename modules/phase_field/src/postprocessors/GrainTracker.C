@@ -572,6 +572,20 @@ GrainTracker::updateFieldInfo()
   }
 }
 
+std::vector<std::pair<unsigned int, unsigned int> >
+GrainTracker::getNodalValues(unsigned int node_id) const
+{
+  // A vector of unique_grain ids and their associated variable index for the given node
+  std::vector<std::pair<unsigned int, unsigned int> > node_info;
+
+  for (std::map<unsigned int, UniqueGrain *>::const_iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
+    if (grain_it->second->status != INACTIVE && grain_it->second->nodes_ptr->find(node_id) != grain_it->second->nodes_ptr->end())
+      node_info.push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
+
+  return node_info;
+}
+
+
 Real
 GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2, bool ignore_radii) const
 {
