@@ -148,7 +148,7 @@
 
 [Postprocessors]
   [./nonlinear_its]
-    type = PrintNumNonlinearIters
+    type = NumNonlinearIterations
   [../]
 []
 

@@ -111,7 +111,7 @@
 
 [Postprocessors]
   [./nonlnrits]
-    type = PrintNumNonlinearIters
+    type = NumNonlinearIterations
   [../]
 [] # Postprocessors
 

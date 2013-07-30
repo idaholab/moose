@@ -197,7 +197,7 @@
     variable = saved_t
   [../]
   [./nonlinear_its]
-    type = PrintNumNonlinearIters
+    type = NumNonlinearIterations
   []
 []
 

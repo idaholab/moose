@@ -139,7 +139,7 @@
     type = PrintResidual
   [../]
   [./iters]
-    type = PrintNumNonlinearIters
+    type = NumNonlinearIterations
   [../]
 []
 
