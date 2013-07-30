@@ -12,24 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PrintNumLinearIters.h"
+#ifndef NUMLINEARITERATIONS_H
+#define NUMLINEARITERATIONS_H
 
-#include "FEProblem.h"
-#include "SubProblem.h"
+#include "GeneralPostprocessor.h"
+
+//Forward Declarations
+class NumLinearIterations;
 
 template<>
-InputParameters validParams<PrintNumLinearIters>()
-{
-  InputParameters params = validParams<GeneralPostprocessor>();
-  return params;
-}
+InputParameters validParams<NumLinearIterations>();
 
-PrintNumLinearIters::PrintNumLinearIters(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters)
-{}
-
-Real
-PrintNumLinearIters::getValue()
+class NumLinearIterations : public GeneralPostprocessor
 {
-  return _subproblem.nLinearIterations();
-}
+public:
+  NumLinearIterations(const std::string & name, InputParameters parameters);
+
+  virtual void initialize() {}
+  virtual void execute() {}
+
+  /**
+   * This will return the degrees of freedom in the system.
+   */
+  virtual Real getValue();
+};
+
+#endif // NUMLINEARITERATIONS_H

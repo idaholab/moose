@@ -81,7 +81,7 @@
     type = PrintNumNonlinearIters
   [../]
   [./num_linear_its]
-    type = PrintNumLinearIters
+    type = NumLinearIterations
   [../]
   [./residual]
     type = PrintResidual
