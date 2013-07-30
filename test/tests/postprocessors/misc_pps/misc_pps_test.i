@@ -74,7 +74,7 @@
   # Should be zero since we aren't setting this inside any MooseObject
   # This PPS will also always report zero in this test
   [./elapsed_time]
-    type = PrintRunTime
+    type = RunTime
     time_type = active
   [../]
   [./num_nonlinear_its]
@@ -125,4 +125,3 @@
   exodus = true
   perf_log = true
 []
-

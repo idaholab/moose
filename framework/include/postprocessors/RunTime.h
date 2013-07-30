@@ -12,21 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PRINTRUNTIME_H
-#define PRINTRUNTIME_H
+#ifndef RUNTIME_H
+#define RUNTIME_H
 
 #include "GeneralPostprocessor.h"
 
 //Forward Declarations
-class PrintRunTime;
+class RunTime;
 
 template<>
-InputParameters validParams<PrintRunTime>();
+InputParameters validParams<RunTime>();
 
-class PrintRunTime : public GeneralPostprocessor
+class RunTime : public GeneralPostprocessor
 {
 public:
-  PrintRunTime(const std::string & name, InputParameters parameters);
+  RunTime(const std::string & name, InputParameters parameters);
 
   virtual void initialize() {}
   virtual void execute() {}
@@ -40,4 +40,4 @@ protected:
   MooseEnum _time_type;
 };
 
-#endif //PRINTRUNTIME_H
+#endif // RUNTIME_H

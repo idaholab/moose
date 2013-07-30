@@ -12,13 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PrintRunTime.h"
+#include "RunTime.h"
 
 #include "FEProblem.h"
 #include "SubProblem.h"
 
 template<>
-InputParameters validParams<PrintRunTime>()
+InputParameters validParams<RunTime>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   MooseEnum time_options("alive, active");
@@ -26,13 +26,13 @@ InputParameters validParams<PrintRunTime>()
   return params;
 }
 
-PrintRunTime::PrintRunTime(const std::string & name, InputParameters parameters) :
+RunTime::RunTime(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     _time_type(getParam<MooseEnum>("time_type"))
 {}
 
 Real
-PrintRunTime::getValue()
+RunTime::getValue()
 {
   switch(_time_type)
   {

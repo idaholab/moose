@@ -133,7 +133,7 @@
 
 #include "NumDOFs.h"
 #include "TimestepSize.h"
-#include "PrintRunTime.h"
+#include "RunTime.h"
 #include "PrintPerfData.h"
 #include "NumElems.h"
 #include "PrintNumNodes.h"
@@ -423,7 +423,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NodalVariableValue);
   registerPostprocessor(NumDOFs);
   registerPostprocessor(TimestepSize);
-  registerPostprocessor(PrintRunTime);
+  registerPostprocessor(RunTime);
   registerPostprocessor(PrintPerfData);
   registerPostprocessor(NumElems);
   registerPostprocessor(PrintNumNodes);
