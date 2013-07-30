@@ -57,7 +57,7 @@
   active = ' '
 
   [./residual]
-    type = PrintResidual
+    type = Residual
   [../]
 
   [./nl_its]
