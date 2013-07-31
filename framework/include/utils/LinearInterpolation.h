@@ -60,6 +60,12 @@ public:
   double sample(double x) const;
 
   /**
+   * This function will take an independent variable input and will return the derivative of the dependent variable
+   * with respect to the independent variable based on the generated fit
+   */
+  double sampleDerivative(double x) const;
+
+  /**
    * This function will dump GNUPLOT input files that can be run to show the data points and
    * function fits
    */

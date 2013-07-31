@@ -69,6 +69,25 @@ LinearInterpolation::sample(double x) const
 }
 
 double
+LinearInterpolation::sampleDerivative(double x) const
+{
+  // endpoint cases
+  if (x <= _x[0])
+    return 0.0;
+  if (x >= _x[_x.size()-1])
+    return 0.0;
+
+  for (unsigned int i=0; i < _x.size()-1; ++i)
+    if (x >= _x[i]  && x < _x[i+1])
+    {
+      return (_y[i+1]-_y[i])/(_x[i+1]-_x[i]);
+    }
+
+  mooseError("Unreachable?");
+  return 0;
+}
+
+double
 LinearInterpolation::integrate()
 {
   double answer(0);

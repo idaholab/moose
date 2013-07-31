@@ -67,6 +67,11 @@ LinearInterpolationTest::sample()
   CPPUNIT_ASSERT( std::abs(interp.sample( 6. ) - 8.) < _tol );
 
   CPPUNIT_ASSERT( interp.sample( 1.5 ) == 2.5 );
+
+  CPPUNIT_ASSERT( std::abs(interp.sampleDerivative( 0. ) - 0.) < _tol );
+  CPPUNIT_ASSERT( std::abs(interp.sampleDerivative( 1.1 ) - 5.) < _tol );
+  CPPUNIT_ASSERT( std::abs(interp.sampleDerivative( 2. ) - 1.) < _tol );
+  CPPUNIT_ASSERT( std::abs(interp.sampleDerivative( 2.1 ) - 1.) < _tol );
 }
 
 void
