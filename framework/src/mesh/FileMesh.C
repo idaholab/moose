@@ -45,7 +45,7 @@ FileMesh::FileMesh(const std::string & name, InputParameters parameters) :
     _file_name(getParam<MeshFileName>("file")),
     _exreader(NULL)
 {
-  _mesh.set_mesh_dimension(getParam<MooseEnum>("dim"));
+  getMesh().set_mesh_dimension(getParam<MooseEnum>("dim"));
   _is_parallel = getParam<bool>("nemesis");
 }
 
@@ -90,14 +90,14 @@ FileMesh::init()
 
     if (_app.setFileRestart() && (_file_name.rfind(".exd") < _file_name.size() || _file_name.rfind(".e") < _file_name.size()))
     {
-      _exreader = new ExodusII_IO(_mesh);
+      _exreader = new ExodusII_IO(getMesh());
       _exreader->read(_file_name);
     }
     else
-      _mesh.read(_file_name);
+      getMesh().read(_file_name);
   }
 
-  _mesh.skip_partitioning(getParam<bool>("skip_partitioning"));
+  getMesh().skip_partitioning(getParam<bool>("skip_partitioning"));
 
   Moose::setup_perf_log.pop("Read Mesh","Setup");
 }
@@ -105,8 +105,8 @@ FileMesh::init()
 void
 FileMesh::read(const std::string & file_name)
 {
-  if (dynamic_cast<ParallelMesh *>(&_mesh) && !_is_parallel)
-    _mesh.read(file_name, NULL, false);
+  if (dynamic_cast<ParallelMesh *>(&getMesh()) && !_is_parallel)
+    getMesh().read(file_name, NULL, false);
   else
-    _mesh.read(file_name, NULL, true);
+    getMesh().read(file_name, NULL, true);
 }

@@ -97,14 +97,29 @@ GeneratedMesh::init()
   // Switching on MooseEnum
   switch (_dim)
   {
+    // The build_XYZ mesh generation functions take an
+    // UnstructuredMesh& as the first argument, hence the dynamic_cast.
   case 1:
-    MeshTools::Generation::build_line(_mesh, _nx, getParam<Real>("xmin"), getParam<Real>("xmax"), elem_type);
+    MeshTools::Generation::build_line(dynamic_cast<UnstructuredMesh&>(getMesh()),
+                                      _nx,
+                                      getParam<Real>("xmin"),
+                                      getParam<Real>("xmax"),
+                                      elem_type);
     break;
   case 2:
-    MeshTools::Generation::build_square(_mesh, _nx, _ny, getParam<Real>("xmin"), getParam<Real>("xmax"), getParam<Real>("ymin"), getParam<Real>("ymax"), elem_type);
+    MeshTools::Generation::build_square(dynamic_cast<UnstructuredMesh&>(getMesh()),
+                                        _nx, _ny,
+                                        getParam<Real>("xmin"), getParam<Real>("xmax"),
+                                        getParam<Real>("ymin"), getParam<Real>("ymax"),
+                                        elem_type);
     break;
   case 3:
-    MeshTools::Generation::build_cube(_mesh, _nx, _ny, _nz, getParam<Real>("xmin"), getParam<Real>("xmax"), getParam<Real>("ymin"), getParam<Real>("ymax"), getParam<Real>("zmin"), getParam<Real>("zmax"), elem_type);
+    MeshTools::Generation::build_cube(dynamic_cast<UnstructuredMesh&>(getMesh()),
+                                      _nx, _ny, _nz,
+                                      getParam<Real>("xmin"), getParam<Real>("xmax"),
+                                      getParam<Real>("ymin"), getParam<Real>("ymax"),
+                                      getParam<Real>("zmin"), getParam<Real>("zmax"),
+                                      elem_type);
     break;
   }
 }

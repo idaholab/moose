@@ -18,6 +18,7 @@
 
 // libMesh includes
 #include "libmesh/mesh_modification.h"
+#include "libmesh/serial_mesh.h"
 
 template<>
 InputParameters validParams<TiledMesh>()
@@ -86,10 +87,10 @@ TiledMesh::init()
   {
     ExodusII_IO ex(*this);
     ex.read(mesh_file);
-    _mesh.prepare_for_use();
+    getMesh().prepare_for_use();
   }
   else
-    _mesh.read(mesh_file);
+    getMesh().read(mesh_file);
 
   BoundaryID left = getBoundaryID(getParam<BoundaryName>("left_boundary"));
   BoundaryID right = getBoundaryID(getParam<BoundaryName>("right_boundary"));
@@ -98,34 +99,40 @@ TiledMesh::init()
   BoundaryID front = getBoundaryID(getParam<BoundaryName>("front_boundary"));
   BoundaryID back = getBoundaryID(getParam<BoundaryName>("back_boundary"));
 
+  // stitch_meshes() is only implemented for SerialMesh.  So make sure
+  // we have one here before continuing.
+  SerialMesh* serial_mesh = dynamic_cast<SerialMesh*>( &getMesh() );
+  if (!serial_mesh)
+    mooseError("Error, TiledMesh calls stitch_meshes() which only works on SerialMesh.");
+
   {
-    AutoPtr<MeshBase> clone = _mesh.clone();
+    AutoPtr<MeshBase> clone = getMesh().clone();
 
     // Build X Tiles
     for (unsigned int i=1; i<getParam<unsigned int>("x_tiles"); ++i)
     {
       MeshTools::Modification::translate(*clone, _x_width, 0, 0);
-      _mesh.stitch_meshes(dynamic_cast<SerialMesh &>(*clone), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+      serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
     }
   }
   {
-    AutoPtr<MeshBase> clone = _mesh.clone();
+    AutoPtr<MeshBase> clone = getMesh().clone();
 
     // Build Y Tiles
     for (unsigned int i=1; i<getParam<unsigned int>("y_tiles"); ++i)
     {
       MeshTools::Modification::translate(*clone, 0, _y_width, 0);
-      _mesh.stitch_meshes(dynamic_cast<SerialMesh &>(*clone), top, bottom, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+      serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), top, bottom, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
     }
   }
   {
-    AutoPtr<MeshBase> clone = _mesh.clone();
+    AutoPtr<MeshBase> clone = getMesh().clone();
 
     // Build Z Tiles
     for (unsigned int i=1; i<getParam<unsigned int>("z_tiles"); ++i)
     {
       MeshTools::Modification::translate(*clone, 0, 0, _z_width);
-      _mesh.stitch_meshes(dynamic_cast<SerialMesh &>(*clone), front, back, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+      serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), front, back, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
     }
   }
 

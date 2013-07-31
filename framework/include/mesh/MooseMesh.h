@@ -314,14 +314,15 @@ public:
   unsigned int getPatchSize();
 
   /**
-   * Implicit conversion operator from MooseMesh -> libMesh::Mesh.
+   * Implicit conversion operator from MooseMesh -> libMesh::MeshBase.
    */
-  operator libMesh::Mesh &();
+  operator libMesh::MeshBase &();
 
   /**
    * Accessor for the underlying libMesh Mesh object.
    */
   MeshBase & getMesh();
+  const MeshBase & getMesh() const;
 
   /**
    * Not implemented -- always returns NULL.
@@ -529,8 +530,8 @@ public:
   bool isBoundaryNode(unsigned int node_id);
 
 protected:
-  /// Underlying libMesh mesh object
-  libMesh::Mesh _mesh;
+  /// Pointer to underlying libMesh mesh object
+  libMesh::MeshBase* _mesh;
 
   /// Convienence enums
   enum {
