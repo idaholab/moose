@@ -59,63 +59,150 @@ public:
   Real _distance;
 };
 
-// NOTE: maybe inheritance would be better here
-//
+/**
+ * MooseMesh wraps a libMesh::Mesh object and enhances its capabilities
+ * by caching additional data and storing more state.
+ */
 class MooseMesh : public MooseObject
 {
 public:
+  /**
+   * Typical "Moose-style" constructor and copy constructor.
+   */
   MooseMesh(const std::string & name, InputParameters parameters);
   MooseMesh(const MooseMesh & other_mesh);
+
+  /**
+   * Destructor
+   */
   virtual ~MooseMesh();
 
+  /**
+   * Clone method.  Allocates memory you are responsible to clean up.
+   */
   virtual MooseMesh & clone() const = 0;
 
+  /**
+   * Do subclass-specific initialization.
+   */
   virtual void init() = 0;
 
+  /**
+   * Returns MeshBase::mesh_dimsension(), (not
+   * MeshBase::spatial_dimension()!) of the underlying libMesh mesh
+   * object.
+   */
   virtual unsigned int dimension() const { return _mesh.mesh_dimension(); }
 
+  /**
+   * Returns a vector of boundary IDs for the requested element on the
+   * requested side.
+   */
   std::vector<BoundaryID> boundaryIDs(const Elem *const elem, const unsigned short int side) const { return _mesh.boundary_info->boundary_ids(elem, side); }
+
+  /**
+   * Returns a const reference to a set of all user-specified
+   * boundary IDs.
+   */
   const std::set<BoundaryID> & getBoundaryIDs() const { return _mesh.boundary_info->get_boundary_ids(); }
 
+  /**
+   * Calls BoundaryInfo::build_node_list()/build_side_list() and *makes separate copies* of
+   * Nodes/Elems in those lists.
+   *
+   * Allocates memory which is cleaned up in the freeBndNodes()/freeBndElems() functions.
+   */
   void buildNodeList();
   void buildBndElemList();
+
+  /**
+   * If not already created, creates a map from every node to all
+   * elements to which they are created.
+   */
   std::map<unsigned int, std::vector<unsigned int> > & nodeToElemMap();
 
+  /**
+   * Return iterators to the beginning/end of the boundary nodes list.
+   */
   virtual bnd_node_iterator bndNodesBegin();
   virtual bnd_node_iterator bndNodesEnd();
 
+  /**
+   * Return iterators to the beginning/end of the boundary elements list.
+   */
   virtual bnd_elem_iterator bndElemsBegin();
   virtual bnd_elem_iterator bndElemsEnd();
 
+  /**
+   * Calls BoundaryInfo::build_node_list_from_side_list().
+   */
   void buildNodeListFromSideList() { _mesh.boundary_info->build_node_list_from_side_list(); }
+
+  /**
+   * Calls BoundaryInfo::build_side_list().
+   * Fills in the three passed vectors with list logical (element, side, id) tuples.
+   */
   void buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<short int> & il) { _mesh.boundary_info->build_side_list(el, sl, il); }
+
+  /**
+   * Calls BoundaryInfo::side_with_boundary_id().
+   */
   unsigned int sideWithBoundaryID(const Elem * const elem, const BoundaryID boundary_id) const { return _mesh.boundary_info->side_with_boundary_id(elem, boundary_id); }
 
+  /**
+   * Calls local_nodes_begin/end() on the underlying libMesh mesh object.
+   */
   MeshBase::const_node_iterator localNodesBegin() { return _mesh.local_nodes_begin(); }
   MeshBase::const_node_iterator localNodesEnd() { return _mesh.local_nodes_end(); }
 
+  /**
+   * Calls active_local_nodes_begin/end() on the underlying libMesh mesh object.
+   */
   MeshBase::const_element_iterator activeLocalElementsBegin() { return _mesh.active_local_elements_begin(); }
   const MeshBase::const_element_iterator activeLocalElementsEnd() { return _mesh.active_local_elements_end(); }
 
+  /**
+   * Calls n_nodes/elem() on the underlying libMesh mesh object.
+   */
   virtual unsigned int nNodes() const { return _mesh.n_nodes(); }
   virtual unsigned int nElem() const { return _mesh.n_elem(); }
 
+  /**
+   * Various accessors (pointers/references) for Node "i".
+   */
   virtual const Node & node (const unsigned int i) const;
   virtual Node & node (const unsigned int i);
   virtual const Node* nodePtr(const unsigned int i) const;
   virtual Node* nodePtr(const unsigned int i);
 
+  /**
+   * Various accessors (pointers/references) for Elem "i".
+   */
   virtual Elem * elem(const unsigned int i) { return _mesh.elem(i); }
   virtual const Elem * elem(const unsigned int i) const { return _mesh.elem(i); }
 
+  /**
+   * Setter/getter for the _is_changed flag.
+   */
   bool changed() const { return _is_changed; }
   void changed(bool state) { _is_changed = state; }
 
+  /**
+   * Setter/getter for the _is_prepared flag.
+   */
   bool prepared() const { return _is_prepared; }
   void prepared(bool state) { _is_prepared = state; }
 
+  /**
+   * Getter for the _is_parallel flag.
+   */
   bool parallel() { return _is_parallel; }
 
+  /**
+   * Declares that the MooseMesh has changed, invalidates cached data
+   * and rebuilds caches.  Sets a flag so that clients of the
+   * MooseMesh also know when it has changed.
+   */
   void meshChanged();
 
   /**
@@ -146,8 +233,16 @@ public:
    */
   std::vector<const Elem *> & coarsenedElementChildren(const Elem * elem);
 
+  /**
+   * Clears the "semi-local" node list and rebuilds it.  Semi-local nodes
+   * consist of all nodes that belong to local and ghost elements.
+   */
   void updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems);
 
+  /**
+   * Return pointers to range objects for various types of ranges
+   * (local nodes, boundary elems, etc.).
+   */
   ConstElemRange * getActiveLocalElementRange();
   NodeRange * getActiveNodeRange();
   SemiLocalNodeRange * getActiveSemiLocalNodeRange();
@@ -155,14 +250,39 @@ public:
   ConstBndNodeRange * getBoundaryNodeRange();
   ConstBndElemRange * getBoundaryElementRange();
 
+  /**
+   * Returns a read-only reference to the set of subdomains currently
+   * present in the Mesh.
+   */
   const std::set<SubdomainID> & meshSubdomains() const { return _mesh_subdomains; }
+
+  /**
+   * Returns a read-only reference to the set of subdomains currently
+   * present in the Mesh.
+   */
   const std::set<BoundaryID> & meshBoundaryIds() const { return _mesh_boundary_ids; }
+
+  /**
+   * Returns the normal vector associated with a given BoundaryID.
+   * It's only valid to call this when AddAllSideSetsByNormals is active.
+   */
   const RealVectorValue & getNormalByBoundaryID(BoundaryID id) const;
 
+  /**
+   * Calls prepare_for_use() on the underlying Mesh object, then communicates various
+   * boundary information on parallel meshes. Also calls update() internally.
+   */
   void prepare();
+
+  /**
+   * Calls buildNodeListFromSideList(), buildNodeList(), and buildBndElemList().
+   */
   void update();
 
 #ifdef LIBMESH_ENABLE_AMR
+  /**
+   * Returns the level of uniform refinement requested (zero if AMR is disabled).
+   */
   unsigned int & uniformRefineLevel() { return _uniform_refine_level; }
 #endif //LIBMESH_ENABLE_AMR
 
@@ -177,23 +297,51 @@ public:
    */
   void setGhostedBoundaryInflation(const std::vector<Real> & inflation) { _ghosted_boundaries_inflation = inflation; }
 
+  /**
+   * Return a writeable reference to the set of ghosted boundary IDs.
+   */
   std::set<unsigned int> & getGhostedBoundaries() { return _ghosted_boundaries; }
 
+  /**
+   * Return a writeable reference to the _ghosted_boundaries_inflation vector.
+   */
   std::vector<Real> & getGhostedBoundaryInflation() { return _ghosted_boundaries_inflation; }
 
+  /**
+   * Getter/setter for the patch_size parameter.
+   */
   void setPatchSize(const unsigned int patch_size) { _patch_size = patch_size; }
   unsigned int getPatchSize() { return _patch_size; }
 
+  /**
+   * Implicit conversion operator from MooseMesh -> libMesh::Mesh.
+   */
   operator libMesh::Mesh &(void) { return _mesh; }
 
+  /**
+   * Accessor for the underlying libMesh Mesh object.
+   */
   MeshBase & getMesh() { return _mesh; }
 
+  /**
+   * Not implemented -- always returns NULL.
+   */
   virtual ExodusII_IO * exReader() const { return NULL; }
 
+  /**
+   * Calls print_info() on the underlying Mesh.
+   */
   inline void printInfo(std::ostream &os=libMesh::out) { _mesh.print_info(os); }
 
+  /**
+   * Return list of blocks to which the given node belongs.
+   */
   std::set<SubdomainID> & getNodeBlockIds(const Node & node);
 
+  /**
+   * Return a writeable reference to a vector of node IDs that belong
+   * to nodeset_id.
+   */
   std::vector<unsigned int> & getNodeList(short int nodeset_id) { return _node_set_nodes[nodeset_id]; }
 
   /**
@@ -294,6 +442,11 @@ public:
   Real getMinInDimension(unsigned int component) const;
   Real getMaxInDimension(unsigned int component) const;
 
+  /**
+   * For "regular orthogonal" meshes, determine if variable var_num is
+   * periodic with respect to the primary and secondary BoundaryIDs,
+   * record this fact in the _periodic_dim data structure.
+   */
   void addPeriodicVariable(unsigned int var_num, BoundaryID primary, BoundaryID secondary);
 
   /**
@@ -354,6 +507,11 @@ public:
    */
   const std::vector<std::pair<unsigned int, QpMap> > & getCoarseningMap(const Elem & elem, int input_side);
 
+  /**
+   * Change all the boundary IDs for a given side from old_id to
+   * new_id.  If delete_prev is true, also actually remove the side
+   * with old_id from the BoundaryInfo object.
+   */
   void changeBoundaryId(const boundary_id_type old_id, const boundary_id_type new_id, bool delete_prev);
 
   /**
@@ -364,6 +522,10 @@ public:
    */
   const std::set<unsigned int> & getSubdomainBoundaryIds(unsigned int subdomain_id) { return _subdomain_boundary_ids[subdomain_id]; }
 
+  /**
+   * Returns true if the requested node is in the list of boundary
+   * nodes, false otherwise.
+   */
   bool isBoundaryNode(unsigned int node_id) { return _bnd_node_ids.find(node_id) != _bnd_node_ids.end(); }
 
 protected:
