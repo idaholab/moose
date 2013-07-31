@@ -1482,3 +1482,212 @@ MooseMesh::getNormalByBoundaryID(BoundaryID id) const
   // construct a new RealVectorValue - (x,y,z)=(0, 0, 0)
   return (*_boundary_to_normal_map)[id];
 }
+
+unsigned int
+MooseMesh::dimension() const
+{
+  return _mesh.mesh_dimension();
+}
+
+std::vector<BoundaryID>
+MooseMesh::boundaryIDs(const Elem *const elem, const unsigned short int side) const
+{
+  return _mesh.boundary_info->boundary_ids(elem, side);
+}
+
+const std::set<BoundaryID> &
+MooseMesh::getBoundaryIDs() const
+{
+  return _mesh.boundary_info->get_boundary_ids();
+}
+
+void
+MooseMesh::buildNodeListFromSideList()
+{
+  _mesh.boundary_info->build_node_list_from_side_list();
+}
+
+void
+MooseMesh::buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<short int> & il)
+{
+  _mesh.boundary_info->build_side_list(el, sl, il);
+}
+
+unsigned int
+MooseMesh::sideWithBoundaryID(const Elem * const elem, const BoundaryID boundary_id) const
+{
+  return _mesh.boundary_info->side_with_boundary_id(elem, boundary_id);
+}
+
+MeshBase::const_node_iterator
+MooseMesh::localNodesBegin()
+{
+  return _mesh.local_nodes_begin();
+}
+
+MeshBase::const_node_iterator
+MooseMesh::localNodesEnd()
+{
+  return _mesh.local_nodes_end();
+}
+
+MeshBase::const_element_iterator
+MooseMesh::activeLocalElementsBegin()
+{
+  return _mesh.active_local_elements_begin();
+}
+
+const MeshBase::const_element_iterator
+MooseMesh::activeLocalElementsEnd()
+{
+  return _mesh.active_local_elements_end();
+}
+
+unsigned int
+MooseMesh::nNodes() const
+{
+  return _mesh.n_nodes();
+}
+
+unsigned int
+MooseMesh::nElem() const
+{
+  return _mesh.n_elem();
+}
+
+Elem *
+MooseMesh::elem(const unsigned int i)
+{
+  return _mesh.elem(i);
+}
+
+const Elem *
+MooseMesh::elem(const unsigned int i) const
+{
+  return _mesh.elem(i);
+}
+
+bool
+MooseMesh::changed() const
+{
+  return _is_changed;
+}
+
+void
+MooseMesh::changed(bool state)
+{
+  _is_changed = state;
+}
+
+bool
+MooseMesh::prepared() const
+{
+  return _is_prepared;
+}
+
+void
+MooseMesh::prepared(bool state)
+{
+  _is_prepared = state;
+}
+
+bool
+MooseMesh::parallel()
+{
+  return _is_parallel;
+}
+
+const std::set<SubdomainID> &
+MooseMesh::meshSubdomains() const
+{
+  return _mesh_subdomains;
+}
+
+const std::set<BoundaryID> &
+MooseMesh::meshBoundaryIds() const
+{
+  return _mesh_boundary_ids;
+}
+
+#ifdef LIBMESH_ENABLE_AMR
+unsigned int & MooseMesh::uniformRefineLevel()
+{
+  return _uniform_refine_level;
+}
+#endif // LIBMESH_ENABLE_AMR
+
+void
+MooseMesh::addGhostedBoundary(BoundaryID boundary_id)
+{
+  _ghosted_boundaries.insert(boundary_id);
+}
+
+void
+MooseMesh::setGhostedBoundaryInflation(const std::vector<Real> & inflation)
+{
+  _ghosted_boundaries_inflation = inflation;
+}
+
+std::set<unsigned int> &
+MooseMesh::getGhostedBoundaries()
+{
+  return _ghosted_boundaries;
+}
+
+std::vector<Real> &
+MooseMesh::getGhostedBoundaryInflation()
+{
+  return _ghosted_boundaries_inflation;
+}
+
+void
+MooseMesh::setPatchSize(const unsigned int patch_size)
+{
+  _patch_size = patch_size;
+}
+
+unsigned int
+MooseMesh::getPatchSize()
+{
+  return _patch_size;
+}
+
+MooseMesh::operator libMesh::Mesh &()
+{
+  return _mesh;
+}
+
+MeshBase &
+MooseMesh::getMesh()
+{
+  return _mesh;
+}
+
+ExodusII_IO *
+MooseMesh::exReader() const
+{
+  return NULL;
+}
+
+void MooseMesh::printInfo(std::ostream &os)
+{
+  _mesh.print_info(os);
+}
+
+std::vector<unsigned int> &
+MooseMesh::getNodeList(short int nodeset_id)
+{
+  return _node_set_nodes[nodeset_id];
+}
+
+const std::set<unsigned int> &
+MooseMesh::getSubdomainBoundaryIds(unsigned int subdomain_id)
+{
+  return _subdomain_boundary_ids[subdomain_id];
+}
+
+bool
+MooseMesh::isBoundaryNode(unsigned int node_id)
+{
+  return _bnd_node_ids.find(node_id) != _bnd_node_ids.end();
+}

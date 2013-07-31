@@ -92,19 +92,19 @@ public:
    * MeshBase::spatial_dimension()!) of the underlying libMesh mesh
    * object.
    */
-  virtual unsigned int dimension() const { return _mesh.mesh_dimension(); }
+  virtual unsigned int dimension() const;
 
   /**
    * Returns a vector of boundary IDs for the requested element on the
    * requested side.
    */
-  std::vector<BoundaryID> boundaryIDs(const Elem *const elem, const unsigned short int side) const { return _mesh.boundary_info->boundary_ids(elem, side); }
+  std::vector<BoundaryID> boundaryIDs(const Elem *const elem, const unsigned short int side) const;
 
   /**
    * Returns a const reference to a set of all user-specified
    * boundary IDs.
    */
-  const std::set<BoundaryID> & getBoundaryIDs() const { return _mesh.boundary_info->get_boundary_ids(); }
+  const std::set<BoundaryID> & getBoundaryIDs() const;
 
   /**
    * Calls BoundaryInfo::build_node_list()/build_side_list() and *makes separate copies* of
@@ -136,36 +136,36 @@ public:
   /**
    * Calls BoundaryInfo::build_node_list_from_side_list().
    */
-  void buildNodeListFromSideList() { _mesh.boundary_info->build_node_list_from_side_list(); }
+  void buildNodeListFromSideList();
 
   /**
    * Calls BoundaryInfo::build_side_list().
    * Fills in the three passed vectors with list logical (element, side, id) tuples.
    */
-  void buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<short int> & il) { _mesh.boundary_info->build_side_list(el, sl, il); }
+  void buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<short int> & il);
 
   /**
    * Calls BoundaryInfo::side_with_boundary_id().
    */
-  unsigned int sideWithBoundaryID(const Elem * const elem, const BoundaryID boundary_id) const { return _mesh.boundary_info->side_with_boundary_id(elem, boundary_id); }
+  unsigned int sideWithBoundaryID(const Elem * const elem, const BoundaryID boundary_id) const;
 
   /**
    * Calls local_nodes_begin/end() on the underlying libMesh mesh object.
    */
-  MeshBase::const_node_iterator localNodesBegin() { return _mesh.local_nodes_begin(); }
-  MeshBase::const_node_iterator localNodesEnd() { return _mesh.local_nodes_end(); }
+  MeshBase::const_node_iterator localNodesBegin();
+  MeshBase::const_node_iterator localNodesEnd();
 
   /**
    * Calls active_local_nodes_begin/end() on the underlying libMesh mesh object.
    */
-  MeshBase::const_element_iterator activeLocalElementsBegin() { return _mesh.active_local_elements_begin(); }
-  const MeshBase::const_element_iterator activeLocalElementsEnd() { return _mesh.active_local_elements_end(); }
+  MeshBase::const_element_iterator activeLocalElementsBegin();
+  const MeshBase::const_element_iterator activeLocalElementsEnd();
 
   /**
    * Calls n_nodes/elem() on the underlying libMesh mesh object.
    */
-  virtual unsigned int nNodes() const { return _mesh.n_nodes(); }
-  virtual unsigned int nElem() const { return _mesh.n_elem(); }
+  virtual unsigned int nNodes() const;
+  virtual unsigned int nElem() const;
 
   /**
    * Various accessors (pointers/references) for Node "i".
@@ -178,25 +178,25 @@ public:
   /**
    * Various accessors (pointers/references) for Elem "i".
    */
-  virtual Elem * elem(const unsigned int i) { return _mesh.elem(i); }
-  virtual const Elem * elem(const unsigned int i) const { return _mesh.elem(i); }
+  virtual Elem * elem(const unsigned int i);
+  virtual const Elem * elem(const unsigned int i) const;
 
   /**
    * Setter/getter for the _is_changed flag.
    */
-  bool changed() const { return _is_changed; }
-  void changed(bool state) { _is_changed = state; }
+  bool changed() const;
+  void changed(bool state);
 
   /**
    * Setter/getter for the _is_prepared flag.
    */
-  bool prepared() const { return _is_prepared; }
-  void prepared(bool state) { _is_prepared = state; }
+  bool prepared() const;
+  void prepared(bool state);
 
   /**
    * Getter for the _is_parallel flag.
    */
-  bool parallel() { return _is_parallel; }
+  bool parallel();
 
   /**
    * Declares that the MooseMesh has changed, invalidates cached data
@@ -254,13 +254,13 @@ public:
    * Returns a read-only reference to the set of subdomains currently
    * present in the Mesh.
    */
-  const std::set<SubdomainID> & meshSubdomains() const { return _mesh_subdomains; }
+  const std::set<SubdomainID> & meshSubdomains() const;
 
   /**
    * Returns a read-only reference to the set of subdomains currently
    * present in the Mesh.
    */
-  const std::set<BoundaryID> & meshBoundaryIds() const { return _mesh_boundary_ids; }
+  const std::set<BoundaryID> & meshBoundaryIds() const;
 
   /**
    * Returns the normal vector associated with a given BoundaryID.
@@ -283,55 +283,55 @@ public:
   /**
    * Returns the level of uniform refinement requested (zero if AMR is disabled).
    */
-  unsigned int & uniformRefineLevel() { return _uniform_refine_level; }
+  unsigned int & uniformRefineLevel();
 #endif //LIBMESH_ENABLE_AMR
 
   /**
    * This will add the boundary ids to be ghosted to this processor
    */
-  void addGhostedBoundary(BoundaryID boundary_id) { _ghosted_boundaries.insert(boundary_id); }
+  void addGhostedBoundary(BoundaryID boundary_id);
 
   /**
    * This sets the inflation amount for the bounding box for each partition for use in
    * ghosting boundaries
    */
-  void setGhostedBoundaryInflation(const std::vector<Real> & inflation) { _ghosted_boundaries_inflation = inflation; }
+  void setGhostedBoundaryInflation(const std::vector<Real> & inflation);
 
   /**
    * Return a writeable reference to the set of ghosted boundary IDs.
    */
-  std::set<unsigned int> & getGhostedBoundaries() { return _ghosted_boundaries; }
+  std::set<unsigned int> & getGhostedBoundaries();
 
   /**
    * Return a writeable reference to the _ghosted_boundaries_inflation vector.
    */
-  std::vector<Real> & getGhostedBoundaryInflation() { return _ghosted_boundaries_inflation; }
+  std::vector<Real> & getGhostedBoundaryInflation();
 
   /**
    * Getter/setter for the patch_size parameter.
    */
-  void setPatchSize(const unsigned int patch_size) { _patch_size = patch_size; }
-  unsigned int getPatchSize() { return _patch_size; }
+  void setPatchSize(const unsigned int patch_size);
+  unsigned int getPatchSize();
 
   /**
    * Implicit conversion operator from MooseMesh -> libMesh::Mesh.
    */
-  operator libMesh::Mesh &(void) { return _mesh; }
+  operator libMesh::Mesh &();
 
   /**
    * Accessor for the underlying libMesh Mesh object.
    */
-  MeshBase & getMesh() { return _mesh; }
+  MeshBase & getMesh();
 
   /**
    * Not implemented -- always returns NULL.
    */
-  virtual ExodusII_IO * exReader() const { return NULL; }
+  virtual ExodusII_IO * exReader() const;
 
   /**
    * Calls print_info() on the underlying Mesh.
    */
-  inline void printInfo(std::ostream &os=libMesh::out) { _mesh.print_info(os); }
+  void printInfo(std::ostream &os=libMesh::out);
 
   /**
    * Return list of blocks to which the given node belongs.
@@ -342,7 +342,7 @@ public:
    * Return a writeable reference to a vector of node IDs that belong
    * to nodeset_id.
    */
-  std::vector<unsigned int> & getNodeList(short int nodeset_id) { return _node_set_nodes[nodeset_id]; }
+  std::vector<unsigned int> & getNodeList(short int nodeset_id);
 
   /**
    * Add a new node to the mesh.  If there is already a node located at the point passed
@@ -520,13 +520,13 @@ public:
    * @param subdomain_id The subdomain ID you want to get the boundary ids for.
    * @return All boundary IDs connected to elements in the give
    */
-  const std::set<unsigned int> & getSubdomainBoundaryIds(unsigned int subdomain_id) { return _subdomain_boundary_ids[subdomain_id]; }
+  const std::set<unsigned int> & getSubdomainBoundaryIds(unsigned int subdomain_id);
 
   /**
    * Returns true if the requested node is in the list of boundary
    * nodes, false otherwise.
    */
-  bool isBoundaryNode(unsigned int node_id) { return _bnd_node_ids.find(node_id) != _bnd_node_ids.end(); }
+  bool isBoundaryNode(unsigned int node_id);
 
 protected:
   /// Underlying libMesh mesh object
