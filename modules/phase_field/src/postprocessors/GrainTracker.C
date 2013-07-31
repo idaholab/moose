@@ -150,7 +150,7 @@ GrainTracker::buildBoundingSpheres()
   std::map<BoundaryID, std::set<unsigned int> > pb_nodes;
   // Build a list of periodic nodes
   _mesh.buildPeriodicNodeSets(pb_nodes, _var_number, _pbs);
-  MeshBase & mesh = _mesh._mesh;
+  MeshBase & mesh = _mesh.getMesh();
 
   unsigned long total_node_count = 0;
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
