@@ -114,7 +114,7 @@ NodalFloodCount::initialize()
 
   // Build a new node to element map
   _nodes_to_elem_map.clear();
-  MeshTools::build_nodes_to_elem_map(_mesh._mesh, _nodes_to_elem_map);
+  MeshTools::build_nodes_to_elem_map(_mesh.getMesh(), _nodes_to_elem_map);
 
   // TODO: We might only need to build this once if adaptivity is turned off
   _mesh.buildPeriodicNodeMap(_periodic_node_map, _var_number, _pbs);
@@ -479,7 +479,7 @@ NodalFloodCount::flood(const Node *node, int current_idx, unsigned int live_regi
   }
 
   std::vector< const Node * > neighbors;
-  MeshTools::find_nodal_neighbors(_mesh._mesh, *node, _nodes_to_elem_map, neighbors);
+  MeshTools::find_nodal_neighbors(_mesh.getMesh(), *node, _nodes_to_elem_map, neighbors);
   // Flood neighboring nodes that are also above this threshold with recursion
   for (unsigned int i=0; i<neighbors.size(); ++i)
   {
@@ -550,8 +550,8 @@ NodalFloodCount::calculateBubbleVolumes()
   }
 
   std::vector<unsigned int> flood_nodes(_maps_size);
-  const MeshBase::const_element_iterator el_end = _mesh._mesh.active_local_elements_end();
-  for (MeshBase::const_element_iterator el = _mesh._mesh.active_local_elements_begin(); el != el_end; ++el)
+  const MeshBase::const_element_iterator el_end = _mesh.getMesh().active_local_elements_end();
+  for (MeshBase::const_element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != el_end; ++el)
   {
     Elem *elem = *el;
     unsigned int elem_n_nodes = elem->n_nodes();
