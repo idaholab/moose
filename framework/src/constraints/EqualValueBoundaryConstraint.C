@@ -32,7 +32,7 @@ EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const std::string & n
 
   std::vector<unsigned int> nodelist;
   std::vector<boundary_id_type> boundary_id_list;
-  _mesh._mesh.boundary_info->build_node_list(nodelist,boundary_id_list);
+  _mesh.getMesh().boundary_info->build_node_list(nodelist,boundary_id_list);
   
   std::vector<unsigned int>::iterator in;
   std::vector<boundary_id_type>::iterator ib;
