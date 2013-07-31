@@ -2255,7 +2255,9 @@ NonlinearSystem::printTopResiduals(const NumericVector<Number> & residual, unsig
   vec.resize(residual.local_size());
 
   unsigned int j = 0;
-  for (MeshBase::node_iterator it = _mesh.getMesh().local_nodes_begin(); it != _mesh.getMesh().local_nodes_end(); ++it)
+  MeshBase::node_iterator it = _mesh.getMesh().local_nodes_begin();
+  const MeshBase::node_iterator end = _mesh.getMesh().local_nodes_end();
+  for (; it != end; ++it)
   {
     Node & node = *(*it);
     unsigned int nd = node.id();

@@ -506,7 +506,8 @@ MooseMesh::getBoundaryElementRange()
 void
 MooseMesh::cacheInfo()
 {
-  for (MeshBase::element_iterator el = _mesh.elements_begin(); el != _mesh.elements_end(); ++el)
+  const MeshBase::element_iterator end = _mesh.elements_end();
+  for (MeshBase::element_iterator el = _mesh.elements_begin(); el != end; ++el)
   {
     Elem * elem = *el;
 
@@ -578,7 +579,8 @@ MooseMesh::addUniqueNode(const Point & p, Real tol)
   {
     _node_map.clear();
     _node_map.reserve(_mesh.n_nodes());
-    for (libMesh::MeshBase::node_iterator i=_mesh.nodes_begin(); i!=_mesh.nodes_end(); ++i)
+    const libMesh::MeshBase::node_iterator end = _mesh.nodes_end();
+    for (libMesh::MeshBase::node_iterator i=_mesh.nodes_begin(); i != end; ++i)
     {
       _node_map.push_back(*i);
     }
