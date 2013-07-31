@@ -189,6 +189,8 @@ protected:
   std::vector<unsigned int> _stateful_prop_id_to_prop_id;
 
   unsigned int addPropertyId (const std::string & prop_name);
+
+  void sizeProps(MaterialProperties & mp, unsigned int size);
 };
 
 

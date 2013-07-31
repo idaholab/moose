@@ -111,6 +111,8 @@ ComputeIndicatorThread::onElement(const Elem *elem)
     }
   }
 
+  _fe_problem.swapBackMaterials(_tid);
+
   if(!_finalize) // During finalize the Indicators should be setting values in the vectors manually
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
@@ -153,11 +155,14 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
     {
       _fe_problem.reinitNeighbor(elem, side, _tid);
 
-      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
-      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
+      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       for (std::vector<Indicator *>::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
         (*it)->computeIndicator();
+
+      _fe_problem.swapBackMaterialsFace(_tid);
+      _fe_problem.swapBackMaterialsNeighbor(_tid);
     }
   }
 }

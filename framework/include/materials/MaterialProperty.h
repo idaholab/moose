@@ -70,7 +70,7 @@ public:
    */
   virtual void resize (int n) = 0;
 
-  virtual void shallowCopy (PropertyValue *rhs) = 0;
+  virtual void swap (PropertyValue *rhs) = 0;
 
   /**
    * Copy the value of a Property from one specific to a specific qp in this Property.
@@ -139,7 +139,7 @@ public:
   /**
    *
    */
-  virtual void shallowCopy (PropertyValue *rhs);
+  virtual void swap (PropertyValue *rhs);
 
   /**
    * Copy the value of a Property from one specific to a specific qp in this Property.
@@ -211,10 +211,10 @@ MaterialProperty<T>::resize (int n)
 
 template <typename T>
 inline void
-MaterialProperty<T>::shallowCopy (PropertyValue *rhs)
+MaterialProperty<T>::swap (PropertyValue *rhs)
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");
-  _value.shallowCopy(libmesh_cast_ptr<const MaterialProperty<T>*>(rhs)->_value);
+  _value.swap(libmesh_cast_ptr<MaterialProperty<T>*>(rhs)->_value);
 }
 
 template <typename T>
@@ -250,6 +250,8 @@ class MaterialProperties : public std::vector<PropertyValue *>
 public:
   MaterialProperties() { }
 
+  virtual ~MaterialProperties() { }
+
   /**
    * Parameter map iterator.
    */
@@ -267,6 +269,17 @@ public:
   {
     for (iterator k = begin(); k != end(); ++k)
       delete *k;
+  }
+
+  /**
+   * Resize items in this array, i.e. the number of values needed in PropertyValue array
+   * @param n_qpoints The number of values needed to store (equals the the number of quadrature points per mesh element)
+   */
+  void resizeItems(unsigned int n_qpoints)
+  {
+    for (iterator k = begin(); k != end(); ++k)
+      if (*k != NULL)
+        (*k)->resize(n_qpoints);
   }
 };
 

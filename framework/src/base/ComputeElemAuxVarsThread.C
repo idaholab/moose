@@ -100,6 +100,8 @@ ComputeElemAuxVarsThread::onElement(const Elem * elem)
         aux_it++)
       (*aux_it)->compute();
 
+    _fe_problem.swapBackMaterials(_tid);
+
     // update the solution vector
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);

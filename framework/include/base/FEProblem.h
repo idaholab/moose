@@ -352,9 +352,15 @@ public:
   virtual void prepareMaterials(SubdomainID blk_id, THREAD_ID tid);
 
   virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid);
-  virtual void reinitMaterialsFace(SubdomainID blk_id, unsigned int side, THREAD_ID tid);
-  virtual void reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int side, THREAD_ID tid);
+  virtual void reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid);
+  virtual void reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid);
   virtual void reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid);
+  /*
+   * Swap back underlying data storing stateful material properties
+   */
+  virtual void swapBackMaterials(THREAD_ID tid);
+  virtual void swapBackMaterialsFace(THREAD_ID tid);
+  virtual void swapBackMaterialsNeighbor(THREAD_ID tid);
 
   // Postprocessors /////
   virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
@@ -680,6 +686,8 @@ protected:
   std::vector<MaterialData *> _material_data;
   std::vector<MaterialData *> _bnd_material_data;
   std::vector<MaterialData *> _neighbor_material_data;
+  /// Flag to indicated that boundary materials were swapped
+  bool _bnd_material_swapped;
 
   // materials
   std::vector<MaterialWarehouse> _materials;

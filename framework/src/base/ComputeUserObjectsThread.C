@@ -100,6 +100,8 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
        UserObject_it != _user_objects[_tid].elementUserObjects(_subdomain, _group).end();
        ++UserObject_it)
     (*UserObject_it)->execute();
+
+  _fe_problem.swapBackMaterials(_tid);
 }
 
 void
@@ -108,12 +110,14 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
   if (_user_objects[_tid].sideUserObjects(bnd_id).size() > 0)
   {
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
-    _fe_problem.reinitMaterialsFace(_subdomain, side, _tid);
+    _fe_problem.reinitMaterialsFace(_subdomain, _tid);
 
     for (std::vector<SideUserObject *>::const_iterator side_UserObject_it = _user_objects[_tid].sideUserObjects(bnd_id, _group).begin();
          side_UserObject_it != _user_objects[_tid].sideUserObjects(bnd_id, _group).end();
          ++side_UserObject_it)
       (*side_UserObject_it)->execute();
+
+    _fe_problem.swapBackMaterialsFace(_tid);
   }
 }
 
@@ -133,16 +137,18 @@ ComputeUserObjectsThread::onInternalSide(const Elem *elem, unsigned int side)
     if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
     {
       _fe_problem.prepareFace(elem, _tid);
-
       _fe_problem.reinitNeighbor(elem, side, _tid);
-      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
-      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
+      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       for (std::vector<InternalSideUserObject *>::const_iterator it = isuo.begin(); it != isuo.end(); ++it)
       {
         InternalSideUserObject * uo = *it;
         uo->execute();
       }
+
+      _fe_problem.swapBackMaterialsFace(_tid);
+      _fe_problem.swapBackMaterialsNeighbor(_tid);
     }
   }
 }

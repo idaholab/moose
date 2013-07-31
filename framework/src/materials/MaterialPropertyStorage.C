@@ -34,7 +34,7 @@ void shallowCopyData(const std::vector<unsigned int> & stateful_prop_ids, Materi
     PropertyValue * prop = data[stateful_prop_ids[i]];              // do the look-up just once (OPT)
     PropertyValue * prop_from = data_from[i];                       // do the look-up just once (OPT)
     if (prop != NULL && prop_from != NULL)
-      prop->shallowCopy(prop_from);
+      prop->swap(prop_from);
   }
 }
 
@@ -45,7 +45,7 @@ void shallowCopyDataBack(const std::vector<unsigned int> & stateful_prop_ids, Ma
     PropertyValue * prop = data[i];                                 // do the look-up just once (OPT)
     PropertyValue * prop_from = data_from[stateful_prop_ids[i]];    // do the look-up just once (OPT)
     if (prop != NULL && prop_from != NULL)
-      prop->shallowCopy(prop_from);
+      prop->swap(prop_from);
   }
 }
 
@@ -60,6 +60,8 @@ MaterialPropertyStorage::MaterialPropertyStorage() :
 
 MaterialPropertyStorage::~MaterialPropertyStorage()
 {
+  releaseProperties();
+
   delete _props_elem;
   delete _props_elem_old;
   delete _props_elem_older;

@@ -84,6 +84,8 @@ ComputeMarkerThread::onElement(const Elem *elem)
   for (std::vector<Marker *>::const_iterator it = markers.begin(); it != markers.end(); ++it)
     (*it)->computeMarker();
 
+  _fe_problem.swapBackMaterials(_tid);
+
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)

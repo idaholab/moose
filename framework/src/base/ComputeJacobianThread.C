@@ -150,6 +150,8 @@ ComputeJacobianThread::onElement(const Elem *elem)
     _fe_problem.reinitOffDiagScalars(_tid);
 
   computeJacobian();
+
+  _fe_problem.swapBackMaterials(_tid);
 }
 
 void
@@ -163,10 +165,12 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
     if (_subdomain != _old_subdomain)
       _fe_problem.subdomainSetupSide(_subdomain, _tid);
 
-    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
+    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
     computeFaceJacobian(bnd_id);
+
+    _fe_problem.swapBackMaterialsFace(_tid);
   }
 }
 
@@ -187,10 +191,13 @@ ComputeJacobianThread::onInternalSide(const Elem *elem, unsigned int side)
     {
       _fe_problem.reinitNeighbor(elem, side, _tid);
 
-      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
-      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
+      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       computeInternalFaceJacobian();
+
+      _fe_problem.swapBackMaterialsFace(_tid);
+      _fe_problem.swapBackMaterialsNeighbor(_tid);
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);

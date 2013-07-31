@@ -207,28 +207,17 @@ FEProblem::~FEProblem()
 {
   delete _cm;
 
-  bool stateful_props = _material_props.hasStatefulProperties();
-
   unsigned int n_threads = libMesh::n_threads();
   for (unsigned int i = 0; i < n_threads; i++)
   {
     delete _assembly[i];
 
-    if (!stateful_props)
-    {
-      delete _material_data[i];
-      delete _bnd_material_data[i];
-      delete _neighbor_material_data[i];
-    }
+    delete _material_data[i];
+    delete _bnd_material_data[i];
+    delete _neighbor_material_data[i];
 
     for (std::map<std::string, Function *>::iterator it = _functions[i].begin(); it != _functions[i].end(); ++it)
       delete it->second;
-  }
-
-  if (stateful_props)
-  {
-    _material_props.releaseProperties();
-    _bnd_material_props.releaseProperties();
   }
 
   delete &_mesh;
@@ -1474,25 +1463,31 @@ FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid)
     unsigned int n_points = _assembly[tid]->qRule()->n_points();
     if (_material_data[tid]->nQPoints() != n_points)
       _material_data[tid]->size(n_points);
-    _material_data[tid]->reinit(_materials[tid].getMaterials(blk_id), *elem, 0);
+    _material_data[tid]->swap(*elem, 0);
+    _material_data[tid]->reinit(_materials[tid].getMaterials(blk_id));
   }
 }
 
 void
-FEProblem::reinitMaterialsFace(SubdomainID blk_id, unsigned int side, THREAD_ID tid)
+FEProblem::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid)
 {
   if (_materials[tid].hasFaceMaterials(blk_id))
   {
     const Elem * & elem = _assembly[tid]->elem();
+    unsigned int side = _assembly[tid]->side();
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+
     if (_bnd_material_data[tid]->nQPoints() != n_points)
       _bnd_material_data[tid]->size(n_points);
-    _bnd_material_data[tid]->reinit(_materials[tid].getFaceMaterials(blk_id), *elem, side);
+    if (!_bnd_material_swapped)
+      _bnd_material_data[tid]->swap(*elem, side);
+    _bnd_material_swapped = true;
+    _bnd_material_data[tid]->reinit(_materials[tid].getFaceMaterials(blk_id));
   }
 }
 
 void
-FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int /*side*/, THREAD_ID tid)
+FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid)
 {
   if (_materials[tid].hasNeighborMaterials(blk_id))
   {
@@ -1502,23 +1497,51 @@ FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, unsigned int /*side*/, TH
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     if (_neighbor_material_data[tid]->nQPoints() != n_points)
       _neighbor_material_data[tid]->size(n_points);
-    _neighbor_material_data[tid]->reinit(_materials[tid].getNeighborMaterials(blk_id), *neighbor, neighbor_side);
+    _neighbor_material_data[tid]->swap(*neighbor, neighbor_side);
+    _neighbor_material_data[tid]->reinit(_materials[tid].getNeighborMaterials(blk_id));
   }
 }
 
 void
-FEProblem::reinitMaterialsBoundary(BoundaryID bnd_id, THREAD_ID tid)
+FEProblem::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid)
 {
-  if (_materials[tid].hasBoundaryMaterials(bnd_id))
+  if (_materials[tid].hasBoundaryMaterials(boundary_id))
   {
-    // this works b/c we called reinitElemFace before, so assembly has the right values
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     if (_bnd_material_data[tid]->nQPoints() != n_points)
       _bnd_material_data[tid]->size(n_points);
-    _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(bnd_id), *elem, side);
+    if (!_bnd_material_swapped)
+      _bnd_material_data[tid]->swap(*elem, side);
+    _bnd_material_swapped = true;
+    _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(boundary_id));
   }
+}
+
+void
+FEProblem::swapBackMaterials(THREAD_ID tid)
+{
+  const Elem * & elem = _assembly[tid]->elem();
+  _material_data[tid]->swapBack(*elem);
+}
+
+void
+FEProblem::swapBackMaterialsFace(THREAD_ID tid)
+{
+  const Elem * & elem = _assembly[tid]->elem();
+  unsigned int side = _assembly[tid]->side();
+  _bnd_material_data[tid]->swapBack(*elem, side);
+  _bnd_material_swapped = false;
+}
+
+void
+FEProblem::swapBackMaterialsNeighbor(THREAD_ID tid)
+{
+  // NOTE: this will not work with h-adaptivity
+  const Elem * & neighbor = _assembly[tid]->neighbor();
+  unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
+  _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
 }
 
 /**

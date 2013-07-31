@@ -121,6 +121,12 @@ public:
   const T & operator[](const unsigned int i) const;
 
   /**
+   * Swap memory in this object woth the 'rhs' object
+   * @param rhs The object we are swapping with
+   */
+  void swap(MooseArray & rhs);
+
+  /**
    * Doesn't actually make a copy of the data.
    *
    * Just makes _this_ object operate on the same data.
@@ -266,6 +272,16 @@ MooseArray<T>::operator[](const unsigned int i) const
   mooseAssert(i < _size, "Access out of bounds in MooseArray (i: " << i << " size: " << _size << ")");
 
   return _data[i];
+}
+
+template<typename T>
+inline
+void
+MooseArray<T>::swap(MooseArray & rhs)
+{
+  std::swap(_data, rhs._data);
+  std::swap(_size, rhs._size);
+  std::swap(_allocated_size, rhs._allocated_size);
 }
 
 template<typename T>

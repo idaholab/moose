@@ -23,36 +23,29 @@ MaterialData::MaterialData(MaterialPropertyStorage & storage) :
 
 MaterialData::~MaterialData()
 {
-  for (MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
-    delete *it;
-  for (MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
-    delete *it;
-  for (MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
-    delete *it;
+  release();
+}
+
+void
+MaterialData::release()
+{
+  _props.destroy();
+  _props_old.destroy();
+  _props_older.destroy();
 }
 
 void
 MaterialData::size(unsigned int n_qpoints)
 {
-  unsigned int j = 0;
-  for (MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it, j++)
-  {
-    if (*it != NULL)
-      (*it)->resize(n_qpoints);
-  }
-
+  _props.resizeItems(n_qpoints);
   // if there are stateful material properties in the system, also resize
   // storage for old and older material properties
   if (_storage.hasStatefulProperties())
   {
-    for (MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
-      if (*it != NULL)
-        (*it)->resize(n_qpoints);
+    _props_old.resizeItems(n_qpoints);
 
     if (_storage.hasOlderProperties())
-      for (MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
-        if (*it != NULL)
-          (*it)->resize(n_qpoints);
+      _props_older.resizeItems(n_qpoints);
   }
   _n_qpoints = n_qpoints;
 }
@@ -64,14 +57,22 @@ MaterialData::nQPoints()
 }
 
 void
-MaterialData::reinit(std::vector<Material *> & mats, const Elem & elem, unsigned int side/* = 0*/)
+MaterialData::swap(const Elem & elem, unsigned int side/* = 0*/)
 {
   if (_storage.hasStatefulProperties())
     _storage.swap(*this, elem, side);
+}
 
+void
+MaterialData::reinit(std::vector<Material *> & mats)
+{
   for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
     (*it)->computeProperties();
+}
 
+void
+MaterialData::swapBack(const Elem & elem, unsigned int side/* = 0*/)
+{
   if (_storage.hasStatefulProperties())
     _storage.swapBack(*this, elem, side);
 }

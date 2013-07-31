@@ -1795,6 +1795,8 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
           }
         }
 
+        _fe_problem.swapBackMaterials(tid);
+
         for (unsigned int side=0; side<elem->n_sides(); side++)
         {
           std::vector<BoundaryID> boundary_ids = _mesh.boundaryIDs(elem, side);
@@ -1810,7 +1812,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
               {
                 _fe_problem.prepareFace(elem, tid);
                 _fe_problem.reinitElemFace(elem, side, bnd_id, tid);
-                _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, tid);
+                _fe_problem.reinitMaterialsFace(elem->subdomain_id(), tid);
                 _fe_problem.reinitMaterialsBoundary(bnd_id, tid);
 
                 for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
@@ -1825,6 +1827,8 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
                     }
                   }
                 }
+
+                _fe_problem.swapBackMaterialsFace(tid);
               }
             }
           }
@@ -1847,8 +1851,8 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
                 _fe_problem.prepareFace(elem, tid);
                 _fe_problem.reinitNeighbor(elem, side, tid);
 
-                _fe_problem.reinitMaterialsFace(elem->subdomain_id(), side, tid);
-                _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, tid);
+                _fe_problem.reinitMaterialsFace(elem->subdomain_id(), tid);
+                _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), tid);
 
                 for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
                 {
@@ -1860,6 +1864,9 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
                     dg->computeOffDiagJacobian(jvar);
                   }
                 }
+
+                _fe_problem.swapBackMaterialsFace(tid);
+                _fe_problem.swapBackMaterialsNeighbor(tid);
 
                 std::vector<unsigned int> neighbor_dof_indices;
                 dof_map.dof_indices(neighbor, neighbor_dof_indices);

@@ -70,6 +70,8 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
         for (std::vector<AuxKernel*>::const_iterator element_bc_it = bcs.begin();
             element_bc_it != bcs.end(); ++element_bc_it)
           (*element_bc_it)->compute();
+
+        _problem.swapBackMaterialsFace(_tid);
       }
 
       // update the solution vector

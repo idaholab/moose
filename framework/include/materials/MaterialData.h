@@ -36,6 +36,8 @@ public:
   MaterialData(MaterialPropertyStorage & storage);
   virtual ~MaterialData();
 
+  void release();
+
   /**
    * Size the properties
    */
@@ -76,8 +78,12 @@ public:
   bool have_property_name_old(const std::string & prop_name) const;
   bool have_property_name_older(const std::string & prop_name) const;
 
+  // material properties for given element (and possible side)
+  void swap(const Elem & elem, unsigned int side = 0);
   // Reinit material properties for given element (and possible side)
-  void reinit(std::vector<Material *> & mats, const Elem & elem, unsigned int side = 0);
+  void reinit(std::vector<Material *> & mats);
+  // material properties for given element (and possible side)
+  void swapBack(const Elem & elem, unsigned int side = 0);
 
   MaterialProperties & props() { return _props; }
   MaterialProperties & propsOld() { return _props_old; }
