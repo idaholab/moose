@@ -83,13 +83,13 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   }
 
   if (getParam<bool>("second_order"))
-    mesh->_mesh.all_second_order(true);
+    mesh->getMesh().all_second_order(true);
 
   // Note: Metis is the default partitioner so we don't even test for that case
   if (getParam<MooseEnum>("partitioner") == "parmetis")
-    mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new ParmetisPartitioner);
+    mesh->getMesh().partitioner() = AutoPtr<Partitioner>(new ParmetisPartitioner);
   else if (getParam<MooseEnum>("partitioner") == "linear")
-    mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
+    mesh->getMesh().partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
   else if (getParam<MooseEnum>("partitioner") == "centroid")
   {
     if(!isParamValid("centroid_partitioner_direction"))
@@ -98,13 +98,13 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
     MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
     if(direction == "x")
-      mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
+      mesh->getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
     else if(direction == "y")
-      mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Y));
+      mesh->getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Y));
     else if(direction == "z")
-      mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Z));
+      mesh->getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Z));
     else if(direction == "radial")
-      mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+      mesh->getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::RADIAL));
     else
       mooseError("Invalid centroid_partitioner_direction!");
   }
@@ -156,7 +156,7 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   }
 
   if (getParam<bool>("construct_side_list_from_node_list"))
-    mesh->_mesh.boundary_info->build_side_list_from_node_list();
+    mesh->getMesh().boundary_info->build_side_list_from_node_list();
 
 }
 

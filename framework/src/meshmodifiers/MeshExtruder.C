@@ -45,16 +45,24 @@ MeshExtruder::~MeshExtruder()
 void
 MeshExtruder::modify()
 {
-  Mesh source_mesh(_mesh_ptr->_mesh);  // copy constructor
-  if (source_mesh.mesh_dimension() == 3)
+  // When we clone, we're responsible to clean up after ourselves!
+  // TODO: traditionally clone() methods return pointers...
+  MooseMesh * source_mesh =  &(_mesh_ptr->clone());
+
+  if (source_mesh->getMesh().mesh_dimension() == 3)
     mooseError("You cannot extrude a 3D mesh!");
 
-  _mesh_ptr->_mesh.clear();
+  _mesh_ptr->getMesh().clear();
 
-  MeshTools::Generation::build_extrusion(_mesh_ptr->_mesh, source_mesh, _num_layers, _extrusion_vector);
+  // The first argument to build_extrusion() is required to be UnstructuredMesh&, a common
+  // base class of both SerialMesh and ParallelMesh, hence the dynamic_cast...
+  MeshTools::Generation::build_extrusion(dynamic_cast<libMesh::UnstructuredMesh&>(_mesh_ptr->getMesh()),
+                                         source_mesh->getMesh(),
+                                         _num_layers,
+                                         _extrusion_vector);
 
   // See if the user has requested specific sides for the top and bottom
-  const std::set<boundary_id_type> &side_ids = _mesh_ptr->_mesh.boundary_info->get_side_boundary_ids();
+  const std::set<boundary_id_type> &side_ids = _mesh_ptr->getMesh().boundary_info->get_side_boundary_ids();
   std::set<boundary_id_type>::reverse_iterator last_side_it = side_ids.rbegin();
 
   const boundary_id_type old_top = *last_side_it;
@@ -68,7 +76,10 @@ MeshExtruder::modify()
     changeID(getParam<std::vector<BoundaryName> >("top_sideset"), old_top);
 
   // Update the dimension
-  _mesh_ptr->_mesh.set_mesh_dimension(source_mesh.mesh_dimension() + 1);
+  _mesh_ptr->getMesh().set_mesh_dimension(source_mesh->getMesh().mesh_dimension() + 1);
+
+  // Clean up the source mesh we allocated
+  delete source_mesh;
 }
 
 
@@ -81,7 +92,7 @@ MeshExtruder::changeID(const std::vector<BoundaryName> & names, BoundaryID old_i
     _mesh_ptr->changeBoundaryId(old_id, boundary_ids[0], true);
 
   for (unsigned int i=0; i<boundary_ids.size(); ++i)
-    _mesh_ptr->_mesh.boundary_info->sideset_name(boundary_ids[i]) = names[i];
+    _mesh_ptr->getMesh().boundary_info->sideset_name(boundary_ids[i]) = names[i];
 }
 
 

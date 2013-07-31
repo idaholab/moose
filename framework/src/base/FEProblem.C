@@ -3417,8 +3417,8 @@ FEProblem::checkUserObjects()
 void
 FEProblem::checkCoordinateSystems()
 {
-  MeshBase::const_element_iterator it = _mesh._mesh.elements_begin();
-  MeshBase::const_element_iterator it_end = _mesh._mesh.elements_end();
+  MeshBase::const_element_iterator it = _mesh.getMesh().elements_begin();
+  MeshBase::const_element_iterator it_end = _mesh.getMesh().elements_end();
 
   for ( ; it != it_end; ++it)
   {

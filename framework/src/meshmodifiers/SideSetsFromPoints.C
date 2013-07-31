@@ -84,5 +84,5 @@ SideSetsFromPoints::modify()
   finalize();
 
   for (unsigned int i=0; i<_boundary_ids.size(); ++i)
-    _mesh_ptr->_mesh.boundary_info->sideset_name(_boundary_ids[i]) = _boundary_names[i];
+    _mesh_ptr->getMesh().boundary_info->sideset_name(_boundary_ids[i]) = _boundary_names[i];
 }

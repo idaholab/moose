@@ -94,7 +94,7 @@ AddSideSetsBase::flood(const Elem *elem, Point normal, BoundaryID side_id)
     // We'll just use the normal of the first qp
     if (std::abs(1.0 - normal*normals[0]) <= _variance)
     {
-      _mesh_ptr->_mesh.boundary_info->add_side(elem, side, side_id);
+      _mesh_ptr->getMesh().boundary_info->add_side(elem, side, side_id);
       for (unsigned int neighbor=0; neighbor < elem->n_sides(); ++neighbor)
       {
         // Flood to the neighboring elements using the current matching side normal from this element.

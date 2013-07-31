@@ -271,8 +271,6 @@ public:
    */
   void setBoundaryName(BoundaryID boundary_id, BoundaryName name);
 
-  libMesh::Mesh _mesh;
-
   /**
    * This routine builds a multimap of boundary ids to matching boundary ids across all periodic boundaries
    * in the system.  It does this only for active local elements so the list will not be globally complete when
@@ -369,6 +367,9 @@ public:
   bool isBoundaryNode(unsigned int node_id) { return _bnd_node_ids.find(node_id) != _bnd_node_ids.end(); }
 
 protected:
+  /// Underlying libMesh mesh object
+  libMesh::Mesh _mesh;
+
   /// Convienence enums
   enum {
     X = 0,

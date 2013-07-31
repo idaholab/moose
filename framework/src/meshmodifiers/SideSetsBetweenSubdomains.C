@@ -38,7 +38,7 @@ SideSetsBetweenSubdomains::~SideSetsBetweenSubdomains()
 void
 SideSetsBetweenSubdomains::modify()
 {
-  MeshBase & mesh = _mesh_ptr->_mesh;
+  MeshBase & mesh = _mesh_ptr->getMesh();
 
   SubdomainID master_id = _mesh_ptr->getSubdomainID(getParam<SubdomainName>("master_block"));
   SubdomainID paired_id = _mesh_ptr->getSubdomainID(getParam<SubdomainName>("paired_block"));

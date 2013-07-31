@@ -61,7 +61,7 @@ NodalNormalsPreprocessor::execute()
     if (_mesh.isBoundaryNode(node->id()))
     {
       // it is a boundary node and not a part of 'corner boundary id'
-      if (!_has_corners || !_mesh._mesh.boundary_info->has_boundary_id(node, _corner_boundary_id))
+      if (!_has_corners || !_mesh.getMesh().boundary_info->has_boundary_id(node, _corner_boundary_id))
       {
         if (node->n_dofs(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number()) > 0)
         {

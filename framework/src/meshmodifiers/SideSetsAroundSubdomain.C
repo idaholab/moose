@@ -40,7 +40,7 @@ SideSetsAroundSubdomain::~SideSetsAroundSubdomain()
 void
 SideSetsAroundSubdomain::modify()
 {
-  MeshBase & mesh = _mesh_ptr->_mesh;
+  MeshBase & mesh = _mesh_ptr->getMesh();
 
   SubdomainID block_id = _mesh_ptr->getSubdomainID(getParam<SubdomainName>("block"));
   std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName> >("boundary");

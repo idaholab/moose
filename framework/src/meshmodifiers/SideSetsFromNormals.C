@@ -64,8 +64,8 @@ SideSetsFromNormals::modify()
 
   // We'll need to loop over all of the elements to find ones that match this normal.
   // We can't rely on flood catching them all here...
-  MeshBase::const_element_iterator       el     = _mesh_ptr->_mesh.elements_begin();
-  const MeshBase::const_element_iterator end_el = _mesh_ptr->_mesh.elements_end();
+  MeshBase::const_element_iterator       el     = _mesh_ptr->getMesh().elements_begin();
+  const MeshBase::const_element_iterator end_el = _mesh_ptr->getMesh().elements_end();
   for ( ; el != end_el ; ++el)
   {
     const Elem *elem = *el;
@@ -89,6 +89,6 @@ SideSetsFromNormals::modify()
   finalize();
 
   for (unsigned int i=0; i<_boundary_ids.size(); ++i)
-    _mesh_ptr->_mesh.boundary_info->sideset_name(_boundary_ids[i]) = _boundary_names[i];
+    _mesh_ptr->getMesh().boundary_info->sideset_name(_boundary_ids[i]) = _boundary_names[i];
 
 }
