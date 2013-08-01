@@ -38,6 +38,7 @@
 #include "ConvectionPrecompute.h"
 #include "CoupledKernelGradTest.h"
 #include "CoupledKernelValueTest.h"
+#include "SplineFFn.h"
 
 #include "CoupledAux.h"
 #include "CoupledGradAux.h"
@@ -191,6 +192,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(ConvectionPrecompute);
   registerKernel(CoupledKernelGradTest);
   registerKernel(CoupledKernelValueTest);
+  registerKernel(SplineFFn);
 
   // Aux kernels
   registerAux(CoupledAux);

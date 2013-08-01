@@ -112,6 +112,7 @@
 #include "SolutionFunction.h"
 #include "PiecewiseBilinear.h"
 #include "PiecewiseLinearFile.h"
+#include "SplineFunction.h"
 
 // materials
 #include "GenericConstantMaterial.h"
@@ -403,6 +404,7 @@ registerObjects(Factory & factory)
   registerFunction(SolutionFunction);
   registerFunction(PiecewiseBilinear);
   registerFunction(PiecewiseLinearFile);
+  registerFunction(SplineFunction);
   // materials
   registerMaterial(GenericConstantMaterial);
   registerMaterial(GenericFunctionMaterial);

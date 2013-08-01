@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'spline_interpolation.i'
+    exodiff = 'spline_interpolation_out.e'
+  [../]
+[]
+  
