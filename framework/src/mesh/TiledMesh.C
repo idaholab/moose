@@ -77,67 +77,62 @@ TiledMesh::clone() const
 void
 TiledMesh::init()
 {
-// This class only works with SerialMesh
-#ifndef LIBMESH_ENABLE_PARMESH
-
-  std::string mesh_file(getParam<MeshFileName>("file"));
-
-  if (mesh_file.rfind(".exd") < mesh_file.size() ||
-      mesh_file.rfind(".e") < mesh_file.size())
-  {
-    ExodusII_IO ex(*this);
-    ex.read(mesh_file);
-    getMesh().prepare_for_use();
-  }
-  else
-    getMesh().read(mesh_file);
-
-  BoundaryID left = getBoundaryID(getParam<BoundaryName>("left_boundary"));
-  BoundaryID right = getBoundaryID(getParam<BoundaryName>("right_boundary"));
-  BoundaryID top = getBoundaryID(getParam<BoundaryName>("top_boundary"));
-  BoundaryID bottom = getBoundaryID(getParam<BoundaryName>("bottom_boundary"));
-  BoundaryID front = getBoundaryID(getParam<BoundaryName>("front_boundary"));
-  BoundaryID back = getBoundaryID(getParam<BoundaryName>("back_boundary"));
-
   // stitch_meshes() is only implemented for SerialMesh.  So make sure
   // we have one here before continuing.
   SerialMesh* serial_mesh = dynamic_cast<SerialMesh*>( &getMesh() );
+
   if (!serial_mesh)
     mooseError("Error, TiledMesh calls stitch_meshes() which only works on SerialMesh.");
-
+  else
   {
-    AutoPtr<MeshBase> clone = getMesh().clone();
+    std::string mesh_file(getParam<MeshFileName>("file"));
 
-    // Build X Tiles
-    for (unsigned int i=1; i<getParam<unsigned int>("x_tiles"); ++i)
+    if (mesh_file.rfind(".exd") < mesh_file.size() ||
+        mesh_file.rfind(".e") < mesh_file.size())
     {
-      MeshTools::Modification::translate(*clone, _x_width, 0, 0);
-      serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+      ExodusII_IO ex(*this);
+      ex.read(mesh_file);
+      serial_mesh->prepare_for_use();
+    }
+    else
+      serial_mesh->read(mesh_file);
+
+    BoundaryID left = getBoundaryID(getParam<BoundaryName>("left_boundary"));
+    BoundaryID right = getBoundaryID(getParam<BoundaryName>("right_boundary"));
+    BoundaryID top = getBoundaryID(getParam<BoundaryName>("top_boundary"));
+    BoundaryID bottom = getBoundaryID(getParam<BoundaryName>("bottom_boundary"));
+    BoundaryID front = getBoundaryID(getParam<BoundaryName>("front_boundary"));
+    BoundaryID back = getBoundaryID(getParam<BoundaryName>("back_boundary"));
+
+    {
+      AutoPtr<MeshBase> clone = serial_mesh->clone();
+
+      // Build X Tiles
+      for (unsigned int i=1; i<getParam<unsigned int>("x_tiles"); ++i)
+      {
+        MeshTools::Modification::translate(*clone, _x_width, 0, 0);
+        serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+      }
+    }
+    {
+      AutoPtr<MeshBase> clone = serial_mesh->clone();
+
+      // Build Y Tiles
+      for (unsigned int i=1; i<getParam<unsigned int>("y_tiles"); ++i)
+      {
+        MeshTools::Modification::translate(*clone, 0, _y_width, 0);
+        serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), top, bottom, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+      }
+    }
+    {
+      AutoPtr<MeshBase> clone = serial_mesh->clone();
+
+      // Build Z Tiles
+      for (unsigned int i=1; i<getParam<unsigned int>("z_tiles"); ++i)
+      {
+        MeshTools::Modification::translate(*clone, 0, 0, _z_width);
+        serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), front, back, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+      }
     }
   }
-  {
-    AutoPtr<MeshBase> clone = getMesh().clone();
-
-    // Build Y Tiles
-    for (unsigned int i=1; i<getParam<unsigned int>("y_tiles"); ++i)
-    {
-      MeshTools::Modification::translate(*clone, 0, _y_width, 0);
-      serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), top, bottom, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
-    }
-  }
-  {
-    AutoPtr<MeshBase> clone = getMesh().clone();
-
-    // Build Z Tiles
-    for (unsigned int i=1; i<getParam<unsigned int>("z_tiles"); ++i)
-    {
-      MeshTools::Modification::translate(*clone, 0, 0, _z_width);
-      serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), front, back, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
-    }
-  }
-
-#else
-  mooseError("TiledMesh cannot be used with --enable-parmesh");
-#endif
-
 }
