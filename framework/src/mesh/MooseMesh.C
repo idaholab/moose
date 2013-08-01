@@ -70,7 +70,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     MooseObject(other_mesh._name, other_mesh._pars),
-    _mesh(other_mesh._mesh->clone().release()),
+    _mesh(other_mesh.getMesh().clone().release()),
     _uniform_refine_level(0),
     _is_changed(false),
     _is_parallel(false),
