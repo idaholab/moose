@@ -375,6 +375,10 @@ public:
 
   Moose::PCSideType getPCSide() { return _pc_side; }
 
+  bool doingDG() { return _doing_dg; }
+
+  bool hasActiveIntegratedBCs(BoundaryID bnd_id, THREAD_ID tid) { return ! _bcs[tid].activeIntegrated(bnd_id).empty(); }
+
 public:
   FEProblem & _fe_problem;
   // FIXME: make these protected and create getters/setters
@@ -518,6 +522,8 @@ public:
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;
   friend class ComputeFullJacobianThread;
+//  friend class ComputeMaterialsObjectThread;
+//  friend class ProjectMaterialProperties;
   friend class ComputeDiracThread;
   friend class ComputeDampingThread;
 };

@@ -97,37 +97,46 @@ ProjectMaterialProperties::onElement(const Elem *elem)
                                           *elem,
                                           -1);
   }
+}
 
-  // Project the sides that correspond to sides of the parent element
-  for (unsigned int side=0; side<elem->n_sides(); side++)
+void
+ProjectMaterialProperties::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+{
+  if (!_sys.hasActiveIntegratedBCs(bnd_id, _tid))
+    return;
+
+  _assembly[_tid]->reinit(elem, side);
+
+  if(_refine)
   {
-    mooseAssert(_materials[_tid].hasFaceMaterials(_subdomain), "No face materials on subdomain block");
-    _assembly[_tid]->reinit(elem, side);
+    const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, side, -1, side);
 
-    if(_refine)
-    {
-      const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, side, -1, side);
-
-      _bnd_material_props.prolongStatefulProps(refinement_map,
-                                           *_assembly[_tid]->qRule(),
-                                           *_assembly[_tid]->qRuleFace(),
-                                           _bnd_material_props, // Passing in the same properties to do side_to_side projection
-                                           *_bnd_material_data[_tid],
-                                           *elem,
-                                           side,-1,side); // Gets us side to side projection
-    }
-    else
-    {
-      const std::vector<std::pair<unsigned int, QpMap> > & coarsening_map = _mesh.getCoarseningMap(*elem, side);
-
-      _bnd_material_props.restrictStatefulProps(coarsening_map,
-                                                _mesh.coarsenedElementChildren(elem),
-                                                *_assembly[_tid]->qRule(),
-                                                *_assembly[_tid]->qRuleFace(),
-                                                *_material_data[_tid],
-                                                *elem, side);
-    }
+    _bnd_material_props.prolongStatefulProps(refinement_map,
+                                             *_assembly[_tid]->qRule(),
+                                             *_assembly[_tid]->qRuleFace(),
+                                             _bnd_material_props, // Passing in the same properties to do side_to_side projection
+                                             *_bnd_material_data[_tid],
+                                             *elem,
+                                             side,-1,side); // Gets us side to side projection
   }
+  else
+  {
+    const std::vector<std::pair<unsigned int, QpMap> > & coarsening_map = _mesh.getCoarseningMap(*elem, side);
+
+    _bnd_material_props.restrictStatefulProps(coarsening_map,
+                                              _mesh.coarsenedElementChildren(elem),
+                                              *_assembly[_tid]->qRule(),
+                                              *_assembly[_tid]->qRuleFace(),
+                                              *_material_data[_tid],
+                                              *elem, side);
+  }
+}
+
+void
+ProjectMaterialProperties::onInternalSide(const Elem *elem, unsigned int side)
+{
+  if (!_sys.doingDG())
+    return;
 
   if(_refine) // If we're refining then we need to also project "internal" child sides.
   {

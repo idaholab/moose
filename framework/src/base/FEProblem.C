@@ -1489,7 +1489,7 @@ FEProblem::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid)
 void
 FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid)
 {
-  if (_materials[tid].hasNeighborMaterials(blk_id))
+  if (_materials[tid].hasNeighborMaterials(blk_id)/* && _nl.doingDG()*/)
   {
     // NOTE: this will not work with h-adaptivity
     const Elem * & neighbor = _assembly[tid]->neighbor();
@@ -1505,7 +1505,7 @@ FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid)
 void
 FEProblem::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid)
 {
-  if (_materials[tid].hasBoundaryMaterials(boundary_id))
+  if (_materials[tid].hasBoundaryMaterials(boundary_id)/* && _nl.hasActiveIntegratedBCs(boundary_id, tid)*/)
   {
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
