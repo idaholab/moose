@@ -31,7 +31,7 @@
     variable = nn
     solution = soln
     direct = true
-		from_variable = source_nodal
+    from_variable = source_nodal
   [../]
 []
 

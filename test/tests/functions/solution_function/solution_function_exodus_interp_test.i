@@ -84,8 +84,8 @@
 [UserObjects]
   [./cube_soln]
     type = SolutionUserObject
-		mesh = cubesource.e
-		variables = source_nodal
+    mesh = cubesource.e
+    variables = source_nodal
   [../]
 []
 

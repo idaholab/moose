@@ -28,15 +28,15 @@
   [./initial_cond_aux]
     type = SolutionAux
     solution = xda_soln
-		execute_on = initial
+    execute_on = initial
     variable = u_aux
   [../]
 []
 
 [UserObjects]
   [./xda_soln]
-	  type = SolutionUserObject
-		mesh = out_0001_mesh.xda
+    type = SolutionUserObject
+    mesh = out_0001_mesh.xda
     es = out_0001.xda
     system = AuxiliarySystem
     variables = u_aux

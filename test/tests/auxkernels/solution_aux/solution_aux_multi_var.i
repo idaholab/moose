@@ -31,18 +31,18 @@
 [AuxKernels]
   [./nn]
     type = SolutionAux
-		solution = soln
+    solution = soln
     variable = nn
     scale_factor = 2.0
-		from_variable = nodal_10
-		add_factor = -20
+    from_variable = nodal_10
+    add_factor = -20
   [../]
   [./en]
     type = SolutionAux
     solution = soln
-		variable = en
+    variable = en
     scale_factor = 2.0
-		from_variable = source_nodal
+    from_variable = source_nodal
   [../]
 []
 
@@ -62,7 +62,6 @@
     boundary = '1 2'
     value = 0.0
   [../]
-
 []
 
 [Executioner]

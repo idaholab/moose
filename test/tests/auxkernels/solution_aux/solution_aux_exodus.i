@@ -31,14 +31,14 @@
 [AuxKernels]
   [./nn]
     type = SolutionAux
-		solution = soln
+    solution = soln
     variable = nn
     scale_factor = 2.0
   [../]
   [./en]
     type = SolutionAux
     solution = soln
-		variable = en
+    variable = en
     scale_factor = 2.0
   [../]
 []

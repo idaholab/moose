@@ -31,18 +31,18 @@
 [AuxKernels]
   [./nn]
     type = SolutionAux
-		solution = soln
+    solution = soln
     variable = nn
     scale_factor = 2.0
-		#from_variable = source_nodal
-		#add_factor = -10
+    #from_variable = source_nodal
+    #add_factor = -10
   [../]
   [./en]
     type = SolutionAux
     solution = soln
-		variable = en
+    variable = en
     scale_factor = 2.0
-		#from_variable = source_nodal
+    #from_variable = source_nodal
   [../]
 []
 

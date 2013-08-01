@@ -28,7 +28,7 @@
 [AuxKernels]
   [./nn]
     type = SolutionAux
-		solution = soln
+    solution = soln
     variable = nn
     scale_factor = 2.0
     direct = true
