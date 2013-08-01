@@ -62,7 +62,10 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _exodus_index2(-1)
 {
 
-  // Create a libmesh::Mesh object for storing the loaded data
+  // Create a libmesh::Mesh object for storing the loaded data.  This _should_
+  // work regardless of whether the underlying type of Mesh is SerialMesh or
+  // ParallelMesh (if libmesh has been compiled with --enable-parmesh or not),
+  // so this line is OK.
   _mesh = new Mesh;
 
   // ExodusII mesh file supplied

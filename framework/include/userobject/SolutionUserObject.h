@@ -143,7 +143,7 @@ protected:
   bool _interpolate_times;
 
   /// Pointer the libmesh::mesh object
-  Mesh * _mesh;
+  MeshBase * _mesh;
 
   /// Pointer to the libmesh::EquationSystems object
   EquationSystems * _es;
