@@ -123,7 +123,6 @@ SolutionUserObject::~SolutionUserObject()
 void
 SolutionUserObject::readXda()
 {
-
   // Check that the EquationSystems XDA file
   if (_es_file == "")
       mooseError("In SolutionUserObject, es must be supplied when file_type=xda");
@@ -132,16 +131,16 @@ SolutionUserObject::readXda()
   if (_system_name == "")
       mooseError("In SolutionUserObject, system must be supplied when file_type=xda");
 
-    // Read the libmesh::mesh from the xda file
-    _mesh->read(_mesh_file);
+  // Read the libmesh::mesh from the xda file
+  _mesh->read(_mesh_file);
 
-    // Create, read, and update the libmesh::EquationSystems
-    _es = new EquationSystems(*_mesh);
-    _es->read(_es_file);
-    _es->update();
+  // Create, read, and update the libmesh::EquationSystems
+  _es = new EquationSystems(*_mesh);
+  _es->read(_es_file);
+  _es->update();
 
-    // Store the EquationSystems name locally
-    _system = &_es->get_system(_system_name);
+  // Store the EquationSystems name locally
+  _system = &_es->get_system(_system_name);
 }
 
 void
@@ -168,8 +167,8 @@ SolutionUserObject::readExodusII()
   // Account for parallel mesh
   if (dynamic_cast<ParallelMesh *>(_mesh))
   {
-      _mesh->allow_renumbering(true);
-      _mesh->prepare_for_use(/*false*/);
+    _mesh->allow_renumbering(true);
+    _mesh->prepare_for_use(/*false*/);
   }
   else
   {
@@ -391,7 +390,6 @@ SolutionUserObject::updateExodusBracketingTimeIndices(Real time)
 Real
 SolutionUserObject::pointValue(Real t, const Point & p, const std::string & var_name) const
 {
-
   // Extract the value at the current point
   Real val = evalMeshFunction(p, var_name, 1);
 
