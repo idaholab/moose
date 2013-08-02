@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys, os, subprocess, socket, pickle, argparse, time, decimal, csv
+import sys, os, subprocess, socket, pickle, argparse, time, decimal, csv, platform, re
 from tempfile import TemporaryFile
 
 class MemoryPlotter:
@@ -207,6 +207,7 @@ the methods to retrieve memory usage and stack traces.
     self.arguments = arguments
     self.log = TemporaryFile()
     self.last_position = 0
+    self.machine_type = self.get_platform()[0]
 
   def __del__(self):
     try:
@@ -214,13 +215,16 @@ the methods to retrieve memory usage and stack traces.
     except:
       pass
 
+  def get_platform(self):
+    return platform.platform(0, 1).split('-')[:-1]
+
   def _discover_name(self):
     if self.arguments.run:
       for item in self.arguments.run[-1].split():
         if os.path.exists(item):
-          return item.split('/').pop()
+          return (item.split('/').pop(), item)
     elif self.arguments.call_back_host:
-      return self.arguments.agent_run
+      return (self.arguments.agent_run, self.arguments.agent_run)
 
   # Gets the current stdout/err
   def read_log(self):
@@ -237,7 +241,7 @@ the methods to retrieve memory usage and stack traces.
       command = ['ps', '-e', '-o', 'pid,rss,user,comm']
       tmp_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       all_pids = tmp_proc.communicate()[0].split('\n')
-      search_for = self._discover_name()
+      (search_for, abs) = self._discover_name()
       for single_pid in all_pids:
         if single_pid.find(search_for) > -1 and single_pid.find(os.getenv('USER')) > -1:
           pid_list[single_pid.split()[0]] = []
@@ -269,16 +273,37 @@ the methods to retrieve memory usage and stack traces.
 
   # Get Stack Trace information from first discovered PID
   def read_pstack(self):
-    if self.arguments.pstack:
-      pid_list = self.get_pids()
-      if pid_list == None:
-        return ''
-      for single_pid in pid_list:
-        # This is very expensive on some systems (~1 second). Hence we only do this once.
-        tmp_proc = subprocess.Popen(['pstack', str(single_pid)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return tmp_proc.communicate()[0]
+    if self.machine_type.find('Darwin') != -1:
+      # We are Macintosh
+      if self.arguments.pstack:
+        pid_list = self.get_pids()
+        if pid_list == None:
+          return ''
+        try:
+          with open('gdb_commands_temp'): pass
+        except IOError:
+          gdb_commands_temp = open('gdb_commands_temp', 'w')
+          gdb_commands_temp.write('set width 0\nset height 0\nset pagination no\nbt\n')
+          gdb_commands_temp.close()
+        for single_pid in pid_list:
+          # This is very expensive on some systems (~1 second). Hence we only do this once.
+          tmp_proc = subprocess.Popen(['gdb', '--batch', '--quiet', '-x', 'gdb_commands_temp', self._discover_name()[1], str(single_pid)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+          tmp_results = tmp_proc.communicate()[0]
+          return ''.join(re.findall(r'#.*\n', tmp_results))
+        else:
+          return ''
     else:
-      return ''
+      # We are Linux
+      if self.arguments.pstack:
+        pid_list = self.get_pids()
+        if pid_list == None:
+          return ''
+        for single_pid in pid_list:
+          # This is very expensive on some systems (~1 second). Hence we only do this once.
+          tmp_proc = subprocess.Popen(['pstack', str(single_pid)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+          return tmp_proc.communicate()[0]
+        else:
+          return ''
 
 class Report:
   """This class handles all the actual data.
@@ -321,8 +346,8 @@ class Report:
       # If we are the server, only get stdout
       self.current_results['HOST'][self.current_results['REPORTING_HOST']]['LOG']  = self.sampler.read_log()
     else:
-      self.current_results['HOST'][self.args.my_hostname]['TOTAL']  = self.sampler.read_ps()
       self.current_results['HOST'][self.args.my_hostname]['PSTACK'] = self.sampler.read_pstack()
+      self.current_results['HOST'][self.args.my_hostname]['TOTAL']  = self.sampler.read_ps()
       self.current_results['HOST'][self.args.my_hostname]['LOG']  = self.sampler.read_log()
       self.current_results['REPORTING_HOST'] = self.args.my_hostname
     self.updateReport()
@@ -612,7 +637,7 @@ ServerAgent also creates the reporter instance and launches all reporter agents.
     print 'Application terminated. Wrote to file:', self.args.outfile[-1]
 
   def launch_agents(self):
-    self.args.agent_run = self.report.sampler._discover_name()
+    (self.args.agent_run, abs) = self.report.sampler._discover_name()
     if self.args.agent_run == None:
       print 'No binary detected. Exiting...'
       sys.exit(1)
@@ -794,6 +819,9 @@ def _verifyARGs(args):
     if args.mpi is not True and args.pbs:
       print 'Ummm, you are specifying PBS with out using mpiexec/mpirun.'
       sys.exit(0)
+    if which('pstack') != None or which('gdb') != None:
+      args.pstack = True
+
   args.my_hostname = socket.gethostname()
   return args
 
@@ -814,9 +842,9 @@ def parseArguments(args=None):
   readgroup.add_argument('--separate', dest='separate', action='store_const', const=True, default=False, help='Display individual node memory usage\n ')
   readgroup.add_argument('--export', nargs=1, metavar='file', help='Export specified log file to a comma delimited format\n ')
 
-  commongroup = parser.add_argument_group('Common Options', 'The following options can be used when tracking or displaying the results')
-  commongroup.add_argument('--pstack', dest='pstack', action='store_const', const=True, default=False, help='Save or Display stack trace information\n ')
-  commongroup.add_argument('--stdout', dest='stdout', action='store_const', const=True, default=False, help='Display stdout information (memory logger always saves stdout)\n ')
+  commongroup = parser.add_argument_group('Common Options', 'The following options can be used when displaying the results')
+  commongroup.add_argument('--pstack', dest='pstack', action='store_const', const=True, default=False, help='Display stack trace information (if available)\n ')
+  commongroup.add_argument('--stdout', dest='stdout', action='store_const', const=True, default=False, help='Display stdout information\n ')
 
   plotgroup = parser.add_argument_group('Plot Options', 'Additional options when using --plot')
   plotgroup.add_argument('--rotate-text', nargs=1, metavar='int', type=int, default=[30], help='Rotate stdout/pstack text by this ammount (default 30)\n ')
