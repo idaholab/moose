@@ -522,6 +522,7 @@ public:
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;
   friend class ComputeFullJacobianThread;
+  friend class ComputeJacobianBlockThread;
 //  friend class ComputeMaterialsObjectThread;
 //  friend class ProjectMaterialProperties;
   friend class ComputeDiracThread;

@@ -24,6 +24,7 @@
 #include "ComputeResidualThread.h"
 #include "ComputeJacobianThread.h"
 #include "ComputeFullJacobianThread.h"
+#include "ComputeJacobianBlockThread.h"
 #include "ComputeDiracThread.h"
 #include "ComputeDampingThread.h"
 #include "TimeKernel.h"
@@ -1734,188 +1735,66 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
   // In Petsc 3.0.0, MatSetOption has three args...the third arg
   // determines whether the option is set (true) or unset (false)
   MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-   MAT_KEEP_ZEROED_ROWS,
-   PETSC_TRUE);
+    MAT_KEEP_ZEROED_ROWS,
+    PETSC_TRUE);
 #else
   MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-   MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
-   PETSC_TRUE);
+    MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
+    PETSC_TRUE);
 #endif
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+#else
+  // PETSc 3.3.0
+  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 #endif
 
-/*
-    Threads::parallel_for(ConstElemRange(Moose::mesh->active_local_elements_begin(),
-                                         Moose::mesh->active_local_elements_end(),1),
-                          ComputeInternalJacobianBlocks(soln, jacobian, precond_system, ivar, jvar));
-*/
-  {
-    unsigned int tid = 0;
+#endif
 
-    MeshBase::const_element_iterator el = _mesh.activeLocalElementsBegin();
-    const MeshBase::const_element_iterator end_el = _mesh.activeLocalElementsEnd();
+  jacobian.zero();
 
-    unsigned int subdomain = std::numeric_limits<unsigned int>::max();
-
-    const DofMap & dof_map = precond_system.get_dof_map();
-    std::vector<unsigned int> dof_indices;
-
-    jacobian.zero();
-
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
     _fe_problem.reinitScalars(tid);
 
-    for (; el != end_el; ++el)
-    {
-      const Elem* elem = *el;
-      unsigned int cur_subdomain = elem->subdomain_id();
-
-      dof_map.dof_indices(elem, dof_indices);
-      if(dof_indices.size())
-      {
-        _fe_problem.prepare(elem, ivar, jvar, dof_indices, tid);
-        _fe_problem.reinitElem(elem, tid);
-
-        if(cur_subdomain != subdomain)
-        {
-          subdomain = cur_subdomain;
-          _fe_problem.subdomainSetup(subdomain, tid);
-          _kernels[tid].updateActiveKernels(cur_subdomain);
-        }
-
-        _fe_problem.reinitMaterials(cur_subdomain, tid);
-
-        //Kernels
-        std::vector<Kernel *> kernels = _kernels[tid].active();
-        for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); it++)
-        {
-          Kernel * kernel = *it;
-          if (kernel->variable().index() == ivar)
-          {
-            kernel->subProblem().prepareShapes(jvar, tid);
-            kernel->computeOffDiagJacobian(jvar);
-          }
-        }
-
-        _fe_problem.swapBackMaterials(tid);
-
-        for (unsigned int side=0; side<elem->n_sides(); side++)
-        {
-          std::vector<BoundaryID> boundary_ids = _mesh.boundaryIDs(elem, side);
-
-          if (boundary_ids.size() > 0)
-          {
-            for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-            {
-              BoundaryID bnd_id = *it;
-
-              std::vector<IntegratedBC *> bcs = _bcs[tid].activeIntegrated(bnd_id);
-              if (bcs.size() > 0)
-              {
-                _fe_problem.prepareFace(elem, tid);
-                _fe_problem.reinitElemFace(elem, side, bnd_id, tid);
-                _fe_problem.reinitMaterialsFace(elem->subdomain_id(), tid);
-                _fe_problem.reinitMaterialsBoundary(bnd_id, tid);
-
-                for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
-                {
-                  IntegratedBC * bc = *it;
-                  if(bc->variable().index() == ivar)
-                  {
-                    if (bc->shouldApply())
-                    {
-                      bc->subProblem().prepareFaceShapes(jvar, tid);
-                      bc->computeJacobianBlock(jvar);
-                    }
-                  }
-                }
-
-                _fe_problem.swapBackMaterialsFace(tid);
-              }
-            }
-          }
-
-          if (elem->neighbor(side) != NULL)
-          {
-            // on internal edge
-            // Pointer to the neighbor we are currently working on.
-            const Elem * neighbor = elem->neighbor(side);
-
-            // Get the global id of the element and the neighbor
-            const unsigned int elem_id = elem->id();
-            const unsigned int neighbor_id = neighbor->id();
-
-            if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
-            {
-              std::vector<DGKernel *> dgks = _dg_kernels[tid].active();
-              if (dgks.size() > 0)
-              {
-                _fe_problem.prepareFace(elem, tid);
-                _fe_problem.reinitNeighbor(elem, side, tid);
-
-                _fe_problem.reinitMaterialsFace(elem->subdomain_id(), tid);
-                _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), tid);
-
-                for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
-                {
-                  DGKernel * dg = *it;
-                  if(dg->variable().index() == ivar)
-                  {
-                    dg->subProblem().prepareFaceShapes(jvar, tid);
-                    dg->subProblem().prepareNeighborShapes(jvar, tid);
-                    dg->computeOffDiagJacobian(jvar);
-                  }
-                }
-
-                _fe_problem.swapBackMaterialsFace(tid);
-                _fe_problem.swapBackMaterialsNeighbor(tid);
-
-                std::vector<unsigned int> neighbor_dof_indices;
-                dof_map.dof_indices(neighbor, neighbor_dof_indices);
-                {
-                  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-                  _fe_problem.addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tid);
-                }
-              }
-            }
-          }
-        }
-
-        _fe_problem.addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tid);
-      }
-    }
+  PARALLEL_TRY {
+    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    ComputeJacobianBlockThread cjb(_fe_problem, precond_system, jacobian, ivar, jvar);
+    Threads::parallel_reduce(elem_range, cjb);
   }
-
+  PARALLEL_CATCH;
   jacobian.close();
 
   //Dirichlet BCs
   std::vector<numeric_index_type> zero_rows;
-
-  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-  for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
-  {
-    const BndNode * bnode = *nd;
-    BoundaryID boundary_id = bnode->_bnd_id;
-    Node * node = bnode->_node;
-
-    std::vector<NodalBC *> bcs = _bcs[0].activeNodal(boundary_id);
-    if (bcs.size() > 0)
+  PARALLEL_TRY {
+    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
     {
-      if (node->processor_id() == libMesh::processor_id())
-      {
-        _fe_problem.reinitNodeFace(node, boundary_id, 0);
+      const BndNode * bnode = *nd;
+      BoundaryID boundary_id = bnode->_bnd_id;
+      Node * node = bnode->_node;
 
-        for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
+      std::vector<NodalBC *> bcs = _bcs[0].activeNodal(boundary_id);
+      if (bcs.size() > 0)
+      {
+        if (node->processor_id() == libMesh::processor_id())
         {
-          NodalBC * bc = *it;
-          if (bc->variable().index() == ivar && bc->shouldApply())
+          _fe_problem.reinitNodeFace(node, boundary_id, 0);
+
+          for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
           {
-            //The first zero is for the variable number... there is only one variable in each mini-system
-            //The second zero only works with Lagrange elements!
-            zero_rows.push_back(node->dof_number(precond_system.number(), 0, 0));
+            NodalBC * bc = *it;
+            if (bc->variable().index() == ivar && bc->shouldApply())
+            {
+              //The first zero is for the variable number... there is only one variable in each mini-system
+              //The second zero only works with Lagrange elements!
+              zero_rows.push_back(node->dof_number(precond_system.number(), 0, 0));
+            }
           }
         }
       }
     }
   }
+  PARALLEL_CATCH;
 
   jacobian.close();
 
