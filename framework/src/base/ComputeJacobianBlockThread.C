@@ -61,8 +61,8 @@ ComputeJacobianBlockThread::operator() (const ConstElemRange & range, bool bypas
   const DofMap & dof_map = _precond_system.get_dof_map();
   std::vector<unsigned int> dof_indices;
 
-  ConstElemRange::const_iterator el = range.begin();
-  for (el = range.begin() ; el != range.end(); ++el)
+  ConstElemRange::const_iterator range_end = range.end();
+  for (ConstElemRange::const_iterator el = range.begin() ; el != range_end; ++el)
   {
     const Elem* elem = *el;
     unsigned int cur_subdomain = elem->subdomain_id();
