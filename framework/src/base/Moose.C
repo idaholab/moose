@@ -100,7 +100,7 @@
 // executioners
 #include "Steady.h"
 #include "Transient.h"
-#include "TransientAdaptive.h"
+#include "PetscTSExecutioner.h"
 #include "CoupledTransientExecutioner.h"
 
 // functions
@@ -391,7 +391,7 @@ registerObjects(Factory & factory)
   registerExecutioner(CoupledTransientExecutioner);
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,4,0)
 #if 0 // This seems to be broken right now -- doesn't work wiith petsc >= 3.4 either
-  registerExecutioner(TransientAdaptive);
+  registerExecutioner(PetscTSExecutioner);
 #endif
 #endif
 

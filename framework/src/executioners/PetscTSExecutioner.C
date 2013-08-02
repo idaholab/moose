@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "TransientAdaptive.h"
+#include "PetscTSExecutioner.h"
 
 #include "libmesh/petsc_macro.h"
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,4,0)
@@ -37,7 +37,7 @@
 #include <fstream>
 
 template<>
-InputParameters validParams<TransientAdaptive>()
+InputParameters validParams<PetscTSExecutioner>()
 {
   MooseEnum schemes("implicit-euler, explicit-euler, crank-nicolson, bdf2, petsc", "implicit-euler");
   InputParameters params = validParams<Executioner>();
@@ -237,7 +237,7 @@ TimeStepper *createTimeStepper(Moose::TimeSteppingScheme scheme, FEProblem &fe_p
   }
 }
 
-TransientAdaptive::TransientAdaptive(const std::string & name, InputParameters parameters) :
+PetscTSExecutioner::PetscTSExecutioner(const std::string & name, InputParameters parameters) :
   Executioner(name, parameters),
   _fe_problem(*getParam<FEProblem *>("_fe_problem")),
   _time_stepper(NULL)
@@ -266,7 +266,7 @@ TransientAdaptive::TransientAdaptive(const std::string & name, InputParameters p
 #endif
 }
 
-TransientAdaptive::~TransientAdaptive()
+PetscTSExecutioner::~PetscTSExecutioner()
 {
   // This problem was built by the Factory and needs to be released by this destructor
   delete &_fe_problem;
@@ -274,13 +274,13 @@ TransientAdaptive::~TransientAdaptive()
 }
 
 Problem &
-TransientAdaptive::problem()
+PetscTSExecutioner::problem()
 {
   return _fe_problem;
 }
 
 bool
-TransientAdaptive::keepGoing(TimeStepperStatus status,Real /* time */) const
+PetscTSExecutioner::keepGoing(TimeStepperStatus status,Real /* time */) const
 {
   // This is only responsible for checking for conditions other than number of steps and final time
   if (status != STATUS_ITERATING) return false;
@@ -288,7 +288,7 @@ TransientAdaptive::keepGoing(TimeStepperStatus status,Real /* time */) const
 }
 
 void
-TransientAdaptive::execute()
+PetscTSExecutioner::execute()
 {
   TimeStepperStatus status = STATUS_ITERATING;
   Real ftime = -1e100;

@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef TRANSIENTADAPTIVE_H
-#define TRANSIENTADAPTIVE_H
+#ifndef PETSCTSEXECUTIONER_H
+#define PETSCTSEXECUTIONER_H
 
 #include "libmesh/petsc_macro.h"
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,4,0)
@@ -26,7 +26,7 @@
 #include <string>
 
 // Forward Declarations
-class TransientAdaptive;
+class PetscTSExecutioner;
 class TimeStepper;
 class FEProblem;
 
@@ -41,12 +41,12 @@ enum TimeStepperStatus {
 };
 
 template<>
-InputParameters validParams<TransientAdaptive>();
+InputParameters validParams<PetscTSExecutioner>();
 
 /**
  * Transient executioners solve time steps sequentially.
  */
-class TransientAdaptive: public Executioner
+class PetscTSExecutioner: public Executioner
 {
 public:
   /**
@@ -56,9 +56,9 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  TransientAdaptive(const std::string & name, InputParameters parameters);
+  PetscTSExecutioner(const std::string & name, InputParameters parameters);
 
-  virtual ~TransientAdaptive();
+  virtual ~PetscTSExecutioner();
 
   virtual void execute();
 
@@ -71,4 +71,4 @@ protected:
 };
 #endif // This seems to be broken right now -- Moose::TimeSteppingScheme undefined
 #endif
-#endif // TRANSIENTADAPTIVE_H
+#endif // PETSCTSEXECUTIONER_H
