@@ -464,6 +464,8 @@ class TestHarness:
         self.num_passed += 1
       elif result.find('skipped') != -1:
         self.num_skipped += 1
+      elif result.find('deleted') != -1:
+        self.num_skipped += 1
       elif result.find('LAUNCHED') != -1 or result.find('RUNNING') != -1 or result.find('QUEUED') != -1 or result.find('EXITING') != -1:
         self.num_pending += 1
       else:
@@ -472,6 +474,8 @@ class TestHarness:
       if result.find('OK') != -1:
         self.num_passed += 1
       elif result.find('skipped') != -1:
+        self.num_skipped += 1
+      elif result.find('deleted') != -1:
         self.num_skipped += 1
       elif result.find('LAUNCHED') != -1 or result.find('RUNNING') != -1 or result.find('QUEUED') != -1 or result.find('EXITING') != -1:
         self.num_pending += 1
