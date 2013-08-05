@@ -177,15 +177,17 @@ class RunParallel:
   def readOutput(self, f, max_size=100000):
     first_part = int(max_size*(2.0/3.0))
     second_part = int(max_size*(1.0/3.0))
+    output = ''
 
     f.seek(0)
-    output = f.read(first_part)     # Limit the output to 1MB
-    if len(output) == first_part:   # This means we didn't read the whole file yet
-      output += "\n" + "#"*80 + "\n\nOutput trimmed\n\n" + "#"*80 + "\n"
-      f.seek(-second_part, 2)       # Skip the middle part of the file
+    if self.harness.options.sep_files != True:
+      output = f.read(first_part)     # Limit the output to 1MB
+      if len(output) == first_part:   # This means we didn't read the whole file yet
+        output += "\n" + "#"*80 + "\n\nOutput trimmed\n\n" + "#"*80 + "\n"
+        f.seek(-second_part, 2)       # Skip the middle part of the file
 
-      if (f.tell() <= first_part):  # Don't re-read some of what you've already read
-        f.seek(first_part+1, 0)
+        if (f.tell() <= first_part):  # Don't re-read some of what you've already read
+          f.seek(first_part+1, 0)
 
     output += f.read()              # Now read the rest
     return output
