@@ -20,6 +20,7 @@
     type = 'Exodiff'
     input = 4ElemTensionRelease.i
     exodiff = 4ElemTensionRelease_out.e
+    custom_cmp = '4ElemTensionRelease.exodiff'
     min_parallel = 4
   [../]
 []
