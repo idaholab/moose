@@ -147,6 +147,8 @@ protected:
   /// Mapping of friendly names
   std::map<std::string, RavenMapContainer> _rvect_map;
 
+  const Real & _zero;
+
   virtual unsigned int getNextSubdomainId();
   virtual unsigned int getNextBCId();
 

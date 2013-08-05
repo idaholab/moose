@@ -103,7 +103,9 @@ Component::Component(const std::string & name, InputParameters parameters) :
     _mesh(_sim.mesh()),
     _phys_mesh(_sim.physicalMesh()),
 
-    _input_file_name(getParam<std::string>("physics_input_file"))
+    _input_file_name(getParam<std::string>("physics_input_file")),
+
+    _zero(_sim._zero)
 {
 }
 
