@@ -15,4 +15,11 @@
     custom_cmp = 'pressure.exodiff'
     max_parallel = 1
   [../]
+
+  [./4ElemTensionRelease]
+    type = 'Exodiff'
+    input = 4ElemTensionRelease.i
+    exodiff = 4ElemTensionRelease_out.e
+    min_parallel = 4
+  [../]
 []

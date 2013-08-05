@@ -31,18 +31,10 @@
 
 [] # Kernels
 
-[AuxKernels]
-  [./nodal_area]
-    type = NodalAreaAux
-    variable = nodal_area
-    nodal_area_object = nodal_area
-  [../]
-[]
-
 [UserObjects]
   [./nodal_area]
     type = NodalArea
-    variable = dummy
+    variable = nodal_area
     boundary = 1
   [../]
 []

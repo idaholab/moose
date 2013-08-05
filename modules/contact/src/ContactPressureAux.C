@@ -9,7 +9,7 @@ template<>
 InputParameters validParams<ContactPressureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<UserObjectName>("nodal_area_object", "The NodalArea UserObject to get values from");
+  params.addRequiredCoupledVar("nodal_area", "The nodal area");
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.set<MooseEnum>("execute_on") = "jacobian";
   return params;
@@ -17,7 +17,7 @@ InputParameters validParams<ContactPressureAux>()
 
 ContactPressureAux::ContactPressureAux(const std::string & name, InputParameters params) :
     AuxKernel(name, params),
-    _nodal_area(getUserObject<NodalArea>("nodal_area_object")),
+    _nodal_area(coupledValue("nodal_area")),
     _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(getParam<MooseEnum>("order"))))
 {
 }
@@ -30,7 +30,7 @@ Real
 ContactPressureAux::computeValue()
 {
   Real value(0);
-  const Real area = _nodal_area.nodalArea(_current_node->id());
+  const Real area = _nodal_area[_qp];
   const PenetrationLocator::PenetrationInfo * pinfo(NULL);
 
   const std::map<unsigned int, PenetrationLocator::PenetrationInfo*>::const_iterator it = _penetration_locator._penetration_info.find( _current_node->id() );

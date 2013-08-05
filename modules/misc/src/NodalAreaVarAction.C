@@ -13,7 +13,6 @@ InputParameters validParams<NodalAreaVarAction>()
 
   InputParameters params = validParams<Action>();
   params.addParam<MooseEnum>("order", orders, "The finite element order: " + orders.getRawNames());
-  params.addParam<bool>("output_area",false,"Output the nodal area");
   return params;
 }
 
@@ -25,14 +24,12 @@ NodalAreaVarAction::NodalAreaVarAction(const std::string & name, InputParameters
 void
 NodalAreaVarAction::act()
 {
-  if (getParam<bool>("output_area"))
-  {
-    std::string short_name(_name);
-    // Chop off "Contact/"
-    short_name.erase(0, 8);
+  std::string short_name(_name);
+  // Chop off "Contact/"
+  short_name.erase(0, 8);
 
-    _problem->addAuxVariable("nodal_area_"+ short_name,
-                             FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                                    Utility::string_to_enum<FEFamily>("LAGRANGE")));
-  }
+  _problem->addAuxVariable("nodal_area_"+ short_name,
+                           FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
+                                  Utility::string_to_enum<FEFamily>("LAGRANGE")));
+
 }

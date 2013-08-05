@@ -15,25 +15,20 @@ public:
   virtual void execute();
   virtual void finalize();
 
-  Real nodalArea( unsigned id ) const;
-  void resetCommunication()
-  {
-    _resetCommunication = true;
-  }
+  Real nodalArea( const Node * node ) const;
 
 protected:
   virtual Real computeQpIntegral();
 
-  void initializeCommunication();
-  void communicate();
-
-  std::map<unsigned, Real> _node_areas;
+  std::map<const Node *, Real> _node_areas;
 
   std::map<unsigned, unsigned> _commMap;
   std::vector<Real> _commVec;
-  bool _resetCommunication;
 
   const VariablePhiValue & _phi;
+
+  SystemBase & _system;
+  NumericVector<Number> & _aux_solution;
 };
 
 template<>

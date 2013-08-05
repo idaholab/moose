@@ -15,7 +15,6 @@ InputParameters validParams<NodalAreaAction>()
 
   InputParameters params = validParams<Action>();
   params.addParam<BoundaryName>("slave", "The slave surface");
-  params.addRequiredParam<NonlinearVariableName>("disp_x", "The x displacement");
 
   // Set this action to build "NodalArea"
   params.set<std::string>("type") = "NodalArea";
@@ -30,8 +29,12 @@ NodalAreaAction::NodalAreaAction(const std::string & name, InputParameters param
 void
 NodalAreaAction::act()
 {
+  std::string short_name(_name);
+  // Chop off "Contact/"
+  short_name.erase(0, 8);
+
   _moose_object_pars.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,getParam<BoundaryName>("slave"));
-  _moose_object_pars.set<VariableName>("variable") = getParam<NonlinearVariableName>("disp_x");
+  _moose_object_pars.set<VariableName>("variable") = "nodal_area_"+short_name;
 
   _moose_object_pars.set<MooseEnum>("execute_on") = "timestep_begin";
   _moose_object_pars.set<bool>("use_displaced_mesh") = true;

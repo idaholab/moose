@@ -17,10 +17,10 @@ InputParameters validParams<ContactMaster>()
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
-  params.addRequiredParam<UserObjectName>("nodal_area_object", "The NodalArea UserObject to get values from");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addRequiredCoupledVar("nodal_area", "The nodal area");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
 
   params.set<bool>("use_displaced_mesh") = true;
@@ -41,7 +41,6 @@ InputParameters validParams<ContactMaster>()
 
 ContactMaster::ContactMaster(const std::string & name, InputParameters parameters) :
   DiracKernel(name, parameters),
-  _nodal_area(getUserObject<NodalArea>("nodal_area_object")),
   _component(getParam<unsigned int>("component")),
   _model(contactModel(getParam<std::string>("model"))),
   _formulation(contactFormulation(getParam<std::string>("formulation"))),
@@ -55,7 +54,11 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
   _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
   _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
-  _vars(_x_var, _y_var, _z_var)
+  _vars(_x_var, _y_var, _z_var),
+  _nodal_area_var(getVar("nodal_area", 0)),
+  _aux_system( _nodal_area_var->sys() ),
+  _aux_solution( _aux_system.currentSolution() )
+
 {
   if (parameters.isParamValid("tangential_tolerance"))
   {
@@ -154,8 +157,20 @@ ContactMaster::updateContactSet(bool beginning_of_step)
     {
       const Node * node = pinfo->_node;
 
-      Real area = _nodal_area.nodalArea(node->id());
-      area = area != 0 ? area : 1;
+      unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->index(), 0);
+
+      Real area = (*_aux_solution)( dof );
+      if (area == 0)
+      {
+        if (_t_step > 1)
+        {
+          mooseError("Zero nodal area found");
+        }
+        else
+        {
+          area = 1; // Avoid divide by zero during initialization
+        }
+      }
 
       Real resid( -(pinfo->_normal * pinfo->_contact_force) / area );
 
@@ -184,8 +199,22 @@ ContactMaster::updateContactSet(bool beginning_of_step)
     {
       if (_formulation == CF_PENALTY)
       {
-        Real area = _nodal_area.nodalArea(pinfo->_node->id());
-        area = area != 0 ? area : 1;
+        const Node * node = pinfo->_node;
+
+        unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->index(), 0);
+
+        Real area = (*_aux_solution)( dof );
+        if (area == 0)
+        {
+          if (_t_step > 1)
+          {
+            mooseError("Zero nodal area found");
+          }
+          else
+          {
+            area = 1; // Avoid divide by zero during initialization
+          }
+        }
         if (pinfo->_distance >= 0)
         {
           if (hpit == has_penetrated.end())

@@ -16,8 +16,9 @@ InputParameters validParams<NodalArea>()
 
 NodalArea::NodalArea(const std::string & name, InputParameters parameters) :
     SideIntegralVariableUserObject(name, parameters),
-    _resetCommunication(true),
-    _phi( _var.phiFace() )
+    _phi( _var.phiFace() ),
+    _system( _variable->sys() ),
+    _aux_solution( _system.solution() )
 {}
 
 NodalArea::~NodalArea()
@@ -28,8 +29,9 @@ NodalArea::threadJoin(const UserObject & fred)
 {
   const NodalArea & na = dynamic_cast<const NodalArea &>(fred);
 
-  std::map<unsigned, Real>::const_iterator it = na._node_areas.begin();
-  for ( ; it != _node_areas.end(); ++it )
+  std::map<const Node *, Real>::const_iterator it = na._node_areas.begin();
+  const std::map<const Node *, Real>::const_iterator it_end = na._node_areas.end();
+  for ( ; it != it_end; ++it )
   {
     _node_areas[it->first] += it->second;
   }
@@ -63,7 +65,7 @@ NodalArea::execute()
     const Real area = nodeAreas[j];
     if (area != 0)
     {
-      _node_areas[_current_elem->node(j)] += area;
+      _node_areas[_current_elem->get_node(j)] += area;
     }
   }
 }
@@ -71,94 +73,34 @@ NodalArea::execute()
 void
 NodalArea::finalize()
 {
-  if (_resetCommunication)
-  {
-    initializeCommunication();
-    _resetCommunication = false;
-  }
 
-  communicate();
+  const std::map<const Node *, Real>::iterator it_end = _node_areas.end();
+  for ( std::map<const Node *, Real>::iterator it = _node_areas.begin(); it != it_end; ++it )
+  {
+    const Node * const node = it->first;
+    unsigned int dof = node->dof_number(_system.number(), _variable->index(), 0);
+    _aux_solution.set( dof, 0 );
+  }
+  _aux_solution.close();
+
+  for ( std::map<const Node *, Real>::iterator it = _node_areas.begin(); it != it_end; ++it )
+  {
+    const Node * const node = it->first;
+    unsigned int dof = node->dof_number(_system.number(), _variable->index(), 0);
+    _aux_solution.add( dof, it->second );
+  }
+  _aux_solution.close();
+
 }
 
 Real
-NodalArea::nodalArea( unsigned id ) const
+NodalArea::nodalArea( const Node * node ) const
 {
-  std::map<unsigned, Real>::const_iterator it = _node_areas.find( id );
+  std::map<const Node *, Real>::const_iterator it = _node_areas.find( node );
   Real retVal(0);
   if (it != _node_areas.end())
   {
     retVal = it->second;
   }
   return retVal;
-}
-
-
-
-void
-NodalArea::initializeCommunication()
-{
-  const unsigned numProc = libMesh::n_processors();
-  const unsigned myProc = libMesh::processor_id();
-
-  // Get the number of nodes on each processor
-  std::vector<unsigned> numNodesVec(numProc, 0);
-  numNodesVec[myProc] = _node_areas.size();
-  Parallel::sum(numNodesVec);
-
-  // Get the total number of nodes and the location where this proc's nodes will
-  //   be inserted into the vector of all nodes
-  const unsigned totalNumNodes = std::accumulate(numNodesVec.begin(), numNodesVec.end(), 0);
-  unsigned index = std::accumulate(&numNodesVec[0], &numNodesVec[0]+myProc, 0);
-
-  // Fill vector with this proc's nodes
-  std::vector<unsigned> nodesVec(totalNumNodes, 0);
-  for ( std::map<unsigned, Real>::iterator it = _node_areas.begin(); it != _node_areas.end(); ++it )
-  {
-    nodesVec[index++] = it->first;
-  }
-
-  // Get list of all nodes
-  Parallel::sum(nodesVec);
-
-  // Collect nodes, counting how many times each appears
-  std::map<unsigned, unsigned> countMap;
-  for ( unsigned i(0); i < totalNumNodes; ++i )
-  {
-    ++countMap[nodesVec[i]];
-  }
-
-  // Record number of communicating nodes and the index of each
-  //   communicating node on this processor
-  _commMap.clear();
-
-  unsigned counter(0);
-  for ( std::map<unsigned, unsigned>::iterator it = countMap.begin(); it != countMap.end(); ++it )
-  {
-    if (it->second > 1) // This node communicates
-    {
-      if (_node_areas.find( it->first ) != _node_areas.end()) // This proc has this node
-      {
-        // Global id points to index in vector (global to local)
-        _commMap[it->first] = counter;
-      }
-      ++counter;
-    }
-  }
-
-  _commVec.resize(counter);
-}
-
-void
-NodalArea::communicate()
-{
-  _commVec.assign(_commVec.size(), 0);
-  for ( std::map<unsigned,unsigned>::iterator it = _commMap.begin(); it != _commMap.end(); ++it )
-  {
-    _commVec[it->second] = _node_areas[it->first];
-  }
-  Parallel::sum(_commVec);
-  for ( std::map<unsigned,unsigned>::iterator it = _commMap.begin(); it != _commMap.end(); ++it )
-  {
-    _node_areas[it->first] = _commVec[it->second];
-  }
 }

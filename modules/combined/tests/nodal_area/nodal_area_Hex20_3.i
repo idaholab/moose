@@ -35,10 +35,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./nodal_area]
-    order = SECOND
-    family = LAGRANGE
-  [../]
   [./react_x]
     order = SECOND
     family = LAGRANGE
@@ -70,11 +66,6 @@
     tensor = stress
     variable = stress_xx
     index = 0
-  [../]
-  [./nodal_area]
-    type = NodalAreaAux
-    variable = nodal_area
-    nodal_area_object = nodal_area_object_0
   [../]
 []
 
@@ -175,7 +166,7 @@
   [../]
   [./total_area]
     type = NodalSum
-    variable = nodal_area
+    variable = nodal_area_dummy_name
     boundary = 2
   [../]
 []

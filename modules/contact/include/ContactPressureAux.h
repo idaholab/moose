@@ -17,7 +17,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  const NodalArea & _nodal_area;
+  const VariableValue & _nodal_area;
   const PenetrationLocator & _penetration_locator;
 };
 
