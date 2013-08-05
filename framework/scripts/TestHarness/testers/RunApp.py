@@ -79,6 +79,9 @@ class RunApp(Tester):
     if options.scaling and specs[SCALE_REFINE] > 0:
       command += ' -r ' + str(specs[SCALE_REFINE])
 
+    if options.cli_args:
+      command += ' ' + options.cli_args
+
     if options.pbs:
       return self.getPBSCommand(options)
     return command
