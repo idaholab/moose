@@ -136,6 +136,21 @@ Component::getNextBCId()
 }
 
 void
+Component::aliasParam(const std::string & rname, const std::string & name, Component * comp/* = NULL*/)
+{
+  if (comp == NULL)
+    _param_alias_map[rname] = std::pair<Component *, std::string>(this, name);
+  else
+    _param_alias_map[rname] = std::pair<Component *, std::string>(comp, name);
+}
+
+void
+Component::aliasVectorParam(const std::string & rname, const std::string & name, unsigned int pos, Component * /*comp = NULL*/)
+{
+  createVectorControllableParMapping(rname, name, pos);
+}
+
+void
 Component::connectObject(const std::string & rname, const std::string & mooseName, const std::string & name)
 {
   RavenNameEntry rne(mooseName, name);

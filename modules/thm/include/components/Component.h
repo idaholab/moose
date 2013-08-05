@@ -103,6 +103,8 @@ public:
   void
   setRParam(const std::string & param_name, const T & value);
 
+  void aliasParam(const std::string & rname, const std::string & name, Component * comp = NULL);
+  void aliasVectorParam(const std::string & rname, const std::string & name, unsigned int pos, Component * comp = NULL);
   void connectObject(const std::string & rname, const std::string & mooseName, const std::string & name);
   void connectObject(const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name);
 
@@ -146,6 +148,8 @@ protected:
   std::map<std::string, std::map<std::string, std::vector<RavenNameEntry> > > _rname_map;
   /// Mapping of friendly names
   std::map<std::string, RavenMapContainer> _rvect_map;
+  /// Map for aliasing component param names
+  std::map<std::string, std::pair<Component *, std::string> > _param_alias_map;
 
   const Real & _zero;
 
@@ -179,12 +183,31 @@ Component::getRParam(const std::string & param_name)
   for (std::vector<RavenNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
   {
     const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(it->_object_name, 0);
-    std::string par_name = it->_par_name.empty() ? s[1] : it->_par_name;
-    for (std::vector<MooseObject *>::const_iterator jt = objs.begin() ; jt != objs.end(); ++jt)
+    if (objs.size() > 0)
     {
-      MooseObject * obj = *jt;
-      if (obj->parameters().have_parameter<T>(par_name))
-        return obj->parameters().get<T>(par_name);
+      std::string par_name = it->_par_name.empty() ? s[1] : it->_par_name;
+      for (std::vector<MooseObject *>::const_iterator jt = objs.begin() ; jt != objs.end(); ++jt)
+      {
+        MooseObject * obj = *jt;
+        if (obj->parameters().have_parameter<T>(par_name))
+          return obj->parameters().get<T>(par_name);
+      }
+    }
+  }
+
+  // look for the parameter in this components' input parameters
+  if (this->parameters().have_parameter<T>(param_name))
+    return this->parameters().get<T>(param_name);
+  else
+  {
+    // not found, check in the alias map
+    std::map<std::string, std::pair<Component *, std::string> >::iterator it = _param_alias_map.find(param_name);
+    if (it != _param_alias_map.end())
+    {
+      Component * comp = it->second.first;
+      std::string par_name = it->second.second;
+      if (comp->parameters().have_parameter<T>(par_name))
+        return comp->parameters().get<T>(par_name);
     }
   }
 
@@ -206,7 +229,6 @@ void
 Component::setRParam(const std::string & param_name, const T & value)
 {
   std::vector<std::string> s = split(param_name);
-  bool found = false;
 
   std::map<std::string, std::vector<RavenNameEntry> > & rmap = _rname_map[s[0]];
   const std::vector<RavenNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
@@ -222,25 +244,39 @@ Component::setRParam(const std::string & param_name, const T & value)
         if (obj->parameters().have_parameter<T>(par_name))
         {
           obj->parameters().set<T>(par_name) = value;
-          found = true;
         }
       }
     }
   }
 
+  // look for the parameter in this components' input parameters
+  if (this->parameters().have_parameter<T>(param_name))
+  {
+    this->parameters().set<T>(param_name) = value;
+  }
+  else
+  {
+    // not found, check in the alias map
+    std::map<std::string, std::pair<Component *, std::string> >::iterator it = _param_alias_map.find(param_name);
+    if (it != _param_alias_map.end())
+    {
+      Component * comp = it->second.first;
+      std::string par_name = it->second.second;
+      if (comp->parameters().have_parameter<T>(par_name))
+        comp->parameters().set<T>(par_name) = value;
+    }
+  }
+
   // Specialization for RAVEN. At this point the variable has not been found.
   // Try to search into the vector parameter mapping
-  if (!found)
+  if (_rvect_map.find(param_name) != _rvect_map.end())
   {
-    if (_rvect_map.find(param_name) != _rvect_map.end())
+    RavenMapContainer name_cont = _rvect_map.find(param_name)->second;
+    if (parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName()))
     {
-      RavenMapContainer name_cont = _rvect_map.find(param_name)->second;
-      if (parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName()))
-      {
-        std::vector<T> tempp = parameters().get< std::vector<T> >(name_cont.getControllableParName());
-        tempp[name_cont.getControllableParPosition()] = value;
-        parameters().set<std::vector<T> >(name_cont.getControllableParName()) = tempp;
-      }
+      std::vector<T> tempp = parameters().get< std::vector<T> >(name_cont.getControllableParName());
+      tempp[name_cont.getControllableParPosition()] = value;
+      parameters().set<std::vector<T> >(name_cont.getControllableParName()) = tempp;
     }
   }
 }
