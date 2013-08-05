@@ -129,7 +129,11 @@ class Tester(object):
         return (False, reason)
 
     # Check for heavy tests
-    if self.specs[HEAVY] and not options.heavy_tests:
+    if options.all_tests or options.heavy_tests:
+      if not self.specs[HEAVY] and options.heavy_tests:
+        reason = 'skipped (NOT HEAVY)'
+        return (False, reason)
+    elif self.specs[HEAVY]:
       reason = 'skipped (HEAVY)'
       return (False, reason)
 
