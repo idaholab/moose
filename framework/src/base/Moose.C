@@ -251,6 +251,7 @@
 #include "MultiAppUserObjectTransfer.h"
 #include "MultiAppNearestNodeTransfer.h"
 #include "MultiAppInterpolationTransfer.h"
+#include "MultiAppPostprocessorTransfer.h"
 
 
 // Actions
@@ -540,6 +541,7 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppUserObjectTransfer);
   registerTransfer(MultiAppNearestNodeTransfer);
   registerTransfer(MultiAppInterpolationTransfer);
+  registerTransfer(MultiAppPostprocessorTransfer);
 
   registered = true;
 }
