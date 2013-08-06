@@ -238,16 +238,16 @@ the methods to retrieve memory usage and stack traces.
   def get_pids(self):
     pid_list = {}
     if self.arguments.track == None:
-      command = ['ps', '-e', '-o', 'pid,rss,user,comm']
+      command = ['ps', '-e', '-o', 'pid,rss,user,args']
       tmp_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       all_pids = tmp_proc.communicate()[0].split('\n')
       (search_for, abs) = self._discover_name()
       for single_pid in all_pids:
-        if single_pid.find(search_for) > -1 and single_pid.find(os.getenv('USER')) > -1:
+        if single_pid.find(search_for) > -1 and single_pid.find(os.getenv('USER')) > -1 and single_pid.find(__file__) == -1:
           pid_list[single_pid.split()[0]] = []
           pid_list[single_pid.split()[0]].append(single_pid.split()[1])
     else:
-      command = ['ps', str(self.arguments.track[-1]), '-e', '-o', 'pid,rss,user,comm']
+      command = ['ps', str(self.arguments.track[-1]), '-e', '-o', 'pid,rss,user,args']
       tmp_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       all_pids = tmp_proc.communicate()[0].split('\n')
       for single_pid in all_pids:
@@ -819,8 +819,6 @@ def _verifyARGs(args):
     if args.mpi is not True and args.pbs:
       print 'Ummm, you are specifying PBS with out using mpiexec/mpirun.'
       sys.exit(0)
-    if which('pstack') != None or which('gdb') != None:
-      args.pstack = True
 
   args.my_hostname = socket.gethostname()
   return args
