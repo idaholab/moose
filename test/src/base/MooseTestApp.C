@@ -95,6 +95,9 @@
 #include "RandomHitSolutionModifier.h"
 #include "MaterialPropertyUserObject.h"
 #include "InsideUserObject.h"
+
+// Postprocessors
+#include "TestCopyInitialSolution.h"
 #include "InsideValuePPS.h"
 
 // Functions
@@ -269,6 +272,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(InsideUserObject);
 
   registerPostprocessor(InsideValuePPS);
+  registerPostprocessor(TestCopyInitialSolution);
 
   registerMarker(RandomHitMarker);
 

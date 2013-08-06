@@ -331,6 +331,28 @@ void FEProblem::initialSetup()
   if (_output_es_info)
     _eq.print_info();
 
+  for(unsigned int i=0; i<n_threads; i++)
+  {
+    _indicators[i].initialSetup();
+    _markers[i].initialSetup();
+  }
+
+#ifdef LIBMESH_ENABLE_AMR
+  Moose::setup_perf_log.push("initial adaptivity","Setup");
+  for (unsigned int i = 0; i < adaptivity().getInitialSteps(); i++)
+  {
+    computeIndicatorsAndMarkers();
+
+    _adaptivity.initialAdaptMesh();
+    meshChanged();
+
+    //reproject the initial condition
+    _nl.projectSolution();
+  }
+  Moose::setup_perf_log.pop("initial adaptivity","Setup");
+#endif //LIBMESH_ENABLE_AMR
+
+  // During initial setup the solution is copied to solution_old and solution_older
   Moose::setup_perf_log.push("copySolutionsBackwards()","Setup");
   copySolutionsBackwards();
   Moose::setup_perf_log.pop("copySolutionsBackwards()","Setup");
@@ -367,27 +389,6 @@ void FEProblem::initialSetup()
 
 //  // RUN initial postprocessors
 //  computePostprocessors(EXEC_INITIAL);
-
-  for(unsigned int i=0; i<n_threads; i++)
-  {
-    _indicators[i].initialSetup();
-    _markers[i].initialSetup();
-  }
-
-#ifdef LIBMESH_ENABLE_AMR
-  Moose::setup_perf_log.push("initial adaptivity","Setup");
-  for (unsigned int i = 0; i < adaptivity().getInitialSteps(); i++)
-  {
-    computeIndicatorsAndMarkers();
-
-    _adaptivity.initialAdaptMesh();
-    meshChanged();
-
-    //reproject the initial condition
-    _nl.projectSolution();
-  }
-  Moose::setup_perf_log.pop("initial adaptivity","Setup");
-#endif //LIBMESH_ENABLE_AMR
 
   _nl.setSolution(*(_nl.sys().current_local_solution.get()));
 
