@@ -123,7 +123,7 @@ class Tester(object):
     for check in local_checks:
       test_platforms = set()
       for x in self.specs[check]:
-        test_platforms.add(x)
+        test_platforms.add(x.upper())
       if not len(test_platforms.intersection(checks[check])):
         reason = 'skipped (' + re.sub(r'\[|\]', '', check).upper() + '!=' + ', '.join(self.specs[check]) + ')'
         return (False, reason)
