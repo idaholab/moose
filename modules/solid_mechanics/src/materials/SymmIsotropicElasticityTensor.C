@@ -244,4 +244,3 @@ SymmIsotropicElasticityTensor::adjustForCracking( const RealVectorValue & crack_
 
   _val[20] *= c02;
 }
-
