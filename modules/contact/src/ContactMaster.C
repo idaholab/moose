@@ -72,7 +72,8 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   {
     _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
   }
-  if (_model == CM_GLUED)
+  if (_model == CM_GLUED ||
+      (_model == CM_COULOMB && _formulation == CF_DEFAULT))
   {
     _penetration_locator.setUpdate(false);
   }
@@ -153,7 +154,8 @@ ContactMaster::updateContactSet(bool beginning_of_step)
       pinfo->_starting_closest_point_ref = it->second->_closest_point_ref;
     }
 
-    if (_model == CM_EXPERIMENTAL)
+    if (_model == CM_EXPERIMENTAL ||
+        (_model == CM_COULOMB && _formulation == CF_DEFAULT))
     {
       const Node * node = pinfo->_node;
 
@@ -336,20 +338,12 @@ ContactMaster::computeQpResidual()
     pinfo->_contact_force(_component) = -resid;
     pinfo->_mech_status=PenetrationLocator::MS_SLIPPING;
   }
-  else if (_model == CM_COULOMB)
+  else if (_model == CM_COULOMB && _formulation == CF_PENALTY)
   {
+    distance_vec = pinfo->_incremental_slip + (pinfo->_normal * (_mesh.node(node->id()) - pinfo->_closest_point)) * pinfo->_normal;
+    pen_force = _penalty * distance_vec;
 
-    if (_formulation == CF_PENALTY)
-    {
-      distance_vec = pinfo->_incremental_slip + (pinfo->_normal * (_mesh.node(node->id()) - pinfo->_closest_point)) * pinfo->_normal;
-      pen_force = _penalty * distance_vec;
-
-      resid = pinfo->_normal * pen_force;
-    }
-    else
-    {
-      mooseError("Invalid contact formulation");
-    }
+    resid = pinfo->_normal * pen_force;
 
     // Frictional capacity
     // const Real capacity( _friction_coefficient * (pen_force * pinfo->_normal < 0 ? -resid : 0) );
@@ -378,7 +372,8 @@ ContactMaster::computeQpResidual()
 
   }
   else if (_model == CM_GLUED ||
-           _model == CM_TIED)
+           _model == CM_TIED ||
+           (_model == CM_COULOMB && _formulation == CF_DEFAULT))
   {
     switch(_formulation)
     {

@@ -155,20 +155,13 @@ SlaveConstraint::computeQpResidual()
     pinfo->_mech_status=PenetrationLocator::MS_SLIPPING;
 
   }
-  else if (_model == CM_COULOMB)
+  else if (_model == CM_COULOMB && _formulation == CF_PENALTY)
   {
 
-    if (_formulation == CF_PENALTY)
-    {
-      distance_vec = pinfo->_incremental_slip + (pinfo->_normal * (_mesh.node(node->id()) - pinfo->_closest_point)) * pinfo->_normal;
-      pen_force = _penalty * distance_vec;
+    distance_vec = pinfo->_incremental_slip + (pinfo->_normal * (_mesh.node(node->id()) - pinfo->_closest_point)) * pinfo->_normal;
+    pen_force = _penalty * distance_vec;
 
-      resid = pinfo->_normal * pen_force;
-    }
-    else
-    {
-      mooseError("Invalid contact formulation");
-    }
+    resid = pinfo->_normal * pen_force;
 
     // Frictional capacity
     // const Real capacity( _friction_coefficient * (pen_force * pinfo->_normal < 0 ? -resid : 0) );
@@ -195,7 +188,9 @@ SlaveConstraint::computeQpResidual()
     resid = pinfo->_contact_force(_component);
 
   }
-  else if (_model == CM_GLUED || _model == CM_TIED)
+  else if (_model == CM_GLUED ||
+           _model == CM_TIED ||
+           (_model == CM_COULOMB && _formulation == CF_DEFAULT))
   {
 
     if(_formulation == CF_DEFAULT)
