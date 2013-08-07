@@ -5,6 +5,7 @@
     expect_err = "Caught exception"
     petsc_version = '>=3.1.0'
     should_crash = false
+		max_threads = 1
   [../]
 
   [./parallel_exception_residual]

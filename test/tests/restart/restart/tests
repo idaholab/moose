@@ -10,7 +10,6 @@
     input = 'xda_restart_part2.i'
     exodiff = 'out_xda_restart_part2.e'
     max_parallel = 1
-    max_threads = 1
     prereq = 'test_xda_restart_part_1'
   [../]
 
@@ -32,7 +31,6 @@
     input = 'xda_restart_part1.i'
     exodiff = 'out_xda_restart_part1.e'
     max_parallel = 1
-    max_threads = 1
   [../]
 
   [./test_nodal_var_2]
