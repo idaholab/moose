@@ -96,6 +96,10 @@ public:
   virtual std::string variableName(std::string piece) = 0;
 
   template<typename T>
+  bool
+  hasRParam(const std::string & param_name);
+
+  template<typename T>
   const T &
   getRParam(const std::string & param_name);
 
@@ -170,6 +174,60 @@ private:
 };
 
 
+
+template<typename T>
+bool
+Component::hasRParam(const std::string & param_name)
+{
+  std::vector<std::string> s = split(param_name);
+
+  std::map<std::string, std::vector<RavenNameEntry> > & rmap = _rname_map[s[0]];
+
+  const std::vector<RavenNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
+  for (std::vector<RavenNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
+  {
+    const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(it->_object_name, 0);
+    if (objs.size() > 0)
+    {
+      std::string par_name = it->_par_name.empty() ? s[1] : it->_par_name;
+      for (std::vector<MooseObject *>::const_iterator jt = objs.begin() ; jt != objs.end(); ++jt)
+      {
+        MooseObject * obj = *jt;
+        if (obj->parameters().have_parameter<T>(par_name))
+          return true;
+      }
+    }
+  }
+
+  // look for the parameter in this components' input parameters
+  if (this->parameters().have_parameter<T>(param_name))
+    return true;
+  else
+  {
+    // not found, check in the alias map
+    std::map<std::string, std::pair<Component *, std::string> >::iterator it = _param_alias_map.find(param_name);
+    if (it != _param_alias_map.end())
+    {
+      Component * comp = it->second.first;
+      std::string par_name = it->second.second;
+      if (comp->parameters().have_parameter<T>(par_name))
+        return true;
+    }
+  }
+
+  // Specialization for RAVEN. At this point the variable has not been found.
+  // Try to search into the vector parameter mapping.
+  if (_rvect_map.find(param_name) == _rvect_map.end())
+    return false;
+  else
+  {
+    RavenMapContainer name_cont = _rvect_map.find(param_name)->second;
+    if (parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName()))
+      return true;
+  }
+
+  return false;
+}
 
 template<typename T>
 const T &
