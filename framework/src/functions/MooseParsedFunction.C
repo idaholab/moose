@@ -41,6 +41,9 @@ MooseParsedFunction::value(Real t, const Point & pt)
   // This gurantees that the function is initilized
   mooseAssert(_initialized, "The 'initialSetup' method must be called before the 'value' method");
 
+  // Make certain the things are up to date
+  updatePostprocessorValues();
+
   // Evaluate and return the libMesh::ParsedFunction
   return (*_function)(pt, t);
 }
@@ -129,28 +132,4 @@ MooseParsedFunction::initialSetup()
 
   // The class is now initialized
    _initialized = true;
-}
-
-void
-MooseParsedFunction::timestepSetup()
-{
-  updatePostprocessorValues();
-}
-
-void
-MooseParsedFunction::jacobianSetup()
-{
-  updatePostprocessorValues();
-}
-
-void
-MooseParsedFunction::residualSetup()
-{
-  updatePostprocessorValues();
-}
-
-void
-MooseParsedFunction::subdomainSetup()
-{
-  updatePostprocessorValues();
 }

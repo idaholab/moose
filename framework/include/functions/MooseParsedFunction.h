@@ -83,26 +83,6 @@ public:
    */
   virtual void initialSetup();
 
-  /**
-   * Updates the Postprocessor data for the libMesh::ParsedFunction on timestep
-   */
-  virtual void timestepSetup();
-
-   /**
-   * Updates the Postprocessor data for the libMesh::ParsedFunction with Jacobian calculation
-   */
-  virtual void jacobianSetup();
-
-  /**
-   * Updates the Postprocessor data for the libMesh::ParsedFunction with residual calculation
-   */
-  virtual void residualSetup();
-
-  /**
-   * Updates the Postprocessor data for the libMesh::ParsedFunction with subdomains
-   */
-  virtual void subdomainSetup();
-
 protected:
   /**
    * Override this method if you want to make your own MooseParsedFunction with custom

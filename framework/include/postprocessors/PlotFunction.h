@@ -43,6 +43,4 @@ protected:
   const Real _scale_factor;
 };
 
-
-
 #endif /* PLOTFUNCTION_H */
