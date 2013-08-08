@@ -133,7 +133,7 @@ ProjectMaterialProperties::onBoundary(const Elem *elem, unsigned int side, Bound
 }
 
 void
-ProjectMaterialProperties::onInternalSide(const Elem *elem, unsigned int side)
+ProjectMaterialProperties::onInternalSide(const Elem *elem, unsigned int /*side*/)
 {
   if (!_sys.doingDG())
     return;

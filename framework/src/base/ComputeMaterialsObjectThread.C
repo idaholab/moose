@@ -76,7 +76,7 @@ ComputeMaterialsObjectThread::onElement(const Elem *elem)
 }
 
 void
-ComputeMaterialsObjectThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+ComputeMaterialsObjectThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID /*bnd_id*/)
 {
 //  if (!_sys.hasActiveIntegratedBCs(bnd_id, _tid) && !_sys.doingDG())
 //    return;

@@ -35,7 +35,7 @@ ComputeJacobianBlockThread::ComputeJacobianBlockThread(FEProblem & fe_problem, l
 }
 
 // Splitting Constructor
-ComputeJacobianBlockThread::ComputeJacobianBlockThread(ComputeJacobianBlockThread & x, Threads::split split) :
+ComputeJacobianBlockThread::ComputeJacobianBlockThread(ComputeJacobianBlockThread & x, Threads::split /*split*/) :
     _fe_problem(x._fe_problem),
     _precond_system(x._precond_system),
     _nl(x._nl),

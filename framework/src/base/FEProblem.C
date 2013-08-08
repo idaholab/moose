@@ -3580,9 +3580,9 @@ MooseLinearConvergenceReason
 FEProblem::checkLinearConvergence(std::string & /*msg*/,
                                   const int n,
                                   const Real rnorm,
-                                  const Real rtol,
-                                  const Real atol,
-                                  const Real dtol,
+                                  const Real /*rtol*/,
+                                  const Real /*atol*/,
+                                  const Real /*dtol*/,
                                   const int maxits)
 {
   // We initialize the reason to something that basically means MOOSE
