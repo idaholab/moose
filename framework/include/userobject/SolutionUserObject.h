@@ -166,10 +166,10 @@ protected:
   /// Pointer to a second libMesh::System object, used for interpolation
   System * _system2;
 
-  /// Pointer to second libMesh::MeshFuntion, used for interplolation
+  /// Pointer to second libMesh::MeshFuntion, used for interpolation
   MeshFunction * _mesh_function2;
 
-  /// Pointer to second serial solution, used for interplolation
+  /// Pointer to second serial solution, used for interpolation
   NumericVector<Number> * _serialized_solution2;
 
   /// Interpolation time

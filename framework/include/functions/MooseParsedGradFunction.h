@@ -41,7 +41,7 @@ public:
    */
   MooseParsedGradFunction(const std::string & name, InputParameters parameters);
 
-  /**ar
+  /**
    * Class destructor, it removes the libMesh::ParsedFunction
    */
   virtual ~MooseParsedGradFunction();

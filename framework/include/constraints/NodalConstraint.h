@@ -74,7 +74,7 @@ public:
   MooseVariable & variable() { return _var; }
 
   /**
-   * Subproblem this constriant is part of
+   * Subproblem this constraint is part of
    * @return The reference to the subproblem
    */
   SubProblem & subProblem() { return _subproblem; }

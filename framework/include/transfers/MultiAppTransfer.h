@@ -59,10 +59,10 @@ public:
   virtual int executeOn() { return _multi_app->executeOn(); }
 
 protected:
-  /// The MultiApp this Transfer is transfering data to or from
+  /// The MultiApp this Transfer is transferring data to or from
   MultiApp * _multi_app;
 
-  /// Whether we're transfering to or from the MultiApp
+  /// Whether we're transferring to or from the MultiApp
   MooseEnum _direction;
 };
 

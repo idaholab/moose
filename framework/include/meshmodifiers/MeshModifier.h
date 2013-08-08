@@ -51,7 +51,7 @@ public:
   void setMeshPointer(MooseMesh *mesh) { _mesh_ptr = mesh; }
 
   /**
-   * Pure virtual modify function MUST be overriden by children classes.
+   * Pure virtual modify function MUST be overridden by children classes.
    * This is where the MeshModifier actually does it's work.
    */
   virtual void modify() = 0;

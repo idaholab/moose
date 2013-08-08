@@ -218,9 +218,9 @@ public:
   ConstElemPointerRange * refinedElementRange();
 
   /**
-   * Return a range that is suitable for threaded execution over elements that were just coarsend.
+   * Return a range that is suitable for threaded execution over elements that were just coarsened.
    * Note that these are the _Parent_ elements that are now set to be INACTIVE.  Their _children_
-   * are the elements that were just removed.  Use coarsenedElementChildren() to get the elment
+   * are the elements that were just removed.  Use coarsenedElementChildren() to get the element
    * IDs for the children that were just removed for a particular parent element.
    */
   ConstElemPointerRange * coarsenedElementRange();
@@ -298,12 +298,12 @@ public:
   void setGhostedBoundaryInflation(const std::vector<Real> & inflation);
 
   /**
-   * Return a writeable reference to the set of ghosted boundary IDs.
+   * Return a writable reference to the set of ghosted boundary IDs.
    */
   std::set<unsigned int> & getGhostedBoundaries();
 
   /**
-   * Return a writeable reference to the _ghosted_boundaries_inflation vector.
+   * Return a writable reference to the _ghosted_boundaries_inflation vector.
    */
   std::vector<Real> & getGhostedBoundaryInflation();
 
@@ -340,20 +340,20 @@ public:
   std::set<SubdomainID> & getNodeBlockIds(const Node & node);
 
   /**
-   * Return a writeable reference to a vector of node IDs that belong
+   * Return a writable reference to a vector of node IDs that belong
    * to nodeset_id.
    */
   std::vector<unsigned int> & getNodeList(short int nodeset_id);
 
   /**
    * Add a new node to the mesh.  If there is already a node located at the point passed
-   * then the node will not be added.  In either case a refernce to the node at that location
+   * then the node will not be added.  In either case a reference to the node at that location
    * will be returned
    */
   const Node * addUniqueNode(const Point & p, Real tol=1e-6);
 
   /**
-   * Adds a ficticious "QuadratureNode".  This doesn't actually add it to the libMesh mesh...
+   * Adds a fictitious "QuadratureNode".  This doesn't actually add it to the libMesh mesh...
    * we just keep track of these here in MooseMesh.
    *
    * QuadratureNodes are fictitious "Nodes" that are located at quadrature points.  This is useful for using
@@ -533,7 +533,7 @@ protected:
   /// Pointer to underlying libMesh mesh object
   libMesh::MeshBase* _mesh;
 
-  /// Convienence enums
+  /// Convenience enums
   enum {
     X = 0,
     Y,
@@ -550,7 +550,7 @@ protected:
   /// true if mesh is changed (i.e. after adaptivity step)
   bool _is_changed;
 
-  /// True if using a TRUE parallel mesh (ie Nemesis)
+  /// True if using a TRUE parallel mesh (i.e. Nemesis)
   bool _is_parallel;
 
   /// True if prepare has been called on the mesh
@@ -639,7 +639,7 @@ protected:
   /// Vector of all the Nodes in the mesh for determining when to add a new point
   std::vector<Node *> _node_map;
 
-  /// Boolean indiciating whether this mesh was detected to be regular and orthogonal
+  /// Boolean indicating whether this mesh was detected to be regular and orthogonal
   bool _regular_orthogonal_mesh;
 
   /// The bounds in each dimension of the mesh for regular orthogonal meshes
@@ -660,7 +660,7 @@ private:
   std::map<unsigned int, std::vector<bool> > _periodic_dim;
 
   /**
-   * A convience vector used to hold values in each dimension representing half of the range.
+   * A convenience vector used to hold values in each dimension representing half of the range.
    */
   RealVectorValue _half_range;
 
@@ -669,7 +669,7 @@ private:
 
   /**
    * This routine determines whether the Mesh is a regular orthogonal mesh (i.e. square in 2D, cubic in 3D).
-   * If it is, then we can use a number of convience functions when periodic boundary conditions
+   * If it is, then we can use a number of convenience functions when periodic boundary conditions
    * are applied.  This routine populates the _range vector which is necessary for these convenience functions.
    * Note:  This routine can potentially identify meshes with concave faces that still "fit" in the convex hull
    * of the corresponding regular orthogonal mesh.  This case is highly unlikely in practice and if a user
@@ -718,7 +718,7 @@ private:
   void mapPoints(const std::vector<Point> & from, const std::vector<Point> & to, std::vector<QpMap> & qp_map);
 
   /**
-   * Given an elem type, get maps that tell us what qp's are closest to eachother between a parent and it's children.
+   * Given an elem type, get maps that tell us what qp's are closest to each other between a parent and it's children.
    * This is mainly used for mapping stateful material properties during adaptivity.
    *
    * There are 3 cases here:

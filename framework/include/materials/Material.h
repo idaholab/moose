@@ -155,7 +155,7 @@ protected:
    * Initialize stateful properties at quadrature points.  Note when using this function you only need to address
    * the "current" material properties not the old ones directly, i.e. if you have a property named "_diffusivity"
    * and an older property named "_diffusivity_old".  You only need to initialize diffusivity.  MOOSE will use
-   * copy that initial value to the old and older values as necesary.
+   * copy that initial value to the old and older values as necessary.
    */
   virtual void initQpStatefulProperties();
 

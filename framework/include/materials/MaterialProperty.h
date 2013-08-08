@@ -164,7 +164,7 @@ public:
    * Friend helper function to handle scalar material property initializations
    * @param size - the size corresponding to the quadrature rule
    * @param prop - The Material property that we will resize since this is not a member
-   * @param the_type - This is just a template paramter used to identify the
+   * @param the_type - This is just a template parameter used to identify the
    *                   difference between the scalar and vector template functions
    */
   template<typename P>

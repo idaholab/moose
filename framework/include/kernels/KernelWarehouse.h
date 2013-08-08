@@ -103,9 +103,9 @@ public:
    * representing all of the subdomains, if not then the supplied set is filled in
    * with the complete set of subdomains represented which may or may not represent
    * the entire domain.  In addition a count variables containing one or more kernels
-   * is returned through the reference paramater.
-   * @param subdomains_covered A writeable reference to a list of subdomains with active kernels on them if no global kernels exist
-   * @param unique_variable_count A writeable reference to a count of variables containing one or kernels
+   * is returned through the reference parameter.
+   * @param subdomains_covered A writable reference to a list of subdomains with active kernels on them if no global kernels exist
+   * @param unique_variable_count A writable reference to a count of variables containing one or kernels
    * @return bool A Boolean indicating whether all subdomains are covered by kernels
    */
   bool subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variable_count) const;

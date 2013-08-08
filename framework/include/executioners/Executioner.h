@@ -61,7 +61,7 @@ public:
   virtual void init();
 
   /**
-   * Pure virtual execute function MUST be overriden by children classes.
+   * Pure virtual execute function MUST be overridden by children classes.
    * This is where the Executioner actually does it's work.
    */
   virtual void execute() = 0;

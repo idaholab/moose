@@ -19,7 +19,7 @@
 
 #include "libmesh/libmesh_common.h"
 
-/// Execution flags - when is the oject executed/evaluated
+/// Execution flags - when is the object executed/evaluated
 enum ExecFlagType {
   /// Object is evaluated only once at the beginning of the simulation
   EXEC_INITIAL,
@@ -87,7 +87,7 @@ protected:
   std::vector<T> _obj_timestep;
   /// executed at the beginning of every time step
   std::vector<T> _obj_ts_begin;
-  /// executed at a custom time by the Exeuctioner
+  /// executed at a custom time by the Executioner
   std::vector<T> _obj_custom;
 };
 

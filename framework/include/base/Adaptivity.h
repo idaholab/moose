@@ -131,7 +131,7 @@ public:
   void setTimeActive(Real start_time, Real stop_time);
 
   /**
-   * Tells this object we're using the "new" adaptivity sytem.
+   * Tells this object we're using the "new" adaptivity system.
    */
   void setUseNewSystem();
 
@@ -215,7 +215,7 @@ protected:
   /// The number of adaptivity cycles per step
   unsigned int _cycles_per_step;
 
-  /// Whether or not to use the "new" adaptivity sytem
+  /// Whether or not to use the "new" adaptivity system
   bool _use_new_system;
 
   /// Name of the marker variable if using the new adaptivity system

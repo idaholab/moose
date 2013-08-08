@@ -48,7 +48,7 @@ public:
   /**
    * The value of the variable at a point.
    *
-   * This must be overriden by derived classes.
+   * This must be overridden by derived classes.
    */
   virtual Real value(const Point & p);
 

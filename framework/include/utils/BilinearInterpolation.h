@@ -33,7 +33,7 @@ class BilinearInterpolation
 public:
 
   /* Constructor, Takes two vectors of points for which to apply the fit.  One should be of the
-   * independent variable while the other should be of the dependent varible.  These values should
+   * independent variable while the other should be of the dependent variable.  These values should
    * correspond to one and other in the same position.
    */
   BilinearInterpolation(const std::vector<Real> & XAXIS,

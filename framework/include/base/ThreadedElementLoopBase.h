@@ -74,8 +74,8 @@ public:
   virtual void onInternalSide(const Elem *elem, unsigned int side);
 
   /**
-   * Called every time the current subdoain changes (ie the subdomain of _this_ element
-   * is not the same as the subdomain of the last element).  Beware of overusing this!
+   * Called every time the current subdomain changes (i.e. the subdomain of _this_ element
+   * is not the same as the subdomain of the last element).  Beware of over-using this!
    * You might think that you can do some expensive stuff in here and get away with it...
    * but there are applications that have TONS of subdomains....
    */

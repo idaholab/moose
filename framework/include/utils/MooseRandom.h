@@ -26,21 +26,21 @@
  *
  * 1. SIMPLE INTERFACE:
  *    There are three static functions that are suitable as a drop in replacement for the
- *    random number capabilities available in the stanadard C++ libarary.
+ *    random number capabilities available in the standard C++ library.
  *
  * 2. ADVANCED INTERFACE:
  *    When creating an instance of this class, one can maintain an arbitrary number of
  *    multiple independent streams of random numbers.  Furthermore, the state of these
  *    generators can be saved and restored for all streams by using the "saveState" and
  *    "restoreState" methods.  Finally, this class uses a fast hash map so that indexes
- *    for the generators are not required to be contigous.
+ *    for the generators are not required to be contiguous.
  */
 class MooseRandom
 {
 public:
 
   /**
-   * The methoed seeds the random number generator
+   * The method seeds the random number generator
    * @param seed  the seed number
    */
   static inline void seed(unsigned int seed)

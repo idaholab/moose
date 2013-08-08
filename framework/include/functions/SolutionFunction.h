@@ -45,7 +45,7 @@ public:
 
   /** Extract a value from the solution
    * @param t Time at which to extract
-   * @param p Spatial locatoin of desired data
+   * @param p Spatial location of desired data
    * @return The value at t and p
    */
   virtual Real value(Real t, const Point & p);
@@ -54,7 +54,7 @@ public:
 
   /** Setup the function for use
    * Gathers a pointer to the SolutionUserObject containing the solution that
-   * was read. A pointer is requred because Functions are created prior to UserObjects,
+   * was read. A pointer is required because Functions are created prior to UserObjects,
    * see Moose.C.
    */
   virtual void initialSetup();

@@ -78,7 +78,7 @@
 #define registerNamedTimeIntegrator(obj, name)      registerNamedObject(obj, name)
 #define registerNamedPredictor(obj, name)           registerNamedObject(obj, name)
 
-// Macro for registering depracated objects
+// Macro for registering deprecated objects
 #define registerDeprecatedObject(name, message)     factory.reg<name>(stringifyName(name), message)
 
 

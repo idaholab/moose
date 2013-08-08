@@ -64,7 +64,7 @@ public:
   };
 
   /**
-   * Data structure used to hold penetation information
+   * Data structure used to hold penetration information
    */
   class PenetrationInfo
   {

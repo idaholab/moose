@@ -121,7 +121,7 @@ public:
   const T & operator[](const unsigned int i) const;
 
   /**
-   * Swap memory in this object woth the 'rhs' object
+   * Swap memory in this object with the 'rhs' object
    * @param rhs The object we are swapping with
    */
   void swap(MooseArray & rhs);
@@ -133,7 +133,7 @@ public:
    *
    * Note! You can leak memory with this function if you
    * don't take care to have a copy of _this_ array somewhere
-   * else.  This is because the data pointer will get overriden
+   * else.  This is because the data pointer will get overridden
    * here.
    */
   void shallowCopy(const MooseArray & rhs);
@@ -145,7 +145,7 @@ public:
    *
    * Note! You can leak memory with this function if you
    * don't take care to have a copy of _this_ array somewhere
-   * else.  This is because the data pointer will get overriden
+   * else.  This is because the data pointer will get overridden
    * here.
    *
    * I repeat!  This is an extremely dangerous function!
@@ -171,7 +171,7 @@ public:
   MooseArray<T> & operator=(const MooseArray<T> & rhs);
 
   /**
-   * Extremely inefficent way to produce a std::vector from a MooseArray!
+   * Extremely inefficient way to produce a std::vector from a MooseArray!
    *
    * @return A _copy_ of the MooseArray contents.
    */

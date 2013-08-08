@@ -87,7 +87,7 @@ protected:
 
   /// Value(s) of the scalar variable
   VariableValue & _u;
-  /// Old value(s) of the scalar varaible
+  /// Old value(s) of the scalar variable
   VariableValue & _u_old;
   VariableValue & _u_dot;
   VariableValue & _du_dot_du;

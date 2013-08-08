@@ -115,7 +115,7 @@ public:
   void addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
 
   /**
-   * Adds a Dirac kernal
+   * Adds a Dirac kernel
    * @param kernel_name The type of the dirac kernel
    * @param name The name of the Dirac kernel
    * @param parameters Dirac kernel parameters
@@ -123,7 +123,7 @@ public:
   void addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
   /**
-   * Adds a DG kernal
+   * Adds a DG kernel
    * @param dg_kernel_name The type of the DG kernel
    * @param name The name of the DG kernel
    * @param parameters DG kernel parameters
@@ -194,7 +194,7 @@ public:
 
   /**
    * Adds entries to the Jacobian in the correct positions for couplings coming from dofs being coupled that
-   * are related geometrically (ie near eachother across a gap).
+   * are related geometrically (i.e. near each other across a gap).
    */
   void addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jacobian, GeometricSearchData & geom_search_data);
 
@@ -310,7 +310,7 @@ public:
 
   /**
    * Indicates whether to assemble residual and Jacobian after each constraint application.
-   * When true, enables "transitive" constraint appication: subsequent constraints can use prior constraints' results.
+   * When true, enables "transitive" constraint application: subsequent constraints can use prior constraints' results.
    */
   void assembleConstraintsSeparately(bool separately=true) {_assemble_constraints_separately = separately;}
 

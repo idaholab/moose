@@ -169,7 +169,7 @@ public:
   void setCheckUnusedFlag(bool warn_is_error = false);
 
   /**
-   * Set a flag so that the parser will throw an error if overriden parameters are detected
+   * Set a flag so that the parser will throw an error if overridden parameters are detected
    */
   void setErrorOverridden();
 

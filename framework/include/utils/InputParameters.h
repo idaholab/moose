@@ -263,7 +263,7 @@ public:
    * This function checks parameters stored in the object to make sure they are in the correct
    * state as the user expects:
    *   Required parameters are verified as valid meaning that they were either initialized when
-   *   they were created, or were read from an inputfile or some other valid source
+   *   they were created, or were read from an input file or some other valid source
    */
   void checkParams(const std::string & prefix) const;
 
@@ -335,7 +335,7 @@ void InputParameters::addRequiredParam(const std::string &name, const std::strin
 template <typename T>
 void InputParameters::addRequiredParam(const std::string & /*name*/, const T & /*value*/, const std::string & /*doc_string*/)
 {
-  mooseError("You cannont call addRequiredParam and supply a default value for this type, please use addParam instead");
+  mooseError("You cannon call addRequiredParam and supply a default value for this type, please use addParam instead");
 }
 
 template <typename T>
@@ -420,7 +420,7 @@ void InputParameters::addCommandLineParam(const std::string &name, const std::st
 template <typename T>
 void InputParameters::checkConsistentType(const std::string &name) const
 {
-  // Do we have a paremeter with the same name but a different type?
+  // Do we have a parameter with the same name but a different type?
   Parameters::const_iterator it = _values.find(name);
   if (it != _values.end() && dynamic_cast<const Parameter<T>*>(it->second) == NULL)
     mooseError("Parameter: " << name << " already exists but with a different type");

@@ -52,9 +52,9 @@ public:
   virtual ~Indicator(){};
 
   /**
-   * Pure virtual that must be overriden.
+   * Pure virtual that must be overridden.
    *
-   * This is generally overriden by an intermediate base class.
+   * This is generally overridden by an intermediate base class.
    * Usually you will want to inherit from InternalSideIndicator or ElementIndicator.
    * They contain other virtual functions you will probably want to override instead.
    */

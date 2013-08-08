@@ -36,13 +36,13 @@ public:
 
 protected:
   /**
-   * This MUST be overriden by a child ConstantDamper.
+   * This MUST be overridden by a child ConstantDamper.
    *
    * This is where they actually compute a number between 0 and 1.
    */
   virtual Real computeQpDamping();
 
-  /// The constant amount of the newton update to take.
+  /// The constant amount of the Newton update to take.
   Real _damping;
 };
 

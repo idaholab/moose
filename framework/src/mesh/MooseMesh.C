@@ -1370,7 +1370,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
 
   std::vector<unsigned int> children;
 
-  if(child != -1) // Passed in a child explicitlyy
+  if(child != -1) // Passed in a child explicitly
     children.push_back(child);
   else
   {
@@ -1422,7 +1422,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
 
     std::vector<QpMap> qp_map;
 
-    // Find all of the closests points from parent_qp to _THIS_ child's qp
+    // Find all of the closest points from parent_qp to _THIS_ child's qp
     mapPoints(parent_ref_points, child_ref_points, qp_map);
 
     // Check those to see if they are closer than what we currently have for each point

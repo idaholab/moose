@@ -89,7 +89,7 @@ public:
   virtual void timestepSetup();
 
    /**
-   * Updates the Postprocessor data for the libMesh::ParsedFunction with Jacobian calculatin
+   * Updates the Postprocessor data for the libMesh::ParsedFunction with Jacobian calculation
    */
   virtual void jacobianSetup();
 

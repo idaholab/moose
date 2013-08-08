@@ -65,7 +65,7 @@ public:
 
   /**
    * The total number of entries in the Tensor.
-   * ie cols * rows
+   * i.e. cols * rows
    */
   unsigned int numEntries() const;
 
@@ -132,7 +132,7 @@ public:
   ColumnMajorMatrix deviatoric();
 
      /**
-   * Returns a matrix that is the absolute vaule of the matrix this
+   * Returns a matrix that is the absolute value of the matrix this
    * was called on.
    */
   ColumnMajorMatrix abs();
@@ -184,12 +184,12 @@ public:
   unsigned int m() const;
 
   /**
-   * Returns eigen system solve for a symmetrix real matrix
+   * Returns eigen system solve for a symmetric real matrix
    */
   void eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) const;
 
   /**
-   * Returns eigen system solve for a nonsymetric real matrix
+   * Returns eigen system solve for a non-symmetric real matrix
    */
   void eigenNonsym(ColumnMajorMatrix & eval_real, ColumnMajorMatrix & eval_img, ColumnMajorMatrix & evec_right, ColumnMajorMatrix & eve_left) const;
 

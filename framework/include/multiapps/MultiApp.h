@@ -239,7 +239,7 @@ protected:
   /// The MPI communicator this object is going to use.
   MPI_Comm _my_comm;
 
-  /// The number of processors in the origal comm
+  /// The number of processors in the original comm
   int _orig_num_procs;
 
   /// The mpi "rank" of this processor in the original communicator

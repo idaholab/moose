@@ -18,7 +18,7 @@
 #include "AuxKernel.h"
 #include "SolutionUserObject.h"
 
-// Forward decleartion
+// Forward declaration
 class SolutionAux;
 
 template<>
@@ -39,7 +39,7 @@ public:
    */
   SolutionAux(const std::string & name, InputParameters parameters);
 
-  /** Empy destructor
+  /** Empty destructor
    */
   virtual ~SolutionAux();
 
@@ -60,7 +60,7 @@ protected:
   /// The variable name of interest
   std::string _var_name;
 
-  /// Flag for directly grabing the data based on the dof
+  /// Flag for directly grabbing the data based on the dof
   const bool _direct;
 
   /// Multiplier for the solution, the a of ax+b

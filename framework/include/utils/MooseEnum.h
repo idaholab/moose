@@ -25,7 +25,7 @@
 
 /**
  * This is a "smart" enum class intended to replace many of the shortcomings in the C++ enum type
- * It should be initialized with a comma-seperated list of strings which become the enum values.
+ * It should be initialized with a comma-separated list of strings which become the enum values.
  * You may also optionally supply numeric ints for one or more values similar to a C++ enum.  This
  * is done with the "=" sign. It can be used any place where an integer (switch statements), const char*
  * or std::string is expected.  In addition the InputParameters system has full support for this Enum type
@@ -34,10 +34,10 @@ class MooseEnum
 {
 public:
   /**
-   * Constructor that takes a list of enumeration values, and a seperate string to set a default for this instance
+   * Constructor that takes a list of enumeration values, and a separate string to set a default for this instance
    * @param names - a list of names for this enumeration
    * @default_name - the default value for this enumeration instance
-   * @allow_out_of_range - detemines whether this enumeration will accept values outside of it's range of
+   * @allow_out_of_range - determines whether this enumeration will accept values outside of it's range of
    *                       defined values.
    */
   MooseEnum(std::string names, std::string default_name="", bool allow_out_of_range=false);
@@ -57,13 +57,13 @@ public:
 
   /**
    * Method for returning the raw name strings for this instance
-   * @return a comma seperated list of names
+   * @return a comma separated list of names
    */
   const std::string & getRawNames() const { return _raw_names; }
 
   /**
    * Method for returning the raw name strings for this instance
-   * @return a space seperated list of names
+   * @return a space separated list of names
    */
   const std::string & getRawNamesNoCommas() const { return _raw_names_no_commas; }
 
@@ -122,17 +122,17 @@ private:
 
   /**
    * Populates the _names vector
-   * @param names - a space seperated list of names used to populate the internal names vector
+   * @param names - a space separated list of names used to populate the internal names vector
    */
   void fillNames(std::string names);
 
   /// The vector of enumeration names
   std::vector<std::string> _names;
 
-  /// The raw string of names sepearted by commas
+  /// The raw string of names separated by commas
   std::string _raw_names;
 
-  /// The raw string of names seperated by space
+  /// The raw string of names separated by space
   std::string _raw_names_no_commas;
 
   /// The map of names to enumeration constants
@@ -146,7 +146,7 @@ private:
   std::string _current_name_preserved;
 
   /**
-   * The index of values asssigned that are NOT values in this enum.  If this index is 0 (false) then
+   * The index of values assigned that are NOT values in this enum.  If this index is 0 (false) then
    * out of range values are not allowed.
    */
   int _out_of_range_index;

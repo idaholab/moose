@@ -38,7 +38,7 @@ public:
   /**
    * Retrieve the Quadrature PentrationLocator associated with the two sides.
    *
-   * A "Quadrature" vesion means that it's going to find the penetration each quadrature point on this boundary
+   * A "Quadrature" version means that it's going to find the penetration each quadrature point on this boundary
    */
   PenetrationLocator & getQuadraturePenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order);
 
@@ -50,7 +50,7 @@ public:
   /**
    * Retrieve a Quadrature NearestNodeLocator associated with the two sides.
    *
-   * A "Quadrature" vesion means that it's going to find the nearest nodes to each quadrature point on this boundary
+   * A "Quadrature" version means that it's going to find the nearest nodes to each quadrature point on this boundary
    */
   NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave);
 

@@ -784,7 +784,7 @@ protected:
   /// Whether or not this system has any Constraints.
   bool _has_constraints;
 
-  /// Whether nor not statefule materials have been initialized
+  /// Whether nor not stateful materials have been initialized
   bool _has_initialized_stateful;
 
   /// Object responsible for restart (read/write)
