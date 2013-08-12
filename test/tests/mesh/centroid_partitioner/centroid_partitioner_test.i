@@ -19,6 +19,12 @@
   # their centroid.  Perfect for meshes predominantly in
   # one direction
   centroid_partitioner_direction = y
+
+  # The CentroidPartitioner itself seems to work OK with ParallelMesh
+  # enabled; this test doesn't work because there is something wrong
+  # with ExodusII_IO::write_element_data() which causes the processor
+  # ID auxiliary field to be written out completely wrong.
+  distribution = serial
 []
 
 [Variables]

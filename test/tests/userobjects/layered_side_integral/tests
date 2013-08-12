@@ -4,11 +4,13 @@
     input = 'layered_side_integral_test.i'
     exodiff = 'out.e'
   [../]
+
   [./average]
     type = 'Exodiff'
     input = 'layered_side_average.i'
     exodiff = 'layered_side_average_out.e'
   [../]
+
   [./flux_average]
     type = 'Exodiff'
     input = 'layered_side_flux_average.i'

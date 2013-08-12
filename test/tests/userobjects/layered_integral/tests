@@ -4,6 +4,7 @@
     input = 'layered_integral_test.i'
     exodiff = 'out.e'
   [../]
+
   [./average_sample]
     type = 'Exodiff'
     input = 'average_sample.i'

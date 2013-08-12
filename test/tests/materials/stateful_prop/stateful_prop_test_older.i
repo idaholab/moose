@@ -1,6 +1,10 @@
 [Mesh]
   dim = 3
   file = cube.e
+  # This input file uses CONSTANT MONOMIAL AuxVariables, which don't
+  # currently work right with ParallelMesh in parallel.  See #2122 for
+  # more information.
+  distribution = serial
 []
 
 [Variables]

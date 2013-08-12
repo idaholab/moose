@@ -9,7 +9,6 @@
     type = 'Exodiff'
     input = 'monomial-const-3d.i'
     exodiff = 'monomial-const-3d_out.e'
-    max_parallel = 1
   [../]
 
   [./test_monomial_constant_2d]

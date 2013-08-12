@@ -6,6 +6,10 @@
   nz = 0
   zmax = 0
   elem_type = QUAD4
+  # This test currently diffs when run in parallel with ParallelMesh enabled,
+  # most likely due to the fact that CONSTANT MONOMIALS are currently not written
+  # out correctly in this case.  For more information, see #2122.
+  distribution = serial
 []
 
 [Variables]

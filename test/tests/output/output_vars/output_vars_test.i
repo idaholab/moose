@@ -8,6 +8,9 @@
   nx = 10
   ny = 10
   elem_type = QUAD9
+  # This test doesn't work in parallel with ParallelMesh because writing
+  # CONSTANT MONOMIAL data doesn't currently work. See #2122.
+  distribution = serial
 []
 
 [Variables]

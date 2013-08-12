@@ -5,6 +5,10 @@
   ny = 32
   xmax = 16
   ymax = 16
+  # This test currently diffs when run in parallel with ParallelMesh enabled,
+  # most likely due to the fact that CONSTANT MONOMIALS are currently not written
+  # out correctly in this case.  For more information, see #2122.
+  distribution = serial
 []
 
 [Variables]
