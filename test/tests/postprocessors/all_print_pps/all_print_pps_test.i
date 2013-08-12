@@ -3,12 +3,15 @@
   dim = 2
   nx = 5
   ny = 5
-
   xmin = 0
   xmax = 2
-
   ymin = 0
   ymax = 2
+  # Since this test prints the number of residual evaluations, its
+  # output strongly depends on the number of processors you run it on,
+  # and, apparently, the type of Mesh.  To reduce this variability, we
+  # limit it to run with SerialMesh only.
+  distribution = serial
 []
 
 [Variables]
