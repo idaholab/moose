@@ -37,22 +37,13 @@
     prereq = 'test_compiler_check'
   [../]
 
-  [./test_parmesh_check]
-    type = 'Exodiff'
-    input = '2d_diffusion_test.i'
-    exodiff = 'out.e'
-    mesh_mode = 'SERIAL'
-    prereq = 'test_platform_check'
-  [../]
-
   [./test_combined]
     type = 'Exodiff'
     input = '2d_diffusion_test.i'
     exodiff = 'out.e'
     platform = 'DARWIN'
     compiler = 'GCC CLANG'
-    mesh_mode = 'SERIAL'
-    prereq = 'test_parmesh_check'
+    prereq = 'test_platform_check'
   [../]
 
   [./test_threads_test]
