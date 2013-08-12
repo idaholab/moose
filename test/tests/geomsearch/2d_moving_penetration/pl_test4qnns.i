@@ -6,6 +6,9 @@
 [Mesh]
   file = pl_test4q.e
   displacements = 'disp_x disp_y'
+  # This test will not work in parallel with ParallelMesh enabled
+  # due to a bug in the GeometricSearch system.
+  distribution = serial
 []
 
 [Variables]

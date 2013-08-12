@@ -3,6 +3,10 @@
   dim = 2
   nx = 10
   ny = 10
+  # This test currently diffs when run in parallel with ParallelMesh enabled,
+  # most likely due to the fact that it uses some geometric search stuff.
+  # For more information, see #2121.
+  distribution = serial
 []
 
 [Variables]

@@ -1,6 +1,10 @@
 [Mesh]
   file = nonmatching.e
   dim = 2
+  # This test will not work in parallel with ParallelMesh enabled
+  # due to a bug in the GeometricSearch system.  See #2121 for more
+  # information.
+  distribution = serial
 []
 
 [Variables]

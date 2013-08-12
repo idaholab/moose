@@ -4,7 +4,6 @@
     input = '3d_penetration_locator_test.i'
     exodiff = 'out.e'
     group = 'geometric'
-    mesh_mode = 'SERIAL'
     scale_refine = 1
   [../]
 
@@ -13,7 +12,6 @@
     input = '3d_tet.i'
     exodiff = '3d_tet_out.e'
     group = 'geometric'
-    mesh_mode = 'SERIAL'
     scale_refine = 1
   [../]
 []

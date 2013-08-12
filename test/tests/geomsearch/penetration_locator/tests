@@ -4,7 +4,6 @@
     input = 'penetration_locator_test.i'
     exodiff = 'out.e'
     group = 'geometric'
-    mesh_mode = 'SERIAL'
   [../]
 
   [./parallel_test]
@@ -13,7 +12,6 @@
     exodiff = 'out.e'
     group = 'geometric'
     max_parallel = '3'
-    mesh_mode = 'SERIAL'
     prereq = 'test'
   [../]
 []

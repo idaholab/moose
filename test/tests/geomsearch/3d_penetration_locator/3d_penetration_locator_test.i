@@ -1,6 +1,9 @@
 [Mesh]
   file = 3d_penetration_test.e
-#  uniform_refine = 1
+  # This test will not work in parallel with ParallelMesh enabled
+  # due to a bug in the GeometricSearch system.
+  distribution = serial
+  # uniform_refine = 1
 []
 
 [Variables]
