@@ -563,9 +563,9 @@ PropertyValue *
 MaterialProperty<SymmTensor>::init (int size);
 
 template<>
-void materialPropertyStore(std::ofstream & stream, const SymmTensor & v);
+void materialPropertyStore(std::ostream & stream, const SymmTensor & v);
 
 template<>
-void materialPropertyLoad(std::ifstream & stream, SymmTensor & v);
+void materialPropertyLoad(std::istream & stream, SymmTensor & v);
 
 #endif // SYMMTENSOR_H
