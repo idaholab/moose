@@ -23,6 +23,7 @@ public:
   Real _flux;
   Real _T_hot;
   Real _length_scale;
+  Real _k0;
 
 private:
 };
