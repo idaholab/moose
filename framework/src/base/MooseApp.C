@@ -236,7 +236,9 @@ MooseApp::meshOnly(std::string mesh_file_name)
   MeshRefinement mesh_refinement(mesh->getMesh());
   mesh_refinement.uniformly_refine(mesh->uniformRefineLevel());
 
-  if (mesh_file_name == "")
+  // If no argument specified or if the argument following --mesh-only starts
+  // with a dash, try to build an output filename based on the input mesh filename.
+  if ((mesh_file_name == "") || (mesh_file_name[0] == '-'))
   {
     mesh_file_name = _parser.getFileName();
     size_t pos = mesh_file_name.find_last_of('.');
