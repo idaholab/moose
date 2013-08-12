@@ -29,11 +29,9 @@ InputParameters validParams<FileMesh>()
   InputParameters params = validParams<MooseMesh>();
 
   params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read");
-  params.addParam<bool>("nemesis", false, "If nemesis=true and file=foo.e, actually reads foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, where N = # CPUs, with NemesisIO.");
   params.addParam<bool>("skip_partitioning", false, "If true the mesh won't be partitioned.  Probably not a good idea to use it with a serial mesh!");
 
   // groups
-  params.addParamNamesToGroup("nemesis", "Advanced");
   params.addParamNamesToGroup("skip_partitioning", "Partitioning");
 
   return params;
@@ -46,7 +44,6 @@ FileMesh::FileMesh(const std::string & name, InputParameters parameters) :
     _exreader(NULL)
 {
   getMesh().set_mesh_dimension(getParam<MooseEnum>("dim"));
-  _is_parallel = getParam<bool>("nemesis");
 }
 
 FileMesh::FileMesh(const FileMesh & other_mesh) :
@@ -74,7 +71,7 @@ FileMesh::init()
   std::string _file_name = getParam<MeshFileName>("file");
 
   Moose::setup_perf_log.push("Read Mesh","Setup");
-  if (getParam<bool>("nemesis"))
+  if (_is_nemesis)
   {
     // Nemesis_IO only takes a reference to ParallelMesh, so we can't be quite so short here.
     ParallelMesh& pmesh = libmesh_cast_ref<ParallelMesh&>(getMesh());
@@ -105,8 +102,8 @@ FileMesh::init()
 void
 FileMesh::read(const std::string & file_name)
 {
-  if (dynamic_cast<ParallelMesh *>(&getMesh()) && !_is_parallel)
-    getMesh().read(file_name, NULL, false);
+  if (dynamic_cast<ParallelMesh *>(&getMesh()) && !_is_nemesis)
+    getMesh().read(file_name, /*mesh_data=*/NULL, /*skip_renumber=*/false);
   else
-    getMesh().read(file_name, NULL, true);
+    getMesh().read(file_name, /*mesh_data=*/NULL, /*skip_renumber=*/true);
 }

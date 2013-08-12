@@ -194,11 +194,6 @@ public:
   void prepared(bool state);
 
   /**
-   * Getter for the _is_parallel flag.
-   */
-  bool parallel();
-
-  /**
    * Declares that the MooseMesh has changed, invalidates cached data
    * and rebuilds caches.  Sets a flag so that clients of the
    * MooseMesh also know when it has changed.
@@ -530,6 +525,15 @@ public:
   bool isBoundaryNode(unsigned int node_id);
 
 protected:
+  /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
+  /// the underlying libMesh mesh is a SerialMesh or ParallelMesh.
+  MooseEnum _mesh_distribution_type;
+
+  /// False by default.  Final value is determined by several factors
+  /// including the 'distribution' setting in the input file, and whether
+  /// or not the Mesh file is a Nemesis file.
+  bool _use_parallel_mesh;
+
   /// Pointer to underlying libMesh mesh object
   libMesh::MeshBase* _mesh;
 
@@ -550,8 +554,8 @@ protected:
   /// true if mesh is changed (i.e. after adaptivity step)
   bool _is_changed;
 
-  /// True if using a TRUE parallel mesh (i.e. Nemesis)
-  bool _is_parallel;
+  /// True if a Nemesis Mesh was read in
+  bool _is_nemesis;
 
   /// True if prepare has been called on the mesh
   bool _is_prepared;

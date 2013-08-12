@@ -44,6 +44,8 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<bool>("error_unused", "-e --error-unused", "Error when encounting unused input file options");
   params.addCommandLineParam<bool>("error_override", "-o --error-override", "Error when encountering overriden or parameters supplied multipled times");
 
+  params.addCommandLineParam<bool>("parallel_mesh", "--parallel-mesh", "The libMesh Mesh underlying MooseMesh should always be a ParallelMesh");
+
   params.addCommandLineParam<unsigned int>("refinements", "-r <n>", 0, "Specify additional initial uniform refinements for automatic scaling");
 
   params.addPrivateParam<int>("_argc");
@@ -69,7 +71,8 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters):
     _factory(*this),
     _error_overridden(false),
     _ready_to_exit(false),
-    _initial_from_file(false)
+    _initial_from_file(false),
+    _parallel_mesh_on_command_line(false)
 {
   if(isParamValid("_argc") && isParamValid("_argv"))
   {
@@ -100,6 +103,9 @@ MooseApp::setupOptions()
 
   if (isParamValid("error_override"))
     setErrorOverridden();
+
+  if (isParamValid("parallel_mesh"))
+    _parallel_mesh_on_command_line = true;
 
   if (isParamValid("help"))
   {

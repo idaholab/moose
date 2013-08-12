@@ -18,6 +18,7 @@
 #include "CacheChangedListsThread.h"
 #include "Assembly.h"
 #include "MooseUtils.h"
+#include "MooseApp.h"
 
 // libMesh
 #include "libmesh/boundary_info.h"
@@ -36,12 +37,29 @@ InputParameters validParams<MooseMesh>()
 {
   InputParameters params = validParams<MooseObject>();
 
+  MooseEnum mesh_distribution_type("PARALLEL=0, SERIAL, DEFAULT", "DEFAULT");
+  params.addParam<MooseEnum>("distribution", mesh_distribution_type,
+                             "PARALLEL: Always use libMesh::ParallelMesh "
+                             "SERIAL: Always use libMesh::SerialMesh "
+                             "DEFAULT: Use libMesh::SerialMesh unless --parallel-mesh is specified on the command line");
+
+  params.addParam<bool>("nemesis", false,
+                        "If nemesis=true and file=foo.e, actually reads "
+                        "foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, "
+                        "where N = # CPUs, with NemesisIO.");
+
   MooseEnum dims("1 = 1, 2, 3", "3");
-  params.addParam<MooseEnum>("dim", dims, "This is only required for certain mesh formats where the dimension of the mesh cannot be autodetected.  In particular you must supply this for GMSH meshes.  Note: This is completely ignored for ExodusII meshes!");
+  params.addParam<MooseEnum>("dim", dims,
+                             "This is only required for certain mesh formats where "
+                             "the dimension of the mesh cannot be autodetected.  "
+                             "In particular you must supply this for GMSH meshes.  "
+                             "Note: This is completely ignored for ExodusII meshes!");
 
   params.addPrivateParam<std::string>("built_by_action", "setup_mesh");
+
   // groups
   params.addParamNamesToGroup("dim", "Advanced");
+  params.addParamNamesToGroup("nemesis", "Advanced");
 
   return params;
 }
@@ -49,10 +67,12 @@ InputParameters validParams<MooseMesh>()
 
 MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    _mesh(new libMesh::Mesh(getParam<MooseEnum>("dim"))),
+    _mesh_distribution_type(getParam<MooseEnum>("distribution")),
+    _use_parallel_mesh(false),
+    _mesh(NULL),
     _uniform_refine_level(0),
     _is_changed(false),
-    _is_parallel(false),
+    _is_nemesis(getParam<bool>("nemesis")),
     _is_prepared(false),
     _refined_elements(NULL),
     _coarsened_elements(NULL),
@@ -66,14 +86,48 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     _patch_size(40),
     _regular_orthogonal_mesh(false)
 {
+  switch (_mesh_distribution_type)
+  {
+  case 0: // PARALLEL
+    _use_parallel_mesh = true;
+    break;
+  case 1: // SERIAL
+    break;
+  case 2: // DEFAULT
+  {
+    // The user did not specify 'distribution = XYZ' in the input file,
+    // so we allow the --parallel-mesh command line arg to possibly turn
+    // on ParallelMesh.  If the command line arg is not present, we pick SerialMesh.
+    if (_app.getParallelMeshOnCommandLine())
+      _use_parallel_mesh = true;
+
+    break;
+  }
+  default:
+    mooseError("Unknown mesh distribution type!");
+  }
+
+  // If the user specifies 'nemesis = true' in the Mesh block, we
+  // must use ParallelMesh.
+  if (_is_nemesis)
+    _use_parallel_mesh = true;
+
+  unsigned dim = getParam<MooseEnum>("dim");
+
+  if (_use_parallel_mesh)
+    _mesh = new ParallelMesh(dim);
+  else
+    _mesh = new SerialMesh(dim);
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     MooseObject(other_mesh._name, other_mesh._pars),
+    _mesh_distribution_type(other_mesh._mesh_distribution_type),
+    _use_parallel_mesh(other_mesh._use_parallel_mesh),
     _mesh(other_mesh.getMesh().clone().release()),
     _uniform_refine_level(0),
     _is_changed(false),
-    _is_parallel(false),
+    _is_nemesis(false),
     _is_prepared(false),
     _refined_elements(NULL),
     _coarsened_elements(NULL),
@@ -152,15 +206,17 @@ MooseMesh::freeBndElems()
 void
 MooseMesh::prepare()
 {
-  if (dynamic_cast<ParallelMesh *>(&getMesh()) && !_is_parallel)
+  if (dynamic_cast<ParallelMesh *>(&getMesh()) && !_is_nemesis)
   {
+    // Call prepare_for_use() and allow renumbering
     getMesh().allow_renumbering(true);
-    getMesh().prepare_for_use(/*false*/);
+    getMesh().prepare_for_use();
   }
   else
   {
+    // Call prepare_for_use() and DO NOT allow renumbering
     getMesh().allow_renumbering(false);
-    getMesh().prepare_for_use(/*true*/);
+    getMesh().prepare_for_use();
   }
 
   // Collect (local) subdomain IDs
@@ -1590,12 +1646,6 @@ void
 MooseMesh::prepared(bool state)
 {
   _is_prepared = state;
-}
-
-bool
-MooseMesh::parallel()
-{
-  return _is_parallel;
 }
 
 const std::set<SubdomainID> &

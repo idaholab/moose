@@ -224,6 +224,12 @@ public:
    */
   virtual void executeExecutioner();
 
+  /**
+   * Returns true if the user specifed --parallel-mesh on the command line and false
+   * otherwise.
+   */
+  bool getParallelMeshOnCommandLine() const { return _parallel_mesh_on_command_line; }
+
 protected:
   MooseApp(const std::string & name, InputParameters parameters);
 
@@ -283,6 +289,9 @@ protected:
 
   /// This variable indicates when a request has been made to restart from an Exodus file
   bool _initial_from_file;
+
+  /// This variable indicates that ParallelMesh should be used for the libMesh mesh underlying MooseMesh.
+  bool _parallel_mesh_on_command_line;
 };
 
 #endif /* MOOSEAPP_H */
