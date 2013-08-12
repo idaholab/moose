@@ -51,7 +51,7 @@ RandomHitSolutionModifier::execute()
     // First find the element the hit lands in
     const Elem * elem = (*pl)(hit);
 
-    if(elem->processor_id() == libMesh::processor_id())
+    if (elem && (elem->processor_id() == libMesh::processor_id()))
     {
       Real closest_distance = std::numeric_limits<unsigned int>::max();
       Node * closest_node = NULL;
