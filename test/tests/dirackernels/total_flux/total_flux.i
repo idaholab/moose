@@ -3,6 +3,9 @@
   dim = 2
   nx = 10
   ny = 10
+  # DiracKernels don't seem to work quite right in parallel with
+  # ParallelMesh enabled (segfaults).  See #2125 for more details.
+  distribution = serial
 []
 
 [Variables]

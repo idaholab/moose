@@ -2,6 +2,9 @@
   type = GeneratedMesh
   dim = 1
   nx = 10
+  # DiracKernels don't seem to work quite right in parallel with
+  # ParallelMesh enabled (segfaults).  See #2125 for more details.
+  distribution = serial
 []
 
 [Variables]
