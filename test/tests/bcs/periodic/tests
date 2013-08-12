@@ -4,7 +4,6 @@
     input = 'all_periodic_trans.i'
     exodiff = 'all_periodic_trans_out.e'
     group = 'periodic'
-    mesh_mode = 'SERIAL'
   [../]
 
   [./auto_wrap_2d_test]
@@ -12,7 +11,6 @@
     input =  'auto_periodic_bc_test.i'
     exodiff = 'out_auto.e'
     group = 'periodic'
-    mesh_mode = 'SERIAL'
     abs_zero = 1e-6
   [../]
 
@@ -21,7 +19,6 @@
     input =  'auto_periodic_bc_non_generated.i'
     exodiff = 'out_auto_non_generated.e'
     group = 'periodic'
-    mesh_mode = 'SERIAL'
   [../]
 
   [./auto_wrap_2d_test_error_check]
@@ -38,7 +35,6 @@
     input = ' auto_periodic_bc_test_3d.i '
     exodiff = 'out_auto_3d.e'
     group = 'periodic'
-    mesh_mode = 'SERIAL'
     no_valgrind = True
     abs_zero = 1e-6
   [../]
@@ -48,7 +44,6 @@
     input = 'orthogonal_pbc_on_square.i'
     exodiff = 'orthogonal_pbc_on_square_out.e'
     group = 'periodic'
-    mesh_mode = 'SERIAL'
   [../]
 
   [./parallel_pbc_using_trans_test]
@@ -56,7 +51,6 @@
     input = ' parallel_pbc_using_trans.i '
     exodiff = 'parallel_pbc_using_trans_out.e'
     group = 'periodic'
-    mesh_mode = 'SERIAL'
   [../]
 
   [./subdomain_restricted_vars_test]
@@ -64,7 +58,6 @@
     input = 'periodic_subdomain_restricted_test.i'
     exodiff = 'out_restrict.e'
     group = 'periodic'
-    mesh_mode = 'SERIAL'
     deleted = 'Libmesh Bug #1410'
   [../]
 
@@ -73,7 +66,6 @@
     input = 'periodic_level_1_test.i'
     exodiff = 'level1.e level1.e-s005 level1.e-s010'
     group = 'periodic'
-    mesh_mode = 'SERIAL'
     group = 'adaptive  periodic'
     no_valgrind = True
     abs_zero = 1e-6
@@ -84,7 +76,6 @@
     input = 'periodic_bc_test.i'
     exodiff = 'out.e'
     group = 'periodic'
-    mesh_mode = 'SERIAL'
     abs_zero = 1e-6
   [../]
 
@@ -93,16 +84,13 @@
     input = 'trapezoid.i'
     exodiff = 'out_trapezoid.e'
     group = 'periodic'
-    mesh_mode = 'SERIAL'
   [../]
 
   [./testwedge]
     type = 'Exodiff'
     input = 'wedge.i'
     exodiff = 'out_wedge.e'
-    max_parallel = 1
     group = 'periodic'
-    mesh_mode = 'SERIAL'
   [../]
 
   [./testwedgesys]
@@ -111,6 +99,5 @@
     exodiff = 'out_wedge_sys.e'
     max_parallel = 1
     group = 'periodic'
-    mesh_mode = 'SERIAL'
   [../]
 []

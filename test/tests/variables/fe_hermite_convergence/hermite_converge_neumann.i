@@ -8,6 +8,9 @@
   nx = 4
   ny = 4
   elem_type = QUAD4
+  # This test will not work in parallel with ParallelMesh enabled
+  # due to a bug in PeriodicBCs.
+  distribution = serial
 []
 
 [Functions]

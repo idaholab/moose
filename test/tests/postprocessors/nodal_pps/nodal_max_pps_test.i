@@ -1,6 +1,9 @@
 [Mesh]
   file = trapezoid.e
   uniform_refine = 1
+  # This test will not work in parallel with ParallelMesh enabled
+  # due to a bug in PeriodicBCs.
+  distribution = serial
 []
 
 [Functions]

@@ -4,11 +4,13 @@
   nx = 10
   ny = 10
   nz = 10
-
   xmax = 40
   ymax = 40
   zmax = 40
   elem_type = HEX8
+  # This test will not work in parallel with ParallelMesh enabled
+  # due to a bug in PeriodicBCs.
+  distribution = serial
 []
 
 [Variables]

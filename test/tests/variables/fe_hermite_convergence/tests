@@ -5,7 +5,6 @@
     exodiff = 'hermite_converge_periodic_out.e-s003'
     group = 'periodic'
     no_valgrind = true
-    mesh_mode = 'SERIAL'
   [../]
 
   [./test_hermite_converge_neumann]
