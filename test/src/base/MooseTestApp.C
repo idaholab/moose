@@ -107,6 +107,9 @@
 #include "MTPiecewiseConst2D.h"
 #include "MTPiecewiseConst3D.h"
 
+// DiracKernels
+#include "ReportingConstantSource.h"
+
 // markers
 #include "RandomHitMarker.h"
 
@@ -259,6 +262,9 @@ MooseTestApp::registerObjects(Factory & factory)
   registerFunction(MTPiecewiseConst1D);
   registerFunction(MTPiecewiseConst2D);
   registerFunction(MTPiecewiseConst3D);
+
+  // DiracKernels
+  registerDiracKernel(ReportingConstantSource);
 
   // meshes
   registerObject(StripeMesh);

@@ -12,37 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Reporter.h"
+#ifndef REPORTINGCONSTANTSOURCE_H
+#define REPORTINGCONSTANTSOURCE_H
+
+// Moose Includes
+#include "DiracKernel.h"
+
+//Forward Declarations
+class ReportingConstantSource;
 
 template<>
-InputParameters validParams<Reporter>()
-{
-  InputParameters params = validParams<GeneralPostprocessor>();
-  params.addParam<Real>("default", 0, "Default value");
-  params.addParam<bool>("sum", false, "Whether or not to use the global sum as the value");
-  return params;
-}
+InputParameters validParams<ReportingConstantSource>();
 
-Reporter::Reporter(const std::string & name, InputParameters params) :
-    GeneralPostprocessor(name, params),
-    _my_value(getPostprocessorValueByName(name)),
-    _sum(getParam<bool>("sum"))
+/**
+ * TOOD
+ */
+class ReportingConstantSource : public DiracKernel
 {
-}
+public:
+  ReportingConstantSource(const std::string & name, InputParameters parameters);
 
-void
-Reporter::initialSetup()
-{
-  // Set the default value
-  _my_value = getParam<Real>("default");
-}
+  virtual void addPoints();
+  virtual Real computeQpResidual();
 
-Real
-Reporter::getValue()
-{
-  if(_sum)
-    gatherSum(_my_value);
+protected:
+  Real _value;
+  std::vector<Real> _point_param;
+  Point _p;
 
-  // Return the stored value (references stored value in getPostprocessorData)
-  return _my_value;
-}
+  PostprocessorValue & _reporter;
+};
+
+#endif //REPORTINGCONSTANTSOURCE_H

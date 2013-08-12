@@ -43,6 +43,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     UserObjectInterface(parameters),
     TransientInterface(parameters, name, "dirac_kernels"),
     MaterialPropertyInterface(parameters),
+    PostprocessorInterface(parameters),
     GeometricSearchInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),

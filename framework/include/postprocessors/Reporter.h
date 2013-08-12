@@ -62,6 +62,9 @@ protected:
 
   /// Reference to the value being stored in the associated PostprocessorData class
   PostprocessorValue & _my_value;
+
+  /// Whether or not the value should be the global sum
+  bool _sum;
 };
 
 #endif //REPORTER_H

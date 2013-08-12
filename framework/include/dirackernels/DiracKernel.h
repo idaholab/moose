@@ -27,6 +27,7 @@
 #include "UserObjectInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
+#include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"
@@ -61,6 +62,7 @@ class DiracKernel :
   public UserObjectInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
+  public PostprocessorInterface,
   protected GeometricSearchInterface
 {
 public:
