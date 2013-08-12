@@ -810,6 +810,7 @@ public:
   friend class AuxiliarySystem;
   friend class NonlinearSystem;
   friend class Resurrector;
+  friend class MaterialPropertyIO;
 };
 
 #endif /* FEPROBLEM_H */

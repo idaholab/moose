@@ -14,10 +14,12 @@
 
 #include "MaterialPropertyIO.h"
 #include "MaterialPropertyStorage.h"
+#include "MooseMesh.h"
+#include "FEProblem.h"
 #include <cstring>
 
 
-const unsigned int MaterialPropertyIO::file_version = 1;
+const unsigned int MaterialPropertyIO::file_version = 2;
 
 struct MSMPHeader
 {
@@ -26,9 +28,11 @@ struct MSMPHeader
 };
 
 
-MaterialPropertyIO::MaterialPropertyIO(MaterialPropertyStorage & material_props, MaterialPropertyStorage & bnd_material_props) :
-    _material_props(material_props),
-    _bnd_material_props(bnd_material_props)
+MaterialPropertyIO::MaterialPropertyIO(FEProblem & fe_problem) :
+    _fe_problem(fe_problem),
+    _mesh(_fe_problem.mesh()),
+    _material_props(_fe_problem._material_props),
+    _bnd_material_props(_fe_problem._bnd_material_props)
 {
 }
 
@@ -39,14 +43,6 @@ MaterialPropertyIO::~MaterialPropertyIO()
 void
 MaterialPropertyIO::write(const std::string & file_name)
 {
-  std::ofstream out(file_name.c_str(), std::ios::out | std::ios::binary);
-
-  // header
-  MSMPHeader head;
-  std::memcpy(head._id, "MSMP", 4);
-  head._file_version = file_version;
-  out.write((const char *) &head, sizeof(head));
-
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props = _material_props.props();
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOld = _material_props.propsOld();
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOlder = _material_props.propsOlder();
@@ -55,96 +51,129 @@ MaterialPropertyIO::write(const std::string & file_name)
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & bnd_propsOld = _bnd_material_props.propsOld();
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & bnd_propsOlder = _bnd_material_props.propsOlder();
 
-  // number of blocks
-  // TODO: go over elements and figure out the groups of elements we are going to write in a file
-  unsigned int n_blocks = 1;             // just one for right now
-  out.write((const char *) &n_blocks, sizeof(n_blocks));
-
-  // number of quadrature points
-  // we go grab element 0, side 0 (it's volumetric mat. properties) and we will use the first stateful property to get the number of QPs (all should be sized the same)
-  unsigned int n_qps = 0;
-  for (MaterialProperties::iterator it = props[0][0].begin(); it != props[0][0].end(); ++it)        // we expect to have element 0 always (lame)
-    if (*it != NULL)
-      n_qps = (*it)->size();
-  out.write((const char *) &n_qps, sizeof(n_qps));
-
-  // save the number of elements in this block (since we do only 1 block right now, we store everything)
-  unsigned int n_elems = props.size();
-  out.write((const char *) &n_elems, sizeof(n_elems));
-
-  // properties
   std::vector<unsigned int> & prop_ids = _material_props.statefulProps();
-//  std::vector<unsigned int> prop_ids;
-//  prop_ids.insert(prop_ids.end(), stateful_props.begin(), stateful_props.end());
-//  std::sort(prop_ids.begin(), prop_ids.end());
-
   unsigned int n_props = prop_ids.size();        // number of properties in this block
-  out.write((const char *) &n_props, sizeof(n_props));
-  // property names
-  for (unsigned int i = 0; i < n_props; i++)
+
+  std::ofstream out;
+  // head node writes the header
+  if (libMesh::processor_id() == 0)
   {
-    unsigned int pid = prop_ids[i];
-    std::string prop_name = _material_props.statefulPropNames()[pid];
-    out.write(prop_name.c_str(), prop_name.length() + 1);                 // do not forget the trailing zero ;-)
-  }
+    out.open(file_name.c_str(), std::ios::out | std::ios::binary);
 
-  std::cout<<"props size: "<<props.size()<<std::endl;
+    // header
+    MSMPHeader head;
+    std::memcpy(head._id, "MSMP", 4);
+    head._file_version = file_version;
+    out.write((const char *) &head, sizeof(head));
 
-  // save current material properties
-  for (HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> >::iterator props_it=props.begin(); props_it != props.end(); ++props_it)
-  {
-    const Elem * elem = props_it->first;
+    // save the number of elements in this block (since we do only 1 block right now, we store everything)
+    unsigned int n_elems = _mesh.nElem();
+    out.write((const char *) &n_elems, sizeof(n_elems));
 
-    if(elem)
+    // properties
+    out.write((const char *) &n_props, sizeof(n_props));
+    // property names
+    for (unsigned int i = 0; i < n_props; i++)
     {
-      unsigned int elem_id = elem->id();
-      out.write((const char *) &elem_id, sizeof(elem_id));
-
-      // write out the properties themselves
-      for (unsigned int i = 0; i < n_props; i++)
-      {
-//        unsigned int pid = prop_ids[i];
-        props[elem][0][i]->store(out);
-        propsOld[elem][0][i]->store(out);
-        if (_material_props.hasOlderProperties())
-          propsOlder[elem][0][i]->store(out);
-      }
+      unsigned int pid = prop_ids[i];
+      std::string prop_name = _material_props.statefulPropNames()[pid];
+      out.write(prop_name.c_str(), prop_name.length() + 1);                 // do not forget the trailing zero ;-)
     }
+
+    out.close();
   }
 
-  // save the material props on sides
-  unsigned int n_sides = bnd_props[0].size();
-  out.write((const char *) &n_sides, sizeof(n_sides));
+  libMesh::Parallel::barrier(libMesh::CommWorld);
 
-  // save current material properties
-  for (HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> >::iterator props_it=props.begin(); props_it != props.end(); ++props_it)
+  // now each process dump its part, appending into the file
+  for (unsigned int proc = 0; proc < libMesh::n_processors(); proc++)
   {
-    const Elem * elem = props_it->first;
-
-    if(elem)
+    if (libMesh::processor_id() == proc)
     {
+      out.open(file_name.c_str(), std::ios::app | std::ios::binary);
 
-      unsigned int elem_id = elem->id();
-      out.write((const char *) &elem_id, sizeof(elem_id));
-
-      for (unsigned int s = 0; s < n_sides; s++)
+      // save current material properties
+      for (HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> >::iterator props_it=props.begin(); props_it != props.end(); ++props_it)
       {
-        // write out the properties themselves
-        for (unsigned int i = 0; i < n_props; i++)
+        const Elem * elem = props_it->first;
+
+        if (elem && elem->processor_id() == proc)
         {
-          unsigned int pid = prop_ids[i];
-          bnd_props[elem][s][pid]->store(out);
-          bnd_propsOld[elem][s][pid]->store(out);
-          if (_material_props.hasOlderProperties())
-            bnd_propsOlder[elem][s][pid]->store(out);
+          unsigned int elem_id = elem->id();
+          out.write((const char *) &elem_id, sizeof(elem_id));
+
+          // write out the properties into mem buffer
+          std::ostringstream prop_blk;
+          for (unsigned int i = 0; i < n_props; i++)
+          {
+            props[elem][0][i]->store(prop_blk);
+            propsOld[elem][0][i]->store(prop_blk);
+            if (_material_props.hasOlderProperties())
+              propsOlder[elem][0][i]->store(prop_blk);
+          }
+
+          unsigned int prop_blk_size = prop_blk.tellp();
+          out.write((const char *) &prop_blk_size, sizeof(prop_blk_size));
+
+          out << prop_blk.str();
         }
       }
+
+      out.close();
     }
+
+    libMesh::Parallel::barrier(libMesh::CommWorld);
   }
 
-  // TODO: end of the loop over blocks
+  // again, each process dumps its part, appending into the file
+  for (unsigned int proc = 0; proc < libMesh::n_processors(); proc++)
+  {
+    if (libMesh::processor_id() == proc)
+    {
+      out.open(file_name.c_str(), std::ios::app | std::ios::binary);
 
-  out.close();
+      // save current material properties
+      for (HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> >::iterator props_it=props.begin(); props_it != props.end(); ++props_it)
+      {
+        const Elem * elem = props_it->first;
+
+        if (elem && elem->processor_id() == proc)
+        {
+          unsigned int elem_id = elem->id();
+          out.write((const char *) &elem_id, sizeof(elem_id));
+
+          // save the material props on sides
+          unsigned int n_sides = bnd_props[elem].size();
+          out.write((const char *) &n_sides, sizeof(n_sides));
+
+          for (HashMap<unsigned int, MaterialProperties>::iterator side_it = bnd_props[elem].begin(); side_it != bnd_props[elem].end(); ++side_it)
+          {
+            unsigned int s = side_it->first;
+            out.write((const char *) &s, sizeof(s));
+
+            // write out the properties into mem buffer
+            std::ostringstream prop_blk;
+            for (unsigned int i = 0; i < n_props; i++)
+            {
+              bnd_props[elem][s][i]->store(prop_blk);
+              bnd_propsOld[elem][s][i]->store(prop_blk);
+              if (_material_props.hasOlderProperties())
+                bnd_propsOlder[elem][s][i]->store(prop_blk);
+            }
+
+            unsigned int prop_blk_size = prop_blk.tellp();
+            out.write((const char *) &prop_blk_size, sizeof(prop_blk_size));
+
+            out << prop_blk.str();
+          }
+        }
+      }
+
+      out.close();
+    }
+
+    libMesh::Parallel::barrier(libMesh::CommWorld);
+  }
 }
 
 void
@@ -177,86 +206,88 @@ MaterialPropertyIO::read(const std::string & file_name)
   for (std::map<unsigned int, std::string>::iterator it = stateful_prop_names.begin(); it != stateful_prop_names.end(); ++it)
     stateful_prop_ids[it->second] = it->first;
 
-  // number of blocks
-  unsigned int n_blocks = 0;
-  in.read((char *) &n_blocks, sizeof(n_blocks));
+  // number of elements
+  unsigned int n_elems = props.size();
+  in.read((char *) &n_elems, sizeof(n_elems));
+  // number of properties in this block
+  unsigned int n_props = 0;
+  in.read((char *) &n_props, sizeof(n_props));
+  // property names
+  std::vector<std::string> prop_names(n_props);
+  std::vector<unsigned int> prop_id(n_props);
 
-  // loop over block
-  for (unsigned int blk_id = 0; blk_id < n_blocks; blk_id++)
+  for (unsigned int i = 0; i < n_props; i++)
   {
-    // number of quadrature points
-    unsigned int n_qps = 0;
-    in.read((char *) &n_qps, sizeof(n_qps));
-    // number of elements
-    unsigned int n_elems = props.size();
-    in.read((char *) &n_elems, sizeof(n_elems));
-    // number of properties in this block
-    unsigned int n_props = 0;
-    in.read((char *) &n_props, sizeof(n_props));
-    // property names
-    std::vector<std::string> prop_names;
+    std::string prop_name;
+    char ch = 0;
+    do {
+      in.read(&ch, 1);
+      if (ch != '\0')
+        prop_name += ch;
+    } while (ch != '\0');
+    prop_names[i] = prop_name;
+    prop_id[i] = stateful_prop_ids[prop_name];
+  }
 
-    for (unsigned int i = 0; i < n_props; i++)
+  for (unsigned int i = 0; i < n_elems; i++)
+  {
+    unsigned int elem_id = 0;
+    in.read((char *) &elem_id, sizeof(elem_id));
+
+    unsigned int blk_size = 0;
+    in.read((char *) &blk_size, sizeof(blk_size));
+
+    const Elem * elem = _mesh.elem(elem_id);
+
+    if (elem && (elem->processor_id() == libMesh::processor_id()))
     {
-      std::string prop_name;
-      char ch = 0;
-      do {
-        in.read(&ch, 1);
-        if (ch != '\0')
-          prop_name += ch;
-      } while (ch != '\0');
-      prop_names.push_back(prop_name);
-    }
-
-    for (HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> >::iterator props_it=props.begin(); props_it != props.end(); ++props_it)
-    {
-      const Elem * elem = props_it->first;
-
-      if(elem)
+      // read in the properties themselves
+      for (unsigned int i = 0; i < n_props; i++)
       {
-        unsigned int elem_id = elem->id();
-        in.read((char *) &elem_id, sizeof(elem_id));
-
-        // read in the properties themselves
-        for (unsigned int i = 0; i < n_props; i++)
-        {
-//          unsigned int pid = stateful_prop_ids[prop_names[i]];
-
-          props[elem][0][i]->load(in);
-          propsOld[elem][0][i]->load(in);
-          if (_material_props.hasOlderProperties())               // this should actually check if the value is stored in the file (we do not store it right now)
-            propsOlder[elem][0][i]->load(in);
-        }
+        unsigned int pid = prop_id[i];
+        if (props[elem][0][pid] != NULL) props[elem][0][pid]->load(in);
+        if (propsOld[elem][0][pid] != NULL) propsOld[elem][0][pid]->load(in);
+        if (_material_props.hasOlderProperties())               // this should actually check if the value is stored in the file (we do not store it right now)
+          if (propsOlder[elem][0][pid] != NULL) propsOlder[elem][0][pid]->load(in);
       }
     }
+    else
+      in.seekg(blk_size, std::ios_base::cur);
+  }
 
-    // load in the material props on sides
+  // load in the material props on sides
+  for (unsigned int i = 0; i < n_elems; i++)
+  {
+    unsigned int elem_id = 0;
+    in.read((char *) &elem_id, sizeof(elem_id));
+
     unsigned int n_sides = 0;
     in.read((char *) &n_sides, sizeof(n_sides));
 
-    for (HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> >::iterator props_it=props.begin(); props_it != props.end(); ++props_it)
+    for (unsigned int s = 0; s < n_sides; s++)
     {
-      const Elem * elem = props_it->first;
+      unsigned int side = 0;
+      in.read((char *) &side, sizeof(side));
 
-      if(elem)
+      unsigned int blk_size = 0;
+      in.read((char *) &blk_size, sizeof(blk_size));
+
+      const Elem * elem = _mesh.elem(elem_id);
+      if (elem && (elem->processor_id() == libMesh::processor_id()))
       {
-        unsigned int elem_id = elem->id();
-        in.read((char *) &elem_id, sizeof(elem_id));
-
-        for (unsigned int s = 0; s < n_sides; s++)
+        // read in the properties themselves
+        for (unsigned int i = 0; i < n_props; i++)
         {
-          // read in the properties themselves
-          for (unsigned int i = 0; i < n_props; i++)
-          {
-            unsigned int pid = stateful_prop_ids[prop_names[i]];
+          unsigned int pid = prop_id[i];
 
-            bnd_props[elem][s][pid]->load(in);
-            bnd_propsOld[elem][s][pid]->load(in);
-            if (_material_props.hasOlderProperties())               // this should actually check if the value is stored in the file (we do not store it right now)
-              bnd_propsOlder[elem][s][pid]->load(in);
-          }
+          if (bnd_props[elem][side][pid] != NULL) bnd_props[elem][side][pid]->load(in);
+          if (bnd_propsOld[elem][side][pid] != NULL) bnd_propsOld[elem][side][pid]->load(in);
+          if (_material_props.hasOlderProperties())               // this should actually check if the value is stored in the file (we do not store it right now)
+            if (bnd_propsOlder[elem][side][pid] != NULL) bnd_propsOlder[elem][side][pid]->load(in);
         }
       }
+      else
+        in.seekg(blk_size, std::ios_base::cur);
     }
   }
 

@@ -1,16 +1,8 @@
 [Tests]
-  [./test_nodal_var_1]
+  [./test_1]
     type = 'Exodiff'
-    input = 'nodal_part1.i'
-    exodiff = 'out_nodal_part1.e'
-  [../]
-
-  [./test_xda_restart_part_2]
-    type = 'Exodiff'
-    input = 'xda_restart_part2.i'
-    exodiff = 'out_xda_restart_part2.e'
-    max_parallel = 1
-    prereq = 'test_xda_restart_part_1'
+    input = 'part1.i'
+    exodiff = 'out_part1.e'
   [../]
 
   [./test_2]
@@ -20,17 +12,11 @@
     prereq = 'test_1'
   [../]
 
-  [./test_1]
+  
+  [./test_nodal_var_1]
     type = 'Exodiff'
-    input = 'part1.i'
-    exodiff = 'out_part1.e'
-  [../]
-
-  [./test_xda_restart_part_1]
-    type = 'Exodiff'
-    input = 'xda_restart_part1.i'
-    exodiff = 'out_xda_restart_part1.e'
-    max_parallel = 1
+    input = 'nodal_part1.i'
+    exodiff = 'out_nodal_part1.e'
   [../]
 
   [./test_nodal_var_2]
@@ -40,4 +26,19 @@
     max_parallel = 1
     prereq = 'test_nodal_var_1'
   [../]
+
+
+  [./test_xda_restart_part_1]
+    type = 'Exodiff'
+    input = 'xda_restart_part1.i'
+    exodiff = 'out_xda_restart_part1.e'
+  [../]
+
+  [./test_xda_restart_part_2]
+    type = 'Exodiff'
+    input = 'xda_restart_part2.i'
+    exodiff = 'out_xda_restart_part2.e'
+    prereq = 'test_xda_restart_part_1'
+  [../]
+
 []

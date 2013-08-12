@@ -28,7 +28,8 @@
 #include <iostream>
 #include <fstream>
 
-
+class MooseMesh;
+class FEProblem;
 class MaterialPropertyStorage;
 
 /**
@@ -38,13 +39,15 @@ class MaterialPropertyStorage;
 class MaterialPropertyIO
 {
 public:
-  MaterialPropertyIO(MaterialPropertyStorage & material_props, MaterialPropertyStorage & bnd_material_props);
+  MaterialPropertyIO(FEProblem & fe_problem);
   virtual ~MaterialPropertyIO();
 
   virtual void write(const std::string & file_name);
   virtual void read(const std::string & file_name);
 
 protected:
+  FEProblem & _fe_problem;
+  MooseMesh & _mesh;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
 
@@ -54,14 +57,14 @@ protected:
 // global store functions
 
 template<typename T>
-void materialPropertyStore(std::ofstream & stream, const T & v)
+void materialPropertyStore(std::ostream & stream, const T & v)
 {
   stream.write((const char *) &v, sizeof(v));
 }
 
 template<typename T>
 inline void
-materialPropertyStore(std::ofstream & stream, const std::vector<T> & v)
+materialPropertyStore(std::ostream & stream, const std::vector<T> & v)
 {
   for (unsigned int i = 0; i < v.size(); i++)
     materialPropertyStore(stream, v[i]);
@@ -69,7 +72,7 @@ materialPropertyStore(std::ofstream & stream, const std::vector<T> & v)
 
 template<>
 inline void
-materialPropertyStore(std::ofstream & stream, const DenseMatrix<Real> & v)
+materialPropertyStore(std::ostream & stream, const DenseMatrix<Real> & v)
 {
   for (unsigned int i = 0; i < v.m(); i++)
     for (unsigned int j = 0; j < v.n(); j++)
@@ -81,7 +84,7 @@ materialPropertyStore(std::ofstream & stream, const DenseMatrix<Real> & v)
 
 template<>
 inline void
-materialPropertyStore(std::ofstream & stream, const ColumnMajorMatrix & v)
+materialPropertyStore(std::ostream & stream, const ColumnMajorMatrix & v)
 {
   for (unsigned int i = 0; i < v.m(); i++)
     for (unsigned int j = 0; j < v.n(); j++)
@@ -93,7 +96,7 @@ materialPropertyStore(std::ofstream & stream, const ColumnMajorMatrix & v)
 
 template<>
 inline void
-materialPropertyStore(std::ofstream & stream, const RealTensorValue & v)
+materialPropertyStore(std::ostream & stream, const RealTensorValue & v)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
     for (unsigned int j = 0; i < LIBMESH_DIM; i++)
@@ -102,7 +105,7 @@ materialPropertyStore(std::ofstream & stream, const RealTensorValue & v)
 
 template<>
 inline void
-materialPropertyStore(std::ofstream & stream, const RealVectorValue & v)
+materialPropertyStore(std::ostream & stream, const RealVectorValue & v)
 {
   // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it won't work.
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
@@ -113,14 +116,14 @@ materialPropertyStore(std::ofstream & stream, const RealVectorValue & v)
 // global load functions
 
 template<typename T>
-void materialPropertyLoad(std::ifstream & stream, T & v)
+void materialPropertyLoad(std::istream & stream, T & v)
 {
   stream.read((char *) &v, sizeof(v));
 }
 
 template<typename T>
 inline void
-materialPropertyLoad(std::ifstream & stream, std::vector<T> & v)
+materialPropertyLoad(std::istream & stream, std::vector<T> & v)
 {
   for (unsigned int i = 0; i < v.size(); i++)
     materialPropertyLoad(stream, v[i]);
@@ -128,7 +131,7 @@ materialPropertyLoad(std::ifstream & stream, std::vector<T> & v)
 
 template<>
 inline void
-materialPropertyLoad(std::ifstream & stream, DenseMatrix<Real> & v)
+materialPropertyLoad(std::istream & stream, DenseMatrix<Real> & v)
 {
   for (unsigned int i = 0; i < v.m(); i++)
     for (unsigned int j = 0; j < v.n(); j++)
@@ -141,7 +144,7 @@ materialPropertyLoad(std::ifstream & stream, DenseMatrix<Real> & v)
 
 template<>
 inline void
-materialPropertyLoad(std::ifstream & stream, ColumnMajorMatrix & v)
+materialPropertyLoad(std::istream & stream, ColumnMajorMatrix & v)
 {
   for (unsigned int i = 0; i < v.m(); i++)
     for (unsigned int j = 0; j < v.n(); j++)
@@ -154,7 +157,7 @@ materialPropertyLoad(std::ifstream & stream, ColumnMajorMatrix & v)
 
 template<>
 inline void
-materialPropertyLoad(std::ifstream & stream, RealTensorValue & v)
+materialPropertyLoad(std::istream & stream, RealTensorValue & v)
 {
   // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it won't work.
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
@@ -168,7 +171,7 @@ materialPropertyLoad(std::ifstream & stream, RealTensorValue & v)
 
 template<>
 inline void
-materialPropertyLoad(std::ifstream & stream, RealVectorValue & v)
+materialPropertyLoad(std::istream & stream, RealVectorValue & v)
 {
   // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it won't work.
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)

@@ -82,8 +82,8 @@ public:
   virtual void qpCopy (const unsigned int to_qp, PropertyValue *rhs, const unsigned int from_qp) = 0;
 
   // save/restore in a file
-  virtual void store(std::ofstream & stream) = 0;
-  virtual void load(std::ifstream & stream) = 0;
+  virtual void store(std::ostream & stream) = 0;
+  virtual void load(std::istream & stream) = 0;
 };
 
 /**
@@ -153,12 +153,12 @@ public:
   /**
    * Store the property into a binary stream
    */
-  virtual void store(std::ofstream & stream);
+  virtual void store(std::ostream & stream);
 
   /**
    * Load the property from a binary stream
    */
-  virtual void load(std::ifstream & stream);
+  virtual void load(std::istream & stream);
 
   /**
    * Friend helper function to handle scalar material property initializations
@@ -227,7 +227,7 @@ MaterialProperty<T>::qpCopy (const unsigned int to_qp, PropertyValue *rhs, const
 
 template<typename T>
 inline void
-MaterialProperty<T>::store(std::ofstream & stream)
+MaterialProperty<T>::store(std::ostream & stream)
 {
   for (unsigned int i = 0; i < _value.size(); i++)
     materialPropertyStore<T>(stream, _value[i]);
@@ -235,7 +235,7 @@ MaterialProperty<T>::store(std::ofstream & stream)
 
 template<typename T>
 inline void
-MaterialProperty<T>::load(std::ifstream & stream)
+MaterialProperty<T>::load(std::istream & stream)
 {
   for (unsigned int i = 0; i < _value.size(); i++)
     materialPropertyLoad<T>(stream, _value[i]);

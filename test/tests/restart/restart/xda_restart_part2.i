@@ -5,7 +5,7 @@
 #
 
 [Mesh]
-  file = out_xda_restart_part1_restart_0005_mesh.xda
+  file = out_xda_restart_part1.e
 []
 
 [Functions]

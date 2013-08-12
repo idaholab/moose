@@ -25,7 +25,7 @@ Resurrector::Resurrector(FEProblem & fe_problem) :
     _restart(false),
     _num_restart_files(0),
     _xda(_fe_problem.es()),
-    _mat(_fe_problem._material_props, _fe_problem._bnd_material_props)
+    _mat(_fe_problem)
 //    _user_object(_fe_problem._user_objects[0])
 {
 }
