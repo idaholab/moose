@@ -32,7 +32,7 @@ ElementalVariableValue::ElementalVariableValue(const std::string & name, InputPa
     GeneralPostprocessor(name, parameters),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
-    _element(_mesh.elem(parameters.get<unsigned int>("elementid")))
+    _element(_mesh.getMesh().query_elem(parameters.get<unsigned int>("elementid")))
 {
 }
 
@@ -41,7 +41,7 @@ ElementalVariableValue::getValue()
 {
   Real value = 0;
 
-  if(_element->processor_id() == libMesh::processor_id())
+  if (_element && (_element->processor_id() == libMesh::processor_id()))
   {
     _subproblem.prepare(_element, _tid);
     _subproblem.reinitElem(_element, _tid);
