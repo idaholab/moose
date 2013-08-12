@@ -1,16 +1,3 @@
-#[Mesh]
-#  type = GeneratedMesh
-#  dim = 3
-#  nx = 4
-#  ny = 4
-#  nz = 4
-#
-#  xmax = 10
-#  ymax = 10
-#  zmax = 10
-#  elem_type = HEX8
-#[]
-
 [Mesh]
   type = TiledMesh
   file = cube.e
@@ -29,4 +16,8 @@
   x_tiles = 2
   y_tiles = 2
   z_tiles = 2
+
+  # You can only run this test with SerialMesh because the underlying
+  # algorithm, stitch_meshes(), only works with SerialMesh.
+  distribution = serial
 []
