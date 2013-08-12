@@ -3,6 +3,5 @@
     type = 'Exodiff'
     input = 'accumulate_aux.i'
     exodiff = 'accumulate_aux_out.e'
-    mesh_mode = 'SERIAL'
   [../]
 []

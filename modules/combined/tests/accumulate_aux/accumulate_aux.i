@@ -5,6 +5,8 @@
 
 [Mesh]
   file = square.e
+  # This test hangs when run in parallel with ParallelMesh enabled.
+  distribution = serial
 []
 
 [Variables]
