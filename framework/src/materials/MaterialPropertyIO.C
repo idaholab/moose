@@ -214,7 +214,6 @@ MaterialPropertyIO::read(const std::string & file_name)
   in.read((char *) &n_props, sizeof(n_props));
   // property names
   std::vector<std::string> prop_names(n_props);
-  std::vector<unsigned int> prop_id(n_props);
 
   for (unsigned int i = 0; i < n_props; i++)
   {
@@ -226,7 +225,6 @@ MaterialPropertyIO::read(const std::string & file_name)
         prop_name += ch;
     } while (ch != '\0');
     prop_names[i] = prop_name;
-    prop_id[i] = stateful_prop_ids[prop_name];
   }
 
   for (unsigned int i = 0; i < n_elems; i++)
@@ -244,11 +242,10 @@ MaterialPropertyIO::read(const std::string & file_name)
       // read in the properties themselves
       for (unsigned int i = 0; i < n_props; i++)
       {
-        unsigned int pid = prop_id[i];
-        if (props[elem][0][pid] != NULL) props[elem][0][pid]->load(in);
-        if (propsOld[elem][0][pid] != NULL) propsOld[elem][0][pid]->load(in);
+        if (props[elem][0][i] != NULL) props[elem][0][i]->load(in);
+        if (propsOld[elem][0][i] != NULL) propsOld[elem][0][i]->load(in);
         if (_material_props.hasOlderProperties())               // this should actually check if the value is stored in the file (we do not store it right now)
-          if (propsOlder[elem][0][pid] != NULL) propsOlder[elem][0][pid]->load(in);
+          if (propsOlder[elem][0][i] != NULL) propsOlder[elem][0][i]->load(in);
       }
     }
     else
@@ -278,12 +275,10 @@ MaterialPropertyIO::read(const std::string & file_name)
         // read in the properties themselves
         for (unsigned int i = 0; i < n_props; i++)
         {
-          unsigned int pid = prop_id[i];
-
-          if (bnd_props[elem][side][pid] != NULL) bnd_props[elem][side][pid]->load(in);
-          if (bnd_propsOld[elem][side][pid] != NULL) bnd_propsOld[elem][side][pid]->load(in);
+          if (bnd_props[elem][side][i] != NULL) bnd_props[elem][side][i]->load(in);
+          if (bnd_propsOld[elem][side][i] != NULL) bnd_propsOld[elem][side][i]->load(in);
           if (_material_props.hasOlderProperties())               // this should actually check if the value is stored in the file (we do not store it right now)
-            if (bnd_propsOlder[elem][side][pid] != NULL) bnd_propsOlder[elem][side][pid]->load(in);
+            if (bnd_propsOlder[elem][side][i] != NULL) bnd_propsOlder[elem][side][i]->load(in);
         }
       }
       else
