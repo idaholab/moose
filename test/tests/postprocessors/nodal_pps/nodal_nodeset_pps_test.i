@@ -1,8 +1,5 @@
 [Mesh]
   file = block_nodeset.e
-  # This test currently segfaults in parallel with ParallelMesh enabled, so restrict it
-  # to SerialMesh for right now.  See #2125.
-  distribution = serial
 []
 
 [Variables]

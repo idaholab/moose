@@ -121,7 +121,7 @@ DiracKernel::computeQpJacobian()
 void
 DiracKernel::addPoint(const Elem * elem, Point p)
 {
-  if(elem->processor_id() != libMesh::processor_id())
+  if (!elem || (elem->processor_id() != libMesh::processor_id()))
     return;
 
   _dirac_kernel_info.addPoint(elem, p);

@@ -1,9 +1,6 @@
 [Mesh]
   file = square.e
   uniform_refine = 4
-  # DiracKernels don't seem to work quite right in parallel with
-  # ParallelMesh enabled (segfaults).  See #2125 for more details.
-  distribution = serial
 []
 
 [Variables]
