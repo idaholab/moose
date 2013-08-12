@@ -115,13 +115,29 @@ MooseApp::setupOptions()
   else if (isParamValid("dump"))
   {
     _parser.initSyntaxFormatter(Parser::INPUT_FILE, true);
-    _parser.buildFullTree(getParam<std::string>("dump"));
+
+    // If there's a non-dash argument following --yaml on the command line,
+    // send that to the buildFullTree() method, otherwise send an empty string.
+    std::string dump_following_arg = getParam<std::string>("dump");
+    if (dump_following_arg[0] == '-')
+      _parser.buildFullTree("");
+    else
+      _parser.buildFullTree(dump_following_arg);
+
     _ready_to_exit = true;
   }
   else if (isParamValid("yaml"))
   {
     _parser.initSyntaxFormatter(Parser::YAML, true);
-    _parser.buildFullTree(getParam<std::string>("yaml"));
+
+    // If there's a non-dash argument following --yaml on the command line,
+    // send that to the buildFullTree() method, otherwise send an empty string.
+    std::string yaml_following_arg = getParam<std::string>("yaml");
+    if (yaml_following_arg[0] == '-')
+      _parser.buildFullTree("");
+    else
+      _parser.buildFullTree(yaml_following_arg);
+
     _ready_to_exit = true;
   }
   else if (isParamValid("syntax"))
