@@ -72,20 +72,8 @@ NemesisOutput::output(const std::string & file_base, Real time)
 {
   if (_out == NULL)
   {
-    // If the underlying libmesh Mesh can be successfully cast to a
-    // ParallelMesh, proceed with using this output object, otherwise
-    // report an error.
-    ParallelMesh* parallel_mesh = dynamic_cast<ParallelMesh*>( &(_es.get_mesh()) );
-
-    if (parallel_mesh)
-    {
-      _out = new Nemesis_IO(*parallel_mesh);
-      _file_num++;
-    }
-    else
-    {
-      mooseError("Nemesis not supported when compiled without --enable-parmesh");
-    }
+    _out = new Nemesis_IO( _es.get_mesh());
+    _file_num++;
   }
 
   _num++;

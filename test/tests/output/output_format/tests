@@ -3,7 +3,6 @@
     type = 'CheckFiles'
     input = 'output_test_nemesis.i'
     check_files = 'out.e.1.0'
-    mesh_mode = 'PARALLEL'
   [../]
 
   [./pps_file_out_warn_test]
@@ -36,13 +35,6 @@
     input = 'IGNORED'
     expect_out = 'block\s*=\s*ANY_BLOCK_ID'
     cli_args = '--dump'
-  [../]
-
-  [./nemesis_out_check_test]
-    type = 'RunException'
-    input = 'output_test_nemesis.i'
-    expect_err = 'Nemesis not supported when compiled without --enable-parmesh'
-    mesh_mode = 'SERIAL'
   [../]
 
   [./gnuplot_ps_out_test]
