@@ -243,12 +243,15 @@ MooseVariable::reinitNodes(const std::vector<unsigned int> & nodes)
   _dof_indices.clear();
   for (unsigned int i = 0; i < nodes.size(); i++)
   {
-    Node & nd = _subproblem.mesh().node(nodes[i]);
-    if (nd.processor_id() == libMesh::processor_id())
+    // The MeshBase::query_node_ptr() routine will return NULL if the requested
+    // node is non-local.
+    Node * nd = _subproblem.mesh().getMesh().query_node_ptr(nodes[i]);
+
+    if (nd && (nd->processor_id() == libMesh::processor_id()))
     {
-      if (nd.n_dofs(_sys.number(), _var_num) > 0)
+      if (nd->n_dofs(_sys.number(), _var_num) > 0)
       {
-        unsigned int dof = nd.dof_number(_sys.number(), _var_num, 0);
+        unsigned int dof = nd->dof_number(_sys.number(), _var_num, 0);
         _dof_indices.push_back(dof);
       }
     }
