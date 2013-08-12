@@ -1,6 +1,9 @@
 [Mesh]
   file = exodus_refined_restart_1.e
   uniform_refine = 1
+  # Restart relies on the ExodusII_IO::copy_nodal_solution()
+  # functionality, which only works with SerialMesh.
+  distribution = serial
 []
 
 [Variables]
