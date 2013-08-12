@@ -11,6 +11,10 @@
   ny = 1
   nz = 1
   elem_type = HEX27
+  # This problem only has 1 element, so using ParallelMesh in parallel
+  # isn't really an option, and we don't care that much about ParallelMesh
+  # in serial.
+  distribution = serial
 []
 
 [Functions]

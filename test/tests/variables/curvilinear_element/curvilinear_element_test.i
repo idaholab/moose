@@ -1,5 +1,9 @@
 [Mesh]
   file = curvi.e
+  # This mesh only has one element.  It does seem to work if you
+  # use SerialMesh on two processors, but it hangs with ParallelMesh
+  # on two processors.
+  distribution = serial
 []
 
 [Variables]

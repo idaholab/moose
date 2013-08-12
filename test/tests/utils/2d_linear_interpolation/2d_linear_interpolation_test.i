@@ -98,6 +98,10 @@
 #
 [Mesh]
   file = cube.e
+  # This problem only has 1 element, so using ParallelMesh in parallel
+  # isn't really an option, and we don't care that much about ParallelMesh
+  # in serial.
+  distribution = serial
 []
 
 [Variables]

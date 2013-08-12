@@ -21,6 +21,10 @@
 # At time = 0, the variable = 0, at time = 1, variable = 4 and so on.
 [Mesh]
   file = cube.e
+  # This problem only has 1 element, so using ParallelMesh in parallel
+  # isn't really an option, and we don't care that much about ParallelMesh
+  # in serial.
+  distribution = serial
 []
 
 [Variables]
