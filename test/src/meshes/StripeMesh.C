@@ -55,10 +55,19 @@ StripeMesh::init()
 
   for (unsigned int en = 0; en < nElem(); en++)
   {
-    Elem * e = elem(en);                                        // get an element
+    // get an element
+    Elem * e = elem(en);
+
+    if (!e)
+    {
+      mooseError("Error getting element " << en << ". StripeMesh only works with SerialMesh...");
+    }
+    else
+    {
     Point centroid = e->centroid();                             // get its centroid
     subdomain_id_type sid = floor((centroid(0) - getParam<Real>("xmin")) / h);   // figure out the subdomain ID
     e->subdomain_id() = sid;
+    }
   }
 }
 
