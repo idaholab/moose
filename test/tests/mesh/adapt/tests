@@ -30,6 +30,7 @@
     group = 'adaptive'
     max_parallel = 1
     max_threads = 1
+		# PatchRecoveryErrorEstimator creates slighlty different refinement patterns when run on multiple processors, so this test must be limited to one.
   [../]
 
   [./adapt_cycles_test]
