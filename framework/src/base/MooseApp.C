@@ -116,10 +116,13 @@ MooseApp::setupOptions()
   {
     _parser.initSyntaxFormatter(Parser::INPUT_FILE, true);
 
-    // If there's a non-dash argument following --yaml on the command line,
-    // send that to the buildFullTree() method, otherwise send an empty string.
+    // Get command line argument following --dump on command line
     std::string dump_following_arg = getParam<std::string>("dump");
-    if (dump_following_arg[0] == '-')
+
+    // If the argument following --dump is non-existent or begins with
+    // a dash, call buildFullTree() with an empty string, otherwise
+    // pass the argument following --dump.
+    if (dump_following_arg.empty() || (dump_following_arg.find('-') == 0))
       _parser.buildFullTree("");
     else
       _parser.buildFullTree(dump_following_arg);
@@ -130,10 +133,13 @@ MooseApp::setupOptions()
   {
     _parser.initSyntaxFormatter(Parser::YAML, true);
 
-    // If there's a non-dash argument following --yaml on the command line,
-    // send that to the buildFullTree() method, otherwise send an empty string.
+    // Get command line argument following --yaml on command line
     std::string yaml_following_arg = getParam<std::string>("yaml");
-    if (yaml_following_arg[0] == '-')
+
+    // If the argument following --yaml is non-existent or begins with
+    // a dash, call buildFullTree() with an empty string, otherwise
+    // pass the argument following --yaml.
+    if (yaml_following_arg.empty() || (yaml_following_arg.find('-') == 0))
       _parser.buildFullTree("");
     else
       _parser.buildFullTree(yaml_following_arg);
@@ -254,7 +260,7 @@ MooseApp::meshOnly(std::string mesh_file_name)
 
   // If no argument specified or if the argument following --mesh-only starts
   // with a dash, try to build an output filename based on the input mesh filename.
-  if ((mesh_file_name == "") || (mesh_file_name[0] == '-'))
+  if (mesh_file_name.empty() || (mesh_file_name.find('-') == 0))
   {
     mesh_file_name = _parser.getFileName();
     size_t pos = mesh_file_name.find_last_of('.');
