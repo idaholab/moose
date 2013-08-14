@@ -1639,10 +1639,6 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationLocator::Penetration
 
     Elem *side = (elem->build_side(sides[i],false)).release();
 
-    // Note: LibMesh does not currently set the side's subdomain to match the parent's, so we
-    // do that manually here.  TODO: This may eventually be patched in libmesh, making this line
-    // unnecessary, so once that happens, come back and remove this code!
-    side->subdomain_id() = elem->subdomain_id();
 
     //Only continue with creating info for this side if the side contains
     //all of the nodes in nodes_that_must_be_on_side
