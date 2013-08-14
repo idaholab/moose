@@ -157,6 +157,7 @@ ComputeJacobianThread::onElement(const Elem *elem)
 void
 ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
+
   std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {

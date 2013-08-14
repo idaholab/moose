@@ -60,7 +60,10 @@ void
 MaterialData::swap(const Elem & elem, unsigned int side/* = 0*/)
 {
   if (_storage.hasStatefulProperties())
+  {
     _storage.swap(*this, elem, side);
+    _swapped = true;
+  }
 }
 
 void
@@ -74,7 +77,10 @@ void
 MaterialData::swapBack(const Elem & elem, unsigned int side/* = 0*/)
 {
   if (_storage.hasStatefulProperties())
+  {
     _storage.swapBack(*this, elem, side);
+    _swapped = false;
+  }
 }
 
 bool
@@ -93,4 +99,10 @@ bool
 MaterialData::have_property_name_older(const std::string & prop_name) const
 {
   return _storage.hasProperty(prop_name);
+}
+
+bool
+MaterialData::isSwapped()
+{
+  return _swapped;
 }

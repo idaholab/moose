@@ -117,6 +117,7 @@ ComputeResidualThread::onElement(const Elem *elem)
 void
 ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
+
   std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {
@@ -135,7 +136,6 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
       if (bc->shouldApply())
         bc->computeResidual();
     }
-
     _fe_problem.swapBackMaterialsFace(_tid);
   }
 }

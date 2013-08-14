@@ -1480,9 +1480,9 @@ FEProblem::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid)
 
     if (_bnd_material_data[tid]->nQPoints() != n_points)
       _bnd_material_data[tid]->size(n_points);
-    if (!_bnd_material_swapped)
+    if (!_bnd_material_data[tid]->isSwapped())
       _bnd_material_data[tid]->swap(*elem, side);
-    _bnd_material_swapped = true;
+
     _bnd_material_data[tid]->reinit(_materials[tid].getFaceMaterials(blk_id));
   }
 }
@@ -1513,9 +1513,9 @@ FEProblem::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid)
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     if (_bnd_material_data[tid]->nQPoints() != n_points)
       _bnd_material_data[tid]->size(n_points);
-    if (!_bnd_material_swapped)
+    if (!_bnd_material_data[tid]->isSwapped())
       _bnd_material_data[tid]->swap(*elem, side);
-    _bnd_material_swapped = true;
+
     _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(boundary_id));
   }
 }
@@ -1533,7 +1533,6 @@ FEProblem::swapBackMaterialsFace(THREAD_ID tid)
   const Elem * & elem = _assembly[tid]->elem();
   unsigned int side = _assembly[tid]->side();
   _bnd_material_data[tid]->swapBack(*elem, side);
-  _bnd_material_swapped = false;
 }
 
 void

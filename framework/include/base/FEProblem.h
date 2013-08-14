@@ -686,8 +686,6 @@ protected:
   std::vector<MaterialData *> _material_data;
   std::vector<MaterialData *> _bnd_material_data;
   std::vector<MaterialData *> _neighbor_material_data;
-  /// Flag to indicated that boundary materials were swapped
-  bool _bnd_material_swapped;
 
   // materials
   std::vector<MaterialWarehouse> _materials;

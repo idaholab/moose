@@ -108,7 +108,13 @@ public:
   template <typename T>
   MaterialProperty<T> & getPropertyOlder(const std::string & prop_name);
 
+  /** Return the swapped status of material
+   * \return Returns true of the stateful material is swapped
+   */
+  bool isSwapped();
+
 protected:
+
   MaterialPropertyStorage & _storage;
   /// Number of quadrature points
   unsigned int _n_qpoints;
@@ -120,6 +126,10 @@ protected:
 
   template<typename T>
   void resizeProps(unsigned int size);
+
+  /// Status of storage swapping (calling swap sets this to true; swapBack sets it to false)
+  bool _swapped;
+
 };
 
 
