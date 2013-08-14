@@ -42,11 +42,6 @@ FunctionPeriodicBoundary::FunctionPeriodicBoundary(const FunctionPeriodicBoundar
   init();
 }
 
-namespace
-{
-  Threads::spin_mutex fpb_mutex;
-}
-
 Point
 FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt) const
 {
