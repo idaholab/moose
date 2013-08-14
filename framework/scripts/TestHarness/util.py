@@ -168,8 +168,17 @@ def getCompilers(libmesh_dir):
   p = Popen(command, shell=True, stdout=PIPE)
   mpicxx_cmd = p.communicate()[0].strip()
 
-  p = Popen(mpicxx_cmd + " -show", shell=True, stdout=PIPE)
-  raw_compiler = p.communicate()[0]
+  # Account for useage of distcc
+  if "distcc" in mpicxx_cmd:
+    split_cmd = mpicxx_cmd.split()
+    mpicxx_cmd = split_cmd[-1]
+
+  # If mpi ic on the command, run -show to get the compiler
+  if "mpi" in mpicxx_cmd:
+    p = Popen(mpicxx_cmd + " -show", shell=True, stdout=PIPE)
+    raw_compiler = p.communicate()[0]
+  else:
+    raw_compiler = mpicxx_cmd
 
   if re.match('icpc', raw_compiler) != None:
     compilers.add("INTEL")
