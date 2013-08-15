@@ -31,9 +31,9 @@ void
 SolidWall::addMooseObjects()
 {
   // coupling "vectors"
-  std::vector<std::string> cv_p(1, FlowModel::PRESSURE);
-  std::vector<std::string> cv_rho(1, FlowModel::RHO);
-  std::vector<std::string> cv_rhoE(1, FlowModel::RHOE);
+  std::vector<VariableName> cv_p(1, FlowModel::PRESSURE);
+  std::vector<VariableName> cv_rho(1, FlowModel::RHO);
+  std::vector<VariableName> cv_rhoE(1, FlowModel::RHOE);
   // boundary id
   std::vector<unsigned int> bnd_id(1, getBoundaryId());
   {
@@ -49,10 +49,10 @@ SolidWall::addMooseObjects()
     params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
 
     // coupling
-    params.set<std::vector<std::string> >("p") = cv_p;
-    params.set<std::vector<std::string> >("rho") = cv_rho;
+    params.set<std::vector<VariableName> >("p") = cv_p;
+    params.set<std::vector<VariableName> >("rho") = cv_rho;
     if (_model_type == FlowModel::EQ_MODEL_3)
-      params.set<std::vector<std::string> >("rhoE") = cv_rhoE;
+      params.set<std::vector<VariableName> >("rhoE") = cv_rhoE;
     _sim.addBoundaryCondition("OneDMomentumSolidWallBC", genName("bc", _id, "rhou"), params);
   }
 
