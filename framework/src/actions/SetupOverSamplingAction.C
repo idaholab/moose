@@ -41,7 +41,7 @@ InputParameters validParams<SetupOverSamplingAction>()
   params.addParam<bool>("tecplot_binary", false, "Specifies that you would like Tecplot binary output solution files(s)");
   params.addParam<bool>("xda", false, "Specifies that you would like xda output solution files(s)");
 
-  params.addParam<std::vector<std::string> >("output_variables", "A list of the variables that should be in the Exodus output file.  If this is not provided then all variables will be in the output.");
+  params.addParam<std::vector<VariableName> >("output_variables", "A list of the variables that should be in the Exodus output file.  If this is not provided then all variables will be in the output.");
 
   params.addParam<int>("interval", 1, "The iterval at which timesteps are output to the solution file");
   params.addParam<Real>("iteration_plot_start_time", std::numeric_limits<Real>::max(), "Specifies a time after which the solution will be written following each nonlinear iteration");
@@ -71,7 +71,7 @@ SetupOverSamplingAction::act()
 
   if(!_pars.isParamValid("output_variables"))
   {
-    _pars.set<std::vector<std::string> >("output_variables") = _problem->getVariableNames();
+    _pars.set<std::vector<VariableName> >("output_variables") = _problem->getVariableNames();
   }
 
   if(_pars.isParamValid("position"))

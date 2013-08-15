@@ -35,7 +35,7 @@ InputParameters validParams<AddPeriodicBCAction>()
   params.addParam<std::vector<std::string> >("transform_func", "Functions that specify the transformation");
   params.addParam<std::vector<std::string> >("inv_transform_func", "Functions that specify the inverse transformation");
 
-  params.addParam<std::vector<std::string> >("variable", "Variable for the periodic boundary");
+  params.addParam<std::vector<VariableName> >("variable", "Variable for the periodic boundary");
   return params;
 }
 
@@ -45,10 +45,10 @@ AddPeriodicBCAction::AddPeriodicBCAction(const std::string & name, InputParamete
 }
 
 void
-AddPeriodicBCAction::setPeriodicVars(PeriodicBoundaryBase & p, const std::vector<std::string> & var_names)
+AddPeriodicBCAction::setPeriodicVars(PeriodicBoundaryBase & p, const std::vector<VariableName> & var_names)
 {
   NonlinearSystem & nl = _problem->getNonlinearSystem();
-  std::vector<std::string> const * var_names_ptr;
+  std::vector<VariableName> const * var_names_ptr;
 
   // If var_names is empty - then apply this periodic condition to all variables in the system
   if (var_names.empty())
@@ -56,7 +56,7 @@ AddPeriodicBCAction::setPeriodicVars(PeriodicBoundaryBase & p, const std::vector
   else
     var_names_ptr = &var_names;
 
-  for (std::vector<std::string>::const_iterator it = var_names_ptr->begin(); it != var_names_ptr->end(); ++it)
+  for (std::vector<VariableName>::const_iterator it = var_names_ptr->begin(); it != var_names_ptr->end(); ++it)
   {
     unsigned int var_num = nl.getVariable(0, (*it)).index();
 
@@ -104,7 +104,7 @@ AddPeriodicBCAction::autoTranslationBoundaries()
 
         p.myboundary = boundary_ids->first;
         p.pairedboundary = boundary_ids->second;
-        setPeriodicVars(p, getParam<std::vector<std::string> >("variable"));
+        setPeriodicVars(p, getParam<std::vector<VariableName> >("variable"));
         nl.dofMap().add_periodic_boundary(p);
       }
     }
@@ -129,7 +129,7 @@ AddPeriodicBCAction::act()
     PeriodicBoundary p(translation);
     p.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary"));
     p.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));
-    setPeriodicVars(p, getParam<std::vector<std::string> >("variable"));
+    setPeriodicVars(p, getParam<std::vector<VariableName> >("variable"));
 
     nl.dofMap().add_periodic_boundary(p);
   }
@@ -146,12 +146,12 @@ AddPeriodicBCAction::act()
     FunctionPeriodicBoundary pb(*_problem, fn_names);
     pb.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary"));
     pb.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));
-    setPeriodicVars(pb, getParam<std::vector<std::string> >("variable"));
+    setPeriodicVars(pb, getParam<std::vector<VariableName> >("variable"));
 
     FunctionPeriodicBoundary ipb(*_problem, inv_fn_names);
     ipb.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));   // these are swapped
     ipb.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary")); // these are swapped
-    setPeriodicVars(ipb, getParam<std::vector<std::string> >("variable"));
+    setPeriodicVars(ipb, getParam<std::vector<VariableName> >("variable"));
 
     // Add the pair of periodic boundaries to the dof map
     nl.dofMap().add_periodic_boundary(pb, ipb);

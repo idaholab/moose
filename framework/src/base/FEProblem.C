@@ -3085,13 +3085,13 @@ FEProblem::setOutputVariables()
   if (_variable_white_list.empty() && _variable_black_list.empty())
     return;
 
-  std::vector<std::string> output_vars;
+  std::vector<VariableName> output_vars;
   // If the white list is populated then we'll use that as a starting point for variables to output
   if (!_variable_white_list.empty())
   {
     //Make sure that all of the variables in the whitelist actually exist
     //Get list of variable names
-    std::vector<std::string> available_vars = getVariableNames();
+    std::vector<VariableName> available_vars = getVariableNames();
 
     //Get names of scalar variables, add to list
     std::vector<MooseVariableScalar*> scalar_vars = _nl.getScalarVariables(0);
@@ -3143,7 +3143,7 @@ FEProblem::setOutputVariables()
   // If the black list is populated then we'll take those variables out of the list
   if (!_variable_black_list.empty())
   {
-    std::vector<std::string> temp_output_vars(output_vars);
+    std::vector<VariableName> temp_output_vars(output_vars);
     output_vars.clear();
 
     std::sort(temp_output_vars.begin(), temp_output_vars.end());
@@ -3159,7 +3159,7 @@ FEProblem::setOutputVariables()
       {
         std::ostringstream oss;
         oss << "One or more variables was specified to be both shown and hidden:\n";
-        for (std::vector<std::string>::iterator i = output_vars.begin(); i != output_vars.end();  ++i)
+        for (std::vector<VariableName>::iterator i = output_vars.begin(); i != output_vars.end();  ++i)
           oss << *i << "\n";
         mooseError(oss.str());
       }
@@ -3175,25 +3175,25 @@ FEProblem::setOutputVariables()
 }
 
 void
-FEProblem::hideVariableFromOutput(const std::string & var_name)
+FEProblem::hideVariableFromOutput(const VariableName & var_name)
 {
   _variable_black_list.push_back(var_name);
 }
 
 void
-FEProblem::hideVariableFromOutput(const std::vector<std::string> & var_names)
+FEProblem::hideVariableFromOutput(const std::vector<VariableName> & var_names)
 {
   _variable_black_list.insert(_variable_black_list.end(), var_names.begin(), var_names.end());
 }
 
 void
-FEProblem::showVariableInOutput(const std::string & var_name)
+FEProblem::showVariableInOutput(const VariableName & var_name)
 {
   _variable_white_list.push_back(var_name);
 }
 
 void
-FEProblem::showVariableInOutput(const std::vector<std::string> & var_names)
+FEProblem::showVariableInOutput(const std::vector<VariableName> & var_names)
 {
   _variable_white_list.insert(_variable_white_list.end(), var_names.begin(), var_names.end());
 }
@@ -3472,15 +3472,15 @@ FEProblem::isRestarting()
   return _resurrector->isOn();
 }
 
-std::vector<std::string>
+std::vector<VariableName>
 FEProblem::getVariableNames()
 {
-  std::vector<std::string> names;
+  std::vector<VariableName> names;
 
-  const std::vector<std::string> & nl_var_names = _nl.getVariableNames();
+  const std::vector<VariableName> & nl_var_names = _nl.getVariableNames();
   names.insert(names.end(), nl_var_names.begin(), nl_var_names.end());
 
-  const std::vector<std::string> & aux_var_names = _aux.getVariableNames();
+  const std::vector<VariableName> & aux_var_names = _aux.getVariableNames();
   names.insert(names.end(), aux_var_names.begin(), aux_var_names.end());
 
   return names;

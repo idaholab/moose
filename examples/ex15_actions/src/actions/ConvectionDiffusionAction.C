@@ -35,7 +35,7 @@ void
 ConvectionDiffusionAction::act()
 {
   std::vector<NonlinearVariableName> variables = getParam<std::vector<NonlinearVariableName> > ("variables");
-  std::vector<NonlinearVariableName> vel_vec_variable;
+  std::vector<VariableName> vel_vec_variable;
 
   /**
    * We need to manually setup our Convection-Diffusion and Diffusion variables on our two
@@ -57,9 +57,9 @@ ConvectionDiffusionAction::act()
   {
     InputParameters params = _factory.getValidParams("Convection");
     params.set<NonlinearVariableName>("variable") = variables[0];
-    params.addCoupledVar("some_variable", "The gradient of this var");
+//    params.addCoupledVar("some_variable", "The gradient of this var");
     vel_vec_variable.push_back(variables[1]);
-    params.set<std::vector<NonlinearVariableName> >("some_variable") = vel_vec_variable;
+    params.set<std::vector<VariableName> >("some_variable") = vel_vec_variable;
     _problem->addKernel("Convection", "conv", params);
   }
 

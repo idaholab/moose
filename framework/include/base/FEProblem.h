@@ -213,7 +213,7 @@ public:
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
    */
-  std::vector<std::string> getVariableNames();
+  std::vector<VariableName> getVariableNames();
 
 
   virtual void initialSetup();
@@ -579,10 +579,10 @@ public:
    * @param output_variables The list of variable names to write in the ouput files
    */
   void setOutputVariables();
-  void hideVariableFromOutput(const std::string & var_name);
-  void hideVariableFromOutput(const std::vector<std::string> & var_names);
-  void showVariableInOutput(const std::string & var_name);
-  void showVariableInOutput(const std::vector<std::string> & var_names);
+  void hideVariableFromOutput(const VariableName & var_name);
+  void hideVariableFromOutput(const std::vector<VariableName> & var_names);
+  void showVariableInOutput(const VariableName & var_name);
+  void showVariableInOutput(const std::vector<VariableName> & var_names);
 
   OutputProblem & getOutputProblem(unsigned int refinements, MeshFileName file = "");
   void setMaxPPSRowsScreen(unsigned int n) { _pps_output_table_max_rows = n; }
@@ -792,8 +792,8 @@ protected:
   /// Determines if the setup log is printed before the first time step
   bool _output_setup_log_early;
 
-  std::vector<std::string> _variable_white_list;
-  std::vector<std::string> _variable_black_list;
+  std::vector<VariableName> _variable_white_list;
+  std::vector<VariableName> _variable_black_list;
 
   /// Number of top residual to print out
   unsigned int _dbg_top_residuals;

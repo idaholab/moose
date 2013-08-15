@@ -601,7 +601,7 @@ DisplacedProblem::outputPps(const FormattedTable & table)
 }
 
 void
-DisplacedProblem::setOutputVariables(std::vector<std::string> output_variables)
+DisplacedProblem::setOutputVariables(std::vector<VariableName> output_variables)
 {
   _ex->setOutputVariables(output_variables);
 }

@@ -34,3 +34,9 @@ void
 GlobalParamsAction::act()
 {
 }
+
+void
+GlobalParamsAction::remove(const std::string & name)
+{
+  parameters().remove(name);
+}

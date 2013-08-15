@@ -71,6 +71,12 @@ public:
   virtual void set_attributes(const std::string & name, bool inserted_only);
 
   /**
+   * Returns a writable reference to the named parametesr.  Note: This is not a virutal
+   * function! Use caution when comparing to the parent class implementation
+   */
+  template <typename T> T & set (const std::string&);
+
+  /**
    * This method adds a parameter and documentation string to the InputParameters
    * object that will be extracted from the input file.  If the parameter is
    * missing in the input file, and error will be thrown
@@ -323,11 +329,25 @@ private:
 
 // Template and inline function implementations
 template <typename T>
+inline
+T& InputParameters::set (const std::string& name)
+{
+  checkConsistentType<T>(name);
+
+  if (!this->have_parameter<T>(name))
+    _values[name] = new Parameter<T>;
+
+  set_attributes(name, false);
+
+  return libmesh_cast_ptr<Parameter<T>*>(_values[name])->set();
+}
+
+template <typename T>
 void InputParameters::addRequiredParam(const std::string &name, const std::string &doc_string)
 {
   checkConsistentType<T>(name);
 
-  Parameters::insert<T>(name);
+  InputParameters::insert<T>(name);
   _required_params.insert(name);
   _doc_string[name] = doc_string;
 }
@@ -343,7 +363,7 @@ void InputParameters::addParam(const std::string &name, const T &value, const st
 {
   checkConsistentType<T>(name);
 
-  Parameters::set<T>(name) = value;                    // valid parameter is set by set_attributes
+  InputParameters::set<T>(name) = value;                    // valid parameter is set by set_attributes
   _doc_string[name] = doc_string;
 }
 
@@ -352,7 +372,7 @@ void InputParameters::addParam(const std::string &name, const std::string &doc_s
 {
   checkConsistentType<T>(name);
 
-  Parameters::insert<T>(name);
+  InputParameters::insert<T>(name);
   _doc_string[name] = doc_string;
 }
 
@@ -382,7 +402,7 @@ void InputParameters::addPrivateParam(const std::string &name)
 {
   checkConsistentType<T>(name);
 
-  Parameters::insert<T>(name);
+  InputParameters::insert<T>(name);
   _private_params.insert(name);
 }
 
@@ -391,7 +411,7 @@ void InputParameters::addPrivateParam(const std::string &name, const T &value)
 {
   checkConsistentType<T>(name);
 
-  Parameters::set<T>(name) = value;
+  InputParameters::set<T>(name) = value;
   _private_params.insert(name);
 }
 
@@ -420,10 +440,10 @@ void InputParameters::addCommandLineParam(const std::string &name, const std::st
 template <typename T>
 void InputParameters::checkConsistentType(const std::string &name) const
 {
-  // Do we have a parameter with the same name but a different type?
-  Parameters::const_iterator it = _values.find(name);
+  // Do we have a paremeter with the same name but a different type?
+  InputParameters::const_iterator it = _values.find(name);
   if (it != _values.end() && dynamic_cast<const Parameter<T>*>(it->second) == NULL)
-    mooseError("Parameter: " << name << " already exists but with a different type");
+    mooseError("Attempting to set parameter \"" << name << "\" with type (" << demangle(typeid(T).name()) << ")\nbut the parameter already exists as type (" << it->second->type() << ")");
 }
 
 template <typename T>
@@ -468,7 +488,7 @@ template <>
 inline
 void InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const MooseEnum &moose_enum, const std::string &doc_string)
 {
-  Parameters::set<MooseEnum>(name) = moose_enum;                    // valid parameter is set by set_attributes
+  InputParameters::set<MooseEnum>(name) = moose_enum;                    // valid parameter is set by set_attributes
   _required_params.insert(name);
   _doc_string[name] = doc_string;
 }
@@ -477,7 +497,7 @@ template <>
 inline
 void InputParameters::addRequiredParam<std::vector<MooseEnum> >(const std::string &name, const std::vector<MooseEnum> &moose_enums, const std::string &doc_string)
 {
-  Parameters::set<std::vector<MooseEnum> >(name) = moose_enums;    // valid parameter is set by set_attributes
+  InputParameters::set<std::vector<MooseEnum> >(name) = moose_enums;    // valid parameter is set by set_attributes
   _required_params.insert(name);
   _doc_string[name] = doc_string;
 }

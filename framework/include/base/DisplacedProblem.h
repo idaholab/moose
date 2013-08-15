@@ -159,7 +159,7 @@ public:
    * Set which variables will be written in output files
    * @param output_variables The list of variable names to write in the output files
    */
-  virtual void setOutputVariables(std::vector<std::string> output_variables);
+  virtual void setOutputVariables(std::vector<VariableName> output_variables);
 
   /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor

@@ -30,6 +30,13 @@ public:
 
   virtual void act();
 
+  /**
+   * This function is here to remove parameters of a type so that global parameters
+   * can potentially use the same named variable as a differenent type depending on the
+   * application.
+   */
+  void remove(const std::string & name);
+
   template <typename T>
   inline
   T & setScalarParam(const std::string &name)

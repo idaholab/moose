@@ -23,3 +23,11 @@ Outputter::Outputter(EquationSystems & es) :
 Outputter::~Outputter()
 {
 }
+
+void
+Outputter::setOutputVariables(std::vector<VariableName> output_variables)
+{
+  _output_variables.resize(output_variables.size());
+  for (unsigned int i=0; i<output_variables.size(); ++i)
+    _output_variables[i] = output_variables[i];
+}

@@ -16,6 +16,7 @@
 #define OUTPUT_H
 
 #include "Moose.h"
+#include "MooseTypes.h"
 #include "FormattedTable.h"
 
 // libMesh
@@ -85,7 +86,7 @@ public:
    *
    * Must be called before any outputers are added!
    */
-  void setOutputVariables(std::vector<std::string> output_variables) { _output_variables = output_variables; }
+  void setOutputVariables(std::vector<VariableName> output_variables) { _output_variables = output_variables; }
 
   bool PpsFileOutputEnabled();
   /// sets the time interval at which the solution should be output
@@ -117,7 +118,7 @@ protected:
   std::set<Type> _outputter_types;
 
   /// The variables to be output
-  std::vector<std::string> _output_variables;
+  std::vector<VariableName> _output_variables;
 
   Real _last_iteration_output_time;
   ///if to use time interval output

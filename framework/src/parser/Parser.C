@@ -607,7 +607,10 @@ void Parser::setScalarParameter(const std::string & full_name, const std::string
   T value = gp->get_value_no_default(full_name.c_str(), param->get());
   param->set() = value;
   if (in_global)
+  {
+    global_block->remove(short_name);
     global_block->setScalarParam<T>(short_name) = value;
+  }
 }
 
 template<typename T>
@@ -631,6 +634,7 @@ void Parser::setVectorParameter(const std::string & full_name, const std::string
 
   if (in_global)
   {
+    global_block->remove(short_name);
     global_block->setVectorParam<T>(short_name).resize(vec_size);
     for (int i = 0; i < vec_size; ++i)
       global_block->setVectorParam<T>(short_name)[i] = param->get()[i];
@@ -661,7 +665,10 @@ void Parser::setScalarComponentParameter(const std::string & full_name, const st
 
   param->set() = value;
   if (in_global)
+  {
+    global_block->remove(short_name);
     global_block->setScalarParam<T>(short_name) = value;
+  }
 }
 
 template<typename T>
@@ -695,6 +702,7 @@ void Parser::setVectorComponentParameter(const std::string & full_name, const st
 
   if (in_global)
   {
+    global_block->remove(short_name);
     global_block->setVectorParam<T>(short_name).resize(vec_size, values[0]);
     for (int i = 0; i < vec_size / LIBMESH_DIM; ++i)
       global_block->setVectorParam<T>(short_name)[i] = values[0];
@@ -731,7 +739,10 @@ void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const 
   std::string value = gp->get_value_no_default(full_name.c_str(), current_name);
   param->set() = value;
   if (in_global)
+  {
+    global_block->remove(short_name);
     global_block->setScalarParam<MooseEnum>(short_name) = current_param;
+  }
 }
 
 template<>
@@ -758,7 +769,10 @@ void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, 
 
   param->set() = value;
   if (in_global)
+  {
+    global_block->remove(short_name);
     global_block->setScalarParam<RealTensorValue>(short_name) = value;
+  }
 }
 
 template<>
@@ -803,6 +817,7 @@ void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const 
 
   if (in_global)
   {
+    global_block->remove(short_name);
     global_block->setVectorParam<MooseEnum>(short_name).resize(vec_size, enum_values[0]);
     for (int i = 0; i < vec_size; ++i)
       global_block->setVectorParam<MooseEnum>(short_name)[i] = values[0];

@@ -49,7 +49,7 @@ void
 Output::init()
 {
   // put nodal variables into _output_vars
-  std::vector<std::string> vars = _fe_problem.getVariableNames();
+  std::vector<VariableName> vars = _fe_problem.getVariableNames();
   for (unsigned int i = 0; i < vars.size(); ++i)
   {
     std::string var_name = vars[i];

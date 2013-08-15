@@ -2050,9 +2050,9 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
     }
   }
 
-  std::set<std::string> variables(getVariableNames().begin(), getVariableNames().end());
+  std::set<VariableName> variables(getVariableNames().begin(), getVariableNames().end());
 
-  std::set<std::string> difference;
+  std::set<VariableName> difference;
   std::set_difference (variables.begin(), variables.end(),
                        kernel_variables.begin(), kernel_variables.end(),
                        std::inserter(difference, difference.end()));

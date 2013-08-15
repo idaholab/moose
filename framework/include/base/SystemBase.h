@@ -495,7 +495,7 @@ public:
 
   virtual unsigned int nVariables() { return _vars[0].all().size(); }
 
-  const std::vector<std::string> & getVariableNames() const { return _var_names; }
+  const std::vector<VariableName> & getVariableNames() const { return _var_names; }
 
   virtual void computeVariables(const NumericVector<Number>& /*soln*/)
   {
@@ -593,7 +593,7 @@ protected:
   T & _sys;
   /// default kind of variables in this system
   Moose::VarKindType _var_kind;
-  std::vector<std::string> _var_names;
+  std::vector<VariableName> _var_names;
 
   NumericVector<Number> & _solution;
   NumericVector<Number> & _solution_old;

@@ -16,6 +16,7 @@
 #define OUTPUTTER_H
 
 #include "Moose.h"
+#include "MooseTypes.h"
 #include "FormattedTable.h"
 
 // libMesh
@@ -45,7 +46,7 @@ public:
   virtual void meshChanged() = 0;
   virtual void sequence(bool state) = 0;
 
-  void setOutputVariables(std::vector<std::string> output_variables) { _output_variables = output_variables; }
+  void setOutputVariables(std::vector<VariableName> output_variables);
 
   /// Set (or reset) the output position
   virtual void setOutputPosition(const Point & /*p*/) {}

@@ -60,8 +60,8 @@ InputParameters validParams<SetupOutputAction>()
 
   params.addParam<bool>("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
   params.addParam<bool>("show_setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled in ""perf_log"" is false");
-  params.addParam<std::vector<std::string> >("output_variables", "A list of the variables that should be output to the Exodus file.  If this is not provided then all variables will be in the output.");
-  params.addParam<std::vector<std::string> >("hidden_variables", "A list of the variables that should NOT be output to the Exodus file.  If this is not provided then all variables will be in the output.");
+  params.addParam<std::vector<VariableName> >("output_variables", "A list of the variables that should be output to the Exodus file.  If this is not provided then all variables will be in the output.");
+  params.addParam<std::vector<VariableName> >("hidden_variables", "A list of the variables that should NOT be output to the Exodus file.  If this is not provided then all variables will be in the output.");
   params.addParam<bool>("elemental_as_nodal", false, "Output elemental variables also as nodal");
   params.addParam<bool>("exodus_inputfile_output", true, "Determines whether or not the input file is output to exodus - default (true)");
   params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputing only a subset of outputs when using MultiApps.");
@@ -89,7 +89,7 @@ SetupOutputAction::SetupOutputAction(const std::string & name, InputParameters p
 void
 SetupOutputAction::setupOutputObject(Output &output, InputParameters & params)
 {
-  mooseAssert(params.have_parameter<std::vector<std::string> >("output_variables"), "Output Variables are required");
+  mooseAssert(params.have_parameter<std::vector<VariableName> >("output_variables"), "Output Variables are required");
 
   OutFileBase base = params.get<OutFileBase>("file_base");
 
@@ -139,12 +139,12 @@ SetupOutputAction::act()
 
   if (_pars.isParamValid("hidden_variables"))
   {
-    _problem->hideVariableFromOutput(getParam<std::vector<std::string> >("hidden_variables"));
+    _problem->hideVariableFromOutput(getParam<std::vector<VariableName> >("hidden_variables"));
   }
 
   if (_pars.isParamValid("output_variables"))
   {
-    _problem->showVariableInOutput(getParam<std::vector<std::string> >("output_variables"));
+    _problem->showVariableInOutput(getParam<std::vector<VariableName> >("output_variables"));
   }
   else
   {

@@ -46,7 +46,7 @@ protected:
    */
   bool autoTranslationBoundaries();
 
-  void setPeriodicVars(PeriodicBoundaryBase & p, const std::vector<std::string> & var_names);
+  void setPeriodicVars(PeriodicBoundaryBase & p, const std::vector<VariableName> & var_names);
 
   MooseMesh * _mesh;
 };
