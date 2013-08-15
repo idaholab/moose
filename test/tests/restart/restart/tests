@@ -41,4 +41,16 @@
     prereq = 'test_xda_restart_part_1'
   [../]
 
+  [./elem_var_1]
+    type = 'Exodiff'
+    input = 'elem_part1.i'
+    exodiff = 'elem_part1_out.e'
+  [../]
+  [./elem_var_2]
+    type = 'Exodiff'
+    input = 'elem_part2.i'
+    exodiff = 'elem_part2_out.e'
+    max_parallel = 1
+    prereq = 'elem_var_1'
+  [../]
 []

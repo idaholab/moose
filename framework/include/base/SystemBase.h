@@ -582,7 +582,10 @@ public:
     {
       did_copy = true;
       VarCopyInfo & vci = *it;
-      io.copy_nodal_solution(_sys, vci._name, vci._timestep);
+      if (getVariable(0, vci._name).isNodal())
+        io.copy_nodal_solution(_sys, vci._name, vci._timestep);
+      else
+        io.copy_elemental_solution(_sys, vci._name, vci._name, vci._timestep);
     }
 
     if(did_copy)
