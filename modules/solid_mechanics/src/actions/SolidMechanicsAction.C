@@ -79,7 +79,7 @@ SolidMechanicsAction::act()
     bool rspherical(false);
     unsigned int dim(1);
     std::vector<std::string> keys;
-    std::vector<std::string> vars;
+    std::vector<VariableName> vars;
     std::vector<std::vector<AuxVariableName> > save_in;
     std::vector<std::vector<AuxVariableName> > diag_save_in;
     std::string type("StressDivergence");
@@ -185,7 +185,7 @@ SolidMechanicsAction::act()
     for (unsigned j(0); j < num_coupled; ++j)
     {
       params.addCoupledVar(keys[j], "");
-      params.set<std::vector<std::string> >(keys[j]) = std::vector<std::string>(1, vars[j]);
+      params.set<std::vector<VariableName> >(keys[j]) = std::vector<VariableName>(1, vars[j]);
     }
 
     params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");

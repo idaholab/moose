@@ -50,7 +50,7 @@ ContactPressureAuxAction::act()
     params.set<BoundaryName>("paired_boundary") = _master;
     params.set<AuxVariableName>("variable") = "contact_pressure";
     params.addRequiredCoupledVar("nodal_area", "The nodal area");
-    params.set<std::vector<std::string> >("nodal_area") = std::vector<std::string>(1, "nodal_area_"+short_name);
+    params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+short_name);
     params.set<MooseEnum>("order") = _order;
 
     params.set<bool>("use_displaced_mesh") = true;

@@ -92,7 +92,7 @@ ContactAction::act()
     params.set<Real>("friction_coefficient") = _friction_coefficient;
     params.set<Real>("tension_release") = _tension_release;
     params.addRequiredCoupledVar("nodal_area", "The nodal area");
-    params.set<std::vector<std::string> >("nodal_area") = std::vector<std::string>(1, "nodal_area_"+short_name);
+    params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+short_name);
     if (isParamValid("tangential_tolerance"))
     {
       params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
@@ -106,16 +106,16 @@ ContactAction::act()
       params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
     }
     params.addCoupledVar("disp_x", "The x displacement");
-    params.set<std::vector<std::string> >("disp_x") = std::vector<std::string>(1, _disp_x);
+    params.set<std::vector<VariableName> >("disp_x") = std::vector<VariableName>(1, _disp_x);
     params.addCoupledVar("disp_y", "The y displacement");
     if (dim > 1)
     {
-      params.set<std::vector<std::string> >("disp_y") = std::vector<std::string>(1, _disp_y);
+      params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1, _disp_y);
     }
     params.addCoupledVar("disp_z", "The z displacement");
     if (dim == 3)
     {
-      params.set<std::vector<std::string> >("disp_z") = std::vector<std::string>(1, _disp_z);
+      params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1, _disp_z);
     }
 
     params.set<bool>("use_displaced_mesh") = true;
@@ -151,7 +151,7 @@ ContactAction::act()
     params.set<Real>("penalty") = _penalty;
     params.set<Real>("friction_coefficient") = _friction_coefficient;
     params.addRequiredCoupledVar("nodal_area", "The nodal area");
-    params.set<std::vector<std::string> >("nodal_area") = std::vector<std::string>(1, "nodal_area_"+short_name);
+    params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+short_name);
     if (isParamValid("tangential_tolerance"))
     {
       params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
@@ -165,16 +165,16 @@ ContactAction::act()
       params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
     }
     params.addCoupledVar("disp_x", "The x displacement");
-    params.set<std::vector<std::string> >("disp_x") = std::vector<std::string>(1, _disp_x);
+    params.set<std::vector<VariableName> >("disp_x") = std::vector<VariableName>(1, _disp_x);
     params.addCoupledVar("disp_y", "The y displacement");
     if (dim > 1)
     {
-      params.set<std::vector<std::string> >("disp_y") = std::vector<std::string>(1, _disp_y);
+      params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1, _disp_y);
     }
     params.addCoupledVar("disp_z", "The z displacement");
     if (dim == 3)
     {
-      params.set<std::vector<std::string> >("disp_z") = std::vector<std::string>(1, _disp_z);
+      params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1, _disp_z);
     }
 
     params.set<bool>("use_displaced_mesh") = true;

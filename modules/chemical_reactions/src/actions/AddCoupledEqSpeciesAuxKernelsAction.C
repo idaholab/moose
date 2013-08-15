@@ -76,7 +76,7 @@ AddCoupledEqSpeciesAuxKernelsAction::act()
     std::vector<string> eq_species;
     std::vector<Real> eq_const;
     std::vector<std::vector<Real> > stos;
-    std::vector<std::vector<std::string> > primary_species_involved;
+    std::vector<std::vector<VariableName> > primary_species_involved;
     
     
     unsigned int n_reactions = 0;
@@ -96,7 +96,7 @@ AddCoupledEqSpeciesAuxKernelsAction::act()
       bool secondary = false;
       
       std::vector<Real> local_stos;
-      std::vector<std::string> local_species_list;
+      std::vector<VariableName> local_species_list;
       
       // Going to find every single term in this reaction, sto_species combos and operators
       while (re_terms.FindAndConsume(&single_reaction, &term))
@@ -162,7 +162,7 @@ AddCoupledEqSpeciesAuxKernelsAction::act()
         params_eq.set<AuxVariableName>("variable") = eq_species[j];
         params_eq.set<Real>("log_k") = eq_const[j];
         params_eq.set<std::vector<Real> >("sto_v") = stos[j];
-        params_eq.set<std::vector<std::string> >("v") = primary_species_involved[j];
+        params_eq.set<std::vector<VariableName> >("v") = primary_species_involved[j];
         _problem->addAuxKernel("AqueousEquilibriumRxnAux", "aux_"+eq_species[j], params_eq);
         
         std::cout << "aux_"+eq_species[j] << "\n";

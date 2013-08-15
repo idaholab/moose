@@ -72,7 +72,7 @@ AddCoupledEqSpeciesKernelsAction::act()
   std::vector<Real> eq_const;
   std::vector<std::vector<Real> > sto_u(vars.size());
   std::vector<std::vector<std::vector<Real> > > sto_v(vars.size());
-  std::vector<std::vector<std::vector<std::string> > > coupled_v(vars.size());
+  std::vector<std::vector<std::vector<VariableName> > > coupled_v(vars.size());
 
   std::vector<std::vector<Real> > stos;
   std::vector<std::vector<std::string> > primary_species_involved;
@@ -227,7 +227,7 @@ AddCoupledEqSpeciesKernelsAction::act()
         params_sub.set<Real>("log_k") = eq_const[j];
         params_sub.set<Real>("sto_u") = sto_u[i][j];
         params_sub.set<std::vector<Real> >("sto_v") = sto_v[i][j];
-        params_sub.set<std::vector<std::string> >("v") = coupled_v[i][j];
+        params_sub.set<std::vector<VariableName> >("v") = coupled_v[i][j];
         _problem->addKernel("CoupledBEEquilibriumSub", vars[i]+"_"+eq_species[j]+"_sub", params_sub);
         
         std::cout << vars[i]+"_"+eq_species[j]+"_sub" << "\n";
@@ -239,7 +239,7 @@ AddCoupledEqSpeciesKernelsAction::act()
         params_cd.set<Real>("log_k") = eq_const[j];
         params_cd.set<Real>("sto_u") = sto_u[i][j];
         params_cd.set<std::vector<Real> >("sto_v") = sto_v[i][j];
-        params_cd.set<std::vector<std::string> >("v") = coupled_v[i][j];
+        params_cd.set<std::vector<VariableName> >("v") = coupled_v[i][j];
         _problem->addKernel("CoupledDiffusionReactionSub", vars[i]+"_"+eq_species[j]+"_cd", params_cd);
         
         std::cout << vars[i]+"_"+eq_species[j]+"_diff" << "\n";
@@ -251,7 +251,7 @@ AddCoupledEqSpeciesKernelsAction::act()
         {
           std::string p;
           p = getParam<std::string>("pressure");
-          std::vector<std::string> press(1);
+          std::vector<VariableName> press(1);
           press[0] = p;
           std::cout << "coupled gradient of p" << press[0] << "\n";
           
@@ -261,9 +261,9 @@ AddCoupledEqSpeciesKernelsAction::act()
           params_conv.set<Real>("log_k") = eq_const[j];
           params_conv.set<Real>("sto_u") = sto_u[i][j];
           params_conv.set<std::vector<Real> >("sto_v") = sto_v[i][j];
-          params_conv.set<std::vector<std::string> >("v") = coupled_v[i][j];
+          params_conv.set<std::vector<VariableName> >("v") = coupled_v[i][j];
           // Pressure is required to be named as "pressure" if it is a primary variable
-          params_conv.set<std::vector<std::string> >("p") = press;
+          params_conv.set<std::vector<VariableName> >("p") = press;
           _problem->addKernel("CoupledConvectionReactionSub", vars[i]+"_"+eq_species[j]+"_conv", params_conv);
           
           std::cout << vars[i]+"_"+eq_species[j]+"_conv" << "\n";

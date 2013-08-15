@@ -19,9 +19,9 @@ InputParameters validParams<ThermalContactBCsAction>()
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
-  params.addParam<NonlinearVariableName>("disp_x", "The x displacement");
-  params.addParam<NonlinearVariableName>("disp_y", "The y displacement");
-  params.addParam<NonlinearVariableName>("disp_z", "The z displacement");
+  params.addParam<VariableName>("disp_x", "The x displacement");
+  params.addParam<VariableName>("disp_y", "The y displacement");
+  params.addParam<VariableName>("disp_z", "The z displacement");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
   params.addParam<std::vector<std::string> >("save_in", "The Auxiliary Variable to (optionally) save the boundary flux in");
@@ -54,11 +54,11 @@ ThermalContactBCsAction::act()
 
   if(!quadrature)
   {
-    std::vector<AuxVariableName> vars(1);
+    std::vector<VariableName> vars(1);
     vars[0] = "penetration";
-    params.set<std::vector<AuxVariableName> >("gap_distance") = vars;
+    params.set<std::vector<VariableName> >("gap_distance") = vars;
     vars[0] = ThermalContactAuxVarsAction::getGapValueName(_pars);
-    params.set<std::vector<AuxVariableName> >("gap_temp") = vars;
+    params.set<std::vector<VariableName> >("gap_temp") = vars;
   }
   else
   {
@@ -77,20 +77,20 @@ ThermalContactBCsAction::act()
   if (isParamValid("disp_x"))
   {
     params.addCoupledVar("disp_x", "The x displacement");
-    std::vector<NonlinearVariableName> disp_x(1, getParam<NonlinearVariableName>("disp_x"));
-    params.set< std::vector<NonlinearVariableName> >("disp_x") = disp_x;
+    std::vector<VariableName> disp_x(1, getParam<VariableName>("disp_x"));
+    params.set< std::vector<VariableName> >("disp_x") = disp_x;
   }
   if (isParamValid("disp_y"))
   {
     params.addCoupledVar("disp_y", "The y displacement");
-    std::vector<NonlinearVariableName> disp_y(1, getParam<NonlinearVariableName>("disp_y"));
-    params.set< std::vector<NonlinearVariableName> >("disp_y") = disp_y;
+    std::vector<VariableName> disp_y(1, getParam<VariableName>("disp_y"));
+    params.set< std::vector<VariableName> >("disp_y") = disp_y;
   }
   if (isParamValid("disp_z"))
   {
     params.addCoupledVar("disp_z", "The z displacement");
-    std::vector<NonlinearVariableName> disp_z(1, getParam<NonlinearVariableName>("disp_z"));
-    params.set< std::vector<NonlinearVariableName> >("disp_z") = disp_z;
+    std::vector<VariableName> disp_z(1, getParam<VariableName>("disp_z"));
+    params.set< std::vector<VariableName> >("disp_z") = disp_z;
   }
 
   _problem->addBoundaryCondition(getParam<std::string>("type"),

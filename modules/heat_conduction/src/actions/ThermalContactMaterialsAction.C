@@ -52,10 +52,10 @@ ThermalContactMaterialsAction::act()
 
   if(!quadrature)
   {
-    params.set<std::vector<AuxVariableName> >("gap_temp") = std::vector<AuxVariableName>(1, ThermalContactAuxVarsAction::getGapValueName(_pars));
-    std::vector<AuxVariableName> vars(1);
+    params.set<std::vector<VariableName> >("gap_temp") = std::vector<VariableName>(1, ThermalContactAuxVarsAction::getGapValueName(_pars));
+    std::vector<VariableName> vars(1);
     vars[0] = "penetration";
-    params.set<std::vector<AuxVariableName> >("gap_distance") = vars;
+    params.set<std::vector<VariableName> >("gap_distance") = vars;
   }
   else
   {

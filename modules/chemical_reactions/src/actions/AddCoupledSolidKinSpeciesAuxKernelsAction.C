@@ -62,7 +62,7 @@ AddCoupledSolidKinSpeciesAuxKernelsAction::act()
     MooseUtils::tokenize(reactions[j], tokens, 1, "+=");
     
     std::vector<Real> stos(tokens.size()-1);
-    std::vector<std::string> rxn_vars(tokens.size()-1);
+    std::vector<VariableName> rxn_vars(tokens.size()-1);
     
     for (unsigned int k=0; k < tokens.size(); k++)
     {
@@ -95,7 +95,7 @@ AddCoupledSolidKinSpeciesAuxKernelsAction::act()
     params_kin.set<Real>("ref_temp") = ref_temp[j];
     params_kin.set<Real>("sys_temp") = sys_temp[j];
     params_kin.set<std::vector<Real> >("sto_v") = stos;
-    params_kin.set<std::vector<std::string> >("v") = rxn_vars;
+    params_kin.set<std::vector<VariableName> >("v") = rxn_vars;
     _problem->addAuxKernel("KineticDisPreConcAux", "aux_"+solid_kin_species[j], params_kin);
     
     std::cout << "aux_"+solid_kin_species[j] << "\n";

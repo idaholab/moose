@@ -101,14 +101,14 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
         }
         std::cout << "solid kinetic species: " << solid_kin_species[j] << "\n";
 
-        std::vector<std::string> coupled_var(1);
+        std::vector<VariableName> coupled_var(1);
         coupled_var[0] = solid_kin_species[j];
         
         // Building kernels for solid kinetic species
         InputParameters params_kin = _factory.getValidParams("CoupledBEKinetic");
         params_kin.set<NonlinearVariableName>("variable") = vars[i];
         params_kin.set<std::vector<Real> >("weight") = weight;
-        params_kin.set<std::vector<std::string> >("v") = coupled_var;
+        params_kin.set<std::vector<VariableName> >("v") = coupled_var;
         _problem->addKernel("CoupledBEKinetic", vars[i]+"_"+solid_kin_species[j]+"_kin", params_kin);
         
         std::cout << vars[i]+"_"+solid_kin_species[j]+"_kin" << "\n";
