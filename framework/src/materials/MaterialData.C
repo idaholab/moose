@@ -17,7 +17,8 @@
 
 MaterialData::MaterialData(MaterialPropertyStorage & storage) :
     _storage(storage),
-    _n_qpoints(0)
+    _n_qpoints(0),
+    _swapped(false)
 {
 }
 
