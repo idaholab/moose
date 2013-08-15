@@ -49,14 +49,14 @@ FlowJunction::addVariables()
 void
 FlowJunction::addMooseObjects()
 {
-  std::vector<std::string> cv_area(1, FlowModel::AREA);
-  std::vector<std::string> cv_u(1, FlowModel::VELOCITY);
-  std::vector<std::string> cv_pressure(1, FlowModel::PRESSURE);
-  std::vector<std::string> cv_enthalpy(1, FlowModel::ENTHALPY);
-  std::vector<std::string> cv_rho(1, FlowModel::RHO);
-  std::vector<std::string> cv_rhou(1, FlowModel::RHOU);
-  std::vector<std::string> cv_rhoE(1, FlowModel::RHOE);
-  std::vector<std::string> cv_lambda(1, _lm_name);
+  std::vector<VariableName> cv_area(1, FlowModel::AREA);
+  std::vector<VariableName> cv_u(1, FlowModel::VELOCITY);
+  std::vector<VariableName> cv_pressure(1, FlowModel::PRESSURE);
+  std::vector<VariableName> cv_enthalpy(1, FlowModel::ENTHALPY);
+  std::vector<VariableName> cv_rho(1, FlowModel::RHO);
+  std::vector<VariableName> cv_rhou(1, FlowModel::RHOU);
+  std::vector<VariableName> cv_rhoE(1, FlowModel::RHOE);
+  std::vector<VariableName> cv_lambda(1, _lm_name);
   std::vector<Real> sf = _sim.getParam<std::vector<Real> >("scaling_factors");
 
   MooseEnum execute_options(SetupInterface::getExecuteOptions());
@@ -70,8 +70,8 @@ FlowJunction::addMooseObjects()
     params.set<MooseEnum>("output") = "none";
     params.set<UserObjectName>("eos")  = getParam<UserObjectName>("eos");
     // coupling
-    params.set<std::vector<std::string> >("area") = cv_area;
-    params.set<std::vector<std::string> >("pressure") = cv_pressure;
+    params.set<std::vector<VariableName> >("area") = cv_area;
+    params.set<std::vector<VariableName> >("pressure") = cv_pressure;
 
     _sim.addPostprocessor("PressureCB", c_pps, params);
   }
@@ -90,16 +90,16 @@ FlowJunction::addMooseObjects()
       params.set<PostprocessorName>("c") = c_pps;
       params.set<std::vector<Real> >("scaling_factors") = sf;
       // coupling
-      params.set<std::vector<std::string> >("rho") = cv_rho;
-      params.set<std::vector<std::string> >("rhou") = cv_rhou;
-      params.set<std::vector<std::string> >("u") = cv_u;
-      params.set<std::vector<std::string> >("area") = cv_area;
-      params.set<std::vector<std::string> >("lambda") = cv_lambda;
+      params.set<std::vector<VariableName> >("rho") = cv_rho;
+      params.set<std::vector<VariableName> >("rhou") = cv_rhou;
+      params.set<std::vector<VariableName> >("u") = cv_u;
+      params.set<std::vector<VariableName> >("area") = cv_area;
+      params.set<std::vector<VariableName> >("lambda") = cv_lambda;
 
       if (_model_type == FlowModel::EQ_MODEL_3)
       {
-        params.set<std::vector<std::string> >("rhoE") = cv_rhoE;
-        params.set<std::vector<std::string> >("enthalpy") = cv_enthalpy;
+        params.set<std::vector<VariableName> >("rhoE") = cv_rhoE;
+        params.set<std::vector<VariableName> >("enthalpy") = cv_enthalpy;
       }
 
       _sim.addBoundaryCondition("OneDFreeMassBC", genName("mass", _id, "_bc"), params);
@@ -113,17 +113,17 @@ FlowJunction::addMooseObjects()
       params.set<PostprocessorName>("c") = c_pps;
       params.set<std::vector<Real> >("scaling_factors") = sf;
       // coupling
-      params.set<std::vector<std::string> >("rho") = cv_rho;
-      params.set<std::vector<std::string> >("rhou") = cv_rhou;
-      params.set<std::vector<std::string> >("u") = cv_u;
-      params.set<std::vector<std::string> >("pressure") = cv_pressure;
-      params.set<std::vector<std::string> >("area") = cv_area;
-      params.set<std::vector<std::string> >("lambda") = cv_lambda;
+      params.set<std::vector<VariableName> >("rho") = cv_rho;
+      params.set<std::vector<VariableName> >("rhou") = cv_rhou;
+      params.set<std::vector<VariableName> >("u") = cv_u;
+      params.set<std::vector<VariableName> >("pressure") = cv_pressure;
+      params.set<std::vector<VariableName> >("area") = cv_area;
+      params.set<std::vector<VariableName> >("lambda") = cv_lambda;
 
       if (_model_type == FlowModel::EQ_MODEL_3)
       {
-        params.set<std::vector<std::string> >("rhoE") = cv_rhoE;
-        params.set<std::vector<std::string> >("enthalpy") = cv_enthalpy;
+        params.set<std::vector<VariableName> >("rhoE") = cv_rhoE;
+        params.set<std::vector<VariableName> >("enthalpy") = cv_enthalpy;
       }
 
       _sim.addBoundaryCondition("OneDFreeMomentumBC", genName("mom", _id, "_bc"), params);
@@ -136,15 +136,15 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
       params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
       // coupling
-      params.set<std::vector<std::string> >("rho") = cv_rho;
-      params.set<std::vector<std::string> >("rhou") = cv_rhou;
-      params.set<std::vector<std::string> >("rhoE") = cv_rhoE;
-      params.set<std::vector<std::string> >("u") = cv_u;
-      params.set<std::vector<std::string> >("enthalpy") = cv_enthalpy;
-      params.set<std::vector<std::string> >("area") = cv_area;
+      params.set<std::vector<VariableName> >("rho") = cv_rho;
+      params.set<std::vector<VariableName> >("rhou") = cv_rhou;
+      params.set<std::vector<VariableName> >("rhoE") = cv_rhoE;
+      params.set<std::vector<VariableName> >("u") = cv_u;
+      params.set<std::vector<VariableName> >("enthalpy") = cv_enthalpy;
+      params.set<std::vector<VariableName> >("area") = cv_area;
       params.set<PostprocessorName>("c") = c_pps;
       params.set<std::vector<Real> >("scaling_factors") = sf;
-      params.set<std::vector<std::string> >("lambda") = cv_lambda;
+      params.set<std::vector<VariableName> >("lambda") = cv_lambda;
 
       _sim.addBoundaryCondition("OneDFreeEnergyBC", genName("erg", _id, "_bc"), params);
     }
@@ -161,14 +161,14 @@ FlowJunction::addMooseObjects()
     params.set<std::vector<Real> >("normals") = _normals;
     params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
     // coupling
-    params.set<std::vector<std::string> >("u") = cv_u;
-    params.set<std::vector<std::string> >("p") = cv_pressure;
-    params.set<std::vector<std::string> >("rho") = cv_rho;
-    params.set<std::vector<std::string> >("rhou") = cv_rhou;
+    params.set<std::vector<VariableName> >("u") = cv_u;
+    params.set<std::vector<VariableName> >("p") = cv_pressure;
+    params.set<std::vector<VariableName> >("rho") = cv_rho;
+    params.set<std::vector<VariableName> >("rhou") = cv_rhou;
     if (_model_type == FlowModel::EQ_MODEL_3)
     {
-      params.set<std::vector<std::string> >("rhoE") = cv_rhoE;
-      params.set<std::vector<std::string> >("enthalpy") = cv_enthalpy;
+      params.set<std::vector<VariableName> >("rhoE") = cv_rhoE;
+      params.set<std::vector<VariableName> >("enthalpy") = cv_enthalpy;
     }
 
     _sim.addScalarKernel("FlowConstraint", genName("flow", _id, "_c0"), params);
