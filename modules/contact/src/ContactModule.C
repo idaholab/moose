@@ -15,6 +15,7 @@
 #include "SlaveConstraint.h"
 #include "OneDContactConstraint.h"
 #include "MultiDContactConstraint.h"
+#include "GluedContactConstraint.h"
 #include "FrictionalContactProblem.h"
 #include "ReferenceResidualProblem.h"
 
@@ -26,6 +27,7 @@ Elk::Contact::registerObjects(Factory & factory)
   registerDiracKernel(SlaveConstraint);
   registerConstraint(OneDContactConstraint);
   registerConstraint(MultiDContactConstraint);
+  registerConstraint(GluedContactConstraint);
   registerProblem(FrictionalContactProblem);
   registerProblem(ReferenceResidualProblem);
 
