@@ -27,6 +27,7 @@ InputParameters validParams<ExplicitEuler>()
 ExplicitEuler::ExplicitEuler(const std::string & name, InputParameters parameters) :
     TimeIntegrator(name, parameters)
 {
+  _fe_problem.setConstJacobian(true);
 }
 
 ExplicitEuler::~ExplicitEuler()

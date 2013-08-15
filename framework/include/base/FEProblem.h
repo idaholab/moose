@@ -644,6 +644,12 @@ public:
 
   void setKernelTypeResidual(Moose::KernelType kt) { _kernel_type = kt; }
 
+  /**
+   * Set flag that Jacobian is constant (for optimization purposes)
+   * @param state True if the Jacobian is constant, false otherwise
+   */
+  void setConstJacobian(bool state) { _const_jacobian = state; }
+
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
@@ -800,6 +806,11 @@ protected:
 
   // Should we print out residuals of individaul variables at NL iterations?
   bool _dbg_print_var_rnorms;
+
+  /// true if the Jacobian is constant
+  bool _const_jacobian;
+  /// Indicates if the Jacobian was computed
+  bool _has_jacobian;
 
 public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)

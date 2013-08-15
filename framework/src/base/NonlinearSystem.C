@@ -146,6 +146,14 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
   _sys.nonlinear_solver->nullspace     = Moose::compute_nullspace;
   _sys.nonlinear_solver->nearnullspace = Moose::compute_nearnullspace;
 
+#ifdef LIBMESH_HAVE_PETSC
+  PetscNonlinearSolver<Real> * petsc_solver = static_cast<PetscNonlinearSolver<Real> *>(_sys.nonlinear_solver.get());
+  if (petsc_solver)
+  {
+    petsc_solver->set_residual_zero_out(false);
+    petsc_solver->set_jacobian_zero_out(false);
+  }
+#endif
 
   unsigned int n_threads = libMesh::n_threads();
   _kernels.resize(n_threads);
@@ -1699,6 +1707,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   Moose::enableFPE();
 
   try {
+    jacobian.zero();
     computeJacobianInternal(jacobian);
   }
   catch (MooseException & e)

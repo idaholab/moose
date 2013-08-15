@@ -130,7 +130,9 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _output_setup_log_early(false),
     // debugging
     _dbg_top_residuals(0),
-    _dbg_print_var_rnorms(false)
+    _dbg_print_var_rnorms(false),
+    _const_jacobian(false),
+    _has_jacobian(false)
 {
 #ifdef LIBMESH_HAVE_PETSC
   // put in empty arrays for PETSc options
@@ -2854,40 +2856,45 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 void
 FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
 {
-  _nl.setSolution(soln);
-
-  _nl.zeroVariablesForJacobian();
-  _aux.zeroVariablesForJacobian();
-
-  execTransfers(EXEC_JACOBIAN);
-  execMultiApps(EXEC_JACOBIAN);
-
-  computeUserObjects(EXEC_JACOBIAN);
-
-  if (_displaced_problem != NULL)
-    _displaced_problem->updateMesh(soln, *_aux.currentSolution());
-
-  unsigned int n_threads = libMesh::n_threads();
-
-  for(unsigned int i=0; i<n_threads; i++)
+  if (!_has_jacobian || !_const_jacobian)
   {
-    _materials[i].jacobianSetup();
+    _nl.setSolution(soln);
 
-    for(std::map<std::string, Function *>::iterator vit = _functions[i].begin();
-        vit != _functions[i].end();
-        ++vit)
-      vit->second->jacobianSetup();
+    _nl.zeroVariablesForJacobian();
+    _aux.zeroVariablesForJacobian();
+
+    execTransfers(EXEC_JACOBIAN);
+    execMultiApps(EXEC_JACOBIAN);
+
+    computeUserObjects(EXEC_JACOBIAN);
+
+    if (_displaced_problem != NULL)
+      _displaced_problem->updateMesh(soln, *_aux.currentSolution());
+
+    unsigned int n_threads = libMesh::n_threads();
+
+    for(unsigned int i=0; i<n_threads; i++)
+    {
+      _materials[i].jacobianSetup();
+
+      for(std::map<std::string, Function *>::iterator vit = _functions[i].begin();
+          vit != _functions[i].end();
+          ++vit)
+        vit->second->jacobianSetup();
+    }
+
+    _aux.jacobianSetup();
+
+    // TODO: This can be made more efficient if we group the kernels together in a single group to be
+    //       executed.  If the user has both Residual and Jacobian aux kernels, we are looping over both
+    //       groups separately.
+    _aux.compute();
+    _aux.compute(EXEC_JACOBIAN);
+
+    _nl.computeJacobian(jacobian);
+
+    _has_jacobian = true;
   }
-
-  _aux.jacobianSetup();
-
-  // TODO: This can be made more efficient if we group the kernels together in a single group to be
-  //       executed.  If the user has both Residual and Jacobian aux kernels, we are looping over both
-  //       groups separately.
-  _aux.compute();
-  _aux.compute(EXEC_JACOBIAN);
-
-  _nl.computeJacobian(jacobian);
 
   // This call is here to make sure the residual vector is up to date with any decisions that have been made in
   // the Jacobian evaluation.  That is important in JFNK because that residual is used for finite differencing

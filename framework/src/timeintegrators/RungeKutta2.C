@@ -30,6 +30,7 @@ RungeKutta2::RungeKutta2(const std::string & name, InputParameters parameters) :
     _Re_half(_nl.addVector("Re_half", true, GHOSTED)),
     _stage(0)
 {
+  _fe_problem.setConstJacobian(true);
 }
 
 RungeKutta2::~RungeKutta2()
