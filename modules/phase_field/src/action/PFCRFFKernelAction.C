@@ -43,7 +43,7 @@ PFCRFFKernelAction::act()
   _problem->addKernel("TimeDerivative", "IE_n", poly_params);
   
   //Now the CHPFCRFF kernel
-  std::vector<std::string> real_v; //First, we have to create the vector containing the names of the real L variables
+  std::vector<VariableName> real_v; //First, we have to create the vector containing the names of the real L variables
   real_v.resize(_num_L);
   for (unsigned int l = 0; l<_num_L; l++)
   {
@@ -58,7 +58,7 @@ PFCRFFKernelAction::act()
 
   poly_params = _factory.getValidParams("CHPFCRFF");
   poly_params.set<NonlinearVariableName>("variable") = _n_name;
-  poly_params.set<std::vector<std::string> >("v") = real_v;
+  poly_params.set<std::vector<VariableName> >("v") = real_v;
   poly_params.set<std::string>("mob_name") = getParam<std::string>("mob_name");
   poly_params.set<MooseEnum>("log_approach") = getParam<MooseEnum>("log_approach");
   poly_params.set<Real>("tol") = getParam<Real>("tol");
@@ -111,7 +111,7 @@ PFCRFFKernelAction::act()
       poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = real_name;
       poly_params.set<bool>("positive") = false;
-      poly_params.set<std::vector<std::string> >("coupled_var").push_back(imag_name);
+      poly_params.set<std::vector<VariableName> >("coupled_var").push_back(imag_name);
 
       pname = "alpha_I_";
       pname.append(out.str());
@@ -127,7 +127,7 @@ PFCRFFKernelAction::act()
     poly_params = _factory.getValidParams("HHPFCRFF");
     poly_params.set<NonlinearVariableName>("variable") = real_name;
     poly_params.set<bool>("positive") = false;
-    poly_params.set<std::vector<std::string> >("coupled_var").push_back(_n_name);
+    poly_params.set<std::vector<VariableName> >("coupled_var").push_back(_n_name);
 
     pname = "A_R_";
     pname.append(out.str());
@@ -167,7 +167,7 @@ PFCRFFKernelAction::act()
       poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = true;
-      poly_params.set<std::vector<std::string> >("coupled_var").push_back(real_name);
+      poly_params.set<std::vector<VariableName> >("coupled_var").push_back(real_name);
 
       pname = "alpha_I_";
       pname.append(out.str());
@@ -182,7 +182,7 @@ PFCRFFKernelAction::act()
       poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = false;
-      poly_params.set<std::vector<std::string> >("coupled_var").push_back(_n_name);
+      poly_params.set<std::vector<VariableName> >("coupled_var").push_back(_n_name);
 
       pname = "A_I_";
       pname.append(out.str());
