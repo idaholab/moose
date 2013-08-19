@@ -528,28 +528,18 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
+    // Set the parameters for thread ID and material data
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
+    // Create the kernel object via the factory
     Kernel *kernel = static_cast<Kernel *>(_factory.create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
 
-    std::set<SubdomainID> blk_ids;
-    if (!parameters.isParamValid("block"))
-      blk_ids = _var_map[kernel->variable().index()];
-    else
-    {
-      std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
-      for (unsigned int i=0; i<blocks.size(); ++i)
-      {
-        SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
+    // Extract the SubdomainIDs from the object (via BlockRestrictable class)
+    std::set<SubdomainID> blk_ids = kernel->getSubdomainIDs();
 
-        if (_var_map[kernel->variable().index()].count(blk_id) > 0 || _var_map[kernel->variable().index()].size() == 0)
-          blk_ids.insert(blk_id);
-        else
-          mooseError("Kernel (" + kernel->name() + "): block outside of the domain of the variable");
-      }
-    }
+    // Add the kernel to the warehouse
     _kernels[tid].addKernel(kernel, blk_ids);
     _fe_problem._objects_by_name[tid][name].push_back(kernel);
   }

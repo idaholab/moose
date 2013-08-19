@@ -22,6 +22,7 @@
 #include "MooseVariableDependencyInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
+#include "BlockRestrictable.h"
 
 // libMesh
 #include "libmesh/elem.h"
@@ -35,6 +36,7 @@ InputParameters validParams<ElementUserObject>();
 
 class ElementUserObject :
   public UserObject,
+  public BlockRestrictable,
   public UserObjectInterface,
   public Coupleable,
   public MooseVariableDependencyInterface,
@@ -43,8 +45,6 @@ class ElementUserObject :
 {
 public:
   ElementUserObject(const std::string & name, InputParameters parameters);
-
-  const std::vector<SubdomainName> & blocks() { return _blocks; }
 
   /**
    * This function will get called on each geometric object this postprocessor acts on
@@ -63,9 +63,6 @@ public:
   virtual void threadJoin(const UserObject & uo) = 0;
 
 protected:
-/// The block ID this postprocessor works on
-  std::vector<SubdomainName> _blocks;
-
   MooseMesh & _mesh;
 
   /// The current element pointer (available during execute())

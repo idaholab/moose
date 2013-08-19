@@ -22,6 +22,7 @@
 #include "DependencyResolverInterface.h"
 #include "MooseVariableDependencyInterface.h"
 #include "UserObjectInterface.h"
+#include "BlockRestrictable.h"
 
 // libmesh Includes
 #include "libmesh/threads.h"
@@ -41,6 +42,7 @@ InputParameters validParams<Marker>();
 
 class Marker :
   public MooseObject,
+  public BlockRestrictable,
   public SetupInterface,
   public DependencyResolverInterface,
   public MooseVariableDependencyInterface,

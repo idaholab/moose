@@ -1,0 +1,57 @@
+[Tests]
+  [./solution_working]
+	  type = 'Exodiff'
+		input = 'block_restrictable.i'
+		cli_args = "Output/file_base=solution_working_out"
+		exodiff = 'solution_working_out.e'
+  [../]
+
+	[./undefined_var_block]
+    type = 'RunException'
+    input = 'block_restrictable.i'
+		cli_args = "Variables/u/block=1"
+    expect_err = "In Object 'diff': block outside of the domain"
+  [../]
+
+	[./fe_problem_null]
+    type = 'RunException'
+    input = 'block_restrictable.i'
+	  cli_args = "Kernels/diff/test=fe_problem_null"
+    expect_err = "The input paramters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'"
+  [../]
+
+	[./mesh_null]
+    type = 'RunException'
+    input = 'block_restrictable.i'
+		cli_args = "Kernels/diff/test=mesh_null"
+    expect_err = "The input paramters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'"
+  [../]
+
+	[./blocks]
+    type = 'RunException'
+    input = 'block_restrictable.i'
+		cli_args = "Kernels/diff/test=blocks"
+    expect_err = "Blocks testing passed"
+  [../]
+
+	[./hasBlocks]
+    type = 'RunException'
+    input = 'block_restrictable.i'
+		cli_args = "Kernels/diff/test=has_blocks"
+    expect_err = "hasBlocks testing passed"
+  [../]
+
+	[./getSubdomainIDs]
+    type = 'RunException'
+    input = 'block_restrictable.i'
+		cli_args = "Kernels/diff/test=get_sub"
+    expect_err = "getSubdomains testing passed"
+  [../]
+
+  [./isSubset]
+    type = 'RunException'
+    input = 'block_restrictable.i'
+		cli_args = "Kernels/diff/test=is_subset"
+    expect_err = "isSubset testing passed"
+  [../]
+[]

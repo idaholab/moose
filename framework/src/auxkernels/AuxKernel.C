@@ -29,6 +29,8 @@ InputParameters validParams<AuxKernel>()
   MooseEnum execute_options(SetupInterface::getExecuteOptions());
 
   InputParameters params = validParams<MooseObject>();
+  params += validParams<BlockRestrictable>();
+
   params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin|custom) to execute only at that moment");
 
   params.addRequiredParam<AuxVariableName>("variable", "The name of the variable that this object applies to");
@@ -39,7 +41,6 @@ InputParameters validParams<AuxKernel>()
 
   // For use on the boundary only
   params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this AuxBC applies");
-  params.addParam<std::vector<SubdomainName> >("block", "The list of ids or names of the blocks (subdomain) that this aux kernel will be applied to");
 
   params.addPrivateParam<std::string>("built_by_action", "add_aux_kernel");
   return params;
@@ -47,6 +48,7 @@ InputParameters validParams<AuxKernel>()
 
 AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    BlockRestrictable(name, parameters),
     SetupInterface(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
     FunctionInterface(parameters),

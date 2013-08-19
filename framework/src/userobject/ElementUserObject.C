@@ -20,20 +20,23 @@ template<>
 InputParameters validParams<ElementUserObject>()
 {
   InputParameters params = validParams<UserObject>();
-  std::vector<SubdomainName> everywhere(1);
-  everywhere[0] = "ANY_BLOCK_ID";
-  params.addParam<std::vector<SubdomainName> >("block", everywhere, "block ID or name where the object works");
+  params += validParams<BlockRestrictable>();
+
+  std::vector<SubdomainName> block_everywhere(1);
+  block_everywhere[0] = "ANY_BLOCK_ID";
+  params.set<std::vector<SubdomainName> >("block") = block_everywhere;
+
   return params;
 }
 
 ElementUserObject::ElementUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
+    BlockRestrictable(name, parameters),
     UserObjectInterface(parameters),
     Coupleable(parameters, false),
     MooseVariableDependencyInterface(),
     TransientInterface(parameters, name, "element_user_objects"),
     PostprocessorInterface(parameters),
-    _blocks(parameters.get<std::vector<SubdomainName> >("block")),
     _mesh(_subproblem.mesh()),
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),

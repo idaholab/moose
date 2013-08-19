@@ -30,7 +30,7 @@ class PostprocessorInterface
 public:
   PostprocessorInterface(InputParameters & params);
 
-  /**
+  /**public BlockRestrictable,
    * Retrieve the value of a Postprocessor
    * @param name The name of the Postprocessor (see below)
    * @return A reference to the desired value

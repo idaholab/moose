@@ -24,6 +24,7 @@
 #include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
+#include "BlockRestrictable.h"
 #include "Assembly.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"
@@ -43,6 +44,7 @@ InputParameters validParams<Kernel>();
 
 class Kernel :
   public MooseObject,
+  public BlockRestrictable,
   public SetupInterface,
   public CoupleableMooseVariableDependencyIntermediateInterface,
   public FunctionInterface,
@@ -79,7 +81,6 @@ public:
   // materials
   template<typename T>
   MaterialProperty<T> & getMaterialProperty(const std::string & name);
-
 
 protected:
   SubProblem & _subproblem;

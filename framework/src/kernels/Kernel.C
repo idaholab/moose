@@ -27,8 +27,8 @@ InputParameters validParams<Kernel>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
+  params += validParams<BlockRestrictable>();
   params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this kernel operates on");
-  params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that this kernel will be applied to");
   params.addParam<std::vector<AuxVariableName> >("save_in", "The name of auxiliary variables to save this Kernel's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
   params.addParam<std::vector<AuxVariableName> >("diag_save_in", "The name of auxiliary variables to save this Kernel's diagonal jacobian contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
 
@@ -45,6 +45,7 @@ InputParameters validParams<Kernel>()
 
 Kernel::Kernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    BlockRestrictable(name, parameters),
     SetupInterface(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     FunctionInterface(parameters),

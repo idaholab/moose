@@ -22,6 +22,7 @@
 #include "UserObjectInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "MooseVariableDependencyInterface.h"
+#include "BlockRestrictable.h"
 
 #include "Assembly.h"
 #include "MooseVariable.h"
@@ -42,6 +43,7 @@ InputParameters validParams<Indicator>();
 
 class Indicator :
   public MooseObject,
+  public BlockRestrictable,
   public SetupInterface,
   public FunctionInterface,
   public UserObjectInterface,

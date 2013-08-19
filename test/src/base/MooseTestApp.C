@@ -39,6 +39,7 @@
 #include "CoupledKernelGradTest.h"
 #include "CoupledKernelValueTest.h"
 #include "SplineFFn.h"
+#include "BlkResTestDiffusion.h"
 
 #include "CoupledAux.h"
 #include "CoupledGradAux.h"
@@ -199,6 +200,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(CoupledKernelGradTest);
   registerKernel(CoupledKernelValueTest);
   registerKernel(SplineFFn);
+  registerKernel(BlkResTestDiffusion);
 
   // Aux kernels
   registerAux(CoupledAux);

@@ -21,6 +21,7 @@
 #include "MooseVariable.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
+#include "BlockRestrictable.h"
 
 class MooseVariable;
 
@@ -32,6 +33,7 @@ InputParameters validParams<NodalUserObject>();
 
 class NodalUserObject :
   public UserObject,
+  public BlockRestrictable,
   public UserObjectInterface,
   public Coupleable,
   public ScalarCoupleable,
@@ -43,7 +45,6 @@ public:
   NodalUserObject(const std::string & name, InputParameters parameters);
 
   const std::vector<BoundaryName> & boundaries() { return _boundaries; }
-  const std::vector<SubdomainName> & blocks() { return _blocks; }
 
   /**
    * This function will get called on each geometric object this postprocessor acts on
@@ -63,7 +64,6 @@ public:
 
 protected:
   std::vector<BoundaryName> _boundaries;
-  std::vector<SubdomainName> _blocks;
 
   const unsigned int _qp;
   const Node * & _current_node;

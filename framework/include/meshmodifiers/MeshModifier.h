@@ -31,7 +31,8 @@ InputParameters validParams<MeshModifier>();
 /**
  * MeshModifiers are objects that can modify or add to an existing mesh.
  */
-class MeshModifier : public MooseObject
+class MeshModifier :
+  public MooseObject
 {
 public:
   /**

@@ -31,6 +31,7 @@
 #include "SubProblem.h"
 #include "DependencyResolverInterface.h"
 #include "Function.h"
+#include "BlockRestrictable.h"
 
 // libMesh includes
 #include "libmesh/quadrature_gauss.h"
@@ -59,6 +60,7 @@ InputParameters validParams<Material>();
  */
 class Material :
   public MooseObject,
+  public BlockRestrictable,
   public SetupInterface,
   public Coupleable,
   public MooseVariableDependencyInterface,

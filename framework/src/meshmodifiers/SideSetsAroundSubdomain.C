@@ -23,13 +23,15 @@ template<>
 InputParameters validParams<SideSetsAroundSubdomain>()
 {
   InputParameters params = validParams<MeshModifier>();
+  params += validParams<BlockRestrictable>();
+
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "A list of boudnary names to associate with the subdomain");
-  params.addRequiredParam<SubdomainName>("block", "A block for which to draw a sideset around");
   return params;
 }
 
 SideSetsAroundSubdomain::SideSetsAroundSubdomain(const std::string & name, InputParameters parameters):
-    MeshModifier(name, parameters)
+    MeshModifier(name, parameters),
+    BlockRestrictable(name, parameters)
 {
 }
 
@@ -42,7 +44,14 @@ SideSetsAroundSubdomain::modify()
 {
   MeshBase & mesh = _mesh_ptr->getMesh();
 
-  SubdomainID block_id = _mesh_ptr->getSubdomainID(getParam<SubdomainName>("block"));
+  // Extract the first block id, produce a warning if more exist
+  SubdomainID block_id = _vec_ids[0];
+  if (_vec_ids.size() > 1)
+  {
+    std::vector<SubdomainName> blks = blocks();
+    mooseWarning("SideSetsAroundSubdomain only acts on a single subdomain, but multiple were provided: only the " << blks[0] << "' subdomain is being used.");
+  }
+
   std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName> >("boundary");
   std::vector<BoundaryID> boundary_ids = _mesh_ptr->getBoundaryIDs(boundary_names, true);
 

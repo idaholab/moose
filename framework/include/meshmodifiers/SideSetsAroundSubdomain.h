@@ -16,13 +16,16 @@
 #define SIDESETSAROUNDSUBDOMAIN_H
 
 #include "AddSideSetsBase.h"
+#include "BlockRestrictable.h"
 
 class SideSetsAroundSubdomain;
 
 template<>
 InputParameters validParams<SideSetsAroundSubdomain>();
 
-class SideSetsAroundSubdomain : public MeshModifier
+class SideSetsAroundSubdomain :
+  public MeshModifier,
+  public BlockRestrictable
 {
 public:
   SideSetsAroundSubdomain(const std::string & name, InputParameters parameters);

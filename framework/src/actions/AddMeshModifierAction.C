@@ -32,6 +32,11 @@ AddMeshModifierAction::AddMeshModifierAction(const std::string & name, InputPara
 void
 AddMeshModifierAction::act()
 {
+
+  // Add a pointer to the mesh, this is required for this MeshModifier to inheret from the BlockRestrictable,
+  // as is the case for SideSetAroundSubdomain
+  _moose_object_pars.set<MooseMesh *>("_mesh") = _mesh;
+
   // Create the modifier object and run it
   MeshModifier *mesh_modifier = static_cast<MeshModifier *>(_factory.create(_type, getShortName(), _moose_object_pars));
 
@@ -41,6 +46,7 @@ AddMeshModifierAction::act()
   // Run the modifier on the normal mesh
   mesh_modifier->setMeshPointer(_mesh);
   mesh_modifier->modify();
+
   // We'll need to prepare again!
   _mesh->prepared(false);
 
