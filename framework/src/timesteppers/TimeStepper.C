@@ -76,6 +76,11 @@ TimeStepper::step()
 }
 
 void
+TimeStepper::acceptStep()
+{
+}
+
+void
 TimeStepper::rejectStep()
 {
   _fe_problem.restoreSolutions();

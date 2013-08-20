@@ -270,6 +270,8 @@ Transient::takeStep(Real input_dt)
   {
     std::cout<<"Solve Converged!"<<std::endl;
 
+    _time_stepper->acceptStep();
+
     _solution_change_norm = _problem.solutionChangeNorm();
 
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);

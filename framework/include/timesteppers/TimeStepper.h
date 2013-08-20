@@ -59,6 +59,11 @@ public:
   virtual void step();
 
   /**
+   * This gets called when time step is accepted
+   */
+  virtual void acceptStep();
+
+  /**
    * This gets called when time step is rejected
    */
   virtual void rejectStep();

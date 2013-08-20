@@ -30,11 +30,16 @@ public:
 
   virtual void init();
 
+  virtual void preExecute();
+
+  virtual void acceptStep();
   virtual void rejectStep();
 
 protected:
   virtual Real computeInitialDT();
   virtual Real computeDT();
+
+  void removeOldKnots();
 
   const std::vector<Real> & _time_t;
   /// Piecewise linear definition of time stepping
