@@ -23,6 +23,7 @@ InputParameters validParams<FunctionDT>()
   params.addParam<std::vector<Real> >("time_t", "The values of t");
   params.addParam<std::vector<Real> >("time_dt", "The values of dt");
   params.addParam<Real>("growth_factor", 2, "Maximum ratio of new to previous timestep sizes following a step that required the time step to be cut due to a failed solve.");
+  params.addParam<Real>("min_dt", 0, "The minimal dt to take.");
 
   return params;
 }
@@ -32,15 +33,15 @@ FunctionDT::FunctionDT(const std::string & name, InputParameters parameters) :
     _time_t(getParam<std::vector<Real> >("time_t")),
     _time_ipol(_time_t, getParam<std::vector<Real> >("time_dt")),
     _growth_factor(getParam<Real>("growth_factor")),
-    _cutback_occurred(false)
+    _cutback_occurred(false),
+    _min_dt(getParam<Real>("min_dt"))
 {
+  _time_knots = _time_t;
 }
 
 void
 FunctionDT::init()
 {
-  // insert times as sync points except the very first one
-  _executioner.syncTimes().insert(_time_t.begin() + 1, _time_t.end());
 }
 
 Real
@@ -53,6 +54,19 @@ Real
 FunctionDT::computeDT()
 {
   Real local_dt = _time_ipol.sample(_time);
+
+  // remove a knot if we end up in its neighborhood
+  if ((_time_knots.size() > 0) && (std::abs(_time + local_dt - (*_time_knots.begin())) <= 1e-12))
+    _time_knots.erase(_time_knots.begin());
+  // sync to time knot
+  if ((_time_knots.size() > 0) && (_time + local_dt >= (*_time_knots.begin())))
+  {
+    local_dt = (*_time_knots.begin()) - _time;
+    _time_knots.erase(_time_knots.begin());
+  }
+  // honor minimal dt
+  if (local_dt < _min_dt)
+    local_dt = _min_dt;
 
   if (_cutback_occurred && (local_dt > _dt * _growth_factor))
     local_dt = _dt * _growth_factor;

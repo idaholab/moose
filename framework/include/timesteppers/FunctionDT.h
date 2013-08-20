@@ -42,6 +42,8 @@ protected:
   Real _growth_factor;
   /// True if cut back of the time step occurred
   bool _cutback_occurred;
+  Real _min_dt;
+  std::vector<Real> _time_knots;
 };
 
 #endif /* FUNCTIONDT_H_ */
