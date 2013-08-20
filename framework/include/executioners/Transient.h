@@ -138,6 +138,12 @@ public:
   void setTimeStepper(TimeStepper * ts) { _time_stepper = ts; }
 
   /**
+   * Get the time scheme used
+   * @return MooseEnum with the time scheme
+   */
+  MooseEnum getTimeScheme() { return _time_scheme; }
+
+  /**
    * Get the set of sync times
    * @return The reference to the set of sync times
    */
