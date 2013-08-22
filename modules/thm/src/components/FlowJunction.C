@@ -11,6 +11,7 @@ template<>
 InputParameters validParams<FlowJunction>()
 {
   InputParameters params = validParams<Junction>();
+  params.addParam<std::vector<Real> >("K", "Form loss coefficients");
   params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
   return params;
 }
@@ -18,7 +19,8 @@ InputParameters validParams<FlowJunction>()
 
 FlowJunction::FlowJunction(const std::string & name, InputParameters params) :
     Junction(name, params),
-    _lm_name(genName("lm", _id, ""))
+    _lm_name(genName("lm", _id, "")),
+    _K(getParam<std::vector<Real> >("K"))
 {
 }
 
@@ -150,7 +152,7 @@ FlowJunction::addMooseObjects()
     }
   }
 
-  // add the constrains
+  // add the constraints
   {
     InputParameters params = _factory.getValidParams("FlowConstraint");
     params.set<NonlinearVariableName>("variable") = _lm_name;
@@ -159,6 +161,7 @@ FlowJunction::addMooseObjects()
     params.set<std::vector<unsigned int> >("nodes") = _nodes;
     params.set<std::vector<Real> >("areas") = _Areas;
     params.set<std::vector<Real> >("normals") = _normals;
+    params.set<std::vector<Real> >("K") = _K;
     params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
     // coupling
     params.set<std::vector<VariableName> >("u") = cv_u;

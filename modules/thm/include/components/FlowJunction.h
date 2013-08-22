@@ -23,6 +23,7 @@ public:
 
 protected:
   std::string _lm_name;
+  std::vector<Real> _K;
 };
 
 #endif /* FLOWJUNCTION_H */
