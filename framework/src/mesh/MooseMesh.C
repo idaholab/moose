@@ -210,19 +210,21 @@ MooseMesh::freeBndElems()
 }
 
 void
-MooseMesh::prepare()
+MooseMesh::prepare(bool force)
 {
   if (dynamic_cast<ParallelMesh *>(&getMesh()) && !_is_nemesis)
   {
     // Call prepare_for_use() and allow renumbering
     getMesh().allow_renumbering(true);
-    getMesh().prepare_for_use();
+    if (force)
+      getMesh().prepare_for_use();
   }
   else
   {
     // Call prepare_for_use() and DO NOT allow renumbering
     getMesh().allow_renumbering(false);
-    getMesh().prepare_for_use();
+    if (force)
+      getMesh().prepare_for_use();
   }
 
   // Collect (local) subdomain IDs

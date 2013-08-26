@@ -89,6 +89,9 @@ FileMesh::init()
     {
       _exreader = new ExodusII_IO(getMesh());
       _exreader->read(_file_name);
+
+      getMesh().allow_renumbering(false);
+      getMesh().prepare_for_use();
     }
     else
       getMesh().read(_file_name);

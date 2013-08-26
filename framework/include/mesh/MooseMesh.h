@@ -264,10 +264,10 @@ public:
   const RealVectorValue & getNormalByBoundaryID(BoundaryID id) const;
 
   /**
-   * Calls prepare_for_use() on the underlying Mesh object, then communicates various
+   * Calls prepare_for_use() if force=true on the underlying Mesh object, then communicates various
    * boundary information on parallel meshes. Also calls update() internally.
    */
-  void prepare();
+  void prepare(bool force=false);
 
   /**
    * Calls buildNodeListFromSideList(), buildNodeList(), and buildBndElemList().
