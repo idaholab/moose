@@ -17,9 +17,16 @@
 
 [Variables]
   [./PolycrystalVariables]
-    periodic = '1 1 0'
-    grain_num = 12
-    rand_seed = 8675
+    ICType = -8
+  [../]
+[]
+
+[ICs]
+  [./PolycrystalICs]
+    [./PolycrystalVoronoiIC]
+      rand_seed = 8675
+      grain_num = 12
+    [../]
   [../]
 []
 
@@ -88,7 +95,7 @@
     type = CuGrGr
     block = 0
     temp = 500 # K
-    wGB = 50 # nm
+    wGB = 70 # nm
   [../]
 []
 
@@ -102,9 +109,8 @@
     use_single_map = false
     enable_var_coloring = true
     condense_map_info = true
-    bubble_volume_file = 'bubble_volumes.txt'
+    bubble_volume_file = bubble_volumes.txt
   [../]
-
   [./DOFs]
     type = NumDOFs
   [../]
@@ -112,8 +118,8 @@
 
 [Executioner]
   type = Transient
-  scheme = 'bdf2'
-  petsc_options = '-snes_mf_operator'
+  scheme = bdf2
+  petsc_options = -snes_mf_operator
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
   l_tol = 1.0e-4
@@ -121,8 +127,8 @@
   nl_max_its = 20
   nl_rel_tol = 1.0e-9
   start_time = 0.0
-  num_steps = 2
-  dt = 15.0
+  num_steps = 1
+  dt = 50.0
 []
 
 [Output]
