@@ -12,34 +12,17 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SIDESETSFROMPOINTS_H
-#define SIDESETSFROMPOINTS_H
-
-#include "AddSideSetsBase.h"
 #include "BoundaryRestrictableRequired.h"
-#include "libmesh/fe.h"
-
-class SideSetsFromPoints;
 
 template<>
-InputParameters validParams<SideSetsFromPoints>();
-
-class SideSetsFromPoints :
-  public AddSideSetsBase,
-  public BoundaryRestrictableRequired
+InputParameters validParams<BoundaryRestrictableRequired>()
 {
-public:
-  SideSetsFromPoints(const std::string & name, InputParameters parameters);
+  InputParameters params = emptyInputParameters();
+  params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
+  return params;
+}
 
-  virtual ~SideSetsFromPoints();
-
-  virtual void modify();
-
-protected:
-
-  std::vector<BoundaryID> _boundary_ids;
-
-  std::vector<Point> _points;
-};
-
-#endif /* SIDESETSFROMPOINTS_H */
+BoundaryRestrictableRequired::BoundaryRestrictableRequired(InputParameters & parameters) :
+    BoundaryRestrictable(parameters)
+{
+}

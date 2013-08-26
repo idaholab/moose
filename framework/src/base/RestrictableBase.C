@@ -12,34 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SIDESETSFROMPOINTS_H
-#define SIDESETSFROMPOINTS_H
+#include "RestrictableBase.h"
 
-#include "AddSideSetsBase.h"
-#include "BoundaryRestrictableRequired.h"
-#include "libmesh/fe.h"
-
-class SideSetsFromPoints;
-
-template<>
-InputParameters validParams<SideSetsFromPoints>();
-
-class SideSetsFromPoints :
-  public AddSideSetsBase,
-  public BoundaryRestrictableRequired
+RestrictableBase::RestrictableBase(InputParameters & parameters) :
+    _r_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
+    _r_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL)
 {
-public:
-  SideSetsFromPoints(const std::string & name, InputParameters parameters);
 
-  virtual ~SideSetsFromPoints();
+  // If the mesh pointer is not defined, but FEProblem is, get it from there
+  if (_r_feproblem != NULL && _r_mesh == NULL)
+    _r_mesh = &_r_feproblem->mesh();
 
-  virtual void modify();
+  // Check that the mesh pointer was defined, it is required for this class to operate
+  if (_r_mesh == NULL)
+    mooseError("The input paramters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
+}
 
-protected:
-
-  std::vector<BoundaryID> _boundary_ids;
-
-  std::vector<Point> _points;
-};
-
-#endif /* SIDESETSFROMPOINTS_H */
+RestrictableBase::~RestrictableBase()
+{
+}

@@ -22,6 +22,7 @@
 #include "TransientInterface.h"
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
+#include "BoundaryRestrictable.h"
 
 //Forward Declarations
 class SideUserObject;
@@ -31,6 +32,7 @@ InputParameters validParams<SideUserObject>();
 
 class SideUserObject :
   public UserObject,
+  public BoundaryRestrictable,
   public Coupleable,
   public MooseVariableDependencyInterface,
   public UserObjectInterface,
@@ -40,7 +42,7 @@ class SideUserObject :
 public:
   SideUserObject(const std::string & name, InputParameters parameters);
 
-  const std::vector<BoundaryName> & boundaries() { return _boundaries; }
+  //const std::vector<BoundaryName> & boundaries() { return _boundaries; }
 
   /**
    * This function will get called on each geometric object this postprocessor acts on
@@ -60,7 +62,7 @@ public:
 
 protected:
 
-  std::vector<BoundaryName> _boundaries;
+  //std::vector<BoundaryName> _boundaries;
 
   MooseMesh & _mesh;
 

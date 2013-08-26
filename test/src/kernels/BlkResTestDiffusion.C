@@ -5,7 +5,7 @@
 template<>
 InputParameters validParams<BlkResTestDiffusion>()
 {
-  MooseEnum test("none=0, fe_problem_null=1, mesh_null=2, use_mesh=3, has_blocks=4, blocks=5, get_sub=6, is_subset=7", "none", "Select a test");
+  MooseEnum test("none=0, fe_problem_null=1, mesh_null=2, use_mesh=3, hasBlocks=4, blocks=5, blockIDs=6, isBlockSubset=7", "none", "Select a test");
   InputParameters params = validParams<Kernel>();
   params.addParam<MooseEnum>("test", test, "Select the desired test");
   return params;
@@ -55,7 +55,7 @@ BlkResTestDiffusion::BlkResTestDiffusion(const std::string & name, InputParamete
   MooseEnum test = parameters.get<MooseEnum>("test");
 
   // test that hasBlocks is working
-  if (test == "has_blocks")
+  if (test == "hasBlocks")
   {
     // Define a SubdomainName vector for testing against
     std::vector<SubdomainName> id_names(2);
@@ -123,26 +123,32 @@ BlkResTestDiffusion::BlkResTestDiffusion(const std::string & name, InputParamete
     const std::vector<SubdomainName> & blks = blocks();
     if (blks[0] == "1" && blks[1] == "2" && blks.size() == 2)
       mooseError("Blocks testing passed"); // expected error
+    else
+      mooseError("Blocks testing failed");
   }
 
   // Test that the getSubdomains() is working
-  else if (test == "get_sub")
+  else if (test == "blockIDs")
   {
-    const std::set<SubdomainID> & ids = getSubdomainIDs();
+    const std::set<SubdomainID> & ids = blockIDs();
     if (ids.count(1) == 1 && ids.count(2) == 1)
-      mooseError("getSubdomains testing passed"); // expected error
+      mooseError("blockIDs testing passed"); // expected error
+    else
+      mooseError("blockIDs testing failed");
   }
 
   // Test that the isSubset() is working
-  else if (test == "is_subset")
+  else if (test == "isBlockSubset")
   {
     std::set<SubdomainID> sub_id;
     sub_id.insert(10);
     sub_id.insert(1);
     sub_id.insert(4);
     sub_id.insert(2);
-    if (isSubset(sub_id))
-      mooseError("isSubset testing passed"); // expetect error
+    if (isBlockSubset(sub_id))
+      mooseError("isBlockSubset testing passed"); // expetect error
+    else
+      mooseError("isBlockSubset testing failed");
   }
 }
 

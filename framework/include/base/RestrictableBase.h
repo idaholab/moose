@@ -12,34 +12,39 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SIDESETSFROMPOINTS_H
-#define SIDESETSFROMPOINTS_H
+#ifndef RESTRICTABLEBASE_H
+#define RESTRICTABLEBASE_H
 
-#include "AddSideSetsBase.h"
-#include "BoundaryRestrictableRequired.h"
-#include "libmesh/fe.h"
+#include "InputParameters.h"
+#include "MooseTypes.h"
+#include "FEProblem.h"
 
-class SideSetsFromPoints;
-
-template<>
-InputParameters validParams<SideSetsFromPoints>();
-
-class SideSetsFromPoints :
-  public AddSideSetsBase,
-  public BoundaryRestrictableRequired
+/**
+ * A base class for creating restricted objects
+ * \see BlockRestrictable BoundaryRestrictable
+ */
+class RestrictableBase
 {
 public:
-  SideSetsFromPoints(const std::string & name, InputParameters parameters);
 
-  virtual ~SideSetsFromPoints();
+  /**
+   * Class constructor
+   * Populates the FEProblem and MooseMesh pointers
+   */
+  RestrictableBase(InputParameters & parameters);
 
-  virtual void modify();
+  /**
+   * Emtpy destructor
+   */
+  virtual ~RestrictableBase();
 
 protected:
 
-  std::vector<BoundaryID> _boundary_ids;
+  /// Pointer to the FEProblem class
+  FEProblem * _r_feproblem;
 
-  std::vector<Point> _points;
+  /// Pointer to the MooseMesh class
+  MooseMesh * _r_mesh;
 };
 
-#endif /* SIDESETSFROMPOINTS_H */
+#endif // RESTRICTABLEBASE

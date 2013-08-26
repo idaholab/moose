@@ -32,6 +32,7 @@
 #include "DependencyResolverInterface.h"
 #include "Function.h"
 #include "BlockRestrictable.h"
+#include "BoundaryRestrictable.h"
 
 // libMesh includes
 #include "libmesh/quadrature_gauss.h"
@@ -61,6 +62,7 @@ InputParameters validParams<Material>();
 class Material :
   public MooseObject,
   public BlockRestrictable,
+  public BoundaryRestrictable,
   public SetupInterface,
   public Coupleable,
   public MooseVariableDependencyInterface,
@@ -174,17 +176,6 @@ protected:
   virtual QpData * createData();
 
   /**
-   * Block ID this material is active on.
-   */
-  std::vector<SubdomainID> _block_id;
-
-  /**
-   * Boundary ID this material is active on.
-   */
-  std::vector<BoundaryID> _boundary_id;
-
-
-  /**
    * Declare the Real valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
@@ -237,14 +228,14 @@ private:
    */
   void registerPropName(std::string prop_name, bool is_get)
   {
-    for(unsigned int i=0; i<_block_id.size(); i++)
+    for (std::set<SubdomainID>::const_iterator it = _blk_ids.begin(); it != _blk_ids.end(); ++it)
     {
       // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
       if (!is_get)
         _supplied_props.insert(prop_name);
-      _subproblem.storeMatPropName(_block_id[i], prop_name);
+      _subproblem.storeMatPropName(*it, prop_name);
       if (_displaced_subproblem != NULL)
-        _displaced_subproblem->storeMatPropName(_block_id[i], prop_name);
+        _displaced_subproblem->storeMatPropName(*it, prop_name);
     }
   }
 

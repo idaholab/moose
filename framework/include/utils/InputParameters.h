@@ -203,6 +203,13 @@ public:
   void suppressParameter(const std::string &name);
 
   /**
+   * Changes the parameter to be required.
+   * @param name The parameter name
+   */
+  template <typename T>
+  void makeParamRequired(const std::string &name);
+
+  /**
    * This method adds a coupled variable name pair.  The parser will look for variable
    * name pair in the input file and can return a reference to the storage location
    * for the coupled variable if found

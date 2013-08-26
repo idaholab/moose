@@ -30,6 +30,7 @@ InputParameters validParams<AuxKernel>()
 
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
+  params += validParams<BoundaryRestrictable>();
 
   params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin|custom) to execute only at that moment");
 
@@ -38,10 +39,6 @@ InputParameters validParams<AuxKernel>()
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
-
-  // For use on the boundary only
-  params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this AuxBC applies");
-
   params.addPrivateParam<std::string>("built_by_action", "add_aux_kernel");
   return params;
 }
@@ -49,6 +46,7 @@ InputParameters validParams<AuxKernel>()
 AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     BlockRestrictable(name, parameters),
+    BoundaryRestrictable(parameters),
     SetupInterface(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
     FunctionInterface(parameters),
@@ -67,7 +65,8 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
 
     _var(_aux_sys.getVariable(_tid, parameters.get<AuxVariableName>("variable"))),
     _nodal(_var.isNodal()),
-    _bnd(parameters.have_parameter<unsigned int>("_boundary_id")),
+
+    _bnd(parameters.have_parameter<BoundaryID>("_boundary_id")),
 
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),

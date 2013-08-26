@@ -61,6 +61,7 @@
 #include "OnOffNeumannBC.h"
 #include "DivergenceBC.h"
 #include "ScalarVarBC.h"
+#include "BndTestDirichletBC.h"
 
 #include "TEIC.h"
 
@@ -201,6 +202,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(CoupledKernelValueTest);
   registerKernel(SplineFFn);
   registerKernel(BlkResTestDiffusion);
+  registerKernel(BndTestDirichletBC);
 
   // Aux kernels
   registerAux(CoupledAux);

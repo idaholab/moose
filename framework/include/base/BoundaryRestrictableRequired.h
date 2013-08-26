@@ -12,34 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SIDESETSFROMPOINTS_H
-#define SIDESETSFROMPOINTS_H
+#ifndef BOUNDARYRESTRICTABLEREQUIRED_H
+#define BOUNDARYRESTRICTABLEREQUIRED_H
 
-#include "AddSideSetsBase.h"
-#include "BoundaryRestrictableRequired.h"
-#include "libmesh/fe.h"
+// Moose includes
+#include "BoundaryRestrictable.h"
 
-class SideSetsFromPoints;
+// Forward declerations
+class BoundaryRestrictableRequired;
 
 template<>
-InputParameters validParams<SideSetsFromPoints>();
+InputParameters validParams<BoundaryRestrictableRequired>();
 
-class SideSetsFromPoints :
-  public AddSideSetsBase,
-  public BoundaryRestrictableRequired
+/**
+ * A class for requiring an object to be boundary restricted.
+ * This class acts as a wrapper for BoundaryRestrictable, it allows
+ * an additional validParams<> specialization that adds the 'boundary'
+ * parameter as required.
+ */
+class BoundaryRestrictableRequired : public BoundaryRestrictable
 {
 public:
-  SideSetsFromPoints(const std::string & name, InputParameters parameters);
-
-  virtual ~SideSetsFromPoints();
-
-  virtual void modify();
-
-protected:
-
-  std::vector<BoundaryID> _boundary_ids;
-
-  std::vector<Point> _points;
+  BoundaryRestrictableRequired(InputParameters & parameters);
 };
 
-#endif /* SIDESETSFROMPOINTS_H */
+#endif // BOUNDARYRESTRICTABLEREQURIED_H

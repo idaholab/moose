@@ -16,13 +16,16 @@
 #define SIDESETSBETWEENSUBDOMAINS_H
 
 #include "AddSideSetsBase.h"
+#include "BoundaryRestrictableRequired.h"
 
 class SideSetsBetweenSubdomains;
 
 template<>
 InputParameters validParams<SideSetsBetweenSubdomains>();
 
-class SideSetsBetweenSubdomains : public MeshModifier
+class SideSetsBetweenSubdomains :
+  public MeshModifier,
+  public BoundaryRestrictableRequired
 {
 public:
   SideSetsBetweenSubdomains(const std::string & name, InputParameters parameters);

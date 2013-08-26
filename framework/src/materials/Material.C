@@ -24,8 +24,7 @@ InputParameters validParams<Material>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
-  params.addParam<std::vector<BoundaryName> >("boundary", "The id or name of the boundary that this material represents.");
-
+  params += validParams<BoundaryRestrictable>();
   params.addPrivateParam<std::string>("built_by_action", "add_material");
   return params;
 }
@@ -34,6 +33,7 @@ InputParameters validParams<Material>()
 Material::Material(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     BlockRestrictable(name, parameters),
+    BoundaryRestrictable(parameters),
     SetupInterface(parameters),
     Coupleable(parameters, false),
     MooseVariableDependencyInterface(),
@@ -62,8 +62,6 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
     _coord_sys(_assembly.coordSystem()),
-    _block_id(_mesh.getSubdomainIDs(parameters.get<std::vector<SubdomainName> >("block"))),
-    _boundary_id(_mesh.getBoundaryIDs(parameters.get<std::vector<BoundaryName> >("boundary"))),
     _real_zero(_subproblem._real_zero[_tid]),
     _zero(_subproblem._zero[_tid]),
     _grad_zero(_subproblem._grad_zero[_tid]),

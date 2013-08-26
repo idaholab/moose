@@ -29,11 +29,12 @@ InputParameters validParams<NearestNodeValueAux>()
 
 NearestNodeValueAux::NearestNodeValueAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _nearest_node(getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0])),
+    _nearest_node(getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"),
+                                        boundaryNames()[0])),
     _serialized_solution(_nl_sys.currentSolution()),
     _paired_variable(coupled("paired_variable"))
 {
-  if(getParam<std::vector<BoundaryName> >("boundary").size() > 1)
+  if(boundaryNames().size() > 1)
     mooseError("NearestNodeValueAux can only be used with one boundary at a time!");
 }
 

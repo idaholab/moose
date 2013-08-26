@@ -158,7 +158,7 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
     SidePostprocessor * side_pp = dynamic_cast<SidePostprocessor*>(postprocessor);
     MooseMesh &mesh = side_pp->getSubProblem().mesh();
 
-    const std::vector<BoundaryName> & bnds = dynamic_cast<SidePostprocessor*>(side_pp)->boundaries();
+    const std::vector<BoundaryName> & bnds = dynamic_cast<SidePostprocessor*>(side_pp)->boundaryNames();
     for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
     {
       BoundaryID boundary_id = mesh.getBoundaryID(*it);
@@ -174,7 +174,7 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
     MooseMesh &mesh = nodal_pp->getSubProblem().mesh();
 
     // NodalPostprocessors can be "block" restricted or "boundary" restricted
-    const std::vector<BoundaryName> & bnds = nodal_pp->boundaries();
+    const std::vector<BoundaryName> & bnds = nodal_pp->boundaryNames();
     const std::vector<SubdomainName> & blocks = nodal_pp->blocks();
 
     if (blocks.size() == 0 || blocks[0] == "ANY_BLOCK_ID")

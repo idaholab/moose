@@ -15,6 +15,7 @@
 #ifndef BOUNDARYCONDITION_H
 #define BOUNDARYCONDITION_H
 
+// MOOSE
 #include "MooseObject.h"
 #include "SetupInterface.h"
 #include "MooseVariable.h"
@@ -25,6 +26,7 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
+#include "BoundaryRestrictableRequired.h"
 #include "Assembly.h"
 
 // libMesh
@@ -33,6 +35,7 @@
 #include "libmesh/tensor_value.h"
 #include "libmesh/numeric_vector.h"
 
+// Forward declerations
 class MooseVariable;
 class MooseMesh;
 class Problem;
@@ -49,6 +52,7 @@ InputParameters validParams<BoundaryCondition>();
  */
 class BoundaryCondition :
   public MooseObject,
+  public BoundaryRestrictableRequired,
   public SetupInterface,
   public FunctionInterface,
   public UserObjectInterface,
@@ -57,21 +61,25 @@ class BoundaryCondition :
   public GeometricSearchInterface
 {
 public:
-  BoundaryCondition(const std::string & name, InputParameters parameters);
 
   /**
-   * Gets boundary ID this BC is active on
-   * @return the boundary ID
+   * Class constructor.
+   * @param name The name of the boundary condition object
+   * @param parameters The InputParameters for the object
    */
-  BoundaryID boundaryID() { return _boundary_id; }
+  BoundaryCondition(const std::string & name, InputParameters parameters);
 
   /**
    * Gets the variable this BC is active on
    * @return the variable
    */
-  MooseVariable & variable() { return _var; }
+  MooseVariable & variable();
 
-  SubProblem & subProblem() { return _subproblem; }
+  /**
+   * Get a reference to the subproblem
+   * @return Reference to SubProblem
+   */
+  SubProblem & subProblem();
 
   /**
    * Hook for turning the boundary condition on and off.
@@ -80,26 +88,41 @@ public:
   virtual bool shouldApply();
 
 protected:
+
+  /// Reference to SubProblem
   SubProblem & _subproblem;
+
+  /// Reference to FEProblem
   FEProblem & _fe_problem;
+
+  /// Reference to SystemBase
   SystemBase & _sys;
-  /// thread id
+
+  /// Thread id
   THREAD_ID _tid;
+
+  /// Reference to assembly
   Assembly & _assembly;
+
   /// variable this BC works on
   MooseVariable & _var;
+
   /// Mesh this BC is defined on
   MooseMesh & _mesh;
+
   /// dimension of the mesh
   unsigned int _dim;
 
-  /// boundary ID this BC is active on
-  BoundaryID _boundary_id;
-
-  // Single Instance Variables
+  /// Single Instance Variables
   Real & _real_zero;
+
+  /// Reference to an array of zeros
   MooseArray<Real> & _zero;
+
+  /// Reference to a gradient filled with zeros
   MooseArray<RealGradient> & _grad_zero;
+
+  /// Reference to second order derivate term filled with zero
   MooseArray<RealTensor> & _second_zero;
 };
 

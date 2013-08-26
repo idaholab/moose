@@ -16,6 +16,7 @@
 #define SIDESETSFROMNORMALS_H
 
 #include "AddSideSetsBase.h"
+#include "BoundaryRestrictableRequired.h"
 #include "libmesh/fe.h"
 
 class SideSetsFromNormals;
@@ -23,7 +24,9 @@ class SideSetsFromNormals;
 template<>
 InputParameters validParams<SideSetsFromNormals>();
 
-class SideSetsFromNormals : public AddSideSetsBase
+class SideSetsFromNormals :
+  public AddSideSetsBase,
+  public BoundaryRestrictableRequired
 {
 public:
   SideSetsFromNormals(const std::string & name, InputParameters parameters);
@@ -33,10 +36,11 @@ public:
   virtual void modify();
 
 protected:
-  std::vector<Point> _normals;
 
   std::vector<BoundaryID> _boundary_ids;
-  std::vector<BoundaryName> _boundary_names;
+
+  std::vector<Point> _normals;
+
 };
 
 #endif /* SIDESETSFROMNORMALS_H */

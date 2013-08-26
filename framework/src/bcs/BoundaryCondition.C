@@ -23,18 +23,17 @@ InputParameters validParams<BoundaryCondition>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
+  params += validParams<BoundaryRestrictableRequired>();
   params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this boundary condition applies to");
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
-  params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
-
   params.addPrivateParam<std::string>("built_by_action", "add_bc");
   return params;
 }
 
-
 BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    BoundaryRestrictableRequired(parameters),
     SetupInterface(parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
@@ -49,13 +48,21 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
-    _boundary_id(parameters.get<BoundaryID>("_boundary_id")),
-
     _real_zero(_subproblem._real_zero[_tid]),
     _zero(_subproblem._zero[_tid]),
     _grad_zero(_subproblem._grad_zero[_tid]),
     _second_zero(_subproblem._second_zero[_tid])
 {
+}
+
+MooseVariable &
+BoundaryCondition::variable(){
+  return _var;
+}
+
+SubProblem &
+BoundaryCondition::subProblem(){
+  return _subproblem;
 }
 
 bool

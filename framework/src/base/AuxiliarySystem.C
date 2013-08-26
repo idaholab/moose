@@ -184,7 +184,7 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
   for (unsigned int i=0; i<boundaries.size(); ++i)
   {
     BoundaryID boundary = _mesh.getBoundaryID(boundaries[i]);
-    parameters.set<unsigned int>("_boundary_id") = boundary;
+    parameters.set<BoundaryID>("_boundary_id") = boundary;
 
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
@@ -404,4 +404,3 @@ AuxiliarySystem::augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
                                  std::vector<unsigned int> & /*n_oz*/)
 {
 }
-

@@ -20,14 +20,16 @@ template<>
 InputParameters validParams<SideSetsBetweenSubdomains>()
 {
   InputParameters params = validParams<AddSideSetsBase>();
-  params.addRequiredParam<std::vector<BoundaryName> >("boundary", "A list of boudnary names to associate with the subdomain");
+  params += validParams<BoundaryRestrictableRequired>();
+
   params.addRequiredParam<SubdomainName>("master_block", "The first block for which to draw a sideset between");
   params.addRequiredParam<SubdomainName>("paired_block", "The second block for which to draw a sideset between");
   return params;
 }
 
 SideSetsBetweenSubdomains::SideSetsBetweenSubdomains(const std::string & name, InputParameters parameters):
-    MeshModifier(name, parameters)
+    MeshModifier(name, parameters),
+    BoundaryRestrictableRequired(parameters)
 {
 }
 
@@ -42,8 +44,8 @@ SideSetsBetweenSubdomains::modify()
 
   SubdomainID master_id = _mesh_ptr->getSubdomainID(getParam<SubdomainName>("master_block"));
   SubdomainID paired_id = _mesh_ptr->getSubdomainID(getParam<SubdomainName>("paired_block"));
-  std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName> >("boundary");
-  std::vector<BoundaryID> boundary_ids = _mesh_ptr->getBoundaryIDs(boundary_names, true);
+  std::vector<BoundaryName> boundary_names = boundaryNames();
+  std::vector<BoundaryID> boundary_ids(boundaryIDs().begin(), boundaryIDs().end());
 
   MeshBase::const_element_iterator	 el	= mesh.active_elements_begin();
   const MeshBase::const_element_iterator end_el = mesh.active_elements_end();

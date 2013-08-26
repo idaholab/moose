@@ -22,6 +22,7 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "BlockRestrictable.h"
+#include "BoundaryRestrictable.h"
 
 class MooseVariable;
 
@@ -34,6 +35,7 @@ InputParameters validParams<NodalUserObject>();
 class NodalUserObject :
   public UserObject,
   public BlockRestrictable,
+  public BoundaryRestrictable,
   public UserObjectInterface,
   public Coupleable,
   public ScalarCoupleable,
@@ -43,8 +45,6 @@ class NodalUserObject :
 {
 public:
   NodalUserObject(const std::string & name, InputParameters parameters);
-
-  const std::vector<BoundaryName> & boundaries() { return _boundaries; }
 
   /**
    * This function will get called on each geometric object this postprocessor acts on
@@ -63,7 +63,6 @@ public:
   virtual void threadJoin(const UserObject & uo) = 0;
 
 protected:
-  std::vector<BoundaryName> _boundaries;
 
   const unsigned int _qp;
   const Node * & _current_node;

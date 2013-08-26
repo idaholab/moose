@@ -257,7 +257,7 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
     SideUserObject * side_pp = dynamic_cast<SideUserObject*>(user_object);
     MooseMesh &mesh = side_pp->getSubProblem().mesh();
 
-    const std::vector<BoundaryName> & bnds = side_pp->boundaries();
+    const std::vector<BoundaryName> & bnds = side_pp->boundaryNames();
     for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
     {
       BoundaryID boundary_id = mesh.getBoundaryID(*it);
@@ -278,7 +278,7 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
     MooseMesh &mesh = nodal_pp->getSubProblem().mesh();
 
     // NodalUserObjects can be "block" restricted or "boundary" restricted
-    const std::vector<BoundaryName> & bnds = nodal_pp->boundaries();
+    const std::vector<BoundaryName> & bnds = nodal_pp->boundaryNames();
     const std::vector<SubdomainName> & blocks = nodal_pp->blocks();
 
     if (blocks[0] == "ANY_BLOCK_ID")

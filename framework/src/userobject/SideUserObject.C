@@ -20,18 +20,18 @@ template<>
 InputParameters validParams<SideUserObject>()
 {
   InputParameters params = validParams<UserObject>();
-  params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs or names from the mesh where this boundary condition applies");
+  params += validParams<BoundaryRestrictable>();
   return params;
 }
 
 SideUserObject::SideUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
+    BoundaryRestrictable(parameters),
     Coupleable(parameters, false),
     MooseVariableDependencyInterface(),
     UserObjectInterface(parameters),
     TransientInterface(parameters, name, "side_user_objects"),
     PostprocessorInterface(parameters),
-    _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),
     _mesh(_subproblem.mesh()),
     _q_point(_assembly.qPointsFace()),
     _qrule(_assembly.qRuleFace()),

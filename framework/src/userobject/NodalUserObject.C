@@ -23,6 +23,10 @@ InputParameters validParams<NodalUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<BlockRestrictable>();
+  params += validParams<BoundaryRestrictable>();
+
+
+  /// \TODO: The default for both Boundary and Block Restrictable should be ANY...
 
   // NodalUserObjects can be restricted to either Nodesets or Domains
   std::vector<BoundaryName> everywhere(1);
@@ -39,13 +43,13 @@ InputParameters validParams<NodalUserObject>()
 NodalUserObject::NodalUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
     BlockRestrictable(name, parameters),
+    BoundaryRestrictable(parameters),
     UserObjectInterface(parameters),
     Coupleable(parameters, true),
     ScalarCoupleable(parameters),
     MooseVariableDependencyInterface(),
     TransientInterface(parameters, name, "nodal_user_objects"),
     PostprocessorInterface(parameters),
-    _boundaries(parameters.get<std::vector<BoundaryName> >("boundary")),
     _qp(0),
     _current_node(_assembly.node()),
     _real_zero(_subproblem._real_zero[_tid]),

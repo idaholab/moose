@@ -27,15 +27,16 @@ template<>
 InputParameters validParams<SideSetsFromPoints>()
 {
   InputParameters params = validParams<AddSideSetsBase>();
-  params.addRequiredParam<std::vector<BoundaryName> >("boundary", "A list of boundary names to associate with the painted sidesets");
+  params += validParams<BoundaryRestrictableRequired>();
   params.addRequiredParam<std::vector<Point> >("points", "A list of points from which to start painting sidesets");
   return params;
 }
 
 SideSetsFromPoints::SideSetsFromPoints(const std::string & name, InputParameters parameters):
     AddSideSetsBase(name, parameters),
-    _points(getParam<std::vector<Point> >("points")),
-    _boundary_names(getParam<std::vector<BoundaryName> >("boundary"))
+    BoundaryRestrictableRequired(parameters),
+    _boundary_ids(_bnd_ids.begin(), _bnd_ids.end()),
+    _points(getParam<std::vector<Point> >("points"))
 {
   if (_points.size() != _boundary_names.size())
     mooseError("point list and boundary list are not the same length");

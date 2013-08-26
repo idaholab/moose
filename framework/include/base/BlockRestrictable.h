@@ -17,9 +17,11 @@
 
 #include "InputParameters.h"
 #include "MooseTypes.h"
+#include "RestrictableBase.h"
 #include "FEProblem.h"
 
 class BlockRestrictable;
+
 
 template<>
 InputParameters validParams<BlockRestrictable>();
@@ -53,7 +55,7 @@ InputParameters validParams<BlockRestrictable>();
  * \see Kernel
  * \see SideSetsAroundSubdomain
  */
-class BlockRestrictable
+class BlockRestrictable : public RestrictableBase
 {
 public:
   /**
@@ -71,10 +73,16 @@ public:
   const std::vector<SubdomainName> & blocks();
 
   /**
+   * Return the number of blocks for this object
+   * @return The number of subdomains
+   */
+  const  unsigned int numBlocks();
+
+  /**
    * Return the block subdomain ids for this object
    * @return a set of SudomainIDs that are valid for this object
    */
-  const std::set<SubdomainID> & getSubdomainIDs();
+  const std::set<SubdomainID> & blockIDs();
 
   /**
    * Test if the suplied block name is valid for this object
@@ -118,22 +126,12 @@ public:
    * @return True if all of the block ids for this class are found within the given ids (opposite of hasBlocks)
    * \see hasBlocks
    */
-  bool isSubset(std::set<SubdomainID> ids);
-
+  bool isBlockSubset(std::set<SubdomainID> ids);
 
 protected:
 
-  /// Pointer to the FEProblem
-  FEProblem * _br_fe_problem;
-
-  /// Pointer to the MooseMesh
-  MooseMesh * _br_mesh;
-
-  /// Vector of subdomain id
-  std::vector<SubdomainID> _vec_ids;
-
   /// Set of subdomain ids
-  std::set<SubdomainID> _set_ids;
+  std::set<SubdomainID> _blk_ids;
 
   /// Vector the the subdomain names
   std::vector<SubdomainName> _blocks;

@@ -27,6 +27,7 @@
 #include "GeometricSearchInterface.h"
 #include "MooseMesh.h"
 #include "BlockRestrictable.h"
+#include "BoundaryRestrictable.h"
 
 //forward declarations
 class Problem;
@@ -45,6 +46,7 @@ InputParameters validParams<AuxKernel>();
 class AuxKernel :
   public MooseObject,
   public BlockRestrictable,
+  public BoundaryRestrictable,
   public SetupInterface,
   public CoupleableMooseVariableDependencyIntermediateInterface,
   public FunctionInterface,

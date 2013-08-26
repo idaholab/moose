@@ -537,7 +537,7 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
     mooseAssert(kernel != NULL, "Not a Kernel object");
 
     // Extract the SubdomainIDs from the object (via BlockRestrictable class)
-    std::set<SubdomainID> blk_ids = kernel->getSubdomainIDs();
+    std::set<SubdomainID> blk_ids = kernel->blockIDs();
 
     // Add the kernel to the warehouse
     _kernels[tid].addKernel(kernel, blk_ids);

@@ -12,34 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SIDESETSFROMPOINTS_H
-#define SIDESETSFROMPOINTS_H
+#ifndef BNDTESTDIRICHLETBC_H
+#define BNDTESTDIRICHLETBC_H
 
-#include "AddSideSetsBase.h"
-#include "BoundaryRestrictableRequired.h"
-#include "libmesh/fe.h"
+#include "NodalBC.h"
 
-class SideSetsFromPoints;
+class BndTestDirichletBC;
 
 template<>
-InputParameters validParams<SideSetsFromPoints>();
+InputParameters validParams<BndTestDirichletBC>();
 
-class SideSetsFromPoints :
-  public AddSideSetsBase,
-  public BoundaryRestrictableRequired
+/**
+ * Boundary condition of a Dirichlet type
+ *
+ * Sets the value in the node
+ */
+class BndTestDirichletBC : public NodalBC
 {
 public:
-  SideSetsFromPoints(const std::string & name, InputParameters parameters);
-
-  virtual ~SideSetsFromPoints();
-
-  virtual void modify();
+  BndTestDirichletBC(const std::string & name, InputParameters parameters);
 
 protected:
+  virtual Real computeQpResidual();
 
-  std::vector<BoundaryID> _boundary_ids;
-
-  std::vector<Point> _points;
+  /// The value for this BC
+  const Real & _value;
 };
 
-#endif /* SIDESETSFROMPOINTS_H */
+#endif /* BNDTESTDIRICHLETBC_H */
