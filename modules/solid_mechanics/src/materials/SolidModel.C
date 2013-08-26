@@ -121,11 +121,13 @@ SolidModel::SolidModel( const std::string & name,
    _d_stress_dT(createProperty<SymmTensor>("d_stress_dT")),
    _total_strain_increment(0),
    _strain_increment(0),
+   _block_id(std::vector<SubdomainID>(_blk_ids.begin(), _blk_ids.end())),
    _element(NULL),
    _local_elasticity_tensor(NULL)
-{
+{ 
   bool same_coord_type = true;
-  for (unsigned int i = 1; i < _block_id.size(); i++)
+
+  for (unsigned int i=1; i<_block_id.size(); ++i)
     same_coord_type &= (_subproblem.getCoordSystem(_block_id[0]) == _subproblem.getCoordSystem(_block_id[i]));
   if (!same_coord_type)
     mooseError("Material '" << name << "' was specified on multiple blocks that do not have the same coordinate system");

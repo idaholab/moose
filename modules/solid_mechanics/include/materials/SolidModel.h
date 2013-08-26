@@ -112,6 +112,8 @@ protected:
   SymmTensor _total_strain_increment;
   SymmTensor _strain_increment;
 
+  
+  
   virtual void initQpStatefulProperties();
 
   virtual void initialSetup();
@@ -191,6 +193,8 @@ protected:
 
   virtual void createElasticityTensor();
 
+  std::vector<SubdomainID> _block_id;
+
 private:
 
   void computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_strain );
@@ -201,6 +205,8 @@ private:
   Elk::SolidMechanics::Element * _element;
 
   SymmElasticityTensor * _local_elasticity_tensor;
+
+
 
 };
 
