@@ -14,7 +14,7 @@ def launchDaemon(user_list, options):
   # build the --allow arguments
   for allowed_host in [i for i in user_list]:
     if allowed_host.find('#') == -1:
-      (hostname, cores, threads, use, network) = getMachine(allowed_host)
+      (hostname, cores, threads, use, network, desc) = getMachine(allowed_host)
       try:
         distccd_command.extend(['--allow', socket.gethostbyname(hostname)])
         if hostname == socket.gethostname().split('.')[0]:
@@ -29,15 +29,17 @@ def launchDaemon(user_list, options):
   # Launch the daemon process
   subprocess.Popen(distccd_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-def launchClient(user_list, options):
+def launchClient(user_list, options, other_args):
   distcc_hosts = []
   total_jobs = 0
   print '#'*45
+  if options.summary:
+    print '# description, jobs, hostname'
   if options.quiet:
     os.environ['DISTCC_VERBOSE'] = '0'
   for allowed_host in [i for i in user_list]:
     if allowed_host.find('#') == -1:
-      (hostname, cores, threads, use, network) = getMachine(allowed_host)
+      (hostname, cores, threads, use, network, desc) = getMachine(allowed_host)
       if isAvailable(hostname):
         if hostname == socket.gethostname().split('.')[0]:
           distcc_hosts.insert(0, '--localslots=' + str(int(threads) / 4) + ' --localslots_cpp=' + str(int(threads) - 2) + ' localhost/2')
@@ -47,21 +49,24 @@ def launchClient(user_list, options):
             distcc_hosts.extend([socket.gethostbyname(hostname) + '/' + threads])
             total_jobs += int(threads)
             if options.summary:
-              print '#', hostname, threads
+              print '#', desc, threads, hostname
           else:
             distcc_hosts.extend([socket.gethostbyname(hostname) + '/' + use])
             total_jobs += int(use)
             if options.summary:
-              print '#', hostname, threads
+              print '#', desc, use, hostname
       else:
         if options.summary:
-          print '#', hostname, 'not available'
+          print '#', desc, 'not available', hostname
   print '# Using', total_jobs, 'processors'
   print '#'*45
   # export the environment
   os.environ['DISTCC_HOSTS']=' '.join(distcc_hosts)
-#  print 'Environment:', os.getenv('DISTCC_HOSTS'), '\nmake -j', total_jobs
-  make_process = subprocess.Popen(['make', '-j', str(total_jobs)])
+#  print 'Environment:', os.getenv('DISTCC_HOSTS'), '\nmake -j', total_jobs, ''.join(other_args)
+  if len(other_args) > 0:
+    make_process = subprocess.Popen(['make', '-j', str(total_jobs), ''.join(other_args)])
+  else:
+    make_process = subprocess.Popen(['make', '-j', str(total_jobs)])
   make_process.communicate()
 
 def getMachine(machine):
@@ -81,7 +86,7 @@ def parseArguments(args=None):
   parser.add_argument('--max', metavar='', action='store_const', const=True, default=False, help='Use maximum jobs across the board\n ')
   parser.add_argument('--quiet', metavar='', action='store_const', const=True, default=False, help='Do not print compile errors/warnings\n ')
   parser.add_argument('--summary', metavar='', action='store_const', const=True, default=False, help='Show distribution summary\n ')
-  return parser.parse_args(args)
+  return parser.parse_known_args()
 
 def which(program):
   def is_exe(fpath):
@@ -98,7 +103,7 @@ def which(program):
   return None
 
 if __name__ == "__main__":
-  options = parseArguments()
+  (options, other_args) = parseArguments()
   if socket.gethostbyname(socket.gethostname()).find('134') != -1:
     options.type = 'inl'
   else:
@@ -109,4 +114,4 @@ if __name__ == "__main__":
     os.environ['DISTCC_CMDLIST']=' '.join([which(i) for i in allow_commands])
     launchDaemon(user_list, options)
   else:
-    launchClient(user_list, options)
+    launchClient(user_list, options, other_args)
