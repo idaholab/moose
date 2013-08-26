@@ -22,7 +22,7 @@ InputParameters validParams<BlockRestrictable>()
   return params;
 }
 
-BlockRestrictable::BlockRestrictable(const std::string & name, InputParameters & parameters) :
+BlockRestrictable::BlockRestrictable(InputParameters & parameters) :
     RestrictableBase(parameters)
 {
   // If the 'block' input is not defined, populate it
@@ -80,7 +80,7 @@ BlockRestrictable::BlockRestrictable(const std::string & name, InputParameters &
 
       // Test if the variable Subdomain IDs are valid for this object
       if (!isBlockSubset(var_ids))
-        mooseError("In Object '" + name + "': block outside of the domain of the variable");
+        mooseError("The defined blocks are outside of the domain of the variable");
     }
   }
 }

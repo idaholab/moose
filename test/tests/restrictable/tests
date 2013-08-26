@@ -24,7 +24,7 @@
     type = 'RunException'
     input = 'block_restrictable.i'
 		cli_args = "Variables/u/block=1"
-    expect_err = "In Object 'diff': block outside of the domain"
+    expect_err = "The defined blocks are outside of the domain of the variable"
   [../]
 
 	[./blocks]

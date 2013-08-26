@@ -30,7 +30,7 @@ InputParameters validParams<SideSetsAroundSubdomain>()
 
 SideSetsAroundSubdomain::SideSetsAroundSubdomain(const std::string & name, InputParameters parameters):
     MeshModifier(name, parameters),
-    BlockRestrictable(name, parameters),
+    BlockRestrictable(parameters),
     BoundaryRestrictableRequired(parameters)
 {
 }

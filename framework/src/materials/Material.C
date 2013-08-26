@@ -32,7 +32,7 @@ InputParameters validParams<Material>()
 
 Material::Material(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    BlockRestrictable(name, parameters),
+    BlockRestrictable(parameters),
     BoundaryRestrictable(parameters),
     SetupInterface(parameters),
     Coupleable(parameters, false),

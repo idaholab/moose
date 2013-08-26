@@ -64,7 +64,7 @@ public:
    * @param name The name of the class
    * @param parameters The input parameters (see the detailed help for additional information)
    */
-  BlockRestrictable(const std::string & name, InputParameters & params);
+  BlockRestrictable(InputParameters & params);
 
   /**
    * Return the block names for this object

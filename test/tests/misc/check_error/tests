@@ -287,7 +287,7 @@
   [./subdomain_restricted_kernel_test]
     type = 'RunException'
     input = 'subdomain_restricted_kernel_mismatch.i'
-    expect_err = "In Object \'\w+\': block outside of the domain of the variable"
+    expect_err = "The defined blocks are outside of the domain of the variable"
   [../]
 
   [./unused_param_test]
