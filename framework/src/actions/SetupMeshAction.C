@@ -109,6 +109,9 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
       mooseError("Invalid centroid_partitioner_direction!");
   }
 
+  if (getParam<MooseEnum>("partitioner") != "metis") // NOT the default
+    mesh->getMesh().prepare_for_use(); // repartition
+
 #ifdef LIBMESH_ENABLE_AMR
   unsigned int level = getParam<unsigned int>("uniform_refine");
 
