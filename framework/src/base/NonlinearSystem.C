@@ -1658,7 +1658,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
         {
           NodalBC * bc = *it;
-          if (bc->shouldApply())
+          if (bc->shouldApply() && bc->variable().isNodalDefined())
             zero_rows.push_back(bc->variable().nodalDofIndex());
         }
       }
