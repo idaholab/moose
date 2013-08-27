@@ -76,47 +76,47 @@ public:
    * Return the number of boundaries for this object
    * @return The number of subdomains
    */
-  const unsigned int numBoundary();
+  unsigned int numBoundary();
 
   /**
-   * Test if the suplied boundary name is valid for this object
+   * Test if the supplied boundary name is valid for this object
    * @param name A BoundaryName to check
    * @return True if the given id is valid for this object
    */
   bool hasBoundary(BoundaryName name);
 
   /**
-   * Test if the suplied vector of boundary names are valid for this object
+   * Test if the supplied vector of boundary names are valid for this object
    * @param names A vector of BoundaryNames to check
    * @return True if the given ids are valid for this object
    */
   bool hasBoundary(std::vector<BoundaryName> names);
 
   /**
-   * Test if the suplied boundary ids are valid for this object
+   * Test if the supplied boundary ids are valid for this object
    * @param id A BoundaryID to check
    * @return True if the given id is valid for this object
    */
   bool hasBoundary(BoundaryID id);
 
-  /*
-   * Test if the suplied vector boundary ids are valid for this object
+  /**
+   * Test if the supplied vector boundary ids are valid for this object
    * @param ids A vector of BoundaryIDs ids to check
    * @return True if the all of the given ids are found within the ids for this object
    */
   bool hasBoundary(std::vector<BoundaryID> ids);
 
-  /*
-   * Test if the suplied set of boundary ids are valid for this object
+  /**
+   * Test if the supplied set of boundary ids are valid for this object
    * @param ids A std::set of BoundaryIDs to check
    * @return True if the all of the given ids are found within the ids for this object
    * \see isSubset
    */
   bool hasBoundary(std::set<BoundaryID> ids);
 
-  /*
+  /**
    * Test if the class boundary ids are a subset of the supplied objects
-   * @param ids A std::set of Boundarys to check
+   * @param ids A std::set of boundaries to check
    * @return True if all of the boundary ids for this class are found within the given ids (opposite of hasBoundary)
    * \see hasBoundary
    */

@@ -62,11 +62,12 @@ BoundaryRestrictable::boundaryNames()
   return _boundary_names;
 }
 
-const unsigned int
+unsigned int
 BoundaryRestrictable::numBoundary()
 {
   return (unsigned int) _bnd_ids.size();
 }
+
 bool
 BoundaryRestrictable::hasBoundary(BoundaryName name)
 {

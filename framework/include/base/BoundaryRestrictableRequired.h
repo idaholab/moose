@@ -18,7 +18,7 @@
 // Moose includes
 #include "BoundaryRestrictable.h"
 
-// Forward declerations
+// Forward declarations
 class BoundaryRestrictableRequired;
 
 template<>

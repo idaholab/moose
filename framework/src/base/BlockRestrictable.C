@@ -97,7 +97,7 @@ BlockRestrictable::blockIDs()
   return _blk_ids;
 }
 
-const unsigned int
+unsigned int
 BlockRestrictable::numBlocks()
 {
   return (unsigned int) _blk_ids.size();
