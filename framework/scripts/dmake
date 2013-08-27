@@ -15,12 +15,13 @@ def launchDaemon(user_list, options):
   for allowed_host in [i for i in user_list]:
     if allowed_host.find('#') == -1:
       (hostname, cores, threads, use, network, desc) = getMachine(allowed_host)
-      try:
-        distccd_command.extend(['--allow', socket.gethostbyname(hostname)])
-        if hostname == socket.gethostname().split('.')[0]:
-          distccd_command.extend(['--jobs', str(threads)])
-      except socket.gaierror:
-        print 'WARNING, Hostname:', hostname, 'not found on the network. DNS error?'
+      if network == options.network:
+        try:
+          distccd_command.extend(['--allow', socket.gethostbyname(hostname)])
+          if hostname == socket.gethostname().split('.')[0]:
+            distccd_command.extend(['--jobs', str(threads)])
+        except socket.gaierror:
+          print 'WARNING, Hostname:', hostname, 'not found on the network. DNS error?'
    
   # Kill any running distccd process
   killall_process = subprocess.Popen([which('killall'), 'distccd'])
@@ -40,21 +41,26 @@ def launchClient(user_list, options, other_args):
   for allowed_host in [i for i in user_list]:
     if allowed_host.find('#') == -1:
       (hostname, cores, threads, use, network, desc) = getMachine(allowed_host)
-      if isAvailable(hostname):
-        if hostname == socket.gethostname().split('.')[0]:
-          distcc_hosts.insert(0, '--localslots=' + str(int(threads) / 4) + ' --localslots_cpp=' + str(int(threads) - 2) + ' localhost/2')
-          total_jobs += 2
-        else:
-          if options.max:
-            distcc_hosts.extend([socket.gethostbyname(hostname) + '/' + threads])
-            total_jobs += int(threads)
-            if options.summary:
-              print '#', desc, threads, hostname
+      if isAvailable(options, allowed_host):
+        try:
+          if hostname == socket.gethostname().split('.')[0]:
+            distcc_hosts.insert(0, '--localslots=' + str(int(threads) / 4) + ' --localslots_cpp=' + str(int(threads) - 2) + ' localhost/2')
+            total_jobs += 2
           else:
-            distcc_hosts.extend([socket.gethostbyname(hostname) + '/' + use])
-            total_jobs += int(use)
-            if options.summary:
-              print '#', desc, use, hostname
+            if options.max:
+              distcc_hosts.extend([socket.gethostbyname(hostname) + '/' + threads])
+              total_jobs += int(threads)
+              if options.summary:
+                print '#', desc, threads, hostname
+            else:
+              distcc_hosts.extend([socket.gethostbyname(hostname) + '/' + use])
+              total_jobs += int(use)
+              if options.summary:
+                print '#', desc, use, hostname
+        except socket.error, e:
+            print '#', desc, 'not available', hostname
+      elif isAvailable(options, allowed_host) == None:
+        pass
       else:
         if options.summary:
           print '#', desc, 'not available', hostname
@@ -72,12 +78,15 @@ def launchClient(user_list, options, other_args):
 def getMachine(machine):
   return machine.split(',')
 
-def isAvailable(machine):
-  lsdistcc_process = subprocess.Popen([which('lsdistcc'), '-x', machine.split(',')[0]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def isAvailable(options, machine):
+  (hostname, cores, threads, use, network, desc) = getMachine(machine)
+  lsdistcc_process = subprocess.Popen([which('lsdistcc'), '-x', hostname], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   status = lsdistcc_process.communicate()[0]
   if status != None:
-    if status.find(',down') == -1:
+    if status.find(',down') == -1 and network == options.network:
       return True
+  if network != options.network:
+    return None
   return False
 
 def parseArguments(args=None):
@@ -105,9 +114,9 @@ def which(program):
 if __name__ == "__main__":
   (options, other_args) = parseArguments()
   if socket.gethostbyname(socket.gethostname()).find('134') != -1:
-    options.type = 'inl'
+    options.network = 'inl'
   else:
-    options.type = 'fn'
+    options.network = 'fn'
   user_list = getList()
   if options.daemon:
     allow_commands = ['gcc', 'g++', 'gfortran', 'clang', 'clang++', 'mpicc', 'mpicxx']
