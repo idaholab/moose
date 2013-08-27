@@ -115,6 +115,7 @@ if __name__ == "__main__":
   (options, other_args) = parseArguments()
   if socket.gethostbyname(socket.gethostname()).find('134') != -1:
     options.network = 'inl'
+    os.environ['no_proxy'] = 'hpcsc.inl.gov'
   else:
     options.network = 'fn'
   user_list = getList()
