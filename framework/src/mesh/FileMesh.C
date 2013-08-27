@@ -76,6 +76,9 @@ FileMesh::init()
     // Nemesis_IO only takes a reference to ParallelMesh, so we can't be quite so short here.
     ParallelMesh& pmesh = libmesh_cast_ref<ParallelMesh&>(getMesh());
     Nemesis_IO(pmesh).read(_file_name);
+
+    getMesh().allow_renumbering(false);
+    getMesh().prepare_for_use();
   }
   else // not reading Nemesis files
   {
