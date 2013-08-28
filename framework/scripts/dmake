@@ -51,29 +51,59 @@ def launchClient(user_list, options, other_args):
               distcc_hosts.extend([socket.gethostbyname(hostname) + '/' + threads])
               total_jobs += int(threads)
               if options.summary:
-                print '#', desc, threads, hostname
+                print '#', desc, threads, hostname, socket.gethostbyname(hostname)
             else:
               distcc_hosts.extend([socket.gethostbyname(hostname) + '/' + use])
               total_jobs += int(use)
               if options.summary:
-                print '#', desc, use, hostname
+                print '#', desc, use, hostname, socket.gethostbyname(hostname)
         except socket.error, e:
             print '#', desc, 'not available', hostname
       elif isAvailable(options, allowed_host) == None:
         pass
       else:
         if options.summary:
-          print '#', desc, 'not available', hostname
+          print '#', desc, 'not available', hostname, socket.gethostbyname(hostname)
   print '# Using', total_jobs, 'processors'
-  print '#'*45
   # export the environment
   os.environ['DISTCC_HOSTS']=' '.join(distcc_hosts)
-#  print 'Environment:', os.getenv('DISTCC_HOSTS'), '\nmake -j', total_jobs, ''.join(other_args)
+  if options.summary:
+    print '# Environment:', os.getenv('DISTCC_HOSTS'), '\n# make -j', total_jobs, ''.join(other_args)
+    print '#'*45
+    return
+  print '#'*45
   if len(other_args) > 0:
     make_process = subprocess.Popen(['make', '-j', str(total_jobs), ''.join(other_args)])
   else:
     make_process = subprocess.Popen(['make', '-j', str(total_jobs)])
   make_process.communicate()
+
+def checkDaemon(user_list, options):
+  if options.no_daemon:
+    return
+  #allow_commands = ['gcc', 'g++', 'gfortran', 'clang', 'clang++', 'mpicc', 'mpicxx']
+  #os.environ['DISTCC_CMDLIST']=' '.join([which(i) for i in allow_commands])
+  if options.daemon:
+    launchDaemon(user_list, options)
+  else:
+    if os.path.exists(os.getenv('HOME') + '/.dmake'):
+      dmake_file = open(os.getenv('HOME') + '/.dmake', 'r')
+      dmake_time = int(dmake_file.read())
+      dmake_file.close()
+      if (int(time.time()) - dmake_time) >= 14400:
+        dmake_file = open(os.getenv('HOME') + '/.dmake', 'w')
+        dmake_file.write(time.strftime('%s'))
+        dmake_file.close()
+        print 'reloading daemons...'
+        launchDaemon(user_list, options)
+      else:
+        return
+    else:
+      dmake_file = open(os.getenv('HOME') + '/.dmake', 'w')
+      dmake_file.write(time.strftime('%s'))
+      dmake_file.close()
+      print 'loading daemons...'
+      launchDaemon(user_list, options)
 
 def getMachine(machine):
   return machine.split(',')
@@ -92,9 +122,11 @@ def isAvailable(options, machine):
 def parseArguments(args=None):
   parser = argparse.ArgumentParser(description='distcc front end tool')
   parser.add_argument('--daemon', metavar='', action='store_const', const=True, default=False, help='Launch distcc as a daemon (distccd --daemon)\n ')
+  parser.add_argument('--no-daemon', metavar='', action='store_const', const=True, default=False, help='Do not launch any daemon processes\n ')
   parser.add_argument('--max', metavar='', action='store_const', const=True, default=False, help='Use maximum jobs across the board\n ')
   parser.add_argument('--quiet', metavar='', action='store_const', const=True, default=False, help='Do not print compile errors/warnings\n ')
   parser.add_argument('--summary', metavar='', action='store_const', const=True, default=False, help='Show distribution summary\n ')
+  #parser.add_argument('--jobs', '-j', metavar='int', nargs=1, type=int, help='Arbitrarily set job count\n ')
   return parser.parse_known_args()
 
 def which(program):
@@ -120,8 +152,7 @@ if __name__ == "__main__":
     options.network = 'fn'
   user_list = getList()
   if options.daemon:
-    allow_commands = ['gcc', 'g++', 'gfortran', 'clang', 'clang++', 'mpicc', 'mpicxx']
-    os.environ['DISTCC_CMDLIST']=' '.join([which(i) for i in allow_commands])
-    launchDaemon(user_list, options)
+    checkDaemon(user_list, options)
   else:
+    checkDaemon(user_list, options)
     launchClient(user_list, options, other_args)
