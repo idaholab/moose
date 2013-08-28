@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os, sys, subprocess, re, urllib2, socket, argparse, time
+from random import shuffle
 
 def getList():
   # Get real user's machines
@@ -32,6 +33,7 @@ def launchDaemon(user_list, options):
 
 def launchClient(user_list, options, other_args):
   distcc_hosts = []
+  summary_list = []
   total_jobs = 0
   print '#'*45
   if options.summary:
@@ -43,32 +45,47 @@ def launchClient(user_list, options, other_args):
       (hostname, cores, threads, use, network, desc) = getMachine(allowed_host)
       if isAvailable(options, allowed_host):
         try:
-          if hostname == socket.gethostname().split('.')[0]:
-            distcc_hosts.insert(0, '--localslots=' + str(int(threads) / 4) + ' --localslots_cpp=' + str(int(threads) - 2) + ' localhost/2')
-            total_jobs += 2
+          if options.max:
+            distcc_hosts.append(socket.gethostbyname(hostname) + '/' + threads)
+            total_jobs += int(threads)
+            if options.summary:
+              summary_list.append('# ' + desc + ' : ' + threads + ' : ' + hostname + ' : ' + socket.gethostbyname(hostname))
           else:
-            if options.max:
-              distcc_hosts.extend([socket.gethostbyname(hostname) + '/' + threads])
-              total_jobs += int(threads)
-              if options.summary:
-                print '#', desc, threads, hostname, socket.gethostbyname(hostname)
-            else:
-              distcc_hosts.extend([socket.gethostbyname(hostname) + '/' + use])
-              total_jobs += int(use)
-              if options.summary:
-                print '#', desc, use, hostname, socket.gethostbyname(hostname)
+            distcc_hosts.append(socket.gethostbyname(hostname) + '/' + use)
+            total_jobs += int(use)
+            if options.summary:
+              summary_list.append('# ' + desc + ' : ' + use + ' : ' + hostname + ' : ' + socket.gethostbyname(hostname))
         except socket.error, e:
-            print '#', desc, 'not available', hostname
+          print '# Information: ', hostname, ' is not available'
       elif isAvailable(options, allowed_host) == None:
         pass
       else:
         if options.summary:
-          print '#', desc, 'not available', hostname, socket.gethostbyname(hostname)
+          print '# Information: ', hostname, ' is not available'
+
+  # Randomize the list
+  shuffle(distcc_hosts)
+
+  # Set localslots
+  distcc_hosts.insert(0, '--localslots=' + str(int(threads) / 4) + ' --localslots_cpp=' + str(int(threads) - 2) + ' localhost/2')
+  summary_list.append('# Localhost : 2 : ' + hostname + ' : ' + socket.gethostbyname(hostname))
+  total_jobs += 2
+
+  # Print summary
+  if options.summary:
+    summary_list.sort()
+    for machine in summary_list:
+      print ''.join(machine)
+
+  # Set job count based on processors tallied, default, or --jobs argument
+  if options.max is not True and options.jobs[0] != 90:
+    total_jobs = options.jobs[0]
+
   print '# Using', total_jobs, 'processors'
   # export the environment
   os.environ['DISTCC_HOSTS']=' '.join(distcc_hosts)
   if options.summary:
-    print '# Environment:', os.getenv('DISTCC_HOSTS'), '\n# make -j', total_jobs, ''.join(other_args)
+    print '# DISTCC_HOSTS= ' + os.getenv('DISTCC_HOSTS'), '\n# make -j', total_jobs, ''.join(other_args)
     print '#'*45
     return
   print '#'*45
@@ -114,19 +131,26 @@ def isAvailable(options, machine):
   status = lsdistcc_process.communicate()[0]
   if status != None:
     if status.find(',down') == -1 and network == options.network:
-      return True
+      if options.dedicated and desc.find('Dedicated') == -1:
+        if hostname.split('.')[0] == socket.gethostname().split('.')[0]:
+          return True
+        else:
+          return None
+      else:
+        return True
   if network != options.network:
     return None
   return False
 
 def parseArguments(args=None):
   parser = argparse.ArgumentParser(description='distcc front end tool')
-  parser.add_argument('--daemon', metavar='', action='store_const', const=True, default=False, help='Launch distcc as a daemon (distccd --daemon)\n ')
+  parser.add_argument('--daemon', metavar='', action='store_const', const=True, default=False, help='Launch distcc as a daemon\n ')
   parser.add_argument('--no-daemon', metavar='', action='store_const', const=True, default=False, help='Do not launch any daemon processes\n ')
-  parser.add_argument('--max', metavar='', action='store_const', const=True, default=False, help='Use maximum jobs across the board\n ')
-  parser.add_argument('--quiet', metavar='', action='store_const', const=True, default=False, help='Do not print compile errors/warnings\n ')
-  parser.add_argument('--summary', metavar='', action='store_const', const=True, default=False, help='Show distribution summary\n ')
-  #parser.add_argument('--jobs', '-j', metavar='int', nargs=1, type=int, help='Arbitrarily set job count\n ')
+  parser.add_argument('--max', '-m', metavar='', action='store_const', const=True, default=False, help='Use maximum jobs across the board\n ')
+  parser.add_argument('--quiet', '-q', metavar='', action='store_const', const=True, default=False, help='Do not print compile errors/warnings\n ')
+  parser.add_argument('--summary', '-s', metavar='', action='store_const', const=True, default=False, help='Show distribution summary\n ')
+  parser.add_argument('--jobs', '-j', metavar='int', nargs=1, type=int, default=[70], help='Arbitrarily set job count (defaults to 70 if not set)\n ')
+  parser.add_argument('--dedicated', '-d', metavar='', action='store_const', const=True, default=False, help='Only use dedicated compile boxes\n ')
   return parser.parse_known_args()
 
 def which(program):
