@@ -46,15 +46,17 @@ def launchClient(user_list, options, other_args):
       if isAvailable(options, allowed_host):
         try:
           if options.max:
-            distcc_hosts.append(socket.gethostbyname(hostname) + '/' + threads)
-            total_jobs += int(threads)
-            if options.summary:
-              summary_list.append('# ' + desc + ' : ' + threads + ' : ' + hostname + ' : ' + socket.gethostbyname(hostname))
+            if hostname.split('.')[0] != socket.gethostname().split('.')[0]:
+              distcc_hosts.append(socket.gethostbyname(hostname) + '/' + threads)
+              total_jobs += int(threads)
+              if options.summary:
+                summary_list.append('# ' + desc + ' : ' + threads + ' : ' + hostname + ' : ' + socket.gethostbyname(hostname))
           else:
-            distcc_hosts.append(socket.gethostbyname(hostname) + '/' + use)
-            total_jobs += int(use)
-            if options.summary:
-              summary_list.append('# ' + desc + ' : ' + use + ' : ' + hostname + ' : ' + socket.gethostbyname(hostname))
+            if hostname.split('.')[0] != socket.gethostname().split('.')[0]:
+              distcc_hosts.append(socket.gethostbyname(hostname) + '/' + use)
+              total_jobs += int(use)
+              if options.summary:
+                summary_list.append('# ' + desc + ' : ' + use + ' : ' + hostname + ' : ' + socket.gethostbyname(hostname))
         except socket.error, e:
           print '# Information: ', hostname, ' is not available'
       elif isAvailable(options, allowed_host) == None:
@@ -66,10 +68,14 @@ def launchClient(user_list, options, other_args):
   # Randomize the list
   shuffle(distcc_hosts)
 
-  # Set localslots
-  distcc_hosts.insert(0, '--localslots=' + str(int(threads) / 4) + ' --localslots_cpp=' + str(int(threads) - 2) + ' localhost/2')
-  summary_list.append('# Localhost : 2 : ' + hostname + ' : ' + socket.gethostbyname(hostname))
-  total_jobs += 2
+  # Set localslots for client machine
+  for allowed_host in [i for i in user_list]:
+    if allowed_host.find('#') == -1:
+      (hostname, cores, threads, use, network, desc) = getMachine(allowed_host)
+      if hostname.split('.')[0] == socket.gethostname().split('.')[0]:
+        distcc_hosts.insert(0, '--localslots=' + str(int(threads) / 4) + ' --localslots_cpp=' + str(int(threads) - 2) + ' localhost/2')
+        summary_list.append('# Localhost : 2 : ' + hostname + ' : ' + socket.gethostbyname(hostname))
+        total_jobs += 2
 
   # Print summary
   if options.summary:
