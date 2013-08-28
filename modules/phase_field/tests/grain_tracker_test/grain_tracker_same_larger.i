@@ -17,7 +17,6 @@
 
 [Variables]
   [./PolycrystalVariables]
-    ICType = -8
   [../]
 []
 
