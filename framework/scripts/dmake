@@ -89,7 +89,7 @@ def launchClient(user_list, options, other_args):
       print ''.join(machine)
 
   # Set job count based on processors tallied, default, or --jobs argument
-  if options.max is not True and options.jobs != 70:
+  if options.max is False:
     total_jobs = options.jobs
 
   print '# Using', total_jobs, 'processors'
@@ -160,10 +160,11 @@ def parseArguments(args=None):
   parser.add_argument('--max', '-m',  action='store_true', help='Use maximum jobs across the board\n ')
   parser.add_argument('--quiet', '-q', action='store_true', help='Do not print compile errors/warnings\n ')
   parser.add_argument('--summary', '-s', action='store_true', help='Show distribution summary\n ')
-  parser.add_argument('--jobs', '-j', nargs=1, type=int, default=70, help='Arbitrarily set job count (default: %(default)d)')
+  parser.add_argument('--jobs', '-j', type=int, default=70, help='Arbitrarily set job count (default: %(default)d)')
   parser.add_argument('--dedicated', '-d', action='store_true', help='Only use dedicated compile boxes')
   parser.add_argument('--local', '-l', action='store_true', help='Run make locally, do not distribute')
-  return parser.parse_known_args()
+  (options, other_args) = parser.parse_known_args()
+  return (options, other_args)
 
 def which(program):
   def is_exe(fpath):
