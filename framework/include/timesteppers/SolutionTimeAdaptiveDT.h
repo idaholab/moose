@@ -17,6 +17,8 @@
 
 #include "TimeStepper.h"
 
+#include <fstream>
+
 class SolutionTimeAdaptiveDT;
 
 template<>

@@ -25,6 +25,7 @@
 #include <map>
 #include <set>
 #include <ostream>
+#include <fstream>
 
 class FormattedTable
 {
