@@ -431,10 +431,11 @@ void
 FiniteStrainCrystalPlasticity::calc_resid_jacob(RankTwoTensor* pk2,RankTwoTensor *sig, RankTwoTensor* fp_old_inv,RankTwoTensor* fp_inv,
 						Real* slip_incr,Real *tau, RankTwoTensor* resid, RankFourTensor *jac)
 {
-
+  
   RankTwoTensor fe,ce,ee,iden,ce_pk2;
   RankTwoTensor eqv_slip_incr,pk2_new;
-  RankTwoTensor s0[_nss],dtaudpk2[_nss],dfpinvdslip[_nss],temp2;
+  std::vector<RankTwoTensor> s0(_nss),dtaudpk2(_nss),dfpinvdslip(_nss);
+  RankTwoTensor temp2;
   Real dslipdtau[_nss];
   RankFourTensor dfedfpinv,deedfe,dfpinvdpk2,idenFour;
   RankFourTensor temp4;

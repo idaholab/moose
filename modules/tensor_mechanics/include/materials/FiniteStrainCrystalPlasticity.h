@@ -29,7 +29,7 @@ protected:
   RankFourTensor outerProduct(RankTwoTensor &a,RankTwoTensor &b);
   RankTwoTensor getmatrot(RankTwoTensor &a);
   
-  int _nss;
+  const int _nss;
   
   std::vector<Real> _gprops;
   std::vector<Real> _hprops;
