@@ -10,11 +10,15 @@
 #include "FiniteStrainElasticMaterial.h"
 #include "FiniteStrainPlasticMaterial.h"
 #include "FiniteStrainRatePlasticMaterial.h"
+#include "FiniteStrainCrystalPlasticity.h"
 #include "RankTwoAux.h"
 #include "RealTensorValueAux.h"
 #include "RankFourAux.h"
 #include "TensorElasticEnergyAux.h"
 #include "FiniteStrainPlasticAux.h"
+#include "CrystalPlasticitySlipSysAux.h"
+#include "CrystalPlasticityRotationOutAux.h"
+
 
 
 void
@@ -27,13 +31,15 @@ Elk::TensorMechanics::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainElasticMaterial);
   registerMaterial(FiniteStrainPlasticMaterial);
   registerMaterial(FiniteStrainRatePlasticMaterial);
-
+  registerMaterial(FiniteStrainCrystalPlasticity);
 
   registerAux(RankTwoAux);
   registerAux(RealTensorValueAux);
   registerAux(RankFourAux);
   registerAux(TensorElasticEnergyAux);
   registerAux(FiniteStrainPlasticAux);
+  registerAux(CrystalPlasticitySlipSysAux);
+  registerAux(CrystalPlasticityRotationOutAux);
 }
 
 void

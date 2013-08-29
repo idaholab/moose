@@ -68,6 +68,9 @@ protected:
 
   RealVectorValue _Euler_angles;
 
+// Current deformation gradient
+  RankTwoTensor _dfgrd;
+
 private:
 
 };

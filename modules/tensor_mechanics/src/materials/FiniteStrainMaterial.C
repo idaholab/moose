@@ -17,7 +17,8 @@ FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name,
       _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
       _elastic_strain_old(declarePropertyOld<RankTwoTensor>("elastic_strain")),
       _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
-      _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment"))
+      _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment")),
+      _dfgrd(declareProperty<RankTwoTensor>("deformation gradient"))
 {
 }
 
@@ -34,13 +35,18 @@ void FiniteStrainMaterial::computeStrain()
   Fhat.resize(_qrule->n_points());
   RankTwoTensor ave_Fhat;
   Real volume(0);
-  
+  Real ave_dfgrd_det;
+
+  ave_dfgrd_det=0.0;
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     //Deformation gradient
     RankTwoTensor A(_grad_disp_x[_qp],_grad_disp_y[_qp],_grad_disp_z[_qp]); //Deformation gradient
     RankTwoTensor Fbar(_grad_disp_x_old[_qp],_grad_disp_y_old[_qp],_grad_disp_z_old[_qp]); //Old Deformation gradient 
   
+    _dfgrd[_qp]=A;
+    _dfgrd[_qp].addIa(1.0);//Gauss point deformation gradient
+
     A -= Fbar; //A = gradU - gradUold
     
     Fbar.addIa(1.0); //Fbar = ( I + gradUold)
@@ -52,17 +58,28 @@ void FiniteStrainMaterial::computeStrain()
     //Calculate average Fhat for volumetric locking correction
     ave_Fhat += Fhat[_qp]*_JxW[_qp];
     volume += _JxW[_qp];
+
+    ave_dfgrd_det += _dfgrd[_qp].det()*_JxW[_qp];//Average deformation gradient
+
+
   }
 
   ave_Fhat /= volume; //This is needed for volumetric locking correction
-  
+  ave_dfgrd_det /=volume; //Average deformation gradient
+ 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     Real factor( std::pow( ave_Fhat.det()/Fhat[_qp].det(), 1.0/3.0));
     Fhat[_qp] *= factor; //Finalize volumetric locking correction
     
     computeQpStrain(Fhat[_qp]);
+
+    factor=pow(ave_dfgrd_det/_dfgrd[_qp].det(), 1.0/3.0);//Volumetric locking correction
+    _dfgrd[_qp] *=factor;//Volumetric locking correction
+
   }
+
+
   
 }
 void FiniteStrainMaterial::computeQpStrain()
