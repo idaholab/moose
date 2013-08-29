@@ -153,7 +153,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
   RankFourTensor jac;
   Real slip_incr_max,slip_incr_tol,fac;
   int iter,iterg,maxiter,maxiterg;
-  Real rnorma[1000];
+
 
 
   maxiter=100;
@@ -198,7 +198,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
 	}
 
       rnorm=resid.L2norm();
-      rnorma[iter]=rnorm;
+
       
       //      printf("rnorm=%d %f\n",iter,rnorm);
 
@@ -231,20 +231,15 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
 	  rnorm=resid.L2norm();
 
 	  iter+=1;
-	  rnorma[iter]=rnorm;
+
 	  
 	  //	  printf("rnorm=%d %f\n",iter,rnorm);
 
 	}
 
       if(iter==maxiter)
-	{
-	  printf("rnorm=");
-	  for(int i=0;i<iter;i++)
-	    printf("%e\t",rnorma[i]);
-	  printf("\n");
-	  mooseError("Stress Integration error \n");
-	}
+	mooseError("Stress Integration error \n");
+      
 
       for(int i=0;i<_nss;i++)
 	gss_prev[i]=_gss[_qp][i];
