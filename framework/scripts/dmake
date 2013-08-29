@@ -23,7 +23,7 @@ def launchDaemon(user_list, options):
             distccd_command.extend(['--jobs', str(threads)])
         except socket.gaierror:
           print 'WARNING, Hostname:', hostname, 'not found on the network. DNS error?'
-   
+
   # Kill any running distccd process
   killall_process = subprocess.Popen([which('killall'), 'distccd'])
   # Wait a few to allow sockets to close
@@ -73,9 +73,14 @@ def launchClient(user_list, options, other_args):
     if allowed_host.find('#') == -1:
       (hostname, cores, threads, use, network, desc) = getMachine(allowed_host)
       if hostname.split('.')[0] == socket.gethostname().split('.')[0]:
-        distcc_hosts.insert(0, '--localslots=' + str(int(threads) / 4) + ' --localslots_cpp=' + str(int(threads) - 2) + ' localhost/2')
-        summary_list.append('# Localhost : 2 : ' + hostname + ' : ' + socket.gethostbyname(hostname))
-        total_jobs += 2
+        if options.local:
+          distcc_hosts = ['localhost/' + str(int(threads))]
+          summary_list.append('# Localhost : ' + str(int(threads)) + ' : ' + hostname + ' : ' + socket.gethostbyname(hostname))
+          total_jobs = threads
+        else:
+          distcc_hosts.insert(0, '--localslots=' + str(int(threads) / 4) + ' --localslots_cpp=' + str(int(threads) - 2) + ' localhost/2')
+          summary_list.append('# Localhost : 2 : ' + hostname + ' : ' + socket.gethostbyname(hostname))
+          total_jobs += 2
 
   # Print summary
   if options.summary:
@@ -84,8 +89,8 @@ def launchClient(user_list, options, other_args):
       print ''.join(machine)
 
   # Set job count based on processors tallied, default, or --jobs argument
-  if options.max is not True and options.jobs[0] != 90:
-    total_jobs = options.jobs[0]
+  if options.max is not True and options.jobs != 70:
+    total_jobs = options.jobs
 
   print '# Using', total_jobs, 'processors'
   # export the environment
@@ -150,13 +155,14 @@ def isAvailable(options, machine):
 
 def parseArguments(args=None):
   parser = argparse.ArgumentParser(description='distcc front end tool')
-  parser.add_argument('--daemon', metavar='', action='store_const', const=True, default=False, help='Launch distcc as a daemon\n ')
-  parser.add_argument('--no-daemon', metavar='', action='store_const', const=True, default=False, help='Do not launch any daemon processes\n ')
-  parser.add_argument('--max', '-m', metavar='', action='store_const', const=True, default=False, help='Use maximum jobs across the board\n ')
-  parser.add_argument('--quiet', '-q', metavar='', action='store_const', const=True, default=False, help='Do not print compile errors/warnings\n ')
-  parser.add_argument('--summary', '-s', metavar='', action='store_const', const=True, default=False, help='Show distribution summary\n ')
-  parser.add_argument('--jobs', '-j', metavar='int', nargs=1, type=int, default=[70], help='Arbitrarily set job count (defaults to 70 if not set)\n ')
-  parser.add_argument('--dedicated', '-d', metavar='', action='store_const', const=True, default=False, help='Only use dedicated compile boxes\n ')
+  parser.add_argument('--daemon', action='store_true', help='Launch distcc as a daemon\n ')
+  parser.add_argument('--no-daemon', action='store_true', help='Do not launch any daemon processes\n ')
+  parser.add_argument('--max', '-m',  action='store_true', help='Use maximum jobs across the board\n ')
+  parser.add_argument('--quiet', '-q', action='store_true', help='Do not print compile errors/warnings\n ')
+  parser.add_argument('--summary', '-s', action='store_true', help='Show distribution summary\n ')
+  parser.add_argument('--jobs', '-j', nargs=1, type=int, default=70, help='Arbitrarily set job count (default: %(default)d)')
+  parser.add_argument('--dedicated', '-d', action='store_true', help='Only use dedicated compile boxes')
+  parser.add_argument('--local', '-l', action='store_true', help='Run make locally, do not distribute')
   return parser.parse_known_args()
 
 def which(program):
@@ -175,6 +181,7 @@ def which(program):
 
 if __name__ == "__main__":
   (options, other_args) = parseArguments()
+
   if socket.gethostbyname(socket.gethostname()).find('134') != -1:
     options.network = 'inl'
     os.environ['no_proxy'] = 'hpcsc.inl.gov'
