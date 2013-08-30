@@ -228,8 +228,8 @@ SetupOutputAction::act()
    }
 
 #ifdef LIBMESH_HAVE_PETSC
-//  if (getParam<bool>("print_linear_residuals"))
-//    PetscOptionsSetValue("-ksp_monitor", PETSC_NULL);
+  if (getParam<bool>("print_linear_residuals"))
+    PetscOptionsSetValue("-ksp_monitor", PETSC_NULL);
 #endif
 
  // Test to make sure that the user can write to the directory specified in file_base

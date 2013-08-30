@@ -36,13 +36,23 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<Real>        ("nl_abs_step_tol", 1.0e-50,  "Nonlinear Absolute step Tolerance");
   params.addParam<Real>        ("nl_rel_step_tol", 1.0e-50,  "Nonlinear Relative step Tolerance");
   params.addParam<bool>        ("no_fe_reinit",    false,    "Specifies whether or not to reinitialize FEs");
-//  params.addParam<bool>        ("auto_scaling",    false,    "Turns on automatic variable scaling");
 
-
-  //params.addPrivateParam<unsigned int>("steps", 0);  // This is initial adaptivity steps - it'll be set
-                                                     // in the adaptivity block later but needs to be here now
+  MooseEnum solve_type("PJFNK, JFNK, NEWTON");
+  params.addParam<MooseEnum>   ("solve_type",      solve_type,
+                                "PJFNK: Preconditioned Jacobian-Free Newton Krylov "
+                                "JFNK: Jacobian-Free Newton Krylov "
+                                "NEWTON: Full Newton Solve");
 
 #ifdef LIBMESH_HAVE_PETSC
+
+  // Line Search Options
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+  MooseEnum line_search("default, cubic, quadratic, none, basic, basicnonorms", "default");
+#else
+  MooseEnum line_search("default, bt, none, basic", "default");
+#endif
+  params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type (Note: none = basic)");
+
   MooseEnum common_petsc_options("-ksp_monitor, -snes_mf_operator", "", true);
   std::vector<MooseEnum> common_petsc_options_vec(1, common_petsc_options);
 
@@ -78,8 +88,50 @@ CreateExecutionerAction::act()
   if (mproblem != NULL)
   {
 #ifdef LIBMESH_HAVE_PETSC
-    mproblem->storePetscOptions(getParam<std::vector<MooseEnum> >("petsc_options"),
-                                getParam<std::vector<std::string> >("petsc_options_iname"), getParam<std::vector<std::string> >("petsc_options_value"));
+    std::vector<MooseEnum> petsc_options = getParam<std::vector<MooseEnum> >("petsc_options");
+    std::vector<std::string> petsc_options_iname = getParam<std::vector<std::string> >("petsc_options_iname");
+    std::vector<std::string> petsc_options_value = getParam<std::vector<std::string> >("petsc_options_value");
+
+    if (_pars.isParamValid("solve_type"))
+    {
+      // Extract the solve type
+      MooseEnum raw_solve_type = getParam<MooseEnum>("solve_type");
+
+      /**
+       *  Here we set the PETSc option with a magic num (5678) so that we won't warn the user later when
+       *  we ship the final option to PETSc
+       */
+      switch (raw_solve_type)
+      {
+      case 0: // PJFNK
+        petsc_options.push_back(MooseEnum("-snes_mf_operator=5678", "-snes_mf_operator")); break;
+      case 1: // JFNK
+        petsc_options.push_back(MooseEnum("-snes_mf=5678", "-snes_mf")); break;
+      case 2: // NEWTON
+        petsc_options.push_back(MooseEnum("-snes=5678", "-snes")); break;
+      }
+    }
+
+    // Extract the line search options
+    MooseEnum line_search = getParam<MooseEnum>("line_search");
+    // Change linesearch type of "none" to "basic"
+    if (line_search == "none")
+      line_search = "basic";
+
+    if (line_search != "default")
+    {
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+      petsc_options_iname.push_back("-snes_type");
+      petsc_options_iname.push_back("-snes_ls");
+      petsc_options_value.push_back("ls");
+#else
+      petsc_options_iname.push_back("-snes_linesearch_type");
+#endif
+
+      petsc_options_value.push_back(line_search);
+    }
+
+    mproblem->storePetscOptions(petsc_options, petsc_options_iname, petsc_options_value);
 #endif //LIBMESH_HAVE_PETSC
 
     // solver params

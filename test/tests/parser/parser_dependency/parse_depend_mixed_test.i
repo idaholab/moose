@@ -26,7 +26,11 @@
 
 [Executioner]
   type = Steady
-  petsc_options = '-snes_mf_operator'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+
 []
 
 [Mesh]

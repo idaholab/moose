@@ -106,7 +106,11 @@
 [Executioner]
   type                 = Steady
   nl_rel_tol               = 1.e-10
-  petsc_options        = '-snes_mf_operator -ksp_monitor'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+  petsc_options        = '-ksp_monitor'
   petsc_options_iname  = '-pc_type -pc_factor_levels -pc_factor_mat_ordering_type'
   petsc_options_value  = 'ilu 20 rcm'
 []

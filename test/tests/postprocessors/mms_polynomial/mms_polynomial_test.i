@@ -87,7 +87,11 @@
   type = Transient
   dt = .1
   num_steps = 20
-  petsc_options = "-snes_mf_operator"
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+
 []
 
 [Output]

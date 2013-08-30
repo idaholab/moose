@@ -47,7 +47,11 @@
 
 [Executioner]
   type = Transient   # Here we use the Transient Executioner
-  petsc_options = '-snes_mf_operator'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+
 
   num_steps = 75
   dt = 1

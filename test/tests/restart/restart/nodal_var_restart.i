@@ -88,7 +88,11 @@
 [Executioner]
   type = Steady
   perf_log = true
-  petsc_options = '-snes_mf_operator'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+
 []
 
 [Output]

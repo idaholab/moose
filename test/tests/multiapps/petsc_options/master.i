@@ -42,7 +42,11 @@
   dt = 1
   l_max_its = 4
   nl_max_its = 2
-  petsc_options = '-snes_mf_operator -ksp_monitor'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+  petsc_options = '-ksp_monitor'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   l_tol = 1e-12

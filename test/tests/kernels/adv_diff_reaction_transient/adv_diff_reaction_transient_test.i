@@ -112,7 +112,11 @@
   type                 = Transient #Steady
   scheme               = bdf2
   nl_rel_tol           = 1e-10
-  petsc_options        = '-snes_mf_operator -ksp_monitor'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+  petsc_options        = '-ksp_monitor'
   petsc_options_iname  = '-pc_factor_levels -pc_factor_mat_ordering_type'
   petsc_options_value  = '20 rcm'
 

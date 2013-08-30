@@ -84,7 +84,11 @@
   start_time = 0
   num_steps = 10
     
-  petsc_options = '-snes_mf_operator'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+
 []
 
 [Output]

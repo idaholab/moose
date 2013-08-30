@@ -101,7 +101,11 @@
     dt = 0.1
   [../]
   scheme = 'implicit-euler'
-  petsc_options = '-snes_mf_operator'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+
 
   start_time = 0.0
   num_steps = 5

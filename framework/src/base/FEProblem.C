@@ -3645,12 +3645,21 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
     if (petsc_options[i] == "-log_summary")
       mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
 
+    // Warn about solver type
+    else if (petsc_options[i] != 5678 /* Magic Num */ && (petsc_options[i] == "-snes" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator"))
+      mooseWarning("The PETSc option " << petsc_options[i] << " should not be used directly in a MOOSE input file. Please set the solver type through \"solve_type\".");
+
+
     if (find(po.begin(), po.end(), petsc_options[i]) == po.end())
       po.push_back(petsc_options[i]);
   }
 
   std::vector<std::string> & pn = parameters().set<std::vector<std::string> >("petsc_inames");         // set because we need a writable reference
   std::vector<std::string> & pv = parameters().set<std::vector<std::string> >("petsc_values");         // set because we need a writable reference
+
+  if (pn.size() != pv.size())
+    mooseError("Petsc names and options are not the same length");
+
   for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
   {
     if (find(pn.begin(), pn.end(), petsc_options_inames[i]) == pn.end())

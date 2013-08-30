@@ -59,7 +59,7 @@ namespace PetscSupport
 
 void petscSetOptions(Problem & problem)
 {
-  const std::vector<MooseEnum>   & petsc_options = problem.parameters().get<std::vector<MooseEnum> >("petsc_options");
+        std::vector<MooseEnum>     petsc_options = problem.parameters().get<std::vector<MooseEnum> >("petsc_options");
   const std::vector<std::string> & petsc_options_inames = problem.parameters().get<std::vector<std::string> >("petsc_inames");
   const std::vector<std::string> & petsc_options_values = problem.parameters().get<std::vector<std::string> >("petsc_values");
 
@@ -75,6 +75,22 @@ void petscSetOptions(Problem & problem)
     PetscGetArgs(&argc, &args);
     PetscOptionsInsert(&argc, &args, NULL);
   }
+
+  // Make sure that the solve mode has been explicity set and that it hasn't been set more than once.
+  std::string solver_mode;
+  for (unsigned int i=0; i<petsc_options.size(); ++i)
+  {
+    if (petsc_options[i] == "-snes" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator")
+    {
+      if (solver_mode == "")
+        solver_mode = std::string(petsc_options[i]);
+      else if (petsc_options[i] != solver_mode)
+        mooseError("Multiple conflicting solver modes supplied: " << solver_mode << " and " << petsc_options[i] << "\n");
+    }
+  }
+  // If a PETSc solve mode hasn't been set, default it to "-snes_mf_operator"
+  if (solver_mode == "")
+    petsc_options.push_back(MooseEnum("-snes_mf_operator", "-snes_mf_operator"));
 
   // Add any options specified in the input file
   for (unsigned int i=0; i<petsc_options.size(); ++i)

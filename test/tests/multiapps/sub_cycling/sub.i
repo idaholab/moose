@@ -40,7 +40,11 @@
   type = Transient
   num_steps = 4
   dt = 0.01
-  petsc_options = '-snes_mf_operator -ksp_monitor'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+  petsc_options = '-ksp_monitor'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

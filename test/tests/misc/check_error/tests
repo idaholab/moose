@@ -240,6 +240,7 @@
     input = 'nan_test.i'
     expect_err = "Floating point exception"
     errors = 'foo'
+    petsc_version = '<3.4'
   [../]
 
   [./no_output_dir_test]

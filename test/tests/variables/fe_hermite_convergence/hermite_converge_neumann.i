@@ -138,7 +138,11 @@
 
 [Executioner]
   type = Steady
-  petsc_options = '-snes_mf_operator'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+
   [./Adaptivity]
     steps = 2
     refine_fraction = 1

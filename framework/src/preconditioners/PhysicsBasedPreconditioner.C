@@ -124,7 +124,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const std::string & name
 
   // If using PETSc, use the right PETSc option
 #ifdef LIBMESH_HAVE_PETSC
-  std::vector<MooseEnum> petsc_options(1, MooseEnum("-snes_mf", "-snes_mf"));  // SNES Matrix Free
+  std::vector<MooseEnum> petsc_options(1, MooseEnum("-snes_mf=5678", "-snes_mf"));  // SNES Matrix Free
   std::vector<std::string> petsc_inames, petsc_values;
 
   _fe_problem.storePetscOptions(petsc_options, petsc_inames, petsc_values);

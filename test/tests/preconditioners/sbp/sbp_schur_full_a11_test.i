@@ -104,7 +104,11 @@
 
 [Executioner]
   type = Steady
-  petsc_options       = '-snes_mf_operator -snes_view -snes_monitor -snes_converged_reason -ksp_monitor -ksp_converged_reason'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+  petsc_options       = '-snes_view -snes_monitor -snes_converged_reason -ksp_monitor -ksp_converged_reason'
 []
 
 [Output]
