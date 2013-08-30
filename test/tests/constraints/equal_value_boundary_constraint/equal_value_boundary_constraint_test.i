@@ -48,9 +48,16 @@
 
 [Executioner]
   type = Steady
-  petsc_options = '-snes_mf_operator'
-  petsc_options_iname = '-snes_linesearch_type'
-  petsc_options_value = 'basic'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+
+  petsc_options_iname = ''
+  petsc_options_value = ''
+
+  line_search = 'none'
+
 []
 
 [Postprocessors]
