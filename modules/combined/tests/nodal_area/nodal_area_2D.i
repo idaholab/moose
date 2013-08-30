@@ -53,9 +53,17 @@
 [Executioner]
 
   type = Steady
-  petsc_options = '-snes_mf_operator -ksp_monitor'
-  petsc_options_iname = '-pc_type -snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart'
-  petsc_options_value = 'jacobi   ls         basic    basic                    101'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+  petsc_options = '-ksp_monitor'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart'
+  petsc_options_value = 'jacobi   101'
+
+
+  line_search = 'none'
+
 
   nl_abs_tol = 1e-11
   nl_rel_tol = 1e-10

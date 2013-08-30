@@ -224,7 +224,11 @@
 [./SMP_PJFNK]
   type = SMP
   full = true
-  petsc_options = '-snes_mf_operator'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+
 [../]
 []
 
@@ -236,8 +240,11 @@
   perf_log = true
 
   # Basic GMRES/linesearch options only
-  petsc_options_iname = '-ksp_gmres_restart -snes_linesearch_type'
-  petsc_options_value = '300                basic                '
+  petsc_options_iname = '-ksp_gmres_restart '
+  petsc_options_value = '300                '
+
+  line_search = 'none'
+
 
   # MOOSE does not correctly read these options!! Always run with actual command line arguments if
   # you want to guarantee you are getting pilut!  Also, even though there are pilut defaults,

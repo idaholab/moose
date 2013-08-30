@@ -120,9 +120,17 @@
 
   type = Transient
 
-  petsc_options = '-snes_mf_operator -ksp_monitor'
-  petsc_options_iname = '-pc_type -snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart'
-  petsc_options_value = 'lu       ls         basic    basic                    101'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+  petsc_options = '-ksp_monitor'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart'
+  petsc_options_value = 'lu       101'
+
+
+  line_search = 'none'
+
 
   l_max_its = 100
   l_tol = 8e-3

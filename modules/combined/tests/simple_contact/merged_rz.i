@@ -155,9 +155,17 @@
 
 [Executioner]
   type = Transient
-  petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
-  petsc_options_iname = '-pc_type -snes_type -snes_ls -snes_linesearch_type'
-  petsc_options_value = 'lu       ls         basic    basic                '
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+  petsc_options = '-ksp_monitor -snes_ksp_ew'
+  petsc_options_iname = '-pc_type '
+  petsc_options_value = 'lu       '
+
+
+  line_search = 'none'
+
 
   nl_abs_tol = 1e-8
 

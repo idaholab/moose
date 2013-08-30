@@ -140,7 +140,11 @@
 [Executioner]
   # l_max_its = 60
   type = Transient
-  petsc_options = '-snes_mf_operator -snes_ksp_ew -ksp_monitor'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+  petsc_options = '-snes_ksp_ew -ksp_monitor'
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type'
   petsc_options_value = '101 hypre boomeramg'
   nl_rel_tol = 1e-8

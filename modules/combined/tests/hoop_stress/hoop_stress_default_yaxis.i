@@ -222,9 +222,17 @@
 [Executioner]
 
   type = Transient
-  petsc_options = '-snes_mf_operator -ksp_monitor -ksp_gmres_modifiedgramschmidt'
-  petsc_options_iname = '-snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart -pc_type  -pc_hypre_type'
-  petsc_options_value = 'ls         basic    basic                   201                 hypre     boomeramg     '
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+  petsc_options = '-ksp_monitor -ksp_gmres_modifiedgramschmidt'
+  petsc_options_iname = '-ksp_gmres_restart -pc_type  -pc_hypre_type'
+  petsc_options_value = '201                 hypre     boomeramg     '
+
+
+  line_search = 'none'
+
 
   nl_rel_tol = 1e-10
   nl_abs_tol = 1e-7

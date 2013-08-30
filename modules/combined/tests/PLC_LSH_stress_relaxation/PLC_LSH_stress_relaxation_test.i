@@ -188,9 +188,17 @@
 [Executioner]
 #  type = SolutionTimeAdaptive
   type = Transient
-  petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
-  petsc_options_iname = '-snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart -pc_type -sub_pc_type'
-  petsc_options_value = 'ls         basic    basic                    101           asm      lu'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+  petsc_options = '-ksp_monitor -snes_ksp_ew'
+  petsc_options_iname = '-ksp_gmres_restart -pc_type -sub_pc_type'
+  petsc_options_value = '101           asm      lu'
+
+
+  line_search = 'none'
+
 
   l_max_its = 100
   nl_max_its = 100

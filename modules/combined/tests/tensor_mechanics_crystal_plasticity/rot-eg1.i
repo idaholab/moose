@@ -152,7 +152,11 @@
 [Executioner]
   type = Transient
   dt = 0.01
-  petsc_options = '-ksp_monitor -snes_mf_operator'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+  petsc_options = '-ksp_monitor '
   petsc_options_iname = -pc_hypre_type
   petsc_options_value = boomerang
   dtmax = 0.01

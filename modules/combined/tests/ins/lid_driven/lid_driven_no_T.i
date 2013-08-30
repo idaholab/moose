@@ -175,7 +175,11 @@
 [./SMP_PJFNK]
   type = SMP
   full = true
-  petsc_options = '-snes_mf_operator'
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+
 [../]
 []
 
@@ -185,8 +189,11 @@
   dt = 1.e-2
   dtmin = 1.e-6
   perf_log = true
-  petsc_options_iname = '-ksp_gmres_restart -snes_linesearch_type'
-  petsc_options_value = '300                basic'
+  petsc_options_iname = '-ksp_gmres_restart '
+  petsc_options_value = '300                '
+
+  line_search = 'none'
+
   nl_rel_tol = 1e-5
   nl_max_its = 6
   l_tol = 1e-6

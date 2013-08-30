@@ -154,7 +154,10 @@
   dtmax = 0.02
   dtmin = 0.02
   type = Transient
-  petsc_options = -snes_mf_operator
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
   petsc_options_iname = -pc_hypre_type
   petsc_options_value = boomerang
   nl_abs_tol = 1e-08
