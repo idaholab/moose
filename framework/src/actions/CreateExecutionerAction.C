@@ -37,11 +37,12 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<Real>        ("nl_rel_step_tol", 1.0e-50,  "Nonlinear Relative step Tolerance");
   params.addParam<bool>        ("no_fe_reinit",    false,    "Specifies whether or not to reinitialize FEs");
 
-  MooseEnum solve_type("PJFNK, JFNK, NEWTON");
+  MooseEnum solve_type("PJFNK, JFNK, NEWTON, FD");
   params.addParam<MooseEnum>   ("solve_type",      solve_type,
                                 "PJFNK: Preconditioned Jacobian-Free Newton Krylov "
                                 "JFNK: Jacobian-Free Newton Krylov "
-                                "NEWTON: Full Newton Solve");
+                                "NEWTON: Full Newton Solve"
+                                "FD: Use finite differences to compute Jacobian");
 
 #ifdef LIBMESH_HAVE_PETSC
 
@@ -109,6 +110,8 @@ CreateExecutionerAction::act()
         petsc_options.push_back(MooseEnum("-snes_mf=5678", "-snes_mf")); break;
       case 2: // NEWTON
         petsc_options.push_back(MooseEnum("-snes=5678", "-snes")); break;
+      case 3: // FD
+        petsc_options.push_back(MooseEnum("-snes_fd=5678", "-snes_fd")); break;
       }
     }
 

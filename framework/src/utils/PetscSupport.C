@@ -80,7 +80,7 @@ void petscSetOptions(Problem & problem)
   std::string solver_mode;
   for (unsigned int i=0; i<petsc_options.size(); ++i)
   {
-    if (petsc_options[i] == "-snes" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator")
+    if (petsc_options[i] == "-snes" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator" || petsc_options[i] == "-snes_fd")
     {
       if (solver_mode == "")
         solver_mode = std::string(petsc_options[i]);
