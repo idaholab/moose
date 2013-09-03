@@ -104,7 +104,7 @@ SubProblem::getMaterialPropertyBlocks(const std::string prop_name)
     }
   }
 
-  // Copy it out to a vector for convenience
+  // Copy it out to a bector for convenience
   blocks_vec.reserve(blocks.size());
 
   for(std::set<SubdomainID>::iterator it = blocks.begin();

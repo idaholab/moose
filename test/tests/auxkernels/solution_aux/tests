@@ -46,4 +46,10 @@
     input = 'solution_aux_multi_err.i'
     expect_err = 'The SolutionUserObject contains multiple variables, \w+'
   [../]
+
+  [./scaled_solution]
+    type = 'Exodiff'
+    input = 'solution_aux_scale.i'
+    exodiff = 'solution_aux_scale_out.e'
+  [../]
 []

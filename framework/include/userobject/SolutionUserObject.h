@@ -186,6 +186,12 @@ protected:
 
   /// Time index 2, used for interpolation
   int _exodus_index2;
+
+  /// Scale parameter
+  std::vector<Real> _scale;
+
+  /// Factor parameter
+  std::vector<Real> _factor;
 };
 
 #endif //SOLUTIONUSEROBJECT_H

@@ -32,6 +32,10 @@ InputParameters validParams<SolutionUserObject>()
   // must be set to timestep_begin to interp values in Exodus files correctly.
   params.set<MooseEnum>("execute_on") = "timestep_begin";
 
+  // Add ability to perform coordinate transformation: scale, factor
+  params.addParam<std::vector<Real> >("coord_scale", std::vector<Real>(LIBMESH_DIM,1), "Scaling parameter for x,y,z coordiantes (e.g. x*scale)");
+  params.addParam<std::vector<Real> >("coord_factor", std::vector<Real>(LIBMESH_DIM,0), "Transformation factors for x,y,z coordiantes (e.g., x + factor)");
+
   // Return the parameters
   return params;
 }
@@ -59,7 +63,9 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _interpolation_factor(0.0),
     _exodus_times(NULL),
     _exodus_index1(-1),
-    _exodus_index2(-1)
+    _exodus_index2(-1),
+    _scale(getParam<std::vector<Real> >("coord_scale")),
+    _factor(getParam<std::vector<Real> >("coord_factor"))
 {
 
   // Create a libmesh::Mesh object for storing the loaded data.  This _should_
@@ -393,14 +399,21 @@ SolutionUserObject::updateExodusBracketingTimeIndices(Real time)
 Real
 SolutionUserObject::pointValue(Real t, const Point & p, const std::string & var_name) const
 {
+  // Create copy of point
+  Point pt(p);
+
+  // Apply scaling and factor
+  for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+    pt(i) = (pt(i) - _factor[i])/_scale[i];
+
   // Extract the value at the current point
-  Real val = evalMeshFunction(p, var_name, 1);
+  Real val = evalMeshFunction(pt, var_name, 1);
 
   // Interplolate
   if (_file_type == 1 && _interpolate_times)
   {
     mooseAssert(t == _interpolation_time,"Time passed into value() must match time at last call to timestepSetup()");
-    Real val2 = evalMeshFunction(p, var_name, 2);
+    Real val2 = evalMeshFunction(pt, var_name, 2);
     val = val + (val2 - val)*_interpolation_factor;
   }
   return val;
