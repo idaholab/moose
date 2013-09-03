@@ -115,7 +115,7 @@ class Tester(object):
     # Check for PETSc versions
     (petsc_status, logic_reason, petsc_version) = checkPetscVersion(checks, self.specs)
     if not petsc_status:
-      reason = 'skipped (PETSc version ' + str(checks[PETSC_VERSION]) + ' ' + logic_reason + ' ' + petsc_version + ')'
+      reason = 'skipped (using PETSc ' + str(checks[PETSC_VERSION]) + ' REQ: ' + logic_reason + ' ' + petsc_version + ')'
       return (False, reason)
 
     # PETSc is being explicitly checked above
