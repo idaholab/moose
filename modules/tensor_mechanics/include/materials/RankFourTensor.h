@@ -101,8 +101,16 @@ public:
 //  int MatrixInversion(double *, int, double* );//Added
 
   int MatrixInversion(double *, int);//Added
-virtual void surfaceFillFromInputVector(const std::vector<Real> input);
+  
+  virtual void surfaceFillFromInputVector(const std::vector<Real> input);
 
+   /**
+  * fillFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in
+  * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
+  * C_ijkl = C_ijlk, C_ijkl = C_jikl
+  */
+  void fillFromInputVector(const std::vector<Real> input, bool all);
+  
 protected:
 
 /**

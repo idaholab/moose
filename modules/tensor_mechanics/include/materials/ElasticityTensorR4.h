@@ -22,12 +22,7 @@ public:
   
   virtual ~ElasticityTensorR4() {}
   
-  /**
-  * fillFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in
-  * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
-  * C_ijkl = C_ijlk, C_ijkl = C_jikl
-  */
-  void fillFromInputVector(const std::vector<Real> input, bool all);
+ 
   
   /**
  * calculates the Jacobian of the elastic stiffness tensor.
