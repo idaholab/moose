@@ -585,6 +585,20 @@ GrainTracker::getNodalValues(unsigned int node_id) const
   return node_info;
 }
 
+std::vector<std::vector<std::pair<unsigned int, unsigned int> > >
+GrainTracker::getElementalValues(unsigned int elem_id) const
+{
+  std::vector<std::vector<std::pair<unsigned int, unsigned int> > > elem_info;
+
+  const Elem * curr_elem = _mesh.elem(elem_id);
+  elem_info.resize(curr_elem->n_nodes());
+
+  for (unsigned int i=0; i<elem_info.size(); ++i)
+    // Note: This map only works with Linear Lagrange on First Order Elements
+    elem_info[_qp_to_node[i]] = getNodalValues(curr_elem->node(i));
+
+  return elem_info;
+}
 
 Real
 GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2, bool ignore_radii) const
@@ -636,3 +650,5 @@ GrainTracker::UniqueGrain::~UniqueGrain()
   for (unsigned int i=0; i<sphere_ptrs.size(); ++i)
     delete sphere_ptrs[i];
 }
+
+const unsigned int GrainTracker::_qp_to_node[8] = { 0, 1, 3, 2, 4, 5, 7, 6 };

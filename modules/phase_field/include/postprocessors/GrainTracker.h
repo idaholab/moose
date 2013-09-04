@@ -38,8 +38,18 @@ public:
    */
   virtual Real getElementalValue(unsigned int element_id) const;
 
-  
+  /**
+   * Returns a list of active unique grains for a particular node in a vector of pairs
+   * (unique_grain_id, variable_idx)
+   */
   virtual std::vector<std::pair<unsigned int, unsigned int> > getNodalValues(unsigned int node_id) const;
+
+  /**
+   * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
+   * holds the ith node with the inner vector holds the list of active unique grains.
+   * (unique_grain_id, variable_idx)
+   */
+  virtual std::vector<std::vector<std::pair<unsigned int, unsigned int> > > getElementalValues(unsigned int elem_id) const;
 
 protected:
   /// This struct holds the nodesets and bounding spheres for each flooded region.
@@ -136,6 +146,9 @@ protected:
      */
     const std::set<unsigned int> *nodes_ptr;
   };
+
+  // This map only works with Linear Lagrange on First Order Elements
+  static const unsigned int _qp_to_node[8];
 };
 
 #endif
