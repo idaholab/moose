@@ -52,6 +52,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _bnd(parameters.get<bool>("_bnd")),
     _neighbor(getParam<bool>("_neighbor")),
     _material_data(*parameters.get<MaterialData *>("_material_data")),
+    _qp(std::numeric_limits<unsigned int>::max()),
     _qrule(_bnd ? _assembly.qRuleFace() : _assembly.qRule()),
     _JxW(_bnd ? _assembly.JxWFace() : _assembly.JxW()),
     _coord(_assembly.coordTransformation()),
