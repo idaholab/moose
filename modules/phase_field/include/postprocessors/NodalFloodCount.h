@@ -56,6 +56,7 @@ public:
   virtual Real getElementalValue(unsigned int element_id) const;
 
   virtual std::vector<std::pair<unsigned int, unsigned int> > getNodalValues(unsigned int node_id) const;
+  virtual std::vector<std::vector<std::pair<unsigned int, unsigned int> > > getElementalValues(unsigned int elem_id) const;
 
 protected:
   class BubbleData
