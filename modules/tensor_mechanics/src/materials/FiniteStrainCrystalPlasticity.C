@@ -124,6 +124,7 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
     }
 
 
+  get_euler_ang();
   get_euler_rot();
 
   _mo.resize(_nss*3);
@@ -193,7 +194,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
       if(slip_incr_max > slip_incr_tol)
 	{
 	  fac=0.1;
-	  printf("slip_incr=%d %f\n",_qp,slip_incr_max);
+	  printf("slip_incr=%d %d %f\n",_current_elem->id(),_qp,slip_incr_max);
 	  mooseError("Slip increment exceeds tolerance");
 	}
 
@@ -224,7 +225,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
 	  if(slip_incr_max > slip_incr_tol)
 	    {
 	      fac=0.1;
-	      printf("slip_incr=%d %f\n",_qp,slip_incr_max);
+	      printf("slip_incr=%d %d %f\n",_current_elem->id(),_qp,slip_incr_max);
 	      mooseError("Slip increment exceeds tolerance");
 	    }
 
@@ -275,6 +276,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
   rot=getmatrot(_dfgrd[_qp]);
 
   _update_rot[_qp]=rot*_crysrot;
+
 
 }
 
@@ -601,9 +603,56 @@ RankTwoTensor FiniteStrainCrystalPlasticity::getmatrot(RankTwoTensor &a)
     for(int j=0;j<3;j++)
       evec(i,j)=cmat[i][j];
 
-  rot=a*(evec*diag*evec.transpose()).inverse();
-
+  rot=a*((evec.transpose()*diag*evec).inverse());
 
   return rot;
+
+}
+
+
+void
+FiniteStrainCrystalPlasticity::get_euler_ang()
+{
+
+  std::ifstream fileeuler;
+  Real vec[3];
+  int elemno;
+
+  if(_euler_angle_file_name.length()!=0)
+    {
+
+      fileeuler.open(_euler_angle_file_name.c_str());
+      
+      if (!fileeuler)
+	mooseError("Can't open euler angle input file ");
+      else
+	{
+	  
+	  while(!fileeuler.eof())
+	    {
+	      fileeuler >> elemno;
+	      for(int i=0;i<3;i++)
+		fileeuler >> vec[i];
+		  
+	      if(elemno-1==_current_elem->id())
+		{
+		  _euler_angle_1=vec[0];
+		  _euler_angle_2=vec[1];
+		  _euler_angle_3=vec[2];
+		  	      
+		  fileeuler.close();
+		  return;
+
+		}
+		
+
+	    }
+	  
+	  fileeuler.close();
+
+	}
+      
+    }
+
 
 }

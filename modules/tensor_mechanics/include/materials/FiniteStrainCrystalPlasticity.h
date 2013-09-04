@@ -24,6 +24,7 @@ protected:
   virtual void update_gss(Real*);
 
   virtual void get_slip_sys();
+  virtual void get_euler_ang();
 
   void get_euler_rot();
   RankFourTensor outerProduct(RankTwoTensor &a,RankTwoTensor &b);

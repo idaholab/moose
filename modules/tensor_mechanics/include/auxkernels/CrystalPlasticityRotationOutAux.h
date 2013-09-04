@@ -21,6 +21,7 @@ protected:
 
 private:
   std::string _rotout_file_name;
+  int _out_freq;
   MaterialProperty<RankTwoTensor> & _update_rot;
 };
 
