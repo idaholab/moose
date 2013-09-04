@@ -50,7 +50,7 @@ InputParameters validParams<CreateExecutionerAction>()
 #if PETSC_VERSION_LESS_THAN(3,3,0)
   MooseEnum line_search("default, cubic, quadratic, none, basic, basicnonorms", "default");
 #else
-  MooseEnum line_search("default, bt, none, basic", "default");
+  MooseEnum line_search("default, shell, none, basic, l2, bt, cp", "default");
 #endif
   params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type (Note: none = basic)");
 
