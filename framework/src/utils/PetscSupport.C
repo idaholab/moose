@@ -90,7 +90,10 @@ void petscSetOptions(Problem & problem)
   }
   // If a PETSc solve mode hasn't been set, default it to "-snes_mf_operator"
   if (solver_mode == "")
+  {
+    mooseDoOnce(std::cout << "Defaulting Solve Type to \"Preconditioned JFNK\"\n");
     petsc_options.push_back(MooseEnum("-snes_mf_operator", "-snes_mf_operator"));
+  }
 
   // Add any options specified in the input file
   for (unsigned int i=0; i<petsc_options.size(); ++i)

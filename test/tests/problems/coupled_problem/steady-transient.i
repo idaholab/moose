@@ -13,4 +13,6 @@
 
 [Executioner]
   type = SteadyTransientExecutioner
+
+  solve_type = NEWTON
 []

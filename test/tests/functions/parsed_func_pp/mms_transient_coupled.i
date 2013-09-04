@@ -29,7 +29,7 @@
   [./u_mms_func]
     # MMS Forcing function for the u equation.
     type = ParsedFunction
-    value = ' 20*exp(20*t)*x*x*x-6*exp(20*t)*x-(2-0.125*exp(20*t))*sin(5/2*x*pi)-0.125*exp(20*t)-1  
+    value = ' 20*exp(20*t)*x*x*x-6*exp(20*t)*x-(2-0.125*exp(20*t))*sin(5/2*x*pi)-0.125*exp(20*t)-1
 '
   [../]
   [./v_mms_func]
@@ -57,7 +57,7 @@
   # Strong Form:
   # \frac{\partial u}{\partial t} - \nabla \cdot 0.5 \nabla u - v = 0
   # \frac{\partial u}{\partial t} - \nabla \cdot \nabla v = 0
-  # 
+  #
   # BCs:
   # u(0,y,t) = 1
   # \nabla u |_{x=1} = 3\exp(20*t)
@@ -65,7 +65,7 @@
   # v(1,y,t) = 3
   # \nabla u |_{y=0,1} = 0
   # \nabla v |_{y=0,1} = 0
-  # 
+  #
   [./u_time]
     type = TimeDerivative
     variable = u
@@ -152,7 +152,9 @@
 [Executioner]
   type = Transient
   dt = 0.01
-  petsc_options = snes_mf_operator
+
+  solve_type = NEWTON
+
   end_time = 0.1
   scheme = crank-nicolson
 []

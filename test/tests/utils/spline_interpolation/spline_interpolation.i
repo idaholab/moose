@@ -27,7 +27,7 @@
     type = Diffusion
     variable = u
   [../]
-  
+
   [./ufn]
     type = SplineFFn
     variable = u
@@ -54,6 +54,7 @@
 
 [Executioner]
   type = Steady
+  solve_type = NEWTON
 []
 
 [Output]

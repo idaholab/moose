@@ -123,10 +123,7 @@
 [Executioner]
   type = Steady
 
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
-
+  solve_type = 'NEWTON'
 []
 
 [Output]

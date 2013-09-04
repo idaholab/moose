@@ -4,9 +4,10 @@
     input = 'steady.i'
     exodiff = 'steady_out.e'
   [../]
-	[./transient]
-		type = 'Exodiff'
-		input = 'mms_transient_coupled.i'
-		exodiff = 'mms_transient_coupled_out.e'
-	[../]
+
+  [./transient]
+    type = 'Exodiff'
+    input = 'mms_transient_coupled.i'
+    exodiff = 'mms_transient_coupled_out.e'
+  [../]
 []
