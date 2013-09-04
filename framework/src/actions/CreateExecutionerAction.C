@@ -109,7 +109,7 @@ CreateExecutionerAction::act()
       case 1: // JFNK
         petsc_options.push_back(MooseEnum("-snes_mf=5678", "-snes_mf")); break;
       case 2: // NEWTON
-        petsc_options.push_back(MooseEnum("-snes=5678", "-snes")); break;
+        petsc_options.push_back(MooseEnum("-newton=5678", "-newton")); break;
       case 3: // FD
         petsc_options.push_back(MooseEnum("-snes_fd=5678", "-snes_fd")); break;
       }

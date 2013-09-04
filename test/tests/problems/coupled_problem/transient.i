@@ -60,6 +60,8 @@
   # get 'er done
   nl_rel_tol = 1e-15
   nl_abs_tol = 1e-14
+
+  solve_type = NEWTON
 []
 
 [Output]

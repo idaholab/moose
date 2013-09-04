@@ -80,7 +80,10 @@ void petscSetOptions(Problem & problem)
   std::string solver_mode;
   for (unsigned int i=0; i<petsc_options.size(); ++i)
   {
-    if (petsc_options[i] == "-snes" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator" || petsc_options[i] == "-snes_fd")
+    if (petsc_options[i] == "-snes")
+      mooseDoOnce(std::cout << "The PETSc Option: \"-snes\" is ignored.\n");
+
+    if (petsc_options[i] == "-newton" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator" || petsc_options[i] == "-snes_fd")
     {
       if (solver_mode == "")
         solver_mode = std::string(petsc_options[i]);
@@ -97,7 +100,8 @@ void petscSetOptions(Problem & problem)
 
   // Add any options specified in the input file
   for (unsigned int i=0; i<petsc_options.size(); ++i)
-    PetscOptionsSetValue(std::string(petsc_options[i]).c_str(), PETSC_NULL);
+    if (petsc_options[i] != "-newton") // "-newton is NOT a real petsc option
+      PetscOptionsSetValue(std::string(petsc_options[i]).c_str(), PETSC_NULL);
 
   for (unsigned int i=0; i<petsc_options_inames.size(); ++i)
     PetscOptionsSetValue(petsc_options_inames[i].c_str(), petsc_options_values[i].c_str());

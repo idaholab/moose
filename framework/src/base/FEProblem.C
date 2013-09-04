@@ -3645,10 +3645,9 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
     if (petsc_options[i] == "-log_summary")
       mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
 
-    // Warn about solver type
-    else if (petsc_options[i] != 5678 /* Magic Num */ && (petsc_options[i] == "-snes" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator"))
+    // Warn about solver type (Note: -snes is not a REAL option)
+    else if (petsc_options[i] != 5678 /* Magic Num */ && (petsc_options[i] == "-newton" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator"))
       mooseWarning("The PETSc option " << petsc_options[i] << " should not be used directly in a MOOSE input file. Please set the solver type through \"solve_type\".");
-
 
     if (find(po.begin(), po.end(), petsc_options[i]) == po.end())
       po.push_back(petsc_options[i]);
