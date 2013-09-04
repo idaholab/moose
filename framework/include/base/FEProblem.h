@@ -846,7 +846,7 @@ protected:
 
   bool _print_linear_residuals;// \TODO Remove after new output system implemented
 
-  void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
+  void computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GROUP group);
 
 public:
   /**
