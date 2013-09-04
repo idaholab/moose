@@ -2175,11 +2175,11 @@ FEProblem::computeIndicatorsAndMarkers()
 }
 
 void
-FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)
+FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GROUP group)
 {
-  if (pps[0].blockIds().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0 || pps[0].blockNodalIds().size() > 0)
+  std::vector<UserObjectWarehouse> & pps = _user_objects(type);
+  if (pps[0].blockIds().size() || pps[0].boundaryIds().size() || pps[0].nodesetIds().size() || pps[0].blockNodalIds().size() || pps[0].internalSideUserObjects(group).size())
   {
-
     /* Note: The fact that we compute the aux system when we compute the user_objects
      * is a very bad behavior that some of our applications have come to rely on.  This
      * needs to be fixed.  For now we cannot easily change this behavior without
@@ -2193,7 +2193,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
       if (_displaced_problem != NULL)
         _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
-      _aux.compute();
+      _aux.compute(type);
     }
 
     // init
@@ -2541,7 +2541,7 @@ FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP*/, UserObjectW
   default:
     break;
   }
-  computeUserObjectsInternal(_user_objects(type), group);
+  computeUserObjectsInternal(type, group);
 
   Moose::perf_log.pop("compute_user_objects()","Solve");
 }

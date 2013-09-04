@@ -881,7 +881,7 @@ protected:
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
 
-  void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
+  void computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GROUP group);
 
 protected:
   void checkUserObjects();
