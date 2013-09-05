@@ -80,6 +80,10 @@ class TestHarness:
                 # Strip begining and ending spaces to input file name
                 test[INPUT] = test[INPUT].strip()
 
+                # Double the alloted time for tests when running with the valgrind option
+                if self.options.enable_valgrind:
+                  test[MAX_TIME] = test[MAX_TIME] * 2
+
                 # Build the requested Tester object and run
                 tester = self.factory.create(test[TYPE], test)
 
