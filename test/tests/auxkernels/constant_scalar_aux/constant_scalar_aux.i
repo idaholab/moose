@@ -33,6 +33,14 @@
   [../]
 []
 
+[ICs]
+  [./ic_x]
+    type = ScalarConstantIC
+    variable = x
+    value = 11
+  [../]
+[]
+
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
