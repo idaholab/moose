@@ -36,6 +36,13 @@
     variable = prop1
     property = thermal_conductivity
   [../]
+
+  [./prop1_output_init]
+    type = MaterialRealAux
+    variable = prop1
+    property = thermal_conductivity
+    execute_on = initial
+  [../]
 []
 
 [BCs]

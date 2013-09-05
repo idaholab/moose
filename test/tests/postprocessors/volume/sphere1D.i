@@ -41,6 +41,15 @@
   [../]
 []
 
+[ICs]
+  [./ic1]
+    type = ConstantIC
+    variable = constantVar
+    value = 1
+    block = 1
+  [../]
+[]
+
 [Kernels]
 
   [./heat_r]

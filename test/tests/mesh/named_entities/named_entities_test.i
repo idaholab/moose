@@ -27,6 +27,14 @@
   [../]
 []
 
+[ICs]
+  [./reporter_ic]
+    type = ConstantIC
+    variable = reporter
+    value = 10
+  [../]
+[]
+
 [Kernels]
   active = 'diff body_force'
 
