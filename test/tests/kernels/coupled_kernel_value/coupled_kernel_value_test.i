@@ -179,7 +179,9 @@
 [Executioner]
   type = Steady
 #  petsc_options = '-snes_mf_operator'
-  petsc_options = '-snes'
+
+  solve_type = 'NEWTON'
+
   nl_rel_tol = 1e-15
 []
 

@@ -33,6 +33,12 @@
   uniform_refine = 1
 []
 
+[MeshModifiers]
+  [./*]
+    type = SideSetsFromNormals
+  [../]
+[]
+
 [Variables]
   [./*]
     order = FIRST
@@ -164,6 +170,12 @@
     preconditioner  = 'AMG ASM'
     off_diag_row    = 'v'
     off_diag_column = 'u'
+
+    solve_type = 'PJFNK'
+
+    petsc_options = '-snes_mf_operator'
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = 'lu'
   [../]
 []
 
@@ -189,9 +201,15 @@
   l_max_its = 1
   nl_max_its = 1
 
+  solve_type = 'PJFNK'
+
   petsc_options = '-snes_mf_operator'
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
+
+  [./TimeStepper]
+    type = PostprocessorDT
+  [../]
 
   [./Adaptivity]
     steps = 3

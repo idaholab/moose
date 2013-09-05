@@ -52,7 +52,8 @@
 
 [Executioner]
   type = Transient
-  petsc_options = -snes
+
+  solve_type = 'NEWTON'
   l_max_its = 800
   nl_rel_tol = 1e-10
   num_steps = 50

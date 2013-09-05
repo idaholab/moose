@@ -41,7 +41,9 @@
     off_diag_row    = 'forced'
     off_diag_column = 'diffused'
 
-    petsc_options = '-snes'
+
+    solve_type = 'NEWTON'
+
     petsc_options_iname = '-pc_type -mat_fd_coloring_err -mat_fd_type'
     petsc_options_value = 'lu       1e-6                 ds'
   [../]
@@ -51,7 +53,9 @@
 
     full = true
 
-    petsc_options = '-snes'
+
+    solve_type = 'NEWTON'
+
     petsc_options_iname = '-pc_type -mat_fd_coloring_err -mat_fd_type'
     petsc_options_value = 'lu       1e-6                 ds'
   [../]

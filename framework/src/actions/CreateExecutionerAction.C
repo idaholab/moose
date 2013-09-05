@@ -37,6 +37,17 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<Real>        ("nl_rel_step_tol", 1.0e-50,  "Nonlinear Relative step Tolerance");
   params.addParam<bool>        ("no_fe_reinit",    false,    "Specifies whether or not to reinitialize FEs");
 
+  CreateExecutionerAction::populateCommonExecutionerParams(params);
+
+  params.addParamNamesToGroup("l_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol", "Solver");
+  params.addParamNamesToGroup("no_fe_reinit", "Advanced");
+
+  return params;
+}
+
+void
+CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & params)
+{
   MooseEnum solve_type("PJFNK, JFNK, NEWTON, FD");
   params.addParam<MooseEnum>   ("solve_type",      solve_type,
                                 "PJFNK: Preconditioned Jacobian-Free Newton Krylov "
@@ -44,7 +55,7 @@ InputParameters validParams<CreateExecutionerAction>()
                                 "NEWTON: Full Newton Solve"
                                 "FD: Use finite differences to compute Jacobian");
 
-#ifdef LIBMESH_HAVE_PETSC
+  #ifdef LIBMESH_HAVE_PETSC
 
   // Line Search Options
 #if PETSC_VERSION_LESS_THAN(3,3,0)
@@ -61,13 +72,7 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<std::vector<std::string> >("petsc_options_iname", "Names of Petsc name/value pairs");
   params.addParam<std::vector<std::string> >("petsc_options_value", "Values of Petsc name/value pairs (must correspond with \"petsc_options_iname\"");
 #endif //LIBMESH_HAVE_PETSC
-
-  params.addParamNamesToGroup("l_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol", "Solver");
-  params.addParamNamesToGroup("no_fe_reinit", "Advanced");
-
-  return params;
 }
-
 
 CreateExecutionerAction::CreateExecutionerAction(const std::string & name, InputParameters params) :
     MooseObjectAction(name, params)
@@ -85,60 +90,12 @@ CreateExecutionerAction::act()
   Executioner * executioner = static_cast<Executioner *>(_factory.create(_type, "Executioner", _moose_object_pars));
   Moose::setup_perf_log.pop("Create Executioner","Setup");
 
-  FEProblem *mproblem = _problem;
-  if (mproblem != NULL)
+  if (_problem != NULL)
   {
-#ifdef LIBMESH_HAVE_PETSC
-    std::vector<MooseEnum> petsc_options = getParam<std::vector<MooseEnum> >("petsc_options");
-    std::vector<std::string> petsc_options_iname = getParam<std::vector<std::string> >("petsc_options_iname");
-    std::vector<std::string> petsc_options_value = getParam<std::vector<std::string> >("petsc_options_value");
-
-    if (_pars.isParamValid("solve_type"))
-    {
-      // Extract the solve type
-      MooseEnum raw_solve_type = getParam<MooseEnum>("solve_type");
-
-      /**
-       *  Here we set the PETSc option with a magic num (5678) so that we won't warn the user later when
-       *  we ship the final option to PETSc
-       */
-      switch (raw_solve_type)
-      {
-      case 0: // PJFNK
-        petsc_options.push_back(MooseEnum("-snes_mf_operator=5678", "-snes_mf_operator")); break;
-      case 1: // JFNK
-        petsc_options.push_back(MooseEnum("-snes_mf=5678", "-snes_mf")); break;
-      case 2: // NEWTON
-        petsc_options.push_back(MooseEnum("-newton=5678", "-newton")); break;
-      case 3: // FD
-        petsc_options.push_back(MooseEnum("-snes_fd=5678", "-snes_fd")); break;
-      }
-    }
-
-    // Extract the line search options
-    MooseEnum line_search = getParam<MooseEnum>("line_search");
-    // Change linesearch type of "none" to "basic"
-    if (line_search == "none")
-      line_search = "basic";
-
-    if (line_search != "default")
-    {
-#if PETSC_VERSION_LESS_THAN(3,3,0)
-      petsc_options_iname.push_back("-snes_type");
-      petsc_options_iname.push_back("-snes_ls");
-      petsc_options_value.push_back("ls");
-#else
-      petsc_options_iname.push_back("-snes_linesearch_type");
-#endif
-
-      petsc_options_value.push_back(line_search);
-    }
-
-    mproblem->storePetscOptions(petsc_options, petsc_options_iname, petsc_options_value);
-#endif //LIBMESH_HAVE_PETSC
+    storeCommonExecutionerParams(*_problem, _pars);
 
     // solver params
-    EquationSystems & es = mproblem->es();
+    EquationSystems & es = _problem->es();
     es.parameters.set<Real> ("linear solver tolerance")
       = getParam<Real>("l_tol");
 
@@ -167,20 +124,65 @@ CreateExecutionerAction::act()
       = getParam<Real>("nl_rel_step_tol");
 
 #ifdef LIBMESH_HAVE_PETSC
-    mproblem->getNonlinearSystem()._l_abs_step_tol = getParam<Real>("l_abs_step_tol");
+    _problem->getNonlinearSystem()._l_abs_step_tol = getParam<Real>("l_abs_step_tol");
 #endif
 
-#ifdef LIBMESH_HAVE_PETSC
-    Moose::PetscSupport::petscSetOptions(*_problem);
-#endif //LIBMESH_HAVE_PETSC
   }
+
   _awh.executioner() = executioner;
+}
 
 
-  /*
-  Transient * transient_exec = dynamic_cast<Transient *>(_awh.executioner());
+void
+CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, InputParameters & params)
+{
 
-  if (!transient_exec)
-    mooseError("Time Periods are not valid for Steady executioners");
-  */
+#ifdef LIBMESH_HAVE_PETSC
+  std::vector<MooseEnum>   petsc_options       = params.get<std::vector<MooseEnum> >  ("petsc_options");
+  std::vector<std::string> petsc_options_iname = params.get<std::vector<std::string> >("petsc_options_iname");
+  std::vector<std::string> petsc_options_value = params.get<std::vector<std::string> >("petsc_options_value");
+
+  if (params.isParamValid("solve_type"))
+  {
+    // Extract the solve type
+    MooseEnum raw_solve_type = params.get<MooseEnum>("solve_type");
+
+    /**
+     *  Here we set the PETSc option with a magic num (5678) so that we won't warn the user later when
+     *  we ship the final option to PETSc
+     */
+    switch (raw_solve_type)
+    {
+    case 0: // PJFNK
+      petsc_options.push_back(MooseEnum("-snes_mf_operator=5678", "-snes_mf_operator")); break;
+    case 1: // JFNK
+      petsc_options.push_back(MooseEnum("-snes_mf=5678", "-snes_mf")); break;
+    case 2: // NEWTON
+      petsc_options.push_back(MooseEnum("-newton=5678", "-newton")); break;
+    case 3: // FD
+      petsc_options.push_back(MooseEnum("-snes_fd=5678", "-snes_fd")); break;
+    }
+  }
+
+  // Extract the line search options
+  MooseEnum line_search = params.get<MooseEnum>("line_search");
+  // Change linesearch type of "none" to "basic"
+  if (line_search == "none")
+    line_search = "basic";
+
+  if (line_search != "default")
+  {
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+    petsc_options_iname.push_back("-snes_type");
+    petsc_options_iname.push_back("-snes_ls");
+    petsc_options_value.push_back("ls");
+#else
+    petsc_options_iname.push_back("-snes_linesearch_type");
+#endif
+
+    petsc_options_value.push_back(line_search);
+  }
+
+  fe_problem.storePetscOptions(petsc_options, petsc_options_iname, petsc_options_value);
+#endif //LIBMESH_HAVE_PETSC
 }

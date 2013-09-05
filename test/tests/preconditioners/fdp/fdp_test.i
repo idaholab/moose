@@ -85,7 +85,6 @@
   l_max_its = 1
   nl_max_its = 1
 
-  petsc_options = '-snes_mf_operater'
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 []

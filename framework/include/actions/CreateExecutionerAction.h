@@ -29,6 +29,9 @@ public:
   CreateExecutionerAction(const std::string & name, InputParameters params);
 
   virtual void act();
+
+  static void populateCommonExecutionerParams(InputParameters & params);
+  static void    storeCommonExecutionerParams(FEProblem & problem, InputParameters & params);
 };
 
 #endif // CREATEEXECUTIONERACTION_H

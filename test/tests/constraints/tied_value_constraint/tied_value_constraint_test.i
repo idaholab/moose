@@ -60,7 +60,9 @@
 
 [Executioner]
   type = Steady
-  petsc_options = '-snes'
+
+  solve_type = 'NEWTON'
+
   l_max_its = 100
 #  l_tol = 1e-1
 #  l_tol = 1e-
