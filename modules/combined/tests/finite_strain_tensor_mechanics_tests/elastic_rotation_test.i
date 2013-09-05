@@ -227,7 +227,9 @@ active = ''
 [Executioner]
   # Executioner
   type = Transient
-  petsc_options = '-snes -ksp_monitor'
+
+  solve_type = 'NEWTON'
+  petsc_options = '-ksp_monitor'
   petsc_options_iname = '-pc_type '
   petsc_options_value = 'lu'
   nl_rel_tol = 1e-30

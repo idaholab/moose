@@ -109,7 +109,9 @@
 
 [Executioner]
   type = Steady
-  petsc_options = '-snes -ksp_monitor'
+
+  solve_type = 'NEWTON'
+  petsc_options = '-ksp_monitor'
   nl_rel_tol = 1e-14
 []
 

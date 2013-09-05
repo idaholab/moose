@@ -212,7 +212,9 @@ active = 'SMP_Newton'
 [./FDP_Newton]
 type = FDP
 full = true
-petsc_options = '-snes'
+
+solve_type = 'NEWTON'
+
 #petsc_options_iname = '-mat_fd_coloring_err'
 #petsc_options_value = '1.e-10'
 [../]
@@ -233,7 +235,9 @@ petsc_options = '-snes'
 [./SMP_Newton]
   type = SMP
   full = true
-  petsc_options = '-snes'
+
+  solve_type = 'NEWTON'
+
 [../]
 []
 

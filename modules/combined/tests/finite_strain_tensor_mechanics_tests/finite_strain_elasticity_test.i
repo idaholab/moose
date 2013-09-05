@@ -361,7 +361,9 @@
 [Executioner]
   # Executioner
   type = Transient
-  petsc_options = '-snes -ksp_monitor'
+
+  solve_type = 'NEWTON'
+  petsc_options = '-ksp_monitor'
   nl_abs_tol = 1e-10
   l_max_its = 20
   start_time = 0.0
