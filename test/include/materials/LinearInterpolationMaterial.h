@@ -17,6 +17,8 @@ public:
   LinearInterpolationMaterial(const std::string & name,
                               InputParameters parameters);
 
+  virtual ~LinearInterpolationMaterial();
+
 protected:
   virtual void computeQpProperties();
 

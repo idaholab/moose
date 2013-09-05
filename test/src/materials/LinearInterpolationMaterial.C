@@ -11,6 +11,12 @@ InputParameters validParams<LinearInterpolationMaterial>()
   return params;
 }
 
+LinearInterpolationMaterial::~LinearInterpolationMaterial()
+{
+  delete _poly_fit;
+  delete _linear_interp;
+}
+
 
 LinearInterpolationMaterial::LinearInterpolationMaterial(const std::string & name, InputParameters parameters) :
     Material(name, parameters),
