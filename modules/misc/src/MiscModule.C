@@ -19,6 +19,7 @@
 #include "RigidBodyModesRZ.h"
 #include "RigidBodyModes3D.h"
 #include "CoupledDirectionalMeshHeightInterpolation.h"
+#include "CInterfacePosition.h"
 
 void
 Elk::Misc::registerObjects(Factory & factory)
@@ -44,6 +45,7 @@ Elk::Misc::registerObjects(Factory & factory)
   registerPostprocessor(SharpInterfaceForcing);
 
   registerUserObject(NodalArea);
+  registerPostprocessor(CInterfacePosition);
 }
 
 void
