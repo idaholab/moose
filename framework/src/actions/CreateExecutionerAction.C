@@ -65,7 +65,7 @@ CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & param
 #endif
   params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type (Note: none = basic)");
 
-  MooseEnum common_petsc_options("-ksp_monitor, -snes_mf_operator", "", true);
+  MooseEnum common_petsc_options("-ksp_monitor", "", true);
   std::vector<MooseEnum> common_petsc_options_vec(1, common_petsc_options);
 
   params.addParam<std::vector<MooseEnum> >("petsc_options", common_petsc_options_vec, "Singleton Petsc options");

@@ -59,6 +59,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const std::string & name
     NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
     unsigned int n_vars = nl.nVariables();
 
+    // The coupling matrix is held and released by FEProblem, so it is not released in this object
     CouplingMatrix * cm = new CouplingMatrix(n_vars);
 
     bool full = false; //getParam<bool>("full"); // TODO: add a FULL option for PBP
