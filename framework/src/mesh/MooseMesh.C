@@ -185,6 +185,8 @@ MooseMesh::~MooseMesh()
   delete _local_node_range;
   delete _bnd_node_range;
   delete _bnd_elem_range;
+  delete _refined_elements;
+  delete _coarsened_elements;
   delete _mesh;
 }
 
