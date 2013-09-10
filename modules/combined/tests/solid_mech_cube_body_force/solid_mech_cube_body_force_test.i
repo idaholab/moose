@@ -100,7 +100,9 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options = '-ksp_monitor'
+
+  print_linear_residuals = true
+
 []
 
 [Output]

@@ -242,7 +242,9 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options = '-ksp_monitor -snes_ksp'
+
+  print_linear_residuals = true
+  petsc_options = '-snes_ksp'
   petsc_options_iname = '-ksp_gmres_restart'
   petsc_options_value = '101'
 

@@ -111,7 +111,9 @@
   type = Steady
 
   solve_type = 'NEWTON'
-  petsc_options = '-ksp_monitor'
+
+  print_linear_residuals = true
+
   nl_rel_tol = 1e-14
 []
 

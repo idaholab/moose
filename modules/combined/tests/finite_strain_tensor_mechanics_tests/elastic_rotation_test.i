@@ -229,7 +229,9 @@ active = ''
   type = Transient
 
   solve_type = 'NEWTON'
-  petsc_options = '-ksp_monitor'
+
+  print_linear_residuals = true
+
   petsc_options_iname = '-pc_type '
   petsc_options_value = 'lu'
   nl_rel_tol = 1e-30

@@ -130,7 +130,9 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options = '-ksp_monitor'
+
+  print_linear_residuals = true
+
 
 # controls for linear iterations
   l_max_its = 100

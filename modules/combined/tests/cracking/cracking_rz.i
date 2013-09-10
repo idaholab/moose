@@ -159,7 +159,9 @@
   type = Transient
 
   solve_type = PJFNK
-  petsc_options = '-ksp_monitor'
+
+  print_linear_residuals = true
+
   petsc_options_iname = '-ksp_gmres_restart'
   petsc_options_value = '101               '
 

@@ -166,7 +166,9 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options = '-ksp_monitor'
+
+  print_linear_residuals = true
+
 
   # Two sets of linesearch options are for petsc 3.1 and 3.3 respectively
   petsc_options_iname = '-pc_type -ksp_gmres_restart'

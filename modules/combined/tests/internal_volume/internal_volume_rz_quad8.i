@@ -105,7 +105,9 @@
   type = Transient
 
   solve_type = PJFNK
-  petsc_options = '-ksp_monitor'
+
+  print_linear_residuals = true
+
 
   nl_abs_tol = 1e-10
 

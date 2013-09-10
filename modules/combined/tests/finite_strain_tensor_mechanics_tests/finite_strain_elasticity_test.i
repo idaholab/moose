@@ -363,7 +363,9 @@
   type = Transient
 
   solve_type = 'NEWTON'
-  petsc_options = '-ksp_monitor'
+
+  print_linear_residuals = true
+
   nl_abs_tol = 1e-10
   l_max_its = 20
   start_time = 0.0

@@ -138,7 +138,9 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options = '-ksp_monitor'
+
+  print_linear_residuals = true
+
 #  petsc_options_iname = '-snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart -pc_type'
 #  petsc_options_value = 'ls         basic    basic                    201                lu'
 

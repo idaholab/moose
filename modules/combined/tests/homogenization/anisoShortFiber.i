@@ -396,7 +396,9 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
- petsc_options = '-ksp_monitor -ksp_gmres_modifiedgramschmidt'
+
+ print_linear_residuals = true
+ petsc_options = '-ksp_gmres_modifiedgramschmidt'
  petsc_options_iname = '-ksp_gmres_restart -pc_type   -pc_hypre_type -pc_hypre_boomeramg_max_iter -pc_hypre_boomeramg_grid_sweeps_all -ksp_type -mat_mffd_type'
  petsc_options_value = '201                 hypre       boomeramg      2                            2                                   fgmres    ds'
 

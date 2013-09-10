@@ -156,7 +156,9 @@
   type = Transient
 
   solve_type = PJFNK
-  petsc_options = '-ksp_monitor'
+
+  print_linear_residuals = true
+
 
   l_max_its = 100
 

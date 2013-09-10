@@ -172,7 +172,9 @@
   solve_type = 'PJFNK'  
   line_search = none	
 
-  petsc_options = '-ksp_monitor -snes_ksp_ew'
+
+  print_linear_residuals = true
+  petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-ksp_gmres_restart'
   petsc_options_value = '101'
 

@@ -127,7 +127,9 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-   petsc_options = '-snes_ksp_ew -ksp_monitor'
+
+   print_linear_residuals = true
+   petsc_options = '-snes_ksp_ew '
    petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type'
    petsc_options_value = '70 hypre boomeramg'
    l_max_its = 60
