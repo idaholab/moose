@@ -115,7 +115,9 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options = '-ksp_monitor '
+
+  print_linear_residuals = true
+
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold' 
   petsc_options_value = 'hypre boomeramg 31 0.7'
   l_tol = 1.0e-4
