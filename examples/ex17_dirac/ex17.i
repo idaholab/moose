@@ -61,7 +61,9 @@
 
 [Executioner]
   type = Steady
-  petsc_options = '-snes_mf'
+
+  solve_type = JFNK
+
 []
 
 [Output]

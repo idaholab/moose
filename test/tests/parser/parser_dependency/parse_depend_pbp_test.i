@@ -93,7 +93,9 @@
   l_max_its = 1
   nl_max_its = 1
 
-  petsc_options = '-snes_mf'
+
+  solve_type = JFNK
+
 []
 
 [Output]

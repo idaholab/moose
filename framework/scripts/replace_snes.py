@@ -28,30 +28,34 @@ def fixupHeader():
         checkAndUpdate(dirpath + '/' + file)
 
 
-re_snes = re.compile(r"^(\s*)([^#]*) -snes\b \s*(.*)", re.X)
+re_snes = re.compile(r"^(\s*)([^#]*) -snes_mf\b \s*(.*)", re.X)
 #re_ls31_option = re.compile(r"^([^#]*) -snes_type \s+ -snes_ls \s*(.*)", re.X)
 #re_ls31_value = re.compile(r"^([^#]* petsc_options_value .*? ) ls \s+ (\w+) \s*(.*)", re.X)
 #re_ls33_option = re.compile(r"^([^#]*) -snes_linesearch_type \s*(.*)", re.X)
 #re_ls33_value = re.compile(r"^([^#]* petsc_options_value .*? ) \b(cubic | quadratic | basic | bt)\b \s*(.*)", re.X)
 
-
 re2 = re.compile(r"(.*)^([^#]*? petsc_options \s*=\s* (?: '\s*' | \"\s*\" | \s* ) )$", re.M | re.X | re.S)
+re_pre = re.compile(r"^[^#]* type \s* = \s* PBP", re.X)
 
 def checkAndUpdate(filename):
   f = open(filename)
   lines = f.readlines()
   f.close()
 
-#  print filename
+  solve_type = 'PJFNK'
+  for i, line in enumerate(lines):
+    if re_pre.search(line) != None:
+      solve_type = 'JFNK'
+
   replacement_made = False
   line_search_added = False
   for i, line in enumerate(lines):
 
     # Replace PETSc solver type
-    (lines[i], num_replacements) = re_snes.subn("\n\g<1>solve_type = 'NEWTON'\n\g<1>\g<2>\g<3>", lines[i])
+    (lines[i], num_replacements) = re_snes.subn("\n\g<1>solve_type = " + solve_type + "\n\g<1>\g<2>\g<3>", lines[i])
     if num_replacements:
       replacement_made = True
-      print filename
+      print filename + " switching to " + solve_type
 
     # Replace PETSC3.1 linesearch options
 #    (lines[i], num_replacements) = re_ls31_option.subn("\g<1>\g<2>", lines[i])

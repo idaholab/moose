@@ -108,7 +108,9 @@
 [Executioner]
   type = Transient
   perf_log = true
-  petsc_options = '-snes_mf'
+
+  solve_type = JFNK
+
   restart_file_base = out_xda_restart_part1_restart_0005
   
   start_time = 1
