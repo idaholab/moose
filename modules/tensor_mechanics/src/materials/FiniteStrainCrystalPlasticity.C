@@ -604,6 +604,7 @@ RankTwoTensor FiniteStrainCrystalPlasticity::getmatrot(RankTwoTensor &a)
       evec(i,j)=cmat[i][j];
 
   rot=a*((evec.transpose()*diag*evec).inverse());
+  
 
   return rot;
 
