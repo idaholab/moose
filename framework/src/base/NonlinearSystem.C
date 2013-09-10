@@ -1030,7 +1030,8 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
       ++it)
   {
 
-    if (_assemble_constraints_separately) {
+    if (_assemble_constraints_separately)
+    {
       // Reset the constraint_applied flag before each new constraint, as they need to be assembled separately
       constraints_applied = false;
     }
@@ -1115,19 +1116,21 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
       }
     }
   }
-  if (!_assemble_constraints_separately) {
+  if (!_assemble_constraints_separately)
+  {
     Parallel::max(constraints_applied);
 
     if(constraints_applied)
+    {
+      residual.close();
+      _fe_problem.addCachedResidual(residual, 0);
+      residual.close();
+      if (_need_residual_ghosted)
       {
-	residual.close();
-	_fe_problem.addCachedResidual(residual, 0);
-	residual.close();
-	if (_need_residual_ghosted) {
-	  _residual_ghosted = residual;
-	  _residual_ghosted.close();  // somewhat redundant since the assignment above should also close
-	}
+        _residual_ghosted = residual;
+        _residual_ghosted.close();  // somewhat redundant since the assignment above should also close
       }
+    }
   }
 }
 
@@ -1389,7 +1392,8 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
       it != penetration_locators->end();
       ++it)
   {
-    if (_assemble_constraints_separately) {
+    if (_assemble_constraints_separately)
+    {
       // Reset the constraint_applied flag before each new constraint, as they need to be assembled separately
       constraints_applied = false;
     }
@@ -1478,27 +1482,27 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
       if(constraints_applied)
       {
 #ifdef LIBMESH_HAVE_PETSC
-	//Necessary for speed
+        //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
-	MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3,1,0)
-	// In Petsc 3.0.0, MatSetOption has three args...the third arg
-	// determines whether the option is set (true) or unset (false)
-	MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-		     MAT_KEEP_ZEROED_ROWS,
-		     PETSC_TRUE);
+        // In Petsc 3.0.0, MatSetOption has three args...the third arg
+        // determines whether the option is set (true) or unset (false)
+        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                     MAT_KEEP_ZEROED_ROWS,
+                     PETSC_TRUE);
 #else
-	MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-		     MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
-		     PETSC_TRUE);
+        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                     MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
+                     PETSC_TRUE);
 #endif
 #endif
 
-	jacobian.close();
-	jacobian.zero_rows(zero_rows, 0.0);
-	jacobian.close();
-	_fe_problem.addCachedJacobian(jacobian, 0);
-	jacobian.close();
+        jacobian.close();
+        jacobian.zero_rows(zero_rows, 0.0);
+        jacobian.close();
+        _fe_problem.addCachedJacobian(jacobian, 0);
+        jacobian.close();
       }
     }
   }
@@ -1517,12 +1521,12 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
       // In Petsc 3.0.0, MatSetOption has three args...the third arg
       // determines whether the option is set (true) or unset (false)
       MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-		   MAT_KEEP_ZEROED_ROWS,
-		   PETSC_TRUE);
+                   MAT_KEEP_ZEROED_ROWS,
+                   PETSC_TRUE);
 #else
       MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-		   MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
-		   PETSC_TRUE);
+                   MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
+                   PETSC_TRUE);
 #endif
 #endif
 
