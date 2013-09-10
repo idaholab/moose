@@ -52,10 +52,6 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("output_es_info", true, "Requests that we output Equation Systems info during calls to initialSetup (normallly at the beginning of a simulation.)");
   params.addParam<Real>("time_interval", "simulation time at which to solve and output");
 
-#ifdef LIBMESH_HAVE_PETSC
-  params.addParam<bool>("print_linear_residuals", false, "Specifies whether the linear residuals are printed during the solve");
-#endif
-
   params.addParam<Real>("iteration_plot_start_time", std::numeric_limits<Real>::max(), "Specifies a time after which the solution will be written following each nonlinear iteration");
 
   params.addParam<bool>("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
@@ -70,7 +66,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<unsigned int>("num_restart_files", 0, "Number of the restart files to save (0 = no restart files)");
   params.addParam<Point>("position", "Set a positional offset.  This vector will get added to the nodal cooardinates to move the domain.");
 
-  params.addParamNamesToGroup("position interval time_interval output_displaced output_solution_history print_linear_residuals iteration_plot_start_time elemental_as_nodal exodus_inputfile_output output_es_info output_variables hidden_variables", "Advanced");
+  params.addParamNamesToGroup("position interval time_interval output_displaced output_solution_history iteration_plot_start_time elemental_as_nodal exodus_inputfile_output output_es_info output_variables hidden_variables", "Advanced");
   params.addParamNamesToGroup("nemesis gmv vtk tecplot tecplot_binary xda", "Format");
   params.addParamNamesToGroup("screen_interval postprocessor_screen max_pps_rows_screen pps_fit_to_screen postprocessor_csv postprocessor_gnuplot gnuplot_format", "Postprocessor");
   params.addParamNamesToGroup("perf_log show_setup_log_early", "Logging");
@@ -226,11 +222,6 @@ SetupOutputAction::act()
        mooseError("time interval must be positive");
      }
    }
-
-#ifdef LIBMESH_HAVE_PETSC
-  if (getParam<bool>("print_linear_residuals"))
-    PetscOptionsSetValue("-ksp_monitor", PETSC_NULL);
-#endif
 
  // Test to make sure that the user can write to the directory specified in file_base
   std::string base = "./" + getParam<OutFileBase>("file_base");

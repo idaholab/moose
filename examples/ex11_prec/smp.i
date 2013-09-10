@@ -118,7 +118,9 @@
 [Executioner]
   type = Steady
 
-  petsc_options = '-ksp_monitor'
+
+  print_linear_residuals = true
+
 []
 
 [Output]

@@ -26,7 +26,9 @@
     preconditioner  = 'LU LU'
     off_diag_row    = 'v'
     off_diag_column = 'u'
-    petsc_options = '-ksp_monitor'  # Test petsc options in PBP block
+
+    print_linear_residuals = true
+    petsc_options = ''  # Test petsc options in PBP block
   [../]
 []
 

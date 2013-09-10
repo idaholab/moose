@@ -55,7 +55,7 @@ CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & param
                                 "NEWTON: Full Newton Solve"
                                 "FD: Use finite differences to compute Jacobian");
 
-  #ifdef LIBMESH_HAVE_PETSC
+#ifdef LIBMESH_HAVE_PETSC
 
   // Line Search Options
 #if PETSC_VERSION_LESS_THAN(3,3,0)
@@ -64,8 +64,9 @@ CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & param
   MooseEnum line_search("default, shell, none, basic, l2, bt, cp", "default");
 #endif
   params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type (Note: none = basic)");
+  params.addParam<bool>("print_linear_residuals", false, "Specifies whether the linear residuals are printed during the solve");
 
-  MooseEnum common_petsc_options("-ksp_monitor", "", true);
+  MooseEnum common_petsc_options("", "", true);
   std::vector<MooseEnum> common_petsc_options_vec(1, common_petsc_options);
 
   params.addParam<std::vector<MooseEnum> >("petsc_options", common_petsc_options_vec, "Singleton Petsc options");
@@ -141,6 +142,9 @@ CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, In
   std::vector<MooseEnum>   petsc_options       = params.get<std::vector<MooseEnum> >  ("petsc_options");
   std::vector<std::string> petsc_options_iname = params.get<std::vector<std::string> >("petsc_options_iname");
   std::vector<std::string> petsc_options_value = params.get<std::vector<std::string> >("petsc_options_value");
+
+  if (params.get<bool>("print_linear_residuals"))
+    petsc_options.push_back(MooseEnum("-ksp_monitor=5678", "-ksp_monitor"));
 
   if (params.isParamValid("solve_type"))
   {

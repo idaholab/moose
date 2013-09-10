@@ -3645,9 +3645,18 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
     if (petsc_options[i] == "-log_summary")
       mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
 
-    // Warn about solver type (Note: -snes is not a REAL option)
-    else if (petsc_options[i] != 5678 /* Magic Num */ && (petsc_options[i] == "-newton" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator"))
-      mooseWarning("The PETSc option " << petsc_options[i] << " should not be used directly in a MOOSE input file. Please set the solver type through \"solve_type\".");
+    // Warn about superceeded PETSc options (Note: -snes is not a REAL option)
+    else if (petsc_options[i] != 5678) /* Magic Num */
+    {
+      std::string help_string;
+      if (petsc_options[i] == "-newton" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator")
+        help_string = "Please set the solver type through \"solve_type\".";
+      else if (petsc_options[i] == "-ksp_monitor")
+        help_string = "Please use \"print_linear_residuals = true\"";
+
+      if (help_string != "")
+        mooseWarning("The PETSc option " << petsc_options[i] << " should not be used directly in a MOOSE input file. " << help_string);
+    }
 
     if (find(po.begin(), po.end(), petsc_options[i]) == po.end())
       po.push_back(petsc_options[i]);

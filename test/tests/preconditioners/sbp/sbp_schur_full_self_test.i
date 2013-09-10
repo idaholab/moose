@@ -108,7 +108,9 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options       = '-snes_view -snes_monitor -snes_converged_reason -ksp_monitor -ksp_converged_reason'
+
+  print_linear_residuals = true
+  petsc_options       = '-snes_view -snes_monitor -snes_converged_reason -ksp_converged_reason'
 []
 
 [Output]

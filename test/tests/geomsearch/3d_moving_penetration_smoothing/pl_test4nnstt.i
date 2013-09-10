@@ -279,7 +279,9 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options = '-ksp_monitor -snes_ksp_ew'
+
+  print_linear_residuals = true
+  petsc_options = '-snes_ksp_ew'
 
   nl_rel_tol = 1e-9
   l_max_its = 10
