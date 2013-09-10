@@ -73,7 +73,9 @@
 
 [Executioner]
   type = Steady #Transient
-  petsc_options = '-snes_mf -ksp_monitor'
+
+  solve_type = PJFNK
+  petsc_options = '-ksp_monitor'
 
   l_max_its = 100
 

@@ -101,7 +101,9 @@
 
 [Executioner]
   type = AdaptiveTransient
-  petsc_options = '-snes_mf -ksp_monitor -snes_ksp_ew'
+
+  solve_type = PJFNK
+  petsc_options = '-ksp_monitor -snes_ksp_ew'
   petsc_options_iname = '-ksp_gmres_restart'
   petsc_options_value = '101'
 

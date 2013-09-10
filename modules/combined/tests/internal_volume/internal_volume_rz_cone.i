@@ -90,7 +90,9 @@
 [Executioner]
 
   type = Transient
-  petsc_options = '-snes_mf -ksp_monitor'
+
+  solve_type = PJFNK
+  petsc_options = '-ksp_monitor'
 
   nl_abs_tol = 1e-10
 
