@@ -501,9 +501,6 @@ void petscSetDefaults(FEProblem & problem)
   }
 #endif
 
-  SNESMonitorCancel(snes);
-  KSPMonitorCancel(ksp);
-
   {
     PetscErrorCode ierr;
 #if PETSC_VERSION_LESS_THAN(2,3,3)
@@ -524,7 +521,6 @@ void petscSetDefaults(FEProblem & problem)
 #endif
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
   }
-
 
 
 }

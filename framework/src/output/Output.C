@@ -118,12 +118,19 @@ Output::output()
 void
 Output::timestepSetup()
 {
+
 #ifdef LIBMESH_HAVE_PETSC
   if (_time >= _iteration_plot_start_time)
   {
     NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
     PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
     SNES snes = petsc_solver->snes();
+    KSP ksp;
+    SNESGetKSP(snes, &ksp);
+
+    SNESMonitorCancel(snes);
+    KSPMonitorCancel(ksp);
+
 #if PETSC_VERSION_LESS_THAN(2,3,3)
     PetscErrorCode ierr =
       SNESSetMonitor (snes, Output::iterationOutput, this, PETSC_NULL);
