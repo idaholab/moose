@@ -115,7 +115,7 @@ void outputNorm(Real old_norm, Real norm, bool color)
     if(norm < old_norm)
     {
       // If it changes by more than 10% color green
-      if(std::abs(old_norm - norm) / old_norm > 0.1)
+      if(std::abs(old_norm - norm) / old_norm > 0.05)
         libMesh::out << set_colors(VT_GREEN, VT_DEFAULT);
       else // yellow if it's not going so well
         libMesh::out << set_colors(VT_YELLOW, VT_DEFAULT);
