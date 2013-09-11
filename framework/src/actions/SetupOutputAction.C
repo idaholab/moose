@@ -229,18 +229,23 @@ SetupOutputAction::act()
 
   if(getParam<bool>("color_output"))
   {
-    std::string term(getenv("TERM"));
+    char * term_env = getenv("TERM");
 
-    bool color = false;
+    if(term_env)
+    {
+      std::string term(term_env);
 
-    if(term == "xterm-256color")
-      color = true;
+      bool color = false;
 
-    if(term == "xterm")
-      color = true;
+      if(term == "xterm-256color")
+        color = true;
 
-    if(color == true)
-      _problem->colorOutput(true);
+      if(term == "xterm")
+        color = true;
+
+      if(color == true)
+        _problem->colorOutput(true);
+    }
   }
 
  // Test to make sure that the user can write to the directory specified in file_base
