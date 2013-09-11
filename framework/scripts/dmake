@@ -109,8 +109,12 @@ def launchClient(user_list, options, other_args):
 def checkDaemon(user_list, options):
   if options.no_daemon:
     return
-  #allow_commands = ['gcc', 'g++', 'gfortran', 'clang', 'clang++', 'mpicc', 'mpicxx']
-  #os.environ['DISTCC_CMDLIST']=' '.join([which(i) for i in allow_commands])
+  allow_commands = ['gcc', 'g++', 'gfortran', 'clang', 'clang++', 'mpicc', 'mpicxx', 'cc']
+  cmd_list = open(os.getenv('HOME') + '/.cmd_list', 'w')
+  for command in allow_commands:
+    cmd_list.write(which(command) + '\n')
+  cmd_list.close()
+  os.environ['DISTCC_CMDLIST']=os.getenv('HOME') + '/.cmd_list'
   if options.daemon:
     launchDaemon(user_list, options)
   else:
