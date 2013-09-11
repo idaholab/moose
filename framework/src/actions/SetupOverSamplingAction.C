@@ -22,6 +22,8 @@
 #include "libmesh/exodusII_io.h"
 #include "MooseMesh.h"
 
+#include "unistd.h"
+
 template<>
 InputParameters validParams<SetupOverSamplingAction>()
 {

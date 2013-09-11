@@ -23,6 +23,8 @@
 #include "MooseMesh.h"
 #include "libmesh/exodusII_io.h"
 
+#include "unistd.h"
+
 template<>
 InputParameters validParams<SetupOutputAction>()
 {
