@@ -24,6 +24,8 @@ elif os.environ.has_key("MOOSE_DEV"):
 
 sys.path.append(MOOSE_DIR + '/scripts/common')
 
+os.environ["TERM"] = "peacock"
+
 from optparse import OptionParser
 
 from InputFileWidget import *

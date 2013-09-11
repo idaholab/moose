@@ -23,6 +23,7 @@
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
 #include "MooseTypes.h"
+#include "vt100.h"
 
 //libMesh Includes
 #include "libmesh/libmesh_common.h"
@@ -49,7 +50,6 @@
 // PETSc 3.3.0+
 #include <petscdm.h>
 #endif
-
 
 namespace Moose
 {
@@ -105,6 +105,79 @@ void petscSetOptions(Problem & problem)
 
   for (unsigned int i=0; i<petsc_options_inames.size(); ++i)
     PetscOptionsSetValue(petsc_options_inames[i].c_str(), petsc_options_values[i].c_str());
+}
+
+/// Quick helper to output the norm in color
+void outputNorm(Real old_norm, Real norm, bool color)
+{
+  if(color)
+  {
+    if(norm < old_norm)
+    {
+      // If it changes by more than 10% color green
+      if(std::abs(old_norm - norm) / old_norm > 0.1)
+        libMesh::out << set_colors(VT_GREEN, VT_DEFAULT);
+      else // yellow if it's not going so well
+        libMesh::out << set_colors(VT_YELLOW, VT_DEFAULT);
+    }
+    else // Red if the residual went up...
+      libMesh::out << set_colors(VT_RED, VT_DEFAULT);
+  }
+
+  libMesh::out << norm;
+
+  if(color) // Set the color back to normal
+    libMesh::out << set_colors(VT_DEFAULT, VT_DEFAULT);
+
+  libMesh::out << std::endl;
+}
+
+PetscErrorCode nonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_ptr)
+{
+  static Real old_norm;
+
+  Problem * problem = static_cast<Problem*>(void_ptr);
+
+  bool color = problem->shouldColorOutput();
+
+  if(its == 0)
+    old_norm = std::numeric_limits<Real>::max();
+
+  libMesh::out << std::setw(2) << its
+               << std::scientific
+               << " Nonlinear |R| = ";
+
+  outputNorm(old_norm, fnorm, color);
+
+  old_norm = fnorm;
+
+  return 0;
+}
+
+
+PetscErrorCode  linearMonitor(KSP ksp, PetscInt its, PetscReal rnorm, void *void_ptr)
+{
+  static Real old_norm;
+
+  Problem * problem = static_cast<Problem*>(void_ptr);
+
+  if(!problem)
+    mooseError("What are you trying to solve?");
+
+  bool color = problem->shouldColorOutput();
+
+  if(its == 0)
+    old_norm = std::numeric_limits<Real>::max();
+
+  libMesh::out << std::setw(7) << its
+               << std::scientific
+               << " Linear |R| = ";
+
+  outputNorm(old_norm, rnorm, color);
+
+  old_norm = rnorm;
+
+  return 0;
 }
 
 PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason, void * ctx)
@@ -426,8 +499,34 @@ void petscSetDefaults(FEProblem & problem)
                                   PETSC_NULL);
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
   }
-
 #endif
+
+  SNESMonitorCancel(snes);
+  KSPMonitorCancel(ksp);
+
+  {
+    PetscErrorCode ierr;
+#if PETSC_VERSION_LESS_THAN(2,3,3)
+    ierr = SNESSetMonitor (snes, nonlinearMonitor, &problem, PETSC_NULL);
+#else
+    ierr = SNESMonitorSet (snes, nonlinearMonitor, &problem, PETSC_NULL);
+#endif
+    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  }
+
+  if(problem.shouldPrintLinearResiduals())
+  {
+    PetscErrorCode ierr;
+#if PETSC_VERSION_LESS_THAN(2,3,3)
+    ierr = KSPSetMonitor (ksp, linearMonitor, &problem, PETSC_NULL);
+#else
+    ierr = KSPMonitorSet (ksp, linearMonitor, &problem, PETSC_NULL);
+#endif
+    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  }
+
+
+
 }
 } // Namespace PetscSupport
 } // Namespace MOOSE

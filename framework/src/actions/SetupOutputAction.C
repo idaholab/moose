@@ -54,6 +54,8 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("output_es_info", true, "Requests that we output Equation Systems info during calls to initialSetup (normallly at the beginning of a simulation.)");
   params.addParam<Real>("time_interval", "simulation time at which to solve and output");
 
+  params.addParam<bool>("color_output", true, "If true then MOOSE will attempt to add color when it outputs to the console.");
+
   params.addParam<Real>("iteration_plot_start_time", std::numeric_limits<Real>::max(), "Specifies a time after which the solution will be written following each nonlinear iteration");
 
   params.addParam<bool>("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
@@ -224,6 +226,22 @@ SetupOutputAction::act()
        mooseError("time interval must be positive");
      }
    }
+
+  if(getParam<bool>("color_output"))
+  {
+    std::string term(getenv("TERM"));
+
+    bool color = false;
+
+    if(term == "xterm-256color")
+      color = true;
+
+    if(term == "xterm")
+      color = true;
+
+    if(color == true)
+      _problem->colorOutput(true);
+  }
 
  // Test to make sure that the user can write to the directory specified in file_base
   std::string base = "./" + getParam<OutFileBase>("file_base");

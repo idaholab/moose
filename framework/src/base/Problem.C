@@ -26,7 +26,8 @@ InputParameters validParams<Problem>()
 }
 
 Problem::Problem(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters)
+    MooseObject(name, parameters),
+    _color_output(false)
 {
 }
 

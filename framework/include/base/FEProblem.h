@@ -574,6 +574,18 @@ public:
   virtual void outputSolutionHistory(bool state = true) { _output_solution_history = state; }
   virtual void outputESInfo(bool state = true) { _output_es_info = state; }
 
+
+  /**
+   * Whether or not we should be printing the linear residuals.
+   * @param state True to print linear residuals.
+   */
+  virtual void printLinearResiduals(bool state) { _print_linear_residuals = state; }
+
+  /**
+   * Whether or not we should be printing the linear residuals.
+   */
+  virtual bool shouldPrintLinearResiduals() { return _print_linear_residuals; }
+
   /**
    * Set which variables will be written in ouput files
    * @param output_variables The list of variable names to write in the ouput files
@@ -727,6 +739,8 @@ protected:
   unsigned int _pps_output_table_max_rows;
   MooseEnum _pps_fit_to_screen;
 
+  bool _print_linear_residuals;
+
   void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
 
 public:
@@ -779,6 +793,7 @@ protected:
   bool _output_solution_history;
   /// true for outputting equations systems information
   bool _output_es_info;
+
   /// whether input file has been written
   bool _input_file_saved;
 

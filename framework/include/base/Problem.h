@@ -65,6 +65,17 @@ public:
   // Output system /////
   virtual void output(bool force = false) = 0;
 
+  /**
+   * Whether or not to color output to the terminal.
+   * @param state Pass true for color, false to not color.
+   */
+  virtual void colorOutput(bool state) { _color_output = state; }
+
+  /**
+   * Return the current status of whether or not to color terminal output.
+   */
+  virtual bool shouldColorOutput() { return _color_output; }
+
   // Time periods //////
 
   /**
@@ -87,6 +98,9 @@ public:
 protected:
   /// Time periods
   std::vector<TimePeriod *> _time_periods;
+
+  /// True if we're going to attempt to write color output
+  bool _color_output;
 };
 
 #endif /* PROBLEM_H */

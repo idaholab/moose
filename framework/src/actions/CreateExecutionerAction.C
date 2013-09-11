@@ -143,8 +143,7 @@ CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, In
   std::vector<std::string> petsc_options_iname = params.get<std::vector<std::string> >("petsc_options_iname");
   std::vector<std::string> petsc_options_value = params.get<std::vector<std::string> >("petsc_options_value");
 
-  if (params.get<bool>("print_linear_residuals"))
-    petsc_options.push_back(MooseEnum("-ksp_monitor=5678", "-ksp_monitor"));
+  fe_problem.printLinearResiduals(params.get<bool>("print_linear_residuals"));
 
   if (params.isParamValid("solve_type"))
   {
