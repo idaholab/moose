@@ -104,6 +104,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _quadrature_order(CONSTANT),
     _pps_output_table_max_rows(0),
     _pps_fit_to_screen(FormattedTable::getWidthModes()),
+    _print_linear_residuals(false),
     _postprocessor_screen_output(true),
     _postprocessor_csv_output(false),
     _postprocessor_gnuplot_output(false),

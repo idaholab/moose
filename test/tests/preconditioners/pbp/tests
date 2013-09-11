@@ -17,7 +17,7 @@
   [./check_petsc_options_test]
     type = 'RunApp'
     input = 'pbp_test_options.i'
-    expect_out = 'KSP Residual'
+    expect_out = 'Linear'
     max_parallel = 1
   [../]
 []

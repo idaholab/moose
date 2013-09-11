@@ -9,7 +9,7 @@
   [./testverifydamping]
     type = 'RunApp'
     input = 'constant_damper_test.i'
-    expect_out = 'NL step\s+8'
+    expect_out = '8 Nonlinear'
     prereq = 'testdamper'
   [../]
 []
