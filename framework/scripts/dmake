@@ -13,6 +13,9 @@ def getList():
 def launchDaemon(user_list, options):
   distccd_command = [which('distccd'), '--daemon']
   # build the --allow arguments
+  if options.allow:
+    for host in options.allow:
+      user_list.append(host + ',,,,' + options.network + ',')
   for allowed_host in [i for i in user_list]:
     if allowed_host.find('#') == -1:
       (hostname, cores, threads, use, network, desc) = getMachine(allowed_host)
@@ -22,7 +25,10 @@ def launchDaemon(user_list, options):
           if hostname == socket.gethostname().split('.')[0]:
             distccd_command.extend(['--jobs', str(threads)])
         except socket.gaierror:
-          print 'WARNING, Hostname:', hostname, 'not found on the network. DNS error?'
+          if options.allow:
+            print 'WARNING, Hostname:', hostname, 'not found on the network. DNS error? Try entering the IP instead?'
+          else:
+            print 'WARNING, Hostname:', hostname, 'not found on the network. DNS error?'
 
   # Kill any running distccd process
   killall_process = subprocess.Popen([which('killall'), 'distccd'])
@@ -115,7 +121,7 @@ def checkDaemon(user_list, options):
     cmd_list.write(which(command) + '\n')
   cmd_list.close()
   os.environ['DISTCC_CMDLIST']=os.getenv('HOME') + '/.cmd_list'
-  if options.daemon:
+  if options.daemon or options.allow:
     launchDaemon(user_list, options)
   else:
     if os.path.exists(os.getenv('HOME') + '/.dmake'):
@@ -167,6 +173,7 @@ def parseArguments(args=None):
   parser.add_argument('--jobs', '-j', type=int, default=70, help='Arbitrarily set job count (default: %(default)d)')
   parser.add_argument('--dedicated', '-d', action='store_true', help='Only use dedicated compile boxes')
   parser.add_argument('--local', '-l', action='store_true', help='Run make locally, do not distribute')
+  parser.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
   (options, other_args) = parser.parse_known_args()
   return (options, other_args)
 
@@ -187,13 +194,13 @@ def which(program):
 if __name__ == "__main__":
   (options, other_args) = parseArguments()
 
-  if socket.gethostbyname(socket.gethostname()).find('134') != -1:
+  if socket.gethostbyname(socket.gethostname()).find('204') != -1:
+    options.network = 'fn'
+  else:
     options.network = 'inl'
     os.environ['no_proxy'] = 'hpcsc.inl.gov'
-  else:
-    options.network = 'fn'
   user_list = getList()
-  if options.daemon:
+  if options.daemon or options.allow:
     checkDaemon(user_list, options)
   else:
     checkDaemon(user_list, options)
