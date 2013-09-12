@@ -63,20 +63,16 @@
     type = SMP
     full = true
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
   [../]
 
   [./FDP_PJFNK]
     type = FDP
     full = true
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
     # These options **together** cause a zero pivot in this problem, even without SUPG terms.
     # But using either option alone appears to be OK.

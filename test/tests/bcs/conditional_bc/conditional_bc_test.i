@@ -59,10 +59,8 @@
   dt = 0.1
   
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 []
 
 [Output]

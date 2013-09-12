@@ -56,7 +56,7 @@
   num_steps = 4
   dt = 1e-3
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_hypre_type'

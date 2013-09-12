@@ -70,10 +70,8 @@
 [Executioner]
   type = Steady
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   restart_file_base = uo_restart_part1_out_restart_0001
 []

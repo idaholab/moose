@@ -69,10 +69,8 @@
 
   type = Steady
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
   print_linear_residuals = true
 
   petsc_options_iname = '-pc_type -snes_ls -ksp_gmres_restart'

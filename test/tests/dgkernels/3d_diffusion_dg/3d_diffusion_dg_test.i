@@ -92,10 +92,8 @@
   type = Steady
   perf_log = true
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 []
 
 [Postprocessors]

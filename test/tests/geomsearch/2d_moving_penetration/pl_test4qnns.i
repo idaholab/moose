@@ -218,10 +218,8 @@
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
   print_linear_residuals = true
   petsc_options = '-snes_ksp_ew'
 

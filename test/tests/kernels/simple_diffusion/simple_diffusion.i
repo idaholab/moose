@@ -35,7 +35,7 @@
 [Executioner]
   type = Steady
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   print_linear_residuals = true

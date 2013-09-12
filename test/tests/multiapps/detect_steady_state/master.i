@@ -43,10 +43,8 @@
   num_steps = 3
   dt = 1
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
   print_linear_residuals = true
 
   petsc_options_iname = '-pc_type -pc_hypre_type'

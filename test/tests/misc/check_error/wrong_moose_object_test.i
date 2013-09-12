@@ -42,10 +42,8 @@
 [Executioner]
   type = Steady
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 []
 
 [Output]

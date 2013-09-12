@@ -73,10 +73,8 @@
   [../]
 
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   nl_abs_tol = 1e-15
 #  l_tol = 1e-5

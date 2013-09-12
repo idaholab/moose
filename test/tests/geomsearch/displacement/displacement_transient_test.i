@@ -85,10 +85,8 @@
   num_steps = 10
     
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 []
 
 [Output]

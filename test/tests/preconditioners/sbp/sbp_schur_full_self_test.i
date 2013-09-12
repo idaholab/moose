@@ -105,10 +105,8 @@
 [Executioner]
   type = Steady
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
   print_linear_residuals = true
   petsc_options       = '-snes_view -snes_monitor -snes_converged_reason -ksp_converged_reason'
 []

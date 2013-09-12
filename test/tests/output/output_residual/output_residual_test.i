@@ -98,10 +98,8 @@
   type = Transient
   scheme = 'implicit-euler'
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   start_time = 0.0
   num_steps = 5

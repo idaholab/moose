@@ -85,10 +85,8 @@
   type = Transient
 
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   nl_rel_tol = 1e-7
 #  l_tol = 1e-5
