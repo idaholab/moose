@@ -4,6 +4,7 @@
   xmin = 0
   xmax = 1
   nx = 10
+  distribution = serial
 []
 
 [Variables]

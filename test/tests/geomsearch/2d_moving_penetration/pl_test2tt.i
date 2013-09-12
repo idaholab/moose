@@ -6,9 +6,6 @@
 [Mesh]
   file = pl_test2.e
   displacements = 'disp_x disp_y'
-  # This test will not work in parallel with ParallelMesh enabled
-  # due to a bug in the GeometricSearch system.
-  distribution = serial
 []
 
 [Variables]
@@ -40,11 +37,11 @@
 [Kernels]
   [./diff_x]
     type = Diffusion
-    variable = disp_x 
+    variable = disp_x
   [../]
   [./diff_y]
     type = Diffusion
-    variable = disp_y 
+    variable = disp_y
   [../]
 []
 

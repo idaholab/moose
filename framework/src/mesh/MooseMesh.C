@@ -1759,6 +1759,8 @@ MooseMesh::ghostGhostedBoundaries()
   if(!_use_parallel_mesh)
     return;
 
+  Moose::perf_log.push("ghostGhostedBoundaries()","MooseMesh");
+
   std::vector<unsigned int> elems;
   std::vector<unsigned short int> sides;
   std::vector<boundary_id_type> ids;
@@ -1800,6 +1802,8 @@ MooseMesh::ghostGhostedBoundaries()
 
   mesh.comm().allgather_packed_range(&mesh, connected_nodes_to_ghost.begin(), connected_nodes_to_ghost.end(), extra_ghost_elem_inserter<Node>(mesh));
   mesh.comm().allgather_packed_range(&mesh, boundary_elems_to_ghost.begin(), boundary_elems_to_ghost.end(), extra_ghost_elem_inserter<Elem>(mesh));
+
+  Moose::perf_log.pop("ghostGhostedBoundaries()","MooseMesh");
 }
 
 void

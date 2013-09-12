@@ -311,6 +311,12 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
   }
 
+  // Do this just in case things have been done to the mesh
+  ghostGhostedBoundaries();
+  _mesh.meshChanged();
+  if(_displaced_problem)
+    _displaced_mesh->meshChanged();
+
   unsigned int n_threads = libMesh::n_threads();
 
   // Call the initialSetup methods for functions
@@ -723,6 +729,16 @@ FEProblem::addGhostedBoundary(BoundaryID boundary_id)
   if(_displaced_problem)
     _displaced_mesh->addGhostedBoundary(boundary_id);
 }
+
+void
+FEProblem::ghostGhostedBoundaries()
+{
+  _mesh.ghostGhostedBoundaries();
+
+  if(_displaced_problem)
+    _displaced_mesh->ghostGhostedBoundaries();
+}
+
 
 bool
 FEProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
@@ -2645,7 +2661,7 @@ FEProblem::init()
     mooseError("No variables specified in the FEProblem '" << name() << "'.");
 
   Moose::setup_perf_log.push("eq.init()","ghostGhostedBoundaries");
-  _mesh.ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
+  ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
   Moose::setup_perf_log.pop("eq.init()","ghostGhostedBoundaries");
 
   Moose::setup_perf_log.push("eq.init()","Setup");
@@ -2658,6 +2674,8 @@ FEProblem::init()
 
   Moose::setup_perf_log.push("FEProblem::init::meshChanged()","Setup");
   _mesh.meshChanged();
+  if(_displaced_problem)
+    _displaced_mesh->meshChanged();
   Moose::setup_perf_log.pop("FEProblem::init::meshChanged()","Setup");
 
   init2();
@@ -3252,7 +3270,7 @@ FEProblem::meshChanged()
   // Clear these out because they corresponded to the old mesh
   _ghosted_elems.clear();
 
-  _mesh.ghostGhostedBoundaries();
+  ghostGhostedBoundaries();
 
   // mesh changed
   _eq.reinit();

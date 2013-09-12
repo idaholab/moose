@@ -165,11 +165,17 @@ public:
    * Will make sure that all dofs connected to elem_id are ghosted to this processor
    */
   virtual void addGhostedElem(unsigned int elem_id);
+
   /**
    * Will make sure that all necessary elements from boundary_id are ghosted to this processor
    * @param boundary_id Boundary ID
    */
   virtual void addGhostedBoundary(BoundaryID boundary_id);
+
+  /**
+   * Causes the boundaries added using addGhostedBoundary to actually be ghosted.
+   */
+  virtual void ghostGhostedBoundaries();
 
 protected:
   FEProblem & _mproblem;

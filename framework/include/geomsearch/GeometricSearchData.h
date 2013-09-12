@@ -83,6 +83,11 @@ private:
    * Completely redo quadrature nodes
    */
   void reinitQuadratureNodes(unsigned int slave_id);
+
+  /**
+   * Denotes whether this is the first time the gometric search objects have been updated.
+   */
+  bool _first;
 };
 
 #endif //GEOMETRICSEARCHDATA_H

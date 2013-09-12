@@ -616,6 +616,12 @@ DisplacedProblem::addGhostedBoundary(BoundaryID boundary_id)
   _mproblem.addGhostedBoundary(boundary_id);
 }
 
+void
+DisplacedProblem::ghostGhostedBoundaries()
+{
+  _mproblem.ghostGhostedBoundaries();
+}
+
 MooseMesh &
 DisplacedProblem::refMesh()
 {

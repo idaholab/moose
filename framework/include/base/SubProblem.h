@@ -181,6 +181,11 @@ public:
   virtual void addGhostedBoundary(BoundaryID boundary_id) = 0;
 
   /**
+   * Causes the boundaries added using addGhostedBoundary to actually be ghosted.
+   */
+  virtual void ghostGhostedBoundaries() = 0;
+
+  /**
    * Get a vector containing the block ids the material property is defined on.
    */
   virtual std::vector<SubdomainID> getMaterialPropertyBlocks(const std::string prop_name);

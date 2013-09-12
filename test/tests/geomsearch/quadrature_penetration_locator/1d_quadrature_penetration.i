@@ -2,9 +2,6 @@
   type = FileMesh
   file = 1d_penetration.e
   construct_side_list_from_node_list = true
-  # This test will not work in parallel with ParallelMesh enabled
-  # due to a bug in the GeometricSearch system.
-  distribution = serial
 []
 
 [Variables]

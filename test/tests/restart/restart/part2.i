@@ -1,5 +1,6 @@
 [Mesh]
   file = out_part1_restart_0005_mesh.xda
+  distribution = serial
 []
 
 [Functions]

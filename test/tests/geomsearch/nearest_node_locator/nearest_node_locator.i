@@ -1,8 +1,5 @@
 [Mesh]
   file = 2dcontact_collide.e
-  # This test will not work in parallel with ParallelMesh enabled
-  # due to a bug in the GeometricSearch system.
-  distribution = serial
 []
 
 [Variables]

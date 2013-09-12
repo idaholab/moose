@@ -9,6 +9,7 @@
   zmax = 0
   elem_type = QUAD4
   uniform_refine = 4
+  distribution = serial #This is because of floating point roundoff being different with parallel mesh
 []
 
 [Variables]
@@ -73,7 +74,7 @@
   type = Transient
   dt = 2
   num_steps = 10
-  nl_rel_tol = 1e-10
+  nl_rel_tol = 1e-12
 
   [./Adaptivity]
     refine_fraction = .80
@@ -81,7 +82,6 @@
     max_h_level = 4
     error_estimator = KellyErrorEstimator
   [../]
-  nl_rel_tol = 1e-12
 []
 
 [Output]

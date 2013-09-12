@@ -4,6 +4,7 @@
     input = 'pl_test3nns.i'
     exodiff = 'pl_test3nns_out.e'
     group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test3nnstt]
@@ -11,6 +12,7 @@
     input = 'pl_test3nnstt.i'
     exodiff = 'pl_test3nnstt_out.e'
     group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test3ns]
@@ -18,6 +20,7 @@
     input = 'pl_test3ns.i'
     exodiff = 'pl_test3ns_out.e'
     group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test3nstt]
@@ -25,6 +28,7 @@
     input = 'pl_test3nstt.i'
     exodiff = 'pl_test3nstt_out.e'
     group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test3qns]
@@ -32,6 +36,7 @@
     input = 'pl_test3qns.i'
     exodiff = 'pl_test3qns_out.e'
     group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test3qnstt]
@@ -39,6 +44,7 @@
     input = 'pl_test3qnstt.i'
     exodiff = 'pl_test3qnstt_out.e'
     group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4nns]
@@ -46,6 +52,7 @@
     input = 'pl_test4nns.i'
     exodiff = 'pl_test4nns_out.e'
     group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4nnstt]
@@ -53,6 +60,7 @@
     input = 'pl_test4nnstt.i'
     exodiff = 'pl_test4nnstt_out.e'
     group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4ns]
@@ -60,6 +68,7 @@
     input = 'pl_test4ns.i'
     exodiff = 'pl_test4ns_out.e'
     group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4nstt]
@@ -67,6 +76,7 @@
     input = 'pl_test4nstt.i'
     exodiff = 'pl_test4nstt_out.e'
     group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4qns]
@@ -74,6 +84,7 @@
     input = 'pl_test4qns.i'
     exodiff = 'pl_test4qns_out.e'
     group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4qnstt]
@@ -81,5 +92,6 @@
     input = 'pl_test4qnstt.i'
     exodiff = 'pl_test4qnstt_out.e'
     group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
   [../]
 []

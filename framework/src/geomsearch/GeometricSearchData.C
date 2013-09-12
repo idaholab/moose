@@ -21,7 +21,8 @@
 
 GeometricSearchData::GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh) :
     _subproblem(subproblem),
-    _mesh(mesh)
+    _mesh(mesh),
+    _first(true)
 {}
 
 GeometricSearchData::~GeometricSearchData()
@@ -44,6 +45,16 @@ GeometricSearchData::~GeometricSearchData()
 void
 GeometricSearchData::update()
 {
+  if(_first) // Only do this once
+  {
+    _first = false;
+
+    for(std::map<unsigned int, unsigned int>::iterator it = _slave_to_qslave.begin();
+        it != _slave_to_qslave.end();
+        ++it)
+      generateQuadratureNodes(it->first, it->second);
+  }
+
   // Update the position of quadrature nodes first
   for(std::set<unsigned int>::iterator qbnd_it = _quadrature_boundaries.begin();
       qbnd_it != _quadrature_boundaries.end();
@@ -107,6 +118,9 @@ GeometricSearchData::getPenetrationLocator(const BoundaryName & master, const Bo
   unsigned int master_id = _mesh.getBoundaryID(master);
   unsigned int slave_id  = _mesh.getBoundaryID(slave);
 
+  _subproblem.addGhostedBoundary(master_id);
+  _subproblem.addGhostedBoundary(slave_id);
+
   PenetrationLocator * pl = _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)];
 
   if(!pl)
@@ -123,6 +137,9 @@ GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & master
 {
   unsigned int master_id = _mesh.getBoundaryID(master);
   unsigned int slave_id  = _mesh.getBoundaryID(slave);
+
+  _subproblem.addGhostedBoundary(master_id);
+  _subproblem.addGhostedBoundary(slave_id);
 
   // Generate a new boundary id
   // TODO: Make this better!
@@ -148,6 +165,9 @@ GeometricSearchData::getNearestNodeLocator(const BoundaryName & master, const Bo
   unsigned int master_id = _mesh.getBoundaryID(master);
   unsigned int slave_id  = _mesh.getBoundaryID(slave);
 
+  _subproblem.addGhostedBoundary(master_id);
+  _subproblem.addGhostedBoundary(slave_id);
+
   return getNearestNodeLocator(master_id, slave_id);
 }
 
@@ -155,6 +175,9 @@ NearestNodeLocator &
 GeometricSearchData::getNearestNodeLocator(const unsigned int master_id, const unsigned int slave_id)
 {
   NearestNodeLocator * nnl = _nearest_node_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)];
+
+  _subproblem.addGhostedBoundary(master_id);
+  _subproblem.addGhostedBoundary(slave_id);
 
   if(!nnl)
   {
@@ -171,6 +194,9 @@ GeometricSearchData::getQuadratureNearestNodeLocator(const BoundaryName & master
   unsigned int master_id = _mesh.getBoundaryID(master);
   unsigned int slave_id  = _mesh.getBoundaryID(slave);
 
+  _subproblem.addGhostedBoundary(master_id);
+  _subproblem.addGhostedBoundary(slave_id);
+
   return getQuadratureNearestNodeLocator(master_id, slave_id);
 }
 
@@ -182,8 +208,6 @@ GeometricSearchData::getQuadratureNearestNodeLocator(const unsigned int master_i
   unsigned int qslave_id = slave_id + base_id;
 
   _slave_to_qslave[slave_id] = qslave_id;
-
-  generateQuadratureNodes(slave_id, qslave_id);
 
   return getNearestNodeLocator(master_id, qslave_id);
 }

@@ -227,6 +227,7 @@ public:
 
   virtual void addGhostedElem(unsigned int elem_id);
   virtual void addGhostedBoundary(BoundaryID boundary_id);
+  virtual void ghostGhostedBoundaries();
 
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
