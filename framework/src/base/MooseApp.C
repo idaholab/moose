@@ -308,18 +308,9 @@ MooseApp::setErrorOverridden()
 void
 MooseApp::run()
 {
-  // It appears that leaving uncaught exceptions on MVAPICH can be a bad thing.
-  // Here we will catch any exception and exit properly.
-  try
-  {
-    setupOptions();
-    runInputFile();
-    executeExecutioner();
-  }
-  catch(...)
-  {
-    MPI_Abort(libMesh::COMM_WORLD,1);
-  }
+  setupOptions();
+  runInputFile();
+  executeExecutioner();
 }
 
 void
