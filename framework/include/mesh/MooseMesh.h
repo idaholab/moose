@@ -524,6 +524,14 @@ public:
    */
   bool isBoundaryNode(unsigned int node_id);
 
+  /**
+   * Generate a unified error message if the underlying libMesh mesh
+   * is a ParallelMesh.  Clients of MooseMesh can use this function to
+   * throw an error if they know they don't work with ParallelMesh.
+   * See, for example, the NodalVariableValue class.
+   */
+  void errorIfParallelDistribution(std::string name) const;
+
 protected:
   /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a SerialMesh or ParallelMesh.

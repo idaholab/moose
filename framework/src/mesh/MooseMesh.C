@@ -1758,3 +1758,12 @@ MooseMesh::isBoundaryNode(unsigned int node_id)
 {
   return _bnd_node_ids.find(node_id) != _bnd_node_ids.end();
 }
+
+void
+MooseMesh::errorIfParallelDistribution(std::string name) const
+{
+  if (_use_parallel_mesh)
+    mooseError("Cannot use " << name << " with ParallelMesh!\n"
+               << "Consider specifying distribution = 'serial' in your input file\n"
+               << "to prevent it from being run with ParallelMesh.");
+}

@@ -34,6 +34,10 @@ NodalVariableValue::NodalVariableValue(const std::string & name, InputParameters
     _var_name(parameters.get<VariableName>("variable")),
     _node_ptr(_mesh.getMesh().query_node_ptr(getParam<unsigned int>("nodeid")))
 {
+  // This class only works with SerialMesh, since it relies on a
+  // specific node numbering that we can't guarantee with ParallelMesh
+  _mesh.errorIfParallelDistribution("NodalVariableValue");
+
   if (_node_ptr == NULL)
     mooseError("Node #" << getParam<unsigned int>("nodeid") << " specified in '" << name << "' not found in the mesh!");
 }
