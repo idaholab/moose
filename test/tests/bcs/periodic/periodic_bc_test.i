@@ -8,9 +8,6 @@
   ymax = 40
   zmax = 0
   elem_type = QUAD4
-  # This test will not work in parallel with ParallelMesh enabled
-  # due to a bug in PeriodicBCs.
-  distribution = serial
 []
 
 [Variables]

@@ -29,6 +29,18 @@
 #include "libmesh/periodic_boundary_base.h"
 #include "libmesh/fe_interface.h"
 #include "libmesh/serial_mesh.h"
+#include "libmesh/mesh_inserter_iterator.h"
+#include "libmesh/mesh_communication.h"
+#include "libmesh/mesh_inserter_iterator.h"
+#include "libmesh/mesh_tools.h"
+#include "libmesh/parallel.h"
+#include "libmesh/parallel_elem.h"
+#include "libmesh/parallel_mesh.h"
+#include "libmesh/parallel_node.h"
+#include "libmesh/parallel_ghost_sync.h"
+#include "libmesh/utility.h"
+#include "libmesh/remote_elem.h"
+
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 
@@ -1697,6 +1709,97 @@ std::vector<Real> &
 MooseMesh::getGhostedBoundaryInflation()
 {
   return _ghosted_boundaries_inflation;
+}
+
+namespace // Anonymous namespace for helper
+{
+  // A class for templated methods that expect output iterator
+  // arguments, which adds objects to the Mesh.
+  // Although any mesh_inserter_iterator can add any object, we
+  // template it around object type so that type inference and
+  // iterator_traits will work.
+  // This object specifically is used to insert extra ghost elems into the mesh
+  template <typename T>
+  struct extra_ghost_elem_inserter
+    : std::iterator<std::output_iterator_tag, T>
+  {
+    extra_ghost_elem_inserter(ParallelMesh& m) : mesh(m) {}
+
+    void operator=(Elem* e) { mesh.add_extra_ghost_elem(e); }
+
+    void operator=(Node* n) { mesh.add_node(n); }
+
+    void operator=(Point* p) { mesh.add_point(*p); }
+
+    extra_ghost_elem_inserter& operator++() {
+      return *this;
+    }
+
+    extra_ghost_elem_inserter operator++(int) {
+      return extra_ghost_elem_inserter(*this);
+    }
+
+    // We don't return a reference-to-T here because we don't want to
+    // construct one or have any of its methods called.  We just want
+    // to allow the returned object to be able to do mesh insertions
+    // with operator=().
+    extra_ghost_elem_inserter& operator*() { return *this; }
+  private:
+
+    ParallelMesh& mesh;
+  };
+
+} // anonymous namespace
+
+
+void
+MooseMesh::ghostGhostedBoundaries()
+{
+  // No need to do this if using a serial mesh
+  if(!_use_parallel_mesh)
+    return;
+
+  std::vector<unsigned int> elems;
+  std::vector<unsigned short int> sides;
+  std::vector<boundary_id_type> ids;
+
+  ParallelMesh & mesh = dynamic_cast<ParallelMesh &>(getMesh());
+
+  mesh.clear_extra_ghost_elems();
+
+  mesh.boundary_info->build_side_list(elems, sides, ids);
+
+  std::set<const Elem *> boundary_elems_to_ghost;
+  std::set<Node *> connected_nodes_to_ghost;
+
+  std::vector<const Elem*> family_tree;
+
+  for(unsigned int i=0; i<elems.size(); i++)
+  {
+    if(_ghosted_boundaries.find(ids[i]) != _ghosted_boundaries.end())
+    {
+      Elem * elem = mesh.elem(elems[i]);
+
+
+#ifdef LIBMESH_ENABLE_AMR
+      elem->family_tree(family_tree);
+#else
+      family_tree.clear();
+      family_tree.push_back(elem);
+#endif
+      for (unsigned int leaf=0; leaf<family_tree.size(); leaf++)
+      {
+        const Elem * felem = family_tree[leaf];
+        boundary_elems_to_ghost.insert(felem);
+
+        for (unsigned int n=0; n<felem->n_nodes(); n++)
+          connected_nodes_to_ghost.insert (felem->get_node(n));
+      }
+    }
+  }
+
+  mesh.comm().allgather_packed_range(&mesh, connected_nodes_to_ghost.begin(), connected_nodes_to_ghost.end(), extra_ghost_elem_inserter<Node>(mesh));
+  mesh.comm().allgather_packed_range(&mesh, boundary_elems_to_ghost.begin(), boundary_elems_to_ghost.end(), extra_ghost_elem_inserter<Elem>(mesh));
 }
 
 void

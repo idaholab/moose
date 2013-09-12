@@ -9,9 +9,6 @@
   zmax = 0
   elem_type = QUAD4
   uniform_refine = 4
-  # This test will not work in parallel with ParallelMesh enabled
-  # due to a bug in PeriodicBCs.
-  distribution = serial
 []
 
 [Variables]

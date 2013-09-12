@@ -48,7 +48,7 @@ InputParameters validParams<SetupMeshAction>()
   params.addParam<bool>("construct_side_list_from_node_list", false, "If true, construct side lists from the nodesets in the mesh (i.e. if every node on a give side is in a nodeset then add that side to a sideset");
 
   params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
-  params.addParam<std::vector<unsigned int> >("ghosted_boundaries", "Boundaries to be ghosted if using Nemesis");
+  params.addParam<std::vector<BoundaryName> >("ghosted_boundaries", "Boundaries to be ghosted if using Nemesis");
   params.addParam<std::vector<Real> >("ghosted_boundaries_inflation", "If you are using ghosted boundaries you will want to set this value to a vector of amounts to inflate the bounding boxes by.  ie if you are running a 3D problem you might set it to '0.2 0.1 0.4'");
   params.addParam<unsigned int>("patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
   params.addParam<unsigned int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
@@ -70,9 +70,9 @@ SetupMeshAction::SetupMeshAction(const std::string & name, InputParameters param
 void
 SetupMeshAction::setupMesh(MooseMesh *mesh)
 {
-  std::vector<unsigned int> ghosted_boundaries = getParam<std::vector<unsigned int > >("ghosted_boundaries");
+  std::vector<BoundaryName> ghosted_boundaries = getParam<std::vector<BoundaryName> >("ghosted_boundaries");
   for(unsigned int i=0; i<ghosted_boundaries.size(); i++)
-    mesh->addGhostedBoundary(ghosted_boundaries[i]);
+    mesh->addGhostedBoundary(mesh->getBoundaryID(ghosted_boundaries[i]));
 
   mesh->setPatchSize(getParam<unsigned int>("patch_size"));
 
@@ -81,6 +81,8 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
     std::vector<Real> ghosted_boundaries_inflation = getParam<std::vector<Real> >("ghosted_boundaries_inflation");
     mesh->setGhostedBoundaryInflation(ghosted_boundaries_inflation);
   }
+
+  mesh->ghostGhostedBoundaries();
 
   if (getParam<bool>("second_order"))
     mesh->getMesh().all_second_order(true);

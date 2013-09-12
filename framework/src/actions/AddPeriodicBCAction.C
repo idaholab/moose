@@ -131,6 +131,9 @@ AddPeriodicBCAction::act()
     p.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));
     setPeriodicVars(p, getParam<std::vector<VariableName> >("variable"));
 
+    _mesh->addGhostedBoundary(p.myboundary);
+    _mesh->addGhostedBoundary(p.pairedboundary);
+
     nl.dofMap().add_periodic_boundary(p);
   }
   else if (getParam<std::vector<std::string> >("transform_func") != std::vector<std::string>())
@@ -152,6 +155,9 @@ AddPeriodicBCAction::act()
     ipb.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));   // these are swapped
     ipb.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary")); // these are swapped
     setPeriodicVars(ipb, getParam<std::vector<VariableName> >("variable"));
+
+    _mesh->addGhostedBoundary(ipb.myboundary);
+    _mesh->addGhostedBoundary(ipb.pairedboundary);
 
     // Add the pair of periodic boundaries to the dof map
     nl.dofMap().add_periodic_boundary(pb, ipb);

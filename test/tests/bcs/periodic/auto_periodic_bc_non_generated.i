@@ -1,9 +1,7 @@
 [Mesh]
   file = square2.e
   uniform_refine = 3
-  # This test will not work in parallel with ParallelMesh enabled
-  # due to a bug in PeriodicBCs.
-  distribution = serial
+  ghosted_boundaries = '1 2 10 20' # Necessary for auto periodic bcs with ParallelMesh
 []
 
 [Variables]

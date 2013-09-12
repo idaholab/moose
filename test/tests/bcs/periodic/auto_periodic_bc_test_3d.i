@@ -8,9 +8,7 @@
   ymax = 40
   zmax = 40
   elem_type = HEX8
-  # This test will not work in parallel with ParallelMesh enabled
-  # due to a bug in PeriodicBCs.
-  distribution = serial
+  ghosted_boundaries = '0 1 2 3 4 5' # Necessary for auto periodic bcs with ParallelMesh
 []
 
 [Variables]

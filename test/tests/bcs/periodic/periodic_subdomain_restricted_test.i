@@ -1,8 +1,5 @@
 [Mesh]
   file = rect-2blk.e
-  # This test will not work in parallel with ParallelMesh enabled
-  # due to a bug in PeriodicBCs.
-  distribution = serial
 []
 
 [Variables]

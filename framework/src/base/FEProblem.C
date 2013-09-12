@@ -2644,6 +2644,10 @@ FEProblem::init()
   if (_solve && n_vars == 0)
     mooseError("No variables specified in the FEProblem '" << name() << "'.");
 
+  Moose::setup_perf_log.push("eq.init()","ghostGhostedBoundaries");
+  _mesh.ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
+  Moose::setup_perf_log.pop("eq.init()","ghostGhostedBoundaries");
+
   Moose::setup_perf_log.push("eq.init()","Setup");
   _eq.init();
   Moose::setup_perf_log.pop("eq.init()","Setup");
@@ -3247,6 +3251,8 @@ FEProblem::meshChanged()
 
   // Clear these out because they corresponded to the old mesh
   _ghosted_elems.clear();
+
+  _mesh.ghostGhostedBoundaries();
 
   // mesh changed
   _eq.reinit();

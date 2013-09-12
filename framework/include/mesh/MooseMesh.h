@@ -303,6 +303,11 @@ public:
   std::vector<Real> & getGhostedBoundaryInflation();
 
   /**
+   * Actually do the ghosting of boundaries that need to be ghosted to this processor.
+   */
+  void ghostGhostedBoundaries();
+
+  /**
    * Getter/setter for the patch_size parameter.
    */
   void setPatchSize(const unsigned int patch_size);
