@@ -21,8 +21,6 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  std::string _fuel_type;
-
   const Real & _power_fraction;
   VariableValue & _total_power;
   PostprocessorValue & _fuel_volume;

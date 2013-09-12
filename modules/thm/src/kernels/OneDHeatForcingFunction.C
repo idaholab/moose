@@ -4,7 +4,6 @@ template<>
 InputParameters validParams<OneDHeatForcingFunction>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<std::string>("fuel_type", "The type of the fuel (plate | cylinder)");
   params.addRequiredParam<Real>("power_fraction", "The fraction of power used");
   params.addRequiredCoupledVar("total_power", "Total reactor power");
   params.addParam<PostprocessorName>("fuel_volume", "The name of the postprocessor that computes fuel volume");
@@ -15,7 +14,6 @@ InputParameters validParams<OneDHeatForcingFunction>()
 
 OneDHeatForcingFunction::OneDHeatForcingFunction(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
-    _fuel_type(getParam<std::string>("fuel_type")),
     _power_fraction(getParam<Real>("power_fraction")),
     _total_power(coupledScalarValue("total_power")),
     _fuel_volume(getPostprocessorValue("fuel_volume")),
