@@ -260,10 +260,10 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_
   {
     std::ostringstream oss;
 
-    oss << message_indicator << ": The following parameters were unused in your input file:\n";
+    oss << "\n" << message_indicator << ": The following parameters were unused in your input file:\n";
     for (std::set<std::string>::iterator i=difference.begin(); i != difference.end(); ++i)
       oss << *i << "\n";
-    oss << message_indicator << "\n\n";
+    oss << message_indicator << "\n";
 
     if (error_on_warn)
       mooseError(oss.str());
