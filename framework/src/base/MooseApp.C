@@ -338,9 +338,9 @@ MooseApp::printSimulationInfo()
   std::stringstream oss;
 
   oss << std::left << '\n'
-      << "Simulation Information:\n"
-      << std::setw(25) << "Num Processors: "      << static_cast<std::size_t>(libMesh::n_processors()) << '\n'
-      << std::setw(25) << "Num Threads: "         << static_cast<std::size_t>(libMesh::n_threads()) << '\n'
+      << "Parallelism:\n"
+      << std::setw(25) << "  Num Processors: "      << static_cast<std::size_t>(libMesh::n_processors()) << '\n'
+      << std::setw(25) << "  Num Threads: "         << static_cast<std::size_t>(libMesh::n_threads()) << '\n'
       << '\n';
 
   MooseMesh *moose_mesh = _action_warehouse.mesh();
