@@ -3,10 +3,6 @@
   dim = 2
   nx = 15
   ny = 15
-  # This example uses Adaptivity Indicators, which are written out as
-  # CONSTANT MONOMIAL variables, which don't currently work correctly
-  # with ParallelMesh in parallel.  See #2122 for more information.
-  distribution = serial
 []
 
 [Variables]

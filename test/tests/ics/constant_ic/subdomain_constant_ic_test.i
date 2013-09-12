@@ -1,10 +1,6 @@
 [Mesh]
   file = sq-2blk.e
   uniform_refine = 1
-  # This input file uses CONSTANT MONOMIAL AuxVariables, which don't
-  # currently work right with ParallelMesh in parallel.  See #2122 for
-  # more information.
-  distribution = serial
 []
 
 [Variables]

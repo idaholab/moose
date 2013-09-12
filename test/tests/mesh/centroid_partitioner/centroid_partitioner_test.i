@@ -20,10 +20,9 @@
   # one direction
   centroid_partitioner_direction = y
 
-  # The CentroidPartitioner itself seems to work OK with ParallelMesh
-  # enabled; this test doesn't work because there is something wrong
-  # with ExodusII_IO::write_element_data() which causes the processor
-  # ID auxiliary field to be written out completely wrong.
+  # The centroid partitioner behaves differently depending on
+  # whether you are using Serial or ParallelMesh, so to get
+  # repeatable results, we restrict this test to using SerialMesh.
   distribution = serial
 []
 

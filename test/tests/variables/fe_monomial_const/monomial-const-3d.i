@@ -11,9 +11,6 @@
   ny = 21
   nz = 21
   elem_type = HEX8
-  # This test doesn't work in parallel with ParallelMesh because writing
-  # CONSTANT MONOMIAL data doesn't currently work. See #2122.
-  distribution = serial
 []
 
 [Functions]

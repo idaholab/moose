@@ -3,9 +3,8 @@
   dim = 2
   nx = 10
   ny = 10
-  # This test currently diffs when run in parallel with ParallelMesh enabled,
-  # most likely due to the fact that CONSTANT MONOMIALS are currently not written
-  # out correctly in this case.  For more information, see #2122.
+  # The MultiAppMeshFunctionTransfer doesn't work with ParallelMesh.
+  # See tosub_master.i and #2145 for more information.
   distribution = serial
 []
 

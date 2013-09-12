@@ -5,9 +5,6 @@
   xmax = 1
   nx = 100
   elem_type = EDGE3
-  # This test doesn't work in parallel with ParallelMesh because writing
-  # CONSTANT MONOMIAL data doesn't currently work. See #2122.
-  distribution = serial
 []
 
 [Functions]

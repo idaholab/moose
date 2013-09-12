@@ -6,10 +6,6 @@
   nz = 0
   zmax = 0
   elem_type = QUAD4
-  # This input file uses BoxMarker, which outputs as a CONSTANT
-  # MONOMIAL AuxVariable; those are not currently working with
-  # ParallelMesh in parallel.  See #2122 for more information.
-  distribution = serial
 []
 
 [Variables]

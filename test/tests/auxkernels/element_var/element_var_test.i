@@ -8,9 +8,8 @@
   nx = 10
   ny = 10
   elem_type = QUAD4
-  # This input file uses CONSTANT MONOMIAL AuxVariables, which don't
-  # currently work right with ParallelMesh in parallel.  See #2122 for
-  # more information.
+  # This test uses ElementalVariableValue postprocessors on specific
+  # elements, if you use ParallelMesh the elements get renumbered.
   distribution = serial
 []
 
