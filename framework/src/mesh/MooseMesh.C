@@ -116,12 +116,12 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
 
   if (_use_parallel_mesh)
   {
-    std::cout << "Using ParallelMesh!" << std::endl;
+//    std::cout << "Using ParallelMesh!" << std::endl;
     _mesh = new ParallelMesh(dim);
   }
   else
   {
-    std::cout << "Using SerialMesh!" << std::endl;
+//    std::cout << "Using SerialMesh!" << std::endl;
     _mesh = new SerialMesh(dim);
   }
 }
@@ -185,8 +185,6 @@ MooseMesh::~MooseMesh()
   delete _local_node_range;
   delete _bnd_node_range;
   delete _bnd_elem_range;
-  delete _refined_elements;
-  delete _coarsened_elements;
   delete _mesh;
 }
 

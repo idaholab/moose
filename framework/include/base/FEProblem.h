@@ -631,6 +631,12 @@ public:
    */
   virtual bool isRestarting();
 
+  /**
+   * Determines the solver mode based on existin options and returns it.
+   * In MOOSE we default to PJFNK if no solver type is explicitly set!
+   */
+  std::string solverMode();
+
 #ifdef LIBMESH_ENABLE_AMR
   // Adaptivity /////
   Adaptivity & adaptivity() { return _adaptivity; }
@@ -826,6 +832,8 @@ protected:
   bool _const_jacobian;
   /// Indicates if the Jacobian was computed
   bool _has_jacobian;
+
+  std::string _solver_mode;
 
 public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)

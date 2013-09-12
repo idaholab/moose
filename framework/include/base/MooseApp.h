@@ -187,6 +187,11 @@ public:
   std::string getSysInfo();
 
   /**
+   * Prints the simulation information header
+   */
+  void printSimulationInfo();
+
+  /**
    * Retrieve the Executioner for this App.
    */
   Executioner * getExecutioner() { return _executioner; }

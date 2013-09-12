@@ -138,6 +138,11 @@ public:
   void setTimeStepper(TimeStepper * ts) { _time_stepper = ts; }
 
   /**
+   * Get the timestepper.
+   */
+  virtual std::string getTimeStepper();
+
+  /**
    * Get the time scheme used
    * @return MooseEnum with the time scheme
    */

@@ -150,7 +150,6 @@ Transient::init()
 {
   if (_time_stepper == NULL)
   {
-    std::cout << "\nInfo, Time stepper not set, defaulting to constant time stepping...\n";
     InputParameters pars = _app.getFactory().getValidParams("ConstantDT");
     pars.set<FEProblem *>("_fe_problem") = &_problem;
     pars.set<Transient *>("_executioner") = this;
@@ -567,3 +566,13 @@ Transient::setupTimeIntegrator()
     _problem.addTimeIntegrator(ti_str, ti_str, params);
   }
 }
+
+std::string
+Transient::getTimeStepper()
+{
+  if (_time_stepper != NULL)
+    return demangle(typeid(*_time_stepper).name());
+  else
+    return std::string();
+}
+

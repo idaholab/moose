@@ -532,6 +532,11 @@ public:
    */
   void errorIfParallelDistribution(std::string name) const;
 
+  /*
+   * Returns the final Mesh distribution type.
+   */
+  bool isParallelMesh() { return _use_parallel_mesh; }
+
 protected:
   /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a SerialMesh or ParallelMesh.

@@ -21,6 +21,7 @@
 #include "MooseMesh.h"
 
 #include "libmesh/mesh_refinement.h"
+#include "libmesh/string_to_enum.h"
 
 template<>
 InputParameters validParams<MooseApp>()
@@ -234,6 +235,7 @@ MooseApp::executeExecutioner()
   if (_executioner)
   {
     _executioner->init();
+    printSimulationInfo();
     _executioner->execute();
   }
   else
@@ -327,4 +329,130 @@ std::string
 MooseApp::getFileName(bool stripLeadingPath) const
 {
   return _parser.getFileName(stripLeadingPath);
+}
+
+
+void
+MooseApp::printSimulationInfo()
+{
+  std::stringstream oss;
+
+  oss << std::left << '\n'
+      << "Simulation Information:\n"
+      << std::setw(25) << "Num Processors: "      << static_cast<std::size_t>(libMesh::n_processors()) << '\n'
+      << std::setw(25) << "Num Threads: "         << static_cast<std::size_t>(libMesh::n_threads()) << '\n'
+      << '\n';
+
+  MooseMesh *moose_mesh = _action_warehouse.mesh();
+  if (moose_mesh)
+  {
+    MeshBase & mesh = moose_mesh->getMesh();
+
+    oss << std::setw(25) << "Mesh: " << '\n'
+        << std::setw(25) << "  Distribution: " << (_action_warehouse.mesh()->isParallelMesh() ? "PARALLEL" : "SERIAL") << '\n'
+        << std::setw(25) << "  Mesh Dimension: " << mesh.mesh_dimension() << '\n'
+        << std::setw(25) << "  Spatial Dimension: " << mesh.spatial_dimension() << '\n'
+        << std::setw(25) << "  Nodes:" << '\n'
+        << std::setw(25) << "    Total:" << mesh.n_nodes() << '\n'
+        << std::setw(25) << "    Local:" << mesh.n_local_nodes() << '\n'
+        << std::setw(25) << "  Elems:" << '\n'
+        << std::setw(25) << "    Total:" << mesh.n_elem() << '\n'
+        << std::setw(25) << "    Local:" << mesh.n_local_elem() << '\n'
+        << std::setw(25) << "  Num Subdomains: "      << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
+        << std::setw(25) << "  Num Partitions: "      << static_cast<std::size_t>(mesh.n_partitions()) << '\n'
+        << '\n';
+  }
+
+  FEProblem *problem = _action_warehouse.problem();
+  if (problem)
+  {
+    EquationSystems & eq = _action_warehouse.problem()->es();
+    unsigned int num_systems = eq.n_systems();
+    for (unsigned int i=0; i<num_systems; ++i)
+    {
+      const System & system = eq.get_system(i);
+      if (system.system_type() == "TransientNonlinearImplicit")
+        oss << std::setw(25) << "Nonlinear System:" << '\n';
+      else if (system.system_type() == "TransientExplicit")
+        oss << std::setw(25) << "Auxiliary System:" << '\n';
+      else
+        oss << std::setw(25) << system.system_type() << '\n';
+
+      if (system.n_dofs())
+      {
+        oss << std::setw(25) << "  Num DOFs: " << system.n_dofs() << '\n'
+            << std::setw(25) << "  Num Local DOFs: " << system.n_local_dofs() << '\n'
+            << std::setw(25) << "  Variables: ";
+        for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+        {
+          const VariableGroup &vg_description (system.variable_group(vg));
+
+          if (vg_description.n_variables() > 1) oss << "{ ";
+          for (unsigned int vn=0; vn<vg_description.n_variables(); vn++)
+            oss << "\"" << vg_description.name(vn) << "\" ";
+          if (vg_description.n_variables() > 1) oss << "} ";
+        }
+        oss << '\n';
+
+        oss << std::setw(25) << "  Finite Element Types: ";
+#ifndef LIBMESH_ENABLE_INFINITE_ELEMENTS
+        for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+          oss << "\""
+              << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().family)
+              << "\" ";
+        oss << '\n';
+#else
+        for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+        {
+          oss << "\""
+              << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().family)
+              << "\", \""
+              << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().radial_family)
+              << "\" ";
+        }
+        oss << '\n';
+
+        oss << std::setw(25) << "  Infinite Element Mapping: ";
+        for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+          oss << "\""
+              << libMesh::Utility::enum_to_string<InfMapType>(system.get_dof_map().variable_group(vg).type().inf_map)
+              << "\" ";
+        oss << '\n';
+#endif
+
+
+        oss << std::setw(25) << "  Approximation Orders: ";
+        for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+        {
+#ifndef LIBMESH_ENABLE_INFINITE_ELEMENTS
+          oss << "\""
+              << Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().order)
+              << "\" ";
+#else
+          oss << "\""
+              << Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().order)
+              << "\", \""
+              << Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().radial_order)
+              << "\" ";
+#endif
+        }
+        oss << "\n\n";
+      }
+      else
+        oss << "  *** EMPTY ***\n\n";
+    }
+
+    oss << "Execution Information:\n"
+        << std::setw(25) << "  Executioner: " << demangle(typeid(*_executioner).name()) << '\n';
+
+    std::string time_stepper = _executioner->getTimeStepper();
+    if (time_stepper != "")
+      oss << std::setw(25) << "  TimeStepper: " << time_stepper << '\n';
+
+    oss << std::setw(25) << "  Solver Mode: " << _action_warehouse.problem()->solverMode() << '\n';
+    oss << '\n';
+  }
+
+
+  std::cout << oss.str();
 }

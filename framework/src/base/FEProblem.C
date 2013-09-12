@@ -331,9 +331,6 @@ void FEProblem::initialSetup()
     projectSolution();
   }
 
-  if (_output_es_info)
-    _eq.print_info();
-
   for(unsigned int i=0; i<n_threads; i++)
   {
     _indicators[i].initialSetup();
@@ -2611,6 +2608,9 @@ FEProblem::init()
   if (_initialized)
     return;
 
+  // Set the solverMode
+  solverMode();
+
   unsigned int n_vars = _nl.nVariables();
   switch (_coupling)
   {
@@ -3627,9 +3627,6 @@ FEProblem::checkLinearConvergence(std::string & /*msg*/,
   return reason;
 }
 
-
-
-
 #ifdef LIBMESH_HAVE_PETSC
 void
 FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
@@ -3685,3 +3682,48 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
   }
 }
 #endif
+
+std::string
+FEProblem::solverMode()
+{
+  if (_solver_mode == "")
+  {
+#ifdef LIBMESH_HAVE_PETSC
+    std::string solver_mode;
+
+    std::vector<MooseEnum> & petsc_options = parameters().set<std::vector<MooseEnum> >("petsc_options");         // set because we need a writable reference
+    for (unsigned int i=0; i<petsc_options.size(); ++i)
+    {
+      if (petsc_options[i] == "-snes")
+        mooseDoOnce(std::cout << "The PETSc Option: \"-snes\" is ignored.\n");
+
+      if (petsc_options[i] == "-newton" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator" || petsc_options[i] == "-snes_fd")
+      {
+        if (solver_mode == "")
+          solver_mode = std::string(petsc_options[i]);
+        else if (petsc_options[i] != solver_mode)
+        mooseError("Multiple conflicting solver modes supplied: " << solver_mode << " and " << petsc_options[i] << "\n");
+      }
+    }
+    // If a PETSc solve mode hasn't been set, default it to "-snes_mf_operator"
+    if (solver_mode == "")
+    {
+      petsc_options.push_back(MooseEnum("-snes_mf_operator", "-snes_mf_operator"));
+    }
+
+    if (solver_mode == "-newton")
+      _solver_mode = "NEWTON";
+    else if (solver_mode == "-snef_mf")
+      _solver_mode = "JFNK";
+    else if (solver_mode == "-snes_mf_operator")
+      _solver_mode = "Preconditioned JFNK";
+    else if (solver_mode == "-snes_fd")
+      _solver_mode = "FD";
+#else
+    // Trilinos
+    _solver_mode = "Preconditioned JFNK";
+#endif
+  }
+
+  return _solver_mode;
+}

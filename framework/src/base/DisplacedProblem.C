@@ -165,8 +165,6 @@ DisplacedProblem::init()
   _eq.init();
   Moose::setup_perf_log.pop("DisplacedProblem::init::eq.init()","Setup");
 
-  _eq.print_info(std::cout);
-
   Moose::setup_perf_log.push("DisplacedProblem::init::meshChanged()","Setup");
   _mesh.meshChanged();
   Moose::setup_perf_log.pop("DisplacedProblem::init::meshChanged()","Setup");

@@ -181,8 +181,6 @@ Adaptivity::initialAdaptMesh()
     std::string temp = _marker_variable_name;
     _marker_variable_name = _initial_marker_variable_name;
 
-    std::cout<<"Adapting using "<<_marker_variable_name<<std::endl;
-
     adaptMesh();
 
     _marker_variable_name = temp;

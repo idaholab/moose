@@ -88,6 +88,8 @@ public:
 
   virtual Problem & problem() = 0;
 
+  virtual std::string getTimeStepper() { return std::string(); }
+
   void outputInitial(bool out_init);
 
   /**
