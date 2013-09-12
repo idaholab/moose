@@ -27,6 +27,7 @@ LaplacianJumpIndicator::LaplacianJumpIndicator(const std::string & name, InputPa
     _second_u(second()),
     _second_u_neighbor(neighborSecond())
 {
+  _mesh.errorIfParallelDistribution("LaplacianJumpIndicator");
 }
 
 
