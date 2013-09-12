@@ -70,6 +70,19 @@ AddPeriodicBCAction::autoTranslationBoundaries()
 {
   if (isParamValid("auto_direction"))
   {
+    // If we are working with a parallel mesh then we're going to ghost all the boundaries everywhere because we don't know what we need...
+    if(_mesh->isParallelMesh())
+    {
+      const std::set<BoundaryID> & ids = _mesh->meshBoundaryIds();
+      for(std::set<BoundaryID>::const_iterator id_it = ids.begin();
+          id_it != ids.end();
+          ++id_it)
+        _problem->addGhostedBoundary(*id_it);
+
+      _problem->ghostGhostedBoundaries();
+      _mesh->detectOrthogonalDimRanges();
+    }
+
     NonlinearSystem & nl = _problem->getNonlinearSystem();
     std::vector<std::string> auto_dirs = getParam<std::vector<std::string> >("auto_direction");
 

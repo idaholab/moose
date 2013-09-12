@@ -10,6 +10,7 @@
   ymax = 1
   nx = 20
   ny = 20
+  distribution = serial
 []
 
 [Functions]

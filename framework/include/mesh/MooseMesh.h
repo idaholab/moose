@@ -444,6 +444,16 @@ public:
   Real getMaxInDimension(unsigned int component) const;
 
   /**
+   * This routine determines whether the Mesh is a regular orthogonal mesh (i.e. square in 2D, cubic in 3D).
+   * If it is, then we can use a number of convenience functions when periodic boundary conditions
+   * are applied.  This routine populates the _range vector which is necessary for these convenience functions.
+   * Note:  This routine can potentially identify meshes with concave faces that still "fit" in the convex hull
+   * of the corresponding regular orthogonal mesh.  This case is highly unlikely in practice and if a user
+   * does this, well.... release the kicker!
+   */
+  bool detectOrthogonalDimRanges(Real tol=1e-6);
+
+  /**
    * For "regular orthogonal" meshes, determine if variable var_num is
    * periodic with respect to the primary and secondary BoundaryIDs,
    * record this fact in the _periodic_dim data structure.
@@ -688,16 +698,6 @@ private:
 
   /// A vector containing the nodes at the corners of a regular orthogonal mesh
   std::vector<Node *> _extreme_nodes;
-
-  /**
-   * This routine determines whether the Mesh is a regular orthogonal mesh (i.e. square in 2D, cubic in 3D).
-   * If it is, then we can use a number of convenience functions when periodic boundary conditions
-   * are applied.  This routine populates the _range vector which is necessary for these convenience functions.
-   * Note:  This routine can potentially identify meshes with concave faces that still "fit" in the convex hull
-   * of the corresponding regular orthogonal mesh.  This case is highly unlikely in practice and if a user
-   * does this, well.... release the kicker!
-   */
-  bool detectOrthogonalDimRanges(Real tol=1e-6);
 
   /**
    * This routine detects paired sidesets of a regular orthogonal mesh (.i.e. parallel sidesets "across" from one and other).

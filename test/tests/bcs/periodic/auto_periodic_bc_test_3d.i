@@ -8,7 +8,6 @@
   ymax = 40
   zmax = 40
   elem_type = HEX8
-  ghosted_boundaries = '0 1 2 3 4 5' # Necessary for auto periodic bcs with ParallelMesh
 []
 
 [Variables]

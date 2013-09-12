@@ -1,7 +1,6 @@
 [Mesh]
   file = square2.e
   uniform_refine = 3
-  ghosted_boundaries = '1 2 10 20' # Necessary for auto periodic bcs with ParallelMesh
 []
 
 [Variables]
