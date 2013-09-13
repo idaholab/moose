@@ -972,15 +972,6 @@ MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<unsigned int> > &
 bool
 MooseMesh::detectOrthogonalDimRanges(Real tol)
 {
-  // If this mesh is already regular orthogonal, we don't need to do any extra work!
-  if (_regular_orthogonal_mesh)
-  {
-    // Make sure that bounds has also been set
-    if (_bounds.size() != LIBMESH_DIM)
-      mooseError("\"_regular_orthogonal_mesh\" has been set, but \"_bounds\" has not been properly initialized.");
-    return true;
-  }
-
   std::vector<Real> min(3, std::numeric_limits<Real>::max());
   std::vector<Real> max(3, std::numeric_limits<Real>::min());
   unsigned int dim = getMesh().mesh_dimension();
