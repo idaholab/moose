@@ -46,6 +46,8 @@ MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const std::string & nam
     _displaced_target_mesh(getParam<bool>("displaced_target_mesh")),
     _fixed_meshes(getParam<bool>("fixed_meshes"))
 {
+  // This transfer does not work with ParallelMesh
+  _fe_problem.mesh().errorIfParallelDistribution("MultiAppNearestNodeTransfer");
 }
 
 void

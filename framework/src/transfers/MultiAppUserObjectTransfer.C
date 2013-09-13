@@ -43,6 +43,8 @@ MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const std::string & name,
     _user_object_name(getParam<UserObjectName>("user_object")),
     _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
 {
+  // This transfer does not work with ParallelMesh
+  _fe_problem.mesh().errorIfParallelDistribution("MultiAppUserObjectTransfer");
 }
 
 void

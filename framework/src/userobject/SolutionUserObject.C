@@ -67,12 +67,17 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _scale(getParam<std::vector<Real> >("coord_scale")),
     _factor(getParam<std::vector<Real> >("coord_factor"))
 {
+  // Several aspects of SolutionUserObject won't work if the FEProblem's MooseMesh is
+  // a ParallelMesh:
+  // .) ExodusII_IO::copy_nodal_solution() doesn't work in parallel.
+  // .) We don't know if directValue will be used, which may request
+  //    a value on a Node we don't have.
+  _fe_problem.mesh().errorIfParallelDistribution("SolutionUserObject");
 
-  // Create a libmesh::Mesh object for storing the loaded data.  This _should_
-  // work regardless of whether the underlying type of Mesh is SerialMesh or
-  // ParallelMesh (if libmesh has been compiled with --enable-parmesh or not),
-  // so this line is OK.
-  _mesh = new Mesh;
+  // Create a libmesh::Mesh object for storing the loaded data.  Since
+  // SolutionUserObject is restricted to only work with SerialMesh
+  // (see above) we can force the Mesh used here to be a SerialMesh.
+  _mesh = new SerialMesh;
 
   // ExodusII mesh file supplied
   if (MooseUtils::hasExtension(_mesh_file, "e"))

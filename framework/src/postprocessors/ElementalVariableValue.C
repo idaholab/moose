@@ -34,6 +34,9 @@ ElementalVariableValue::ElementalVariableValue(const std::string & name, InputPa
     _var_name(parameters.get<VariableName>("variable")),
     _element(_mesh.getMesh().query_elem(parameters.get<unsigned int>("elementid")))
 {
+  // This class only works with SerialMesh, since it relies on a
+  // specific element numbering that we can't guarantee with ParallelMesh
+  _mesh.errorIfParallelDistribution("ElementalVariableValue");
 }
 
 Real

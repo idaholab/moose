@@ -58,6 +58,8 @@ TiledMesh::TiledMesh(const std::string & name, InputParameters parameters):
     _y_width(getParam<Real>("y_width")),
     _z_width(getParam<Real>("z_width"))
 {
+  // The TiledMesh class only works with SerialMesh
+  errorIfParallelDistribution("TiledMesh");
 }
 
 TiledMesh::TiledMesh(const TiledMesh & other_mesh) :

@@ -1,6 +1,8 @@
 [Mesh]
   type = FileMesh
   file = square.e
+  # This test uses SolutionUserObject which doesn't work with ParallelMesh.
+  distribution = serial
 []
 
 [Variables]

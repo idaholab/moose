@@ -42,6 +42,8 @@ MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const std::string & n
     _from_var_name(getParam<VariableName>("source_variable")),
     _error_on_miss(getParam<bool>("error_on_miss"))
 {
+  // This transfer does not work with ParallelMesh
+  _fe_problem.mesh().errorIfParallelDistribution("MultiAppMeshFunctionTransfer");
 }
 
 void

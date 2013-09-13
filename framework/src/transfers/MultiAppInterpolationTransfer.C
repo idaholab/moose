@@ -58,6 +58,8 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const std::string &
     _interp_type(getParam<MooseEnum>("interp_type")),
     _radius(getParam<Real>("radius"))
 {
+  // This transfer does not work with ParallelMesh
+  _fe_problem.mesh().errorIfParallelDistribution("MultiAppInterpolationTransfer");
 }
 
 void

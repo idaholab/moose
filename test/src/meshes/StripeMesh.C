@@ -28,6 +28,8 @@ StripeMesh::StripeMesh(const std::string & name, InputParameters parameters) :
     GeneratedMesh(name, parameters),
     _n_stripes(getParam<unsigned int>("stripes"))
 {
+  // The StripeMesh class only works with SerialMesh
+  errorIfParallelDistribution("StripeMesh");
 }
 
 StripeMesh::StripeMesh(const StripeMesh & other_mesh) :

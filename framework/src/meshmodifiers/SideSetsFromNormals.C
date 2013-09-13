@@ -56,6 +56,12 @@ SideSetsFromNormals::~SideSetsFromNormals()
 void
 SideSetsFromNormals::modify()
 {
+  if (!_mesh_ptr)
+    mooseError("_mesh_ptr must be initialized before calling SideSetsFromNormals::modify()!");
+
+  // We can't call this in the constructor, it appears that _mesh_ptr is always NULL there.
+  _mesh_ptr->errorIfParallelDistribution("SideSetsFromNormals");
+
   // Get the BoundaryIDs from the mesh
   _boundary_ids = _mesh_ptr->getBoundaryIDs(_boundary_names, true);
 

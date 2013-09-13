@@ -4,6 +4,8 @@
   nx = 10
   ny = 10
   displacements = 'disp_x disp_y'
+  # The MultiAppInterpolationTransfer object only works with SerialMesh
+  distribution = serial
 []
 
 [Variables]
