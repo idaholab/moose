@@ -257,13 +257,15 @@
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-6
   l_tol = 1e-5
-  start_time = 0.0
+  start_time = 0.6
   end_time = 1.0
-  num_steps = 10
+  num_steps = 6
   dt = 1.e-1
+  restart_file_base = power_law_creep_restart1_out_restart_0006
 []
 
 [Output]
+  file_base = power_law_creep_test_out
   interval = 1
   output_initial = true
   exodus = true

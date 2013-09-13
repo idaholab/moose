@@ -259,7 +259,7 @@
   l_tol = 1e-5
   start_time = 0.0
   end_time = 1.0
-  num_steps = 10
+  num_steps = 6
   dt = 1.e-1
 []
 
@@ -267,5 +267,7 @@
   interval = 1
   output_initial = true
   exodus = true
+  postprocessor_csv = true
   perf_log = true
+  num_restart_files = 1
 []
