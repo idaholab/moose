@@ -188,15 +188,12 @@
 
 
 [Output]
-  file_base = out
+  file_base = LinearStrainHardening_test_out
   interval = 1
   output_initial = true
-  elemental_as_nodal = true
   exodus = true
   postprocessor_csv = true
 #  gmv = true
 #  tecplot = true
   perf_log = true
 []
-
-

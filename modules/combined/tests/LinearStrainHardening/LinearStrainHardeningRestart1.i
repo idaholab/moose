@@ -188,7 +188,6 @@
 [Output]
   interval = 1
   output_initial = true
-  elemental_as_nodal = true
   exodus = true
   postprocessor_csv = true
 #  gmv = true
@@ -197,5 +196,3 @@
 
   num_restart_files = 1
 []
-
-
