@@ -15,7 +15,7 @@ LIBMESH_OPTIONS = {
 		      }
 		    },
    'dtk' :          { 're_option' : r'#define\s+LIBMESH_HAVE_DTK\s+(\d+)',
-                      'default'   : 'False',
+                      'default'   : 'FALSE',
 		      'options'   :
 		      {
                         'TRUE'  : '1',
