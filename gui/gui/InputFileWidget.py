@@ -29,7 +29,7 @@ class InputFileWidget(QtGui.QWidget):
 
     self.recache()
     
-    self.action_syntax = ActionSyntax(app_path)
+    self.action_syntax = ActionSyntax(app_path, options.use_cached_syntax)
 
     # Start with an input file template if this application has one
     input_file_template_name = os.path.dirname(app_path) + '/input_template'
@@ -254,6 +254,6 @@ class InputFileWidget(QtGui.QWidget):
   def recache(self, force_recache = False):
 
     if not self.yaml_data:
-      self.yaml_data = YamlData(self.qt_app, self.app_path, force_recache or self.options.recache)
+      self.yaml_data = YamlData(self.qt_app, self.app_path, force_recache or self.options.recache, self.options.use_cached_syntax)
     else:
       self.yaml_data.recache(False)

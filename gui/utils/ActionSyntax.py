@@ -2,22 +2,25 @@
 import sys, os, commands, time, re, copy
 
 class ActionSyntax():
-  def __init__(self, app_path):
+  def __init__(self, app_path, use_cached_syntax):
     self.app_path = app_path
     self.paths = []
     self.hard_paths = []
     self.hard_path_patterns = {}
 
-    if not os.path.isfile(self.app_path):
+    if not use_cached_syntax and not os.path.isfile(self.app_path):
       print 'ERROR: Executable ' + self.app_path + ' not found!'
       sys.exit(1)
       
     executable = os.path.basename(self.app_path)
 
-    data = commands.getoutput( self.app_path + " --syntax" )
-
-    data = data.split('**START SYNTAX DATA**\n')[1]
-    data = data.split('**END SYNTAX DATA**')[0]
+    data = None
+    if not use_cached_syntax:
+      data = commands.getoutput( self.app_path + " --syntax" )
+      data = data.split('**START SYNTAX DATA**\n')[1]
+      data = data.split('**END SYNTAX DATA**')[0]
+    else:
+      data = open(os.path.dirname(app_path) + '/syntax_dump_' + os.path.basename(app_path)).read()
 
     data_set = set(data.split('\n'))
 

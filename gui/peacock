@@ -87,27 +87,27 @@ class UiBox(QtGui.QMainWindow):
           self.tab_widget.setCurrentWidget(tab)
           tab._openFile(options.visualize_result)
     
-def recursiveFindExecutable(current_path, p):
+def recursiveFindFile(current_path, p, executable):
   files = os.listdir(current_path)
 
   split = current_path.split('/')
 
   # if we're in the "problems" directory... hop over to this application's directory instead
   if len(split) > 2 and split[len(split)-2] == 'problems':
-    return recursiveFindExecutable('/'.join(split[:len(split)-2]) + '/' + split[len(split)-1], p)
+    return recursiveFindFile('/'.join(split[:len(split)-2]) + '/' + split[len(split)-1], p, executable)
   
   for afile in files:
-    if p.match(afile) and os.access(current_path+'/'+afile, os.X_OK):
+    if p.match(afile) and ((not executable) or os.access(current_path+'/'+afile, os.X_OK)):
       return current_path + '/' + afile
 
   up_one = os.path.dirname(current_path)
 
   if current_path != '/':
-    return recursiveFindExecutable(up_one, p)
+    return recursiveFindFile(up_one, p, executable)
 
   return None  
 
-def findExecutable(executable_option, method_option):
+def findExecutable(executable_option, method_option, use_cached_syntax):
   if executable_option and os.path.exists(executable_option):
     return executable_option
   else:
@@ -123,11 +123,33 @@ def findExecutable(executable_option, method_option):
       
     p = re.compile('.+-'+method+'$')
 
-    executable = recursiveFindExecutable(os.getcwd(), p)
+    executable = recursiveFindFile(os.getcwd(), p, True)
 
     if not executable:
-      print 'Executable not found!  Try specifying it using -e'
-      sys.exit(1)
+      print 'Executable not found!'
+
+      if not use_cached_syntax:
+        print 'Try specifying it using -e'
+        sys.exit(1)
+      else:
+        p = re.compile('syntax.+-'+method+'$')
+        syntax_file = recursiveFindFile(os.getcwd(), p, False)
+
+        if not syntax_file:
+          print 'Unable to find cached syntax and yaml dumps!'
+          sys.exit(1)
+
+        executable_re = re.compile('.+/syntax_dump_(.+)')
+        amatch = executable_re.match(syntax_file)
+        executable = amatch.group(1)
+
+        if (not os.path.isfile(os.path.dirname(syntax_file) + "/" + "yaml_dump_" + executable) or
+           not os.path.isfile(os.path.dirname(syntax_file) + "/" + "yaml_dump_" + executable + "_raw")):
+           print 'Unable to find cached syntax and yaml dumps!'
+           sys.exit(1)
+
+        executable = os.path.dirname(syntax_file) + "/" + executable
+        print 'Using cached syntax files associated with: ' + executable
 
     return executable
   
@@ -194,6 +216,8 @@ if __name__ == '__main__':
                     help="Pass either opt, dbg or devel.  Works the same as setting the $METHOD environment variable.")
 
   parser.add_option("-r", "--recache-syntax", action="store_true", dest="recache", help="Force a recache of the syntax for this executable. Use if you add new syntax or objects.")
+
+  parser.add_option("-c", "--use-cached-syntax", action="store_true", dest="use_cached_syntax", help="Attempt to use a cached syntax dump in the case an executable can't be located.")
   
   (options, args) = parser.parse_args()
 
@@ -203,9 +227,10 @@ if __name__ == '__main__':
     elif '.i' in arg:
       options.input_file = arg
 
-  executable = findExecutable(options.executable, options.method)
+  executable = findExecutable(options.executable, options.method, options.use_cached_syntax)
 
-  print 'Using Executable: ' + executable
+  if not options.use_cached_syntax:
+    print 'Using Executable: ' + executable
 
   app = QtGui.QApplication(sys.argv)
   main_window = UiBox(options,args,executable,app)

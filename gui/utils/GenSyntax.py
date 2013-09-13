@@ -25,14 +25,15 @@ def printYaml(data, level):
       printYaml(d, level+1)    
 
 class GenSyntax():
-  def __init__(self, qt_app, app_path):
+  def __init__(self, qt_app, app_path, use_cached_syntax):
     self.qt_app = qt_app
     self.app_path = app_path
+    self.use_cached_syntax = use_cached_syntax
     self.saved_raw_data = None
     self.saved_data = None    
     
   def GetSyntax(self, recache):
-    if not os.path.isfile(self.app_path):
+    if not self.use_cached_syntax and not os.path.isfile(self.app_path):
       print 'ERROR: Executable ' + self.app_path + ' not found!'
       sys.exit(1)
     self.executable = os.path.basename(self.app_path)
@@ -81,9 +82,14 @@ class GenSyntax():
     return data
 
   def getRawDump(self):
-    data = commands.getoutput( self.app_path + " --yaml" )
-    data = data.split('**START YAML DATA**\n')[1]
-    data = data.split('**END YAML DATA**')[0]
+
+    if not self.use_cached_syntax:
+      data = commands.getoutput( self.app_path + " --yaml" )
+      data = data.split('**START YAML DATA**\n')[1]
+      data = data.split('**END YAML DATA**')[0]
+    else:
+      data = pickle.load(open(self.executable_path + '/yaml_dump_' + self.executable + '_raw', 'rb'))
+
     return data
 
   def massage_data(self, data):

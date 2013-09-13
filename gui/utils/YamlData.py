@@ -10,11 +10,11 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class YamlData():
-  def __init__(self, qt_app, app_path, recache):
+  def __init__(self, qt_app, app_path, recache, use_cached_syntax):
     self.qt_app = qt_app
     self.app_path = app_path
-    self.gen_syntax = GenSyntax(qt_app, app_path)
-    self.yaml_data = self.gen_syntax.GetSyntax(recache)
+    self.use_cached_syntax = use_cached_syntax
+    self.gen_syntax = GenSyntax(qt_app, app_path, use_cached_syntax)
 
   def recache(self, recache):
     self.yaml_data = self.gen_syntax.GetSyntax(recache)
