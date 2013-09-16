@@ -52,13 +52,13 @@ def launchClient(user_list, options, other_args):
       if isAvailable(options, allowed_host):
         try:
           if options.max:
-            if hostname.split('.')[0] != socket.gethostname().split('.')[0]:
+            if not Me(hostname):
               distcc_hosts.append(socket.gethostbyname(hostname) + '/' + threads)
               total_jobs += int(threads)
               if options.summary:
                 summary_list.append('# ' + desc + ' : ' + threads + ' : ' + hostname + ' : ' + socket.gethostbyname(hostname))
           else:
-            if hostname.split('.')[0] != socket.gethostname().split('.')[0]:
+            if not Me(hostname):
               distcc_hosts.append(socket.gethostbyname(hostname) + '/' + use)
               total_jobs += int(use)
               if options.summary:
@@ -78,7 +78,7 @@ def launchClient(user_list, options, other_args):
   for allowed_host in [i for i in user_list]:
     if allowed_host.find('#') == -1:
       (hostname, cores, threads, use, network, desc) = getMachine(allowed_host)
-      if hostname.split('.')[0] == socket.gethostname().split('.')[0]:
+      if Me(hostname):
         if options.local:
           distcc_hosts = ['localhost/' + str(int(threads))]
           summary_list.append('# Localhost : ' + str(int(threads)) + ' : ' + hostname + ' : ' + socket.gethostbyname(hostname))
@@ -142,6 +142,12 @@ def checkDaemon(user_list, options):
       dmake_file.close()
       print 'loading daemons...'
       launchDaemon(user_list, options)
+
+def Me(hostname):
+  me = socket.gethostbyname(socket.gethostname())
+  them = socket.gethostbyname(hostname)
+  if me == them:
+    return True
 
 def getMachine(machine):
   return machine.split(',')
