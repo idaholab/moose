@@ -64,12 +64,12 @@ def launchClient(user_list, options, other_args):
               if options.summary:
                 summary_list.append('# ' + desc + ' : ' + use + ' : ' + hostname + ' : ' + socket.gethostbyname(hostname))
         except socket.error, e:
-          print '# Information: ', hostname, ' is not available'
+          print '# Information: ', desc, ' is not available'
       elif isAvailable(options, allowed_host) == None:
         pass
       else:
         if options.summary:
-          print '# Information: ', hostname, ' is not available'
+          print '# Information: ', desc, ' is not available'
 
   # Randomize the list
   shuffle(distcc_hosts)
@@ -94,8 +94,8 @@ def launchClient(user_list, options, other_args):
     for machine in summary_list:
       print ''.join(machine)
 
-  # Set job count based on processors tallied, default, or --jobs argument
-  if options.max is False:
+  # If the user set the --jobs, use it, otherwise use the total_jobs computed
+  if options.jobs != -1:
     total_jobs = options.jobs
 
   print '# Using', total_jobs, 'processors'
@@ -110,7 +110,11 @@ def launchClient(user_list, options, other_args):
     make_process = subprocess.Popen(['make', '-j', str(total_jobs), ''.join(other_args)])
   else:
     make_process = subprocess.Popen(['make', '-j', str(total_jobs)])
+
+  # Time and run make command
+  strt = time.clock()
   make_process.communicate()
+  options.make_time = time.clock() - strt
 
 def checkDaemon(user_list, options):
   if options.no_daemon:
@@ -176,7 +180,7 @@ def parseArguments(args=None):
   parser.add_argument('--max', '-m',  action='store_true', help='Use maximum jobs across the board\n ')
   parser.add_argument('--quiet', '-q', action='store_true', help='Do not print compile errors/warnings\n ')
   parser.add_argument('--summary', '-s', action='store_true', help='Show distribution summary\n ')
-  parser.add_argument('--jobs', '-j', type=int, default=70, help='Arbitrarily set job count (default: %(default)d)')
+  parser.add_argument('--jobs', '-j', type=int, default=-1, help='Arbitrarily set job count (default: %(default)d)')
   parser.add_argument('--dedicated', '-d', action='store_true', help='Only use dedicated compile boxes')
   parser.add_argument('--local', '-l', action='store_true', help='Run make locally, do not distribute')
   parser.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
@@ -198,6 +202,9 @@ def which(program):
   return None
 
 if __name__ == "__main__":
+  # Save the start time for dmake execution
+  strt = time.clock()
+
   (options, other_args) = parseArguments()
 
   if socket.gethostbyname(socket.gethostname()).find('204') != -1:
@@ -211,3 +218,9 @@ if __name__ == "__main__":
   else:
     checkDaemon(user_list, options)
     launchClient(user_list, options, other_args)
+
+  # Print the time
+  total_time = time.clock() - strt
+  if hasattr(options, 'make_time'):
+    print 'Elapsed time for make: ' + str(options.make_time) + ' sec.'
+    print "Elasped time for dmake: " + str(total_time - options.make_time) + " sec."
