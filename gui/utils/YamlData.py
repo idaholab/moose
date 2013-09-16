@@ -15,6 +15,7 @@ class YamlData():
     self.app_path = app_path
     self.use_cached_syntax = use_cached_syntax
     self.gen_syntax = GenSyntax(qt_app, app_path, use_cached_syntax)
+    self.yaml_data = self.gen_syntax.GetSyntax(recache)
 
   def recache(self, recache):
     self.yaml_data = self.gen_syntax.GetSyntax(recache)
