@@ -26,13 +26,12 @@
 template<>
 InputParameters validParams<AuxKernel>()
 {
-  MooseEnum execute_options(SetupInterface::getExecuteOptions());
-
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
 
-  params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin|custom) to execute only at that moment");
+  // Add the SetupInterface parameter, 'execute_on', the default is 'residual'
+  params += validParams<SetupInterface>();
 
   params.addRequiredParam<AuxVariableName>("variable", "The name of the variable that this object applies to");
 

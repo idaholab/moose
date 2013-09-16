@@ -26,9 +26,9 @@ InputParameters validParams<Transfer>()
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addPrivateParam<std::string>("built_by_action", "add_transfer");
 
-  MooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "timestep_begin";  // set the default
-  params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin|custom) to execute only at that moment");
+  // Add the SetupInterface parameter, 'execute_on', and set it to a default of 'timestep'
+  params += validParams<SetupInterface>();
+  params.set<MooseEnum>("execute_on") = "timestep_begin";
 
   return params;
 }

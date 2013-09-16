@@ -15,6 +15,19 @@
 #include "SetupInterface.h"
 #include "Conversion.h"
 
+template<>
+InputParameters validParams<SetupInterface>()
+{
+  InputParameters params = emptyInputParameters();
+
+  // Get an MooseEnum of the avaible 'execute_on' optoins
+  MooseEnum execute_options(SetupInterface::getExecuteOptions());
+
+  // Add the 'execute_on' input parameter for users to set
+  params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin|custom) to execute only at that moment");
+
+  return params;
+}
 
 SetupInterface::SetupInterface(InputParameters & params)
 {
@@ -52,4 +65,10 @@ ExecFlagType
 SetupInterface::execFlag() const
 {
   return _exec_flags;
+}
+
+MooseEnum
+SetupInterface::getExecuteOptions()
+{
+  return MooseEnum("initial, residual, jacobian, timestep, timestep_begin, custom", "residual");
 }

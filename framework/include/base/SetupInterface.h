@@ -19,6 +19,12 @@
 #include "ExecStore.h"
 #include "MooseEnum.h"
 
+// Forward declarations
+class SetupInterface;
+
+template<>
+InputParameters validParams<SetupInterface>();
+
 class SetupInterface
 {
 public:
@@ -55,7 +61,11 @@ public:
    */
   virtual ExecFlagType execFlag() const;
 
-  static MooseEnum getExecuteOptions() { return MooseEnum("initial, residual, jacobian, timestep, timestep_begin, custom", "residual"); }
+  /**
+   * Returns the available options for the 'execute_on' input parameters
+   * @return A MooseEnum with the avaiable 'execute_on' options, the default is 'residual'
+   */
+  static MooseEnum getExecuteOptions();
 
 protected:
   /// execution flag (when is the object executed/evaluated)
