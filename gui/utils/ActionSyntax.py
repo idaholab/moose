@@ -19,6 +19,11 @@ class ActionSyntax():
       data = commands.getoutput( self.app_path + " --syntax" )
       data = data.split('**START SYNTAX DATA**\n')[1]
       data = data.split('**END SYNTAX DATA**')[0]
+
+      # Cache the syntax out to a file in case we need to load it without the executable
+      executable = os.path.basename(self.app_path)
+      executable_path = os.path.dirname(self.app_path)
+      open(executable_path+"/syntax_dump_"+executable,"w").write(data)
     else:
       data = open(os.path.dirname(app_path) + '/syntax_dump_' + os.path.basename(app_path)).read()
 
