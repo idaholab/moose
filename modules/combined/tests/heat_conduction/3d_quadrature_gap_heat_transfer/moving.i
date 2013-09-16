@@ -66,6 +66,7 @@
     master = rightleft
     slave = leftright
     quadrature = true
+    use_displaced_mesh = true
   [../]
 []
 
@@ -75,6 +76,7 @@
     block = 'left right'
     specific_heat = 1
     thermal_conductivity = 1
+    use_displaced_mesh = true
   [../]
 []
 

@@ -63,7 +63,6 @@ protected:
 
   MooseVariable * _temp_var;
   PenetrationLocator * _penetration_locator;
-  MooseMesh * _current_mesh;
   const NumericVector<Number> * * _serialized_solution;
   DofMap * _dof_map;
   const bool _warnings;

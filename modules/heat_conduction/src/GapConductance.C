@@ -62,7 +62,6 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
    _max_gap(getParam<Real>("max_gap")),
    _temp_var(_quadrature ? getVar("variable",0) : NULL),
    _penetration_locator(NULL),
-   _current_mesh(NULL),
    _serialized_solution(_quadrature ? &_temp_var->sys().currentSolution() : NULL),
    _dof_map(_quadrature ? &_temp_var->sys().dofMap() : NULL),
    _warnings(getParam<bool>("warnings"))
@@ -84,20 +83,9 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
 
   if(_quadrature)
   {
-    if(_displaced_subproblem)
-    {
-      _penetration_locator = &_displaced_subproblem->geomSearchData().getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"),
-                                                                                                     getParam<std::vector<BoundaryName> >("boundary")[0],
-                                                                                                     Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
-      _current_mesh = &_displaced_subproblem->mesh();
-    }
-    else
-    {
-      _penetration_locator = &_subproblem.geomSearchData().getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"),
-                                                                                           getParam<std::vector<BoundaryName> >("boundary")[0],
-                                                                                           Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
-      _current_mesh = &_subproblem.mesh();
-    }
+    _penetration_locator = &_subproblem.geomSearchData().getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"),
+                                                                                         getParam<std::vector<BoundaryName> >("boundary")[0],
+                                                                                         Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
   }
 }
 
@@ -218,7 +206,7 @@ GapConductance::computeGapValues()
   }
   else
   {
-    Node * qnode = _current_mesh->getQuadratureNode(_current_elem, _current_side, _qp);
+    Node * qnode = _mesh.getQuadratureNode(_current_elem, _current_side, _qp);
     PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator->_penetration_info[qnode->id()];
 
     _gap_temp = 0.0;
