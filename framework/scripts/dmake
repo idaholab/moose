@@ -106,15 +106,14 @@ def launchClient(user_list, options, other_args):
     print '#'*45
     return
   print '#'*45
+  strt = time.clock()
   if len(other_args) > 0:
     make_process = subprocess.Popen(['make', '-j', str(total_jobs), ''.join(other_args)])
   else:
     make_process = subprocess.Popen(['make', '-j', str(total_jobs)])
 
-  # Time and run make command
-  strt = time.clock()
-  make_process.communicate()
-  options.make_time = time.clock() - strt
+  while make_process.poll() == None:
+    options.make_time = time.clock() - strt
 
 def checkDaemon(user_list, options):
   if options.no_daemon:
@@ -222,5 +221,6 @@ if __name__ == "__main__":
   # Print the time
   total_time = time.clock() - strt
   if hasattr(options, 'make_time'):
+    print '\n'
     print 'Elapsed time for make: ' + str(options.make_time) + ' sec.'
     print "Elasped time for dmake: " + str(total_time - options.make_time) + " sec."
