@@ -102,7 +102,7 @@ def launchClient(user_list, options, other_args):
   # export the environment
   os.environ['DISTCC_HOSTS']=' '.join(distcc_hosts)
   if options.summary:
-    print '# DISTCC_HOSTS= ' + os.getenv('DISTCC_HOSTS'), '\n# make -j', total_jobs, ''.join(other_args)
+    print '# DISTCC_HOSTS="' + os.getenv('DISTCC_HOSTS') + '"', '\n# make -j', total_jobs, ''.join(other_args)
     print '#'*45
     return
   print '#'*45
