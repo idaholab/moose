@@ -1318,8 +1318,18 @@ void
 FEProblem::addMaterial(const std::string & mat_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<FEProblem *>("_fe_problem") = this;
-  parameters.set<SubProblem *>("_subproblem") = this;
-  parameters.set<SubProblem *>("_subproblem_displaced") = _displaced_problem;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
+    _reinit_displaced_elem = true;
+  }
+  else
+  {
+    parameters.set<SubProblem *>("_subproblem") = this;
+  }
+
+//  parameters.set<SubProblem *>("_subproblem") = this;
+//  parameters.set<SubProblem *>("_subproblem_displaced") = _displaced_problem;
 
   std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
   std::vector<SubdomainID> block_ids(blocks.size());

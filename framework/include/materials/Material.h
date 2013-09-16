@@ -119,7 +119,6 @@ public:
 
 protected:
   SubProblem & _subproblem;
-  SubProblem * _displaced_subproblem;          // materials do not distinguish between non-displaced and displaced problems
 
   FEProblem & _fe_problem;
   THREAD_ID _tid;
@@ -233,11 +232,11 @@ private:
       // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
       if (!is_get)
         _supplied_props.insert(prop_name);
+      _fe_problem.storeMatPropName(*it, prop_name);
       _subproblem.storeMatPropName(*it, prop_name);
-      if (_displaced_subproblem != NULL)
-        _displaced_subproblem->storeMatPropName(*it, prop_name);
     }
   }
+
 
   bool _has_stateful_property;
 };

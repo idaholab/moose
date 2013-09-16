@@ -25,6 +25,10 @@ InputParameters validParams<Material>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
+
+  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
+  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
+
   params.addPrivateParam<std::string>("built_by_action", "add_material");
   return params;
 }
@@ -45,7 +49,6 @@ Material::Material(const std::string & name, InputParameters parameters) :
     PostprocessorInterface(parameters),
     DependencyResolverInterface(),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _displaced_subproblem(parameters.get<SubProblem *>("_subproblem_displaced")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
