@@ -326,9 +326,9 @@ class ExecuteWidget(QtGui.QWidget):
   def incrementPB(self, text):
     split = text.split('\n')
     # List of keywords to increment the PB on
-    increment_on = ['Mesh Information','EquationSystems','NL step  0']
+    increment_on = ['Mesh','Nonlinear System','0 Nonlinear |R|']
     for line in split:
-      if 'NL step  0' in line:
+      if '0 Nonlinear |R|' in line:
         self.timestep_begin.emit()
       if 'Norm of each nonlinear' in line:
         self.timestep_end.emit()
