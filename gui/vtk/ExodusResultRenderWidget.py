@@ -44,7 +44,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.timer = QtCore.QTimer()
     self.timer.stop()
-    self.timer.setInterval(1000)
+    self.timer.setInterval(100)
     self.timer.timeout.connect(self._updateData)
     
     self.execution_widget = execution_widget
