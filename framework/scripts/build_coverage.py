@@ -108,11 +108,10 @@ def verifyCoverage(options):
   summary_command = subprocess.Popen([options.lcov_command[0], '--summary', options.outfile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   summary_output = summary_command.communicate()[1]
   coverage = float(re.findall(r'lines.*: (\d+.\d+)', summary_output)[0])
+  print summary_output + '\n\nCode Coverage: ' + str(coverage)
   if coverage >= options.coverage_percent:
-    print 'True'
     sys.exit(0)
   else:
-    print 'False'
     sys.exit(1)
 
 def postProcess(options):
