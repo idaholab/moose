@@ -12,35 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PrintNumVars.h"
-#include "SubProblem.h"
+#ifndef NUMVARS_H
+#define NUMVARS_H
+
+#include "GeneralPostprocessor.h"
+
+//Forward Declarations
+class NumVars;
 
 template<>
-InputParameters validParams<PrintNumVars>()
+InputParameters validParams<NumVars>();
+
+class NumVars : public GeneralPostprocessor
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+public:
+  NumVars(const std::string & name, InputParameters parameters);
 
-  MooseEnum system_options("nonlinear, auxiliary", "nonlinear");
-  params.addParam<MooseEnum>("system", system_options, "The system for which you want to print the number of variables.");
+  virtual void initialize() {}
 
-  return params;
-}
+  virtual void execute() {}
 
-PrintNumVars::PrintNumVars(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
-    _system(getParam<MooseEnum>("system"))
-{}
+  /**
+   * This will return the number of elements in the system
+   */
+  virtual Real getValue();
 
-Real
-PrintNumVars::getValue()
-{
-  switch(_system)
-  {
-    case 0:
-      return _fe_problem.getNonlinearSystem().sys().n_vars();
-    case 1:
-      return _fe_problem.getAuxiliarySystem().sys().n_vars();
-  }
+protected:
+  MooseEnum _system;
+};
 
-  mooseError("Unknown system type!");
-}
+#endif //NUMVARS_H

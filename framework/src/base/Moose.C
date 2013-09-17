@@ -142,7 +142,7 @@
 #include "NumLinearIterations.h"
 #include "Residual.h"
 #include "ScalarVariable.h"
-#include "PrintNumVars.h"
+#include "NumVars.h"
 #include "NumResidualEvaluations.h"
 
 #include "Reporter.h"
@@ -434,7 +434,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NumLinearIterations);
   registerPostprocessor(Residual);
   registerPostprocessor(ScalarVariable);
-  registerPostprocessor(PrintNumVars);
+  registerPostprocessor(NumVars);
   registerPostprocessor(NumResidualEvaluations);
   registerPostprocessor(PlotFunction);
   registerPostprocessor(Reporter);
