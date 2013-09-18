@@ -137,14 +137,16 @@ class RunParallel:
       if tuple != None:
         (p, command, tester, start_time, f) = tuple
         if p.poll() != None or now > (start_time + float(tester.specs[MAX_TIME])):
+          # finish up as many jobs as possible, don't sleep until
+          # we've cleared all of the finished jobs
           self.returnToTestHarness(job_index)
-
-       #   if tester in self.reporting_jobs:
-        #    self.reporting_jobs.remove(tester)
+          # We just output to the screen so reset the test harness "activity" timer
           self.reported_timer = now
+          # We just reset the timer so no need to check if we've been waiting for awhile in
+          # this iteration
 
-        # Has the TestHarness done nothing for awhile?
-        if now > (self.reported_timer + 10.0):
+        # Has the TestHarness done nothing for awhile
+        elif now > (self.reported_timer + 10.0):
           # Has the current test been previously reported?
           if tester not in self.reported_jobs:
             if tester.specs.isValid(MIN_REPORTED_TIME):
