@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'side_flux_average.i'
+    exodiff = 'side_flux_average_out.e'
+  [../]
+[]
