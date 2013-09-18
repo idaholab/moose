@@ -506,7 +506,7 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
 
                 VectorValue<unsigned int> residual_dofs(node->dof_number(aux_sys.number(), residual_x_var->index(), 0),
                                                         node->dof_number(aux_sys.number(), residual_y_var->index(), 0),
-                                                        (residual_z_var ? node->dof_number(nonlinear_sys.number(), residual_z_var->index(), 0) : 0));
+                                                        (residual_z_var ? node->dof_number(aux_sys.number(), residual_z_var->index(), 0) : 0));
 
                 VectorValue<unsigned int> diag_stiff_dofs(node->dof_number(aux_sys.number(), diag_stiff_x_var->index(), 0),
                                                           node->dof_number(aux_sys.number(), diag_stiff_y_var->index(), 0),
