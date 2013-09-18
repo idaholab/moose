@@ -235,6 +235,13 @@ public:
   void updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems);
 
   /**
+   * Returns true if the node is semi-local
+   * @param node Node pointer
+   * @return true is the node is semi-local, false otherwise
+   */
+  bool isSemiLocal(Node * node);
+
+  /**
    * Return pointers to range objects for various types of ranges
    * (local nodes, boundary elems, etc.).
    */

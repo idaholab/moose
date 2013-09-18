@@ -441,6 +441,12 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems
   _active_semilocal_node_range = new SemiLocalNodeRange(_semilocal_node_list.begin(), _semilocal_node_list.end());
 }
 
+bool
+MooseMesh::isSemiLocal(Node * node)
+{
+  return _semilocal_node_list.find(node) != _semilocal_node_list.end();
+}
+
 void
 MooseMesh::buildNodeList()
 {

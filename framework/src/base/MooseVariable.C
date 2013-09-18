@@ -247,7 +247,7 @@ MooseVariable::reinitNodes(const std::vector<unsigned int> & nodes)
     // node is non-local.
     Node * nd = _subproblem.mesh().getMesh().query_node_ptr(nodes[i]);
 
-    if (nd && (nd->processor_id() == libMesh::processor_id()))
+    if (nd && (_subproblem.mesh().isSemiLocal(nd)))
     {
       if (nd->n_dofs(_sys.number(), _var_num) > 0)
       {
