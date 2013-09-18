@@ -38,7 +38,7 @@ InputParameters validParams<NodalFloodCount>()
   params.addRequiredCoupledVar("variable", "Ths variable(s) for which to find connected regions of interests, i.e. \"bubbles\".");
   params.addParam<Real>("threshold", 0.5, "The threshold value for which a new bubble may be started");
   params.addParam<Real>("connecting_threshold", "The threshold for which an existing bubble may be extended (defaults to \"threshold\")");
-  params.addParam<std::string>("elem_avg_value", "If supplied, will be used to find the scaled threshold of the bubble edges");
+  params.addParam<PostprocessorName>("elem_avg_value", "If supplied, will be used to find the scaled threshold of the bubble edges");
   params.addParam<bool>("use_single_map", true, "Determine whether information is tracked per coupled variable or consolidated into one (default: true)");
   params.addParam<bool>("condense_map_info", false, "Determines whether we condense all the node values when in multimap mode (default: false)");
   params.addParam<bool>("use_global_numbering", false, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: false)");
@@ -471,7 +471,7 @@ NodalFloodCount::flood(const Node *node, int current_idx, unsigned int live_regi
   _nodes_visited[current_idx][node_id] = true;
 
   // Determing which threshold to use based on whether this is an established region
-  Real threshold = (live_region ? _step_connecting_threshold : _threshold);
+  Real threshold = (live_region ? _step_connecting_threshold : _step_threshold);
 
   // This node hasn't been marked, is it in a bubble?
   if (_vars[current_idx]->getNodalValue(*node) < threshold)
