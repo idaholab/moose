@@ -4,7 +4,7 @@
     input = 'pl_test1q.i'
     exodiff = 'pl_test1q_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test1qtt]
@@ -12,7 +12,7 @@
     input = 'pl_test1qtt.i'
     exodiff = 'pl_test1qtt_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test2qtt]
@@ -20,7 +20,7 @@
     input = 'pl_test2qtt.i'
     exodiff = 'pl_test2qtt_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test3qtt]
@@ -29,7 +29,7 @@
     exodiff = 'pl_test3qtt_out.e'
     abs_zero = 1e-09
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test2q]
@@ -37,7 +37,7 @@
     input = 'pl_test2q.i'
     exodiff = 'pl_test2q_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test1tt]
@@ -45,7 +45,7 @@
     input = 'pl_test1tt.i'
     exodiff = 'pl_test1tt_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4qtt]
@@ -54,7 +54,7 @@
     exodiff = 'pl_test4qtt_out.e'
     abs_zero = 1e-09
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4q]
@@ -63,7 +63,7 @@
     exodiff = 'pl_test4q_out.e'
     abs_zero = 1e-09
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4qns]
@@ -72,7 +72,7 @@
     exodiff = 'pl_test4qns_out.e'
     abs_zero = 1e-09
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4qnns]
@@ -81,7 +81,7 @@
     exodiff = 'pl_test4qnns_out.e'
     abs_zero = 1e-09
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test1]
@@ -89,7 +89,7 @@
     input = 'pl_test1.i'
     exodiff = 'pl_test1_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test2tt]
@@ -97,7 +97,7 @@
     input = 'pl_test2tt.i'
     exodiff = 'pl_test2tt_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test3]
@@ -105,7 +105,7 @@
     input = 'pl_test3.i'
     exodiff = 'pl_test3_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test3ns]
@@ -113,7 +113,7 @@
     input = 'pl_test3ns.i'
     exodiff = 'pl_test3ns_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test3nns]
@@ -121,7 +121,7 @@
     input = 'pl_test3nns.i'
     exodiff = 'pl_test3nns_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test2]
@@ -129,7 +129,7 @@
     input = 'pl_test2.i'
     exodiff = 'pl_test2_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4]
@@ -137,7 +137,7 @@
     input = 'pl_test4.i'
     exodiff = 'pl_test4_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4ns]
@@ -145,7 +145,7 @@
     input = 'pl_test4ns.i'
     exodiff = 'pl_test4ns_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4nns]
@@ -153,7 +153,7 @@
     input = 'pl_test4nns.i'
     exodiff = 'pl_test4nns_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test3q]
@@ -161,7 +161,7 @@
     input = 'pl_test3q.i'
     exodiff = 'pl_test3q_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test3qns]
@@ -169,7 +169,7 @@
     input = 'pl_test3qns.i'
     exodiff = 'pl_test3qns_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test3qnns]
@@ -177,7 +177,7 @@
     input = 'pl_test3qnns.i'
     exodiff = 'pl_test3qnns_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test4tt]
@@ -185,7 +185,7 @@
     input = 'pl_test4tt.i'
     exodiff = 'pl_test4tt_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./pl_test3tt]
@@ -193,6 +193,6 @@
     input = 'pl_test3tt.i'
     exodiff = 'pl_test3tt_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 []

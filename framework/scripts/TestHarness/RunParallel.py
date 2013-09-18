@@ -42,6 +42,12 @@ class RunParallel:
     # List of skipped jobs to resolve prereq issues for tests that never run
     self.skipped_jobs = set()
 
+    # Jobs we are reporting as taking longer then 10% of MAX_TIME
+    self.reported_jobs = set()
+
+    # Reporting timer which resets when ever data is printed to the screen.
+    self.reported_timer = clock()
+
   ## run the command asynchronously and call testharness.testOutputAndFinish when complete
   def run(self, tester, command, recurse=True):
     # First see if any of the queued jobs can be run but only if recursion is allowed on this run
@@ -76,7 +82,7 @@ class RunParallel:
       print "Error in launching a new task"
       raise
 
-    self.jobs[job_index] = (p, command, tester, clock() + float(tester.specs[MAX_TIME]), f)
+    self.jobs[job_index] = (p, command, tester, clock(), f)
 
   def startReadyJobs(self):
     queue_items = len(self.queue)
@@ -129,10 +135,31 @@ class RunParallel:
     job_index = 0
     for tuple in self.jobs:
       if tuple != None:
-        (p, command, tester, time, f) = tuple
-        if p.poll() != None or now > time:
+        (p, command, tester, start_time, f) = tuple
+        if p.poll() != None or now > (start_time + float(tester.specs[MAX_TIME])):
           self.returnToTestHarness(job_index)
-          break
+
+       #   if tester in self.reporting_jobs:
+        #    self.reporting_jobs.remove(tester)
+          self.reported_timer = now
+
+        # Has the TestHarness done nothing for awhile?
+        if now > (self.reported_timer + 10.0):
+          # Has the current test been previously reported?
+          if tester not in self.reported_jobs:
+            if tester.specs.isValid(MIN_REPORTED_TIME):
+              start_min_threshold = start_time + float(tester.specs[MIN_REPORTED_TIME])
+            else:
+              start_min_threshold = start_time + (0.1 * float(tester.specs[MAX_TIME]))
+
+            threshold = max(start_min_threshold, (0.1 * float(tester.specs[MAX_TIME])))
+
+            if now >= threshold:
+              self.harness.handleTestResult(tester.specs, '', 'RUNNING', start_time, now, False)
+
+              self.reported_jobs.add(tester)
+              self.reported_timer = now
+
       job_index += 1
 
     sleep(time_to_wait)

@@ -8,5 +8,6 @@
     compiler = 'GCC CLANG'
     method = 'OPT OPROF'
     no_valgrind = true
+    min_reported_time = 20
   [../]
 []

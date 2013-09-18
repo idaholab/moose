@@ -4,7 +4,7 @@
     input = '2d_penetration_locator_test.i'
     exodiff = 'out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 
   [./2d_triangle]
@@ -12,6 +12,6 @@
     input = '2d_triangle.i'
     exodiff = '2d_triangle_out.e'
     group = 'geometric'
-    custom_cmp = ../3d_penetration_locator/exclude_elem_id.cmp
+    custom_cmp = exclude_elem_id.cmp
   [../]
 []

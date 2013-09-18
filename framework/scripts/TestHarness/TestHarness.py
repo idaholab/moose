@@ -174,9 +174,9 @@ class TestHarness:
             if params.type(key) == list:
               params[key] = value.split(' ')
             else:
-	      if re.match('".*"', value):  # Strip quotes
-	        params[key] = value[1:-1]
-	      else:
+              if re.match('".*"', value):  # Strip quotes
+                params[key] = value[1:-1]
+              else:
                 params[key] = value
           else:
             params_ignored.add(key)
@@ -188,7 +188,7 @@ class TestHarness:
         if len(params_ignored):
           print 'Ignored Parameter(s): ', params_ignored
 
-	# TODO: In progress formatting
+        # TODO: In progress formatting
 #        formatted_name = relative_path + '.' + testname
         formatted_name = relative_path.replace('/tests/', '') + '.' + testname
 #	formatted_name = '/'.join(relative_path.split('/')[1:]) + '.' + testname
@@ -202,7 +202,7 @@ class TestHarness:
         params[RELATIVE_PATH] = relative_path
         params[EXECUTABLE] = self.executable
         params[HOSTNAME] = self.host_name
-	params[MOOSE_DIR] = self.moose_dir
+        params[MOOSE_DIR] = self.moose_dir
         if params.isValid(PREREQ):
           if type(params[PREREQ]) != list:
             print "Option 'PREREQ' needs to be of type list in " + params[TEST_NAME]
@@ -248,18 +248,18 @@ class TestHarness:
         # Now update all the base level keys
         test.update(test_opts)
 
-	# Backwards compatibility
+        # Backwards compatibility
         if len(test[CSVDIFF]) > 0 and TYPE not in test:
           print 'CSVDIFF is deprecated in the legacy test format unless "type" is supplied. Please convert to the new format:\n' + test_dir + '/' + filename
           sys.exit(1)
-	if (test[EXPECT_ERR] != None or test[EXPECT_ASSERT] != None or test[SHOULD_CRASH] == True) and not TYPE in test:
-	  test[TYPE] = 'RunException'
-	  test[SHOULD_CRASH] = True
+        if (test[EXPECT_ERR] != None or test[EXPECT_ASSERT] != None or test[SHOULD_CRASH] == True) and not TYPE in test:
+          test[TYPE] = 'RunException'
+          test[SHOULD_CRASH] = True
 
         test.update( { TEST_NAME : testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path, EXECUTABLE : self.executable, HOSTNAME : self.host_name, MOOSE_DIR : self.moose_dir} )
 
-	if TYPE not in test:
-	  test.update( { TYPE : "Exodiff" } )
+        if TYPE not in test:
+          test.update( { TYPE : "Exodiff" } )
 
         if test[PREREQ] != None:
           if type(test[PREREQ]) != list:
@@ -267,8 +267,8 @@ class TestHarness:
             sys.exit(1)
           test[PREREQ] = [module_name + '.' + item for item in test[PREREQ]]
 
-	# Create an InputParmaters object using the raw test specs dictionary
-	params = self.populateParams(InputParameters(), test)
+        # Create an InputParmaters object using the raw test specs dictionary
+        params = self.populateParams(InputParameters(), test)
 
         # Build a list of test specs (dicts) to return
         tests.append(params)
@@ -375,16 +375,16 @@ class TestHarness:
                 output_file.close()
               else:
                 # I ran into this scenario when the cluster went down, but launched/completed my job :)
-                self.handleTestResult(tester.specs, '', 'FAILED (NO STDOUT FILE)', 0, 0)
+                self.handleTestResult(tester.specs, '', 'FAILED (NO STDOUT FILE)', 0, 0, True)
             elif output_value == 'R':
               # Job is currently running
-              self.handleTestResult(tester.specs, '', 'RUNNING', 0, 0)
+              self.handleTestResult(tester.specs, '', 'RUNNING', 0, 0, True)
             elif output_value == 'E':
               # Job is exiting
-              self.handleTestResult(tester.specs, '', 'EXITING', 0, 0)
+              self.handleTestResult(tester.specs, '', 'EXITING', 0, 0, True)
             elif output_value == 'Q':
               # Job is currently queued
-              self.handleTestResult(tester.specs, '', 'QUEUED', 0, 0)
+              self.handleTestResult(tester.specs, '', 'QUEUED', 0, 0, True)
     else:
       return ('BATCH FILE NOT FOUND', '')
 
@@ -441,7 +441,7 @@ class TestHarness:
 
   ## Update global variables and print output based on the test result
   # Containing OK means it passed, skipped means skipped, anything else means it failed
-  def handleTestResult(self, specs, output, result, start=0, end=0):
+  def handleTestResult(self, specs, output, result, start=0, end=0, add_to_table=True):
     timing = ''
 
     if self.options.timing:
@@ -449,12 +449,20 @@ class TestHarness:
     elif self.options.store_time:
       timing = self.getSolveTime(output)
 
-    # I have to evaluate processingPBS like this, because there are two stages of processingPBS (launching and then evaluating output)...
-    if self.processingPBS:
+    # Only add to the test_table if told to. We now have enough cases where we wish to print to the screen, but not
+    # in the 'Final Test Results' area.
+    if add_to_table:
       self.test_table.append( (specs, output, result, timing, start, end) )
-    # Normal operation
-    elif self.options.pbs == None:
-      self.test_table.append( (specs, output, result, timing, start, end) )
+      if result.find('OK') != -1:
+        self.num_passed += 1
+      elif result.find('skipped') != -1:
+        self.num_skipped += 1
+      elif result.find('deleted') != -1:
+        self.num_skipped += 1
+      elif result.find('LAUNCHED') != -1 or result.find('RUNNING') != -1 or result.find('QUEUED') != -1 or result.find('EXITING') != -1:
+        self.num_pending += 1
+      else:
+        self.num_failed += 1
 
     self.postRun(specs, timing)
 
@@ -462,29 +470,6 @@ class TestHarness:
       print printResult(specs[RELATIVE_PATH] + '/' + specs[TEST_NAME].split('/')[-1], result, timing, start, end, self.options)
     else:
       print printResult(specs[TEST_NAME], result, timing, start, end, self.options)
-
-    if self.processingPBS:
-      if result.find('OK') != -1:
-        self.num_passed += 1
-      elif result.find('skipped') != -1:
-        self.num_skipped += 1
-      elif result.find('deleted') != -1:
-        self.num_skipped += 1
-      elif result.find('LAUNCHED') != -1 or result.find('RUNNING') != -1 or result.find('QUEUED') != -1 or result.find('EXITING') != -1:
-        self.num_pending += 1
-      else:
-        self.num_failed += 1
-    elif self.options.pbs == None:
-      if result.find('OK') != -1:
-        self.num_passed += 1
-      elif result.find('skipped') != -1:
-        self.num_skipped += 1
-      elif result.find('deleted') != -1:
-        self.num_skipped += 1
-      elif result.find('LAUNCHED') != -1 or result.find('RUNNING') != -1 or result.find('QUEUED') != -1 or result.find('EXITING') != -1:
-        self.num_pending += 1
-      else:
-        self.num_failed += 1
 
     if self.options.verbose or ('FAILED' in result and not self.options.quiet):
       output = output.replace('\r', '\n')  # replace the carriage returns with newlines

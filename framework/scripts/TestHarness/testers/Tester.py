@@ -10,6 +10,7 @@ class Tester(object):
     # Common Options
     params.addRequiredParam('type', "The type of test of Tester to create for this test.")
     params.addParam('max_time',   300, "The maximum in seconds that the test will be allowed to run.")
+    params.addParam('min_reported_time', "The minimum time elapsed before a test is reported as taking to long to run.")
     params.addParam('skip',     False, "If supplied will skip the test and print the reason given for doing so.")
     params.addParam('deleted',         "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
 
