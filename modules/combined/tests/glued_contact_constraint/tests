@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'glued_contact_constraint.i'
+    exodiff = 'out.e'
+  [../]
+[]
