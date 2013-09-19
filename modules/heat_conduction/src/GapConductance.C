@@ -37,6 +37,9 @@ InputParameters validParams<GapConductance>()
   params.addParam<Real>("stefan_boltzmann", 5.669e-8, "The Stefan-Boltzmann constant");
   params.addParam<Real>("emissivity_1", 0.0, "The emissivity of the fuel surface");
   params.addParam<Real>("emissivity_2", 0.0, "The emissivity of the cladding surface");
+
+  params.addParam<bool>("use_displaced_mesh", true, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
+
   return params;
 }
 

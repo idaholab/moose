@@ -245,4 +245,3 @@ GapHeatTransfer::computeGapValues()
     }
   }
 }
-
