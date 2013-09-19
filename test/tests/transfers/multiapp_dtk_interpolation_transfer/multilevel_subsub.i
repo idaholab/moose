@@ -3,6 +3,7 @@
   dim = 2
   nx = 2
   ny = 2
+  distribution = serial
 []
 
 [Variables]

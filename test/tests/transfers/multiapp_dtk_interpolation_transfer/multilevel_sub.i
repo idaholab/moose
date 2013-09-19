@@ -5,6 +5,7 @@
   ny = 8
   xmax = 4
   ymax = 4
+  distribution = serial
 []
 
 [Variables]

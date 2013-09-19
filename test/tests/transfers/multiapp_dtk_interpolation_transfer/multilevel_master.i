@@ -5,6 +5,7 @@
   ny = 32
   xmax = 16
   ymax = 16
+  distribution = serial
 []
 
 [Variables]

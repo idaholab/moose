@@ -4,6 +4,7 @@
   nx = 20
   ny = 20
   nz = 20
+  distribution = serial
 []
 
 [Variables]
