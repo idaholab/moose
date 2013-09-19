@@ -415,7 +415,11 @@ void petscSetupDampers(NonlinearImplicitSystem& sys)
 #else
   // PETSc 3.3.0+
   SNESLineSearch linesearch;
+#if PETSC_VERSION_LESS_THAN(3,4,0)
   PetscErrorCode ierr = SNESGetSNESLineSearch(snes, &linesearch);
+#else
+  PetscErrorCode ierr = SNESGetLineSearch(snes, &linesearch);
+#endif
   CHKERRABORT(libMesh::COMM_WORLD,ierr);
 
   ierr = SNESLineSearchSetPostCheck(linesearch, dampedCheck, problem);
