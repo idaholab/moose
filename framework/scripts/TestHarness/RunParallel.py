@@ -133,6 +133,7 @@ class RunParallel:
   def spinwait(self, time_to_wait=0.05):
     now = clock()
     job_index = 0
+    slot_freed = False
     for tuple in self.jobs:
       if tuple != None:
         (p, command, tester, start_time, f) = tuple
@@ -142,6 +143,8 @@ class RunParallel:
           self.returnToTestHarness(job_index)
           # We just output to the screen so reset the test harness "activity" timer
           self.reported_timer = now
+
+          slot_freed = True
           # We just reset the timer so no need to check if we've been waiting for awhile in
           # this iteration
 
@@ -164,7 +167,8 @@ class RunParallel:
 
       job_index += 1
 
-    sleep(time_to_wait)
+    if not slot_freed:
+      sleep(time_to_wait)
 
   def satisfyLoad(self):
     # We'll always run at least one job regardless of load or we'll starve!
