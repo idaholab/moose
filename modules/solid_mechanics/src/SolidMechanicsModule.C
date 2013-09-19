@@ -39,6 +39,7 @@
 #include "StressDivergence.h"
 #include "StressDivergenceRZ.h"
 #include "StressDivergenceRSpherical.h"
+#include "StressDivergenceTruss.h"
 
 void
 Elk::SolidMechanics::registerObjects(Factory & factory)
@@ -49,7 +50,7 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerAux(MaterialVectorAux);
   registerAux(AccumulateAux);
   registerAux(ElementsOnLineAux);
-  
+
   registerExecutioner(AdaptiveTransient);
 
   registerMaterial(AbaqusCreepMaterial);
@@ -76,12 +77,13 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerKernel(StressDivergence);
   registerKernel(StressDivergenceRZ);
   registerKernel(StressDivergenceRSpherical);
+  registerKernel(StressDivergenceTruss);
 
   registerPostprocessor(HomogenizedElasticConstants);
   registerPostprocessor(Mass);
 
   registerUserObject(MaterialTensorOnLine);
-  
+
 }
 
 void

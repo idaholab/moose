@@ -8,6 +8,8 @@ template<>
 InputParameters validParams<SolidMechanicsAction>()
 {
   InputParameters params = validParams<Action>();
+  MooseEnum elemType("truss, undefined", "undefined");
+  params.addParam<MooseEnum>("type", elemType, "The element type: " + elemType.getRawNames());
   params.addParam<NonlinearVariableName>("disp_x", "", "The x displacement");
   params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
@@ -83,7 +85,11 @@ SolidMechanicsAction::act()
     std::vector<std::vector<AuxVariableName> > save_in;
     std::vector<std::vector<AuxVariableName> > diag_save_in;
     std::string type("StressDivergence");
-    if (coord_type == Moose::COORD_RZ)
+    if (getParam<MooseEnum>("type") == 0) // truss
+    {
+      type = "StressDivergenceTruss";
+    }
+    else if (coord_type == Moose::COORD_RZ)
     {
       rz = true;
       type = "StressDivergenceRZ";
