@@ -66,7 +66,6 @@
     master = rightleft
     slave = leftright
     quadrature = true
-    use_displaced_mesh = true
   [../]
 []
 

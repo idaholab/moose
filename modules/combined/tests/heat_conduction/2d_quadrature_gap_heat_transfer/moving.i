@@ -64,7 +64,6 @@
     master = rightleft
     variable = temp
     type = GapHeatTransfer
-    use_displaced_mesh = true
   [../]
 []
 
