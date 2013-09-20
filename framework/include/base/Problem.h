@@ -20,6 +20,7 @@
 #include "ExecStore.h"
 #include "MooseMesh.h"
 #include "MooseArray.h"
+#include "XTermConstants.h"
 
 // libMesh
 #include "libmesh/libmesh_common.h"
@@ -28,6 +29,8 @@
 #include "libmesh/elem.h"
 #include "libmesh/node.h"
 #include "libmesh/nonlinear_implicit_system.h"
+
+#include <string>
 
 class MooseVariable;
 class MooseVariableScalar;
@@ -69,12 +72,26 @@ public:
    * Whether or not to color output to the terminal.
    * @param state Pass true for color, false to not color.
    */
-  virtual void colorOutput(bool state) { _color_output = state; }
+  void setColorOutput(bool state) { _color_output = state; }
 
   /**
    * Return the current status of whether or not to color terminal output.
    */
-  virtual bool shouldColorOutput() { return _color_output; }
+  bool shouldColorOutput() const { return _color_output; }
+
+  /**
+   * Returns a character string to produce a specific color in terminals supporting
+   * color. The list of color constants is available in XTermConstants.h
+   * @param color (from XTermConstants.h)
+   */
+  const char * setColor(const std::string & color) const
+    { return _color_output ? color.c_str() : ""; }
+  const char * setColor(const char * color) const;
+
+  /**
+   * For Internal Use
+   */
+  void _setCLIOption() { _cli_option_found = true; }
 
   // Time periods //////
 
@@ -98,6 +115,9 @@ public:
 protected:
   /// Time periods
   std::vector<TimePeriod *> _time_periods;
+
+  /// True if the CLI option is found
+  bool _cli_option_found;
 
   /// True if we're going to attempt to write color output
   bool _color_output;

@@ -23,7 +23,6 @@
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
 #include "MooseTypes.h"
-#include "vt100.h"
 
 //libMesh Includes
 #include "libmesh/libmesh_common.h"
@@ -86,28 +85,25 @@ void petscSetOptions(Problem & problem)
 }
 
 /// Quick helper to output the norm in color
-void outputNorm(Real old_norm, Real norm, bool color)
+void outputNorm(Real old_norm, Real norm, Problem * problem)
 {
-  if(color)
+  std::string color(DEFAULT);
+
+  if (problem->shouldColorOutput())
   {
-    if(norm < old_norm)
-    {
-      // If it changes by more than 10% color green
-      if(std::abs(old_norm - norm) / old_norm > 0.05)
-        libMesh::out << set_colors(VT_GREEN, VT_DEFAULT);
-      else // yellow if it's not going so well
-        libMesh::out << set_colors(VT_YELLOW, VT_DEFAULT);
-    }
-    else // Red if the residual went up...
-      libMesh::out << set_colors(VT_RED, VT_DEFAULT);
+    // Red if the residual went up...
+    if (norm > old_norm)
+      color = RED;
+    // Yellow if change is less than 5%
+    else if ((old_norm - norm) / old_norm <= 0.05)
+      color = YELLOW;
+    // Green if change is more than 5%
+    else
+      color = GREEN;
   }
 
-  libMesh::out << norm;
-
-  if(color) // Set the color back to normal
-    libMesh::out << set_colors(VT_DEFAULT, VT_DEFAULT);
-
-  libMesh::out << std::endl;
+  libMesh::out << problem->setColor(color.c_str()) << norm << problem->setColor(DEFAULT)
+               << std::endl;
 }
 
 PetscErrorCode nonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_ptr)
@@ -125,7 +121,7 @@ PetscErrorCode nonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_
                << std::scientific
                << " Nonlinear |R| = ";
 
-  outputNorm(old_norm, fnorm, color);
+  outputNorm(old_norm, fnorm, problem);
 
   old_norm = fnorm;
 
@@ -151,7 +147,7 @@ PetscErrorCode  linearMonitor(KSP ksp, PetscInt its, PetscReal rnorm, void *void
                << std::scientific
                << " Linear |R| = ";
 
-  outputNorm(old_norm, rnorm, color);
+  outputNorm(old_norm, rnorm, problem);
 
   old_norm = rnorm;
 

@@ -177,6 +177,7 @@ MooseApp::setupOptions()
   }
 }
 
+
 void
 MooseApp::setInputFileName(std::string input_filename)
 {
@@ -236,6 +237,17 @@ MooseApp::executeExecutioner()
   {
     _executioner->init();
     printSimulationInfo();
+
+    const char code[12] = {45,45,103,105,114,108,
+                           45,109,111,100,101,0};
+
+    if (_command_line->getPot()->search(code))
+    {
+      FEProblem *problem = _action_warehouse.problem();
+      if (problem)
+        problem->_setCLIOption();
+    }
+
     _executioner->execute();
   }
   else

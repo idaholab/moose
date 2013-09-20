@@ -27,6 +27,7 @@ InputParameters validParams<Problem>()
 
 Problem::Problem(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    _cli_option_found(false),
     _color_output(false)
 {
 }
@@ -53,6 +54,19 @@ Problem::getTimePeriodByName(const std::string & name)
     if (_time_periods[i]->name() == name)
       return _time_periods[i];
   return NULL;
+}
+
+const char *
+Problem::setColor(const char * color) const
+{
+  if (_color_output)
+  {
+    std::string _color(color);
+    if (_cli_option_found && _color.length() == 8 && _color[3] == '2')
+      _color.replace(3, 1, "5", 1);
+    return _color.c_str();
+  }
+  return "";
 }
 
 const std::vector<TimePeriod *> &

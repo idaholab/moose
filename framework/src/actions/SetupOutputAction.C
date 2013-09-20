@@ -244,7 +244,7 @@ SetupOutputAction::act()
         color = true;
 
       if(color == true)
-        _problem->colorOutput(true);
+        _problem->setColorOutput(true);
     }
   }
 
