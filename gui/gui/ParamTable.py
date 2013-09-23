@@ -555,7 +555,8 @@ class ParamTable:
         table_widget.setCellWidget(row, 2, options_item)
 
       if 'cpp_type' in param and (param['cpp_type'] == 'MooseEnum' or param['cpp_type'] == 'std::vector<MooseEnum, std::allocator<MooseEnum> >'):
-        options_item = OptionsWidget(table_widget,row,param['options'].split(' '), self.isVectorType(param['cpp_type']))
+        options = param['options'].split(' ') if param['options'] != None else ''
+        options_item = OptionsWidget(table_widget,row,options, self.isVectorType(param['cpp_type']))
         table_widget.setCellWidget(row, 2, options_item)
       
       name_item.setFlags(QtCore.Qt.ItemIsEnabled)
