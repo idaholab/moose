@@ -40,6 +40,7 @@
 #include "StressDivergenceRZ.h"
 #include "StressDivergenceRSpherical.h"
 #include "StressDivergenceTruss.h"
+#include "TrussMaterial.h"
 
 void
 Elk::SolidMechanics::registerObjects(Factory & factory)
@@ -65,6 +66,7 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerMaterial(PLC_LSH);
   registerMaterial(PLSHPlasticMaterial);
   registerMaterial(PowerLawCreep);
+  registerMaterial(TrussMaterial);
 
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PlenumPressure);
