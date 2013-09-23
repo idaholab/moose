@@ -151,34 +151,61 @@ GrainTracker::buildBoundingSpheres()
   // Build a list of periodic nodes
   _mesh.buildPeriodicNodeSets(pb_nodes, _var_number, _pbs);
   MeshBase & mesh = _mesh.getMesh();
-
+  
   unsigned long total_node_count = 0;
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
+    /**
+     * Create a pair of vectors of real values that is 3 (for the x,y,z components) times
+     * the length of the current _bubble_sets length. Each processor will update the
+     * vector for the nodes that it owns.  Then a parallel exchange will all for the
+     * global min/maxs of each bubble.
+     */
+    std::vector<Real> min_points(_bubble_sets[map_num].size()*3,  1e30);
+    std::vector<Real> max_points(_bubble_sets[map_num].size()*3, -1e30);
+    
+    unsigned int set_counter=0;
     for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[map_num].begin();
          it1 != _bubble_sets[map_num].end(); ++it1)
     {
       total_node_count += it1->_nodes.size();
-
-      Point min( 1.e30,  1.e30,  1.e30);
-      Point max(-1.e30, -1.e30, -1.e30);
-      unsigned int some_node_id = *(it1->_nodes.begin());
-
+      
       // Find the min/max of our bounding box to calculate our bounding sphere
       for (std::set<unsigned int>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
-        for (unsigned int i=0; i<mesh.spatial_dimension(); ++i)
-        {
-          min(i) = std::min(min(i), mesh.point(*it2)(i));
-          max(i) = std::max(max(i), mesh.point(*it2)(i));
-        }
+      {
+        Node *node = mesh.query_node_ptr(*it2);
+        if (node)
+          for (unsigned int i=0; i<mesh.spatial_dimension(); ++i)
+          {
+            min_points[set_counter*3+i] = std::min(min_points[set_counter*3+i], (*node)(i));
+            max_points[set_counter*3+i] = std::max(max_points[set_counter*3+i], (*node)(i));
+          }
+      }
 
+      ++set_counter;
+    }
+
+    Parallel::min(min_points);
+    Parallel::max(max_points);
+
+    set_counter = 0;
+    for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[map_num].begin();
+         it1 != _bubble_sets[map_num].end(); ++it1)
+    {
+      Point min(min_points[set_counter*3], min_points[set_counter*3+1], min_points[set_counter*3+2]);
+      Point max(max_points[set_counter*3], max_points[set_counter*3+1], max_points[set_counter*3+2]);
+      
       // Calulate our bounding sphere
       Point center(min + ((max - min) / 2.0));
+      
       // The radius is the different between the outer edge of the "bounding box"
       // and the center plus the "hull buffer" value
       Real radius = (max - center).size() + _hull_buffer;
 
+      unsigned int some_node_id = *(it1->_nodes.begin());
       _bounding_spheres[map_num].push_back(new BoundingSphereInfo(some_node_id, center, radius));
+
+      ++set_counter;
     }
   }
 
@@ -492,13 +519,15 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
 
   std::cout << "Remapping to: " << new_variable_idx << " whose closest grain is at a distance of " << min_distances[new_variable_idx] << "\n";
 
+
+  MeshBase & mesh = _mesh.getMesh();
   // Remap the grain
   for (std::set<unsigned int>::const_iterator node_it = grain_it1->second->nodes_ptr->begin();
        node_it != grain_it1->second->nodes_ptr->end(); ++node_it)
   {
-    Node * curr_node = _mesh.nodePtr(*node_it);
+    Node *curr_node = mesh.query_node_ptr(*node_it);
 
-    if (curr_node->processor_id() == libMesh::processor_id())
+    if (curr_node && curr_node->processor_id() == libMesh::processor_id())
     {
       _subproblem.reinitNode(curr_node, 0);
 
@@ -550,6 +579,7 @@ GrainTracker::updateFieldInfo()
     _bubble_maps[map_num].clear();
 
   std::map<unsigned int, Real> tmp_map;
+  MeshBase & mesh = _mesh.getMesh();
 
   for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
   {
@@ -560,13 +590,13 @@ GrainTracker::updateFieldInfo()
       for (std::set<unsigned int>::const_iterator node_it = grain_it->second->nodes_ptr->begin();
            node_it != grain_it->second->nodes_ptr->end(); ++node_it)
       {
-        const Node & curr_node = _mesh.node(*node_it);
-
-        if (_vars[grain_it->second->variable_idx]->getNodalValue(curr_node) > tmp_map[curr_node.id()])
+        const Node *curr_node = mesh.query_node_ptr(*node_it);
+       
+        if (curr_node && _vars[grain_it->second->variable_idx]->getNodalValue(*curr_node) > tmp_map[curr_node->id()])
         {
-          _bubble_maps[map_idx][curr_node.id()] = grain_it->first;
+          _bubble_maps[map_idx][curr_node->id()] = grain_it->first;
           if (_var_index_mode)
-            _var_index_maps[map_idx][curr_node.id()] = grain_it->second->variable_idx;
+            _var_index_maps[map_idx][curr_node->id()] = grain_it->second->variable_idx;
         }
       }
   }
