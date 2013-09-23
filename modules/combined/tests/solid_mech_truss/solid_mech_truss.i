@@ -27,6 +27,11 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./area]
+    order = CONSTANT
+    family = MONOMIAL
+#    initial_condition = 1.0
+  [../]
 []
 
 [Functions]
@@ -110,24 +115,13 @@
     property = e_over_l
     variable = e_over_l
   [../]
+  [./area]
+    type = ConstantAux
+    variable = area
+    value = 1.0
+    execute_on = timestep_begin
+  [../]
 []
-
-#[DiracKernels]
-#  [./pullRight]
-#    type = ConstantPointSource
-#    variable = disp_x
-#    value = 1e4
-#    point = '1 1 0'
-#  [../]
-#[]
-
-#[Preconditioning]
-#  [./SMP]
-#    type = SMP
-#    full = true
-#    petsc_options = -snes
-#  [../]
-#[]
 
 [Executioner]
   type = Transient
@@ -144,32 +138,43 @@
   end_time = 3
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Kernels]
+  [./solid_x]
+    type = StressDivergenceTruss
+    variable = disp_x
+    component = 0
+    area = area
+  [../]
+  [./solid_y]
+    type = StressDivergenceTruss
+    variable = disp_y
+    component = 0
+    area = area
+  [../]
+  [./solid_z]
+    type = StressDivergenceTruss
+    variable = disp_z
+    component = 0
+    area = area
   [../]
 []
 
-[Materials]
-#  [./steel]
-#    type = HeatConductionMaterial
-#    block = '1 2'
-#    thermal_conductivity = 10
-#    specific_heat = 1
+#[SolidMechanics]
+#  [./solid]
+#    type = truss
+#    disp_x = disp_x
+#    disp_y = disp_y
+#    disp_z = disp_z
+#    area = area
 #  [../]
-  [./dummy]
-    type = Elastic
+#[]
+
+[Materials]
+  [./steel]
+    type = HeatConductionMaterial
     block = '1 2'
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    youngs_modulus = 1e6
-    poissons_ratio = 0.2
-#    thermal_expansion = 0.1
-#    t_ref = 0.5
-#    temp = temp
+    thermal_conductivity = 10
+    specific_heat = 1
   [../]
   [./linelast]
     type = TrussMaterial

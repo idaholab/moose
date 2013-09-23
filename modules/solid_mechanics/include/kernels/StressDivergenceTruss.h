@@ -27,8 +27,6 @@ protected:
 
   MaterialProperty<Real> & _axial_stress;
   MaterialProperty<Real> & _E_over_L;
-  MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
-  MaterialProperty<SymmTensor> & _d_stress_dT;
 
 private:
   const unsigned int _component;

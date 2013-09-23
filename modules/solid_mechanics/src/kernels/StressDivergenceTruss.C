@@ -12,6 +12,7 @@ InputParameters validParams<StressDivergenceTruss>()
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature");
+  params.addCoupledVar("area", "Cross-sectional area of truss element");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
   params.set<bool>("use_displaced_mesh") = true;
@@ -23,9 +24,7 @@ InputParameters validParams<StressDivergenceTruss>()
 StressDivergenceTruss::StressDivergenceTruss(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
    _axial_stress(getMaterialProperty<Real>("axial_stress" + getParam<std::string>("appended_property_name"))),
-   _E_over_L(getMaterialProperty<Real>("E_over_L" + getParam<std::string>("appended_property_name"))),
-   _Jacobian_mult(getMaterialProperty<SymmElasticityTensor>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
-   _d_stress_dT(getMaterialProperty<SymmTensor>("d_stress_dT"+ getParam<std::string>("appended_property_name"))),
+   _E_over_L(getMaterialProperty<Real>("e_over_l" + getParam<std::string>("appended_property_name"))),
    _component(getParam<unsigned int>("component")),
    _xdisp_coupled(isCoupled("disp_x")),
    _ydisp_coupled(isCoupled("disp_y")),
