@@ -37,13 +37,16 @@ def launchDaemon(user_list, options):
   # Launch the daemon process
   subprocess.Popen(distccd_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+def formatter(desc, cpus, hostname, ip):
+  return '%40s |' % desc + '%7s |' % cpus + '%18s |' % hostname + '%18s |' % ip
+
 def launchClient(user_list, options, other_args):
   distcc_hosts = []
   summary_list = []
   total_jobs = 0
   print '#'*45
   if options.summary:
-    print '# description, jobs, hostname'
+    print '#      Status: ' + formatter('Client', 'Jobs', 'Hostname', 'IP')
   if options.quiet:
     os.environ['DISTCC_VERBOSE'] = '0'
   for allowed_host in [i for i in user_list]:
@@ -56,20 +59,20 @@ def launchClient(user_list, options, other_args):
               distcc_hosts.append(socket.gethostbyname(hostname) + '/' + threads)
               total_jobs += int(threads)
               if options.summary:
-                summary_list.append('# ' + desc + ' : ' + threads + ' : ' + hostname + ' : ' + socket.gethostbyname(hostname))
+                summary_list.append('#   Available: ' + formatter(desc, threads, hostname, socket.gethostbyname(hostname)))
           else:
             if not Me(hostname):
               distcc_hosts.append(socket.gethostbyname(hostname) + '/' + use)
               total_jobs += int(use)
               if options.summary:
-                summary_list.append('# ' + desc + ' : ' + use + ' : ' + hostname + ' : ' + socket.gethostbyname(hostname))
+                summary_list.append('#   Available: ' + formatter(desc, use, hostname, socket.gethostbyname(hostname)))
         except socket.error, e:
-          print '# Information: ', desc, ' is not available'
+          print '#     Warning: ', desc, ' is not available'
       elif isAvailable(options, allowed_host) == None:
         pass
       else:
         if options.summary:
-          print '# Information: ', desc, ' is not available'
+          print '#     Warning: ' + formatter(desc, threads, hostname, socket.gethostbyname(hostname)) + ' Not Available'
 
   # Randomize the list
   shuffle(distcc_hosts)
@@ -81,28 +84,28 @@ def launchClient(user_list, options, other_args):
       if Me(hostname):
         if options.local:
           distcc_hosts = ['localhost/' + str(int(threads))]
-          summary_list.append('# Localhost : ' + str(int(threads)) + ' : ' + hostname + ' : ' + socket.gethostbyname(hostname))
+          summary_list.append('#   Available: ' + formatter('localhost', threads, hostname , socket.gethostbyname(hostname)))
           total_jobs = threads
         else:
           distcc_hosts.insert(0, '--localslots=' + str(int(threads) / 4) + ' --localslots_cpp=' + str(int(threads) - 2) + ' localhost/2')
-          summary_list.append('# Localhost : 2 : ' + hostname + ' : ' + socket.gethostbyname(hostname))
+          summary_list.append('#   Available: ' + formatter('localhost', '2', hostname, socket.gethostbyname(hostname)))
           total_jobs += 2
 
   # Print summary
   if options.summary:
     summary_list.sort()
     for machine in summary_list:
-      print ''.join(machine)
+      print machine
 
   # If the user set the --jobs, use it, otherwise use the total_jobs computed
   if options.jobs != -1:
     total_jobs = options.jobs
 
-  print '# Using', total_jobs, 'processors'
+  print '#\n# \tUsing', total_jobs, 'processors'
   # export the environment
   os.environ['DISTCC_HOSTS']=' '.join(distcc_hosts)
   if options.summary:
-    print '# DISTCC_HOSTS="' + os.getenv('DISTCC_HOSTS') + '"', '\n# make -j', total_jobs, ''.join(other_args)
+    print '#\n# \tDISTCC_HOSTS="' + os.getenv('DISTCC_HOSTS') + '"', '\n# \tmake -j', total_jobs, ''.join(other_args)
     print '#'*45
     return
   print '#'*45
@@ -147,10 +150,17 @@ def checkDaemon(user_list, options):
       launchDaemon(user_list, options)
 
 def Me(hostname):
-  me = socket.gethostbyname(socket.gethostname())
-  them = socket.gethostbyname(hostname)
-  if me == them:
-    return True
+  try:
+    me = socket.gethostbyname(socket.gethostname())
+    them = socket.gethostbyname(hostname)
+    if me == them:
+      return True
+  except socket.gaierror:
+    if options.allow:
+      print 'WARNING, Hostname:', hostname, 'not found on the network. DNS error? Try entering the IP instead?'
+    else:
+      print 'WARNING, Hostname:', hostname, 'not found on the network. DNS error?'
+  
 
 def getMachine(machine):
   return machine.split(',')
