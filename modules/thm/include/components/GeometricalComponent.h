@@ -23,10 +23,7 @@ public:
   virtual RealVectorValue getDirection() { return _dir; }
   virtual Real getRotation() { return _rotation; }
 
-  virtual Node * getBoundaryNode(RELAP7::EEndType id);
-  virtual unsigned int getBoundaryId(RELAP7::EEndType id);
-  virtual Real getBoundaryOutNorm(RELAP7::EEndType id);
-  virtual Real getArea(RELAP7::EEndType id) = 0;
+  virtual const std::vector<RELAP7::Connection> & getConnections(RELAP7::EEndType id);
 
 protected:
   /// Physical position in the space
@@ -36,15 +33,7 @@ protected:
   /// Rotation of the component around x-axis in non-displaced space
   Real _rotation;
 
-  /// Boundary nodes of this pipe (indexing: local "node id" => Node).
-  /// Local node IDs are used by other components for connecting
-  std::map<RELAP7::EEndType, Node *> _bnd_nodes;
-
-  /// Boundary id of this pipe (indexing: local "node id" => boundary_id).
-  std::map<RELAP7::EEndType, unsigned int> _bnd_ids;
-
-  /// Out norm (either 1 or -1) on boundaries
-  std::map<RELAP7::EEndType, Real> _bnd_out_norm;
+  std::map<RELAP7::EEndType, std::vector<RELAP7::Connection> > _connections;
 };
 
 #endif /* GEOMETRICALCOMPONENT_H */
