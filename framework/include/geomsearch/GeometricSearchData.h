@@ -85,7 +85,7 @@ private:
   void reinitQuadratureNodes(unsigned int slave_id);
 
   /**
-   * Denotes whether this is the first time the gometric search objects have been updated.
+   * Denotes whether this is the first time the geometric search objects have been updated.
    */
   bool _first;
 };
