@@ -1,5 +1,7 @@
 # Patch Test for second order hex elements (HEX20)
 #
+# From Abaqus, Verification Manual, 1.5.2
+#
 # This test is designed to compute constant xx, yy, zz, xy, yz, and zx
 #  stress on a set of irregular hexes.  The mesh is composed of one
 #  block with seven elements.  The elements form a unit cube with one
@@ -13,7 +15,7 @@
 #
 #  giving uniform strains of
 #
-#    exx = eyy = ezz = exy = eyz = exz = 1e-4
+#    exx = eyy = ezz = 2*exy = 2*eyz = 2*exz = 1e-4
 #
 #
 # Hooke's Law provides an analytical solution for the uniform stress state.
@@ -32,7 +34,7 @@
 # Thus
 #
 #    stress xx = 4e5 * (3e-4) + 2 * 4e5 * 1e-4 = 200
-#    stress xy = 2 * 4e5 * 1e-4 = 80
+#    stress xy = 2 * 4e5 * 1e-4/2 = 40
 #
 
 [Mesh]
