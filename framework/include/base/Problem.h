@@ -84,9 +84,8 @@ public:
    * color. The list of color constants is available in XTermConstants.h
    * @param color (from XTermConstants.h)
    */
-  const char * setColor(const std::string & color) const
-    { return _color_output ? color.c_str() : ""; }
-  const char * setColor(const char * color) const;
+  template <typename T>
+  std::string colorText(const std::string color, T text) const;
 
   /**
    * For Internal Use
@@ -122,5 +121,26 @@ protected:
   /// True if we're going to attempt to write color output
   bool _color_output;
 };
+
+template <typename T>
+std::string
+Problem::colorText(std::string color, T text) const
+{
+  std::ostringstream oss;
+  oss << std::scientific;
+
+  if (_color_output)
+  {
+    if (_cli_option_found && color.length() == 5 && color[3] == '2')
+      color.replace(3, 1, "5", 1);
+
+    oss << color << text << DEFAULT;
+  }
+  else
+    oss << text;
+
+  return oss.str();
+}
+
 
 #endif /* PROBLEM_H */

@@ -56,19 +56,6 @@ Problem::getTimePeriodByName(const std::string & name)
   return NULL;
 }
 
-const char *
-Problem::setColor(const char * color) const
-{
-  if (_color_output)
-  {
-    std::string _color(color);
-    if (_cli_option_found && _color.length() == 8 && _color[3] == '2')
-      _color.replace(3, 1, "5", 1);
-    return _color.c_str();
-  }
-  return "";
-}
-
 const std::vector<TimePeriod *> &
 Problem::getTimePeriods() const
 {

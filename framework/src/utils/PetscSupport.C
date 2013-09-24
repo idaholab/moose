@@ -102,8 +102,7 @@ void outputNorm(Real old_norm, Real norm, Problem * problem)
       color = GREEN;
   }
 
-  libMesh::out << problem->setColor(color.c_str()) << norm << problem->setColor(DEFAULT)
-               << std::endl;
+  libMesh::out << problem->colorText(color, norm) << std::endl;
 }
 
 PetscErrorCode nonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_ptr)
@@ -112,13 +111,10 @@ PetscErrorCode nonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_
 
   Problem * problem = static_cast<Problem*>(void_ptr);
 
-  bool color = problem->shouldColorOutput();
-
   if(its == 0)
     old_norm = std::numeric_limits<Real>::max();
 
   libMesh::out << std::setw(2) << its
-               << std::scientific
                << " Nonlinear |R| = ";
 
   outputNorm(old_norm, fnorm, problem);
@@ -137,8 +133,6 @@ PetscErrorCode  linearMonitor(KSP ksp, PetscInt its, PetscReal rnorm, void *void
 
   if(!problem)
     mooseError("What are you trying to solve?");
-
-  bool color = problem->shouldColorOutput();
 
   if(its == 0)
     old_norm = std::numeric_limits<Real>::max();

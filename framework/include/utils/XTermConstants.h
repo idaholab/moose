@@ -15,14 +15,14 @@
 #ifndef XTERMCONSTANTS_H
 #define XTERMCONSTANTS_H
 
-#define BLACK    "\33[30;49m"
-#define RED      "\33[31;49m"
-#define GREEN    "\33[32;49m"
-#define YELLOW   "\33[33;49m"
-#define BLUE     "\33[34;49m"
-#define MAGENTA  "\33[35;49m"
-#define CYAN     "\33[36;49m"
-#define WHITE    "\33[37;49m"
-#define DEFAULT  "\33[39;49m"
+#define BLACK    "\33[30m"
+#define RED      "\33[31m"
+#define GREEN    "\33[32m"
+#define YELLOW   "\33[33m"
+#define BLUE     "\33[34m"
+#define MAGENTA  "\33[35m"
+#define CYAN     "\33[36m"
+#define WHITE    "\33[37m"
+#define DEFAULT  "\33[39m"
 
 #endif
