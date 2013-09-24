@@ -35,8 +35,15 @@ StressDivergenceTruss::StressDivergenceTruss(const std::string & name, InputPara
    _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
    _temp_var(_temp_coupled ? coupled("temp") : 0),
    _area(coupledValue("area")),
-   _orientation(_subproblem.assembly(_tid).getFE(FEType())->get_dxyzdxi())
+   _orientation(NULL)
 {}
+
+void
+StressDivergenceTruss::initialSetup()
+{
+  _orientation = &_subproblem.assembly(_tid).getFE(FEType())->get_dxyzdxi();
+}
+
 
 void
 StressDivergenceTruss::computeResidual()
@@ -46,13 +53,13 @@ StressDivergenceTruss::computeResidual()
   _local_re.resize(re.size());
   _local_re.zero();
 
-  RealGradient orientation( _orientation[0] );
+  RealGradient orientation( (*_orientation)[0] );
   orientation /= orientation.size();
   VectorValue<Real> force_local = _axial_stress[0] * _area[0] * orientation;
 
-  int sign(_test[0][0]/std::abs(_test[0][0]));
-  _local_re(0) += sign * force_local(_component);
-  _local_re(1) += -_local_re(0);
+  int sign(-_test[0][0]/std::abs(_test[0][0]));
+  _local_re(0) = sign * force_local(_component);
+  _local_re(1) = -_local_re(0);
 
   re += _local_re;
 
@@ -67,7 +74,7 @@ StressDivergenceTruss::computeResidual()
 void
 StressDivergenceTruss::computeStiffness(ColumnMajorMatrix & stiff_global)
 {
-  RealGradient orientation( _orientation[0] );
+  RealGradient orientation( (*_orientation)[0] );
   orientation /= orientation.size();
 
   // Now get a rotation matrix

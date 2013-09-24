@@ -1,6 +1,7 @@
 [Mesh]
   type = FileMesh
   file = twoTrussLine.e
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -31,6 +32,18 @@
     order = CONSTANT
     family = MONOMIAL
 #    initial_condition = 1.0
+  [../]
+  [./react_x]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./react_y]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./react_z]
+    order = FIRST
+    family = LAGRANGE
   [../]
 []
 
@@ -102,21 +115,45 @@
     boundary = 3
     value = 0
   [../]
+
+  [./fixDummyHex_x]
+    type = DirichletBC
+    variable = disp_x
+    boundary = 1000
+    value = 0
+  [../]
+
+  [./fixDummyHex_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = 1000
+    value = 0
+  [../]
+
+  [./fixDummyHex_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = 1000
+    value = 0
+  [../]
 []
 
 [AuxKernels]
   [./axial_stress]
     type = MaterialRealAux
+    block = '1 2'
     property = axial_stress
     variable = axial_stress
   [../]
   [./e_over_l]
     type = MaterialRealAux
+    block = '1 2'
     property = e_over_l
     variable = e_over_l
   [../]
   [./area]
     type = ConstantAux
+    block = '1 2'
     variable = area
     value = 1.0
     execute_on = timestep_begin
@@ -141,40 +178,67 @@
 [Kernels]
   [./solid_x]
     type = StressDivergenceTruss
+    block = '1 2'
     variable = disp_x
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
     component = 0
     area = area
+    save_in = react_x
   [../]
   [./solid_y]
     type = StressDivergenceTruss
+    block = '1 2'
     variable = disp_y
-    component = 0
+    component = 1
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
     area = area
+    save_in = react_y
   [../]
   [./solid_z]
     type = StressDivergenceTruss
+    block = '1 2'
     variable = disp_z
-    component = 0
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    component = 2
     area = area
+    save_in = react_z
   [../]
 []
 
-#[SolidMechanics]
+[SolidMechanics]
 #  [./solid]
 #    type = truss
 #    disp_x = disp_x
 #    disp_y = disp_y
 #    disp_z = disp_z
 #    area = area
+#    save_in = react_x
+#    save_in = react_y
+#    save_in = react_z
 #  [../]
-#[]
+  [./dummyHex]
+    block = 1000
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+  [../]
+[]
 
 [Materials]
-  [./steel]
-    type = HeatConductionMaterial
-    block = '1 2'
-    thermal_conductivity = 10
-    specific_heat = 1
+  [./goo]
+    type = Elastic
+    block = 1000
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    youngs_modulus = 1e6
+    poissons_ratio = 0
   [../]
   [./linelast]
     type = TrussMaterial
@@ -186,11 +250,6 @@
 #    thermal_expansion = 0.1
 #    t_ref = 0.5
 #    temp = temp
-  [../]
-  [./density]
-    type = Density
-    block = '1 2'
-    density = 1
   [../]
 []
 

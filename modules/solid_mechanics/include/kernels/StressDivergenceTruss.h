@@ -16,6 +16,7 @@ public:
   virtual ~StressDivergenceTruss() {}
 
 protected:
+  virtual void initialSetup();
   virtual void computeResidual();
   virtual Real computeQpResidual() {return 0;}
 
@@ -42,7 +43,7 @@ private:
   const unsigned int _temp_var;
 
   const VariableValue & _area;
-  const std::vector<RealGradient> & _orientation;
+  const std::vector<RealGradient> * _orientation;
 
 };
 
