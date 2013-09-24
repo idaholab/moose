@@ -19,7 +19,8 @@ Density::Density( const std::string & name, InputParameters parameters ) :
   Material( name, parameters ),
 
   _is_coupled( isCoupled("disp_x") || isCoupled("disp_r") ),
-  _is_RZ( isCoupled("disp_r") ),
+  _is_RZ( isCoupled("disp_r") && isCoupled("disp_z") ),
+  _is_SphericalR( isCoupled("disp_r") && !isCoupled("disp_z") ),
   _grad_disp_x( isCoupled("disp_x") ? coupledGradient("disp_x") :
                 ( isCoupled("disp_r") ? coupledGradient("disp_r") : _grad_zero ) ),
   _grad_disp_y( isCoupled("disp_y") ? coupledGradient("disp_y") :
@@ -47,21 +48,24 @@ Density::computeProperties()
       const Real Axy = _grad_disp_x[qp](1);
       const Real Axz = _grad_disp_x[qp](2);
       const Real Ayx = _grad_disp_y[qp](0);
-      const Real Ayy = _grad_disp_y[qp](1) + 1;
+            Real Ayy = _grad_disp_y[qp](1) + 1;
       const Real Ayz = _grad_disp_y[qp](2);
       const Real Azx = _grad_disp_z[qp](0);
       const Real Azy = _grad_disp_z[qp](1);
-      Real Azz(1.0);
+            Real Azz = _grad_disp_z[qp](2) + 1;
       if (_is_RZ)
       {
         if (_q_point[qp](0)!=0.0)
         {
-          Azz=_disp_r[qp]/_q_point[qp](0)+1;
+          Azz = _disp_r[qp]/_q_point[qp](0) + 1;
         }
       }
-      else
+      else if (_is_SphericalR)
       {
-        Azz = _grad_disp_z[qp](2) + 1;
+        if (_q_point[qp](0)!=0.0)
+        {
+          Ayy = Azz = _disp_r[qp]/_q_point[qp](0) + 1;
+        }
       }
       d /= Axx*Ayy*Azz + Axy*Ayz*Azx + Axz*Ayx*Azy - Azx*Ayy*Axz - Azy*Ayz*Axx - Azz*Ayx*Axy;
     }

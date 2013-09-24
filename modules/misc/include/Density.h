@@ -18,6 +18,7 @@ protected:
 
   const bool _is_coupled;
   const bool _is_RZ;
+  const bool _is_SphericalR;
   const VariableGradient & _grad_disp_x;
   const VariableGradient & _grad_disp_y;
   const VariableGradient & _grad_disp_z;
