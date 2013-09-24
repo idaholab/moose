@@ -103,25 +103,21 @@
   [./intVol1]
     type = InternalVolume
     boundary = 2
-    variable = disp_x
     component = 0
   [../]
   [./intVol1Again]
     type = InternalVolume
     boundary = 9
-    variable = disp_x
     component = 0
   [../]
   [./intVol2]
     type = InternalVolume
     boundary = 11
-    variable = disp_x
     component = 0
   [../]
   [./intVolTotal]
     type = InternalVolume
     boundary = 4
-    variable = disp_x
     component = 0
   [../]
 []

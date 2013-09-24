@@ -49,7 +49,6 @@
     formulation = penalty
 #    model = glued
     tangential_tolerance = 1e-3
-    output_area = true
   [../]
 []
 
