@@ -131,9 +131,10 @@ Problem::colorText(std::string color, T text) const
 
   if (_color_output)
   {
+#if !defined(__INTEL_COMPILER)
     if (_cli_option_found && color.length() == 5 && color[3] == '2')
       color.replace(3, 1, "5", 1);
-
+#endif
     oss << color << text << DEFAULT;
   }
   else
