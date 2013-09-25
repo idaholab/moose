@@ -9,4 +9,9 @@
     input = 'trussTest.i'
     exodiff = 'trussTest_out.e'
   [../]
+  [./truss]
+    type = 'Exodiff'
+    input = 'truss.i'
+    exodiff = 'truss_out.e'
+  [../]
 []
