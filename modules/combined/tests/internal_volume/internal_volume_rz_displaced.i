@@ -2,7 +2,7 @@
 # Volume Test
 #
 # This test is designed to compute the volume of a space when displacements
-#   are imposed..
+#   are imposed.
 #
 # The mesh is composed of one block (1) with two elements.  The mesh is
 #   such that the initial volume is 1.  One element face is displaced to
