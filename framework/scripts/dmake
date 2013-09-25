@@ -234,7 +234,7 @@ class Farm(object):
   def _getHosts(self):
 
     # If the .dmake_hosts file does not exist start the client
-    if self._options.refresh or self._options.max or (not os.path.exists(self._dmake_hosts)):
+    if self._options.refresh or (not os.path.exists(self._dmake_hosts)):
       return self._initClient()
 
     # Restart the clients if the .dmake_hosts file is older than 20 min.
@@ -308,12 +308,11 @@ class Farm(object):
     if self._options.jobs:
       jobs = int(self._options.jobs)
 
-    # Write dmake_hosts file (do not write if --max is used)
-    if not self._options.max:
-      fid = open(self._dmake_hosts, 'w')
-      fid.write(distcc_hosts + '\n')
-      fid.write(str(jobs) + '\n')
-      fid.close()
+    # Write dmake_hosts file
+    fid = open(self._dmake_hosts, 'w')
+    fid.write(distcc_hosts + '\n')
+    fid.write(str(jobs) + '\n')
+    fid.close()
 
     # Return the hosts and jobs
     return distcc_hosts, jobs
@@ -385,9 +384,9 @@ class Farm(object):
     # Build the distccd command
     distccd_cmd = [which('distccd'), '--daemon']
     for user in self._slaves:
-      distccd_cmd.extend(['--allow', user.address, '--jobs', str(user.threads)])
+      distccd_cmd.extend(['--allow', user.address])
     for user in self._down:
-      distccd_cmd.extend(['--allow', user.address, '--jobs', str(user.threads)])
+      distccd_cmd.extend(['--allow', user.address])
 
     # Set the DISTCC backoff period to something large, so if server fails it will not try again
     os.environ['DISTCC_BACKOFF_PERIOD'] = '6000'
@@ -456,11 +455,6 @@ class Farm(object):
         distcc_hosts += " " + machine.hostname +'/' + str(machine.use)
         jobs += machine.use
 
-    # Produce error if _master is not defined
-    if not isinstance(self._master, Machine):
-      print 'ERROR: Your machine was not located on the distcc user list'
-      sys.exit()
-
     # Return the distcc hosts and jobs
     return distcc_hosts, jobs
 
@@ -501,6 +495,14 @@ def parseArguments(args=None):
 
   # Parse the input and return the options
   (options, other_args) = parser.parse_known_args()
+
+  # Set the refresh options if any of the following options are used
+  refresh = ['max', 'dedicated', 'localhost', 'localslots', 'localslots_cpp', 'jratio']
+  for r in refresh:
+    if getattr(options, r):
+      options.refresh = True
+      break
+
   return (options, other_args)
 
 # Main function
