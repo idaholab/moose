@@ -12,9 +12,9 @@ class Machine(object):
 
     # Set the various attributes of the machine
     self.hostname = user_data[0]
-    #self.cores = int(user_data[1])
-    self.threads = user_data[2]
-    self.use = user_data[3]
+    self.cores = int(user_data[1])
+    self.threads = int(user_data[2])
+    self.use = int(user_data[3])
     self.network = user_data[4]
     self.name = user_data[5]
 
@@ -25,11 +25,11 @@ class Machine(object):
       self.available = self._isAvailable()
 
     # Attempt to get the host ip address
-    try:
-      self.address = socket.gethostbyname(self.hostname)
+    #try:
+    self.address = socket.gethostbyname(self.hostname)
 
-    except socket.gaierror:
-      self.available = False
+    #except socket.gaierror:
+     #s self.available = False
 
   ## Return the Machine information
   def info(self):
@@ -97,7 +97,7 @@ class Farm(object):
     # Create the master Machine (localhost)
     hostname = socket.gethostname()
     jobs = str(multiprocessing.cpu_count())
-    self._master = Machine([hostname, '', jobs, jobs, '', 'localhost'])
+    self._master = Machine([hostname, '0', jobs, jobs, '', 'localhost'])
 
     # Determine the network
     #if socket.gethostbyname(socket.gethostname()).find('204') != -1:
@@ -201,15 +201,14 @@ class Farm(object):
       output.insert(0,s)   # top line
       output.append(s)
 
+      # Print the master machine information
+      output.append(self._master.info())
+
       # Print the slave machine information, if the information exists
       if len(self._slaves) > 0:
         for user in self._slaves:
           output.append(user.info())
         output.append(s)
-
-      # Print the master machine information
-      output.append(self._master.info())
-      output.append(s)     # end line
 
       # Print the down machine information, if the informatin exists
       if len(self._down) > 0:
@@ -220,7 +219,6 @@ class Farm(object):
      # Add the cache message
       if self._cache:
         output.append('Used cached DISTCC_HOSTS, use --refresh to update')
-
 
     # The basic information
     output.append('Number of processors: ' + str(jobs))
@@ -262,39 +260,50 @@ class Farm(object):
     self._cache = False
 
     # Initilize the slave machines
-    self._initSlaves()
+    distcc_hosts, jobs = self._initSlaves()
 
-    # Set the localhosts
-    if self._options.localhost:
-      localhost = self._options.localhost
-    else:
-      localhost = int(self._master.threads)
-
-    # Set the localslots
+    # Get the default or user-defined values for localhost/localslots_cpp/localslots
     if self._options.localslots:
-      localslots = self._options.localslots
+      localslots = self._options.localslots_cpp
     else:
-      localslots = int(self._master.threads)/4
+      localslots = self._master.threads/4
 
-    # Set the localslots_cpp
     if self._options.localslots_cpp:
       localslots_cpp = self._options.localslots_cpp
     else:
-      localslots_cpp = int(self._master.threads) - localslots
+      localslots_cpp = jobs/self._options.jratio
 
-    # Build the command string
-    distcc_hosts = '--localslots=' + str(localslots) + ' --localslots_cpp=' + \
-                         str(localslots_cpp) + ' localhost/' + str(localhost)
+    if self._options.localhost:
+      localhost = self._options.localhost
+    else:
+      localhost = self._master.threads - localslots_cpp
 
-    # Add the compile machines
-    jobs = localhost
-    for user in self._slaves:
-      if self._options.max:
-        distcc_hosts += " " + user.hostname +'/' + user.threads
-        jobs += int(user.threads)
-      else:
-        distcc_hosts += " " + user.hostname +'/' + user.use
-        jobs += int(user.use)
+    # The localhost/localslots_cpp are balanced to the number of threads by default,
+    # if one is set the other should be balanced, thus the following special case
+    # is needed if localhost is set by the user but localslots_cpp is not
+    if self._options.localhost and not self._options.localslots_cpp:
+      localslots_cpp = self._master.threads - localhost
+
+    # Make sure the defaults are reasonable (do not overwrite user defined options)
+    if localhost < 2 and not self._options.localhost:
+      localhost = 2
+      localslots_cpp = self._master.threads - localhost
+
+    if localslots_cpp > self._master.threads and not self._options.localslots_cpp:
+      localslots_cpp = self._master.threads - localhost
+
+    # Create the DISTCC_HOSTS variable
+    if jobs == 0:
+      localhost = self._master.threads
+      distcc_hosts = 'localhost/' + str(int(localhost))
+
+    else:
+      distcc_hosts = '--localslots=' + str(int(localslots)) + ' --localslots_cpp=' + \
+                   str(int(localslots_cpp)) + ' localhost/' + str(int(localhost)) + \
+                   distcc_hosts
+
+    # Add the local machine to the jobs total
+    jobs += int(localhost)
 
     # Override jobs if the option is given
     if self._options.jobs:
@@ -356,13 +365,18 @@ class Farm(object):
     if self._options.no_daemon:
       return
 
+    # Initilize the slave macines
+    self._initSlaves()
+
     # List of allowable commands
     allow_commands = ['gcc', 'g++', 'gfortran', 'clang', 'clang++', 'mpicc', 'mpicxx', 'cc']
 
     # Create the distcc .cmd_list file
     cmd_list = open(os.getenv('HOME') + '/.cmd_list', 'w')
     for command in allow_commands:
-      cmd_list.write(which(command) + '\n')
+      cmd = which(command)
+      if cmd != None:
+        cmd_list.write(cmd + '\n')
     cmd_list.close()
 
     # Set the environment variable for the allowed commands
@@ -371,10 +385,9 @@ class Farm(object):
     # Build the distccd command
     distccd_cmd = [which('distccd'), '--daemon']
     for user in self._slaves:
-      distccd_cmd.extend(['--allow', user.address, '--jobs', user.threads])
-    for use in self._down:
-      distccd_cmd.extend(['--allow', user.address, '--jobs', user.threads])
-    distccd_cmd.extend(['--allow', self._master.address, '--jobs', self._master.threads])
+      distccd_cmd.extend(['--allow', user.address, '--jobs', str(user.threads)])
+    for user in self._down:
+      distccd_cmd.extend(['--allow', user.address, '--jobs', str(user.threads)])
 
     # Set the DISTCC backoff period to something large, so if server fails it will not try again
     os.environ['DISTCC_BACKOFF_PERIOD'] = '6000'
@@ -388,6 +401,10 @@ class Farm(object):
 
   ## Method for reading the User (private)
   def _initSlaves(self):
+
+    # Initialize the jobs
+    distcc_hosts = ''
+    jobs = 0
 
     # Extract the list of users from the HPCSC website
     fid = urllib2.urlopen('https://hpcsc.inl.gov/ssl/HERD/distcc_list_users')
@@ -426,6 +443,12 @@ class Farm(object):
         # Workers
         else:
           self._slaves.append(machine)
+          if self._options.max:
+            distcc_hosts += " " + machine.hostname +'/' + str(machine.threads)
+            jobs += int(machine.threads)
+          else:
+            distcc_hosts += " " + machine.hostname +'/' + str(machine.use)
+            jobs += machine.use
 
     # Randomize the slave list
     shuffle(self._slaves)
@@ -434,6 +457,10 @@ class Farm(object):
     if not isinstance(self._master, Machine):
       print 'ERROR: Your machine was not located on the distcc user list'
       sys.exit()
+
+    # Return the distcc hosts and jobs
+    return distcc_hosts, jobs
+
 
 ## Function for parsing command line arguments
 def parseArguments(args=None):
@@ -465,6 +492,7 @@ def parseArguments(args=None):
   grp2.add_argument('--localslots_cpp', type=int, help='Override the automatic setting for the number of local preprocessor slots')
   grp2.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
   grp2.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
+  grp2.add_argument('--jratio', type=float, default=3, help='Remote jobs ratio utilize for computing localhost (default: %(default)d)')
 
   # Allow flags to be run together
   parser.parse_args('-mqvdnlr'.split())
