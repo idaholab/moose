@@ -50,6 +50,7 @@
 #include "PeriodicDistanceAux.h"
 #include "MatPropUserObjectAux.h"
 #include "SumNodalValuesAux.h"
+#include "UniqueIDAux.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -214,6 +215,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(PeriodicDistanceAux);
   registerAux(MatPropUserObjectAux);
   registerAux(SumNodalValuesAux);
+  registerAux(UniqueIDAux);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);
