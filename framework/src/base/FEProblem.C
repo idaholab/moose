@@ -3319,6 +3319,8 @@ FEProblem::meshChanged()
 
   }
   _out.meshChanged();
+
+  _has_jacobian = false;                    // we have to recompute jacobian when mesh changed
 }
 
 void

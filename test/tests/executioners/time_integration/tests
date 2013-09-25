@@ -93,6 +93,12 @@
     exodiff = 'ee-2d-linear_out.e'
   [../]
 
+  [./ee-2d-linear-adapt]
+    type = 'Exodiff'
+    input = 'ee-2d-linear-adapt.i'
+    exodiff = 'ee-2d-linear-adapt_out.e ee-2d-linear-adapt_out.e-s003'
+  [../]
+
   [./ee-2d-quadratic]
     type = 'Exodiff'
     input = 'ee-2d-quadratic.i'
