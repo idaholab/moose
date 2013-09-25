@@ -309,6 +309,15 @@ class Farm(object):
     # Return the hosts and jobs
     return distcc_hosts, jobs
 
+  ## use 'ps' to see if distccd is actually running
+  def _isRunning(self):
+    ps_process = subprocess.Popen(['ps', '-e'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    ps_output = ps_process.communicate()[0]
+    if ps_output.find('distccd') != -1:
+      return True
+    else:
+      return False
+
   ## Check if the distcc daemons are running (private)
   # If the daemon command has not run in the last 4 hours
   # start/re-start the daemons using 'distccd'
@@ -318,9 +327,9 @@ class Farm(object):
     w_flag = False
 
     # If the file does not exist start the daemon and create. dmake file
-    if not os.path.exists(self._dmake_file):
+    if not os.path.exists(self._dmake_file) or not self._isRunning():
       w_flag = True
-      self.startDaemon()
+      self._launchDaemon()
 
     # Open the .dmake and lanuch the daemon
     else:
@@ -328,7 +337,7 @@ class Farm(object):
       t = int(fid.readline())
       fid.close()
       if (int(time.time()) - t) >= 14400:
-        self.startDaemon()
+        self._launchDaemon()
         w_flag = True
 
     # Write the .dmake file
