@@ -25,11 +25,10 @@ class Machine(object):
       self.available = self._isAvailable()
 
     # Attempt to get the host ip address
-    #try:
-    self.address = socket.gethostbyname(self.hostname)
-
-    #except socket.gaierror:
-     #s self.available = False
+    try:
+      self.address = socket.gethostbyname(self.hostname)
+    except socket.gaierror:
+      self.available = False
 
   ## Return the Machine information
   def info(self):
@@ -235,7 +234,7 @@ class Farm(object):
   def _getHosts(self):
 
     # If the .dmake_hosts file does not exist start the client
-    if self._options.refresh or (not os.path.exists(self._dmake_hosts)):
+    if self._options.refresh or self._options.max or (not os.path.exists(self._dmake_hosts)):
       return self._initClient()
 
     # Restart the clients if the .dmake_hosts file is older than 20 min.
@@ -309,11 +308,12 @@ class Farm(object):
     if self._options.jobs:
       jobs = int(self._options.jobs)
 
-    # Write dmake_hosts file
-    fid = open(self._dmake_hosts, 'w')
-    fid.write(distcc_hosts + '\n')
-    fid.write(str(jobs) + '\n')
-    fid.close()
+    # Write dmake_hosts file (do not write if --max is used)
+    if not self._options.max:
+      fid = open(self._dmake_hosts, 'w')
+      fid.write(distcc_hosts + '\n')
+      fid.write(str(jobs) + '\n')
+      fid.close()
 
     # Return the hosts and jobs
     return distcc_hosts, jobs
