@@ -443,15 +443,18 @@ class Farm(object):
         # Workers
         else:
           self._slaves.append(machine)
-          if self._options.max:
-            distcc_hosts += " " + machine.hostname +'/' + str(machine.threads)
-            jobs += int(machine.threads)
-          else:
-            distcc_hosts += " " + machine.hostname +'/' + str(machine.use)
-            jobs += machine.use
 
     # Randomize the slave list
     shuffle(self._slaves)
+
+    # Create the distcc_hosts and jobs output
+    for machine in self._slaves:
+      if self._options.max:
+        distcc_hosts += " " + machine.hostname +'/' + str(machine.threads)
+        jobs += int(machine.threads)
+      else:
+        distcc_hosts += " " + machine.hostname +'/' + str(machine.use)
+        jobs += machine.use
 
     # Produce error if _master is not defined
     if not isinstance(self._master, Machine):
@@ -460,7 +463,6 @@ class Farm(object):
 
     # Return the distcc hosts and jobs
     return distcc_hosts, jobs
-
 
 ## Function for parsing command line arguments
 def parseArguments(args=None):
