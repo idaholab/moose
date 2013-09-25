@@ -263,7 +263,7 @@ class Farm(object):
 
     # Get the default or user-defined values for localhost/localslots_cpp/localslots
     if self._options.localslots:
-      localslots = self._options.localslots_cpp
+      localslots = self._options.localslots
     else:
       localslots = self._master.threads/4
 
