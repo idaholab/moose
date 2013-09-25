@@ -255,33 +255,21 @@
   [./no_x_interior]
     type = DirichletBC
     variable = disp_x
-    boundary = 1
+    boundary = '1 2'
     value = 0.0
   [../]
 
   [./no_y_interior]
     type = DirichletBC
     variable = disp_y
-    boundary = 3
-    value = 0.0
-  [../]
-  [./no_y2_interior]
-    type = DirichletBC
-    variable = disp_y
-    boundary = 4
+    boundary = '3 4'
     value = 0.0
   [../]
 
   [./no_z_interior]
     type = DirichletBC
     variable = disp_z
-    boundary = 5
-    value = 0.0
-  [../]
-  [./no_z2_interior]
-    type = DirichletBC
-    variable = disp_z
-    boundary = 6
+    boundary = '5 6'
     value = 0.0
   [../]
 
@@ -415,10 +403,8 @@
 []
 
 [Output]
-  file_base = out
   interval = 1
   output_initial = true
-  elemental_as_nodal = true
   exodus = true
   perf_log = true
 []

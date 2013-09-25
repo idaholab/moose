@@ -2,14 +2,14 @@
   [./test]
     type = 'Exodiff'
     input = 'plenum_pressure.i'
-    exodiff = 'out.e'
+    exodiff = 'plenum_pressure_out.e'
     abs_zero = 1e-10
   [../]
 
   [./test_rz]
     type = 'Exodiff'
     input = 'plenum_pressure_rz.i'
-    exodiff = 'out_rz.e'
+    exodiff = 'plenum_pressure_rz_out.e'
     abs_zero = 1e-10
   [../]
 
