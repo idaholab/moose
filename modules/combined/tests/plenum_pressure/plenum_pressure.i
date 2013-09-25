@@ -20,7 +20,7 @@
 # with
 #   alpha = n0
 #   beta = T0/2
-#   gamma = -(0.0232558...)*V0
+#   gamma = -(0.003322259...)*V0
 #   T0 = 240.54443866068704
 #   V0 = 7
 #   n0 = f(p0)
@@ -226,13 +226,13 @@
   [../]
 
   [./prescribed_left]
-    type = FunctionDirichletBC
+    type = FunctionPresetBC
     variable = disp_x
     boundary = 13
     function = displ_positive
   [../]
   [./prescribed_right]
-    type = FunctionDirichletBC
+    type = FunctionPresetBC
     variable = disp_x
     boundary = 14
     function = displ_negative
@@ -288,13 +288,13 @@
 
 
   [./temperatureInterior]
-    type = FunctionDirichletBC
+    type = FunctionPresetBC
     boundary = 100
     function = temp1
     variable = temp
   [../]
   [./MaterialInput]
-    type = FunctionDirichletBC
+    type = FunctionPresetBC
     boundary = '100 13 14 15 16'
     function = material_input_function
     variable = material_input
