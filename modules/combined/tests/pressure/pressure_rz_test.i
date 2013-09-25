@@ -9,7 +9,7 @@
 #   Pressure of 1000/area is applied on each face.
 # Step 2:
 #   Step 1 load plus a pressure on the vertical faces that varies from
-#   0 to 1000 from top to bottom.
+#   0 to 1000/A from top to bottom.
 #
 # Solution:
 # Step 1:
