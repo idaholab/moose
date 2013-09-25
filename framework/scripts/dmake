@@ -176,7 +176,9 @@ class Farm(object):
 
     # Run make
     strt = time.clock()
-    sub = subprocess.Popen(['make', '-j', str(jobs)])
+    make = ['make', '-j', str(jobs)]
+    make.extend(self._make_args)
+    sub = subprocess.Popen(make)
 
     # Wait for process to terminate
     while sub.poll() == None:
@@ -224,7 +226,10 @@ class Farm(object):
 
     if self._options.verbose:
       output.append('DISTCC_HOSTS=\"' + distcc_hosts + '\"')
-      output.append( 'make -j ' + str(jobs) + '\n')
+      make = 'make -j ' + str(jobs)
+      for a in self._make_args:
+        make += ' ' + a
+      output.append(make)
 
     # Print the output
     for line in output:
