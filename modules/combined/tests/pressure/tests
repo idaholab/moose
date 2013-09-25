@@ -3,12 +3,12 @@
   [./3D]
     type = Exodiff
     input = 'pressure_test.i'
-    exodiff = 'out.e'
+    exodiff = 'pressure_test_out.e'
   [../]
   [./RZ]
     type = Exodiff
     input = 'pressure_rz_test.i'
-    exodiff = 'out_rz.e'
+    exodiff = 'pressure_rz_test_out.e'
   [../]
   [./RSpherical]
     type = Exodiff
