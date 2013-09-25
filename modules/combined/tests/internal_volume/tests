@@ -43,4 +43,10 @@
     input = 'internal_volume_rz_displaced.i'
     csvdiff = 'internal_volume_rz_displaced_out.csv'
   [../]
+
+  [./test_rz_displaced_quad8]
+    type = 'CSVDiff'
+    input = 'internal_volume_rz_displaced_quad8.i'
+    csvdiff = 'internal_volume_rz_displaced_quad8_out.csv'
+  [../]
 []
