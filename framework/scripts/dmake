@@ -80,10 +80,10 @@ class Farm(object):
   def __init__(self, options, make_args):
 
     # Initialize class variables
-    self._slaves = []       # list of Machine objects to build on (private)
-    self._down = []         # list of Machine objects that are not working (private)
-    self._network = ''      # network that the user is on (private)
-    self._cache = None      # flag indicating if cache DISTCC_HOSTS was used (priavte)
+    self._slaves = []         # list of Machine objects to build on (private)
+    self._down = []           # list of Machine objects that are not working (private)
+    self._network = ''        # network that the user is on (private)
+    self._cache = None        # flag indicating if cache DISTCC_HOSTS was used (priavte)
 
     # Set the temporary file names
     self._dmake_file = os.path.join(os.getenv('HOME'), '.dmake')
@@ -255,11 +255,25 @@ class Farm(object):
   # @return Integer with the number of jobs to run
   def _initClient(self):
 
+    # Write a message if building DISTCC_HOSTS
+    print 'Building DISTCC_HOSTS environment variable'
+
     # Set the cache flag to false
     self._cache = False
 
     # Initilize the slave machines
-    distcc_hosts, jobs = self._initSlaves()
+    self._initSlaves()
+
+    # Create the distcc_hosts and jobs output
+    jobs = 0
+    distcc_hosts = ''
+    for machine in self._slaves:
+      if self._options.max:
+        distcc_hosts += " " + machine.hostname +'/' + str(machine.threads)
+        jobs += int(machine.threads)
+      else:
+        distcc_hosts += " " + machine.hostname +'/' + str(machine.use)
+        jobs += machine.use
 
     # Get the default or user-defined values for localhost/localslots_cpp/localslots
     if self._options.localslots:
@@ -401,9 +415,9 @@ class Farm(object):
   ## Method for reading the User (private)
   def _initSlaves(self):
 
-    # Initialize the jobs
-    distcc_hosts = ''
-    jobs = 0
+    # Check if initialized
+    if len(self._slaves) > 0:
+      return
 
     # Extract the list of users from the HPCSC website
     fid = urllib2.urlopen('https://hpcsc.inl.gov/ssl/HERD/distcc_list_users')
@@ -446,18 +460,6 @@ class Farm(object):
     # Randomize the slave list
     shuffle(self._slaves)
 
-    # Create the distcc_hosts and jobs output
-    for machine in self._slaves:
-      if self._options.max:
-        distcc_hosts += " " + machine.hostname +'/' + str(machine.threads)
-        jobs += int(machine.threads)
-      else:
-        distcc_hosts += " " + machine.hostname +'/' + str(machine.use)
-        jobs += machine.use
-
-    # Return the distcc hosts and jobs
-    return distcc_hosts, jobs
-
 ## Function for parsing command line arguments
 def parseArguments(args=None):
   parser = argparse.ArgumentParser(description='A front-end tool for distcc')
@@ -499,7 +501,7 @@ def parseArguments(args=None):
   # Set the refresh options if any of the following options are used
   refresh = ['max', 'dedicated', 'localhost', 'localslots', 'localslots_cpp', 'jratio']
   for r in refresh:
-    if getattr(options, r):
+    if getattr(options, r) and getattr(options, r) != parser.get_default(r):
       options.refresh = True
       break
 
