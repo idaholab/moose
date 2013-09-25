@@ -1,201 +1,65 @@
 #!/usr/bin/env python
-import os, sys, subprocess, re, urllib2, socket, argparse, time
+
+# Load the required modules
+import os, sys, subprocess, re, urllib2, socket, argparse, time, multiprocessing
 from random import shuffle
 
-def getList():
-  # Get real user's machines
-  users_connect = urllib2.urlopen('https://hpcsc.inl.gov/ssl/HERD/distcc_list_users')
-  distcc_list_users = users_connect.read().split('\n')
-  distcc_list_users.pop()
-  users_connect.close()
-  return distcc_list_users
+## User class for defining machine characteristics
+class Machine(object):
 
-def launchDaemon(user_list, options):
-  distccd_command = [which('distccd'), '--daemon']
-  # build the --allow arguments
-  if options.allow:
-    for host in options.allow:
-      user_list.append(host + ',,,,' + options.network + ',')
-  for allowed_host in [i for i in user_list]:
-    if allowed_host.find('#') == -1:
-      (hostname, cores, threads, use, network, desc) = getMachine(allowed_host)
-      if network == options.network:
-        try:
-          distccd_command.extend(['--allow', socket.gethostbyname(hostname)])
-          if hostname == socket.gethostname().split('.')[0]:
-            distccd_command.extend(['--jobs', str(threads)])
-        except socket.gaierror:
-          if options.allow:
-            print 'WARNING, Hostname:', hostname, 'not found on the network. DNS error? Try entering the IP instead?'
-          else:
-            print 'WARNING, Hostname:', hostname, 'not found on the network. DNS error?'
+  ## Machine class constructor
+  def __init__(self, user_data):
 
-  # Kill any running distccd process
-  killall_process = subprocess.Popen([which('killall'), 'distccd'])
-  # Wait a few to allow sockets to close
-  time.sleep(3)
-  # Launch the daemon process
-  subprocess.Popen(distccd_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # Set the various attributes of the machine
+    self.hostname = user_data[0]
+    #self.cores = int(user_data[1])
+    self.threads = user_data[2]
+    self.use = user_data[3]
+    self.network = user_data[4]
+    self.name = user_data[5]
 
-def formatter(desc, cpus, hostname, ip):
-  return '%40s |' % desc + '%7s |' % cpus + '%18s |' % hostname + '%18s |' % ip
-
-def launchClient(user_list, options, other_args):
-  distcc_hosts = []
-  summary_list = []
-  total_jobs = 0
-  print '#'*45
-  if options.summary:
-    print '#      Status: ' + formatter('Client', 'Jobs', 'Hostname', 'IP')
-  if options.quiet:
-    os.environ['DISTCC_VERBOSE'] = '0'
-  for allowed_host in [i for i in user_list]:
-    if allowed_host.find('#') == -1:
-      (hostname, cores, threads, use, network, desc) = getMachine(allowed_host)
-      if isAvailable(options, allowed_host):
-        try:
-          if options.max:
-            if not Me(hostname):
-              distcc_hosts.append(socket.gethostbyname(hostname) + '/' + threads)
-              total_jobs += int(threads)
-              if options.summary:
-                summary_list.append('#   Available: ' + formatter(desc, threads, hostname, socket.gethostbyname(hostname)))
-          else:
-            if not Me(hostname):
-              distcc_hosts.append(socket.gethostbyname(hostname) + '/' + use)
-              total_jobs += int(use)
-              if options.summary:
-                summary_list.append('#   Available: ' + formatter(desc, use, hostname, socket.gethostbyname(hostname)))
-        except socket.error, e:
-          print '#     Warning: ', desc, ' is not available'
-      elif isAvailable(options, allowed_host) == None:
-        pass
-      else:
-        if options.summary:
-          print '#     Warning: ' + formatter(desc, threads, hostname, socket.gethostbyname(hostname)) + ' Not Available'
-
-  # Randomize the list
-  shuffle(distcc_hosts)
-
-  # Set localslots for client machine
-  for allowed_host in [i for i in user_list]:
-    if allowed_host.find('#') == -1:
-      (hostname, cores, threads, use, network, desc) = getMachine(allowed_host)
-      if Me(hostname):
-        if options.local:
-          distcc_hosts = ['localhost/' + str(int(threads))]
-          summary_list.append('#   Available: ' + formatter('localhost', threads, hostname , socket.gethostbyname(hostname)))
-          total_jobs = threads
-        else:
-          distcc_hosts.insert(0, '--localslots=' + str(int(threads) / 4) + ' --localslots_cpp=' + str(int(threads) - 2) + ' localhost/2')
-          summary_list.append('#   Available: ' + formatter('localhost', '2', hostname, socket.gethostbyname(hostname)))
-          total_jobs += 2
-
-  # Print summary
-  if options.summary:
-    summary_list.sort()
-    for machine in summary_list:
-      print machine
-
-  # If the user set the --jobs, use it, otherwise use the total_jobs computed
-  if options.jobs != -1:
-    total_jobs = options.jobs
-
-  print '#\n# \tUsing', total_jobs, 'processors'
-  # export the environment
-  os.environ['DISTCC_HOSTS']=' '.join(distcc_hosts)
-  if options.summary:
-    print '#\n# \tDISTCC_HOSTS="' + os.getenv('DISTCC_HOSTS') + '"', '\n# \tmake -j', total_jobs, ''.join(other_args)
-    print '#'*45
-    return
-  print '#'*45
-  strt = time.clock()
-  if len(other_args) > 0:
-    make_process = subprocess.Popen(['make', '-j', str(total_jobs), ''.join(other_args)])
-  else:
-    make_process = subprocess.Popen(['make', '-j', str(total_jobs)])
-
-  while make_process.poll() == None:
-    options.make_time = time.clock() - strt
-
-def checkDaemon(user_list, options):
-  if options.no_daemon:
-    return
-  allow_commands = ['gcc', 'g++', 'gfortran', 'clang', 'clang++', 'mpicc', 'mpicxx', 'cc']
-  cmd_list = open(os.getenv('HOME') + '/.cmd_list', 'w')
-  for command in allow_commands:
-    cmd_list.write(which(command) + '\n')
-  cmd_list.close()
-  os.environ['DISTCC_CMDLIST']=os.getenv('HOME') + '/.cmd_list'
-  if options.daemon or options.allow:
-    launchDaemon(user_list, options)
-  else:
-    if os.path.exists(os.getenv('HOME') + '/.dmake'):
-      dmake_file = open(os.getenv('HOME') + '/.dmake', 'r')
-      dmake_time = int(dmake_file.read())
-      dmake_file.close()
-      if (int(time.time()) - dmake_time) >= 14400:
-        dmake_file = open(os.getenv('HOME') + '/.dmake', 'w')
-        dmake_file.write(time.strftime('%s'))
-        dmake_file.close()
-        print 'reloading daemons...'
-        launchDaemon(user_list, options)
-      else:
-        return
+    # Test if the machine is available on the network (localhost must be available)
+    if self.name == 'localhost':
+      self.available = True
     else:
-      dmake_file = open(os.getenv('HOME') + '/.dmake', 'w')
-      dmake_file.write(time.strftime('%s'))
-      dmake_file.close()
-      print 'loading daemons...'
-      launchDaemon(user_list, options)
+      self.available = self._isAvailable()
 
-def Me(hostname):
-  try:
-    me = socket.gethostbyname(socket.gethostname())
-    them = socket.gethostbyname(hostname)
-    if me == them:
+    # Attempt to get the host ip address
+    try:
+      self.address = socket.gethostbyname(self.hostname)
+
+    except socket.gaierror:
+      self.available = False
+
+  ## Return the Machine information
+  def info(self):
+
+    # Set the status
+    if self.available:
+      return formatter('Available', self.name, self.use, self.hostname, self.address)
+    else:
+      return formatter('Offline', self.name, self.use, self.hostname,'')
+
+  ## Test if the machine is available
+  def _isAvailable(self):
+
+    # Run lsdistcc with the given hostname
+    sub = subprocess.Popen([which('lsdistcc'), '-x', self.hostname],\
+                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    status = sub.communicate()[0]
+
+    # If empty or contians ',down' then the host is not available
+    if status != None and status.find(',down') == -1:
       return True
-  except socket.gaierror:
-    if options.allow:
-      print 'WARNING, Hostname:', hostname, 'not found on the network. DNS error? Try entering the IP instead?'
+
     else:
-      print 'WARNING, Hostname:', hostname, 'not found on the network. DNS error?'
-  
+      return False
 
-def getMachine(machine):
-  return machine.split(',')
+## A function for formatting the output text
+def formatter(status, name, threads, hostname, addr):
+  return '| %-10s |' %status + ' %-40s |' % name + ' %-4s |' % threads + ' %-20s |' % hostname + ' %-15s |' % addr
 
-def isAvailable(options, machine):
-  (hostname, cores, threads, use, network, desc) = getMachine(machine)
-  lsdistcc_process = subprocess.Popen([which('lsdistcc'), '-x', hostname], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-  status = lsdistcc_process.communicate()[0]
-  if status != None:
-    if status.find(',down') == -1 and network == options.network:
-      if options.dedicated and desc.find('Dedicated') == -1:
-        if hostname.split('.')[0] == socket.gethostname().split('.')[0]:
-          return True
-        else:
-          return None
-      else:
-        return True
-  if network != options.network:
-    return None
-  return False
-
-def parseArguments(args=None):
-  parser = argparse.ArgumentParser(description='distcc front end tool')
-  parser.add_argument('--daemon', action='store_true', help='Launch distcc as a daemon\n ')
-  parser.add_argument('--no-daemon', action='store_true', help='Do not launch any daemon processes\n ')
-  parser.add_argument('--max', '-m',  action='store_true', help='Use maximum jobs across the board\n ')
-  parser.add_argument('--quiet', '-q', action='store_true', help='Do not print compile errors/warnings\n ')
-  parser.add_argument('--summary', '-s', action='store_true', help='Show distribution summary\n ')
-  parser.add_argument('--jobs', '-j', type=int, default=-1, help='Arbitrarily set job count (default: %(default)d)')
-  parser.add_argument('--dedicated', '-d', action='store_true', help='Only use dedicated compile boxes')
-  parser.add_argument('--local', '-l', action='store_true', help='Run make locally, do not distribute')
-  parser.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
-  (options, other_args) = parser.parse_known_args()
-  return (options, other_args)
-
+## Function for testing the existence for a program
 def which(program):
   def is_exe(fpath):
     return os.path.exists(fpath) and os.access(fpath, os.X_OK)
@@ -210,27 +74,421 @@ def which(program):
         return exe_file
   return None
 
+## Class for managing the machines on the farm
+class Farm(object):
+
+  ## Class constructor
+  def __init__(self, options, make_args):
+
+    # Initialize class variables
+    self._slaves = []       # list of Machine objects to build on (private)
+    self._down = []         # list of Machine objects that are not working (private)
+    self._network = ''      # network that the user is on (private)
+    self._cache = None      # flag indicating if cache DISTCC_HOSTS was used (priavte)
+
+    # Set the temporary file names
+    self._dmake_file = os.path.join(os.getenv('HOME'), '.dmake')
+    self._dmake_hosts = os.path.join(os.getenv('HOME'), '.dmake_hosts')
+
+    # Extract the options from the command line
+    self._options = options
+    self._make_args = make_args
+
+    # Create the master Machine (localhost)
+    hostname = socket.gethostname()
+    jobs = str(multiprocessing.cpu_count())
+    self._master = Machine([hostname, '', jobs, jobs, '', 'localhost'])
+
+    # Determine the network
+    #if socket.gethostbyname(socket.gethostname()).find('204') != -1:
+    if self._master.address.find('204') != -1:
+      self._network = 'fn'
+    else:
+      self._network = 'inl'
+      os.environ['no_proxy'] = 'hpcsc.inl.gov'
+
+    # Set the network of the master Machine
+    self._master.network = self._network
+
+  ## Run the build locally only
+  # @return Time required for running make
+  def local(self):
+
+    # Set the DISTCC_HOSTS environment
+    distcc_hosts = 'localhost/' + self._master.threads
+
+    # Get the number of jobs
+    if self._options.jobs:
+      jobs = self._options.jobs
+    else:
+      jobs = self._master.threads
+
+    # Print the information
+    self._display(distcc_hosts, jobs)
+
+    # Run 'make'
+    self._make(distcc_hosts, jobs)
+
+  ## Run the build distributed
+  # @return Time required for running make
+  def distribute(self):
+
+    # Check that the distccd daemons are running
+    self._checkDaemon()
+
+    # Prepare the client
+    distcc_hosts, jobs = self._getHosts()
+
+    # Print the information
+    self._display(distcc_hosts, jobs)
+
+    # Run 'make'
+    self._make(distcc_hosts, jobs)
+
+  ## Run the deamon command
+  def startDaemon(self):
+    self.killDaemon()
+    time.sleep(1)
+    self._launchDaemon()
+
+  ## Kill the daemons
+  def killDaemon(self):
+    subprocess.Popen([which('killall'), 'distccd'])
+
+  ## Print a detailed summary
+  # @return A time of 0.0 (used in main function to display dmake exeuction time)
+  def summary(self):
+    distcc_hosts, jobs = self._initClient()
+    self._options.verbose = True
+    self._display(distcc_hosts, jobs)
+
+  ## Run the make command (private)
+  # @param distcc_hosts String contaning the DISTCC_HOSTS environmental variable
+  # @param jobs The -j amount to use for 'make'
+  # Runs 'make', this is executed via the local() and distribute() commands
+  def _make(self, distcc_hosts, jobs):
+
+    # Set the DISTCC_HOSTS environmental variable
+    os.environ['DISTCC_HOSTS'] = distcc_hosts
+
+    # Set the verboseness of distcc
+    if self._options.quiet:
+      os.environ['DISTCC_VERBOSE'] = '0'
+
+    # Run make
+    strt = time.clock()
+    sub = subprocess.Popen(['make', '-j', str(jobs)])
+
+    # Wait for process to terminate
+    while sub.poll() == None:
+      pass
+
+    # Display and return the time
+    print 'Elapsed time for make: ' + str(time.clock() - strt) + ' sec.'
+
+  ## Print a summary of the distcc compile farm (private)
+  def _display(self, distcc_hosts, jobs):
+
+    # Setup the output list variable
+    output = []
+
+    # Print verbose information, if desired
+    if self._options.verbose:
+
+      # Print the headings
+      output.append(formatter('STATUS', 'DESCRIPTION', 'JOBS', 'HOSTNAME', 'IP ADDRESS'))
+      s = '+' + '-'*(len(output[0])-2) + '+'
+      output.insert(0,s)   # top line
+      output.append(s)
+
+      # Print the slave machine information, if the information exists
+      if len(self._slaves) > 0:
+        for user in self._slaves:
+          output.append(user.info())
+        output.append(s)
+
+      # Print the master machine information
+      output.append(self._master.info())
+      output.append(s)     # end line
+
+      # Print the down machine information, if the informatin exists
+      if len(self._down) > 0:
+        for user in self._down:
+          output.append(user.info())
+        output.append(s)
+
+     # Add the cache message
+      if self._cache:
+        output.append('Used cached DISTCC_HOSTS, use --refresh to update')
+
+
+    # The basic information
+    output.append('Number of processors: ' + str(jobs))
+
+    if self._options.verbose:
+      output.append('DISTCC_HOSTS=\"' + distcc_hosts + '\"')
+      output.append( 'make -j ' + str(jobs) + '\n')
+
+    # Print the output
+    for line in output:
+      print line
+
+  ## Return the distcc hosts and jobs
+  def _getHosts(self):
+
+    # If the .dmake_hosts file does not exist start the client
+    if self._options.refresh or (not os.path.exists(self._dmake_hosts)):
+      return self._initClient()
+
+    # Restart the clients if the .dmake_hosts file is older than 20 min.
+    elif (time.time() - os.path.getmtime(self._dmake_hosts)) > 1200:
+      return self._initClient()
+
+    # Use cache
+    else:
+      fid = open(self._dmake_hosts, 'r')
+      distcc_hosts = fid.readline()
+      jobs = int(fid.readline())
+      fid.close()
+      self._cache = True
+      return distcc_hosts, jobs
+
+  ## Setup the distcc client (private)
+  # @return String with the DISTCC_HOSTS environment
+  # @return Integer with the number of jobs to run
+  def _initClient(self):
+
+    # Set the cache flag to false
+    self._cache = False
+
+    # Initilize the slave machines
+    self._initSlaves()
+
+    # Set the localhosts
+    if self._options.localhost:
+      localhost = self._options.localhost
+    else:
+      localhost = int(self._master.threads)
+
+    # Set the localslots
+    if self._options.localslots:
+      localslots = self._options.localslots
+    else:
+      localslots = int(self._master.threads)/4
+
+    # Set the localslots_cpp
+    if self._options.localslots_cpp:
+      localslots_cpp = self._options.localslots_cpp
+    else:
+      localslots_cpp = int(self._master.threads) - localslots
+
+    # Build the command string
+    distcc_hosts = '--localslots=' + str(localslots) + ' --localslots_cpp=' + \
+                         str(localslots_cpp) + ' localhost/' + str(localhost)
+
+    # Add the compile machines
+    jobs = localhost
+    for user in self._slaves:
+      if self._options.max:
+        distcc_hosts += " " + user.hostname +'/' + user.threads
+        jobs += int(user.threads)
+      else:
+        distcc_hosts += " " + user.hostname +'/' + user.use
+        jobs += int(user.use)
+
+    # Override jobs if the option is given
+    if self._options.jobs:
+      jobs = int(self._options.jobs)
+
+    # Write dmake_hosts file
+    fid = open(self._dmake_hosts, 'w')
+    fid.write(distcc_hosts + '\n')
+    fid.write(str(jobs) + '\n')
+    fid.close()
+
+    # Return the hosts and jobs
+    return distcc_hosts, jobs
+
+  ## Check if the distcc daemons are running (private)
+  # If the daemon command has not run in the last 4 hours
+  # start/re-start the daemons using 'distccd'
+  def _checkDaemon(self):
+
+    # Flag for writting timestamp file
+    w_flag = False
+
+    # If the file does not exist start the daemon and create. dmake file
+    if not os.path.exists(self._dmake_file):
+      w_flag = True
+      self.startDaemon()
+
+    # Open the .dmake and lanuch the daemon
+    else:
+      fid = open(self._dmake_file)
+      t = int(fid.readline())
+      fid.close()
+      if (int(time.time()) - t) >= 14400:
+        self.startDaemon()
+        w_flag = True
+
+    # Write the .dmake file
+    if w_flag:
+      fid = open(self._dmake_file, 'w')
+      fid.write(time.strftime('%s'))
+      fid.close()
+
+  ## Launches the Daemon (private)
+  # Runs the distccd command, to start the daemons with dmake use the
+  # the --daemon option
+  # \see startDaemon
+  def _launchDaemon(self):
+
+    # Return if --no-daemon was used
+    if self._options.no_daemon:
+      return
+
+    # List of allowable commands
+    allow_commands = ['gcc', 'g++', 'gfortran', 'clang', 'clang++', 'mpicc', 'mpicxx', 'cc']
+
+    # Create the distcc .cmd_list file
+    cmd_list = open(os.getenv('HOME') + '/.cmd_list', 'w')
+    for command in allow_commands:
+      cmd_list.write(which(command) + '\n')
+    cmd_list.close()
+
+    # Set the environment variable for the allowed commands
+    os.environ['DISTCC_CMDLIST'] = os.getenv('HOME') + '/.cmd_list'
+
+    # Build the distccd command
+    distccd_cmd = [which('distccd'), '--daemon']
+    for user in self._slaves:
+      distccd_cmd.extend(['--allow', user.address, '--jobs', user.threads])
+    for use in self._down:
+      distccd_cmd.extend(['--allow', user.address, '--jobs', user.threads])
+    distccd_cmd.extend(['--allow', self._master.address, '--jobs', self._master.threads])
+
+    # Set the DISTCC backoff period to something large, so if server fails it will not try again
+    os.environ['DISTCC_BACKOFF_PERIOD'] = '6000'
+
+    # Set the timeout length, if a file takes more than this amount of time to compile consider it a failure
+    os.environ['DISTCC_IO_TIMEOUT'] = str(self._options.timeout)
+
+    # Run the daemon
+    print 'Launching distcc daemons'
+    subprocess.Popen(distccd_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+  ## Method for reading the User (private)
+  def _initSlaves(self):
+
+    # Extract the list of users from the HPCSC website
+    fid = urllib2.urlopen('https://hpcsc.inl.gov/ssl/HERD/distcc_list_users')
+    lines = fid.read().split('\n')
+    fid.close()
+
+    # Loop through each line (user)
+    for line in lines:
+
+      # Skip comment lines (#)
+      if len(line) == 0 or line[0] == '#':
+        continue
+
+      # Skip non-dedicated boxes (--dedicated)
+      if self._options.dedicated:
+        if line.lower().find('dedicated') == -1:
+          continue
+
+      # Parse the input for the current line
+      parts = line.split(',')
+
+      # Skip comment lines and off-network machines
+      if parts[0][0] != '#' and parts[4] == self._network:
+
+        # Build a Machine object and populate the master/slave attributes
+        machine = Machine(parts)
+
+        # This machine
+        if machine.hostname == self._master.hostname:
+          continue
+
+        # Skip if the use field is zero
+        elif machine.use == 0 or not machine.available:
+          self._down.append(machine)
+
+        # Workers
+        else:
+          self._slaves.append(machine)
+
+    # Randomize the slave list
+    shuffle(self._slaves)
+
+    # Produce error if _master is not defined
+    if not isinstance(self._master, Machine):
+      print 'ERROR: Your machine was not located on the distcc user list'
+      sys.exit()
+
+## Function for parsing command line arguments
+def parseArguments(args=None):
+  parser = argparse.ArgumentParser(description='A front-end tool for distcc')
+
+  # Flag options
+  grp0 = parser.add_argument_group('Flags for adjusting behavior of \'make\'\n' + \
+                                   'These flags may be used in conjuction with each other,\nfor ' + \
+                                   'example: \'dmake -mvn\'')
+  grp0.add_argument('--max', '-m',  action='store_true', help='Use maximum jobs across the board')
+  grp0.add_argument('--quiet', '-q', action='store_true', help='Do not print compile errors/warnings')
+  grp0.add_argument('--dedicated', '-d', action='store_true', help='Only use dedicated compile boxes')
+  grp0.add_argument('--local', '-l', action='store_true', help='Run make locally with all possible threads')
+  grp0.add_argument('--verbose', '-v', action='store_true', help='Show a detailed summary')
+  grp0.add_argument('--no-daemon', '-n', action='store_true', help='Do not launch any daemon processes')
+  grp0.add_argument('--refresh', '-r', action='store_true', help='Force a refresh of the stored DISTCC_HOSTS cache')
+
+  # Options that do not run make
+  grp1 = parser.add_argument_group('Daemon and Testings Commands (do not run \'make\')')
+  grp1.add_argument('--daemon', action='store_true', help='Launch distcc as a daemon')
+  grp1.add_argument('--kill', action='store_true', help='Kill distcc as a daemon')
+  grp1.add_argument('--summary', '-s', action='store_true', help='Show distribution summary')
+
+  # Advanced options
+  grp2 = parser.add_argument_group('Advanced Options')
+  grp2.add_argument('--jobs', '-j', type=int, help='Override the automatic job count settings')
+  grp2.add_argument('--localhost', type=int, help='Override the automatic setting for the number of localhost processors to utilize')
+  grp2.add_argument('--localslots', type=int, help='Override the automatic setting for the number of local compile slots')
+  grp2.add_argument('--localslots_cpp', type=int, help='Override the automatic setting for the number of local preprocessor slots')
+  grp2.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
+  grp2.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
+
+  # Allow flags to be run together
+  parser.parse_args('-mqvdnlr'.split())
+
+  # Parse the input and return the options
+  (options, other_args) = parser.parse_known_args()
+  return (options, other_args)
+
+# Main function
 if __name__ == "__main__":
-  # Save the start time for dmake execution
-  strt = time.clock()
 
-  (options, other_args) = parseArguments()
+  # Extract the options from the command line
+  (options, make_args) = parseArguments()
 
-  if socket.gethostbyname(socket.gethostname()).find('204') != -1:
-    options.network = 'fn'
+  # Create the compile farm object
+  farm = Farm(options, make_args)
+
+  # Run local build if desired, short-circut the rest of the script for speed
+  if options.local:
+    farm.local()
+
+  # Print a summary, do not run make
+  elif options.summary:
+    farm.summary()
+
+  # Start the distcc daemon, do not run make
+  elif options.daemon:
+    farm.startDaemon()
+
+  # Kill the daemons, do not run make
+  elif options.kill:
+    farm.killDaemon()
+
+  # Run a distributed compile
   else:
-    options.network = 'inl'
-    os.environ['no_proxy'] = 'hpcsc.inl.gov'
-  user_list = getList()
-  if options.daemon or options.allow:
-    checkDaemon(user_list, options)
-  else:
-    checkDaemon(user_list, options)
-    launchClient(user_list, options, other_args)
-
-  # Print the time
-  total_time = time.clock() - strt
-  if hasattr(options, 'make_time'):
-    print '\n'
-    print 'Elapsed time for make: ' + str(options.make_time) + ' sec.'
-    print "Elasped time for dmake: " + str(total_time - options.make_time) + " sec."
+    farm.distribute()
