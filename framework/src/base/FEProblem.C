@@ -3347,7 +3347,7 @@ FEProblem::checkProblemIntegrity()
 
       if(libMesh::n_processors() > 1)
       {
-        std::cout<<std::endl<<"Warning! Mesh re-partitioning is disabled while using stateful material properties!  This can lead to large load imblances and degreaded performance!!"<<std::endl;
+        std::cout<<std::endl<<"Warning! Mesh re-partitioning is disabled while using stateful material properties!  This can lead to large load imbalances and degraded performance!!"<<std::endl;
         _mesh.getMesh().skip_partitioning(true);
         if(_displaced_problem)
           _displaced_problem->mesh().getMesh().skip_partitioning(true);
