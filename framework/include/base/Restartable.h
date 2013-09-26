@@ -54,6 +54,16 @@ protected:
   template<typename T>
   T & declareRestartableData(std::string data_name);
 
+  /**
+   * Declare a piece of data as "restartable" and initialize it.
+   * This means that in the event of a restart this piece of data
+   * will be restored back to its previous value.
+   *
+   * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
+   */
+  template<typename T>
+  T & declareRestartableData(std::string data_name, const T & init_value);
+
 private:
   /// Helper function so we don't have to #include FEProblem in the header
   void registerRestartableDataOnFEProblem(std::string name, RestartableDataValue * data, THREAD_ID tid);
@@ -80,6 +90,20 @@ Restartable::declareRestartableData(std::string data_name)
 {
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
   RestartableData<T> * data_ptr = new RestartableData<T>(full_name);
+
+  registerRestartableDataOnFEProblem(full_name, data_ptr, _restartable_tid);
+
+  return data_ptr->get();
+}
+
+template<typename T>
+T &
+Restartable::declareRestartableData(std::string data_name, const T & init_value)
+{
+  std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
+  RestartableData<T> * data_ptr = new RestartableData<T>(full_name);
+
+  data_ptr->set() = init_value;
 
   registerRestartableDataOnFEProblem(full_name, data_ptr, _restartable_tid);
 

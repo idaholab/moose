@@ -187,11 +187,11 @@ protected:
   Real & _dt;
   Real & _dt_old;
 
-  Real _unconstrained_dt;
-  Real _unconstrained_dt_old;
+  Real & _unconstrained_dt;
+  Real & _unconstrained_dt_old;
 
-  Real _prev_dt;
-  bool _reset_dt;
+  Real & _prev_dt;
+  bool & _reset_dt;
 
   Real _end_time;
   Real _dtmin;
@@ -205,15 +205,15 @@ protected:
   bool _trans_ss_check;
   Real _ss_check_tol;
   Real _ss_tmin;
-  Real _old_time_solution_norm;
+  Real & _old_time_solution_norm;
 
   std::set<Real> _sync_times;
   Real _prev_sync_time;
-  bool _remaining_sync_time;
+  bool & _remaining_sync_time;
 
   bool _abort;
   ///if to use time interval output
-  bool _time_interval;
+  bool & _time_interval;
   ///the output interval to use
   Real _time_interval_output_interval;
   Real _start_time;
