@@ -86,7 +86,6 @@ class Farm(object):
     self._cache = None         # flag indicating if cache DISTCC_HOSTS was used (priavte)
     self._make_output = None   # output pipe from make (private)
     self._make_time = None     # duration of make command (private)
-    self._info_frmt = '%25s: ' # format string for displaying build information (private)
 
     # Set the temporary file names
     self._dmake_file = os.path.join(os.getenv('HOME'), '.dmake')
@@ -181,22 +180,14 @@ class Farm(object):
     strt = time.clock()
     make = ['make', '-j', str(jobs)]
     make.extend(self._make_args)
-    sub = subprocess.Popen(make, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    make_output = sub.communicate()[0]
+    sub = subprocess.Popen(make)
 
     # Wait for process to terminate
     while sub.poll() == None:
       pass
 
     # Print the make durration
-    print self._info_frmt % 'Make Execution Time' + str(time.clock() - strt) + ' sec.'
-
-    # Print the make output
-    if self._options.verbose:
-      print '\nMAKE OUTPUT:'
-      print '\t' + make_output
-    else:
-      print '\n' + make_output + '\n'
+    print 'Make Execution Time: ' + str(time.clock() - strt) + ' sec.'
 
   ## Print a summary of the distcc compile farm (private)
   def _display(self, distcc_hosts, jobs):
@@ -235,17 +226,18 @@ class Farm(object):
       output.append('\nBUILD INFROMATION:')
 
     # The basic information
-    output.append(self._info_frmt % 'Number of processors' + str(jobs))
+    frmt = '%25s: '
+    output.append(frmt % 'Number of processors' + str(jobs))
 
     if self._options.verbose:
       # Add make command
-      make = self._info_frmt % 'Make Command' + 'make -j ' + str(jobs)
+      make = frmt % 'Make Command' + 'make -j ' + str(jobs)
       for a in self._make_args:
         make += ' ' + a
       output.append(make)
 
       # Display DISTCC_HOSTS
-      output.append(self._info_frmt % 'DISTCC_HOSTS' + distcc_hosts)
+      output.append(frmt % 'DISTCC_HOSTS' + distcc_hosts + '\n')
 
     # Print the output
     for line in output:
