@@ -226,10 +226,14 @@ class Farm(object):
       output.append('\nBUILD INFROMATION:')
 
     # The basic information
-    frmt = '%25s: '
-    output.append(frmt % 'Number of processors' + str(jobs))
-
     if self._options.verbose:
+
+      # Format string for information display
+      frmt = '%25s: '
+
+      # Print processors
+      output.append(frmt % 'Number of processors' + str(jobs))
+
       # Add make command
       make = frmt % 'Make Command' + 'make -j ' + str(jobs)
       for a in self._make_args:
@@ -238,6 +242,9 @@ class Farm(object):
 
       # Display DISTCC_HOSTS
       output.append(frmt % 'DISTCC_HOSTS' + distcc_hosts + '\n')
+
+    else:
+      output.append('Number of processors: ' + str(jobs))
 
     # Print the output
     for line in output:
