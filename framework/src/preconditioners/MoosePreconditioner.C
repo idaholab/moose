@@ -29,6 +29,7 @@ InputParameters validParams<MoosePreconditioner>()
 
 MoosePreconditioner::MoosePreconditioner(const std::string & name, InputParameters params) :
     MooseObject(name, params),
+    Restartable(name, params, "Preconditioners"),
     _fe_problem(*getParam<FEProblem *>("_fe_problem"))
 {
   _fe_problem.getNonlinearSystem().setPCSide(getParam<MooseEnum>("pc_side"));

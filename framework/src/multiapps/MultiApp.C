@@ -92,6 +92,7 @@ InputParameters validParams<MultiApp>()
 
 MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     MooseObject(name, parameters),
+    Restartable(name, parameters, "MultiApps"),
     _fe_problem(getParam<FEProblem *>("_fe_problem")),
     _app_type(getParam<MooseEnum>("app_type")),
     _input_files(getParam<std::vector<std::string> >("input_files")),

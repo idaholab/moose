@@ -23,6 +23,7 @@
 #include "MaterialPropertyInterface.h"
 #include "MooseVariableDependencyInterface.h"
 #include "BlockRestrictable.h"
+#include "Restartable.h"
 
 #include "Assembly.h"
 #include "MooseVariable.h"
@@ -47,7 +48,8 @@ class Indicator :
   public SetupInterface,
   public FunctionInterface,
   public UserObjectInterface,
-  public MooseVariableDependencyInterface
+  public MooseVariableDependencyInterface,
+  public Restartable
 {
 public:
   Indicator(const std::string & name, InputParameters parameters);

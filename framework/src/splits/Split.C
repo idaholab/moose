@@ -36,6 +36,7 @@ InputParameters validParams<Split>()
 
 Split::Split (const std::string & name, InputParameters params) :
   MooseObject(name, params),
+  Restartable(name, params, "Splits"),
   _fe_problem(*getParam<FEProblem*>("_fe_problem")),
   _vars(getParam<std::vector<std::string> >("vars")),
   _blocks(getParam<std::vector<std::string> >("blocks")),

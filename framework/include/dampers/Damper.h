@@ -21,6 +21,8 @@
 #include "ParallelUniqueId.h"
 #include "MooseVariable.h"
 #include "MaterialPropertyInterface.h"
+#include "Restartable.h"
+
 // libMesh
 #include "libmesh/elem.h"
 #include "libmesh/quadrature.h"
@@ -43,7 +45,8 @@ InputParameters validParams<Damper>();
 class Damper :
   public MooseObject,
   public SetupInterface,
-  protected MaterialPropertyInterface
+  protected MaterialPropertyInterface,
+  public Restartable
 {
 public:
   Damper(const std::string & name, InputParameters parameters);

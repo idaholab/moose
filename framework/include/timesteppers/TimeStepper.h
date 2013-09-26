@@ -16,6 +16,7 @@
 #define TIMESTEPPER_H
 
 #include "MooseObject.h"
+#include "Restartable.h"
 
 class TimeStepper;
 class FEProblem;
@@ -27,7 +28,9 @@ InputParameters validParams<TimeStepper>();
 /**
  * Base class for time stepping
  */
-class TimeStepper : public MooseObject
+class TimeStepper :
+  public MooseObject,
+  public Restartable
 {
 public:
   TimeStepper(const std::string & name, InputParameters parameters);

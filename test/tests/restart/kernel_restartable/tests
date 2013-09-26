@@ -1,0 +1,50 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'kernel_restartable.i'
+    exodiff = 'kernel_restartable_out.e'
+  [../]
+
+  [./test2]
+    type = 'Exodiff'
+    input = 'kernel_restartable_second.i'
+    exodiff = 'kernel_restartable_second_out.e'
+    prereq = 'test'
+  [../]
+
+  [./parallel_error]
+    type = 'RunException'
+    input = 'kernel_restartable_second.i'
+    min_parallel = 2
+    max_parallel = 2
+    prereq = test2
+    expect_err = 'Cannot restart using a different number of processors'
+  [../]
+
+  [./with_threads]
+    type = 'Exodiff'
+    input = 'kernel_restartable.i'
+    exodiff = 'kernel_restartable_out.e'
+    min_threads = 4
+    max_threads = 4
+    prereq = parallel_error
+  [../]
+
+  [./with_threads2]
+    type = 'Exodiff'
+    input = 'kernel_restartable.i'
+    exodiff = 'kernel_restartable_out.e'
+    min_threads = 4
+    max_threads = 4
+    prereq = with_threads
+  [../]
+
+  [./threads_error]
+    type = 'RunException'
+    input = 'kernel_restartable_second.i'
+    min_threads = 2
+    max_threads = 2
+    prereq = with_threads2
+    expect_err = 'Cannot restart using a different number of threads'
+  [../]
+[]

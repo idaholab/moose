@@ -18,6 +18,7 @@
 #include "MooseObject.h"
 #include "MooseMesh.h"
 #include "InputParameters.h"
+#include "Restartable.h"
 
 // System includes
 #include <string>
@@ -32,7 +33,8 @@ InputParameters validParams<MeshModifier>();
  * MeshModifiers are objects that can modify or add to an existing mesh.
  */
 class MeshModifier :
-  public MooseObject
+  public MooseObject,
+  public Restartable
 {
 public:
   /**

@@ -27,6 +27,7 @@ InputParameters validParams<TimeStepper>()
 
 TimeStepper::TimeStepper(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    Restartable(name, parameters, "TimeSteppers"),
     _fe_problem(*getParam<FEProblem *>("_fe_problem")),
     _executioner(*getParam<Transient *>("_executioner")),
     _time(_fe_problem.time()),

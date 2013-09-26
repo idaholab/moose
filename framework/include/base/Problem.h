@@ -18,9 +18,9 @@
 #include "ParallelUniqueId.h"
 #include "InputParameters.h"
 #include "ExecStore.h"
-#include "MooseMesh.h"
 #include "MooseArray.h"
 #include "XTermConstants.h"
+#include "MooseObject.h"
 
 // libMesh
 #include "libmesh/libmesh_common.h"

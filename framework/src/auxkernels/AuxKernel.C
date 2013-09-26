@@ -55,6 +55,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     PostprocessorInterface(parameters),
     DependencyResolverInterface(),
     GeometricSearchInterface(parameters),
+    Restartable(name, parameters, "AuxKernels"),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _nl_sys(*parameters.get<SystemBase *>("_nl_sys")),

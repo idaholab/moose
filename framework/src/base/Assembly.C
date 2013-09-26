@@ -19,6 +19,7 @@
 #include "ArbitraryQuadrature.h"
 #include "SystemBase.h"
 #include "MooseTypes.h"
+#include "MooseMesh.h"
 
 // libMesh
 #include "libmesh/quadrature_gauss.h"

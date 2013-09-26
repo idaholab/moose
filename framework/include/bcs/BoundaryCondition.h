@@ -28,6 +28,7 @@
 #include "GeometricSearchInterface.h"
 #include "BoundaryRestrictableRequired.h"
 #include "Assembly.h"
+#include "Restartable.h"
 
 // libMesh
 #include "libmesh/elem.h"
@@ -58,7 +59,8 @@ class BoundaryCondition :
   public UserObjectInterface,
   public TransientInterface,
   public PostprocessorInterface,
-  public GeometricSearchInterface
+  public GeometricSearchInterface,
+  public Restartable
 {
 public:
 

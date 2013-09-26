@@ -19,6 +19,7 @@
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
 #include "ParallelUniqueId.h"
+#include "Restartable.h"
 
 // System includes
 #include <string>
@@ -44,7 +45,8 @@ InputParameters validParams<InitialCondition>();
 class InitialCondition :
   public MooseObject,
   public FunctionInterface,
-  public UserObjectInterface
+  public UserObjectInterface,
+  public Restartable
 {
 public:
   /**

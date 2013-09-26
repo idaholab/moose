@@ -32,6 +32,7 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
+#include "Restartable.h"
 
 //libMesh includes
 #include "libmesh/libmesh_common.h"
@@ -63,7 +64,8 @@ class DiracKernel :
   public TransientInterface,
   public MaterialPropertyInterface,
   public PostprocessorInterface,
-  protected GeometricSearchInterface
+  protected GeometricSearchInterface,
+  public Restartable
 {
 public:
   DiracKernel(const std::string & name, InputParameters parameters);

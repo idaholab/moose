@@ -36,6 +36,7 @@ Marker::Marker(const std::string & name, InputParameters parameters) :
     BlockRestrictable(parameters),
     SetupInterface(parameters),
     UserObjectInterface(parameters),
+    Restartable(name, parameters, "Markers"),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _adaptivity(_fe_problem.adaptivity()),

@@ -18,15 +18,15 @@
 #include <stdio.h>
 
 const std::string Resurrector::MAT_PROP_EXT(".msmp");
-const std::string Resurrector::USER_DATA_EXT(".muds");
+const std::string Resurrector::RESTARTABLE_DATA_EXT(".rd");
 
 Resurrector::Resurrector(FEProblem & fe_problem) :
     _fe_problem(fe_problem),
     _restart(false),
     _num_restart_files(0),
     _xda(_fe_problem.es()),
-    _mat(_fe_problem)
-//    _user_object(_fe_problem._user_objects[0])
+    _mat(_fe_problem),
+    _restartable(_fe_problem)
 {
 }
 
@@ -48,24 +48,22 @@ Resurrector::restartFromFile()
   MooseUtils::checkFileReadable(file_name);
   _fe_problem._eq.read(file_name, libMeshEnums::READ, EquationSystems::READ_DATA);
   _fe_problem._nl.update();
+  _restartable.readRestartableData(_restart_file_base + RESTARTABLE_DATA_EXT);
 }
 
 void
 Resurrector::restartStatefulMaterialProps()
 {
-  // read material properties from a file
   std::string file_name(_restart_file_base + MAT_PROP_EXT);
   MooseUtils::checkFileReadable(file_name);
   _mat.read(file_name);
 }
 
 void
-Resurrector::restartUserData()
+Resurrector::restartRestartableData()
 {
-  // read material properties from a file
-  std::string file_name(_restart_file_base + USER_DATA_EXT);
+  std::string file_name(_restart_file_base + RESTARTABLE_DATA_EXT);
   MooseUtils::checkFileReadable(file_name);
-//  _user_object.read(file_name);
 }
 
 
@@ -88,11 +86,8 @@ Resurrector::write()
   _xda.output(s, _fe_problem.time());                   // time does not have any effect here actually
   if (_fe_problem._material_props.hasStatefulProperties())
     _mat.write(file_base + MAT_PROP_EXT);
-  //  THREAD_ID tid = 0;
-  /*
-  if (_fe_problem._user_objects[tid].size() > 0)
-    _user_object.write(file_base + USER_DATA_EXT);
-  */
+
+  _restartable.writeRestartableData(file_base + RESTARTABLE_DATA_EXT);
 
   if (_restart_file_names.size() > _num_restart_files)
   {
@@ -107,7 +102,7 @@ Resurrector::write()
     remove(fn.c_str());           // solution
     fn = fb + MAT_PROP_EXT;
     remove(fn.c_str());           // material properties
-    fn = fb + USER_DATA_EXT;
+    fn = fb + RESTARTABLE_DATA_EXT;
     remove(fn.c_str());           // user data
   }
 }

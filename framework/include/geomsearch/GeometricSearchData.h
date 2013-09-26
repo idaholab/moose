@@ -15,8 +15,9 @@
 #ifndef GEOMETRICSEARCHDATA_H
 #define GEOMETRICSEARCHDATA_H
 
+#include "MooseTypes.h"
+
 //libmesh includes
-#include "MooseMesh.h"
 
 #include <map>
 

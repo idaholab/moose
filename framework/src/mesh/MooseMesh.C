@@ -79,6 +79,7 @@ InputParameters validParams<MooseMesh>()
 
 MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    Restartable(name, parameters, "Mesh"),
     _mesh_distribution_type(getParam<MooseEnum>("distribution")),
     _use_parallel_mesh(false),
     _mesh(NULL),
@@ -140,6 +141,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     MooseObject(other_mesh._name, other_mesh._pars),
+    Restartable(_name, _pars, "Mesh"),
     _mesh_distribution_type(other_mesh._mesh_distribution_type),
     _use_parallel_mesh(other_mesh._use_parallel_mesh),
     _mesh(other_mesh.getMesh().clone().release()),

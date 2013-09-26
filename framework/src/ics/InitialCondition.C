@@ -33,6 +33,7 @@ InitialCondition::InitialCondition(const std::string & name, InputParameters par
     MooseObject(name, parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
+    Restartable(name, parameters, "InitialConditions"),
     _fe_problem(*getParam<FEProblem *>("_fe_problem")),
     _sys(*getParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),

@@ -12,51 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef POSTPROCESSOR_H
-#define POSTPROCESSOR_H
-
-#include <string>
-// MOOSE includes
-#include "InputParameters.h"
 #include "Restartable.h"
+#include "FEProblem.h"
 
-// libMesh
-#include "libmesh/parallel.h"
-
-class Postprocessor;
-
-template<>
-InputParameters validParams<Postprocessor>();
-
-
-class Postprocessor
+Restartable::Restartable(std::string name, InputParameters & parameters, std::string system_name) :
+    _restartable_name(name),
+    _restartable_params(parameters),
+    _restartable_system_name(system_name),
+    _restartable_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
+    _restartable_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL)
 {
-public:
-  Postprocessor(const std::string & name, InputParameters parameters);
+}
 
-  virtual ~Postprocessor(){ }
 
-  /**
-   * This will get called to actually grab the final value the postprocessor has calculated.
-   */
-  virtual PostprocessorValue getValue() = 0;
+Restartable::~Restartable()
+{
+}
 
-  /**
-   * Get the postprocessor output type
-   * @return postprocessor output type
-   */
-  Moose::PPSOutputType getOutput() { return _output; }
-
-  /**
-   * Returns the name of the Postprocessor.
-   */
-  std::string PPName() { return _pp_name; }
-
-protected:
-  std::string _pp_name;
-
-  /// If and where is the postprocessor output
-  Moose::PPSOutputType _output;
-};
-
-#endif
+void
+Restartable::registerRestartableDataOnFEProblem(std::string name, RestartableDataValue * data, THREAD_ID tid)
+{
+  _restartable_feproblem->registerRestartableData(name, data, tid);
+}

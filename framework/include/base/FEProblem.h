@@ -17,15 +17,12 @@
 
 #include "Moose.h"
 #include "SubProblem.h"
-#include "MooseMesh.h"
-#include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "Assembly.h"
 #include "GeometricSearchData.h"
 #include "MaterialWarehouse.h"
 #include "MaterialPropertyStorage.h"
 #include "PostprocessorWarehouse.h"
-#include "UserObjectWarehouse.h"
 #include "PostprocessorData.h"
 #include "Output.h"
 #include "Adaptivity.h"
@@ -35,11 +32,16 @@
 #include "MultiAppWarehouse.h"
 #include "TransferWarehouse.h"
 #include "MooseEnum.h"
+#include "RestartableData.h"
+#include "Resurrector.h"
+#include "UserObjectWarehouse.h"
+#include "NonlinearSystem.h"
 
 class DisplacedProblem;
 class OutputProblem;
-
 class FEProblem;
+class MooseMesh;
+class NonlinearSystem;
 
 template<>
 InputParameters validParams<FEProblem>();
@@ -396,16 +398,7 @@ public:
    * @param tid The thread ID
    * @return Const reference to the user object
    */
-
-  const UserObject & getUserObjectBase(const std::string & name)
-  {
-    ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
-    for (unsigned int i = 0; i < LENGTHOF(types); i++)
-      if (_user_objects(types[i])[0].hasUserObject(name))
-        return *_user_objects(types[i])[0].getUserObjectByName(name);
-
-    mooseError("Unable to find user object with name '" + name + "'");
-  }
+  const UserObject & getUserObjectBase(const std::string & name);
 
   /**
    * Check if there if a user object of given name
@@ -633,6 +626,16 @@ public:
   virtual bool isRestarting();
 
   /**
+   * Register a piece of restartable data.  This is data that will get
+   * written / read to / from a restart file.
+   *
+   * @param name The full (unique) name.
+   * @param data The actual data object.
+   * @param tid The thread id of the object.  Use 0 if the object is not threaded.
+   */
+  virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
+
+  /**
    * Determines the solver mode based on existin options and returns it.
    * In MOOSE we default to PJFNK if no solver type is explicitly set!
    */
@@ -816,6 +819,9 @@ protected:
   /// Object responsible for restart (read/write)
   Resurrector * _resurrector;
 
+  /// Where the restartable data is held (indexed on tid)
+  std::vector<std::map<std::string, RestartableDataValue *> > _restartable_data;
+
 //  PerfLog _solve_only_perf_log;                         ///< Only times the solve
   /// Determines if the setup log is printed before the first time step
   bool _output_setup_log_early;
@@ -844,6 +850,7 @@ public:
   friend class NonlinearSystem;
   friend class Resurrector;
   friend class MaterialPropertyIO;
+  friend class RestartableDataIO;
 };
 
 #endif /* FEPROBLEM_H */

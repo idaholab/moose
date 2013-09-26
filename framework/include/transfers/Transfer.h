@@ -21,6 +21,7 @@
 #include "InputParameters.h"
 #include "SetupInterface.h"
 #include "MooseEnum.h"
+#include "Restartable.h"
 
 // libMesh
 #include "libmesh/system.h"
@@ -41,7 +42,8 @@ InputParameters validParams<Transfer>();
  */
 class Transfer :
   public MooseObject,
-  public SetupInterface
+  public SetupInterface,
+  public Restartable
 {
 public:
   Transfer(const std::string & name, InputParameters parameters);

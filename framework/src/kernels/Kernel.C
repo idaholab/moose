@@ -54,6 +54,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     PostprocessorInterface(parameters),
     MaterialPropertyInterface(parameters),
     GeometricSearchInterface(parameters),
+    Restartable(name, parameters, "Kernels"),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _sys(*parameters.get<SystemBase *>("_sys")),

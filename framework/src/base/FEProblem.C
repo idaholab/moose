@@ -194,6 +194,9 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   }
 
   _pps_data.resize(n_threads);
+
+  _restartable_data.resize(n_threads);
+
   _objects_by_name.resize(n_threads);
 
   _indicators.resize(n_threads);
@@ -220,6 +223,11 @@ FEProblem::~FEProblem()
     delete _neighbor_material_data[i];
 
     for (std::map<std::string, Function *>::iterator it = _functions[i].begin(); it != _functions[i].end(); ++it)
+      delete it->second;
+
+    for(std::map<std::string, RestartableDataValue *>::iterator it = _restartable_data[i].begin();
+        it != _restartable_data[i].end();
+        ++it)
       delete it->second;
   }
 
@@ -1743,6 +1751,17 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
       _objects_by_name[tid][name].push_back(mo);
     }
   }
+}
+
+const UserObject &
+FEProblem::getUserObjectBase(const std::string & name)
+{
+  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
+  for (unsigned int i = 0; i < LENGTHOF(types); i++)
+    if (_user_objects(types[i])[0].hasUserObject(name))
+      return *_user_objects(types[i])[0].getUserObjectByName(name);
+
+  mooseError("Unable to find user object with name '" + name + "'");
 }
 
 bool
@@ -3515,6 +3534,17 @@ bool
 FEProblem::isRestarting()
 {
   return _resurrector->isOn();
+}
+
+void
+FEProblem::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
+{
+  std::map<std::string, RestartableDataValue *> & restartable_data = _restartable_data[tid];
+
+  if(restartable_data.find(name) != restartable_data.end())
+    mooseError("Attempted to declare restartable twice with the same name: " << name);
+
+  restartable_data[name] = data;
 }
 
 std::vector<VariableName>

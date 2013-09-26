@@ -12,51 +12,39 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef POSTPROCESSOR_H
-#define POSTPROCESSOR_H
+#ifndef RESTARTABLEDATAIO_H
+#define RESTARTABLEDATAIO_H
+
+#include "Moose.h"
 
 #include <string>
-// MOOSE includes
-#include "InputParameters.h"
-#include "Restartable.h"
+#include <list>
 
-// libMesh
-#include "libmesh/parallel.h"
+class FEProblem;
 
-class Postprocessor;
-
-template<>
-InputParameters validParams<Postprocessor>();
-
-
-class Postprocessor
+/**
+ * Class for doing restart.
+ *
+ * It takes care of writing and reading the restart files.
+ */
+class RestartableDataIO
 {
 public:
-  Postprocessor(const std::string & name, InputParameters parameters);
-
-  virtual ~Postprocessor(){ }
+  RestartableDataIO(FEProblem & fe_problem);
 
   /**
-   * This will get called to actually grab the final value the postprocessor has calculated.
+   * Write out the restartable data.
    */
-  virtual PostprocessorValue getValue() = 0;
+  void writeRestartableData(std::string file_name);
 
   /**
-   * Get the postprocessor output type
-   * @return postprocessor output type
+   * Read the restartable data.
    */
-  Moose::PPSOutputType getOutput() { return _output; }
+  void readRestartableData(std::string file_name);
 
-  /**
-   * Returns the name of the Postprocessor.
-   */
-  std::string PPName() { return _pp_name; }
-
-protected:
-  std::string _pp_name;
-
-  /// If and where is the postprocessor output
-  Moose::PPSOutputType _output;
+private:
+  /// Reference to a FEProblem being restarted
+  FEProblem & _fe_problem;
 };
 
-#endif
+#endif /* RESTARTABLEDATAIO_H */

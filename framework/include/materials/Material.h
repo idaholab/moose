@@ -33,6 +33,7 @@
 #include "Function.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
+#include "Restartable.h"
 
 // libMesh includes
 #include "libmesh/quadrature_gauss.h"
@@ -72,7 +73,8 @@ class Material :
   public TransientInterface,
   public MaterialPropertyInterface,
   public PostprocessorInterface,
-  public DependencyResolverInterface
+  public DependencyResolverInterface,
+  public Restartable
 {
 public:
   Material(const std::string & name, InputParameters parameters);

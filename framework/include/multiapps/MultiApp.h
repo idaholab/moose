@@ -16,6 +16,7 @@
 
 #include "MooseApp.h"
 #include "MooseEnum.h"
+#include "Restartable.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
@@ -35,7 +36,9 @@ InputParameters validParams<MultiApp>();
  * These other MOOSE apps generally represent some "sub-solve" or "embedded-solves"
  * of the overall nonlinear solve.
  */
-class MultiApp : public MooseObject
+class MultiApp :
+  public MooseObject,
+  public Restartable
 {
 public:
   MultiApp(const std::string & name, InputParameters parameters);

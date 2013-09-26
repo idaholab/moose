@@ -17,7 +17,6 @@
 
 #include <vector>
 
-#include "MooseMesh.h"
 #include "VariableWarehouse.h"
 #include "Assembly.h"
 #include "ParallelUniqueId.h"
@@ -36,6 +35,7 @@
 class Factory;
 class MooseApp;
 class MooseVariable;
+class MooseMesh;
 
 /**
  * ///< Type of coordinate system

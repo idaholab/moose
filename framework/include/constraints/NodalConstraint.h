@@ -27,6 +27,7 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
+#include "Restartable.h"
 
 //libMesh includes
 #include "libmesh/libmesh_common.h"
@@ -50,7 +51,8 @@ class NodalConstraint :
   public FunctionInterface,
   public UserObjectInterface,
   public TransientInterface,
-  protected GeometricSearchInterface
+  protected GeometricSearchInterface,
+  public Restartable
 {
 public:
   NodalConstraint(const std::string & name, InputParameters parameters);

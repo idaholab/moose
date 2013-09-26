@@ -20,6 +20,7 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "UserObjectInterface.h"
+#include "Restartable.h"
 
 // libMesh
 #include "libmesh/vector_value.h"
@@ -39,7 +40,8 @@ class Function :
   public SetupInterface,
   public TransientInterface,
   public PostprocessorInterface,
-  public UserObjectInterface
+  public UserObjectInterface,
+  public Restartable
 {
 public:
   Function(const std::string & name, InputParameters parameters);

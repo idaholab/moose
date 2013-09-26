@@ -18,7 +18,7 @@
 #include "Moose.h"
 #include "XDAOutput.h"
 #include "MaterialPropertyIO.h"
-#include "UserObjectIO.h"
+#include "RestartableDataIO.h"
 
 #include <string>
 #include <list>
@@ -54,7 +54,7 @@ public:
 
   void restartStatefulMaterialProps();
 
-  void restartUserData();
+  void restartRestartableData();
 
   /**
    * Set the number of restart file to store
@@ -74,6 +74,7 @@ public:
   void write();
 
 protected:
+
   /// Reference to a FEProblem being restarted
   FEProblem & _fe_problem;
 
@@ -88,13 +89,14 @@ protected:
   XDAOutput _xda;
   /// Stateful material property output
   MaterialPropertyIO _mat;
-  /// User Data IO
-//  UserObjectIO _user_object;
+  /// Restartable Data
+  RestartableDataIO _restartable;
+
   /// list of file names we keep around
   std::list<std::string> _restart_file_names;
 
   static const std::string MAT_PROP_EXT;
-  static const std::string USER_DATA_EXT;
+  static const std::string RESTARTABLE_DATA_EXT;
 };
 
 #endif /* RESURRECTOR_H */

@@ -20,6 +20,7 @@
 #include "BndNode.h"
 #include "BndElement.h"
 #include "MooseTypes.h"
+#include "Restartable.h"
 
 // libMesh
 #include "libmesh/mesh.h"
@@ -63,7 +64,9 @@ public:
  * MooseMesh wraps a libMesh::Mesh object and enhances its capabilities
  * by caching additional data and storing more state.
  */
-class MooseMesh : public MooseObject
+class MooseMesh :
+  public MooseObject,
+  public Restartable
 {
 public:
   /**

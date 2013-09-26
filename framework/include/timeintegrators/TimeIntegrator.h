@@ -17,6 +17,7 @@
 
 #include "MooseObject.h"
 #include "libmesh/numeric_vector.h"
+#include "Restartable.h"
 
 class TimeIntegrator;
 class FEProblem;
@@ -28,7 +29,9 @@ InputParameters validParams<TimeIntegrator>();
 /**
  * Base class for time integrators
  */
-class TimeIntegrator : public MooseObject
+class TimeIntegrator :
+  public MooseObject,
+  public Restartable
 {
 public:
   TimeIntegrator(const std::string & name, InputParameters parameters);

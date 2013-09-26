@@ -50,7 +50,7 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   FunctionInterface(parameters),
   TransientInterface(parameters, name, "node_face_constraints"),
   GeometricSearchInterface(parameters),
-
+  Restartable(name, parameters, "Constraints"),
   _subproblem(*parameters.get<SubProblem *>("_subproblem")),
   _sys(*parameters.get<SystemBase *>("_sys")),
   _tid(parameters.get<THREAD_ID>("_tid")),

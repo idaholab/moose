@@ -12,6 +12,7 @@
 #include "DiffMKernel.h"
 #include "GaussContForcing.h"
 #include "CoefDiffusion.h"
+#include "RestartDiffusion.h"
 #include "Convection.h"
 #include "PolyDiffusion.h"
 #include "PolyConvection.h"
@@ -175,6 +176,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(DiffMKernel);
   registerKernel(GaussContForcing);
   registerKernel(CoefDiffusion);
+  registerKernel(RestartDiffusion);
   registerKernel(Convection);
   registerKernel(PolyDiffusion);
   registerKernel(PolyConvection);

@@ -23,7 +23,6 @@
 #include "DamperWarehouse.h"
 #include "ConstraintWarehouse.h"
 #include "SplitWarehouse.h"
-#include "MoosePreconditioner.h"
 #include "TimeIntegrator.h"
 #include "Predictor.h"
 
@@ -36,6 +35,7 @@
 #include "libmesh/coupling_matrix.h"
 
 class FEProblem;
+class MoosePreconditioner;
 
 /**
  * Nonlinear system to be solved

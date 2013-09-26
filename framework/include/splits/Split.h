@@ -17,8 +17,12 @@
 #include <vector>
 #include "libmesh/petsc_macro.h"
 #include "FEProblem.h"
+#include "Restartable.h"
 
-class Split : public MooseObject {
+class Split :
+  public MooseObject,
+  public Restartable
+{
  public:
   Split(const std::string& name, InputParameters params);
   virtual void setup(const std::string& prefix = "-");

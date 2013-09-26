@@ -40,6 +40,7 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     TransientInterface(parameters, name, "bcs"),
     PostprocessorInterface(parameters),
     GeometricSearchInterface(parameters),
+    Restartable(name, parameters, "BCs"),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _sys(*parameters.get<SystemBase *>("_sys")),

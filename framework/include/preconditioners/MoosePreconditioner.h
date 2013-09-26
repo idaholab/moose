@@ -16,6 +16,8 @@
 #define MOOSEPRECONDITIONER_H
 
 #include "MooseObject.h"
+#include "Restartable.h"
+
 // libMesh include
 #include "libmesh/numeric_vector.h"
 
@@ -35,7 +37,9 @@ InputParameters validParams<MoosePreconditioner>();
 /**
  * Base class for MOOSE preconditioners
  */
-class MoosePreconditioner : public MooseObject
+class MoosePreconditioner :
+  public MooseObject,
+  public Restartable
 {
 public:
   MoosePreconditioner(const std::string & name, InputParameters params);

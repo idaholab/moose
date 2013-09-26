@@ -28,6 +28,7 @@
 #include "MooseMesh.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
+#include "Restartable.h"
 
 //forward declarations
 class Problem;
@@ -55,7 +56,8 @@ class AuxKernel :
   public MaterialPropertyInterface,
   public PostprocessorInterface,
   public DependencyResolverInterface,
-  protected GeometricSearchInterface
+  protected GeometricSearchInterface,
+  public Restartable
 {
 public:
   AuxKernel(const std::string & name, InputParameters parameters);

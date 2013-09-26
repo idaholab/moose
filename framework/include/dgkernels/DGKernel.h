@@ -26,6 +26,7 @@
 #include "MooseVariableInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 #include "Assembly.h"
+#include "Restartable.h"
 
 class MooseMesh;
 class Problem;
@@ -49,7 +50,8 @@ class DGKernel :
   public FunctionInterface,
   public UserObjectInterface,
   public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
-  protected TwoMaterialPropertyInterface
+  protected TwoMaterialPropertyInterface,
+  public Restartable
 {
 public:
 

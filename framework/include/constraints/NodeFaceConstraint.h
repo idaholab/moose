@@ -28,6 +28,7 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
+#include "Restartable.h"
 
 //libMesh includes
 #include "libmesh/libmesh_common.h"
@@ -59,7 +60,8 @@ class NodeFaceConstraint :
   public CoupleableMooseVariableDependencyIntermediateInterface,
   public FunctionInterface,
   public TransientInterface,
-  private GeometricSearchInterface
+  private GeometricSearchInterface,
+  public Restartable
 {
 public:
   NodeFaceConstraint(const std::string & name, InputParameters parameters);

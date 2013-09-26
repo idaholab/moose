@@ -18,6 +18,7 @@
 #include "Assembly.h"
 #include "NonlinearSystem.h"
 #include "Assembly.h"
+#include "MooseMesh.h"
 
 // libMesh
 #include "libmesh/numeric_vector.h"

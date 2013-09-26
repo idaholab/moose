@@ -21,6 +21,8 @@
 #include "MaterialPropertyInterface.h"
 #include "ParallelUniqueId.h"
 #include "SubProblem.h"
+#include "Restartable.h"
+#include "MooseMesh.h"
 
 //libMesh includes
 #include "libmesh/libmesh_common.h"
@@ -38,7 +40,8 @@ InputParameters validParams<UserObject>();
 class UserObject :
   public MooseObject,
   public SetupInterface,
-  public MaterialPropertyInterface
+  public MaterialPropertyInterface,
+  public Restartable
 {
 public:
   UserObject(const std::string & name, InputParameters params);

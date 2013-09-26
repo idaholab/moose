@@ -29,6 +29,7 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
+#include "Restartable.h"
 
 // libMesh
 #include "libmesh/fe.h"
@@ -52,7 +53,8 @@ class Kernel :
   public TransientInterface,
   public PostprocessorInterface,
   public MaterialPropertyInterface,
-  protected GeometricSearchInterface
+  protected GeometricSearchInterface,
+  public Restartable
 {
 public:
   Kernel(const std::string & name, InputParameters parameters);
