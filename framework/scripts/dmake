@@ -242,7 +242,7 @@ class Farm(object):
       frmt = '%25s: '
 
       # Print processors
-      output.append(frmt % 'Number of processors' + str(jobs))
+      output.append(frmt % 'Processors' + str(jobs))
 
       # Add make command
       make = frmt % 'Make Command' + 'make -j ' + str(jobs)
@@ -527,9 +527,10 @@ def parseArguments(args=None):
   grp2.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
   grp2.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
   grp2.add_argument('--jratio', type=float, default=3, help='Remote jobs ratio utilize for computing localhost (default: %(default)d)')
+  grp2.add_argument('--benchmark','-b', action='store_true', help='Run \'make cleanall\' and \'dmake\' in moose_test directory') 
 
   # Allow flags to be run together
-  parser.parse_args('-mqvdnlr'.split())
+  parser.parse_args('-mqvdnlrb'.split())
 
   # Parse the input and return the options
   (options, other_args) = parser.parse_known_args()
@@ -549,9 +550,22 @@ if __name__ == "__main__":
   # Extract the options from the command line
   (options, make_args) = parseArguments()
 
+  # Run a benchmark in moose_test
+  # \todo make this test your environment for moose_test directory and return an error
+  if options.benchmark:
+    pth = os.path.join(os.environ['HOME'], 'projects', 'trunk', 'moose_test')
+    if not os.path.exists(pth):
+      print 'Error: The path the moose_test was not found, benchmark option failed'
+      sys.exit()
+
+    cwd = os.getcwd()    
+    os.chdir(os.path.join(os.environ['HOME'], 'projects', 'trunk', 'moose_test'))
+    sub = subprocess.Popen(['make', 'cleanall'])
+    sub.wait()
+
   # Create the compile farm object
   farm = Farm(options, make_args)
-
+ 
   # Run local build if desired, short-circut the rest of the script for speed
   if options.local:
     farm.local()
@@ -571,3 +585,7 @@ if __name__ == "__main__":
   # Run a distributed compile
   else:
     farm.distribute()
+
+  # Return to the orginal directory if running benchmark
+  if options.benchmark:
+    os.chdir(cwd)
