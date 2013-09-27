@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Load the required modules
-import os, sys, subprocess, re, urllib2, socket, argparse, time, multiprocessing
+import os, sys, subprocess, re, urllib2, socket, argparse, time, multiprocessing, platform
 from random import shuffle
 
 ## User class for defining machine characteristics
@@ -21,12 +21,20 @@ class Machine(object):
     # Test if the machine is available on the network (localhost must be available)
     if self.name == 'localhost':
       self.available = True
+
     else:
       self.available = self._isAvailable()
 
     # Attempt to get the host ip address
     try:
-      self.address = socket.gethostbyname(self.hostname)
+      # Get the IP address, if on linux you need to get the IP address in special way to
+      # avoid getting 127.0.0.1 for the local machine
+      if self.name == 'localhost' and  platform.system().lower() == 'linux':
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('inl.gov', 0))
+        self.address = s.getsockname()[0]
+      else:
+        self.address = socket.gethostbyname(self.hostname)
     except socket.gaierror:
       self.available = False
 
@@ -91,18 +99,20 @@ class Farm(object):
     self._dmake_file = os.path.join(os.getenv('HOME'), '.dmake')
     self._dmake_hosts = os.path.join(os.getenv('HOME'), '.dmake_hosts')
 
+    # Set the OS type
+    self._system = platform.system().lower()
+
     # Extract the options from the command line
     self._options = options
     self._make_args = make_args
 
     # Create the master Machine (localhost)
-    hostname = socket.gethostname()
+    hostname = socket.getfqdn()
     jobs = str(multiprocessing.cpu_count())
     self._master = Machine([hostname, '0', jobs, jobs, '', 'localhost'])
 
     # Determine the network
-    #if socket.gethostbyname(socket.gethostname()).find('204') != -1:
-    if self._master.address.find('204') != -1:
+    if self._master.address.find('204.') != -1:
       self._network = 'fn'
     else:
       self._network = 'inl'
@@ -116,7 +126,7 @@ class Farm(object):
   def local(self):
 
     # Set the DISTCC_HOSTS environment
-    distcc_hosts = 'localhost/' + self._master.threads
+    distcc_hosts = 'localhost/' + str(self._master.threads)
 
     # Get the number of jobs
     if self._options.jobs:
@@ -441,9 +451,12 @@ class Farm(object):
     # Check if initialized
     if len(self._slaves) > 0:
       return
-
+    
+    # Change file based on OS
+    filename = 'https://hpcsc.inl.gov/ssl/HERD/distcc_list_users-' + self._system
+    
     # Extract the list of users from the HPCSC website
-    fid = urllib2.urlopen('https://hpcsc.inl.gov/ssl/HERD/distcc_list_users')
+    fid = urllib2.urlopen(filename)
     lines = fid.read().split('\n')
     fid.close()
 
@@ -468,11 +481,11 @@ class Farm(object):
         # Build a Machine object and populate the master/slave attributes
         machine = Machine(parts)
 
-        # This machine
-        if machine.hostname == self._master.hostname:
+        # Skip this machine
+        if machine.hostname == self._master.hostname or machine.address == self._master.address:
           continue
 
-        # Skip if the use field is zero
+        # Store the machine as offline if it is unavilable or that use column is zero
         elif machine.use == 0 or not machine.available:
           self._down.append(machine)
 
