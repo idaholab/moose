@@ -45,6 +45,7 @@
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
+    execute_on = timestep
   [../]
 []
 
