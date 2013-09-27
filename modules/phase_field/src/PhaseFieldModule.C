@@ -1,6 +1,7 @@
 #include "PhaseFieldModule.h"
 #include "Factory.h"
 #include "ActionFactory.h"
+#include "Parser.h"
 
 // phase_field
 #include "MatDiffusion.h"
@@ -21,6 +22,22 @@
 #include "NodalFloodCount.h"
 #include "NodalFloodCountAux.h"
 #include "NodalVolumeFraction.h"
+#include "BndsCalcAux.h"
+#include "ACGrGrPoly.h"
+#include "GBEvolution.h"
+#include "HexPolycrystalIC.h"
+#include "PolycrystalRandomIC.h"
+#include "PolycrystalReducedIC.h"
+#include "ThumbIC.h"
+#include "Tricrystal2CircleGrainsIC.h"
+#include "PolycrystalVariablesAction.h"
+#include "PolycrystalKernelAction.h"
+#include "BicrystalCircleGrainICAction.h"
+#include "BicrystalBoundingBoxICAction.h"
+#include "Tricrystal2CircleGrainsICAction.h"
+#include "PolycrystalHexGrainICAction.h"
+#include "PolycrystalVoronoiICAction.h"
+#include "PolycrystalRandomICAction.h"
 
 void
 Elk::PhaseField::registerObjects(Factory & factory)
@@ -33,6 +50,7 @@ Elk::PhaseField::registerObjects(Factory & factory)
   registerKernel(SplitCHWRes);
   registerKernel(SplitCHMath);
   registerKernel(CoupledImplicitEuler);
+  registerKernel(ACGrGrPoly);
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
   registerInitialCondition(RndSmoothCircleIC);
@@ -40,8 +58,39 @@ Elk::PhaseField::registerObjects(Factory & factory)
   registerInitialCondition(LatticeSmoothCircleIC);
   registerInitialCondition(SpecifiedSmoothCircleIC);
   registerInitialCondition(RndBoundingBoxIC);
+  registerInitialCondition(HexPolycrystalIC);
+  registerInitialCondition(PolycrystalRandomIC);
+  registerInitialCondition(PolycrystalReducedIC);
+  registerInitialCondition(ThumbIC);
+  registerInitialCondition(Tricrystal2CircleGrainsIC);
   registerMaterial(PFMobility);
+  registerMaterial(GBEvolution);
   registerUserObject(NodalFloodCount);
   registerAux(NodalFloodCountAux);
+  registerAux(BndsCalcAux);
   registerUserObject(NodalVolumeFraction);
 }
+
+void
+Elk::PhaseField::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  syntax.registerActionSyntax("PolycrystalKernelAction", "Kernels/PolycrystalKernel");
+  syntax.registerActionSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
+  syntax.registerActionSyntax("EmptyAction", "ICs/PolycrystalICs");  // placeholder
+  syntax.registerActionSyntax("BicrystalCircleGrainICAction", "ICs/PolycrystalICs/BicrystalCircleGrainIC");
+  syntax.registerActionSyntax("BicrystalBoundingBoxICAction", "ICs/PolycrystalICs/BicrystalBoundingBoxIC");
+  syntax.registerActionSyntax("Tricrystal2CircleGrainsICAction", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
+  syntax.registerActionSyntax("PolycrystalHexGrainICAction", "ICs/PolycrystalICs/PolycrystalHexGrainIC");
+  syntax.registerActionSyntax("PolycrystalVoronoiICAction", "ICs/PolycrystalICs/PolycrystalVoronoiIC");
+  syntax.registerActionSyntax("PolycrystalRandomICAction", "ICs/PolycrystalICs/PolycrystalRandomIC");
+  
+  registerAction(PolycrystalKernelAction, "add_kernel");
+  registerAction(PolycrystalVariablesAction, "add_variable");
+  registerAction(BicrystalCircleGrainICAction, "add_ic");
+  registerAction(BicrystalBoundingBoxICAction, "add_ic");
+  registerAction(Tricrystal2CircleGrainsICAction, "add_ic");
+  registerAction(PolycrystalHexGrainICAction, "add_ic");
+  registerAction(PolycrystalVoronoiICAction, "add_ic");
+  registerAction(PolycrystalRandomICAction, "add_ic");
+}
+

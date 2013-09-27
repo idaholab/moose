@@ -64,6 +64,7 @@ ElkApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   Elk::SolidMechanics::associateSyntax(syntax, action_factory);
   Elk::TensorMechanics::associateSyntax(syntax, action_factory);
+  Elk::PhaseField::associateSyntax(syntax, action_factory);
   Elk::Contact::associateSyntax(syntax, action_factory);
   Elk::HeatConduction::associateSyntax(syntax, action_factory);
   Elk::ChemicalReactions::associateSyntax(syntax, action_factory);
