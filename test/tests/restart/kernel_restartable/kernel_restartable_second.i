@@ -42,7 +42,7 @@
   type = Transient
   restart_file_base = kernel_restartable_out_restart_0005
   num_steps = 10
-  dt = 1e-4
+  dt = 1e-2
   solve_type = PJFNK
   print_linear_residuals = true
   petsc_options_iname = '-pc_type -pc_hypre_type'

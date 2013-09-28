@@ -41,7 +41,7 @@
   # Preconditioned JFNK (default)
   type = Transient
   num_steps = 5
-  dt = 1e-4
+  dt = 1e-2
   solve_type = PJFNK
   print_linear_residuals = true
   petsc_options_iname = '-pc_type -pc_hypre_type'
