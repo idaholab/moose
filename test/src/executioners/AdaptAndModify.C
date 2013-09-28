@@ -31,8 +31,26 @@ AdaptAndModify::AdaptAndModify(const std::string & name, InputParameters paramet
 {}
 
 void
+AdaptAndModify::incrementStepOrReject()
+{
+  if(_last_solve_converged)
+  {
+    _time_old = _time;
+    _t_step++;
+
+    _problem.copyOldSolutions();
+  }
+  else
+    _time_stepper->rejectStep();
+
+  _first = false;
+}
+
+void
 AdaptAndModify::endStep()
 {
+  _last_solve_converged = lastSolveConverged();
+
   if (lastSolveConverged())
   {
     for(unsigned int i=0; i<_adapt_cycles; i++)
@@ -54,14 +72,5 @@ AdaptAndModify::endStep()
     // if _reset_dt is true, force the output no matter what
     _problem.output(_reset_dt);
     _problem.outputPostprocessors(_reset_dt);
-
-    _time_old = _time;
-    _t_step++;
-
-    _problem.copyOldSolutions();
-  }
-  else
-  {
-    _time_stepper->rejectStep();
   }
 }

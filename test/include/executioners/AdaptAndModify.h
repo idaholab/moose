@@ -29,6 +29,8 @@ public:
 
   AdaptAndModify(const std::string & name, InputParameters parameters);
 
+  virtual void incrementStepOrReject();
+
   virtual void endStep();
 
 protected:
