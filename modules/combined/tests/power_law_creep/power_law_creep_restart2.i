@@ -259,7 +259,7 @@
   l_tol = 1e-5
   start_time = 0.6
   end_time = 1.0
-  num_steps = 6
+  num_steps = 12
   dt = 1.e-1
   restart_file_base = power_law_creep_restart1_out_restart_0006
 []
