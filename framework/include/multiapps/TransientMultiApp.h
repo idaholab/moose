@@ -96,6 +96,9 @@ private:
   bool _catch_up;
   Real _max_catch_up_steps;
 
+  /// Is it our first time through the execution loop?
+  bool & _first;
+
   /// The variables that have been transferred to.  Used when doing transfer interpolation.  This will be cleared after each solve.
   std::vector<std::string> _transferred_vars;
 

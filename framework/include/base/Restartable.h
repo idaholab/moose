@@ -88,6 +88,9 @@ template<typename T>
 T &
 Restartable::declareRestartableData(std::string data_name)
 {
+  if(!_restartable_feproblem)
+    mooseError("No valid FEProblem found for " << _restartable_system_name << "/" << _restartable_name);
+
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
   RestartableData<T> * data_ptr = new RestartableData<T>(full_name);
 
@@ -100,6 +103,9 @@ template<typename T>
 T &
 Restartable::declareRestartableData(std::string data_name, const T & init_value)
 {
+  if(!_restartable_feproblem)
+    mooseError("No valid FEProblem found for " << _restartable_system_name << "/" << _restartable_name);
+
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
   RestartableData<T> * data_ptr = new RestartableData<T>(full_name);
 

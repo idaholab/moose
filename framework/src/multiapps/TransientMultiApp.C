@@ -59,7 +59,8 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     _tolerate_failure(getParam<bool>("tolerate_failure")),
     _failures(0),
     _catch_up(getParam<bool>("catch_up")),
-    _max_catch_up_steps(getParam<Real>("max_catch_up_steps"))
+    _max_catch_up_steps(getParam<Real>("max_catch_up_steps")),
+    _first(declareRestartableData<bool>("first", true))
 {
   // Transfer interpolation only makes sense for sub-cycling solves
   if(_interpolate_transfers && !_sub_cycling)
@@ -179,8 +180,15 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
       bool at_steady = false;
 
       // Now do all of the solves we need
-      while(!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time)
+      while(true)
       {
+        if(_first != true)
+          ex->incrementStepOrReject();
+        _first = false;
+
+        if(!(!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time))
+          break;
+
         ex->computeDT();
 
         if(_interpolate_transfers)
@@ -272,6 +280,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
     else
     {
       std::cout<<"Solving Normal Step!"<<std::endl;
+      if(_first != true)
+        ex->incrementStepOrReject();
 
       ex->takeStep(dt);
       ex->endStep();
@@ -295,6 +305,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
           while(!caught_up && catch_up_step < _max_catch_up_steps)
           {
             std::cerr<<"Solving " << _name << "catch up step " << catch_up_step <<std::endl;
+            ex->incrementStepOrReject();
 
             ex->computeDT();
             ex->takeStep(catch_up_dt); // Cut the timestep in half to try two half-step solves
@@ -323,6 +334,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
       }
     }
   }
+
+  _first = false;
 
   // Swap back
   Moose::swapLibMeshComm(swapped);

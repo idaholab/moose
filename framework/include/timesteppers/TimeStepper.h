@@ -121,9 +121,15 @@ protected:
   /// Whether or not the previous solve converged.
   bool _converged;
 
+  /// If true then the next dt will be computed by computeInitialDT()
+  bool _reset_dt;
+
+  /// True if dt has been reset
+  bool _has_reset_dt;
+
 private:
   /// Size of the current time step as computed by the Stepper.  Note that the actual dt that was taken might be smaller if the Executioner constrained it.
-  Real _current_dt;
+  Real & _current_dt;
 };
 
 #endif /* TIMESTEPPER_H */

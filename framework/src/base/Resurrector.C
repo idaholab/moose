@@ -48,7 +48,6 @@ Resurrector::restartFromFile()
   MooseUtils::checkFileReadable(file_name);
   _fe_problem._eq.read(file_name, libMeshEnums::READ, EquationSystems::READ_DATA);
   _fe_problem._nl.update();
-  _restartable.readRestartableData(_restart_file_base + RESTARTABLE_DATA_EXT);
 }
 
 void
@@ -62,8 +61,7 @@ Resurrector::restartStatefulMaterialProps()
 void
 Resurrector::restartRestartableData()
 {
-  std::string file_name(_restart_file_base + RESTARTABLE_DATA_EXT);
-  MooseUtils::checkFileReadable(file_name);
+  _restartable.readRestartableData(_restart_file_base + RESTARTABLE_DATA_EXT);
 }
 
 

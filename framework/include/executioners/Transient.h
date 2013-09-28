@@ -91,6 +91,12 @@ public:
   virtual void preExecute();
 
   virtual void computeDT();
+
+  /**
+   * This is where the solve step is actually incremented.
+   */
+  virtual void incrementStepOrReject();
+
   virtual void endStep();
 
   /**
@@ -193,6 +199,12 @@ protected:
   Real & _prev_dt;
   bool & _reset_dt;
 
+  /// Is it our first time through the execution loop?
+  bool & _first;
+
+  /// Whether or not the last solve converged
+  bool & _last_solve_converged;
+
   Real _end_time;
   Real _dtmin;
   Real _dtmax;
@@ -218,7 +230,7 @@ protected:
   Real _time_interval_output_interval;
   Real _start_time;
   Real _timestep_tolerance;
-  Real _target_time;
+  Real & _target_time;
   bool _use_multiapp_dt;
 
   bool _allow_output;

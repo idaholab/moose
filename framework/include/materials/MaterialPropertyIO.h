@@ -62,6 +62,14 @@ void materialPropertyStore(std::ostream & stream, const T & v)
   stream.write((const char *) &v, sizeof(v));
 }
 
+template<>
+inline
+void materialPropertyStore(std::ostream & stream, const Real & v)
+{
+  stream.write((char *) &v, sizeof(v));
+//  std::cout<<"value: "<<v<<std::endl;
+}
+
 template<typename T>
 inline void
 materialPropertyStore(std::ostream & stream, const std::vector<T> & v)
@@ -119,6 +127,14 @@ template<typename T>
 void materialPropertyLoad(std::istream & stream, T & v)
 {
   stream.read((char *) &v, sizeof(v));
+}
+
+template<>
+inline void
+materialPropertyLoad(std::istream & stream, Real & v)
+{
+  stream.read((char *) &v, sizeof(v));
+//  std::cout<<"value: "<<v<<std::endl;
 }
 
 template<typename T>

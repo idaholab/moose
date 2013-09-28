@@ -48,6 +48,7 @@ InputParameters validParams<Transient>()
   params.addParam<Real>("dt",              1.,     "The timestep size between solves");
   params.addParam<Real>("dtmin",           2.0e-14,    "The minimum timestep size in an adaptive run");
   params.addParam<Real>("dtmax",           1.0e30, "The maximum timestep size in an adaptive run");
+  params.addParam<bool>("reset_dt", false, "Use when restarting a calculation to force a change in dt.");
   params.addParam<Real>("num_steps",       std::numeric_limits<Real>::max(),     "The number of timesteps in a transient run");
   params.addParam<int> ("n_startup_steps", 0,      "The number of timesteps during startup");
   params.addParam<bool>("trans_ss_check",  false,  "Whether or not to check for steady state conditions");
@@ -86,6 +87,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _unconstrained_dt_old(declareRestartableData<Real>("unconstrained_dt_old", 0)),
     _prev_dt(declareRestartableData<Real>("prev_dt", -1)),
     _reset_dt(declareRestartableData<bool>("reset_dt", false)),
+    _first(declareRestartableData<bool>("first", true)),
+    _last_solve_converged(declareRestartableData<bool>("last_solve_converged", true)),
     _end_time(getParam<Real>("end_time")),
     _dtmin(getParam<Real>("dtmin")),
     _dtmax(getParam<Real>("dtmax")),
@@ -101,7 +104,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _time_interval(declareRestartableData<bool>("time_interval", false)),
     _start_time(getParam<Real>("start_time")),
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
-    _target_time(-1),
+    _target_time(declareRestartableData<Real>("target_time", -1)),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
     _allow_output(true)
 {
@@ -154,6 +157,7 @@ Transient::init()
     pars.set<FEProblem *>("_fe_problem") = &_problem;
     pars.set<Transient *>("_executioner") = this;
     pars.set<Real>("dt") = getParam<Real>("dt");
+    pars.set<bool>("reset_dt") = getParam<bool>("reset_dt");
     _time_stepper = static_cast<TimeStepper *>(_app.getFactory().create("ConstantDT", "TimeStepper", pars));
   }
 
@@ -189,12 +193,21 @@ Transient::execute()
   _problem.copyOldSolutions();
 
   // Start time loop...
-  while (keepGoing())
+  while (true)
   {
+    if(_first != true)
+      incrementStepOrReject();
+
+    _first = false;
+
+    if(!keepGoing())
+      break;
+
     computeDT();
     takeStep();
     endStep();
   }
+
 
   postExecute();
   _time_stepper->postExecute();
@@ -204,6 +217,26 @@ void
 Transient::computeDT()
 {
   _time_stepper->computeStep(); // This is actually when DT gets computed
+}
+
+void
+Transient::incrementStepOrReject()
+{
+  if(_last_solve_converged)
+  {
+#ifdef LIBMESH_ENABLE_AMR
+    if (_problem.adaptivity().isOn())
+      _problem.adaptMesh();
+#endif
+    _time_old = _time;
+    _t_step++;
+
+    _problem.copyOldSolutions();
+  }
+  else
+    _time_stepper->rejectStep();
+
+  _first = false;
 }
 
 void
@@ -299,7 +332,8 @@ Transient::takeStep(Real input_dt)
 void
 Transient::endStep()
 {
-  if (lastSolveConverged())
+  _last_solve_converged = lastSolveConverged();
+  if (_last_solve_converged)
   {
     // Compute the Error Indicators and Markers
     _problem.computeIndicatorsAndMarkers();
@@ -325,21 +359,6 @@ Transient::endStep()
         _problem.outputPostprocessors(_reset_dt);
       }
     }
-#ifdef LIBMESH_ENABLE_AMR
-    if (_problem.adaptivity().isOn())
-    {
-      _problem.adaptMesh();
-    }
-#endif
-
-    _time_old = _time;
-    _t_step++;
-
-    _problem.copyOldSolutions();
-  }
-  else
-  {
-    _time_stepper->rejectStep();
   }
 }
 

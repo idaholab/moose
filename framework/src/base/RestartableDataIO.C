@@ -92,7 +92,15 @@ RestartableDataIO::writeRestartableData(std::string base_file_name)
           for(std::map<std::string, RestartableDataValue *>::iterator it = restartable_data.begin();
               it != restartable_data.end();
               ++it)
-            it->second->store(data_blk);
+          {
+            std::ostringstream data;
+            it->second->store(data);
+
+            // Store the size of the data then the data
+            unsigned int data_size = data.tellp();
+            data_blk.write((const char *) &data_size, sizeof(data_size));
+            data_blk << data.str();
+          }
 
           // Write out this proc's block size
           unsigned int data_blk_size = data_blk.tellp();
@@ -116,6 +124,8 @@ RestartableDataIO::readRestartableData(std::string base_file_name)
 {
   unsigned int n_threads = libMesh::n_threads();
   unsigned int n_procs = libMesh::n_processors();
+
+  std::vector<std::string> ignored_data;
 
   for(unsigned int tid=0; tid<n_threads; tid++)
   {
@@ -199,13 +209,20 @@ RestartableDataIO::readRestartableData(std::string base_file_name)
           {
             std::string current_name = data_names[i];
 
+            unsigned int data_size = 0;
+            in.read((char *) &data_size, sizeof(data_size));
+
             if(restartable_data.find(current_name) != restartable_data.end()) // Only restore values if they're currently being used
             {
               RestartableDataValue * current_data = restartable_data[current_name];
               current_data->load(in);
             }
             else
-              mooseWarning("Restartable data " << current_name << " found in restart file but is being ignored.");
+            {
+              // Skip this piece of data
+              in.seekg(data_size, std::ios_base::cur);
+              ignored_data.push_back(current_name);
+            }
           }
         }
         else // Skip this block
@@ -216,5 +233,15 @@ RestartableDataIO::readRestartableData(std::string base_file_name)
 
       in.close();
     }
+  }
+
+  if(ignored_data.size())
+  {
+    std::ostringstream names;
+
+    for(unsigned int i=0; i<ignored_data.size(); i++)
+      names << ignored_data[i] << "\n";
+
+    mooseWarning("The following RestorableData was found in restart file but is being ignored:\n" << names.str());
   }
 }

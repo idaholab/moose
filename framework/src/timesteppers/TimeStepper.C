@@ -22,6 +22,7 @@ InputParameters validParams<TimeStepper>()
   InputParameters params = validParams<MooseObject>();
 
   params.addPrivateParam<std::string>("built_by_action", "setup_time_stepper");
+  params.addParam<bool>("reset_dt", false, "Use when restarting a calculation to force a change in dt.");
   return params;
 }
 
@@ -37,7 +38,9 @@ TimeStepper::TimeStepper(const std::string & name, InputParameters parameters) :
     _dt_min(_executioner.dtMin()),
     _dt_max(_executioner.dtMax()),
     _converged(true),
-    _current_dt(1.0)
+    _reset_dt(getParam<bool>("reset_dt")),
+    _has_reset_dt(false),
+    _current_dt(declareRestartableData("current_dt",1.0))
 {
 }
 
@@ -53,8 +56,10 @@ TimeStepper::init()
 void
 TimeStepper::computeStep()
 {
-  if (_t_step < 2)
+  if (_t_step < 2 || (_reset_dt && !_has_reset_dt))
   {
+    _has_reset_dt = true;
+
     if (converged())
       _current_dt = computeInitialDT();
     else

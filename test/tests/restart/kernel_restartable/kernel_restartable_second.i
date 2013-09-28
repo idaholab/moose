@@ -41,7 +41,7 @@
   # Preconditioned JFNK (default)
   type = Transient
   restart_file_base = kernel_restartable_out_restart_0005
-  num_steps = 5
+  num_steps = 10
   dt = 1e-4
   solve_type = PJFNK
   print_linear_residuals = true

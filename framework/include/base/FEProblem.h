@@ -36,6 +36,7 @@
 #include "Resurrector.h"
 #include "UserObjectWarehouse.h"
 #include "NonlinearSystem.h"
+#include "Restartable.h"
 
 class DisplacedProblem;
 class OutputProblem;
@@ -91,7 +92,8 @@ enum MooseLinearConvergenceReason
  *
  */
 class FEProblem :
-  public SubProblem
+  public SubProblem,
+  public Restartable
 {
 public:
   FEProblem(const std::string & name, InputParameters parameters);
@@ -673,6 +675,9 @@ public:
   void setConstJacobian(bool state) { _const_jacobian = state; }
 
 protected:
+  /// Where the restartable data is held (indexed on tid)
+  std::vector<std::map<std::string, RestartableDataValue *> > _restartable_data;
+
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;
@@ -686,7 +691,7 @@ protected:
   Real & _time_old;
   int & _t_step;
   Real & _dt;
-  Real _dt_old;
+  Real & _dt_old;
 
   /// Objects by names, indexing: [thread][name]->array of moose objects with name 'name'
   std::vector<std::map<std::string, std::vector<MooseObject *> > > _objects_by_name;
@@ -818,9 +823,6 @@ protected:
 
   /// Object responsible for restart (read/write)
   Resurrector * _resurrector;
-
-  /// Where the restartable data is held (indexed on tid)
-  std::vector<std::map<std::string, RestartableDataValue *> > _restartable_data;
 
 //  PerfLog _solve_only_perf_log;                         ///< Only times the solve
   /// Determines if the setup log is printed before the first time step

@@ -83,8 +83,17 @@ InputParameters validParams<FEProblem>()
   return params;
 }
 
+/// Inject this object's self into it's own parameters
+InputParameters & injectFEProblem(FEProblem * fe_problem, InputParameters & parameters)
+{
+  parameters.set<FEProblem *>("_fe_problem") = fe_problem;
+  return parameters;
+}
+
 FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     SubProblem(name, parameters),
+    Restartable(name, injectFEProblem(this, parameters), "FEProblem"),
+    _restartable_data(libMesh::n_threads()),
     _mesh(*parameters.get<MooseMesh *>("mesh")),
     _eq(_mesh),
     _initialized(false),
@@ -92,10 +101,11 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _solve(getParam<bool>("solve")),
 
     _transient(false),
-    _time(_eq.parameters.set<Real>("time")),
-    _time_old(_eq.parameters.set<Real>("time_old")),
-    _t_step(_eq.parameters.set<int>("t_step")),
-    _dt(_eq.parameters.set<Real>("dt")),
+    _time(declareRestartableData<Real>("time")),
+    _time_old(declareRestartableData<Real>("time_old")),
+    _t_step(declareRestartableData<int>("t_step")),
+    _dt(declareRestartableData<Real>("dt")),
+    _dt_old(declareRestartableData<Real>("dt_old")),
 
     _nl(*this, name_sys("nl", _n)),
     _aux(*this, name_sys("aux", _n)),
@@ -194,8 +204,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   }
 
   _pps_data.resize(n_threads);
-
-  _restartable_data.resize(n_threads);
 
   _objects_by_name.resize(n_threads);
 
@@ -488,6 +496,9 @@ void FEProblem::initialSetup()
       Threads::parallel_reduce(elem_range, cmt);
     }
   }
+
+  if(isRestarting())
+    _resurrector->restartRestartableData();
 }
 
 void FEProblem::timestepSetup()
