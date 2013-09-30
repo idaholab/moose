@@ -33,5 +33,6 @@
     exodiff = plenum_pressure_refab_out.e
     exodiff_opts = -TM
     min_parallel = 2
+    skip = "Hales Can You Take a Look At This?"
   [../]
 []
