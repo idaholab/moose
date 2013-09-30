@@ -230,7 +230,7 @@ inline void
 MaterialProperty<T>::store(std::ostream & stream)
 {
   for (unsigned int i = 0; i < _value.size(); i++)
-    materialPropertyStore<T>(stream, _value[i]);
+    dataStore<T>(stream, _value[i]);
 }
 
 template<typename T>
@@ -238,7 +238,7 @@ inline void
 MaterialProperty<T>::load(std::istream & stream)
 {
   for (unsigned int i = 0; i < _value.size(); i++)
-    materialPropertyLoad<T>(stream, _value[i]);
+    dataLoad<T>(stream, _value[i]);
 }
 
 

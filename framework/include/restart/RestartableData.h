@@ -139,14 +139,14 @@ template<typename T>
 inline void
 RestartableData<T>::store(std::ostream & stream)
 {
-  materialPropertyStore<T>(stream, *_value_ptr);
+  dataStore<T>(stream, *_value_ptr);
 }
 
 template<typename T>
 inline void
 RestartableData<T>::load(std::istream & stream)
 {
-  materialPropertyLoad<T>(stream, *_value_ptr);
+  dataLoad<T>(stream, *_value_ptr);
 }
 
 /**
