@@ -23,7 +23,7 @@ MaterialProperty<SymmTensor>::init (int size)
 }
 
 template<>
-void materialPropertyStore(std::ostream & stream, const SymmTensor & v)
+void dataStore(std::ostream & stream, const SymmTensor & v)
 {
   Real r;
   r = v.xx(); stream.write((const char *) &r, sizeof(r));
@@ -35,7 +35,7 @@ void materialPropertyStore(std::ostream & stream, const SymmTensor & v)
 }
 
 template<>
-void materialPropertyLoad(std::istream & stream, SymmTensor & v)
+void dataLoad(std::istream & stream, SymmTensor & v)
 {
   Real r = 0.;
   stream.read((char *) &r, sizeof(r)); v.xx(r);

@@ -3,6 +3,8 @@
 
 #include "ColumnMajorMatrix.h"
 #include "MaterialProperty.h"
+#include "DataIO.h"
+
 #include <cmath>
 #include "libmesh/libmesh.h"
 #include "libmesh/point.h"
@@ -563,9 +565,9 @@ PropertyValue *
 MaterialProperty<SymmTensor>::init (int size);
 
 template<>
-void materialPropertyStore(std::ostream & stream, const SymmTensor & v);
+void dataStore(std::ostream & stream, const SymmTensor & v);
 
 template<>
-void materialPropertyLoad(std::istream & stream, SymmTensor & v);
+void dataLoad(std::istream & stream, SymmTensor & v);
 
 #endif // SYMMTENSOR_H
