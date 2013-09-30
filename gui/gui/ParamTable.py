@@ -58,6 +58,27 @@ class FileOpenWidget(QtGui.QPushButton):
       else:
         table_value_item.setText(str(table_value_item.text()).strip("'") + ' ' + file_name)
 
+class FileNoExtensionOpenWidget(QtGui.QPushButton):
+  def __init__(self, table_widget, row, is_vector_type):
+    self.table_widget = table_widget
+    self.row = row
+    self.is_vector_type = is_vector_type
+    QtGui.QPushButton.__init__(self,'Find File')
+    QtCore.QObject.connect(self, QtCore.SIGNAL("clicked()"), self.clicked)
+    
+  def clicked(self):
+    file_name = QtGui.QFileDialog.getOpenFileName(self, "Find Mesh File", os.getcwd(), "File (*)")
+
+    file_name = os.path.relpath(str(file_name))
+    
+    if file_name and file_name != '':
+      table_value_item = self.table_widget.item(self.row,1)
+
+      if not self.is_vector_type or table_value_item.text() == '':
+        table_value_item.setText(os.path.splitext(file_name)[0])
+      else:
+        table_value_item.setText(str(table_value_item.text()).strip("'") + ' ' + os.path.splitext(file_name)[0])
+
 
 class ParamTable:
   def __init__(self, main_data, action_syntax, single_options, incoming_data, incoming_param_comments, incoming_comment, main_layout, parent_class, already_has_parent_params, type_options, global_params):
@@ -546,6 +567,14 @@ class ParamTable:
 
         table_widget.setItem(row, 1, value_item)
         
+      if 'cpp_type' in param and (param['cpp_type'] == 'MeshFileName' or param['cpp_type'] == 'FileName'):
+        options_item = FileOpenWidget(table_widget,row,self.isVectorType(param['cpp_type']))
+        table_widget.setCellWidget(row, 2, options_item)
+
+      if 'cpp_type' in param and param['cpp_type'] == 'FileNameNoExtension':
+        options_item = FileNoExtensionOpenWidget(table_widget,row,self.isVectorType(param['cpp_type']))
+        table_widget.setCellWidget(row, 2, options_item)
+
       if 'cpp_type' in param and param['cpp_type'] == 'MeshFileName':
         options_item = FileOpenWidget(table_widget,row,self.isVectorType(param['cpp_type']))
         table_widget.setCellWidget(row, 2, options_item)

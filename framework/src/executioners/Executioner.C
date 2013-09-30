@@ -27,7 +27,7 @@ template<>
 InputParameters validParams<Executioner>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<std::string>("restart_file_base", "File base name used for restart");
+  params.addParam<FileNameNoExtension>("restart_file_base", "File base name used for restart");
 
   params.addPrivateParam<std::string>("built_by_action", "setup_executioner");
 
@@ -44,7 +44,7 @@ Executioner::Executioner(const std::string & name, InputParameters parameters) :
     _output_initial(false),
     _initial_residual_norm(std::numeric_limits<Real>::max()),
     _old_initial_residual_norm(std::numeric_limits<Real>::max()),
-    _restart_file_base(getParam<std::string>("restart_file_base"))
+    _restart_file_base(getParam<FileNameNoExtension>("restart_file_base"))
 {
 }
 

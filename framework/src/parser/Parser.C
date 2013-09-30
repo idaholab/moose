@@ -546,6 +546,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractScalar(SubdomainName         , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(BoundaryName          , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(FileName              , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(FileNameNoExtension   , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(MeshFileName          , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(OutFileBase           , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(VariableName          , it->second, full_name, it->first, in_global, global_params_block);

@@ -153,6 +153,9 @@ enum PCSideType
 /// This type is for expected filenames, it can be used to trigger open file dialogs in the GUI
 DerivativeStringClass(FileName);
 
+/// This type is for expected filenames where the extension is unwanted, it can be used to trigger open file dialogs in the GUI
+DerivativeStringClass(FileNameNoExtension);
+
 /// This type is similar to "FileName", but is used to further filter file dialogs on known file mesh types
 DerivativeStringClass(MeshFileName);
 
