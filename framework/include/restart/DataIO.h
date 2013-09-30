@@ -31,7 +31,6 @@
 class MooseMesh;
 class FEProblem;
 
-
 /**
  * Scalar helper routine so that specialization isn't needed for basic scalar types
  */
@@ -238,7 +237,6 @@ void loadHelper(std::istream & stream, std::vector<P> & data)
 {
   vectorDataLoad(stream, data);
 }
-
 
 #endif /* DATAIO_H */
 
