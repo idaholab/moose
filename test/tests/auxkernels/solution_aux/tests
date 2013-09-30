@@ -29,6 +29,19 @@
     exodiff = 'solution_aux_exodus_interp_out.e'
   [../]
 
+  [./exodus_interp_restart1]
+    type = 'Exodiff'
+    input = 'solution_aux_exodus_interp_restart1.i'
+    exodiff = 'solution_aux_exodus_interp_restart1_out.e'
+  [../]
+
+  [./exodus_interp_restart2]
+    type = 'Exodiff'
+    input = 'solution_aux_exodus_interp_restart2.i'
+    exodiff = 'solution_aux_exodus_interp_restart2_out.e'
+    prereq = exodus_interp_restart1
+  [../]
+
   [./exodus_interp_direct]
     type = 'Exodiff'
     input = 'solution_aux_exodus_interp_direct.i'
