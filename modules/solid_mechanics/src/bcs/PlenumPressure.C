@@ -25,7 +25,7 @@ InputParameters validParams<PlenumPressure>()
 
 PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
   :IntegratedBC(name, params),
-   _n0(0),
+   _n0(declareRestartableData<Real>("initial_moles", 0)),
    _component(getParam<int>("component")),
    _initial_pressure(getParam<Real>("initial_pressure")),
    _material_input(),
@@ -37,7 +37,7 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
    _initial_moles( getParam<PostprocessorName>("output_initial_moles") != "" ? &getPostprocessorValue("output_initial_moles") : NULL ),
    _output( getParam<PostprocessorName>("output") != "" ? &getPostprocessorValue("output") : NULL ),
    _refab_needed(isParamValid("refab_time") ? getParam<std::vector<Real> >("refab_time").size() : 0),
-   _refab_gas_released(0),
+   _refab_gas_released(declareRestartableData<Real>("refab_gas_released", 0)),
    _refab_time( isParamValid("refab_time") ?
                 getParam<std::vector<Real> >("refab_time") :
                 std::vector<Real>(1, -std::numeric_limits<Real>::max()) ),
@@ -53,8 +53,8 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
    _refab_type( isParamValid("refab_type") ?
                 getParam<std::vector<unsigned> >("refab_type") :
                 std::vector<unsigned>(_refab_time.size(), 0) ),
-   _refab_counter(0),
-   _my_value(0)
+   _refab_counter(declareRestartableData<unsigned int>("refab_counter", 0)),
+   _my_value(declareRestartableData<Real>("plenum_pressure", 0))
 {
 
   if (isParamValid("material_input"))
@@ -105,15 +105,18 @@ PlenumPressure::computeQpResidual()
 void
 PlenumPressure::initialSetup()
 {
-  _n0 = _initial_pressure * _volume / (_R * _temperature);
+  if (0 == _refab_counter)
+  {
+    _n0 = _initial_pressure * _volume / (_R * _temperature);
 
+    _start_time = _t - _dt;
+    const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t-_start_time) / _startup_time;
+    _my_value = factor * _initial_pressure;
+  }
   if ( _initial_moles )
   {
     *_initial_moles = _n0;
   }
-  _start_time = _t - _dt;
-  const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t-_start_time) / _startup_time;
-  _my_value = factor * _initial_pressure;
   if (_output)
   {
     *_output = _my_value;

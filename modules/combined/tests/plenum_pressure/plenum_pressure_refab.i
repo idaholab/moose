@@ -236,6 +236,7 @@
       temperature = aveTempInterior
       volume = internalVolume
       output = ppress
+      output_initial_moles = initial_moles
       refab_time = 1.01
       refab_pressure = 10
       refab_temperature = 350
@@ -336,6 +337,9 @@
   [../]
 
   [./ppress]
+    type = Reporter
+  [../]
+  [./initial_moles]
     type = Reporter
   [../]
 []
