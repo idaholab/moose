@@ -99,6 +99,8 @@
 #include "RandomHitSolutionModifier.h"
 #include "MaterialPropertyUserObject.h"
 #include "InsideUserObject.h"
+#include "RestartableTypes.h"
+#include "RestartableTypesChecker.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -284,6 +286,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(RandomHitSolutionModifier);
   registerUserObject(MaterialPropertyUserObject);
   registerUserObject(InsideUserObject);
+  registerUserObject(RestartableTypes);
+  registerUserObject(RestartableTypesChecker);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);

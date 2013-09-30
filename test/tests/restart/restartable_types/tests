@@ -1,0 +1,13 @@
+[Tests]
+  [./first]
+    type = 'RunApp'
+    input = 'restartable_types.i'
+  [../]
+
+  [./second]
+    # Using RunApp here because the error checking happens _in_ the app
+    type = 'RunApp'
+    input = 'restartable_types2.i'
+    prereq = first
+  [../]
+[]

@@ -12,7 +12,8 @@ RestartDiffusion::RestartDiffusion(const std::string & name, InputParameters par
     Kernel(name, parameters),
     _coef(getParam<Real>("coef")),
     _current_coef(declareRestartableData<Real>("current_coef", 1))
-{}
+{
+}
 
 void
 RestartDiffusion::timestepSetup()

@@ -31,6 +31,32 @@
 class MooseMesh;
 class FEProblem;
 
+
+/**
+ * Scalar helper routine so that specialization isn't needed for basic scalar types
+ */
+template<typename P>
+void storeHelper(std::ostream & stream, const P & data);
+
+/**
+ * Vector helper routine so that specialization isn't needed for basic vector types
+ */
+template<typename P>
+void storeHelper(std::ostream & stream, const std::vector<P> & data);
+
+/**
+ * Scalar helper routine so that specialization isn't needed for basic scalar types
+ */
+template<typename P>
+void loadHelper(std::istream & stream, P & data);
+
+/**
+ * Vector helper routine so that specialization isn't needed for basic vector types
+ */
+template<typename P>
+void loadHelper(std::istream & stream, std::vector<P> & data);
+
+
 // global store functions
 
 template<typename T>
@@ -49,10 +75,14 @@ void dataStore(std::ostream & stream, const Real & v)
 
 template<typename T>
 inline void
-dataStore(std::ostream & stream, const std::vector<T> & v)
+vectorDataStore(std::ostream & stream, const std::vector<T> & v)
 {
-  for (unsigned int i = 0; i < v.size(); i++)
-    dataStore(stream, v[i]);
+  // First store the size of the vector
+  unsigned int size = v.size();
+  stream.write((const char *) &size, sizeof(size));
+
+  for (unsigned int i = 0; i < size; i++)
+    storeHelper(stream, v[i]);
 }
 
 template<>
@@ -116,10 +146,16 @@ dataLoad(std::istream & stream, Real & v)
 
 template<typename T>
 inline void
-dataLoad(std::istream & stream, std::vector<T> & v)
+vectorDataLoad(std::istream & stream, std::vector<T> & v)
 {
-  for (unsigned int i = 0; i < v.size(); i++)
-    dataLoad(stream, v[i]);
+  // First read the size of the vector
+  unsigned int size = 0;
+  stream.read((char *) &size, sizeof(size));
+
+  v.resize(size);
+
+  for (unsigned int i = 0; i < size; i++)
+    loadHelper(stream, v[i]);
 }
 
 template<>
@@ -175,4 +211,34 @@ dataLoad(std::istream & stream, RealVectorValue & v)
   }
 }
 
+// Scalar Helper Function
+template<typename P>
+void storeHelper(std::ostream & stream, const P & data)
+{
+  dataStore<P>(stream, data);
+}
+
+// Vector Helper Function
+template<typename P>
+void storeHelper(std::ostream & stream, const std::vector<P> & data)
+{
+  vectorDataStore(stream, data);
+}
+
+// Scalar Helper Function
+template<typename P>
+void loadHelper(std::istream & stream, P & data)
+{
+  dataLoad<P>(stream, data);
+}
+
+// Vector Helper Function
+template<typename P>
+void loadHelper(std::istream & stream, std::vector<P> & data)
+{
+  vectorDataLoad(stream, data);
+}
+
+
 #endif /* DATAIO_H */
+
