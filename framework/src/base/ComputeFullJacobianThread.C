@@ -48,7 +48,7 @@ ComputeFullJacobianThread::computeJacobian()
     MooseVariable & ivariable = _sys.getVariable(_tid, ivar);
     MooseVariable & jvariable = _sys.getVariable(_tid, jvar);
 
-    if (ivariable.dofIndices().size() > 0 && jvariable.dofIndices().size() > 0)
+    if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain))
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)
       const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeVar(ivar);
@@ -72,7 +72,7 @@ ComputeFullJacobianThread::computeJacobian()
     for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); it++)
     {
       MooseVariable & ivar = *(*it);
-      if (ivar.dofIndices().size() > 0)
+      if (ivar.activeOnSubdomain(_subdomain) > 0)
       {
         // for each variable get the list of active kernels
         const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeVar(ivar.index());
@@ -107,7 +107,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
     unsigned int jvar = (*it).second;
 
     MooseVariable & var = _sys.getVariable(_tid, jvar);
-    if (var.dofIndices().size() > 0)
+    if (var.activeOnSubdomain(_subdomain))
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)
       std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
@@ -131,7 +131,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
     for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); it++)
     {
       MooseVariable & ivar = *(*it);
-      if (ivar.dofIndices().size() > 0)
+      if (ivar.activeOnSubdomain(_subdomain) > 0)
       {
         // for each variable get the list of active kernels
         std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
