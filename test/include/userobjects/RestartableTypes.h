@@ -42,6 +42,20 @@ dataLoad(std::istream & stream, Dummy * & v)
   dataLoad(stream, v->_i);
 }
 
+template<>
+inline void
+dataStore(std::ostream & stream, Dummy & v)
+{
+  dataStore(stream, v._i);
+}
+
+template<>
+inline void
+dataLoad(std::istream & stream, Dummy & v)
+{
+  dataLoad(stream, v._i);
+}
+
 /**
  * User Object for testing Restartable data types
  */
@@ -63,6 +77,7 @@ protected:
   std::vector<Real> & _vector_data;
   std::vector<std::vector<Real> > & _vector_vector_data;
   Dummy * & _pointer_data;
+  Dummy & _custom_data;
 };
 
 

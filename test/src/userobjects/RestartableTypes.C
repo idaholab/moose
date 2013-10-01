@@ -27,7 +27,8 @@ RestartableTypes::RestartableTypes(const std::string & name, InputParameters par
     _real_data(declareRestartableData<Real>("real_data", 1)),
     _vector_data(declareRestartableData<std::vector<Real> >("vector_data")),
     _vector_vector_data(declareRestartableData<std::vector<std::vector<Real> > >("vector_vector_data")),
-    _pointer_data(declareRestartableData<Dummy *>("pointer_data"))
+    _pointer_data(declareRestartableData<Dummy *>("pointer_data")),
+    _custom_data(declareRestartableData<Dummy>("custom_data"))
 {
   _vector_data.resize(4,1);
   _vector_vector_data.resize(4);
@@ -43,6 +44,7 @@ RestartableTypes::RestartableTypes(const std::string & name, InputParameters par
   _pointer_data = new Dummy;
 
   _pointer_data->_i = 1;
+  _custom_data._i = 1;
 }
 
 RestartableTypes::~RestartableTypes()
@@ -62,6 +64,7 @@ void RestartableTypes::initialSetup()
       _vector_vector_data[i][j] = 2;
 
   _pointer_data->_i = 2;
+  _custom_data._i = 2;
 }
 
 void RestartableTypes::timestepSetup()
@@ -76,6 +79,7 @@ void RestartableTypes::timestepSetup()
       _vector_vector_data[i][j] += 1;
 
   _pointer_data->_i += 1;
+  _custom_data._i += 1;
 }
 
 void

@@ -67,6 +67,9 @@ RestartableTypesChecker::execute()
 
     if(_pointer_data->_i != 5)
       mooseError("Error reading restartable pointer data!");
+
+    if(_custom_data._i != 5)
+      mooseError("Error reading restartable custom data!");
   }
 
   _first = false;
