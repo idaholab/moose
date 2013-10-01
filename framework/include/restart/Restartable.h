@@ -20,6 +20,8 @@
 #include "RestartableData.h"
 #include "ParallelUniqueId.h"
 
+class PostprocessorData;
+
 /**
  * A  class for creating restricted objects
  * \see BlockRestartable BoundaryRestartable
@@ -36,6 +38,16 @@ public:
    * @param system_name The name of the MOOSE system.  ie "Kernel", "BCs", etc.  Should roughly correspond to the section in the input file so errors are easy to understand.
    */
   Restartable(std::string name, InputParameters & parameters, std::string system_name);
+
+  /**
+   * Constructor for objects that don't have "parameters"
+   *
+   * @param name The name of the object
+   * @param system_name The name of the MOOSE system.  ie "Kernel", "BCs", etc.  Should roughly correspond to the section in the input file so errors are easy to understand.
+   * @param fe_problem A reference to the fe_problem for this object
+   * @param tid Optional thread id (will default to zero)
+   */
+  Restartable(std::string name, std::string system_name, FEProblem & fe_problem, THREAD_ID tid = 0);
 
   /**
    * Emtpy destructor
@@ -65,6 +77,18 @@ protected:
   T & declareRestartableData(std::string data_name, const T & init_value);
 
 private:
+  /**
+   * Note: This is only used internally in MOOSE.  DO NOT use this function!
+   *
+   * Declare a piece of data as "restartable".
+   * This means that in the event of a restart this piece of data
+   * will be restored back to its previous value.
+   *
+   * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
+   */
+  template<typename T>
+  T & declareRestartableDataWithObjectName(std::string data_name, std::string object_name);
+
   /// Helper function so we don't have to #include FEProblem in the header
   void registerRestartableDataOnFEProblem(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
@@ -72,7 +96,7 @@ private:
   std::string _restartable_name;
 
   /// The object's parameters
-  InputParameters & _restartable_params;
+  InputParameters * _restartable_params;
 
   /// The system name this object is in
   std::string _restartable_system_name;
@@ -82,6 +106,9 @@ private:
 
   /// Pointer to the FEProblem class
   FEProblem * _restartable_feproblem;
+
+  /// For access to registerRestartableDataOnFEProblem()
+  friend class PostprocessorData;
 };
 
 template<typename T>
@@ -114,6 +141,21 @@ Restartable::declareRestartableData(std::string data_name, const T & init_value)
   registerRestartableDataOnFEProblem(full_name, data_ptr, _restartable_tid);
 
   return data_ptr->get();
+}
+
+template<typename T>
+T &
+Restartable::declareRestartableDataWithObjectName(std::string data_name, std::string object_name)
+{
+  std::string old_name = _restartable_name;
+
+  _restartable_name = object_name;
+
+  T & value = declareRestartableData<T>(data_name);
+
+  _restartable_name = old_name;
+
+  return value;
 }
 
 #endif // RESTARTABLE

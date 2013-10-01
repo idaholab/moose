@@ -17,10 +17,18 @@
 
 Restartable::Restartable(std::string name, InputParameters & parameters, std::string system_name) :
     _restartable_name(name),
-    _restartable_params(parameters),
+    _restartable_params(&parameters),
     _restartable_system_name(system_name),
     _restartable_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
     _restartable_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL)
+{
+}
+
+Restartable::Restartable(std::string name, std::string system_name, FEProblem & fe_problem, THREAD_ID tid) :
+    _restartable_name(name),
+    _restartable_system_name(system_name),
+    _restartable_tid(tid),
+    _restartable_feproblem(&fe_problem)
 {
 }
 

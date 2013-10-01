@@ -13,9 +13,12 @@
 /****************************************************************/
 
 #include "PostprocessorData.h"
+#include "FEProblem.h"
 
-PostprocessorData::PostprocessorData()
-{}
+PostprocessorData::PostprocessorData(FEProblem & fe_problem, THREAD_ID tid) :
+    Restartable("values", "PostprocessorData", fe_problem, tid)
+{
+}
 
 bool
 PostprocessorData::hasPostprocessor(const std::string & name)
@@ -26,38 +29,42 @@ PostprocessorData::hasPostprocessor(const std::string & name)
 PostprocessorValue &
 PostprocessorData::getPostprocessorValue(const PostprocessorName & name)
 {
-  // TODO: do something smarter so we can have lazy binding like this... but still have good errors.
-  /*
-  if (_values.find(name) == _values.end())
-    mooseError("No Data found for name: " + name);
-  */
+  PostprocessorValue * & pp_val = _values[name];
 
-  return _values[name];
+  if(pp_val == NULL)
+    pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values");
+
+  return *pp_val;
 }
 
 PostprocessorValue &
 PostprocessorData::getPostprocessorValueOld(const std::string & name)
 {
-  return _values_old[name];
+  PostprocessorValue * & pp_val = _values_old[name];
+
+  if(pp_val == NULL)
+    pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values_old");
+
+  return *pp_val;
 }
 
 
 void
 PostprocessorData::init(const std::string & name)
 {
-  _values[name] = 0.0;
-  _values_old[name] = 0.0;
+  getPostprocessorValue(name) = 0.0;
+  getPostprocessorValueOld(name) = 0.0;
 }
 
 void
 PostprocessorData::storeValue(const std::string & name, PostprocessorValue value)
 {
-  _values[name] = value;
+  getPostprocessorValue(name) = value;
 }
 
 void
 PostprocessorData::copyValuesBack()
 {
-  for (std::map<std::string, PostprocessorValue>::iterator it = _values.begin(); it != _values.end(); ++it)
-    _values_old[it->first] = it->second;
+  for (std::map<std::string, PostprocessorValue*>::iterator it = _values.begin(); it != _values.end(); ++it)
+    (*_values_old[it->first]) = (*it->second);
 }

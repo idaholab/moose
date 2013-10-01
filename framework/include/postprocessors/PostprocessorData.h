@@ -15,17 +15,21 @@
 #ifndef POSTPROCESSORDATA_H
 #define POSTPROCESSORDATA_H
 
-#include <map>
 //MOOSE includes
 #include "MooseTypes.h"
+#include "Restartable.h"
 
-class PostprocessorData
+#include <map>
+
+class FEProblem;
+
+class PostprocessorData : public Restartable
 {
 public:
   /**
    * Class constructor
    */
-  PostprocessorData();
+  PostprocessorData(FEProblem & fe_problem, THREAD_ID tid);
 
   /**
    * Initialization method, sets the current and old value to 0.0 for this
@@ -55,7 +59,7 @@ public:
   /**
    * Get the map of names -> postprocessor values. Exposed for error checking.
    */
-  const std::map<std::string, PostprocessorValue> & values() const { return _values; }
+  const std::map<std::string, PostprocessorValue*> & values() const { return _values; }
 
   /**
    * Copy the current post-processor values into old (i.e. shift it "back in time")
@@ -63,11 +67,14 @@ public:
   void copyValuesBack();
 
 protected:
+  /// The FEProblem
+  FEProblem * _fe_problem;
+
   /// Values of the post-processor at the current time
-  std::map<std::string, PostprocessorValue> _values;
+  std::map<std::string, PostprocessorValue*> _values;
 
   /// Values of the post-processors at the time t-1
-  std::map<std::string, PostprocessorValue> _values_old;
+  std::map<std::string, PostprocessorValue*> _values_old;
 };
 
 #endif //POSTPROCESSORDATA_H

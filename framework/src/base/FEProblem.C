@@ -205,6 +205,9 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
   _pps_data.resize(n_threads);
 
+  for(unsigned int i=0; i<n_threads; i++)
+    _pps_data[i] = new PostprocessorData(*this, i);
+
   _objects_by_name.resize(n_threads);
 
   _indicators.resize(n_threads);
@@ -1656,7 +1659,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 
       Postprocessor * pp = getPostprocessorPointer(mo);
       _pps(type)[tid].addPostprocessor(pp);
-      _pps_data[tid].init(name);
+      _pps_data[tid]->init(name);
       _objects_by_name[tid][name].push_back(mo);
 
       // Add it to the user object warehouse as well...
@@ -1681,7 +1684,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 
       Postprocessor * pp = getPostprocessorPointer(mo);
       _pps(type)[tid].addPostprocessor(pp);
-      _pps_data[tid].init(name);
+      _pps_data[tid]->init(name);
       _objects_by_name[tid][name].push_back(mo);
 
       // Add it to the user object warehouse as well...
@@ -1788,19 +1791,19 @@ FEProblem::hasUserObject(const std::string & name)
 bool
 FEProblem::hasPostprocessor(const std::string & name, THREAD_ID tid)
 {
-  return _pps_data[tid].hasPostprocessor(name);
+  return _pps_data[tid]->hasPostprocessor(name);
 }
 
 Real &
 FEProblem::getPostprocessorValue(const PostprocessorName & name, THREAD_ID tid)
 {
-  return _pps_data[tid].getPostprocessorValue(name);
+  return _pps_data[tid]->getPostprocessorValue(name);
 }
 
 Real &
 FEProblem::getPostprocessorValueOld(const std::string & name, THREAD_ID tid)
 {
-  return _pps_data[tid].getPostprocessorValueOld(name);
+  return _pps_data[tid]->getPostprocessorValueOld(name);
 }
 
 void
@@ -1999,7 +2002,7 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
               // store the value in each thread
 
               for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-                _pps_data[tid].storeValue(name, value);
+                _pps_data[tid]->storeValue(name, value);
             }
 
             already_gathered.insert(ps);
@@ -2037,7 +2040,7 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
 
               // store the value in each thread
               for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-                _pps_data[tid].storeValue(name, value);
+                _pps_data[tid]->storeValue(name, value);
             }
 
             already_gathered.insert(ps);
@@ -2097,7 +2100,7 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
 
               // store the value in each thread
               for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-                _pps_data[tid].storeValue(name, value);
+                _pps_data[tid]->storeValue(name, value);
             }
 
             already_gathered.insert(ps);
@@ -2134,7 +2137,7 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
 
               // store the value in each thread
               for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-                _pps_data[tid].storeValue(name, value);
+                _pps_data[tid]->storeValue(name, value);
             }
 
             already_gathered.insert(ps);
@@ -2163,7 +2166,7 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
 
       // store the value in each thread
       for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-        _pps_data[tid].storeValue(name, value);
+        _pps_data[tid]->storeValue(name, value);
     }
   }
 }
@@ -2217,7 +2220,7 @@ FEProblem::addPPSValuesToTable(ExecFlagType type)
     if (out_type != Moose::PPS_OUTPUT_NONE)
     {
       std::string name = pps->PPName();
-      Real value = _pps_data[0].getPostprocessorValue(name);
+      Real value = _pps_data[0]->getPostprocessorValue(name);
       switch (out_type)
       {
       case Moose::PPS_OUTPUT_FILE:
@@ -2829,7 +2832,7 @@ FEProblem::onTimestepBegin()
   _nl.onTimestepBegin();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    _pps_data[tid].copyValuesBack();
+    _pps_data[tid]->copyValuesBack();
 }
 
 void
@@ -3468,7 +3471,7 @@ FEProblem::checkUserObjects()
   }
 
   // check that all requested UserObjects were defined in the input file
-  for (std::map<std::string, PostprocessorValue>::const_iterator it = _pps_data[0].values().begin(); it != _pps_data[0].values().end(); ++it)
+  for (std::map<std::string, PostprocessorValue*>::const_iterator it = _pps_data[0]->values().begin(); it != _pps_data[0]->values().end(); ++it)
   {
     if (names.find(it->first) == names.end())
       mooseError("Postprocessor '" + it->first + "' requested but not specified in the input file.");

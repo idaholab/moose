@@ -730,7 +730,7 @@ protected:
   std::vector<MarkerWarehouse> _markers;
 
   // postprocessors
-  std::vector<PostprocessorData> _pps_data;
+  std::vector<PostprocessorData*> _pps_data;
   ExecStore<PostprocessorWarehouse> _pps;
 
   // user objects
