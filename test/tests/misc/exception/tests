@@ -5,7 +5,8 @@
     expect_err = "Caught exception"
     petsc_version = '>=3.1.0'
     should_crash = false
-		max_threads = 1
+    max_threads = 1
+    deleted = "Ticket #2225"
   [../]
 
   [./parallel_exception_residual]
