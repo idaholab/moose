@@ -26,7 +26,8 @@ RestartableTypes::RestartableTypes(const std::string & name, InputParameters par
     GeneralUserObject(name, params),
     _real_data(declareRestartableData<Real>("real_data", 1)),
     _vector_data(declareRestartableData<std::vector<Real> >("vector_data")),
-    _vector_vector_data(declareRestartableData<std::vector<std::vector<Real> > >("vector_vector_data"))
+    _vector_vector_data(declareRestartableData<std::vector<std::vector<Real> > >("vector_vector_data")),
+    _pointer_data(declareRestartableData<Dummy *>("pointer_data"))
 {
   _vector_data.resize(4,1);
   _vector_vector_data.resize(4);
@@ -38,10 +39,15 @@ RestartableTypes::RestartableTypes(const std::string & name, InputParameters par
     for(unsigned int j=0; j<_vector_vector_data[i].size(); j++)
       _vector_vector_data[i][j] = 1;
   }
+
+  _pointer_data = new Dummy;
+
+  _pointer_data->_i = 1;
 }
 
 RestartableTypes::~RestartableTypes()
 {
+  delete _pointer_data;
 }
 
 void RestartableTypes::initialSetup()
@@ -54,6 +60,8 @@ void RestartableTypes::initialSetup()
   for(unsigned int i=0; i<_vector_vector_data.size(); i++)
     for(unsigned int j=0; j<_vector_vector_data[i].size(); j++)
       _vector_vector_data[i][j] = 2;
+
+  _pointer_data->_i = 2;
 }
 
 void RestartableTypes::timestepSetup()
@@ -66,6 +74,8 @@ void RestartableTypes::timestepSetup()
   for(unsigned int i=0; i<_vector_vector_data.size(); i++)
     for(unsigned int j=0; j<_vector_vector_data[i].size(); j++)
       _vector_vector_data[i][j] += 1;
+
+  _pointer_data->_i += 1;
 }
 
 void

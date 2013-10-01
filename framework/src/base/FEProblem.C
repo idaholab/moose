@@ -93,7 +93,6 @@ InputParameters & injectFEProblem(FEProblem * fe_problem, InputParameters & para
 FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     SubProblem(name, parameters),
     Restartable(name, injectFEProblem(this, parameters), "FEProblem"),
-    _restartable_data(libMesh::n_threads()),
     _mesh(*parameters.get<MooseMesh *>("mesh")),
     _eq(_mesh),
     _initialized(false),
@@ -235,11 +234,12 @@ FEProblem::~FEProblem()
 
     for (std::map<std::string, Function *>::iterator it = _functions[i].begin(); it != _functions[i].end(); ++it)
       delete it->second;
-
+/*
     for(std::map<std::string, RestartableDataValue *>::iterator it = _restartable_data[i].begin();
         it != _restartable_data[i].end();
         ++it)
       delete it->second;
+*/
   }
 
   delete &_mesh;
@@ -248,6 +248,9 @@ FEProblem::~FEProblem()
 
   if (_out_problem)
     delete _out_problem;
+
+  for(unsigned int i=0; i<n_threads; i++)
+    delete _pps_data[i];
 
   delete _resurrector;
 }

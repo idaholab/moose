@@ -17,17 +17,14 @@
 template<>
 InputParameters validParams<RestartableTypesChecker>()
 {
-  InputParameters params = validParams<UserObject>();
+  InputParameters params = validParams<RestartableTypes>();
   return params;
 }
 
 
 RestartableTypesChecker::RestartableTypesChecker(const std::string & name, InputParameters params) :
-    GeneralUserObject(name, params),
-    _first(true),
-    _real_data(declareRestartableData<Real>("real_data", 1)),
-    _vector_data(declareRestartableData<std::vector<Real> >("vector_data")),
-    _vector_vector_data(declareRestartableData<std::vector<std::vector<Real> > >("vector_vector_data"))
+    RestartableTypes(name, params),
+    _first(true)
 {
 }
 
@@ -67,6 +64,9 @@ RestartableTypesChecker::execute()
         if(_vector_vector_data[i][j] != 5)
           mooseError("Error reading restartable std::vector<std::vector<Real> > expected 5 got " << _vector_vector_data[i][j]);
     }
+
+    if(_pointer_data->_i != 5)
+      mooseError("Error reading restartable pointer data!");
   }
 
   _first = false;

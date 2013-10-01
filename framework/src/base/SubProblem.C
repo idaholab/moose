@@ -30,7 +30,8 @@ InputParameters validParams<SubProblem>()
 
 SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
     Problem(name, parameters),
-    _factory(_app.getFactory())
+    _factory(_app.getFactory()),
+    _restartable_data(libMesh::n_threads())
 {
   unsigned int n_threads = libMesh::n_threads();
   _real_zero.resize(n_threads, 0.);

@@ -32,25 +32,25 @@ class MooseMesh;
 class FEProblem;
 
 /**
- * Scalar helper routine so that specialization isn't needed for basic scalar types
+ * Scalar helper routine
  */
 template<typename P>
-void storeHelper(std::ostream & stream, const P & data);
+void storeHelper(std::ostream & stream, P & data);
 
 /**
- * Vector helper routine so that specialization isn't needed for basic vector types
+ * Vector helper routine
  */
 template<typename P>
-void storeHelper(std::ostream & stream, const std::vector<P> & data);
+void storeHelper(std::ostream & stream, std::vector<P> & data);
 
 /**
- * Scalar helper routine so that specialization isn't needed for basic scalar types
+ * Scalar helper routine
  */
 template<typename P>
 void loadHelper(std::istream & stream, P & data);
 
 /**
- * Vector helper routine so that specialization isn't needed for basic vector types
+ * Vector helper routine
  */
 template<typename P>
 void loadHelper(std::istream & stream, std::vector<P> & data);
@@ -59,14 +59,20 @@ void loadHelper(std::istream & stream, std::vector<P> & data);
 // global store functions
 
 template<typename T>
-void dataStore(std::ostream & stream, const T & v)
+void dataStore(std::ostream & stream, T & v)
 {
-  stream.write((const char *) &v, sizeof(v));
+  stream.write((char *) &v, sizeof(v));
+}
+
+template<typename T>
+void dataStore(std::ostream & stream, T * & v)
+{
+  mooseError("Cannot store raw pointers as restartable data!\nWrite a custom dataStore() template specialization!");
 }
 
 template<>
 inline
-void dataStore(std::ostream & stream, const Real & v)
+void dataStore(std::ostream & stream, Real & v)
 {
   stream.write((char *) &v, sizeof(v));
 //  std::cout<<"value: "<<v<<std::endl;
@@ -74,11 +80,11 @@ void dataStore(std::ostream & stream, const Real & v)
 
 template<typename T>
 inline void
-vectorDataStore(std::ostream & stream, const std::vector<T> & v)
+vectorDataStore(std::ostream & stream, std::vector<T> & v)
 {
   // First store the size of the vector
   unsigned int size = v.size();
-  stream.write((const char *) &size, sizeof(size));
+  stream.write((char *) &size, sizeof(size));
 
   for (unsigned int i = 0; i < size; i++)
     storeHelper(stream, v[i]);
@@ -86,44 +92,44 @@ vectorDataStore(std::ostream & stream, const std::vector<T> & v)
 
 template<>
 inline void
-dataStore(std::ostream & stream, const DenseMatrix<Real> & v)
+dataStore(std::ostream & stream, DenseMatrix<Real> & v)
 {
   for (unsigned int i = 0; i < v.m(); i++)
     for (unsigned int j = 0; j < v.n(); j++)
     {
       Real r = v(i, j);
-      stream.write((const char *) &r, sizeof(r));
+      stream.write((char *) &r, sizeof(r));
     }
 }
 
 template<>
 inline void
-dataStore(std::ostream & stream, const ColumnMajorMatrix & v)
+dataStore(std::ostream & stream, ColumnMajorMatrix & v)
 {
   for (unsigned int i = 0; i < v.m(); i++)
     for (unsigned int j = 0; j < v.n(); j++)
     {
       Real r = v(i, j);
-      stream.write((const char *) &r, sizeof(r));
+      stream.write((char *) &r, sizeof(r));
     }
 }
 
 template<>
 inline void
-dataStore(std::ostream & stream, const RealTensorValue & v)
+dataStore(std::ostream & stream, RealTensorValue & v)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
     for (unsigned int j = 0; i < LIBMESH_DIM; i++)
-      stream.write((const char *) &v(i, j), sizeof(v(i, j)));
+      stream.write((char *) &v(i, j), sizeof(v(i, j)));
 }
 
 template<>
 inline void
-dataStore(std::ostream & stream, const RealVectorValue & v)
+dataStore(std::ostream & stream, RealVectorValue & v)
 {
   // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it won't work.
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-    stream.write((const char *) &v(i), sizeof(v(i)));
+    stream.write((char *) &v(i), sizeof(v(i)));
 }
 
 
@@ -133,6 +139,12 @@ template<typename T>
 void dataLoad(std::istream & stream, T & v)
 {
   stream.read((char *) &v, sizeof(v));
+}
+template<typename T>
+
+void dataLoad(std::istream & stream, T * & v)
+{
+  mooseError("Cannot load raw pointers as restartable data!\nWrite a custom dataLoad() template specialization!");
 }
 
 template<>
@@ -212,14 +224,14 @@ dataLoad(std::istream & stream, RealVectorValue & v)
 
 // Scalar Helper Function
 template<typename P>
-void storeHelper(std::ostream & stream, const P & data)
+void storeHelper(std::ostream & stream, P & data)
 {
-  dataStore<P>(stream, data);
+  dataStore(stream, data);
 }
 
 // Vector Helper Function
 template<typename P>
-void storeHelper(std::ostream & stream, const std::vector<P> & data)
+void storeHelper(std::ostream & stream, std::vector<P> & data)
 {
   vectorDataStore(stream, data);
 }
@@ -228,7 +240,7 @@ void storeHelper(std::ostream & stream, const std::vector<P> & data)
 template<typename P>
 void loadHelper(std::istream & stream, P & data)
 {
-  dataLoad<P>(stream, data);
+  dataLoad(stream, data);
 }
 
 // Vector Helper Function

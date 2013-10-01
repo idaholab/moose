@@ -15,7 +15,7 @@
 #ifndef RESTARTABLETYPESCHECKER_H
 #define RESTARTABLETYPESCHECKER_H
 
-#include "GeneralUserObject.h"
+#include "RestartableTypes.h"
 
 class RestartableTypesChecker;
 
@@ -26,7 +26,7 @@ InputParameters validParams<RestartableTypesChecker>();
 /**
  * User Object for testing Restartable data types
  */
-class RestartableTypesChecker : public GeneralUserObject
+class RestartableTypesChecker : public RestartableTypes
 {
 public:
   RestartableTypesChecker(const std::string & name, InputParameters params);
@@ -41,10 +41,6 @@ public:
 
 protected:
   bool _first;
-
-  Real & _real_data;
-  std::vector<Real> & _vector_data;
-  std::vector<std::vector<Real> > & _vector_vector_data;
 };
 
 

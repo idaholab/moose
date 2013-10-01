@@ -20,6 +20,7 @@
 #include "DiracKernelInfo.h"
 #include "Assembly.h"
 #include "GeometricSearchData.h"
+#include "RestartableData.h"
 
 // libMesh include
 #include "libmesh/equation_systems.h"
@@ -238,6 +239,9 @@ protected:
 
   /// Elements that should have Dofs ghosted to the local processor
   std::set<unsigned int> _ghosted_elems;
+
+  /// Where the restartable data is held (indexed on tid)
+  RestartableDatas _restartable_data;
 };
 
 

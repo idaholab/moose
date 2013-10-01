@@ -675,9 +675,6 @@ public:
   void setConstJacobian(bool state) { _const_jacobian = state; }
 
 protected:
-  /// Where the restartable data is held (indexed on tid)
-  std::vector<std::map<std::string, RestartableDataValue *> > _restartable_data;
-
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;
@@ -843,7 +840,6 @@ protected:
   bool _has_jacobian;
 
   std::string _solver_mode;
-
 public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)
   static unsigned int _n;

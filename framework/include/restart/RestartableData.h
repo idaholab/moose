@@ -139,7 +139,8 @@ template<typename T>
 inline void
 RestartableData<T>::store(std::ostream & stream)
 {
-  storeHelper(stream, *_value_ptr);
+  T & tmp = *_value_ptr;
+  storeHelper(stream, tmp);
 }
 
 template<typename T>
@@ -152,30 +153,32 @@ RestartableData<T>::load(std::istream & stream)
 /**
  * Container for storing material properties
  */
-class RestartableDatas : public std::vector<RestartableDataValue *>
+class RestartableDatas : public std::vector<std::map<std::string, RestartableDataValue *> >
 {
 public:
-  RestartableDatas() { }
+  RestartableDatas(size_type n) :
+      std::vector<std::map<std::string, RestartableDataValue *> >(n)
+    {
+    }
 
-  virtual ~RestartableDatas() { }
 
-  /**
-   * Parameter map iterator.
-   */
-  typedef std::vector<RestartableDataValue *>::iterator iterator;
+  virtual ~RestartableDatas()
+    {
+      for (std::vector<std::map<std::string, RestartableDataValue *> >::iterator i = begin(); i != end(); ++i)
+        for (std::map<std::string, RestartableDataValue *>::iterator j=(*i).begin();
+             j != (*i).end();
+             ++j)
+          delete j->second;
+    }
 
-  /**
-   * Constant parameter map iterator.
-   */
-  typedef std::vector<RestartableDataValue *>::const_iterator const_iterator;
+//   /**
+//    * Parameter map iterator.
+//    */
+//   typedef std::vector<RestartableDataValue *>::iterator iterator;
 
-  /**
-   * Deallocates the memory
-   */
-  void destroy()
-  {
-    for (iterator k = begin(); k != end(); ++k)
-      delete *k;
-  }
+//   /**
+//    * Constant parameter map iterator.
+//    */
+//   typedef std::vector<RestartableDataValue *>::const_iterator const_iterator;
 };
 #endif
