@@ -66,5 +66,8 @@ void
 PostprocessorData::copyValuesBack()
 {
   for (std::map<std::string, PostprocessorValue*>::iterator it = _values.begin(); it != _values.end(); ++it)
-    (*_values_old[it->first]) = (*it->second);
+  {
+    if (_values_old[it->first] != NULL)
+      (*_values_old[it->first]) = (*it->second);
+  }
 }
