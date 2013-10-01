@@ -3,13 +3,14 @@
 #include "SolutionUserObject.h"
 
 // libMesh includes
-#include "MooseMesh.h"
+//#include "MooseMesh.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/mesh_function.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/transient_system.h"
 #include "libmesh/parallel_mesh.h"
+#include "libmesh/serial_mesh.h"
 
 template<>
 InputParameters validParams<SolutionUserObject>()

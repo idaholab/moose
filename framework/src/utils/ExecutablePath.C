@@ -20,6 +20,8 @@
 #include <mach-o/dyld.h>
 #endif
 
+#include <unistd.h>
+
 namespace Moose {
 
 std::string getExecutablePath()
