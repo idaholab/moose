@@ -80,7 +80,7 @@ void dataStore(std::ostream & stream, Real & v)
 
 template<typename T>
 inline void
-vectorDataStore(std::ostream & stream, std::vector<T> & v)
+dataStore(std::ostream & stream, const std::vector<T> & v)
 {
   // First store the size of the vector
   unsigned int size = v.size();
@@ -157,7 +157,7 @@ dataLoad(std::istream & stream, Real & v)
 
 template<typename T>
 inline void
-vectorDataLoad(std::istream & stream, std::vector<T> & v)
+dataLoad(std::istream & stream, std::vector<T> & v)
 {
   // First read the size of the vector
   unsigned int size = 0;
@@ -233,7 +233,7 @@ void storeHelper(std::ostream & stream, P & data)
 template<typename P>
 void storeHelper(std::ostream & stream, std::vector<P> & data)
 {
-  vectorDataStore(stream, data);
+  dataStore<P>(stream, data);
 }
 
 // Scalar Helper Function
@@ -247,8 +247,7 @@ void loadHelper(std::istream & stream, P & data)
 template<typename P>
 void loadHelper(std::istream & stream, std::vector<P> & data)
 {
-  vectorDataLoad(stream, data);
+  dataLoad<P>(stream, data);
 }
 
 #endif /* DATAIO_H */
-
