@@ -105,9 +105,10 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     _use_parallel_mesh = true;
     break;
   case 1: // SERIAL
+    if (_app.getParallelMeshOnCommandLine())
+      mooseWarning("Ignoring --parallel-mesh option. Mesh distribution has been explicitly set to SERIAL.");
     break;
   case 2: // DEFAULT
-  {
     // The user did not specify 'distribution = XYZ' in the input file,
     // so we allow the --parallel-mesh command line arg to possibly turn
     // on ParallelMesh.  If the command line arg is not present, we pick SerialMesh.
@@ -115,9 +116,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
       _use_parallel_mesh = true;
 
     break;
-  }
-  default:
-    mooseError("Unknown mesh distribution type!");
+    // No default switch needed for MooseEnum
   }
 
   // If the user specifies 'nemesis = true' in the Mesh block, we

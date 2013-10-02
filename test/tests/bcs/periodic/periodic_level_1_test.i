@@ -9,7 +9,7 @@
   zmax = 0
   elem_type = QUAD4
   uniform_refine = 4
-  distribution = serial #This is because of floating point roundoff being different with parallel mesh
+  distribution = SERIAL #This is because of floating point roundoff being different with parallel mesh
 []
 
 [Variables]
