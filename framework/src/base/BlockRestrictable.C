@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<BlockRestrictable>()
 {
   // Create InputParameters object that will be appended to the parameters for the inheriting object
-  InputParameters params = validParams<RestrictableBase>();
+  InputParameters params = emptyInputParameters();
 
   // Add the user-facing 'block' input parameter
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (SubdomainID) that this kernel will be applied to");
@@ -27,13 +27,30 @@ InputParameters validParams<BlockRestrictable>()
   // object inheriting from this class
   params.addPrivateParam<std::vector<SubdomainID> >("_block_ids", std::vector<SubdomainID>());
 
+  // A parameter for disabling error message for objects restrictable by boundary and block,
+  // if the parameter is valid it was already set so don't do anything
+  if (!params.isParamValid("_dual_restrictable"))
+    params.addPrivateParam<bool>("_dual_restrictable", false);
+
   // Return the parameters
   return params;
 }
 
 BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & parameters) :
-    RestrictableBase(name, parameters)
+    _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
+    _blk_feproblem(parameters.isParamValid("_fe_problem") ?
+                   parameters.get<FEProblem *>("_fe_problem") : NULL),
+    _blk_mesh(parameters.isParamValid("_mesh") ?
+              parameters.get<MooseMesh *>("_mesh") : NULL)
 {
+  // If the mesh pointer is not defined, but FEProblem is, get it from there
+  if (_blk_feproblem != NULL && _blk_mesh == NULL)
+    _blk_mesh = &_blk_feproblem->mesh();
+
+  // Check that the mesh pointer was defined, it is required for this class to operate
+  if (_blk_mesh == NULL)
+    mooseError("The input paramters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
+
   // The 'block' input is defined and the FEProblem pointer is valid
   if (parameters.isParamValid("block"))
   {
@@ -41,7 +58,7 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
     _blocks = parameters.get<std::vector<SubdomainName> >("block");
 
     // Get the IDs from the supplied names
-    std::vector<SubdomainID> vec_ids = _r_mesh->getSubdomainIDs(_blocks);
+    std::vector<SubdomainID> vec_ids = _blk_mesh->getSubdomainIDs(_blocks);
 
     // Create a set of IDS
     for (std::vector<SubdomainID>::const_iterator it = vec_ids.begin(); it != vec_ids.end(); ++it)
@@ -56,14 +73,14 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
       SystemBase* sys = parameters.get<SystemBase *>("_sys");
       THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 
-  // A pointer to the variable class
+      // A pointer to the variable class
       MooseVariable * var;
 
-  // Get the variable based on the type
+      // Get the variable based on the type
       if (parameters.have_parameter<NonlinearVariableName>("variable"))
-        var = &_r_feproblem->getVariable(tid, parameters.get<NonlinearVariableName>("variable"));
+        var = &_blk_feproblem->getVariable(tid, parameters.get<NonlinearVariableName>("variable"));
       else if (parameters.have_parameter<AuxVariableName>("variable"))
-        var = &_r_feproblem->getVariable(tid, parameters.get<AuxVariableName>("variable"));
+        var = &_blk_feproblem->getVariable(tid, parameters.get<AuxVariableName>("variable"));
       else
         mooseError("The variable input has an unknown Type");
 
@@ -77,7 +94,7 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
   }
 
   // Produce error if the object is not allowed to be both block and boundary restrictable
-  if (!_dual_restrictable && !_blk_ids.empty())
+  if (!_blk_dual_restrictable && !_blk_ids.empty())
     if (parameters.isParamValid("_boundary_ids"))
     {
       std::vector<BoundaryID> bnd_ids = parameters.get<std::vector<BoundaryID> >("_boundary_ids");
@@ -118,13 +135,13 @@ BlockRestrictable::hasBlocks(SubdomainName name)
   // handles the ANY_BLOCK_ID (getSubdomainID does not)
   std::vector<SubdomainName> names(1);
   names[0] = name;
-  return hasBlocks(_r_mesh->getSubdomainIDs(names));
+  return hasBlocks(_blk_mesh->getSubdomainIDs(names));
 }
 
 bool
 BlockRestrictable::hasBlocks(std::vector<SubdomainName> names)
 {
-  return hasBlocks(_r_mesh->getSubdomainIDs(names));
+  return hasBlocks(_blk_mesh->getSubdomainIDs(names));
 }
 
 bool

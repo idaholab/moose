@@ -17,7 +17,8 @@
 
 #include "InputParameters.h"
 #include "MooseTypes.h"
-#include "RestrictableBase.h"
+#include "FEProblem.h"
+#include "MooseMesh.h"
 
 class BoundaryRestrictable;
 
@@ -30,11 +31,8 @@ InputParameters validParams<BoundaryRestrictable>();
  * The is class the inheriting class with methods useful for limiting an object
  * to certain boundaries. The parameters "_boundary_id" and "boundary", which are
  * created with validParams<BoundaryRestrictable> are used the framework.
- *
- * This class requires that either _fe_problem or _mesh be defined within the
- * parameters passed to the class constructor.
  */
-class BoundaryRestrictable : public RestrictableBase
+class BoundaryRestrictable
 {
 public:
 
@@ -168,6 +166,15 @@ protected:
 
   /// Boundary ID this BC is active on
   BoundaryID _boundary_id;
+
+  /// Flag for allowing dual restriction with BlockRestrictable
+  const bool _bnd_dual_restrictable;
+
+  /// Pointer to FEProblem
+  FEProblem * _bnd_feproblem;
+
+  /// Point to mesh
+  MooseMesh * _bnd_mesh;
 };
 
 template<typename T>
@@ -175,7 +182,7 @@ bool
 BoundaryRestrictable::hasBoundaryMaterialProperty(const std::string & name)
 {
   // Return true if the boundaries for this object are a subset of the boundaries for the material
-  return isBoundarySubset(_r_feproblem->getMaterialPropertyBoundaryIDs(name));
+  return isBoundarySubset(_bnd_feproblem->getMaterialPropertyBoundaryIDs(name));
 }
 
 #endif // BOUNDARYRESTRICTABLE_H

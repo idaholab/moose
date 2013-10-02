@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<BoundaryRestrictable>()
 {
   // Create instance of InputParameters
-  InputParameters params = validParams<RestrictableBase>();
+  InputParameters params = emptyInputParameters();
 
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries
   params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
@@ -26,23 +26,42 @@ InputParameters validParams<BoundaryRestrictable>()
   // Create a private parameter for storing the boundary IDs
   params.addPrivateParam<std::vector<BoundaryID> >("_boundary_ids", std::vector<BoundaryID>());
 
+  // A parameter for disabling error message for objects restrictable by boundary and block,
+  // if the parameter is valid it was already set so don't do anything
+  if (!params.isParamValid("_dual_restrictable"))
+    params.addPrivateParam<bool>("_dual_restrictable", false);
+
   return params;
 }
 
 BoundaryRestrictable::BoundaryRestrictable(const std::string name, InputParameters & parameters) :
-    RestrictableBase(name, parameters),
     _boundary_names(parameters.get<std::vector<BoundaryName> >("boundary")),
-    _boundary_id(parameters.isParamValid("_boundary_id") ? parameters.get<BoundaryID>("_boundary_id") : Moose::ANY_BOUNDARY_ID)
+    _boundary_id(parameters.isParamValid("_boundary_id") ?
+                 parameters.get<BoundaryID>("_boundary_id") : Moose::ANY_BOUNDARY_ID),
+    _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
+    _bnd_feproblem(parameters.isParamValid("_fe_problem") ?
+                   parameters.get<FEProblem *>("_fe_problem") : NULL),
+    _bnd_mesh(parameters.isParamValid("_mesh") ?
+              parameters.get<MooseMesh *>("_mesh") : NULL)
 {
+
+  // If the mesh pointer is not defined, but FEProblem is, get it from there
+  if (_bnd_feproblem != NULL && _bnd_mesh == NULL)
+    _bnd_mesh = &_bnd_feproblem->mesh();
+
+  // Check that the mesh pointer was defined, it is required for this class to operate
+  if (_bnd_mesh == NULL)
+    mooseError("The input paramters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
+
   // If the user supplies boundary IDs
   if (!_boundary_names.empty())
   {
-    std::vector<BoundaryID> ids = _r_mesh->getBoundaryIDs(_boundary_names, true);
+    std::vector<BoundaryID> ids = _bnd_mesh->getBoundaryIDs(_boundary_names, true);
     _bnd_ids.insert(ids.begin(), ids.end());
   }
 
   // Produce error if the object is not allowed to be both block and boundary restrictable
-  if (!_dual_restrictable && !_bnd_ids.empty())
+  if (!_bnd_dual_restrictable && !_bnd_ids.empty())
     if (parameters.isParamValid("_block_ids"))
     {
        std::vector<SubdomainID> blk_ids = parameters.get<std::vector<SubdomainID> >("_block_ids");
@@ -91,16 +110,16 @@ bool
 BoundaryRestrictable::hasBoundary(BoundaryName name)
 {
   // Create a vector and utilize the getBoundaryIDs function, which
-  // handles the ANY_BLOCK_ID (getBoundaryID does not)
+  // handles the ANY_BOUNDARY_ID (getBoundaryID does not)
   std::vector<BoundaryName> names(1);
   names[0] = name;
-  return hasBoundary(_r_mesh->getBoundaryIDs(names));
+  return hasBoundary(_bnd_mesh->getBoundaryIDs(names));
 }
 
 bool
 BoundaryRestrictable::hasBoundary(std::vector<BoundaryName> names)
 {
-  return hasBoundary(_r_mesh->getBoundaryIDs(names));
+  return hasBoundary(_bnd_mesh->getBoundaryIDs(names));
 }
 
 bool
@@ -156,7 +175,7 @@ bool
 BoundaryRestrictable::isBoundarySubset(std::set<BoundaryID> ids)
 {
   // An empty input is assumed to be ANY_BOUNDARY_ID
-  if (ids.size() == 0 || ids.count(Moose::ANY_BOUNDARY_ID))
+  if (ids.size() == 0 || ids.count(Moose::ANY_BOUNDARY_ID) > 0)
     return true;
   else
     return std::includes(ids.begin(), ids.end(), _bnd_ids.begin(), _bnd_ids.end());

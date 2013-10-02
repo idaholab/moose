@@ -17,7 +17,6 @@
 
 #include "InputParameters.h"
 #include "MooseTypes.h"
-#include "RestrictableBase.h"
 #include "FEProblem.h"
 
 class BlockRestrictable;
@@ -54,7 +53,7 @@ InputParameters validParams<BlockRestrictable>();
  * \see Kernel
  * \see SideSetsAroundSubdomain
  */
-class BlockRestrictable : public RestrictableBase
+class BlockRestrictable
 {
 public:
   /**
@@ -160,6 +159,16 @@ protected:
 
   /// Vector the block names
   std::vector<SubdomainName> _blocks;
+
+  /// Flag for allowing dual restriction
+  const bool _blk_dual_restrictable;
+
+  /// Pointer to FEProblem
+  FEProblem * _blk_feproblem;
+
+  /// Pointer to Mesh
+  MooseMesh * _blk_mesh;
+
 };
 
 template<typename T>
@@ -167,7 +176,7 @@ bool
 BlockRestrictable::hasBlockMaterialProperty(const std::string & name)
 {
   // Return true if the blocks for this object are a subset of the blocks for the material
-  return isBlockSubset(_r_feproblem->getMaterialPropertyBlocks(name));
+  return isBlockSubset(_blk_feproblem->getMaterialPropertyBlocks(name));
 }
 
 #endif // BLOCKRESTRICTABLE_H
