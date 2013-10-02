@@ -65,7 +65,7 @@ void dataStore(std::ostream & stream, T & v)
 }
 
 template<typename T>
-void dataStore(std::ostream & stream, T * & v)
+void dataStore(std::ostream & /*stream*/, T * & /*v*/)
 {
   mooseError("Cannot store raw pointers as restartable data!\nWrite a custom dataStore() template specialization!\n\n");
 }
@@ -142,7 +142,7 @@ void dataLoad(std::istream & stream, T & v)
 }
 
 template<typename T>
-void dataLoad(std::istream & stream, T * & v)
+void dataLoad(std::istream & /*stream*/, T * & /*v*/)
 {
   mooseError("Cannot load raw pointers as restartable data!\nWrite a custom dataLoad() template specialization!\n\n");
 }
