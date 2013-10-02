@@ -1,0 +1,19 @@
+[Tests]
+  [./pointer_store_error]
+    type = 'RunException'
+    input = 'pointer_store_error.i'
+    expect_err = 'Cannot store raw pointers'
+  [../]
+
+  [./pointer_load_error]
+    type = 'RunApp'
+    input = 'pointer_load_error.i'
+  [../]
+
+  [./pointer_load_error2]
+    type = 'RunException'
+    input = 'pointer_load_error2.i'
+    expect_err = 'Cannot load raw pointers'
+    prereq = pointer_load_error
+  [../]
+[]

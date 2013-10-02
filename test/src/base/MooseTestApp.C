@@ -101,6 +101,8 @@
 #include "InsideUserObject.h"
 #include "RestartableTypes.h"
 #include "RestartableTypesChecker.h"
+#include "PointerStoreError.h"
+#include "PointerLoadError.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -288,6 +290,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(InsideUserObject);
   registerUserObject(RestartableTypes);
   registerUserObject(RestartableTypesChecker);
+  registerUserObject(PointerStoreError);
+  registerUserObject(PointerLoadError);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
