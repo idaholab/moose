@@ -12,51 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef RESTRICTABLEBASE_H
-#define RESTRICTABLEBASE_H
+#ifndef MATTESTNEUMANNBC_H
+#define MATTESTNEUMANNBC_H
 
-#include "InputParameters.h"
-#include "MooseTypes.h"
-#include "FEProblem.h"
+#include "NeumannBC.h"
 
-// Forward declerations
-class RestrictableBase;
+class MatTestNeumannBC;
 
 template<>
-InputParameters validParams<RestrictableBase>();
+InputParameters validParams<MatTestNeumannBC>();
 
 /**
- * A base class for creating restricted objects
- * \see BlockRestrictable BoundaryRestrictable
+ * Neumann boundary condition for testing BoundaryRestrictable class
  */
-class RestrictableBase
+class MatTestNeumannBC : public NeumannBC
 {
 public:
-
-  /**
-   * Class constructor
-   * Populates the FEProblem and MooseMesh pointers
-   */
-  RestrictableBase(const std::string name, InputParameters & parameters);
-
-  /**
-   * Emtpy destructor
-   */
-  virtual ~RestrictableBase();
+  MatTestNeumannBC(const std::string & name, InputParameters parameters);
 
 protected:
 
-  /// Pointer to the FEProblem class
-  FEProblem * _r_feproblem;
+  virtual Real computeQpResidual();
 
-  /// Pointer to the MooseMesh class
-  MooseMesh * _r_mesh;
+  const std::string _prop_name;
 
-  /// The parent object name, included for better error messages
-  const std::string _r_name;
-
-  /// A flag for disabling dual block/boundary restriction errors
-  const bool _dual_restrictable;
+  MaterialProperty<Real> * _value;
 };
 
-#endif // RESTRICTABLEBASE
+#endif /* MATTESTNEUMANNBC_H */

@@ -750,7 +750,6 @@ void
 FEProblem::addGhostedBoundary(BoundaryID boundary_id)
 {
   _mesh.addGhostedBoundary(boundary_id);
-
   if(_displaced_problem)
     _displaced_mesh->addGhostedBoundary(boundary_id);
 }
@@ -1356,12 +1355,15 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
 //  parameters.set<SubProblem *>("_subproblem") = this;
 //  parameters.set<SubProblem *>("_subproblem_displaced") = _displaced_problem;
 
+  // Get user-defined list of block names
   std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
   std::vector<SubdomainID> block_ids(blocks.size());
 
+  // Get user-defined list of boundary names
   std::vector<BoundaryName> boundaries = parameters.get<std::vector<BoundaryName> >("boundary");
   std::vector<BoundaryID> boundary_ids(boundaries.size());
 
+  // Convert the ids to names
   for (unsigned int i=0; i<blocks.size(); ++i)
     block_ids[i] = _mesh.getSubdomainID(blocks[i]);
   for (unsigned int i=0; i < boundaries.size(); ++i)
@@ -1371,7 +1373,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    if (blocks.size() > 0)
+    if (block_ids.size() > 0)
     {
       // volume material
       parameters.set<bool>("_bnd") = false;
@@ -1400,7 +1402,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       _materials[tid].addNeighborMaterial(block_ids, neighbor_material);
       _objects_by_name[tid][name].push_back(neighbor_material);
     }
-    else if (boundaries.size() > 0)
+    else if (boundary_ids.size() > 0)
     {
       parameters.set<bool>("_bnd") = true;
       parameters.set<bool>("_neighbor") = false;
@@ -1412,7 +1414,6 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
     }
     else
       mooseError("Material '" + name + "' did not specify either block or boundary parameter");
-
   }
 }
 
@@ -1648,56 +1649,33 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    // distinguish between side and the rest of PPs to provide the right material object
+    // Set a pointer to the correct material data; assume that it is a non-boundary material unless proven
+    // to be otherwise
+    MaterialData * mat_data = _material_data[tid];
     if(parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal"))
+       mat_data = _bnd_material_data[tid];
+
+    if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+      _reinit_displaced_face = true;
+
+    parameters.set<MaterialData *>("_material_data") = mat_data;
+
+    MooseObject * mo = _factory.create(pp_name, name, parameters);
+    if(!mo)
+      mooseError("Unable to determine type for Postprocessor: " + mo->name());
+
+    Postprocessor * pp = getPostprocessorPointer(mo);
+    _pps(type)[tid].addPostprocessor(pp);
+    _pps_data[tid]->init(name);
+    _objects_by_name[tid][name].push_back(mo);
+
+    // Add it to the user object warehouse as well...
     {
-      if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-        _reinit_displaced_face = true;
+      UserObject * user_object = dynamic_cast<UserObject *>(mo);
+      if(!user_object)
+        mooseError("Unknown user object type: " + pp_name);
 
-      parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-
-      MooseObject * mo = _factory.create(pp_name, name, parameters);
-      if(!mo)
-        mooseError("Unable to determine type for Postprocessor: " + mo->name());
-
-      Postprocessor * pp = getPostprocessorPointer(mo);
-      _pps(type)[tid].addPostprocessor(pp);
-      _pps_data[tid]->init(name);
-      _objects_by_name[tid][name].push_back(mo);
-
-      // Add it to the user object warehouse as well...
-      {
-        UserObject * user_object = dynamic_cast<UserObject *>(mo);
-        if(!user_object)
-          mooseError("Unknown user object type: " + pp_name);
-
-        _user_objects(type)[tid].addUserObject(user_object);
-      }
-    }
-    else
-    {
-      if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-        _reinit_displaced_elem = true;
-
-      parameters.set<MaterialData *>("_material_data") = _material_data[tid];
-
-      MooseObject * mo = _factory.create(pp_name, name, parameters);
-      if(!mo)
-        mooseError("Unable to determine type for Postprocessor: " + mo->name());
-
-      Postprocessor * pp = getPostprocessorPointer(mo);
-      _pps(type)[tid].addPostprocessor(pp);
-      _pps_data[tid]->init(name);
-      _objects_by_name[tid][name].push_back(mo);
-
-      // Add it to the user object warehouse as well...
-      {
-        UserObject * user_object = dynamic_cast<UserObject *>(mo);
-        if(!user_object)
-          mooseError("Unknown user object type: " + pp_name);
-
-        _user_objects(type)[tid].addUserObject(user_object);
-      }
+      _user_objects(type)[tid].addUserObject(user_object);
     }
   }
 }
@@ -1735,38 +1713,25 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    // distinguish between side and the rest of USER_OBJECTs to provide the right material object
+    // Set a pointer to the correct material data; assume that it is a non-boundary material unless proven
+    // to be otherwise
+    MaterialData * mat_data = _material_data[tid];
     if(parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal"))
-    {
-      if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-        _reinit_displaced_face = true;
+       mat_data = _bnd_material_data[tid];
 
-      parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
+    if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+      _reinit_displaced_face = true;
 
-      MooseObject * mo = _factory.create(user_object_name, name, parameters);
+    parameters.set<MaterialData *>("_material_data") = mat_data;
 
-      UserObject * user_object = dynamic_cast<UserObject *>(mo);
-      if(!user_object)
-        mooseError("Unknown user object type: " + user_object_name);
+    MooseObject * mo = _factory.create(user_object_name, name, parameters);
 
-      _user_objects(type)[tid].addUserObject(user_object);
-      _objects_by_name[tid][name].push_back(mo);
-    }
-    else
-    {
-      if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-        _reinit_displaced_elem = true;
+    UserObject * user_object = dynamic_cast<UserObject *>(mo);
+    if(!user_object)
+      mooseError("Unknown user object type: " + user_object_name);
 
-      parameters.set<MaterialData *>("_material_data") = _material_data[tid];
-      MooseObject * mo = _factory.create(user_object_name, name, parameters);
-
-      UserObject * user_object = dynamic_cast<UserObject *>(mo);
-      if(!user_object)
-        mooseError("Unknown user object type: " + user_object_name);
-
-      _user_objects(type)[tid].addUserObject(user_object);
-      _objects_by_name[tid][name].push_back(mo);
-    }
+    _user_objects(type)[tid].addUserObject(user_object);
+    _objects_by_name[tid][name].push_back(mo);
   }
 }
 
@@ -1876,7 +1841,7 @@ FEProblem::computeIndicatorsAndMarkers()
 
 void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)
 {
-  if (pps[0].blocks().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0 || pps[0].blockNodalIds().size() > 0 || pps[0].internalSideUserObjects(group).size() > 0)
+  if (pps[0].blockIds().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0 || pps[0].blockNodalIds().size() > 0 || pps[0].internalSideUserObjects(group).size() > 0)
   {
 
     /* Note: The fact that we compute the aux system when we compute the user_objects
@@ -1902,8 +1867,8 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
     bool have_nodal_uo = false;
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      for (std::set<SubdomainID>::const_iterator block_it = pps[tid].blocks().begin();
-          block_it != pps[tid].blocks().end();
+      for (std::set<SubdomainID>::const_iterator block_it = pps[tid].blockIds().begin();
+          block_it != pps[tid].blockIds().end();
           ++block_it)
       {
         SubdomainID block_id = *block_it;
@@ -1976,8 +1941,8 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
       ComputeUserObjectsThread cppt(*this, getNonlinearSystem(), *getNonlinearSystem().currentSolution(), pps, group);
       Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
 
-      for (std::set<SubdomainID>::const_iterator block_ids_it = pps[0].blocks().begin();
-           block_ids_it != pps[0].blocks().end();
+      for (std::set<SubdomainID>::const_iterator block_ids_it = pps[0].blockIds().begin();
+           block_ids_it != pps[0].blockIds().end();
            ++block_ids_it)
       {
         SubdomainID block_id = *block_ids_it;
@@ -2141,9 +2106,9 @@ void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pp
               // store the value in each thread
               for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
                 _pps_data[tid]->storeValue(name, value);
-            }
 
-            already_gathered.insert(ps);
+              already_gathered.insert(ps);
+            }
           }
         }
       }
@@ -3370,6 +3335,7 @@ FEProblem::checkProblemIntegrity()
 {
   // Check for unsatisfied actions
   const std::set<SubdomainID> & mesh_subdomains = _mesh.meshSubdomains();
+
   // Check kernel coverage of subdomains (blocks) in the mesh
   if(_solve)
     _nl.checkKernelCoverage(mesh_subdomains);
@@ -3394,6 +3360,7 @@ FEProblem::checkProblemIntegrity()
 #endif
 
     std::set<SubdomainID> local_mesh_subs(mesh_subdomains);
+
     /**
      * If a material is specified for any block in the simulation, then all blocks must
      * have a material specified.
@@ -3401,7 +3368,7 @@ FEProblem::checkProblemIntegrity()
     bool check_material_coverage = false;
     for (std::set<SubdomainID>::const_iterator i = _materials[0].blocks().begin(); i != _materials[0].blocks().end(); ++i)
     {
-      if (mesh_subdomains.find(*i) == mesh_subdomains.end())
+      if (*i != Moose::ANY_BLOCK_ID && mesh_subdomains.find(*i) == mesh_subdomains.end())
       {
         std::stringstream oss;
         oss << "Material block \"" << *i << "\" specified in the input file does not exist";
@@ -3422,8 +3389,9 @@ FEProblem::checkProblemIntegrity()
       mooseError("The following blocks from your input mesh do not contain on active material: " + extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, all blocks must contain a Material object.\n");
     }
 
-    // Check material properties
-    checkMatProps();
+    // Check material properties on blocks and boundaries
+    checkBlockMatProps();
+    //checkBoundaryMatProps();
 
     // Check that material properties exist when requested by other properties on a given block
     _materials[0].checkMaterialDependSanity();
@@ -3455,7 +3423,7 @@ FEProblem::checkUserObjects()
     for (std::vector<UserObject *>::const_iterator it = _user_objects(types[i])[0].all().begin(); it != _user_objects(types[i])[0].all().end(); ++it)
       names.insert((*it)->name());
 
-    user_objects_blocks.insert(_user_objects(types[i])[0].blocks().begin(), _user_objects(types[i])[0].blocks().end());
+    user_objects_blocks.insert(_user_objects(types[i])[0].blockIds().begin(), _user_objects(types[i])[0].blockIds().end());
   }
 
   // See if all referenced blocks are covered

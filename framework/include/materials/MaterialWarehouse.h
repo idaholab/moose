@@ -78,24 +78,35 @@ public:
    * @return The list of subdomain IDs
    */
   const std::set<SubdomainID> & blocks() { return _blocks; }
+
+  /**
+   * Get the list of boundary ids that the materials are defined
+   * @return The set of Boundary IDs
+   */
   const std::set<BoundaryID> & boundaries() { return _boundaries; }
 
   /// This function displays a list of active materials and the properties they supply
   void printMaterialMap();
+
+
   void checkMaterialDependSanity();
 
 protected:
   /// A list of material associated with the block (subdomain)
   std::map<SubdomainID, std::vector<Material *> > _active_materials;
+
   /// A list of face materials associated with the block (subdomain)
   std::map<SubdomainID, std::vector<Material *> > _active_face_materials;
+
   /// A list of neighbor materials associated with the block (subdomain) (for DG)
   std::map<SubdomainID, std::vector<Material *> > _active_neighbor_materials;
-  /// A list of boundary materials associated with the block (subdomain)
+
+  /// A list of boundary materials associated with the boundary (boundary)
   std::map<BoundaryID, std::vector<Material *> > _active_boundary_materials;
 
   /// Set of blocks where materials are defined
   std::set<SubdomainID> _blocks;
+
   /// Set of boundaries where materials are defined
   std::set<BoundaryID> _boundaries;
 

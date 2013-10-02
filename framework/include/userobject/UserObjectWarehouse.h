@@ -122,7 +122,7 @@ public:
    * Get the list of blocks with user_objects
    * @return The list of block IDs with user_objects
    */
-  const std::set<SubdomainID> & blocks() { return _block_ids_with_user_objects; }
+  const std::set<SubdomainID> & blockIds() { return _block_ids_with_user_objects; }
 
   /**
    * Get the list of boundary IDs with user_objects

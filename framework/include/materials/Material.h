@@ -145,10 +145,12 @@ protected:
 
   MooseMesh & _mesh;
   unsigned int _dim;
+
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;
 
   std::set<std::string> _depend_props;
+
   std::set<std::string> _supplied_props;
 
   enum QP_Data_Type {
@@ -229,6 +231,7 @@ private:
    */
   void registerPropName(std::string prop_name, bool is_get)
   {
+    // Store material properties for block ids
     for (std::set<SubdomainID>::const_iterator it = _blk_ids.begin(); it != _blk_ids.end(); ++it)
     {
       // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
@@ -237,8 +240,18 @@ private:
       _fe_problem.storeMatPropName(*it, prop_name);
       _subproblem.storeMatPropName(*it, prop_name);
     }
-  }
 
+    // Store material properites for the boundary ids
+    for (std::set<BoundaryID>::const_iterator it = _bnd_ids.begin(); it != _bnd_ids.end(); ++it)
+    {
+      // \TODO: see ticket #2192
+      // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
+      // if (!is_get)
+      //  _supplied_props.insert(prop_name);
+      _fe_problem.storeMatPropName(*it, prop_name);
+      _subproblem.storeMatPropName(*it, prop_name);
+    }
+  }
 
   bool _has_stateful_property;
 };
@@ -248,8 +261,9 @@ template<typename T>
 MaterialProperty<T> &
 Material::getMaterialProperty(const std::string & name)
 {
+  // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
   _depend_props.insert(name);
-  return declareProperty<T>(name, true);      ///< the property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
+  return declareProperty<T>(name, true);
 }
 
 template<typename T>

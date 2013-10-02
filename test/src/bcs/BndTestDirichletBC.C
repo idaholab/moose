@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<BndTestDirichletBC>()
 {
   InputParameters p = validParams<NodalBC>();
-  MooseEnum test("none, boundaryNames, boundaryIDs, hasBoundary", "none", "Select a test");
+  MooseEnum test("none, boundaryNames, boundaryIDs, hasBoundary, isBoundarySubset, hasBoundaryMaterialProperty_true, hasBoundaryMaterialProperty_false", "none", "Select a test");
   p.addParam<MooseEnum>("test", test, "Select the desired test");
   p.addRequiredParam<Real>("value", "Value of the BC");
   return p;
@@ -126,6 +126,23 @@ BndTestDirichletBC::BndTestDirichletBC(const std::string & name, InputParameters
       mooseError("isBoundarySubset test passed"); // expetect error
     else
       mooseError("isBoundarySubset test failed");
+  }
+
+  // Test that hasMaterialPropertyBoundary is working properly
+  else if (test == "hasBoundaryMaterialProperty_true")
+  {
+    if (hasBoundaryMaterialProperty<Real>("a"))
+      mooseError("hasBoundaryMaterialProperty is true, test passed"); // expected error
+    else
+      mooseError("hasBoundaryMaterialProperty is false, test failed");
+  }
+
+  else if (test == "hasBoundaryMaterialProperty_false")
+  {
+    if (hasBoundaryMaterialProperty<Real>("b"))
+      mooseError("hasBoundaryMaterialProperty is true, test failed");
+    else
+      mooseError("hasBoundaryMaterialProperty is false, test passed"); // expected error
   }
 }
 

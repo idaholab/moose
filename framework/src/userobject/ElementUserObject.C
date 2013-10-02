@@ -22,16 +22,13 @@ InputParameters validParams<ElementUserObject>()
   InputParameters params = validParams<UserObject>();
   params += validParams<BlockRestrictable>();
 
-  std::vector<SubdomainName> block_everywhere(1);
-  block_everywhere[0] = "ANY_BLOCK_ID";
-  params.set<std::vector<SubdomainName> >("block") = block_everywhere;
-
   return params;
 }
 
 ElementUserObject::ElementUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
-    BlockRestrictable(parameters),
+    BlockRestrictable(name, parameters),
+    MaterialPropertyInterface(parameters),
     UserObjectInterface(parameters),
     Coupleable(parameters, false),
     MooseVariableDependencyInterface(),

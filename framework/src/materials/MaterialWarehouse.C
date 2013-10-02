@@ -226,12 +226,10 @@ void MaterialWarehouse::addNeighborMaterial(std::vector<SubdomainID> blocks, Mat
 void MaterialWarehouse::addBoundaryMaterial(std::vector<BoundaryID> boundaries, Material *material)
 {
   _mats.push_back(material);
-
-  for (unsigned int i = 0; i < boundaries.size(); ++i)
+  for (std::vector<BoundaryID>::const_iterator it = boundaries.begin(); it != boundaries.end(); ++it)
   {
-    SubdomainID bnd_id = boundaries[i];
-    _boundaries.insert(bnd_id);
-    _active_boundary_materials[bnd_id].push_back(material);
+    _boundaries.insert(*it);
+    _active_boundary_materials[*it].push_back(material);
     _mat_by_name[material->name()].push_back(material);
   }
 }

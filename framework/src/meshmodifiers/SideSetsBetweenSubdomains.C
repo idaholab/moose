@@ -29,7 +29,7 @@ InputParameters validParams<SideSetsBetweenSubdomains>()
 
 SideSetsBetweenSubdomains::SideSetsBetweenSubdomains(const std::string & name, InputParameters parameters):
     MeshModifier(name, parameters),
-    BoundaryRestrictableRequired(parameters)
+    BoundaryRestrictableRequired(name, parameters)
 {
 }
 

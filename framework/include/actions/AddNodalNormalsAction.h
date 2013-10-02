@@ -42,7 +42,13 @@ public:
   virtual void act();
 
 protected:
+  /// The supplied boundary name from the user
   std::vector<BoundaryName> _boundary;
+
+  /// Flag for testing the existance of the corner boundary input
+  bool _has_corners;
+
+  /// The supplied boundary name for the corner boundary
   BoundaryName _corner_boundary;
 };
 

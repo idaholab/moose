@@ -20,6 +20,7 @@
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
+#include "MaterialPropertyInterface.h"
 #include "Problem.h"
 
 
@@ -33,6 +34,7 @@ InputParameters validParams<GeneralUserObject>();
  * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
 class GeneralUserObject :
   public UserObject,
+  public MaterialPropertyInterface,
   public TransientInterface,
   public FunctionInterface,
   public UserObjectInterface,

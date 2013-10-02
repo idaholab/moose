@@ -7,12 +7,12 @@
     type = ParsedFunction
     value = x*x+y*y
   [../]
-  
+
   [./f_fn]
     type = ParsedFunction
     value = -4
   [../]
- 
+
   [./analytical_normal_x]
     type = ParsedFunction
     value = x

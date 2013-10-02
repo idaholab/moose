@@ -17,6 +17,7 @@
 
 #include "UserObject.h"
 #include "Coupleable.h"
+#include "MaterialPropertyInterface.h"
 #include "MooseVariableDependencyInterface.h"
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
@@ -32,6 +33,7 @@ InputParameters validParams<InternalSideUserObject>();
  */
 class InternalSideUserObject :
   public UserObject,
+  public MaterialPropertyInterface,
   public NeighborCoupleable,
   public MooseVariableDependencyInterface,
   public UserObjectInterface,

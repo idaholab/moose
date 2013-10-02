@@ -25,13 +25,14 @@ InputParameters validParams<SideSetsAroundSubdomain>()
   InputParameters params = validParams<MeshModifier>();
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictableRequired>();
+  params.set<bool>("_dual_restrictable") = true;
   return params;
 }
 
 SideSetsAroundSubdomain::SideSetsAroundSubdomain(const std::string & name, InputParameters parameters):
     MeshModifier(name, parameters),
-    BlockRestrictable(parameters),
-    BoundaryRestrictableRequired(parameters)
+    BlockRestrictable(name, parameters),
+    BoundaryRestrictableRequired(name, parameters)
 {
 }
 

@@ -59,10 +59,9 @@
 [Materials]
   [./gcm]
     type = GenericConstantMaterial
-    block = 0
     prop_values = 2
     prop_names = diffusivity
-    boundary = right
+    boundary = 'right top'
   [../]
 []
 
@@ -87,3 +86,6 @@
   exodus = true
 []
 
+[Debug]
+  show_material_props = true
+[]

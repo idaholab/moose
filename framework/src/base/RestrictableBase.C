@@ -14,9 +14,24 @@
 
 #include "RestrictableBase.h"
 
-RestrictableBase::RestrictableBase(InputParameters & parameters) :
+template<>
+InputParameters validParams<RestrictableBase>()
+{
+  // Create instance of InputParameters
+  InputParameters params = emptyInputParameters();
+
+  // A parameter for disabling error message for objects restrictable by boundary and block
+  params.addPrivateParam<bool>("_dual_restrictable", false);
+
+  // Return the parameters
+  return params;
+}
+
+RestrictableBase::RestrictableBase(const std::string name, InputParameters & parameters) :
     _r_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
-    _r_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL)
+    _r_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
+    _r_name(name),
+    _dual_restrictable(parameters.get<bool>("_dual_restrictable"))
 {
 
   // If the mesh pointer is not defined, but FEProblem is, get it from there

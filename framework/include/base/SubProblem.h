@@ -163,14 +163,61 @@ public:
 
   // Geom Search
   virtual void updateGeomSearch() = 0;
+
   virtual GeometricSearchData & geomSearchData() = 0;
 
   virtual void meshChanged();
 
+  /**
+   * Adds the given material property to a storage map based on block ids
+   *
+   * This is method is called from within the Material class when the property
+   * is begin registered.
+   * @param block_id The block id for the MaterialProperty
+   * @param name The name of the property
+   */
   virtual void storeMatPropName(SubdomainID block_id, const std::string & name);
-  virtual void delayedCheckMatProp(SubdomainID block_id, const std::string & name);
 
-  virtual void checkMatProps();
+  /**
+   * Adds the given material property to a storage map based on boundary ids
+   *
+   * This is method is called from within the Material class when the property
+   * is begin registered.
+   * @param boundary_id The block id for the MaterialProperty
+   * @param name The name of the property
+   */
+  virtual void storeMatPropName(BoundaryID boundary_id, const std::string & name);
+
+  /**
+   * Adds to a map based on block ids of material properties to validate
+   *
+   * @param block_id The block id for the MaterialProperty
+   * @param name The name of the property
+   */
+  virtual void storeDelayedCheckMatProp(SubdomainID block_id, const std::string & name);
+
+  /**
+   * Adds to a map based on boundary ids of material properties to validate
+   *
+   * @param boundary_id The block id for the MaterialProperty
+   * @param name The name of the property
+   */
+  virtual void storeDelayedCheckMatProp(BoundaryID boundary_id, const std::string & name);
+
+  /**
+   * Checks block material properties integrity
+   *
+   * \see FEProblem::checkProblemIntegrity
+   */
+  virtual void checkBlockMatProps();
+
+  /**
+   * Checks boundary material properties integrity
+   *
+   * \see FEProblem::checkProblemIntegrity
+   */
+  virtual void checkBoundaryMatProps();
+
   /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor
    */
@@ -189,12 +236,22 @@ public:
   /**
    * Get a vector containing the block ids the material property is defined on.
    */
-  virtual std::vector<SubdomainID> getMaterialPropertyBlocks(const std::string prop_name);
+  virtual std::vector<SubdomainID> getMaterialPropertyBlocks(const std::string & prop_name);
 
   /**
    * Get a vector of block id equivalences that the material property is defined on.
    */
-  virtual std::vector<SubdomainName> getMaterialPropertyBlockNames(const std::string prop_name);
+  virtual std::vector<SubdomainName> getMaterialPropertyBlockNames(const std::string & prop_name);
+
+  /**
+   * Get a vector containing the block ids the material property is defined on.
+   */
+  virtual std::vector<BoundaryID> getMaterialPropertyBoundaryIDs(const std::string & prop_name);
+
+  /**
+   * Get a vector of block id equivalences that the material property is defined on.
+   */
+  virtual std::vector<BoundaryName> getMaterialPropertyBoundaryNames(const std::string & prop_name);
 
   /**
    * Returns true if the problem is in the process of computing it's initial residual.
@@ -207,6 +264,7 @@ public:
    * @return The list
    */
   virtual std::set<unsigned int> & ghostedElems() { return _ghosted_elems; }
+
 public:
   /**
    * Convenience zeros
@@ -225,11 +283,17 @@ protected:
 
   DiracKernelInfo _dirac_kernel_info;
 
-  /// the map of material properties (block_id -> list of properties)
-  std::map<unsigned int, std::set<std::string> > _map_material_props;
+  /// Map of material properties (block_id -> list of properties)
+  std::map<unsigned int, std::set<std::string> > _map_block_material_props;
+
+  /// Map for boundary material properties (boundary_id -> list of properties)
+  std::map<unsigned int, std::set<std::string> > _map_boundary_material_props;
 
   /// the map of properties requested (need to be checked)
-  std::map<unsigned int, std::set<std::string> > _map_material_props_check;
+  std::map<unsigned int, std::set<std::string> > _map_block_material_props_check;
+
+  /// the map of properties requested (need to be checked)
+  std::map<unsigned int, std::set<std::string> > _map_boundary_material_props_check;
 
   /// This is the set of MooseVariables that will actually get reinited by a call to reinit(elem)
   std::vector<std::set<MooseVariable *> > _active_elemental_moose_variables;
@@ -242,8 +306,20 @@ protected:
 
   /// Where the restartable data is held (indexed on tid)
   RestartableDatas _restartable_data;
-};
 
+private:
+
+/**
+   * Helper method for peforming material property checks
+   * @param props Reference to the map of properties known
+   * @param check_props Reference to the map of properities to check
+   * \see checkBlockMatProps
+   * \see checkBoundaryMatProps
+   */
+  void checkMatProps(std::map<unsigned int, std::set<std::string> > & props,
+                     std::map<unsigned int, std::set<std::string> > & check_props,
+                     std::string type);
+};
 
 namespace Moose
 {
@@ -251,6 +327,5 @@ namespace Moose
 void initial_condition(EquationSystems & es, const std::string & system_name);
 
 } // namespace Moose
-
 
 #endif /* SUBPROBLEM_H */

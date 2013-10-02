@@ -13,6 +13,7 @@
 #include "GaussContForcing.h"
 #include "CoefDiffusion.h"
 #include "RestartDiffusion.h"
+#include "MatCoefDiffusion.h"
 #include "Convection.h"
 #include "PolyDiffusion.h"
 #include "PolyConvection.h"
@@ -42,6 +43,7 @@
 #include "SplineFFn.h"
 #include "BlkResTestDiffusion.h"
 
+
 #include "CoupledAux.h"
 #include "CoupledGradAux.h"
 #include "PolyConstantAux.h"
@@ -64,6 +66,7 @@
 #include "DivergenceBC.h"
 #include "ScalarVarBC.h"
 #include "BndTestDirichletBC.h"
+#include "MatTestNeumannBC.h"
 
 #include "TEIC.h"
 
@@ -181,6 +184,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(GaussContForcing);
   registerKernel(CoefDiffusion);
   registerKernel(RestartDiffusion);
+  registerKernel(MatCoefDiffusion);
   registerKernel(Convection);
   registerKernel(PolyDiffusion);
   registerKernel(PolyConvection);
@@ -209,7 +213,6 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(CoupledKernelValueTest);
   registerKernel(SplineFFn);
   registerKernel(BlkResTestDiffusion);
-  registerKernel(BndTestDirichletBC);
 
   // Aux kernels
   registerAux(CoupledAux);
@@ -236,6 +239,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerBoundaryCondition(OnOffDirichletBC);
   registerBoundaryCondition(OnOffNeumannBC);
   registerBoundaryCondition(ScalarVarBC);
+  registerBoundaryCondition(BndTestDirichletBC);
+  registerBoundaryCondition(MatTestNeumannBC);
 
   registerBoundaryCondition(DGMDDBC);
   registerBoundaryCondition(DGFunctionConvectionDirichletBC);

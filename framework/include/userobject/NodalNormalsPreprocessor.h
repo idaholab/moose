@@ -16,6 +16,8 @@
 #define NODALNORMALSPREPROCESSOR_H
 
 #include "ElementUserObject.h"
+#include "SideUserObject.h"
+#include "BoundaryRestrictable.h"
 #include "libmesh/fe.h"
 
 class NodalNormalsPreprocessor;
@@ -27,7 +29,9 @@ InputParameters validParams<NodalNormalsPreprocessor>();
 /**
  *
  */
-class NodalNormalsPreprocessor : public ElementUserObject
+class NodalNormalsPreprocessor :
+  public ElementUserObject,
+  public BoundaryRestrictable
 {
 public:
   NodalNormalsPreprocessor(const std::string & name, InputParameters parameters);

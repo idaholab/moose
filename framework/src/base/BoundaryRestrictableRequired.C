@@ -17,12 +17,16 @@
 template<>
 InputParameters validParams<BoundaryRestrictableRequired>()
 {
-  InputParameters params = emptyInputParameters();
+  InputParameters params = validParams<RestrictableBase>();
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
+
+  // Create a private parameter for storing the boundary IDs
+  params.addPrivateParam<std::vector<BoundaryID> >("_boundary_ids", std::vector<BoundaryID>());
+
   return params;
 }
 
-BoundaryRestrictableRequired::BoundaryRestrictableRequired(InputParameters & parameters) :
-    BoundaryRestrictable(parameters)
+BoundaryRestrictableRequired::BoundaryRestrictableRequired(const std::string name, InputParameters & parameters) :
+    BoundaryRestrictable(name, parameters)
 {
 }

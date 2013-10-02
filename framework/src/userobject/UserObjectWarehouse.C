@@ -231,90 +231,90 @@ UserObjectWarehouse::jacobianSetup()
 void
 UserObjectWarehouse::addUserObject(UserObject *user_object)
 {
+  // Add the object and its name to the lists of all objects
   _all_user_objects.push_back(user_object);
   _name_to_user_objects[user_object->name()] = user_object;
 
+  // Add an ElementUserObject
   if(dynamic_cast<ElementUserObject*>(user_object))
   {
-    ElementUserObject * elem_pp = dynamic_cast<ElementUserObject*>(user_object);
-    MooseMesh &mesh = elem_pp->getSubProblem().mesh();
-    const std::vector<SubdomainName> & blocks = elem_pp->blocks();
-    for (std::vector<SubdomainName>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
-    {
-      SubdomainID block_id;
-      // Switch the Any Block Id string to a number type here
-      if (*it == "ANY_BLOCK_ID")
-        block_id = Moose::ANY_BLOCK_ID;
-      else
-        block_id = mesh.getSubdomainID(*it);
-      _element_user_objects[block_id].push_back(elem_pp);
-      _all_element_user_objects.push_back(elem_pp);
-      _block_ids_with_user_objects.insert(block_id);
-    }
+    // Extract the blockIDs (see by BlockRestrictable)
+    ElementUserObject * elem_uo = dynamic_cast<ElementUserObject*>(user_object);
+    const std::set<SubdomainID> & blocks = elem_uo->blockIDs();
+
+    // Add the to list of all ElementUserObjects
+    _all_element_user_objects.push_back(elem_uo);
+
+    // Loop through each of the block ids and update the various storage lists
+    for (std::set<SubdomainID>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+      {
+        _element_user_objects[*it].push_back(elem_uo);
+        _block_ids_with_user_objects.insert(*it);
+      }
   }
+
+  // Add a SideUserObject
   else if(dynamic_cast<SideUserObject*>(user_object))
   {
-    SideUserObject * side_pp = dynamic_cast<SideUserObject*>(user_object);
-    MooseMesh &mesh = side_pp->getSubProblem().mesh();
+    // Extract the BoundaryIDs (see BoundaryRestrictable)
+    SideUserObject * side_uo = dynamic_cast<SideUserObject*>(user_object);
+    const std::set<BoundaryID> & bnds = side_uo->boundaryIDs();
 
-    const std::vector<BoundaryName> & bnds = side_pp->boundaryNames();
-    for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
+    // Add to the list of all SideUserObjects
+    _all_side_user_objects.push_back(side_uo);
+
+    // Loop through each of the block ids and update the various storage lists
+    for (std::set<BoundaryID>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
     {
-      BoundaryID boundary_id = mesh.getBoundaryID(*it);
-
-      _side_user_objects[boundary_id].push_back(side_pp);
-      _all_side_user_objects.push_back(side_pp);
-      _boundary_ids_with_user_objects.insert(boundary_id);
+      _side_user_objects[*it].push_back(side_uo);
+      _boundary_ids_with_user_objects.insert(*it);
     }
   }
+
+  // Add an InternalSideUserObject
   else if(dynamic_cast<InternalSideUserObject*>(user_object))
   {
     InternalSideUserObject * int_side_uo = dynamic_cast<InternalSideUserObject*>(user_object);
     _internal_side_user_objects.push_back(int_side_uo);
   }
+
+  // Add a NodalUserObject
   else if(dynamic_cast<NodalUserObject*>(user_object))
   {
-    NodalUserObject * nodal_pp = dynamic_cast<NodalUserObject*>(user_object);
-    MooseMesh &mesh = nodal_pp->getSubProblem().mesh();
+    // Extract the Boundary and Block Ids (see BoundaryRestrictable and BlockRestrictable)
+    NodalUserObject * nodal_uo = dynamic_cast<NodalUserObject*>(user_object);
+    const std::set<BoundaryID> & bnds = nodal_uo->boundaryIDs();
+    const std::set<SubdomainID> & blks = nodal_uo->blockIDs();
 
-    // NodalUserObjects can be "block" restricted or "boundary" restricted
-    const std::vector<BoundaryName> & bnds = nodal_pp->boundaryNames();
-    const std::vector<SubdomainName> & blocks = nodal_pp->blocks();
+    // Update the list of all NodalUserObjects
+    _all_nodal_user_objects.push_back(nodal_uo);
 
-    if (blocks[0] == "ANY_BLOCK_ID")
-      for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
+    // If the Block IDs does not contain ANY_BLOCK_ID, then the object is block restricted
+    if (blks.find(Moose::ANY_BLOCK_ID) == blks.end())
+       for (std::set<SubdomainID>::const_iterator it = blks.begin(); it != blks.end(); ++it)
       {
-        BoundaryID boundary_id;
-
-        if (*it == "ANY_BOUNDARY_ID")
-          boundary_id = Moose::ANY_BOUNDARY_ID;
-        else
-          boundary_id = mesh.getBoundaryID(*it);
-        _nodal_user_objects[boundary_id].push_back(nodal_pp);
-        _all_nodal_user_objects.push_back(nodal_pp);
-        _nodeset_ids_with_user_objects.insert(boundary_id);
+        _block_nodal_user_objects[*it].push_back(nodal_uo);
+        _block_ids_with_nodal_user_objects.insert(*it);
       }
+
+    // Otherwise the objects is boundary restricted
     else
-      for (std::vector<SubdomainName>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+      for (std::set<BoundaryID>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
       {
-        SubdomainID block_id;
-
-        if (*it == "ANY_BLOCK_ID")
-          block_id = Moose::ANY_BLOCK_ID;
-        else
-          block_id = mesh.getSubdomainID(*it);
-        _block_nodal_user_objects[block_id].push_back(nodal_pp);
-        _all_nodal_user_objects.push_back(nodal_pp);
-        _block_ids_with_nodal_user_objects.insert(block_id);
+        _nodal_user_objects[*it].push_back(nodal_uo);
+        _nodeset_ids_with_user_objects.insert(*it);
       }
+
   }
+
+  // Add a GeneralUserObject
   else
   {
-    GeneralUserObject * general_pp = dynamic_cast<GeneralUserObject*>(user_object);
+    GeneralUserObject * general_uo = dynamic_cast<GeneralUserObject*>(user_object);
 
     // FIXME: generic pps multithreaded
-    _generic_user_objects.push_back(general_pp);
-    _all_generic_user_objects.push_back(general_pp);
+    _generic_user_objects.push_back(general_uo);
+    _all_generic_user_objects.push_back(general_uo);
   }
 }
 

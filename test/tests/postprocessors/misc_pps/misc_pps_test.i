@@ -105,7 +105,7 @@
     type = GenericConstantMaterial
     prop_names = diffusivity
     prop_values = 1
-    block = 0
+		block = 0
   [../]
 []
 

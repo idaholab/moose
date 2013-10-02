@@ -34,7 +34,7 @@ InputParameters validParams<SideSetsFromNormals>()
 
 SideSetsFromNormals::SideSetsFromNormals(const std::string & name, InputParameters parameters):
     AddSideSetsBase(name, parameters),
-    BoundaryRestrictableRequired(parameters),
+    BoundaryRestrictableRequired(name, parameters),
     _boundary_ids(_bnd_ids.begin(), _bnd_ids.end()),
     _normals(getParam<std::vector<Point> >("normals"))
 {

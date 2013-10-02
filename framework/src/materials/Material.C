@@ -1,3 +1,4 @@
+
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
@@ -36,8 +37,8 @@ InputParameters validParams<Material>()
 
 Material::Material(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    BlockRestrictable(parameters),
-    BoundaryRestrictable(parameters),
+    BlockRestrictable(name, parameters),
+    BoundaryRestrictable(name, parameters),
     SetupInterface(parameters),
     Coupleable(parameters, false),
     MooseVariableDependencyInterface(),

@@ -37,7 +37,7 @@ InputParameters validParams<Indicator>()
 
 Indicator::Indicator(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    BlockRestrictable(parameters),
+    BlockRestrictable(name, parameters),
     SetupInterface(parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),

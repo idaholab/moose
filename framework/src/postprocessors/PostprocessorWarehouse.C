@@ -138,71 +138,53 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
   if(dynamic_cast<ElementPostprocessor*>(postprocessor))
   {
     ElementPostprocessor * elem_pp = dynamic_cast<ElementPostprocessor*>(postprocessor);
-    MooseMesh &mesh = elem_pp->getSubProblem().mesh();
-    const std::vector<SubdomainName> & blocks = dynamic_cast<ElementPostprocessor*>(elem_pp)->blocks();
-    for (std::vector<SubdomainName>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+    const std::set<SubdomainID> & block_ids = dynamic_cast<ElementPostprocessor*>(elem_pp)->blockIDs();
+    _all_element_postprocessors.push_back(elem_pp);
+    for (std::set<SubdomainID>::const_iterator it = block_ids.begin(); it != block_ids.end(); ++it)
     {
-      SubdomainID block_id;
-      // Switch the Any Block Id string to a number type here
-      if (*it == "ANY_BLOCK_ID")
-        block_id = Moose::ANY_BLOCK_ID;
-      else
-        block_id = mesh.getSubdomainID(*it);
-      _element_postprocessors[block_id].push_back(elem_pp);
-      _all_element_postprocessors.push_back(elem_pp);
-      _block_ids_with_postprocessors.insert(block_id);
+      _element_postprocessors[*it].push_back(elem_pp);
+      _block_ids_with_postprocessors.insert(*it);
     }
   }
   else if(dynamic_cast<SidePostprocessor*>(postprocessor))
   {
     SidePostprocessor * side_pp = dynamic_cast<SidePostprocessor*>(postprocessor);
-    MooseMesh &mesh = side_pp->getSubProblem().mesh();
+    _all_side_postprocessors.push_back(side_pp);
 
-    const std::vector<BoundaryName> & bnds = dynamic_cast<SidePostprocessor*>(side_pp)->boundaryNames();
-    for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
+    const std::set<BoundaryID> & bnds = dynamic_cast<SidePostprocessor*>(side_pp)->boundaryIDs();
+    for (std::set<BoundaryID>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
     {
-      BoundaryID boundary_id = mesh.getBoundaryID(*it);
-
-      _side_postprocessors[boundary_id].push_back(side_pp);
-      _all_side_postprocessors.push_back(side_pp);
-      _boundary_ids_with_postprocessors.insert(boundary_id);
+      _side_postprocessors[*it].push_back(side_pp);
+      _boundary_ids_with_postprocessors.insert(*it);
     }
   }
   else if(dynamic_cast<NodalPostprocessor*>(postprocessor))
   {
     NodalPostprocessor * nodal_pp = dynamic_cast<NodalPostprocessor*>(postprocessor);
-    MooseMesh &mesh = nodal_pp->getSubProblem().mesh();
 
-    // NodalPostprocessors can be "block" restricted or "boundary" restricted
-    const std::vector<BoundaryName> & bnds = nodal_pp->boundaryNames();
-    const std::vector<SubdomainName> & blocks = nodal_pp->blocks();
+    // NodalPostprocessors can be "block" restricted and/or "boundary" restricted
+    const std::set<BoundaryID> & bnds = nodal_pp->boundaryIDs();
+    const std::set<SubdomainID> & blks = nodal_pp->blockIDs();
 
-    if (blocks.size() == 0 || blocks[0] == "ANY_BLOCK_ID")
-      for (std::vector<BoundaryName>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
+    // Add to the storage of all postprocessors
+    _all_nodal_postprocessors.push_back(nodal_pp);
+
+    // If the Block IDs are not empty, then the postprocessor is block restricted
+    if (blks.find(Moose::ANY_BLOCK_ID) == blks.end())
+      for (std::set<SubdomainID>::const_iterator it = blks.begin(); it != blks.end(); ++it)
       {
-        BoundaryID boundary_id;
-
-        if (*it == "ANY_BOUNDARY_ID")
-          boundary_id = Moose::ANY_BOUNDARY_ID;
-        else
-          boundary_id = mesh.getBoundaryID(*it);
-        _nodal_postprocessors[boundary_id].push_back(nodal_pp);
-        _all_nodal_postprocessors.push_back(nodal_pp);
-        _nodeset_ids_with_postprocessors.insert(boundary_id);
+        _block_nodal_postprocessors[*it].push_back(nodal_pp);
+        _block_ids_with_nodal_postprocessors.insert(*it);
       }
+
+    // Otherwise the postprocessor is a boundary postprocessor
     else
-      for (std::vector<SubdomainName>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+      for (std::set<BoundaryID>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
       {
-        SubdomainID block_id;
-
-        if (*it == "ANY_BLOCK_ID")
-          block_id = Moose::ANY_BLOCK_ID;
-        else
-          block_id = mesh.getSubdomainID(*it);
-        _block_nodal_postprocessors[block_id].push_back(nodal_pp);
-        _all_nodal_postprocessors.push_back(nodal_pp);
-        _block_ids_with_nodal_postprocessors.insert(block_id);
+        _nodal_postprocessors[*it].push_back(nodal_pp);
+        _nodeset_ids_with_postprocessors.insert(*it);
       }
+
   }
   else
   {

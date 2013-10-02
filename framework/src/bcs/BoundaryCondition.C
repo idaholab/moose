@@ -33,7 +33,7 @@ InputParameters validParams<BoundaryCondition>()
 
 BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    BoundaryRestrictableRequired(parameters),
+    BoundaryRestrictableRequired(name, parameters),
     SetupInterface(parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),

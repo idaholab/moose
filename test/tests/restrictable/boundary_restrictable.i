@@ -31,6 +31,21 @@
   [../]
 []
 
+[Materials]
+  [./mat0]
+    type = GenericConstantMaterial
+		boundary = 1
+    prop_names = 'a'
+		prop_values = '1'
+  [../]
+  [./mat1]
+    type = GenericConstantMaterial
+		boundary = 2
+    prop_names = 'a b'
+		prop_values = '10 20'
+  [../]
+[]
+
 [Executioner]
   type = Steady
 

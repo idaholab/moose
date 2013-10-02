@@ -42,10 +42,9 @@ InputParameters validParams<Kernel>()
   return params;
 }
 
-
 Kernel::Kernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    BlockRestrictable(parameters),
+    BlockRestrictable(name, parameters),
     SetupInterface(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     FunctionInterface(parameters),

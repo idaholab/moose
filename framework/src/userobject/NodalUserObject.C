@@ -25,25 +25,14 @@ InputParameters validParams<NodalUserObject>()
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
 
-
-  /// \TODO: The default for both Boundary and Block Restrictable should be ANY...
-
-  // NodalUserObjects can be restricted to either Nodesets or Domains
-  std::vector<BoundaryName> everywhere(1);
-  everywhere[0] = "ANY_BOUNDARY_ID";
-  params.addParam<std::vector<BoundaryName> >("boundary", everywhere, "boundary ID or name where the postprocessor works");
-
-  std::vector<SubdomainName> block_everywhere(1);
-  block_everywhere[0] = "ANY_BLOCK_ID";
-  params.set<std::vector<SubdomainName> >("block") = block_everywhere;
-
   return params;
 }
 
 NodalUserObject::NodalUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
-    BlockRestrictable(parameters),
-    BoundaryRestrictable(parameters),
+    BlockRestrictable(name, parameters),
+    BoundaryRestrictable(name, parameters),
+    MaterialPropertyInterface(parameters),
     UserObjectInterface(parameters),
     Coupleable(parameters, true),
     ScalarCoupleable(parameters),

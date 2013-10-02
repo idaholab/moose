@@ -33,13 +33,26 @@
   [../]
 []
 
+[Materials]
+  [./mat0]
+    type = GenericConstantMaterial
+		block = '1'
+    prop_names = 'a b'
+		prop_values = '1 2'
+  [../]
+  [./mat1]
+    type = GenericConstantMaterial
+		block = '2'
+    prop_names = 'a'
+		prop_values = '10'
+  [../]
+[]
+
 [Executioner]
   type = Steady
-
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
   print_linear_residuals = true
-
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

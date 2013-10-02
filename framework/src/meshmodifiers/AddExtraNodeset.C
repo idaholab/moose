@@ -32,7 +32,7 @@ InputParameters validParams<AddExtraNodeset>()
 
 AddExtraNodeset::AddExtraNodeset(const std::string & name, InputParameters params) :
     MeshModifier(name, params),
-    BoundaryRestrictableRequired(params)
+    BoundaryRestrictableRequired(name, params)
 {
 }
 

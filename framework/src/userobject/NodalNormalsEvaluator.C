@@ -20,7 +20,7 @@ template<>
 InputParameters validParams<NodalNormalsEvaluator>()
 {
   InputParameters params = validParams<NodalUserObject>();
-
+  params.set<bool>("_dual_restrictable") = true;
   return params;
 }
 

@@ -115,8 +115,9 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
     for (std::vector<SideUserObject *>::const_iterator side_UserObject_it = _user_objects[_tid].sideUserObjects(bnd_id, _group).begin();
          side_UserObject_it != _user_objects[_tid].sideUserObjects(bnd_id, _group).end();
          ++side_UserObject_it)
+    {
       (*side_UserObject_it)->execute();
-
+    }
     _fe_problem.swapBackMaterialsFace(_tid);
   }
 }

@@ -29,17 +29,18 @@ AddUserObjectAction::AddUserObjectAction(const std::string & name, InputParamete
 void
 AddUserObjectAction::act()
 {
-  // Do some error checking to make sure that both BoundaryName and SubdomainName aren't supplied
-  // for NodalUserObjects.
+
+  // Checking to make sure that both BoundaryName and SubdomainName aren't supplied for NodalUserObjects
   if (_moose_object_pars.have_parameter<std::vector<BoundaryName> >("boundary") &&
       _moose_object_pars.have_parameter<std::vector<SubdomainName> >("block"))
   {
     const std::vector<BoundaryName> bnd_ids = _moose_object_pars.get<std::vector<BoundaryName> >("boundary");
-    const std::vector<SubdomainName> block_ids = _moose_object_pars.get<std::vector<SubdomainName> >("block");
+    const std::vector<SubdomainName> blk_ids = _moose_object_pars.get<std::vector<SubdomainName> >("block");
 
-    if (bnd_ids[0] != "ANY_BOUNDARY_ID" && block_ids[0] != "ANY_BLOCK_ID")
+    if (std::find(bnd_ids.begin(), bnd_ids.end(), "ANY_BOUNDARY_ID") != bnd_ids.end()
+        && std::find(blk_ids.begin(), blk_ids.end(), "ANY_BLOCK_ID") != blk_ids.end())
       mooseError (std::string("The parameter 'boundary' and 'block' were both supplied for ") + getShortName());
-    else if (block_ids[0] != "ANY_BLOCK_ID")
+    else if (std::find(blk_ids.begin(), blk_ids.end(), "ANY_BLOCK_ID") != blk_ids.end())
       _moose_object_pars.addPrivateParam<bool>("block_restricted_nodal", true);
   }
 

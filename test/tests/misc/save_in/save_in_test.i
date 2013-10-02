@@ -61,6 +61,7 @@
     type = NodalL2Norm
     variable = saved
     execute_on = timestep
+		block = 0
   [../]
 []
 
@@ -82,4 +83,3 @@
   print_linear_residuals = true
   perf_log = true
 []
-

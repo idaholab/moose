@@ -23,6 +23,7 @@
 #include "PostprocessorInterface.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
+#include "MaterialPropertyInterface.h"
 
 class MooseVariable;
 
@@ -36,6 +37,7 @@ class NodalUserObject :
   public UserObject,
   public BlockRestrictable,
   public BoundaryRestrictable,
+  public MaterialPropertyInterface,
   public UserObjectInterface,
   public Coupleable,
   public ScalarCoupleable,
@@ -64,11 +66,16 @@ public:
 
 protected:
 
+  /// Quadrature point index
   const unsigned int _qp;
+
+  /// Refernce to current node pointer
   const Node * & _current_node;
 
-  // Single Instance Variables
+  /// Scalar zero
   Real & _real_zero;
+
+  /// Array of zeros
   MooseArray<Real> & _zero;
 };
 

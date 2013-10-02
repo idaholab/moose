@@ -34,7 +34,6 @@ InputParameters validParams<UserObject>()
 UserObject::UserObject(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
-    MaterialPropertyInterface(parameters),
     Restartable(name, parameters, "UserObjects"),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),

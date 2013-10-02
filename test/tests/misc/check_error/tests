@@ -81,7 +81,7 @@
   [./double_restrict_uo_test]
     type = 'RunException'
     input = 'double_restrict_uo.i'
-    expect_err = "The parameter 'boundary' and 'block' were both supplied for \w+"
+    expect_err = "Attempted to restrict the object '\S+' to a boundary, but the object is already restricted"
   [../]
 
   [./dynamic_check_name_block_mismatch_test]
@@ -282,13 +282,13 @@
   [./subdomain_restricted_auxkernel_test]
     type = 'RunException'
     input = 'subdomain_restricted_auxkernel_mismatch.i'
-    expect_err = "AuxKernel \(\w+\): block outside of the domain of the variable"
+    expect_err = "In object \w+\ the defined blocks are outside of the domain of the variable"
   [../]
 
   [./subdomain_restricted_kernel_test]
     type = 'RunException'
     input = 'subdomain_restricted_kernel_mismatch.i'
-    expect_err = "The defined blocks are outside of the domain of the variable"
+    expect_err = "In object \w+\ the defined blocks are outside of the domain of the variable"
   [../]
 
   [./unused_param_test]

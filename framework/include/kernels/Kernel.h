@@ -80,10 +80,6 @@ public:
 
   SubProblem & subProblem();
 
-  // materials
-  template<typename T>
-  MaterialProperty<T> & getMaterialProperty(const std::string & name);
-
 protected:
   SubProblem & _subproblem;
   FEProblem & _fe_problem;
@@ -158,31 +154,5 @@ protected:
 
   virtual void precalculateResidual();
 };
-
-
-template<typename T>
-MaterialProperty<T> &
-Kernel::getMaterialProperty(const std::string & name)
-{
-  if (parameters().isParamValid("block"))
-  {
-    // check blocks where the kernel is defined
-    std::vector<SubdomainName> blocks = parameters().get<std::vector<SubdomainName> >("block");
-    for (std::vector<SubdomainName>::iterator it = blocks.begin(); it != blocks.end(); ++it)
-      _subproblem.delayedCheckMatProp(_subproblem.mesh().getSubdomainID(*it), name);
-  }
-  else
-  {
-    // Is this variable already block restricted?
-    const std::set<SubdomainID> * blocks = &_sys.getSubdomainsForVar(_var.index());
-    if (blocks->empty())
-      // no kernel blocks specified, check all blocks that are in the mesh
-      blocks = &_mesh.meshSubdomains();
-    for (std::set<SubdomainID>::const_iterator it = blocks->begin(); it != blocks->end(); ++it)
-      _subproblem.delayedCheckMatProp(*it, name);
-  }
-
-  return MaterialPropertyInterface::getMaterialProperty<T>(name);
-}
 
 #endif /* KERNEL_H */

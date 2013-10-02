@@ -12,28 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "LayeredSideFluxAverage.h"
-
-// libmesh includes
-#include "libmesh/mesh_tools.h"
+#include "MatTestNeumannBC.h"
 
 template<>
-InputParameters validParams<LayeredSideFluxAverage>()
+InputParameters validParams<MatTestNeumannBC>()
 {
-  InputParameters params = validParams<LayeredSideIntegral>();
-  params.addRequiredParam<std::string>("diffusivity", "The name of the diffusivity material property that will be used in the flux computation.");
-  return params;
+  InputParameters p = validParams<NeumannBC>();
+  p.addRequiredParam<std::string>("mat_prop", "The material property that gives the value of the BC");
+  return p;
 }
 
-LayeredSideFluxAverage::LayeredSideFluxAverage(const std::string & name, InputParameters parameters) :
-    LayeredSideAverage(name, parameters),
-    _diffusivity(parameters.get<std::string>("diffusivity")),
-    _diffusion_coef(getMaterialProperty<Real>(_diffusivity))
+
+MatTestNeumannBC::MatTestNeumannBC(const std::string & name, InputParameters parameters) :
+    NeumannBC(name, parameters),
+    _prop_name(getParam<std::string>("mat_prop"))
 {
+  if (hasBoundaryMaterialProperty<Real>(_prop_name))
+    _value = &getMaterialProperty<Real>(_prop_name);
+
+  else
+    mooseError("The material property " << _prop_name << " is not defined on all boundaries of this object");
 }
 
 Real
-LayeredSideFluxAverage::computeQpIntegral()
+MatTestNeumannBC::computeQpResidual()
 {
-  return -_diffusion_coef[_qp]*_grad_u[_qp]*_normals[_qp];
+  return -_test[_i][_qp]*(*_value)[_qp];
 }

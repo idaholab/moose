@@ -1,0 +1,31 @@
+[Tests]
+  [./property_on_all_blocks]
+    type = 'Exodiff'
+    input = 'has_block_prop.i'
+    exodiff = 'has_block_prop_out.e'
+    cli_args = 'Kernels/u_diff/conductivity=k'
+  [../]
+	[./property_on_one_block]
+    type = 'RunException'
+    input = 'has_block_prop.i'
+    expect_err = 'The material property k_right is not defined on all blocks of the kernel'
+    cli_args = 'Kernels/u_diff/conductivity=k_right'
+  [../]
+	[./hasMaterialProperty]
+    type = 'RunException'
+    input = 'has_block_prop.i'
+    expect_err = 'hasMaterialProperty test passed'
+    cli_args = 'Kernels/u_diff/conductivity=k_right Kernels/u_diff/test=hasMaterialProperty'
+  [../]
+  [./property_on_boundary]
+    type = 'Exodiff'
+    input = 'has_boundary_prop.i'
+    exodiff = 'has_boundary_prop_out.e'
+  [../]
+	[./property_not_on_boundary]
+    type = 'RunException'
+		input = 'has_boundary_prop.i'
+		expect_err = 'The material property other_value is not defined on all boundaries'
+    cli_args = 'BCs/right/mat_prop=other_value'
+  [../]
+[]

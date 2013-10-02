@@ -8,7 +8,7 @@
     type = ParsedFunction
     value = x*x+y*y
   [../]
-  
+
   [./f_fn]
     type = ParsedFunction
     value = -4

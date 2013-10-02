@@ -169,6 +169,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.toggle_groupbox = QtGui.QGroupBox("View")
     self.toggle_groupbox.setMaximumHeight(70)
     self.toggle_layout = QtGui.QHBoxLayout()
+    self.toggle_groupbox.setMaximumHeight(70)
     self.draw_edges_checkbox = QtGui.QCheckBox("View Mesh")
     self.draw_edges_checkbox.setToolTip('Show mesh elements')
     self.draw_edges_checkbox.stateChanged[int].connect(self._drawEdgesChanged)

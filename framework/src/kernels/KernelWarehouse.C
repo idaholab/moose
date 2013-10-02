@@ -63,7 +63,7 @@ KernelWarehouse::addKernel(Kernel *kernel, const std::set<SubdomainID> & block_i
 {
   _all_kernels.push_back(kernel);
 
-  if (block_ids.empty())
+  if (block_ids.empty() || block_ids.find(Moose::ANY_BLOCK_ID) != block_ids.end())
   {
     if (dynamic_cast<TimeKernel *>(kernel) != NULL)
     {

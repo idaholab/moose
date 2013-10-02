@@ -23,6 +23,7 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "BlockRestrictable.h"
+#include "MaterialPropertyInterface.h"
 
 // libMesh
 #include "libmesh/elem.h"
@@ -37,6 +38,7 @@ InputParameters validParams<ElementUserObject>();
 class ElementUserObject :
   public UserObject,
   public BlockRestrictable,
+  public MaterialPropertyInterface,
   public UserObjectInterface,
   public Coupleable,
   public MooseVariableDependencyInterface,

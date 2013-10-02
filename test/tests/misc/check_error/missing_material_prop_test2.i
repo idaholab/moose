@@ -65,8 +65,6 @@
 
 [Executioner]
   type = Steady
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 []
 
@@ -78,4 +76,6 @@
   perf_log = true
 []
 
-
+[Debug]
+  show_material_props = true
+[]

@@ -17,45 +17,25 @@
 template<>
 InputParameters validParams<BlockRestrictable>()
 {
-  InputParameters params = emptyInputParameters();
-  params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that this kernel will be applied to");
+  // Create InputParameters object that will be appended to the parameters for the inheriting object
+  InputParameters params = validParams<RestrictableBase>();
+
+  // Add the user-facing 'block' input parameter
+  params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (SubdomainID) that this kernel will be applied to");
+
+  // Add the private parameter that is populated by this class that contains valid block ids for the
+  // object inheriting from this class
+  params.addPrivateParam<std::vector<SubdomainID> >("_block_ids", std::vector<SubdomainID>());
+
+  // Return the parameters
   return params;
 }
 
-BlockRestrictable::BlockRestrictable(InputParameters & parameters) :
-    RestrictableBase(parameters)
+BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & parameters) :
+    RestrictableBase(name, parameters)
 {
-  // If the 'block' input is not defined, populate it
-  if (!parameters.isParamValid("block"))
-  {
-    // Case when a nonlinear variable limits the blocks
-    if (parameters.have_parameter<NonlinearVariableName>("variable") && parameters.isParamValid("variable"))
-    {
-
-      // Check that the FEProblem pointer is defined
-      if (_r_feproblem == NULL)
-        mooseError("The BlockRestrictable class requires '_fe_problem' to be defined as an input parameter when the object is variable restricted (i.e., contains the 'variable' input parameter)");
-
-      // Get the SystemBase and the thread id
-      SystemBase* sys = parameters.get<SystemBase *>("_sys");
-      THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
-
-      // Get the subdomains for curent variable
-      MooseVariable & var = _r_feproblem->getVariable(tid, parameters.get<NonlinearVariableName>("variable"));
-      _blk_ids = sys->getSubdomainsForVar(var.index());
-    }
-
-    // General case when the mesh limits the blocks
-    else
-      _blk_ids = _r_mesh->meshSubdomains();
-
-    // Define a vector that stores the block names
-    for (std::set<SubdomainID>::const_iterator it = _blk_ids.begin(); it != _blk_ids.end(); ++it)
-      _blocks.push_back(_r_mesh->getMesh().subdomain_name(*it));
-  }
-
   // The 'block' input is defined and the FEProblem pointer is valid
-  else
+  if (parameters.isParamValid("block"))
   {
     // Extract the blocks from the input
     _blocks = parameters.get<std::vector<SubdomainName> >("block");
@@ -68,21 +48,49 @@ BlockRestrictable::BlockRestrictable(InputParameters & parameters) :
       _blk_ids.insert(*it);
 
     // Check that supplied blocks are within the variable domain
-    if (parameters.have_parameter<NonlinearVariableName>("variable") && parameters.isParamValid("variable"))
+    if (parameters.isParamValid("variable") &&
+        (parameters.have_parameter<NonlinearVariableName>("variable") ||
+         parameters.have_parameter<AuxVariableName>("variable")))
     {
       // Get the SystemBase and the thread id
       SystemBase* sys = parameters.get<SystemBase *>("_sys");
       THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 
-      // Get the subdomains for curent variable
-      MooseVariable & var = _r_feproblem->getVariable(tid, parameters.get<NonlinearVariableName>("variable"));
-      std::set<SubdomainID> var_ids = sys->getSubdomainsForVar(var.index());
+  // A pointer to the variable class
+      MooseVariable * var;
 
-      // Test if the variable Subdomain IDs are valid for this object
+  // Get the variable based on the type
+      if (parameters.have_parameter<NonlinearVariableName>("variable"))
+        var = &_r_feproblem->getVariable(tid, parameters.get<NonlinearVariableName>("variable"));
+      else if (parameters.have_parameter<AuxVariableName>("variable"))
+        var = &_r_feproblem->getVariable(tid, parameters.get<AuxVariableName>("variable"));
+      else
+        mooseError("The variable input has an unknown Type");
+
+      // Return the block ids for the variable
+      std::set<SubdomainID> var_ids = sys->getSubdomainsForVar(var->index());
+
+      // Test if the variable blockIDs are valid for this object
       if (!isBlockSubset(var_ids))
-        mooseError("The defined blocks are outside of the domain of the variable");
+        mooseError("In object " << name << " the defined blocks are outside of the domain of the variable");
     }
   }
+
+  // Produce error if the object is not allowed to be both block and boundary restrictable
+  if (!_dual_restrictable && !_blk_ids.empty())
+    if (parameters.isParamValid("_boundary_ids"))
+    {
+      std::vector<BoundaryID> bnd_ids = parameters.get<std::vector<BoundaryID> >("_boundary_ids");
+      if (!bnd_ids.empty() && bnd_ids[0] != Moose::ANY_BOUNDARY_ID)
+        mooseError("Attempted to restrict the object '" << name << "' to a block, but the object is already restricted by boundary");
+    }
+
+  // If no blocks were defined above, specify that it is valid on all blocks
+  if (_blk_ids.empty())
+    _blk_ids.insert(Moose::ANY_BLOCK_ID);
+
+  // Store the private parameter that contains the set of block ids
+  parameters.set<std::vector<SubdomainID> >("_block_ids") = std::vector<SubdomainID>(_blk_ids.begin(), _blk_ids.end());
 }
 
 const std::vector<SubdomainName> &
@@ -158,4 +166,11 @@ BlockRestrictable::isBlockSubset(std::set<SubdomainID> ids)
     return true;
   else
     return std::includes(ids.begin(), ids.end(), _blk_ids.begin(), _blk_ids.end());
+}
+
+bool
+BlockRestrictable::isBlockSubset(std::vector<SubdomainID> ids)
+{
+  std::set<SubdomainID> ids_set(ids.begin(), ids.end());
+  return isBlockSubset(ids_set);
 }

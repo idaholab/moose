@@ -18,7 +18,6 @@
 //MOOSE includes
 #include "MooseObject.h"
 #include "SetupInterface.h"
-#include "MaterialPropertyInterface.h"
 #include "ParallelUniqueId.h"
 #include "SubProblem.h"
 #include "Restartable.h"
@@ -40,16 +39,11 @@ InputParameters validParams<UserObject>();
 class UserObject :
   public MooseObject,
   public SetupInterface,
-  public MaterialPropertyInterface,
   public Restartable
 {
 public:
   UserObject(const std::string & name, InputParameters params);
   virtual ~UserObject();
-
-  // materials
-  template<typename T>
-  MaterialProperty<T> & getMaterialProperty(const std::string & name);
 
   /**
    * Called before execute() is ever called so that data can be cleared.
@@ -87,7 +81,7 @@ public:
   virtual Real spatialValue(const Point & /*p*/) const { mooseError(_name << " does not satisfy the Spatial UserObject interface!"); }
 
   /**
-   * Gather the parallel sum of the variable passed in. It HAS to take care of values across all threads and CPUs (we DO hybrid parallelism!)
+   * Gather the parallel sum of the variable passed in. It takes care of values across all threads and CPUs (we DO hybrid parallelism!)
    *
    * After calling this, the variable that was passed in will hold the gathered value.
    */
@@ -118,7 +112,10 @@ public:
   }
 
 protected:
+  /// Reference to the Subproblem for this user object
   SubProblem & _subproblem;
+
+  /// Reference to the FEProblem for this user object
   FEProblem & _fe_problem;
 
   /// Thread ID of this postprocessor
@@ -129,31 +126,5 @@ protected:
   const Moose::CoordinateSystemType & _coord_sys;
 };
 
-template<typename T>
-MaterialProperty<T> &
-UserObject::getMaterialProperty(const std::string & name)
-{
-  bool checked = false;
-  if (parameters().isParamValid("block"))
-  {
-    // check blocks where the uo is defined
-    std::vector<SubdomainName> blocks = parameters().get<std::vector<SubdomainName> >("block");
-    if (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") == blocks.end())
-    {
-      for (std::vector<SubdomainName>::iterator it = blocks.begin(); it != blocks.end(); ++it)
-        _subproblem.delayedCheckMatProp(_subproblem.mesh().getSubdomainID(*it), name);
-      checked = true;
-    }
-  }
-  if (!checked)
-  {
-    // no uo blocks specified, check all blocks that are in the mesh
-    const std::set<SubdomainID> & blocks = _subproblem.mesh().meshSubdomains();
-    for (std::set<SubdomainID>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
-      _subproblem.delayedCheckMatProp(*it, name);
-  }
-
-  return MaterialPropertyInterface::getMaterialProperty<T>(name);
-}
 
 #endif /* USEROBJECT_H */

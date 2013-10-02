@@ -23,6 +23,7 @@ InputParameters validParams<GeneralUserObject>()
 
 GeneralUserObject::GeneralUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
+    MaterialPropertyInterface(parameters),
     TransientInterface(parameters, name, "general_user_objects"),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),

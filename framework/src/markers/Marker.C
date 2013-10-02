@@ -33,7 +33,7 @@ InputParameters validParams<Marker>()
 
 Marker::Marker(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    BlockRestrictable(parameters),
+    BlockRestrictable(name, parameters),
     SetupInterface(parameters),
     UserObjectInterface(parameters),
     Restartable(name, parameters, "Markers"),

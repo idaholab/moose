@@ -5,7 +5,7 @@
 template<>
 InputParameters validParams<BlkResTestDiffusion>()
 {
-  MooseEnum test("none=0, fe_problem_null=1, mesh_null=2, use_mesh=3, hasBlocks=4, blocks=5, blockIDs=6, isBlockSubset=7", "none", "Select a test");
+  MooseEnum test("none, fe_problem_null, mesh_null, use_mesh, hasBlocks, blocks, blockIDs, isBlockSubset, hasBlockMaterialProperty_true, hasBlockMaterialProperty_false", "none", "Select a test");
   InputParameters params = validParams<Kernel>();
   params.addParam<MooseEnum>("test", test, "Select the desired test");
   return params;
@@ -146,9 +146,26 @@ BlkResTestDiffusion::BlkResTestDiffusion(const std::string & name, InputParamete
     sub_id.insert(4);
     sub_id.insert(2);
     if (isBlockSubset(sub_id))
-      mooseError("isBlockSubset testing passed"); // expetect error
+      mooseError("isBlockSubset testing passed"); // expected error
     else
       mooseError("isBlockSubset testing failed");
+  }
+
+  // Test that hasMaterialPropertyBlock is working properly
+  else if (test == "hasBlockMaterialProperty_true")
+  {
+    if (hasBlockMaterialProperty<Real>("a"))
+      mooseError("hasBlockMaterialProperty is true, test passed"); // expected error
+    else
+      mooseError("hasBlockMaterialProperty is false, test failed");
+  }
+
+  else if (test == "hasBlockMaterialProperty_false")
+  {
+    if (hasBlockMaterialProperty<Real>("b"))
+      mooseError("hasBlockMaterialProperty is true, test failed");
+    else
+      mooseError("hasBlockMaterialProperty is false, test passed"); // expected error
   }
 }
 

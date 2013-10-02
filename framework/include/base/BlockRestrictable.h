@@ -22,7 +22,6 @@
 
 class BlockRestrictable;
 
-
 template<>
 InputParameters validParams<BlockRestrictable>();
 
@@ -64,10 +63,14 @@ public:
    * @param name The name of the class
    * @param parameters The input parameters (see the detailed help for additional information)
    */
-  BlockRestrictable(InputParameters & params);
+  BlockRestrictable(const std::string name, InputParameters & params);
 
   /**
    * Return the block names for this object
+   *
+   * Note, if the 'blocks' input parameter was not utilized this will return an
+   * empty vector.
+   *
    * @return vector of SubdomainNames that are valid for this object
    */
   const std::vector<SubdomainName> & blocks();
@@ -128,13 +131,43 @@ public:
    */
   bool isBlockSubset(std::set<SubdomainID> ids);
 
+  /**
+   * Test if the class block ids are a subset of the supplied objects
+   * @param ids A std::vector of Subdomains to check
+   * @return True if all of the block ids for this class are found within the given ids (opposite of hasBlocks)
+   * \see hasBlocks
+   */
+  bool isBlockSubset(std::vector<SubdomainID> ids);
+
+  /**
+   * Check if a material property is valid for all blocks of this object
+   *
+   * This method returns true if the block ids for this object are a subset of the blocks
+   * associated with the material property for the supplied property name
+   *
+   * @param name the name of the property to query
+   * @return true if the property exists for all block ids of the object, otherwise false
+   * \see MaterialPropertyInterface::getMaterialPropertyBlocks
+   * \see isBlockSubet
+   */
+  template<typename T>
+  bool hasBlockMaterialProperty(const std::string & name);
+
 protected:
 
-  /// Set of subdomain ids
+  /// Set of block ids
   std::set<SubdomainID> _blk_ids;
 
-  /// Vector the the subdomain names
+  /// Vector the block names
   std::vector<SubdomainName> _blocks;
 };
+
+template<typename T>
+bool
+BlockRestrictable::hasBlockMaterialProperty(const std::string & name)
+{
+  // Return true if the blocks for this object are a subset of the blocks for the material
+  return isBlockSubset(_r_feproblem->getMaterialPropertyBlocks(name));
+}
 
 #endif // BLOCKRESTRICTABLE_H
