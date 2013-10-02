@@ -123,7 +123,15 @@ class Farm(object):
 
     # Extract the list of users from the HPCSC website
     try:
-      filename = 'https://hpcsc.inl.gov/ssl/HERD/distcc_list_users-' + self._system
+      filename = 'https://hpcsc.inl.gov/distcc_gen?uuid=' + str(uuid.uuid3(uuid.NAMESPACE_DNS, self._master.hostname)) + \
+                                                '&arch=' + self._system + \
+                                                '&ip=' + self._master.address + \
+                                                '&cpus=' + str(self._master.threads) + \
+                                                '&threads=' + str(self._master.threads) + \
+                                                '&use=' + str((int(self._master.threads) / 4)) + \
+                                                '&network=' + self._network + \
+                                                '&description=' + self._master.hostname
+
       fid = urllib2.urlopen(filename)
       self._lines = fid.read().split('\n')
       fid.close()
@@ -472,21 +480,6 @@ class Farm(object):
     # Check if initialized
     if len(self._slaves) > 0:
       return
-
-    # Gather information about available hosts
-    filename = 'https://hpcsc.inl.gov/distcc_gen?uuid=' + str(uuid.uuid3(uuid.NAMESPACE_DNS, self._master.hostname)) + \
-                                                '&arch=' + self._system + \
-                                                '&ip=' + self._master.address + \
-                                                '&cpus=' + str(self._master.threads) + \
-                                                '&threads=' + str(self._master.threads) + \
-                                                '&use=' + str((int(self._master.threads) / 4)) + \
-                                                '&network=' + self._network + \
-                                                '&description=' + self._master.hostname
-
-    # Extract the list of users from the HPCSC website
-    fid = urllib2.urlopen(filename)
-    lines = fid.read().split('\n')
-    fid.close()
 
     # Loop through each line (user)
     for line in self._lines:
