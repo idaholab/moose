@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Load the required modules
-import os, sys, subprocess, re, urllib2, socket, argparse, time, multiprocessing, platform
+import os, sys, subprocess, re, urllib2, socket, argparse, time, multiprocessing, platform, uuid
 from random import shuffle
 
 ## User class for defining machine characteristics
@@ -116,7 +116,7 @@ class Farm(object):
       self._network = 'fn'
     else:
       self._network = 'inl'
-      os.environ['no_proxy'] = 'hpcsc.inl.gov'
+      os.environ['no_proxy'] = '.inl.gov'
 
     # Set the network of the master Machine
     self._master.network = self._network
@@ -472,6 +472,21 @@ class Farm(object):
     # Check if initialized
     if len(self._slaves) > 0:
       return
+
+    # Gather information about available hosts
+    filename = 'https://hpcsc.inl.gov/distcc_gen?uuid=' + str(uuid.uuid3(uuid.NAMESPACE_DNS, self._master.hostname)) + \
+                                                '&arch=' + self._system + \
+                                                '&ip=' + self._master.address + \
+                                                '&cpus=' + str(self._master.threads) + \
+                                                '&threads=' + str(self._master.threads) + \
+                                                '&use=' + str((int(self._master.threads) / 4)) + \
+                                                '&network=' + self._network + \
+                                                '&description=' + self._master.hostname
+
+    # Extract the list of users from the HPCSC website
+    fid = urllib2.urlopen(filename)
+    lines = fid.read().split('\n')
+    fid.close()
 
     # Loop through each line (user)
     for line in self._lines:
