@@ -43,9 +43,9 @@ class Machine(object):
 
     # Set the status
     if self.available:
-      return formatter('Available', self.name, self.use, self.hostname, self.address)
+      return formatter('Available', urllib2.unquote(self.name), self.use, self.hostname, self.address)
     else:
-      return formatter('Offline', self.name, self.use, self.hostname,'')
+      return formatter('Offline', urllib2.unquote(self.name), self.use, self.hostname,'')
 
   ## Test if the machine is available
   def _isAvailable(self):
@@ -129,13 +129,13 @@ class Farm(object):
         use = str((int(self._master.threads) / 4))
 
       filename = 'https://hpcsc.inl.gov/distcc_gen?uuid=' + str(uuid.uuid3(uuid.NAMESPACE_DNS, self._master.hostname)) + \
-                                                '&arch=' + self._system + \
-                                                '&ip=' + self._master.address + \
-                                                '&cpus=' + str(self._master.threads) + \
-                                                '&threads=' + str(self._master.threads) + \
-                                                '&use=' + use + \
-                                                '&network=' + self._network + \
-                                                '&description=' + self._master.hostname
+                                                 '&arch=' + self._system + \
+                                                 '&ip=' + self._master.address + \
+                                                 '&cpus=' + str(self._master.threads) + \
+                                                 '&threads=' + str(self._master.threads) + \
+                                                 '&use=' + use + \
+                                                 '&network=' + self._network + \
+                                                 '&description=' + urllib2.quote(self._options.description[0])
 
       fid = urllib2.urlopen(filename)
       self._lines = fid.read().split('\n')
@@ -535,6 +535,7 @@ def parseArguments(args=None):
   grp2.add_argument('--jratio', type=float, default=3, help='Remote jobs ratio utilize for computing localhost (default: %(default)d)')
   grp2.add_argument('--benchmark','-b', action='store_true', help='Run \'make cleanall\' and \'dmake\' in moose_test directory')
   grp2.add_argument('--dedicated', '-d', action='store_true', help='Identify this machine as a dedicated build box')
+  grp2.add_argument('--description', nargs=1, type=str, default=[socket.gethostname()], help='Add a description to your machine (default: %(default)s)')
 
   # Allow flags to be run together
   parser.parse_args('-mqvdnlrb'.split())
