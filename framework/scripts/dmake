@@ -123,12 +123,17 @@ class Farm(object):
 
     # Extract the list of users from the HPCSC website
     try:
+      if self._options.dedicated:
+        use = str((int(self._master.threads) / 2))
+      else:
+        use = str((int(self._master.threads) / 4))
+
       filename = 'https://hpcsc.inl.gov/distcc_gen?uuid=' + str(uuid.uuid3(uuid.NAMESPACE_DNS, self._master.hostname)) + \
                                                 '&arch=' + self._system + \
                                                 '&ip=' + self._master.address + \
                                                 '&cpus=' + str(self._master.threads) + \
                                                 '&threads=' + str(self._master.threads) + \
-                                                '&use=' + str((int(self._master.threads) / 4)) + \
+                                                '&use=' + use + \
                                                 '&network=' + self._network + \
                                                 '&description=' + self._master.hostname
 
@@ -165,7 +170,7 @@ class Farm(object):
     if self._lines == None:
       print 'Warning: Failed to connect to hpcsc, running locally'
       self.local()
-      sys.exit()
+      return
 
     # Check that the distccd daemons are running
     self._checkDaemon()
@@ -336,6 +341,11 @@ class Farm(object):
         jobs += machine.use
 
     # Get the default or user-defined values for localhost/localslots_cpp/localslots
+    if self._options.localhost:
+      localhost = self._options.localhost
+    else:
+      localhost = min(2, self._master.threads)
+
     if self._options.localslots:
       localslots = self._options.localslots
     else:
@@ -344,25 +354,6 @@ class Farm(object):
     if self._options.localslots_cpp:
       localslots_cpp = self._options.localslots_cpp
     else:
-      localslots_cpp = jobs/self._options.jratio
-
-    if self._options.localhost:
-      localhost = self._options.localhost
-    else:
-      localhost = self._master.threads - localslots_cpp
-
-    # The localhost/localslots_cpp are balanced to the number of threads by default,
-    # if one is set the other should be balanced, thus the following special case
-    # is needed if localhost is set by the user but localslots_cpp is not
-    if self._options.localhost and not self._options.localslots_cpp:
-      localslots_cpp = self._master.threads - localhost
-
-    # Make sure the defaults are reasonable (do not overwrite user defined options)
-    if localhost < 2 and not self._options.localhost:
-      localhost = 2
-      localslots_cpp = self._master.threads - localhost
-
-    if localslots_cpp > self._master.threads and not self._options.localslots_cpp:
       localslots_cpp = self._master.threads - localhost
 
     # Create the DISTCC_HOSTS variable
@@ -488,11 +479,6 @@ class Farm(object):
       if len(line) == 0 or line[0] == '#':
         continue
 
-      # Skip non-dedicated boxes (--dedicated)
-      if self._options.dedicated:
-        if line.lower().find('dedicated') == -1:
-          continue
-
       # Parse the input for the current line
       parts = line.split(',')
 
@@ -527,7 +513,6 @@ def parseArguments(args=None):
                                    'example: \'dmake -mvn\'')
   grp0.add_argument('--max', '-m',  action='store_true', help='Use maximum jobs across the board')
   grp0.add_argument('--quiet', '-q', action='store_true', help='Do not print compile errors/warnings')
-  grp0.add_argument('--dedicated', '-d', action='store_true', help='Only use dedicated compile boxes')
   grp0.add_argument('--local', '-l', action='store_true', help='Run make locally with all possible threads')
   grp0.add_argument('--verbose', '-v', action='store_true', help='Show a detailed summary')
   grp0.add_argument('--no-daemon', '-n', action='store_true', help='Do not launch any daemon processes')
@@ -549,6 +534,7 @@ def parseArguments(args=None):
   grp2.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
   grp2.add_argument('--jratio', type=float, default=3, help='Remote jobs ratio utilize for computing localhost (default: %(default)d)')
   grp2.add_argument('--benchmark','-b', action='store_true', help='Run \'make cleanall\' and \'dmake\' in moose_test directory')
+  grp2.add_argument('--dedicated', '-d', action='store_true', help='Identify this machine as a dedicated build box')
 
   # Allow flags to be run together
   parser.parse_args('-mqvdnlrb'.split())
