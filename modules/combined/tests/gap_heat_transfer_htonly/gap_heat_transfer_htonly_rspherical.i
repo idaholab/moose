@@ -113,7 +113,6 @@
 []
 
 [Materials]
-
   [./heat1]
     type = HeatConductionMaterial
     block = '1 2'
