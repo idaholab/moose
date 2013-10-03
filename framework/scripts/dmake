@@ -375,11 +375,12 @@ class Farm(object):
     elif not self._options.max and jobs > 70:
       jobs = 70
 
-    # Write dmake_hosts file
-    fid = open(self._dmake_hosts, 'w')
-    fid.write(distcc_hosts + '\n')
-    fid.write(str(jobs) + '\n')
-    fid.close()
+    # Write dmake_hosts file (do not save if using --max)
+    if not self._options.max:
+      fid = open(self._dmake_hosts, 'w')
+      fid.write(distcc_hosts + '\n')
+      fid.write(str(jobs) + '\n')
+      fid.close()
 
     # Return the hosts and jobs
     return distcc_hosts, jobs
@@ -532,19 +533,18 @@ def parseArguments(args=None):
   grp2.add_argument('--localslots_cpp', type=int, help='Override the automatic setting for the number of local preprocessor slots')
   grp2.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
   grp2.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
-  grp2.add_argument('--jratio', type=float, default=3, help='Remote jobs ratio utilize for computing localhost (default: %(default)d)')
   grp2.add_argument('--benchmark','-b', action='store_true', help='Run \'make cleanall\' and \'dmake\' in moose_test directory')
-  grp2.add_argument('--dedicated', '-d', action='store_true', help='Identify this machine as a dedicated build box')
+  grp2.add_argument('--dedicated', action='store_true', help='Identify this machine as a dedicated build box')
   grp2.add_argument('--description', nargs=1, type=str, default=[socket.gethostname()], help='Add a description to your machine (default: %(default)s)')
 
   # Allow flags to be run together
-  parser.parse_args('-mqvdnlrb'.split())
+  parser.parse_args('-mqvnlrb'.split())
 
   # Parse the input and return the options
   (options, other_args) = parser.parse_known_args()
 
   # Set the refresh options if any of the following options are used
-  refresh = ['max', 'dedicated', 'localhost', 'localslots', 'localslots_cpp', 'jratio', 'jobs']
+  refresh = ['max', 'localhost', 'localslots', 'localslots_cpp', 'jobs']
   for r in refresh:
     if getattr(options, r) and getattr(options, r) != parser.get_default(r):
       options.refresh = True
