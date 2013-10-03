@@ -193,6 +193,10 @@ BlockRestrictable::isBlockSubset(std::vector<SubdomainID> ids)
 std::set<SubdomainID>
 BlockRestrictable::variableSubdomianIDs(InputParameters & parameters)
 {
+  // Return an empty set if _sys is not defined
+  if (!parameters.isParamValid("_sys"))
+    return std::set<SubdomainID>();
+
   // Get the SystemBase and the thread id
   SystemBase* sys = parameters.get<SystemBase *>("_sys");
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
