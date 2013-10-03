@@ -270,10 +270,18 @@ class Farm(object):
     if self._options.quiet:
       os.environ['DISTCC_VERBOSE'] = '0'
 
-    # Run make
-    strt = time.clock()
+    # Build the make command
+    if (self._options.debug):
+      os.environ['METHOD'] = 'dbg'
+    elif (self._options.oprof):
+      os.environ['METHOD'] = 'oprof'
+    elif (self._options.opt):
+      os.environ['METHOD'] = 'opt'
     make = ['make', '-j', str(jobs)]
     make.extend(self._make_args)
+
+    # Run make
+    strt = time.clock()
     sub = subprocess.Popen(make)
 
     # Wait for process to terminate
@@ -566,8 +574,8 @@ def parseArguments(args=None):
 
   # Flag options
   grp0 = parser.add_argument_group('Flags for adjusting behavior of \'make\'\n' + \
-                                   'These flags may be used in conjuction with each other,\nfor ' + \
-                                   'example: \'dmake -mvn\'')
+                                   'These flags may be used in conjuction with each\n' + \
+                                   'other (e.g., \'dmake -mvn\')')
   grp0.add_argument('--max', '-m',  action='store_true', help='Use maximum jobs across the board')
   grp0.add_argument('--quiet', '-q', action='store_true', help='Do not print compile errors/warnings')
   grp0.add_argument('--local', '-l', action='store_true', help='Run make locally with all possible threads')
@@ -575,26 +583,34 @@ def parseArguments(args=None):
   grp0.add_argument('--no-daemon', '-n', action='store_true', help='Do not launch any daemon processes')
   grp0.add_argument('--refresh', '-r', action='store_true', help='Force a refresh of the stored DISTCC_HOSTS cache')
 
+  # Build options
+  grp1 = parser.add_argument_group('Compiler Options (listed in order of priority)\n' + \
+                                   'These flags may be used in union with each other and the flags\n' + \
+                                   'list in the above section (e.g., dmake -dmv)')
+  grp1.add_argument('--debug', '-d', action='store_true', help='Build in debug mode')
+  grp1.add_argument('--oprof', '-p', action='store_true', help='Build in oprof mode')
+  grp1.add_argument('--opt', '-o', action='store_true', help='Build in opt mode')
+
   # Options that do not run make
-  grp1 = parser.add_argument_group('Daemon and Testings Commands (do not run \'make\')')
-  grp1.add_argument('--daemon', action='store_true', help='Launch distcc as a daemon')
-  grp1.add_argument('--kill', action='store_true', help='Kill distcc as a daemon')
-  grp1.add_argument('--summary', '-s', action='store_true', help='Show distribution summary')
+  grp2 = parser.add_argument_group('Daemon and Testings Commands (do not run \'make\')')
+  grp2.add_argument('--daemon', action='store_true', help='Launch distcc as a daemon')
+  grp2.add_argument('--kill', action='store_true', help='Kill distcc as a daemon')
+  grp2.add_argument('--summary', '-s', action='store_true', help='Show distribution summary')
 
   # Advanced options
-  grp2 = parser.add_argument_group('Advanced Options')
-  grp2.add_argument('--jobs', '-j', type=int, help='Override the automatic job count settings')
-  grp2.add_argument('--localhost', type=int, help='Override the automatic setting for the number of localhost processors to utilize')
-  grp2.add_argument('--localslots', type=int, help='Override the automatic setting for the number of local compile slots')
-  grp2.add_argument('--localslots_cpp', type=int, help='Override the automatic setting for the number of local preprocessor slots')
-  grp2.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
-  grp2.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
-  grp2.add_argument('--benchmark','-b', action='store_true', help='Run \'make cleanall\' and \'dmake\' in moose_test directory')
-  grp2.add_argument('--dedicated', action='store_true', help='Identify this machine as a dedicated build box')
-  grp2.add_argument('--description', nargs=1, type=str, default=[socket.gethostname()], help='Add a description to your machine (default: %(default)s)')
+  grp3 = parser.add_argument_group('Advanced Options')
+  grp3.add_argument('--jobs', '-j', type=int, help='Override the automatic job count settings')
+  grp3.add_argument('--localhost', type=int, help='Override the automatic setting for the number of localhost processors to utilize')
+  grp3.add_argument('--localslots', type=int, help='Override the automatic setting for the number of local compile slots')
+  grp3.add_argument('--localslots_cpp', type=int, help='Override the automatic setting for the number of local preprocessor slots')
+  grp3.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
+  grp3.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
+  grp3.add_argument('--benchmark','-b', action='store_true', help='Run \'make cleanall\' and \'dmake\' in moose_test directory')
+  grp3.add_argument('--dedicated', action='store_true', help='Identify this machine as a dedicated build box')
+  grp3.add_argument('--description', nargs=1, type=str, default=[socket.gethostname()], help='Add a description to your machine (default: %(default)s)')
 
   # Allow flags to be run together
-  parser.parse_args('-mqvnlrb'.split())
+  parser.parse_args('-mqvnlrbdpo'.split())
 
   # Parse the input and return the options
   (options, other_args) = parser.parse_known_args()
