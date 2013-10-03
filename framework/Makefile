@@ -23,7 +23,6 @@ DEP_APPS	?= $(shell scripts/find_dep_apps.py MOOSE)
 include build.mk
 include moose.mk
 
-
 ###############################################################################
 # Additional special case targets should be added here
 
