@@ -94,6 +94,8 @@ class Farm(object):
     self._cache = None         # flag indicating if cache DISTCC_HOSTS was used (priavte)
     self._make_output = None   # output pipe from make (private)
     self._make_time = None     # duration of make command (private)
+    self._lines = []           # lines read from the HPCSC server
+    self._local_lines = []     # lines read from the local .dmake_hosts file
 
     # Set the temporary file names
     self._dmake_file = os.path.join(os.getenv('HOME'), '.dmake')
@@ -121,27 +123,32 @@ class Farm(object):
     # Set the network of the master Machine
     self._master.network = self._network
 
-    # Extract the list of users from the HPCSC website
-    try:
-      if self._options.dedicated:
-        use = str((int(self._master.threads) / 2))
-      else:
-        use = str((int(self._master.threads) / 4))
+    # Read the hosts if not running a local build
+    if not self._options.local:
+      self._readHosts()
 
-      filename = 'https://hpcsc.inl.gov/distcc_gen?uuid=' + str(uuid.uuid3(uuid.NAMESPACE_DNS, self._master.hostname)) + \
-                                                 '&arch=' + self._system + \
-                                                 '&ip=' + self._master.address + \
-                                                 '&cpus=' + str(self._master.threads) + \
-                                                 '&threads=' + str(self._master.threads) + \
-                                                 '&use=' + use + \
-                                                 '&network=' + self._network + \
-                                                 '&description=' + urllib2.quote(self._options.description[0])
+  ##  Execute the correct action
+  def execute(self):
 
-      fid = urllib2.urlopen(filename)
-      self._lines = fid.read().split('\n')
-      fid.close()
-    except urllib2.HTTPError:
-      self._lines = None
+    # Print a summary, do not run make
+    if self._options.summary:
+      self.summary()
+
+    # Start the distcc daemon, do not run make
+    elif self._options.daemon:
+      _self.startDaemon()
+
+    # Kill the daemons, do not run make
+    elif self._options.kill:
+      _self.killDaemon()
+
+    # Run local build if desired, short-circut the rest of the script for speed
+    elif self._options.local:
+      self.local()
+
+    # Run a distributed compile
+    else:
+      self.distribute()
 
   ## Run the build locally only
   # @return Time required for running make
@@ -165,12 +172,6 @@ class Farm(object):
   ## Run the build distributed
   # @return Time required for running make
   def distribute(self):
-
-    # If no file was found in the constructor, run locally
-    if self._lines == None:
-      print 'Warning: Failed to connect to hpcsc, running locally'
-      self.local()
-      return
 
     # Check that the distccd daemons are running
     self._checkDaemon()
@@ -198,14 +199,63 @@ class Farm(object):
   # @return A time of 0.0 (used in main function to display dmake exeuction time)
   def summary(self):
 
-    # If no file was found in the constructor, run locally
-    if self._lines == None:
-      print 'Error: Failed to connect to hpcsc, summary is unavailable'
+    # The summary is not available for local compiles
+    if self._options.local:
+      print "Summary not available when running locally"
       sys.exit()
 
+    # Display the results
     distcc_hosts, jobs = self._initClient()
     self._options.verbose = True
     self._display(distcc_hosts, jobs)
+
+  ## Function for reading hosts files
+  def _readHosts(self):
+
+    # Extract the list of users from the HPCSC website
+    try:
+      if self._options.dedicated:
+        use = str((int(self._master.threads) / 2))
+      else:
+        use = str((int(self._master.threads) / 4))
+
+      # The file containing the list of available machines
+      filename = 'https://hpcsc.inl.gov/distcc_gen?uuid=' + str(uuid.uuid3(uuid.NAMESPACE_DNS, self._master.hostname)) + \
+                                                 '&arch=' + self._system + \
+                                                 '&ip=' + self._master.address + \
+                                                 '&cpus=' + str(self._master.threads) + \
+                                                 '&threads=' + str(self._master.threads) + \
+                                                 '&use=' + use + \
+                                                 '&network=' + self._network + \
+                                                 '&description=' + urllib2.quote(self._options.description[0])
+
+
+      # Read the file
+      fid = urllib2.urlopen(filename)
+      self._lines = fid.read().split('\n')
+      fid.close()
+
+    # If the file fails to read run a local build
+    except:# urllib2.HTTPError or urllib2.URLError:
+      print 'Warning: Failed to connect to hpcsc, running locally'
+      self._options.local = True
+      self._lines = None
+
+    # Extract the local copy of the hosts file, if the file doesn't exist
+    # create it from the file read from server
+    if not os.path.exists(self._dmake_file):
+      self._local_lines = self._lines
+      fid = open(self._dmake_hosts, 'w')
+      for line in self.lines:
+        fid.write(line)
+      fid.close()
+
+    # Otherwise, read the stored lines
+    else:
+      fid = open(self._dmake_file)
+      self._local_lines = fid.read().split('\n')
+      fid.close()
+
 
   ## Run the make command (private)
   # @param distcc_hosts String contaning the DISTCC_HOSTS environmental variable
@@ -264,9 +314,9 @@ class Farm(object):
       if len(self._down) > 0:
         for user in self._down:
           output.append(user.info())
-        output.append(s)
 
       # Print header for building information
+      output.append(s)
       output.append('\nBUILD INFROMATION:')
 
     # The basic information
@@ -399,27 +449,33 @@ class Farm(object):
   # start/re-start the daemons using 'distccd'
   def _checkDaemon(self):
 
+    # Print a message that the check is underway
+    print 'Checking if distcc daemons need to be restarted'
+
+    # Filter out empty strings from the lists
+    self._lines = filter(None,self._lines)
+    self._local_lines = filter(None,self._local_lines)
+
     # Flag for writting timestamp file
-    w_flag = False
+    write_flag = False
 
     # If the file does not exist start the daemon and create. dmake file
     if not os.path.exists(self._dmake_file) or not self._isRunning():
-      w_flag = True
+      write_flag = True
       self._launchDaemon()
 
-    # Open the .dmake and lanuch the daemon
-    else:
-      fid = open(self._dmake_file)
-      t = int(fid.readline())
-      fid.close()
-      if (int(time.time()) - t) >= 14400:
-        self._launchDaemon()
-        w_flag = True
+    # If the local host file lines do not match the lines from the server,
+    # launch the daemon and re-write the file
+    elif self._lines != self._local_lines:
+      write_flag = True
+      self._launchDaemon()
 
     # Write the .dmake file
-    if w_flag:
+    if write_flag:
+      print 'Updating local distcc hosts file'
       fid = open(self._dmake_file, 'w')
-      fid.write(time.strftime('%s'))
+      for line in self._lines:
+        fid.write(line + '\n')
       fid.close()
 
   ## Launches the Daemon (private)
@@ -571,28 +627,9 @@ if __name__ == "__main__":
     sub = subprocess.Popen(['make', 'cleanall'])
     sub.wait()
 
-  # Create the compile farm object
+  # Create the compile farm object and execute the build
   farm = Farm(options, make_args)
-
-  # Run local build if desired, short-circut the rest of the script for speed
-  if options.local:
-    farm.local()
-
-  # Print a summary, do not run make
-  elif options.summary:
-    farm.summary()
-
-  # Start the distcc daemon, do not run make
-  elif options.daemon:
-    farm.startDaemon()
-
-  # Kill the daemons, do not run make
-  elif options.kill:
-    farm.killDaemon()
-
-  # Run a distributed compile
-  else:
-    farm.distribute()
+  farm.execute()
 
   # Return to the orginal directory if running benchmark
   if options.benchmark:
