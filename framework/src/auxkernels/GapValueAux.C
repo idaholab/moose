@@ -26,6 +26,7 @@ InputParameters validParams<GapValueAux>()
   MooseEnum orders("FIRST, SECOND, THIRD, FOURTH", "FIRST");
 
   InputParameters params = validParams<AuxKernel>();
+  params.set<bool>("_dual_restrictable") = true;
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary on the other side of a gap.");
   params.addRequiredParam<VariableName>("paired_variable", "The variable to get the value of.");
   params.set<bool>("use_displaced_mesh") = true;

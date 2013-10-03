@@ -169,6 +169,14 @@ protected:
   /// Pointer to Mesh
   MooseMesh * _blk_mesh;
 
+private:
+
+  /**
+   * A helper function for extracting the subdomain IDs for a variable
+   * @param paramters A reference to the input parameters supplied to the object
+   */
+  std::set<SubdomainID> variableSubdomianIDs(InputParameters & parameters);
+
 };
 
 template<typename T>

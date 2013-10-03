@@ -21,6 +21,7 @@ template<>
 InputParameters validParams<NearestNodeValueAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.set<bool>("_dual_restrictable") = true;
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to get the value from.");
   params.addRequiredCoupledVar("paired_variable", "The variable to get the value of.");
   params.set<bool>("use_displaced_mesh") = true;

@@ -51,7 +51,7 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
   if (_blk_mesh == NULL)
     mooseError("The input paramters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
 
-  // The 'block' input is defined and the FEProblem pointer is valid
+  // The 'block' input is defined
   if (parameters.isParamValid("block"))
   {
     // Extract the blocks from the input
@@ -61,7 +61,7 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
     std::vector<SubdomainID> vec_ids = _blk_mesh->getSubdomainIDs(_blocks);
 
     // Create a set of IDS
-    for (std::vector<SubdomainID>::const_iterator it = vec_ids.begin(); it != vec_ids.end(); ++it)
+    for (std::vector<SubdomainID>::const_iterator it=vec_ids.begin(); it != vec_ids.end(); ++it)
       _blk_ids.insert(*it);
 
     // Check that supplied blocks are within the variable domain
@@ -69,27 +69,24 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
         (parameters.have_parameter<NonlinearVariableName>("variable") ||
          parameters.have_parameter<AuxVariableName>("variable")))
     {
-      // Get the SystemBase and the thread id
-      SystemBase* sys = parameters.get<SystemBase *>("_sys");
-      THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
-
       // A pointer to the variable class
-      MooseVariable * var;
-
-      // Get the variable based on the type
-      if (parameters.have_parameter<NonlinearVariableName>("variable"))
-        var = &_blk_feproblem->getVariable(tid, parameters.get<NonlinearVariableName>("variable"));
-      else if (parameters.have_parameter<AuxVariableName>("variable"))
-        var = &_blk_feproblem->getVariable(tid, parameters.get<AuxVariableName>("variable"));
-      else
-        mooseError("The variable input has an unknown Type");
-
-      // Return the block ids for the variable
-      std::set<SubdomainID> var_ids = sys->getSubdomainsForVar(var->index());
+      std::set<SubdomainID> var_ids = variableSubdomianIDs(parameters);
 
       // Test if the variable blockIDs are valid for this object
       if (!isBlockSubset(var_ids))
         mooseError("In object " << name << " the defined blocks are outside of the domain of the variable");
+    }
+  }
+
+  // The 'block' input parameter is undefined
+  else
+  {
+    // If the object contains a variable, set the subdomain ids to those of the variable
+    if (parameters.isParamValid("variable") &&
+        (parameters.have_parameter<NonlinearVariableName>("variable") ||
+         parameters.have_parameter<AuxVariableName>("variable")))
+    {
+      _blk_ids = variableSubdomianIDs(parameters);
     }
   }
 
@@ -98,7 +95,8 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
     if (parameters.isParamValid("_boundary_ids"))
     {
       std::vector<BoundaryID> bnd_ids = parameters.get<std::vector<BoundaryID> >("_boundary_ids");
-      if (!bnd_ids.empty() && bnd_ids[0] != Moose::ANY_BOUNDARY_ID)
+      if (!bnd_ids.empty()
+          && std::find(bnd_ids.begin(), bnd_ids.end(), Moose::ANY_BOUNDARY_ID) != bnd_ids.end())
         mooseError("Attempted to restrict the object '" << name << "' to a block, but the object is already restricted by boundary");
     }
 
@@ -190,4 +188,24 @@ BlockRestrictable::isBlockSubset(std::vector<SubdomainID> ids)
 {
   std::set<SubdomainID> ids_set(ids.begin(), ids.end());
   return isBlockSubset(ids_set);
+}
+
+std::set<SubdomainID>
+BlockRestrictable::variableSubdomianIDs(InputParameters & parameters)
+{
+  // Get the SystemBase and the thread id
+  SystemBase* sys = parameters.get<SystemBase *>("_sys");
+  THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
+
+  // Pointer to MooseVariable
+  MooseVariable * var = NULL;
+
+  // Get the variable based on the type
+  if (parameters.have_parameter<NonlinearVariableName>("variable"))
+    var = &_blk_feproblem->getVariable(tid, parameters.get<NonlinearVariableName>("variable"));
+  else if (parameters.have_parameter<AuxVariableName>("variable"))
+    var = &_blk_feproblem->getVariable(tid, parameters.get<AuxVariableName>("variable"));
+
+  // Return the block ids for the variable
+  return sys->getSubdomainsForVar(var->index());
 }
