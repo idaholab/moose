@@ -1,8 +1,8 @@
-# This is a test designed to evaluate the cabability of the 
-# AdaptiveTransient Executioner to adjust time step size according to
+# This is a test designed to evaluate the cabability of the
+# AdaptiveDT TimeStepper to adjust time step size according to
 # a function.  For example, if the power input function for a BISON
-# simulation rapidly increases or decreases, the AdaptiveTransient
-# Executioner should take time steps small enough to capture the
+# simulation rapidly increases or decreases, the AdaptiveDT
+# TimeStepper should take time steps small enough to capture the
 # oscillation.
 
 [GlobalParams]
@@ -145,7 +145,7 @@
 []
 
 [Executioner]
-  type = AdaptiveTransient
+  type = Transient
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
@@ -154,19 +154,23 @@
   nl_abs_tol = 1e-10
   start_time = 0.0
   num_steps = 50000
-  dt = 1e6
+#  dt = 1e6
   end_time = 2.002e6
-  timestep_limiting_function = Fiss_Function
-  max_function_change = 3e7
+  [./TimeStepper]
+    type = AdaptiveDT
+    timestep_limiting_function = Fiss_Function
+    max_function_change = 3e7
+    dt = 1e6
+  [../]
 []
 
 [Postprocessors]
-  [./Temperatrue_of_Block]          
+  [./Temperatrue_of_Block]
     type = ElementAverageValue
     variable = temp
   [../]
 
-  [./vonMises]          
+  [./vonMises]
     type = ElementAverageValue
     variable = vonmises
   [../]
@@ -181,4 +185,3 @@
   perf_log = true
   max_pps_rows_screen = 10
 []
-

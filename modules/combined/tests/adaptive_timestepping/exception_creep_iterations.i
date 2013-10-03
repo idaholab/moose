@@ -227,8 +227,7 @@
 []
 
 [Executioner]
-  type = AdaptiveTransient
-#  petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
+  type = Transient
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
@@ -251,7 +250,10 @@
   start_time = 0.0
   end_time = 1.0
   num_steps = 100
-  dt = 1.0
+  [./TimeStepper]
+    type = AdaptiveDT
+    dt = 1.0
+  [../]
 []
 
 [Output]

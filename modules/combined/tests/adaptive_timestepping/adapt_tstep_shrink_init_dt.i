@@ -100,7 +100,7 @@
 []
 
 [Executioner]
-  type = AdaptiveTransient
+  type = Transient
 
   solve_type = PJFNK
 
@@ -120,15 +120,17 @@
   l_tol           = 1e-5
   l_abs_step_tol  = 1e-6
 
-  optimal_iterations = 1
-  iteration_window = 1
-  linear_iteration_ratio = 1
   start_time = 0.0
-#  num_steps = 10
-  dt = 5.0
   dtmin = 3.0
   end_time = 13.0
-#  sync_times = '0.5, 9.5'
+
+  [./TimeStepper]
+    type = AdaptiveDT
+    optimal_iterations = 1
+    iteration_window = 1
+    linear_iteration_ratio = 1
+    dt = 5.0
+  [../]
 []
 
 [Postprocessors]

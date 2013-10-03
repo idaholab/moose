@@ -100,7 +100,7 @@
 []
 
 [Executioner]
-  type = AdaptiveTransient
+  type = Transient
 
   solve_type = PJFNK
 
@@ -119,13 +119,16 @@
   nl_abs_tol = 1e-3
   l_tol = 1e-5
 
-  optimal_iterations = 10
   start_time = 0.0
-  dt = 1.0
   end_time = 20.0
-#  sync_times = '0.5, 9.5'
-  time_t  = '0.0, 5.0'
-  time_dt = '1.0, 5.0'
+
+  [./TimeStepper]
+    type = AdaptiveDT
+    dt = 1.0
+    optimal_iterations = 10
+    time_t  = '0.0, 5.0'
+    time_dt = '1.0, 5.0'
+  [../]
 []
 
 [Postprocessors]

@@ -6,6 +6,7 @@
 // solid_mechanics
 #include "AbaqusCreepMaterial.h"
 #include "AbaqusUmatMaterial.h"
+#include "AdaptiveDT.h"
 #include "AdaptiveTransient.h"
 #include "CLSHPlasticMaterial.h"
 #include "DashpotBC.h"
@@ -52,6 +53,11 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerAux(AccumulateAux);
   registerAux(ElementsOnLineAux);
 
+  registerBoundaryCondition(DashpotBC);
+  registerBoundaryCondition(PlenumPressure);
+  registerBoundaryCondition(PresetVelocity);
+  registerBoundaryCondition(Pressure);
+
   registerExecutioner(AdaptiveTransient);
 
   registerMaterial(AbaqusCreepMaterial);
@@ -68,11 +74,6 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerMaterial(PowerLawCreep);
   registerMaterial(TrussMaterial);
 
-  registerBoundaryCondition(DashpotBC);
-  registerBoundaryCondition(PlenumPressure);
-  registerBoundaryCondition(PresetVelocity);
-  registerBoundaryCondition(Pressure);
-
   registerKernel(Gravity);
   registerKernel(HomogenizationKernel);
   registerKernel(SolidMechImplicitEuler);
@@ -83,6 +84,8 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
 
   registerPostprocessor(HomogenizedElasticConstants);
   registerPostprocessor(Mass);
+
+  registerTimeStepper(AdaptiveDT);
 
   registerUserObject(MaterialTensorOnLine);
 
