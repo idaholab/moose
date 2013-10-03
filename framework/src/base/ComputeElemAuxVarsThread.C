@@ -20,10 +20,11 @@
 #include "libmesh/threads.h"
 
 
-ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs) :
+ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs, bool need_materials) :
     ThreadedElementLoop<ConstElemRange>(problem, sys),
     _aux_sys(sys),
-    _auxs(auxs)
+    _auxs(auxs),
+    _need_materials(need_materials)
 {
 }
 
@@ -31,7 +32,8 @@ ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, Auxiliar
 ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split /*split*/) :
     ThreadedElementLoop<ConstElemRange>(x._fe_problem, x._system),
     _aux_sys(x._aux_sys),
-    _auxs(x._auxs)
+    _auxs(x._auxs),
+    _need_materials(x._need_materials)
 {
 }
 
@@ -92,7 +94,7 @@ ComputeElemAuxVarsThread::onElement(const Elem * elem)
   {
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
-    _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
+    _fe_problem.reinitMaterials(elem->subdomain_id(), _tid, _need_materials);
 
     // block
     for(std::vector<AuxKernel*>::const_iterator block_element_aux_it = _auxs[_tid].activeBlockElementKernels(_subdomain).begin();

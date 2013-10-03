@@ -118,9 +118,9 @@ public:
   NumericVector<Number> & addVector(const std::string & vector_name, const bool project, const ParallelType type);
 
 protected:
-  void computeScalarVars(std::vector<AuxWarehouse> & auxs);
-  void computeNodalVars(std::vector<AuxWarehouse> & auxs);
-  void computeElementalVars(std::vector<AuxWarehouse> & auxs);
+  void computeScalarVars(ExecFlagType type);
+  void computeNodalVars(ExecFlagType type);
+  void computeElementalVars(ExecFlagType type);
 
   FEProblem & _mproblem;
 
