@@ -78,7 +78,7 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
       if (!var.activeOnSubdomain(elem->subdomain_id()))
         continue;
 
-      InitialCondition * ic = _sys._vars[_tid].getInitialCondition(var.name(), elem->subdomain_id());
+      InitialCondition * ic = _sys._ics[_tid].getInitialCondition(var.name(), elem->subdomain_id());
       if (ic == NULL)
         continue;               // no initial condition -> skip this variable
 

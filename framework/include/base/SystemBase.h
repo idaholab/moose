@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "VariableWarehouse.h"
+#include "InitialConditionWarehouse.h"
 #include "Assembly.h"
 #include "ParallelUniqueId.h"
 #include "SubProblem.h"
@@ -390,6 +391,8 @@ protected:
   std::vector<VariableWarehouse> _vars;
   /// Map of variables (variable id -> array of subdomains where it lives)
   std::map<unsigned int, std::set<SubdomainID> > _var_map;
+  /// Initial condition warehouses (one for each thread)
+  std::vector<InitialConditionWarehouse> _ics;
 
   std::vector<std::string> _vars_to_be_zeroed_on_residual;
   std::vector<std::string> _vars_to_be_zeroed_on_jacobian;

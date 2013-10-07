@@ -51,7 +51,8 @@ SystemBase::SystemBase(SubProblem & subproblem, const std::string & name) :
     _name(name),
     _currently_computing_jacobian(false),
     _vars(libMesh::n_threads()),
-    _var_map()
+    _var_map(),
+    _ics(libMesh::n_threads())
 {
 }
 
@@ -59,7 +60,7 @@ void
 SystemBase::initialICSetup()
 {
   for(unsigned int i=0; i<libMesh::n_threads(); i++)
-    _vars[i].initialSetup();
+    _ics[i].initialSetup();
 }
 
 MooseVariable &
@@ -412,10 +413,10 @@ SystemBase::addInitialCondition(const std::string & ic_name, const std::string &
       for (unsigned int i = 0; i < blocks.size(); i++)
       {
         SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
-        _vars[tid].addInitialCondition(var_name, blk_id, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
+        _ics[tid].addInitialCondition(var_name, blk_id, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
       }
     else
-      _vars[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
+      _ics[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
   }
 }
 
@@ -430,7 +431,7 @@ SystemBase::addScalarInitialCondition(const std::string & ic_name, const std::st
   for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    _vars[tid].addScalarInitialCondition(var_name, static_cast<ScalarInitialCondition *>(_factory.create(ic_name, name, parameters)));
+    _ics[tid].addScalarInitialCondition(var_name, static_cast<ScalarInitialCondition *>(_factory.create(ic_name, name, parameters)));
   }
 }
 
@@ -456,7 +457,7 @@ SystemBase::projectSolution()
     for (std::vector<MooseVariableScalar *>::const_iterator it = scalar_vars.begin(); it != scalar_vars.end(); ++it)
     {
       MooseVariableScalar * var = *it;
-      ScalarInitialCondition * sic = _vars[tid].getScalarInitialCondition(var->name());
+      ScalarInitialCondition * sic = _ics[tid].getScalarInitialCondition(var->name());
       if (sic != NULL)
       {
         var->reinit();
