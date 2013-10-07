@@ -33,6 +33,8 @@ protected:
   MaterialProperty<Real> & _e_over_l;
   Real _youngs_modulus;
 
+  bool _has_temp;
+  VariableValue & _temp;
   Real _t_ref;
   Real _alpha;
   

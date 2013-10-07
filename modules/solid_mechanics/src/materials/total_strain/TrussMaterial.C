@@ -17,6 +17,7 @@ InputParameters validParams<TrussMaterial>()
   params.addRequiredParam<Real>("youngs_modulus", "Young's Modulus");
   params.addParam<Real>("t_ref", 0.0, "The reference temperature at which this material has zero strain.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
+  params.addCoupledVar("temp", "The temperature if you want thermal expansion.");
   return params;
 }
 
@@ -26,6 +27,8 @@ TrussMaterial::TrussMaterial(const std::string  & name,
    _axial_stress(declareProperty<Real>("axial_stress")),
    _e_over_l(declareProperty<Real>("e_over_l")),
    _youngs_modulus(getParam<Real>("youngs_modulus")),
+   _has_temp(isCoupled("temp")),
+   _temp(_has_temp ? coupledValue("temp") : _zero),
    _t_ref(getParam<Real>("t_ref")),
    _alpha(getParam<Real>("thermal_expansion")),
    _dim(1)
@@ -112,11 +115,16 @@ TrussMaterial::computeProperties()
   }
   Real new_length = std::sqrt( ddx*ddx + ddy*ddy + ddz*ddz );
   Real strain = (new_length-orig_length)/orig_length;
-  Real axial_stress = _youngs_modulus*strain;
+
+  Real thermal_strain = 0.0;
 
   for(_qp=0; _qp < _qrule->n_points(); ++_qp)
   {
-    _axial_stress[_qp] = axial_stress;
+    if (_has_temp)
+    {
+      thermal_strain = _alpha * (_t_ref - _temp[_qp]);
+    }
+    _axial_stress[_qp] = _youngs_modulus*(strain+thermal_strain);
     _e_over_l[_qp] = _youngs_modulus/orig_length;
   }
 }
