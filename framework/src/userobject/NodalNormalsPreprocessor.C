@@ -57,6 +57,9 @@ NodalNormalsPreprocessor::execute()
 {
   NumericVector<Number> & sln = _aux.solution();
 
+  // Make sure the solution is ready to be modified
+  _aux.solution().close();
+
   // Loop through each node on the current element
   for (unsigned int i = 0; i < _current_elem->n_nodes(); i++)
   {
@@ -95,12 +98,14 @@ NodalNormalsPreprocessor::execute()
       }
     }
   }
+
+  // Close the solution
+  _aux.solution().close();
 }
 
 void
 NodalNormalsPreprocessor::finalize()
 {
-  _aux.solution().close();
 }
 
 void
