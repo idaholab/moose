@@ -19,15 +19,8 @@ void
 InitialConditionWarehouse::initialSetup()
 {
   for (std::map<std::string, std::map<SubdomainID, InitialCondition *> >::iterator it1 = _ics.begin(); it1 != _ics.end(); ++it1)
-  {
-    std::cerr << "s = " << it1->first << ":";
     for (std::map<SubdomainID, InitialCondition *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
-    {
-      std::cerr << " " << it2->first;
       it2->second->initialSetup();
-    }
-    std::cerr << std::endl;
-  }
 }
 
 void
@@ -47,7 +40,6 @@ InitialConditionWarehouse::addInitialCondition(const std::string & var_name, Sub
                + "' are both defined on the same block.");
 
   _ics[var_name][blockid] = ic;
-  std::cerr << "Added ic = " << ic << std::endl;
 }
 
 InitialCondition *
