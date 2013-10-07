@@ -328,4 +328,10 @@
     input_switch = '-m'
     expect_out = '^Usage:'
   [../]
+
+  [./ics_missing_variable]
+    type = 'RunException'
+    input = 'ic_variable_not_specified.i'
+    expect_err = "The required parameter '\S+' is missing."
+  [../]
 []

@@ -1314,8 +1314,10 @@ FEProblem::addDGKernel(const std::string & dg_kernel_name, const std::string & n
 void
 FEProblem::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters)
 {
-  const std::string & var_name = parameters.get<VariableName>("variable");
+  // before we start to mess with the initial condition, we need to check parameters for errors.
+  parameters.checkParams(name);
 
+  const std::string & var_name = parameters.get<VariableName>("variable");
   parameters.set<FEProblem *>("_fe_problem") = this;
   if (_nl.hasVariable(var_name))
     _nl.addInitialCondition(ic_name, name, parameters);
