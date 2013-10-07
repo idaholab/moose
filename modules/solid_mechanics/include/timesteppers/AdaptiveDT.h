@@ -54,6 +54,7 @@ protected:
 
   unsigned int & _nl_its;  /// Number of nonlinear iterations in previous solve
   unsigned int & _l_its;   /// Number of linear iterations in previous solve
+  bool & _cutback_occurred;
 
 };
 

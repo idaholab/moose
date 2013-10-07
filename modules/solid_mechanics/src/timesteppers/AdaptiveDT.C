@@ -38,7 +38,8 @@ AdaptiveDT::AdaptiveDT(const std::string & name, InputParameters parameters) :
   _growth_factor(getParam<Real>("growth_factor")),
   _cutback_factor(getParam<Real>("cutback_factor")),
   _nl_its(declareRestartableData<unsigned int>("nl_its", 0)),
-  _l_its(declareRestartableData<unsigned int>("l_its", 0))
+  _l_its(declareRestartableData<unsigned int>("l_its", 0)),
+  _cutback_occurred(declareRestartableData<bool>("cutback_occurred", false))
 {
 
   if (isParamValid("optimal_iterations"))
@@ -176,7 +177,16 @@ AdaptiveDT::computeDT()
 {
   Real dt(_dt_old);
 
-  if (_synced_last_step)
+  if ( _cutback_occurred ) //Don't allow it to grow this step, but shrink if needed
+  {
+    _cutback_occurred = false;
+    if (_adaptive_timestepping)
+    {
+      bool allowToGrow(false);
+      computeAdaptiveDT(dt,allowToGrow);
+    }
+  }
+  else if (_synced_last_step)
   {
     _synced_last_step = false;
 
@@ -241,29 +251,39 @@ AdaptiveDT::computeDT()
 
   }
 
+  // Don't let the time step size exceed maximum time step size
+  if (dt > _dt_max)
+  {
+    dt = _dt_max;
+
+    std::cout << "Limiting dt to dtmax: "
+              << std::setw(9)
+              << std::setprecision(6)
+              << std::setfill('0')
+              << std::showpoint
+              << std::left
+              << _dt_max
+              << std::endl;
+  }
+
   return dt;
 }
 
 Real
 AdaptiveDT::computeFailedDT()
 {
-  Real dt(_dt_old);
+  _cutback_occurred = true;
+  Real dt(_dt);
 
   if (dt <= _dt_min)
   { //Can't cut back any more
     mooseError("Solve failed and timestep already at dtmin, cannot continue!");
   }
 
-  dt = _cutback_factor * _dt_old;
+  dt *= _cutback_factor;
   if (dt < _dt_min)
   {
     dt =  _dt_min;
-  }
-
-  if (_adaptive_timestepping)
-  {
-    bool allowToGrow = false;
-    computeAdaptiveDT(dt, allowToGrow);
   }
 
   // Limit the timestep to limit change in the function
