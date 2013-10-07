@@ -177,7 +177,21 @@ class TestHarness:
               if re.match('".*"', value):  # Strip quotes
                 params[key] = value[1:-1]
               else:
-                params[key] = value
+                # Prevent bool types from being stored as strings.  This can lead to the
+                # strange situation where string('False') evaluates to true...
+                if params.isValid(key) and (type(params[key]) == type(bool())):
+                  # We support using the case-insensitive strings {true, false} and the string '0', '1'.
+                  if (value.lower()=='true') or (value=='1'):
+                    params[key] = True
+                  elif (value.lower()=='false') or (value=='0'):
+                    params[key] = False
+                  else:
+                    print "Unrecognized (key,value) pair: (", key, ',', value, ")"
+                    sys.exit(1)
+
+                # Otherwise, just do normal assignment
+                else:
+                  params[key] = value
           else:
             params_ignored.add(key)
 
