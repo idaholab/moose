@@ -660,3 +660,11 @@ DisplacedProblem::getQuadratureOrder()
 {
   return _mproblem.getQuadratureOrder();
 }
+
+void
+DisplacedProblem::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
+{
+  name += "/displaced";
+
+  _mproblem.registerRestartableData(name, data, tid);
+}

@@ -22,7 +22,17 @@
 #include "PenetrationThread.h"
 #include "Moose.h"
 
+std::string _PLBoundaryFuser(unsigned int boundary1, unsigned int boundary2)
+{
+  std::stringstream ss;
+
+  ss << boundary1 << "to" << boundary2;
+
+  return ss.str();
+}
+
 PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchData & /*geom_search_data*/, MooseMesh & mesh, const unsigned int master_id, const unsigned int slave_id, Order order, NearestNodeLocator & nearest_node) :
+    Restartable(_PLBoundaryFuser(master_id, slave_id), "PenetrationLocator", subproblem, 0),
     _subproblem(subproblem),
     _mesh(mesh),
     _master_boundary(master_id),

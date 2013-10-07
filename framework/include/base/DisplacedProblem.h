@@ -177,6 +177,16 @@ public:
    */
   virtual void ghostGhostedBoundaries();
 
+  /**
+   * Register a piece of restartable data.  This is data that will get
+   * written / read to / from a restart file.
+   *
+   * @param name The full (unique) name.
+   * @param data The actual data object.
+   * @param tid The thread id of the object.  Use 0 if the object is not threaded.
+   */
+  virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
+
 protected:
   FEProblem & _mproblem;
   MooseMesh & _mesh;

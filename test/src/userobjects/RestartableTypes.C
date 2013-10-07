@@ -24,11 +24,13 @@ InputParameters validParams<RestartableTypes>()
 
 RestartableTypes::RestartableTypes(const std::string & name, InputParameters params) :
     GeneralUserObject(name, params),
+    _context_int(3),
     _real_data(declareRestartableData<Real>("real_data", 1)),
     _vector_data(declareRestartableData<std::vector<Real> >("vector_data")),
     _vector_vector_data(declareRestartableData<std::vector<std::vector<Real> > >("vector_vector_data")),
     _pointer_data(declareRestartableData<Dummy *>("pointer_data")),
-    _custom_data(declareRestartableData<Dummy>("custom_data"))
+    _custom_data(declareRestartableData<Dummy>("custom_data")),
+    _custom_with_context(declareRestartableData<DummyNeedingContext>("custom_with_context", &_context_int))
 {
   _vector_data.resize(4,1);
   _vector_vector_data.resize(4);
@@ -45,6 +47,7 @@ RestartableTypes::RestartableTypes(const std::string & name, InputParameters par
 
   _pointer_data->_i = 1;
   _custom_data._i = 1;
+  _custom_with_context._i = 1;
 }
 
 RestartableTypes::~RestartableTypes()
@@ -65,6 +68,7 @@ void RestartableTypes::initialSetup()
 
   _pointer_data->_i = 2;
   _custom_data._i = 2;
+  _custom_with_context._i = 2;
 }
 
 void RestartableTypes::timestepSetup()
@@ -80,6 +84,7 @@ void RestartableTypes::timestepSetup()
 
   _pointer_data->_i += 1;
   _custom_data._i += 1;
+  _custom_with_context._i += 1;
 }
 
 void

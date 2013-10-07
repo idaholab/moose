@@ -70,6 +70,9 @@ RestartableTypesChecker::execute()
 
     if(_custom_data._i != 5)
       mooseError("Error reading restartable custom data!");
+
+    if(_custom_with_context._i != 5)
+      mooseError("Error reading restartable custom data with context!");
   }
 
   _first = false;

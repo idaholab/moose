@@ -21,6 +21,7 @@
 #include "ParallelUniqueId.h"
 
 class PostprocessorData;
+class SubProblem;
 
 /**
  * A  class for creating restricted objects
@@ -31,7 +32,7 @@ class Restartable
 public:
   /**
    * Class constructor
-   * Populates the FEProblem and MooseMesh pointers
+   * Populates the SubProblem and MooseMesh pointers
    *
    * @param name The name of the object
    * @param parameters The InputParameters for the object.
@@ -47,7 +48,7 @@ public:
    * @param fe_problem A reference to the fe_problem for this object
    * @param tid Optional thread id (will default to zero)
    */
-  Restartable(std::string name, std::string system_name, FEProblem & fe_problem, THREAD_ID tid = 0);
+  Restartable(std::string name, std::string system_name, SubProblem & subproblem, THREAD_ID tid = 0);
 
   /**
    * Emtpy destructor
@@ -62,9 +63,12 @@ protected:
    * will be restored back to its previous value.
    *
    * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
+   *
+   * @param data_name The name of the data (usually just use the same name as the member variable)
+   * @param context Optional context pointer that will be passed to the load and store functions
    */
   template<typename T>
-  T & declareRestartableData(std::string data_name);
+  T & declareRestartableData(std::string data_name, void * context = NULL);
 
   /**
    * Declare a piece of data as "restartable" and initialize it.
@@ -72,9 +76,13 @@ protected:
    * will be restored back to its previous value.
    *
    * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
+   *
+   * @param data_name The name of the data (usually just use the same name as the member variable)
+   * @param init_value The initial value of the data
+   * @param context Optional context pointer that will be passed to the load and store functions
    */
   template<typename T>
-  T & declareRestartableData(std::string data_name, const T & init_value);
+  T & declareRestartableData(std::string data_name, const T & init_value, void * context = NULL);
 
 private:
   /**
@@ -85,12 +93,15 @@ private:
    * will be restored back to its previous value.
    *
    * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
+   *
+   * @param data_name The name of the data (usually just use the same name as the member variable)
+   * @param object_name A supplied name for the object that is declaring this data.
    */
   template<typename T>
-  T & declareRestartableDataWithObjectName(std::string data_name, std::string object_name);
+  T & declareRestartableDataWithObjectName(std::string data_name, std::string object_name, void * context = NULL);
 
-  /// Helper function so we don't have to #include FEProblem in the header
-  void registerRestartableDataOnFEProblem(std::string name, RestartableDataValue * data, THREAD_ID tid);
+  /// Helper function so we don't have to #include SubProblem in the header
+  void registerRestartableDataOnSubProblem(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
   /// The name of the object
   std::string _restartable_name;
@@ -104,54 +115,55 @@ private:
   /// The thread ID for this object
   THREAD_ID _restartable_tid;
 
-  /// Pointer to the FEProblem class
-  FEProblem * _restartable_feproblem;
+  /// Pointer to the SubProblem class
+  SubProblem * _restartable_subproblem;
 
-  /// For access to registerRestartableDataOnFEProblem()
+  /// For access to registerRestartableDataOnSubProblem()
   friend class PostprocessorData;
+  friend class NearestNodeLocator;
 };
 
 template<typename T>
 T &
-Restartable::declareRestartableData(std::string data_name)
+Restartable::declareRestartableData(std::string data_name, void * context)
 {
-  if(!_restartable_feproblem)
-    mooseError("No valid FEProblem found for " << _restartable_system_name << "/" << _restartable_name);
+  if(!_restartable_subproblem)
+    mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
 
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
-  RestartableData<T> * data_ptr = new RestartableData<T>(full_name);
+  RestartableData<T> * data_ptr = new RestartableData<T>(full_name, context);
 
-  registerRestartableDataOnFEProblem(full_name, data_ptr, _restartable_tid);
+  registerRestartableDataOnSubProblem(full_name, data_ptr, _restartable_tid);
 
   return data_ptr->get();
 }
 
 template<typename T>
 T &
-Restartable::declareRestartableData(std::string data_name, const T & init_value)
+Restartable::declareRestartableData(std::string data_name, const T & init_value, void * context)
 {
-  if(!_restartable_feproblem)
-    mooseError("No valid FEProblem found for " << _restartable_system_name << "/" << _restartable_name);
+  if(!_restartable_subproblem)
+    mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
 
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
-  RestartableData<T> * data_ptr = new RestartableData<T>(full_name);
+  RestartableData<T> * data_ptr = new RestartableData<T>(full_name, context);
 
   data_ptr->set() = init_value;
 
-  registerRestartableDataOnFEProblem(full_name, data_ptr, _restartable_tid);
+  registerRestartableDataOnSubProblem(full_name, data_ptr, _restartable_tid);
 
   return data_ptr->get();
 }
 
 template<typename T>
 T &
-Restartable::declareRestartableDataWithObjectName(std::string data_name, std::string object_name)
+Restartable::declareRestartableDataWithObjectName(std::string data_name, std::string object_name, void * context)
 {
   std::string old_name = _restartable_name;
 
   _restartable_name = object_name;
 
-  T & value = declareRestartableData<T>(data_name);
+  T & value = declareRestartableData<T>(data_name, context);
 
   _restartable_name = old_name;
 

@@ -24,8 +24,18 @@
 #include "libmesh/plane.h"
 #include "libmesh/mesh_tools.h"
 
+std::string _boundaryFuser(BoundaryID boundary1, BoundaryID boundary2)
+{
+  std::stringstream ss;
+
+  ss << boundary1 << "to" << boundary2;
+
+  return ss.str();
+}
+
 
 NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh, BoundaryID boundary1, BoundaryID boundary2) :
+    Restartable(_boundaryFuser(boundary1, boundary2), "NearestNodeLocator", subproblem, 0),
     _subproblem(subproblem),
     _mesh(mesh),
     _slave_node_range(NULL),

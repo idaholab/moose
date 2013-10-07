@@ -17,6 +17,7 @@
 
 // Moose includes
 #include "GeometricSearchInterface.h"
+#include "Restartable.h"
 
 // libmesh includes
 #include "libmesh/libmesh_common.h"
@@ -34,7 +35,7 @@ class SubProblem;
 class MooseMesh;
 class GeometricSearchData;
 
-class PenetrationLocator
+class PenetrationLocator : Restartable
 {
 public:
   PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh, const unsigned int master_id, const unsigned int slave_id, Order order, NearestNodeLocator & nearest_node);

@@ -31,9 +31,9 @@ public:
 /// Store but no Load!
 template<>
 inline void
-dataStore(std::ostream & stream, Stupid * & v)
+dataStore(std::ostream & stream, Stupid * & v, void * context)
 {
-  dataStore(stream, v->_i);
+  dataStore(stream, v->_i, context);
 }
 
 

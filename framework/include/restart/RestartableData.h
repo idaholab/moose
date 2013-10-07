@@ -36,7 +36,10 @@ public:
    * Constructor
    * @param name The full (unique) name for this piece of data.
    */
-  RestartableDataValue(std::string name):_name(name) {}
+  RestartableDataValue(std::string name, void * context) :
+      _name(name),
+      _context(context)
+    {}
 
   /**
    * Destructor.
@@ -54,15 +57,23 @@ public:
    */
   std::string name() { return _name; }
 
+  /**
+   * A context pointer for helping with load / store.
+   */
+  void * context() { return _context; }
+
   virtual void swap (RestartableDataValue *rhs) = 0;
 
   // save/restore in a file
   virtual void store(std::ostream & stream) = 0;
   virtual void load(std::istream & stream) = 0;
 
-private:
+protected:
   /// The full (unique) name of this particular piece of data.
   std::string _name;
+
+  /// A context pointer for helping with load and store
+  void * _context;
 };
 
 /**
@@ -77,7 +88,11 @@ public:
    * Constructor
    * @param name The full (unique) name for this piece of data.
    */
-  RestartableData(std::string name):RestartableDataValue(name) { _value_ptr = new T; }
+  RestartableData(std::string name, void * context) :
+      RestartableDataValue(name, context)
+  {
+    _value_ptr = new T;
+  }
 
   virtual ~RestartableData() { delete _value_ptr; }
 
@@ -140,14 +155,14 @@ inline void
 RestartableData<T>::store(std::ostream & stream)
 {
   T & tmp = *_value_ptr;
-  storeHelper(stream, tmp);
+  storeHelper(stream, tmp, _context);
 }
 
 template<typename T>
 inline void
 RestartableData<T>::load(std::istream & stream)
 {
-  loadHelper(stream, *_value_ptr);
+  loadHelper(stream, *_value_ptr, _context);
 }
 
 /**

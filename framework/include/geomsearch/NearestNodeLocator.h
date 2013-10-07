@@ -18,6 +18,7 @@
 // Moose
 #include "MooseMesh.h"
 #include "libmesh/vector_value.h"
+#include "Restartable.h"
 
 // libMesh
 #include "libmesh/libmesh_common.h"
@@ -33,7 +34,7 @@ class SubProblem;
 /**
  * Finds the nearest node to each node in boundary1 to each node in boundary2 and the other way around.
  */
-class NearestNodeLocator
+class NearestNodeLocator : public Restartable
 {
 public:
   NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh, BoundaryID boundary1, BoundaryID boundary2);

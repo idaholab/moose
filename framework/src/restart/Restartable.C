@@ -13,22 +13,22 @@
 /****************************************************************/
 
 #include "Restartable.h"
-#include "FEProblem.h"
+#include "SubProblem.h"
 
 Restartable::Restartable(std::string name, InputParameters & parameters, std::string system_name) :
     _restartable_name(name),
     _restartable_params(&parameters),
     _restartable_system_name(system_name),
     _restartable_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
-    _restartable_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL)
+    _restartable_subproblem(parameters.isParamValid("_subproblem") ? parameters.get<SubProblem *>("_subproblem") : (parameters.isParamValid("_fe_problem") ? (SubProblem*)parameters.get<FEProblem *>("_fe_problem") : NULL) )
 {
 }
 
-Restartable::Restartable(std::string name, std::string system_name, FEProblem & fe_problem, THREAD_ID tid) :
+Restartable::Restartable(std::string name, std::string system_name, SubProblem & fe_problem, THREAD_ID tid) :
     _restartable_name(name),
     _restartable_system_name(system_name),
     _restartable_tid(tid),
-    _restartable_feproblem(&fe_problem)
+    _restartable_subproblem(&fe_problem)
 {
 }
 
@@ -38,7 +38,7 @@ Restartable::~Restartable()
 }
 
 void
-Restartable::registerRestartableDataOnFEProblem(std::string name, RestartableDataValue * data, THREAD_ID tid)
+Restartable::registerRestartableDataOnSubProblem(std::string name, RestartableDataValue * data, THREAD_ID tid)
 {
-  _restartable_feproblem->registerRestartableData(name, data, tid);
+  _restartable_subproblem->registerRestartableData(name, data, tid);
 }
