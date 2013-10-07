@@ -130,6 +130,10 @@ class Farm(object):
   ##  Execute the correct action
   def execute(self):
 
+    # Clean up the .dmake files
+    if self._options.clean:
+      self._clean()
+
     # Print a summary, do not run make
     if self._options.summary:
       self.summary()
@@ -209,6 +213,11 @@ class Farm(object):
     self._options.verbose = True
     self._display(distcc_hosts, jobs)
 
+  ## Clean the temp dmake files
+  def _clean(self):
+    os.remove(os.path.join(os.getenv('HOME'), '.dmake'));
+    os.remove(os.path.join(os.getenv('HOME'), '.dmake_hosts'));
+
   ## Function for reading hosts files
   def _readHosts(self):
 
@@ -245,8 +254,8 @@ class Farm(object):
     # create it from the file read from server
     if not os.path.exists(self._dmake_file):
       self._local_lines = self._lines
-      fid = open(self._dmake_hosts, 'w')
-      for line in self.lines:
+      fid = open(self._dmake_file, 'w')
+      for line in self._lines:
         fid.write(line)
       fid.close()
 
@@ -608,9 +617,10 @@ def parseArguments(args=None):
   grp3.add_argument('--benchmark','-b', action='store_true', help='Run \'make cleanall\' and \'dmake\' in moose_test directory')
   grp3.add_argument('--dedicated', action='store_true', help='Identify this machine as a dedicated build box')
   grp3.add_argument('--description', nargs=1, type=str, default=[socket.gethostname()], help='Add a description to your machine (default: %(default)s)')
+  grp3.add_argument('--clean', '-c', action='store_true', help='Clean up .dmake and .dmake_hosts files')
 
   # Allow flags to be run together
-  parser.parse_args('-mqvnlrbdpo'.split())
+  parser.parse_args('-mqvnlrbdpoc'.split())
 
   # Parse the input and return the options
   (options, other_args) = parser.parse_known_args()
