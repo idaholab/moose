@@ -14,6 +14,7 @@ class Exodiff(RunApp):
     params.addParam('rel_err',       5.5e-6, "Relative error value used in exodiff comparisons.")
     params.addParam('custom_cmp',            "Custom comparison file")
     params.addParam('use_old_floor',  False, "Use Exodiff old floor option")
+    params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
 
     return params
   getValidParams = staticmethod(getValidParams)
@@ -22,11 +23,12 @@ class Exodiff(RunApp):
     RunApp.__init__(self, name, params)
 
   def prepare(self):
-    for file in self.specs[EXODIFF]:
-      try:
-        os.remove(os.path.join(self.specs[TEST_DIR], file))
-      except:
-        pass
+    if self.specs[DELETE_OUTPUT_BEFORE_RUNNING] == True:
+      for file in self.specs[EXODIFF]:
+        try:
+          os.remove(os.path.join(self.specs[TEST_DIR], file))
+        except:
+          pass
 
   def processResults(self, moose_dir, retcode, options, output):
     (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)

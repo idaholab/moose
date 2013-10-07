@@ -76,6 +76,7 @@ REL_ERR       = 'rel_err'        # Relative error value passed to the exodiff to
 # EXODIFF options
 CUSTOM_CMP    = 'custom_cmp'     # Custom comparison file
 USE_OLD_FLOOR = 'use_old_floor'  # Boolean: Use Exodiff old floor option
+DELETE_OUTPUT_BEFORE_RUNNING = 'delete_output_before_running' # Boolean: Default true, if false does not delete "old" output files before running
 
 # Valgrind Options
 NO_VALGRIND   = 'no_valgrind'    # Set to True to skip test when testing with --valgrind
@@ -114,6 +115,7 @@ DEFAULTS = { EXODIFF : [],
              REL_ERR : 5.5e-6,      # Exodiff option
              CUSTOM_CMP : None,     # Exodiff option
              USE_OLD_FLOOR : False, # Exodiff option
+             DELETE_OUTPUT_BEFORE_RUNNING : True, # Exodiff option
              GOLD_DIR : 'gold',
              PREREQ : [],
              NO_VALGRIND : False
