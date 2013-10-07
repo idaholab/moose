@@ -154,7 +154,6 @@
   nl_abs_tol = 1e-10
   start_time = 0.0
   num_steps = 50000
-#  dt = 1e6
   end_time = 2.002e6
   [./TimeStepper]
     type = AdaptiveDT
@@ -162,6 +161,8 @@
     max_function_change = 3e7
     dt = 1e6
   [../]
+
+  restart_file_base = adapt_tstep_function_change_restart1_out_restart_0065
 []
 
 [Postprocessors]
@@ -177,6 +178,7 @@
 []
 
 [Output]
+  file_base = adapt_tstep_function_change_out
   output_initial = true
   elemental_as_nodal = true
   interval = 1

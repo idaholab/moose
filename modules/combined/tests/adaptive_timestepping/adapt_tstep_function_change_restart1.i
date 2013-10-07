@@ -153,8 +153,8 @@
 
   nl_abs_tol = 1e-10
   start_time = 0.0
-  num_steps = 50000
-#  dt = 1e6
+#  num_steps = 50000
+  num_steps = 65
   end_time = 2.002e6
   [./TimeStepper]
     type = AdaptiveDT
@@ -183,4 +183,5 @@
   exodus = true
   perf_log = true
   max_pps_rows_screen = 10
+  num_restart_files = 1
 []

@@ -21,21 +21,24 @@ InputParameters validParams<AdaptiveDT>()
 }
 
 AdaptiveDT::AdaptiveDT(const std::string & name, InputParameters parameters) :
-    TimeStepper(name, parameters),
-    _input_dt(getParam<Real>("dt")),
-    _synced_last_step(false),
-    _linear_iteration_ratio(isParamValid("linear_iteration_ratio") ? getParam<unsigned>("linear_iteration_ratio") : 25),  // Default to 25
-    _adaptive_timestepping(false),
-    _timestep_limiting_function(NULL),
-    _max_function_change(-1),
-    _sync_times(getParam<std::vector<Real> >("time_t")),
-    _sync_times_iter(_sync_times.begin()),
-    _remaining_sync_time(_sync_times.size() > 0),
-    _time_ipol(getParam<std::vector<Real> >("time_t"),
-               getParam<std::vector<Real> >("time_dt")),
-    _use_time_ipol(_time_ipol.getSampleSize() > 0),
-    _growth_factor(getParam<Real>("growth_factor")),
-    _cutback_factor(getParam<Real>("cutback_factor"))
+  TimeStepper(name, parameters),
+  _dt_old(declareRestartableData<Real>("dt_old")),
+  _input_dt(getParam<Real>("dt")),
+  _synced_last_step(false),
+  _linear_iteration_ratio(isParamValid("linear_iteration_ratio") ? getParam<unsigned>("linear_iteration_ratio") : 25),  // Default to 25
+  _adaptive_timestepping(false),
+  _timestep_limiting_function(NULL),
+  _max_function_change(-1),
+  _sync_times(getParam<std::vector<Real> >("time_t")),
+  _sync_times_iter(_sync_times.begin()),
+  _remaining_sync_time(_sync_times.size() > 0),
+  _time_ipol(getParam<std::vector<Real> >("time_t"),
+             getParam<std::vector<Real> >("time_dt")),
+  _use_time_ipol(_time_ipol.getSampleSize() > 0),
+  _growth_factor(getParam<Real>("growth_factor")),
+  _cutback_factor(getParam<Real>("cutback_factor")),
+  _nl_its(declareRestartableData<unsigned int>("nl_its", 0)),
+  _l_its(declareRestartableData<unsigned int>("l_its", 0))
 {
 
   if (isParamValid("optimal_iterations"))
@@ -95,9 +98,15 @@ AdaptiveDT::~AdaptiveDT()
 {
 }
 
-Real
-AdaptiveDT::computeInitialDT()
+
+void
+AdaptiveDT::init()
 {
+  if (isParamValid("timestep_limiting_function"))
+  {
+    _timestep_limiting_function = &_fe_problem.getFunction(getParam<FunctionName>("timestep_limiting_function"), isParamValid("_tid") ? getParam<THREAD_ID>("_tid") : 0);
+  }
+
   // Advance to the first sync time if one is provided in sim time range
   _sync_times_iter = _sync_times.begin();
   _remaining_sync_time = _sync_times_iter != _sync_times.end();
@@ -108,10 +117,22 @@ AdaptiveDT::computeInitialDT()
       _remaining_sync_time = false;
     }
   }
+}
 
-  if (isParamValid("timestep_limiting_function"))
+
+Real
+AdaptiveDT::computeInitialDT()
+{
+
+  // Advance to the first sync time if one is provided in sim time range
+  _sync_times_iter = _sync_times.begin();
+  _remaining_sync_time = _sync_times_iter != _sync_times.end();
+  while (_remaining_sync_time && *_sync_times_iter <= _time)
   {
-    _timestep_limiting_function = &_fe_problem.getFunction(getParam<FunctionName>("timestep_limiting_function"), isParamValid("_tid") ? getParam<THREAD_ID>("_tid") : 0);
+    if (++_sync_times_iter == _sync_times.end())
+    {
+      _remaining_sync_time = false;
+    }
   }
 
   Real dt = _input_dt;
@@ -153,7 +174,7 @@ AdaptiveDT::computeInitialDT()
 Real
 AdaptiveDT::computeDT()
 {
-  Real dt(_dt);
+  Real dt(_dt_old);
 
   if (_synced_last_step)
   {
@@ -181,9 +202,9 @@ AdaptiveDT::computeDT()
   else
   {
     dt *= _growth_factor;
-    if (dt > _dt * _growth_factor)
+    if (dt > _dt_old * _growth_factor)
     {
-      dt = _dt * _growth_factor;
+      dt = _dt_old * _growth_factor;
     }
   }
 
@@ -226,14 +247,14 @@ AdaptiveDT::computeDT()
 Real
 AdaptiveDT::computeFailedDT()
 {
-  Real dt(_dt);
+  Real dt(_dt_old);
 
   if (dt <= _dt_min)
   { //Can't cut back any more
     mooseError("Solve failed and timestep already at dtmin, cannot continue!");
   }
 
-  dt = _cutback_factor * _dt;
+  dt = _cutback_factor * _dt_old;
   if (dt < _dt_min)
   {
     dt =  _dt_min;
@@ -280,26 +301,24 @@ AdaptiveDT::limitDTByFunction(Real & limitedDT)
 void
 AdaptiveDT::computeAdaptiveDT(Real &dt, bool allowToGrow, bool allowToShrink)
 {
-  const unsigned int nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
-  const unsigned int l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
   const unsigned int growth_nl_its(_optimal_iterations > _iteration_window ? _optimal_iterations - _iteration_window : 0);
   const unsigned int shrink_nl_its(_optimal_iterations + _iteration_window);
   const unsigned int growth_l_its(_optimal_iterations > _iteration_window ? _linear_iteration_ratio*(_optimal_iterations - _iteration_window) : 0);
   const unsigned int shrink_l_its(_linear_iteration_ratio*(_optimal_iterations + _iteration_window));
 
-  if (allowToGrow && (nl_its < growth_nl_its && l_its < growth_l_its))
+  if (allowToGrow && (_nl_its < growth_nl_its && _l_its < growth_l_its))
   { //grow the timestep
     dt *= _growth_factor;
 
-    std::cout << "Growing dt: nl its = "<<nl_its<<" < "<<growth_nl_its
-              << " && lin its = "<<l_its<<" < "<<growth_l_its
+    std::cout << "Growing dt: nl its = "<<_nl_its<<" < "<<growth_nl_its
+              << " && lin its = "<<_l_its<<" < "<<growth_l_its
               << " old dt: "
               << std::setw(9)
               << std::setprecision(6)
               << std::setfill('0')
               << std::showpoint
               << std::left
-              << _dt
+              << _dt_old
               << " new dt: "
               << std::setw(9)
               << std::setprecision(6)
@@ -309,19 +328,19 @@ AdaptiveDT::computeAdaptiveDT(Real &dt, bool allowToGrow, bool allowToShrink)
               << dt
               << std::endl;
   }
-  else if (allowToShrink && (nl_its > shrink_nl_its || l_its > shrink_l_its))
+  else if (allowToShrink && (_nl_its > shrink_nl_its || _l_its > shrink_l_its))
   { //shrink the timestep
     dt *= _cutback_factor;
 
-    std::cout << "Shrinking dt: nl its = "<<nl_its<<" > "<<shrink_nl_its
-              << " || lin its = "<<l_its<<" > "<<shrink_l_its
+    std::cout << "Shrinking dt: nl its = "<<_nl_its<<" > "<<shrink_nl_its
+              << " || lin its = "<<_l_its<<" > "<<shrink_l_its
               << " old dt: "
               << std::setw(9)
               << std::setprecision(6)
               << std::setfill('0')
               << std::showpoint
               << std::left
-              << _dt
+              << _dt_old
               << " new dt: "
               << std::setw(9)
               << std::setprecision(6)
@@ -337,9 +356,9 @@ void
 AdaptiveDT::computeInterpolationDT(Real & dt)
 {
   dt = _time_ipol.sample(_time_old);
-  if (dt > _dt * _growth_factor)
+  if (dt > _dt_old * _growth_factor)
   {
-    dt = _dt * _growth_factor;
+    dt = _dt_old * _growth_factor;
 
     std::cout << "Growing dt to recover from cutback.  old dt: "
               << std::setw(9)
@@ -347,7 +366,7 @@ AdaptiveDT::computeInterpolationDT(Real & dt)
               << std::setfill('0')
               << std::showpoint
               << std::left
-              << _dt
+              << _dt_old
               << " new dt: "
               << std::setw(9)
               << std::setprecision(6)
@@ -366,4 +385,16 @@ AdaptiveDT::rejectStep()
   std::cout<<"Solve failed... cutting timestep"<<std::endl;
 
   TimeStepper::rejectStep();
+}
+
+
+void
+AdaptiveDT::acceptStep()
+{
+  _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
+  _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
+
+  _dt_old = _dt;
+
+  TimeStepper::acceptStep();
 }

@@ -115,21 +115,21 @@
 
   l_max_its = 100
   nl_max_its = 100
-  nl_rel_tol = 1e-16
-  nl_abs_tol = 1e-4
-  l_tol           = 1e-5
-  l_abs_step_tol  = 1e-6
+  nl_rel_tol = 1e-5
+  nl_abs_tol = 1e-3
+  l_tol = 1e-5
 
   start_time = 0.0
-  dtmin = 3.0
-  end_time = 13.0
+  end_time = 20.0
+  sync_times = '0.5, 9.5'
+  n_startup_steps = 2
+  dtmax = 6.0
+  num_steps = 5
 
   [./TimeStepper]
     type = AdaptiveDT
-    optimal_iterations = 1
-    iteration_window = 1
-    linear_iteration_ratio = 1
-    dt = 5.0
+    optimal_iterations = 10
+    dt = 1.0
   [../]
 []
 
@@ -143,4 +143,5 @@
   interval = 1
   output_initial = true
   exodus = true
+  num_restart_files = 1
 []

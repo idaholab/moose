@@ -123,6 +123,7 @@
   start_time = 0.0
   dtmin = 3.0
   end_time = 13.0
+  num_steps = 1
 
   [./TimeStepper]
     type = AdaptiveDT
@@ -143,4 +144,5 @@
   interval = 1
   output_initial = true
   exodus = true
+  num_restart_files = 1
 []

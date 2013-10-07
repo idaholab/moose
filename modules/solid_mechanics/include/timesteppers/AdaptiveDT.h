@@ -16,7 +16,11 @@ public:
   AdaptiveDT(const std::string & name, InputParameters parameters);
   virtual ~AdaptiveDT();
 
+  virtual void init();
+
   virtual void rejectStep();
+
+  virtual void acceptStep();
 
 protected:
   virtual Real computeInitialDT();
@@ -25,6 +29,8 @@ protected:
   void computeAdaptiveDT(Real & dt, bool allowToGrow=true, bool allowToShrink=true);
   void computeInterpolationDT(Real & dt);
   void limitDTByFunction(Real & limitedDT);
+
+  Real & _dt_old;
 
   const Real _input_dt;                       ///< The dt from the input file.
   bool _synced_last_step;
@@ -45,6 +51,9 @@ protected:
   const bool _use_time_ipol;      ///< true if we want to use piecewise-defined time stepping
   const Real _growth_factor;
   const Real _cutback_factor;
+
+  unsigned int & _nl_its;  /// Number of nonlinear iterations in previous solve
+  unsigned int & _l_its;   /// Number of linear iterations in previous solve
 
 };
 

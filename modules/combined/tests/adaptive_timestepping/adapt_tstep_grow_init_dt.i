@@ -139,7 +139,6 @@
 []
 
 [Output]
-  file_base = out_grow_init_dt
   interval = 1
   output_initial = true
   exodus = true

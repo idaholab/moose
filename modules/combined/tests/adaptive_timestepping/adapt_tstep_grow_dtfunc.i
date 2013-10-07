@@ -138,7 +138,6 @@
 []
 
 [Output]
-  file_base = out_grow_dtfunc
   interval = 1
   output_initial = true
   exodus = true
