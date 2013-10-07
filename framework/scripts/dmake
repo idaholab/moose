@@ -140,11 +140,11 @@ class Farm(object):
 
     # Start the distcc daemon, do not run make
     elif self._options.daemon:
-      _self.startDaemon()
+      self.startDaemon()
 
     # Kill the daemons, do not run make
     elif self._options.kill:
-      _self.killDaemon()
+      self.killDaemon()
 
     # Run local build if desired, short-circut the rest of the script for speed
     elif self._options.local:
