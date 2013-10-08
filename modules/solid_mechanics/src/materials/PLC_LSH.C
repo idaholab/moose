@@ -63,6 +63,10 @@ PLC_LSH::PLC_LSH( const std::string & name,
    _output( getParam<PostprocessorName>("output") != "" ? &getPostprocessorValue("output") : NULL )
 
 {
+  if (_yield_stress <= 0)
+  {
+    mooseError("Yield stress must be greater than zero");
+  }
 }
 
 void
@@ -78,13 +82,6 @@ PLC_LSH::computeStress()
   // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
   // stress = stressOld + stressIncrement
   // creep_strain = creep_strainOld + creep_strainIncrement
-  //
-  //
-  // This is more work than needs to be done.  The strain and stress tensors are symmetric, and so we are carrying
-  //   a third more memory than is required.  We are also running a 9x9 * 9x1 matrix-vector multiply when at most
-  //   a 6x6 * 6x1 matrix vector multiply is needed.  For the most common case, isotropic elasticity, only two
-  //   constants are needed and a matrix vector multiply can be avoided entirely.
-  //
 
   if(_t_step == 0) return;
 
@@ -121,8 +118,8 @@ PLC_LSH::computeStress()
     stress_new += _stress_old;
     computeCreep( creep_strain_increment, stress_new );
 
-   // now use stress_new to calculate a new effective_trial_stress and determine if
-   // yield has occured and if so, calculate the corresponding plastic strain
+    // now use stress_new to calculate a new effective_trial_stress and determine if
+    // yield has occured and if so, calculate the corresponding plastic strain
 
     computeLSH( creep_strain_increment, plastic_strain_increment, stress_new );
 
@@ -133,10 +130,13 @@ PLC_LSH::computeStress()
     // now check convergence
     SymmTensor deltaS(stress_new_last - stress_new);
     delS = std::sqrt(deltaS.doubleContraction(deltaS));
-    if(counter==0) first_delS = delS;
+    if (counter == 0)
+    {
+      first_delS = delS;
+    }
     stress_new_last = stress_new;
 
-   if (_output_iteration_info == true)
+    if (_output_iteration_info == true)
     {
       std::cout
         << "stress_it=" << counter
@@ -199,7 +199,7 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
     Real dphi_ddelp = -3*_coefficient*_shear_modulus*_n_exponent*
       std::pow(effective_trial_stress-3*_shear_modulus*del_p, _n_exponent-1)*exponential*expTime;
 
-    creep_residual = phi -  del_p/_dt;
+    creep_residual = phi - del_p/_dt;
     norm_creep_residual = std::abs(creep_residual);
     if (it == 0)
     {
@@ -264,45 +264,48 @@ PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
 {
 
   // compute deviatoric trial stress
-  SymmTensor dev_trial_stress_p(stress_new);
-  dev_trial_stress_p.addDiag( -stress_new.trace()/3 );
+  SymmTensor dev_trial_stress(stress_new);
+  dev_trial_stress.addDiag( -stress_new.trace()/3 );
 
   // effective trial stress
-  Real dts_squared_p = dev_trial_stress_p.doubleContraction(dev_trial_stress_p);
-  Real effective_trial_stress_p = std::sqrt(1.5 * dts_squared_p);
+  Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
+  Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
 
   // determine if yield condition is satisfied
-  Real yield_condition = effective_trial_stress_p - _hardening_variable_old[_qp] - _yield_stress;
+  Real yield_condition = effective_trial_stress - _hardening_variable_old[_qp] - _yield_stress;
 
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
 
-  if (yield_condition > 0.)  //then use newton iteration to determine effective plastic strain increment
+  if (yield_condition > 0)  // then use newton iteration to determine effective plastic strain increment
   {
-    unsigned int jt = 0;
-    Real plastic_residual = 10;
+    unsigned int it = 0;
+    Real plastic_residual = 0;
     Real norm_plas_residual = 10;
     Real first_norm_plas_residual = 10;
     Real scalar_plastic_strain_increment = 0;
 
-    while(jt < _max_its &&
+    while(it < _max_its &&
           norm_plas_residual > _absolute_tolerance &&
           (norm_plas_residual/first_norm_plas_residual) > _relative_tolerance)
     {
-      plastic_residual = effective_trial_stress_p - (3. * _shear_modulus * scalar_plastic_strain_increment) -
+      plastic_residual = effective_trial_stress - (3. * _shear_modulus * scalar_plastic_strain_increment) -
         _hardening_variable[_qp] - _yield_stress;
       norm_plas_residual = std::abs(plastic_residual);
-      if(jt==0) first_norm_plas_residual = norm_plas_residual;
+      if (it == 0)
+      {
+        first_norm_plas_residual = norm_plas_residual;
+      }
 
-      scalar_plastic_strain_increment = scalar_plastic_strain_increment + ((plastic_residual) / (3. * _shear_modulus + _hardening_constant));
+      scalar_plastic_strain_increment += ((plastic_residual) / (3. * _shear_modulus + _hardening_constant));
 
       _hardening_variable[_qp] = _hardening_variable_old[_qp] + (_hardening_constant * scalar_plastic_strain_increment);
 
       if (_output_iteration_info == true)
       {
         std::cout
-          << "pls_it=" << jt
-          << " trl_strs=" << effective_trial_stress_p
+          << "pls_it=" << it
+          << " trl_strs=" << effective_trial_stress
           << " del_p=" << scalar_plastic_strain_increment
           << " harden=" <<_hardening_variable[_qp]
           << " rel_res=" << norm_plas_residual/first_norm_plas_residual
@@ -312,18 +315,21 @@ PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
           << std::endl;
       }
 
-      jt++;
+      ++it;
 
     }
 
-    if(jt == _max_its && (norm_plas_residual/first_norm_plas_residual) > _relative_tolerance && norm_plas_residual > _absolute_tolerance)
+    if(it == _max_its && (norm_plas_residual/first_norm_plas_residual) > _relative_tolerance && norm_plas_residual > _absolute_tolerance)
     {
       mooseError("Max sub-newton iteration hit during plasticity increment solve!");
     }
 
-    if (effective_trial_stress_p < 0.01) effective_trial_stress_p = 0.01;
-    plastic_strain_increment = dev_trial_stress_p;
-    plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress_p);
+    if (effective_trial_stress < 0.01)
+    {
+      effective_trial_stress = 0.01;
+    }
+    plastic_strain_increment = dev_trial_stress;
+    plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress);
 
     SymmTensor elastic_strain_increment(_strain_increment);
     elastic_strain_increment -= plastic_strain_increment;
@@ -336,6 +342,6 @@ PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
     stress_new += _stress_old;
     _plastic_strain[_qp] += plastic_strain_increment;
 
-  }//end of if statement
+  } // end of if statement
 
 }
