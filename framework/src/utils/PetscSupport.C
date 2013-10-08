@@ -125,7 +125,7 @@ PetscErrorCode nonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_
 }
 
 
-PetscErrorCode  linearMonitor(KSP ksp, PetscInt its, PetscReal rnorm, void *void_ptr)
+PetscErrorCode  linearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void *void_ptr)
 {
   static Real old_norm;
 
