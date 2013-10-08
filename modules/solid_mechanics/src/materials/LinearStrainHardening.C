@@ -129,8 +129,7 @@ LinearStrainHardening::computeStress()
   {
 
     // update stress
-    _stress[_qp] = *elasticityTensor() * _strain_increment;
-    _stress[_qp] += _stress_old;
+    _stress[_qp] = stress_new;
 
   } // end of else
 
