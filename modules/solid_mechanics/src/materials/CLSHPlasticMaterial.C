@@ -120,8 +120,7 @@ CLSHPlasticMaterial::computeStress()
   else
   {
     // update stress and plastic strain
-    _stress[_qp] = *elasticityTensor() * _strain_increment;
-    _stress[_qp] += _stress_old;
+    _stress[_qp] = trial_stress;
 
     _hardening_variable[_qp] = 0.0;
     _plastic_strain[_qp].zero();
@@ -130,4 +129,3 @@ CLSHPlasticMaterial::computeStress()
 
 
 }
-
