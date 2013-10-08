@@ -260,15 +260,6 @@ PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
                      SymmTensor & stress_new )
 {
 
-  if (_t_step == 1)
-  {
-    _hardening_variable[_qp] =
-      _hardening_variable_old[_qp] = 0;
-    _plastic_strain[_qp] =
-      _plastic_strain_old[_qp] = 0;
-  }
-
-
   // compute deviatoric trial stress
   SymmTensor dev_trial_stress_p(stress_new);
   dev_trial_stress_p.addDiag( -stress_new.trace()/3.0 );
