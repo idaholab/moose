@@ -60,8 +60,6 @@ PLC_LSH::PLC_LSH( const std::string & name,
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
 
-   _del_p(declareProperty<Real>("del_p")),
-
    _output( getParam<PostprocessorName>("output") != "" ? &getPostprocessorValue("output") : NULL )
 
 {
@@ -249,7 +247,6 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
   stress_last = stress_next;
 
   creep_strain_increment += creep_strain_sub_increment;
-  _del_p[_qp] += del_p;
 
   _creep_strain[_qp] = creep_strain_increment;
   _creep_strain[_qp] += _creep_strain_old[_qp];

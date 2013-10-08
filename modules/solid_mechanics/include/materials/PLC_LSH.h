@@ -50,8 +50,6 @@ protected:
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
 
-  MaterialProperty<Real> & _del_p;
-
   PostprocessorValue * const _output;
 
   /// Compute the stress (sigma += deltaSigma)
