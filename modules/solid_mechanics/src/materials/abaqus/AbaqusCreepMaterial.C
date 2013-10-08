@@ -124,39 +124,56 @@ void AbaqusCreepMaterial::modifyStrain(const unsigned int qp,
                                        SymmTensor & strain_increment,
                                        SymmTensor & /*dstrain_increment_dT*/)
 {
-  //Recover "old" state variables
+  // Recover "old" state variables
   for(unsigned int i=0; i<_num_state_vars; i++)
     _STATEV[i]=_state_var_old[qp][i];
 
-  //Initialize DECRA and DESWA arrays
+  // Initialize DECRA and DESWA arrays
   for(unsigned int i=0; i<5; i++)
   {
     _DECRA[i] = 0.0;
     _DESWA[i] = 0.0;
   }
 
-  //Calculate stress array components
-  _stress_component[0] = (_elasticity_tensor[0]*strain_increment.component(0))+(_elasticity_tensor[1]*strain_increment.component(1))+(_elasticity_tensor[1]*strain_increment.component(2));
-  _stress_component[1] = (_elasticity_tensor[1]*strain_increment.component(0))+(_elasticity_tensor[0]*strain_increment.component(1))+(_elasticity_tensor[1]*strain_increment.component(2));
-  _stress_component[2] = (_elasticity_tensor[1]*strain_increment.component(0))+(_elasticity_tensor[1]*strain_increment.component(1))+(_elasticity_tensor[0]*strain_increment.component(2));
+  // Calculate stress array components
+  _stress_component[0] =
+    (_elasticity_tensor[0]*strain_increment.component(0)) +
+    (_elasticity_tensor[1]*strain_increment.component(1)) +
+    (_elasticity_tensor[1]*strain_increment.component(2));
+
+  _stress_component[1] =
+    (_elasticity_tensor[1]*strain_increment.component(0)) +
+    (_elasticity_tensor[0]*strain_increment.component(1)) +
+    (_elasticity_tensor[1]*strain_increment.component(2));
+
+  _stress_component[2] =
+    (_elasticity_tensor[1]*strain_increment.component(0)) +
+    (_elasticity_tensor[1]*strain_increment.component(1)) +
+    (_elasticity_tensor[0]*strain_increment.component(2));
+
   _stress_component[3] = (_elasticity_tensor[2]*strain_increment.component(3));
   _stress_component[4] = (_elasticity_tensor[2]*strain_increment.component(4));
   _stress_component[5] = (_elasticity_tensor[2]*strain_increment.component(5));
 
-  //Calculate trial stress and deviatoric trail stress
-  SymmTensor trial_stress(_stress_component[0],_stress_component[1],_stress_component[2],_stress_component[3],_stress_component[4],_stress_component[5]);
+  // Calculate trial stress and deviatoric trial stress
+  SymmTensor trial_stress(_stress_component[0], _stress_component[1], _stress_component[2],
+                          _stress_component[3], _stress_component[4], _stress_component[5]);
   _trial_stress[qp] = trial_stress;
   _trial_stress[qp] += _stress_old[qp];
   _dev_trial_stress[qp] = _trial_stress[qp];
   _dev_trial_stress[qp].addDiag(-_trial_stress[qp].trace()/3.0);
 
-  //Calculate effective trial stress (_ets)
+  // Calculate effective trial stress (_ets)
   Real dts_squared = _dev_trial_stress[qp].doubleContraction(_dev_trial_stress[qp]);
-  _ets[qp] = std::sqrt(1.5 * dts_squared);
+
+  if (dts_squared >= 0.)
+    _ets[qp] = std::sqrt(1.5 * dts_squared);
+  else
+    mooseError("Attempted to take square root of a negative number!\n");
 
   // Calculate gradient of dev stress potential (grad_dts)
   // grad_dts = d(qtild)/d(dev_trial_stress)
-  SymmTensor delta_dts = _dev_trial_stress[qp]-_dev_trial_stress_old[qp];
+  SymmTensor delta_dts = _dev_trial_stress[qp] - _dev_trial_stress_old[qp];
 
   Real delta_ets = _ets[qp] - _ets_old[qp];
 
@@ -169,9 +186,10 @@ void AbaqusCreepMaterial::modifyStrain(const unsigned int qp,
       grad_dts_potential[i] = delta_ets / delta_dts.component(i);
   }
 
-  SymmTensor grad_dts(grad_dts_potential[0], grad_dts_potential[1],grad_dts_potential[2],grad_dts_potential[3],grad_dts_potential[4],grad_dts_potential[5]);
+  SymmTensor grad_dts(grad_dts_potential[0], grad_dts_potential[1], grad_dts_potential[2],
+                      grad_dts_potential[3], grad_dts_potential[4], grad_dts_potential[5]);
 
-  //Pass variables in for information
+  // Pass variables in for information
   _KSTEP = _t_step;                   //Step number
   _TIME[0] = _dt;                     //Value of step time at the end of the increment - Check
   _TIME[1] = _t;                      //Value of total time at the end of the increment - Check
@@ -183,16 +201,17 @@ void AbaqusCreepMaterial::modifyStrain(const unsigned int qp,
   _QTILD = _ets[qp];                  //Von mises equivalent stress
   _P = -_trial_stress[qp].trace();    //Equivalent pressure stress
 
-  //Connection to extern statement
-  _creep(_DECRA, _DESWA, _STATEV, &_SERD, _EC, _ESW, &_P, &_QTILD, &_TEMP, &_DTEMP, _PREDEF, _DPRED, _TIME, &_DTIME, &_CMNAME, &_LEXIMP, &_LEND, _COORDS, &_NSTATV, &_NOEL, &_NPT, &_LAYER, &_KSPT, &_KSTEP, &_KINC);
+  // Connection to extern statement
+  _creep(_DECRA, _DESWA, _STATEV, &_SERD, _EC, _ESW, &_P, &_QTILD, &_TEMP, &_DTEMP, _PREDEF, _DPRED,
+         _TIME, &_DTIME, &_CMNAME, &_LEXIMP, &_LEND, _COORDS, &_NSTATV, &_NOEL, &_NPT, &_LAYER, &_KSPT, &_KSTEP, &_KINC);
 
-  //Update state variables
+  // Update state variables
   for (unsigned int i=0; i<_num_state_vars; i++)
-    _state_var[qp][i]=_STATEV[i];
+    _state_var[qp][i] = _STATEV[i];
 
-  //Solve for Incremental creep (creep_inc_used) and/or Incremental Swell (swell_inc_used) based on definition
-  //NOTE: Below are equations for metal creep and/or time-dependent volumetric swelling materials only
-  //Drucker-Prager, Capped Drucker-Prager, and Gasket materials have not been included
+  // Solve for Incremental creep (creep_inc_used) and/or Incremental Swell (swell_inc_used) based on definition
+  // NOTE: Below are equations for metal creep and/or time-dependent volumetric swelling materials only
+  // Drucker-Prager, Capped Drucker-Prager, and Gasket materials have not been included
   _creep_inc[qp] = _DECRA[0];
   _total_creep[qp] = _creep_inc[qp];
   _total_creep[qp] += _total_creep_old[qp];
@@ -233,17 +252,18 @@ void AbaqusCreepMaterial::modifyStrain(const unsigned int qp,
     swell_inc_used = (_DESWA[4]*(_ets[qp]-_ets_old[qp]))+_swell_inc_old[qp];
   }
 
-  //Calculate Incremental Creep Strain (total_effects)
-  //Incremental creep strain = ((1/3)*(swell_inc_used)*R) + (creep_inc_used*grad_dts)
-  //R = The matrix with the anisotropic swelling ratios in the diagonal if anisotropic swelling is defined; Otherwise R = Identity
+  // Calculate Incremental Creep Strain (total_effects)
+  // Incremental creep strain = ((1/3)*(swell_inc_used)*R) + (creep_inc_used*grad_dts)
+  // R = The matrix with the anisotropic swelling ratios in the diagonal if anisotropic swelling is defined; Otherwise R = Identity
   SymmTensor R(1.,1.,1.,0.,0.,0.);
   SymmTensor total_effects = (R*(swell_inc_used/3.)) + (grad_dts*(creep_inc_used));
 
-  //Modify strain increment
+  // Modify strain increment
   strain_increment += total_effects;
 
-  //Update Stress
-  SymmTensor stressnew(_stress_component[0],_stress_component[1],_stress_component[2],_stress_component[3],_stress_component[4],_stress_component[5]);
+  // Update Stress
+  SymmTensor stressnew(_stress_component[0], _stress_component[1], _stress_component[2],
+                       _stress_component[3], _stress_component[4], _stress_component[5]);
   _stress[qp] = stressnew;
   _stress[qp] += _stress_old[qp];
 }
