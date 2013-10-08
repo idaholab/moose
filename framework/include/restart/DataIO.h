@@ -72,10 +72,9 @@ void dataStore(std::ostream & /*stream*/, T * & /*v*/, void * /*context*/)
 
 template<>
 inline
-void dataStore(std::ostream & stream, Real & v, void * context)
+void dataStore(std::ostream & stream, Real & v, void * /*context*/)
 {
   stream.write((char *) &v, sizeof(v));
-//  std::cout<<"value: "<<v<<std::endl;
 }
 
 template<typename T>
