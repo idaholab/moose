@@ -30,7 +30,7 @@ RestartableTypes::RestartableTypes(const std::string & name, InputParameters par
     _vector_vector_data(declareRestartableData<std::vector<std::vector<Real> > >("vector_vector_data")),
     _pointer_data(declareRestartableData<Dummy *>("pointer_data")),
     _custom_data(declareRestartableData<Dummy>("custom_data")),
-    _custom_with_context(declareRestartableData<DummyNeedingContext>("custom_with_context", &_context_int))
+    _custom_with_context(declareRestartableDataWithContext<DummyNeedingContext>("custom_with_context", &_context_int))
 {
   _vector_data.resize(4,1);
   _vector_vector_data.resize(4);

@@ -65,10 +65,9 @@ protected:
    * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
-   * @param context Optional context pointer that will be passed to the load and store functions
    */
   template<typename T>
-  T & declareRestartableData(std::string data_name, void * context = NULL);
+  T & declareRestartableData(std::string data_name);
 
   /**
    * Declare a piece of data as "restartable" and initialize it.
@@ -79,10 +78,37 @@ protected:
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param init_value The initial value of the data
-   * @param context Optional context pointer that will be passed to the load and store functions
    */
   template<typename T>
-  T & declareRestartableData(std::string data_name, const T & init_value, void * context = NULL);
+  T & declareRestartableData(std::string data_name, const T & init_value);
+
+  /**
+   * Declare a piece of data as "restartable".
+   * This means that in the event of a restart this piece of data
+   * will be restored back to its previous value.
+   *
+   * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
+   *
+   * @param data_name The name of the data (usually just use the same name as the member variable)
+   * @param context Context pointer that will be passed to the load and store functions
+   */
+  template<typename T>
+  T & declareRestartableDataWithContext(std::string data_name, void * context);
+
+  /**
+   * Declare a piece of data as "restartable" and initialize it.
+   * This means that in the event of a restart this piece of data
+   * will be restored back to its previous value.
+   *
+   * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
+   *
+   * @param data_name The name of the data (usually just use the same name as the member variable)
+   * @param init_value The initial value of the data
+   * @param context Context pointer that will be passed to the load and store functions
+   */
+  template<typename T>
+  T & declareRestartableDataWithContext(std::string data_name, const T & init_value, void * context);
+
 
 private:
   /**
@@ -98,7 +124,22 @@ private:
    * @param object_name A supplied name for the object that is declaring this data.
    */
   template<typename T>
-  T & declareRestartableDataWithObjectName(std::string data_name, std::string object_name, void * context = NULL);
+  T & declareRestartableDataWithObjectName(std::string data_name, std::string object_name);
+
+  /**
+   * Note: This is only used internally in MOOSE.  DO NOT use this function!
+   *
+   * Declare a piece of data as "restartable".
+   * This means that in the event of a restart this piece of data
+   * will be restored back to its previous value.
+   *
+   * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
+   *
+   * @param data_name The name of the data (usually just use the same name as the member variable)
+   * @param object_name A supplied name for the object that is declaring this data.
+   */
+  template<typename T>
+  T & declareRestartableDataWithObjectNameWithContext(std::string data_name, std::string object_name, void * context);
 
   /// Helper function so we don't have to #include SubProblem in the header
   void registerRestartableDataOnSubProblem(std::string name, RestartableDataValue * data, THREAD_ID tid);
@@ -125,7 +166,21 @@ private:
 
 template<typename T>
 T &
-Restartable::declareRestartableData(std::string data_name, void * context)
+Restartable::declareRestartableData(std::string data_name)
+{
+  return declareRestartableDataWithContext<T>(data_name, NULL);
+}
+
+template<typename T>
+T &
+Restartable::declareRestartableData(std::string data_name, const T & init_value)
+{
+  return declareRestartableDataWithContext<T>(data_name, init_value, NULL);
+}
+
+template<typename T>
+T &
+Restartable::declareRestartableDataWithContext(std::string data_name, void * context)
 {
   if(!_restartable_subproblem)
     mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
@@ -140,7 +195,7 @@ Restartable::declareRestartableData(std::string data_name, void * context)
 
 template<typename T>
 T &
-Restartable::declareRestartableData(std::string data_name, const T & init_value, void * context)
+Restartable::declareRestartableDataWithContext(std::string data_name, const T & init_value, void * context)
 {
   if(!_restartable_subproblem)
     mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
@@ -157,13 +212,20 @@ Restartable::declareRestartableData(std::string data_name, const T & init_value,
 
 template<typename T>
 T &
-Restartable::declareRestartableDataWithObjectName(std::string data_name, std::string object_name, void * context)
+Restartable::declareRestartableDataWithObjectName(std::string data_name, std::string object_name)
+{
+  return declareRestartableDataWithObjectNameWithContext<T>(data_name, object_name, NULL);
+}
+
+template<typename T>
+T &
+Restartable::declareRestartableDataWithObjectNameWithContext(std::string data_name, std::string object_name, void * context)
 {
   std::string old_name = _restartable_name;
 
   _restartable_name = object_name;
 
-  T & value = declareRestartableData<T>(data_name, context);
+  T & value = declareRestartableDataWithContext<T>(data_name, context);
 
   _restartable_name = old_name;
 
