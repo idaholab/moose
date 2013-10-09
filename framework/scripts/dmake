@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Load the required modules
-import os, sys, subprocess, re, urllib2, socket, argparse, time, multiprocessing, platform, uuid
+import os, sys, subprocess, re, urllib2, socket, argparse, time, multiprocessing, platform, uuid, pickle
 from random import shuffle
 
 ## User class for defining machine characteristics
@@ -95,11 +95,12 @@ class Farm(object):
     self._make_output = None   # output pipe from make (private)
     self._make_time = None     # duration of make command (private)
     self._lines = []           # lines read from the HPCSC server
-    self._local_lines = []     # lines read from the local .dmake_hosts file
+
+    # Data to be read/written to ._dmake_file
+    self._dmake_data = {}
 
     # Set the temporary file names
-    self._dmake_file = os.path.join(os.getenv('HOME'), '.dmake')
-    self._dmake_hosts = os.path.join(os.getenv('HOME'), '.dmake_hosts')
+    self._dmake_file = os.path.join(os.getenv('HOME'), '.dmakerc')
 
     # Set the OS type
     self._system = platform.system().lower()
@@ -139,7 +140,7 @@ class Farm(object):
       self.summary()
 
     # Start the distcc daemon, do not run make
-    elif self._options.daemon:
+    elif self._options.daemon or self._options.dedicated:
       self.startDaemon()
 
     # Kill the daemons, do not run make
@@ -176,7 +177,6 @@ class Farm(object):
   ## Run the build distributed
   # @return Time required for running make
   def distribute(self):
-
     # Check that the distccd daemons are running
     self._checkDaemon()
 
@@ -215,11 +215,29 @@ class Farm(object):
 
   ## Clean the temp dmake files
   def _clean(self):
-    os.remove(os.path.join(os.getenv('HOME'), '.dmake'));
-    os.remove(os.path.join(os.getenv('HOME'), '.dmake_hosts'));
+    os.remove(os.path.join(os.getenv('HOME'), '.dmakerc'));
 
   ## Function for reading hosts files
   def _readHosts(self):
+    # Populate ._dmake_data if available
+    if os.path.exists(self._dmake_file):
+      try:
+        fid = open(self._dmake_file, 'r')
+        self._dmake_data = pickle.load(fid)
+        fid.close()
+
+      # IndexError or EOFError delete the file and begin anew
+      except EOFError:
+        self._clean()
+      except IndexError:
+        self._clean()
+
+    # Set description via arguments or prompt user for description if none set
+    if self._options.description[0] != socket.gethostname():
+      self._dmake_data['DESCRIPTION'] = self._options.description[0]
+    elif 'DESCRIPTION' not in self._dmake_data:
+      print 'Supply a description of your machine:'
+      self._dmake_data['DESCRIPTION'] = sys.stdin.readline().split('\n')[0]
 
     # Extract the list of users from the HPCSC website
     try:
@@ -236,7 +254,7 @@ class Farm(object):
                                                  '&threads=' + str(self._master.threads) + \
                                                  '&use=' + use + \
                                                  '&network=' + self._network + \
-                                                 '&description=' + urllib2.quote(self._options.description[0])
+                                                 '&description=' + urllib2.quote(self._dmake_data['DESCRIPTION'])
 
 
       # Read the file
@@ -253,18 +271,10 @@ class Farm(object):
     # Extract the local copy of the hosts file, if the file doesn't exist
     # create it from the file read from server
     if not os.path.exists(self._dmake_file):
-      self._local_lines = self._lines
+      self._dmake_data['HOST_LINES'] = self._lines
       fid = open(self._dmake_file, 'w')
-      for line in self._lines:
-        fid.write(line)
+      pickle.dump(self._dmake_data, fid)
       fid.close()
-
-    # Otherwise, read the stored lines
-    else:
-      fid = open(self._dmake_file)
-      self._local_lines = fid.read().split('\n')
-      fid.close()
-
 
   ## Run the make command (private)
   # @param distcc_hosts String contaning the DISTCC_HOSTS environmental variable
@@ -364,22 +374,20 @@ class Farm(object):
   ## Return the distcc hosts and jobs
   def _getHosts(self):
 
-    # If the .dmake_hosts file does not exist start the client
-    if self._options.refresh or (not os.path.exists(self._dmake_hosts)):
+    # If DISTCC_HOSTS has not been populated with data
+    if self._options.refresh or ('DISTCC_HOSTS' not in self._dmake_data):
       return self._initClient()
 
-    # Restart the clients if the .dmake_hosts file is older than 20 min.
-    elif (time.time() - os.path.getmtime(self._dmake_hosts)) > 1200:
+    # Restart the clients if the ._dmake_file file is older than 20 min.
+    elif (time.time() - os.path.getmtime(self._dmake_file)) > 1200:
       return self._initClient()
 
     # Use cache
     else:
       print 'Utilizing cached DISTCC_HOSTS, use --refresh flag to update'
-      fid = open(self._dmake_hosts, 'r')
-      distcc_hosts = fid.readline()
-      jobs = int(fid.readline())
-      fid.close()
       self._cache = True
+      distcc_hosts = self._dmake_data['DISTCC_HOSTS']
+      jobs = self._dmake_data['JOBS']
       return distcc_hosts, jobs
 
   ## Setup the distcc client (private)
@@ -401,10 +409,10 @@ class Farm(object):
     distcc_hosts = ''
     for machine in self._slaves:
       if self._options.max:
-        distcc_hosts += " " + machine.hostname +'/' + str(machine.threads)
+        distcc_hosts += " " + machine.hostname + '/' + str(machine.threads)
         jobs += int(machine.threads)
       else:
-        distcc_hosts += " " + machine.hostname +'/' + str(machine.use)
+        distcc_hosts += " " + machine.hostname + '/' + str(machine.use)
         jobs += machine.use
 
     # Get the default or user-defined values for localhost/localslots_cpp/localslots
@@ -442,11 +450,14 @@ class Farm(object):
     elif not self._options.max and jobs > 70:
       jobs = 70
 
-    # Write dmake_hosts file (do not save if using --max)
+    # Populate ._dmake_data to be written
+    self._dmake_data['DISTCC_HOSTS'] = distcc_hosts
+    self._dmake_data['JOBS'] = jobs
+
+    # Overwrite ._dmake_file file (do not save if using --max)
     if not self._options.max:
-      fid = open(self._dmake_hosts, 'w')
-      fid.write(distcc_hosts + '\n')
-      fid.write(str(jobs) + '\n')
+      fid = open(self._dmake_file, 'w')
+      pickle.dump(self._dmake_data, fid)
       fid.close()
 
     # Return the hosts and jobs
@@ -471,7 +482,7 @@ class Farm(object):
 
     # Filter out empty strings from the lists
     self._lines = filter(None,self._lines)
-    self._local_lines = filter(None,self._local_lines)
+    self._dmake_data['HOST_LINES'] = filter(None,self._dmake_data['HOST_LINES'])
 
     # Flag for writting timestamp file
     write_flag = False
@@ -483,16 +494,17 @@ class Farm(object):
 
     # If the local host file lines do not match the lines from the server,
     # launch the daemon and re-write the file
-    elif self._lines != self._local_lines:
+
+    elif len(set(self._lines) - set(self._dmake_data['HOST_LINES'])) > 0:
+      self._dmake_data['HOST_LINES'] = self._lines
       write_flag = True
       self._launchDaemon()
 
-    # Write the .dmake file
+    # Write the ._dmake_data file
     if write_flag:
       print 'Updating local distcc hosts file'
       fid = open(self._dmake_file, 'w')
-      for line in self._lines:
-        fid.write(line + '\n')
+      pickle.dump(self._dmake_data, fid)
       fid.close()
 
   ## Launches the Daemon (private)
