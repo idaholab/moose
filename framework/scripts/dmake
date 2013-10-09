@@ -260,8 +260,10 @@ class Farm(object):
     if self._options.description[0] != socket.gethostname():
       self._dmake_data['DESCRIPTION'] = self._options.description[0]
     elif 'DESCRIPTION' not in self._dmake_data:
+      self._dmake_data['DESCRIPTION'] = ''
       print 'Supply a description of your machine:'
-      self._dmake_data['DESCRIPTION'] = sys.stdin.readline().split('\n')[0]
+      while self._dmake_data['DESCRIPTION'] == '':
+        self._dmake_data['DESCRIPTION'] = sys.stdin.readline().split('\n')[0]
 
     # Extract the list of users from the HPCSC website
     try:
