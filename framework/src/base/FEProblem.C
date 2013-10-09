@@ -3565,7 +3565,6 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
                                      const Real ref_resid,
                                      const Real div_threshold)
 {
-
   NonlinearSystem & system = getNonlinearSystem();
   MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
   std::stringstream oss;

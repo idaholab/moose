@@ -362,6 +362,11 @@ public:
    */
   void printTopResiduals(const NumericVector<Number> & residual, unsigned int n);
 
+  /**
+   * Force the printing of all variable norms after each solve.
+   */
+  void printAllVariableNorms(bool state) { _print_all_var_norms = state; }
+
   void debuggingResiduals(bool state) { _debugging_residuals = state; }
 
   unsigned int _num_residual_evaluations;
@@ -517,6 +522,7 @@ protected:
 
   bool _computing_initial_residual;
 
+  bool _print_all_var_norms;
 
 public:
   friend class ComputeResidualThread;

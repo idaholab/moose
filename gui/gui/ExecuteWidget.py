@@ -330,7 +330,7 @@ class ExecuteWidget(QtGui.QWidget):
     for line in split:
       if '0 Nonlinear |R|' in line:
         self.timestep_begin.emit()
-      if 'Norm of each nonlinear' in line:
+      if 'Solve Converged' in line:
         self.timestep_end.emit()
       for keyword in increment_on:
         if keyword in line:  

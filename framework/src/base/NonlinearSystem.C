@@ -138,7 +138,8 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _n_residual_evaluations(0),
     _final_residual(0.),
     _predictor(NULL),
-    _computing_initial_residual(false)
+    _computing_initial_residual(false),
+    _print_all_var_norms(false)
 {
   _sys.nonlinear_solver->residual      = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian      = Moose::compute_jacobian;
@@ -209,7 +210,7 @@ NonlinearSystem::solve()
     _sys.rhs->close();
     _initial_residual = _sys.rhs->l2_norm();
     std::cout <<std::scientific<<std::setprecision(6);
-    std::cout << "  Initial |residual|_2 = "<<_initial_residual<<"\n";
+    std::cout << " Initial |R| = "<<_initial_residual<<"\n";
   }
   catch (MooseException & e)
   {
@@ -1989,11 +1990,47 @@ NonlinearSystem::printVarNorms()
 {
   TransientNonlinearImplicitSystem &s = static_cast<TransientNonlinearImplicitSystem &>(_sys);
 
-  std::cout << "Norm of each nonlinear variable's residual:" << std::endl;
+  std::map<std::string, Real> other_var_norms;
+  std::map<std::string, Real> outlier_var_norms;
+
+  unsigned int n_vars = _sys.n_vars();
+
+  Real average_norm = (_last_nl_rnorm*_last_nl_rnorm) / n_vars;
+
   for (unsigned int var_num = 0; var_num < _sys.n_vars(); var_num++)
   {
-    std::cout << s.variable_name(var_num) << ": "
-              << s.calculate_norm(*s.rhs,var_num,DISCRETE_L2) << std::endl;
+    Real var_norm = s.calculate_norm(*s.rhs,var_num,DISCRETE_L2);
+    var_norm *= var_norm; // use the norm squared
+
+    if(var_norm > 2 * average_norm)
+      outlier_var_norms[s.variable_name(var_num)] = var_norm;
+    else
+      other_var_norms[s.variable_name(var_num)] = var_norm;
+  }
+
+  if(outlier_var_norms.size())
+  {
+    std::cout<<"Outlier Variable Residual Norms:"<<std::endl;
+    for(std::map<std::string, Real>::iterator it = outlier_var_norms.begin();
+        it != outlier_var_norms.end();
+        ++it)
+    {
+      std::string color(YELLOW);
+
+      if(it->second > 0.8 * _last_nl_rnorm*_last_nl_rnorm)
+        color = RED;
+
+      std::cout<<" "<<it->first<<": "<<_fe_problem.colorText(color,std::sqrt(it->second))<<std::endl;
+    }
+  }
+
+  if(_print_all_var_norms)
+  {
+    std::cout<<"Variable Residual Norms:"<<std::endl;
+    for(std::map<std::string, Real>::iterator it = other_var_norms.begin();
+        it != other_var_norms.end();
+        ++it)
+      std::cout<<" "<<it->first<<": "<<_fe_problem.colorText(GREEN,std::sqrt(it->second))<<std::endl;
   }
 }
 

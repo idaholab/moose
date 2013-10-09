@@ -262,9 +262,8 @@ Transient::takeStep(Real input_dt)
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   _problem.execMultiApps(EXEC_TIMESTEP_BEGIN);
 
-  std::cout<<"DT: "<<_dt<<std::endl;
+  std::cout << "\nTime Step ";
 
-  std::cout << " Solving time step ";
   {
     std::ostringstream out;
 
@@ -276,10 +275,11 @@ Transient::takeStep(Real input_dt)
         << std::setfill('0')
         << std::showpoint
         << std::left
-        << _time
-        <<  "...";
+        << _time;
     std::cout << out.str() << std::endl;
   }
+
+  std::cout<<" DT = "<<_dt<<std::endl;
 
   preSolve();
   _time_stepper->preSolve();

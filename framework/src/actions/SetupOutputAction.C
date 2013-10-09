@@ -69,6 +69,7 @@ InputParameters validParams<SetupOutputAction>()
   // restart options
   params.addParam<unsigned int>("num_restart_files", 0, "Number of the restart files to save (0 = no restart files)");
   params.addParam<Point>("position", "Set a positional offset.  This vector will get added to the nodal cooardinates to move the domain.");
+  params.addParam<bool>("all_var_norms", false, "If true then all variable norms will be printed after each solve");
 
   params.addParamNamesToGroup("position interval time_interval output_displaced output_solution_history iteration_plot_start_time elemental_as_nodal exodus_inputfile_output output_es_info output_variables hidden_variables", "Advanced");
   params.addParamNamesToGroup("nemesis gmv vtk tecplot tecplot_binary xda", "Format");
@@ -256,4 +257,6 @@ SetupOutputAction::act()
   // use that instead of creating another one here
   if (access(base.c_str(), W_OK) == -1)
     mooseError("Can not write to directory: " + base + " for file base: " + getParam<OutFileBase>("file_base"));
+
+  _problem->getNonlinearSystem().printAllVariableNorms(getParam<bool>("all_var_norms"));
 }
