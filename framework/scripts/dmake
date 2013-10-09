@@ -226,10 +226,8 @@ class Farm(object):
         self._dmake_data = pickle.load(fid)
         fid.close()
 
-      # IndexError or EOFError delete the file and begin anew
-      except EOFError:
-        self._clean()
-      except IndexError:
+      # If IndexError, EOFError or ValueError delete the file and begin anew
+      except (EOFError, IndexError, ValueError):
         self._clean()
 
     # Set description via arguments or prompt user for description if none set
@@ -290,7 +288,7 @@ class Farm(object):
       os.environ['DISTCC_VERBOSE'] = '0'
 
     # Build the make command
-    if (self._options.debug):
+    if (self._options.dbg):
       os.environ['METHOD'] = 'dbg'
     elif (self._options.oprof):
       os.environ['METHOD'] = 'oprof'
