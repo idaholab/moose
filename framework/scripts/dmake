@@ -608,7 +608,7 @@ def parseArguments(args=None):
   grp1 = parser.add_argument_group('Compiler Options (listed in order of priority)\n' + \
                                    'These flags may be used in union with each other and the flags\n' + \
                                    'list in the above section (e.g., dmake -dmv)')
-  grp1.add_argument('--debug', '-d', action='store_true', help='Build in debug mode')
+  grp1.add_argument('--dbg', '-d', action='store_true', help='Build in debug mode')
   grp1.add_argument('--oprof', '-p', action='store_true', help='Build in oprof mode')
   grp1.add_argument('--opt', '-o', action='store_true', help='Build in opt mode')
 
