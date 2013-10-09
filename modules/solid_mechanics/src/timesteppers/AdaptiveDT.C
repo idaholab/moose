@@ -326,11 +326,13 @@ AdaptiveDT::computeAdaptiveDT(Real &dt, bool allowToGrow, bool allowToShrink)
   const unsigned int growth_l_its(_optimal_iterations > _iteration_window ? _linear_iteration_ratio*(_optimal_iterations - _iteration_window) : 0);
   const unsigned int shrink_l_its(_linear_iteration_ratio*(_optimal_iterations + _iteration_window));
 
+  std::ostringstream out;
+
   if (allowToGrow && (_nl_its < growth_nl_its && _l_its < growth_l_its))
   { //grow the timestep
-    dt *= _growth_factor;
+    dt *= _growth_factor;    
 
-    std::cout << "Growing dt: nl its = "<<_nl_its<<" < "<<growth_nl_its
+    out << "Growing dt: nl its = "<<_nl_its<<" < "<<growth_nl_its
               << " && lin its = "<<_l_its<<" < "<<growth_l_its
               << " old dt: "
               << std::setw(9)
@@ -352,7 +354,7 @@ AdaptiveDT::computeAdaptiveDT(Real &dt, bool allowToGrow, bool allowToShrink)
   { //shrink the timestep
     dt *= _cutback_factor;
 
-    std::cout << "Shrinking dt: nl its = "<<_nl_its<<" > "<<shrink_nl_its
+    out << "Shrinking dt: nl its = "<<_nl_its<<" > "<<shrink_nl_its
               << " || lin its = "<<_l_its<<" > "<<shrink_l_its
               << " old dt: "
               << std::setw(9)
@@ -370,6 +372,8 @@ AdaptiveDT::computeAdaptiveDT(Real &dt, bool allowToGrow, bool allowToShrink)
               << dt
               << std::endl;
   }
+
+  std::cout<<out.str();
 }
 
 void
