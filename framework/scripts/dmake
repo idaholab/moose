@@ -64,7 +64,7 @@ class Machine(object):
 
 ## A function for formatting the output text
 def formatter(status, name, threads, hostname, addr):
-  return '| %-10s |' %status + ' %-40s |' % name + ' %-4s |' % threads + ' %-20s |' % hostname + ' %-15s |' % addr
+  return '| %-10s |' %status + ' %-50s |' % name + ' %-4s |' % threads + ' %-20s |' % hostname + ' %-15s |' % addr
 
 ## Function for testing the existence for a program
 def which(program):
@@ -180,6 +180,9 @@ class Farm(object):
     # Check that the distccd daemons are running
     self._checkDaemon()
 
+    # Check if we are running in dedicated mode, if so, stop because we are now _using_ dmake as a client
+    self.manageCron()
+
     # Prepare the client
     distcc_hosts, jobs = self._getHosts()
 
@@ -191,6 +194,7 @@ class Farm(object):
 
   ## Run the deamon command
   def startDaemon(self):
+    self.manageCron()
     self.killDaemon()
     time.sleep(1)
     self._launchDaemon()
@@ -212,6 +216,28 @@ class Farm(object):
     distcc_hosts, jobs = self._initClient()
     self._options.verbose = True
     self._display(distcc_hosts, jobs)
+
+  # A function to facilitate cronjobs. Useful for dedicated use.
+  def manageCron(self):
+    cron_proc = subprocess.Popen([which('crontab'), '-l'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    current_cron = cron_proc.communicate()[0]
+    # Modify crontab to run dmake in dedicated mode, refreshing the list every 15 minutes
+    if self._options.dedicated:
+      if current_cron.find('dmake') == -1:
+        current_cron += '*/15 * * * * if [ -f ~/.bash_profile ]; then source ~/.bash_profile >/dev/null 2>&1; elif [ -f ~/.bashrc ]; then source ~/.bashrc >/dev/null 2>&1; fi && dmake --dedicated --refresh --description "' + self._dmake_data['DESCRIPTION'] + ' (Dedicated Mode)"' + ' >/dev/null 2>&1\n'
+        self._updateCron(current_cron)
+    else:
+      # Remove dmake from the users cron, if detected
+      if current_cron.find('dmake --dedicated') != -1:
+        cron_line = re.findall(r'.*dmake --dedicated.*\n', current_cron)[0]
+        current_cron = current_cron.replace(cron_line, '')
+        self._updateCron(current_cron)
+
+  def _updateCron(self, cron_lines):
+    cron_file = open(self._dmake_file + '_cron', 'w')
+    cron_file.write(cron_lines)
+    subprocess.Popen([which('crontab'), self._dmake_file + '_cron'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    cron_file.close()
 
   ## Clean the temp dmake files
   def _clean(self):
