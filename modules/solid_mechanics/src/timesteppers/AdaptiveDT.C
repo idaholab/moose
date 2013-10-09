@@ -146,21 +146,23 @@ AdaptiveDT::computeInitialDT()
 
     dt = *_sync_times_iter - _time_old;
 
-    std::cout << "Limiting dt to sync with dt function time: "
-              << std::setw(9)
-              << std::setprecision(6)
-              << std::setfill('0')
-              << std::showpoint
-              << std::left
-              << *_sync_times_iter
-              << " dt: "
-              << std::setw(9)
-              << std::setprecision(6)
-              << std::setfill('0')
-              << std::showpoint
-              << std::left
-              << dt
-              << std::endl;
+    std::ostringstream out;
+    out << "Limiting dt to sync with dt function time: "
+        << std::setw(9)
+        << std::setprecision(6)
+        << std::setfill('0')
+        << std::showpoint
+        << std::left
+        << *_sync_times_iter
+        << " dt: "
+        << std::setw(9)
+        << std::setprecision(6)
+        << std::setfill('0')
+        << std::showpoint
+        << std::left
+        << dt
+        << std::endl;
+    std::cout << out.str();
 
     if (++_sync_times_iter == _sync_times.end())
     {
@@ -177,6 +179,8 @@ AdaptiveDT::computeDT()
 {
   Real dt(_dt_old);
 
+  std::ostringstream out;
+
   if ( _cutback_occurred ) //Don't allow it to grow this step, but shrink if needed
   {
     _cutback_occurred = false;
@@ -192,14 +196,14 @@ AdaptiveDT::computeDT()
 
     dt = _time_ipol.sample(_time_old);
 
-    std::cout << "Setting dt to value specified by dt function: "
-              << std::setw(9)
-              << std::setprecision(6)
-              << std::setfill('0')
-              << std::showpoint
-              << std::left
-              << dt
-              << std::endl;
+    out << "Setting dt to value specified by dt function: "
+        << std::setw(9)
+        << std::setprecision(6)
+        << std::setfill('0')
+        << std::showpoint
+        << std::left
+        << dt
+        << std::endl;
   }
   else if (_adaptive_timestepping)
   {
@@ -228,21 +232,21 @@ AdaptiveDT::computeDT()
 
     dt = *_sync_times_iter - _time_old;
 
-    std::cout << "Limiting dt to sync with dt function time: "
-              << std::setw(9)
-              << std::setprecision(6)
-              << std::setfill('0')
-              << std::showpoint
-              << std::left
-              << *_sync_times_iter
-              << " dt: "
-              << std::setw(9)
-              << std::setprecision(6)
-              << std::setfill('0')
-              << std::showpoint
-              << std::left
-              << dt
-              << std::endl;
+    out << "Limiting dt to sync with dt function time: "
+        << std::setw(9)
+        << std::setprecision(6)
+        << std::setfill('0')
+        << std::showpoint
+        << std::left
+        << *_sync_times_iter
+        << " dt: "
+        << std::setw(9)
+        << std::setprecision(6)
+        << std::setfill('0')
+        << std::showpoint
+        << std::left
+        << dt
+        << std::endl;
 
     if (++_sync_times_iter == _sync_times.end())
     {
@@ -256,15 +260,17 @@ AdaptiveDT::computeDT()
   {
     dt = _dt_max;
 
-    std::cout << "Limiting dt to dtmax: "
-              << std::setw(9)
-              << std::setprecision(6)
-              << std::setfill('0')
-              << std::showpoint
-              << std::left
-              << _dt_max
-              << std::endl;
+    out << "Limiting dt to dtmax: "
+        << std::setw(9)
+        << std::setprecision(6)
+        << std::setfill('0')
+        << std::showpoint
+        << std::left
+        << _dt_max
+        << std::endl;
   }
+
+  std::cout << out.str();
 
   return dt;
 }
@@ -330,7 +336,7 @@ AdaptiveDT::computeAdaptiveDT(Real &dt, bool allowToGrow, bool allowToShrink)
 
   if (allowToGrow && (_nl_its < growth_nl_its && _l_its < growth_l_its))
   { //grow the timestep
-    dt *= _growth_factor;    
+    dt *= _growth_factor;
 
     out << "Growing dt: nl its = "<<_nl_its<<" < "<<growth_nl_its
               << " && lin its = "<<_l_its<<" < "<<growth_l_its
@@ -373,7 +379,7 @@ AdaptiveDT::computeAdaptiveDT(Real &dt, bool allowToGrow, bool allowToShrink)
               << std::endl;
   }
 
-  std::cout<<out.str();
+  std::cout << out.str();
 }
 
 void
@@ -384,21 +390,24 @@ AdaptiveDT::computeInterpolationDT(Real & dt)
   {
     dt = _dt_old * _growth_factor;
 
-    std::cout << "Growing dt to recover from cutback.  old dt: "
-              << std::setw(9)
-              << std::setprecision(6)
-              << std::setfill('0')
-              << std::showpoint
-              << std::left
-              << _dt_old
-              << " new dt: "
-              << std::setw(9)
-              << std::setprecision(6)
-              << std::setfill('0')
-              << std::showpoint
-              << std::left
-              << dt
-              << std::endl;
+    std::ostringstream out;
+    out << "Growing dt to recover from cutback.  old dt: "
+        << std::setw(9)
+        << std::setprecision(6)
+        << std::setfill('0')
+        << std::showpoint
+        << std::left
+        << _dt_old
+        << " new dt: "
+        << std::setw(9)
+        << std::setprecision(6)
+        << std::setfill('0')
+        << std::showpoint
+        << std::left
+        << dt
+        << std::endl;
+
+    std::cout << out.str();
   }
 }
 
@@ -406,7 +415,7 @@ AdaptiveDT::computeInterpolationDT(Real & dt)
 void
 AdaptiveDT::rejectStep()
 {
-  std::cout<<"Solve failed... cutting timestep"<<std::endl;
+  std::cout << "Solve failed... cutting timestep" << std::endl;
 
   TimeStepper::rejectStep();
 }
