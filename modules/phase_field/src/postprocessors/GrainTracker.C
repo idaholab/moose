@@ -157,9 +157,12 @@ GrainTracker::finalize()
     for (std::map<unsigned int, UniqueGrain *>::const_iterator grain_it = _unique_grains.begin();
          grain_it != _unique_grains.end(); ++grain_it)
     {
-      std::set<unsigned int>::const_iterator node_it_end = grain_it->second->nodes_ptr->end();
-      for (std::set<unsigned int>::const_iterator node_it = grain_it->second->nodes_ptr->begin(); node_it != node_it_end; ++node_it)
-        _nodal_data[*node_it].push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
+      if (grain_it->second->status != INACTIVE)
+      {
+        std::set<unsigned int>::const_iterator node_it_end = grain_it->second->nodes_ptr->end();
+        for (std::set<unsigned int>::const_iterator node_it = grain_it->second->nodes_ptr->begin(); node_it != node_it_end; ++node_it)
+          _nodal_data[*node_it].push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
+      }
     }
   }
 }
