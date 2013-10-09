@@ -65,16 +65,16 @@ Nonlinear3D::computeIncrementalDeformationGradient( std::vector<ColumnMajorMatri
 
   _Fbar.resize(_qrule->n_points());
 
-  for ( _qp= 0; _qp < _qrule->n_points(); ++_qp )
+  for ( unsigned qp= 0; qp < _qrule->n_points(); ++qp )
   {
-    fillMatrix( _grad_disp_x, _grad_disp_y, _grad_disp_z, A );
-    fillMatrix( _grad_disp_x_old, _grad_disp_y_old, _grad_disp_z_old, Fbar);
+    fillMatrix( qp, _grad_disp_x, _grad_disp_y, _grad_disp_z, A );
+    fillMatrix( qp, _grad_disp_x_old, _grad_disp_y_old, _grad_disp_z_old, Fbar);
 
     A -= Fbar;
 
     Fbar.addDiag( 1 );
 
-    _Fbar[_qp] = Fbar;
+    _Fbar[qp] = Fbar;
 
 
     // Get Fbar^(-1)
@@ -84,14 +84,14 @@ Nonlinear3D::computeIncrementalDeformationGradient( std::vector<ColumnMajorMatri
 
     invertMatrix( Fbar, Fbar_inverse );
 
-    Fhat[_qp] = A * Fbar_inverse;
-    Fhat[_qp].addDiag( 1 );
+    Fhat[qp] = A * Fbar_inverse;
+    Fhat[qp].addDiag( 1 );
 
 
     // Now include the contribution for the integration of Fhat over the element
-    Fhat_average += Fhat[_qp] * _JxW[_qp];
+    Fhat_average += Fhat[qp] * _JxW[qp];
 
-    volume += _JxW[_qp];  // Accumulate original configuration volume
+    volume += _JxW[qp];  // Accumulate original configuration volume
   }
 
   Fhat_average /= volume;
@@ -100,12 +100,12 @@ Nonlinear3D::computeIncrementalDeformationGradient( std::vector<ColumnMajorMatri
 
 
   // Finalize volumetric locking correction
-  for ( _qp=0; _qp < _qrule->n_points(); ++_qp )
+  for ( unsigned qp=0; qp < _qrule->n_points(); ++qp )
   {
-    const Real det_Fhat( detMatrix( Fhat[_qp] ) );
+    const Real det_Fhat( detMatrix( Fhat[qp] ) );
     const Real factor( std::pow( det_Fhat_average/det_Fhat, third ) );
 
-    Fhat[_qp] *= factor;
+    Fhat[qp] *= factor;
 
   }
 }

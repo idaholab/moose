@@ -20,7 +20,8 @@ public:
   virtual void modifyStrain(const unsigned int qp,
                             SymmTensor & strain_increment,
                             SymmTensor & dstrain_increment_dT) = 0;
-
+private:
+  using Material::_qp;
 };
 
 #endif // VOLUMETRICMODEL_H

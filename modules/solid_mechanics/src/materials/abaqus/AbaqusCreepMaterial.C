@@ -108,15 +108,18 @@ AbaqusCreepMaterial::~AbaqusCreepMaterial()
   dlclose(_handle);
 }
 
-void AbaqusCreepMaterial::initQpStatefulProperties()
+void AbaqusCreepMaterial::initStatefulProperties(unsigned n_points)
 {
-  //Initialize state variable vector
-  _state_var[_qp].resize(_num_state_vars);
-  _state_var_old[_qp].resize(_num_state_vars);
-  for(unsigned int i=0; i<_num_state_vars; i++)
+  for ( unsigned qp(0); qp < n_points; ++qp )
   {
-    _state_var[_qp][i] = 0.0;
-    _state_var_old[_qp][i] = 0.0;
+    //Initialize state variable vector
+    _state_var[qp].resize(_num_state_vars);
+    _state_var_old[qp].resize(_num_state_vars);
+    for(unsigned int i=0; i<_num_state_vars; i++)
+    {
+      _state_var[qp][i] = 0.0;
+      _state_var_old[qp][i] = 0.0;
+    }
   }
 }
 

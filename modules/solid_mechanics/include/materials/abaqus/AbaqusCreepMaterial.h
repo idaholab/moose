@@ -30,7 +30,7 @@ protected:
 
   // Function pointer to the dynamically loaded function
   creep_t _creep;
-  
+
   //CREEP subroutine real scalar values
   Real _SERD, _P, _QTILD, _TEMP, _DTEMP, _DTIME, _CMNAME, _LEXIMP, _LEND, _NSTATV;
 
@@ -43,7 +43,7 @@ protected:
   //Elasticity reference
   Real _ebulk3, _eg2, _eg, _eg3, _elam, _elasticity_tensor[3], _stress_component[6];
 
-  virtual void initQpStatefulProperties();
+  virtual void initStatefulProperties(unsigned n_points);
   virtual void modifyStrain(const unsigned int qp,
                             SymmTensor & strain_increment,
                             SymmTensor & dstrain_increment_dT);
