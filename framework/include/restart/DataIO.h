@@ -44,6 +44,12 @@ template<typename P>
 void storeHelper(std::ostream & stream, std::vector<P> & data, void * context);
 
 /**
+ * Set helper routine
+ */
+template<typename P>
+void storeHelper(std::ostream & stream, std::set<P> & data, void * context);
+
+/**
  * Scalar helper routine
  */
 template<typename P>
@@ -55,12 +61,20 @@ void loadHelper(std::istream & stream, P & data, void * context);
 template<typename P>
 void loadHelper(std::istream & stream, std::vector<P> & data, void * context);
 
+/**
+ * Set helper routine
+ */
+template<typename P>
+void loadHelper(std::istream & stream, std::set<P> & data, void * context);
+
 
 // global store functions
 
 template<typename T>
 void dataStore(std::ostream & stream, T & v, void * /*context*/)
 {
+  // std::cout<<"Generic dataStore"<<std::endl;
+
   stream.write((char *) &v, sizeof(v));
 }
 
@@ -74,6 +88,8 @@ template<>
 inline
 void dataStore(std::ostream & stream, Real & v, void * /*context*/)
 {
+  // std::cout<<"Real dataStore"<<std::endl;
+
   stream.write((char *) &v, sizeof(v));
 }
 
@@ -81,12 +97,35 @@ template<typename T>
 inline void
 dataStore(std::ostream & stream, const std::vector<T> & v, void * context)
 {
+  // std::cout<<"Vector dataStore"<<std::endl;
+
   // First store the size of the vector
   unsigned int size = v.size();
   stream.write((char *) &size, sizeof(size));
 
+  // std::cout<<"Size: "<<size<<std::endl;
+
   for (unsigned int i = 0; i < size; i++)
     storeHelper(stream, v[i], context);
+}
+
+template<typename T>
+inline void
+dataStore(std::ostream & stream, const std::set<T> & s, void * context)
+{
+  // std::cout<<"Set dataStore"<<std::endl;
+
+  // First store the size of the set
+  unsigned int size = s.size();
+  stream.write((char *) &size, sizeof(size));
+
+  // std::cout<<"Size: "<<size<<std::endl;
+
+  typename std::set<T>::const_iterator it = s.begin();
+  typename std::set<T>::const_iterator end = s.end();
+
+  for (; it != end; ++it)
+    storeHelper(stream, *it, context);
 }
 
 template<>
@@ -137,6 +176,8 @@ dataStore(std::ostream & stream, RealVectorValue & v, void * /*context*/)
 template<typename T>
 void dataLoad(std::istream & stream, T & v, void * /*context*/)
 {
+  // std::cout<<"Generic dataLoad"<<std::endl;
+
   stream.read((char *) &v, sizeof(v));
 }
 
@@ -150,22 +191,47 @@ template<>
 inline void
 dataLoad(std::istream & stream, Real & v, void * /*context*/)
 {
+  // std::cout<<"Real dataLoad"<<std::endl;
+
   stream.read((char *) &v, sizeof(v));
-//  std::cout<<"value: "<<v<<std::endl;
 }
 
 template<typename T>
 inline void
 dataLoad(std::istream & stream, std::vector<T> & v, void * context)
 {
+  // std::cout<<"Vector dataLoad"<<std::endl;
+
   // First read the size of the vector
   unsigned int size = 0;
   stream.read((char *) &size, sizeof(size));
+
+  // std::cout<<"Size: "<<size<<std::endl;
 
   v.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
     loadHelper(stream, v[i], context);
+}
+template<typename T>
+
+inline void
+dataLoad(std::istream & stream, std::set<T> & s, void * context)
+{
+  // std::cout<<"Set dataLoad"<<std::endl;
+
+  // First read the size of the set
+  unsigned int size = 0;
+  stream.read((char *) &size, sizeof(size));
+
+  // std::cout<<"Size: "<<size<<std::endl;
+
+  for (unsigned int i = 0; i < size; i++)
+  {
+    T data;
+    loadHelper(stream, data, context);
+    s.insert(data);
+  }
 }
 
 template<>
@@ -225,6 +291,7 @@ dataLoad(std::istream & stream, RealVectorValue & v, void * /*context*/)
 template<typename P>
 void storeHelper(std::ostream & stream, P & data, void * context)
 {
+  // std::cout<<"Scalar storeHelper"<<std::endl;
   dataStore(stream, data, context);
 }
 
@@ -232,6 +299,15 @@ void storeHelper(std::ostream & stream, P & data, void * context)
 template<typename P>
 void storeHelper(std::ostream & stream, std::vector<P> & data, void * context)
 {
+  // std::cout<<"Vector storeHelper"<<std::endl;
+  dataStore<P>(stream, data, context);
+}
+
+// Set Helper Function
+template<typename P>
+void storeHelper(std::ostream & stream, std::set<P> & data, void * context)
+{
+  // std::cout<<"Set storeHelper"<<std::endl;
   dataStore<P>(stream, data, context);
 }
 
@@ -239,6 +315,7 @@ void storeHelper(std::ostream & stream, std::vector<P> & data, void * context)
 template<typename P>
 void loadHelper(std::istream & stream, P & data, void * context)
 {
+  // std::cout<<"Scalar loadHelper"<<std::endl;
   dataLoad(stream, data, context);
 }
 
@@ -246,6 +323,15 @@ void loadHelper(std::istream & stream, P & data, void * context)
 template<typename P>
 void loadHelper(std::istream & stream, std::vector<P> & data, void * context)
 {
+  // std::cout<<"Vector loadHelper"<<std::endl;
+  dataLoad<P>(stream, data, context);
+}
+
+// Set Helper Function
+template<typename P>
+void loadHelper(std::istream & stream, std::set<P> & data, void * context)
+{
+  // std::cout<<"Set loadHelper"<<std::endl;
   dataLoad<P>(stream, data, context);
 }
 

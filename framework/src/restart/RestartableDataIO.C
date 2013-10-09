@@ -93,6 +93,8 @@ RestartableDataIO::writeRestartableData(std::string base_file_name)
               it != restartable_data.end();
               ++it)
           {
+            // std::cout<<"Storing "<<it->first<<std::endl;
+
             std::ostringstream data;
             it->second->store(data);
 
@@ -214,6 +216,8 @@ RestartableDataIO::readRestartableData(std::string base_file_name)
 
             if(restartable_data.find(current_name) != restartable_data.end()) // Only restore values if they're currently being used
             {
+              // std::cout<<"Loading "<<current_name<<std::endl;
+
               RestartableDataValue * current_data = restartable_data[current_name];
               current_data->load(in);
             }

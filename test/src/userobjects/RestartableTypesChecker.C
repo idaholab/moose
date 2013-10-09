@@ -73,6 +73,10 @@ RestartableTypesChecker::execute()
 
     if(_custom_with_context._i != 5)
       mooseError("Error reading restartable custom data with context!");
+
+    for(std::set<Real>::iterator it = _set_data.begin(); it != _set_data.end(); ++it)
+      if(*it != 1 && *it != 2)
+        mooseError("Error reading restartable set data!");
   }
 
   _first = false;

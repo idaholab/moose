@@ -110,6 +110,7 @@ protected:
   Dummy * & _pointer_data;
   Dummy & _custom_data;
   DummyNeedingContext & _custom_with_context;
+  std::set<Real> & _set_data;
 };
 
 
