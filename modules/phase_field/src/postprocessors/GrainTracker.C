@@ -16,8 +16,12 @@ InputParameters validParams<GrainTracker>()
   params.addRequiredParam<unsigned int>("crys_num","number of grains");
   params.addRequiredParam<std::string>("var_name_base","base for variable names");
   params.addParam<int>("tracking_step", 1, "The timestep for when we should start tracking grains");
-  params.addParam<Real>("convex_hull_buffer", 1.0, "The buffer around the convex hull used to determine when features intersect");
+  params.addParam<Real>("convex_hull_buffer", 1.0, "The buffer around the convex hull used to determine"
+                                                   "when features intersect");
   params.addParam<bool>("remap_grains", true, "Indicates whether remapping should be done or not (default: true)");
+  params.addParam<bool>("compute_op_maps", false, "Indicates whether the data structures that"
+                                                  "hold the active order parameter information"
+                                                  "should be populated or not");
 
   // We are using "addV" to add the variable parameter on the fly
   params.suppressParameter<std::vector<VariableName> >("variable");
@@ -30,7 +34,8 @@ GrainTracker::GrainTracker(const std::string & name, InputParameters parameters)
     _tracking_step(getParam<int>("tracking_step")),
     _hull_buffer(getParam<Real>("convex_hull_buffer")),
     _remap(getParam<bool>("remap_grains")),
-    _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem())
+    _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
+    _compute_op_maps(getParam<bool>("compute_op_maps"))
 {
   // Size the data structures to hold the correct number of maps
   _bounding_spheres.resize(_maps_size);
@@ -138,7 +143,57 @@ GrainTracker::finalize()
     data.insert(data.end(), _all_bubble_volumes.begin(), _all_bubble_volumes.end());
     writeCSVFile(getParam<FileName>("bubble_volume_file"), data);
   }
+
+  std::cout << "Fuk 0\n";
+
+  if (_compute_op_maps)
+  {
+    std::cout << "Fuk 1\n";
+
+    for (std::map<unsigned int, UniqueGrain *>::const_iterator grain_it = _unique_grains.begin();
+         grain_it != _unique_grains.end(); ++grain_it)
+    {
+      std::cout << "Fuk 2\n";
+
+      std::set<unsigned int>::const_iterator node_it_end = grain_it->second->nodes_ptr->end();
+      for (std::set<unsigned int>::const_iterator node_it = grain_it->second->nodes_ptr->begin(); node_it != node_it_end; ++node_it)
+        _nodal_data[*node_it].push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
+    }
+  }
 }
+
+
+const std::vector<std::pair<unsigned int, unsigned int> > &
+GrainTracker::getNodalValues(unsigned int node_id) const
+{
+  const std::map<unsigned int, std::vector<std::pair<unsigned int, unsigned int> > >::const_iterator pos = _nodal_data.find(node_id);
+
+  if (pos != _nodal_data.end())
+    return pos->second;
+  else
+  {
+#if DEBUG
+    mooseDoOnce(std::cout << "Nodal values not in structure for node: " << node_id << " this may be normal.");
+#endif
+    return _empty;
+  }
+}
+
+std::vector<std::vector<std::pair<unsigned int, unsigned int> > >
+GrainTracker::getElementalValues(unsigned int elem_id) const
+{
+  std::vector<std::vector<std::pair<unsigned int, unsigned int> > > elem_info;
+
+  const Elem * curr_elem = _mesh.elem(elem_id);
+  elem_info.resize(curr_elem->n_nodes());
+
+  for (unsigned int i=0; i<elem_info.size(); ++i)
+    // Note: This map only works with Linear Lagrange on First Order Elements
+    elem_info[_qp_to_node[i]] = getNodalValues(curr_elem->node(i));
+
+  return elem_info;
+}
+
 
 void
 GrainTracker::buildBoundingSpheres()
@@ -151,7 +206,7 @@ GrainTracker::buildBoundingSpheres()
   // Build a list of periodic nodes
   _mesh.buildPeriodicNodeSets(pb_nodes, _var_number, _pbs);
   MeshBase & mesh = _mesh.getMesh();
-  
+
   unsigned long total_node_count = 0;
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
@@ -163,13 +218,13 @@ GrainTracker::buildBoundingSpheres()
      */
     std::vector<Real> min_points(_bubble_sets[map_num].size()*3,  1e30);
     std::vector<Real> max_points(_bubble_sets[map_num].size()*3, -1e30);
-    
+
     unsigned int set_counter=0;
     for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[map_num].begin();
          it1 != _bubble_sets[map_num].end(); ++it1)
     {
       total_node_count += it1->_nodes.size();
-      
+
       // Find the min/max of our bounding box to calculate our bounding sphere
       for (std::set<unsigned int>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
       {
@@ -194,10 +249,10 @@ GrainTracker::buildBoundingSpheres()
     {
       Point min(min_points[set_counter*3], min_points[set_counter*3+1], min_points[set_counter*3+2]);
       Point max(max_points[set_counter*3], max_points[set_counter*3+1], max_points[set_counter*3+2]);
-      
+
       // Calulate our bounding sphere
       Point center(min + ((max - min) / 2.0));
-      
+
       // The radius is the different between the outer edge of the "bounding box"
       // and the center plus the "hull buffer" value
       Real radius = (max - center).size() + _hull_buffer;
@@ -591,7 +646,7 @@ GrainTracker::updateFieldInfo()
            node_it != grain_it->second->nodes_ptr->end(); ++node_it)
       {
         const Node *curr_node = mesh.query_node_ptr(*node_it);
-       
+
         if (curr_node && _vars[grain_it->second->variable_idx]->getNodalValue(*curr_node) > tmp_map[curr_node->id()])
         {
           _bubble_maps[map_idx][curr_node->id()] = grain_it->first;
@@ -602,33 +657,7 @@ GrainTracker::updateFieldInfo()
   }
 }
 
-std::vector<std::pair<unsigned int, unsigned int> >
-GrainTracker::getNodalValues(unsigned int node_id) const
-{
-  // A vector of unique_grain ids and their associated variable index for the given node
-  std::vector<std::pair<unsigned int, unsigned int> > node_info;
 
-  for (std::map<unsigned int, UniqueGrain *>::const_iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
-    if (grain_it->second->status != INACTIVE && grain_it->second->nodes_ptr->find(node_id) != grain_it->second->nodes_ptr->end())
-      node_info.push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
-
-  return node_info;
-}
-
-std::vector<std::vector<std::pair<unsigned int, unsigned int> > >
-GrainTracker::getElementalValues(unsigned int elem_id) const
-{
-  std::vector<std::vector<std::pair<unsigned int, unsigned int> > > elem_info;
-
-  const Elem * curr_elem = _mesh.elem(elem_id);
-  elem_info.resize(curr_elem->n_nodes());
-
-  for (unsigned int i=0; i<elem_info.size(); ++i)
-    // Note: This map only works with Linear Lagrange on First Order Elements
-    elem_info[_qp_to_node[i]] = getNodalValues(curr_elem->node(i));
-
-  return elem_info;
-}
 
 Real
 GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2, bool ignore_radii) const
