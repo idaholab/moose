@@ -47,6 +47,14 @@ GrainTracker::~GrainTracker()
     delete it->second;
 }
 
+void
+GrainTracker::initialize()
+{
+  NodalFloodCount::initialize();
+
+  _nodal_data.clear();
+}
+
 Real
 GrainTracker::getNodalValue(unsigned int node_id, unsigned int var_idx, bool show_var_coloring) const
 {
@@ -144,17 +152,11 @@ GrainTracker::finalize()
     writeCSVFile(getParam<FileName>("bubble_volume_file"), data);
   }
 
-  std::cout << "Fuk 0\n";
-
   if (_compute_op_maps)
   {
-    std::cout << "Fuk 1\n";
-
     for (std::map<unsigned int, UniqueGrain *>::const_iterator grain_it = _unique_grains.begin();
          grain_it != _unique_grains.end(); ++grain_it)
     {
-      std::cout << "Fuk 2\n";
-
       std::set<unsigned int>::const_iterator node_it_end = grain_it->second->nodes_ptr->end();
       for (std::set<unsigned int>::const_iterator node_it = grain_it->second->nodes_ptr->begin(); node_it != node_it_end; ++node_it)
         _nodal_data[*node_it].push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
