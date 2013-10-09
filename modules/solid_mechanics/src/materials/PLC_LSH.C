@@ -116,16 +116,18 @@ PLC_LSH::computeStress()
     elastic_strain_increment -= plastic_strain_increment;
     stress_new = *elasticityTensor() * elastic_strain_increment;
     stress_new += _stress_old;
-    computeCreep( creep_strain_increment, stress_new );
+
+    elastic_strain_increment = _strain_increment;
+    computeCreep( elastic_strain_increment, creep_strain_increment, stress_new );
 
     // now use stress_new to calculate a new effective_trial_stress and determine if
     // yield has occured and if so, calculate the corresponding plastic strain
 
-    computeLSH( creep_strain_increment, plastic_strain_increment, stress_new );
-
-    elastic_strain_increment = _strain_increment;
-    elastic_strain_increment -= plastic_strain_increment;
     elastic_strain_increment -= creep_strain_increment;
+
+    computeLSH( elastic_strain_increment, plastic_strain_increment, stress_new );
+
+    elastic_strain_increment -= plastic_strain_increment;
 
     // now check convergence
     SymmTensor deltaS(stress_new_last - stress_new);
@@ -163,7 +165,8 @@ PLC_LSH::computeStress()
 }
 
 void
-PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
+PLC_LSH::computeCreep( const SymmTensor & strain_increment,
+                       SymmTensor & creep_strain_increment,
                        SymmTensor & stress_new )
 {
   // compute deviatoric trial stress
@@ -243,7 +246,7 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
   creep_strain_increment = dev_trial_stress;
   creep_strain_increment *= (1.5*del_p/effective_trial_stress);
 
-  SymmTensor elastic_strain_increment(_strain_increment);
+  SymmTensor elastic_strain_increment(strain_increment);
   elastic_strain_increment -= creep_strain_increment;
 
   // compute stress increment
@@ -258,7 +261,7 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
 }
 
 void
-PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
+PLC_LSH::computeLSH( const SymmTensor & strain_increment,
                      SymmTensor & plastic_strain_increment,
                      SymmTensor & stress_new )
 {
@@ -333,9 +336,8 @@ PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
     plastic_strain_increment = dev_trial_stress;
     plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress);
 
-    SymmTensor elastic_strain_increment(_strain_increment);
+    SymmTensor elastic_strain_increment(strain_increment);
     elastic_strain_increment -= plastic_strain_increment;
-    elastic_strain_increment -= creep_strain_increment;
 
     // compute stress increment
     stress_new = *elasticityTensor() * elastic_strain_increment;
