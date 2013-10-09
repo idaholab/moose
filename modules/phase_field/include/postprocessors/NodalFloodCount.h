@@ -55,7 +55,7 @@ public:
   virtual Real getNodalValue(unsigned int node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
   virtual Real getElementalValue(unsigned int element_id) const;
 
-  virtual std::vector<std::pair<unsigned int, unsigned int> > getNodalValues(unsigned int node_id) const;
+  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getNodalValues(unsigned int node_id) const;
   virtual std::vector<std::vector<std::pair<unsigned int, unsigned int> > > getElementalValues(unsigned int elem_id) const;
 
 protected:
@@ -247,6 +247,9 @@ protected:
    * when requested by passing a file name to write this information to.
    */
   std::vector<Real> _all_bubble_volumes;
+
+  // Dummy value for unimplemented method
+  static const std::vector<std::pair<unsigned int, unsigned int> > _empty;
 };
 
 #endif

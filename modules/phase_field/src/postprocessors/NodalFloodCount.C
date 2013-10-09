@@ -212,13 +212,11 @@ NodalFloodCount::getElementalValue(unsigned int /*element_id*/) const
   return 0;
 }
 
-std::vector<std::pair<unsigned int, unsigned int> >
+const std::vector<std::pair<unsigned int, unsigned int> > &
 NodalFloodCount::getNodalValues(unsigned int node_id) const
 {
-  std::vector<std::pair<unsigned int, unsigned int> > empty;
-
   mooseDoOnce(mooseWarning("Method not implemented"));
-  return empty;
+  return _empty;
 }
 
 std::vector<std::vector<std::pair<unsigned int, unsigned int> > >
@@ -619,3 +617,5 @@ NodalFloodCount::writeCSVFile(const std::string file_name, const std::vector<Rea
     *_file_handles[file_name] << std::endl;
   }
 }
+
+const std::vector<std::pair<unsigned int, unsigned int> > NodalFloodCount::_empty;
