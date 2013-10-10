@@ -69,11 +69,11 @@ SlaveConstraint::addPoints()
 
   std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
 
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
+  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
   for(; it!=end; ++it)
   {
-    PenetrationLocator::PenetrationInfo * pinfo = it->second;
+    PenetrationInfo * pinfo = it->second;
 
     if (!pinfo)
     {
@@ -113,7 +113,7 @@ SlaveConstraint::computeQpResidual()
 {
   std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
 
-  PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
+  PenetrationInfo * pinfo = _point_to_info[_current_point];
   const Node * node = pinfo->_node;
 
   Real resid(0);
@@ -152,7 +152,7 @@ SlaveConstraint::computeQpResidual()
     }
 
     pinfo->_contact_force(_component) = resid;
-    pinfo->_mech_status=PenetrationLocator::MS_SLIPPING;
+    pinfo->_mech_status=PenetrationInfo::MS_SLIPPING;
 
   }
   else if (_model == CM_COULOMB && _formulation == CF_PENALTY)
@@ -178,11 +178,11 @@ SlaveConstraint::computeQpResidual()
     if ( tan_mag > capacity )
     {
       pinfo->_contact_force = contact_force_normal + capacity * contact_force_tangential / tan_mag;
-      pinfo->_mech_status=PenetrationLocator::MS_SLIPPING;
+      pinfo->_mech_status=PenetrationInfo::MS_SLIPPING;
     }
     else
     {
-      pinfo->_mech_status=PenetrationLocator::MS_STICKING;
+      pinfo->_mech_status=PenetrationInfo::MS_STICKING;
     }
 
     resid = pinfo->_contact_force(_component);
@@ -211,7 +211,7 @@ SlaveConstraint::computeQpResidual()
     }
 
     pinfo->_contact_force(_component) = resid;
-    pinfo->_mech_status=PenetrationLocator::MS_STICKING;
+    pinfo->_mech_status=PenetrationInfo::MS_STICKING;
 
   }
   else
@@ -230,7 +230,7 @@ SlaveConstraint::computeQpJacobian()
   //   we should subtract off the existing Jacobian weighted by the effect of the normal
 
 
-  PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
+  PenetrationInfo * pinfo = _point_to_info[_current_point];
   const Node * node = pinfo->_node;
 //   long int dof_number = node->dof_number(0, _var.number(), 0);
 

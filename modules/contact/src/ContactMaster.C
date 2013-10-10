@@ -3,6 +3,7 @@
 #include "FrictionalContactProblem.h"
 #include "NodalArea.h"
 #include "SystemBase.h"
+#include "PenetrationInfo.h"
 
 // libmesh includes
 #include "libmesh/sparse_matrix.h"
@@ -127,12 +128,12 @@ ContactMaster::updateContactSet(bool beginning_of_step)
   std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._locked_this_step;
   std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
 
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
+  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {
-    PenetrationLocator::PenetrationInfo * pinfo = it->second;
+    PenetrationInfo * pinfo = it->second;
 
     if (!pinfo)
     {
@@ -184,7 +185,7 @@ ContactMaster::updateContactSet(bool beginning_of_step)
         std::cout << "Releasing node " << node->id() << " " << resid << " < " << -_tension_release << std::endl;
         has_penetrated.erase(hpit);
         pinfo->_contact_force.zero();
-        pinfo->_mech_status=PenetrationLocator::MS_NO_CONTACT;
+        pinfo->_mech_status=PenetrationInfo::MS_NO_CONTACT;
         ++unlocked_this_step[slave_node_num];
       }
       else if (distance > 0)
@@ -235,7 +236,7 @@ ContactMaster::updateContactSet(bool beginning_of_step)
             has_penetrated.erase(hpit);
           }
           pinfo->_contact_force.zero();
-          pinfo->_mech_status=PenetrationLocator::MS_NO_CONTACT;
+          pinfo->_mech_status=PenetrationInfo::MS_NO_CONTACT;
         }
       }
       else
@@ -264,12 +265,12 @@ ContactMaster::addPoints()
 
   std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
 
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
+  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {
-    PenetrationLocator::PenetrationInfo * pinfo = it->second;
+    PenetrationInfo * pinfo = it->second;
 
     if (!pinfo)
     {
@@ -293,7 +294,7 @@ ContactMaster::computeQpResidual()
 {
   std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
 
-  PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
+  PenetrationInfo * pinfo = _point_to_info[_current_point];
   const Node * node = pinfo->_node;
 //  std::cout<<node->id()<<std::endl;
 //  long int dof_number = node->dof_number(0, _var_num, 0);
@@ -336,7 +337,7 @@ ContactMaster::computeQpResidual()
       break;
     }
     pinfo->_contact_force(_component) = -resid;
-    pinfo->_mech_status=PenetrationLocator::MS_SLIPPING;
+    pinfo->_mech_status=PenetrationInfo::MS_SLIPPING;
   }
   else if (_model == CM_COULOMB && _formulation == CF_PENALTY)
   {
@@ -360,11 +361,11 @@ ContactMaster::computeQpResidual()
     if ( tan_mag > capacity )
     {
       pinfo->_contact_force = contact_force_normal + capacity * contact_force_tangential / tan_mag;
-      pinfo->_mech_status=PenetrationLocator::MS_SLIPPING;
+      pinfo->_mech_status=PenetrationInfo::MS_SLIPPING;
     }
     else
     {
-      pinfo->_mech_status=PenetrationLocator::MS_STICKING;
+      pinfo->_mech_status=PenetrationInfo::MS_STICKING;
     }
 
     // Change the sign since master force is equal and opposite slave force
@@ -392,7 +393,7 @@ ContactMaster::computeQpResidual()
       break;
     }
     pinfo->_contact_force(_component) = -resid;
-    pinfo->_mech_status=PenetrationLocator::MS_STICKING;
+    pinfo->_mech_status=PenetrationInfo::MS_STICKING;
   }
   else
   {
@@ -406,7 +407,7 @@ Real
 ContactMaster::computeQpJacobian()
 {
 
-  PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
+  PenetrationInfo * pinfo = _point_to_info[_current_point];
 
   switch(_model)
   {

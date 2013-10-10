@@ -33,7 +33,7 @@ protected:
 
   NumericVector<Number> & _residual_copy;
 
-  std::map<Point, PenetrationLocator::PenetrationInfo *> _point_to_info;
+  std::map<Point, PenetrationInfo *> _point_to_info;
 
   const unsigned int _x_var;
   const unsigned int _y_var;

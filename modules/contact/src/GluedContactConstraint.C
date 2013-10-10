@@ -125,12 +125,12 @@ GluedContactConstraint::updateContactSet(bool beginning_of_step)
   std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._locked_this_step;
   std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
 
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
+  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {
-    PenetrationLocator::PenetrationInfo * pinfo = it->second;
+    PenetrationInfo * pinfo = it->second;
 
     if (!pinfo)
     {
@@ -168,7 +168,7 @@ GluedContactConstraint::shouldApply()
 Real
 GluedContactConstraint::computeQpSlaveValue()
 {
-  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+  PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
   return _u_slave[_qp];
 }
 
@@ -179,25 +179,25 @@ GluedContactConstraint::computeQpResidual(Moose::ConstraintType type)
   {
     case Moose::Slave:
     {
-      PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+      PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
       Real distance = (*_current_node)(_component) - pinfo->_closest_point(_component);
       Real pen_force = _penalty * distance;
     
       Real resid = pen_force;
       pinfo->_contact_force(_component) = resid;
-      pinfo->_mech_status=PenetrationLocator::MS_STICKING;
+      pinfo->_mech_status=PenetrationInfo::MS_STICKING;
 
       return _test_slave[_i][_qp] * resid;
     }
     case Moose::Master:
     {
-      PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+      PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
       
       long int dof_number = _current_node->dof_number(0, _vars(_component), 0);
       Real resid = _residual_copy(dof_number);
     
       pinfo->_contact_force(_component) = -resid;
-      pinfo->_mech_status=PenetrationLocator::MS_STICKING;
+      pinfo->_mech_status=PenetrationInfo::MS_STICKING;
       
       return _test_master[_i][_qp] * resid;
     }

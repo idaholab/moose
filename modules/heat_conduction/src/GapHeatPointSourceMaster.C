@@ -1,5 +1,6 @@
 #include "GapHeatPointSourceMaster.h"
 #include "SystemBase.h"
+#include "PenetrationInfo.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -46,12 +47,12 @@ GapHeatPointSourceMaster::addPoints()
 
   _slave_flux.close();
 
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
+  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
 
   for(; it!=end; ++it)
   {
-    PenetrationLocator::PenetrationInfo * pinfo = it->second;
+    PenetrationInfo * pinfo = it->second;
 
     if(!pinfo)
       continue;
@@ -64,7 +65,7 @@ GapHeatPointSourceMaster::addPoints()
 Real
 GapHeatPointSourceMaster::computeQpResidual()
 {
-  PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
+  PenetrationInfo * pinfo = point_to_info[_current_point];
   const Node * node = pinfo->_node;
   long int dof_number = node->dof_number(_sys.number(), _var.index(), 0);
 

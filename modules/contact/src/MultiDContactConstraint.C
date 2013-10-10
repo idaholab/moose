@@ -79,12 +79,12 @@ MultiDContactConstraint::updateContactSet()
 //  std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
   std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._unlocked_this_step;
 
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
+  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {
-    PenetrationLocator::PenetrationInfo * pinfo = it->second;
+    PenetrationInfo * pinfo = it->second;
 
     if (!pinfo)
     {
@@ -155,7 +155,7 @@ MultiDContactConstraint::shouldApply()
 Real
 MultiDContactConstraint::computeQpSlaveValue()
 {
-  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+  PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 /*
   std::cerr<<std::endl
            <<"Popping out node: "<<_current_node->id()<<std::endl
@@ -171,7 +171,7 @@ MultiDContactConstraint::computeQpSlaveValue()
 Real
 MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
 {
-  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+  PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
   const Node * node = pinfo->_node;
 
   RealVectorValue res_vec;
@@ -235,7 +235,7 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
 Real
 MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
-  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+  PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 
   double slave_jac = 0;
   switch(type)

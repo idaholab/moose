@@ -52,12 +52,12 @@ OneDContactConstraint::updateContactSet()
 {
   std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
 
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
+  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {
-    PenetrationLocator::PenetrationInfo * pinfo = it->second;
+    PenetrationInfo * pinfo = it->second;
 
     if (!pinfo)
     {
@@ -82,7 +82,7 @@ OneDContactConstraint::shouldApply()
 Real
 OneDContactConstraint::computeQpSlaveValue()
 {
-  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+  PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
   std::cerr<<std::endl
            <<"Popping out node: "<<_current_node->id()<<std::endl
            <<"Closest Point x: "<<pinfo->_closest_point(0)<<std::endl
@@ -95,7 +95,7 @@ OneDContactConstraint::computeQpSlaveValue()
 Real
 OneDContactConstraint::computeQpResidual(Moose::ConstraintType type)
 {
-  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+  PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 
   switch(type)
   {

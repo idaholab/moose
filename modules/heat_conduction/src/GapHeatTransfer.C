@@ -216,7 +216,7 @@ GapHeatTransfer::computeGapValues()
   else
   {
     Node * qnode = _mesh.getQuadratureNode(_current_elem, _current_side, _qp);
-    PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator->_penetration_info[qnode->id()];
+    PenetrationInfo * pinfo = _penetration_locator->_penetration_info[qnode->id()];
 
     _gap_temp = 0.0;
     _gap_distance = 88888;

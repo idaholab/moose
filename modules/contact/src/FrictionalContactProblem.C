@@ -353,7 +353,7 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
 
           if(pen_loc._penetration_info[slave_node_num])
           {
-            PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
+            PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
             std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
 
@@ -492,7 +492,7 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
 
           if(pen_loc._penetration_info[slave_node_num])
           {
-            PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
+            PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
             const Node * node = info._node;
 
             if (node->processor_id() == libMesh::processor_id())
@@ -955,7 +955,7 @@ FrictionalContactProblem::updateIncrementalSlip()
 
         if(pen_loc._penetration_info[slave_node_num])
         {
-          PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
+          PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
           std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
 

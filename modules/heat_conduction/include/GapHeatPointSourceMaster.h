@@ -21,7 +21,7 @@ public:
   virtual Real computeQpJacobian();
 protected:
   PenetrationLocator & _penetration_locator;
-  std::map<Point, PenetrationLocator::PenetrationInfo *> point_to_info;
+  std::map<Point, PenetrationInfo *> point_to_info;
   NumericVector<Number> & _slave_flux;
 
 //  std::vector<Real> _localized_slave_flux;
