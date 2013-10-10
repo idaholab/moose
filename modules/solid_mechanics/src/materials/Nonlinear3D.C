@@ -108,9 +108,28 @@ Nonlinear3D::computeIncrementalDeformationGradient( std::vector<ColumnMajorMatri
     Fhat[qp] *= factor;
 
   }
+//    std::cout << "Fhat(0,0)" << Fhat[0](0,0) << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////
+
+void
+Nonlinear3D::computeDeformationGradient( unsigned int qp, ColumnMajorMatrix & F)
+{
+  mooseAssert(F.n() == 3 && F.m() == 3, "computeDefGrad requires 3x3 matrix");
+
+  F(0,0) = _grad_disp_x[qp](0) + 1; 
+  F(0,1) = _grad_disp_x[qp](1);     
+  F(0,2) = _grad_disp_x[qp](2);     
+  F(1,0) = _grad_disp_y[qp](0);     
+  F(1,1) = _grad_disp_y[qp](1) + 1; 
+  F(1,2) = _grad_disp_y[qp](2);     
+  F(2,0) = _grad_disp_z[qp](0);       
+  F(2,1) = _grad_disp_z[qp](1);
+  F(2,2) = _grad_disp_z[qp](2) + 1;
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void
 Nonlinear3D::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat,
@@ -123,41 +142,44 @@ Nonlinear3D::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat,
   }
 
   else if ( _decomp_method == Eigen )
-  {
+ {
+ ////
+ ////   const int ND = 3;
+ ////
+ ////   ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
+ ////   ColumnMajorMatrix invUhat(ND,ND), logVhat(ND,ND);
+ ////   ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
+ ////
+ ////   ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
+ ////
+ ////   Chat.eigen(eigen_value,eigen_vector);
+ ////
+ ////   for(int i = 0; i < ND; i++)
+ ////   {
+ ////     N1(i) = eigen_vector(i,0);
+ ////     N2(i) = eigen_vector(i,1);
+ ////     N3(i) = eigen_vector(i,2);
+ ////   }
+ ////
+ ////   const Real lamda1 = std::sqrt(eigen_value(0));
+ ////   const Real lamda2 = std::sqrt(eigen_value(1));
+ ////   const Real lamda3 = std::sqrt(eigen_value(2));
+ ////
+ ////
+ ////   const Real log1 = std::log(lamda1);
+ ////   const Real log2 = std::log(lamda2);
+ ////   const Real log3 = std::log(lamda3);
+ ////
+ ////   _Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
+ ////
+ ////   invertMatrix(_Uhat,invUhat);
+ ////
+ ////   _incremental_rotation = Fhat * invUhat;
+ ////
+ ////   strain_increment = N1 * N1.transpose() * log1 +  N2 * N2.transpose() * log2 +  N3 * N3.transpose() * log3;
 
-    const int ND = 3;
-
-    ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
-    ColumnMajorMatrix invUhat(ND,ND), logVhat(ND,ND);
-    ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
-
-    ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
-
-    Chat.eigen(eigen_value,eigen_vector);
-
-    for(int i = 0; i < ND; i++)
-    {
-      N1(i) = eigen_vector(i,0);
-      N2(i) = eigen_vector(i,1);
-      N3(i) = eigen_vector(i,2);
-    }
-
-    const Real lamda1 = std::sqrt(eigen_value(0));
-    const Real lamda2 = std::sqrt(eigen_value(1));
-    const Real lamda3 = std::sqrt(eigen_value(2));
-
-
-    const Real log1 = std::log(lamda1);
-    const Real log2 = std::log(lamda2);
-    const Real log3 = std::log(lamda3);
-
-    _Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
-
-    invertMatrix(_Uhat,invUhat);
-
-    _incremental_rotation = Fhat * invUhat;
-
-    strain_increment = N1 * N1.transpose() * log1 +  N2 * N2.transpose() * log2 +  N3 * N3.transpose() * log3;
+   Element::polarDecompositionEigen( Fhat, _incremental_rotation, strain_increment);
+   
 
   }
   else

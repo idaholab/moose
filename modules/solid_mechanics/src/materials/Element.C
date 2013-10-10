@@ -148,6 +148,82 @@ Element::rotateSymmetricTensor( const ColumnMajorMatrix & R,
 ////////////////////////////////////////////////////////////////////////
 
 void
+Element::unrotateSymmetricTensor( const ColumnMajorMatrix & R,
+                                const SymmTensor & T,
+                                SymmTensor & result )
+{
+
+  //     Rt           T         R    
+  //  00 10 20    00 01 02   00 01 02
+  //  01 11 21  * 10 11 12 * 10 11 12
+  //  02 12 22    20 21 22   20 21 22
+  //
+  const Real T00 = R(0,0)*T.xx() + R(1,0)*T.xy() + R(2,0)*T.zx();
+  const Real T01 = R(0,0)*T.xy() + R(1,0)*T.yy() + R(2,0)*T.yz();
+  const Real T02 = R(0,0)*T.zx() + R(1,0)*T.yz() + R(2,0)*T.zz();
+
+  const Real T10 = R(0,1)*T.xx() + R(1,1)*T.xy() + R(2,1)*T.zx();
+  const Real T11 = R(0,1)*T.xy() + R(1,1)*T.yy() + R(2,1)*T.yz();
+  const Real T12 = R(0,1)*T.zx() + R(1,1)*T.yz() + R(2,1)*T.zz();
+
+  const Real T20 = R(0,2)*T.xx() + R(1,2)*T.xy() + R(2,2)*T.zx();
+  const Real T21 = R(0,2)*T.xy() + R(1,2)*T.yy() + R(2,2)*T.yz();
+  const Real T22 = R(0,2)*T.zx() + R(1,2)*T.yz() + R(2,2)*T.zz();
+
+  result.xx( T00 * R(0,0) + T01 * R(1,0) + T02 * R(2,0) );
+  result.yy( T10 * R(0,1) + T11 * R(1,1) + T12 * R(2,1) );
+  result.zz( T20 * R(0,2) + T21 * R(1,2) + T22 * R(2,2) );
+  result.xy( T00 * R(0,1) + T01 * R(1,1) + T02 * R(2,1) );
+  result.yz( T10 * R(0,2) + T11 * R(1,2) + T12 * R(2,2) );
+  result.zx( T00 * R(0,2) + T01 * R(1,2) + T02 * R(2,2) );
+
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+Element::polarDecompositionEigen( const ColumnMajorMatrix & Fhat, ColumnMajorMatrix & Rhat, SymmTensor & strain_increment )
+{
+      const int ND = 3;
+
+    ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
+    ColumnMajorMatrix invUhat(ND,ND), logVhat(ND,ND);
+    ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
+
+    ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
+
+    Chat.eigen(eigen_value,eigen_vector);
+
+    for(int i = 0; i < ND; i++)
+    {
+      N1(i) = eigen_vector(i,0);
+      N2(i) = eigen_vector(i,1);
+      N3(i) = eigen_vector(i,2);
+    }
+
+    const Real lamda1 = std::sqrt(eigen_value(0));
+    const Real lamda2 = std::sqrt(eigen_value(1));
+    const Real lamda3 = std::sqrt(eigen_value(2));
+
+
+    const Real log1 = std::log(lamda1);
+    const Real log2 = std::log(lamda2);
+    const Real log3 = std::log(lamda3);
+
+    ColumnMajorMatrix Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
+
+    invertMatrix(Uhat,invUhat);
+
+    Rhat = Fhat * invUhat;
+
+    strain_increment = N1 * N1.transpose() * log1 +  N2 * N2.transpose() * log2 +  N3 * N3.transpose() * log3;
+
+  }
+
+////////////////////////////////////////////////////////////////////////
+
+
+void
 Element::fillMatrix( unsigned int qp,
                      const VariableGradient & grad_x,
                      const VariableGradient & grad_y,

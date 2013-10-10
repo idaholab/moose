@@ -55,8 +55,11 @@ protected:
 
   std::vector<ColumnMajorMatrix> _Fhat;
   std::vector<ColumnMajorMatrix> _Fbar;
+  ColumnMajorMatrix _F;
 
   virtual void init();
+
+  virtual void computeDeformationGradient( unsigned int qp, ColumnMajorMatrix & F);
 
   virtual void computeStrain( const unsigned qp,
                               const SymmTensor & total_strain_old,

@@ -22,11 +22,13 @@
 #include "LinearStrainHardening.h"
 #include "MacroElastic.h"
 #include "Mass.h"
+#include "JIntegral.h"
 #include "MaterialSymmElasticityTensorAux.h"
 #include "MaterialTensorAux.h"
 #include "MaterialTensorOnLine.h"
 #include "MaterialVectorAux.h"
 #include "AccumulateAux.h"
+#include "qFunctionJIntegral.h"
 #include "PLC_LSH.h"
 #include "PowerLawCreep.h"
 #include "PlenumPressure.h"
@@ -51,6 +53,7 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerAux(MaterialTensorAux);
   registerAux(MaterialVectorAux);
   registerAux(AccumulateAux);
+  registerAux(qFunctionJIntegral);
   registerAux(ElementsOnLineAux);
 
   registerBoundaryCondition(DashpotBC);
@@ -84,6 +87,7 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
 
   registerPostprocessor(HomogenizedElasticConstants);
   registerPostprocessor(Mass);
+  registerPostprocessor(JIntegral);
 
   registerTimeStepper(AdaptiveDT);
 

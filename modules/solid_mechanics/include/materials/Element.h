@@ -30,6 +30,11 @@ class Element :
     // If only these things were publicly accessible.
     //
     // Just try to ignore the "is-a" and think "needs-the-interface-of."
+    //
+    // WARNING
+    // Do not use _qp in classes derived from Element.  Use the _qp from the
+    // class using Element.
+    //
     public Material
 {
 public:
@@ -47,8 +52,18 @@ public:
 
   static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const SymmTensor & T,
                                      SymmTensor & result );
+  static void unrotateSymmetricTensor( const ColumnMajorMatrix & R, const SymmTensor & T,
+                                     SymmTensor & result );
+
+  static void polarDecompositionEigen( const ColumnMajorMatrix & Fhat, ColumnMajorMatrix & Rhat, SymmTensor & strain_increment );
 
   virtual void init() {}
+
+  virtual void computeDeformationGradient( unsigned int /*qp*/, ColumnMajorMatrix & /*F*/)
+  
+    {
+       mooseError("You tried to compute the deformation gradient on an element other than a nonlinear 3D element");
+    }
 
   virtual void computeStrain( const unsigned qp,
                               const SymmTensor & total_strain_old,

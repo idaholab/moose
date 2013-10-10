@@ -112,6 +112,13 @@ protected:
   SymmTensor _total_strain_increment;
   SymmTensor _strain_increment;
 
+  MaterialProperty<Real> & _SED;
+  MaterialProperty<Real> & _SED_old;
+  const bool _compute_JIntegral;
+  MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor;
+  MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor_small;
+  
+
   
   
   virtual void initQpStatefulProperties();
@@ -139,7 +146,9 @@ protected:
 
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeStress() = 0;
-
+  virtual void computeEshelby();
+  virtual void computeStrainEnergyDensity();
+  
   /*
    * Determine whether new cracks have formed.
    * Rotate old and new stress to global, if cracking active

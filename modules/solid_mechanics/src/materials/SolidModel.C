@@ -36,6 +36,7 @@ InputParameters validParams<SolidModel>()
   params.addParam<MooseEnum>("formulation", formulation, "Element formulation.  Choices are: " + formulation.getRawNames());
   params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen). For use with Nonlinear3D formulation.");
   params.addParam<bool>("large_strain", false, "Whether to include large strain terms in AxisymmetricRZ, SphericalR, and PlaneStrain formulations.");
+  params.addParam<bool>("compute_JIntegral", false, "Whether to compute the J Integral.");
   params.addCoupledVar("disp_r", "The r displacement");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
@@ -121,6 +122,11 @@ SolidModel::SolidModel( const std::string & name,
    _d_stress_dT(createProperty<SymmTensor>("d_stress_dT")),
    _total_strain_increment(0),
    _strain_increment(0),
+   _SED(declareProperty<Real>("strain_energy_density")),
+   _SED_old(declarePropertyOld<Real>("strain_energy_density")),
+   _compute_JIntegral(getParam<bool>("compute_JIntegral")),
+   _Eshelby_tensor(declareProperty<ColumnMajorMatrix>("Eshelby_tensor")),
+   _Eshelby_tensor_small(declareProperty<ColumnMajorMatrix>("Eshelby_tensor_small")),
    _block_id(std::vector<SubdomainID>(_blk_ids.begin(), _blk_ids.end())),
    _element(NULL),
    _local_elasticity_tensor(NULL)
@@ -425,6 +431,7 @@ SolidModel::initQpStatefulProperties()
     (*_crack_rotation)[_qp].identity();
     (*_crack_rotation_old)[_qp].identity();
   }
+  _SED[_qp] = _SED_old[_qp] = 0;  
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -450,16 +457,107 @@ SolidModel::computeProperties()
     computeElasticityTensor();
 
     computeStress();
-
+    if (_compute_JIntegral)
+    {
+      computeStrainEnergyDensity();
+    }
+      
     _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment;
 
     crackingStressRotation();
 
     finalizeStress();
 
+    if (_compute_JIntegral)
+    {
+      computeEshelby();
+    }
+
     computePreconditioning();
 
   }
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void SolidModel::computeStrainEnergyDensity()
+{
+  _SED[_qp] = _SED_old[_qp] + _stress[_qp].doubleContraction(_strain_increment)/2 + _stress_old_prop[_qp].doubleContraction(_strain_increment)/2;
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+SolidModel::computeEshelby() 
+{
+  ColumnMajorMatrix stress_CMM;
+  stress_CMM(0,0) = _stress[_qp].xx();
+  stress_CMM(0,1) = _stress[_qp].xy();
+  stress_CMM(0,2) = _stress[_qp].xz();
+  stress_CMM(1,0) = _stress[_qp].xy();
+  stress_CMM(1,1) = _stress[_qp].yy();
+  stress_CMM(1,2) = _stress[_qp].yz();
+  stress_CMM(2,0) = _stress[_qp].xz();
+  stress_CMM(2,1) = _stress[_qp].yz();
+  stress_CMM(2,2) = _stress[_qp].zz();
+  ColumnMajorMatrix F;
+  _element->computeDeformationGradient(_qp, F);
+  Real detF = _element->detMatrix(F);
+  ColumnMajorMatrix Finv;
+  _element->invertMatrix(F, Finv);
+  ColumnMajorMatrix FinvT;
+  FinvT = Finv.transpose();
+  ColumnMajorMatrix FT;
+  FT = F.transpose();
+  //
+  ColumnMajorMatrix piola;
+  ColumnMajorMatrix piola_small;
+  ColumnMajorMatrix R(3,3);
+  SymmTensor dummy;
+  Elk::SolidMechanics::Element::polarDecompositionEigen(F, R, dummy);
+  SymmTensor unrotated_stress;
+  Elk::SolidMechanics::Element::unrotateSymmetricTensor(R, _stress[_qp], unrotated_stress);
+  ColumnMajorMatrix unrotated_stress_CMM;
+  unrotated_stress_CMM(0,0) = unrotated_stress.xx();
+  unrotated_stress_CMM(0,1) = unrotated_stress.xy();
+  unrotated_stress_CMM(0,2) = unrotated_stress.xz();
+  unrotated_stress_CMM(1,0) = unrotated_stress.xy();
+  unrotated_stress_CMM(1,1) = unrotated_stress.yy();
+  unrotated_stress_CMM(1,2) = unrotated_stress.yz();
+  unrotated_stress_CMM(2,0) = unrotated_stress.xz();
+  unrotated_stress_CMM(2,1) = unrotated_stress.yz();
+  unrotated_stress_CMM(2,2) = unrotated_stress.zz();
+  //
+  piola = stress_CMM * FinvT;
+  piola_small = unrotated_stress_CMM;
+  piola *= detF;
+  
+//  _FTP[_qp] = _FT * _det_F * stress_CMM * _FinvT;
+  ColumnMajorMatrix FTP;
+  FTP = FT * piola;
+//
+  ColumnMajorMatrix strain_increment_CMM;// D
+  strain_increment_CMM.zero();
+  strain_increment_CMM(0,0) = _strain_increment.xx();
+  strain_increment_CMM(0,1) = _strain_increment.xy();
+  strain_increment_CMM(0,2) = _strain_increment.xz();
+  strain_increment_CMM(1,0) = _strain_increment.xy();
+  strain_increment_CMM(1,1) = _strain_increment.yy();
+  strain_increment_CMM(1,2) = _strain_increment.yz();
+  strain_increment_CMM(2,0) = _strain_increment.xz();
+  strain_increment_CMM(2,1) = _strain_increment.yz();
+  strain_increment_CMM(2,2) = _strain_increment.zz();
+  ColumnMajorMatrix WI;
+  WI.identity();
+  WI *= _SED[_qp];
+  WI *= detF;
+  ColumnMajorMatrix WI_small;
+  WI_small.identity();
+  WI_small *= _SED[_qp];
+  _Eshelby_tensor[_qp] = WI - FTP;
+  _Eshelby_tensor[_qp] *= -1.0;
+  _Eshelby_tensor_small[_qp] = WI_small - piola_small;
+  _Eshelby_tensor_small[_qp] *= -1.0;
 }
 
 ////////////////////////////////////////////////////////////////////////
