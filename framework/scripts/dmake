@@ -11,7 +11,7 @@ class Machine(object):
   def __init__(self, user_data):
 
     # Set the various attributes of the machine
-    self.hostname = user_data[0]
+    self.address = user_data[0]
     self.cores = int(user_data[1])
     self.threads = int(user_data[2])
     self.use = int(user_data[3])
@@ -25,18 +25,14 @@ class Machine(object):
     else:
       self.available = self._isAvailable()
 
-    # Attempt to get the host ip address
+    # Attempt to get the host name from ip
     try:
-      # Get the IP address, if on linux you need to get the IP address in special way to
-      # avoid getting 127.0.0.1 for the local machine
-      if self.name == 'localhost' and  platform.system().lower() == 'linux':
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('inl.gov', 0))
-        self.address = s.getsockname()[0]
-      else:
-        self.address = socket.gethostbyname(self.hostname)
-    except socket.gaierror:
+      h = socket.gethostbyaddr(self.address)
+      self.hostname = h[0]
+    except:
+      self.hostname = self.address
       self.available = False
+
 
   ## Return the Machine information
   def info(self):
@@ -45,13 +41,13 @@ class Machine(object):
     if self.available:
       return formatter('Available', urllib2.unquote(self.name), self.use, self.hostname, self.address)
     else:
-      return formatter('Offline', urllib2.unquote(self.name), self.use, self.hostname,'')
+      return formatter('Offline', urllib2.unquote(self.name), self.use, '',self.address)
 
   ## Test if the machine is available
   def _isAvailable(self):
 
     # Run lsdistcc with the given hostname
-    sub = subprocess.Popen([which('lsdistcc'), '-x', self.hostname],\
+    sub = subprocess.Popen([which('lsdistcc'), '-x', self.address],\
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     status = sub.communicate()[0]
 
@@ -64,7 +60,7 @@ class Machine(object):
 
 ## A function for formatting the output text
 def formatter(status, name, threads, hostname, addr):
-  return '| %-10s |' %status + ' %-50s |' % name + ' %-4s |' % threads + ' %-20s |' % hostname + ' %-15s |' % addr
+  return '| %-10s |' %status + ' %-50s |' % name + ' %-4s |' % threads + ' %-30s |' % hostname + ' %-15s |' % addr
 
 ## Function for testing the existence for a program
 def which(program):
@@ -110,9 +106,17 @@ class Farm(object):
     self._make_args = make_args
 
     # Create the master Machine (localhost)
-    hostname = socket.getfqdn()
+    # Get the IP address of this machine, if on linux you need to get the IP address in special way to
+    # avoid getting 127.0.0.1 for the local machine
+    if platform.system().lower() == 'linux':
+      s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+      s.connect(('inl.gov', 0))
+      addr = s.getsockname()[0]
+    else:
+      addr = socket.gethostbyname(socket.gethostname())
+
     jobs = str(multiprocessing.cpu_count())
-    self._master = Machine([hostname, '0', jobs, jobs, '', 'localhost'])
+    self._master = Machine([addr, '0', jobs, jobs, '', 'localhost'])
 
     # Determine the network
     if self._master.address.find('204.') != -1:
@@ -273,7 +277,7 @@ class Farm(object):
         use = str((int(self._master.threads) / 4))
 
       # The file containing the list of available machines
-      filename = 'https://hpcsc.inl.gov/distcc_gen?uuid=' + str(uuid.uuid3(uuid.NAMESPACE_DNS, self._master.hostname)) + \
+      filename = 'https://hpcsc.inl.gov/distcc_gen?uuid=' + str(uuid.uuid3(uuid.NAMESPACE_DNS, self._master.address)) + \
                                                  '&arch=' + self._system + \
                                                  '&ip=' + self._master.address + \
                                                  '&cpus=' + str(self._master.threads) + \
@@ -358,9 +362,13 @@ class Farm(object):
         output.append(s)
 
       # Print the slave machine information, if the information exists
+      use = 0
+      total = 0
       if len(self._slaves) > 0:
         for user in self._slaves:
           output.append(user.info())
+          use += user.use
+          total += user.cores
         output.append(s)
 
       # Print the down machine information, if the informatin exists
@@ -379,7 +387,11 @@ class Farm(object):
       frmt = '%25s: '
 
       # Print processors
-      output.append(frmt % 'Processors' + str(jobs))
+      output.append(frmt % 'Processors Used' + str(jobs))
+
+      # Total available
+      output.append(frmt % 'Available Processors' + str(use+self._master.use))
+      output.append(frmt % 'Total Processors' + str(total+self._master.cores))
 
       # Add make command
       make = frmt % 'Make Command' + 'make -j ' + str(jobs)
@@ -602,6 +614,7 @@ class Farm(object):
 
         # Skip this machine
         if machine.hostname == self._master.hostname or machine.address == self._master.address:
+          self._master.name = machine.name
           continue
 
         # Store the machine as offline if it is unavilable or that use column is zero
