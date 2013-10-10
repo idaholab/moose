@@ -50,6 +50,12 @@ template<typename P>
 void storeHelper(std::ostream & stream, std::set<P> & data, void * context);
 
 /**
+ * Map helper routine
+ */
+template<typename P, typename Q>
+void storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context);
+
+/**
  * Scalar helper routine
  */
 template<typename P>
@@ -67,6 +73,11 @@ void loadHelper(std::istream & stream, std::vector<P> & data, void * context);
 template<typename P>
 void loadHelper(std::istream & stream, std::set<P> & data, void * context);
 
+/**
+ * Map helper routine
+ */
+template<typename P, typename Q>
+void loadHelper(std::istream & stream, std::map<P,Q> & data, void * context);
 
 // global store functions
 
@@ -126,6 +137,28 @@ dataStore(std::ostream & stream, const std::set<T> & s, void * context)
 
   for (; it != end; ++it)
     storeHelper(stream, *it, context);
+}
+
+template<typename T, typename U>
+inline void
+dataStore(std::ostream & stream, const std::map<T,U> & m, void * context)
+{
+  // std::cout<<"Map dataStore"<<std::endl;
+
+  // First store the size of the map
+  unsigned int size = m.size();
+  stream.write((char *) &size, sizeof(size));
+
+  // std::cout<<"Size: "<<size<<std::endl;
+
+  typename std::map<T,U>::const_iterator it = m.begin();
+  typename std::map<T,U>::const_iterator end = m.end();
+
+  for (; it != end; ++it)
+  {
+    storeHelper(stream, it->first, context);
+    storeHelper(stream, it->second, context);
+  }
 }
 
 template<>
@@ -213,8 +246,8 @@ dataLoad(std::istream & stream, std::vector<T> & v, void * context)
   for (unsigned int i = 0; i < size; i++)
     loadHelper(stream, v[i], context);
 }
-template<typename T>
 
+template<typename T>
 inline void
 dataLoad(std::istream & stream, std::set<T> & s, void * context)
 {
@@ -231,6 +264,30 @@ dataLoad(std::istream & stream, std::set<T> & s, void * context)
     T data;
     loadHelper(stream, data, context);
     s.insert(data);
+  }
+}
+
+template<typename T, typename U>
+inline void
+dataLoad(std::istream & stream, std::map<T,U> & m, void * context)
+{
+  // std::cout<<"Map dataLoad"<<std::endl;
+
+  // First read the size of the map
+  unsigned int size = 0;
+  stream.read((char *) &size, sizeof(size));
+
+  // std::cout<<"Size: "<<size<<std::endl;
+
+  for (unsigned int i = 0; i < size; i++)
+  {
+    T key;
+    loadHelper(stream, key, context);
+
+    U data;
+    loadHelper(stream, data, context);
+
+    m[key] = data;
   }
 }
 
@@ -311,6 +368,14 @@ void storeHelper(std::ostream & stream, std::set<P> & data, void * context)
   dataStore<P>(stream, data, context);
 }
 
+// Map Helper Function
+template<typename P, typename Q>
+void storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context)
+{
+  // std::cout<<"Map storeHelper"<<std::endl;
+  dataStore<P>(stream, data, context);
+}
+
 // Scalar Helper Function
 template<typename P>
 void loadHelper(std::istream & stream, P & data, void * context)
@@ -332,6 +397,14 @@ template<typename P>
 void loadHelper(std::istream & stream, std::set<P> & data, void * context)
 {
   // std::cout<<"Set loadHelper"<<std::endl;
+  dataLoad<P>(stream, data, context);
+}
+
+// Map Helper Function
+template<typename P, typename Q>
+void loadHelper(std::istream & stream, std::map<P,Q> & data, void * context)
+{
+  // std::cout<<"Map loadHelper"<<std::endl;
   dataLoad<P>(stream, data, context);
 }
 

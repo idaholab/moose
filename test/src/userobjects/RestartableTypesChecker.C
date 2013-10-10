@@ -74,9 +74,21 @@ RestartableTypesChecker::execute()
     if(_custom_with_context._i != 5)
       mooseError("Error reading restartable custom data with context!");
 
+    if(_set_data.size() != 2)
+      mooseError("Error reading restartable std::set expected size 2 got " << _set_data.size());
+
     for(std::set<Real>::iterator it = _set_data.begin(); it != _set_data.end(); ++it)
       if(*it != 1 && *it != 2)
         mooseError("Error reading restartable set data!");
+
+    if(_map_data.size() != 2)
+      mooseError("Error reading restartable std::map expected size 2 got " << _map_data.size());
+
+    if(_map_data[1] != 2.2)
+      mooseError("Error reading restartable map data!");
+
+    if(_map_data[2] != 3.4)
+      mooseError("Error reading restartable map data!");
   }
 
   _first = false;
