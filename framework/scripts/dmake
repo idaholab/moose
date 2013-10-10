@@ -667,7 +667,7 @@ def parseArguments(args=None):
   grp3.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
   grp3.add_argument('--benchmark','-b', action='store_true', help='Run \'make cleanall\' and \'dmake\' in moose_test directory')
   grp3.add_argument('--dedicated', action='store_true', help='Identify this machine as a dedicated build box')
-  grp3.add_argument('--description', nargs=1, type=str, default=[socket.gethostname()], help='Add a description to your machine (default: %(default)s)')
+  grp3.add_argument('--description', nargs=1, metavar='"Description"', type=str, default=socket.gethostname(), help='Add description for your machine (default: %(default)s)')
   grp3.add_argument('--clean', '-c', action='store_true', help='Clean up .dmake and .dmake_hosts files')
 
   # Allow flags to be run together
