@@ -1704,6 +1704,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo
                             true, _tangential_tolerance, contact_point_on_side);
 
     thisElemInfo.push_back(pen_info);
+
     p_info.push_back(pen_info);
   }
 }

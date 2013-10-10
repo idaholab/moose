@@ -26,6 +26,12 @@
 #include <vector>
 #include <map>
 
+class PenetrationInfo;
+
+// Used for Restart
+template<> void dataStore(std::ostream & stream, PenetrationInfo * & pinfo, void * context);
+template<> void dataLoad(std::istream & stream, PenetrationInfo * & pinfo, void * context);
+
 /**
  * Data structure used to hold penetration information
  */
@@ -36,8 +42,9 @@ public:
 
   PenetrationInfo(const PenetrationInfo & p);
 
-  ~PenetrationInfo();
+  PenetrationInfo();
 
+  ~PenetrationInfo();
 
   enum MECH_STATUS_ENUM
   {
@@ -75,5 +82,6 @@ public:
   bool _penetrated_at_beginning_of_step;
   MECH_STATUS_ENUM _mech_status;
 };
+
 
 #endif //PENETRATIONINFO_H

@@ -36,6 +36,34 @@ class SubProblem;
 class MooseMesh;
 class GeometricSearchData;
 
+/**
+ * We have to have a specialization for this map because the PenetrationInfo
+ * objects MUST get deleted before the ones are loaded from a file or it's a memory leak.
+ */
+template<>
+inline void
+dataLoad(std::istream & stream, std::map<unsigned int, PenetrationInfo *> & m, void * context)
+{
+  typename std::map<unsigned int, PenetrationInfo *>::iterator it = m.begin();
+  typename std::map<unsigned int, PenetrationInfo *>::iterator end = m.end();
+
+  for (; it != end; ++it)
+    delete it->second;
+
+  m.clear();
+
+  // First read the size of the map
+  unsigned int size = 0;
+  stream.read((char *) &size, sizeof(size));
+
+  for (unsigned int i = 0; i < size; i++)
+  {
+    unsigned int key;
+    loadHelper(stream, key, context);
+    loadHelper(stream, m[key], context);
+  }
+}
+
 class PenetrationLocator : Restartable
 {
 public:
@@ -77,12 +105,12 @@ public:
   NearestNodeLocator & _nearest_node;
 
   /// Data structure of nodes and their associated penetration information
-  std::map<unsigned int, PenetrationInfo *> _penetration_info;
+  std::map<unsigned int, PenetrationInfo *> & _penetration_info;
 
-  std::set<unsigned int> _has_penetrated;
-  std::map<unsigned int, unsigned> _locked_this_step;
-  std::map<unsigned int, unsigned> _unlocked_this_step;
-  std::map<unsigned int, Real> _lagrange_multiplier;
+  std::set<unsigned int> & _has_penetrated;
+  std::map<unsigned int, unsigned> & _locked_this_step;
+  std::map<unsigned int, unsigned> & _unlocked_this_step;
+  std::map<unsigned int, Real> & _lagrange_multiplier;
 
   void setUpdate(bool update);
   void setTangentialTolerance(Real tangential_tolerance);
@@ -91,7 +119,7 @@ public:
   void saveContactStateVars();
 
 protected:
-  bool _update_location; // Update the penetration location for nodes found last time
+  bool & _update_location; // Update the penetration location for nodes found last time
   Real _tangential_tolerance; // Tangential distance a node can be from a face and still be in contact
   bool _do_normal_smoothing;  // Should we do contact normal smoothing?
   Real _normal_smoothing_distance; // Distance from edge (in parametric coords) within which to perform normal smoothing

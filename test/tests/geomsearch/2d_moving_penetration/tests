@@ -195,4 +195,21 @@
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
   [../]
+
+  [./restart]
+    type = 'Exodiff'
+    input = 'restart.i'
+    exodiff = 'restart_out.e'
+    group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
+  [../]
+
+  [./restart2]
+    type = 'Exodiff'
+    input = 'restart2.i'
+    exodiff = 'restart2_out.e'
+    group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
+    prereq = restart
+  [../]
 []

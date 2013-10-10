@@ -22,6 +22,7 @@
 #include "libmesh/dense_matrix.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
+#include "libmesh/elem.h"
 
 #include <string>
 #include <vector>
@@ -35,54 +36,55 @@ class FEProblem;
  * Scalar helper routine
  */
 template<typename P>
-void storeHelper(std::ostream & stream, P & data, void * context);
+inline void storeHelper(std::ostream & stream, P & data, void * context);
 
 /**
  * Vector helper routine
  */
 template<typename P>
-void storeHelper(std::ostream & stream, std::vector<P> & data, void * context);
+inline void storeHelper(std::ostream & stream, std::vector<P> & data, void * context);
 
 /**
  * Set helper routine
  */
 template<typename P>
-void storeHelper(std::ostream & stream, std::set<P> & data, void * context);
+inline void storeHelper(std::ostream & stream, std::set<P> & data, void * context);
 
 /**
  * Map helper routine
  */
 template<typename P, typename Q>
-void storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context);
+inline void storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context);
 
 /**
  * Scalar helper routine
  */
 template<typename P>
-void loadHelper(std::istream & stream, P & data, void * context);
+inline void loadHelper(std::istream & stream, P & data, void * context);
 
 /**
  * Vector helper routine
  */
 template<typename P>
-void loadHelper(std::istream & stream, std::vector<P> & data, void * context);
+inline void loadHelper(std::istream & stream, std::vector<P> & data, void * context);
 
 /**
  * Set helper routine
  */
 template<typename P>
-void loadHelper(std::istream & stream, std::set<P> & data, void * context);
+inline void loadHelper(std::istream & stream, std::set<P> & data, void * context);
 
 /**
  * Map helper routine
  */
 template<typename P, typename Q>
-void loadHelper(std::istream & stream, std::map<P,Q> & data, void * context);
+inline void loadHelper(std::istream & stream, std::map<P,Q> & data, void * context);
 
 // global store functions
 
 template<typename T>
-void dataStore(std::ostream & stream, T & v, void * /*context*/)
+inline void
+dataStore(std::ostream & stream, T & v, void * /*context*/)
 {
   // std::cout<<"Generic dataStore"<<std::endl;
 
@@ -90,23 +92,15 @@ void dataStore(std::ostream & stream, T & v, void * /*context*/)
 }
 
 template<typename T>
-void dataStore(std::ostream & /*stream*/, T * & /*v*/, void * /*context*/)
+inline void
+dataStore(std::ostream & /*stream*/, T * & /*v*/, void * /*context*/)
 {
   mooseError("Cannot store raw pointers as restartable data!\nWrite a custom dataStore() template specialization!\n\n");
 }
 
-template<>
-inline
-void dataStore(std::ostream & stream, Real & v, void * /*context*/)
-{
-  // std::cout<<"Real dataStore"<<std::endl;
-
-  stream.write((char *) &v, sizeof(v));
-}
-
 template<typename T>
 inline void
-dataStore(std::ostream & stream, const std::vector<T> & v, void * context)
+dataStore(std::ostream & stream, std::vector<T> & v, void * context)
 {
   // std::cout<<"Vector dataStore"<<std::endl;
 
@@ -122,7 +116,7 @@ dataStore(std::ostream & stream, const std::vector<T> & v, void * context)
 
 template<typename T>
 inline void
-dataStore(std::ostream & stream, const std::set<T> & s, void * context)
+dataStore(std::ostream & stream, std::set<T> & s, void * context)
 {
   // std::cout<<"Set dataStore"<<std::endl;
 
@@ -132,8 +126,8 @@ dataStore(std::ostream & stream, const std::set<T> & s, void * context)
 
   // std::cout<<"Size: "<<size<<std::endl;
 
-  typename std::set<T>::const_iterator it = s.begin();
-  typename std::set<T>::const_iterator end = s.end();
+  typename std::set<T>::iterator it = s.begin();
+  typename std::set<T>::iterator end = s.end();
 
   for (; it != end; ++it)
     storeHelper(stream, *it, context);
@@ -141,7 +135,7 @@ dataStore(std::ostream & stream, const std::set<T> & s, void * context)
 
 template<typename T, typename U>
 inline void
-dataStore(std::ostream & stream, const std::map<T,U> & m, void * context)
+dataStore(std::ostream & stream, std::map<T,U> & m, void * context)
 {
   // std::cout<<"Map dataStore"<<std::endl;
 
@@ -151,63 +145,35 @@ dataStore(std::ostream & stream, const std::map<T,U> & m, void * context)
 
   // std::cout<<"Size: "<<size<<std::endl;
 
-  typename std::map<T,U>::const_iterator it = m.begin();
-  typename std::map<T,U>::const_iterator end = m.end();
+  typename std::map<T,U>::iterator it = m.begin();
+  typename std::map<T,U>::iterator end = m.end();
 
   for (; it != end; ++it)
   {
+    // std::cout<<"First"<<std::endl;
+    // std::cout<<"Key: "<<it->first<<std::endl;
     storeHelper(stream, it->first, context);
+
+    // std::cout<<"Second"<<std::endl;
     storeHelper(stream, it->second, context);
   }
 }
 
-template<>
-inline void
-dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * /*context*/)
-{
-  for (unsigned int i = 0; i < v.m(); i++)
-    for (unsigned int j = 0; j < v.n(); j++)
-    {
-      Real r = v(i, j);
-      stream.write((char *) &r, sizeof(r));
-    }
-}
-
-template<>
-inline void
-dataStore(std::ostream & stream, ColumnMajorMatrix & v, void * /*context*/)
-{
-  for (unsigned int i = 0; i < v.m(); i++)
-    for (unsigned int j = 0; j < v.n(); j++)
-    {
-      Real r = v(i, j);
-      stream.write((char *) &r, sizeof(r));
-    }
-}
-
-template<>
-inline void
-dataStore(std::ostream & stream, RealTensorValue & v, void * /*context*/)
-{
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-    for (unsigned int j = 0; i < LIBMESH_DIM; i++)
-      stream.write((char *) &v(i, j), sizeof(v(i, j)));
-}
-
-template<>
-inline void
-dataStore(std::ostream & stream, RealVectorValue & v, void * /*context*/)
-{
-  // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it won't work.
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-    stream.write((char *) &v(i), sizeof(v(i)));
-}
+// Specializations (defined in .C)
+template<> void dataStore(std::ostream & stream, Real & v, void * /*context*/);
+template<> void dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * /*context*/);
+template<> void dataStore(std::ostream & stream, ColumnMajorMatrix & v, void * /*context*/);
+template<> void dataStore(std::ostream & stream, RealTensorValue & v, void * /*context*/);
+template<> void dataStore(std::ostream & stream, RealVectorValue & v, void * /*context*/);
+template<> void dataStore(std::ostream & stream, const Elem * & e, void * context);
+template<> void dataStore(std::ostream & stream, const Node * & n, void * context);
 
 
 // global load functions
 
 template<typename T>
-void dataLoad(std::istream & stream, T & v, void * /*context*/)
+inline void
+dataLoad(std::istream & stream, T & v, void * /*context*/)
 {
   // std::cout<<"Generic dataLoad"<<std::endl;
 
@@ -218,15 +184,6 @@ template<typename T>
 void dataLoad(std::istream & /*stream*/, T * & /*v*/, void * /*context*/)
 {
   mooseError("Cannot load raw pointers as restartable data!\nWrite a custom dataLoad() template specialization!\n\n");
-}
-
-template<>
-inline void
-dataLoad(std::istream & stream, Real & v, void * /*context*/)
-{
-  // std::cout<<"Real dataLoad"<<std::endl;
-
-  stream.read((char *) &v, sizeof(v));
 }
 
 template<typename T>
@@ -273,6 +230,8 @@ dataLoad(std::istream & stream, std::map<T,U> & m, void * context)
 {
   // std::cout<<"Map dataLoad"<<std::endl;
 
+  m.clear();
+
   // First read the size of the map
   unsigned int size = 0;
   stream.read((char *) &size, sizeof(size));
@@ -283,70 +242,23 @@ dataLoad(std::istream & stream, std::map<T,U> & m, void * context)
   {
     T key;
     loadHelper(stream, key, context);
-
-    U data;
-    loadHelper(stream, data, context);
-
-    m[key] = data;
+    loadHelper(stream, m[key], context);
   }
 }
 
-template<>
-inline void
-dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * /*context*/)
-{
-  for (unsigned int i = 0; i < v.m(); i++)
-    for (unsigned int j = 0; j < v.n(); j++)
-    {
-      Real r = 0;
-      stream.read((char *) &r, sizeof(r));
-      v(i, j) = r;
-    }
-}
-
-template<>
-inline void
-dataLoad(std::istream & stream, ColumnMajorMatrix & v, void * /*context*/)
-{
-  for (unsigned int i = 0; i < v.m(); i++)
-    for (unsigned int j = 0; j < v.n(); j++)
-    {
-      Real r = 0;
-      stream.read((char *) &r, sizeof(r));
-      v(i, j) = r;
-    }
-}
-
-template<>
-inline void
-dataLoad(std::istream & stream, RealTensorValue & v, void * /*context*/)
-{
-  // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it won't work.
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-    for (unsigned int j = 0; i < LIBMESH_DIM; i++)
-    {
-      Real r = 0;
-      stream.read((char *) &r, sizeof(r));
-      v(i, j) = r;
-    }
-}
-
-template<>
-inline void
-dataLoad(std::istream & stream, RealVectorValue & v, void * /*context*/)
-{
-  // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it won't work.
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-  {
-    Real r = 0;
-    stream.read((char *) &r, sizeof(r));
-    v(i) = r;
-  }
-}
+// Specializations (defined in .C)
+template<> void dataLoad(std::istream & stream, Real & v, void * /*context*/);
+template<> void dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * /*context*/);
+template<> void dataLoad(std::istream & stream, ColumnMajorMatrix & v, void * /*context*/);
+template<> void dataLoad(std::istream & stream, RealTensorValue & v, void * /*context*/);
+template<> void dataLoad(std::istream & stream, RealVectorValue & v, void * /*context*/);
+template<> void dataLoad(std::istream & stream, const Elem * & e, void * context);
+template<> void dataLoad(std::istream & stream, const Node * & e, void * context);
 
 // Scalar Helper Function
 template<typename P>
-void storeHelper(std::ostream & stream, P & data, void * context)
+inline void
+storeHelper(std::ostream & stream, P & data, void * context)
 {
   // std::cout<<"Scalar storeHelper"<<std::endl;
   dataStore(stream, data, context);
@@ -354,31 +266,35 @@ void storeHelper(std::ostream & stream, P & data, void * context)
 
 // Vector Helper Function
 template<typename P>
-void storeHelper(std::ostream & stream, std::vector<P> & data, void * context)
+inline void
+storeHelper(std::ostream & stream, std::vector<P> & data, void * context)
 {
   // std::cout<<"Vector storeHelper"<<std::endl;
-  dataStore<P>(stream, data, context);
+  dataStore(stream, data, context);
 }
 
 // Set Helper Function
 template<typename P>
-void storeHelper(std::ostream & stream, std::set<P> & data, void * context)
+inline void
+storeHelper(std::ostream & stream, std::set<P> & data, void * context)
 {
   // std::cout<<"Set storeHelper"<<std::endl;
-  dataStore<P>(stream, data, context);
+  dataStore(stream, data, context);
 }
 
 // Map Helper Function
 template<typename P, typename Q>
-void storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context)
+inline void
+storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context)
 {
   // std::cout<<"Map storeHelper"<<std::endl;
-  dataStore<P>(stream, data, context);
+  dataStore(stream, data, context);
 }
 
 // Scalar Helper Function
 template<typename P>
-void loadHelper(std::istream & stream, P & data, void * context)
+inline void
+loadHelper(std::istream & stream, P & data, void * context)
 {
   // std::cout<<"Scalar loadHelper"<<std::endl;
   dataLoad(stream, data, context);
@@ -386,26 +302,29 @@ void loadHelper(std::istream & stream, P & data, void * context)
 
 // Vector Helper Function
 template<typename P>
-void loadHelper(std::istream & stream, std::vector<P> & data, void * context)
+inline void
+loadHelper(std::istream & stream, std::vector<P> & data, void * context)
 {
   // std::cout<<"Vector loadHelper"<<std::endl;
-  dataLoad<P>(stream, data, context);
+  dataLoad(stream, data, context);
 }
 
 // Set Helper Function
 template<typename P>
-void loadHelper(std::istream & stream, std::set<P> & data, void * context)
+inline void
+loadHelper(std::istream & stream, std::set<P> & data, void * context)
 {
   // std::cout<<"Set loadHelper"<<std::endl;
-  dataLoad<P>(stream, data, context);
+  dataLoad(stream, data, context);
 }
 
 // Map Helper Function
 template<typename P, typename Q>
-void loadHelper(std::istream & stream, std::map<P,Q> & data, void * context)
+inline void
+loadHelper(std::istream & stream, std::map<P,Q> & data, void * context)
 {
   // std::cout<<"Map loadHelper"<<std::endl;
-  dataLoad<P>(stream, data, context);
+  dataLoad(stream, data, context);
 }
 
 #endif /* DATAIO_H */
