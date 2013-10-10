@@ -228,7 +228,7 @@ class Farm(object):
     # Modify crontab to run dmake in dedicated mode, refreshing the list every 15 minutes
     if self._options.dedicated:
       if current_cron.find('dmake') == -1:
-        current_cron += '*/15 * * * * if [ -f ~/.bash_profile ]; then source ~/.bash_profile >/dev/null 2>&1; elif [ -f ~/.bashrc ]; then source ~/.bashrc >/dev/null 2>&1; fi && dmake --dedicated --refresh --description "' + self._dmake_data['DESCRIPTION'] + ' (Dedicated Mode)"' + ' >/dev/null 2>&1\n'
+        current_cron += '*/30 * * * * if [ -f ~/.bash_profile ]; then source ~/.bash_profile >/dev/null 2>&1; elif [ -f ~/.bashrc ]; then source ~/.bashrc >/dev/null 2>&1; fi && dmake --dedicated --description "' + self._dmake_data['DESCRIPTION'] + ' (Dedicated Mode)"' + ' >/dev/null 2>&1\n'
         self._updateCron(current_cron)
     else:
       # Remove dmake from the users cron, if detected
@@ -285,7 +285,6 @@ class Farm(object):
                                                  '&use=' + use + \
                                                  '&network=' + self._network + \
                                                  '&description=' + urllib2.quote(self._dmake_data['DESCRIPTION'])
-
 
       # Read the file
       fid = urllib2.urlopen(filename)
@@ -667,7 +666,7 @@ def parseArguments(args=None):
   grp3.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
   grp3.add_argument('--benchmark','-b', action='store_true', help='Run \'make cleanall\' and \'dmake\' in moose_test directory')
   grp3.add_argument('--dedicated', action='store_true', help='Identify this machine as a dedicated build box')
-  grp3.add_argument('--description', nargs=1, metavar='"Description"', type=str, default=socket.gethostname(), help='Add description for your machine (default: %(default)s)')
+  grp3.add_argument('--description', nargs=1, metavar='"Description"', type=str, default=[socket.gethostname()], help='Add description for your machine (default: %(default)s)')
   grp3.add_argument('--clean', '-c', action='store_true', help='Clean up .dmake and .dmake_hosts files')
 
   # Allow flags to be run together
