@@ -82,7 +82,7 @@ GapValueAux::computeValue()
   else
     current_node = _mesh.getQuadratureNode(_current_elem, _current_side, _qp);
 
-  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[current_node->id()];
+  PenetrationInfo * pinfo = _penetration_locator._penetration_info[current_node->id()];
 
   Real gap_value = 0.0;
 

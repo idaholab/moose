@@ -126,7 +126,7 @@ PenetrationAux::computeValue()
   else
     current_node = _mesh.getQuadratureNode(_current_elem, _current_side, _qp);
 
-  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[current_node->id()];
+  PenetrationInfo * pinfo = _penetration_locator._penetration_info[current_node->id()];
 
   Real retVal(-999999);
   if(pinfo)
@@ -153,28 +153,28 @@ PenetrationAux::computeValue()
       retVal = (Real) (pinfo->_side_num);
     else if (_quantity == PA_INCREMENTAL_SLIP_MAG)
     {
-      if (pinfo->_mech_status == PenetrationLocator::MS_NO_CONTACT)
+      if (pinfo->_mech_status == PenetrationInfo::MS_NO_CONTACT)
         retVal = 0.0;
       else
         retVal = pinfo->_incremental_slip.size();
     }
     else if (_quantity == PA_INCREMENTAL_SLIP_X)
     {
-      if (pinfo->_mech_status == PenetrationLocator::MS_NO_CONTACT)
+      if (pinfo->_mech_status == PenetrationInfo::MS_NO_CONTACT)
         retVal = 0.0;
       else
         retVal = pinfo->_incremental_slip(0);
     }
     else if (_quantity == PA_INCREMENTAL_SLIP_Y)
     {
-      if (pinfo->_mech_status == PenetrationLocator::MS_NO_CONTACT)
+      if (pinfo->_mech_status == PenetrationInfo::MS_NO_CONTACT)
         retVal = 0.0;
       else
         retVal = pinfo->_incremental_slip(1);
     }
     else if (_quantity == PA_INCREMENTAL_SLIP_Z)
     {
-      if (pinfo->_mech_status == PenetrationLocator::MS_NO_CONTACT)
+      if (pinfo->_mech_status == PenetrationInfo::MS_NO_CONTACT)
         retVal = 0.0;
       else
         retVal = pinfo->_incremental_slip(2);

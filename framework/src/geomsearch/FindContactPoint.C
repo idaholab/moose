@@ -41,7 +41,7 @@ namespace Moose
  * @param contact_point_on_side whether or not the contact_point actually lies on _that_ side of the element.
  */
 void
-findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
+findContactPoint(PenetrationInfo & p_info,
                  FEBase * _fe, FEType & _fe_type, const Point & slave_point,
                  bool start_with_centroid, const Real tangential_tolerance,
                  bool & contact_point_on_side)

@@ -31,7 +31,7 @@ PenetrationThread::PenetrationThread(SubProblem & subproblem,
                                      const MooseMesh & mesh,
                                      BoundaryID master_boundary,
                                      BoundaryID slave_boundary,
-                                     std::map<unsigned int, PenetrationLocator::PenetrationInfo *> & penetration_info,
+                                     std::map<unsigned int, PenetrationInfo *> & penetration_info,
                                      bool update_location,
                                      Real tangential_tolerance,
                                      bool do_normal_smoothing,
@@ -116,10 +116,10 @@ PenetrationThread::operator() (const NodeIdRange & range)
     // This will alow us to manipulate this pointer without having to go through
     // the _penetration_info map... meaning this is the only mutex we'll have to do!
     pinfo_mutex.lock();
-    PenetrationLocator::PenetrationInfo * & info = _penetration_info[node.id()];
+    PenetrationInfo * & info = _penetration_info[node.id()];
     pinfo_mutex.unlock();
 
-    std::vector<PenetrationLocator::PenetrationInfo*> p_info;
+    std::vector<PenetrationInfo*> p_info;
     bool info_set(false);
 
     // See if we already have info about this node
@@ -184,7 +184,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
         unsigned int elem_id = closest_elems[j];
         const Elem * elem = _mesh.elem(elem_id);
 
-        std::vector<PenetrationLocator::PenetrationInfo*> thisElemInfo;
+        std::vector<PenetrationInfo*> thisElemInfo;
         std::vector<const Node*> nodesThatMustBeOnSide;
         nodesThatMustBeOnSide.push_back(closest_node);
         bool check_whether_reasonable = true;
@@ -421,8 +421,8 @@ PenetrationThread::join(const PenetrationThread & /*other*/)
 {}
 
 void
-PenetrationThread::switchInfo( PenetrationLocator::PenetrationInfo * & info,
-                               PenetrationLocator::PenetrationInfo * & infoNew )
+PenetrationThread::switchInfo( PenetrationInfo * & info,
+                               PenetrationInfo * & infoNew )
 {
   mooseAssert(infoNew != NULL, "infoNew object is null");
   if (info)
@@ -446,8 +446,8 @@ PenetrationThread::switchInfo( PenetrationLocator::PenetrationInfo * & info,
 
 //Determine whether first (pi1) or second (pi2) interaction is stronger
 PenetrationThread::CompeteInteractionResult
-PenetrationThread::competeInteractions(PenetrationLocator::PenetrationInfo * pi1,
-                                       PenetrationLocator::PenetrationInfo * pi2)
+PenetrationThread::competeInteractions(PenetrationInfo * pi1,
+                                       PenetrationInfo * pi2)
 {
 
   CompeteInteractionResult result = NEITHER_WINS;
@@ -581,8 +581,8 @@ PenetrationThread::competeInteractions(PenetrationLocator::PenetrationInfo * pi1
 }
 
 PenetrationThread::CommonEdgeResult
-PenetrationThread::interactionsOffCommonEdge(PenetrationLocator::PenetrationInfo * pi1,
-                                             PenetrationLocator::PenetrationInfo * pi2)
+PenetrationThread::interactionsOffCommonEdge(PenetrationInfo * pi1,
+                                             PenetrationInfo * pi2)
 {
   CommonEdgeResult common_edge(NO_COMMON);
   const std::vector<Node*> &off_edge_nodes1(pi1->_off_edge_nodes);
@@ -642,14 +642,14 @@ PenetrationThread::findRidgeContactPoint(Point &contact_point,
                                          Node* &closest_node,
                                          unsigned int &index,
                                          Point &contact_point_ref,
-                                         std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
+                                         std::vector<PenetrationInfo*> &p_info,
                                          const unsigned int index1,
                                          const unsigned int index2)
 {
   tangential_distance = 0.0;
   closest_node = NULL;
-  PenetrationLocator::PenetrationInfo* pi1 = p_info[index1];
-  PenetrationLocator::PenetrationInfo* pi2 = p_info[index2];
+  PenetrationInfo* pi1 = p_info[index1];
+  PenetrationInfo* pi2 = p_info[index2];
   const unsigned sidedim(pi1->_side->dim());
   mooseAssert(sidedim == pi2->_side->dim(), "Incompatible dimensionalities");
 
@@ -1192,8 +1192,7 @@ PenetrationThread::isFaceReasonableCandidate(const Elem * master_elem,
 }
 
 void
-PenetrationThread::computeSlip(FEBase & fe,
-                               PenetrationLocator::PenetrationInfo & info)
+PenetrationThread::computeSlip(FEBase & fe, PenetrationInfo & info)
 {
   // Slip is current projected position of slave node minus
   //   original projected position of slave node
@@ -1203,7 +1202,7 @@ PenetrationThread::computeSlip(FEBase & fe,
   fe.reinit(side.get(), &points);
   const std::vector<Point> & starting_point = fe.get_xyz();
   info._incremental_slip = info._closest_point - starting_point[0];
-  if (info._mech_status != PenetrationLocator::MS_NO_CONTACT)
+  if (info._mech_status != PenetrationInfo::MS_NO_CONTACT)
   {
     info._frictional_energy = info._frictional_energy_old + info._contact_force*info._incremental_slip;
     info._accumulated_slip = info._accumulated_slip_old + info._incremental_slip.size();
@@ -1211,8 +1210,8 @@ PenetrationThread::computeSlip(FEBase & fe,
 }
 
 void
-PenetrationThread::smoothNormal(PenetrationLocator::PenetrationInfo* info,
-                                std::vector<PenetrationLocator::PenetrationInfo*> & p_info)
+PenetrationThread::smoothNormal(PenetrationInfo* info,
+                                std::vector<PenetrationInfo*> & p_info)
 {
   if (_do_normal_smoothing)
   {
@@ -1221,7 +1220,7 @@ PenetrationThread::smoothNormal(PenetrationLocator::PenetrationInfo* info,
       //If we are within the smoothing distance of any edges or corners, find the
       //corner nodes for those edges/corners, and weights from distance to edge/corner
       std::vector<Real> edge_face_weights;
-      std::vector<PenetrationLocator::PenetrationInfo*> edge_face_info;
+      std::vector<PenetrationInfo*> edge_face_info;
 
       getSmoothingFacesAndWeights(info, edge_face_info, edge_face_weights, p_info);
 
@@ -1235,7 +1234,7 @@ PenetrationThread::smoothNormal(PenetrationLocator::PenetrationInfo* info,
 
         for (unsigned int efwi = 0; efwi<edge_face_weights.size(); ++efwi)
         {
-          PenetrationLocator::PenetrationInfo *npi = edge_face_info[efwi];
+          PenetrationInfo *npi = edge_face_info[efwi];
           if (npi)
           {
             new_normal += npi->_normal * edge_face_weights[efwi];
@@ -1271,10 +1270,10 @@ PenetrationThread::smoothNormal(PenetrationLocator::PenetrationInfo* info,
 }
 
 void
-PenetrationThread::getSmoothingFacesAndWeights(PenetrationLocator::PenetrationInfo* info,
-                                               std::vector<PenetrationLocator::PenetrationInfo*> &edge_face_info,
+PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo* info,
+                                               std::vector<PenetrationInfo*> &edge_face_info,
                                                std::vector<Real> &edge_face_weights,
-                                               std::vector<PenetrationLocator::PenetrationInfo*> & p_info)
+                                               std::vector<PenetrationInfo*> & p_info)
 {
   const Elem* side = info->_side;
   const Point& p=info->_closest_point_ref;
@@ -1296,7 +1295,7 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationLocator::PenetrationIn
     //Sort all sets of edge nodes (needed for comparing edges)
     std::sort(edge_nodes[i].begin(),edge_nodes[i].end());
 
-    std::vector<PenetrationLocator::PenetrationInfo*> face_info_comm_edge;
+    std::vector<PenetrationInfo*> face_info_comm_edge;
     getInfoForFacesWithCommonNodes(slave_node, elems_to_exclude, edge_nodes[i], face_info_comm_edge, p_info);
 
     if (face_info_comm_edge.size() == 0)
@@ -1337,7 +1336,7 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationLocator::PenetrationIn
       elems_to_exclude.insert(edge_face_info[i]->_elem->id());
     }
 
-    std::vector<PenetrationLocator::PenetrationInfo*> face_info_comm_edge;
+    std::vector<PenetrationInfo*> face_info_comm_edge;
     getInfoForFacesWithCommonNodes(slave_node, elems_to_exclude, common_nodes, face_info_comm_edge, p_info);
 
     unsigned int num_corner_neighbors = face_info_comm_edge.size();
@@ -1506,8 +1505,8 @@ void
 PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
                                                   const std::set<unsigned int> &elems_to_exclude,
                                                   const std::vector<const Node*> edge_nodes,
-                                                  std::vector<PenetrationLocator::PenetrationInfo*> &face_info_comm_edge,
-                                                  std::vector<PenetrationLocator::PenetrationInfo*> & p_info)
+                                                  std::vector<PenetrationInfo*> &face_info_comm_edge,
+                                                  std::vector<PenetrationInfo*> & p_info)
 {
   //elems connected to a node on this edge, find one that has the same corners as this, and is not the current elem
   std::vector<unsigned int> & elems_connected_to_node = _node_to_elem_map[edge_nodes[0]->id()]; //just need one of the nodes
@@ -1560,7 +1559,7 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
 
     for (unsigned int i=0; i<elems_connected_to_edge.size(); ++i)
     {
-      std::vector<PenetrationLocator::PenetrationInfo*> thisElemInfo;
+      std::vector<PenetrationInfo*> thisElemInfo;
       getInfoForElem(thisElemInfo, p_info, elems_connected_to_edge[i]);
       if (thisElemInfo.size() > 0 && !allowMultipleNeighbors)
       {
@@ -1590,8 +1589,8 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
 }
 
 void
-PenetrationThread::getInfoForElem(std::vector<PenetrationLocator::PenetrationInfo*> &thisElemInfo,
-                                  std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
+PenetrationThread::getInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo,
+                                  std::vector<PenetrationInfo*> &p_info,
                                   const Elem* elem)
 {
   for (unsigned int pii=0; pii<p_info.size(); ++pii)
@@ -1607,8 +1606,8 @@ PenetrationThread::getInfoForElem(std::vector<PenetrationLocator::PenetrationInf
 }
 
 void
-PenetrationThread::createInfoForElem(std::vector<PenetrationLocator::PenetrationInfo*> &thisElemInfo,
-                                     std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
+PenetrationThread::createInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo,
+                                     std::vector<PenetrationInfo*> &p_info,
                                      const Node* slave_node,
                                      const Elem* elem,
                                      const std::vector<const Node*> &nodes_that_must_be_on_side,
@@ -1684,22 +1683,22 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationLocator::Penetration
     std::vector<RealGradient> dxyzdeta;
     std::vector<RealGradient> d2xyzdxideta;
 
-    PenetrationLocator::PenetrationInfo * pen_info =
-      new PenetrationLocator::PenetrationInfo(slave_node,
-                                              elem,
-                                              side,
-                                              sides[i],
-                                              normal,
-                                              distance,
-                                              tangential_distance,
-                                              contact_phys,
-                                              contact_ref,
-                                              contact_on_face_ref,
-                                              off_edge_nodes,
-                                              side_phi,
-                                              dxyzdxi,
-                                              dxyzdeta,
-                                              d2xyzdxideta);
+    PenetrationInfo * pen_info =
+      new PenetrationInfo(slave_node,
+                          elem,
+                          side,
+                          sides[i],
+                          normal,
+                          distance,
+                          tangential_distance,
+                          contact_phys,
+                          contact_ref,
+                          contact_on_face_ref,
+                          off_edge_nodes,
+                          side_phi,
+                          dxyzdxi,
+                          dxyzdeta,
+                          d2xyzdxideta);
 
     Moose::findContactPoint(*pen_info, fe, _fe_type, *slave_node,
                             true, _tangential_tolerance, contact_point_on_side);

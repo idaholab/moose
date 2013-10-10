@@ -27,7 +27,7 @@ public:
                     const MooseMesh & mesh,
                     BoundaryID master_boundary,
                     BoundaryID slave_boundary,
-                    std::map<unsigned int, PenetrationLocator::PenetrationInfo *> & penetration_info,
+                    std::map<unsigned int, PenetrationInfo *> & penetration_info,
                     bool update_location,
                     Real tangential_tolerance,
                     bool do_normal_smoothing,
@@ -56,7 +56,7 @@ protected:
   BoundaryID _slave_boundary;
 
   // This is the info map we're actually filling here
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *> & _penetration_info;
+  std::map<unsigned int, PenetrationInfo *> & _penetration_info;
 
   bool _update_location;
   Real _tangential_tolerance;
@@ -99,12 +99,12 @@ protected:
   };
 
   CompeteInteractionResult
-  competeInteractions(PenetrationLocator::PenetrationInfo * pi1,
-                      PenetrationLocator::PenetrationInfo * pi2);
+  competeInteractions(PenetrationInfo * pi1,
+                      PenetrationInfo * pi2);
 
   CommonEdgeResult
-  interactionsOffCommonEdge(PenetrationLocator::PenetrationInfo * pi1,
-                            PenetrationLocator::PenetrationInfo * pi2);
+  interactionsOffCommonEdge(PenetrationInfo * pi1,
+                            PenetrationInfo * pi2);
 
   bool
   findRidgeContactPoint(Point &contact_point,
@@ -112,7 +112,7 @@ protected:
                         Node* &closest_node,
                         unsigned int &index,
                         Point &contact_point_ref,
-                        std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
+                        std::vector<PenetrationInfo*> &p_info,
                         const unsigned int index1,
                         const unsigned int index2);
 
@@ -138,15 +138,15 @@ protected:
                             const Real tangential_tolerance);
 
   void
-  smoothNormal(PenetrationLocator::PenetrationInfo* info,
-               std::vector<PenetrationLocator::PenetrationInfo*> & p_info);
+  smoothNormal(PenetrationInfo* info,
+               std::vector<PenetrationInfo*> & p_info);
 
 
   void
-  getSmoothingFacesAndWeights(PenetrationLocator::PenetrationInfo* info,
-                              std::vector<PenetrationLocator::PenetrationInfo*> &edge_face_info,
+  getSmoothingFacesAndWeights(PenetrationInfo* info,
+                              std::vector<PenetrationInfo*> &edge_face_info,
                               std::vector<Real> &edge_face_weights,
-                              std::vector<PenetrationLocator::PenetrationInfo*> & p_info);
+                              std::vector<PenetrationInfo*> & p_info);
   void
   getSmoothingEdgeNodesAndWeights(const Point& p,
                                   const Elem* side,
@@ -157,17 +157,17 @@ protected:
   getInfoForFacesWithCommonNodes(const Node* slave_node,
                                  const std::set<unsigned int> &elems_to_exclude,
                                  const std::vector<const Node*> edge_nodes,
-                                 std::vector<PenetrationLocator::PenetrationInfo*> &face_info_comm_edge,
-                                 std::vector<PenetrationLocator::PenetrationInfo*> & p_info);
+                                 std::vector<PenetrationInfo*> &face_info_comm_edge,
+                                 std::vector<PenetrationInfo*> & p_info);
 
   void
-  getInfoForElem(std::vector<PenetrationLocator::PenetrationInfo*> &thisElemInfo,
-                 std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
+  getInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo,
+                 std::vector<PenetrationInfo*> &p_info,
                  const Elem* elem);
 
   void
-  createInfoForElem(std::vector<PenetrationLocator::PenetrationInfo*> &thisElemInfo,
-                    std::vector<PenetrationLocator::PenetrationInfo*> &p_info,
+  createInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo,
+                    std::vector<PenetrationInfo*> &p_info,
                     const Node* slave_node,
                     const Elem* elem,
                     const std::vector<const Node*> &nodes_that_must_be_on_side,
@@ -179,11 +179,11 @@ protected:
 
   void
   computeSlip( FEBase & fe,
-               PenetrationLocator::PenetrationInfo & info );
+               PenetrationInfo & info );
 
   void
-  switchInfo( PenetrationLocator::PenetrationInfo * & info,
-              PenetrationLocator::PenetrationInfo * & infoNew );
+  switchInfo( PenetrationInfo * & info,
+              PenetrationInfo * & infoNew );
 
   struct RidgeData
   {
