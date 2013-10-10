@@ -277,7 +277,7 @@ class Farm(object):
         use = str((int(self._master.threads) / 4))
 
       # The file containing the list of available machines
-      filename = 'https://hpcsc.inl.gov/distcc_gen?uuid=' + str(uuid.uuid3(uuid.NAMESPACE_DNS, self._master.address)) + \
+      filename = 'https://hpcsc.inl.gov/distcc_gen?uuid=' + str(uuid.uuid3(uuid.NAMESPACE_DNS, self._master.hostname)) + \
                                                  '&arch=' + self._system + \
                                                  '&ip=' + self._master.address + \
                                                  '&cpus=' + str(self._master.threads) + \
