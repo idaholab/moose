@@ -24,7 +24,7 @@
 class XDAOutput : public Outputter
 {
 public:
-  XDAOutput(EquationSystems & es);
+  XDAOutput(EquationSystems & es, bool binary = false);
   virtual ~XDAOutput();
 
   virtual void output(const std::string & file_base, Real time);
@@ -38,6 +38,9 @@ public:
 protected:
   /// number of the file
   int _file_num;
+
+  /// true if outputting in binary format
+  bool _binary;
 };
 
 #endif /* XDAOUTPUT_H */

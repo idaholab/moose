@@ -93,7 +93,11 @@ Output::add(Output::Type type, bool output_input)
     break;
 
   case XDA:
-    o = new XDAOutput(_eq);
+    o = new XDAOutput(_eq, false);
+    break;
+
+  case XDR:
+    o = new XDAOutput(_eq, true);
     break;
 
   default:

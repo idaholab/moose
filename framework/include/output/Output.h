@@ -39,7 +39,8 @@ public:
     VTK,
     TECPLOT,
     TECPLOT_BIN,
-    XDA
+    XDA,
+    XDR
   };
 
   // FIXME: this is not good - the whole Output class has to be refactored with respect to OutputProblem class

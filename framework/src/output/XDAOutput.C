@@ -18,9 +18,10 @@
 #include <sstream>
 #include <iomanip>
 
-XDAOutput::XDAOutput(EquationSystems & es) :
+XDAOutput::XDAOutput(EquationSystems & es, bool binary) :
     Outputter(es),
-    _file_num(0)
+    _file_num(0),
+    _binary(binary)
 {
 }
 
@@ -50,8 +51,17 @@ XDAOutput::output(const std::string & file_base, Real /*time*/)
 {
   MeshBase & mesh = _es.get_mesh();
 
-  mesh.write(getFileName(file_base)+"_mesh.xda");
-  _es.write (getFileName(file_base)+".xda", libMeshEnums::WRITE);
+  if (_binary)
+  {
+    mesh.write(getFileName(file_base)+"_mesh.xdr");
+    _es.write (getFileName(file_base)+".xdr", libMeshEnums::ENCODE);
+  }
+  else
+  {
+    mesh.write(getFileName(file_base)+"_mesh.xda");
+    _es.write (getFileName(file_base)+".xda", libMeshEnums::WRITE);
+  }
+
   _file_num++;
 }
 

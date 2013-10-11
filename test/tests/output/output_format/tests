@@ -92,4 +92,10 @@
     input = 'output_test_sln.i'
     check_files = 'out.slh'
   [../]
+
+  [./xdr_output]
+    type = 'CheckFiles'
+    input = 'output_test_xdr.i'
+    check_files = 'out_0001.xdr out_0001_mesh.xdr'
+  [../]
 []
