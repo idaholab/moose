@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<ExplicitODE>()
 {
   InputParameters params = validParams<AuxScalarKernel>();
-  params.addParam<Real>("lambda", "Lambda on the right-hand side");
+  params.addParam<Real>("lambda", 1, "Lambda on the right-hand side");
   return params;
 }
 
@@ -35,5 +35,5 @@ ExplicitODE::~ExplicitODE()
 Real
 ExplicitODE::computeValue()
 {
-  return _u_old[_i] * (1 - _dt);
+  return _u_old[_i] * (1 - (_lambda*_dt));
 }
