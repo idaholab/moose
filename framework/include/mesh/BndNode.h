@@ -15,6 +15,7 @@
 #ifndef BNDNODE_H
 #define BNDNODE_H
 
+#include "MooseTypes.h"
 #include "libmesh/node.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/stored_range.h"

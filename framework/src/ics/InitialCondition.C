@@ -22,8 +22,10 @@ template<>
 InputParameters validParams<InitialCondition>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<BlockRestrictable>();
+  params += validParams<BoundaryRestrictable>();
+
   params.addRequiredParam<VariableName>("variable", "The variable this initial condition is supposed to provide values for.");
-  params.addParam<std::vector<SubdomainName> >("block", "The list of ids or names of the blocks (subdomain) that this initial condition will be applied to");
 
   params.addPrivateParam<std::string>("built_by_action", "add_ic");
   return params;
@@ -33,6 +35,8 @@ InitialCondition::InitialCondition(const std::string & name, InputParameters par
     MooseObject(name, parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
+    BlockRestrictable(name, parameters),
+    BoundaryRestrictable(name, parameters),
     Restartable(name, parameters, "InitialConditions"),
     _fe_problem(*getParam<FEProblem *>("_fe_problem")),
     _sys(*getParam<SystemBase *>("_sys")),

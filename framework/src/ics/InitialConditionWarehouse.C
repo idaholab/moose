@@ -11,6 +11,9 @@ InitialConditionWarehouse::~InitialConditionWarehouse()
   for (std::map<std::string, std::map<SubdomainID, InitialCondition *> >::iterator it = _ics.begin(); it != _ics.end(); ++it)
     for (std::map<SubdomainID, InitialCondition *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
       delete jt->second;
+  for (std::map<std::string, std::map<BoundaryID, InitialCondition *> >::iterator it = _boundary_ics.begin(); it != _boundary_ics.end(); ++it)
+    for (std::map<BoundaryID, InitialCondition *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
+      delete jt->second;
   for (std::map<std::string, ScalarInitialCondition *>::iterator it = _scalar_ics.begin(); it != _scalar_ics.end(); ++it)
     delete it->second;
 }
@@ -20,6 +23,9 @@ InitialConditionWarehouse::initialSetup()
 {
   for (std::map<std::string, std::map<SubdomainID, InitialCondition *> >::iterator it1 = _ics.begin(); it1 != _ics.end(); ++it1)
     for (std::map<SubdomainID, InitialCondition *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
+      it2->second->initialSetup();
+  for (std::map<std::string, std::map<BoundaryID, InitialCondition *> >::iterator it1 = _boundary_ics.begin(); it1 != _boundary_ics.end(); ++it1)
+    for (std::map<BoundaryID, InitialCondition *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
       it2->second->initialSetup();
 }
 
@@ -42,6 +48,15 @@ InitialConditionWarehouse::addInitialCondition(const std::string & var_name, Sub
   _ics[var_name][blockid] = ic;
 }
 
+void
+InitialConditionWarehouse::addBoundaryInitialCondition(const std::string & var_name, BoundaryID boundary_id, InitialCondition * ic)
+{
+  if (_boundary_ics[var_name].find(boundary_id) == _boundary_ics[var_name].end())                     // Two ics on the same boundary
+    _boundary_ics[var_name][boundary_id] = ic;
+  else
+    mooseError("Initial condition '" << _boundary_ics[var_name][boundary_id]->name() << "' and '" << ic->name() << "' are both defined on the same block.");
+}
+
 InitialCondition *
 InitialConditionWarehouse::getInitialCondition(const std::string & var_name, SubdomainID blockid)
 {
@@ -62,6 +77,21 @@ InitialConditionWarehouse::getInitialCondition(const std::string & var_name, Sub
     return NULL;
 }
 
+InitialCondition *
+InitialConditionWarehouse::getBoundaryInitialCondition(const std::string & var_name, BoundaryID boundary_id)
+{
+  std::map<std::string, std::map<BoundaryID, InitialCondition *> >::iterator it = _boundary_ics.find(var_name);
+  if (it != _boundary_ics.end())
+  {
+    std::map<BoundaryID, InitialCondition *>::iterator jt = it->second.find(boundary_id);
+    if (jt != it->second.end())
+      return jt->second;                        // we return the IC that was defined on the specified boundary (boundary_id)
+    else
+      return NULL;                              // No IC there at all
+  }
+  else
+    return NULL;
+}
 
 void
 InitialConditionWarehouse::addScalarInitialCondition(const std::string & var_name, ScalarInitialCondition * ic)

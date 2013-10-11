@@ -23,6 +23,7 @@
 #include "MooseTypes.h"
 #include "InitialCondition.h"
 #include "ScalarInitialCondition.h"
+#include "ComputeBoundaryInitialConditionThread.h"
 // libMesh
 #include "libmesh/quadrature_gauss.h"
 
@@ -404,19 +405,48 @@ SystemBase::addInitialCondition(const std::string & ic_name, const std::string &
   parameters.set<SystemBase *>("_sys") = this;
 
   const std::string & var_name = parameters.get<VariableName>("variable");
-  const std::vector<SubdomainName> & blocks = parameters.get<std::vector<SubdomainName> >("block");
 
-  for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
+  const std::vector<SubdomainName> & blocks = parameters.get<std::vector<SubdomainName> >("block");
+  const std::vector<BoundaryName> & boundaries = parameters.get<std::vector<BoundaryName> >("boundary");
+
+  if (blocks.size() > 0 && boundaries.size() > 0)
   {
-    parameters.set<THREAD_ID>("_tid") = tid;
-    if (blocks.size() > 0)
-      for (unsigned int i = 0; i < blocks.size(); i++)
+    mooseError("Both 'block' and 'boundary' parameters were specified in initial condition '" << name << "'.  You can only you either of them.");
+  }
+  // boundary-restricted IC
+  else if (boundaries.size() > 0 && blocks.size() == 0)
+  {
+    if (getVariable(0, var_name).isNodal())
+    {
+      for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
       {
-        SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
-        _ics[tid].addInitialCondition(var_name, blk_id, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
+        parameters.set<THREAD_ID>("_tid") = tid;
+        for (unsigned int i = 0; i < boundaries.size(); i++)
+        {
+          BoundaryID bnd_id = _mesh.getBoundaryID(boundaries[i]);
+          _ics[tid].addBoundaryInitialCondition(var_name, bnd_id, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
+        }
       }
+    }
     else
-      _ics[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
+      mooseError("You are trying to set a boundary restricted variable on non-nodal variable.  That is not allowed.");
+  }
+  // block-restricted IC
+  else
+  {
+    // this means: either no block and no boundary parameters specified or just block specified
+    for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
+    {
+      parameters.set<THREAD_ID>("_tid") = tid;
+      if (blocks.size() > 0)
+        for (unsigned int i = 0; i < blocks.size(); i++)
+        {
+          SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
+          _ics[tid].addInitialCondition(var_name, blk_id, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
+        }
+      else
+        _ics[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
+    }
   }
 }
 
@@ -446,6 +476,10 @@ SystemBase::projectSolution()
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   ComputeInitialConditionThread cic(_subproblem, *this, solution());
   Threads::parallel_reduce(elem_range, cic);
+  // now run boundary-restricted initial conditions
+  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  ComputeBoundaryInitialConditionThread cbic(_subproblem, *this, solution());
+  Threads::parallel_reduce(bnd_nodes, cbic);
 
   // Also, load values into the SCALAR dofs
   // Note: We assume that all SCALAR dofs are on the

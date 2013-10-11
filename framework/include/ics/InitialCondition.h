@@ -20,6 +20,8 @@
 #include "UserObjectInterface.h"
 #include "ParallelUniqueId.h"
 #include "Restartable.h"
+#include "BlockRestrictable.h"
+#include "BoundaryRestrictable.h"
 
 // System includes
 #include <string>
@@ -46,6 +48,8 @@ class InitialCondition :
   public MooseObject,
   public FunctionInterface,
   public UserObjectInterface,
+  public BlockRestrictable,
+  public BoundaryRestrictable,
   public Restartable
 {
 public:

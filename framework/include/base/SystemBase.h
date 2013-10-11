@@ -398,6 +398,7 @@ protected:
   std::vector<std::string> _vars_to_be_zeroed_on_jacobian;
 
   friend class ComputeInitialConditionThread;
+  friend class ComputeBoundaryInitialConditionThread;
 };
 
 /**

@@ -26,16 +26,34 @@ public:
   /**
    * Add an initial condition for field variable
    * @param var_name The variable name this initial condition works on
+   * @param blockid The block to which this IC is restricted
    * @param ic The initial condition object
    */
   void addInitialCondition(const std::string & var_name, SubdomainID blockid, InitialCondition * ic);
 
   /**
+   * Add an initial condition for field variable restricted to a boundary
+   * @param var_name The variable name this initial condition works on
+   * @param boundary_id The boundary to which this IC is restricted
+   * @param ic The initial condition object
+   */
+  void addBoundaryInitialCondition(const std::string & var_name, BoundaryID boundary_id, InitialCondition * ic);
+
+  /**
    * Get an initial condition
    * @param var_name The name of the variable for which we are retrieving the initial condition
+   * @param blockid The block to which this IC is restricted
    * @return The initial condition object if the initial condition exists, NULL otherwise
    */
   InitialCondition * getInitialCondition(const std::string & var_name, SubdomainID blockid);
+
+  /**
+   * Get a boundary-restricted initial condition
+   * @param var_name The name of the variable for which we are retrieving the initial condition
+   * @param boundary_id The boundary to which this IC is restricted
+   * @return The initial condition object if the initial condition exists, NULL otherwise
+   */
+  InitialCondition * getBoundaryInitialCondition(const std::string & var_name, BoundaryID boundary_id);
 
   /**
    * Add an initial condition for scalar variable
@@ -54,6 +72,8 @@ public:
 protected:
   /// Initial conditions: [var name] -> [block_id] -> initial condition (only 1 IC per sub-block)
   std::map<std::string, std::map<SubdomainID, InitialCondition *> > _ics;
+  /// Initial conditions: [var name] -> [boundary_id] -> initial condition (only 1 IC per boundary)
+  std::map<std::string, std::map<BoundaryID, InitialCondition *> > _boundary_ics;
 
   /// Initial conditions: [var name] -> initial condition
   std::map<std::string, ScalarInitialCondition *> _scalar_ics;
