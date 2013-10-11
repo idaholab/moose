@@ -16,6 +16,7 @@
 #define FACTORY_H
 
 #include <vector>
+#include <time.h>
 
 #include "MooseObject.h"
 #include "InputParameters.h"
@@ -78,9 +79,9 @@
 #define registerNamedTimeIntegrator(obj, name)      registerNamedObject(obj, name)
 #define registerNamedPredictor(obj, name)           registerNamedObject(obj, name)
 
-// Macro for registering deprecated objects
-#define registerDeprecatedObject(name, message)     factory.reg<name>(stringifyName(name), message)
-
+// Macros for registering deprecated objects
+#define registerDeprecatedObject(name, time)        factory.regDeprecated<name>(stringifyName(name), time)
+#define registerDeprecatedObjectName(obj, name, time)     factory.regReplaced<obj>(stringifyName(obj), name, time)
 
 /**
  * Typedef for function to build objects
@@ -106,7 +107,6 @@ MooseObject * buildObject(const std::string & name, InputParameters parameters)
   return new T(name, parameters);
 }
 
-
 /**
  * Generic factory class for build all sorts of objects
  */
@@ -118,20 +118,49 @@ public:
 
   /**
    * Register a new object
-   * @param name Name of the object to register
+   * @param obj_name Name of the object to register
    */
   template<typename T>
-  void reg(const std::string & name, const std::string & deprecated_message="")
+  void reg(const std::string & obj_name)
   {
-    if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
+    if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
     {
-      _name_to_build_pointer[name] = &buildObject<T>;
-      _name_to_params_pointer[name] = &validParams<T>;
-      if (deprecated_message != "")
-        _name_to_deprecated_message[name] = deprecated_message;
+      _name_to_build_pointer[obj_name] = &buildObject<T>;
+      _name_to_params_pointer[obj_name] = &validParams<T>;
     }
     else
-      mooseError("Object '" + name + "' already registered.");
+      mooseError("Object '" + obj_name + "' already registered.");
+  }
+
+  /**
+   * Register a deprecated object that expires
+   * @param obj_name The name of the object to register
+   * @param t_str String contiaining the experiation date for the object
+   */
+  template<typename T>
+  void regDeprecated(const std::string & obj_name, const std::string t_str)
+  {
+    // Register the name
+    reg<T>(obj_name);
+
+    // Store the time
+    _deprecated_time[obj_name] = parseTime(t_str);
+  }
+
+  /**
+   * Register a deprecated object that expires and has a replacement object
+   * @param obj_name The name of the object to register (the new object you want people to use)
+   * @param name The name of the object that is deprecated
+   * @param t_str String contiaining the experiation date for the object
+   */
+  template<typename T>
+  void regReplaced(const std::string & obj_name, const std::string & name, const std::string t_str)
+  {
+    // Register the name
+    regDeprecated<T>(name, t_str);
+
+    // Store the new name
+    _deprecated_name[name] = obj_name;
   }
 
   /**
@@ -150,15 +179,46 @@ public:
    */
   virtual MooseObject *create(const std::string & obj_name, const std::string & name, InputParameters parameters);
 
+  /**
+   * Access to registered object iterator (begin)
+   */
   registeredMooseObjectIterator registeredObjectsBegin() { return _name_to_params_pointer.begin(); }
+
+  /**
+   * Access to registered object iterator (end)
+   */
   registeredMooseObjectIterator registeredObjectsEnd() { return _name_to_params_pointer.end(); }
 
 protected:
+
+  /**
+   * Parse time string (mm/dd/yyyy HH:MM)
+   * @param t_str String with the object experiation date, this must be in the form mm/dd/yyyy HH:MM
+   * @return A time_t object with the experation date
+   */
+  time_t parseTime(std::string);
+
+  /**
+   * Show the appropriate message for deprecated objects
+   * @param obj_name Name of the deprecated object
+   */
+  void deprecatedMessage(const std::string obj_name);
+
+  /// Reference to the application
   MooseApp & _app;
 
-  std::map<std::string, buildPtr>    _name_to_build_pointer;
-  std::map<std::string, paramsPtr>   _name_to_params_pointer;
-  std::map<std::string, std::string> _name_to_deprecated_message;
+  /// Storage for pointers to the object
+  std::map<std::string, buildPtr> _name_to_build_pointer;
+
+  /// Storage for pointers to the parameters objects
+  std::map<std::string, paramsPtr> _name_to_params_pointer;
+
+  /// Storage for deprecated object experiation dates
+  std::map<std::string, time_t> _deprecated_time;
+
+  /// Storage for the deprecated objects that have replacements
+  std::map<std::string, std::string> _deprecated_name;
+
 };
 
 #endif /* FACTORY_H */
