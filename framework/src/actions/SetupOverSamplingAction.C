@@ -42,6 +42,7 @@ InputParameters validParams<SetupOverSamplingAction>()
   params.addParam<bool>("tecplot", false, "Specifies that you would like Tecplot output solution files(s)");
   params.addParam<bool>("tecplot_binary", false, "Specifies that you would like Tecplot binary output solution files(s)");
   params.addParam<bool>("xda", false, "Specifies that you would like xda output solution files(s)");
+  params.addParam<bool>("xdr", false, "Specifies that you would like xdr (binary) output solution file(s)");
 
   params.addParam<std::vector<VariableName> >("output_variables", "A list of the variables that should be in the Exodus output file.  If this is not provided then all variables will be in the output.");
 
