@@ -69,6 +69,8 @@
 #include "MatTestNeumannBC.h"
 
 #include "TEIC.h"
+#include "MTICSum.h"
+#include "MTICMult.h"
 
 #include "MTMaterial.h"
 #include "Diff1Material.h"
@@ -253,6 +255,8 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // Initial conditions
   registerInitialCondition(TEIC);
+  registerInitialCondition(MTICSum);
+  registerInitialCondition(MTICMult);
 
   // Materials
   registerMaterial(MTMaterial);

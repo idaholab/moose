@@ -21,12 +21,42 @@ InitialConditionWarehouse::~InitialConditionWarehouse()
 void
 InitialConditionWarehouse::initialSetup()
 {
+  // Sort the ICs
+  for (std::map<SubdomainID, std::vector<InitialCondition *> >::iterator it = _all_ics.begin(); it != _all_ics.end(); ++it)
+    sortICs(_all_ics[(*it).first]);
+  for (std::map<BoundaryID, std::vector<InitialCondition *> >::iterator it = _active_boundary_ics.begin(); it != _active_boundary_ics.end(); ++it)
+    sortICs(_active_boundary_ics[(*it).first]);
+
   for (std::map<std::string, std::map<SubdomainID, InitialCondition *> >::iterator it1 = _ics.begin(); it1 != _ics.end(); ++it1)
     for (std::map<SubdomainID, InitialCondition *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
       it2->second->initialSetup();
   for (std::map<std::string, std::map<BoundaryID, InitialCondition *> >::iterator it1 = _boundary_ics.begin(); it1 != _boundary_ics.end(); ++it1)
     for (std::map<BoundaryID, InitialCondition *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
       it2->second->initialSetup();
+
+  sortScalarICs(_active_scalar_ics);
+}
+
+void
+InitialConditionWarehouse::updateActiveICs(SubdomainID subdomain)
+{
+  _active_ics.clear();
+  // add global ICs
+  _active_ics.insert(_active_ics.end(), _all_ics[Moose::ANY_BLOCK_ID].begin(), _all_ics[Moose::ANY_BLOCK_ID].end());
+  // and then block-restricted ICs
+  _active_ics.insert(_active_ics.end(), _all_ics[subdomain].begin(), _all_ics[subdomain].end());
+}
+
+const std::vector<InitialCondition *> &
+InitialConditionWarehouse::active()
+{
+  return _active_ics;
+}
+
+const std::vector<InitialCondition *> &
+InitialConditionWarehouse::activeBoundary(BoundaryID boundary_id)
+{
+  return _active_boundary_ics[boundary_id];
 }
 
 void
@@ -42,55 +72,28 @@ InitialConditionWarehouse::addInitialCondition(const std::string & var_name, Sub
     name = _ics[var_name].begin()->second->name();
 
   if (name != "")
-    mooseError(std::string("Initial Conditions '") + name + "' and '" + ic->name()
-               + "' are both defined on the same block.");
+    mooseError(std::string("Initial Conditions '") + name + "' and '" + ic->name() + "' are both defined on the same block.");
 
   _ics[var_name][blockid] = ic;
+  _all_ics[blockid].push_back(ic);
 }
 
 void
 InitialConditionWarehouse::addBoundaryInitialCondition(const std::string & var_name, BoundaryID boundary_id, InitialCondition * ic)
 {
   if (_boundary_ics[var_name].find(boundary_id) == _boundary_ics[var_name].end())                     // Two ics on the same boundary
+  {
     _boundary_ics[var_name][boundary_id] = ic;
+    _active_boundary_ics[boundary_id].push_back(ic);
+  }
   else
     mooseError("Initial condition '" << _boundary_ics[var_name][boundary_id]->name() << "' and '" << ic->name() << "' are both defined on the same block.");
 }
 
-InitialCondition *
-InitialConditionWarehouse::getInitialCondition(const std::string & var_name, SubdomainID blockid)
+const std::vector<ScalarInitialCondition *> &
+InitialConditionWarehouse::activeScalar()
 {
-  std::map<std::string, std::map<SubdomainID, InitialCondition *> >::iterator it = _ics.find(var_name);
-  if (it != _ics.end())
-  {
-    std::map<SubdomainID, InitialCondition *>::iterator jt = it->second.find(blockid);
-    if (jt != it->second.end())
-      return jt->second;                        // we return the IC that was defined on the specified block (blockid)
-
-    jt = it->second.find(Moose::ANY_BLOCK_ID);
-    if (jt != it->second.end())
-      return jt->second;                        // return the IC that lives everywhere
-    else
-      return NULL;                              // No IC there at all
-  }
-  else
-    return NULL;
-}
-
-InitialCondition *
-InitialConditionWarehouse::getBoundaryInitialCondition(const std::string & var_name, BoundaryID boundary_id)
-{
-  std::map<std::string, std::map<BoundaryID, InitialCondition *> >::iterator it = _boundary_ics.find(var_name);
-  if (it != _boundary_ics.end())
-  {
-    std::map<BoundaryID, InitialCondition *>::iterator jt = it->second.find(boundary_id);
-    if (jt != it->second.end())
-      return jt->second;                        // we return the IC that was defined on the specified boundary (boundary_id)
-    else
-      return NULL;                              // No IC there at all
-  }
-  else
-    return NULL;
+  return _active_scalar_ics;
 }
 
 void
@@ -98,17 +101,51 @@ InitialConditionWarehouse::addScalarInitialCondition(const std::string & var_nam
 {
   std::map<std::string, ScalarInitialCondition *>::iterator it = _scalar_ics.find(var_name);
   if (it == _scalar_ics.end())
+  {
     _scalar_ics[var_name] = ic;
+    _active_scalar_ics.push_back(ic);
+  }
   else
     mooseError("Initial condition for variable '" << var_name << "' has been already set.");
 }
 
-ScalarInitialCondition *
-InitialConditionWarehouse::getScalarInitialCondition(const std::string & var_name)
+
+void
+InitialConditionWarehouse::sortICs(std::vector<InitialCondition *> & ics)
 {
-  std::map<std::string, ScalarInitialCondition *>::iterator it = _scalar_ics.find(var_name);
-  if (it != _scalar_ics.end())
-    return it->second;
-  else
-    return NULL;
+  try
+  {
+    // Sort based on dependencies
+    DependencyResolverInterface::sort(ics.begin(), ics.end());
+  }
+  catch (CyclicDependencyException<DependencyResolverInterface *> & e)
+  {
+    std::ostringstream oss;
+
+    oss << "Cyclic dependency detected in aux kernel ordering:" << std::endl;
+    const std::multimap<DependencyResolverInterface *, DependencyResolverInterface *> & depends = e.getCyclicDependencies();
+    for (std::multimap<DependencyResolverInterface *, DependencyResolverInterface *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
+      oss << (static_cast<InitialCondition *>(it->first))->name() << " -> " << (static_cast<InitialCondition *>(it->second))->name() << std::endl;
+    mooseError(oss.str());
+  }
+}
+
+void
+InitialConditionWarehouse::sortScalarICs(std::vector<ScalarInitialCondition *> & ics)
+{
+  try
+  {
+    // Sort based on dependencies
+    DependencyResolverInterface::sort(ics.begin(), ics.end());
+  }
+  catch (CyclicDependencyException<DependencyResolverInterface *> & e)
+  {
+    std::ostringstream oss;
+
+    oss << "Cyclic dependency detected in aux kernel ordering:" << std::endl;
+    const std::multimap<DependencyResolverInterface *, DependencyResolverInterface *> & depends = e.getCyclicDependencies();
+    for (std::multimap<DependencyResolverInterface *, DependencyResolverInterface *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
+      oss << (static_cast<ScalarInitialCondition *>(it->first))->name() << " -> " << (static_cast<ScalarInitialCondition *>(it->second))->name() << std::endl;
+    mooseError(oss.str());
+  }
 }

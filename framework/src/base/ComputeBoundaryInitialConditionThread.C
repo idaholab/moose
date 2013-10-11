@@ -19,17 +19,13 @@
 #include "libmesh/threads.h"
 #include "libmesh/fe_interface.h"
 
-ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(SubProblem & subproblem, SystemBase & sys, NumericVector<Number> & solution) :
-    _subproblem(subproblem),
-    _sys(sys),
-    _solution(solution)
+ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(FEProblem & fe_problem) :
+    _fe_problem(fe_problem)
 {
 }
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(ComputeBoundaryInitialConditionThread & x, Threads::split /*split*/) :
-    _subproblem(x._subproblem),
-    _sys(x._sys),
-    _solution(x._solution)
+    _fe_problem(x._fe_problem)
 {
 }
 
@@ -46,20 +42,15 @@ ComputeBoundaryInitialConditionThread::operator() (const ConstBndNodeRange & ran
     Node * node = bnode->_node;
     BoundaryID boundary_id = bnode->_bnd_id;
 
-    _subproblem.assembly(_tid).reinit(node);
+    _fe_problem.assembly(_tid).reinit(node);
 
-    // Loop over all the variables in the system
-    const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
-    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+    const std::vector<InitialCondition *> & ics = _fe_problem._ics[_tid].activeBoundary(boundary_id);
+    for (std::vector<InitialCondition *>::const_iterator it = ics.begin(); it != ics.end(); ++it)
     {
-      MooseVariable & var = *(*it);
-
-      InitialCondition * ic = _sys._ics[_tid].getBoundaryInitialCondition(var.name(), boundary_id);
-      if (ic == NULL)
-        continue;               // no initial condition -> skip this variable
-
+      InitialCondition * ic = (*it);
       if (node->processor_id() == libMesh::processor_id())
       {
+        MooseVariable & var = ic->variable();
         var.reinitNode();
         var.computeNodalValues();                   // has to call this to resize the internal array
         Real value = ic->value(*node);
@@ -68,7 +59,7 @@ ComputeBoundaryInitialConditionThread::operator() (const ConstBndNodeRange & ran
         // We are done, so update the solution vector
         {
           Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-          var.insert(_solution);
+          var.insert(var.sys().solution());
         }
       }
     }

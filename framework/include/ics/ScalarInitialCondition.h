@@ -18,6 +18,8 @@
 #include "MooseObject.h"
 #include "ParallelUniqueId.h"
 #include "InputParameters.h"
+#include "Coupleable.h"
+#include "DependencyResolverInterface.h"
 
 #include "libmesh/dense_vector.h"
 
@@ -38,7 +40,9 @@ InputParameters validParams<ScalarInitialCondition>();
  * InitialConditions are objects that set the initial value of variables.
  */
 class ScalarInitialCondition :
-  public MooseObject
+  public MooseObject,
+  public ScalarCoupleable,
+  public DependencyResolverInterface
 {
 public:
   /**
@@ -50,6 +54,8 @@ public:
   ScalarInitialCondition(const std::string & name, InputParameters parameters);
 
   virtual ~ScalarInitialCondition();
+
+  MooseVariableScalar & variable() { return _var; }
 
   /**
    * Compute the initial condition
@@ -63,6 +69,10 @@ public:
    */
   virtual Real value() = 0;
 
+  virtual const std::set<std::string> & getRequestedItems();
+
+  virtual const std::set<std::string> & getSuppliedItems();
+
 protected:
   SubProblem & _subproblem;
   SystemBase & _sys;
@@ -73,6 +83,9 @@ protected:
   MooseVariableScalar & _var;
 
   unsigned int _i;
+
+  std::set<std::string> _depend_vars;
+  std::set<std::string> _supplied_vars;
 };
 
 #endif //SCALARINITIALCONDITION_H

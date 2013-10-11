@@ -22,13 +22,12 @@
 #include "libmesh/elem_range.h"
 #include "libmesh/numeric_vector.h"
 
-class SubProblem;
-class SystemBase;
+class FEProblem;
 
 class ComputeBoundaryInitialConditionThread
 {
 public:
-  ComputeBoundaryInitialConditionThread(SubProblem & subproblem, SystemBase & sys, NumericVector<Number> & solution);
+  ComputeBoundaryInitialConditionThread(FEProblem & fe_problem);
   // Splitting Constructor
   ComputeBoundaryInitialConditionThread(ComputeBoundaryInitialConditionThread & x, Threads::split split);
 
@@ -36,10 +35,8 @@ public:
   void join(const ComputeBoundaryInitialConditionThread & /*y*/);
 
 protected:
-  SubProblem & _subproblem;
-  SystemBase & _sys;
+  FEProblem & _fe_problem;
   THREAD_ID _tid;
-  NumericVector<Number> & _solution;
 };
 
 #endif //COMPUTEBOUNDARYINITIALCONDITIONTHREAD_H

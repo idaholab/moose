@@ -51,6 +51,8 @@ public:
 
   void prepareNeighbor();
   void prepareAux();
+  void prepareIC();
+
   void reinitNode();
   void reinitNodeNeighbor();
   void reinitAux();
@@ -186,7 +188,7 @@ public:
   /**
    * Set the nodal value for this variable (to keep everything up to date
    */
-  void setNodalValue(Number value);
+  void setNodalValue(Number value, unsigned int idx = 0);
 
   /**
    * Set the neighbor nodal value for this variable

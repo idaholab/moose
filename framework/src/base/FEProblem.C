@@ -25,6 +25,8 @@
 #include "ProjectMaterialProperties.h"
 #include "ComputeIndicatorThread.h"
 #include "ComputeMarkerThread.h"
+#include "ComputeInitialConditionThread.h"
+#include "ComputeBoundaryInitialConditionThread.h"
 #include "ActionWarehouse.h"
 #include "Conversion.h"
 #include "Material.h"
@@ -37,6 +39,7 @@
 #include "PetscSupport.h"
 #include "SetupOutputAction.h"
 
+#include "ScalarInitialCondition.h"
 #include "ElementPostprocessor.h"
 #include "NodalPostprocessor.h"
 #include "SidePostprocessor.h"
@@ -190,6 +193,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   _nl.setDecomposition(splits);
 
   _functions.resize(n_threads);
+  _ics.resize(n_threads);
   _materials.resize(n_threads);
 
   _material_data.resize(n_threads);
@@ -354,8 +358,8 @@ void FEProblem::initialSetup()
 
   if (!isRestarting())
   {
-    _aux.initialICSetup();
-    _nl.initialICSetup();
+    for (unsigned int i = 0; i < n_threads; i++)
+      _ics[i].initialSetup();
     projectSolution();
   }
 
@@ -375,7 +379,7 @@ void FEProblem::initialSetup()
     meshChanged();
 
     //reproject the initial condition
-    _nl.projectSolution();
+    projectSolution();
   }
   Moose::setup_perf_log.pop("initial adaptivity","Setup");
 #endif //LIBMESH_ENABLE_AMR
@@ -1317,16 +1321,74 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
   // before we start to mess with the initial condition, we need to check parameters for errors.
   parameters.checkParams(name);
 
-  const std::string & var_name = parameters.get<VariableName>("variable");
   parameters.set<FEProblem *>("_fe_problem") = this;
-  if (_nl.hasVariable(var_name))
-    _nl.addInitialCondition(ic_name, name, parameters);
-  else if (_nl.hasScalarVariable(var_name))
-    _nl.addScalarInitialCondition(ic_name, name, parameters);
-  else if (_aux.hasVariable(var_name))
-    _aux.addInitialCondition(ic_name, name, parameters);
-  else if (_aux.hasScalarVariable(var_name))
-    _aux.addScalarInitialCondition(ic_name, name, parameters);
+  parameters.set<SubProblem *>("_subproblem") = this;
+
+  const std::string & var_name = parameters.get<VariableName>("variable");
+  // field IC
+  if (hasVariable(var_name))
+  {
+    MooseVariable & var = getVariable(0, var_name);
+    parameters.set<SystemBase *>("_sys") = &var.sys();
+
+    const std::vector<SubdomainName> & blocks = parameters.get<std::vector<SubdomainName> >("block");
+    const std::vector<BoundaryName> & boundaries = parameters.get<std::vector<BoundaryName> >("boundary");
+
+    if (blocks.size() > 0 && boundaries.size() > 0)
+    {
+      mooseError("Both 'block' and 'boundary' parameters were specified in initial condition '" << name << "'.  You can only you either of them.");
+    }
+    // boundary-restricted IC
+    else if (boundaries.size() > 0 && blocks.size() == 0)
+    {
+      if (var.isNodal())
+      {
+        for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
+        {
+          parameters.set<THREAD_ID>("_tid") = tid;
+          for (unsigned int i = 0; i < boundaries.size(); i++)
+          {
+            BoundaryID bnd_id = _mesh.getBoundaryID(boundaries[i]);
+            _ics[tid].addBoundaryInitialCondition(var_name, bnd_id, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
+          }
+        }
+      }
+      else
+        mooseError("You are trying to set a boundary restricted variable on non-nodal variable.  That is not allowed.");
+    }
+    // block-restricted IC
+    else
+    {
+      // this means: either no block and no boundary parameters specified or just block specified
+      for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
+      {
+        parameters.set<THREAD_ID>("_tid") = tid;
+        if (blocks.size() > 0)
+          for (unsigned int i = 0; i < blocks.size(); i++)
+          {
+            SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
+            _ics[tid].addInitialCondition(var_name, blk_id, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
+          }
+        else
+          _ics[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
+      }
+    }
+
+  }
+  // scalar IC
+  else if (hasScalarVariable(var_name))
+  {
+    MooseVariableScalar & var = getScalarVariable(0, var_name);
+    parameters.set<SystemBase *>("_sys") = &var.sys();
+
+    for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+    {
+      parameters.set<THREAD_ID>("_tid") = tid;
+      _ics[tid].addScalarInitialCondition(var_name, static_cast<ScalarInitialCondition *>(_factory.create(ic_name, name, parameters)));
+    }
+  }
+  else
+    mooseError("Variable '" << var_name << "' requested in initial condition '" << name << "' does not exist.");
 }
 
 void
@@ -1334,10 +1396,50 @@ FEProblem::projectSolution()
 {
   Moose::enableFPE();
 
-  _aux.projectSolution();
-  _nl.projectSolution();
+  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  ComputeInitialConditionThread cic(*this);
+  Threads::parallel_reduce(elem_range, cic);
+
+  // now run boundary-restricted initial conditions
+  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  ComputeBoundaryInitialConditionThread cbic(*this);
+  Threads::parallel_reduce(bnd_nodes, cbic);
+
+  // Also, load values into the SCALAR dofs
+  // Note: We assume that all SCALAR dofs are on the
+  // processor with highest ID
+  if(libMesh::processor_id() == (libMesh::n_processors()-1))
+  {
+    THREAD_ID tid = 0;
+
+    const std::vector<ScalarInitialCondition *> & ics = _ics[tid].activeScalar();
+    for (std::vector<ScalarInitialCondition *>::const_iterator it = ics.begin(); it != ics.end(); ++it)
+    {
+      ScalarInitialCondition * ic = (*it);
+
+      MooseVariableScalar & var = ic->variable();
+      var.reinit();
+
+      DenseVector<Number> vals(var.order());
+      ic->compute(vals);
+
+      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+      {
+        const unsigned int global_index = var.dofIndices()[i];
+        var.sys().solution().set(global_index, vals(i));
+        var.setValue(i, vals(i));
+      }
+    }
+  }
 
   Moose::enableFPE(false);
+
+  _nl.solution().close();
+  _nl.solution().localize(*_nl.sys().current_local_solution, _nl.dofMap().get_send_list());
+
+  _aux.solution().close();
+  _aux.solution().localize(*_aux.sys().current_local_solution, _aux.dofMap().get_send_list());
 }
 
 void

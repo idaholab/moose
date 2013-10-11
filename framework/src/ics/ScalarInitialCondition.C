@@ -29,16 +29,35 @@ InputParameters validParams<ScalarInitialCondition>()
 
 ScalarInitialCondition::ScalarInitialCondition(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    ScalarCoupleable(parameters),
+    DependencyResolverInterface(),
     _subproblem(*getParam<SubProblem *>("_subproblem")),
     _sys(*getParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getScalarVariable(_tid, parameters.get<VariableName>("variable")))
 {
+  _supplied_vars.insert(getParam<VariableName>("variable"));
+
+  const std::vector<MooseVariableScalar *> & coupled_vars = getCoupledMooseScalarVars();
+  for (std::vector<MooseVariableScalar *>::const_iterator it = coupled_vars.begin(); it != coupled_vars.end(); ++it)
+    _depend_vars.insert((*it)->name());
 }
 
 ScalarInitialCondition::~ScalarInitialCondition()
 {
+}
+
+const std::set<std::string> &
+ScalarInitialCondition::getRequestedItems()
+{
+  return _depend_vars;
+}
+
+const std::set<std::string> &
+ScalarInitialCondition::getSuppliedItems()
+{
+  return _supplied_vars;
 }
 
 void

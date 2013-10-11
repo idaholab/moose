@@ -23,7 +23,6 @@
 #include "ParallelUniqueId.h"
 #include "SubProblem.h"
 #include "MooseVariableScalar.h"
-#include "ComputeInitialConditionThread.h"
 #include "MooseException.h"
 // libMesh
 #include "libmesh/equation_systems.h"
@@ -60,9 +59,6 @@ class SystemBase
 public:
   SystemBase(SubProblem & subproblem, const std::string & name);
   virtual ~SystemBase() {}
-
-  // Setup Functions ////
-  void initialICSetup();
 
   virtual unsigned int number() = 0;
   virtual const std::string & name() = 0;
@@ -101,8 +97,6 @@ public:
 
   virtual void copyOldSolutions() = 0;
   virtual void restoreSolutions() = 0;
-
-  virtual void projectSolution();
 
   /**
    * The solution vector that is currently being operated on.
@@ -161,23 +155,6 @@ public:
    * @param active_subdomains a list of subdomain ids this variable is active on
    */
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL) = 0;
-
-  // ICs /////
-  /**
-   * Add an initial condition for a field variable.
-   * @param ic_name The initial condition type
-   * @param name The name of the initial condition
-   * @param parameters Input parameters
-   */
-  void addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters);
-
-  /**
-   * Add an initial condition for scalar variable
-   * @param ic_name The initial condition type
-   * @param name The name of the initial condition
-   * @param parameters Input parameters
-   */
-  void addScalarInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters);
 
   /**
    * Query a system for a variable
@@ -391,14 +368,9 @@ protected:
   std::vector<VariableWarehouse> _vars;
   /// Map of variables (variable id -> array of subdomains where it lives)
   std::map<unsigned int, std::set<SubdomainID> > _var_map;
-  /// Initial condition warehouses (one for each thread)
-  std::vector<InitialConditionWarehouse> _ics;
 
   std::vector<std::string> _vars_to_be_zeroed_on_residual;
   std::vector<std::string> _vars_to_be_zeroed_on_jacobian;
-
-  friend class ComputeInitialConditionThread;
-  friend class ComputeBoundaryInitialConditionThread;
 };
 
 /**

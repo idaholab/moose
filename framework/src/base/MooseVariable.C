@@ -168,6 +168,13 @@ MooseVariable::prepareAux()
 }
 
 void
+MooseVariable::prepareIC()
+{
+  _dof_map.dof_indices(_elem, _dof_indices, _var_num);
+  _nodal_u.resize(_dof_indices.size());
+}
+
+void
 MooseVariable::reinitNode()
 {
   if (_node->n_dofs(_sys.number(), _var_num) > 0)
@@ -1011,9 +1018,9 @@ MooseVariable::computeNodalNeighborValues()
 }
 
 void
-MooseVariable::setNodalValue(Number value)
+MooseVariable::setNodalValue(Number value, unsigned int idx/* = 0*/)
 {
-  _nodal_u[0] = value;                  // update variable nodal value
+  _nodal_u[idx] = value;                  // update variable nodal value
   _has_nodal_value = true;
 
   if(!isNodal()) // If this is an elemental variable, then update the qp values as well

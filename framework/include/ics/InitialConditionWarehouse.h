@@ -24,6 +24,24 @@ public:
   void initialSetup();
 
   /**
+   * Update the list of active ICs
+   * @param subdomain The subdomain for which we are updating the list of active ICs
+   */
+  void updateActiveICs(SubdomainID subdomain);
+
+  /**
+   * Get the list of active ICs
+   * @return the list of active ICs
+   */
+  const std::vector<InitialCondition *> & active();
+
+  /**
+   * Get the list of active boundary ICs
+   * @return the list of active boundary ICs
+   */
+  const std::vector<InitialCondition *> & activeBoundary(BoundaryID boundary_id);
+
+  /**
    * Add an initial condition for field variable
    * @param var_name The variable name this initial condition works on
    * @param blockid The block to which this IC is restricted
@@ -39,21 +57,13 @@ public:
    */
   void addBoundaryInitialCondition(const std::string & var_name, BoundaryID boundary_id, InitialCondition * ic);
 
-  /**
-   * Get an initial condition
-   * @param var_name The name of the variable for which we are retrieving the initial condition
-   * @param blockid The block to which this IC is restricted
-   * @return The initial condition object if the initial condition exists, NULL otherwise
-   */
-  InitialCondition * getInitialCondition(const std::string & var_name, SubdomainID blockid);
+  // Scalar ICs //////
 
   /**
-   * Get a boundary-restricted initial condition
-   * @param var_name The name of the variable for which we are retrieving the initial condition
-   * @param boundary_id The boundary to which this IC is restricted
-   * @return The initial condition object if the initial condition exists, NULL otherwise
+   * Get the list of active scalar ICs
+   * @return the list of active scalar ICs
    */
-  InitialCondition * getBoundaryInitialCondition(const std::string & var_name, BoundaryID boundary_id);
+  const std::vector<ScalarInitialCondition *> & activeScalar();
 
   /**
    * Add an initial condition for scalar variable
@@ -62,21 +72,35 @@ public:
    */
   void addScalarInitialCondition(const std::string & var_name, ScalarInitialCondition * ic);
 
-  /**
-   * Get a scalar initial condition
-   * @param var_name The name of the variable for which we are retrieving the initial condition
-   * @return The initial condition object if the initial condition exists, NULL otherwise
-   */
-  ScalarInitialCondition * getScalarInitialCondition(const std::string & var_name);
-
 protected:
+  /// Active ICs
+  std::vector<InitialCondition *> _active_ics;
+  /// All block-restricted ICs
+  std::map<SubdomainID, std::vector<InitialCondition *> > _all_ics;
   /// Initial conditions: [var name] -> [block_id] -> initial condition (only 1 IC per sub-block)
   std::map<std::string, std::map<SubdomainID, InitialCondition *> > _ics;
+  /// All boundary restricted ICs
+  std::map<BoundaryID, std::vector<InitialCondition *> > _active_boundary_ics;
   /// Initial conditions: [var name] -> [boundary_id] -> initial condition (only 1 IC per boundary)
   std::map<std::string, std::map<BoundaryID, InitialCondition *> > _boundary_ics;
 
   /// Initial conditions: [var name] -> initial condition
   std::map<std::string, ScalarInitialCondition *> _scalar_ics;
+  /// Active scalar ICs
+  std::vector<ScalarInitialCondition *> _active_scalar_ics;
+
+private:
+  /**
+   * This routine uses the Dependency Resolver to sort initial conditions based on dependencies they
+   * might have on coupled values
+   */
+  void sortICs(std::vector<InitialCondition *> & ics);
+
+  /**
+   * This routine uses the Dependency Resolver to sort scalar initial conditions based on dependencies they
+   * might have on coupled values
+   */
+  void sortScalarICs(std::vector<ScalarInitialCondition *> & ics);
 };
 
 #endif /* INITIALCONDITIONWAREHOUSE_H */

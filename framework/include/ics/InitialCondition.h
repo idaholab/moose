@@ -18,9 +18,11 @@
 #include "MooseObject.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "ParallelUniqueId.h"
 #include "Restartable.h"
 #include "BlockRestrictable.h"
+#include "DependencyResolverInterface.h"
 #include "BoundaryRestrictable.h"
 
 // System includes
@@ -46,10 +48,12 @@ InputParameters validParams<InitialCondition>();
  */
 class InitialCondition :
   public MooseObject,
+  public Coupleable,
   public FunctionInterface,
   public UserObjectInterface,
   public BlockRestrictable,
   public BoundaryRestrictable,
+  public DependencyResolverInterface,
   public Restartable
 {
 public:
@@ -62,6 +66,10 @@ public:
   InitialCondition(const std::string & name, InputParameters parameters);
 
   virtual ~InitialCondition();
+
+  MooseVariable & variable() { return _var; }
+
+  virtual void compute();
 
   /**
    * The value of the variable at a point.
@@ -86,6 +94,10 @@ public:
    */
   virtual void initialSetup() {}
 
+  virtual const std::set<std::string> & getRequestedItems();
+
+  virtual const std::set<std::string> & getSuppliedItems();
+
 protected:
   FEProblem & _fe_problem;
   SystemBase & _sys;
@@ -100,6 +112,11 @@ protected:
   MooseVariable & _var;
 
   const Elem * & _current_elem;
+
+  unsigned int _qp;
+
+  std::set<std::string> _depend_vars;
+  std::set<std::string> _supplied_vars;
 };
 
 #endif //INITIALCONDITION_H

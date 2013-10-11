@@ -709,6 +709,9 @@ protected:
   /// functions
   std::vector<std::map<std::string, Function *> > _functions;
 
+  /// Initial condition warehouses (one for each thread)
+  std::vector<InitialConditionWarehouse> _ics;
+
   // material properties
   MaterialPropertyStorage _material_props;
   MaterialPropertyStorage _bnd_material_props;
@@ -849,6 +852,8 @@ public:
   friend class Resurrector;
   friend class MaterialPropertyIO;
   friend class RestartableDataIO;
+  friend class ComputeInitialConditionThread;
+  friend class ComputeBoundaryInitialConditionThread;
 };
 
 #endif /* FEPROBLEM_H */
