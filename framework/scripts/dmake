@@ -83,27 +83,23 @@ class Farm(object):
   ## Class constructor
   def __init__(self, options, make_args):
 
-    # Initialize class variables
-    self._slaves = []          # list of Machine objects to build on (private)
-    self._down = []            # list of Machine objects that are not working (private)
-    self._network = ''         # network that the user is on (private)
-    self._cache = None         # flag indicating if cache DISTCC_HOSTS was used (priavte)
-    self._make_output = None   # output pipe from make (private)
-    self._make_time = None     # duration of make command (private)
-    self._lines = []           # lines read from the HPCSC server
+    # Extract the options from the command line (public)
+    self.options = options
 
-    # Data to be read/written to ._dmake_file
-    self._dmake_data = {}
+    # Initialize class variables
+    self._slaves = []                            # list of Machine objects to build on (private)
+    self._down = []                              # list of Machine objects that are not working (private)
+    self._network = ''                           # network that the user is on (private)
+    self._cache = None                           # flag indicating if cache DISTCC_HOSTS was used (priavte)
+    self._make_output = None                     # output pipe from make (private)
+    self._make_time = None                       # duration of make command (private)
+    self._lines = []                             # lines read from the HPCSC server
+    self._dmake_data = {}                        # data to be read/written to ._dmake_file (private)
+    self._system = platform.system().lower()     # Operating system name (private)
+    self._make_args = make_args                  # Additional arguments to pass to make (private)
 
     # Set the temporary file names
     self._dmake_file = os.path.join(os.getenv('HOME'), '.dmakerc')
-
-    # Set the OS type
-    self._system = platform.system().lower()
-
-    # Extract the options from the command line
-    self._options = options
-    self._make_args = make_args
 
     # Create the master Machine (localhost)
     # Get the IP address of this machine, if on linux you need to get the IP address in special way to
@@ -128,36 +124,13 @@ class Farm(object):
     # Set the network of the master Machine
     self._master.network = self._network
 
-    # Read the hosts if not running a local build
-    if not self._options.local:
-      self._readHosts()
-
-  ##  Execute the correct action
-  def execute(self):
-
     # Clean up the .dmake files
-    if self._options.clean:
-      self._clean()
+    if self.options.clean:
+      os.remove(os.path.join(os.getenv('HOME'), '.dmakerc'));
 
-    # Print a summary, do not run make
-    if self._options.summary:
-      self.summary()
-
-    # Start the distcc daemon, do not run make
-    elif self._options.daemon or self._options.dedicated:
-      self.startDaemon()
-
-    # Kill the daemons, do not run make
-    elif self._options.kill:
-      self.killDaemon()
-
-    # Run local build if desired, short-circut the rest of the script for speed
-    elif self._options.local:
-      self.local()
-
-    # Run a distributed compile
-    else:
-      self.distribute()
+    # Read the hosts if not running a local build
+    if not self.options.local:
+      self._readHosts()
 
   ## Run the build locally only
   # @return Time required for running make
@@ -167,8 +140,8 @@ class Farm(object):
     distcc_hosts = 'localhost/' + str(self._master.threads)
 
     # Get the number of jobs
-    if self._options.jobs:
-      jobs = self._options.jobs
+    if self.options.jobs:
+      jobs = self.options.jobs
     else:
       jobs = self._master.threads
 
@@ -181,6 +154,7 @@ class Farm(object):
   ## Run the build distributed
   # @return Time required for running make
   def distribute(self):
+
     # Check that the distccd daemons are running
     self._checkDaemon()
 
@@ -212,13 +186,13 @@ class Farm(object):
   def summary(self):
 
     # The summary is not available for local compiles
-    if self._options.local:
+    if self.options.local:
       print "Summary not available when running locally"
       sys.exit()
 
     # Display the results
     distcc_hosts, jobs = self._initClient()
-    self._options.verbose = True
+    self.options.verbose = True
     self._display(distcc_hosts, jobs)
 
   # A function to facilitate cronjobs. Useful for dedicated use.
@@ -226,7 +200,7 @@ class Farm(object):
     cron_proc = subprocess.Popen([which('crontab'), '-l'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     current_cron = cron_proc.communicate()[0]
     # Modify crontab to run dmake in dedicated mode, refreshing the list every 15 minutes
-    if self._options.dedicated:
+    if self.options.dedicated:
       if current_cron.find('dmake') == -1:
         current_cron += '*/30 * * * * if [ -f ~/.bash_profile ]; then source ~/.bash_profile >/dev/null 2>&1; elif [ -f ~/.bashrc ]; then source ~/.bashrc >/dev/null 2>&1; fi && dmake --dedicated --description "' + self._dmake_data['DESCRIPTION'] + ' (Dedicated Mode)"' + ' >/dev/null 2>&1\n'
         self._updateCron(current_cron)
@@ -243,12 +217,9 @@ class Farm(object):
     subprocess.Popen([which('crontab'), self._dmake_file + '_cron'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     cron_file.close()
 
-  ## Clean the temp dmake files
-  def _clean(self):
-    os.remove(os.path.join(os.getenv('HOME'), '.dmakerc'));
-
   ## Function for reading hosts files
   def _readHosts(self):
+
     # Populate ._dmake_data if available
     if os.path.exists(self._dmake_file):
       try:
@@ -261,8 +232,8 @@ class Farm(object):
         self._clean()
 
     # Set description via arguments or prompt user for description if none set
-    if self._options.description[0] != socket.gethostname():
-      self._dmake_data['DESCRIPTION'] = self._options.description[0]
+    if self.options.description[0] != socket.gethostname():
+      self._dmake_data['DESCRIPTION'] = self.options.description[0]
     elif 'DESCRIPTION' not in self._dmake_data:
       self._dmake_data['DESCRIPTION'] = ''
       print 'Supply a description of your machine:'
@@ -271,7 +242,7 @@ class Farm(object):
 
     # Extract the list of users from the HPCSC website
     try:
-      if self._options.dedicated:
+      if self.options.dedicated:
         use = str((int(self._master.threads) / 2))
       else:
         use = str((int(self._master.threads) / 4))
@@ -294,7 +265,7 @@ class Farm(object):
     # If the file fails to read run a local build
     except:# urllib2.HTTPError or urllib2.URLError:
       print 'Warning: Failed to connect to hpcsc, running locally'
-      self._options.local = True
+      self.options.local = True
       self._lines = None
 
     # Extract the local copy of the hosts file, if the file doesn't exist
@@ -315,15 +286,15 @@ class Farm(object):
     os.environ['DISTCC_HOSTS'] = distcc_hosts
 
     # Set the verboseness of distcc
-    if self._options.quiet:
+    if self.options.quiet:
       os.environ['DISTCC_VERBOSE'] = '0'
 
     # Build the make command
-    if (self._options.dbg):
+    if (self.options.dbg):
       os.environ['METHOD'] = 'dbg'
-    elif (self._options.oprof):
+    elif (self.options.oprof):
       os.environ['METHOD'] = 'oprof'
-    elif (self._options.opt):
+    elif (self.options.opt):
       os.environ['METHOD'] = 'opt'
     make = ['make', '-j', str(jobs)]
     make.extend(self._make_args)
@@ -346,7 +317,7 @@ class Farm(object):
     output = []
 
     # Print verbose information, if desired
-    if self._options.verbose:
+    if self.options.verbose:
 
       # Print the headings
       output.append('\nMACHINE INFORMATION:')
@@ -380,7 +351,7 @@ class Farm(object):
       output.append('\nBUILD INFROMATION:')
 
     # The basic information
-    if self._options.verbose:
+    if self.options.verbose:
 
       # Format string for information display
       frmt = '%25s: '
@@ -412,7 +383,7 @@ class Farm(object):
   def _getHosts(self):
 
     # If DISTCC_HOSTS has not been populated with data
-    if self._options.refresh or ('DISTCC_HOSTS' not in self._dmake_data):
+    if self.options.refresh or ('DISTCC_HOSTS' not in self._dmake_data):
       return self._initClient()
 
     # Restart the clients if the ._dmake_file file is older than 20 min.
@@ -445,7 +416,7 @@ class Farm(object):
     jobs = 0
     distcc_hosts = ''
     for machine in self._slaves:
-      if self._options.max:
+      if self.options.max:
         distcc_hosts += " " + machine.hostname + '/' + str(machine.threads)
         jobs += int(machine.threads)
       else:
@@ -453,18 +424,18 @@ class Farm(object):
         jobs += machine.use
 
     # Get the default or user-defined values for localhost/localslots_cpp/localslots
-    if self._options.localhost:
-      localhost = self._options.localhost
+    if self.options.localhost:
+      localhost = self.options.localhost
     else:
       localhost = min(2, self._master.threads)
 
-    if self._options.localslots:
-      localslots = self._options.localslots
+    if self.options.localslots:
+      localslots = self.options.localslots
     else:
       localslots = self._master.threads/4
 
-    if self._options.localslots_cpp:
-      localslots_cpp = self._options.localslots_cpp
+    if self.options.localslots_cpp:
+      localslots_cpp = self.options.localslots_cpp
     else:
       localslots_cpp = self._master.threads - localhost
 
@@ -482,9 +453,9 @@ class Farm(object):
     jobs += int(localhost)
 
     # Override jobs if the option is given
-    if self._options.jobs:
-      jobs = int(self._options.jobs)
-    elif not self._options.max and jobs > 70:
+    if self.options.jobs:
+      jobs = int(self.options.jobs)
+    elif not self.options.max and jobs > 70:
       jobs = 70
 
     # Populate ._dmake_data to be written
@@ -492,7 +463,7 @@ class Farm(object):
     self._dmake_data['JOBS'] = jobs
 
     # Overwrite ._dmake_file file (do not save if using --max)
-    if not self._options.max:
+    if not self.options.max:
       fid = open(self._dmake_file, 'w')
       pickle.dump(self._dmake_data, fid)
       fid.close()
@@ -551,7 +522,7 @@ class Farm(object):
   def _launchDaemon(self):
 
     # Return if --no-daemon was used
-    if self._options.no_daemon:
+    if self.options.no_daemon:
       return
 
     # Initilize the slave macines
@@ -582,7 +553,7 @@ class Farm(object):
     os.environ['DISTCC_BACKOFF_PERIOD'] = '6000'
 
     # Set the timeout length, if a file takes more than this amount of time to compile consider it a failure
-    os.environ['DISTCC_IO_TIMEOUT'] = str(self._options.timeout)
+    os.environ['DISTCC_IO_TIMEOUT'] = str(self.options.timeout)
 
     # Run the daemon
     print 'Launching distcc daemons'
@@ -611,13 +582,18 @@ class Farm(object):
         # Build a Machine object and populate the master/slave attributes
         machine = Machine(parts)
 
-        # Skip this machine
+        # Disabled machines
+        if self.isMachineDisabled(machine):
+          machine.available = False
+          machine.name = machine.name + ' ** DISABLED **'
+
+        # Skip this machine if is localhost
         if machine.hostname == self._master.hostname or machine.address == self._master.address:
           self._master.name = machine.name
           continue
 
-        # Store the machine as offline if it is unavilable or that use column is zero
-        elif machine.use == 0 or not machine.available:
+        # Store the machine as offline if it is unavilable or that use column is zero or is disabled
+        if machine.use == 0 or not machine.available:
           self._down.append(machine)
 
         # Workers
@@ -626,6 +602,18 @@ class Farm(object):
 
     # Randomize the slave list
     shuffle(self._slaves)
+
+  ## Examine if the given machine was disabled by the user
+  def isMachineDisabled(self, machine):
+
+    # Examine the disable list
+    if self.options.disable:
+      for d in self.options.disable:
+        if d in machine.hostname or d in machine.address:
+          return True
+
+    # Not disable
+    return False
 
 ## Function for parsing command line arguments
 def parseArguments(args=None):
@@ -664,10 +652,11 @@ def parseArguments(args=None):
   grp3.add_argument('--localslots_cpp', type=int, help='Override the automatic setting for the number of local preprocessor slots')
   grp3.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
   grp3.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
-  grp3.add_argument('--benchmark','-b', action='store_true', help='Run \'make cleanall\' and \'dmake\' in moose_test directory')
+  grp3.add_argument('--benchmark','-b', action='store_true', help='Run \'make cleanall\' and \'dmake\' in the current directory')
   grp3.add_argument('--dedicated', action='store_true', help='Identify this machine as a dedicated build box')
   grp3.add_argument('--description', nargs=1, metavar='"Description"', type=str, default=[socket.gethostname()], help='Add description for your machine (default: %(default)s)')
   grp3.add_argument('--clean', '-c', action='store_true', help='Clean up .dmake and .dmake_hosts files')
+  grp3.add_argument('--disable', nargs='+', help='Temporarly remove hostname/IP(s) from your DISTCC_HOSTS list list')
 
   # Allow flags to be run together
   parser.parse_args('-mqvnlrbdpoc'.split())
@@ -676,7 +665,7 @@ def parseArguments(args=None):
   (options, other_args) = parser.parse_known_args()
 
   # Set the refresh options if any of the following options are used
-  refresh = ['max', 'localhost', 'localslots', 'localslots_cpp', 'jobs']
+  refresh = ['max', 'localhost', 'localslots', 'localslots_cpp', 'jobs', 'disable']
   for r in refresh:
     if getattr(options, r) and getattr(options, r) != parser.get_default(r):
       options.refresh = True
@@ -693,20 +682,30 @@ if __name__ == "__main__":
   # Run a benchmark in moose_test
   # \todo make this test your environment for moose_test directory and return an error
   if options.benchmark:
-    pth = os.path.join(os.environ['HOME'], 'projects', 'trunk', 'moose_test')
-    if not os.path.exists(pth):
-      print 'Error: The path the moose_test was not found, benchmark option failed'
-      sys.exit()
-
-    cwd = os.getcwd()
-    os.chdir(os.path.join(os.environ['HOME'], 'projects', 'trunk', 'moose_test'))
     sub = subprocess.Popen(['make', 'cleanall'])
     sub.wait()
 
-  # Create the compile farm object and execute the build
+  # Create the compile farm object and execute the build, the initialization
+  # of this object modifies the options depending on a number of factors; thus,
+  # farms.options is user from here for running the various actions
   farm = Farm(options, make_args)
-  farm.execute()
 
-  # Return to the orginal directory if running benchmark
-  if options.benchmark:
-    os.chdir(cwd)
+  # Print a summary, do not run make
+  if farm.options.summary:
+    farm.summary()
+
+  # Start the distcc daemon, do not run make
+  elif farm.options.daemon or farm.options.dedicated:
+    farm.startDaemon()
+
+  # Kill the daemons, do not run make
+  elif farm.options.kill:
+    farm.killDaemon()
+
+  # Run local build if desired, short-circut the rest of the script for speed
+  elif farm.options.local:
+    farm.local()
+
+  # Run a distributed compile
+  else:
+    farm.distribute()
