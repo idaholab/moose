@@ -75,7 +75,7 @@ ExodusOutput::getFileName(const std::string & file_base)
 
 
 void
-ExodusOutput::output(const std::string & file_base, Real time)
+ExodusOutput::output(const std::string & file_base, Real time, unsigned int /*t_step*/)
 {
   if (_out == NULL)
   {

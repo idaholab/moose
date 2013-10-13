@@ -23,8 +23,7 @@
 #include <iomanip>
 
 VTKOutput::VTKOutput(EquationSystems & es) :
-    Outputter(es),
-    _file_num(0)
+    Outputter(es)
 {
 }
 
@@ -33,7 +32,7 @@ VTKOutput::~VTKOutput()
 }
 
 std::string
-VTKOutput::getFileName(const std::string & file_base)
+VTKOutput::getFileName(const std::string & file_base, unsigned int t_step)
 {
   std::ostringstream stream_file_base;
 
@@ -43,19 +42,18 @@ VTKOutput::getFileName(const std::string & file_base)
                    << std::setprecision(0)
                    << std::setfill('0')
                    << std::right
-                   << _file_num;
+                   << t_step;
 
   return stream_file_base.str() + ".vtk";
 }
 
 
 void
-VTKOutput::output(const std::string & file_base, Real /*time*/)
+VTKOutput::output(const std::string & file_base, Real /*time*/, unsigned int t_step)
 {
   VTKIO out(_es.get_mesh());
 
-  out.write_equation_systems(getFileName(file_base), _es);
-  _file_num++;
+  out.write_equation_systems(getFileName(file_base, t_step), _es);
 }
 
 void

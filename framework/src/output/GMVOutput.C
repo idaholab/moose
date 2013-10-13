@@ -23,8 +23,7 @@
 #include <iomanip>
 
 GMVOutput::GMVOutput(EquationSystems & es) :
-    Outputter(es),
-    _file_num(0)
+    Outputter(es)
 {
 }
 
@@ -33,7 +32,7 @@ GMVOutput::~GMVOutput()
 }
 
 std::string
-GMVOutput::getFileName(const std::string & file_base)
+GMVOutput::getFileName(const std::string & file_base, unsigned int t_step)
 {
   std::ostringstream stream_file_base;
 
@@ -43,19 +42,18 @@ GMVOutput::getFileName(const std::string & file_base)
                    << std::setprecision(0)
                    << std::setfill('0')
                    << std::right
-                   << _file_num;
+                   << t_step;
 
   return stream_file_base.str() + ".gmv";
 }
 
 
 void
-GMVOutput::output(const std::string & file_base, Real /*time*/)
+GMVOutput::output(const std::string & file_base, Real /*time*/, unsigned int t_step)
 {
   GMVIO out(_es.get_mesh());
 
-  out.write_equation_systems(getFileName(file_base), _es);
-  _file_num++;
+  out.write_equation_systems(getFileName(file_base, t_step), _es);
 }
 
 void

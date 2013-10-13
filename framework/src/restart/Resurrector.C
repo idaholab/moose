@@ -78,10 +78,10 @@ Resurrector::write()
     return;
 
   std::string s = _fe_problem.out().fileBase() + "_restart";
-  std::string file_base = _xda.getFileName(s);
+  std::string file_base = _xda.getFileName(s, _fe_problem.timeStep());
   _restart_file_names.push_back(file_base);
 
-  _xda.output(s, _fe_problem.time());                   // time does not have any effect here actually
+  _xda.output(s, _fe_problem.time(), _fe_problem.timeStep());                   // time does not have any effect here actually
   if (_fe_problem._material_props.hasStatefulProperties())
     _mat.write(file_base + MAT_PROP_EXT);
 

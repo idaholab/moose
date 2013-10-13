@@ -27,18 +27,15 @@ public:
   XDAOutput(EquationSystems & es, bool binary = false);
   virtual ~XDAOutput();
 
-  virtual void output(const std::string & file_base, Real time);
+  virtual void output(const std::string & file_base, Real time, unsigned int t_step);
   virtual void outputPps(const std::string & file_base, const FormattedTable & table, Real time);
 
   virtual void meshChanged();
   virtual void sequence(bool state);
 
-  std::string getFileName(const std::string & file_base);
+  std::string getFileName(const std::string & file_base, unsigned int t_step);
 
 protected:
-  /// number of the file
-  int _file_num;
-
   /// true if outputting in binary format
   bool _binary;
 };

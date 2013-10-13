@@ -574,7 +574,7 @@ DisplacedProblem::updateGeomSearch()
 void
 DisplacedProblem::output(bool /*force*/)
 {
-  _ex->output(_mproblem.out().fileBase() + "_displaced", _mproblem.time());
+  _ex->output(_mproblem.out().fileBase() + "_displaced", _mproblem.time(), _mproblem.timeStep());
   if (_seq)
     _ex->meshChanged();
 }

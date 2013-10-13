@@ -41,6 +41,7 @@ public:
    * @param file_name The file base name of a restart file
    */
   void setRestartFile(const std::string & file_base);
+
   /**
    * Are we restarting from a file
    * @return true if we are restarting, otherwise false

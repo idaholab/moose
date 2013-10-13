@@ -28,6 +28,7 @@ Output::Output(FEProblem & fe_problem, EquationSystems & eq) :
     _fe_problem(fe_problem),
     _eq(eq),
     _time(_fe_problem.time()),
+    _time_step(_fe_problem.timeStep()),
     _dt(_fe_problem.dt()),
     _interval(1),
     _screen_interval(1),
@@ -116,7 +117,7 @@ void
 Output::output()
 {
   for (unsigned int i = 0; i < _outputters.size(); i++)
-    _outputters[i]->output(_file_base, _time);
+    _outputters[i]->output(_file_base, _time, _time_step);
 }
 
 void
@@ -174,7 +175,7 @@ Output::iterationOutput(SNES, PetscInt its, PetscReal /*fnorm*/, void * _output)
     std::cout << "  Writing iteration plot for NL step " << its << " at time " << iteration_time << std::endl;
     for (unsigned int i(0); i < output->_outputters.size(); ++i)
     {
-      output->_outputters[i]->output(output->_file_base, iteration_time);
+      output->_outputters[i]->output(output->_file_base, iteration_time, output->_time_step);
     }
   }
   return 0;

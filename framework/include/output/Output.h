@@ -110,6 +110,7 @@ protected:
   FEProblem & _fe_problem;
   EquationSystems & _eq;
   Real & _time;
+  int & _time_step;
   Real & _dt;
   unsigned int _interval;
   unsigned int _screen_interval;

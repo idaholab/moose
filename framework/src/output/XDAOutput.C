@@ -20,7 +20,6 @@
 
 XDAOutput::XDAOutput(EquationSystems & es, bool binary) :
     Outputter(es),
-    _file_num(0),
     _binary(binary)
 {
 }
@@ -30,7 +29,7 @@ XDAOutput::~XDAOutput()
 }
 
 std::string
-XDAOutput::getFileName(const std::string & file_base)
+XDAOutput::getFileName(const std::string & file_base, unsigned int t_step)
 {
   std::ostringstream stream_file_base;
 
@@ -40,29 +39,27 @@ XDAOutput::getFileName(const std::string & file_base)
                    << std::setprecision(0)
                    << std::setfill('0')
                    << std::right
-                   << _file_num;
+                   << t_step;
 
   return stream_file_base.str();
 }
 
 
 void
-XDAOutput::output(const std::string & file_base, Real /*time*/)
+XDAOutput::output(const std::string & file_base, Real /*time*/, unsigned int t_step)
 {
   MeshBase & mesh = _es.get_mesh();
 
   if (_binary)
   {
-    mesh.write(getFileName(file_base)+"_mesh.xdr");
-    _es.write (getFileName(file_base)+".xdr", libMeshEnums::ENCODE);
+    mesh.write(getFileName(file_base, t_step)+"_mesh.xdr");
+    _es.write (getFileName(file_base, t_step)+".xdr", libMeshEnums::ENCODE);
   }
   else
   {
-    mesh.write(getFileName(file_base)+"_mesh.xda");
-    _es.write (getFileName(file_base)+".xda", libMeshEnums::WRITE);
+    mesh.write(getFileName(file_base, t_step)+"_mesh.xda");
+    _es.write (getFileName(file_base, t_step)+".xda", libMeshEnums::WRITE);
   }
-
-  _file_num++;
 }
 
 void

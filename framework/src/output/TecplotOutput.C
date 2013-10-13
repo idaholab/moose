@@ -23,7 +23,6 @@
 
 TecplotOutput::TecplotOutput(EquationSystems & es, bool binary) :
     Outputter(es),
-    _file_num(0),
     _binary(binary)
 {
 }
@@ -33,7 +32,7 @@ TecplotOutput::~TecplotOutput()
 }
 
 std::string
-TecplotOutput::getFileName(const std::string & file_base)
+TecplotOutput::getFileName(const std::string & file_base, unsigned int t_step)
 {
   std::ostringstream stream_file_base;
 
@@ -43,19 +42,18 @@ TecplotOutput::getFileName(const std::string & file_base)
                    << std::setprecision(0)
                    << std::setfill('0')
                    << std::right
-                   << _file_num;
+                   << t_step;
 
   return stream_file_base.str();
 }
 
 
 void
-TecplotOutput::output(const std::string & file_base, Real /*time*/)
+TecplotOutput::output(const std::string & file_base, Real /*time*/, unsigned int t_step)
 {
   TecplotIO out(_es.get_mesh(), _binary);
 
-  out.write_equation_systems(getFileName(file_base) + ".plt", _es);
-  _file_num++;
+  out.write_equation_systems(getFileName(file_base, t_step) + ".plt", _es);
 }
 
 void

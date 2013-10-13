@@ -31,7 +31,7 @@ public:
   ExodusOutput(MooseApp & app, EquationSystems & es, bool output_input=true);
   virtual ~ExodusOutput();
 
-  virtual void output(const std::string & file_base, Real time);
+  virtual void output(const std::string & file_base, Real time, unsigned int t_step);
   virtual void outputPps(const std::string & file_base, const FormattedTable & table, Real time);
   virtual bool supportsPpsOutput() { return true; }
   virtual void outputInput();
