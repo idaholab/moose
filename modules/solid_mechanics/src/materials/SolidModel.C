@@ -610,7 +610,7 @@ SolidModel::computeCombinedStress()
   const std::vector<ConstitutiveModel*> & cm( _submodels[current_block] );
   const unsigned num_submodels = cm.size();
 
-  std::vector<SymmTensor> inelastic_strain_increment(num_submodels);
+  SymmTensor inelastic_strain_increment;
 
   SymmTensor elastic_strain_increment;
   SymmTensor stress_new_last( stress_new );
@@ -624,14 +624,14 @@ SolidModel::computeCombinedStress()
         (num_submodels != 1 || counter < 1))
   {
     elastic_strain_increment = _strain_increment;
-    stress_new = *elasticityTensor() * (elastic_strain_increment - inelastic_strain_increment[num_submodels-1]);
+    stress_new = *elasticityTensor() * (elastic_strain_increment - inelastic_strain_increment);
     stress_new += _stress_old;
 
     for (unsigned i_cm(0); i_cm < num_submodels; ++i_cm)
     {
       cm[i_cm]->computeStress( _qp, *elasticityTensor(), elastic_strain_increment, _stress_old,
-                               inelastic_strain_increment[i_cm], stress_new );
-      elastic_strain_increment -= inelastic_strain_increment[i_cm];
+                               inelastic_strain_increment, stress_new );
+      elastic_strain_increment -= inelastic_strain_increment;
     }
 
     // now check convergence
