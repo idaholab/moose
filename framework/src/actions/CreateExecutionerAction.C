@@ -64,7 +64,7 @@ CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & param
   MooseEnum line_search("default, shell, none, basic, l2, bt, cp", "default");
 #endif
   params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type (Note: none = basic)");
-  params.addParam<bool>("print_linear_residuals", false, "Specifies whether the linear residuals are printed during the solve");
+  params.addParam<bool>("print_linear_residuals", "Specifies whether the linear residuals are printed during the solve");
 
   MooseEnum common_petsc_options("", "", true);
   std::vector<MooseEnum> common_petsc_options_vec(1, common_petsc_options);
@@ -143,7 +143,8 @@ CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, In
   std::vector<std::string> petsc_options_iname = params.get<std::vector<std::string> >("petsc_options_iname");
   std::vector<std::string> petsc_options_value = params.get<std::vector<std::string> >("petsc_options_value");
 
-  fe_problem.printLinearResiduals(params.get<bool>("print_linear_residuals"));
+  if (params.isParamValid("print_linear_residuals"))
+    fe_problem.printLinearResiduals(params.get<bool>("print_linear_residuals"));
 
   if (params.isParamValid("solve_type"))
   {
