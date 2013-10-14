@@ -39,7 +39,7 @@
 
 [Postprocessors]
   [./from_master]
-    type = Reporter
+    type = Receiver
   [../]
 []
 
@@ -61,4 +61,3 @@
   exodus = true
   perf_log = true
 []
-

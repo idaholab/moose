@@ -146,6 +146,7 @@
 #include "NumResidualEvaluations.h"
 
 #include "Reporter.h"
+#include "Receiver.h"
 #include "SideAverageValue.h"
 #include "SideFluxIntegral.h"
 #include "SideFluxAverage.h"
@@ -438,6 +439,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NumResidualEvaluations);
   registerPostprocessor(PlotFunction);
   registerPostprocessor(Reporter);
+  registerPostprocessor(Receiver);
   registerPostprocessor(SideAverageValue);
   registerPostprocessor(SideFluxIntegral);
   registerPostprocessor(SideFluxAverage);
