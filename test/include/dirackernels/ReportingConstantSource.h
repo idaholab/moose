@@ -41,7 +41,7 @@ protected:
   Point _p;
 
   //PostprocessorValue & _reporter;
-  PostprocessorValue & _reporter;
+  ReportableValue & _reporter;
 };
 
 #endif //REPORTINGCONSTANTSOURCE_H

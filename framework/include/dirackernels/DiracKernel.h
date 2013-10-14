@@ -32,8 +32,8 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
-#include "Reportable.h"
 #include "Restartable.h"
+#include "Reportable.h"
 
 //libMesh includes
 #include "libmesh/libmesh_common.h"
@@ -66,8 +66,8 @@ class DiracKernel :
   public MaterialPropertyInterface,
   public PostprocessorInterface,
   protected GeometricSearchInterface,
-  public Reportable,
-  public Restartable
+  public Restartable,
+  public Reportable
 {
 public:
   DiracKernel(const std::string & name, InputParameters parameters);

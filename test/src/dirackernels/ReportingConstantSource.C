@@ -20,7 +20,6 @@ InputParameters validParams<ReportingConstantSource>()
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<Real>("value", "The value of the point source");
   params.addRequiredParam<std::vector<Real> >("point", "The x,y,z coordinates of the point");
-  params.addRequiredParam<PostprocessorName>("reporter", "The Postprocessor to report the total flux to");
   return params;
 }
 
@@ -28,7 +27,7 @@ ReportingConstantSource::ReportingConstantSource(const std::string & name, Input
     DiracKernel(name, parameters),
     _value(getParam<Real>("value")),
     _point_param(getParam<std::vector<Real> >("point")),
-    _reporter(getPostprocessorValue("reporter"))
+    _reporter(declareReportableValue("dirac_reporter"))
 {
   _p(0) = _point_param[0];
 
