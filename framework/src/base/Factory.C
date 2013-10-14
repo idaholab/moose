@@ -69,8 +69,8 @@ time_t Factory::parseTime(const std::string t_str)
   t_end_info->tm_mon  = std::atoi(t_str.substr(0,2).c_str())-1;
   t_end_info->tm_mday = std::atoi(t_str.substr(3,2).c_str());
   t_end_info->tm_year = std::atoi(t_str.substr(6,4).c_str())-1900;
-  t_end_info->tm_hour = std::atoi(t_str.substr(11,2).c_str());
-  t_end_info->tm_min  = std::atoi(t_str.substr(15,2).c_str());
+  t_end_info->tm_hour = std::atoi(t_str.substr(11,2).c_str())+1;
+  t_end_info->tm_min  = std::atoi(t_str.substr(14,2).c_str());
   t_end_info->tm_sec  = 0;
   t_end = mktime(t_end_info);
   return t_end;

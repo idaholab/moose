@@ -438,7 +438,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NumVars);
   registerPostprocessor(NumResidualEvaluations);
   registerPostprocessor(PlotFunction);
-  registerPostprocessor(Reporter);
+  registerDeprecatedObject(Reporter, "11/14/2013 07:42");
   registerPostprocessor(Receiver);
   registerPostprocessor(SideAverageValue);
   registerPostprocessor(SideFluxIntegral);
