@@ -478,11 +478,9 @@ void petscSetDefaults(FEProblem & problem)
 #if PETSC_VERSION_LESS_THAN(2,3,3)
     ierr = SNESSetMonitor (snes, nonlinearMonitor, &problem, PETSC_NULL);
 #else
-    ierr = SNESMonitorCancel(snes);
-    CHKERRABORT(libMesh::COMM_WORLD, ierr);
-    ierr = SNESMonitorSet(snes, nonlinearMonitor, &problem, PETSC_NULL);
+    ierr = SNESMonitorSet (snes, nonlinearMonitor, &problem, PETSC_NULL);
 #endif
-    CHKERRABORT(libMesh::COMM_WORLD, ierr);
+    CHKERRABORT(libMesh::COMM_WORLD,ierr);
   }
 
   if(problem.shouldPrintLinearResiduals())
@@ -491,11 +489,9 @@ void petscSetDefaults(FEProblem & problem)
 #if PETSC_VERSION_LESS_THAN(2,3,3)
     ierr = KSPSetMonitor (ksp, linearMonitor, &problem, PETSC_NULL);
 #else
-    ierr = KSPMonitorCancel(ksp);
-    CHKERRABORT(libMesh::COMM_WORLD, ierr);
-    ierr = KSPMonitorSet(ksp, linearMonitor, &problem, PETSC_NULL);
+    ierr = KSPMonitorSet (ksp, linearMonitor, &problem, PETSC_NULL);
 #endif
-    CHKERRABORT(libMesh::COMM_WORLD, ierr);
+    CHKERRABORT(libMesh::COMM_WORLD,ierr);
   }
 
 
