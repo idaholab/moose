@@ -21,6 +21,7 @@
 #include "PostprocessorInterface.h"
 #include "UserObjectInterface.h"
 #include "Restartable.h"
+#include "Reportable.h"
 
 // libMesh
 #include "libmesh/vector_value.h"
@@ -41,7 +42,8 @@ class Function :
   public TransientInterface,
   public PostprocessorInterface,
   public UserObjectInterface,
-  public Restartable
+  public Restartable,
+  public Reportable
 {
 public:
   Function(const std::string & name, InputParameters parameters);

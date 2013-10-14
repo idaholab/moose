@@ -41,6 +41,7 @@ InitialCondition::InitialCondition(const std::string & name, InputParameters par
     BoundaryRestrictable(name, parameters),
     DependencyResolverInterface(),
     Restartable(name, parameters, "InitialConditions"),
+    Reportable(name, parameters),
     _fe_problem(*getParam<FEProblem *>("_fe_problem")),
     _sys(*getParam<SystemBase *>("_sys")),
     _tid(getParam<THREAD_ID>("_tid")),

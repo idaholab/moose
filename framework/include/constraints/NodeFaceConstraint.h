@@ -29,6 +29,7 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "Restartable.h"
+#include "Reportable.h"
 
 //libMesh includes
 #include "libmesh/libmesh_common.h"
@@ -61,7 +62,8 @@ class NodeFaceConstraint :
   public FunctionInterface,
   public TransientInterface,
   private GeometricSearchInterface,
-  public Restartable
+  public Restartable,
+  public Reportable
 {
 public:
   NodeFaceConstraint(const std::string & name, InputParameters parameters);

@@ -26,6 +26,7 @@
 #include "MooseVariableScalar.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"
+#include "Reportable.h"
 
 // libMesh
 #include "libmesh/fe.h"
@@ -48,7 +49,8 @@ class ScalarKernel :
   public FunctionInterface,
   public UserObjectInterface,
   public PostprocessorInterface,
-  public TransientInterface
+  public TransientInterface,
+  public Reportable
 {
 public:
   ScalarKernel(const std::string & name, InputParameters parameters);

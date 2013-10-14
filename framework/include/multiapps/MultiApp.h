@@ -17,6 +17,7 @@
 #include "MooseApp.h"
 #include "MooseEnum.h"
 #include "Restartable.h"
+#include "Reportable.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
@@ -38,7 +39,8 @@ InputParameters validParams<MultiApp>();
  */
 class MultiApp :
   public MooseObject,
-  public Restartable
+  public Restartable,
+  public Reportable
 {
 public:
   MultiApp(const std::string & name, InputParameters parameters);

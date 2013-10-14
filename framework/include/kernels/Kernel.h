@@ -29,8 +29,8 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
-#include "Reportable.h"
 #include "Restartable.h"
+#include "Reportable.h"
 
 // libMesh
 #include "libmesh/fe.h"
@@ -55,8 +55,8 @@ class Kernel :
   public PostprocessorInterface,
   public MaterialPropertyInterface,
   protected GeometricSearchInterface,
-  public Reportable,
-  public Restartable
+  public Restartable,
+  public Reportable
 {
 public:
   Kernel(const std::string & name, InputParameters parameters);

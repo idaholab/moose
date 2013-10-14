@@ -29,6 +29,7 @@
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "Restartable.h"
+#include "Reportable.h"
 
 //forward declarations
 class Problem;
@@ -57,7 +58,8 @@ class AuxKernel :
   public PostprocessorInterface,
   public DependencyResolverInterface,
   protected GeometricSearchInterface,
-  public Restartable
+  public Restartable,
+  public Reportable
 {
 public:
   AuxKernel(const std::string & name, InputParameters parameters);

@@ -24,6 +24,7 @@
 #include "MooseVariableDependencyInterface.h"
 #include "BlockRestrictable.h"
 #include "Restartable.h"
+#include "Reportable.h"
 
 #include "Assembly.h"
 #include "MooseVariable.h"
@@ -49,7 +50,8 @@ class Indicator :
   public FunctionInterface,
   public UserObjectInterface,
   public MooseVariableDependencyInterface,
-  public Restartable
+  public Restartable,
+  public Reportable
 {
 public:
   Indicator(const std::string & name, InputParameters parameters);

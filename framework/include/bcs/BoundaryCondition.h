@@ -29,6 +29,7 @@
 #include "BoundaryRestrictableRequired.h"
 #include "Assembly.h"
 #include "Restartable.h"
+#include "Reportable.h"
 
 // libMesh
 #include "libmesh/elem.h"
@@ -60,7 +61,8 @@ class BoundaryCondition :
   public TransientInterface,
   public PostprocessorInterface,
   public GeometricSearchInterface,
-  public Restartable
+  public Restartable,
+  public Reportable
 {
 public:
 

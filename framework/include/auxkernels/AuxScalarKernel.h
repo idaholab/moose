@@ -25,6 +25,7 @@
 #include "Assembly.h"
 #include "MooseVariableScalar.h"
 #include "SubProblem.h"
+#include "Reportable.h"
 
 // libMesh
 #include "libmesh/fe.h"
@@ -50,7 +51,8 @@ class AuxScalarKernel :
   public FunctionInterface,
   public UserObjectInterface,
   public PostprocessorInterface,
-  public TransientInterface
+  public TransientInterface,
+  public Reportable
 {
 public:
   AuxScalarKernel(const std::string & name, InputParameters parameters);

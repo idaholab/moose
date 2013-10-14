@@ -42,6 +42,7 @@ ScalarKernel::ScalarKernel(const std::string & name, InputParameters parameters)
     UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
     TransientInterface(parameters, name, "scalar_kernel"),
+    Reportable(name, parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
 

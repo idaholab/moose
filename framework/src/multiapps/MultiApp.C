@@ -93,6 +93,7 @@ InputParameters validParams<MultiApp>()
 MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     MooseObject(name, parameters),
     Restartable(name, parameters, "MultiApps"),
+    Reportable(name, parameters),
     _fe_problem(getParam<FEProblem *>("_fe_problem")),
     _app_type(getParam<MooseEnum>("app_type")),
     _input_files(getParam<std::vector<std::string> >("input_files")),
@@ -493,4 +494,3 @@ MultiApp::globalAppToLocal(unsigned int global_app)
   std::cout<<_first_local_app<<" "<<global_app<<std::endl;
   mooseError("Invalid global_app!");
 }
-

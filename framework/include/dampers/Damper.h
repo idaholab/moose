@@ -22,6 +22,7 @@
 #include "MooseVariable.h"
 #include "MaterialPropertyInterface.h"
 #include "Restartable.h"
+#include "Reportable.h"
 
 // libMesh
 #include "libmesh/elem.h"
@@ -46,7 +47,8 @@ class Damper :
   public MooseObject,
   public SetupInterface,
   protected MaterialPropertyInterface,
-  public Restartable
+  public Restartable,
+  public Reportable
 {
 public:
   Damper(const std::string & name, InputParameters parameters);

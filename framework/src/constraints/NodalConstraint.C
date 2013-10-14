@@ -36,6 +36,7 @@ NodalConstraint::NodalConstraint(const std::string & name, InputParameters param
   TransientInterface(parameters, name, "nodal_constraints"),
   GeometricSearchInterface(parameters),
   Restartable(name, parameters, "Constraints"),
+  Reportable(name, parameters),
   _subproblem(*parameters.get<SubProblem *>("_subproblem")),
   _sys(*parameters.get<SystemBase *>("_sys")),
   _tid(parameters.get<THREAD_ID>("_tid")),

@@ -22,6 +22,7 @@
 #include "SubProblem.h"
 #include "Restartable.h"
 #include "MooseMesh.h"
+#include "Reportable.h"
 
 //libMesh includes
 #include "libmesh/libmesh_common.h"
@@ -39,7 +40,8 @@ InputParameters validParams<UserObject>();
 class UserObject :
   public MooseObject,
   public SetupInterface,
-  public Restartable
+  public Restartable,
+  public Reportable
 {
 public:
   UserObject(const std::string & name, InputParameters params);

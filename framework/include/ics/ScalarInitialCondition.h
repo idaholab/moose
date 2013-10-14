@@ -20,6 +20,7 @@
 #include "InputParameters.h"
 #include "Coupleable.h"
 #include "DependencyResolverInterface.h"
+#include "Reportable.h"
 
 #include "libmesh/dense_vector.h"
 
@@ -42,7 +43,8 @@ InputParameters validParams<ScalarInitialCondition>();
 class ScalarInitialCondition :
   public MooseObject,
   public ScalarCoupleable,
-  public DependencyResolverInterface
+  public DependencyResolverInterface,
+  public Reportable
 {
 public:
   /**

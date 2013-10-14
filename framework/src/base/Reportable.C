@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "Reportable.h"
+#include "FEProblem.h"
 
 Reportable::Reportable(std::string name, InputParameters & parameters) :
     _reportable_feproblem(parameters.get<FEProblem *>("_fe_problem")),

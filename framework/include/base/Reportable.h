@@ -16,11 +16,13 @@
 #define REPORTABLE_H
 
 #include "InputParameters.h"
-#include "FEProblem.h"
+#include "ReportableData.h"
+
+// Forward decleration
+class FEProblem;
 
 /**
  * An interface for declaring reportable data
- *
  */
 class Reportable
 {
