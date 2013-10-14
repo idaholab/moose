@@ -38,7 +38,6 @@
   [../]
 
   [./temp]
-    initial_condition = 300.0
   [../]
 []
 
