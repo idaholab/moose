@@ -1,6 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
+  nx = 2
+  ny = 2
+  nz = 2
   elem_type = HEX8
 []
 
@@ -138,6 +141,7 @@
     hprops = '1 541.5 60.8 109.8'
     gprops = '1 12 60.8'
     all_21 = false
+    euler_angle_file_name = euler_ang_test.inp
   [../]
   [./elastic]
     type = FiniteStrainElasticMaterial
@@ -181,12 +185,10 @@
 []
 
 [Executioner]
+  # Preconditioned JFNK (default)
   type = Transient
   dt = 0.05
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  solve_type = PJFNK
   petsc_options_iname = -pc_hypre_type
   petsc_options_value = boomerang
   nl_abs_tol = 1e-10
@@ -200,7 +202,7 @@
 []
 
 [Output]
-  file_base = out
+  file_base = outpoly
   output_initial = true
   exodus = true
 []

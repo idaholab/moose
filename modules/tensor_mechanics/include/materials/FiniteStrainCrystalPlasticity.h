@@ -17,6 +17,7 @@ public:
 
 protected:
   virtual void computeQpStress();
+  virtual void computeQpElasticityTensor();
   virtual void initQpStatefulProperties();
   virtual void calc_resid_jacob(RankTwoTensor*,RankTwoTensor*,RankTwoTensor*,RankTwoTensor*,Real*,Real*,
 				RankTwoTensor*,RankFourTensor*);
@@ -29,6 +30,7 @@ protected:
   void get_euler_rot();
   RankFourTensor outerProduct(RankTwoTensor &a,RankTwoTensor &b);
   RankTwoTensor getmatrot(RankTwoTensor &a);
+  
   
   const int _nss;
   
@@ -53,6 +55,7 @@ protected:
   Real _r;
   Real _rtol;
   Real _gtol;
+  Real _slip_incr_tol;
   
     
 

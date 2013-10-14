@@ -16,6 +16,7 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
   params.addParam<std::string>("euler_angle_file_name","", "Name of the file containing the euler angles");
   params.addParam<Real>("rtol",1e-8,"Constitutive stress residue tolerance");
   params.addParam<Real>("gtol",1e2,"Constitutive gss residue tolerance");
+  params.addParam<Real>("slip_incr_tol",2e-2,"Constitutive gss residue tolerance");
 
   return params;
 }
@@ -31,6 +32,7 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string &
       _euler_angle_file_name(getParam<std::string>("euler_angle_file_name")),
       _rtol(getParam<Real>("rtol")),
       _gtol(getParam<Real>("gtol")),
+      _slip_incr_tol(getParam<Real>("slip_incr_tol")),
       _fp(declareProperty<RankTwoTensor>("fp")),
       _fp_old(declarePropertyOld<RankTwoTensor>("fp")),
       _pk2(declareProperty<RankTwoTensor>("pk2")),
@@ -160,7 +162,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
   maxiter=100;
   maxiterg=100;
   
-  slip_incr_tol=0.02;
+
 
   fp_inv.zero();
   fp_old_inv=_fp_old[_qp].inverse();
@@ -191,7 +193,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
 	}
 
       fac=1.0;
-      if(slip_incr_max > slip_incr_tol)
+      if(slip_incr_max > _slip_incr_tol)
 	{
 	  fac=0.1;
 	  printf("slip_incr=%d %d %f\n",_current_elem->id(),_qp,slip_incr_max);
@@ -222,7 +224,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
 	    }
 	  
 	  fac=1.0;
-	  if(slip_incr_max > slip_incr_tol)
+	  if(slip_incr_max > _slip_incr_tol)
 	    {
 	      fac=0.1;
 	      printf("slip_incr=%d %d %f\n",_current_elem->id(),_qp,slip_incr_max);
@@ -392,18 +394,24 @@ FiniteStrainCrystalPlasticity::update_gss(Real *slip_incr)
   Real hab;
   Real hb[_nss];
   Real qab,val;
+  Real *data;//Kalidindi
+
+  int nsize=_hprops.size();//Kalidindi
+  data=_hprops.data();//Kalidindi
+  Real a=data[4];//Kalidindi
 
   _acc_slip[_qp]=_acc_slip_old[_qp];
   for(int i=0;i < _nss; i++)
     _acc_slip[_qp]=_acc_slip[_qp]+fabs(slip_incr[i]);
 
 
-  val=cosh(_h0*_acc_slip[_qp]/(_tau_sat-_tau_init));
-  val=_h0*pow(1.0/val,2.0);
+  val=cosh(_h0*_acc_slip[_qp]/(_tau_sat-_tau_init));//Karthik
+  val=_h0*pow(1.0/val,2.0);//Kalidindi
 
 
   for(int i=0;i < _nss; i++)
-    hb[i]=val;
+    //    hb[i]=val;
+    hb[i]=_h0*pow(1.0-_gss[_qp][i]/_tau_sat,a);
   
 
       
@@ -414,7 +422,11 @@ FiniteStrainCrystalPlasticity::update_gss(Real *slip_incr)
 
       for(int j=0;j < _nss; j++)
 	{
-	  if(i==j)
+	  int iplane,jplane;
+	  iplane=i/3;
+	  jplane=j/3;
+
+	  if(iplane==jplane)//Kalidindi
 	    qab=1.0; 
 	  else
 	    qab=_r;
@@ -496,7 +508,6 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(RankTwoTensor* pk2,RankTwoTensor
 
   for (int i=0;i<_nss;i++)
     {
-      //      dtaudpk2[i]=ce*s0[i];
       dtaudpk2[i]=s0[i];
       dfpinvdslip[i]=-(*fp_old_inv)*s0[i];
     }
@@ -655,5 +666,59 @@ FiniteStrainCrystalPlasticity::get_euler_ang()
       
     }
 
+
+}
+
+void FiniteStrainCrystalPlasticity::computeQpElasticityTensor()
+{
+  // Fill in the matrix stiffness material property
+  _elasticity_tensor[_qp] = _Cijkl;
+
+  ElasticityTensorR4 tan_mod;
+  RankTwoTensor fe,fp_inv,pk2fet,fepk2;
+  RankFourTensor dfedf,deedfe,dsigdpk2dfe,temp;
+
+  fp_inv=_fp[_qp].inverse();
+  fe=_dfgrd[_qp]*fp_inv;
+
+  for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+      for(int l=0;l<3;l++)
+	dfedf(i,j,i,l)=fp_inv(l,j);
+
+  for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+      for(int k=0;k<3;k++)
+	{
+	  deedfe(i,j,k,i)=deedfe(i,j,k,i)+fe(k,j)*0.5;
+	  deedfe(i,j,k,j)=deedfe(i,j,k,j)+fe(k,i)*0.5;
+	}
+
+  
+  for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+      for(int k=0;k<3;k++)
+	for(int l=0;l<3;l++)
+	  temp(i,j,k,l)=fe(i,k)*fe(j,l);
+
+  dsigdpk2dfe=temp*_elasticity_tensor[_qp]*deedfe;
+
+  pk2fet=_pk2[_qp]*fe.transpose();
+  fepk2=fe*_pk2[_qp];
+
+  for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+      for(int l=0;l<3;l++)
+	{
+	  tan_mod(i,j,i,l)=tan_mod(i,j,i,l)+pk2fet(l,j);
+	  tan_mod(i,j,j,l)=tan_mod(i,j,j,l)+fepk2(i,l);
+	}
+
+  tan_mod+=dsigdpk2dfe;
+
+  Real je=fe.det();
+  tan_mod/=je;
+
+  _Jacobian_mult[_qp] = tan_mod;
 
 }
