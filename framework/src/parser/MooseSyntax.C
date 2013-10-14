@@ -74,6 +74,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   syntax.registerActionSyntax("AddDamperAction", "Dampers/*");
 
+  syntax.registerActionSyntax("RecoverBaseAction", "Output");
   syntax.registerActionSyntax("SetupOutputAction", "Output");
   syntax.registerActionSyntax("SetupOverSamplingAction", "Output/OverSampling");
 

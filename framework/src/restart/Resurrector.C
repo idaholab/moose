@@ -22,7 +22,6 @@ const std::string Resurrector::RESTARTABLE_DATA_EXT(".rd");
 
 Resurrector::Resurrector(FEProblem & fe_problem) :
     _fe_problem(fe_problem),
-    _restart(false),
     _num_restart_files(0),
     _xda(_fe_problem.es()),
     _mat(_fe_problem),
@@ -37,7 +36,6 @@ Resurrector::~Resurrector()
 void
 Resurrector::setRestartFile(const std::string & file_base)
 {
-  _restart = true;
   _restart_file_base = file_base;
 }
 
@@ -103,12 +101,6 @@ Resurrector::write()
     fn = fb + RESTARTABLE_DATA_EXT;
     remove(fn.c_str());           // user data
   }
-}
-
-bool
-Resurrector::isOn()
-{
-  return _restart;
 }
 
 unsigned int

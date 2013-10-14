@@ -49,6 +49,10 @@ InputParameters validParams<MooseApp>()
 
   params.addCommandLineParam<unsigned int>("refinements", "-r <n>", 0, "Specify additional initial uniform refinements for automatic scaling");
 
+  params.addCommandLineParam<std::string>("recover", "--recover [file_base]", "Continue the calculation.  If file_base is ommitted then the most recent recovery file will be utilized");
+
+  params.addCommandLineParam<bool>("half_transient", "--half-transient", "When true the simulation will only run half of its specified transient (ie half the timesteps).  This is useful for testing recovery and restart");
+
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char**>("_argv");
 
@@ -73,7 +77,9 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters):
     _error_overridden(false),
     _ready_to_exit(false),
     _initial_from_file(false),
-    _parallel_mesh_on_command_line(false)
+    _parallel_mesh_on_command_line(false),
+    _recover(false),
+    _half_transient(false)
 {
   if(isParamValid("_argc") && isParamValid("_argv"))
   {
@@ -107,6 +113,9 @@ MooseApp::setupOptions()
 
   if (isParamValid("parallel_mesh"))
     _parallel_mesh_on_command_line = true;
+
+  if(isParamValid("half_transient"))
+    _half_transient = true;
 
   if (isParamValid("help"))
   {
@@ -166,6 +175,19 @@ MooseApp::setupOptions()
   }
   else if (isParamValid("input_file"))
   {
+    if(isParamValid("recover"))
+    {
+      _recover = true;
+
+      // Get command line argument following --recover on command line
+      std::string recover_following_arg = getParam<std::string>("recover");
+
+      // If the argument following --recover is non-existent or begins with
+      // a dash then we are going to eventually find the newest recovery file to use
+      if (!(recover_following_arg.empty() || (recover_following_arg.find('-') == 0)))
+        _recover_base = recover_following_arg;
+    }
+
     _input_filename = getParam<std::string>("input_file");
     _parser.parse(_input_filename);
     _action_warehouse.build();

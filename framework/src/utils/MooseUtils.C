@@ -147,4 +147,5 @@ hasExtension(const std::string & filename, std::string ext)
   else
     return false;
 }
+
 } // MooseUtils namespace

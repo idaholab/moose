@@ -628,6 +628,12 @@ public:
   virtual bool isRestarting();
 
   /**
+   * Are we recovering a previous simulation??
+   * @return true if recovering form a file, otherwise false
+   */
+  virtual bool isRecovering();
+
+  /**
    * Register a piece of restartable data.  This is data that will get
    * written / read to / from a restart file.
    *
@@ -843,6 +849,9 @@ protected:
   bool _has_jacobian;
 
   std::string _solver_mode;
+
+  /// True if we're doing a _restart_ (note: this is _not_ true when recovering!)
+  bool _restarting;
 public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)
   static unsigned int _n;

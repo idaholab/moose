@@ -139,6 +139,12 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _problem.setRestartFile(_restart_file_base);
 
   setupTimeIntegrator();
+
+  if(_app.halfTransient()) // Cut timesteps and end_time in half...
+  {
+    _end_time /= 2.0;
+    _num_steps /= 2.0;
+  }
 }
 
 Transient::~Transient()

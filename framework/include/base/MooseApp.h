@@ -30,6 +30,7 @@
 
 class Executioner;
 class MooseApp;
+class RecoverBaseAction;
 
 template<>
 InputParameters validParams<MooseApp>();
@@ -235,6 +236,21 @@ public:
    */
   bool getParallelMeshOnCommandLine() const { return _parallel_mesh_on_command_line; }
 
+  /**
+   * Whether or not this is a "recover" calculation.
+   */
+  bool isRecovering() { return _recover; }
+
+  /**
+   * The file_base for the recovery file.
+   */
+  std::string getRecoverFileBase() { return _recover_base; }
+
+  /**
+   *  Whether or not this simulation should only run half its transient (useful for testing recovery)
+   */
+  bool halfTransient() { return _half_transient; }
+
 protected:
   MooseApp(const std::string & name, InputParameters parameters);
 
@@ -297,6 +313,17 @@ protected:
 
   /// This variable indicates that ParallelMesh should be used for the libMesh mesh underlying MooseMesh.
   bool _parallel_mesh_on_command_line;
+
+  /// Whether or not this is a recovery run
+  bool _recover;
+
+  /// The base name to recover from.  If blank then we will find the newest recovery file.
+  std::string _recover_base;
+
+  /// Whether or not this simulation should only run half its transient (useful for testing recovery)
+  bool _half_transient;
+
+  friend class RecoverBaseAction;
 };
 
 #endif /* MOOSEAPP_H */

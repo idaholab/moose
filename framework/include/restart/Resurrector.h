@@ -43,12 +43,6 @@ public:
   void setRestartFile(const std::string & file_base);
 
   /**
-   * Are we restarting from a file
-   * @return true if we are restarting, otherwise false
-   */
-  bool isOn();
-
-  /**
    * Perform a restart from a file
    */
   void restartFromFile();
@@ -79,8 +73,6 @@ protected:
   /// Reference to a FEProblem being restarted
   FEProblem & _fe_problem;
 
-  /// true if restarting from a file, otherwise false
-  bool _restart;
   /// name of the file that we restart from
   std::string _restart_file_base;
 

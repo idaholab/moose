@@ -145,7 +145,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _dbg_top_residuals(0),
     _dbg_print_var_rnorms(false),
     _const_jacobian(false),
-    _has_jacobian(false)
+    _has_jacobian(false),
+    _restarting(false)
 {
 #ifdef LIBMESH_HAVE_PETSC
   // put in empty arrays for PETSc options
@@ -316,25 +317,31 @@ FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const std::
 
 void FEProblem::initialSetup()
 {
-  if (isRestarting())
+  if(isRecovering())
+    _resurrector->setRestartFile(_app.getRecoverFileBase());
+
+  if(isRestarting() || isRecovering())
     _resurrector->restartFromFile();
   else
   {
     ExodusII_IO * reader = _mesh.exReader();
 
-    if (reader != NULL)
+    if(reader != NULL)
     {
       _nl.copyVars(*reader);
       _aux.copyVars(*reader);
     }
   }
 
-  // uniform refine
-  if (_mesh.uniformRefineLevel() > 0)
+  if(!isRecovering())
   {
-    Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
-    adaptivity().uniformRefine(_mesh.uniformRefineLevel());
-    Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
+    // uniform refine
+    if(_mesh.uniformRefineLevel() > 0)
+    {
+      Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
+      adaptivity().uniformRefine(_mesh.uniformRefineLevel());
+      Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
+    }
   }
 
   // Do this just in case things have been done to the mesh
@@ -356,7 +363,7 @@ void FEProblem::initialSetup()
     }
   }
 
-  if (!isRestarting())
+  if (!isRecovering())
   {
     for (unsigned int i = 0; i < n_threads; i++)
       _ics[i].initialSetup();
@@ -370,24 +377,32 @@ void FEProblem::initialSetup()
   }
 
 #ifdef LIBMESH_ENABLE_AMR
-  Moose::setup_perf_log.push("initial adaptivity","Setup");
-  for (unsigned int i = 0; i < adaptivity().getInitialSteps(); i++)
+
+  if(!isRecovering())
   {
-    computeIndicatorsAndMarkers();
+    Moose::setup_perf_log.push("initial adaptivity","Setup");
+    for (unsigned int i = 0; i < adaptivity().getInitialSteps(); i++)
+    {
+      computeIndicatorsAndMarkers();
 
-    _adaptivity.initialAdaptMesh();
-    meshChanged();
+      _adaptivity.initialAdaptMesh();
+      meshChanged();
 
-    //reproject the initial condition
-    projectSolution();
+      //reproject the initial condition
+      projectSolution();
+    }
+    Moose::setup_perf_log.pop("initial adaptivity","Setup");
   }
-  Moose::setup_perf_log.pop("initial adaptivity","Setup");
+
 #endif //LIBMESH_ENABLE_AMR
 
-  // During initial setup the solution is copied to solution_old and solution_older
-  Moose::setup_perf_log.push("copySolutionsBackwards()","Setup");
-  copySolutionsBackwards();
-  Moose::setup_perf_log.pop("copySolutionsBackwards()","Setup");
+  if(!isRecovering() && !isRestarting())
+  {
+    // During initial setup the solution is copied to solution_old and solution_older
+    Moose::setup_perf_log.push("copySolutionsBackwards()","Setup");
+    copySolutionsBackwards();
+    Moose::setup_perf_log.pop("copySolutionsBackwards()","Setup");
+  }
 
   for(unsigned int i=0; i<n_threads; i++)
     _materials[i].initialSetup();
@@ -401,9 +416,11 @@ void FEProblem::initialSetup()
   }
 
   _aux.initialSetup();
-  _aux.compute(EXEC_INITIAL);
 
-  if (isRestarting())
+  if(!isRecovering())
+    _aux.compute(EXEC_INITIAL);
+
+  if (isRestarting() || isRecovering())
   {
     // now if restarting and we have stateful material properties, go overwrite the values with the ones
     // from the restart file.  We need to do it this way, since we have no idea about sizes of user-defined material
@@ -460,22 +477,26 @@ void FEProblem::initialSetup()
     _user_objects(EXEC_CUSTOM)[i].initialSetup();
   }
 
-  _aux.compute(EXEC_TIMESTEP_BEGIN);
+  if(!isRecovering())
+  {
+    _aux.compute(EXEC_TIMESTEP_BEGIN);
 
-  Moose::setup_perf_log.push("Initial execTransfers()","Setup");
-  execTransfers(EXEC_INITIAL);
-  Moose::setup_perf_log.pop("Initial execTransfers()","Setup");
+    Moose::setup_perf_log.push("Initial execTransfers()","Setup");
+    execTransfers(EXEC_INITIAL);
+    Moose::setup_perf_log.pop("Initial execTransfers()","Setup");
 
-  Moose::setup_perf_log.push("Initial execMultiApps()","Setup");
-  execMultiApps(EXEC_INITIAL);
-  Moose::setup_perf_log.pop("Initial execMultiApps()","Setup");
+    Moose::setup_perf_log.push("Initial execMultiApps()","Setup");
+    execMultiApps(EXEC_INITIAL);
+    Moose::setup_perf_log.pop("Initial execMultiApps()","Setup");
 
-  Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
-  computeUserObjects();
-  computeUserObjects(EXEC_INITIAL);
-  computeUserObjects(EXEC_TIMESTEP_BEGIN);
-  computeUserObjects(EXEC_RESIDUAL);
-  Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
+    Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
+    computeUserObjects();
+    computeUserObjects(EXEC_INITIAL);
+    computeUserObjects(EXEC_TIMESTEP_BEGIN);
+    computeUserObjects(EXEC_RESIDUAL);
+    Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
+  }
+
 
   // Moose::setup_perf_log.push("Output Initial Condition","Setup");
   // if (_output_initial)
@@ -497,7 +518,7 @@ void FEProblem::initialSetup()
   // during initialSetup by calls to computeProperties.
   if (_material_props.hasStatefulProperties())
   {
-    if (isRestarting())
+    if (isRestarting() || isRecovering())
       _resurrector->restartStatefulMaterialProps();
     else
     {
@@ -507,7 +528,7 @@ void FEProblem::initialSetup()
     }
   }
 
-  if(isRestarting())
+  if(isRestarting() || isRecovering())
     _resurrector->restartRestartableData();
 }
 
@@ -3604,6 +3625,7 @@ FEProblem::setOutputPosition(Point p)
 void
 FEProblem::setRestartFile(const std::string & file_name)
 {
+  _restarting = true;
   _resurrector->setRestartFile(file_name);
 }
 
@@ -3622,7 +3644,13 @@ FEProblem::getNumRestartFiles()
 bool
 FEProblem::isRestarting()
 {
-  return _resurrector->isOn();
+  return _restarting;
+}
+
+bool
+FEProblem::isRecovering()
+{
+  return _app.isRecovering();
 }
 
 void

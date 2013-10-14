@@ -302,7 +302,7 @@
 #include "AddTransferAction.h"
 #include "AddNodalNormalsAction.h"
 #include "SetupTimeStepperAction.h"
-
+#include "RecoverBaseAction.h"
 
 namespace Moose {
 
@@ -563,6 +563,7 @@ addActionTypes(Syntax & syntax)
   /**** Register Actions ****/
   /**************************/
   /// Minimal Problem
+  registerActionName("recover_base", false);
   registerActionName("setup_mesh", false);
   registerActionName("prepare_mesh", false);
   registerActionName("setup_mesh_complete", false);  // calls prepare
@@ -641,6 +642,7 @@ addActionTypes(Syntax & syntax)
   syntax.addDependencySets(
 "(meta_action)"
 "(set_global_params)"
+"(recover_base)"
 "(check_copy_nodal_vars)"
 "(setup_mesh)"
 "(prepare_mesh)"
@@ -716,6 +718,7 @@ addActionTypes(Syntax & syntax)
 void
 registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
+  registerAction(RecoverBaseAction, "recover_base");
   registerAction(SetupMeshAction, "setup_mesh");
   registerAction(SetupMeshCompleteAction, "prepare_mesh");
   registerAction(AddMeshModifierAction, "add_mesh_modifier");
