@@ -31,6 +31,9 @@ class ReportableData : public Restartable
 {
 public:
 
+  /// A local short-hand for the threaded storage of Reportable value names
+  typedef std::vector<std::set<std::string> > ReportableNames;
+
   /**
    * Class constructor
    * @param fe_problem A reference to FEProblem
@@ -86,14 +89,14 @@ public:
 
 protected:
 
+  /// Map of stored names
+  ReportableNames & _names;
+
   /// Values of the post-processor at the current time
-  std::map<std::string, ReportableValue> _values;
+  std::map<std::string, ReportableValue> & _values;
 
   /// Values of the post-processors at the time t-1
-  std::map<std::string, ReportableValue> _values_old;
-
-  /// Map of stored names
-  std::vector<std::set<std::string> > _names;
+  std::map<std::string, ReportableValue> & _values_old;
 
 };
 

@@ -15,9 +15,14 @@
 #include "ReportableData.h"
 #include "FEProblem.h"
 
+
+
 ReportableData::ReportableData(FEProblem & fe_problem) :
     Restartable("values", "ReportableData", fe_problem),
-    _names(std::vector<std::set<std::string> >(libMesh::n_threads(), std::set<std::string>()))
+    _names(declareRestartableData<ReportableNames>("_reportable_names",
+                                                  ReportableNames(libMesh::n_threads(), std::set<std::string>()))),
+    _values(declareRestartableData<std::map<std::string, ReportableValue> >("reportable_values")),
+    _values_old(declareRestartableData<std::map<std::string, ReportableValue> >("reportable_values_old"))
 {
 }
 

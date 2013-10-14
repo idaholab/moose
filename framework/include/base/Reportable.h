@@ -22,7 +22,9 @@
 class FEProblem;
 
 /**
- * An interface for declaring reportable data
+ * An interface for declaring reportable data.
+ * By design all data declared as Reportable is also Restartable
+ * @see Restartable
  */
 class Reportable
 {
