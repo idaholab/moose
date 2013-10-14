@@ -146,7 +146,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _dbg_print_var_rnorms(false),
     _const_jacobian(false),
     _has_jacobian(false),
-    _restarting(false)
+    _restarting(false),
+    _reportable_data(*this)
 {
 #ifdef LIBMESH_HAVE_PETSC
   // put in empty arrays for PETSc options
@@ -222,6 +223,9 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   _resurrector = new Resurrector(*this);
 
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
+
+  // Add pointer to the ReportableData class to the parameters
+  parameters.addPrivateParam<ReportableData *>("_reportable_data", &_reportable_data);
 }
 
 FEProblem::~FEProblem()
@@ -239,6 +243,7 @@ FEProblem::~FEProblem()
 
     for (std::map<std::string, Function *>::iterator it = _functions[i].begin(); it != _functions[i].end(); ++it)
       delete it->second;
+
 /*
     for(std::map<std::string, RestartableDataValue *>::iterator it = _restartable_data[i].begin();
         it != _restartable_data[i].end();
@@ -1964,7 +1969,8 @@ FEProblem::computeIndicatorsAndMarkers()
   }
 }
 
-void FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)
+void
+FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)
 {
   if (pps[0].blockIds().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0 || pps[0].blockNodalIds().size() > 0 || pps[0].internalSideUserObjects(group).size() > 0)
   {
@@ -2302,18 +2308,30 @@ FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP*/, UserObjectW
 void
 FEProblem::addPPSValuesToTable(ExecFlagType type)
 {
-  // Store values into table
-  for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps(type)[0].all().begin();
-      postprocessor_it != _pps(type)[0].all().end();
-      ++postprocessor_it)
+  // Always add the reportable data to the output
+  for (std::map<std::string, ReportableValue>::const_iterator it=_reportable_data.values().begin();
+       it!=_reportable_data.values().end(); ++it)
   {
-    Postprocessor *pps = *postprocessor_it;
+    _pps_output_table_screen.addData(it->first, it->second, _time);
+    _pps_output_table_file.addData(it->first, it->second, _time);
+  }
 
-    Moose::PPSOutputType out_type = pps->getOutput();
+  // Get a reference to a vector of all the postprocessors
+  const std::vector<Postprocessor *> & pps_ptrs = _pps(type)[0].all();
+
+  // Loop through the postprocessors
+  for (std::vector<Postprocessor*>::const_iterator it=pps_ptrs.begin(); it!=pps_ptrs.end(); ++it)
+  {
+    // Get the name and value from the iterator
+    std::string name = (*it)->PPName();
+    PostprocessorValue value = _pps_data[0]->getPostprocessorValue(name);
+
+    // Set the output type, defaults to auto if the postprocessor was not found
+    Moose::PPSOutputType out_type = (*it)->getOutput();
+
+    // Produce the correct output
     if (out_type != Moose::PPS_OUTPUT_NONE)
     {
-      std::string name = pps->PPName();
-      Real value = _pps_data[0]->getPostprocessorValue(name);
       switch (out_type)
       {
       case Moose::PPS_OUTPUT_FILE:
@@ -2357,6 +2375,7 @@ FEProblem::reinitBecauseOfGhosting()
 void
 FEProblem::outputPostprocessors(bool force/* = false*/)
 {
+
   ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
     addPPSValuesToTable(types[i]);
@@ -2627,12 +2646,6 @@ FEProblem::addTransfer(const std::string & transfer_name, const std::string & na
   else
     _transfers(type)[0].addTransfer(transfer);
 }
-
-
-
-
-
-
 
 bool
 FEProblem::hasVariable(const std::string & var_name)
@@ -3908,4 +3921,10 @@ FEProblem::solverMode()
   }
 
   return _solver_mode;
+}
+
+ReportableData &
+FEProblem::getReportableData()
+{
+  return _reportable_data;
 }

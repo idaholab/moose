@@ -12,36 +12,34 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REPORTINGCONSTANTSOURCE_H
-#define REPORTINGCONSTANTSOURCE_H
+#include "Reportable.h"
 
-// Moose Includes
-#include "DiracKernel.h"
-
-//Forward Declarations
-class ReportingConstantSource;
-
-template<>
-InputParameters validParams<ReportingConstantSource>();
-
-/**
- * TOOD
- */
-class ReportingConstantSource : public DiracKernel
+Reportable::Reportable(std::string name, InputParameters & parameters) :
+    _reportable_feproblem(parameters.get<FEProblem *>("_fe_problem")),
+    _reportable_data(_reportable_feproblem->getReportableData()),
+    _reportable_tid(parameters.get<THREAD_ID>("_tid"))
 {
-public:
-  ReportingConstantSource(const std::string & name, InputParameters parameters);
+}
 
-  virtual void addPoints();
-  virtual Real computeQpResidual();
+Reportable::~Reportable()
+{
+}
 
-protected:
-  Real _value;
-  std::vector<Real> _point_param;
-  Point _p;
+ReportableValue &
+Reportable::declareReportableValue(std::string name, Real value)
+{
+  _reportable_data.init(name, value, _reportable_tid);
+  return getReportableValue(name);
+}
 
-  //PostprocessorValue & _reporter;
-  PostprocessorValue & _reporter;
-};
+ReportableValue &
+Reportable::getReportableValue(std::string name)
+{
+  return _reportable_data.getReportableValue(name);
+}
 
-#endif //REPORTINGCONSTANTSOURCE_H
+bool
+Reportable::hasReportableValue(std::string name)
+{
+  return _reportable_data.hasReportableValue(name, _reportable_tid);
+}

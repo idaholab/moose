@@ -42,6 +42,7 @@
 #include "CoupledKernelValueTest.h"
 #include "SplineFFn.h"
 #include "BlkResTestDiffusion.h"
+#include "ReportableDiffusion.h"
 
 
 #include "CoupledAux.h"
@@ -122,6 +123,7 @@
 
 // DiracKernels
 #include "ReportingConstantSource.h"
+#include "ReportingConstantSourceReportable.h"
 
 // markers
 #include "RandomHitMarker.h"
@@ -215,6 +217,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(CoupledKernelValueTest);
   registerKernel(SplineFFn);
   registerKernel(BlkResTestDiffusion);
+  registerKernel(ReportableDiffusion);
 
   // Aux kernels
   registerAux(CoupledAux);
@@ -286,6 +289,7 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // DiracKernels
   registerDiracKernel(ReportingConstantSource);
+  registerDiracKernel(ReportingConstantSourceReportable);
 
   // meshes
   registerObject(StripeMesh);

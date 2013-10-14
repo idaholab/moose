@@ -12,23 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ReportingConstantSource.h"
+#include "ReportingConstantSourceReportable.h"
 
 template<>
-InputParameters validParams<ReportingConstantSource>()
+InputParameters validParams<ReportingConstantSourceReportable>()
 {
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<Real>("value", "The value of the point source");
   params.addRequiredParam<std::vector<Real> >("point", "The x,y,z coordinates of the point");
-  params.addRequiredParam<PostprocessorName>("reporter", "The Postprocessor to report the total flux to");
   return params;
 }
 
-ReportingConstantSource::ReportingConstantSource(const std::string & name, InputParameters parameters) :
+ReportingConstantSourceReportable::ReportingConstantSourceReportable(const std::string & name, InputParameters parameters) :
     DiracKernel(name, parameters),
     _value(getParam<Real>("value")),
     _point_param(getParam<std::vector<Real> >("point")),
-    _reporter(getPostprocessorValue("reporter"))
+    _reporter(declareReportableValue("dirac_reporter"))
 {
   _p(0) = _point_param[0];
 
@@ -44,7 +43,7 @@ ReportingConstantSource::ReportingConstantSource(const std::string & name, Input
 }
 
 void
-ReportingConstantSource::addPoints()
+ReportingConstantSourceReportable::addPoints()
 {
   // This function gets called just before the DiracKernel is evaluated
   // so this is a handy place to zero this out.
@@ -54,13 +53,10 @@ ReportingConstantSource::addPoints()
 }
 
 Real
-ReportingConstantSource::computeQpResidual()
+ReportingConstantSourceReportable::computeQpResidual()
 {
   // This is negative because it's a forcing function that has been brought over to the left side.
   Real flux = -_test[_i][_qp]*_value;
-
-  // This wouldn't be thread safe in any other object but DiracKernels are not currently threaded.
   _reporter += flux;
-
   return flux;
 }

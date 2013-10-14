@@ -195,3 +195,17 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
     _all_generic_postprocessors.push_back(general_pp);
   }
 }
+
+Postprocessor *
+PostprocessorWarehouse::getPostprocessor(std::string name)
+{
+  // Loop through all the postprocessors, return the pointer if the names match
+  for (std::vector<Postprocessor *>::iterator it=_all_postprocessors.begin(); it != _all_postprocessors.end(); ++it)
+  {
+    if (name.compare((*it)->PPName()) == 0)
+      return *it;
+  }
+
+  // Return a null if nothing was found
+  return NULL;
+}

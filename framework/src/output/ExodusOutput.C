@@ -196,4 +196,3 @@ ExodusOutput::setOutputPosition(const Point & /* p */)
   sequence(true);
   meshChanged();
 }
-

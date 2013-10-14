@@ -1,0 +1,22 @@
+[Tests]
+  [./basic]
+    type = 'Exodiff'
+    input = 'reportable_kernel.i'
+    exodiff = 'reportable_kernel_out.e'
+  [../]
+
+  [./has_reportable]
+    type = 'RunException'
+    input = 'reportable_kernel.i'
+    expect_err = "The name 'unknown' is not a reportable value"
+		cli_args = 'Kernels/diff/test_has_reportable=true'
+  [../]
+
+  [./dirackernel_total_flux]
+		# This test mimics the behavior of dirackernel/total_flux; the gold file was copied
+    # directly from that test
+	  type = 'Exodiff'
+    input = 'dirackernel_total_flux.i'
+    exodiff = 'dirackernel_total_flux_out.e'
+  [../]
+[]

@@ -32,6 +32,7 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
+#include "Reportable.h"
 #include "Restartable.h"
 
 //libMesh includes
@@ -65,6 +66,7 @@ class DiracKernel :
   public MaterialPropertyInterface,
   public PostprocessorInterface,
   protected GeometricSearchInterface,
+  public Reportable,
   public Restartable
 {
 public:

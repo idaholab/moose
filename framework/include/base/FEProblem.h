@@ -37,6 +37,7 @@
 #include "UserObjectWarehouse.h"
 #include "NonlinearSystem.h"
 #include "Restartable.h"
+#include "ReportableData.h"
 
 class DisplacedProblem;
 class OutputProblem;
@@ -680,6 +681,12 @@ public:
    */
   void setConstJacobian(bool state) { _const_jacobian = state; }
 
+  /**
+   * Access to the ReportableData storage class
+   * @return Reference to the ReportableData object
+   */
+  ReportableData & getReportableData();
+
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
@@ -852,6 +859,10 @@ protected:
 
   /// True if we're doing a _restart_ (note: this is _not_ true when recovering!)
   bool _restarting;
+
+  /// Storage facility for Reportable values
+  ReportableData _reportable_data;
+
 public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)
   static unsigned int _n;

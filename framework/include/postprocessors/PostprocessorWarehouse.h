@@ -82,6 +82,13 @@ public:
   const std::vector<Postprocessor *> & all() { return _all_postprocessors; }
 
   /**
+   * Get a pointer to a postprocessor
+   * @param The name of the postprocessor to retrieve
+   * @return A postprocessor for the given name
+   */
+  Postprocessor * getPostprocessor(std::string name);
+
+  /**
    * Add a postprocessor
    * @param postprocessor Postprocessor being added
    */

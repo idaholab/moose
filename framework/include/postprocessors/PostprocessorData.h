@@ -67,8 +67,6 @@ public:
   void copyValuesBack();
 
 protected:
-  /// The FEProblem
-  FEProblem * _fe_problem;
 
   /// Values of the post-processor at the current time
   std::map<std::string, PostprocessorValue*> _values;

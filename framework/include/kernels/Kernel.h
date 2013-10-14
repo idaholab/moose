@@ -29,6 +29,7 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
+#include "Reportable.h"
 #include "Restartable.h"
 
 // libMesh
@@ -54,6 +55,7 @@ class Kernel :
   public PostprocessorInterface,
   public MaterialPropertyInterface,
   protected GeometricSearchInterface,
+  public Reportable,
   public Restartable
 {
 public:

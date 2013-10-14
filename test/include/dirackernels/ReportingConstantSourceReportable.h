@@ -12,25 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REPORTINGCONSTANTSOURCE_H
-#define REPORTINGCONSTANTSOURCE_H
+#ifndef REPORTINGCONSTANTSOURCEREPORTABLE_H
+#define REPORTINGCONSTANTSOURCEREPORTABLE_H
 
 // Moose Includes
 #include "DiracKernel.h"
 
 //Forward Declarations
-class ReportingConstantSource;
+class ReportingConstantSourceReportable;
 
 template<>
-InputParameters validParams<ReportingConstantSource>();
+InputParameters validParams<ReportingConstantSourceReportable>();
 
 /**
- * TOOD
+ * A class for testing the Reportable interface, test mimics the
+ * dirackernels/total_flux. The gold file from this test was directly copied
+ * to the gold for this directory
  */
-class ReportingConstantSource : public DiracKernel
+class ReportingConstantSourceReportable : public DiracKernel
 {
 public:
-  ReportingConstantSource(const std::string & name, InputParameters parameters);
+  ReportingConstantSourceReportable(const std::string & name, InputParameters parameters);
 
   virtual void addPoints();
   virtual Real computeQpResidual();
@@ -39,9 +41,7 @@ protected:
   Real _value;
   std::vector<Real> _point_param;
   Point _p;
-
-  //PostprocessorValue & _reporter;
-  PostprocessorValue & _reporter;
+  ReportableValue & _reporter;
 };
 
-#endif //REPORTINGCONSTANTSOURCE_H
+#endif //REPORTINGCONSTANTSOURCEREPORTABLE_H

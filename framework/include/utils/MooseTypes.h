@@ -16,6 +16,7 @@
 #define MOOSETYPES_H
 
 #include "Moose.h"
+#include "Atomic.h"
 
 // libMesh includes
 #include "libmesh/id_types.h"
@@ -29,6 +30,7 @@
  * MOOSE typedefs
  */
 typedef Real                     PostprocessorValue;
+typedef MooseAtomic<Real>        ReportableValue;
 typedef boundary_id_type         BoundaryID;
 typedef subdomain_id_type        SubdomainID;
 
@@ -44,7 +46,6 @@ const BoundaryID ANY_BOUNDARY_ID = (BoundaryID) -1;
 /**
  * Framework-wide stuff
  */
-
 enum VarKindType
 {
   VAR_NONLINEAR,
