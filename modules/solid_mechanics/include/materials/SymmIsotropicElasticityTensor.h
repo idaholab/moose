@@ -64,6 +64,17 @@ public:
    */
   void setShearModulus(const Real k);
 
+  /**
+   * Return Mu
+   */
+  Real mu() const;
+
+  /**
+   * Return the shear modulus... same thing as Mu
+   */
+  Real shearModulus() const;
+
+
   virtual Real stiffness( const unsigned i, const unsigned j,
                           const RealGradient & test,
                           const RealGradient & phi );

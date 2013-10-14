@@ -16,6 +16,7 @@
 #include "Gravity.h"
 #include "HomogenizationKernel.h"
 #include "HomogenizedElasticConstants.h"
+#include "IsotropicPlasticity.h"
 #include "LinearAnisotropicMaterial.h"
 #include "LinearGeneralAnisotropicMaterial.h"
 #include "LinearIsotropicMaterial.h"
@@ -31,6 +32,7 @@
 #include "qFunctionJIntegral.h"
 #include "PLC_LSH.h"
 #include "PowerLawCreep.h"
+#include "PowerLawCreepModel.h"
 #include "PlenumPressure.h"
 #include "PlenumPressureAction.h"
 #include "PresetVelocity.h"
@@ -39,6 +41,7 @@
 #include "PLSHPlasticMaterial.h"
 #include "SolidMechanicsAction.h"
 #include "SolidMechImplicitEuler.h"
+#include "SolidModel.h"
 #include "StressDivergence.h"
 #include "StressDivergenceRZ.h"
 #include "StressDivergenceRSpherical.h"
@@ -67,6 +70,7 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerMaterial(AbaqusUmatMaterial);
   registerMaterial(CLSHPlasticMaterial);
   registerMaterial(Elastic);
+  registerMaterial(IsotropicPlasticity);
   registerMaterial(LinearAnisotropicMaterial);
   registerMaterial(LinearGeneralAnisotropicMaterial);
   registerMaterial(LinearIsotropicMaterial);
@@ -75,6 +79,8 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerMaterial(PLC_LSH);
   registerMaterial(PLSHPlasticMaterial);
   registerMaterial(PowerLawCreep);
+  registerMaterial(PowerLawCreepModel);
+  registerMaterial(SolidModel);
   registerMaterial(TrussMaterial);
 
   registerKernel(Gravity);

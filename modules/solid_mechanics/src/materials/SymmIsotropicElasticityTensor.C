@@ -55,6 +55,22 @@ SymmIsotropicElasticityTensor::setShearModulus(const Real k)
   setMu(k);
 }
 
+Real
+SymmIsotropicElasticityTensor::shearModulus() const
+{
+  return mu();
+}
+
+Real
+SymmIsotropicElasticityTensor::mu() const
+{
+  if (!_mu_set)
+  {
+    mooseError("mu not set");
+  }
+  return _mu;
+}
+
 void
 SymmIsotropicElasticityTensor::calculateLameCoefficients()
 {

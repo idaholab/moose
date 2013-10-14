@@ -6,9 +6,11 @@
 #include "Nonlinear3D.h"
 #include "PlaneStrain.h"
 
-#include "Problem.h"
+#include "ConstitutiveModel.h"
 #include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
+
+#include "Problem.h"
 
 template<>
 InputParameters validParams<SolidModel>()
@@ -41,6 +43,12 @@ InputParameters validParams<SolidModel>()
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+
+  params.addParam<std::vector<std::string> >("submodels", "List of submodels ConstitutiveModels");
+  params.addParam<unsigned int>("max_its", 30, "Maximum number of submodel iterations");
+  params.addParam<bool>("output_iteration_info", false, "Set true to output submodel iteration information");
+  params.addParam<Real>("relative_tolerance", 1e-5, "Relative convergence tolerance for combined submodel iteration");
+  params.addParam<Real>("absolute_tolerance", 1e-5, "Absolute convergence tolerance for combined submodel iteration");
   return params;
 }
 
@@ -128,9 +136,13 @@ SolidModel::SolidModel( const std::string & name,
    _Eshelby_tensor(declareProperty<ColumnMajorMatrix>("Eshelby_tensor")),
    _Eshelby_tensor_small(declareProperty<ColumnMajorMatrix>("Eshelby_tensor_small")),
    _block_id(std::vector<SubdomainID>(_blk_ids.begin(), _blk_ids.end())),
+   _max_its(parameters.get<unsigned int>("max_its")),
+   _output_iteration_info(getParam<bool>("output_iteration_info")),
+   _relative_tolerance(parameters.get<Real>("relative_tolerance")),
+   _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
    _element(NULL),
    _local_elasticity_tensor(NULL)
-{ 
+{
   bool same_coord_type = true;
 
   for (unsigned int i=1; i<_block_id.size(); ++i)
@@ -431,7 +443,7 @@ SolidModel::initQpStatefulProperties()
     (*_crack_rotation)[_qp].identity();
     (*_crack_rotation_old)[_qp].identity();
   }
-  _SED[_qp] = _SED_old[_qp] = 0;  
+  _SED[_qp] = _SED_old[_qp] = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -456,12 +468,20 @@ SolidModel::computeProperties()
 
     computeElasticityTensor();
 
-    computeStress();
+    if (_submodels.empty())
+    {
+      computeStress();
+    }
+    else
+    {
+      computeCombinedStress();
+    }
+
     if (_compute_JIntegral)
     {
       computeStrainEnergyDensity();
     }
-      
+
     _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment;
 
     crackingStressRotation();
@@ -488,7 +508,7 @@ void SolidModel::computeStrainEnergyDensity()
 ////////////////////////////////////////////////////////////////////////
 
 void
-SolidModel::computeEshelby() 
+SolidModel::computeEshelby()
 {
   ColumnMajorMatrix stress_CMM;
   stress_CMM(0,0) = _stress[_qp].xx();
@@ -531,7 +551,7 @@ SolidModel::computeEshelby()
   piola = stress_CMM * FinvT;
   piola_small = unrotated_stress_CMM;
   piola *= detF;
-  
+
 //  _FTP[_qp] = _FT * _det_F * stress_CMM * _FinvT;
   ColumnMajorMatrix FTP;
   FTP = FT * piola;
@@ -558,6 +578,95 @@ SolidModel::computeEshelby()
   _Eshelby_tensor[_qp] *= -1.0;
   _Eshelby_tensor_small[_qp] = WI_small - piola_small;
   _Eshelby_tensor_small[_qp] *= -1.0;
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+SolidModel::computeCombinedStress()
+{
+  // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
+  // stress = stressOld + stressIncrement
+  // creep_strain = creep_strainOld + creep_strainIncrement
+
+  if(_t_step == 0) return;
+
+  if (_output_iteration_info == true)
+  {
+    std::cout
+      << std::endl
+      << "iteration output for MaterialDriver solve:"
+      << " time=" <<_t
+      << " temperature=" << _temperature[_qp]
+      << " int_pt=" << _qp
+      << std::endl;
+  }
+
+  // compute trial stress
+  SymmTensor stress_new( *elasticityTensor() * _strain_increment );
+  stress_new += _stress_old;
+
+  const SubdomainID current_block = _current_elem->subdomain_id();
+  const std::vector<ConstitutiveModel*> & cm( _submodels[current_block] );
+  const unsigned num_submodels = cm.size();
+
+  std::vector<SymmTensor> inelastic_strain_increment(num_submodels);
+
+  SymmTensor elastic_strain_increment;
+  SymmTensor stress_new_last( stress_new );
+  Real delS(_absolute_tolerance+1);
+  Real first_delS(delS);
+  unsigned int counter(0);
+
+  while(counter < _max_its &&
+        delS > _absolute_tolerance &&
+        (delS/first_delS) > _relative_tolerance &&
+        (num_submodels != 1 || counter < 1))
+  {
+    elastic_strain_increment = _strain_increment;
+    stress_new = *elasticityTensor() * (elastic_strain_increment - inelastic_strain_increment[num_submodels-1]);
+    stress_new += _stress_old;
+
+    for (unsigned i_cm(0); i_cm < num_submodels; ++i_cm)
+    {
+      cm[i_cm]->computeStress( _qp, *elasticityTensor(), elastic_strain_increment, _stress_old,
+                               inelastic_strain_increment[i_cm], stress_new );
+      elastic_strain_increment -= inelastic_strain_increment[i_cm];
+    }
+
+    // now check convergence
+    SymmTensor deltaS(stress_new_last - stress_new);
+    delS = std::sqrt(deltaS.doubleContraction(deltaS));
+    if (counter == 0)
+    {
+      first_delS = delS;
+    }
+    stress_new_last = stress_new;
+
+    if (_output_iteration_info == true)
+    {
+      std::cout
+        << "stress_it=" << counter
+        << " rel_delS=" << delS/first_delS
+        << " rel_tol="  << _relative_tolerance
+        << " abs_delS=" << delS
+        << " abs_tol="  << _absolute_tolerance
+        << std::endl;
+    }
+
+    ++counter;
+  }
+
+  if(counter == _max_its &&
+     delS > _absolute_tolerance &&
+     (delS/first_delS) > _relative_tolerance)
+  {
+    mooseError("Max stress iteration hit during combined submodel solve!");
+  }
+
+  _strain_increment = elastic_strain_increment;
+  _stress[_qp] = stress_new;
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -640,7 +749,9 @@ SolidModel::initialSetup()
 
   createElasticityTensor();
 
-  // Load in the volumetric models
+  // Load in the volumetric models or submodels
+
+  const std::vector<std::string> & submodels = getParam<std::vector<std::string> >("submodels");
 
   for(unsigned i(0); i < _block_id.size(); ++i)
   {
@@ -661,6 +772,25 @@ SolidModel::initialSetup()
       if (vm)
       {
         _volumetric_models[_block_id[i]].push_back( vm );
+      }
+    }
+
+    for (unsigned int i_name(0); i_name < submodels.size(); ++i_name)
+    {
+      bool found = false;
+      for (unsigned int j=0; j < mats.size(); ++j)
+      {
+        ConstitutiveModel * cm = dynamic_cast<ConstitutiveModel*>(mats[j]);
+        if (cm && cm->name() == submodels[i_name])
+        {
+          _submodels[_block_id[i]].push_back( cm );
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+      {
+        mooseError("Unable to find submodel " + submodels[i_name]);
       }
     }
   }

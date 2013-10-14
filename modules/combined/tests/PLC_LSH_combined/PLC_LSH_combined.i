@@ -282,13 +282,13 @@
   l_tol = 1e-5
   start_time = 0.0
   end_time = 1.4999999999
-  
+
   dt = 0.001
   [./TimeStepper]
     type = FunctionDT
     time_t  = '0        0.5    1.0    1.5'
     time_dt = '0.015  0.015  0.005  0.005'
-  [../]    
+  [../]
 []
 
 [Postprocessors]
@@ -298,10 +298,8 @@
 []
 
 [Output]
-  file_base = out
   interval = 1
   output_initial = true
-  elemental_as_nodal = true
   exodus = true
   perf_log = true
 []

@@ -5,6 +5,7 @@
 #include "SymmTensor.h"
 
 // Forward declarations
+class ConstitutiveModel;
 class SolidModel;
 class SymmElasticityTensor;
 class VolumetricModel;
@@ -117,10 +118,7 @@ protected:
   const bool _compute_JIntegral;
   MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor;
   MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor_small;
-  
 
-  
-  
   virtual void initQpStatefulProperties();
 
   virtual void initialSetup();
@@ -145,10 +143,14 @@ protected:
   virtual unsigned int getNumKnownCrackDirs() const;
 
   /// Compute the stress (sigma += deltaSigma)
-  virtual void computeStress() = 0;
+  virtual void computeStress()
+  {
+    mooseError("SolidModel::computeStress must be defined by the derived class");
+  }
+
   virtual void computeEshelby();
   virtual void computeStrainEnergyDensity();
-  
+
   /*
    * Determine whether new cracks have formed.
    * Rotate old and new stress to global, if cracking active
@@ -203,6 +205,16 @@ protected:
   virtual void createElasticityTensor();
 
   std::vector<SubdomainID> _block_id;
+
+  std::map<SubdomainID, std::vector<ConstitutiveModel*> > _submodels;
+
+  unsigned int _max_its;
+  bool _output_iteration_info;
+  Real _relative_tolerance;
+  Real _absolute_tolerance;
+  /// Compute the stress (sigma += deltaSigma)
+  virtual void computeCombinedStress();
+
 
 private:
 
