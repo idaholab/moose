@@ -1,28 +1,40 @@
 #
-# 1x1x1 unit cube with constant displacement on top face
+# 1x1x1 unit cube with time-varying pressure on top face
 #
-# This problem was taken from "Finite element three-dimensional elastic-plastic
-#    creep analysis" by A. Levy, Eng. Struct., 1981, Vol. 3, January, pp. 9-16.
+# The problem is a one-dimensional creep analysis.  The top face has a
+#    pressure load that is a function of time.  The creep strain can be
+#    calculated analytically.  There is no lsh plasticity.
 #
-# The problem is a one-dimensional creep analysis.  The top face is displaced 0.01
-#    units and held there.  The stress relaxes in time according to the creep law.
+# The analytic solution to this problem is:
 #
-# The analytic solution to this problem is (contrary to what is shown in the paper):
+#    d ec
+#    ---- = a*S^b  with S = c*t^d
+#     dt
 #
-#                /       (E*ef)^3     \^(1/3)
-#    stress_yy = |--------------------|
-#                \ 3*a*E^4*ef^3*t + 1 /
+#    d ec = a*c^b*t^(b*d) dt
 #
-#    where E  = 2.8e7 (Young's modulus)
-#          a  = 3e-26 (creep coefficient)
-#          ef = 0.01  (displacement)
-#          t  =       (time)
+#         a*c^b
+#    ec = ----- t^(b*d+1)
+#         b*d+1
 #
-# The solution computed is very close to the exact solution.  This test is not a
-#     correct representation of the problem since it does not set the initial
-#     condition for the displacement and the stress.  Currently (1 March 2011),
-#     no capability exists for setting the initial condition of stress.  Until
-#     that is available, some error will be inherent in the solution.
+#    where S  = stress
+#          ec = creep strain
+#          t  = time
+#          a  = constant
+#          b  = constant
+#          c  = constant
+#          d  = constant
+#
+# With a = 3e-24,
+#      b = 4,
+#      c = 1,
+#      d = 1/2, and
+#      t = 32400
+#   we have
+#
+#   S = t^(1/2) = 180
+#
+#   ec = 1e-24*t^3 = 3.4012224e-11
 #
 [Mesh]
   file = 1x1x1_cube.e
@@ -68,10 +80,9 @@
 []
 
 [Functions]
-  [./top_pull]
-    type = PiecewiseLinear
-    x = '0 20'
-    y = '0 1'
+  [./pressure]
+    type = ParsedFunction
+    value = 'sqrt(t)'
   [../]
 []
 
@@ -113,39 +124,40 @@
 
 
 [BCs]
-  [./u_top_pull]
-    type = PresetBC
+  [./top_pressure]
+    type = Pressure
     variable = disp_y
+    component = 1
     boundary = 5
-    value = 0.01
+    function = pressure
   [../]
   [./u_bottom_fix]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 3
     value = 0.0
   [../]
   [./u_yz_fix]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
   [../]
   [./u_xy_fix]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 2
     value = 0.0
   [../]
 
   [./temp_top_fix]
-    type = PresetBC
+    type = DirichletBC
     variable = temp
     boundary = 5
     value = 1000.0
   [../]
   [./temp_bottom_fix]
-    type = PresetBC
+    type = DirichletBC
     variable = temp
     boundary = 3
     value = 1000.0
@@ -158,7 +170,7 @@
     block = 1
     youngs_modulus = 2.8e7
     poissons_ratio = .3
-    coefficient = 3.0e-26
+    coefficient = 3.0e-24
     n_exponent = 4
     activation_energy = 0
     relative_tolerance = 1.e-5
@@ -178,15 +190,18 @@
     specific_heat = 1.0
     thermal_conductivity = 100.
   [../]
+
   [./density]
     type = Density
     block = 1
     density = 1
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
 [Executioner]
-#  type = SolutionTimeAdaptive
   type = Transient
 
   #Preconditioned JFNK (default)
@@ -208,11 +223,7 @@
   nl_abs_tol = 1e-5
   l_tol = 1e-5
   start_time = 0.0
-#  end_time = 2160000
-  end_time = 21600
-#  num_steps = 50
-#  dt = 1.e-3
-#  dtmax = 1.e-4
+  end_time = 32400
   dt = 1e-2
   [./TimeStepper]
     type = FunctionDT
@@ -228,10 +239,8 @@
 []
 
 [Output]
-  file_base = out
   interval = 1
   output_initial = true
-  elemental_as_nodal = true
   exodus = true
   perf_log = true
 []

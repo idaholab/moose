@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'PLC_LSH_plc_test.i'
-    exodiff = 'out.e'
-  [../]
-[]

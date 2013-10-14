@@ -1,8 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'PLC_LSH_stress_relaxation_test.i'
-    exodiff = 'out.e'
-    abs_zero = 1e-09
-  [../]
-[]

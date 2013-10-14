@@ -10,7 +10,7 @@
 #
 
 [Mesh]
-  file = PLC_LSH_lsh_test.e
+  file = PLC_LSH_lsh.e
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -142,20 +142,23 @@
 []
 
 [Materials]
-  [./lsh]
-    type = PLC_LSH
+  [./driver]
+    type = SolidModel
     block = 1
     youngs_modulus = 2.4e5
     poissons_ratio = .3
-    yield_stress = 2.4e2
-    hardening_constant = 1206.
-    coefficient = 0.0
-    n_exponent = 1.0
-    activation_energy = 0.0
     relative_tolerance = 1.e-8
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
+    submodels = lsh
+  [../]
+  [./lsh]
+    type = IsotropicPlasticity
+    block = 1
+    yield_stress = 2.4e2
+    hardening_constant = 1206.
+    relative_tolerance = 1.e-8
   [../]
 []
 
@@ -187,10 +190,9 @@
 []
 
 [Output]
-  file_base = out
+  file_base = PLC_LSH_lsh_out
   interval = 1
   output_initial = true
-  elemental_as_nodal = true
   exodus = true
   perf_log = true
 []
