@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if(($# != 1))
+  then
+    echo Please supply the name of the new test directory
+    exit 1
+fi
+
+basename=`basename $1`
+
+cp -r kernels/simple_transient_diffusion $1
+cd $1
+
+rm -f *~*
+rm -f *#*
+rm -f *out*
+rm -f peacock*
+rm -f *.pyc
+rm gold/*
+
+mv simple_transient_diffusion.i $basename.i
+
+sed -i "" "s/simple_transient_diffusion/$basename/g" tests
