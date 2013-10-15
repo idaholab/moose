@@ -1,0 +1,16 @@
+[Tests]
+  [./serial_mesh]
+    type = 'RunApp'
+    input = 'unique_ids.i'
+    unique_ids = True
+    min_parallel = 2
+  [../]
+
+  [./parallel_mesh]
+    type = 'RunApp'
+    input = 'unique_ids.i'
+    unique_ids = True
+    cli_args = '--parallel-mesh'
+    min_parallel = 2
+  [../]
+[]
