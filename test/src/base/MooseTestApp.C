@@ -109,6 +109,8 @@
 #include "RestartableTypesChecker.h"
 #include "PointerStoreError.h"
 #include "PointerLoadError.h"
+#include "VerifyElementUniqueID.h"
+#include "VerifyNodalUniqueID.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -303,6 +305,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(RestartableTypesChecker);
   registerUserObject(PointerStoreError);
   registerUserObject(PointerLoadError);
+  registerUserObject(VerifyElementUniqueID);
+  registerUserObject(VerifyNodalUniqueID);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);

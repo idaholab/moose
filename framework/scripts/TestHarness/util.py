@@ -14,6 +14,14 @@ LIBMESH_OPTIONS = {
 		        'SERIAL'   : '0'
 		      }
 		    },
+   'unique_ids' :   { 're_option' : r'#define\s+LIBMESH_ENABLE_UNIQUE_ID\s+(\d+)',
+                      'default'   : 'FALSE',
+		      'options'   :
+		      {
+                        'TRUE'  : '1',
+                        'FALSE' : '0'
+		      }
+		    },
    'dtk' :          { 're_option' : r'#define\s+LIBMESH_HAVE_DTK\s+(\d+)',
                       'default'   : 'FALSE',
 		      'options'   :
@@ -22,6 +30,7 @@ LIBMESH_OPTIONS = {
                         'FALSE' : '0'
 		      }
 		    }
+
                   }
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0

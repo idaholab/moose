@@ -44,6 +44,7 @@ class TestHarness:
     self.checks[MESH_MODE] = getLibMeshConfigOption(self.libmesh_dir, MESH_MODE)
     self.checks[DTK] =  getLibMeshConfigOption(self.libmesh_dir, DTK)
     self.checks[LIBRARY_MODE] = getSharedOption(self.libmesh_dir)
+    self.checks[UNIQUE_IDS] = getLibMeshConfigOption(self.libmesh_dir, UNIQUE_IDS)
 
     method = set()
     method.add('ALL')
@@ -314,7 +315,7 @@ class TestHarness:
     if reason == '':
       # It ran OK but is this test set to be skipped on any platform, compiler, so other reason?
       if self.options.extra_info:
-        checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE, METHOD, LIBRARY_MODE, DTK]
+        checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE, METHOD, LIBRARY_MODE, DTK, UNIQUE_IDS]
         for check in checks:
           if not 'ALL' in test[check]:
             caveats.append(', '.join(test[check]))

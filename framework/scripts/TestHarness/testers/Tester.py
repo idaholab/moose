@@ -26,6 +26,7 @@ class Tester(object):
     params.addParam('method',        ['ALL'], "A test that runs under certain executable configurations ('ALL', 'OPT', 'DBG', 'DEVEL', 'OPROF', 'PRO')")
     params.addParam('library_mode',  ['ALL'], "A test that only runs when libraries are built under certain configurations ('ALL', 'STATIC', 'DYNAMIC')")
     params.addParam('dtk',           ['ALL'], "A test that runs only if DTK is detected ('TRUE', 'FALSE')")
+    params.addParam('unique_ids',    ['ALL'], "A test that runs only if UNIQUE_IDs are enabled ('TRUE', 'FALSE')")
 
     return params
   getValidParams = staticmethod(getValidParams)
@@ -120,7 +121,7 @@ class Tester(object):
       return (False, reason)
 
     # PETSc is being explicitly checked above
-    local_checks = [PLATFORM, COMPILER, MESH_MODE, METHOD, LIBRARY_MODE, DTK]
+    local_checks = [PLATFORM, COMPILER, MESH_MODE, METHOD, LIBRARY_MODE, DTK, UNIQUE_IDS]
     for check in local_checks:
       test_platforms = set()
       for x in self.specs[check]:
