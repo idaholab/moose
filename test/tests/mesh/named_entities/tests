@@ -6,6 +6,14 @@
     max_parallel = 1
   [../]
 
+  [./test_names_xda]
+    type = 'Exodiff'
+    input = 'named_entities_test_xda.i'
+    exodiff = 'named_entities_test_xda_out.e'
+    max_parallel = 1
+    deleted = 'Waiting for libMesh update #1055'
+  [../]
+
   [./test_periodic_names]
     type = 'Exodiff'
     input = 'periodic_bc_names_test.i'
