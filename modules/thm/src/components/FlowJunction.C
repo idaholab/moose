@@ -159,7 +159,6 @@ FlowJunction::addMooseObjects()
 
     params.set<FlowModel::EModelType>("model_type") = _model_type;
     params.set<std::vector<unsigned int> >("nodes") = _nodes;
-    params.set<std::vector<Real> >("areas") = _Areas;
     params.set<std::vector<Real> >("normals") = _normals;
     params.set<std::vector<Real> >("K") = _K;
     params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
@@ -168,6 +167,7 @@ FlowJunction::addMooseObjects()
     params.set<std::vector<VariableName> >("p") = cv_pressure;
     params.set<std::vector<VariableName> >("rho") = cv_rho;
     params.set<std::vector<VariableName> >("rhou") = cv_rhou;
+    params.set<std::vector<VariableName> >("area") = cv_area;
     if (_model_type == FlowModel::EQ_MODEL_3)
     {
       params.set<std::vector<VariableName> >("rhoE") = cv_rhoE;
