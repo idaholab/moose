@@ -16,10 +16,9 @@ private:
   bool _with_bub;
   std::string _c_name;
   Real _en_ratio;
-  std::string _bnds;
   bool _implicit;
-  
-  
+  VariableName _T;
+
 };
 
 template<>

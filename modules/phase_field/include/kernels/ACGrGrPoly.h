@@ -34,9 +34,10 @@ private:
 
   MaterialProperty<Real> & _mu;
   MaterialProperty<Real> & _gamma;
+  MaterialProperty<Real> & _tgrad_corr_mult;
 
-  bool _has_bnds;
-  VariableValue & _bnds;
+  bool _has_T;
+  VariableGradient * _grad_T;
   
   unsigned int _ncrys;
 

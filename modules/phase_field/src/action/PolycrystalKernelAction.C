@@ -13,8 +13,9 @@ InputParameters validParams<PolycrystalKernelAction>()
   params.addParam<bool>("with_bub",false,"specifies if the grain growth simulation is run with a bubble model or by itself");
   params.addParam<std::string>("c_name","c","Name of coupled concentration variable");
   params.addParam<Real>("en_ratio","Ratio of surface to GB energy");
-  params.addParam<std::string>("bnds","coupled bnds variable name");
   params.addParam<bool>("implicit",true,"Whether kernels are implicit or not");
+  params.addParam<bool>("tgrad_correction",false,"Add in correction factor to cancel out false temperature gradient driving force");
+  params.addParam<VariableName>("T","Name of coupled concentration variable");
   
   return params;
 }
@@ -26,10 +27,9 @@ PolycrystalKernelAction::PolycrystalKernelAction(const std::string & name, Input
    _with_bub(getParam<bool>("with_bub")),
    _c_name(getParam<std::string>("c_name")),
    _en_ratio(getParam<Real>("en_ratio")),
-   _bnds(getParam<std::string>("bnds")),
-   _implicit(getParam<bool>("implicit"))
-{
-}
+   _implicit(getParam<bool>("implicit")),
+   _T(getParam<VariableName>("T"))
+{}
 
 void
 PolycrystalKernelAction::act() 
@@ -72,13 +72,9 @@ PolycrystalKernelAction::act()
     poly_params.set<NonlinearVariableName>("variable") = var_name;
     poly_params.set<std::vector<VariableName> >("v") = v;
     poly_params.set<bool>("implicit")=_implicit;
-    
-    if (!_bnds.empty())
-    {  
-    std::vector<std::string> bnds_bin(1);
-    bnds_bin[0] = _bnds;
-    poly_params.set<std::vector<std::string> >("bnds") = bnds_bin;
-    }
+    poly_params.set<bool>("tgrad_correction")=getParam<bool>("tgrad_correction");
+    if (!_T.empty())
+      poly_params.set<std::vector<VariableName> >("T").push_back(_T);
     
     std::string kernel_name = "ACBulk_";
     kernel_name.append(var_name);

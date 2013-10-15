@@ -12,6 +12,7 @@ InputParameters validParams<GBEvolution>();
 class GBEvolution : public Material
 {
 public:
+  
   GBEvolution(const std::string & name,
           InputParameters parameters);
   
@@ -31,6 +32,7 @@ private:
   Real _GBenergy;
   bool _has_T;
   Real _GBMobility;
+  Real _molar_vol;
   
   VariableValue * _T; //pointer rather than reference
   
@@ -41,8 +43,12 @@ private:
   MaterialProperty<Real> & _L;
   MaterialProperty<Real> & _l_GB;
   MaterialProperty<Real> & _mu;
+  MaterialProperty<Real> & _entropy_diff;
+  MaterialProperty<Real> & _molar_volume;
+  MaterialProperty<Real> & _act_wGB;
+  MaterialProperty<Real> & _tgrad_corr_mult;
   
-  Real kb;
+  Real _kb;
   
 };
 

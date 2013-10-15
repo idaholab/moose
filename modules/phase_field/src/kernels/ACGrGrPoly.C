@@ -8,7 +8,8 @@ InputParameters validParams<ACGrGrPoly>()
   InputParameters params = validParams<ACBulk>();
   
   params.addRequiredCoupledVar("v", "Array of coupled variable names");
-  params.addCoupledVar("bnds","Term distinguishing grain from grain boundary");
+  params.addParam<bool>("tgrad_correction",false,"Add in correction factor to cancel out false temperature gradient driving force");
+  params.addCoupledVar("T","temperature");
   
   return params;
 }
@@ -17,8 +18,9 @@ ACGrGrPoly::ACGrGrPoly(const std::string & name, InputParameters parameters)
   :ACBulk(name,parameters),
    _mu(getMaterialProperty<Real>("mu")),
    _gamma(getMaterialProperty<Real>("gamma_asymm")),
-   _has_bnds(isCoupled("bnds")),
-   _bnds(_has_bnds ? coupledValue("bnds") : _zero)
+   _tgrad_corr_mult(getMaterialProperty<Real>("tgrad_corr_mult")),
+   _has_T(isCoupled("T")),
+   _grad_T(_has_T ? &coupledGradient("T") : NULL)
 {
   //Array of coupled variables is created in the constructor
   _ncrys = coupledComponents("v"); //determine number of grains from the number of names passed in.  Note this is the actual number -1
@@ -32,6 +34,14 @@ ACGrGrPoly::ACGrGrPoly(const std::string & name, InputParameters parameters)
     _vals[i] = &coupledValue("v", i);
     _vals_var[i] = coupled("v",i);
   }  
+
+  if(getParam<bool>("tgrad_correction") && !_has_T)
+  {
+    std::cout << _has_T << std::endl;
+    
+    mooseError("T is not provided for temperature gradient correction");
+  }
+  
   
 }
 
@@ -39,26 +49,30 @@ Real
 ACGrGrPoly::computeDFDOP(PFFunctionType type)
 {
   Real SumEtaj = 0.0;
-  if (_has_bnds && _bnds[_qp] >= 1.0 && _t_step > 1) //This is a possibly misguided attempt to speed up the calculation of SumEtaj
-  {
-    if (_u[_qp] < 0.0001 )
-      SumEtaj = 1.0;
-    //std::cout << "SumEtaj = " << SumEtaj << " u = " << _u[_qp] << " bnds = " << _bnds[_qp] << "||";
-  }
-  else
-  {
     for (unsigned int i=0; i<_ncrys; ++i)
       SumEtaj += (*_vals[i])[_qp]*(*_vals[i])[_qp]; //Sum all other order parameters
-  }
+
+  Real tgrad_correction = 0.0;
 
   //Calcualte either the residual or jacobian of the grain growth free energy
   switch (type)
   {
   case Residual:
-    return _mu[_qp]*(_u[_qp]*_u[_qp]*_u[_qp] - _u[_qp] + 2.0*_gamma[_qp]*_u[_qp]*SumEtaj);
-
+  {
+    if (getParam<bool>("tgrad_correction"))
+      tgrad_correction = _tgrad_corr_mult[_qp]*_grad_u[_qp]*(*_grad_T)[_qp];
+        
+    return _mu[_qp]*(_u[_qp]*_u[_qp]*_u[_qp] - _u[_qp] + 2.0*_gamma[_qp]*_u[_qp]*SumEtaj) + tgrad_correction;
+  }
+  
   case Jacobian:
-    return _mu[_qp]*(_phi[_j][_qp]*(3*_u[_qp]*_u[_qp] - 1.0 + 2.0*_gamma[_qp]*SumEtaj));
+  {
+    if (getParam<bool>("tgrad_correction"))
+      tgrad_correction = _tgrad_corr_mult[_qp]*_grad_phi[_j][_qp]*(*_grad_T)[_qp];
+        
+    return _mu[_qp]*(_phi[_j][_qp]*(3*_u[_qp]*_u[_qp] - 1.0 + 2.0*_gamma[_qp]*SumEtaj)) + tgrad_correction;
+  }
+  
   }
 
   mooseError("Invalid type passed in");
