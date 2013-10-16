@@ -29,6 +29,7 @@ RestartableDataIO::writeRestartableData(std::string base_file_name)
 {
   unsigned int n_threads = libMesh::n_threads();
   unsigned int n_procs = libMesh::n_processors();
+  unsigned int proc_id = libMesh::processor_id();
 
   for(unsigned int tid=0; tid<n_threads; tid++)
   {
@@ -43,13 +44,14 @@ RestartableDataIO::writeRestartableData(std::string base_file_name)
       std::ostringstream file_name_stream;
       file_name_stream << base_file_name;
 
+      file_name_stream << "-" << proc_id;
+
       if(n_threads > 1)
         file_name_stream << "-" << tid;
 
       std::string file_name = file_name_stream.str();
 
-      if (libMesh::processor_id() == 0)
-      {
+      { // Write out header
         out.open(file_name.c_str(), std::ios::out | std::ios::binary);
 
         char id[2];
@@ -76,49 +78,36 @@ RestartableDataIO::writeRestartableData(std::string base_file_name)
           std::string name = it->second->name();
           out.write(name.c_str(), name.length() + 1); // trailing 0!
         }
+      }
+      {
+        std::ostringstream data_blk;
+
+        for(std::map<std::string, RestartableDataValue *>::iterator it = restartable_data.begin();
+            it != restartable_data.end();
+            ++it)
+        {
+          // std::cout<<"Storing "<<it->first<<std::endl;
+
+          std::ostringstream data;
+          it->second->store(data);
+
+          // Store the size of the data then the data
+          unsigned int data_size = data.tellp();
+          data_blk.write((const char *) &data_size, sizeof(data_size));
+          data_blk << data.str();
+        }
+
+        // Write out this proc's block size
+        unsigned int data_blk_size = data_blk.tellp();
+        out.write((const char *) &data_blk_size, sizeof(data_blk_size));
+
+        // Write out the values
+        out << data_blk.str();
 
         out.close();
       }
-
-      // now each process dump its part, appending into the file
-      for (unsigned int proc = 0; proc < n_procs; proc++)
-      {
-        if (libMesh::processor_id() == proc)
-        {
-          out.open(file_name.c_str(), std::ios::app | std::ios::binary);
-
-          std::ostringstream data_blk;
-
-          for(std::map<std::string, RestartableDataValue *>::iterator it = restartable_data.begin();
-              it != restartable_data.end();
-              ++it)
-          {
-            // std::cout<<"Storing "<<it->first<<std::endl;
-
-            std::ostringstream data;
-            it->second->store(data);
-
-            // Store the size of the data then the data
-            unsigned int data_size = data.tellp();
-            data_blk.write((const char *) &data_size, sizeof(data_size));
-            data_blk << data.str();
-          }
-
-          // Write out this proc's block size
-          unsigned int data_blk_size = data_blk.tellp();
-          out.write((const char *) &data_blk_size, sizeof(data_blk_size));
-
-          // Write out the values
-          out << data_blk.str();
-
-          out.close();
-        }
-
-        libMesh::Parallel::barrier(libMesh::CommWorld);
-      }
     }
   }
-
 }
 
 void
@@ -126,6 +115,7 @@ RestartableDataIO::readRestartableData(std::string base_file_name)
 {
   unsigned int n_threads = libMesh::n_threads();
   unsigned int n_procs = libMesh::n_processors();
+  unsigned int proc_id = libMesh::processor_id();
 
   std::vector<std::string> ignored_data;
 
@@ -137,6 +127,8 @@ RestartableDataIO::readRestartableData(std::string base_file_name)
     {
       std::ostringstream file_name_stream;
       file_name_stream << base_file_name;
+
+      file_name_stream << "-" << proc_id;
 
       if(n_threads > 1)
         file_name_stream << "-" << tid;
@@ -198,41 +190,30 @@ RestartableDataIO::readRestartableData(std::string base_file_name)
         data_names[i] = data_name;
       }
 
-      // Read each data value
-      for (unsigned int proc = 0; proc < libMesh::n_processors(); proc++)
+      // Grab this processor's block size
+      unsigned int data_blk_size = 0;
+      in.read((char *) &data_blk_size, sizeof(data_blk_size));
+
+      for(unsigned int i=0; i < n_data; i++)
       {
-        // Grab this processor's block size
-        unsigned int data_blk_size = 0;
-        in.read((char *) &data_blk_size, sizeof(data_blk_size));
+        std::string current_name = data_names[i];
 
-        if (libMesh::processor_id() == proc)
+        unsigned int data_size = 0;
+        in.read((char *) &data_size, sizeof(data_size));
+
+        if(restartable_data.find(current_name) != restartable_data.end()) // Only restore values if they're currently being used
         {
-          for(unsigned int i=0; i < n_data; i++)
-          {
-            std::string current_name = data_names[i];
+          // std::cout<<"Loading "<<current_name<<std::endl;
 
-            unsigned int data_size = 0;
-            in.read((char *) &data_size, sizeof(data_size));
-
-            if(restartable_data.find(current_name) != restartable_data.end()) // Only restore values if they're currently being used
-            {
-              // std::cout<<"Loading "<<current_name<<std::endl;
-
-              RestartableDataValue * current_data = restartable_data[current_name];
-              current_data->load(in);
-            }
-            else
-            {
-              // Skip this piece of data
-              in.seekg(data_size, std::ios_base::cur);
-              ignored_data.push_back(current_name);
-            }
-          }
+          RestartableDataValue * current_data = restartable_data[current_name];
+          current_data->load(in);
         }
-        else // Skip this block
-          in.seekg(data_blk_size, std::ios_base::cur);
-
-        libMesh::Parallel::barrier(libMesh::CommWorld);
+        else
+        {
+          // Skip this piece of data
+          in.seekg(data_size, std::ios_base::cur);
+          ignored_data.push_back(current_name);
+        }
       }
 
       in.close();
