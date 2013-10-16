@@ -5,6 +5,6 @@
     exodiff = 'out.e'
     library_mode = 'DYNAMIC'
     abs_zero = 1e-06
-    delete = 'Ticket #2239'
+    deleted = 'Ticket #2239'
   [../]
 []
