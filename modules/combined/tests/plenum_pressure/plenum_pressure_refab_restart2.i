@@ -315,7 +315,7 @@
   dt = 0.5
   end_time = 2.0
 
-  restart_file_base = plenum_pressure_refab_restart1_out_restart_0003
+#  restart_file_base = plenum_pressure_refab_restart1_out_restart_0003
 []
 
 [Postprocessors]
