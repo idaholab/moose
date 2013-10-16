@@ -19,7 +19,7 @@ CHSplitVar::CHSplitVar(const std::string & name, InputParameters parameters)
 RealGradient
 CHSplitVar::precomputeQpResidual()
 {
-  return  _grad_c[_qp];
+  return  _grad_c[_qp];//*_grad_test[_i][_qp]
 }
 
 RealGradient
