@@ -33,7 +33,7 @@ RestartableDataIO::writeRestartableData(std::string base_file_name)
 
   for(unsigned int tid=0; tid<n_threads; tid++)
   {
-    std::map<std::string, RestartableDataValue *> restartable_data = _fe_problem._restartable_data[tid];
+    const std::map<std::string, RestartableDataValue *> & restartable_data = _fe_problem._restartable_data[tid];
 
     if(restartable_data.size())
     {
@@ -71,18 +71,18 @@ RestartableDataIO::writeRestartableData(std::string base_file_name)
         out.write((const char *) &n_data, sizeof(n_data));
 
         // data names
-        for(std::map<std::string, RestartableDataValue *>::iterator it = restartable_data.begin();
+        for(std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
             it != restartable_data.end();
             ++it)
         {
-          std::string name = it->second->name();
+          std::string name = it->first;
           out.write(name.c_str(), name.length() + 1); // trailing 0!
         }
       }
       {
         std::ostringstream data_blk;
 
-        for(std::map<std::string, RestartableDataValue *>::iterator it = restartable_data.begin();
+        for(std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
             it != restartable_data.end();
             ++it)
         {
@@ -228,5 +228,6 @@ RestartableDataIO::readRestartableData(std::string base_file_name)
       names << ignored_data[i] << "\n";
 
     mooseWarning("The following RestorableData was found in restart file but is being ignored:\n" << names.str());
+
   }
 }
