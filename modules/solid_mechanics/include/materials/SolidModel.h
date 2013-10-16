@@ -31,6 +31,8 @@ public:
               InputParameters parameters );
   virtual ~SolidModel();
 
+  virtual void applyThermalStrain();
+
   static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const SymmTensor & T,
                                      SymmTensor & result );
 
@@ -135,7 +137,6 @@ protected:
 
   /// Modify increment for things like thermal strain
   virtual void modifyStrainIncrement();
-  virtual void applyThermalStrain();
 
   /// Determine cracking directions.  Rotate elasticity tensor.
   virtual void crackingStrainDirections();
@@ -206,14 +207,11 @@ protected:
 
   std::vector<SubdomainID> _block_id;
 
-  std::map<SubdomainID, std::vector<ConstitutiveModel*> > _submodels;
+  std::map<SubdomainID, ConstitutiveModel*> _constitutive_model;
+  bool _constitutive_active;
 
-  unsigned int _max_its;
-  bool _output_iteration_info;
-  Real _relative_tolerance;
-  Real _absolute_tolerance;
   /// Compute the stress (sigma += deltaSigma)
-  virtual void computeCombinedStress();
+  virtual void computeConstitutiveModelStress();
 
 
 private:

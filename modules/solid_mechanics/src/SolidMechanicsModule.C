@@ -9,6 +9,7 @@
 #include "AdaptiveDT.h"
 #include "AdaptiveTransient.h"
 #include "CLSHPlasticMaterial.h"
+#include "CombinedCreepPlasticity.h"
 #include "DashpotBC.h"
 #include "Elastic.h"
 #include "ElasticEnergyAux.h"
@@ -69,6 +70,7 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerMaterial(AbaqusCreepMaterial);
   registerMaterial(AbaqusUmatMaterial);
   registerMaterial(CLSHPlasticMaterial);
+  registerMaterial(CombinedCreepPlasticity);
   registerMaterial(Elastic);
   registerMaterial(IsotropicPlasticity);
   registerMaterial(LinearAnisotropicMaterial);

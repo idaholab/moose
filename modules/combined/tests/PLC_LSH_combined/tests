@@ -46,4 +46,10 @@
     input = 'PLC_LSH_plc.i'
     exodiff = 'PLC_LSH_plc_out.e'
   [../]
+  [./plc2]
+    type = 'Exodiff'
+    input = 'PLC_LSH_plc2.i'
+    exodiff = 'PLC_LSH_plc_out.e'
+    prereq = plc
+  [../]
 []

@@ -1,13 +1,13 @@
 #ifndef ISOTROPICPLASTICITY_H
 #define ISOTROPICPLASTICITY_H
 
-#include "ConstitutiveModel.h"
+#include "ReturnMappingModel.h"
 
 
 /**
  */
 
-class IsotropicPlasticity : public ConstitutiveModel
+class IsotropicPlasticity : public ReturnMappingModel
 {
 public:
   IsotropicPlasticity( const std::string & name,

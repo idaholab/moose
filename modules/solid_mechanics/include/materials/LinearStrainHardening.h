@@ -10,8 +10,6 @@ template<>
 InputParameters validParams<LinearStrainHardening>();
 
 /**
- * Power-law creep material
- * edot = A(sigma)**n * exp(-Q/(RT))
  */
 
 class LinearStrainHardening : public SolidModel

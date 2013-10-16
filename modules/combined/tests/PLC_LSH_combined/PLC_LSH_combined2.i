@@ -224,14 +224,20 @@
     block = 1
     youngs_modulus = 1e3
     poissons_ratio = .3
-    submodels = 'creep plas'
-    absolute_tolerance = 1e-5
-    max_its = 30
+    constitutive_model = combined
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
     temp = temp
     formulation = nonlinear3D
+  [../]
+
+  [./combined]
+    type = CombinedCreepPlasticity
+    block = 1
+    submodels = 'creep plas'
+    absolute_tolerance = 1e-5
+    max_its = 30
 #    output_iteration_info = true
   [../]
 

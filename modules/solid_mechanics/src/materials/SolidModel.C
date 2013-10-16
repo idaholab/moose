@@ -44,11 +44,7 @@ InputParameters validParams<SolidModel>()
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
 
-  params.addParam<std::vector<std::string> >("submodels", "List of submodels ConstitutiveModels");
-  params.addParam<unsigned int>("max_its", 30, "Maximum number of submodel iterations");
-  params.addParam<bool>("output_iteration_info", false, "Set true to output submodel iteration information");
-  params.addParam<Real>("relative_tolerance", 1e-5, "Relative convergence tolerance for combined submodel iteration");
-  params.addParam<Real>("absolute_tolerance", 1e-5, "Absolute convergence tolerance for combined submodel iteration");
+  params.addParam<std::string>("constitutive_model", "ConstitutiveModel to use (optional)");
   return params;
 }
 
@@ -136,10 +132,7 @@ SolidModel::SolidModel( const std::string & name,
    _Eshelby_tensor(declareProperty<ColumnMajorMatrix>("Eshelby_tensor")),
    _Eshelby_tensor_small(declareProperty<ColumnMajorMatrix>("Eshelby_tensor_small")),
    _block_id(std::vector<SubdomainID>(_blk_ids.begin(), _blk_ids.end())),
-   _max_its(parameters.get<unsigned int>("max_its")),
-   _output_iteration_info(getParam<bool>("output_iteration_info")),
-   _relative_tolerance(parameters.get<Real>("relative_tolerance")),
-   _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
+   _constitutive_active(false),
    _element(NULL),
    _local_elasticity_tensor(NULL)
 {
@@ -199,7 +192,9 @@ SolidModel::SolidModel( const std::string & name,
   }
 
   if (parameters.isParamValid("thermal_expansion") && parameters.isParamValid("thermal_expansion_function"))
+  {
     mooseError("Cannot specify both thermal_expansion and thermal_expansion_function");
+  }
 
 }
 
@@ -353,13 +348,23 @@ SolidModel::elasticityTensor( SymmElasticityTensor * e )
 void
 SolidModel::modifyStrainIncrement()
 {
-  applyThermalStrain();
-
+  bool modified = false;
   const SubdomainID current_block = _current_elem->subdomain_id();
-  const std::vector<VolumetricModel*> & vm( _volumetric_models[current_block] );
-  for (unsigned int i(0); i < vm.size(); ++i)
+  if (_constitutive_active)
   {
-    vm[i]->modifyStrain(_qp, _strain_increment, _d_strain_dT);
+    ConstitutiveModel * cm = _constitutive_model[current_block];
+    modified |= cm->modifyStrainIncrement(_qp, _strain_increment, _d_strain_dT);
+  }
+
+  if (!modified)
+  {
+    applyThermalStrain();
+
+    const std::vector<VolumetricModel*> & vm( _volumetric_models[current_block] );
+    for (unsigned int i(0); i < vm.size(); ++i)
+    {
+      vm[i]->modifyStrain(_qp, _strain_increment, _d_strain_dT);
+    }
   }
 }
 
@@ -468,13 +473,13 @@ SolidModel::computeProperties()
 
     computeElasticityTensor();
 
-    if (_submodels.empty())
+    if (!_constitutive_active)
     {
       computeStress();
     }
     else
     {
-      computeCombinedStress();
+      computeConstitutiveModelStress();
     }
 
     if (_compute_JIntegral)
@@ -583,90 +588,20 @@ SolidModel::computeEshelby()
 ////////////////////////////////////////////////////////////////////////
 
 void
-SolidModel::computeCombinedStress()
+SolidModel::computeConstitutiveModelStress()
 {
   // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
   // stress = stressOld + stressIncrement
-  // creep_strain = creep_strainOld + creep_strainIncrement
 
   if(_t_step == 0) return;
 
-  if (_output_iteration_info == true)
-  {
-    std::cout
-      << std::endl
-      << "iteration output for MaterialDriver solve:"
-      << " time=" <<_t
-      << " temperature=" << _temperature[_qp]
-      << " int_pt=" << _qp
-      << std::endl;
-  }
-
-  // compute trial stress
-  SymmTensor stress_new( *elasticityTensor() * _strain_increment );
-  stress_new += _stress_old;
-
   const SubdomainID current_block = _current_elem->subdomain_id();
-  const std::vector<ConstitutiveModel*> & cm( _submodels[current_block] );
-  const unsigned num_submodels = cm.size();
+  ConstitutiveModel* cm = _constitutive_model[current_block];
+  mooseAssert(_constitutive_active, "Logic error.  ConstitutiveModel not active.");
+  mooseAssert(cm, "Logic error.  No ConstitutiveModel.");
 
-  SymmTensor inelastic_strain_increment;
-
-  SymmTensor elastic_strain_increment;
-  SymmTensor stress_new_last( stress_new );
-  Real delS(_absolute_tolerance+1);
-  Real first_delS(delS);
-  unsigned int counter(0);
-
-  while(counter < _max_its &&
-        delS > _absolute_tolerance &&
-        (delS/first_delS) > _relative_tolerance &&
-        (num_submodels != 1 || counter < 1))
-  {
-    elastic_strain_increment = _strain_increment;
-    stress_new = *elasticityTensor() * (elastic_strain_increment - inelastic_strain_increment);
-    stress_new += _stress_old;
-
-    for (unsigned i_cm(0); i_cm < num_submodels; ++i_cm)
-    {
-      cm[i_cm]->computeStress( _qp, *elasticityTensor(), elastic_strain_increment, _stress_old,
-                               inelastic_strain_increment, stress_new );
-      elastic_strain_increment -= inelastic_strain_increment;
-    }
-
-    // now check convergence
-    SymmTensor deltaS(stress_new_last - stress_new);
-    delS = std::sqrt(deltaS.doubleContraction(deltaS));
-    if (counter == 0)
-    {
-      first_delS = delS;
-    }
-    stress_new_last = stress_new;
-
-    if (_output_iteration_info == true)
-    {
-      std::cout
-        << "stress_it=" << counter
-        << " rel_delS=" << delS/first_delS
-        << " rel_tol="  << _relative_tolerance
-        << " abs_delS=" << delS
-        << " abs_tol="  << _absolute_tolerance
-        << std::endl;
-    }
-
-    ++counter;
-  }
-
-  if(counter == _max_its &&
-     delS > _absolute_tolerance &&
-     (delS/first_delS) > _relative_tolerance)
-  {
-    mooseError("Max stress iteration hit during combined submodel solve!");
-  }
-
-  _strain_increment = elastic_strain_increment;
-  _stress[_qp] = stress_new;
-
+  cm->computeStress( *_current_elem, _qp, *elasticityTensor(), _stress_old, _strain_increment,
+                     _stress[_qp] );
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -697,7 +632,14 @@ bool
 SolidModel::updateElasticityTensor(SymmElasticityTensor & tensor)
 {
   bool changed(false);
-  if (_youngs_modulus_function || _poissons_ratio_function)
+  if (_constitutive_active)
+  {
+    const SubdomainID current_block = _current_elem->subdomain_id();
+    ConstitutiveModel* cm = _constitutive_model[current_block];
+    changed |= cm->updateElasticityTensor( _qp, tensor );
+  }
+
+  if (!changed && (_youngs_modulus_function || _poissons_ratio_function))
   {
     SymmIsotropicElasticityTensor * t = dynamic_cast<SymmIsotropicElasticityTensor*>(&tensor);
     if (!t)
@@ -749,9 +691,7 @@ SolidModel::initialSetup()
 
   createElasticityTensor();
 
-  // Load in the volumetric models or submodels
-
-  const std::vector<std::string> & submodels = getParam<std::vector<std::string> >("submodels");
+  // Load in the volumetric models or constitutive model
 
   for(unsigned i(0); i < _block_id.size(); ++i)
   {
@@ -775,22 +715,23 @@ SolidModel::initialSetup()
       }
     }
 
-    for (unsigned int i_name(0); i_name < submodels.size(); ++i_name)
+    if (isParamValid("constitutive_model"))
     {
-      bool found = false;
+      const std::string & constitutive_model = getParam<std::string>("constitutive_model");
+
       for (unsigned int j=0; j < mats.size(); ++j)
       {
         ConstitutiveModel * cm = dynamic_cast<ConstitutiveModel*>(mats[j]);
-        if (cm && cm->name() == submodels[i_name])
+        if (cm && cm->name() == constitutive_model)
         {
-          _submodels[_block_id[i]].push_back( cm );
-          found = true;
+          _constitutive_model[_block_id[i]] = cm;
+          _constitutive_active = true;
           break;
         }
       }
-      if (!found)
+      if (!_constitutive_active)
       {
-        mooseError("Unable to find submodel " + submodels[i_name]);
+        mooseError("Unable to find constitutive model " + getParam<std::string>("constitutive_model"));
       }
     }
   }

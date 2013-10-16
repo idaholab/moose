@@ -15,6 +15,10 @@ InputParameters validParams<ConstitutiveModel>()
   params.addParam<Real>("absolute_tolerance", 1e-20, "Absolute convergence tolerance for sub-newtion iteration");
   params.addCoupledVar("temp", "Coupled Temperature");
 
+  params.addParam<Real>("thermal_expansion", "The thermal expansion coefficient.");
+  params.addParam<FunctionName>("thermal_expansion_function", "Thermal expansion coefficient as a function of temperature.");
+  params.addParam<Real>("stress_free_temperature", "The stress-free temperature.  If not specified, the initial temperature is used.");
+
   return params;
 }
 
@@ -22,101 +26,63 @@ InputParameters validParams<ConstitutiveModel>()
 ConstitutiveModel::ConstitutiveModel( const std::string & name,
                                       InputParameters parameters )
   :Material( name, parameters ),
-   _max_its(parameters.get<unsigned int>("max_its")),
-   _output_iteration_info(getParam<bool>("output_iteration_info")),
-   _relative_tolerance(parameters.get<Real>("relative_tolerance")),
-   _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
    _has_temp(isCoupled("temp")),
    _temperature(_has_temp ? coupledValue("temp") : _zero),
-   _temperature_old(_has_temp ? coupledValueOld("temp") : _zero)
+   _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
+   _alpha(parameters.isParamValid("thermal_expansion") ? getParam<Real>("thermal_expansion") : 0.),
+   _alpha_function( parameters.isParamValid("thermal_expansion_function") ? &getFunction("thermal_expansion_function") : NULL),
+   _has_stress_free_temp(isParamValid("stress_free_temperature")),
+   _stress_free_temp(_has_stress_free_temp ? getParam<Real>("stress_free_temperature") : 0.0)
 {}
 
 void
-ConstitutiveModel::computeStress( unsigned qp,
+ConstitutiveModel::computeStress( const Elem & current_elem,
+                                  unsigned qp,
                                   const SymmElasticityTensor & elasticityTensor,
-                                  const SymmTensor & strain_increment,
                                   const SymmTensor & stress_old,
-                                  SymmTensor & inelastic_strain_increment,
+                                  SymmTensor & strain_increment,
                                   SymmTensor & stress_new )
 {
-
-  // compute deviatoric trial stress
-  SymmTensor dev_trial_stress(stress_new);
-  dev_trial_stress.addDiag( -dev_trial_stress.trace()/3.0 );
-
-  // compute effective trial stress
-  Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
-  Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
-
-  computeStressInitialize(qp, effective_trial_stress, elasticityTensor);
-
-  // Use Newton sub-iteration to determine inelastic strain increment
-
-  Real scalar = 0;
-  unsigned int it = 0;
-  Real residual = 10;
-  Real norm_residual = 10;
-  Real first_norm_residual = 10;
-
-  while(it < _max_its &&
-        norm_residual > _absolute_tolerance &&
-        (norm_residual/first_norm_residual) > _relative_tolerance)
-  {
-    iterationInitialize( qp, scalar );
-
-    residual = computeResidual(qp, effective_trial_stress, scalar);
-    norm_residual = std::abs(residual);
-    if (it == 0)
-    {
-      first_norm_residual = norm_residual;
-    }
-
-    scalar -= residual / computeDerivative(qp, effective_trial_stress, scalar);
-
-    if (_output_iteration_info == true)
-    {
-      std::cout
-      << " it="       << it
-      << " trl_strs=" << effective_trial_stress
-      << " scalar="   << scalar
-      << " rel_res="  << norm_residual/first_norm_residual
-      << " rel_tol="  << _relative_tolerance
-      << " abs_res="  << norm_residual
-      << " abs_tol="  << _absolute_tolerance
-      << std::endl;
-    }
-
-    iterationFinalize( qp, scalar );
-
-    ++it;
-  }
-
-
-  if(it == _max_its &&
-     norm_residual > _absolute_tolerance &&
-     (norm_residual/first_norm_residual) > _relative_tolerance)
-  {
-    mooseError("Max sub-newton iteration hit during nonlinear constitutive model solve!");
-  }
-
-  // compute creep and elastic strain increments (avoid potential divide by zero - how should this be done)?
-  if (effective_trial_stress < 0.01)
-  {
-    effective_trial_stress = 0.01;
-  }
-
-  inelastic_strain_increment = dev_trial_stress;
-  inelastic_strain_increment *= (1.5*scalar/effective_trial_stress);
-
-  SymmTensor elastic_strain_increment(strain_increment);
-  elastic_strain_increment -= inelastic_strain_increment;
-
-  // compute stress increment
-  stress_new = elasticityTensor * elastic_strain_increment;
-
-  // update stress
+  stress_new = elasticityTensor * strain_increment;
   stress_new += stress_old;
+}
 
-  computeStressFinalize(qp, inelastic_strain_increment);
+void
+ConstitutiveModel::initStatefulProperties( unsigned int /*qp*/ )
+{
+}
 
+bool
+ConstitutiveModel::applyThermalStrain(unsigned qp,
+                                      SymmTensor & strain_increment,
+                                      SymmTensor & d_strain_dT)
+{
+  bool modified = false;
+  if ( _has_temp && _t_step != 0 )
+  {
+    Real tStrain;
+    Real alpha(_alpha);
+    if (_alpha_function)
+    {
+      Point p;
+      alpha = _alpha_function->value(_temperature[qp],p);
+    }
+    if (alpha != 0)
+    {
+      modified = true;
+    }
+    if (_t_step == 1 && _has_stress_free_temp)
+    {
+      tStrain = alpha * (_temperature[qp] - _stress_free_temp);
+    }
+    else
+    {
+      tStrain = alpha * (_temperature[qp] - _temperature_old[qp]);
+    }
+    strain_increment.addDiag( -tStrain );
+
+    d_strain_dT.zero();
+    d_strain_dT.addDiag( -alpha );
+  }
+  return modified;
 }

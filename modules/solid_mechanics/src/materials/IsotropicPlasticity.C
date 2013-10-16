@@ -5,7 +5,7 @@
 template<>
 InputParameters validParams<IsotropicPlasticity>()
 {
-  InputParameters params = validParams<ConstitutiveModel>();
+  InputParameters params = validParams<ReturnMappingModel>();
 
   // Linear strain hardening parameters
   params.addRequiredParam<Real>("yield_stress", "The point at which plastic strain begins accumulating");
@@ -17,7 +17,7 @@ InputParameters validParams<IsotropicPlasticity>()
 
 IsotropicPlasticity::IsotropicPlasticity( const std::string & name,
                                       InputParameters parameters )
-  :ConstitutiveModel( name, parameters ),
+  :ReturnMappingModel( name, parameters ),
    _yield_stress(parameters.get<Real>("yield_stress")),
    _hardening_constant(parameters.get<Real>("hardening_constant")),
 
@@ -40,6 +40,7 @@ IsotropicPlasticity::initStatefulProperties(unsigned n_points)
   {
     _hardening_variable[qp] = _hardening_variable_old[qp] = 0;
   }
+  ConstitutiveModel::initStatefulProperties( n_points );
 }
 
 void

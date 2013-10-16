@@ -1,13 +1,13 @@
 #ifndef POWERLAWCREEPMODEL_H
 #define POWERLAWCREEPMODEL_H
 
-#include "ConstitutiveModel.h"
+#include "ReturnMappingModel.h"
 
 
 /**
  */
 
-class PowerLawCreepModel : public ConstitutiveModel
+class PowerLawCreepModel : public ReturnMappingModel
 {
 public:
   PowerLawCreepModel( const std::string & name,

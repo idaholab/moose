@@ -5,7 +5,7 @@
 template<>
 InputParameters validParams<PowerLawCreepModel>()
 {
-  InputParameters params = validParams<ConstitutiveModel>();
+  InputParameters params = validParams<ReturnMappingModel>();
 
   // Power-law creep material parameters
   params.addRequiredParam<Real>("coefficient", "Leading coefficent in power-law equation");
@@ -21,7 +21,7 @@ InputParameters validParams<PowerLawCreepModel>()
 
 PowerLawCreepModel::PowerLawCreepModel( const std::string & name,
                                 InputParameters parameters )
-  :ConstitutiveModel( name, parameters ),
+  :ReturnMappingModel( name, parameters ),
    _coefficient(parameters.get<Real>("coefficient")),
    _n_exponent(parameters.get<Real>("n_exponent")),
    _m_exponent(parameters.get<Real>("m_exponent")),

@@ -15,34 +15,37 @@ public:
   ConstitutiveModel( const std::string & name,
                      InputParameters parameters );
 
-  virtual void computeStress( unsigned qp,
+  virtual ~ConstitutiveModel() {}
+
+  virtual void initStatefulProperties(unsigned int n_points);
+
+  virtual void computeStress( const Elem & current_elem,
+                              unsigned qp,
                               const SymmElasticityTensor & elasticityTensor,
-                              const SymmTensor & strain_increment,
                               const SymmTensor & stress_old,
-                              SymmTensor & inelastic_strain_increment,
+                              SymmTensor & strain_increment,
                               SymmTensor & stress_new );
 
+  virtual bool modifyStrainIncrement(unsigned qp, SymmTensor & strain_increment, SymmTensor & d_strain_dT)
+  {
+    return applyThermalStrain(qp, strain_increment, d_strain_dT);
+  }
+  virtual bool updateElasticityTensor(unsigned /*qp*/, SymmElasticityTensor & /*elasticityTensor*/)
+  {
+    return false;
+  }
+
+  virtual bool applyThermalStrain(unsigned qp, SymmTensor & strain_increment, SymmTensor & d_strain_dT);
+
 protected:
-  virtual void computeStressInitialize(unsigned /*qp*/,
-                                       Real /*effectiveTrialStress*/,
-                                       const SymmElasticityTensor & /*elasticityTensor*/) {}
-  virtual void computeStressFinalize(unsigned /*qp*/,
-                                     const SymmTensor & /*inelasticStrainIncrement*/) {}
-
-
-  virtual void iterationInitialize(unsigned /*qp*/, Real /*scalar*/) {}
-  virtual Real computeResidual(unsigned qp, Real effectiveTrialStress, Real scalar) = 0;
-  virtual Real computeDerivative(unsigned qp, Real effectiveTrialStress, Real scalar) = 0;
-  virtual void iterationFinalize(unsigned /*qp*/, Real /*scalar*/) {}
-
-  const unsigned int _max_its;
-  const bool _output_iteration_info;
-  const Real _relative_tolerance;
-  const Real _absolute_tolerance;
 
   const bool _has_temp;
   VariableValue & _temperature;
   VariableValue & _temperature_old;
+  const Real _alpha;
+  Function * const _alpha_function;
+  const bool _has_stress_free_temp;
+  const Real _stress_free_temp;
 
 private:
   using Material::computeProperties;

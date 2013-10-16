@@ -147,11 +147,10 @@
     block = 1
     youngs_modulus = 2.4e5
     poissons_ratio = .3
-    relative_tolerance = 1.e-8
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    submodels = lsh
+    constitutive_model = lsh
   [../]
   [./lsh]
     type = IsotropicPlasticity
@@ -159,6 +158,7 @@
     yield_stress = 2.4e2
     hardening_constant = 1206.
     relative_tolerance = 1.e-8
+#    output_iteration_info = true
   [../]
 []
 
