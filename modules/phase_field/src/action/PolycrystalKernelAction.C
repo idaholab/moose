@@ -14,8 +14,7 @@ InputParameters validParams<PolycrystalKernelAction>()
   params.addParam<std::string>("c_name","c","Name of coupled concentration variable");
   params.addParam<Real>("en_ratio","Ratio of surface to GB energy");
   params.addParam<bool>("implicit",true,"Whether kernels are implicit or not");
-  params.addParam<bool>("tgrad_correction",false,"Add in correction factor to cancel out false temperature gradient driving force");
-  params.addParam<VariableName>("T","Name of coupled concentration variable");
+  params.addParam<VariableName>("T","Name of temperature variable");
   
   return params;
 }
@@ -72,7 +71,6 @@ PolycrystalKernelAction::act()
     poly_params.set<NonlinearVariableName>("variable") = var_name;
     poly_params.set<std::vector<VariableName> >("v") = v;
     poly_params.set<bool>("implicit")=_implicit;
-    poly_params.set<bool>("tgrad_correction")=getParam<bool>("tgrad_correction");
     if (!_T.empty())
       poly_params.set<std::vector<VariableName> >("T").push_back(_T);
     

@@ -58,7 +58,6 @@
 
 [Kernels]
   [./PolycrystalKernel]
-    tgrad_correction = true
     T = T
   [../]
 []
