@@ -15,7 +15,7 @@
 #include "Reportable.h"
 #include "FEProblem.h"
 
-Reportable::Reportable(std::string name, InputParameters & parameters) :
+Reportable::Reportable(std::string /*name*/, InputParameters & parameters) :
     _reportable_feproblem(parameters.get<FEProblem *>("_fe_problem")),
     _reportable_data(_reportable_feproblem->getReportableData()),
     _reportable_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)

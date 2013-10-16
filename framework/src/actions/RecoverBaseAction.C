@@ -42,7 +42,7 @@ RecoverBaseAction::RecoverBaseAction(const std::string & name, InputParameters p
 }
 
 void
-RecoverBaseAction::RecoverBaseObject(Output &output, InputParameters & params)
+RecoverBaseAction::RecoverBaseObject(Output & /*output*/, InputParameters & /*params*/)
 {
 }
 
@@ -80,7 +80,7 @@ RecoverBaseAction::newestRestartFileWithBase(std::string base_name)
   if(tinydir_open(&tdir, dir.c_str()) == -1)
     mooseError("Cannot open directory!");
 
-  unsigned int max_file_num = 0;
+  int max_file_num = 0;
   std::string max_base;
 
   while(tdir.has_next)
