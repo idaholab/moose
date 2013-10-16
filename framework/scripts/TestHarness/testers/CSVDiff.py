@@ -10,6 +10,7 @@ class CSVDiff(RunApp):
     params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
     params.addParam('abs_zero',       1e-10, "Absolute zero cutoff used in exodiff comparisons.")
     params.addParam('rel_err',       5.5e-6, "Relative error value used in exodiff comparisons.")
+    params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
 
     return params
   getValidParams = staticmethod(getValidParams)
@@ -18,11 +19,12 @@ class CSVDiff(RunApp):
     RunApp.__init__(self, name, params)
 
   def prepare(self):
-    for file in self.specs[CSVDIFF]:
-      try:
-        os.remove(os.path.join(self.specs[TEST_DIR], file))
-      except:
-        pass
+    if self.specs[DELETE_OUTPUT_BEFORE_RUNNING] == True:
+      for file in self.specs[CSVDIFF]:
+        try:
+          os.remove(os.path.join(self.specs[TEST_DIR], file))
+        except:
+          pass
 
   def processResults(self, moose_dir, retcode, options, output):
     (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)

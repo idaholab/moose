@@ -9,6 +9,7 @@ class CheckFiles(RunApp):
     params = RunApp.getValidParams()
     params.addParam('check_files', [], "A list of files that MUST exist.")
     params.addParam('check_not_exists', [], "A list of files that must NOT exist.")
+    params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
 
     return params
   getValidParams = staticmethod(getValidParams)
@@ -17,11 +18,12 @@ class CheckFiles(RunApp):
     RunApp.__init__(self, name, params)
 
   def prepare(self):
-    for file in self.specs[CHECK_FILES] + self.specs[CHECK_NOT_EXISTS]:
-      try:
-        os.remove(os.path.join(self.specs[TEST_DIR], file))
-      except:
-        pass
+    if self.specs[DELETE_OUTPUT_BEFORE_RUNNING] == True:
+      for file in self.specs[CHECK_FILES] + self.specs[CHECK_NOT_EXISTS]:
+        try:
+          os.remove(os.path.join(self.specs[TEST_DIR], file))
+        except:
+          pass
 
   def processResults(self, moose_dir, retcode, options, output):
     (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
