@@ -1,5 +1,6 @@
 import os, sys, re, inspect, types, errno, pprint, subprocess, io, shutil
 import ParseGetPot
+import copy
 from socket import gethostname
 from options import *
 from util import *
@@ -76,6 +77,10 @@ class TestHarness:
                 tests = self.parseGetPotTestFormat(file)
               elif file[-2:] == 'py' and self.test_match.search(file): # Legacy file formatted test
                 tests = self.parseLegacyTestFormat(file)
+
+              if self.options.enable_recover:
+                tests = self.appendRecoverableTests(tests)
+
               # Go through the list of test specs and run them
               for test in tests:
                 # Strip begining and ending spaces to input file name
@@ -294,6 +299,32 @@ class TestHarness:
   def augmentTestSpecs(self, test):
     test[EXECUTABLE] = self.executable
     test[HOSTNAME] = self.host_name
+
+  # This method splits a lists of tests into two pieces each, the first piece will run the test for
+  # approx. half the number of timesteps and will write out a restart file.  The second test will
+  # then complete the run using the MOOSE recover option.
+  def appendRecoverableTests(self, tests):
+    new_tests = []
+
+    for part1 in tests:
+      if part1[RECOVER] == True:
+        # Clone the test specs
+        part2 = copy.deepcopy(part1)
+
+        # Part 1:
+        part1[TEST_NAME] += '_part1'
+        part1[CLI_ARGS].append('--half-transient')
+        part1[CLI_ARGS].append('Output/num_restart_files=1')
+        part1['skip_checks'] = True
+
+        # Part 2:
+        part2[PREREQ].append(part1[TEST_NAME])
+        part2[CLI_ARGS].append('--recover')
+
+        new_tests.append(part2)
+
+    tests.extend(new_tests)
+    return tests
 
   ## Finish the test by inspecting the raw output
   def testOutputAndFinish(self, tester, retcode, output, start=0, end=0):
@@ -631,6 +662,7 @@ class TestHarness:
     parser.add_argument('--parallel', '-p', nargs='?', action='store', type=int, dest='parallel', const=1, help='Number of processors to use when running mpiexec')
     parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
     parser.add_argument('-d', action='store_true', dest='debug_harness', help='Turn on Test Harness debugging')
+    parser.add_argument('--recover', action='store_true', dest='enable_recover', help='Run a test in recover mode')
     parser.add_argument('--valgrind', action='store_true', dest='enable_valgrind', help='Enable Valgrind')
     parser.add_argument('--valgrind-max-fails', nargs=1, type=int, dest='valgrind_max_fails', default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
     parser.add_argument('--pbs', nargs='?', metavar='batch_file', dest='pbs', const='generate', help='Enable launching tests via PBS. If no batch file is specified one will be created for you')

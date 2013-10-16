@@ -26,6 +26,10 @@ class CheckFiles(RunApp):
   def processResults(self, moose_dir, retcode, options, output):
     (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
 
+    specs = self.specs
+    if reason != '' or specs['skip_checks']:
+      return (reason, output)
+
     if reason == '':
      # if still no errors, check other files (just for existence)
      for file in self.specs[CHECK_FILES]:

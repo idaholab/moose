@@ -17,6 +17,7 @@ class Tester(object):
     params.addParam('heavy',    False, "Set to True if this test should only be run when the '--heavy' option is used.")
     params.addParam('group',       [], "A list of groups for which this test belongs.")
     params.addParam('prereq',      [], "A list of prereq tests that need to run successfully before launching this test.")
+    params.addParam('skip_checks', False, "Tells the TestHarness to skip additional checks (This parameter is set automatically by the TestHarness during recovery tests)")
 
     # Test Filters
     params.addParam('platform',      ['ALL'], "A list of platforms for which this test will run on. ('ALL', 'DARWIN', 'LINUX', 'SL', 'LION', 'ML')")
@@ -25,8 +26,9 @@ class Tester(object):
     params.addParam('mesh_mode',     ['ALL'], "A list of mesh modes for which this test will run ('PARALLEL', 'SERIAL')")
     params.addParam('method',        ['ALL'], "A test that runs under certain executable configurations ('ALL', 'OPT', 'DBG', 'DEVEL', 'OPROF', 'PRO')")
     params.addParam('library_mode',  ['ALL'], "A test that only runs when libraries are built under certain configurations ('ALL', 'STATIC', 'DYNAMIC')")
-    params.addParam('dtk',           ['ALL'], "A test that runs only if DTK is detected ('TRUE', 'FALSE')")
-    params.addParam('unique_ids',    ['ALL'], "A test that runs only if UNIQUE_IDs are enabled ('TRUE', 'FALSE')")
+    params.addParam('dtk',           ['ALL'], "A test that runs only if DTK is detected ('ALL', 'TRUE', 'FALSE')")
+    params.addParam('unique_ids',    ['ALL'], "A test that runs only if UNIQUE_IDs are enabled ('ALL', 'TRUE', 'FALSE')")
+    params.addParam('recover',       True,    "A test that runs with '--recover' mode enabled")
 
     return params
   getValidParams = staticmethod(getValidParams)

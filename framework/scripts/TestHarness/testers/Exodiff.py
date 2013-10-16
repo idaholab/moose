@@ -32,10 +32,10 @@ class Exodiff(RunApp):
 
   def processResults(self, moose_dir, retcode, options, output):
     (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
-    if reason != '':
-      return (reason, output)
 
     specs = self.specs
+    if reason != '' or specs['skip_checks']:
+      return (reason, output)
 
     # Don't Run Exodiff on Scaled Tests
     if options.scaling and specs[SCALE_REFINE]:

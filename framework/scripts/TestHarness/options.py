@@ -34,6 +34,7 @@ DTK           = 'dtk'            # A test that runs only if DTK is detected 'TRU
 METHOD        = 'method'         # A test that only runs under an executable built by the specified method 'ALL', 'OPT', 'DBG', 'DEVEL', 'OPROF', 'PRO'
 LIBRARY_MODE  = 'library_mode'   # A test that only runs when libraries are built in a certain mode 'ALL', 'STATIC', 'DYNAMIC'
 UNIQUE_IDS    = 'unique_ids'     # A test that only runs when libMesh is configured with '--enable-unique-id' 'ALL', 'TRUE', 'FALSE'
+RECOVER       = 'recover'        # A test that runs in '--recover' mode: 'TRUE', 'FALSE'
 
 EXODIFF       = 'exodiff'        # A list of files to exodiff
 EXODIFF_OPTS  = 'exodiff_opts'   # A place where the user can put in what ever else needs to be sent out.
@@ -99,6 +100,7 @@ DEFAULTS = { EXODIFF : [],
              LIBRARY_MODE : ['ALL'],
 	     DTK : ['ALL'],
              UNIQUE_IDS : ['ALL'],
+             RECOVER : True,
              SHOULD_CRASH : False,
              EXPECT_ERR : None,
              EXPECT_OUT : None,
