@@ -23,7 +23,7 @@ InputParameters validParams<PlenumPressureAction>()
   params.addRequiredParam<PostprocessorName>("temperature", "The name of the average temperature postprocessor value.");
   params.addRequiredParam<PostprocessorName>("volume", "The name of the internal volume postprocessor value.");
   params.addParam<Real>("startup_time", 0, "The amount of time during which the pressure will ramp from zero to its true value.");
-  params.addParam<PostprocessorName>("output_initial_moles", "", "The reporting postprocessor to use for the initial moles of gas.");
+  params.addParam<bool>("output_initial_moles", false, "The reporting postprocessor to use for the initial moles of gas.");
   params.addParam<PostprocessorName>("output", "", "The reporting postprocessor to use for the plenum pressure value.");
 
   params.addParam<std::vector<Real> >("refab_time", "The time at which the plenum pressure must be reinitialized due to fuel rod refabrication.");
@@ -47,8 +47,7 @@ PlenumPressureAction::PlenumPressureAction(const std::string & name, InputParame
   _temperature(getParam<PostprocessorName>("temperature")),
   _volume(getParam<PostprocessorName>("volume")),
   _startup_time(getParam<Real>("startup_time")),
-  _output_initial_moles(getParam<PostprocessorName>("output_initial_moles")),
-  _output(getParam<PostprocessorName>("output")),
+  _output_initial_moles(getParam<bool>("output_initial_moles")),
 
   _kernel_name("PlenumPressure"),
   _use_displaced_mesh(true)
@@ -101,8 +100,7 @@ PlenumPressureAction::act()
     params.set<PostprocessorName>("temperature") = _temperature;
     params.set<PostprocessorName>("volume") = _volume;
     params.set<Real>("startup_time") = _startup_time;
-    params.set<PostprocessorName>("output_initial_moles") = _output_initial_moles;
-    params.set<PostprocessorName>("output") = _output;
+    params.set<bool>("output_initial_moles") = _output_initial_moles;
     if (isParamValid("refab_time"))
     {
       params.set<std::vector<Real> >("refab_time") = getParam<std::vector<Real> >("refab_time");
@@ -131,7 +129,7 @@ PlenumPressureAction::act()
     {
       params.set<std::vector<AuxVariableName> >("save_in") = _save_in_vars[i];
     }
-
+    
     _problem->addBoundaryCondition(_kernel_name, name.str(), params);
   }
 }

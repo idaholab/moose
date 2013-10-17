@@ -298,7 +298,6 @@
       temperature = aveTempInterior
       volume = internalVolume
       startup_time = 0.5
-      output = ppress
       save_in_disp_x = pressure_residual_x
       save_in_disp_y = pressure_residual_y
       save_in_disp_z = pressure_residual_z
@@ -395,10 +394,6 @@
     boundary = '7 8 9 10 11 12'
     variable = material_input
     execute_on = residual
-  [../]
-
-  [./ppress]
-    type = Reporter
   [../]
 []
 

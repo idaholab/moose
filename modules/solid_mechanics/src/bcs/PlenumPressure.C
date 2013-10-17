@@ -1,4 +1,5 @@
 #include "PlenumPressure.h"
+#include "Conversion.h"
 
 template<>
 InputParameters validParams<PlenumPressure>()
@@ -11,8 +12,7 @@ InputParameters validParams<PlenumPressure>()
   params.addRequiredParam<PostprocessorName>("temperature", "The name of the average temperature postprocessor value.");
   params.addRequiredParam<PostprocessorName>("volume", "The name of the internal volume postprocessor value.");
   params.addParam<Real>("startup_time", 0, "The amount of time during which the pressure will ramp from zero to its true value.");
-  params.addParam<PostprocessorName>("output_initial_moles", "", "The reporting postprocessor to use for the initial moles of gas.");
-  params.addParam<PostprocessorName>("output", "", "The reporting postprocessor to use for the plenum pressure value.");
+  params.addParam<bool>("output_initial_moles", false, "The reporting postprocessor to use for the initial moles of gas.");
   params.addParam<std::vector<Real> >("refab_time", "The time at which the plenum pressure must be reinitialized due to fuel rod refabrication.");
   params.addParam<std::vector<Real> >("refab_pressure", "The pressure of fill gas at refabrication.");
   params.addParam<std::vector<Real> >("refab_temperature", "The temperature at refabrication.");
@@ -25,8 +25,9 @@ InputParameters validParams<PlenumPressure>()
 
 PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
   :IntegratedBC(name, params),
-   _n0(declareRestartableData<Real>("initial_moles", 0)),
    _component(getParam<int>("component")),
+   _n0(declareReportableValue("initial_moles", 0.0,
+                              getParam<bool>("output_initial_moles"))),
    _initial_pressure(getParam<Real>("initial_pressure")),
    _material_input(),
    _R(getParam<Real>("R")),
@@ -34,8 +35,6 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
    _volume( getPostprocessorValue("volume")),
    _start_time(0),
    _startup_time( getParam<Real>("startup_time")),
-   _initial_moles( getParam<PostprocessorName>("output_initial_moles") != "" ? &getPostprocessorValue("output_initial_moles") : NULL ),
-   _output( getParam<PostprocessorName>("output") != "" ? &getPostprocessorValue("output") : NULL ),
    _refab_needed(isParamValid("refab_time") ? getParam<std::vector<Real> >("refab_time").size() : 0),
    _refab_gas_released(declareRestartableData<Real>("refab_gas_released", 0)),
    _refab_time( isParamValid("refab_time") ?
@@ -54,7 +53,7 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
                 getParam<std::vector<unsigned> >("refab_type") :
                 std::vector<unsigned>(_refab_time.size(), 0) ),
    _refab_counter(declareRestartableData<unsigned int>("refab_counter", 0)),
-   _my_value(declareRestartableData<Real>("plenum_pressure", 0))
+   _my_value(declareReportableValue("ppress", 0.0))
 {
 
   if (isParamValid("material_input"))
@@ -93,7 +92,6 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
 
     mooseError( errMsg.str() );
   }
-
 }
 
 Real
@@ -112,15 +110,7 @@ PlenumPressure::initialSetup()
     _start_time = _t - _dt;
     const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t-_start_time) / _startup_time;
     _my_value = factor * _initial_pressure;
-  }
-  if ( _initial_moles )
-  {
-    *_initial_moles = _n0;
-  }
-  if (_output)
-  {
-    *_output = _my_value;
-  }
+  } 
 }
 
 void
@@ -136,16 +126,8 @@ PlenumPressure::timestepSetup()
 
     _n0 = _refab_pressure[_refab_counter] * _refab_volume[_refab_counter] / (_R * _refab_temperature[_refab_counter]);
 
-    if ( _initial_moles )
-    {
-      *_initial_moles = _n0;
-    }
     const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t-_start_time) / _startup_time;
     _my_value = factor * _refab_pressure[_refab_counter];
-    if (_output)
-    {
-      *_output = _my_value;
-    }
     ++_refab_counter;
   }
 }
@@ -173,8 +155,4 @@ PlenumPressure::residualSetup()
 
   const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t-_start_time) / _startup_time;
   _my_value = factor * pressure;
-  if (_output)
-  {
-    *_output = _my_value;
-  }
 }
