@@ -75,8 +75,6 @@ class TestHarness:
               os.chdir(dirpath)
               if file == self.options.input_file_name:  # New GetPot file formatted test
                 tests = self.parseGetPotTestFormat(file)
-              elif file[-2:] == 'py' and self.test_match.search(file): # Legacy file formatted test
-                tests = self.parseLegacyTestFormat(file)
 
               if self.options.enable_recover:
                 tests = self.appendRecoverableTests(tests)
@@ -231,69 +229,6 @@ class TestHarness:
 
         # Build a list of test specs (dicts) to return
         tests.append(params)
-    return tests
-
-  def parseLegacyTestFormat(self, filename):
-    # dynamically load the module
-    module_name = filename[:-3]   # Always a python file (*.py)
-    module = __import__(module_name)
-    test_dir = os.path.dirname(module.__file__)
-    tests = []
-
-    for test_name, test_opts in inspect.getmembers(module):
-      if isinstance(test_opts, types.DictType) and self.test_match.search(test_name):
-
-        # insert default values where none provided
-        testname = module_name + '.' + test_name
-
-        # Filter tests that we want to run
-        will_run = False
-        if len(self.tests) == 0:
-          will_run = True
-        else:
-          for item in self.tests:
-            pos = item.find(".")
-            # Does the passed in argument have a "dot"?
-            if (pos > -1 and item == testname) or (pos == -1 and item == module_name):
-              will_run = True
-
-        if not will_run:
-          continue
-
-        test = DEFAULTS.copy()
-
-        # Get relative path to test[TEST_DIR]
-        relative_path = test_dir.replace(self.executable.split(self.executable.split('/').pop())[0], '')
-
-        # Now update all the base level keys
-        test.update(test_opts)
-
-        # Backwards compatibility
-        if len(test[CSVDIFF]) > 0 and TYPE not in test:
-          print 'CSVDIFF is deprecated in the legacy test format unless "type" is supplied. Please convert to the new format:\n' + test_dir + '/' + filename
-          sys.exit(1)
-        if (test[EXPECT_ERR] != None or test[EXPECT_ASSERT] != None or test[SHOULD_CRASH] == True) and not TYPE in test:
-          test[TYPE] = 'RunException'
-          test[SHOULD_CRASH] = True
-
-        test.update( { TEST_NAME : testname, TEST_DIR : test_dir, RELATIVE_PATH : relative_path, EXECUTABLE : self.executable, HOSTNAME : self.host_name, MOOSE_DIR : self.moose_dir} )
-
-        if TYPE not in test:
-          test.update( { TYPE : "Exodiff" } )
-
-        if test[PREREQ] != None:
-          if type(test[PREREQ]) != list:
-            print "Option 'PREREQ' needs to be of type list in " + module_name + '.' + test[TEST_NAME]
-            sys.exit(1)
-          test[PREREQ] = [module_name + '.' + item for item in test[PREREQ]]
-
-        # Create an InputParmaters object using the raw test specs dictionary
-        params = self.populateParams(InputParameters(), test)
-
-        # Build a list of test specs (dicts) to return
-        tests.append(params)
-    if len(tests) > 0:
-      print colorText("WARNING: The python test specification format has been deprecated.  Please migrate your test files to the new getpot format", self.options, "RED")
     return tests
 
   def augmentTestSpecs(self, test):
