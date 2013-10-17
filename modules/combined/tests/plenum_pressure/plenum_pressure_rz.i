@@ -118,6 +118,7 @@
       temperature = aveTempInterior
       volume = internalVolume
       startup_time = 0.5
+      output = ppress
     [../]
   [../]
 
@@ -199,6 +200,10 @@
     boundary = 2
     variable = temp
     execute_on = residual
+  [../]
+
+  [./ppress]
+    type = Reporter
   [../]
 []
 

@@ -2,7 +2,6 @@
 #define PLENUMPRESSURE_H
 
 #include "IntegratedBC.h"
-#include "MooseTypes.h"
 
 //Forward Declarations
 class PlenumPressure;
@@ -27,11 +26,10 @@ public:
 protected:
 
   virtual Real computeQpResidual();
-  
-  const int _component;
 
-  /// The initial number of moles of gas.
-  ReportableValue & _n0; 
+  Real & _n0; // The initial number of moles of gas.
+
+  const int _component;
 
   const Real _initial_pressure;
 
@@ -45,7 +43,10 @@ protected:
 
   Real _start_time;
   const Real _startup_time;
-  
+
+  PostprocessorValue * const _initial_moles;
+  PostprocessorValue * const _output;
+
   const unsigned _refab_needed;
   Real & _refab_gas_released;
   const std::vector<Real> _refab_time;
@@ -55,8 +56,8 @@ protected:
   const std::vector<unsigned> _refab_type;
   unsigned & _refab_counter;
 
-  /// Plenum pressure for this BC
-  ReportableValue & _my_value;
+  Real & _my_value;
+
 };
 
 #endif //PLENUMRESSURE_H

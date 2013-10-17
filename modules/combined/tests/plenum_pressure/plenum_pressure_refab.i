@@ -235,7 +235,8 @@
       R = 8.314472
       temperature = aveTempInterior
       volume = internalVolume
-      output_initial_moles = true
+      output = ppress
+      output_initial_moles = initial_moles
       refab_time = 1.01
       refab_pressure = 10
       refab_temperature = 350
@@ -333,6 +334,13 @@
     boundary = '7 8 9 10 11 12'
     variable = material_input
     execute_on = residual
+  [../]
+
+  [./ppress]
+    type = Reporter
+  [../]
+  [./initial_moles]
+    type = Reporter
   [../]
 []
 

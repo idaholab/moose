@@ -29,7 +29,8 @@ private:
   const PostprocessorName _temperature;
   const PostprocessorName _volume;
   const Real _startup_time;
-  const bool _output_initial_moles;
+  const PostprocessorName _output_initial_moles;
+  const PostprocessorName _output;
 
 protected:
   std::string _kernel_name;
