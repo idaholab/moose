@@ -115,6 +115,10 @@ class Tester(object):
     elif options.enable_valgrind and self.specs[NO_VALGRIND]:
       reason = 'skipped (NO VALGRIND)'
       return (False, reason)
+    # If we're running in recover mode skip tests that have recover = false
+    elif options.enable_recover and self.specs[RECOVER] == False:
+      reason = 'skipped (NO RECOVER)'
+      return (False, reason)
 
     # Check for PETSc versions
     (petsc_status, logic_reason, petsc_version) = checkPetscVersion(checks, self.specs)

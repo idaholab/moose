@@ -321,6 +321,7 @@ class TestHarness:
         part2[PREREQ].append(part1[TEST_NAME])
         part2[DELETE_OUTPUT_BEFORE_RUNNING] = False
         part2[CLI_ARGS].append('--recover')
+        part2.addParam('CAVEATS', ['RECOVER'], "")
 
         new_tests.append(part2)
 
