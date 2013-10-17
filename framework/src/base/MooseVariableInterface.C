@@ -76,7 +76,7 @@ VariableValue &
 MooseVariableInterface::dot()
 {
   if (_variable->kind() == Moose::VAR_AUXILIARY)
-    mooseError("Can't get time derivative of auxiliary _variables!");
+    mooseError("Can't get time derivative of auxiliary variables!");
 
   if (_nodal)
     return _variable->nodalSlnDot();
@@ -88,7 +88,7 @@ VariableValue &
 MooseVariableInterface::dotDu()
 {
   if (_variable->kind() == Moose::VAR_AUXILIARY)
-    mooseError("Can't get time derivative of auxiliary _variables!");
+    mooseError("Can't get time derivative of auxiliary variables!");
 
   if (_nodal)
     return _variable->nodalSlnDuDotDu();
@@ -101,7 +101,7 @@ VariableGradient &
 MooseVariableInterface::gradient()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have gradients");
+    mooseError("Nodal variables do not have gradients");
 
   return _variable->gradSln();
 }
@@ -110,7 +110,7 @@ VariableGradient &
 MooseVariableInterface::gradientOld()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have gradients");
+    mooseError("Nodal variables do not have gradients");
 
   return _variable->gradSlnOld();
 }
@@ -119,7 +119,7 @@ VariableGradient &
 MooseVariableInterface::gradientOlder()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have gradients");
+    mooseError("Nodal variables do not have gradients");
 
   return _variable->gradSlnOlder();
 }
@@ -212,7 +212,7 @@ VariableGradient &
 NeighborMooseVariableInterface::neighborGradient()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have gradients");
+    mooseError("Nodal variables do not have gradients");
 
   return _variable->gradSlnNeighbor();
 }
@@ -221,7 +221,7 @@ VariableGradient &
 NeighborMooseVariableInterface::neighborGradientOld()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have gradients");
+    mooseError("Nodal variables do not have gradients");
 
   return _variable->gradSlnOldNeighbor();
 }
@@ -230,7 +230,7 @@ VariableGradient &
 NeighborMooseVariableInterface::neighborGradientOlder()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have gradients");
+    mooseError("Nodal variables do not have gradients");
 
   return _variable->gradSlnOlderNeighbor();
 }
@@ -239,7 +239,7 @@ VariableSecond &
 NeighborMooseVariableInterface::neighborSecond()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have second derivatives");
+    mooseError("Nodal variables do not have second derivatives");
 
   return _variable->secondSlnNeighbor();
 }
@@ -248,7 +248,7 @@ VariableSecond &
 NeighborMooseVariableInterface::neighborSecondOld()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have second derivatives");
+    mooseError("Nodal variables do not have second derivatives");
 
   return _variable->secondSlnOldNeighbor();
 }
@@ -257,7 +257,7 @@ VariableSecond &
 NeighborMooseVariableInterface::neighborSecondOlder()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have second derivatives");
+    mooseError("Nodal variables do not have second derivatives");
 
   return _variable->secondSlnOlderNeighbor();
 }
@@ -266,7 +266,7 @@ VariableTestSecond &
 NeighborMooseVariableInterface::neighborSecondTest()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have second derivatives");
+    mooseError("Nodal variables do not have second derivatives");
 
   return const_cast<VariableTestSecond &>(_variable->secondPhiFaceNeighbor());
 }
@@ -275,7 +275,7 @@ VariablePhiSecond &
 NeighborMooseVariableInterface::neighborSecondPhi()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have second derivatives");
+    mooseError("Nodal variables do not have second derivatives");
 
   return const_cast<VariablePhiSecond &>(_mvi_assembly->secondPhiFaceNeighbor());
 }

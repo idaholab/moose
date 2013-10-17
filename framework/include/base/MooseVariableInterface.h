@@ -73,7 +73,7 @@ protected:
 
   /**
    * The derivative of the time derivative of the variable this object is operating on
-   * with respect to this variable's coeffients.
+   * with respect to this variable's coefficients.
    *
    * This is useful for creating Jacobian entries for residual statements that use _u_dot
    *
