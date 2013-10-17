@@ -25,6 +25,8 @@ InputParameters validParams<RandomInterface>()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<unsigned int>("seed", 0, "The seed for the master random number generator");
+
+  params.addParamNamesToGroup("seed", "Advanced");
   return params;
 }
 
