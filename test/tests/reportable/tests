@@ -11,4 +11,10 @@
     expect_err = "The name 'unknown' is not a reportable value"
 		cli_args = 'Kernels/diff/test_has_reportable=true'
   [../]
-[]
+
+  [./disable_output]
+    type = 'Exodiff'
+    input = 'reportable_kernel.i'
+    exodiff = 'reportable_kernel_no_coef_out.e'
+		cli_args = 'Kernels/diff/output_coef=false Output/file_base=reportable_kernel_no_coef_out'
+  [../]

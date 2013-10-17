@@ -15,29 +15,31 @@
 #include "ReportableData.h"
 #include "FEProblem.h"
 
-
-
 ReportableData::ReportableData(FEProblem & fe_problem) :
     Restartable("values", "ReportableData", fe_problem),
     _names(declareRestartableData<ReportableNames>("_reportable_names",
                                                   ReportableNames(libMesh::n_threads(), std::set<std::string>()))),
     _values(declareRestartableData<std::map<std::string, ReportableValue> >("reportable_values")),
-    _values_old(declareRestartableData<std::map<std::string, ReportableValue> >("reportable_values_old"))
+    _values_old(declareRestartableData<std::map<std::string, ReportableValue> >("reportable_values_old")),
+    _output(declareRestartableData<std::map<std::string, bool> >("reportable_output"))
 {
 }
 
 void
-ReportableData::init(const std::string & name, Real value, THREAD_ID tid)
+ReportableData::init(const std::string & name, Real value, THREAD_ID tid, bool output)
 {
   // Check that the name was not already used
   if (hasReportableValue(name, tid))
-    mooseError("A reportable value with the name " << name << " was already initiallized");
+    mooseError("A reportable value with the name " << name << " already exists");
 
   // Create the current value
   _values.insert(std::pair<std::string, ReportableValue>(name, ReportableValue(value)));
 
   // Create the old value
   _values_old.insert(std::pair<std::string, ReportableValue>(name, ReportableValue(value)));
+
+  // Output the output flag
+  _output.insert(std::pair<std::string, bool>(name, output));
 
   // Update the name storage
   _names[tid].insert(name);
@@ -86,4 +88,10 @@ void
 ReportableData::copyValuesBack()
 {
   _values_old = _values;
+}
+
+bool
+ReportableData::valueOutput(std::string name)
+{
+  return _output[name];
 }

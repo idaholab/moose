@@ -27,9 +27,9 @@ Reportable::~Reportable()
 }
 
 ReportableValue &
-Reportable::declareReportableValue(std::string name, Real value)
+Reportable::declareReportableValue(std::string name, Real value, bool output)
 {
-  _reportable_data.init(name, value, _reportable_tid);
+  _reportable_data.init(name, value, _reportable_tid, output);
   return getReportableValue(name);
 }
 

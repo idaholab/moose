@@ -44,9 +44,12 @@ public:
 
   /**
    * Initilizes a value as being reportable
+   * @param name The name of the reportable value (must be unique)
+   * @param value The initial value for the data
+   * @param output A flag for toggling output (false disables all ouput of this parameter)
    * @return A reference to the ReportableValue
    */
-  ReportableValue & declareReportableValue(std::string name, Real value = 0.0);
+  ReportableValue & declareReportableValue(std::string name, Real value = 0.0, bool output = true);
 
   /**
    * Get a reference to the reportable value

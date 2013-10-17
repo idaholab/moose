@@ -45,8 +45,9 @@ public:
    * @param name The name of the new ReportableValue
    * @param value The value to initilize both the current and old value (defaults to 0.0)
    * @param tid The thread id (only used for name checking)
+   * @param output Sets the output flag for the Reportable data (false disable all output)
    */
-  void init(const std::string & name, Real value=0.0, THREAD_ID tid=0);
+  void init(const std::string & name, Real value=0.0, THREAD_ID tid=0, bool output = true);
 
   /**
    * Test if a ReportableValue already exists
@@ -87,16 +88,25 @@ public:
    */
   void copyValuesBack();
 
+  /**
+   * Returns the output flag for the stored value
+   * @return True if the reportable data is set for output
+   */
+  bool valueOutput(std::string name);
+
 protected:
 
   /// Map of stored names
   ReportableNames & _names;
 
-  /// Values of the post-processor at the current time
+  /// Values of the reportable data at the current time
   std::map<std::string, ReportableValue> & _values;
 
-  /// Values of the post-processors at the time t-1
+  /// Values of the reportable data at the time t-1
   std::map<std::string, ReportableValue> & _values_old;
+
+  /// Output flag map for the reportable data
+  std::map<std::string, bool> & _output;
 
 };
 

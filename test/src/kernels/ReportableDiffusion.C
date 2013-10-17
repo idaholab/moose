@@ -6,12 +6,13 @@ InputParameters validParams<ReportableDiffusion>()
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("coef", 0.0, "The coefficient of diffusion");
   params.addParam<bool>("test_has_reportable", false, "Set to true to test the false case of hasReportableValue");
+  params.addParam<bool>("output_coef", true, "Output the coefficient");
   return params;
 }
 
 ReportableDiffusion::ReportableDiffusion(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
-    _coef(declareReportableValue("coef", getParam<Real>("coef")))
+    _coef(declareReportableValue("coef", getParam<Real>("coef"), getParam<bool>("output_coef")))
 {
   // Test the true case of hasReportableValue
   if (!hasReportableValue("coef"))
