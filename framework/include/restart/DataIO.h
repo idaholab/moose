@@ -88,12 +88,6 @@ inline void loadHelper(std::istream & stream, std::set<P> & data, void * context
 template<typename P, typename Q>
 inline void loadHelper(std::istream & stream, std::map<P,Q> & data, void * context);
 
-/**
- * Moose::Atomic routine
- */
-template<typename P>
-inline void loadHelper(std::istream & stream, MooseAtomic<P> & data, void * context);
-
 template<typename T>
 inline void
 dataStore(std::ostream & stream, T & v, void * /*context*/);
@@ -181,14 +175,6 @@ dataStore(std::ostream & stream, std::map<T,U> & m, void * context)
     // std::cout<<"Second"<<std::endl;
     storeHelper(stream, it->second, context);
   }
-}
-
-template<typename T>
-inline void
-dataStore(std::ostream & stream, MooseAtomic<T> & v, void * context)
-{
-  // std::cout<<"MooseAtomic dataStore()"<<std::endl;
-  storeHelper(stream, v.getValueReference(), context);
 }
 
 // Specializations (defined in .C)
@@ -280,15 +266,6 @@ dataLoad(std::istream & stream, std::map<T,U> & m, void * context)
   }
 }
 
-template<typename T>
-inline void
-dataLoad(std::istream & stream, MooseAtomic<T> & s, void * context)
-{
-  T x;
-  loadHelper(stream, x, context);
-  s = x;
-}
-
 // Specializations (defined in .C)
 template<> void dataLoad(std::istream & stream, Real & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, std::string & v, void * /*context*/);
@@ -377,15 +354,6 @@ inline void
 loadHelper(std::istream & stream, std::map<P,Q> & data, void * context)
 {
   // std::cout<<"Map loadHelper"<<std::endl;
-  dataLoad(stream, data, context);
-}
-
-// MooseAtomic Helper Function
-template<typename P>
-inline void
-loadHelper(std::istream & stream, MooseAtomic<P> & data, void * context)
-{
-  // std::cout<< "MooseAtomic loadHelper" << std::endl;
   dataLoad(stream, data, context);
 }
 

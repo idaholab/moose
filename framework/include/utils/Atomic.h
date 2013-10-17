@@ -121,17 +121,6 @@ public:
       _value = value;
     }
 
-  /** Access a reference to the raw data (do not use)
-   * This method exists for storing data for restart, otherwise
-   * this should not be used.
-   * @return Reference to raw value
-   * @see DataIO
-   */
-  T & getValueReference()
-  {
-    return _value;
-  }
-
 protected:
 
   /// The stored value
