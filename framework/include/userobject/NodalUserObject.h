@@ -24,6 +24,7 @@
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "MaterialPropertyInterface.h"
+#include "RandomInterface.h"
 
 class MooseVariable;
 
@@ -43,7 +44,8 @@ class NodalUserObject :
   public ScalarCoupleable,
   public MooseVariableDependencyInterface,
   public TransientInterface,
-  protected PostprocessorInterface
+  protected PostprocessorInterface,
+  public RandomInterface
 {
 public:
   NodalUserObject(const std::string & name, InputParameters parameters);

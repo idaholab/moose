@@ -15,6 +15,7 @@
 #include "AuxKernel.h"
 
 //local includes
+#include "FEProblem.h"
 #include "SubProblem.h"
 #include "AuxiliarySystem.h"
 #include "MooseTypes.h"
@@ -29,6 +30,7 @@ InputParameters validParams<AuxKernel>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
+  params += validParams<RandomInterface>();
 
   // Add the SetupInterface parameter, 'execute_on', the default is 'residual'
   params += validParams<SetupInterface>();
@@ -54,6 +56,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),
     DependencyResolverInterface(),
+    RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
     GeometricSearchInterface(parameters),
     Restartable(name, parameters, "AuxKernels"),
     Reportable(name, parameters),

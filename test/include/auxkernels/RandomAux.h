@@ -12,42 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "NodalBC.h"
-#include "MooseVariable.h"
+#ifndef RANDOMAUX_H
+#define RANDOMAUX_H
 
+#include "AuxKernel.h"
+
+//Forward Declarations
+class RandomAux;
+class RandomElementalUserObject;
 
 template<>
-InputParameters validParams<NodalBC>()
+InputParameters validParams<RandomAux>();
+
+/**
+ * An AuxKernel that uses built-in Random number generation.
+ */
+class RandomAux : public AuxKernel
 {
-  InputParameters params = validParams<BoundaryCondition>();
-  params += validParams<RandomInterface>();
+public:
+  RandomAux(const std::string & name, InputParameters params);
 
-  return params;
-}
+  virtual ~RandomAux();
 
+protected:
+  virtual Real computeValue();
 
-NodalBC::NodalBC(const std::string & name, InputParameters parameters) :
-    BoundaryCondition(name, parameters),
-    RandomInterface(parameters, _fe_problem, _tid, true),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
-    _current_node(_var.node()),
-    _u(_var.nodalSln())
-{
-}
+  const RandomElementalUserObject *_random_uo;
+  bool _generate_ints;
+};
 
-void
-NodalBC::computeResidual(NumericVector<Number> & residual)
-{
-  if (_var.isNodalDefined())
-  {
-    unsigned int & dof_idx = _var.nodalDofIndex();
-    _qp = 0;
-    residual.set(dof_idx, computeQpResidual());
-  }
-}
-
-void
-NodalBC::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
-{
-  mooseError("This shouldn't be called!");
-}
+#endif //RANDOMAUX_H

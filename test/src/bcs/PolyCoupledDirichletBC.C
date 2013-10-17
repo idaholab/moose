@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<PolyCoupledDirichletBC>()
 {
-  InputParameters params = validParams<BoundaryCondition>();
+  InputParameters params = validParams<NodalBC>();
   params.set<bool>("_integrated") = false;
   params.addParam<Real>("value", 0.0, "Value multiplied by the coupled value on the boundary");
 

@@ -66,7 +66,7 @@ public:
   virtual void syncSolutions(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
   virtual void updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
 
-  virtual bool isTransient() { return _mproblem.isTransient(); }
+  virtual bool isTransient() const { return _mproblem.isTransient(); }
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) { return _mproblem.getCoordSystem(sid); }
 
   // Variables /////

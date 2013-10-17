@@ -17,24 +17,8 @@
 
 #include <vector>
 
+#include "Moose.h"
 #include "libmesh/libmesh_common.h"
-
-/// Execution flags - when is the object executed/evaluated
-enum ExecFlagType {
-  /// Object is evaluated only once at the beginning of the simulation
-  EXEC_INITIAL,
-  /// Object is evaluated in every residual computation
-  EXEC_RESIDUAL,
-  /// Object is evaluated in every jacobian computation
-  EXEC_JACOBIAN,
-  /// Object is evaluated at the end of every time step
-  EXEC_TIMESTEP,
-  /// Object is evaluated at the beginning of every time step
-  EXEC_TIMESTEP_BEGIN,
-  /// For use with custom executioners that want to fire objects at a specific time
-  EXEC_CUSTOM
-};
-
 
 /**
  * The class for storing warehouses that holds objects that are being evaluated at different times

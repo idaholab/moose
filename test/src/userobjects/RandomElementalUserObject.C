@@ -1,0 +1,75 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "RandomElementalUserObject.h"
+
+template<>
+InputParameters validParams<RandomElementalUserObject>()
+{
+  InputParameters params = validParams<ElementUserObject>();
+
+  MooseEnum setup_options(SetupInterface::getExecuteOptions());
+  setup_options = "timestep_begin";
+  params.set<MooseEnum>("execute_on") = setup_options;
+  return params;
+}
+
+RandomElementalUserObject::RandomElementalUserObject(const std::string & name, InputParameters parameters) :
+    ElementUserObject(name, parameters)
+{
+  /**
+   * This call turns on Random Number generation for this object, it can be called either in
+   * the constructor or in initialSetup().
+   */
+  setRandomResetFrequency(EXEC_TIMESTEP_BEGIN);
+}
+
+RandomElementalUserObject::~RandomElementalUserObject()
+{
+}
+
+void
+RandomElementalUserObject::initialize()
+{
+  _random_data.clear();
+}
+
+void
+RandomElementalUserObject::execute()
+{
+  _random_data[_current_elem->id()] = getRandomLong();
+}
+
+void
+RandomElementalUserObject::finalize()
+{
+  Parallel::set_union(_random_data);
+}
+
+void
+RandomElementalUserObject::threadJoin(const UserObject &y)
+{
+  const RandomElementalUserObject & uo = static_cast<const RandomElementalUserObject &>(y);
+
+  _random_data.insert(uo._random_data.begin(), uo._random_data.end());
+}
+
+unsigned long
+RandomElementalUserObject::getElementalValue(unsigned int element_id) const
+{
+  if (_random_data.find(element_id) == _random_data.end())
+    return 0;
+  else
+    return _random_data.at(element_id);
+}

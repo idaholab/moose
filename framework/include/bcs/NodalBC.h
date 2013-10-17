@@ -16,6 +16,7 @@
 #define NODALBC_H
 
 #include "BoundaryCondition.h"
+#include "RandomInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
 // libMesh
@@ -33,6 +34,7 @@ InputParameters validParams<NodalBC>();
  */
 class NodalBC :
   public BoundaryCondition,
+  public RandomInterface,
   public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:

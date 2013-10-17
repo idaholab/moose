@@ -24,6 +24,7 @@
 #include "PostprocessorInterface.h"
 #include "BlockRestrictable.h"
 #include "MaterialPropertyInterface.h"
+#include "RandomInterface.h"
 
 // libMesh
 #include "libmesh/elem.h"
@@ -43,7 +44,8 @@ class ElementUserObject :
   public Coupleable,
   public MooseVariableDependencyInterface,
   public TransientInterface,
-  protected PostprocessorInterface
+  protected PostprocessorInterface,
+  public RandomInterface
 {
 public:
   ElementUserObject(const std::string & name, InputParameters parameters);

@@ -38,6 +38,7 @@
 #include "Material.h"
 #include "PetscSupport.h"
 #include "SetupOutputAction.h"
+#include "RandomInterface.h"
 
 #include "ScalarInitialCondition.h"
 #include "ElementPostprocessor.h"
@@ -219,6 +220,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   _markers.resize(n_threads);
 
   _active_elemental_moose_variables.resize(n_threads);
+
+  _random_interface_objects.resize(n_threads);
 
   _resurrector = new Resurrector(*this);
 
@@ -480,6 +483,10 @@ void FEProblem::initialSetup()
     _user_objects(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
     _user_objects(EXEC_INITIAL)[i].initialSetup();
     _user_objects(EXEC_CUSTOM)[i].initialSetup();
+
+    // Random interface objects
+    for (unsigned int j=0; j<_random_interface_objects[i].size(); j++)
+      _random_interface_objects[i][j]->updateSeeds(EXEC_INITIAL);
   }
 
   if(!isRecovering())
@@ -558,6 +565,10 @@ void FEProblem::timestepSetup()
   {
     _indicators[i].timestepSetup();
     _markers[i].timestepSetup();
+
+    // Random interface objects
+    for (unsigned int j=0; j<_random_interface_objects[i].size(); j++)
+      _random_interface_objects[i][j]->updateSeeds(EXEC_TIMESTEP_BEGIN);
   }
 
   _out.timestepSetup();
@@ -2997,6 +3008,13 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   _nl.zeroVariablesForResidual();
   _aux.zeroVariablesForResidual();
 
+  unsigned int n_threads = libMesh::n_threads();
+
+  // Random interface objects
+  for (unsigned int i=0; i<n_threads; ++i)
+    for (unsigned int j=0; j<_random_interface_objects[i].size(); j++)
+      _random_interface_objects[i][j]->updateSeeds(EXEC_RESIDUAL);
+
   execTransfers(EXEC_RESIDUAL);
 
   execMultiApps(EXEC_RESIDUAL);
@@ -3006,7 +3024,7 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(soln, *_aux.currentSolution());
 
-  unsigned int n_threads = libMesh::n_threads();
+
 
   for(unsigned int i=0; i<n_threads; i++)
   {
@@ -3040,6 +3058,13 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     _nl.zeroVariablesForJacobian();
     _aux.zeroVariablesForJacobian();
 
+    unsigned int n_threads = libMesh::n_threads();
+
+    // Random interface objects
+    for (unsigned int i=0; i<n_threads; ++i)
+      for (unsigned int j=0; j<_random_interface_objects[i].size(); j++)
+        _random_interface_objects[i][j]->updateSeeds(EXEC_JACOBIAN);
+
     execTransfers(EXEC_JACOBIAN);
     execMultiApps(EXEC_JACOBIAN);
 
@@ -3047,8 +3072,6 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
 
     if (_displaced_problem != NULL)
       _displaced_problem->updateMesh(soln, *_aux.currentSolution());
-
-    unsigned int n_threads = libMesh::n_threads();
 
     for(unsigned int i=0; i<n_threads; i++)
     {
@@ -3931,4 +3954,10 @@ ReportableData &
 FEProblem::getReportableData()
 {
   return _reportable_data;
+}
+
+void
+FEProblem::registerRandomInterface(RandomInterface *random_interface, THREAD_ID tid)
+{
+  _random_interface_objects[tid].push_back(random_interface);
 }

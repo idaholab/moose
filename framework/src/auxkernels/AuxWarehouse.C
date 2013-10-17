@@ -50,7 +50,10 @@ AuxWarehouse::initialSetup()
     sortAuxKernels(i->second);
 
   for (std::vector<AuxKernel *>::const_iterator i = all().begin(); i != all().end(); ++i)
+  {
+    (*i)->updateSeeds(EXEC_INITIAL);
     (*i)->initialSetup();
+  }
 }
 
 void

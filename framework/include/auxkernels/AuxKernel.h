@@ -24,6 +24,7 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "DependencyResolverInterface.h"
+#include "RandomInterface.h"
 #include "GeometricSearchInterface.h"
 #include "MooseMesh.h"
 #include "BlockRestrictable.h"
@@ -57,6 +58,7 @@ class AuxKernel :
   public MaterialPropertyInterface,
   public PostprocessorInterface,
   public DependencyResolverInterface,
+  public RandomInterface,
   protected GeometricSearchInterface,
   public Restartable,
   public Reportable

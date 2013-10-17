@@ -28,6 +28,8 @@ InputParameters validParams<Kernel>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
   params += validParams<BlockRestrictable>();
+  params += validParams<RandomInterface>();
+
   params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this kernel operates on");
   params.addParam<std::vector<AuxVariableName> >("save_in", "The name of auxiliary variables to save this Kernel's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
   params.addParam<std::vector<AuxVariableName> >("diag_save_in", "The name of auxiliary variables to save this Kernel's diagonal jacobian contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
@@ -52,6 +54,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     TransientInterface(parameters, name, "kernels"),
     PostprocessorInterface(parameters),
     MaterialPropertyInterface(parameters),
+    RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
     GeometricSearchInterface(parameters),
     Restartable(name, parameters, "Kernels"),
       Reportable(name, parameters),

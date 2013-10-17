@@ -55,6 +55,7 @@
 #include "MatPropUserObjectAux.h"
 #include "SumNodalValuesAux.h"
 #include "UniqueIDAux.h"
+#include "RandomAux.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -111,6 +112,7 @@
 #include "PointerLoadError.h"
 #include "VerifyElementUniqueID.h"
 #include "VerifyNodalUniqueID.h"
+#include "RandomElementalUserObject.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -231,6 +233,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(MatPropUserObjectAux);
   registerAux(SumNodalValuesAux);
   registerAux(UniqueIDAux);
+  registerAux(RandomAux);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);
@@ -307,6 +310,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(PointerLoadError);
   registerUserObject(VerifyElementUniqueID);
   registerUserObject(VerifyNodalUniqueID);
+  registerUserObject(RandomElementalUserObject);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);

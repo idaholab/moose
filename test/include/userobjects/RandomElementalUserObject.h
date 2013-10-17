@@ -12,42 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "NodalBC.h"
-#include "MooseVariable.h"
+#ifndef RANDOMELEMENTALUSEROBJECT_H
+#define RANDOMELEMENTALUSEROBJECT_H
 
+#include "ElementUserObject.h"
+
+//Forward Declarations
+class RandomElementalUserObject;
 
 template<>
-InputParameters validParams<NodalBC>()
+InputParameters validParams<RandomElementalUserObject>();
+
+/**
+ * An Elemental user object tha uses built-in Random number generation.
+ */
+class RandomElementalUserObject : public ElementUserObject
 {
-  InputParameters params = validParams<BoundaryCondition>();
-  params += validParams<RandomInterface>();
+public:
+  RandomElementalUserObject(const std::string & name, InputParameters parameters);
 
-  return params;
-}
+  virtual ~RandomElementalUserObject();
 
+  virtual void initialize();
+  virtual void execute();
+  virtual void threadJoin(const UserObject & y);
+  virtual void finalize();
 
-NodalBC::NodalBC(const std::string & name, InputParameters parameters) :
-    BoundaryCondition(name, parameters),
-    RandomInterface(parameters, _fe_problem, _tid, true),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
-    _current_node(_var.node()),
-    _u(_var.nodalSln())
-{
-}
+  unsigned long getElementalValue(unsigned int element_id) const;
 
-void
-NodalBC::computeResidual(NumericVector<Number> & residual)
-{
-  if (_var.isNodalDefined())
-  {
-    unsigned int & dof_idx = _var.nodalDofIndex();
-    _qp = 0;
-    residual.set(dof_idx, computeQpResidual());
-  }
-}
+protected:
+  std::map<dof_id_type, unsigned long> _random_data;
+};
 
-void
-NodalBC::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
-{
-  mooseError("This shouldn't be called!");
-}
+#endif //RANDOMELEMENTALUSEROBJECT_H

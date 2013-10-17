@@ -62,7 +62,7 @@ public:
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;
 
-  virtual bool isTransient() = 0;
+  virtual bool isTransient() const = 0;
 
   virtual Order getQuadratureOrder() = 0;
 

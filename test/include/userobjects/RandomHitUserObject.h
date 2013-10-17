@@ -25,8 +25,6 @@ class RandomHitUserObject;
 template<>
 InputParameters validParams<RandomHitUserObject>();
 
-/* This class is here to combine the Postprocessor interface and the
- * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
 class RandomHitUserObject :
   public GeneralUserObject
 {
@@ -49,16 +47,13 @@ public:
   /**
    * Called before execute() is ever called so that data can be cleared.
    */
-  virtual void initialize(){};
+  virtual void initialize(){}
 
   /**
    * Compute the hit positions for this timestep
    */
   virtual void execute();
 
-  /**
-   * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
-   */
   virtual void finalize(){}
 
 protected:

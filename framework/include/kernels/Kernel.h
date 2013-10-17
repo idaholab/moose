@@ -22,6 +22,7 @@
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
+#include "RandomInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
 #include "BlockRestrictable.h"
@@ -54,6 +55,7 @@ class Kernel :
   public TransientInterface,
   public PostprocessorInterface,
   public MaterialPropertyInterface,
+  public RandomInterface,
   protected GeometricSearchInterface,
   public Restartable,
   public Reportable

@@ -44,6 +44,7 @@ class OutputProblem;
 class FEProblem;
 class MooseMesh;
 class NonlinearSystem;
+class RandomInterface;
 
 template<>
 InputParameters validParams<FEProblem>();
@@ -280,14 +281,14 @@ public:
   virtual void onTimestepBegin();
   virtual void onTimestepEnd();
 
-  virtual Real & time() { return _time; }
-  virtual Real & timeOld() { return _time_old; }
-  virtual int & timeStep() { return _t_step; }
-  virtual Real & dt() { return _dt; }
-  virtual Real & dtOld() { return _dt_old; }
+  virtual Real & time() const { return _time; }
+  virtual Real & timeOld() const { return _time_old; }
+  virtual int & timeStep() const { return _t_step; }
+  virtual Real & dt() const { return _dt; }
+  virtual Real & dtOld() const { return _dt_old; }
 
   virtual void transient(bool trans) { _transient = trans; }
-  virtual bool isTransient() { return _transient; }
+  virtual bool isTransient() const { return _transient; }
 
   virtual void addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
   virtual void addPredictor(const std::string & type, const std::string & name, InputParameters parameters);
@@ -687,6 +688,8 @@ public:
    */
   ReportableData & getReportableData();
 
+  void registerRandomInterface(RandomInterface *random_interface, THREAD_ID tid);
+
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
@@ -759,6 +762,9 @@ protected:
 
   /// Transfers executed just after MultiApps to transfer data from them
   ExecStore<TransferWarehouse> _from_multi_app_transfers;
+
+  /// A list of objects that consume random numbers
+  std::vector<std::vector<RandomInterface *> > _random_interface_objects;
 
   /// Table with postprocessors that will go into files
   FormattedTable _pps_output_table_file;
