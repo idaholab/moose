@@ -35,6 +35,13 @@ class RunApp(Tester):
   def __init__(self, name, params):
     Tester.__init__(self, name, params)
 
+  def checkRunnable(self, options):
+    if options.enable_recover:
+      if self.specs.isValid('expect_out') or self.specs[SHOULD_CRASH] == True:
+        reason = 'skipped (expect_out RECOVER)'
+        return (False, reason)
+    return (True, '')
+
   def getCommand(self, options):
     # Create the command line string to run
     command = ''

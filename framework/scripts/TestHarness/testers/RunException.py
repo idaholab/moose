@@ -16,6 +16,12 @@ class RunException(RunApp):
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)
 
+  def checkRunnable(self, options):
+    if options.enable_recover:
+      reason = 'skipped (RunException RECOVER)'
+      return (False, reason)
+    return (True, '')
+
   def processResults(self, moose_dir, retcode, options, output):
     reason = ''
     specs = self.specs
