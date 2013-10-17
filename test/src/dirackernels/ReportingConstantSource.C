@@ -58,7 +58,6 @@ ReportingConstantSource::computeQpResidual()
   // This is negative because it's a forcing function that has been brought over to the left side.
   Real flux = -_test[_i][_qp]*_value;
 
-  // This wouldn't be thread safe in any other object but DiracKernels are not currently threaded.
   _reporter += flux;
 
   return flux;

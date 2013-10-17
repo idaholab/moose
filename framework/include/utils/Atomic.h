@@ -15,6 +15,10 @@
 #ifndef MOOSEATOMIC_H
 #define MOOSEATOMIC_H
 
+// Moose includes
+//#include "DataIO.h" // need to make friends
+//class MooseAtomic;
+
 // Libmesh threading
 #include "libmesh/threads.h"
 
@@ -112,20 +116,29 @@ public:
     return _value;
   }
 
+  void setRawValue(T value)
+    {
+      _value = value;
+    }
+
+  /** Access a reference to the raw data (do not use)
+   * This method exists for storing data for restart, otherwise
+   * this should not be used.
+   * @return Reference to raw value
+   * @see DataIO
+   */
+  T & getValueReference()
+  {
+    return _value;
+  }
+
 protected:
+
   /// The stored value
   T _value;
 
   /// spin_mutex object for applying scoped_lock to _value access
   libMesh::Threads::spin_mutex _smutex;
 };
-
-
-
-
-
-
-
-
 
 #endif // MOOSEATOMIC_H

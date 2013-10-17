@@ -19,9 +19,22 @@ template<>
 void
 dataStore(std::ostream & stream, Real & v, void * /*context*/)
 {
-  // std::cout<<"Real dataStore"<<std::endl;
+  //std::cout<<"Real dataStore"<<std::endl;
 
   stream.write((char *) &v, sizeof(v));
+}
+
+template<>
+void
+dataStore(std::ostream & stream, std::string & v, void * /*context*/)
+{
+  //std::cout<<"std::string dataStore ("<<v<<")"<<std::endl;
+  // Write the size of the string
+  unsigned int size = v.size();
+  stream.write((char *) &size, sizeof(size));
+
+  // Write the string
+  stream.write(v.c_str(), sizeof(char)*(size+1));
 }
 
 
@@ -127,6 +140,25 @@ dataLoad(std::istream & stream, Real & v, void * /*context*/)
   // std::cout<<"Real dataLoad"<<std::endl;
 
   stream.read((char *) &v, sizeof(v));
+}
+
+template<>
+void
+dataLoad(std::istream & stream, std::string & v, void * /*context*/)
+{
+  // std::cout<<"std::string dataLoad"<<std::endl;
+
+  // Read the size of the string
+  unsigned int size = 0;
+  stream.read((char *) &size, sizeof(size));
+
+  // std::cout<<"Size: "<<size<<std::endl;
+
+  // Read and store the string
+  char* s = new char[size];
+  stream.read(s, sizeof(char)*(size+1));
+  v = s;
+
 }
 
 template<>
@@ -239,11 +271,3 @@ dataLoad(std::istream & stream, const Node * & n, void * context)
     // std::cout<<"NULL Node"<<std::endl;
   }
 }
-
-
-
-
-
-
-
-

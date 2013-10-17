@@ -65,6 +65,10 @@ public:
 
 protected:
 
+  ///
+  std::string longName(std::string & name);
+
+
   /// Pointer to FEProblem
   FEProblem * _reportable_feproblem;
 
@@ -73,6 +77,10 @@ protected:
 
   /// The thread id for the object
   THREAD_ID _reportable_tid;
+
+  /// The name of the objet
+  std::string _reportable_object_name;
+
 };
 
 #endif // REPORTABLE_H

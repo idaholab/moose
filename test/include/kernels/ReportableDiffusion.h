@@ -20,11 +20,14 @@ public:
   ReportableDiffusion(const std::string & name, InputParameters parameters);
 
 protected:
+
   virtual Real computeQpResidual();
 
   virtual Real computeQpJacobian();
 
-  ReportableValue &  _coef;
+  const Real &  _coef;
+
+  ReportableValue & _calls;
 };
 
 #endif //REPORTABLEDIFFUSION_H

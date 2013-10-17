@@ -15,6 +15,26 @@
   [./disable_output]
     type = 'Exodiff'
     input = 'reportable_kernel.i'
-    exodiff = 'reportable_kernel_no_coef_out.e'
-		cli_args = 'Kernels/diff/output_coef=false Output/file_base=reportable_kernel_no_coef_out'
+    exodiff = 'reportable_kernel_no_report_out.e'
+		cli_args = 'Kernels/diff/report=false Output/file_base=reportable_kernel_no_report_out'
   [../]
+
+	[./transient] # runs a test with 20 steps
+    type = 'Exodiff'
+		input = 'reportable_transient.i'
+		exodiff = 'reportable_transient_out.e'
+  []
+
+	[./restart1] # runs 10 steps of transient
+		type = 'Exodiff'
+		input = 'reportable_restart1.i'
+		exodiff = 'reportable_restart1_out.e'
+	[../]
+
+	[./restart2] # restarts and runs another 10 steps of transient, results should match ./transient test
+		type = 'Exodiff'
+		input = 'reportable_restart2.i'
+		exodiff = 'reportable_restart2_out.e'
+		prereq = 'restart1 transient'
+	[../]
+[]

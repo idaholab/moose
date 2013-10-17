@@ -17,6 +17,8 @@
 
 #include "Moose.h"
 #include "ColumnMajorMatrix.h"
+#include "MooseTypes.h"
+#include "Atomic.h"
 
 //libMesh
 #include "libmesh/dense_matrix.h"
@@ -57,6 +59,12 @@ template<typename P, typename Q>
 inline void storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context);
 
 /**
+ * Map helper routine
+ */
+template<typename P>
+inline void storeHelper(std::ostream & stream, MooseAtomic<P> & data, void * context);
+
+/**
  * Scalar helper routine
  */
 template<typename P>
@@ -80,6 +88,16 @@ inline void loadHelper(std::istream & stream, std::set<P> & data, void * context
 template<typename P, typename Q>
 inline void loadHelper(std::istream & stream, std::map<P,Q> & data, void * context);
 
+/**
+ * Moose::Atomic routine
+ */
+template<typename P>
+inline void loadHelper(std::istream & stream, MooseAtomic<P> & data, void * context);
+
+template<typename T>
+inline void
+dataStore(std::ostream & stream, T & v, void * /*context*/);
+
 // global store functions
 
 template<typename T>
@@ -87,7 +105,6 @@ inline void
 dataStore(std::ostream & stream, T & v, void * /*context*/)
 {
   // std::cout<<"Generic dataStore"<<std::endl;
-
   stream.write((char *) &v, sizeof(v));
 }
 
@@ -130,7 +147,11 @@ dataStore(std::ostream & stream, std::set<T> & s, void * context)
   typename std::set<T>::iterator end = s.end();
 
   for (; it != end; ++it)
-    storeHelper(stream, *it, context);
+  {
+    T & x = const_cast<T&>(*it);
+    storeHelper(stream, x, context);
+  }
+
 }
 
 template<typename T, typename U>
@@ -143,7 +164,7 @@ dataStore(std::ostream & stream, std::map<T,U> & m, void * context)
   unsigned int size = m.size();
   stream.write((char *) &size, sizeof(size));
 
-  // std::cout<<"Size: "<<size<<std::endl;
+  std::cout<<"Size: "<<size<<std::endl;
 
   typename std::map<T,U>::iterator it = m.begin();
   typename std::map<T,U>::iterator end = m.end();
@@ -152,22 +173,33 @@ dataStore(std::ostream & stream, std::map<T,U> & m, void * context)
   {
     // std::cout<<"First"<<std::endl;
     // std::cout<<"Key: "<<it->first<<std::endl;
-    storeHelper(stream, it->first, context);
+
+    T & key = const_cast<T&>(it->first);
+
+    storeHelper(stream, key, context);
 
     // std::cout<<"Second"<<std::endl;
     storeHelper(stream, it->second, context);
   }
 }
 
+template<typename T>
+inline void
+dataStore(std::ostream & stream, MooseAtomic<T> & v, void * context)
+{
+  // std::cout<<"MooseAtomic dataStore()"<<std::endl;
+  storeHelper(stream, v.getValueReference(), context);
+}
+
 // Specializations (defined in .C)
 template<> void dataStore(std::ostream & stream, Real & v, void * /*context*/);
+template<> void dataStore(std::ostream & stream, std::string & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, ColumnMajorMatrix & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, RealTensorValue & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, RealVectorValue & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, const Elem * & e, void * context);
 template<> void dataStore(std::ostream & stream, const Node * & n, void * context);
-
 
 // global load functions
 
@@ -190,7 +222,7 @@ template<typename T>
 inline void
 dataLoad(std::istream & stream, std::vector<T> & v, void * context)
 {
-  // std::cout<<"Vector dataLoad"<<std::endl;
+  //std::cout<<"Vector dataLoad"<<std::endl;
 
   // First read the size of the vector
   unsigned int size = 0;
@@ -214,7 +246,7 @@ dataLoad(std::istream & stream, std::set<T> & s, void * context)
   unsigned int size = 0;
   stream.read((char *) &size, sizeof(size));
 
-  // std::cout<<"Size: "<<size<<std::endl;
+  //std::cout<<"Size: "<<size<<std::endl;
 
   for (unsigned int i = 0; i < size; i++)
   {
@@ -242,12 +274,24 @@ dataLoad(std::istream & stream, std::map<T,U> & m, void * context)
   {
     T key;
     loadHelper(stream, key, context);
-    loadHelper(stream, m[key], context);
+
+    U & value = m[key];
+    loadHelper(stream, value, context);
   }
+}
+
+template<typename T>
+inline void
+dataLoad(std::istream & stream, MooseAtomic<T> & s, void * context)
+{
+  T x;
+  loadHelper(stream, x, context);
+  s = x;
 }
 
 // Specializations (defined in .C)
 template<> void dataLoad(std::istream & stream, Real & v, void * /*context*/);
+template<> void dataLoad(std::istream & stream, std::string & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, ColumnMajorMatrix & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, RealTensorValue & v, void * /*context*/);
@@ -260,7 +304,7 @@ template<typename P>
 inline void
 storeHelper(std::ostream & stream, P & data, void * context)
 {
-  // std::cout<<"Scalar storeHelper"<<std::endl;
+  // std::cout<<"Generic storeHelper"<<std::endl;
   dataStore(stream, data, context);
 }
 
@@ -287,7 +331,16 @@ template<typename P, typename Q>
 inline void
 storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context)
 {
-  // std::cout<<"Map storeHelper"<<std::endl;
+  //std::cout<<"Map storeHelper"<<std::endl;
+  dataStore(stream, data, context);
+}
+
+// MooseAtomic Helper Function
+template<typename P>
+inline void
+storeHelper(std::ostream & stream, MooseAtomic<P> & data, void * context)
+{
+  // std::cout<<"MooseAtomic storeHelper"<<std::endl;
   dataStore(stream, data, context);
 }
 
@@ -296,7 +349,7 @@ template<typename P>
 inline void
 loadHelper(std::istream & stream, P & data, void * context)
 {
-  // std::cout<<"Scalar loadHelper"<<std::endl;
+  // std::cout<<"Generic loadHelper"<<std::endl;
   dataLoad(stream, data, context);
 }
 
@@ -324,6 +377,15 @@ inline void
 loadHelper(std::istream & stream, std::map<P,Q> & data, void * context)
 {
   // std::cout<<"Map loadHelper"<<std::endl;
+  dataLoad(stream, data, context);
+}
+
+// MooseAtomic Helper Function
+template<typename P>
+inline void
+loadHelper(std::istream & stream, MooseAtomic<P> & data, void * context)
+{
+  // std::cout<< "MooseAtomic loadHelper" << std::endl;
   dataLoad(stream, data, context);
 }
 

@@ -17,10 +17,7 @@
 
 ReportableData::ReportableData(FEProblem & fe_problem) :
     Restartable("values", "ReportableData", fe_problem),
-    _names(declareRestartableData<ReportableNames>("_reportable_names",
-                                                  ReportableNames(libMesh::n_threads(), std::set<std::string>()))),
-    _values(declareRestartableData<std::map<std::string, ReportableValue> >("reportable_values")),
-    _values_old(declareRestartableData<std::map<std::string, ReportableValue> >("reportable_values_old")),
+    _names(declareRestartableData<std::vector<std::set<std::string> > >("reportable_names", std::vector<std::set<std::string> >(libMesh::n_threads(), std::set<std::string>()))),
     _output(declareRestartableData<std::map<std::string, bool> >("reportable_output"))
 {
 }
@@ -32,11 +29,16 @@ ReportableData::init(const std::string & name, Real value, THREAD_ID tid, bool o
   if (hasReportableValue(name, tid))
     mooseError("A reportable value with the name " << name << " already exists");
 
-  // Create the current value
-  _values.insert(std::pair<std::string, ReportableValue>(name, ReportableValue(value)));
+  // Declare the data as restartable
+  if (_values.find(name) == _values.end())
+  {
+    _values[name] = &declareRestartableDataWithObjectName<ReportableValue>(name, "reportable_values");
+    _values_old[name] = &declareRestartableDataWithObjectName<ReportableValue>(name, "reportable_values_old");
+  }
 
-  // Create the old value
-  _values_old.insert(std::pair<std::string, ReportableValue>(name, ReportableValue(value)));
+  // Set the values
+  getReportableValue(name) = value;
+  getReportableValueOld(name) = value;
 
   // Output the output flag
   _output.insert(std::pair<std::string, bool>(name, output));
@@ -49,36 +51,41 @@ bool
 ReportableData::hasReportableValue(const std::string & name, THREAD_ID tid)
 {
   // Return true if the supplied name was already defined on the thread
-  if (_names[tid].find(name) != _names[tid].end())
-    return true;
-  else
-    return false;
+  return _names[tid].find(name) != _names[tid].end();
 }
 
 
 ReportableValue &
 ReportableData::getReportableValue(const std::string & name)
 {
-  return _values[name];
+  // If the stored value does not exists; create it, this allows getReportableValue to be called
+  // without calling init
+  if (_values.find(name) == _values.end())
+    _values[name] = &declareRestartableDataWithObjectName<ReportableValue>(name, "reportable_values");
+
+  return *_values[name];
 }
 
 ReportableValue &
 ReportableData::getReportableValueOld(const std::string & name)
 {
-  return _values_old[name];
+  if (_values.find(name) == _values.end())
+    _values_old[name] = &declareRestartableDataWithObjectName<ReportableValue>(name, "reportable_values_old");
+
+  return *_values_old[name];
 }
 
 void
 ReportableData::storeValue(const std::string & name, Real value)
 {
-  // If the reportable value exists, store the given data, error if it was not found
   if (hasReportableValue(name))
-    _values[name] = value;
+    getReportableValue(name) = value;
   else
     mooseError("A ReportableValue with the name " << name << " does not exist, must initialize first");
 }
 
-const std::map<std::string, ReportableValue> &
+
+const std::map<std::string, ReportableValue*> &
 ReportableData::values() const
 {
   return _values;

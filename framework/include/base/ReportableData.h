@@ -31,9 +31,6 @@ class ReportableData : public Restartable
 {
 public:
 
-  /// A local short-hand for the threaded storage of Reportable value names
-  typedef std::vector<std::set<std::string> > ReportableNames;
-
   /**
    * Class constructor
    * @param fe_problem A reference to FEProblem
@@ -81,7 +78,7 @@ public:
    * Extract a reference to a map of all the reportable values
    * @return Reference to std::map of reportable values
    */
-  const std::map<std::string, ReportableValue> & values() const;
+  const std::map<std::string, ReportableValue *> & values() const;
 
   /**
    * Copy the current values to the old values
@@ -97,17 +94,16 @@ public:
 protected:
 
   /// Map of stored names
-  ReportableNames & _names;
+  std::vector<std::set<std::string> > & _names;
 
   /// Values of the reportable data at the current time
-  std::map<std::string, ReportableValue> & _values;
+  std::map<std::string, ReportableValue *> _values;
 
   /// Values of the reportable data at the time t-1
-  std::map<std::string, ReportableValue> & _values_old;
+  std::map<std::string, ReportableValue *> _values_old;
 
   /// Output flag map for the reportable data
   std::map<std::string, bool> & _output;
-
 };
 
 #endif //REPORTABLEDATA_H

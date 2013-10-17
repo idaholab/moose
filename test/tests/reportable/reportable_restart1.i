@@ -12,7 +12,12 @@
 
 [Kernels]
   [./diff]
-    type = Diffusion
+    type = ReportableDiffusion
+    variable = u
+    coef = 0.1
+  [../]
+  [./time]
+    type = TimeDerivative
     variable = u
   [../]
 []
@@ -33,12 +38,12 @@
 []
 
 [Executioner]
-  type = Steady
-
   # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
+  type = Transient
+  num_steps = 10
+  dt = 0.1
+  solve_type = PJFNK
   print_linear_residuals = true
-
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
@@ -47,13 +52,6 @@
   output_initial = true
   exodus = true
   perf_log = true
-[]
-
-[DiracKernels]
-  [./source]
-    point = '0.2 0.2 0'
-    value = 2
-    variable = u
-    type = ReportingConstantSource
-  [../]
+  num_restart_files = 1
+	file_base = reportable_restart1_out
 []

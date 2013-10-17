@@ -162,6 +162,7 @@ private:
   /// For access to registerRestartableDataOnSubProblem()
   friend class PostprocessorData;
   friend class NearestNodeLocator;
+  friend class ReportableData;
 };
 
 template<typename T>

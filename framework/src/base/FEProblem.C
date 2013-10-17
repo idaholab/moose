@@ -2309,14 +2309,14 @@ void
 FEProblem::addPPSValuesToTable(ExecFlagType type)
 {
   // Always add the reportable data to the output
-  for (std::map<std::string, ReportableValue>::const_iterator it=_reportable_data.values().begin();
+  for (std::map<std::string, ReportableValue *>::const_iterator it=_reportable_data.values().begin();
        it!=_reportable_data.values().end(); ++it)
   {
     // Ignore reportable values that have a false output flag
     if (_reportable_data.valueOutput(it->first))
     {
-      _pps_output_table_screen.addData(it->first, it->second, _time);
-      _pps_output_table_file.addData(it->first, it->second, _time);
+      _pps_output_table_screen.addData(it->first, *it->second, _time);
+      _pps_output_table_file.addData(it->first, *it->second, _time);
     }
   }
 
