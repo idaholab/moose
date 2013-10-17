@@ -13,6 +13,21 @@
   file = heat_conduction_ortho.e
 [] # Mesh
 
+[Functions]
+  [./1000]
+    type = ParsedFunction
+    value = 1000
+  [../]
+  [./100]
+    type = ParsedFunction
+    value = 100
+  [../]
+  [./10]
+    type = ParsedFunction
+    value = 10
+  [../]
+[]
+
 [Variables]
 
   [./temp]
@@ -103,18 +118,18 @@
 
 [Postprocessors]
   [./tcx]
-    type = Reporter
-    default = 1000
+    type = PlotFunction
+    function = 1000
     output = none
   [../]
   [./tcy]
-    type = Reporter
-    default = 100
+    type = PlotFunction
+    function = 100
     output = none
   [../]
   [./tcz]
-    type = Reporter
-    default = 10
+    type = PlotFunction
+    function = 10
     output = none
   [../]
 []
