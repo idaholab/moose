@@ -20,6 +20,7 @@
     input = 'random_uo.i'
     exodiff = 'random_uo_out.e'
     max_threads = 1
+    deleted = 'Threading needs work #2088'
   [../]
 
   [./parallel_verification_uo]
