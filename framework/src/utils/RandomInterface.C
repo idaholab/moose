@@ -38,6 +38,7 @@ RandomInterface::RandomInterface(InputParameters & parameters, FEProblem & probl
     _master_seed(parameters.get<unsigned int>("seed")),
     _is_nodal(is_nodal),
     _current_master_seed(0),
+    _new_seed(1),
     _reset_on(EXEC_RESIDUAL),
     _curr_node(_ri_assembly.node()),
     _curr_element(_ri_assembly.elem())
@@ -70,9 +71,9 @@ RandomInterface::updateSeeds(ExecFlagType exec_flag)
    * several runs.  We will default to _master_seed + the current time step.
    */
   if (exec_flag == EXEC_INITIAL)
-    _current_master_seed = _master_seed;
+    _new_seed = _master_seed;
   else
-    _current_master_seed = _master_seed + _ri_problem.timeStep();
+    _new_seed = _master_seed + _ri_problem.timeStep();
   /**
    * case EXEC_TIMESTEP_BEGIN:   // reset and advance every timestep
    * case EXEC_TIMESTEP:         // reset and advance every timestep
@@ -80,10 +81,22 @@ RandomInterface::updateSeeds(ExecFlagType exec_flag)
    * case EXEC_JACOBIAN:         // Reset every Jacobian, advance every timestep
    */
 
-  if (_reset_on == exec_flag            // If the exec_flag matches the reset flag
-      || (exec_flag == EXEC_INITIAL)    // or if this is the first time...
-      || (_reset_on != EXEC_INITIAL &&  // or if it's at least reset_on timestep or faster
-          (exec_flag == EXEC_TIMESTEP || exec_flag == EXEC_TIMESTEP_BEGIN))) // and we are at a timestep
+
+  // If the _new_seed has been updated, we need to update all of the generators
+  if (_new_seed != _current_master_seed)
+  {
+    _current_master_seed = _new_seed;
+    updateGenerators();
+    _generator.saveState();       // Save states so that we can reset on demand
+  }
+
+  if (_reset_on == exec_flag)
+    _generator.restoreState();    // Restore states here
+}
+
+void
+RandomInterface::updateGenerators()
+{
   {
     /**
      * Set the master seed and repopulate all of the child generators
@@ -158,4 +171,3 @@ RandomInterface::getRandomReal()
     return _generator.rand(_curr_element->id());
   }
 }
-

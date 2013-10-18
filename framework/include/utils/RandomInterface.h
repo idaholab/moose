@@ -55,6 +55,8 @@ public:
   unsigned int getSeed(unsigned int id);
 
 private:
+  void updateGenerators();
+
   MooseRandom _generator;
   FEProblem & _ri_problem;
   Assembly & _ri_assembly;
@@ -64,6 +66,7 @@ private:
   bool _is_nodal;
 
   unsigned int _current_master_seed;
+  unsigned int _new_seed;
   ExecFlagType _reset_on;
 
   const Node * & _curr_node;
