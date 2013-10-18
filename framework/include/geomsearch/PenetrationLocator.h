@@ -44,8 +44,8 @@ template<>
 inline void
 dataLoad(std::istream & stream, std::map<unsigned int, PenetrationInfo *> & m, void * context)
 {
-  typename std::map<unsigned int, PenetrationInfo *>::iterator it = m.begin();
-  typename std::map<unsigned int, PenetrationInfo *>::iterator end = m.end();
+  std::map<unsigned int, PenetrationInfo *>::iterator it = m.begin();
+  std::map<unsigned int, PenetrationInfo *>::iterator end = m.end();
 
   for (; it != end; ++it)
     delete it->second;
