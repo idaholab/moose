@@ -275,7 +275,8 @@ SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props
     std::string check_name;
     if (block_type)
     {
-      const std::map<subdomain_id_type, std::string> & name_map = mesh().getMesh().get_subdomain_name_map();
+      // TODO: Put a better a interface in MOOSE
+      std::map<subdomain_id_type, std::string> & name_map = mesh().getMesh().set_subdomain_name_map();
       std::map<subdomain_id_type, std::string>::const_iterator pos = name_map.find(check_id);
       if (pos != name_map.end())
         check_name = pos->second;
