@@ -274,7 +274,12 @@ SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props
     // Get the name of the block/boundary (for error reporting)
     std::string check_name;
     if (block_type)
-      check_name = mesh().getMesh().subdomain_name(check_id);
+    {
+      const std::map<subdomain_id_type, std::string> & name_map = mesh().getMesh().get_subdomain_name_map();
+      std::map<subdomain_id_type, std::string>::const_iterator pos = name_map.find(check_id);
+      if (pos != name_map.end())
+        check_name = pos->second;
+    }
     else
       check_name = mesh().getMesh().boundary_info->sideset_name(check_id);
 
