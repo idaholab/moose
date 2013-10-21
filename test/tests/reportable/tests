@@ -5,11 +5,18 @@
     exodiff = 'reportable_kernel_out.e'
   [../]
 
+	[./by_name]
+    type = 'Exodiff'
+    input = 'reportable_kernel.i'
+    exodiff = 'reportable_kernel_by_name_out.e'
+		cli_args = 'Kernels/diff/test=by_name Output/file_base=reportable_kernel_by_name_out'
+  [../]
+
   [./has_reportable]
     type = 'RunException'
     input = 'reportable_kernel.i'
     expect_err = "The name 'unknown' is not a reportable value"
-		cli_args = 'Kernels/diff/test_has_reportable=true'
+		cli_args = 'Kernels/diff/test=has_reportable'
   [../]
 
   [./disable_output]

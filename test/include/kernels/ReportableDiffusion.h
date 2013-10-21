@@ -27,6 +27,8 @@ protected:
 
   const Real &  _coef;
 
+  const MooseEnum & _test;
+
   ReportableValue & _calls;
 };
 

@@ -30,20 +30,40 @@ Reportable::~Reportable()
 ReportableValue &
 Reportable::declareReportableValue(std::string name, Real value, bool output)
 {
-  _reportable_data.init(longName(name), value, _reportable_tid, output);
-  return getReportableValue(name);
+  std::string long_name = longName(name);
+  _reportable_data.init(long_name, value, _reportable_tid, output);
+  return _reportable_data.getReportableValue(long_name);
 }
 
 ReportableValue &
+Reportable::declareReportableValueByName(std::string name, Real value, bool output)
+{
+  _reportable_data.init(name, value, _reportable_tid, output);
+  return _reportable_data.getReportableValue(name);
+}
+
+const ReportableValue &
 Reportable::getReportableValue(std::string name)
 {
   return _reportable_data.getReportableValue(longName(name));
+}
+
+const ReportableValue &
+Reportable::getReportableValueByName(std::string name)
+{
+  return _reportable_data.getReportableValue(name);
 }
 
 bool
 Reportable::hasReportableValue(std::string name)
 {
   return _reportable_data.hasReportableValue(longName(name), _reportable_tid);
+}
+
+bool
+Reportable::hasReportableValueByName(std::string name)
+{
+  return _reportable_data.hasReportableValue(name, _reportable_tid);
 }
 
 std::string
