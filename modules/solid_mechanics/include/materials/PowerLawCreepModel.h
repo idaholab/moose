@@ -25,6 +25,7 @@ protected:
   const Real _m_exponent;
   const Real _activation_energy;
   const Real _gas_constant;
+  const Real _start_time;
 
   Real _shear_modulus;
   Real _exponential;

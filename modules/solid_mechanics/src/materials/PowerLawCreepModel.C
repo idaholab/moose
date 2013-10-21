@@ -13,6 +13,7 @@ InputParameters validParams<PowerLawCreepModel>()
   params.addParam<Real>("m_exponent", 0.0, "Exponent on time in power-law equation");
   params.addRequiredParam<Real>("activation_energy", "Activation energy");
   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
+  params.addParam<Real>("start_time", 0, "Start time (if not zero)");
   params.addCoupledVar("temp", "Coupled Temperature");
 
   return params;
@@ -27,6 +28,7 @@ PowerLawCreepModel::PowerLawCreepModel( const std::string & name,
    _m_exponent(parameters.get<Real>("m_exponent")),
    _activation_energy(parameters.get<Real>("activation_energy")),
    _gas_constant(parameters.get<Real>("gas_constant")),
+   _start_time(getParam<Real>("start_time")),
    _creep_strain(declareProperty<SymmTensor>("creep_strain")),
    _creep_strain_old(declarePropertyOld<SymmTensor>("creep_strain"))
 {}
@@ -46,7 +48,8 @@ PowerLawCreepModel::computeStressInitialize(unsigned qp, Real /*effectiveTrialSt
   {
     _exponential = std::exp(-_activation_energy/(_gas_constant *_temperature[qp]));
   }
-  _expTime = std::pow(_t, _m_exponent);
+
+  _expTime = std::pow(_t-_start_time, _m_exponent);
 
   _creep_strain[qp] = _creep_strain_old[qp];
 }
