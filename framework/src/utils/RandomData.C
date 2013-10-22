@@ -72,40 +72,62 @@ RandomData::updateSeeds(ExecFlagType exec_flag)
 void
 RandomData::updateGenerators()
 {
+  //  Set the master seed and repopulate all of the child generators
+  _generator.seed(MASTER, _current_master_seed);
+
+  /**
+   * When using parallel mesh it's not worth generating parallel consistent numbers.
+   * Each processor may not be aware of which entities belong on another mesh. We do have
+   * to be careful to *not* generate the same patterns on different processors however.
+   * To do that, we will use the MASTER generator to generate new master seeds for each
+   * processor based on their individual processor ids before generating seeds for
+   * the mesh entities.
+   */
+  if (_rd_mesh.isParallelMesh())
   {
-    /**
-     * Set the master seed and repopulate all of the child generators
-     */
-    _generator.seed(MASTER, _current_master_seed);
+    unsigned int parallel_seed;
+    for (processor_id_type proc_id = 0; proc_id < libMesh::n_processors(); ++proc_id)
+      if (proc_id == libMesh::processor_id())
+        parallel_seed = _generator.randl(MASTER);
+      else
+        _generator.randl(MASTER); // Generate but throw away numbers that aren't mine
 
-    if (_is_nodal)
+    _generator.seed(MASTER, parallel_seed);
+  }
+
+  /**
+   * Set the master seed and repopulate all of the child generators
+   */
+  _generator.seed(MASTER, _current_master_seed);
+
+  if (_is_nodal)
+  {
+    MeshBase::const_node_iterator it = _rd_mesh.getMesh().active_nodes_begin();
+    MeshBase::const_node_iterator end_it = _rd_mesh.getMesh().active_nodes_end();
+
+    for (; it != end_it; ++it)
     {
-      MeshBase::const_node_iterator it = _rd_mesh.getMesh().active_nodes_begin();
-      MeshBase::const_node_iterator end_it = _rd_mesh.getMesh().active_nodes_end();
+      unsigned int id = (*it)->id();
+      _seeds[id] = _generator.randl(MASTER);
 
-      for (; it != end_it; ++it)
-      {
-        unsigned int id = (*it)->id();
-        _seeds[id] = _generator.randl(MASTER);
-
-        // Update the individual dof object generators
-        _generator.seed(id, _seeds[id]);
-      }
-    }
-    else
-    {
-      MeshBase::const_element_iterator it = _rd_mesh.getMesh().active_elements_begin();
-      MeshBase::const_element_iterator end_it = _rd_mesh.getMesh().active_elements_end();
-
-      for (; it != end_it; ++it)
-      {
-        unsigned int id = (*it)->id();
-        _seeds[id] = _generator.randl(MASTER);
-
-        // Update the individual dof object generators
-        _generator.seed(id, _seeds[id]);
-      }
+      // Update the individual dof object generators
+      _generator.seed(id, _seeds[id]);
     }
   }
+  else
+  {
+    MeshBase::const_element_iterator it = _rd_mesh.getMesh().active_elements_begin();
+    MeshBase::const_element_iterator end_it = _rd_mesh.getMesh().active_elements_end();
+
+    for (; it != end_it; ++it)
+    {
+      unsigned int id = (*it)->id();
+      _seeds[id] = _generator.randl(MASTER);
+
+      // Update the individual dof object generators
+      _generator.seed(id, _seeds[id]);
+    }
+  }
+
 }
 
