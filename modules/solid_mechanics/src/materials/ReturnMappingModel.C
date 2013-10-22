@@ -85,6 +85,10 @@ ReturnMappingModel::computeStress( const Elem & current_elem, unsigned qp,
     if (it == 0)
     {
       first_norm_residual = norm_residual;
+      if (first_norm_residual == 0)
+      {
+        first_norm_residual = 1;
+      }
     }
 
     scalar -= residual / computeDerivative(qp, effective_trial_stress, scalar);
