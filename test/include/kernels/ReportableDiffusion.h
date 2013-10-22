@@ -27,9 +27,9 @@ protected:
 
   const Real &  _coef;
 
-  const MooseEnum & _test;
+  const MooseEnum & _test_type;
 
-  ReportableValue & _calls;
+  ReportableValue & _value;
 };
 
 #endif //REPORTABLEDIFFUSION_H

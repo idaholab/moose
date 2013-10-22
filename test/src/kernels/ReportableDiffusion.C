@@ -15,17 +15,17 @@ InputParameters validParams<ReportableDiffusion>()
 ReportableDiffusion::ReportableDiffusion(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
     _coef(getParam<Real>("coef")),
-    _test(getParam<MooseEnum>("test")),
-    _calls(_test == "by_name" ?
-           declareReportableValueByName("residual_calls", 0.0, getParam<bool>("report")) :
-           declareReportableValue("residual_calls", 0.0, getParam<bool>("report")))
+    _test_type(getParam<MooseEnum>("test")),
+    _value(_test_type == "by_name" ?
+           declareReportableValueByName("value", 0.0, getParam<bool>("report")) :
+           declareReportableValue("value", 0.0, getParam<bool>("report")))
 {
   // Test the true case of hasReportableValue
-  if (_test == "none" && !hasReportableValue("residual_calls"))
-    mooseError("Expected a reportable value for the name 'residual_calls', but it was not found");
+  if (_test_type == "none" && !hasReportableValue("value"))
+    mooseError("Expected a reportable value for the name 'value', but it was not found");
 
   // Test the false case of hasReportableValue
-  if (_test == "has_reportable")
+  if (_test_type == "has_reportable")
     if (!hasReportableValue("unknown"))
       mooseError("The name 'unknown' is not a reportable value");
 }
@@ -33,7 +33,7 @@ ReportableDiffusion::ReportableDiffusion(const std::string & name, InputParamete
 Real
 ReportableDiffusion::computeQpResidual()
 {
-  _calls += 1;
+  _value += -_test[_i][_qp]*_coef;
   return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
 }
 
