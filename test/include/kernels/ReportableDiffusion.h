@@ -30,6 +30,9 @@ protected:
   const MooseEnum & _test_type;
 
   ReportableValue & _value;
+
+  Point _point;
+
 };
 
 #endif //REPORTABLEDIFFUSION_H

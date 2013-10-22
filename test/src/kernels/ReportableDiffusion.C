@@ -18,7 +18,8 @@ ReportableDiffusion::ReportableDiffusion(const std::string & name, InputParamete
     _test_type(getParam<MooseEnum>("test")),
     _value(_test_type == "by_name" ?
            declareReportableValueByName("value", 0.0, getParam<bool>("report")) :
-           declareReportableValue("value", 0.0, getParam<bool>("report")))
+           declareReportableValue("value", 0.0, getParam<bool>("report"))),
+    _point(0.5,0.5,0.0)
 {
   // Test the true case of hasReportableValue
   if (_test_type == "none" && !hasReportableValue("value"))
@@ -33,7 +34,9 @@ ReportableDiffusion::ReportableDiffusion(const std::string & name, InputParamete
 Real
 ReportableDiffusion::computeQpResidual()
 {
-  _value += -_test[_i][_qp]*_coef;
+  if (_current_elem->contains_point(_point))
+    _value += _current_elem->volume();
+
   return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
 }
 

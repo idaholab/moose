@@ -3,8 +3,6 @@
     type = 'Exodiff'
     input = 'reportable_kernel.i'
     exodiff = 'reportable_kernel_out.e'
-    min_threads = 2
-    max_threads = 2
     min_parallel = 2
     max_parallel = 2
   [../]
@@ -14,8 +12,6 @@
     input = 'reportable_kernel.i'
     exodiff = 'reportable_kernel_by_name_out.e'
 		cli_args = 'Kernels/diff/test=by_name Output/file_base=reportable_kernel_by_name_out'
-    min_threads = 2
-    max_threads = 2
     min_parallel = 2
     max_parallel = 2
   [../]
@@ -38,8 +34,6 @@
     type = 'Exodiff'
     input = 'reportable_transient.i'
     exodiff = 'reportable_transient_out.e'
-    min_threads = 2
-    max_threads = 2
     min_parallel = 2
     max_parallel = 2
   []
