@@ -23,6 +23,8 @@ InputParameters validParams<ReferenceResidualProblem>()
   InputParameters params = validParams<FEProblem>();
   params.addParam<std::vector<std::string> >("solution_variables","Set of solution variables to be checked for relative convergence");
   params.addParam<std::vector<std::string> >("reference_residual_variables","Set of variables that provide reference residuals for relative convergence check");
+  params.addParam<Real>("acceptable_multiplier",1.0,"Multiplier applied to relative tolerance for acceptable limit");
+  params.addParam<int>("acceptable_iterations",0,"Iterations after which convergence to acceptable limits is accepted");
   return params;
 }
 
@@ -43,6 +45,8 @@ ReferenceResidualProblem::ReferenceResidualProblem(const std::string & name, Inp
         <<") != size of reference_residual_variables ("<<_refResidVarNames.size()<<")";
     mooseError(err.str());
   }
+  _accept_mult = params.get<Real>("acceptable_multiplier");
+  _accept_iters = params.get<int>("acceptable_iterations");
 }
 
 ReferenceResidualProblem::~ReferenceResidualProblem()
@@ -207,6 +211,16 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
         oss << "Converged due to function norm " << fnorm << " < " << " (relative tolerance)" << std::endl;
       reason = MOOSE_CONVERGED_FNORM_RELATIVE;
     }
+    else if (it >= _accept_iters && checkRelativeConvergence(fnorm, rtol*_accept_mult, ref_resid))
+    {
+      if (_resid.size() > 0)
+        oss << "Converged due to function norm " << " < " << " (acceptable relative tolerance) for all solution variables" << std::endl;
+      else
+        oss << "Converged due to function norm " << fnorm << " < " << " (acceptable relative tolerance)" << std::endl;
+      std::cout<<"ACCEPTABLE"<<std::endl;
+      reason = MOOSE_CONVERGED_FNORM_RELATIVE;
+    }
+
     else if (snorm < stol*xnorm)
     {
       oss << "Converged due to small update length: " << snorm << " < " << stol << " * " << xnorm << std::endl;

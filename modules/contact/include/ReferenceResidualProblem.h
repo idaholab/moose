@@ -56,6 +56,8 @@ protected:
   std::vector<std::string> _refResidVarNames;
   std::vector<unsigned int> _solnVars;
   std::vector<unsigned int> _refResidVars;
+  Real _accept_mult;
+  int _accept_iters;
   std::vector<Real> _refResid;
   std::vector<Real> _resid;
 };
