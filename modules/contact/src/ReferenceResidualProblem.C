@@ -203,18 +203,18 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
 
   if (it && !reason)
   {
-    if (checkRelativeConvergence(fnorm, rtol, ref_resid))
+    if (checkConvergenceIndividVars(fnorm, abstol, rtol, ref_resid))
     {
       if (_resid.size() > 0)
-        oss << "Converged due to function norm " << " < " << " (relative tolerance) for all solution variables" << std::endl;
+        oss << "Converged due to function norm " << " < " << " (relative tolerance) or (absolute tolerance) for all solution variables" << std::endl;
       else
         oss << "Converged due to function norm " << fnorm << " < " << " (relative tolerance)" << std::endl;
       reason = MOOSE_CONVERGED_FNORM_RELATIVE;
     }
-    else if (it >= _accept_iters && checkRelativeConvergence(fnorm, rtol*_accept_mult, ref_resid))
+    else if (it >= _accept_iters && checkConvergenceIndividVars(fnorm, abstol*_accept_mult, rtol*_accept_mult, ref_resid))
     {
       if (_resid.size() > 0)
-        oss << "Converged due to function norm " << " < " << " (acceptable relative tolerance) for all solution variables" << std::endl;
+        oss << "Converged due to function norm " << " < " << " (acceptable relative tolerance) or (acceptable absolute tolerance) for all solution variables" << std::endl;
       else
         oss << "Converged due to function norm " << fnorm << " < " << " (acceptable relative tolerance)" << std::endl;
       std::cout<<"ACCEPTABLE"<<std::endl;
@@ -240,16 +240,17 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
 
 
 bool
-ReferenceResidualProblem::checkRelativeConvergence(const Real fnorm,
-                                                   const Real rtol,
-                                                   const Real ref_resid)
+ReferenceResidualProblem::checkConvergenceIndividVars(const Real fnorm,
+                                                      const Real abstol,
+                                                      const Real rtol,
+                                                      const Real ref_resid)
 {
   bool convergedRelative = true;
   if (_resid.size() > 0)
   {
     for (unsigned int i=0; i<_resid.size(); ++i)
     {
-      convergedRelative &= (_resid[i] < _refResid[i]*rtol);
+      convergedRelative &= ((_resid[i] < _refResid[i]*rtol) || (_resid[i] < abstol));
     }
   }
   else if (fnorm > ref_resid*rtol)

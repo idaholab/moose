@@ -828,7 +828,7 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
   if ((reason > 0) || //converged
       (reason == MOOSE_NONLINEAR_ITERATING && //iterating and converged within factor
        (fnorm < abstol*_contact_slip_tol_factor ||
-        checkRelativeConvergence(fnorm, rtol*_contact_slip_tol_factor, ref_resid))))
+        checkConvergenceIndividVars(fnorm, abstol*_contact_slip_tol_factor, rtol*_contact_slip_tol_factor, ref_resid))))
   {
     std::cout<<"Slip iteration "<<_num_slip_iterations<<" ";
     if (_num_slip_iterations < _min_slip_iters)

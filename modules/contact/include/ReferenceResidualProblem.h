@@ -47,9 +47,10 @@ public:
                                                                     const Real ref_resid,
                                                                     const Real div_threshold);
 
-  bool checkRelativeConvergence(const Real fnorm,
-                                const Real rtol,
-                                const Real ref_resid);
+  bool checkConvergenceIndividVars(const Real fnorm,
+                                   const Real abstol,
+                                   const Real rtol,
+                                   const Real ref_resid);
 
 protected:
   std::vector<std::string> _solnVarNames;
