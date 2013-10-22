@@ -54,7 +54,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     TransientInterface(parameters, name, "kernels"),
     PostprocessorInterface(parameters),
     MaterialPropertyInterface(parameters),
-    RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
+    RandomInterface(name, parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
     GeometricSearchInterface(parameters),
     Restartable(name, parameters, "Kernels"),
       Reportable(name, parameters),

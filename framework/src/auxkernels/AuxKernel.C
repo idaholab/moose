@@ -56,7 +56,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),
     DependencyResolverInterface(),
-    RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
+    RandomInterface(name, parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
     GeometricSearchInterface(parameters),
     Restartable(name, parameters, "AuxKernels"),
     Reportable(name, parameters),

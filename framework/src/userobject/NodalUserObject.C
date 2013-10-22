@@ -41,7 +41,7 @@ NodalUserObject::NodalUserObject(const std::string & name, InputParameters param
     MooseVariableDependencyInterface(),
     TransientInterface(parameters, name, "nodal_user_objects"),
     PostprocessorInterface(parameters),
-    RandomInterface(parameters, _fe_problem, _tid, true),
+    RandomInterface(name, parameters, _fe_problem, _tid, true),
     _qp(0),
     _current_node(_assembly.node()),
     _real_zero(_subproblem._real_zero[_tid]),

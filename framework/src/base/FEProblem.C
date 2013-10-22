@@ -39,6 +39,7 @@
 #include "PetscSupport.h"
 #include "SetupOutputAction.h"
 #include "RandomInterface.h"
+#include "RandomData.h"
 
 #include "ScalarInitialCondition.h"
 #include "ElementPostprocessor.h"
@@ -221,8 +222,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
   _active_elemental_moose_variables.resize(n_threads);
 
-  _random_interface_objects.resize(n_threads);
-
   _resurrector = new Resurrector(*this);
 
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
@@ -266,6 +265,12 @@ FEProblem::~FEProblem()
     delete _pps_data[i];
 
   delete _resurrector;
+
+  // Random data objects
+  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
+       it != _random_data_objects.end(); ++it)
+    delete it->second;
+
 }
 
 Moose::CoordinateSystemType
@@ -483,11 +488,13 @@ void FEProblem::initialSetup()
     _user_objects(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
     _user_objects(EXEC_INITIAL)[i].initialSetup();
     _user_objects(EXEC_CUSTOM)[i].initialSetup();
-
-    // Random interface objects
-    for (unsigned int j=0; j<_random_interface_objects[i].size(); j++)
-      _random_interface_objects[i][j]->updateSeeds(EXEC_INITIAL);
   }
+
+  // Random interface objects
+  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
+       it != _random_data_objects.end();
+       ++it)
+    it->second->updateSeeds(EXEC_INITIAL);
 
   if(!isRecovering())
   {
@@ -567,8 +574,10 @@ void FEProblem::timestepSetup()
     _markers[i].timestepSetup();
 
     // Random interface objects
-    for (unsigned int j=0; j<_random_interface_objects[i].size(); j++)
-      _random_interface_objects[i][j]->updateSeeds(EXEC_TIMESTEP_BEGIN);
+    for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
+         it != _random_data_objects.end();
+         ++it)
+      it->second->updateSeeds(EXEC_TIMESTEP_BEGIN);
   }
 
   _out.timestepSetup();
@@ -3011,9 +3020,10 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   unsigned int n_threads = libMesh::n_threads();
 
   // Random interface objects
-  for (unsigned int i=0; i<n_threads; ++i)
-    for (unsigned int j=0; j<_random_interface_objects[i].size(); j++)
-      _random_interface_objects[i][j]->updateSeeds(EXEC_RESIDUAL);
+  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
+       it != _random_data_objects.end();
+       ++it)
+    it->second->updateSeeds(EXEC_RESIDUAL);
 
   execTransfers(EXEC_RESIDUAL);
 
@@ -3061,9 +3071,10 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     unsigned int n_threads = libMesh::n_threads();
 
     // Random interface objects
-    for (unsigned int i=0; i<n_threads; ++i)
-      for (unsigned int j=0; j<_random_interface_objects[i].size(); j++)
-        _random_interface_objects[i][j]->updateSeeds(EXEC_JACOBIAN);
+    for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
+         it != _random_data_objects.end();
+         ++it)
+      it->second->updateSeeds(EXEC_JACOBIAN);
 
     execTransfers(EXEC_JACOBIAN);
     execMultiApps(EXEC_JACOBIAN);
@@ -3957,7 +3968,16 @@ FEProblem::getReportableData()
 }
 
 void
-FEProblem::registerRandomInterface(RandomInterface *random_interface, THREAD_ID tid)
+FEProblem::registerRandomInterface(RandomInterface & random_interface, const std::string & name, ExecFlagType exec_flag)
 {
-  _random_interface_objects[tid].push_back(random_interface);
+  RandomData *random_data;
+  if (_random_data_objects.find(name) == _random_data_objects.end())
+  {
+    random_data = new RandomData(*this, random_interface);
+    random_interface.setRandomDataPointer(random_data);
+
+    _random_data_objects[name] = random_data;
+  }
+  else
+    random_interface.setRandomDataPointer(_random_data_objects[name]);
 }

@@ -1,8 +1,9 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
+  type = FileMesh
+  file = simple_diffusion_out_0001_mesh.xda
+#  dim = 2
+#  nx = 10
+#  ny = 10
 []
 
 [Variables]

@@ -17,6 +17,8 @@
 
 #include "mtwist.h"
 
+#include "MooseError.h"
+
 #include "libmesh/libmesh_config.h"
 #include LIBMESH_INCLUDE_UNORDERED_MAP
 
@@ -83,6 +85,7 @@ public:
    */
   inline double rand(unsigned int i)
   {
+    mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id");
     return mts_ldrand(&(_states[i]));
   }
 
@@ -93,6 +96,7 @@ public:
    */
   inline uint32_t randl(unsigned int i)
   {
+    mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id");
     return mts_lrand(&(_states[i]));
   }
 

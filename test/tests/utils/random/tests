@@ -4,7 +4,6 @@
     input = 'random.i'
     exodiff = 'random_out.e'
     max_threads = 1
-    deleted = 'Threading needs work #2088'
   [../]
 
   [./parallel_verification]
@@ -14,7 +13,14 @@
     prereq = 'test'
     min_parallel = 2
     max_threads = 1
-    deleted = 'Threading needs work #2088'
+  [../]
+
+  [./threads_verification]
+    type = 'Exodiff'
+    input = 'random.i'
+    exodiff = 'random_out.e'
+    prereq = 'parallel_verification'
+    min_threads = 2
   [../]
 
   [./test_uo]
@@ -22,7 +28,6 @@
     input = 'random_uo.i'
     exodiff = 'random_uo_out.e'
     max_threads = 1
-    deleted = 'Threading needs work #2088'
   [../]
 
   [./parallel_verification_uo]
@@ -32,15 +37,13 @@
     prereq = 'test_uo'
     min_parallel = 2
     max_threads = 1
-    deleted = 'Threading needs work #2088'
   [../]
 
-#  # Threads need work
-#  [./thread_test]
-#    type = 'Exodiff'
-#    input = 'random.i'
-#    exodiff = 'random_out.e'
-#    prereq = 'parallel_test'
-#    min_threads = 2
-#  [../]
+  [./threads_verification_uo]
+    type = 'Exodiff'
+    input = 'random_uo.i'
+    exodiff = 'random_uo_out.e'
+    prereq = 'parallel_verification_uo'
+    min_threads = 2
+  [../]
 []

@@ -35,7 +35,7 @@ ElementUserObject::ElementUserObject(const std::string & name, InputParameters p
     MooseVariableDependencyInterface(),
     TransientInterface(parameters, name, "element_user_objects"),
     PostprocessorInterface(parameters),
-    RandomInterface(parameters, _fe_problem, _tid, false),
+    RandomInterface(name, parameters, _fe_problem, _tid, false),
     _mesh(_subproblem.mesh()),
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),

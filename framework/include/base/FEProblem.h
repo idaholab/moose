@@ -45,6 +45,7 @@ class FEProblem;
 class MooseMesh;
 class NonlinearSystem;
 class RandomInterface;
+class RandomData;
 
 template<>
 InputParameters validParams<FEProblem>();
@@ -688,7 +689,8 @@ public:
    */
   ReportableData & getReportableData();
 
-  void registerRandomInterface(RandomInterface *random_interface, THREAD_ID tid);
+  void registerRandomInterface(RandomInterface & random_interface,
+                               const std::string & name, ExecFlagType exec_flag);
 
 protected:
   MooseMesh & _mesh;
@@ -763,8 +765,8 @@ protected:
   /// Transfers executed just after MultiApps to transfer data from them
   ExecStore<TransferWarehouse> _from_multi_app_transfers;
 
-  /// A list of objects that consume random numbers
-  std::vector<std::vector<RandomInterface *> > _random_interface_objects;
+  /// A map of objects that consume random numbers
+  std::map<std::string, RandomData *> _random_data_objects;
 
   /// Table with postprocessors that will go into files
   FormattedTable _pps_output_table_file;

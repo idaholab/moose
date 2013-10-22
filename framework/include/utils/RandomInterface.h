@@ -16,16 +16,13 @@
 #define RANDOMINTERFACE_H
 
 #include "InputParameters.h"
-#include "MooseRandom.h"
+#include "FEProblem.h"
 #include "ParallelUniqueId.h"
 
-#include "libmesh/libmesh_config.h"
-#include LIBMESH_INCLUDE_UNORDERED_MAP
-
 class RandomInterface;
-class FEProblem;
 class Assembly;
-class MooseMesh;
+class RandomData;
+class MooseRandom;
 
 template<>
 InputParameters validParams<RandomInterface>();
@@ -37,43 +34,58 @@ InputParameters validParams<RandomInterface>();
 class RandomInterface
 {
 public:
-  RandomInterface(InputParameters & parameters, FEProblem & problem, THREAD_ID tid, bool is_nodal);
+  RandomInterface(const std::string & name, InputParameters & parameters, FEProblem & problem,
+                  THREAD_ID tid, bool is_nodal);
+
   ~RandomInterface();
 
+  /**
+   * This interface should be called from a derived class to enable random number
+   * generation in this object.
+   */
   void setRandomResetFrequency(ExecFlagType exec_flag);
 
-  virtual void updateSeeds(ExecFlagType exec_flag);
-
-
+  /**
+   * Returns the next random number (long) from the generator tied to this object (elem/node).
+   */
   unsigned long getRandomLong();
 
+  /**
+   * Returns the next random number (Real) from the generator tied to this object (elem/node).
+   */
   Real getRandomReal();
 
-
-  void updateMasterSeed(unsigned int seed);
-
+  /**
+   * Get the seed for the passed in elem/node id.
+   * @param id - dof object id
+   * @return current seed for this id
+   */
   unsigned int getSeed(unsigned int id);
 
-private:
-  void updateGenerators();
+  /**************************************************
+   *                Data Accessors                  *
+   **************************************************/
+  unsigned int getMasterSeed() const { return _master_seed; }
+  bool isNodal() const { return _is_nodal; }
+  ExecFlagType getResetOnTime() const { return _reset_on; }
 
-  MooseRandom _generator;
+  void setRandomDataPointer(RandomData *random_data);
+
+private:
+  RandomData *_random_data;
+  MooseRandom *_generator;
+
   FEProblem & _ri_problem;
-  Assembly & _ri_assembly;
-  MooseMesh & _ri_mesh;
-  THREAD_ID _ri_tid;
+  const std::string & _ri_name;
+
   unsigned int _master_seed;
   bool _is_nodal;
-
-  unsigned int _current_master_seed;
-  unsigned int _new_seed;
   ExecFlagType _reset_on;
 
   const Node * & _curr_node;
   const Elem * & _curr_element;
 
-  // dof id to seed
-  LIBMESH_BEST_UNORDERED_MAP<dof_id_type, unsigned int> _seeds;
+//  friend void FEProblem::registerRandomInterface(RandomInterface *random_interface, const std::string & name, ExecFlagType exec_flag);
 };
 
 #endif /* RANDOMINTERFACE_H */

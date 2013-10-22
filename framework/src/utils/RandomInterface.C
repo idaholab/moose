@@ -14,11 +14,9 @@
 
 #include "Moose.h"
 #include "RandomInterface.h"
-#include "FEProblem.h"
 #include "Assembly.h"
-#include "MooseMesh.h"
-
-const unsigned int MASTER = std::numeric_limits<unsigned int>::max();
+#include "RandomData.h"
+#include "MooseRandom.h"
 
 template<>
 InputParameters validParams<RandomInterface>()
@@ -30,18 +28,17 @@ InputParameters validParams<RandomInterface>()
   return params;
 }
 
-RandomInterface::RandomInterface(InputParameters & parameters, FEProblem & problem, THREAD_ID tid, bool is_nodal) :
+RandomInterface::RandomInterface(const std::string & name, InputParameters & parameters,
+                                 FEProblem & problem, THREAD_ID tid, bool is_nodal) :
+    _random_data(NULL),
+    _generator(NULL),
     _ri_problem(problem),
-    _ri_assembly(problem.assembly(tid)),
-    _ri_mesh(problem.mesh()),
-    _ri_tid(tid),
+    _ri_name(name),
     _master_seed(parameters.get<unsigned int>("seed")),
     _is_nodal(is_nodal),
-    _current_master_seed(0),
-    _new_seed(1),
     _reset_on(EXEC_RESIDUAL),
-    _curr_node(_ri_assembly.node()),
-    _curr_element(_ri_assembly.elem())
+    _curr_node(problem.assembly(tid).node()),
+    _curr_element(problem.assembly(tid).elem())
 {
 }
 
@@ -52,122 +49,48 @@ RandomInterface::~RandomInterface()
 void
 RandomInterface::setRandomResetFrequency(ExecFlagType exec_flag)
 {
-  _reset_on = exec_flag;
-  _ri_problem.registerRandomInterface(this, _ri_tid);
+  _ri_problem.registerRandomInterface(*this, _ri_name, exec_flag);
 }
 
 void
-RandomInterface::updateMasterSeed(unsigned int seed)
+RandomInterface::setRandomDataPointer(RandomData *random_data)
 {
-  _current_master_seed = seed;
-}
-
-void
-RandomInterface::updateSeeds(ExecFlagType exec_flag)
-{
-  /**
-   * Set the seed. This part is critical! If this is done incorrectly, it may lead to difficult to
-   * detect patterns in your random numbers either within a single run or over the course of
-   * several runs.  We will default to _master_seed + the current time step.
-   */
-  if (exec_flag == EXEC_INITIAL)
-    _new_seed = _master_seed;
-  else
-    _new_seed = _master_seed + _ri_problem.timeStep();
-  /**
-   * case EXEC_TIMESTEP_BEGIN:   // reset and advance every timestep
-   * case EXEC_TIMESTEP:         // reset and advance every timestep
-   * case EXEC_RESIDUAL:         // Reset every residual, advance every timestep
-   * case EXEC_JACOBIAN:         // Reset every Jacobian, advance every timestep
-   */
-
-
-  // If the _new_seed has been updated, we need to update all of the generators
-  if (_new_seed != _current_master_seed)
-  {
-    _current_master_seed = _new_seed;
-    updateGenerators();
-    _generator.saveState();       // Save states so that we can reset on demand
-  }
-
-  if (_reset_on == exec_flag)
-    _generator.restoreState();    // Restore states here
-}
-
-void
-RandomInterface::updateGenerators()
-{
-  {
-    /**
-     * Set the master seed and repopulate all of the child generators
-     */
-    _generator.seed(MASTER, _current_master_seed);
-
-    if (_is_nodal)
-    {
-      MeshBase::const_node_iterator it = _ri_mesh.getMesh().active_nodes_begin();
-      MeshBase::const_node_iterator end_it = _ri_mesh.getMesh().active_nodes_end();
-
-      for (; it != end_it; ++it)
-      {
-        unsigned int id = (*it)->id();
-        _seeds[id] = _generator.randl(MASTER);
-
-        // Update the individual dof object generators
-        _generator.seed(id, _seeds[id]);
-      }
-    }
-    else
-    {
-      MeshBase::const_element_iterator it = _ri_mesh.getMesh().active_elements_begin();
-      MeshBase::const_element_iterator end_it = _ri_mesh.getMesh().active_elements_end();
-
-      for (; it != end_it; ++it)
-      {
-        unsigned int id = (*it)->id();
-        _seeds[id] = _generator.randl(MASTER);
-
-        // Update the individual dof object generators
-        _generator.seed(id, _seeds[id]);
-      }
-    }
-  }
+  _random_data = random_data;
+  _generator = &_random_data->getGenerator();
 }
 
 unsigned int
 RandomInterface::getSeed(unsigned int id)
 {
-  mooseAssert(_seeds.find(id) != _seeds.end(), "Call to updateSeeds() is stale! Check your initialize() or timestepSetup() calls");
+  mooseAssert(_random_data, "RandomData object is NULL!");
 
-  return _seeds[id];
+  return _random_data->getSeed(id);
 }
 
 unsigned long
 RandomInterface::getRandomLong()
 {
+  mooseAssert(_generator, "Random Generator is NULL, did you call setRandomResetFrequency()?");
+
+  dof_id_type id;
   if (_is_nodal)
-  {
-    mooseAssert(_seeds.find(_curr_node->id()) != _seeds.end(), "Call to updateSeeds() is stale! Check your initialize() or timestepSetup() calls.");
-    return _generator.randl(_curr_node->id());
-  }
+    id = _curr_node->id();
   else
-  {
-    mooseAssert(_seeds.find(_curr_element->id()) != _seeds.end(), "Call to updateSeeds() is stale! Check your initialize() or timestepSetup() calls.");
-    return _generator.randl(_curr_element->id());
-  }
+    id = _curr_element->id();
+
+  return _generator->randl(id);
 }
 
 Real
 RandomInterface::getRandomReal()
 {
+  mooseAssert(_generator, "Random Generator is NULL, did you call setRandomResetFrequency()?");
+
+  dof_id_type id;
   if (_is_nodal)
-  {
-    mooseAssert(_seeds.find(_curr_node->id()) != _seeds.end(), "Call to updateSeeds() is stale! Check your initialize() or timestepSetup() calls.");
-    return _generator.rand(_curr_node->id());
-  }
+    id = _curr_node->id();
   else
-  {
-    mooseAssert(_seeds.find(_curr_element->id()) != _seeds.end(), "Call to updateSeeds() is stale! Check your initialize() or timestepSetup() calls.");
-    return _generator.rand(_curr_element->id());
-  }
+    id = _curr_element->id();
+
+  return _generator->rand(id);
 }

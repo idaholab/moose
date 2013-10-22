@@ -34,7 +34,7 @@ InputParameters validParams<IntegratedBC>()
 
 IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters) :
     BoundaryCondition(name, parameters),
-    RandomInterface(parameters, _fe_problem, _tid, false),
+    RandomInterface(name, parameters, _fe_problem, _tid, false),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     MaterialPropertyInterface(parameters),
     _current_elem(_assembly.elem()),
