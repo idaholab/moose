@@ -29,8 +29,19 @@ Density::Density( const std::string & name, InputParameters parameters ) :
   _disp_r( _is_RZ ? coupledValue("disp_r") : _zero ),
 
   _orig_density(getParam<Real>("density")),
-  _density(declareProperty<Real>("density"))
+  _density(declareProperty<Real>("density")),
+  _density_old(declarePropertyOld<Real>("density"))
+
 {}
+
+void
+Density::initStatefulProperties(unsigned n_points)
+{
+  for (unsigned qp(0); qp < n_points; ++qp)
+  {
+    _density[qp] = _orig_density;
+  }
+}
 
 void
 Density::computeProperties()
@@ -67,7 +78,8 @@ Density::computeProperties()
           Ayy = Azz = _disp_r[qp]/_q_point[qp](0) + 1;
         }
       }
-      d /= Axx*Ayy*Azz + Axy*Ayz*Azx + Axz*Ayx*Azy - Azx*Ayy*Axz - Azy*Ayz*Axx - Azz*Ayx*Axy;
+      const Real detF = Axx*Ayy*Azz + Axy*Ayz*Azx + Axz*Ayx*Azy - Azx*Ayy*Axz - Azy*Ayz*Axx - Azz*Ayx*Axy;
+      d /= detF;
     }
     _density[qp] = d;
   }

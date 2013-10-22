@@ -118,15 +118,30 @@ Nonlinear3D::computeDeformationGradient( unsigned int qp, ColumnMajorMatrix & F)
 {
   mooseAssert(F.n() == 3 && F.m() == 3, "computeDefGrad requires 3x3 matrix");
 
-  F(0,0) = _grad_disp_x[qp](0) + 1; 
-  F(0,1) = _grad_disp_x[qp](1);     
-  F(0,2) = _grad_disp_x[qp](2);     
-  F(1,0) = _grad_disp_y[qp](0);     
-  F(1,1) = _grad_disp_y[qp](1) + 1; 
-  F(1,2) = _grad_disp_y[qp](2);     
-  F(2,0) = _grad_disp_z[qp](0);       
+  F(0,0) = _grad_disp_x[qp](0) + 1;
+  F(0,1) = _grad_disp_x[qp](1);
+  F(0,2) = _grad_disp_x[qp](2);
+  F(1,0) = _grad_disp_y[qp](0);
+  F(1,1) = _grad_disp_y[qp](1) + 1;
+  F(1,2) = _grad_disp_y[qp](2);
+  F(2,0) = _grad_disp_z[qp](0);
   F(2,1) = _grad_disp_z[qp](1);
   F(2,2) = _grad_disp_z[qp](2) + 1;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+Real
+Nonlinear3D::volumeRatioOld(unsigned int qp) const
+{
+  ColumnMajorMatrix Fnm1T(_grad_disp_x_old[qp],
+                          _grad_disp_y_old[qp],
+                          _grad_disp_z_old[qp]);
+  Fnm1T(0,0) += 1;
+  Fnm1T(1,1) += 1;
+  Fnm1T(2,2) += 1;
+
+  return detMatrix(Fnm1T);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -179,7 +194,7 @@ Nonlinear3D::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat,
  ////   strain_increment = N1 * N1.transpose() * log1 +  N2 * N2.transpose() * log2 +  N3 * N3.transpose() * log3;
 
    Element::polarDecompositionEigen( Fhat, _incremental_rotation, strain_increment);
-   
+
 
   }
   else

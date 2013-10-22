@@ -45,6 +45,7 @@ protected:
 
   virtual void initStatefulProperties(unsigned n_points);
   virtual void modifyStrain(const unsigned int qp,
+                            const Real /*scale_factor*/,
                             SymmTensor & strain_increment,
                             SymmTensor & dstrain_increment_dT);
 

@@ -18,6 +18,7 @@ public:
   virtual ~VolumetricModel();
 
   virtual void modifyStrain(const unsigned int qp,
+                            const Real scale_factor,
                             SymmTensor & strain_increment,
                             SymmTensor & dstrain_increment_dT) = 0;
 private:

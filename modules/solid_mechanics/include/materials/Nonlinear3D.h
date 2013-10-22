@@ -66,6 +66,8 @@ protected:
                               SymmTensor & total_strain_new,
                               SymmTensor & strain_increment );
 
+  virtual Real volumeRatioOld(unsigned qp) const;
+
   /// Rotate stress to current configuration
   virtual void finalizeStress( std::vector<SymmTensor*> & t );
 

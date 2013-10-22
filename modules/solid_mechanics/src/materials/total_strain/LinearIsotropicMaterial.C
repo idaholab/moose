@@ -34,8 +34,8 @@ LinearIsotropicMaterial::LinearIsotropicMaterial(const std::string  & name,
 
   _pi = 3.14159;
   _tol = 1.0e-5;
-  
-  
+
+
 }
 
 LinearIsotropicMaterial::~LinearIsotropicMaterial()
@@ -45,7 +45,7 @@ LinearIsotropicMaterial::~LinearIsotropicMaterial()
 
 void
 LinearIsotropicMaterial::computeProperties()
-{  
+{
   for(_qp=0; _qp < _qrule->n_points(); ++_qp)
   {
       Real alpha = computeAlpha();
@@ -78,7 +78,7 @@ LinearIsotropicMaterial::computeProperties()
     SymmTensor dv_strain_dT(0);
     for (unsigned int i(0); i < _volumetric_models.size(); ++i)
     {
-      _volumetric_models[i]->modifyStrain(_qp, v_strain, dv_strain_dT);
+      _volumetric_models[i]->modifyStrain(_qp, 1, v_strain, dv_strain_dT);
     }
     SymmTensor strain( v_strain );
     strain *= _dt;
@@ -101,7 +101,7 @@ LinearIsotropicMaterial::computeStress(const SymmTensor & strain,
 
   computeStrain(strain, elastic_strain);
 
-  
+
   // Multiplier that zeros out stiffness
   //Real h = (1.0 - _c[_qp]*_c[_qp]);
   /*Real vl = -0.05 + _c[_qp]*1.1;
@@ -109,7 +109,7 @@ LinearIsotropicMaterial::computeStress(const SymmTensor & strain,
     vl = 0.0;
   if (vl > 1.0)
   vl = 1.0;*/
-  
+
   Real h = (1.0 + std::cos(_pi*_c[_qp]))/2.0;
   if (h < _tol)
     h = _tol;
@@ -135,12 +135,12 @@ LinearIsotropicMaterial::computeStrain(const SymmTensor & total_strain, SymmTens
     vl = 0.0;
   if (vl > 1.0)
   vl = 1.0;*/
-  
+
   Real h = (1.0 + std::cos(_pi*_c[_qp]))/2.0;
   if (h < _tol)
     h = _tol;
-  
-  
+
+
   elastic_strain = total_strain;
   //Jacobian multiplier of the stress
   _Jacobian_mult[_qp] = *_local_elasticity_tensor*h;
@@ -149,7 +149,7 @@ LinearIsotropicMaterial::computeStrain(const SymmTensor & total_strain, SymmTens
 //   d_stress_dT *= _dt;
   d_stress_dT *= h;
   _d_stress_dT[_qp] = d_stress_dT;
-  
+
 
 }
 

@@ -60,7 +60,7 @@ public:
   virtual void init() {}
 
   virtual void computeDeformationGradient( unsigned int /*qp*/, ColumnMajorMatrix & /*F*/)
-  
+
     {
        mooseError("You tried to compute the deformation gradient on an element other than a nonlinear 3D element");
     }
@@ -69,6 +69,8 @@ public:
                               const SymmTensor & total_strain_old,
                               SymmTensor & total_strain_new,
                               SymmTensor & strain_increment ) = 0;
+
+  virtual Real volumeRatioOld(unsigned /*qp*/) const { return 1; }
 
   /// Rotate stress to current configuration
   virtual void finalizeStress( std::vector<SymmTensor*> & /*t*/ ) {}

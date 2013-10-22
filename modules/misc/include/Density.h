@@ -13,6 +13,8 @@ public:
   Density( const std::string & name,
            InputParameters params );
 
+  virtual void initStatefulProperties(unsigned n_points);
+
 protected:
   virtual void computeProperties();
 
@@ -26,6 +28,7 @@ protected:
 
   const Real _orig_density;
   MaterialProperty<Real> & _density;
+  MaterialProperty<Real> & _density_old;
 };
 
 template<>
