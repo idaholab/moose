@@ -95,11 +95,6 @@ RandomData::updateGenerators()
     _generator.seed(MASTER, parallel_seed);
   }
 
-  /**
-   * Set the master seed and repopulate all of the child generators
-   */
-  _generator.seed(MASTER, _current_master_seed);
-
   if (_is_nodal)
   {
     MeshBase::const_node_iterator it = _rd_mesh.getMesh().active_nodes_begin();
