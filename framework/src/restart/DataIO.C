@@ -154,11 +154,13 @@ dataLoad(std::istream & stream, std::string & v, void * /*context*/)
 
   // std::cout<<"Size: "<<size<<std::endl;
 
-  // Read and store the string
-  char* s = new char[size];
+  // Read the string
+  char* s = new char[size+1];
   stream.read(s, sizeof(char)*(size+1));
-  v = s;
 
+  // Store the string and clean up
+  v = s;
+  delete[] s;
 }
 
 template<>

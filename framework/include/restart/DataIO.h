@@ -164,7 +164,7 @@ dataStore(std::ostream & stream, std::map<T,U> & m, void * context)
   unsigned int size = m.size();
   stream.write((char *) &size, sizeof(size));
 
-  std::cout<<"Size: "<<size<<std::endl;
+  //std::cout<<"Size: "<<size<<std::endl;
 
   typename std::map<T,U>::iterator it = m.begin();
   typename std::map<T,U>::iterator end = m.end();
