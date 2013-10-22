@@ -25,8 +25,8 @@ RandomData::RandomData(FEProblem &problem, const RandomInterface & random_interf
     _is_nodal(random_interface.isNodal()),
     _reset_on(random_interface.getResetOnTime()),
     _master_seed(random_interface.getMasterSeed()),
-    _current_master_seed(0),
-    _new_seed(1)
+    _current_master_seed(std::numeric_limits<unsigned int>::max()),
+    _new_seed(0)
 {
 }
 

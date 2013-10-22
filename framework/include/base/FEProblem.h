@@ -689,8 +689,7 @@ public:
    */
   ReportableData & getReportableData();
 
-  void registerRandomInterface(RandomInterface & random_interface,
-                               const std::string & name, ExecFlagType exec_flag);
+  void registerRandomInterface(RandomInterface & random_interface, const std::string & name);
 
 protected:
   MooseMesh & _mesh;

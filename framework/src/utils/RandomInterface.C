@@ -49,7 +49,8 @@ RandomInterface::~RandomInterface()
 void
 RandomInterface::setRandomResetFrequency(ExecFlagType exec_flag)
 {
-  _ri_problem.registerRandomInterface(*this, _ri_name, exec_flag);
+  _reset_on = exec_flag;
+  _ri_problem.registerRandomInterface(*this, _ri_name);
 }
 
 void

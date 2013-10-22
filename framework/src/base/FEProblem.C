@@ -3968,7 +3968,7 @@ FEProblem::getReportableData()
 }
 
 void
-FEProblem::registerRandomInterface(RandomInterface & random_interface, const std::string & name, ExecFlagType exec_flag)
+FEProblem::registerRandomInterface(RandomInterface & random_interface, const std::string & name)
 {
   RandomData *random_data;
   if (_random_data_objects.find(name) == _random_data_objects.end())

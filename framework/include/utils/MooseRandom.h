@@ -85,7 +85,7 @@ public:
    */
   inline double rand(unsigned int i)
   {
-    mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id");
+    mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id: " << i);
     return mts_ldrand(&(_states[i]));
   }
 
@@ -96,7 +96,7 @@ public:
    */
   inline uint32_t randl(unsigned int i)
   {
-    mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id");
+    mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id: " << i);
     return mts_lrand(&(_states[i]));
   }
 

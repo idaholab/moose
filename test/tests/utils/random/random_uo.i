@@ -62,7 +62,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 10
+  num_steps = 5
   dt = 0.1
   solve_type = PJFNK
   print_linear_residuals = true
