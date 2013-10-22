@@ -70,7 +70,7 @@
 
 [Executioner]
   type = Steady
-  petsc_options = -snes_mf_operator
+	solve_type = 'PJFNK'
   nl_rel_tol = 1e-10
 []
 
@@ -79,4 +79,3 @@
   exodus = true
   perf_log = true
 []
-
