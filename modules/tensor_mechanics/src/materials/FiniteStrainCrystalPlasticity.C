@@ -42,7 +42,10 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string &
       _gss_old(declarePropertyOld<std::vector<Real> >("gss")),
       _acc_slip(declareProperty<Real>("acc_slip")),
       _acc_slip_old(declarePropertyOld<Real>("acc_slip")),
-      _update_rot(declareProperty<RankTwoTensor>("update_rot"))
+      _update_rot(declareProperty<RankTwoTensor>("update_rot")),
+      _crysrot(declareProperty<RankTwoTensor>("crysrot")),
+      _crysrot_old(declarePropertyOld<RankTwoTensor>("crysrot"))
+
 
 {
 }
@@ -136,11 +139,13 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
 
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
-      rot(i,j)=_crysrot(i,j);
+      rot(i,j)=_crysrot[_qp](i,j);
+
 
   _elasticity_tensor[_qp].rotate(rot);
 
-  _update_rot[_qp]=_crysrot;
+  _update_rot[_qp]=_crysrot[_qp];
+
 
 }
 
@@ -158,12 +163,11 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
   int iter,iterg,maxiter,maxiterg;
 
 
-
   maxiter=100;
   maxiterg=100;
+
+  _crysrot[_qp]=_crysrot_old[_qp];
   
-
-
   fp_inv.zero();
   fp_old_inv=_fp_old[_qp].inverse();
 
@@ -188,7 +192,9 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
       for(int i=0;i<_nss;i++)
 	{
 	  if(fabs(slip_incr[i])>slip_incr_max)
-	    slip_incr_max=fabs(slip_incr[i]);
+	    {
+	      slip_incr_max=fabs(slip_incr[i]);
+	    }
 
 	}
 
@@ -219,7 +225,9 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
 	  for(int i=0;i<_nss;i++)
 	    {
 	      if(fabs(slip_incr[i])>slip_incr_max)
-		slip_incr_max=fabs(slip_incr[i]);
+		{
+		  slip_incr_max=fabs(slip_incr[i]);
+		}
 	      
 	    }
 	  
@@ -277,7 +285,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
 
   rot=getmatrot(_dfgrd[_qp]);
 
-  _update_rot[_qp]=rot*_crysrot;
+  _update_rot[_qp]=rot*_crysrot[_qp];
 
 
 }
@@ -291,6 +299,8 @@ FiniteStrainCrystalPlasticity::get_euler_rot()
   Real cp, cp1, cp2, sp, sp1, sp2;
   RankTwoTensor RT;
   Real pi = 4.0*atan(1.0);
+
+  //  printf("get euler=%d %d %f %f %f\n",_current_elem->id(),_qp,_euler_angle_1,_euler_angle_2,_euler_angle_3);
 
   phi1 = _euler_angle_1 * (pi/180.0);
   phi = _euler_angle_2 * (pi/180.0);
@@ -314,7 +324,9 @@ FiniteStrainCrystalPlasticity::get_euler_rot()
   RT(2,1) = -cp1 * sp;
   RT(2,2) = cp;
 
- _crysrot= RT.transpose();
+  _crysrot[_qp]= RT.transpose();
+  _crysrot_old[_qp]=_crysrot[_qp];
+
 }
 
 
@@ -372,14 +384,16 @@ FiniteStrainCrystalPlasticity::get_slip_sys()
 	{
 	  _mo[i*3+j]=0.0;
 	  for(int k=0;k<3;k++)
-	    _mo[i*3+j]=_mo[i*3+j]+_crysrot(j,k)*sd[i*3+k];
+	    _mo[i*3+j]=_mo[i*3+j]+_crysrot[_qp](j,k)*sd[i*3+k];
+
 	}
 
       for(int j=0;j<3;j++)
 	{
 	  _no[i*3+j]=0.0;
 	  for(int k=0;k<3;k++)
-	    _no[i*3+j]=_no[i*3+j]+_crysrot(j,k)*sn[i*3+k];
+	    _no[i*3+j]=_no[i*3+j]+_crysrot[_qp](j,k)*sn[i*3+k];
+
 	}
       
     }

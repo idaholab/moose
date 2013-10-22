@@ -37,7 +37,7 @@ protected:
   std::vector<Real> _gprops;
   std::vector<Real> _hprops;
   std::vector<Real> _flowprops;
-  RankTwoTensor _crysrot;
+
 
   std::string _slip_sys_file_name;
   std::string _euler_angle_file_name;
@@ -69,8 +69,10 @@ protected:
   MaterialProperty<Real>  & _acc_slip;
   MaterialProperty<Real>  & _acc_slip_old;
   MaterialProperty<RankTwoTensor> & _update_rot;
+  MaterialProperty<RankTwoTensor> & _crysrot;
+  MaterialProperty<RankTwoTensor> & _crysrot_old;
 
-  
+
   
 private:
 
