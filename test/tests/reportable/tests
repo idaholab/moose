@@ -7,11 +7,11 @@
     max_parallel = 2
   [../]
 
-	[./by_name]
+  [./by_name]
     type = 'Exodiff'
     input = 'reportable_kernel.i'
     exodiff = 'reportable_kernel_by_name_out.e'
-		cli_args = 'Kernels/diff/test=by_name Output/file_base=reportable_kernel_by_name_out'
+    cli_args = 'Kernels/diff/test=by_name Output/file_base=reportable_kernel_by_name_out'
     min_parallel = 2
     max_parallel = 2
   [../]
@@ -20,14 +20,14 @@
     type = 'RunException'
     input = 'reportable_kernel.i'
     expect_err = "The name 'unknown' is not a reportable value"
-		cli_args = 'Kernels/diff/test=has_reportable'
+    cli_args = 'Kernels/diff/test=has_reportable'
   [../]
 
   [./disable_output]
     type = 'Exodiff'
     input = 'reportable_kernel.i'
     exodiff = 'reportable_kernel_no_report_out.e'
-		cli_args = 'Kernels/diff/report=false Output/file_base=reportable_kernel_no_report_out'
+    cli_args = 'Kernels/diff/report=false Output/file_base=reportable_kernel_no_report_out'
   [../]
 
   [./transient] # runs a test with 20 steps
@@ -46,6 +46,7 @@
     max_threads = 2
     min_parallel = 2
     max_parallel = 2
+    rel_err = 1e-1
   [../]
 
   [./restart2] # restarts and runs another 10 steps of transient, results should match ./transient test
@@ -56,6 +57,7 @@
     min_threads = 2
     max_threads = 2
     min_parallel = 2
-    max_parallel = 2
+    max_parallel = 2  
+    rel_err = 1e-1	 
   [../]
 []
