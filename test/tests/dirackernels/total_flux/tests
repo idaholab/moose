@@ -3,5 +3,7 @@
     type = 'Exodiff'
     input = 'total_flux.i'
     exodiff = 'total_flux_out.e'
+		max_threads = 1
+		max_parallel = 1
   [../]
 []
