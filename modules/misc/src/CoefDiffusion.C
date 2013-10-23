@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<CoefDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
-  params.set<Real>("coef")=0.0;
+  params.addParam("coef", 0.0, "Diffusion coefficient");
   return params;
 }
 
