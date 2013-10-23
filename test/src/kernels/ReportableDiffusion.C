@@ -34,9 +34,7 @@ ReportableDiffusion::ReportableDiffusion(const std::string & name, InputParamete
 Real
 ReportableDiffusion::computeQpResidual()
 {
-  if (_current_elem->contains_point(_point))
-    _value += _current_elem->volume();
-
+  _value += _current_elem->volume();
   return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
 }
 

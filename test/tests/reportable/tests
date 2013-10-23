@@ -3,17 +3,21 @@
     type = 'Exodiff'
     input = 'reportable_kernel.i'
     exodiff = 'reportable_kernel_out.e'
-    min_parallel = 2
-    max_parallel = 2
+    max_parallel = 1
   [../]
 
   [./by_name]
     type = 'Exodiff'
     input = 'reportable_kernel.i'
     exodiff = 'reportable_kernel_by_name_out.e'
+<<<<<<< HEAD
     cli_args = 'Kernels/diff/test=by_name Output/file_base=reportable_kernel_by_name_out'
     min_parallel = 2
     max_parallel = 2
+=======
+		cli_args = 'Kernels/diff/test=by_name Output/file_base=reportable_kernel_by_name_out'
+    max_parallel = 1
+>>>>>>> Reportable tests are now serial (refs #2136)
   [../]
 
   [./has_reportable]
@@ -34,19 +38,14 @@
     type = 'Exodiff'
     input = 'reportable_transient.i'
     exodiff = 'reportable_transient_out.e'
-    min_parallel = 2
-    max_parallel = 2
+    max_parallel = 1
   []
 
   [./restart1] # runs 10 steps of transient
     type = 'Exodiff'
     input = 'reportable_restart1.i'
     exodiff = 'reportable_restart1_out.e'
-    min_threads = 2
-    max_threads = 2
-    min_parallel = 2
-    max_parallel = 2
-    rel_err = 1e-1
+    max_parallel = 1
   [../]
 
   [./restart2] # restarts and runs another 10 steps of transient, results should match ./transient test
@@ -54,10 +53,6 @@
     input = 'reportable_restart2.i'
     exodiff = 'reportable_restart2_out.e'
     prereq = 'restart1'
-    min_threads = 2
-    max_threads = 2
-    min_parallel = 2
-    max_parallel = 2  
-    rel_err = 1e-1	 
+    max_parallel = 1
   [../]
 []
