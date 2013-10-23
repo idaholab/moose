@@ -31,8 +31,6 @@ protected:
 
   ReportableValue & _value;
 
-  Point _point;
-
 };
 
 #endif //REPORTABLEDIFFUSION_H

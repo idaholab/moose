@@ -18,8 +18,7 @@ ReportableDiffusion::ReportableDiffusion(const std::string & name, InputParamete
     _test_type(getParam<MooseEnum>("test")),
     _value(_test_type == "by_name" ?
            declareReportableValueByName("value", 0.0, getParam<bool>("report")) :
-           declareReportableValue("value", 0.0, getParam<bool>("report"))),
-    _point(0.5,0.5,0.0)
+           declareReportableValue("value", 0.0, getParam<bool>("report")))
 {
   // Test the true case of hasReportableValue
   if (_test_type == "none" && !hasReportableValue("value"))
