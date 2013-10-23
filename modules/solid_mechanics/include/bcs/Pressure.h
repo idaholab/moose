@@ -28,6 +28,8 @@ protected:
 
   Function * const _function;
 
+  const PostprocessorValue * const _postprocessor;
+
 };
 
 #endif //PRESSURE_H

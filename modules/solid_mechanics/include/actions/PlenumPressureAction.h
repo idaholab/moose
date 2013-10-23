@@ -23,14 +23,6 @@ private:
   const NonlinearVariableName _disp_z;
   std::vector<std::vector<AuxVariableName> > _save_in_vars;
   std::vector<bool> _has_save_in_vars;
-  const Real _initial_pressure;
-  const std::vector<PostprocessorName> _material_input;
-  const Real _R;
-  const PostprocessorName _temperature;
-  const PostprocessorName _volume;
-  const Real _startup_time;
-  const PostprocessorName _output_initial_moles;
-  const PostprocessorName _output;
 
 protected:
   std::string _kernel_name;

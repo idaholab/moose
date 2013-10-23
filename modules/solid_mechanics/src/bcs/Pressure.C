@@ -17,8 +17,10 @@ Pressure::Pressure(const std::string & name, InputParameters parameters)
   :IntegratedBC(name, parameters),
    _component(getParam<int>("component")),
    _factor(getParam<Real>("factor")),
-   _function( getParam<FunctionName>("function") != "" ? &getFunction("function") : NULL )
+   _function( getParam<FunctionName>("function") != "" ? &getFunction("function") : NULL ),
+   _postprocessor( isParamValid("postprocessor") ? &getPostprocessorValue("postprocessor") : NULL )
 {
+
   if(_component < 0 || _component > 2)
   {
     std::stringstream errMsg;
@@ -42,6 +44,11 @@ Pressure::computeQpResidual()
   if (_function)
   {
     factor *= _function->value(_t, _q_point[_qp]);
+  }
+
+  if (_postprocessor)
+  {
+    factor *= *_postprocessor;
   }
 
   return factor * (_normals[_qp](_component) * _test[_i][_qp]);

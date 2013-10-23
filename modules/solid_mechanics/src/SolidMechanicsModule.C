@@ -34,8 +34,10 @@
 #include "PLC_LSH.h"
 #include "PowerLawCreep.h"
 #include "PowerLawCreepModel.h"
-#include "PlenumPressure.h"
+// #include "PlenumPressure.h"
 #include "PlenumPressureAction.h"
+#include "PlenumPressurePostprocessor.h"
+#include "PlenumPressurePPAction.h"
 #include "PresetVelocity.h"
 #include "Pressure.h"
 #include "PressureAction.h"
@@ -61,7 +63,7 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerAux(ElementsOnLineAux);
 
   registerBoundaryCondition(DashpotBC);
-  registerBoundaryCondition(PlenumPressure);
+  // registerBoundaryCondition(PlenumPressure);
   registerBoundaryCondition(PresetVelocity);
   registerBoundaryCondition(Pressure);
 
@@ -96,6 +98,7 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerPostprocessor(HomogenizedElasticConstants);
   registerPostprocessor(Mass);
   registerPostprocessor(JIntegral);
+  registerPostprocessor(PlenumPressurePostprocessor);
 
   registerTimeStepper(AdaptiveDT);
 
@@ -108,6 +111,7 @@ Elk::SolidMechanics::associateSyntax(Syntax & syntax, ActionFactory & action_fac
 {
   syntax.registerActionSyntax("EmptyAction", "BCs/PlenumPressure");
   syntax.registerActionSyntax("PlenumPressureAction", "BCs/PlenumPressure/*");
+  syntax.registerActionSyntax("PlenumPressurePPAction", "BCs/PlenumPressure/*");
 
   syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
@@ -115,6 +119,7 @@ Elk::SolidMechanics::associateSyntax(Syntax & syntax, ActionFactory & action_fac
   syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
 
   registerAction(PlenumPressureAction, "add_bc");
+  registerAction(PlenumPressurePPAction, "add_postprocessor");
   registerAction(PressureAction, "add_bc");
   registerAction(SolidMechanicsAction, "add_kernel");
 }

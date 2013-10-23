@@ -337,12 +337,6 @@
     execute_on = residual
   [../]
 
-  [./ppress]
-    type = Reporter
-  [../]
-  [./initial_moles]
-    type = Reporter
-  [../]
 []
 
 [Output]

@@ -12,8 +12,14 @@ InputParameters validParams<PressureAction>()
   params.addRequiredParam<NonlinearVariableName>("disp_x", "The x displacement");
   params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
+
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_x", "The save_in variables for x displacement");
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_y", "The save_in variables for y displacement");
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_z", "The save_in variables for z displacement");
+
   params.addParam<Real>("factor", 1.0, "The factor to use in computing the pressure");
   params.addParam<FunctionName>("function", "", "The function that describes the pressure");
+  params.addParam<PostprocessorName>("postprocessor", "", "The postprocessor that describes the pressure");
   return params;
 }
 
@@ -25,9 +31,17 @@ PressureAction::PressureAction(const std::string & name, InputParameters params)
   _disp_z(getParam<NonlinearVariableName>("disp_z")),
   _factor(getParam<Real>("factor")),
   _function(getParam<FunctionName>("function")),
+  _postprocessor(getParam<PostprocessorName>("postprocessor")),
   _kernel_name("Pressure"),
   _use_displaced_mesh(true)
 {
+  _save_in_vars.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_x"));
+  _save_in_vars.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_y"));
+  _save_in_vars.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_z"));
+
+  _has_save_in_vars.push_back(params.isParamValid("save_in_disp_x"));
+  _has_save_in_vars.push_back(params.isParamValid("save_in_disp_y"));
+  _has_save_in_vars.push_back(params.isParamValid("save_in_disp_z"));
 }
 
 void
@@ -44,13 +58,13 @@ PressureAction::act()
     ++dim;
   }
 
-  std::vector<std::string> vars;
+  std::vector<NonlinearVariableName> vars;
   vars.push_back(_disp_x);
   vars.push_back(_disp_y);
   vars.push_back(_disp_z);
   std::string short_name(_name);
   // Chop off "BCs/Pressure/"
-  short_name.erase(0, 4+_kernel_name.size());
+  short_name.erase(0, 5+_kernel_name.size());
   for (unsigned int i(0); i < dim; ++i)
   {
     std::stringstream name;
@@ -69,6 +83,10 @@ PressureAction::act()
 
     params.set<int>("component") = i;
     params.set<NonlinearVariableName>("variable") = vars[i];
+    if (_has_save_in_vars[i])
+    {
+      params.set<std::vector<AuxVariableName> >("save_in") = _save_in_vars[i];
+    }
 
     _problem->addBoundaryCondition(_kernel_name, name.str(), params);
   }

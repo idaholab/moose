@@ -1,18 +1,16 @@
-#include "PlenumPressure.h"
+#include "PlenumPressurePostprocessor.h"
 
 template<>
-InputParameters validParams<PlenumPressure>()
+InputParameters validParams<PlenumPressurePostprocessor>()
 {
-  InputParameters params = validParams<IntegratedBC>();
-  params.addRequiredParam<int>("component", "The component for the PlenumPressure");
+  InputParameters params = validParams<GeneralPostprocessor>();
   params.addParam<Real>("initial_pressure", 0, "The initial pressure in the plenum.  If not given, a zero initial pressure will be used.");
   params.addParam<std::vector<PostprocessorName> >("material_input", "The name of the postprocessor(s) that holds the amount of material injected into the plenum.");
   params.addRequiredParam<Real>("R", "The universal gas constant for the units used.");
   params.addRequiredParam<PostprocessorName>("temperature", "The name of the average temperature postprocessor value.");
   params.addRequiredParam<PostprocessorName>("volume", "The name of the internal volume postprocessor value.");
   params.addParam<Real>("startup_time", 0, "The amount of time during which the pressure will ramp from zero to its true value.");
-  params.addParam<PostprocessorName>("output_initial_moles", "", "The reporting postprocessor to use for the initial moles of gas.");
-  params.addParam<PostprocessorName>("output", "", "The reporting postprocessor to use for the plenum pressure value.");
+  params.addParam<std::string>("output_initial_moles", "", "The name to use when reporting the initial moles of gas.");
   params.addParam<std::vector<Real> >("refab_time", "The time at which the plenum pressure must be reinitialized due to fuel rod refabrication.");
   params.addParam<std::vector<Real> >("refab_pressure", "The pressure of fill gas at refabrication.");
   params.addParam<std::vector<Real> >("refab_temperature", "The temperature at refabrication.");
@@ -20,13 +18,15 @@ InputParameters validParams<PlenumPressure>()
   params.addParam<std::vector<unsigned> >("refab_type", "The type of refabrication.  0 for instantaneous reset of gas, 1 for reset with constant fraction until next refabrication");
 
   params.set<bool>("use_displaced_mesh") = true;
+
+  // Hide from input file dump
+  params.addPrivateParam<std::string>("built_by_action", "" );
   return params;
 }
 
-PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
-  :IntegratedBC(name, params),
+PlenumPressurePostprocessor::PlenumPressurePostprocessor(const std::string & name, InputParameters params)
+  :GeneralPostprocessor(name, params),
    _n0(declareRestartableData<Real>("initial_moles", 0)),
-   _component(getParam<int>("component")),
    _initial_pressure(getParam<Real>("initial_pressure")),
    _material_input(),
    _R(getParam<Real>("R")),
@@ -34,8 +34,7 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
    _volume( getPostprocessorValue("volume")),
    _start_time(0),
    _startup_time( getParam<Real>("startup_time")),
-   _initial_moles( getParam<PostprocessorName>("output_initial_moles") != "" ? &getPostprocessorValue("output_initial_moles") : NULL ),
-   _output( getParam<PostprocessorName>("output") != "" ? &getPostprocessorValue("output") : NULL ),
+   _initial_moles( getParam<std::string>("output_initial_moles") != "" ? &declareReportableValueByName(getParam<std::string>("output_initial_moles"), 0.0, true) : NULL ),
    _refab_needed(isParamValid("refab_time") ? getParam<std::vector<Real> >("refab_time").size() : 0),
    _refab_gas_released(declareRestartableData<Real>("refab_gas_released", 0)),
    _refab_time( isParamValid("refab_time") ?
@@ -54,7 +53,8 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
                 getParam<std::vector<unsigned> >("refab_type") :
                 std::vector<unsigned>(_refab_time.size(), 0) ),
    _refab_counter(declareRestartableData<unsigned int>("refab_counter", 0)),
-   _my_value(declareRestartableData<Real>("plenum_pressure", 0))
+   _my_value(declareRestartableData<Real>("plenum_pressure", 0)),
+   _initialized(false)
 {
 
   if (isParamValid("material_input"))
@@ -72,7 +72,7 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
         params.isParamValid("refab_temperature") &&
         params.isParamValid("refab_volume")))
   {
-    mooseError("PlenumPressure error: refabrication time given but not complete set of refabrication data");
+    mooseError("PlenumPressurePostprocessor error: refabrication time given but not complete set of refabrication data");
   }
   if (_refab_time.size() != _refab_pressure.size() ||
       _refab_pressure.size() != _refab_temperature.size() ||
@@ -82,28 +82,10 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters params)
     mooseError("Refab parameters do not have equal lengths");
   }
 
-  if(_component < 0 || _component > 2 )
-  {
-    std::stringstream errMsg;
-    errMsg << "Invalid component given for "
-           << name
-           << ": "
-           << _component
-           << "." << std::endl;
-
-    mooseError( errMsg.str() );
-  }
-
-}
-
-Real
-PlenumPressure::computeQpResidual()
-{
-  return _my_value * (_normals[_qp](_component) * _test[_i][_qp]);
 }
 
 void
-PlenumPressure::initialSetup()
+PlenumPressurePostprocessor::init()
 {
   if (0 == _refab_counter)
   {
@@ -117,14 +99,11 @@ PlenumPressure::initialSetup()
   {
     *_initial_moles = _n0;
   }
-  if (_output)
-  {
-    *_output = _my_value;
-  }
+  _initialized = true;
 }
 
 void
-PlenumPressure::timestepSetup()
+PlenumPressurePostprocessor::initialize()
 {
   if (_refab_counter < _refab_needed && _refab_time[_refab_counter] <= _t)
   {
@@ -142,17 +121,19 @@ PlenumPressure::timestepSetup()
     }
     const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t-_start_time) / _startup_time;
     _my_value = factor * _refab_pressure[_refab_counter];
-    if (_output)
-    {
-      *_output = _my_value;
-    }
     ++_refab_counter;
   }
 }
 
 void
-PlenumPressure::residualSetup()
+PlenumPressurePostprocessor::execute()
 {
+
+  if (!_initialized)
+  {
+    init();
+  }
+
   Real pressure(0);
   if (!_refab_needed ||
       _refab_counter == 0 || // refab has not occurred
@@ -173,8 +154,4 @@ PlenumPressure::residualSetup()
 
   const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t-_start_time) / _startup_time;
   _my_value = factor * pressure;
-  if (_output)
-  {
-    *_output = _my_value;
-  }
 }
