@@ -63,6 +63,7 @@ NodalNormalsCorner::execute()
 void
 NodalNormalsCorner::initialize()
 {
+  _aux.solution().close();
 }
 
 void

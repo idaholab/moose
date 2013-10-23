@@ -67,6 +67,7 @@ NodalNormalsEvaluator::execute()
 void
 NodalNormalsEvaluator::initialize()
 {
+  _aux.solution().close();
 }
 
 void
