@@ -33,6 +33,9 @@ ReportableData::init(const std::string & name, Real value, THREAD_ID tid, bool o
   if (_values.find(name) == _values.end())
   {
     _values[name] = &declareRestartableDataWithObjectName<ReportableValue>(name, "reportable_values");
+  }
+  if (_values_old.find(name) == _values_old.end())
+  {
     _values_old[name] = &declareRestartableDataWithObjectName<ReportableValue>(name, "reportable_values_old");
   }
 
@@ -69,7 +72,7 @@ ReportableData::getReportableValue(const std::string & name)
 ReportableValue &
 ReportableData::getReportableValueOld(const std::string & name)
 {
-  if (_values.find(name) == _values.end())
+  if (_values_old.find(name) == _values_old.end())
     _values_old[name] = &declareRestartableDataWithObjectName<ReportableValue>(name, "reportable_values_old");
 
   return *_values_old[name];
