@@ -42,9 +42,8 @@ NodalUserObject::NodalUserObject(const std::string & name, InputParameters param
     TransientInterface(parameters, name, "nodal_user_objects"),
     PostprocessorInterface(parameters),
     RandomInterface(name, parameters, _fe_problem, _tid, true),
+    ZeroInterface(parameters),
     _qp(0),
-    _current_node(_assembly.node()),
-    _real_zero(_subproblem._real_zero[_tid]),
-    _zero(_subproblem._zero[_tid])
+    _current_node(_assembly.node())
 {
 }

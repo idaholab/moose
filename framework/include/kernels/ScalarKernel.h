@@ -27,7 +27,7 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "Reportable.h"
-
+#include "ZeroInterface.h"
 // libMesh
 #include "libmesh/fe.h"
 #include "libmesh/quadrature.h"
@@ -50,7 +50,8 @@ class ScalarKernel :
   public UserObjectInterface,
   public PostprocessorInterface,
   public TransientInterface,
-  public Reportable
+  public Reportable,
+  public ZeroInterface
 {
 public:
   ScalarKernel(const std::string & name, InputParameters parameters);
@@ -93,12 +94,6 @@ protected:
   VariableValue & _u_old;
   VariableValue & _u_dot;
   VariableValue & _du_dot_du;
-
-  // Single Instance Variables
-  Real & _real_zero;
-  MooseArray<Real> & _zero;
-  MooseArray<RealGradient> & _grad_zero;
-  MooseArray<RealTensor> & _second_zero;
 };
 
 #endif /* SCALARKERNEL_H */

@@ -60,6 +60,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     GeometricSearchInterface(parameters),
     Restartable(name, parameters, "AuxKernels"),
     Reportable(name, parameters),
+    ZeroInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _nl_sys(*parameters.get<SystemBase *>("_nl_sys")),
@@ -91,12 +92,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
 
     _current_node(_var.node()),
 
-    _solution(_aux_sys.solution()),
-
-    _real_zero(_subproblem._real_zero[_tid]),
-    _zero(_subproblem._zero[_tid]),
-    _grad_zero(_subproblem._grad_zero[_tid]),
-    _second_zero(_subproblem._second_zero[_tid])
+    _solution(_aux_sys.solution())
 {
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 

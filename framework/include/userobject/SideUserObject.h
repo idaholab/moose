@@ -24,6 +24,7 @@
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "BoundaryRestrictable.h"
+#include "ZeroInterface.h"
 
 //Forward Declarations
 class SideUserObject;
@@ -39,7 +40,8 @@ class SideUserObject :
   public MooseVariableDependencyInterface,
   public UserObjectInterface,
   public TransientInterface,
-  protected PostprocessorInterface
+  protected PostprocessorInterface,
+  public ZeroInterface
 {
 public:
   SideUserObject(const std::string & name, InputParameters parameters);
@@ -80,12 +82,6 @@ protected:
 
   const Elem * & _current_side_elem;
   const Real & _current_side_volume;
-
-  // Single Instance Variables
-  Real & _real_zero;
-  MooseArray<Real> & _zero;
-  MooseArray<RealGradient> & _grad_zero;
-  MooseArray<RealTensor> & _second_zero;
 };
 
 #endif

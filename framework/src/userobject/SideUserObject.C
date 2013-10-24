@@ -33,6 +33,7 @@ SideUserObject::SideUserObject(const std::string & name, InputParameters paramet
     UserObjectInterface(parameters),
     TransientInterface(parameters, name, "side_user_objects"),
     PostprocessorInterface(parameters),
+    ZeroInterface(parameters),
     _mesh(_subproblem.mesh()),
     _q_point(_assembly.qPointsFace()),
     _qrule(_assembly.qRuleFace()),
@@ -42,11 +43,7 @@ SideUserObject::SideUserObject(const std::string & name, InputParameters paramet
     _current_elem(_assembly.elem()),
     _current_side(_assembly.side()),
     _current_side_elem(_assembly.sideElem()),
-    _current_side_volume(_assembly.sideElemVolume()),
-    _real_zero(_subproblem._real_zero[_tid]),
-    _zero(_subproblem._zero[_tid]),
-    _grad_zero(_subproblem._grad_zero[_tid]),
-    _second_zero(_subproblem._second_zero[_tid])
+    _current_side_volume(_assembly.sideElemVolume())
 {
   // Keep track of which variables are coupled so we know what we depend on
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();

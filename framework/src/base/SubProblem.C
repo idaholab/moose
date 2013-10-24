@@ -38,6 +38,7 @@ SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
   _zero.resize(n_threads);
   _grad_zero.resize(n_threads);
   _second_zero.resize(n_threads);
+  _second_phi_zero.resize(n_threads);
   _active_elemental_moose_variables.resize(n_threads);
   _has_active_elemental_moose_variables.resize(n_threads);
 }
@@ -50,11 +51,8 @@ SubProblem::~SubProblem()
     _zero[i].release();
     _grad_zero[i].release();
     _second_zero[i].release();
+    _second_phi_zero[i].release();
   }
-  _real_zero.release();
-  _zero.release();
-  _grad_zero.release();
-  _second_zero.release();
 }
 
 void

@@ -25,7 +25,7 @@
 #include "Coupleable.h"
 #include "MooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
-
+#include "ZeroInterface.h"
 // libMesh
 #include "libmesh/fe.h"
 #include "libmesh/quadrature.h"
@@ -45,7 +45,8 @@ class ElementIndicator :
   public Coupleable,
   public ScalarCoupleable,
   public MooseVariableInterface,
-  public MaterialPropertyInterface
+  public MaterialPropertyInterface,
+  public ZeroInterface
 {
 public:
     ElementIndicator(const std::string & name, InputParameters parameters);
@@ -76,12 +77,6 @@ protected:
     VariableValue & _u_dot;
     /// Derivative of u_dot wrt u
     VariableValue & _du_dot_du;
-
-    // Single Instance Variables
-    Real & _real_zero;
-    MooseArray<Real> & _zero;
-    MooseArray<RealGradient> & _grad_zero;
-    MooseArray<RealTensor> & _second_zero;
 
     /// Holds local indicator entries as their accumulated by this ElementIndicator
     DenseVector<Number> _local_indtr;

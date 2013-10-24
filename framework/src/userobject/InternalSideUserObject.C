@@ -30,6 +30,7 @@ InternalSideUserObject::InternalSideUserObject(const std::string & name, InputPa
     UserObjectInterface(parameters),
     TransientInterface(parameters, name, "internal_side_user_object"),
     PostprocessorInterface(parameters),
+    ZeroInterface(parameters),
     _mesh(_subproblem.mesh()),
     _q_point(_assembly.qPointsFace()),
     _qrule(_assembly.qRuleFace()),
@@ -41,11 +42,7 @@ InternalSideUserObject::InternalSideUserObject(const std::string & name, InputPa
     _current_side_elem(_assembly.sideElem()),
     _current_side_volume(_assembly.sideElemVolume()),
     _neighbor_elem(_assembly.neighbor()),
-    _neighbor_elem_volume(_assembly.neighborVolume()),
-    _real_zero(_subproblem._real_zero[_tid]),
-    _zero(_subproblem._zero[_tid]),
-    _grad_zero(_subproblem._grad_zero[_tid]),
-    _second_zero(_subproblem._second_zero[_tid])
+    _neighbor_elem_volume(_assembly.neighborVolume())
 {
   // Keep track of which variables are coupled so we know what we depend on
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();

@@ -35,7 +35,7 @@
 #include "BoundaryRestrictable.h"
 #include "Restartable.h"
 #include "Reportable.h"
-
+#include "ZeroInterface.h"
 // libMesh includes
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/elem.h"
@@ -76,7 +76,8 @@ class Material :
   public PostprocessorInterface,
   public DependencyResolverInterface,
   public Restartable,
-  public Reportable
+  public Reportable,
+  public ZeroInterface
 {
 public:
   Material(const std::string & name, InputParameters parameters);
@@ -220,12 +221,6 @@ protected:
 
   std::map<unsigned int, std::vector<QpData *> > _qp_prev;
   std::map<unsigned int, std::vector<QpData *> > _qp_curr;
-
-  // Single Instance Variables
-  Real & _real_zero;
-  MooseArray<Real> & _zero;
-  MooseArray<RealGradient> & _grad_zero;
-  MooseArray<RealTensor> & _second_zero;
 
 private:
   /**

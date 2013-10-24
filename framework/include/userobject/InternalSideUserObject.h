@@ -22,6 +22,7 @@
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
+#include "ZeroInterface.h"
 
 class InternalSideUserObject;
 
@@ -38,7 +39,8 @@ class InternalSideUserObject :
   public MooseVariableDependencyInterface,
   public UserObjectInterface,
   public TransientInterface,
-  public PostprocessorInterface
+  public PostprocessorInterface,
+  public ZeroInterface
 {
 public:
   InternalSideUserObject(const std::string & name, InputParameters parameters);
@@ -80,12 +82,6 @@ protected:
   const Elem * & _neighbor_elem;
   /// The volume (or length) of the current neighbor
   const Real & _neighbor_elem_volume;
-
-  // Single Instance Variables
-  Real & _real_zero;
-  MooseArray<Real> & _zero;
-  MooseArray<RealGradient> & _grad_zero;
-  MooseArray<RealTensor> & _second_zero;
 };
 
 

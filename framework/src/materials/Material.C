@@ -51,6 +51,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     DependencyResolverInterface(),
     Restartable(name, parameters, "Materials"),
     Reportable(name, parameters),
+    ZeroInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
@@ -69,10 +70,6 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
     _coord_sys(_assembly.coordSystem()),
-    _real_zero(_subproblem._real_zero[_tid]),
-    _zero(_subproblem._zero[_tid]),
-    _grad_zero(_subproblem._grad_zero[_tid]),
-    _second_zero(_subproblem._second_zero[_tid]),
     _has_stateful_property(false)
 {
   // Fill in the MooseVariable dependencies

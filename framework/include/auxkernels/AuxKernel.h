@@ -31,6 +31,7 @@
 #include "BoundaryRestrictable.h"
 #include "Restartable.h"
 #include "Reportable.h"
+#include "ZeroInterface.h"
 
 //forward declarations
 class Problem;
@@ -61,7 +62,8 @@ class AuxKernel :
   public RandomInterface,
   protected GeometricSearchInterface,
   public Restartable,
-  public Reportable
+  public Reportable,
+  public ZeroInterface
 {
 public:
   AuxKernel(const std::string & name, InputParameters parameters);
@@ -165,16 +167,6 @@ protected:
 
   /// Quadrature point index
   unsigned int _qp;
-
-  // Single Instance Variables
-  /// Scalar zero
-  Real & _real_zero;
-  /// Scalar zero in quadrature points
-  MooseArray<Real> & _zero;
-  /// Zero gradient in quadrature points
-  MooseArray<RealGradient> & _grad_zero;
-  /// Zero second derivative in quadrature points
-  MooseArray<RealTensor> & _second_zero;
 
   /// Depend AuxKernels
   std::set<std::string> _depend_vars;

@@ -30,7 +30,7 @@
 #include "MooseMesh.h"
 #include "Restartable.h"
 #include "Reportable.h"
-
+#include "ZeroInterface.h"
 //libMesh includes
 #include "libmesh/libmesh_common.h"
 #include "libmesh/elem.h"
@@ -63,7 +63,8 @@ class NodeFaceConstraint :
   public TransientInterface,
   private GeometricSearchInterface,
   public Restartable,
-  public Reportable
+  public Reportable,
+  public ZeroInterface
 {
 public:
   NodeFaceConstraint(const std::string & name, InputParameters parameters);
@@ -198,12 +199,6 @@ protected:
    * the residual previously at that node for that variable.
    */
   bool _overwrite_slave_residual;
-
-  // Single Instance Variables
-  Real & _real_zero;
-  MooseArray<Real> & _zero;
-  MooseArray<RealGradient> & _grad_zero;
-  MooseArray<RealTensor> & _second_zero;
 
 public:
   std::vector<unsigned int> _connected_dof_indices;

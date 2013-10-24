@@ -30,7 +30,7 @@
 #include "Assembly.h"
 #include "Restartable.h"
 #include "Reportable.h"
-
+#include "ZeroInterface.h"
 // libMesh
 #include "libmesh/elem.h"
 #include "libmesh/vector_value.h"
@@ -62,7 +62,8 @@ class BoundaryCondition :
   public PostprocessorInterface,
   public GeometricSearchInterface,
   public Restartable,
-  public Reportable
+  public Reportable,
+  public ZeroInterface
 {
 public:
 
@@ -116,18 +117,6 @@ protected:
 
   /// dimension of the mesh
   unsigned int _dim;
-
-  /// Single Instance Variables
-  Real & _real_zero;
-
-  /// Reference to an array of zeros
-  MooseArray<Real> & _zero;
-
-  /// Reference to a gradient filled with zeros
-  MooseArray<RealGradient> & _grad_zero;
-
-  /// Reference to second order derivate term filled with zero
-  MooseArray<RealTensor> & _second_zero;
 };
 
 #endif /* BOUNDARYCONDITION_H */

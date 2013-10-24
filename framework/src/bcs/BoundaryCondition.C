@@ -43,6 +43,7 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     GeometricSearchInterface(parameters),
     Restartable(name, parameters, "BCs"),
     Reportable(name, parameters),
+    ZeroInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
@@ -50,11 +51,7 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
-    _dim(_mesh.dimension()),
-    _real_zero(_subproblem._real_zero[_tid]),
-    _zero(_subproblem._zero[_tid]),
-    _grad_zero(_subproblem._grad_zero[_tid]),
-    _second_zero(_subproblem._second_zero[_tid])
+    _dim(_mesh.dimension())
 {
 }
 

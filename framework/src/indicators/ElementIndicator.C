@@ -45,6 +45,7 @@ ElementIndicator::ElementIndicator(const std::string & name, InputParameters par
     ScalarCoupleable(parameters),
     MooseVariableInterface(parameters, false),
     MaterialPropertyInterface(parameters),
+    ZeroInterface(parameters),
 
     _field_var(_sys.getVariable(_tid, name)),
 
@@ -60,12 +61,7 @@ ElementIndicator::ElementIndicator(const std::string & name, InputParameters par
     _u(_var.sln()),
     _grad_u(_var.gradSln()),
     _u_dot(_var.uDot()),
-    _du_dot_du(_var.duDotDu()),
-
-    _real_zero(_subproblem._real_zero[_tid]),
-    _zero(_subproblem._zero[_tid]),
-    _grad_zero(_subproblem._grad_zero[_tid]),
-    _second_zero(_subproblem._second_zero[_tid])
+    _du_dot_du(_var.duDotDu())
 {
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
   for(unsigned int i=0; i<coupled_vars.size(); i++)

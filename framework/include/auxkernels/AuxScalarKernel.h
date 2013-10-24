@@ -26,7 +26,7 @@
 #include "MooseVariableScalar.h"
 #include "SubProblem.h"
 #include "Reportable.h"
-
+#include "ZeroInterface.h"
 // libMesh
 #include "libmesh/fe.h"
 #include "libmesh/quadrature.h"
@@ -52,7 +52,8 @@ class AuxScalarKernel :
   public UserObjectInterface,
   public PostprocessorInterface,
   public TransientInterface,
-  public Reportable
+  public Reportable,
+  public ZeroInterface
 {
 public:
   AuxScalarKernel(const std::string & name, InputParameters parameters);
@@ -92,12 +93,6 @@ protected:
 
   VariableValue & _u;
   VariableValue & _u_old;
-
-  // Single Instance Variables
-  Real & _real_zero;
-  MooseArray<Real> & _zero;
-  MooseArray<RealGradient> & _grad_zero;
-  MooseArray<RealTensor> & _second_zero;
 
   /**
    * Compute the value of this kernel.

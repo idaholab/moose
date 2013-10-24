@@ -52,6 +52,7 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   GeometricSearchInterface(parameters),
   Restartable(name, parameters, "Constraints"),
   Reportable(name, parameters),
+  ZeroInterface(parameters),
   _subproblem(*parameters.get<SubProblem *>("_subproblem")),
   _sys(*parameters.get<SystemBase *>("_sys")),
   _tid(parameters.get<THREAD_ID>("_tid")),
@@ -87,12 +88,7 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   _dof_map(_sys.dofMap()),
   _node_to_elem_map(_mesh.nodeToElemMap()),
 
-  _overwrite_slave_residual(true),
-
-  _real_zero(_subproblem._real_zero[_tid]),
-  _zero(_subproblem._zero[_tid]),
-  _grad_zero(_subproblem._grad_zero[_tid]),
-  _second_zero(_subproblem._second_zero[_tid])
+  _overwrite_slave_residual(true)
 {
   if (parameters.isParamValid("tangential_tolerance"))
   {

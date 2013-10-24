@@ -25,6 +25,7 @@
 #include "BoundaryRestrictable.h"
 #include "MaterialPropertyInterface.h"
 #include "RandomInterface.h"
+#include "ZeroInterface.h"
 
 class MooseVariable;
 
@@ -45,7 +46,8 @@ class NodalUserObject :
   public MooseVariableDependencyInterface,
   public TransientInterface,
   protected PostprocessorInterface,
-  public RandomInterface
+  public RandomInterface,
+  public ZeroInterface
 {
 public:
   NodalUserObject(const std::string & name, InputParameters parameters);
@@ -71,14 +73,8 @@ protected:
   /// Quadrature point index
   const unsigned int _qp;
 
-  /// Refernce to current node pointer
+  /// Reference to current node pointer
   const Node * & _current_node;
-
-  /// Scalar zero
-  Real & _real_zero;
-
-  /// Array of zeros
-  MooseArray<Real> & _zero;
 };
 
 #endif

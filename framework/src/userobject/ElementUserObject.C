@@ -36,17 +36,14 @@ ElementUserObject::ElementUserObject(const std::string & name, InputParameters p
     TransientInterface(parameters, name, "element_user_objects"),
     PostprocessorInterface(parameters),
     RandomInterface(name, parameters, _fe_problem, _tid, false),
+    ZeroInterface(parameters),
     _mesh(_subproblem.mesh()),
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),
     _q_point(_assembly.qPoints()),
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
-    _coord(_assembly.coordTransformation()),
-    _real_zero(_subproblem._real_zero[_tid]),
-    _zero(_subproblem._zero[_tid]),
-    _grad_zero(_subproblem._grad_zero[_tid]),
-    _second_zero(_subproblem._second_zero[_tid])
+    _coord(_assembly.coordTransformation())
 {
   // Keep track of which variables are coupled so we know what we depend on
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();

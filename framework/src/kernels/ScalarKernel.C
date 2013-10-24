@@ -43,6 +43,7 @@ ScalarKernel::ScalarKernel(const std::string & name, InputParameters parameters)
     PostprocessorInterface(parameters),
     TransientInterface(parameters, name, "scalar_kernel"),
     Reportable(name, parameters),
+    ZeroInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
 
@@ -55,12 +56,7 @@ ScalarKernel::ScalarKernel(const std::string & name, InputParameters parameters)
     _u(_var.sln()),
     _u_old(_var.slnOld()),
     _u_dot(_var.uDot()),
-    _du_dot_du(_var.duDotDu()),
-
-    _real_zero(_subproblem._real_zero[_tid]),
-    _zero(_subproblem._zero[_tid]),
-    _grad_zero(_subproblem._grad_zero[_tid]),
-    _second_zero(_subproblem._second_zero[_tid])
+    _du_dot_du(_var.duDotDu())
 {
 }
 

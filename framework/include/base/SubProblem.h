@@ -279,10 +279,11 @@ public:
   /**
    * Convenience zeros
    */
-  MooseArray<Real> _real_zero;
-  MooseArray<MooseArray<Real> > _zero;
-  MooseArray<MooseArray<RealGradient> > _grad_zero;
-  MooseArray<MooseArray<RealTensor> > _second_zero;
+  std::vector<Real> _real_zero;
+  std::vector<VariableValue> _zero;
+  std::vector<VariableGradient> _grad_zero;
+  std::vector<VariableSecond> _second_zero;
+  std::vector<VariablePhiSecond> _second_phi_zero;
 
 protected:
   /// The Factory for building objects

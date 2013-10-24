@@ -34,7 +34,7 @@
 #include "MooseMesh.h"
 #include "Restartable.h"
 #include "Reportable.h"
-
+#include "ZeroInterface.h"
 //libMesh includes
 #include "libmesh/libmesh_common.h"
 #include "libmesh/elem.h"
@@ -67,7 +67,8 @@ class DiracKernel :
   public PostprocessorInterface,
   protected GeometricSearchInterface,
   public Restartable,
-  public Reportable
+  public Reportable,
+  public ZeroInterface
 {
 public:
   DiracKernel(const std::string & name, InputParameters parameters);
@@ -217,17 +218,6 @@ protected:
   VariableValue & _u_dot;
   /// Derivative of u_dot wrt u
   VariableValue & _du_dot_du;
-
-  // Single Instance Variables
-
-  /// Scalar zero
-  Real & _real_zero;
-  /// Scalar zero at QPs
-  MooseArray<Real> & _zero;
-  /// Zero gradient at QPs
-  MooseArray<RealGradient> & _grad_zero;
-  /// Zero second derivative at QPs
-  MooseArray<RealTensor> & _second_zero;
 };
 
 #endif

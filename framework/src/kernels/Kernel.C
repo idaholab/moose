@@ -57,7 +57,8 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     RandomInterface(name, parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
     GeometricSearchInterface(parameters),
     Restartable(name, parameters, "Kernels"),
-      Reportable(name, parameters),
+    Reportable(name, parameters),
+    ZeroInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
@@ -84,11 +85,6 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu()),
-
-    _real_zero(_subproblem._real_zero[_tid]),
-    _zero(_subproblem._zero[_tid]),
-    _grad_zero(_subproblem._grad_zero[_tid]),
-    _second_zero(_subproblem._second_zero[_tid]),
 
     _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName> >("diag_save_in"))

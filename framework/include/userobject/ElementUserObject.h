@@ -25,7 +25,7 @@
 #include "BlockRestrictable.h"
 #include "MaterialPropertyInterface.h"
 #include "RandomInterface.h"
-
+#include "ZeroInterface.h"
 // libMesh
 #include "libmesh/elem.h"
 #include "MooseTypes.h"
@@ -45,7 +45,8 @@ class ElementUserObject :
   public MooseVariableDependencyInterface,
   public TransientInterface,
   protected PostprocessorInterface,
-  public RandomInterface
+  public RandomInterface,
+  public ZeroInterface
 {
 public:
   ElementUserObject(const std::string & name, InputParameters parameters);
@@ -79,12 +80,6 @@ protected:
   QBase * & _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
-
-  // Single Instance Variables
-  Real & _real_zero;
-  MooseArray<Real> & _zero;
-  MooseArray<RealGradient> & _grad_zero;
-  MooseArray<RealTensor> & _second_zero;
 };
 
 #endif

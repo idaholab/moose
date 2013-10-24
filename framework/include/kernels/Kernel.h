@@ -32,7 +32,7 @@
 #include "MooseTypes.h"
 #include "Restartable.h"
 #include "Reportable.h"
-
+#include "ZeroInterface.h"
 // libMesh
 #include "libmesh/fe.h"
 #include "libmesh/quadrature.h"
@@ -58,7 +58,8 @@ class Kernel :
   public RandomInterface,
   protected GeometricSearchInterface,
   public Restartable,
-  public Reportable
+  public Reportable,
+  public ZeroInterface
 {
 public:
   Kernel(const std::string & name, InputParameters parameters);
@@ -125,12 +126,6 @@ protected:
   VariableValue & _u_dot;
   /// Derivative of u_dot wrt u
   VariableValue & _du_dot_du;
-
-  // Single Instance Variables
-  Real & _real_zero;
-  MooseArray<Real> & _zero;
-  MooseArray<RealGradient> & _grad_zero;
-  MooseArray<RealTensor> & _second_zero;
 
   /// Holds residual entries as they are accumulated by this Kernel
   DenseVector<Number> _local_re;
