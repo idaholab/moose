@@ -26,8 +26,6 @@ InputParameters validParams<RungeKutta2>()
 
 RungeKutta2::RungeKutta2(const std::string & name, InputParameters parameters) :
     TimeIntegrator(name, parameters),
-    _sln_half(_nl.addVector("sln_half", true, GHOSTED)),
-    _Re_half(_nl.addVector("Re_half", true, GHOSTED)),
     _stage(0)
 {
   _fe_problem.setConstJacobian(true);
@@ -46,11 +44,21 @@ void
 RungeKutta2::computeTimeDerivatives()
 {
   _u_dot  = *_nl.currentSolution();
-  _u_dot -= _nl.solutionOld();
-  _u_dot *= 1. / _dt;
-  _u_dot.close();
+  if (_stage == 1)
+  {
+    _u_dot -= _nl.solutionOld();
+    _u_dot *= 2. / _dt;
 
-  _du_dot_du = 1. / _dt;
+    _du_dot_du = 2. / _dt;
+  }
+  else
+  {
+    _u_dot -= _nl.solutionOlder();
+    _u_dot *= 1. / _dt;
+
+    _du_dot_du = 1. / _dt;
+  }
+  _u_dot.close();
   _du_dot_du.close();
 }
 
@@ -62,29 +70,23 @@ RungeKutta2::solve()
   Real time_half = (time + time_old) / 2.;
 
   _stage = 1;
-  // make sure that time derivative contribution is zero in the first pre-solve step
-  _u_dot.zero();
-  _u_dot.close();
-  _du_dot_du.zero();
-  _du_dot_du.close();
-
   _fe_problem.time() = time_half;
-  _nl.sys().solve();
+  _fe_problem.solve();
+
+  _fe_problem.copyOldSolutions();
 
   // ---------------------------------
   std::cout << " 2. stage" << std::endl;
   _stage = 2;
   _fe_problem.time() = time;
   _fe_problem.timeOld() = time_half;
-  _nl.sys().solve();
+  _fe_problem.solve();
 }
 
 void
 RungeKutta2::postStep(NumericVector<Number> & residual)
 {
   residual += _Re_non_time;
-  if (_stage == 1)
-    residual *= 0.5;
   residual += _Re_time;
   residual.close();
 }

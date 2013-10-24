@@ -39,9 +39,6 @@ public:
   virtual void postStep(NumericVector<Number> & residual);
 
 protected:
-  NumericVector<Number> & _sln_half;
-  NumericVector<Number> & _Re_half;
-
   unsigned int _stage;
 };
 

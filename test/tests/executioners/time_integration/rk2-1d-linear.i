@@ -1,13 +1,10 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 2
+  dim = 1
   xmin = -1
   xmax = 1
-  ymin = -1
-  ymax = 1
   nx = 20
-  ny = 20
-  elem_type = QUAD9
+  elem_type = EDGE2
 []
 
 [Functions]
@@ -18,18 +15,18 @@
 
   [./forcing_fn]
     type = ParsedFunction
-    value = 2*t*((x*x)+(y*y))-(4*t*t)
+    value = x
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = t*t*((x*x)+(y*y))
+    value = t*x
   [../]
 []
 
 [Variables]
   [./u]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
 
     [./InitialCondition]
@@ -61,12 +58,10 @@
 []
 
 [BCs]
-  active = 'all'
-  
   [./all]
     type = FunctionDirichletBC
     variable = u
-    boundary = '0 1 2 3'
+    boundary = '0 1'
     function = exact_fn
   [../]
 []
@@ -77,6 +72,10 @@
     variable = u
     function = exact_fn
   [../]
+  
+  [./res]
+    type = Residual
+  [../]
 []
 
 [Executioner]
@@ -85,8 +84,8 @@
 
   start_time = 0.0
   num_steps = 10
-  dt = 0.0001
-  l_tol = 1e-8
+  dt = 0.001
+  l_tol = 1e-15
 []
 
 [Output]
@@ -94,4 +93,3 @@
   interval = 1
   exodus = true
 []
-
