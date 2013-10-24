@@ -46,5 +46,5 @@ TimeIntegrator::~TimeIntegrator()
 void
 TimeIntegrator::solve()
 {
-  _fe_problem.solve();
+  _nl.sys().solve();
 }

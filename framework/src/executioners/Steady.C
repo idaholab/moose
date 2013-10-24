@@ -90,7 +90,7 @@ Steady::execute()
     _problem.updateMaterials();
     _problem.timestepSetup();
     _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
-    _problem.step();
+    _problem.solve();
     postSolve();
 
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);

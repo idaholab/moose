@@ -77,7 +77,7 @@ TimeStepper::computeStep()
 void
 TimeStepper::step()
 {
-  _fe_problem.step();
+  _fe_problem.solve();
   _converged = _fe_problem.converged();
 }
 

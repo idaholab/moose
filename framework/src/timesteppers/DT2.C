@@ -95,7 +95,7 @@ DT2::step()
   TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
 
   // solve the problem with full dt
-  _fe_problem.step();
+  _fe_problem.solve();
   _converged = nl.converged();
   if (_converged)
   {

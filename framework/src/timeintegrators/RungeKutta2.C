@@ -71,7 +71,7 @@ RungeKutta2::solve()
 
   _stage = 1;
   _fe_problem.time() = time_half;
-  _fe_problem.solve();
+  _fe_problem.getNonlinearSystem().sys().solve();
 
   _fe_problem.copyOldSolutions();
 
@@ -80,7 +80,7 @@ RungeKutta2::solve()
   _stage = 2;
   _fe_problem.time() = time;
   _fe_problem.timeOld() = time_half;
-  _fe_problem.solve();
+  _fe_problem.getNonlinearSystem().sys().solve();
 }
 
 void
