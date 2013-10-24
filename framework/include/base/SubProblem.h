@@ -319,10 +319,10 @@ protected:
 
 private:
 
-/**
-   * Helper method for peforming material property checks
+  /**
+   * Helper method for performing material property checks
    * @param props Reference to the map of properties known
-   * @param check_props Reference to the map of properities to check
+   * @param check_props Reference to the map of properties to check
    * \see checkBlockMatProps
    * \see checkBoundaryMatProps
    */
