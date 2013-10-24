@@ -25,7 +25,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(InputParameters & parameter
 {
 }
 
-std::vector<SubdomainID>
+std::set<SubdomainID>
 MaterialPropertyInterface::getMaterialPropertyBlocks(const std::string & name)
 {
   return _mi_feproblem.getMaterialPropertyBlocks(name);
@@ -37,7 +37,7 @@ MaterialPropertyInterface::getMaterialPropertyBlockNames(const std::string & nam
   return _mi_feproblem.getMaterialPropertyBlockNames(name);
 }
 
-std::vector<BoundaryID>
+std::set<BoundaryID>
 MaterialPropertyInterface::getMaterialPropertyBoundaryIDs(const std::string & name)
 {
   return _mi_feproblem.getMaterialPropertyBoundaryIDs(name);

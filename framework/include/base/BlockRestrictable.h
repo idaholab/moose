@@ -142,14 +142,14 @@ public:
    * Check if a material property is valid for all blocks of this object
    *
    * This method returns true if the block ids for this object are a subset of the blocks
-   * associated with the material property for the supplied property name
+   * associated with the material property for the supplied property name. This function
+   * will return false it the getMaterialPropertyBlocks for the same name is empty.
    *
    * @param name the name of the property to query
    * @return true if the property exists for all block ids of the object, otherwise false
    * \see MaterialPropertyInterface::getMaterialPropertyBlocks
    * \see isBlockSubet
    */
-  template<typename T>
   bool hasBlockMaterialProperty(const std::string & name);
 
 protected:
@@ -179,12 +179,5 @@ private:
 
 };
 
-template<typename T>
-bool
-BlockRestrictable::hasBlockMaterialProperty(const std::string & name)
-{
-  // Return true if the blocks for this object are a subset of the blocks for the material
-  return isBlockSubset(_blk_feproblem->getMaterialPropertyBlocks(name));
-}
 
 #endif // BLOCKRESTRICTABLE_H

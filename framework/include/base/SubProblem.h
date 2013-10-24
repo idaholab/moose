@@ -236,7 +236,7 @@ public:
   /**
    * Get a vector containing the block ids the material property is defined on.
    */
-  virtual std::vector<SubdomainID> getMaterialPropertyBlocks(const std::string & prop_name);
+  virtual std::set<SubdomainID> getMaterialPropertyBlocks(const std::string & prop_name);
 
   /**
    * Get a vector of block id equivalences that the material property is defined on.
@@ -246,7 +246,7 @@ public:
   /**
    * Get a vector containing the block ids the material property is defined on.
    */
-  virtual std::vector<BoundaryID> getMaterialPropertyBoundaryIDs(const std::string & prop_name);
+  virtual std::set<BoundaryID> getMaterialPropertyBoundaryIDs(const std::string & prop_name);
 
   /**
    * Get a vector of block id equivalences that the material property is defined on.

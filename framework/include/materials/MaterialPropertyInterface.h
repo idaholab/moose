@@ -66,7 +66,7 @@ public:
    * @param name The name of the material property
    * @return A vector the the block ids for the property
    */
-  std::vector<SubdomainID> getMaterialPropertyBlocks(const std::string & name);
+  std::set<SubdomainID> getMaterialPropertyBlocks(const std::string & name);
 
   /**
    * Retrieve the block names that the material property is defined
@@ -80,7 +80,7 @@ public:
    * @param name The name of the material property
    * @return A vector the the boundary ids for the property
    */
-  std::vector<BoundaryID> getMaterialPropertyBoundaryIDs(const std::string & name);
+  std::set<BoundaryID> getMaterialPropertyBoundaryIDs(const std::string & name);
 
   /**
    * Retrieve the boundary namess that the material property is defined

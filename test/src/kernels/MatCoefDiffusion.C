@@ -33,7 +33,7 @@ MatCoefDiffusion::MatCoefDiffusion(const std::string & name, InputParameters par
 
   // Check that hasBlockMaterialProperty is working
   // (true only if blocks of material match blocks of object)
-  if (hasBlockMaterialProperty<Real>(_prop_name))
+  if (hasBlockMaterialProperty(_prop_name))
     _coef = &getMaterialProperty<Real>(_prop_name);
   else
     mooseError("The material property " << _prop_name << " is not defined on all blocks of the kernel");

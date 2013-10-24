@@ -83,7 +83,7 @@ SubProblem::clearActiveElementalMooseVariables(THREAD_ID tid)
   _active_elemental_moose_variables[tid].clear();
 }
 
-std::vector<SubdomainID>
+std::set<SubdomainID>
 SubProblem::getMaterialPropertyBlocks(const std::string & prop_name)
 {
   std::set<SubdomainID> blocks;
@@ -103,27 +103,27 @@ SubProblem::getMaterialPropertyBlocks(const std::string & prop_name)
         blocks.insert(block);
     }
   }
-  // Copy it out to a vector for convenience
-  std::vector<SubdomainID> blocks_vec(blocks.begin(), blocks.end());
-  return blocks_vec;
+
+  return blocks;
 }
 
 std::vector<SubdomainName>
 SubProblem::getMaterialPropertyBlockNames(const std::string & prop_name)
 {
-  std::vector<SubdomainID> blocks = getMaterialPropertyBlocks(prop_name);
-  std::vector<SubdomainName> block_names(blocks.size());
+  std::set<SubdomainID> blocks = getMaterialPropertyBlocks(prop_name);
+  std::vector<SubdomainName> block_names;
+  block_names.reserve(blocks.size());
 
-  for (unsigned int i=0; i<blocks.size(); ++i)
+  for (std::set<SubdomainID>::iterator it = blocks.begin(); it != blocks.end(); ++it)
   {
     std::stringstream ss;
-    ss << blocks[i];
-    block_names[i] = ss.str();
+    ss << *it;
+    block_names.push_back(ss.str());
   }
   return block_names;
 }
 
-std::vector<BoundaryID>
+std::set<BoundaryID>
 SubProblem::getMaterialPropertyBoundaryIDs(const std::string & prop_name)
 {
   std::set<BoundaryID> boundaries;
@@ -144,22 +144,21 @@ SubProblem::getMaterialPropertyBoundaryIDs(const std::string & prop_name)
     }
   }
 
-  // Copy it out to a vector for convenience
-  std::vector<BoundaryID> bnd_vec(boundaries.begin(), boundaries.end());
-  return bnd_vec;
+  return boundaries;
 }
 
 std::vector<BoundaryName>
 SubProblem::getMaterialPropertyBoundaryNames(const std::string & prop_name)
 {
-  std::vector<BoundaryID> boundaries = getMaterialPropertyBoundaryIDs(prop_name);
-  std::vector<BoundaryName> boundary_names(boundaries.size());
+  std::set<BoundaryID> boundaries = getMaterialPropertyBoundaryIDs(prop_name);
+  std::vector<BoundaryName> boundary_names;
+  boundary_names.reserve(boundaries.size());
 
-  for (unsigned int i=0; i<boundaries.size(); ++i)
+  for (std::set<BoundaryID>::iterator it = boundaries.begin(); it != boundaries.end(); ++it)
   {
     std::stringstream ss;
-    ss << boundaries[i];
-    boundary_names[i] = ss.str();
+    ss << *it;
+    boundary_names.push_back(ss.str());
   }
   return boundary_names;
 }

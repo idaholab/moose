@@ -167,7 +167,7 @@ bool
 BlockRestrictable::hasBlocks(std::set<SubdomainID> ids)
 {
   // An empty input is assumed to be ANY_BLOCK_ID
-  if (ids.size() == 0 || ids.count(Moose::ANY_BLOCK_ID))
+  if (ids.empty() || ids.count(Moose::ANY_BLOCK_ID) > 0)
     return true;
   else
     return std::includes(_blk_ids.begin(), _blk_ids.end(), ids.begin(), ids.end());
@@ -177,7 +177,7 @@ bool
 BlockRestrictable::isBlockSubset(std::set<SubdomainID> ids)
 {
   // An empty input is assumed to be ANY_BLOCK_ID
-  if (ids.size() == 0 || ids.count(Moose::ANY_BLOCK_ID))
+  if (ids.empty() || ids.count(Moose::ANY_BLOCK_ID)  > 0)
     return true;
   else
     return std::includes(ids.begin(), ids.end(), _blk_ids.begin(), _blk_ids.end());
@@ -212,4 +212,18 @@ BlockRestrictable::variableSubdomianIDs(InputParameters & parameters)
 
   // Return the block ids for the variable
   return sys->getSubdomainsForVar(var->index());
+}
+
+bool
+BlockRestrictable::hasBlockMaterialProperty(const std::string & name)
+{
+  // Get reference to the blocks for the material
+  const std::set<SubdomainID> & mat_blk = _blk_feproblem->getMaterialPropertyBlocks(name);
+
+  // If material blocks are empty return false, otherwise test if the materials are a subset
+  // of the blocks for this object
+  if (mat_blk.empty())
+    return false;
+  else
+    return isBlockSubset(mat_blk);
 }

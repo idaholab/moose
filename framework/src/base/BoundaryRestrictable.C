@@ -147,7 +147,7 @@ bool
 BoundaryRestrictable::hasBoundary(std::set<BoundaryID> ids, TEST_TYPE type)
 {
   // An empty input is assumed to be ANY_BOUNDARY_ID
-  if (ids.size() == 0 || ids.count(Moose::ANY_BOUNDARY_ID) > 0)
+  if (ids.empty() || ids.count(Moose::ANY_BOUNDARY_ID) > 0)
     return true;
 
   // All supplied IDs must match those of the object
@@ -175,7 +175,7 @@ bool
 BoundaryRestrictable::isBoundarySubset(std::set<BoundaryID> ids)
 {
   // An empty input is assumed to be ANY_BOUNDARY_ID
-  if (ids.size() == 0 || ids.count(Moose::ANY_BOUNDARY_ID) > 0)
+  if (ids.empty() || ids.count(Moose::ANY_BOUNDARY_ID) > 0)
     return true;
   else
     return std::includes(ids.begin(), ids.end(), _bnd_ids.begin(), _bnd_ids.end());
