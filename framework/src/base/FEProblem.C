@@ -2877,6 +2877,12 @@ FEProblem::init2()
 }
 
 void
+FEProblem::step()
+{
+  _nl.step();
+}
+
+void
 FEProblem::solve()
 {
 #ifdef LIBMESH_HAVE_PETSC

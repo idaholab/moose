@@ -49,6 +49,7 @@ public:
   virtual ~NonlinearSystem();
 
   virtual void init();
+  virtual void step();
   virtual void solve();
   virtual void restoreSolutions();
 

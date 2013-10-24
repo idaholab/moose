@@ -197,7 +197,7 @@ NonlinearSystem::init()
 }
 
 void
-NonlinearSystem::solve()
+NonlinearSystem::step()
 {
   try
   {
@@ -225,6 +225,17 @@ NonlinearSystem::solve()
   // Initialize the solution vector using a predictor and known values from nodal bcs
   setInitialSolution();
 
+  _time_integrator->solve();
+  _time_integrator->postSolve();
+
+  // we are back from the libMesh solve, so re-throw the exception if we got one;
+  if (_exception > 0)
+    throw _exception;
+}
+
+void
+NonlinearSystem::solve()
+{
   if(_use_finite_differenced_preconditioner)
     setupFiniteDifferencedPreconditioner();
 
@@ -234,8 +245,7 @@ NonlinearSystem::solve()
   if(_use_split_based_preconditioner)
     setupSplitBasedPreconditioner();
 
-  _time_integrator->solve();
-  _time_integrator->postSolve();
+  sys().solve();
 
   // store info about the solve
   _n_iters = _sys.n_nonlinear_iterations();
@@ -253,10 +263,6 @@ NonlinearSystem::solve()
     MatFDColoringDestroy(&_fdcoloring);
 #endif
 #endif
-
-  // we are back from the libMesh solve, so re-throw the exception if we got one;
-  if (_exception > 0)
-    throw _exception;
 }
 
 void
