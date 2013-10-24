@@ -17,7 +17,7 @@
 #include "MooseMesh.h"
 #include "RandomInterface.h"
 
-const unsigned int MASTER = std::numeric_limits<unsigned int>::max();
+const unsigned int MASTER = std::numeric_limits<dof_id_type>::max();
 
 RandomData::RandomData(FEProblem &problem, const RandomInterface & random_interface) :
     _rd_problem(problem),
