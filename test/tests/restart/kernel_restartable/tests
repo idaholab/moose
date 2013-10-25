@@ -28,6 +28,7 @@
     max_parallel = 2
     prereq = parallel_error1
     expect_err = 'Cannot restart using a different number of processors'
+    deleted = 'Broken on Linux #2266'
   [../]
 
   [./with_threads]
