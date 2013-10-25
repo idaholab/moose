@@ -47,6 +47,16 @@ class TestHarness:
     self.checks[LIBRARY_MODE] = getSharedOption(self.libmesh_dir)
     self.checks[UNIQUE_IDS] = getLibMeshConfigOption(self.libmesh_dir, UNIQUE_IDS)
 
+    # Override the MESH_MODE option if using '--parallel-mesh' option
+    if self.options.parallel_mesh == True or \
+          (self.options.cli_args != None and \
+          self.options.cli_args.find('--parallel-mesh') != -1):
+
+      option_set = set()
+      option_set.add('ALL')
+      option_set.add('PARALLEL')
+      self.checks[MESH_MODE] = option_set
+
     method = set()
     method.add('ALL')
     method.add(self.options.method.upper())
@@ -604,6 +614,7 @@ class TestHarness:
     parser.add_argument('--pbs', nargs='?', metavar='batch_file', dest='pbs', const='generate', help='Enable launching tests via PBS. If no batch file is specified one will be created for you')
     parser.add_argument('--pbs-cleanup', nargs=1, metavar='batch_file', help='Clean up the directories/files created by PBS. You must supply the same batch_file used to launch PBS.')
     parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
+    parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help="Pass --parallel-mesh to executable")
     parser.add_argument('--cli-args', nargs='?', type=str, dest='cli_args', help='Append the following list of arguments to the command line (Encapsulate the command in quotes)')
 
     outputgroup = parser.add_argument_group('Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
