@@ -74,7 +74,7 @@
     input = 'ee-1d-linear.i'
     exodiff = 'ee-1d-linear_out.e'
   [../]
-  
+
   [./ee-1d-quadratic]
     type = 'Exodiff'
     input = 'ee-1d-quadratic.i'
@@ -97,6 +97,7 @@
     type = 'Exodiff'
     input = 'ee-2d-linear-adapt.i'
     exodiff = 'ee-2d-linear-adapt_out.e ee-2d-linear-adapt_out.e-s003'
+    abs_zero = 1e-8
   [../]
 
   [./ee-2d-quadratic]
@@ -104,14 +105,14 @@
     input = 'ee-2d-quadratic.i'
     exodiff = 'ee-2d-quadratic_out.e'
   [../]
-  
+
   # RK-2
   [./rk2-1d-linear]
     type = 'Exodiff'
     input = 'rk2-1d-linear.i'
     exodiff = 'rk2-1d-linear_out.e'
   [../]
-  
+
   [./rk2-2d-quadratic]
     type = 'Exodiff'
     input = 'rk2-2d-quadratic.i'
