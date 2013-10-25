@@ -159,3 +159,18 @@ CombinedCreepPlasticity::computeStress( const Elem & current_elem,
   strain_increment = elastic_strain_increment;
 
 }
+
+bool
+CombinedCreepPlasticity::modifyStrainIncrement(const Elem & current_elem, unsigned qp, SymmTensor & strain_increment, SymmTensor & d_strain_dT)
+{
+  bool modified = false;
+  const SubdomainID current_block = current_elem.subdomain_id();
+  const std::vector<ReturnMappingModel*> & rmm( _submodels[current_block] );
+  const unsigned num_submodels = rmm.size();
+
+  for (unsigned i_rmm(0); i_rmm < num_submodels; ++i_rmm)
+  {
+    modified |= rmm[i_rmm]->modifyStrainIncrement( current_elem, qp, strain_increment, d_strain_dT);
+  }
+  return modified;
+}

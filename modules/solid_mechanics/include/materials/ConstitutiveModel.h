@@ -26,7 +26,10 @@ public:
                               SymmTensor & strain_increment,
                               SymmTensor & stress_new );
 
-  virtual bool modifyStrainIncrement(unsigned qp, SymmTensor & strain_increment, SymmTensor & d_strain_dT)
+  virtual bool modifyStrainIncrement(const Elem & /*elem*/,
+                                     unsigned qp,
+                                     SymmTensor & strain_increment,
+                                     SymmTensor & d_strain_dT)
   {
     return applyThermalStrain(qp, strain_increment, d_strain_dT);
   }

@@ -349,11 +349,14 @@ void
 SolidModel::modifyStrainIncrement()
 {
   bool modified = false;
+  _d_strain_dT.zero();
+
   const SubdomainID current_block = _current_elem->subdomain_id();
   if (_constitutive_active)
   {
     ConstitutiveModel * cm = _constitutive_model[current_block];
-    modified |= cm->modifyStrainIncrement(_qp, _strain_increment, _d_strain_dT);
+    modified |= cm->modifyStrainIncrement(*_current_elem, _qp,
+                                          _strain_increment, _d_strain_dT);
   }
 
   if (!modified)
@@ -393,7 +396,6 @@ SolidModel::applyThermalStrain()
     }
     _strain_increment.addDiag( -tStrain );
 
-    _d_strain_dT.zero();
     _d_strain_dT.addDiag( -alpha );
   }
 }

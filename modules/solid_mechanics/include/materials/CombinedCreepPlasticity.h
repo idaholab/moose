@@ -25,6 +25,10 @@ public:
                               SymmTensor & strain_increment,
                               SymmTensor & stress_new );
 
+  virtual bool modifyStrainIncrement(const Elem & current_elem,
+                                     unsigned qp,
+                                     SymmTensor & strain_increment,
+                                     SymmTensor & d_strain_dT);
 protected:
 
   virtual void initialSetup();

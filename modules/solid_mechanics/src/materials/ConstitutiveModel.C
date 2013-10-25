@@ -1,6 +1,3 @@
-// Name RadialReturn
-//   or ReturnMappingModel ...
-
 #include "ConstitutiveModel.h"
 
 template<>
@@ -80,8 +77,6 @@ ConstitutiveModel::applyThermalStrain(unsigned qp,
       tStrain = alpha * (_temperature[qp] - _temperature_old[qp]);
     }
     strain_increment.addDiag( -tStrain );
-
-    d_strain_dT.zero();
     d_strain_dT.addDiag( -alpha );
   }
   return modified;
