@@ -430,6 +430,9 @@ Transient::computeConstrainedDT()
     }
   }
 
+  // Allow the time stepper to limit the time step
+  _time_stepper->constrainStep(dt_cur);
+
   // Constrain by what the multi apps are doing
   Real multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP_BEGIN);
   if(_use_multiapp_dt || multi_app_dt < dt_cur)

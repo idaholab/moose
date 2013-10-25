@@ -75,6 +75,11 @@ TimeStepper::computeStep()
 }
 
 void
+TimeStepper::constrainStep(Real &/*dt*/)
+{
+}
+
+void
 TimeStepper::step()
 {
   _fe_problem.solve();

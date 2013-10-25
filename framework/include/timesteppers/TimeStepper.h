@@ -57,6 +57,12 @@ public:
   void computeStep();
 
   /**
+   * Called after computeStep() is called.
+   * Apply constraints on dt.
+   */
+  void constrainStep(Real &dt);
+
+  /**
    * Take a time step
    */
   virtual void step();
