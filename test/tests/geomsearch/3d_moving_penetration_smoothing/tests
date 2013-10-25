@@ -45,6 +45,9 @@
     exodiff = 'pl_test3qnstt_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+
+    # Note: This test only works with serial mesh
+    mesh_mode = SERIAL
   [../]
 
   [./pl_test4nns]
@@ -93,5 +96,8 @@
     exodiff = 'pl_test4qnstt_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+
+    # Note: This test only works with serial mesh
+    mesh_mode = SERIAL
   [../]
 []
