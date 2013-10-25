@@ -85,7 +85,6 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _dt_old(_problem.dtOld()),
     _unconstrained_dt(declareRestartableData<Real>("unconstrained_dt", 0)),
     _unconstrained_dt_old(declareRestartableData<Real>("unconstrained_dt_old", 0)),
-    _prev_dt(declareRestartableData<Real>("prev_dt", -1)),
     _reset_dt(declareRestartableData<bool>("reset_dt", false)),
     _first(declareRestartableData<bool>("first", true)),
     _last_solve_converged(declareRestartableData<bool>("last_solve_converged", true)),
@@ -418,7 +417,6 @@ Transient::computeConstrainedDT()
     if (_sync_times.begin() == _sync_times.end())
       _remaining_sync_time = false;
 
-    _prev_dt = dt_cur;
     _reset_dt = true;
   }
   else
@@ -446,7 +444,6 @@ Transient::computeConstrainedDT()
   {
     dt_cur = _target_time - _time;
 
-    _prev_dt = _dt;
     _reset_dt = true;
   }
 
