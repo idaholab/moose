@@ -24,14 +24,14 @@ AdaptiveDT::AdaptiveDT(const std::string & name, InputParameters parameters) :
   TimeStepper(name, parameters),
   _dt_old(declareRestartableData<Real>("dt_old")),
   _input_dt(getParam<Real>("dt")),
-  _synced_last_step(false),
+  _tfunc_last_step(false),
   _linear_iteration_ratio(isParamValid("linear_iteration_ratio") ? getParam<unsigned>("linear_iteration_ratio") : 25),  // Default to 25
   _adaptive_timestepping(false),
   _timestep_limiting_function(NULL),
   _max_function_change(-1),
-  _sync_times(getParam<std::vector<Real> >("time_t")),
-  _sync_times_iter(_sync_times.begin()),
-  _remaining_sync_time(_sync_times.size() > 0),
+  _tfunc_times(getParam<std::vector<Real> >("time_t")),
+  _tfunc_times_iter(_tfunc_times.begin()),
+  _remaining_tfunc_time(_tfunc_times.size() > 0),
   _time_ipol(getParam<std::vector<Real> >("time_t"),
              getParam<std::vector<Real> >("time_dt")),
   _use_time_ipol(_time_ipol.getSampleSize() > 0),
@@ -84,12 +84,12 @@ AdaptiveDT::AdaptiveDT(const std::string & name, InputParameters parameters) :
     }
   }
 
-  // Advance to the first sync time if one is provided in sim time range
-  while (_remaining_sync_time && *_sync_times_iter <= _time)
+  // Advance to the first tfunc time if one is provided in sim time range
+  while (_remaining_tfunc_time && *_tfunc_times_iter <= _time)
   {
-    if (++_sync_times_iter == _sync_times.end())
+    if (++_tfunc_times_iter == _tfunc_times.end())
     {
-      _remaining_sync_time = false;
+      _remaining_tfunc_time = false;
     }
   }
 
@@ -108,14 +108,14 @@ AdaptiveDT::init()
     _timestep_limiting_function = &_fe_problem.getFunction(getParam<FunctionName>("timestep_limiting_function"), isParamValid("_tid") ? getParam<THREAD_ID>("_tid") : 0);
   }
 
-  // Advance to the first sync time if one is provided in sim time range
-  _sync_times_iter = _sync_times.begin();
-  _remaining_sync_time = _sync_times_iter != _sync_times.end();
-  while (_remaining_sync_time && *_sync_times_iter <= _time)
+  // Advance to the first tfunc time if one is provided in sim time range
+  _tfunc_times_iter = _tfunc_times.begin();
+  _remaining_tfunc_time = _tfunc_times_iter != _tfunc_times.end();
+  while (_remaining_tfunc_time && *_tfunc_times_iter <= _time)
   {
-    if (++_sync_times_iter == _sync_times.end())
+    if (++_tfunc_times_iter == _tfunc_times.end())
     {
-      _remaining_sync_time = false;
+      _remaining_tfunc_time = false;
     }
   }
 }
@@ -125,26 +125,26 @@ Real
 AdaptiveDT::computeInitialDT()
 {
 
-  // Advance to the first sync time if one is provided in sim time range
-  _sync_times_iter = _sync_times.begin();
-  _remaining_sync_time = _sync_times_iter != _sync_times.end();
-  while (_remaining_sync_time && *_sync_times_iter <= _time)
+  // Advance to the first tfunc time if one is provided in sim time range
+  _tfunc_times_iter = _tfunc_times.begin();
+  _remaining_tfunc_time = _tfunc_times_iter != _tfunc_times.end();
+  while (_remaining_tfunc_time && *_tfunc_times_iter <= _time)
   {
-    if (++_sync_times_iter == _sync_times.end())
+    if (++_tfunc_times_iter == _tfunc_times.end())
     {
-      _remaining_sync_time = false;
+      _remaining_tfunc_time = false;
     }
   }
 
   Real dt = _input_dt;
   limitDTByFunction(dt);
 
-  // Adjust to the next sync time if needed
-  if (_remaining_sync_time && _time_old + dt >= *_sync_times_iter)
+  // Adjust to the next tfunc time if needed
+  if (_remaining_tfunc_time && _time_old + dt >= *_tfunc_times_iter)
   {
-    _synced_last_step = true;
+    _tfunc_last_step = true;
 
-    dt = *_sync_times_iter - _time_old;
+    dt = *_tfunc_times_iter - _time_old;
 
     std::ostringstream out;
     out << "Limiting dt to sync with dt function time: "
@@ -153,7 +153,7 @@ AdaptiveDT::computeInitialDT()
         << std::setfill('0')
         << std::showpoint
         << std::left
-        << *_sync_times_iter
+        << *_tfunc_times_iter
         << " dt: "
         << std::setw(9)
         << std::setprecision(6)
@@ -164,9 +164,9 @@ AdaptiveDT::computeInitialDT()
         << std::endl;
     std::cout << out.str();
 
-    if (++_sync_times_iter == _sync_times.end())
+    if (++_tfunc_times_iter == _tfunc_times.end())
     {
-      _remaining_sync_time = false;
+      _remaining_tfunc_time = false;
     }
 
   }
@@ -190,9 +190,9 @@ AdaptiveDT::computeDT()
       computeAdaptiveDT(dt,allowToGrow);
     }
   }
-  else if (_synced_last_step)
+  else if (_tfunc_last_step)
   {
-    _synced_last_step = false;
+    _tfunc_last_step = false;
 
     dt = _time_ipol.sample(_time_old);
 
@@ -225,12 +225,12 @@ AdaptiveDT::computeDT()
   // Limit the timestep to limit change in the function
   limitDTByFunction(dt);
 
-  // Adjust to the next sync time if needed
-  if (_remaining_sync_time && _time_old + dt >= *_sync_times_iter)
+  // Adjust to the next tfunc time if needed
+  if (_remaining_tfunc_time && _time_old + dt >= *_tfunc_times_iter)
   {
-    _synced_last_step = true;
+    _tfunc_last_step = true;
 
-    dt = *_sync_times_iter - _time_old;
+    dt = *_tfunc_times_iter - _time_old;
 
     out << "Limiting dt to sync with dt function time: "
         << std::setw(9)
@@ -238,7 +238,7 @@ AdaptiveDT::computeDT()
         << std::setfill('0')
         << std::showpoint
         << std::left
-        << *_sync_times_iter
+        << *_tfunc_times_iter
         << " dt: "
         << std::setw(9)
         << std::setprecision(6)
@@ -248,9 +248,9 @@ AdaptiveDT::computeDT()
         << dt
         << std::endl;
 
-    if (++_sync_times_iter == _sync_times.end())
+    if (++_tfunc_times_iter == _tfunc_times.end())
     {
-      _remaining_sync_time = false;
+      _remaining_tfunc_time = false;
     }
 
   }

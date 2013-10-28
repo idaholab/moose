@@ -33,7 +33,7 @@ protected:
   Real & _dt_old;
 
   const Real _input_dt;                       ///< The dt from the input file.
-  bool _synced_last_step;
+  bool _tfunc_last_step;
 
   int _optimal_iterations;
   int _iteration_window;
@@ -43,9 +43,9 @@ protected:
   Function * _timestep_limiting_function;
   Real _max_function_change;
 
-  const std::vector<Real> _sync_times;
-  std::vector<Real>::const_iterator _sync_times_iter;
-  bool _remaining_sync_time;
+  const std::vector<Real> _tfunc_times;
+  std::vector<Real>::const_iterator _tfunc_times_iter;
+  bool _remaining_tfunc_time;
 
   LinearInterpolation _time_ipol; ///< Piecewise linear definition of time stepping
   const bool _use_time_ipol;      ///< true if we want to use piecewise-defined time stepping
