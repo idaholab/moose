@@ -119,48 +119,48 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   if(libMesh::processor_id() == 1)
     sleep(1);
 
-  std::cout<<"n_nodes_per_elem: "<<n_nodes_per_elem<<std::endl;
+  Moose::out<<"n_nodes_per_elem: "<<n_nodes_per_elem<<std::endl;
 
-  std::cout<<"Dim: "<<dim<<std::endl;
+  Moose::out<<"Dim: "<<dim<<std::endl;
 
-  std::cerr<<"Vertices size: "<<vertices.size()<<std::endl;
+  Moose::err<<"Vertices size: "<<vertices.size()<<std::endl;
   {
-    std::cerr<<libMesh::processor_id()<<" Vertices: ";
+    Moose::err<<libMesh::processor_id()<<" Vertices: ";
 
     for(unsigned int i=0; i<vertices.size(); i++)
-      std::cerr<<vertices[i]<<" ";
+      Moose::err<<vertices[i]<<" ";
 
-    std::cerr<<std::endl;
+    Moose::err<<std::endl;
   }
 
-  std::cerr<<"Coordinates size: "<<coordinates.size()<<std::endl;
+  Moose::err<<"Coordinates size: "<<coordinates.size()<<std::endl;
   {
-    std::cerr<<libMesh::processor_id()<<" Coordinates: ";
+    Moose::err<<libMesh::processor_id()<<" Coordinates: ";
 
     for(unsigned int i=0; i<coordinates.size(); i++)
-      std::cerr<<coordinates[i]<<" ";
+      Moose::err<<coordinates[i]<<" ";
 
-    std::cerr<<std::endl;
+    Moose::err<<std::endl;
   }
 
-  std::cerr<<"Connectivity size: "<<connectivity.size()<<std::endl;
+  Moose::err<<"Connectivity size: "<<connectivity.size()<<std::endl;
   {
-    std::cerr<<libMesh::processor_id()<<" Connectivity: ";
+    Moose::err<<libMesh::processor_id()<<" Connectivity: ";
 
     for(unsigned int i=0; i<connectivity.size(); i++)
-      std::cerr<<connectivity[i]<<" ";
+      Moose::err<<connectivity[i]<<" ";
 
-    std::cerr<<std::endl;
+    Moose::err<<std::endl;
   }
 
-  std::cerr<<"Permutation_List size: "<<permutation_list.size()<<std::endl;
+  Moose::err<<"Permutation_List size: "<<permutation_list.size()<<std::endl;
   {
-    std::cerr<<libMesh::processor_id()<<" Permutation_List: ";
+    Moose::err<<libMesh::processor_id()<<" Permutation_List: ";
 
     for(unsigned int i=0; i<permutation_list.size(); i++)
-      std::cerr<<permutation_list[i]<<" ";
+      Moose::err<<permutation_list[i]<<" ";
 
-    std::cerr<<std::endl;
+    Moose::err<<std::endl;
   }
 
   */

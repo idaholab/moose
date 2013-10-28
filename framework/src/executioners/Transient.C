@@ -268,7 +268,7 @@ Transient::takeStep(Real input_dt)
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   _problem.execMultiApps(EXEC_TIMESTEP_BEGIN);
 
-  std::cout << "\nTime Step ";
+  Moose::out << "\nTime Step ";
 
   {
     std::ostringstream out;
@@ -282,10 +282,10 @@ Transient::takeStep(Real input_dt)
         << std::showpoint
         << std::left
         << _time;
-    std::cout << out.str() << std::endl;
+    Moose::out << out.str() << '\n';
   }
 
-  std::cout<<" DT = "<<_dt<<std::endl;
+  Moose::out << " DT = " << _dt << std::endl;
 
   preSolve();
   _time_stepper->preSolve();
@@ -306,7 +306,7 @@ Transient::takeStep(Real input_dt)
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
   if (lastSolveConverged())
   {
-    std::cout<<"Solve Converged!"<<std::endl;
+    Moose::out << "Solve Converged!" << std::endl;
 
     _time_stepper->acceptStep();
 
@@ -329,7 +329,7 @@ Transient::takeStep(Real input_dt)
     _problem.execMultiApps(EXEC_TIMESTEP);
   }
   else
-    std::cout<<"Solve Did NOT Converge!"<<std::endl;
+    Moose::out << "Solve Did NOT Converge!" << std::endl;
 
   postSolve();
   _time_stepper->postSolve();
@@ -475,7 +475,7 @@ Transient::keepGoing()
     // Check current solution relative error norm against steady-state tolerance
     if(ss_relerr_norm < _ss_check_tol)
     {
-      std::cout<<"Steady-State Solution Achieved at time: "<<_time<<std::endl;
+      Moose::out << "Steady-State Solution Achieved at time: " << _time << std::endl;
       //Output last solve if not output previously by forcing it
       keep_going = false;
     }
@@ -484,7 +484,7 @@ Transient::keepGoing()
       // Update solution norm for next time step
       _old_time_solution_norm = new_time_solution_norm;
       // Print steady-state relative error norm
-      std::cout<<"Steady-State Relative Differential Norm: "<<ss_relerr_norm<<std::endl;
+      Moose::out << "Steady-State Relative Differential Norm: " << ss_relerr_norm << std::endl;
     }
   }
 
@@ -504,7 +504,7 @@ Transient::keepGoing()
 
   if(!lastSolveConverged() && _abort)
   {
-    std::cout<<"Aborting as solve did not converge and input selected to abort"<<std::endl;
+    Moose::out << "Aborting as solve did not converge and input selected to abort" << std::endl;
     keep_going = false;
   }
   return keep_going;

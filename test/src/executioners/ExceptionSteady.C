@@ -24,6 +24,6 @@ ExceptionSteady::execute()
   }
   catch (MooseException & e)
   {
-    std::cerr << "Caught exception " << e << std::endl;
+    Moose::err << "Caught exception " << e << std::endl;
   }
 }

@@ -127,15 +127,9 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
   unsigned dim = getParam<MooseEnum>("dim");
 
   if (_use_parallel_mesh)
-  {
-//    std::cout << "Using ParallelMesh!" << std::endl;
     _mesh = new ParallelMesh(dim);
-  }
   else
-  {
-//    std::cout << "Using SerialMesh!" << std::endl;
     _mesh = new SerialMesh(dim);
-  }
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :

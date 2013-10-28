@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "Moose.h"
 #include "FP.h"
 #include "libmesh/print_trace.h"
 #include <stdlib.h>
@@ -29,32 +30,31 @@
  */
 void handleFPE(int /*signo*/, siginfo_t *info, void * /*context*/)
 {
-  std::cerr << std::endl;
-  std::cerr << "Floating point exception signaled (";
+  Moose::err << '\n';
+  Moose::err << "Floating point exception signaled (";
   switch (info->si_code)
   {
-    case FPE_INTDIV: std::cerr << "integer divide by zero"; break;
-    case FPE_INTOVF: std::cerr << "integer overflow"; break;
-    case FPE_FLTDIV: std::cerr << "floating point divide by zero"; break;
-    case FPE_FLTOVF: std::cerr << "floating point overflow"; break;
-    case FPE_FLTUND: std::cerr << "floating point underflow"; break;
-    case FPE_FLTRES: std::cerr << "floating point inexact result"; break;
-    case FPE_FLTINV: std::cerr << "invalid floating point operation"; break;
-    case FPE_FLTSUB: std::cerr << "subscript out of range"; break;
+    case FPE_INTDIV: Moose::err << "integer divide by zero"; break;
+    case FPE_INTOVF: Moose::err << "integer overflow"; break;
+    case FPE_FLTDIV: Moose::err << "floating point divide by zero"; break;
+    case FPE_FLTOVF: Moose::err << "floating point overflow"; break;
+    case FPE_FLTUND: Moose::err << "floating point underflow"; break;
+    case FPE_FLTRES: Moose::err << "floating point inexact result"; break;
+    case FPE_FLTINV: Moose::err << "invalid floating point operation"; break;
+    case FPE_FLTSUB: Moose::err << "subscript out of range"; break;
   }
-  std::cerr << ")!" << std::endl;
+  Moose::err << ")!" << '\n';
 
 #ifdef DEBUG
-  std::cerr<<std::endl<<"Backtrace:"<<std::endl;
-  libMesh::print_trace(std::cerr);
+  Moose::err << "\nBacktrace:\n";
+  libMesh::print_trace(Moose::err);
 #endif
 
-  std::cerr << std::endl;
-  std::cerr << "To track this down, compile debug version, start debugger, set breakpoint for 'handleFPE' and run" << std::endl;
-  std::cerr << "In gdb do:" << std::endl;
-  std::cerr << "  break handleFPE" << std::endl;
-  std::cerr << "  run" << std::endl;
-  std::cerr << "  bt" << std::endl;
+  Moose::err << "\nTo track this down, compile debug version, start debugger, set breakpoint for 'handleFPE' and run\n"
+             << "In gdb do:\n"
+             << "  break handleFPE\n"
+             << "  run\n"
+             << "  bt" << std::endl;
 
   exit(-2);             // MAGIC NUMBER!
 }

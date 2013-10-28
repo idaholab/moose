@@ -172,7 +172,7 @@ Output::iterationOutput(SNES, PetscInt its, PetscReal /*fnorm*/, void * _output)
       output->_last_iteration_output_time += output->_dt*1e-2;
 
     Real iteration_time = output->_last_iteration_output_time;
-    std::cout << "  Writing iteration plot for NL step " << its << " at time " << iteration_time << std::endl;
+    Moose::out << "  Writing iteration plot for NL step " << its << " at time " << iteration_time << std::endl;
     for (unsigned int i(0); i < output->_outputters.size(); ++i)
     {
       output->_outputters[i]->output(output->_file_base, iteration_time, output->_time_step);

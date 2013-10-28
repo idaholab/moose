@@ -209,8 +209,8 @@ NonlinearSystem::solve()
 
     _sys.rhs->close();
     _initial_residual = _sys.rhs->l2_norm();
-    std::cout <<std::scientific<<std::setprecision(6);
-    std::cout << " Initial |R| = "<<_initial_residual<<"\n";
+    Moose::out << std::scientific << std::setprecision(6);
+    Moose::out << " Initial |R| = " << _initial_residual << std::endl;
   }
   catch (MooseException & e)
   {
@@ -383,7 +383,6 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
   ISColoringDestroy(&iscoloring);
 #endif
 
-//  std::cout<<*_sys.matrix<<std::endl;
 #endif
 }
 
@@ -2010,7 +2009,7 @@ NonlinearSystem::printVarNorms()
 
   if(outlier_var_norms.size())
   {
-    std::cout<<"Outlier Variable Residual Norms:"<<std::endl;
+    Moose::out << "Outlier Variable Residual Norms:\n";
     for(std::map<std::string, Real>::iterator it = outlier_var_norms.begin();
         it != outlier_var_norms.end();
         ++it)
@@ -2020,18 +2019,22 @@ NonlinearSystem::printVarNorms()
       if(it->second > 0.8 * _last_nl_rnorm*_last_nl_rnorm)
         color = RED;
 
-      std::cout<<" "<<it->first<<": "<<_fe_problem.colorText(color,std::sqrt(it->second))<<std::endl;
+      Moose::out << " " << it->first << ": " <<
+        _fe_problem.colorText(color, std::sqrt(it->second)) << '\n';
     }
   }
 
   if(_print_all_var_norms)
   {
-    std::cout<<"Variable Residual Norms:"<<std::endl;
+    Moose::out << "Variable Residual Norms:\n";
     for(std::map<std::string, Real>::iterator it = other_var_norms.begin();
         it != other_var_norms.end();
         ++it)
-      std::cout<<" "<<it->first<<": "<<_fe_problem.colorText(GREEN,std::sqrt(it->second))<<std::endl;
+      Moose::out << " " << it->first << ": " <<
+        _fe_problem.colorText(GREEN, std::sqrt(it->second)) << '\n';
   }
+
+  Moose::out.flush();
 }
 
 void
@@ -2194,13 +2197,13 @@ NonlinearSystem::printTopResiduals(const NumericVector<Number> & residual, unsig
   // sort vec by residuals
   std::sort(vec.begin(), vec.end(), dbg_sort_residuals);
   // print out
-  std::cerr << "[DBG][" << libMesh::processor_id() << "] Max " << n << " residuals";
+  Moose::err << "[DBG][" << libMesh::processor_id() << "] Max " << n << " residuals";
   if (j < n)
   {
     n = j;
-    std::cerr << " (Only " << n << " available)";
+    Moose::err << " (Only " << n << " available)";
   }
-  std::cerr << std::endl;
+  Moose::err << std::endl;
 
   for (unsigned int i = 0; i < n; ++i)
   {

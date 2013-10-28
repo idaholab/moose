@@ -18,6 +18,7 @@
 // libMesh includes
 #include "libmesh/perf_log.h"
 #include "libmesh/parallel.h"
+#include "libmesh/libmesh_common.h"
 
 #include <string>
 
@@ -69,6 +70,12 @@ extern PerfLog perf_log;
  * PerfLog to be used during setup.  This log will get printed just before the first solve.
  */
 extern PerfLog setup_perf_log;
+
+/**
+ * Import libMesh::out, and libMesh::err for use in MOOSE.
+ */
+using libMesh::out;
+using libMesh::err;
 
 /**
  * Register objects that are in MOOSE

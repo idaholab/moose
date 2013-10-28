@@ -119,7 +119,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
   if(!_has_an_app)
     return;
 
-  std::cout<<"Solving MultiApp "<<_name<<std::endl;
+  Moose::out << "Solving MultiApp " << _name << std::endl;
 
   // "target_time" must always be in global time
   target_time += _app.getGlobalTimeOffset();
@@ -245,11 +245,11 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
         Real solution_change_norm = ex->getSolutionChangeNorm();
 
         if(_detect_steady_state)
-          std::cout<<"Solution change norm: "<<solution_change_norm<<std::endl;
+          Moose::out << "Solution change norm: " << solution_change_norm << std::endl;
 
         if(converged && _detect_steady_state && solution_change_norm < _steady_state_tol)
         {
-          std::cout<<"Detected Steady State!  Fast-forwarding to "<<target_time<<std::endl;
+          Moose::out << "Detected Steady State!  Fast-forwarding to " << target_time << std::endl;
 
           at_steady = true;
 
@@ -279,7 +279,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
     }
     else
     {
-      std::cout<<"Solving Normal Step!"<<std::endl;
+      Moose::out << "Solving Normal Step!" << std::endl;
       if(_first != true)
         ex->incrementStepOrReject();
 
@@ -288,11 +288,11 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
       if(!ex->lastSolveConverged())
       {
-        mooseWarning(_name<<_first_local_app+i<<" failed to converge!"<<std::endl);
+        mooseWarning(_name << _first_local_app+i << " failed to converge!" << std::endl);
 
         if(_catch_up)
         {
-          std::cout<<"Starting Catch Up!"<<std::endl;
+          Moose::out << "Starting Catch Up!" << std::endl;
 
           bool caught_up = false;
 
@@ -304,7 +304,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
           while(!caught_up && catch_up_step < _max_catch_up_steps)
           {
-            std::cerr<<"Solving " << _name << "catch up step " << catch_up_step <<std::endl;
+            Moose::err << "Solving " << _name << "catch up step " << catch_up_step << std::endl;
             ex->incrementStepOrReject();
 
             ex->computeDT();
@@ -327,7 +327,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
           }
 
           if(!caught_up)
-            mooseError(_name << " Failed to catch up!" << std::endl);
+            mooseError(_name << " Failed to catch up!\n");
 
           ex->allowOutput(true);
         }
@@ -342,7 +342,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
   _transferred_vars.clear();
 
-  std::cout<<"Finished Solving MultiApp "<<_name<<std::endl;
+  Moose::out << "Finished Solving MultiApp " << _name << std::endl;
 }
 
 Real

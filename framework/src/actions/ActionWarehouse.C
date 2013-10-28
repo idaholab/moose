@@ -158,26 +158,26 @@ ActionWarehouse::checkUnsatisfiedActions() const
 void
 ActionWarehouse::printActionDependencySets()
 {
-  std::cerr << "[DBG][ACT] Ordered Actions:\n";
+  Moose::err << "[DBG][ACT] Ordered Actions:\n";
 
   const std::vector<std::set<std::string> > & ordered_names = _syntax.getSortedActionNameSet();
   for (std::vector<std::set<std::string> >::const_iterator i = ordered_names.begin(); i != ordered_names.end(); ++i)
   {
-    std::cerr << "[DBG][ACT] (";
+    Moose::err << "[DBG][ACT] (";
     unsigned int jj = 0;
     for (std::set<std::string>::const_iterator j = i->begin(); j != i->end(); ++j)
     {
-      if (jj++) std::cerr << ", ";
-      std::cout << *j;
+      if (jj++) Moose::err << ", ";
+      Moose::out << *j;
     }
-    std::cout << ")\n";
+    Moose::out << ")\n";
 
     for (std::set<std::string>::const_iterator j = i->begin(); j != i->end(); ++j)
     {
       for (std::vector<Action *>::const_iterator k = _action_blocks[*j].begin(); k != _action_blocks[*j].end(); ++k)
       {
         Action * act = *k;
-        std::cerr << "[DBG][ACT]" << "\t" << act->getAction();
+        Moose::err << "[DBG][ACT]" << "\t" << act->getAction();
         if (dynamic_cast<MooseObjectAction *>(act) != NULL ||
             dynamic_cast<AddVariableAction *>(act) != NULL ||
             dynamic_cast<AddAuxVariableAction *>(act) != NULL)
@@ -186,9 +186,9 @@ ActionWarehouse::printActionDependencySets()
           std::stringstream ss;
           ss << ": " << (*k)->getShortName();
           if (ss.str().size() > 2)
-            std::cerr << ss.str();
+            Moose::err << ss.str();
         }
-        std::cerr << "\n";
+        Moose::err << "\n";
       }
     }
   }
@@ -199,9 +199,9 @@ ActionWarehouse::executeAllActions()
 {
   if (_show_actions)
   {
-    std::cerr << "[DBG][ACT] Action Dependency Sets:\n";
+    Moose::err << "[DBG][ACT] Action Dependency Sets:\n";
     printActionDependencySets();
-    std::cerr << "[DBG][ACT] Executing actions:" << std::endl;
+    Moose::err << "[DBG][ACT] Executing actions:" << std::endl;
   }
 
   for (std::vector<std::string>::iterator it = _ordered_names.begin(); it != _ordered_names.end(); ++it)
@@ -219,7 +219,7 @@ ActionWarehouse::executeActionsWithAction(const std::string & name)
        ++act_iter)
   {
     if (_show_actions)
-      std::cerr << "[DBG][ACT] - " << (*act_iter)->name() << std::endl;
+      Moose::err << "[DBG][ACT] - " << (*act_iter)->name() << std::endl;
     (*act_iter)->act();
   }
 }

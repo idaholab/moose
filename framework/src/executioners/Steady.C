@@ -71,7 +71,7 @@ Steady::init()
 void
 Steady::execute()
 {
-  std::cout << "Time: " << _time_step << "\n";
+  Moose::out << "Time: " << _time_step << '\n';
   preExecute();
 
   // first step in any steady state solve is always 1 (preserving backwards compatibility)

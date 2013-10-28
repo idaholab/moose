@@ -491,19 +491,19 @@ PenetrationThread::competeInteractions(PenetrationInfo * pi1,
     else if (std::abs(pi1->_distance) < std::abs(pi2->_distance)) //otherwise, favor the closer face
     {
       //TODO: This could cause an abrupt jump from one face to the other.  Smooth this transition
-      //std::cout<<"Case1:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2: "<<pi2->_elem->id()<<std::endl;
+      //Moose::out<<"Case1:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2: "<<pi2->_elem->id()<<std::endl;
       result=FIRST_WINS;
     }
     else if (std::abs(pi2->_distance) < std::abs(pi1->_distance)) //otherwise, favor the closer face
     {
       //TODO: This could cause an abrupt jump from one face to the other.  Smooth this transition
-      //std::cout<<"Case2:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2: "<<pi2->_elem->id()<<std::endl;
+      //Moose::out<<"Case2:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2: "<<pi2->_elem->id()<<std::endl;
       result=SECOND_WINS;
     }
     else //completely equal.  Favor the one with a smaller element id (for repeatibility)
     {
       //TODO: This could cause an abrupt jump from one face to the other.  Smooth this transition
-      //std::cout<<"Case3:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2: "<<pi2->_elem->id()<<std::endl;
+      //Moose::out<<"Case3:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2: "<<pi2->_elem->id()<<std::endl;
       if (pi1->_elem->id()<pi2->_elem->id())
       {
         result=FIRST_WINS;

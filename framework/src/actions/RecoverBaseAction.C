@@ -58,7 +58,7 @@ RecoverBaseAction::act()
 
       std::string newest_recovery_file = newestRestartFileWithBase(getParam<OutFileBase>("file_base") + "_restart");
 
-      std::cout<<"\nUsing "<<newest_recovery_file<<" for recovery.\n"<<std::endl;
+      Moose::out << "\nUsing " << newest_recovery_file << " for recovery.\n" << std::endl;
 
       _app._recover_base = newest_recovery_file;
     }

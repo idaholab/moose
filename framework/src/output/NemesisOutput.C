@@ -116,7 +116,7 @@ NemesisOutput::outputPps(const std::string & /*file_base*/, const FormattedTable
   // If we didn't find anything, print an error message
   if ( rit == rend )
     {
-      std::cerr << "Input time: " << time
+      Moose::err << "Input time: " << time
                 << "\nLatest Table time: " << (*(table.getData().rbegin())).first << std::endl;
       mooseError("Time mismatch in outputting Nemesis global variables\n"
                  "Have the postprocessor values been computed with the correct time?");

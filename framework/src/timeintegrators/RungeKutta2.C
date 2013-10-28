@@ -76,7 +76,7 @@ RungeKutta2::solve()
   _fe_problem.copyOldSolutions();
 
   // ---------------------------------
-  std::cout << " 2. stage" << std::endl;
+  Moose::out << " 2. stage" << std::endl;
   _stage = 2;
   _fe_problem.time() = time;
   _fe_problem.timeOld() = time_half;

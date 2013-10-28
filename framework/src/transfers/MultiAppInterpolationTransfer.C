@@ -65,7 +65,7 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const std::string &
 void
 MultiAppInterpolationTransfer::execute()
 {
-  std::cout<<"Beginning InterpolationTransfer "<<_name<<std::endl;
+  Moose::out << "Beginning InterpolationTransfer " << _name << std::endl;
 
   switch(_direction)
   {
@@ -441,7 +441,7 @@ MultiAppInterpolationTransfer::execute()
     }
   }
 
-  std::cout<<"Finished InterpolationTransfer "<<_name<<std::endl;
+  Moose::out << "Finished InterpolationTransfer " << _name << std::endl;
 }
 
 Node * MultiAppInterpolationTransfer::getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end)

@@ -166,7 +166,7 @@ Adaptivity::adaptMesh()
 
     if (meshChanged && _print_mesh_changed)
     {
-      std::cout << "\nMesh Changed:\n";
+      Moose::out << "\nMesh Changed:\n";
       _mesh.printInfo();
     }
   }

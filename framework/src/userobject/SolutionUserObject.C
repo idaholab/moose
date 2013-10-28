@@ -199,9 +199,10 @@ SolutionUserObject::readExodusII()
   // Add the variables to the system
   for (unsigned int i = 0; i < _var_name.size(); ++i)
   {
-    std::cout << "Adding variable " << _var_name[i] << std::cout;
+    Moose::out << "Adding variable " << _var_name[i] << '\n';
     _system->add_variable(_var_name[i], FIRST);
   }
+  Moose::out.flush();
 
   // Initilize the equations systems
   _es->init();

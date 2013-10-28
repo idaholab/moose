@@ -59,8 +59,6 @@ ActionFactory::create(const std::string & action, const std::string & name, Inpu
   if (params.get<std::string>("action") == "")
     params.set<std::string>("action") = build_info->_action_name;
 
-//  std::cerr << "*** " << params.get<std::string>("name") << " " << params.get<std::string>("action") << " ***\n";
-
   return (*build_info->_build_pointer)(name, params);
 }
 

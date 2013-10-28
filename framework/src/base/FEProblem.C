@@ -2408,9 +2408,9 @@ FEProblem::outputPostprocessors(bool force/* = false*/)
   {
     if (force || (_postprocessor_screen_output && (_t_step % out().screen_interval() == 0)))
     {
-      std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
-      _pps_output_table_screen.printTable(std::cout, _pps_output_table_max_rows, _pps_fit_to_screen);
-      std::cout<<std::endl;
+      Moose::out << "\nPostprocessor Values:\n";
+      _pps_output_table_screen.printTable(Moose::out, _pps_output_table_max_rows, _pps_fit_to_screen);
+      Moose::out << std::endl;
     }
   }
 
@@ -2576,15 +2576,15 @@ FEProblem::execMultiApps(ExecFlagType type)
 
   if(multi_apps.size())
   {
-    std::cout<<"--Executing MultiApps--"<<std::endl;
+    Moose::out << "--Executing MultiApps--" << std::endl;
 
     for(unsigned int i=0; i<multi_apps.size(); i++)
       multi_apps[i]->solveStep(_dt, _time);
 
-    std::cout<<"--Waiting For Other Processors To Finish--"<<std::endl;
+    Moose::out << "--Waiting For Other Processors To Finish--" << std::endl;
     MooseUtils::parallelBarrierNotify();
 
-    std::cout<<"--Finished Executing MultiApps--"<<std::endl;
+    Moose::out << "--Finished Executing MultiApps--" << std::endl;
   }
 
   // Execute Transfers _from_ MultiApps
@@ -2592,14 +2592,14 @@ FEProblem::execMultiApps(ExecFlagType type)
     std::vector<Transfer *> transfers = _from_multi_app_transfers(type)[0].all();
     if(transfers.size())
     {
-      std::cout<<"--Starting Transfers From MultiApps--"<<std::endl;
+      Moose::out << "--Starting Transfers From MultiApps--" << std::endl;
       for(unsigned int i=0; i<transfers.size(); i++)
         transfers[i]->execute();
 
-      std::cout<<"--Waiting For Transfers To Finish--"<<std::endl;
+      Moose::out << "--Waiting For Transfers To Finish--" << std::endl;
       MooseUtils::parallelBarrierNotify();
 
-      std::cout<<"--Transfers To Finished--"<<std::endl;
+      Moose::out << "--Transfers To Finished--" << std::endl;
     }
   }
 }
@@ -2783,7 +2783,7 @@ void
 FEProblem::useFECache(bool fe_cache)
 {
   if(fe_cache)
-    std::cout<<std::endl<<"Utilizing FE Shape Function Caching"<<std::endl<<std::endl;
+    Moose::out << "\nUtilizing FE Shape Function Caching\n" << std::endl;
 
   unsigned int n_threads = libMesh::n_threads();
 
@@ -3521,17 +3521,18 @@ FEProblem::checkProblemIntegrity()
 #ifdef LIBMESH_ENABLE_AMR
     if (_material_props.hasStatefulProperties() && _adaptivity.isOn())
     {
-      std::cout<<"Using EXPERIMENTAL Stateful Material Property projection with Adaptivity!"<<std::endl;
+      Moose::out << "Using EXPERIMENTAL Stateful Material Property projection with Adaptivity!\n";
 
       if(libMesh::n_processors() > 1)
       {
-        std::cout<<std::endl<<"Warning! Mesh re-partitioning is disabled while using stateful material properties!  This can lead to large load imbalances and degraded performance!!"<<std::endl;
+        Moose::out << "\nWarning! Mesh re-partitioning is disabled while using stateful material properties!  This can lead to large load imbalances and degraded performance!!\n\n";
         _mesh.getMesh().skip_partitioning(true);
         if(_displaced_problem)
           _displaced_problem->mesh().getMesh().skip_partitioning(true);
       }
 
-      std::cout<<std::endl;
+      // flush buffer
+      Moose::out.flush();
     }
 #endif
 
@@ -3760,11 +3761,11 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
       if (var_name_size > max_name_size)
         max_name_size = var_name_size;
     }
-    std::cout<<"    |residual|_2 of individual variables:"<<std::endl;
+    Moose::out << "    |residual|_2 of individual variables:" << std::endl;
     for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
     {
       Real varResid = s.calculate_norm(*s.rhs,var_num,DISCRETE_L2);
-      std::cout<<std::setw(27-max_name_size)<<" "<<std::setw(max_name_size+2) //match position of overall NL residual
+      Moose::out<<std::setw(27-max_name_size)<<" "<<std::setw(max_name_size+2) //match position of overall NL residual
                <<std::left<<s.variable_name(var_num)+":"
                <<varResid<<std::endl;
     }
@@ -3928,7 +3929,7 @@ FEProblem::solverMode()
     for (unsigned int i=0; i<petsc_options.size(); ++i)
     {
       if (petsc_options[i] == "-snes")
-        mooseDoOnce(std::cout << "The PETSc Option: \"-snes\" is ignored.\n");
+        mooseDoOnce(Moose::out << "The PETSc Option: \"-snes\" is ignored.\n");
 
       if (petsc_options[i] == "-newton" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator" || petsc_options[i] == "-snes_fd")
       {

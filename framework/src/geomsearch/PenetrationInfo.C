@@ -35,11 +35,11 @@ dataStore(std::ostream & stream, PenetrationInfo * & pinfo, void * context)
     unsigned int i = 1;
     storeHelper(stream, i, context);
 
-    // std::cout<<"dataStore<PInfo> Node ptr: "<<pinfo->_node<<std::endl;
-    // std::cout<<"dataStore<PInfo> Node id: "<<pinfo->_node->id()<<std::endl;
-    // std::cout<<"dataStore<PInfo> Elem ptr: "<<pinfo->_elem<<std::endl;
-    // std::cout<<"dataStore<PInfo> Elem id: "<<pinfo->_elem->id()<<std::endl;
-    // std::cout<<"dataStore<PInfo> Side: "<<pinfo->_side_num<<std::endl;
+    // Moose::out<<"dataStore<PInfo> Node ptr: "<<pinfo->_node<<std::endl;
+    // Moose::out<<"dataStore<PInfo> Node id: "<<pinfo->_node->id()<<std::endl;
+    // Moose::out<<"dataStore<PInfo> Elem ptr: "<<pinfo->_elem<<std::endl;
+    // Moose::out<<"dataStore<PInfo> Elem id: "<<pinfo->_elem->id()<<std::endl;
+    // Moose::out<<"dataStore<PInfo> Side: "<<pinfo->_side_num<<std::endl;
 
     storeHelper(stream, pinfo->_node, context);
     storeHelper(stream, pinfo->_elem, context);
@@ -101,11 +101,11 @@ dataLoad(std::istream & stream, PenetrationInfo * & pinfo, void * context)
     loadHelper(stream, pinfo->_elem, context);
     loadHelper(stream, pinfo->_side_num, context);
 
-    // std::cout<<"dataLoad<PInfo> Node ptr: "<<pinfo->_node<<std::endl;
-    // std::cout<<"dataLoad<PInfo> Node id: "<<pinfo->_node->id()<<std::endl;
-    // std::cout<<"dataLoad<PInfo> Elem ptr: "<<pinfo->_elem<<std::endl;
-    // std::cout<<"dataLoad<PInfo> Elem id: "<<pinfo->_elem->id()<<std::endl;
-    // std::cout<<"dataLoad<PInfo> Side: "<<pinfo->_side_num<<std::endl;
+    // Moose::out<<"dataLoad<PInfo> Node ptr: "<<pinfo->_node<<std::endl;
+    // Moose::out<<"dataLoad<PInfo> Node id: "<<pinfo->_node->id()<<std::endl;
+    // Moose::out<<"dataLoad<PInfo> Elem ptr: "<<pinfo->_elem<<std::endl;
+    // Moose::out<<"dataLoad<PInfo> Elem id: "<<pinfo->_elem->id()<<std::endl;
+    // Moose::out<<"dataLoad<PInfo> Side: "<<pinfo->_side_num<<std::endl;
 
     pinfo->_side = pinfo->_elem->build_side(pinfo->_side_num, false).release();
 

@@ -182,7 +182,7 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
         local_out += _syntax_tree.printParams(name, *a_it->second, depth, local_search_string, local_found);
         found |= local_found;   // Update the current frame's found variable
         //DEBUG
-        // std::cout << "\n" << indent << "(" << ait->first << ")";
+        // Moose::out << "\n" << indent << "(" << ait->first << ")";
         //DEBUG
       }
 
@@ -191,7 +191,7 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
       local_out += _syntax_tree.printParams(name, *it->second, depth, local_search_string, local_found);
       found |= local_found;
       //DEBUG
-      // std::cout << "\n" << indent << "{" << it->first << "}";
+      // Moose::out << "\n" << indent << "{" << it->first << "}";
       //DEBUG
     }
 

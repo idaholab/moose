@@ -42,9 +42,9 @@ Predictor::apply(NumericVector<Number> & sln)
 {
   if (_dt_old > 0)
   {
-    std::streamsize cur_precision(std::cout.precision());
-    std::cout << "  Applying predictor with scale factor = " << std::fixed << std::setprecision(2) << _scale << std::endl;
-    std::cout << std::scientific << std::setprecision(cur_precision);
+    std::streamsize cur_precision(Moose::out.precision());
+    Moose::out << "  Applying predictor with scale factor = " << std::fixed << std::setprecision(2) << _scale << std::endl;
+    Moose::out << std::scientific << std::setprecision(cur_precision);
 
     Real dt_adjusted_scale_factor = _scale * _dt / _dt_old;
     if (dt_adjusted_scale_factor != 0.0)

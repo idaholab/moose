@@ -106,14 +106,7 @@ Real BilinearInterpolation::sample(Real xcoord, Real ycoord)
 	fxy += fQ12 * (x2 - x) * (y - y1);
 	fxy += fQ22 * (x - x1) * (y - y1);
 	fxy /= ((x2 - x1) * (y2 - y1));
-/*  std::cout << _xAxis[0] << "xAxis0 from sample" << std::endl;
-  std::cout << xcoord << "xcoord from sample" << std::endl;
-  std::cout << ycoord << "ycoord from sample" << std::endl;
-  std::cout << _zSurface(0,0) << "z(0,0) from sample" << std::endl;
-  std::cout << _zSurface(0,1) << "z(0,1) from sample" << std::endl;
-  std::cout << _zSurface(1,0) << "z(1,0) from sample" << std::endl;
-  std::cout << _zSurface(1,1) << "z(0,0) from sample" << std::endl;
-*/
-  return fxy;
+
+        return fxy;
 }
 

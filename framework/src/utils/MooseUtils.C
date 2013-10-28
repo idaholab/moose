@@ -123,11 +123,11 @@ parallelBarrierNotify()
   if (libMesh::processor_id() == 0)
   {
     // The master process is already through, so report it
-    std::cout << "Jobs complete: 1/" << libMesh::n_processors() << "\r" << std::flush;
+    Moose::out << "Jobs complete: 1/" << libMesh::n_processors() << "\r" << std::flush;
     for (unsigned int i=2; i<=libMesh::n_processors(); ++i)
     {
       Parallel::receive(MPI_ANY_SOURCE, slave_processor_id);
-      std::cout << "Jobs complete: " << i << "/" << libMesh::n_processors() << (i == libMesh::n_processors() ? "\n" : "\r") << std::flush;
+      Moose::out << "Jobs complete: " << i << "/" << libMesh::n_processors() << (i == libMesh::n_processors() ? "\n" : "\r") << std::flush;
     }
   }
   else

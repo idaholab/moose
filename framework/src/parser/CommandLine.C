@@ -145,8 +145,8 @@ CommandLine::printUsage() const
   std::string command((*_get_pot)[0]);
   command.substr(command.find_last_of("/\\")+1);
 
-  std::cout << "\nUsage: " << command << " [<options>]\n\n"
-            << "Options:\n" << std::left;
+  Moose::out << "\nUsage: " << command << " [<options>]\n\n"
+             << "Options:\n" << std::left;
 
   for (std::map<std::string, Option>::const_iterator i = _cli_options.begin(); i != _cli_options.end(); ++i)
   {
@@ -156,11 +156,11 @@ CommandLine::printUsage() const
       if (j) oss << " ";
       oss << i->second.cli_syntax[j];
     }
-    std::cout << "  " << std::setw(50) << oss.str() << i->second.description << "\n";
+    Moose::out << "  " << std::setw(50) << oss.str() << i->second.description << "\n";
   }
 
-  std::cout << "\nSolver Options:\n"
-            << "  See solver manual for details (Petsc or Trilinos)\n";
+  Moose::out << "\nSolver Options:\n"
+             << "  See solver manual for details (Petsc or Trilinos)\n";
 }
 
 void

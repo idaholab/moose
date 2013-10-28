@@ -31,7 +31,7 @@ PeriodicDistanceAux::PeriodicDistanceAux(const std::string & name, InputParamete
   for (unsigned int i=0; i<LIBMESH_DIM; ++i)
     if (_point(i) < _mesh.getMinInDimension(i) || _point(i) > _mesh.getMaxInDimension(i))
     {
-      std::cout << _mesh.getMinInDimension(i) << "\t" << _mesh.getMaxInDimension(i) << "\n";
+      Moose::out << _mesh.getMinInDimension(i) << "\t" << _mesh.getMaxInDimension(i) << "\n";
       mooseError("\"point\" is outside of the domain.");
     }
 }

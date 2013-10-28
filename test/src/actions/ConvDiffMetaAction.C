@@ -43,8 +43,6 @@ ConvDiffMetaAction::act()
 
   std::vector<NonlinearVariableName> variables = getParam<std::vector<NonlinearVariableName> > ("variables");
 
-//  std::cerr << "Acting on " << getParam<std::string>("built_by_action") << "\n\n";
-
   /**
    * We need to manually setup our Convection-Diffusion and Diffusion variables on our two
    * variables we are expecting from the input file.  Much of the syntax below is hidden by the

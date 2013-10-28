@@ -171,7 +171,7 @@ SetupMeshAction::act()
   if (_type == "MooseMesh")
   {
     mooseDeprecated();
-    std::cout << "Warning: MooseMesh is gone - please use FileMesh instead!";
+    Moose::err << "Warning: MooseMesh is gone - please use FileMesh instead!";
     _type = "FileMesh";
   }
 

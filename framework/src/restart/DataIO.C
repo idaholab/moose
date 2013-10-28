@@ -19,8 +19,6 @@ template<>
 void
 dataStore(std::ostream & stream, Real & v, void * /*context*/)
 {
-  //std::cout<<"Real dataStore"<<std::endl;
-
   stream.write((char *) &v, sizeof(v));
 }
 
@@ -28,7 +26,6 @@ template<>
 void
 dataStore(std::ostream & stream, std::string & v, void * /*context*/)
 {
-  //std::cout<<"std::string dataStore ("<<v<<")"<<std::endl;
   // Write the size of the string
   unsigned int size = v.size();
   stream.write((char *) &size, sizeof(size));
@@ -84,7 +81,7 @@ template<>
 void
 dataStore(std::ostream & stream, const Elem * & e, void * context)
 {
-  // std::cout<<"const Elem pointer store"<<std::endl;
+  // Moose::out<<"const Elem pointer store"<<std::endl;
 
 
   // TODO: Write out the unique ID of this elem
@@ -93,13 +90,13 @@ dataStore(std::ostream & stream, const Elem * & e, void * context)
   if(e)
   {
     id = e->id();
-    // std::cout<<"Storing Elem id: "<<id<<std::endl;
+    // Moose::out<<"Storing Elem id: "<<id<<std::endl;
     if(id == libMesh::DofObject::invalid_id)
       mooseError("Can't output Elems with invalid ids!");
   }
   else
   {
-    // std::cout<<"Outputting NULL Elem pointer"<<std::endl;
+    // Moose::out<<"Outputting NULL Elem pointer"<<std::endl;
   }
 
   storeHelper(stream, id, context);
@@ -109,7 +106,7 @@ template<>
 void
 dataStore(std::ostream & stream, const Node * & n, void * context)
 {
-  // std::cout<<"const Node pointer store"<<std::endl;
+  // Moose::out<<"const Node pointer store"<<std::endl;
 
 
   // TODO: Write out the unique ID of this node
@@ -118,13 +115,13 @@ dataStore(std::ostream & stream, const Node * & n, void * context)
   if(n)
   {
     id = n->id();
-    // std::cout<<"Storing Node id: "<<id<<std::endl;
+    // Moose::out<<"Storing Node id: "<<id<<std::endl;
     if(id == libMesh::DofObject::invalid_id)
       mooseError("Can't output Nodes with invalid ids!");
   }
   else
   {
-    // std::cout<<"Outputting NULL Node pointer"<<std::endl;
+    // Moose::out<<"Outputting NULL Node pointer"<<std::endl;
   }
 
   storeHelper(stream, id, context);
@@ -137,7 +134,7 @@ template<>
 void
 dataLoad(std::istream & stream, Real & v, void * /*context*/)
 {
-  // std::cout<<"Real dataLoad"<<std::endl;
+  // Moose::out<<"Real dataLoad"<<std::endl;
 
   stream.read((char *) &v, sizeof(v));
 }
@@ -146,13 +143,13 @@ template<>
 void
 dataLoad(std::istream & stream, std::string & v, void * /*context*/)
 {
-  // std::cout<<"std::string dataLoad"<<std::endl;
+  // Moose::out<<"std::string dataLoad"<<std::endl;
 
   // Read the size of the string
   unsigned int size = 0;
   stream.read((char *) &size, sizeof(size));
 
-  // std::cout<<"Size: "<<size<<std::endl;
+  // Moose::out<<"Size: "<<size<<std::endl;
 
   // Read the string
   char* s = new char[size+1];
@@ -225,7 +222,7 @@ dataLoad(std::istream & stream, const Elem * & e, void * context)
 
   MooseMesh * mesh = static_cast<MooseMesh *>(context);
 
-  // std::cout<<"Elem pointer load"<<std::endl;
+  // Moose::out<<"Elem pointer load"<<std::endl;
 
   // TODO: Write out the unique ID of this element
   dof_id_type id;
@@ -235,14 +232,14 @@ dataLoad(std::istream & stream, const Elem * & e, void * context)
   if(id != libMesh::DofObject::invalid_id)
   {
     e = mesh->elem(id);
-    // std::cout<<"Retrived Elem: "<<id<<std::endl;
-    // std::cout<<"Elem ptr: "<<e<<std::endl;
-    // std::cout<<"Elem id: "<<e->id()<<std::endl;
+    // Moose::out<<"Retrived Elem: "<<id<<std::endl;
+    // Moose::out<<"Elem ptr: "<<e<<std::endl;
+    // Moose::out<<"Elem id: "<<e->id()<<std::endl;
   }
   else
   {
     e = NULL;
-    // std::cout<<"NULL Elem"<<std::endl;
+    // Moose::out<<"NULL Elem"<<std::endl;
   }
 }
 
@@ -255,7 +252,7 @@ dataLoad(std::istream & stream, const Node * & n, void * context)
 
   MooseMesh * mesh = static_cast<MooseMesh *>(context);
 
-  // std::cout<<"Node pointer load"<<std::endl;
+  // Moose::out<<"Node pointer load"<<std::endl;
 
   // TODO: Write out the unique ID of this nodeent
   dof_id_type id;
@@ -265,11 +262,11 @@ dataLoad(std::istream & stream, const Node * & n, void * context)
   if(id != libMesh::DofObject::invalid_id)
   {
     n = mesh->nodePtr(id);
-    // std::cout<<"Retrived Node: "<<id<<std::endl;
+    // Moose::out<<"Retrived Node: "<<id<<std::endl;
   }
   else
   {
     n = NULL;
-    // std::cout<<"NULL Node"<<std::endl;
+    // Moose::out<<"NULL Node"<<std::endl;
   }
 }

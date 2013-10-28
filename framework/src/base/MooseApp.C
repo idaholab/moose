@@ -173,12 +173,12 @@ MooseApp::setupOptions()
   else if (isParamValid("syntax"))
   {
     std::multimap<std::string, Syntax::ActionInfo> syntax = _syntax.getAssociatedActions();
-    std::cout << "**START SYNTAX DATA**\n";
+    Moose::out << "**START SYNTAX DATA**\n";
     for (std::multimap<std::string, Syntax::ActionInfo>::iterator it = syntax.begin(); it != syntax.end(); ++it)
     {
-      std::cout << it->first << "\n";
+      Moose::out << it->first << "\n";
     }
-    std::cout << "**END SYNTAX DATA**\n" << std::endl;
+    Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
   }
   else if(_input_filename != "") // They already specified an input filename
@@ -237,7 +237,7 @@ MooseApp::runInputFile()
   // Print the input file syntax if requested
   if (isParamValid("show_input"))
   {
-    _action_warehouse.printInputFile(std::cout);
+    _action_warehouse.printInputFile(Moose::out);
   }
 
   _action_warehouse.executeAllActions();
@@ -527,5 +527,5 @@ MooseApp::printSimulationInfo()
   }
 
 
-  std::cout << oss.str();
+  Moose::out << oss.str();
 }

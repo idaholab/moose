@@ -268,7 +268,7 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_
     if (error_on_warn)
       mooseError(oss.str());
     else
-      std::cout << oss.str();
+      Moose::out << oss.str();
   }
 }
 
@@ -295,7 +295,7 @@ Parser::checkOverriddenParams(bool error_on_warn)
     if (error_on_warn)
       mooseError(oss.str());
     else
-      std::cout << oss.str();
+      Moose::out << oss.str();
   }
 }
 
@@ -388,7 +388,7 @@ Parser::buildFullTree(const std::string &search_string)
     }
   }
 
-  std::cout << _syntax_formatter->print(search_string);
+  Moose::out << _syntax_formatter->print(search_string);
 }
 
 

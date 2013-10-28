@@ -375,9 +375,9 @@ ColumnMajorMatrix::print()
   for(unsigned int i=0; i<_n_rows; i++)
   {
     for(unsigned int j=0; j<_n_cols; j++)
-      std::cout << std::setw(15) <<s(i,j)<<" ";
+      Moose::out << std::setw(15) <<s(i,j)<<" ";
 
-    std::cout <<std::endl;
+    Moose::out <<std::endl;
   }
 }
 

@@ -106,7 +106,7 @@ DT2::step()
     _aux1->close();
 
     // take two steps with dt/2
-    std::cout << "Taking two dt/2 time steps" << std::endl;
+    Moose::out << "Taking two dt/2 time steps" << std::endl;
 
     // restore solutions to the original state
     *nl_sys.current_local_solution = *_u_saved;
@@ -122,7 +122,7 @@ DT2::step()
     // Compute Post-Aux User Objects (Timestep begin)
     _fe_problem.computeUserObjects();
 
-    std::cout << "  - 1. step" << std::endl;
+    Moose::out << "  - 1. step" << std::endl;
     Moose::setSolverDefaults(_fe_problem);
     nl.solve();
     _converged = nl.converged();
@@ -138,7 +138,7 @@ DT2::step()
       _fe_problem.onTimestepBegin();
       _fe_problem.computeUserObjects();
 
-      std::cout << "  - 2. step" << std::endl;
+      Moose::out << "  - 2. step" << std::endl;
       Moose::setSolverDefaults(_fe_problem);
       nl.solve();
       _converged = nl.converged();
@@ -212,8 +212,8 @@ void
 DT2::rejectStep()
 {
   if (_error >= _e_max)
-    std::cout << "DT2Transient: Marking last solve not converged since |U2-U1|/max(|U2|,|U1|) = "
-              << _error << " >= e_max." << std::endl;
+    Moose::out << "DT2Transient: Marking last solve not converged since |U2-U1|/max(|U2|,|U1|) = "
+               << _error << " >= e_max." << std::endl;
 
   TransientNonlinearImplicitSystem & nl_sys = _fe_problem.getNonlinearSystem().sys();
   TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();

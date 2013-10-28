@@ -111,9 +111,9 @@ SolutionTimeAdaptiveDT::computeDT()
 void
 SolutionTimeAdaptiveDT::rejectStep()
 {
-  std::cout<<"Solve failed... cutting timestep"<<std::endl;
+  Moose::out << "Solve failed... cutting timestep" << std::endl;
   if (_adapt_log)
-    _adaptive_log<<"Solve failed... cutting timestep"<<std::endl;
+    _adaptive_log << "Solve failed... cutting timestep" << std::endl;
 
   TimeStepper::rejectStep();
 }

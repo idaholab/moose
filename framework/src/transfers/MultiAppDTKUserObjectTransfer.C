@@ -58,21 +58,21 @@ MultiAppDTKUserObjectTransfer::execute()
 
     _src_to_tgt_map = new DataTransferKit::VolumeSourceMap<DataTransferKit::Box, GlobalOrdinal, DataTransferKit::MeshContainer<GlobalOrdinal> >(_comm_default, 3, true);
 
-    std::cout<<"--Setting Up Transfer--"<<std::endl;
+    Moose::out << "--Setting Up Transfer--" << std::endl;
     if(_variable->isNodal())
       _src_to_tgt_map->setup(_multi_app_geom, _to_adapter->get_target_coords());
     else
       _src_to_tgt_map->setup(_multi_app_geom, _to_adapter->get_elem_target_coords());
 
-    std::cout<<"--Transfer Setup Complete--"<<std::endl;
+    Moose::out << "--Transfer Setup Complete--" << std::endl;
 
     _to_values = _to_adapter->get_values_to_fill(_variable->name());
 
   }
 
-  std::cout<<"--Mapping Values--"<<std::endl;
+  Moose::out << "--Mapping Values--" << std::endl;
   _src_to_tgt_map->apply(_field_evaluator, _to_values);
-  std::cout<<"--Finished Mapping--"<<std::endl;
+  Moose::out << "--Finished Mapping--" << std::endl;
 
   _to_adapter->update_variable_values(_variable->name(), _src_to_tgt_map->getMissedTargetPoints());
   _multi_app->problem()->es().update();

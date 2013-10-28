@@ -42,7 +42,7 @@ AppFactory::createApp(std::string app_type, int argc, char ** argv)
   MooseApp * app = AppFactory::instance().create(app_type, "main", app_params);
 
   // print out the System Info here!
-  std::cout << app->getSysInfo();
+  Moose::out << app->getSysInfo();
 
   return app;
 }

@@ -80,7 +80,7 @@ CoupledTransientExecutioner::execute()
 
     for (unsigned int i = 0; i < n_problems; i++)
     {
-      std::cout << "Solving '" << _fep_mapping[_fe_problems[i]] << "'" << std::endl;
+      Moose::out << "Solving '" << _fep_mapping[_fe_problems[i]] << "'" << std::endl;
       trans[i]->takeStep(_dt);
       projectVariables(*_fe_problems[(i + 1) % n_problems]);
     }

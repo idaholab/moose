@@ -49,7 +49,7 @@ MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const std::string & n
 void
 MultiAppMeshFunctionTransfer::execute()
 {
-  std::cout<<"Beginning MeshFunctionTransfer "<<_name<<std::endl;
+  Moose::out << "Beginning MeshFunctionTransfer " << _name << std::endl;
 
   switch(_direction)
   {
@@ -295,6 +295,6 @@ MultiAppMeshFunctionTransfer::execute()
     }
   }
 
-  std::cout<<"Finished MeshFunctionTransfer "<<_name<<std::endl;
+  Moose::out << "Finished MeshFunctionTransfer " << _name << std::endl;
 }
 

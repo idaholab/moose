@@ -243,48 +243,49 @@ MaterialWarehouse::printMaterialMap()
     switch (map_num)
     {
     case 0:
-      std::cout << " Active materials on blocks:" << std::endl;
+      Moose::out << " Active materials on blocks:\n";
       break;
     case 1:
-      std::cout << " Active face materials on blocks:" << std::endl;
+      Moose::out << " Active face materials on blocks:\n";
       break;
     case 2:
-      std::cout << " Active neighboring materials on blocks:" << std::endl;
+      Moose::out << " Active neighboring materials on blocks:\n";
       break;
     }
 
     for (std::map<SubdomainID, std::vector<Material *> >::iterator k = (*i)->begin(); k != (*i)->end(); ++k)
     {
-      std::cout << "  block ID = " << k->first << ":" << std::endl;
+      Moose::out << "  block ID = " << k->first << ":\n";
       for (unsigned int l=0; l<k->second.size(); l++)
       {
-        std::cout << "   material = " << k->second[l]->name() << ":" << std::endl;
+        Moose::out << "   material = " << k->second[l]->name() << ":\n";
 
         for (std::set<std::string>::const_iterator it=k->second[l]->getSuppliedItems().begin();
              it!=k->second[l]->getSuppliedItems().end(); it++)
-          std::cout << "    " << *it << std::endl;
+          Moose::out << "    " << *it << std::endl;
       }
-      std::cout << std::endl;
+      Moose::out << '\n';
     }
 
     ++map_num;
   }
 
-  std::cout << " Active materials on side sets:" << std::endl;
+  Moose::out << " Active materials on side sets:\n";
   for (std::map<BoundaryID, std::vector<Material *> >::iterator k = _active_boundary_materials.begin();
        k != _active_boundary_materials.end(); ++k)
   {
-    std::cout << "  side set ID = " << k->first << ":" << std::endl;
+    Moose::out << "  side set ID = " << k->first << ":\n";
     for (unsigned int l=0; l<k->second.size(); l++)
     {
-      std::cout << "   material = " << k->second[l]->name() << ":" << std::endl;
+      Moose::out << "   material = " << k->second[l]->name() << ":\n";
 
       for (std::set<std::string>::const_iterator it=k->second[l]->getSuppliedItems().begin();
            it!=k->second[l]->getSuppliedItems().end(); it++)
-        std::cout << "    " << *it << std::endl;
+        Moose::out << "    " << *it << '\n';
     }
-    std::cout << std::endl;
+    Moose::out << '\n';
   }
+  Moose::out.flush();
 }
 
 void

@@ -125,7 +125,7 @@ bool CommandLine::search(const std::string &option_name, T & argument)
 
     if (pos->second.required)
     {
-      std::cout << "Required parameter: " << option_name << " missing\n";
+      Moose::err << "Required parameter: " << option_name << " missing\n";
       printUsage();
     }
   }

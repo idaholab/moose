@@ -25,11 +25,11 @@ InputParameters validParams<MooseTestProblem>()
 MooseTestProblem::MooseTestProblem(const std::string & name, InputParameters params) :
     FEProblem(name, params)
 {
-  std::cout << "Hello, I am your FEProblem-derived class and my name is '" << this->name() << "'" << std::endl;
+  Moose::out << "Hello, I am your FEProblem-derived class and my name is '" << this->name() << "'" << std::endl;
 }
 
 MooseTestProblem::~MooseTestProblem()
 {
-  std::cout << "Goodbye!" << std::endl;
+  Moose::out << "Goodbye!" << std::endl;
 }
 

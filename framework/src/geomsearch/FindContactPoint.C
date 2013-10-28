@@ -205,7 +205,7 @@ findContactPoint(PenetrationInfo & p_info,
 
 /*
   if(nit == 12 && update_size > TOLERANCE*TOLERANCE)
-    std::cerr<<"Warning!  Newton solve for contact point failed to converge!"<<std::endl;
+    Moose::err<<"Warning!  Newton solve for contact point failed to converge!"<<std::endl;
 */
 
   p_info._closest_point_ref = ref_point;

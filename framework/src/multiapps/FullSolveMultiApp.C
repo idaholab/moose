@@ -69,7 +69,7 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/)
   if(_solved)
     return;
 
-  std::cout<<"Fully Solving MultiApp "<<_name<<std::endl;
+  Moose::out << "Fully Solving MultiApp " << _name << std::endl;
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
@@ -89,5 +89,5 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/)
 
   _solved = true;
 
-  std::cout<<"Finished Solving MultiApp "<<_name<<std::endl;
+  Moose::out << "Finished Solving MultiApp " << _name << std::endl;
 }

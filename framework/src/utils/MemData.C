@@ -83,7 +83,6 @@ void MemData::get_current_mem_usage(long& mem_in_kB, struct rusage& r_usage)
 #elif __linux // compiler predefines for Linux, http://predef.sourceforge.net/preos.html
 
   pid_t pid = getpid();
-  // std::cout << "process ID for this process is " << pid << std::endl;
 
   // Open the status file
   std::ostringstream oss;
@@ -101,8 +100,6 @@ void MemData::get_current_mem_usage(long& mem_in_kB, struct rusage& r_usage)
       // way because std::getline may have set EOF.
       if (file)
 	{
-	  // std::cout << "line=" << line << std::endl;
-
 	  // Search line for "VmSize"
 	  size_t start = line.find("VmSize");
 
@@ -112,7 +109,6 @@ void MemData::get_current_mem_usage(long& mem_in_kB, struct rusage& r_usage)
 	      std::istringstream iss(line);
 	      std::string key, units;
 	      iss >> key >> mem_in_kB >> units;
-	      //std::cout << "Found VmSize=" << this->mem_in_kB << ' ' << units << std::endl;
 
 	      // Sanity check, I've never seen a Linux that didn't report values in kB
 	      if (units != "kB")
