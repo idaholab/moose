@@ -45,6 +45,10 @@ void
 ParsedFunctionTest::finalize()
 {
   delete _fe_problem;
+  _fe_problem = NULL;
+
+  delete _app;
+  _app = NULL;
 }
 
 
