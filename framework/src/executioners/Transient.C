@@ -99,7 +99,6 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _ss_tmin(getParam<Real>("ss_tmin")),
     _old_time_solution_norm(declareRestartableData<Real>("old_time_solution_norm", 0.0)),
     _sync_times(getParam<std::vector<Real> >("sync_times").begin(),getParam<std::vector<Real> >("sync_times").end()),
-    _remaining_sync_time(declareRestartableData<bool>("remaining_sync_time", true)),
     _abort(getParam<bool>("abort_on_solve_fail")),
     _time_interval(declareRestartableData<bool>("time_interval", false)),
     _start_time(getParam<Real>("start_time")),
@@ -110,6 +109,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 {
   _t_step = 0;
   _dt = 0;
+  _next_interval_output_time = 0.0;
+
 
   // Either a start_time has been forced on us, or we want to tell the App about what our start time is (in case anyone else is interested.
   if(_app.hasStartTime())
@@ -344,16 +345,29 @@ Transient::endStep()
     // Compute the Error Indicators and Markers
     _problem.computeIndicatorsAndMarkers();
 
+    // If there are sync times at or before the current time, delete them
+    while (!_sync_times.empty() && _time + _timestep_tolerance >= *_sync_times.begin())
+    {
+      _sync_times.erase(_sync_times.begin());
+    }
+
     //output
     if(_time_interval)
     {
-      if(std::abs(_time-(_prev_sync_time))<=_dtmin || (_t_step % _problem.out().interval() == 0 && _problem.out().interval() > 1))
+      //Force output if the current time is at an output interval
+      if(std::abs(_time-_next_interval_output_time)<=_timestep_tolerance
+         || (_problem.out().interval() > 1 && _t_step % _problem.out().interval() == 0))
       {
         if(_allow_output)
         {
           _problem.output(true);
           _problem.outputPostprocessors(true);
         }
+      }
+      //Set the time for the next output interval if we're at an output interval
+      if(std::abs(_time-_next_interval_output_time)<=_timestep_tolerance)
+      {
+        _next_interval_output_time += _time_interval_output_interval;
       }
     }
     else
@@ -398,25 +412,13 @@ Transient::computeConstrainedDT()
   if (_time + dt_cur > _end_time)
     dt_cur = _end_time - _time;
 
-  // Adjust to a sync time if supplied and skipped over
-  if (_remaining_sync_time && _time + dt_cur + _timestep_tolerance >= (*_sync_times.begin()))
+  // Adjust to a sync time if supplied
+  if (!_sync_times.empty() && _time + dt_cur + _timestep_tolerance >= (*_sync_times.begin()))
   {
-    if (fabs(*_sync_times.begin() - _time) >= _timestep_tolerance)
-    {
-      dt_cur = *_sync_times.begin() - _time;
-    }
-    _prev_sync_time = *_sync_times.begin();
-    _sync_times.erase(_sync_times.begin());
-    if(_time_interval)
-    {
-      Real d = (_time + dt_cur - _start_time) / _time_interval_output_interval;
-      if (d-std::floor(d) <= _timestep_tolerance || std::ceil(d)-d <= _timestep_tolerance)
-      {
-        _sync_times.insert((_time + dt_cur + _time_interval_output_interval));
-      }
-    }
-    if (_sync_times.begin() == _sync_times.end())
-      _remaining_sync_time = false;
+    dt_cur = *_sync_times.begin() - _time;
+
+    if (dt_cur <= 0.0)
+      mooseError("Adjusting to sync time resulted in a non-positive time step.  dt: "<<dt_cur<<" sync time: "<<*_sync_times.begin()<<" time: "<<_time);
 
     _prev_dt = dt_cur;
     _reset_dt = true;
@@ -440,6 +442,15 @@ Transient::computeConstrainedDT()
   multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP);
   if(multi_app_dt < dt_cur)
     dt_cur = multi_app_dt;
+
+  // Don't let time go beyond next time interval output if specified
+  if ((_time_interval) &&
+      (_time + dt_cur + _timestep_tolerance >= _next_interval_output_time))
+  {
+    dt_cur = _next_interval_output_time - _time;
+    _prev_dt = _dt;
+    _reset_dt = true;
+  }
 
   // Adjust to a target time if set
   if (_target_time > 0 && _time + dt_cur + _timestep_tolerance >= _target_time)
@@ -492,7 +503,7 @@ Transient::keepGoing()
   if(_t_step>_num_steps)
     keep_going = false;
 
-  if((_time>_end_time) || (fabs(_time-_end_time)<_timestep_tolerance))
+  if((_time>_end_time) || (fabs(_time-_end_time)<=_timestep_tolerance))
     keep_going = false;
 
   if(!keep_going && !_problem.out().wasOutput())
@@ -528,23 +539,17 @@ Transient::preExecute()
   {
     _time_interval = true;
     _time_interval_output_interval = _problem.out().timeinterval();
-    _sync_times.insert((_time + _time_interval_output_interval));
+    _next_interval_output_time = _time + _time_interval_output_interval;
   }
   // process time periods
   const std::vector<TimePeriod *> time_periods = _problem.getTimePeriods();
   for (unsigned int i = 0; i < time_periods.size(); ++i)
     _sync_times.insert(time_periods[i]->start());
 
-  // Advance to the first sync time if one is provided in sim time range
-  while (_remaining_sync_time && *_sync_times.begin() <= _time)
+  // Delete all sync times that are at or before the begin time
+  while (!_sync_times.empty() && _time + _timestep_tolerance >= *_sync_times.begin())
   {
     _sync_times.erase(_sync_times.begin());
-    if (_sync_times.begin() == _sync_times.end())
-      _remaining_sync_time = false;
-  }
-  if(_remaining_sync_time)
-  {
-    _prev_sync_time = *_sync_times.begin();
   }
 }
 

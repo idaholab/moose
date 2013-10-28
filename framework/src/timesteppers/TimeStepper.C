@@ -37,6 +37,8 @@ TimeStepper::TimeStepper(const std::string & name, InputParameters parameters) :
     _dt(_fe_problem.dt()),
     _dt_min(_executioner.dtMin()),
     _dt_max(_executioner.dtMax()),
+    _end_time(_executioner.endTime()),
+    _timestep_tol(_executioner.timestepTol()),
     _converged(true),
     _reset_dt(getParam<bool>("reset_dt")),
     _has_reset_dt(false),

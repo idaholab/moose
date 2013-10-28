@@ -123,6 +123,8 @@ protected:
   Real & _dt;
   Real & _dt_min;
   Real & _dt_max;
+  Real & _end_time;
+  Real & _timestep_tol;
 
   /// Whether or not the previous solve converged.
   bool _converged;

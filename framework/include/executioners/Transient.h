@@ -173,6 +173,18 @@ public:
   Real & dtMin() { return _dtmin; }
 
   /**
+   * Get the end time
+   * @return The end time
+   */
+  Real & endTime() { return _end_time; }
+
+  /**
+   * Get the timestep tolerance
+   * @return The timestep tolerance
+   */
+  Real & timestepTol() { return _timestep_tolerance; }
+
+  /**
    * Set (or reset) the output position of the application.
    */
   virtual void setOutputPosition(const Point & p) { _problem.setOutputPosition(p); }
@@ -220,14 +232,13 @@ protected:
   Real & _old_time_solution_norm;
 
   std::set<Real> _sync_times;
-  Real _prev_sync_time;
-  bool & _remaining_sync_time;
 
   bool _abort;
   ///if to use time interval output
   bool & _time_interval;
   ///the output interval to use
   Real _time_interval_output_interval;
+  Real _next_interval_output_time;
   Real _start_time;
   Real _timestep_tolerance;
   Real & _target_time;
