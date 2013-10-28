@@ -145,7 +145,7 @@ AddCoupledEqSpeciesKernelsAction::act()
           secondary = true;
       }
       else
-        mooseError("Error parsing term: " << term);
+        mooseError("Error parsing term: " << term.as_string());
     }
     
     std::cout << "\nEquilibrium Species: " << eq_species[n_reactions-1] << std::endl;
