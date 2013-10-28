@@ -97,6 +97,7 @@ NodalFloodCount::initialize()
   for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
   {
     _bubble_maps[map_num].clear();
+    _bubble_sets[map_num].clear();
     _region_counts[map_num] = 0;
     _nodes_visited[map_num].clear();
 
@@ -334,10 +335,7 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
   unsigned int curr_set_length=0;
   std::set<unsigned int> curr_set;
   unsigned int curr_var_idx = std::numeric_limits<unsigned int>::max();
-
-  for (unsigned int i=0; i<_maps_size; ++i)
-    _bubble_sets[i].clear();
-
+  
   _region_to_var_idx.clear();
   for (unsigned int i=0; i<packed_data.size(); ++i)
   {
