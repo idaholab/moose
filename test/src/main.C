@@ -11,8 +11,6 @@ int main(int argc, char *argv[])
   // Initialize MPI, solvers and MOOSE
   MooseInit init(argc, argv);
 
-  std::cout << "Thanks for running moose_test, have a nice day!\n";
-
   // Register this application's MooseApp and any it depends on
   MooseTestApp::registerApps();
 
