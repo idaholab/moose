@@ -56,4 +56,10 @@
     input = 'GrGr_test_explicit.i'
     exodiff = 'explicit.e'
   [../]
+
+  [./GrGrVoronoi3D_test]
+    type = 'Exodiff'
+    input = 'GrGr_voronoi_columnar3D_test.i'
+    exodiff = 'voronoi3D.e'
+  [../]
 []
