@@ -39,6 +39,8 @@ protected:
   const unsigned int _y_var;
   const unsigned int _z_var;
 
+  const unsigned int _mesh_dimension;
+  
   const RealVectorValue _vars;
 };
 

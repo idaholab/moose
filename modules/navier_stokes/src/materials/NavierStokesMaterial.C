@@ -33,9 +33,10 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
                                            InputParameters parameters)
     :
     Material(name, parameters),
+    _mesh_dimension(_mesh.dimension()),
     _grad_u(coupledGradient("u")),
     _grad_v(coupledGradient("v")),
-    _grad_w(_dim==3 ? coupledGradient("w") : _grad_zero),
+    _grad_w(_mesh_dimension == 3 ? coupledGradient("w") : _grad_zero),
    
     _viscous_stress_tensor(declareProperty<RealTensorValue>("viscous_stress_tensor")),
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
@@ -61,7 +62,7 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     // Coupled solution values needed for computing SUPG stabilization terms
     _u_vel(coupledValue("u")),
     _v_vel(coupledValue("v")),
-    _w_vel(_dim == 3 ? coupledValue("w") : _zero),
+    _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
 
     _temperature(coupledValue("temperature")),
     _enthalpy(coupledValue("enthalpy")),
@@ -70,21 +71,21 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     _rho(coupledValue("rho")),
     _rho_u(coupledValue("rhou")),
     _rho_v(coupledValue("rhov")),
-    _rho_w( _dim == 3 ? coupledValue("rhow") : _zero),
+    _rho_w(_mesh.dimension() == 3 ? coupledValue("rhow") : _zero),
     _rho_e(coupledValue("rhoe")),
     
     // Time derivative values
     _drho_dt(coupledDot("rho")),
     _drhou_dt(coupledDot("rhou")),
     _drhov_dt(coupledDot("rhov")),
-    _drhow_dt( _dim == 3 ? coupledDot("rhow") : _zero),
+    _drhow_dt( _mesh.dimension() == 3 ? coupledDot("rhow") : _zero),
     _drhoe_dt(coupledDot("rhoe")),
     
     // Gradients
     _grad_rho(coupledGradient("rho")),
     _grad_rho_u(coupledGradient("rhou")),
     _grad_rho_v(coupledGradient("rhov")),
-    _grad_rho_w( _dim == 3 ? coupledGradient("rhow") : _grad_zero),
+    _grad_rho_w( _mesh.dimension() == 3 ? coupledGradient("rhow") : _grad_zero),
     _grad_rho_e(coupledGradient("rhoe")),
 
     // Material properties for stabilization
@@ -193,7 +194,7 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
   mooseAssert(qp < _detady.size(), "Insufficient data in detady array!");
   mooseAssert(qp < _detadz.size(), "Insufficient data in detadz array!");
     
-  if (_dim == 3)
+  if (_mesh_dimension == 3)
   {
     mooseAssert(qp < _dzetadx.size(), "Insufficient data in dzetadx array!");
     mooseAssert(qp < _dzetady.size(), "Insufficient data in dzetady array!");
@@ -218,7 +219,7 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
   }
 
   // The last row of entries available only for 3D elements.
-  if (_dim == 3)
+  if (_mesh_dimension == 3)
   {
     dxi_dx[2][0] = _dzetadx[qp];   dxi_dx[2][1] = _dzetady[qp];   dxi_dx[2][2] = _dzetadz[qp];
   }
@@ -502,7 +503,7 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   _strong_residuals[qp][2] = _drhov_dt[qp] + mom_resid(1);
 
   // The z-momentum strong residual, viscous terms neglected.
-  if (_dim == 3)
+  if (_mesh_dimension == 3)
     _strong_residuals[qp][3] = _drhow_dt[qp] + mom_resid(2);
   else
     _strong_residuals[qp][3] = 0.;

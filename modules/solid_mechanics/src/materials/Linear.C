@@ -15,7 +15,7 @@ Linear::Linear(const std::string & name,
    _large_strain(getParam<bool>("large_strain")),
    _grad_disp_x(coupledGradient("disp_x")),
    _grad_disp_y(coupledGradient("disp_y")),
-   _grad_disp_z(_dim == 3 ? coupledGradient("disp_z") : _grad_zero)
+   _grad_disp_z(_mesh.dimension() == 3 ? coupledGradient("disp_z") : _grad_zero)
 {
 }
 

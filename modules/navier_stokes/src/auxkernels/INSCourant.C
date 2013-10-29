@@ -16,8 +16,8 @@ InputParameters validParams<INSCourant>()
 INSCourant::INSCourant(const std::string & name, InputParameters parameters)
   :AuxKernel(name, parameters),
   _u_vel(coupledValue("u")),
-  _v_vel(_dim >= 2 ? coupledValue("v") : _zero),
-  _w_vel(_dim == 3 ? coupledValue("w") : _zero)
+  _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
+  _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero)
 {}
 
 Real

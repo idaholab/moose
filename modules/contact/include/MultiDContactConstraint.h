@@ -64,6 +64,8 @@ protected:
   unsigned int _y_var;
   unsigned int _z_var;
 
+  const unsigned int _mesh_dimension;
+
   RealVectorValue _vars;
 };
 

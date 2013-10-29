@@ -16,8 +16,8 @@ InputParameters validParams<INSDivergenceAux>()
 INSDivergenceAux::INSDivergenceAux(const std::string & name, InputParameters parameters)
   :AuxKernel(name, parameters),
   _grad_u_vel(coupledGradient("u")),
-  _grad_v_vel(_dim >= 2 ? coupledGradient("v") : _grad_zero),
-  _grad_w_vel(_dim == 3 ? coupledGradient("w") : _grad_zero)
+  _grad_v_vel(_mesh.dimension() >= 2 ? coupledGradient("v") : _grad_zero),
+  _grad_w_vel(_mesh.dimension() == 3 ? coupledGradient("w") : _grad_zero)
 {}
 
 Real

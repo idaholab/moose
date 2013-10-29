@@ -24,6 +24,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   
 private:
+  const unsigned int _mesh_dimension;
+  
   unsigned int _x_var;
   VariableValue  & _x;
   VariableGradient & _grad_x;

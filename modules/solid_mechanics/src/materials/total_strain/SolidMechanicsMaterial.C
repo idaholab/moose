@@ -22,7 +22,7 @@ SolidMechanicsMaterial::SolidMechanicsMaterial(const std::string & name, InputPa
    _appended_property_name( getParam<std::string>("appended_property_name") ),
    _grad_disp_x(coupledGradient("disp_x")),
    _grad_disp_y(coupledGradient("disp_y")),
-   _grad_disp_z(_dim == 3 ? coupledGradient("disp_z") : _grad_zero),
+   _grad_disp_z(_mesh.dimension() == 3 ? coupledGradient("disp_z") : _grad_zero),
    _has_temp(isCoupled("temp")),
    _temp(_has_temp ? coupledValue("temp") : _zero),
    _has_c(isCoupled("c")),

@@ -46,6 +46,7 @@ SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters param
    _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
    _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
    _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
+   _mesh_dimension(_mesh.dimension()),
    _vars(_x_var, _y_var, _z_var)
 {
   if (parameters.isParamValid("tangential_tolerance"))
@@ -119,7 +120,7 @@ SlaveConstraint::computeQpResidual()
   Real resid(0);
   RealVectorValue res_vec;
   // Build up residual vector
-  for(unsigned int i=0; i<_dim; ++i)
+  for(unsigned int i=0; i<_mesh_dimension; ++i)
   {
     int dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);
@@ -268,7 +269,7 @@ SlaveConstraint::computeQpJacobian()
     const RealGradient & A1( pinfo->_dxyzdxi [0] );
     RealGradient A2;
     RealGradient d2;
-    if ( _dim == 3 )
+    if ( _mesh_dimension == 3 )
     {
       A2 = pinfo->_dxyzdeta[0];
       d2 = pinfo->_d2xyzdxideta[0];
@@ -290,14 +291,14 @@ SlaveConstraint::computeQpJacobian()
     Real invD11(0);
     Real invD12(0);
     Real invD22(0);
-    if ( _dim == 3)
+    if ( _mesh_dimension == 3)
     {
       const Real detD( D11*D22 - D12*D12 );
       invD11 =  D22/detD;
       invD12 = -D12/detD;
       invD22 =  D11/detD;
     }
-    else if ( _dim == 2 )
+    else if ( _mesh_dimension == 2 )
     {
       invD11 = 1 / D11;
     }

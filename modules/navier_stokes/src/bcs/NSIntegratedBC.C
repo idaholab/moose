@@ -31,26 +31,26 @@ NSIntegratedBC::NSIntegratedBC(const std::string & name, InputParameters paramet
       // Coupled variables
       _u_vel(coupledValue("u")),
       _v_vel(coupledValue("v")),
-      _w_vel(_dim == 3 ? coupledValue("w") : _zero),
+      _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
 
       _rho(coupledValue("rho")),
       _rho_u(coupledValue("rhou")),
       _rho_v(coupledValue("rhov")),
-      _rho_w( _dim == 3 ? coupledValue("rhow") : _zero),
+      _rho_w(_mesh.dimension() == 3 ? coupledValue("rhow") : _zero),
       _rho_e(coupledValue("rhoe")),
 
       // Gradients
       _grad_rho(coupledGradient("rho")),
       _grad_rho_u(coupledGradient("rhou")),
       _grad_rho_v(coupledGradient("rhov")),
-      _grad_rho_w( _dim == 3 ? coupledGradient("rhow") : _grad_zero),
+      _grad_rho_w(_mesh.dimension() == 3 ? coupledGradient("rhow") : _grad_zero),
       _grad_rho_e(coupledGradient("rhoe")),
 
       // Variable numberings
       _rho_var_number( coupled("rho") ),
       _rhou_var_number( coupled("rhou") ),
       _rhov_var_number( coupled("rhov") ),
-      _rhow_var_number( _dim == 3 ? coupled("rhow") : libMesh::invalid_uint),
+      _rhow_var_number(_mesh.dimension() == 3 ? coupled("rhow") : libMesh::invalid_uint),
       _rhoe_var_number( coupled("rhoe") ),
       
       // Material properties

@@ -12,7 +12,8 @@ SolidMechTempCouple::SolidMechTempCouple(const std::string & name, InputParamete
   :SolidMech(name, parameters),
     _temp_var(coupled("temp")),
     _thermal_strain(getMaterialProperty<Real>("thermal_strain")),
-    _alpha(getMaterialProperty<Real>("alpha"))
+   _alpha(getMaterialProperty<Real>("alpha")),
+   _mesh_dimension(_mesh.dimension())
 {}
 
 void
@@ -32,6 +33,6 @@ SolidMechTempCouple::recomputeCouplingConstants()
   
   _c4 = _E/(1.-_nu);
   
-  if( 3 == _dim )
+  if (_mesh_dimension == 3)
     _c4 = _E/(1.-2.*_nu);
 }

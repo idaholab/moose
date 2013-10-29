@@ -55,6 +55,7 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
   _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
   _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
+  _mesh_dimension(_mesh.dimension()),
   _vars(_x_var, _y_var, _z_var),
   _nodal_area_var(getVar("nodal_area", 0)),
   _aux_system( _nodal_area_var->sys() ),
@@ -305,7 +306,7 @@ ContactMaster::computeQpResidual()
   Real resid(0);
   RealVectorValue res_vec;
   // Build up residual vector
-  for(unsigned int i=0; i<_dim; ++i)
+  for(unsigned int i=0; i<_mesh_dimension; ++i)
   {
     long int dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);

@@ -30,7 +30,7 @@ NSStagnationBC::NSStagnationBC(const std::string & name, InputParameters paramet
       // Coupled variables
       _u_vel(coupledValue("u")),
       _v_vel(coupledValue("v")),
-      _w_vel(_dim == 3 ? coupledValue("w") : _zero),
+      _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
 
       _temperature(coupledValue("temperature")),
 

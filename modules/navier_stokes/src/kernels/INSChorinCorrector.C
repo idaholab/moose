@@ -25,16 +25,16 @@ INSChorinCorrector::INSChorinCorrector(const std::string & name, InputParameters
 
   // Current velocities
   _u_vel_star(coupledValue("u_star")),
-  _v_vel_star(_dim >= 2 ? coupledValue("v_star") : _zero),
-  _w_vel_star(_dim == 3 ? coupledValue("w_star") : _zero),
+  _v_vel_star(_mesh.dimension() >= 2 ? coupledValue("v_star") : _zero),
+  _w_vel_star(_mesh.dimension() == 3 ? coupledValue("w_star") : _zero),
 
   // Pressure gradient
   _grad_p(coupledGradient("p")),
 
   // Variable numberings
   _u_vel_star_var_number(coupled("u_star")),
-  _v_vel_star_var_number(_dim >= 2 ? coupled("v_star") : libMesh::invalid_uint),
-  _w_vel_star_var_number(_dim == 3 ? coupled("w_star") : libMesh::invalid_uint),
+  _v_vel_star_var_number(_mesh.dimension() >= 2 ? coupled("v_star") : libMesh::invalid_uint),
+  _w_vel_star_var_number(_mesh.dimension() == 3 ? coupled("w_star") : libMesh::invalid_uint),
   _p_var_number(coupled("p")),
 
   // Required parameters

@@ -30,43 +30,43 @@ INSChorinPredictor::INSChorinPredictor(const std::string & name, InputParameters
 
   // Current velocities
   _u_vel(coupledValue("u")),
-  _v_vel(_dim >= 2 ? coupledValue("v") : _zero),
-  _w_vel(_dim == 3 ? coupledValue("w") : _zero),
+  _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
+  _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
 
   // Old velocities
   _u_vel_old(coupledValueOld("u")),
-  _v_vel_old(_dim >= 2 ? coupledValueOld("v") : _zero),
-  _w_vel_old(_dim == 3 ? coupledValueOld("w") : _zero),
+  _v_vel_old(_mesh.dimension() >= 2 ? coupledValueOld("v") : _zero),
+  _w_vel_old(_mesh.dimension() == 3 ? coupledValueOld("w") : _zero),
 
   // Star velocities
   _u_vel_star(coupledValue("u_star")),
-  _v_vel_star(_dim >= 2 ? coupledValue("v_star") : _zero),
-  _w_vel_star(_dim == 3 ? coupledValue("w_star") : _zero),
+  _v_vel_star(_mesh.dimension() >= 2 ? coupledValue("v_star") : _zero),
+  _w_vel_star(_mesh.dimension() == 3 ? coupledValue("w_star") : _zero),
 
   // Velocity Gradients
   _grad_u_vel(coupledGradient("u")),
-  _grad_v_vel(_dim >= 2 ? coupledGradient("v") : _grad_zero),
-  _grad_w_vel(_dim == 3 ? coupledGradient("w") : _grad_zero),
+  _grad_v_vel(_mesh.dimension() >= 2 ? coupledGradient("v") : _grad_zero),
+  _grad_w_vel(_mesh.dimension() == 3 ? coupledGradient("w") : _grad_zero),
 
   // Old Velocity Gradients
   _grad_u_vel_old(coupledGradientOld("u")),
-  _grad_v_vel_old(_dim >= 2 ? coupledGradientOld("v") : _grad_zero),
-  _grad_w_vel_old(_dim == 3 ? coupledGradientOld("w") : _grad_zero),
+  _grad_v_vel_old(_mesh.dimension() >= 2 ? coupledGradientOld("v") : _grad_zero),
+  _grad_w_vel_old(_mesh.dimension() == 3 ? coupledGradientOld("w") : _grad_zero),
 
   // Star Velocity Gradients
   _grad_u_vel_star(coupledGradient("u_star")),
-  _grad_v_vel_star(_dim >= 2 ? coupledGradient("v_star") : _grad_zero),
-  _grad_w_vel_star(_dim == 3 ? coupledGradient("w_star") : _grad_zero),
+  _grad_v_vel_star(_mesh.dimension() >= 2 ? coupledGradient("v_star") : _grad_zero),
+  _grad_w_vel_star(_mesh.dimension() == 3 ? coupledGradient("w_star") : _grad_zero),
 
   // Variable numberings
   _u_vel_var_number(coupled("u")),
-  _v_vel_var_number(_dim >= 2 ? coupled("v") : libMesh::invalid_uint),
-  _w_vel_var_number(_dim == 3 ? coupled("w") : libMesh::invalid_uint),
+  _v_vel_var_number(_mesh.dimension() >= 2 ? coupled("v") : libMesh::invalid_uint),
+  _w_vel_var_number(_mesh.dimension() == 3 ? coupled("w") : libMesh::invalid_uint),
 
   // Star velocity numberings
   _u_vel_star_var_number(coupled("u_star")),
-  _v_vel_star_var_number(_dim >= 2 ? coupled("v_star") : libMesh::invalid_uint),
-  _w_vel_star_var_number(_dim == 3 ? coupled("w_star") : libMesh::invalid_uint),
+  _v_vel_star_var_number(_mesh.dimension() >= 2 ? coupled("v_star") : libMesh::invalid_uint),
+  _w_vel_star_var_number(_mesh.dimension() == 3 ? coupled("w_star") : libMesh::invalid_uint),
 
   // Required parameters
   _mu(getParam<Real>("mu")),

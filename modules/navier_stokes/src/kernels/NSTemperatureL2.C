@@ -26,8 +26,8 @@ NSTemperatureL2::NSTemperatureL2(const std::string & name, InputParameters param
     _u_vel(coupledValue("u")),
     _v_vel_var(coupled("v")),
     _v_vel(coupledValue("v")),
-    _w_vel_var(_dim == 3 ? coupled("w") : 0),
-    _w_vel(_dim == 3 ? coupledValue("w") : _zero),
+    _w_vel_var(_mesh.dimension() == 3 ? coupled("w") : 0),
+    _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
     _c_v(getMaterialProperty<Real>("c_v"))
 {}
 

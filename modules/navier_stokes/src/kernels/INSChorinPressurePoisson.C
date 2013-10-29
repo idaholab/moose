@@ -23,13 +23,13 @@ INSChorinPressurePoisson::INSChorinPressurePoisson(const std::string & name, Inp
 
   // Gradients
   _grad_u_star(coupledGradient("u_star")),
-  _grad_v_star(_dim >= 2 ? coupledGradient("v_star") : _grad_zero),
-  _grad_w_star(_dim == 3 ? coupledGradient("w_star") : _grad_zero),
+  _grad_v_star(_mesh.dimension() >= 2 ? coupledGradient("v_star") : _grad_zero),
+  _grad_w_star(_mesh.dimension() == 3 ? coupledGradient("w_star") : _grad_zero),
 
   // Variable numberings
   _u_vel_star_var_number(coupled("u_star")),
-  _v_vel_star_var_number(_dim >= 2 ? coupled("v_star") : libMesh::invalid_uint),
-  _w_vel_star_var_number(_dim == 3 ? coupled("w_star") : libMesh::invalid_uint),
+  _v_vel_star_var_number(_mesh.dimension() >= 2 ? coupled("v_star") : libMesh::invalid_uint),
+  _w_vel_star_var_number(_mesh.dimension() == 3 ? coupled("w_star") : libMesh::invalid_uint),
 
   // Required parameters
   _rho(getParam<Real>("rho"))

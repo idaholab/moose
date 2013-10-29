@@ -49,6 +49,7 @@ MultiDContactConstraint::MultiDContactConstraint(const std::string & name, Input
     _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
     _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
     _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
+    _mesh_dimension(_mesh.dimension()),
     _vars(_x_var, _y_var, _z_var)
 {
   _overwrite_slave_residual = false;
@@ -98,7 +99,7 @@ MultiDContactConstraint::updateContactSet()
 
     RealVectorValue res_vec;
     // Build up residual vector
-    for(unsigned int i=0; i<_dim; ++i)
+    for(unsigned int i=0; i<_mesh_dimension; ++i)
     {
       int dof_number = node->dof_number(0, _vars(i), 0);
       res_vec(i) = _residual_copy(dof_number);
@@ -176,7 +177,7 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
 
   RealVectorValue res_vec;
   // Build up residual vector
-  for(unsigned int i=0; i<_dim; ++i)
+  for(unsigned int i=0; i<_mesh_dimension; ++i)
   {
     int dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);

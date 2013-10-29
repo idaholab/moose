@@ -23,7 +23,7 @@ NSPressureAux::NSPressureAux(const std::string & name, InputParameters parameter
    _rho(coupledValue("rho")),
    _u_vel(coupledValue("u")),
    _v_vel(coupledValue("v")),
-   _w_vel(_dim == 3 ? coupledValue("w") : _zero),
+   _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
    _rhoe(coupledValue("rhoe")),
    _gamma(getParam<Real>("gamma")) // can't use Material properties in Nodal Aux...
 {}

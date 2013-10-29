@@ -37,6 +37,8 @@ protected:
    */
   virtual void computeProperties();
 
+  const unsigned int _mesh_dimension;
+  
   VariableGradient& _grad_u;
   VariableGradient& _grad_v;
   VariableGradient& _grad_w;
@@ -126,7 +128,7 @@ private:
 
   // Reference to a pointer to an FEBase object from the _subproblem object.  Initialized in ctor.
   FEBase*& _fe;
-
+  
   // Constant references to finite element mapping data
   const std::vector<Real>& _dxidx;
   const std::vector<Real>& _dxidy;

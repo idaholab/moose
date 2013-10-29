@@ -29,6 +29,8 @@ protected:
   MaterialProperty<Real> & _alpha;
 
   Real _c4;
+  
+  const unsigned int _mesh_dimension;
 };
  
 
