@@ -76,6 +76,24 @@ PiecewiseLinearFile::value(Real t, const Point &)
 }
 
 Real
+PiecewiseLinearFile::getTimeDerivative(Real t, const Point &)
+{
+  return  _linear_interp->sampleDerivative( t ) * _scale_factor;
+}
+
+Real
+PiecewiseLinearFile::getFunctionSize()
+{
+  return _linear_interp->getSampleSize();
+}
+
+Real
+PiecewiseLinearFile::getSegmentPointDomain(int i)
+{
+  return _linear_interp->domain(i);
+}
+
+Real
 PiecewiseLinearFile::integral()
 {
   return _linear_interp->integrate() * _scale_factor;

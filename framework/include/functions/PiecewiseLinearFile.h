@@ -37,7 +37,10 @@ public:
    * This function will return a value based on the first input argument only.
    */
   virtual Real value(Real t, const Point & pt);
+  virtual Real getTimeDerivative(Real t, const Point & pt);
 
+  virtual Real getFunctionSize();
+  virtual Real getSegmentPointDomain(int i);
   virtual Real integral();
   virtual Real average();
 
