@@ -101,6 +101,10 @@ GrainTracker::threadJoin(const UserObject & y)
 
   // Append the packed data structures together
   std::copy(pps_packed_data.begin(), pps_packed_data.end(), std::back_inserter(_packed_data));
+
+  // Calculate thread Memory Usage
+  if (_track_memory)
+    _bytes_used += pps.calculateUsage();
 }
 
 
@@ -164,6 +168,14 @@ GrainTracker::finalize()
           _nodal_data[*node_it].push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
       }
     }
+  }
+
+  // Calculate memory usage
+  if (_track_memory)
+  {
+    _bytes_used += calculateUsage();
+    Parallel::sum(_bytes_used);
+    formatBytesUsed();
   }
 }
 
@@ -693,6 +705,26 @@ GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres
 
   return min_distance;
 }
+
+
+
+unsigned long
+GrainTracker::calculateUsage() const
+{
+  unsigned long bytes = NodalFloodCount::calculateUsage();
+
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+  {
+    bytes += bytesHelper(_bounding_spheres[map_num]);
+  }
+
+  // not counted: _nodal_data
+
+  bytes += bytesHelper(_unique_grains);
+
+  return bytes;
+}
+
 
 // BoundingSphereInfo
 GrainTracker::BoundingSphereInfo::BoundingSphereInfo(unsigned int node_id, const Point & center, Real radius) :
