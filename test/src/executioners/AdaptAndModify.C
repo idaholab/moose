@@ -69,8 +69,8 @@ AdaptAndModify::endStep()
 
     _problem.computeUserObjects(EXEC_CUSTOM);
 
-    // if _reset_dt is true, force the output no matter what
-    _problem.output(_reset_dt);
-    _problem.outputPostprocessors(_reset_dt);
+    // if _force_output is true, force the output no matter what
+    _problem.output(_force_output);
+    _problem.outputPostprocessors(_force_output);
   }
 }

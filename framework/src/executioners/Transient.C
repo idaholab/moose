@@ -83,10 +83,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _time_old(_problem.timeOld()),
     _dt(_problem.dt()),
     _dt_old(_problem.dtOld()),
-    _unconstrained_dt(declareRestartableData<Real>("unconstrained_dt", 0)),
-    _unconstrained_dt_old(declareRestartableData<Real>("unconstrained_dt_old", 0)),
     _prev_dt(declareRestartableData<Real>("prev_dt", -1)),
-    _reset_dt(declareRestartableData<bool>("reset_dt", false)),
+    _force_output(declareRestartableData<bool>("force_output", false)),
     _first(declareRestartableData<bool>("first", true)),
     _last_solve_converged(declareRestartableData<bool>("last_solve_converged", true)),
     _end_time(getParam<Real>("end_time")),
@@ -252,7 +250,6 @@ Transient::takeStep(Real input_dt)
   _problem.out().setOutput(false);
 
   _dt_old = _dt;
-  _unconstrained_dt_old = _unconstrained_dt;
 
   if (input_dt == -1.0)
     _dt = computeConstrainedDT();
@@ -364,19 +361,19 @@ Transient::endStep()
           _problem.outputPostprocessors(true);
         }
       }
-      //Set the time for the next output interval if we're at an output interval
-      if(std::abs(_time-_next_interval_output_time)<=_timestep_tolerance)
+      //Set the time for the next output interval if we're at or beyond an output interval
+      if (_time + _timestep_tolerance >= _next_interval_output_time)
       {
         _next_interval_output_time += _time_interval_output_interval;
       }
     }
     else
     {
-      // if _reset_dt is true, force the output no matter what
+      // if _force_output is true, force the output no matter what
       if(_allow_output)
       {
-        _problem.output(_reset_dt);
-        _problem.outputPostprocessors(_reset_dt);
+        _problem.output(_force_output);
+        _problem.outputPostprocessors(_force_output);
       }
     }
   }
@@ -392,12 +389,12 @@ Transient::computeConstrainedDT()
 //    _dt = _input_dt;
 
   Real dt_cur = _dt;
+  _force_output = false;
 
   //After startup steps, compute new dt
   if (_t_step > _n_startup_steps)
   {
-    _unconstrained_dt = getDT();
-    dt_cur = _unconstrained_dt;
+    dt_cur = getDT();
   }
 
   // Don't let the time step size exceed maximum time step size
@@ -421,15 +418,7 @@ Transient::computeConstrainedDT()
       mooseError("Adjusting to sync time resulted in a non-positive time step.  dt: "<<dt_cur<<" sync time: "<<*_sync_times.begin()<<" time: "<<_time);
 
     _prev_dt = dt_cur;
-    _reset_dt = true;
-  }
-  else
-  {
-    if (_reset_dt)
-    {
-      dt_cur = getDT();
-      _reset_dt = false;
-    }
+    _force_output = true;
   }
 
   // Allow the time stepper to limit the time step
@@ -449,7 +438,7 @@ Transient::computeConstrainedDT()
   {
     dt_cur = _next_interval_output_time - _time;
     _prev_dt = _dt;
-    _reset_dt = true;
+    _force_output = true;
   }
 
   // Adjust to a target time if set
@@ -458,7 +447,7 @@ Transient::computeConstrainedDT()
     dt_cur = _target_time - _time;
 
     _prev_dt = _dt;
-    _reset_dt = true;
+    _force_output = true;
   }
 
   return dt_cur;

@@ -205,11 +205,8 @@ protected:
   Real & _dt;
   Real & _dt_old;
 
-  Real & _unconstrained_dt;
-  Real & _unconstrained_dt_old;
-
   Real & _prev_dt;
-  bool & _reset_dt;
+  bool & _force_output;
 
   /// Is it our first time through the execution loop?
   bool & _first;
