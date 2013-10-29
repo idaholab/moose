@@ -562,6 +562,11 @@ public:
    */
   bool isParallelMesh() { return _use_parallel_mesh; }
 
+  /*
+   * Set/Get the partitioner name
+   */
+  std::string & partitionerName() { return _partitioner_name; }
+
 protected:
   /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a SerialMesh or ParallelMesh.
@@ -689,6 +694,9 @@ protected:
 
   /// A vector holding the paired boundaries for a regular orthogonal mesh
   std::vector<std::pair<BoundaryID, BoundaryID> > _paired_boundary;
+
+  /// Partitioner Name
+  std::string _partitioner_name;
 
   void cacheInfo();
   void freeBndNodes();

@@ -407,8 +407,10 @@ MooseApp::printSimulationInfo()
         << std::setw(FIELD_WIDTH) << "    Total:" << mesh.n_elem() << '\n'
         << std::setw(FIELD_WIDTH) << "    Local:" << mesh.n_local_elem() << '\n'
         << std::setw(FIELD_WIDTH) << "  Num Subdomains: "      << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
-        << std::setw(FIELD_WIDTH) << "  Num Partitions: "      << static_cast<std::size_t>(mesh.n_partitions()) << '\n'
-        << '\n';
+        << std::setw(FIELD_WIDTH) << "  Num Partitions: "      << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
+    if (libMesh::n_processors() > 1 && moose_mesh->partitionerName() != "")
+      oss << std::setw(FIELD_WIDTH) << "  Partitioner: "         << moose_mesh->partitionerName() << '\n';
+    oss << '\n';
   }
 
   FEProblem *problem = _action_warehouse.problem();

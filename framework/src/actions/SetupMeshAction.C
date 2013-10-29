@@ -23,6 +23,8 @@
 #include "libmesh/linear_partitioner.h"
 #include "libmesh/centroid_partitioner.h"
 #include "libmesh/parmetis_partitioner.h"
+#include "libmesh/hilbert_sfc_partitioner.h"
+#include "libmesh/morton_sfc_partitioner.h"
 #include "MooseEnum.h"
 
 template<>
@@ -33,7 +35,7 @@ InputParameters validParams<SetupMeshAction>()
 
   params.addParam<bool>("second_order", false, "Converts a first order mesh to a second order mesh.  Note: This is NOT needed if you are reading an actual first order mesh.");
 
-  MooseEnum partitioning("metis, linear, centroid, parmetis", "metis");
+  MooseEnum partitioning("metis, linear, centroid, parmetis, hilbert_sfc, morton_sfc", "metis");
   params.addParam<MooseEnum>("partitioner", partitioning, "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation.");
 
   MooseEnum direction("x, y, z, radial");
@@ -110,9 +112,15 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
     else
       mooseError("Invalid centroid_partitioner_direction!");
   }
+  else if (getParam<MooseEnum>("partitioner") == "hilbert_sfc")
+    mesh->getMesh().partitioner() = AutoPtr<Partitioner>(new HilbertSFCPartitioner);
+  else if (getParam<MooseEnum>("partitioner") == "morton_sfc")
+    mesh->getMesh().partitioner() = AutoPtr<Partitioner>(new MortonSFCPartitioner);
 
   if (getParam<MooseEnum>("partitioner") != "metis") // NOT the default
     mesh->getMesh().prepare_for_use(); // repartition
+
+  mesh->partitionerName() = std::string(getParam<MooseEnum>("partitioner"));
 
 #ifdef LIBMESH_ENABLE_AMR
   unsigned int level = getParam<unsigned int>("uniform_refine");
