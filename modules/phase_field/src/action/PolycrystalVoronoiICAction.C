@@ -26,6 +26,8 @@ InputParameters validParams<PolycrystalVoronoiICAction>()
   params.addParam<unsigned int>("rand_seed",12444,"The random seed");
 
   params.addParam<bool>("cody_test",false,"Use set grain center points for Cody's test. Grain num MUST equal 10");
+
+  params.addParam<bool>("columnar_3D",false,"3D microstructure will be columnar in the z-direction?");
   
 
   return params;
@@ -35,9 +37,7 @@ PolycrystalVoronoiICAction::PolycrystalVoronoiICAction(const std::string & name,
   :Action(name, params),
    _crys_num(getParam<unsigned int>("crys_num")),
    _grain_num(getParam<unsigned int>("grain_num")),
-   _var_name_base(getParam<std::string>("var_name_base")),
-   _rand_seed(getParam<unsigned int>("rand_seed")),
-   _cody_test(getParam<bool>("cody_test"))
+   _var_name_base(getParam<std::string>("var_name_base"))
 {}
 
 void
@@ -64,8 +64,9 @@ PolycrystalVoronoiICAction::act()
     poly_params.set<unsigned int>("crys_num") = _crys_num;
     poly_params.set<unsigned int>("grain_num") = _grain_num;
     poly_params.set<unsigned int>("crys_index") = crys;
-    poly_params.set<unsigned int>("rand_seed") = _rand_seed;
-    poly_params.set<bool>("cody_test") = _cody_test;
+    poly_params.set<unsigned int>("rand_seed") = getParam<unsigned int>("rand_seed");
+    poly_params.set<bool>("cody_test") = getParam<bool>("cody_test");
+    poly_params.set<bool>("columnar_3D") = getParam<bool>("columnar_3D");
     
     
     //Add initial condition
