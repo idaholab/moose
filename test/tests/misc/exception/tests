@@ -18,6 +18,7 @@
     should_crash = false
     compiler = 'GCC INTEL'
     max_threads = 1
+    deleted = "Ticket #2269"
   [../]
 
   [./parallel_exception_initial_condition]
@@ -29,6 +30,7 @@
     should_crash = false
     compiler = 'GCC INTEL'
     max_threads = 1
+    deleted = "Ticket #2269"
   [../]
 
   [./parallel_exception_jacobian]
@@ -40,5 +42,6 @@
     should_crash = false
     compiler = 'GCC INTEL'
     max_threads = 1
+    deleted = "Ticket #2269"
   [../]
 []
