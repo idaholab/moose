@@ -813,6 +813,13 @@ FEProblem::ghostGhostedBoundaries()
     _displaced_mesh->ghostGhostedBoundaries();
 }
 
+void
+FEProblem::sizeZeroes(unsigned int size, THREAD_ID tid)
+{
+  _zero[tid].resize(size, 0);
+  _grad_zero[tid].resize(size, 0);
+  _second_zero[tid].resize(size, RealTensor(0.));
+}
 
 bool
 FEProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
@@ -844,10 +851,7 @@ FEProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 void
 FEProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
-  unsigned int n_points = _assembly[tid]->qRule()->n_points();
-  _zero[tid].resize(n_points, 0);
-  _grad_zero[tid].resize(n_points, 0);
-  _second_zero[tid].resize(n_points, RealTensor(0.));
+  sizeZeroes(_assembly[tid]->qRule()->n_points(), tid);
 
   _nl.reinitElem(elem, tid);
   _aux.reinitElem(elem, tid);
@@ -879,10 +883,7 @@ FEProblem::reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_i
 {
   _assembly[tid]->reinit(elem, side);
 
-  unsigned int n_points = _assembly[tid]->qRule()->n_points();
-  _zero[tid].resize(n_points, 0);
-  _grad_zero[tid].resize(n_points, 0);
-  _second_zero[tid].resize(n_points, RealTensor(0.));
+  sizeZeroes(_assembly[tid]->qRule()->n_points(), tid);
 
   _nl.reinitElemFace(elem, side, bnd_id, tid);
   _aux.reinitElemFace(elem, side, bnd_id, tid);
@@ -896,10 +897,7 @@ FEProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
   _assembly[tid]->reinit(node);
 
-  unsigned int n_points = 1;
-  _zero[tid].resize(n_points, 0);
-  _grad_zero[tid].resize(n_points, 0);
-  _second_zero[tid].resize(n_points, RealTensor(0.));
+  sizeZeroes(1, tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
     _displaced_problem->reinitNode(&_displaced_mesh->node(node->id()), tid);
@@ -913,10 +911,7 @@ FEProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid)
 {
   _assembly[tid]->reinit(node);
 
-  unsigned int n_points = 1;
-  _zero[tid].resize(n_points, 0);
-  _grad_zero[tid].resize(n_points, 0);
-  _second_zero[tid].resize(n_points, RealTensor(0.));
+  sizeZeroes(1, tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_face)
     _displaced_problem->reinitNodeFace(&_displaced_mesh->node(node->id()), bnd_id, tid);
@@ -929,10 +924,7 @@ FEProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid)
 void
 FEProblem::reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid)
 {
-  unsigned int n_points = nodes.size();
-  _zero[tid].resize(n_points, 0);
-  _grad_zero[tid].resize(n_points, 0);
-  _second_zero[tid].resize(n_points, RealTensor(0.));
+  sizeZeroes(nodes.size(), tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
     _displaced_problem->reinitNodes(nodes, tid);
@@ -946,10 +938,7 @@ FEProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
 {
   _assembly[tid]->reinitNodeNeighbor(node);
 
-  unsigned int n_points = 1;
-  _zero[tid].resize(n_points, 0);
-  _grad_zero[tid].resize(n_points, 0);
-  _second_zero[tid].resize(n_points, RealTensor(0.));
+  sizeZeroes(1, tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
     _displaced_problem->reinitNodeNeighbor(&_displaced_mesh->node(node->id()), tid);

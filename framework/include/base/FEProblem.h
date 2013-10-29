@@ -236,6 +236,7 @@ public:
   virtual void addGhostedBoundary(BoundaryID boundary_id);
   virtual void ghostGhostedBoundaries();
 
+  virtual void sizeZeroes(unsigned int size, THREAD_ID tid);
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemPhys(const Elem * elem, std::vector<Point> phys_points_in_elem, THREAD_ID tid);
