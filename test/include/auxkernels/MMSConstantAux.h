@@ -32,6 +32,8 @@ public:
 
 protected:
   virtual Real computeValue();
+
+  unsigned int _mesh_dimension;
 };
 
 #endif //MMSCONSTANTAUX_H

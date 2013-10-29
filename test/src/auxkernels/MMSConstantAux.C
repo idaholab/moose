@@ -9,7 +9,8 @@ InputParameters validParams<MMSConstantAux>()
 }
 
 MMSConstantAux::MMSConstantAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters)
+    AuxKernel(name, parameters),
+    _mesh_dimension(_mesh.dimension())
 {}
 
 
@@ -21,7 +22,7 @@ MMSConstantAux::computeValue()
   Real y = (*_current_node)(1);
   Real t = _t;
 
-  if (_dim == 3)
+  if (_mesh_dimension == 3)
   {
     Real z = (*_current_node)(2);
     return std::sin(a*x*y*z*t);

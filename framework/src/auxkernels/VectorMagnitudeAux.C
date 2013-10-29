@@ -14,8 +14,8 @@ InputParameters validParams<VectorMagnitudeAux>()
 VectorMagnitudeAux::VectorMagnitudeAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
     _x(coupledValue("x")),
-    _y(_dim >= 2 ? coupledValue("y") : _zero),
-    _z(_dim >= 3 ? coupledValue("z") : _zero)
+    _y(_mesh.dimension() >= 2 ? coupledValue("y") : _zero),
+    _z(_mesh.dimension() >= 3 ? coupledValue("z") : _zero)
 {
 }
 

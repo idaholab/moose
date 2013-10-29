@@ -20,10 +20,11 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
+  unsigned int _mesh_dimension;
+
   Real _x;
   Real _y;
   Real _z;
-
 };
 
 #endif //MMSFORCING_H_

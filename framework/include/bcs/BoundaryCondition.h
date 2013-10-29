@@ -115,8 +115,8 @@ protected:
   /// Mesh this BC is defined on
   MooseMesh & _mesh;
 
-  /// dimension of the mesh
-  unsigned int _dim;
+//  /// dimension of the mesh
+//  unsigned int _dim;
 };
 
 #endif /* BOUNDARYCONDITION_H */

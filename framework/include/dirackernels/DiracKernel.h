@@ -162,7 +162,7 @@ protected:
   MooseMesh & _mesh;
 
   /// Dimension of the problem
-  unsigned int _dim;
+//  unsigned int _dim;
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;
 

@@ -74,7 +74,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _bnd(parameters.have_parameter<BoundaryID>("_boundary_id")),
 
     _mesh(_subproblem.mesh()),
-    _dim(_mesh.dimension()),
+//    _dim(_mesh.dimension()),
 
     _q_point(_bnd ? _assembly.qPointsFace() : _assembly.qPoints()),
     _qrule(_bnd ? _assembly.qRuleFace() : _assembly.qRule()),

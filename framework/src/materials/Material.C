@@ -68,7 +68,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _current_elem(_neighbor ? _assembly.neighbor() : _assembly.elem()),
     _current_side(_neighbor ? _assembly.neighborSide() : _assembly.side()),
     _mesh(_subproblem.mesh()),
-    _dim(_mesh.dimension()),
+//    _dim(_mesh.dimension()),
     _coord_sys(_assembly.coordSystem()),
     _has_stateful_property(false)
 {

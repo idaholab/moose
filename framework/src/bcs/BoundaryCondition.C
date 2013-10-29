@@ -50,8 +50,8 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
-    _mesh(_subproblem.mesh()),
-    _dim(_mesh.dimension())
+    _mesh(_subproblem.mesh())
+//    _dim(_mesh.dimension())
 {
 }
 

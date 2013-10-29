@@ -59,7 +59,7 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   _assembly(_subproblem.assembly(_tid)),
   _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
   _mesh(_subproblem.mesh()),
-  _dim(_mesh.dimension()),
+//  _dim(_mesh.dimension()),
 
   _slave(_mesh.getBoundaryID(getParam<BoundaryName>("slave"))),
   _master(_mesh.getBoundaryID(getParam<BoundaryName>("master"))),

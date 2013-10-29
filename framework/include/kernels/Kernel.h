@@ -95,7 +95,7 @@ protected:
   Assembly & _assembly;
   MooseVariable & _var;
   MooseMesh & _mesh;
-  unsigned int _dim;
+//  unsigned int _dim;
 
   const Elem * & _current_elem;
   /// Volume of the current element

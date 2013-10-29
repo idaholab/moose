@@ -17,6 +17,8 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+
+  unsigned int _mesh_dimension;
 };
 
 #endif //MMSDIFFUSION_H

@@ -43,7 +43,7 @@ NodalConstraint::NodalConstraint(const std::string & name, InputParameters param
   _assembly(_subproblem.assembly(_tid)),
   _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
   _mesh(_subproblem.mesh()),
-  _dim(_mesh.dimension()),
+//  _dim(_mesh.dimension()),
 
   _master_node_id(getParam<unsigned int>("master")),
 

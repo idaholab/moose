@@ -54,7 +54,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
-    _dim(_mesh.dimension()),
+//    _dim(_mesh.dimension()),
     _coord_sys(_assembly.coordSystem()),
     _dirac_kernel_info(_subproblem.diracKernelInfo()),
 

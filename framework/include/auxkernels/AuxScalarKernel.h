@@ -87,7 +87,7 @@ protected:
   Assembly & _assembly;
   MooseVariableScalar & _var;
   MooseMesh & _mesh;
-  unsigned int _dim;
+//  unsigned int _dim;
 
   unsigned int _i;
 

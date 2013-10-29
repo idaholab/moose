@@ -9,7 +9,8 @@ InputParameters validParams<MMSDiffusion>()
 
 
 MMSDiffusion::MMSDiffusion(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+    Kernel(name, parameters),
+    _mesh_dimension(_mesh.dimension())
 {}
 
 Real
@@ -19,7 +20,7 @@ MMSDiffusion::computeQpResidual()
   Real x = _q_point[_qp](0);
   Real y = _q_point[_qp](1);
   Real t = _t;
-  if (_dim == 3)
+  if (_mesh_dimension == 3)
   {
     Real z = _q_point[_qp](2);
     Real u = std::sin(a*x*y*z*t);
@@ -43,7 +44,7 @@ MMSDiffusion::computeQpJacobian()
   Real x = _q_point[_qp](0);
   Real y = _q_point[_qp](1);
   Real t = _t;
-  if (_dim == 3)
+  if (_mesh_dimension == 3)
   {
     Real z = _q_point[_qp](2);
     Real u = std::sin(a*x*y*z*t);

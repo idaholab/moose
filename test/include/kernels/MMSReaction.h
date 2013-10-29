@@ -16,6 +16,8 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+
+  unsigned int _mesh_dimension;
 };
 
 #endif //MMSREACTION_H_

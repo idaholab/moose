@@ -147,7 +147,7 @@ protected:
   unsigned int & _current_side;
 
   MooseMesh & _mesh;
-  unsigned int _dim;
+//  unsigned int _dim;
 
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;

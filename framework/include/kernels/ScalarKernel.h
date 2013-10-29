@@ -84,7 +84,7 @@ protected:
   /// Scalar variable
   MooseVariableScalar & _var;
   MooseMesh & _mesh;
-  unsigned int _dim;
+//  unsigned int _dim;
 
   unsigned int _i, _j;
 

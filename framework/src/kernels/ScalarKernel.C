@@ -51,7 +51,7 @@ ScalarKernel::ScalarKernel(const std::string & name, InputParameters parameters)
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getScalarVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
-    _dim(_mesh.dimension()),
+//    _dim(_mesh.dimension()),
 
     _u(_var.sln()),
     _u_old(_var.slnOld()),

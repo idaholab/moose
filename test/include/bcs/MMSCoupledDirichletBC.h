@@ -18,6 +18,7 @@ protected:
   virtual Real computeQpResidual();
 
   Real _value; //Multiplier on the boundary
+  unsigned int _mesh_dimension;
 };
 
 #endif //MMSCOUPLEDDIRICHLETBC_H_

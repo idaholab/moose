@@ -93,6 +93,6 @@ protected:
 //  const MooseVariable & _var;
 
   MooseMesh & _mesh;
-  unsigned int _dim;
+//  unsigned int _dim;
 };
 #endif /* INDICATOR_H */

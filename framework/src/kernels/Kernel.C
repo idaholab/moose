@@ -66,7 +66,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
-    _dim(_mesh.dimension()),
+//    _dim(_mesh.dimension()),
 
     _current_elem(_var.currentElem()),
     _current_elem_volume(_assembly.elemVolume()),

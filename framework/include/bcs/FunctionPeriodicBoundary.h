@@ -58,7 +58,7 @@ public:
   virtual AutoPtr<PeriodicBoundaryBase> clone(TransformationType t) const;
 
 protected:
-  /// The dimension of the problem (says which _tr_XYZ member variables are active)
+//  /// The dimension of the problem (says which _tr_XYZ member variables are active)
   unsigned int _dim;
 
   /// Pointer to Function for x-component of the boundary

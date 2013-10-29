@@ -132,7 +132,7 @@ protected:
   /// Mesh this kernel is active on
   MooseMesh & _mesh;
   /// Dimension of the problem being solved
-  unsigned int _dim;
+//  unsigned int _dim;
 
   /// Active quadrature points
   const MooseArray< Point > & _q_point;

@@ -48,7 +48,7 @@ AuxScalarKernel::AuxScalarKernel(const std::string & name, InputParameters param
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getScalarVariable(_tid, parameters.get<AuxVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
-    _dim(_mesh.dimension()),
+//    _dim(_mesh.dimension()),
 
     _u(_var.sln()),
     _u_old(_var.slnOld())

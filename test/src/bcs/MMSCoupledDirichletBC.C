@@ -12,7 +12,8 @@ InputParameters validParams<MMSCoupledDirichletBC>()
 MMSCoupledDirichletBC::MMSCoupledDirichletBC(const std::string & name, InputParameters parameters) :
     NodalBC(name, parameters),
     //Grab the parameter for the multiplier.
-    _value(getParam<Real>("value"))
+    _value(getParam<Real>("value")),
+    _mesh_dimension(_mesh.dimension())
 {}
 
 Real
@@ -23,7 +24,7 @@ MMSCoupledDirichletBC::computeQpResidual()
   Real x = (*_current_node)(0);
   Real y = (*_current_node)(1);
   Real t = _t;
-  if (_dim == 3)
+  if (_mesh_dimension == 3)
   {
     Real z = (*_current_node)(2);
     Real u = sin(a*x*y*z*t);
