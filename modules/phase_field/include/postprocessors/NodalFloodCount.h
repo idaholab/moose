@@ -147,6 +147,14 @@ protected:
     return false;
   }
 
+  // Attempt to make a lower bound computation of memory consumed by this object
+  virtual unsigned long calculateUsage() const;
+
+  template<typename T>
+  static unsigned long bytesHelper(T container);
+
+  void formatBytesUsed() const;
+
   /*************************************************
    *************** Data Structures *****************
    ************************************************/
@@ -248,8 +256,21 @@ protected:
    */
   std::vector<Real> _all_bubble_volumes;
 
+  // Memory Usage
+  const bool _track_memory;
+  unsigned long _bytes_used;
+
   // Dummy value for unimplemented method
   static const std::vector<std::pair<unsigned int, unsigned int> > _empty;
 };
+
+template<typename T>
+unsigned long
+NodalFloodCount::bytesHelper(T container)
+{
+  typename T::value_type t;
+  return sizeof(t) * container.size();
+}
+
 
 #endif

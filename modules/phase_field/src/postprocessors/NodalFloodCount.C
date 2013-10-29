@@ -44,6 +44,7 @@ InputParameters validParams<NodalFloodCount>()
   params.addParam<bool>("use_global_numbering", false, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: false)");
   params.addParam<bool>("enable_var_coloring", false, "Instruct the UO to populate the variable index map.");
   params.addParam<FileName>("bubble_volume_file", "An optional file name where bubble volumes can be output.");
+  params.addParam<bool>("track_memory_usage", false, "Calculate memory usage");
   return params;
 }
 
@@ -60,7 +61,8 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _var_index_mode(getParam<bool>("enable_var_coloring")),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
     _pbs(NULL),
-    _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero)
+    _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
+    _track_memory(getParam<bool>("track_memory_usage"))
     //   _bubble_volume_file_name(parameters.isParamValid("bubble_volume_file") ? getParam<FileName>("bubble_volume_file") : "")
 {
   // Size the data structures to hold the correct number of maps
@@ -125,6 +127,8 @@ NodalFloodCount::initialize()
   _step_connecting_threshold = _element_average_value + _connecting_threshold;
 
   _all_bubble_volumes.clear();
+
+  _bytes_used = 0;
 }
 
 void
@@ -165,6 +169,14 @@ NodalFloodCount::finalize()
     data.push_back(_fe_problem.time());
     data.insert(data.end(), _all_bubble_volumes.begin(), _all_bubble_volumes.end());
     writeCSVFile(getParam<FileName>("bubble_volume_file"), data);
+  }
+
+  // Calculate memory usage
+  if (_track_memory)
+  {
+    _bytes_used += calculateUsage();
+    Parallel::sum(_bytes_used);
+    formatBytesUsed();
   }
 }
 
@@ -242,6 +254,10 @@ NodalFloodCount::threadJoin(const UserObject &y)
 
    // Append the packed data structures together
    std::copy(pps_packed_data.begin(), pps_packed_data.end(), std::back_inserter(_packed_data));
+
+   // Calculate thread Memory Usage
+   if (_track_memory)
+     _bytes_used += pps.calculateUsage();
 }
 
 
@@ -335,7 +351,7 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
   unsigned int curr_set_length=0;
   std::set<unsigned int> curr_set;
   unsigned int curr_var_idx = std::numeric_limits<unsigned int>::max();
-  
+
   _region_to_var_idx.clear();
   for (unsigned int i=0; i<packed_data.size(); ++i)
   {
@@ -615,5 +631,65 @@ NodalFloodCount::writeCSVFile(const std::string file_name, const std::vector<Rea
     *_file_handles[file_name] << std::endl;
   }
 }
+
+
+template<>
+unsigned long
+NodalFloodCount::bytesHelper(std::list<BubbleData> container)
+{
+  unsigned long bytes = 0;
+  for (std::list<BubbleData>::iterator it = container.begin(); it != container.end(); ++it)
+    bytes += bytesHelper(it->_nodes) + sizeof(it->_var_idx);
+  return bytes;
+}
+
+unsigned long
+NodalFloodCount::calculateUsage() const
+{
+  unsigned long bytes = 0;
+
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+  {
+    bytes += bytesHelper(_nodes_visited[map_num]);
+    bytes += bytesHelper(_bubble_maps[map_num]);
+
+    if (_var_index_mode)
+      bytes += bytesHelper(_var_index_maps[map_num]);
+
+    bytes += bytesHelper(_bubble_sets[map_num]);
+  }
+
+  bytes += sizeof(unsigned int) * _region_counts.size();
+  bytes += sizeof(unsigned int) * _packed_data.size();
+  bytes += sizeof(unsigned int) * _region_to_var_idx.size();
+  bytes += sizeof(unsigned int) * _region_offsets.size();
+
+  bytes += bytesHelper(_periodic_node_map);
+  bytes += bytesHelper(_file_handles);
+
+  bytes += sizeof(Real) * _all_bubble_volumes.size();
+
+  // Not counted: _nodes_to_elem_map
+
+  return bytes;
+}
+
+void
+NodalFloodCount::formatBytesUsed() const
+{
+  std::stringstream oss;
+  oss.precision(1);
+  oss << std::fixed;
+  if (_bytes_used >= 1<<30)
+    oss << _name << " Memory Used: " << _bytes_used / Real(1<<30) << " GB\n";
+  else if (_bytes_used >= 1<<20)
+    oss << _name << " Memory Used: " << _bytes_used / Real(1<<20) << " MB\n";
+  else if (_bytes_used >= 1<<10)
+    oss << _name << " Memory Used: " << _bytes_used / Real(1<<10) << " KB\n";
+  else
+    oss << _name << " Memory Used: " << _bytes_used << " Bytes\n";
+  Moose::out << oss.str() << std::endl;
+}
+
 
 const std::vector<std::pair<unsigned int, unsigned int> > NodalFloodCount::_empty;
