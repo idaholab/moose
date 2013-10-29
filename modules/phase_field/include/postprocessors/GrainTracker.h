@@ -92,6 +92,8 @@ protected:
    */
   Real boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2, bool ignore_radii) const;
 
+  virtual unsigned long calculateUsage() const;
+
   /*************************************************
    *************** Data Structures *****************
    ************************************************/
