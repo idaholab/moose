@@ -1,6 +1,7 @@
 #include "AdaptiveDT.h"
 
 #include "Function.h"
+#include "PiecewiseLinearFile.h"
 
 template<>
 InputParameters validParams<AdaptiveDT>()
@@ -11,6 +12,7 @@ InputParameters validParams<AdaptiveDT>()
   params.addParam<unsigned> ("linear_iteration_ratio", "The ratio of linear to nonlinear iterations to determine target linear iterations and window for adaptive timestepping (default = 25)");
   params.addParam<FunctionName> ("timestep_limiting_function", "A function used to control the timestep by limiting the change in the function over a timestep");
   params.addParam<Real> ("max_function_change", "The absolute value of the maximum change in timestep_limiting_function over a timestep");
+  params.addParam<bool> ("force_step_every_function_point", false,"Forces the timestepper to take a step that is consistent with points defined in the function.");
   params.addRequiredParam<Real>("dt", "The default timestep size between solves");
   params.addParam<std::vector<Real> >("time_t", "The values of t");
   params.addParam<std::vector<Real> >("time_dt", "The values of dt");
@@ -28,7 +30,10 @@ AdaptiveDT::AdaptiveDT(const std::string & name, InputParameters parameters) :
   _linear_iteration_ratio(isParamValid("linear_iteration_ratio") ? getParam<unsigned>("linear_iteration_ratio") : 25),  // Default to 25
   _adaptive_timestepping(false),
   _timestep_limiting_function(NULL),
+  _piecewise_linear_timestep_limiting_function(NULL),
+  _times(0),
   _max_function_change(-1),
+  _force_step_every_function_point(getParam<bool>("force_step_every_function_point")),
   _tfunc_times(getParam<std::vector<Real> >("time_t")),
   _tfunc_times_iter(_tfunc_times.begin()),
   _remaining_tfunc_time(_tfunc_times.size() > 0),
@@ -106,7 +111,20 @@ AdaptiveDT::init()
   if (isParamValid("timestep_limiting_function"))
   {
     _timestep_limiting_function = &_fe_problem.getFunction(getParam<FunctionName>("timestep_limiting_function"), isParamValid("_tid") ? getParam<THREAD_ID>("_tid") : 0);
+    _piecewise_linear_timestep_limiting_function = dynamic_cast<PiecewiseLinearFile*>(_timestep_limiting_function);
+    if(_piecewise_linear_timestep_limiting_function)
+    {
+      unsigned int time_size = _piecewise_linear_timestep_limiting_function->getFunctionSize();
+//     std::cout << "time_size = " << time_size << std::endl;
+      _times.resize(time_size);
+      for (unsigned int i=0; i < time_size; ++i)
+      {
+       _times[i] = _piecewise_linear_timestep_limiting_function->getSegmentPointDomain(i);
+//     std::cout << "times["<<i<<"] = "<< _times[i] << std::endl;
+      }
+    }
   }
+
 
   // Advance to the first tfunc time if one is provided in sim time range
   _tfunc_times_iter = _tfunc_times.begin();
@@ -317,6 +335,22 @@ AdaptiveDT::limitDTByFunction(Real & limitedDT)
       }
       while (change > _max_function_change);
     }
+  }
+  if (_piecewise_linear_timestep_limiting_function && _force_step_every_function_point)
+  {
+    Point dummyPoint;
+     Real oldSlope = _piecewise_linear_timestep_limiting_function->getTimeDerivative(_time_old,dummyPoint);
+     Real newSlope = _piecewise_linear_timestep_limiting_function->getTimeDerivative(_time_old+limitedDT,dummyPoint);
+     for (unsigned int i=0; i < _times.size()-1; ++i)
+      if(_time >= _times[i] && _time < _times[i+1])
+       {
+         if(limitedDT > _times[i+1] - _time)
+         {
+//           std::cout << "Old delta t = " << limitedDT << std::endl;
+//           std::cout << "New delta t = "<< _times[i+1]-_time << std::endl;
+           limitedDT = _times[i+1] - _time;
+         }
+       }
   }
   if (limitedDT < _dt_min)
   {

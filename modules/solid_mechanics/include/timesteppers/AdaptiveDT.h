@@ -6,6 +6,7 @@
 #include "LinearInterpolation.h"
 
 class Function;
+class PiecewiseLinearFile;
 
 /**
  *
@@ -41,7 +42,10 @@ protected:
   bool _adaptive_timestepping;
 
   Function * _timestep_limiting_function;
+  PiecewiseLinearFile * _piecewise_linear_timestep_limiting_function;
+  std::vector<Real> _times;
   Real _max_function_change;
+  bool _force_step_every_function_point;
 
   const std::vector<Real> _tfunc_times;
   std::vector<Real>::const_iterator _tfunc_times_iter;

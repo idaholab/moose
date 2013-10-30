@@ -25,6 +25,13 @@
     rel_err = 9e-06
   [../]
 
+  [./test_function_force_step]
+    type = 'Exodiff'
+    input = 'adapt_tstep_function_force_step.i'
+    exodiff = 'adapt_tstep_function_force_step_out.e'
+    rel_err = 9e-06
+  [../]
+
   [./test_function_change_restart1]
     type = 'RunApp'
     input = 'adapt_tstep_function_change_restart1.i'
