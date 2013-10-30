@@ -91,15 +91,9 @@ SubProblem::getMaterialPropertyBlocks(const std::string & prop_name)
       ++it)
   {
     std::set<std::string> & prop_names = it->second;
-    SubdomainID block = it->first;
-
-    for(std::set<std::string>::iterator name_it = prop_names.begin();
-        name_it != prop_names.end();
-        ++name_it)
-    {
-      if(*name_it == prop_name)
-        blocks.insert(block);
-    }
+    std::set<std::string>::iterator name_it = prop_names.find(prop_name);
+    if (name_it != prop_names.end())
+      blocks.insert(it->first);
   }
 
   return blocks;
@@ -131,15 +125,9 @@ SubProblem::getMaterialPropertyBoundaryIDs(const std::string & prop_name)
       ++it)
   {
     std::set<std::string> & prop_names = it->second;
-    BoundaryID boundary = it->first;
-
-    for(std::set<std::string>::iterator name_it = prop_names.begin();
-        name_it != prop_names.end();
-        ++name_it)
-    {
-      if(*name_it == prop_name)
-        boundaries.insert(boundary);
-    }
+    std::set<std::string>::iterator name_it = prop_names.find(prop_name);
+    if (name_it != prop_names.end())
+      boundaries.insert(it->first);
   }
 
   return boundaries;
