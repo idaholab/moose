@@ -38,7 +38,8 @@ TimeStepper::TimeStepper(const std::string & name, InputParameters parameters) :
     _dt_min(_executioner.dtMin()),
     _dt_max(_executioner.dtMax()),
     _end_time(_executioner.endTime()),
-    _timestep_tol(_executioner.timestepTol()),
+    _sync_times(_executioner.syncTimes()),
+    _timestep_tolerance(_executioner.timestepTol()),
     _converged(true),
     _reset_dt(getParam<bool>("reset_dt")),
     _has_reset_dt(false),
@@ -53,6 +54,16 @@ TimeStepper::~TimeStepper()
 void
 TimeStepper::init()
 {
+}
+
+void
+TimeStepper::preExecute()
+{
+  // Delete all sync times that are at or before the begin time
+  while (!_sync_times.empty() && _time + _timestep_tolerance >= *_sync_times.begin())
+  {
+    _sync_times.erase(_sync_times.begin());
+  }
 }
 
 void
@@ -76,9 +87,35 @@ TimeStepper::computeStep()
   }
 }
 
-void
-TimeStepper::constrainStep(Real &/*dt*/)
+bool
+TimeStepper::constrainStep(Real &dt)
 {
+  bool force_output = false;
+
+  // Don't let the time step size exceed maximum time step size
+  if (dt > _dt_max)
+    dt = _dt_max;
+
+  // Don't allow time step size to be smaller than minimum time step size
+  if (dt < _dt_min)
+    dt = _dt_min;
+
+  // Don't let time go beyond simulation end time
+  if (_time + dt > _end_time)
+    dt = _end_time - _time;
+
+  // Adjust to a sync time if supplied
+  if (!_sync_times.empty() && _time + dt + _timestep_tolerance >= (*_sync_times.begin()))
+  {
+    dt = *_sync_times.begin() - _time;
+
+    if (dt <= 0.0)
+      mooseError("Adjusting to sync time resulted in a non-positive time step.  dt: "<<dt<<" sync time: "<<*_sync_times.begin()<<" time: "<<_time);
+
+    force_output = true;
+  }
+
+  return force_output;
 }
 
 void
@@ -91,6 +128,12 @@ TimeStepper::step()
 void
 TimeStepper::acceptStep()
 {
+  // If there are sync times at or before the current time, delete them
+  while (!_sync_times.empty() && _time + _timestep_tolerance >= *_sync_times.begin())
+  {
+    _sync_times.erase(_sync_times.begin());
+  }
+
 }
 
 void

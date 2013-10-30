@@ -54,6 +54,7 @@ DT2::DT2(const std::string & name, InputParameters parameters) :
 void
 DT2::preExecute()
 {
+  TimeStepper::preExecute();
   TransientNonlinearImplicitSystem & nl_sys = _fe_problem.getNonlinearSystem().sys();
   _u1 = &nl_sys.add_vector("u1", true, GHOSTED);
   _u2 = &nl_sys.add_vector("u2", false, GHOSTED);

@@ -189,7 +189,6 @@ void
 Transient::execute()
 {
   preExecute();
-  _time_stepper->preExecute();
 
   // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have a wrong answer and might need to be regolded.
   // The reason is that we actually move the solution back in time before we actually start solving (which I think is wrong).  So this call here
@@ -215,7 +214,6 @@ Transient::execute()
 
 
   postExecute();
-  _time_stepper->postExecute();
 }
 
 void
@@ -342,12 +340,6 @@ Transient::endStep()
     // Compute the Error Indicators and Markers
     _problem.computeIndicatorsAndMarkers();
 
-    // If there are sync times at or before the current time, delete them
-    while (!_sync_times.empty() && _time + _timestep_tolerance >= *_sync_times.begin())
-    {
-      _sync_times.erase(_sync_times.begin());
-    }
-
     //output
     if(_time_interval)
     {
@@ -389,7 +381,6 @@ Transient::computeConstrainedDT()
 //    _dt = _input_dt;
 
   Real dt_cur = _dt;
-  _force_output = false;
 
   //After startup steps, compute new dt
   if (_t_step > _n_startup_steps)
@@ -397,40 +388,12 @@ Transient::computeConstrainedDT()
     dt_cur = getDT();
   }
 
-  // Don't let the time step size exceed maximum time step size
-  if (dt_cur > _dtmax)
-    dt_cur = _dtmax;
-
-  // Don't allow time step size to be smaller than minimum time step size
-  if (dt_cur < _dtmin)
-    dt_cur = _dtmin;
-
-  // Don't let time go beyond simulation end time
-  if (_time + dt_cur > _end_time)
-    dt_cur = _end_time - _time;
-
-  // Adjust to a sync time if supplied
-  if (!_sync_times.empty() && _time + dt_cur + _timestep_tolerance >= (*_sync_times.begin()))
-  {
-    dt_cur = *_sync_times.begin() - _time;
-
-    if (dt_cur <= 0.0)
-      mooseError("Adjusting to sync time resulted in a non-positive time step.  dt: "<<dt_cur<<" sync time: "<<*_sync_times.begin()<<" time: "<<_time);
-
-    _prev_dt = dt_cur;
-    _force_output = true;
-  }
-
   // Allow the time stepper to limit the time step
-  _time_stepper->constrainStep(dt_cur);
-
-  // Constrain by what the multi apps are doing
-  Real multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP_BEGIN);
-  if(_use_multiapp_dt || multi_app_dt < dt_cur)
-    dt_cur = multi_app_dt;
-  multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP);
-  if(multi_app_dt < dt_cur)
-    dt_cur = multi_app_dt;
+  _force_output = _time_stepper->constrainStep(dt_cur);
+  if (_force_output)
+  {
+    _prev_dt = _dt;
+  }
 
   // Don't let time go beyond next time interval output if specified
   if ((_time_interval) &&
@@ -449,6 +412,14 @@ Transient::computeConstrainedDT()
     _prev_dt = _dt;
     _force_output = true;
   }
+
+  // Constrain by what the multi apps are doing
+  Real multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP_BEGIN);
+  if(_use_multiapp_dt || multi_app_dt < dt_cur)
+    dt_cur = multi_app_dt;
+  multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP);
+  if(multi_app_dt < dt_cur)
+    dt_cur = multi_app_dt;
 
   return dt_cur;
 }
@@ -530,16 +501,18 @@ Transient::preExecute()
     _time_interval_output_interval = _problem.out().timeinterval();
     _next_interval_output_time = _time + _time_interval_output_interval;
   }
-  // process time periods
+  // Add time period start times to sync times
   const std::vector<TimePeriod *> time_periods = _problem.getTimePeriods();
   for (unsigned int i = 0; i < time_periods.size(); ++i)
-    _sync_times.insert(time_periods[i]->start());
+    _time_stepper->addSyncTime(time_periods[i]->start());
 
-  // Delete all sync times that are at or before the begin time
-  while (!_sync_times.empty() && _time + _timestep_tolerance >= *_sync_times.begin())
-  {
-    _sync_times.erase(_sync_times.begin());
-  }
+  _time_stepper->preExecute();
+}
+
+void
+Transient::postExecute()
+{
+  _time_stepper->postExecute();
 }
 
 Problem &

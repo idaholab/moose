@@ -41,7 +41,7 @@ public:
    */
   virtual void init();
 
-  virtual void preExecute() { }
+  virtual void preExecute();
   virtual void preSolve() { }
   virtual void postSolve() { }
   virtual void postExecute() { }
@@ -58,9 +58,9 @@ public:
 
   /**
    * Called after computeStep() is called.
-   * Apply constraints on dt.
+   * @return true if output should be forced, false otherwise
    */
-  void constrainStep(Real &dt);
+  bool constrainStep(Real &dt);
 
   /**
    * Take a time step
@@ -89,6 +89,11 @@ public:
   Real getCurrentDT() { return _current_dt; }
 
   virtual void forceTimeStep(Real dt);
+
+  /**
+   * Add a sync time
+   */
+  void addSyncTime(Real sync_time) { _sync_times.insert(sync_time);}
 
 protected:
   /**
@@ -124,7 +129,8 @@ protected:
   Real & _dt_min;
   Real & _dt_max;
   Real & _end_time;
-  Real & _timestep_tol;
+  std::set<Real> & _sync_times;
+  Real & _timestep_tolerance;
 
   /// Whether or not the previous solve converged.
   bool _converged;

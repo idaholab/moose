@@ -54,6 +54,7 @@ FunctionDT::removeOldKnots()
 void
 FunctionDT::preExecute()
 {
+  TimeStepper::preExecute();
   removeOldKnots();
 }
 
