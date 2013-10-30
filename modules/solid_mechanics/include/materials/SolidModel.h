@@ -40,6 +40,7 @@ public:
   {
     CR_ABRUPT = 0,
     CR_EXPONENTIAL,
+    CR_POWER,
     CR_UNKNOWN
   };
 
@@ -95,6 +96,8 @@ protected:
   MaterialProperty<RealVectorValue> * _crack_flags;
   MaterialProperty<RealVectorValue> * _crack_flags_old;
   RealVectorValue _crack_flags_local;
+  MaterialProperty<RealVectorValue> * _crack_count;
+  MaterialProperty<RealVectorValue> * _crack_count_old;
   MaterialProperty<ColumnMajorMatrix> * _crack_rotation;
   MaterialProperty<ColumnMajorMatrix> * _crack_rotation_old;
   MaterialProperty<RealVectorValue> * _crack_strain;

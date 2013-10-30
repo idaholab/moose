@@ -64,6 +64,10 @@ namespace
     {
       cm = SolidModel::CR_EXPONENTIAL;
     }
+    else if (n == "power")
+    {
+      cm = SolidModel::CR_POWER;
+    }
     if (cm == SolidModel::CR_UNKNOWN)
     {
       mooseError("Unknown cracking model");
@@ -153,6 +157,11 @@ SolidModel::SolidModel( const std::string & name,
   {
     _crack_flags = &createProperty<RealVectorValue>("crack_flags");
     _crack_flags_old = &createPropertyOld<RealVectorValue>("crack_flags");
+    if ( _cracking_release == CR_POWER )
+    {
+      _crack_count = &createProperty<RealVectorValue>("crack_count");
+      _crack_count_old = &createPropertyOld<RealVectorValue>("crack_count");
+    }
     _crack_rotation = &createProperty<ColumnMajorMatrix>("crack_rotation");
     _crack_rotation_old = &createPropertyOld<ColumnMajorMatrix>("crack_rotation");
     _crack_max_strain = &createProperty<RealVectorValue>("crack_max_strain");
@@ -447,6 +456,15 @@ SolidModel::initQpStatefulProperties()
       (*_crack_flags_old)[_qp](0) =
       (*_crack_flags_old)[_qp](1) =
       (*_crack_flags_old)[_qp](2) = 1;
+    if (_crack_count)
+    {
+      (*_crack_count)[_qp](0) =
+        (*_crack_count)[_qp](1) =
+        (*_crack_count)[_qp](2) =
+        (*_crack_count_old)[_qp](0) =
+        (*_crack_count_old)[_qp](1) =
+        (*_crack_count_old)[_qp](2) = 1;
+    }
 
     (*_crack_rotation)[_qp].identity();
     (*_crack_rotation_old)[_qp].identity();
@@ -959,12 +977,41 @@ SolidModel::crackingStressRotation()
       }
 
       Real crackFactor(1);
-      if ((*_crack_flags_old)[_qp](i) == 1 &&
-          sigma(i) > _cracking_stress &&
-          num_cracks < _max_cracks &&
-          _active_crack_planes[i] == 1)
+      if ( _cracking_release == CR_POWER )
       {
+        (*_crack_count)[_qp](i) = (*_crack_count_old)[_qp](i);
+      }
+      if ( _cracking_release == CR_POWER &&
+           sigma(i) > _cracking_stress &&
+           _active_crack_planes[i] == 1)
+      {
+        cracked = true;
+        ++(*_crack_count)[_qp](i);
+        // Assume Poisson's ratio drops to zero for this direction.  Stiffness is then Young's modulus.
+        const Real stiff = _youngs_modulus_function ? _youngs_modulus_function->value(_temperature[_qp], Point()) : _youngs_modulus;
 
+        if ((*_crack_count_old)[_qp](i) == 0)
+        {
+          new_crack = true;
+          ++num_cracks;
+
+          (*_crack_strain)[_qp](i) = _cracking_stress/stiff;
+        }
+        // Compute stress, factor....
+        (*_crack_flags)[_qp](i) *= 1./3.;
+
+        if ((*_crack_max_strain)[_qp](i) < (*_crack_strain)[_qp](i))
+        {
+          (*_crack_max_strain)[_qp](i) = (*_crack_strain)[_qp](i);
+        }
+        sigma(i) = (*_crack_flags)[_qp](i) * stiff * _principal_strain(i,0);
+
+      }
+      else if ((*_crack_flags_old)[_qp](i) == 1 &&
+               sigma(i) > _cracking_stress &&
+               num_cracks < _max_cracks &&
+               _active_crack_planes[i] == 1)
+      {
         // A new crack
 
         cracked = true;
@@ -991,7 +1038,8 @@ SolidModel::crackingStressRotation()
 //        (*_crack_strain_old)[_qp](i) = _principal_strain(i,0);
 
       }
-      else if ((*_crack_flags_old)[_qp](i) < 1)
+      else if (_cracking_release != CR_POWER &&
+               (*_crack_flags_old)[_qp](i) < 1)
       {
         // Previously cracked
         cracked = true;
