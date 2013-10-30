@@ -15,6 +15,7 @@
 #include "RungeKutta2.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
+#include "PetscSupport.h"
 
 template<>
 InputParameters validParams<RungeKutta2>()
@@ -45,19 +46,13 @@ RungeKutta2::computeTimeDerivatives()
 {
   _u_dot  = *_nl.currentSolution();
   if (_stage == 1)
-  {
     _u_dot -= _nl.solutionOld();
-    _u_dot *= 2. / _dt;
-
-    _du_dot_du = 2. / _dt;
-  }
   else
-  {
     _u_dot -= _nl.solutionOlder();
-    _u_dot *= 1. / _dt;
+  _u_dot *= 1. / _dt;
 
-    _du_dot_du = 1. / _dt;
-  }
+  _du_dot_du = 1. / _dt;
+
   _u_dot.close();
   _du_dot_du.close();
 }
@@ -80,6 +75,12 @@ RungeKutta2::solve()
   _stage = 2;
   _fe_problem.time() = time;
   _fe_problem.timeOld() = time_half;
+
+#ifdef LIBMESH_HAVE_PETSC
+  Moose::PetscSupport::petscSetOptions(_fe_problem);
+#endif
+  Moose::setSolverDefaults(_fe_problem);
+
   _fe_problem.getNonlinearSystem().sys().solve();
 }
 
@@ -87,6 +88,8 @@ void
 RungeKutta2::postStep(NumericVector<Number> & residual)
 {
   residual += _Re_non_time;
+  if (_stage == 1)
+    residual *= 0.5;
   residual += _Re_time;
   residual.close();
 }
