@@ -79,7 +79,7 @@ class TestHarness:
             # set cluster_handle to be None initially (happens for each test)
             self.options.cluster_handle = None
             # See if there were other arguments (test names) passed on the command line
-            if file == self.options.input_file_name and self.test_match.search(file):
+            if file == self.options.input_file_name: #and self.test_match.search(file):
               saved_cwd = os.getcwd()
               sys.path.append(os.path.abspath(dirpath))
               os.chdir(dirpath)
