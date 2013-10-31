@@ -12,13 +12,15 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PARSEDGRADFUNCTION_H
-#define PARSEDGRADFUNCTION_H
+#ifndef MOOSEPARSEDGRADFUNCTION_H
+#define MOOSERPARSEDGRADFUNCTION_H
 
+// MOOSE includes
 #include "Function.h"
+#include "MooseParsedFunctionBase.h"
+#include "MooseParsedFunctionWrapper.h"
 
-#include "MooseParsedFunction.h"
-
+// Forward declerations
 class MooseParsedGradFunction;
 
 template<>
@@ -31,7 +33,9 @@ InputParameters validParams<MooseParsedGradFunction>();
  * Documentation for the Function Parser can be found at:
  * http://warp.povusers.org/FunctionParser/fparser.html
  */
-class MooseParsedGradFunction : public MooseParsedFunction
+class MooseParsedGradFunction :
+  public Function,
+  public MooseParsedFunctionBase
 {
 public:
   /**
@@ -42,9 +46,16 @@ public:
   MooseParsedGradFunction(const std::string & name, InputParameters parameters);
 
   /**
-   * Class destructor, it removes the libMesh::ParsedFunction
+   * Class destructor
    */
   virtual ~MooseParsedGradFunction();
+
+  /**
+   * Return a scalar value from the function
+   * @param t Current time
+   * @param p The current spatial location
+   */
+  virtual Real value(Real t, const Point & p);
 
   /**
    * Compute the gradient of the function
@@ -52,30 +63,33 @@ public:
    * @param pt The current point (x,y,z)
    * @return Gradient of the function
    */
-  virtual RealGradient gradient(Real t, const Point & pt);
+  virtual RealGradient gradient(Real t, const Point & p);
 
   /**
-   * Establishes a libMesh::ParsedFunction for the gradient
+   * Method invalid for ParsedGradFunction
+   * @see ParsedVectorFunction
+   */
+  virtual RealVectorValue vectorValue(Real t, const Point & p);
+
+  /**
+   * Creates two libMesh::ParsedFunction objects for returning a vector via the 'gradient' method
+   * and a scalar vis the 'value' method
    */
   virtual void initialSetup();
 
 protected:
 
-  /**
-   * A method for updating the Postprocessor values of the libMesh::ParsedFunction from the values in the
-   * Postprocessors
-   */
-  virtual void updatePostprocessorValues();
+  /// String for the scalar function string
+  std::string _value;
 
-  /// Storage for gradient input function(s), i.e., grad_x, grad_y, and grad_z, in format ready for libMesh
+  /// String for the gradient, vector function string
   std::string _grad_value;
 
-  /// Pointer to the libMesh::ParsedFunction for the gradient
-  ParsedFunction<Real> * _grad_function;
+  /// Pointer to the Parsed function wrapper object for the scalar
+  MooseParsedFunctionWrapper * _function_ptr;
 
-  /// Vector of pointers to the variables in libMesh::ParseFunctio
-  std::vector<Real *> _grad_var_addr;
-
+  /// Pointer to the Parsed function wrapper object for the gradient
+  MooseParsedFunctionWrapper * _grad_function_ptr;
 };
 
-#endif //PARSEDGRADFUNCTION_H
+#endif // MOOSEPARSEDGRADFUNCTION_H

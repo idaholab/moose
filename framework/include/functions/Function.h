@@ -46,22 +46,49 @@ class Function :
   public Reportable
 {
 public:
+  /**
+   * Class constructor
+   * \param name The name of the function
+   * \param parameters The input parameters for the function
+   */
   Function(const std::string & name, InputParameters parameters);
+
+  /**
+   * Function destructor
+   */
   virtual ~Function();
 
   /**
-   * Override this to evaluate the function at point (t,x,y,z)
+   * Override this to evaluate the scalar function at point (t,x,y,z), by default
+   * this returns zero, you must override it.
+   * \param t The time
+   * \param p The Point in space (x,y,z)
+   * \return A scalar of the function evaluated at the time and location
    */
-  virtual Real value(Real t, const Point & p) = 0;
+  virtual Real value(Real t, const Point & p);
+
+  /**
+   * Override this to evaluate the vector function at a point (t,x,y,z), by default
+   * this returns a zero vector, you must override it.
+   * \param t The time
+   * \param p The Point in space (x,y,z)
+   * \return A vector of the function evaluated at the time and location
+   */
+  virtual RealVectorValue vectorValue(Real t, const Point & p);
 
   /**
    * Function objects can optionally provide a gradient at a point. By default
    * this returns 0, you must override it.
+   * \param t The time
+   * \param p The Point in space (x,y,z)
+   * \return A gradient of the function evaluated at the time and location
    */
   virtual RealGradient gradient(Real t, const Point & p);
 
+  // Not defined
   virtual Real integral();
 
+  // Not defined
   virtual Real average();
 };
 

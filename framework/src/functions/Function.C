@@ -38,26 +38,34 @@ Function::~Function()
 {
 }
 
+Real
+Function::value(Real /*t*/, const Point & /*p*/)
+{
+  return 0.0;
+}
+
 RealGradient
 Function::gradient(Real /*t*/, const Point & /*p*/)
 {
   return RealGradient(0, 0, 0);
 }
 
+RealVectorValue
+Function::vectorValue(Real /*t*/, const Point & /*p*/)
+{
+  return RealVectorValue(0, 0, 0);
+}
+
 Real
 Function::integral()
 {
-  std::string errorMsg("Integral method not defined for function ");
-  errorMsg += _name;
-  mooseError( errorMsg );
+  mooseError("Integral method not defined for function " << _name);
   return 0;
 }
 
 Real
 Function::average()
 {
-  std::string errorMsg("Average method not defined for function ");
-  errorMsg += _name;
-  mooseError( errorMsg );
+  mooseError("Average method not defined for function " << _name);
   return 0;
 }

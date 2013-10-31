@@ -17,7 +17,8 @@
 template<>
 InputParameters validParams<MooseParsedGradFunction>()
 {
-  InputParameters params = validParams<MooseParsedFunction>();
+  InputParameters params = validParams<MooseParsedFunctionBase>();
+  params.addParam<std::string>("value", "0", "User defined function.");
   params.addParam<std::string>("grad_x", "0", "Partial with respect to x.");
   params.addParam<std::string>("grad_y", "0", "Partial with respect to y.");
   params.addParam<std::string>("grad_z", "0", "Partial with respect to z.");
@@ -25,60 +26,45 @@ InputParameters validParams<MooseParsedGradFunction>()
 }
 
 MooseParsedGradFunction::MooseParsedGradFunction(const std::string & name, InputParameters parameters) :
-    MooseParsedFunction(name, parameters),
-    _grad_value(std::string("{") + getParam<std::string>("grad_x") + "}{" +
-                getParam<std::string>("grad_y") + "}{" +
-                getParam<std::string>("grad_z") + "}")
-{}
+    Function(name, parameters),
+    MooseParsedFunctionBase(name, parameters),
+    _value(verifyFunction(getParam<std::string>("value"))),
+    _grad_value(verifyFunction(std::string("{") + getParam<std::string>("grad_x") + "}{" +
+                                 getParam<std::string>("grad_y") + "}{" +
+                                 getParam<std::string>("grad_z") + "}"))
+{
+}
 
 MooseParsedGradFunction::~MooseParsedGradFunction()
 {
-  delete _grad_function; // remove the libMesh::ParsedFunction for the gradient
+  // Clean up the parsed function object
+  delete _function_ptr;
+  delete _grad_function_ptr;
+}
+
+Real
+MooseParsedGradFunction::value(Real t, const Point & p)
+{
+  // Return a scalar value
+  return _function_ptr->evaluate<Real>(t, p);
 }
 
 RealGradient
-MooseParsedGradFunction::gradient(Real t, const Point & pt)
+MooseParsedGradFunction::gradient(Real t, const Point & p)
 {
-  // Define the output vector
-  DenseVector<Real> output(LIBMESH_DIM);
-
-  // Evaluate the gradient libMesh::ParsedFunction
-  (*_grad_function)(pt, t, output);
-
-  // Return the gradient, sized correctly for the dimension of the problem
-  return RealGradient(output(0)
-#if LIBMESH_DIM > 1
-                      , output(1)
-#endif
-#if LIBMESH_DIM > 2
-                      , output(2)
-#endif
-    );
+  // Return gradient (RealGradient = RealVectorValue)
+  return _grad_function_ptr->evaluate<RealVectorValue>(t, p);
 }
 
-void
-MooseParsedGradFunction::updatePostprocessorValues()
+RealVectorValue
+MooseParsedGradFunction::vectorValue(Real /*t*/, const Point & /*p*/)
 {
-  // Loop through the variables that are Postprocessors and update the libMesh::ParsedFunction
-  for (unsigned int i = 0; i < _pp_index.size(); ++i)
-  {
-    (*_var_addr[i]) = (*_pp_vals[i]);      // updates values in _function
-    (*_grad_var_addr[i]) = (*_pp_vals[i]); //updates values in _grad_function
-  }
+  mooseError("The vectorValue method is not defined in ParsedGradFunction");
 }
-
 
 void
 MooseParsedGradFunction::initialSetup()
 {
-  // Call the initialSetup from the base class (MooseParsedFunction)
-  MooseParsedFunction::initialSetup();
-
-  // Create the libMesh::ParsedFunction for the gradient
-  _grad_function = new ParsedFunction<Real>(_grad_value, &_vars, &_vals);
-
-  // Store pointers to the variables of the libMesh::ParsedFunction
- for (unsigned int i = 0; i < _pp_index.size(); ++i)
-   _grad_var_addr.push_back(&_grad_function->getVarAddress(_vars[_pp_index[i]]));
-
+  _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _value, _vars, _vals);
+  _grad_function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _grad_value, _vars, _vals);
 }

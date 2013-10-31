@@ -196,7 +196,8 @@ public:
 
   /**
    * This method supresses an inherited parameter so that it isn't required or valid
-   * in the derived class.  Suppressing a parameter can have dire consequences.
+   * in the derived class. The parameter is added to the private parameter list.
+   * Suppressing a parameter can have dire consequences.
    * Use at your own risk!
    */
   template <typename T>
@@ -458,6 +459,7 @@ void InputParameters::suppressParameter(const std::string &name)
 {
   _required_params.erase(name);
   _valid_params.erase(name);
+  _private_params.insert(name);
 }
 
 template <typename T>

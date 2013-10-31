@@ -1,0 +1,17 @@
+[Tests]
+  [./steady]
+    type = 'Exodiff'
+    input = 'steady.i'
+    exodiff = 'steady_out.e'
+  [../]
+	[./transient]
+		type = 'Exodiff'
+		input = 'mms_transient_coupled.i'
+		exodiff = 'mms_transient_coupled_out.e'
+	[../]
+	[./vector]
+		type = 'Exodiff'
+		input = 'vector_function.i'
+		exodiff = 'vector_function_out.e'
+  [../]
+[]

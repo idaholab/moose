@@ -14,6 +14,7 @@
 #include "CoefDiffusion.h"
 #include "RestartDiffusion.h"
 #include "MatCoefDiffusion.h"
+#include "FuncCoefDiffusion.h"
 #include "Convection.h"
 #include "PolyDiffusion.h"
 #include "PolyConvection.h"
@@ -43,8 +44,7 @@
 #include "SplineFFn.h"
 #include "BlkResTestDiffusion.h"
 #include "ReportableDiffusion.h"
-
-
+#include "DiffTensorKernel.h"
 #include "CoupledAux.h"
 #include "CoupledGradAux.h"
 #include "PolyConstantAux.h"
@@ -192,6 +192,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(CoefDiffusion);
   registerKernel(RestartDiffusion);
   registerKernel(MatCoefDiffusion);
+  registerKernel(FuncCoefDiffusion);
   registerKernel(Convection);
   registerKernel(PolyDiffusion);
   registerKernel(PolyConvection);
@@ -221,6 +222,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(SplineFFn);
   registerKernel(BlkResTestDiffusion);
   registerKernel(ReportableDiffusion);
+  registerKernel(DiffTensorKernel);
 
   // Aux kernels
   registerAux(CoupledAux);

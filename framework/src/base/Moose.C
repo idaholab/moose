@@ -107,6 +107,7 @@
 #include "ConstantFunction.h"
 #include "CompositeFunction.h"
 #include "MooseParsedFunction.h"
+#include "MooseParsedVectorFunction.h"
 #include "MooseParsedGradFunction.h"
 #include "PiecewiseLinear.h"
 #include "SolutionFunction.h"
@@ -402,11 +403,13 @@ registerObjects(Factory & factory)
   registerFunction(CompositeFunction);
   registerNamedFunction(MooseParsedFunction, "ParsedFunction");
   registerNamedFunction(MooseParsedGradFunction, "ParsedGradFunction");
+  registerNamedFunction(MooseParsedVectorFunction, "ParsedVectorFunction");
   registerFunction(PiecewiseLinear);
   registerFunction(SolutionFunction);
   registerFunction(PiecewiseBilinear);
   registerFunction(PiecewiseLinearFile);
   registerFunction(SplineFunction);
+
   // materials
   registerMaterial(GenericConstantMaterial);
   registerMaterial(GenericFunctionMaterial);
