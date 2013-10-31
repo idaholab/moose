@@ -1,23 +1,23 @@
 #include "PowerLawCreep.h"
 
-#include "MooseException.h"
-#include "SymmIsotropicElasticityTensor.h"
-
 template<>
 InputParameters validParams<PowerLawCreep>()
 {
   InputParameters params = validParams<SolidModel>();
 
   //   Power-law creep material parameters
-   params.addRequiredParam<Real>("coefficient", "Leading coefficent in power-law equation");
-   params.addRequiredParam<Real>("exponent", "Exponent in power-law equation");
-   params.addRequiredParam<Real>("activation_energy", "Activation energy");
-   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
+  params.addRequiredParam<Real>("coefficient", "Leading coefficent in power-law equation");
+  params.addRequiredParam<Real>("n_exponent", "Exponent on effective stress in power-law equation");
+  params.addParam<Real>("m_exponent", 0.0, "Exponent on time in power-law equation");
+  params.addRequiredParam<Real>("activation_energy", "Activation energy");
+  params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
+  params.addParam<Real>("start_time", 0, "Start time (if not zero)");
 
   //  Sub-Newton Iteration control parameters
-   params.addParam<Real>("tolerance", 1e-5, "Convergence tolerance for sub-newtion iteration");
-   params.addParam<unsigned int>("max_its", 10, "Maximum number of sub-newton iterations");
-   params.addParam<bool>("output_iteration_info", false, "Set true to output sub-newton iteration information");
+  params.addParam<Real>("relative_tolerance", 1e-5, "Relative convergence tolerance for sub-newtion iteration");
+  params.addParam<Real>("absolute_tolerance", 1e-20, "Absolute convergence tolerance for sub-newtion iteration");
+  params.addParam<unsigned int>("max_its", 10, "Maximum number of sub-newton iterations");
+  params.addParam<bool>("output_iteration_info", false, "Set true to output sub-newton iteration information");
 
   return params;
 }
@@ -25,104 +25,9 @@ InputParameters validParams<PowerLawCreep>()
 
 PowerLawCreep::PowerLawCreep( const std::string & name,
                               InputParameters parameters )
-  :SolidModel( name, parameters ),
-   _coefficient(parameters.get<Real>("coefficient")),
-   _exponent(parameters.get<Real>("exponent")),
-   _activation_energy(parameters.get<Real>("activation_energy")),
-   _gas_constant(parameters.get<Real>("gas_constant")),
-   _tolerance(parameters.get<Real>("tolerance")),
-   _max_its(parameters.get<unsigned int>("max_its")),
-   _output_iteration_info(getParam<bool>("output_iteration_info")),
-
-   _creep_strain(declareProperty<SymmTensor>("creep_strain")),
-   _creep_strain_old(declarePropertyOld<SymmTensor>("creep_strain"))
+  :SolidModel( name, parameters )
 {
-}
 
-void
-PowerLawCreep::computeStress()
-{
-  // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
-  // stress = stressOld + stressIncrement
-  // creep_strain = creep_strainOld + creep_strainIncrement
-
-  // compute trial stress
-  SymmTensor stress_new( (*elasticityTensor()) * _strain_increment );
-  stress_new += _stress_old;
-
-  // compute deviatoric trial stress
-  SymmTensor dev_trial_stress(stress_new);
-  dev_trial_stress.addDiag( -dev_trial_stress.trace()/3.0 );
-
-  // compute effective trial stress
-  Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
-  Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
-
-  // Use Newton sub-iteration to determine effective creep strain increment
-
-  unsigned int it = 0;
-  Real del_p = 0.;
-  Real norm_residual = 10.;
-
-  while(it < _max_its && norm_residual > _tolerance)
-  {
-
-    Real phi = _coefficient*std::pow(effective_trial_stress - 3.*_shear_modulus*del_p, _exponent)*
-      std::exp(-_activation_energy/(_gas_constant*_temperature[_qp]));
-    Real dphi_ddelp = -3.*_coefficient*_shear_modulus*_exponent*
-      std::pow(effective_trial_stress-3.*_shear_modulus*del_p, _exponent-1.)*
-      std::exp(-_activation_energy/(_gas_constant*_temperature[_qp]));
-    Real creep_residual = phi -  del_p/_dt;
-    norm_residual = std::abs(creep_residual);
-    del_p = del_p + (creep_residual / (1/_dt - dphi_ddelp));
-
-    // iteration output
-    if (_output_iteration_info == true)
-      std::cout
-        <<" it=" <<it
-        <<" temperature=" << _temperature[_qp]
-        <<" trial stress=" <<effective_trial_stress
-        <<" phi=" <<phi
-        <<" dphi=" <<dphi_ddelp
-        <<" creep_res=" <<creep_residual
-        <<" del_p=" <<del_p
-        <<std::endl;
-
-    ++it;
-  }
-
-  if(it == _max_its)
-  {
-    std::stringstream errorMsg;
-    errorMsg << "Max sub-newton iteration hit during creep solve!";
-    if (libMesh::n_processors()>1)
-    {
-      mooseError(errorMsg.str());
-    }
-    else
-    {
-      std::cout<<std::endl<<errorMsg.str()<<std::endl<<std::endl;
-      throw MooseException();
-    }
-  }
-
-
-  // compute creep and elastic strain increments (avoid potential divide by zero - how should this be done)?
-  if (effective_trial_stress < 0.01)
-  {
-    effective_trial_stress = 0.01;
-  }
-  SymmTensor creep_strain_increment(dev_trial_stress);
-  creep_strain_increment *= (1.5*del_p/effective_trial_stress);
-
-  _strain_increment -= creep_strain_increment;
-
-  //  compute stress increment
-  _stress[_qp] = *elasticityTensor() * _strain_increment;
-
-  // update stress and creep strain
-  _stress[_qp] += _stress_old;
-  _creep_strain[_qp] = creep_strain_increment;
-  _creep_strain[_qp] += _creep_strain_old[_qp];
+  createConstitutiveModel( "PowerLawCreepModel", parameters );
 
 }

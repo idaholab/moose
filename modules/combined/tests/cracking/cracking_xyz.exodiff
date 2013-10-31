@@ -1,16 +1,16 @@
 
 #  *****************************************************************
-#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  
-#                                                                   
+#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF
+#
 #                        Version: 2.18 (2008-01-08)
-#           Authors : Richard Drake, rrdrake@sandia.gov             
-#                     Greg Sjaardema, gdsjaar@sandia.gov            
-#                                                                   
-#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  
+#           Authors : Richard Drake, rrdrake@sandia.gov
+#                     Greg Sjaardema, gdsjaar@sandia.gov
+#
+#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF
 #  *****************************************************************
 
 #  FILE 1: cracking_xyz_out.e
-#   Title: 
+#   Title:
 #          Dim = 3, Blocks = 1, Nodes = 8, Elements = 1, Nodesets = 14, Sidesets = 6
 #          Vars: Global = 0, Nodal = 3, Element = 12, Nodeset = 0, Sideset = 0, Times = 302
 
@@ -45,11 +45,10 @@ ELEMENT VARIABLES relative 1.e-6 floor 1e-8
 	stress_xx  # min:               0 @ t1,b1,e1	max:   1.1785013e+08 @ t38,b1,e1
 	stress_yy floor 1e-2 # min:               0 @ t1,b1,e1	max:   1.3052912e+08 @ t136,b1,e1
 	stress_zz floor 1e-2 # min:               0 @ t1,b1,e1	max:   1.6594791e+08 @ t236,b1,e1
-	stress_xy  # min:               0 @ t1,b1,e1	max:     4.70206e-09 @ t39,b1,e1
-	stress_yz  # min:               0 @ t1,b1,e1	max:   3.4260097e-09 @ t137,b1,e1
-	stress_zx  # min:               0 @ t1,b1,e1	max:   1.3729488e-09 @ t5,b1,e1
+	stress_xy floor 1e-7 # min:               0 @ t1,b1,e1	max:     4.70206e-09 @ t39,b1,e1
+	stress_yz floor 1e-7 # min:               0 @ t1,b1,e1	max:   3.4260097e-09 @ t137,b1,e1
+	stress_zx floor 1e-7 # min:               0 @ t1,b1,e1	max:   1.3729488e-09 @ t5,b1,e1
 
 # No NODESET VARIABLES
 
 # No SIDESET VARIABLES
-

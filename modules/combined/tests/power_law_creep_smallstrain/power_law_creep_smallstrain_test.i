@@ -196,9 +196,10 @@
     youngs_modulus = 2.e11
     poissons_ratio = .3
     coefficient = 1.0e-15
-    exponent = 4
+    n_exponent = 4
     activation_energy = 3.0e5
-    tolerance = 1.e-5
+    relative_tolerance = 1e-25
+    absolute_tolerance = 1e-5
     max_its = 100
     disp_x = disp_x
     disp_y = disp_y
@@ -260,5 +261,3 @@
   postprocessor_csv = true
   perf_log = true
 []
-
-

@@ -12,6 +12,7 @@
 #include "CombinedCreepPlasticity.h"
 #include "DashpotBC.h"
 #include "Elastic.h"
+#include "ElasticModel.h"
 #include "ElasticEnergyAux.h"
 #include "ElementsOnLineAux.h"
 #include "Gravity.h"
@@ -34,7 +35,6 @@
 #include "PLC_LSH.h"
 #include "PowerLawCreep.h"
 #include "PowerLawCreepModel.h"
-// #include "PlenumPressure.h"
 #include "PlenumPressureAction.h"
 #include "PlenumPressurePostprocessor.h"
 #include "PlenumPressurePPAction.h"
@@ -63,7 +63,6 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerAux(ElementsOnLineAux);
 
   registerBoundaryCondition(DashpotBC);
-  // registerBoundaryCondition(PlenumPressure);
   registerBoundaryCondition(PresetVelocity);
   registerBoundaryCondition(Pressure);
 
@@ -74,6 +73,7 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerMaterial(CLSHPlasticMaterial);
   registerMaterial(CombinedCreepPlasticity);
   registerMaterial(Elastic);
+  registerMaterial(ElasticModel);
   registerMaterial(IsotropicPlasticity);
   registerMaterial(LinearAnisotropicMaterial);
   registerMaterial(LinearGeneralAnisotropicMaterial);

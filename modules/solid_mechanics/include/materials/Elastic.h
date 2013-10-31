@@ -12,9 +12,6 @@ public:
 
 protected:
 
-  /// Compute the stress (sigma += deltaSigma)
-  virtual void computeStress();
-
 };
 
 template<>

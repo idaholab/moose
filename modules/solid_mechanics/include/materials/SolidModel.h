@@ -216,6 +216,8 @@ protected:
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeConstitutiveModelStress();
 
+  void createConstitutiveModel(const std::string & cm_name, const InputParameters & params);
+
 
 private:
 

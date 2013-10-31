@@ -243,7 +243,7 @@
 [Materials]
 
   [./stiffStuff1]
-    type = Elastic
+    type = SolidModel
     block = 1
 
     disp_x = disp_x
@@ -252,6 +252,11 @@
 
     youngs_modulus = 1e6
     poissons_ratio = 0.25
+    constitutive_model = elastic
+  [../]
+  [./elastic]
+    type = ElasticModel
+    block = 1
   [../]
 
 [] # Materials

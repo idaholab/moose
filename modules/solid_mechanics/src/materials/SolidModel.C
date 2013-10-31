@@ -10,6 +10,7 @@
 #include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
 
+#include "MooseApp.h"
 #include "Problem.h"
 
 template<>
@@ -373,13 +374,13 @@ SolidModel::modifyStrainIncrement()
   if (!modified)
   {
     applyThermalStrain();
+  }
 
-    const Real VoldV0 = _element->volumeRatioOld(_qp);
-    const std::vector<VolumetricModel*> & vm( _volumetric_models[current_block] );
-    for (unsigned int i(0); i < vm.size(); ++i)
-    {
-      vm[i]->modifyStrain(_qp, 1/VoldV0, _strain_increment, _d_strain_dT);
-    }
+  const Real VoldV0 = _element->volumeRatioOld(_qp);
+  const std::vector<VolumetricModel*> & vm( _volumetric_models[current_block] );
+  for (unsigned int i(0); i < vm.size(); ++i)
+  {
+    vm[i]->modifyStrain(_qp, 1/VoldV0, _strain_increment, _d_strain_dT);
   }
 }
 
@@ -738,7 +739,7 @@ SolidModel::initialSetup()
       }
     }
 
-    if (isParamValid("constitutive_model"))
+    if (isParamValid("constitutive_model") && !_constitutive_active)
     {
       const std::string & constitutive_model = getParam<std::string>("constitutive_model");
 
@@ -1264,4 +1265,23 @@ SolidModel::createElement( const std::string & name,
   mooseAssert( element, "No Element created for material " + name );
 
   return element;
+}
+
+void
+SolidModel::createConstitutiveModel(const std::string & cm_name, const InputParameters & params)
+{
+
+  Factory & factory = _app.getFactory();
+  ConstitutiveModel * cm = dynamic_cast<ConstitutiveModel*>(factory.create(cm_name, _name+"Model", params));
+  if (!cm)
+  {
+    mooseError("\""+_name+"\" is not a ConstitutiveModel");
+  }
+
+  _constitutive_active = true;
+  for(unsigned i(0); i < _block_id.size(); ++i)
+  {
+    _constitutive_model[_block_id[i]] = cm;
+  }
+
 }
