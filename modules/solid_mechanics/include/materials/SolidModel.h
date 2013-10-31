@@ -31,6 +31,8 @@ public:
               InputParameters parameters );
   virtual ~SolidModel();
 
+  virtual void initStatefulProperties( unsigned n_points );
+
   virtual void applyThermalStrain();
 
   static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const SymmTensor & T,

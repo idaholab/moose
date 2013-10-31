@@ -45,7 +45,7 @@ ConstitutiveModel::computeStress( const Elem & current_elem,
 }
 
 void
-ConstitutiveModel::initStatefulProperties( unsigned int /*qp*/ )
+ConstitutiveModel::initStatefulProperties( unsigned int /*n_points*/ )
 {
 }
 

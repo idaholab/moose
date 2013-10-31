@@ -157,11 +157,11 @@
     hardening_constant = 100.
     c_alpha = 0.2418e-6
     c_beta = 0.1135
-    tolerance = 1.e-5
+    relative_tolerance = 1e-25
+    absolute_tolerance = 1e-5
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    print_debug_info = true
   [../]
 []
 
@@ -169,8 +169,8 @@
   type = Transient
 
   # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'  
-  line_search = none	
+  solve_type = 'PJFNK'
+  line_search = none
 
 
   print_linear_residuals = true
@@ -190,15 +190,10 @@
   dt = 1.
 []
 
-
-
 [Output]
-  file_base = out
   interval = 1
   output_initial = true
   elemental_as_nodal = true
   exodus = true
   perf_log = true
 []
-
-

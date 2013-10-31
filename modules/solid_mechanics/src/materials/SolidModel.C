@@ -1285,3 +1285,18 @@ SolidModel::createConstitutiveModel(const std::string & cm_name, const InputPara
   }
 
 }
+
+void
+SolidModel::initStatefulProperties(unsigned n_points)
+{
+  for (_qp = 0; _qp < n_points; ++_qp)
+  {
+    initQpStatefulProperties();
+  }
+  if (_constitutive_active)
+  {
+    const SubdomainID current_block = _current_elem->subdomain_id();
+    ConstitutiveModel* cm = _constitutive_model[current_block];
+    cm->initStatefulProperties( n_points );
+  }
+}

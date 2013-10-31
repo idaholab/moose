@@ -40,7 +40,7 @@ IsotropicPlasticity::initStatefulProperties(unsigned n_points)
   {
     _hardening_variable[qp] = _hardening_variable_old[qp] = 0;
   }
-  ConstitutiveModel::initStatefulProperties( n_points );
+  ReturnMappingModel::initStatefulProperties( n_points );
 }
 
 void
