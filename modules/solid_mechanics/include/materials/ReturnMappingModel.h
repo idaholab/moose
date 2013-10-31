@@ -44,10 +44,11 @@ protected:
   virtual Real computeDerivative(unsigned qp, Real effectiveTrialStress, Real scalar) = 0;
   virtual void iterationFinalize(unsigned /*qp*/, Real /*scalar*/) {}
 
-  unsigned int _max_its;
-  bool _output_iteration_info;
-  Real _relative_tolerance;
-  Real _absolute_tolerance;
+  const unsigned int _max_its;
+  const bool _output_iteration_info;
+  const bool _output_iteration_info_on_error;
+  const Real _relative_tolerance;
+  const Real _absolute_tolerance;
 
 private:
 

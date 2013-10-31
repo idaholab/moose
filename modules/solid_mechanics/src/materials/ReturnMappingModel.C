@@ -10,6 +10,7 @@ InputParameters validParams<ReturnMappingModel>()
   // Sub-Newton Iteration control parameters
   params.addParam<unsigned int>("max_its", 30, "Maximum number of sub-newton iterations");
   params.addParam<bool>("output_iteration_info", false, "Set true to output sub-newton iteration information");
+   params.addParam<bool>("output_iteration_info_on_error", false, "Set true to output sub-newton iteration information when a step fails");
   params.addParam<Real>("relative_tolerance", 1e-5, "Relative convergence tolerance for sub-newtion iteration");
   params.addParam<Real>("absolute_tolerance", 1e-20, "Absolute convergence tolerance for sub-newtion iteration");
 
@@ -22,6 +23,7 @@ ReturnMappingModel::ReturnMappingModel( const std::string & name,
   :ConstitutiveModel( name, parameters ),
    _max_its(parameters.get<unsigned int>("max_its")),
    _output_iteration_info(getParam<bool>("output_iteration_info")),
+   _output_iteration_info_on_error(getParam<bool>("output_iteration_info_on_error")),
    _relative_tolerance(parameters.get<Real>("relative_tolerance")),
    _absolute_tolerance(parameters.get<Real>("absolute_tolerance"))
 {
@@ -74,6 +76,8 @@ ReturnMappingModel::computeStress( const Elem & current_elem, unsigned qp,
   Real norm_residual = 10;
   Real first_norm_residual = 10;
 
+  std::stringstream iter_output;
+
   while(it < _max_its &&
         norm_residual > _absolute_tolerance &&
         (norm_residual/first_norm_residual) > _relative_tolerance)
@@ -93,17 +97,18 @@ ReturnMappingModel::computeStress( const Elem & current_elem, unsigned qp,
 
     scalar -= residual / computeDerivative(qp, effective_trial_stress, scalar);
 
-    if (_output_iteration_info == true)
+    if (_output_iteration_info == true ||
+        _output_iteration_info_on_error == true)
     {
-      std::cout
-      << " it="       << it
-      << " trl_strs=" << effective_trial_stress
-      << " scalar="   << scalar
-      << " rel_res="  << norm_residual/first_norm_residual
-      << " rel_tol="  << _relative_tolerance
-      << " abs_res="  << norm_residual
-      << " abs_tol="  << _absolute_tolerance
-      << std::endl;
+      iter_output
+        << " it="       << it
+        << " trl_strs=" << effective_trial_stress
+        << " scalar="   << scalar
+        << " rel_res="  << norm_residual/first_norm_residual
+        << " rel_tol="  << _relative_tolerance
+        << " abs_res="  << norm_residual
+        << " abs_tol="  << _absolute_tolerance
+        << std::endl;
     }
 
     iterationFinalize( qp, scalar );
@@ -111,11 +116,19 @@ ReturnMappingModel::computeStress( const Elem & current_elem, unsigned qp,
     ++it;
   }
 
+  if (_output_iteration_info)
+  {
+    std::cout << iter_output.str();
+  }
 
   if(it == _max_its &&
      norm_residual > _absolute_tolerance &&
      (norm_residual/first_norm_residual) > _relative_tolerance)
   {
+    if (_output_iteration_info_on_error)
+    {
+      std::cerr << iter_output.str();
+    }
     mooseError("Max sub-newton iteration hit during nonlinear constitutive model solve!");
   }
 
