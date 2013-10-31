@@ -332,7 +332,7 @@ class Report:
     self.initialize = { 'REPORTING_HOST' : self.args.my_hostname,
                         'REQ'            : True,
                         'REQ_DATA'       : { 'agent_run'   : None,
-                                             'repeat_rate' : None,
+                                             'sample_delay' : None,
                                              'pstack'      : None,
                                              'pbs_delay'   : None
                                              }
@@ -354,16 +354,20 @@ class Report:
 
   def updateReport(self):
     total_mem = 0
+    log_changed = False
     for key in self.args.node_list:
-      if self.current_results['HOST'][key]['TOTAL'] != None:
-        total_mem += int(self.current_results['HOST'][key]['TOTAL'])
+      if self.current_results['HOST'][key]['TOTAL'] == None and self.args.pbs != True:
+        print 'Informing server all processes have stopped.'
+        self.current_results['RUN'] = False
+        self.current_results['HOST'][key]['TOTAL'] = 0
       else:
-        if self.args.pbs != True:
-          print 'Informing server all processes have stopped.'
-          self.current_results['RUN'] = False
-          self.current_results['HOST'][key]['TOTAL'] = 0
+        if self.current_results['HOST'][key]['TOTAL'] != None:
+          total_mem += int(self.current_results['HOST'][key]['TOTAL'])
+          if self.current_results['HOST'][key]['LOG'] != "":
+            log_changed = True
+
     self.current_results['TOTAL'] = total_mem
-    if self.last_results != self.current_results:
+    if self.last_results != self.current_results or log_changed:
       self.changes = True
       for key in self.last_results.keys():
         if key != 'HOST':
@@ -620,7 +624,7 @@ ServerAgent also creates the reporter instance and launches all reporter agents.
     (self.host, self.port) = self.server.getsockname()
     self.report = Report(self.args)
     self.cp = ClientParser(self.report)
-    print 'Memory Logger running on:', self.host, self.port, '\nNodes:', ', '.join(self.args.node_list), '\nSample rate (including stdout):', self.args.repeat_rate[-1], 's\nDelaying', self.args.pbs_delay[-1], 'seconds before agents attempt tracking\n'
+    print 'Memory Logger running on:', self.host, self.port, '\nNodes:', ', '.join(self.args.node_list), '\nSample rate (including stdout):', self.args.sample_delay[-1], 's\nDelaying', self.args.pbs_delay[-1], 'seconds before agents attempt tracking\n'
 
   def start_server(self):
     self.launch_agents()
@@ -749,7 +753,7 @@ def trackMemory(args):
     report.current_results = agent.receive(report.current_results)
     print report.current_results
     agent.close()
-    args.repeat_rate = report.current_results['REQ_DATA']['repeat_rate']
+    args.sample_delay = report.current_results['REQ_DATA']['sample_delay']
     args.pstack = report.current_results['REQ_DATA']['pstack']
     args.agent_run = report.current_results['REQ_DATA']['agent_run']
     while report.current_results['RUN']:
@@ -758,7 +762,7 @@ def trackMemory(args):
         agent = ClientConnection((args.call_back_host[0], int(args.call_back_host[1])))
         agent.send(report.current_results)
         agent.close()
-      time.sleep(args.repeat_rate[-1])
+      time.sleep(args.sample_delay[-1])
   else:
     args.node_list = None
     report = Report(args)
@@ -767,9 +771,9 @@ def trackMemory(args):
     try:
       while report.current_results['RUN']:
         report.getReport()
-        if report.changes:
+        if report.changes:  #or args.report_unchanged:  <- Unnecessary
           report.writeResults()
-        time.sleep(args.repeat_rate[-1])
+        time.sleep(args.sample_delay[-1])
     except KeyboardInterrupt:
       print 'Canceled by user'
       sys.exit(0)
@@ -831,7 +835,8 @@ def parseArguments(args=None):
   rungroup.add_argument('--pbs', dest='pbs', metavar='', action='store_const', const=True, default=False, help='Instruct memory logger to tally all launches on all nodes\n ')
   rungroup.add_argument('--pbs-delay', dest='pbs_delay', metavar='float', nargs=1, type=float, default=[1.0], help='For larger jobs, you may need to increase the delay as to when the memory_logger will launch the tracking agents\n ')
   rungroup.add_argument('--track', nargs=1, metavar='int', type=int, help='Track a single specific PID already running\n ')
-  rungroup.add_argument('--repeat-rate', nargs=1,  metavar='float', type=float, default=[0.25], help='Indicate the sleep delay in float seconds to check memory usage (default 0.25 seconds)\n ')
+  rungroup.add_argument('--sample-delay', nargs=1,  metavar='float', type=float, default=[0.25], help='Indicate the sleep delay in float seconds to check memory usage (default 0.25 seconds)\n ')
+#  rungroup.add_argument('--report-unchanged', dest='report_unchanged', action='store_const', const=True, default=False, help='Track changes even when memory is unchanged.  This may significantly increase the size of your logfile.')
   rungroup.add_argument('--outfile', nargs=1, metavar='file', default=[os.getcwd() + '/usage.log'], help='Save log to specified file. (Defaults to usage.log)\n ')
 
   readgroup = parser.add_argument_group('Read / Display', 'Options to manipulate or read log files created by the memory_logger')
