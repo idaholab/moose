@@ -34,8 +34,6 @@ class MemoryPlotter:
     plot_list = []
     tmp_plot = []
     tmp_legend = []
-    self.stdout_msg = []
-    self.pstack_msg = []
     self.multiples = 1
     self.memory_label = 'Memory in Bytes'
 
@@ -71,6 +69,9 @@ class MemoryPlotter:
       tmp_pstack_x = []
       tmp_pstack_y = []
 
+      stdout_msg = []
+      pstack_msg = []
+
       # Get the start time, and make this 0
       try:
         tmp_zero = decimal.Decimal(value_list[0][0])
@@ -86,12 +87,12 @@ class MemoryPlotter:
         if len(records[2]) > 0 and self.arguments.stdout:
           tmp_stdout_x.append(tmp_time[-1])
           tmp_stdout_y.append(tmp_memory[-1])
-          self.stdout_msg.append(records[2])
+          stdout_msg.append(records[2])
 
         if len(records[3]) > 0 and self.arguments.pstack:
           tmp_pstack_x.append(tmp_time[-1])
           tmp_pstack_y.append(tmp_memory[-1])
-          self.pstack_msg.append(records[3])
+          pstack_msg.append(records[3])
 
       # Do the actual plotting:
       f, = plot_list[-1].plot(tmp_time, tmp_memory)
@@ -105,7 +106,7 @@ class MemoryPlotter:
       if self.arguments.stdout:
         stdout_line, = plot_list[-1].plot(tmp_stdout_x, tmp_stdout_y, 'x', picker=10, color=f.get_color())
         stdout_line.set_gid('stdout')
-        self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, self.stdout_msg, f.get_color())
+        self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, stdout_msg, f.get_color())
 
       if self.arguments.pstack:
         pstack_line, = plot_list[-1].plot(tmp_pstack_x, tmp_pstack_y, 'o', picker=10, color=f.get_color())
