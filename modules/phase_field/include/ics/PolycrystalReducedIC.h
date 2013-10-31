@@ -53,6 +53,7 @@ public:
   unsigned int _rand_seed;
 
   bool _cody_test;
+  bool _columnar_3D;
 
   Point _bottom_left;
   Point _top_right;

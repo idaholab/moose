@@ -28,7 +28,8 @@ PolycrystalReducedIC::PolycrystalReducedIC(const std::string & name,
    _grain_num(getParam<unsigned int>("grain_num")),
    _op_index(getParam<unsigned int>("crys_index")),
    _rand_seed(getParam<unsigned int>("rand_seed")),
-   _cody_test(getParam<bool>("cody_test"))
+   _cody_test(getParam<bool>("cody_test")),
+   _columnar_3D(getParam<bool>("columnar_3D"))
 {
 }
 
@@ -88,7 +89,7 @@ PolycrystalReducedIC::initialSetup()
       else
         _centerpoints[grain](i) = _bottom_left(i) + _range(i)*MooseRandom::rand();
     }
-    if (getParam<bool>("columnar_3D"))
+    if (_columnar_3D)
         _centerpoints[grain](2) = _bottom_left(2) + _range(2)*0.5;
   }
   
@@ -159,7 +160,11 @@ PolycrystalReducedIC::value(const Point & p)
   //Loops through all of the grain centers and finds the center that is closest to the point p
   for (unsigned int grain=0; grain<_grain_num; grain++)
   {
-    Real distance = _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], p);
+    Point cp = p;
+    if (_columnar_3D)
+      cp(2) = _centerpoints[grain](2);
+    
+    Real distance = _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], cp);
       
     if (min_distance > distance)
     {
