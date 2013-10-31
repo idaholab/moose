@@ -142,6 +142,7 @@ AdaptiveDT::init()
 Real
 AdaptiveDT::computeInitialDT()
 {
+  std::ostringstream diag;
 
   // Advance to the first tfunc time if one is provided in sim time range
   _tfunc_times_iter = _tfunc_times.begin();
@@ -164,23 +165,21 @@ AdaptiveDT::computeInitialDT()
 
     dt = *_tfunc_times_iter - _time_old;
 
-    std::ostringstream out;
-    out << "Limiting dt to sync with dt function time: "
-        << std::setw(9)
-        << std::setprecision(6)
-        << std::setfill('0')
-        << std::showpoint
-        << std::left
-        << *_tfunc_times_iter
-        << " dt: "
-        << std::setw(9)
-        << std::setprecision(6)
-        << std::setfill('0')
-        << std::showpoint
-        << std::left
-        << dt
-        << std::endl;
-    std::cout << out.str();
+    diag << "Limiting dt to sync with dt function time: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << *_tfunc_times_iter
+         << " dt: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << dt
+         << std::endl;
 
     if (++_tfunc_times_iter == _tfunc_times.end())
     {
@@ -189,6 +188,9 @@ AdaptiveDT::computeInitialDT()
 
   }
 
+  if (_verbose)
+    Moose::out << diag.str();
+
   return dt;
 }
 
@@ -196,8 +198,7 @@ Real
 AdaptiveDT::computeDT()
 {
   Real dt(_dt_old);
-
-  std::ostringstream out;
+  std::ostringstream diag;
 
   if ( _cutback_occurred ) //Don't allow it to grow this step, but shrink if needed
   {
@@ -214,14 +215,14 @@ AdaptiveDT::computeDT()
 
     dt = _time_ipol.sample(_time_old);
 
-    out << "Setting dt to value specified by dt function: "
-        << std::setw(9)
-        << std::setprecision(6)
-        << std::setfill('0')
-        << std::showpoint
-        << std::left
-        << dt
-        << std::endl;
+    diag << "Setting dt to value specified by dt function: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << dt
+         << std::endl;
   }
   else if (_adaptive_timestepping)
   {
@@ -250,21 +251,21 @@ AdaptiveDT::computeDT()
 
     dt = *_tfunc_times_iter - _time_old;
 
-    out << "Limiting dt to sync with dt function time: "
-        << std::setw(9)
-        << std::setprecision(6)
-        << std::setfill('0')
-        << std::showpoint
-        << std::left
-        << *_tfunc_times_iter
-        << " dt: "
-        << std::setw(9)
-        << std::setprecision(6)
-        << std::setfill('0')
-        << std::showpoint
-        << std::left
-        << dt
-        << std::endl;
+    diag << "Limiting dt to sync with dt function time: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << *_tfunc_times_iter
+         << " dt: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << dt
+         << std::endl;
 
     if (++_tfunc_times_iter == _tfunc_times.end())
     {
@@ -278,17 +279,18 @@ AdaptiveDT::computeDT()
   {
     dt = _dt_max;
 
-    out << "Limiting dt to dtmax: "
-        << std::setw(9)
-        << std::setprecision(6)
-        << std::setfill('0')
-        << std::showpoint
-        << std::left
-        << _dt_max
-        << std::endl;
+    diag << "Limiting dt to dtmax: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << _dt_max
+         << std::endl;
   }
 
-  std::cout << out.str();
+  if (_verbose)
+    Moose::out << diag.str();
 
   return dt;
 }
@@ -298,11 +300,25 @@ AdaptiveDT::computeFailedDT()
 {
   _cutback_occurred = true;
   Real dt(_dt);
+  std::ostringstream diag;
 
   if (dt <= _dt_min)
   { //Can't cut back any more
     mooseError("Solve failed and timestep already at dtmin, cannot continue!");
   }
+
+  if (!_verbose)
+    Moose::out << std::endl << "Solve failed, cutting timestep" << std::endl;
+
+  diag << std::endl
+       << "Solve failed with dt: "
+       << std::setw(9)
+       << std::setprecision(6)
+       << std::setfill('0')
+       << std::showpoint
+       << std::left
+       << _dt
+       << std::endl;
 
   dt *= _cutback_factor;
   if (dt < _dt_min)
@@ -311,14 +327,29 @@ AdaptiveDT::computeFailedDT()
   }
 
   // Limit the timestep to limit change in the function
-  //TODO: handle conflict of this with dtmin
   limitDTByFunction(dt);
+
+  diag << "Retrying with reduced dt: "
+       << std::setw(9)
+       << std::setprecision(6)
+       << std::setfill('0')
+       << std::showpoint
+       << std::left
+       << dt
+       << std::endl;
+
+  if (_verbose)
+    Moose::out << diag.str();
+
   return dt;
 }
 
 void
 AdaptiveDT::limitDTByFunction(Real & limitedDT)
 {
+  std::ostringstream diag;
+  Real orig_dt(limitedDT);
+
   if (_timestep_limiting_function)
   {
     Point dummyPoint;
@@ -356,6 +387,21 @@ AdaptiveDT::limitDTByFunction(Real & limitedDT)
   {
     limitedDT = _dt_min;
   }
+
+  if (limitedDT < orig_dt)
+  {
+    diag << "Limiting dt to limit change in function. dt: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << limitedDT
+         << std::endl;
+  }
+  
+  if (_verbose)
+    Moose::out << diag.str();
 }
 
 void
@@ -366,91 +412,91 @@ AdaptiveDT::computeAdaptiveDT(Real &dt, bool allowToGrow, bool allowToShrink)
   const unsigned int growth_l_its(_optimal_iterations > _iteration_window ? _linear_iteration_ratio*(_optimal_iterations - _iteration_window) : 0);
   const unsigned int shrink_l_its(_linear_iteration_ratio*(_optimal_iterations + _iteration_window));
 
-  std::ostringstream out;
+  std::ostringstream diag;
 
   if (allowToGrow && (_nl_its < growth_nl_its && _l_its < growth_l_its))
   { //grow the timestep
     dt *= _growth_factor;
 
-    out << "Growing dt: nl its = "<<_nl_its<<" < "<<growth_nl_its
-              << " && lin its = "<<_l_its<<" < "<<growth_l_its
-              << " old dt: "
-              << std::setw(9)
-              << std::setprecision(6)
-              << std::setfill('0')
-              << std::showpoint
-              << std::left
-              << _dt_old
-              << " new dt: "
-              << std::setw(9)
-              << std::setprecision(6)
-              << std::setfill('0')
-              << std::showpoint
-              << std::left
-              << dt
-              << std::endl;
+    diag << "Growing dt: nl its = "<<_nl_its<<" < "<<growth_nl_its
+         << " && lin its = "<<_l_its<<" < "<<growth_l_its
+         << " old dt: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << _dt_old
+         << " new dt: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << dt
+         << std::endl;
   }
   else if (allowToShrink && (_nl_its > shrink_nl_its || _l_its > shrink_l_its))
   { //shrink the timestep
     dt *= _cutback_factor;
 
-    out << "Shrinking dt: nl its = "<<_nl_its<<" > "<<shrink_nl_its
-              << " || lin its = "<<_l_its<<" > "<<shrink_l_its
-              << " old dt: "
-              << std::setw(9)
-              << std::setprecision(6)
-              << std::setfill('0')
-              << std::showpoint
-              << std::left
-              << _dt_old
-              << " new dt: "
-              << std::setw(9)
-              << std::setprecision(6)
-              << std::setfill('0')
-              << std::showpoint
-              << std::left
-              << dt
-              << std::endl;
+    diag << "Shrinking dt: nl its = "<<_nl_its<<" > "<<shrink_nl_its
+         << " || lin its = "<<_l_its<<" > "<<shrink_l_its
+         << " old dt: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << _dt_old
+         << " new dt: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << dt
+         << std::endl;
   }
 
-  std::cout << out.str();
+  if (_verbose)
+    std::cout << diag.str();
 }
 
 void
 AdaptiveDT::computeInterpolationDT(Real & dt)
 {
+  std::ostringstream diag;
   dt = _time_ipol.sample(_time_old);
   if (dt > _dt_old * _growth_factor)
   {
     dt = _dt_old * _growth_factor;
 
-    std::ostringstream out;
-    out << "Growing dt to recover from cutback.  old dt: "
-        << std::setw(9)
-        << std::setprecision(6)
-        << std::setfill('0')
-        << std::showpoint
-        << std::left
-        << _dt_old
-        << " new dt: "
-        << std::setw(9)
-        << std::setprecision(6)
-        << std::setfill('0')
-        << std::showpoint
-        << std::left
-        << dt
-        << std::endl;
+    diag << "Growing dt to recover from cutback.  old dt: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << _dt_old
+         << " new dt: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << dt
+         << std::endl;
 
-    std::cout << out.str();
   }
+  if (_verbose)
+    Moose::out << diag.str();
 }
 
 
 void
 AdaptiveDT::rejectStep()
 {
-  std::cout << "Solve failed... cutting timestep" << std::endl;
-
   TimeStepper::rejectStep();
 }
 

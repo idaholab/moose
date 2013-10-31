@@ -232,7 +232,7 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
+  verbose = true
   print_linear_residuals = true
   petsc_options = '-snes_ksp'
   petsc_options_iname = '-ksp_gmres_restart'

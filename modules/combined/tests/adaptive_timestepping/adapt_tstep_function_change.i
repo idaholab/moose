@@ -150,7 +150,7 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
+  verbose = true
   nl_abs_tol = 1e-10
   start_time = 0.0
   num_steps = 50000
