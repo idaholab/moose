@@ -237,7 +237,10 @@ Transient::incrementStepOrReject()
     _problem.copyOldSolutions();
   }
   else
+  {
     _time_stepper->rejectStep();
+    _time = _time_old;
+  }
 
   _first = false;
 }
