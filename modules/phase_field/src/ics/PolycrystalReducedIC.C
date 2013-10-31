@@ -41,11 +41,6 @@ PolycrystalReducedIC::initialSetup()
     _bottom_left(i) = _mesh.getMinInDimension(i);
     _top_right(i) = _mesh.getMaxInDimension(i);
   }
-  if (getParam<bool>("columnar_3D"))
-  {
-    _bottom_left(2) = _top_right(2)/2.0;
-    _top_right(2) /= 2.0;
-  }
   _range = _top_right - _bottom_left;
   
   if (_op_num > _grain_num)
@@ -93,6 +88,8 @@ PolycrystalReducedIC::initialSetup()
       else
         _centerpoints[grain](i) = _bottom_left(i) + _range(i)*MooseRandom::rand();
     }
+    if (getParam<bool>("columnar_3D"))
+        _centerpoints[grain](2) = _bottom_left(2) + _range(2)*0.5;
   }
   
   //Assign grains to each order parameter
