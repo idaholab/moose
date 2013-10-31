@@ -154,17 +154,13 @@ PolycrystalReducedIC::value(const Point & p)
   // Assumption: We are going to assume that all variables are periodic together
 //  _mesh.initPeriodicDistanceForVariable(_nl, _var.number());
   
-  Real min_distance = 1e10;
+  Real min_distance = _top_right(0)*1e5;
   Real val = 0.0;
-  unsigned int min_index = _grain_num + 1;
+  unsigned int min_index = _grain_num + 100;
   //Loops through all of the grain centers and finds the center that is closest to the point p
   for (unsigned int grain=0; grain<_grain_num; grain++)
   {
-    Point cp = p;
-    if (_columnar_3D)
-      cp(2) = _centerpoints[grain](2);
-    
-    Real distance = _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], cp);
+    Real distance = _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], p);
       
     if (min_distance > distance)
     {
