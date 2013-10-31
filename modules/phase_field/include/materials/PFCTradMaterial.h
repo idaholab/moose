@@ -18,13 +18,16 @@ public:
 protected:
   virtual void computeQpProperties();
 
-private:  
+private:
+  unsigned int _order;
   MaterialProperty<Real> & _M;
   MaterialProperty<Real> & _a;
   MaterialProperty<Real> & _b;
   MaterialProperty<Real> & _C0;
   MaterialProperty<Real> & _C2;
   MaterialProperty<Real> & _C4;
+  MaterialProperty<Real> & _C6;
+  MaterialProperty<Real> & _C8;
   
 };
 
