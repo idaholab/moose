@@ -40,17 +40,6 @@
   [../]
 []
 
-[Contact]
-  active = ' '
-  [./dummy_name]
-    master = 3
-    slave = 2
-    disp_x = disp_x
-    disp_y = disp_y
-    penalty = 1e6
-  [../]
-[]
-
 [Constraints]
   [./contact_x]
     type = MultiDContactConstraint
@@ -118,16 +107,6 @@
   [../]
 [] # Materials
 
- [Preconditioning]
-   active = ' '
-
-  [./FDP]
-    type = FDP
-#    full = true
-#    off_diag_row    = 'v'
-#    off_diag_column = 'u'
-  [../]
-[]
 
 [Executioner]
   type = Transient

@@ -162,7 +162,6 @@
 [] # BCs
 
 [Materials]
-  active = 'stiffStuff'
 
   [./stiffStuff]
     type = Elastic

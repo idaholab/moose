@@ -27,8 +27,6 @@
 
 [Variables]
 
-#  active = 'disp_x disp_y disp_z'
-
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -56,8 +54,6 @@
 
 [BCs]
 
-  active = 'no_x no_y prescribed_z'
-
   [./no_x]
     type = DirichletBC
     variable = disp_x
@@ -81,8 +77,6 @@
 []
 
 [Materials]
-  active = 'stiffStuff stiffStuff2'
-
   [./stiffStuff]
     type = LinearIsotropicMaterial
     block = 1

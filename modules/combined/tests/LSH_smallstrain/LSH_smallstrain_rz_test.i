@@ -7,7 +7,6 @@
 []
 
 [Variables]
-  active = 'disp_x disp_y'
 
   [./disp_x]
     order = FIRST
@@ -47,8 +46,6 @@
 
 
 [Functions]
-  active = 'top_pull'
-
   [./top_pull]
     type = ParsedFunction
     value = t*(1.0/5.0)

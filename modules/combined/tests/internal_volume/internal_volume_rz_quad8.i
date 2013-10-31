@@ -75,8 +75,6 @@
 []
 
 [Materials]
-  active = 'stiffStuff stiffStuff2'
-
   [./stiffStuff]
     type = Elastic
     block = 1

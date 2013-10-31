@@ -8,8 +8,6 @@
 []
 
 [Variables]
-  active = 'disp_x disp_y disp_z'
-
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -28,8 +26,6 @@
 
 
 [AuxVariables]
-
-#active = ' '
 
   [./stress_yy]
     order = CONSTANT
@@ -54,8 +50,6 @@
 
 
 [Functions]
-  active = 'top_pull'
-
   [./top_pull]
     type = ParsedFunction
     value = t*(1.0/5.0)
@@ -72,8 +66,6 @@
 
 
 [AuxKernels]
-
-#active = ' '
 
   [./stress_yy]
     type = MaterialTensorAux
@@ -107,7 +99,6 @@
 
 
 [BCs]
-  active = 'y_pull_function  y_bot x_bot z_bot'
 
   [./y_pull_function]
     type = FunctionDirichletBC
@@ -143,7 +134,6 @@
   [./delaware]
     type = LinearStrainHardening
     formulation = linear
-#    type = LSHPlasticMaterial
     block = 1
     youngs_modulus = 2.1e5
     poissons_ratio = .3
@@ -158,8 +148,6 @@
 
 [Executioner]
   type = Transient
-
-  # Two sets of linesearch options are for petsc 3.1 and 3.3 respectively
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
@@ -195,5 +183,3 @@
   exodus = true
   perf_log = true
 []
-
-

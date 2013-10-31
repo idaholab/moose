@@ -6,8 +6,6 @@
 []
 
 [Variables]
-  active = 'disp_x disp_y disp_z temp'
-
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -28,11 +26,9 @@
     family = LAGRANGE
     initial_condition = 1000.0
   [../]
- []
+[]
 
 [AuxVariables]
-  active = 'stress_yy creep_strain_xx creep_strain_yy creep_strain_zz'
-
   [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
@@ -55,8 +51,6 @@
 []
 
 [Functions]
-  active = 'top_pull'
-
   [./top_pull]
     type = PiecewiseLinear
 
@@ -74,8 +68,6 @@
 []
 
 [Kernels]
-  active = 'solid_x_ie solid_y_ie solid_z_ie heat heat_ie'
-
   [./solid_x_ie]
     type = SolidMechImplicitEuler
     variable = disp_x
@@ -104,8 +96,6 @@
 
 
 [AuxKernels]
-  active = 'stress_yy creep_strain_xx creep_strain_yy creep_strain_zz'
-
   [./stress_yy]
     type = MaterialTensorAux
     tensor = stress
@@ -139,8 +129,6 @@
 
 
 [BCs]
-  active = 'u_top_pull u_bottom_fix u_yz_fix u_xy_fix temp_top_fix temp_bottom_fix'
-
   [./u_top_pull]
     type = Pressure
     variable = disp_y

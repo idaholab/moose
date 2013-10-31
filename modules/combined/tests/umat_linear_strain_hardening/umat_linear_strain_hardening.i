@@ -1,4 +1,4 @@
-# Testing the UMAT Interface - creep linear strain hardening model using the small strain formulation - visco-plastic material.  
+# Testing the UMAT Interface - creep linear strain hardening model using the small strain formulation - visco-plastic material.
 # Note that this isn't a thermal or irradiation creep model.
 
 [Mesh]
@@ -20,14 +20,6 @@
   [../]
 []
 
-[AuxVariables]
-  # active = ' '
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
 [Functions]
   [./top_pull]
     type = ParsedFunction
@@ -40,16 +32,6 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-  [../]
-[]
-
-[AuxKernels]
-  # active = ' '
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
   [../]
 []
 
@@ -129,4 +111,3 @@
   exodus = true
   perf_log = true
 []
-

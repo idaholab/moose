@@ -5,8 +5,6 @@
 []
 
 [Variables]
-  active = 'x_disp y_disp z_disp'
-
   [./x_disp]
     order = FIRST
     family = LAGRANGE
@@ -32,7 +30,6 @@
 []
 
 [BCs]
-  active = 'y_force left bottom'
 
   [./y_force]
     type = NeumannBC
@@ -58,8 +55,6 @@
 []
 
 [Materials]
-  active = 'constant'
-
   [./constant]
     type = LinearIsotropicMaterial
     block = 1
@@ -95,5 +90,3 @@
 #  tecplot = true
   perf_log = true
 []
-
-

@@ -12,8 +12,6 @@
 []
 
 [Variables]
-  active = 'disp_x disp_y disp_z'
-
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -32,8 +30,6 @@
 
 
 [AuxVariables]
-
-#active = ' '
 
   [./stress_yy]
     order = CONSTANT
@@ -58,8 +54,6 @@
 
 
 [Functions]
-  active = 'top_pull'
-
   [./top_pull]
     type = ParsedFunction
     value = t/100
@@ -75,8 +69,6 @@
 []
 
 [AuxKernels]
-
-#active = ' '
 
   [./stress_yy]
     type = MaterialTensorAux
@@ -110,7 +102,6 @@
 
 
 [BCs]
-  active = 'y_pull_function  y_bot x_bot z_bot'
 
   [./y_pull_function]
     type = FunctionDirichletBC
@@ -143,11 +134,8 @@
 []
 
 [Materials]
-  active = 'constant'
-
 
   [./constant]
-#    type = LinearStrainHardening
     type = CLSHPlasticMaterial
     formulation = LINEAr
     block = 1

@@ -110,7 +110,6 @@
 [] # BCs
 
 [Materials]
-  active = 'stiffStuff'
 
   [./stiffStuff]
     type = LinearIsotropicMaterial
@@ -147,17 +146,6 @@
   num_steps = 2
   end_time = 2.0
 [] # Executioner
-
-[Postprocessors]
-  # Test that no spaces (keyword='') will parse
-  active=''
-
-  [./dispZ]
-    type = ElementAverageValue
-    block = 'block_1'
-    variable = disp_z
-  [../]
-[] # Postprocessors
 
 [Output]
   interval = 1

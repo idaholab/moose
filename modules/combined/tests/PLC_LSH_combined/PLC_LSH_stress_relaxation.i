@@ -30,8 +30,6 @@
 []
 
 [Variables]
-  active = 'disp_x disp_y disp_z temp'
-
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -52,7 +50,7 @@
     family = LAGRANGE
     initial_condition = 1000.0
   [../]
- []
+[]
 
 [AuxVariables]
 

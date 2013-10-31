@@ -217,8 +217,6 @@
 [] # BCs
 
 [Materials]
-  active = 'test'
-
   [./test]
     type = Elastic
     block = 1
@@ -229,20 +227,6 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-  [../]
-
-  [./stiffStuff]
-    type = LinearIsotropicMaterial
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    thermal_conductivity = 1.0
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
-    thermal_expansion = 1e-5
   [../]
 
 [] # Materials
@@ -269,19 +253,9 @@
   end_time = 2.0
 [] # Executioner
 
-[Postprocessors]
-  # Test that no spaces (keyword='') will parse
-  active=''
-
-  [./dispZ]
-    type = ElementAverageValue
-    block = 'block_1'
-    variable = disp_z
-  [../]
-[] # Postprocessors
 
 [Output]
-  file_base = out
+  file_base=out
   interval = 1
   output_initial = true
   elemental_as_nodal = true

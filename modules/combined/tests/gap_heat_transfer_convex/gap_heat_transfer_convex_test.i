@@ -20,8 +20,6 @@
 []
 
 [Variables]
-  active = 'displ_x displ_y displ_z temp'
-
   [./displ_x]
     order = FIRST
     family = LAGRANGE

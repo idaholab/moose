@@ -108,15 +108,6 @@
   [../]
 [] # Materials
 
-# [Preconditioning]
-#   active = ' '
-#   [./FDP]
-#     type = FDP
-#     full = true
-#    off_diag_row    = 'v'
-#    off_diag_column = 'u'
-#  [../]
-#[]
 
 [Executioner]
   type = Transient

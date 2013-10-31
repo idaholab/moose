@@ -1,13 +1,3 @@
-# [Preconditioning]
-# active = ' '
-# [./FDP]
-# type = FDP
-# full = true
-# off_diag_row    = 'v'
-# off_diag_column = 'u'
-# [../]
-# []
-
 [Mesh]
   type = FileMesh
   file = simplest_contact.e
@@ -140,4 +130,3 @@
   exodus = true
   perf_log = true
 []
-

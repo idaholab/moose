@@ -125,23 +125,19 @@
 []
 [BCs]
 
-#active = 'Periodic'
+  [./Periodic]
+    [./top_bottom]
+      primary = 30
+      secondary = 40
+      translation = '0 1 0'
+    [../]
 
- [./Periodic]
- active = 'top_bottom left_right'
- [./top_bottom]
- primary = 30
- secondary = 40
- translation = '0 1 0'
- [../]
-
- [./left_right]
- primary = 10
- secondary = 20
- translation = '1 0 0'
- [../]
-
- [../]
+    [./left_right]
+      primary = 10
+      secondary = 20
+      translation = '1 0 0'
+    [../]
+  [../]
 
   [./dx_xx_anchor]
     type = DirichletBC
@@ -308,7 +304,6 @@
 []
 
  [Postprocessors]
-  #active = 'E1122'
 
   [./E1111]
     type = HomogenizedElasticConstants
@@ -434,6 +429,3 @@
   exodus = true
   postprocessor_csv = true
 []
-
-
-

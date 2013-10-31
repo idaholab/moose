@@ -103,43 +103,12 @@
 [] # Kernels
 
 [AuxKernels]
-  active = 'stress_xx'
 
   [./stress_xx]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_xx
     index = 0
-  [../]
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-  [../]
-  [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zz
-    index = 2
-  [../]
-  [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xy
-    index = 3
-  [../]
-  [./stress_yz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yz
-    index = 4
-  [../]
-  [./stress_zx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zx
-    index = 5
   [../]
 
 [] # AuxKernels

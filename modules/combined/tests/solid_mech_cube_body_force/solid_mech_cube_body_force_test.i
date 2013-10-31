@@ -5,8 +5,6 @@
 []
 
 [Variables]
-  active = 'x_disp y_disp z_disp'
-
   [./x_disp]
     order = FIRST
     family = LAGRANGE
@@ -21,16 +19,9 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
-  [./temp]
-    order = FIRST
-    family = LAGRANGE
-  [../]
 []
 
 [Kernels]
-  active = 'solid_x solid_y solid_z body_force'
-
   [./solid_x]
     type = SolidMechX
     variable = x_disp
@@ -60,8 +51,6 @@
 []
 
 [BCs]
-  active = 'bottom_x bottom_y bottom_z'
-
   [./bottom_x]
     type = DirichletBC
     variable = x_disp
@@ -114,5 +103,3 @@
 #  tecplot = true
   perf_log = true
 []
-
-

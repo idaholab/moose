@@ -5,8 +5,6 @@
 []
 
 [Variables]
-  active = 'x_disp y_disp z_disp temp'
-
   [./x_disp]
     order = FIRST
     family = LAGRANGE
