@@ -43,19 +43,16 @@ class MemoryPlotter:
       for records in value_list:
         largest_memory.append(int(records[1]))
     largest_memory.sort()
-    # TODO: Better way to round and determin the following? It looks stupid.
-    if largest_memory[-1] < 1000000000:
-      self.multiples = 1000000
-      self.memory_label = 'Memory in Gigabytes'
-    if largest_memory[-1] < 1000000:
-      self.multiples = 1000
-      self.memory_label = 'Memory in Megabytes'
-    if largest_memory[-1] < 10000:
-      self.multiples = 10
-      self.memory_label = 'Memory in Kilobytes'
-    if largest_memory[-1] < 1000:
-      self.multiples = 1
-      self.memory_label = 'Memory in Bytes'
+
+    # Determine the scale of the graph
+    suffixes = ["Terabytes", "Gigabytes", "Megabytes", "Kilobytes", "Bytes"]
+    multiplier = 1 << 40;
+    index = 0
+    while largest_memory[-1] < multiplier and multiplier >= 1:
+      multiplier = multiplier >> 10
+      index = index + 1
+    self.multiples = multiplier
+    self.memory_label = "Memory in " + suffixes[index]
 
     # Loop through each log file
     for plot_name, value_list in plot_dictionary.iteritems():
