@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #ifndef MOOSEPARSEDGRADFUNCTION_H
-#define MOOSERPARSEDGRADFUNCTION_H
+#define MOOSEPARSEDGRADFUNCTION_H
 
 // MOOSE includes
 #include "Function.h"

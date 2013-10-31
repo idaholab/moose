@@ -85,5 +85,7 @@ protected:
   /// Pointer to the wrapper object for the function
   MooseParsedFunctionWrapper * _function_ptr;
 
+  friend class ParsedFunctionTest;
+
 };
 #endif //MOOSEPARSEDFUNCTION_H

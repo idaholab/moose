@@ -25,6 +25,6 @@ FuncCoefDiffusion::computeQpResidual()
 Real
 FuncCoefDiffusion::computeQpJacobian()
 {
-  Real k = 1;//_function.value(_t, _qp);
+  Real k = _function.value(_t, _qp);
   return k*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
 }

@@ -104,6 +104,10 @@ private:
    * Updates postprocessor values for use in the libMesh::ParsedFunction
    */
   void update();
+
+  // moose_unit needs access
+  friend class ParsedFunctionTest;
+
 };
 
 /**

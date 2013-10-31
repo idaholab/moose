@@ -87,7 +87,8 @@ ParsedFunctionTest::advancedConstructor()
 
   MooseParsedFunction f("test", params);
   f.initialSetup();
-  f.getVarAddr("q") = 4;
+  // Access address via pointer to MooseParsedFunctionWrapper that contains pointer to libMesh::ParsedFunction
+  f._function_ptr->_function_ptr->getVarAddress("q") = 4;
   CPPUNIT_ASSERT( f.value(0, Point(1,2)) == 7 );
 
   //test the constructor with three variables
@@ -104,9 +105,9 @@ ParsedFunctionTest::advancedConstructor()
 
   MooseParsedFunction f2("test", params2);
   f2.initialSetup();
-  f2.getVarAddr("q") = 4;
-  f2.getVarAddr("w") = 2;
-  f2.getVarAddr("r") = 1.5;
+  f2._function_ptr->_function_ptr->getVarAddress("q") = 4;
+  f2._function_ptr->_function_ptr->getVarAddress("w") = 2;
+  f2._function_ptr->_function_ptr->getVarAddress("r") = 1.5;
   CPPUNIT_ASSERT( f2.value(0, Point(2,4)) == 9 );
 
   //test the constructor with one variable that's set
@@ -138,9 +139,9 @@ ParsedFunctionTest::advancedConstructor()
 
   MooseParsedFunction f4("test", params4);
   f4.initialSetup();
-  f4.getVarAddr("r") = 2;
+  f4._function_ptr->_function_ptr->getVarAddress("r") = 2;
   CPPUNIT_ASSERT( f4.value(0, Point(2, 4)) == 6 );
-  f4.getVarAddr("r") = 4;
+  f4._function_ptr->_function_ptr->getVarAddress("r") = 4;
   CPPUNIT_ASSERT( f4.value(0, Point(2, 4)) == 5 );
 
   finalize();
@@ -164,7 +165,7 @@ ParsedFunctionTest::testVariables()
 
   MooseParsedFunction f("test", params);
   f.initialSetup();
-  Real & q = f.getVarAddr("q");
+  Real & q = f._function_ptr->_function_ptr->getVarAddress("q");
   q = 4;
   CPPUNIT_ASSERT( f.value(0, Point(1, 2)) == 7 );
   q = 2;
@@ -186,9 +187,9 @@ ParsedFunctionTest::testVariables()
 
   MooseParsedFunction f2("test", params2);
   f2.initialSetup();
-  Real & q2 = f2.getVarAddr("q");
-  Real & w2 = f2.getVarAddr("w");
-  Real & r2 = f2.getVarAddr("r");
+  Real & q2 = f2._function_ptr->_function_ptr->getVarAddress("q");
+  Real & w2 = f2._function_ptr->_function_ptr->getVarAddress("w");
+  Real & r2 = f2._function_ptr->_function_ptr->getVarAddress("r");
   q2 = 4; w2 = 2; r2 = 1.5;
   CPPUNIT_ASSERT( f2.value(0, Point(2, 4)) == 9 );
   q2 = 1; w2 = 4; r2 = 2.5;
