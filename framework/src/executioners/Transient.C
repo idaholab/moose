@@ -69,6 +69,7 @@ InputParameters validParams<Transient>()
   params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol ss_tmin sync_times time_t time_dt growth_factor predictor_scale use_AB2 use_littlef abort_on_solve_fail output_to_file file_name estimate_time_error timestep_tolerance use_multiapp_dt", "Advanced");
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
+  params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
 
   return params;
 }
@@ -103,7 +104,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(declareRestartableData<Real>("target_time", -1)),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
-    _allow_output(true)
+    _allow_output(true),
+    _verbose(getParam<bool>("verbose"))
 {
   _t_step = 0;
   _dt = 0;
@@ -274,17 +276,47 @@ Transient::takeStep(Real input_dt)
 
     out << std::setw(2)
         << _t_step
-        << ", time="
+        << ", time = "
         << std::setw(9)
         << std::setprecision(6)
         << std::setfill('0')
         << std::showpoint
         << std::left
         << _time;
-    Moose::out << out.str() << '\n';
+    Moose::out << out.str() << std::endl;
   }
 
-  Moose::out << " DT = " << _dt << std::endl;
+  {
+    std::ostringstream tstepstr;
+    tstepstr << std::setw(2) << _t_step;
+    unsigned int tsteplen = tstepstr.str().size();
+
+    std::ostringstream out;
+
+    if (_verbose)
+    {
+      out << std::setw(tsteplen)
+          << "          old time = "
+          << std::setw(9)
+          << std::setprecision(6)
+          << std::setfill('0')
+          << std::showpoint
+          << std::left
+          << _time_old
+          << std::endl;
+    }
+
+    out << std::setw(tsteplen)
+        <<"                dt = "
+        << std::setw(9)
+        << std::setprecision(6)
+        << std::setfill('0')
+        << std::showpoint
+        << std::left
+        << _dt;
+
+    Moose::out << out.str() << std::endl;
+  }
 
   preSolve();
   _time_stepper->preSolve();

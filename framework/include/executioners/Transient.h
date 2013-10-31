@@ -187,6 +187,12 @@ public:
   Real & timestepTol() { return _timestep_tolerance; }
 
   /**
+   * Is verbose output turned on?
+   * @return The verbose output flag
+   */
+  bool isVerbose() { return _verbose; }
+
+  /**
    * Set (or reset) the output position of the application.
    */
   virtual void setOutputPosition(const Point & p) { _problem.setOutputPosition(p); }
@@ -244,6 +250,9 @@ protected:
   bool _use_multiapp_dt;
 
   bool _allow_output;
+
+  ///should detailed diagnostic output be printed
+  bool _verbose;
 
   Real _solution_change_norm;
 

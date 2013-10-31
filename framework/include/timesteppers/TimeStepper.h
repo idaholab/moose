@@ -132,6 +132,9 @@ protected:
   std::set<Real> & _sync_times;
   Real & _timestep_tolerance;
 
+  ///should detailed diagnostic output be printed
+  bool _verbose;
+
   /// Whether or not the previous solve converged.
   bool _converged;
 
