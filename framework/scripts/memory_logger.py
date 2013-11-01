@@ -52,7 +52,7 @@ class MemoryPlotter:
       multiplier = multiplier >> 10
       index = index + 1
     self.multiples = multiplier
-    self.memory_label = "Memory in " + suffixes[index]
+    self.memory_label = "Memory in " + suffixes[index-1]
 
     # Loop through each log file
     for plot_name, value_list in plot_dictionary.iteritems():
