@@ -40,7 +40,7 @@ TimeStepper::TimeStepper(const std::string & name, InputParameters parameters) :
     _end_time(_executioner.endTime()),
     _sync_times(_executioner.syncTimes()),
     _timestep_tolerance(_executioner.timestepTol()),
-    _verbose(_executioner.isVerbose()),
+    _verbose(_executioner.verbose()),
     _converged(true),
     _reset_dt(getParam<bool>("reset_dt")),
     _has_reset_dt(false),

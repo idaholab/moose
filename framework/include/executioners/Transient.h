@@ -187,10 +187,10 @@ public:
   Real & timestepTol() { return _timestep_tolerance; }
 
   /**
-   * Is verbose output turned on?
+   * Get the verbose output flag
    * @return The verbose output flag
    */
-  bool isVerbose() { return _verbose; }
+  bool & verbose() { return _verbose; }
 
   /**
    * Set (or reset) the output position of the application.

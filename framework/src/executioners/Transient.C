@@ -288,8 +288,10 @@ Transient::takeStep(Real input_dt)
 
   {
     std::ostringstream tstepstr;
-    tstepstr << std::setw(2) << _t_step;
+    tstepstr << _t_step;
     unsigned int tsteplen = tstepstr.str().size();
+    if (tsteplen < 2)
+      tsteplen = 2;
 
     std::ostringstream out;
 

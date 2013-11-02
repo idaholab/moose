@@ -133,7 +133,7 @@ protected:
   Real & _timestep_tolerance;
 
   ///should detailed diagnostic output be printed
-  bool _verbose;
+  bool & _verbose;
 
   /// Whether or not the previous solve converged.
   bool _converged;
