@@ -54,6 +54,11 @@
     type = ParsedFunction
     value = t*(0.0625)
   [../]
+  [./hf]
+    type = PiecewiseLinear
+    x = '0  0.001 0.003 0.023'
+    y = '50 52    54    56'
+  [../]
 []
 
 [SolidMechanics]
@@ -132,18 +137,25 @@
 
 [Materials]
   [./vermont]
-    type = PLSHPlasticMaterial
+    type = SolidModel
     formulation = lINeaR
     block = 1
     youngs_modulus = 2.1e5
     poissons_ratio = .3
-    yield_stress = 50.0
-    hardening_constant = 2000.
-    tolerance = 1.e-5
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
+    constitutive_model = plsh
   [../]
+  [./plsh]
+    type = IsotropicPlasticity
+    block = 1
+    yield_stress = 50.0
+    hardening_function = hf
+    relative_tolerance = 1e-25
+    absolute_tolerance = 1e-5
+  [../]
+
 []
 
 [Executioner]
@@ -177,7 +189,6 @@
 
 
 [Output]
-  file_base = out
   interval = 1
   output_initial = true
   elemental_as_nodal = true

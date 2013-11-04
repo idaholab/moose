@@ -42,7 +42,6 @@
 #include "PresetVelocity.h"
 #include "Pressure.h"
 #include "PressureAction.h"
-#include "PLSHPlasticMaterial.h"
 #include "SolidMechanicsAction.h"
 #include "SolidMechImplicitEuler.h"
 #include "SolidModel.h"
@@ -83,7 +82,6 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerMaterial(LinearStrainHardening);
   registerMaterial(MacroElastic);
   registerMaterial(PLC_LSH);
-  registerMaterial(PLSHPlasticMaterial);
   registerMaterial(PowerLawCreep);
   registerMaterial(PowerLawCreepModel);
   registerMaterial(SolidModel);

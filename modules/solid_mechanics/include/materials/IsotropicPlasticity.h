@@ -3,6 +3,7 @@
 
 #include "ReturnMappingModel.h"
 
+class PiecewiseLinear;
 
 /**
  */
@@ -23,14 +24,20 @@ protected:
   virtual Real computeDerivative(unsigned qp, Real effectiveTrialStress, Real scalar);
   virtual void iterationFinalize(unsigned qp, Real scalar);
 
+  virtual Real computeHardening(unsigned qp, Real scalar);
+
   const Real _yield_stress;
   const Real _hardening_constant;
+  PiecewiseLinear * const _hardening_function;
 
   Real _yield_condition;
   Real _shear_modulus;
+  Real _hardening_slope;
 
   MaterialProperty<SymmTensor> & _plastic_strain;
   MaterialProperty<SymmTensor> & _plastic_strain_old;
+  MaterialProperty<Real> * _scalar_plastic_strain;
+  MaterialProperty<Real> * _scalar_plastic_strain_old;
 
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
