@@ -4,16 +4,17 @@ template<>
 InputParameters validParams<NSVelocityAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addCoupledVar("rho", "");
-  params.addCoupledVar("momentum", "");
+  params.addRequiredCoupledVar("rho", "Density (conserved form)");
+  params.addRequiredCoupledVar("momentum", "Momentum (conserved form)");
   return params;
 }
 
-NSVelocityAux::NSVelocityAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters),
-   _rho(coupledValue("rho")),
-   _momentum(coupledValue("momentum"))
-{}
+NSVelocityAux::NSVelocityAux(const std::string & name, InputParameters parameters) :
+    AuxKernel(name, parameters),
+    _rho(coupledValue("rho")),
+    _momentum(coupledValue("momentum"))
+{
+}
 
 Real
 NSVelocityAux::computeValue()
