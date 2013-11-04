@@ -72,7 +72,7 @@ double
 LinearInterpolation::sampleDerivative(double x) const
 {
   // endpoint cases
-  if (x <= _x[0])
+  if (x < _x[0])
     return 0.0;
   if (x >= _x[_x.size()-1])
     return 0.0;

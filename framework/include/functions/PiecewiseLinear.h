@@ -37,6 +37,10 @@ public:
    * This function will return a value based on the first input argument only.
    */
   virtual Real value(Real t, const Point & pt);
+  /**
+   * This function will return a value based on the first input argument only.
+   */
+  virtual Real getTimeDerivative(Real t, const Point & pt);
 
   virtual Real integral();
 

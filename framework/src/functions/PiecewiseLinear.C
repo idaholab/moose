@@ -61,6 +61,21 @@ PiecewiseLinear::value(Real t, const Point & p)
 }
 
 Real
+PiecewiseLinear::getTimeDerivative(Real t, const Point & p)
+{
+  Real func_value;
+  if (_has_axis)
+  {
+    func_value = _linear_interp.sampleDerivative( p(_axis) );
+  }
+  else
+  {
+    func_value = _linear_interp.sampleDerivative( t );
+  }
+  return _scale_factor * func_value;
+}
+
+Real
 PiecewiseLinear::integral()
 {
   return _linear_interp.integrate();
