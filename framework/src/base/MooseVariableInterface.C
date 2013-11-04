@@ -128,7 +128,7 @@ VariableSecond &
 MooseVariableInterface::second()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have second derivatives");
+    mooseError("Nodal variables do not have second derivatives");
 
   return _variable->secondSln();
 }
@@ -137,7 +137,7 @@ VariableSecond &
 MooseVariableInterface::secondOld()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have second derivatives");
+    mooseError("Nodal variables do not have second derivatives");
 
   return _variable->secondSlnOld();
 }
@@ -146,7 +146,7 @@ VariableSecond &
 MooseVariableInterface::secondOlder()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have second derivatives");
+    mooseError("Nodal variables do not have second derivatives");
 
   return _variable->secondSlnOlder();
 }
@@ -155,7 +155,7 @@ VariableTestSecond &
 MooseVariableInterface::secondTest()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have second derivatives");
+    mooseError("Nodal variables do not have second derivatives");
 
   return const_cast<VariableTestSecond &>(_variable->secondPhi());
 }
@@ -164,7 +164,7 @@ VariablePhiSecond &
 MooseVariableInterface::secondPhi()
 {
   if (_nodal)
-    mooseError("Nodal _variables do not have second derivatives");
+    mooseError("Nodal variables do not have second derivatives");
 
   return const_cast<VariablePhiSecond &>(_mvi_assembly->secondPhi());
 }
