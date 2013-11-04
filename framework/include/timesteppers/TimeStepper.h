@@ -60,7 +60,7 @@ public:
    * Called after computeStep() is called.
    * @return true if output should be forced, false otherwise
    */
-  bool constrainStep(Real &dt);
+  virtual bool constrainStep(Real &dt);
 
   /**
    * Take a time step
