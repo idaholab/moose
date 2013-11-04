@@ -3281,7 +3281,11 @@ FEProblem::output(bool force/*= false*/)
       _input_file_saved = true;
     }
   }
+}
 
+void
+FEProblem::outputRestart()
+{
   _resurrector->write();
 }
 

@@ -176,6 +176,7 @@ Transient::init()
   {
     _problem.output();
     _problem.outputPostprocessors();
+    _problem.outputRestart();
   }
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 
@@ -388,6 +389,7 @@ Transient::endStep()
         {
           _problem.output(true);
           _problem.outputPostprocessors(true);
+          _problem.outputRestart();
         }
       }
       //Set the time for the next output interval if we're at or beyond an output interval
@@ -403,6 +405,7 @@ Transient::endStep()
       {
         _problem.output(_force_output);
         _problem.outputPostprocessors(_force_output);
+        _problem.outputRestart();
       }
     }
   }
@@ -508,6 +511,7 @@ Transient::keepGoing()
     _problem.output(true);
     if(_allow_output)
       _problem.outputPostprocessors(true);
+    _problem.outputRestart();
   }
 
   if(!lastSolveConverged() && _abort)
@@ -569,6 +573,7 @@ Transient::forceOutput()
 {
   _problem.output(true);
   _problem.outputPostprocessors(true);
+  _problem.outputRestart();
 }
 
 Real

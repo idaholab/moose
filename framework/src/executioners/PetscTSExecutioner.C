@@ -298,6 +298,7 @@ PetscTSExecutioner::execute()
   {
     _fe_problem.output();
     _fe_problem.outputPostprocessors();
+    _problem.outputRestart();
   }
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
   _time_stepper->setup(*_fe_problem.getNonlinearSystem().sys().solution);
@@ -317,6 +318,7 @@ PetscTSExecutioner::execute()
     bool reset_dt = false;      /* has some meaning in Transient::computeConstrainedDT, but we do not use that logic here */
     _fe_problem.output(reset_dt);
     _fe_problem.outputPostprocessors(reset_dt);
+    _problem.outputRestart();
 
 #ifdef LIBMESH_ENABLE_AMR
     if (_fe_problem.adaptivity().isOn())
