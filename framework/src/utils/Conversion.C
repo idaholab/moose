@@ -85,6 +85,7 @@ namespace Moose {
       solve_type_to_enum["JFNK"]   = ST_JFNK;
       solve_type_to_enum["NEWTON"] = ST_NEWTON;
       solve_type_to_enum["FD"]     = ST_FD;
+      solve_type_to_enum["LINEAR"] = ST_LINEAR;
     }
   }
 
@@ -216,6 +217,7 @@ namespace Moose {
     case ST_JFNK:   return "JFNK";
     case ST_PJFNK:  return "Preconditioned JFNK";
     case ST_FD:     return "FD";
+    case ST_LINEAR: return "Linear";
     }
     return "";
   }

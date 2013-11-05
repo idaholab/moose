@@ -48,12 +48,13 @@ InputParameters validParams<CreateExecutionerAction>()
 void
 CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & params)
 {
-  MooseEnum solve_type("PJFNK, JFNK, NEWTON, FD");
+  MooseEnum solve_type("PJFNK, JFNK, NEWTON, FD, LINEAR");
   params.addParam<MooseEnum>   ("solve_type",      solve_type,
                                 "PJFNK: Preconditioned Jacobian-Free Newton Krylov "
                                 "JFNK: Jacobian-Free Newton Krylov "
                                 "NEWTON: Full Newton Solve "
-                                "FD: Use finite differences to compute Jacobian");
+                                "FD: Use finite differences to compute Jacobian "
+                                "LINEAR: Solving a linear problem");
 
   params.addParam<bool>("print_linear_residuals", "Specifies whether the linear residuals are printed during the solve");
 

@@ -139,7 +139,8 @@ enum SolveType
   ST_PJFNK,            ///< Preconditioned Jacobian-Free Newton Krylov
   ST_JFNK,             ///< Jacobian-Free Newton Krylov
   ST_NEWTON,           ///< Full Newton Solve
-  ST_FD                ///< Use finite differences to compute Jacobian
+  ST_FD,               ///< Use finite differences to compute Jacobian
+  ST_LINEAR            ///< Solving a linear problem
 };
 
 /**

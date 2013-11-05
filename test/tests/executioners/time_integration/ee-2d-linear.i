@@ -84,6 +84,7 @@
 [Executioner]
   type = Transient
   scheme = 'explicit-euler'
+  solve_type = 'LINEAR'
 
   start_time = 0.0
   num_steps = 20

@@ -81,6 +81,7 @@
 [Executioner]
   type = Transient
   scheme = 'rk-2'
+  solve_type = 'LINEAR'
 
   start_time = 0.0
   num_steps = 10

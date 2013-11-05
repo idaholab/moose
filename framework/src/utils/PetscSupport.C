@@ -97,6 +97,10 @@ setSolverOptions(SolverParams & solver_params)
   case Moose::ST_FD:
     PetscOptionsSetValue("-snes_fd", PETSC_NULL);
     break;
+
+  case Moose::ST_LINEAR:
+    PetscOptionsSetValue("-snes_type", "ksponly");
+    break;
   }
 
   Moose::LineSearchType ls_type = solver_params._line_search;

@@ -100,7 +100,9 @@
 [Executioner]
   type = Transient
   scheme = 'explicit-euler'
+  solve_type = 'LINEAR'
 
+  l_tol = 1e-12
   start_time = 0.0
   num_steps = 10
   dt = 0.001
