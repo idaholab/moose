@@ -116,7 +116,11 @@
   nl_max_its = 10
   dt = 0.1
   num_steps = 30
-  predictor_scale = 1.0
+  
+  [./Predictor]
+    type = SimplePredictor
+    scale = 1.0
+  [../]
 [] # Executioner
 
 [Output]

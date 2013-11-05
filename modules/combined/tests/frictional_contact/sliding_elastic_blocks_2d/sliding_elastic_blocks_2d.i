@@ -196,7 +196,11 @@
   nl_rel_tol = 1e-4
   dtmin = 0.01
   l_tol = 1e-3
-  predictor_scale = 1.0
+
+  [./Predictor]
+    type = SimplePredictor
+    scale = 1.0
+  [../]
 []
 
 [Output]

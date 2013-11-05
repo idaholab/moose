@@ -149,7 +149,11 @@
   dt = 0.25
   num_steps = 4
   end_time = 1.0
-  predictor_scale = 1.0
+
+  [./Predictor]
+    type = SimplePredictor
+    scale = 1.0
+  [../]
 [] # Executioner
 
 [Postprocessors]

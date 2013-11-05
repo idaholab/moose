@@ -204,7 +204,11 @@
   nl_abs_tol = 1e-8
   dtmin = 0.001
   l_tol = 1e-3
-  predictor_scale = 1.0
+
+  [./Predictor]
+    type = SimplePredictor
+    scale = 1.0
+  [../]
 []
 
 [Output]

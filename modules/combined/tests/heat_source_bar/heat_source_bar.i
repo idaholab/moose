@@ -98,7 +98,10 @@
   line_search = 'none'
 
 
-  predictor_scale = 1.0
+  [./Predictor]
+    type = SimplePredictor
+    scale = 1.0
+  [../]
 
 # controls for linear iterations
   l_max_its = 100
