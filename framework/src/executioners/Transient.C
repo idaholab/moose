@@ -423,12 +423,34 @@ Transient::computeConstrainedDT()
 //    _dt = _input_dt;
 
   Real dt_cur = _dt;
+  std::ostringstream diag;
 
   //After startup steps, compute new dt
   if (_t_step > _n_startup_steps)
   {
     dt_cur = getDT();
   }
+  else
+  {
+    diag << "Timestep < n_startup_steps, using old dt: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << _dt
+         << " tstep: "
+         << _t_step
+         << " n_startup_steps: "
+         << _n_startup_steps
+         << std::endl;
+  }
+
+  if (_verbose)
+    Moose::out << diag.str();
+
+  diag.str("");
+  diag.clear();
 
   // Allow the time stepper to limit the time step
   _at_sync_point = _time_stepper->constrainStep(dt_cur);
@@ -444,15 +466,46 @@ Transient::computeConstrainedDT()
     dt_cur = _next_interval_output_time - _time;
     _unconstrained_dt = _dt;
     _at_sync_point = true;
+
+    diag << "Limiting dt for time interval output at time: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << _next_interval_output_time
+         << " dt: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << dt_cur
+         << std::endl;
   }
 
   // Adjust to a target time if set
   if (_target_time > 0 && _time + dt_cur + _timestep_tolerance >= _target_time)
   {
     dt_cur = _target_time - _time;
-
     _unconstrained_dt = _dt;
     _at_sync_point = true;
+
+    diag << "Limiting dt for target time: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << _next_interval_output_time
+         << " dt: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << dt_cur
+         << std::endl;
   }
 
   // Constrain by what the multi apps are doing
@@ -461,13 +514,32 @@ Transient::computeConstrainedDT()
   {
     dt_cur = multi_app_dt;
     _at_sync_point = false;
+    diag << "Limiting dt for MultiApps: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << dt_cur
+         << std::endl;
   }
   multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP);
   if(multi_app_dt < dt_cur)
   {
     dt_cur = multi_app_dt;
     _at_sync_point = false;
+    diag << "Limiting dt for MultiApps: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << dt_cur
+         << std::endl;
   }
+
+  if (_verbose)
+    Moose::out << diag.str();
 
   return dt_cur;
 }

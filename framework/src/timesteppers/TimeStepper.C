@@ -111,7 +111,17 @@ TimeStepper::constrainStep(Real &dt)
 
   // Don't allow time step size to be smaller than minimum time step size
   if (dt < _dt_min)
+  {
     dt = _dt_min;
+    diag << "Increasing dt to dtmin: "
+         << std::setw(9)
+         << std::setprecision(6)
+         << std::setfill('0')
+         << std::showpoint
+         << std::left
+         << _dt_min
+         << std::endl;
+  }
 
   // Don't let time go beyond simulation end time
   if (_time + dt > _end_time)
