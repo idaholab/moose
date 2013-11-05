@@ -206,8 +206,7 @@
     value = 0.0
   [../]
   [./move_x]
-    #type = FunctionPresetBC
-    type = FunctionDirichletBC
+    type = FunctionPresetBC
     variable = disp_x
     boundary = 4
     function = displx
@@ -323,4 +322,3 @@
 
 #  iteration_plot_start_time = 0
 []
-
