@@ -12,33 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Predictor.h"
+#include "SimplePredictor.h"
 #include "NonlinearSystem.h"
 
 template<>
-InputParameters validParams<Predictor>()
+InputParameters validParams<SimplePredictor>()
 {
-  InputParameters params = validParams<TimeIntegrator>();
+  InputParameters params = validParams<Predictor>();
   params.addRequiredParam<Real>("scale", "The scale factor for the predictor (can range from 0 to 1)");
 
   return params;
 }
 
-Predictor::Predictor(const std::string & name, InputParameters parameters) :
-    TimeIntegrator(name, parameters),
-    _solution(*_nl.currentSolution()),
-    _solution_old(_nl.solutionOld()),
-    _solution_older(_nl.solutionOlder()),
+SimplePredictor::SimplePredictor(const std::string & name, InputParameters parameters) :
+    Predictor(name, parameters),
     _scale(getParam<Real>("scale"))
 {
 }
 
-Predictor::~Predictor()
+SimplePredictor::~SimplePredictor()
 {
 }
 
 void
-Predictor::apply(NumericVector<Number> & sln)
+SimplePredictor::apply(NumericVector<Number> & sln)
 {
   if (_dt_old > 0)
   {

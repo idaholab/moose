@@ -64,7 +64,12 @@
   e_max = 10
   e_tol = .1
   dt = 1000000000
-  predictor_scale= 1
+  
+  [./Predictor]
+    type = SimplePredictor
+    scale = 1.0
+  [../]
+  
   ss_check_tol = .00000000000000001
   trans_ss_check = true
   nl_abs_tol = 1e-15

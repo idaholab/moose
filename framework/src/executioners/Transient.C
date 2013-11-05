@@ -123,12 +123,14 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 
   if (parameters.isParamValid("predictor_scale"))
   {
+    mooseWarning("Parameter 'predictor_scale' is deprecated, migrate your input file to use Predictor sub-block.");
+
     Real predscale = getParam<Real>("predictor_scale");
-    if (predscale >= 0.0 and predscale <= 1.0)
+    if (predscale >= 0.0 && predscale <= 1.0)
     {
-      InputParameters params = _app.getFactory().getValidParams("Predictor");
+      InputParameters params = _app.getFactory().getValidParams("SimplePredictor");
       params.set<Real>("scale") = predscale;
-      _problem.addPredictor("Predictor", "predictor", params);
+      _problem.addPredictor("SimplePredictor", "predictor", params);
     }
     else
     {

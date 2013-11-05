@@ -233,7 +233,7 @@
 #include "ExplicitEuler.h"
 #include "RungeKutta2.h"
 //
-#include "Predictor.h"
+#include "SimplePredictor.h"
 #include "AdamsPredictor.h"
 
 // MultiApps
@@ -305,6 +305,7 @@
 #include "AddNodalNormalsAction.h"
 #include "SetupTimeStepperAction.h"
 #include "RecoverBaseAction.h"
+#include "SetupPredictorAction.h"
 
 namespace Moose {
 
@@ -530,7 +531,7 @@ registerObjects(Factory & factory)
   registerTimeIntegrator(ExplicitEuler);
   registerTimeIntegrator(RungeKutta2);
   // predictors
-  registerPredictor(Predictor);
+  registerPredictor(SimplePredictor);
   registerPredictor(AdamsPredictor);
 
   // Transfers
@@ -626,6 +627,7 @@ addActionTypes(Syntax & syntax)
   registerActionName("add_multi_app", false);
   registerActionName("add_transfer", false);
   registerActionName("add_nodal_normals", false);
+  registerActionName("setup_predictor", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_function_complete", false);
@@ -656,6 +658,7 @@ addActionTypes(Syntax & syntax)
 "(create_problem)"
 "(setup_executioner)"
 "(setup_time_stepper)"
+"(setup_predictor)"
 "(add_feproblem)"
 "(setup_time_periods)"
 "(init_displaced_problem)"
@@ -737,6 +740,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(CreateProblemAction, "create_problem");
   registerAction(SetupOutputAction, "setup_output");
   registerAction(GlobalParamsAction, "set_global_params");
+  registerAction(SetupPredictorAction, "setup_predictor");
 
   /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "add_variable");

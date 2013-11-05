@@ -12,23 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PREDICTOR_H
-#define PREDICTOR_H
+#ifndef SIMPLEPREDICTOR_H
+#define SIMPLEPREDICTOR_H
 
-#include "TimeIntegrator.h"
-#include "libmesh/numeric_vector.h"
+#include "Predictor.h"
 
-class Predictor;
+class SimplePredictor;
 
 template<>
-InputParameters validParams<Predictor>();
+InputParameters validParams<SimplePredictor>();
 
 /**
- * Base class for predictors
- *
- * Currently it implements only a simple predictor
- *
- * A Predictor is an algorithm that will predict the next solution based on
+ * A SimplePredictor uses an algorithm that will predict the next solution based on
  * previous solutions.  Basically, it works like:
  *
  *             sol - prev_sol
@@ -49,23 +44,16 @@ InputParameters validParams<Predictor>();
  * used if the predictor were not enabled.
  *
  */
-class Predictor : public TimeIntegrator
+class SimplePredictor : public Predictor
 {
 public:
-  Predictor(const std::string & name, InputParameters parameters);
-  virtual ~Predictor();
+  SimplePredictor(const std::string & name, InputParameters parameters);
+  virtual ~SimplePredictor();
 
-  virtual int order() { return 0; }
-  virtual void computeTimeDerivatives() { }
   virtual void apply(NumericVector<Number> & sln);
 
 protected:
-  const NumericVector<Number> & _solution;
-  NumericVector<Number> & _solution_old;
-  NumericVector<Number> & _solution_older;
-
-  ///
   Real _scale;
 };
 
-#endif /* PREDICTOR_H */
+#endif /* SIMPLEPREDICTOR_H */

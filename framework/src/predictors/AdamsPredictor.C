@@ -26,7 +26,6 @@ InputParameters validParams<AdamsPredictor>()
 AdamsPredictor::AdamsPredictor(const std::string & name, InputParameters parameters) :
     Predictor(name, parameters),
     _order(getParam<int>("order")),
-    _predicted_solution(_nl.addVector("predicted_solution", true, GHOSTED)),
     _current_old_solution(_nl.addVector("AB2_current_old_solution", true, GHOSTED)),
     _older_solution(_nl.addVector("AB2_older_solution", true, GHOSTED)),
     _oldest_solution(_nl.addVector("AB2_rejected_solution", true, GHOSTED)),
@@ -79,7 +78,7 @@ AdamsPredictor::apply(NumericVector<Number> & sln)
     return;
 
   // localize current solution to working vec
-  sln.localize(_predicted_solution);
+  sln.localize(_solution_predictor);
   // NumericVector<Number> & vector1 = _tmp_previous_solution;
   NumericVector<Number> & vector2 = _tmp_residual_old;
   NumericVector<Number> & vector3 = _tmp_third_vector;
@@ -91,12 +90,12 @@ AdamsPredictor::apply(NumericVector<Number> & sln)
   _older_solution.localize(vector2);
   _oldest_solution.localize(vector3);
 
-  _predicted_solution *= 1 + commonpart * firstpart;
+  _solution_predictor *= 1 + commonpart * firstpart;
   vector2 *= -1. * commonpart * (firstpart + secondpart);
   vector3 *= commonpart * secondpart;
 
-  _predicted_solution += vector2;
-  _predicted_solution += vector3;
+  _solution_predictor += vector2;
+  _solution_predictor += vector3;
 
-  _predicted_solution.localize(sln);
+  _solution_predictor.localize(sln);
 }

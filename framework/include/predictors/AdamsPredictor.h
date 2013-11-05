@@ -16,7 +16,6 @@
 #define ADAMSPREDICTOR_H
 
 #include "Predictor.h"
-#include "TimeIntegrator.h"
 #include "libmesh/numeric_vector.h"
 
 class AdamsPredictor;
@@ -35,12 +34,11 @@ public:
 
   virtual int order() { return _order; }
   virtual void apply(NumericVector<Number> & sln);
-  virtual NumericVector<Number> & predictedSolution() { return _predicted_solution; }
+  virtual NumericVector<Number> & solutionPredictor() { return _solution_predictor; }
   virtual void historyControl();
 
 protected:
   int _order;
-  NumericVector<Number> & _predicted_solution;
   NumericVector<Number> & _current_old_solution;
   NumericVector<Number> & _older_solution;
   NumericVector<Number> & _oldest_solution;
