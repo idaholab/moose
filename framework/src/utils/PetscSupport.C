@@ -55,15 +55,75 @@ namespace Moose
 namespace PetscSupport
 {
 
+std::string
+stringify(const LineSearchType & t)
+{
+  switch (t)
+  {
+  case LS_BASIC:   return "basic";
+  case LS_DEFAULT: return "default";
+  case LS_NONE:    return "none";
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+  case LS_CUBIC:        return "cubic";
+  case LS_QUADRATIC:    return "quadratic";
+  case LS_BASICNONORMS: return "basicnonorms";
+#else
+  case LS_SHELL: return "shell";
+  case LS_L2:    return "l2";
+  case LS_BT:    return "bt";
+  case LS_CP:    return "cp";
+#endif
+  }
+  return "";
+}
 
-void petscSetOptions(Problem & problem)
+void
+setSolverOptions(SolverParams & solver_params)
+{
+  // set PETSc options implied by a solve type
+  switch (solver_params._type)
+  {
+  case Moose::ST_PJFNK:
+    PetscOptionsSetValue("-snes_mf_operator", PETSC_NULL);
+    break;
+
+  case Moose::ST_JFNK:
+    PetscOptionsSetValue("-snes_mf", PETSC_NULL);
+    break;
+
+  case Moose::ST_NEWTON:
+    break;
+
+  case Moose::ST_FD:
+    PetscOptionsSetValue("-snes_fd", PETSC_NULL);
+    break;
+  }
+
+  Moose::LineSearchType ls_type = solver_params._line_search;
+  if (ls_type == Moose::LS_NONE)
+    ls_type = Moose::LS_BASIC;
+
+  if (ls_type != Moose::LS_DEFAULT)
+  {
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+    PetscOptionsSetValue("-snes_type", "ls");
+    PetscOptionsSetValue("-snes_ls", stringify(ls_type));
+#else
+    PetscOptionsSetValue("-snes_linesearch_type", stringify(ls_type).c_str());
+#endif
+  }
+}
+
+
+void
+petscSetOptions(FEProblem & problem)
 {
         std::vector<MooseEnum>     petsc_options = problem.parameters().get<std::vector<MooseEnum> >("petsc_options");
   const std::vector<std::string> & petsc_options_inames = problem.parameters().get<std::vector<std::string> >("petsc_inames");
   const std::vector<std::string> & petsc_options_values = problem.parameters().get<std::vector<std::string> >("petsc_values");
 
   if (petsc_options_inames.size() != petsc_options_values.size())
-    mooseError("Petsc names and options are not the same length");
+    mooseError("PETSc names and options are not the same length");
 
   PetscOptionsClear();
 
@@ -75,11 +135,11 @@ void petscSetOptions(Problem & problem)
     PetscOptionsInsert(&argc, &args, NULL);
   }
 
-  // Add any options specified in the input file
-  for (unsigned int i=0; i<petsc_options.size(); ++i)
-    if (petsc_options[i] != "-newton") // "-newton is NOT a real petsc option
-      PetscOptionsSetValue(std::string(petsc_options[i]).c_str(), PETSC_NULL);
+  setSolverOptions(problem.solverParams());
 
+  // Add any additional options specified in the input file
+  for (unsigned int i=0; i<petsc_options.size(); ++i)
+    PetscOptionsSetValue(std::string(petsc_options[i]).c_str(), PETSC_NULL);
   for (unsigned int i=0; i<petsc_options_inames.size(); ++i)
     PetscOptionsSetValue(petsc_options_inames[i].c_str(), petsc_options_values[i].c_str());
 }

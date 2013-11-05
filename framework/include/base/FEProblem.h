@@ -38,6 +38,7 @@
 #include "NonlinearSystem.h"
 #include "Restartable.h"
 #include "ReportableData.h"
+#include "SolverParams.h"
 
 class DisplacedProblem;
 class OutputProblem;
@@ -649,10 +650,9 @@ public:
   virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
   /**
-   * Determines the solver mode based on existin options and returns it.
-   * In MOOSE we default to PJFNK if no solver type is explicitly set!
+   * Get the solver parameters
    */
-  std::string solverMode();
+  SolverParams & solverParams();
 
 #ifdef LIBMESH_ENABLE_AMR
   // Adaptivity /////
@@ -864,7 +864,7 @@ protected:
   /// Indicates if the Jacobian was computed
   bool _has_jacobian;
 
-  std::string _solver_mode;
+  SolverParams _solver_params;
 
   /// True if we're doing a _restart_ (note: this is _not_ true when recovering!)
   bool _restarting;

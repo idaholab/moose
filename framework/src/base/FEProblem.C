@@ -2786,9 +2786,6 @@ FEProblem::init()
   if (_initialized)
     return;
 
-  // Set the solverMode
-  solverMode();
-
   unsigned int n_vars = _nl.nVariables();
   switch (_coupling)
   {
@@ -3870,11 +3867,11 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
     if (petsc_options[i] == "-log_summary")
       mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
 
-    // Warn about superceeded PETSc options (Note: -snes is not a REAL option)
-    else if (petsc_options[i] != 5678) /* Magic Num */
+    // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in their input files)
+    else
     {
       std::string help_string;
-      if (petsc_options[i] == "-newton" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator")
+      if (petsc_options[i] == "-snes" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator")
         help_string = "Please set the solver type through \"solve_type\".";
       else if (petsc_options[i] == "-ksp_monitor")
         help_string = "Please use \"print_linear_residuals = true\"";
@@ -3891,7 +3888,7 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
   std::vector<std::string> & pv = parameters().set<std::vector<std::string> >("petsc_values");         // set because we need a writable reference
 
   if (pn.size() != pv.size())
-    mooseError("Petsc names and options are not the same length");
+    mooseError("PETSc names and options are not the same length");
 
   for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
   {
@@ -3910,49 +3907,10 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
 }
 #endif
 
-std::string
-FEProblem::solverMode()
+SolverParams &
+FEProblem::solverParams()
 {
-  if (_solver_mode == "")
-  {
-#ifdef LIBMESH_HAVE_PETSC
-    std::string solver_mode;
-
-    std::vector<MooseEnum> & petsc_options = parameters().set<std::vector<MooseEnum> >("petsc_options");         // set because we need a writable reference
-    for (unsigned int i=0; i<petsc_options.size(); ++i)
-    {
-      if (petsc_options[i] == "-snes")
-        mooseDoOnce(Moose::out << "The PETSc Option: \"-snes\" is ignored.\n");
-
-      if (petsc_options[i] == "-newton" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator" || petsc_options[i] == "-snes_fd")
-      {
-        if (solver_mode == "")
-          solver_mode = std::string(petsc_options[i]);
-        else if (petsc_options[i] != solver_mode)
-        mooseError("Multiple conflicting solver modes supplied: " << solver_mode << " and " << petsc_options[i] << "\n");
-      }
-    }
-    // If a PETSc solve mode hasn't been set, default it to "-snes_mf_operator"
-    if (solver_mode == "")
-    {
-      petsc_options.push_back(MooseEnum("-snes_mf_operator", "-snes_mf_operator"));
-    }
-
-    if (solver_mode == "-newton")
-      _solver_mode = "NEWTON";
-    else if (solver_mode == "-snef_mf")
-      _solver_mode = "JFNK";
-    else if (solver_mode == "-snes_mf_operator")
-      _solver_mode = "Preconditioned JFNK";
-    else if (solver_mode == "-snes_fd")
-      _solver_mode = "FD";
-#else
-    // Trilinos
-    _solver_mode = "Preconditioned JFNK";
-#endif
-  }
-
-  return _solver_mode;
+  return _solver_params;
 }
 
 ReportableData &

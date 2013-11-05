@@ -123,14 +123,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const std::string & name
   _nl.sys().nonlinear_solver->jacobian = NULL;
   _nl.sys().nonlinear_solver->attach_preconditioner(this);
 
-  // If using PETSc, use the right PETSc option
-#ifdef LIBMESH_HAVE_PETSC
-  std::vector<MooseEnum> petsc_options(1, MooseEnum("-snes_mf=5678", "-snes_mf"));  // SNES Matrix Free
-  std::vector<std::string> petsc_inames, petsc_values;
-
-  _fe_problem.storePetscOptions(petsc_options, petsc_inames, petsc_values);
-  Moose::PetscSupport::petscSetOptions(_fe_problem);
-#endif
+  _fe_problem.solverParams()._type = Moose::ST_JFNK;
 }
 
 PhysicsBasedPreconditioner::~PhysicsBasedPreconditioner ()

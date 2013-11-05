@@ -19,6 +19,7 @@
 #include "InputFileFormatter.h"
 #include "YAMLFormatter.h"
 #include "MooseMesh.h"
+#include "Conversion.h"
 
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/string_to_enum.h"
@@ -524,7 +525,7 @@ MooseApp::printSimulationInfo()
     if (time_stepper != "")
       oss << std::setw(FIELD_WIDTH) << "  TimeStepper: " << time_stepper << '\n';
 
-    oss << std::setw(FIELD_WIDTH) << "  Solver Mode: " << _action_warehouse.problem()->solverMode() << '\n';
+    oss << std::setw(FIELD_WIDTH) << "  Solver Mode: " << Moose::stringify<Moose::SolveType>(_action_warehouse.problem()->solverParams()._type) << '\n';
     oss << '\n';
   }
 

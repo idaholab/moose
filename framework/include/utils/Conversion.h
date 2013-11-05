@@ -42,6 +42,12 @@ namespace Moose {
   template<>
   PPSOutputType stringToEnum<PPSOutputType>(const std::string & s);
 
+  template<>
+  SolveType stringToEnum<SolveType>(const std::string & s);
+
+  template<>
+  LineSearchType stringToEnum<LineSearchType>(const std::string & s);
+
   // conversion to string
   template<typename T>
   std::string
@@ -52,6 +58,11 @@ namespace Moose {
     return os.str();
   }
 
+  /**
+   * Convert solve type into human readable string
+   */
+  template<>
+  std::string stringify(const SolveType & t);
 }
 
 /**

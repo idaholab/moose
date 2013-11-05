@@ -12,32 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PETSCSUPPORT_H
-#define PETSCSUPPORT_H
+#ifndef SOLVERPARAMS_H
+#define SOLVERPARAMS_H
 
-#include "libmesh/libmesh.h"
+#include "MooseTypes.h"
 
-#ifdef LIBMESH_HAVE_PETSC
-
-#include "Problem.h"
-// libMesh
-#include "libmesh/petsc_nonlinear_solver.h"
-
-class FEProblem;
-
-namespace Moose
+class SolverParams
 {
-namespace PetscSupport
-{
-void petscSetOptions(FEProblem & problem);
+public:
+  SolverParams();
 
-void petscSetDefaults(FEProblem & problem);
+  Moose::SolveType _type;
+  Moose::LineSearchType _line_search;
+};
 
-void petscSetupDampers(NonlinearImplicitSystem& sys);
-
-}
-}
-
-#endif //LIBMESH_HAVE_PETSC
-
-#endif //PETSCSUPPORT_H
+#endif /* SOLVERPARAMS_H_ */

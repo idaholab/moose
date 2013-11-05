@@ -25,6 +25,8 @@ namespace Moose {
   std::map<std::string, QuadratureType> quadrature_type_to_enum;
   std::map<std::string, CoordinateSystemType> coordinate_system_type_to_enum;
   std::map<std::string, PPSOutputType> pps_output_type_to_enum;
+  std::map<std::string, SolveType> solve_type_to_enum;
+  std::map<std::string, LineSearchType> line_search_type_to_enum;
 
   void initExecStoreType()
   {
@@ -74,6 +76,38 @@ namespace Moose {
       pps_output_type_to_enum["BOTH"]   = PPS_OUTPUT_BOTH;
     }
   }
+
+  void initSolveType()
+  {
+    if (solve_type_to_enum.empty())
+    {
+      solve_type_to_enum["PJFNK"]  = ST_PJFNK;
+      solve_type_to_enum["JFNK"]   = ST_JFNK;
+      solve_type_to_enum["NEWTON"] = ST_NEWTON;
+      solve_type_to_enum["FD"]     = ST_FD;
+    }
+  }
+
+  void initLineSearchType()
+  {
+    if (line_search_type_to_enum.empty())
+    {
+      line_search_type_to_enum["DEFAULT"] = LS_DEFAULT;
+      line_search_type_to_enum["NONE"]    = LS_NONE;
+      line_search_type_to_enum["BASIC"]   = LS_BASIC;
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+      line_search_type_to_enum["CUBIC"]        = LS_CUBIC;
+      line_search_type_to_enum["QUADRATIC"]    = LS_QUADRATIC;
+      line_search_type_to_enum["BASICNONORMS"] = LS_BASICNONORMS;
+#else
+      line_search_type_to_enum["SHELL"] = LS_SHELL;
+      line_search_type_to_enum["L2"]    = LS_L2;
+      line_search_type_to_enum["BT"]    = LS_BT;
+      line_search_type_to_enum["CP"]    = LS_CP;
+#endif
+    }
+  }
+
 
   template<>
   ExecFlagType stringToEnum(const std::string & s)
@@ -142,6 +176,48 @@ namespace Moose {
       mooseError("Unknown PPS output type: " << upper);
 
     return pps_output_type_to_enum[upper];
+  }
+
+  template<>
+  SolveType stringToEnum<SolveType>(const std::string & s)
+  {
+    initSolveType();
+
+    std::string upper(s);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    if (!solve_type_to_enum.count(upper))
+      mooseError("Unknown solve type: " << upper);
+
+    return solve_type_to_enum[upper];
+  }
+
+  template<>
+  LineSearchType stringToEnum<LineSearchType>(const std::string & s)
+  {
+    initLineSearchType();
+
+    std::string upper(s);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    if (!line_search_type_to_enum.count(upper))
+      mooseError("Unknown line search type: " << upper);
+
+    return line_search_type_to_enum[upper];
+  }
+
+
+  template<>
+  std::string stringify(const SolveType & t)
+  {
+    switch (t)
+    {
+    case ST_NEWTON: return "NEWTON";
+    case ST_JFNK:   return "JFNK";
+    case ST_PJFNK:  return "Preconditioned JFNK";
+    case ST_FD:     return "FD";
+    }
+    return "";
   }
 }
 

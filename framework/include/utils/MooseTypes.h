@@ -19,9 +19,11 @@
 #include "Atomic.h"
 
 // libMesh includes
+#include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
 #include "libmesh/stored_range.h"
 #include "libmesh/elem.h"
+#include "libmesh/petsc_macro.h"
 
 #include <string>
 #include <vector>
@@ -127,6 +129,40 @@ enum PCSideType
   PCS_LEFT,
   PCS_RIGHT,
   PCS_SYMMETRIC
+};
+
+/**
+ * Type of the solve
+ */
+enum SolveType
+{
+  ST_PJFNK,            ///< Preconditioned Jacobian-Free Newton Krylov
+  ST_JFNK,             ///< Jacobian-Free Newton Krylov
+  ST_NEWTON,           ///< Full Newton Solve
+  ST_FD                ///< Use finite differences to compute Jacobian
+};
+
+/**
+ * Type of the line search
+ */
+enum LineSearchType
+{
+  LS_INVALID,           ///< means not set
+  LS_DEFAULT,
+  LS_NONE,
+  LS_BASIC,
+#ifdef LIBMESH_HAVE_PETSC
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+  LS_CUBIC,
+  LS_QUADRATIC,
+  LS_BASICNONORMS,
+#else
+  LS_SHELL,
+  LS_L2,
+  LS_BT,
+  LS_CP
+#endif
+#endif
 };
 
 }
