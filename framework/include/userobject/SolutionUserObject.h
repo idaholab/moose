@@ -69,6 +69,10 @@ public:
   // Required pure virtual function (not used)
   virtual void execute();
 
+  /// Initialize the System and Mesh objects for the solution being read
+  virtual void initialSetup();
+
+
 protected:
   /**
    * Method for reading XDA mesh and equation systems file(s)
@@ -130,11 +134,11 @@ protected:
   /// The system name to extract from the XDA file (xda only)
   std::string _system_name;
 
-  /// A vector of variable names to read from the file
-  std::vector<std::string> _var_name;
+  /// A vector of nodal variable names to read from the file
+  const std::vector<std::string> _nodal_vars;
 
-  /// The number associated with the system variables read from the file
-  std::vector<unsigned int> _var_num;
+  /// A vector of nodal variable names to read from the file
+  const std::vector<std::string> _elem_vars;
 
   /// Current ExodusII time index
   int _exodus_time_index;
@@ -192,6 +196,7 @@ protected:
 
   /// Factor parameter
   std::vector<Real> _factor;
+
 };
 
 #endif //SOLUTIONUSEROBJECT_H

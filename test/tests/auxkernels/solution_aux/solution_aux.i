@@ -41,7 +41,7 @@
     mesh = out_0001_mesh.xda
     es = out_0001.xda
     system = AuxiliarySystem
-    variables = u_aux
+    nodal_variables = u_aux
   [../]
 []
 

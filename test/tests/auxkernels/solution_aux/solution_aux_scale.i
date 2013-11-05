@@ -47,7 +47,7 @@
     mesh = out_0001_mesh.xda
     es = out_0001.xda
     system = AuxiliarySystem
-    variables = u_aux
+    nodal_variables = u_aux
     coord_scale = '3 2 1'
     coord_factor = '1 1 0'
   [../]

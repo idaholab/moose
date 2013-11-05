@@ -365,16 +365,28 @@ void FEProblem::initialSetup()
 
   unsigned int n_threads = libMesh::n_threads();
 
-  // Call the initialSetup methods for functions
+  // UserObject initialSetup
   for(unsigned int i=0; i<n_threads; i++)
   {
-    for(std::map<std::string, Function *>::iterator vit = _functions[i].begin();
-        vit != _functions[i].end();
-        ++vit)
-    {
-      vit->second->initialSetup();
-    }
+    _user_objects(EXEC_RESIDUAL)[i].updateDependObjects(_aux.getDependObjects(EXEC_RESIDUAL));
+    _user_objects(EXEC_JACOBIAN)[i].updateDependObjects(_aux.getDependObjects(EXEC_JACOBIAN));
+    _user_objects(EXEC_TIMESTEP)[i].updateDependObjects(_aux.getDependObjects(EXEC_TIMESTEP));
+    _user_objects(EXEC_TIMESTEP_BEGIN)[i].updateDependObjects(_aux.getDependObjects(EXEC_TIMESTEP_BEGIN));
+    _user_objects(EXEC_INITIAL)[i].updateDependObjects(_aux.getDependObjects(EXEC_INITIAL));
+    _user_objects(EXEC_CUSTOM)[i].updateDependObjects(_aux.getDependObjects(EXEC_CUSTOM));
+
+    _user_objects(EXEC_RESIDUAL)[i].initialSetup();
+    _user_objects(EXEC_JACOBIAN)[i].initialSetup();
+    _user_objects(EXEC_TIMESTEP)[i].initialSetup();
+    _user_objects(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
+    _user_objects(EXEC_INITIAL)[i].initialSetup();
+    _user_objects(EXEC_CUSTOM)[i].initialSetup();
   }
+
+  // Call the initialSetup methods for functions
+  for(unsigned int i=0; i<n_threads; i++)
+    for(std::map<std::string, Function *>::iterator vit = _functions[i].begin(); vit != _functions[i].end(); ++vit)
+      vit->second->initialSetup();
 
   if (!isRecovering())
   {
@@ -428,8 +440,8 @@ void FEProblem::initialSetup()
     _has_initialized_stateful = true;
   }
 
+  // Auxilary variable initialSetup calls
   _aux.initialSetup();
-
   if(!isRecovering())
     _aux.compute(EXEC_INITIAL);
 
@@ -470,31 +482,18 @@ void FEProblem::initialSetup()
   reinitBecauseOfGhosting();
   Moose::setup_perf_log.pop("reinit() after updateGeomSearch()","Setup");
 
+
   if(_displaced_mesh)
     _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
-  for(unsigned int i=0; i<n_threads; i++)
-  {
-    _user_objects(EXEC_RESIDUAL)[i].updateDependObjects(_aux.getDependObjects(EXEC_RESIDUAL));
-    _user_objects(EXEC_JACOBIAN)[i].updateDependObjects(_aux.getDependObjects(EXEC_JACOBIAN));
-    _user_objects(EXEC_TIMESTEP)[i].updateDependObjects(_aux.getDependObjects(EXEC_TIMESTEP));
-    _user_objects(EXEC_TIMESTEP_BEGIN)[i].updateDependObjects(_aux.getDependObjects(EXEC_TIMESTEP_BEGIN));
-    _user_objects(EXEC_INITIAL)[i].updateDependObjects(_aux.getDependObjects(EXEC_INITIAL));
-    _user_objects(EXEC_CUSTOM)[i].updateDependObjects(_aux.getDependObjects(EXEC_CUSTOM));
-
-    _user_objects(EXEC_RESIDUAL)[i].initialSetup();
-    _user_objects(EXEC_JACOBIAN)[i].initialSetup();
-    _user_objects(EXEC_TIMESTEP)[i].initialSetup();
-    _user_objects(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
-    _user_objects(EXEC_INITIAL)[i].initialSetup();
-    _user_objects(EXEC_CUSTOM)[i].initialSetup();
-  }
 
   // Random interface objects
   for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
        it != _random_data_objects.end();
        ++it)
     it->second->updateSeeds(EXEC_INITIAL);
+
+
 
   if(!isRecovering())
   {

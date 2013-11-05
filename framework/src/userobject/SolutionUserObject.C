@@ -16,11 +16,13 @@ template<>
 InputParameters validParams<SolutionUserObject>()
 {
   // Get the input parameters from the parent class
-  InputParameters params = validParams<UserObject>();
+  InputParameters params = validParams<GeneralUserObject>();
 
   // Add required parameters
   params.addRequiredParam<std::string>("mesh", "The name of the mesh file (must be xda or exodusII file.");
-  params.addRequiredParam<std::vector<std::string> >("variables", "The name of the variable from the file you want to use for values.");
+  //params.addRequiredParam<std::vector<std::string> >("variables", "The name of the variable from the file you want to use for values.");
+  params.addParam<std::vector<std::string> >("nodal_variables", "The name of the nodal variables from the file you want to use for values.");
+  params.addParam<std::vector<std::string> >("elemental_variables", "The name of the element variables from the file you want to use for values.");
 
   // When using XDA files the following must be defined
   params.addParam<std::string>("es", "The name of the file holding the equation system info in xda format (xda only).");
@@ -47,7 +49,10 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _mesh_file(getParam<std::string>("mesh")),
     _es_file(getParam<std::string>("es")),
     _system_name(getParam<std::string>("system")),
-    _var_name(getParam<std::vector<std::string> >("variables")),
+    _nodal_vars(isParamValid("nodal_variables") ?
+                getParam<std::vector<std::string> >("nodal_variables") : std::vector<std::string>()),
+    _elem_vars(isParamValid("elemental_variables") ?
+               getParam<std::vector<std::string> >("elemental_variables") : std::vector<std::string>()),
     _exodus_time_index(getParam<int>("timestep")),
     _interpolate_times(false),
     _mesh(NULL),
@@ -68,51 +73,7 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _scale(getParam<std::vector<Real> >("coord_scale")),
     _factor(getParam<std::vector<Real> >("coord_factor"))
 {
-  // Several aspects of SolutionUserObject won't work if the FEProblem's MooseMesh is
-  // a ParallelMesh:
-  // .) ExodusII_IO::copy_nodal_solution() doesn't work in parallel.
-  // .) We don't know if directValue will be used, which may request
-  //    a value on a Node we don't have.
-  _fe_problem.mesh().errorIfParallelDistribution("SolutionUserObject");
-
-  // Create a libmesh::Mesh object for storing the loaded data.  Since
-  // SolutionUserObject is restricted to only work with SerialMesh
-  // (see above) we can force the Mesh used here to be a SerialMesh.
-  _mesh = new SerialMesh;
-
-  // ExodusII mesh file supplied
-  if (MooseUtils::hasExtension(_mesh_file, "e"))
-  {
-    _file_type = "exodusII";
-    readExodusII();
-  }
-
-  // XDA mesh file supplied
-  else if (MooseUtils::hasExtension(_mesh_file, "xda"))
-  {
-    _file_type = "xda";
-    readXda();
-  }
-
-  // Produce an error for an unknown file type
-  else
-    mooseError("In SolutionUserObject, invalid file type (only .xda and .e supported)");
-
-  // Intilize the serial solution vector
-  _serialized_solution = NumericVector<Number>::build().release();
-  _serialized_solution->init(_system->n_dofs(), false, SERIAL);
-
-  // Pull down a full copy of this vector on every processor so we can get values in parallel
-  _system->solution->localize(*_serialized_solution);
-
-  // Gather the variable numbers for the desired variables
-  _var_num.resize(_var_name.size());
-  for (unsigned int i = 0; i < _var_num.size(); ++i)
-    _var_num[i] = _system->variable_number(_var_name[i]);
-
-  // Create the MeshFunction for working with the solution data
-  _mesh_function = new MeshFunction(*_es, *_serialized_solution, _system->get_dof_map(), _var_num);
-  _mesh_function->init();
+  _exec_flags = EXEC_INITIAL;
 }
 
 SolutionUserObject::~SolutionUserObject()
@@ -196,13 +157,11 @@ SolutionUserObject::readExodusII()
   _es->add_system<ExplicitSystem> (_system_name);
   _system = &_es->get_system(_system_name);
 
-  // Add the variables to the system
-  for (unsigned int i = 0; i < _var_name.size(); ++i)
-  {
-    Moose::out << "Adding variable " << _var_name[i] << '\n';
-    _system->add_variable(_var_name[i], FIRST);
-  }
-  Moose::out.flush();
+  // Add the nodal variables to the system
+  for (std::vector<std::string>::const_iterator it = _nodal_vars.begin(); it != _nodal_vars.end(); ++it)
+    _system->add_variable(*it, FIRST);
+  for (std::vector<std::string>::const_iterator it = _elem_vars.begin(); it != _elem_vars.end(); ++it)
+    _system->add_variable(*it, CONSTANT, MONOMIAL);
 
   // Initilize the equations systems
   _es->init();
@@ -216,8 +175,10 @@ SolutionUserObject::readExodusII()
     _system2 = &_es2->get_system(_system_name);
 
     // Add the variables
-    for (unsigned int i = 0; i < _var_name.size(); ++i)
-      _system2->add_variable(_var_name[i], FIRST);
+    for (std::vector<std::string>::const_iterator it = _nodal_vars.begin(); it != _nodal_vars.end(); ++it)
+      _system2->add_variable(*it, FIRST);
+    for (std::vector<std::string>::const_iterator it = _elem_vars.begin(); it != _elem_vars.end(); ++it)
+      _system2->add_variable(*it, CONSTANT, MONOMIAL);
 
     // Initialize
     _es2->init();
@@ -226,10 +187,17 @@ SolutionUserObject::readExodusII()
     updateExodusBracketingTimeIndices(0.0);
 
     // Copy the nodal solution to the equations systems from the Exodus file
-    for (unsigned int i = 0; i < _var_name.size(); ++i)
+    for (std::vector<std::string>::const_iterator it = _nodal_vars.begin(); it != _nodal_vars.end(); ++it)
     {
-      _exodusII_io->copy_nodal_solution(*_system, _var_name[i], _exodus_index1+1);
-      _exodusII_io->copy_nodal_solution(*_system2, _var_name[i], _exodus_index2+1);
+      _exodusII_io->copy_nodal_solution(*_system, *it, _exodus_index1+1);
+      _exodusII_io->copy_nodal_solution(*_system2, *it, _exodus_index2+1);
+    }
+
+    // Copy the elemental solution to the equations systems from the Exodus file
+    for (std::vector<std::string>::const_iterator it = _elem_vars.begin(); it != _elem_vars.end(); ++it)
+    {
+      _exodusII_io->copy_elemental_solution(*_system, *it, *it, _exodus_index1+1);
+      _exodusII_io->copy_elemental_solution(*_system2, *it, *it, _exodus_index2+1);
     }
 
     // Update the systems
@@ -259,8 +227,11 @@ SolutionUserObject::readExodusII()
       mooseError("In SolutionUserObject, timestep = "<<_exodus_time_index<<", but there are only "<<num_exo_times<<" time steps.");
 
     // Copy the values from the ExodusII file
-    for (unsigned int i = 0; i < _var_name.size(); ++i)
-      _exodusII_io->copy_nodal_solution(*_system, _var_name[i], _exodus_time_index);
+    for (std::vector<std::string>::const_iterator it = _nodal_vars.begin(); it != _nodal_vars.end(); ++it)
+      _exodusII_io->copy_nodal_solution(*_system, *it, _exodus_time_index);
+
+    for (std::vector<std::string>::const_iterator it = _elem_vars.begin(); it != _elem_vars.end(); ++it)
+      _exodusII_io->copy_elemental_solution(*_system, *it, *it, _exodus_time_index);
 
     // Update the equations systems
     _system->update();
@@ -321,6 +292,59 @@ SolutionUserObject::execute()
 {
 }
 
+void
+SolutionUserObject::initialSetup()
+{
+  // Several aspects of SolutionUserObject won't work if the FEProblem's MooseMesh is
+  // a ParallelMesh:
+  // .) ExodusII_IO::copy_nodal_solution() doesn't work in parallel.
+  // .) We don't know if directValue will be used, which may request
+  //    a value on a Node we don't have.
+  _fe_problem.mesh().errorIfParallelDistribution("SolutionUserObject");
+
+  // Create a libmesh::Mesh object for storing the loaded data.  Since
+  // SolutionUserObject is restricted to only work with SerialMesh
+  // (see above) we can force the Mesh used here to be a SerialMesh.
+  _mesh = new SerialMesh;
+
+  // ExodusII mesh file supplied
+  if (MooseUtils::hasExtension(_mesh_file, "e"))
+  {
+    _file_type = "exodusII";
+    readExodusII();
+  }
+
+  // XDA mesh file supplied
+  else if (MooseUtils::hasExtension(_mesh_file, "xda"))
+  {
+    _file_type = "xda";
+    readXda();
+  }
+
+  // Produce an error for an unknown file type
+  else
+    mooseError("In SolutionUserObject, invalid file type (only .xda and .e supported)");
+
+  // Intilize the serial solution vector
+  _serialized_solution = NumericVector<Number>::build().release();
+  _serialized_solution->init(_system->n_dofs(), false, SERIAL);
+
+  // Pull down a full copy of this vector on every processor so we can get values in parallel
+  _system->solution->localize(*_serialized_solution);
+
+  // Gather the variable numbers for the desired variables
+  std::vector<unsigned int> var_num;
+  var_num.reserve(_nodal_vars.size() + _elem_vars.size());
+  for (std::vector<std::string>::const_iterator it = _nodal_vars.begin(); it != _nodal_vars.end(); ++it)
+    var_num.push_back(_system->variable_number(*it));
+  for (std::vector<std::string>::const_iterator it = _elem_vars.begin(); it != _elem_vars.end(); ++it)
+    var_num.push_back(_system->variable_number(*it));
+
+  // Create the MeshFunction for working with the solution data
+  _mesh_function = new MeshFunction(*_es, *_serialized_solution, _system->get_dof_map(), var_num);
+  _mesh_function->init();
+}
+
 MooseEnum
 SolutionUserObject::getSolutionFileType()
 {
@@ -335,15 +359,21 @@ SolutionUserObject::updateExodusTimeInterpolation(Real time)
     if (updateExodusBracketingTimeIndices(time))
     {
 
-      for (unsigned int i = 0; i < _var_name.size(); ++i)
-        _exodusII_io->copy_nodal_solution(*_system, _var_name[i], _exodus_index1+1);
+      for (std::vector<std::string>::const_iterator it = _nodal_vars.begin(); it != _nodal_vars.end(); ++it)
+        _exodusII_io->copy_nodal_solution(*_system, *it, _exodus_index1+1);
+
+      for (std::vector<std::string>::const_iterator it = _elem_vars.begin(); it != _elem_vars.end(); ++it)
+        _exodusII_io->copy_elemental_solution(*_system, *it, *it, _exodus_index1+1);
 
       _system->update();
       _es->update();
       _system->solution->localize(*_serialized_solution);
 
-      for (unsigned int i = 0; i < _var_name.size(); ++i)
-        _exodusII_io->copy_nodal_solution(*_system2, _var_name[i], _exodus_index2+1);
+      for (std::vector<std::string>::const_iterator it = _nodal_vars.begin(); it != _nodal_vars.end(); ++it)
+        _exodusII_io->copy_nodal_solution(*_system2, *it, _exodus_index2+1);
+
+      for (std::vector<std::string>::const_iterator it = _elem_vars.begin(); it != _elem_vars.end(); ++it)
+        _exodusII_io->copy_elemental_solution(*_system2, *it, *it, _exodus_index1+1);
 
       _system2->update();
       _es2->update();

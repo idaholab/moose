@@ -1,7 +1,10 @@
 [Mesh]
-  type = FileMesh
   file = cubesource.e
-  # This test uses SolutionUserObject which doesn't work with ParallelMesh.
+  # The SolutionUserObject uses the copy_nodal_solution() capability
+  # of the Exodus reader, and therefore won't work if the initial mesh
+  # has been renumbered (it will be reunumbered if you are running with
+  # ParallelMesh in parallel).  Hence, we restrict this test to run with
+  # SerialMesh only.
   distribution = serial
 []
 
@@ -18,6 +21,10 @@
     order = FIRST
     family = LAGRANGE
   [../]
+  [./en]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -30,8 +37,17 @@
 [AuxKernels]
   [./nn]
     type = SolutionAux
-    variable = nn
     solution = soln
+    variable = nn
+    scale_factor = 2.0
+		from_variable = source_nodal
+  [../]
+  [./en]
+    type = SolutionAux
+    solution = soln
+    variable = en
+    scale_factor = 2.0
+		from_variable = source_element
   [../]
 []
 
@@ -40,6 +56,8 @@
     type = SolutionUserObject
     mesh = cubesource.e
     nodal_variables = source_nodal
+		elemental_variables = source_element
+    timestep = 2
   [../]
 []
 
@@ -50,12 +68,14 @@
     boundary = '1 2'
     value = 0.0
   [../]
+
 []
 
 [Executioner]
   type = Transient
 
   solve_type = 'NEWTON'
+
   l_max_its = 800
   nl_rel_tol = 1e-10
   num_steps = 50

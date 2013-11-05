@@ -43,7 +43,6 @@ public:
    */
   virtual ~SolutionAux();
 
-
 protected:
 
   /** Compute the value for the kernel

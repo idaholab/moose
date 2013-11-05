@@ -62,7 +62,7 @@ public:
 protected:
 
   /// Pointer to SolutionUserObject containing the solution of interest
-  const  SolutionUserObject * _solution_object_ptr;
+  const SolutionUserObject * _solution_object_ptr;
 
   /// The variable name to extract from the file
   std::string _var_name;

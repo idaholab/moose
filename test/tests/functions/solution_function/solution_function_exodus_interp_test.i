@@ -87,7 +87,7 @@
   [./cube_soln]
     type = SolutionUserObject
     mesh = cubesource.e
-    variables = source_nodal
+    nodal_variables = source_nodal
   [../]
 []
 

@@ -17,6 +17,13 @@
     exodiff = 'solution_aux_exodus_out.e'
   [../]
 
+  [./exodus_elemental]
+    type = 'Exodiff'
+    input = 'solution_aux_exodus_elemental.i'
+    exodiff = 'solution_aux_exodus_elemental_out.e'
+		max_threads = 1 # ticket 2283
+  [../]
+
   [./exodus_direct]
     type = 'Exodiff'
     input = 'solution_aux_exodus_direct.i'

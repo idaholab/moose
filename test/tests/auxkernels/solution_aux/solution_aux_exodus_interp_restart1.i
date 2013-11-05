@@ -39,7 +39,7 @@
   [./soln]
     type = SolutionUserObject
     mesh = cubesource.e
-    variables = source_nodal
+    nodal_variables = source_nodal
   [../]
 []
 
@@ -67,4 +67,3 @@
   num_restart_files = 1
   perf_log = true
 []
-

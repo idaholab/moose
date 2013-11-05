@@ -37,7 +37,7 @@
     variable = nn
     scale_factor = 2.0
     #from_variable = source_nodal
-    #add_factor = -10
+    #add_factor = -10teg
   [../]
   [./en]
     type = SolutionAux
@@ -52,7 +52,7 @@
   [./soln]
     type = SolutionUserObject
     mesh = cubesource_added.e
-    variables = 'source_nodal nodal_10'
+    nodal_variables = 'source_nodal nodal_10'
     timestep = 2
   [../]
 []

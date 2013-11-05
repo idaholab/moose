@@ -49,7 +49,8 @@ SolutionFunction::~SolutionFunction()
 void
 SolutionFunction::initialSetup()
 {
-  // Get a pointer to the SolutionUserObject
+  // Get a pointer to the SolutionUserObject. A pointer is used because the UserObject is not available during the
+  // construction of the function
   _solution_object_ptr = &getUserObject<SolutionUserObject>("solution");
 
   // If 'from_variable' is supplied, use the value
@@ -59,8 +60,10 @@ SolutionFunction::initialSetup()
   // If not, get the value from the SolutionUserObject
   else
   {
-    // Get the variables from the SolutionUserObject
-    std::vector<std::string> vars = _solution_object_ptr->getParam<std::vector<std::string> >("variables");
+    // Get all the variables from the SolutionUserObject
+    std::vector<std::string> vars = _solution_object_ptr->getParam<std::vector<std::string> >("nodal_variables");
+    std::vector<std::string> elem_vars = _solution_object_ptr->getParam<std::vector<std::string> >("elemental_variables");
+    vars.insert(vars.end(), elem_vars.begin(), elem_vars.end());
 
     // If there are more than one, throw an error
     if (vars.size() > 1)
