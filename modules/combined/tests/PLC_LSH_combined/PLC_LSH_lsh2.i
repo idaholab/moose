@@ -157,7 +157,8 @@
     block = 1
     yield_stress = 2.4e2
     hardening_constant = 1206.
-    relative_tolerance = 1.e-8
+    relative_tolerance = 1e-8
+    absolute_tolerance = 1e-12
 #    output_iteration_info = true
   [../]
 []
