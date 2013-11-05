@@ -201,16 +201,18 @@ NonlinearSystem::solve()
 {
   try
   {
-    //Calculate the initial residual for use in the convergence criterion.  The initial
-    //residual
-    _computing_initial_residual = true;
-    _fe_problem.computeResidual(_sys, *_current_solution, *_sys.rhs);
-    _computing_initial_residual = false;
-
-    _sys.rhs->close();
-    _initial_residual = _sys.rhs->l2_norm();
-    Moose::out << std::scientific << std::setprecision(6);
-    Moose::out << " Initial |R| = " << _initial_residual << std::endl;
+    if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
+    {
+      //Calculate the initial residual for use in the convergence criterion.  The initial
+      //residual
+      _computing_initial_residual = true;
+      _fe_problem.computeResidual(_sys, *_current_solution, *_sys.rhs);
+      _computing_initial_residual = false;
+      _sys.rhs->close();
+      _initial_residual = _sys.rhs->l2_norm();
+      Moose::out << std::scientific << std::setprecision(6);
+      Moose::out << " Initial |R| = " << _initial_residual << std::endl;
+    }
   }
   catch (MooseException & e)
   {

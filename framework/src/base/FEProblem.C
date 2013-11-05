@@ -3092,10 +3092,13 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     _has_jacobian = true;
   }
 
-  // This call is here to make sure the residual vector is up to date with any decisions that have been made in
-  // the Jacobian evaluation.  That is important in JFNK because that residual is used for finite differencing
-  computeResidual(sys, soln, *sys.rhs);
-  sys.rhs->close();
+  if (_solver_params._type == Moose::ST_JFNK || _solver_params._type == Moose::ST_PJFNK)
+  {
+    // This call is here to make sure the residual vector is up to date with any decisions that have been made in
+    // the Jacobian evaluation.  That is important in JFNK because that residual is used for finite differencing
+    computeResidual(sys, soln, *sys.rhs);
+    sys.rhs->close();
+  }
 }
 
 void
