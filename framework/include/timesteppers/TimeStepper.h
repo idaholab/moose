@@ -58,7 +58,7 @@ public:
 
   /**
    * Called after computeStep() is called.
-   * @return true if output should be forced, false otherwise
+   * @return true if any type of sync point was hit, false otherwise
    */
   virtual bool constrainStep(Real &dt);
 

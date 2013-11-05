@@ -69,8 +69,8 @@ AdaptAndModify::endStep()
 
     _problem.computeUserObjects(EXEC_CUSTOM);
 
-    // if _force_output is true, force the output no matter what
-    _problem.output(_force_output);
-    _problem.outputPostprocessors(_force_output);
+    // if _at_sync_point is true, force the output no matter what
+    _problem.output(_at_sync_point);
+    _problem.outputPostprocessors(_at_sync_point);
   }
 }

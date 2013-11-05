@@ -84,8 +84,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _time_old(_problem.timeOld()),
     _dt(_problem.dt()),
     _dt_old(_problem.dtOld()),
-    _prev_dt(declareRestartableData<Real>("prev_dt", -1)),
-    _force_output(declareRestartableData<bool>("force_output", false)),
+    _unconstrained_dt(declareRestartableData<Real>("unconstrained_dt", -1)),
+    _at_sync_point(declareRestartableData<bool>("at_sync_point", false)),
     _first(declareRestartableData<bool>("first", true)),
     _last_solve_converged(declareRestartableData<bool>("last_solve_converged", true)),
     _end_time(getParam<Real>("end_time")),
@@ -402,11 +402,11 @@ Transient::endStep()
     }
     else
     {
-      // if _force_output is true, force the output no matter what
+      // if _at_sync_point is true, force the output no matter what
       if(_allow_output)
       {
-        _problem.output(_force_output);
-        _problem.outputPostprocessors(_force_output);
+        _problem.output(_at_sync_point);
+        _problem.outputPostprocessors(_at_sync_point);
         _problem.outputRestart();
       }
     }
@@ -431,10 +431,10 @@ Transient::computeConstrainedDT()
   }
 
   // Allow the time stepper to limit the time step
-  _force_output = _time_stepper->constrainStep(dt_cur);
-  if (_force_output)
+  _at_sync_point = _time_stepper->constrainStep(dt_cur);
+  if (_at_sync_point)
   {
-    _prev_dt = _dt;
+    _unconstrained_dt = _dt;
   }
 
   // Don't let time go beyond next time interval output if specified
@@ -442,8 +442,8 @@ Transient::computeConstrainedDT()
       (_time + dt_cur + _timestep_tolerance >= _next_interval_output_time))
   {
     dt_cur = _next_interval_output_time - _time;
-    _prev_dt = _dt;
-    _force_output = true;
+    _unconstrained_dt = _dt;
+    _at_sync_point = true;
   }
 
   // Adjust to a target time if set
@@ -451,17 +451,23 @@ Transient::computeConstrainedDT()
   {
     dt_cur = _target_time - _time;
 
-    _prev_dt = _dt;
-    _force_output = true;
+    _unconstrained_dt = _dt;
+    _at_sync_point = true;
   }
 
   // Constrain by what the multi apps are doing
   Real multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP_BEGIN);
   if(_use_multiapp_dt || multi_app_dt < dt_cur)
+  {
     dt_cur = multi_app_dt;
+    _at_sync_point = false;
+  }
   multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP);
   if(multi_app_dt < dt_cur)
+  {
     dt_cur = multi_app_dt;
+    _at_sync_point = false;
+  }
 
   return dt_cur;
 }

@@ -193,6 +193,18 @@ public:
   bool & verbose() { return _verbose; }
 
   /**
+   * Is the current step at a sync point (sync times, time interval, target time, etc)?
+   * @return Bool indicataing whether we are at a sync point
+   */
+  bool atSyncPoint() { return _at_sync_point; }
+
+  /**
+   * Get the unconstrained dt
+   * @return Value of dt before constraints were applied
+   */
+  Real unconstrainedDT() { return _unconstrained_dt; }
+
+  /**
    * Set (or reset) the output position of the application.
    */
   virtual void setOutputPosition(const Point & p) { _problem.setOutputPosition(p); }
@@ -213,8 +225,8 @@ protected:
   Real & _dt;
   Real & _dt_old;
 
-  Real & _prev_dt;
-  bool & _force_output;
+  Real & _unconstrained_dt;
+  bool & _at_sync_point;
 
   /// Is it our first time through the execution loop?
   bool & _first;
