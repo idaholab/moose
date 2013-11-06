@@ -31,7 +31,9 @@ MooseParsedGradFunction::MooseParsedGradFunction(const std::string & name, Input
     _value(verifyFunction(getParam<std::string>("value"))),
     _grad_value(verifyFunction(std::string("{") + getParam<std::string>("grad_x") + "}{" +
                                  getParam<std::string>("grad_y") + "}{" +
-                                 getParam<std::string>("grad_z") + "}"))
+                                 getParam<std::string>("grad_z") + "}")),
+    _function_ptr(NULL),
+    _grad_function_ptr(NULL)
 {
 }
 
@@ -65,6 +67,9 @@ MooseParsedGradFunction::vectorValue(Real /*t*/, const Point & /*p*/)
 void
 MooseParsedGradFunction::initialSetup()
 {
-  _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _value, _vars, _vals);
-  _grad_function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _grad_value, _vars, _vals);
+  if (_function_ptr == NULL)
+    _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _value, _vars, _vals);
+
+  if (_grad_function_ptr == NULL)
+    _grad_function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _grad_value, _vars, _vals);
 }

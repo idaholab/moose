@@ -30,7 +30,8 @@ MooseParsedVectorFunction::MooseParsedVectorFunction(const std::string & name, I
     MooseParsedFunctionBase(name, parameters),
     _vector_value(verifyFunction(std::string("{") + getParam<std::string>("value_x") + "}{" +
                                  getParam<std::string>("value_y") + "}{" +
-                                 getParam<std::string>("value_z") + "}"))
+                                 getParam<std::string>("value_z") + "}")),
+    _function_ptr(NULL)
 {
 }
 
@@ -54,5 +55,6 @@ MooseParsedVectorFunction::gradient(Real /*t*/, const Point & /*p*/)
 void
 MooseParsedVectorFunction::initialSetup()
 {
-  _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _vector_value, _vars, _vals);
+  if (_function_ptr == NULL)
+    _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _vector_value, _vars, _vals);
 }

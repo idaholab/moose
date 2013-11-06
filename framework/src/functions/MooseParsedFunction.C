@@ -27,7 +27,8 @@ InputParameters validParams<MooseParsedFunction>()
 MooseParsedFunction::MooseParsedFunction(const std::string & name, InputParameters parameters) :
     Function(name, parameters),
     MooseParsedFunctionBase(name, parameters),
-    _value(verifyFunction(getParam<std::string>("value")))
+    _value(verifyFunction(getParam<std::string>("value"))),
+    _function_ptr(NULL)
 {
 }
 
@@ -40,7 +41,6 @@ Real
 MooseParsedFunction::value(Real t, const Point & p)
 {
   return _function_ptr->evaluate<Real>(t, p);
-
 }
 
 RealVectorValue
@@ -52,5 +52,6 @@ MooseParsedFunction::vectorValue(Real /*t*/, const Point & /*p*/)
 void
 MooseParsedFunction::initialSetup()
 {
-  _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _value, _vars, _vals);
+  if (_function_ptr == NULL)
+    _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _value, _vars, _vals);
 }
