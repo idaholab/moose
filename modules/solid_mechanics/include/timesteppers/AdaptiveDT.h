@@ -18,6 +18,7 @@ public:
   virtual ~AdaptiveDT();
 
   virtual void init();
+  virtual void preExecute();
 
   virtual void rejectStep();
 
@@ -26,6 +27,7 @@ public:
 protected:
   virtual Real computeInitialDT();
   virtual Real computeDT();
+  virtual bool constrainStep(Real &dt);
   virtual Real computeFailedDT();
   void computeAdaptiveDT(Real & dt, bool allowToGrow=true, bool allowToShrink=true);
   void computeInterpolationDT(Real & dt);
@@ -35,6 +37,7 @@ protected:
 
   const Real _input_dt;                       ///< The dt from the input file.
   bool _tfunc_last_step;
+  bool _sync_last_step;
 
   int _optimal_iterations;
   int _iteration_window;
@@ -47,9 +50,7 @@ protected:
   Real _max_function_change;
   bool _force_step_every_function_point;
 
-  const std::vector<Real> _tfunc_times;
-  std::vector<Real>::const_iterator _tfunc_times_iter;
-  bool _remaining_tfunc_time;
+  std::set<Real> _tfunc_times;
 
   LinearInterpolation _time_ipol; ///< Piecewise linear definition of time stepping
   const bool _use_time_ipol;      ///< true if we want to use piecewise-defined time stepping
