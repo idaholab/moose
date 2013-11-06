@@ -15,7 +15,10 @@
 #ifndef NODALFLOODCOUNT_H
 #define NODALFLOODCOUNT_H
 
-#include "ElementPostprocessor.h"
+#include "GeneralPostprocessor.h"
+#include "Coupleable.h"
+#include "MooseVariableDependencyInterface.h"
+#include "ZeroInterface.h"
 
 #include <list>
 #include <vector>
@@ -39,7 +42,11 @@ InputParameters validParams<NodalFloodCount>();
  * Note:  When inspecting multiple variables, those variables must not have regions of interest
  *        that overlap or they will not be correctly colored.
  */
-class NodalFloodCount : public ElementPostprocessor
+class NodalFloodCount :
+  public GeneralPostprocessor,
+  public Coupleable,
+  public MooseVariableDependencyInterface,
+  public ZeroInterface
 {
 public:
   NodalFloodCount(const std::string & name, InputParameters parameters);
@@ -47,7 +54,7 @@ public:
 
   virtual void initialize();
   virtual void execute();
-  virtual void threadJoin(const UserObject & y);
+//  virtual void threadJoin(const UserObject & y);
   virtual void finalize();
   virtual Real getValue();
 

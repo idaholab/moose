@@ -34,7 +34,7 @@
 template<>
 InputParameters validParams<NodalFloodCount>()
 {
-  InputParameters params = validParams<ElementPostprocessor>();
+  InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredCoupledVar("variable", "Ths variable(s) for which to find connected regions of interests, i.e. \"bubbles\".");
   params.addParam<Real>("threshold", 0.5, "The threshold value for which a new bubble may be started");
   params.addParam<Real>("connecting_threshold", "The threshold for which an existing bubble may be extended (defaults to \"threshold\")");
@@ -49,7 +49,10 @@ InputParameters validParams<NodalFloodCount>()
 }
 
 NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters parameters) :
-    ElementPostprocessor(name, parameters),
+    GeneralPostprocessor(name, parameters),
+    Coupleable(parameters, false),
+    MooseVariableDependencyInterface(),
+    ZeroInterface(parameters),
     _vars(getCoupledMooseVars()),
     _threshold(getParam<Real>("threshold")),
     _connecting_threshold(isParamValid("connecting_threshold") ? getParam<Real>("connecting_threshold") : getParam<Real>("threshold")),
@@ -134,13 +137,18 @@ NodalFloodCount::initialize()
 void
 NodalFloodCount::execute()
 {
-  unsigned int n_nodes = _current_elem->n_vertices();
-  for (unsigned int i=0; i < n_nodes; ++i)
+  const MeshBase::element_iterator end = _mesh.getMesh().active_local_elements_end();
+  for (MeshBase::element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
   {
-    const Node *node = _current_elem->get_node(i);
+    Elem *current_elem = *el;
+    unsigned int n_nodes = current_elem->n_vertices();
+    for (unsigned int i=0; i < n_nodes; ++i)
+    {
+      const Node *node = current_elem->get_node(i);
 
-    for (unsigned int var_num=0; var_num<_vars.size(); ++var_num)
-      flood(node, var_num, 0);
+      for (unsigned int var_num=0; var_num<_vars.size(); ++var_num)
+        flood(node, var_num, 0);
+    }
   }
 }
 
@@ -241,6 +249,7 @@ NodalFloodCount::getElementalValues(unsigned int elem_id) const
   return empty;
 }
 
+/*
 void
 NodalFloodCount::threadJoin(const UserObject &y)
 {
@@ -259,7 +268,7 @@ NodalFloodCount::threadJoin(const UserObject &y)
    if (_track_memory)
      _bytes_used += pps.calculateUsage();
 }
-
+*/
 
 void
 NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_periodic_info) const
