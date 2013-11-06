@@ -1980,7 +1980,12 @@ FEProblem::computeIndicatorsAndMarkers()
 void
 FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)
 {
-  if (pps[0].blockIds().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0 || pps[0].blockNodalIds().size() > 0 || pps[0].internalSideUserObjects(group).size() > 0)
+  if (pps[0].blockIds().size() > 0 ||
+      pps[0].boundaryIds().size() > 0 ||
+      pps[0].nodesetIds().size() > 0 ||
+      pps[0].blockNodalIds().size() > 0 ||
+      pps[0].internalSideUserObjects(group).size() > 0 ||
+      pps[0].genericUserObjects(group).size() > 0) // Yes! Only GUOs that couple in variables
   {
 
     /* Note: The fact that we compute the aux system when we compute the user_objects
