@@ -445,6 +445,7 @@ Transient::computeConstrainedDT()
          << _n_startup_steps
          << std::endl;
   }
+  _unconstrained_dt = dt_cur;
 
   if (_verbose)
     Moose::out << diag.str();
@@ -454,17 +455,12 @@ Transient::computeConstrainedDT()
 
   // Allow the time stepper to limit the time step
   _at_sync_point = _time_stepper->constrainStep(dt_cur);
-  if (_at_sync_point)
-  {
-    _unconstrained_dt = _dt;
-  }
 
   // Don't let time go beyond next time interval output if specified
   if ((_time_interval) &&
       (_time + dt_cur + _timestep_tolerance >= _next_interval_output_time))
   {
     dt_cur = _next_interval_output_time - _time;
-    _unconstrained_dt = _dt;
     _at_sync_point = true;
 
     diag << "Limiting dt for time interval output at time: "
@@ -488,7 +484,6 @@ Transient::computeConstrainedDT()
   if (_target_time > 0 && _time + dt_cur + _timestep_tolerance >= _target_time)
   {
     dt_cur = _target_time - _time;
-    _unconstrained_dt = _dt;
     _at_sync_point = true;
 
     diag << "Limiting dt for target time: "
