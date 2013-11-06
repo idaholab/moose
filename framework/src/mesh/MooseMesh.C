@@ -442,6 +442,33 @@ MooseMesh::isSemiLocal(Node * node)
   return _semilocal_node_list.find(node) != _semilocal_node_list.end();
 }
 
+/**
+ * Helper class for sorting Boundary Nodes so that we always get the same
+ * order of application for boundary conditions.
+ */
+class BndNodeCompare
+{
+public:
+  BndNodeCompare(){}
+
+  bool operator()(const BndNode * const & lhs, const BndNode * const & rhs)
+  {
+    if(lhs->_bnd_id < rhs->_bnd_id)
+      return true;
+
+    if(lhs->_bnd_id > rhs->_bnd_id)
+      return false;
+
+    if(lhs->_node->id() < rhs->_node->id())
+      return true;
+
+    if(lhs->_node->id() > rhs->_node->id())
+      return false;
+
+    return false;
+  }
+};
+
 void
 MooseMesh::buildNodeList()
 {
@@ -468,6 +495,11 @@ MooseMesh::buildNodeList()
     _bnd_nodes.push_back(bnode);
     _bnd_node_ids.insert(_extra_bnd_nodes[i]._node->id());
   }
+
+  BndNodeCompare mein_kompfare;
+
+  // This sort is here so that boundary conditions are always applied in the same order
+  std::sort(_bnd_nodes.begin(), _bnd_nodes.end(), mein_kompfare);
 }
 
 void

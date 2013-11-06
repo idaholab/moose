@@ -67,7 +67,7 @@ MaterialPropertyIO::write(const std::string & file_name)
     out.write((const char *) &head, sizeof(head));
 
     // save the number of elements in this block (since we do only 1 block right now, we store everything)
-    unsigned int n_elems = _mesh.nElem();
+    unsigned int n_elems = props.size(); //_mesh.nElem();
     out.write((const char *) &n_elems, sizeof(n_elems));
 
     // properties

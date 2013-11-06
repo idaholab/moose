@@ -7,7 +7,7 @@
   ymax = 1
   nx = 4
   ny = 4
-  elem_type = QUAD4  
+  elem_type = QUAD4
 []
 
 [Problem]
@@ -35,14 +35,14 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = left
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = right
     value = 1
   [../]
 []
