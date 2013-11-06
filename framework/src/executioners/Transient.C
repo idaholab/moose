@@ -186,8 +186,16 @@ Transient::init()
   if (_t_step == 0)
     _t_step = 1;
 
-  computeDT();
-  _dt = getDT();
+  if (_t_step > 1) //Restart case
+  {
+    _dt_old = _dt;
+  }
+  else
+  {
+    computeDT();
+//  _dt = computeConstrainedDT();
+    _dt = getDT();
+  }
 }
 
 void
