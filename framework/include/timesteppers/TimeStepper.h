@@ -93,7 +93,7 @@ public:
   /**
    * Add a sync time
    */
-  void addSyncTime(Real sync_time) { _sync_times.insert(sync_time);}
+  void addSyncTime(Real sync_time);
 
 protected:
   /**
