@@ -2,6 +2,7 @@
 
 #include "Function.h"
 #include "PiecewiseLinearFile.h"
+#include "Transient.h"
 
 template<>
 InputParameters validParams<AdaptiveDT>()
