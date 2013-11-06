@@ -73,6 +73,7 @@ stringify(const LineSearchType & t)
   case LS_BT:    return "bt";
   case LS_CP:    return "cp";
 #endif
+  case LS_INVALID: mooseError("Invalid LineSearchType");
   }
   return "";
 }
