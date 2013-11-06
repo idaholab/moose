@@ -91,7 +91,7 @@ TimeStepper::computeStep()
 bool
 TimeStepper::constrainStep(Real &dt)
 {
-  bool force_output = false;
+  bool at_sync_point = false;
 
   std::ostringstream diag;
 
@@ -171,7 +171,7 @@ TimeStepper::constrainStep(Real &dt)
                  <<dt<<" sync_time: "<<*_sync_times.begin()<<" time: "<<_time);
     }
 
-    force_output = true;
+    at_sync_point = true;
   }
 
   if (_verbose)
@@ -179,7 +179,7 @@ TimeStepper::constrainStep(Real &dt)
     Moose::out << diag.str();
   }
 
-  return force_output;
+  return at_sync_point;
 }
 
 void
