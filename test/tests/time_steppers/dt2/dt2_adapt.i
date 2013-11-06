@@ -5,9 +5,14 @@
   xmax = 1
   ymin = -1
   ymax = 1
-  nx = 4
-  ny = 4
+  nx = 15
+  ny = 15
   elem_type = QUAD4
+[]
+
+[GlobalParams]
+  slope = 1
+  t_jump = 2
 []
 
 [Variables]
@@ -18,29 +23,15 @@
     family = LAGRANGE
 
     [./InitialCondition]
-      type = ConstantIC
-      value = 0
+      type = TEIC
     [../]
   [../]
 []
 
-[Functions]
-  [./forcing_fn]
-    type = ParsedFunction
-    # dudt = 3*t^2*(x^2 + y^2)
-    value = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
-  [../]
-
-  [./exact_fn]
-    type = ParsedFunction
-    value = t*t*t*((x*x)+(y*y))
-  [../]
-[]
-
 [Kernels]
-  active = 'diff ie ffn'
+  active = 'td diff ffn'
 
-  [./ie]
+  [./td]
     type = TimeDerivative
     variable = u
   [../]
@@ -51,9 +42,8 @@
   [../]
 
   [./ffn]
-    type = UserForcingFunction
+    type = TEJumpFFN
     variable = u
-    function = forcing_fn
   [../]
 []
 
@@ -61,56 +51,53 @@
   active = 'all'
 
   [./all]
-    type = FunctionDirichletBC
+    type = TEJumpBC
     variable = u
     boundary = '0 1 2 3'
-    function = exact_fn
-  [../]
-
-  [./left]
-    type = DirichletBC
-    variable = u
-    boundary = 3
-    value = 0
-  [../]
-
-  [./right]
-    type = DirichletBC
-    variable = u
-    boundary = 1
-    value = 1
   [../]
 []
 
 [Postprocessors]
-  [./l2_err]
-    type = ElementL2Error
-    variable = u
-    function = exact_fn
+  active = 'dt'
+
+  [./dt]
+    type = TimestepSize
   [../]
 []
 
 [Executioner]
   type = Transient
-  scheme = 'bdf2'
+
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  start_time = 0.0
-  num_steps = 5
-  dt = 0.25
+  nl_rel_tol = 1e-7
+#  l_tol = 1e-5
 
   [./Adaptivity]
     refine_fraction = 0.2
     coarsen_fraction = 0.3
     max_h_level = 4
   [../]
+
+  start_time = 0.0
+  end_time = 5
+  num_steps = 500000
+
+  dtmax = 0.25
+
+  [./TimeStepper]
+    type = DT2
+    dt = 0.1
+    e_max = 3e-1
+    e_tol = 1e-1
+  [../]
 []
 
 [Output]
-  file_base = out_bdf2_adapt
   output_initial = false
+  postprocessor_csv = false
   interval = 1
   exodus = true
   perf_log = true

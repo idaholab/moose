@@ -11,8 +11,18 @@
 []
 
 [GlobalParams]
-  slope = 10
+  slope = 1
   t_jump = 2
+[]
+
+[Functions]
+  active = 'u_func'
+
+  [./u_func]
+    type = ParsedFunction
+    value = 'atan((t-2)*pi)'   # atan((t-t_jump)*pi*slope) - has to match global params above
+
+  [../]
 []
 
 [Variables]
@@ -58,38 +68,44 @@
 []
 
 [Postprocessors]
-  active = ''
+  active = 'dt l2'
 
   [./dt]
     type = TimestepSize
+  [../]
+
+  [./l2]
+    type = ElementL2Error
+    variable = u
+    function = u_func
   [../]
 []
 
 [Executioner]
   type = Transient
-  [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
-    dt = 0.15
-  [../]
 
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  nl_abs_tol = 1e-15
+  nl_rel_tol = 1e-7
 #  l_tol = 1e-5
 
   start_time = 0.0
   end_time = 5
   num_steps = 500000
-
-  dtmax = 0.1
   dtmax = 0.25
+
+  [./TimeStepper]
+    type = DT2
+    dt = 0.1
+    e_max = 3e-1
+    e_tol = 1e-1
+  [../]
 []
 
 [Output]
-  file_base = out_time_adaptive
-  output_initial = true
+  output_initial = false
   postprocessor_csv = true
   interval = 1
   exodus = true

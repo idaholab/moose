@@ -5,13 +5,13 @@
   xmax = 1
   ymin = -1
   ymax = 1
-  nx = 15
-  ny = 15
+  nx = 20
+  ny = 20
   elem_type = QUAD4
 []
 
 [GlobalParams]
-  slope = 1
+  slope = 10
   t_jump = 2
 []
 
@@ -58,7 +58,7 @@
 []
 
 [Postprocessors]
-  active = 'dt'
+  active = ''
 
   [./dt]
     type = TimestepSize
@@ -67,38 +67,30 @@
 
 [Executioner]
   type = Transient
+  [./TimeStepper]
+    type = SolutionTimeAdaptiveDT
+    dt = 0.15
+  [../]
 
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  nl_rel_tol = 1e-7
+  nl_abs_tol = 1e-15
 #  l_tol = 1e-5
-
-  [./Adaptivity]
-    refine_fraction = 0.2
-    coarsen_fraction = 0.3
-    max_h_level = 4
-  [../]
 
   start_time = 0.0
   end_time = 5
   num_steps = 500000
 
+  dtmax = 0.1
   dtmax = 0.25
-
-  [./TimeStepper]
-    type = DT2
-    dt = 0.1
-    e_max = 3e-1
-    e_tol = 1e-1
-  [../]
 []
 
 [Output]
-  file_base = out_dt2_adapt
-  output_initial = false
-  postprocessor_csv = false
+  file_base = out
+  output_initial = true
+  postprocessor_csv = true
   interval = 1
   exodus = true
   perf_log = true

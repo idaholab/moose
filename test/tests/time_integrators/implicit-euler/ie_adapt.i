@@ -1,7 +1,3 @@
-#
-# Testing a solution that is second order in space and first order in time
-#
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -9,14 +5,16 @@
   xmax = 1
   ymin = -1
   ymax = 1
-  nx = 10
-  ny = 10
-  elem_type = QUAD9
+  nx = 4
+  ny = 4
+  elem_type = QUAD4
 []
 
 [Variables]
+  active = 'u'
+
   [./u]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
 
     [./InitialCondition]
@@ -29,16 +27,19 @@
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
-    value = ((x*x)+(y*y))-(4*t)
+    # dudt = 3*t^2*(x^2 + y^2)
+    value = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = t*((x*x)+(y*y))
+    value = t*t*t*((x*x)+(y*y))
   [../]
 []
 
 [Kernels]
+  active = 'diff ie ffn'
+
   [./ie]
     type = TimeDerivative
     variable = u
@@ -57,11 +58,27 @@
 []
 
 [BCs]
+  active = 'all'
+
   [./all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
+  [../]
+
+  [./left]
+    type = DirichletBC
+    variable = u
+    boundary = 3
+    value = 0
+  [../]
+
+  [./right]
+    type = DirichletBC
+    variable = u
+    boundary = 1
+    value = 1
   [../]
 []
 
@@ -76,22 +93,24 @@
 [Executioner]
   type = Transient
   scheme = 'implicit-euler'
+  perf_log = true
+
+  # Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
 
   start_time = 0.0
   num_steps = 5
   dt = 0.25
 
-#  [./Adaptivity]
-#    refine_fraction = 0.2
-#    coarsen_fraction = 0.3
-#    max_h_level = 4
-#  [../]
+  [./Adaptivity]
+    refine_fraction = 0.2
+    coarsen_fraction = 0.3
+    max_h_level = 4
+  [../]
 []
 
 [Output]
-  file_base = out_ie
-  output_initial = true
+  output_initial = false
   interval = 1
   exodus = true
-  perf_log = true
 []

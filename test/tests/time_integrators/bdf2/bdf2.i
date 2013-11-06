@@ -1,7 +1,3 @@
-#
-# Testing a solution that is second order in space and second order in time
-#
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -9,12 +5,14 @@
   xmax = 1
   ymin = -1
   ymax = 1
-  nx = 10
-  ny = 10
+  nx = 20
+  ny = 20
   elem_type = QUAD9
 []
 
 [Variables]
+  active = 'u'
+
   [./u]
     order = SECOND
     family = LAGRANGE
@@ -29,16 +27,19 @@
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
-    value = 2*t*((x*x)+(y*y))-(4*t*t)
+    # dudt = 3*t^2*(x^2 + y^2)
+    value = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = t*t*((x*x)+(y*y))
+    value = t*t*t*((x*x)+(y*y))
   [../]
 []
 
 [Kernels]
+  active = 'diff ie ffn'
+
   [./ie]
     type = TimeDerivative
     variable = u
@@ -57,11 +58,27 @@
 []
 
 [BCs]
+  active = 'all'
+
   [./all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
+  [../]
+
+  [./left]
+    type = DirichletBC
+    variable = u
+    boundary = 3
+    value = 0
+  [../]
+
+  [./right]
+    type = DirichletBC
+    variable = u
+    boundary = 1
+    value = 1
   [../]
 []
 
@@ -75,7 +92,7 @@
 
 [Executioner]
   type = Transient
-  scheme = 'crank-nicolson'
+  scheme = 'bdf2'
 
   start_time = 0.0
   num_steps = 5
@@ -89,8 +106,7 @@
 []
 
 [Output]
-  file_base = out_cranic
-  output_initial = true
+  output_initial = false
   interval = 1
   exodus = true
   perf_log = true

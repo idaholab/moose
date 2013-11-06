@@ -76,7 +76,6 @@
 
 [Output]
   output_initial = 1
-  file_base = out_AEE
   interval = 1
   exodus = true
   perf_log = true

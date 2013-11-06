@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CheckFiles'
+    input = 'time-adaptive.i'
+    check_files = 'out.e'
+  [../]
+[]

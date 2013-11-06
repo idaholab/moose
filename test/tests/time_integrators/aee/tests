@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'aee.i'
+    exodiff = 'aee_out.e'
+    rel_err = 0.003
+  [../]
+[]

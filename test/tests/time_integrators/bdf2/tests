@@ -1,0 +1,14 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'bdf2.i'
+    exodiff = 'bdf2_out.e'
+  [../]
+
+  [./adapt]
+    type = 'Exodiff'
+    input = 'bdf2_adapt.i'
+    exodiff = 'bdf2_adapt_out.e-s005'
+    group = 'adaptive'
+  [../]
+[]

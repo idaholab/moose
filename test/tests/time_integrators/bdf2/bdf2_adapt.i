@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  xmin = 0
+  xmin = -1
   xmax = 1
-  ymin = 0
+  ymin = -1
   ymax = 1
   nx = 4
   ny = 4
@@ -11,9 +11,16 @@
 []
 
 [Variables]
+  active = 'u'
+
   [./u]
     order = FIRST
     family = LAGRANGE
+
+    [./InitialCondition]
+      type = ConstantIC
+      value = 0
+    [../]
   [../]
 []
 
@@ -21,12 +28,12 @@
   [./forcing_fn]
     type = ParsedFunction
     # dudt = 3*t^2*(x^2 + y^2)
-    value = sin(pi*x)*sin(pi*y)+2*t*pi*pi*sin(pi*x)*sin(pi*y)
+    value = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = t*sin(pi*x)*sin(pi*y)
+    value = t*t*t*((x*x)+(y*y))
   [../]
 []
 
@@ -51,11 +58,27 @@
 []
 
 [BCs]
+  active = 'all'
+
   [./all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
+  [../]
+
+  [./left]
+    type = DirichletBC
+    variable = u
+    boundary = 3
+    value = 0
+  [../]
+
+  [./right]
+    type = DirichletBC
+    variable = u
+    boundary = 1
+    value = 1
   [../]
 []
 
@@ -69,14 +92,14 @@
 
 [Executioner]
   type = Transient
-  scheme = 'crank-nicolson'
+  scheme = 'bdf2'
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   start_time = 0.0
   num_steps = 5
-  dt = 0.1
+  dt = 0.25
 
   [./Adaptivity]
     refine_fraction = 0.2
@@ -86,7 +109,6 @@
 []
 
 [Output]
-  file_base = out_cranic_adapt
   output_initial = false
   interval = 1
   exodus = true

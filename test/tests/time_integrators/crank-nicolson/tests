@@ -1,0 +1,15 @@
+[Tests]
+  [./adapt]
+    type = 'Exodiff'
+    input = 'cranic_adapt.i'
+    exodiff = 'cranic_adapt_out.e-s005'
+    group = 'adaptive'
+  [../]
+
+  [./test]
+    type = 'Exodiff'
+    input = 'cranic.i'
+    exodiff = 'cranic_out.e'
+    max_parallel = 1
+  [../]
+[]
