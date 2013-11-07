@@ -414,6 +414,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.color_scheme_component = QtGui.QComboBox()
     self.color_scheme_component.addItem('Diverging (Blue to Red)')
     self.color_scheme_component.addItem('HSV (Cool to Warm)')
+    self.color_scheme_component.addItem('Shock')
     self.color_scheme_component.setToolTip('The color scheme used byt the render view')
     self.color_scheme_component.currentIndexChanged[str].connect(self._colorSchemeSelected)
 
@@ -573,8 +574,33 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     lut.Build()
     self.luts.append(lut)
 
+    # Shock
+    ctf = vtk.vtkColorTransferFunction()
+    min = 93698.4
+    max = 230532
+    ctf.AddRGBPoint(self._normalize(min, max,  93698.4),  0.0,         0.0,      1.0)
+    ctf.AddRGBPoint(self._normalize(min, max, 115592.0),  0.0,         0.905882, 1.0)
+    ctf.AddRGBPoint(self._normalize(min, max, 138853.0),  0.0941176,   0.733333, 0.027451)
+    ctf.AddRGBPoint(self._normalize(min, max, 159378.0),  1.0,         0.913725, 0.00784314)
+    ctf.AddRGBPoint(self._normalize(min, max, 181272.0),  1.0,         0.180392, 0.239216)
+    ctf.AddRGBPoint(self._normalize(min, max, 203165.0),  1.0,         0.701961, 0.960784)
+    ctf.AddRGBPoint(self._normalize(min, max, 230532.0),  1.0,         1.0,      1.0)
+    cc = list()
+    for i in xrange(256):
+      cc.append(ctf.GetColor(float(i) / 255.0))
+    lut = vtk.vtkLookupTable()
+    lut.SetNumberOfColors(256)
+    for i, item in enumerate(cc):
+      lut.SetTableValue(i, item[0], item[1], item[2], 1.0)
+    lut.Build()
+    self.luts.append(lut)
+
     self.current_lut = self.luts[0]
 
+
+  def _normalize(self, min, max, value):
+    print (value - min) / (max - min)
+    return (value - min) / (max - min)
     
   def _blockViewItemChanged(self, item):
     if item.checkState() == QtCore.Qt.Checked:
