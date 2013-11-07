@@ -39,6 +39,8 @@
 #include "PlenumPressureAction.h"
 #include "PlenumPressurePostprocessor.h"
 #include "PlenumPressurePPAction.h"
+#include "PlenumPressureUserObject.h"
+#include "PlenumPressureUOAction.h"
 #include "PresetVelocity.h"
 #include "Pressure.h"
 #include "PressureAction.h"
@@ -103,6 +105,7 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerTimeStepper(AdaptiveDT);
 
   registerUserObject(MaterialTensorOnLine);
+  registerUserObject(PlenumPressureUserObject);
 
 }
 
@@ -112,14 +115,16 @@ Elk::SolidMechanics::associateSyntax(Syntax & syntax, ActionFactory & action_fac
   syntax.registerActionSyntax("EmptyAction", "BCs/PlenumPressure");
   syntax.registerActionSyntax("PlenumPressureAction", "BCs/PlenumPressure/*");
   syntax.registerActionSyntax("PlenumPressurePPAction", "BCs/PlenumPressure/*");
+  syntax.registerActionSyntax("PlenumPressureUOAction", "BCs/PlenumPressure/*");
 
   syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
   syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
 
+  registerAction(PressureAction, "add_bc");
   registerAction(PlenumPressureAction, "add_bc");
   registerAction(PlenumPressurePPAction, "add_postprocessor");
-  registerAction(PressureAction, "add_bc");
+  registerAction(PlenumPressureUOAction, "add_user_object");
   registerAction(SolidMechanicsAction, "add_kernel");
 }
