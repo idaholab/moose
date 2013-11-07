@@ -11,11 +11,12 @@ class ExodusResult:
 
     self.current_actors = []
 
-  def setFileName(self, file_name):      
+  def setFileName(self, file_name, lut):
 
     try:
       self.currently_has_actor = True
-      
+      self.lut = lut
+
       self.file_name = file_name
       self.reader = vtk.vtkExodusIIReader()
       self.reader.SetFileName(self.file_name)
@@ -58,11 +59,6 @@ class ExodusResult:
       self.geom.SetInputConnection(0,self.reader.GetOutputPort(0))
       self.geom.Update()
    
-      self.lut = vtk.vtkLookupTable()
-      self.lut.SetHueRange(0.667, 0.0)
-      self.lut.SetNumberOfColors(256)
-      self.lut.Build()
-   
       self.data = self.geom.GetOutput()
    
       num_nodal_variables = self.data.GetPointData().GetNumberOfArrays()
@@ -86,7 +82,7 @@ class ExodusResult:
   #    self.mapper.SetInputConnection(self.tf.GetOutputPort())
       self.mapper.SetInputConnection(self.application_filter.GetOutputPort())
       self.mapper.ScalarVisibilityOn()
-      self.mapper.SetLookupTable(self.lut)
+      self.mapper.SetLookupTable(lut)
       self.mapper.SetColorModeToMapScalars()
       self.mapper.InterpolateScalarsBeforeMappingOn()
       
@@ -111,7 +107,7 @@ class ExodusResult:
       self.clip_mapper = vtk.vtkPolyDataMapper()
       self.clip_mapper.SetInputConnection(self.clip_application_filter.GetOutputPort())
       self.clip_mapper.ScalarVisibilityOn()
-      self.clip_mapper.SetLookupTable(self.lut)
+      self.clip_mapper.SetLookupTable(lut)
    
       self.clip_actor = vtk.vtkActor()
       self.clip_actor.SetMapper(self.clip_mapper)
@@ -126,9 +122,13 @@ class ExodusResult:
     except:
       pass
 
+  def setColorScheme(self, lut):
+    self.mapper.SetLookupTable(lut)
+    self.clip_mapper.SetLookupTable(lut)
+    self.scalar_bar.SetLookupTable(lut)
+
   def hideBlock(self, block_num):
     self.reader.SetElementBlockArrayStatus(self.reader.GetElementBlockArrayName(self.reader.GetObjectIndex(vtk.vtkExodusIIReader.ELEM_BLOCK, block_num)), 0)
 
   def showBlock(self, block_num):
     self.reader.SetElementBlockArrayStatus(self.reader.GetElementBlockArrayName(self.reader.GetObjectIndex(vtk.vtkExodusIIReader.ELEM_BLOCK, block_num)), 1)
-

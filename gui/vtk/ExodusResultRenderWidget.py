@@ -34,6 +34,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     
     self.file_name = None
 
+    self.setupLuts()
+
     # The multiple (from adaptivity) file names we know of
     self.file_names = []
 
@@ -338,6 +340,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 #    self.variable_contour_layout.addLayout(self.component_layout)
     self.variable_contour_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignHCenter)
 
+
     self.minmax_contour_layout = QtGui.QVBoxLayout()
     self.contour_layout.addLayout(self.minmax_contour_layout)
 
@@ -406,7 +409,19 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.minmax_contour_layout.addWidget(self.max_groupbox)
 
 
+#    self.component_layout = QtGui.QHBoxLayout()
+    self.color_scheme_label = QtGui.QLabel("Color Scheme:")
+    self.color_scheme_component = QtGui.QComboBox()
+    self.color_scheme_component.addItem('Diverging (Blue to Red)')
+    self.color_scheme_component.addItem('HSV (Cool to Warm)')
+    self.color_scheme_component.setToolTip('The color scheme used byt the render view')
+    self.color_scheme_component.currentIndexChanged[str].connect(self._colorSchemeSelected)
 
+#    self.component_layout.addWidget(self.component_label, alignment=QtCore.Qt.AlignRight)
+#    self.component_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignLeft)
+#    self.variable_contour_layout.addLayout(self.component_layout)
+
+    self.minmax_contour_layout.addWidget(self.color_scheme_component)
 
     self.left_controls_layout.addWidget(self.contour_groupbox)
 
@@ -531,6 +546,35 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       
     self.time_slider.setMinimum(0)
     self.time_slider.setMaximum(self.current_max_timestep)
+
+
+  def setupLuts(self):
+    self.luts = []
+
+    # HSV (Blue to REd)  Default
+    lut = vtk.vtkLookupTable()
+    lut.SetHueRange(0.667, 0.0)
+    lut.SetNumberOfColors(256)
+    lut.Build()
+    self.luts.append(lut)
+
+    # Diverging (Cool to Warm) color scheme
+    ctf = vtk.vtkColorTransferFunction()
+    ctf.SetColorSpaceToDiverging()
+    ctf.AddRGBPoint(0.0, 0.230, 0.299, 0.754)
+    ctf.AddRGBPoint(1.0, 0.706, 0.016, 0.150)
+    cc = list()
+    for i in xrange(256):
+      cc.append(ctf.GetColor(float(i) / 255.0))
+    lut = vtk.vtkLookupTable()
+    lut.SetNumberOfColors(256)
+    for i, item in enumerate(cc):
+      lut.SetTableValue(i, item[0], item[1], item[2], 1.0)
+    lut.Build()
+    self.luts.append(lut)
+
+    self.current_lut = self.luts[0]
+
     
   def _blockViewItemChanged(self, item):
     if item.checkState() == QtCore.Qt.Checked:
@@ -669,6 +713,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self._updateContours()
 
   def _updateContours(self):
+    self.exodus_result.setColorScheme(self.current_lut)
     if self.component_index == -1:
       self.exodus_result.lut.SetVectorModeToMagnitude()
     elif self.component_index == 0:
@@ -749,6 +794,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.exodus_result.scalar_bar.SetTitle(self.current_variable)
     self.renderer.AddActor2D(self.exodus_result.scalar_bar)
     self.vtkwidget.updateGL()
+
+  def _colorSchemeSelected(self, value):
+    self.current_lut = self.luts[self.color_scheme_component.currentIndex()]
+    self._updateContours()
 
   def _openFile(self, file_name):
     self._clear()
@@ -930,7 +979,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         if int(file_stamp) >= int(self.base_stamp) and int(file_stamp) <= int(time.time() - 1) and file_name not in self.file_names:
           self.file_names.append(file_name)
           exodus_result = ExodusResult(self, self.plane)
-          exodus_result.setFileName(file_name)
+          exodus_result.setFileName(file_name, self.current_lut)
           self.exodus_results.append(exodus_result)
           self.new_stuff_to_read = True
       
@@ -949,7 +998,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           if int(file_stamp) >= int(self.base_stamp) and int(file_stamp) <= int(time.time() - 1) and file_name not in self.file_names:
             self.file_name = file_name
             self.exodus_result = ExodusResult(self, self.plane)
-            self.exodus_result.setFileName(file_name)
+            self.exodus_result.setFileName(file_name, self.current_lut)
             self.exodus_results.append(self.exodus_result)
             self.current_max_timestep = self.exodus_result.max_timestep
             self.renderer.AddActor(self.exodus_result.actor)
