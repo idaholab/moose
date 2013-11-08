@@ -34,6 +34,8 @@ class MemoryPlotter:
     plot_list = []
     tmp_plot = []
     tmp_legend = []
+    self.stdout_msgs = {}
+    self.pstack_msgs = {}
     self.multiples = 1
     self.memory_label = 'Memory in Bytes'
 
@@ -102,12 +104,16 @@ class MemoryPlotter:
       # Plot annotations
       if self.arguments.stdout:
         stdout_line, = plot_list[-1].plot(tmp_stdout_x, tmp_stdout_y, 'x', picker=10, color=f.get_color())
-        stdout_line.set_gid('stdout')
+        next_index = str(len(plot_list))
+        stdout_line.set_gid('stdout' + next_index)
+        self.stdout_msgs[next_index] = stdout_msg
         self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, stdout_msg, f.get_color())
 
       if self.arguments.pstack:
         pstack_line, = plot_list[-1].plot(tmp_pstack_x, tmp_pstack_y, 'o', picker=10, color=f.get_color())
-        pstack_line.set_gid('pstack')
+        next_index = str(len(plot_list))
+        pstack_line.set_gid('pstack' + next_index)
+        self.pstack_msgs[next_index] = pstack_msg
 
     # Make points clickable
     fig.canvas.mpl_connect('pick_event', self)
@@ -121,21 +127,25 @@ class MemoryPlotter:
     color_codes = {'RESET':'\033[0m', 'r':'\033[31m','g':'\033[32m','c':'\033[36m','y':'\033[33m', 'b':'\033[34m', 'm':'\033[35m', 'k':'\033[0m', 'w':'\033[0m' }
     line = event.artist
     ind = event.ind
-    if self.arguments.stdout and line.get_gid() == 'stdout':
+
+    name = line.get_gid()[:-1]
+    index = line.get_gid()[-1]
+
+    if self.arguments.stdout and name == 'stdout':
       if self.arguments.no_color != False:
         print color_codes[line.get_color()]
       print "stdout -----------------------------------------------------\n"
       for id in ind:
-        print self.stdout_msg[id]
+        print self.stdout_msgs[index][id]
       if self.arguments.no_color != False:
         print color_codes['RESET']
 
-    if self.arguments.pstack and line.get_gid() == 'pstack':
+    if self.arguments.pstack and name == 'pstack':
       if self.arguments.no_color != False:
         print color_codes[line.get_color()]
       print "pstack -----------------------------------------------------\n"
       for id in ind:
-        print self.pstack_msg[id]
+        print self.pstack_msgs[index][id]
       if self.arguments.no_color != False:
         print color_codes['RESET']
 
