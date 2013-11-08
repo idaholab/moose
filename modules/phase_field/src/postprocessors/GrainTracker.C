@@ -85,6 +85,7 @@ GrainTracker::getElementalValue(unsigned int element_id) const
   return 0;
 }
 
+/*
 void
 GrainTracker::threadJoin(const UserObject & y)
 {
@@ -106,6 +107,7 @@ GrainTracker::threadJoin(const UserObject & y)
   if (_track_memory)
     _bytes_used += pps.calculateUsage();
 }
+*/
 
 
 void
@@ -126,7 +128,7 @@ GrainTracker::finalize()
   buildBoundingSpheres();                    // Build bounding sphere information
   Moose::perf_log.pop("buildspheres()","GrainTracker");
 
-  NodalFloodCount::updateFieldInfo();
+//  NodalFloodCount::updateFieldInfo();
   _packed_data.clear();
   pack(_packed_data, true);                  // Pack the data again but this time add periodic neighbor information
   Parallel::allgather(_packed_data, false);
