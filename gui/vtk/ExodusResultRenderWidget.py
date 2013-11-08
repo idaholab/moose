@@ -599,7 +599,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
 
   def _normalize(self, min, max, value):
-    print (value - min) / (max - min)
     return (value - min) / (max - min)
     
   def _blockViewItemChanged(self, item):
