@@ -23,4 +23,13 @@
     custom_cmp = '4ElemTensionRelease.exodiff'
     min_parallel = 4
   [../]
+
+  [./8ElemTensionRelease]
+    type = 'Exodiff'
+    input = 8ElemTensionRelease.i
+    exodiff = 8ElemTensionRelease_out.e
+    custom_cmp = '8ElemTensionRelease.exodiff'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
 []

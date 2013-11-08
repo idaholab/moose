@@ -1,0 +1,48 @@
+
+#  *****************************************************************
+#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  
+#                                                                   
+#                       Version 2.39 (2010-12-22)
+#             Authors:  Richard Drake, rrdrake@sandia.gov           
+#                       Greg Sjaardema, gdsjaar@sandia.gov          
+#                       2013/11/08   16:37:08 MST
+#                                                                   
+#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  
+#  *****************************************************************
+
+#  FILE 1: 8ElemTensionRelease_out.e
+#   Title: 8ElemTensionRelease_out.e
+#          Dim = 2, Blocks = 2, Nodes = 20, Elements = 8, Nodesets = 4, Sidesets = 4
+#          Vars: Global = 0, Nodal = 6, Element = 1, Nodeset = 0, Sideset = 0, Times = 31
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6    # min separation = 0
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               3 @ t31
+
+
+# No GLOBAL VARIABLES
+
+NODAL VARIABLES relative 1.e-6 floor 1.e-10
+	disp_x                 # min:               0 @ t1,n1	max:    2.520956e-05 @ t11,n11
+	disp_y                 # min:               0 @ t1,n1	max:          0.0001 @ t31,n9
+	status                 # min:               0 @ t1,n1	max:               2 @ t2,n11
+	penetration            # min:               0 @ t1,n1	max:          0.0001 @ t31,n20
+	contact_pressure       floor 1e-6 # min:               0 @ t1,n1	max:        130.2514 @ t11,n16
+	nodal_area_dummy_name  # min:               0 @ t1,n1	max:       0.2500126 @ t12,n14
+
+ELEMENT VARIABLES relative 1.e-6 floor 0.0
+	pid  # min:               0 @ t1,b1,e4	max:               3 @ t1,b1,e1
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
+
