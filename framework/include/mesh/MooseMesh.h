@@ -21,6 +21,7 @@
 #include "BndElement.h"
 #include "MooseTypes.h"
 #include "Restartable.h"
+#include "MooseEnum.h"
 
 // libMesh
 #include "libmesh/mesh.h"
@@ -557,15 +558,25 @@ public:
    */
   void errorIfParallelDistribution(std::string name) const;
 
-  /*
+  /**
    * Returns the final Mesh distribution type.
    */
-  bool isParallelMesh() { return _use_parallel_mesh; }
+  bool isParallelMesh() const { return _use_parallel_mesh; }
+
+  /**
+   * Tell the user if the distribution was overriden for any reason
+   */
+  bool isDistributionForced() const { return _distribution_overridden; }
 
   /*
    * Set/Get the partitioner name
    */
-  std::string & partitionerName() { return _partitioner_name; }
+  const MooseEnum & partitionerName() const { return _partitioner_name; }
+
+  /**
+   * Tell the user if the partitioner was overriden for any reason
+   */
+  bool isPartitionerForced() const { return _partitioner_overridden; }
 
 protected:
   /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
@@ -576,9 +587,14 @@ protected:
   /// including the 'distribution' setting in the input file, and whether
   /// or not the Mesh file is a Nemesis file.
   bool _use_parallel_mesh;
+  bool _distribution_overridden;
 
   /// Pointer to underlying libMesh mesh object
   libMesh::MeshBase* _mesh;
+
+  /// The partitioner used on this mesh
+  MooseEnum _partitioner_name;
+  bool _partitioner_overridden;
 
   /// Convenience enums
   enum {
@@ -694,9 +710,6 @@ protected:
 
   /// A vector holding the paired boundaries for a regular orthogonal mesh
   std::vector<std::pair<BoundaryID, BoundaryID> > _paired_boundary;
-
-  /// Partitioner Name
-  std::string _partitioner_name;
 
   void cacheInfo();
   void freeBndNodes();

@@ -398,7 +398,8 @@ MooseApp::printSimulationInfo()
     MeshBase & mesh = moose_mesh->getMesh();
 
     oss << std::setw(FIELD_WIDTH) << "Mesh: " << '\n'
-        << std::setw(FIELD_WIDTH) << "  Distribution: " << (_action_warehouse.mesh()->isParallelMesh() ? "PARALLEL" : "SERIAL") << '\n'
+        << std::setw(FIELD_WIDTH) << "  Distribution: " << (moose_mesh->isParallelMesh() ? "parallel" : "serial")
+                                                        << (moose_mesh->isDistributionForced() ? " (forced) " : "") << '\n'
         << std::setw(FIELD_WIDTH) << "  Mesh Dimension: " << mesh.mesh_dimension() << '\n'
         << std::setw(FIELD_WIDTH) << "  Spatial Dimension: " << mesh.spatial_dimension() << '\n'
         << std::setw(FIELD_WIDTH) << "  Nodes:" << '\n'
@@ -410,7 +411,9 @@ MooseApp::printSimulationInfo()
         << std::setw(FIELD_WIDTH) << "  Num Subdomains: "      << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
         << std::setw(FIELD_WIDTH) << "  Num Partitions: "      << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
     if (libMesh::n_processors() > 1 && moose_mesh->partitionerName() != "")
-      oss << std::setw(FIELD_WIDTH) << "  Partitioner: "         << moose_mesh->partitionerName() << '\n';
+      oss << std::setw(FIELD_WIDTH) << "  Partitioner: "       << moose_mesh->partitionerName()
+                                                               << (moose_mesh->isPartitionerForced() ? " (forced) " : "")
+          << '\n';
     oss << '\n';
   }
 

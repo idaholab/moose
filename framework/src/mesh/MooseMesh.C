@@ -41,6 +41,11 @@
 #include "libmesh/utility.h"
 #include "libmesh/remote_elem.h"
 
+#include "libmesh/linear_partitioner.h"
+#include "libmesh/centroid_partitioner.h"
+#include "libmesh/parmetis_partitioner.h"
+#include "libmesh/hilbert_sfc_partitioner.h"
+#include "libmesh/morton_sfc_partitioner.h"
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 
@@ -67,11 +72,16 @@ InputParameters validParams<MooseMesh>()
                              "In particular you must supply this for GMSH meshes.  "
                              "Note: This is completely ignored for ExodusII meshes!");
 
+  MooseEnum partitioning("default=-3, metis=-2, parmetis=-1, linear=0, centroid, hilbert_sfc, morton_sfc", "default");
+  params.addParam<MooseEnum>("partitioner", partitioning, "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation.");
+  MooseEnum direction("x, y, z, radial");
+  params.addParam<MooseEnum>("centroid_partitioner_direction", direction, "Specifies the sort direction if using the centroid partitioner. Available options: x, y, z, radial");
+
   params.addPrivateParam<std::string>("built_by_action", "setup_mesh");
 
   // groups
-  params.addParamNamesToGroup("dim", "Advanced");
-  params.addParamNamesToGroup("nemesis", "Advanced");
+  params.addParamNamesToGroup("dim nemesis", "Advanced");
+  params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
   return params;
 }
@@ -82,7 +92,10 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     Restartable(name, parameters, "Mesh"),
     _mesh_distribution_type(getParam<MooseEnum>("distribution")),
     _use_parallel_mesh(false),
+    _distribution_overridden(false),
     _mesh(NULL),
+    _partitioner_name(getParam<MooseEnum>("partitioner")),
+    _partitioner_overridden(false),
     _uniform_refine_level(0),
     _is_changed(false),
     _is_nemesis(getParam<bool>("nemesis")),
@@ -105,8 +118,8 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     _use_parallel_mesh = true;
     break;
   case 1: // SERIAL
-    if (_app.getParallelMeshOnCommandLine())
-      mooseWarning("Ignoring --parallel-mesh option. Mesh distribution has been explicitly set to SERIAL.");
+    if (_app.getParallelMeshOnCommandLine() || _is_nemesis)
+      _distribution_overridden = true;
     break;
   case 2: // DEFAULT
     // The user did not specify 'distribution = XYZ' in the input file,
@@ -127,9 +140,63 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
   unsigned dim = getParam<MooseEnum>("dim");
 
   if (_use_parallel_mesh)
+  {
     _mesh = new ParallelMesh(dim);
+    if (_partitioner_name != "default" && _partitioner_name != "parmetis")
+    {
+      _partitioner_name = "parmetis";
+      _partitioner_overridden = true;
+    }
+  }
   else
+  {
     _mesh = new SerialMesh(dim);
+  }
+
+  // Set the partitioner
+  switch (_partitioner_name)
+  {
+  case -3: // default
+    // We'll use the default partitioner, but notify the user of which one is being used...
+    if (_use_parallel_mesh)
+      _partitioner_name = "parmetis";
+    else
+      _partitioner_name = "metis";
+    break;
+
+  // No need to explicitily create the metis or parmetis partitioners,
+  // They are the default for serial and parallel mesh respectively
+  case -2: // metis
+  case -1: // parmetis
+    break;
+
+  case 0: // linear
+    getMesh().partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
+    break;
+  case 1: // centroid
+  {
+    if (!isParamValid("centroid_partitioner_direction"))
+      mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
+
+    MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
+
+    if(direction == "x")
+      getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
+    else if(direction == "y")
+      getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Y));
+    else if(direction == "z")
+      getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Z));
+    else if(direction == "radial")
+      getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+    break;
+  }
+  case 2: // hilbert_sfc
+    getMesh().partitioner() = AutoPtr<Partitioner>(new HilbertSFCPartitioner);
+    break;
+  case 3: // morton_sfc
+    getMesh().partitioner() = AutoPtr<Partitioner>(new MortonSFCPartitioner);
+    break;
+  }
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
@@ -137,7 +204,10 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     Restartable(_name, _pars, "Mesh"),
     _mesh_distribution_type(other_mesh._mesh_distribution_type),
     _use_parallel_mesh(other_mesh._use_parallel_mesh),
+    _distribution_overridden(other_mesh._distribution_overridden),
     _mesh(other_mesh.getMesh().clone().release()),
+    _partitioner_name(other_mesh._partitioner_name),
+    _partitioner_overridden(other_mesh._partitioner_overridden),
     _uniform_refine_level(0),
     _is_changed(false),
     _is_nemesis(false),
@@ -1898,3 +1968,4 @@ MooseMesh::errorIfParallelDistribution(std::string name) const
                << "Consider specifying distribution = 'serial' in your input file\n"
                << "to prevent it from being run with ParallelMesh.");
 }
+
