@@ -286,24 +286,17 @@ ContactMaster::addPoints()
     {
       addPoint(pinfo->_elem, pinfo->_closest_point);
       _point_to_info[pinfo->_closest_point] = pinfo;
+      computeContactForce(pinfo);
     }
   }
 }
 
-Real
-ContactMaster::computeQpResidual()
+void
+ContactMaster::computeContactForce(PenetrationInfo * pinfo)
 {
   std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
-
-  PenetrationInfo * pinfo = _point_to_info[_current_point];
   const Node * node = pinfo->_node;
-//  std::cout<<node->id()<<std::endl;
-//  long int dof_number = node->dof_number(0, _var_num, 0);
-//  std::cout<<dof_number<<std::endl;
-//  std::cout<<_residual_copy(dof_number)<<std::endl;
 
-//  std::cout<<node->id()<<": "<<_residual_copy(dof_number)<<std::endl;
-  Real resid(0);
   RealVectorValue res_vec;
   // Build up residual vector
   for(unsigned int i=0; i<_mesh_dimension; ++i)
@@ -314,22 +307,20 @@ ContactMaster::computeQpResidual()
   RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
   RealVectorValue pen_force(_penalty * distance_vec);
   RealVectorValue tan_residual(0,0,0);
-//  Real tan_residual_mag(0);
-  RealVectorValue unity(1.0, 1.0, 1.0);
+
   if (_model == CM_FRICTIONLESS ||
       _model == CM_EXPERIMENTAL)
   {
-
     switch (_formulation)
     {
     case CF_DEFAULT:
-      resid = pinfo->_normal(_component) * (pinfo->_normal * res_vec);
+      pinfo->_contact_force = -pinfo->_normal * (pinfo->_normal * res_vec);
       break;
     case CF_PENALTY:
-      resid = -pinfo->_normal(_component) * (pinfo->_normal * pen_force);
+      pinfo->_contact_force = pinfo->_normal * (pinfo->_normal * pen_force);
       break;
     case CF_AUGMENTED_LAGRANGE:
-      resid = -(pinfo->_normal(_component) * (pinfo->_normal *
+      pinfo->_contact_force = (pinfo->_normal * (pinfo->_normal *
           //( pen_force + (lagrange_multiplier[node->id()]/distance_vec.size())*distance_vec)));
           ( pen_force + lagrange_multiplier[node->id()] * pinfo->_normal)));
       break;
@@ -337,7 +328,6 @@ ContactMaster::computeQpResidual()
       mooseError("Invalid contact formulation");
       break;
     }
-    pinfo->_contact_force(_component) = -resid;
     pinfo->_mech_status=PenetrationInfo::MS_SLIPPING;
   }
   else if (_model == CM_COULOMB && _formulation == CF_PENALTY)
@@ -345,10 +335,8 @@ ContactMaster::computeQpResidual()
     distance_vec = pinfo->_incremental_slip + (pinfo->_normal * (_mesh.node(node->id()) - pinfo->_closest_point)) * pinfo->_normal;
     pen_force = _penalty * distance_vec;
 
-    resid = pinfo->_normal * pen_force;
-
     // Frictional capacity
-    // const Real capacity( _friction_coefficient * (pen_force * pinfo->_normal < 0 ? -resid : 0) );
+    // const Real capacity( _friction_coefficient * (pen_force * pinfo->_normal < 0 ? -pen_force * pinfo->_normal : 0) );
     const Real capacity( _friction_coefficient * (res_vec * pinfo->_normal > 0 ? res_vec * pinfo->_normal : 0) );
 
     // Elastic predictor
@@ -368,10 +356,6 @@ ContactMaster::computeQpResidual()
     {
       pinfo->_mech_status=PenetrationInfo::MS_STICKING;
     }
-
-    // Change the sign since master force is equal and opposite slave force
-    resid = -pinfo->_contact_force(_component);
-
   }
   else if (_model == CM_GLUED ||
            _model == CM_TIED ||
@@ -380,27 +364,32 @@ ContactMaster::computeQpResidual()
     switch(_formulation)
     {
     case CF_DEFAULT:
-      resid = res_vec(_component);
+      pinfo->_contact_force =  -res_vec;
       break;
     case CF_PENALTY:
-      resid = -pen_force(_component);
+      pinfo->_contact_force = pen_force;
       break;
     case CF_AUGMENTED_LAGRANGE:
-      resid = -(pen_force(_component) +
-          lagrange_multiplier[node->id()]*distance_vec(_component)/distance_vec.size());
+      pinfo->_contact_force = pen_force +
+                              lagrange_multiplier[node->id()]*distance_vec/distance_vec.size();
       break;
     default:
       mooseError("Invalid contact formulation");
       break;
     }
-    pinfo->_contact_force(_component) = -resid;
     pinfo->_mech_status=PenetrationInfo::MS_STICKING;
   }
   else
   {
     mooseError("Invalid or unavailable contact model");
   }
+}
 
+Real
+ContactMaster::computeQpResidual()
+{
+  PenetrationInfo * pinfo = _point_to_info[_current_point];
+  Real resid = -pinfo->_contact_force(_component);
   return _test[_i][_qp] * resid;
 }
 

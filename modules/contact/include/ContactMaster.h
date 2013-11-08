@@ -33,6 +33,7 @@ public:
   virtual void timestepSetup();
 
   virtual void addPoints();
+  void computeContactForce(PenetrationInfo * pinfo);
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
