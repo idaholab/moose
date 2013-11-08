@@ -20,7 +20,7 @@ public:
   virtual ~GrainTracker();
 
   virtual void initialize();
-  virtual void threadJoin(const UserObject & y);
+  //virtual void threadJoin(const UserObject & y);
   virtual void finalize();
 
   /**
