@@ -19,7 +19,7 @@
 
 [Functions]
   [./ic_function]
-    type = PiecewiseLinearFile
+    type = PiecewiseLinear
     yourFileName = dummy #we don't get that far
     format = rowls
     scale_factor = 1.0
@@ -68,5 +68,3 @@
   print_linear_residuals = true
   perf_log = true
 []
-
-

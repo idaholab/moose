@@ -129,7 +129,7 @@
   [./function_file_test4]
     type = 'RunException'
     input = 'function_file_test4.i'
-    expect_err = "Invalid option for format: \S+ in PiecewiseLinearFile.  Valid options are rows and columns."
+    expect_err = "Invalid option for format: \S+ in ic_function.  Valid options are rows and columns."
   [../]
 
   [./incomplete_kernel_block_coverage_test]

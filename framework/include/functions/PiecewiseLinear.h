@@ -40,17 +40,25 @@ public:
   /**
    * This function will return a value based on the first input argument only.
    */
-  virtual Real getTimeDerivative(Real t, const Point & pt);
+  virtual Real timeDerivative(Real t, const Point & pt);
+
+  virtual Real functionSize();
+
+  virtual Real domain(int i);
 
   virtual Real integral();
 
   virtual Real average();
 
 private:
-  LinearInterpolation _linear_interp;
+  LinearInterpolation * _linear_interp;
+  const std::string _file_name;
   Real _scale_factor;
   int _axis;
   bool _has_axis;
+  bool parseNextLineReals( std::ifstream & ifs, std::vector<Real> & myvec);
+  void parseRows( std::vector<Real> & x, std::vector<Real> & y );
+  void parseColumns( std::vector<Real> & x, std::vector<Real> & y);
 
 };
 
