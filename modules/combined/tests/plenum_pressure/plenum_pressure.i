@@ -362,7 +362,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
   petsc_options_iname = '-pc_type -sub_pc_type'
   petsc_options_value = 'asm       lu'
@@ -400,6 +399,7 @@
 []
 
 [Output]
+  linear_residuals = true
   interval = 1
   output_initial = true
   exodus = true

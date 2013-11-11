@@ -121,7 +121,6 @@
   solve_type = 'PJFNK'
 
 
-   print_linear_residuals = true
    petsc_options = '-snes_ksp_ew '
    petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type'
    petsc_options_value = '70 hypre boomeramg'
@@ -137,6 +136,7 @@
 []			# Executioner END
 
 [Output]		# Output Start
+  linear_residuals = true
   file_base = out_rz_tf
   interval = 1
   output_initial = true

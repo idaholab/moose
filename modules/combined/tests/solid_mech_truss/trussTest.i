@@ -165,7 +165,6 @@
   type = Transient
 
   solve_type = PJFNK
-  print_linear_residuals = true
 
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'jacobi   101'
@@ -258,6 +257,7 @@
 []
 
 [Output]
+  linear_residuals = true
   output_initial = true
   exodus = true
   perf_log = true

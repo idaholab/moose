@@ -155,8 +155,6 @@
     disp_r = disp_x
     disp_z = disp_y
   [../]
-[]
-
 [] # Materials
 
 [Executioner]
@@ -167,7 +165,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
 
   # Two sets of linesearch options are for petsc 3.1 and 3.3 respectively
@@ -189,6 +186,7 @@
 [] # Executioner
 
 [Output]
+  linear_residuals = true
   interval = 1
   output_initial = true
   elemental_as_nodal = true

@@ -182,7 +182,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
 
   nl_abs_tol = 1e-12
@@ -202,6 +201,7 @@
 [] # Executioner
 
 [Output]
+  linear_residuals = true
   file_base = out_rz_quad8
   interval = 1
   output_initial = true

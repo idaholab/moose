@@ -244,7 +244,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type '
   petsc_options_value = 'lu       '
@@ -261,6 +260,7 @@
 [] # Executioner
 
 [Output]
+  linear_residuals = true
   file_base = merged_out
   interval = 1
   output_initial = true

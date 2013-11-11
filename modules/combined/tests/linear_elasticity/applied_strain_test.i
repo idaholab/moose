@@ -112,12 +112,12 @@
 
   solve_type = 'NEWTON'
 
-  print_linear_residuals = true
 
   nl_rel_tol = 1e-14
 []
 
 [Output]
+  linear_residuals = true
   file_base = applied_strain
   output_initial = true
   interval = 1

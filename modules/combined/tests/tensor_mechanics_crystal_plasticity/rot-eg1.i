@@ -157,7 +157,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
   petsc_options_iname = -pc_hypre_type
   petsc_options_value = boomerang
@@ -167,6 +166,7 @@
 []
 
 [Output]
+  linear_residuals = true
   file_base = rot_eg1
   output_initial = true
   exodus = true

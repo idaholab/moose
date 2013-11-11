@@ -364,7 +364,6 @@
 
   solve_type = 'NEWTON'
 
-  print_linear_residuals = true
 
   nl_abs_tol = 1e-10
   l_max_its = 20
@@ -377,6 +376,7 @@
 []
 
 [Output]
+  linear_residuals = true
   # Output
   file_base = out
   interval = 1

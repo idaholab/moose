@@ -131,7 +131,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
 
 # controls for linear iterations
@@ -163,6 +162,7 @@
 []
 
 [Output]
+  linear_residuals = true
   file_base = out
   interval = 4      #Just output the last step to avoid comparing nl iters on other steps
   output_initial = true

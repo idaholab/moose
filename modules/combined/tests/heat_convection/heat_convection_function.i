@@ -11,7 +11,7 @@
   [./htc]
     type = ParsedFunction
     value = 10.0
-  []
+  [../]
 []
 
 [Variables]	# Variables Start
@@ -47,6 +47,7 @@
     variable = temp
     boundary = 10
     value = 100
+  [../]
 []		# BCs END
 
 [Materials]		# Materials Start
@@ -71,7 +72,6 @@
   solve_type = 'PJFNK'
 
 
-   print_linear_residuals = true
    petsc_options = '-snes_ksp_ew '
    petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type'
    petsc_options_value = '70 hypre boomeramg'
@@ -86,9 +86,10 @@
 []			# Executioner END
 
 [Output]		# Output Start
+  linear_residuals = true
   interval = 1
   output_initial = true
   exodus = true
   perf_log = true
- []			# Output END
+[]			# Output END
 #			# Input file END

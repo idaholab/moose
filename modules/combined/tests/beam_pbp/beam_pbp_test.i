@@ -102,7 +102,6 @@
 
   solve_type = JFNK
 
-  print_linear_residuals = true
   petsc_options = '-snew_ksp_ew'
 
   nl_abs_tol = 1e-8
@@ -120,6 +119,7 @@
 [] # Postprocessors
 
 [Output]
+  linear_residuals = true
   file_base = out
   interval = 1
   output_initial = true

@@ -82,7 +82,6 @@
 
   solve_type = PJFNK
 
-  print_linear_residuals = true
 
 
   nl_abs_tol = 1e-10
@@ -123,6 +122,7 @@
 []
 
 [Output]
+  linear_residuals = true
   interval = 1
   output_initial = true
   exodus = true

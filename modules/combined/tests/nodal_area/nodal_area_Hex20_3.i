@@ -140,7 +140,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
 #  petsc_options_iname = '-snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart -pc_type'
 #  petsc_options_value = 'ls         basic    basic                    201                lu'
@@ -182,6 +181,7 @@
 []
 
 [Output]
+  linear_residuals = true
   interval = 1
   output_initial = true
   exodus = true

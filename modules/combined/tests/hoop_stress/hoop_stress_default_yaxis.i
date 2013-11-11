@@ -227,7 +227,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
   petsc_options = '-ksp_gmres_modifiedgramschmidt'
   petsc_options_iname = '-ksp_gmres_restart -pc_type  -pc_hypre_type'
   petsc_options_value = '201                 hypre     boomeramg     '
@@ -248,6 +247,7 @@
 [] # Executioner
 
 [Output]
+  linear_residuals = true
   interval = 1
   output_initial = true
   exodus = true

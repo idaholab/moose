@@ -84,7 +84,6 @@ active = 'ie_c diff'
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -mat_mffd_type'
@@ -108,6 +107,7 @@ active = 'ie_c diff'
 []
 
 [Output]
+  linear_residuals = true
   output_initial = true
   interval = 1
   exodus = true

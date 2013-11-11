@@ -269,7 +269,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
 
   nl_rel_tol = 1e-6
@@ -284,6 +283,7 @@
 [] # Executioner
 
 [Output]
+  linear_residuals = true
 
   interval = 1
   output_initial = true

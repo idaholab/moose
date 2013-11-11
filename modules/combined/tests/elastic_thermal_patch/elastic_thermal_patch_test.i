@@ -412,7 +412,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
 
   nl_rel_tol = 1e-12
@@ -426,6 +425,7 @@
 [] # Executioner
 
 [Output]
+  linear_residuals = true
   file_base = out
   interval = 1
   output_initial = true

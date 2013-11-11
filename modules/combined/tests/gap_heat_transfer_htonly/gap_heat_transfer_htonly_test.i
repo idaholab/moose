@@ -42,7 +42,7 @@
     type = PiecewiseLinear
     x = '0   1   2'
     y = '100 200 200'
-  [./]
+  [../]
 []
 
 [ThermalContact]
@@ -162,7 +162,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
 
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
@@ -239,6 +238,7 @@
 []
 
 [Output]
+  linear_residuals = true
   interval = 1
   output_initial = true
   exodus = true

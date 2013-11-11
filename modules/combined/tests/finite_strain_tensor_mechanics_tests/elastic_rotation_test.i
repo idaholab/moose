@@ -230,7 +230,6 @@ active = ''
 
   solve_type = 'NEWTON'
 
-  print_linear_residuals = true
 
   petsc_options_iname = '-pc_type '
   petsc_options_value = 'lu'
@@ -255,6 +254,7 @@ active = ''
 []
 
 [Output]
+  linear_residuals = true
   # Output
   file_base = elastic_rotation
   interval = 1

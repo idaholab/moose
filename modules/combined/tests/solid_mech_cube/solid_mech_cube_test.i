@@ -71,7 +71,6 @@
 
   solve_type = PJFNK
 
-  print_linear_residuals = true
 
 
   l_max_its = 100
@@ -82,6 +81,7 @@
 []
 
 [Output]
+  linear_residuals = true
   file_base = out
   interval = 1
   output_initial = true

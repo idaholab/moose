@@ -22,6 +22,7 @@
     x = '0 1'
     y = '0 1'
     scale_factor = 100
+  [../]
 [] # Functions
 
 [Variables]
@@ -180,7 +181,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type '
   petsc_options_value = 'lu       '
@@ -198,6 +198,7 @@
 [] # Executioner
 
 [Output]
+  linear_residuals = true
   file_base = out_rz
   interval = 1
   output_initial = true

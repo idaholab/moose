@@ -52,7 +52,7 @@
     type = PiecewiseLinear
     x = '0   1'
     y = '200 200'
-  [./]
+  [../]
 []
 
 [Variables]
@@ -123,7 +123,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
 
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
@@ -171,9 +170,10 @@
     boundary = 3
     diffusivity = thermal_conductivity
   [../]
-
+[]
 
 [Output]
+  linear_residuals = true
   interval = 1
   output_initial = true
   exodus = true

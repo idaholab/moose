@@ -212,7 +212,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
 
   nl_abs_tol = 1e-10
@@ -226,6 +225,7 @@
 [] # Executioner
 
 [Output]
+  linear_residuals = true
   interval = 1
   output_initial = true
   elemental_as_nodal = true

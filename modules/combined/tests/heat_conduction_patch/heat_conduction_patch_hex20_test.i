@@ -125,7 +125,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'lu       101'
@@ -147,6 +146,7 @@
 [] # Executioner
 
 [Output]
+  linear_residuals = true
   file_base = out_hex20
   interval = 1
   output_initial = true
