@@ -60,7 +60,7 @@ protected:
   std::string _var_name;
 
   /// Flag for directly grabbing the data based on the dof
-  const bool _direct;
+   bool _direct;
 
   /// Multiplier for the solution, the a of ax+b
   const Real _scale_factor;

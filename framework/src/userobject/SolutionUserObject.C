@@ -189,8 +189,8 @@ SolutionUserObject::readExodusII()
     // Copy the nodal solution to the equations systems from the Exodus file
     for (std::vector<std::string>::const_iterator it = _nodal_vars.begin(); it != _nodal_vars.end(); ++it)
     {
-      _exodusII_io->copy_nodal_solution(*_system, *it, _exodus_index1+1);
-      _exodusII_io->copy_nodal_solution(*_system2, *it, _exodus_index2+1);
+      _exodusII_io->copy_nodal_solution(*_system, *it, *it, _exodus_index1+1);
+      _exodusII_io->copy_nodal_solution(*_system2, *it, *it, _exodus_index2+1);
     }
 
     // Copy the elemental solution to the equations systems from the Exodus file
@@ -228,7 +228,7 @@ SolutionUserObject::readExodusII()
 
     // Copy the values from the ExodusII file
     for (std::vector<std::string>::const_iterator it = _nodal_vars.begin(); it != _nodal_vars.end(); ++it)
-      _exodusII_io->copy_nodal_solution(*_system, *it, _exodus_time_index);
+      _exodusII_io->copy_nodal_solution(*_system, *it, *it,  _exodus_time_index);
 
     for (std::vector<std::string>::const_iterator it = _elem_vars.begin(); it != _elem_vars.end(); ++it)
       _exodusII_io->copy_elemental_solution(*_system, *it, *it, _exodus_time_index);
@@ -247,8 +247,8 @@ SolutionUserObject::directValue(const Node * node, const std::string & var_name)
   unsigned int sys_num = _system->number();
 
   // Get the node id and associated dof
-  unsigned int node_id = node->id();
-  unsigned int dof_id = _fe_problem.mesh().node(node_id).dof_number(sys_num, var_num, 0);
+  libMesh::dof_id_type node_id = node->id();
+  libMesh::dof_id_type dof_id = _system->get_mesh().node(node_id).dof_number(sys_num, var_num, 0);
 
   // Return the desried value for the dof
   return directValue(dof_id);
@@ -262,8 +262,8 @@ SolutionUserObject::directValue(const Elem * elem, const std::string & var_name)
   unsigned int sys_num = _system->number();
 
   // Get the element id and associated dof
-  unsigned int elem_id = elem->id();
-  unsigned int dof_id = _fe_problem.mesh().elem(elem_id)->dof_number(sys_num, var_num, 0);
+  libMesh::dof_id_type elem_id = elem->id();
+  libMesh::dof_id_type dof_id = _system->get_mesh().elem(elem_id)->dof_number(sys_num, var_num, 0);
 
   // Return the desired value
   return directValue(dof_id);
@@ -337,6 +337,7 @@ SolutionUserObject::initialSetup()
   var_num.reserve(_nodal_vars.size() + _elem_vars.size());
   for (std::vector<std::string>::const_iterator it = _nodal_vars.begin(); it != _nodal_vars.end(); ++it)
     var_num.push_back(_system->variable_number(*it));
+
   for (std::vector<std::string>::const_iterator it = _elem_vars.begin(); it != _elem_vars.end(); ++it)
     var_num.push_back(_system->variable_number(*it));
 

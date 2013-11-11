@@ -35,18 +35,19 @@ SolutionAux::SolutionAux(const std::string & name, InputParameters parameters) :
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor"))
 {
- // If 'from_variable' is supplied, use the value
+
+  // Get all the variables from the SolutionUserObject
+  std::vector<std::string> vars = _solution_object.getParam<std::vector<std::string> >("nodal_variables");
+  std::vector<std::string> elem_vars = _solution_object.getParam<std::vector<std::string> >("elemental_variables");
+  vars.insert(vars.end(), elem_vars.begin(), elem_vars.end());
+
+  // If 'from_variable' is supplied, use the value
   if (isParamValid("from_variable"))
     _var_name = getParam<std::string>("from_variable");
 
   // If not, get the value from the SolutionUserObject
   else
   {
-    // Get all the variables from the SolutionUserObject
-    std::vector<std::string> vars = _solution_object.getParam<std::vector<std::string> >("nodal_variables");
-    std::vector<std::string> elem_vars = _solution_object.getParam<std::vector<std::string> >("elemental_variables");
-    vars.insert(vars.end(), elem_vars.begin(), elem_vars.end());
-
     // If there are more than one, throw an error
     if (vars.size() > 1)
       mooseError("The SolutionUserObject contains multiple variables, in this case the SolutionFunction must specifiy the desired variable in the input file with 'from_variable'");
@@ -54,6 +55,10 @@ SolutionAux::SolutionAux(const std::string & name, InputParameters parameters) :
     // Define the variable
     _var_name = vars[0];
   }
+
+  // Determine if 'from_variable' is elemental, if so then use direct extraction
+  if (std::find(elem_vars.begin(), elem_vars.end(), _var_name) != elem_vars.end())
+    _direct = true;
 }
 
 SolutionAux::~SolutionAux()
@@ -65,7 +70,7 @@ SolutionAux::computeValue()
 {
   // The value to output
   Real output;  // _direct=true, extract the values using the dof
-  if(_direct)
+  if (_direct)
   {
     if (isNodal())
       output = _solution_object.directValue(_current_node, _var_name);
