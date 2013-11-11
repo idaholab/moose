@@ -115,7 +115,6 @@
   solve_type = 'PJFNK'
 
 
-  print_linear_residuals = true
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold' 
   petsc_options_value = 'hypre boomeramg 31 0.7'
@@ -136,6 +135,7 @@
 []
 
 [Output]
+  linear_residuals = true
   file_base = 2phase_reconstruction_test
   output_initial = true
   interval = 1
