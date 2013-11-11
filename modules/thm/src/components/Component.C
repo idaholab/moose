@@ -52,7 +52,7 @@ std::string
 Component::genName(const std::string & prefix, unsigned int id, const std::string & suffix)
 {
   std::stringstream ss;
-  ss << prefix << id << suffix;
+  ss << prefix << ":" << id << ":" << suffix;
   return ss.str();
 }
 
@@ -67,7 +67,7 @@ std::string
 Component::genName(const std::string & prefix, const std::string & middle, const std::string & suffix)
 {
   std::stringstream ss;
-  ss << prefix << middle << suffix;
+  ss << prefix << ":" << middle << ":" << suffix;
   return ss.str();
 }
 
