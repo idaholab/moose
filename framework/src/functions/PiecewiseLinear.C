@@ -17,75 +17,17 @@
 template<>
 InputParameters validParams<PiecewiseLinear>()
 {
-  InputParameters params = validParams<Function>();
-  params.addParam<std::vector<Real> >("x", "The abscissa values");
-  params.addParam<std::vector<Real> >("y", "The ordinate values");
-  params.addParam<std::string>("yourFileName", "File holding your csv data for use with PiecewiseLilinearFile");
-  params.addParam<std::string>("format", "rows" ,"Format of csv data file that is in either in columns or rows");
-  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
-  params.addParam<int>("axis", "The axis used (0, 1, or 2 for x, y, or z) if this is to be a function of position");
+  InputParameters params = validParams<Piecewise>();
   return params;
 }
 
 PiecewiseLinear::PiecewiseLinear(const std::string & name, InputParameters parameters) :
-  Function(name, parameters),
-  _linear_interp( NULL ),
-  _file_name( isParamValid("yourFileName") ? getParam<std::string>("yourFileName") : ""),
-  _scale_factor( getParam<Real>("scale_factor") ),
-  _has_axis(false)
+  Piecewise(name, parameters)
 {
-  std::vector<Real> x;
-  std::vector<Real> y;
-
-  if (parameters.isParamValid("yourFileName"))
-  {
-    if (parameters.isParamValid("x"))
-    {
-      mooseError("Error in PiecewiseLinear: Cannot specify yourFileName and either x or y.");
-    }
-    std::string format = getParam<std::string>("format");
-    if (format.compare(0, 4, "rows")==0)
-    {
-      parseRows( x, y );
-    }
-    else if (format.compare(0, 7, "columns")==0)
-    {
-      parseColumns( x, y);
-    }
-    else
-    {
-      mooseError("Invalid option for format: "+format+" in "+_name+".  Valid options are rows and columns.");
-    }
-  }
-  else if (parameters.isParamValid("x"))
-  {
-    if (!parameters.isParamValid("y"))
-    {
-      mooseError("Error in PiecewiseLinear: If one of x and y is specified, both must be.");
-    }
-    x = getParam<std::vector<Real> >("x");
-    y = getParam<std::vector<Real> >("y");
-  }
-  else
-  {
-    mooseError("Error in PiecewiseLinear: Either yourFileName or both of x and y must be specified.");
-  }
-
-  _linear_interp = new LinearInterpolation( x, y );
-
-
-  if (parameters.isParamValid("axis"))
-  {
-    _axis=parameters.get<int>("axis");
-    if (_axis < 0 || _axis > 2)
-      mooseError("In PiecewiseLinear function axis="<<_axis<<" outside allowable range (0-2).");
-    _has_axis = true;
-  }
 }
 
 PiecewiseLinear::~PiecewiseLinear()
 {
-  delete _linear_interp;
 }
 
 Real
@@ -119,18 +61,6 @@ PiecewiseLinear::timeDerivative(Real t, const Point & p)
 }
 
 Real
-PiecewiseLinear::functionSize()
-{
-  return _linear_interp->getSampleSize();
-}
-
-Real
-PiecewiseLinear::domain(int i)
-{
-  return _linear_interp->domain(i);
-}
-
-Real
 PiecewiseLinear::integral()
 {
   return _scale_factor * _linear_interp->integrate();
@@ -139,90 +69,5 @@ PiecewiseLinear::integral()
 Real
 PiecewiseLinear::average()
 {
-  return _scale_factor * integral()/(_linear_interp->domain(_linear_interp->getSampleSize()-1)-_linear_interp->domain(0));
-}
-
-bool
-PiecewiseLinear::parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec)
-{
-  std::string line;
-  myvec.clear();
-  bool gotline(false);
-  if (getline(ifs,line))
-  {
-    gotline=true;
-
-    //Replace all commas with spaces
-    while(size_t pos=line.find(','))
-    {
-      if (pos == line.npos)
-        break;
-      line.replace(pos,1,1,' ');
-    }
-
-    //Harvest floats separated by whitespace
-    std::istringstream iss(line);
-    Real f;
-    while (iss>>f)
-    {
-      myvec.push_back(f);
-    }
-  }
-  return gotline;
-}
-
-void
-PiecewiseLinear::parseRows( std::vector<Real> & x, std::vector<Real> & y )
-{
-  std::ifstream file(_file_name.c_str());
-  if (!file.good())
-    mooseError("Error opening file '" + _file_name + "' from PiecewiseLinearFile function.");
-  std::string line;
-
-  while(parseNextLineReals(file, x))
-  {
-    if (x.size() >0)
-      break;
-  }
-
-  if (x.size() == 0)
-    mooseError("File '" + _file_name + "' contains no data for PiecewiseLinearFile function.");
-
-  while(parseNextLineReals(file, y))
-  {
-    if (y.size() >0)
-      break;
-  }
-
-  if (y.size() == 0)
-    mooseError("File '" + _file_name + "' contains no y data for PiecewiseLinearFile function.");
-  else if (y.size() != x.size())
-    mooseError("Lengths of x and y data do not match in file '" + _file_name + "' for PiecewiseLinearFile function.");
-
-  std::vector<Real> scratch;
-  while(parseNextLineReals(file, scratch)){
-    if (scratch.size() > 0)
-      mooseError("Read more than two rows of data from file '" + _file_name + "' for PiecewiseLinearFile function.  Did you mean to use \"format = columns\"?");
-  }
-
-}
-
-void
-PiecewiseLinear::parseColumns( std::vector<Real> & x, std::vector<Real> & y )
-{
-  std::ifstream file(_file_name.c_str());
-  if (!file.good())
-    mooseError("Error opening file '" + _file_name + "' from PiecewiseLinearFile function.");
-  std::string line;
-
-  std::vector<Real> scratch;
-  while(parseNextLineReals(file, scratch))
-  {
-    if (scratch.size() > 0){
-      if (scratch.size() != 2)
-        mooseError("Read more than 2 columns of data from file '" + _file_name + "' for PiecewiseLinearFile function.  Did you mean to use \"format = rows\"?");
-      x.push_back(scratch[0]);
-      y.push_back(scratch[1]);
-    }
-  }
+  return integral()/(_linear_interp->domain(_linear_interp->getSampleSize()-1)-_linear_interp->domain(0));
 }

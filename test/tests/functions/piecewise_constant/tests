@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'piecewise_constant.i'
+    exodiff = 'piecewise_constant_out.e'
+  [../]
+[]

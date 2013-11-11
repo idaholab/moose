@@ -111,19 +111,19 @@
   [./function_file_test1]
     type = 'RunException'
     input = 'function_file_test1.i'
-    expect_err = "Read more than two rows of data from file '\S+' for PiecewiseLinearFile function.  Did you mean to use \"format = columns\"?"
+    expect_err = "Read more than two rows of data from file '\S+' for Piecewise function.  Did you mean to use \"format = columns\"?"
   [../]
 
   [./function_file_test2]
     type = 'RunException'
     input = 'function_file_test2.i'
-    expect_err = "Read more than 2 columns of data from file '\S+' for PiecewiseLinearFile function.  Did you mean to use \"format = rows\"?"
+    expect_err = "Read more than 2 columns of data from file '\S+' for Piecewise function.  Did you mean to use \"format = rows\"?"
   [../]
 
   [./function_file_test3]
     type = 'RunException'
     input = 'function_file_test3.i'
-    expect_err = "Lengths of x and y data do not match in file '\S+' for PiecewiseLinearFile function."
+    expect_err = "Lengths of x and y data do not match in file '\S+' for Piecewise function."
   [../]
 
   [./function_file_test4]
@@ -171,7 +171,7 @@
   [./missing_function_file_test]
     type = 'RunException'
     input = 'missing_function_file_test.i'
-    expect_err = "Error opening file \S+ from PiecewiseLinearFile function"
+    expect_err = "Error opening file \S+ from Piecewise function"
   [../]
 
   [./missing_function_test]

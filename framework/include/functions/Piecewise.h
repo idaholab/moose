@@ -12,38 +12,42 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PIECEWISELINEAR_H
-#define PIECEWISELINEAR_H
+#ifndef PIECEWISE_H
+#define PIECEWISE_H
 
-#include "Piecewise.h"
+#include "Function.h"
 #include "LinearInterpolation.h"
 
 /**
  * Base class for function objects.  Functions override value to supply a
  * value at a point.
  */
-class PiecewiseLinear : public Piecewise
+class Piecewise : public Function
 {
 public:
-  PiecewiseLinear(const std::string & name, InputParameters parameters);
-  virtual ~PiecewiseLinear();
+  Piecewise(const std::string & name, InputParameters parameters);
+  virtual ~Piecewise();
 
-  /**
-   * This function will return a value based on the first input argument only.
-   */
-  virtual Real value(Real t, const Point & pt);
-  /**
-   * This function will return a value based on the first input argument only.
-   */
-  virtual Real timeDerivative(Real t, const Point & pt);
+  virtual Real timeDerivative(Real t, const Point & p) = 0;
 
-  virtual Real integral();
+  virtual Real functionSize();
+  virtual Real domain(int i);
+  virtual Real range(int i);
 
-  virtual Real average();
+protected:
+  const Real _scale_factor;
+  LinearInterpolation * _linear_interp;
+  int _axis;
+  bool _has_axis;
+private:
+  const std::string _file_name;
+  bool parseNextLineReals( std::ifstream & ifs, std::vector<Real> & myvec);
+  void parseRows( std::vector<Real> & x, std::vector<Real> & y );
+  void parseColumns( std::vector<Real> & x, std::vector<Real> & y);
 
 };
 
 template<>
-InputParameters validParams<PiecewiseLinear>();
+InputParameters validParams<Piecewise>();
 
 #endif

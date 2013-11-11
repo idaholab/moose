@@ -109,6 +109,7 @@
 #include "MooseParsedFunction.h"
 #include "MooseParsedVectorFunction.h"
 #include "MooseParsedGradFunction.h"
+#include "PiecewiseConstant.h"
 #include "PiecewiseLinear.h"
 #include "SolutionFunction.h"
 #include "PiecewiseBilinear.h"
@@ -404,6 +405,7 @@ registerObjects(Factory & factory)
   registerNamedFunction(MooseParsedFunction, "ParsedFunction");
   registerNamedFunction(MooseParsedGradFunction, "ParsedGradFunction");
   registerNamedFunction(MooseParsedVectorFunction, "ParsedVectorFunction");
+  registerFunction(PiecewiseConstant);
   registerFunction(PiecewiseLinear);
   registerNamedFunction(PiecewiseLinear, "PiecewiseLinearFile");
   registerFunction(SolutionFunction);

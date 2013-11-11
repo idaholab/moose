@@ -12,21 +12,17 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PIECEWISELINEAR_H
-#define PIECEWISELINEAR_H
+#ifndef PIECEWISECONSTANT_H
+#define PIECEWISECONSTANT_H
 
 #include "Piecewise.h"
 #include "LinearInterpolation.h"
 
-/**
- * Base class for function objects.  Functions override value to supply a
- * value at a point.
- */
-class PiecewiseLinear : public Piecewise
+class PiecewiseConstant : public Piecewise
 {
 public:
-  PiecewiseLinear(const std::string & name, InputParameters parameters);
-  virtual ~PiecewiseLinear();
+  PiecewiseConstant(const std::string & name, InputParameters parameters);
+  virtual ~PiecewiseConstant();
 
   /**
    * This function will return a value based on the first input argument only.
@@ -41,9 +37,20 @@ public:
 
   virtual Real average();
 
+private:
+
+  enum DirectionEnum {
+    LEFT = 0,
+    RIGHT,
+    UNDEFINED
+  };
+  DirectionEnum getDirection( const std::string & direction );
+
+  const DirectionEnum _direction;
+
 };
 
 template<>
-InputParameters validParams<PiecewiseLinear>();
+InputParameters validParams<PiecewiseConstant>();
 
 #endif
