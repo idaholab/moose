@@ -43,13 +43,13 @@
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-  print_linear_residuals = true
 
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 []
 
 [Output]
+  linear_residuals = true
   output_initial = true
   exodus = true
   perf_log = true

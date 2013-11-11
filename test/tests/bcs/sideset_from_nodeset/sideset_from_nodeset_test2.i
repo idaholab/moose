@@ -49,10 +49,10 @@
 []
 
 [Output]
+  linear_residuals = true
   file_base = cube_tet_out
   output_initial = true
   interval = 1
   exodus = true
-  print_linear_residuals = true
   perf_log = true
 []

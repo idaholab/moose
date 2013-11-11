@@ -56,8 +56,6 @@ CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & param
                                 "FD: Use finite differences to compute Jacobian "
                                 "LINEAR: Solving a linear problem");
 
-  params.addParam<bool>("print_linear_residuals", "Specifies whether the linear residuals are printed during the solve");
-
   // Line Search Options
 #ifdef LIBMESH_HAVE_PETSC
 #if PETSC_VERSION_LESS_THAN(3,3,0)
@@ -144,9 +142,6 @@ CreateExecutionerAction::act()
 void
 CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, InputParameters & params)
 {
-  if (params.isParamValid("print_linear_residuals"))
-    fe_problem.printLinearResiduals(params.get<bool>("print_linear_residuals"));
-
   if (params.isParamValid("solve_type"))
   {
     // Extract the solve type

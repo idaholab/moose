@@ -125,12 +125,12 @@
 []
 
 [Output]
+  linear_residuals = true
   file_base = out_avg_nodal_var_value_ts_begin
   output_initial = false
   postprocessor_csv = false
   interval = 1
   exodus = true
-  print_linear_residuals = false
   perf_log = true
 []
 

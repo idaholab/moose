@@ -75,9 +75,9 @@
 []
 
 [Output]
+  linear_residuals = true
   output_initial = true
   interval = 1
   exodus = true
-  print_linear_residuals = true
   perf_log = true
 []

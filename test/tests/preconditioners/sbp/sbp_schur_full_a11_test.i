@@ -107,11 +107,11 @@
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-  print_linear_residuals = true
   petsc_options       = '-snes_view -snes_monitor -snes_converged_reason -ksp_converged_reason'
 []
 
 [Output]
+  linear_residuals = true
   file_base = sbp_schur_full_a11_out
   output_initial = true
   interval = 1

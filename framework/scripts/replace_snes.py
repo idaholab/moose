@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
-# This script checks and can optionally update MOOSE source files.
-# You should always run this script without the "-u" option
-# first to make sure there is a clean dry run of the files that should
-# be updated
-
 import os, sys, re
 from optparse import OptionParser
+
+sys.path.append("./common")
+import ParseGetPot
 
 global_ignores = ['archive', 'contrib', '.svn', '.git']
 
@@ -28,28 +26,58 @@ def fixupHeader():
         checkAndUpdate(dirpath + '/' + file)
 
 
-re_snes = re.compile(r"^(\s*)([^#]*) -ksp_monitor\b \s*(.*)", re.X)
+#re_print_linear = re.compile(r"^(\s*)([^#]*) print_linear_residuals\b \s*(.*)", re.X)
 #re_ls31_option = re.compile(r"^([^#]*) -snes_type \s+ -snes_ls \s*(.*)", re.X)
 #re_ls31_value = re.compile(r"^([^#]* petsc_options_value .*? ) ls \s+ (\w+) \s*(.*)", re.X)
 #re_ls33_option = re.compile(r"^([^#]*) -snes_linesearch_type \s*(.*)", re.X)
 #re_ls33_value = re.compile(r"^([^#]* petsc_options_value .*? ) \b(cubic | quadratic | basic | bt)\b \s*(.*)", re.X)
 
-re2 = re.compile(r"(.*)^([^#]*? petsc_options \s*=\s* (?: '\s*' | \"\s*\" | \s* ) )$", re.M | re.X | re.S)
+#re2 = re.compile(r"(.*)^([^#]*? petsc_options \s*=\s* (?: '\s*' | \"\s*\" | \s* ) )$", re.M | re.X | re.S)
 
 def checkAndUpdate(filename):
+  # Use the parser to find a specific parameter
+  try:
+    data = ParseGetPot.readInputFile(filename)
+  except:        # ParseGetPot class
+    print "*********************************************************************\nFailed to Parse " + filename + "\n"
+    return
+
+  if 'Executioner' in data.children:
+    new_data = data.children['Executioner']
+    if 'print_linear_residuals' in new_data.params:
+      print filename
+      update(filename)
+
+  if 'Output' in data.children:
+    new_data = data.children['Output']
+    if 'print_linear_residuals' in new_data.params:
+      print filename
+      update(filename)
+
+
+def update(filename):
   f = open(filename)
   lines = f.readlines()
   f.close()
 
+  re_linear_res = re.compile(r"(\s*)([^#]*) print_linear_residuals.*\n", re.X)
+  re_output = re.compile(r"([^#]*? \s* \[Output\].*)$(.*)$", re.X | re.M)   # .*$(.*)?$"
+
   replacement_made = False
-  line_search_added = False
+#  line_search_added = False
   for i, line in enumerate(lines):
 
-    # Replace PETSc solver type
-    (lines[i], num_replacements) = re_snes.subn("\n\g<1>print_linear_residuals = true\n\g<1>\g<2>\g<3>", lines[i])
+    # Remove print_linear_residuals
+    (lines[i], num_replacements) = re_linear_res.subn("", lines[i])
     if num_replacements:
       replacement_made = True
-      print filename
+
+    # Add linear_residuals
+    m = re_output.search(lines[i])
+    if m != None:
+      (lines[i], num_replacements) = re_output.subn("\g<1>\n  linear_residuals = true", lines[i])
+      replacement_made = True
+
 
     # Replace PETSC3.1 linesearch options
 #    (lines[i], num_replacements) = re_ls31_option.subn("\g<1>\g<2>", lines[i])
@@ -85,12 +113,12 @@ def checkAndUpdate(filename):
 
     # See if we've left an empty set of options now that we've replaced the solver type, remove if necessary
     if replacement_made:
-      lines[i] = re2.sub("\g<1>", lines[i])
+#      lines[i] = re2.sub("\g<1>", lines[i])
 
-    f = open(filename + '~tmp', 'w')
-    f.write(''.join(lines))
-    f.close()
-    os.rename(filename + '~tmp', filename)
+      f = open(filename + '~tmp', 'w')
+      f.write(''.join(lines))
+      f.close()
+      os.rename(filename + '~tmp', filename)
 
 if __name__ == '__main__':
   parser = OptionParser()

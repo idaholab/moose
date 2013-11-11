@@ -50,11 +50,11 @@
 []
 
 [Output]
+  linear_residuals = true
   # Note: file_base is optional in which case it'll come out as the 
   #       mesh's filename with "_out" appended ( # file_base = square_out.e )
   output_initial = true
   interval = 1
   exodus = true
-  print_linear_residuals = true
   perf_log = true
 []

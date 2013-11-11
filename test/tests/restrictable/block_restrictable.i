@@ -52,12 +52,12 @@
   type = Steady
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-  print_linear_residuals = true
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
 [Output]
+  linear_residuals = true
   output_initial = true
   exodus = true
   perf_log = true

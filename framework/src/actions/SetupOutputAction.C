@@ -66,6 +66,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("elemental_as_nodal", false, "Output elemental variables also as nodal");
   params.addParam<bool>("exodus_inputfile_output", true, "Determines whether or not the input file is output to exodus - default (true)");
   params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputing only a subset of outputs when using MultiApps.");
+  params.addParam<bool>("linear_residuals", "Specifies whether the linear residuals are printed during the solve");
 
   // restart options
   params.addParam<unsigned int>("num_restart_files", 0, "Number of the restart files to save (0 = no restart files)");
@@ -136,6 +137,9 @@ SetupOutputAction::act()
   }
 
   mooseAssert(_problem, "This should never happen!");
+
+  if (_pars.isParamValid("linear_residuals"))
+    _problem->printLinearResiduals(getParam<bool>("linear_residuals"));
 
   /// Determines whether we see the perf log early in a run or not
   _problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));

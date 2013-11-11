@@ -274,7 +274,6 @@
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-  print_linear_residuals = true
   petsc_options = '-snes_ksp_ew'
 
   nl_rel_tol = 1e-9
@@ -289,6 +288,7 @@
 []
 
 [Output]
+  linear_residuals = true
   file_base = pl_test4qns_out
   output_initial = true
   interval = 1

@@ -48,12 +48,12 @@
   type = Steady
   restart_file_base = pointer_load_error_out_restart_0001
   solve_type = PJFNK
-  print_linear_residuals = true
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
 [Output]
+  linear_residuals = true
   output_initial = true
   exodus = true
   num_restart_files = 1

@@ -115,7 +115,6 @@
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-  print_linear_residuals = true
 
   petsc_options_iname  = '-pc_factor_levels -pc_factor_mat_ordering_type'
   petsc_options_value  = '20 rcm'
@@ -128,6 +127,7 @@
 []
 
 [Output]
+  linear_residuals = true
   file_base = out
   interval = 1
   output_initial = true

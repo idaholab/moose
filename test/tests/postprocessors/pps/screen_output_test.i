@@ -129,11 +129,11 @@
 []
 
 [Output]
+  linear_residuals = true
   output_initial = false
   postprocessor_csv = false
   interval = 1
   exodus = true
-  print_linear_residuals = false
   perf_log = true
   max_pps_rows_screen = 2
 []

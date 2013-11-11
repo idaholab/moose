@@ -84,11 +84,11 @@
 []
 
 [Output]
+  linear_residuals = true
   file_base = out
   output_initial = true
   elemental_as_nodal = true
   interval = 1
   exodus = true
-  print_linear_residuals = true
   perf_log = true
 []

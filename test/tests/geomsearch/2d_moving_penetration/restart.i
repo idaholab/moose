@@ -216,7 +216,6 @@
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-  print_linear_residuals = true
   petsc_options = '-snes_ksp_ew'
 
   nl_rel_tol = 1e-9
@@ -228,6 +227,7 @@
 []
 
 [Output]
+  linear_residuals = true
   output_initial = true
   interval = 1
   exodus = true

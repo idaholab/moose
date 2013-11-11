@@ -129,13 +129,13 @@
 []
 
 [Output]
+  linear_residuals = true
   file_base = ignore_bad
   output_initial = true
   postprocessor_csv = false
   interval = 4
   screen_interval = 3
   exodus = true
-  print_linear_residuals = false
   perf_log = true
 []
 

@@ -71,7 +71,6 @@
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-  print_linear_residuals = true
 
   petsc_options_iname = '-pc_type -snes_ls -ksp_gmres_restart'
   petsc_options_value = 'lu       basic                 101'
@@ -111,6 +110,7 @@
 []
 
 [Output]
+  linear_residuals = true
   interval = 1
   output_initial = true
   exodus = true
