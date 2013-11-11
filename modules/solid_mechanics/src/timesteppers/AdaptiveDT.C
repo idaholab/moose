@@ -1,7 +1,7 @@
 #include "AdaptiveDT.h"
 
 #include "Function.h"
-#include "PiecewiseLinearFile.h"
+#include "PiecewiseLinear.h"
 #include "Transient.h"
 
 template<>
@@ -101,15 +101,15 @@ AdaptiveDT::init()
   if (isParamValid("timestep_limiting_function"))
   {
     _timestep_limiting_function = &_fe_problem.getFunction(getParam<FunctionName>("timestep_limiting_function"), isParamValid("_tid") ? getParam<THREAD_ID>("_tid") : 0);
-    _piecewise_linear_timestep_limiting_function = dynamic_cast<PiecewiseLinearFile*>(_timestep_limiting_function);
+    _piecewise_linear_timestep_limiting_function = dynamic_cast<PiecewiseLinear*>(_timestep_limiting_function);
     if(_piecewise_linear_timestep_limiting_function)
     {
-      unsigned int time_size = _piecewise_linear_timestep_limiting_function->getFunctionSize();
+      unsigned int time_size = _piecewise_linear_timestep_limiting_function->functionSize();
 //     std::cout << "time_size = " << time_size << std::endl;
       _times.resize(time_size);
       for (unsigned int i=0; i < time_size; ++i)
       {
-       _times[i] = _piecewise_linear_timestep_limiting_function->getSegmentPointDomain(i);
+       _times[i] = _piecewise_linear_timestep_limiting_function->domain(i);
 //     std::cout << "times["<<i<<"] = "<< _times[i] << std::endl;
       }
     }
@@ -306,8 +306,8 @@ AdaptiveDT::limitDTByFunction(Real & limitedDT)
   if (_piecewise_linear_timestep_limiting_function && _force_step_every_function_point)
   {
     Point dummyPoint;
-     Real oldSlope = _piecewise_linear_timestep_limiting_function->getTimeDerivative(_time_old,dummyPoint);
-     Real newSlope = _piecewise_linear_timestep_limiting_function->getTimeDerivative(_time_old+limitedDT,dummyPoint);
+     Real oldSlope = _piecewise_linear_timestep_limiting_function->timeDerivative(_time_old,dummyPoint);
+     Real newSlope = _piecewise_linear_timestep_limiting_function->timeDerivative(_time_old+limitedDT,dummyPoint);
      for (unsigned int i=0; i < _times.size()-1; ++i)
       if(_time >= _times[i] && _time < _times[i+1])
        {
@@ -331,7 +331,7 @@ AdaptiveDT::limitDTByFunction(Real & limitedDT)
          << limitedDT
          << std::endl;
   }
-  
+
   if (_verbose)
     Moose::out << diag.str();
 }
