@@ -29,6 +29,8 @@ InputParameters validParams<CreateProblemAction>()
   params.addParam<std::vector<MooseEnum> >("coord_type", coord_types_vec, "Type of the coordinate system per block param");
 
   params.addParam<bool>("fe_cache", false, "Whether or not to turn on the finite element shape function caching system.  This can increase speed with an associated memory cost.");
+
+  params.addParam<bool>("kernel_coverage_check", true, "Set to false to disable kernel->subdomain kernel coverage check");
   return params;
 }
 
@@ -57,5 +59,6 @@ CreateProblemAction::act()
     // set up the problem
     _problem->setCoordSystem(_blocks, _coord_sys);
     _problem->useFECache(_fe_cache);
+    _problem->setKernelCoverageCheck(getParam<bool>("kernel_coverage_check"));
   }
 }

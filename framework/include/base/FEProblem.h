@@ -693,6 +693,8 @@ public:
 
   void registerRandomInterface(RandomInterface & random_interface, const std::string & name);
 
+  void setKernelCoverageCheck(bool flag) { _kernel_coverage_check = flag; }
+
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
@@ -871,6 +873,9 @@ protected:
 
   /// Storage facility for Reportable values
   ReportableData _reportable_data;
+
+  /// Determies whether a check to verify an active kernel on every subdomain
+  bool _kernel_coverage_check;
 
 public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)

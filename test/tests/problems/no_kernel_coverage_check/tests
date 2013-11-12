@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'no_coverage_check.i'
+    exodiff = 'no_coverage_check_out.e'
+  [../]
+[]

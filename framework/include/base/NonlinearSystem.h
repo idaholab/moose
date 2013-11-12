@@ -325,7 +325,7 @@ public:
   void reinitDampers(THREAD_ID tid);
 
   /// System Integrity Checks
-  void checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const;
+  void checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains, bool check_kernel_coverage) const;
   void checkBCCoverage() const;
   bool containsTimeKernel();
 

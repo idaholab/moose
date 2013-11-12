@@ -149,7 +149,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _const_jacobian(false),
     _has_jacobian(false),
     _restarting(false),
-    _reportable_data(*this)
+    _reportable_data(*this),
+    _kernel_coverage_check(false)
 {
 #ifdef LIBMESH_HAVE_PETSC
   // put in empty arrays for PETSc options
@@ -3506,7 +3507,7 @@ FEProblem::checkProblemIntegrity()
 
   // Check kernel coverage of subdomains (blocks) in the mesh
   if(_solve)
-    _nl.checkKernelCoverage(mesh_subdomains);
+    _nl.checkKernelCoverage(mesh_subdomains, _kernel_coverage_check);
 
   // Check materials
   {
