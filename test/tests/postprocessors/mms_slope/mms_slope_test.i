@@ -71,18 +71,6 @@
 
   solve_type = NEWTON
 
-  # This is the exact solution, if you compute h1 error it must provide a gradient
-  function = u_func
-
-  # Set this to true if you want to compute the h1 error, you must provide a gradient
-  h1_error = true
-
-  # Derek said this might help improve the values we get, but it didnt do anything for me
-  #extra_quadrature_order = 3
-
-  # this is the filename where the dofs and norm values will be printed
-  norm_file = dofs
-
   [./Adaptivity]
     # if the refine fraction is 1 it will refine every element
     # remember < 1 means only refine that percentage of elements
@@ -120,7 +108,6 @@
 
   [./dofs]
     type = NumDOFs
-    variable = u
   [../]
 []
 

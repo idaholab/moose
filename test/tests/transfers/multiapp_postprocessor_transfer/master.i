@@ -66,7 +66,6 @@
   [./pp_sub]
     app_type = MooseTestApp
     positions = '0.5 0.5 0 0.7 0.7 0'
-    output_base = pp_master_out_pp_sub
     execute_on = timestep
     type = TransientMultiApp
     input_files = sub.i

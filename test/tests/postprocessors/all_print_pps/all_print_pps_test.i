@@ -60,22 +60,18 @@
 [Postprocessors]
   [./nodes]
     type = NumNodes
-    variable = u
   [../]
 
   [./elements]
     type = NumElems
-    variable = u
   [../]
 
   [./dofs]
     type = NumDOFs
-    variable = u
   [../]
 
   [./residuals]
     type = NumResidualEvaluations
-    variable = u
   [../]
 []
 

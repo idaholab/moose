@@ -33,7 +33,6 @@
   [./forcing]
     type = GaussContForcing
     variable = u
-    function = forcing_func
   [../]
 
   [./dot]

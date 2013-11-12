@@ -55,7 +55,6 @@
     [../]
     [./combo]
       type = ComboMarker
-      field_name = combo
       markers = 'box box2'
     [../]
     [./box2]

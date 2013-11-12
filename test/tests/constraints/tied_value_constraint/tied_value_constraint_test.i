@@ -15,7 +15,6 @@
   [./diff]
     type = Diffusion
     variable = u
-    initial_condition = 4
   [../]
 []
 

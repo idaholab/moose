@@ -30,7 +30,6 @@
   [./forcing]
     type = GaussContForcing
     variable = u
-    function = forcing_func
     x_center = 0.1
     y_center = 0.3
     x_spread = 0.1

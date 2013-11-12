@@ -30,8 +30,6 @@
     type = Convection
     variable = u
     velocity = '10 1 0'
-    x = 10
-    y = 1
   [../]
 
   [./uie]

@@ -5,11 +5,11 @@
   nx = 10
 
   xmin = 0.0
-  xmax = 1.0  
+  xmax = 1.0
 
 []
 
-#still need BC for Energy, IC's for both. 
+#still need BC for Energy, IC's for both.
 [Variables]
   active = 'Time'
 
@@ -22,7 +22,7 @@
 
 [Functions]
 	active = 'func'
-	
+
 	[./func]
 		type = ParsedFunction
 		value = 2.0*t
@@ -30,13 +30,13 @@
 []
 
 [Kernels]
-  active = 't_time func_time' 
- 
+  active = 't_time func_time'
+
   [./t_time]
     type = TimeDerivative
     variable = Time
   [../]
- 
+
   [./func_time]
     type = UserForcingFunction
     variable = Time
@@ -45,14 +45,14 @@
 []
 
 [BCs]
-  active = 'Top_Temperature' 
-  
+  active = 'Top_Temperature'
+
   [./Top_Temperature]
     type = NeumannBC
     variable = Time
     boundary = 'left right'
   [../]
- 
+
 []
 
 [Executioner]
@@ -61,15 +61,13 @@
   #scheme = 'crank-nicolson'
   start_time = 0
   num_steps = 4
-  e_max = 10
-  e_tol = .1
   dt = 1000000000
-  
+
   [./Predictor]
     type = SimplePredictor
     scale = 1.0
   [../]
-  
+
   ss_check_tol = .00000000000000001
   trans_ss_check = true
   nl_abs_tol = 1e-15

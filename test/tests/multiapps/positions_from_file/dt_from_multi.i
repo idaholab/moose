@@ -60,7 +60,6 @@
     type = TransientMultiApp
     input_files = 'dt_from_multi_sub.i'
     app_type = MooseTestApp
-    output_base = dt_from_multi_sub_out
   [../]
 []
 

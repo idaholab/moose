@@ -93,7 +93,6 @@
 [Executioner]
   type = Transient
   scheme = 'implicit-euler'
-  perf_log = true
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'

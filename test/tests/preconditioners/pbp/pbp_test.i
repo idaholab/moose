@@ -27,7 +27,6 @@
     off_diag_row    = 'v'
     off_diag_column = 'u'
 
-    print_linear_residuals = true
     petsc_options = ''  # Test petsc options in PBP block
   [../]
 []
@@ -95,6 +94,7 @@
 []
 
 [Output]
+  linear_residuals = true
   file_base = out
   output_initial = true
   interval = 1

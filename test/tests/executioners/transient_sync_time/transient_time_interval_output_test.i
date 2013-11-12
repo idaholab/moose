@@ -3,12 +3,6 @@
   dim = 2
   nx = 20
   ny = 20
-
-  x_min = 0
-  x_max = 1
-
-  y_min = 0
-  y_max = 1
 []
 
 [Variables]

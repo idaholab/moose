@@ -112,7 +112,6 @@
 
   [./dofs]
     type = NumDOFs
-    varaible = u
   [../]
 []
 

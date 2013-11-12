@@ -95,17 +95,14 @@
   [./volume1]
     type = VolumePostprocessor
     block = 1
-    variable = constantVar
   [../]
   [./volume2]
     type = VolumePostprocessor
     block = 2
-    variable = constantVar
   [../]
   [./volume3]
     type = VolumePostprocessor
     block = 3
-    variable = constantVar
   [../]
 []
 

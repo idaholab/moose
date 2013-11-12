@@ -73,7 +73,6 @@
     type = TransientMultiApp
     input_files = sub.i
     app_type = MooseTestApp
-    output_base = sub_out
   [../]
 []
 

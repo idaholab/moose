@@ -1,7 +1,6 @@
 [Mesh]
   dim              = 2
   file             = Mesh24.e
-  init_unif_refine = 0
 []
 
 [Variables]

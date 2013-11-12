@@ -90,7 +90,6 @@
 
 [Executioner]
   type = Steady
-  perf_log = true
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
@@ -106,7 +105,6 @@
 
   [./dofs]
     type = NumDOFs
-    variable = u
   [../]
 
   [./l2_err]

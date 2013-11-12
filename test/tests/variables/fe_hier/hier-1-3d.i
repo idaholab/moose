@@ -9,7 +9,7 @@
   zmax = 1
   nx = 5
   ny = 5
-  zy = 5
+
   elem_type = HEX8
 []
 

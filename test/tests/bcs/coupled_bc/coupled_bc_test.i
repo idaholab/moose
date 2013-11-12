@@ -49,7 +49,6 @@
     variable = u
     boundary = 1
     v = v
-    value = 3
   [../]
 []
 
