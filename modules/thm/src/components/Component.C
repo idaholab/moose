@@ -154,14 +154,20 @@ void
 Component::connectObject(const std::string & rname, const std::string & mooseName, const std::string & name)
 {
   RavenNameEntry rne(mooseName, name);
-  _rname_map[rname][name].push_back(rne);
+  if (_parent != NULL)
+    _parent->_rname_map[rname][name].push_back(rne);
+  else
+    _rname_map[rname][name].push_back(rne);
 }
 
 void
 Component::connectObject(const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name)
 {
   RavenNameEntry rne(mooseName, par_name);
-  _rname_map[rname][name].push_back(rne);
+  if (_parent != NULL)
+    _parent->_rname_map[rname][name].push_back(rne);
+  else
+    _rname_map[rname][name].push_back(rne);
 }
 
 
