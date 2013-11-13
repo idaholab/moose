@@ -130,7 +130,7 @@
     time_dt = '1.0, 5.0'
   [../]
 
-  restart_file_base = adapt_tstep_grow_dtfunc_restart1_out_restart_0004
+  restart_file_base = adapt_tstep_grow_dtfunc_restart1_out_cp/0004
 []
 
 [Postprocessors]

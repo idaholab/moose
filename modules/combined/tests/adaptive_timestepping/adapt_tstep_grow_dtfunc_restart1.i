@@ -143,5 +143,5 @@
   interval = 1
   output_initial = true
   exodus = true
-  num_restart_files = 1
+  num_checkpoint_files = 1
 []
