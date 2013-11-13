@@ -21,6 +21,9 @@ protected:
   virtual Real computeQpResidual();
 
   virtual Real computeQpJacobian();
+
+private:
+  unsigned int _timestep_to_nan;
 };
 
 #endif //NANKERNEL_H

@@ -239,8 +239,20 @@
     type = 'RunException'
     input = 'nan_test.i'
     expect_err = "Floating point exception"
-    errors = 'foo'
     petsc_version = '<3.4'
+    # Right now we don't check for the PETSc converged reason after the solve
+    # we only do this in the monitor callbacks, thus we don't get a PETSc
+    # error on newer versions of PETSc.
+  [../]
+
+  [./nan_test_transient]
+    type = 'RunException'
+    input = 'nan_test_transient.i'
+    expect_err = "Floating point exception"
+    petsc_version = '<3.4'
+    # Right now we don't check for the PETSc converged reason after the solve
+    # we only do this in the monitor callbacks, thus we don't get a PETSc
+    # error on newer versions of PETSc.
   [../]
 
   [./no_output_dir_test]
