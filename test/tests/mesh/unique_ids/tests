@@ -12,5 +12,6 @@
     unique_ids = True
     cli_args = '--parallel-mesh'
     min_parallel = 2
+    prereq = serial_mesh
   [../]
 []
