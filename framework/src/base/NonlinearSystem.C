@@ -153,6 +153,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
   {
     petsc_solver->set_residual_zero_out(false);
     petsc_solver->set_jacobian_zero_out(false);
+    petsc_solver->use_default_monitor(false);
   }
 #endif
 

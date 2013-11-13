@@ -131,9 +131,6 @@ Output::timestepSetup()
   KSP ksp;
   SNESGetKSP(snes, &ksp);
 
-  SNESMonitorCancel(snes);
-  KSPMonitorCancel(ksp);
-
   if (_time >= _iteration_plot_start_time)
   {
 #if PETSC_VERSION_LESS_THAN(2,3,3)
