@@ -5,6 +5,7 @@
     exodiff = 'master_out.e master_out_sub_app0.e master_out_sub_app1.e'
     dtk = True
     method = 'OPT OPROF'
+    recover = false
   [../]
 
   [./check_error]
@@ -13,5 +14,6 @@
     expect_err = "A '\w+' is not a registered object"
     dtk = False
     method = 'OPT OPROF'
+    recover = false
   [../]
 []

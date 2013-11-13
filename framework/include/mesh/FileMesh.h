@@ -33,7 +33,7 @@ public:
 
   virtual MooseMesh & clone() const;
 
-  virtual void init();
+  virtual void buildMesh();
 
   void read(const std::string & file_name);
   virtual ExodusII_IO * exReader() const { return _exreader; }

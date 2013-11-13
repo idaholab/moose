@@ -4,5 +4,6 @@
     input = 'around.i'
     cli_args = '--mesh-only'
     exodiff = 'around_in.e'
+    recover = false
   [../]
 []

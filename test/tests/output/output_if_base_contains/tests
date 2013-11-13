@@ -10,5 +10,6 @@
 
     check_not_exists = 'dt_from_master_master_out_sub0_sub0.e
                         dt_from_master_master_out_sub1_sub0.e'
+    recover = false
   [../]
 []

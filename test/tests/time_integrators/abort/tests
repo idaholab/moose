@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'abort.i'
     exodiff = 'out.e'
+    recover = false
   [../]
 []

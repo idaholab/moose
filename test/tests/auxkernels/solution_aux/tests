@@ -47,6 +47,7 @@
     input = 'solution_aux_exodus_interp_restart2.i'
     exodiff = 'solution_aux_exodus_interp_restart2_out.e'
     prereq = exodus_interp_restart1
+    recover = false
   [../]
 
   [./exodus_interp_direct]

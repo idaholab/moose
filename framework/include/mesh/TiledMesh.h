@@ -33,7 +33,7 @@ public:
 
   virtual MooseMesh & clone() const;
 
-  virtual void init();
+  virtual void buildMesh();
 
 protected:
   const Real _x_width;

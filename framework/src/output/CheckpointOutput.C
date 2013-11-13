@@ -12,29 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "XDAOutput.h"
+#include "CheckpointOutput.h"
 #include "Problem.h"
+
+#include "libmesh/checkpoint_io.h"
+#include "libmesh/serial_mesh.h"
+#include "libmesh/parallel_mesh.h"
 
 #include <sstream>
 #include <iomanip>
 
-XDAOutput::XDAOutput(EquationSystems & es, bool binary, SubProblem & sub_problem) :
-    Outputter(es, sub_problem, "XDAOutput"),
+CheckpointOutput::CheckpointOutput(EquationSystems & es, bool binary, SubProblem & sub_problem) :
+    Outputter(es, sub_problem, "CheckpointOutput"),
     _binary(binary)
 {
 }
 
-XDAOutput::~XDAOutput()
+CheckpointOutput::~CheckpointOutput()
 {
 }
 
 std::string
-XDAOutput::getFileName(const std::string & file_base, unsigned int t_step)
+CheckpointOutput::getFileName(const std::string & file_base, unsigned int t_step)
 {
   std::ostringstream stream_file_base;
 
   stream_file_base << file_base
-                   << "_"
                    << std::setw(4)
                    << std::setprecision(0)
                    << std::setfill('0')
@@ -46,36 +49,38 @@ XDAOutput::getFileName(const std::string & file_base, unsigned int t_step)
 
 
 void
-XDAOutput::output(const std::string & file_base, Real /*time*/, unsigned int t_step)
+CheckpointOutput::output(const std::string & file_base, Real /*time*/, unsigned int t_step)
 {
   MeshBase & mesh = _es.get_mesh();
 
+  CheckpointIO io(mesh, _binary);
+
   if (_binary)
   {
-    mesh.write(getFileName(file_base, t_step)+"_mesh.xdr");
-    _es.write (getFileName(file_base, t_step)+".xdr", libMeshEnums::ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
+    io.write(getFileName(file_base, t_step)+"_mesh.cpr");
+    _es.write (getFileName(file_base, t_step)+".xdr", libMeshEnums::ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES);
   }
   else
   {
-    mesh.write(getFileName(file_base, t_step)+"_mesh.xda");
-    _es.write (getFileName(file_base, t_step)+".xda", libMeshEnums::WRITE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
+    io.write(getFileName(file_base, t_step)+"_mesh.cpa");
+    _es.write (getFileName(file_base, t_step)+".xda", libMeshEnums::WRITE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES);
   }
 }
 
 void
-XDAOutput::outputPps(const std::string & /*file_base*/, const FormattedTable & /*table*/, Real /*time*/)
+CheckpointOutput::outputPps(const std::string & /*file_base*/, const FormattedTable & /*table*/, Real /*time*/)
 {
   // XDA does not support PPS values
 }
 
 
 void
-XDAOutput::meshChanged()
+CheckpointOutput::meshChanged()
 {
 }
 
 void
-XDAOutput::sequence(bool /*state*/)
+CheckpointOutput::sequence(bool /*state*/)
 {
   // do nothing, XDA files are always sequences
 }

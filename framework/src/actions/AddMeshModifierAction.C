@@ -16,6 +16,7 @@
 #include "MooseMesh.h"
 #include "MeshModifier.h"
 #include "Factory.h"
+#include "MooseApp.h"
 
 template<>
 InputParameters validParams<AddMeshModifierAction>()
@@ -32,6 +33,9 @@ AddMeshModifierAction::AddMeshModifierAction(const std::string & name, InputPara
 void
 AddMeshModifierAction::act()
 {
+  // Don't do mesh modifiers when recovering!
+  if(_app.isRecovering())
+    return;
 
   // Add a pointer to the mesh, this is required for this MeshModifier to inheret from the BlockRestrictable,
   // as is the case for SideSetAroundSubdomain

@@ -40,7 +40,8 @@ public:
     TECPLOT,
     TECPLOT_BIN,
     XDA,
-    XDR
+    XDR,
+    CHECKPOINT
   };
 
   // FIXME: this is not good - the whole Output class has to be refactored with respect to OutputProblem class
@@ -104,6 +105,12 @@ public:
   /// Set (or reset) the output position
   void setOutputPosition(Point p);
 
+  /**
+   * Set the append flag on this class, the flag will subsequently be
+   * applied to all Outputters this class contains.
+   */
+  void setAppend(bool b);
+
 protected:
   std::string _file_base;
 
@@ -128,6 +135,9 @@ protected:
   ///the output interval to use
   Real _time_interval_output_interval;
   bool _output;
+  /// If true, will instruct our Outputters to append.  Only
+  /// makes sense for the Exodus Outputter currently.
+  bool _append;
 };
 
 #endif /* OUTPUTTER_H */

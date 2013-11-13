@@ -3,18 +3,21 @@
     type = 'Exodiff'
     input = 'tosub_master.i'
     exodiff = 'tosub_master_out_sub0.e'
+    recover = false
   [../]
 
   [./fromsub]
     type = 'Exodiff'
     input = 'fromsub_master.i'
     exodiff = 'fromsub_master_out.e'
+    recover = false
   [../]
 
   [./fromsub_displaced]
     type = 'Exodiff'
     input = 'fromsub_displaced_master.i'
     exodiff = 'fromsub_displaced_master_out.e'
+    recover = false
   [../]
 
   [./tosub_displaced]
@@ -22,11 +25,13 @@
     input = 'tosub_displaced_master.i'
     exodiff = 'tosub_displaced_master_out_sub0.e'
     deleted = 'Not yet implemented properly!'
+    recover = false
   [../]
 
   [./fromsub_fixed_meshes]
     type = 'Exodiff'
     input = 'fromsub_fixed_meshes_master.i'
     exodiff = 'fromsub_fixed_meshes_master_out.e'
+    recover = false
   [../]
 []

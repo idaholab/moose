@@ -37,7 +37,7 @@ public:
 
   virtual MooseMesh & clone() const;
 
-  virtual void init();
+  virtual void buildMesh();
 
 protected:
   /// The dimension of the mesh

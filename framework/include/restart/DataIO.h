@@ -19,6 +19,7 @@
 #include "ColumnMajorMatrix.h"
 #include "MooseTypes.h"
 #include "Atomic.h"
+#include "HashMap.h"
 
 //libMesh
 #include "libmesh/dense_matrix.h"
@@ -59,6 +60,12 @@ template<typename P, typename Q>
 inline void storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context);
 
 /**
+ * HashMap helper routine
+ */
+template<typename P, typename Q>
+inline void storeHelper(std::ostream & stream, HashMap<P,Q> & data, void * context);
+
+/**
  * Map helper routine
  */
 template<typename P>
@@ -87,6 +94,12 @@ inline void loadHelper(std::istream & stream, std::set<P> & data, void * context
  */
 template<typename P, typename Q>
 inline void loadHelper(std::istream & stream, std::map<P,Q> & data, void * context);
+
+/**
+ * Hashmap helper routine
+ */
+template<typename P, typename Q>
+inline void loadHelper(std::istream & stream, HashMap<P,Q> & data, void * context);
 
 /**
  * Moose::Atomic routine
@@ -164,10 +177,39 @@ dataStore(std::ostream & stream, std::map<T,U> & m, void * context)
   unsigned int size = m.size();
   stream.write((char *) &size, sizeof(size));
 
-  //Moose::out<<"Size: "<<size<<std::endl;
+  //// Moose::out<<"Size: "<<size<<std::endl;
 
   typename std::map<T,U>::iterator it = m.begin();
   typename std::map<T,U>::iterator end = m.end();
+
+  for (; it != end; ++it)
+  {
+    // Moose::out<<"First"<<std::endl;
+    // Moose::out<<"Key: "<<it->first<<std::endl;
+
+    T & key = const_cast<T&>(it->first);
+
+    storeHelper(stream, key, context);
+
+    // Moose::out<<"Second"<<std::endl;
+    storeHelper(stream, it->second, context);
+  }
+}
+
+template<typename T, typename U>
+inline void
+dataStore(std::ostream & stream, HashMap<T,U> & m, void * context)
+{
+  // Moose::out<<"HashMap dataStore"<<std::endl;
+
+  // First store the size of the map
+  unsigned int size = m.size();
+  stream.write((char *) &size, sizeof(size));
+
+  // Moose::out<<"Size: "<<size<<std::endl;
+
+  typename HashMap<T,U>::iterator it = m.begin();
+  typename HashMap<T,U>::iterator end = m.end();
 
   for (; it != end; ++it)
   {
@@ -200,6 +242,8 @@ template<> void dataStore(std::ostream & stream, RealTensorValue & v, void * /*c
 template<> void dataStore(std::ostream & stream, RealVectorValue & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, const Elem * & e, void * context);
 template<> void dataStore(std::ostream & stream, const Node * & n, void * context);
+template<> void dataStore(std::ostream & stream, Elem * & e, void * context);
+template<> void dataStore(std::ostream & stream, Node * & n, void * context);
 
 // global load functions
 
@@ -222,7 +266,7 @@ template<typename T>
 inline void
 dataLoad(std::istream & stream, std::vector<T> & v, void * context)
 {
-  //Moose::out<<"Vector dataLoad"<<std::endl;
+  //// Moose::out<<"Vector dataLoad"<<std::endl;
 
   // First read the size of the vector
   unsigned int size = 0;
@@ -246,7 +290,7 @@ dataLoad(std::istream & stream, std::set<T> & s, void * context)
   unsigned int size = 0;
   stream.read((char *) &size, sizeof(size));
 
-  //Moose::out<<"Size: "<<size<<std::endl;
+  //// Moose::out<<"Size: "<<size<<std::endl;
 
   for (unsigned int i = 0; i < size; i++)
   {
@@ -263,6 +307,31 @@ dataLoad(std::istream & stream, std::map<T,U> & m, void * context)
   // Moose::out<<"Map dataLoad"<<std::endl;
 
   m.clear();
+
+  // First read the size of the map
+  unsigned int size = 0;
+  stream.read((char *) &size, sizeof(size));
+
+  // Moose::out<<"Size: "<<size<<std::endl;
+
+  for (unsigned int i = 0; i < size; i++)
+  {
+    T key;
+    loadHelper(stream, key, context);
+
+    U & value = m[key];
+    loadHelper(stream, value, context);
+  }
+}
+
+
+template<typename T, typename U>
+inline void
+dataLoad(std::istream & stream, HashMap<T,U> & m, void * context)
+{
+  // Moose::out<<"HashMap dataLoad"<<std::endl;
+
+  // m.clear();
 
   // First read the size of the map
   unsigned int size = 0;
@@ -298,6 +367,8 @@ template<> void dataLoad(std::istream & stream, RealTensorValue & v, void * /*co
 template<> void dataLoad(std::istream & stream, RealVectorValue & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, const Elem * & e, void * context);
 template<> void dataLoad(std::istream & stream, const Node * & e, void * context);
+template<> void dataLoad(std::istream & stream, Elem * & e, void * context);
+template<> void dataLoad(std::istream & stream, Node * & e, void * context);
 
 // Scalar Helper Function
 template<typename P>
@@ -331,7 +402,17 @@ template<typename P, typename Q>
 inline void
 storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context)
 {
-  //Moose::out<<"Map storeHelper"<<std::endl;
+  //// Moose::out<<"Map storeHelper"<<std::endl;
+  dataStore(stream, data, context);
+}
+
+
+// HashMap Helper Function
+template<typename P, typename Q>
+inline void
+storeHelper(std::ostream & stream, HashMap<P,Q> & data, void * context)
+{
+  // Moose::out<<"HashMap storeHelper"<<std::endl;
   dataStore(stream, data, context);
 }
 
@@ -377,6 +458,15 @@ inline void
 loadHelper(std::istream & stream, std::map<P,Q> & data, void * context)
 {
   // Moose::out<<"Map loadHelper"<<std::endl;
+  dataLoad(stream, data, context);
+}
+
+// HashMap Helper Function
+template<typename P, typename Q>
+inline void
+loadHelper(std::istream & stream, HashMap<P,Q> & data, void * context)
+{
+  // Moose::out<<"HashMap loadHelper"<<std::endl;
   dataLoad(stream, data, context);
 }
 

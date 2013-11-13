@@ -16,6 +16,7 @@
 #include "MooseUtils.h"
 #include "RestartableData.h"
 #include "FEProblem.h"
+#include "MooseApp.h"
 
 #include <stdio.h>
 
@@ -25,7 +26,7 @@ RestartableDataIO::RestartableDataIO(FEProblem & fe_problem) :
 }
 
 void
-RestartableDataIO::writeRestartableData(std::string base_file_name)
+RestartableDataIO::writeRestartableData(std::string base_file_name, const RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data)
 {
   unsigned int n_threads = libMesh::n_threads();
   unsigned int n_procs = libMesh::n_processors();
@@ -33,7 +34,7 @@ RestartableDataIO::writeRestartableData(std::string base_file_name)
 
   for(unsigned int tid=0; tid<n_threads; tid++)
   {
-    const std::map<std::string, RestartableDataValue *> & restartable_data = _fe_problem._restartable_data[tid];
+    const std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
 
     if(restartable_data.size())
     {
@@ -111,8 +112,10 @@ RestartableDataIO::writeRestartableData(std::string base_file_name)
 }
 
 void
-RestartableDataIO::readRestartableData(std::string base_file_name)
+RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data)
 {
+  bool recovering = _fe_problem.getMooseApp().isRecovering();
+
   unsigned int n_threads = libMesh::n_threads();
   unsigned int n_procs = libMesh::n_processors();
   unsigned int proc_id = libMesh::processor_id();
@@ -121,7 +124,7 @@ RestartableDataIO::readRestartableData(std::string base_file_name)
 
   for(unsigned int tid=0; tid<n_threads; tid++)
   {
-    std::map<std::string, RestartableDataValue *> restartable_data = _fe_problem._restartable_data[tid];
+    std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
 
     if(restartable_data.size())
     {
@@ -201,7 +204,9 @@ RestartableDataIO::readRestartableData(std::string base_file_name)
         unsigned int data_size = 0;
         in.read((char *) &data_size, sizeof(data_size));
 
-        if(restartable_data.find(current_name) != restartable_data.end()) // Only restore values if they're currently being used
+        if(restartable_data.find(current_name) != restartable_data.end() // Only restore values if they're currently being used
+           && (recovering || (_recoverable_data.find(current_name) == _recoverable_data.end())) // Only read this value if we're either recovering or this hasn't been specified to be recovery only data
+          )
         {
           // Moose::out<<"Loading "<<current_name<<std::endl;
 

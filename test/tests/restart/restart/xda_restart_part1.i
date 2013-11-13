@@ -29,7 +29,7 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  
+
   [./diffusivity]
     order = FIRST
     family = LAGRANGE
@@ -53,7 +53,7 @@
     variable = u
     function = forcing_fn
   [../]
-  
+
   [./out_diffusivity]
     type = RealPropertyOutput
     variable = diffusivity
@@ -96,5 +96,5 @@
   exodus = true
   perf_log = true
   # restart
-  num_restart_files = 2
+  num_checkpoint_files = 2
 []

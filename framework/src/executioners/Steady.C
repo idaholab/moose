@@ -31,6 +31,12 @@ Steady::Steady(const std::string & name, InputParameters parameters) :
     _time_step(_problem.timeStep()),
     _time(_problem.time())
 {
+  if(_app.isRecovering())
+  {
+    Moose::out<<"\nCannot recover steady solves!\nExiting...\n"<<std::endl;
+    MPI_Abort(libMesh::COMM_WORLD, 0);
+  }
+
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
 

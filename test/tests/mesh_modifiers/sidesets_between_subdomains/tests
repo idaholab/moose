@@ -4,5 +4,6 @@
     input = 'between.i'
     cli_args = '--mesh-only'
     exodiff = 'between_in.e'
+    recover = false
   [../]
 []

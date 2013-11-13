@@ -86,6 +86,21 @@ public:
   virtual void load(std::istream & stream) = 0;
 };
 
+template<>
+inline void
+dataStore(std::ostream & stream, PropertyValue * & p, void * /*context*/)
+{
+  p->store(stream);
+}
+
+template<>
+inline void
+dataLoad(std::istream & stream, PropertyValue * & p, void * /*context*/)
+{
+  p->load(stream);
+}
+
+
 /**
  * Concrete definition of a parameter value
  * for a specified type.
@@ -241,7 +256,6 @@ MaterialProperty<T>::load(std::istream & stream)
     loadHelper(stream, _value[i], NULL);
 }
 
-
 /**
  * Container for storing material properties
  */
@@ -282,6 +296,26 @@ public:
         (*k)->resize(n_qpoints);
   }
 };
+
+template<>
+inline void
+dataStore(std::ostream & stream, MaterialProperties & v, void * context)
+{
+  // Cast this to a vector so we can just piggy back on the vector store capability
+  std::vector<PropertyValue *> & mat_props = static_cast<std::vector<PropertyValue *> &>(v);
+
+  storeHelper(stream, mat_props, context);
+}
+
+template<>
+inline void
+dataLoad(std::istream & stream, MaterialProperties & v, void * context)
+{
+  // Cast this to a vector so we can just piggy back on the vector store capability
+  std::vector<PropertyValue *> & mat_props = static_cast<std::vector<PropertyValue *> &>(v);
+
+  loadHelper(stream, mat_props, context);
+}
 
 // Scalar Init Helper Function
 template<typename P>

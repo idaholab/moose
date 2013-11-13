@@ -42,3 +42,9 @@ Restartable::registerRestartableDataOnSubProblem(std::string name, RestartableDa
 {
   _restartable_subproblem->registerRestartableData(name, data, tid);
 }
+
+void
+Restartable::registerRecoverableDataOnSubProblem(std::string name)
+{
+  _restartable_subproblem->registerRecoverableData(name);
+}

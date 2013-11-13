@@ -32,9 +32,9 @@ AdamsPredictor::AdamsPredictor(const std::string & name, InputParameters paramet
     _tmp_previous_solution(_nl.addVector("tmp_previous_solution", true, GHOSTED)),
     _tmp_residual_old(_nl.addVector("tmp_residual_old", true, GHOSTED)),
     _tmp_third_vector(_nl.addVector("tmp_third_vector", true, GHOSTED)),
-    _t_step_old(0),
-    _dt_older(0),
-    _dtstorage(0)
+    _t_step_old(declareRestartableData<int>("t_step_old", 0)),
+    _dt_older(declareRestartableData<Real>("dt_older", 0)),
+    _dtstorage(declareRestartableData<Real>("dtstorage", 0))
 {
 }
 

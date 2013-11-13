@@ -54,10 +54,10 @@ protected:
   NumericVector<Number> & _aux1;
 
   /// dt of the big step
-  Real _dt_full;
+  Real & _dt_full;
 
   /// global relative time discretization error estimate
-  Real _error;
+  Real & _error;
   /// error tolerance
   Real _e_tol;
   /// maximal error
@@ -67,11 +67,11 @@ protected:
   /// steps to take before increasing dt
   int _steps_between_increase;
   /// steps taken at current dt
-  int _dt_steps_taken;
+  int & _dt_steps_taken;
   int _start_adapting;
-  Real _my_dt_old;
+  Real & _my_dt_old;
   ///infinity norm of the solution vector
-  Real _infnorm;
+  Real & _infnorm;
   /// scaling_parameter for time step selection, default is 0.8
   Real _scaling_parameter;
   std::ofstream myfile;

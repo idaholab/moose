@@ -2,6 +2,7 @@
   [./first]
     type = 'RunApp'
     input = 'restartable_types.i'
+    recover = false
   [../]
 
   [./second]
@@ -9,5 +10,6 @@
     type = 'RunApp'
     input = 'restartable_types2.i'
     prereq = first
+    recover = false
   [../]
 []
