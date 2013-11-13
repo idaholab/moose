@@ -258,7 +258,7 @@ class TestHarness:
         # Part 1:
         part1[TEST_NAME] += '_part1'
         part1[CLI_ARGS].append('--half-transient')
-        part1[CLI_ARGS].append('Output/num_checkpoint_files=1')
+        part1[CLI_ARGS].append('Output/num_restart_files=1')
         part1['skip_checks'] = True
 
         # Part 2:

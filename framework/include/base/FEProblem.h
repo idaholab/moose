@@ -622,24 +622,6 @@ public:
   virtual void setNumRestartFiles(unsigned int num_files);
 
   /**
-   * Set the suffix for the checkpoint directory
-   *
-   * This will be appended to the output file base to create
-   * the directory name for checkpoint files.
-   */
-  virtual void setCheckpointDirSuffix(std::string suffix);
-
-  /**
-   * Get the checkpoint dir suffix
-   */
-  virtual std::string getCheckpointDirSuffix();
-
-  /**
-   * Get the checkpoint dir
-   */
-  virtual std::string getCheckpointDir();
-
-  /**
    * Gets the number of restart files to save
    * @return the number of files to keep around
    */
@@ -790,9 +772,9 @@ protected:
   std::map<std::string, RandomData *> _random_data_objects;
 
   /// Table with postprocessors that will go into files
-  FormattedTable & _pps_output_table_file;
+  FormattedTable _pps_output_table_file;
   /// Table with postprocessors that will go on screen
-  FormattedTable & _pps_output_table_screen;
+  FormattedTable _pps_output_table_screen;
   unsigned int _pps_output_table_max_rows;
   MooseEnum _pps_fit_to_screen;
 
@@ -886,9 +868,6 @@ protected:
 
   SolverParams _solver_params;
 
-  /// The suffix to append to the output base to create the checkpoint directory
-  std::string _checkpoint_dir_suffix;
-
   /// True if we're doing a _restart_ (note: this is _not_ true when recovering!)
   bool _restarting;
 
@@ -902,22 +881,6 @@ public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)
   static unsigned int _n;
 
-private:
-  /**
-   * NOTE: This is an internal function meant for MOOSE use only!
-   *
-   * Register a piece of recoverable data.  This is data that will get
-   * written / read to / from a restart file.
-   *
-   * However, this data will ONLY get read from the restart file during a RECOVERY operation!
-   *
-   * @param name The full (unique) name.
-   */
-  virtual void registerRecoverableData(std::string name);
-
-  /// Data names that will only be read from the restart file during RECOVERY
-  std::set<std::string> _recoverable_data;
-
   friend class AuxiliarySystem;
   friend class NonlinearSystem;
   friend class Resurrector;
@@ -925,8 +888,6 @@ private:
   friend class RestartableDataIO;
   friend class ComputeInitialConditionThread;
   friend class ComputeBoundaryInitialConditionThread;
-  friend class Restartable;
-  friend class DisplacedProblem;
 };
 
 #endif /* FEPROBLEM_H */

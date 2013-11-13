@@ -49,9 +49,9 @@ StripeMesh::clone() const
 }
 
 void
-StripeMesh::buildMesh()
+StripeMesh::init()
 {
-  GeneratedMesh::buildMesh();
+  GeneratedMesh::init();
 
   Real h = (getParam<Real>("xmax") - getParam<Real>("xmin")) / _n_stripes;  // width of the stripe
 

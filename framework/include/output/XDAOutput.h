@@ -24,7 +24,7 @@
 class XDAOutput : public Outputter
 {
 public:
-  XDAOutput(EquationSystems & es, bool binary, SubProblem & sub_problem);
+  XDAOutput(EquationSystems & es, bool binary = false);
   virtual ~XDAOutput();
 
   virtual void output(const std::string & file_base, Real time, unsigned int t_step);

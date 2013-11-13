@@ -22,8 +22,8 @@
 #include <sstream>
 #include <iomanip>
 
-VTKOutput::VTKOutput(EquationSystems & es, SubProblem & sub_problem) :
-    Outputter(es, sub_problem, "VTKOutput")
+VTKOutput::VTKOutput(EquationSystems & es) :
+    Outputter(es)
 {
 }
 

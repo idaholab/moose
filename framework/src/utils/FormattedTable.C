@@ -25,32 +25,6 @@
 const unsigned short FormattedTable::_column_width = 15;
 const unsigned short FormattedTable::_min_pps_width = 40;
 
-template<>
-void
-dataStore(std::ostream & stream, FormattedTable & table, void * context)
-{
-  storeHelper(stream, table._data, context);
-  storeHelper(stream, table._column_names, context);
-
-  // Don't store these
-  // _output_file
-  // _stream_open
-
-  storeHelper(stream, table._last_key, context);
-}
-
-template<>
-void
-dataLoad(std::istream & stream, FormattedTable & table, void * context)
-{
-  loadHelper(stream, table._data, context);
-
-  loadHelper(stream, table._column_names, context);
-
-  table._stream_open = false;
-
-  loadHelper(stream, table._last_key, context);
-}
 
 FormattedTable::FormattedTable() :
     _stream_open(false),

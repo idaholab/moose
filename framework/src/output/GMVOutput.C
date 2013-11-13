@@ -22,8 +22,8 @@
 #include <sstream>
 #include <iomanip>
 
-GMVOutput::GMVOutput(EquationSystems & es, SubProblem & sub_problem) :
-    Outputter(es, sub_problem, "GMVOutput")
+GMVOutput::GMVOutput(EquationSystems & es) :
+    Outputter(es)
 {
 }
 

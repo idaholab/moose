@@ -21,8 +21,8 @@
 #include <sstream>
 #include <iomanip>
 
-TecplotOutput::TecplotOutput(EquationSystems & es, bool binary, SubProblem & sub_problem) :
-    Outputter(es, sub_problem, "TecplotOutput"),
+TecplotOutput::TecplotOutput(EquationSystems & es, bool binary) :
+    Outputter(es),
     _binary(binary)
 {
 }

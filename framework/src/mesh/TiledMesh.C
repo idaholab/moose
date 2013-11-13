@@ -77,7 +77,7 @@ TiledMesh::clone() const
 }
 
 void
-TiledMesh::buildMesh()
+TiledMesh::init()
 {
   // stitch_meshes() is only implemented for SerialMesh.  So make sure
   // we have one here before continuing.

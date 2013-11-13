@@ -54,7 +54,7 @@
 
 [Executioner]
   type = Transient
-  restart_file_base = solution_aux_exodus_interp_restart1_out_cp/0005
+  restart_file_base = solution_aux_exodus_interp_restart1_out_restart_0005
   solve_type = NEWTON
   l_max_its = 800
   nl_rel_tol = 1e-10

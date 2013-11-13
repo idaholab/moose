@@ -1,5 +1,5 @@
 [Mesh]
-  file = out_part1_cp/0005_mesh.cpr
+  file = out_part1_restart_0005_mesh.xda
   distribution = serial
 []
 
@@ -53,7 +53,7 @@
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-  restart_file_base = out_part1_cp/0005
+  restart_file_base = out_part1_restart_0005
 []
 
 [Output]

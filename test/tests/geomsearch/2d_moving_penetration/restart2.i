@@ -214,7 +214,7 @@
 [Executioner]
   type = Transient
 
-  restart_file_base = restart_out_cp/0010
+  restart_file_base = restart_out_restart_0010
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'

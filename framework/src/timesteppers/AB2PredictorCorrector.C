@@ -45,18 +45,17 @@ AB2PredictorCorrector::AB2PredictorCorrector(const std::string & name, InputPara
     TimeStepper(name, parameters),
     _u1(_fe_problem.getNonlinearSystem().addVector("u1", true, GHOSTED)),
     _aux1(_fe_problem.getAuxiliarySystem().addVector("aux1", true, GHOSTED)),
-    _dt_full(declareRestartableData<Real>("dt_full", 0)),
-    _error(declareRestartableData<Real>("error", 0)),
     _e_tol(getParam<Real>("e_tol")),
     _e_max(getParam<Real>("e_max")),
     _max_increase(getParam<Real>("max_increase")),
     _steps_between_increase(getParam<int>("steps_between_increase")),
-    _dt_steps_taken(declareRestartableData<int>("dt_steps_taken", 0)),
+    _dt_steps_taken(0),
     _start_adapting(getParam<int>("start_adapting")),
-    _my_dt_old(declareRestartableData<Real>("my_dt_old", 0)),
-    _infnorm(declareRestartableData<Real>("infnorm", 0)),
+    _my_dt_old(0),
+    _infnorm(0),
     _scaling_parameter(getParam<Real>("scaling_parameter"))
 {
+  _error = 0;
   Real predscale = 1.;
   InputParameters params = _app.getFactory().getValidParams("AdamsPredictor");
   params.set<Real>("scale") = predscale;
@@ -100,7 +99,6 @@ AB2PredictorCorrector::step()
     {
       // Calculate error if past the first solve
       _error = estimateTimeError(_u1);
-
       _infnorm = _u1.linfty_norm();
       _e_max = 1.1 * _e_tol * _infnorm;
       Moose::out << "Time Error Estimate: " << _error << std::endl;
@@ -139,21 +137,17 @@ AB2PredictorCorrector::computeDT()
   if (_t_step <= _start_adapting)
     return _dt;
 
-
   _my_dt_old = _dt;
-
   _dt_steps_taken += 1;
   if(_dt_steps_taken >= _steps_between_increase)
   {
     Real new_dt = _dt_full * _scaling_parameter * std::pow(_infnorm * _e_tol / _error, 1.0 / 3.0);
-
     if (new_dt / _dt_full > _max_increase)
       _dt = _dt_full*_max_increase;
     else
       _dt = new_dt;
     _dt_steps_taken = 0;
   }
-
   return _dt;
 }
 

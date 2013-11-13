@@ -207,8 +207,7 @@ Transient::execute()
   // The reason is that we actually move the solution back in time before we actually start solving (which I think is wrong).  So this call here
   // is to maintain backward compatibility and so that MOOSE is giving the same answer.  However, we might remove this call and regold the test
   // in the future eventually.
-  if(!_app.isRecovering())
-    _problem.copyOldSolutions();
+  _problem.copyOldSolutions();
 
   // Start time loop...
   while (true)
@@ -590,7 +589,7 @@ Transient::keepGoing()
   if((_time>_end_time) || (fabs(_time-_end_time)<=_timestep_tolerance))
     keep_going = false;
 
-  if(!keep_going && !_problem.out().wasOutput() && !_app.halfTransient())
+  if(!keep_going && !_problem.out().wasOutput())
   {
     _problem.output(true);
     if(_allow_output)

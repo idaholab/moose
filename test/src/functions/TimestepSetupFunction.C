@@ -23,7 +23,7 @@ InputParameters validParams<TimestepSetupFunction>()
 
 TimestepSetupFunction::TimestepSetupFunction(const std::string & name, InputParameters parameters) :
     Function(name, parameters),
-    _local_timestep(declareRestartableData<unsigned int>("local_timestep", 0))
+    _local_timestep(0)
 {}
 
 void

@@ -65,7 +65,7 @@ FileMesh::clone() const
 }
 
 void
-FileMesh::buildMesh()
+FileMesh::init()
 {
 //  mooseAssert(_mesh == NULL, "Mesh already exists, and you are trying to read another");
   std::string _file_name = getParam<MeshFileName>("file");

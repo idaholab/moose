@@ -25,9 +25,8 @@ InputParameters validParams<BDF2>()
 
 BDF2::BDF2(const std::string & name, InputParameters parameters) :
     TimeIntegrator(name, parameters),
-    _weight(declareRestartableData<std::vector<Real> >("weight"))
+    _weight(3, 0.)
 {
-  _weight.resize(3);
 }
 
 BDF2::~BDF2()

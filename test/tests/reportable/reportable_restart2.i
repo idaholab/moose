@@ -40,7 +40,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  restart_file_base = reportable_restart1_out_cp/0010
+  restart_file_base = reportable_restart1_out_restart_0010
   num_steps = 20
   dt = 0.1
   solve_type = PJFNK

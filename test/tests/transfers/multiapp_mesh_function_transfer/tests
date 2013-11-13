@@ -3,7 +3,6 @@
     type = 'Exodiff'
     input = 'tosub_master.i'
     exodiff = 'tosub_master_out_sub0.e tosub_master_out_sub1.e tosub_master_out_sub2.e'
-    recover = false
   [../]
 
 
@@ -11,13 +10,11 @@
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out.e'
-    recover = false
   [../]
 
   [./missed_point]
     type = 'RunException'
     input = 'missing_master.i'
     expect_err = 'Point not found'
-    recover = false
   [../]
 []

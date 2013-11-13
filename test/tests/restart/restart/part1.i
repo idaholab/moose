@@ -81,5 +81,5 @@
   exodus = true
   xda = true
   perf_log = true
-  num_checkpoint_files = 1
+  num_restart_files = 1
 []

@@ -141,44 +141,8 @@ private:
   template<typename T>
   T & declareRestartableDataWithObjectNameWithContext(std::string data_name, std::string object_name, void * context);
 
-  /**
-   * NOTE: These are used internally in MOOSE.  NOT FOR PUBLIC CONSUMPTION!
-   *
-   * Declare a piece of data as "recoverable".
-   * This means that in the event of a recovery this piece of data
-   * will be restored back to its previous value.
-   *
-   * Note - this data will NOT be restored on _Restart_!
-   *
-   * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
-   *
-   * @param data_name The name of the data (usually just use the same name as the member variable)
-   */
-  template<typename T>
-  T & declareRecoverableData(std::string data_name);
-
-  /**
-   * NOTE: These are used internally in MOOSE.  NOT FOR PUBLIC CONSUMPTION!
-   *
-   * Declare a piece of data as "restartable" and initialize it.
-   * This means that in the event of a restart this piece of data
-   * will be restored back to its previous value.
-   *
-   * Note - this data will NOT be restored on _Restart_!
-   *
-   * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
-   *
-   * @param data_name The name of the data (usually just use the same name as the member variable)
-   * @param init_value The initial value of the data
-   */
-  template<typename T>
-  T & declareRecoverableData(std::string data_name, const T & init_value);
-
   /// Helper function so we don't have to #include SubProblem in the header
   void registerRestartableDataOnSubProblem(std::string name, RestartableDataValue * data, THREAD_ID tid);
-
-  /// Helper function so we don't have to #include SubProblem in the header
-  void registerRecoverableDataOnSubProblem(std::string name);
 
   /// The name of the object
   std::string _restartable_name;
@@ -199,7 +163,6 @@ private:
   friend class PostprocessorData;
   friend class NearestNodeLocator;
   friend class ReportableData;
-  friend class ExodusOutput;
 };
 
 template<typename T>
@@ -269,34 +232,5 @@ Restartable::declareRestartableDataWithObjectNameWithContext(std::string data_na
 
   return value;
 }
-
-template<typename T>
-T &
-Restartable::declareRecoverableData(std::string data_name)
-{
-  if(!_restartable_subproblem)
-    mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
-
-  std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
-
-  registerRecoverableDataOnSubProblem(full_name);
-
-  return declareRestartableDataWithContext<T>(data_name, NULL);
-}
-
-template<typename T>
-T &
-Restartable::declareRecoverableData(std::string data_name, const T & init_value)
-{
-  if(!_restartable_subproblem)
-    mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
-
-  std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
-
-  registerRecoverableDataOnSubProblem(full_name);
-
-  return declareRestartableDataWithContext<T>(data_name, init_value, NULL);
-}
-
 
 #endif // RESTARTABLE

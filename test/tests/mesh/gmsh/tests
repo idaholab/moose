@@ -4,6 +4,5 @@
     input = 'gmsh_test.i'
     exodiff = 'gmsh_test_in.e'
     cli_args = '--mesh-only'
-    recover = false
   [../]
 []

@@ -3,6 +3,5 @@
     type = 'Exodiff'
     input = 'var_coupling.i'
     exodiff = 'var_coupling_out.e'
-    recover = false
   [../]
 []

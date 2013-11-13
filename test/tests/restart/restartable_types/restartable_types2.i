@@ -46,7 +46,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Steady
-  restart_file_base = restartable_types_out_cp/0001
+  restart_file_base = restartable_types_out_restart_0001
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'

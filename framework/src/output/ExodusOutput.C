@@ -30,16 +30,14 @@
 #include <sstream>
 #include <iomanip>
 
-ExodusOutput::ExodusOutput(MooseApp & app, EquationSystems & es, bool output_input, SubProblem & sub_problem, std::string name) :
-    Outputter(es, sub_problem, name),
+ExodusOutput::ExodusOutput(MooseApp & app, EquationSystems & es, bool output_input) :
+    Outputter(es),
     _app(app),
     _out(NULL),
-    _seq(declareRecoverableData<bool>("seq", false)),
-    _file_num(declareRecoverableData<int>("file_num", 0)),
-    _num(declareRecoverableData<int>("num", 0)),
-    _output_input(output_input),
-    _first(declareRecoverableData<bool>("first",true)),
-    _mesh_just_changed(declareRecoverableData<bool>("mesh_just_changed",false))
+    _seq(false),
+    _file_num(-1),
+    _num(0),
+    _output_input(output_input)
 {
 }
 
@@ -61,14 +59,14 @@ ExodusOutput::getFileName(const std::string & file_base)
      * OSSRealzeroright(exodus_stream_file_base, 4, 0, _file_num);
      * return exodus_stream_file_base.str() + ".e";
      */
-    if (_file_num > 1)
+    if (_file_num)
     {
       exodus_stream_file_base << "-s"
                               << std::setw(3)
                               << std::setprecision(0)
                               << std::setfill('0')
                               << std::right
-                              << _file_num;
+                              << _file_num+1;
     }
   }
 
@@ -80,7 +78,21 @@ void
 ExodusOutput::output(const std::string & file_base, Real time, unsigned int /*t_step*/)
 {
   if (_out == NULL)
-    allocateExodusObject();
+  {
+    _out = new ExodusII_IO(_es.get_mesh());
+    _out->set_output_variables(_output_variables);
+
+    // Skip output of z coordinates for 2D meshes, but still
+    // write 1D meshes as 3D, otherwise Paraview has trouble
+    // viewing them for some reason.
+    if (_es.get_mesh().mesh_dimension() != 1)
+      _out->use_mesh_dimension_instead_of_spatial_dimension(true);
+
+    if(_app.hasOutputPosition())
+      _out->set_coordinate_offset(_app.getOutputPosition());
+
+    _file_num++;
+  }
 
   _num++;
   _out->write_timestep(getFileName(file_base), _es, _num, time + _app.getGlobalTimeOffset());
@@ -152,9 +164,6 @@ ExodusOutput::outputPps(const std::string & /*file_base*/, const FormattedTable 
 void
 ExodusOutput::meshChanged()
 {
-  _mesh_just_changed = true;
-
-  _append = false;
   _num = 0;
 
   delete _out;
@@ -169,7 +178,7 @@ ExodusOutput::outputInput()
     return;
 
   if (_out == NULL)
-    allocateExodusObject();
+    _out = new ExodusII_IO(_es.get_mesh());
 
   ExodusFormatter syntax_formatter;
   syntax_formatter.printInputFile(_app.actionWarehouse());
@@ -181,36 +190,9 @@ ExodusOutput::outputInput()
 void
 ExodusOutput::setOutputPosition(const Point & /* p */)
 {
-  if(_file_num == 0) // This might happen in the case of a MultiApp reset
-    _file_num = 1;
+  if(_file_num == -1) // This might happen in the case of a MultiApp reset
+    _file_num = 0;
 
   sequence(true);
   meshChanged();
-}
-
-void
-ExodusOutput::allocateExodusObject()
-{
-  _out = new ExodusII_IO(_es.get_mesh());
-  _out->set_output_variables(_output_variables);
-
-  // Skip output of z coordinates for 2D meshes, but still
-  // write 1D meshes as 3D, otherwise Paraview has trouble
-  // viewing them for some reason.
-  if (_es.get_mesh().mesh_dimension() != 1)
-    _out->use_mesh_dimension_instead_of_spatial_dimension(true);
-
-  if(_app.hasOutputPosition())
-    _out->set_coordinate_offset(_app.getOutputPosition());
-
-  if(_first || _mesh_just_changed)
-    _file_num++;
-
-  _first = false;
-
-  _mesh_just_changed = false;
-
-  // Set the append flag on the underlying ExodusII_IO object
-  if(!_mesh_just_changed)
-    _out->append(_append);
 }

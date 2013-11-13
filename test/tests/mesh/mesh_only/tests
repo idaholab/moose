@@ -4,6 +4,5 @@
     input = 'mesh_only.i'
     cli_args = '--mesh-only 3d_chimney.e'
     exodiff = '3d_chimney.e'
-    recover = false
   [../]
 []

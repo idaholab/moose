@@ -20,7 +20,6 @@
     type = 'CheckFiles'
     input = 'output_test_gmv.i'
     check_files = 'out_0000.gmv'
-    recover = false
   [../]
 
   [./yaml_dump_test]

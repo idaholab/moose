@@ -25,7 +25,7 @@
 class VTKOutput : public Outputter
 {
 public:
-  VTKOutput(EquationSystems & es, SubProblem & sub_problem);
+  VTKOutput(EquationSystems & es);
   virtual ~VTKOutput();
 
   virtual void output(const std::string & file_base, Real time, unsigned int t_step);

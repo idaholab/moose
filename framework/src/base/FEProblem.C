@@ -116,8 +116,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
     _quadrature_order(CONSTANT),
-    _pps_output_table_file(declareRestartableData<FormattedTable>("pps_output_table_file")),
-    _pps_output_table_screen(declareRestartableData<FormattedTable>("pps_output_table_screen")),
     _pps_output_table_max_rows(0),
     _pps_fit_to_screen(FormattedTable::getWidthModes()),
     _print_linear_residuals(false),
@@ -3682,24 +3680,6 @@ FEProblem::setNumRestartFiles(unsigned int num_files)
   _resurrector->setNumRestartFiles(num_files);
 }
 
-void
-FEProblem::setCheckpointDirSuffix(std::string suffix)
-{
-  _checkpoint_dir_suffix = suffix;
-}
-
-std::string
-FEProblem::getCheckpointDirSuffix()
-{
-  return _checkpoint_dir_suffix;
-}
-
-std::string
-FEProblem::getCheckpointDir()
-{
-  return out().fileBase() + "_" + getCheckpointDirSuffix();
-}
-
 unsigned int
 FEProblem::getNumRestartFiles()
 {
@@ -3727,12 +3707,6 @@ FEProblem::registerRestartableData(std::string name, RestartableDataValue * data
     mooseError("Attempted to declare restartable twice with the same name: " << name);
 
   restartable_data[name] = data;
-}
-
-void
-FEProblem::registerRecoverableData(std::string name)
-{
-  _recoverable_data.insert(name);
 }
 
 std::vector<VariableName>

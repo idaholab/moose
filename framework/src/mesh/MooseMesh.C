@@ -110,8 +110,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     _bnd_elem_range(NULL),
     _node_to_elem_map_built(false),
     _patch_size(40),
-    _regular_orthogonal_mesh(false),
-    _allow_recovery(true)
+    _regular_orthogonal_mesh(false)
 {
   switch (_mesh_distribution_type)
   {
@@ -1655,15 +1654,6 @@ MooseMesh::getNormalByBoundaryID(BoundaryID id) const
   // Note: Boundaries that are not in the map (existing boundaries) will default
   // construct a new RealVectorValue - (x,y,z)=(0, 0, 0)
   return (*_boundary_to_normal_map)[id];
-}
-
-void
-MooseMesh::init()
-{
-  if(!_app.isRecovering() || !_allow_recovery)
-    buildMesh();
-  else // When recovering just read the CPR file
-    getMesh().read(_app.getRecoverFileBase() + "_mesh.cpr");
 }
 
 unsigned int

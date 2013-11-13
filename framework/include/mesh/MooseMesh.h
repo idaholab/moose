@@ -87,19 +87,9 @@ public:
   virtual MooseMesh & clone() const = 0;
 
   /**
-   * Initialize the Mesh object.  Most of the time this will turn around
-   * and call build_mesh so the child class can build the Mesh object.
-   *
-   * However, during Recovery this will read the CPA file...
+   * Do subclass-specific initialization.
    */
-  void init();
-
-  /**
-   * Must be overridden by child classes.
-   *
-   * This is where the Mesh object is actually created and filled in.
-   */
-  virtual void buildMesh() = 0;
+  virtual void init() = 0;
 
   /**
    * Returns MeshBase::mesh_dimsension(), (not
@@ -588,11 +578,6 @@ public:
    */
   bool isPartitionerForced() const { return _partitioner_overridden; }
 
-  /**
-   * Set whether or not this mesh is allowed to read a recovery file.
-   */
-  void allowRecovery(bool allow) { _allow_recovery = allow; }
-
 protected:
   /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a SerialMesh or ParallelMesh.
@@ -822,9 +807,6 @@ private:
 
   /// Holds a map from subomdain ids to the boundary ids that are attached to it
   std::map<unsigned int, std::set<unsigned int> > _subdomain_boundary_ids;
-
-  /// Whether or not this Mesh is allowed to read a recovery file
-  bool _allow_recovery;
 
   friend class AddAllSideSetsByNormals;
 };

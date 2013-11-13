@@ -16,7 +16,7 @@
 #define RESURRECTOR_H
 
 #include "Moose.h"
-#include "CheckpointOutput.h"
+#include "XDAOutput.h"
 #include "MaterialPropertyIO.h"
 #include "RestartableDataIO.h"
 
@@ -76,10 +76,10 @@ protected:
   /// name of the file that we restart from
   std::string _restart_file_base;
 
-  /// number of checkpoint files to keep around
-  unsigned int _num_checkpoint_files;
-  /// Checkpoint writer
-  CheckpointOutput _checkpoint;
+  /// number of restart files to keep around
+  unsigned int _num_restart_files;
+  /// XDA writer
+  XDAOutput _xda;
   /// Stateful material property output
   MaterialPropertyIO _mat;
   /// Restartable Data

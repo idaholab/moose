@@ -40,7 +40,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  restart_file_base = kernel_restartable_out_cp/0005
+  restart_file_base = kernel_restartable_out_restart_0005
   num_steps = 10
   dt = 1e-2
   solve_type = PJFNK
@@ -52,7 +52,7 @@
   linear_residuals = true
   output_initial = true
   exodus = true
-  num_checkpoint_files = 100
+  num_restart_files = 100
   perf_log = true
 []
 

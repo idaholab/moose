@@ -64,6 +64,6 @@
 
 [Output]
   exodus = true
-  num_checkpoint_files = 1
+  num_restart_files = 1
   perf_log = true
 []

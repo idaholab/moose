@@ -15,7 +15,6 @@
 #include "OutputProblem.h"
 #include "MooseMesh.h"
 #include "FileMesh.h"
-#include "MooseApp.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/explicit_system.h"
@@ -195,18 +194,12 @@ OutputProblem::meshInitHelper(FEProblem & fe_problem, InputParameters & params)
     mesh_params.set<bool>("nemesis") = false;
     mesh_params.set<bool>("skip_partitioning") = false;
     mesh = new FileMesh("output_problem_mesh", mesh_params);
-    mesh->allowRecovery(false); // We actually want to reread the initial mesh
     mesh->init();
     mesh->prepare();
     mesh->meshChanged();
   }
   else
-  {
-    if(fe_problem.getMooseApp().isRecovering())
-      mooseWarning("Recovering or Restarting with Oversampling may not work (especially with adapted meshes)!!  Refs #2295");
-
     mesh = &fe_problem.mesh().clone();
-  }
 
   return mesh;
 }

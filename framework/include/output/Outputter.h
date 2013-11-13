@@ -18,7 +18,6 @@
 #include "Moose.h"
 #include "MooseTypes.h"
 #include "FormattedTable.h"
-#include "Restartable.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
@@ -28,17 +27,10 @@
 
 class Problem;
 
-class Outputter : public Restartable
+class Outputter
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param es The EquationSystems object to output
-   * @param sub_problem The sub_problem this Outputter is associated with
-   * @param name The name of the Outputter (like Exodus, VTK, etc.)
-   */
-  Outputter(EquationSystems & es, SubProblem & sub_problem, std::string name);
+  Outputter(EquationSystems & es);
   virtual ~Outputter();
 
   /**
@@ -59,20 +51,11 @@ public:
   /// Set (or reset) the output position
   virtual void setOutputPosition(const Point & /*p*/) {}
 
-  /**
-   * Set the append flag on this Outputter.  Derived classes may or
-   * may not make use of this flag when they are created.
-   */
-  virtual void setAppend(bool b);
-
 protected:
   EquationSystems & _es;
 
   /// The variables to be output
   std::vector<std::string> _output_variables;
-
-  /// The flag which gets set by the setAppend() function
-  bool _append;
 };
 
 #endif /* OUTPUTTER_H */

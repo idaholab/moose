@@ -17,7 +17,6 @@
 
 #include "Moose.h"
 #include "MooseEnum.h"
-#include "DataIO.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/exodusII_io.h"
@@ -27,11 +26,6 @@
 #include <set>
 #include <ostream>
 #include <fstream>
-
-class FormattedTable;
-
-template<> void dataStore(std::ostream & stream, FormattedTable & table, void * context);
-template<> void dataLoad(std::istream & stream, FormattedTable & v, void * context);
 
 class FormattedTable
 {
@@ -126,9 +120,7 @@ protected:
 
   /// The last key value inserted
   Real _last_key;
-
-  friend void dataStore<FormattedTable>(std::ostream & stream, FormattedTable & table, void * context);
-  friend void dataLoad<FormattedTable>(std::istream & stream, FormattedTable & v, void * context);
 };
+
 
 #endif //FORMATTEDTABLE_H

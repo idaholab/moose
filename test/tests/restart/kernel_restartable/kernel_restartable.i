@@ -51,7 +51,7 @@
   linear_residuals = true
   output_initial = true
   exodus = true
-  num_checkpoint_files = 100
+  num_restart_files = 100
   perf_log = true
 []
 

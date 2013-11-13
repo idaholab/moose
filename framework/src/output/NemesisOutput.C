@@ -27,8 +27,8 @@
 #include <sstream>
 #include <iomanip>
 
-NemesisOutput::NemesisOutput(EquationSystems & es, SubProblem & sub_problem) :
-    Outputter(es, sub_problem, "NemesisOutput"),
+NemesisOutput::NemesisOutput(EquationSystems & es) :
+    Outputter(es),
     _out(NULL),
     _seq(false),
     _file_num(-1),

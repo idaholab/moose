@@ -4,7 +4,6 @@
     input = 'simple.i'
     exodiff = 'simple_in.e'
     cli_args = '--mesh-only'
-    recover = false
   [../]
 
   [./less_simple]
@@ -12,6 +11,5 @@
     input = 'less_simple.i'
     exodiff = 'less_simple_in.e'
     cli_args = '--mesh-only'
-    recover = false
   [../]
 []
