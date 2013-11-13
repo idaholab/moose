@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<ConstantIC>()
 {
   InputParameters params = validParams<InitialCondition>();
-  params.set<Real>("value") = 0.0;
+  params.addRequiredParam<Real>("value", "The value to be set in IC");
   return params;
 }
 
