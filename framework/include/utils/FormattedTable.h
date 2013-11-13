@@ -131,4 +131,7 @@ protected:
   friend void dataLoad<FormattedTable>(std::istream & stream, FormattedTable & v, void * context);
 };
 
+template<> void dataStore(std::ostream & stream, FormattedTable & table, void * context);
+template<> void dataLoad(std::istream & stream, FormattedTable & v, void * context);
+
 #endif //FORMATTEDTABLE_H
