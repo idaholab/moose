@@ -195,5 +195,5 @@
 #  tecplot = true
   perf_log = true
 
-  num_restart_files = 1
+  num_checkpoint_files = 1
 []

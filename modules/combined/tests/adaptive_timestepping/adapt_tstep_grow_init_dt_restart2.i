@@ -131,7 +131,7 @@
     dt = 1.0
   [../]
 
-  restart_file_base = adapt_tstep_grow_init_dt_restart1_out_restart_0005
+  restart_file_base = adapt_tstep_grow_init_dt_restart1_out_cp/0005
 []
 
 [Postprocessors]
@@ -146,5 +146,5 @@
   interval = 1
   output_initial = true
   exodus = true
-  num_restart_files = 1
+  num_checkpoint_files = 1
 []
