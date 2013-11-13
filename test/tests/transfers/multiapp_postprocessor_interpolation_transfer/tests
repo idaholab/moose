@@ -3,17 +3,20 @@
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out.e'
+    recover = false
   [../]
 
   [./radial_basis]
     type = 'Exodiff'
     input = 'radial_master.i'
     exodiff = 'radial_master_out.e'
+    recover = false
   [../]
 
   [./multilevel]
     type = 'Exodiff'
     input = 'multilevel_master.i'
     exodiff = 'multilevel_master_out.e multilevel_master_out_sub0.e multilevel_master_out_sub0_sub0.e multilevel_master_out_sub0_sub1.e multilevel_master_out_sub1.e multilevel_master_out_sub1_sub0.e multilevel_master_out_sub1_sub1.e'
+    recover = false
   [../]
 []

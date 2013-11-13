@@ -28,7 +28,7 @@
 class ExodusOutput : public Outputter
 {
 public:
-  ExodusOutput(MooseApp & app, EquationSystems & es, bool output_input=true);
+  ExodusOutput(MooseApp & app, EquationSystems & es, bool output_input, SubProblem & sub_problem, std::string name);
   virtual ~ExodusOutput();
 
   virtual void output(const std::string & file_base, Real time, unsigned int t_step);
@@ -47,14 +47,25 @@ protected:
 
   ExodusII_IO * _out;
 
-  bool _seq;
+  bool & _seq;
   /// number of the file
-  int _file_num;
+  int & _file_num;
   /// the number of timestep within the file
-  int _num;
+  int & _num;
 
   bool _output_input;
   std::string getFileName(const std::string & file_base);
+
+  bool & _first;
+
+  bool & _mesh_just_changed;
+
+  /**
+   * Since we need to allocate the ExodusII_IO object in two different
+   * locations, use this helper function to make sure it gets
+   * allocated the same way no matter what.
+   */
+  void allocateExodusObject();
 };
 
 #endif /* EXODUSOUTPUTTER_H */

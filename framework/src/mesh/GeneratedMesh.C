@@ -77,7 +77,7 @@ GeneratedMesh::clone() const
 }
 
 void
-GeneratedMesh::init()
+GeneratedMesh::buildMesh()
 {
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
 

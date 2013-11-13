@@ -37,7 +37,7 @@ public:
   virtual void postStep(NumericVector<Number> & residual);
 
 protected:
-  std::vector<Real> _weight;
+  std::vector<Real> & _weight;
 };
 
 

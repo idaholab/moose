@@ -21,7 +21,9 @@
 #include "GMVOutput.h"
 #include "VTKOutput.h"
 #include "XDAOutput.h"
+#include "CheckpointOutput.h"
 #include "TecplotOutput.h"
+#include "Conversion.h"
 
 Output::Output(FEProblem & fe_problem, EquationSystems & eq) :
     _file_base("out"),
@@ -36,7 +38,8 @@ Output::Output(FEProblem & fe_problem, EquationSystems & eq) :
     _last_iteration_output_time(0.0),
     _time_interval(false),
     _time_interval_output_interval(0.0),
-    _output(false)
+    _output(false),
+    _append(false)
 {
 }
 
@@ -66,40 +69,48 @@ Output::init()
 void
 Output::add(Output::Type type, bool output_input)
 {
+  static unsigned int i = 0;
+  i++;
+
   Outputter *o = NULL;
   switch (type)
   {
   case EXODUS:
-    o = new ExodusOutput(_fe_problem.getMooseApp(), _eq, output_input);
+    o = new ExodusOutput(_fe_problem.getMooseApp(), _eq, output_input, _fe_problem, "ExodusOutput" + Moose::stringify(i));
     break;
 
   case NEMESIS:
-    o = new NemesisOutput(_eq);
+    o = new NemesisOutput(_eq, _fe_problem);
     break;
 
   case GMV:
-    o = new GMVOutput(_eq);
+    o = new GMVOutput(_eq, _fe_problem);
     break;
 
   case VTK:
-    o = new VTKOutput(_eq);
+    o = new VTKOutput(_eq, _fe_problem);
     break;
 
   case TECPLOT:
-    o = new TecplotOutput(_eq, false);
+    o = new TecplotOutput(_eq, false, _fe_problem);
     break;
 
   case TECPLOT_BIN:
-    o = new TecplotOutput(_eq, true);
+    o = new TecplotOutput(_eq, true, _fe_problem);
     break;
 
   case XDA:
-    o = new XDAOutput(_eq, false);
+    o = new XDAOutput(_eq, false, _fe_problem);
     break;
 
   case XDR:
-    o = new XDAOutput(_eq, true);
+    o = new XDAOutput(_eq, true, _fe_problem);
     break;
+
+  case CHECKPOINT:
+    o = new CheckpointOutput(_eq, true, _fe_problem);
+    break;
+
 
   default:
     mooseError("I do not know how to build and unknown outputter");
@@ -109,6 +120,11 @@ Output::add(Output::Type type, bool output_input)
   _outputter_types.insert(type);
 
   o->setOutputVariables(_output_variables);
+
+  // Set the append flag on the Outputter object to whatever ours is,
+  // note that the _append flag must be set before Output::add is called
+  // in order for it to take effect.
+  o->setAppend(_append);
 
   _outputters.push_back(o);
 }
@@ -306,3 +322,8 @@ Output::setOutputPosition(Point p)
 }
 
 
+void
+Output::setAppend(bool b)
+{
+  _append = b;
+}

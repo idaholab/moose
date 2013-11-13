@@ -41,8 +41,9 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("tecplot", false, "Specifies that you would like Tecplot output solution files(s)");
   params.addParam<bool>("tecplot_binary", false, "Specifies that you would like Tecplot binary output solution files(s)");
   params.addParam<bool>("xda", false, "Specifies that you would like xda output solution files(s)");
+  params.addParam<bool>("checkpoint", false, "Specifies that you would like checkpoint output solution files(s)");
   params.addParam<bool>("xdr", false, "Specifies that you would like xdr (binary) output solution file(s)");
-  params.addParam<bool>("postprocessor_screen", true, "Specifies that you would like PostProcessor output to the screen (stdout)");
+  params.addParam<bool>("postprocessor_screen",true, "Specifies that you would like PostProcessor output to the screen (stdout)");
   params.addParam<unsigned int>("max_pps_rows_screen", 15, "The maximum number of postprocessor values displayed on screen during a timestep (set to 0 for unlimited)");
   params.addParam<MooseEnum>("pps_fit_to_screen", pps_fit_mode, "Specifies the wrapping mode for post-processor tables that are printed to the screen "
                              "(ENVIRONMENT: Read \"PPS_WIDTH\" for desired width, AUTO: Attempt to determine width automatically (serial only), <n>: Desired width");
@@ -69,7 +70,9 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("linear_residuals", "Specifies whether the linear residuals are printed during the solve");
 
   // restart options
-  params.addParam<unsigned int>("num_restart_files", 0, "Number of the restart files to save (0 = no restart files)");
+  params.addParam<unsigned int>("num_checkpoint_files", 0, "Number of the restart files to save (0 = no restart files)");
+  params.addParam<std::string>("checkpoint_dir_suffix", "cp", "This will be appended to the file_base to create the directory name for checkpoint files.");
+
   params.addParam<Point>("position", "Set a positional offset.  This vector will get added to the nodal cooardinates to move the domain.");
   params.addParam<bool>("all_var_norms", false, "If true then all variable norms will be printed after each solve");
 
@@ -77,7 +80,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParamNamesToGroup("nemesis gmv vtk tecplot tecplot_binary xda xdr", "Format");
   params.addParamNamesToGroup("screen_interval postprocessor_screen max_pps_rows_screen pps_fit_to_screen postprocessor_csv postprocessor_gnuplot gnuplot_format", "Postprocessor");
   params.addParamNamesToGroup("perf_log show_setup_log_early", "Logging");
-  params.addParamNamesToGroup("num_restart_files", "Restart");
+  params.addParamNamesToGroup("num_checkpoint_files checkpoint_dir_suffix", "Checkpoint");
 
 
   return params;
@@ -95,6 +98,10 @@ SetupOutputAction::setupOutputObject(Output &output, InputParameters & params)
   mooseAssert(params.have_parameter<std::vector<VariableName> >("output_variables"), "Output Variables are required");
 
   OutFileBase base = params.get<OutFileBase>("file_base");
+
+  // Set the append parameter on the Output object (default false).
+  if (_app.isRecovering())
+    output.setAppend(true);
 
   if(params.isParamValid("output_if_base_contains"))
   {
@@ -124,6 +131,7 @@ SetupOutputAction::setupOutputObject(Output &output, InputParameters & params)
   if (params.get<bool>("tecplot_binary")) output.add(Output::TECPLOT_BIN);
   if (params.get<bool>("xda")) output.add(Output::XDA);
   if (params.get<bool>("xdr")) output.add(Output::XDR);
+  if (params.get<bool>("checkpoint")) output.add(Output::CHECKPOINT);
 }
 
 void
@@ -180,7 +188,7 @@ SetupOutputAction::act()
   setupOutputObject(output, _pars);
 
   const bool output_initial = getParam<bool>("output_initial");
-  if (_executioner != NULL)
+  if (_executioner != NULL && !_app.isRecovering())
     _executioner->outputInitial(output_initial);
 
   // TODO: handle this thru Problem interface
@@ -195,7 +203,8 @@ SetupOutputAction::act()
   _problem->outputSolutionHistory(getParam<bool>("output_solution_history"));
   _problem->outputESInfo(getParam<bool>("output_es_info"));
 
-  _problem->setNumRestartFiles(getParam<unsigned int>("num_restart_files"));
+  _problem->setNumRestartFiles(getParam<unsigned int>("num_checkpoint_files"));
+  _problem->setCheckpointDirSuffix(getParam<std::string>("checkpoint_dir_suffix"));
 
 
 #ifdef LIBMESH_ENABLE_AMR

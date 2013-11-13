@@ -20,6 +20,8 @@
 #include <string>
 #include <list>
 
+class RestartableDatas;
+
 class FEProblem;
 
 /**
@@ -35,12 +37,12 @@ public:
   /**
    * Write out the restartable data.
    */
-  void writeRestartableData(std::string file_name);
+  void writeRestartableData(std::string base_file_name, const RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data);
 
   /**
    * Read the restartable data.
    */
-  void readRestartableData(std::string file_name);
+  void readRestartableData(std::string base_file_name, RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data);
 
 private:
   /// Reference to a FEProblem being restarted

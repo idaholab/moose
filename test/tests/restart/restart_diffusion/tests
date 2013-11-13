@@ -17,6 +17,7 @@
     type = 'Exodiff'
     input = 'exodus_refined_restart_1_test.i'
     exodiff = 'exodus_refined_restart_1.e'
+    recover = false
   [../]
 
   [./test_2]

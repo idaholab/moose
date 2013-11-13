@@ -330,6 +330,20 @@ private:
   void checkMatProps(std::map<unsigned int, std::set<std::string> > & props,
                      std::map<unsigned int, std::set<std::string> > & check_props,
                      std::string type);
+
+  /**
+   * NOTE: This is an internal function meant for MOOSE use only!
+   *
+   * Register a piece of recoverable data.  This is data that will get
+   * written / read to / from a restart file.
+   *
+   * However, this data will ONLY get read from the restart file during a RECOVERY operation!
+   *
+   * @param name The full (unique) name.
+   */
+  virtual void registerRecoverableData(std::string name) = 0;
+
+  friend class Restartable;
 };
 
 namespace Moose

@@ -15,6 +15,7 @@
 #include "TimeStepper.h"
 #include "FEProblem.h"
 #include "Transient.h"
+#include "MooseApp.h"
 
 template<>
 InputParameters validParams<TimeStepper>()
@@ -123,8 +124,8 @@ TimeStepper::constrainStep(Real &dt)
          << std::endl;
   }
 
-  // Don't let time go beyond simulation end time
-  if (_time + dt > _end_time)
+  // Don't let time go beyond simulation end time (unless we're doing a half transient)
+  if (_time + dt > _end_time && !_app.halfTransient())
   {
     dt = _end_time - _time;
     diag << "Limiting dt for end_time: "

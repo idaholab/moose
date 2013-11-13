@@ -3,11 +3,13 @@
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out_sub0.e master_out_sub1.e'
+    recover = false
   [../]
 
   [./pp_test]
     type = 'Exodiff'
     input = 'pp_master.i'
     exodiff = 'pp_master_out_pp_sub0.e pp_master_out_pp_sub1.e'
+    recover = false
   [../]
 []

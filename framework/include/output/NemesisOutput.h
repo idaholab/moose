@@ -25,7 +25,7 @@
 class NemesisOutput : public Outputter
 {
 public:
-  NemesisOutput(EquationSystems & es);
+  NemesisOutput(EquationSystems & es, SubProblem & sub_problem);
   virtual ~NemesisOutput();
 
   virtual void output(const std::string & file_base, Real time, unsigned int t_step);

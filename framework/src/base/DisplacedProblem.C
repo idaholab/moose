@@ -114,7 +114,7 @@ DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_m
     _displaced_nl(*this, _mproblem.getNonlinearSystem(), _mproblem.getNonlinearSystem().name() + "_displaced", Moose::VAR_NONLINEAR),
     _displaced_aux(*this, _mproblem.getAuxiliarySystem(), _mproblem.getAuxiliarySystem().name() + "_displaced", Moose::VAR_AUXILIARY),
     _geometric_search_data(_mproblem, _mesh),
-    _ex(new ExodusOutput(_app, _eq)),
+    _ex(new ExodusOutput(_app, _eq, true, *this, "DisplacedExodusOutput")),
     _seq(params.get<bool>("sequence"))
 {
   _ex->sequence(_seq);
@@ -668,3 +668,12 @@ DisplacedProblem::registerRestartableData(std::string name, RestartableDataValue
 
   _mproblem.registerRestartableData(name, data, tid);
 }
+
+void
+DisplacedProblem::registerRecoverableData(std::string name)
+{
+  name += "/displaced";
+
+  _mproblem.registerRecoverableData(name);
+}
+

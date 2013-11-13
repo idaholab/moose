@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out_pp_sub0.e master_out_pp_sub1.e'
+    recover = false
   [../]
 []

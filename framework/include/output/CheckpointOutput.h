@@ -12,28 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "TimestepSetupFunction.h"
+#ifndef CHECKPOINTOUTPUT_H
+#define CHECKPOINTOUTPUT_H
 
-template<>
-InputParameters validParams<TimestepSetupFunction>()
+#include "Outputter.h"
+#include "FormattedTable.h"
+
+// libMesh
+#include "libmesh/libmesh_common.h"
+
+class CheckpointOutput : public Outputter
 {
-  InputParameters params = validParams<Function>();
-  return params;
-}
+public:
+  CheckpointOutput(EquationSystems & es, bool binary, SubProblem & sub_problem);
+  virtual ~CheckpointOutput();
 
-TimestepSetupFunction::TimestepSetupFunction(const std::string & name, InputParameters parameters) :
-    Function(name, parameters),
-    _local_timestep(declareRestartableData<unsigned int>("local_timestep", 0))
-{}
+  virtual void output(const std::string & file_base, Real time, unsigned int t_step);
+  virtual void outputPps(const std::string & file_base, const FormattedTable & table, Real time);
 
-void
-TimestepSetupFunction::timestepSetup()
-{
-  _local_timestep++;
-}
+  virtual void meshChanged();
+  virtual void sequence(bool state);
 
-Real
-TimestepSetupFunction::value(Real /*t*/, const Point & /*p*/)
-{
-  return _local_timestep;
-}
+  std::string getFileName(const std::string & file_base, unsigned int t_step);
+
+protected:
+  /// true if outputting in binary format
+  bool _binary;
+};
+
+#endif /* CHECKPOINTOUTPUT_H */

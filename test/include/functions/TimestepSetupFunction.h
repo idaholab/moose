@@ -31,7 +31,7 @@ public:
 
   virtual void timestepSetup();
 private:
-  unsigned int _local_timestep;
+  unsigned int &  _local_timestep;
 };
 
 #endif //TIMESTEPSETUPFUNCTION_H

@@ -90,9 +90,9 @@
   nl_abs_tol = 1e-14
 
   start_time = 0.0
-  num_steps = 50
+  num_steps = 12
   dt = 1
-  
+
   trans_ss_check = true
 []
 

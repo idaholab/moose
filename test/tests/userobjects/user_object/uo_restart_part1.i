@@ -73,5 +73,5 @@
   exodus = true
   output_initial = true
   # restart
-  num_restart_files = 1
+  num_checkpoint_files = 1
 []

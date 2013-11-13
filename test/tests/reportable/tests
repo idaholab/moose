@@ -44,6 +44,7 @@
     exodiff = 'reportable_restart1_out.e'
     max_parallel = 1
     max_threads = 1
+    recover = false
   [../]
 
   [./restart2] # restarts and runs another 10 steps of transient, results should match ./transient test
@@ -53,5 +54,6 @@
     prereq = 'restart1'
     max_parallel = 1
     max_threads = 1
+    recover = false
   [../]
 []

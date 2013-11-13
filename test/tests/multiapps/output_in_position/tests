@@ -3,11 +3,13 @@
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out_sub0.e'
+    recover = false
   [../]
 
   [./multilevel]
     type = 'Exodiff'
     input = 'multilevel_master.i'
     exodiff = 'multilevel_master_out_sub0_sub0.e'
+    recover = false
   [../]
 []

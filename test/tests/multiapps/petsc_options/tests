@@ -4,5 +4,6 @@
     input = 'master.i'
     exodiff = 'master_out.e master_out_sub0.e'
     expect_out = '8 Linear'
+    recover = false
   [../]
 []

@@ -25,7 +25,7 @@
 class GMVOutput : public Outputter
 {
 public:
-  GMVOutput(EquationSystems & es);
+  GMVOutput(EquationSystems & es, SubProblem & sub_problem);
   virtual ~GMVOutput();
 
   virtual void output(const std::string & file_base, Real time, unsigned int t_step);
