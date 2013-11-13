@@ -132,7 +132,7 @@
     dt = 5.0
   [../]
 
-  restart_file_base = adapt_tstep_shrink_init_dt_restart1_out_cp/0001
+  restart_file_base = adapt_tstep_shrink_init_dt_restart1_out_restart_0001
 []
 
 [Postprocessors]

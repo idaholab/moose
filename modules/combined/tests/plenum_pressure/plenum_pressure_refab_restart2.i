@@ -85,11 +85,13 @@
   [./temp]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 70.0
   [../]
 
   [./material_input]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 0
   [../]
 []
 
@@ -312,7 +314,7 @@
   dt = 0.5
   end_time = 2.0
 
-  restart_file_base = plenum_pressure_refab_restart1_out_cp/0003
+#  restart_file_base = plenum_pressure_refab_restart1_out_restart_0003
 []
 
 [Postprocessors]

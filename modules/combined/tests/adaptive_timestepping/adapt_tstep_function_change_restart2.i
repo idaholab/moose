@@ -161,7 +161,7 @@
     dt = 1e6
   [../]
 
-  restart_file_base = adapt_tstep_function_change_restart1_out_cp/0065
+  restart_file_base = adapt_tstep_function_change_restart1_out_restart_0065
 []
 
 [Postprocessors]

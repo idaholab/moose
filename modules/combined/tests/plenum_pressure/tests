@@ -33,5 +33,6 @@
     exodiff = plenum_pressure_refab_out.e
     exodiff_opts = -TM
     min_parallel = 2
+    cli_args = '--recover plenum_pressure_refab_restart1_out_restart_0003'
   [../]
 []

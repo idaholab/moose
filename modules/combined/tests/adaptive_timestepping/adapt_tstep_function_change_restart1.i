@@ -183,5 +183,5 @@
   exodus = true
   perf_log = true
   max_pps_rows_screen = 10
-  num_checkpoint_files = 1
+  num_restart_files = 1
 []
