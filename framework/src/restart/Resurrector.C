@@ -134,8 +134,6 @@ Resurrector::write()
     {
       for(unsigned int tid=0; tid<n_threads; tid++)
       {
-        const std::map<std::string, RestartableDataValue *> & restartable_data = _fe_problem._restartable_data[tid];
-
         std::ostringstream file_name_stream;
         file_name_stream << fb + RESTARTABLE_DATA_EXT;
 

@@ -44,9 +44,7 @@ MaterialPropertyIO::~MaterialPropertyIO()
 void
 MaterialPropertyIO::write(const std::string & file_name)
 {
-  unsigned int n_threads = libMesh::n_threads();
-  unsigned int n_procs = libMesh::n_processors();
-  unsigned int proc_id = libMesh::processor_id();
+  processor_id_type proc_id = libMesh::processor_id();
 
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props = _material_props.props();
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOld = _material_props.propsOld();
@@ -85,9 +83,7 @@ MaterialPropertyIO::write(const std::string & file_name)
 void
 MaterialPropertyIO::read(const std::string & file_name)
 {
-  unsigned int n_threads = libMesh::n_threads();
-  unsigned int n_procs = libMesh::n_processors();
-  unsigned int proc_id = libMesh::processor_id();
+  processor_id_type proc_id = libMesh::processor_id();
 
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props = _material_props.props();
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOld = _material_props.propsOld();

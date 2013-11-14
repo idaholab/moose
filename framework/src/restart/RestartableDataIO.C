@@ -26,7 +26,7 @@ RestartableDataIO::RestartableDataIO(FEProblem & fe_problem) :
 }
 
 void
-RestartableDataIO::writeRestartableData(std::string base_file_name, const RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data)
+RestartableDataIO::writeRestartableData(std::string base_file_name, const RestartableDatas & restartable_datas, std::set<std::string> & /*_recoverable_data*/)
 {
   unsigned int n_threads = libMesh::n_threads();
   unsigned int n_procs = libMesh::n_processors();

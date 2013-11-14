@@ -114,7 +114,7 @@ private:
  * The general evaluation method is not defined.
  */
 template<typename T>
-T evaluate(Real t, const Point & p)
+T evaluate(Real /*t*/, const Point & /*p*/)
 {
   mooseError("The evaluate method is not defined for this type.");
 }

@@ -95,7 +95,7 @@ PiecewiseConstant::value(Real t, const Point & p)
 }
 
 Real
-PiecewiseConstant::timeDerivative(Real t, const Point & p)
+PiecewiseConstant::timeDerivative(Real /*t*/, const Point & /*p*/)
 {
   return 0;
 }

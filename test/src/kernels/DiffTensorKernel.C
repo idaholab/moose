@@ -36,7 +36,7 @@ DiffTensorKernel::computeQpJacobian()
 
 
 RealTensorValue
-DiffTensorKernel::computeConductivity(Real t, const Point & pt)
+DiffTensorKernel::computeConductivity(Real /*t*/, const Point & /*pt*/)
 {
   // Return the value from the ParsedVectorFunction (this is the point of the test)
   RealVectorValue vector = _k_comp.vectorValue(_t, _qp);
