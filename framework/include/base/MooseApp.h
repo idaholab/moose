@@ -247,6 +247,11 @@ public:
   std::string getRecoverFileBase() { return _recover_base; }
 
   /**
+   * mutator for recover_base (set by RecoverBaseAction)
+   */
+  void setRecoverFileBase(std::string recover_base) { _recover_base = recover_base; }
+
+  /**
    *  Whether or not this simulation should only run half its transient (useful for testing recovery)
    */
   bool halfTransient() { return _half_transient; }
@@ -322,8 +327,6 @@ protected:
 
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
   bool _half_transient;
-
-  friend class RecoverBaseAction;
 };
 
 #endif /* MOOSEAPP_H */

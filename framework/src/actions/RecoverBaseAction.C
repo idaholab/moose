@@ -52,7 +52,8 @@ RecoverBaseAction::act()
 {
   if(_app.isRecovering())
   {
-    if(_app._recover_base.empty()) // If this is the case then we need to find the newest recovery file.
+    // If this is the case then we need to find the newest recovery file.
+    if(_app.getRecoverFileBase().empty())
     {
       if (!_pars.isParamValid("file_base"))
         mooseError("\"Output/file_base\" must be valid if no recovery file is specified!");
@@ -61,7 +62,7 @@ RecoverBaseAction::act()
 
       Moose::out << "\nUsing " << newest_recovery_file << " for recovery.\n" << std::endl;
 
-      _app._recover_base = newest_recovery_file;
+      _app.setRecoverFileBase(newest_recovery_file);
     }
   }
 }
