@@ -237,8 +237,9 @@ protected:
   Real _end_time;
   Real _dtmin;
   Real _dtmax;
-  Real _num_steps;
+  unsigned int _num_steps;
   int _n_startup_steps;
+  unsigned int _steps_taken;
 
   /**
    * Steady state detection variables:

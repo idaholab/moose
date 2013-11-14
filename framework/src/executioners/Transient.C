@@ -49,7 +49,7 @@ InputParameters validParams<Transient>()
   params.addParam<Real>("dtmin",           2.0e-14,    "The minimum timestep size in an adaptive run");
   params.addParam<Real>("dtmax",           1.0e30, "The maximum timestep size in an adaptive run");
   params.addParam<bool>("reset_dt", false, "Use when restarting a calculation to force a change in dt.");
-  params.addParam<Real>("num_steps",       std::numeric_limits<Real>::max(),     "The number of timesteps in a transient run");
+  params.addParam<unsigned int>("num_steps",       std::numeric_limits<Real>::max(),     "The number of timesteps in a transient run");
   params.addParam<int> ("n_startup_steps", 0,      "The number of timesteps during startup");
   params.addParam<bool>("trans_ss_check",  false,  "Whether or not to check for steady state conditions");
   params.addParam<Real>("ss_check_tol",    1.0e-08,"Whenever the relative residual changes by less than this the solution will be considered to be at steady state.");
@@ -91,8 +91,9 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _end_time(getParam<Real>("end_time")),
     _dtmin(getParam<Real>("dtmin")),
     _dtmax(getParam<Real>("dtmax")),
-    _num_steps(getParam<Real>("num_steps")),
+    _num_steps(getParam<unsigned int>("num_steps")),
     _n_startup_steps(getParam<int>("n_startup_steps")),
+    _steps_taken(0),
     _trans_ss_check(getParam<bool>("trans_ss_check")),
     _ss_check_tol(getParam<Real>("ss_check_tol")),
     _ss_tmin(getParam<Real>("ss_tmin")),
@@ -147,6 +148,9 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
   {
     _end_time /= 2.0;
     _num_steps /= 2.0;
+
+    if(_num_steps == 0) // Always do one step in the first half
+      _num_steps = 1;
   }
 }
 
@@ -224,6 +228,8 @@ Transient::execute()
     computeDT();
     takeStep();
     endStep();
+
+    _steps_taken++;
   }
 
 
@@ -590,7 +596,7 @@ Transient::keepGoing()
   if((_time>_end_time) || (fabs(_time-_end_time)<=_timestep_tolerance))
     keep_going = false;
 
-  if(!keep_going && !_problem.out().wasOutput() && !_app.halfTransient())
+  if(!keep_going && _steps_taken && !_problem.out().wasOutput() && !_app.halfTransient())
   {
     _problem.output(true);
     if(_allow_output)
