@@ -443,7 +443,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NumVars);
   registerPostprocessor(NumResidualEvaluations);
   registerPostprocessor(PlotFunction);
-  registerDeprecatedObject(Reporter, "11/14/2013 07:42");
+  registerDeprecatedObject(Reporter, "12/14/2013 07:42");
   registerPostprocessor(Receiver);
   registerPostprocessor(SideAverageValue);
   registerPostprocessor(SideFluxIntegral);
