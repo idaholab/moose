@@ -57,6 +57,8 @@ InputParameters validParams<MooseApp>()
 
   params.addCommandLineParam<bool>("half_transient", "--half-transient", "When true the simulation will only run half of its specified transient (ie half the timesteps).  This is useful for testing recovery and restart");
 
+  params.addCommandLineParam<bool>("trap_fpe", "--trap-fpe", "Enable Floating Point Exception handling in critical sections of code.  This is enabled automatically in DEBUG mode");
+
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char**>("_argv");
 
@@ -131,6 +133,10 @@ MooseApp::setupOptions()
 
   if(isParamValid("half_transient"))
     _half_transient = true;
+
+  if (isParamValid("trap_fpe"))
+    // Seting Global Variable
+    Moose::__trap_fpe = true;
 
   if (isParamValid("help"))
   {

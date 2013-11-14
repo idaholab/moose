@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "FEProblem.h"
-//#include "SystemBase.h"
 #include "Factory.h"
 #include "MooseUtils.h"
 #include "DisplacedProblem.h"
@@ -31,7 +30,6 @@
 #include "Conversion.h"
 #include "Material.h"
 #include "ConstantIC.h"
-#include "FP.h"
 #include "Parser.h"
 #include "ElementH1Error.h"
 #include "Function.h"

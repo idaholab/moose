@@ -836,7 +836,19 @@ swapLibMeshComm(MPI_Comm new_comm)
   return old_comm;
 }
 
+void
+enableFPE(bool on)
+{
+#ifdef DEBUG
+  libMesh::enableFPE(on);
+#else
+  if (__trap_fpe)
+    libMesh::enableFPE(on);
+#endif
+}
 
 PerfLog setup_perf_log("Setup");
+
+bool __trap_fpe = false;
 
 } // namespace Moose

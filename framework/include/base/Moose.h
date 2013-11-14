@@ -72,6 +72,11 @@ extern PerfLog perf_log;
 extern PerfLog setup_perf_log;
 
 /**
+ * Variable indicating whether we will enable FPE trapping for this run.
+ */
+extern bool __trap_fpe;
+
+/**
  * Import libMesh::out, and libMesh::err for use in MOOSE.
  */
 using libMesh::out;
@@ -90,6 +95,8 @@ void setSolverDefaults(FEProblem & problem);
  * Swap the libMesh MPI communicator out for ours.
  */
 MPI_Comm swapLibMeshComm(MPI_Comm new_comm);
+
+void enableFPE(bool on = true);
 
 } // namespace Moose
 
