@@ -79,8 +79,6 @@ ExodusOutput::getFileName(const std::string & file_base)
 void
 ExodusOutput::output(const std::string & file_base, Real time, unsigned int /*t_step*/)
 {
-  print_trace();
-
   if (_out == NULL)
     allocateExodusObject();
 
