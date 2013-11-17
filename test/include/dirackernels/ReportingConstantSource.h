@@ -40,8 +40,7 @@ protected:
   std::vector<Real> _point_param;
   Point _p;
 
-  //PostprocessorValue & _reporter;
-  ReportableValue & _reporter;
+  PostprocessorValue & _reporter;
 };
 
 #endif //REPORTINGCONSTANTSOURCE_H

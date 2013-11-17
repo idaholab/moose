@@ -50,7 +50,6 @@ Material::Material(const std::string & name, InputParameters parameters) :
     PostprocessorInterface(parameters),
     DependencyResolverInterface(),
     Restartable(name, parameters, "Materials"),
-    Reportable(name, parameters),
     ZeroInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),

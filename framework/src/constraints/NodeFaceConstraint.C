@@ -51,7 +51,6 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   TransientInterface(parameters, name, "node_face_constraints"),
   GeometricSearchInterface(parameters),
   Restartable(name, parameters, "Constraints"),
-  Reportable(name, parameters),
   ZeroInterface(parameters),
   _subproblem(*parameters.get<SubProblem *>("_subproblem")),
   _sys(*parameters.get<SystemBase *>("_sys")),

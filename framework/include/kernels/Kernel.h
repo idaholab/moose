@@ -31,7 +31,6 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 #include "Restartable.h"
-#include "Reportable.h"
 #include "ZeroInterface.h"
 // libMesh
 #include "libmesh/fe.h"
@@ -58,7 +57,6 @@ class Kernel :
   public RandomInterface,
   protected GeometricSearchInterface,
   public Restartable,
-  public Reportable,
   public ZeroInterface
 {
 public:

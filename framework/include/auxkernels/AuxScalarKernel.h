@@ -25,7 +25,6 @@
 #include "Assembly.h"
 #include "MooseVariableScalar.h"
 #include "SubProblem.h"
-#include "Reportable.h"
 #include "ZeroInterface.h"
 // libMesh
 #include "libmesh/fe.h"
@@ -52,7 +51,6 @@ class AuxScalarKernel :
   public UserObjectInterface,
   public PostprocessorInterface,
   public TransientInterface,
-  public Reportable,
   public ZeroInterface
 {
 public:

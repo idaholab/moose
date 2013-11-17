@@ -43,7 +43,6 @@
 #include "CoupledKernelValueTest.h"
 #include "SplineFFn.h"
 #include "BlkResTestDiffusion.h"
-#include "ReportableDiffusion.h"
 #include "DiffTensorKernel.h"
 #include "CoupledAux.h"
 #include "CoupledGradAux.h"
@@ -221,7 +220,6 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(CoupledKernelValueTest);
   registerKernel(SplineFFn);
   registerKernel(BlkResTestDiffusion);
-  registerKernel(ReportableDiffusion);
   registerKernel(DiffTensorKernel);
 
   // Aux kernels

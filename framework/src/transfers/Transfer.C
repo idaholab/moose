@@ -37,7 +37,6 @@ Transfer::Transfer(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
     Restartable(name, parameters, "Transfers"),
-    Reportable(name, parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _sys(*parameters.get<SystemBase *>("_sys")),

@@ -18,7 +18,6 @@
 #include "Moose.h"
 #include "ColumnMajorMatrix.h"
 #include "MooseTypes.h"
-#include "Atomic.h"
 #include "HashMap.h"
 
 //libMesh
@@ -66,12 +65,6 @@ template<typename P, typename Q>
 inline void storeHelper(std::ostream & stream, HashMap<P,Q> & data, void * context);
 
 /**
- * Map helper routine
- */
-template<typename P>
-inline void storeHelper(std::ostream & stream, MooseAtomic<P> & data, void * context);
-
-/**
  * Scalar helper routine
  */
 template<typename P>
@@ -100,12 +93,6 @@ inline void loadHelper(std::istream & stream, std::map<P,Q> & data, void * conte
  */
 template<typename P, typename Q>
 inline void loadHelper(std::istream & stream, HashMap<P,Q> & data, void * context);
-
-/**
- * Moose::Atomic routine
- */
-template<typename P>
-inline void loadHelper(std::istream & stream, MooseAtomic<P> & data, void * context);
 
 template<typename T>
 inline void
@@ -225,14 +212,6 @@ dataStore(std::ostream & stream, HashMap<T,U> & m, void * context)
   }
 }
 
-template<typename T>
-inline void
-dataStore(std::ostream & stream, MooseAtomic<T> & v, void * context)
-{
-  // Moose::out<<"MooseAtomic dataStore()"<<std::endl;
-  storeHelper(stream, v.getValueReference(), context);
-}
-
 // Specializations (defined in .C)
 template<> void dataStore(std::ostream & stream, Real & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, std::string & v, void * /*context*/);
@@ -349,15 +328,6 @@ dataLoad(std::istream & stream, HashMap<T,U> & m, void * context)
   }
 }
 
-template<typename T>
-inline void
-dataLoad(std::istream & stream, MooseAtomic<T> & s, void * context)
-{
-  T x;
-  loadHelper(stream, x, context);
-  s = x;
-}
-
 // Specializations (defined in .C)
 template<> void dataLoad(std::istream & stream, Real & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, std::string & v, void * /*context*/);
@@ -416,15 +386,6 @@ storeHelper(std::ostream & stream, HashMap<P,Q> & data, void * context)
   dataStore(stream, data, context);
 }
 
-// MooseAtomic Helper Function
-template<typename P>
-inline void
-storeHelper(std::ostream & stream, MooseAtomic<P> & data, void * context)
-{
-  // Moose::out<<"MooseAtomic storeHelper"<<std::endl;
-  dataStore(stream, data, context);
-}
-
 // Scalar Helper Function
 template<typename P>
 inline void
@@ -467,15 +428,6 @@ inline void
 loadHelper(std::istream & stream, HashMap<P,Q> & data, void * context)
 {
   // Moose::out<<"HashMap loadHelper"<<std::endl;
-  dataLoad(stream, data, context);
-}
-
-// MooseAtomic Helper Function
-template<typename P>
-inline void
-loadHelper(std::istream & stream, MooseAtomic<P> & data, void * context)
-{
-  // Moose::out<< "MooseAtomic loadHelper" << std::endl;
   dataLoad(stream, data, context);
 }
 

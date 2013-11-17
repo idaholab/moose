@@ -34,7 +34,6 @@
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "Restartable.h"
-#include "Reportable.h"
 #include "ZeroInterface.h"
 // libMesh includes
 #include "libmesh/quadrature_gauss.h"
@@ -76,7 +75,6 @@ class Material :
   public PostprocessorInterface,
   public DependencyResolverInterface,
   public Restartable,
-  public Reportable,
   public ZeroInterface
 {
 public:

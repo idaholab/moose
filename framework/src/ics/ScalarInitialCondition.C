@@ -31,7 +31,6 @@ ScalarInitialCondition::ScalarInitialCondition(const std::string & name, InputPa
     MooseObject(name, parameters),
     ScalarCoupleable(parameters),
     DependencyResolverInterface(),
-    Reportable(name, parameters),
     _subproblem(*getParam<SubProblem *>("_subproblem")),
     _sys(*getParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),

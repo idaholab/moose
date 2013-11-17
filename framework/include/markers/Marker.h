@@ -24,7 +24,6 @@
 #include "UserObjectInterface.h"
 #include "BlockRestrictable.h"
 #include "Restartable.h"
-#include "Reportable.h"
 
 // libmesh Includes
 #include "libmesh/threads.h"
@@ -49,8 +48,7 @@ class Marker :
   public DependencyResolverInterface,
   public MooseVariableDependencyInterface,
   public UserObjectInterface,
-  public Restartable,
-  public Reportable
+  public Restartable
 {
 public:
   Marker(const std::string & name, InputParameters parameters);

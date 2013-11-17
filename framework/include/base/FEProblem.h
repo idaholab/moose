@@ -37,7 +37,6 @@
 #include "UserObjectWarehouse.h"
 #include "NonlinearSystem.h"
 #include "Restartable.h"
-#include "ReportableData.h"
 #include "SolverParams.h"
 
 class DisplacedProblem;
@@ -703,12 +702,6 @@ public:
    */
   void setConstJacobian(bool state) { _const_jacobian = state; }
 
-  /**
-   * Access to the ReportableData storage class
-   * @return Reference to the ReportableData object
-   */
-  ReportableData & getReportableData();
-
   void registerRandomInterface(RandomInterface & random_interface, const std::string & name);
 
   void setKernelCoverageCheck(bool flag) { _kernel_coverage_check = flag; }
@@ -891,9 +884,6 @@ protected:
 
   /// True if we're doing a _restart_ (note: this is _not_ true when recovering!)
   bool _restarting;
-
-  /// Storage facility for Reportable values
-  ReportableData _reportable_data;
 
   /// Determies whether a check to verify an active kernel on every subdomain
   bool _kernel_coverage_check;

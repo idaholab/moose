@@ -57,7 +57,6 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     RandomInterface(name, parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
     GeometricSearchInterface(parameters),
     Restartable(name, parameters, "Kernels"),
-    Reportable(name, parameters),
     ZeroInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),

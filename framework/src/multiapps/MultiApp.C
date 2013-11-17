@@ -93,7 +93,6 @@ InputParameters validParams<MultiApp>()
 MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     MooseObject(name, parameters),
     Restartable(name, parameters, "MultiApps"),
-    Reportable(name, parameters),
     _fe_problem(getParam<FEProblem *>("_fe_problem")),
     _app_type(getParam<MooseEnum>("app_type")),
     _input_files(getParam<std::vector<std::string> >("input_files")),
@@ -443,7 +442,6 @@ MultiApp::buildComm()
   // In this case we need to divide up the processors that are going to work on each app
   int rank;
   ierr = MPI_Comm_rank(_orig_comm, &rank); mooseCheckMPIErr(ierr);
-//  sleep(rank);
 
   unsigned int procs_per_app = _orig_num_procs / _total_num_apps;
 

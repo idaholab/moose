@@ -32,6 +32,12 @@
   [../]
 []
 
+[Postprocessors]
+  [./dirac_reporter]
+    type = Reporter
+	[../]
+[]
+
 [Executioner]
   type = Steady
 
@@ -55,5 +61,6 @@
     value = 2
     variable = u
     type = ReportingConstantSource
+		reporter = dirac_reporter
   [../]
 []

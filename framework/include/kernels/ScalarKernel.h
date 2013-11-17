@@ -26,7 +26,6 @@
 #include "MooseVariableScalar.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"
-#include "Reportable.h"
 #include "ZeroInterface.h"
 // libMesh
 #include "libmesh/fe.h"
@@ -50,7 +49,6 @@ class ScalarKernel :
   public UserObjectInterface,
   public PostprocessorInterface,
   public TransientInterface,
-  public Reportable,
   public ZeroInterface
 {
 public:

@@ -46,7 +46,6 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     PostprocessorInterface(parameters),
     GeometricSearchInterface(parameters),
     Restartable(name, parameters, "DiracKernels"),
-    Reportable(name, parameters),
     ZeroInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),

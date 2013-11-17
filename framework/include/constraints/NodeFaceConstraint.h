@@ -29,7 +29,6 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "Restartable.h"
-#include "Reportable.h"
 #include "ZeroInterface.h"
 //libMesh includes
 #include "libmesh/libmesh_common.h"
@@ -63,7 +62,6 @@ class NodeFaceConstraint :
   public TransientInterface,
   private GeometricSearchInterface,
   public Restartable,
-  public Reportable,
   public ZeroInterface
 {
 public:

@@ -30,7 +30,6 @@
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "Restartable.h"
-#include "Reportable.h"
 #include "ZeroInterface.h"
 
 //forward declarations
@@ -62,7 +61,6 @@ class AuxKernel :
   public RandomInterface,
   protected GeometricSearchInterface,
   public Restartable,
-  public Reportable,
   public ZeroInterface
 {
 public:

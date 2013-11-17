@@ -149,7 +149,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _const_jacobian(false),
     _has_jacobian(false),
     _restarting(false),
-    _reportable_data(*this),
     _kernel_coverage_check(false)
 {
 #ifdef LIBMESH_HAVE_PETSC
@@ -226,9 +225,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   _resurrector = new Resurrector(*this);
 
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
-
-  // Add pointer to the ReportableData class to the parameters
-  parameters.addPrivateParam<ReportableData *>("_reportable_data", &_reportable_data);
 }
 
 FEProblem::~FEProblem()
@@ -2317,17 +2313,6 @@ FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP*/, UserObjectW
 void
 FEProblem::addPPSValuesToTable(ExecFlagType type)
 {
-  // Always add the reportable data to the output
-  for (std::map<std::string, ReportableValue *>::const_iterator it=_reportable_data.values().begin();
-       it!=_reportable_data.values().end(); ++it)
-  {
-    // Ignore reportable values that have a false output flag
-    if (_reportable_data.valueOutput(it->first))
-    {
-      _pps_output_table_screen.addData(it->first, *it->second, _time);
-      _pps_output_table_file.addData(it->first, *it->second, _time);
-    }
-  }
 
   // Get a reference to a vector of all the postprocessors
   const std::vector<Postprocessor *> & pps_ptrs = _pps(type)[0].all();
@@ -3938,12 +3923,6 @@ SolverParams &
 FEProblem::solverParams()
 {
   return _solver_params;
-}
-
-ReportableData &
-FEProblem::getReportableData()
-{
-  return _reportable_data;
 }
 
 void

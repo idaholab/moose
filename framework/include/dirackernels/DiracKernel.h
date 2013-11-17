@@ -33,7 +33,6 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "Restartable.h"
-#include "Reportable.h"
 #include "ZeroInterface.h"
 //libMesh includes
 #include "libmesh/libmesh_common.h"
@@ -67,7 +66,6 @@ class DiracKernel :
   public PostprocessorInterface,
   protected GeometricSearchInterface,
   public Restartable,
-  public Reportable,
   public ZeroInterface
 {
 public:

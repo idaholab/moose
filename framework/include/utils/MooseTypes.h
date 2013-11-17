@@ -16,7 +16,6 @@
 #define MOOSETYPES_H
 
 #include "Moose.h"
-#include "Atomic.h"
 
 // libMesh includes
 #include "libmesh/libmesh.h"
@@ -32,7 +31,6 @@
  * MOOSE typedefs
  */
 typedef Real                     PostprocessorValue;
-typedef MooseAtomic<Real>        ReportableValue;
 typedef boundary_id_type         BoundaryID;
 typedef subdomain_id_type        SubdomainID;
 

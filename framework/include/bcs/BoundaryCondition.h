@@ -29,7 +29,6 @@
 #include "BoundaryRestrictableRequired.h"
 #include "Assembly.h"
 #include "Restartable.h"
-#include "Reportable.h"
 #include "ZeroInterface.h"
 // libMesh
 #include "libmesh/elem.h"
@@ -62,7 +61,6 @@ class BoundaryCondition :
   public PostprocessorInterface,
   public GeometricSearchInterface,
   public Restartable,
-  public Reportable,
   public ZeroInterface
 {
 public:
