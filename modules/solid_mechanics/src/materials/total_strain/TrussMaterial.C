@@ -14,7 +14,8 @@ InputParameters validParams<TrussMaterial>()
   params.addRequiredParam<NonlinearVariableName>("disp_x","Variable containing the x displacement");
   params.addParam<NonlinearVariableName>        ("disp_y","Variable containing the y displacement");
   params.addParam<NonlinearVariableName>        ("disp_z","Variable containing the z displacement");
-  params.addRequiredParam<Real>("youngs_modulus", "Young's Modulus");
+  params.addParam<Real>("youngs_modulus", "Young's Modulus");
+  params.addCoupledVar("youngs_modulus_var","Variable containing Young's modulus");
   params.addParam<Real>("t_ref", 0.0, "The reference temperature at which this material has zero strain.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addCoupledVar("temp", "The temperature if you want thermal expansion.");
@@ -26,7 +27,9 @@ TrussMaterial::TrussMaterial(const std::string  & name,
   :Material(name, parameters),
    _axial_stress(declareProperty<Real>("axial_stress")),
    _e_over_l(declareProperty<Real>("e_over_l")),
-   _youngs_modulus(getParam<Real>("youngs_modulus")),
+   _youngs_modulus(isParamValid("youngs_modulus") ? getParam<Real>("youngs_modulus") : 0),
+   _youngs_modulus_coupled(isCoupled("youngs_modulus_var")),
+   _youngs_modulus_var(_youngs_modulus_coupled ? coupledValue("youngs_modulus_var"): _zero),
    _has_temp(isCoupled("temp")),
    _temp(_has_temp ? coupledValue("temp") : _zero),
    _t_ref(getParam<Real>("t_ref")),
@@ -56,6 +59,21 @@ TrussMaterial::TrussMaterial(const std::string  & name,
       NonlinearVariableName disp_z = parameters.get<NonlinearVariableName>("disp_z");
       _disp_z_var = &_fe_problem.getVariable(_tid,disp_z);
       _dim = 3;
+    }
+  }
+
+  if (parameters.isParamValid("youngs_modulus"))
+  {
+    if (_youngs_modulus_coupled)
+    {
+      mooseError("Cannot specify both youngs_modulus and youngs_modulus_var");
+    }
+  }
+  else
+  {
+    if (!_youngs_modulus_coupled)
+    {
+      mooseError("Must specify either youngs_modulus or youngs_modulus_var");
     }
   }
 }
@@ -120,11 +138,12 @@ TrussMaterial::computeProperties()
 
   for(_qp=0; _qp < _qrule->n_points(); ++_qp)
   {
+    Real youngs_modulus(_youngs_modulus_coupled ? _youngs_modulus_var[_qp] : _youngs_modulus);
     if (_has_temp)
     {
       thermal_strain = _alpha * (_t_ref - _temp[_qp]);
     }
-    _axial_stress[_qp] = _youngs_modulus*(strain+thermal_strain);
-    _e_over_l[_qp] = _youngs_modulus/orig_length;
+    _axial_stress[_qp] = youngs_modulus*(strain+thermal_strain);
+    _e_over_l[_qp] = youngs_modulus/orig_length;
   }
 }
