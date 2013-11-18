@@ -36,11 +36,12 @@ LatticeSmoothCircleIC::LatticeSmoothCircleIC(const std::string & name,
   if (_Lz != 0.0 && _circles_per_side[2] == 0)    
     mooseError("If domain is 3D, circles_per_side must have three values");
   
-  if (_Ly != 0.0)
+  if (_Ly == 0.0)
+  {
     _circles_per_side[1] = 0;
-
-  if (_Lz != 0.0)
-    _circles_per_side[2] == 0)  
+    _circles_per_side[2] = 0;
+  }
+  
   
   if (_Lz == 0.0)
   {
