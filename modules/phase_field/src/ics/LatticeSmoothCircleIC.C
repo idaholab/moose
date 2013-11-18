@@ -6,9 +6,11 @@ InputParameters validParams<LatticeSmoothCircleIC>()
 {
   InputParameters params = validParams<MultiSmoothCircleIC>();
   params.addParam<Real>("Rnd_variation",0.0, "Variation from central lattice position");
-  params.addRequiredParam<unsigned int>("circles_per_side","Number of circles along each side");
+  params.addRequiredParam<std::vector<unsigned int> >("circles_per_side","Vector containing the number of bubbles along each side");
   params.set<unsigned int>("numbub") = 0;
   params.set<Real>("bubspac") = 0.0;
+  params.set<Real>("x1") = 0.0;
+  params.set<Real>("y1") = 0.0;
   
   return params;
 }
@@ -17,25 +19,39 @@ LatticeSmoothCircleIC::LatticeSmoothCircleIC(const std::string & name,
                                                InputParameters parameters)
   :MultiSmoothCircleIC(name, parameters),
    _Rnd_variation(getParam<Real>("Rnd_variation")),
-   _circles_per_side(getParam<unsigned int>("circles_per_side"))
+   _circles_per_side(getParam<std::vector<unsigned int> >("circles_per_side"))
 {
-  std::vector<unsigned int> circles_per_side;
+  /*std::vector<unsigned int> circles_per_side;
   circles_per_side.resize(3);
   
 
   for (unsigned int i = 0; i<3; ++i)
-    circles_per_side[i] = _circles_per_side;
+  circles_per_side[i] = _circles_per_side;*/
+
+  //std::cout << "1: "<< _circles_per_side[0] << " 2: "<< _circles_per_side[1] << " 3: " << _circles_per_side[2] << std::endl;
+  
+  if (_Ly != 0.0 && _circles_per_side[1] == 0)
+    mooseError("If domain is > 1D, circles_per_side must have more than one value");
+
+  if (_Lz != 0.0 && _circles_per_side[2] == 0)    
+    mooseError("If domain is 3D, circles_per_side must have three values");
+  
+  if (_Ly != 0.0)
+    _circles_per_side[1] = 0;
+
+  if (_Lz != 0.0)
+    _circles_per_side[2] == 0)  
   
   if (_Lz == 0.0)
   {
-    circles_per_side[2] = 0;
-    _numbub = circles_per_side[0]*circles_per_side[1];
+    _circles_per_side[2] = 0;
+    _numbub = _circles_per_side[0]*_circles_per_side[1];
   }
   else
   {
-    _numbub = circles_per_side[0]*circles_per_side[1]*circles_per_side[2];
-    if (_Lz < _Lx) //For non-uniform domain.  This needs to be changed
-      circles_per_side[2] = circles_per_side[0]*_Lz/_Lx;
+    _numbub = _circles_per_side[0]*_circles_per_side[1]*_circles_per_side[2];
+    /*if (_Lz < _Lx) //For non-uniform domain.  This needs to be changed
+      circles_per_side[2] = _circles_per_side[0]*_Lz/_Lx;*/
   }
   
   
@@ -44,23 +60,23 @@ LatticeSmoothCircleIC::LatticeSmoothCircleIC(const std::string & name,
    
   MooseRandom::seed(_rnd_seed);
 
-  Real x_sep = _Lx/(circles_per_side[0]);
-  Real y_sep = _Ly/(circles_per_side[1]);
+  Real x_sep = _Lx/(_circles_per_side[0]);
+  Real y_sep = _Ly/(_circles_per_side[1]);
   
-  Real z_sep = _Lz/(circles_per_side[2]);
-  
-  unsigned int z_num = circles_per_side[2];
-  if (_Lz == 0.0)
+  Real z_sep = 0.0;
+  unsigned int z_num = 1.0;
+
+  if (_Lz > 0.0)
   {
-    z_num = 1;
-    z_sep = 0.0;
+    z_sep = _Lz/(_circles_per_side[2]);
+    z_num = _circles_per_side[2];
   }
   
 
   unsigned int cnt = 0;
 
-  for(unsigned int i=0; i<_circles_per_side; i++)
-    for (unsigned int j=0; j<_circles_per_side; j++)
+  for(unsigned int i=0; i<_circles_per_side[0]; i++)
+    for (unsigned int j=0; j<_circles_per_side[1]; j++)
       for (unsigned int k=0; k<z_num; k++)
       {
         //Vary circle radius

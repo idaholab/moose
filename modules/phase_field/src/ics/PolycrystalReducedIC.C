@@ -115,22 +115,25 @@ PolycrystalReducedIC::initialSetup()
       std::vector<Real> min_op_dist;
       min_op_ind.resize(_op_num);
       min_op_dist.resize(_op_num); 
-      std::fill(min_op_dist.begin() , min_op_dist.end(), 1.0e6*_top_right(1));
       //Determine the distance to the closest center assigned to each order parameter
-      for (unsigned int i=0; i<grain; i++) //These shouldn't run for grain = 0
+      if (grain >= _op_num)
       {
-        
-        Real dist =  _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], _centerpoints[i]);
-        if (min_op_dist[_assigned_op[i]] > dist)
+        std::fill(min_op_dist.begin() , min_op_dist.end(), _range.size());
+        for (unsigned int i=0; i<grain; i++) 
         {
-          min_op_dist[_assigned_op[i]] = dist;
-          min_op_ind[_assigned_op[i]] = i;
+          Real dist =  _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], _centerpoints[i]);
+          if (min_op_dist[_assigned_op[i]] > dist)
+          {
+            min_op_dist[_assigned_op[i]] = dist;
+            min_op_ind[_assigned_op[i]] = i;
+          }
         }
       }
+      
       //Assign the current center point to the order parameter that is furthest away.
       Real mx;
-      if (grain == 0)
-        _assigned_op[grain] = 0;
+      if (grain < _op_num)
+        _assigned_op[grain] = grain;
       else
       {
         mx = 0.0;

@@ -33,7 +33,7 @@ public:
 
 protected:
   Real _Rnd_variation;
-  unsigned int _circles_per_side;
+  std::vector<unsigned int> _circles_per_side;
   
 // private:
   
