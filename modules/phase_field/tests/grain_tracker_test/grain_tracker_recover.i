@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 50
-  ny = 50
+  nx = 25
+  ny = 25
   nz = 0
   xmax = 1000
   ymax = 1000
@@ -11,7 +11,7 @@
 []
 
 [GlobalParams]
-  crys_num = 12
+  crys_num = 7
   var_name_base = gr
 []
 
@@ -24,7 +24,7 @@
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
       rand_seed = 8675
-      grain_num = 12
+      grain_num = 10
     [../]
   [../]
 []
@@ -94,21 +94,20 @@
     type = CuGrGr
     block = 0
     temp = 500 # K
-    wGB = 70 # nm
+    wGB = 75 # nm
   [../]
 []
 
 [Postprocessors]
   [./grain_tracker]
     type = GrainTracker
-    threshold = 0.5
-    convex_hull_buffer = 5.0
+    threshold = 0.8
+    convex_hull_buffer = 1.0
     execute_on = timestep
     remap_grains = true
     use_single_map = false
     enable_var_coloring = true
     condense_map_info = true
-    bubble_volume_file = bubble_volumes.txt
   [../]
   [./DOFs]
     type = NumDOFs
@@ -116,12 +115,10 @@
 []
 
 [Executioner]
+  # Preconditioned JFNK (default)
   type = Transient
   scheme = bdf2
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
   l_tol = 1.0e-4
@@ -129,8 +126,12 @@
   nl_max_its = 20
   nl_rel_tol = 1.0e-9
   start_time = 0.0
-  num_steps = 1
-  dt = 50.0
+  num_steps = 3
+  dt = 100.0
+  [./Adaptivity]
+    refine_fraction = 0.2
+    max_h_level = 3
+  [../]
 []
 
 [Output]
