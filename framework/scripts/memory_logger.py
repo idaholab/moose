@@ -833,8 +833,6 @@ def verifyArgs(args):
     if args.call_back_host == None:
       print 'You must use one of the following: run, read, or plot'
       sys.exit(1)
-  args.socket = socket.gethostname()
-  args.delay = 2.0
   args.cwd = os.getcwd()
   if args.outfile == None and args.run:
     args.outfile = [os.getcwd() + '/' + args.run[0].replace('..', '').replace('/', '').replace(' ', '_') + '.log']
