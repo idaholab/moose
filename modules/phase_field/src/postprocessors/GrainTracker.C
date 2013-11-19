@@ -9,6 +9,53 @@
 
 #include <limits>
 
+template<> void dataStore(std::ostream & stream, GrainTracker::UniqueGrain * & unique_grain, void * context)
+{
+  mooseAssert(unique_grain, "Unique Grain Pointer is NULL");
+  
+  storeHelper(stream, unique_grain->variable_idx, context);
+  storeHelper(stream, unique_grain->status, context);
+  storeHelper(stream, unique_grain->sphere_ptrs, context);
+  
+  // We do not need to store the nodes_ptrs structure. This information is not necessary for restart.
+}
+
+template<> void dataLoad(std::istream & stream, GrainTracker::UniqueGrain * & unique_grain, void * context)
+{
+  unsigned int variable_idx;
+  GrainTracker::STATUS status;
+
+  loadHelper(stream, variable_idx, context);
+  loadHelper(stream, status, context);
+
+  // Load the Bounding Spheres
+  std::vector<GrainTracker::BoundingSphereInfo *> spheres;
+  loadHelper(stream, spheres, context);
+
+  unique_grain = new GrainTracker::UniqueGrain(variable_idx, spheres, NULL, status);
+}
+
+template<> void dataStore(std::ostream & stream, GrainTracker::BoundingSphereInfo * & bound_sphere_info, void * context)
+{
+  mooseAssert(bound_sphere_info, "Sphere pointer is NULL");
+  storeHelper(stream, bound_sphere_info->member_node_id, context);
+  storeHelper(stream, bound_sphere_info->b_sphere.center(), context);
+  storeHelper(stream, bound_sphere_info->b_sphere.radius(), context); 
+}
+
+template<> void dataLoad(std::istream & stream, GrainTracker::BoundingSphereInfo * & bound_sphere_info, void * context)
+{
+  unsigned int member_node_id;
+  Point center;
+  Real radius;
+    
+  loadHelper(stream, member_node_id, context);
+  loadHelper(stream, center, context);
+  loadHelper(stream, radius, context);
+
+  bound_sphere_info = new GrainTracker::BoundingSphereInfo(member_node_id, center, radius);
+}
+
 template<>
 InputParameters validParams<GrainTracker>()
 {
@@ -35,6 +82,7 @@ GrainTracker::GrainTracker(const std::string & name, InputParameters parameters)
     _hull_buffer(getParam<Real>("convex_hull_buffer")),
     _remap(getParam<bool>("remap_grains")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
+    _unique_grains(declareRestartableData<std::map<unsigned int, UniqueGrain *> >("unique_grains")),
     _compute_op_maps(getParam<bool>("compute_op_maps"))
 {
   // Size the data structures to hold the correct number of maps

@@ -5,9 +5,12 @@
     exodiff = 'grain_tracker_same_out.e'
   [../]
 
-  [./test2]
+  [./test_recover]
     type = 'Exodiff'
-    input = 'grain_tracker_same_larger.i'
-    exodiff = 'grain_tracker_same_larger_out.e'
+    input = 'grain_tracker_recover.i'
+    exodiff = 'grain_tracker_recover_out.e
+	       grain_tracker_recover_out.e-s002
+               grain_tracker_recover_out.e-s003'
+    min_parallel = 2
   [../]
 []
