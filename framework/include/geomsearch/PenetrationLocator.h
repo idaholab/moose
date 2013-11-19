@@ -117,6 +117,7 @@ public:
   void setNormalSmoothingDistance(Real normal_smoothing_distance);
   void setNormalSmoothingMethod(std::string nsmString);
   void saveContactStateVars();
+  Real getTangentialTolerance() {return _tangential_tolerance;}
 
 protected:
   bool & _update_location; // Update the penetration location for nodes found last time
